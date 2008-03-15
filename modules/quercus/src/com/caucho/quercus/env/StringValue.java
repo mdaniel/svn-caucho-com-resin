@@ -304,34 +304,160 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public static long toLong(String string)
   {
-    if (string.equals(""))
-      return 0;
+    return _toLong(string);
+  }
 
-    int len = string.length();
+  /**
+   * String to long conversion routines used by this module
+   * and other modules in this package. These methods are
+   * only invoked by other implementations of a "string" object.
+   * The 3 implementations should be identical except for the
+   * char data source.
+   */
+
+  static long _toLong(char []buffer, int offset, int len)
+  {
+    if (len == 0)
+      return 0;
 
     long value = 0;
     long sign = 1;
+    boolean isResultSet = false;
+    long result = 0;
 
-    int i = 0;
-    char ch = string.charAt(0);
+    int end = offset + len;
 
-    if (ch == '-') {
+    if (buffer[offset] == '-') {
       sign = -1;
-      i = 1;
+      offset++;
     }
-    else if (ch == '+')
-      i = 1;
-
-    for (; i < len; i++) {
-      ch = string.charAt(i);
-
-      if ('0' <= ch && ch <= '9')
-        value = 10 * value + ch - '0';
-      else
-        return sign * value;
+    else if (buffer[offset] == '+') {
+      sign = +1;
+      offset++;
     }
 
-    return value;
+    while (offset < end) {
+      int ch = buffer[offset++];
+
+      if ('0' <= ch && ch <= '9') {
+        long new_value = 10 * value + ch - '0';
+        if (new_value < value) {
+          // long value overflowed, set result to 0
+          result = 0;
+          isResultSet = true;
+          break;
+        }
+        value = new_value;
+      }
+      else {
+        result = sign * value;
+        isResultSet = true;
+        break;
+      }
+    }
+
+    if (!isResultSet)
+      result = sign * value;
+
+    return result;
+  }
+
+  static long _toLong(byte []buffer, int offset, int len)
+  {
+    if (len == 0)
+      return 0;
+
+    long value = 0;
+    long sign = 1;
+    boolean isResultSet = false;
+    long result = 0;
+
+    int end = offset + len;
+
+    if (buffer[offset] == '-') {
+      sign = -1;
+      offset++;
+    }
+    else if (buffer[offset] == '+') {
+      sign = +1;
+      offset++;
+    }
+
+    while (offset < end) {
+      int ch = buffer[offset++];
+
+      if ('0' <= ch && ch <= '9') {
+        long new_value = 10 * value + ch - '0';
+        if (new_value < value) {
+          // long value overflowed, set result to 0
+          result = 0;
+          isResultSet = true;
+          break;
+        }
+        value = new_value;
+      }
+      else {
+        result = sign * value;
+        isResultSet = true;
+        break;
+      }
+    }
+
+    if (!isResultSet)
+      result = sign * value;
+
+    return result;
+  }
+
+  static long _toLong(String string)
+  {
+    final int len = string.length();
+
+    if (len == 0)
+      return 0;
+
+    long value = 0;
+    long sign = 1;
+    boolean isResultSet = false;
+    long result = 0;
+
+    int offset = 0;
+    int i = 0;
+    int end = offset + len;
+
+    if (string.charAt(offset) == '-') {
+      sign = -1;
+      offset++;
+    }
+    else if (string.charAt(offset) == '+') {
+      sign = +1;
+      offset++;
+    }
+
+    while (offset < end) {
+      int ch = string.charAt(offset++);
+
+      if ('0' <= ch && ch <= '9') {
+        long new_value = 10 * value + ch - '0';
+        if (new_value < value) {
+          // long value overflowed, set result to 0
+          result = 0;
+          isResultSet = true;
+          break;
+        }
+        value = new_value;
+      }
+      else {
+        result = sign * value;
+        isResultSet = true;
+        break;
+      }
+    }
+
+    if (!isResultSet)
+      result = sign * value;
+
+    return result;
   }
 
   /**

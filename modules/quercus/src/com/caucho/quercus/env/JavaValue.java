@@ -85,39 +85,7 @@ public class JavaValue
    */
   public long toLong()
   {
-    return toLong(toString());
-  }
-  
-  /**
-   * Converts to a long.
-   */
-  public static long toLong(String string)
-  {
-    int len = string.length();
-
-    long value = 0;
-    long sign = 1;
-
-    int i = 0;
-    char ch = string.charAt(0);
-
-    if (ch == '-') {
-      sign = -1;
-      i = 1;
-    }
-    else if (ch == '+')
-      i = 1;
-
-    for (; i < len; i++) {
-      ch = string.charAt(i);
-
-      if ('0' <= ch && ch <= '9')
-        value = 10 * value + ch - '0';
-      else
-        return 1;
-    }
-
-    return value;
+    return StringValue._toLong(toString());
   }
 
   /**

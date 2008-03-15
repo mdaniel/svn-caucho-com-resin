@@ -285,7 +285,7 @@ public class StringBuilderValue
   @Override
   public long toLong()
   {
-    return UnicodeBuilderValue.toLong(_buffer, 0, _length);
+    return _toLong(_buffer, 0, _length);
   }
 
   /**

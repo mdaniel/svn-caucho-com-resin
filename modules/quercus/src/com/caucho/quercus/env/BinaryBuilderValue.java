@@ -258,7 +258,7 @@ public class BinaryBuilderValue
   @Override
   public long toLong()
   {
-    return toLong(_buffer, 0, _length);
+    return _toLong(_buffer, 0, _length);
   }
 
   /**
@@ -1323,37 +1323,6 @@ public class BinaryBuilderValue
     }
     else
       return IS_STRING;
-  }
-
-  /**
-   * Converts to a long.
-   */
-  public static long toLong(byte []buffer, int offset, int len)
-  {
-    if (len == 0)
-      return 0;
-
-    long value = 0;
-    long sign = 1;
-
-    int i = 0;
-    int end = offset + len;
-
-    if (buffer[offset] == '-') {
-      sign = -1;
-      offset++;
-    }
-
-    while (offset < end) {
-      int ch = buffer[offset++];
-
-      if ('0' <= ch && ch <= '9')
-        value = 10 * value + ch - '0';
-      else
-        return sign * value;
-    }
-
-    return value;
   }
 
   public static double toDouble(byte []buffer, int offset, int len)
