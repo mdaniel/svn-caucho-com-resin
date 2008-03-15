@@ -33,6 +33,7 @@ import com.caucho.amber.expr.KeyColumnExpr;
 import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Column;
+import com.caucho.amber.type.AbstractStatefulType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.bytecode.JClassWrapper;
@@ -216,6 +217,22 @@ public class KeyPropertyField extends PropertyField implements IdField {
     throws IOException
   {
     throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Creates a copy of the field for a parent
+   */
+  public AmberField override(AbstractStatefulType type)
+  {
+    KeyPropertyField field
+      = new KeyPropertyField((EntityType) getSourceType(), getName());
+
+    field.setOverride(true);
+    field.setLazy(isLazy());
+    field.setInsert(isInsert());
+    field.setUpdate(isUpdate());
+
+    return field;
   }
 
   /**

@@ -116,6 +116,15 @@ abstract public class CascadableField extends AbstractField {
   }
 
   /**
+   * Sets the cascade types for this field
+   * from parent to child.
+   */
+  public CascadeType []getCascadeType()
+  {
+    return _cascadeTypes;
+  }
+
+  /**
    * Generates the (pre) cascade operation from
    * parent to this child. This field will only
    * be cascaded first if the operation can be

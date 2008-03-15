@@ -256,7 +256,23 @@ public class EntityManyToOneField extends CascadableField {
   }
 
   /**
-   * Overrides the load-group index to
+   * Creates a copy of the field for a parent
+   */
+  public AmberField override(AbstractStatefulType type)
+  {
+    EntityManyToOneField field
+      = new EntityManyToOneField((EntityType) getSourceType(), getName(),
+				 getCascadeType(), _isManyToOne);
+
+    field.setOverride(true);
+    field.setLazy(isLazy());
+    /*
+    field.setInsert(_isInsert);
+    field.setUpdate(_isUpdate);
+    */
+    
+    return field;
+  }
 
   /**
    * Initializes the field.

@@ -35,6 +35,7 @@ import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -168,6 +169,205 @@ public class EntityComponent extends AmberMappedComponent {
     out.println();
     out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
     out.println("}");
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
+   * Generates the flush
+   */
+  void generateFlush(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("protected void __caucho_flush_callback()");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
+    out.println("}");
+
+    out.println();
+    out.println("public boolean __caucho_flush()");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
+    out.pushDepth();
+
+    boolean isAbstract = (_entityType.getBeanClass().isAbstract()
+                          && _entityType.getPersistenceUnit().isJPA());
+
+    if (_entityType.getId() == null || isAbstract) {
+      // jpa/0ge6: MappedSuperclass
+
+      out.println("return false;");
+      out.popDepth();
+      out.println("}");
+
+      return;
+    }
+
+    out.println("if (__caucho_session == null)");
+    out.println("  return false;");
+    out.println();
+
+    ArrayList<AmberField> fields = _entityType.getFields();
+
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField field = fields.get(i);
+
+      if (field.isCascadable()) {
+        CascadableField cascadable = (CascadableField) field;
+
+        cascadable.generateFlushCheck(out);
+
+        out.println();
+      }
+    }
+
+    out.println();
+    out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_DELETED) {");
+    out.println("  __caucho_delete_int();");
+    out.println("  return true;");
+    out.println("}");
+    out.println("else if (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSISTING) {");
+    // jpa/0ga2
+    out.println("  __caucho_create(__caucho_session, __caucho_home);");
+    out.println("}");
+    out.println("else if (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSISTED) {");
+    out.println("  __caucho_cascadePrePersist(__caucho_session);");
+    out.println("}");
+    out.println();
+
+    out.println("boolean isDirty = false;");
+
+    int dirtyCount = _entityType.getDirtyIndex();
+
+    for (int i = 0; i <= dirtyCount / 64; i++) {
+      out.println("long mask_" + i + " = __caucho_dirtyMask_" + i + ";");
+      out.println("__caucho_dirtyMask_" + i + " = 0L;");
+      out.println("__caucho_updateMask_" + i + " |= mask_" + i + ";");
+
+      out.println();
+      out.println("if (mask_" + i + " != 0L)");
+      out.println("  isDirty = true;");
+    }
+
+    out.println();
+
+    // if (version == null)
+    out.println("if (isDirty) {");
+    out.pushDepth();
+
+    // ejb/0605
+    out.println();
+    out.println("__caucho_flush_callback();");
+
+    // else {
+    // jpa/0x02
+    //  out.println("if (! (isDirty || " + version.generateIsNull() + "))");
+    // }
+    // out.println("  return true;");
+
+    // jpa/0r10
+    out.println("__caucho_home.preUpdate(this);");
+
+    // jpa/0r10
+    generateCallbacks(out, "this", _entityType.getPreUpdateCallbacks());
+
+    out.println("com.caucho.util.CharBuffer cb = new com.caucho.util.CharBuffer();");
+
+    out.println("__caucho_home.generateUpdateSQLPrefix(cb);");
+
+    out.println("boolean isFirst = true;");
+
+    VersionField version = _entityType.getVersionField();
+
+    for (int i = 0; i <= dirtyCount / 64; i++) {
+      // jpa/0x02 is a negative test.
+      if (i != 0 || version == null) {
+        out.println("if (mask_" + i + " != 0L)");
+        out.print("  ");
+      }
+
+      out.println("isFirst = __caucho_home.generateUpdateSQLComponent(cb, " + i + ", mask_" + i + ", isFirst);");
+    }
+    out.println("__caucho_home.generateUpdateSQLSuffix(cb);");
+
+    out.println();
+    out.println("java.sql.PreparedStatement pstmt = null;");
+    out.println("String sql = cb.toString();");
+    out.println();
+    out.println("try {");
+    out.pushDepth();
+
+    out.println("pstmt = __caucho_session.prepareStatement(sql);");
+
+    out.println("int index = 1;");
+
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField field = fields.get(i);
+
+      field.generateUpdate(out, "mask", "pstmt", "index");
+    }
+
+    out.println();
+    _entityType.getId().generateSet(out, "pstmt", "index");
+
+    if (version != null) {
+      out.println();
+      version.generateSet(out, "pstmt", "index");
+    }
+
+    out.println();
+    out.println("int updateCount = pstmt.executeUpdate();");
+    out.println();
+
+    if (version != null) {
+      out.println("if (updateCount == 0) {");
+      out.println("  throw new javax.persistence.OptimisticLockException((com.caucho.amber.entity.Entity) this);");
+      out.println("} else {");
+      out.pushDepth();
+      String value = version.generateGet("super");
+      Type type = version.getColumn().getType();
+      out.println(version.generateSuperSetter(type.generateIncrementVersion(value)) + ";");
+      out.popDepth();
+      out.println("}");
+      out.println();
+    }
+
+    out.println("__caucho_home.postUpdate(this);");
+
+    generateCallbacks(out, "this", _entityType.getPostUpdateCallbacks());
+
+    out.println();
+    generateLogFine(out, " amber update");
+
+    out.println();
+    out.println("__caucho_inc_version = false;");
+    out.println();
+
+    out.popDepth();
+    out.println("} catch (Exception e) {");
+    out.println("  if (pstmt != null)");
+    out.println("    __caucho_session.closeStatement(sql);");
+    out.println();
+    out.println("  if (e instanceof java.sql.SQLException)");
+    out.println("    throw (java.sql.SQLException) e;");
+    out.println();
+    out.println("  if (e instanceof RuntimeException)");
+    out.println("    throw (RuntimeException) e;");
+    out.println();
+    out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
+    out.println("}");
+
+    out.popDepth();
+    out.println("}");
+
+    out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSISTED) {");
+    out.println("  __caucho_cascadePostPersist(__caucho_session);");
+    out.println("}");
+
+    out.println();
+    out.println("return false;");
 
     out.popDepth();
     out.println("}");

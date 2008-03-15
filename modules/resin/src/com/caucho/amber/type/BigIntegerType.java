@@ -89,6 +89,18 @@ public class BigIntegerType extends Type {
   }
 
   /**
+   * Generates a string to load the property.
+   */
+  @Override
+  public int generateLoadNative(JavaWriter out, int index)
+    throws IOException
+  {
+    out.print("com.caucho.amber.type.BigIntegerType.toBigInteger(rs.getBigDecimal(columnNames[" + index + "]), rs.wasNull())");
+
+    return index + 1;
+  }
+
+  /**
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
@@ -133,5 +145,16 @@ public class BigIntegerType extends Type {
                                         int scale)
   {
     return manager.getCreateColumnSQL(Types.NUMERIC, length, precision, scale);
+  }
+
+  /**
+   * Converts a value to a int.
+   */
+  public static BigInteger toBigInteger(BigDecimal value, boolean wasNull)
+  {
+    if (wasNull || value == null)
+      return null;
+    else
+      return value.toBigInteger();
   }
 }

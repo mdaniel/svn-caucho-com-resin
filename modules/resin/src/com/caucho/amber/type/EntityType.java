@@ -154,7 +154,7 @@ public class EntityType extends AbstractStatefulType {
    */
   public boolean isEntity()
   {
-    return true;
+    return ! getBeanClass().isAbstract();
   }
   
   /**
@@ -853,7 +853,9 @@ public class EntityType extends AbstractStatefulType {
 
     for (AmberField field : mappedFields) {
       resultFields.add(field);
-   }
+    }
+
+    Collections.sort(resultFields, new AmberFieldCompare());
 
     return resultFields;
   }

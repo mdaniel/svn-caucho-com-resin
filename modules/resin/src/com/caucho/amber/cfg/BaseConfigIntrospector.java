@@ -657,125 +657,6 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   /**
-   * Introspects the Inheritance
-   */
-  void introspectInheritance(AmberPersistenceUnit persistenceUnit,
-                             EntityType entityType,
-                             JClass type,
-                             JAnnotation inheritanceAnn,
-                             InheritanceConfig inheritanceConfig)
-    throws ConfigException, SQLException
-  {
-    InheritanceType strategy;
-
-    if (inheritanceAnn != null)
-      strategy = (InheritanceType) inheritanceAnn.get("strategy");
-    else
-      strategy = inheritanceConfig.getStrategy();
-
-    JAnnotation discValueAnn = type.getAnnotation(DiscriminatorValue.class);
-
-    String discriminatorValue = null;
-
-    if (discValueAnn != null)
-      discriminatorValue = discValueAnn.getString("value");
-
-    if (discriminatorValue == null || discriminatorValue.equals("")) {
-      String name = entityType.getBeanClass().getName();
-      int p = name.lastIndexOf('.');
-      if (p > 0)
-        name = name.substring(p + 1);
-
-      discriminatorValue = name;
-    }
-
-    entityType.setDiscriminatorValue(discriminatorValue);
-
-    if (entityType instanceof SubEntityType) {
-      SubEntityType subType = (SubEntityType) entityType;
-
-      subType.getParentType().addSubClass(subType);
-
-      getInternalPrimaryKeyJoinColumnConfig(type, _annotationCfg);
-      JAnnotation joinAnn = _annotationCfg.getAnnotation();
-      PrimaryKeyJoinColumnConfig primaryKeyJoinColumnConfig = _annotationCfg.getPrimaryKeyJoinColumnConfig();
-
-      // if (subType.isJoinedSubClass()) {
-      if (strategy == InheritanceType.JOINED) {
-        linkInheritanceTable(subType.getRootType().getTable(),
-                             subType.getTable(),
-                             joinAnn,
-                             primaryKeyJoinColumnConfig);
-
-        subType.setId(new SubId(subType, subType.getRootType()));
-      }
-
-      return;
-    }
-
-    switch (strategy) {
-    case JOINED:
-      entityType.setJoinedSubClass(true);
-      break;
-    }
-
-    getInternalDiscriminatorColumnConfig(type, _annotationCfg);
-    JAnnotation discriminatorAnn = _annotationCfg.getAnnotation();
-    DiscriminatorColumnConfig discriminatorConfig = _annotationCfg.getDiscriminatorColumnConfig();
-
-    String columnName = null;
-
-    if (discriminatorAnn != null)
-      columnName = discriminatorAnn.getString("name");
-
-    if (columnName == null || columnName.equals(""))
-      columnName = "DTYPE";
-
-    Type columnType = null;
-    DiscriminatorType discType = DiscriminatorType.STRING;
-
-    if (discriminatorAnn != null)
-      discType = (DiscriminatorType) discriminatorAnn.get("discriminatorType");
-
-    switch (discType) {
-    case STRING:
-      columnType = StringType.create();
-      break;
-    case CHAR:
-      columnType = PrimitiveCharType.create();
-      break;
-    case INTEGER:
-      columnType = PrimitiveIntType.create();
-      break;
-    default:
-      throw new IllegalStateException();
-    }
-
-    Table table = entityType.getTable();
-
-    // jpa/0gg0
-    if (table == null)
-      return;
-
-    Column column = table.createColumn(columnName, columnType);
-
-    if (discriminatorAnn != null) {
-      column.setNotNull(! discriminatorAnn.getBoolean("nullable"));
-
-      column.setLength(discriminatorAnn.getInt("length"));
-
-      if (! "".equals(discriminatorAnn.get("columnDefinition")))
-        column.setSQLType(discriminatorAnn.getString("columnDefinition"));
-    }
-    else {
-      column.setNotNull(true);
-      column.setLength(10);
-    }
-
-    entityType.setDiscriminator(column);
-  }
-
-  /**
    * Introspects the fields.
    */
   void introspectIdMethod(AmberPersistenceUnit persistenceUnit,
@@ -1002,19 +883,19 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     KeyPropertyField idField;
 
     Column keyColumn = null;
+    keyColumn = createColumn(entityType,
+			     field,
+			     fieldName,
+			     column,
+			     amberType,
+			     columnConfig);
+
 
     if (entityType.getTable() != null) {
-      keyColumn = createColumn(entityType,
-                               field,
-                               fieldName,
-                               column,
-                               amberType,
-                               columnConfig);
-
       idField = new KeyPropertyField(entityType, fieldName, keyColumn);
     }
     else {
-      idField = new KeyPropertyField(entityType, fieldName);
+      idField = new KeyPropertyField(entityType, fieldName, keyColumn);
       return idField;
     }
 

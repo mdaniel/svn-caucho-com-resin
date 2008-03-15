@@ -86,7 +86,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     try {
       EntityType parentType = introspectParent(type.getSuperClass());
 
-      entityType = introspectEntityType(type);
+      entityType = introspectEntityType(type, parentType);
 
       MappedSuperclassConfig mappedSuperOrEntityConfig
 	= introspectEntityConfig(type);
@@ -193,7 +193,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     return entityType;
   }
 
-  private EntityType introspectEntityType(JClass type)
+  private EntityType introspectEntityType(JClass type, EntityType parentType)
     throws SQLException
   {
     EntityType entityType;

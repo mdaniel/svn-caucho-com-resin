@@ -122,12 +122,11 @@ public class SubEntityType extends EntityType {
 
       // jpa/0ge2: MappedSuperclassType and
       // jpa/0gg0: abstract parent
-      if (_parent instanceof EntityType
-          && ! _parent.getBeanClass().isAbstract()) {
+      if (_parent.isEntity()) {
         _loadGroupIndex++;
-      }
 
-      _defaultLoadGroupIndex = _loadGroupIndex;
+	_defaultLoadGroupIndex = _loadGroupIndex;
+      }
     }
 
     return _loadGroupIndex;
@@ -140,7 +139,10 @@ public class SubEntityType extends EntityType {
   {
     if (_defaultLoadGroupIndex < 0) {
       // initialized by getLoadGroupIndex()
-      getLoadGroupIndex();
+      if (getParentType().isEntity())
+	getLoadGroupIndex();
+      else
+	_defaultLoadGroupIndex = _parent.getDefaultLoadGroupIndex();
     }
 
     return _defaultLoadGroupIndex;

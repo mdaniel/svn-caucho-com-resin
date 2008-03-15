@@ -77,9 +77,23 @@ public class PrimitiveCharArrayType extends Type {
                           String indexVar, int index)
     throws IOException
   {
+    out.print("com.caucho.amber.type.PrimitiveCharArrayType.toCharArray(");
     out.print(rs + ".getString(" + indexVar + " + " + index + ")");
-    out.print(" == null || " + rs + ".wasNull() ? null : ");
-    out.print(rs + ".getString(" + indexVar + " + " + index + ").toCharArray()");
+    out.print(", " + rs + ".wasNull())");
+
+    return index + 1;
+  }
+
+  /**
+   * Generates a string to load the property.
+   */
+  @Override
+  public int generateLoadNative(JavaWriter out, int index)
+    throws IOException
+  {
+    out.print("com.caucho.amber.type.PrimitiveCharArrayType.toCharArray(");
+    out.print("rs.getString(columnNames[" + index + "])");
+    out.print(", rs.wasNull())");
 
     return index + 1;
   }
@@ -121,5 +135,13 @@ public class PrimitiveCharArrayType extends Type {
       return null;
 
     return s.toCharArray();
+  }
+  
+  public static char []toCharArray(String v, boolean wasNull)
+  {
+    if (wasNull || v == null)
+      return null;
+    else
+      return v.toCharArray();
   }
 }

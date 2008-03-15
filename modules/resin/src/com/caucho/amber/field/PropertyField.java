@@ -133,12 +133,22 @@ public class PropertyField extends AbstractField {
     _isInsert = isInsert;
   }
 
+  public boolean isInsert()
+  {
+    return _isInsert;
+  }
+
   /**
    * Set true if the property should be saved on an update.
    */
   public void setUpdate(boolean isUpdate)
   {
     _isUpdate = isUpdate;
+  }
+
+  public boolean isUpdate()
+  {
+    return _isUpdate;
   }
 
   /**

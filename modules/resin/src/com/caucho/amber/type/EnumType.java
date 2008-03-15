@@ -166,6 +166,28 @@ public class EnumType extends Type {
   /**
    * Generates a string to load the property.
    */
+  public int generateLoadNative(JavaWriter out, int index)
+    throws IOException
+  {
+    if (_isOrdinal) {
+      out.print("(" + getName() + ") com.caucho.amber.type.EnumType.toEnum("
+		+ "rs.getInt(columnNames[" + index + "]), "
+		+ "rs.wasNull(), "
+		+ getName() + ".values())");
+    }
+    else {
+      out.print("(" + getName() + ") com.caucho.amber.type.EnumType.toEnum("
+		+ "rs.getString(columnNames[" + index + "]), "
+		+ "rs.wasNull(), "
+		+ getName() + ".class)");
+    }
+
+    return index + 1;
+  }
+
+  /**
+   * Generates a string to load the property.
+   */
   public int generateLoadForeign(JavaWriter out, String rs,
                                  String indexVar, int index)
     throws IOException

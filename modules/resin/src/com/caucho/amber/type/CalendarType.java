@@ -89,6 +89,18 @@ public class CalendarType extends Type {
   }
 
   /**
+   * Generates a string to load the property.
+   */
+  @Override
+  public int generateLoadNative(JavaWriter out, int index)
+    throws IOException
+  {
+    out.print("com.caucho.amber.type.CalendarType.toCalendar(rs.getTimestamp(columnNames[" + index + "]))");
+
+    return index + 1;
+  }
+
+  /**
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
