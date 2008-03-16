@@ -31,7 +31,7 @@ package com.caucho.amber.cfg;
 
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.table.ForeignColumn;
-import com.caucho.amber.type.AbstractStatefulType;
+import com.caucho.amber.type.BeanType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.bytecode.JAccessibleObject;
 import com.caucho.bytecode.JAnnotation;
@@ -212,7 +212,7 @@ abstract public class AbstractConfigIntrospector {
     return null;
   }
 
-  static boolean containsFieldOrCompletion(AbstractStatefulType type,
+  static boolean containsFieldOrCompletion(BeanType type,
                                            String fieldName)
   {
     // jpa/0l03

@@ -36,6 +36,7 @@ import com.caucho.bytecode.*;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaCompiler;
 import com.caucho.java.WorkDir;
+import com.caucho.java.gen.ClassComponent;
 import com.caucho.java.gen.DependencyComponent;
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.JavaClassGenerator;
@@ -294,7 +295,9 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       genClass.addImport("com.caucho.amber.entity.*");
       genClass.addImport("com.caucho.amber.type.*");
 
-      AmberMappedComponent componentGenerator = type.getComponentGenerator();
+      AmberMappedComponent componentGenerator
+	= (AmberMappedComponent) type.getComponentGenerator();
+      
 
       componentGenerator.setRelatedType((EntityType) type);
       componentGenerator.setBaseClassName(baseClass.getName());
@@ -404,23 +407,26 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     javaClass.addImport("com.caucho.amber.entity.*");
     javaClass.addImport("com.caucho.amber.type.*");
 
-    AmberMappedComponent componentGenerator
+    ClassComponent componentGenerator
       = type.getComponentGenerator();
 
-    if (componentGenerator != null) {
+    if (componentGenerator instanceof AmberMappedComponent) {
+      AmberMappedComponent entityGenerator
+	= (AmberMappedComponent) componentGenerator;
+      
       // type is EntityType or MappedSuperclassType
 
       javaClass.addInterfaceName(type.getComponentInterfaceName());
 
       type.setEnhanced(true);
 
-      componentGenerator.setRelatedType((EntityType) type);
-      componentGenerator.setBaseClassName(type.getBeanClass().getName());
+      entityGenerator.setRelatedType((EntityType) type);
+      entityGenerator.setBaseClassName(type.getBeanClass().getName());
 
       //String extClassName = gen.getBaseClassName() + "__ResinExt";
       // type.setInstanceClassName(extClassName);
 
-      componentGenerator.setExtClassName(type.getInstanceClassName());
+      entityGenerator.setExtClassName(type.getInstanceClassName());
 
       javaClass.addComponent(componentGenerator);
     }
@@ -438,12 +444,13 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
       javaClass.addComponent(listener);
     }
-    else {
+    else if (componentGenerator instanceof EmbeddableComponent) {
+      EmbeddableComponent embeddable
+	= (EmbeddableComponent) componentGenerator;
+      
       javaClass.addInterfaceName("com.caucho.amber.entity.Embeddable");
 
       type.setEnhanced(true);
-
-      EmbeddableComponent embeddable = new EmbeddableComponent();
 
       embeddable.setEmbeddableType((EmbeddableType) type);
       embeddable.setBaseClassName(type.getBeanClass().getName());
@@ -549,7 +556,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     // Field-based fixup.
     do {
-      AbstractStatefulType type;
+      BeanType type;
 
       type = _amberContainer.getEntity(thisClass.getName());
 

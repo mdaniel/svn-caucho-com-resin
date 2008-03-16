@@ -64,14 +64,14 @@ public class PropertyField extends AbstractField {
   private boolean _isInsert = true;
   private boolean _isUpdate = true;
 
-  public PropertyField(AbstractStatefulType statefulType,
+  public PropertyField(BeanType statefulType,
                        String name)
     throws ConfigException
   {
     super(statefulType, name);
   }
 
-  public PropertyField(AbstractStatefulType statefulType)
+  public PropertyField(BeanType statefulType)
   {
     super(statefulType);
   }
@@ -154,7 +154,7 @@ public class PropertyField extends AbstractField {
   /**
    * Creates a copy of the field for a parent
    */
-  public AmberField override(AbstractStatefulType type)
+  public AmberField override(BeanType type)
   {
     PropertyField field = new PropertyField(getSourceType(), getName());
 

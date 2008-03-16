@@ -29,18 +29,12 @@
 
 package com.caucho.amber.cfg;
 
-import com.caucho.amber.AmberTableCache;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.table.Table;
 import com.caucho.amber.type.*;
-import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
 import com.caucho.config.ConfigException;
-import com.caucho.config.types.Period;
 import com.caucho.util.L10N;
 
-import javax.persistence.InheritanceType;
-import javax.persistence.AttributeOverrides;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,7 +72,7 @@ public class AmberConfigManager {
   /**
    * Introspects the type
    */
-  public EntityType introspectEntity(JClass type)
+  public BeanType introspect(JClass type)
   {
     TypeConfig typeConfig = _typeMap.get(type.getName());
 
@@ -103,7 +97,11 @@ public class AmberConfigManager {
     _pendingIntrospectorList.clear();
 
     for (BaseConfigIntrospector introspector : introspectorList) {
-      introspector.configure();
+      introspector.configureLinks();
+    }
+
+    for (BaseConfigIntrospector introspector : introspectorList) {
+      introspector.configureDependencies();
     }
   }
 

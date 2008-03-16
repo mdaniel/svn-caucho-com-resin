@@ -98,7 +98,7 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Returns the owning entity class.
    */
-  public AbstractStatefulType getSourceType()
+  public BeanType getSourceType()
   {
     return _embeddedField.getSourceType();
   }
@@ -248,7 +248,12 @@ public class EmbeddedSubField implements AmberField {
    */
   public String generateSuperGetter()
   {
-    throw new UnsupportedOperationException();
+    if (! getSourceType().isEmbeddable())
+      return "__caucho_super_get_" + getName() + "()";
+    else if (getSourceType().isFieldAccess())
+      return "__caucho_super_get_" + getName() + "()";
+    else
+      return getGetterMethod().getName() + "()";
   }
 
   /**
@@ -264,7 +269,12 @@ public class EmbeddedSubField implements AmberField {
    */
   public String generateSuperSetter(String objThis, String value)
   {
-    throw new UnsupportedOperationException();
+    if (! getSourceType().isEmbeddable())
+      return objThis + "." + "__caucho_super_set_" + getName() + "(" + value + ")";
+    else if (getSourceType().isFieldAccess())
+      return objThis + "." + getName() + " = " + value;
+    else
+      return objThis + "." + getSetterMethod().getName() + "(" + value + ")";
   }
 
   /**
@@ -423,7 +433,6 @@ public class EmbeddedSubField implements AmberField {
   public void generateSuperGetter(JavaWriter out)
     throws IOException
   {
-    throw new UnsupportedOperationException();
   }
 
   /**
@@ -432,13 +441,12 @@ public class EmbeddedSubField implements AmberField {
   public void generateSuperSetter(JavaWriter out)
     throws IOException
   {
-    throw new UnsupportedOperationException();
   }
 
   /**
    * Override the field
    */
-  public AmberField override(AbstractStatefulType entityType)
+  public AmberField override(BeanType entityType)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

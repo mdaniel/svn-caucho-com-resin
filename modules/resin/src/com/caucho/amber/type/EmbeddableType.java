@@ -31,15 +31,14 @@ package com.caucho.amber.type;
 
 import com.caucho.amber.AmberRuntimeException;
 import com.caucho.amber.entity.Embeddable;
-import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.field.*;
 import com.caucho.amber.gen.*;
 import com.caucho.java.*;
+import com.caucho.java.gen.ClassComponent;
 import com.caucho.util.L10N;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.io.*;
 import java.util.*;
@@ -48,7 +47,7 @@ import java.util.logging.Logger;
 /**
  * Represents an embeddable type
  */
-public class EmbeddableType extends AbstractStatefulType {
+public class EmbeddableType extends BeanType {
   private static final Logger log
     = Logger.getLogger(EmbeddableType.class.getName());
   private static final L10N L = new L10N(EmbeddableType.class);
@@ -61,9 +60,19 @@ public class EmbeddableType extends AbstractStatefulType {
   /**
    * Returns true for an embeddable
    */
+  @Override
   public boolean isEmbeddable()
   {
     return true;
+  }
+
+  /**
+   * Gets a component generator.
+   */
+  @Override
+  public ClassComponent getComponentGenerator()
+  {
+    return new EmbeddableComponent();
   }
 
   /**
@@ -93,13 +102,5 @@ public class EmbeddableType extends AbstractStatefulType {
     } catch (Exception e) {
       throw new AmberRuntimeException(e);
     }
-  }
-
-  /**
-   * Printable version of the entity.
-   */
-  public String toString()
-  {
-    return "EmbeddableType[" + _beanClass.getName() + "]";
   }
 }

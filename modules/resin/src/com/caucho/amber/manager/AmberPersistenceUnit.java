@@ -486,46 +486,10 @@ public class AmberPersistenceUnit {
       }
     }
 
-    EntityType entityType = _configManager.introspectEntity(type);
+    BeanType beanType = _configManager.introspect(type);
 
-    _amberContainer.addEntity(className, entityType);
-    
-    /*
-    boolean isEntity = _entityIntrospector.isEntity(type);
-    boolean isEmbeddable = _embeddableIntrospector.isEmbeddable(type);
-    boolean isMappedSuper = _mappedSuperIntrospector.isMappedSuper(type);
-
-    if (! (isEntity || isEmbeddable || isMappedSuper)) {
-      throw new ConfigException(L.l("'{0}' must implement javax.persistence.Entity, javax.persistence.Embeddable or javax.persistence.MappedSuperclass",
-                                    className));
-    }
-
-    try {
-      if (isEntity) {
-        EntityType entityType = (EntityType) _entityIntrospector.introspect(type);
-
-        // EntityType entity = createEntity(type);
-
-        _amberContainer.addEntity(className, entityType);
-      }
-      else if (isEmbeddable) {
-	EmbeddableType embeddableType = createEmbeddable(type);
-
-	_amberContainer.addEmbeddable(className, embeddableType);
-      }
-      else if (isMappedSuper) {
-        // XXX: needs to refactor EntityIntrospector and MappedSuperIntrospector.
-        MappedSuperclassType mappedSuperclassType
-          = (MappedSuperclassType) _entityIntrospector.introspect(type);
-
-        _amberContainer.addMappedSuperclass(className, mappedSuperclassType);
-      }
-    } catch (Exception e) {
-      _amberContainer.addEntityException(className, e);
-
-      throw ConfigException.create(e);
-    }
-    */
+    if (beanType instanceof EntityType)
+      _amberContainer.addEntity(className, (EntityType) beanType);
   }
 
   /**
@@ -730,13 +694,7 @@ public class AmberPersistenceUnit {
 
     _embeddableTypes.add(embeddableType);
 
-    try {
-      getEmbeddableIntrospector().introspect(beanClass);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
+    _amberContainer.addEmbeddable(beanClass.getName(), embeddableType);
 
     return embeddableType;
   }

@@ -36,7 +36,7 @@ import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.AbstractStatefulType;
+import com.caucho.amber.type.BeanType;
 import com.caucho.amber.type.EmbeddableType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.EntityType;
@@ -166,7 +166,7 @@ abstract public class LoadExpr extends AbstractAmberExpr {
   public void generateSelect(CharBuffer cb,
                              boolean fullSelect)
   {
-    AbstractStatefulType type = (AbstractStatefulType) getType();
+    BeanType type = (BeanType) getType();
 
     if (type instanceof EmbeddableType) {
       _expr.generateSelect(cb);

@@ -605,50 +605,60 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   /**
    * Completes all partial bean introspection.
    */
-  public void configure()
+  public void configureLinks()
     throws ConfigException
   {
     RuntimeException exn = null;
 
-    while (_depCompletions.size() > 0 || _linkCompletions.size() > 0) {
-      while (_linkCompletions.size() > 0) {
-        Completion completion = _linkCompletions.remove(0);
+    while (_linkCompletions.size() > 0) {
+      Completion completion = _linkCompletions.remove(0);
 
-        try {
-          completion.complete();
-        } catch (Exception e) {
-	  if (e instanceof ConfigException) {
-	    log.warning(e.getMessage());
-	    log.log(Level.FINEST, e.toString(), e);
-	  }
-	  else
-	    log.log(Level.WARNING, e.toString(), e);
+      try {
+	completion.complete();
+      } catch (Exception e) {
+	if (e instanceof ConfigException) {
+	  log.warning(e.getMessage());
+	  log.log(Level.FINEST, e.toString(), e);
+	}
+	else
+	  log.log(Level.WARNING, e.toString(), e);
 	  
-          completion.getRelatedType().setConfigException(e);
+	completion.getRelatedType().setConfigException(e);
 
-          if (exn == null)
-            exn = ConfigException.create(e);
-        }
+	if (exn == null)
+	  exn = ConfigException.create(e);
       }
+    }
 
-      if (_depCompletions.size() > 0) {
-        Completion completion = _depCompletions.remove(0);
+    if (exn != null)
+      throw exn;
+  }
 
-        try {
-          completion.complete();
-        } catch (Exception e) {
-	  if (e instanceof ConfigException) {
-	    log.warning(e.getMessage());
-	    log.log(Level.FINEST, e.toString(), e);
-	  }
-	  else
-	    log.log(Level.WARNING, e.toString(), e);
+  /**
+   * Completes all partial bean introspection.
+   */
+  public void configureDependencies()
+    throws ConfigException
+  {
+    RuntimeException exn = null;
 
-          completion.getRelatedType().setConfigException(e);
+    if (_depCompletions.size() > 0) {
+      Completion completion = _depCompletions.remove(0);
 
-          if (exn == null)
-            exn = ConfigException.create(e);
-        }
+      try {
+	completion.complete();
+      } catch (Exception e) {
+	if (e instanceof ConfigException) {
+	  log.warning(e.getMessage());
+	  log.log(Level.FINEST, e.toString(), e);
+	}
+	else
+	  log.log(Level.WARNING, e.toString(), e);
+
+	completion.getRelatedType().setConfigException(e);
+
+	if (exn == null)
+	  exn = ConfigException.create(e);
       }
     }
 
@@ -811,6 +821,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       id.setKeyClass(idClass);
 
       entityType.setId(id);
+
+      _configManager.introspect(idClass);
     }
   }
 
@@ -957,7 +969,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     IdField idField;
 
     EmbeddableType embeddableType
-      = persistenceUnit.createEmbeddable(fieldType);
+      = (EmbeddableType) _configManager.introspect(fieldType);
 
     idField = new EmbeddedIdField(ownerType, embeddableType, fieldName);
 
@@ -1133,8 +1145,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    * Introspects the methods.
    */
   void introspectMethods(AmberPersistenceUnit persistenceUnit,
-                         AbstractStatefulType entityType,
-                         AbstractStatefulType parentType,
+                         BeanType entityType,
+                         BeanType parentType,
                          JClass type,
                          AbstractEnhancedConfig typeConfig)
     throws ConfigException
@@ -1223,8 +1235,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    * Introspects the fields.
    */
   void introspectFields(AmberPersistenceUnit persistenceUnit,
-                        AbstractStatefulType entityType,
-                        AbstractStatefulType parentType,
+                        BeanType entityType,
+                        BeanType parentType,
                         JClass type,
                         AbstractEnhancedConfig typeConfig,
                         boolean isEmbeddable)
@@ -1250,7 +1262,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   void introspectField(AmberPersistenceUnit persistenceUnit,
-                       AbstractStatefulType sourceType,
+                       BeanType sourceType,
                        JAccessibleObject field,
                        String fieldName,
                        JClass fieldType,
@@ -1275,7 +1287,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     // jpa/0r37: fields declared in non-entity superclasses
     // must not be considered.
 
-    AbstractStatefulType declaringType;
+    BeanType declaringType;
 
     declaringType = _persistenceUnit.getEntityType(jClass.getName());
 
@@ -1514,7 +1526,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
   }
 
-  void addBasic(AbstractStatefulType sourceType,
+  void addBasic(BeanType sourceType,
                 JAccessibleObject field,
                 String fieldName,
                 JClass fieldType,
@@ -1614,7 +1626,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     sourceType.setVersionField(version);
   }
 
-  private Column createColumn(AbstractStatefulType beanType,
+  private Column createColumn(BeanType beanType,
                               JAccessibleObject field,
                               String fieldName,
                               JAnnotation columnAnn,
@@ -2404,7 +2416,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                                         null);
 
       if (sourceField == null)
-        throw error(_field, L.l("'{0}' does not have matching field for @ManyToOne(mappedBy={1}).",
+        throw error(_field, L.l("'{1}' is an unknown column in '{0}' for @ManyToOne(mappedBy={1}).",
                                 targetType.getName(),
                                 mappedBy));
 
@@ -2667,6 +2679,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       return _fieldName;
     }
 
+    @Override
     void complete()
       throws ConfigException
     {
@@ -2948,6 +2961,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       _embeddedId = embeddedId;
     }
 
+    @Override
     void complete()
       throws ConfigException
     {

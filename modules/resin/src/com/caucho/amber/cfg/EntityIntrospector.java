@@ -36,6 +36,7 @@ import com.caucho.amber.type.*;
 import com.caucho.amber.field.SubId;
 import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.util.L10N;
@@ -78,15 +79,29 @@ public class EntityIntrospector extends BaseConfigIntrospector {
   /**
    * Introspects.
    */
-  public EntityType introspect(JClass type)
+  public BeanType introspect(JClass type)
     throws ConfigException, SQLException
   {
-    EntityType entityType = null;
-
+    BeanType beanType = null;
+    
     try {
+      EntityType entityType = null;
+
       EntityType parentType = introspectParent(type.getSuperClass());
 
       entityType = introspectEntityType(type, parentType);
+
+      if (entityType == null)
+	entityType = introspectMappedType(type, parentType);
+
+      if (entityType == null)
+	return introspectEmbeddableType(type);
+      
+      beanType = entityType;
+      
+      // jpa/0ge2
+      entityType.setInstanceClassName(type.getName() + "__ResinExt");
+      entityType.setEnhanced(true);
 
       MappedSuperclassConfig mappedSuperOrEntityConfig
 	= introspectEntityConfig(type);
@@ -98,8 +113,6 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       introspectTable(type, entityType, parentType);
     
       introspectTableCache(entityType, type);
-
-      introspectSecondaryTable(entityType, type);
 
       getInternalIdClassConfig(type, _annotationCfg);
       JAnnotation idClassAnn = _annotationCfg.getAnnotation();
@@ -115,8 +128,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         }
 
         // XXX: temp. introspects idClass as an embeddable type.
-        EmbeddableType embeddable
-          = _persistenceUnit.getEmbeddableIntrospector().introspect(idClass);
+	_persistenceUnit.addEntityClass(idClass.getName(), idClass);
 
         // jpa/0i49 vs jpa/0i40
         // embeddable.setFieldAccess(isField);
@@ -154,6 +166,8 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       // Introspect overridden attributes. (jpa/0ge2)
       introspectAttributeOverrides(entityType, type);
 
+      introspectSecondaryTable(entityType, type);
+
       if (entityType.isFieldAccess())
         introspectFields(_persistenceUnit, entityType, parentType, type,
                          mappedSuperOrEntityConfig, false);
@@ -174,30 +188,29 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       introspectNamedQueries(type, entityType.getName());
       introspectNamedNativeQueries(type, entityType.getName());
     } catch (ConfigException e) {
-      if (entityType != null)
-        entityType.setConfigException(e);
+      if (beanType != null)
+        beanType.setConfigException(e);
 
       throw e;
     } catch (SQLException e) {
-      if (entityType != null)
-        entityType.setConfigException(e);
+      if (beanType != null)
+        beanType.setConfigException(e);
 
       throw e;
     } catch (RuntimeException e) {
-      if (entityType != null)
-        entityType.setConfigException(e);
+      if (beanType != null)
+        beanType.setConfigException(e);
 
       throw e;
     }
 
-    return entityType;
+    return beanType;
   }
 
-  private EntityType introspectEntityType(JClass type, EntityType parentType)
+  private EntityType introspectEntityType(JClass type,
+					  EntityType parentType)
     throws SQLException
   {
-    EntityType entityType;
-    
     getInternalEntityConfig(type, _annotationCfg);
       
     JAnnotation entityAnn = _annotationCfg.getAnnotation();
@@ -205,41 +218,16 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
     boolean isEntity = ! _annotationCfg.isNull();
 
-    boolean isMappedSuperclass = false;
-    JAnnotation mappedSuperAnn = null;
-    MappedSuperclassConfig mappedSuperConfig = null;
-
+    if (! isEntity)
+      return null;
+    
+    EntityType entityType;
     String typeName;
-
-    MappedSuperclassConfig mappedSuperOrEntityConfig = null;
-
-    if (isEntity) {
-      mappedSuperOrEntityConfig = entityConfig;
-
-      if (entityConfig != null)
-	typeName = entityConfig.getClassName();
-      else
-	typeName = entityAnn.getString("name");
-    }
-    else {
-      getInternalMappedSuperclassConfig(type, _annotationCfg);
-      mappedSuperAnn = _annotationCfg.getAnnotation();
-      mappedSuperConfig = _annotationCfg.getMappedSuperclassConfig();
-
-      isMappedSuperclass = ! _annotationCfg.isNull();
-
-      if (isMappedSuperclass) {
-	mappedSuperOrEntityConfig = mappedSuperConfig;
-
-	if (mappedSuperConfig != null)
-	  typeName = mappedSuperConfig.getClassName();
-	else
-	  typeName = mappedSuperAnn.getString("name");
-      }
-      else
-	throw new ConfigException(L.l("'{0}' is not an @Entity or @MappedSuperclass.",
-				      type));
-    }
+    
+    if (entityConfig != null)
+      typeName = entityConfig.getClassName();
+    else
+      typeName = entityAnn.getString("name");
 
     // Validates the type
     String entityName;
@@ -249,51 +237,96 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     JAnnotation rootEntityAnn = null;
     EntityConfig rootEntityConfig = null;
 
-    if (isEntity || isMappedSuperclass) {
-      validateType(type, isEntity);
+    validateType(type, true);
 
       // jpa/0ge2
       // if (hasInheritance) {
 
-      if (isEntity) {
-	if (entityConfig == null)
-	  entityName = entityAnn.getString("name");
-	else {
-	  entityName = entityConfig.getClassName();
-
-	  int p = entityName.lastIndexOf('.');
-
-	  if (p > 0)
-	    entityName = entityName.substring(p + 1);
-	}
-      }
-      else { // jpa/0ge2
-	if (mappedSuperConfig == null)
-	  entityName = mappedSuperAnn.getString("name");
-	else {
-	  entityName = mappedSuperConfig.getClassName();
-
-	  int p = entityName.lastIndexOf('.');
-
-	  if (p > 0)
-	    entityName = entityName.substring(p + 1);
-	}
-      }
-    }
+    if (entityConfig == null)
+      entityName = entityAnn.getString("name");
     else {
-      entityName = type.getName();
+      entityName = entityConfig.getClassName();
+
+      int p = entityName.lastIndexOf('.');
+
+      if (p > 0)
+	entityName = entityName.substring(p + 1);
     }
 
     if ((entityName == null) || "".equals(entityName)) {
       entityName = type.getSimpleName();
     }
 
-    if (isEntity) {
-      entityType = _persistenceUnit.createEntity(entityName, type);
-    }
+    entityType = _persistenceUnit.createEntity(entityName, type);
+
+    _configManager.addType(type, new EntityConfig(type.getName(), this, entityType));
+
+    boolean isField = isField(type, entityConfig, false);
+
+    if (isField)
+      entityType.setFieldAccess(true);
+
+    return entityType;
+  }
+
+  private EntityType introspectMappedType(JClass type, EntityType parentType)
+    throws SQLException
+  {
+    EntityType entityType;
+
+    boolean isMappedSuperclass = false;
+    JAnnotation mappedSuperAnn = null;
+    MappedSuperclassConfig mappedSuperConfig = null;
+
+    String typeName;
+
+    MappedSuperclassConfig mappedSuperOrEntityConfig = null;
+
+    getInternalMappedSuperclassConfig(type, _annotationCfg);
+    mappedSuperAnn = _annotationCfg.getAnnotation();
+    mappedSuperConfig = _annotationCfg.getMappedSuperclassConfig();
+
+    isMappedSuperclass = ! _annotationCfg.isNull();
+
+    if (! isMappedSuperclass)
+      return null;
+    
+    mappedSuperOrEntityConfig = mappedSuperConfig;
+
+    if (mappedSuperConfig != null)
+      typeName = mappedSuperConfig.getClassName();
+    else
+      typeName = mappedSuperAnn.getString("name");
+
+    // Validates the type
+    String entityName;
+    JAnnotation inheritanceAnn = null;
+    InheritanceConfig inheritanceConfig = null;
+    JClass rootClass = type;
+    JAnnotation rootEntityAnn = null;
+    EntityConfig rootEntityConfig = null;
+
+    validateType(type, false);
+
+    // jpa/0ge2
+    // if (hasInheritance) {
+
+    if (mappedSuperConfig == null)
+      entityName = mappedSuperAnn.getString("name");
     else {
-      entityType = _persistenceUnit.createMappedSuperclass(entityName, type);
+      entityName = mappedSuperConfig.getClassName();
+
+      int p = entityName.lastIndexOf('.');
+
+      if (p > 0)
+	entityName = entityName.substring(p + 1);
     }
+
+    if ((entityName == null) || "".equals(entityName)) {
+      entityName = type.getSimpleName();
+    }
+
+    entityType = _persistenceUnit.createMappedSuperclass(entityName, type);
 
     _configManager.addType(type, new EntityConfig(type.getName(), this, entityType));
 
@@ -307,6 +340,71 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     entityType.setEnhanced(true);
 
     return entityType;
+  }
+
+  /**
+   * Introspects.
+   */
+  private EmbeddableType introspectEmbeddableType(JClass type)
+    throws ConfigException, SQLException
+  {
+    getInternalEmbeddableConfig(type, _annotationCfg);
+    JAnnotation embeddableAnn = _annotationCfg.getAnnotation();
+    EmbeddableConfig embeddableConfig = _annotationCfg.getEmbeddableConfig();
+
+    /*
+    if (_annotationCfg.isNull())
+      return null;
+    */
+
+    String typeName = type.getName();
+    EmbeddableType embeddableType
+      = _persistenceUnit.createEmbeddable(typeName, type);
+
+    _configManager.addType(type, new EmbeddableConfig(type.getName(), this, embeddableType));
+
+    try {
+
+      boolean isField = isField(type, embeddableConfig);
+
+      if (isField)
+        embeddableType.setFieldAccess(true);
+
+      // XXX: jpa/0u21
+      JAnnotation ann = type.getAnnotation(javax.persistence.Embeddable.class);
+
+      if (ann == null) {
+        isField = true;
+        embeddableType.setIdClass(true);
+      
+	_persistenceUnit.getAmberContainer().addEmbeddable(typeName,
+							   embeddableType);
+      }
+
+      embeddableType.setInstanceClassName(type.getName() +
+                                          "__ResinExt");
+      embeddableType.setEnhanced(true);
+
+      if (isField)
+        introspectFields(_persistenceUnit, embeddableType, null,
+                         type, embeddableConfig, true);
+      else
+        introspectMethods(_persistenceUnit, embeddableType, null,
+                          type, embeddableConfig);
+
+    } catch (ConfigException e) {
+      if (embeddableType != null)
+	embeddableType.setConfigException(e);
+
+      throw e;
+    } catch (RuntimeException e) {
+      if (embeddableType != null)
+	embeddableType.setConfigException(e);
+
+      throw e;
+    }
+
+    return embeddableType;
   }
 
   private MappedSuperclassConfig introspectEntityConfig(JClass type)
@@ -331,11 +429,11 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     getInternalEntityConfig(parentClass, _annotationCfg);
 
     if (! _annotationCfg.isNull())
-      return _configManager.introspectEntity(parentClass);
+      return (EntityType) _configManager.introspect(parentClass);
     else if (parentClass.isAnnotationPresent(javax.persistence.Entity.class))
-      return _configManager.introspectEntity(parentClass);
+      return (EntityType) _configManager.introspect(parentClass);
     else if (parentClass.isAnnotationPresent(javax.persistence.MappedSuperclass.class))
-      return _configManager.introspectEntity(parentClass);
+      return (EntityType) _configManager.introspect(parentClass);
     else
       return null;
   }
@@ -738,5 +836,27 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
     _depCompletions.add(new AttributeOverrideCompletion(this, entityType, type,
 							overrideMap));
+  }
+
+  boolean isField(JClass type,
+                  AbstractEnhancedConfig typeConfig)
+    throws ConfigException
+  {
+    for (JMethod method : type.getDeclaredMethods()) {
+      JAnnotation ann[] = method.getDeclaredAnnotations();
+
+      for (int i = 0; ann != null && i < ann.length; i++) {
+	if (isPropertyAnnotation(ann[i].getType()))
+	  return false;
+      }
+    }
+
+    return true;
+  }
+
+  private boolean isPropertyAnnotation(String name)
+  {
+    return ("javax.persistence.Basic".equals(name)
+	    || "javax.persistence.Column".equals(name));
   }
 }

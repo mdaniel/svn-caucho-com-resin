@@ -37,7 +37,6 @@ import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.EntityItem;
 import com.caucho.amber.entity.Listener;
 import com.caucho.amber.field.*;
-import com.caucho.amber.gen.AmberMappedComponent;
 import com.caucho.amber.gen.EntityComponent;
 import com.caucho.amber.idgen.AmberTableGenerator;
 import com.caucho.amber.idgen.IdGenerator;
@@ -49,6 +48,7 @@ import com.caucho.amber.table.Table;
 import com.caucho.bytecode.*;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.ClassComponent;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -66,7 +66,7 @@ import java.util.logging.Logger;
 /**
  * Base for entity or mapped-superclass types.
  */
-public class EntityType extends AbstractStatefulType {
+public class EntityType extends BeanType {
   private static final Logger log = Logger.getLogger(EntityType.class.getName());
   private static final L10N L = new L10N(EntityType.class);
 
@@ -152,6 +152,7 @@ public class EntityType extends AbstractStatefulType {
   /**
    * returns true for a loadable entity 
    */
+  @Override
   public boolean isEntity()
   {
     return ! getBeanClass().isAbstract();
@@ -209,7 +210,7 @@ public class EntityType extends AbstractStatefulType {
    * Gets a component generator.
    */
   @Override
-  public AmberMappedComponent getComponentGenerator()
+  public ClassComponent getComponentGenerator()
   {
     return new EntityComponent();
   }

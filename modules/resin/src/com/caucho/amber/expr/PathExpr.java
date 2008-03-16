@@ -30,7 +30,7 @@ package com.caucho.amber.expr;
 
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.type.AbstractStatefulType;
+import com.caucho.amber.type.BeanType;
 
 /**
  * Represents an amber mapping query expression
@@ -39,7 +39,7 @@ public interface PathExpr extends AmberExpr {
   /**
    * Returns the target type.
    */
-  public AbstractStatefulType getTargetType();
+  public BeanType getTargetType();
 
   /**
    * Creates the expr from the path.

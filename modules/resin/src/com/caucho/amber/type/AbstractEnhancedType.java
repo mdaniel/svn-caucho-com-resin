@@ -36,6 +36,7 @@ import com.caucho.amber.gen.AmberMappedComponent;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JMethod;
+import com.caucho.java.gen.ClassComponent;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -186,7 +187,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Gets a component generator.
    */
-  public AmberMappedComponent getComponentGenerator()
+  public ClassComponent getComponentGenerator()
   {
     return null;
   }

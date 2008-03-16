@@ -66,8 +66,7 @@ public class MappedSuperclassComponent extends AmberMappedComponent {
    * Generates the init generated code.
    */
   @Override
-  void generateInit(JavaWriter out,
-                    boolean isEntityParent)
+  void generateInit(JavaWriter out)
     throws IOException
   {
   }

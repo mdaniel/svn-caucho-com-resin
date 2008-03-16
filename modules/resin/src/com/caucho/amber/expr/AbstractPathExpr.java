@@ -32,7 +32,7 @@ import com.caucho.amber.AmberRuntimeException;
 import com.caucho.amber.field.AmberField;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.type.AbstractStatefulType;
+import com.caucho.amber.type.BeanType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.util.L10N;
 
@@ -50,7 +50,7 @@ abstract public class AbstractPathExpr extends AbstractAmberExpr
   {
     AmberField field = null;
 
-    AbstractStatefulType type = getTargetType();
+    BeanType type = getTargetType();
 
     do {
       field = type.getField(fieldName);

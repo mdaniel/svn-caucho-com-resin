@@ -29,6 +29,8 @@
 
 package com.caucho.amber.cfg;
 
+import com.caucho.amber.type.EmbeddableType;
+
 
 /**
  * <embeddable> tag in the orm.xml
@@ -43,10 +45,30 @@ public class EmbeddableConfig extends AbstractEnhancedConfig {
   private String _description;
   private EmbeddableAttributesConfig _attributes;
 
+  private EntityIntrospector _introspector;
+  private EmbeddableType _embeddableType;
+
   EmbeddableConfig(String name)
   {
     super(name);
   }
+
+  EmbeddableConfig(String name,
+		   EntityIntrospector introspector,
+		   EmbeddableType embeddableType)
+  {
+    super(name);
+    
+    _embeddableType = embeddableType;
+    _introspector = introspector;
+  }
+
+  @Override
+  BaseConfigIntrospector getIntrospector()
+  {
+    return _introspector;
+  }
+
 
   public String getDescription()
   {

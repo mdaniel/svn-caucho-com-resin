@@ -33,10 +33,10 @@ import com.caucho.amber.entity.MappedSuperclass;
 import com.caucho.amber.gen.*;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.*;
+import com.caucho.java.gen.ClassComponent;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
-import java.util.ArrayList;
 
 /**
  * Represents a non-persistent class with abstract O/R mapping information.
@@ -81,7 +81,7 @@ public class MappedSuperclassType extends EntityType {
    * Gets a component generator.
    */
   @Override
-  public AmberMappedComponent getComponentGenerator()
+  public ClassComponent getComponentGenerator()
   {
     return new MappedSuperclassComponent();
   }

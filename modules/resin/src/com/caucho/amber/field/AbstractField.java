@@ -36,7 +36,7 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.Column;
-import com.caucho.amber.type.AbstractStatefulType;
+import com.caucho.amber.type.BeanType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassWrapper;
@@ -65,7 +65,7 @@ abstract public class AbstractField implements AmberField {
   protected static final Logger log
     = Logger.getLogger(AbstractField.class.getName());
 
-  final AbstractStatefulType _sourceType;
+  final BeanType _sourceType;
 
   private String _name;
 
@@ -80,12 +80,12 @@ abstract public class AbstractField implements AmberField {
   private int _updateIndex;
   private int _loadGroupIndex = -1;
 
-  AbstractField(AbstractStatefulType sourceType)
+  AbstractField(BeanType sourceType)
   {
     _sourceType = sourceType;
   }
 
-  AbstractField(AbstractStatefulType sourceType, String name)
+  AbstractField(BeanType sourceType, String name)
     throws ConfigException
   {
     this(sourceType);
@@ -112,11 +112,11 @@ abstract public class AbstractField implements AmberField {
       String getter = "get" + name;
       String setter = "set" + name;
 
-      _getterMethod = AbstractStatefulType.getGetter(getBeanClass(), getter);
+      _getterMethod = BeanType.getGetter(getBeanClass(), getter);
 
       if (_getterMethod == null) {
         getter = "is" + name;
-        _getterMethod = AbstractStatefulType.getGetter(getBeanClass(), getter);
+        _getterMethod = BeanType.getGetter(getBeanClass(), getter);
       }
 
       /* jpa/0u21
@@ -126,7 +126,7 @@ abstract public class AbstractField implements AmberField {
       */
 
       if (_getterMethod == null) {
-        JField field = AbstractStatefulType.getField(getBeanClass(), _name);
+        JField field = BeanType.getField(getBeanClass(), _name);
 
         if (field == null)
           throw new ConfigException(L.l("{0}: {1} has no matching field.",
@@ -137,11 +137,11 @@ abstract public class AbstractField implements AmberField {
       else {
         _javaType = _getterMethod.getGenericReturnType();
 
-        _setterMethod = AbstractStatefulType.getSetter(getBeanClass(), setter);
+        _setterMethod = BeanType.getSetter(getBeanClass(), setter);
       }
     }
     else {
-      JField field = AbstractStatefulType.getField(getBeanClass(), name);
+      JField field = BeanType.getField(getBeanClass(), name);
 
       if (field == null)
         throw new ConfigException(L.l("{0}: {1} has no matching field.",
@@ -184,7 +184,7 @@ abstract public class AbstractField implements AmberField {
   /**
    * Returns the owning entity class.
    */
-  public AbstractStatefulType getSourceType()
+  public BeanType getSourceType()
   {
     return _sourceType;
   }
@@ -417,7 +417,7 @@ abstract public class AbstractField implements AmberField {
   /**
    * Creates a copy of the field for a parent
    */
-  public AmberField override(AbstractStatefulType table)
+  public AmberField override(BeanType table)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -715,7 +715,7 @@ abstract public class AbstractField implements AmberField {
     if (! getSourceType().isEmbeddable())
       return "__caucho_super_get_" + getName() + "()";
     else if (isFieldAccess())
-      return "__caucho_super_get_" + getName() + "()";
+      return getName();
     else
       return getGetterMethod().getName() + "()";
   }
@@ -733,7 +733,12 @@ abstract public class AbstractField implements AmberField {
    */
   public String generateSuperSetter(String objThis, String value)
   {
-    return objThis + "." + "__caucho_super_set_" + getName() + "(" + value + ")";
+    if (! getSourceType().isEmbeddable())
+      return objThis + "." + "__caucho_super_set_" + getName() + "(" + value + ")";
+    else if (isFieldAccess())
+      return objThis + "." + getName() + " = " + value;
+    else
+      return objThis + "." + getSetterMethod().getName() + "(" + value + ")";
   }
 
   /**

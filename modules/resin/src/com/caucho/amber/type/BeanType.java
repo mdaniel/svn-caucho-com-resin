@@ -54,9 +54,9 @@ import java.util.logging.Logger;
  * Represents a stateful type:
  * embeddable, entity or mapped-superclass.
  */
-abstract public class AbstractStatefulType extends AbstractEnhancedType {
-  private static final Logger log = Logger.getLogger(AbstractStatefulType.class.getName());
-  private static final L10N L = new L10N(AbstractStatefulType.class);
+abstract public class BeanType extends AbstractEnhancedType {
+  private static final Logger log = Logger.getLogger(BeanType.class.getName());
+  private static final L10N L = new L10N(BeanType.class);
 
   private boolean _isFieldAccess;
 
@@ -73,7 +73,7 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
 
   private Column _discriminator;
 
-  public AbstractStatefulType(AmberPersistenceUnit amberPersistenceUnit)
+  public BeanType(AmberPersistenceUnit amberPersistenceUnit)
   {
     super(amberPersistenceUnit);
   }
@@ -138,6 +138,7 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   public void addField(AmberField field)
   {
     _selfFields.add(field);
+    Collections.sort(_selfFields, new AmberFieldCompare());
   }
 
   /**

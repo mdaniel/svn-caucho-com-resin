@@ -258,7 +258,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Creates a copy of the field for a parent
    */
-  public AmberField override(AbstractStatefulType type)
+  public AmberField override(BeanType type)
   {
     EntityManyToOneField field
       = new EntityManyToOneField((EntityType) getSourceType(), getName(),

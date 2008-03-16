@@ -36,7 +36,7 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.Column;
-import com.caucho.amber.type.AbstractStatefulType;
+import com.caucho.amber.type.BeanType;
 import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JType;
 import com.caucho.config.ConfigException;
@@ -56,7 +56,7 @@ public interface AmberField {
   /**
    * Returns the owning entity class.
    */
-  public AbstractStatefulType getSourceType();
+  public BeanType getSourceType();
 
   /**
    * Returns the field name.
@@ -146,7 +146,7 @@ public interface AmberField {
   /**
    * Override the field
    */
-  public AmberField override(AbstractStatefulType entityType);
+  public AmberField override(BeanType entityType);
 
   /**
    * Links to the target.
