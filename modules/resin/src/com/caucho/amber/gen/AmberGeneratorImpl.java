@@ -99,7 +99,8 @@ public class AmberGeneratorImpl implements AmberGenerator {
     genClass.addImport("com.caucho.amber.entity.*");
     genClass.addImport("com.caucho.amber.type.*");
 
-    AmberMappedComponent componentGenerator = type.getComponentGenerator();
+    AmberMappedComponent componentGenerator
+      = (AmberMappedComponent) type.getComponentGenerator();
 
     if (componentGenerator != null) {
       // type is EntityType or MappedSuperclassType
