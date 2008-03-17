@@ -32,6 +32,7 @@ package com.caucho.boot;
 import com.caucho.config.*;
 import com.caucho.config.program.*;
 import com.caucho.server.admin.HessianHmuxProxy;
+import com.caucho.server.util.*;
 import com.caucho.util.*;
 import com.caucho.Version;
 import com.caucho.vfs.Path;
@@ -367,7 +368,9 @@ public class WatchdogClient
 
     list.addAll(_config.getWatchdogJvmArgs());
 
-    if (! list.contains("-d32") && ! list.contains("-d64") && is64bit())
+    // XXX: can this just be copied from original args?
+    if (! list.contains("-d32") && ! list.contains("-d64")
+	&& is64bit() && ! CauchoSystem.isWindows())
       list.add("-d64");
 
     list.add("com.caucho.boot.WatchdogManager");

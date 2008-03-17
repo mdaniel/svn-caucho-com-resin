@@ -12,6 +12,8 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>admin: profiling issue with MacOSX (#2480, rep by Javier Vegas)</li>
+<li>boot: 64-bit windows does not use -d64 flag (#2501, rep by fesse)</li>
 <li>amber: native query needs to use column names (#1716)</li>
 <li>amber: @OneToMany was ignoring fetch annotation (#2423, rep by Daniel Spangler)</li>
 <li>amber: @PersistenceUnit was not initialized before binding @Component (#2498, rep by wesley)</li>

@@ -49,6 +49,12 @@ public class IfStatement extends Statement {
     _test = test;
     _trueBlock = trueBlock;
     _falseBlock = falseBlock;
+
+    if (_trueBlock != null)
+      _trueBlock.setParent(this);
+
+    if (_falseBlock != null)
+      _falseBlock.setParent(this);
   }
 
   protected Expr getTest()

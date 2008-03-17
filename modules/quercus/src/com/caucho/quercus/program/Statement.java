@@ -67,13 +67,18 @@ abstract public class Statement {
   {
     return _location;
   }
+
+  public boolean isLoop()
+  {
+    return false;
+  }
   
-  public Statement getParent()
+  final public Statement getParent()
   {
     return _parent;
   }
   
-  public void setParent(Statement parent)
+  final public void setParent(Statement parent)
   {
     _parent = parent;
   }

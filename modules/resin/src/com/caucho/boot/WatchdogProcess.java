@@ -34,6 +34,7 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.log.RotateStream;
 import com.caucho.server.port.Port;
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.Vfs;
@@ -425,7 +426,8 @@ class WatchdogProcess
     if (! _watchdog.hasXmx())
       list.add("-Xmx256m");
 
-    if (! list.contains("-d32") && ! list.contains("-d64") && _watchdog.is64bit())
+    if (! list.contains("-d32") && ! list.contains("-d64")
+	&& _watchdog.is64bit() && ! CauchoSystem.isWindows())
       list.add("-d64");
 
     for (String arg : _watchdog.getJvmArgs()) {

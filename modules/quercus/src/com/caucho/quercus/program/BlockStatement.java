@@ -46,6 +46,9 @@ public class BlockStatement extends Statement {
     super(location);
 
     _statements = statements;
+
+    for (Statement stmt : _statements)
+      stmt.setParent(this);
   }
 
   public BlockStatement(Location location, ArrayList<Statement> statementList)
@@ -54,6 +57,9 @@ public class BlockStatement extends Statement {
 
     _statements = new Statement[statementList.size()];
     statementList.toArray(_statements);
+
+    for (Statement stmt : _statements)
+      stmt.setParent(this);
   }
 
   public BlockStatement append(ArrayList<Statement> statementList)
@@ -72,14 +78,6 @@ public class BlockStatement extends Statement {
   public Statement []getStatements()
   {
     return _statements;
-  }
-  
-  @Override
-  public void setParent(Statement parent)
-  {
-    for (int i = 0; i < _statements.length; i++) {
-      _statements[i].setParent(parent);
-    }
   }
 
   /**

@@ -650,7 +650,7 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 		args = set_ms_args(java_exe, cp, server_root, jit, main, resin_argc, resin_argv, java_argv);
 	}
 
-	sprintf(buf, "PATH=%s;%s\\bin;%s\\win32;\\openssl\\bin", getenv("PATH"), resin_home, resin_home);
+	sprintf(buf, "PATH=%s;%s\\bin;%s\\win32;%s\\win64;\\openssl\\bin", getenv("PATH"), resin_home, resin_home);
 	putenv(buf);
 
 	if (! SetCurrentDirectory(server_root)) {

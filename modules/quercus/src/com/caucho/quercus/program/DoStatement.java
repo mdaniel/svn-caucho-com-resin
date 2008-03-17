@@ -53,6 +53,12 @@ public class DoStatement extends Statement {
     block.setParent(this);
   }
 
+  @Override
+  public boolean isLoop()
+  {
+    return true;
+  }
+
   public Value execute(Env env)
   {
     try {

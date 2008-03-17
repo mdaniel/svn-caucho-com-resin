@@ -53,11 +53,15 @@ public class TryStatement extends Statement {
     super(location);
 
     _block = block;
+
+    block.setParent(this);
   }
 
   public void addCatch(String id, AbstractVarExpr lhs, Statement block)
   {
     _catchList.add(new Catch(id, lhs, block));
+    
+    block.setParent(this);
   }
 
   public Value execute(Env env)
