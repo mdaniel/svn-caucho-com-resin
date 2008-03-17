@@ -30,8 +30,7 @@
 package com.caucho.server.http;
 
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.AbstractHttpRequest;
-import com.caucho.server.connection.AbstractHttpResponse;
+import com.caucho.server.connection.*;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
@@ -101,6 +100,22 @@ public class HttpResponse extends AbstractHttpResponse
     throws IOException
   {
     return _rawWrite;
+  }
+
+  /**
+   * Upgrade protocol
+   */
+  @Override
+  public void upgradeProtocol(TcpConnectionHandler handler)
+  {
+    TcpConnectionController controller
+      = new TcpConnectionController(getOriginalRequest(), handler);
+    
+    setStatus(101);
+    setContentLength(0);
+
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " upgrade HTTP to " + handler);
   }
 
   /**

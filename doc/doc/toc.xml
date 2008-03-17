@@ -42,8 +42,6 @@
 	    description="connection pool and database driver configuration"/>
       <item link="host-tags.xtp" title="&lt;host>"
 	    description="virtual hosts" />
-      <item link="config-log.xtp" title="Log tags"
-	    description="access log, java.util.logging, and stdout" />
       <item link="port-tags.xtp" title="Ports"
              description="HTTP, SSL, addresses and ports"/>
       <item link="resin-tags.xtp" title="&lt;resin>"
@@ -160,6 +158,9 @@
 
       <item link="jsp-templates.xtp" title="JSP Templates"/>
     </item>
+    
+    <item link="config-log.xtp" title="Logging"
+          description="access log, java.util.logging, and stdout" />
     
     <item link="resin-messaging.xtp" title="Messaging"
           description="JMS, JCA, Message Driven Beans and Queues"/>

@@ -179,7 +179,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
   /**
    * Try to read nonblock
    */
-  private boolean waitForKeepalive()
+  public boolean waitForKeepalive()
     throws IOException
   {
     Port port = getPort();
@@ -421,12 +421,19 @@ public class TcpConnection extends PortConnection implements ThreadTask
     if (controller != null) {
       // comet suspension
       _suspendTime = Alarm.getCurrentTime();
-      
-      if (port.suspend(this)) {
+
+      boolean isSuspended = false;
+
+      if (controller.isDuplex()) {
+	isSuspended = port.registerDuplex(this);
+      }
+      else if (port.suspend(this)) {
+	isSuspended = true;
 	if (log.isLoggable(Level.FINE))
 	  log.fine(dbgId() + " suspend");
       }
-      else {
+
+      if (! isSuspended) {
 	if (log.isLoggable(Level.FINE))
 	  log.fine(dbgId() + " suspend fail");
 	
@@ -457,6 +464,49 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
       setKeepalive();
       ThreadPool.getThreadPool().schedule(this);
+    }
+  }
+
+  /**
+   * Tries to add the connection as select
+   *
+   * At exit, the connection is either:
+   *   1) freed (no keepalive)
+   *   2) rescheduled (keepalive with new thread)
+   *   3) in select pool (keepalive with poll)
+   */
+  public boolean waitForSelect()
+  {
+    Port port = getPort();
+
+    if (! port.keepaliveBegin(this, _connectionStartTime)) {
+      free();
+      return false;
+    }
+    else if (port.getSelectManager() != null) {
+      if (port.getSelectManager().keepalive(this)) {
+        if (log.isLoggable(Level.FINE))
+          log.fine(dbgId() + "keepalive (select)");
+
+	return true;
+      }
+      else {
+        // XXX: s/b
+        // setKeepalive();
+        // ThreadPool.schedule(this);
+	log.warning(dbgId() + "failed keepalive (select)");
+
+        port.keepaliveEnd(this);
+	free();
+
+	return false;
+      }
+    }
+    else {
+      if (log.isLoggable(Level.FINE))
+        log.fine(dbgId() + "keepalive (thread)");
+
+      return false;
     }
   }
 
@@ -491,20 +541,32 @@ public class TcpConnection extends PortConnection implements ThreadTask
   {
     ConnectionController controller = getController();
 
-    if (controller != null) {
-      _isWake = true;
+    if (controller == null)
+      return false;
+    
+    _isWake = true;
 
+    if (controller.isDuplex()) {
+      if (getPort().resumeWrite(this, controller)) {
+	log.fine(dbgId() + "wake");
+	return true;
+      }
+    }
+    else {
+      // comet
       if (getPort().resume(this)) {
 	log.fine(dbgId() + "wake");
 	return true;
       }
-      else {
-	log.fine(dbgId() + "wake failed");
-	return false;
-      }
     }
-    else
-      return false;
+
+    log.fine(dbgId() + "wake failed");
+    return false;
+  }
+
+  public boolean suspendWrite()
+  {
+    return getPort().suspendWrite(this);
   }
 
   /**
@@ -559,7 +621,17 @@ public class TcpConnection extends PortConnection implements ThreadTask
       if (isResume) {
 	ConnectionController controller = getController();
 
-	if (request.handleResume()) {
+	if (controller.isDuplex()) {
+	  TcpConnectionController duplex
+	    = (TcpConnectionController) controller;
+
+	  Runnable readTask = duplex.getReadTask();
+	  if (readTask != null) {
+	    isKeepalive = true;
+	    readTask.run();
+	  }
+	}
+	else if (request.handleResume()) {
 	  isKeepalive = true;
 	}
 	else {
@@ -605,7 +677,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
 	      controller = getController();
 	      if (controller != null && controller.isActive()) {
-		  isKeepalive = true;
+		isKeepalive = true;
 		return;
 	      }
 		/* XXX: else if (isKeepalive) check

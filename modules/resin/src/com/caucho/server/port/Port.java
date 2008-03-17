@@ -41,6 +41,7 @@ import com.caucho.loader.EnvironmentListener;
 import com.caucho.log.Log;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.server.connection.ConnectionController;
+import com.caucho.server.connection.TcpConnectionController;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.*;
@@ -140,6 +141,10 @@ public class Port
     = new ArrayList<TcpConnection>();
 
   private Alarm _suspendAlarm;
+
+  // duplex
+  private ArrayList<TcpConnection> _writeSuspendList
+    = new ArrayList<TcpConnection>();
 
   // statistics
 
@@ -672,6 +677,14 @@ public class Port
   public int getCometIdleCount()
   {
     return _suspendList.size();
+  }
+
+  /**
+   * Returns the number of duplex connections.
+   */
+  public int getDuplexCount()
+  {
+    return _writeSuspendList.size();
   }
 
   public long getLifetimeRequestCount()
@@ -1371,6 +1384,98 @@ public class Port
       ThreadPool.getThreadPool().schedule(conn);
 
     return true;
+  }
+
+  /**
+   * Registers the controller for TCP full duplex
+   */
+  boolean registerDuplex(TcpConnection conn)
+  {
+    ConnectionController connController = conn.getController();
+
+    if (! (connController instanceof TcpConnectionController)) {
+      log.warning(connController + " should be duplex TcpConnectionConroller");
+      return false;
+    }
+    
+    TcpConnectionController tcpController
+      = (TcpConnectionController) connController;
+
+    boolean isResumeWrite = false;
+
+    synchronized (_writeSuspendList) {
+      if (conn.isWake()) {
+	isResumeWrite = true;
+	conn.setResume();
+      }
+      else if (conn.isComet()) {
+	_writeSuspendList.add(conn);
+      }
+      else
+	return false;
+    }
+
+    if (isResumeWrite) {
+      Runnable writeTask = tcpController.getWriteTask();
+
+      if (writeTask == null)
+	return false;
+      
+      ThreadPool.getThreadPool().schedule(writeTask);
+    }
+
+    Runnable readTask = tcpController.getReadTask();
+
+    if (readTask == null)
+      return false;
+
+    // XXX: check for data
+    ThreadPool.getThreadPool().schedule(readTask);
+
+    return true;
+  }
+
+  boolean suspendWrite(TcpConnection conn)
+  {
+    boolean isResumeWrite = false;
+
+    synchronized (_writeSuspendList) {
+      if (conn.isWake()) {
+	conn.setResume();
+	return false;
+      }
+      else if (conn.isComet()) {
+	_writeSuspendList.add(conn);
+	return true;
+      }
+      else
+	return true;
+    }
+  }
+
+  /**
+   * Suspends the controller (for duplex protocols)
+   */
+  boolean resumeWrite(TcpConnection conn, ConnectionController controller)
+  {
+    TcpConnectionController tcpController
+      = (TcpConnectionController) controller;
+    
+    synchronized (_suspendList) {
+      if (! _writeSuspendList.remove(conn))
+	return false;
+      
+      conn.setResume();
+    }
+
+    Runnable writeTask = tcpController.getWriteTask();
+
+    if (writeTask != null) {
+      ThreadPool.getThreadPool().schedule(writeTask);
+      return true;
+    }
+    else
+      return false;
   }
 
   /**

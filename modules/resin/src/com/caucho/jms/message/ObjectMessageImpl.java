@@ -63,6 +63,12 @@ public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
     _tempStream = msg._tempStream;
   }
 
+  public ObjectMessageImpl(Serializable value)
+    throws JMSException
+  {
+    setObject(value);
+  }
+
   /**
    * Returns the type enumeration.
    */

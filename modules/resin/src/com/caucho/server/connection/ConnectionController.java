@@ -87,6 +87,14 @@ public class ConnectionController
   }
 
   /**
+   * Returns true for a duplex controller
+   */
+  public boolean isDuplex()
+  {
+    return false;
+  }
+
+  /**
    * Sets the timeout.
    */
   public final void timeout()

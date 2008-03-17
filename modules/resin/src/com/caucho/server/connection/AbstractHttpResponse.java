@@ -2088,6 +2088,12 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     else
       return null;
   }
+
+  public void upgradeProtocol(TcpConnectionHandler handler)
+  {
+    throw new IllegalStateException(L.l("'{0}' does not support upgrading",
+					this));
+  }
   
   /**
    * Complete the request.  Flushes the streams, completes caching

@@ -1002,7 +1002,7 @@ public final class ReadStream extends InputStream
   private boolean readBuffer()
     throws IOException
   {
-    if (_readBuffer == null) {
+    if (_readBuffer == null || _source == null) {
       _readOffset = 0;
       _readLength = 0;
       return false;
