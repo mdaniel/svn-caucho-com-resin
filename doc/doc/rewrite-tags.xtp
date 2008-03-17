@@ -759,6 +759,17 @@ indicating that the resource has moved.</p>
 &lt;/web-app>
 </example>
 
+<example title="Redirecting all http:// requests to https://">
+  &lt;host ... &gt;
+     &lt;rewrite-dispatch&gt;
+        &lt;redirect regexp="^" target="https://${host.name}"&gt;
+          &lt;when secure="false"/&gt;
+        &lt;/redirect&gt;
+      &lt;/rewrite-dispatch&gt;
+      ...
+   &lt;/host&gt;
+</example>
+
 <deftable-childtags>
 <tr><td><a href="#disable-at">disable-at</a></td>
     <td>A cron syntax time specification for triggering disablement of the rule</td>
