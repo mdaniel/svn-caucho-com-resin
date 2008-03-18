@@ -1281,6 +1281,65 @@ successful and unsuccessful matches are logged.
 
 </s1>
 
+<s1 title="Examples">
+<s2 title="Redirect http:// requests to https:// requests">
+  <p>
+  The desired behaviour is to redirect plain connections to SSL connections.
+  </p>
+
+  <example title="Desired behaviour">
+    http://anything.com/anything.html
+      redirect => https://anything.com/anything.html
+  </example>
+
+  <example title="Configuration">
+    &lt;host ...&gt;
+      ...
+      &lt;rewrite-dispatch&gt;
+        &lt;redirect regexp="^" target="https://${host.name}"&gt;
+          &lt;when secure="false"/&gt;
+        &lt;/redirect&gt;
+      &lt;/rewrite-dispatch&gt;
+      ...
+    &lt;/host&gt;
+  </example>
+</s2>
+
+<s2 title="Forward based on host name">
+  <p>
+  The desired behaviour is to internally forward requests based on the host name.
+  </p>
+
+  <example title="Desired behaviour">
+    http://gryffindor.hogwarts.com/anything.html
+      forward => /gryffindor/*
+
+    http://slytherin.hogwarts.com/anything.html
+      forward => /slytherin/anything.html
+
+    http://hogwarts.com/anything.html
+      forward => /anything.html
+  </example>
+
+  <p>
+  The rewrite-dispatch tag is used at the &lt;cluster&gt; level.  If it was placed in the &lt;host&gt;
+  or the &lt;web-app&gt; then it would be too late to forward to a different host
+  because Resin would have already resolved the host.
+  </p>
+
+  <example title="Configuration">
+    &lt;cluster&gt;
+      ...
+      &lt;rewrite-dispatch&gt;
+        &lt;forward regexp="http://gryffindor\.[^/]+" target="/gryffindor/"/&gt;
+        &lt;forward regexp="http://slytherin\.[^/]+" target="/slytherin/"/&gt;
+      &lt;/rewrite-dispatch&gt;
+      ...
+    &lt;/cluster&gt;
+  </example>
+</s2>
+</s1>
+
 </body>
 
 </document>
