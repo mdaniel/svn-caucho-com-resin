@@ -102,14 +102,14 @@ public class JspViewHandler extends ViewHandler
       int p = contentType.indexOf("charset=");
 
       if (p > 0) {
-	int q = contentType.indexOf(';', p + 1);
+	int q = contentType.indexOf(';', p + 9);
 
 	String charset;
 
 	if (q > 0)
-	  charset = contentType.substring(p, q).trim();
+	  charset = contentType.substring(p + 8, q).trim();
 	else
-	  charset = contentType.substring(p).trim();
+	  charset = contentType.substring(p + 8).trim();
 
 	return charset;
       }
