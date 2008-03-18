@@ -197,6 +197,9 @@ public class HtmlResponseWriter extends ResponseWriter
   public void close()
     throws IOException
   {
+    // jsf/2006
+    flush();
+    _out.close();
   }
 
   public String toString()
