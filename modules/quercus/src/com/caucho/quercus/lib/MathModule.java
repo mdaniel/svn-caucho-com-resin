@@ -124,7 +124,7 @@ public class MathModule extends AbstractQuercusModule {
 
   private static Value baseToValue(Env env, String number, int base)
   {
-    int mode = 0;
+    boolean isLong = true;
 
     final long cutoff = Long.MAX_VALUE / base;
     final long cutlim = Long.MAX_VALUE % base;
@@ -151,22 +151,24 @@ public class MathModule extends AbstractQuercusModule {
       if (value >= base)
         continue;
 
-      switch (mode) {
-        case 0: // Integer
-          if (num < cutoff || (num == cutoff && value <= cutlim)) {
-            num = num * base + value;
-            break;
-          } else {
-            fnum = num;
-            mode = 1;
-          }
-          // fall-through
-        case 1: // Float
-          fnum = fnum * base + value;
+      if (isLong) {
+        // Integer
+
+        if (num < cutoff || (num == cutoff && value <= cutlim)) {
+          num = num * base + value;
+        } else {
+          fnum = num;
+          isLong = false;
+        }
+      }
+
+      if (!isLong) {
+        // Float
+        fnum = fnum * base + value;
       }
     }
 
-    if (mode == 1)
+    if (!isLong)
       return DoubleValue.create(fnum);
     else
       return LongValue.create(num);
@@ -205,8 +207,13 @@ public class MathModule extends AbstractQuercusModule {
 
     StringBuilder sb = new StringBuilder();
 
+    // Ignore sign bit
+
+    if (val < 0)
+      val = -val;
+
     do {
-      int d = Math.abs((int) (val % base));
+      int d = (int) (val % base);
       val /= base;
 
       if (d < 10)
@@ -240,15 +247,20 @@ public class MathModule extends AbstractQuercusModule {
 
     StringBuilder sb = new StringBuilder();
 
+    // Ignore sign bit
+
+    if (fval < 0)
+      fval = -fval;
+
     do {
-      int d = Math.abs((int) (fval % base));
+      int d = (int) (fval % base);
       fval /= base;
 
       if (d < 10)
         sb.append((char) (d + '0'));
       else
         sb.append((char) (d - 10 + 'a'));
-    } while (Math.abs(fval) >= 1.0);
+    } while (fval >= 1.0);
 
     sb.reverse();
 
