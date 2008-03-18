@@ -102,6 +102,19 @@ public class CharacterArrayType extends ArrayType {
   }
 
   /**
+   * Generates a string to load the property.
+   */
+  public int generateLoadNative(JavaWriter out, int index)
+    throws IOException
+  {
+    out.print("CharacterArrayType.toCharArray(");
+    out.print("rs.getString(columnNames[" + index + "]), ");
+    out.print("rs.wasNull())");
+
+    return index + 1;
+  }
+
+  /**
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
@@ -144,6 +157,24 @@ public class CharacterArrayType extends ArrayType {
 
     if (rs.wasNull())
       return null;
+
+    Character[] wrapperCharacter = new Character[primitiveCharacter.length];
+    for (int i=0; i < primitiveCharacter.length; i++)
+      wrapperCharacter[i] = new Character(primitiveCharacter[i]);
+
+    return wrapperCharacter;
+  }
+
+  /**
+   * Gets the value.
+   */
+  public static Character []toCharArray(String v, boolean isNull)
+    throws SQLException
+  {
+    if (isNull)
+      return null;
+    
+    char[] primitiveCharacter = v.toCharArray();
 
     Character[] wrapperCharacter = new Character[primitiveCharacter.length];
     for (int i=0; i < primitiveCharacter.length; i++)

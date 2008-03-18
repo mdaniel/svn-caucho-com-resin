@@ -111,7 +111,7 @@ public class StringType extends Type {
     if (pstmt.startsWith("query"))
       out.println(pstmt + ".setString(" + index + "++, " + value + ");");
     else
-      out.println("__caucho_setInternalString(" + pstmt + ", " + index + "++, " + value + ");");
+      out.println("StringType.setString(" + pstmt + ", " + index + "++, " + value + ");");
   }
 
   /**
@@ -132,11 +132,52 @@ public class StringType extends Type {
   }
 
   /**
+   * Sets the value.
+   */
+  public void setParameter(PreparedStatement pstmt, int index, String value)
+    throws SQLException
+  {
+    if (value == null)
+      pstmt.setNull(index, java.sql.Types.VARCHAR);
+    else
+      pstmt.setString(index, value);
+  }
+
+  /**
    * Gets the value.
    */
   public Object getObject(ResultSet rs, int index)
     throws SQLException
   {
     return rs.getString(index);
+  }
+
+  /**
+   * Sets the value.
+   */
+  public void setString(PreparedStatement pstmt, int index, Object value)
+    throws SQLException
+  {
+    if (value == null) {
+      // XXX: issue with derby.
+      // pstmt.setNull(index, java.sql.Types.OTHER);
+      pstmt.setString(index, null);
+    }
+    else if (value instanceof String)
+      pstmt.setString(index, (String) value);
+    else // ejb/0623
+      pstmt.setObject(index, value);
+  }
+
+  /**
+   * Sets the value.
+   */
+  public static void setString(PreparedStatement pstmt, int index, String value)
+    throws SQLException
+  {
+    if (value == null)
+      pstmt.setNull(index, java.sql.Types.VARCHAR);
+    else
+      pstmt.setString(index, value);
   }
 }

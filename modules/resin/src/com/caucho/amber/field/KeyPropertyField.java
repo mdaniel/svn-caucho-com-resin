@@ -191,6 +191,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
   {
     super.generatePrologue(out, completedSet);
 
+    /*
     if (isAbstract()) {
       out.println();
 
@@ -206,6 +207,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
       out.println("  " + getFieldName() + " = v;");
       out.println("}");
     }
+    */
   }
 
   /**
@@ -498,6 +500,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
   /**
    * Sets the actual data.
    */
+  /*
   @Override
   public String generateSuperSetter(String objThis, String value)
   {
@@ -506,10 +509,12 @@ public class KeyPropertyField extends PropertyField implements IdField {
     else
       return objThis + "." + getSetterName() + "(" + value + ")";
   }
+  */
 
   /**
    * Sets the actual data.
    */
+  /*
   @Override
   public String generateSuperGetter()
   {
@@ -518,6 +523,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
     else
       return getGetterName() + "()";
   }
+  */
 
   /**
    * Generates the property getter for an EJB proxy

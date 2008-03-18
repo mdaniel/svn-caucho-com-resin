@@ -226,8 +226,6 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
       generateHome(out);
 
-      generateInternals(out);
-
       // printDependList(out, _dependencies);
     } catch (IOException e) {
       throw e;
@@ -635,10 +633,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
     for (AmberField prop : _entityType.getFields()) {
       if (_entityType == prop.getSourceType()) {
 	prop.generateSuperGetter(out);
-	prop.generateGetProperty(out);
-
 	prop.generateSuperSetter(out);
-	prop.generateSetProperty(out);
+
+	if (! (prop instanceof IdField)) {
+	  prop.generateGetProperty(out);
+	  prop.generateSetProperty(out);
+	}
       }
     }
   }
@@ -2228,22 +2228,6 @@ abstract public class AmberMappedComponent extends ClassComponent {
         out.println(object + "." + method.getName() + "();");
       }
     }
-  }
-
-  void generateInternals(JavaWriter out)
-    throws IOException
-  {
-    out.println();
-    out.println("private void __caucho_setInternalString(java.sql.PreparedStatement pstmt, int index, String s)");
-    out.println("  throws java.sql.SQLException");
-    out.println("{");
-    out.pushDepth();
-    out.println("if (s == null)");
-    out.println("  pstmt.setNull(index, java.sql.Types.VARCHAR);");
-    out.println("else");
-    out.println("  pstmt.setString(index, s);");
-    out.popDepth();
-    out.println("}");
   }
 
   protected void generateLogFine(JavaWriter out, String msg)

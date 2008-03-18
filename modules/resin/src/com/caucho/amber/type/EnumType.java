@@ -225,7 +225,7 @@ public class EnumType extends Type {
       if (pstmt.startsWith("query"))
         out.println(pstmt + ".setString(" + index + "++, " + value + ");");
       else
-        out.println("__caucho_setInternalString(" + pstmt + ", " + index + "++, " + value + " == null ? null : " + value + ".toString());");
+        out.println("StringType.setString(" + pstmt + ", " + index + "++, " + value + ");");
     }
   }
 

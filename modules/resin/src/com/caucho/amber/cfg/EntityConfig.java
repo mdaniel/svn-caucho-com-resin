@@ -60,6 +60,10 @@ public class EntityConfig extends MappedSuperclassConfig {
   private EntityType _entityType;
   private EntityIntrospector _introspector;
 
+  public EntityConfig()
+  {
+  }
+  
   EntityConfig(String name)
   {
     super(name);

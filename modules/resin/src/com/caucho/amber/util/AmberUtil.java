@@ -19,7 +19,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -27,38 +26,26 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.cfg;
+package com.caucho.amber.util;
 
-import com.caucho.amber.type.*;
-
+import java.sql.*;
 
 /**
- * Configuration for an entity bean
+ * Runtime utilities
  */
-class TypeConfig {
-  private String _name;
-  
-  TypeConfig()
+public class AmberUtil {
+  private AmberUtil()
   {
-  }
-  
-  TypeConfig(String name)
-  {
-    _name = name;
   }
 
-  BeanType getType()
+  public static void setString(PreparedStatement pstmt,
+			       int index,
+			       String value)
+    throws SQLException
   {
-    return getEntityType();
-  }
-
-  EntityType getEntityType()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  
-  BaseConfigIntrospector getIntrospector()
-  {
-    return null;
+    if (value != null)
+      pstmt.setString(index, value);
+    else
+      pstmt.setNull(index, Types.VARCHAR);
   }
 }

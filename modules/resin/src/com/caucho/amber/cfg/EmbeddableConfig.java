@@ -29,7 +29,7 @@
 
 package com.caucho.amber.cfg;
 
-import com.caucho.amber.type.EmbeddableType;
+import com.caucho.amber.type.*;
 
 
 /**
@@ -78,6 +78,17 @@ public class EmbeddableConfig extends AbstractEnhancedConfig {
   public void setDescription(String description)
   {
     _description = description;
+  }
+
+  @Override
+  BeanType getType()
+  {
+    return _embeddableType;
+  }
+
+  EntityType getEntityType()
+  {
+    return null;
   }
 
   /**

@@ -54,6 +54,10 @@ public class MappedSuperclassConfig extends AbstractEnhancedConfig {
   private PostLoadConfig _postLoad;
   private AttributesConfig _attributes;
 
+  public MappedSuperclassConfig()
+  {
+  }
+
   MappedSuperclassConfig(String name)
   {
     super(name);
@@ -73,6 +77,19 @@ public class MappedSuperclassConfig extends AbstractEnhancedConfig {
   public String getClassName()
   {
     return _className;
+  }
+
+  /**
+   * Returns the class name.
+   */
+  public String getSimpleClassName()
+  {
+    int p = _className.lastIndexOf('.');
+
+    if (p > 0)
+      return _className.substring(p + 1);
+    else
+      return _className;
   }
 
   /**

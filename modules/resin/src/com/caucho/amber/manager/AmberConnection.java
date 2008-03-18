@@ -2064,33 +2064,36 @@ public class AmberConnection
     try {
       pstmt = _preparedStatementMap.get(sql);
 
-      if (pstmt == null) {
-        Connection conn = getConnection();
+      if (pstmt != null)
+	return pstmt;
+      
+      Connection conn = getConnection();
 
-        // XXX: avoids locking issues.
-        if (_statements.size() > 0) {
-          conn = _statements.get(0).getConnection();
-        }
-
-        if (_persistenceUnit.hasReturnGeneratedKeys())
-          pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        else {
-          // XXX: avoids locking issues.
-          // See com.caucho.sql.UserConnection
-          pstmt = conn.prepareStatement(sql,
-                                        ResultSet.TYPE_FORWARD_ONLY,
-                                        ResultSet.CONCUR_READ_ONLY);
-        }
-
-        _statements.add(pstmt);
-
-        _preparedStatementMap.put(sql, pstmt);
+      // XXX: avoids locking issues.
+      if (_statements.size() > 0) {
+	conn = _statements.get(0).getConnection();
       }
+
+      if (_persistenceUnit.hasReturnGeneratedKeys())
+	pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+      else {
+	// XXX: avoids locking issues.
+	// See com.caucho.sql.UserConnection
+	pstmt = conn.prepareStatement(sql,
+				      ResultSet.TYPE_FORWARD_ONLY,
+				      ResultSet.CONCUR_READ_ONLY);
+      }
+
+      _statements.add(pstmt);
+
+      _preparedStatementMap.put(sql, pstmt);
+
+      return pstmt;
     } catch (SQLException e) {
       closeStatement(sql);
-    }
 
-    return pstmt;
+      throw e;
+    }
   }
 
   /**

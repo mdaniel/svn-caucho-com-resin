@@ -77,7 +77,7 @@ public class AmberConfigManager {
     TypeConfig typeConfig = _typeMap.get(type.getName());
 
     if (typeConfig != null)
-      return typeConfig.getEntityType();
+      return typeConfig.getType();
 
     try {
       EntityIntrospector introspector

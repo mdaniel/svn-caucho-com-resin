@@ -454,13 +454,7 @@ public class EntityType extends BeanType {
     if (_discriminatorValue != null)
       return _discriminatorValue;
     else {
-      String name = getBeanClass().getName();
-
-      int p = name.lastIndexOf('.');
-      if (p > 0)
-        return name.substring(0, p);
-      else
-        return name;
+      return getBeanClass().getSimpleName();
     }
   }
 

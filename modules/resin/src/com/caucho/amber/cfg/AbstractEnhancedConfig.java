@@ -38,6 +38,10 @@ abstract class AbstractEnhancedConfig extends TypeConfig {
   // attributes
   private String _access;
 
+  AbstractEnhancedConfig()
+  {
+  }
+
   AbstractEnhancedConfig(String name)
   {
     super(name);

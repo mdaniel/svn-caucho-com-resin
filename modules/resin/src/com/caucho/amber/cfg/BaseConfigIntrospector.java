@@ -971,6 +971,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     EmbeddableType embeddableType
       = (EmbeddableType) _configManager.introspect(fieldType);
 
+    if (embeddableType == null)
+      throw new IllegalStateException("" + fieldType + " is an unsupported embeddable type");
+
     idField = new EmbeddedIdField(ownerType, embeddableType, fieldName);
 
     return idField;
@@ -1449,7 +1452,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       boolean isOwner = (mappedBy == null || mappedBy.equals(""));
 
       if (isOwner)
-        _depCompletions.add(oneToOne);
+        _linkCompletions.add(oneToOne);
       else {
         _depCompletions.add(0, oneToOne);
         entityType.setHasDependent(true);

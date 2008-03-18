@@ -108,10 +108,11 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 				 
       entityType.setParentType(parentType);
 
+      introspectTable(type, entityType, parentType);
+
+      // inheritance must be after table since it adds columns
       introspectInheritance(type, entityType, parentType);
       
-      introspectTable(type, entityType, parentType);
-    
       introspectTableCache(entityType, type);
 
       getInternalIdClassConfig(type, _annotationCfg);
@@ -314,12 +315,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     if (mappedSuperConfig == null)
       entityName = mappedSuperAnn.getString("name");
     else {
-      entityName = mappedSuperConfig.getClassName();
-
-      int p = entityName.lastIndexOf('.');
-
-      if (p > 0)
-	entityName = entityName.substring(p + 1);
+      entityName = mappedSuperConfig.getSimpleClassName();
     }
 
     if ((entityName == null) || "".equals(entityName)) {
@@ -467,24 +463,23 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       if (hasInheritance)
 	throw new ConfigException(L.l("'{0}' cannot have @Inheritance. It must be specified on the entity class that is the root of the entity class hierarchy.",
 				      type));
-      entityType.getRootType().addSubClass(entityType);
+      
+      EntityType rootType = entityType.getRootType();
+      rootType.addSubClass(entityType);
 
       getInternalPrimaryKeyJoinColumnConfig(type, _annotationCfg);
       JAnnotation joinAnn = _annotationCfg.getAnnotation();
       PrimaryKeyJoinColumnConfig primaryKeyJoinColumnConfig
 	= _annotationCfg.getPrimaryKeyJoinColumnConfig();
 
-      // if (subType.isJoinedSubClass()) {
-      /*
-      if (strategy == InheritanceType.JOINED) {
-        linkInheritanceTable(entityType.getRootType().getTable(),
+      if (rootType.isJoinedSubClass()) {
+        linkInheritanceTable(rootType.getTable(),
                              entityType.getTable(),
                              joinAnn,
                              primaryKeyJoinColumnConfig);
 
-        entityType.setId(new SubId(entityType, entityType.getRootType()));
+        entityType.setId(new SubId(entityType, rootType));
       }
-      */
 
       return;
     }
@@ -507,10 +502,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       discriminatorValue = discValueAnn.getString("value");
 
     if (discriminatorValue == null || discriminatorValue.equals("")) {
-      String name = entityType.getBeanClass().getName();
-      int p = name.lastIndexOf('.');
-      if (p > 0)
-        name = name.substring(p + 1);
+      String name = entityType.getBeanClass().getSimpleName();
 
       discriminatorValue = name;
     }
@@ -653,10 +645,12 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       else if (parentType == null || parentType.getTable() == null) {
 	entityType.setTable(_persistenceUnit.createTable(tableName));
       }
-      /*
-      else if (strategy == InheritanceType.JOINED) {
+      else if (parentType.isJoinedSubClass()) {
 	entityType.setTable(_persistenceUnit.createTable(tableName));
 
+	EntityType rootType = parentType.getRootType();
+
+	JClass rootClass = rootType.getBeanClass();
 	getInternalTableConfig(rootClass, _annotationCfg);
 	JAnnotation rootTableAnn = _annotationCfg.getAnnotation();
 	TableConfig rootTableConfig = _annotationCfg.getTableConfig();
@@ -669,35 +663,13 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 	  rootTableName = rootTableConfig.getName();
 
 	if (rootTableName == null || rootTableName.equals("")) {
-
-	  String rootEntityName;
-
-	  if (rootEntityAnn != null)
-	    rootEntityName = rootEntityAnn.getString("name");
-	  else {
-	    rootEntityName = rootEntityConfig.getClassName();
-
-	    int p = rootEntityName.lastIndexOf('.');
-
-	    if (p > 0)
-	      rootEntityName = rootEntityName.substring(p + 1);
-	  }
-
-	  if (rootEntityName.equals("")) {
-	    rootEntityName = rootClass.getName();
-
-	    int p = rootEntityName.lastIndexOf('.');
-
-	    if (p > 0)
-	      rootEntityName = rootEntityName.substring(p + 1);
-	  }
+	  String rootEntityName = rootType.getName();
 
 	  rootTableName = toSqlName(rootEntityName);
 	}
 
 	entityType.setRootTableName(rootTableName);
       }
-       */
       else
 	entityType.setTable(parentType.getTable());
     }

@@ -754,6 +754,8 @@ abstract public class AbstractField implements AmberField {
 
     if (isAbstract() || getGetterMethod() == null)
       out.println("return " + getFieldName() + ";");
+    else if (this instanceof IdField)
+      out.println("return " + getGetterName() + "();");
     else
       out.println("return super." + getGetterName() + "();");
 
@@ -774,7 +776,11 @@ abstract public class AbstractField implements AmberField {
 
     if (isAbstract() || getGetterMethod() == null)
       out.println(getFieldName() + " = v;");
-    else if (getSetterMethod() != null)
+    else if (getSetterMethod() == null) {
+    }
+    else if (this instanceof IdField)
+      out.println(getSetterMethod().getName() + "(v);");
+    else
       out.println("super." + getSetterMethod().getName() + "(v);");
 
     out.popDepth();
