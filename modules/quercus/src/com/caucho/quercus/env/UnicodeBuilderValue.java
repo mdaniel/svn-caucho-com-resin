@@ -736,7 +736,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
    */
   public static long toLong(char []buffer, int offset, int len)
   {
-    return _toLong(buffer, offset, len);
+    return parseLong(buffer, offset, len);
   }
 
   public static double toDouble(char []buffer, int offset, int len)

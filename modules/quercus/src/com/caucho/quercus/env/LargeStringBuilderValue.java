@@ -160,7 +160,7 @@ public class LargeStringBuilderValue
   @Override
   public long toLong()
   {
-    return _toLong(_bufferList[0], 0, _length);
+    return parseLong(_bufferList[0], 0, _length);
   }
 
   /**

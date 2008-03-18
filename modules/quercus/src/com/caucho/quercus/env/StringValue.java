@@ -304,7 +304,7 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public static long toLong(String string)
   {
-    return _toLong(string);
+    return parseLong(string);
   }
 
   /**
@@ -315,7 +315,7 @@ abstract public class StringValue extends Value implements CharSequence {
    * char data source.
    */
 
-  static long _toLong(char []buffer, int offset, int len)
+  static long parseLong(char []buffer, int offset, int len)
   {
     if (len == 0)
       return 0;
@@ -340,14 +340,14 @@ abstract public class StringValue extends Value implements CharSequence {
       int ch = buffer[offset++];
 
       if ('0' <= ch && ch <= '9') {
-        long new_value = 10 * value + ch - '0';
-        if (new_value < value) {
+        long newValue = 10 * value + ch - '0';
+        if (newValue < value) {
           // long value overflowed, set result to 0
           result = 0;
           isResultSet = true;
           break;
         }
-        value = new_value;
+        value = newValue;
       }
       else {
         result = sign * value;
@@ -362,7 +362,7 @@ abstract public class StringValue extends Value implements CharSequence {
     return result;
   }
 
-  static long _toLong(byte []buffer, int offset, int len)
+  static long parseLong(byte []buffer, int offset, int len)
   {
     if (len == 0)
       return 0;
@@ -387,14 +387,14 @@ abstract public class StringValue extends Value implements CharSequence {
       int ch = buffer[offset++];
 
       if ('0' <= ch && ch <= '9') {
-        long new_value = 10 * value + ch - '0';
-        if (new_value < value) {
+        long newValue = 10 * value + ch - '0';
+        if (newValue < value) {
           // long value overflowed, set result to 0
           result = 0;
           isResultSet = true;
           break;
         }
-        value = new_value;
+        value = newValue;
       }
       else {
         result = sign * value;
@@ -409,7 +409,7 @@ abstract public class StringValue extends Value implements CharSequence {
     return result;
   }
 
-  static long _toLong(String string)
+  static long parseLong(String string)
   {
     final int len = string.length();
 
@@ -438,14 +438,14 @@ abstract public class StringValue extends Value implements CharSequence {
       int ch = string.charAt(offset++);
 
       if ('0' <= ch && ch <= '9') {
-        long new_value = 10 * value + ch - '0';
-        if (new_value < value) {
+        long newValue = 10 * value + ch - '0';
+        if (newValue < value) {
           // long value overflowed, set result to 0
           result = 0;
           isResultSet = true;
           break;
         }
-        value = new_value;
+        value = newValue;
       }
       else {
         result = sign * value;

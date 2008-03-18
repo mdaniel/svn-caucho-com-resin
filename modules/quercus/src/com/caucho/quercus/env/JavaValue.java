@@ -85,7 +85,7 @@ public class JavaValue
    */
   public long toLong()
   {
-    return StringValue._toLong(toString());
+    return StringValue.parseLong(toString());
   }
 
   /**

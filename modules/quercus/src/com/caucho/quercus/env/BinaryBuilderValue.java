@@ -258,7 +258,7 @@ public class BinaryBuilderValue
   @Override
   public long toLong()
   {
-    return _toLong(_buffer, 0, _length);
+    return parseLong(_buffer, 0, _length);
   }
 
   /**
