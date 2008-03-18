@@ -158,19 +158,7 @@ public class UICommand extends UIComponentBase
 
       FacesContext context = FacesContext.getCurrentInstance();
 
-      // jsf/0235, jsf/31h6
-
-      /*
-      ActionListener []listeners = getActionListeners();
-
-      for (int i = 0; i < listeners.length; i++)
-	listeners[i].processAction(actionEvent);
-      */
-
-      MethodBinding binding = getActionListener();
-      
-      if (binding != null)
-	binding.invoke(context, new Object[] { });
+      // jsf/0235, jsf/31h6, jsf/31h8
 
       ActionListener listener = context.getApplication().getActionListener();
 
