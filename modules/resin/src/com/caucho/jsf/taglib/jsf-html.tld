@@ -82,21 +82,21 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <!-- UICommand values -->
     <attribute>
       <name>action</name>
       <deferred-method>
-        <method-signature>Object listener()</method-signature>
+        <method-signature>java.lang.Object action()</method-signature>
       </deferred-method>
     </attribute>
 
     <attribute>
       <name>actionListener</name>
       <deferred-method>
-        <method-signature>void listener(javax.faces.event.ActionEvent)</method-signature>
+        <method-signature>void actionListener(javax.faces.event.ActionEvent)</method-signature>
       </deferred-method>
     </attribute>
 
@@ -269,21 +269,21 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <!-- UICommand values -->
     <attribute>
       <name>action</name>
       <deferred-method>
-        <method-signature>Object listener()</method-signature>
+        <method-signature>java.lang.Object action()</method-signature>
       </deferred-method>
     </attribute>
 
     <attribute>
       <name>actionListener</name>
       <deferred-method>
-        <method-signature>void listener(javax.faces.event.ActionEvent)</method-signature>
+        <method-signature>void actionListener(javax.faces.event.ActionEvent)</method-signature>
       </deferred-method>
     </attribute>
 
@@ -458,6 +458,7 @@
     <!-- UIData values -->
     <attribute>
       <name>var</name>
+      <deferred-value><type>String</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -799,7 +800,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -996,7 +997,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
   </tag>
 
@@ -1086,7 +1087,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <!-- UIInput values -->
@@ -1327,7 +1328,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <!-- UIInput values -->
@@ -1568,7 +1569,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -1755,7 +1756,7 @@
 
     <attribute>
       <name>fatalStyle</name>
-      <deferred-value><type>Boolean</type></deferred-value>
+      <deferred-value><type>java.lang.String</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -1868,7 +1869,7 @@
 
     <attribute>
       <name>fatalStyle</name>
-      <deferred-value><type>Boolean</type></deferred-value>
+      <deferred-value><type>java.lang.String</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -2024,7 +2025,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -2231,7 +2232,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -2458,7 +2459,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -2680,7 +2681,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -2897,7 +2898,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -3119,7 +3120,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -3336,7 +3337,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->
@@ -3513,7 +3514,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -3585,7 +3586,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -3657,7 +3658,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -3805,7 +3806,7 @@
 
     <attribute>
       <name>value</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <!-- passthrough values -->

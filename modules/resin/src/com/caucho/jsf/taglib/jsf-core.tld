@@ -17,7 +17,7 @@
 
     <attribute>
       <name>binding</name>
-      <deferred-value><type>javax.el.ValueExpression</type></deferred-value>
+      <deferred-value><type>javax.faces.event.ActionListener</type></deferred-value>
     </attribute>
   </tag>
 
@@ -78,7 +78,7 @@
 
     <attribute>
       <name>binding</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>javax.faces.convert.DateTimeConverter</type></deferred-value>
     </attribute>
   </tag>
 
@@ -90,7 +90,7 @@
 
     <attribute>
       <name>binding</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>javax.faces.convert.NumberConverter</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -115,7 +115,7 @@
 
     <attribute>
       <name>locale</name>
-      <deferred-value><type>Object</type></deferred-value>
+      <deferred-value><type>java.util.Locale</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -157,7 +157,7 @@
 
     <attribute>
       <name>binding</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>javax.faces.convert.Converter</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -175,6 +175,7 @@
     <attribute>
       <name>name</name>
       <required>true</required>
+      <deferred-value><type>String</type></deferred-value>
     </attribute>
   </tag>
 
@@ -187,6 +188,7 @@
     <attribute>
       <name>var</name>
       <required>true</required>
+      <deferred-value><type>String</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -208,7 +210,7 @@
 
     <attribute>
       <name>binding</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>javax.faces.component.UIComponent</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -319,13 +321,13 @@
     <attribute>
       <name>value</name>
       <required>true</required>
-      <deferred-value/>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
 
     <attribute>
       <name>target</name>
       <required>true</required>
-      <deferred-value/>
+      <deferred-value><type>java.lang.Object</type></deferred-value>
     </attribute>
   </tag>
   
@@ -341,7 +343,7 @@
 
     <attribute>
       <name>binding</name>
-      <deferred-value><type>javax.el.ValueExpression</type></deferred-value>
+      <deferred-value><type>javax.faces.component.UIComponent</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -407,7 +409,7 @@
 
     <attribute>
       <name>binding</name>
-      <deferred-value><type>javax.faces.validator.Validator</type></deferred-value>
+      <deferred-value><type>javax.faces.validator.DoubleRangeValidator</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -429,7 +431,7 @@
 
     <attribute>
       <name>binding</name>
-      <deferred-value><type>javax.faces.validator.Validator</type></deferred-value>
+      <deferred-value><type>javax.faces.validator.LengthValidator</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -451,7 +453,7 @@
 
     <attribute>
       <name>binding</name>
-      <deferred-value><type>javax.faces.validator.Validator</type></deferred-value>
+      <deferred-value><type>javax.faces.validator.LongRangeValidator</type></deferred-value>
     </attribute>
 
     <attribute>

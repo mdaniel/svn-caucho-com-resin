@@ -31,16 +31,22 @@ package com.caucho.jsf.el;
 import javax.el.*;
 import javax.faces.context.*;
 import javax.faces.el.*;
+import javax.faces.component.StateHolder;
 
-public class ValueBindingAdapter extends ValueBinding
+public class ValueBindingAdapter extends ValueBinding implements StateHolder
 {
-  private final ValueExpression _expr;
+  private ValueExpression _expr;
+  private boolean _isTransient;
 
   public ValueBindingAdapter(ValueExpression expr)
   {
     _expr = expr;
   }
-  
+
+  public ValueBindingAdapter()
+  {
+  }
+
   @Deprecated
   public Object getValue(FacesContext context)
     throws EvaluationException, javax.faces.el.PropertyNotFoundException
@@ -89,6 +95,26 @@ public class ValueBindingAdapter extends ValueBinding
   public String getExpressionString()
   {
     return _expr.getExpressionString();
+  }
+
+  public Object saveState(FacesContext context)
+  {
+    return _expr;
+  }
+
+  public void restoreState(FacesContext context, Object state)
+  {
+    _expr = (ValueExpression) state;
+  }
+
+  public boolean isTransient()
+  {
+    return _isTransient;
+  }
+
+  public void setTransient(boolean isTransient)
+  {
+    _isTransient = isTransient;
   }
 
   public String toString()

@@ -892,7 +892,6 @@ public class ApplicationImpl
   {
     ExpressionFactory factory = getExpressionFactory();
 
-    ELResolver elResolver = getELResolver();
     FacesContext facesContext = FacesContext.getCurrentInstance();
     ELContext elContext = new FacesELContext(facesContext, getELResolver());
 
