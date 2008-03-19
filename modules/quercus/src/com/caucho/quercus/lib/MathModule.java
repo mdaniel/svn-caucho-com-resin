@@ -32,10 +32,12 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 
 import java.util.Iterator;
+import java.math.BigInteger;
 
 /**
  * PHP math routines.
@@ -130,7 +132,8 @@ public class MathModule extends AbstractQuercusModule {
     final long cutlim = Long.MAX_VALUE % base;
 
     long num = 0;
-    double fnum = 0.0;
+    BigInteger bigNum = null;
+    BigInteger bigBase = BigInteger.valueOf(base);
 
     final int len = number.length();
 
@@ -157,20 +160,34 @@ public class MathModule extends AbstractQuercusModule {
         if (num < cutoff || (num == cutoff && value <= cutlim)) {
           num = num * base + value;
         } else {
-          fnum = num;
+          bigNum = BigInteger.valueOf(num);
           isLong = false;
         }
       }
 
       if (!isLong) {
-        // Float
-        fnum = fnum * base + value;
+        // BigInteger
+        //
+        // num = num * base + value
+
+        BigInteger tmp = bigNum.multiply(bigBase);
+
+        BigInteger bigValue = BigInteger.valueOf(value);
+
+        bigNum = tmp.add(bigValue);
       }
     }
 
-    if (!isLong)
-      return DoubleValue.create(fnum);
-    else
+    if (!isLong) {
+      // Load BigIntegerValue wrapper, it contains a Java BigInteger
+
+      JavaClassDef jClassDef = env.getJavaClassDefinition(BigInteger.class);
+
+      if (jClassDef == null)
+        throw new NullPointerException("jClassDef returned by getJavaClassDefinition() is null");
+
+      return new BigIntegerValue(env, bigNum, jClassDef);
+    } else
       return LongValue.create(num);
   }
 
@@ -185,8 +202,8 @@ public class MathModule extends AbstractQuercusModule {
 
   private static StringValue valueToBase(Env env, Value value, int base)
   {
-    if (value instanceof DoubleValue) {
-      return valueToBase(env, (DoubleValue) value, base);
+    if (value instanceof BigIntegerValue) {
+      return valueToBase(env, (BigIntegerValue) value, base);
     } else if (value instanceof LongValue) {
       return valueToBase(env, (LongValue) value, base);
     } else {
@@ -228,39 +245,39 @@ public class MathModule extends AbstractQuercusModule {
   }
 
   /**
-   * valueToBase implementation for an floating point DoubleValue.
+   * valueToBase implementation for an integer BigIntegerValue.
    */
 
-  private static StringValue valueToBase(Env env, DoubleValue value, int base)
+  private static StringValue valueToBase(Env env, BigIntegerValue value, int base)
   {
-    double fval = Math.floor(value.toDouble());
+    BigInteger bigNum = value.toBigInteger();
+    BigInteger bigZero = BigInteger.valueOf(0);
+    BigInteger bigBase = BigInteger.valueOf(base);
 
-    if (fval == 0.0)
+    if (bigNum.equals(bigZero))
       return env.createString("0.0");
-
-    // Don't try to convert +/- infinity
-
-    if (fval == Double.POSITIVE_INFINITY || fval == Double.NEGATIVE_INFINITY) {
-      env.warning(L.l("Number too large"));
-      return env.createEmptyString();
-    }
 
     StringBuilder sb = new StringBuilder();
 
     // Ignore sign bit
 
-    if (fval < 0)
-      fval = -fval;
+    if (bigNum.compareTo(bigZero) < 0)
+      bigNum = bigNum.negate();
 
     do {
-      int d = (int) (fval % base);
-      fval /= base;
+      // d = (int) (bigNum % base);
+      // bigNum /= base;
+
+      BigInteger bigD = bigNum.mod(bigBase);
+      int d = bigD.intValue();
+      bigNum = bigNum.divide(bigBase);
 
       if (d < 10)
         sb.append((char) (d + '0'));
       else
         sb.append((char) (d - 10 + 'a'));
-    } while (fval >= 1.0);
+    // while (bigNum != 0)
+    } while (bigNum.compareTo(bigZero) != 0);
 
     sb.reverse();
 
