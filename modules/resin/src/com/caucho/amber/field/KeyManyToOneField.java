@@ -291,7 +291,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   /**
    * Returns the actual data.
    */
-  public String generateSuperGetter()
+  public String generateSuperGetter(String objThis)
   {
     if (isAbstract() || getGetterMethod() == null)
       return getFieldName();
@@ -368,7 +368,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt,
+  public void generateStatementSet(JavaWriter out, String pstmt,
                           String index, String value)
     throws IOException
   {
@@ -389,7 +389,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt, String index)
+  public void generateStatementSet(JavaWriter out, String pstmt, String index)
     throws IOException
   {
     String var = getFieldName();
@@ -410,7 +410,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   public void generateSetInsert(JavaWriter out, String pstmt, String index)
     throws IOException
   {
-    String value = generateSuperGetter();
+    String value = generateSuperGetter("this");
 
     out.println("if (" + getEntityTargetType().generateIsNull(value) + ") {");
     out.pushDepth();
@@ -421,7 +421,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
     out.println("} else {");
     out.pushDepth();
 
-    generateSet(out, pstmt, index);
+    generateStatementSet(out, pstmt, index);
 
     out.popDepth();
     out.println("}");
@@ -465,7 +465,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   public void generateCheckCreateKey(JavaWriter out)
     throws IOException
   {
-    out.println("if (" + generateSuperGetter() + " == null)");
+    out.println("if (" + generateSuperGetter("this") + " == null)");
     out.println("  throw new com.caucho.amber.AmberException(\"primary key must not be null on creation.  " + getGetterName() + "() must not return null.\");");
   }
 

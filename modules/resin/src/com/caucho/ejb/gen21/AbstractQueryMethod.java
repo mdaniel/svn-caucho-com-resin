@@ -155,7 +155,7 @@ abstract public class AbstractQueryMethod extends BaseMethod {
     Collections.sort(keys, new IdFieldCompare());
       
     for (IdField field : keys) {
-      field.generateSet(out, query + "", "index", "super");
+      field.generateStatementSet(out, query + "", "index", "super");
     }
   }
   
@@ -326,7 +326,7 @@ abstract public class AbstractQueryMethod extends BaseMethod {
       out.pushDepth();
       
       for (IdField field : keys) {
-	field.generateSet(out, query + "", "index", arg);
+	field.generateStatementSet(out, query + "", "index", arg);
       }
       
       out.popDepth();
@@ -334,7 +334,7 @@ abstract public class AbstractQueryMethod extends BaseMethod {
       out.pushDepth();
       
       for (IdField field : keys) {
-	field.generateSet(out, query + "", "index", null);
+	field.generateStatementSet(out, query + "", "index", null);
       }
       
       out.popDepth();

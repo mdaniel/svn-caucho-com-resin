@@ -34,7 +34,6 @@ import com.caucho.amber.table.Column;
 import com.caucho.amber.type.*;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -42,9 +41,7 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -271,14 +268,6 @@ public class Id {
   /**
    * Returns the key for the value
    */
-  public String generateGetProperty(String value)
-  {
-    return getKey().generateGet(value);
-  }
-
-  /**
-   * Returns the key for the value
-   */
   public String generateGetProxyKey(String value)
   {
     return "((" + getForeignTypeName() + ") " + value + ".getPrimaryKey())";
@@ -298,14 +287,22 @@ public class Id {
   }
 
   /**
+   * Returns the key for the value
+   */
+  public String generateGet(String obj)
+  {
+    return getKey().generateGet(obj);
+  }
+
+  /**
    * Generates loading cache
    */
-  public void generateSet(JavaWriter out, String obj)
+  public void generateSet(JavaWriter out, String obj, String value)
     throws IOException
   {
     IdField key = getKey();
 
-    key.generateSet(out, key.toValue(obj));
+    key.generateSet(out, obj, key.toValue(value));
     // key.generateSet(out, key.getColumn().getType().generateCastFromObject(obj));
   }
 
@@ -398,20 +395,20 @@ public class Id {
     ArrayList<IdField> keys = getKeys();
 
     for (int i = 0; i < keys.size(); i++) {
-      keys.get(i).generateSet(out, pstmt, index, value);
+      keys.get(i).generateStatementSet(out, pstmt, index, value);
     }
   }
 
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt, String index)
+  public void generateStatementSet(JavaWriter out, String pstmt, String index)
     throws IOException
   {
     ArrayList<IdField> keys = getKeys();
 
     for (int i = 0; i < keys.size(); i++) {
-      keys.get(i).generateSet(out, pstmt, index);
+      keys.get(i).generateStatementSet(out, pstmt, index);
     }
   }
 
@@ -469,7 +466,7 @@ public class Id {
   {
     IdField id = getKeys().get(0);
 
-    out.println("return (" + id.generateEquals(id.generateSuperGetter(),
+    out.println("return (" + id.generateEquals(id.generateSuperGetter("this"),
                                                id.toValue(key)) + ");");
   }
 

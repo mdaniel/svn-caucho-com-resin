@@ -31,7 +31,6 @@ package com.caucho.amber.entity;
 
 import com.caucho.amber.AmberException;
 import com.caucho.amber.AmberRuntimeException;
-import com.caucho.amber.AmberObjectNotFoundException;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.CacheUpdate;
@@ -46,7 +45,6 @@ import java.lang.reflect.Modifier;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

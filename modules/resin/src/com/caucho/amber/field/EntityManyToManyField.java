@@ -222,7 +222,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt,
+  public void generateStatementSet(JavaWriter out, String pstmt,
                           String obj, String index)
     throws IOException
   {
@@ -281,19 +281,19 @@ public class EntityManyToManyField extends AssociationField {
 
     if (! dst.equals("super")) { // || isLazy())) {
       String oThis = "((" + getRelatedType().getInstanceClassName() + ") " + dst + ")";
-      out.println(generateSuperSetter(oThis, generateSuperGetter()) + ";");
+      out.println(generateSuperSetter(oThis, generateSuperGetter("this")) + ";");
     }
   }
 
   /**
    * Updates the cached copy.
    */
-  public void generateCopyMergeObject(JavaWriter out,
-                                      String dst, String src,
-                                      int updateIndex)
+  public void generateMergeFrom(JavaWriter out,
+                                      String dst, String src)
     throws IOException
   {
     // jpa/0s2k
+    int updateIndex = 0;
     generateCopyLoadObject(out, dst, src, updateIndex);
 
     out.println();
@@ -332,7 +332,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Generates the set property.
    */
-  public void generateGetProperty(JavaWriter out)
+  public void generateGetterMethod(JavaWriter out)
     throws IOException
   {
     String var = "_caucho_field_" + getGetterName();
@@ -766,7 +766,7 @@ public class EntityManyToManyField extends AssociationField {
       else
         amberCascade += "_remove";
 
-      String getter = "_caucho_field_" + getGetterName(); // generateSuperGetter();
+      String getter = "_caucho_field_" + getGetterName(); // generateSuperGetterMethod();
 
       out.println("if (" + getter + " != null) {");
       out.pushDepth();
@@ -1015,7 +1015,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Generates the set property.
    */
-  public void generateSetProperty(JavaWriter out)
+  public void generateSetterMethod(JavaWriter out)
     throws IOException
   {
     // commented out: jpa/0s2i
@@ -1044,7 +1044,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("{");
     out.pushDepth();
 
-    out.println("if (" + generateSuperGetter() + " == value)");
+    out.println("if (" + generateSuperGetter("this") + " == value)");
     out.println("  return;");
     out.println();
 

@@ -54,7 +54,7 @@ import java.util.logging.Logger;
  */
 public class KeyPropertyField extends PropertyField implements IdField {
   private static final L10N L = new L10N(KeyPropertyField.class);
-  protected static final Logger log = Log.open(KeyPropertyField.class);
+  private static final Logger log = Log.open(KeyPropertyField.class);
 
   private Column _column;
   private boolean _isKeyField;
@@ -210,6 +210,84 @@ public class KeyPropertyField extends PropertyField implements IdField {
     */
   }
 
+  //
+  // getter/setter generation
+  //
+
+  /**
+   * Generates the field getter.
+   *
+   * @param value the non-null value
+   */
+  public String generateGet(String objThis)
+  {
+    if (objThis == null)
+      return generateNull();
+
+    if ("super".equals(objThis))
+      return generateSuperGetter("this");
+    else
+      return generateSuperGetter(objThis);
+  }
+
+  /**
+   * Generates the field setter.
+   *
+   * @param value the non-null value
+   */
+  public String generateSet(String objThis, String value)
+  {
+    if ("super".equals(objThis))
+      objThis = "this";
+    
+    if (isFieldAccess())
+      return objThis + "." + getName() + " = " + value;
+    else
+      return objThis + "." + getSetterName() + "(" + value + ")";
+  }
+
+  /**
+   * Sets the actual data.
+   */
+  /*
+  @Override
+  public String generateSuperSetter(String objThis, String value)
+  {
+    if (isFieldAccess())
+      return objThis + "." + getName() + " = " + value;
+    else
+      return objThis + "." + getSetterName() + "(" + value + ")";
+  }
+  */
+
+  /**
+   * Sets the actual data.
+   */
+  /*
+  @Override
+  public String generateSuperGetter()
+  {
+    if (isFieldAccess())
+      return getName();
+    else
+      return getGetterName() + "()";
+  }
+  */
+
+  //
+  // copy
+  //
+
+  /**
+   * Keys are not merged
+   */
+  @Override
+  public void generateMergeFrom(JavaWriter out,
+				String dst, String src)
+    throws IOException
+  {
+  }
+
   /**
    * Generates code to copy to an object.
    */
@@ -288,10 +366,11 @@ public class KeyPropertyField extends PropertyField implements IdField {
   /**
    * Generates loading cache
    */
+  @Override
   public void generateLoadFromObject(JavaWriter out, String obj)
     throws IOException
   {
-    out.println(generateSuperSetter(generateGet(obj)) + ";");
+    out.println(generateSuperSetter("this", generateGet(obj)) + ";");
   }
 
   /**
@@ -308,7 +387,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
    */
   public String generateIsNull(String value)
   {
-    return  "(" + getType().generateIsNull(generateSuperGetter()) + ")";
+    return  "(" + getType().generateIsNull(generateSuperGetter("this")) + ")";
   }
 
   /**
@@ -326,7 +405,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt,
+  public void generateStatementSet(JavaWriter out, String pstmt,
                           String index, String value)
     throws IOException
   {
@@ -360,7 +439,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
   public void generateSetInsert(JavaWriter out, String pstmt, String index)
     throws IOException
   {
-    String value = generateSuperGetter();
+    String value = generateSuperGetter("this");
 
     if (isAutoGenerate()) {
       out.println("if (" + getType().generateIsNull(value) + ") {");
@@ -372,13 +451,13 @@ public class KeyPropertyField extends PropertyField implements IdField {
       out.println("} else {");
       out.pushDepth();
 
-      generateSet(out, pstmt, index);
+      generateStatementSet(out, pstmt, index);
 
       out.popDepth();
       out.println("}");
     }
     else
-      generateSet(out, pstmt, index);
+      generateStatementSet(out, pstmt, index);
   }
 
   /**
@@ -398,7 +477,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
       if (getEntitySourceType().getGenerator(getName()) == null)
         throw new IllegalStateException("no sequence generator for " + getName());
 
-      out.println("if (" + getType().generateIsNull(generateSuperGetter()) + ") {");
+      out.println("if (" + getType().generateIsNull(generateSuperGetter("this")) + ") {");
       out.pushDepth();
 
       String id = "home.nextGeneratorId(aConn, \"" + getName() + "\")";
@@ -423,7 +502,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
         throw new UnsupportedOperationException(L.l("{0} is an unsupported generated key type.",
                                                     javaType));
 
-      out.println(generateSuperSetter(id) + ";");
+      out.println(generateSuperSetter("this", id) + ";");
 
       out.popDepth();
       out.println("}");
@@ -432,7 +511,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
     }
 
     if (! getJavaType().isPrimitive()) {
-      out.println("if (" + getType().generateIsNull(generateSuperGetter()) + ")");
+      out.println("if (" + getType().generateIsNull(generateSuperGetter("this")) + ")");
       out.println("  throw new com.caucho.amber.AmberException(\"primary key must not be null on creation.  " + getGetterName() + "() must not return null.\");");
     }
   }
@@ -447,7 +526,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
       return;
 
     out.print("if (");
-    out.print(getType().generateIsNull(generateSuperGetter()));
+    out.print(getType().generateIsNull(generateSuperGetter("this")));
     out.println(") {");
     out.pushDepth();
 
@@ -461,10 +540,10 @@ public class KeyPropertyField extends PropertyField implements IdField {
     getType().generateLoad(out, var, "", 1);
     out.println(";");
 
-    out.println(generateSuperSetter("v1") + ";");
+    out.println(generateSuperSetter("this", "v1") + ";");
 
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINER))");
-    out.println("  __caucho_log.finer(\"create with new primaryKey \" + " + generateSuperGetter() + ");");
+    out.println("  __caucho_log.finer(\"create with new primaryKey \" + " + generateSuperGetter("this") + ");");
 
     out.popDepth();
     out.println("}");
@@ -496,34 +575,6 @@ public class KeyPropertyField extends PropertyField implements IdField {
     else
       return generateGet(key);
   }
-
-  /**
-   * Sets the actual data.
-   */
-  /*
-  @Override
-  public String generateSuperSetter(String objThis, String value)
-  {
-    if (isFieldAccess())
-      return objThis + "." + getName() + " = " + value;
-    else
-      return objThis + "." + getSetterName() + "(" + value + ")";
-  }
-  */
-
-  /**
-   * Sets the actual data.
-   */
-  /*
-  @Override
-  public String generateSuperGetter()
-  {
-    if (isFieldAccess())
-      return getName();
-    else
-      return getGetterName() + "()";
-  }
-  */
 
   /**
    * Generates the property getter for an EJB proxy

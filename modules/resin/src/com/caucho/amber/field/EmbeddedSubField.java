@@ -157,22 +157,6 @@ public class EmbeddedSubField implements AmberField {
   }
 
   /**
-   * Returns the getter method.
-   */
-  public JMethod getGetterMethod()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Returns the getter name.
-   */
-  public String getGetterName()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
    * Returns the type of the field
    */
   public JType getJavaType()
@@ -186,22 +170,6 @@ public class EmbeddedSubField implements AmberField {
   public String getJavaTypeName()
   {
     return _embeddableField.getJavaTypeName();
-  }
-
-  /**
-   * Returns the setter method.
-   */
-  public JMethod getSetterMethod()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Returns the setter name.
-   */
-  public String getSetterName()
-  {
-    throw new UnsupportedOperationException();
   }
 
   /**
@@ -235,18 +203,46 @@ public class EmbeddedSubField implements AmberField {
   {
   }
 
+  //
+  // getter/setter
+  //
+
   /**
-   * Links to the target.
+   * Returns the getter method.
    */
-  public void init()
-    throws ConfigException
+  public JMethod getGetterMethod()
   {
+    return _embeddedField.getGetterMethod();
+  }
+
+  /**
+   * Returns the getter name.
+   */
+  public String getGetterName()
+  {
+    return _embeddedField.getGetterName();
+  }
+
+  /**
+   * Returns the setter method.
+   */
+  public JMethod getSetterMethod()
+  {
+    return _embeddedField.getSetterMethod();
+  }
+
+  /**
+   * Returns the setter name.
+   */
+  public String getSetterName()
+  {
+    return _embeddedField.getSetterName();
   }
 
   /**
    * Returns the actual data.
    */
-  public String generateSuperGetter()
+  public String generateSuperGetter(String objThis)
   {
     if (! getSourceType().isEmbeddable())
       return "__caucho_super_get_" + getName() + "()";
@@ -259,22 +255,34 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Sets the actual data.
    */
-  public String generateSuperSetter(String value)
+  public String generateSuperSetter(String objThis, String value)
   {
-    return generateSuperSetter("this", value);
+    /*
+    if (! getSourceType().isEmbeddable())
+      return objThis + "." + "__caucho_super_set_" + getName() + "(" + value + ")";
+      else
+   */
+    if (getSourceType().isFieldAccess())
+      return objThis + "." + getName() + " = " + value;
+    else
+      return objThis + "." + getSetterName() + "(" + value + ")";
   }
 
   /**
-   * Sets the actual data.
+   * Generates loading cache
    */
-  public String generateSuperSetter(String objThis, String value)
+  public void generateSet(JavaWriter out, String objThis, String value)
+    throws IOException
   {
-    if (! getSourceType().isEmbeddable())
-      return objThis + "." + "__caucho_super_set_" + getName() + "(" + value + ")";
-    else if (getSourceType().isFieldAccess())
-      return objThis + "." + getName() + " = " + value;
-    else
-      return objThis + "." + getSetterMethod().getName() + "(" + value + ")";
+    _embeddedField.generateSet(out, objThis, value);
+  }
+
+  /**
+   * Links to the target.
+   */
+  public void init()
+    throws ConfigException
+  {
   }
 
   /**
@@ -358,15 +366,6 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Generates loading cache
    */
-  public void generateSet(JavaWriter out, String obj)
-    throws IOException
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Generates loading cache
-   */
   public void generateUpdateFromObject(JavaWriter out, String obj)
     throws IOException
   {
@@ -412,7 +411,7 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Generates the get property.
    */
-  public void generateGetProperty(JavaWriter out)
+  public void generateGetterMethod(JavaWriter out)
     throws IOException
   {
     throw new UnsupportedOperationException();
@@ -421,7 +420,7 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Generates the set property.
    */
-  public void generateSetProperty(JavaWriter out)
+  public void generateSetterMethod(JavaWriter out)
     throws IOException
   {
     throw new UnsupportedOperationException();
@@ -430,7 +429,7 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Generates the get property.
    */
-  public void generateSuperGetter(JavaWriter out)
+  public void generateSuperGetterMethod(JavaWriter out)
     throws IOException
   {
   }
@@ -438,7 +437,7 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Generates the get property.
    */
-  public void generateSuperSetter(JavaWriter out)
+  public void generateSuperSetterMethod(JavaWriter out)
     throws IOException
   {
   }
@@ -462,7 +461,7 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Generates the JDBC preparedStatement set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt, String index)
+  public void generateStatementSet(JavaWriter out, String pstmt, String index)
     throws IOException
   {
     getColumn().generateSet(out, pstmt, index, generateGet("this"));
@@ -514,9 +513,8 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Updates the cached copy.
    */
-  public void generateCopyMergeObject(JavaWriter out,
-                                      String dst, String src,
-                                      int loadIndex)
+  public void generateMergeFrom(JavaWriter out,
+                                      String dst, String src)
     throws IOException
   {
     throw new UnsupportedOperationException();
@@ -535,7 +533,7 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt,
+  public void generateStatementSet(JavaWriter out, String pstmt,
                           String index, String obj)
     throws IOException
   {

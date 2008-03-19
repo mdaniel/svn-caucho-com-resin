@@ -419,7 +419,8 @@ public class CompositeId extends Id {
   /**
    * Returns the key for the value
    */
-  public String generateGetProperty(String value)
+  @Override
+  public String generateGet(String value)
   {
     CharBuffer cb = CharBuffer.allocate();
 
@@ -438,6 +439,100 @@ public class CompositeId extends Id {
     cb.append(")");
 
     return cb.close();
+  }
+
+  /**
+   * Generates loading cache
+   */
+  public void generateSet(JavaWriter out, String objThis, String value)
+    throws IOException
+  {
+    out.println("if (" + value + " != null) {");
+    out.pushDepth();
+
+    AmberPersistenceUnit persistenceUnit
+      = getOwnerType().getPersistenceUnit();
+
+    // ejb/06ie
+    if (persistenceUnit.isJPA() && ! isEmbeddedId()) {
+
+      // jpa/0u21
+
+      EmbeddableType embeddable
+        = persistenceUnit.getEmbeddable(_keyClass.getName());
+
+      // jpa/0u21 ArrayList<IdField> keys = getKeys();
+      ArrayList<AmberField> keys = embeddable.getFields();
+
+      for (int i = 0; i < keys.size(); i++) {
+        PropertyField key = (PropertyField) keys.get(i);
+
+        String getter = "__caucho_get_field(" + i + ")";
+
+        String subValue
+          = "((com.caucho.amber.entity.Embeddable) key)." + getter;
+
+        out.println("Object field" + i + " = " + subValue + ";");
+
+        out.println("if (field" + i + " == null)");
+        out.println("  return;");
+
+        KeyPropertyField prop = null;
+
+        Column column = key.getColumn();
+
+	// jpa/0j55
+        if (true || column == null) {
+          ArrayList<IdField> fields = getKeys();
+          for (int j = 0; j < fields.size(); j++) {
+            IdField id = fields.get(j);
+            if (id.getName().equals(key.getName()))
+              if (id instanceof KeyPropertyField)
+                prop = (KeyPropertyField) id;
+          }
+        }
+
+        if (prop != null)
+          key = prop;
+
+        Type columnType = key.getColumn().getType();
+
+        value = columnType.generateCastFromObject("field" + i);
+
+        key.generateSet(out, objThis, value);
+      }
+
+      // jpa/0u21
+      // out.println("__caucho_compound_key  = (" + getForeignTypeName() + ") " + value + ";");
+
+      /*
+      for (int i = 0; i < keys.size(); i++) {
+        IdField key = keys.get(i);
+
+        key.generateStatementSet(out, key.generateGetKeyProperty(obj + "_key"));
+      }
+      */
+    }
+    else {
+      out.println(getForeignTypeName() + " " + value + "_key = (" + getForeignTypeName() + ") " + value + ";");
+
+      if (getEmbeddedIdField() == null) {
+        // ejb/06ie
+
+        ArrayList<IdField> keys = getKeys();
+
+        for (int i = 0; i < keys.size(); i++) {
+          IdField key = keys.get(i);
+
+          key.generateSet(out, objThis, key.generateGetKeyProperty(objThis + "_key"));
+        }
+      }
+      else
+        getEmbeddedIdField().generateSet(out, objThis, value + "_key");
+    }
+
+    out.popDepth();
+    out.println("}");
   }
 
   /**
@@ -475,100 +570,6 @@ public class CompositeId extends Id {
     for (int i = 0; i < keys.size(); i++) {
       keys.get(i).generateLoadFromObject(out, obj);
     }
-  }
-
-  /**
-   * Generates loading cache
-   */
-  public void generateSet(JavaWriter out, String obj)
-    throws IOException
-  {
-    out.println("if (" + obj + " != null) {");
-    out.pushDepth();
-
-    AmberPersistenceUnit persistenceUnit
-      = getOwnerType().getPersistenceUnit();
-
-    // ejb/06ie
-    if (persistenceUnit.isJPA() && ! isEmbeddedId()) {
-
-      // jpa/0u21
-
-      EmbeddableType embeddable
-        = persistenceUnit.getEmbeddable(_keyClass.getName());
-
-      // jpa/0u21 ArrayList<IdField> keys = getKeys();
-      ArrayList<AmberField> keys = embeddable.getFields();
-
-      for (int i = 0; i < keys.size(); i++) {
-        PropertyField key = (PropertyField) keys.get(i);
-
-        String getter = "__caucho_get_field(" + i + ")";
-
-        String value
-          = "((com.caucho.amber.entity.Embeddable) key)." + getter;
-
-        out.println("Object field" + i + " = " + value + ";");
-
-        out.println("if (field" + i + " == null)");
-        out.println("  return;");
-
-        KeyPropertyField prop = null;
-
-        Column column = key.getColumn();
-
-	// jpa/0j55
-        if (true || column == null) {
-          ArrayList<IdField> fields = getKeys();
-          for (int j = 0; j < fields.size(); j++) {
-            IdField id = fields.get(j);
-            if (id.getName().equals(key.getName()))
-              if (id instanceof KeyPropertyField)
-                prop = (KeyPropertyField) id;
-          }
-        }
-
-        if (prop != null)
-          key = prop;
-
-        Type columnType = key.getColumn().getType();
-
-        value = columnType.generateCastFromObject("field" + i);
-
-        key.generateSet(out, value);
-      }
-
-      // jpa/0u21
-      out.println("__caucho_compound_key  = (" + getForeignTypeName() + ") " + obj + ";");
-
-      /*
-      for (int i = 0; i < keys.size(); i++) {
-        IdField key = keys.get(i);
-
-        key.generateSet(out, key.generateGetKeyProperty(obj + "_key"));
-      }
-      */
-    }
-    else {
-      out.println(getForeignTypeName() + " " + obj + "_key = (" + getForeignTypeName() + ") " + obj + ";");
-
-      if (getEmbeddedIdField() == null) {
-        // ejb/06ie
-
-        ArrayList<IdField> keys = getKeys();
-
-        for (int i = 0; i < keys.size(); i++) {
-          IdField key = keys.get(i);
-
-          key.generateSet(out, key.generateGetKeyProperty(obj + "_key"));
-        }
-      }
-      else
-        getEmbeddedIdField().generateSet(out, obj+"_key");
-    }
-
-    out.popDepth();
-    out.println("}");
   }
 
   /**

@@ -76,7 +76,8 @@ public class AmberEntityManagerFactory
    */
   public void close()
   {
-    _isOpen = false;
+    // jpa/0s20
+    // _isOpen = false;
   }
 
   /**

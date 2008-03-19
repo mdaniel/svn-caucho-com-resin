@@ -51,13 +51,14 @@ public class CacheableEntityItem extends EntityItem {
     // jpa/0w00
     cacheEntity.__caucho_setConnection(null);
 
-    if (cacheEntity.__caucho_getLoadMask(0) != 0)
+    if (cacheEntity.__caucho_isLoaded())
       _expireTime = Alarm.getCurrentTime() + _home.getCacheTimeout();
   }
 
   /**
    * Returns the entity home.
    */
+  @Override
   public AmberEntityHome getEntityHome()
   {
     return _home;
@@ -91,6 +92,7 @@ public class CacheableEntityItem extends EntityItem {
    *
    * @return true if the cached value is valid.
    */
+  @Override
   public Entity loadEntity(int loadGroup)
   {
     long now = Alarm.getCurrentTime();
@@ -117,6 +119,7 @@ public class CacheableEntityItem extends EntityItem {
    *
    * @return true if the cached value is valid.
    */
+  @Override
   public Entity loadEntity(AmberConnection aConn,
                            int loadGroup)
   {
@@ -144,22 +147,6 @@ public class CacheableEntityItem extends EntityItem {
     }
 
     return _cacheEntity;
-  }
-
-  /**
-   * Creates a bean instance
-   */
-  public Entity copy(AmberConnection aConn)
-  {
-    return _cacheEntity.__caucho_copy(aConn, this);
-  }
-
-  /**
-   * Creates a bean instance
-   */
-  public Entity copyTo(Entity targetEntity, AmberConnection aConn)
-  {
-    return _cacheEntity.__caucho_copyTo(targetEntity, aConn, this);
   }
 
   /**

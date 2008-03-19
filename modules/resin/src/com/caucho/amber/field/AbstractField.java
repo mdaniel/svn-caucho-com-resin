@@ -45,7 +45,6 @@ import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -315,25 +314,6 @@ abstract public class AbstractField implements AmberField {
   }
 
   /**
-   * Returns the getter method.
-   */
-  public JMethod getGetterMethod()
-  {
-    return _getterMethod;
-  }
-
-  /**
-   * Returns the getter name.
-   */
-  public String getGetterName()
-  {
-    if (isFieldAccess())
-      return "__caucho_get_" + getName();
-    else
-      return _getterMethod.getName();
-  }
-
-  /**
    * Returns the getter name.
    */
   public String getJavaTypeName()
@@ -358,27 +338,6 @@ abstract public class AbstractField implements AmberField {
   public JType getJavaType()
   {
     return _javaType;
-  }
-
-  /**
-   * Returns the setter method.
-   */
-  public JMethod getSetterMethod()
-  {
-    return _setterMethod;
-  }
-
-  /**
-   * Returns the setter name.
-   */
-  public String getSetterName()
-  {
-    if (isFieldAccess())
-      return "__caucho_set_" + getName();
-    else if (_setterMethod != null)
-      return _setterMethod.getName();
-    else
-      return "set" + getGetterName().substring(3);
   }
 
   /**
@@ -459,6 +418,211 @@ abstract public class AbstractField implements AmberField {
     }
   }
 
+  //
+  // getter/setter code generation
+  //
+
+  /**
+   * Returns the getter method.
+   */
+  public JMethod getGetterMethod()
+  {
+    return _getterMethod;
+  }
+
+  /**
+   * Returns the setter method.
+   */
+  public JMethod getSetterMethod()
+  {
+    return _setterMethod;
+  }
+
+  /**
+   * Returns the getter name.
+   */
+  public String getGetterName()
+  {
+    if (isFieldAccess())
+      return "__caucho_get_" + getName();
+    else
+      return _getterMethod.getName();
+  }
+
+  /**
+   * Returns the setter name.
+   */
+  public String getSetterName()
+  {
+    if (isFieldAccess())
+      return "__caucho_set_" + getName();
+    else if (_setterMethod != null)
+      return _setterMethod.getName();
+    else
+      return "set" + getGetterName().substring(3);
+  }
+  
+  /**
+   * Returns the actual data.
+   */
+  public String generateSuperGetter(String objThis)
+  {
+    if (! getSourceType().isEmbeddable())
+      return objThis + ".__caucho_super_get_" + getName() + "()";
+    else if (isFieldAccess())
+      return objThis + "." + getName();
+    else
+      return objThis + "." + getGetterMethod().getName() + "()";
+  }
+
+  /**
+   * Sets the actual data.
+   */
+  public String generateSuperSetter(String objThis, String value)
+  {
+    if (! getSourceType().isEmbeddable())
+      return objThis + "." + "__caucho_super_set_" + getName() + "(" + value + ")";
+    else if (isFieldAccess())
+      return objThis + "." + getName() + " = " + value;
+    else
+      return objThis + "." + getSetterMethod().getName() + "(" + value + ")";
+  }
+
+  /**
+   * Generates the field getter.
+   *
+   * @param value the non-null value
+   */
+  public String generateGet(String objThis)
+  {
+    if (objThis == null)
+      return generateNull();
+
+    if (objThis.equals("super"))
+      return generateSuperGetter("this");
+    else
+      return objThis + "." + getGetterName() + "()";
+    
+    /*
+    else if (! isAbstract())
+      return obj + "." + _getterMethod.getName() + "()";
+    else if (_getterMethod != null)
+      return obj + "." + _getterMethod.getName() + "()";
+    else
+      return generateSuperGetter(obj);
+    */
+  }
+
+  /**
+   * Generates the field setter.
+   *
+   * @param value the non-null value
+   */
+  public String generateSet(String objThis, String value)
+  {
+    if (objThis.equals("super"))
+      return generateSuperSetter("this", value);
+    else
+      return objThis + "." + getSetterName() + "(" + value + ")";
+    /*
+    else if (isFieldAccess()) {
+      // jpa/0h09
+      return obj + "." + getSetterName() + "(" + value + ")";
+    }
+    else if (_setterMethod != null)
+      return obj + "." + _setterMethod.getName() + "(" + value + ")";
+    else
+      return obj +  ""; // ejb/0gb9
+     */
+  }
+
+  /**
+   * Generates the field getter.
+   *
+   * @param value the non-null value
+   */
+  public void generateGet(JavaWriter out, String objThis)
+    throws IOException
+  {
+    out.print(generateGet(objThis));
+  }
+
+  /**
+   * Generates set code, which goes through the active calls, i.e.
+   * not a direct call to the underlying field.
+   */
+  public void generateSet(JavaWriter out, String obj, String value)
+    throws IOException
+  {
+    out.println(generateSet(obj, value) + ";");
+  }
+
+   /**
+   * Generates the super getter method implementation
+   */
+  public void generateSuperGetterMethod(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public final " + getJavaTypeName() + " __caucho_super_get_" + getName() + "()");
+    out.println("{");
+    out.pushDepth();
+
+    if (isAbstract() || getGetterMethod() == null)
+      out.println("return " + getFieldName() + ";");
+    else if (this instanceof IdField)
+      out.println("return " + getGetterName() + "();");
+    else
+      out.println("return super." + getGetterName() + "();");
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
+   * Generates the super setter method implementation
+   */
+  public void generateSuperSetterMethod(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public final void __caucho_super_set_" + getName() + "(" + getJavaTypeName() + " v)");
+    out.println("{");
+    out.pushDepth();
+
+    if (isAbstract() || getGetterMethod() == null)
+      out.println(getFieldName() + " = v;");
+    else if (getSetterMethod() == null) {
+    }
+    else if (this instanceof IdField)
+      out.println(getSetterMethod().getName() + "(v);");
+    else
+      out.println("super." + getSetterMethod().getName() + "(v);");
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
+   * Generates the getter method implementation.
+   */
+  public void generateGetterMethod(JavaWriter out)
+    throws IOException
+  {
+  }
+
+  /**
+   * Generates the setter method implementation.
+   */
+  public void generateSetterMethod(JavaWriter out)
+    throws IOException
+  {
+  }
+
+  //
+  // SQL generation
+  //
+  
   /**
    * Generates the select clause for an entity load.
    */
@@ -512,7 +676,7 @@ abstract public class AbstractField implements AmberField {
     out.println("if ((" + maskVar + "_" + group + " & " + mask + "L) != 0) {");
     out.pushDepth();
 
-    generateSet(out, pstmt, index);
+    generateStatementSet(out, pstmt, index);
 
     out.popDepth();
     out.println("}");
@@ -562,7 +726,7 @@ abstract public class AbstractField implements AmberField {
     out.println("if ((" + loadVar + " & " + loadMask + "L) != 0)");
     out.print("  ");
 
-    out.println("  " + generateSuperSetter(generateGet(obj)) + ";");
+    out.println("  " + generateSuperSetter("this", generateGet(obj)) + ";");
   }
 
   /**
@@ -584,30 +748,10 @@ abstract public class AbstractField implements AmberField {
   /**
    * Generates loading cache
    */
-  public void generateSet(JavaWriter out, String obj)
-    throws IOException
-  {
-    out.println(generateSuperSetter(obj) + ";");
-  }
-
-  /**
-   * Generates loading cache
-   */
   public void generateUpdateFromObject(JavaWriter out, String obj)
     throws IOException
   {
-    out.println(generateSuperSetter(generateGet(obj)) + ";");
-  }
-
-  /**
-   * Generates the field getter.
-   *
-   * @param value the non-null value
-   */
-  public void generateGet(JavaWriter out, String value)
-    throws IOException
-  {
-    out.print(generateGet(value));
+    out.println(generateSuperSetter("this", generateGet(obj)) + ";");
   }
 
   /**
@@ -616,55 +760,6 @@ abstract public class AbstractField implements AmberField {
   public String generateNull()
   {
     return "null";
-  }
-
-  /**
-   * Generates the field getter.
-   *
-   * @param value the non-null value
-   */
-  public String generateGet(String obj)
-  {
-    if (obj == null)
-      return generateNull();
-
-    if (obj.equals("super"))
-      return generateSuperGetter();
-    /*
-    else if (! isAbstract())
-      return obj + "." + _getterMethod.getName() + "()";
-    else if (_getterMethod != null)
-      return obj + "." + _getterMethod.getName() + "()";
-    */
-    else
-      return obj + "." + generateSuperGetter();
-  }
-
-  /**
-   * Generates the field setter.
-   *
-   * @param value the non-null value
-   */
-  public String generateSet(String obj, String value)
-  {
-    if (obj.equals("super"))
-      return generateSuperSetter(value);
-    else
-      return generateSuperSetter(obj, value);
-    /*
-    else if (isAbstract()) {
-      if (isFieldAccess()) {
-        // jpa/0h09
-        return obj + "." + getSetterName() + "(" + value + ")";
-      }
-
-      return obj + "." + generateSuperSetter(value);
-    }
-    else if (_setterMethod != null)
-      return obj + "." + _setterMethod.getName() + "(" + value + ")";
-    else
-      return ""; // ejb/0gb9
-    */
   }
 
   /**
@@ -691,103 +786,6 @@ abstract public class AbstractField implements AmberField {
   }
 
   /**
-   * Generates the get property.
-   */
-  public void generateGetProperty(JavaWriter out)
-    throws IOException
-  {
-
-  }
-
-  /**
-   * Generates the set property.
-   */
-  public void generateSetProperty(JavaWriter out)
-    throws IOException
-  {
-  }
-
-  /**
-   * Returns the actual data.
-   */
-  public String generateSuperGetter()
-  {
-    if (! getSourceType().isEmbeddable())
-      return "__caucho_super_get_" + getName() + "()";
-    else if (isFieldAccess())
-      return getName();
-    else
-      return getGetterMethod().getName() + "()";
-  }
-
-  /**
-   * Sets the actual data.
-   */
-  public final String generateSuperSetter(String value)
-  {
-    return generateSuperSetter("this", value);
-  }
-
-  /**
-   * Sets the actual data.
-   */
-  public String generateSuperSetter(String objThis, String value)
-  {
-    if (! getSourceType().isEmbeddable())
-      return objThis + "." + "__caucho_super_set_" + getName() + "(" + value + ")";
-    else if (isFieldAccess())
-      return objThis + "." + getName() + " = " + value;
-    else
-      return objThis + "." + getSetterMethod().getName() + "(" + value + ")";
-  }
-
-  /**
-   * Generates the get property.
-   */
-  public void generateSuperGetter(JavaWriter out)
-    throws IOException
-  {
-    out.println();
-    out.println("public final " + getJavaTypeName() + " __caucho_super_get_" + getName() + "()");
-    out.println("{");
-    out.pushDepth();
-
-    if (isAbstract() || getGetterMethod() == null)
-      out.println("return " + getFieldName() + ";");
-    else if (this instanceof IdField)
-      out.println("return " + getGetterName() + "();");
-    else
-      out.println("return super." + getGetterName() + "();");
-
-    out.popDepth();
-    out.println("}");
-  }
-
-  /**
-   * Generates the set property.
-   */
-  public void generateSuperSetter(JavaWriter out)
-    throws IOException
-  {
-    out.println();
-    out.println("public final void __caucho_super_set_" + getName() + "(" + getJavaTypeName() + " v)");
-    out.println("{");
-    out.pushDepth();
-
-    if (isAbstract() || getGetterMethod() == null)
-      out.println(getFieldName() + " = v;");
-    else if (getSetterMethod() == null) {
-    }
-    else if (this instanceof IdField)
-      out.println(getSetterMethod().getName() + "(v);");
-    else
-      out.println("super." + getSetterMethod().getName() + "(v);");
-
-    out.popDepth();
-    out.println("}");
-  }
-
-  /**
    * Generates the table create.
    */
   public String generateCreateTableSQL(AmberPersistenceUnit manager)
@@ -798,10 +796,10 @@ abstract public class AbstractField implements AmberField {
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt, String index)
+  public void generateStatementSet(JavaWriter out, String pstmt, String index)
     throws IOException
   {
-    generateSet(out, pstmt, index, "super");
+    generateStatementSet(out, pstmt, index, "super");
   }
 
   /**
@@ -811,7 +809,7 @@ abstract public class AbstractField implements AmberField {
                                 String index, String obj)
     throws IOException
   {
-    generateSet(out, pstmt, index, obj);
+    generateStatementSet(out, pstmt, index, obj);
   }
 
   /**
@@ -821,7 +819,7 @@ abstract public class AbstractField implements AmberField {
                                 String index, String obj)
     throws IOException
   {
-    generateSet(out, pstmt, index, obj);
+    generateStatementSet(out, pstmt, index, obj);
   }
 
   /**
@@ -854,7 +852,7 @@ abstract public class AbstractField implements AmberField {
 
     String value = generateGet(src);
 
-    // jpa/0l43 out.println(generateSet(dst, value) + ";");
+    // jpa/0l43 out.println(generateStatementSet(dst, value) + ";");
 
     boolean isJPA = getEntitySourceType().getPersistenceUnit().isJPA();
 
@@ -878,11 +876,18 @@ abstract public class AbstractField implements AmberField {
   /**
    * Updates the cached copy.
    */
-  public void generateCopyMergeObject(JavaWriter out,
-                                      String dst, String src,
-                                      int loadIndex)
+  public void generateMergeFrom(JavaWriter out,
+				String dst, String src)
     throws IOException
   {
+    // jpa/0g0l
+    //if (getLoadGroupIndex() != loadIndex)
+    //  return;
+
+    String value = generateGet(src);
+
+    // jpa/0l43
+    out.println(generateSet(dst, value) + ";");
   }
 
   /**
@@ -897,7 +902,7 @@ abstract public class AbstractField implements AmberField {
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt,
+  public void generateStatementSet(JavaWriter out, String pstmt,
                           String index, String obj)
     throws IOException
   {
@@ -982,6 +987,7 @@ abstract public class AbstractField implements AmberField {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getName() + "," + getSourceType() + "]";

@@ -80,7 +80,7 @@ public class MapElementField extends AssociationField
   /**
    * Generates the set property.
    */
-  public void generateGetProperty(JavaWriter out)
+  public void generateGetterMethod(JavaWriter out)
     throws IOException
   {
   }

@@ -57,7 +57,7 @@ import java.util.logging.Logger;
  */
 public class EntityOneToManyField extends CollectionField {
   private static final L10N L = new L10N(EntityOneToManyField.class);
-  protected static final Logger log 
+  private static final Logger log 
     = Logger.getLogger(EntityOneToManyField.class.getName());
 
   private String _mapKey;
@@ -229,11 +229,11 @@ public class EntityOneToManyField extends CollectionField {
   {
     if (isCascade(cascadeType)) {
 
-      String getter = "_caucho_field_" + getGetterName(); // generateSuperGetter();
+      String getter = "_caucho_field_" + getGetterName(); // generateSuperGetterMethod();
 
-      out.println("if (" + getter + " == null && " + generateSuperGetter() + " != null)");
+      out.println("if (" + getter + " == null && " + generateSuperGetter("this") + " != null)");
       out.pushDepth();
-      out.println(getSetterName() + "(" + generateSuperGetter() + ");");
+      out.println(getSetterName() + "(" + generateSuperGetter("this") + ");");
       out.popDepth();
 
       out.println();
@@ -293,7 +293,7 @@ public class EntityOneToManyField extends CollectionField {
    * Generates the set clause.
    */
   @Override
-  public void generateSet(JavaWriter out, String pstmt,
+  public void generateStatementSet(JavaWriter out, String pstmt,
                           String obj, String index)
     throws IOException
   {
@@ -361,7 +361,7 @@ public class EntityOneToManyField extends CollectionField {
    * Generates the set property.
    */
   @Override
-  public void generateGetProperty(JavaWriter out)
+  public void generateGetterMethod(JavaWriter out)
     throws IOException
   {
     String var = "_caucho_field_" + getGetterName();
@@ -454,7 +454,7 @@ public class EntityOneToManyField extends CollectionField {
 
       // jpa/0j63
       if (getterMapKey == null) {
-        getterMapKey = getEntityTargetType().getId().generateGetProperty("this");
+        getterMapKey = getEntityTargetType().getId().generateGet("this");
       }
       else {
         getterMapKey = "get" + Character.toUpperCase(getterMapKey.charAt(0))
@@ -482,7 +482,7 @@ public class EntityOneToManyField extends CollectionField {
     out.println("return " + var + ";");
     */
     
-    out.println("return " + generateSuperGetter() + ";");
+    out.println("return " + generateSuperGetter("this") + ";");
 
     out.popDepth();
     out.println("}");
@@ -546,7 +546,7 @@ public class EntityOneToManyField extends CollectionField {
     }
 
     // jpa/0j70
-    out.println(generateSuperSetter(var) + ";");
+    out.println(generateSuperSetter("this", var) + ";");
 
     out.println();
     out.println("return " + var + ";");
@@ -626,7 +626,7 @@ public class EntityOneToManyField extends CollectionField {
    * Generates the set property.
    */
   @Override
-  public void generateSetProperty(JavaWriter out)
+  public void generateSetterMethod(JavaWriter out)
     throws IOException
   {
     // commented out: jpa/0s2d
@@ -656,7 +656,7 @@ public class EntityOneToManyField extends CollectionField {
     out.println("{");
     out.pushDepth();
 
-    // out.println("if (" + generateSuperGetter() + " == value)");
+    // out.println("if (" + generateSuperGetterMethod() + " == value)");
     // out.println("  return;");
     // out.println();
 
@@ -671,7 +671,7 @@ public class EntityOneToManyField extends CollectionField {
 
     out.println("if (__caucho_session == null) {");
     out.pushDepth();
-    out.println(generateSuperSetter("value") + ";");
+    out.println(generateSuperSetter("this", "value") + ";");
     out.popDepth();
     out.println("} else {");
     out.pushDepth();

@@ -33,21 +33,17 @@ import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.EmbeddedExpr;
 import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EmbeddableType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -169,7 +165,7 @@ public class EntityEmbeddedField extends AbstractField
   /**
    * Generates the set property.
    */
-  public void generateGetProperty(JavaWriter out)
+  public void generateGetterMethod(JavaWriter out)
     throws IOException
   {
     if (! isFieldAccess() && getGetterMethod() == null)
@@ -187,7 +183,7 @@ public class EntityEmbeddedField extends AbstractField
       out.println();
     }
 
-    out.println("return " + generateSuperGetter() + ";");
+    out.println("return " + generateSuperGetter("this") + ";");
 
     out.popDepth();
     out.println("}");
@@ -196,7 +192,8 @@ public class EntityEmbeddedField extends AbstractField
   /**
    * Generates the set property.
    */
-  public void generateSetProperty(JavaWriter out)
+  @Override
+  public void generateSetterMethod(JavaWriter out)
     throws IOException
   {
     if (! isFieldAccess() && (getGetterMethod() == null
@@ -210,10 +207,10 @@ public class EntityEmbeddedField extends AbstractField
 
     if (! _isUpdate) {
       out.println("if (__caucho_session == null)");
-      out.println("  " + generateSuperSetter("v") + ";");
+      out.println("  " + generateSuperSetter("this", "v") + ";");
     }
     else {
-      out.println(getJavaTypeName() + " oldValue = " + generateSuperGetter() + ";");
+      out.println(getJavaTypeName() + " oldValue = " + generateSuperGetter("this") + ";");
 
       int maskGroup = getLoadGroupIndex() / 64;
       String loadVar = "__caucho_loadMask_" + maskGroup;
@@ -229,7 +226,7 @@ public class EntityEmbeddedField extends AbstractField
         out.println("  return;");
       }
 
-      out.println(generateSuperSetter("v") + ";");
+      out.println(generateSuperSetter("this", "v") + ";");
 
       int dirtyGroup = getIndex() / 64;
       String dirtyVar = "__caucho_dirtyMask_" + dirtyGroup;
@@ -345,7 +342,7 @@ public class EntityEmbeddedField extends AbstractField
     throws IOException
   {
     if (_isInsert)
-      generateSet(out, pstmt, index, obj);
+      generateStatementSet(out, pstmt, index, obj);
     else if (getLoadGroupIndex() != 0) {
       int groupIndex = getLoadGroupIndex();
       int group = groupIndex / 64;
@@ -362,13 +359,13 @@ public class EntityEmbeddedField extends AbstractField
     throws IOException
   {
     if (_isUpdate)
-      generateSet(out, pstmt, index, obj);
+      generateStatementSet(out, pstmt, index, obj);
   }
 
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt,
+  public void generateStatementSet(JavaWriter out, String pstmt,
                           String index, String obj)
     throws IOException
   {
@@ -394,12 +391,12 @@ public class EntityEmbeddedField extends AbstractField
       out.pushDepth();
 
       // embeddableType.generateSetNull(out, pstmt, "index++");
-      column.generateSet(out, pstmt, index, null);
+      column.generateStatementSet(out, pstmt, index, null);
 
       out.popDepth();
       out.println("} else");
       out.pushDepth();
-      column.generateSet(out, pstmt, index, generateGet(obj)+"."+getter);
+      column.generateStatementSet(out, pstmt, index, generateGet(obj)+"."+getter);
       out.popDepth();
     }
     */
@@ -440,6 +437,7 @@ public class EntityEmbeddedField extends AbstractField
   /**
    * Generates loading code
    */
+  @Override
   public int generateLoad(JavaWriter out, String rs,
                           String indexVar, int index)
     throws IOException
@@ -459,7 +457,7 @@ public class EntityEmbeddedField extends AbstractField
     // XXX: should cound
     index += _subFields.size();
 
-    out.println(generateSuperSetter(value) + ";");
+    out.println(generateSuperSetter("this", value) + ";");
 
     // out.println("__caucho_loadMask |= " + (1L << getIndex()) + "L;");
 
@@ -470,6 +468,7 @@ public class EntityEmbeddedField extends AbstractField
    * Creates the expression for the field.
    */
 
+  @Override
   public AmberExpr createExpr(QueryParser parser, PathExpr parent)
   {
     return new EmbeddedExpr(parent, _embeddableType, _subFields);

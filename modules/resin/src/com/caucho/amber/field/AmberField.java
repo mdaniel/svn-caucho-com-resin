@@ -94,16 +94,6 @@ public interface AmberField {
   public long getCreateLoadMask(int group);
 
   /**
-   * Returns the getter method.
-   */
-  public JMethod getGetterMethod();
-
-  /**
-   * Returns the getter name.
-   */
-  public String getGetterName();
-
-  /**
    * Returns the type of the field
    */
   public JType getJavaType();
@@ -112,16 +102,6 @@ public interface AmberField {
    * Returns the name of the java type.
    */
   public String getJavaTypeName();
-
-  /**
-   * Returns the setter method.
-   */
-  public JMethod getSetterMethod();
-
-  /**
-   * Returns the setter name.
-   */
-  public String getSetterName();
 
   /**
    * Returns true if the methods are abstract.
@@ -155,14 +135,39 @@ public interface AmberField {
     throws ConfigException;
 
   /**
-   * Returns the actual data.
+   * Generates any prologue.
    */
-  public String generateSuperGetter();
+  public void generatePrologue(JavaWriter out, HashSet<Object> completedSet)
+    throws IOException;
+
+  //
+  // getter/setter
+  //
 
   /**
-   * Sets the actual data.
+   * Returns the getter method.
    */
-  public String generateSuperSetter(String value);
+  public JMethod getGetterMethod();
+
+  /**
+   * Returns the setter method.
+   */
+  public JMethod getSetterMethod();
+
+  /**
+   * Returns the getter name.
+   */
+  public String getGetterName();
+
+  /**
+   * Returns the setter name.
+   */
+  public String getSetterName();
+  
+  /**
+   * Returns the actual data.
+   */
+  public String generateSuperGetter(String objThis);
 
   /**
    * Sets the actual data.
@@ -170,10 +175,60 @@ public interface AmberField {
   public String generateSuperSetter(String objThis, String value);
 
   /**
-   * Generates any prologue.
+   * Generates the field getter.
+   *
+   * @param value the non-null value
    */
-  public void generatePrologue(JavaWriter out, HashSet<Object> completedSet)
+  public String generateGet(String objThis);
+
+  /**
+   * Generates the field setter.
+   *
+   * @param value the non-null value
+   */
+  public String generateSet(String objThis, String value);
+
+  /**
+   * Generates the field getter.
+   *
+   * @param value the non-null value
+   */
+  public void generateGet(JavaWriter out, String objThis)
     throws IOException;
+
+  /**
+   * Generates loading cache
+   */
+  public void generateSet(JavaWriter out, String objThis, String value)
+    throws IOException;
+
+  /**
+   * Generates the get property
+   */
+  public void generateSuperGetterMethod(JavaWriter out)
+    throws IOException;
+
+  /**
+   * Generates the get property
+   */
+  public void generateSuperSetterMethod(JavaWriter out)
+    throws IOException;
+
+  /**
+   * Generates the get property implementation.
+   */
+  public void generateGetterMethod(JavaWriter out)
+    throws IOException;
+
+  /**
+   * Generates the set property implementation.
+   */
+  public void generateSetterMethod(JavaWriter out)
+    throws IOException;
+  
+  //
+  // constructor code
+  //
 
   /**
    * Generates the post constructor fixup
@@ -251,65 +306,13 @@ public interface AmberField {
   /**
    * Generates loading cache
    */
-  public void generateSet(JavaWriter out, String obj)
-    throws IOException;
-
-  /**
-   * Generates loading cache
-   */
   public void generateUpdateFromObject(JavaWriter out, String obj)
     throws IOException;
-
-  /**
-   * Generates the field getter.
-   *
-   * @param value the non-null value
-   */
-  public void generateGet(JavaWriter out, String value)
-    throws IOException;
-
-  /**
-   * Generates the field getter.
-   *
-   * @param value the non-null value
-   */
-  public String generateGet(String value);
-
-  /**
-   * Generates the field setter.
-   *
-   * @param value the non-null value
-   */
-  public String generateSet(String obj, String value);
 
   /**
    * Generates the insert.
    */
   public void generateInsertColumns(ArrayList<String> columns);
-
-  /**
-   * Generates the get property.
-   */
-  public void generateGetProperty(JavaWriter out)
-    throws IOException;
-
-  /**
-   * Generates the set property.
-   */
-  public void generateSetProperty(JavaWriter out)
-    throws IOException;
-
-  /**
-   * Generates the get property.
-   */
-  public void generateSuperGetter(JavaWriter out)
-    throws IOException;
-
-  /**
-   * Generates the get property.
-   */
-  public void generateSuperSetter(JavaWriter out)
-    throws IOException;
 
   /**
    * Generates the table create.
@@ -319,7 +322,7 @@ public interface AmberField {
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt, String index)
+  public void generateStatementSet(JavaWriter out, String pstmt, String index)
     throws IOException;
 
   /**
@@ -355,9 +358,8 @@ public interface AmberField {
   /**
    * Updates the cached copy.
    */
-  public void generateCopyMergeObject(JavaWriter out,
-                                      String dst, String src,
-                                      int loadIndex)
+  public void generateMergeFrom(JavaWriter out,
+                                String dst, String src)
     throws IOException;
 
   /**
@@ -370,7 +372,7 @@ public interface AmberField {
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt,
+  public void generateStatementSet(JavaWriter out, String pstmt,
                           String index, String obj)
     throws IOException;
 

@@ -1138,20 +1138,19 @@ public class EntityType extends BeanType {
   /**
    * Copy from an object.
    */
-  public void generateCopyMergeObject(JavaWriter out,
-                                      String dst, String src,
-                                      int loadGroup)
+  public void generateMergeFrom(JavaWriter out,
+                               String dst, String src)
     throws IOException
   {
     if (getParentType() != null)
-      getParentType().generateCopyMergeObject(out, dst, src, loadGroup);
+      getParentType().generateMergeFrom(out, dst, src);
 
     ArrayList<AmberField> fields = getFields();
 
     for (int i = 0; i < fields.size(); i++) {
       AmberField field = fields.get(i);
 
-      field.generateCopyMergeObject(out, dst, src, loadGroup);
+      field.generateMergeFrom(out, dst, src);
     }
   }
 

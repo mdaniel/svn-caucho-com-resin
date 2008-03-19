@@ -37,7 +37,6 @@ import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.EmbeddableType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -51,7 +50,7 @@ import java.util.logging.Logger;
 public class EmbeddedIdField extends EntityEmbeddedField implements IdField
 {
   private static final L10N L = new L10N(EmbeddedIdField.class);
-  protected static final Logger log
+  private static final Logger log
     = Logger.getLogger(EmbeddedIdField.class.getName());
 
   boolean _isKeyField;
@@ -70,6 +69,7 @@ public class EmbeddedIdField extends EntityEmbeddedField implements IdField
     super(ownerType, embeddableType, name);
   }
 
+  @Override
   protected EmbeddedSubField createSubField(AmberField field, int index)
   {
     return new KeyEmbeddedSubField(this, field, index);
@@ -154,6 +154,7 @@ public class EmbeddedIdField extends EntityEmbeddedField implements IdField
   /**
    * Generates any prologue.
    */
+  @Override
   public void generatePrologue(JavaWriter out, HashSet<Object> completedSet)
     throws IOException
   {
@@ -203,6 +204,7 @@ public class EmbeddedIdField extends EntityEmbeddedField implements IdField
   /**
    * Generates loading code
    */
+  @Override
   public int generateLoad(JavaWriter out, String rs,
                           String indexVar, int index)
     throws IOException
@@ -223,15 +225,17 @@ public class EmbeddedIdField extends EntityEmbeddedField implements IdField
   /**
    * Generates loading cache
    */
+  @Override
   public void generateLoadFromObject(JavaWriter out, String obj)
     throws IOException
   {
-    out.println(generateSuperSetter(generateGet(obj)) + ";");
+    out.println(generateSuperSetter("this", generateGet(obj)) + ";");
   }
 
   /**
    * Generates the select clause.
    */
+  @Override
   public String generateLoadSelect(Table table, String id)
   {
     return null;
@@ -269,11 +273,11 @@ public class EmbeddedIdField extends EntityEmbeddedField implements IdField
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt,
+  public void generateStatementSet(JavaWriter out, String pstmt,
                           String index, String value)
     throws IOException
   {
-    super.generateSet(out, pstmt, index, value);
+    super.generateStatementSet(out, pstmt, index, value);
   }
 
   /**
@@ -298,7 +302,7 @@ public class EmbeddedIdField extends EntityEmbeddedField implements IdField
   public void generateSetInsert(JavaWriter out, String pstmt, String index)
     throws IOException
   {
-    generateSet(out, pstmt, index);
+    generateStatementSet(out, pstmt, index);
   }
 
   /**

@@ -1702,7 +1702,7 @@ public class AmberConnection
   public void beforeCompletion()
   {
     if (log.isLoggable(Level.FINER))
-      log.log(Level.FINER, "AmberConnection.beforeCompletion");
+      log.log(Level.FINER, this + " beforeCompletion");
 
     try {
       beforeCommit();
@@ -1722,8 +1722,12 @@ public class AmberConnection
    */
   public void afterCompletion(int status)
   {
-    if (log.isLoggable(Level.FINER))
-      log.log(Level.FINER, "AmberConnection.afterCompletion");
+    if (log.isLoggable(Level.FINER)) {
+      if (status == Status.STATUS_COMMITTED)
+	log.finer(this + " afterCompletion(commit)");
+      else
+	log.finer(this + " afterCompletion(rollback)");
+    }
 
     afterCommit(status == Status.STATUS_COMMITTED);
     _isXA = false;
@@ -1738,7 +1742,7 @@ public class AmberConnection
     throws SQLException
   {
     if (log.isLoggable(Level.FINER))
-      log.log(Level.FINER, "AmberConnection.beforeCommit");
+      log.finer(this + " beforeCommit");
 
     try {
       flushInternal();
@@ -2528,6 +2532,7 @@ public class AmberConnection
     }
   }
 
+  @Override
   public String toString()
   {
     if (_persistenceUnit != null)
@@ -2539,6 +2544,7 @@ public class AmberConnection
   /**
    * Finalizer.
    */
+  @Override
   public void finalize()
   {
     cleanup();
@@ -2858,22 +2864,7 @@ public class AmberConnection
         try {
           entity.__caucho_flush();
         } catch (SQLException e) {
-          log.log(Level.FINER, e.toString(), e);
-
-          String sqlState = e.getSQLState();
-
-          JdbcMetaData metaData = _persistenceUnit.getMetaData();
-
-          if (metaData.isUniqueConstraintSQLState(sqlState)) {
-            // jpa/0ga5
-            throw new EntityExistsException(L.l("Trying to persist an entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", entity.getClass().getName(), entity.__caucho_getPrimaryKey(), entity.__caucho_getEntityState()));
-          }
-          else if (metaData.isForeignKeyViolationSQLState(sqlState)) {
-            // jpa/0o42
-            throw new IllegalStateException(L.l("Trying to persist an entity of class '{0}' with PK '{1}' would break a foreign key constraint. The entity state is '{2}'. Please make sure there are associated entities for all required relationships. If you are merging an entity make sure the association fields are annotated with cascade=MERGE or cascade=ALL.", entity.getClass().getName(), entity.__caucho_getPrimaryKey(), entity.__caucho_getEntityState()));
-          }
-
-          throw e;
+	  throwPersistException(e, entity);
         }
       }
     }
@@ -2883,8 +2874,9 @@ public class AmberConnection
     for (int i = _txEntitiesTop - 1; i >= 0; i--) {
       Entity entity = _txEntities[i];
 
-      if (! entity.__caucho_getEntityState().isPersist())
+      if (! entity.__caucho_getEntityState().isPersist()) {
         entity.__caucho_flush();
+      }
     }
 
     if (! isInTransaction()) {
@@ -2903,6 +2895,27 @@ public class AmberConnection
     }
   }
 
+  private void throwPersistException(SQLException e, Entity entity)
+    throws SQLException
+  {
+    log.log(Level.FINER, e.toString(), e);
+
+    String sqlState = e.getSQLState();
+
+    JdbcMetaData metaData = _persistenceUnit.getMetaData();
+
+    if (metaData.isUniqueConstraintSQLState(sqlState)) {
+      // jpa/0ga5
+      throw new EntityExistsException(L.l("Trying to persist an entity '{0}[{1}]' that already exists. Entity state '{2}'", entity.getClass().getName(), entity.__caucho_getPrimaryKey(), entity.__caucho_getEntityState()));
+    }
+    else if (metaData.isForeignKeyViolationSQLState(sqlState)) {
+      // jpa/0o42
+      throw new IllegalStateException(L.l("Trying to persist an entity of class '{0}' with PK '{1}' would break a foreign key constraint. The entity state is '{2}'. Please make sure there are associated entities for all required relationships. If you are merging an entity make sure the association fields are annotated with cascade=MERGE or cascade=ALL.", entity.getClass().getName(), entity.__caucho_getPrimaryKey(), entity.__caucho_getEntityState()));
+    }
+
+    throw e;
+  }
+  
   /**
    * Persists the entity.
    */
@@ -3024,19 +3037,14 @@ public class AmberConnection
         Object pk = entity.__caucho_getPrimaryKey();
         EntityState state = entity.__caucho_getEntityState();
 
-        log.log(Level.FINER, L.l("recursiveMerge(class: '{0}' PK: '{1}' state: '{2}')",
-                                 className, pk, state));
+        log.finer(L.l("recursiveMerge({0}[{1}] state: '{2}'",
+		      className, pk, state));
       }
 
-      Entity managedEntity = null;
-
       if (containsMergingEntity(entity))
-        managedEntity = entity;
+        return (T) entity;
       else
-        managedEntity = mergeDetachedEntity(entity, true);
-
-      return (T) managedEntity;
-
+        return (T) mergeDetachedEntity(entity);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -3044,134 +3052,58 @@ public class AmberConnection
     }
   }
 
-  public Entity mergeDetachedEntity(Entity entity, boolean isFullMerge)
+  public Entity mergeDetachedEntity(Entity newEntity)
   {
     try {
-      if (entity == null)
-        return entity;
+      if (newEntity == null)
+        return newEntity;
 
-      Class entityClass = entity.getClass();
-      String className = entity.getClass().getName();
-      EntityState state = entity.__caucho_getEntityState();
+      Class entityClass = newEntity.getClass();
+      String className = newEntity.getClass().getName();
+      EntityState state = newEntity.__caucho_getEntityState();
 
-      Object pk = entity.__caucho_getPrimaryKey();
+      Object pk = newEntity.__caucho_getPrimaryKey();
 
       if (log.isLoggable(Level.FINER))
-        log.finer(L.l("{0}[{1}] amber merge  state='{2}')",
+        log.finer(L.l("{0}[{1}] amber merge state='{2}'",
 		      entityClass.getSimpleName(), pk, state));
 
-      if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
+      if (state.isDeleting()) {
         // removed entity instance
         throw new IllegalArgumentException(L.l("{0}: merge operation cannot be applied to a removed entity instance",
 					       entityClass));
       }
-
-      Entity managedEntity = null;
 
       // XXX: jpa/0o42 try {
 
       Entity existingEntity = null;
 
       try {
-        boolean isManaged = entity.__caucho_getEntityState().isManaged();
-
         existingEntity = (Entity) load(entityClass, pk, true);
       } catch (AmberObjectNotFoundException e) {
         if (log.isLoggable(Level.FINER))
           log.log(Level.FINER, e.toString(), e);
         // JPA: should not throw at all, returns null only.
       }
+      
+      if (existingEntity != null) {
+	if (containsMergingEntity(existingEntity))
+	    return existingEntity;
+	    
+        _mergingEntities.add(existingEntity);
+        
+        existingEntity.__caucho_mergeFrom(this, newEntity);
+              
+        return existingEntity;
+      }
 
       // XXX: the original entity should remain detached jpa/0s2k
       // setTransactionalState(entity);
 
-      if (existingEntity == null) {
-        // new entity instance
-        managedEntity = addNewEntity(entityClass, pk);
-
-        if (managedEntity == null)
-          throw new IllegalStateException(L.l("Unable to add a new managed entity when merging object class: {0}[{1}].", className, pk));
-      }
-      else {
-        // jpa/0h08
-        managedEntity = existingEntity;
-      }
-
-      int index = getEntityMatch(_mergingEntities, entityClass, pk);
-
-      if (index >= 0) {
-        // jpa/0o42
-        managedEntity = _mergingEntities.get(index);
-      }
-      else {
-        _mergingEntities.add(managedEntity);
-
-        if (isFullMerge) {
-          // jpa/0o42: avoids premature loading.
-          managedEntity.__caucho_setConnection(null);
-
-          entity.__caucho_copyTo(managedEntity, this, true);
-
-          // jpa/0o42
-          managedEntity.__caucho_setConnection(this);
-        }
-
-        if (existingEntity == null) {
-          // jpa/0o42
-
-          // cascade children
-          // XXX: called from persist()
-          // entity.__caucho_cascadePrePersist(this);
-
-          // jpa/0o42
-          managedEntity.__caucho_setConnection(null);
-          managedEntity.__caucho_setEntityState(EntityState.TRANSIENT);
-
-          persist(managedEntity);
-
-          // jpa/0i5g
-          // XXX: called from persist()
-          // entity.__caucho_cascadePostPersist(this);
-
-          if (log.isLoggable(Level.FINER))
-            log.log(Level.FINER, L.l("merged to a new entity (persisted)"));
-        }
-        else {
-          // Handled in addInternalEntity()
-          // setTransactionalState(managedEntity);
-
-          if (log.isLoggable(Level.FINER))
-            log.log(Level.FINER, L.l("merged to an existing entity"));
-        }
-
-        // jpa/0o42: avoids premature loading.
-        managedEntity.__caucho_setConnection(null);
-
-        // jpa/0ga3, jpa/0h08, jpa/0o4-
-        entity.__caucho_merge(managedEntity, this, false);
-
-        // jpa/0o42
-        managedEntity.__caucho_setConnection(this);
-
-        // jpa/0h08
-        entity.__caucho_copyDirtyMaskFrom(managedEntity);
-        entity.__caucho_copyLoadMaskFrom(managedEntity);
-      }
-
-      /* XXX: jpa/0o42
-         } catch (Exception e) {
-           if (e.getCause() instanceof SQLException) {
-             // OK: entity exists in the database
-             log.log(Level.FINER, e.toString(), e);
-           }
-           else {
-             throw e;
-           }
-         }
-      */
-
-      return managedEntity;
-
+      // new entity instance
+      persist(newEntity);
+        
+      return newEntity;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

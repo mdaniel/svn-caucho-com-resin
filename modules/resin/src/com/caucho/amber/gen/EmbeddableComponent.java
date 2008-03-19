@@ -216,11 +216,11 @@ public class EmbeddableComponent extends ClassComponent {
 
       prop.generatePrologue(out, null);
 
-      prop.generateSuperGetter(out);
-      prop.generateGetProperty(out);
+      prop.generateSuperGetterMethod(out);
+      prop.generateGetterMethod(out);
 
-      prop.generateSuperSetter(out);
-      prop.generateSetProperty(out);
+      prop.generateSuperSetterMethod(out);
+      prop.generateSetterMethod(out);
     }
   }
   */
@@ -316,7 +316,7 @@ public class EmbeddableComponent extends ClassComponent {
 
       out.println("case " + i + ":");
 
-      out.println("  return " + prop.generateSuperGetter() + ";");
+      out.println("  return " + prop.generateSuperGetter("this") + ";");
 
       out.println();
     }

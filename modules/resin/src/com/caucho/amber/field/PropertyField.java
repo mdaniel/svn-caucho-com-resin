@@ -41,7 +41,6 @@ import com.caucho.amber.table.Table;
 import com.caucho.amber.type.*;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -54,7 +53,8 @@ import java.util.logging.Logger;
  */
 public class PropertyField extends AbstractField {
   private static final L10N L = new L10N(PropertyField.class);
-  protected static final Logger log = Log.open(PropertyField.class);
+  private static final Logger log
+    = Logger.getLogger(PropertyField.class.getName());
 
   private Column _column;
   private Type _type;
@@ -104,6 +104,7 @@ public class PropertyField extends AbstractField {
   /**
    * Returns the table containing the field's columns.
    */
+  @Override
   public Table getTable()
   {
     return getColumn().getTable();
@@ -112,6 +113,7 @@ public class PropertyField extends AbstractField {
   /**
    * Sets the column.
    */
+  @Override
   public void setColumn(Column column)
   {
     _column = column;
@@ -120,6 +122,7 @@ public class PropertyField extends AbstractField {
   /**
    * Gets the column.
    */
+  @Override
   public Column getColumn()
   {
     return _column;
@@ -154,6 +157,7 @@ public class PropertyField extends AbstractField {
   /**
    * Creates a copy of the field for a parent
    */
+  @Override
   public AmberField override(BeanType type)
   {
     PropertyField field = new PropertyField(getSourceType(), getName());
@@ -169,6 +173,7 @@ public class PropertyField extends AbstractField {
   /**
    * Initializes the property.
    */
+  @Override
   public void init()
     throws ConfigException
   {
@@ -197,33 +202,16 @@ public class PropertyField extends AbstractField {
     }
   }
 
-  /**
-   * Returns the null value.
-   */
-  public String generateNull()
-  {
-    return getType().generateNull();
-  }
+  //
+  // getter/setter
+  //
 
-  /**
-   * Returns the field name.
-   */
-  protected String getFieldName()
-  {
-    if (isFieldAccess())
-      return super.getFieldName();
-    else if (getColumn() == null) {
-      // jpa/0w01, jpa/0w10
-      return "__amber_" + AbstractConfigIntrospector.toSqlName(getName());
-    }
-    else
-      return getColumn().getFieldName();
-  }
 
   /**
    * Generates the set property.
    */
-  public void generateGetProperty(JavaWriter out)
+  @Override
+  public void generateGetterMethod(JavaWriter out)
     throws IOException
   {
     if (! isFieldAccess() && getGetterMethod() == null)
@@ -240,7 +228,7 @@ public class PropertyField extends AbstractField {
       out.println();
     }
 
-    out.println("return " + generateSuperGetter() + ";");
+    out.println("return " + generateSuperGetter("this") + ";");
 
     out.popDepth();
     out.println("}");
@@ -249,11 +237,13 @@ public class PropertyField extends AbstractField {
   /**
    * Generates the set property.
    */
-  public void generateSetProperty(JavaWriter out)
+  @Override
+  public void generateSetterMethod(JavaWriter out)
     throws IOException
   {
-    if (! isFieldAccess() && (getGetterMethod() == null
-			      || getSetterMethod() == null && ! isAbstract()))
+    if (! isFieldAccess()
+	&& (getGetterMethod() == null
+	    || getSetterMethod() == null && ! isAbstract()))
       return;
 
     out.println();
@@ -268,14 +258,14 @@ public class PropertyField extends AbstractField {
 
     // jpa/0gh0
     if (! _isUpdate || getSourceType() instanceof EmbeddableType) {
-      out.println(generateSuperSetter("v") + ";");
+      out.println(generateSuperSetter("this", "v") + ";");
       out.popDepth();
       out.println("}");
       return;
     }
 
     out.println("if (__caucho_session == null) {");
-    out.println("  " + generateSuperSetter("v") + ";");
+    out.println("  " + generateSuperSetter("this", "v") + ";");
     out.println("  return;");
     out.println("}");
 
@@ -289,7 +279,7 @@ public class PropertyField extends AbstractField {
     out.println("}");
     
     out.println();
-    out.println(getJavaTypeName() + " oldValue = " + generateSuperGetter() + ";");
+    out.println(getJavaTypeName() + " oldValue = " + generateSuperGetter("this") + ";");
 
     out.println();
     if (getJavaTypeName().equals("java.lang.String")) {
@@ -305,7 +295,7 @@ public class PropertyField extends AbstractField {
     out.println("try {");
     out.pushDepth();
 
-    out.println(generateSuperSetter("v") + ";");
+    out.println(generateSuperSetter("this", "v") + ";");
 
     out.popDepth();
     out.println("} catch (Exception e1) {");
@@ -334,10 +324,37 @@ public class PropertyField extends AbstractField {
     out.popDepth();
     out.println("}");
   }
+  
+
+  /**
+   * Returns the null value.
+   */
+  @Override
+  public String generateNull()
+  {
+    return getType().generateNull();
+  }
+
+  /**
+   * Returns the field name.
+   */
+  @Override
+  protected String getFieldName()
+  {
+    if (isFieldAccess())
+      return super.getFieldName();
+    else if (getColumn() == null) {
+      // jpa/0w01, jpa/0w10
+      return "__amber_" + AbstractConfigIntrospector.toSqlName(getName());
+    }
+    else
+      return getColumn().getFieldName();
+  }
 
   /**
    * Generates the select clause.
    */
+  @Override
   public String generateLoadSelect(Table table, String id)
   {
     if (getColumn().getTable() != table) {
@@ -352,6 +369,7 @@ public class PropertyField extends AbstractField {
   /**
    * Generates the select clause.
    */
+  @Override
   public String generateSelect(String id)
   {
     return getColumn().generateSelect(id);
@@ -360,6 +378,7 @@ public class PropertyField extends AbstractField {
   /**
    * Generates the where clause.
    */
+  @Override
   public String generateWhere(String id)
   {
     return getColumn().generateSelect(id);
@@ -368,6 +387,7 @@ public class PropertyField extends AbstractField {
   /**
    * Generates the insert.
    */
+  @Override
   public void generateInsertColumns(ArrayList<String> columns)
   {
     if (_isInsert && _aliasKey == null)
@@ -377,6 +397,7 @@ public class PropertyField extends AbstractField {
   /**
    * Generates the update set clause
    */
+  @Override
   public void generateUpdate(CharBuffer sql)
   {
     if (_isUpdate && _aliasKey == null)
@@ -390,6 +411,7 @@ public class PropertyField extends AbstractField {
   /**
    * Generates the set clause for the insert clause.
    */
+  @Override
   public void generateInsertSet(JavaWriter out, String pstmt,
                                 String index, String obj)
     throws IOException
@@ -397,7 +419,7 @@ public class PropertyField extends AbstractField {
     if (_aliasKey != null) {
     }
     else if (_isInsert)
-      generateSet(out, pstmt, index, obj);
+      generateStatementSet(out, pstmt, index, obj);
     else if (getLoadGroupIndex() != 0) {
       int groupIndex = getLoadGroupIndex();
       int group = groupIndex / 64;
@@ -409,18 +431,20 @@ public class PropertyField extends AbstractField {
   /**
    * Generates the set clause for the insert clause.
    */
+  @Override
   public void generateUpdateSet(JavaWriter out, String pstmt,
                                 String index, String obj)
     throws IOException
   {
     if (_isUpdate && _aliasKey == null)
-      generateSet(out, pstmt, index, obj);
+      generateStatementSet(out, pstmt, index, obj);
   }
 
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt,
+  @Override
+  public void generateStatementSet(JavaWriter out, String pstmt,
                           String index, String obj)
     throws IOException
   {
@@ -434,6 +458,7 @@ public class PropertyField extends AbstractField {
   /**
    * Generates loading code
    */
+  @Override
   public int generateLoad(JavaWriter out, String rs,
                           String indexVar, int index)
     throws IOException
@@ -493,10 +518,10 @@ public class PropertyField extends AbstractField {
       out.println("}");
 
       out.println();
-      out.println(generateSuperSetter(var + "_temp") + ";");
+      out.println(generateSuperSetter("this", var + "_temp") + ";");
     }
     else
-      out.println(generateSuperSetter(var) + ";");
+      out.println(generateSuperSetter("this", var) + ";");
 
     // out.println("__caucho_loadMask |= " + (1L << getIndex()) + "L;");
 
@@ -506,6 +531,7 @@ public class PropertyField extends AbstractField {
   /**
    * Generates loading code
    */
+  @Override
   public int generateLoadNative(JavaWriter out, int index)
     throws IOException
   {
@@ -526,7 +552,7 @@ public class PropertyField extends AbstractField {
 
     out.println(";");
     
-    out.println(generateSuperSetter(var) + ";");
+    out.println(generateSuperSetter("this", var) + ";");
 
     return index;
   }
@@ -546,6 +572,7 @@ public class PropertyField extends AbstractField {
   /**
    * Creates the expression for the field.
    */
+  @Override
   public AmberExpr createExpr(QueryParser parser, PathExpr parent)
   {
     Column column;

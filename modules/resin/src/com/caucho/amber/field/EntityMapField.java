@@ -188,7 +188,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Generates the get property.
    */
-  public void generateSuperGetter(JavaWriter out)
+  public void generateSuperGetterMethod(JavaWriter out)
     throws IOException
   {
   }
@@ -196,7 +196,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Generates the get property.
    */
-  public void generateSuperSetter(JavaWriter out)
+  public void generateSuperSetterMethod(JavaWriter out)
     throws IOException
   {
   }
@@ -204,7 +204,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Generates the set property.
    */
-  public void generateGetProperty(JavaWriter out)
+  public void generateGetterMethod(JavaWriter out)
     throws IOException
   {
     if (getGetterMethod() != null) {
@@ -270,7 +270,7 @@ public class EntityMapField extends AbstractField {
       for (int i = 0; i < keys.size(); i++) {
         IdField key = keys.get(i);
 
-        key.generateSet(out, "query", "index", "this");
+        key.generateStatementSet(out, "query", "index", "this");
       }
 
       out.print("return (");

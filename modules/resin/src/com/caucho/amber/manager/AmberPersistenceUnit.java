@@ -1690,27 +1690,10 @@ public class AmberPersistenceUnit {
       if (oldCacheItem != null)
         cacheItem = oldCacheItem;
 
-      contextEntity.__caucho_updateCacheItem(cacheItem.getEntity());
+      // contextEntity.__caucho_updateCacheItem(cacheItem.getEntity());
     }
 
     return cacheItem;
-  }
-
-  /**
-   * Safely copies a cache item to a context object.
-   */
-  public Entity copyFromCacheItem(AmberConnection aConn,
-                                  Entity contextEntity,
-                                  EntityItem cacheItem)
-  {
-    if (cacheItem == null)
-      throw new IllegalStateException(L.l("Null cache item cannot be used to update a persistence context object"));
-
-    synchronized (_entityKey) {
-      cacheItem.copyTo(contextEntity, aConn);
-    }
-
-    return contextEntity;
   }
 
   /**

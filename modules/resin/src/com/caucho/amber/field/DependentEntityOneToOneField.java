@@ -54,7 +54,8 @@ import javax.persistence.CascadeType;
  */
 public class DependentEntityOneToOneField extends CascadableField {
   private static final L10N L = new L10N(DependentEntityOneToOneField.class);
-  protected static final Logger log = Log.open(DependentEntityOneToOneField.class);
+  private static final Logger log
+    = Logger.getLogger(DependentEntityOneToOneField.class.getName());
 
   private EntityManyToOneField _targetField;
   private long _targetLoadIndex;
@@ -207,7 +208,7 @@ public class DependentEntityOneToOneField extends CascadableField {
     if (! getEntitySourceType().getPersistenceUnit().isJPA())
       return false;
 
-    String getter = generateSuperGetter();
+    String getter = generateSuperGetter("this");
 
     out.println("if (" + getter + " != null) {");
     out.pushDepth();
@@ -258,12 +259,13 @@ public class DependentEntityOneToOneField extends CascadableField {
   /**
    * Generates loading code
    */
+  @Override
   public int generateLoad(JavaWriter out, String rs,
                           String indexVar, int index)
     throws IOException
   {
     if (isLazy()) {
-      out.println(generateSuperSetter("null") + ";");
+      out.println(generateSuperSetter("this", "null") + ";");
 
       String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
       long loadMask = (1L << _targetLoadIndex);
@@ -277,6 +279,7 @@ public class DependentEntityOneToOneField extends CascadableField {
   /**
    * Generates loading code after the basic fields.
    */
+  @Override
   public int generatePostLoadSelect(JavaWriter out, int index)
     throws IOException
   {
@@ -307,7 +310,8 @@ public class DependentEntityOneToOneField extends CascadableField {
   /**
    * Generates the set property.
    */
-  public void generateGetProperty(JavaWriter out)
+  @Override
+  public void generateGetterMethod(JavaWriter out)
     throws IOException
   {
     String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
@@ -342,7 +346,7 @@ public class DependentEntityOneToOneField extends CascadableField {
     out.popDepth();
     out.println("}");
     out.println("else {");
-    out.println("  return " + generateSuperGetter() + ";");
+    out.println("  return " + generateSuperGetter("this") + ";");
     out.println("}");
 
     out.popDepth();
@@ -401,7 +405,7 @@ public class DependentEntityOneToOneField extends CascadableField {
     out.println("  throw new RuntimeException(e);");
     out.println("}");
 
-    out.println(generateSuperSetter("v"+index) + ";");
+    out.println(generateSuperSetter("this", "v" + index) + ";");
   }
 
   /**
@@ -422,7 +426,7 @@ public class DependentEntityOneToOneField extends CascadableField {
 
       value = "(" + getEntityTargetType().getInstanceClassName() + ") aConn.getEntity((com.caucho.amber.entity.Entity) " + value + ")";
 
-      out.println(generateSet(dst, value) + ";");
+      out.println(generateStatementSet(dst, value) + ";");
     }
     */
   }
@@ -499,14 +503,10 @@ public class DependentEntityOneToOneField extends CascadableField {
   /**
    * Updates the cached copy.
    */
-  public void generateCopyMergeObject(JavaWriter out,
-                                      String dst, String src,
-                                      int updateIndex)
+  public void generateMergeFrom(JavaWriter out,
+                                      String dst, String src)
     throws IOException
   {
-    if (getLoadGroupIndex() != updateIndex)
-      return;
-
     if (! (getEntityTargetType() instanceof EntityType))
       return;
 
@@ -516,7 +516,7 @@ public class DependentEntityOneToOneField extends CascadableField {
     out.pushDepth();
 
     if (! isCascade(CascadeType.MERGE)) {
-      value = "(" + getJavaTypeName() + ") aConn.mergeDetachedEntity((com.caucho.amber.entity.Entity) " + value + ", false)";
+      value = "(" + getJavaTypeName() + ") aConn.mergeDetachedEntity((com.caucho.amber.entity.Entity) " + value + ")";
     }
     else {
       value = "(" + getJavaTypeName() + ") aConn.recursiveMerge(" +
@@ -545,7 +545,7 @@ public class DependentEntityOneToOneField extends CascadableField {
       return;
 
     out.println();
-    out.println("thisRef = (com.caucho.amber.entity.Entity) " + generateSuperGetter() + ";");
+    out.println("thisRef = (com.caucho.amber.entity.Entity) " + generateSuperGetter("this") + ";");
 
     out.println();
     out.println("if (thisRef != null) {");
@@ -579,7 +579,8 @@ public class DependentEntityOneToOneField extends CascadableField {
   /**
    * Generates the set property.
    */
-  public void generateSetProperty(JavaWriter out)
+  @Override
+  public void generateSetterMethod(JavaWriter out)
     throws IOException
   {
     Id id = getEntityTargetType().getId();
@@ -591,7 +592,7 @@ public class DependentEntityOneToOneField extends CascadableField {
     out.println("{");
     out.pushDepth();
 
-    out.println(generateSuperSetter("v") + ";");
+    out.println(generateSuperSetter("this", "v") + ";");
     out.println("if (__caucho_session != null) {");
     out.pushDepth();
 
@@ -624,7 +625,7 @@ public class DependentEntityOneToOneField extends CascadableField {
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt, String index)
+  public void generateStatementSet(JavaWriter out, String pstmt, String index)
     throws IOException
   {
   }

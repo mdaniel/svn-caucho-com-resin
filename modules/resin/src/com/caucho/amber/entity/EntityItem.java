@@ -80,10 +80,6 @@ abstract public class EntityItem {
 
   abstract public void expire();
 
-  abstract public Entity copy(AmberConnection aConn);
-
-  abstract public Entity copyTo(Entity targetEntity, AmberConnection aConn);
-
   public Entity load(AmberConnection aConn)
   {
     return aConn.getEntity(this);

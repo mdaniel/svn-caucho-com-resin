@@ -41,15 +41,6 @@ import java.sql.SQLException;
  */
 public interface Entity extends MappedSuperclass
 {
-  public static final int TRANSIENT = 0;
-  public static final int P_NEW = 1;
-  public static final int P_PERSISTING = 2;
-  public static final int P_PERSISTED = 3;
-  public static final int P_NON_TRANSACTIONAL = 4;
-  public static final int P_TRANSACTIONAL = 5;
-  public static final int P_DELETING = 6;
-  public static final int P_DELETED = 7;
-
   /**
    * Makes the entity persistent.
    */
@@ -113,11 +104,6 @@ public interface Entity extends MappedSuperclass
   public void __caucho_setCacheItem(EntityItem item);
 
   /**
-   * Updates the cache item after commit.
-   */
-  public void __caucho_updateCacheItem(Entity item);
-
-  /**
    * Set the primary key.
    */
   public void __caucho_setPrimaryKey(Object key);
@@ -163,19 +149,9 @@ public interface Entity extends MappedSuperclass
   public AmberConnection __caucho_getConnection();
 
   /**
-   * Copies all the dirty mask values from a source entity.
+   * Returns true if the item is loaded
    */
-  public void __caucho_copyDirtyMaskFrom(Entity sourceEntity);
-
-  /**
-   * Copies all the load mask values from a source entity.
-   */
-  public void __caucho_copyLoadMaskFrom(Entity sourceEntity);
-
-  /**
-   * Returns the load mask value for a load group.
-   */
-  public long __caucho_getLoadMask(int loadGroup);
+  public boolean __caucho_isLoaded();
 
   /**
    * Returns true if the entity is dirty.
@@ -212,36 +188,10 @@ public interface Entity extends MappedSuperclass
                                   EntityItem cacheItem);
 
   /**
-   * Creates a new instance based on the current entity.
-   */
-  public Entity __caucho_copy(AmberConnection aConn, EntityItem cacheItem);
-
-  /**
-   * Copies this entity state to an existing entity.
-   */
-  public Entity __caucho_copyTo(Entity targetEntity,
-                                AmberConnection aConn,
-                                EntityItem cacheItem);
-
-  /**
-   * Copies this entity state to an existing entity.
-   */
-  public void __caucho_copyTo(Entity targetEntity,
-                              AmberConnection aConn);
-
-  /**
-   * Copies this entity state to an existing entity.
-   */
-  public void __caucho_copyTo(Entity targetEntity,
-                              AmberConnection aConn,
-                              boolean isFullMerge);
-
-  /**
    * Merges this entity state into an existing entity.
    */
-  public void __caucho_merge(Entity targetEntity,
-                             AmberConnection aConn,
-                             boolean isFullMerge);
+  public void __caucho_mergeFrom(AmberConnection aConn,
+                               Entity targetEntity);
 
   /**
    * Retrieves data from the data store, including the eager loads.

@@ -51,6 +51,7 @@ public class EntityComponent extends AmberMappedComponent {
   /**
    * Gets the entity type.
    */
+  @Override
   public EntityType getEntityType()
   {
     return (EntityType) _entityType;
@@ -129,7 +130,7 @@ public class EntityComponent extends AmberMappedComponent {
     out.pushDepth();
 
     out.print("__caucho_home.delete(__caucho_session, ");
-    out.print(id.toObject(id.generateGetProperty("this")));
+    out.print(id.toObject(id.generateGet("this")));
     out.println(");");
 
     out.println("__caucho_session.removeEntity((com.caucho.amber.entity.Entity) this);");
@@ -310,11 +311,11 @@ public class EntityComponent extends AmberMappedComponent {
     }
 
     out.println();
-    _entityType.getId().generateSet(out, "pstmt", "index");
+    _entityType.getId().generateStatementSet(out, "pstmt", "index");
 
     if (version != null) {
       out.println();
-      version.generateSet(out, "pstmt", "index");
+      version.generateStatementSet(out, "pstmt", "index");
     }
 
     out.println();
@@ -328,7 +329,7 @@ public class EntityComponent extends AmberMappedComponent {
       out.pushDepth();
       String value = version.generateGet("super");
       Type type = version.getColumn().getType();
-      out.println(version.generateSuperSetter(type.generateIncrementVersion(value)) + ";");
+      out.println(version.generateSuperSetter("this", type.generateIncrementVersion(value)) + ";");
       out.popDepth();
       out.println("}");
       out.println();

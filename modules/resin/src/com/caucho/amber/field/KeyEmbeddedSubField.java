@@ -175,7 +175,7 @@ public class KeyEmbeddedSubField extends EmbeddedSubField implements IdField
   {
     // XXX: autogenerate stuff, see KeyPropertyField
     
-    generateSet(out, pstmt, index);
+    generateStatementSet(out, pstmt, index);
   }
 
   /**
@@ -228,6 +228,6 @@ public class KeyEmbeddedSubField extends EmbeddedSubField implements IdField
    */
   public String toValue(String value)
   {
-    throw new UnsupportedOperationException();
+    return getColumn().getType().generateCastFromObject(value);
   }
 }

@@ -45,7 +45,7 @@ import java.util.logging.Logger;
  */
 public class VersionField extends PropertyField {
   private static final L10N L = new L10N(VersionField.class);
-  protected static final Logger log = Log.open(VersionField.class);
+  private static final Logger log = Log.open(VersionField.class);
 
   public VersionField(EntityType entityType, String name)
     throws ConfigException
@@ -67,7 +67,7 @@ public class VersionField extends PropertyField {
    */
   public String generateIsNull()
   {
-    String getter = generateSuperGetter();
+    String getter = generateSuperGetter("this");
     Type type = getColumn().getType();
 
     return type.generateIsNull(getter);
@@ -84,15 +84,15 @@ public class VersionField extends PropertyField {
 
     long dirtyMask = 1L << (getIndex() % 64);
 
-    String getter = generateSuperGetter();
+    String getter = generateSuperGetter("this");
     Type type = getColumn().getType();
 
     // jpa/0x02
     out.println();
     out.println("if (" + generateIsNull() + ")");
-    out.println("  " + generateSuperSetter("new Integer(1)") + ";");
+    out.println("  " + generateSuperSetter("this", "new Integer(1)") + ";");
     out.println("else");
-    out.println("  " + generateSuperSetter(type.generateIncrementVersion(getter)) + ";");
+    out.println("  " + generateSuperSetter("this", type.generateIncrementVersion(getter)) + ";");
 
     out.println();
     out.println("long oldMask = " + dirtyVar + ";");

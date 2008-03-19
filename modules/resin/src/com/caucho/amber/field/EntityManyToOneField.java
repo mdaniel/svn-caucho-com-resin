@@ -443,7 +443,7 @@ public class EntityManyToOneField extends CascadableField {
     throws IOException
   {
     if (_aliasField == null) {
-      out.println(getSetterName() + "(" + generateSuperGetter() + ");");
+      out.println(getSetterName() + "(" + generateSuperGetter("this") + ");");
     }
   }
 
@@ -575,11 +575,11 @@ public class EntityManyToOneField extends CascadableField {
 
     proxy = "(" + getEntityTargetType().getProxyClass().getName() + ") " + proxy;
 
-    out.println(generateSuperSetter(proxy) + ";");
+    out.println(generateSuperSetterMethod(proxy) + ";");
     */
 
     // commented out jpa/0l40
-    // out.println(generateSuperSetter("null") + ";");
+    // out.println(generateSuperSetterMethod("null") + ";");
 
     int group = _targetLoadIndex / 64;
     long mask = (1L << (_targetLoadIndex % 64));
@@ -617,7 +617,7 @@ public class EntityManyToOneField extends CascadableField {
    * Generates the get property.
    */
   @Override
-  public void generateGetProperty(JavaWriter out)
+  public void generateGetterMethod(JavaWriter out)
     throws IOException
   {
     // jpa/0h07, jpa/0h08
@@ -688,7 +688,7 @@ public class EntityManyToOneField extends CascadableField {
     out.println("}");
 
     out.println();
-    out.println("return " + generateSuperGetter() + ";");
+    out.println("return " + generateSuperGetter("this") + ";");
 
     out.popDepth();
     out.println("}");
@@ -788,12 +788,12 @@ public class EntityManyToOneField extends CascadableField {
                 + otherKey + ", false);");
 
     // jpa/0j67
-    out.println("if (" + varName + " != null && " + varName + " != " + generateSuperGetter() + ") {");
+    out.println("if (" + varName + " != null && " + varName + " != " + generateSuperGetter("this") + ") {");
     out.pushDepth();
 
     // ejb/069a
     if (isJPA)
-      out.println(generateSuperSetter(varName) + ";");
+      out.println(generateSuperSetter("this", varName) + ";");
 
     generateSetTargetLoadMask(out, varName);
     
@@ -839,7 +839,7 @@ public class EntityManyToOneField extends CascadableField {
     out.popDepth();
     out.println("}");
 
-    out.println(generateSuperSetter(proxyVarName) + ";");
+    out.println(generateSuperSetter("this", proxyVarName) + ";");
 
     return proxyVarName;
   }
@@ -855,7 +855,7 @@ public class EntityManyToOneField extends CascadableField {
       long targetGroup = targetLoadIndex / 64;
       long targetMask = (1L << (targetLoadIndex % 64));
 
-      out.println(varName + ".__caucho_setLoadMask(" + varName + ".__caucho_getLoadMask(" + targetGroup + ") | " + targetMask + "L, " + targetGroup + ");");
+      //out.println(varName + ".__caucho_setLoadMask(" + varName + ".__caucho_getLoadMask(" + targetGroup + ") | " + targetMask + "L, " + targetGroup + ");");
 
       varName = "((" + _targetType.getInstanceClassName() + ") " + varName + ")";
 
@@ -893,7 +893,7 @@ public class EntityManyToOneField extends CascadableField {
 
       value = "(" + _targetType.getInstanceClassName() + ") aConn.getEntity((com.caucho.amber.entity.Entity) " + value + ")";
 
-      out.println(generateSet(dst, value) + ";");
+      out.println(generateStatementSet(dst, value) + ";");
     }
     */
   }
@@ -1021,7 +1021,7 @@ public class EntityManyToOneField extends CascadableField {
           targetObject = "(" + targetTypeExt + ") child";
         }
         else
-          targetObject = generateSuperGetter();
+          targetObject = generateSuperGetter("this");
 
 	String objThis = "((" + getRelatedType().getInstanceClassName() + ") " + dst + ")";
 
@@ -1041,7 +1041,7 @@ public class EntityManyToOneField extends CascadableField {
       if (_targetLoadIndex == updateIndex) {
       // ejb/0a06
       String value = generateGet(src);
-      out.println(generateSet(dst, value) + ";");
+      out.println(generateStatementSet(dst, value) + ";");
       }
     */
   }
@@ -1050,14 +1050,9 @@ public class EntityManyToOneField extends CascadableField {
    * Updates the cached copy.
    */
   @Override
-  public void generateCopyMergeObject(JavaWriter out,
-                                      String dst, String src,
-                                      int updateIndex)
+  public void generateMergeFrom(JavaWriter out, String dst, String src)
     throws IOException
   {
-    if (getLoadGroupIndex() != updateIndex)
-      return;
-
     if (! (getEntityTargetType() instanceof EntityType))
       return;
 
@@ -1066,66 +1061,19 @@ public class EntityManyToOneField extends CascadableField {
     out.println("if (" + value + " != null) {");
     out.pushDepth();
 
-    if (! isCascade(CascadeType.MERGE)) {
-      // jpa/0h08
-      value = "(" + getJavaTypeName() + ") aConn.mergeDetachedEntity((com.caucho.amber.entity.Entity) " + value + ", false)";
+    if (isCascade(CascadeType.MERGE)) {
+      value = ("(" + getJavaTypeName() + ") aConn.recursiveMerge("
+	       + value + ")");
     }
     else {
-      value = "(" + getJavaTypeName() + ") aConn.recursiveMerge(" +
-        value + ")";
+      // jpa/0h08
+      value = "(" + getJavaTypeName() + ") aConn.mergeDetachedEntity((com.caucho.amber.entity.Entity) " + value + ")";
     }
 
     out.println(generateSet(dst, value) + ";");
 
     out.popDepth();
     out.println("}");
-  }
-
-  /**
-   * Checks entity-relationships from an object.
-   */
-  public void generateDumpRelationships(JavaWriter out,
-                                        int updateIndex)
-    throws IOException
-  {
-    // jpa/0o05
-
-    if (getLoadGroupIndex() != updateIndex)
-      return;
-
-    if (! (getEntityTargetType() instanceof EntityType))
-      return;
-
-    out.println();
-    out.println("thisRef = (com.caucho.amber.entity.Entity) " + generateSuperGetter() + ";");
-
-    out.println();
-    out.println("if (thisRef != null) {");
-    out.pushDepth();
-
-    String var = "__caucho_field_" + getName();
-
-    String logMessage = "relationship from owning side - entity class: \" + this.getClass().getName() + \" PK: \" + __caucho_getPrimaryKey() + \" to object class: \" + thisRef.getClass().getName() + \" PK: \" + " + var;
-
-    out.println("if (__caucho_session.isCacheEntity(thisRef)) {");
-    out.pushDepth();
-
-    out.println("Exception e = new IllegalStateException(\"amber dump relationship: inconsistent " + logMessage + ");");
-
-    out.println("__caucho_log.log(java.util.logging.Level.FINEST, e.toString(), e);");
-
-    out.popDepth();
-    out.println("} else {");
-    out.pushDepth();
-
-    out.println("__caucho_log.log(java.util.logging.Level.FINEST, \"amber dump relationship: consistent " + logMessage + ");");
-
-    out.popDepth();
-    out.println("}");
-
-    out.popDepth();
-    out.println("}");
-
   }
 
   private String generateAccessor(String src, String var)
@@ -1139,7 +1087,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates the set property.
    */
-  public void generateSetProperty(JavaWriter out)
+  public void generateSetterMethod(JavaWriter out)
     throws IOException
   {
     // ejb/06gc - updates with EJB 2.0
@@ -1171,7 +1119,7 @@ public class EntityManyToOneField extends CascadableField {
       out.println();
       out.println("if (v == null) {");
       out.println("  if (" + var + " == null) {");
-      out.println("    " + generateSuperSetter("null") + ";");
+      out.println("    " + generateSuperSetter("this", "null") + ";");
       out.println("    return;");
       out.println("  }");
 
@@ -1190,14 +1138,14 @@ public class EntityManyToOneField extends CascadableField {
       else {
         String v = "((" + getEntityTargetType().getInstanceClassName()+ ") v)";
 
-        out.print(id.toObject(id.generateGetProperty(v)));
+        out.print(id.toObject(id.generateGet(v)));
       }
 
       out.println(";");
 
       out.println();
       out.println("if (key.equals(" + var + ")) {");
-      out.println("  " + generateSuperSetter("v") + ";");
+      out.println("  " + generateSuperSetter("this", "v") + ";");
       out.println("  return;");
       out.println("}");
 
@@ -1215,7 +1163,7 @@ public class EntityManyToOneField extends CascadableField {
       // jpa/0o42: merge()
       out.println(dirtyVar + " |= " + dirtyMask + "L;");
 
-      out.println(generateSuperSetter("v") + ";");
+      out.println(generateSuperSetter("this", "v") + ";");
       out.println();
       out.println("if (__caucho_session != null) {");
       out.pushDepth();
@@ -1249,7 +1197,7 @@ public class EntityManyToOneField extends CascadableField {
       out.println("if (__caucho_session != null)");
       out.println("  throw new IllegalStateException(\"aliased field cannot be set\");");
 
-      out.println(generateSuperSetter("v") + ";");
+      out.println(generateSuperSetter("this", "v") + ";");
     }
 
     out.popDepth();
@@ -1259,6 +1207,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates the flush check for this child.
    */
+  @Override
   public boolean generateFlushCheck(JavaWriter out)
     throws IOException
   {
@@ -1266,7 +1215,7 @@ public class EntityManyToOneField extends CascadableField {
     if (! getRelatedType().getPersistenceUnit().isJPA())
       return false;
 
-    String getter = generateSuperGetter();
+    String getter = generateSuperGetter("this");
 
     String dirtyVar = "__caucho_dirtyMask_" + (getIndex() / 64);
     long dirtyMask = (1L << (getIndex() % 64));
@@ -1305,7 +1254,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt,
+  public void generateStatementSet(JavaWriter out, String pstmt,
                           String index, String source)
     throws IOException
   {

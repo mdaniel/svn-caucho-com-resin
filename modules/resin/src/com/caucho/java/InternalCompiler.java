@@ -117,8 +117,10 @@ public class InternalCompiler extends AbstractJavaCompiler {
           argList.add(_compiler.getEncoding());
         }
       }
+
       argList.add("-classpath");
       argList.add(_compiler.getClassPath());
+      
       ArrayList<String> args = _compiler.getArgs();
       if (args != null)
 	argList.addAll(args);
@@ -132,6 +134,12 @@ public class InternalCompiler extends AbstractJavaCompiler {
         CharBuffer msg = new CharBuffer();
 	msg.append("javac(int)");
 	for (int i = 0; i < argList.size(); i++) {
+	  if (argList.get(i).equals("-classpath")
+	      && ! log.isLoggable(Level.FINEST)) {
+	    i++;
+	    continue;
+	  }
+	  
 	  msg.append(" ");
 	  msg.append(argList.get(i));
 	}

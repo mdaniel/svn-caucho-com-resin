@@ -48,7 +48,7 @@ import java.util.logging.Logger;
  */
 public class SubId extends Id {
   private static final L10N L = new L10N(SubId.class);
-  protected static final Logger log = Log.open(SubId.class);
+  private static final Logger log = Log.open(SubId.class);
 
   private Id _parentId;
   private LinkColumns _link;
@@ -135,6 +135,7 @@ public class SubId extends Id {
   /**
    * Generates the select clause.
    */
+  @Override
   public String generateLoadSelect(String id)
   {
     return null;
@@ -143,14 +144,16 @@ public class SubId extends Id {
   /**
    * Returns the key for the value
    */
-  public String generateGetProperty(String value)
+  @Override
+  public String generateGet(String value)
   {
-    return _parentId.generateGetProperty(value);
+    return _parentId.generateGet(value);
   }
 
   /**
    * Generates loading cache
    */
+  @Override
   public void generateLoadFromObject(JavaWriter out, String obj)
     throws IOException
   {
@@ -160,15 +163,17 @@ public class SubId extends Id {
   /**
    * Generates loading cache
    */
-  public void generateSet(JavaWriter out, String obj)
+  @Override
+  public void generateSet(JavaWriter out, String objThis, String value)
     throws IOException
   {
-    _parentId.generateSet(out, obj);
+    _parentId.generateSet(out, objThis, value);
   }
 
   /**
    * Generates loading cache
    */
+  @Override
   public void generateUpdateFromObject(JavaWriter out, String obj)
     throws IOException
   {
@@ -178,6 +183,7 @@ public class SubId extends Id {
   /**
    * Generates the where clause.
    */
+  @Override
   public String generateMatchArgWhere(String id)
   {
     ArrayList<IdField> keys = getParentKeys();
@@ -238,6 +244,7 @@ public class SubId extends Id {
   /**
    * Generates the set clause.
    */
+  @Override
   public void generateSet(JavaWriter out, String pstmt,
                           String obj, String index)
     throws IOException
@@ -248,15 +255,17 @@ public class SubId extends Id {
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt, String index)
+  @Override
+  public void generateStatementSet(JavaWriter out, String pstmt, String index)
     throws IOException
   {
-    _parentId.generateSet(out, pstmt, index);
+    _parentId.generateStatementSet(out, pstmt, index);
   }
 
   /**
    * Generates the set clause.
    */
+  @Override
   public void generateSetInsert(JavaWriter out, String pstmt, String index)
     throws IOException
   {
@@ -266,6 +275,7 @@ public class SubId extends Id {
   /**
    * Generates code to convert to the type from the object.
    */
+  @Override
   public String generateCastFromObject(String value)
   {
     return value;
@@ -274,6 +284,7 @@ public class SubId extends Id {
   /**
    * Generates code for a match.
    */
+  @Override
   public void generateMatch(JavaWriter out, String key)
     throws IOException
   {
@@ -284,6 +295,7 @@ public class SubId extends Id {
   /**
    * Generates code to test the equals.
    */
+  @Override
   public String generateEquals(String leftBase, String value)
   {
     return leftBase + ".equals(" + value + ")";
@@ -292,6 +304,7 @@ public class SubId extends Id {
   /**
    * Generates the set clause.
    */
+  @Override
   public void generateCheckCreateKey(JavaWriter out)
     throws IOException
   {
@@ -300,6 +313,7 @@ public class SubId extends Id {
   /**
    * Generates code to convert to the object.
    */
+  @Override
   public String toObject(String value)
   {
     return value;

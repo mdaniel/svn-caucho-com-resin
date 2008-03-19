@@ -134,7 +134,7 @@ public class CollectionField extends CascadableField {
   {
     if (isCascade(cascadeType)) {
 
-      String getter = "_caucho_field_" + getGetterName(); // generateSuperGetter();
+      String getter = "_caucho_field_" + getGetterName(); // generateSuperGetterMethod();
 
       out.println("if (" + getter + " != null) {");
       out.pushDepth();
@@ -203,7 +203,7 @@ public class CollectionField extends CascadableField {
   /**
    * Generates the set clause.
    */
-  public void generateSet(JavaWriter out, String pstmt,
+  public void generateStatementSet(JavaWriter out, String pstmt,
                           String obj, String index)
     throws IOException
   {
@@ -223,7 +223,7 @@ public class CollectionField extends CascadableField {
     out.println("if ((" + maskVar + " & " + maskValue + "L) != 0) {");
     out.pushDepth();
 
-    generateSet(out, pstmt, index);
+    generateStatementSet(out, pstmt, index);
 
     out.popDepth();
     out.println("}");
