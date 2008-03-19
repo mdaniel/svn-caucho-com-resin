@@ -61,6 +61,7 @@ class HtmlPanelGroupRenderer extends Renderer
   {
     ResponseWriter out = context.getResponseWriter();
 
+    String id = null;
     String layout = null;
     String style = null;
     String styleClass = null;
@@ -68,13 +69,15 @@ class HtmlPanelGroupRenderer extends Renderer
     if (component instanceof HtmlPanelGroup) {
       HtmlPanelGroup html = (HtmlPanelGroup) component;
 
+      id = html.getId();
       layout = html.getLayout();
       style = html.getStyle();
       styleClass = html.getStyleClass();
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
-    
+
+      id = (String) attrMap.get("id");
       layout = (String) attrMap.get("layout");
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
@@ -86,7 +89,10 @@ class HtmlPanelGroupRenderer extends Renderer
       out.startElement("div", component);
     else
       out.startElement("span", component);
-    
+
+    if (id != null)
+      out.writeAttribute("id", id, "id");
+
     if (layout != null)
       out.writeAttribute("layout", layout, "layout");
     
