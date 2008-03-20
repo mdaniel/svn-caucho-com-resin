@@ -673,6 +673,14 @@ public class EmbeddedSubField implements AmberField {
       sql.append(getColumn().generateUpdateSet());
   }
 
+  /**
+   * Generates any code needed before a persist occurs
+   */
+  public void generatePrePersist(JavaWriter out)
+    throws IOException
+  {
+  }
+
   //
   // Query methods
 
