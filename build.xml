@@ -39,22 +39,6 @@
 
   <property name="shell" value="bash"/>
 
-  <!--
-    The Adobe Flex SDK can be downloaded from: 
-
-      http://www.adobe.com/products/flex/downloads/
-
-    The Ant tasks for Flex can be downloaded from:
-
-      http://labs.adobe.com/wiki/index.php/Flex_Ant_Tasks
-
-    Unzip the SDK in ${user.home}/flash and the Ant tasks in
-    ${user.home}/flash/flexTasks
-   -->
-  <taskdef resource="flexTasks.tasks" 
-           classpath="${user.home}/flash/flexTasks/lib/flexTasks.jar" />
-  <property name="FLEX_HOME" value="${user.home}/flash"/>
-
   <target name="update">
     <mkdir dir="${ivy.lib}"/>
     <ivy:retrieve pattern="${ivy.lib}/[artifact]-[revision].[ext]"/>

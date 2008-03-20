@@ -176,6 +176,14 @@ public class Post {
           mimeType = (String) ms.getAttribute("content-type");
         }
 
+        // php/0864
+        //
+        // mime type is empty string when no file is uploaded.
+
+        if (filename.length() == 0) {
+          mimeType = "";
+        }
+
         addFormFile(env,
                     files,
                     name,
