@@ -151,7 +151,7 @@ public class Post {
         // create a temp file in the upload directory.
 
         if (filename.length() > 0) {
-          Path tmpPath = env.getUploadDirectory().createTempFile("php", "tmp");
+          Path tmpPath = env.getUploadDirectory().createTempFile("php", ".tmp");
 
           env.addRemovePath(tmpPath);
 
@@ -166,12 +166,22 @@ public class Post {
           tmpLength = tmpPath.getLength();
         }
 
+        // php/0865
+        //
+        // A header like "Content-Type: image/gif" indicates the mime type
+        // for an uploaded file.
+
+        String mimeType = getAttribute(attr, "mime-type");
+        if (mimeType == null) {
+          mimeType = (String) ms.getAttribute("content-type");
+        }
+
         addFormFile(env,
                     files,
                     name,
                     filename,
                     tmpName,
-                    getAttribute(attr, "mime-type"),
+                    mimeType,
                     tmpLength,
                     addSlashesToValues);
       }
