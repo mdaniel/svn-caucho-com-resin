@@ -103,6 +103,7 @@ public class CompositeId extends Id {
   /**
    * Generates any prologue.
    */
+  @Override
   public void generatePrologue(JavaWriter out, HashSet<Object> completedSet)
     throws IOException
   {

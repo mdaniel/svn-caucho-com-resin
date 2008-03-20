@@ -359,6 +359,17 @@ abstract public class BeanType extends AbstractEnhancedType {
   }
 
   /**
+   * Returns the load mask generated on create.
+   */
+  public void generatePrePersist(JavaWriter out)
+    throws IOException
+  {
+    for (AmberField field : getFields()) {
+      field.generatePrePersist(out);
+    }
+  }
+
+  /**
    * Generates the foreign delete
    */
   public void generateInvalidateForeign(JavaWriter out)

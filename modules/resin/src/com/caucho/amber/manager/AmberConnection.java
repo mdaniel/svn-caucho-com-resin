@@ -234,25 +234,27 @@ public class AmberConnection
    * Makes the instance managed called
    * from cascading operations.
    */
-  public void persistFromCascade(Object o)
+  public Object persistFromCascade(Object o)
   {
     // jpa/0h25, jpa/0i5e
 
     try {
       if (o == null)
-        return;
+        return null;
 
       Entity entity = (Entity) o;
 
       // jpa/0h25
 
-      persistInternal(entity);
+      return persistInternal(entity);
 
     } catch (EntityExistsException e) {
       log.log(Level.FINER, e.toString(), e);
       // This is not an issue. It is the cascading
       // operation trying to persist the source
       // entity from the destination end.
+
+      return o;
     } catch (RuntimeException e) {
       throw e;
     } catch (SQLException e) {
@@ -2700,7 +2702,7 @@ public class AmberConnection
     }
 
     if (home == null)
-      throw new AmberException(L.l("`{0}' is not a known entity class.",
+      throw new AmberException(L.l("'{0}' is not a known entity class.",
                                    obj.getClass().getName()));
 
     createInternal(home, obj);
@@ -2717,7 +2719,7 @@ public class AmberConnection
     AmberEntityHome home = _persistenceUnit.getEntityHome(homeName);
 
     if (home == null)
-      throw new AmberException(L.l("`{0}' is not a known entity class.",
+      throw new AmberException(L.l("'{0}' is not a known entity class.",
                                    obj.getClass().getName()));
 
     createInternal(home, obj);
@@ -2919,7 +2921,7 @@ public class AmberConnection
   /**
    * Persists the entity.
    */
-  private void persistInternal(Entity entity)
+  private Entity persistInternal(Entity entity)
     throws Exception
   {
     EntityState state = entity.__caucho_getEntityState();
@@ -2931,17 +2933,19 @@ public class AmberConnection
                                          entity.__caucho_getPrimaryKey());
 
         // jpa/0ga3
-        if (contextEntity != null) {
-          if (contextEntity.__caucho_getEntityState().ordinal()
-              == EntityState.P_DELETED.ordinal()) {
-            // jpa/0ga3
-            contextEntity.__caucho_flush();
-          }
-          else if (entity != contextEntity) {
-            // jpa/0ga1: trying to persist a detached entity that already exists.
-            throw new EntityExistsException(L.l("Trying to persist a detached entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", entity.getClass().getName(), entity.__caucho_getPrimaryKey(), state));
-          }
-        }
+        if (contextEntity == null) {
+	}
+	else if (contextEntity.__caucho_getEntityState().isDeleting()) {
+	  // jpa/0ga3
+	  contextEntity.__caucho_flush();
+	}
+	else if (entity != contextEntity) {
+	  return contextEntity;
+	  /*
+	  // jpa/0ga1: trying to persist a detached entity that already exists.
+	  throw new EntityExistsException(L.l("Trying to persist a detached entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", entity.getClass().getName(), entity.__caucho_getPrimaryKey(), state));
+	  */
+	}
 
         // jpa/0h24
         // Pre-persist child entities.
@@ -2975,7 +2979,7 @@ public class AmberConnection
 
     default:
       if (entity.__caucho_getConnection() == this)
-        return;
+        return entity;
       else {
         // jpa/0ga5 (tck):
         // See entitytest.persist.basic.persistBasicTest4 vs.
@@ -2990,6 +2994,8 @@ public class AmberConnection
     // jpa/0h27, jpa/0i5c, jpa/0j5g
     // Post-persist child entities.
     entity.__caucho_cascadePostPersist(this);
+
+    return entity;
   }
 
   /**

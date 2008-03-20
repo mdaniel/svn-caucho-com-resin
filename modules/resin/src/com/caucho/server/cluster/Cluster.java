@@ -909,6 +909,16 @@ public class Cluster
   {
   }
 
+  public void startPersistentStore()
+  {
+    try {
+      if (_clusterStore != null)
+        _clusterStore.start();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
   /**
    * Handles the case where the environment is starting (after init).
    */
@@ -921,12 +931,6 @@ public class Cluster
    */
   public void environmentStart(EnvironmentClassLoader loader)
   {
-    try {
-      if (_clusterStore != null)
-        _clusterStore.start();
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
   }
 
   /**

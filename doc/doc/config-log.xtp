@@ -12,7 +12,442 @@
 <body>
 <localtoc/>
 
-<s1 title="Log Configuration Tags">
+<s1 title="java.util.logging">
+
+<s2 title="Logger: Application logging">
+
+<p>You can take advantage of the JDK's logging facility to add
+logging to your application.  Choosing a good logging name and levels
+are important for troubleshooting and debugging your code.  Logging
+to much can be almost as confusing as logging too little.</p>
+
+<p>The logging name should be the full class name of the class you're
+instrumenting.  Although other schemes are possible, the class name
+is more maintainable.</p>
+
+<p>The logging level should be consistent across your application.  For Resin,
+we use the following level conventions:</p>
+
+<example title="Example: logging at finer">
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+public class Foo {
+  private static final Logger log
+    = Logger.getLogger(Foo.class.getName());
+
+  ...
+  void doFoo(String bar)
+  {
+    // check for log level if your logging call does anything more
+    // than pass parameters
+    if (log.isLoggable(Level.FINER))
+        log.finer(this + "doFoo(" + bar + ")");
+
+    ...
+
+    log.info(...);
+
+    try {
+        ...
+    } catch (ExpectedException ex) {
+      log.log(Level.FINEST, "expected exception", ex);
+    }
+  }
+  ...
+}
+</example>
+</s2>
+
+<s2 title="Log names">
+
+<p>The JDK logging api uses a hierarchical naming scheme.  Typically the name
+is aligned with a java class name.  When you specify a name, all logging
+requests that use a name that starts with the name you have specified are
+matched.  For example: <code>&lt;logger name="example.hogwarts" ...&gt;</code>
+matches a logging request for both "example.hogwarts.System" and
+"example.hogwarts.gryffindor.System"</p>
+
+<p>Resin's logging is based on Resin's source class names.  The following are
+useful logs.</p>
+
+<deftable title="Resin log names">
+<tr>
+  <th>log <var>name</var> value</th>
+  <th>Meaning</th>
+</tr>
+<tr>
+  <td>""</td>
+  <td>Debug everything</td>
+</tr>
+<tr>
+  <td>com.caucho.amber</td>
+  <td>Amber (JPA) handling</td>
+</tr>
+<tr>
+  <td>com.caucho.ejb</td>
+  <td>EJB handling</td>
+</tr>
+<tr>
+  <td>com.caucho.jsp</td>
+  <td>Debug jsp</td>
+</tr>
+<tr>
+  <td>com.caucho.java</td>
+  <td>Java compilation</td>
+</tr>
+<tr>
+  <td>com.caucho.server.port</td>
+  <td>TCP port debugging and threading</td>
+</tr>
+<tr>
+  <td>com.caucho.server.port.AcceptPool</td>
+  <td>port thread creation</td>
+</tr>
+<tr>
+  <td>com.caucho.server.http</td>
+  <td>HTTP-related debugging</td>
+</tr>
+<tr>
+  <td>com.caucho.server.webapp</td>
+  <td>web-app related debugging</td>
+</tr>
+<tr>
+  <td>com.caucho.server.cache</td>
+  <td>Cache related debugging</td>
+</tr>
+<tr>
+  <td>com.caucho.sql</td>
+  <td>Database pooling</td>
+</tr>
+<tr>
+  <td>com.caucho.transaction</td>
+  <td>Transaction handling</td>
+</tr>
+</deftable>
+
+</s2> <!-- Log names -->
+
+<s2 title="Log levels">
+<p>The <var>level</var> for log tags matches the levels in the JDK 
+<a href="javadoc|java.util.logging.Level|"/>.</p>
+
+<deftable title="Logging Level values">
+<tr>
+  <th>Name</th>
+  <th>API</th>
+  <th>Suggested Use</th>
+</tr>
+<tr>
+  <td>off</td>
+  <td>&#160;</td>
+  <td>turn off logging</td>
+</tr>
+<tr>
+  <td>severe</td>
+  <td>log.severe("...")</td>
+  <td>a major failure which prevents normal program execution,
+e.g. a web-app failing to start or a server restart</td>
+</tr>
+<tr>
+ <td>warning</td>
+  <td>log.warning("...")</td>
+  <td>a serious issue, likely causing incorrect behavior, like a
+500 response code to a browser</td>
+</tr>
+<tr>
+  <td>info</td>
+  <td>log.info("...")</td>
+  <td>major lifecycle events, like a web-app starting</td>
+</tr>
+<tr>
+  <td>config</td>
+  <td>log.config("...")</td>
+  <td>detailed configuration logging</td>
+</tr>
+<tr>
+  <td>fine</td>
+  <td>log.fine("...")</td>
+  <td>debugging at an administrator level, i.e. for someone not familiar with
+the source code being debugged</td>
+</tr>
+<tr>
+  <td>finer</td>
+  <td>log.finer("...")</td>
+  <td>detailed debugging for a developer of the code being debugged</td>
+</tr>
+<tr>
+  <td>finest</td>
+  <td>log.finest("...")</td>
+  <td>events not normally debugged, e.g. expected exceptions logged to
+avoid completely swallowing, or Hessian or XML protocol parsing</td>
+</tr>
+<tr>
+  <td>all</td>
+  <td>&#160;</td>
+  <td>all messages should be logged</td>
+</tr>
+</deftable>
+
+</s2>
+
+<s2 title="&lt;log>" type="defun">
+<parents>resin, server, host-default, host, web-app-default, web-app</parents>
+   
+<p>Configure the amount and destination of debug logging for the JDK
+java.util.logging.* API.</p>
+
+<deftable-childtags title="&lt;log> values">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>name</td>
+  <td>A hierarchical name, typically aligned with the Java packaging names</td>
+  <td>match all names</td>
+</tr>
+<tr>
+  <td>level</td>
+  <td>The <a href="#Log-Levels">log level</a></td>
+  <td>info</td>
+</tr>
+<tr>
+  <td>path</td>
+  <td>Output path for the log messages, see 
+       <a href="#path">"Log Paths"</a>
+    </td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>path-format</td>
+  <td>Selects a format for generating path names.  The syntax is the same as for archive-format</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td>timestamp</td>
+  <td>a timestamp <a href="#timestamp">format string</a> 
+        to use at the beginning of each log line.
+    </td>
+  <td>"[%Y/%m/%d %H:%M:%S.%s] "</td>
+</tr>
+<tr>
+  <td>format</td>
+  <td>a <a href="#Format-String">format string</a> to control the 
+        output of each log message. Since Resin 3.0.5.
+    </td>
+  <td>${log.message}</td>
+</tr>
+<tr>
+  <td>rollover-count</td>
+  <td>maximum number of rollover files before the oldest ones get overwritten.
+        See <a href="#rollover">Rollovers</a>. 
+    </td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>rollover-period</td>
+  <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
+        months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
+    </td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>rollover-size</td>
+  <td>maximum size of the file before a rollover occurs, in bytes (50000), 
+        kb (128kb), or megabytes (10mb).  
+        See <a href="#rollover">Rollovers</a>.
+    </td>
+  <td>1mb</td>
+</tr>
+<tr>
+  <td>archive-format</td>
+  <td>the format for the archive filename when a rollover occurs,
+        see <a href="#rollover">Rollovers</a>.
+    </td>
+  <td>see below</td>
+</tr>
+<tr>
+  <td>mbean-name</td>
+  <td>an mbean name, see <a href="#mbean">MBean control</a>.</td>
+  <td>no mbean name, no mbean registration</td>
+</tr>
+<tr>
+  <td>handler</td>
+  <td>add a custom Handler, the name of a class that extends 
+        <a href="javadoc|java.util.logging.Handler"/>
+    </td>
+  <td>&#160;</td>
+</tr>
+<tr>
+  <td>formatter</td>
+  <td>set a custom Formatter, the name of a class that extends 
+        <a href="javadoc|java.util.logging.Formatter"/>
+    </td>
+  <td>none, or <a href="javadoc|com.caucho.log.ELFormatter"/> if 
+        <var>format</var> is used.</td>
+</tr>
+</deftable-childtags>
+
+<p>The default archive format is
+</p>
+
+<def title="default archive-format">
+<var>path</var> + ".%Y%m%d"    if rollover-period >= 1 day.
+<var>path</var> + ".%Y%m%d.%H" if rollover-period &lt; 1 day.
+</def>
+
+<p>For example, to log everything to standard error use:</p>
+
+<example title="Example: logging everything to System.err">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"/&gt;
+  ...
+&lt;/resin&gt;
+</example>
+
+<p>A useful technique is to enable full debug logging to track down a problem:
+</p>
+
+<example title="debug logging">
+
+&lt;resin&gt;
+  ...
+  &lt;log name='' level='finer' path='log/debug.log'
+       timestamp="[%H:%M:%S.%s]"
+       rollover-period='1h' rollover-count='1'/&gt;
+  ...
+&lt;/resin&gt;
+</example>
+
+<p>More examples of debug logging are in the <a href="troubleshoot-technique.xtp#debug-log">Troubleshooting</a> section.</p>
+
+<p>The class that corresponds to &lt;log&gt; is <a href="javadoc|com.caucho.log.LogConfig|"/>.</p>
+
+<s3 name="Format-String" title="Log format string">
+
+<p>The <var>format</var> for log tags is used to specify a format string for each
+log message.  <code>format</code> recognizes EL-expressions. The EL variable
+<var>log</var> is a 
+<a href="javadoc|com.caucho.log.ELFormatter.ELFormatterLogRecord|"/>
+ object.</p>
+
+<example title="log format string">
+
+&lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"
+     format=" ${log.level} ${log.loggerName} ${log.message}"/&gt;
+
+</example>
+
+<deftable title="log EL variable `log' is a LogRecord">
+<tr><th>Accessor</th><th>Value
+</th></tr><tr><td>${log.level}</td><td>The level of the log record
+</td></tr><tr><td>${log.name}</td><td>The source loggers name
+</td></tr><tr><td>${log.shortName}</td><td>A shorter version of the source loggers name, "Foo" instead of "com.hogwarts.Foo"
+</td></tr><tr><td>${log.message}</td><td>The message, with no formatting or localization
+</td></tr><tr><td>${log.millis}</td><td>event time in milliseconds since 1970
+</td></tr><tr><td>${log.sourceClassName}</td><td>Get the name of the class that issued the logging request (may not be available at runtime)
+</td></tr><tr><td>${log.sourceMethodName}</td><td>Get the name of the method that issued the logging request (may not be available at runtime)
+</td></tr><tr><td>${log.threadID}</td><td>Get an <var>int</var> identifier of the thread where the logging request originated
+</td></tr><tr><td>${log.thrown}</td><td>Get any <a href="javadoc|java.lang.Throwable|"/> associated with the logging request
+</td></tr></deftable>
+
+<p>You can also use the <a href="el-var.xtp">Environment EL variables</a> in your format string:</p>
+
+<example title="log format string using an Environment EL variable.">
+&lt;host ...&gt;
+
+  &lt;web-app&gt;
+    &lt;log name='' level='all' path='log/debug.log' timestamp="[%H:%M:%S.%s]"
+         format=" [<b>${app.contextPath}</b>] ${log.message}"/&gt;
+
+    ...
+  &lt;/web-app&gt;
+
+  ...
+
+&lt;/host&gt;
+</example>
+<results>
+[14:55:10.189] [/foo] `null' returning JNDI java:
+       model for EnvironmentClassLoader[web-app:http://localhost:8080/foo]
+[14:55:10.189] [/foo] JNDI lookup `java:comp/env/caucho/auth'
+       exception javax.naming.NameNotFoundException: java:comp/env/caucho/auth
+[14:55:10.199] [/foo] Application[http://localhost:8080/foo] starting
+
+</results>
+
+<p>The <a href="el-var.xtp#sprintf">fmt.sprintf()</a> function can
+space pad the values and make the results look a little nicer:</p>
+
+<example title="fmt.sprintf() in log format string">
+&lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"
+     format=" ${fmt.sprintf('%-7s %45s %s',log.level,log.loggerName,log.message)}"/&gt;
+</example>
+
+<results>
+[14:28:08.137] INFO com.caucho.vfs.QJniServerSocket Loaded Socket JNI library.
+[14:28:08.137] INFO com.caucho.server.port.Port http listening to *:8080
+[14:28:08.137] INFO com.caucho.server.resin.ServletServer ServletServer[] starting
+[14:28:08.307] INFO com.caucho.server.port.Port hmux listening to localhost:6802
+[14:28:08.437] INFO com.caucho.server.host.Host Host[] starting 
+</results>
+
+
+<p><a href="config-el.xtp#sprintf">fmt.sprintf()</a> and <a href="config-el.xtp#timestamp">fmt.timestamp()</a> can be used to produce CSV files:</p>
+
+<example title="CSV log files">
+&lt;log name='' level='all' path='log/debug.csv' timestamp=""
+     format="${fmt.sprintf('%vs,%d,%d,%vs,%vs',fmt.timestamp('%Y-%m-%d %H:%M:%S.%s'), 
+               log.threadID, log.level.intLevel(), log.loggerName, log.message)}"/&gt;
+</example>
+
+<results>
+"2003-11-17 14:46:14.529",10,800,"com.caucho.vfs.QJniServerSocket",
+            "Loaded Socket JNI library."
+"2003-11-17 14:46:14.549",10,800,"com.caucho.server.port.Port",
+            "http listening to *:8080"
+"2003-11-17 14:46:14.549",10,800,"com.caucho.server.resin.ServletServer",
+            "ServletServer[] starting"
+"2003-11-17 14:46:14.719",10,800,"com.caucho.server.port.Port",
+            "hmux listening to localhost:6802"
+"2003-11-17 14:46:14.850",10,800,"com.caucho.server.host.Host",
+            "Host[] starting"
+"2003-11-17 14:46:15.100",10,800,"com.caucho.server.webapp.Application",
+            "Application[http://localhost:8080/freelistbm] starting"
+</results>
+
+</s3> <!-- Format-String -->
+
+
+<s3 title="com.caucho.log.SyslogHandler">
+
+<p>On Unix systems, the SyslogHandler lets you log messages to syslog.</p>
+
+<example>
+&lt;log name="" level="warning"&gt;
+  &lt;handler resin:type="com.caucho.log.SyslogHandler"&gt;
+    &lt;facility&gt;daemon&lt;/facility&gt;
+    &lt;severity&gt;notice&lt;/severity&gt;
+  &lt;/handler&gt;
+&lt;/log&gt;
+</example>
+
+<p>The possible values for <var>facility</var> are user, mail, daemon, auth, lpr,
+news, uucp, cron, authpriv, ftp, local0, local1, local2, local3, local4,
+local5, local6, local7. The default is <i>daemon</i>.</p>
+
+<p>The possible values for <var>severity</var> are emerg, alert, crit, err,
+warning, notice, info, debug. The default is <i>info</i>.</p>
+
+<p>See also `<code>man 3 syslog</code>' and `<code>man syslog.conf</code>'.
+</p></s3>
+
+</s2> <!-- log  ...  -->
+</s1> <!-- java.util.logging  -->
+
+<s1 title="Standard Output Redirection">
 
 <s2 title="stdout-log" type="defun">
 <parents>resin, server, host-default, web-app-default, web-app</parents>
@@ -173,7 +608,9 @@ the same output file.</p>
 
 </s2>
 
-<s2 title="access-log" version="Resin 2.1" type="defun">
+</s1>
+
+<s1 title="Access logging">
 <parents>server, host-default, host, web-app-default, web-app</parents>
 
 <p>Specify the access log file.</p>
@@ -299,337 +736,7 @@ parameters in the custom class.</p>
 ...
 </example>
 
-</s2>
-
-<s2 title="log" type="defun">
-<parents>resin, server, host-default, host, web-app-default, web-app</parents>
-   
-<p>Configure the amount and destination of debug logging for the JDK
-java.util.logging.* API.</p>
-
-<deftable-childtags>
-<tr><td>name
-    </td><td>A hierarchical name, typically aligned with the Java packaging names
-    </td><td>match all names
-</td></tr><tr><td>level
-    </td><td>The <a href="#Log-Levels">log level</a>
-    </td><td>info
-</td></tr>
-<tr>
-  <td>path</td>
-  <td>Output path for the log messages, see 
-       <a href="#path">"Log Paths"</a>
-    </td>
-  <td>required</td>
-</tr>
-<tr>
-  <td>path-format</td>
-  <td>Selects a format for generating path names.  The syntax is the same as for archive-format</td>
-  <td>optional</td>
-</tr>
-<tr><td>timestamp
-    </td><td>a timestamp <a href="#timestamp">format string</a> 
-        to use at the beginning of each log line.
-    </td><td>"[%Y/%m/%d %H:%M:%S.%s] "
-</td></tr><tr><td>format
-    </td><td>a <a href="#Format-String">format string</a> to control the 
-        output of each log message. Since Resin 3.0.5.
-    </td><td>${log.message}
-</td></tr><tr><td>rollover-count
-    </td><td>maximum number of rollover files before the oldest ones get overwritten.
-        See <a href="#rollover">Rollovers</a>. 
-    </td><td>none
-</td></tr><tr><td>rollover-period
-    </td><td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
-        months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
-    </td><td>none
-</td></tr><tr><td>rollover-size
-    </td><td>maximum size of the file before a rollover occurs, in bytes (50000), 
-        kb (128kb), or megabytes (10mb).  
-        See <a href="#rollover">Rollovers</a>.
-    </td><td>1mb
-</td></tr><tr><td>archive-format
-    </td><td>the format for the archive filename when a rollover occurs,
-        see <a href="#rollover">Rollovers</a>.
-    </td><td>see below
-
-</td></tr><tr><td>mbean-name
-    </td><td>an mbean name, see <a href="#mbean">MBean control</a>.
-    </td><td>no mbean name, no mbean registration
-
-</td></tr><tr><td>handler
-    </td><td>add a custom Handler, the name of a class that extends 
-        <a href="javadoc|java.util.logging.Handler"/>
-    </td><td>&#160;
-</td></tr><tr><td>formatter
-    </td><td>set a custom Formatter, the name of a class that extends 
-        <a href="javadoc|java.util.logging.Formatter"/>
-    </td><td>none, or <a href="javadoc|com.caucho.log.ELFormatter"/> if 
-        <var>format</var> is used.
-</td></tr></deftable-childtags>
-
-<p>The default archive format is
-</p><pre>
-  <var>path</var> + ".%Y%m%d" or
-  <var>path</var> + ".%Y%m%d.%H" if rollover-period &lt; 1 day.
-</pre>
-
-<p>For example, to log everything to standard error use:</p>
-
-<example>
-&lt;resin&gt;
-  &lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"/&gt;
-  ...
-&lt;/resin&gt;
-</example>
-
-<p>A useful technique is to enable full debug logging to track down a problem:
-</p>
-
-<example title="debug logging">
-
-&lt;resin&gt;
-  ...
-  &lt;log name='' level='finer' path='log/debug.log'
-       timestamp="[%H:%M:%S.%s]"
-       rollover-period='1h' rollover-count='1'/&gt;
-  ...
-&lt;/resin&gt;
-</example>
-
-<p>More examples of debug logging are in the <a href="troubleshoot-technique.xtp#debug-log">Troubleshooting</a> section.</p>
-
-<p>The class that corresponds to &lt;log&gt; is <a href="javadoc|com.caucho.log.LogConfig|"/>.</p>
-
-<s3 title="Log names">
-
-<p>The JDK logging api uses a hierarchical naming scheme.  Typically the name
-is aligned with a java class name.  When you specify a name, all logging
-requests that use a name that starts with the name you have specified are
-matched.  For example: <code>&lt;log name="example.hogwarts" ...&gt;</code>
-matches a logging request for both "example.hogwarts.System" and
-"example.hogwarts.gryffindor.System"</p>
-
-<p>Resin's logging is based on Resin's source class names.  The following are
-useful logs.</p>
-
-<deftable>
-<tr>
-  <th>log <var>name</var> value</th>
-  <th>Meaning</th>
-</tr>
-<tr><td>""</td><td>Debug everything</td></tr>
-<tr><td>com.caucho.jsp</td><td>Debug jsp</td></tr>
-<tr><td>com.caucho.java</td><td>Java compilation
-</td></tr><tr><td>com.caucho.xsl</td><td>XSL debugging
-</td></tr><tr><td>com.caucho.server.port</td><td>TCP port debugging and threading
-</td></tr><tr><td>com.caucho.server.port.AcceptPool</td><td>port thread creation
-</td></tr><tr><td>com.caucho.server.http</td><td>HTTP-related debugging
-</td></tr><tr><td>com.caucho.server.webapp</td><td>web-app related debugging
-</td></tr><tr><td>com.caucho.server.cache</td><td>Cache related debugging
-</td></tr><tr><td>com.caucho.sql</td><td>Database pooling
-</td></tr><tr><td>com.caucho.transaction</td><td>Transaction handling
-</td></tr><tr><td>com.caucho.ejb</td><td>EJB handling
-</td></tr></deftable>
-</s3>
-
-
-<s3 title="Use logging in applications">
-
-<p>You can take advantage of the JDK's logging facility to add
-logging to your application.  It's a good idea to keep such log
-messages in your code, when your application goes into
-production you can set the log level to <var>warn</var>; if
-problem's occur you can set it to <var>finest</var> and still have
-all of the information you need to troubleshoot.</p>
-
-<example>
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-public class Foo {
-  static protected final Logger log = 
-    Logger.getLogger(Foo.class.getName());
-
-  ...
-  void doFoo(String bar)
-  {
-    // check for log level if your logging call does anything more
-    // than pass parameters
-    if (log.isLoggable(Level.FINER))
-        log.entering("Foo","doFoo()", new Object[] { bar });
-    ...
-
-    log.info(...);
-
-    try {
-        ...
-    } catch (ExpectedException ex) {
-      log.log(Level.FINE, "expected exception", ex);
-    }
-  }
-  ...
-}
-</example>
-</s3>
-
-<s3 title="Log levels">
-<p>The <var>level</var> for log tags matches the levels in the JDK 
-<a href="javadoc|java.util.logging.Level|"/>.</p>
-
-<deftable>
-<tr><th>Name</th><th>API</th><th>Meaning
-</th></tr><tr><td>off</td><td>&#160;</td><td>turn off logging
-</td></tr><tr><td>severe</td><td>log.severe("...")</td><td>a serious failure, likely to prevent normal program execution
-</td></tr><tr><td>warning</td><td>log.warning("...")</td><td>a potential problem
-</td></tr><tr><td>info</td><td>log.info("...")</td><td>informational messages
-</td></tr><tr><td>config</td><td>log.config("...")</td><td>static configuration messages, meant to assist in debugging problems associated with particular configurations
-</td></tr><tr><td>fine</td><td>log.fine("...")</td><td>tracing information
-</td></tr><tr><td>finer</td><td>log.finer("...")</td><td>fairly detailed tracing message
-</td></tr><tr><td>finest</td><td>log.finest("...")</td><td>highly detailed tracing message
-</td></tr><tr><td>all</td><td>&#160;</td><td>all messages should be logged
-</td></tr></deftable>
-
-</s3>
-
-<s3 title="&lt;logger&gt; specifies multiple names for one destination">
-<p>&lt;log&gt; can contain multiple &lt;logger&gt; entries.</p>
-
-<example title="multiple log">
-&lt;resin&gt;
-  &lt;!-- log request and response info --&gt;
-  &lt;log path='stdout:' timestamp='[%H:%M:%S.%s] '&gt;
-    &lt;logger name="com.caucho.server.port.TcpConnection" level="fine"/&gt;
-    &lt;logger name="com.caucho.server.http.HttpRequest" level="fine"/&gt;
-    &lt;logger name="com.caucho.server.connection.AbstractHttpResponse" level="fine"/&gt;
-  &lt;/log&gt;
-
-  ...
-&lt;/resin&gt;
-</example>
-</s3>
-
-<s3 name="Format-String" title="Log format string">
-
-<p>The <var>format</var> for log tags is used to specify a format string for each
-log message.  <code>format</code> recognizes EL-expressions. The EL variable
-<var>log</var> is a 
-<a href="javadoc|com.caucho.log.ELFormatter.ELFormatterLogRecord|"/>
- object.</p>
-
-<example title="log format string">
-
-&lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"
-     format=" ${log.level} ${log.loggerName} ${log.message}"/&gt;
-
-</example>
-
-<deftable title="log EL variable `log' is a LogRecord">
-<tr><th>Accessor</th><th>Value
-</th></tr><tr><td>${log.level}</td><td>The level of the log record
-</td></tr><tr><td>${log.name}</td><td>The source loggers name
-</td></tr><tr><td>${log.shortName}</td><td>A shorter version of the source loggers name, "Foo" instead of "com.hogwarts.Foo"
-</td></tr><tr><td>${log.message}</td><td>The message, with no formatting or localization
-</td></tr><tr><td>${log.millis}</td><td>event time in milliseconds since 1970
-</td></tr><tr><td>${log.sourceClassName}</td><td>Get the name of the class that issued the logging request (may not be available at runtime)
-</td></tr><tr><td>${log.sourceMethodName}</td><td>Get the name of the method that issued the logging request (may not be available at runtime)
-</td></tr><tr><td>${log.threadID}</td><td>Get an <var>int</var> identifier of the thread where the logging request originated
-</td></tr><tr><td>${log.thrown}</td><td>Get any <a href="javadoc|java.lang.Throwable|"/> associated with the logging request
-</td></tr></deftable>
-
-<p>You can also use the <a href="el-var.xtp">Environment EL variables</a> in your format string:</p>
-
-<example title="log format string using an Environment EL variable.">
-&lt;host ...&gt;
-
-  &lt;web-app&gt;
-    &lt;log name='' level='all' path='log/debug.log' timestamp="[%H:%M:%S.%s]"
-         format=" [<b>${app.contextPath}</b>] ${log.message}"/&gt;
-
-    ...
-  &lt;/web-app&gt;
-
-  ...
-
-&lt;/host&gt;
-</example>
-<results>
-[14:55:10.189] [/foo] `null' returning JNDI java:
-       model for EnvironmentClassLoader[web-app:http://localhost:8080/foo]
-[14:55:10.189] [/foo] JNDI lookup `java:comp/env/caucho/auth'
-       exception javax.naming.NameNotFoundException: java:comp/env/caucho/auth
-[14:55:10.199] [/foo] Application[http://localhost:8080/foo] starting
-
-</results>
-
-<p>The <a href="el-var.xtp#sprintf">fmt.sprintf()</a> function can
-space pad the values and make the results look a little nicer:</p>
-
-<example title="fmt.sprintf() in log format string">
-&lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"
-     format=" ${fmt.sprintf('%-7s %45s %s',log.level,log.loggerName,log.message)}"/&gt;
-</example>
-
-<results>
-[14:28:08.137] INFO com.caucho.vfs.QJniServerSocket Loaded Socket JNI library.
-[14:28:08.137] INFO com.caucho.server.port.Port http listening to *:8080
-[14:28:08.137] INFO com.caucho.server.resin.ServletServer ServletServer[] starting
-[14:28:08.307] INFO com.caucho.server.port.Port hmux listening to localhost:6802
-[14:28:08.437] INFO com.caucho.server.host.Host Host[] starting 
-</results>
-
-
-<p><a href="config-el.xtp#sprintf">fmt.sprintf()</a> and <a href="config-el.xtp#timestamp">fmt.timestamp()</a> can be used to produce CSV files:</p>
-
-<example title="CSV log files">
-&lt;log name='' level='all' path='log/debug.csv' timestamp=""
-     format="${fmt.sprintf('%vs,%d,%d,%vs,%vs',fmt.timestamp('%Y-%m-%d %H:%M:%S.%s'), 
-               log.threadID, log.level.intLevel(), log.loggerName, log.message)}"/&gt;
-</example>
-
-<results>
-"2003-11-17 14:46:14.529",10,800,"com.caucho.vfs.QJniServerSocket",
-            "Loaded Socket JNI library."
-"2003-11-17 14:46:14.549",10,800,"com.caucho.server.port.Port",
-            "http listening to *:8080"
-"2003-11-17 14:46:14.549",10,800,"com.caucho.server.resin.ServletServer",
-            "ServletServer[] starting"
-"2003-11-17 14:46:14.719",10,800,"com.caucho.server.port.Port",
-            "hmux listening to localhost:6802"
-"2003-11-17 14:46:14.850",10,800,"com.caucho.server.host.Host",
-            "Host[] starting"
-"2003-11-17 14:46:15.100",10,800,"com.caucho.server.webapp.Application",
-            "Application[http://localhost:8080/freelistbm] starting"
-</results>
-
-</s3> <!-- Format-String -->
-
-
-<s3 title="com.caucho.log.SyslogHandler">
-
-<p>On Unix systems, the SyslogHandler lets you log messages to syslog.</p>
-
-<example>
-&lt;log name="" level="warning"&gt;
-  &lt;handler resin:type="com.caucho.log.SyslogHandler"&gt;
-    &lt;facility&gt;daemon&lt;/facility&gt;
-    &lt;severity&gt;notice&lt;/severity&gt;
-  &lt;/handler&gt;
-&lt;/log&gt;
-</example>
-
-<p>The possible values for <var>facility</var> are user, mail, daemon, auth, lpr,
-news, uucp, cron, authpriv, ftp, local0, local1, local2, local3, local4,
-local5, local6, local7. The default is <i>daemon</i>.</p>
-
-<p>The possible values for <var>severity</var> are emerg, alert, crit, err,
-warning, notice, info, debug. The default is <i>info</i>.</p>
-
-<p>See also `<code>man 3 syslog</code>' and `<code>man syslog.conf</code>'.
-</p></s3>
-
-</s2> <!-- log  ...  -->
-</s1> <!-- log ...  -->
+</s1> <!-- access logging -->
 
 <s1 name="path" title="Log Paths">
 

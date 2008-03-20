@@ -526,10 +526,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     boolean isAbstractParent
       = (_entityType.getParentType() == null
-	 || _entityType.getParentType().getBeanClass().isAbstract());
+	 || ! _entityType.getParentType().isEntity());
 
     // jpa/0m02
-    if (id != null && isAbstractParent)
+    if (id != null) // && isAbstractParent)
       id.generatePrologue(out, completedSet);
 
     ArrayList<AmberField> fields = _entityType.getFields();
@@ -1055,13 +1055,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.print(getClassName() + " item = (" + getClassName() + ")");
     out.println("__caucho_cacheItem.getEntity();");
     
-    _entityType.generateCopyLoadObject(out, "super", "item", group);
-    out.println("item.__caucho_loadMask_" + group + " |= __caucho_loadMask_" + group + " & 1L;");
-    
-
     out.println("Object pk = __caucho_getPrimaryKey();");
+    out.println("item.__caucho_setPrimaryKey(pk);");
     
-    out.println("__caucho_session.getPersistenceUnit().updateCacheItem((com.caucho.amber.type.EntityType) __caucho_home.getRootType(), pk, this, __caucho_cacheItem);");
+    _entityType.generateCopyLoadObject(out, "item", "super", group);
+    out.println("item.__caucho_loadMask_" + group + " |= __caucho_loadMask_" + group + " & 1L;");
+
+    out.println("__caucho_session.getPersistenceUnit().updateCacheItem((com.caucho.amber.type.EntityType) __caucho_home.getRootType(), pk, __caucho_cacheItem);");
 
     out.popDepth();
     out.println("}");
@@ -1190,8 +1190,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("__caucho_session = aConn;");
       out.println("__caucho_home = home;");
 
-      out.println("__caucho_home.prePersist(this);");
+      _entityType.generatePrePersist(out);
 
+      //out.println();
+      //out.println("__caucho_home.prePersist(this);");
+
+      out.println();
+      
       // jpa/0r20
       for (JMethod method : _entityType.getPrePersistCallbacks()) {
         out.println(method.getName() + "();");
@@ -1203,8 +1208,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
       }
       else {
         // jpa/0j5e: persist() is lazy but should cascade to add entities to the context.
-        out.println();
-        out.println("__caucho_cascadePrePersist(aConn);");
+        //out.println();
+        //out.println("__caucho_cascadePrePersist(aConn);");
 
         out.println("__caucho_cascadePostPersist(aConn);");
       }
@@ -1478,7 +1483,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("}");
     */
 
-    generateLogFine(out, " merged");
+    // jpa/1900
+    //generateLogFine(out, " merged");
 
     out.popDepth();
     out.println("}");

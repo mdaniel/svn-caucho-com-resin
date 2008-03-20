@@ -340,6 +340,12 @@ public interface AmberField {
     throws IOException;
 
   /**
+   * Generates any code needed before a persist occurs
+   */
+  public void generatePrePersist(JavaWriter out)
+    throws IOException;
+
+  /**
    * Updates the cached copy.
    */
   public void generateCopyUpdateObject(JavaWriter out,

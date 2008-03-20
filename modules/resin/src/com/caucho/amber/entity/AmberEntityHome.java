@@ -45,15 +45,17 @@ import java.lang.reflect.Modifier;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.lang.Comparable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Manages the set of persistent beans.
  */
-public class AmberEntityHome {
+public class AmberEntityHome implements Comparable {
   private static final L10N L = new L10N(AmberEntityHome.class);
-  private static final Logger log = Log.open(AmberEntityHome.class);
+  private static final Logger log
+    = Logger.getLogger(AmberEntityHome.class.getName());
 
   private AmberPersistenceUnit _manager;
   private EntityType _entityType;
@@ -749,6 +751,13 @@ public class AmberEntityHome {
   public void addUpdate(CacheUpdate update)
   {
     _cacheUpdates.add(new SoftReference<CacheUpdate>(update));
+  }
+
+  public int compareTo(Object b)
+  {
+    AmberEntityHome home = (AmberEntityHome) b;
+
+    return _entityType.getClassName().compareTo(home.getEntityType().getClassName());
   }
 
   public String toString()

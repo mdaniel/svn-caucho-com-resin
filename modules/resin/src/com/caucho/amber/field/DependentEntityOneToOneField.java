@@ -201,6 +201,7 @@ public class DependentEntityOneToOneField extends CascadableField {
   /**
    * Generates the flush check for this child.
    */
+  /*
   public boolean generateFlushCheck(JavaWriter out)
     throws IOException
   {
@@ -228,6 +229,7 @@ public class DependentEntityOneToOneField extends CascadableField {
 
     return true;
   }
+  */
 
   /**
    * Generates any prologue.
@@ -284,24 +286,7 @@ public class DependentEntityOneToOneField extends CascadableField {
     throws IOException
   {
     if (! isLazy()) {
-      long group = _targetLoadIndex / 64;
-      long mask = (1L << (_targetLoadIndex % 64));
-      String loadVar = "__caucho_loadMask_" + group;
-
-      // out.println("if ((" + loadVar + " & " + mask + "L) == 0) {");
-      // out.pushDepth();
-      // out.println(loadVar + " |= " + mask + "L;");
-
-      String javaType = getJavaTypeName();
-
-      String indexS = "_" + group + "_" + index;
-
-      // generateLoadProperty(out, indexS, "aConn");
-
       out.println(getGetterName() + "();");
-
-      // out.popDepth();
-      // out.println("}");
     }
 
     return ++index;
@@ -329,18 +314,13 @@ public class DependentEntityOneToOneField extends CascadableField {
 
     // jpa/0h29
     out.println("if (__caucho_session != null");
-    out.println("    && __caucho_state != com.caucho.amber.entity.EntityState.P_DELETED");
+    out.println("    && ! __caucho_state.isDeleting()");
     out.println("    && (" + loadVar + " & " + loadMask + "L) == 0) {");
     out.pushDepth();
     out.println("__caucho_load_select_" + getLoadGroupIndex() + "(__caucho_session);");
     out.println(loadVar + " |= " + loadMask + "L;");
 
     generateLoadProperty(out, index, "__caucho_session");
-
-    /*
-      out.print(javaType + " v = (" + javaType + ") __caucho_session.loadProxy(\"" + getEntityTargetType().getName() + "\", ");
-      out.println("__caucho_field_" + getName() + ", true);");
-    */
 
     out.println("return v"+index+";");
     out.popDepth();
@@ -363,7 +343,7 @@ public class DependentEntityOneToOneField extends CascadableField {
   {
     String javaType = getJavaTypeName();
 
-    out.println(javaType + " v"+index+" = null;");
+    out.println(javaType + " v" + index + " = null;");
 
     out.println("try {");
     out.pushDepth();
@@ -434,75 +414,6 @@ public class DependentEntityOneToOneField extends CascadableField {
   /**
    * Updates the cached copy.
    */
-  public void generateCopyLoadObject(JavaWriter out,
-                                     String dst, String src,
-                                     int updateIndex)
-    throws IOException
-  {
-    if (getLoadGroupIndex() == updateIndex) {
-      // jpa/0o08, jpa/0o04
-      if (dst.equals("cacheEntity") || dst.equals("super"))
-        return;
-
-      String value = generateGet(src);
-
-      out.println("child = " + value + ";");
-
-      boolean isJPA = getEntitySourceType().getPersistenceUnit().isJPA();
-
-      if (isJPA && ! dst.equals("item")) {
-        // jpa/0o42
-        out.println("if (isFullMerge)");
-        out.println("  child = " + value + ";");
-        out.println("else {");
-        out.pushDepth();
-      }
-
-      out.println("if (child != null) {");
-      out.pushDepth();
-
-      // jpa/0ge4
-      String targetTypeName = getJavaTypeName(); // getEntityTargetType().getInstanceClassName();
-
-      // jpa/0l42
-      out.println("com.caucho.amber.entity.Entity newChild = aConn.addNewEntity(child.getClass(), ((com.caucho.amber.entity.Entity) child).__caucho_getPrimaryKey());");
-
-      out.println("if (newChild == null) {");
-      out.pushDepth();
-
-      value = "aConn.getEntity((com.caucho.amber.entity.Entity) child)";
-
-      out.println("newChild = " + value + ";");
-
-      out.popDepth();
-      out.println("} else {");
-      out.pushDepth();
-
-      out.println("((com.caucho.amber.entity.Entity) child).__caucho_copyTo(newChild, aConn);");
-
-      out.popDepth();
-      out.println("}");
-
-      out.println("child = newChild;");
-
-      out.popDepth();
-      out.println("}");
-
-      if (isJPA && ! dst.equals("item")) {
-        // jpa/0o42
-        out.popDepth();
-        out.println("}");
-      }
-
-      value = "(" + targetTypeName + ") child";
-
-      out.println(generateSet(dst, value) + ";");
-    }
-  }
-
-  /**
-   * Updates the cached copy.
-   */
   public void generateMergeFrom(JavaWriter out,
                                       String dst, String src)
     throws IOException
@@ -527,53 +438,6 @@ public class DependentEntityOneToOneField extends CascadableField {
 
     out.popDepth();
     out.println("}");
-  }
-
-  /**
-   * Checks entity-relationships from an object.
-   */
-  public void generateDumpRelationships(JavaWriter out,
-                                        int updateIndex)
-    throws IOException
-  {
-    // jpa/0o05
-
-    if (getLoadGroupIndex() != updateIndex)
-      return;
-
-    if (! (getEntityTargetType() instanceof EntityType))
-      return;
-
-    out.println();
-    out.println("thisRef = (com.caucho.amber.entity.Entity) " + generateSuperGetter("this") + ";");
-
-    out.println();
-    out.println("if (thisRef != null) {");
-    out.pushDepth();
-
-    String var = "thisRef.__caucho_getPrimaryKey()";
-
-    String logMessage = "relationship from dependent side - entity class: \" + this.getClass().getName() + \" PK: \" + __caucho_getPrimaryKey() + \" to object class: \" + thisRef.getClass().getName() + \" PK: \" + " + var;
-
-    out.println("if (__caucho_session.isCacheEntity(thisRef)) {");
-    out.pushDepth();
-
-    out.println("Exception e = new IllegalStateException(\"amber dump relationship: inconsistent " + logMessage + ");");
-
-    out.println("__caucho_log.log(java.util.logging.Level.FINEST, e.toString(), e);");
-
-    out.popDepth();
-    out.println("} else {");
-    out.pushDepth();
-
-    out.println("__caucho_log.log(java.util.logging.Level.FINEST, \"amber dump relationship: consistent " + logMessage + ");");
-
-    out.popDepth();
-    out.println("}");
-
-    out.popDepth();
-    out.println("}");
-
   }
 
   /**
@@ -609,12 +473,18 @@ public class DependentEntityOneToOneField extends CascadableField {
     out.println("} catch (Exception e) {");
     out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
     out.println("}");
+    
+    String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
+    long loadMask = 1L << (_targetLoadIndex % 64);
+    out.println(loadVar + " |= " + loadMask + "L;");
 
+    /*
     String updateVar = "__caucho_updateMask_" + (_targetLoadIndex / 64);
     long updateMask = (1L << _targetLoadIndex);
 
     out.println(updateVar + " |= " + updateMask + "L;");
     out.println("__caucho_session.update(this);");
+    */
     out.popDepth();
     out.println("}");
 

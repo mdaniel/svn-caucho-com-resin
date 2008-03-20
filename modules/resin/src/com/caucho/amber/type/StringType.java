@@ -155,7 +155,7 @@ public class StringType extends Type {
   /**
    * Sets the value.
    */
-  public void setString(PreparedStatement pstmt, int index, Object value)
+  public static void setString(PreparedStatement pstmt, int index, Object value)
     throws SQLException
   {
     if (value == null) {

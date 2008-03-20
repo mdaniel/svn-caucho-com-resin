@@ -104,7 +104,10 @@ The server id will select which instance to start or stop.</p>
 
 <p>In some cases, it's best to let each Resin instance have its own
 watchdog, for example when multiple users are sharing the same
-machine.</p>
+machine.  Each &lt;server> block configures a separate &lt;watchdog-port>.
+Because the watchdog will read the resin.conf and use the &lt;server> block
+matching the <code>-server id</code> command-line argument, each watchdog
+will start with it's own port.</p>
 
 <example title="Example: conf/resin.conf">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -135,6 +138,14 @@ machine.</p>
 &lt;/cluster>
 
 &lt;/resin>
+</example>
+
+<p>In the previous example, starting Resin with <code>-server app-a</code>
+will start a watchdog at port 6700.  Starting Resin
+with <code>-server app-b</code> will start the watchdog at port 6701.</p>
+
+<example title="Example: starting app-b with watchdog-port=6701">
+resin-3.1.x> java -jar lib/resin.jar -server app-b start
 </example>
 
 </s1>

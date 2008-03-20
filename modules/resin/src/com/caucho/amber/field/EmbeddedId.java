@@ -135,6 +135,7 @@ public class EmbeddedId extends CompositeId {
   /**
    * Generates any class prologue.
    */
+  @Override
   public void generatePrologue(JavaWriter out, HashSet<Object> completedSet)
     throws IOException
   {
@@ -152,7 +153,8 @@ public class EmbeddedId extends CompositeId {
   /**
    * Returns the key for the value
    */
-  public String generateGetProperty(String objThis)
+  @Override
+  public String generateGet(String objThis)
   {
     return _embeddedIdField.generateGet(objThis);
   }

@@ -68,10 +68,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.sql.ResultSetMetaData;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -1348,17 +1345,24 @@ public class AmberPersistenceUnit {
   public void initEntityHomes()
     throws AmberRuntimeException, ConfigException
   {
+    ArrayList<AmberEntityHome> homeList;
+    
     synchronized (this) {
       if (_isInit)
         return;
       _isInit = true;
+
+      homeList = new ArrayList<AmberEntityHome>(_lazyHomeInit);
+
+      _lazyHomeInit.clear();
     }
 
     initTables();
 
-    while (_lazyHomeInit.size() > 0) {
-      AmberEntityHome home = _lazyHomeInit.remove(0);
+    // for QA consistency
+    Collections.sort(homeList);
 
+    for (AmberEntityHome home : homeList) {
       home.init();
     }
   }
@@ -1656,10 +1660,9 @@ public class AmberPersistenceUnit {
   /**
    * Updates the cache item after commit.
    */
-  public EntityItem updateCacheItem(EntityType rootType,
-                                    Object key,
-                                    Entity contextEntity,
-                                    EntityItem cacheItem)
+  public void updateCacheItem(EntityType rootType,
+			      Object key,
+			      EntityItem cacheItem)
   {
     if (cacheItem == null)
       throw new IllegalStateException(L.l("Null entity item cannot be used to update the persistence unit cache"));
@@ -1668,32 +1671,14 @@ public class AmberPersistenceUnit {
 
     synchronized (_entityKey) {
       _entityKey.init(rootType.getInstanceClass(), key);
-      ref = _entityCache.get(_entityKey);
-
-      EntityItem oldCacheItem = null;
-
-      // jpa/0g70
-      if (ref != null)
-        oldCacheItem = ref.get();
 
       // jpa/0q00
-      if (oldCacheItem == null) {
-        ref = new SoftReference<EntityItem>(cacheItem);
-        EntityKey entityKey = new EntityKey(rootType.getInstanceClass(), key);
+      ref = new SoftReference<EntityItem>(cacheItem);
+      EntityKey entityKey = new EntityKey(rootType.getInstanceClass(), key);
 
-        // ejb/0628, ejb/06d0
-        ref = _entityCache.putIfNew(entityKey, ref);
-
-        oldCacheItem = ref.get();
-      }
-
-      if (oldCacheItem != null)
-        cacheItem = oldCacheItem;
-
-      // contextEntity.__caucho_updateCacheItem(cacheItem.getEntity());
+      // ejb/0628, ejb/06d0
+      _entityCache.put(entityKey, ref);
     }
-
-    return cacheItem;
   }
 
   /**

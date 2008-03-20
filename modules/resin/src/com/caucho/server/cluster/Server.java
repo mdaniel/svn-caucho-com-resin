@@ -1217,6 +1217,8 @@ public class Server extends ProtocolDispatchServer
 
       _hostContainer.start();
 
+      getCluster().startPersistentStore();
+
       // will only occur if bind-ports-at-end is true
       if (_isBindPortsAtEnd) {
         bindPorts();
