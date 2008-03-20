@@ -614,7 +614,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     else
       return null;
   }
-
+  
   public EntityManager getPersistenceContext(String name)
   {
     if (_exception != null)
@@ -643,6 +643,28 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
       _persistenceContextMap.put(name, context);
       
       return context;
+    }
+
+    return null;
+  }
+  
+  public EntityManager getExtendedPersistenceContext(String name)
+  {
+    if (_exception != null)
+      throw new AmberRuntimeException(_exception);
+
+    if ("".equals(name) && _unitConfigList.size() > 0)
+      name = _unitConfigList.get(0).getName();
+
+    if (_pendingRootList.size() > 0)
+      configurePersistenceRoots();
+
+    if ("".equals(name) && _unitConfigList.size() > 0)
+      name = _unitConfigList.get(0).getName();
+    
+    AmberPersistenceUnit amberUnit = _unitMap.get(name);
+    if (amberUnit != null) {
+      return new EntityManagerExtendedProxy(amberUnit);
     }
 
     return null;

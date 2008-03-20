@@ -474,6 +474,12 @@ public class InjectIntrospector {
     throws ConfigException
   {
     AmberContainer.create().start();
+
+    PersistenceContextType pType = pContext.type();
+
+    if (PersistenceContextType.EXTENDED.equals(pType))
+      return generateExtendedPersistenceContext(location, type,
+						jndiName, pContext);
     
     if (! type.isAssignableFrom(EntityManager.class)) {
       throw new ConfigException(location + L.l("@PersistenceContext field type '{0}' must be assignable from EntityManager", type.getName()));
@@ -505,6 +511,28 @@ public class InjectIntrospector {
     bindJndi(location, jndiName, component);
 
     return new ComponentValueGenerator(location, component);
+  }
+
+  private static ValueGenerator
+    generateExtendedPersistenceContext(String location,
+				       Class type,
+				       String jndiName,
+				       PersistenceContext pContext)
+    throws ConfigException
+  {
+    AmberContainer.create().start();
+    
+    if (! type.isAssignableFrom(EntityManager.class)) {
+      throw new ConfigException(location + L.l("@PersistenceContext field type '{0}' must be assignable from EntityManager", type.getName()));
+    }
+
+    PersistenceContextGenerator gen;
+    
+    gen = new PersistenceContextGenerator(location, pContext);
+
+    bindJndi(location, jndiName, gen);
+
+    return gen;
   }
 
   private static ValueGenerator

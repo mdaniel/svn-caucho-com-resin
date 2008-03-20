@@ -115,7 +115,12 @@ public class PersistenceContextGenerator
 
     AmberContainer amber = AmberContainer.getCurrent();
 
-    EntityManager manager = amber.getPersistenceContext(_unitName);
+    EntityManager manager;
+
+    if (PersistenceContextType.EXTENDED.equals(_type))
+      manager = amber.getExtendedPersistenceContext(_unitName);
+    else
+      manager = amber.getPersistenceContext(_unitName);
 
     if (manager == null)
       throw new ConfigException(_location
