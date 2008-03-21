@@ -182,7 +182,8 @@ public class FileStore extends StoreManager {
    *
    * @param uniqueId the identifier of the object.
    */
-  public void accessImpl(String uniqueId)
+  @Override
+  public void accessImpl(String objectId, String uniqueId)
     throws Exception
   {
     _backing.updateAccess(uniqueId);

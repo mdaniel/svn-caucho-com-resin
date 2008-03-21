@@ -12,7 +12,13 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
-<li>admin: profiling issue with MacOSX (#2480, rep by Javier Vegas)</li>
+<li>quercus: cleanup list can't use SoftReference (#2542, rep by Matt Johnston)</li>
+<li>jsp: dependency generation could mistakenly add classpath: for root-based JSP files (#2486, rep by L Geller)</li>
+<li>rewrite-dispatch: query string resulted in added getParameterValues value (#2464, rep by zdavis)</li>
+<li>quercus: regexp a <= Integer.MAX_VALUE test is unstable for some JIT/OS, so use a <= Integer.MAX_VALUE - 1 (#2526, rep by Chris Chen)</li>
+<li>jsp: application, session, and request are not EL implicit objects (#2499, rep by B Whitehead)</li>
+<li>config: redeploy-mode needs to be allowed in &lt;host-default> (#2538, rep by G Perales)</li>
+<li>(2008-03-20) admin: profiling issue with MacOSX (#2480, rep by Javier Vegas)</li>
 <li>boot: 64-bit windows does not use -d64 flag (#2501, rep by fesse)</li>
 <li>amber: native query needs to use column names (#1716)</li>
 <li>amber: @OneToMany was ignoring fetch annotation (#2423, rep by Daniel Spangler)</li>

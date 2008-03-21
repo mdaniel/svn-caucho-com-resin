@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,19 +30,15 @@
 package com.caucho.quercus.lib.regexp;
 
 import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.UsesSymbolTable;
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.lib.JavaModule;
-import com.caucho.quercus.lib.regexp.JavaRegexpModule.GroupNeighborMap;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
-import java.io.CharConversionException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,8 +46,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CauchoRegexpModule
   extends AbstractQuercusModule
@@ -74,6 +68,9 @@ public class CauchoRegexpModule
 
   public static final int PREG_GREP_INVERT = 1;
 
+  // #2526, possible JIT/OS problem with max comparison
+  private static final long LONG_MAX = Long.MAX_VALUE - 1;
+
   public static final boolean [] PREG_QUOTE = new boolean[256];
 
   private static final LruCache<StringValue, Regexp> _regexpCache
@@ -85,6 +82,7 @@ public class CauchoRegexpModule
   private static final HashMap<String, Value> _constMap
   = new HashMap<String, Value>();
 
+  @Override
   public String []getLoadedExtensions()
   {
     return new String[] { "pcre" };
@@ -139,7 +137,7 @@ public class CauchoRegexpModule
 
     StringValue rawPatternStr;
 
-    if (!(rawPattern instanceof StringValue)) {
+    if (! (rawPattern instanceof StringValue)) {
       rawPatternStr = rawPattern.toLongValue().toStringValue();
     } else {
       rawPatternStr = rawPattern.toStringValue();
@@ -227,6 +225,7 @@ public class CauchoRegexpModule
       
       Regexp regexp = getRegexp(env, regexpValue);
       RegexpState regexpState = new RegexpState(env, regexp, subject);
+      System.out.println("REGEXP: " + regexp + " " + regexpState);
 
       ArrayValue regs;
 
@@ -640,7 +639,7 @@ public class CauchoRegexpModule
     StringValue string = subject;
 
     if (limit < 0)
-      limit = Long.MAX_VALUE;
+      limit = LONG_MAX;
 
     if (patternValue.isArray() && replacement.isArray()) {
       ArrayValue patternArray = (ArrayValue) patternValue;
@@ -710,7 +709,7 @@ public class CauchoRegexpModule
     long numberOfMatches = 0;
 
     if (limit < 0)
-      limit = Long.MAX_VALUE;
+      limit = LONG_MAX;
 
     Regexp regexp = getRegexp(env, patternString);
     RegexpState regexpState = new RegexpState(env, regexp, subject);
@@ -902,7 +901,7 @@ public class CauchoRegexpModule
 			  boolean isEval)
   {
     if (limit < 0)
-      limit = Long.MAX_VALUE;
+      limit = LONG_MAX;
 
     int length = subject.length();
 
@@ -1029,7 +1028,7 @@ public class CauchoRegexpModule
     throws IllegalRegexpException
   {
     if (limit < 0)
-      limit = Long.MAX_VALUE;
+      limit = LONG_MAX;
 
     if (patternValue.isArray()) {
       ArrayValue patternArray = (ArrayValue) patternValue;
@@ -1073,7 +1072,7 @@ public class CauchoRegexpModule
     try {
     
       if (limit <= 0)
-	limit = Long.MAX_VALUE;
+	limit = LONG_MAX;
 
       StringValue empty = patternString.getEmptyString();
     
@@ -1284,7 +1283,7 @@ public class CauchoRegexpModule
   {
     try {
       if (limit < 0)
-        limit = Long.MAX_VALUE;
+        limit = LONG_MAX;
 
       // php/151c
 

@@ -69,7 +69,7 @@ abstract public class PageManager {
   private long _updateInterval = 1000;
   private boolean _isAdapter;
   private boolean _omitInitLog;
-  private int _pageCacheMax = 256;
+  private int _pageCacheMax = 1024;
   private LruCache<String,Entry> _cache;
 
   // true if the manager should detect page changes and automatically recompile

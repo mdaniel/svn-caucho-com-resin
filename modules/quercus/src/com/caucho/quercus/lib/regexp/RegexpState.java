@@ -170,7 +170,7 @@ public class RegexpState {
     boolean []firstSet = _regexp._firstSet;
     int end = subject.length() - minLength;
     RegexpNode prog = _regexp._prog;
-
+    System.out.println("PROG: " + prog);
     for (; start <= end; start++) {
       if (firstSet != null && (start < end || minLength > 0)) {
 	char firstChar = subject.charAt(start);

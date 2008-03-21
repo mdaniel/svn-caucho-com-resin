@@ -118,7 +118,6 @@ abstract public class QuercusPage
     try {
       return execute(env);
     } catch (QuercusLanguageException e) {
-      
       if (env.getExceptionHandler() != null) {
         try {
           env.getExceptionHandler().call(env, e.getValue());
@@ -132,7 +131,6 @@ abstract public class QuercusPage
       }
       
       return NullValue.NULL;
-      
     } finally {
       env.setPwd(oldPwd);
     }

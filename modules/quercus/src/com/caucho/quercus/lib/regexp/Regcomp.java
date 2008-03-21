@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -47,6 +47,9 @@ class Regcomp {
   private static final Logger log
     = Logger.getLogger(Regcomp.class.getName());
   private static final L10N L = new L10N(RegexpNode.class);
+
+  // #2526, JIT issues with Integer.MAX_VALUE
+  private static final int INTEGER_MAX = Integer.MAX_VALUE - 1;
   
   static final int MULTILINE = 0x1;
   static final int SINGLE_LINE = 0x2;
@@ -182,7 +185,7 @@ class Regcomp {
       if (tail == null)
 	throw error(L.l("'*' requires a preceeding regexp"));
 
-      tail = createLoop(pattern, tail, 0, Integer.MAX_VALUE);
+      tail = createLoop(pattern, tail, 0, INTEGER_MAX);
       
       return parseRec(pattern, tail.getTail());
 
@@ -190,7 +193,7 @@ class Regcomp {
       if (tail == null)
 	throw error(L.l("'+' requires a preceeding regexp"));
 
-      tail = createLoop(pattern, tail, 1, Integer.MAX_VALUE);
+      tail = createLoop(pattern, tail, 1, INTEGER_MAX);
       
       return parseRec(pattern, tail.getTail());
 
@@ -564,48 +567,12 @@ class Regcomp {
    *   {n,m}  -- from n to m
    *   {,m}   -- at most m
    */
-  /*
-  private void parseBrace(PeekStream pattern, RegexpNode loopNode)
-  {
-    RegexpNode.Compat loop = (RegexpNode.Compat) loopNode;
-    
-    loop._min = 0;
-    int ch;
-
-    while ((ch = pattern.read()) >= '0' && ch <= '9') {
-      loop._min = 10 * loop._min + ch - '0';
-    }
-
-    if (ch != ',') {
-      loop._max = loop._min;
-      pattern.ungetc(ch);
-      return;
-    }
-
-    loop._max = Integer.MAX_VALUE;
-    while ((ch = pattern.read()) >= '0' && ch <= '9') {
-      loop._max = loop._max == Integer.MAX_VALUE ? 0 : loop._max;
-      loop._max = 10 * loop._max + ch - '0';
-    }
-
-    pattern.ungetc(ch);
-  }
-  */
-
-  /**
-   *   Parse the repetition construct.
-   *
-   *   {n}    -- exactly n
-   *   {n,}   -- at least n
-   *   {n,m}  -- from n to m
-   *   {,m}   -- at most m
-   */
   private RegexpNode parseBrace(PeekStream pattern, RegexpNode node)
     throws IllegalRegexpException
   {
     int ch;
     int min = 0;
-    int max = Integer.MAX_VALUE;
+    int max = INTEGER_MAX;
 
     while ((ch = pattern.read()) >= '0' && ch <= '9') {
       min = 10 * min + ch - '0';
@@ -613,7 +580,7 @@ class Regcomp {
 
     if (ch == ',') {
       while ('0' <= (ch = pattern.read()) && ch <= '9') {
-	if (max == Integer.MAX_VALUE)
+	if (max == INTEGER_MAX)
 	  max = 0;
 	
 	max = 10 * max + ch - '0';

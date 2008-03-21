@@ -29,16 +29,13 @@
 
 package com.caucho.quercus.lib.regexp;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.logging.*;
 
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.util.*;
 
 public class Regexp {

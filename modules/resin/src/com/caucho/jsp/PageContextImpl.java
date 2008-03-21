@@ -1991,6 +1991,8 @@ public class PageContextImpl extends PageContext
     
     public ELResolver getELResolver()
     {
+      System.out.println("RESOLV: " + _elResolver);
+      
       return _elResolver;
     }
 
@@ -2027,12 +2029,15 @@ public class PageContextImpl extends PageContext
     {
       if (_map != null) {
         ValueExpression expr = _map.get(var);
+	System.out.println("RESOLVE: " + expr + " " + var);
 
         if (expr != null)
           return expr;
       }
       
-      return super.resolveVariable(var);
+      ValueExpression expr = super.resolveVariable(var);
+      System.out.println("RESOLVE2: " + expr + " " + var);
+      return expr;
     }
 
     public ValueExpression setVariable(String var,

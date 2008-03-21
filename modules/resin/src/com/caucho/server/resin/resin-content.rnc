@@ -67,8 +67,8 @@ r_cluster-Basis =
 
   & r_ignore-client-disconnect?
 
-  & (attribute invocation-cache-size { r_kbytes-Type }
-     | element invocation-cache-size { r_kbytes-Type })?
+  & (attribute invocation-cache-size { r_int-Type }
+     | element invocation-cache-size { r_int-Type })?
 
   & (attribute invocation-cache-max-url-length { r_int-Type }
      | element invocation-cache-max-url-length { r_int-Type })?
@@ -152,18 +152,10 @@ r_host = element host {
 
   & (attribute host-name { string } | element host-name { string })?
 
-  & r_lazy-init?
-
-  & r_redeploy-check-interval?
-
-  & r_redeploy-mode?
-
   & r_root-directory?
 
   & (attribute secure-host-name { string }
     | element secure-host-name { string })?
-
-  & r_startup-mode?
 
   & r_host-Group
 }
@@ -183,7 +175,15 @@ r_host-Content =
 
   & r_error-page*
 
+  & r_lazy-init?
+
+  & r_redeploy-check-interval?
+
+  & r_redeploy-mode?
+
   & r_rewrite-dispatch?
+
+  & r_startup-mode?
 
   & r_web-app-deploy*
 

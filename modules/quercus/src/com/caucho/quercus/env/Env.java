@@ -161,8 +161,8 @@ public class Env {
 
   private Value _this = NullThisValue.NULL;
 
-  private ArrayList<SoftReference<EnvCleanup>> _cleanupList
-    = new ArrayList<SoftReference<EnvCleanup>>();
+  private ArrayList<EnvCleanup> _cleanupList
+    = new ArrayList<EnvCleanup>();
   
   private ArrayList<Shutdown> _shutdownList
     = new ArrayList<Shutdown>();
@@ -621,7 +621,7 @@ public class Env {
    */
   public void addCleanup(EnvCleanup envCleanup)
   {
-    _cleanupList.add(new SoftReference<EnvCleanup>(envCleanup));
+    _cleanupList.add(envCleanup);
   }
 
   /**
@@ -633,9 +633,7 @@ public class Env {
   public void removeCleanup(EnvCleanup envCleanup)
   {
     for (int i = _cleanupList.size() - 1; i >= 0; i--) {
-      SoftReference<EnvCleanup> ref = _cleanupList.get(i);
-
-      EnvCleanup res = ref.get();
+      EnvCleanup res = _cleanupList.get(i);
 
       if (envCleanup.equals(res)) {
         _cleanupList.remove(i);
@@ -4714,13 +4712,11 @@ public class Env {
         log.log(Level.FINE, e.toString(), e);
       }
 
-      ArrayList<SoftReference<EnvCleanup>> cleanupList = _cleanupList;
-      _cleanupList = new ArrayList<SoftReference<EnvCleanup>>(_cleanupList);
+      ArrayList<EnvCleanup> cleanupList = _cleanupList;
+      _cleanupList = new ArrayList<EnvCleanup>(_cleanupList);
 
-      for (SoftReference<EnvCleanup> ref : cleanupList) {
+      for (EnvCleanup envCleanup : cleanupList) {
         try {
-          EnvCleanup envCleanup = ref.get();
-
           if (envCleanup != null)
             envCleanup.cleanup();
         }

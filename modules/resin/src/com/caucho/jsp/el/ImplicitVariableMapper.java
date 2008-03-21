@@ -52,7 +52,6 @@ public class ImplicitVariableMapper extends VariableMapper
   }
 
   static {
-    _map.put("application", ApplicationExpression.EXPR);
     _map.put("applicationScope", ApplicationScopeExpression.EXPR);
     _map.put("cookie", CookieExpression.EXPR);
     _map.put("header", HeaderExpression.EXPR);
@@ -62,9 +61,7 @@ public class ImplicitVariableMapper extends VariableMapper
     _map.put("pageScope", PageScopeExpression.EXPR);
     _map.put("param", ParamExpression.EXPR);
     _map.put("paramValues", ParamValuesExpression.EXPR);
-    _map.put("request", RequestExpression.EXPR);
     _map.put("requestScope", RequestScopeExpression.EXPR);
-    _map.put("session", SessionExpression.EXPR);
     _map.put("sessionScope", SessionScopeExpression.EXPR);
   }
 }

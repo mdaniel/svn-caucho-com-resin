@@ -110,10 +110,9 @@ public class Mysqli extends JdbcConnectionResource {
     else
       hostStr = host.toString();
 
-    connectInternal(env, hostStr,
-      user.toString(), password.toString(),
-      db.toString(), port, socket.toString(),
-      0, null, null);
+    connectInternal(env, hostStr, user.toString(), password.toString(),
+		    db.toString(), port, socket.toString(),
+		    0, null, null);
   }
 
   /**
@@ -139,10 +138,8 @@ public class Mysqli extends JdbcConnectionResource {
     if (host == null || host.length() == 0)
       host = "localhost";
 
-    connectInternal(env, host,
-      user, password,
-      db, port, socket,
-      flags, driver, url);
+    connectInternal(env, host, user, password, db, port, socket,
+		    flags, driver, url);
   }
 
   protected Mysqli(Env env)
@@ -177,10 +174,10 @@ public class Mysqli extends JdbcConnectionResource {
           return;
         }
 
-        String full_version = null;
+        String fullVersion = null;
 
         try {
-          full_version = databaseMetaData.getDriverVersion();
+          fullVersion = databaseMetaData.getDriverVersion();
         } catch (SQLException e) {
           log.log(Level.FINE, e.toString(), e);
         }
@@ -188,12 +185,12 @@ public class Mysqli extends JdbcConnectionResource {
         // If getDriverVersion() returns null or raises a SQLException,
         // then we can't verify the driver version.
 
-        if (full_version == null) {
+        if (fullVersion == null) {
           _checkedDriverVersion = "";
           return;
         }
 
-        String version = full_version;
+        String version = fullVersion;
 
         // Extract full version number.
 
@@ -232,8 +229,10 @@ public class Mysqli extends JdbcConnectionResource {
         }
 
         if (! valid) {
-          throw new SQLException("invalid Connector/J version \"" +
-            version + "\" found in \"" + full_version + "\", must be 3.1.14 or newer");
+	  conn.close();
+	  
+          throw new SQLException(L.l("invalid Connector/J version '{0}' found in '{1}' must be 3.1.14 or newer",
+				     version, fullVersion));
         }
       }
     }

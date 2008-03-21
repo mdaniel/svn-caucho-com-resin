@@ -1933,12 +1933,12 @@ public class JavaJspGenerator extends JspGenerator {
       prefix = prefix + "/";
 
     if (path.startsWith(prefix)) {
-      path = path.substring(prefix.length());
-      Path appPathTest = appDir.lookup(path);
+      String subPath = path.substring(prefix.length());
+      Path appPathTest = appDir.lookup(subPath);
 
       if (appPathTest.getCrc64() == depend.getPath().getCrc64()) {
 	out.print("appDir.lookup(\"");
-	out.printJavaString(path);
+	out.printJavaString(subPath);
 	out.print("\")");
 	return;
       }
@@ -1953,7 +1953,9 @@ public class JavaJspGenerator extends JspGenerator {
       if (! prefix.endsWith("/"))
 	prefix = prefix + "/";
 
-      if (path.startsWith(prefix)) {
+      if (prefix.equals("/"))
+	continue;
+      else if (path.startsWith(prefix)) {
         String tail = path.substring(prefix.length());
 
 	if (tail.startsWith("/"))
@@ -1982,20 +1984,6 @@ public class JavaJspGenerator extends JspGenerator {
       out.printJavaString(path);
       out.print("\")");
     }
-    /* XXX: why?  This messes up tests like server/0526
-    else if (path.startsWith("/")) {
-      out.print("mergePath.lookup(\"file:");
-      out.printJavaString(path);
-      out.print("\")");
-    }
-    */
-    /*
-    else if (classPath.lookup("./" + path).canRead()) {
-      out.print("mergePath.lookup(\"./");
-      out.printJavaString(path);
-      out.print("\")");
-    }
-    */
     else {
       out.print("mergePath.lookup(\"");
       out.printJavaString(depend.getPath().getURL());

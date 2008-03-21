@@ -39,7 +39,6 @@ import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.persistence.CascadeType;
