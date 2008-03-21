@@ -225,7 +225,6 @@ public class CauchoRegexpModule
       
       Regexp regexp = getRegexp(env, regexpValue);
       RegexpState regexpState = new RegexpState(env, regexp, subject);
-      System.out.println("REGEXP: " + regexp + " " + regexpState);
 
       ArrayValue regs;
 
