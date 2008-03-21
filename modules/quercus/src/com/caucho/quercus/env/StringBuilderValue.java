@@ -515,6 +515,15 @@ public class StringBuilderValue
   {
     return charValueAt(key.toLong());
   }
+  
+  /**
+   * Sets the array ref.
+   */
+  @Override
+  public Value put(Value index, Value value)
+  {
+    return setCharValueAt(index.toLong(), value.toString());
+  }
 
   /**
    * sets the character at an index
@@ -576,6 +585,41 @@ public class StringBuilderValue
       else
 	return new StringBuilderValue((char) ch);
     }
+  }
+  
+  /**
+   * sets the character at an index
+   */
+  @Override
+  public Value setCharValueAt(long indexL, String value)
+  {
+    int len = _length;
+
+    if (indexL < 0)
+      return this;
+    else {
+      int index = (int) indexL;
+      
+      int padLen = index - len;
+
+      if (padLen > 0) {
+        ensureCapacity(index + 1);
+        
+        for (int i = 0; i < padLen; i++) {
+          _buffer[i + len] = ' ';
+        }
+        
+        _length = index + 1;
+      }
+      
+      if (value.length() == 0)
+        _buffer[index] = 0;
+      else
+        _buffer[index] = value.charAt(0);
+      
+    }
+    
+    return this;
   }
     
   /**
@@ -1283,7 +1327,7 @@ public class StringBuilderValue
     ensureCapacity(_length + newCapacity);
   }
 
-  private void ensureCapacity(int newCapacity)
+  protected void ensureCapacity(int newCapacity)
   {
     if (newCapacity <= _buffer.length)
       return;

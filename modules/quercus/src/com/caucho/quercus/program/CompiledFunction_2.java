@@ -82,12 +82,18 @@ abstract public class CompiledFunction_2 extends CompiledFunction {
   {
     switch (argValues.length) {
     case 0:
-      return call(env, _default_0.eval(env), _default_1.eval(env));
+      return call(env,
+                  _default_0.eval(env),
+                  _default_1.eval(env));
     case 1:
-      return call(env, argValues[0], _default_1.eval(env));
+      return call(env,
+                  argValues[0],
+                  _default_1.eval(env));
     case 2:
     default:
-      return call(env, argValues[0], argValues[1]);
+      return call(env,
+                  argValues[0],
+                  argValues[1]);
     }
   }
 

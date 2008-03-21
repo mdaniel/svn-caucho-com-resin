@@ -89,31 +89,31 @@ abstract public class CompiledMethod_3 extends CompiledMethod {
   public Value callMethod(Env env, Value obj, Value []argValues)
   {
     switch (argValues.length) {
-    case 0:
-      return callMethod(env,
-			obj,
-			_default_0.eval(env),
-			_default_1.eval(env),
-			_default_2.eval(env));
-    case 1:
-      return callMethod(env,
-			obj,
-			argValues[0],
-			_default_1.eval(env),
-			_default_2.eval(env));
-    case 2:
-      return callMethod(env,
-			obj,
-			argValues[0],
-			argValues[1],
-			_default_2.eval(env));
-    case 3:
-    default:
-      return callMethod(env,
-			obj,
-			argValues[0],
-			argValues[1],
-			argValues[2]);
+      case 0:
+        return callMethod(env,
+                          obj,
+                          _default_0.eval(env),
+                          _default_1.eval(env),
+                          _default_2.eval(env));
+      case 1:
+        return callMethod(env,
+                          obj,
+                          argValues[0],
+                          _default_1.eval(env),
+                          _default_2.eval(env));
+      case 2:
+        return callMethod(env,
+                          obj,
+                          argValues[0],
+                          argValues[1],
+                          _default_2.eval(env));
+      case 3:
+      default:
+        return callMethod(env,
+                          obj,
+                          argValues[0],
+                          argValues[1],
+                          argValues[2]);
     }
   }
   
@@ -123,10 +123,10 @@ abstract public class CompiledMethod_3 extends CompiledMethod {
   }
 
   abstract public Value callMethod(Env env,
-				   Value obj,
-				   Value a1,
-				   Value a2,
-				   Value a3);
+                                   Value obj,
+                                   Value a1,
+                                   Value a2,
+                                   Value a3);
   
   public String toString()
   {

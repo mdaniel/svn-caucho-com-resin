@@ -161,7 +161,7 @@ public class DoubleValue extends NumberValue
   @Override
   public StringValue toStringBuilder(Env env)
   {
-    return env.createUnicodeBuilder().append(_value);
+    return env.createUnicodeBuilder().append(toString());
   }
 
   /**

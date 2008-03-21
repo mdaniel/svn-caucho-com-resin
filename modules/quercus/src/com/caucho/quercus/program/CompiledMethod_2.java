@@ -87,13 +87,13 @@ abstract public class CompiledMethod_2 extends CompiledMethod {
   public Value callMethod(Env env, Value obj, Value []argValues)
   {
     switch (argValues.length) {
-    case 0:
-      return callMethod(env, obj, _default_0.eval(env), _default_1.eval(env));
-    case 1:
-      return callMethod(env, obj, argValues[0], _default_1.eval(env));
-    case 2:
-    default:
-      return callMethod(env, obj, argValues[0], argValues[1]);
+      case 0:
+        return callMethod(env, obj, _default_0.eval(env), _default_1.eval(env));
+      case 1:
+        return callMethod(env, obj, argValues[0], _default_1.eval(env));
+      case 2:
+      default:
+        return callMethod(env, obj, argValues[0], argValues[1]);
     }
   }
 

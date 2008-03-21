@@ -768,7 +768,7 @@ public class ImageModule extends AbstractQuercusModule {
    * Enable or disable interlace
    */
   public static boolean imageinterlace(QuercusImage image,
-				       @Optional Boolean enable)
+                                       @Optional Boolean enable)
   {
     if (enable != null)
       image.setInterlace(enable);

@@ -679,15 +679,17 @@ abstract public class StringValue extends Value implements CharSequence {
   @Override
   public Value setCharValueAt(long index, String value)
   {
+    //XXX: need to double-check this for non-string values
+    
     int len = length();
 
     if (index < 0 || len <= index)
       return this;
     else {
       return (createStringBuilder()
-	      .append(this, 0, (int) index)
-	      .append(value)
-	      .append(this, (int) (index + 1), length()));
+              .append(this, 0, (int) index)
+              .append(value)
+              .append(this, (int) (index + 1), length()));
     }
   }
 

@@ -82,12 +82,18 @@ abstract public class CompiledFunctionRef_2 extends CompiledFunctionRef {
   {
     switch (argValues.length) {
     case 0:
-      return callRef(env, _default_0.eval(env), _default_1.eval(env));
+      return callRef(env,
+                     _default_0.eval(env),
+                     _default_1.eval(env));
     case 1:
-      return callRef(env, argValues[0], _default_1.eval(env));
+      return callRef(env,
+                     argValues[0],
+                     _default_1.eval(env));
     case 2:
     default:
-      return callRef(env, argValues[0], argValues[1]);
+      return callRef(env,
+                     argValues[0],
+                     argValues[1]);
     }
   }
 

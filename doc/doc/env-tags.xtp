@@ -2464,9 +2464,9 @@ element resin:if {
 &lt;resin xmlns="http://caucho.com/ns/resin"
         xmlns:core="http://caucho.com/ns/resin/core">
 
-  &lt;resin:if test=${system['development']}"&gt;
+  &lt;resin:if test="${system['development']}"&gt;
     &lt;logger name="com.foo" level="finer"/>
-  &lt;resin:if&gt;
+  &lt;/resin:if&gt;
 
   ...
 &lt;/resin>
@@ -2639,7 +2639,7 @@ element set {
 <example title="Example: resin:set in resin.conf">
 &lt;resin xmlns="http://caucho.com/ns/resin"
           xmlns:resin="http://caucho.com/ns/resin/core">
-  &lt;resin:set name="root" value="/var/www">
+  &lt;resin:set name="root" value="/var/www"/>
 
   &lt;cluster id="app-tier">
     &lt;root-directory>${root}&lt;/root-directory>

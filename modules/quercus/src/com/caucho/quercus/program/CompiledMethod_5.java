@@ -95,65 +95,65 @@ abstract public class CompiledMethod_5 extends CompiledMethod {
   public Value callMethod(Env env, Value obj, Value []argValues)
   {
     switch (argValues.length) {
-    case 0:
-      return callMethod(env,
-			obj,
-			_default_0.eval(env),
-			_default_1.eval(env),
-			_default_2.eval(env),
-			_default_3.eval(env),
-			_default_4.eval(env));
-    case 1:
-      return callMethod(env,
-			obj,
-			argValues[0],
-			_default_1.eval(env),
-			_default_2.eval(env),
-			_default_3.eval(env),
-			_default_4.eval(env));
-    case 2:
-      return callMethod(env,
-			obj,
-			argValues[0],
-			argValues[1],
-			_default_2.eval(env),
-			_default_3.eval(env),
-			_default_4.eval(env));
-    case 3:
-      return callMethod(env,
-			obj,
-			argValues[0],
-			argValues[1],
-			argValues[2],
-			_default_3.eval(env),
-			_default_4.eval(env));
-    case 4:
-      return callMethod(env,
-			obj,
-			argValues[0],
-			argValues[1],
-			argValues[2],
-			argValues[3],
-			_default_4.eval(env));
-    case 5:
-    default:
-      return callMethod(env,
-			obj,
-			argValues[0],
-			argValues[1],
-			argValues[2],
-			argValues[3],
-			argValues[4]);
+      case 0:
+        return callMethod(env,
+                          obj,
+                          _default_0.eval(env),
+                          _default_1.eval(env),
+                          _default_2.eval(env),
+                          _default_3.eval(env),
+                          _default_4.eval(env));
+      case 1:
+        return callMethod(env,
+                          obj,
+                          argValues[0],
+                          _default_1.eval(env),
+                          _default_2.eval(env),
+                          _default_3.eval(env),
+                          _default_4.eval(env));
+      case 2:
+        return callMethod(env,
+                          obj,
+                          argValues[0],
+                          argValues[1],
+                          _default_2.eval(env),
+                          _default_3.eval(env),
+                          _default_4.eval(env));
+      case 3:
+        return callMethod(env,
+                          obj,
+                          argValues[0],
+                          argValues[1],
+                          argValues[2],
+                          _default_3.eval(env),
+                          _default_4.eval(env));
+      case 4:
+        return callMethod(env,
+                          obj,
+                          argValues[0],
+                          argValues[1],
+                          argValues[2],
+                          argValues[3],
+                          _default_4.eval(env));
+      case 5:
+      default:
+        return callMethod(env,
+                          obj,
+                          argValues[0],
+                          argValues[1],
+                          argValues[2],
+                          argValues[3],
+                          argValues[4]);
     }
   }
 
   abstract public Value callMethod(Env env,
-				   Value obj,
-				   Value a1,
-				   Value a2,
-				   Value a3,
-				   Value a4,
-				   Value a5);
+                                   Value obj,
+                                   Value a1,
+                                   Value a2,
+                                   Value a3,
+                                   Value a4,
+                                   Value a5);
   
   public String toString()
   {

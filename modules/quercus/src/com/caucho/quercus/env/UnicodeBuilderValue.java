@@ -372,6 +372,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
   /**
    * sets the character at an index
    */
+  /*
   @Override
   public Value setCharValueAt(long index, String value)
   {
@@ -390,6 +391,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
       return sb;
     }
   }
+  /*
 
   /**
    * Returns a subsequence
