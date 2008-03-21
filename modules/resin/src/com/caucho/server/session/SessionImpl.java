@@ -593,7 +593,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       ClusterObject clusterObject = _clusterObject;
       _clusterObject = null;
 
-      if (clusterObject != null)
+      if (clusterObject != null && _isInvalidating)
 	clusterObject.remove();
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);

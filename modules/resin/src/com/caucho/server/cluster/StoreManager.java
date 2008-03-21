@@ -376,7 +376,7 @@ abstract public class StoreManager
     if (obj != null)
       obj.access();
     else
-      accessImpl(uniqueId);
+      accessImpl(obj.getObjectId(), uniqueId);
   }
 
   /**
@@ -396,7 +396,7 @@ abstract public class StoreManager
    *
    * @param uniqueId the identifier of the object.
    */
-  abstract public void accessImpl(String uniqueId)
+  abstract public void accessImpl(String objectId, String uniqueId)
     throws Exception;
   
   /**

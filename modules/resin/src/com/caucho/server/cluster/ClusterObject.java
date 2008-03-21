@@ -326,7 +326,7 @@ public class ClusterObject {
 
     if (getAccessWindow() <= now - _accessTime) {
       try {
-	_storeManager.accessImpl(getUniqueId());
+	_storeManager.accessImpl(getObjectId(), getUniqueId());
       } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
