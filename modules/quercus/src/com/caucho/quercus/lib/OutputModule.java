@@ -509,7 +509,7 @@ public class OutputModule extends AbstractQuercusModule
     StringValue result = env.createBinaryBuilder();
     
     if ((state & (1 << OutputBuffer.PHP_OUTPUT_HANDLER_START)) != 0) {
-      HttpModule.header(env, "Vary: Accept-Encoding", true, 0);
+      HttpModule.header(env, env.createString("Vary: Accept-Encoding"), true, 0);
 
       int encodingFlag = 0;
 
@@ -519,11 +519,11 @@ public class OutputModule extends AbstractQuercusModule
 
       try {
         if (encoding == Encoding.GZIP) {
-          HttpModule.header(env, "Content-Encoding: gzip", true, 0);
+          HttpModule.header(env, env.createString("Content-Encoding: gzip"), true, 0);
 
           pair._outputStream = new GZIPOutputStream(pair._tempStream);
         } else if (encoding == Encoding.DEFLATE) {
-          HttpModule.header(env, "Content-Encoding: deflate", true, 0);
+          HttpModule.header(env, env.createString("Content-Encoding: deflate"), true, 0);
 
           pair._outputStream = new DeflaterOutputStream(pair._tempStream);
         }

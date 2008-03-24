@@ -66,7 +66,8 @@ public class HttpModule extends AbstractQuercusModule {
   /**
    * Adds a header.
    */
-  public static Value header(Env env, String header,
+  public static Value header(Env env,
+                             StringValue headerStr,
                              @Optional("true") boolean replace,
                              @Optional long httpResponseCode)
   {
@@ -77,6 +78,7 @@ public class HttpModule extends AbstractQuercusModule {
       return NullValue.NULL;
     }
 
+    String header = headerStr.toString();
     int len = header.length();
 
     if (header.startsWith("HTTP/")) {
@@ -155,7 +157,17 @@ public class HttpModule extends AbstractQuercusModule {
           }
         }
       }
+    } else {
+      // Check for special headers that are not
+      // colon separated "key: value" pairs.
 
+      if (header.equals("Not Modified") ||
+        header.equals("No Content")) {
+        // php/1b0(j|k|l|m)
+
+        if (httpResponseCode != 0)
+          res.setStatus((int) httpResponseCode, header);
+      }
     }
 
     return NullValue.NULL;

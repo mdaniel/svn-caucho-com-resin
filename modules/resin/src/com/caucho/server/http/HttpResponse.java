@@ -175,6 +175,8 @@ public class HttpResponse extends AbstractHttpResponse
       return false;
     }
 
+    String contentType = _contentType;
+
     int statusCode = _statusCode;
     if (statusCode == 200) {
       if (version < HttpRequest.HTTP_1_1)
@@ -205,9 +207,12 @@ public class HttpResponse extends AbstractHttpResponse
     if (statusCode >= 400) {
       removeHeader("ETag");
       removeHeader("Last-Modified");
-    }
-    // server/1b15
-    else if (_isNoCache) {
+    } else if (statusCode == SC_NOT_MODIFIED || statusCode == SC_NO_CONTENT) {
+      // php/1b0k
+
+      contentType = null;
+    } else if (_isNoCache) {
+      // server/1b15
       removeHeader("ETag");
       removeHeader("Last-Modified");
 
@@ -277,7 +282,6 @@ public class HttpResponse extends AbstractHttpResponse
         log.fine(_request.dbgId() + "Set-Cookie: " + cb);
     }
 
-    String contentType = _contentType;
     if (contentType == null) {
     }
     else if (! contentType.equals("text/html")) {
