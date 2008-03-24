@@ -29,8 +29,11 @@
 package com.caucho.jsf.html;
 
 import com.caucho.util.Base64;
+import com.caucho.util.L10N;
 
 import java.io.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.faces.application.*;
 import javax.faces.context.*;
@@ -38,26 +41,67 @@ import javax.faces.render.*;
 
 public class ResponseStateManagerImpl extends ResponseStateManager
 {
+  private static final L10N L = new L10N(ResponseStateManagerImpl.class);
+  private static final Logger log
+    = Logger.getLogger(ResponseStateManagerImpl.class.getName());
+
+  public static final String VIEW_STRUCTURE_PARAM = "javax.faces.ViewStructure";
+
+
   public void writeState(FacesContext context,
 			 Object state)
     throws IOException
   {
-    if (Object [].class.isAssignableFrom(state.getClass())) {
-      String value = encode(((Object [])state) [0]);
-      
+    if (! Object [].class.isAssignableFrom(state.getClass()))
+      throw new IllegalArgumentException();
+
+    Object [] values = (Object []) state;
+
+    if (values.length != 2)
+      throw new IllegalArgumentException();
+
+
+    if (values[1] == null) {
+      String value = encode(((Object[]) state)[0]);
+
       ResponseWriter rw = context.getResponseWriter();
-      
+
       rw.startElement("input", null);
 
       rw.writeAttribute("type", "hidden", null);
       rw.writeAttribute("name", VIEW_STATE_PARAM, null);
       rw.writeAttribute("value", value, null);
-      
+
       rw.endElement("input");
-      
+
       rw.write("\n");
     } else {
-      throw new IllegalArgumentException();
+
+      String value = encode(values[0]);
+      ResponseWriter rw = context.getResponseWriter();
+
+      rw.startElement("input", null);
+
+      rw.writeAttribute("type", "hidden", null);
+      rw.writeAttribute("name", VIEW_STRUCTURE_PARAM, null);
+      rw.writeAttribute("value", value, null);
+
+      rw.endElement("input");
+
+      rw.write("\n");
+
+      value = encode(values[1]);
+      rw = context.getResponseWriter();
+
+      rw.startElement("input", null);
+
+      rw.writeAttribute("type", "hidden", null);
+      rw.writeAttribute("name", VIEW_STATE_PARAM, null);
+      rw.writeAttribute("value", value, null);
+
+      rw.endElement("input");
+
+      rw.write("\n");
     }
   }
 
@@ -77,26 +121,30 @@ public class ResponseStateManagerImpl extends ResponseStateManager
     ExternalContext extContext = context.getExternalContext();
     
     String data = extContext.getRequestParameterMap().get(VIEW_STATE_PARAM);
-    
-    if (data.charAt(0) == '!') {
-      return new Object []{data.substring(1), null};
-    }
-    else {
-      return new Object []{Base64.decodeToByteArray(data), null};
-    }
+
+    return new Object[]{decode(data), null};
   }
+
 
   @Deprecated
   public Object getTreeStructureToRestore(FacesContext context,
 					  String viewId)
   {
-    return null;
+    ExternalContext extContext = context.getExternalContext();
+
+    String data = extContext.getRequestParameterMap().get(VIEW_STRUCTURE_PARAM);
+
+    return decode(data);
   }
 
   @Deprecated
   public Object getComponentStateToRestore(FacesContext context)
   {
-    return null;
+    ExternalContext extContext = context.getExternalContext();
+
+    String data = extContext.getRequestParameterMap().get(VIEW_STATE_PARAM);
+
+    return decode(data);
   }
 
   /**
@@ -109,7 +157,7 @@ public class ResponseStateManagerImpl extends ResponseStateManager
     return extContext.getRequestParameterMap().containsKey(VIEW_STATE_PARAM);
   }
 
-  private String encode(Object obj) {
+  private String encode(Object obj) throws IOException {
     if (byte [].class.isAssignableFrom(obj.getClass())) {
       
       return Base64.encodeFromByteArray((byte []) obj);
@@ -117,9 +165,51 @@ public class ResponseStateManagerImpl extends ResponseStateManager
     else if (obj instanceof String) {
 
       return "!"+obj.toString();
+    } else if (obj instanceof Serializable || obj instanceof Externalizable) {
+      ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+      ObjectOutputStream oos = new ObjectOutputStream(buffer);
+
+      oos.writeObject(obj);
+      
+      oos.flush();
+      oos.close();
+
+      buffer.flush();
+      buffer.close();
+
+      return "~" + Base64.encodeFromByteArray(buffer.toByteArray());
     }
+
     else {
       throw new IllegalArgumentException();
     }
+  }
+
+  private Object decode(String data)
+  {
+    if (data.charAt(0) == '!') {
+      return data.substring(1);
+    }
+    else if (data.charAt(0) == '~') {
+      try {
+        byte [] bytes = Base64.decodeToByteArray(data.substring(1));
+
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(
+          bytes));
+        Object state = ois.readObject();
+        ois.close();
+
+        return state;
+      }
+      catch (Exception e) {
+        log.log(Level.SEVERE, e.toString(), e);
+        throw new RuntimeException(e);
+      }
+    }
+    else {
+      return Base64.decodeToByteArray(data);
+    }
+
   }
 }
