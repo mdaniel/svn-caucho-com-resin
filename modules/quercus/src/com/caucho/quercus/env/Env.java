@@ -35,6 +35,7 @@ import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.lib.ErrorModule;
 import com.caucho.quercus.lib.VariableModule;
+import com.caucho.quercus.lib.OptionsModule;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.lib.string.StringUtility;
@@ -320,7 +321,7 @@ public class Env {
     _request = request;
     _response = response;
 
-    if (page != null) {
+    if (_page != null) {
       _page.init(this);
 
       _page.importDefinitions(this);
@@ -355,6 +356,14 @@ public class Env {
         setIni("caucho.server_id", selfServer.getId());
     }
     */
+
+    // Define the constant string PHP_VERSION
+
+    VariableModule.define(this,
+      this.createString("PHP_VERSION"),
+      OptionsModule.phpversion(this, null),
+      true);
+
   }
 
   public Env(Quercus quercus)

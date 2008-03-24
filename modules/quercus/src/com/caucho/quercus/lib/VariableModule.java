@@ -121,11 +121,11 @@ public class VariableModule extends AbstractQuercusModule {
    * @param value the constant value
    */
   public static Value define(Env env,
-			     String name,
+			     StringValue name,
 			     Value value,
 			     @Optional boolean isCaseInsensitive)
   {
-    return env.addConstant(name, value, isCaseInsensitive);
+    return env.addConstant(name.toString(), value, isCaseInsensitive);
   }
 
   /**
