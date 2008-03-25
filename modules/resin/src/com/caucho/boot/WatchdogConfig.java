@@ -73,6 +73,8 @@ public class WatchdogConfig
 
   private Path _chroot;
   private Path _pwd;
+
+  private String _watchdogAddress = "127.0.0.1";
   private int _watchdogPort;
 
   private String _userName;
@@ -263,6 +265,19 @@ public class WatchdogConfig
   public void setWatchdogPort(int port)
   {
     _watchdogPort = port;
+  }
+  
+  public String getWatchdogAddress()
+  {
+    if (_watchdogAddress != null)
+      return _watchdogAddress;
+    else
+      return "127.0.0.1";
+  }
+  
+  public void setWatchdogAddress(String addr)
+  {
+    _watchdogAddress = addr;
   }
   
   /**

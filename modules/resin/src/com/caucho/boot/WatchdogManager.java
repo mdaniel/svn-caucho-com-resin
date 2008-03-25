@@ -140,6 +140,8 @@ public class WatchdogManager extends ProtocolDispatchServer {
     else
       clusterServer.setPort(server.getWatchdogPort());
 
+    clusterServer.setAddress(server.getWatchdogAddress());
+
     clusterServer.getClusterPort().setMinSpareListen(1);
     clusterServer.getClusterPort().setMaxSpareListen(2);
       

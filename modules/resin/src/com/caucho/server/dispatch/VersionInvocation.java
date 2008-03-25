@@ -61,6 +61,8 @@ public class VersionInvocation extends Invocation
   {
     _invocation = invocation;
     _webApp = webApp;
+
+    setWebApp(webApp);
     
     _oldInvocation = oldInvocation;
     _oldWebApp = oldWebApp;
@@ -107,7 +109,8 @@ public class VersionInvocation extends Invocation
   {
     if (_expireTime < Alarm.getCurrentTime())
       return _invocation;
-    
+
+    request.setInvocation(this);
     String sessionId = request.getRequestedSessionId();
 
     if (sessionId == null)
@@ -117,7 +120,7 @@ public class VersionInvocation extends Invocation
       return _invocation;
 
     SessionManager oldSessionManager = _oldWebApp.getSessionManager();
-    
+
     if (oldSessionManager != null
 	&& oldSessionManager.containsSession(sessionId)) {
       return _oldInvocation;

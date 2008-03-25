@@ -125,7 +125,8 @@ public class HttpRequest extends AbstractHttpRequest
     _response = new HttpResponse(this);
     _response.init(conn.getWriteStream());
 
-    // _urlLengthMax = server.getURLLengthMax();
+    if (server instanceof Server)
+      _urlLengthMax = ((Server) server).getUrlLengthMax();
 
     // XXX: response.setIgnoreClientDisconnect(server.getIgnoreClientDisconnect());
 

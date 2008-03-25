@@ -747,6 +747,9 @@
 
     <delete dir="${dist}/${dist.name}"/>
     <mkdir dir="${dist}/${dist.name}"/>
+    
+    <copy tofile="${install}/conf/resin.conf.orig"
+          file="${install}/conf/resin.conf"/>
 
     <copy todir="${dist}/${dist.name}" preservelastmodified="true">
       <fileset dir="${install}">

@@ -133,9 +133,10 @@ public class PostgresModule extends AbstractQuercusModule {
                                      @NotNull PostgresResult result)
   {
     try {
+      if (result == null)
+	return -1;
 
       return result.getAffectedRows();
-
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return 0;
@@ -148,6 +149,9 @@ public class PostgresModule extends AbstractQuercusModule {
   public static int pg_cmdtuples(Env env,
                                  @NotNull PostgresResult result)
   {
+    if (result == null)
+      return -1;
+    
     return pg_affected_rows(env, result);
   }
   
@@ -158,12 +162,13 @@ public class PostgresModule extends AbstractQuercusModule {
                                         @NotNull Postgres conn)
   {
     try {
-
+      if (conn == null)
+	return false;
+      
       conn.setAsynchronousStatement(null);
       conn.setAsynchronousResult(null);
 
       return true;
-
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return false;
@@ -2698,7 +2703,6 @@ public class PostgresModule extends AbstractQuercusModule {
                                               boolean reportError)
   {
     try {
-
       // XXX: the PHP api allows conn to be optional but we
       // totally disallow this case.
 
@@ -2709,7 +2713,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       StringValue error = conn.error(env);
 
-      if (error.length() == 0) {
+      if (error.length() != 0) {
         if (reportError)
           env.warning(L.l("Query failed: {0}", error));
 

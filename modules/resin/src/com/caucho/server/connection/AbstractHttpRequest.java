@@ -1415,11 +1415,14 @@ public abstract class AbstractHttpRequest
   public String getRequestedSessionId()
   {
     SessionManager manager = getSessionManager();
+
+    String cookieName = null;
     
     if (manager != null && manager.enableSessionCookies()) {
       setVaryCookie(getSessionCookie(manager));
 
       String id = findSessionIdFromCookie();
+
       if (id != null) {
 	_isSessionIdFromCookie = true;
         setHasCookie();

@@ -195,6 +195,14 @@ public class Watchdog
     return _config.getWatchdogPort();
   }
 
+  /**
+   * Returns the watchdog-address for this watchdog instance
+   */
+  public String getWatchdogAddress()
+  {
+    return _config.getWatchdogAddress();
+  }
+
   Iterable<Port> getPorts()
   {
     return _config.getPorts();

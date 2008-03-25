@@ -86,6 +86,11 @@ public class WatchdogClient
     return _bootManager.getAdminCookie();
   }
 
+  public String getWatchdogAddress()
+  {
+    return _config.getWatchdogAddress();
+  }
+
   public int getWatchdogPort()
   {
     return _config.getWatchdogPort();
@@ -288,7 +293,7 @@ public class WatchdogClient
   }
   private WatchdogAPI getProxy()
   {
-    String url = ("hmux://127.0.0.1:"
+    String url = ("hmux://" + getWatchdogAddress() + ":"
 		  + getWatchdogPort()
 		  + "/watchdog");
     

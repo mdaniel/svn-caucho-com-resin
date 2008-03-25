@@ -553,6 +553,11 @@ Resin instance.</p>
   <td></td>
 </tr>
 <tr>
+  <td>watchdog-address</td>
+  <td>The TCP address the watchdog-manager listens for start, stop, status</td>
+  <td>127.0.0.1</td>
+</tr>
+<tr>
   <td>watchdog-default</td>
   <td>Defaults applied to all watchdog instances</td>
   <td></td>
@@ -572,6 +577,7 @@ Resin instance.</p>
 <def title="&lt;watchdog-manager> schema">
 element watchdog-manager {
   watchdog*
+  &amp; watchdog-address?
   &amp; watchdog-default*
   &amp; watchdog-jvm-arg*
   &amp; watchdog-port?

@@ -109,6 +109,7 @@ public class Server extends ProtocolDispatchServer
   private String _serverHeader = "Resin/" + com.caucho.Version.VERSION;
 
   private String _url = "";
+  private int _urlLengthMax = 8192;
 
   private int _srunCount;
 
@@ -586,6 +587,22 @@ public class Server extends ProtocolDispatchServer
   public String getServerHeader()
   {
     return _serverHeader;
+  }
+
+  /**
+   * Sets the url-length-max
+   */
+  public void setUrlLengthMax(int max)
+  {
+    _urlLengthMax = max;
+  }
+
+  /**
+   * Gets the url-length-max
+   */
+  public int getUrlLengthMax()
+  {
+    return _urlLengthMax;
   }
 
   /**

@@ -265,6 +265,11 @@ matching the -server-id on the command line.</p>
   <td>utf-8</td>
 </tr>
 <tr>
+  <td>url-length-max</td>
+  <td>Configures the maximum length of an allowed URL</td>
+  <td>8192</td>
+</tr>
+<tr>
   <td>web-app-default</td>
   <td>Configures defaults to apply to all web-apps in the cluster</td>
   <td></td>
@@ -301,6 +306,7 @@ element cluster {
   &amp; session-cookie?
   &amp; session-sticky-disable?
   &amp; url-character-encoding?
+  &amp; url-length-max?
   &amp; web-app-default*
 }
 </def>

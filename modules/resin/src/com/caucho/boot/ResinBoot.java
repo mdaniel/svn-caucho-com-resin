@@ -148,13 +148,15 @@ public class ResinBoot {
       try {
 	String status = _client.statusWatchdog();
 	
-	System.out.println(L().l("Resin/{0} status for watchdog at 127.0.0.1:{2}",
+	System.out.println(L().l("Resin/{0} status for watchdog at {1}:{2}",
 				 Version.VERSION, _client.getId(),
+				 _client.getWatchdogAddress(),
 				 _client.getWatchdogPort()));
         System.out.println(status);
       } catch (Exception e) {
-	System.out.println(L().l("Resin/{0} can't start -server '{1}' for watchdog at 127.0.0.1:{2}.\n{3}",
+	System.out.println(L().l("Resin/{0} can't start -server '{1}' for watchdog at {2}:{3}.\n{4}",
 				 Version.VERSION, _client.getId(),
+				 _client.getWatchdogAddress(),
 				 _client.getWatchdogPort(),
 				 e.toString()));
 
@@ -169,12 +171,14 @@ public class ResinBoot {
       try {
 	_client.startWatchdog(_args.getArgv());
 	
-	System.out.println(L().l("Resin/{0} started -server '{1}' for watchdog at 127.0.0.1:{2}",
+	System.out.println(L().l("Resin/{0} started -server '{1}' for watchdog at {2}:{3}",
 				 Version.VERSION, _client.getId(),
+				 _client.getWatchdogAddress(),
 				 _client.getWatchdogPort()));
       } catch (Exception e) {
-	System.out.println(L().l("Resin/{0} can't start -server '{1}' for watchdog at 127.0.0.1:{2}.\n{3}",
+	System.out.println(L().l("Resin/{0} can't start -server '{1}' for watchdog at {2}:{3}.\n{4}",
 				 Version.VERSION, _client.getId(),
+				 _client.getWatchdogAddress(),
 				 _client.getWatchdogPort(),
 				 e.toString()));
 
@@ -189,12 +193,14 @@ public class ResinBoot {
       try {
 	_client.stopWatchdog();
 	
-	System.out.println(L().l("Resin/{0} stopped -server '{1}' for watchdog at 127.0.0.1:{2}",
+	System.out.println(L().l("Resin/{0} stopped -server '{1}' for watchdog at {2}:{3}",
 				 Version.VERSION, _client.getId(),
+				 _client.getWatchdogAddress(),
 				 _client.getWatchdogPort()));
       } catch (Exception e) {
-	System.out.println(L().l("Resin/{0} can't stop -server '{1}' for watchdog at 127.0.0.1:{2}.\n{3}",
+	System.out.println(L().l("Resin/{0} can't stop -server '{1}' for watchdog at {2}:{3}.\n{4}",
 				 Version.VERSION, _client.getId(),
+				 _client.getWatchdogAddress(),
 				 _client.getWatchdogPort(),
 				 e.toString()));
 
@@ -209,12 +215,14 @@ public class ResinBoot {
       try {
 	_client.killWatchdog();
 	
-	System.out.println(L().l("Resin/{0} killed -server '{1}' for watchdog at 127.0.0.1:{2}",
+	System.out.println(L().l("Resin/{0} killed -server '{1}' for watchdog at {2}:{3}",
 				 Version.VERSION, _client.getId(),
+				 _client.getWatchdogAddress(),
 				 _client.getWatchdogPort()));
       } catch (Exception e) {
-	System.out.println(L().l("Resin/{0} can't kill -server '{1}' for watchdog at 127.0.0.1:{2}.\n{3}",
+	System.out.println(L().l("Resin/{0} can't kill -server '{1}' for watchdog at {2}:{3}.\n{4}",
 				 Version.VERSION, _client.getId(),
+				 _client.getWatchdogAddress(),
 				 _client.getWatchdogPort(),
 				 e.toString()));
 
@@ -229,8 +237,9 @@ public class ResinBoot {
       try {
 	_client.restartWatchdog(_args.getArgv());
 	
-	System.out.println(L().l("Resin/{0} stopped -server '{1}' for watchdog at 127.0.0.1:{2}",
+	System.out.println(L().l("Resin/{0} stopped -server '{1}' for watchdog at {2}:{3}",
 				 Version.VERSION, _client.getId(),
+				 _client.getWatchdogAddress(),
 				 _client.getWatchdogPort()));
       } catch (Exception e) {
 	System.out.println(L().l("Resin/{0} can't restart -server '{1}'.\n{2}",

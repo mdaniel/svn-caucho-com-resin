@@ -79,7 +79,7 @@ and treat them just like a top-level cache.</p>
 and proxy cache.</td>
 </tr>
 <tr>
-  <td>Cache-Control: s-max-age=<em>n</em></td>
+  <td>Cache-Control: s-maxage=<em>n</em></td>
   <td>Specifies a static cache time in seconds for the proxy cache only.</td>
 </tr>
 <tr>
@@ -163,7 +163,7 @@ producing a hash or ensuring the <var>ETag</var> value is the same is
 critical.</p>
 
 <p><var>ETag</var> servlets will often also use &lt;cache-mapping>
-configuration to set a <var>max-age</var> or <var>s-max-age</var>.  The
+configuration to set a <var>max-age</var> or <var>s-maxage</var>.  The
 browser and proxy cache will cache the page without revalidation until
 <var>max-age</var> runs out. When the time expires, it will use
 <var>If-None-Match</var> to revalidate the page.</p>

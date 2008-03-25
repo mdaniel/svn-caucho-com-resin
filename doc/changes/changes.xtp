@@ -12,7 +12,17 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
-<li>quercus: cleanup list can't use SoftReference (#2542, rep by Matt Johnston)</li>
+<li>jni: write on linux was not properly retrying on EINTR/EAGAIN (#2521, rep by cytown)</li>
+<li>versioning: issues with cookies managing the versioning (#2519, rep by stbu)</li>
+<li>install: add resin.conf.orig to build (#2533, rep by norlab)</li>
+<li>server: add url-length-max configuration (#2431, rep by A C De Baca)</li>
+<li>boot: add watchdog-address (#2717, rep by Eric Kreiser)</li>
+<li>cache: check web-app startup when adding new cache entry (#2474, rep by Martin Thompson)</li>
+<li>amber: serialization of beans with hessian (#2515, rep by Riccardo Cohen)</li>
+<li>hessian: handing of InputStream.read with Hessian2 encoding (#2535, rep by Ray Erdelyan)</li>
+<li>session: handle ClusterObject.isDead() state when object is loaded (#2477, rep by Matt Hansen)</li>
+<li>session: distributed session synchronization needs to occur after the appliction has started (#2447, rep by Cameron Stokes)</li>
+<li>(2008-03-21) quercus: cleanup list can't use SoftReference (#2542, rep by Matt Johnston)</li>
 <li>jsp: dependency generation could mistakenly add classpath: for root-based JSP files (#2486, rep by L Geller)</li>
 <li>rewrite-dispatch: query string resulted in added getParameterValues value (#2464, rep by zdavis)</li>
 <li>quercus: regexp a <= Integer.MAX_VALUE test is unstable for some JIT/OS, so use a <= Integer.MAX_VALUE - 1 (#2526, rep by Chris Chen)</li>

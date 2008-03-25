@@ -474,14 +474,6 @@ public class SessionImpl implements HttpSession, CacheListener {
     return _isValid;
   }
 
-  /**
-   * Set the session valid or invalid.
-   */
-  void setValid(boolean isValid)
-  {
-    _isValid = isValid;
-  }
-
   boolean isClosing()
   {
     return _isClosing;

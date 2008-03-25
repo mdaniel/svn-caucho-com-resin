@@ -104,6 +104,8 @@ r_cluster-Basis =
 
   & r_url-character-encoding?
 
+  & r_url-length-max?
+
   & r_web-app-default*
 
 ## <cluster> flow control
@@ -472,6 +474,9 @@ r_port-Content =
    & (attribute keepalive-connection-time-max { r_period-Type }
       | element keepalive-connection-time-max { r_period-Type })?
 
+   & (attribute keepalive-max { r_int-Type }
+      | element keepalive-max { r_int-Type })?
+
    & (attribute keepalive-timeout { r_period-Type }
       | element keepalive-timeout { r_period-Type })?
 
@@ -656,6 +661,9 @@ r_server-Basis =
 
   & r_user-name?
 
+  & (attribute watchdog-address { string }
+     | element watchdog-address { string })?
+
   & (attribute watchdog-arg { string }
      | element watchdog-arg { string })*
 
@@ -728,6 +736,10 @@ r_url-character-encoding =
   attribute url-character-encoding { string }
   | element url-character-encoding { string }
 
+r_url-length-max =
+  attribute url-length-max { r_int-Type }
+  | element url-length-max { r_int-Type }
+
 r_user-Management = element user {
   r_name
 
@@ -741,8 +753,11 @@ r_user-name =
   | element user-name { string }
 
 r_watchdog-manager = element watchdog-manager {
-  (attribute watchdog-port { string }
-   | element watchdog-port { string })?
+  (attribute watchdog-address { string }
+   | element watchdog-address { string })?
+
+  & (attribute watchdog-port { string }
+     | element watchdog-port { string })?
 
   & (attribute watchdog-jvm-arg { string }
      | element watchdog-jvm-arg { string })*

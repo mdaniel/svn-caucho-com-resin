@@ -353,6 +353,13 @@ public class ClusterServer {
   }
 
   /**
+   * Arguments on boot
+   */
+  public void addWatchdogAddress(String addr)
+  {
+  }
+
+  /**
    * Sets a port.
    */
   public void setPort(int port)
