@@ -560,8 +560,12 @@ public class MysqlModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
 
     Value fieldTable = result.getFieldTable(env, fieldOffset);
+    Value fieldJdbcType = result.getJdbcType(fieldOffset);
+    String fieldMysqlType = result.getMysqlType(fieldOffset);
 
-    if (fieldTable == BooleanValue.FALSE)
+    if ((fieldTable == BooleanValue.FALSE) ||
+        (fieldJdbcType == BooleanValue.FALSE) ||
+        (fieldMysqlType == null))
       return BooleanValue.FALSE;
 
     String sql = "SHOW FULL COLUMNS FROM " + fieldTable.toString() + " LIKE \'" + fieldName.toString() + "\'";
@@ -571,7 +575,10 @@ public class MysqlModule extends AbstractQuercusModule {
     Object metaResult = conn.validateConnection().realQuery(sql);
 
     if (metaResult instanceof MysqliResult)
-      return ((MysqliResult) metaResult).getFieldFlags();
+      return ((MysqliResult) metaResult).getFieldFlagsImproved(
+        env,
+        fieldJdbcType.toInt(),
+        fieldMysqlType);
 
     return BooleanValue.FALSE;
   }

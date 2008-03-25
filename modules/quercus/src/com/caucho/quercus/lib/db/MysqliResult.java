@@ -507,6 +507,107 @@ public class MysqliResult extends JdbcResultResource {
   }
 
   /**
+   * Returns the following field flags: not_null, primary_key, multiple_key, blob,
+   * unsigned zerofill, binary, enum, auto_increment and timestamp
+   * <p/>
+   * it does not return the MySQL / PHP flag unique_key
+   * <p/>
+   * MysqlModule generates a special result set with the appropriate values
+   *
+   * @return the field flags
+   */
+  public Value getFieldFlagsImproved(Env env, int jdbcType, String mysqlType)
+  {
+    try {
+      StringBuilder flags = new StringBuilder();
+
+      // php/142r
+
+      _rs.next();
+      if (! isInResultString(4, "YES"))
+        flags.append("not_null");
+
+      if (isInResultString(5, "PRI")) {
+        if (flags.length() > 0)
+          flags.append(' ');
+        flags.append("primary_key");
+      } else {
+        if (isInResultString(5, "MUL")) {
+          if (flags.length() > 0)
+            flags.append(' ');
+          flags.append("multiple_key");
+        }
+      }
+
+      final boolean isTimestamp = (jdbcType == Types.TIMESTAMP) &&
+        mysqlType.equals("TIMESTAMP");
+
+      if (isInResultString(2, "blob") ||
+          (jdbcType == Types.LONGVARCHAR)) {
+        if (flags.length() > 0)
+          flags.append(' ');
+        flags.append("blob");
+      }
+
+      if (isInResultString(2, "unsigned") ||
+          (jdbcType == Types.BIT && mysqlType.equals("BIT")) ||
+          isTimestamp) {
+        if (flags.length() > 0)
+          flags.append(' ');
+        flags.append("unsigned");
+      }
+
+      if (isInResultString(2, "zerofill") ||
+          isTimestamp) {
+        if (flags.length() > 0)
+          flags.append(' ');
+        flags.append("zerofill");
+      }
+
+      if (isInResultString(3, "bin") ||
+          (jdbcType == Types.BINARY) ||
+          (jdbcType == Types.LONGVARBINARY) ||
+          (jdbcType == Types.VARBINARY) ||
+          (jdbcType == Types.TIME) ||
+          isTimestamp ||
+          isInResultString(2, "date")) {
+        if (flags.length() > 0)
+          flags.append(' ');
+        flags.append("binary");
+      }
+
+      if (isInResultString(2, "enum")) {
+        if (flags.length() > 0)
+          flags.append(' ');
+        flags.append("enum");
+      }
+
+      if (isInResultString(2, "set")) {
+        if (flags.length() > 0)
+          flags.append(' ');
+        flags.append("set");
+      }
+
+      if (isInResultString(7, "auto_increment")) {
+        if (flags.length() > 0)
+          flags.append(' ');
+        flags.append("auto_increment");
+      }
+
+      if (isTimestamp) {
+        if (flags.length() > 0)
+          flags.append(' ');
+        flags.append("timestamp");
+      }
+
+      return env.createString(flags.toString());
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
    * Get Mysql type string
    *
    * @param fieldOffset the field number (0-based)
