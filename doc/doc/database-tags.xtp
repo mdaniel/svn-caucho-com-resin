@@ -291,7 +291,7 @@ tracking down errors.</p>
 
 <p>The &lt;spy> tag is a very useful logging tag for debugging database
 problems.  If &lt;spy> is enabled, all database queries will be logged
-at the "info" level.  Applications can use &lt;spy> to debug unexpected
+at the "fine" level.  Applications can use &lt;spy> to debug unexpected
 database queries, or to improve query performance.</p>
 
 <default>false</default>
