@@ -742,7 +742,7 @@
   </target>
 
   <target name="dist.build" 
-          depends="compile, support, configure, ant, maven-plugin, webapps, win32, configure, javadoc, relaxng">
+          depends="compile, support, configure, ant, maven-plugin, netbeans-plugin, webapps, win32, configure, javadoc, relaxng">
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <delete dir="${dist}/${dist.name}"/>
@@ -809,9 +809,7 @@
         <include name="lib/jms-11.jar"/>
         <include name="lib/jsdk-15.jar"/>
         <include name="lib/jsr88.jar"/>
-	<!--
         <include name="lib/jsf-12.jar"/>
-	-->
         <include name="lib/jstl-11.jar"/>
         <include name="lib/jta-101.jar"/>
         <include name="lib/jws-15.jar"/>
@@ -848,7 +846,7 @@
     <copy todir="${dist}/${dist.name}/plugins" preservelastmodified="true">
       <fileset dir="${install}/lib">
         <include name="resin-ant.jar"/>
-        <include name="jsf-12.jar"/>
+        <include name="netbeans-plugin.nbm"/>
       </fileset>
     </copy >
     

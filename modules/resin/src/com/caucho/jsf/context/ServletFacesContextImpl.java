@@ -47,7 +47,7 @@ public class ServletFacesContextImpl extends FacesContext
   private static final Logger log
     = Logger.getLogger(ServletFacesContextImpl.class.getName());
   
-  private final FacesContextFactoryImpl _factory;
+  private FacesContextFactoryImpl _factory;
 
   private ServletContext _webApp;
   private HttpServletRequest _request;
@@ -70,9 +70,9 @@ public class ServletFacesContextImpl extends FacesContext
   private boolean _isClosed;
   
   protected ServletFacesContextImpl(FacesContextFactoryImpl factory,
-			  ServletContext webApp,
-			  HttpServletRequest request,
-			  HttpServletResponse response)
+				    ServletContext webApp,
+				    HttpServletRequest request,
+				    HttpServletResponse response)
   {
     _factory = factory;
 

@@ -1267,7 +1267,7 @@ public class Port
       if (! _lifecycle.isActive())
         return false;
       else if (_connectionMax <= _connectionCount + _minSpareConnection) {
-	log.warning(conn + " failed keepalive connection max " + _connectionCount);
+	log.warning(conn + " failed keepalive, connection-max=" + _connectionCount);
 	
         return false;
       }
@@ -1275,14 +1275,14 @@ public class Port
 	       acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime()) {
 	// #2262 - skip this check to avoid confusing the load balancer
 	// the keepalive check is in allowKeepalive
-	log.warning(conn + " failed keepalive delay " + (Alarm.getCurrentTime() - acceptStartTime));
+	log.warning(conn + " failed keepalive, delay=" + (Alarm.getCurrentTime() - acceptStartTime));
 	
 	return false;
       }
       else if (false && _keepaliveMax <= _keepaliveCount) {
 	// #2262 - skip this check to avoid confusing the load balancer
 	// the keepalive check is in allowKeepalive
-	log.warning(conn + " failed keepalive max " + _keepaliveCount);
+	log.warning(conn + " failed keepalive, keepalive-max " + _keepaliveCount);
 	
         return false;
       }

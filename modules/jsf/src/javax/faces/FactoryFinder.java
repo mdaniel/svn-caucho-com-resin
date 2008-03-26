@@ -28,6 +28,7 @@
 
 package javax.faces;
 
+import java.lang.ref.*;
 import java.lang.reflect.*;
 import java.io.*;
 import java.util.*;
@@ -56,12 +57,12 @@ public class FactoryFinder
     = new HashMap<String,Class>();
 
   private static final
-    WeakHashMap<ClassLoader,HashMap<String,String>> _factoryNameMap
-    = new WeakHashMap<ClassLoader,HashMap<String,String>>();
+    WeakHashMap<ClassLoader,HashMap<String,ArrayList<String>>> _factoryNameMap
+    = new WeakHashMap<ClassLoader,HashMap<String,ArrayList<String>>>();
 
   private static final
-    WeakHashMap<ClassLoader,HashMap<String,Object>> _factoryMap
-    = new WeakHashMap<ClassLoader,HashMap<String,Object>>();
+    WeakHashMap<ClassLoader,HashMap<String,SoftReference<Object>>> _factoryMap
+    = new WeakHashMap<ClassLoader,HashMap<String,SoftReference<Object>>>();
 
   public static Object getFactory(String factoryName)
   {
@@ -77,38 +78,46 @@ public class FactoryFinder
     ClassLoader loader = thread.getContextClassLoader();
 
     synchronized (_factoryNameMap) {
-      HashMap<String,Object> objMap = _factoryMap.get(loader);
+      HashMap<String,SoftReference<Object>> objMap = _factoryMap.get(loader);
 
       if (objMap != null) {
-	Object factory = objMap.get(factoryName);
+	SoftReference<Object> factoryRef = objMap.get(factoryName);
 
-	if (factory != null)
-	  return factory;
+	if (factoryRef != null) {
+	  Object factory = factoryRef.get();
+
+	  if (factory != null)
+	    return factory;
+	}
       }
 
-      String className = null;
+      ArrayList<String> classNameList = null;
 
-      HashMap<String,String> nameMap = _factoryNameMap.get(loader);
+      HashMap<String,ArrayList<String>> nameMap = _factoryNameMap.get(loader);
       if (nameMap != null) {
-	className = nameMap.get(factoryName);
+	classNameList = nameMap.get(factoryName);
       }
 
-      if (className == null)
-	className = getDefaultFactory(factoryName);
+      if (classNameList == null) {
+	String className = getDefaultFactory(factoryName);
+	classNameList = new ArrayList<String>();
+	classNameList.add(className);
+      }
 
       Object factory = null;
-      if (className != null)
-	factory = createFactory(className, factoryClass, factory, loader);
+      
+      if (classNameList != null)
+	factory = createFactory(classNameList, factoryClass, loader);
 
       if (factory == null)
 	throw new FacesException("No factory found for " + factoryName);
 
       if (objMap == null) {
-	objMap = new HashMap<String,Object>();
+	objMap = new HashMap<String,SoftReference<Object>>();
 	_factoryMap.put(loader, objMap);
       }
 
-      objMap.put(factoryName, factory);
+      objMap.put(factoryName, new SoftReference<Object>(factory));
 
       return factory;
     }
@@ -128,34 +137,35 @@ public class FactoryFinder
     ClassLoader loader = thread.getContextClassLoader();
 
     synchronized (_factoryNameMap) {
-      HashMap<String,Object> objectMap = _factoryMap.get(loader);
+      HashMap<String,SoftReference<Object>> objectMap
+	= _factoryMap.get(loader);
 
       if (objectMap == null) {
-	objectMap = new HashMap<String,Object>();
+	objectMap = new HashMap<String,SoftReference<Object>>();
 	_factoryMap.put(loader, objectMap);
       }
 
-      Object oldFactory = objectMap.get(factoryName);
-
-      if (oldFactory == null)
-	oldFactory = _factoryMap.get(factoryName);
-
-      HashMap<String,String> map = _factoryNameMap.get(loader);
+      HashMap<String,ArrayList<String>> map = _factoryNameMap.get(loader);
 
       if (map == null) {
-	map = new HashMap<String,String>();
+	map = new HashMap<String,ArrayList<String>>();
 	_factoryNameMap.put(loader, map);
       }
 
-      map.put(factoryName, implName);
+      ArrayList<String> classNameList = map.get(factoryName);
+      if (classNameList == null) {
+	classNameList = new ArrayList<String>();
+	map.put(factoryName, classNameList);
+      }
 
-      Object factory = createFactory(implName, factoryClass, oldFactory,
-				     loader);
+      classNameList.add(implName);
+
+      Object factory = createFactory(classNameList, factoryClass, loader);
 
       if (factory == null)
 	throw new FacesException("No factory found for " + factoryName);
 
-      objectMap.put(factoryName, factory);
+      objectMap.put(factoryName, new SoftReference<Object>(factory));
     }
   }
 
@@ -185,6 +195,21 @@ public class FactoryFinder
     else
       return null;
     */
+  }
+
+  private static Object createFactory(ArrayList<String> classNameList,
+				      Class factoryClass,
+				      ClassLoader loader)
+    throws FacesException
+  {
+    Object factory = null;
+
+    for (int i = classNameList.size() - 1; i >= 0; i--) {
+      factory = createFactory(classNameList.get(i), factoryClass,
+			      factory, loader);
+    }
+
+    return factory;
   }
 
   private static Object createFactory(String className,

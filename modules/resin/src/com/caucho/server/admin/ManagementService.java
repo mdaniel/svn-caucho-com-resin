@@ -228,12 +228,9 @@ abstract public class ManagementService
 
   public String toString()
   {
-    return getClass().getName()
-           + "["
-           + _serviceName
-           + ","
-           + _management.getServerId()
-           + "]";
+    return (getClass().getSimpleName()
+	    + "[" + _serviceName
+	    + "," + _management.getServerId() + "]");
   }
 
   private static class HmuxConstraint

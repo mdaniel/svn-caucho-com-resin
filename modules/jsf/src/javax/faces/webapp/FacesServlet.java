@@ -149,5 +149,6 @@ public final class FacesServlet implements Servlet
 
   public void destroy()
   {
+    FactoryFinder.releaseFactories();
   }
 }
