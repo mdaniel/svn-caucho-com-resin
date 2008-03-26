@@ -80,8 +80,18 @@ public class SessionStateManager extends StateManager
       }
 
       if (! isSavingStateInClient(context)) {
-	context.getExternalContext().getSessionMap().put("caucho.jsf.view", state);
-	return "!";
+        Map sessionMap = context.getExternalContext().getSessionMap();
+
+        Map viewMap = (Map) sessionMap.get("caucho.jsf.view");
+
+        if (viewMap == null)
+          viewMap = new HashMap();
+
+        viewMap.put(root.getViewId(), state);
+
+        sessionMap.put("caucho.jsf.view", viewMap);
+        
+        return "!";
       }
 
       return state;
@@ -140,18 +150,25 @@ public class SessionStateManager extends StateManager
     Object state = rsm.getState(context, viewId);//sessionMap.get("caucho.jsf.view");
 
     if (!isSavingStateInClient(context) && "!".equals(((Object [])state) [0])) {
-      state = context.getExternalContext().getSessionMap().get("caucho.jsf.view"); 
+      Map viewMap = (Map) context.getExternalContext()
+        .getSessionMap()
+        .get("caucho.jsf.view");
+
+      if (viewMap != null)
+        state = viewMap.get(viewId);
     }
-    
+
     if (state == null)
       return null;
     else if (state instanceof byte[])
       return restoreView(context, (byte []) state);
+    if (state instanceof Object [])
+      return restoreView(context, (byte []) ((Object []) state) [0]);
     else if (state instanceof StateManager.SerializedView) {
       StateManager.SerializedView serView
         = (StateManager.SerializedView) state;
-      
-      return restoreView(context, (byte []) serView.getStructure());
+
+      return restoreView(context, (byte[]) serView.getStructure());
     }
     else
       throw new IllegalStateException(L.l("unexpected saved state: '{0}'",

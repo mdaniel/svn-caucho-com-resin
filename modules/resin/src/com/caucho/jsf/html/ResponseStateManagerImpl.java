@@ -45,7 +45,7 @@ public class ResponseStateManagerImpl extends ResponseStateManager
   private static final Logger log
     = Logger.getLogger(ResponseStateManagerImpl.class.getName());
 
-  public static final String VIEW_STRUCTURE_PARAM = "javax.faces.ViewStructure";
+  public static final String COMPONENTS_STATE = "com.caucho.jsf.ComponentsState";
 
 
   public void writeState(FacesContext context,
@@ -60,43 +60,28 @@ public class ResponseStateManagerImpl extends ResponseStateManager
     if (values.length != 2)
       throw new IllegalArgumentException();
 
+    String value = encode(values [0]);
 
-    if (values[1] == null) {
-      String value = encode(((Object[]) state)[0]);
+    ResponseWriter rw = context.getResponseWriter();
 
-      ResponseWriter rw = context.getResponseWriter();
+    rw.startElement("input", null);
 
-      rw.startElement("input", null);
+    rw.writeAttribute("type", "hidden", null);
+    rw.writeAttribute("name", VIEW_STATE_PARAM, null);
+    rw.writeAttribute("value", value, null);
 
-      rw.writeAttribute("type", "hidden", null);
-      rw.writeAttribute("name", VIEW_STATE_PARAM, null);
-      rw.writeAttribute("value", value, null);
+    rw.endElement("input");
 
-      rw.endElement("input");
+    rw.write("\n");
 
-      rw.write("\n");
-    } else {
-
-      String value = encode(values[0]);
-      ResponseWriter rw = context.getResponseWriter();
-
-      rw.startElement("input", null);
-
-      rw.writeAttribute("type", "hidden", null);
-      rw.writeAttribute("name", VIEW_STRUCTURE_PARAM, null);
-      rw.writeAttribute("value", value, null);
-
-      rw.endElement("input");
-
-      rw.write("\n");
-
-      value = encode(values[1]);
+    if (values [1] != null) {
+      value = encode(values [1]);
       rw = context.getResponseWriter();
 
       rw.startElement("input", null);
 
       rw.writeAttribute("type", "hidden", null);
-      rw.writeAttribute("name", VIEW_STATE_PARAM, null);
+      rw.writeAttribute("name", COMPONENTS_STATE, null);
       rw.writeAttribute("value", value, null);
 
       rw.endElement("input");
@@ -132,7 +117,7 @@ public class ResponseStateManagerImpl extends ResponseStateManager
   {
     ExternalContext extContext = context.getExternalContext();
 
-    String data = extContext.getRequestParameterMap().get(VIEW_STRUCTURE_PARAM);
+    String data = extContext.getRequestParameterMap().get(VIEW_STATE_PARAM);
 
     return decode(data);
   }
@@ -142,7 +127,10 @@ public class ResponseStateManagerImpl extends ResponseStateManager
   {
     ExternalContext extContext = context.getExternalContext();
 
-    String data = extContext.getRequestParameterMap().get(VIEW_STATE_PARAM);
+    String data = extContext.getRequestParameterMap().get(COMPONENTS_STATE);
+
+    if (data == null)
+      return null;
 
     return decode(data);
   }
