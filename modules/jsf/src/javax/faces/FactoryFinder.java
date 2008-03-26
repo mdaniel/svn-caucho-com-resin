@@ -99,9 +99,8 @@ public class FactoryFinder
       }
 
       if (classNameList == null) {
-	String className = getDefaultFactory(factoryName);
 	classNameList = new ArrayList<String>();
-	classNameList.add(className);
+	classNameList.add(getDefaultFactory(factoryName));
       }
 
       Object factory = null;
@@ -155,6 +154,8 @@ public class FactoryFinder
       ArrayList<String> classNameList = map.get(factoryName);
       if (classNameList == null) {
 	classNameList = new ArrayList<String>();
+	classNameList.add(getDefaultFactory(factoryName));
+			  
 	map.put(factoryName, classNameList);
       }
 
@@ -204,7 +205,7 @@ public class FactoryFinder
   {
     Object factory = null;
 
-    for (int i = classNameList.size() - 1; i >= 0; i--) {
+    for (int i = 0; i < classNameList.size(); i++) {
       factory = createFactory(classNameList.get(i), factoryClass,
 			      factory, loader);
     }
