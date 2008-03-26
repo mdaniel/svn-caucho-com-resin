@@ -77,10 +77,24 @@ public class HtmlCommandLinkTag extends HtmlStyleBaseTag {
   {
     super.setProperties(component);
 
+    UICommand command = (UICommand) component;
+
     if (_action != null)
-      ((UICommand) component).setActionExpression(_action);
-    
-    if (_actionListener != null)
-      ((UICommand) component).addActionListener(_actionListener);
+      command.setActionExpression(_action);
+
+    if (_actionListener != null) {
+      ActionListener actionListener = null;
+
+      for (ActionListener listener: command.getActionListeners()) {
+         if (_actionListener.equals(listener)) {
+           actionListener = listener;
+
+           break;
+         }
+      }
+
+      if (actionListener == null)
+        command.addActionListener(_actionListener);
+    }
   }
 }

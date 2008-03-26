@@ -83,11 +83,9 @@ public class HtmlCommandButtonTag extends HtmlStyleBaseTag {
 
 
     if (_actionListener != null) {
-      ActionListener [] listeners = command.getActionListeners();
-
       ActionListener actionListener = null;
 
-      for (ActionListener listener : listeners) {
+      for (ActionListener listener : command.getActionListeners()) {
         if (listener.equals(_actionListener)) {
           actionListener = listener;
 
