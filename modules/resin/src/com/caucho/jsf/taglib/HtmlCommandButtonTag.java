@@ -76,10 +76,27 @@ public class HtmlCommandButtonTag extends HtmlStyleBaseTag {
   {
     super.setProperties(component);
 
+    UICommand command = (UICommand) component;
+
     if (_action != null)
-      ((UICommand) component).setActionExpression(_action);
-    
-    if (_actionListener != null)
-      ((UICommand) component).addActionListener(_actionListener);
+      command.setActionExpression(_action);
+
+
+    if (_actionListener != null) {
+      ActionListener [] listeners = command.getActionListeners();
+
+      ActionListener actionListener = null;
+
+      for (ActionListener listener : listeners) {
+        if (listener.equals(_actionListener)) {
+          actionListener = listener;
+
+          break;
+        }
+      }
+
+      if (actionListener == null)
+        command.addActionListener(_actionListener);
+    }
   }
 }
