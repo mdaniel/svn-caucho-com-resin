@@ -1717,9 +1717,14 @@ public class JavaJspGenerator extends JspGenerator {
 
   private boolean isGenerateStatic()
   {
-    return (_rootNode.isStatic() &&
-	    ! _parseState.isTag() &&
-	    _parseState.getExtends() == null);
+    // #2548
+    
+    return false;
+    /*
+    return (_rootNode.isStatic()
+	    && ! _parseState.isTag()
+	    && _parseState.getExtends() == null);
+    */
   }
   /**
    * Generates the normal init.

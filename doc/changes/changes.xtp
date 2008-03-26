@@ -12,6 +12,11 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>openssl: ssl_write updates for SSL_ERROR_WANT_READ and SSL_ERROR_WANT_WRITE (#2465, rep by D Ngo)<li>
+<li>resin.conf: ejb-server in ear-default should not have data-source (#2472, rep by stbu)</li>
+<li>jsp: disable caching of "static" jsp pages (#2548, rep by david-peterson)</li>
+<li>hessian: resource counting for SqlDateDeserializer (#2494, rep by gtong)</li>
+<li>hessian: add content-type for servlet (#2500, rep by mccloud35)</li>
 <li>jni: write on linux was not properly retrying on EINTR/EAGAIN (#2521, rep by cytown)</li>
 <li>versioning: issues with cookies managing the versioning (#2519, rep by stbu)</li>
 <li>install: add resin.conf.orig to build (#2533, rep by norlab)</li>
