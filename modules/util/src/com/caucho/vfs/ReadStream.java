@@ -217,7 +217,7 @@ public final class ReadStream extends InputStream
   }
   
   /**
-   * Returns the sets current read position.
+   * Sets the current read position.
    */
   public boolean setPosition(long pos)
     throws IOException

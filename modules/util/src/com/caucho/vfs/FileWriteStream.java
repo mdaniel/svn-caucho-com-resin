@@ -138,4 +138,17 @@ public class FileWriteStream extends VfsStream
     }
   }
 
+  /**
+   * Seeks based on the start.
+   */
+  public void seekStart(long pos)
+    throws IOException
+  {
+    if (_fileChannel == null) {
+      _fileChannel = _os.getChannel();
+    }
+
+    _fileChannel.position(pos);
+  }
+
 }

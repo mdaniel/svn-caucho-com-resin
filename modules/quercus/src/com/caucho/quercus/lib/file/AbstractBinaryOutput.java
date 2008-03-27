@@ -161,6 +161,30 @@ abstract public class AbstractBinaryOutput
     return false;
   }
 
+  public long seek(long offset, int whence)
+  {
+    long position;
+
+    switch (whence) {
+      case BinaryStream.SEEK_CUR:
+        position = getPosition() + offset;
+        break;
+      case BinaryStream.SEEK_END:
+        // don't necessarily have an end
+        position = getPosition();
+        break;
+      case BinaryStream.SEEK_SET:
+      default:
+        position = offset;
+        break;
+    }
+
+    if (! setPosition(position))
+      return -1L;
+    else
+      return position;
+  }
+
   public String getResourceType()
   {
     return "stream";

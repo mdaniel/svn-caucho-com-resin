@@ -39,10 +39,6 @@ import java.io.UnsupportedEncodingException;
  * Interface for a Quercus binary input stream
  */
 public interface BinaryInput extends BinaryStream {
-  public static final int SEEK_SET = 0;
-  public static final int SEEK_CUR = 1;
-  public static final int SEEK_END = 2;
-
   /**
    * Returns an InputStream to the input.
    */
@@ -130,11 +126,5 @@ public interface BinaryInput extends BinaryStream {
    */
   public void setEncoding(String encoding)
     throws UnsupportedEncodingException;
-
-  /**
-   * Seek according to offset and whence.  For fseek() compatibility in 
-   * wrapped streams.
-   */
-  public long seek(long offset, int whence);
 }
 

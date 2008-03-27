@@ -290,14 +290,14 @@ public class AbstractBinaryInputOutput
     long position;
 
     switch (whence) {
-      case BinaryInput.SEEK_CUR:
+      case BinaryStream.SEEK_CUR:
         position = getPosition() + offset;
         break;
-      case BinaryInput.SEEK_END:
+      case BinaryStream.SEEK_END:
         // don't necessarily have an end
         position = getPosition();
         break;
-      case BinaryInput.SEEK_SET:
+      case BinaryStream.SEEK_SET:
       default:
         position = offset;
         break;

@@ -35,6 +35,10 @@ import com.caucho.quercus.env.Value;
  * Interface for a Quercus stream
  */
 public interface BinaryStream {
+  public static final int SEEK_SET = 0;
+  public static final int SEEK_CUR = 1;
+  public static final int SEEK_END = 2;
+
   /**
    * All streams can be closed.
    */
@@ -52,6 +56,12 @@ public interface BinaryStream {
    * Returns true on success, false otherwise.
    */
   public boolean setPosition(long offset);
+
+  /**
+   * Seek according to offset and whence.
+   * For fseek() compatibility in wrapped streams.
+   */
+  public long seek(long offset, int whence);
 
   /**
    * Returns true if end-of-file has been reached

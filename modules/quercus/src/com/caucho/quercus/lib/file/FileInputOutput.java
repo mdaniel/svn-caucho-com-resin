@@ -411,27 +411,31 @@ public class FileInputOutput extends AbstractBinaryOutput
 
   public long seek(long offset, int whence)
   {
+    long position;
+
     switch (whence) {
-      case BinaryInput.SEEK_CUR:
-        offset = getPosition() + offset;
+      case BinaryStream.SEEK_CUR:
+        position = getPosition() + offset;
         break;
-      case BinaryInput.SEEK_END:
+      case BinaryStream.SEEK_END:
         try {
-          offset = _stream.getLength() + offset;
+          position = _stream.getLength() + offset;
         } catch (IOException e) {
           log.log(Level.FINE, e.toString(), e);
 
           return getPosition();
         }
         break;
-      case SEEK_SET:
+      case BinaryStream.SEEK_SET:
       default:
+        position = offset;
         break;
     }
 
-    _stream.seek(offset);
-
-    return offset;
+    if (! setPosition(position))
+      return -1L;
+    else
+      return position;
   }
 
   /**

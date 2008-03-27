@@ -74,6 +74,7 @@ public class WriteStream extends OutputStreamWithBuffer
   private int _writeLength;
 
   private StreamImpl _source;
+  private long _position;
 
   private char []chars;
   private byte []_bytes;
@@ -138,6 +139,7 @@ public class WriteStream extends OutputStreamWithBuffer
 
     this._source = source;
 
+    _position = 0;
     _writeLength = 0;
     flushOnNewline = source.getFlushOnNewline();
     // Possibly, this should be dependent on the source.  For example,
@@ -261,6 +263,7 @@ public class WriteStream extends OutputStreamWithBuffer
     if (_writeBuffer.length <= len) {
       _writeLength = 0;
       _source.write(_writeBuffer, 0, len, false);
+      _position += len;
     }
 
     _writeBuffer[_writeLength++] = (byte) ch;
@@ -285,7 +288,7 @@ public class WriteStream extends OutputStreamWithBuffer
     if (bufferLength <= length &&
 	_source.write(buffer, 0, writeLength,
 		      buf, offset, length, false)) {
-      _writeLength = 0;
+      _position += (writeLength + length);
       return;
     }
     
@@ -305,6 +308,7 @@ public class WriteStream extends OutputStreamWithBuffer
 	int len = writeLength;
 	writeLength = 0;
 	_source.write(buffer, 0, len, false);
+	_position += len;
       }
     }
 
@@ -321,6 +325,7 @@ public class WriteStream extends OutputStreamWithBuffer
   {
     _writeLength = 0;
     _source.write(_writeBuffer, 0, offset, false);
+    _position += offset;
 
     if (_implicitFlush)
       flush();
@@ -348,6 +353,7 @@ public class WriteStream extends OutputStreamWithBuffer
     if (len > 0) {
       _writeLength = 0;
       _source.write(_writeBuffer, 0, len, false);
+      _position += len;
     }
 
     if (_source != null)
@@ -385,6 +391,7 @@ public class WriteStream extends OutputStreamWithBuffer
     if (len > 0) {
       _writeLength = 0;
       _source.write(_writeBuffer, 0, len, false);
+      _position += len;
       _source.flushBuffer();
     }
   }
@@ -392,15 +399,17 @@ public class WriteStream extends OutputStreamWithBuffer
   /**
    * Seeks based on the start
    */
-  public void seekStart(long offset)
+  public void seekStart(long pos)
     throws IOException
   {
     flushBuffer();
 
     StreamImpl source = _source;
     
-    if (source != null)
-      source.seekStart(offset);
+    if (source != null) {
+      source.seekStart(pos);
+      _position = pos;
+    }
   }
 
   /**
@@ -415,6 +424,10 @@ public class WriteStream extends OutputStreamWithBuffer
     
     if (source != null)
       source.seekEnd(offset);
+
+    // XXX : Don't know where end position is
+
+    _position = offset;
   }
 
   /*
@@ -538,6 +551,7 @@ public class WriteStream extends OutputStreamWithBuffer
 
       if (sublen <= 0) {
 	_source.write(writeBuffer, 0, writeLength, false);
+	_position += writeLength;
 	writeLength = 0;
 	sublen = writeBuffer.length - writeLength;
       }
@@ -942,6 +956,7 @@ public class WriteStream extends OutputStreamWithBuffer
       int tmplen = _writeLength;
       _writeLength = 0;
       _source.write(_writeBuffer, 0, tmplen, false);
+      _position += tmplen;
       outputLength += tmplen;
     }
 
@@ -955,6 +970,7 @@ public class WriteStream extends OutputStreamWithBuffer
 	int tmplen = _writeLength;
 	_writeLength = 0;
 	_source.write(_writeBuffer, 0, tmplen, false);
+	_position += tmplen;
       }
     }
 
@@ -1003,6 +1019,7 @@ public class WriteStream extends OutputStreamWithBuffer
       int tmplen = _writeLength;
       _writeLength = 0;
       _source.write(_writeBuffer, 0, tmplen, false);
+      _position += tmplen;
     }
 
     while (totalLength > 0) {
@@ -1021,6 +1038,7 @@ public class WriteStream extends OutputStreamWithBuffer
 	int tmplen = _writeLength;
 	_writeLength = 0;
 	_source.write(_writeBuffer, 0, tmplen, false);
+	_position += tmplen;
       }
     }
 
@@ -1047,6 +1065,7 @@ public class WriteStream extends OutputStreamWithBuffer
       int tmplen = _writeLength;
       _writeLength = 0;
       this._source.write(_writeBuffer, 0, tmplen, false);
+      _position += tmplen;
     }
 
     while ((len = source.read(_writeBuffer,
@@ -1057,6 +1076,7 @@ public class WriteStream extends OutputStreamWithBuffer
 	int tmplen = _writeLength;
 	_writeLength = 0;
 	this._source.write(_writeBuffer, 0, tmplen, false);
+	_position += tmplen;
       }
     }
 
@@ -1261,6 +1281,37 @@ public class WriteStream extends OutputStreamWithBuffer
 
     LockableStream ls = (LockableStream) _source;
     return ls.unlock();
+  }
+
+  /**
+   * Returns the write position.
+   */
+  public long getPosition()
+  {
+    return _position + _writeLength;
+  }
+
+  /**
+   * Sets the current write position.
+   */
+
+  public boolean setPosition(long pos)
+    throws IOException
+  {
+    if (pos < 0) {
+      // Return error on seek to negative stream position
+
+      return false;
+    } else {
+      // Seek backwards/forwards in the stream
+
+      seekStart(pos);
+
+      if (_source != null)
+        return true;
+      else
+        return false;
+    }
   }
 
   private class StreamWriter extends Writer

@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.file;
 
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.env.Value;
@@ -199,6 +200,32 @@ public class FileOutput extends AbstractBinaryOutput
   public Value stat()
   {
     return FileModule.statImpl(_env, getPath());
+  }
+
+  /**
+   * Returns the current location in the file.
+   */
+  public long getPosition()
+  {
+    if (_os == null)
+      return -1;
+
+    return _os.getPosition();
+  }
+
+  /**
+   * Sets the current location in the stream
+   */
+  public boolean setPosition(long offset)
+  {
+    if (_os == null)
+      return false;
+
+    try {
+      return _os.setPosition(offset);
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**

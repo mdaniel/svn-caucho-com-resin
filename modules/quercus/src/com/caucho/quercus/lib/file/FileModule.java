@@ -104,6 +104,10 @@ public class FileModule extends AbstractQuercusModule {
   public static final int PATHINFO_EXTENSION = 4;
   public static final int PATHINFO_FILENAME = 8;
 
+  public static final int SEEK_SET = BinaryStream.SEEK_SET;
+  public static final int SEEK_CUR = BinaryStream.SEEK_CUR;
+  public static final int SEEK_END = BinaryStream.SEEK_END;
+
   private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
   private static final HashMap<String,Value> _constMap
@@ -453,12 +457,12 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Checks for the end of file.
    */
-  public static boolean feof(Env env, @NotNull BinaryInput is)
+  public static boolean feof(Env env, @NotNull BinaryStream binaryStream)
   {
-    if (is == null)
+    if (binaryStream == null)
       return false;
 
-    return is.isEOF();
+    return binaryStream.isEOF();
   }
 
   /**
@@ -1589,13 +1593,14 @@ public class FileModule extends AbstractQuercusModule {
    * @return 0 on success, -1 on error.
    */
   public static Value fseek(Env env,
-			    @NotNull BinaryInput is,
-			    long offset, @Optional int whence)
+			    @NotNull BinaryStream binaryStream,
+			    long offset,
+			    @Optional("SEEK_SET") int whence)
   {
-    if (is == null)
+    if (binaryStream == null)
       return LongValue.MINUS_ONE;
 
-    long position = is.seek(offset, whence);
+    long position = binaryStream.seek(offset, whence);
 
     if (position < 0)
       return LongValue.MINUS_ONE;
@@ -1618,12 +1623,12 @@ public class FileModule extends AbstractQuercusModule {
    * @return position in file or FALSE on error.
    */
   public static Value ftell(Env env,
-			    @NotNull BinaryInput is)
+			    @NotNull BinaryStream binaryStream)
   {
-    if (is == null)
+    if (binaryStream == null)
       return BooleanValue.FALSE;
 
-    long pos = is.getPosition();
+    long pos = binaryStream.getPosition();
 
     if (pos < 0)
       return BooleanValue.FALSE;
@@ -2442,12 +2447,12 @@ public class FileModule extends AbstractQuercusModule {
    * @param is the file resource
    */
   public static Value rewind(Env env,
-			     @NotNull BinaryInput is)
+			     @NotNull BinaryStream binaryStream)
   {
-    if (is == null)
+    if (binaryStream == null)
       return BooleanValue.FALSE;
 
-    fseek(env, is, 0, BinaryInput.SEEK_SET);
+    fseek(env, binaryStream, 0, SEEK_SET);
     
     return BooleanValue.TRUE;
   }
@@ -2763,9 +2768,9 @@ public class FileModule extends AbstractQuercusModule {
     StreamModule.stream_wrapper_register(new StringBuilderValue("php"),
                                          new PhpProtocolWrapper());
 
-    _constMap.put("SEEK_SET", LongValue.create(BinaryInput.SEEK_SET));
-    _constMap.put("SEEK_CUR", LongValue.create(BinaryInput.SEEK_CUR));
-    _constMap.put("SEEK_END", LongValue.create(BinaryInput.SEEK_END));
+    _constMap.put("SEEK_SET", LongValue.create(SEEK_SET));
+    _constMap.put("SEEK_CUR", LongValue.create(SEEK_CUR));
+    _constMap.put("SEEK_END", LongValue.create(SEEK_END));
 
     _constMap.put("LOCK_SH", LongValue.create(LOCK_SH));
     _constMap.put("LOCK_EX", LongValue.create(LOCK_EX));
