@@ -281,6 +281,10 @@ public class Management
     return _cluster;
   }
 
+  public void dumpThreads()
+  {
+  }
+
   public void destroy()
   {
     TransactionManager transactionManager = _transactionManager;

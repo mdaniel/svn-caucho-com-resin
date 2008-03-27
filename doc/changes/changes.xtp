@@ -12,6 +12,7 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>admin: add thread dumps for cpu load and ping failure (#2428)</li>
 <li>cache: update miss rate to better reflect total caching (#2505)</li>
 <li>openssl: ssl_write updates for SSL_ERROR_WANT_READ and SSL_ERROR_WANT_WRITE (#2465, rep by D Ngo)<li>
 <li>resin.conf: ejb-server in ear-default should not have data-source (#2472, rep by stbu)</li>

@@ -275,6 +275,14 @@ public class Resin implements EnvironmentBean, SchemaBean
   }
 
   /**
+   * Returns the resin server.
+   */
+  public static Resin getCurrent()
+  {
+    return getLocal();
+  }
+
+  /**
    * Returns the classLoader
    */
   public ClassLoader getClassLoader()
