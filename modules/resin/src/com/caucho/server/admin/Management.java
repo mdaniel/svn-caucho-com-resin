@@ -169,6 +169,14 @@ public class Management
   }
 
   /**
+   * Create and configure the stat service
+   */
+  public Object createStatService()
+  {
+    throw new ConfigException(L.l("'stat-service' management requires Resin Professional"));
+  }
+
+  /**
    * Create and configure the transaction log.
    */
   public TransactionLog createXaLogService()
