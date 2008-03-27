@@ -51,7 +51,7 @@ class HtmlGraphicImageRenderer extends Renderer
   @Override
   public boolean getRendersChildren()
   {
-    return true;
+    return false;
   }
   
   /**

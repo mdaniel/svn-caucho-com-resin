@@ -357,6 +357,11 @@ class HtmlSelectOneRadioRenderer extends SelectRenderer
 
     out.endElement("table");
     out.write("\n");
+
+    for (UIComponent child : component.getChildren()) {
+      if (child instanceof UIComponent)
+        child.encodeAll(context);
+    }    
   }
 
   /**

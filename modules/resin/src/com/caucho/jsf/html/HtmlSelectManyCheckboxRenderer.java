@@ -415,6 +415,11 @@ class HtmlSelectManyCheckboxRenderer
 
     out.endElement("table");
     out.write("\n");
+
+    for (UIComponent child : component.getChildren()) {
+      if (child instanceof UIOutput)
+        child.encodeAll(context);      
+    }
   }
 
   private void encodeChild(ResponseWriter out,

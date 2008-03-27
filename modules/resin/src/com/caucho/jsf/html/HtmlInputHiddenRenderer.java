@@ -50,7 +50,7 @@ class HtmlInputHiddenRenderer extends Renderer
   @Override
   public boolean getRendersChildren()
   {
-    return true;
+    return false;
   }
 
   /**
@@ -116,6 +116,8 @@ class HtmlInputHiddenRenderer extends Renderer
 
       out.writeAttribute("value", String.valueOf(value), "value");
     }
+
+    out.endElement("input");
   }
 
   /**
@@ -134,9 +136,6 @@ class HtmlInputHiddenRenderer extends Renderer
   public void encodeEnd(FacesContext context, UIComponent component)
     throws IOException
   {
-    ResponseWriter out = context.getResponseWriter();
-
-    out.endElement("input");
   }
 
   public String toString()

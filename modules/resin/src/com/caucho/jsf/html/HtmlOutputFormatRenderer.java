@@ -200,6 +200,11 @@ class HtmlOutputFormatRenderer extends Renderer
 	out.endElement("span");
       }
     }
+
+    for (UIComponent child : component.getChildren()) {
+      if (child instanceof UIOutput)
+        child.encodeAll(context);
+    }
   }
 
   protected String toString(FacesContext context,

@@ -54,7 +54,7 @@ class HtmlInputTextRenderer extends BaseRenderer
   @Override
   public boolean getRendersChildren()
   {
-    return true;
+    return false;
   }
 
   /**
@@ -294,6 +294,8 @@ class HtmlInputTextRenderer extends BaseRenderer
       out.writeAttribute("title", title, "title");
 
     out.writeAttribute("value", toString(context, component, value), "value");
+
+    out.endElement("input");
   }
 
   /**
@@ -303,30 +305,6 @@ class HtmlInputTextRenderer extends BaseRenderer
   public void encodeChildren(FacesContext context, UIComponent component)
     throws IOException
   {
-    /*
-    ResponseWriter out = context.getResponseWriter();
-
-    if (component instanceof HtmlInputText) {
-      HtmlInputText htmlInput = (HtmlInputText) component;
-
-      Object value = htmlInput.getValue();
-
-      if (value == null)
-	return;
-
-      out.writeText(value, "value");
-    }
-    else {
-      Map<String,Object> attrMap = component.getAttributes();
-
-      Object value = attrMap.get("value");
-
-      if (value == null)
-	return;
-
-      out.writeText(value, "value");
-    }
-    */
   }
 
   /**
@@ -336,9 +314,6 @@ class HtmlInputTextRenderer extends BaseRenderer
   public void encodeEnd(FacesContext context, UIComponent component)
     throws IOException
   {
-    ResponseWriter out = context.getResponseWriter();
-
-    out.endElement("input");
   }
 
   public String toString()

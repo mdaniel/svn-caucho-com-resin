@@ -52,7 +52,7 @@ class HtmlBooleanCheckboxRenderer extends Renderer
   @Override
   public boolean getRendersChildren()
   {
-    return true;
+    return false;
   }
 
   /**

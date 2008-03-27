@@ -50,7 +50,7 @@ class HtmlInputSecretRenderer extends Renderer
   @Override
   public boolean getRendersChildren()
   {
-    return true;
+    return false;
   }
 
   /**
@@ -290,6 +290,8 @@ class HtmlInputSecretRenderer extends Renderer
 
     if (redisplay && value != null)
       out.writeAttribute("value", String.valueOf(value), "value");
+
+    out.endElement("input");
   }
 
   /**
@@ -299,30 +301,6 @@ class HtmlInputSecretRenderer extends Renderer
   public void encodeChildren(FacesContext context, UIComponent component)
     throws IOException
   {
-    /*
-    ResponseWriter out = context.getResponseWriter();
-
-    if (component instanceof HtmlInputText) {
-      HtmlInputText htmlInput = (HtmlInputText) component;
-
-      Object value = htmlInput.getValue();
-
-      if (value == null)
-	return;
-
-      out.writeText(value, "value");
-    }
-    else {
-      Map<String,Object> attrMap = component.getAttributes();
-
-      Object value = attrMap.get("value");
-
-      if (value == null)
-	return;
-
-      out.writeText(value, "value");
-    }
-    */
   }
 
   /**
@@ -332,9 +310,6 @@ class HtmlInputSecretRenderer extends Renderer
   public void encodeEnd(FacesContext context, UIComponent component)
     throws IOException
   {
-    ResponseWriter out = context.getResponseWriter();
-
-    out.endElement("input");
   }
 
   public String toString()

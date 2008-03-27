@@ -288,6 +288,11 @@ class HtmlSelectOneListboxRenderer extends SelectRenderer
 
     out.endElement("select");
     out.write("\n");
+
+    for (UIComponent child : component.getChildren()) {
+      if (child instanceof UIOutput)
+        child.encodeAll(context);
+    }
   }
 
   /**

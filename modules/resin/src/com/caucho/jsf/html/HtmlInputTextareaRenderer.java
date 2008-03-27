@@ -50,7 +50,7 @@ class HtmlInputTextareaRenderer extends Renderer
   @Override
   public boolean getRendersChildren()
   {
-    return true;
+    return false;
   }
 
   /**
@@ -272,6 +272,8 @@ class HtmlInputTextareaRenderer extends Renderer
     
     if (value != null)
       out.writeText(String.valueOf(value), "value");
+
+    out.endElement("textarea");
   }
 
   /**
@@ -281,30 +283,6 @@ class HtmlInputTextareaRenderer extends Renderer
   public void encodeChildren(FacesContext context, UIComponent component)
     throws IOException
   {
-    /*
-    ResponseWriter out = context.getResponseWriter();
-
-    if (component instanceof HtmlInputText) {
-      HtmlInputText htmlInput = (HtmlInputText) component;
-
-      Object value = htmlInput.getValue();
-
-      if (value == null)
-	return;
-
-      out.writeText(value, "value");
-    }
-    else {
-      Map<String,Object> attrMap = component.getAttributes();
-
-      Object value = attrMap.get("value");
-
-      if (value == null)
-	return;
-
-      out.writeText(value, "value");
-    }
-    */
   }
 
   /**
@@ -314,9 +292,6 @@ class HtmlInputTextareaRenderer extends Renderer
   public void encodeEnd(FacesContext context, UIComponent component)
     throws IOException
   {
-    ResponseWriter out = context.getResponseWriter();
-
-    out.endElement("textarea");
   }
 
   public String toString()
