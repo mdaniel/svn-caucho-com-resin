@@ -510,6 +510,9 @@ public class Table extends Store {
       case Column.VARBINARY:
 	os.print("VARBINARY(" + column.getDeclarationSize() + ")");
 	break;
+      case Column.SHORT:
+	os.print("SMALLINT");
+	break;
       case Column.INT:
 	os.print("INTEGER");
 	break;

@@ -335,6 +335,8 @@ r_management-Content =
 
   & r_secure?
 
+  & r_stat-service?
+
   & r_user-Management*
 
   & r_xa-log-service?
@@ -601,6 +603,9 @@ r_server-Basis =
 
   & r_cluster-port*
 
+  & (attribute connection-max { r_int-Type }
+     | element connection-max { r_int-Type })?
+
   & r_http*
 
   & (attribute java-exe { string }
@@ -705,6 +710,26 @@ r_session-url-prefix =
 r_ssl-session-cookie = 
   attribute ssl-session-cookie { string }
   | element ssl-session-cookie { string }
+
+r_stat-service = element stat-service {
+  (attribute cpu-load-exit-threshold { r_double-Type }
+   | element cpu-load-exit-threshold { r_double-Type })?
+
+  & (attribute cpu-load-log-info-threshold { r_double-Type }
+     | element cpu-load-log-info-threshold { r_double-Type })?
+
+  & (attribute cpu-load-log-warning-threshold { r_double-Type }
+     | element cpu-load-log-warning-threshold { r_double-Type })?
+
+  & (attribute cpu-load-thread-dump-threshold { r_double-Type }
+     | element cpu-load-thread-dump-threshold { r_double-Type })?
+
+  & (attribute sample-period { r_period-Type }
+     | element sample-period { r_period-Type }) ?
+
+  & (attribute thread-dump-interval { r_period-Type }
+     | element thread-dump-interval { r_period-Type })?
+}
 
 r_thread-max =
   attribute thread-max { string }

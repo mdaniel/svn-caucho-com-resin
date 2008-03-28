@@ -107,7 +107,7 @@ public class Port
 
   private int _acceptListenBacklog = DEFAULT;
 
-  private int _connectionMax = 512;
+  private int _connectionMax = DEFAULT;
 
   private int _keepaliveMax = DEFAULT;
   
@@ -213,6 +213,9 @@ public class Port
 
       if (_acceptListenBacklog == DEFAULT)
 	_acceptListenBacklog = server.getAcceptListenBacklog();
+
+      if (_connectionMax == DEFAULT)
+	_connectionMax = server.getConnectionMax();
 
       if (_keepaliveMax == DEFAULT)
 	_keepaliveMax = server.getKeepaliveMax();

@@ -53,6 +53,7 @@ abstract public class Column {
   public final static int BLOB = 6;
   public final static int NUMERIC = 7;
   public final static int VARBINARY = 8;
+  public final static int SHORT = 9;
   
   private final Row _row;
   private final String _name;

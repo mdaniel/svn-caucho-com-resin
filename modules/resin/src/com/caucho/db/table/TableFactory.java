@@ -113,6 +113,16 @@ public class TableFactory {
   }
 
   /**
+   * Adds a short
+   */
+  public Column addShort(String name)
+  {
+    _row.allocateColumn();
+    
+    return _row.addColumn(new ShortColumn(_row, name));
+  }
+
+  /**
    * Adds an integer
    */
   public Column addInteger(String name)

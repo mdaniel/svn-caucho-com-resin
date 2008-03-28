@@ -142,6 +142,8 @@ class DatabaseMetaDataImpl implements DatabaseMetaData {
       return Types.TIMESTAMP;
     else if ("tinyint".equals(typeName))
       return Types.TINYINT;
+    else if ("smallint".equals(typeName))
+      return Types.SMALLINT;
     else if ("integer".equals(typeName))
       return Types.INTEGER;
     else if ("bigint".equals(typeName))

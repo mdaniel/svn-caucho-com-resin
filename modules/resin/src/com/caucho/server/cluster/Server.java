@@ -123,6 +123,8 @@ public class Server extends ProtocolDispatchServer
   private int _acceptThreadMin = 5;
   private int _acceptThreadMax = 10;
 
+  private int _connectionMax = 1024 * 1024;
+
   // default is in Port
   private int _keepaliveMax = -1;
   
@@ -293,6 +295,24 @@ public class Server extends ProtocolDispatchServer
   public int getAcceptThreadMax()
   {
     return _acceptThreadMax;
+  }
+
+  /**
+   * Sets the maximum connections per port
+   */
+  public void setConnectionMax(int max)
+  {
+    _connectionMax = max;
+  }
+
+  /**
+   * Returns the port-based connection max.
+   *
+   * @return the connection max.
+   */
+  public int getConnectionMax()
+  {
+    return _connectionMax;
   }
 
   /**

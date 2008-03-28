@@ -137,7 +137,16 @@ class MBeanWrapper implements DynamicMBean {
   public Object getAttribute(String name)
     throws ReflectionException, AttributeNotFoundException, MBeanException
   {
-    return _mbean.getAttribute(name);
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_context.getClassLoader());
+      
+      return _mbean.getAttribute(name);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
   
   /**
@@ -145,7 +154,16 @@ class MBeanWrapper implements DynamicMBean {
    */
   public AttributeList getAttributes(String []names)
   {
-    return _mbean.getAttributes(names);
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_context.getClassLoader());
+      
+      return _mbean.getAttributes(names);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   /**
@@ -157,7 +175,16 @@ class MBeanWrapper implements DynamicMBean {
 	   InvalidAttributeValueException,
 	   MBeanException
   {
-    _mbean.setAttribute(attr);
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_context.getClassLoader());
+      
+      _mbean.setAttribute(attr);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
   
   /**
@@ -165,7 +192,16 @@ class MBeanWrapper implements DynamicMBean {
    */
   public AttributeList setAttributes(AttributeList list)
   {
-    return _mbean.setAttributes(list);
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_context.getClassLoader());
+      
+      return _mbean.setAttributes(list);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   /**
@@ -176,7 +212,16 @@ class MBeanWrapper implements DynamicMBean {
 		       String[]signature)
     throws ReflectionException, MBeanException
   {
-    return _mbean.invoke(operation, params, signature);
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_context.getClassLoader());
+      
+      return _mbean.invoke(operation, params, signature);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   /**

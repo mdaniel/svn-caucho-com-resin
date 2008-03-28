@@ -212,6 +212,14 @@ public class SelectResult {
       _wasNull = true;
       return null;
       
+    case Column.SHORT:
+      {
+	int value = ((read() << 8)
+		     + (read()));
+
+	return String.valueOf(value);
+      }
+      
     case Column.INT:
       {
 	int value = ((read() << 24) +
@@ -290,6 +298,14 @@ public class SelectResult {
       _wasNull = true;
       return 0;
       
+    case Column.SHORT:
+      {
+	int value = ((read() << 8)
+		     + (read()));
+
+	return value;
+      }
+      
     case Column.INT:
       {
 	int value = ((read() << 24) +
@@ -355,6 +371,14 @@ public class SelectResult {
       _wasNull = true;
       return 0;
       
+    case Column.SHORT:
+      {
+	int value = ((read() << 8)
+		     + (read()));
+
+	return value;
+      }
+      
     case Column.INT:
       {
 	int value = ((read() << 24) +
@@ -419,6 +443,14 @@ public class SelectResult {
     case Column.NONE:
       _wasNull = true;
       return 0;
+      
+    case Column.SHORT:
+      {
+	int value = ((read() << 8)
+		     + (read()));
+
+	return value;
+      }
       
     case Column.INT:
       {
@@ -729,6 +761,9 @@ public class SelectResult {
 	_offset += sublen;
 	break;
 
+      case Column.SHORT:
+	_offset += 2;
+	break;
       case Column.INT:
 	_offset += 4;
 	break;
@@ -905,6 +940,16 @@ public class SelectResult {
     write(Column.INT);
     write(value >> 24);
     write(value >> 16);
+    write(value >> 8);
+    write(value);
+  }
+
+  /**
+   * Writes a short
+   */
+  public void writeShort(int value)
+  {
+    write(Column.SHORT);
     write(value >> 8);
     write(value);
   }
