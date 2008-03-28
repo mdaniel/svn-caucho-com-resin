@@ -692,9 +692,7 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
-   * Appends as an argument - only called from compiled code
-   *
-   * XXX: change name to appendArg
+   * Puts all of the arg elements into this array.
    */
   public void putAll(ArrayValue array)
   {

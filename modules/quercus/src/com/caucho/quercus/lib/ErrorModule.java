@@ -68,6 +68,7 @@ public class ErrorModule extends AbstractQuercusModule {
   public static final int E_USER_NOTICE = Env.E_USER_NOTICE;
   public static final int E_ALL = Env.E_ALL;
   public static final int E_STRICT = Env.E_STRICT;
+  public static final int E_RECOVERABLE_ERROR = Env.E_RECOVERABLE_ERROR;
 
   private long _errorReporting = Env.E_DEFAULT;
 
@@ -549,7 +550,7 @@ public class ErrorModule extends AbstractQuercusModule {
   static final IniDefinition INI_ERROR_REPORING
     = _iniDefinitions.add("error_reporing", null, PHP_INI_ALL);
   static final IniDefinition INI_DISPLAY_ERRORS
-    = _iniDefinitions.add("display_errors", true, PHP_INI_ALL);
+    = _iniDefinitions.add("display_errors", "1", PHP_INI_ALL);
   static final IniDefinition INI_DISPLAY_STARTUP_ERRORS
     = _iniDefinitions.add("display_startup_errors", false, PHP_INI_ALL);
   static final IniDefinition INI_LOG_ERRORS

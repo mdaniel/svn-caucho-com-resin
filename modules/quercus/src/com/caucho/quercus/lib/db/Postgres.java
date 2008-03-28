@@ -33,6 +33,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Method;
@@ -137,7 +138,7 @@ public class Postgres extends JdbcConnectionResource {
   {
     PostgresStatement stmt = new PostgresStatement((Postgres)validateConnection());
 
-    stmt.prepare(query);
+    stmt.prepare(env, query);
 
     return stmt;
   }
@@ -149,7 +150,7 @@ public class Postgres extends JdbcConnectionResource {
    *
    * @return a {@link JdbcResultResource}, or null for failure
    */
-  public PostgresResult query(String sql)
+  public PostgresResult query(Env env, String sql)
   {
     SqlParseToken tok = parseSqlToken(sql, null);
 
@@ -174,7 +175,12 @@ public class Postgres extends JdbcConnectionResource {
       }
     }
 
-    return (PostgresResult) realQuery(sql);
+    Object result = realQuery(env, sql).toJavaObject();
+    
+    if (! (result instanceof PostgresResult))
+      return null;
+    
+    return (PostgresResult) result;
   }
 
   /**

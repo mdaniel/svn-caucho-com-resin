@@ -81,20 +81,6 @@ public class JdbcStatementResource {
    * Constructor for JdbcStatementResource
    *
    * @param connV a JdbcConnectionResource connection
-   * @param query a query string to prepare this statement
-   */
-  public JdbcStatementResource(JdbcConnectionResource connV,
-                               String query)
-    throws SQLException
-  {
-    _conn = connV;
-    prepareStatement(query);
-  }
-
-  /**
-   * Constructor for JdbcStatementResource
-   *
-   * @param connV a JdbcConnectionResource connection
    */
   public JdbcStatementResource(JdbcConnectionResource connV)
   {
@@ -523,7 +509,7 @@ public class JdbcStatementResource {
    * @param query SQL query
    * @return true on success or false on failure
    */
-  public boolean prepare(StringValue query)
+  public boolean prepare(Env env, StringValue query)
   {
     try {
 
@@ -535,14 +521,19 @@ public class JdbcStatementResource {
       if (_query.length() == 0)
         return false;
 
+      Connection conn = _conn.getConnection(env);
+      
+      if (conn == null)
+        return false;
+      
       if (this instanceof OracleStatement) {
-        _stmt = _conn.getConnection().prepareCall(_query,
-                                                  ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                                  ResultSet.CONCUR_READ_ONLY);
+        _stmt = conn.prepareCall(_query,
+                                 ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                 ResultSet.CONCUR_READ_ONLY);
       } else {
-        _stmt = _conn.getConnection().prepareStatement(_query,
-                                                       ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                                       ResultSet.CONCUR_READ_ONLY);
+        _stmt = conn.prepareStatement(_query,
+                                      ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                      ResultSet.CONCUR_READ_ONLY);
       }
 
       return true;
@@ -561,7 +552,7 @@ public class JdbcStatementResource {
    * @param query SQL query
    * @return true on success or false on failure
    */
-  public boolean prepareStatement(String query)
+  public boolean prepareStatement(Env env, String query)
   {
     try {
 
@@ -570,14 +561,19 @@ public class JdbcStatementResource {
 
       _query = query;
 
+      Connection conn = _conn.getConnection(env);
+      
+      if (conn == null)
+        return false;
+      
       if (this instanceof OracleStatement) {
-        _stmt = _conn.getConnection().prepareCall(query,
-                                                  ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                                  ResultSet.CONCUR_READ_ONLY);
+        _stmt = conn.prepareCall(query,
+                                ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                ResultSet.CONCUR_READ_ONLY);
       } else {
-        _stmt = _conn.getConnection().prepareStatement(query,
-                                                       ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                                       ResultSet.CONCUR_READ_ONLY);
+        _stmt = conn.prepareStatement(query,
+                                      ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                      ResultSet.CONCUR_READ_ONLY);
       }
 
       return true;

@@ -297,9 +297,6 @@ public class Post {
                                   String []formValueList,
                                   boolean addSlashesToValues)
   {
-    // php/081h
-    key = key.replaceAll("\\.", "_");
-    
     int p = key.indexOf('[');
     int q = key.indexOf(']', p);
 
@@ -311,6 +308,8 @@ public class Post {
 
       if (p > 0) {
         key = key.substring(0, p);
+        
+        key = key.replaceAll("\\.", "_");
         
         keyValue = env.createString(key);
         existingValue = array.get(keyValue);
@@ -385,6 +384,8 @@ public class Post {
         put(array, env.createString(index), formValue, addSlashesToValues);
     }
     else {
+      key = key.replaceAll("\\.", "_");
+      
       put(array, env.createString(key), formValue, addSlashesToValues);
     }
   }

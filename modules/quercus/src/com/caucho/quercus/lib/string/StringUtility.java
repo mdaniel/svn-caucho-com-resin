@@ -84,7 +84,7 @@ public class StringUtility
         }
       
         for (; i < len && (ch = str.charAt(i)) != '='; i++) {
-          i = addQueryChar(byteToChar, str, len, i, ch, true);
+          i = addQueryChar(byteToChar, str, len, i, ch);
         }
 
         String key = byteToChar.getConvertedString();
@@ -94,7 +94,7 @@ public class StringUtility
         String value;
         if (ch == '=') {
           for (i++; i < len && (ch = str.charAt(i)) != '&'; i++) {
-            i = addQueryChar(byteToChar, str, len, i, ch, false);
+            i = addQueryChar(byteToChar, str, len, i, ch);
           }
 
           value = byteToChar.getConvertedString();
@@ -111,7 +111,10 @@ public class StringUtility
           int openBracketIndex = key.indexOf('[');
           int closeBracketIndex = key.indexOf(']');
           if (openBracketIndex > 0) {
-            Value v = env.getVar(key.substring(0,openBracketIndex)).getRawValue();
+            String arrayName = key.substring(0, openBracketIndex);
+            arrayName = arrayName.replaceAll("\\.", "_");
+            
+            Value v = env.getVar(arrayName).getRawValue();
             if (v instanceof ArrayValue) {
               //Check to make sure valid string (ie: foo[...])
               if (closeBracketIndex < 0) {
@@ -119,7 +122,7 @@ public class StringUtility
                 return NullValue.NULL;
               }
               if (closeBracketIndex > openBracketIndex + 1) {
-                String index = key.substring(key.indexOf('[') + 1,key.indexOf(']'));
+                String index = key.substring(key.indexOf('[') + 1, key.indexOf(']'));
                 v.put(env.createString(index), env.createString(value));
               } else {
                 v.put(env.createString(value));
@@ -149,8 +152,7 @@ public class StringUtility
                                     String str,
                                     int len,
                                     int i,
-                                    int ch,
-                                    boolean isConvertDots)
+                                    int ch)
     throws IOException
   {
     if (str == null)
@@ -175,14 +177,6 @@ public class StringUtility
         byteToChar.addByte((byte) ch);
         return i;
       }
-
-    case '.':
-      if (isConvertDots)
-        byteToChar.addChar('_');
-      else
-        byteToChar.addByte((byte) ch);
-
-      return i;
 
     default:
       byteToChar.addByte((byte) ch);

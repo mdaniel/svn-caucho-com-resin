@@ -285,7 +285,9 @@ public class MysqliResult extends JdbcResultResource {
 
     MysqliResult metaResult;
 
-    metaResult = ((Mysqli) getConnection()).metaQuery(sql, fieldCatalog.toString());
+    metaResult = ((Mysqli) getConnection()).metaQuery(env,
+                                                      sql,
+                                                      fieldCatalog.toString());
 
     if (metaResult == null)
       return BooleanValue.FALSE;

@@ -387,16 +387,20 @@ public abstract class JdbcConnectionResource
   /**
    * Returns the connection
    */
-  public final Connection getConnection()
+  public final Connection getConnection(Env env)
   {
     _isUsed = true;
     
     if (_conn != null)
       return _conn;
-    else if (_errorMessage != null)
-      throw new QuercusModuleException(_errorMessage);
-    else
-      throw new QuercusModuleException(L.l("Connection is not available"));
+    else if (_errorMessage != null) {
+      env.warning(_errorMessage);
+      return null;
+    }
+    else {
+      env.warning(L.l("Connection is not available"));
+      return null;
+    }
   }
 
   /**
@@ -577,7 +581,7 @@ public abstract class JdbcConnectionResource
   /**
    * Execute a single query.
    */
-  protected JdbcResultResource realQuery(String sql)
+  protected Value realQuery(Env env, String sql)
   {
     clearErrors();
 
@@ -586,7 +590,10 @@ public abstract class JdbcConnectionResource
     Statement stmt = null;
 
     try {
-      Connection conn = getConnection();
+      Connection conn = getConnection(env);
+      
+      if (conn == null)
+        return BooleanValue.FALSE;
 
       checkSql(conn, sql);
       
@@ -644,7 +651,7 @@ public abstract class JdbcConnectionResource
       } catch (SQLException e) {
         saveErrors(e);
         log.log(Level.FINEST, e.toString(), e);
-        return null;
+        return BooleanValue.FALSE;
       }
     } catch (SQLException e) {
       saveErrors(e);
@@ -654,16 +661,16 @@ public abstract class JdbcConnectionResource
         keepResourceValues(stmt);
       } else {
         log.log(Level.FINEST, e.toString(), e);
-        return null;
+        return BooleanValue.FALSE;
       }
     } catch (IllegalStateException e) {
       // #2184, some drivers return this on closed connection
       saveErrors(new SQLExceptionWrapper(e));
 
-      return null;
+      return BooleanValue.FALSE;
     }
 
-    return _rs;
+    return env.wrapJava(_rs);
   }
 
   private void checkSql(Connection conn, String sql)
@@ -793,7 +800,7 @@ public abstract class JdbcConnectionResource
    * Creates a database-specific result.
    */
   protected JdbcResultResource createResult(Env env,
-					    Statement stmt,
+                                            Statement stmt,
                                             ResultSet rs)
   {
     return new JdbcResultResource(env, stmt, rs, this);
@@ -954,14 +961,16 @@ public abstract class JdbcConnectionResource
   /**
    * Pings the database
    */
-  public boolean ping()
+  public boolean ping(Env env)
   {
     try {
 
-      return isConnected() && ! getConnection().isClosed();
+      return isConnected() && ! getConnection(env).isClosed();
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
+      env.warning(e.toString(), e);
+      
       return false;
     }
   }

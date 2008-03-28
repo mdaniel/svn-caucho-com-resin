@@ -37,6 +37,7 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
+import java.sql.Connection;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -167,7 +168,12 @@ public class MysqlModule extends AbstractQuercusModule {
     // XXX: move implementation
     try {
       try {
-        stmt = conn.validateConnection().getConnection().createStatement();
+        Connection sqlConn = conn.validateConnection().getConnection(env);
+        
+        if (sqlConn == null)
+          return false;
+        
+        stmt = sqlConn.createStatement();
         stmt.setEscapeProcessing(false);
         stmt.executeUpdate("CREATE DATABASE " + name.toString());
       } finally {
@@ -572,8 +578,10 @@ public class MysqlModule extends AbstractQuercusModule {
 
     Mysqli conn = getConnection(env);
 
-    Object metaResult = conn.validateConnection().realQuery(sql);
+    Value resultV = conn.validateConnection().realQuery(env, sql);
 
+    Object metaResult = resultV.toJavaObject();
+    
     if (metaResult instanceof MysqliResult)
       return ((MysqliResult) metaResult).getFieldFlagsImproved(
         env,
@@ -775,18 +783,21 @@ public class MysqlModule extends AbstractQuercusModule {
     if (conn == null)
       conn = getConnection(env);
 
-    return conn.insert_id();
+    return conn.insert_id(env);
   }
 
   /**
    * Returns a result pointer containing the databases available from the current mysql daemon.
    */
-  public static JdbcResultResource mysql_list_dbs(Env env, @Optional Mysqli conn)
+  public static Value mysql_list_dbs(Env env,
+                                     @Optional Mysqli conn)
   {
     if (conn == null)
       conn = getConnection(env);
 
-    return conn.list_dbs();
+    return mysql_query(env,
+                       env.createString("SELECT SCHEMA_NAME AS 'Database' FROM information_schema.SCHEMATA"),
+                       conn);
   }
 
   /**
@@ -1023,7 +1034,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (conn == null)
       conn = getConnection(env);
 
-    return conn.ping();
+    return conn.ping(env);
   }
 
   /**
@@ -1081,7 +1092,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (conn == null)
       conn = getConnection(env);
 
-    return conn.thread_id();
+    return conn.thread_id(env);
   }
 
   //@todo mysql_list_processes()

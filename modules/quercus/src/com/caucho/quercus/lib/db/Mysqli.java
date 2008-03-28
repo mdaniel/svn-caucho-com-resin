@@ -713,9 +713,9 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Quercus function to get the field 'insert_id'.
    */
-  public Value getinsert_id()
+  public Value getinsert_id(Env env)
   {
-    return insert_id();
+    return insert_id(env);
   }
   
   /**
@@ -724,12 +724,15 @@ public class Mysqli extends JdbcConnectionResource {
    * an AUTO_INCREMENT value, or FALSE if no MySQL connection was established
    *
    */
-  public Value insert_id()
+  public Value insert_id(Env env)
   {
     try {
       JdbcConnectionResource connV = validateConnection();
-      Connection conn = connV.getConnection();
+      Connection conn = connV.getConnection(env);
 
+      if (conn == null)
+        return BooleanValue.FALSE;
+      
       Statement stmt = null;
 
       try {
@@ -769,9 +772,9 @@ public class Mysqli extends JdbcConnectionResource {
    * executes one or multiple queries which are
    * concatenated by a semicolon.
    */
-  public boolean multi_query(StringValue query)
+  public boolean multi_query(Env env, StringValue query)
   {
-    return ((Mysqli) validateConnection()).multiQuery(query);
+    return ((Mysqli) validateConnection()).multiQuery(env, query);
   }
 
   /**
@@ -804,16 +807,7 @@ public class Mysqli extends JdbcConnectionResource {
                      StringValue sql,
                      @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
-    MysqliResult result = (MysqliResult) realQuery(sql.toString());
-
-    if (result != null)
-      return env.wrapJava(result);
-    else if (getErrorMessage() == null) {
-      // No error, this was an UPDATE, DELETE, etc.
-      return BooleanValue.TRUE;
-    }
-    else
-      return BooleanValue.FALSE;
+    return realQuery(env, sql.toString());
   }
 
   /**
@@ -821,7 +815,8 @@ public class Mysqli extends JdbcConnectionResource {
    * to handle any special cases.
    */
 
-  protected JdbcResultResource realQuery(String sql)
+  @Override
+  protected Value realQuery(Env env, String sql)
   {
     clearErrors();
 
@@ -832,7 +827,10 @@ public class Mysqli extends JdbcConnectionResource {
     try {
       // Check for valid conneciton
 
-      getConnection();
+      Connection conn = getConnection(env);
+      
+      if (conn == null)
+        return BooleanValue.FALSE;
 
       SqlParseToken tok = parseSqlToken(sql, null);
 
@@ -857,7 +855,7 @@ public class Mysqli extends JdbcConnectionResource {
 
           setCatalog(dbname);
 
-          return null;
+          return BooleanValue.TRUE;
         }
       }
       else if (tok != null &&
@@ -868,17 +866,17 @@ public class Mysqli extends JdbcConnectionResource {
         _lastSQLWasUpdate = true;
       }
 
-      return super.realQuery(sql);
+      return super.realQuery(env, sql);
     } catch (SQLException e) {
       saveErrors(e);
 
       log.log(Level.FINEST, e.toString(), e);
-      return null;
+      return BooleanValue.FALSE;
     } catch (IllegalStateException e) {
       // #2184, some drivers return this on closed connection
       saveErrors(new SQLExceptionWrapper(e));
 
-      return null;
+      return BooleanValue.FALSE;
     }
   }
 
@@ -896,7 +894,7 @@ public class Mysqli extends JdbcConnectionResource {
     // result managemenet logic in multiQuery(), so that a future call to
     // mysqli_store_result() will work as expected.
 
-    return multiQuery(query);
+    return multiQuery(env, query);
   }
 
   /**
@@ -906,7 +904,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     MysqliStatement stmt = new MysqliStatement((Mysqli) validateConnection());
 
-    boolean result = stmt.prepare(query);
+    boolean result = stmt.prepare(env, query);
 
     if (! result) {
       stmt.close();
@@ -1031,7 +1029,11 @@ public class Mysqli extends JdbcConnectionResource {
     try {
       JdbcConnectionResource connV = validateConnection();
 
-      Connection conn = connV.getConnection();
+      Connection conn = connV.getConnection(env);
+      
+      if (conn == null)
+        return BooleanValue.FALSE;
+      
       Statement stmt = null;
 
       StringBuilder str = new StringBuilder();
@@ -1118,9 +1120,9 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Quercus function to get the field 'thread_id'.
    */
-  public Value getthread_id()
+  public Value getthread_id(Env env)
   {
-    return thread_id();
+    return thread_id(env);
   }
 
   /**
@@ -1130,11 +1132,14 @@ public class Mysqli extends JdbcConnectionResource {
    * Return an integer on success, FALSE on failure.
    */
 
-  Value thread_id()
+  Value thread_id(Env env)
   {
     try {
       JdbcConnectionResource connV = validateConnection();
-      Connection conn = connV.getConnection();
+      Connection conn = connV.getConnection(env);
+      
+      if (conn == null)
+        return BooleanValue.FALSE;
 
       Statement stmt = null;
 
@@ -1166,8 +1171,11 @@ public class Mysqli extends JdbcConnectionResource {
   {
     try {
       JdbcConnectionResource connV = validateConnection();
-      Connection conn = connV.getConnection();
+      Connection conn = connV.getConnection(env);
 
+      if (conn == null)
+        return false;
+      
       Statement stmt = null;
       boolean result = false;
 
@@ -1217,9 +1225,9 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Quercus function to get the field 'warning_count'.
    */
-  public int getwarning_count()
+  public int getwarning_count(Env env)
   {
-    return warning_count();
+    return warning_count(env);
   }
   
   /**
@@ -1228,9 +1236,9 @@ public class Mysqli extends JdbcConnectionResource {
    *
    * @return number of warnings
    */
-  public int warning_count()
+  public int warning_count(Env env)
   {
-    return ((Mysqli) validateConnection()).getWarningCount();
+    return ((Mysqli) validateConnection()).getWarningCount(env);
   }
 
   /**
@@ -1249,11 +1257,11 @@ public class Mysqli extends JdbcConnectionResource {
    *
    * @return # of warnings
    */
-  private int getWarningCount()
+  private int getWarningCount(Env env)
   {
     if (getWarnings() != null) {
       JdbcResultResource warningResult;
-      warningResult = metaQuery("SHOW WARNINGS", getCatalog().toString());
+      warningResult = metaQuery(env, "SHOW WARNINGS", getCatalog().toString());
       int warningCount = 0;
 
       if (warningResult != null) {
@@ -1277,7 +1285,8 @@ public class Mysqli extends JdbcConnectionResource {
    *
    * This function DOES NOT clear existing resultsets.
    */
-  protected MysqliResult metaQuery(String sql,
+  protected MysqliResult metaQuery(Env env,
+                                   String sql,
                                    String catalog)
   {
     clearErrors();
@@ -1285,20 +1294,25 @@ public class Mysqli extends JdbcConnectionResource {
     Value currentCatalog = getCatalog();
 
     try {
-      getConnection().setCatalog(catalog);
+      Connection conn = getConnection(env);
+      
+      if (conn == null)
+        return null;
+      
+      conn.setCatalog(catalog);
 
       // need to create statement after setting catalog or
       // else statement will have wrong catalog
-      Statement stmt = getConnection().createStatement();
+      Statement stmt = conn.createStatement();
       stmt.setEscapeProcessing(false);
 
       if (stmt.execute(sql)) {
         MysqliResult result
 	  = (MysqliResult) createResult(getEnv(), stmt, stmt.getResultSet());
-        getConnection().setCatalog(currentCatalog.toString());
+        conn.setCatalog(currentCatalog.toString());
         return result;
       } else {
-        getConnection().setCatalog(currentCatalog.toString());
+        conn.setCatalog(currentCatalog.toString());
         return null;
       }
     } catch (SQLException e) {
@@ -1337,7 +1351,7 @@ public class Mysqli extends JdbcConnectionResource {
    * depending on the last query entered.  Not sure what
    * actual PHP intention is.
    */
-  private boolean multiQuery(StringValue sql)
+  private boolean multiQuery(Env env, StringValue sql)
   {
     clearErrors();
 
@@ -1354,7 +1368,12 @@ public class Mysqli extends JdbcConnectionResource {
       setResultResource(null);
 
       for (String s : splitQuery) {
-        stmt = getConnection().createStatement();
+        Connection conn = getConnection(env);
+        
+        if (conn == null)
+          return false;
+        
+        stmt = conn.createStatement();
         stmt.setEscapeProcessing(false);
         if (stmt.execute(s)) {
           setAffectedRows(0);

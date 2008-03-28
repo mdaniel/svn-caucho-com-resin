@@ -132,7 +132,7 @@ public class Oracle extends JdbcConnectionResource {
   {
     OracleStatement stmt = new OracleStatement((Oracle) validateConnection());
 
-    stmt.prepare(query);
+    stmt.prepare(env, query);
 
     return stmt;
   }

@@ -100,6 +100,7 @@ public class Env {
   public static final int B_USER_WARNING = 9;
   public static final int B_USER_NOTICE = 10;
   public static final int B_STRICT = 11;
+  public static final int B_RECOVERABLE_ERROR = 12;
 
   public static final int E_ERROR = 1 << B_ERROR;
   public static final int E_WARNING = 1 << B_WARNING;
@@ -112,8 +113,9 @@ public class Env {
   public static final int E_USER_ERROR = 1 << B_USER_ERROR;
   public static final int E_USER_WARNING = 1 << B_USER_WARNING;
   public static final int E_USER_NOTICE = 1 << B_USER_NOTICE;
-  public static final int E_ALL = 2048 - 1;
+  public static final int E_ALL = 6143; //(4096 + 2048 - 1)
   public static final int E_STRICT = 1 << B_STRICT;
+  public static final int E_RECOVERABLE_ERROR = 1 << B_RECOVERABLE_ERROR;
 
   public static final int E_DEFAULT = E_ALL & ~E_NOTICE;
 
@@ -1776,13 +1778,13 @@ public class Env {
                              array,
                              true,
                              getHttpInputEncoding());
-
+      
       return var;
     }
       
     case _REQUEST: {
       var = new Var();
-
+      
       ArrayValue array = new ArrayValueImpl();
 
       var.set(array);
@@ -1821,13 +1823,22 @@ public class Env {
       }
 
       if (name.equals("_REQUEST") && _post != null) {
+        
         for (Map.Entry<Value, Value> entry : _post.entrySet()) {
-          array.put(entry.getKey(), entry.getValue().copy());
+          Value key = entry.getKey();
+          Value value = entry.getValue();
+          
+          Value existingValue = array.get(key);
+          
+          if (existingValue.isArray() && value.isArray())
+           existingValue.toArrayValue(this).putAll(value.toArrayValue(this));
+          else
+            array.put(entry.getKey(), entry.getValue().copy());
         }
       }
 
       Cookie []cookies = _request.getCookies();
-      for (int i = 0; cookies != null && i < cookies.length; i++) {      
+      for (int i = 0; cookies != null && i < cookies.length; i++) {   
         Cookie cookie = cookies[i];
 
         String decodedValue = decodeValue(cookie.getValue());
@@ -1838,7 +1849,7 @@ public class Env {
                           new String[] { decodedValue },
                           isMagicQuotes);
       }
-
+      
       return var;
     }
 
@@ -4254,6 +4265,9 @@ public class Env {
 
     if ((mask & E_STRICT) != 0)
       _errorHandlers[B_STRICT] = fun;
+    
+    if ((mask & E_RECOVERABLE_ERROR) != 0)
+      _errorHandlers[B_RECOVERABLE_ERROR] = fun;
   }
 
   /**
@@ -4370,8 +4384,10 @@ public class Env {
 
 	if (getIniBoolean("track_errors"))
 	  setGlobalValue("php_errormsg", createString(fullMsg));
-
-	if (getIniBoolean("display_errors"))
+	
+	if ("stderr".equals(getIniString("display_errors")))
+	  System.err.println(fullMsg);
+	else if (getIniBoolean("display_errors"))
 	  getOut().println(fullMsg);
 
 	if (getIniBoolean("log_errors"))
@@ -4431,6 +4447,8 @@ public class Env {
       return "Notice: ";
     case E_STRICT:
       return "Notice: ";
+    case E_RECOVERABLE_ERROR:
+      return "Error: ";
 
     default:
       return String.valueOf("ErrorCode(" + code + ")");

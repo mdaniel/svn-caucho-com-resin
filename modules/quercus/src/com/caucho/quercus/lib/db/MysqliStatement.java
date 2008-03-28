@@ -330,7 +330,7 @@ public class MysqliStatement extends JdbcStatementResource {
                          StringValue query)
   {
     try {
-      return super.prepare(query);
+      return super.prepare(env, query);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return false;
@@ -478,14 +478,14 @@ public class MysqliStatement extends JdbcStatementResource {
   /**
    * Quercus function to get the field 'insert_id'.
    */
-  public Value getinsert_id()
+  public Value getinsert_id(Env env)
   {
-    return insert_id();
+    return insert_id(env);
   }
 
-  public Value insert_id()
+  public Value insert_id(Env env)
   {
-    return ((Mysqli) validateConnection()).insert_id();
+    return ((Mysqli) validateConnection()).insert_id(env);
   }
 }
 

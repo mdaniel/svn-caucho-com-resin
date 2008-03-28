@@ -2709,7 +2709,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         conn = getConnection(env);
 
-      PostgresResult result = conn.query(query);
+      PostgresResult result = conn.query(env, query);
 
       StringValue error = conn.error(env);
 

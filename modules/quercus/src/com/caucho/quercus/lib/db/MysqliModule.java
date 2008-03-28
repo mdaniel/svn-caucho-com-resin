@@ -444,12 +444,13 @@ public class MysqliModule extends AbstractQuercusModule {
    * INSERT query on success, 0 if the previous query does not generate
    * an AUTO_INCREMENT value, or FALSE if no MySQL connection was established
    */
-  public static Value mysqli_insert_id(@NotNull Mysqli conn)
+  public static Value mysqli_insert_id(Env env,
+                                       @NotNull Mysqli conn)
   {
     if (conn == null)
       return BooleanValue.FALSE;
 
-    return conn.insert_id();
+    return conn.insert_id(env);
   }
 
   /**
@@ -467,13 +468,14 @@ public class MysqliModule extends AbstractQuercusModule {
    * Executes one or multiple queires which are
    * concatenated by a semicolon.
    */
-  public static boolean mysqli_multi_query(@NotNull Mysqli conn,
+  public static boolean mysqli_multi_query(Env env,
+                                           @NotNull Mysqli conn,
                                            StringValue query)
   {
     if (conn == null)
       return false;
 
-    return conn.multi_query(query);
+    return conn.multi_query(env, query);
   }
 
   /**
@@ -778,13 +780,14 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Prepares a statment with a query.
    */
-  public static boolean mysqli_stmt_prepare(@NotNull MysqliStatement stmt,
+  public static boolean mysqli_stmt_prepare(Env env,
+                                            @NotNull MysqliStatement stmt,
                                             StringValue query)
   {
     if (stmt == null)
       return false;
 
-    return stmt.prepare(query);
+    return stmt.prepare(env, query);
   }
 
   /**
@@ -888,23 +891,25 @@ public class MysqliModule extends AbstractQuercusModule {
    *
    * @return number of warnings
    */
-  public static int mysqli_warning_count(@NotNull Mysqli conn)
+  public static int mysqli_warning_count(Env env,
+                                         @NotNull Mysqli conn)
   {
     if (conn == null)
       return 0;
 
-    return conn.warning_count();
+    return conn.warning_count(env);
   }
 
   /**
    * Checks if the connection is still valid
    */
-  public static boolean mysqli_ping(@NotNull Mysqli conn)
+  public static boolean mysqli_ping(Env env,
+                                    @NotNull Mysqli conn)
   {
     if (conn == null)
       return false;
 
-    return conn.ping();
+    return conn.ping(env);
   }
 
   /**
@@ -1377,7 +1382,7 @@ public class MysqliModule extends AbstractQuercusModule {
     if (conn == null)
       return BooleanValue.FALSE;
 
-    return conn.thread_id();
+    return conn.thread_id(env);
   }
 
   /**

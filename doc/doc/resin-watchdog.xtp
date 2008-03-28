@@ -218,7 +218,7 @@ server '' : active
 </example>
 
 <example title="Example: watchdog start">
-resin-3.1.x> java -jar lib/resin.jar -conf conf/test.conf -server-id a start
+resin-3.1.x> java -jar lib/resin.jar -conf conf/test.conf -server a start
 
 Resin/3.1.x started -server 'a' for watchdog at 127.0.0.1:6700
 </example>
