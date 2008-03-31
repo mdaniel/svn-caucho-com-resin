@@ -27,45 +27,23 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.pubsub;
+package com.caucho.hemp.service;
 
-import java.io.Serializable;
 import java.util.*;
+import java.lang.ref.*;
+import java.io.Serializable;
+
+import com.caucho.hemp.*;
+import com.caucho.server.resin.*;
+import com.caucho.util.*;
 
 /**
- * Publish item
+ * Manager
  */
-public class PubSubItem implements Serializable {
-  private String id;
-  private Serializable value;
-
-  public PubSubItem()
-  {
-  }
-
-  public PubSubItem(Serializable value)
-  {
-    this.value = value;
-  }
-
-  public PubSubItem(String id, Serializable value)
-  {
-    this.id = id;
-    this.value = value;
-  }
-
-  public String getId()
-  {
-    return this.id;
-  }
-
-  public Serializable getValue()
-  {
-    return this.value;
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + this.id + "]";
-  }
+public interface HmppManager
+{
+  /**
+   * Creates a session
+   */
+  public HmppSession createSession(String uid, String password);
 }

@@ -27,45 +27,60 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.pubsub;
+package com.caucho.hemp;
 
 import java.io.Serializable;
-import java.util.*;
 
 /**
- * Publish item
+ * HmppError encapsulates error responses for query and presence
  */
-public class PubSubItem implements Serializable {
-  private String id;
-  private Serializable value;
-
-  public PubSubItem()
+public class HmppError implements Serializable {
+  private final String _code;
+  private final String _text;
+  
+  /**
+   * zero-arg constructor for Hessian
+   */
+  private HmppError()
   {
+    _code = null;
+    _text = null;
   }
 
-  public PubSubItem(Serializable value)
+  /**
+   * An error response
+   *
+   * @param code the error code
+   * @param text the error text
+   */
+  public HmppError(String code,
+		   String text)
   {
-    this.value = value;
+    _code = code;
+    _text = text;
   }
 
-  public PubSubItem(String id, Serializable value)
+  /**
+   * Returns the error code
+   */
+  public Serializable getCode()
   {
-    this.id = id;
-    this.value = value;
+    return _code;
   }
 
-  public String getId()
+  /**
+   * Returns the error text
+   */
+  public Serializable getText()
   {
-    return this.id;
+    return _text;
   }
 
-  public Serializable getValue()
-  {
-    return this.value;
-  }
-
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + this.id + "]";
+    return (getClass().getSimpleName()
+	    + "[code=" + _code
+	    + ",text=" + _text + "]");
   }
 }

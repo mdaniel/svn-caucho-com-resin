@@ -27,45 +27,73 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.pubsub;
+package com.caucho.hemp.disco;
 
 import java.io.Serializable;
 import java.util.*;
 
 /**
- * Publish item
+ * service discovery items
+ *
+ * http://www.xmpp.org/extensions/xep-0030.html
+ *
+ * xmlns="http://jabber.org/protocol/disco#items"
+ *
+ * <code><pre>
+ * element query {
+ *   attribute node?,
+ *   item*
+ * }
+ *
+ * element item {
+ *    attribute jid,
+ *    attribute node?,
+ *    attribute name?,
+ *    attribute action { remove, update}?,
+ * }
+ * </pre></code>
  */
-public class PubSubItem implements Serializable {
-  private String id;
-  private Serializable value;
+public class DiscoItem implements java.io.Serializable {
+  private String jid;
+  private String node;
+  private String name;
 
-  public PubSubItem()
+  // remove, update
+  private String action;
+  
+  private DiscoItem()
   {
   }
-
-  public PubSubItem(Serializable value)
+  
+  public DiscoItem(String jid)
   {
-    this.value = value;
+    this.jid = jid;
   }
-
-  public PubSubItem(String id, Serializable value)
+  
+  public DiscoItem(String jid, String node)
   {
-    this.id = id;
-    this.value = value;
+    this.jid = jid;
+    this.node = node;
   }
-
-  public String getId()
+  
+  public DiscoItem(String jid,
+		   String node,
+		   String name,
+		   String action)
   {
-    return this.id;
+    this.jid = jid;
+    this.node = node;
+    this.name = name;
+    this.action = action;
   }
-
-  public Serializable getValue()
-  {
-    return this.value;
-  }
-
+  
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + this.id + "]";
+    if (this.node != null)
+      return (getClass().getSimpleName()
+	      + "[" + this.jid + ",node=" + this.node + "]");
+    else
+      return (getClass().getSimpleName()
+	      + "[" + this.jid + "]");
   }
 }

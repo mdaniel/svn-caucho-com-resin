@@ -27,45 +27,53 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.pubsub;
+package com.caucho.hemp.disco;
 
 import java.io.Serializable;
 import java.util.*;
 
 /**
- * Publish item
+ * service discovery identity
+ *
+ * http://jabber.org/protocol/disco#info
+ *
+ * <code><pre>
+ * element query {
+ *   attribute node?,
+ *   identity*,
+ *   feature*
+ * }
+ *
+ * element identity {
+ *    attribute category,
+ *    attribute name?,
+ *    attribute type
+ * }
+ *
+ * element feature {
+ *    attribute var
+ * }
+ * </pre></code>
  */
-public class PubSubItem implements Serializable {
-  private String id;
-  private Serializable value;
-
-  public PubSubItem()
+public class DiscoIdentity implements java.io.Serializable {
+  private String category;
+  private String type;
+  private String name;
+  
+  public DiscoIdentity()
   {
   }
-
-  public PubSubItem(Serializable value)
+  
+  public DiscoIdentity(String category, String type)
   {
-    this.value = value;
+    this.category = category;
+    this.type = type;
   }
-
-  public PubSubItem(String id, Serializable value)
-  {
-    this.id = id;
-    this.value = value;
-  }
-
-  public String getId()
-  {
-    return this.id;
-  }
-
-  public Serializable getValue()
-  {
-    return this.value;
-  }
-
+  
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + this.id + "]";
+    return (getClass().getSimpleName()
+	    + "[" + this.category
+            + "," + this.type + "]");
   }
 }

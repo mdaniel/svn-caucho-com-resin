@@ -27,45 +27,45 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.pubsub;
+package com.caucho.hemp.manager;
 
-import java.io.Serializable;
 import java.util.*;
+import java.lang.ref.*;
+import java.io.Serializable;
+
+import com.caucho.hemp.*;
+import com.caucho.server.resin.*;
+import com.caucho.util.*;
 
 /**
- * Publish item
+ * Manager
  */
-public class PubSubItem implements Serializable {
-  private String id;
-  private Serializable value;
+public class Roster {
+  private static final L10N L = new L10N(Roster.class);
 
-  public PubSubItem()
+  private String _jid;
+
+  private HashMap<String,RosterItem> _subscriptionMap
+    = new HashMap<String,RosterItem>();
+  
+  public Roster(String jid)
   {
+    _jid = jid;
   }
 
-  public PubSubItem(Serializable value)
+  public ArrayList<RosterItem> getSubscriptions()
   {
-    this.value = value;
+    return new ArrayList<RosterItem>(_subscriptionMap.values());
   }
 
-  public PubSubItem(String id, Serializable value)
+  public void setSubscription(String target, SubscriptionState state)
   {
-    this.id = id;
-    this.value = value;
+    _subscriptionMap.put(target, new RosterItem(_jid, target, state));
   }
-
-  public String getId()
-  {
-    return this.id;
-  }
-
-  public Serializable getValue()
-  {
-    return this.value;
-  }
-
+  
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + this.id + "]";
+    return getClass().getSimpleName() + "[]";
   }
 }

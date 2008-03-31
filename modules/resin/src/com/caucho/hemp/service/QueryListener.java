@@ -36,4 +36,14 @@ import java.io.Serializable;
  */
 public interface QueryListener {
   public Serializable onQuery(String fromJid, String toJid, Serializable query);
+  
+  public void onQueryGet(String id,
+			 String fromJid,
+			 String toJid,
+			 Serializable query);
+  
+  public void onQuerySet(String id,
+			 String fromJid,
+			 String toJid,
+			 Serializable query);
 }

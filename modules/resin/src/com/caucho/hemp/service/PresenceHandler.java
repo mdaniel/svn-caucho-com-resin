@@ -36,58 +36,54 @@ import javax.webbeans.*;
 /**
  * Configuration for a service
  */
-public interface HempService {
-  public Serializable onQuery(String fromJit, String toJid,
-			      Serializable query);
-  
-  public void onMessage(String fromJid, String toJid, Serializable value);
-
+public interface PresenceHandler
+{
   /**
    * General presence, for clients announcing availability
    */
-  public void onPresence(String fromJit,
+  public void onPresence(String fromJid,
 			 String toJid,
-			 Serializable value);
+			 Serializable []data);
 
   /**
    * General presence, for clients announcing unavailability
    */
-  public void onPresenceUnavailable(String fromJit,
+  public void onPresenceUnavailable(String fromJid,
 				    String toJid,
-				    Serializable value);
+				    Serializable []data);
 
   /**
    * Presence probe from the server to a client
    */
-  public void onPresenceProbe(String fromJit,
+  public void onPresenceProbe(String fromJid,
 			      String toJid,
-			      Serializable value);
+			      Serializable []data);
 
   /**
    * A subscription request from a client
    */
-  public void onPresenceSubscribe(String fromJit,
+  public void onPresenceSubscribe(String fromJid,
 				  String toJid,
-				  Serializable value);
+				  Serializable []data);
 
   /**
    * A subscription response to a client
    */
-  public void onPresenceSubscribed(String fromJit,
+  public void onPresenceSubscribed(String fromJid,
 				   String toJid,
-				   Serializable value);
+				   Serializable []data);
 
   /**
    * An unsubscription request from a client
    */
-  public void onPresenceUnsubscribe(String fromJit,
+  public void onPresenceUnsubscribe(String fromJid,
 				    String toJid,
-				    Serializable value);
+				    Serializable []data);
 
   /**
    * A unsubscription response to a client
    */
-  public void onPresenceUnsubscribed(String fromJit,
+  public void onPresenceUnsubscribed(String fromJid,
 				     String toJid,
-				     Serializable value);
+				     Serializable []data);
 }

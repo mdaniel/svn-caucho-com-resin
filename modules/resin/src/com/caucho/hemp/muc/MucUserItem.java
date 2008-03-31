@@ -27,45 +27,33 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.pubsub;
+package com.caucho.hemp.muc;
 
 import java.io.Serializable;
 import java.util.*;
 
 /**
- * Publish item
+ * Muc query
  */
-public class PubSubItem implements Serializable {
-  private String id;
-  private Serializable value;
+public class MucUserItem implements java.io.Serializable {
+  // actor jid
+  private String actor;
+  private String reason;
+  private MucContinue _continue;
 
-  public PubSubItem()
+  // "admin", "member", "none", "outcast", "owner"
+  private String affiliation;
+  private String jid;
+  private String nick;
+  // "moderator", "none", "participant", "visitor"
+  private String role;
+  
+  public MucUserItem()
   {
   }
-
-  public PubSubItem(Serializable value)
-  {
-    this.value = value;
-  }
-
-  public PubSubItem(String id, Serializable value)
-  {
-    this.id = id;
-    this.value = value;
-  }
-
-  public String getId()
-  {
-    return this.id;
-  }
-
-  public Serializable getValue()
-  {
-    return this.value;
-  }
-
+  
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + this.id + "]";
+    return getClass().getSimpleName() + "[]";
   }
 }

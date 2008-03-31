@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp;
+package com.caucho.hemp.pubsub;
 
 import java.io.Serializable;
 import java.util.*;

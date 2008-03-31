@@ -27,45 +27,70 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.pubsub;
+package com.caucho.hemp.manager;
 
-import java.io.Serializable;
 import java.util.*;
+import java.lang.ref.*;
+import java.io.Serializable;
+
+import com.caucho.hemp.*;
+import com.caucho.server.resin.*;
+import com.caucho.util.*;
 
 /**
- * Publish item
+ * Entity
  */
-public class PubSubItem implements Serializable {
-  private String id;
-  private Serializable value;
+class RosterItem {
+  private static final L10N L = new L10N(RosterItem.class);
 
-  public PubSubItem()
+  private final String _ownerJid;
+  private final String _targetJid;
+
+  private final SubscriptionState _state;
+
+  private RosterItem()
   {
+    _ownerJid = null;
+    _targetJid = null;
+    _state = null;
   }
 
-  public PubSubItem(Serializable value)
+  RosterItem(String ownerJid, String targetJid, SubscriptionState state)
   {
-    this.value = value;
+    _ownerJid = ownerJid;
+    _targetJid = targetJid;
+
+    _state = state;
   }
 
-  public PubSubItem(String id, Serializable value)
+  public String getOwner()
   {
-    this.id = id;
-    this.value = value;
+    return _ownerJid;
   }
 
-  public String getId()
+  public String getTarget()
   {
-    return this.id;
+    return _targetJid;
   }
 
-  public Serializable getValue()
+  public boolean isSubscribedTo()
   {
-    return this.value;
+    return (_state == SubscriptionState.TO
+	    || _state == SubscriptionState.BOTH);
   }
 
+  public boolean isSubscriptionFrom()
+  {
+    return (_state == SubscriptionState.FROM
+	    || _state == SubscriptionState.BOTH);
+  }
+  
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + this.id + "]";
+    return (getClass().getSimpleName()
+	    + "[target=" + _targetJid
+	    + ",owner=" + _ownerJid
+	    + "," + _state + "]");
   }
 }

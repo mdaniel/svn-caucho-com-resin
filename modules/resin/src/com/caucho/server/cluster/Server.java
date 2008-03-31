@@ -1612,6 +1612,16 @@ public class Server extends ProtocolDispatchServer
       thread.setContextClassLoader(_classLoader);
 
       try {
+	Management management = _management;
+	_management = null;
+
+	if (management != null)
+	  management.destroy();
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+
+      try {
         _hostContainer.destroy();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);

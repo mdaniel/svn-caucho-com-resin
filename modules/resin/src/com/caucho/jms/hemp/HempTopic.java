@@ -40,6 +40,7 @@ import javax.webbeans.*;
 
 import com.caucho.config.*;
 import com.caucho.hemp.*;
+import com.caucho.hemp.service.*;
 import com.caucho.hemp.broker.*;
 import com.caucho.jms.memory.*;
 import com.caucho.jms.message.*;
@@ -51,7 +52,8 @@ import com.caucho.webbeans.manager.*;
 /**
  * Implements an hemp topic.
  */
-public class HempTopic extends AbstractTopic implements Target
+public class HempTopic extends AbstractTopic
+  implements com.caucho.hemp.service.MessageListener
 {
   private static final L10N L = new L10N(HempTopic.class);
   
@@ -61,14 +63,15 @@ public class HempTopic extends AbstractTopic implements Target
   private ArrayList<AbstractQueue> _subscriptionList
     = new ArrayList<AbstractQueue>();
 
-  private Broker _broker;
+  private HmppManager _broker;
+  private HmppSession _session;
 
   private int _id;
 
   /**
    * Sets the broker
    */
-  public void setBroker(Broker broker)
+  public void setBroker(HmppManager broker)
   {
     _broker = broker;
   }
@@ -93,18 +96,19 @@ public class HempTopic extends AbstractTopic implements Target
     if (_broker == null) {
       WebBeansContainer container = WebBeansContainer.create();
 
-      ComponentFactory comp = container.resolveByType(Broker.class);
+      ComponentFactory comp = container.resolveByType(HmppManager.class);
 
       if (comp == null)
-	throw new ConfigException(L.l("hemp protocol needs broker"));
+	throw new ConfigException(L.l("hmpp protocol needs broker"));
     
-      _broker = (Broker) comp.get();
+      _broker = (HmppManager) comp.get();
 
       if (_broker == null)
 	throw new ConfigException(L.l("Need xmpp protocol"));
     }
 
-    _broker.register(getName(), this);
+    _session = _broker.createSession(getName(), null);
+    _session.setMessageListener(this);
   }
 
   @Override
@@ -142,11 +146,9 @@ public class HempTopic extends AbstractTopic implements Target
     _subscriptionList.remove(queue);
   }
 
-  public void sendMessage(com.caucho.hemp.Message hempMsg)
+  public void onMessage(String fromJit, String toJid, Serializable value)
   {
     try {
-      Serializable value = hempMsg.getValue();
-    
       javax.jms.Message msg = null;
 
       if (value instanceof javax.jms.Message)

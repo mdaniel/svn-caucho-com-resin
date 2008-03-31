@@ -32,7 +32,9 @@ package com.caucho.hemp.servlet;
 import java.io.*;
 import javax.servlet.*;
 
-import com.caucho.hemp.broker.*;
+import com.caucho.hemp.*;
+import com.caucho.hemp.manager.*;
+import com.caucho.hemp.service.*;
 import com.caucho.server.connection.*;
 import com.caucho.vfs.*;
 
@@ -40,17 +42,17 @@ import com.caucho.vfs.*;
  * Main protocol handler for the HTTP version of HeMPP.
  */
 public class HempServlet extends GenericServlet {
-  private Broker _broker;
+  private HmppManager _manager;
 
-  public void setBroker(Broker broker)
+  public void setBroker(HmppManager manager)
   {
-    _broker = broker;
+    _manager = manager;
   }
 
   public void init()
   {
-    if (_broker == null)
-      _broker = new MemoryBroker();
+    if (_manager == null)
+      _manager = new HempManager();
   }
   
   /**
@@ -73,6 +75,6 @@ public class HempServlet extends GenericServlet {
     ReadStream is = req.getConnection().getReadStream();
     WriteStream os = req.getConnection().getWriteStream();
 
-    res.upgradeProtocol(new HempHandler(_broker, is, os));
+    res.upgradeProtocol(new HempHandler(_manager, is, os));
   }
 }

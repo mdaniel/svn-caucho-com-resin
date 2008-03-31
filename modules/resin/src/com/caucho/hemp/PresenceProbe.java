@@ -27,45 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.pubsub;
+package com.caucho.hemp;
 
 import java.io.Serializable;
-import java.util.*;
 
 /**
- * Publish item
+ * PresenceProbe forwards presence announcements from the server to resources
+ * to client has subscriptions from.  i.e. it acts like a listener
+ * registration.
  */
-public class PubSubItem implements Serializable {
-  private String id;
-  private Serializable value;
-
-  public PubSubItem()
+public class PresenceProbe extends Presence {
+  /**
+   * zero-arg constructor for Hessian
+   */
+  private PresenceProbe()
   {
   }
 
-  public PubSubItem(Serializable value)
+  /**
+   * A directed presence announcement to another client
+   *
+   * @param to the target client
+   * @param from the source
+   * @param data a collection of presence data
+   */
+  public PresenceProbe(String to, String from, Serializable []data)
   {
-    this.value = value;
-  }
-
-  public PubSubItem(String id, Serializable value)
-  {
-    this.id = id;
-    this.value = value;
-  }
-
-  public String getId()
-  {
-    return this.id;
-  }
-
-  public Serializable getValue()
-  {
-    return this.value;
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + this.id + "]";
+    super(to, from, data);
   }
 }

@@ -29,85 +29,95 @@
 
 package com.caucho.hemp;
 
-import com.caucho.hemp.spi.PacketHandler;
+import java.io.Serializable;
 
 /**
- * Base packet class.  Contains only a 'to' and a 'from' field.
+ * RPC result from a get or set.  The "id" field is used
+ * to match the query with the response.
  */
-public class Packet implements java.io.Serializable
-{
-  private final String _to;
-  private final String _from;
+public class QueryError extends Packet {
+  private final String _id;
+  
+  private final Serializable _value;
+  private final HmppError _error;
 
   /**
-   * null constructor for Hessian deserialization
+   * zero-arg constructor for Hessian
    */
-  protected Packet()
+  private QueryError()
   {
-    _to = null;
-    _from = null;
+    _id = null;
+    _value = null;
+    _error = null;
   }
 
   /**
-   * Creates a packet with a destination, but no source, e.g. from a
-   * client.  The server will infer the source from the hmpp session
-   * binding.
+   * A query to a target
    *
-   * @param to the destination jid
-   */
-  public Packet(String to)
-  {
-    _to = to;
-    _from = null;
-  }
-
-  /**
-   * Creates a packet with a destination and a source.
-   *
-   * @param to the destination jid
+   * @param id the query id
+   * @param to the target jid
    * @param from the source jid
+   * @param value copy the query request
+   * @param error the query error
    */
-  public Packet(String to, String from)
+  public QueryError(String id,
+		    String to,
+		    String from,
+		    Serializable value,
+		    HmppError error)
   {
-    _to = to;
-    _from = from;
+    super(to, from);
+
+    _id = id;
+    _value = value;
+    _error = error;
   }
 
   /**
-   * Returns the 'to' field
+   * Returns the id
    */
-  public String getTo()
+  public String getId()
   {
-    return _to;
+    return _id;
   }
 
   /**
-   * Returns the 'from' field
+   * Returns the query value
    */
-  public String getFrom()
+  public Serializable getValue()
   {
-    return _from;
+    return _value;
   }
 
-  /**
-   * SPI method to dispatch the packet to the proper handler
-   */
-  public void dispatch(PacketHandler handler)
-  {
-  }
-
+  @Override
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
-    sb.append(getClass().getSimpleName());
-    sb.append("[to=");
-    sb.append(_to);
 
-    if (_from != null) {
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+
+    sb.append("id=");
+    sb.append(_id);
+    
+    if (getTo() != null) {
+      sb.append(",to=");
+      sb.append(getTo());
+    }
+    
+    if (getFrom() != null) {
       sb.append(",from=");
-      sb.append(_from);
+      sb.append(getFrom());
     }
 
+    if (_value != null) {
+      sb.append("," + _value.getClass().getName());
+    }
+
+    if (_error != null) {
+      sb.append(",error=" + _error);
+    }
+    
     sb.append("]");
     
     return sb.toString();

@@ -27,45 +27,19 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.pubsub;
-
-import java.io.Serializable;
-import java.util.*;
+package com.caucho.hemp.manager;
 
 /**
- * Publish item
+ * Subscription states
  */
-public class PubSubItem implements Serializable {
-  private String id;
-  private Serializable value;
-
-  public PubSubItem()
-  {
-  }
-
-  public PubSubItem(Serializable value)
-  {
-    this.value = value;
-  }
-
-  public PubSubItem(String id, Serializable value)
-  {
-    this.id = id;
-    this.value = value;
-  }
-
-  public String getId()
-  {
-    return this.id;
-  }
-
-  public Serializable getValue()
-  {
-    return this.value;
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + this.id + "]";
-  }
-}
+public enum SubscriptionState {
+  NONE,
+  NONE_PENDING_OUT,
+  NONE_PENDING_IN,
+  NONE_PENDING_BOTH,
+  TO,
+  TO_PENDING_IN,
+  FROM,
+  FROM_PENDING_OUT,
+  BOTH,
+};

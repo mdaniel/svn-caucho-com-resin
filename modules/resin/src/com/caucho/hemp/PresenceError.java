@@ -27,45 +27,47 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.pubsub;
+package com.caucho.hemp;
 
 import java.io.Serializable;
-import java.util.*;
 
 /**
- * Publish item
+ * PresenceError returns an error response to a presence packet
  */
-public class PubSubItem implements Serializable {
-  private String id;
-  private Serializable value;
-
-  public PubSubItem()
+public class PresenceError extends Presence {
+  private final HmppError _error;
+  
+  /**
+   * zero-arg constructor for Hessian
+   */
+  private PresenceError()
   {
+    _error = null;
   }
 
-  public PubSubItem(Serializable value)
+  /**
+   * The subscribed response to the original client
+   *
+   * @param to the target client
+   * @param from the source
+   * @param data a collection of presence data
+   * @param error the error information
+   */
+  public PresenceError(String to,
+		       String from,
+		       Serializable []data,
+		       HmppError error)
   {
-    this.value = value;
+    super(to, from, data);
+
+    _error = error;
   }
 
-  public PubSubItem(String id, Serializable value)
+  /**
+   * Returns the error information
+   */
+  public HmppError getError()
   {
-    this.id = id;
-    this.value = value;
-  }
-
-  public String getId()
-  {
-    return this.id;
-  }
-
-  public Serializable getValue()
-  {
-    return this.value;
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + this.id + "]";
+    return _error;
   }
 }

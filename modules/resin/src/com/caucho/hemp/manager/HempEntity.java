@@ -75,6 +75,69 @@ class HempEntity {
     }
   }
 
+  void onPresence(String fromJid, String toJid, Serializable []data)
+  {
+    HempSession []sessionArray = getSessionArray();
+
+    if (sessionArray == null)
+      return;
+
+    for (HempSession session : sessionArray) {
+      if (session != null)
+	session.onPresence(fromJid, toJid, data);
+    }
+  }
+
+  void onPresenceProbe(String fromJid, String toJid, Serializable []data)
+  {
+    HempSession []sessionArray = getSessionArray();
+
+    if (sessionArray == null)
+      return;
+
+    for (HempSession session : sessionArray) {
+      if (session != null)
+	session.onPresenceProbe(fromJid, toJid, data);
+    }
+  }
+
+  void onPresenceUnavailable(String fromJid, String toJid, Serializable []data)
+  {
+    HempSession []sessionArray = getSessionArray();
+
+    if (sessionArray == null)
+      return;
+
+    for (HempSession session : sessionArray) {
+      if (session != null)
+	session.onPresenceUnavailable(fromJid, toJid, data);
+    }
+  }
+
+  protected HempSession []getSessionArray()
+  {
+    HempSession []sessionArray = null;
+    
+    synchronized (_sessionList) {
+      if (_sessionList.size() == 0)
+	return null;
+
+      sessionArray = new HempSession[_sessionList.size()];
+      
+      for (int i = _sessionList.size() - 1; i >= 0; i--) {
+	WeakReference<HempSession> sessionRef = _sessionList.get(i);
+	HempSession hempSession = sessionRef.get();
+
+	if (hempSession != null)
+	  sessionArray[i] = hempSession;
+	else
+	  _sessionList.remove(i);
+      }
+    }
+
+    return sessionArray;
+  }
+
   void onMessage(String fromJid, String toJid, Serializable value)
   {
     HempSession []sessionArray = null;
@@ -104,24 +167,10 @@ class HempEntity {
 
   Serializable onQuery(String fromJid, String toJid, Serializable query)
   {
-    HempSession []sessionArray = null;
-    
-    synchronized (_sessionList) {
-      if (_sessionList.size() == 0)
-	return null;
+    HempSession []sessionArray = getSessionArray();
 
-      sessionArray = new HempSession[_sessionList.size()];
-      
-      for (int i = _sessionList.size() - 1; i >= 0; i--) {
-	WeakReference<HempSession> sessionRef = _sessionList.get(i);
-	HempSession hempSession = sessionRef.get();
-
-	if (hempSession != null)
-	  sessionArray[i] = hempSession;
-	else
-	  _sessionList.remove(i);
-      }
-    }
+    if (sessionArray == null)
+      return null;
 
     for (HempSession session : sessionArray) {
       if (session != null) {
@@ -129,6 +178,40 @@ class HempEntity {
 
 	if (result != null)
 	  return result;
+      }
+    }
+
+    throw new RuntimeException(L.l("'{0}' is an unknown query", query));
+  }
+
+  void onQueryGet(String id, String fromJid, String toJid, Serializable query)
+  {
+    HempSession []sessionArray = getSessionArray();
+
+    if (sessionArray == null)
+      return;
+
+    // XXX: logic isn't right here
+    for (HempSession session : sessionArray) {
+      if (session != null) {
+	session.onQueryGet(id, fromJid, toJid, query);
+      }
+    }
+
+    throw new RuntimeException(L.l("'{0}' is an unknown query", query));
+  }
+
+  void onQuerySet(String id, String fromJid, String toJid, Serializable query)
+  {
+    HempSession []sessionArray = getSessionArray();
+
+    if (sessionArray == null)
+      return;
+
+    // XXX: logic isn't right here
+    for (HempSession session : sessionArray) {
+      if (session != null) {
+	session.onQuerySet(id, fromJid, toJid, query);
       }
     }
 

@@ -314,12 +314,11 @@ abstract public class AbstractContext implements EJBContext {
     if (! getServer().isContainerTransaction())
       throw new IllegalStateException("setRollbackOnly() is only allowed with container-managed transaction");
 
-    TransactionContext trans = getServer().getTransaction();
-
-    if (trans != null)
-      trans.setRollbackOnly();
-    else
-      throw new IllegalStateException("invalid transaction");
+    try {
+      getServer().getUserTransaction().setRollbackOnly();
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
   }
 
   /**

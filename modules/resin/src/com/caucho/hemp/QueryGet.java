@@ -29,85 +29,110 @@
 
 package com.caucho.hemp;
 
-import com.caucho.hemp.spi.PacketHandler;
+import java.io.Serializable;
+
+import com.caucho.hemp.spi.*;
 
 /**
- * Base packet class.  Contains only a 'to' and a 'from' field.
+ * RPC call requesting information/data.  The "id" field is used
+ * to match the query with the response.  The target must either respond
+ * with a QueryResult or QueryError.
  */
-public class Packet implements java.io.Serializable
-{
-  private final String _to;
-  private final String _from;
+public class QueryGet extends Packet {
+  private final String _id;
+  
+  private final Serializable _value;
 
   /**
-   * null constructor for Hessian deserialization
+   * zero-arg constructor for Hessian
    */
-  protected Packet()
+  private QueryGet()
   {
-    _to = null;
-    _from = null;
+    _id = null;
+    _value = null;
   }
 
   /**
-   * Creates a packet with a destination, but no source, e.g. from a
-   * client.  The server will infer the source from the hmpp session
-   * binding.
+   * A query to a target
    *
-   * @param to the destination jid
+   * @param id the query id
+   * @param to the target jid
+   * @param value the query content
    */
-  public Packet(String to)
+  public QueryGet(String id, String to, Serializable value)
   {
-    _to = to;
-    _from = null;
+    super(to);
+
+    _id = id;
+    _value = value;
   }
 
   /**
-   * Creates a packet with a destination and a source.
+   * A query to a target from a given source
    *
-   * @param to the destination jid
+   * @param id the query id
+   * @param to the target jid
    * @param from the source jid
+   * @param value the query content
    */
-  public Packet(String to, String from)
+  public QueryGet(String id, String to, String from, Serializable value)
   {
-    _to = to;
-    _from = from;
+    super(to, from);
+
+    _id = id;
+    _value = value;
   }
 
   /**
-   * Returns the 'to' field
+   * Returns the id
    */
-  public String getTo()
+  public String getId()
   {
-    return _to;
+    return _id;
   }
 
   /**
-   * Returns the 'from' field
+   * Returns the query value
    */
-  public String getFrom()
+  public Serializable getValue()
   {
-    return _from;
+    return _value;
   }
 
   /**
    * SPI method to dispatch the packet to the proper handler
    */
+  @Override
   public void dispatch(PacketHandler handler)
   {
+    handler.onQueryGet(getId(), getFrom(), getTo(), getValue());
   }
 
+  @Override
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
-    sb.append(getClass().getSimpleName());
-    sb.append("[to=");
-    sb.append(_to);
 
-    if (_from != null) {
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+
+    sb.append("id=");
+    sb.append(_id);
+    
+    if (getTo() != null) {
+      sb.append(",to=");
+      sb.append(getTo());
+    }
+    
+    if (getFrom() != null) {
       sb.append(",from=");
-      sb.append(_from);
+      sb.append(getFrom());
     }
 
+    if (_value != null) {
+      sb.append("," + _value.getClass().getName());
+    }
+    
     sb.append("]");
     
     return sb.toString();

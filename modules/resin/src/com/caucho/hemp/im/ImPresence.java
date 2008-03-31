@@ -27,45 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.pubsub;
+package com.caucho.hemp.im;
 
 import java.io.Serializable;
 import java.util.*;
 
 /**
- * Publish item
+ * Presence
  */
-public class PubSubItem implements Serializable {
-  private String id;
-  private Serializable value;
+public class ImPresence implements Serializable {
+  // "away", "chat", "dnd", "xa"
+  private String show;
+  private String status;
+  private int priority;
 
-  public PubSubItem()
-  {
-  }
+  // "error", "probe", "subscribe", "subscribed", "unavailable",
+  // "unsubscribe", "unsubscribed"
+  private String type;
 
-  public PubSubItem(Serializable value)
-  {
-    this.value = value;
-  }
+  private ArrayList<Serializable> ext;
 
-  public PubSubItem(String id, Serializable value)
+  public ImPresence()
   {
-    this.id = id;
-    this.value = value;
-  }
-
-  public String getId()
-  {
-    return this.id;
-  }
-
-  public Serializable getValue()
-  {
-    return this.value;
   }
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + this.id + "]";
+    return getClass().getSimpleName() + "[" + "]";
   }
 }

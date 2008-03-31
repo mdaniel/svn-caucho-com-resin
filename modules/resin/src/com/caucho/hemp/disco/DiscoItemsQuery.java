@@ -27,45 +27,43 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.pubsub;
+package com.caucho.hemp.disco;
 
 import java.io.Serializable;
 import java.util.*;
 
 /**
- * Publish item
+ * service discovery query
+ *
+ * http://www.xmpp.org/extensions/xep-0030.html
+ *
+ * xmlns="http://jabber.org/protocol/disco#items"
+ *
+ * <code><pre>
+ * element query {
+ *   attribute node?,
+ *   item*
+ * }
+ *
+ * element item {
+ *    attribute jid,
+ *    attribute node?,
+ *    attribute name?,
+ *    attribute action { remove, update}?,
+ * }
+ * </pre></code>
  */
-public class PubSubItem implements Serializable {
-  private String id;
-  private Serializable value;
-
-  public PubSubItem()
+public class DiscoItemsQuery implements java.io.Serializable {
+  private String node;
+  
+  private ArrayList<DiscoItem> items;
+  
+  public DiscoItemsQuery()
   {
   }
-
-  public PubSubItem(Serializable value)
-  {
-    this.value = value;
-  }
-
-  public PubSubItem(String id, Serializable value)
-  {
-    this.id = id;
-    this.value = value;
-  }
-
-  public String getId()
-  {
-    return this.id;
-  }
-
-  public Serializable getValue()
-  {
-    return this.value;
-  }
-
+  
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + this.id + "]";
+    return getClass().getSimpleName() + "[]";
   }
 }

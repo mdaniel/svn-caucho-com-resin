@@ -30,10 +30,12 @@
 package com.caucho.hemp.servlet;
 
 import java.io.*;
+import java.util.logging.*;
 import javax.servlet.*;
 
 import com.caucho.hemp.*;
-import com.caucho.hemp.broker.*;
+import com.caucho.hemp.service.*;
+import com.caucho.hemp.spi.*;
 import com.caucho.hessian.io.*;
 import com.caucho.server.connection.*;
 import com.caucho.vfs.*;
@@ -41,16 +43,32 @@ import com.caucho.vfs.*;
 /**
  * Main protocol handler for the HTTP version of HeMPP.
  */
-public class HempHandler implements TcpConnectionHandler {
-  private Broker _broker;
+public class HempHandler implements TcpConnectionHandler, PacketHandler {
+  private static final Logger log
+    = Logger.getLogger(HempHandler.class.getName());
+  
+  private HmppManager _manager;
+  private HmppSession _session;
+
   private Hessian2StreamingInput _in;
   private Hessian2StreamingOutput _out;
 
-  HempHandler(Broker broker, ReadStream is, WriteStream os)
+  HempHandler(HmppManager manager, ReadStream rs, WriteStream ws)
   {
-    _broker = broker;
+    _manager = manager;
+
+    InputStream is = rs;
+    OutputStream os = ws;
+
+    if (log.isLoggable(Level.FINEST)) {
+      os = new HessianDebugOutputStream(os, log, Level.FINEST);
+      is = new HessianDebugInputStream(is, log, Level.FINEST);
+    }
+    
     _in = new Hessian2StreamingInput(is);
     _out = new Hessian2StreamingOutput(os);
+
+    _session = _manager.createSession("anonymous@localhost", "test");
   }
   
   public boolean serviceRead(ReadStream is,
@@ -62,21 +80,19 @@ public class HempHandler implements TcpConnectionHandler {
     if (in == null)
       return false;
 
-    Packet packet = (Packet) in.readObject();
+    Object obj = in.readObject();
+    
+    Packet packet = (Packet) obj;
 
     if (packet == null) {
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " end of stream");
+      
       controller.close();
       return false;
     }
 
-    if (packet instanceof Message) {
-      Message msg = (Message) packet;
-      msg.setFrom("anonymous@localhost");
-      
-      _broker.sendMessage(msg);
-    }
-    else
-      System.out.println("PACKET: " + packet);
+    packet.dispatch(this);
 
     return true;
   }
@@ -86,6 +102,157 @@ public class HempHandler implements TcpConnectionHandler {
     throws IOException
   {
     return false;
+  }
+  
+  /**
+   * Handles a message
+   */
+  public void onMessage(String from,
+			String to,
+			Serializable value)
+  {
+    _session.sendMessage(to, value);
+  }
+  
+  /**
+   * Handles a get query.
+   *
+   * The get handler must respond with either
+   * a QueryResult or a QueryError 
+   */
+  public void onQueryGet(String id,
+			 String from,
+			 String to,
+			 Serializable value)
+  {
+    _session.queryGet(id, to, value);
+  }
+  
+  /**
+   * Handles a set query.
+   *
+   * The set handler must respond with either
+   * a QueryResult or a QueryError 
+   */
+  public void onQuerySet(String id,
+			 String from,
+			 String to,
+			 Serializable value)
+  {
+    _session.querySet(id, to, value);
+  }
+  
+  /**
+   * Handles a query result.
+   *
+   * The result id will match a pending get or set.
+   */
+  public void onQueryResult(String id,
+			    String to,
+			    String from,
+			    Serializable value)
+  {
+  }
+  
+  /**
+   * Handles a query error.
+   *
+   * The result id will match a pending get or set.
+   */
+  public void onQueryError(String id,
+			   String to,
+			   String from,
+			   Serializable value,
+			   HmppError error)
+  {
+  }
+  
+  /**
+   * Handles a presence availability packet.
+   *
+   * If the handler deals with clients, the "from" value should be ignored
+   * and replaced by the client's jid.
+   */
+  public void onPresence(String to,
+			 String from,
+			 Serializable []data)
+
+  {
+    if (to != null)
+      _session.presenceTo(to, data);
+    else
+      _session.presence(data);
+  }
+  
+  /**
+   * Handles a presence unavailability packet.
+   *
+   * If the handler deals with clients, the "from" value should be ignored
+   * and replaced by the client's jid.
+   */
+  public void onPresenceUnavailable(String to,
+				    String from,
+				    Serializable []data)
+  {
+    if (to != null)
+      _session.presenceUnavailable(to, data);
+    else
+      _session.presenceUnavailable(data);
+  }
+  
+  /**
+   * Handles a presence probe from another server
+   */
+  public void onPresenceProbe(String to,
+			      String from,
+			      Serializable []data)
+  {
+  }
+  
+  /**
+   * Handles a presence subscribe request from a client
+   */
+  public void onPresenceSubscribe(String to,
+				  String from,
+				  Serializable []data)
+  {
+  }
+  
+  /**
+   * Handles a presence subscribed result to a client
+   */
+  public void onPresenceSubscribed(String to,
+				   String from,
+				   Serializable []data)
+  {
+  }
+  
+  /**
+   * Handles a presence unsubscribe request from a client
+   */
+  public void onPresenceUnsubscribe(String to,
+				    String from,
+				    Serializable []data)
+  {
+  }
+  
+  /**
+   * Handles a presence unsubscribed result to a client
+   */
+  public void onPresenceUnsubscribed(String to,
+				     String from,
+				     Serializable []data)
+  {
+  }
+  
+  /**
+   * Handles a presence unsubscribed result to a client
+   */
+  public void onPresenceError(String to,
+			      String from,
+			      Serializable []data,
+			      HmppError error)
+  {
   }
 
   public void close()

@@ -38,7 +38,7 @@ import com.caucho.util.*;
 /**
  * Manager
  */
-public class HempSession {
+public class HempSession implements HmppSession {
   private static final L10N L = new L10N(HempSession.class);
   
   private final HempManager _manager;
@@ -49,6 +49,7 @@ public class HempSession {
 
   private MessageListener _messageListener;
   private QueryListener _queryListener;
+  private PresenceHandler _presenceHandler;
 
   HempSession(HempManager manager, HempEntity entity, String jid)
   {
@@ -70,27 +71,14 @@ public class HempSession {
   /**
    * Sends a message
    */
-  public void send(String to, Serializable msg)
+  public void sendMessage(String to, Serializable msg)
   {
     HempManager manager = _manager;
 
     if (manager == null)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _manager.send(_jid, to, msg);
-  }
-
-  /**
-   * Queries the service
-   */
-  public Serializable query(String to, Serializable query)
-  {
-    HempManager manager = _manager;
-
-    if (manager == null)
-      throw new IllegalStateException(L.l("session is closed"));
-    
-    return _manager.query(_jid, to, query);
+    _manager.sendMessage(_jid, to, msg);
   }
 
   /**
@@ -121,6 +109,45 @@ public class HempSession {
   }
 
   /**
+   * Queries the service
+   */
+  public Serializable query(String to, Serializable query)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    return _manager.query(_jid, to, query);
+  }
+
+  /**
+   * Queries the service
+   */
+  public void queryGet(String id, String to, Serializable query)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.queryGet(id, _jid, to, query);
+  }
+
+  /**
+   * Queries the service
+   */
+  public void querySet(String id, String to, Serializable query)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.querySet(id, _jid, to, query);
+  }
+
+  /**
    * Forwards the message
    */
   Serializable onQuery(String fromJid, String toJid, Serializable query)
@@ -131,6 +158,135 @@ public class HempSession {
       return listener.onQuery(fromJid, toJid, query);
     else
       return null;
+  }
+
+  /**
+   * Forwards the message
+   */
+  void onQueryGet(String id,
+		  String fromJid,
+		  String toJid,
+		  Serializable query)
+  {
+    QueryListener listener = _queryListener;
+    
+    if (listener != null)
+      listener.onQueryGet(id, fromJid, toJid, query);
+  }
+
+  /**
+   * Forwards the message
+   */
+  void onQuerySet(String id,
+		  String fromJid,
+		  String toJid,
+		  Serializable query)
+  {
+    QueryListener listener = _queryListener;
+    
+    if (listener != null)
+      listener.onQuerySet(id, fromJid, toJid, query);
+  }
+
+  //
+  // presence handling
+  //
+
+  /**
+   * Sets the presence listener
+   */
+  public void setPresenceHandler(PresenceHandler handler)
+  {
+    _presenceHandler = handler;
+  }
+
+  /**
+   * Basic presence
+   */
+  public void presence(Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presence(_jid, data);
+  }
+
+  /**
+   * Basic presence
+   */
+  public void presenceTo(String toJid, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presence(_jid, toJid, data);
+  }
+
+  /**
+   * Forwards the presence
+   */
+  protected void onPresence(String fromJid, String toJid, Serializable []data)
+  {
+    PresenceHandler handler = _presenceHandler;
+    
+    if (handler != null)
+      handler.onPresence(fromJid, toJid, data);
+  }
+
+  /**
+   * Forwards the presence
+   */
+  protected void onPresenceProbe(String fromJid,
+				 String toJid,
+				 Serializable []data)
+  {
+    PresenceHandler handler = _presenceHandler;
+    
+    if (handler != null)
+      handler.onPresenceProbe(fromJid, toJid, data);
+  }
+
+  /**
+   * Basic presence
+   */
+  public void presenceUnavailable(Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceUnavailable(_jid, data);
+  }
+
+  /**
+   * Basic presence
+   */
+  public void presenceUnavailable(String toJid, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presence(_jid, toJid, data);
+  }
+
+  /**
+   * Forwards the presence
+   */
+  protected void onPresenceUnavailable(String fromJid,
+				       String toJid,
+				       Serializable []data)
+  {
+    PresenceHandler handler = _presenceHandler;
+    
+    if (handler != null)
+      handler.onPresenceUnavailable(fromJid, toJid, data);
   }
   
   /**

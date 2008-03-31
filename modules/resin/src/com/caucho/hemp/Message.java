@@ -30,27 +30,59 @@
 package com.caucho.hemp;
 
 import java.io.Serializable;
+import com.caucho.hemp.spi.*;
 
 /**
  * Unidirectional message with a value.
  */
 public class Message extends Packet {
-  private Serializable value;
+  private final Serializable _value;
 
-  public Message()
+  /**
+   * zero-arg constructor for Hessian
+   */
+  private Message()
   {
+    _value = null;
   }
 
+  /**
+   * An empty message to a destination
+   *
+   * @param to the target jid
+   */
   public Message(String to)
   {
     super(to);
+
+    _value = null;
   }
 
+  /**
+   * An message to a destination
+   *
+   * @param to the target jid
+   * @param value the message content
+   */
   public Message(String to, Serializable value)
   {
     super(to);
 
-    this.value = value;
+    _value = value;
+  }
+
+  /**
+   * An message to a destination with a source jid.
+   *
+   * @param to the target jid
+   * @param from the source jid
+   * @param value the message content
+   */
+  public Message(String to, String from, Serializable value)
+  {
+    super(to, from);
+
+    _value = value;
   }
 
   /**
@@ -58,14 +90,41 @@ public class Message extends Packet {
    */
   public Serializable getValue()
   {
-    return this.value;
+    return _value;
   }
 
   /**
-   * Sets the message value
+   * SPI method to dispatch the packet to the proper handler
    */
-  public void setValue(Serializable value)
+  @Override
+  public void dispatch(PacketHandler handler)
   {
-    this.value = value;
+    handler.onMessage(getFrom(), getTo(), _value);
+  }
+
+  @Override
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+    
+    if (getTo() != null) {
+      sb.append("to=");
+      sb.append(getTo());
+    }
+    
+    if (getFrom() != null) {
+      sb.append(",from=");
+      sb.append(getFrom());
+    }
+
+    if (_value != null) {
+      sb.append("," + _value.getClass().getName());
+    }
+    sb.append("]");
+    
+    return sb.toString();
   }
 }

@@ -44,6 +44,7 @@ import com.caucho.ejb.session.StatelessServer;
 import com.caucho.ejb.timer.EjbTimerService;
 import com.caucho.ejb.xa.EjbTransactionManager;
 import com.caucho.ejb.xa.TransactionContext;
+import com.caucho.jca.UserTransactionProxy;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentBean;
@@ -71,6 +72,9 @@ abstract public class AbstractServer implements EnvironmentBean {
   private static final L10N L = new L10N(AbstractServer.class);
 
   protected final EjbContainer _ejbContainer;
+  
+  protected final UserTransaction _ut
+    = UserTransactionProxy.getInstance();
 
   protected String _filename;
   protected int _line;
@@ -535,7 +539,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   public UserTransaction getUserTransaction()
   {
-    return _ejbContainer.getTransactionManager().getUserTransaction();
+    return _ut;
   }
 
   /**

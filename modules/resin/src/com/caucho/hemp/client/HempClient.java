@@ -62,6 +62,8 @@ public class HempClient {
   private Hessian2StreamingInput _in;
   private Hessian2StreamingOutput _out;
 
+  private long _qId;
+
   private boolean _isFinest;
 
   public HempClient(InetAddress address, int port)
@@ -149,6 +151,120 @@ public class HempClient {
 
     if (out != null) {
       out.writeObject(packet);
+    }
+  }
+
+  /**
+   * Sends a message to a given jid
+   */
+  public void sendMessage(String to, Serializable value)
+    throws IOException
+  {
+    Hessian2StreamingOutput out = _out;
+
+    if (out != null) {
+      out.writeObject(new Message(to, value));
+      out.flush();
+    }
+  }
+
+  /**
+   * Sends a presence packet to the server
+   */
+  public void presence(Serializable []data)
+    throws IOException
+  {
+    Hessian2StreamingOutput out = _out;
+
+    if (out != null) {
+      out.writeObject(new Presence(data));
+      out.flush();
+    }
+  }
+
+  /**
+   * Sends a presence packet to the server
+   */
+  public void presence(String to, Serializable []data)
+    throws IOException
+  {
+    Hessian2StreamingOutput out = _out;
+
+    if (out != null) {
+      out.writeObject(new Presence(to, data));
+      out.flush();
+    }
+  }
+
+  /**
+   * Sends a presence packet to the server
+   */
+  public void presenceUnavailable(Serializable []data)
+    throws IOException
+  {
+    Hessian2StreamingOutput out = _out;
+
+    if (out != null) {
+      out.writeObject(new PresenceUnavailable(data));
+      out.flush();
+    }
+  }
+
+  /**
+   * Sends a presence packet to the server
+   */
+  public void presenceUnavailable(String to, Serializable []data)
+    throws IOException
+  {
+    Hessian2StreamingOutput out = _out;
+
+    if (out != null) {
+      out.writeObject(new PresenceUnavailable(to, data));
+      out.flush();
+    }
+  }
+
+  /**
+   * Sends a query-get packet to the server
+   *
+   * XXX: api needs response
+   */
+  public void queryGet(String to, Serializable value)
+    throws IOException
+  {
+    Hessian2StreamingOutput out = _out;
+
+    if (out != null) {
+      String id;
+      
+      synchronized (this) {
+	id = String.valueOf(_qId++);
+      }
+      
+      out.writeObject(new QueryGet(id, to, value));
+      out.flush();
+    }
+  }
+
+  /**
+   * Sends a query-get packet to the server
+   *
+   * XXX: api needs response
+   */
+  public void querySet(String to, Serializable value)
+    throws IOException
+  {
+    Hessian2StreamingOutput out = _out;
+
+    if (out != null) {
+      String id;
+      
+      synchronized (this) {
+	id = String.valueOf(_qId++);
+      }
+      
+      out.writeObject(new QuerySet(id, to, value));
+      out.flush();
     }
   }
 

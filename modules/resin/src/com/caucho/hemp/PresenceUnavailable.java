@@ -29,87 +29,59 @@
 
 package com.caucho.hemp;
 
-import com.caucho.hemp.spi.PacketHandler;
+import java.io.Serializable;
+import com.caucho.hemp.spi.*;
 
 /**
- * Base packet class.  Contains only a 'to' and a 'from' field.
+ * Announces presence unavailability
  */
-public class Packet implements java.io.Serializable
-{
-  private final String _to;
-  private final String _from;
-
+public class PresenceUnavailable extends Presence {
   /**
-   * null constructor for Hessian deserialization
+   * zero-arg constructor for Hessian
    */
-  protected Packet()
+  private PresenceUnavailable()
   {
-    _to = null;
-    _from = null;
   }
 
   /**
-   * Creates a packet with a destination, but no source, e.g. from a
-   * client.  The server will infer the source from the hmpp session
-   * binding.
+   * An undirected presence unavailable announcement to the server.
    *
-   * @param to the destination jid
+   * @param data a collection of presence data
    */
-  public Packet(String to)
+  public PresenceUnavailable(Serializable []data)
   {
-    _to = to;
-    _from = null;
+    super(data);
   }
 
   /**
-   * Creates a packet with a destination and a source.
+   * A directed presence unavailable announcement to another client
    *
-   * @param to the destination jid
-   * @param from the source jid
+   * @param to the target client
+   * @param data a collection of presence data
    */
-  public Packet(String to, String from)
+  public PresenceUnavailable(String to, Serializable []data)
   {
-    _to = to;
-    _from = from;
+    super(to, data);
   }
 
   /**
-   * Returns the 'to' field
+   * A directed presence unavailable announcement to another client
+   *
+   * @param to the target client
+   * @param from the source
+   * @param data a collection of presence data
    */
-  public String getTo()
+  public PresenceUnavailable(String to, String from, Serializable []data)
   {
-    return _to;
-  }
-
-  /**
-   * Returns the 'from' field
-   */
-  public String getFrom()
-  {
-    return _from;
+    super(to, from, data);
   }
 
   /**
    * SPI method to dispatch the packet to the proper handler
    */
+  @Override
   public void dispatch(PacketHandler handler)
   {
-  }
-
-  public String toString()
-  {
-    StringBuilder sb = new StringBuilder();
-    sb.append(getClass().getSimpleName());
-    sb.append("[to=");
-    sb.append(_to);
-
-    if (_from != null) {
-      sb.append(",from=");
-      sb.append(_from);
-    }
-
-    sb.append("]");
-    
-    return sb.toString();
+    handler.onPresenceUnavailable(getFrom(), getTo(), getData());
   }
 }

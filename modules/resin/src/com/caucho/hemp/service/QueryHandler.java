@@ -27,45 +27,48 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.pubsub;
+package com.caucho.hemp.service;
 
 import java.io.Serializable;
-import java.util.*;
+
+import com.caucho.hemp.*;
 
 /**
- * Publish item
+ * Configuration for a service
  */
-public class PubSubItem implements Serializable {
-  private String id;
-  private Serializable value;
-
-  public PubSubItem()
-  {
-  }
-
-  public PubSubItem(Serializable value)
-  {
-    this.value = value;
-  }
-
-  public PubSubItem(String id, Serializable value)
-  {
-    this.id = id;
-    this.value = value;
-  }
-
-  public String getId()
-  {
-    return this.id;
-  }
-
-  public Serializable getValue()
-  {
-    return this.value;
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + this.id + "]";
-  }
+public interface QueryHandler {
+  /**
+   * Called for a query get packet.  The handler must send either a
+   * queryResult or a queryError in response.
+   */
+  public void onQueryGet(String id,
+			 String fromJid,
+			 String toJid,
+			 Serializable query);
+  
+  /**
+   * Called for a query set packet.  The handler must send either a
+   * queryResult or a queryError in response.
+   */
+  public void onQuerySet(String id,
+			 String fromJid,
+			 String toJid,
+			 Serializable query);
+  
+  /**
+   * Called for a query result packet.
+   */
+  public void onQueryResult(String id,
+			    String fromJid,
+			    String toJid,
+			    Serializable value);
+  
+  /**
+   * Called for a query error packet.
+   */
+  public void onQueryError(String id,
+			   String fromJid,
+			   String toJid,
+			   Serializable query,
+			   HmppError error);
 }

@@ -27,45 +27,31 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.pubsub;
+package com.caucho.hemp;
 
 import java.io.Serializable;
-import java.util.*;
 
 /**
- * Publish item
+ * PresenceUnsubscribed returns a successful unsubscription response to
+ * the client.
  */
-public class PubSubItem implements Serializable {
-  private String id;
-  private Serializable value;
-
-  public PubSubItem()
+public class PresenceUnsubscribed extends Presence {
+  /**
+   * zero-arg constructor for Hessian
+   */
+  private PresenceUnsubscribed()
   {
   }
 
-  public PubSubItem(Serializable value)
+  /**
+   * The unsubscribed response to the original client
+   *
+   * @param to the target client
+   * @param from the source
+   * @param data a collection of presence data
+   */
+  public PresenceUnsubscribed(String to, String from, Serializable []data)
   {
-    this.value = value;
-  }
-
-  public PubSubItem(String id, Serializable value)
-  {
-    this.id = id;
-    this.value = value;
-  }
-
-  public String getId()
-  {
-    return this.id;
-  }
-
-  public Serializable getValue()
-  {
-    return this.value;
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + this.id + "]";
+    super(to, from, data);
   }
 }
