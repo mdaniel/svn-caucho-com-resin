@@ -12,7 +12,7 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
-<li>config: connection-max and keepalive-select-max should default to infinite (#2555, rep by paulberto)</li>
+<li>(2008-03-31) config: connection-max and keepalive-select-max should default to infinite (#2555, rep by paulberto)</li>
 <li>config: connection-max belongs in &lt;server> (#2555, rep by paulberto)</li>
 <li>admin: add thresholds for stat-service</li>
 <li>jmx: jmx operations need to occur in classloader context of the mbean (#2556, rep by Karl Goldstein)</li>
