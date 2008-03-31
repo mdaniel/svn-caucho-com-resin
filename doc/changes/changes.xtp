@@ -18,7 +18,7 @@
 <li>jmx: jmx operations need to occur in classloader context of the mbean (#2556, rep by Karl Goldstein)</li>
 <li>admin: add thread dumps for cpu load and ping failure (#2428)</li>
 <li>cache: update miss rate to better reflect total caching (#2505)</li>
-<li>openssl: ssl_write updates for SSL_ERROR_WANT_READ and SSL_ERROR_WANT_WRITE (#2465, rep by D Ngo)<li>
+<li>openssl: ssl_write updates for SSL_ERROR_WANT_READ and SSL_ERROR_WANT_WRITE (#2465, rep by D Ngo)</li>
 <li>resin.conf: ejb-server in ear-default should not have data-source (#2472, rep by stbu)</li>
 <li>jsp: disable caching of "static" jsp pages (#2548, rep by david-peterson)</li>
 <li>hessian: resource counting for SqlDateDeserializer (#2494, rep by gtong)</li>
@@ -36,7 +36,7 @@
 <li>(2008-03-21) quercus: cleanup list can't use SoftReference (#2542, rep by Matt Johnston)</li>
 <li>jsp: dependency generation could mistakenly add classpath: for root-based JSP files (#2486, rep by L Geller)</li>
 <li>rewrite-dispatch: query string resulted in added getParameterValues value (#2464, rep by zdavis)</li>
-<li>quercus: regexp a <= Integer.MAX_VALUE test is unstable for some JIT/OS, so use a <= Integer.MAX_VALUE - 1 (#2526, rep by Chris Chen)</li>
+<li>quercus: regexp a &lt;= Integer.MAX_VALUE test is unstable for some JIT/OS, so use a &lt;= Integer.MAX_VALUE - 1 (#2526, rep by Chris Chen)</li>
 <li>jsp: application, session, and request are not EL implicit objects (#2499, rep by B Whitehead)</li>
 <li>config: redeploy-mode needs to be allowed in &lt;host-default> (#2538, rep by G Perales)</li>
 <li>(2008-03-20) admin: profiling issue with MacOSX (#2480, rep by Javier Vegas)</li>
