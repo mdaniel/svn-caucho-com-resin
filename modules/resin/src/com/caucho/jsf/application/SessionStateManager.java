@@ -112,20 +112,23 @@ public class SessionStateManager extends StateManager
 			 SerializedView state)
     throws IOException
   {
-    ResponseStateManager rsm =
-      context.getRenderKit().getResponseStateManager();
-
     Object [] stateArray = new Object [2];
+
     stateArray [0] = state.getStructure();
     stateArray [1] = state.getState();
 
-    rsm.writeState(context, stateArray);
+    writeState(context, stateArray);
   }
 
   public void writeState(FacesContext context, Object state)
     throws IOException
   {
-    writeState(context, new SerializedView(state, null));
+    ResponseStateManager rsm = context.getRenderKit().getResponseStateManager();
+
+    if (! (state instanceof Object []))
+      rsm.writeState(context, new Object []{state, null});
+    else
+      rsm.writeState(context, state);
   }
 
   @Override
