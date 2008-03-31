@@ -795,6 +795,11 @@ public class MysqlModule extends AbstractQuercusModule {
     if (conn == null)
       conn = getConnection(env);
 
+    // php/1451
+    // need to return results having column name 'Database' for typo3
+    //
+    // MySQL Connector/J 5.x returns 'SCHEME_NAME' as the column name
+    // for "SHOW DATABASES", while 3.x returns 'Database'
     return mysql_query(env,
                        env.createString("SELECT SCHEMA_NAME AS 'Database' FROM information_schema.SCHEMATA"),
                        conn);

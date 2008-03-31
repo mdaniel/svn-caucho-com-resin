@@ -670,6 +670,9 @@ public abstract class JdbcConnectionResource
       return BooleanValue.FALSE;
     }
 
+    if (_rs == null)
+      return BooleanValue.TRUE;
+    
     return env.wrapJava(_rs);
   }
 

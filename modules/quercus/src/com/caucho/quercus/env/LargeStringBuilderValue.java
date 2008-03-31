@@ -471,6 +471,25 @@ public class LargeStringBuilderValue
   }
   
   /**
+   * Append a Java string to the value.
+   */
+  @Override
+  public StringValue append(String s)
+  {
+    int len = s.length();
+    
+    ensureCapacity(_length + len);
+    
+    for (int i = 0; i < len; i++) {
+      _bufferList[_length / SIZE][_length % SIZE] = (byte) s.charAt(i);
+      
+      _length++;
+    }
+    
+    return this;
+  }
+  
+  /**
    * Append a Java buffer to the value.
    */
   @Override
