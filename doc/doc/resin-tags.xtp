@@ -443,6 +443,62 @@ element security-provider {
 
 </s2>
 
+<defun title="&lt;stat-service>">
+
+<p>&lt;stat-service> periodically checks the status of the server,
+and reports errors as necessary.</p>
+
+<deftable title="&lt;stat-service> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>cpu-load-exit-threshold</th>
+  <td>CPU load triggering a Resin exit (and restart)</th>
+  <td>100.0</th>
+</tr>
+<tr>
+  <td>cpu-load-log-info-threshold</th>
+  <td>CPU load triggering a log message at the info level</th>
+  <td>1.0</th>
+</tr>
+<tr>
+  <td>cpu-load-log-warning-threshold</th>
+  <td>CPU load triggering a log message at the warning level</th>
+  <td>5.0</th>
+</tr>
+<tr>
+  <td>cpu-load-log-thread-dump-threshold</th>
+  <td>CPU load triggering thread dump to the log</th>
+  <td>5.0</th>
+</tr>
+<tr>
+  <td>sample-period</th>
+  <td>how often to sample the statistics</th>
+  <td>60s</th>
+</tr>
+<tr>
+  <td>thread-dump-interval</th>
+  <td>minimum time between thread dumps</th>
+  <td>15m</th>
+</tr>
+</deftable>
+
+<def title="&lt;stat-service> schema">
+element stat-service {
+  cpu-load-exit-threshold?
+  &amp; cpu-load-log-info-threshold?
+  &amp; cpu-load-log-warning-threshold?
+  &amp; cpu-load-thread-dump-threshold?
+  &amp; sample-period?
+  &amp; thread-dump-interval?
+}
+</def>
+
+</defun>
+
 <s2 title="system">
 
 <p>The ${system} variable return the <code>System.getProperties()</code>
