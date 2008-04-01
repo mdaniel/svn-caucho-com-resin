@@ -373,6 +373,9 @@ public abstract class UIComponentBase extends UIComponent
       if (i + 1 == values.length)
 	return base;
 
+      if (base == null)
+        return base;
+
       if (! (base instanceof NamingContainer)) {
 	throw new IllegalArgumentException("'" + v + "' in expression '" + expr + "' does not match an intermediate NamingContainer.");
       }
