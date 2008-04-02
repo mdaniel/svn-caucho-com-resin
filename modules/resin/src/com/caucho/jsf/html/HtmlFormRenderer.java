@@ -182,9 +182,10 @@ class HtmlFormRenderer extends BaseRenderer
 
     out.startElement("form", component);
 
-    out.writeAttribute("name", component.getClientId(context), "name");
-    if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
-      out.writeAttribute("id", component.getClientId(context), "id");
+    String clientId = component.getClientId(context);
+
+    out.writeAttribute("name", clientId, "name");
+    out.writeAttribute("id", clientId, "id");
 
     out.writeAttribute("method", "post", "method");
 
