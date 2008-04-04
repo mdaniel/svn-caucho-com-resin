@@ -142,6 +142,35 @@ public class GenericService
   }
 
   /**
+   * Handles an incoming query
+   */
+  public void onQueryResult(String id,
+			    String fromJid,
+			    String toJid,
+			    Serializable value)
+  {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " onQueryResult id=" + id
+		+ " from=" + fromJid + " to=" + toJid);
+    }
+  }
+
+  /**
+   * Handles an incoming query
+   */
+  public void onQueryError(String id,
+			   String fromJid,
+			   String toJid,
+			   Serializable value,
+			   HmppError error)
+  {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " onQueryError id=" + id
+		+ " from=" + fromJid + " to=" + toJid);
+    }
+  }
+
+  /**
    * Handles an incoming presence notification
    *
    * @param fromJid - the jid of the client sending the notification
