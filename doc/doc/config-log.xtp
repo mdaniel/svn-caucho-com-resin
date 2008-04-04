@@ -73,7 +73,7 @@ useful logs.</p>
 
 <deftable title="Resin log names">
 <tr>
-  <th>log <var>name</var> value</th>
+  <th>name</th>
   <th>Meaning</th>
 </tr>
 <tr>
@@ -188,6 +188,175 @@ avoid completely swallowing, or Hessian or XML protocol parsing</td>
   <td>all messages should be logged</td>
 </tr>
 </deftable>
+
+</s2>
+
+<s2 title="&lt;log-handler>" type="defun">
+<parents>resin, server, host-default, host, web-app-default, web-app</parents>
+   
+<p>Configure a log handler for the JDK java.util.logging.* API.
+java.util.logging has two steps: configure a set of log handlers,
+and configure the levels for each logger.  The &lt;log-handler> creates
+a destination for logs, sets a minimum logging level for the handler,
+and attaches the handler to a logging name.</p>
+
+<p>In addition to configuring custom handlers, &lt;log-handler> has the
+most common configuration build-in: logging to a rotating file.  Most of the
+configuration attributes are used for the rotating file and are shared
+with the other logging configuration.</p>
+
+<deftable-childtags title="&lt;log-handler> values">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>archive-format</td>
+  <td>the format for the archive filename when a rollover occurs,
+        see <a href="#rollover">Rollovers</a>.
+    </td>
+  <td>see below</td>
+</tr>
+<tr>
+  <td>class</td>
+  <td>configures a custom Handler class</td>
+  <td></td>
+</tr>
+<tr>
+  <td>formatter</td>
+  <td>Configures a custom java.util.logging.Formatter to format
+the output.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>init</td>
+  <td>IoC-style initialization configuration for the formatter.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>level</td>
+  <td>The <a href="#Log-Levels">log level</a> for the handler.  Typically,
+the handler's level will be finer than the logger's level</td>
+  <td>info</td>
+</tr>
+<tr>
+  <td>mbean-name</td>
+  <td>an mbean name, see <a href="#mbean">MBean control</a>.</td>
+  <td>no mbean name, no mbean registration</td>
+</tr>
+<tr>
+  <td>name</td>
+  <td>A hierarchical name, typically aligned with the Java packaging names.
+The handler will be registered with the Logger with the matching name.</td>
+  <td>match all names</td>
+</tr>
+<tr>
+  <td>path</td>
+  <td>Output path for the log messages, see 
+       <a href="#path">"Log Paths"</a>
+    </td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>path-format</td>
+  <td>Selects a format for generating path names.  The syntax is the same as for archive-format</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td>timestamp</td>
+  <td>a timestamp <a href="#timestamp">format string</a> 
+        to use at the beginning of each log line.
+    </td>
+  <td>"[%Y/%m/%d %H:%M:%S.%s] "</td>
+</tr>
+<tr>
+  <td>rollover-count</td>
+  <td>maximum number of rollover files before the oldest ones get overwritten.
+        See <a href="#rollover">Rollovers</a>. 
+    </td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>rollover-period</td>
+  <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
+        months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
+    </td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>rollover-size</td>
+  <td>maximum size of the file before a rollover occurs, in bytes (50000), 
+        kb (128kb), or megabytes (10mb).  
+        See <a href="#rollover">Rollovers</a>.
+    </td>
+  <td>1mb</td>
+</tr>
+<tr>
+  <td>uri</td>
+  <td>configures a symbolic alias for the handler's class.  The handler implementer will register the schema</td>
+  <td></td>
+</tr>
+</deftable-childtags>
+
+<def title="&lt;log-handler> schema">
+element log-handler {
+  archive-format?
+  &amp; class?
+  &amp; filter?
+  &amp; format?
+  &amp; formatter?
+  &amp; init?
+  &amp; level?
+  &amp; mbean-name?
+  &amp; name
+  &amp; path?
+  &amp; path-format?
+  &amp; rollover-count?
+  &amp; rollover-period?
+  &amp; rollover-size?
+  &amp; timestamp?
+  &amp; uri?
+  &amp; use-parent-handlers?
+}
+</def>
+
+<p>The following example sends warning messages to a JMS queue.  The
+<code>uri="jms:"</code> is an alias
+for <code>com.caucho.log.handler.JmsHandler</code>.  The
+<code>uri="timestamp:"</code> is a formatter alias
+for <code>com.caucho.log.formatter.TimestampFormatter</code></p>
+
+<example title="Example: logging to a JMS queue">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-queue name="myQueue" uri="memory:"/>
+
+  &lt;log-handler name="qa.test" level="warning" uri="jms:">
+    &lt;init target="${myQueue}"/>
+
+    &lt;formatter uri="timestamp:"/>
+  &lt;/log-handler>
+
+&lt;/web-app>
+</example>
+
+<p>The following example is a standard log handler writing to a rollover
+file.  Because the handler's level is "all", the &lt;logger> configuration
+will set the actual logging level.</p>
+
+<example title="Example: logging to a rollover file">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-queue name="myQueue" uri="memory:"/>
+
+  &lt;log-handler name="" level="all"
+       timestamp="[%Y/%m/%d %H:%M:%S.%s] {%{thread}} "/>
+
+  &lt;logger name="com.caucho" level="info"/>
+
+&lt;/web-app>
+</example>
 
 </s2>
 
@@ -340,7 +509,7 @@ log message.  <code>format</code> recognizes EL-expressions. The EL variable
 
 </example>
 
-<deftable title="log EL variable `log' is a LogRecord">
+<deftable title="log EL variable 'log' is a LogRecord">
 <tr><th>Accessor</th><th>Value
 </th></tr><tr><td>${log.level}</td><td>The level of the log record
 </td></tr><tr><td>${log.name}</td><td>The source loggers name

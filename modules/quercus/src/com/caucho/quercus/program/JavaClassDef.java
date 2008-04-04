@@ -137,7 +137,7 @@ public class JavaClassDef extends ClassDef {
                       String extension)
   {
     this(moduleContext, name, type);
-    
+
     _extension = extension;
     
     moduleContext.addExtensionClass(extension, name);
@@ -187,6 +187,14 @@ public class JavaClassDef extends ClassDef {
   public String getName()
   {
     return _name;
+  }
+
+  /**
+   * Returns the class name.
+   */
+  public String getSimpleName()
+  {
+    return getType().getSimpleName();
   }
 
   public Class getType()
@@ -1220,8 +1228,8 @@ public class JavaClassDef extends ClassDef {
       getIterator(Env env, ObjectValue qThis)
     {
       try {
-        Iterator iterator =
-          (Iterator) _iteratorMethod.invoke(qThis.toJavaObject());
+        Iterator iterator
+	  = (Iterator) _iteratorMethod.invoke(qThis.toJavaObject());
         
         return new JavaIterator(env, iterator);
       }
@@ -1305,7 +1313,10 @@ public class JavaClassDef extends ClassDef {
     
     public boolean hasNext()
     {
-      return _iterator.hasNext();
+      if (_iterator != null)
+	return _iterator.hasNext();
+      else
+	return false;
     }
     
     public void remove()
@@ -1355,7 +1366,10 @@ public class JavaClassDef extends ClassDef {
     
     public boolean hasNext()
     {
-      return _iterator.hasNext();
+      if (_iterator != null)
+	return _iterator.hasNext();
+      else
+	return false;
     }
     
     public void remove()

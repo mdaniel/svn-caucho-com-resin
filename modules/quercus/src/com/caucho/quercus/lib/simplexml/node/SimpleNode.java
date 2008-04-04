@@ -36,9 +36,7 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
+import java.util.*;
 import java.util.LinkedHashMap;
 
 /**
@@ -55,7 +53,7 @@ public abstract class SimpleNode
   ArrayList<SimpleNode> _children;
   
   ArrayList<SimpleElement> _elementList;
-  HashMap<String,SimpleElement> _elementMap;
+  TreeMap<String,SimpleElement> _elementMap;
 
   ArrayList<SimpleAttribute> _attributeList;
   HashMap<String,SimpleAttribute> _attributeMap;
@@ -226,7 +224,7 @@ public abstract class SimpleNode
     return _elementList;
   }
 
-  HashMap<String,SimpleElement> getElementMap()
+  public Map<String,SimpleElement> getElementMap()
   {
     return _elementMap;
   }
@@ -373,7 +371,10 @@ public abstract class SimpleNode
 
   public Iterator<SimpleElement> iterator()
   {
-    return _elementList.iterator();
+    if (_elementList != null)
+      return _elementList.iterator();
+    else
+      return null;
   }
   
   public StringValue toXML(Env env)

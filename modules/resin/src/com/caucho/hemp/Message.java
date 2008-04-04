@@ -78,9 +78,9 @@ public class Message extends Packet {
    * @param from the source jid
    * @param value the message content
    */
-  public Message(String to, String from, Serializable value)
+  public Message(String from, String to, Serializable value)
   {
-    super(to, from);
+    super(from, to);
 
     _value = value;
   }

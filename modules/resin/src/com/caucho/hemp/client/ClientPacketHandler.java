@@ -27,87 +27,92 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.servlet;
+package com.caucho.hemp.client;
 
-import java.io.*;
-import java.util.logging.*;
-import javax.servlet.*;
-
-import com.caucho.hemp.*;
-import com.caucho.hemp.service.*;
-import com.caucho.hemp.spi.*;
-import com.caucho.hessian.io.*;
 import com.caucho.server.connection.*;
+import com.caucho.server.port.*;
+import com.caucho.hemp.*;
+import com.caucho.hemp.spi.*;
+import com.caucho.hemp.service.*;
+import com.caucho.hessian.io.*;
+import com.caucho.util.*;
 import com.caucho.vfs.*;
 
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.logging.*;
+
 /**
- * Main protocol handler for the HTTP version of HeMPP.
+ * HeMPP client protocol
  */
-public class HempHandler implements TcpConnectionHandler, PacketHandler {
+class ClientPacketHandler implements Runnable, PacketHandler {
   private static final Logger log
-    = Logger.getLogger(HempHandler.class.getName());
+    = Logger.getLogger(ClientPacketHandler.class.getName());
+
+  private static long _gId;
   
-  private HmppManager _manager;
-  private HmppSession _session;
+  private HempClient _client;
+  private ClassLoader _loader;
+  
+  private boolean _isFinest;
 
-  private Hessian2StreamingInput _in;
-  private Hessian2StreamingOutput _out;
-
-  private HmppServiceHandler _callbackHandler;
-
-  HempHandler(HmppManager manager, ReadStream rs, WriteStream ws)
+  ClientPacketHandler(HempClient client)
   {
-    _manager = manager;
-
-    InputStream is = rs;
-    OutputStream os = ws;
-
-    if (log.isLoggable(Level.FINEST)) {
-      os = new HessianDebugOutputStream(os, log, Level.FINEST);
-      is = new HessianDebugInputStream(is, log, Level.FINEST);
-    }
-    
-    _in = new Hessian2StreamingInput(is);
-    _out = new Hessian2StreamingOutput(os);
-
-    //    _callbackHandler = new HmppServiceHandler(this, _out);
-
-    _session = _manager.createSession("anonymous@localhost", "test");
-    _session.setMessageListener(_callbackHandler);
-    _session.setQueryListener(_callbackHandler);
+    _client = client;
+    _loader = Thread.currentThread().getContextClassLoader();
   }
-  
-  public boolean serviceRead(ReadStream is,
-			     TcpConnectionController controller)
+
+  private void close()
+  {
+    _client.close();
+  }
+    
+  public void run()
+  {
+    _isFinest = log.isLoggable(Level.FINEST);
+
+    Thread thread = Thread.currentThread();
+    String oldName = thread.getName();
+      
+    try {
+      thread.setName("hmpp-client-" + _gId++);
+      thread.setContextClassLoader(_loader);
+      
+      while (! _client.isClosed()) {
+	readPacket();
+      }
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      close();
+
+      thread.setName(oldName);
+    }
+  }
+
+  private void readPacket()
     throws IOException
   {
-    Hessian2StreamingInput in = _in;
+    int tag;
+
+    Hessian2StreamingInput in = _client.getStreamingInput();
 
     if (in == null)
-      return false;
+      return;
 
-    Object obj = in.readObject();
-    
-    Packet packet = (Packet) obj;
+    Packet packet = (Packet) in.readObject();
 
     if (packet == null) {
-      if (log.isLoggable(Level.FINE))
-	log.fine(this + " end of stream");
-      
-      controller.close();
-      return false;
+      close();
+      return;
     }
 
-    packet.dispatch(this);
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " receive " + packet);
 
-    return true;
-  }
-  
-  public boolean serviceWrite(WriteStream os,
-			      TcpConnectionController controller)
-    throws IOException
-  {
-    return false;
+    packet.dispatch(this);
   }
   
   /**
@@ -117,7 +122,10 @@ public class HempHandler implements TcpConnectionHandler, PacketHandler {
 			String to,
 			Serializable value)
   {
-    _session.sendMessage(to, value);
+    MessageListener listener = _client.getMessageHandler();
+
+    if (listener != null)
+      listener.onMessage(from, to, value);
   }
   
   /**
@@ -131,7 +139,13 @@ public class HempHandler implements TcpConnectionHandler, PacketHandler {
 			 String to,
 			 Serializable value)
   {
-    _session.queryGet(id, to, value);
+    QueryListener handler = _client.getQueryHandler();
+
+    if (handler == null || ! handler.onQueryGet(id, from, to, value)) {
+      _client.queryError(id, from, value,
+			 new HmppError("unknown",
+				       "no onQueryGet handling " + value.getClass().getName()));
+    }
   }
   
   /**
@@ -145,7 +159,13 @@ public class HempHandler implements TcpConnectionHandler, PacketHandler {
 			 String to,
 			 Serializable value)
   {
-    _session.querySet(id, to, value);
+    QueryListener handler = _client.getQueryHandler();
+
+    if (handler == null || ! handler.onQuerySet(id, from, to, value)) {
+      _client.queryError(id, from, value,
+			 new HmppError("unknown",
+				       "no onQuerySet handling " + value.getClass().getName()));
+    }
   }
   
   /**
@@ -158,7 +178,7 @@ public class HempHandler implements TcpConnectionHandler, PacketHandler {
 			    String to,
 			    Serializable value)
   {
-    _session.queryResult(id, from, to, value);
+    _client.onQueryResult(id, from, to, value);
   }
   
   /**
@@ -172,7 +192,7 @@ public class HempHandler implements TcpConnectionHandler, PacketHandler {
 			   Serializable value,
 			   HmppError error)
   {
-    _session.queryError(id, from, to, value, error);
+    _client.onQueryError(id, from, to, value, error);
   }
   
   /**
@@ -181,15 +201,10 @@ public class HempHandler implements TcpConnectionHandler, PacketHandler {
    * If the handler deals with clients, the "from" value should be ignored
    * and replaced by the client's jid.
    */
-  public void onPresence(String to,
-			 String from,
+  public void onPresence(String from,
+			 String to,
 			 Serializable []data)
-
   {
-    if (to != null)
-      _session.presenceTo(to, data);
-    else
-      _session.presence(data);
   }
   
   /**
@@ -198,21 +213,17 @@ public class HempHandler implements TcpConnectionHandler, PacketHandler {
    * If the handler deals with clients, the "from" value should be ignored
    * and replaced by the client's jid.
    */
-  public void onPresenceUnavailable(String to,
-				    String from,
+  public void onPresenceUnavailable(String from,
+				    String to,
 				    Serializable []data)
   {
-    if (to != null)
-      _session.presenceUnavailable(to, data);
-    else
-      _session.presenceUnavailable(data);
   }
   
   /**
    * Handles a presence probe from another server
    */
-  public void onPresenceProbe(String to,
-			      String from,
+  public void onPresenceProbe(String from,
+			      String to,
 			      Serializable []data)
   {
   }
@@ -220,8 +231,8 @@ public class HempHandler implements TcpConnectionHandler, PacketHandler {
   /**
    * Handles a presence subscribe request from a client
    */
-  public void onPresenceSubscribe(String to,
-				  String from,
+  public void onPresenceSubscribe(String from,
+				  String to,
 				  Serializable []data)
   {
   }
@@ -229,8 +240,8 @@ public class HempHandler implements TcpConnectionHandler, PacketHandler {
   /**
    * Handles a presence subscribed result to a client
    */
-  public void onPresenceSubscribed(String to,
-				   String from,
+  public void onPresenceSubscribed(String from,
+				   String to,
 				   Serializable []data)
   {
   }
@@ -238,8 +249,8 @@ public class HempHandler implements TcpConnectionHandler, PacketHandler {
   /**
    * Handles a presence unsubscribe request from a client
    */
-  public void onPresenceUnsubscribe(String to,
-				    String from,
+  public void onPresenceUnsubscribe(String from,
+				    String to,
 				    Serializable []data)
   {
   }
@@ -247,8 +258,8 @@ public class HempHandler implements TcpConnectionHandler, PacketHandler {
   /**
    * Handles a presence unsubscribed result to a client
    */
-  public void onPresenceUnsubscribed(String to,
-				     String from,
+  public void onPresenceUnsubscribed(String from,
+				     String to,
 				     Serializable []data)
   {
   }
@@ -256,33 +267,16 @@ public class HempHandler implements TcpConnectionHandler, PacketHandler {
   /**
    * Handles a presence unsubscribed result to a client
    */
-  public void onPresenceError(String to,
-			      String from,
+  public void onPresenceError(String from,
+			      String to,
 			      Serializable []data,
 			      HmppError error)
   {
   }
 
-  public void close()
-  {
-    Hessian2StreamingInput in = _in;
-    _in = null;
-    
-    Hessian2StreamingOutput out = _out;
-    _out = null;
-
-    if (in != null) {
-      try { in.close(); } catch (IOException e) {}
-    }
-
-    if (out != null) {
-      try { out.close(); } catch (IOException e) {}
-    }
-  }
-
-  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _session + "]";
+    // XXX: should have the connection
+    return getClass().getSimpleName() + "[]";
   }
 }

@@ -30,6 +30,7 @@
 package com.caucho.hemp;
 
 import java.io.Serializable;
+import com.caucho.hemp.spi.*;
 
 /**
  * RPC result from a get or set.  The "id" field is used
@@ -94,6 +95,15 @@ public class QueryResult extends Packet {
   public Serializable getValue()
   {
     return _value;
+  }
+
+  /**
+   * SPI method to dispatch the packet to the proper handler
+   */
+  @Override
+  public void dispatch(PacketHandler handler)
+  {
+    handler.onQueryResult(getId(), getFrom(), getTo(), getValue());
   }
 
   @Override

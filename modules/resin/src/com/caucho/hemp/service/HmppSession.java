@@ -96,6 +96,23 @@ public interface HmppSession {
    */
   public void querySet(String id, String to, Serializable query);
 
+  /**
+   * Sends a query response
+   */
+  public void queryResult(String id,
+			  String from,
+			  String to,
+			  Serializable value);
+
+  /**
+   * Sends a query response
+   */
+  public void queryError(String id,
+			 String from,
+			 String to,
+			 Serializable query,
+			 HmppError error);
+
   //
   // presence handling
   //

@@ -153,20 +153,24 @@ public class JsonModule
    */
   private void encodeObject(Env env, StringValue sb, ObjectValue val)
   {
-      sb.append('{');
+    sb.append('{');
 
-      int length = 0;
-      for (Map.Entry<Value,Value> entry : val.entrySet()) {
-        if (length > 0)
-          sb.append(',');
+    int length = 0;
 
-        jsonEncodeImpl(env, sb, entry.getKey().toStringValue());
-        sb.append(':');
-        jsonEncodeImpl(env, sb, entry.getValue());
-        length++;
-      }
+    Iterator<Map.Entry<Value,Value>> iter = val.getIterator(env);
+    while (iter.hasNext()) {
+      Map.Entry<Value,Value> entry = iter.next();
+	
+      if (length > 0)
+	sb.append(',');
 
-      sb.append('}');
+      jsonEncodeImpl(env, sb, entry.getKey().toStringValue());
+      sb.append(':');
+      jsonEncodeImpl(env, sb, entry.getValue());
+      length++;
+    }
+
+    sb.append('}');
   }
 
   /**

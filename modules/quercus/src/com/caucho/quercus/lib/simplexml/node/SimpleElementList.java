@@ -44,7 +44,7 @@ import java.util.Iterator;
  * Represents a SimpleXML nodelist (though only for non-unique elements).
  * There is no parent node.
  */
-class SimpleElementList extends SimpleElement
+public class SimpleElementList extends SimpleElement
 {
   ArrayList<SimpleElement> _sameNameSiblings
     = new ArrayList<SimpleElement>();
@@ -101,7 +101,7 @@ class SimpleElementList extends SimpleElement
   }
   
   @Override
-  HashMap<String,SimpleElement> getElementMap()
+  public HashMap<String,SimpleElement> getElementMap()
   {
     return _sameNameSiblings.get(0).getElementMap();  
   }

@@ -473,6 +473,39 @@ unix&gt; jconsole
 </p>
 </s1>
 
+<s1 title="stat-service">
+
+<p>Resin 3.1.6 adds a new &lt;stat-service> to the &lt;management tag.
+The &lt;stat-service periodically checks the status of Resin and the JVM
+and can act if certain thresholds are exceeded.  The default check rate
+is every 60s.</p>
+
+<p>The primary statistic that &lt;stat-service> observes is the CPU load
+of the server.  You can set thresholds so Resin will log a thread dump
+if the CPU gets high, e.g. to find and debug a runaway thread.  If necessary,
+you can also have Resin restart if the CPU load gets too high.
+The configuration is documented in
+<a href="resin-tags.xtp#management">&lt;management></p> in the resin-tags
+section.</p>
+
+<example title="Example: CPU thresholds">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;management>
+    &lt;stat-service>
+      &lt;cpu-load-exit-threshold>10.0&lt;/cpu-load-exit-threshold>
+      &lt;cpu-load-log-info-threshold>1.0&lt;/cpu-load-log-info-threshold>
+      &lt;cpu-load-log-warning-threshold>2.0&lt;/cpu-load-log-warning-threshold>
+      &lt;cpu-load-thread-dump-threshold>2.0&lt;/cpu-load-thread-dump-threshold>
+      &lt;sample-period>15s&lt;/sample-period>
+      &lt;thread-dump-interval>10m&lt;/thread-dump-interval>
+    &lt;/stat-service>
+  &lt;/management>
+
+&lt;/resin>
+</example>
+
+</s1>
+
 <s1 title="SNMP">
 
 <p>

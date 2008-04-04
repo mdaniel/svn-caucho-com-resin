@@ -29,13 +29,14 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.util.Base64;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.Log;
-import com.caucho.vfs.PersistentDependency;
+import com.caucho.loader.*;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 import java.security.MessageDigest;
-import java.util.Comparator;
+import java.lang.annotation.*;
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,7 +46,7 @@ import java.util.logging.Logger;
 public class JClassDependency implements PersistentDependency {
   private final static Logger log = Log.open(JClassDependency.class);
   
-  private String _className;
+  private final String _className;
 
   private boolean _checkFields = true;
   private boolean _checkStatic = true;
@@ -90,6 +91,16 @@ public class JClassDependency implements PersistentDependency {
    */
   public JClassDependency(String className, String digest)
   {
+    _className = className;
+    
+    String newDigest = getDigest();
+
+    if (! newDigest.equals(digest)) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(_className + " digest is modified.");
+
+      _isDigestModified = true;
+    }
   }
   
   /**
@@ -118,46 +129,56 @@ public class JClassDependency implements PersistentDependency {
    */
   public String getDigest()
   {
-    return "";
-    /*
     try {
-      if (_cl == null)
+      if (_className == null || "".equals(_className))
+	return "";
+      
+      DynamicClassLoader loader
+	= (DynamicClassLoader) Thread.currentThread().getContextClassLoader();
+
+      ClassLoader tmpLoader = loader.getNewTempClassLoader();
+      
+      Class cl = Class.forName(_className, false, tmpLoader);
+      
+      if (cl == null)
         return "";
 
       MessageDigest digest = MessageDigest.getInstance("MD5");
 
-      addDigest(digest, _cl.getName());
+      addDigest(digest, cl.getName());
 
-      addDigest(digest, _cl.getModifiers());
+      addDigest(digest, cl.getModifiers());
 
-      Class cl = _cl.getSuperclass();
-      if (cl != null)
-        addDigest(digest, cl.getName());
+      Class superClass = cl.getSuperclass();
+      if (superClass != null)
+        addDigest(digest, superClass.getName());
 
-      Class []interfaces = _cl.getInterfaces();
+      Class []interfaces = cl.getInterfaces();
       for (int i = 0; i < interfaces.length; i++)
         addDigest(digest, interfaces[i].getName());
 
-      Field []fields = _cl.getFields();
+      Field []fields = cl.getDeclaredFields();
 
       Arrays.sort(fields, new FieldComparator());
 
       if (_checkFields) {
-        for (int i = 0; i < fields.length; i++) {
-          if (Modifier.isPrivate(fields[i].getModifiers()) &&
-              ! _checkPrivate)
+        for (Field field : fields) {
+          if (Modifier.isPrivate(field.getModifiers())
+	      && ! _checkPrivate)
             continue;
-          if (Modifier.isProtected(fields[i].getModifiers()) &&
-              ! _checkProtected)
+          if (Modifier.isProtected(field.getModifiers())
+	      && ! _checkProtected)
             continue;
           
-          addDigest(digest, fields[i].getName());
-          addDigest(digest, fields[i].getModifiers());
-          addDigest(digest, fields[i].getType().getName());
+          addDigest(digest, field.getName());
+          addDigest(digest, field.getModifiers());
+          addDigest(digest, field.getType().getName());
+
+	  addDigest(digest, field.getAnnotations());
         }
       }
 
-      Method []methods = _cl.getMethods();
+      Method []methods = cl.getDeclaredMethods();
       Arrays.sort(methods, new MethodComparator());
       
       for (int i = 0; i < methods.length; i++) {
@@ -183,6 +204,8 @@ public class JClassDependency implements PersistentDependency {
         Class []exn = method.getExceptionTypes();
         for (int j = 0; j < exn.length; j++)
           addDigest(digest, exn[j].getName());
+	
+	addDigest(digest, method.getAnnotations());
       }
       
       byte []digestBytes = new byte[256];
@@ -195,7 +218,6 @@ public class JClassDependency implements PersistentDependency {
 
       return "";
     }
-    */
   }
 
   /**
@@ -205,6 +227,26 @@ public class JClassDependency implements PersistentDependency {
   {
     return ("new com.caucho.bytecode.JClassDependency(\"" +
             _className + "\", \"" + getDigest() + "\")");
+  }
+  
+  /**
+   * Adds the annotations to the digest using a UTF8 encoding.
+   */
+  private static void addDigest(MessageDigest digest, Annotation []annList)
+  {
+    if (annList == null)
+      return;
+
+    for (Annotation ann : annList)
+      addDigest(digest, ann);
+  }
+  
+  /**
+   * Adds the annotations to the digest using a UTF8 encoding.
+   */
+  private static void addDigest(MessageDigest digest, Annotation ann)
+  {
+    addDigest(digest, ann.annotationType().getName());
   }
   
   /**
@@ -265,8 +307,8 @@ public class JClassDependency implements PersistentDependency {
     return _className.equals(depend._className);
   }
 
-  static class FieldComparator implements Comparator<JField> {
-    public int compare(JField a, JField b)
+  static class FieldComparator implements Comparator<Field> {
+    public int compare(Field a, Field b)
     {
       if (a == b)
 	return 0;
@@ -289,8 +331,8 @@ public class JClassDependency implements PersistentDependency {
     }
   }
 
-  static class MethodComparator implements Comparator<JMethod> {
-    public int compare(JMethod a, JMethod b)
+  static class MethodComparator implements Comparator<Method> {
+    public int compare(Method a, Method b)
     {
       if (a == b)
 	return 0;
@@ -305,8 +347,8 @@ public class JClassDependency implements PersistentDependency {
       if (cmp != 0)
 	return cmp;
 
-      JClass []paramA = a.getParameterTypes();
-      JClass []paramB = b.getParameterTypes();
+      Class []paramA = a.getParameterTypes();
+      Class []paramB = b.getParameterTypes();
 
       if (paramA.length < paramB.length)
 	return -1;

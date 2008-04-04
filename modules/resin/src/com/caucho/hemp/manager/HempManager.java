@@ -30,6 +30,7 @@
 package com.caucho.hemp.manager;
 
 import java.util.*;
+import java.util.logging.*;
 import java.lang.ref.*;
 import java.io.Serializable;
 
@@ -42,6 +43,8 @@ import com.caucho.util.*;
  * Manager
  */
 public class HempManager implements HmppManager {
+  private static final Logger log
+    = Logger.getLogger(HempManager.class.getName());
   private static final L10N L = new L10N(HempManager.class);
 
   private RosterManager _rosterManager = new RosterManager();
@@ -85,6 +88,9 @@ public class HempManager implements HmppManager {
     synchronized (_sessionMap) {
       _sessionMap.put(jid, new WeakReference<HempSession>(session));
     }
+
+    if (log.isLoggable(Level.FINE))
+      log.fine(session + " created");
 
     return session;
   }
@@ -219,6 +225,18 @@ public class HempManager implements HmppManager {
     }
   }
 
+  protected HempSession getSession(String jid)
+  {
+    synchronized (_sessionMap) {
+      WeakReference<HempSession> ref = _sessionMap.get(jid);
+
+      if (ref != null)
+	return ref.get();
+      else
+	return null;
+    }
+  }
+
   /**
    * Query an entity
    */
@@ -241,12 +259,21 @@ public class HempManager implements HmppManager {
    */
   void queryGet(String id, String fromJid, String toJid, Serializable value)
   {
+    HempSession session = getSession(toJid);
+
+    if (session != null) {
+      session.onQueryGet(id, fromJid, toJid, value);
+      return;
+    }
+    
     HempEntity entity = getEntity(toJid);
 
-    if (entity != null)
+    if (entity != null) {
       entity.onQueryGet(id, fromJid, toJid, value);
-    else
-      throw new RuntimeException(L.l("{0} is an unknown entity", toJid));
+      return;
+    }
+    
+    throw new RuntimeException(L.l("{0} is an unknown entity", toJid));
   }
 
   /**
@@ -254,10 +281,49 @@ public class HempManager implements HmppManager {
    */
   void querySet(String id, String fromJid, String toJid, Serializable value)
   {
+    HempSession session = getSession(toJid);
+
+    if (session != null) {
+      session.onQuerySet(id, fromJid, toJid, value);
+      return;
+    }
+    
     HempEntity entity = getEntity(toJid);
 
-    if (entity != null)
+    if (entity != null) {
       entity.onQuerySet(id, fromJid, toJid, value);
+      return;
+    }
+    
+    throw new RuntimeException(L.l("{0} is an unknown entity", toJid));
+  }
+
+  /**
+   * Query an entity
+   */
+  void queryResult(String id, String fromJid, String toJid, Serializable value)
+  {
+    HempSession session = getSession(toJid);
+
+    if (session != null)
+      session.onQueryResult(id, fromJid, toJid, value);
+    else
+      throw new RuntimeException(L.l("{0} is an unknown entity", toJid));
+  }
+
+  /**
+   * Query an entity
+   */
+  void queryError(String id,
+		  String fromJid,
+		  String toJid,
+		  Serializable value,
+		  HmppError error)
+  {
+    HempSession session = getSession(toJid);
+
+    if (session != null)
+      session.onQueryError(id, fromJid, toJid, value, error);
     else
       throw new RuntimeException(L.l("{0} is an unknown entity", toJid));
   }

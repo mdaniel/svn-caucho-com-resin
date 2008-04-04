@@ -1211,14 +1211,14 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   protected Class loadClass(String name, boolean resolve)
     throws ClassNotFoundException
   {
-    synchronized (this) {
-      Class cl = loadClassImpl(name, resolve);
+    // XXX: removed sync block, since handled below
+    
+    Class cl = loadClassImpl(name, resolve);
 
-      if (cl != null)
-	return cl;
-      else
-	throw new ClassNotFoundException(name + " in " + this);
-    }
+    if (cl != null)
+      return cl;
+    else
+      throw new ClassNotFoundException(name + " in " + this);
   }
 
   /**
@@ -1348,29 +1348,34 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     ClassEntry entry = null;
 
+    entry = _entryCache == null ? null : _entryCache.get(name);
+
+    if (entry == null)
+      entry = getClassEntry(name);
+
+    if (entry == null)
+      return null;
+
+    if (entry != null && _isVerbose)
+      verbose(name, (isNormalJdkOrder(name) ? "found" : "found (took priority from parent)"));
+
+    if (_isEnableDependencyCheck)
+      entry.addDependencies(_dependencies);
+
+    // Currently, the entry must be in the entry cache for synchronization
+    // to work.  The same entry must be returned for two separate threads
+    // trying to load the class at the same time.
+
     synchronized (this) {
-      entry = _entryCache == null ? null : _entryCache.get(name);
-
-      if (entry == null)
-        entry = getClassEntry(name);
-
-      if (entry == null)
-        return null;
-
-      if (entry != null && _isVerbose)
-        verbose(name, (isNormalJdkOrder(name) ? "found" : "found (took priority from parent)"));
-
-      if (_isEnableDependencyCheck)
-        entry.addDependencies(_dependencies);
-
-      // Currently, the entry must be in the entry cache for synchronization
-      // to work.  The same entry must be returned for two separate threads
-      // trying to load the class at the same time.
-
       if (_entryCache == null)
         _entryCache = new Hashtable<String,ClassEntry>(8);
 
-      _entryCache.put(name, entry);
+      ClassEntry oldEntry = _entryCache.get(name);
+
+      if (oldEntry != null)
+	entry = oldEntry;
+      else
+	_entryCache.put(name, entry);
     }
 
     try {

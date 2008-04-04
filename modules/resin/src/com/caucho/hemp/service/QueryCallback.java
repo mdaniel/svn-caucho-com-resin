@@ -33,31 +33,13 @@ import java.io.Serializable;
 import com.caucho.hemp.*;
 
 /**
- * Configuration for a service
+ * callback for a query
  */
-public interface QueryListener {
-  public Serializable onQuery(String fromJid,
-			      String toJid,
-			      Serializable query);
+public interface QueryCallback {
+  public void onQueryResult(String fromJid, String toJid,
+			    Serializable value, Object handback);
   
-  public boolean onQueryGet(String id,
-			    String fromJid,
-			    String toJid,
-			    Serializable query);
-  
-  public boolean onQuerySet(String id,
-			    String fromJid,
-			    String toJid,
-			    Serializable query);
-  
-  public void onQueryResult(String id,
-			    String fromJid,
-			    String toJid,
-			    Serializable value);
-  
-  public void onQueryError(String id,
-			   String fromJid,
-			   String toJid,
-			   Serializable query,
-			   HmppError error);
+  public void onQueryError(String fromJid, String toJid,
+			   Serializable value, HmppError error,
+			   Object handback);
 }

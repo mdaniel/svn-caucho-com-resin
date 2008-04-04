@@ -27,37 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.service;
+package com.caucho.quercus.annotation;
 
-import java.io.Serializable;
-import com.caucho.hemp.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Configuration for a service
+ * The @EntrySet annotation tells Quercus introspection a method
+ * to use for map operations like serializability.
  */
-public interface QueryListener {
-  public Serializable onQuery(String fromJid,
-			      String toJid,
-			      Serializable query);
-  
-  public boolean onQueryGet(String id,
-			    String fromJid,
-			    String toJid,
-			    Serializable query);
-  
-  public boolean onQuerySet(String id,
-			    String fromJid,
-			    String toJid,
-			    Serializable query);
-  
-  public void onQueryResult(String id,
-			    String fromJid,
-			    String toJid,
-			    Serializable value);
-  
-  public void onQueryError(String id,
-			   String fromJid,
-			   String toJid,
-			   Serializable query,
-			   HmppError error);
+@Target({ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface EntrySet {
 }

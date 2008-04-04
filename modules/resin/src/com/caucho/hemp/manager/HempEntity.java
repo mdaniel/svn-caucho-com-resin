@@ -193,8 +193,8 @@ class HempEntity {
 
     // XXX: logic isn't right here
     for (HempSession session : sessionArray) {
-      if (session != null) {
-	session.onQueryGet(id, fromJid, toJid, query);
+      if (session != null && session.onQueryGet(id, fromJid, toJid, query)) {
+	return;
       }
     }
 
@@ -210,8 +210,8 @@ class HempEntity {
 
     // XXX: logic isn't right here
     for (HempSession session : sessionArray) {
-      if (session != null) {
-	session.onQuerySet(id, fromJid, toJid, query);
+      if (session != null && session.onQuerySet(id, fromJid, toJid, query)) {
+	return;
       }
     }
 

@@ -35,11 +35,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Represents a SimpleXML element node (i.e. not attribute or text).
@@ -51,7 +47,7 @@ public class SimpleElement extends SimpleNode
     _children = new ArrayList<SimpleNode>();
     
     _elementList = new ArrayList<SimpleElement>();
-    _elementMap = new HashMap<String,SimpleElement>();
+    _elementMap = new TreeMap<String,SimpleElement>();
     
     _attributeList = new ArrayList<SimpleAttribute>();
     _attributeMap = new LinkedHashMap<String,SimpleAttribute>();
@@ -184,7 +180,7 @@ public class SimpleElement extends SimpleNode
       out.println('}');
     }
     
-    HashMap<String,SimpleElement> elementMap = getElementMap();
+    Map<String,SimpleElement> elementMap = getElementMap();
     size = elementMap.size();
     
     if (size > 0) {
@@ -255,7 +251,7 @@ public class SimpleElement extends SimpleNode
       out.println();
     }
     
-    HashMap<String,SimpleElement> elementMap = getElementMap();
+    Map<String,SimpleElement> elementMap = getElementMap();
     size = elementMap.size();
     
     if (size > 0) {

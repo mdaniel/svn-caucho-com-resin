@@ -32,6 +32,7 @@ package com.caucho.hemp.client;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.hemp.*;
+import com.caucho.hemp.service.*;
 import com.caucho.hessian.io.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
@@ -62,6 +63,12 @@ public class HempClient {
   private Hessian2StreamingInput _in;
   private Hessian2StreamingOutput _out;
 
+  private MessageListener _messageHandler;
+  private QueryListener _queryHandler;
+
+  private HashMap<String,QueryItem> _queryMap
+    = new HashMap<String,QueryItem>();
+    
   private long _qId;
 
   private boolean _isFinest;
@@ -134,7 +141,7 @@ public class HempClient {
       _out = new Hessian2StreamingOutput(_os);
       _in = new Hessian2StreamingInput(_is);
 
-      ThreadPool.getThreadPool().start(new Listener());
+      ThreadPool.getThreadPool().start(new ClientPacketHandler(this));
     }
     else {
       if (log.isLoggable(Level.FINE))
@@ -142,6 +149,11 @@ public class HempClient {
       
       throw new IOException("Unexpected result: " + result);
     }
+  }
+
+  Hessian2StreamingInput getStreamingInput()
+  {
+    return _in;
   }
 
   public void writePacket(Packet packet)
@@ -152,6 +164,22 @@ public class HempClient {
     if (out != null) {
       out.writeObject(packet);
     }
+  }
+
+  /**
+   * Sets the message listener
+   */
+  public void setMessageHandler(MessageListener listener)
+  {
+    _messageHandler = listener;
+  }
+
+  /**
+   * Gets the message listener
+   */
+  public MessageListener getMessageHandler()
+  {
+    return _messageHandler;
   }
 
   /**
@@ -225,11 +253,28 @@ public class HempClient {
   }
 
   /**
-   * Sends a query-get packet to the server
-   *
-   * XXX: api needs response
+   * Sets the query handler
    */
-  public void queryGet(String to, Serializable value)
+  public void setQueryHandler(QueryListener handler)
+  {
+    _queryHandler = handler;
+  }
+
+  /**
+   * Gets the query handler
+   */
+  public QueryListener getQueryHandler()
+  {
+    return _queryHandler;
+  }
+
+  /**
+   * Sends a query-get packet to the server
+   */
+  public void queryGet(String to,
+		       Serializable value,
+		       QueryCallback callback,
+		       Object handback)
     throws IOException
   {
     Hessian2StreamingOutput out = _out;
@@ -239,9 +284,36 @@ public class HempClient {
       
       synchronized (this) {
 	id = String.valueOf(_qId++);
+
+	_queryMap.put(id, new QueryItem(id, callback, handback));
       }
-      
+
       out.writeObject(new QueryGet(id, to, value));
+      out.flush();
+    }
+  }
+
+  /**
+   * Sends a query-set packet to the server
+   */
+  public void querySet(String to,
+		       Serializable value,
+		       QueryCallback callback,
+		       Object handback)
+    throws IOException
+  {
+    Hessian2StreamingOutput out = _out;
+
+    if (out != null) {
+      String id;
+      
+      synchronized (this) {
+	id = String.valueOf(_qId++);
+
+	_queryMap.put(id, new QueryItem(id, callback, handback));
+      }
+
+      out.writeObject(new QuerySet(id, to, value));
       out.flush();
     }
   }
@@ -265,6 +337,74 @@ public class HempClient {
       
       out.writeObject(new QuerySet(id, to, value));
       out.flush();
+    }
+  }
+
+  /**
+   * Callback for the response
+   */
+  void onQueryResult(String id, String from, String to, Serializable value)
+  {
+    QueryItem item = null;
+    
+    synchronized (this) {
+      item = _queryMap.remove(id);
+    }
+
+    if (item != null)
+      item.onQueryResult(from, to, value);
+  }
+
+  /**
+   * Callback for the response
+   */
+  void onQueryError(String id,
+		    String from,
+		    String to,
+		    Serializable value,
+		    HmppError error)
+  {
+    QueryItem item = null;
+    
+    synchronized (this) {
+      item = _queryMap.remove(id);
+    }
+
+    if (item != null)
+      item.onQueryError(from, to, value, error);
+  }
+
+  /**
+   * Low-level query response
+   */
+  public void queryResult(String id, String to, Serializable value)
+    throws IOException
+  {
+    Hessian2StreamingOutput out = _out;
+
+    if (out != null) {
+      out.writeObject(new QueryResult(id, to, value));
+      out.flush();
+    }
+  }
+
+  /**
+   * Low-level query error
+   */
+  public void queryError(String id,
+			 String to,
+			 Serializable value,
+			 HmppError error)
+  {
+    try {
+      Hessian2StreamingOutput out = _out;
+
+      if (out != null) {
+	out.writeObject(new QueryError(id, null, to, value, error));
+	out.flush();
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -334,38 +474,31 @@ public class HempClient {
     close();
   }
 
-  class Listener implements Runnable {
-    private boolean _isFinest;
-    
-    public void run()
+  static class QueryItem {
+    private final String _id;
+    private final QueryCallback _callback;
+    private final Object _handback;
+
+    QueryItem(String id, QueryCallback callback, Object handback)
     {
-      _isFinest = log.isLoggable(Level.FINEST);
-      
-      try {
-	while (! isClosed()) {
-	  readPacket();
-	}
-      } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
-      } finally {
-	close();
-      }
+      _id = id;
+      _callback = callback;
+      _handback = handback;
     }
 
-    private void readPacket()
-      throws IOException
+    void onQueryResult(String from, String to, Serializable value)
     {
-      int tag;
+      if (_callback != null)
+	_callback.onQueryResult(from, to, value, _handback);
+    }
 
-      Hessian2StreamingInput in = _in;
-
-      if (in == null)
-	return;
-
-      Packet packet = (Packet) in.readObject();
-
-      if (packet == null)
-	close();
+    void onQueryError(String from,
+		      String to,
+		      Serializable value,
+		      HmppError error)
+    {
+      if (_callback != null)
+	_callback.onQueryError(from, to, value, error, _handback);
     }
   }
 }

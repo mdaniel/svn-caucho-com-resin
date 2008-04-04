@@ -71,7 +71,7 @@ public class JavaModule extends AbstractQuercusModule {
       else
         return newObj;
 
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
 

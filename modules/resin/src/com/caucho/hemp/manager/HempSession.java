@@ -148,6 +148,39 @@ public class HempSession implements HmppSession {
   }
 
   /**
+   * Returns a query result
+   */
+  public void queryResult(String id,
+			  String from,
+			  String to,
+			  Serializable value)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+
+    manager.queryResult(id, from, to, value);
+  }
+
+  /**
+   * Returns a query error (low-level api)
+   */
+  public void queryError(String id,
+			 String from,
+			 String to,
+			 Serializable query,
+			 HmppError error)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+
+    manager.queryError(id, from, to, query, error);
+  }
+
+  /**
    * Forwards the message
    */
   Serializable onQuery(String fromJid, String toJid, Serializable query)
@@ -163,29 +196,67 @@ public class HempSession implements HmppSession {
   /**
    * Forwards the message
    */
-  void onQueryGet(String id,
-		  String fromJid,
-		  String toJid,
-		  Serializable query)
+  boolean onQueryGet(String id,
+		     String fromJid,
+		     String toJid,
+		     Serializable query)
   {
     QueryListener listener = _queryListener;
     
-    if (listener != null)
-      listener.onQueryGet(id, fromJid, toJid, query);
+    if (listener != null && listener.onQueryGet(id, fromJid, toJid, query))
+      return true;
+
+    System.out.println("ON_Q: " + id);
+    queryError(id, toJid, fromJid, query,
+	       new HmppError("protocol-unknwon",
+			     "unknown query: " + query.getClass().getName()));
+    
+    return true;
   }
 
   /**
    * Forwards the message
    */
-  void onQuerySet(String id,
-		  String fromJid,
-		  String toJid,
-		  Serializable query)
+  boolean onQuerySet(String id,
+		     String fromJid,
+		     String toJid,
+		     Serializable query)
   {
     QueryListener listener = _queryListener;
     
     if (listener != null)
-      listener.onQuerySet(id, fromJid, toJid, query);
+      return listener.onQuerySet(id, fromJid, toJid, query);
+    else
+      return false;
+  }
+
+  /**
+   * Result from the message
+   */
+  void onQueryResult(String id,
+		     String fromJid,
+		     String toJid,
+		     Serializable value)
+  {
+    QueryListener listener = _queryListener;
+
+    if (listener != null)
+      listener.onQueryResult(id, fromJid, toJid, value);
+  }
+
+  /**
+   * Error from the message
+   */
+  void onQueryError(String id,
+		    String fromJid,
+		    String toJid,
+		    Serializable query,
+		    HmppError error)
+  {
+    QueryListener listener = _queryListener;
+
+    if (listener != null)
+      listener.onQueryError(id, _jid, toJid, query, error);
   }
 
   //

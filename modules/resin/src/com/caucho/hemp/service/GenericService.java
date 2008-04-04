@@ -84,6 +84,11 @@ public class GenericService
       log.fine(this + " init");
   }
 
+  public HmppSession getSession()
+  {
+    return _session;
+  }
+
   /**
    * Handles an incoming message
    */
@@ -107,29 +112,33 @@ public class GenericService
   /**
    * Handles an incoming query
    */
-  public void onQueryGet(String id,
-			 String fromJid,
-			 String toJid,
-			 Serializable query)
+  public boolean onQueryGet(String id,
+			    String fromJid,
+			    String toJid,
+			    Serializable query)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " onQueryGet id=" + id
 		+ " from=" + fromJid + " to=" + toJid);
     }
+
+    return false;
   }
 
   /**
    * Handles an incoming query
    */
-  public void onQuerySet(String id,
-			 String fromJid,
-			 String toJid,
-			 Serializable query)
+  public boolean onQuerySet(String id,
+			    String fromJid,
+			    String toJid,
+			    Serializable query)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " onQuerySet id=" + id
 		+ " from=" + fromJid + " to=" + toJid);
     }
+
+    return false;
   }
 
   /**

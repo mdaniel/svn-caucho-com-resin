@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.JavaClassDef;
@@ -39,26 +40,23 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.IdentityHashMap;
 import java.util.logging.Logger;
 
 /**
  * Represents a Quercus java value.
  */
-public class JavaValue
-  extends ObjectValue
+public class JavaValue extends ObjectValue
   implements Serializable
 {
   private static final Logger log
     = Logger.getLogger(JavaValue.class.getName());
 
   private JavaClassDef _classDef;
+  protected Env _env;
 
   private Object _object;
-
-  protected Env _env;
 
   public JavaValue(Env env, Object object, JavaClassDef def)
   {
@@ -73,11 +71,6 @@ public class JavaValue
   public String getClassName()
   {
     return _classDef.getName();
-  }
-
-  public Set<? extends Map.Entry<Value, Value>> entrySet()
-  {
-    throw new UnsupportedOperationException("unimplementated");
   }
 
   /**
@@ -196,6 +189,31 @@ public class JavaValue
       return oldValue;
     else
       return NullValue.NULL;
+  }
+
+  public Set<? extends Map.Entry<Value, Value>> entrySet()
+  {
+    // XXX: This logic is due to the SimpleXML handling (php/1x21).  It's not
+    // clear if that implementation is supposed to be an exception or
+    // if it's normal, so this pass is assuming it's normal
+    HashMap<Value,EntryItem> map = new HashMap<Value,EntryItem>();
+    HashSet<EntryItem> set = new HashSet<EntryItem>();
+
+    Iterator<Map.Entry<Value,Value>> iter = getIterator(Env.getInstance());
+    while (iter.hasNext()) {
+      Map.Entry<Value,Value> entry = iter.next();
+
+      EntryItem entryItem = map.get(entry.getKey());
+      if (entryItem != null)
+	entryItem.addValue(entry.getValue());
+      else {
+	entryItem = new EntryItem(entry.getKey(), entry.getValue());
+	set.add(entryItem);
+	map.put(entry.getKey(), entryItem);
+      }
+    }
+
+    return set;
   }
 
   /**
@@ -405,9 +423,34 @@ public class JavaValue
   @Override
   public void serialize(StringBuilder sb)
   {
-    log.fine("Quercus: can't serialize " + _object.getClass());
+    String name = _classDef.getName();
 
-    sb.append("N;");
+    Env env = Env.getInstance();
+    TreeMap<Value,Value> map = new TreeMap<Value,Value>();
+    
+    Set<? extends Map.Entry<Value,Value>> entrySet = entrySet();
+
+    sb.append("O:");
+    sb.append(name.length());
+    sb.append(":\"");
+    sb.append(name);
+    sb.append("\":");
+    sb.append(entrySet.size());
+    sb.append("{");
+
+    boolean isFirst = true;
+    for (Map.Entry<Value,Value> entry : entrySet) {
+      if (! isFirst)
+	sb.append(";");
+      
+      entry.getKey().serialize(sb);
+      sb.append(":");
+      entry.getValue().serialize(sb);
+
+      isFirst = false;
+    }
+
+    sb.append("};");
   }
 
   /**
@@ -514,6 +557,51 @@ public class JavaValue
     setQuercusClass(_env.createQuercusClass(_classDef, null));
 
     _object = in.readObject();
+  }
+
+  private static class EntryItem implements Map.Entry<Value,Value> {
+    private Value _key;
+    private Value _value;
+    private boolean _isArray;
+
+    EntryItem(Value key, Value value)
+    {
+      _key = key;
+      _value = value;
+    }
+
+    public Value getKey()
+    {
+      return _key;
+    }
+
+    public Value getValue()
+    {
+      return _value;
+    }
+
+    public Value setValue(Value value)
+    {
+      return _value;
+    }
+
+    void addValue(Value value)
+    {
+      ArrayValue array = null;
+      
+      if (! _isArray) {
+	_isArray = true;
+	Value oldValue = _value;
+	_value = new ArrayValueImpl();
+	array = (ArrayValue) _value;
+	array.append(oldValue);
+      }
+      else {
+	array = (ArrayValue) _value;
+      }
+
+      array.append(value);
+    }
   }
 }
 

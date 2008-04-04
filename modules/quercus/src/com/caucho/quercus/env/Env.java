@@ -101,6 +101,8 @@ public class Env {
   public static final int B_USER_NOTICE = 10;
   public static final int B_STRICT = 11;
   public static final int B_RECOVERABLE_ERROR = 12;
+  
+  public static final int B_LAST = B_RECOVERABLE_ERROR;
 
   public static final int E_ERROR = 1 << B_ERROR;
   public static final int E_WARNING = 1 << B_WARNING;
@@ -264,8 +266,8 @@ public class Env {
 
   private LocaleInfo _locale;
 
-  private Callback [] _prevErrorHandlers = new Callback[B_STRICT + 1];
-  private Callback [] _errorHandlers = new Callback[B_STRICT + 1];
+  private Callback [] _prevErrorHandlers = new Callback[B_LAST + 1];
+  private Callback [] _errorHandlers = new Callback[B_LAST + 1];
 
   private Callback _prevExceptionHandler;
   private Callback _exceptionHandler;

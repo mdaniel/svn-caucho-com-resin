@@ -35,29 +35,42 @@ import com.caucho.hemp.*;
 /**
  * Configuration for a service
  */
-public interface QueryListener {
+public class AbstractQueryHandler implements QueryListener {
   public Serializable onQuery(String fromJid,
 			      String toJid,
-			      Serializable query);
+			      Serializable query)
+  {
+    throw new IllegalStateException();
+  }
   
   public boolean onQueryGet(String id,
 			    String fromJid,
 			    String toJid,
-			    Serializable query);
+			    Serializable query)
+  {
+    return false;
+  }
   
   public boolean onQuerySet(String id,
 			    String fromJid,
 			    String toJid,
-			    Serializable query);
+			    Serializable query)
+  {
+    return false;
+  }
   
   public void onQueryResult(String id,
 			    String fromJid,
 			    String toJid,
-			    Serializable value);
+			    Serializable value)
+  {
+  }
   
   public void onQueryError(String id,
 			   String fromJid,
 			   String toJid,
 			   Serializable query,
-			   HmppError error);
+			   HmppError error)
+  {
+  }
 }

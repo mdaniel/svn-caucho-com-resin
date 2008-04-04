@@ -43,9 +43,11 @@ import com.caucho.vfs.*;
 /**
  * Main protocol handler for the HTTP version of HeMPP.
  */
-public class HempHandler implements TcpConnectionHandler, PacketHandler {
+public class ServerPacketHandler
+  implements TcpConnectionHandler, PacketHandler
+{
   private static final Logger log
-    = Logger.getLogger(HempHandler.class.getName());
+    = Logger.getLogger(ServerPacketHandler.class.getName());
   
   private HmppManager _manager;
   private HmppSession _session;
@@ -55,7 +57,7 @@ public class HempHandler implements TcpConnectionHandler, PacketHandler {
 
   private HmppServiceHandler _callbackHandler;
 
-  HempHandler(HmppManager manager, ReadStream rs, WriteStream ws)
+  ServerPacketHandler(HmppManager manager, ReadStream rs, WriteStream ws)
   {
     _manager = manager;
 
@@ -70,7 +72,7 @@ public class HempHandler implements TcpConnectionHandler, PacketHandler {
     _in = new Hessian2StreamingInput(is);
     _out = new Hessian2StreamingOutput(os);
 
-    //    _callbackHandler = new HmppServiceHandler(this, _out);
+    _callbackHandler = new HmppServiceHandler(this, _out);
 
     _session = _manager.createSession("anonymous@localhost", "test");
     _session.setMessageListener(_callbackHandler);

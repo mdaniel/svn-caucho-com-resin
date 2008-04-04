@@ -64,21 +64,13 @@ public class Packet implements java.io.Serializable
   /**
    * Creates a packet with a destination and a source.
    *
-   * @param to the destination jid
    * @param from the source jid
+   * @param to the destination jid
    */
-  public Packet(String to, String from)
+  public Packet(String from, String to)
   {
-    _to = to;
     _from = from;
-  }
-
-  /**
-   * Returns the 'to' field
-   */
-  public String getTo()
-  {
-    return _to;
+    _to = to;
   }
 
   /**
@@ -87,6 +79,14 @@ public class Packet implements java.io.Serializable
   public String getFrom()
   {
     return _from;
+  }
+
+  /**
+   * Returns the 'to' field
+   */
+  public String getTo()
+  {
+    return _to;
   }
 
   /**

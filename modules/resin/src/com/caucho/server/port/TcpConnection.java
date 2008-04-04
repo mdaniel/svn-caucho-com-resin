@@ -426,6 +426,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
       if (controller.isDuplex()) {
 	isSuspended = port.registerDuplex(this);
+	_isResume = true;
       }
       else if (port.suspend(this)) {
 	isSuspended = true;
@@ -625,6 +626,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
 	  TcpConnectionController duplex
 	    = (TcpConnectionController) controller;
 
+	  _isResume = true;
+	  
 	  Runnable readTask = duplex.getReadTask();
 	  if (readTask != null) {
 	    isKeepalive = true;
