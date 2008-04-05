@@ -29,6 +29,12 @@
 
 package com.caucho.hemp.manager;
 
+import com.caucho.hemp.im.Roster;
+import com.caucho.hemp.im.RosterItem;
+import com.caucho.hemp.im.RosterManager;
+import com.caucho.hmpp.HmppSession;
+import com.caucho.hmpp.HmppBroker;
+import com.caucho.hmpp.HmppError;
 import java.util.*;
 import java.util.logging.*;
 import java.lang.ref.*;
@@ -42,7 +48,7 @@ import com.caucho.util.*;
 /**
  * Manager
  */
-public class HempManager implements HmppManager {
+public class HempManager implements HmppBroker {
   private static final Logger log
     = Logger.getLogger(HempManager.class.getName());
   private static final L10N L = new L10N(HempManager.class);
@@ -290,23 +296,6 @@ public class HempManager implements HmppManager {
       else
 	return null;
     }
-  }
-
-  /**
-   * Query an entity
-   */
-  Serializable query(String fromJid, String toJid, Serializable value)
-  {
-    HempEntity entity;
-    
-    synchronized (_entityMap) {
-      entity = _entityMap.get(toJid);
-    }
-
-    if (entity != null)
-      return entity.onQuery(fromJid, toJid, value);
-    else
-      throw new RuntimeException(L.l("{0} is an unknown entity", toJid));
   }
 
   /**

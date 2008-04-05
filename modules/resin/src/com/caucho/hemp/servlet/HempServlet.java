@@ -29,6 +29,7 @@
 
 package com.caucho.hemp.servlet;
 
+import com.caucho.hmpp.HmppBroker;
 import java.io.*;
 import javax.servlet.*;
 
@@ -42,9 +43,9 @@ import com.caucho.vfs.*;
  * Main protocol handler for the HTTP version of HeMPP.
  */
 public class HempServlet extends GenericServlet {
-  private HmppManager _manager;
+  private HmppBroker _manager;
 
-  public void setBroker(HmppManager manager)
+  public void setBroker(HmppBroker manager)
   {
     _manager = manager;
   }

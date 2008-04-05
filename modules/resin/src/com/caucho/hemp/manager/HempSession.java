@@ -29,6 +29,11 @@
 
 package com.caucho.hemp.manager;
 
+import com.caucho.hmpp.HmppSession;
+import com.caucho.hmpp.PresenceHandler;
+import com.caucho.hmpp.MessageHandler;
+import com.caucho.hmpp.QueryHandler;
+import com.caucho.hmpp.HmppError;
 import java.io.Serializable;
 
 import com.caucho.hemp.*;
@@ -48,8 +53,8 @@ public class HempSession implements HmppSession {
 
   private boolean _isClosed;
 
-  private MessageListener _messageListener;
-  private QueryListener _queryListener;
+  private MessageHandler _messageListener;
+  private QueryHandler _queryListener;
   private PresenceHandler _presenceHandler;
 
   HempSession(HempManager manager, HempEntity entity, String jid)
@@ -91,7 +96,7 @@ public class HempSession implements HmppSession {
   /**
    * Registers the listener
    */
-  public void setMessageListener(MessageListener listener)
+  public void setMessageListener(MessageHandler listener)
   {
     _messageListener = listener;
   }
@@ -101,7 +106,7 @@ public class HempSession implements HmppSession {
    */
   void onMessage(String fromJid, String toJid, Serializable value)
   {
-    MessageListener listener = _messageListener;
+    MessageHandler listener = _messageListener;
     
     if (listener != null)
       listener.onMessage(fromJid, toJid, value);
@@ -110,7 +115,7 @@ public class HempSession implements HmppSession {
   /**
    * Registers the listener
    */
-  public void setQueryListener(QueryListener listener)
+  public void setQueryListener(QueryHandler listener)
   {
     _queryListener = listener;
   }
@@ -125,7 +130,8 @@ public class HempSession implements HmppSession {
     if (manager == null)
       throw new IllegalStateException(L.l("session is closed"));
     
-    return _manager.query(_jid, to, query);
+    //return _manager.query(_jid, to, query);
+    return null;
   }
 
   /**
@@ -190,25 +196,12 @@ public class HempSession implements HmppSession {
   /**
    * Forwards the message
    */
-  Serializable onQuery(String fromJid, String toJid, Serializable query)
-  {
-    QueryListener listener = _queryListener;
-    
-    if (listener != null)
-      return listener.onQuery(fromJid, toJid, query);
-    else
-      return null;
-  }
-
-  /**
-   * Forwards the message
-   */
   boolean onQueryGet(String id,
 		     String fromJid,
 		     String toJid,
 		     Serializable query)
   {
-    QueryListener listener = _queryListener;
+    QueryHandler listener = _queryListener;
     
     if (listener != null && listener.onQueryGet(id, fromJid, toJid, query))
       return true;
@@ -229,7 +222,7 @@ public class HempSession implements HmppSession {
 		     String toJid,
 		     Serializable query)
   {
-    QueryListener listener = _queryListener;
+    QueryHandler listener = _queryListener;
     
     if (listener != null)
       return listener.onQuerySet(id, fromJid, toJid, query);
@@ -245,7 +238,7 @@ public class HempSession implements HmppSession {
 		     String toJid,
 		     Serializable value)
   {
-    QueryListener listener = _queryListener;
+    QueryHandler listener = _queryListener;
 
     if (listener != null)
       listener.onQueryResult(id, fromJid, toJid, value);
@@ -260,7 +253,7 @@ public class HempSession implements HmppSession {
 		    Serializable query,
 		    HmppError error)
   {
-    QueryListener listener = _queryListener;
+    QueryHandler listener = _queryListener;
 
     if (listener != null)
       listener.onQueryError(id, _jid, toJid, query, error);

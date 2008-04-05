@@ -29,6 +29,18 @@
 
 package com.caucho.hemp.client;
 
+import com.caucho.hmpp.MessageHandler;
+import com.caucho.hmpp.QueryCallback;
+import com.caucho.hmpp.QueryHandler;
+import com.caucho.hmpp.packet.QuerySet;
+import com.caucho.hmpp.packet.QueryResult;
+import com.caucho.hmpp.packet.QueryGet;
+import com.caucho.hmpp.packet.QueryError;
+import com.caucho.hmpp.packet.PresenceUnavailable;
+import com.caucho.hmpp.packet.Presence;
+import com.caucho.hmpp.packet.Packet;
+import com.caucho.hmpp.packet.Message;
+import com.caucho.hmpp.HmppError;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.hemp.*;
@@ -63,8 +75,8 @@ public class HempClient {
   private Hessian2StreamingInput _in;
   private Hessian2StreamingOutput _out;
 
-  private MessageListener _messageHandler;
-  private QueryListener _queryHandler;
+  private MessageHandler _messageHandler;
+  private QueryHandler _queryHandler;
 
   private HashMap<String,QueryItem> _queryMap
     = new HashMap<String,QueryItem>();
@@ -169,7 +181,7 @@ public class HempClient {
   /**
    * Sets the message listener
    */
-  public void setMessageHandler(MessageListener listener)
+  public void setMessageHandler(MessageHandler listener)
   {
     _messageHandler = listener;
   }
@@ -177,7 +189,7 @@ public class HempClient {
   /**
    * Gets the message listener
    */
-  public MessageListener getMessageHandler()
+  public MessageHandler getMessageHandler()
   {
     return _messageHandler;
   }
@@ -255,7 +267,7 @@ public class HempClient {
   /**
    * Sets the query handler
    */
-  public void setQueryHandler(QueryListener handler)
+  public void setQueryHandler(QueryHandler handler)
   {
     _queryHandler = handler;
   }
@@ -263,7 +275,7 @@ public class HempClient {
   /**
    * Gets the query handler
    */
-  public QueryListener getQueryHandler()
+  public QueryHandler getQueryHandler()
   {
     return _queryHandler;
   }

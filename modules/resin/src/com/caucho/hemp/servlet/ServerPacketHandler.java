@@ -29,13 +29,17 @@
 
 package com.caucho.hemp.servlet;
 
+import com.caucho.hmpp.HmppSession;
+import com.caucho.hmpp.HmppBroker;
+import com.caucho.hmpp.packet.PacketHandler;
+import com.caucho.hmpp.packet.Packet;
+import com.caucho.hmpp.HmppError;
 import java.io.*;
 import java.util.logging.*;
 import javax.servlet.*;
 
 import com.caucho.hemp.*;
 import com.caucho.hemp.service.*;
-import com.caucho.hemp.spi.*;
 import com.caucho.hessian.io.*;
 import com.caucho.server.connection.*;
 import com.caucho.vfs.*;
@@ -49,7 +53,7 @@ public class ServerPacketHandler
   private static final Logger log
     = Logger.getLogger(ServerPacketHandler.class.getName());
   
-  private HmppManager _manager;
+  private HmppBroker _manager;
   private HmppSession _session;
 
   private Hessian2StreamingInput _in;
@@ -57,7 +61,7 @@ public class ServerPacketHandler
 
   private HmppServiceHandler _callbackHandler;
 
-  ServerPacketHandler(HmppManager manager, ReadStream rs, WriteStream ws)
+  ServerPacketHandler(HmppBroker manager, ReadStream rs, WriteStream ws)
   {
     _manager = manager;
 

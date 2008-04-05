@@ -29,6 +29,12 @@
 
 package com.caucho.hemp.service;
 
+import com.caucho.hmpp.HmppSession;
+import com.caucho.hmpp.HmppBroker;
+import com.caucho.hmpp.PresenceHandler;
+import com.caucho.hmpp.MessageHandler;
+import com.caucho.hmpp.QueryHandler;
+import com.caucho.hmpp.HmppError;
 import com.caucho.config.*;
 import com.caucho.hemp.*;
 import com.caucho.hemp.manager.*;
@@ -44,13 +50,13 @@ import javax.webbeans.*;
  * Configuration for a service
  */
 public class GenericService
-  implements MessageListener, QueryListener, PresenceHandler
+  implements MessageHandler, QueryHandler, PresenceHandler
 {
   private static final L10N L = new L10N(GenericService.class);
   private static final Logger log
     = Logger.getLogger(GenericService.class.getName());
   
-  private @In HmppManager _manager;
+  private @In HmppBroker _manager;
   
   private String _name;
   private String _password;

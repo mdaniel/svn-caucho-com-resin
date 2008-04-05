@@ -29,6 +29,8 @@
 
 package com.caucho.jms.hemp;
 
+import com.caucho.hmpp.HmppSession;
+import com.caucho.hmpp.HmppBroker;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.*;
@@ -41,7 +43,6 @@ import javax.webbeans.*;
 import com.caucho.config.*;
 import com.caucho.hemp.*;
 import com.caucho.hemp.service.*;
-import com.caucho.hemp.broker.*;
 import com.caucho.jms.memory.*;
 import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
@@ -53,7 +54,7 @@ import com.caucho.webbeans.manager.*;
  * Implements an hemp topic.
  */
 public class HempTopic extends AbstractTopic
-  implements com.caucho.hemp.service.MessageListener
+  implements com.caucho.hmpp.MessageHandler
 {
   private static final L10N L = new L10N(HempTopic.class);
   
@@ -63,7 +64,7 @@ public class HempTopic extends AbstractTopic
   private ArrayList<AbstractQueue> _subscriptionList
     = new ArrayList<AbstractQueue>();
 
-  private HmppManager _broker;
+  private HmppBroker _broker;
   private HmppSession _session;
 
   private int _id;
@@ -71,7 +72,7 @@ public class HempTopic extends AbstractTopic
   /**
    * Sets the broker
    */
-  public void setBroker(HmppManager broker)
+  public void setBroker(HmppBroker broker)
   {
     _broker = broker;
   }
@@ -96,12 +97,12 @@ public class HempTopic extends AbstractTopic
     if (_broker == null) {
       WebBeansContainer container = WebBeansContainer.create();
 
-      ComponentFactory comp = container.resolveByType(HmppManager.class);
+      ComponentFactory comp = container.resolveByType(HmppBroker.class);
 
       if (comp == null)
 	throw new ConfigException(L.l("hmpp protocol needs broker"));
     
-      _broker = (HmppManager) comp.get();
+      _broker = (HmppBroker) comp.get();
 
       if (_broker == null)
 	throw new ConfigException(L.l("Need xmpp protocol"));

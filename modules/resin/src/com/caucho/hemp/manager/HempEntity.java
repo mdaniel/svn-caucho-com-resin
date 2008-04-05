@@ -165,25 +165,6 @@ class HempEntity {
     }
   }
 
-  Serializable onQuery(String fromJid, String toJid, Serializable query)
-  {
-    HempSession []sessionArray = getSessionArray();
-
-    if (sessionArray == null)
-      return null;
-
-    for (HempSession session : sessionArray) {
-      if (session != null) {
-	Serializable result = session.onQuery(fromJid, toJid, query);
-
-	if (result != null)
-	  return result;
-      }
-    }
-
-    throw new RuntimeException(L.l("'{0}' is an unknown query", query));
-  }
-
   void onQueryGet(String id, String fromJid, String toJid, Serializable query)
   {
     HempSession []sessionArray = getSessionArray();

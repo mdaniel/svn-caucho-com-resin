@@ -29,19 +29,25 @@
 
 package com.caucho.hemp.servlet;
 
+import com.caucho.hmpp.packet.QuerySet;
+import com.caucho.hmpp.packet.QueryResult;
+import com.caucho.hmpp.packet.QueryGet;
+import com.caucho.hmpp.packet.QueryError;
+import com.caucho.hmpp.packet.Message;
+import com.caucho.hmpp.HmppError;
 import java.io.*;
 import java.util.logging.*;
 
 import com.caucho.hessian.io.*;
 import com.caucho.hemp.*;
-import com.caucho.hemp.service.MessageListener;
-import com.caucho.hemp.service.QueryListener;
+import com.caucho.hmpp.MessageHandler;
+import com.caucho.hmpp.QueryHandler;
 
 /**
  * Handles callbacks for a hmpp service
  */
 public class HmppServiceHandler
-  implements MessageListener, QueryListener
+  implements MessageHandler, QueryHandler
 {
   private static final Logger log
     = Logger.getLogger(HmppServiceHandler.class.getName());

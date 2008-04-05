@@ -29,10 +29,14 @@
 
 package com.caucho.hemp.client;
 
+import com.caucho.hmpp.MessageHandler;
+import com.caucho.hmpp.QueryHandler;
+import com.caucho.hmpp.packet.PacketHandler;
+import com.caucho.hmpp.packet.Packet;
+import com.caucho.hmpp.HmppError;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.hemp.*;
-import com.caucho.hemp.spi.*;
 import com.caucho.hemp.service.*;
 import com.caucho.hessian.io.*;
 import com.caucho.util.*;
@@ -122,7 +126,7 @@ class ClientPacketHandler implements Runnable, PacketHandler {
 			String to,
 			Serializable value)
   {
-    MessageListener listener = _client.getMessageHandler();
+    MessageHandler listener = _client.getMessageHandler();
 
     if (listener != null)
       listener.onMessage(from, to, value);
@@ -139,7 +143,7 @@ class ClientPacketHandler implements Runnable, PacketHandler {
 			 String to,
 			 Serializable value)
   {
-    QueryListener handler = _client.getQueryHandler();
+    QueryHandler handler = _client.getQueryHandler();
 
     if (handler == null || ! handler.onQueryGet(id, from, to, value)) {
       _client.queryError(id, from, value,
@@ -159,7 +163,7 @@ class ClientPacketHandler implements Runnable, PacketHandler {
 			 String to,
 			 Serializable value)
   {
-    QueryListener handler = _client.getQueryHandler();
+    QueryHandler handler = _client.getQueryHandler();
 
     if (handler == null || ! handler.onQuerySet(id, from, to, value)) {
       _client.queryError(id, from, value,
