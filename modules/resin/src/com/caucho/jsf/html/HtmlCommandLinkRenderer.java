@@ -69,11 +69,11 @@ class HtmlCommandLinkRenderer extends BaseRenderer
     Map<String,String> paramMap = ext.getRequestParameterMap();
 
     String value = paramMap.get(hiddenId);
-    
+
     if (value != null && ! "".equals(value)) {
       ActionEvent event = new ActionEvent(component);
 
-      
+
       component.queueEvent(event);
     }
     else {
@@ -81,7 +81,7 @@ class HtmlCommandLinkRenderer extends BaseRenderer
       String valueY = clientId + ".y";
     }
   }
-  
+
   /**
    * Renders the open tag for the text.
    */
@@ -177,7 +177,7 @@ class HtmlCommandLinkRenderer extends BaseRenderer
       disabled = (Boolean) attrMap.get("disabled");
       hreflang = (String) attrMap.get("hreflang");
       lang = (String) attrMap.get("lang");
-      
+
       onblur = (String) attrMap.get("onblur");
       onclick = (String) attrMap.get("onclick");
       ondblclick = (String) attrMap.get("ondblclick");
@@ -222,9 +222,7 @@ class HtmlCommandLinkRenderer extends BaseRenderer
 
       out.writeAttribute("href", "#", "href");
     }
-      
-    //out.writeAttribute("name", component.getClientId(context), "name");
-    
+ 
     if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
       out.writeAttribute("id", component.getClientId(context), "id");
 
@@ -253,6 +251,10 @@ class HtmlCommandLinkRenderer extends BaseRenderer
     if (disabled) {
     }
     else {
+      HtmlFormRenderer.addCommandLinkHiddenField(context,
+                                                 formClientId,
+                                                 hiddenFieldName);
+      
       StringBuilder clickJs = new StringBuilder();
       clickJs.append("document.forms['");
       clickJs.append(formClientId);
@@ -288,7 +290,7 @@ class HtmlCommandLinkRenderer extends BaseRenderer
 
 	    String val = toString(context, param, param.getValue());
 	    String encodedVal = URLEncoder.encode(val, enc);
-	    
+
 	    clickJs.append(encodedVal);
 	    clickJs.append("';");
 	  }
@@ -378,7 +380,7 @@ class HtmlCommandLinkRenderer extends BaseRenderer
       out.writeText(toString(context, component, value), "value");
 
     final int childCount = component.getChildCount();
-    
+
     if (childCount > 0) {
       List<UIComponent> children = component.getChildren();
 
@@ -399,11 +401,6 @@ class HtmlCommandLinkRenderer extends BaseRenderer
       out.endElement("span");
     else
       out.endElement("a");
-
-    out.startElement("input", component);
-    out.writeAttribute("type", "hidden", "type");
-    out.writeAttribute("name", hiddenFieldName, "name");
-    out.endElement("input");
   }
 
   private String getFormId(FacesContext context, UIComponent component)

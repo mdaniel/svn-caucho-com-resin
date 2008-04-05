@@ -284,10 +284,18 @@ class HtmlFormRenderer extends BaseRenderer
   {
     ViewHandler handler = context.getApplication().getViewHandler();
 
-    // jsf/1136 -- needed by facelets
-    handler.writeState(context);
-
     ResponseWriter out = context.getResponseWriter();
+
+    Set<String> links = findCommandLinkHiddenFieldSet(context, component.getClientId(context),false);
+
+    if (links != null) {
+      for (String link : links) {
+        out.startElement("input", component);
+        out.writeAttribute("type", "hidden", "type");
+        out.writeAttribute("name", link, "name");
+        out.endElement("input");
+      }
+    }
 
     Set<String> params = findCommandLinkParamSet(context,
 						 component.getClientId(context),
@@ -304,6 +312,9 @@ class HtmlFormRenderer extends BaseRenderer
       }
     }
 
+    // jsf/1136 -- needed by facelets
+    handler.writeState(context);
+
     out.endElement("form");
     out.write("\n");
   }
@@ -313,6 +324,12 @@ class HtmlFormRenderer extends BaseRenderer
 				  String name)
   {
     findCommandLinkParamSet(context, formClientId, true).add(name);
+  }
+
+  static void addCommandLinkHiddenField(FacesContext context,
+                                        String formClientId,
+                                        String name) {
+    findCommandLinkHiddenFieldSet(context, formClientId, true).add(name);
   }
 
   private static Set<String> findCommandLinkParamSet(FacesContext context,
@@ -330,4 +347,21 @@ class HtmlFormRenderer extends BaseRenderer
     }
     return params;
   }
+
+  private static Set<String> findCommandLinkHiddenFieldSet(FacesContext context,
+						     String formClientId,
+						     boolean create)
+  {
+    final String setKey = "com.caucho.jsf.html.form." +
+			  formClientId +
+			  ".commandLinks";
+    Map requestMap = context.getExternalContext().getRequestMap();
+    Set<String> links = (Set<String>) requestMap.get(setKey);
+    if (links == null && create) {
+      links = new HashSet<String>();
+      requestMap.put(setKey, links);
+    }
+    return links;
+  }
+
 }
