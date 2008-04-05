@@ -64,75 +64,35 @@ import java.util.logging.*;
  * SimpleXMLElement object oriented API facade.
  * Also acts as the DOM document.
  */
-public class SimpleXMLAttribute extends SimpleXMLElement
+public class SimpleXMLText extends SimpleXMLElement
 {
-  protected SimpleXMLAttribute(SimpleXMLElement parent,
-			       String name)
+  private static final Logger log
+    = Logger.getLogger(SimpleXMLText.class.getName());
+  private static final L10N L = new L10N(SimpleXMLText.class);
+  
+  protected SimpleXMLText()
   {
-    super(parent, name);
+    _name = "#text";
   }
   
-  protected SimpleXMLAttribute(SimpleXMLElement parent,
-			       String name,
-			       String namespace,
-			       StringValue text)
+  protected SimpleXMLText(StringValue text)
   {
-    super(parent, name, namespace);
-    
+    _name = "#text";
     _text = text;
   }
 
-  @Override
-  protected void addNamespace(String prefix, String namespace)
+  protected boolean isElement()
   {
-    if (_parent != null)
-      _parent.addNamespace(prefix, namespace);
-  }
-  
-  /**
-   * Required for 'foreach'. When only values are specified in
-   * the loop <code>foreach($a as $b)</code>, this method
-   * should return an iterator that contains Java objects
-   * that will be wrapped in a Value.
-   *
-   * When a 'foreach' loop with name/value pairs
-   * i.e. <code>foreach($a as $b=>$c)</code>
-   * invokes this method, it expects an iterator that
-   * contains objects that implement Map.Entry.
-   */
-  public Iterator iterator()
-  {
-    if (_attributes != null)
-      return _attributes.iterator();
-    else
-      return null;
-  }
-  
-  /**
-   * Converts node tree to a valid xml string.
-   * 
-   * @return xml string
-   */
-  @ReturnNullAsFalse
-  @Override  
-  public StringValue asXML(Env env)
-  {
-    return null;
+    return false;
   }
 
-  @Override
+  protected boolean isText()
+  {
+    return true;
+  }
+  
   protected void toXMLImpl(StringValue sb)
   {
-    sb.append(" ");
-
-    if (_prefix != null) {
-      sb.append(_prefix);
-      sb.append(":");
-    }
-    sb.append(_name);
-    sb.append("=\"");
-    if (_text != null)
-      sb.append(_text);
-    sb.append("\"");
+    sb.append(_text);
   }
 }

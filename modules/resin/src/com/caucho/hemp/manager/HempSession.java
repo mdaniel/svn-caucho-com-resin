@@ -42,8 +42,9 @@ public class HempSession implements HmppSession {
   private static final L10N L = new L10N(HempSession.class);
   
   private final HempManager _manager;
-  private final HempEntity _entity;
   private final String _jid;
+  
+  private HempEntity _entity;
 
   private boolean _isClosed;
 
@@ -58,6 +59,12 @@ public class HempSession implements HmppSession {
     _jid = jid;
 
     _entity.addSession(this);
+  }
+
+  HempSession(HempManager manager, String jid)
+  {
+    _manager = manager;
+    _jid = jid;
   }
 
   /**

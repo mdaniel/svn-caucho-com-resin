@@ -157,10 +157,7 @@ public class JsonModule
 
     int length = 0;
 
-    Iterator<Map.Entry<Value,Value>> iter = val.getIterator(env);
-    while (iter.hasNext()) {
-      Map.Entry<Value,Value> entry = iter.next();
-	
+    for (Map.Entry<Value,Value> entry : val.entrySet()) {
       if (length > 0)
 	sb.append(',');
 

@@ -867,7 +867,7 @@ abstract public class StringValue extends Value implements CharSequence {
   @Override
   public void serialize(StringBuilder sb)
   {
-    sb.append("s:");
+    sb.append("S:");
     sb.append(length());
     sb.append(":\"");
     sb.append(toString());

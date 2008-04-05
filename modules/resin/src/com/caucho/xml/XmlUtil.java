@@ -326,9 +326,10 @@ public class XmlUtil {
    */
   public static boolean isWhitespace(String text)
   {
-    for (int i = text.length() - 1; i >= 0; i--)
+    for (int i = text.length() - 1; i >= 0; i--) {
       if (! XmlChar.isWhitespace(text.charAt(i)))
 	return false;
+    }
 
     return true;
   }

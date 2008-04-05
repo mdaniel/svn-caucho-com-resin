@@ -74,7 +74,7 @@ public class GenericService
       throw new ConfigException(L.l("{0} requires a name",
 				    getClass().getSimpleName()));
 
-    _session = _manager.createSession(_name, _password);
+    _session = _manager.registerResource(_name);
 
     _session.setMessageListener(this);
     _session.setQueryListener(this);

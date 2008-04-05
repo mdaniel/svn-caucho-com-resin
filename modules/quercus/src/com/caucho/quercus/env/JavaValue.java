@@ -137,8 +137,32 @@ public class JavaValue extends ObjectValue
                             IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
-    if (! _classDef.printRImpl(env, _object, out, depth, valueSet))
+    if (_classDef.printRImpl(env, _object, out, depth, valueSet))
+      return;
+
+    Set<? extends Map.Entry<Value,Value>> entrySet = entrySet();
+
+    if (entrySet == null) {
       out.print("resource(" + toString(env) + ")"); // XXX:
+      return;
+    }
+
+    out.print(_classDef.getSimpleName());
+    out.println(" Object");
+    printRDepth(out, depth);
+    out.print("(");
+
+    for (Map.Entry<Value,Value> entry : entrySet) {
+      out.println();
+      printRDepth(out, depth);
+      out.print("    [" + entry.getKey() + "] => ");
+      
+      entry.getValue().printRImpl(env, out, depth + 1, valueSet);
+    }
+
+    out.println();
+    printRDepth(out, depth);
+    out.println(")");
   }
 
   @Override
@@ -193,27 +217,7 @@ public class JavaValue extends ObjectValue
 
   public Set<? extends Map.Entry<Value, Value>> entrySet()
   {
-    // XXX: This logic is due to the SimpleXML handling (php/1x21).  It's not
-    // clear if that implementation is supposed to be an exception or
-    // if it's normal, so this pass is assuming it's normal
-    HashMap<Value,EntryItem> map = new HashMap<Value,EntryItem>();
-    HashSet<EntryItem> set = new HashSet<EntryItem>();
-
-    Iterator<Map.Entry<Value,Value>> iter = getIterator(Env.getInstance());
-    while (iter.hasNext()) {
-      Map.Entry<Value,Value> entry = iter.next();
-
-      EntryItem entryItem = map.get(entry.getKey());
-      if (entryItem != null)
-	entryItem.addValue(entry.getValue());
-      else {
-	entryItem = new EntryItem(entry.getKey(), entry.getValue());
-	set.add(entryItem);
-	map.put(entry.getKey(), entryItem);
-      }
-    }
-
-    return set;
+    return _classDef.entrySet(_object);
   }
 
   /**
@@ -423,7 +427,7 @@ public class JavaValue extends ObjectValue
   @Override
   public void serialize(StringBuilder sb)
   {
-    String name = _classDef.getName();
+    String name = _classDef.getSimpleName();
 
     Env env = Env.getInstance();
     TreeMap<Value,Value> map = new TreeMap<Value,Value>();
@@ -436,21 +440,17 @@ public class JavaValue extends ObjectValue
     sb.append(name);
     sb.append("\":");
     sb.append(entrySet.size());
-    sb.append("{");
+    sb.append(":{");
 
     boolean isFirst = true;
     for (Map.Entry<Value,Value> entry : entrySet) {
-      if (! isFirst)
-	sb.append(";");
-      
       entry.getKey().serialize(sb);
-      sb.append(":");
       entry.getValue().serialize(sb);
 
       isFirst = false;
     }
 
-    sb.append("};");
+    sb.append("}");
   }
 
   /**
@@ -533,6 +533,13 @@ public class JavaValue extends ObjectValue
       return (InputStream) _object;
     else
       return super.toInputStream();
+  }
+
+  private static void printRDepth(WriteStream out, int depth)
+    throws IOException
+  {
+    for (int i = 0; i < 8 * depth; i++)
+      out.print(' ');
   }
 
   //

@@ -107,6 +107,7 @@ public class JavaClassDef extends ClassDef {
 
   private Method _printRImpl;
   private Method _varDumpImpl;
+  private Method _entrySet;
 
   private TraversableDelegate _traversableDelegate;
   private CountDelegate _countDelegate;
@@ -685,6 +686,19 @@ public class JavaClassDef extends ClassDef {
     return new String(name, 0, nameLen);
   }
 
+  public Set<? extends Map.Entry<Value,Value>> entrySet(Object obj)
+  {
+    try {
+      if (_entrySet == null) {
+        return null;
+      }
+
+      return (Set) _entrySet.invoke(obj);
+    } catch (Exception e) {
+      throw new QuercusException(e);
+    }
+  }
+
   /**
    * Initialize the quercus class.
    */
@@ -1142,6 +1156,8 @@ public class JavaClassDef extends ClassDef {
         _printRImpl = method;
       } else if ("varDumpImpl".equals(method.getName())) {
         _varDumpImpl = method;
+      } else if (method.isAnnotationPresent(EntrySet.class)) {
+        _entrySet = method;
       } else if ("__call".equals(method.getName())) {
         __call = new JavaMethod(moduleContext, method);
       } else {

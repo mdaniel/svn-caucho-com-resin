@@ -46,4 +46,9 @@ public interface HmppManager
    * Creates a session
    */
   public HmppSession createSession(String uid, String password);
+  
+  /**
+   * Registers a resource
+   */
+  public HmppSession registerResource(String jid);
 }

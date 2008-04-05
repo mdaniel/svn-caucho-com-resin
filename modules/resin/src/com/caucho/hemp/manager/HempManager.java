@@ -57,6 +57,9 @@ public class HempManager implements HmppManager {
   
   private String _serverId = Resin.getCurrent().getServerId();
 
+  private String _domain = "localhost";
+  private String _managerJid = "localhost";
+
   /**
    * Creates a session
    */
@@ -93,6 +96,58 @@ public class HempManager implements HmppManager {
       log.fine(session + " created");
 
     return session;
+  }
+
+  /**
+   * Registers a resource
+   */
+  public HmppSession registerResource(String name)
+  {
+    String jid;
+    
+    int p;
+    if ((p = name.indexOf('/')) > 0) {
+      jid = name;
+    }
+    else if ((p = name.indexOf('@')) > 0) {
+      jid = name;
+    }
+    else {
+      jid = name + "@" + getDomain();
+    }
+
+    HempSession session = new HempSession(this, jid);
+
+    synchronized (_sessionMap) {
+      WeakReference<HempSession> oldRef = _sessionMap.get(jid);
+
+      if (oldRef != null && oldRef.get() != null)
+	throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
+					    jid));
+      
+      oldRef = _sessionMap.put(jid, new WeakReference<HempSession>(session));
+    }
+
+    if (log.isLoggable(Level.FINE))
+      log.fine(session + " created");
+
+    return session;
+  }
+
+  /**
+   * Returns the manager's own id.
+   */
+  protected String getManagerJid()
+  {
+    return _managerJid;
+  }
+
+  /**
+   * Returns the domain
+   */
+  protected String getDomain()
+  {
+    return _domain;
   }
 
   /**
@@ -257,45 +312,67 @@ public class HempManager implements HmppManager {
   /**
    * Query an entity
    */
-  void queryGet(String id, String fromJid, String toJid, Serializable value)
+  void queryGet(String id, String fromJid, String toJid, Serializable query)
   {
     HempSession session = getSession(toJid);
 
     if (session != null) {
-      session.onQueryGet(id, fromJid, toJid, value);
+      session.onQueryGet(id, fromJid, toJid, query);
       return;
     }
     
     HempEntity entity = getEntity(toJid);
 
     if (entity != null) {
-      entity.onQueryGet(id, fromJid, toJid, value);
+      entity.onQueryGet(id, fromJid, toJid, query);
       return;
     }
+
+    if (log.isLoggable(Level.FINE)) {
+      log.fine(this + " queryGet to unknown resource '" + toJid
+	       + "' from=" + fromJid);
+    }
+
+    String msg = L.l("'" + toJid + "' is an unknown service");
     
-    throw new RuntimeException(L.l("{0} is an unknown entity", toJid));
+    HmppError error = new HmppError(HmppError.TYPE_CANCEL,
+				    HmppError.SERVICE_UNAVAILABLE,
+				    msg);
+				    
+    queryError(id, getManagerJid(), fromJid, query, error);
   }
 
   /**
    * Query an entity
    */
-  void querySet(String id, String fromJid, String toJid, Serializable value)
+  void querySet(String id, String fromJid, String toJid, Serializable query)
   {
     HempSession session = getSession(toJid);
 
     if (session != null) {
-      session.onQuerySet(id, fromJid, toJid, value);
+      session.onQuerySet(id, fromJid, toJid, query);
       return;
     }
     
     HempEntity entity = getEntity(toJid);
 
     if (entity != null) {
-      entity.onQuerySet(id, fromJid, toJid, value);
+      entity.onQuerySet(id, fromJid, toJid, query);
       return;
     }
+
+    if (log.isLoggable(Level.FINE)) {
+      log.fine(this + " querySet to unknown resource '" + toJid
+	       + "' from=" + fromJid);
+    }
+
+    String msg = L.l("'" + toJid + "' is an unknown service");
     
-    throw new RuntimeException(L.l("{0} is an unknown entity", toJid));
+    HmppError error = new HmppError(HmppError.TYPE_CANCEL,
+				    HmppError.SERVICE_UNAVAILABLE,
+				    msg);
+				    
+    queryError(id, getManagerJid(), fromJid, query, error);
   }
 
   /**

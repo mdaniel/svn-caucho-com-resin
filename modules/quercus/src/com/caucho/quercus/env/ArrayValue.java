@@ -1130,9 +1130,11 @@ abstract public class ArrayValue extends Value {
     out.println("Array");
     printDepth(out, 8 * depth);
     out.println("(");
-
+    
     for (Map.Entry<Value,Value> mapEntry : entrySet()) {
-      printREntry(env, out, depth, valueSet, mapEntry);
+      ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
+      
+      entry.printRImpl(env, out, depth, valueSet);
     }
 
     printDepth(out, 8 * depth);

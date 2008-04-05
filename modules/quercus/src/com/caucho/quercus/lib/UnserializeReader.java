@@ -78,6 +78,7 @@ public final class UnserializeReader {
       }
 
     case 's':
+    case 'S':
       {
         expect(':');
         int len = (int) readInt();

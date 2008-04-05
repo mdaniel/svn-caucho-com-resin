@@ -1258,7 +1258,7 @@ public class StringBuilderValue
    */
   public void serialize(StringBuilder sb)
   {
-    sb.append("s:");
+    sb.append("S:");
     sb.append(_length);
     sb.append(":\"");
     sb.append(toString());
