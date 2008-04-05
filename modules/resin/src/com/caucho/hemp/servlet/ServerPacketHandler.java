@@ -79,8 +79,8 @@ public class ServerPacketHandler
     _callbackHandler = new HmppServiceHandler(this, _out);
 
     _session = _manager.createSession("anonymous@localhost", "test");
-    _session.setMessageListener(_callbackHandler);
-    _session.setQueryListener(_callbackHandler);
+    _session.setMessageHandler(_callbackHandler);
+    _session.setQueryHandler(_callbackHandler);
   }
   
   public boolean serviceRead(ReadStream is,
@@ -119,8 +119,8 @@ public class ServerPacketHandler
   /**
    * Handles a message
    */
-  public void onMessage(String from,
-			String to,
+  public void onMessage(String to,
+			String from,
 			Serializable value)
   {
     _session.sendMessage(to, value);
@@ -132,12 +132,14 @@ public class ServerPacketHandler
    * The get handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public void onQueryGet(String id,
-			 String from,
-			 String to,
-			 Serializable value)
+  public boolean onQueryGet(long id,
+			    String to,
+			    String from,
+			    Serializable value)
   {
     _session.queryGet(id, to, value);
+    
+    return true;
   }
   
   /**
@@ -146,12 +148,14 @@ public class ServerPacketHandler
    * The set handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public void onQuerySet(String id,
-			 String from,
-			 String to,
-			 Serializable value)
+  public boolean onQuerySet(long id,
+			    String to,
+			    String from,
+			    Serializable value)
   {
     _session.querySet(id, to, value);
+    
+    return true;
   }
   
   /**
@@ -159,12 +163,12 @@ public class ServerPacketHandler
    *
    * The result id will match a pending get or set.
    */
-  public void onQueryResult(String id,
-			    String from,
+  public void onQueryResult(long id,
 			    String to,
+			    String from,
 			    Serializable value)
   {
-    _session.queryResult(id, from, to, value);
+    _session.queryResult(id, to, from, value);
   }
   
   /**
@@ -172,13 +176,13 @@ public class ServerPacketHandler
    *
    * The result id will match a pending get or set.
    */
-  public void onQueryError(String id,
-			   String from,
+  public void onQueryError(long id,
 			   String to,
+			   String from,
 			   Serializable value,
 			   HmppError error)
   {
-    _session.queryError(id, from, to, value, error);
+    _session.queryError(id, to, from, value, error);
   }
   
   /**

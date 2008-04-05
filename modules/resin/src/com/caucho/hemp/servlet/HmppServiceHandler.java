@@ -62,15 +62,15 @@ public class HmppServiceHandler
     _out = out;
   }
   
-  public void onMessage(String fromJid, String toJid, Serializable value)
+  public void onMessage(String to, String from, Serializable value)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send message from=" + fromJid
-		  + " to=" + toJid);
+	log.finer(_packetHandler + " send message to=" + to
+		  + " from=" + from);
       }
       
-      _out.writeObject(new Message(fromJid, toJid, value));
+      _out.writeObject(new Message(to, from, value));
       _out.flush();
     } catch (IOException e) {
       _packetHandler.close();
@@ -79,25 +79,25 @@ public class HmppServiceHandler
     }
   }
   
-  public Serializable onQuery(String fromJid,
-			      String toJid,
+  public Serializable onQuery(String to,
+			      String from,
 			      Serializable query)
   {
     return null;
   }
   
-  public boolean onQueryGet(String id,
-			    String fromJid,
-			    String toJid,
+  public boolean onQueryGet(long id,
+			    String to,
+			    String from,
 			    Serializable query)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " queryGet from=" + fromJid
-		  + " to=" + toJid);
+	log.finer(_packetHandler + " queryGet to=" + to
+		  + " from=" + from);
       }
       
-      _out.writeObject(new QueryGet(id, fromJid, toJid, query));
+      _out.writeObject(new QueryGet(id, to, from, query));
       _out.flush();
     } catch (IOException e) {
       _packetHandler.close();
@@ -108,18 +108,18 @@ public class HmppServiceHandler
     return true;
   }
   
-  public boolean onQuerySet(String id,
-			    String fromJid,
-			    String toJid,
+  public boolean onQuerySet(long id,
+			    String to,
+			    String from,
 			    Serializable query)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " querySet from=" + fromJid
-		  + " to=" + toJid);
+	log.finer(_packetHandler + " querySet to=" + to
+		  + " from=" + from);
       }
       
-      _out.writeObject(new QuerySet(id, fromJid, toJid, query));
+      _out.writeObject(new QuerySet(id, to, from, query));
       _out.flush();
     } catch (IOException e) {
       _packetHandler.close();
@@ -130,18 +130,18 @@ public class HmppServiceHandler
     return true;
   }
   
-  public void onQueryResult(String id,
-			    String fromJid,
-			    String toJid,
+  public void onQueryResult(long id,
+			    String to,
+			    String from,
 			    Serializable value)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send query result from=" + fromJid
-		  + " to=" + toJid);
+	log.finer(_packetHandler + " send query result to=" + to
+		  + " from=" + from);
       }
       
-      _out.writeObject(new QueryResult(id, fromJid, toJid, value));
+      _out.writeObject(new QueryResult(id, to, from, value));
       _out.flush();
     } catch (IOException e) {
       _packetHandler.close();
@@ -150,19 +150,19 @@ public class HmppServiceHandler
     }
   }
   
-  public void onQueryError(String id,
-			   String fromJid,
-			   String toJid,
+  public void onQueryError(long id,
+			   String to,
+			   String from,
 			   Serializable query,
 			   HmppError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send " + error + " from=" + fromJid
-		  + " to=" + toJid);
+	log.finer(_packetHandler + " send " + error + " to=" + to
+		  + " from=" + from);
       }
       
-      _out.writeObject(new QueryError(id, fromJid, toJid, query, error));
+      _out.writeObject(new QueryError(id, to, from, query, error));
       _out.flush();
     } catch (IOException e) {
       _packetHandler.close();

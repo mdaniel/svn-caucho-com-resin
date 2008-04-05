@@ -30,6 +30,7 @@
 package com.caucho.hemp.manager;
 
 import com.caucho.hmpp.HmppSession;
+import com.caucho.hmpp.HmppResource;
 import com.caucho.hmpp.PresenceHandler;
 import com.caucho.hmpp.MessageHandler;
 import com.caucho.hmpp.QueryHandler;
@@ -43,28 +44,17 @@ import com.caucho.util.*;
 /**
  * Manager
  */
-public class HempSession implements HmppSession {
+public class HempSession implements HmppSession, HmppResource {
   private static final L10N L = new L10N(HempSession.class);
   
   private final HempManager _manager;
   private final String _jid;
   
-  private HempEntity _entity;
-
   private boolean _isClosed;
 
-  private MessageHandler _messageListener;
-  private QueryHandler _queryListener;
+  private MessageHandler _messageHandler;
+  private QueryHandler _queryHandler;
   private PresenceHandler _presenceHandler;
-
-  HempSession(HempManager manager, HempEntity entity, String jid)
-  {
-    _manager = manager;
-    _entity = entity;
-    _jid = jid;
-
-    _entity.addSession(this);
-  }
 
   HempSession(HempManager manager, String jid)
   {
@@ -90,34 +80,38 @@ public class HempSession implements HmppSession {
     if (manager == null)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _manager.sendMessage(_jid, to, msg);
+    _manager.sendMessage(to, _jid, msg);
   }
 
   /**
    * Registers the listener
    */
-  public void setMessageListener(MessageHandler listener)
+  public void setMessageHandler(MessageHandler handler)
   {
-    _messageListener = listener;
+    _messageHandler = handler;
   }
 
   /**
    * Forwards the message
    */
-  void onMessage(String fromJid, String toJid, Serializable value)
+  public void onMessage(String to, String from, Serializable value)
   {
-    MessageHandler listener = _messageListener;
+    MessageHandler handler = _messageHandler;
     
-    if (listener != null)
-      listener.onMessage(fromJid, toJid, value);
+    if (handler != null)
+      handler.onMessage(to, from, value);
   }
+
+  //
+  // Query/RPC handling
+  //
 
   /**
    * Registers the listener
    */
-  public void setQueryListener(QueryHandler listener)
+  public void setQueryHandler(QueryHandler handler)
   {
-    _queryListener = listener;
+    _queryHandler = handler;
   }
 
   /**
@@ -137,35 +131,35 @@ public class HempSession implements HmppSession {
   /**
    * Queries the service
    */
-  public void queryGet(String id, String to, Serializable query)
+  public void queryGet(long id, String to, Serializable query)
   {
     HempManager manager = _manager;
 
     if (manager == null)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _manager.queryGet(id, _jid, to, query);
+    _manager.queryGet(id, to, _jid, query);
   }
 
   /**
    * Queries the service
    */
-  public void querySet(String id, String to, Serializable query)
+  public void querySet(long id, String to, Serializable query)
   {
     HempManager manager = _manager;
 
     if (manager == null)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _manager.querySet(id, _jid, to, query);
+    _manager.querySet(id, to, _jid, query);
   }
 
   /**
    * Returns a query result
    */
-  public void queryResult(String id,
-			  String from,
+  public void queryResult(long id,
 			  String to,
+			  String from,
 			  Serializable value)
   {
     HempManager manager = _manager;
@@ -173,15 +167,15 @@ public class HempSession implements HmppSession {
     if (manager == null)
       throw new IllegalStateException(L.l("session is closed"));
 
-    manager.queryResult(id, from, to, value);
+    manager.queryResult(id, to, from, value);
   }
 
   /**
    * Returns a query error (low-level api)
    */
-  public void queryError(String id,
-			 String from,
+  public void queryError(long id,
 			 String to,
+			 String from,
 			 Serializable query,
 			 HmppError error)
   {
@@ -190,24 +184,23 @@ public class HempSession implements HmppSession {
     if (manager == null)
       throw new IllegalStateException(L.l("session is closed"));
 
-    manager.queryError(id, from, to, query, error);
+    manager.queryError(id, to, from, query, error);
   }
 
   /**
    * Forwards the message
    */
-  boolean onQueryGet(String id,
-		     String fromJid,
-		     String toJid,
-		     Serializable query)
+  public boolean onQueryGet(long id,
+		            String to,
+		            String from,
+		            Serializable query)
   {
-    QueryHandler listener = _queryListener;
+    QueryHandler handler = _queryHandler;
     
-    if (listener != null && listener.onQueryGet(id, fromJid, toJid, query))
+    if (handler != null && handler.onQueryGet(id, to, from, query))
       return true;
 
-    System.out.println("ON_Q: " + id);
-    queryError(id, toJid, fromJid, query,
+    queryError(id, to, from, query,
 	       new HmppError("protocol-unknwon",
 			     "unknown query: " + query.getClass().getName()));
     
@@ -217,15 +210,15 @@ public class HempSession implements HmppSession {
   /**
    * Forwards the message
    */
-  boolean onQuerySet(String id,
-		     String fromJid,
-		     String toJid,
-		     Serializable query)
+  public boolean onQuerySet(long id,
+		            String to,
+		            String from,
+		            Serializable query)
   {
-    QueryHandler listener = _queryListener;
+    QueryHandler handler = _queryHandler;
     
-    if (listener != null)
-      return listener.onQuerySet(id, fromJid, toJid, query);
+    if (handler != null)
+      return handler.onQuerySet(id, to, from, query);
     else
       return false;
   }
@@ -233,30 +226,30 @@ public class HempSession implements HmppSession {
   /**
    * Result from the message
    */
-  void onQueryResult(String id,
-		     String fromJid,
-		     String toJid,
-		     Serializable value)
+  public void onQueryResult(long id,
+		            String to,
+		            String from,
+		            Serializable value)
   {
-    QueryHandler listener = _queryListener;
+    QueryHandler handler = _queryHandler;
 
-    if (listener != null)
-      listener.onQueryResult(id, fromJid, toJid, value);
+    if (handler != null)
+      handler.onQueryResult(id, to, from, value);
   }
 
   /**
    * Error from the message
    */
-  void onQueryError(String id,
-		    String fromJid,
-		    String toJid,
-		    Serializable query,
-		    HmppError error)
+  public void onQueryError(long id,
+		           String to,
+		           String from,
+		           Serializable query,
+		           HmppError error)
   {
-    QueryHandler listener = _queryListener;
+    QueryHandler handler = _queryHandler;
 
-    if (listener != null)
-      listener.onQueryError(id, _jid, toJid, query, error);
+    if (handler != null)
+      handler.onQueryError(id, to, _jid, query, error);
   }
 
   //
@@ -287,38 +280,38 @@ public class HempSession implements HmppSession {
   /**
    * Basic presence
    */
-  public void presenceTo(String toJid, Serializable []data)
+  public void presenceTo(String to, Serializable []data)
   {
     HempManager manager = _manager;
 
     if (manager == null)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _manager.presence(_jid, toJid, data);
+    _manager.presence(to, _jid, data);
   }
 
   /**
    * Forwards the presence
    */
-  protected void onPresence(String fromJid, String toJid, Serializable []data)
+  public void onPresence(String to, String from, Serializable []data)
   {
     PresenceHandler handler = _presenceHandler;
     
     if (handler != null)
-      handler.onPresence(fromJid, toJid, data);
+      handler.onPresence(to, from, data);
   }
 
   /**
    * Forwards the presence
    */
-  protected void onPresenceProbe(String fromJid,
-				 String toJid,
-				 Serializable []data)
+  public void onPresenceProbe(String to,
+		              String from,
+			      Serializable []data)
   {
     PresenceHandler handler = _presenceHandler;
     
     if (handler != null)
-      handler.onPresenceProbe(fromJid, toJid, data);
+      handler.onPresenceProbe(to, from, data);
   }
 
   /**
@@ -337,27 +330,93 @@ public class HempSession implements HmppSession {
   /**
    * Basic presence
    */
-  public void presenceUnavailable(String toJid, Serializable []data)
+  public void presenceUnavailable(String to, Serializable []data)
   {
     HempManager manager = _manager;
 
     if (manager == null)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _manager.presence(_jid, toJid, data);
+    _manager.presence(to, _jid, data);
   }
 
   /**
    * Forwards the presence
    */
-  protected void onPresenceUnavailable(String fromJid,
-				       String toJid,
-				       Serializable []data)
+  public void onPresenceUnavailable(String to,
+				    String from,
+				    Serializable []data)
   {
     PresenceHandler handler = _presenceHandler;
     
     if (handler != null)
-      handler.onPresenceUnavailable(fromJid, toJid, data);
+      handler.onPresenceUnavailable(to, from, data);
+  }
+
+  /**
+   * Forwards the presence
+   */
+  public void onPresenceSubscribe(String to,
+				  String from,
+				  Serializable []data)
+  {
+    PresenceHandler handler = _presenceHandler;
+    
+    if (handler != null)
+      handler.onPresenceSubscribe(to, from, data);
+  }
+
+  /**
+   * Forwards the presence
+   */
+  public void onPresenceSubscribed(String to,
+				   String from,
+				   Serializable []data)
+  {
+    PresenceHandler handler = _presenceHandler;
+    
+    if (handler != null)
+      handler.onPresenceSubscribed(to, from, data);
+  }
+
+  /**
+   * Forwards the presence
+   */
+  public void onPresenceUnsubscribed(String to,
+				     String from,
+				     Serializable []data)
+  {
+    PresenceHandler handler = _presenceHandler;
+    
+    if (handler != null)
+      handler.onPresenceUnsubscribed(to, from, data);
+  }
+  
+  /**
+   * Forwards the presence
+   */
+  public void onPresenceUnsubscribe(String to,
+				    String from,
+				    Serializable []data)
+  {
+    PresenceHandler handler = _presenceHandler;
+    
+    if (handler != null)
+      handler.onPresenceUnsubscribe(to, from, data);
+  }
+
+  /**
+   * Forwards the presence
+   */
+  public void onPresenceError(String to,
+			      String from,
+			      Serializable []data,
+                              HmppError error)
+  {
+    PresenceHandler handler = _presenceHandler;
+    
+    if (handler != null)
+      handler.onPresenceError(to, from, data, error);
   }
   
   /**
@@ -376,7 +435,6 @@ public class HempSession implements HmppSession {
     _isClosed = true;
     
     _manager.close(_jid);
-    _entity.removeSession(this);
   }
 
   @Override

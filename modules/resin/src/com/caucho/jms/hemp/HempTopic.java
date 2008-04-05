@@ -109,7 +109,7 @@ public class HempTopic extends AbstractTopic
     }
 
     _session = _broker.createSession(getName(), null);
-    _session.setMessageListener(this);
+    _session.setMessageHandler(this);
   }
 
   @Override

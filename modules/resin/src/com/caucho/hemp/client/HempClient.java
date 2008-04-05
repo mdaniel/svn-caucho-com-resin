@@ -78,8 +78,8 @@ public class HempClient {
   private MessageHandler _messageHandler;
   private QueryHandler _queryHandler;
 
-  private HashMap<String,QueryItem> _queryMap
-    = new HashMap<String,QueryItem>();
+  private HashMap<Long,QueryItem> _queryMap
+    = new HashMap<Long,QueryItem>();
     
   private long _qId;
 
@@ -292,10 +292,10 @@ public class HempClient {
     Hessian2StreamingOutput out = _out;
 
     if (out != null) {
-      String id;
+      long id;
       
       synchronized (this) {
-	id = String.valueOf(_qId++);
+	id = _qId++;
 
 	_queryMap.put(id, new QueryItem(id, callback, handback));
       }
@@ -317,10 +317,10 @@ public class HempClient {
     Hessian2StreamingOutput out = _out;
 
     if (out != null) {
-      String id;
+      long id;
       
       synchronized (this) {
-	id = String.valueOf(_qId++);
+	id = _qId++;
 
 	_queryMap.put(id, new QueryItem(id, callback, handback));
       }
@@ -341,10 +341,10 @@ public class HempClient {
     Hessian2StreamingOutput out = _out;
 
     if (out != null) {
-      String id;
+      long id;
       
       synchronized (this) {
-	id = String.valueOf(_qId++);
+	id = _qId++;
       }
       
       out.writeObject(new QuerySet(id, to, value));
@@ -355,7 +355,7 @@ public class HempClient {
   /**
    * Callback for the response
    */
-  void onQueryResult(String id, String from, String to, Serializable value)
+  void onQueryResult(long id, String to, String from, Serializable value)
   {
     QueryItem item = null;
     
@@ -364,15 +364,15 @@ public class HempClient {
     }
 
     if (item != null)
-      item.onQueryResult(from, to, value);
+      item.onQueryResult(to, from, value);
   }
 
   /**
    * Callback for the response
    */
-  void onQueryError(String id,
-		    String from,
+  void onQueryError(long id,
 		    String to,
+		    String from,
 		    Serializable value,
 		    HmppError error)
   {
@@ -383,13 +383,13 @@ public class HempClient {
     }
 
     if (item != null)
-      item.onQueryError(from, to, value, error);
+      item.onQueryError(to, from, value, error);
   }
 
   /**
    * Low-level query response
    */
-  public void queryResult(String id, String to, Serializable value)
+  public void queryResult(long id, String to, Serializable value)
     throws IOException
   {
     Hessian2StreamingOutput out = _out;
@@ -403,7 +403,7 @@ public class HempClient {
   /**
    * Low-level query error
    */
-  public void queryError(String id,
+  public void queryError(long id,
 			 String to,
 			 Serializable value,
 			 HmppError error)
@@ -412,7 +412,7 @@ public class HempClient {
       Hessian2StreamingOutput out = _out;
 
       if (out != null) {
-	out.writeObject(new QueryError(id, null, to, value, error));
+	out.writeObject(new QueryError(id, to, null, value, error));
 	out.flush();
       }
     } catch (IOException e) {
@@ -487,30 +487,36 @@ public class HempClient {
   }
 
   static class QueryItem {
-    private final String _id;
+    private final long _id;
     private final QueryCallback _callback;
     private final Object _handback;
 
-    QueryItem(String id, QueryCallback callback, Object handback)
+    QueryItem(long id, QueryCallback callback, Object handback)
     {
       _id = id;
       _callback = callback;
       _handback = handback;
     }
 
-    void onQueryResult(String from, String to, Serializable value)
+    void onQueryResult(String to, String from, Serializable value)
     {
       if (_callback != null)
-	_callback.onQueryResult(from, to, value, _handback);
+	_callback.onQueryResult(to, from, value, _handback);
     }
 
-    void onQueryError(String from,
-		      String to,
+    void onQueryError(String to,
+		      String from,
 		      Serializable value,
 		      HmppError error)
     {
       if (_callback != null)
-	_callback.onQueryError(from, to, value, error, _handback);
+	_callback.onQueryError(to, from, value, error, _handback);
+    }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _id + "," + _callback + "]";
     }
   }
 }

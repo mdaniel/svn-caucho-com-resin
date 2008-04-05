@@ -82,8 +82,8 @@ public class GenericService
 
     _session = _manager.registerResource(_name);
 
-    _session.setMessageListener(this);
-    _session.setQueryListener(this);
+    _session.setMessageHandler(this);
+    _session.setQueryHandler(this);
     _session.setPresenceHandler(this);
 
     if (log.isLoggable(Level.FINE))
@@ -98,34 +98,26 @@ public class GenericService
   /**
    * Handles an incoming message
    */
-  public void onMessage(String fromJid, String toJid, Serializable value)
+  public void onMessage(String to, String from, Serializable value)
   {
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " onMessage from=" + fromJid + " to=" + toJid);
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " onMessage to=" + to + " from=" + from
+                + " value=" + value);
+    }
   }
 
   /**
    * Handles an incoming query
    */
-  public Serializable onQuery(String fromJid, String toJid, Serializable query)
-  {
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " onQuery from=" + fromJid + " to=" + toJid);
-    
-    return null;
-  }
-
-  /**
-   * Handles an incoming query
-   */
-  public boolean onQueryGet(String id,
-			    String fromJid,
-			    String toJid,
+  public boolean onQueryGet(long id,
+			    String to,
+			    String from,
 			    Serializable query)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " onQueryGet id=" + id
-		+ " from=" + fromJid + " to=" + toJid);
+		+ " to=" + to + " from=" + from
+                + " query=" + query);
     }
 
     return false;
@@ -134,14 +126,15 @@ public class GenericService
   /**
    * Handles an incoming query
    */
-  public boolean onQuerySet(String id,
-			    String fromJid,
-			    String toJid,
+  public boolean onQuerySet(long id,
+			    String to,
+			    String from,
 			    Serializable query)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " onQuerySet id=" + id
-		+ " from=" + fromJid + " to=" + toJid);
+		+ " to=" + to + " from=" + from
+                + " query=" + query);
     }
 
     return false;
@@ -150,29 +143,30 @@ public class GenericService
   /**
    * Handles an incoming query
    */
-  public void onQueryResult(String id,
-			    String fromJid,
-			    String toJid,
+  public void onQueryResult(long id,
+			    String to,
+			    String from,
 			    Serializable value)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " onQueryResult id=" + id
-		+ " from=" + fromJid + " to=" + toJid);
+		+ " to=" + to + " from=" + from
+                + " value=" + value);
     }
   }
 
   /**
    * Handles an incoming query
    */
-  public void onQueryError(String id,
-			   String fromJid,
-			   String toJid,
+  public void onQueryError(long id,
+			   String to,
+			   String from,
 			   Serializable value,
 			   HmppError error)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " onQueryError id=" + id
-		+ " from=" + fromJid + " to=" + toJid);
+		+ " to=" + to + " from=" + from + " error=" + error);
     }
   }
 
@@ -183,10 +177,10 @@ public class GenericService
    * @param toJid - the jid of the resource managed by this service
    * @param value - any additional payload for the presence notification
    */
-  public void onPresence(String fromJid, String toJid, Serializable []data)
+  public void onPresence(String to, String from, Serializable []data)
   {
     if (log.isLoggable(Level.FINER))
-      log.finer(this + " onPresence from=" + fromJid + " to=" + toJid);
+      log.finer(this + " onPresence to=" + to + " from=" + from);
   }
 
   /**
@@ -196,13 +190,13 @@ public class GenericService
    * @param toJid - the jid of the resource managed by this service
    * @param value - any additional payload for the presence notification
    */
-  public void onPresenceUnavailable(String fromJid,
-				    String toJid,
+  public void onPresenceUnavailable(String to,
+				    String from,
 				    Serializable []data)
   {
     if (log.isLoggable(Level.FINER))
-      log.finer(this + " onPresenceUnavailable from=" + fromJid
-		+ " to=" + toJid);
+      log.finer(this + " onPresenceUnavailable to=" + to
+		+ " from=" + from);
   }
 
   /**
@@ -215,12 +209,12 @@ public class GenericService
    * @param toJid - the jid of the resource managed by this service
    * @param data - any additional payload for the presence notification
    */
-  public void onPresenceProbe(String fromJid,
-			      String toJid,
+  public void onPresenceProbe(String to,
+			      String from,
 			      Serializable []data)
   {
     if (log.isLoggable(Level.FINER))
-      log.finer(this + " onPresenceProbe from=" + fromJid + " to=" + toJid);
+      log.finer(this + " onPresenceProbe to=" + to + " from=" + from);
   }
 
   /**
@@ -233,13 +227,13 @@ public class GenericService
    * @param toJid - the jid of the resource managed by this service
    * @param data - any additional payload for the presence notification
    */
-  public void onPresenceSubscribe(String fromJid,
-				  String toJid,
+  public void onPresenceSubscribe(String to,
+				  String from,
 				  Serializable []data)
   {
     if (log.isLoggable(Level.FINER))
-      log.finer(this + " onPresenceSubscription from=" + fromJid
-		+ " to=" + toJid);
+      log.finer(this + " onPresenceSubscription to=" + to
+		+ " from=" + from);
   }
 
   /**
@@ -247,17 +241,17 @@ public class GenericService
    *
    * Clients receive a subscription success when successfully subscribing
    *
-   * @param fromJid - the jid of the client sending the notification
-   * @param toJid - the jid of the resource managed by this service
+   * @param to - the jid of the resource managed by this service
+   * @param from - the jid of the client sending the notification
    * @param data - any additional payload for the presence notification
    */
-  public void onPresenceSubscribed(String fromJid,
-				   String toJid,
+  public void onPresenceSubscribed(String to,
+				   String from,
 				   Serializable []data)
   {
     if (log.isLoggable(Level.FINER))
-      log.finer(this + " onPresenceSubscribed from=" + fromJid
-		+ " to=" + toJid);
+      log.finer(this + " onPresenceSubscribed to=" + to
+		+ " from=" + from);
   }
 
   /**
@@ -266,17 +260,17 @@ public class GenericService
    * Clients request a unsubscription to a roster based on a presence
    * unsubscription.
    *
-   * @param fromJid - the jid of the client sending the notification
-   * @param toJid - the jid of the resource managed by this service
+   * @param to - the jid of the resource managed by this service
+   * @param from - the jid of the client sending the notification
    * @param data - any additional payload for the presence notification
    */
-  public void onPresenceUnsubscribe(String fromJid,
-				    String toJid,
+  public void onPresenceUnsubscribe(String to,
+				    String from,
 				    Serializable []data)
   {
     if (log.isLoggable(Level.FINER))
-      log.finer(this + " onPresenceUnsubscribe from=" + fromJid
-		+ " to=" + toJid);
+      log.finer(this + " onPresenceUnsubscribe to=" + to
+		+ " from=" + from);
   }
 
   /**
@@ -284,38 +278,39 @@ public class GenericService
    *
    * Clients receive a unsubscription success when successfully unsubscribing
    *
-   * @param fromJid - the jid of the client sending the notification
-   * @param toJid - the jid of the resource managed by this service
+   * @param to - the jid of the resource managed by this service
+   * @param from - the jid of the client sending the notification
    * @param value - any additional payload for the presence notification
    */
-  public void onPresenceUnsubscribed(String fromJid,
-				   String toJid,
-				   Serializable []data)
+  public void onPresenceUnsubscribed(String to,
+				     String from,
+				     Serializable []data)
   {
     if (log.isLoggable(Level.FINER))
-      log.finer(this + " onPresenceUnsubscribed from=" + fromJid
-		+ " to=" + toJid);
+      log.finer(this + " onPresenceUnsubscribed to=" + to
+		+ " from=" + from);
   }
 
   /**
    * Handles a presence error notification
    *
-   * @param fromJid - the jid of the client sending the notification
-   * @param toJid - the jid of the resource managed by this service
+   * @param to - the jid of the resource managed by this service
+   * @param from - the jid of the client sending the notification
    * @param data - any additional payload for the presence notification
    * @param error - error information
    */
-  public void onPresenceError(String fromJid,
-			      String toJid,
+  public void onPresenceError(String to,
+			      String from,
 			      Serializable []data,
 			      HmppError error)
   {
     if (log.isLoggable(Level.FINER))
-      log.finer(this + " onPresenceError from=" + fromJid + " to=" + toJid);
+      log.finer(this + " onPresenceError to=" + to + " from=" + from
+                + " error=" + error);
   }
 
   @PreDestroy
-  private void destroy()
+  protected void destroy()
   {
     _session.close();
 
@@ -323,6 +318,7 @@ public class GenericService
       log.fine(this + " destroy");
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _name + "]";

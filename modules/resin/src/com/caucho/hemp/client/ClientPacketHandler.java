@@ -122,14 +122,14 @@ class ClientPacketHandler implements Runnable, PacketHandler {
   /**
    * Handles a message
    */
-  public void onMessage(String from,
-			String to,
+  public void onMessage(String to,
+			String from,
 			Serializable value)
   {
-    MessageHandler listener = _client.getMessageHandler();
+    MessageHandler handler = _client.getMessageHandler();
 
-    if (listener != null)
-      listener.onMessage(from, to, value);
+    if (handler != null)
+      handler.onMessage(to, from, value);
   }
   
   /**
@@ -138,18 +138,20 @@ class ClientPacketHandler implements Runnable, PacketHandler {
    * The get handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public void onQueryGet(String id,
-			 String from,
-			 String to,
-			 Serializable value)
+  public boolean onQueryGet(long id,
+		  	    String to,
+			    String from,
+			    Serializable value)
   {
     QueryHandler handler = _client.getQueryHandler();
 
-    if (handler == null || ! handler.onQueryGet(id, from, to, value)) {
+    if (handler == null || ! handler.onQueryGet(id, to, from, value)) {
       _client.queryError(id, from, value,
 			 new HmppError("unknown",
 				       "no onQueryGet handling " + value.getClass().getName()));
     }
+    
+    return true;
   }
   
   /**
@@ -158,10 +160,10 @@ class ClientPacketHandler implements Runnable, PacketHandler {
    * The set handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public void onQuerySet(String id,
-			 String from,
-			 String to,
-			 Serializable value)
+  public boolean onQuerySet(long id,
+			    String to,
+			    String from,
+			    Serializable value)
   {
     QueryHandler handler = _client.getQueryHandler();
 
@@ -170,6 +172,8 @@ class ClientPacketHandler implements Runnable, PacketHandler {
 			 new HmppError("unknown",
 				       "no onQuerySet handling " + value.getClass().getName()));
     }
+    
+    return true;
   }
   
   /**
@@ -177,12 +181,12 @@ class ClientPacketHandler implements Runnable, PacketHandler {
    *
    * The result id will match a pending get or set.
    */
-  public void onQueryResult(String id,
-			    String from,
+  public void onQueryResult(long id,
 			    String to,
+			    String from,
 			    Serializable value)
   {
-    _client.onQueryResult(id, from, to, value);
+    _client.onQueryResult(id, to, from, value);
   }
   
   /**
@@ -190,13 +194,13 @@ class ClientPacketHandler implements Runnable, PacketHandler {
    *
    * The result id will match a pending get or set.
    */
-  public void onQueryError(String id,
-			   String from,
+  public void onQueryError(long id,
 			   String to,
+			   String from,
 			   Serializable value,
 			   HmppError error)
   {
-    _client.onQueryError(id, from, to, value, error);
+    _client.onQueryError(id, to, from, value, error);
   }
   
   /**
@@ -205,8 +209,8 @@ class ClientPacketHandler implements Runnable, PacketHandler {
    * If the handler deals with clients, the "from" value should be ignored
    * and replaced by the client's jid.
    */
-  public void onPresence(String from,
-			 String to,
+  public void onPresence(String to,
+			 String from,
 			 Serializable []data)
   {
   }
@@ -217,8 +221,8 @@ class ClientPacketHandler implements Runnable, PacketHandler {
    * If the handler deals with clients, the "from" value should be ignored
    * and replaced by the client's jid.
    */
-  public void onPresenceUnavailable(String from,
-				    String to,
+  public void onPresenceUnavailable(String to,
+				    String from,
 				    Serializable []data)
   {
   }
@@ -226,8 +230,8 @@ class ClientPacketHandler implements Runnable, PacketHandler {
   /**
    * Handles a presence probe from another server
    */
-  public void onPresenceProbe(String from,
-			      String to,
+  public void onPresenceProbe(String to,
+			      String from,
 			      Serializable []data)
   {
   }
@@ -235,8 +239,8 @@ class ClientPacketHandler implements Runnable, PacketHandler {
   /**
    * Handles a presence subscribe request from a client
    */
-  public void onPresenceSubscribe(String from,
-				  String to,
+  public void onPresenceSubscribe(String to,
+				  String from,
 				  Serializable []data)
   {
   }
@@ -244,8 +248,8 @@ class ClientPacketHandler implements Runnable, PacketHandler {
   /**
    * Handles a presence subscribed result to a client
    */
-  public void onPresenceSubscribed(String from,
-				   String to,
+  public void onPresenceSubscribed(String to,
+				   String from,
 				   Serializable []data)
   {
   }
@@ -253,8 +257,8 @@ class ClientPacketHandler implements Runnable, PacketHandler {
   /**
    * Handles a presence unsubscribe request from a client
    */
-  public void onPresenceUnsubscribe(String from,
-				    String to,
+  public void onPresenceUnsubscribe(String to,
+				    String from,
 				    Serializable []data)
   {
   }
@@ -262,8 +266,8 @@ class ClientPacketHandler implements Runnable, PacketHandler {
   /**
    * Handles a presence unsubscribed result to a client
    */
-  public void onPresenceUnsubscribed(String from,
-				     String to,
+  public void onPresenceUnsubscribed(String to,
+				     String from,
 				     Serializable []data)
   {
   }
@@ -271,13 +275,14 @@ class ClientPacketHandler implements Runnable, PacketHandler {
   /**
    * Handles a presence unsubscribed result to a client
    */
-  public void onPresenceError(String from,
-			      String to,
+  public void onPresenceError(String to,
+			      String from,
 			      Serializable []data,
 			      HmppError error)
   {
   }
 
+  @Override
   public String toString()
   {
     // XXX: should have the connection
