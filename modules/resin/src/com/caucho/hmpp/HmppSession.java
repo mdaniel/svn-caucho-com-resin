@@ -29,13 +29,8 @@
 
 package com.caucho.hmpp;
 
-import com.caucho.hmpp.PresenceHandler;
-import com.caucho.hmpp.MessageHandler;
-import com.caucho.hmpp.QueryHandler;
-import com.caucho.hmpp.HmppError;
 import java.io.Serializable;
 
-import com.caucho.hemp.*;
 import com.caucho.hemp.service.*;
 import com.caucho.util.*;
 
@@ -67,9 +62,9 @@ public interface HmppSession {
   //
 
   /**
-   * Registers the listener
+   * Registers the message handler
    */
-  public void setMessageListener(MessageHandler listener);
+  public void setMessageHandler(MessageHandler handler);
 
   /**
    * Sends a message
@@ -81,9 +76,9 @@ public interface HmppSession {
   //
 
   /**
-   * Registers the query listener
+   * Registers the query handler
    */
-  public void setQueryListener(QueryHandler listener);
+  public void setQueryHandler(QueryHandler handler);
 
   /**
    * Queries the service
@@ -93,27 +88,27 @@ public interface HmppSession {
   /**
    * Queries the service
    */
-  public void queryGet(String id, String to, Serializable query);
+  public void queryGet(long id, String to, Serializable query);
 
   /**
    * Queries the service
    */
-  public void querySet(String id, String to, Serializable query);
+  public void querySet(long id, String to, Serializable query);
 
   /**
    * Sends a query response
    */
-  public void queryResult(String id,
-			  String from,
+  public void queryResult(long id,
 			  String to,
+			  String from,
 			  Serializable value);
 
   /**
    * Sends a query response
    */
-  public void queryError(String id,
-			 String from,
+  public void queryError(long id,
 			 String to,
+			 String from,
 			 Serializable query,
 			 HmppError error);
 
@@ -141,7 +136,7 @@ public interface HmppSession {
   /**
    * Basic presence
    */
-  public void presenceTo(String toJid, Serializable []data);
+  public void presenceTo(String to, Serializable []data);
 
   /**
    * Sends the basic presence unavailable notification to the server.
@@ -151,5 +146,5 @@ public interface HmppSession {
   /**
    * Sends the basic presence unavailable notification to the server.
    */
-  public void presenceUnavailable(String toJid, Serializable []data);
+  public void presenceUnavailable(String to, Serializable []data);
 }

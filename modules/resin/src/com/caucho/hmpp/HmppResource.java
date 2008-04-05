@@ -29,40 +29,16 @@
 
 package com.caucho.hmpp;
 
-import java.io.Serializable;
+import com.caucho.hmpp.packet.PacketHandler;
 
 /**
- * Configuration for a service
+ * Low-level callback to handle packet events.  Each method corresponds to
+ * a packet class.
  */
-public class AbstractQueryHandler implements QueryHandler {
-  public boolean onQueryGet(long id,
-			    String to,
-			    String from,
-			    Serializable query)
-  {
-    return false;
-  }
-  
-  public boolean onQuerySet(long id,
-			    String to,
-			    String from,
-			    Serializable query)
-  {
-    return false;
-  }
-  
-  public void onQueryResult(long id,
-			    String to,
-			    String from,
-			    Serializable value)
-  {
-  }
-  
-  public void onQueryError(long id,
-			   String to,
-			   String from,
-			   Serializable query,
-			   HmppError error)
-  {
-  }
+public interface HmppResource extends PacketHandler 
+{
+  /**
+   * Returns the resource's preferred jid.
+   */
+  public String getJid();
 }

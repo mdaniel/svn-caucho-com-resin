@@ -29,125 +29,15 @@
 
 package com.caucho.hmpp.packet;
 
-import java.io.Serializable;
-
-import com.caucho.hmpp.HmppError;
+import com.caucho.hmpp.MessageHandler;
+import com.caucho.hmpp.PresenceHandler;
+import com.caucho.hmpp.QueryHandler;
 
 /**
- * Low-level callback to handle packet events.  Each interface corresponds to
+ * Low-level callback to handle packet events.  Each method corresponds to
  * a packet class.
  */
-public interface PacketHandler {
-  /**
-   * Handles a message
-   */
-  public void onMessage(String from,
-			String to,
-			Serializable value);
-  
-  /**
-   * Handles a get query.
-   *
-   * The get handler must respond with either
-   * a QueryResult or a QueryError 
-   */
-  public void onQueryGet(String id,
-			 String from,
-			 String to,
-			 Serializable value);
-  
-  /**
-   * Handles a set query.
-   *
-   * The set handler must respond with either
-   * a QueryResult or a QueryError 
-   */
-  public void onQuerySet(String id,
-			 String from,
-			 String to,
-			 Serializable value);
-  
-  /**
-   * Handles a query result.
-   *
-   * The result id will match a pending get or set.
-   */
-  public void onQueryResult(String id,
-			    String from,
-			    String to,
-			    Serializable value);
-  
-  /**
-   * Handles a query error.
-   *
-   * The result id will match a pending get or set.
-   */
-  public void onQueryError(String id,
-			   String from,
-			   String to,
-			   Serializable value,
-			   HmppError error);
-  
-  /**
-   * Handles a presence availability packet.
-   *
-   * If the handler deals with clients, the "from" value should be ignored
-   * and replaced by the client's jid.
-   */
-  public void onPresence(String from,
-			 String to,
-			 Serializable []data);
-  
-  /**
-   * Handles a presence unavailability packet.
-   *
-   * If the handler deals with clients, the "from" value should be ignored
-   * and replaced by the client's jid.
-   */
-  public void onPresenceUnavailable(String from,
-				    String to,
-				    Serializable []data);
-  
-  /**
-   * Handles a presence probe from another server
-   */
-  public void onPresenceProbe(String from,
-			      String to,
-			      Serializable []data);
-  
-  /**
-   * Handles a presence subscribe request from a client
-   */
-  public void onPresenceSubscribe(String from,
-				  String to,
-				  Serializable []data);
-  
-  /**
-   * Handles a presence subscribed result to a client
-   */
-  public void onPresenceSubscribed(String from,
-				   String to,
-				   Serializable []data);
-  
-  /**
-   * Handles a presence unsubscribe request from a client
-   */
-  public void onPresenceUnsubscribe(String from,
-				    String to,
-				    Serializable []data);
-  
-  /**
-   * Handles a presence unsubscribed result to a client
-   */
-  public void onPresenceUnsubscribed(String from,
-				     String to,
-				     Serializable []data);
-  
-  /**
-   * Handles a presence unsubscribed result to a client
-   */
-  public void onPresenceError(String from,
-			      String to,
-			      Serializable []data,
-			      HmppError error);
+public interface PacketHandler 
+  extends MessageHandler, QueryHandler, PresenceHandler
+{
 }

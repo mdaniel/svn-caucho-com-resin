@@ -81,6 +81,6 @@ public class PresenceUnavailable extends Presence {
   @Override
   public void dispatch(PacketHandler handler)
   {
-    handler.onPresenceUnavailable(getFrom(), getTo(), getData());
+    handler.onPresenceUnavailable(getTo(), getFrom(), getData());
   }
 }

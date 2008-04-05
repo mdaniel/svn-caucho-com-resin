@@ -32,37 +32,22 @@ package com.caucho.hmpp;
 import java.io.Serializable;
 
 /**
- * Configuration for a service
+ * MessageHandler is a callback for handling unidirectional messages.
+ * 
+ * Messages in HMPP consist of a target JID (to), a source JID (from), and
+ * a payload (value).
+ * 
+ * The payload is typed according to the application, so an IM application
+ * might use a payload called ImMessage, while a game might have MoveMessage,
+ * FireLaserMessage, etc.
  */
-public class AbstractQueryHandler implements QueryHandler {
-  public boolean onQueryGet(long id,
-			    String to,
-			    String from,
-			    Serializable query)
-  {
-    return false;
-  }
-  
-  public boolean onQuerySet(long id,
-			    String to,
-			    String from,
-			    Serializable query)
-  {
-    return false;
-  }
-  
-  public void onQueryResult(long id,
-			    String to,
-			    String from,
-			    Serializable value)
-  {
-  }
-  
-  public void onQueryError(long id,
-			   String to,
-			   String from,
-			   Serializable query,
-			   HmppError error)
-  {
-  }
+public interface MessageHandler {
+  /**
+   * Callback to handle messages
+   * 
+   * @param to the target JID
+   * @param from the source JID
+   * @param value the message payload
+   */
+  public void onMessage(String to, String from, Serializable value);
 }

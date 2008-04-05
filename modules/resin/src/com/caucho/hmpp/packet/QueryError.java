@@ -33,11 +33,11 @@ import com.caucho.hmpp.HmppError;
 import java.io.Serializable;
 
 /**
- * RPC result from a get or set.  The "id" field is used
+ * RPC error result from a get or set.  The "id" field is used
  * to match the query with the response.
  */
 public class QueryError extends Packet {
-  private final String _id;
+  private final long _id;
   
   private final Serializable _value;
   private final HmppError _error;
@@ -47,7 +47,7 @@ public class QueryError extends Packet {
    */
   private QueryError()
   {
-    _id = null;
+    _id = 0;
     _value = null;
     _error = null;
   }
@@ -61,7 +61,7 @@ public class QueryError extends Packet {
    * @param value copy the query request
    * @param error the query error
    */
-  public QueryError(String id,
+  public QueryError(long id,
 		    String to,
 		    String from,
 		    Serializable value,
@@ -77,7 +77,7 @@ public class QueryError extends Packet {
   /**
    * Returns the id
    */
-  public String getId()
+  public long getId()
   {
     return _id;
   }
@@ -104,7 +104,7 @@ public class QueryError extends Packet {
   @Override
   public void dispatch(PacketHandler handler)
   {
-    handler.onQueryError(getId(), getFrom(), getTo(), getValue(), getError());
+    handler.onQueryError(getId(), getTo(), getFrom(), getValue(), getError());
   }
 
   @Override

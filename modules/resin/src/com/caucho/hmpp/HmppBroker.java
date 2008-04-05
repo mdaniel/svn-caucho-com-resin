@@ -29,40 +29,26 @@
 
 package com.caucho.hmpp;
 
-import java.io.Serializable;
+import com.caucho.hemp.service.*;
+import java.util.*;
+import java.lang.ref.*;
+
+import com.caucho.hemp.*;
+import com.caucho.server.resin.*;
+import com.caucho.util.*;
 
 /**
- * Configuration for a service
+ * Manager
  */
-public class AbstractQueryHandler implements QueryHandler {
-  public boolean onQueryGet(long id,
-			    String to,
-			    String from,
-			    Serializable query)
-  {
-    return false;
-  }
+public interface HmppBroker
+{
+  /**
+   * Creates a session
+   */
+  public HmppSession createSession(String uid, String password);
   
-  public boolean onQuerySet(long id,
-			    String to,
-			    String from,
-			    Serializable query)
-  {
-    return false;
-  }
-  
-  public void onQueryResult(long id,
-			    String to,
-			    String from,
-			    Serializable value)
-  {
-  }
-  
-  public void onQueryError(long id,
-			   String to,
-			   String from,
-			   Serializable query,
-			   HmppError error)
-  {
-  }
+  /**
+   * Registers a resource
+   */
+  public HmppSession registerResource(String jid);
 }

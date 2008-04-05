@@ -29,8 +29,6 @@
 
 package com.caucho.hmpp.packet;
 
-import com.caucho.hmpp.packet.PacketHandler;
-
 /**
  * Base packet class.  Contains only a 'to' and a 'from' field.
  */
@@ -64,21 +62,13 @@ public class Packet implements java.io.Serializable
   /**
    * Creates a packet with a destination and a source.
    *
-   * @param from the source jid
    * @param to the destination jid
+   * @param from the source jid
    */
-  public Packet(String from, String to)
+  public Packet(String to, String from)
   {
-    _from = from;
     _to = to;
-  }
-
-  /**
-   * Returns the 'from' field
-   */
-  public String getFrom()
-  {
-    return _from;
+    _from = from;
   }
 
   /**
@@ -87,6 +77,14 @@ public class Packet implements java.io.Serializable
   public String getTo()
   {
     return _to;
+  }
+
+  /**
+   * Returns the 'from' field
+   */
+  public String getFrom()
+  {
+    return _from;
   }
 
   /**

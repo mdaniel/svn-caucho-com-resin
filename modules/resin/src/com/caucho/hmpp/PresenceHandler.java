@@ -41,49 +41,57 @@ public interface PresenceHandler
   /**
    * General presence, for clients announcing availability
    */
-  public void onPresence(String fromJid,
-			 String toJid,
+  public void onPresence(String to,
+			 String from,
 			 Serializable []data);
 
   /**
    * General presence, for clients announcing unavailability
    */
-  public void onPresenceUnavailable(String fromJid,
-				    String toJid,
+  public void onPresenceUnavailable(String to,
+				    String from,
 				    Serializable []data);
 
   /**
    * Presence probe from the server to a client
    */
-  public void onPresenceProbe(String fromJid,
-			      String toJid,
+  public void onPresenceProbe(String to,
+			      String from,
 			      Serializable []data);
 
   /**
    * A subscription request from a client
    */
-  public void onPresenceSubscribe(String fromJid,
-				  String toJid,
+  public void onPresenceSubscribe(String to,
+				  String from,
 				  Serializable []data);
 
   /**
    * A subscription response to a client
    */
-  public void onPresenceSubscribed(String fromJid,
-				   String toJid,
+  public void onPresenceSubscribed(String to,
+				   String from,
 				   Serializable []data);
 
   /**
    * An unsubscription request from a client
    */
-  public void onPresenceUnsubscribe(String fromJid,
-				    String toJid,
+  public void onPresenceUnsubscribe(String to,
+				    String from,
 				    Serializable []data);
 
   /**
    * A unsubscription response to a client
    */
-  public void onPresenceUnsubscribed(String fromJid,
-				     String toJid,
+  public void onPresenceUnsubscribed(String to,
+				     String from,
 				     Serializable []data);
+
+  /**
+   * An error response to a client
+   */
+  public void onPresenceError(String to,
+			      String from,
+			      Serializable []data,
+			      HmppError error);
 }

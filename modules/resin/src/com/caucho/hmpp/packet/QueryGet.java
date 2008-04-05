@@ -37,7 +37,7 @@ import java.io.Serializable;
  * with a QueryResult or QueryError.
  */
 public class QueryGet extends Packet {
-  private final String _id;
+  private final long _id;
   
   private final Serializable _value;
 
@@ -46,7 +46,7 @@ public class QueryGet extends Packet {
    */
   private QueryGet()
   {
-    _id = null;
+    _id = 0;
     _value = null;
   }
 
@@ -57,7 +57,7 @@ public class QueryGet extends Packet {
    * @param to the target jid
    * @param value the query content
    */
-  public QueryGet(String id, String to, Serializable value)
+  public QueryGet(long id, String to, Serializable value)
   {
     super(to);
 
@@ -73,7 +73,7 @@ public class QueryGet extends Packet {
    * @param from the source jid
    * @param value the query content
    */
-  public QueryGet(String id, String to, String from, Serializable value)
+  public QueryGet(long id, String to, String from, Serializable value)
   {
     super(to, from);
 
@@ -84,7 +84,7 @@ public class QueryGet extends Packet {
   /**
    * Returns the id
    */
-  public String getId()
+  public long getId()
   {
     return _id;
   }
@@ -103,7 +103,7 @@ public class QueryGet extends Packet {
   @Override
   public void dispatch(PacketHandler handler)
   {
-    handler.onQueryGet(getId(), getFrom(), getTo(), getValue());
+    handler.onQueryGet(getId(), getTo(), getFrom(), getValue());
   }
 
   @Override

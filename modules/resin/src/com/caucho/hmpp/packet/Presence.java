@@ -96,7 +96,7 @@ public class Presence extends Packet {
   @Override
   public void dispatch(PacketHandler handler)
   {
-    handler.onPresence(getFrom(), getTo(), _data);
+    handler.onPresence(getTo(), getFrom(), _data);
   }
 
   @Override
@@ -107,15 +107,23 @@ public class Presence extends Packet {
     sb.append(getClass().getSimpleName());
     sb.append("[");
     
-    if (getTo() != null) {
-      sb.append("to=");
-      sb.append(getTo());
-    }
+    sb.append("to=");
+    sb.append(getTo());
     
     if (getFrom() != null) {
       sb.append(",from=");
       sb.append(getFrom());
     }
+
+    if (_data != null) {
+      for (Object item : _data) {
+	if (item != null) {
+	  sb.append(",");
+	  sb.append(item.getClass().getSimpleName());
+	}
+      }
+    }
+    
     sb.append("]");
     
     return sb.toString();
