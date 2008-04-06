@@ -134,17 +134,100 @@ public interface HmppSession {
   public void presence(Serializable []data);
 
   /**
-   * Basic presence
-   */
-  public void presenceTo(String to, Serializable []data);
-
-  /**
    * Sends the basic presence unavailable notification to the server.
    */
   public void presenceUnavailable(Serializable []data);
 
+  //
+  // directed
+  //
+
   /**
-   * Sends the basic presence unavailable notification to the server.
+   * Basic presence
+   */
+  public void presence(String to, Serializable []data);
+
+  /**
+   * Presence callback on login
+   */
+  public void presenceProbe(String to, Serializable []data);
+
+  /**
+   * Basic presence on logout
    */
   public void presenceUnavailable(String to, Serializable []data);
+
+  /**
+   * Presence subscribe request
+   */
+  public void presenceSubscribe(String to, Serializable []data);
+
+  /**
+   * Presence subscribed request
+   */
+  public void presenceSubscribed(String to, Serializable []data);
+
+  /**
+   * Presence unsubscribe request
+   */
+  public void presenceUnsubscribe(String to, Serializable []data);
+
+  /**
+   * Presence unsubscribed request
+   */
+  public void presenceUnsubscribed(String to, Serializable []data);
+
+  /**
+   * Presence error
+   */
+  public void presenceError(String to,
+			    Serializable []data,
+			    HmppError error);
+
+  //
+  // low-level
+  //
+
+  /**
+   * Basic presence
+   */
+  public void presence(String to, String from, Serializable []data);
+
+  /**
+   * Presence callback on login
+   */
+  public void presenceProbe(String to, String from, Serializable []data);
+
+  /**
+   * Basic presence on logout
+   */
+  public void presenceUnavailable(String to, String from, Serializable []data);
+
+  /**
+   * Presence subscribe request
+   */
+  public void presenceSubscribe(String to, String from, Serializable []data);
+
+  /**
+   * Presence subscribed request
+   */
+  public void presenceSubscribed(String to, String from, Serializable []data);
+
+  /**
+   * Presence unsubscribe request
+   */
+  public void presenceUnsubscribe(String to, String from, Serializable []data);
+
+  /**
+   * Presence unsubscribed request
+   */
+  public void presenceUnsubscribed(String to, String from,
+				   Serializable []data);
+
+  /**
+   * Presence error
+   */
+  public void presenceError(String to, String from,
+			    Serializable []data,
+			    HmppError error);
 }

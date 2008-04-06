@@ -27,58 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmpp.packet;
+package com.caucho.hmpp;
 
-import com.caucho.hmpp.packet.Presence;
-import com.caucho.hmpp.HmppError;
 import java.io.Serializable;
 
 /**
- * PresenceError returns an error response to a presence packet
+ * MessageHandler is a callback for handling unidirectional messages.
+ * 
+ * Messages in HMPP consist of a target JID (to), a source JID (from), and
+ * a payload (value).
+ * 
+ * The payload is typed according to the application, so an IM application
+ * might use a payload called ImMessage, while a game might have MoveMessage,
+ * FireLaserMessage, etc.
  */
-public class PresenceError extends Presence {
-  private final HmppError _error;
-  
+public class AbstractMessageHandler implements MessageHandler {
   /**
-   * zero-arg constructor for Hessian
+   * Callback to handle messages
+   * 
+   * @param to the target JID
+   * @param from the source JID
+   * @param value the message payload
    */
-  private PresenceError()
+  public void onMessage(String to, String from, Serializable value)
   {
-    _error = null;
-  }
-
-  /**
-   * The subscribed response to the original client
-   *
-   * @param to the target client
-   * @param from the source
-   * @param data a collection of presence data
-   * @param error the error information
-   */
-  public PresenceError(String to,
-		       String from,
-		       Serializable []data,
-		       HmppError error)
-  {
-    super(to, from, data);
-
-    _error = error;
-  }
-
-  /**
-   * Returns the error information
-   */
-  public HmppError getError()
-  {
-    return _error;
-  }
-
-  /**
-   * SPI method to dispatch the packet to the proper handler
-   */
-  @Override
-  public void dispatch(PacketHandler handler)
-  {
-    handler.onPresenceError(getTo(), getFrom(), getData(), getError());
   }
 }

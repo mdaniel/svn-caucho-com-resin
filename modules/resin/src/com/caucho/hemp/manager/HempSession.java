@@ -200,8 +200,9 @@ public class HempSession implements HmppSession, HmppResource {
     if (handler != null && handler.onQueryGet(id, to, from, query))
       return true;
 
-    queryError(id, to, from, query,
-	       new HmppError("protocol-unknwon",
+    queryError(id, from, to, query,
+	       new HmppError(HmppError.TYPE_CANCEL,
+			     HmppError.FEATURE_NOT_IMPLEMENTED,
 			     "unknown query: " + query.getClass().getName()));
     
     return true;
@@ -217,10 +218,15 @@ public class HempSession implements HmppSession, HmppResource {
   {
     QueryHandler handler = _queryHandler;
     
-    if (handler != null)
-      return handler.onQuerySet(id, to, from, query);
-    else
-      return false;
+    if (handler != null && handler.onQuerySet(id, to, from, query))
+      return true;
+
+    queryError(id, from, to, query,
+	       new HmppError(HmppError.TYPE_CANCEL,
+			     HmppError.FEATURE_NOT_IMPLEMENTED,
+			     "unknown query: " + query.getClass().getName()));
+
+    return true;
   }
 
   /**
@@ -267,6 +273,19 @@ public class HempSession implements HmppSession, HmppResource {
   /**
    * Basic presence
    */
+  public void presenceUnavailable(Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceUnavailable(_jid, data);
+  }
+
+  /**
+   * Basic presence
+   */
   public void presence(Serializable []data)
   {
     HempManager manager = _manager;
@@ -288,6 +307,225 @@ public class HempSession implements HmppSession, HmppResource {
       throw new IllegalStateException(L.l("session is closed"));
     
     _manager.presence(to, _jid, data);
+  }
+
+  //
+  // directed presence
+  //
+
+  /**
+   * directed presence
+   */
+  public void presence(String to, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presence(to, _jid, data);
+  }
+
+  /**
+   * directed presence
+   */
+  public void presenceProbe(String to, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceProbe(to, _jid, data);
+  }
+
+  /**
+   * directed presence
+   */
+  public void presenceUnavailable(String to, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceUnavailable(to, _jid, data);
+  }
+
+  /**
+   * directed presence
+   */
+  public void presenceSubscribe(String to, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceSubscribe(to, _jid, data);
+  }
+
+  /**
+   * directed presence
+   */
+  public void presenceSubscribed(String to, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceSubscribed(to, _jid, data);
+  }
+
+  /**
+   * directed presence
+   */
+  public void presenceUnsubscribe(String to, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceUnsubscribe(to, _jid, data);
+  }
+
+  /**
+   * directed presence
+   */
+  public void presenceUnsubscribed(String to, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceUnsubscribed(to, _jid, data);
+  }
+
+  /**
+   * directed presence
+   */
+  public void presenceError(String to,
+			    Serializable []data,
+			    HmppError error)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceError(to, _jid, data, error);
+  }
+
+  //
+  // low-level
+  //
+
+  /**
+   * low-level presence
+   */
+  public void presence(String to, String from, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presence(to, from, data);
+  }
+
+  /**
+   * low-level presence
+   */
+  public void presenceProbe(String to, String from, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceProbe(to, from, data);
+  }
+
+  /**
+   * low-level presence
+   */
+  public void presenceUnavailable(String to, String from, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceUnavailable(to, from, data);
+  }
+
+  /**
+   * low-level presence
+   */
+  public void presenceSubscribe(String to, String from, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceSubscribe(to, from, data);
+  }
+
+  /**
+   * low-level presence
+   */
+  public void presenceSubscribed(String to, String from, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceSubscribed(to, from, data);
+  }
+
+  /**
+   * low-level presence
+   */
+  public void presenceUnsubscribe(String to, String from, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceUnsubscribe(to, from, data);
+  }
+
+  /**
+   * low-level presence
+   */
+  public void presenceUnsubscribed(String to, String from, Serializable []data)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceUnsubscribed(to, from, data);
+  }
+
+  /**
+   * low-level presence
+   */
+  public void presenceError(String to, String from, Serializable []data,
+			    HmppError error)
+  {
+    HempManager manager = _manager;
+
+    if (manager == null)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    _manager.presenceError(to, from, data, error);
   }
 
   /**
@@ -312,32 +550,6 @@ public class HempSession implements HmppSession, HmppResource {
     
     if (handler != null)
       handler.onPresenceProbe(to, from, data);
-  }
-
-  /**
-   * Basic presence
-   */
-  public void presenceUnavailable(Serializable []data)
-  {
-    HempManager manager = _manager;
-
-    if (manager == null)
-      throw new IllegalStateException(L.l("session is closed"));
-    
-    _manager.presenceUnavailable(_jid, data);
-  }
-
-  /**
-   * Basic presence
-   */
-  public void presenceUnavailable(String to, Serializable []data)
-  {
-    HempManager manager = _manager;
-
-    if (manager == null)
-      throw new IllegalStateException(L.l("session is closed"));
-    
-    _manager.presence(to, _jid, data);
   }
 
   /**

@@ -61,6 +61,8 @@ public class ServerPacketHandler
 
   private HmppServiceHandler _callbackHandler;
 
+  private String _jid;
+
   ServerPacketHandler(HmppBroker manager, ReadStream rs, WriteStream ws)
   {
     _manager = manager;
@@ -81,6 +83,14 @@ public class ServerPacketHandler
     _session = _manager.createSession("anonymous@localhost", "test");
     _session.setMessageHandler(_callbackHandler);
     _session.setQueryHandler(_callbackHandler);
+    _session.setPresenceHandler(_callbackHandler);
+
+    _jid = _session.getJid();
+  }
+
+  protected String getJid()
+  {
+    return _jid;
   }
   
   public boolean serviceRead(ReadStream is,
@@ -196,10 +206,7 @@ public class ServerPacketHandler
 			 Serializable []data)
 
   {
-    if (to != null)
-      _session.presenceTo(to, data);
-    else
-      _session.presence(data);
+    _session.presence(to, data);
   }
   
   /**
@@ -212,10 +219,7 @@ public class ServerPacketHandler
 				    String from,
 				    Serializable []data)
   {
-    if (to != null)
-      _session.presenceUnavailable(to, data);
-    else
-      _session.presenceUnavailable(data);
+    _session.presenceUnavailable(to, data);
   }
   
   /**
@@ -225,6 +229,7 @@ public class ServerPacketHandler
 			      String from,
 			      Serializable []data)
   {
+    _session.presenceProbe(to, data);
   }
   
   /**
@@ -234,6 +239,7 @@ public class ServerPacketHandler
 				  String from,
 				  Serializable []data)
   {
+    _session.presenceSubscribe(to, data);
   }
   
   /**
@@ -243,6 +249,7 @@ public class ServerPacketHandler
 				   String from,
 				   Serializable []data)
   {
+    _session.presenceSubscribed(to, data);
   }
   
   /**
@@ -252,6 +259,7 @@ public class ServerPacketHandler
 				    String from,
 				    Serializable []data)
   {
+    _session.presenceUnsubscribe(to, data);
   }
   
   /**
@@ -261,6 +269,7 @@ public class ServerPacketHandler
 				     String from,
 				     Serializable []data)
   {
+    _session.presenceUnsubscribed(to, data);
   }
   
   /**
@@ -271,6 +280,7 @@ public class ServerPacketHandler
 			      Serializable []data,
 			      HmppError error)
   {
+    _session.presenceError(to, data, error);
   }
 
   public void close()

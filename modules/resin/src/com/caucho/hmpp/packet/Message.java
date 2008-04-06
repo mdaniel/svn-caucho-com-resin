@@ -98,7 +98,7 @@ public class Message extends Packet {
   @Override
   public void dispatch(PacketHandler handler)
   {
-    handler.onMessage(getFrom(), getTo(), _value);
+    handler.onMessage(getTo(), getFrom(), _value);
   }
 
   @Override

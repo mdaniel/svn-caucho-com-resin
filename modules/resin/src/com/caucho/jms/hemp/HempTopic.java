@@ -41,7 +41,6 @@ import javax.jms.*;
 import javax.webbeans.*;
 
 import com.caucho.config.*;
-import com.caucho.hemp.*;
 import com.caucho.hemp.service.*;
 import com.caucho.jms.memory.*;
 import com.caucho.jms.message.*;
@@ -108,8 +107,10 @@ public class HempTopic extends AbstractTopic
 	throw new ConfigException(L.l("Need xmpp protocol"));
     }
 
-    _session = _broker.createSession(getName(), null);
-    _session.setMessageHandler(this);
+    if (_session == null) {
+      _session = _broker.registerResource(getName());
+      _session.setMessageHandler(this);
+    }
   }
 
   @Override

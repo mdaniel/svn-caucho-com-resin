@@ -29,8 +29,7 @@
 
 package com.caucho.hemp.client;
 
-import com.caucho.hmpp.MessageHandler;
-import com.caucho.hmpp.QueryHandler;
+import com.caucho.hmpp.*;
 import com.caucho.hmpp.packet.PacketHandler;
 import com.caucho.hmpp.packet.Packet;
 import com.caucho.hmpp.HmppError;
@@ -167,7 +166,7 @@ class ClientPacketHandler implements Runnable, PacketHandler {
   {
     QueryHandler handler = _client.getQueryHandler();
 
-    if (handler == null || ! handler.onQuerySet(id, from, to, value)) {
+    if (handler == null || ! handler.onQuerySet(id, to, from, value)) {
       _client.queryError(id, from, value,
 			 new HmppError("unknown",
 				       "no onQuerySet handling " + value.getClass().getName()));
@@ -213,6 +212,10 @@ class ClientPacketHandler implements Runnable, PacketHandler {
 			 String from,
 			 Serializable []data)
   {
+    PresenceHandler handler = _client.getPresenceHandler();
+
+    if (handler != null)
+      handler.onPresence(to, from, data);
   }
   
   /**
@@ -225,6 +228,10 @@ class ClientPacketHandler implements Runnable, PacketHandler {
 				    String from,
 				    Serializable []data)
   {
+    PresenceHandler handler = _client.getPresenceHandler();
+
+    if (handler != null)
+      handler.onPresenceUnavailable(to, from, data);
   }
   
   /**
@@ -234,6 +241,10 @@ class ClientPacketHandler implements Runnable, PacketHandler {
 			      String from,
 			      Serializable []data)
   {
+    PresenceHandler handler = _client.getPresenceHandler();
+
+    if (handler != null)
+      handler.onPresenceProbe(to, from, data);
   }
   
   /**
@@ -243,6 +254,10 @@ class ClientPacketHandler implements Runnable, PacketHandler {
 				  String from,
 				  Serializable []data)
   {
+    PresenceHandler handler = _client.getPresenceHandler();
+
+    if (handler != null)
+      handler.onPresenceSubscribe(to, from, data);
   }
   
   /**
@@ -252,6 +267,10 @@ class ClientPacketHandler implements Runnable, PacketHandler {
 				   String from,
 				   Serializable []data)
   {
+    PresenceHandler handler = _client.getPresenceHandler();
+
+    if (handler != null)
+      handler.onPresenceSubscribed(to, from, data);
   }
   
   /**
@@ -261,6 +280,10 @@ class ClientPacketHandler implements Runnable, PacketHandler {
 				    String from,
 				    Serializable []data)
   {
+    PresenceHandler handler = _client.getPresenceHandler();
+
+    if (handler != null)
+      handler.onPresenceUnsubscribe(to, from, data);
   }
   
   /**
@@ -270,6 +293,10 @@ class ClientPacketHandler implements Runnable, PacketHandler {
 				     String from,
 				     Serializable []data)
   {
+    PresenceHandler handler = _client.getPresenceHandler();
+
+    if (handler != null)
+      handler.onPresenceUnsubscribed(to, from, data);
   }
   
   /**
@@ -280,6 +307,10 @@ class ClientPacketHandler implements Runnable, PacketHandler {
 			      Serializable []data,
 			      HmppError error)
   {
+    PresenceHandler handler = _client.getPresenceHandler();
+
+    if (handler != null)
+      handler.onPresenceError(to, from, data, error);
   }
 
   @Override

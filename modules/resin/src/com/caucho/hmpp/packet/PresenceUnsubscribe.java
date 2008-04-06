@@ -65,4 +65,13 @@ public class PresenceUnsubscribe extends Presence {
   {
     super(to, from, data);
   }
+
+  /**
+   * SPI method to dispatch the packet to the proper handler
+   */
+  @Override
+  public void dispatch(PacketHandler handler)
+  {
+    handler.onPresenceUnsubscribe(getTo(), getFrom(), getData());
+  }
 }

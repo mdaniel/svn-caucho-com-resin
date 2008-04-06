@@ -90,7 +90,7 @@ public class HempManager implements HmppBroker {
     
     return sb.toString();
   }
-
+  
   /**
    * Registers a resource
    */
@@ -182,6 +182,98 @@ public class HempManager implements HmppBroker {
   }
 
   /**
+   * Presence probe
+   */
+  protected void presenceProbe(String to,
+			       String from,
+			       Serializable []data)
+  {
+    HmppResource resource = getResource(to);
+
+    if (resource != null)
+      resource.onPresenceProbe(to, from, data);
+  }
+
+  /**
+   * Presence unavailable
+   */
+  protected void presenceUnavailable(String to,
+				     String from,
+				     Serializable []data)
+  {
+    HmppResource resource = getResource(to);
+
+    if (resource != null)
+      resource.onPresenceUnavailable(to, from, data);
+  }
+
+  /**
+   * Presence subscribe
+   */
+  protected void presenceSubscribe(String to,
+				   String from,
+				   Serializable []data)
+  {
+    HmppResource resource = getResource(to);
+
+    if (resource != null)
+      resource.onPresenceSubscribe(to, from, data);
+  }
+
+  /**
+   * Presence subscribed
+   */
+  protected void presenceSubscribed(String to,
+				   String from,
+				   Serializable []data)
+  {
+    HmppResource resource = getResource(to);
+
+    if (resource != null)
+      resource.onPresenceSubscribed(to, from, data);
+  }
+
+  /**
+   * Presence unsubscribe
+   */
+  protected void presenceUnsubscribe(String to,
+				     String from,
+				     Serializable []data)
+  {
+    HmppResource resource = getResource(to);
+
+    if (resource != null)
+      resource.onPresenceUnsubscribe(to, from, data);
+  }
+
+  /**
+   * Presence unsubscribed
+   */
+  protected void presenceUnsubscribed(String to,
+				      String from,
+				      Serializable []data)
+  {
+    HmppResource resource = getResource(to);
+
+    if (resource != null)
+      resource.onPresenceUnsubscribed(to, from, data);
+  }
+
+  /**
+   * Presence error
+   */
+  protected void presenceError(String to,
+			       String from,
+			       Serializable []data,
+			       HmppError error)
+  {
+    HmppResource resource = getResource(to);
+
+    if (resource != null)
+      resource.onPresenceError(to, from, data, error);
+  }
+
+  /**
    * Presence unavailable
    */
   protected void presenceUnavailable(String fromJid, Serializable []data)
@@ -201,19 +293,6 @@ public class HempManager implements HmppBroker {
 	entity.onPresenceUnavailable(fromJid, targetJid, data);
     }
     */
-  }
-
-  /**
-   * Presence unavailable
-   */
-  protected void presenceUnavailable(String to,
-				     String from,
-				     Serializable []data)
-  {
-    HmppResource resource = getResource(to);
-
-    if (resource != null)
-      resource.onPresenceUnavailable(to, from, data);
   }
 
   /**

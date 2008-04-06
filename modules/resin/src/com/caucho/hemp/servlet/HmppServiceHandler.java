@@ -29,25 +29,19 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.hmpp.packet.QuerySet;
-import com.caucho.hmpp.packet.QueryResult;
-import com.caucho.hmpp.packet.QueryGet;
-import com.caucho.hmpp.packet.QueryError;
-import com.caucho.hmpp.packet.Message;
+import com.caucho.hmpp.packet.*;
 import com.caucho.hmpp.HmppError;
 import java.io.*;
 import java.util.logging.*;
 
 import com.caucho.hessian.io.*;
-import com.caucho.hemp.*;
-import com.caucho.hmpp.MessageHandler;
-import com.caucho.hmpp.QueryHandler;
+import com.caucho.hmpp.*;
 
 /**
  * Handles callbacks for a hmpp service
  */
 public class HmppServiceHandler
-  implements MessageHandler, QueryHandler
+  implements MessageHandler, QueryHandler, PresenceHandler
 {
   private static final Logger log
     = Logger.getLogger(HmppServiceHandler.class.getName());
@@ -170,4 +164,181 @@ public class HmppServiceHandler
       log.log(Level.FINE, e.toString(), e);
     }
   }
+  /**
+   * General presence, for clients announcing availability
+   */
+  public void onPresence(String to,
+			 String from,
+			 Serializable []data)
+  {
+    try {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(_packetHandler + " send presence to=" + to
+		  + " from=" + from);
+      }
+      
+      _out.writeObject(new Presence(to, from, data));
+      _out.flush();
+    } catch (IOException e) {
+      _packetHandler.close();
+      
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
+  /**
+   * General presence, for clients announcing unavailability
+   */
+  public void onPresenceUnavailable(String to,
+				    String from,
+				    Serializable []data)
+  {
+    try {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(_packetHandler + " send presenceUnavailable to=" + to
+		  + " from=" + from);
+      }
+      
+      _out.writeObject(new PresenceUnavailable(to, from, data));
+      _out.flush();
+    } catch (IOException e) {
+      _packetHandler.close();
+      
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
+  /**
+   * Presence probe from the server to a client
+   */
+  public void onPresenceProbe(String to,
+			      String from,
+			      Serializable []data)
+  {
+    try {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(_packetHandler + " send presenceProbe to=" + to
+		  + " from=" + from);
+      }
+      
+      _out.writeObject(new PresenceProbe(to, from, data));
+      _out.flush();
+    } catch (IOException e) {
+      _packetHandler.close();
+      
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
+  /**
+   * A subscription request from a client
+   */
+  public void onPresenceSubscribe(String to,
+				  String from,
+				  Serializable []data)
+  {
+    try {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(_packetHandler + " send presenceSubscribe to=" + to
+		  + " from=" + from);
+      }
+      
+      _out.writeObject(new PresenceSubscribe(to, from, data));
+      _out.flush();
+    } catch (IOException e) {
+      _packetHandler.close();
+      
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
+  /**
+   * A subscription response to a client
+   */
+  public void onPresenceSubscribed(String to,
+				   String from,
+				   Serializable []data)
+  {
+    try {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(_packetHandler + " send presenceSubscribed to=" + to
+		  + " from=" + from);
+      }
+      
+      _out.writeObject(new PresenceSubscribed(to, from, data));
+      _out.flush();
+    } catch (IOException e) {
+      _packetHandler.close();
+      
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
+  /**
+   * An unsubscription request from a client
+   */
+  public void onPresenceUnsubscribe(String to,
+				    String from,
+				    Serializable []data)
+  {
+    try {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(_packetHandler + " send presenceUnsubscribe to=" + to
+		  + " from=" + from);
+      }
+      
+      _out.writeObject(new PresenceUnsubscribe(to, from, data));
+      _out.flush();
+    } catch (IOException e) {
+      _packetHandler.close();
+      
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
+  /**
+   * A unsubscription response to a client
+   */
+  public void onPresenceUnsubscribed(String to,
+				     String from,
+				     Serializable []data)
+  {
+    try {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(_packetHandler + " send presenceUnsubscribed to=" + to
+		  + " from=" + from);
+      }
+      
+      _out.writeObject(new PresenceUnsubscribed(to, from, data));
+      _out.flush();
+    } catch (IOException e) {
+      _packetHandler.close();
+      
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
+  /**
+   * An error response to a client
+   */
+  public void onPresenceError(String to,
+			      String from,
+			      Serializable []data,
+			      HmppError error)
+  {
+    try {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(_packetHandler + " send presenceError to=" + to
+		  + " from=" + from);
+      }
+      
+      _out.writeObject(new PresenceError(to, from, data, error));
+      _out.flush();
+    } catch (IOException e) {
+      _packetHandler.close();
+      
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
 }
+

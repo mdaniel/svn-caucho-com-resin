@@ -29,18 +29,8 @@
 
 package com.caucho.hemp.client;
 
-import com.caucho.hmpp.MessageHandler;
-import com.caucho.hmpp.QueryCallback;
-import com.caucho.hmpp.QueryHandler;
-import com.caucho.hmpp.packet.QuerySet;
-import com.caucho.hmpp.packet.QueryResult;
-import com.caucho.hmpp.packet.QueryGet;
-import com.caucho.hmpp.packet.QueryError;
-import com.caucho.hmpp.packet.PresenceUnavailable;
-import com.caucho.hmpp.packet.Presence;
-import com.caucho.hmpp.packet.Packet;
-import com.caucho.hmpp.packet.Message;
-import com.caucho.hmpp.HmppError;
+import com.caucho.hmpp.*;
+import com.caucho.hmpp.packet.*;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.hemp.*;
@@ -77,6 +67,7 @@ public class HempClient {
 
   private MessageHandler _messageHandler;
   private QueryHandler _queryHandler;
+  private PresenceHandler _presenceHandler;
 
   private HashMap<Long,QueryItem> _queryMap
     = new HashMap<Long,QueryItem>();
@@ -195,6 +186,22 @@ public class HempClient {
   }
 
   /**
+   * Sets the presence handler
+   */
+  public void setPresenceHandler(PresenceHandler handler)
+  {
+    _presenceHandler = handler;
+  }
+
+  /**
+   * Gets the message listener
+   */
+  public PresenceHandler getPresenceHandler()
+  {
+    return _presenceHandler;
+  }
+
+  /**
    * Sends a message to a given jid
    */
   public void sendMessage(String to, Serializable value)
@@ -260,6 +267,86 @@ public class HempClient {
 
     if (out != null) {
       out.writeObject(new PresenceUnavailable(to, data));
+      out.flush();
+    }
+  }
+
+  /**
+   * Sends a presence probe packet to the server
+   */
+  public void presenceProbe(String to, Serializable []data)
+    throws IOException
+  {
+    String from = null;
+    
+    Hessian2StreamingOutput out = _out;
+
+    if (out != null) {
+      out.writeObject(new PresenceProbe(to, from, data));
+      out.flush();
+    }
+  }
+
+  /**
+   * Sends a presence subscribe packet to the server
+   */
+  public void presenceSubscribe(String to, Serializable []data)
+    throws IOException
+  {
+    String from = null;
+    
+    Hessian2StreamingOutput out = _out;
+
+    if (out != null) {
+      out.writeObject(new PresenceSubscribe(to, from, data));
+      out.flush();
+    }
+  }
+
+  /**
+   * Sends a presence subscribed packet to the server
+   */
+  public void presenceSubscribed(String to, Serializable []data)
+    throws IOException
+  {
+    String from = null;
+    
+    Hessian2StreamingOutput out = _out;
+
+    if (out != null) {
+      out.writeObject(new PresenceSubscribed(to, from, data));
+      out.flush();
+    }
+  }
+
+  /**
+   * Sends a presence subscribe packet to the server
+   */
+  public void presenceUnsubscribe(String to, Serializable []data)
+    throws IOException
+  {
+    String from = null;
+    
+    Hessian2StreamingOutput out = _out;
+
+    if (out != null) {
+      out.writeObject(new PresenceUnsubscribe(to, from, data));
+      out.flush();
+    }
+  }
+
+  /**
+   * Sends a presence subscribed packet to the server
+   */
+  public void presenceUnsubscribed(String to, Serializable []data)
+    throws IOException
+  {
+    String from = null;
+    
+    Hessian2StreamingOutput out = _out;
+    
+    if (out != null) {
+      out.writeObject(new PresenceUnsubscribed(to, from, data));
       out.flush();
     }
   }
