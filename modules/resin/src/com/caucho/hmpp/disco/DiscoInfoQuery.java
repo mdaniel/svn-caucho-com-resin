@@ -68,7 +68,7 @@ public class DiscoInfoQuery implements java.io.Serializable {
   private String _node;
   
   private DiscoIdentity []_identity;
-  private DiscoFeature []_feature;
+  private DiscoFeature []_features;
   
   public DiscoInfoQuery()
   {
@@ -79,9 +79,56 @@ public class DiscoInfoQuery implements java.io.Serializable {
     _node = node;
   }
   
+  public DiscoInfoQuery(DiscoIdentity []identity,
+			DiscoFeature []features)
+  {
+    _identity = identity;
+    _features = features;
+  }
+  
+  public DiscoInfoQuery(String node,
+			DiscoIdentity []identity,
+			DiscoFeature []features)
+  {
+    _node = node;
+    
+    _identity = identity;
+    _features = features;
+  }
+  
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+
+    if (_node != null) {
+      sb.append("node=");
+      sb.append(_node);
+      sb.append(",");
+    }
+
+    sb.append("id=[");
+    
+    if (_identity != null) {
+      for (int i = 0; i < _identity.length; i++) {
+	if (i != 0)
+	  sb.append(",");
+	sb.append(_identity[i]);
+      }
+    }
+    sb.append("],features=[");
+    
+    if (_features != null) {
+      for (int i = 0; i < _features.length; i++) {
+	if (i != 0)
+	  sb.append(",");
+	sb.append(_features[i].getVar());
+      }
+    }
+    sb.append("]]");
+    
+    return sb.toString();
   }
 }

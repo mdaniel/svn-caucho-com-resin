@@ -27,57 +27,24 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmpp.disco;
+package com.caucho.hemp.im;
 
 import java.util.*;
+import java.lang.ref.*;
+
+import com.caucho.hmpp.*;
+import com.caucho.server.resin.*;
+import com.caucho.util.*;
 
 /**
- * service discovery identity
- *
- * http://jabber.org/protocol/disco#info
- *
- * <code><pre>
- * element query {
- *   attribute node?,
- *   identity*,
- *   feature*
- * }
- *
- * element identity {
- *    attribute category,
- *    attribute name?,
- *    attribute type
- * }
- *
- * element feature {
- *    attribute _var
- * }
- * </pre></code>
+ * IM Broker
  */
-public class DiscoFeature implements java.io.Serializable {
-  private String _var;
-  
-  public DiscoFeature()
-  {
-  }
-  
-  public DiscoFeature(String var)
-  {
-    _var = var;
-  }
-
+public class ImBroker {
   /**
-   * Returns the feature name
+   * Returns the resource with the given jid
    */
-  public String getVar()
+  protected HmppResource lookupResource(String jid)
   {
-    return _var;
-  }
-  
-  @Override
-  public String toString()
-  {
-    return (getClass().getSimpleName()
-	    + "[" + _var + "]");
+    return null;
   }
 }

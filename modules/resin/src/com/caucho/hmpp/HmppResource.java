@@ -41,4 +41,14 @@ public interface HmppResource extends PacketHandler
    * Returns the resource's preferred jid.
    */
   public String getJid();
+
+  /**
+   * Called when an instance logs in
+   */
+  public void onLogin(String jid);
+
+  /**
+   * Called when an instance logs out
+   */
+  public void onLogout(String jid);
 }

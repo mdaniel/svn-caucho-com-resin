@@ -27,57 +27,46 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmpp.disco;
+package com.caucho.hmpp.auth;
 
-import java.util.*;
+import java.io.Serializable;
 
 /**
- * service discovery identity
- *
- * http://jabber.org/protocol/disco#info
- *
- * <code><pre>
- * element query {
- *   attribute node?,
- *   identity*,
- *   feature*
- * }
- *
- * element identity {
- *    attribute category,
- *    attribute name?,
- *    attribute type
- * }
- *
- * element feature {
- *    attribute _var
- * }
- * </pre></code>
+ * Authentication result returns the jid on success
  */
-public class DiscoFeature implements java.io.Serializable {
-  private String _var;
-  
-  public DiscoFeature()
+public class AuthResult implements Serializable {
+  private final String _jid;
+
+  /**
+   * null constructor for Hessian.
+   */
+  private AuthResult()
   {
-  }
-  
-  public DiscoFeature(String var)
-  {
-    _var = var;
+    _jid = null;
   }
 
   /**
-   * Returns the feature name
+   * login packet
    */
-  public String getVar()
+  public AuthResult(String jid)
   {
-    return _var;
+    _jid = jid;
   }
-  
-  @Override
+
+  public String getJid()
+  {
+    return _jid;
+  }
+
   public String toString()
   {
-    return (getClass().getSimpleName()
-	    + "[" + _var + "]");
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+    sb.append(_jid);
+    sb.append("]");
+
+    return sb.toString();
   }
 }

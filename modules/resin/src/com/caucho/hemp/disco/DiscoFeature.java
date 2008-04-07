@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmpp.disco;
+package com.caucho.hemp.disco;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -50,7 +51,7 @@ import java.util.*;
  * }
  *
  * element feature {
- *    attribute _var
+ *    attribute var
  * }
  * </pre></code>
  */
@@ -65,19 +66,9 @@ public class DiscoFeature implements java.io.Serializable {
   {
     _var = var;
   }
-
-  /**
-   * Returns the feature name
-   */
-  public String getVar()
-  {
-    return _var;
-  }
   
-  @Override
   public String toString()
   {
-    return (getClass().getSimpleName()
-	    + "[" + _var + "]");
+    return (getClass().getSimpleName() + "[" + _var + "]");
   }
 }

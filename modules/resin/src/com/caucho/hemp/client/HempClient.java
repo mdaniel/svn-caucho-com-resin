@@ -30,6 +30,7 @@
 package com.caucho.hemp.client;
 
 import com.caucho.hmpp.*;
+import com.caucho.hmpp.auth.*;
 import com.caucho.hmpp.packet.*;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
@@ -166,6 +167,18 @@ public class HempClient {
 
     if (out != null) {
       out.writeObject(packet);
+    }
+  }
+
+  /**
+   * Login to the server
+   */
+  public void login(String uid, String password)
+  {
+    try {
+      querySet("", new AuthQuery(uid, password));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -368,6 +381,23 @@ public class HempClient {
   }
 
   /**
+   * Sends a query-set packet to the server
+   */
+  public Serializable queryGet(String to,
+			       Serializable query)
+    throws IOException
+  {
+    WaitQueryCallback callback = new WaitQueryCallback();
+
+    queryGet(to, query, callback, null);
+
+    if (callback.waitFor())
+      return callback.getResult();
+    else
+      throw new RuntimeException(String.valueOf(callback.getError()));
+  }
+
+  /**
    * Sends a query-get packet to the server
    */
   public void queryGet(String to,
@@ -390,6 +420,23 @@ public class HempClient {
       out.writeObject(new QueryGet(id, to, value));
       out.flush();
     }
+  }
+
+  /**
+   * Sends a query-set packet to the server
+   */
+  public Serializable querySet(String to,
+			       Serializable query)
+    throws IOException
+  {
+    WaitQueryCallback callback = new WaitQueryCallback();
+
+    querySet(to, query, callback, null);
+
+    if (callback.waitFor())
+      return callback.getResult();
+    else
+      throw new RuntimeException(String.valueOf(callback.getError()));
   }
 
   /**
@@ -422,6 +469,7 @@ public class HempClient {
    *
    * XXX: api needs response
    */
+  /*
   public void querySet(String to, Serializable value)
     throws IOException
   {
@@ -438,6 +486,7 @@ public class HempClient {
       out.flush();
     }
   }
+  */
 
   /**
    * Callback for the response
@@ -604,6 +653,59 @@ public class HempClient {
     public String toString()
     {
       return getClass().getSimpleName() + "[" + _id + "," + _callback + "]";
+    }
+  }
+
+  static class WaitQueryCallback implements QueryCallback {
+    private Serializable _result;
+    private HmppError _error;
+    private boolean _isResult;
+
+    public Serializable getResult()
+    {
+      return _result;
+    }
+    
+    public HmppError getError()
+    {
+      return _error;
+    }
+
+    boolean waitFor()
+    {
+      try {
+	synchronized (this) {
+	  if (! _isResult)
+	    this.wait(10000);
+	}
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+
+      return _isResult;
+    }
+    
+    public void onQueryResult(String fromJid, String toJid,
+			      Serializable value, Object handback)
+    {
+      _result = value;
+
+      synchronized (this) {
+	_isResult = true;
+	notifyAll();
+      }
+    }
+  
+    public void onQueryError(String fromJid, String toJid,
+			     Serializable value, HmppError error,
+			     Object handback)
+    {
+      _error = error;
+
+      synchronized (this) {
+	_isResult = true;
+	notifyAll();
+      }
     }
   }
 }

@@ -91,6 +91,14 @@ public class HempSession implements HmppSession, HmppResource {
     _messageHandler = handler;
   }
 
+  public void onLogin(String jid)
+  {
+  }
+
+  public void onLogout(String jid)
+  {
+  }
+
   /**
    * Forwards the message
    */

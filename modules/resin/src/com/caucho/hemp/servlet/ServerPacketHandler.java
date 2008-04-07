@@ -60,6 +60,7 @@ public class ServerPacketHandler
   private Hessian2StreamingOutput _out;
 
   private HmppServiceHandler _callbackHandler;
+  private AuthPacketHandler _authHandler;
 
   private String _jid;
 
@@ -79,13 +80,7 @@ public class ServerPacketHandler
     _out = new Hessian2StreamingOutput(os);
 
     _callbackHandler = new HmppServiceHandler(this, _out);
-
-    _session = _manager.createSession("anonymous@localhost", "test");
-    _session.setMessageHandler(_callbackHandler);
-    _session.setQueryHandler(_callbackHandler);
-    _session.setPresenceHandler(_callbackHandler);
-
-    _jid = _session.getJid();
+    _authHandler = new AuthPacketHandler(this, _callbackHandler);
   }
 
   protected String getJid()
@@ -114,7 +109,10 @@ public class ServerPacketHandler
       return false;
     }
 
-    packet.dispatch(this);
+    if (_session != null)
+      packet.dispatch(this);
+    else
+      packet.dispatch(_authHandler);
 
     return true;
   }
@@ -124,6 +122,20 @@ public class ServerPacketHandler
     throws IOException
   {
     return false;
+  }
+
+  String login(String uid, Serializable credentials, String resource)
+  {
+    String password = (String) credentials;
+    
+    _session = _manager.createSession(uid, password);
+    _session.setMessageHandler(_callbackHandler);
+    _session.setQueryHandler(_callbackHandler);
+    _session.setPresenceHandler(_callbackHandler);
+
+    _jid = _session.getJid();
+
+    return _jid;
   }
   
   /**

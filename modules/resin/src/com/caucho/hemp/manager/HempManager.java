@@ -35,6 +35,7 @@ import com.caucho.hmpp.HmppError;
 import com.caucho.hemp.*;
 import com.caucho.hemp.service.*;
 import com.caucho.hmpp.HmppResource;
+import com.caucho.hmpp.spi.*;
 import com.caucho.server.resin.*;
 import com.caucho.util.*;
 import java.util.*;
@@ -46,7 +47,7 @@ import java.io.Serializable;
 /**
  * Manager
  */
-public class HempManager implements HmppBroker {
+public class HempManager implements HmppBroker, HmppServer {
   private static final Logger log
     = Logger.getLogger(HempManager.class.getName());
   private static final L10N L = new L10N(HempManager.class);
@@ -58,6 +59,29 @@ public class HempManager implements HmppBroker {
 
   private String _domain = "localhost";
   private String _managerJid = "localhost";
+
+  private ResourceBroker []_brokerList = new ResourceBroker[0];
+
+  //
+  // configuration
+  //
+
+  /**
+   * Adds a broker implementation, e.g. the IM broker.
+   */
+  public void addBroker(ResourceBroker broker)
+  {
+    ResourceBroker []brokerList = new ResourceBroker[_brokerList.length + 1];
+    System.arraycopy(_brokerList, 0, brokerList, 0, _brokerList.length);
+    brokerList[brokerList.length - 1] = broker;
+    _brokerList = brokerList;
+    
+    broker.setServer(this);
+  }
+
+  //
+  // API
+  //
 
   /**
    * Creates a session
@@ -74,6 +98,16 @@ public class HempManager implements HmppBroker {
 
     if (log.isLoggable(Level.FINE))
       log.fine(session + " created");
+
+    int p = jid.indexOf('/');
+    if (p > 0) {
+      String owner = jid.substring(0, p);
+      
+      HmppResource resource = getResource(owner);
+
+      if (resource != null)
+	resource.onLogin(jid);
+    }
 
     return session;
   }
@@ -171,9 +205,9 @@ public class HempManager implements HmppBroker {
   /**
    * Presence to
    */
-  protected void presence(String to,
-			  String from,
-			  Serializable []data)
+  public void presence(String to,
+		       String from,
+		       Serializable []data)
   {
     HmppResource resource = getResource(to);
 
@@ -184,9 +218,9 @@ public class HempManager implements HmppBroker {
   /**
    * Presence probe
    */
-  protected void presenceProbe(String to,
-			       String from,
-			       Serializable []data)
+  public void presenceProbe(String to,
+			    String from,
+			    Serializable []data)
   {
     HmppResource resource = getResource(to);
 
@@ -197,9 +231,9 @@ public class HempManager implements HmppBroker {
   /**
    * Presence unavailable
    */
-  protected void presenceUnavailable(String to,
-				     String from,
-				     Serializable []data)
+  public void presenceUnavailable(String to,
+				  String from,
+				  Serializable []data)
   {
     HmppResource resource = getResource(to);
 
@@ -210,9 +244,9 @@ public class HempManager implements HmppBroker {
   /**
    * Presence subscribe
    */
-  protected void presenceSubscribe(String to,
-				   String from,
-				   Serializable []data)
+  public void presenceSubscribe(String to,
+				String from,
+				Serializable []data)
   {
     HmppResource resource = getResource(to);
 
@@ -223,9 +257,9 @@ public class HempManager implements HmppBroker {
   /**
    * Presence subscribed
    */
-  protected void presenceSubscribed(String to,
-				   String from,
-				   Serializable []data)
+  public void presenceSubscribed(String to,
+				 String from,
+				 Serializable []data)
   {
     HmppResource resource = getResource(to);
 
@@ -236,9 +270,9 @@ public class HempManager implements HmppBroker {
   /**
    * Presence unsubscribe
    */
-  protected void presenceUnsubscribe(String to,
-				     String from,
-				     Serializable []data)
+  public void presenceUnsubscribe(String to,
+				  String from,
+				  Serializable []data)
   {
     HmppResource resource = getResource(to);
 
@@ -249,9 +283,9 @@ public class HempManager implements HmppBroker {
   /**
    * Presence unsubscribed
    */
-  protected void presenceUnsubscribed(String to,
-				      String from,
-				      Serializable []data)
+  public void presenceUnsubscribed(String to,
+				   String from,
+				   Serializable []data)
   {
     HmppResource resource = getResource(to);
 
@@ -262,10 +296,10 @@ public class HempManager implements HmppBroker {
   /**
    * Presence error
    */
-  protected void presenceError(String to,
-			       String from,
-			       Serializable []data,
-			       HmppError error)
+  public void presenceError(String to,
+			    String from,
+			    Serializable []data,
+			    HmppError error)
   {
     HmppResource resource = getResource(to);
 
@@ -343,7 +377,7 @@ public class HempManager implements HmppBroker {
   /**
    * Sends a message
    */
-  void sendMessage(String to, String from, Serializable value)
+  public void sendMessage(String to, String from, Serializable value)
   {
     HmppResource resource = getResource(to);
 
@@ -356,13 +390,27 @@ public class HempManager implements HmppBroker {
   /**
    * Query an entity
    */
-  void queryGet(long id, String to, String from, Serializable query)
+  public void queryGet(long id, String to, String from, Serializable query)
   {
     HmppResource resource = getResource(to);
 
     if (resource != null) {
-      // XXX: error
-      resource.onQueryGet(id, to, from, query);
+      if (! resource.onQueryGet(id, to, from, query)) {
+	if (log.isLoggable(Level.FINE)) {
+	  log.fine(this + " queryGet to unknown feature to='" + to
+		   + "' from=" + from + " query='" + query + "'");
+	}
+	
+	String msg = L.l("'{0}' is an unknown feature for to='{1}'",
+			 query, to);
+    
+	HmppError error = new HmppError(HmppError.TYPE_CANCEL,
+					HmppError.FEATURE_NOT_IMPLEMENTED,
+					msg);
+	
+	queryError(id, from, to, query, error);
+      }
+
       return;
     }
 
@@ -383,7 +431,7 @@ public class HempManager implements HmppBroker {
   /**
    * Query an entity
    */
-  void querySet(long id, String to, String from, Serializable query)
+  public void querySet(long id, String to, String from, Serializable query)
   {
     HmppResource resource = getResource(to);
 
@@ -410,7 +458,7 @@ public class HempManager implements HmppBroker {
   /**
    * Query an entity
    */
-  void queryResult(long id, String to, String from, Serializable value)
+  public void queryResult(long id, String to, String from, Serializable value)
   {
     HmppResource resource = getResource(to);
 
@@ -423,11 +471,11 @@ public class HempManager implements HmppBroker {
   /**
    * Query an entity
    */
-  void queryError(long id,
-		  String to,
-		  String from,
-		  Serializable query,
-		  HmppError error)
+  public void queryError(long id,
+			 String to,
+			 String from,
+			 Serializable query,
+			 HmppError error)
   {
     HmppResource resource = getResource(to);
 
@@ -466,6 +514,13 @@ public class HempManager implements HmppBroker {
 
   protected HmppResource lookupResource(String jid)
   {
+    for (ResourceBroker broker : _brokerList) {
+      HmppResource resource = broker.lookupResource(jid);
+
+      if (resource != null)
+	return resource;
+    }
+
     return null;
   }
   
@@ -474,6 +529,21 @@ public class HempManager implements HmppBroker {
    */
   void close(String jid)
   {
+    int p = jid.indexOf('/');
+    if (p > 0) {
+      String owner = jid.substring(0, p);
+      
+      HmppResource resource = getResource(owner);
+
+      if (resource != null) {
+	try {
+	  resource.onLogout(jid);
+	} catch (Exception e) {
+	  log.log(Level.FINE, e.toString(), e);
+	}
+      }
+    }
+    
     synchronized (_resourceMap) {
       _resourceMap.remove(jid);
     }

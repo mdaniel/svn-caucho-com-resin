@@ -36,12 +36,12 @@ import java.util.logging.*;
 
 import com.caucho.hessian.io.*;
 import com.caucho.hmpp.*;
+import com.caucho.hmpp.spi.*;
 
 /**
  * Handles callbacks for a hmpp service
  */
-public class HmppServiceHandler
-  implements MessageHandler, QueryHandler, PresenceHandler
+public class HmppServiceHandler implements HmppServer, PacketHandler
 {
   private static final Logger log
     = Logger.getLogger(HmppServiceHandler.class.getName());
@@ -56,7 +56,7 @@ public class HmppServiceHandler
     _out = out;
   }
   
-  public void onMessage(String to, String from, Serializable value)
+  public void sendMessage(String to, String from, Serializable value)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -73,17 +73,10 @@ public class HmppServiceHandler
     }
   }
   
-  public Serializable onQuery(String to,
-			      String from,
-			      Serializable query)
-  {
-    return null;
-  }
-  
-  public boolean onQueryGet(long id,
-			    String to,
-			    String from,
-			    Serializable query)
+  public void queryGet(long id,
+		       String to,
+		       String from,
+		       Serializable query)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -98,14 +91,12 @@ public class HmppServiceHandler
       
       log.log(Level.FINE, e.toString(), e);
     }
-    
-    return true;
   }
   
-  public boolean onQuerySet(long id,
-			    String to,
-			    String from,
-			    Serializable query)
+  public void querySet(long id,
+		       String to,
+		       String from,
+		       Serializable query)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -120,14 +111,12 @@ public class HmppServiceHandler
       
       log.log(Level.FINE, e.toString(), e);
     }
-    
-    return true;
   }
   
-  public void onQueryResult(long id,
-			    String to,
-			    String from,
-			    Serializable value)
+  public void queryResult(long id,
+			  String to,
+			  String from,
+			  Serializable value)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -144,11 +133,11 @@ public class HmppServiceHandler
     }
   }
   
-  public void onQueryError(long id,
-			   String to,
-			   String from,
-			   Serializable query,
-			   HmppError error)
+  public void queryError(long id,
+			 String to,
+			 String from,
+			 Serializable query,
+			 HmppError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -167,9 +156,9 @@ public class HmppServiceHandler
   /**
    * General presence, for clients announcing availability
    */
-  public void onPresence(String to,
-			 String from,
-			 Serializable []data)
+  public void presence(String to,
+		       String from,
+		       Serializable []data)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -189,9 +178,9 @@ public class HmppServiceHandler
   /**
    * General presence, for clients announcing unavailability
    */
-  public void onPresenceUnavailable(String to,
-				    String from,
-				    Serializable []data)
+  public void presenceUnavailable(String to,
+				  String from,
+				  Serializable []data)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -211,9 +200,9 @@ public class HmppServiceHandler
   /**
    * Presence probe from the server to a client
    */
-  public void onPresenceProbe(String to,
-			      String from,
-			      Serializable []data)
+  public void presenceProbe(String to,
+			    String from,
+			    Serializable []data)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -233,9 +222,9 @@ public class HmppServiceHandler
   /**
    * A subscription request from a client
    */
-  public void onPresenceSubscribe(String to,
-				  String from,
-				  Serializable []data)
+  public void presenceSubscribe(String to,
+				String from,
+				Serializable []data)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -255,9 +244,9 @@ public class HmppServiceHandler
   /**
    * A subscription response to a client
    */
-  public void onPresenceSubscribed(String to,
-				   String from,
-				   Serializable []data)
+  public void presenceSubscribed(String to,
+				 String from,
+				 Serializable []data)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -277,9 +266,9 @@ public class HmppServiceHandler
   /**
    * An unsubscription request from a client
    */
-  public void onPresenceUnsubscribe(String to,
-				    String from,
-				    Serializable []data)
+  public void presenceUnsubscribe(String to,
+				  String from,
+				  Serializable []data)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -299,9 +288,9 @@ public class HmppServiceHandler
   /**
    * A unsubscription response to a client
    */
-  public void onPresenceUnsubscribed(String to,
-				     String from,
-				     Serializable []data)
+  public void presenceUnsubscribed(String to,
+				   String from,
+				   Serializable []data)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -321,10 +310,10 @@ public class HmppServiceHandler
   /**
    * An error response to a client
    */
-  public void onPresenceError(String to,
-			      String from,
-			      Serializable []data,
-			      HmppError error)
+  public void presenceError(String to,
+			    String from,
+			    Serializable []data,
+			    HmppError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -339,6 +328,135 @@ public class HmppServiceHandler
       
       log.log(Level.FINE, e.toString(), e);
     }
+  }
+  /**
+   * Callback to handle messages
+   * 
+   * @param to the target JID
+   * @param from the source JID
+   * @param value the message payload
+   */
+  public void onMessage(String to, String from, Serializable value)
+  {
+    sendMessage(to, from, value);
+  }
+  
+  public boolean onQueryGet(long id,
+			    String to,
+			    String from,
+			    Serializable query)
+  {
+    queryGet(id, to, from, query);
+    
+    return true;
+  }
+  
+  public boolean onQuerySet(long id,
+			    String to,
+			    String from,
+			    Serializable query)
+  {
+    querySet(id, to, from, query);
+    
+    return true;
+  }
+  
+  public void onQueryResult(long id,
+			    String to,
+			    String from,
+			    Serializable value)
+  {
+    querySet(id, to, from, value);
+  }
+  
+  public void onQueryError(long id,
+			   String to,
+			   String from,
+			   Serializable query,
+			   HmppError error)
+  {
+    queryError(id, to, from, query, error);
+  }
+  
+  /**
+   * General presence, for clients announcing availability
+   */
+  public void onPresence(String to,
+			 String from,
+			 Serializable []data)
+  {
+    presence(to, from, data);
+  }
+
+  /**
+   * General presence, for clients announcing unavailability
+   */
+  public void onPresenceUnavailable(String to,
+				    String from,
+				    Serializable []data)
+  {
+    presenceUnavailable(to, from, data);
+  }
+
+  /**
+   * Presence probe from the server to a client
+   */
+  public void onPresenceProbe(String to,
+			      String from,
+			      Serializable []data)
+  {
+    presenceProbe(to, from, data);
+  }
+
+  /**
+   * A subscription request from a client
+   */
+  public void onPresenceSubscribe(String to,
+				  String from,
+				  Serializable []data)
+  {
+    presenceSubscribe(to, from, data);
+  }
+
+  /**
+   * A subscription response to a client
+   */
+  public void onPresenceSubscribed(String to,
+				   String from,
+				   Serializable []data)
+  {
+    presenceSubscribed(to, from, data);
+  }
+
+  /**
+   * An unsubscription request from a client
+   */
+  public void onPresenceUnsubscribe(String to,
+				    String from,
+				    Serializable []data)
+  {
+    presenceUnsubscribe(to, from, data);
+  }
+
+  /**
+   * A unsubscription response to a client
+   */
+  public void onPresenceUnsubscribed(String to,
+				     String from,
+				     Serializable []data)
+  {
+    presenceUnsubscribed(to, from, data);
+  }
+
+  /**
+   * An error response to a client
+   */
+  public void onPresenceError(String to,
+			      String from,
+			      Serializable []data,
+			      HmppError error)
+  {
+    presenceError(to, from, data, error);
   }
 }
 

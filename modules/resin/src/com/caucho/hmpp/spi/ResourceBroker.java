@@ -27,57 +27,23 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmpp.disco;
+package com.caucho.hmpp.spi;
 
-import java.util.*;
+import com.caucho.hmpp.HmppBroker;
+import com.caucho.hmpp.HmppResource;
 
 /**
- * service discovery identity
- *
- * http://jabber.org/protocol/disco#info
- *
- * <code><pre>
- * element query {
- *   attribute node?,
- *   identity*,
- *   feature*
- * }
- *
- * element identity {
- *    attribute category,
- *    attribute name?,
- *    attribute type
- * }
- *
- * element feature {
- *    attribute _var
- * }
- * </pre></code>
+ * spi for a broker
  */
-public class DiscoFeature implements java.io.Serializable {
-  private String _var;
-  
-  public DiscoFeature()
-  {
-  }
-  
-  public DiscoFeature(String var)
-  {
-    _var = var;
-  }
-
+public interface ResourceBroker extends HmppServer {
   /**
-   * Returns the feature name
+   * Sets the server to send messages
    */
-  public String getVar()
-  {
-    return _var;
-  }
+  public void setServer(HmppServer server);
   
-  @Override
-  public String toString()
-  {
-    return (getClass().getSimpleName()
-	    + "[" + _var + "]");
-  }
+  /**
+   * Returns the resource with the given name, or null if this is not
+   * a known resource
+   */
+  public HmppResource lookupResource(String jid);
 }
