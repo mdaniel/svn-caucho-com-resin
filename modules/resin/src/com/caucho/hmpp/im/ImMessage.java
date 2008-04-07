@@ -33,28 +33,40 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Subscribe query
+ * IM message
  */
 public class ImMessage implements Serializable {
-  private String _value;
+  private String _to;
+  private String _from;
 
-  public ImMessage()
+  // chat, groupchat, headline, normal
+  private String _type;
+  
+  private String []_subject;
+  private String []_body;
+  private String _thread;
+
+  private Serializable []_extra;
+
+  private ImMessage()
   {
   }
 
-  public ImMessage(String value)
+  public ImMessage(String to, String from, String type)
   {
-    _value = value;
+    _to = to;
+    _from = from;
+    _type = type;
   }
 
-  public String getValue()
+  public String getType()
   {
-    return _value;
+    return _type;
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _value + "]";
+    return getClass().getSimpleName() + "[" + _type + "]";
   }
 }

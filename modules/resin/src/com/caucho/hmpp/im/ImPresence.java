@@ -38,12 +38,12 @@ import java.util.*;
 public class ImPresence implements Serializable {
   // "away", "chat", "dnd", "xa"
   private String _show;
-  private String _status;
+  private Text _status;
   private int _priority;
 
   private Serializable []_extra;
 
-  public ImPresence()
+  private ImPresence()
   {
   }
 

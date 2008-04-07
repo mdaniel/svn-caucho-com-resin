@@ -72,12 +72,13 @@ public class SimpleXMLAttribute extends SimpleXMLElement
     super(parent, name);
   }
   
-  protected SimpleXMLAttribute(SimpleXMLElement parent,
+  protected SimpleXMLAttribute(Env env,
+			       SimpleXMLElement parent,
 			       String name,
 			       String namespace,
 			       StringValue text)
   {
-    super(parent, name, namespace);
+    super(env, parent, name, namespace);
     
     _text = text;
   }
@@ -87,6 +88,17 @@ public class SimpleXMLAttribute extends SimpleXMLElement
   {
     if (_parent != null)
       _parent.addNamespace(prefix, namespace);
+  }
+
+  /**
+   * Adds a namespace attribute to this node.
+   */
+  @Override
+  protected void addNamespaceAttribute(Env env, String name,
+				       String namespace)
+  {
+    if (_parent != null)
+      _parent.addNamespaceAttribute(env, name, namespace);
   }
   
   /**
@@ -125,10 +137,11 @@ public class SimpleXMLAttribute extends SimpleXMLElement
   {
     sb.append(" ");
 
-    if (_prefix != null) {
+    if (_prefix != null && ! "".equals(_prefix)) {
       sb.append(_prefix);
       sb.append(":");
     }
+    
     sb.append(_name);
     sb.append("=\"");
     if (_text != null)

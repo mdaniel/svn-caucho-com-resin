@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -95,7 +95,8 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     _name = name;
   }
   
-  protected SimpleXMLElement(SimpleXMLElement parent,
+  protected SimpleXMLElement(Env env,
+			     SimpleXMLElement parent,
 			     String name,
 			     String namespace)
   {
@@ -110,12 +111,27 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     else
       _name = name;
     
+    if ("".equals(_name))
+      throw new IllegalArgumentException(L.l("name can't be empty"));
+      
+    
     _namespace = namespace;
 
-    if (namespace != null)
-      addNamespace(_prefix, namespace);
-    else
-      _prefix = null;
+    if (namespace != null) {
+      if (_prefix == null)
+	_prefix = "";
+      
+      if (! hasNamespace(_prefix, namespace)) {
+	String ns;
+	
+	if ("".equals(_prefix))
+	  ns = "xmlns";
+	else
+	  ns = "xmlns:" + _prefix;
+	
+	addNamespaceAttribute(env, ns, namespace);
+      }
+    }
   }
 
   protected void addNamespace(String prefix, String namespace)
@@ -134,6 +150,13 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
 
   protected boolean hasNamespace(String prefix, String namespace)
   {
+    String uri = getNamespace(prefix);
+
+    return uri != null && uri.equals(namespace);
+  }
+
+  protected String getNamespace(String prefix)
+  {
     if (prefix == null)
       prefix = "";
 
@@ -141,13 +164,13 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
       String uri = _namespaceMap.get(prefix);
 
       if (uri != null)
-	return uri.equals(namespace);
+	return uri;
     }
 
     if (_parent != null)
-      return _parent.hasNamespace(prefix, namespace);
+      return _parent.getNamespace(prefix);
     else
-      return false;
+      return null;
   }
   
   /**
@@ -208,6 +231,11 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     return _name;
   }
 
+  protected String getNamespace()
+  {
+    return _namespace != null ? _namespace : "";
+  }
+
   protected SimpleXMLElement getOwner()
   {
     return this;
@@ -250,7 +278,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     return prefix.equals(_prefix);
   }
 
-  private SimpleXMLElement getAttribute(String name)
+  protected SimpleXMLElement getAttribute(String name)
   {
     if (_attributes == null)
       return null;
@@ -303,12 +331,9 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
 
   /**
    * Adds an attribute to this node.
-   * 
-   * @param name
-   * @param value
-   * @param namespace
    */
-  public void addAttribute(String name,
+  public void addAttribute(Env env,
+			   String name,
                            StringValue value,
                            @Optional String namespace)
   {
@@ -316,7 +341,44 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
       _attributes = new ArrayList<SimpleXMLElement>();
 
     SimpleXMLAttribute attr
-      = new SimpleXMLAttribute(this, name, namespace, value);
+      = new SimpleXMLAttribute(env, this, name, namespace, value);
+    
+    _attributes.add(attr);
+  }
+
+  /**
+   * Adds a namespace attribute to this node.
+   */
+  protected void addNamespaceAttribute(Env env, String name,
+				       String namespace)
+  {
+    if (namespace == null || "".equals(namespace))
+      return;
+    
+    if (_attributes == null)
+      _attributes = new ArrayList<SimpleXMLElement>();
+
+    SimpleXMLAttribute attr
+      = new SimpleXMLAttribute(env, this, name, "",
+			       env.createString(namespace));
+
+    int p = name.indexOf(':');
+    if (p > 0) {
+      String prefix = name.substring(p + 1);
+      addNamespace(prefix, namespace);
+    }
+    else
+      addNamespace("", namespace);
+
+    for (int i = _attributes.size() - 1; i >= 0; i--) {
+      SimpleXMLElement oldAttr = _attributes.get(i);
+
+      if (oldAttr.getName().equals(name)
+	  && oldAttr.getNamespace().equals(namespace)) {
+	_attributes.set(i, attr);
+	return;
+      }
+    }
     
     _attributes.add(attr);
   }
@@ -346,12 +408,14 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
                                    String value,
                                    @Optional Value namespaceV)
   {
-    String namespace = null;
+    String namespace;
 
     if (! namespaceV.isNull())
       namespace = namespaceV.toString();
+    else
+      namespace = _namespace;
     
-    SimpleXMLElement child = new SimpleXMLElement(this, name, namespace);
+    SimpleXMLElement child = new SimpleXMLElement(env, this, name, namespace);
     child.setText(env.createString(value));
 
     addChild(child);
@@ -410,7 +474,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     if (! namespaceV.isNull())
       namespace = namespaceV.toString();
     
-    SimpleXMLElement result = new SimpleXMLElement(_parent, getName());
+    SimpleXMLElement result = new SimpleXMLChildren(this, getName());
 
     if (_attributes != null) {
       for (SimpleXMLElement attr : _attributes) {
@@ -451,8 +515,6 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
            SAXException
   {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    factory.setNamespaceAware(true);
-    
     DocumentBuilder builder = factory.newDocumentBuilder();
 
     Document document = null;
@@ -520,7 +582,8 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     // passed in namespace appears to have no effect in PHP, so just ignore
     // it by passing in null
     SimpleXMLElement elt;
-    elt = new SimpleXMLElement(parent,
+    elt = new SimpleXMLElement(env,
+			       parent,
 			       node.getNodeName(),
 			       node.getNamespaceURI());
 
@@ -535,12 +598,14 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
       for (int i = 0; i < length; i++) {
         Attr attr = (Attr)attrs.item(i);
 
-        if (attr.getName().startsWith("xmlns"))
-	  continue;
-
-        elt.addAttribute(attr.getName(),
-			 env.createString(attr.getValue()),
-			 attr.getNamespaceURI());
+        if (attr.getName().startsWith("xmlns")) {
+	  elt.addNamespaceAttribute(env, attr.getName(), attr.getValue());
+	}
+	else
+	  elt.addAttribute(env,
+			   attr.getName(),
+			   env.createString(attr.getValue()),
+			   attr.getNamespaceURI());
       }
     }
 
@@ -587,13 +652,20 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
   {
     sb.append("<");
 
-    if (_prefix != null) {
+    boolean hasPrefix = false;
+    
+    if (_prefix != null && ! "".equals(_prefix)
+	&& getNamespace(_prefix) != null)
+      hasPrefix = true;
+
+    if (hasPrefix) {
       sb.append(_prefix);
       sb.append(":");
     }
 
     sb.append(_name);
 
+    /*
     if (_namespaceMap != null) {
       for (Map.Entry<String,String> entry : _namespaceMap.entrySet()) {
 	if (! "".equals(entry.getKey())) {
@@ -607,6 +679,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
 	sb.append("\"");
       }
     }
+    */
     
     // add attributes, if any
     if (_attributes != null) {
@@ -644,10 +717,11 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     // add closing tag
     sb.append("</");
 
-    if (_prefix != null) {
+    if (hasPrefix) {
       sb.append(_prefix);
       sb.append(":");
     }
+    
     sb.append(_name);
     
     sb.append(">");
@@ -800,7 +874,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
    */
   public void __set(String name, StringValue value)
   {
-    addAttribute(name, value, null);
+    addAttribute(Env.getInstance(), name, value, null);
   }
   
   /**
