@@ -46,8 +46,10 @@ import javax.interceptor.*;
 public class StatelessLocalMethod extends BusinessMethodGenerator
 {
   private ApiClass _ejbClass;
+  private String _beanClassName;
   
   public StatelessLocalMethod(ApiClass ejbClass,
+			      String beanClassName,
 			      StatelessView view,
 			      ApiMethod apiMethod,
 			      Method implMethod,
@@ -55,6 +57,7 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
   {
     super(view, apiMethod, implMethod, index);
 
+    _beanClassName = beanClassName;
     _ejbClass = ejbClass;
   }
 
@@ -84,13 +87,15 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
   protected void generatePreCall(JavaWriter out)
     throws IOException
   {
-    /*
     out.println("Thread thread = Thread.currentThread();");
     out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
+
+    out.println();
+    out.println(_beanClassName + " bean = _ejb_begin();");
+    out.println();
     out.println("try {");
     out.pushDepth();
     out.println("thread.setContextClassLoader(_context.getStatelessServer().getClassLoader());");
-    */
   }
   
   /**
@@ -99,16 +104,16 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
   protected void generateThis(JavaWriter out)
     throws IOException
   {
-    out.print("this");
+    out.print("bean");
   }
   
   /**
    * Generates the underlying bean instance
    */
-  protected void generateSuper(JavaWriter out)
-    throws IOException
+  @Override
+  protected String getSuper()
   {
-    out.print("super");
+    return "bean";
   }
 
   /**
@@ -117,11 +122,13 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
   protected void generatePostCall(JavaWriter out)
     throws IOException
   {
-    /*
     out.popDepth();
     out.println("} finally {");
     out.println("  thread.setContextClassLoader(oldLoader);");
+
+    out.println("if (bean != null)");
+    out.println("  _ejb_free(bean);");
+    
     out.println("}");
-    */
   }
 }

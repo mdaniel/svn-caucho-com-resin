@@ -193,6 +193,8 @@ public class BusinessMethodGenerator implements EjbCallChain {
       return;
 
     _security.generatePrologue(out, prologueMap);
+
+    generateInterceptorTarget(out);
   }
 
   public final void generateConstructorTop(JavaWriter out, HashMap prologueMap)
@@ -219,7 +221,11 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     out.popDepth();
     out.println("}");
+  }
 
+  protected void generateInterceptorTarget(JavaWriter out)
+    throws IOException
+  {
     if (_interceptor.isEnhanced()) {
       out.println();
       out.print("private ");
@@ -245,7 +251,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
       out.println("{");
       out.pushDepth();
 
-      generateCall(out);
+      generateCall(out, "super");
 
       out.popDepth();
       out.println("}");
@@ -295,7 +301,11 @@ public class BusinessMethodGenerator implements EjbCallChain {
   protected void generateContent(JavaWriter out)
     throws IOException
   {
+    generatePreCall(out);
+    
     _security.generateCall(out);
+
+    generatePostCall(out);
   }
 
   /**
@@ -331,18 +341,21 @@ public class BusinessMethodGenerator implements EjbCallChain {
   public void generateCall(JavaWriter out)
     throws IOException
   {
+    generateCall(out, getSuper());
+  }
+
+  public void generateCall(JavaWriter out, String superVar)
+    throws IOException
+  {
     if (! void.class.equals(_implMethod.getReturnType())) {
       out.printClass(_implMethod.getReturnType());
       out.println(" result;");
     }
     
-    generatePreCall(out);
-    
     if (! void.class.equals(_implMethod.getReturnType()))
       out.print("result = ");
 
-    generateSuper(out);
-    out.print("." + _implMethod.getName() + "(");
+    out.print(superVar + "." + _implMethod.getName() + "(");
 
     Class []types = _implMethod.getParameterTypes();
     for (int i = 0; i < types.length; i++) {
@@ -353,8 +366,6 @@ public class BusinessMethodGenerator implements EjbCallChain {
     }
     
     out.println(");");
-
-    generatePostCall(out);
     
     if (! void.class.equals(_implMethod.getReturnType()))
       out.println("return result;");
@@ -371,10 +382,10 @@ public class BusinessMethodGenerator implements EjbCallChain {
   /**
    * Generates the underlying bean instance
    */
-  protected void generateSuper(JavaWriter out)
+  protected String getSuper()
     throws IOException
   {
-    out.print("super");
+    return "super";
   }
 
   /**

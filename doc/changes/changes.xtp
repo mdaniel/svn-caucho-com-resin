@@ -12,6 +12,9 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>ejb: stateless calls to self do not invoke interceptors (#2529, rep by Daniel D'Alessandro)</li>
+<li>win32 service: nullpointer due to PATH changes to support win64 (#2470, rep by Sharad Kelkar)</li>
+<li>versioning: nullpointer in WebApp.stop() with versioning (#2565, rep by stbu)</li>
 <li>amber: class changes not picked up for reevaluation (#2562, rep by tsv)</li>
 <li>loader: restricted synchronized block on DynamicClassLoader to reduce blocking (rep by Knut Forkalsrud)</li>
 <li>(2008-03-31) config: connection-max and keepalive-select-max should default to infinite (#2555, rep by paulberto)</li>

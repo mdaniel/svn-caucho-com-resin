@@ -96,10 +96,9 @@ public class StatelessCreateMethod extends BusinessMethodGenerator
   /**
    * Generates the underlying bean instance
    */
-  protected void generateSuper(JavaWriter out)
-    throws IOException
+  protected String getSuper()
   {
-    out.print("bean");
+    return "bean";
   }
 
   @Override

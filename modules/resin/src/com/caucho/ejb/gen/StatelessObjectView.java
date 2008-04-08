@@ -221,7 +221,7 @@ public class StatelessObjectView extends StatelessView {
     out.popDepth();
     out.println("}");
 
-    generateBusinessMethods(out);
+    // generateBusinessMethods(out);
     
     out.popDepth();
     out.println("}");
@@ -240,7 +240,16 @@ public class StatelessObjectView extends StatelessView {
     out.println(", StatelessProvider");
     out.println("{");
     out.pushDepth();
+
+    // out.println();
+    // out.println("com.caucho.ejb.xa.EjbTransactionManager _xaManager;");
+
+    out.println();
+    out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
+    out.println("  = new com.caucho.ejb3.xa.XAManager();");
     
+    
+    out.println();
     out.println("private " + getBean().getClassName() + " _context;");
     out.println("private " + getBeanClassName() + " []_freeBeanStack"
 		+ " = new " + getBeanClassName() + "[16];");
@@ -262,6 +271,9 @@ public class StatelessObjectView extends StatelessView {
 
     generateProxyPool(out);
 
+    generateBusinessMethods(out);
+
+    /*
     for (BusinessMethodGenerator bizMethod : getMethods()) {
       out.println();
 
@@ -287,6 +299,7 @@ public class StatelessObjectView extends StatelessView {
       out.popDepth();
       out.println("}");
     }
+    */
     
     out.popDepth();
     out.println("}");

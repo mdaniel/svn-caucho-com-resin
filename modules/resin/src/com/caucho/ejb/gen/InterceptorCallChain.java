@@ -324,7 +324,9 @@ public class InterceptorCallChain extends AbstractCallChain {
     out.println("try {");
     out.pushDepth();
 
-    out.println("if (" + _uniqueName + "_objectChain == null) {");
+    out.print("if (");
+    generateThis(out);
+    out.println("." + _uniqueName + "_objectChain == null) {");
     out.pushDepth();
     generateObjectChain(out);
     out.popDepth();
@@ -342,11 +344,16 @@ public class InterceptorCallChain extends AbstractCallChain {
     }
     
     out.print("new com.caucho.ejb3.gen.InvocationContextImpl(");
-    out.print("this, ");
-    out.print(_uniqueName + "_method, ");
-    out.print(_uniqueName + "_implMethod, ");
-    out.print(_uniqueName + "_methodChain, ");
-    out.print(_uniqueName + "_objectChain, ");
+    generateThis(out);
+    out.print(", ");
+    generateThis(out);
+    out.print("." + _uniqueName + "_method, ");
+    generateThis(out);
+    out.print("." + _uniqueName + "_implMethod, ");
+    generateThis(out);
+    out.print("." + _uniqueName + "_methodChain, ");
+    generateThis(out);
+    out.print("." + _uniqueName + "_objectChain, ");
     out.print("new Object[] { ");
     for (int i = 0; i < _implMethod.getParameterTypes().length; i++) {
       out.print("a" + i + ", ");
@@ -383,6 +390,12 @@ public class InterceptorCallChain extends AbstractCallChain {
     }
     
     out.println("}");
+  }
+
+  protected void generateThis(JavaWriter out)
+    throws IOException
+  {
+    _next.generateThis(out);
   }
 
   private boolean isMostGeneralException(Class []exnList, Class cl)
@@ -436,14 +449,16 @@ public class InterceptorCallChain extends AbstractCallChain {
   protected void generateObjectChain(JavaWriter out)
     throws IOException
   {
-    out.print(_uniqueName + "_objectChain = new Object[] {");
+    generateThis(out);
+    out.print("." + _uniqueName + "_objectChain = new Object[] { ");
 
     for (Class iClass : _interceptors) {
-      out.print(_interceptorVarMap.get(iClass) + ", ");
+      generateThis(out);
+      out.print("." + _interceptorVarMap.get(iClass) + ", ");
     }
 
     if (getAroundInvokeMethod() != null) {
-      _next.generateThis(out);
+      generateThis(out);
       out.print(", ");
     }
     

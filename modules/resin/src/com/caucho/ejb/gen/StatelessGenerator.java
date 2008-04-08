@@ -142,11 +142,10 @@ public class StatelessGenerator extends SessionGenerator {
 
     out.println("protected static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(\"" + getFullClassName() + "\");");
     out.println("protected static final boolean __caucho_isFiner = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
-    out.println();
-    out.println("com.caucho.ejb.xa.EjbTransactionManager _xaManager;");
 
     String beanClass = getEjbClass().getName();
 
+    out.println();
     out.println("private " + beanClass + " []_freeBeanStack = new "
 		+ beanClass + "[" + freeStackMax + "];");
     out.println("private int _freeBeanTop;");
@@ -156,7 +155,7 @@ public class StatelessGenerator extends SessionGenerator {
     out.pushDepth();
     
     out.println("super(server);");
-    out.println("_xaManager = server.getTransactionManager();");
+    //out.println("_xaManager = server.getTransactionManager();");
 
     for (View view : getViews()) {
       view.generateContextHomeConstructor(out);

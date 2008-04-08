@@ -155,6 +155,7 @@ public class StatelessView extends View {
 
     StatelessLocalMethod bizMethod
       = new StatelessLocalMethod(getEjbClass(),
+				 getBeanClassName(),
 				 this,
 				 apiMethod,
 				 implMethod.getMethod(),

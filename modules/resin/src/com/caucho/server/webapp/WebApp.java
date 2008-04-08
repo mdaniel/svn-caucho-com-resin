@@ -2701,22 +2701,26 @@ public class WebApp extends ServletContextImpl
       SessionManager sessionManager = _sessionManager;
       _sessionManager = null;
 
-      if (sessionManager != null &&
-          (! _isInheritSession || _controller.getParent() == null))
+      if (sessionManager != null
+	  && (! _isInheritSession || _controller.getParent() == null))
         sessionManager.close();
 
-      _servletManager.destroy();
-      _filterManager.destroy();
+      if (_servletManager != null)
+	_servletManager.destroy();
+      if (_filterManager != null)
+	_filterManager.destroy();
 
       // server/10g8 -- webApp listeners after session
-      for (int i = _webAppListeners.size() - 1; i >= 0; i--) {
-        ServletContextListener listener = _webAppListeners.get(i);
+      if (_webAppListeners != null) {
+	for (int i = _webAppListeners.size() - 1; i >= 0; i--) {
+	  ServletContextListener listener = _webAppListeners.get(i);
 
-        try {
-          listener.contextDestroyed(event);
-        } catch (Exception e) {
-          log.log(Level.WARNING, e.toString(), e);
-        }
+	  try {
+	    listener.contextDestroyed(event);
+	  } catch (Exception e) {
+	    log.log(Level.WARNING, e.toString(), e);
+	  }
+	}
       }
 
       try {
