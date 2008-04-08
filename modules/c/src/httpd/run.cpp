@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2006 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1999-2008 Caucho Technology.  All rights reserved.
  *
  * This file is part of Resin(R) Open Source
  *
@@ -59,15 +59,32 @@ set_standalone(int is_standalone)
 	g_is_standalone = is_standalone;
 }
 
+int
+resin_is_service()
+{
+	return g_is_service;
+}
+
+static void
+write_event_log(char *msg)
+{
+
+}
+
 void
 die(char *msg, ...)
 {
 	va_list args;
 	char buf[8192];
+
 	va_start(args, msg);
 	vsprintf(buf, msg, args);
 	va_end(args);
-	if (err) {
+
+	if (0 && resin_is_service()) {
+		write_event_log(buf);
+	}
+	else if (err) {
 		fprintf(err, "%s\n", buf);
 		fflush(err);
 	}
@@ -264,6 +281,8 @@ usage(char *name)
 	  "  -install-as <name> : install as a named NT service\n"
 	  "  -remove            : remove as NT service\n"
 	  "  -remove-as <name>  : remove as a named NT service\n"
+	  "  -user <name>       : specify username for NT service\n"
+	  "  -password <pwd>    : specify password for NT\n"
           "  -conf <resin.conf> : alternate configuration file\n",
       name);
 }
@@ -586,7 +605,6 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 		stdout_file = stderr_file;
 	if (stdout_file && ! stderr_file)
 		stderr_file = stdout_file;
-
 	if (! g_is_standalone) {
 		AllocConsole();
 	}
@@ -618,8 +636,10 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 	
 	int fdOut = _open_osfhandle((long) GetStdHandle(STD_OUTPUT_HANDLE), _O_TEXT);
 	int fdErr = _open_osfhandle((long) GetStdHandle(STD_ERROR_HANDLE), _O_TEXT);
-	out = fdopen(fdOut, "w");
-	err = fdopen(fdErr, "w");
+	if (fdOut >= 0)
+		out = fdopen(fdOut, "w");
+	if (fdErr >= 0)
+		err = fdopen(fdErr, "w");
 
 	if (out && err) {
   	  *stdout = *out;
@@ -642,6 +662,7 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 	if (java_home) {
 		if (! java_exe)
 			java_exe = get_java_exe(java_home);
+
 		args = set_jdk_args(java_exe, cp, resin_home, server_root, jit, main, resin_argc, resin_argv, java_argv);
 	}
 	else {
@@ -650,7 +671,8 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 		args = set_ms_args(java_exe, cp, server_root, jit, main, resin_argc, resin_argv, java_argv);
 	}
 
-	sprintf(buf, "PATH=%s;%s\\bin;%s\\win32;%s\\win64;\\openssl\\bin", getenv("PATH"), resin_home, resin_home);
+	sprintf(buf, "PATH=%s;%s\\bin;%s\\win32;%s\\win64;\\openssl\\bin", 
+		    getenv("PATH"), resin_home, resin_home, resin_home);
 	putenv(buf);
 
 	if (! SetCurrentDirectory(server_root)) {

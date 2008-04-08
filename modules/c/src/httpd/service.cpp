@@ -19,6 +19,7 @@ static char *g_user;
 static char *g_password;
 static int g_argc;
 static char **g_argv;
+static TCHAR g_error[1024];
 
 extern FILE *err;
 extern FILE *out;
@@ -29,6 +30,17 @@ extern void stop_server();
 
 static WSAEVENT wait_event;
 
+static TCHAR *
+format_error(int error)
+{
+	TCHAR *buf = g_error;
+
+	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
+		NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		buf, 1024, NULL);
+
+	return g_error;
+}
 
 static int 
 report_status(int currentState, int exitCode, int waitHint)
@@ -83,6 +95,7 @@ stop_resin()
  */
 static VOID WINAPI service_ctrl(DWORD dwCtrlCode)
 {
+	log("CTRL %d\n", dwCtrlCode);
 	switch(dwCtrlCode) {
         // Stop the service.
         //
@@ -110,7 +123,7 @@ service_main(int argc, char **argv)
 	int exit_status = 0;
 
 	g_status_handle = RegisterServiceCtrlHandler(g_name, service_ctrl);
-
+log("HANDLER %x\n", g_status_handle);
 	if (! g_status_handle) {
 		log("service has no handler\n");
 		return;
@@ -178,7 +191,8 @@ start_service(char *name, char *full_name, char *class_name, int argc, char **ar
 		is_service = 1;
 
 	if (is_service && ! StartServiceCtrlDispatcher(dispatch))
-		die("Can't start NT service %s.\n", name);
+		die("Can't start NT service %s.\n%d: %s\n", name,
+		    GetLastError(), format_error(GetLastError()));
 
 	return is_service;
 }
@@ -241,9 +255,11 @@ install_service(char *name, char *full_name, char *user, char *password,
 	TCHAR args[BUF_SIZE];
 	TCHAR t_user[BUF_SIZE];
 	TCHAR t_password[BUF_SIZE];
+	int error;
 
     if (! GetModuleFileName(NULL, path, sizeof(path)))
-      die("Can't get module executable");
+		die("Can't get module executable\n%d: %s",
+	      GetLastError(), format_error(GetLastError()));
 
 	wsprintf(args, "\"%s\" -service", path);
 
@@ -279,7 +295,8 @@ install_service(char *name, char *full_name, char *user, char *password,
 			    SC_MANAGER_ALL_ACCESS);   // access required
 
    if (! manager)
-       die("Can't open service manager");
+	   die("Can't open service manager\n%d: %s", 
+	       GetLastError(), format_error(GetLastError()));
 	/*
    if (! user) {
 	   DWORD len = 256;
@@ -318,6 +335,8 @@ install_service(char *name, char *full_name, char *user, char *password,
 			user,                       // LocalSystem account
 			password);                      // no password
 
+	error = GetLastError();
+	format_error(GetLastError());
 	// Don't automatically start the service
  	if (service)
 		CloseServiceHandle(service);
@@ -325,7 +344,8 @@ install_service(char *name, char *full_name, char *user, char *password,
     CloseServiceHandle(manager);
 
     if (! service)
-      die("Can't install \"%s\" as an NT service", name);
+		die("Can't install \"%s\" as an NT service\n%d: %s",
+	      name, error, g_error);
 }
 
 void remove_service(char *name)
@@ -340,13 +360,15 @@ void remove_service(char *name)
                         SC_MANAGER_ALL_ACCESS   // access required
                         );
     if (! manager) {
-      die("Can't open service manager");
+		die("Can't open service manager\n%d: %s", GetLastError(),
+		  format_error(GetLastError()));
     }
 
     service = OpenService(manager, name, SERVICE_ALL_ACCESS);
 
     if (service == NULL)
-      die("Can't open service");
+		die("Can't open service\n%d: %s", GetLastError(),
+	      format_error(GetLastError()));
 
     // try to stop the service
     if (ControlService(service, SERVICE_CONTROL_STOP, &status)) {
@@ -358,9 +380,12 @@ void remove_service(char *name)
 
     // now remove the service
     if (! DeleteService(service)) {
+		int error = GetLastError();
+		format_error(error);
+
       CloseServiceHandle(service);
       CloseServiceHandle(manager);
-      die("Can't remove %s as an NT service", name);
+	  die("Can't remove %s as an NT service\n%d: %s", name, error, g_error);
     }
 
     CloseServiceHandle(service);

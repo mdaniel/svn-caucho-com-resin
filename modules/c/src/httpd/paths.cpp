@@ -65,13 +65,13 @@ log(char *fmt, ...)
 	va_list arg;
 	va_start(arg, fmt);
 
-	if (err) {
+	if (0 && err) {
 		if (fmt)
 			vfprintf(err, fmt, arg);
 		fflush(err);
 	}
 	else {
-		FILE *file = fopen("/temp/foo.log", "a+");
+		FILE *file = fopen("e:/temp/foo.log", "a+");
 		if (file && fmt) {
 			vfprintf(file, fmt, arg);
 			fclose(file);
