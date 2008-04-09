@@ -57,6 +57,7 @@ class DropQuery extends Query {
   /**
    * Executes the query.
    */
+  @Override
   public void execute(QueryContext queryContext, Transaction xa)
     throws SQLException
   {

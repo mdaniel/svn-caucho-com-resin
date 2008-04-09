@@ -868,7 +868,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("try {");
     out.pushDepth();
 
-    out.println("java.sql.PreparedStatement pstmt = aConn.prepareInsertStatement(sql);");
+    out.println("java.sql.PreparedStatement pstmt = aConn.prepareInsertStatement(sql, false);");
 
     out.println("int index = 1;");
     getRelatedType().getId().generateSet(out, "pstmt", "index", "this");

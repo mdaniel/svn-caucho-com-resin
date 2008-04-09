@@ -74,8 +74,6 @@ abstract public class Block implements SyncCacheListener {
 
     if (log.isLoggable(Level.FINEST))
       log.finest(this + " create");
-    
-    //System.out.println(this + " CREATE");
   }
 
   /**
@@ -106,7 +104,7 @@ abstract public class Block implements SyncCacheListener {
       _useCount++;
       
       if (log.isLoggable(Level.FINEST))
-	log.finest(this + " allocate");
+	log.finest(this + " allocate (" + _useCount + ")");
       
       //System.out.println(this + " ALLOCATE " + _useCount);
 
@@ -201,8 +199,12 @@ abstract public class Block implements SyncCacheListener {
       if (dirtyMax <= dirtyMin)
 	return;
 
+      // temp alloc for sync, matched by the free() below
       _useCount++;
       _isValid = true;
+      
+      if (log.isLoggable(Level.FINEST))
+	log.finest("write alloc " + this + " (" + _useCount + ")");
     }
 
     try {
@@ -292,7 +294,7 @@ abstract public class Block implements SyncCacheListener {
   {
     synchronized (this) {
       if (log.isLoggable(Level.FINEST))
-	log.finest(this + " free");
+	log.finest(this + " free (" + _useCount + ")");
 
       _useCount--;
       

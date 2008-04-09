@@ -80,8 +80,10 @@ public class HostController
     = new ArrayList<String>();
   private ArrayList<Pattern> _entryHostAliasRegexps
     = new ArrayList<Pattern>();
-  
+
+  // includes aliases from the Host, e.g. server/1f35
   private ArrayList<String> _hostAliases = new ArrayList<String>();
+  private ArrayList<Pattern> _hostAliasRegexps = new ArrayList<Pattern>();
 
   // The host variables.
   private final Var _hostVar = new Var();
@@ -213,6 +215,15 @@ public class HostController
   }
 
   /**
+   * Adds an extension host alias, e.g. from a resin:import
+   */
+  public void addExtHostAliasRegexp(Pattern name)
+  {
+    if (! _hostAliasRegexps.contains(name))
+      _hostAliasRegexps.add(name);
+  }
+
+  /**
    * Sets the regexp pattern
    */
   public void setRegexp(Pattern regexp)
@@ -281,6 +292,7 @@ public class HostController
 	aliases = getConfig().getHostAliases();
 
 	_entryHostAliasRegexps.addAll(getConfig().getHostAliasRegexps());
+	_hostAliasRegexps.addAll(getConfig().getHostAliasRegexps());
       }
       
       for (int i = 0; aliases != null && i < aliases.size(); i++) {
@@ -328,8 +340,8 @@ public class HostController
 	return true;
     }
 
-    for (int i = _entryHostAliasRegexps.size() - 1; i >= 0; i--) {
-      Pattern alias = _entryHostAliasRegexps.get(i);
+    for (int i = _hostAliasRegexps.size() - 1; i >= 0; i--) {
+      Pattern alias = _hostAliasRegexps.get(i);
 
       if (alias.matcher(name).find())
 	return true;
@@ -456,7 +468,9 @@ public class HostController
     if (! oldController.getHostName().equals(""))
       _entryHostAliases.add(oldController.getHostName());
     _entryHostAliasRegexps.addAll(oldController._entryHostAliasRegexps);
+    
     _hostAliases.addAll(oldController._hostAliases);
+    _hostAliasRegexps.addAll(oldController._hostAliasRegexps);
 
     if (_regexp == null) {
       _regexp = oldController._regexp;

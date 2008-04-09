@@ -417,6 +417,8 @@ class WatchdogProcess
     
     // This is needed for JMX to work correctly.
     list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
+    // #2567
+    list.add("-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl");
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());
 

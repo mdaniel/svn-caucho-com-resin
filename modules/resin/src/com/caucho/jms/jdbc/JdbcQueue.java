@@ -35,7 +35,7 @@ import com.caucho.jms.connection.MessageConsumerImpl;
 import com.caucho.jms.connection.JmsSession;
 import com.caucho.jms.message.MessageImpl;
 import com.caucho.jms.queue.AbstractQueue;
-import com.caucho.log.Log;
+import com.caucho.jms.queue.PollingQueue;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.jdbc.*;
@@ -53,7 +53,7 @@ import java.util.logging.*;
 /**
  * A jdbc queue.
  */
-public class JdbcQueue extends AbstractQueue {
+public class JdbcQueue extends PollingQueue {
   static final Logger log = Logger.getLogger(JdbcQueue.class.getName());
   static final L10N L = new L10N(JdbcQueue.class);
   
@@ -397,6 +397,57 @@ public class JdbcQueue extends AbstractQueue {
    */
   protected void purgeExpiredMessages()
   {
+  }
+
+  protected void pollImpl()
+  {
+    boolean hasValue = false;
+    
+    try {
+      long minId = -1;
+
+      DataSource dataSource = _jdbcManager.getDataSource();
+      String messageTable = _jdbcManager.getMessageTable();
+      JdbcMessage jdbcMessage = _jdbcManager.getJdbcMessage();
+    
+      Connection conn = dataSource.getConnection();
+      try {
+	String sql = ("SELECT m_id" +
+		      " FROM " + messageTable +
+		      " WHERE ?<m_id AND queue=?" +
+		      "   AND consumer IS NULL AND ?<=expire" +
+		      " ORDER BY m_id");
+
+	PreparedStatement selectStmt = conn.prepareStatement(sql);
+
+	try {
+	  selectStmt.setFetchSize(1);
+	} catch (Throwable e) {
+	  log.log(Level.FINER, e.toString(), e);
+	}
+
+	selectStmt.setLong(1, minId);
+	selectStmt.setInt(2, getId());
+	selectStmt.setLong(3, Alarm.getCurrentTime());
+
+	MessageImpl msg = null;
+
+	ResultSet rs = selectStmt.executeQuery();
+	if (rs.next()) {
+	  hasValue = true;
+	}
+
+	rs.close();
+      } finally {
+	conn.close();
+      }
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    System.out.println("V: " + hasValue);
+    if (hasValue)
+      notifyMessageAvailable();
   }
 
   /**

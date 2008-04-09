@@ -313,6 +313,10 @@ public class UserConnection implements java.sql.Connection {
       throw e;
     }
 
+    if (stmt == null)
+      throw new IllegalStateException(L.l("prepareStatement returned empty SQL\n{0}",
+					  sql));
+
     addStatement(stmt);
 
     if (_mConn.isWrapStatements())

@@ -64,26 +64,6 @@ abstract public class CascadableField extends AbstractField {
     super(sourceType, name);
 
     _cascadeTypes = cascadeTypes;
-
-    if (log.isLoggable(Level.FINER)) {
-      String s = "";
-
-      if (_cascadeTypes != null) {
-        boolean isFirst = true;
-
-        for (int i = _cascadeTypes.length - 1; i >= 0; i--) {
-          if (isFirst)
-            isFirst = false;
-          else
-            s += ", ";
-
-          s += _cascadeTypes[i];
-        }
-      }
-
-      log.log(Level.FINER, L.l("CascadableField.<constructor> class: '{0}' cascade: '{1}'",
-                               this.getClass().getName(), s));
-    }
   }
 
   /**

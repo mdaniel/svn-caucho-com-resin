@@ -46,6 +46,8 @@
   <servlet-mapping url-pattern="*.jspf" servlet-name="resin-jsp"/>
   <servlet-mapping url-pattern="*.jspx" servlet-name="resin-jspx"/>
   
+  <servlet-mapping url-pattern="*.php" servlet-name="resin-php"/>
+
   <servlet-mapping url-pattern="/" servlet-name="resin-file"/>
 
   <servlet servlet-name="j_security_check"

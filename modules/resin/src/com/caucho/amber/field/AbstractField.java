@@ -92,7 +92,7 @@ abstract public class AbstractField implements AmberField {
     setName(name);
     
     if (log.isLoggable(Level.FINER))
-      log.finer(this + " created");
+      log.finer(_sourceType + " field " + this);
   }
 
   /**

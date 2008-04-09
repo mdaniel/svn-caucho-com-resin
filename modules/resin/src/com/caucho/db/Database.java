@@ -253,6 +253,7 @@ public class Database
 
     synchronized (this) {
       table = _tables.get(name);
+      
       if (table == null)
 	throw new SQLException(L.l("Table {0} does not exist.  DROP TABLE can only drop an existing table.",
 				   name));

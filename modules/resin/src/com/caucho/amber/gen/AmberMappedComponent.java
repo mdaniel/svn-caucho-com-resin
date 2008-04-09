@@ -1285,7 +1285,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
 
     out.println();
-    out.println("java.sql.PreparedStatement pstmt = aConn.prepareInsertStatement(sql);");
+    if (isAutoInsert)
+      out.println("java.sql.PreparedStatement pstmt = aConn.prepareInsertStatement(sql, true);");
+    else
+      out.println("java.sql.PreparedStatement pstmt = aConn.prepareInsertStatement(sql, false);");
 
     out.println("int index = 1;");
 

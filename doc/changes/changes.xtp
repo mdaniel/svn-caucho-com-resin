@@ -12,6 +12,11 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>host: allow host-alias-regexp in host.xml (#2582, rep by kenjrwalker)</li>
+<li>amber: multiple @OneToMany annotations were ignored (#2586, rep by Charles Lyons)</li>
+<li>amber: mysql shouldn't use RETURN_GENERATED_KEYS when no @GeneratedId (#2579, rep by Charles Lyon)</li>
+<li>admin: update log_ reloading for remove/restart (#2568, rep by wesley)</li>
+<li>boot: jmx defines must be set by boot process (#2567)</li>
 <li>ejb: stateless calls to self do not invoke interceptors (#2529, rep by Daniel D'Alessandro)</li>
 <li>win32 service: nullpointer due to PATH changes to support win64 (#2470, rep by Sharad Kelkar)</li>
 <li>versioning: nullpointer in WebApp.stop() with versioning (#2565, rep by stbu)</li>

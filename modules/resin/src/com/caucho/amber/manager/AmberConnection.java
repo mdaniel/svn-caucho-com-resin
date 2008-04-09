@@ -2062,7 +2062,8 @@ public class AmberConnection
   /**
    * Prepares an insert statement.
    */
-  public PreparedStatement prepareInsertStatement(String sql)
+  public PreparedStatement prepareInsertStatement(String sql,
+						  boolean isGeneratedId)
     throws SQLException
   {
     PreparedStatement pstmt = null;
@@ -2080,14 +2081,12 @@ public class AmberConnection
 	conn = _statements.get(0).getConnection();
       }
 
-      if (_persistenceUnit.hasReturnGeneratedKeys())
+      if (isGeneratedId && _persistenceUnit.hasReturnGeneratedKeys())
 	pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
       else {
 	// XXX: avoids locking issues.
 	// See com.caucho.sql.UserConnection
-	pstmt = conn.prepareStatement(sql,
-				      ResultSet.TYPE_FORWARD_ONLY,
-				      ResultSet.CONCUR_READ_ONLY);
+	pstmt = conn.prepareStatement(sql);
       }
 
       _statements.add(pstmt);

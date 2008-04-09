@@ -404,7 +404,13 @@ public class Store {
     throws SQLException
   {
     try {
-      _path.remove();
+      Path path = _path;
+      _path = null;
+
+      close();
+
+      if (path != null)
+	path.remove();
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);
     }

@@ -642,7 +642,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     RuntimeException exn = null;
 
-    if (_depCompletions.size() > 0) {
+    while (_depCompletions.size() > 0) {
       Completion completion = _depCompletions.remove(0);
 
       try {

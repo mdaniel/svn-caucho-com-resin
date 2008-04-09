@@ -52,6 +52,7 @@ import com.caucho.vfs.Path;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.*;
 
 /**
  * Resin's virtual host implementation.
@@ -283,6 +284,18 @@ public class Host extends WebAppContainer
   public ArrayList<String> getAliasList()
   {
     return _aliasList;
+  }
+
+  /**
+   * Adds an alias.
+   */
+  public void addHostAliasRegexp(String name)
+  {
+    name = name.trim();
+
+    Pattern pattern = Pattern.compile(name, Pattern.CASE_INSENSITIVE);
+    
+    _controller.addExtHostAliasRegexp(pattern);
   }
 
   /**
