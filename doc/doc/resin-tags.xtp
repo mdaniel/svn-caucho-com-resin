@@ -455,34 +455,34 @@ and reports errors as necessary.</p>
   <th>Default</th>
 </tr>
 <tr>
-  <td>cpu-load-exit-threshold</th>
-  <td>CPU load triggering a Resin exit (and restart)</th>
-  <td>100.0</th>
+  <td>cpu-load-exit-threshold</td>
+  <td>CPU load triggering a Resin exit (and restart)</td>
+  <td>100.0</td>
 </tr>
 <tr>
-  <td>cpu-load-log-info-threshold</th>
-  <td>CPU load triggering a log message at the info level</th>
-  <td>1.0</th>
+  <td>cpu-load-log-info-threshold</td>
+  <td>CPU load triggering a log message at the info level</td>
+  <td>1.0</td>
 </tr>
 <tr>
-  <td>cpu-load-log-warning-threshold</th>
-  <td>CPU load triggering a log message at the warning level</th>
-  <td>5.0</th>
+  <td>cpu-load-log-warning-threshold</td>
+  <td>CPU load triggering a log message at the warning level</td>
+  <td>5.0</td>
 </tr>
 <tr>
-  <td>cpu-load-log-thread-dump-threshold</th>
-  <td>CPU load triggering thread dump to the log</th>
-  <td>5.0</th>
+  <td>cpu-load-log-thread-dump-threshold</td>
+  <td>CPU load triggering thread dump to the log</td>
+  <td>5.0</td>
 </tr>
 <tr>
-  <td>sample-period</th>
-  <td>how often to sample the statistics</th>
-  <td>60s</th>
+  <td>sample-period</td>
+  <td>how often to sample the statistics</td>
+  <td>60s</td>
 </tr>
 <tr>
-  <td>thread-dump-interval</th>
-  <td>minimum time between thread dumps</th>
-  <td>15m</th>
+  <td>thread-dump-interval</td>
+  <td>minimum time between thread dumps</td>
+  <td>15m</td>
 </tr>
 </deftable>
 
