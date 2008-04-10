@@ -719,4 +719,9 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       return -1;
     }
   }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _configDirectory + "]";
+  }
 }

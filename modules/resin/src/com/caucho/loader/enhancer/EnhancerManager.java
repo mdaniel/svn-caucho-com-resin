@@ -71,8 +71,8 @@ public class EnhancerManager implements ClassFileTransformer
   private JavaClassLoader _jClassLoader = new JavaClassLoader();
   private JavaClassGenerator _javaGen = new JavaClassGenerator();
   
-  private ArrayList<ClassEnhancer> _classEnhancerList =
-    new ArrayList<ClassEnhancer>();
+  private ArrayList<ClassEnhancer> _classEnhancerList
+    = new ArrayList<ClassEnhancer>();
   
   private EnhancerManager(ClassLoader loader)
   {
@@ -85,10 +85,11 @@ public class EnhancerManager implements ClassFileTransformer
 
     if (loader != null)
       _parent = getLocalEnhancer(loader.getParent());
-
+    /*
     if (_parent != null) {
       _classEnhancerList.addAll(_parent._classEnhancerList);
     }
+    */
   }
 
   public static EnhancerManager create()
@@ -365,5 +366,10 @@ public class EnhancerManager implements ClassFileTransformer
     }
 
     return false;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _classEnhancerList + "]";
   }
 }

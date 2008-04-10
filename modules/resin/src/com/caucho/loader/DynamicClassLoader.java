@@ -1159,6 +1159,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       return;
 
     try {
+      sendAddLoaderEvent();
+      
       ArrayList<ClassLoaderListener> listeners = getListeners();
 
       if (listeners != null) {
@@ -1263,6 +1265,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (_lifecycle.isBeforeInit())
       init();
+
+    // Force scanning if any loaders have been added
+    sendAddLoaderEvent();
 
     if (normalJdkOrder) {
       try {
@@ -1492,7 +1497,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 	      bBuf = enhancedBuffer;
 	      bLen = enhancedBuffer.length;
 
-	      if (_isVerbose || true)
+	      if (_isVerbose)
 		verbose(name, String.valueOf(transformer));
 	    }
 	    /* RSN-109
@@ -1502,8 +1507,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 	       throw e;
 	    */
 	  } catch (EnhancerRuntimeException e) {
+            e.printStackTrace();
 	    throw e;
 	  } catch (Throwable e) {
+            e.printStackTrace();
 	    log().log(Level.WARNING, e.toString(), e);
 	  }
 	}

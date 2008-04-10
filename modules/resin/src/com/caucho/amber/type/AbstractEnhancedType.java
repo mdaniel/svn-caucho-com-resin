@@ -284,8 +284,9 @@ public abstract class AbstractEnhancedType extends Type {
         else if (_amberPersistenceUnit.getConfigException() != null)
           throw new AmberRuntimeException(_amberPersistenceUnit.getConfigException());
 
-        throw new AmberRuntimeException(L.l("'{0}' with classloader {1} is an illegal instance class",
-                                            _instanceClass.getName(), _instanceClass.getClassLoader()));
+        throw new AmberRuntimeException(L.l("'{0}' with classloader {1} is an illegal instance class.  The class has not been enhanced as implementing {2}.",
+                                            _instanceClass.getName(), _instanceClass.getClassLoader(),
+                                            validationInterface));
       }
     }
 

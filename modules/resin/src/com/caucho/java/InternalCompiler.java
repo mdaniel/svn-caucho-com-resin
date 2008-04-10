@@ -29,8 +29,8 @@
 
 package com.caucho.java;
 
+import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.vfs.*;
 
@@ -47,7 +47,8 @@ import java.util.logging.Logger;
  * Compiles Java source, returning the loaded class.
  */
 public class InternalCompiler extends AbstractJavaCompiler {
-  private static final Logger log = Log.open(InternalCompiler.class);
+  private static final Logger log
+    = Logger.getLogger(InternalCompiler.class.getName());
   
   private static boolean _hasCompiler; // already tested for compiler
   
@@ -75,8 +76,8 @@ public class InternalCompiler extends AbstractJavaCompiler {
       }
 
       try {
-	EnvironmentClassLoader env;
-	env = new EnvironmentClassLoader(ClassLoader.getSystemClassLoader());
+	DynamicClassLoader env;
+	env = new DynamicClassLoader(ClassLoader.getSystemClassLoader());
 
 	Path javaHome = Vfs.lookup(System.getProperty("java.home"));
 	Path jar = javaHome.lookup("./lib/tools.jar");
@@ -154,8 +155,8 @@ public class InternalCompiler extends AbstractJavaCompiler {
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
       
-      EnvironmentClassLoader env;
-      env = new EnvironmentClassLoader(ClassLoader.getSystemClassLoader());
+      DynamicClassLoader env;
+      env = new DynamicClassLoader(ClassLoader.getSystemClassLoader());
 
       Path javaHome = Vfs.lookup(System.getProperty("java.home"));
       Path jar = javaHome.lookup("./lib/tools.jar");
