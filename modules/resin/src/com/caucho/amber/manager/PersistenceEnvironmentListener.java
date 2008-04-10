@@ -53,8 +53,7 @@ public class PersistenceEnvironmentListener implements AddLoaderListener
   {
     AmberContainer amber = AmberContainer.create(loader);
 
-    // Can't start until the configuration happens
-    // amber.start();
+    amber.configurePersistenceRoots();
   }
 
   /**

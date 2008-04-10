@@ -406,7 +406,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
         _addLoaderListeners.set(listeners, this);
       }
 
-      listeners.add(listener);
+      if (! listeners.contains(listener))
+	listeners.add(listener);
     }
 
     listener.addLoader(this);
@@ -442,7 +443,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    * Adds a listener to detect class loader changes.
    */
   @Override
-  protected void sendAddLoaderEventImpl()
+  protected void configureEnhancerEvent()
   {
     ArrayList<AddLoaderListener> listeners = getLoaderListeners();
     
@@ -531,7 +532,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       }
     }
 
-    sendAddLoaderEventImpl();
+    configureEnhancerEvent();
   }
 
   /**

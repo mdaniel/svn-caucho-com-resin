@@ -1004,6 +1004,9 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     if (context.isScanComplete())
       return false;
     else {
+      if (log.isLoggable(Level.FINER))
+	log.finer(this + " scanning " + root);
+      
       context.setScanComplete(true);
       
       return true;
