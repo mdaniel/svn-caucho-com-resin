@@ -54,8 +54,12 @@ public class CallbackObjectMethod extends Callback {
     _hash = MethodMap.hash(methodName);
     _name = _methodName.toCharArray();
     
-    // _fun = env.findMethod(_obj.getType(), _methodName);
-    _fun = env.findMethod(_obj.getClassName(), _methodName);
+
+    // php/1h0n - can't trigger fatal error
+
+    // _fun = env.findMethod(_obj.getClassName(), _methodName);
+    QuercusClass cl = env.findClass(_obj.getClassName());
+    _fun = cl.findFunction(_methodName);
   }
 
   /**

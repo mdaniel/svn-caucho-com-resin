@@ -12,6 +12,7 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>quercus: xml_set_element_handler with empty string callback was causing UnsupportedOperationException (#2591, rep by P Fisher)</li>
 <li>host: allow host-alias-regexp in host.xml (#2582, rep by kenjrwalker)</li>
 <li>amber: multiple @OneToMany annotations were ignored (#2586, rep by Charles Lyons)</li>
 <li>amber: mysql shouldn't use RETURN_GENERATED_KEYS when no @GeneratedId (#2579, rep by Charles Lyon)</li>

@@ -36,13 +36,16 @@ import com.caucho.quercus.expr.StringLiteralExpr;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
-import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.InstanceInitializer;
-import com.caucho.util.IdentityIntMap;
+import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -758,26 +761,6 @@ public class QuercusClass {
     AbstractFunction fun = _methodMap.get(hash, key, key.length);
 
     return fun;
-  }
-
-  /**
-   * Finds the matching function.
-   */
-  public AbstractFunction findFunctionExact(String name)
-  {
-    throw new UnsupportedOperationException();
-    
-    // return _methodMap.get(name);
-  }
-
-  /**
-   * Finds the matching function.
-   */
-  public AbstractFunction findFunctionLowerCase(String name)
-  {
-    throw new UnsupportedOperationException();
-    
-    //return _lowerMethodMap.get(name.toLowerCase());
   }
 
   /**

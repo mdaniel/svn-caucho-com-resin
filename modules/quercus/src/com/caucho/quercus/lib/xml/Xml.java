@@ -143,15 +143,19 @@ public class Xml {
       _startElementHandler = _env.createCallback(startElementHandler);
       _endElementHandler = _env.createCallback(endElementHandler);
     } else {
-      Value value = new ArrayValueImpl();
-      value.put(_obj);
-      value.put(startElementHandler);
-      _startElementHandler = _env.createCallback(value);
+      if (! startElementHandler.isEmpty()) {
+        Value value = new ArrayValueImpl();
+        value.put(_obj);
+        value.put(startElementHandler);
+        _startElementHandler = _env.createCallback(value);
+      }
 
-      value = new ArrayValueImpl();
-      value.put(_obj);
-      value.put(endElementHandler);
-      _endElementHandler = _env.createCallback(value);
+      if (! endElementHandler.isEmpty()) {
+        Value value = new ArrayValueImpl();
+        value.put(_obj);
+        value.put(endElementHandler);
+        _endElementHandler = _env.createCallback(value);
+      }
     }
     return true;
   }

@@ -2619,9 +2619,6 @@ public class Env {
 
     AbstractFunction fun = cl.findFunction(methodName);
 
-    if (fun == null && ! isStrict())
-      fun = cl.findFunctionLowerCase(methodName.toLowerCase());
-
     if (fun == null) {
       error(L.l("'{0}::{1}' is an unknown method.",
                 className, methodName));
@@ -3538,13 +3535,17 @@ public class Env {
       return null;
 
     value = value.toValue();
-
-    if (value instanceof Callback)
+  
+    if (value instanceof Callback) {
       return (Callback) value;
+    }
+    else if (value instanceof StringValue) {
+      // php/1h0o
+      if (value.isEmpty())
+        return null;
 
-    else if (value instanceof StringValue)
       return new CallbackFunction(this, value.toString());
-
+    }
     else if (value instanceof ArrayValue) {
       Value obj = value.get(LongValue.ZERO);
       Value name = value.get(LongValue.ONE);
