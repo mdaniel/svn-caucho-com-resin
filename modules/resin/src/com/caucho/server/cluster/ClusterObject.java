@@ -250,7 +250,7 @@ public class ClusterObject {
       return true;
 
     if (_isDead)
-      throw new IllegalStateException();
+      return false;
 
     if (_isPrimary && _updateCount >= 0)
       return true;

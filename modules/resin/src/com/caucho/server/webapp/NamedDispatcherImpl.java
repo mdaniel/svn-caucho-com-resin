@@ -74,7 +74,7 @@ class NamedDispatcherImpl implements RequestDispatcher {
     // s.setDisableClose(true);
 
     DispatchResponse subResponse = DispatchResponse.createDispatch();
-    subResponse.setRequest(req);
+    subResponse.init(req);
     subResponse.setNextResponse(res);
     // subResponse.init(req, s);
     subResponse.start();

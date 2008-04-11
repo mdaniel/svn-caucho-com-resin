@@ -614,6 +614,9 @@ public class PageContextImpl extends PageContext
       StreamJspWriter writer = (StreamJspWriter) _out;
 
       _bodyResponseStream.setWriter(writer.getWriter());
+
+      if (_response != null)
+	_bodyResponseStream.setEncoding(_response.getCharacterEncoding());
     }
     else if (_out instanceof JspWriterAdapter) {
       if (getCauchoResponse() != null) {
@@ -625,6 +628,9 @@ public class PageContextImpl extends PageContext
       BodyContentImpl body = (BodyContentImpl) _out;
       
       _bodyResponseStream.setWriter(body.getWriter());
+
+      if (_response != null)
+	_bodyResponseStream.setEncoding(_response.getCharacterEncoding());
     }
 
     return _out;
