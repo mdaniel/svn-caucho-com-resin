@@ -53,6 +53,8 @@ public class PersistenceEnvironmentListener implements AddLoaderListener
   {
     AmberContainer amber = AmberContainer.create(loader);
 
+    // called to configure the enhancer when the classloader updates before
+    // any loading of the class
     amber.configurePersistenceRoots();
   }
 

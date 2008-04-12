@@ -137,6 +137,7 @@ public class JdbcMessage
 	     "  consumer " + longType + "," +
 	     "  delivered INTEGER NOT NULL," +
 	     "  msg_type INTEGER NOT NULL," +
+	     "  msg_id VARCHAR(64) NOT NULL," +
 	     "  expire " + longType + " NOT NULL," +
 	     "  header " + blob + "," +
 	     "  body " + blob +
@@ -173,7 +174,9 @@ public class JdbcMessage
     throws SQLException, IOException, JMSException
   {
     if (log.isLoggable(Level.FINE))
-      log.fine("jms jdbc queue:" + queue + " send message");
+      log.fine("jms jdbc queue:" + queue + " send message " + message);
+    
+    String msgId = message.getJMSMessageID();
 
     TempStream header = new TempStream();
     header.openWrite();
@@ -248,8 +251,8 @@ public class JdbcMessage
 	  throw new RuntimeException("can't create message");
 	
 	sql = ("INSERT INTO " + _messageTable +
-	       "(m_id, queue, msg_type, expire, delivered, header, body) " +
-	       "VALUES (?,?,?,?,0,?,?)");
+	       "(m_id, queue, msg_type, msg_id, expire, delivered, header, body) " +
+	       "VALUES (?,?,?,?,?,0,?,?)");
 
 	pstmt = conn.prepareStatement(sql);
 
@@ -257,6 +260,7 @@ public class JdbcMessage
 	pstmt.setLong(i++, mId);
 	pstmt.setInt(i++, queue);
 	pstmt.setInt(i++, type);
+	pstmt.setString(i++, msgId);
 	pstmt.setLong(i++, expireTime);
 
 	if (header.getLength() > 0)
@@ -273,8 +277,8 @@ public class JdbcMessage
       }
       else {
 	sql = ("INSERT INTO " + _messageTable +
-	       "(queue, msg_type, expire, delivered, header, body) " +
-	       "VALUES (?,?,?,0,?,?)");
+	       "(queue, msg_type, msg_id, expire, delivered, header, body) " +
+	       "VALUES (?,?,?,?,0,?,?)");
 	PreparedStatement pstmt;
 
 	pstmt = conn.prepareStatement(sql);
@@ -282,6 +286,7 @@ public class JdbcMessage
 	int i = 1;
 	pstmt.setInt(i++, queue);
 	pstmt.setInt(i++, type);
+	pstmt.setString(i++, msgId);
 	pstmt.setLong(i++, expireTime);
 	pstmt.setBinaryStream(i++, header.openRead(), header.getLength());
 	
@@ -309,7 +314,7 @@ public class JdbcMessage
     
     Connection conn = _dataSource.getConnection();
     try {
-      String sql = ("SELECT m_id, msg_type, delivered, body, header" +
+      String sql = ("SELECT m_id, msg_type, msg_id, delivered, body, header" +
 		    " FROM " + _messageTable +
 		    " WHERE ?<id AND queue=? AND consumer IS NULL" +
 		    " ORDER BY id");
@@ -393,14 +398,15 @@ public class JdbcMessage
     throws SQLException, IOException, JMSException
   {
     int msgType = rs.getInt(2);
-    boolean redelivered = rs.getInt(3) == 1;
+    String msgId = rs.getString(3);
+    boolean redelivered = rs.getInt(4) == 1;
 
     MessageImpl msg;
     
     switch (msgType) {
     case TEXT:
       {
-	InputStream is = rs.getBinaryStream(4);
+	InputStream is = rs.getBinaryStream(5);
 
 	try {
 	  msg = readTextMessage(is);
@@ -413,7 +419,7 @@ public class JdbcMessage
 	    
     case BYTES:
       {
-	InputStream is = rs.getBinaryStream(4);
+	InputStream is = rs.getBinaryStream(5);
 
 	try {
 	  msg = readBytesMessage(is);
@@ -426,7 +432,7 @@ public class JdbcMessage
 	    
     case STREAM:
       {
-	InputStream is = rs.getBinaryStream(4);
+	InputStream is = rs.getBinaryStream(5);
 
 	try {
 	  msg = readStreamMessage(is);
@@ -439,7 +445,7 @@ public class JdbcMessage
 	    
     case OBJECT:
       {
-	InputStream is = rs.getBinaryStream(4);
+	InputStream is = rs.getBinaryStream(5);
 
 	try {
 	  msg = readObjectMessage(is);
@@ -452,7 +458,7 @@ public class JdbcMessage
 	    
     case MAP:
       {
-	InputStream is = rs.getBinaryStream(4);
+	InputStream is = rs.getBinaryStream(5);
 
 	try {
 	  msg = readMapMessage(is);
@@ -471,7 +477,7 @@ public class JdbcMessage
       }
     }
 	  
-    InputStream is = rs.getBinaryStream(5);
+    InputStream is = rs.getBinaryStream(6);
     
     if (is != null) {
       try {
@@ -481,6 +487,7 @@ public class JdbcMessage
       }
     }
 
+    msg.setJMSMessageID(msgId);
     msg.setJMSRedelivered(redelivered);
 
     return msg;

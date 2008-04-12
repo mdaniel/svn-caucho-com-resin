@@ -682,6 +682,7 @@ public class HempClient {
 	log.log(Level.FINE, e.toString(), e);
       }
 
+      System.out.println("WAIT-FOR: " + _isResult);
       return _isResult;
     }
     
@@ -693,6 +694,7 @@ public class HempClient {
       synchronized (this) {
 	_isResult = true;
 	notifyAll();
+	System.out.println("ON_RESULT: " + _result);
       }
     }
   
@@ -705,6 +707,7 @@ public class HempClient {
       synchronized (this) {
 	_isResult = true;
 	notifyAll();
+	System.out.println("ON_ERROR: " + error);
       }
     }
   }

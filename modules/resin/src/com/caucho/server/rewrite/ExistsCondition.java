@@ -24,33 +24,57 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.hemp.im;
+package com.caucho.server.rewrite;
 
-import com.caucho.hemp.manager.*;
-import java.util.*;
-import java.lang.ref.*;
+import com.caucho.util.L10N;
 
-import com.caucho.hemp.*;
-import com.caucho.server.resin.*;
-import com.caucho.util.*;
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.regex.Pattern;
+import com.caucho.vfs.*;
 
 /**
- * Manager
- */
-public class RosterManager {
-  private static final L10N L = new L10N(RosterManager.class);
+* A rewrite condition that passes if the target exists.
+*/
+public class ExistsCondition
+  extends AbstractCondition
+{
+  private static final L10N L = new L10N(ExistsCondition.class);
 
-  public Roster getRoster(String jid)
+  private Path _pwd;
+  
+  private String _value;
+  private Pattern _regexp;
+
+  ExistsCondition(String value)
   {
-    return new Roster(jid);
+    _value = value;
+
+    _pwd = Vfs.lookup();
   }
   
-  @Override
-  public String toString()
+  public String getTagName()
   {
-    return getClass().getSimpleName() + "[]";
+    return "exists";
+  }
+
+  public void setRegexp(Pattern pattern)
+  {
+    _regexp = pattern;
+  }
+
+  public boolean isMatch(HttpServletRequest request,
+                         HttpServletResponse response)
+  {
+    String servletPath = request.getServletPath();
+    String realPath = request.getRealPath(servletPath);
+
+    Path path = _pwd.lookup(realPath);
+    
+    return path.canRead();
   }
 }

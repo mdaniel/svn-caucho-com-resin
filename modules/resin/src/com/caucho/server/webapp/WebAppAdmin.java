@@ -30,6 +30,7 @@
 package com.caucho.server.webapp;
 
 import java.util.Date;
+import java.util.Map;
 
 import com.caucho.management.server.HostMXBean;
 import com.caucho.management.server.SessionManagerMXBean;
@@ -96,6 +97,14 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   public String getVersion()
   {
     return getController().getVersion();
+  }
+
+  /**
+   * Returns the manifest attributes
+   */
+  public Map<String,String> getManifestAttributes()
+  {
+    return getController().getManifestAttributes();
   }
 
   //

@@ -35,20 +35,27 @@ import com.caucho.hmpp.PresenceHandler;
 import com.caucho.hmpp.MessageHandler;
 import com.caucho.hmpp.QueryHandler;
 import com.caucho.hmpp.HmppError;
-import java.io.Serializable;
 
 import com.caucho.hemp.*;
 import com.caucho.hemp.service.*;
 import com.caucho.util.*;
+import java.io.Serializable;
+import java.util.logging.*;
 
 /**
  * Manager
  */
 public class HempSession implements HmppSession, HmppResource {
+  private static final Logger log
+    = Logger.getLogger(HempSession.class.getName());
+  
   private static final L10N L = new L10N(HempSession.class);
   
   private final HempManager _manager;
+  
   private final String _jid;
+  
+  private HmppResource _resource;
   
   private boolean _isClosed;
 
@@ -60,6 +67,13 @@ public class HempSession implements HmppSession, HmppResource {
   {
     _manager = manager;
     _jid = jid;
+
+    String uid = jid;
+    int p = uid.indexOf('/');
+    if (p > 0)
+      uid = uid.substring(0, p);
+
+    _resource = manager.getResource(uid);
   }
 
   /**
@@ -369,8 +383,12 @@ public class HempSession implements HmppSession, HmppResource {
 
     if (manager == null)
       throw new IllegalStateException(L.l("session is closed"));
-    
-    _manager.presenceSubscribe(to, _jid, data);
+
+    if (_resource != null)
+      _resource.onClientPresenceSubscribe(to, _jid, data);
+    else {
+      log.fine(this + " presenceSubscribe to=" + to + " with no self resource");
+    }
   }
 
   /**
@@ -637,6 +655,15 @@ public class HempSession implements HmppSession, HmppResource {
     
     if (handler != null)
       handler.onPresenceError(to, from, data, error);
+  }
+
+  //
+  // client
+  //
+  public void onClientPresenceSubscribe(String to,
+					String from,
+					Serializable []data)
+  {
   }
   
   /**

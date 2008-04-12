@@ -31,12 +31,16 @@ package com.caucho.hmpp;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.logging.*;
 
 /**
  * Configuration for a service
  */
 public class AbstractResource implements HmppResource
 {
+  private static final Logger log
+    = Logger.getLogger(AbstractResource.class.getName());
+  
   private String _jid;
 
   protected void setJid(String jid)
@@ -179,5 +183,24 @@ public class AbstractResource implements HmppResource
 			      Serializable []data,
 			      HmppError error)
   {
+  }
+
+  //
+  // client presence
+  //
+
+  /**
+   * Client request for presence
+   */
+  public void onClientPresenceSubscribe(String to,
+					String from,
+					Serializable []data)
+  {
+    log.fine(this + " onClientPresenceSubscribe to=" + to + " from=" + from);
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _jid + "]";
   }
 }

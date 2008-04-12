@@ -29,9 +29,9 @@
 
 package com.caucho.hemp.im;
 
-import com.caucho.hmpp.HmppBroker;
-import com.caucho.hmpp.HmppResource;
+import com.caucho.hmpp.*;
 import com.caucho.hmpp.disco.*;
+import com.caucho.hmpp.im.*;
 import com.caucho.hmpp.spi.HmppServer;
 import com.caucho.hmpp.AbstractResource;
 import java.io.Serializable;
@@ -66,6 +66,11 @@ public class ImResource extends AbstractResource
     setJid(jid);
 
     _server = server;
+  }
+
+  public String []getJids()
+  {
+    return _jids;
   }
 
   public void onLogin(String jid)
@@ -118,10 +123,95 @@ public class ImResource extends AbstractResource
       
       return true;
     }
+    else if (query instanceof RosterQuery) {
+      _server.queryResult(id, from, to, new RosterQuery(getRoster()));
+
+      return true;
+    }
+    
+    return false;
+  }
+  
+  public boolean onQuerySet(long id,
+			    String to,
+			    String from,
+			    Serializable query)
+  {
+    if (query instanceof RosterQuery) {
+      RosterQuery roster = (RosterQuery) query;
+
+      return querySetRoster(id, to, from, roster);
+    }
     
     return false;
   }
 
+  public void onClientPresenceSubscribe(String to,
+					String from,
+					Serializable []data)
+  {
+    if (rosterSubscribe(to, from, data)) {
+      _server.presenceSubscribe(to, from, data);
+    }
+  }
+
+  public void onPresenceSubscribe(String to,
+				  String from,
+				  Serializable []data)
+  {
+    String []jids = _jids;
+
+    if (jids.length > 0) {
+      _server.presenceSubscribe(jids[0], from, data);
+    }
+    else {
+      log.fine(this + " onPresenceSubscribe to=" + to);
+    }
+  }
+
+  private boolean querySetRoster(long id,
+				 String to,
+				 String from,
+				 RosterQuery roster)
+  {
+    String user = from;
+    int p = from.indexOf('/');
+    if (p > 0)
+      user = from.substring(0, p);
+
+    if (! user.equals(to)) {
+      if (log.isLoggable(Level.FINE)) {
+	log.fine(this + " roster set with non-matching to='"
+		 + to + "' from='" + from + "'");
+      }
+	
+      return false;
+    }
+      
+    if (log.isLoggable(Level.FINE)) {
+      log.fine(this + " roster set to='" + to + "' from='" + from + "'");
+    }
+
+    if (roster.getItems() != null) {
+      for (RosterItem item : roster.getItems()) {
+	if ("remove".equals(item.getSubscription()))
+	  removeRoster(item);
+	else
+	  updateRoster(item);
+
+      }
+    }
+    
+    querySetResources(roster);
+
+    _server.queryResult(id, from, to, null);
+
+    return true;
+  }
+
+  /**
+   * Returns the disco identity of the resource
+   */
   protected DiscoIdentity []getDiscoIdentity()
   {
     return new DiscoIdentity[] {
@@ -129,10 +219,52 @@ public class ImResource extends AbstractResource
     };
   }
 
+  /**
+   * Returns the disco features of the resource
+   */
   protected DiscoFeature []getDiscoFeatures()
   {
     return new DiscoFeature[] {
       new DiscoFeature(DiscoInfoQuery.class.getName()),
     };
+  }
+
+  /**
+   * add/update a roster item
+   */
+  protected void updateRoster(RosterItem item)
+  {
+  }
+
+  /**
+   * remove a roster item
+   */
+  protected void removeRoster(RosterItem item)
+  {
+  }
+
+  /**
+   * remove a roster item
+   */
+  protected boolean rosterSubscribe(String to,
+				    String from,
+				    Serializable []data)
+  {
+    return true;
+  }
+
+  /**
+   * Gets the roster items
+   */
+  protected RosterItem []getRoster()
+  {
+    return new RosterItem [0];
+  }
+
+  /**
+   * Updates resources with the given query
+   */
+  protected void querySetResources(Serializable query)
+  {
   }
 }

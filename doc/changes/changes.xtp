@@ -12,6 +12,12 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>jsp: body tag interaction with jsp:include and i18n (#2581, rep by T Fukuda)</li>
+<li>(2008-04-11) response.sendRedirect should encode in utf-8 (#2580, rep by Sanjeev)</li>
+<li>admin: added .war manifest as a JMX value (#2462)</li>
+<li>jms: polling issues with jdbc store (#2570, rep by J Deffenbaugh)</li>
+<li>rewrite: add exists condition (#2328, rep by Arthur Naylor)</li>
+<li>amber: update classloader order (#2588, rep by Riccardo Cohen)</li>
 <li>quercus: xml_set_element_handler with empty string callback was causing UnsupportedOperationException (#2591, rep by P Fisher)</li>
 <li>host: allow host-alias-regexp in host.xml (#2582, rep by kenjrwalker)</li>
 <li>amber: multiple @OneToMany annotations were ignored (#2586, rep by Charles Lyons)</li>

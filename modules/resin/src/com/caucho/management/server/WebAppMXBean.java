@@ -30,6 +30,7 @@
 package com.caucho.management.server;
 
 import java.util.Date;
+import java.util.Map;
 
 import com.caucho.jmx.Description;
 import com.caucho.jmx.Units;
@@ -80,6 +81,12 @@ public interface WebAppMXBean extends DeployControllerMXBean {
    */
   @Description("The deployed version of the web-app")
   public String getVersion();
+
+  /**
+   * Returns any manifest entries from the .war file
+   */
+  @Description("The manifest attributes from the .war file")
+  public Map<String,String> getManifestAttributes();
 
   //
   // Status attributes

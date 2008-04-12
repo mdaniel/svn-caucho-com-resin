@@ -41,6 +41,7 @@ import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
@@ -122,6 +123,28 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   public Manifest getManifest()
   {
     return _manifest;
+  }
+
+  /**
+   * Returns the manifest as an attribute map
+   */
+  public Map<String,String> getManifestAttributes()
+  {
+    if (_manifest == null)
+      return null;
+    
+    HashMap<String,String> map = new HashMap<String,String>();
+
+    Attributes attr = _manifest.getMainAttributes();
+
+    if (attr != null) {
+      for (Map.Entry entry : attr.entrySet()) {
+	map.put(String.valueOf(entry.getKey()),
+		String.valueOf(entry.getValue()));
+      }
+    }
+
+    return map;
   }
 
   /**

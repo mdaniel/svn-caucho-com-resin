@@ -615,8 +615,27 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
       if (ch == '<')
 	cb.append("%3c");
-      else
+      else if (ch < 0x80)
 	cb.append(ch);
+      else if (_charEncoding == null) {
+	addHex(cb, ch);
+      }
+      else if (ch < 0x800) {
+	int d1 = 0xc0 + ((ch >> 6) & 0x1f);
+	int d2 = 0x80 + (ch & 0x3f);
+
+	addHex(cb, d1);
+	addHex(cb, d2);
+      }
+      else if (ch < 0x8000) {
+	int d1 = 0xe0 + ((ch >> 12) & 0xf);
+	int d2 = 0x80 + ((ch >> 6) & 0x3f);
+	int d3 = 0x80 + (ch & 0x3f);
+
+	addHex(cb, d1);
+	addHex(cb, d2);
+	addHex(cb, d3);
+      }
     }
 
     path = cb.toString();
@@ -637,6 +656,16 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     }
 
     close();
+  }
+
+  private void addHex(CharBuffer cb, int hex)
+  {
+    int d1 = (hex >> 4) & 0xf;
+    int d2 = (hex) & 0xf;
+    
+    cb.append('%');
+    cb.append(d1 < 10 ? (char) (d1 + '0') : (char) (d1 - 10 + 'a'));
+    cb.append(d2 < 10 ? (char) (d2 + '0') : (char) (d2 - 10 + 'a'));
   }
 
   /**

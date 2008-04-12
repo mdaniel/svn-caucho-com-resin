@@ -182,24 +182,11 @@ public class HempManager implements HmppBroker, HmppServer {
    */
   protected void presence(String fromJid, Serializable []data)
   {
-    /*
-    ArrayList<RosterItem> roster = getSubscriptions(fromJid);
-    
-    for (RosterItem item : roster) {
-      String targetJid = item.getTarget();
+    ResourceBroker []brokerList = _brokerList;
 
-      HempEntity entity = getEntity(targetJid);
-
-      if (entity == null)
-	continue;
-
-      if (item.isSubscribedTo())
-	entity.onPresenceProbe(fromJid, targetJid, data);
-
-      if (item.isSubscriptionFrom())
-	entity.onPresence(fromJid, targetJid, data);
+    for (ResourceBroker broker : brokerList) {
+      broker.onPresence(fromJid, data);
     }
-    */
   }
 
   /**

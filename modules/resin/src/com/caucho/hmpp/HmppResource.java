@@ -30,6 +30,7 @@
 package com.caucho.hmpp;
 
 import com.caucho.hmpp.packet.PacketHandler;
+import java.io.Serializable;
 
 /**
  * Low-level callback to handle packet events.  Each method corresponds to
@@ -51,4 +52,10 @@ public interface HmppResource extends PacketHandler
    * Called when an instance logs out
    */
   public void onLogout(String jid);
+
+  /**
+   * Called form a client presence subscription
+   */
+  public void onClientPresenceSubscribe(String to, String from,
+					Serializable []data);
 }

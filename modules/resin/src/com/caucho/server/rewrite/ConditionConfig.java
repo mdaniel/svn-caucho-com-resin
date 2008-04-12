@@ -70,6 +70,11 @@ public class ConditionConfig {
     setCondition(new ExprCondition(expr.getValue()));
   }
 
+  public void setExists(RawString expr)
+  {
+    setCondition(new ExistsCondition(expr.getValue()));
+  }
+
   public void setHeader(String header)
   {
     setCondition(new HeaderCondition(header));

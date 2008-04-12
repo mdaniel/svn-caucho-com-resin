@@ -29,69 +29,46 @@
 
 package com.caucho.hemp.im;
 
-import com.caucho.hemp.im.SubscriptionState;
 import java.util.*;
 import java.lang.ref.*;
-import java.io.Serializable;
 
-import com.caucho.hemp.*;
+import com.caucho.hmpp.*;
+import com.caucho.hmpp.spi.*;
 import com.caucho.server.resin.*;
 import com.caucho.util.*;
+import java.io.Serializable;
 
 /**
- * Entity
+ * IM Broker
  */
-public class RosterItem {
-  private static final L10N L = new L10N(RosterItem.class);
+abstract public class AbstractImBroker extends AbstractBroker {
+  /**
+   * Returns the resource with the given jid
+   */
+  abstract public HmppResource lookupResource(String jid);
 
-  private final String _ownerJid;
-  private final String _targetJid;
-
-  private final SubscriptionState _state;
-
-  private RosterItem()
+  /**
+   * Basic presence
+   */
+  public void onPresence(String from, Serializable []data)
   {
-    _ownerJid = null;
-    _targetJid = null;
-    _state = null;
-  }
+    int p = from.indexOf('/');
 
-  RosterItem(String ownerJid, String targetJid, SubscriptionState state)
-  {
-    _ownerJid = ownerJid;
-    _targetJid = targetJid;
+    String uid = from;
+    if (p > 0)
+      uid = from.substring(0, p);
 
-    _state = state;
-  }
+    ImResource resource = (ImResource) lookupResource(uid);
 
-  public String getOwner()
-  {
-    return _ownerJid;
-  }
+    if (resource == null) {
+      // XXX: error?
+      return;
+    }
 
-  public String getTarget()
-  {
-    return _targetJid;
-  }
-
-  public boolean isSubscribedTo()
-  {
-    return (_state == SubscriptionState.TO
-	    || _state == SubscriptionState.BOTH);
-  }
-
-  public boolean isSubscriptionFrom()
-  {
-    return (_state == SubscriptionState.FROM
-	    || _state == SubscriptionState.BOTH);
-  }
-  
-  @Override
-  public String toString()
-  {
-    return (getClass().getSimpleName()
-	    + "[target=" + _targetJid
-	    + ",owner=" + _ownerJid
-	    + "," + _state + "]");
+    for (String jid : resource.getJids()) {
+      if (! jid.equals(from)) {
+	presence(jid, from, data);
+      }
+    }
   }
 }

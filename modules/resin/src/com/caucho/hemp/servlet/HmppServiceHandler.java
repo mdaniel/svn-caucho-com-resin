@@ -103,6 +103,7 @@ public class HmppServiceHandler implements HmppServer, PacketHandler
 	log.finer(_packetHandler + " querySet to=" + to
 		  + " from=" + from);
       }
+      Thread.dumpStack();
       
       _out.writeObject(new QuerySet(id, to, from, query));
       _out.flush();
@@ -120,7 +121,7 @@ public class HmppServiceHandler implements HmppServer, PacketHandler
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send query result to=" + to
+	log.finer(_packetHandler + " queryResult to=" + to
 		  + " from=" + from);
       }
       
@@ -366,7 +367,7 @@ public class HmppServiceHandler implements HmppServer, PacketHandler
 			    String from,
 			    Serializable value)
   {
-    querySet(id, to, from, value);
+    queryResult(id, to, from, value);
   }
   
   public void onQueryError(long id,

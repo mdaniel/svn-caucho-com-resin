@@ -56,6 +56,15 @@ public class AbstractBroker implements ResourceBroker {
   {
     return null;
   }
+
+  /**
+   * Basic presence
+   */
+  public void onPresence(String from, Serializable []data)
+  {
+
+  }
+  
   //
   // message
   //
@@ -96,6 +105,7 @@ public class AbstractBroker implements ResourceBroker {
 			  String from,
 			  Serializable value)
   {
+    System.out.println("QR: " + _server + " " + to + " " + value);
     _server.queryResult(id, to, from, value);
   }
 

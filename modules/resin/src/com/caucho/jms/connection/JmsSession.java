@@ -1059,6 +1059,8 @@ public class JmsSession implements XASession, ThreadTask, XAResource
    */
   public void run()
   {
+    Thread.currentThread().setContextClassLoader(_classLoader);
+    
     boolean isValid = true;
 
     while (isValid) {

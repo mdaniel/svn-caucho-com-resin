@@ -109,6 +109,9 @@ public class ServerPacketHandler
       return false;
     }
 
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " receive " + packet);
+
     if (_session != null)
       packet.dispatch(this);
     else
@@ -218,7 +221,12 @@ public class ServerPacketHandler
 			 Serializable []data)
 
   {
-    _session.presence(to, data);
+    System.out.println("ON-PRESENCE: " + to);
+
+    if (to != null)
+      _session.presence(to, data);
+    else
+      _session.presence(data);
   }
   
   /**

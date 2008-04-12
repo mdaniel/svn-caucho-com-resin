@@ -32,6 +32,8 @@ package com.caucho.hmpp.spi;
 import com.caucho.hmpp.HmppBroker;
 import com.caucho.hmpp.HmppResource;
 
+import java.io.Serializable;
+
 /**
  * spi for a broker
  */
@@ -46,4 +48,9 @@ public interface ResourceBroker extends HmppServer {
    * a known resource
    */
   public HmppResource lookupResource(String jid);
+
+  /**
+   * Basic presence
+   */
+  public void onPresence(String from, Serializable []data);
 }

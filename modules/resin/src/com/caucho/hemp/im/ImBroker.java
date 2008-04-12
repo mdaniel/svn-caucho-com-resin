@@ -33,18 +33,26 @@ import java.util.*;
 import java.lang.ref.*;
 
 import com.caucho.hmpp.*;
+import com.caucho.hmpp.spi.*;
 import com.caucho.server.resin.*;
 import com.caucho.util.*;
+
+import java.io.Serializable;
 
 /**
  * IM Broker
  */
-public class ImBroker {
+abstract public class ImBroker extends AbstractBroker {
   /**
    * Returns the resource with the given jid
    */
-  protected HmppResource lookupResource(String jid)
+  abstract public HmppResource lookupResource(String jid);
+
+  /**
+   * Basic presence
+   */
+  public void onPresence(String from, Serializable []data)
   {
-    return null;
+
   }
 }

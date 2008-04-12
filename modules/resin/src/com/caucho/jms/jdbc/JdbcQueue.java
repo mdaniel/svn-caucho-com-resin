@@ -218,7 +218,7 @@ public class JdbcQueue extends PollingQueue {
     
       Connection conn = dataSource.getConnection();
       try {
-	String sql = ("SELECT m_id, msg_type, delivered, body, header" +
+	String sql = ("SELECT m_id, msg_type, msg_id, delivered, body, header" +
 		      " FROM " + messageTable +
 		      " WHERE ?<m_id AND queue=?" +
 		      "   AND consumer IS NULL AND ?<=expire" +
@@ -240,7 +240,7 @@ public class JdbcQueue extends PollingQueue {
 	  sql = ("UPDATE " + messageTable +
 		 " SET consumer=?, delivered=1" +
 		 " WHERE m_id=? AND consumer IS NULL");
-      
+
 	PreparedStatement updateStmt = conn.prepareStatement(sql);
 
 	long id = -1;
@@ -260,7 +260,6 @@ public class JdbcQueue extends PollingQueue {
 	    minId = id;
 
 	    msg = jdbcMessage.readMessage(rs);
-
 
 	    /*
 	    if (_selector == null || _selector.isMatch(msg))
@@ -445,7 +444,6 @@ public class JdbcQueue extends PollingQueue {
       log.log(Level.FINE, e.toString(), e);
     }
 
-    System.out.println("V: " + hasValue);
     if (hasValue)
       notifyMessageAvailable();
   }
