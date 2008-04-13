@@ -37,15 +37,67 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Muc query
+ * Muc user query
+ *
+ * http://jabber.org/protocol/muc#user
+ *
+ * <code><pre>
+ * element x {
+ *   decline?
+ *   &amp; destroy?
+ *   &amp; invite*
+ *   &amp; item?
+ *   &amp; password?
+ *   &amp; status*
+ * }
+ *
+ * element decline {
+ *   @from?
+ *   &amp; @to?
+ *   &amp; reason?
+ * }
+ *
+ * element invite {
+ *   @from?
+ *   &amp; @to?
+ *   &amp; reason?
+ * }
+ *
+ * element destroy {
+ *   @jid?
+ *   &amp; reason?
+ * }
+ *
+ * element item {
+ *   @affiliation?
+ *   &amp; @jid?
+ *   &amp; @nick?
+ *   &amp; @role?
+ *   &amp; actor?
+ *   &amp; reason?
+ *   &amp; continue?
+ * }
+ *
+ * element actor {
+ *   @jid
+ * }
+ *
+ * element continue {
+ *   @thread?
+ * }
+ *
+ * element status {
+ *   @code
+ * }
+ * </pre></code>
  */
 public class MucUser implements java.io.Serializable {
-  private MucDecline decline;
-  private MucDestroy destroy;
-  private ArrayList<MucInvite> invite;
-  private MucUserItem item;
-  private String password;
-  private ArrayList<MucStatus> status;
+  private MucDecline _decline;
+  private MucDestroy _destroy;
+  private ArrayList<MucInvite> _invite;
+  private MucUserItem _item;
+  private String _password;
+  private ArrayList<MucStatus> _status;
   
   public MucUser()
   {

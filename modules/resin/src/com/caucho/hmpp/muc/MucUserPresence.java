@@ -37,33 +37,33 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Muc query
+ * Muc user presence
  *
  * <code><pre>
- * element x:{http://happer.org/protocol/muc#user} {
+ * element x:{http://jabber.org/protocol/muc#user} {
  *   password
  * }
  * </pre></code>
  */
 public class MucUserPresence implements java.io.Serializable {
   // actor jid
-  private String actor;
-  private String reason;
+  private String _actor;
+  private String _reason;
   private MucContinue _continue;
 
   // "admin", "member", "none", "outcast", "owner"
-  private String affiliation;
-  private String jid;
-  private String nick;
+  private String _affiliation;
+  private String _jid;
+  private String _nick;
   // "moderator", "none", "participant", "visitor"
-  private String role;
+  private String _role;
   
-  private MucDecline decline;
-  private MucDestroy destroy;
+  private MucDecline _decline;
+  private MucDestroy _destroy;
 
-  private ArrayList<MucStatus> status;
+  private MucStatus []_status;
   
-  private String password;
+  private String _password;
   
   public MucUserPresence()
   {
@@ -72,9 +72,9 @@ public class MucUserPresence implements java.io.Serializable {
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + this.actor
-            + ",nick=" + this.nick
-            + ",affiliation=" + this.affiliation
-            + ",role=" + this.role + "]");
+	    + "[" + _actor
+            + ",nick=" + _nick
+            + ",affiliation=" + _affiliation
+            + ",role=" + _role + "]");
   }
 }
