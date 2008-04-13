@@ -36,62 +36,62 @@ import javax.webbeans.*;
 /**
  * Configuration for a service
  */
-public interface PresenceHandler
+public interface PresenceStream
 {
   /**
    * General presence, for clients announcing availability
    */
-  public void onPresence(String to,
-			 String from,
-			 Serializable []data);
+  public void sendPresence(String to,
+			   String from,
+			   Serializable []data);
 
   /**
    * General presence, for clients announcing unavailability
    */
-  public void onPresenceUnavailable(String to,
-				    String from,
-				    Serializable []data);
+  public void sendPresenceUnavailable(String to,
+				      String from,
+				      Serializable []data);
 
   /**
    * Presence probe from the server to a client
    */
-  public void onPresenceProbe(String to,
-			      String from,
-			      Serializable []data);
+  public void sendPresenceProbe(String to,
+			        String from,
+			        Serializable []data);
 
   /**
    * A subscription request from a client
    */
-  public void onPresenceSubscribe(String to,
-				  String from,
-				  Serializable []data);
-
-  /**
-   * A subscription response to a client
-   */
-  public void onPresenceSubscribed(String to,
-				   String from,
-				   Serializable []data);
-
-  /**
-   * An unsubscription request from a client
-   */
-  public void onPresenceUnsubscribe(String to,
+  public void sendPresenceSubscribe(String to,
 				    String from,
 				    Serializable []data);
 
   /**
-   * A unsubscription response to a client
+   * A subscription response to a client
    */
-  public void onPresenceUnsubscribed(String to,
+  public void sendPresenceSubscribed(String to,
 				     String from,
 				     Serializable []data);
 
   /**
+   * An unsubscription request from a client
+   */
+  public void sendPresenceUnsubscribe(String to,
+				      String from,
+				      Serializable []data);
+
+  /**
+   * A unsubscription response to a client
+   */
+  public void sendPresenceUnsubscribed(String to,
+				       String from,
+				       Serializable []data);
+
+  /**
    * An error response to a client
    */
-  public void onPresenceError(String to,
-			      String from,
-			      Serializable []data,
-			      HmppError error);
+  public void sendPresenceError(String to,
+			        String from,
+			        Serializable []data,
+			        HmppError error);
 }

@@ -58,6 +58,7 @@ public class AuthResult implements Serializable {
     return _jid;
   }
 
+  @Override
   public String toString()
   {
     StringBuilder sb = new StringBuilder();

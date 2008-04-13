@@ -27,17 +27,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmpp.packet;
+package com.caucho.hmpp.spi;
 
-import com.caucho.hmpp.MessageHandler;
-import com.caucho.hmpp.PresenceHandler;
-import com.caucho.hmpp.QueryHandler;
+import com.caucho.hmpp.spi.HmppResource;
+
+import com.caucho.hmpp.HmppStream;
+import java.io.Serializable;
 
 /**
- * Low-level callback to handle packet events.  Each method corresponds to
- * a packet class.
+ * Managed a collection of resources
  */
-public interface PacketHandler 
-  extends MessageHandler, QueryHandler, PresenceHandler
-{
+public interface ResourceManager {
+  /**
+   * Sets the server to send messages
+   */
+  public void setBroker(HmppStream broker);
+  
+  /**
+   * Returns the resource with the given name, or null if this is not
+   * a known resource
+   */
+  public HmppResource lookupResource(String jid);
+
+  /**
+   * Basic presence
+   */
+  public void sendPresence(String to, String from, Serializable []data);
 }

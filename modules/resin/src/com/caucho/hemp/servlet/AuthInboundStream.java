@@ -29,10 +29,6 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.hmpp.HmppSession;
-import com.caucho.hmpp.HmppBroker;
-import com.caucho.hmpp.packet.PacketHandler;
-import com.caucho.hmpp.packet.Packet;
 import com.caucho.hmpp.HmppError;
 import java.io.*;
 import java.util.logging.*;
@@ -49,18 +45,18 @@ import com.caucho.vfs.*;
 /**
  * Main protocol handler for the HTTP version of HeMPP.
  */
-public class AuthPacketHandler extends AbstractPacketHandler
+public class AuthInboundStream extends AbstractHmppStream
 {
   private static final Logger log
-    = Logger.getLogger(AuthPacketHandler.class.getName());
+    = Logger.getLogger(AuthInboundStream.class.getName());
 
-  private ServerPacketHandler _manager;
-  private HmppServer _server;
+  private ServerInboundStream _manager;
+  private HmppStream _broker;
 
-  AuthPacketHandler(ServerPacketHandler manager, HmppServer server)
+  AuthInboundStream(ServerInboundStream manager, HmppStream server)
   {
     _manager = manager;
-    _server = server;
+    _broker = server;
   }
   
   /**
@@ -69,14 +65,15 @@ public class AuthPacketHandler extends AbstractPacketHandler
    * The get handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public boolean onQueryGet(long id,
+  @Override
+  public boolean sendQueryGet(long id,
 			    String to,
 			    String from,
 			    Serializable value)
   {
-    _server.queryError(id, from, to, value, 
-		       new HmppError(HmppError.TYPE_CANCEL,
-				     HmppError.FORBIDDEN));
+    _broker.sendQueryError(id, from, to, value, 
+		           new HmppError(HmppError.TYPE_CANCEL,
+				         HmppError.FORBIDDEN));
       
     return true;
   }
@@ -87,7 +84,8 @@ public class AuthPacketHandler extends AbstractPacketHandler
    * The set handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public boolean onQuerySet(long id,
+  @Override
+  public boolean sendQuerySet(long id,
 			    String to,
 			    String from,
 			    Serializable value)
@@ -100,17 +98,17 @@ public class AuthPacketHandler extends AbstractPacketHandler
 				  auth.getResource());
 
       if (jid != null)
-	_server.queryResult(id, from, to, new AuthResult(jid));
+	_broker.sendQueryResult(id, from, to, new AuthResult(jid));
       else
-	_server.queryError(id, from, to, value,
-			   new HmppError(HmppError.TYPE_AUTH,
-					 HmppError.FORBIDDEN));
+	_broker.sendQueryError(id, from, to, value,
+			       new HmppError(HmppError.TYPE_AUTH,
+					     HmppError.FORBIDDEN));
     }
     else {
       // XXX: auth
-      _server.queryError(id, from, to, value,
-			 new HmppError(HmppError.TYPE_CANCEL,
-				       HmppError.FORBIDDEN));
+      _broker.sendQueryError(id, from, to, value,
+			     new HmppError(HmppError.TYPE_CANCEL,
+				           HmppError.FORBIDDEN));
     }
     
     return true;

@@ -34,12 +34,12 @@ import java.io.Serializable;
 /**
  * Handling query packets
  */
-public interface QueryHandler {
+public interface QueryStream {
   /**
    * Handles a query information request (get), returning true if this
    * handler understands the query class, and false if it does not.
    *
-   * If onQueryGet returns true, the handler MUST send a
+   * If sendQueryGet returns true, the handler MUST send a
    * <code>queryResult</code> or <code>queryError</code> to the sender,
    * using the same <code>id</code>.
    *
@@ -50,16 +50,16 @@ public interface QueryHandler {
    *
    * @return true if this handler understand the query, false otherwise
    */
-  public boolean onQueryGet(long id,
-			    String to,
-			    String from,
-			    Serializable query);
+  public boolean sendQueryGet(long id,
+			      String to,
+			      String from,
+			      Serializable query);
   
   /**
    * Handles a query update request (set), returning true if this handler
    * understands the query class, and false if it does not.
    *
-   * If onQuerySet returns true, the handler MUST send a
+   * If sendQuerySet returns true, the handler MUST send a
    * <code>queryResult</code> or <code>queryError</code> to the sender,
    * using the same <code>id</code>.
    *
@@ -70,10 +70,10 @@ public interface QueryHandler {
    *
    * @return true if this handler understand the query, false otherwise
    */
-  public boolean onQuerySet(long id,
-			    String to,
-			    String from,
-			    Serializable query);
+  public boolean sendQuerySet(long id,
+			      String to,
+			      String from,
+			      Serializable query);
 
   /**
    * Handles the query response from a corresponding queryGet or querySet.
@@ -83,10 +83,10 @@ public interface QueryHandler {
    * @param from the source JID, used as the target for the response
    * @param value the result payload
    */
-  public void onQueryResult(long id,
-			    String to,
-			    String from,
-			    Serializable value);
+  public void sendQueryResult(long id,
+			      String to,
+			      String from,
+			      Serializable value);
   
   /**
    * Handles the query error from a corresponding queryGet or querySet.
@@ -97,9 +97,9 @@ public interface QueryHandler {
    * @param query the query payload
    * @param error additional error information
    */
-  public void onQueryError(long id,
-			   String fromJid,
-			   String toJid,
-			   Serializable query,
-			   HmppError error);
+  public void sendQueryError(long id,
+			     String fromJid,
+			     String toJid,
+			     Serializable query,
+			     HmppError error);
 }

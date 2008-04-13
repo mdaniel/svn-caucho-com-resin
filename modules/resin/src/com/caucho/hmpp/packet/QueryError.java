@@ -29,6 +29,7 @@
 
 package com.caucho.hmpp.packet;
 
+import com.caucho.hmpp.HmppStream;
 import com.caucho.hmpp.HmppError;
 import java.io.Serializable;
 
@@ -102,9 +103,9 @@ public class QueryError extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(PacketHandler handler)
+  public void dispatch(HmppStream handler)
   {
-    handler.onQueryError(getId(), getTo(), getFrom(), getValue(), getError());
+    handler.sendQueryError(getId(), getTo(), getFrom(), getValue(), getError());
   }
 
   @Override

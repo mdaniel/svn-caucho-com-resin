@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.hmpp.HmppBroker;
+import com.caucho.hmpp.HmppConnectionFactory;
 import java.io.*;
 import javax.servlet.*;
 
@@ -38,18 +38,20 @@ import com.caucho.hemp.manager.*;
 import com.caucho.hemp.service.*;
 import com.caucho.server.connection.*;
 import com.caucho.vfs.*;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Main protocol handler for the HTTP version of HeMPP.
  */
 public class HempServlet extends GenericServlet {
-  private HmppBroker _manager;
+  private HmppConnectionFactory _manager;
 
-  public void setBroker(HmppBroker manager)
+  public void setBroker(HmppConnectionFactory manager)
   {
     _manager = manager;
   }
 
+  @Override
   public void init()
   {
     if (_manager == null)
@@ -69,13 +71,13 @@ public class HempServlet extends GenericServlet {
 
     if (! "HMPP/0.9".equals(upgrade)) {
       // eventually can use alt method
-      res.sendError(res.SC_NOT_FOUND);
+      res.sendError(HttpServletResponse.SC_NOT_FOUND);
       return;
     }
 
     ReadStream is = req.getConnection().getReadStream();
     WriteStream os = req.getConnection().getWriteStream();
 
-    res.upgradeProtocol(new ServerPacketHandler(_manager, is, os));
+    res.upgradeProtocol(new ServerInboundStream(_manager, is, os));
   }
 }

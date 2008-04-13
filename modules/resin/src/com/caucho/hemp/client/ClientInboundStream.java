@@ -30,7 +30,7 @@
 package com.caucho.hemp.client;
 
 import com.caucho.hmpp.*;
-import com.caucho.hmpp.packet.PacketHandler;
+import com.caucho.hmpp.HmppStream;
 import com.caucho.hmpp.packet.Packet;
 import com.caucho.hmpp.HmppError;
 import com.caucho.server.connection.*;
@@ -50,9 +50,9 @@ import java.util.logging.*;
 /**
  * HeMPP client protocol
  */
-class ClientPacketHandler implements Runnable, PacketHandler {
+class ClientInboundStream implements Runnable, HmppStream {
   private static final Logger log
-    = Logger.getLogger(ClientPacketHandler.class.getName());
+    = Logger.getLogger(ClientInboundStream.class.getName());
 
   private static long _gId;
   
@@ -61,7 +61,7 @@ class ClientPacketHandler implements Runnable, PacketHandler {
   
   private boolean _isFinest;
 
-  ClientPacketHandler(HempClient client)
+  ClientInboundStream(HempClient client)
   {
     _client = client;
     _loader = Thread.currentThread().getContextClassLoader();
@@ -121,14 +121,14 @@ class ClientPacketHandler implements Runnable, PacketHandler {
   /**
    * Handles a message
    */
-  public void onMessage(String to,
+  public void sendMessage(String to,
 			String from,
 			Serializable value)
   {
-    MessageHandler handler = _client.getMessageHandler();
+    MessageStream handler = _client.getMessageHandler();
 
     if (handler != null)
-      handler.onMessage(to, from, value);
+      handler.sendMessage(to, from, value);
   }
   
   /**
@@ -137,14 +137,14 @@ class ClientPacketHandler implements Runnable, PacketHandler {
    * The get handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public boolean onQueryGet(long id,
+  public boolean sendQueryGet(long id,
 		  	    String to,
 			    String from,
 			    Serializable value)
   {
-    QueryHandler handler = _client.getQueryHandler();
+    QueryStream handler = _client.getQueryHandler();
 
-    if (handler == null || ! handler.onQueryGet(id, to, from, value)) {
+    if (handler == null || ! handler.sendQueryGet(id, to, from, value)) {
       _client.queryError(id, from, value,
 			 new HmppError("unknown",
 				       "no onQueryGet handling " + value.getClass().getName()));
@@ -159,14 +159,14 @@ class ClientPacketHandler implements Runnable, PacketHandler {
    * The set handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public boolean onQuerySet(long id,
+  public boolean sendQuerySet(long id,
 			    String to,
 			    String from,
 			    Serializable value)
   {
-    QueryHandler handler = _client.getQueryHandler();
+    QueryStream handler = _client.getQueryHandler();
 
-    if (handler == null || ! handler.onQuerySet(id, to, from, value)) {
+    if (handler == null || ! handler.sendQuerySet(id, to, from, value)) {
       _client.queryError(id, from, value,
 			 new HmppError("unknown",
 				       "no onQuerySet handling " + value.getClass().getName()));
@@ -180,7 +180,7 @@ class ClientPacketHandler implements Runnable, PacketHandler {
    *
    * The result id will match a pending get or set.
    */
-  public void onQueryResult(long id,
+  public void sendQueryResult(long id,
 			    String to,
 			    String from,
 			    Serializable value)
@@ -193,7 +193,7 @@ class ClientPacketHandler implements Runnable, PacketHandler {
    *
    * The result id will match a pending get or set.
    */
-  public void onQueryError(long id,
+  public void sendQueryError(long id,
 			   String to,
 			   String from,
 			   Serializable value,
@@ -208,14 +208,14 @@ class ClientPacketHandler implements Runnable, PacketHandler {
    * If the handler deals with clients, the "from" value should be ignored
    * and replaced by the client's jid.
    */
-  public void onPresence(String to,
+  public void sendPresence(String to,
 			 String from,
 			 Serializable []data)
   {
-    PresenceHandler handler = _client.getPresenceHandler();
+    PresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
-      handler.onPresence(to, from, data);
+      handler.sendPresence(to, from, data);
   }
   
   /**
@@ -224,93 +224,93 @@ class ClientPacketHandler implements Runnable, PacketHandler {
    * If the handler deals with clients, the "from" value should be ignored
    * and replaced by the client's jid.
    */
-  public void onPresenceUnavailable(String to,
+  public void sendPresenceUnavailable(String to,
 				    String from,
 				    Serializable []data)
   {
-    PresenceHandler handler = _client.getPresenceHandler();
+    PresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
-      handler.onPresenceUnavailable(to, from, data);
+      handler.sendPresenceUnavailable(to, from, data);
   }
   
   /**
    * Handles a presence probe from another server
    */
-  public void onPresenceProbe(String to,
+  public void sendPresenceProbe(String to,
 			      String from,
 			      Serializable []data)
   {
-    PresenceHandler handler = _client.getPresenceHandler();
+    PresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
-      handler.onPresenceProbe(to, from, data);
+      handler.sendPresenceProbe(to, from, data);
   }
   
   /**
    * Handles a presence subscribe request from a client
    */
-  public void onPresenceSubscribe(String to,
+  public void sendPresenceSubscribe(String to,
 				  String from,
 				  Serializable []data)
   {
-    PresenceHandler handler = _client.getPresenceHandler();
+    PresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
-      handler.onPresenceSubscribe(to, from, data);
+      handler.sendPresenceSubscribe(to, from, data);
   }
   
   /**
    * Handles a presence subscribed result to a client
    */
-  public void onPresenceSubscribed(String to,
+  public void sendPresenceSubscribed(String to,
 				   String from,
 				   Serializable []data)
   {
-    PresenceHandler handler = _client.getPresenceHandler();
+    PresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
-      handler.onPresenceSubscribed(to, from, data);
+      handler.sendPresenceSubscribed(to, from, data);
   }
   
   /**
    * Handles a presence unsubscribe request from a client
    */
-  public void onPresenceUnsubscribe(String to,
+  public void sendPresenceUnsubscribe(String to,
 				    String from,
 				    Serializable []data)
   {
-    PresenceHandler handler = _client.getPresenceHandler();
+    PresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
-      handler.onPresenceUnsubscribe(to, from, data);
+      handler.sendPresenceUnsubscribe(to, from, data);
   }
   
   /**
    * Handles a presence unsubscribed result to a client
    */
-  public void onPresenceUnsubscribed(String to,
+  public void sendPresenceUnsubscribed(String to,
 				     String from,
 				     Serializable []data)
   {
-    PresenceHandler handler = _client.getPresenceHandler();
+    PresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
-      handler.onPresenceUnsubscribed(to, from, data);
+      handler.sendPresenceUnsubscribed(to, from, data);
   }
   
   /**
    * Handles a presence unsubscribed result to a client
    */
-  public void onPresenceError(String to,
+  public void sendPresenceError(String to,
 			      String from,
 			      Serializable []data,
 			      HmppError error)
   {
-    PresenceHandler handler = _client.getPresenceHandler();
+    PresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
-      handler.onPresenceError(to, from, data, error);
+      handler.sendPresenceError(to, from, data, error);
   }
 
   @Override

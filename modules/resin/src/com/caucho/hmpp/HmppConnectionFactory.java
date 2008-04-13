@@ -29,33 +29,20 @@
 
 package com.caucho.hmpp;
 
-import com.caucho.hmpp.packet.PacketHandler;
-import java.io.Serializable;
+import com.caucho.hmpp.spi.HmppResource;
 
 /**
- * Low-level callback to handle packet events.  Each method corresponds to
- * a packet class.
+ * Manager
  */
-public interface HmppResource extends PacketHandler 
+public interface HmppConnectionFactory
 {
   /**
-   * Returns the resource's preferred jid.
+   * Creates a session
    */
-  public String getJid();
-
+  public HmppConnection getConnection(String uid, String password);
+  
   /**
-   * Called when an instance logs in
+   * Registers a resource
    */
-  public void onLogin(String jid);
-
-  /**
-   * Called when an instance logs out
-   */
-  public void onLogout(String jid);
-
-  /**
-   * Called form a client presence subscription
-   */
-  public void onClientPresenceSubscribe(String to, String from,
-					Serializable []data);
+  public HmppConnection registerResource(String jid, HmppResource resource);
 }

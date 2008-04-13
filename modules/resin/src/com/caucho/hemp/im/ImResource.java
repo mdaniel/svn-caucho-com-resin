@@ -32,8 +32,7 @@ package com.caucho.hemp.im;
 import com.caucho.hmpp.*;
 import com.caucho.hmpp.disco.*;
 import com.caucho.hmpp.im.*;
-import com.caucho.hmpp.spi.HmppServer;
-import com.caucho.hmpp.AbstractResource;
+import com.caucho.hmpp.spi.AbstractHmppResource;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.*;
@@ -42,12 +41,12 @@ import java.util.logging.*;
 /**
  * Resource representing an IM user
  */
-public class ImResource extends AbstractResource
+public class ImResource extends AbstractHmppResource
 {
   private static final Logger log
     = Logger.getLogger(ImResource.class.getName());
   
-  private HmppServer _server;
+  private HmppStream _broker;
 
   private ArrayList<String> _jidList
     = new ArrayList<String>();
@@ -58,19 +57,35 @@ public class ImResource extends AbstractResource
   {
   }
   
-  public ImResource(HmppServer server, String jid)
+  public ImResource(HmppStream broker, String jid)
   {
-    if (server == null)
+    if (broker == null)
       throw new NullPointerException("server may not be null");
     
     setJid(jid);
 
-    _server = server;
+    _broker = broker;
   }
 
   public String []getJids()
   {
     return _jids;
+  }
+
+  /**
+   * Creates an outbound filter
+   */
+  public HmppStream getOutboundFilter(HmppStream stream)
+  {
+    return new ImOutboundFilter(stream, this);
+  }
+
+  /**
+   * Creates an inbound filter
+   */
+  public HmppStream getInboundFilter(HmppStream stream)
+  {
+    return new ImInboundFilter(stream, this);
   }
 
   public void onLogin(String jid)
@@ -100,17 +115,17 @@ public class ImResource extends AbstractResource
     }
   }
 
-  public void onMessage(String to, String from, Serializable value)
+  public void sendMessage(String to, String from, Serializable value)
   {
     String []jids = _jids;
 
     for (String jid : jids) {
       // XXX: is the "to" correct?
-      _server.sendMessage(jid, from, value);
+      _broker.sendMessage(jid, from, value);
     }
   }
   
-  public boolean onQueryGet(long id,
+  public boolean sendQueryGet(long id,
 			    String to,
 			    String from,
 			    Serializable query)
@@ -119,12 +134,12 @@ public class ImResource extends AbstractResource
       DiscoInfoQuery info = new DiscoInfoQuery(getDiscoIdentity(),
 					       getDiscoFeatures());
       
-      _server.queryResult(id, from, to, info);
+      _broker.sendQueryResult(id, from, to, info);
       
       return true;
     }
     else if (query instanceof RosterQuery) {
-      _server.queryResult(id, from, to, new RosterQuery(getRoster()));
+      _broker.sendQueryResult(id, from, to, new RosterQuery(getRoster()));
 
       return true;
     }
@@ -132,7 +147,7 @@ public class ImResource extends AbstractResource
     return false;
   }
   
-  public boolean onQuerySet(long id,
+  public boolean sendQuerySet(long id,
 			    String to,
 			    String from,
 			    Serializable query)
@@ -146,26 +161,103 @@ public class ImResource extends AbstractResource
     return false;
   }
 
-  public void onClientPresenceSubscribe(String to,
-					String from,
-					Serializable []data)
-  {
-    if (rosterSubscribe(to, from, data)) {
-      _server.presenceSubscribe(to, from, data);
-    }
-  }
-
-  public void onPresenceSubscribe(String to,
-				  String from,
-				  Serializable []data)
+  /**
+   * forwards presence to logged in resources
+   */
+  @Override
+  public void sendPresence(String to, String from, Serializable []data)
   {
     String []jids = _jids;
 
+    for (String jid : jids) {
+      _broker.sendPresence(jid, from, data);
+    }
+  }
+
+  /**
+   * forwards presence to logged in resources
+   */
+  @Override
+  public void sendPresenceProbe(String to, String from, Serializable []data)
+  {
+    String []jids = _jids;
+
+    for (String jid : jids) {
+      _broker.sendPresenceProbe(jid, from, data);
+    }
+  }
+
+  /**
+   * forwards presence to logged in resources
+   */
+  @Override
+  public void sendPresenceUnavailable(String to, String from,
+				      Serializable []data)
+  {
+    String []jids = _jids;
+
+    for (String jid : jids) {
+      _broker.sendPresenceUnavailable(jid, from, data);
+    }
+  }
+
+  /**
+   * Presence from self
+   */
+  public void sendPresence(String from, Serializable []data)
+  {
+    for (RosterItem item : getRoster()) {
+      String subscription = item.getSubscription();
+
+      if ("from".equals(subscription)
+	  || "both".equals(subscription)) {
+	_broker.sendPresence(item.getJid(), getJid(), data);
+      }
+      
+      if ("to".equals(subscription)
+	  || "both".equals(subscription)) {
+	_broker.sendPresenceProbe(item.getJid(), getJid(), data);
+      }
+    }
+    
+    for (String jid : _jids) {
+      if (! jid.equals(from)) {
+	_broker.sendPresence(jid, from, data);
+      }
+    }
+  }
+
+  public void sendPresenceSubscribe(String to,
+				    String from,
+				    Serializable []data)
+  {
+    if (! rosterSubscribeFrom(to, from, data)) {
+      log.fine(this + " sendPresenceSubscribe denied from=" + from);
+
+      return;
+    }
+    
+    String []jids = _jids;
+
     if (jids.length > 0) {
-      _server.presenceSubscribe(jids[0], from, data);
+      _broker.sendPresenceSubscribe(jids[0], from, data);
     }
     else {
       log.fine(this + " onPresenceSubscribe to=" + to);
+    }
+  }
+
+  public void sendPresenceSubscribed(String to,
+				     String from,
+				     Serializable []data)
+  {
+    // complete subscription from the target
+    if (rosterSubscribedFrom(to, from, data)) {
+      String []jids = _jids;
+
+      if (jids.length > 0) {
+	_broker.sendPresenceSubscribed(jids[0], from, data);
+      }
     }
   }
 
@@ -204,7 +296,7 @@ public class ImResource extends AbstractResource
     
     querySetResources(roster);
 
-    _server.queryResult(id, from, to, null);
+    _broker.sendQueryResult(id, from, to, null);
 
     return true;
   }
@@ -244,11 +336,41 @@ public class ImResource extends AbstractResource
   }
 
   /**
-   * remove a roster item
+   * client requests a subscription to this resource
    */
-  protected boolean rosterSubscribe(String to,
-				    String from,
-				    Serializable []data)
+  protected boolean rosterSubscribeTo(String to,
+				      String from,
+				      Serializable []data)
+  {
+    return true;
+  }
+
+  /**
+   * this resource requests a subscription from the target
+   */
+  protected boolean rosterSubscribeFrom(String to,
+					String from,
+					Serializable []data)
+  {
+    return true;
+  }
+
+  /**
+   * subscribe to a roster item
+   */
+  protected boolean rosterSubscribedTo(String to,
+				     String from,
+				     Serializable []data)
+  {
+    return true;
+  }
+
+  /**
+   * add a subscription from a roster item
+   */
+  protected boolean rosterSubscribedFrom(String to,
+					 String from,
+					 Serializable []data)
   {
     return true;
   }

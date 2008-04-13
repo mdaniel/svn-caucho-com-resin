@@ -27,42 +27,28 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmpp;
+package com.caucho.hemp.im;
 
+import com.caucho.hmpp.spi.AbstractHmppFilter;
+import com.caucho.hmpp.*;
+import com.caucho.hmpp.disco.*;
+import com.caucho.hmpp.im.*;
+import java.util.*;
+import java.util.logging.*;
 import java.io.Serializable;
 
+
 /**
- * Configuration for a service
+ * Filter on outbound requests
  */
-public class AbstractQueryHandler implements QueryHandler {
-  public boolean onQueryGet(long id,
-			    String to,
-			    String from,
-			    Serializable query)
-  {
-    return false;
-  }
+public class ImOutboundFilter extends AbstractHmppFilter
+{
+  private ImResource _resource;
   
-  public boolean onQuerySet(long id,
-			    String to,
-			    String from,
-			    Serializable query)
+  public ImOutboundFilter(HmppStream next, ImResource resource)
   {
-    return false;
-  }
-  
-  public void onQueryResult(long id,
-			    String to,
-			    String from,
-			    Serializable value)
-  {
-  }
-  
-  public void onQueryError(long id,
-			   String to,
-			   String from,
-			   Serializable query,
-			   HmppError error)
-  {
+    super(next);
+
+    _resource = resource;
   }
 }

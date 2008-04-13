@@ -66,9 +66,9 @@ public class HempClient {
   private Hessian2StreamingInput _in;
   private Hessian2StreamingOutput _out;
 
-  private MessageHandler _messageHandler;
-  private QueryHandler _queryHandler;
-  private PresenceHandler _presenceHandler;
+  private MessageStream _messageHandler;
+  private QueryStream _queryHandler;
+  private PresenceStream _presenceHandler;
 
   private HashMap<Long,QueryItem> _queryMap
     = new HashMap<Long,QueryItem>();
@@ -145,7 +145,7 @@ public class HempClient {
       _out = new Hessian2StreamingOutput(_os);
       _in = new Hessian2StreamingInput(_is);
 
-      ThreadPool.getThreadPool().start(new ClientPacketHandler(this));
+      ThreadPool.getThreadPool().start(new ClientInboundStream(this));
     }
     else {
       if (log.isLoggable(Level.FINE))
@@ -185,7 +185,7 @@ public class HempClient {
   /**
    * Sets the message listener
    */
-  public void setMessageHandler(MessageHandler listener)
+  public void setMessageHandler(MessageStream listener)
   {
     _messageHandler = listener;
   }
@@ -193,7 +193,7 @@ public class HempClient {
   /**
    * Gets the message listener
    */
-  public MessageHandler getMessageHandler()
+  public MessageStream getMessageHandler()
   {
     return _messageHandler;
   }
@@ -201,7 +201,7 @@ public class HempClient {
   /**
    * Sets the presence handler
    */
-  public void setPresenceHandler(PresenceHandler handler)
+  public void setPresenceHandler(PresenceStream handler)
   {
     _presenceHandler = handler;
   }
@@ -209,7 +209,7 @@ public class HempClient {
   /**
    * Gets the message listener
    */
-  public PresenceHandler getPresenceHandler()
+  public PresenceStream getPresenceHandler()
   {
     return _presenceHandler;
   }
@@ -367,7 +367,7 @@ public class HempClient {
   /**
    * Sets the query handler
    */
-  public void setQueryHandler(QueryHandler handler)
+  public void setQueryHandler(QueryStream handler)
   {
     _queryHandler = handler;
   }
@@ -375,7 +375,7 @@ public class HempClient {
   /**
    * Gets the query handler
    */
-  public QueryHandler getQueryHandler()
+  public QueryStream getQueryHandler()
   {
     return _queryHandler;
   }
@@ -612,11 +612,13 @@ public class HempClient {
     }
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _address + "," + _port + "]";
   }
 
+  @Override
   protected void finalize()
   {
     close();
@@ -682,7 +684,6 @@ public class HempClient {
 	log.log(Level.FINE, e.toString(), e);
       }
 
-      System.out.println("WAIT-FOR: " + _isResult);
       return _isResult;
     }
     
@@ -694,7 +695,6 @@ public class HempClient {
       synchronized (this) {
 	_isResult = true;
 	notifyAll();
-	System.out.println("ON_RESULT: " + _result);
       }
     }
   
@@ -707,7 +707,6 @@ public class HempClient {
       synchronized (this) {
 	_isResult = true;
 	notifyAll();
-	System.out.println("ON_ERROR: " + error);
       }
     }
   }

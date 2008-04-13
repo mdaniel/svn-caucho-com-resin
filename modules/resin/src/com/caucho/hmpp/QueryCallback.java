@@ -29,18 +29,16 @@
 
 package com.caucho.hmpp;
 
-import com.caucho.hmpp.HmppError;
 import java.io.Serializable;
-import com.caucho.hemp.*;
 
 /**
  * callback for a query
  */
 public interface QueryCallback {
-  public void onQueryResult(String fromJid, String toJid,
+  public void onQueryResult(String to, String from,
 			    Serializable value, Object handback);
   
-  public void onQueryError(String fromJid, String toJid,
+  public void onQueryError(String to, String from,
 			   Serializable value, HmppError error,
 			   Object handback);
 }

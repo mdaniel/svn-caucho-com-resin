@@ -27,30 +27,27 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmpp.spi;
-
-import com.caucho.hmpp.HmppBroker;
-import com.caucho.hmpp.HmppResource;
+package com.caucho.hmpp;
 
 import java.io.Serializable;
 
 /**
- * spi for a broker
+ * MessageStream is a callback for handling unidirectional messages.
+ * 
+ * Messages in HMPP consist of a target JID (to), a source JID (from), and
+ * a payload (value).
+ * 
+ * The payload is typed according to the application, so an IM application
+ * might use a payload called ImMessage, while a game might have MoveMessage,
+ * FireLaserMessage, etc.
  */
-public interface ResourceBroker extends HmppServer {
+public interface MessageStream {
   /**
-   * Sets the server to send messages
+   * Sends a message packet
+   * 
+   * @param to the target JID
+   * @param from the source JID
+   * @param value the message payload
    */
-  public void setServer(HmppServer server);
-  
-  /**
-   * Returns the resource with the given name, or null if this is not
-   * a known resource
-   */
-  public HmppResource lookupResource(String jid);
-
-  /**
-   * Basic presence
-   */
-  public void onPresence(String from, Serializable []data);
+  public void sendMessage(String to, String from, Serializable value);
 }

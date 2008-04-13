@@ -29,6 +29,7 @@
 
 package com.caucho.hemp.im;
 
+import com.caucho.hmpp.spi.HmppResource;
 import java.util.*;
 import java.lang.ref.*;
 
@@ -41,7 +42,7 @@ import java.io.Serializable;
 /**
  * IM Broker
  */
-abstract public class AbstractImBroker extends AbstractBroker {
+abstract public class AbstractImBroker extends AbstractResourceManager {
   /**
    * Returns the resource with the given jid
    */

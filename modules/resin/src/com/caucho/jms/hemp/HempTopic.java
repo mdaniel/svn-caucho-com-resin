@@ -29,8 +29,8 @@
 
 package com.caucho.jms.hemp;
 
-import com.caucho.hmpp.HmppSession;
-import com.caucho.hmpp.HmppBroker;
+import com.caucho.hmpp.spi.AbstractHmppResource;
+import com.caucho.hmpp.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.*;
@@ -53,7 +53,7 @@ import com.caucho.webbeans.manager.*;
  * Implements an hemp topic.
  */
 public class HempTopic extends AbstractTopic
-  implements com.caucho.hmpp.MessageHandler
+  implements com.caucho.hmpp.MessageStream
 {
   private static final L10N L = new L10N(HempTopic.class);
   
@@ -63,15 +63,17 @@ public class HempTopic extends AbstractTopic
   private ArrayList<AbstractQueue> _subscriptionList
     = new ArrayList<AbstractQueue>();
 
-  private HmppBroker _broker;
-  private HmppSession _session;
+  private HmppConnectionFactory _broker;
+  private HmppConnection _session;
+
+  private TopicResource _resource = new TopicResource();
 
   private int _id;
 
   /**
    * Sets the broker
    */
-  public void setBroker(HmppBroker broker)
+  public void setBroker(HmppConnectionFactory broker)
   {
     _broker = broker;
   }
@@ -96,20 +98,19 @@ public class HempTopic extends AbstractTopic
     if (_broker == null) {
       WebBeansContainer container = WebBeansContainer.create();
 
-      ComponentFactory comp = container.resolveByType(HmppBroker.class);
+      ComponentFactory comp = container.resolveByType(HmppConnectionFactory.class);
 
       if (comp == null)
 	throw new ConfigException(L.l("hmpp protocol needs broker"));
     
-      _broker = (HmppBroker) comp.get();
+      _broker = (HmppConnectionFactory) comp.get();
 
       if (_broker == null)
 	throw new ConfigException(L.l("Need xmpp protocol"));
     }
 
     if (_session == null) {
-      _session = _broker.registerResource(getName());
-      _session.setMessageHandler(this);
+      _session = _broker.registerResource(getName(), _resource);
     }
   }
 
@@ -148,7 +149,7 @@ public class HempTopic extends AbstractTopic
     _subscriptionList.remove(queue);
   }
 
-  public void onMessage(String fromJit, String toJid, Serializable value)
+  public void sendMessage(String fromJit, String toJid, Serializable value)
   {
     try {
       javax.jms.Message msg = null;
@@ -177,6 +178,9 @@ public class HempTopic extends AbstractTopic
     throws JMSException
   {
     // _xmppNode.send(session, msg, timeout);
+  }
+
+  class TopicResource extends AbstractHmppResource {
   }
 }
 

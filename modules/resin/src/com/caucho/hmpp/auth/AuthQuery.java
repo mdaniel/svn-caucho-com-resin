@@ -85,6 +85,7 @@ public class AuthQuery implements Serializable {
     return _resource;
   }
 
+  @Override
   public String toString()
   {
     StringBuilder sb = new StringBuilder();

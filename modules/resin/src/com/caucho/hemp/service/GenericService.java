@@ -29,15 +29,13 @@
 
 package com.caucho.hemp.service;
 
-import com.caucho.hmpp.HmppSession;
-import com.caucho.hmpp.HmppBroker;
-import com.caucho.hmpp.PresenceHandler;
-import com.caucho.hmpp.MessageHandler;
-import com.caucho.hmpp.QueryHandler;
+import com.caucho.hmpp.HmppConnection;
+import com.caucho.hmpp.HmppConnectionFactory;
 import com.caucho.hmpp.HmppError;
 import com.caucho.config.*;
 import com.caucho.hemp.*;
 import com.caucho.hemp.manager.*;
+import com.caucho.hmpp.spi.AbstractHmppResource;
 import com.caucho.util.*;
 
 import java.io.Serializable;
@@ -49,19 +47,18 @@ import javax.webbeans.*;
 /**
  * Configuration for a service
  */
-public class GenericService
-  implements MessageHandler, QueryHandler, PresenceHandler
+public class GenericService extends AbstractHmppResource
 {
   private static final L10N L = new L10N(GenericService.class);
   private static final Logger log
     = Logger.getLogger(GenericService.class.getName());
   
-  private @In HmppBroker _manager;
+  private @In HmppConnectionFactory _manager;
   
   private String _name;
   private String _password;
 
-  private HmppSession _session;
+  private HmppConnection _conn;
 
   public void setName(String name)
   {
@@ -80,25 +77,21 @@ public class GenericService
       throw new ConfigException(L.l("{0} requires a name",
 				    getClass().getSimpleName()));
 
-    _session = _manager.registerResource(_name);
-
-    _session.setMessageHandler(this);
-    _session.setQueryHandler(this);
-    _session.setPresenceHandler(this);
+    _conn = _manager.registerResource(_name, this);
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " init");
   }
 
-  public HmppSession getSession()
+  public HmppConnection getSession()
   {
-    return _session;
+    return _conn;
   }
 
   /**
    * Handles an incoming message
    */
-  public void onMessage(String to, String from, Serializable value)
+  public void sendMessage(String to, String from, Serializable value)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " onMessage to=" + to + " from=" + from
@@ -109,7 +102,7 @@ public class GenericService
   /**
    * Handles an incoming query
    */
-  public boolean onQueryGet(long id,
+  public boolean sendQueryGet(long id,
 			    String to,
 			    String from,
 			    Serializable query)
@@ -126,7 +119,7 @@ public class GenericService
   /**
    * Handles an incoming query
    */
-  public boolean onQuerySet(long id,
+  public boolean sendQuerySet(long id,
 			    String to,
 			    String from,
 			    Serializable query)
@@ -143,7 +136,7 @@ public class GenericService
   /**
    * Handles an incoming query
    */
-  public void onQueryResult(long id,
+  public void sendQueryResult(long id,
 			    String to,
 			    String from,
 			    Serializable value)
@@ -158,7 +151,7 @@ public class GenericService
   /**
    * Handles an incoming query
    */
-  public void onQueryError(long id,
+  public void sendQueryError(long id,
 			   String to,
 			   String from,
 			   Serializable value,
@@ -177,7 +170,7 @@ public class GenericService
    * @param toJid - the jid of the resource managed by this service
    * @param value - any additional payload for the presence notification
    */
-  public void onPresence(String to, String from, Serializable []data)
+  public void sendPresence(String to, String from, Serializable []data)
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " onPresence to=" + to + " from=" + from);
@@ -190,7 +183,7 @@ public class GenericService
    * @param toJid - the jid of the resource managed by this service
    * @param value - any additional payload for the presence notification
    */
-  public void onPresenceUnavailable(String to,
+  public void sendPresenceUnavailable(String to,
 				    String from,
 				    Serializable []data)
   {
@@ -209,7 +202,7 @@ public class GenericService
    * @param toJid - the jid of the resource managed by this service
    * @param data - any additional payload for the presence notification
    */
-  public void onPresenceProbe(String to,
+  public void sendPresenceProbe(String to,
 			      String from,
 			      Serializable []data)
   {
@@ -227,7 +220,7 @@ public class GenericService
    * @param toJid - the jid of the resource managed by this service
    * @param data - any additional payload for the presence notification
    */
-  public void onPresenceSubscribe(String to,
+  public void sendPresenceSubscribe(String to,
 				  String from,
 				  Serializable []data)
   {
@@ -245,7 +238,7 @@ public class GenericService
    * @param from - the jid of the client sending the notification
    * @param data - any additional payload for the presence notification
    */
-  public void onPresenceSubscribed(String to,
+  public void sendPresenceSubscribed(String to,
 				   String from,
 				   Serializable []data)
   {
@@ -264,7 +257,7 @@ public class GenericService
    * @param from - the jid of the client sending the notification
    * @param data - any additional payload for the presence notification
    */
-  public void onPresenceUnsubscribe(String to,
+  public void sendPresenceUnsubscribe(String to,
 				    String from,
 				    Serializable []data)
   {
@@ -282,7 +275,7 @@ public class GenericService
    * @param from - the jid of the client sending the notification
    * @param value - any additional payload for the presence notification
    */
-  public void onPresenceUnsubscribed(String to,
+  public void sendPresenceUnsubscribed(String to,
 				     String from,
 				     Serializable []data)
   {
@@ -299,7 +292,7 @@ public class GenericService
    * @param data - any additional payload for the presence notification
    * @param error - error information
    */
-  public void onPresenceError(String to,
+  public void sendPresenceError(String to,
 			      String from,
 			      Serializable []data,
 			      HmppError error)
@@ -312,7 +305,7 @@ public class GenericService
   @PreDestroy
   protected void destroy()
   {
-    _session.close();
+    _conn.close();
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " destroy");
@@ -322,5 +315,25 @@ public class GenericService
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _name + "]";
+  }
+
+  public String getJid()
+  {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  public void onLogin(String jid)
+  {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  public void onLogout(String jid)
+  {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  public void onClientPresenceSubscribe(String to, String from, Serializable[] data)
+  {
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 }

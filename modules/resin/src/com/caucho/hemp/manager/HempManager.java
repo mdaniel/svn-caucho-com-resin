@@ -29,12 +29,13 @@
 
 package com.caucho.hemp.manager;
 
-import com.caucho.hmpp.HmppSession;
-import com.caucho.hmpp.HmppBroker;
+import com.caucho.hmpp.HmppConnection;
+import com.caucho.hmpp.HmppConnectionFactory;
 import com.caucho.hmpp.HmppError;
 import com.caucho.hemp.*;
 import com.caucho.hemp.service.*;
-import com.caucho.hmpp.HmppResource;
+import com.caucho.hmpp.spi.HmppResource;
+import com.caucho.hmpp.HmppStream;
 import com.caucho.hmpp.spi.*;
 import com.caucho.server.resin.*;
 import com.caucho.util.*;
@@ -45,12 +46,16 @@ import java.io.Serializable;
 
 
 /**
- * Manager
+ * Broker
  */
-public class HempManager implements HmppBroker, HmppServer {
+public class HempManager implements HmppConnectionFactory, HmppStream {
   private static final Logger log
     = Logger.getLogger(HempManager.class.getName());
   private static final L10N L = new L10N(HempManager.class);
+  
+  // outbound streams
+  private final HashMap<String,WeakReference<HmppStream>> _streamMap
+    = new HashMap<String,WeakReference<HmppStream>>();
   
   private final HashMap<String,WeakReference<HmppResource>> _resourceMap
     = new HashMap<String,WeakReference<HmppResource>>();
@@ -60,7 +65,7 @@ public class HempManager implements HmppBroker, HmppServer {
   private String _domain = "localhost";
   private String _managerJid = "localhost";
 
-  private ResourceBroker []_brokerList = new ResourceBroker[0];
+  private ResourceManager []_resourceManagerList = new ResourceManager[0];
 
   //
   // configuration
@@ -69,14 +74,14 @@ public class HempManager implements HmppBroker, HmppServer {
   /**
    * Adds a broker implementation, e.g. the IM broker.
    */
-  public void addBroker(ResourceBroker broker)
+  public void addBroker(ResourceManager resourceManager)
   {
-    ResourceBroker []brokerList = new ResourceBroker[_brokerList.length + 1];
-    System.arraycopy(_brokerList, 0, brokerList, 0, _brokerList.length);
-    brokerList[brokerList.length - 1] = broker;
-    _brokerList = brokerList;
+    ResourceManager []resourceManagerList = new ResourceManager[_resourceManagerList.length + 1];
+    System.arraycopy(_resourceManagerList, 0, resourceManagerList, 0, _resourceManagerList.length);
+    resourceManagerList[resourceManagerList.length - 1] = resourceManager;
+    _resourceManagerList = resourceManagerList;
     
-    broker.setServer(this);
+    resourceManager.setBroker(this);
   }
 
   //
@@ -86,18 +91,20 @@ public class HempManager implements HmppBroker, HmppServer {
   /**
    * Creates a session
    */
-  public HmppSession createSession(String uid, String password)
+  public HmppConnection getConnection(String uid, String password)
   {
     String jid = generateJid(uid);
 
-    HempSession session = new HempSession(this, jid);
+    HempConnectionImpl conn = new HempConnectionImpl(this, jid);
 
-    synchronized (_resourceMap) {
-      _resourceMap.put(jid, new WeakReference<HmppResource>(session));
+    synchronized (_streamMap) {
+      HmppStream streamHandler = conn.getStreamHandler();
+      
+      _streamMap.put(jid, new WeakReference<HmppStream>(streamHandler));
     }
 
     if (log.isLoggable(Level.FINE))
-      log.fine(session + " created");
+      log.fine(conn + " created");
 
     int p = jid.indexOf('/');
     if (p > 0) {
@@ -109,7 +116,7 @@ public class HempManager implements HmppBroker, HmppServer {
 	resource.onLogin(jid);
     }
 
-    return session;
+    return conn;
   }
 
   protected String generateJid(String uid)
@@ -128,7 +135,7 @@ public class HempManager implements HmppBroker, HmppServer {
   /**
    * Registers a resource
    */
-  public HmppSession registerResource(String name)
+  public HmppConnection registerResource(String name, HmppResource resource)
   {
     String jid;
     
@@ -143,7 +150,7 @@ public class HempManager implements HmppBroker, HmppServer {
       jid = name + "@" + getDomain();
     }
 
-    HempSession session = new HempSession(this, jid);
+    HempConnectionImpl conn = new HempConnectionImpl(this, jid);
 
     synchronized (_resourceMap) {
       WeakReference<HmppResource> oldRef = _resourceMap.get(jid);
@@ -152,13 +159,23 @@ public class HempManager implements HmppBroker, HmppServer {
 	throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
 					    jid));
       
-      _resourceMap.put(jid, new WeakReference<HmppResource>(session));
+      _resourceMap.put(jid, new WeakReference<HmppResource>(resource));
+    }
+
+    synchronized (_streamMap) {
+      WeakReference<HmppStream> oldRef = _streamMap.get(jid);
+
+      if (oldRef != null && oldRef.get() != null)
+	throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
+					    jid));
+      
+      _streamMap.put(jid, new WeakReference<HmppStream>(resource));
     }
 
     if (log.isLoggable(Level.FINE))
-      log.fine(session + " created");
+      log.fine(conn + " created");
 
-    return session;
+    return conn;
   }
 
   /**
@@ -180,209 +197,137 @@ public class HempManager implements HmppBroker, HmppServer {
   /**
    * Presence
    */
-  protected void presence(String fromJid, Serializable []data)
+  public void sendPresence(String to, String from, Serializable []data)
   {
-    ResourceBroker []brokerList = _brokerList;
+    if (to == null) {
+      ResourceManager []resourceManagers = _resourceManagerList;
 
-    for (ResourceBroker broker : brokerList) {
-      broker.onPresence(fromJid, data);
+      for (ResourceManager manager : resourceManagers) {
+        manager.sendPresence(to, from, data);
+      }
+    }
+    else {
+      HmppStream stream = getStream(to);
+      
+      if (stream != null)
+        stream.sendPresence(to, from, data);
     }
   }
 
   /**
-   * Presence to
+   * Presence unavailable
    */
-  public void presence(String to,
-		       String from,
-		       Serializable []data)
+  public void sendPresenceUnavailable(String to,
+				      String from,
+				      Serializable []data)
   {
-    HmppResource resource = getResource(to);
+    HmppStream stream = getStream(to);
 
-    if (resource != null)
-      resource.onPresence(to, from, data);
+    if (stream != null)
+      stream.sendPresenceUnavailable(to, from, data);
   }
 
   /**
    * Presence probe
    */
-  public void presenceProbe(String to,
-			    String from,
-			    Serializable []data)
+  public void sendPresenceProbe(String to,
+			        String from,
+			        Serializable []data)
   {
-    HmppResource resource = getResource(to);
+    HmppStream stream = getStream(to);
 
-    if (resource != null)
-      resource.onPresenceProbe(to, from, data);
-  }
-
-  /**
-   * Presence unavailable
-   */
-  public void presenceUnavailable(String to,
-				  String from,
-				  Serializable []data)
-  {
-    HmppResource resource = getResource(to);
-
-    if (resource != null)
-      resource.onPresenceUnavailable(to, from, data);
+    if (stream != null)
+      stream.sendPresenceProbe(to, from, data);
   }
 
   /**
    * Presence subscribe
    */
-  public void presenceSubscribe(String to,
-				String from,
-				Serializable []data)
+  public void sendPresenceSubscribe(String to,
+				    String from,
+				    Serializable []data)
   {
-    HmppResource resource = getResource(to);
+    HmppStream stream = getStream(to);
 
-    if (resource != null)
-      resource.onPresenceSubscribe(to, from, data);
+    if (stream != null)
+      stream.sendPresenceSubscribe(to, from, data);
   }
 
   /**
    * Presence subscribed
    */
-  public void presenceSubscribed(String to,
-				 String from,
-				 Serializable []data)
+  public void sendPresenceSubscribed(String to,
+				     String from,
+				     Serializable []data)
   {
-    HmppResource resource = getResource(to);
+    HmppStream stream = getStream(to);
 
-    if (resource != null)
-      resource.onPresenceSubscribed(to, from, data);
+    if (stream != null)
+      stream.sendPresenceSubscribed(to, from, data);
   }
 
   /**
    * Presence unsubscribe
    */
-  public void presenceUnsubscribe(String to,
-				  String from,
-				  Serializable []data)
+  public void sendPresenceUnsubscribe(String to,
+				      String from,
+				      Serializable []data)
   {
-    HmppResource resource = getResource(to);
+    HmppStream stream = getStream(to);
 
-    if (resource != null)
-      resource.onPresenceUnsubscribe(to, from, data);
+    if (stream != null)
+      stream.sendPresenceUnsubscribe(to, from, data);
   }
 
   /**
    * Presence unsubscribed
    */
-  public void presenceUnsubscribed(String to,
-				   String from,
-				   Serializable []data)
+  public void sendPresenceUnsubscribed(String to,
+				       String from,
+				       Serializable []data)
   {
-    HmppResource resource = getResource(to);
+    HmppStream stream = getStream(to);
 
-    if (resource != null)
-      resource.onPresenceUnsubscribed(to, from, data);
+    if (stream != null)
+      stream.sendPresenceUnsubscribed(to, from, data);
   }
 
   /**
    * Presence error
    */
-  public void presenceError(String to,
-			    String from,
-			    Serializable []data,
-			    HmppError error)
+  public void sendPresenceError(String to,
+			        String from,
+			        Serializable []data,
+			        HmppError error)
   {
-    HmppResource resource = getResource(to);
+    HmppStream stream = getStream(to);
 
-    if (resource != null)
-      resource.onPresenceError(to, from, data, error);
+    if (stream != null)
+      stream.sendPresenceError(to, from, data, error);
   }
-
-  /**
-   * Presence unavailable
-   */
-  protected void presenceUnavailable(String fromJid, Serializable []data)
-  {
-    /*
-    ArrayList<RosterItem> roster = getSubscriptions(fromJid);
-    
-    for (RosterItem item : roster) {
-      String targetJid = item.getTarget();
-
-      HempEntity entity = getEntity(targetJid);
-
-      if (entity == null)
-	continue;
-
-      if (item.isSubscribedTo() || item.isSubscriptionFrom())
-	entity.onPresenceUnavailable(fromJid, targetJid, data);
-    }
-    */
-  }
-
-  /**
-   * Returns the roster for a user
-   */
-  /*
-  protected ArrayList<RosterItem> getSubscriptions(String fromJid)
-  {
-    Roster roster = getRoster(fromJid);
-
-    if (roster != null)
-      return roster.getSubscriptions();
-    else
-      return new ArrayList<RosterItem>();
-  }
-  */
-
-  /**
-   * Returns the RosterManager
-   */
-  /*
-  protected RosterManager getRosterManager()
-  {
-    return _rosterManager;
-  }
-  */
-
-  /**
-   * Sets the RosterManager
-   */
-  /*
-  protected void setRosterManager(RosterManager manager)
-  {
-    _rosterManager = manager;
-  }
-  */
-
-  /**
-   * Returns the roster
-   */
-  /*
-  protected Roster getRoster(String fromJid)
-  {
-    return getRosterManager().getRoster(fromJid);
-  }
-  */
 
   /**
    * Sends a message
    */
   public void sendMessage(String to, String from, Serializable value)
   {
-    HmppResource resource = getResource(to);
+    HmppStream stream = getStream(to);
 
-    if (resource != null)
-      resource.onMessage(to, from, value);
+    if (stream != null)
+      stream.sendMessage(to, from, value);
     else
-      throw new RuntimeException(L.l("'{0}' is an unknown resource", to));
+      throw new RuntimeException(L.l("'{0}' is an unknown stream", to));
   }
 
   /**
    * Query an entity
    */
-  public void queryGet(long id, String to, String from, Serializable query)
+  public boolean sendQueryGet(long id, String to, String from, Serializable query)
   {
-    HmppResource resource = getResource(to);
+    HmppStream stream = getStream(to);
 
-    if (resource != null) {
-      if (! resource.onQueryGet(id, to, from, query)) {
+    if (stream != null) {
+      if (! stream.sendQueryGet(id, to, from, query)) {
 	if (log.isLoggable(Level.FINE)) {
 	  log.fine(this + " queryGet to unknown feature to='" + to
 		   + "' from=" + from + " query='" + query + "'");
@@ -395,14 +340,14 @@ public class HempManager implements HmppBroker, HmppServer {
 					HmppError.FEATURE_NOT_IMPLEMENTED,
 					msg);
 	
-	queryError(id, from, to, query, error);
+	sendQueryError(id, from, to, query, error);
       }
 
-      return;
+      return true;
     }
 
     if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " queryGet to unknown resource to='" + to
+      log.fine(this + " queryGet to unknown stream to='" + to
 	       + "' from=" + from);
     }
 
@@ -412,24 +357,26 @@ public class HempManager implements HmppBroker, HmppServer {
 				    HmppError.SERVICE_UNAVAILABLE,
 				    msg);
 				    
-    queryError(id, from, to, query, error);
+    sendQueryError(id, from, to, query, error);
+    
+    return true;
   }
 
   /**
    * Query an entity
    */
-  public void querySet(long id, String to, String from, Serializable query)
+  public boolean sendQuerySet(long id, String to, String from, Serializable query)
   {
-    HmppResource resource = getResource(to);
+    HmppStream stream = getStream(to);
 
-    if (resource != null) {
+    if (stream != null) {
       // XXX: error
-      resource.onQuerySet(id, to, from, query);
-      return;
+      stream.sendQuerySet(id, to, from, query);
+      return true;
     }
 
     if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " querySet to unknown resource '" + to
+      log.fine(this + " querySet to unknown stream '" + to
 	       + "' from=" + from);
     }
 
@@ -439,18 +386,20 @@ public class HempManager implements HmppBroker, HmppServer {
 				    HmppError.SERVICE_UNAVAILABLE,
 				    msg);
 				    
-    queryError(id, from, to, query, error);
+    sendQueryError(id, from, to, query, error);
+    
+    return true;
   }
 
   /**
    * Query an entity
    */
-  public void queryResult(long id, String to, String from, Serializable value)
+  public void sendQueryResult(long id, String to, String from, Serializable value)
   {
-    HmppResource resource = getResource(to);
+    HmppStream stream = getStream(to);
 
-    if (resource != null)
-      resource.onQueryResult(id, to, from, value);
+    if (stream != null)
+      stream.sendQueryResult(id, to, from, value);
     else
       throw new RuntimeException(L.l("{0} is an unknown entity", to));
   }
@@ -458,18 +407,45 @@ public class HempManager implements HmppBroker, HmppServer {
   /**
    * Query an entity
    */
-  public void queryError(long id,
+  public void sendQueryError(long id,
 			 String to,
 			 String from,
 			 Serializable query,
 			 HmppError error)
   {
-    HmppResource resource = getResource(to);
+    HmppStream stream = getStream(to);
 
-    if (resource != null)
-      resource.onQueryError(id, to, from, query, error);
+    if (stream != null)
+      stream.sendQueryError(id, to, from, query, error);
     else
       throw new RuntimeException(L.l("{0} is an unknown entity", to));
+  }
+
+  protected HmppStream getStream(String jid)
+  {
+    synchronized (_streamMap) {
+      WeakReference<HmppStream> ref = _streamMap.get(jid);
+
+      if (ref != null)
+	return ref.get();
+    }
+
+    HmppResource resource = getResource(jid);
+
+    if (resource != null) {
+      synchronized (_streamMap) {
+	WeakReference<HmppStream> ref = _streamMap.get(jid);
+
+	if (ref != null)
+	  return ref.get();
+
+	_streamMap.put(jid, new WeakReference<HmppStream>(resource));
+
+	return resource;
+      }
+    }
+    else
+      return null;
   }
 
   protected HmppResource getResource(String jid)
@@ -501,8 +477,8 @@ public class HempManager implements HmppBroker, HmppServer {
 
   protected HmppResource lookupResource(String jid)
   {
-    for (ResourceBroker broker : _brokerList) {
-      HmppResource resource = broker.lookupResource(jid);
+    for (ResourceManager manager : _resourceManagerList) {
+      HmppResource resource = manager.lookupResource(jid);
 
       if (resource != null)
 	return resource;
@@ -533,6 +509,10 @@ public class HempManager implements HmppBroker, HmppServer {
     
     synchronized (_resourceMap) {
       _resourceMap.remove(jid);
+    }
+    
+    synchronized (_streamMap) {
+      _streamMap.remove(jid);
     }
   }
   

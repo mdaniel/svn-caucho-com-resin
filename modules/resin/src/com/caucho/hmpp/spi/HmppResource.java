@@ -27,28 +27,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmpp;
+package com.caucho.hmpp.spi;
 
-import com.caucho.hemp.service.*;
-import java.util.*;
-import java.lang.ref.*;
-
-import com.caucho.hemp.*;
-import com.caucho.server.resin.*;
-import com.caucho.util.*;
+import com.caucho.hmpp.*;
 
 /**
- * Manager
+ * Low-level callback to handle packet events.  Each method corresponds to
+ * a packet class.
  */
-public interface HmppBroker
+public interface HmppResource extends HmppStream 
 {
   /**
-   * Creates a session
+   * Returns the resource's preferred jid.
    */
-  public HmppSession createSession(String uid, String password);
-  
+  public String getJid();
+
   /**
-   * Registers a resource
+   * Called when an instance logs in
    */
-  public HmppSession registerResource(String jid);
+  public void onLogin(String jid);
+
+  /**
+   * Called when an instance logs out
+   */
+  public void onLogout(String jid);
+
+  /**
+   * Returns a filter for outbound calls, i.e. before going through the
+   * router.
+   */
+  public HmppStream getOutboundFilter(HmppStream stream);
+
+  /**
+   * Returns a filter for inbound calls, i.e. from back from the
+   * router.
+   */
+  public HmppStream getInboundFilter(HmppStream stream);
 }

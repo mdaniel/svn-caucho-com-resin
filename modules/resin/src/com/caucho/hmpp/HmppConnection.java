@@ -37,7 +37,7 @@ import com.caucho.util.*;
 /**
  * Manager
  */
-public interface HmppSession {
+public interface HmppConnection {
   /**
    * Returns the session's jid
    */
@@ -56,15 +56,31 @@ public interface HmppSession {
    * Closes the session
    */
   public void close();
-
+  
   //
-  // message handling
+  // handlers
   //
 
   /**
    * Registers the message handler
    */
-  public void setMessageHandler(MessageHandler handler);
+  public void setMessageHandler(MessageStream handler);
+
+  /**
+   * Registers the query handler
+   */
+  public void setQueryHandler(QueryStream handler);
+  
+  /**
+   * Sets the presence listener.  The handler will process presence
+   * events sent by the server and other clients
+   */
+  public void setPresenceHandler(PresenceStream handler);
+
+
+  //
+  // message handling
+  //
 
   /**
    * Sends a message
@@ -76,51 +92,18 @@ public interface HmppSession {
   //
 
   /**
-   * Registers the query handler
+   * Queries the service
    */
-  public void setQueryHandler(QueryHandler handler);
+  public Serializable queryGet(String to, Serializable query);
 
   /**
    * Queries the service
    */
-  public Serializable query(String to, Serializable query);
-
-  /**
-   * Queries the service
-   */
-  public void queryGet(long id, String to, Serializable query);
-
-  /**
-   * Queries the service
-   */
-  public void querySet(long id, String to, Serializable query);
-
-  /**
-   * Sends a query response
-   */
-  public void queryResult(long id,
-			  String to,
-			  String from,
-			  Serializable value);
-
-  /**
-   * Sends a query response
-   */
-  public void queryError(long id,
-			 String to,
-			 String from,
-			 Serializable query,
-			 HmppError error);
+  public Serializable querySet(String to, Serializable query);
 
   //
   // presence handling
   //
-
-  /**
-   * Sets the presence listener.  The handler will process presence
-   * events sent by the server and other clients
-   */
-  public void setPresenceHandler(PresenceHandler handler);
 
   /**
    * Sends the basic presence notification to the server.
@@ -134,28 +117,24 @@ public interface HmppSession {
   public void presence(Serializable []data);
 
   /**
-   * Sends the basic presence unavailable notification to the server.
-   */
-  public void presenceUnavailable(Serializable []data);
-
-  //
-  // directed
-  //
-
-  /**
    * Basic presence
    */
   public void presence(String to, Serializable []data);
 
   /**
-   * Presence callback on login
+   * Sends the basic presence unavailable notification to the server.
    */
-  public void presenceProbe(String to, Serializable []data);
+  public void presenceUnavailable(Serializable []data);
 
   /**
    * Basic presence on logout
    */
   public void presenceUnavailable(String to, Serializable []data);
+
+  /**
+   * Presence callback on login
+   */
+  public void presenceProbe(String to, Serializable []data);
 
   /**
    * Presence subscribe request
@@ -183,51 +162,9 @@ public interface HmppSession {
   public void presenceError(String to,
 			    Serializable []data,
 			    HmppError error);
-
-  //
-  // low-level
-  //
-
+  
   /**
-   * Basic presence
+   * returns the underlying, low-level stream
    */
-  public void presence(String to, String from, Serializable []data);
-
-  /**
-   * Presence callback on login
-   */
-  public void presenceProbe(String to, String from, Serializable []data);
-
-  /**
-   * Basic presence on logout
-   */
-  public void presenceUnavailable(String to, String from, Serializable []data);
-
-  /**
-   * Presence subscribe request
-   */
-  public void presenceSubscribe(String to, String from, Serializable []data);
-
-  /**
-   * Presence subscribed request
-   */
-  public void presenceSubscribed(String to, String from, Serializable []data);
-
-  /**
-   * Presence unsubscribe request
-   */
-  public void presenceUnsubscribe(String to, String from, Serializable []data);
-
-  /**
-   * Presence unsubscribed request
-   */
-  public void presenceUnsubscribed(String to, String from,
-				   Serializable []data);
-
-  /**
-   * Presence error
-   */
-  public void presenceError(String to, String from,
-			    Serializable []data,
-			    HmppError error);
+  public HmppStream getStream();
 }

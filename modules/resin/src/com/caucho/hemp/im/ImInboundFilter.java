@@ -29,31 +29,57 @@
 
 package com.caucho.hemp.im;
 
-import com.caucho.hmpp.spi.HmppResource;
-import java.util.*;
-import java.lang.ref.*;
-
+import com.caucho.hmpp.spi.AbstractHmppFilter;
 import com.caucho.hmpp.*;
-import com.caucho.hmpp.spi.*;
-import com.caucho.server.resin.*;
-import com.caucho.util.*;
-
+import com.caucho.hmpp.disco.*;
+import com.caucho.hmpp.im.*;
+import java.util.*;
+import java.util.logging.*;
 import java.io.Serializable;
 
+
 /**
- * IM Broker
+ * Filter on inbound requests
  */
-abstract public class ImBroker extends AbstractResourceManager {
-  /**
-   * Returns the resource with the given jid
-   */
-  abstract public HmppResource lookupResource(String jid);
-
-  /**
-   * Basic presence
-   */
-  public void onPresence(String from, Serializable []data)
+public class ImInboundFilter extends AbstractHmppFilter
+{
+  private ImResource _resource;
+  
+  public ImInboundFilter(HmppStream next, ImResource resource)
   {
+    super(next);
 
+    _resource = resource;
+  }
+
+  @Override
+  public void sendPresence(String to,
+			   String from,
+			   Serializable []data)
+  {
+    if (to != null)
+      getNext().sendPresence(to, _resource.getJid(), data);
+    else
+      _resource.sendPresence(from, data);
+  }
+
+  @Override
+  public void sendPresenceSubscribe(String to,
+				    String from,
+				    Serializable []data)
+  {
+    if (_resource.rosterSubscribeTo(to, from, data)) {
+      getNext().sendPresenceSubscribe(to, _resource.getJid(), data);
+    }
+  }
+
+  @Override
+  public void sendPresenceSubscribed(String to,
+				     String from,
+				     Serializable []data)
+  {
+    if (_resource.rosterSubscribedTo(to, from, data)) {
+      getNext().sendPresenceSubscribed(to, _resource.getJid(), data);
+    }
   }
 }

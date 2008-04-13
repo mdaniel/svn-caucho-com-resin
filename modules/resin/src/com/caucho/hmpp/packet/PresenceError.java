@@ -29,6 +29,7 @@
 
 package com.caucho.hmpp.packet;
 
+import com.caucho.hmpp.HmppStream;
 import com.caucho.hmpp.packet.Presence;
 import com.caucho.hmpp.HmppError;
 import java.io.Serializable;
@@ -77,8 +78,8 @@ public class PresenceError extends Presence {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(PacketHandler handler)
+  public void dispatch(HmppStream handler)
   {
-    handler.onPresenceError(getTo(), getFrom(), getData(), getError());
+    handler.sendPresenceError(getTo(), getFrom(), getData(), getError());
   }
 }

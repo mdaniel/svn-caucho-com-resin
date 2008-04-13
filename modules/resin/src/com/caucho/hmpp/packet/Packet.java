@@ -29,6 +29,8 @@
 
 package com.caucho.hmpp.packet;
 
+import com.caucho.hmpp.HmppStream;
+
 /**
  * Base packet class.  Contains only a 'to' and a 'from' field.
  */
@@ -90,7 +92,7 @@ public class Packet implements java.io.Serializable
   /**
    * SPI method to dispatch the packet to the proper handler
    */
-  public void dispatch(PacketHandler handler)
+  public void dispatch(HmppStream handler)
   {
   }
 

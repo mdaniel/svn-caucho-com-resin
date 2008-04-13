@@ -413,15 +413,17 @@ public class ClassComponent extends ComponentImpl {
 	Type []param = _ctor.getGenericParameterTypes();
 	Annotation [][]paramAnn = _ctor.getParameterAnnotations();
 
-	_ctorArgs = new ComponentImpl[param.length];
+	ComponentImpl []ctorArgs = new ComponentImpl[param.length];
 
 	for (int i = 0; i < param.length; i++) {
-	  _ctorArgs[i] = _webbeans.bindParameter(loc, param[i], paramAnn[i]);
+	  ctorArgs[i] = _webbeans.bindParameter(loc, param[i], paramAnn[i]);
 
-	  if (_ctorArgs[i] == null)
+	  if (ctorArgs[i] == null)
 	    throw new ConfigException(L.l("{0} does not have valid arguments",
 					  _ctor));
 	}
+	
+	_ctorArgs = ctorArgs;
       }
 
       introspectObservers();

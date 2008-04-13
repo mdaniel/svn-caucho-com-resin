@@ -27,33 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.im;
-
-import com.caucho.hmpp.spi.HmppResource;
-import java.util.*;
-import java.lang.ref.*;
-
-import com.caucho.hmpp.*;
-import com.caucho.hmpp.spi.*;
-import com.caucho.server.resin.*;
-import com.caucho.util.*;
+package com.caucho.hmpp;
 
 import java.io.Serializable;
 
 /**
- * IM Broker
+ * MessageStream is a callback for handling unidirectional messages.
+ * 
+ * Messages in HMPP consist of a target JID (to), a source JID (from), and
+ * a payload (value).
+ * 
+ * The payload is typed according to the application, so an IM application
+ * might use a payload called ImMessage, while a game might have MoveMessage,
+ * FireLaserMessage, etc.
  */
-abstract public class ImBroker extends AbstractResourceManager {
+public class AbstractMessageStream implements MessageStream {
   /**
-   * Returns the resource with the given jid
+   * Callback to handle messages
+   * 
+   * @param to the target JID
+   * @param from the source JID
+   * @param value the message payload
    */
-  abstract public HmppResource lookupResource(String jid);
-
-  /**
-   * Basic presence
-   */
-  public void onPresence(String from, Serializable []data)
+  public void sendMessage(String to, String from, Serializable value)
   {
-
   }
 }

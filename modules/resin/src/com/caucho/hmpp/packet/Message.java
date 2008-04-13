@@ -29,6 +29,7 @@
 
 package com.caucho.hmpp.packet;
 
+import com.caucho.hmpp.HmppStream;
 import java.io.Serializable;
 
 /**
@@ -96,9 +97,9 @@ public class Message extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(PacketHandler handler)
+  public void dispatch(HmppStream handler)
   {
-    handler.onMessage(getTo(), getFrom(), _value);
+    handler.sendMessage(getTo(), getFrom(), _value);
   }
 
   @Override

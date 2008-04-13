@@ -36,12 +36,12 @@ import javax.webbeans.*;
 /**
  * Configuration for a service
  */
-public class AbstractPresenceHandler implements PresenceHandler
+public class AbstractPresenceStream implements PresenceStream
 {
   /**
    * General presence, for clients announcing availability
    */
-  public void onPresence(String to,
+  public void sendPresence(String to,
 			 String from,
 			 Serializable []data)
   {
@@ -50,7 +50,7 @@ public class AbstractPresenceHandler implements PresenceHandler
   /**
    * General presence, for clients announcing unavailability
    */
-  public void onPresenceUnavailable(String to,
+  public void sendPresenceUnavailable(String to,
 				    String from,
 				    Serializable []data)
   {
@@ -59,7 +59,7 @@ public class AbstractPresenceHandler implements PresenceHandler
   /**
    * Presence probe from the server to a client
    */
-  public void onPresenceProbe(String to,
+  public void sendPresenceProbe(String to,
 			      String from,
 			      Serializable []data)
   {
@@ -68,7 +68,7 @@ public class AbstractPresenceHandler implements PresenceHandler
   /**
    * A subscription request from a client
    */
-  public void onPresenceSubscribe(String to,
+  public void sendPresenceSubscribe(String to,
 				  String from,
 				  Serializable []data)
   {
@@ -77,7 +77,7 @@ public class AbstractPresenceHandler implements PresenceHandler
   /**
    * A subscription response to a client
    */
-  public void onPresenceSubscribed(String to,
+  public void sendPresenceSubscribed(String to,
 				   String from,
 				   Serializable []data)
   {
@@ -86,7 +86,7 @@ public class AbstractPresenceHandler implements PresenceHandler
   /**
    * An unsubscription request from a client
    */
-  public void onPresenceUnsubscribe(String to,
+  public void sendPresenceUnsubscribe(String to,
 				    String from,
 				    Serializable []data)
   {
@@ -95,7 +95,7 @@ public class AbstractPresenceHandler implements PresenceHandler
   /**
    * A unsubscription response to a client
    */
-  public void onPresenceUnsubscribed(String to,
+  public void sendPresenceUnsubscribed(String to,
 				     String from,
 				     Serializable []data)
   {
@@ -104,7 +104,7 @@ public class AbstractPresenceHandler implements PresenceHandler
   /**
    * An error response to a client
    */
-  public void onPresenceError(String to,
+  public void sendPresenceError(String to,
 			      String from,
 			      Serializable []data,
 			      HmppError error)

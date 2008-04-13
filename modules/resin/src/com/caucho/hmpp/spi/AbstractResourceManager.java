@@ -29,23 +29,29 @@
 
 package com.caucho.hmpp.spi;
 
-import com.caucho.hmpp.HmppBroker;
-import com.caucho.hmpp.HmppError;
-import com.caucho.hmpp.HmppResource;
+import com.caucho.hmpp.*;
 import java.io.Serializable;
 
 /**
- * spi for a broker
+ * Abstract manages resources
  */
-public class AbstractBroker implements ResourceBroker {
-  private HmppServer _server;
+public class AbstractResourceManager implements ResourceManager {
+  private HmppStream _broker;
   
   /**
    * Sets the server to send messages
    */
-  public void setServer(HmppServer server)
+  public void setBroker(HmppStream broker)
   {
-    _server = server;
+    _broker = broker;
+  }
+  
+  /**
+   * Sets the server to send messages
+   */
+  public HmppStream getBroker()
+  {
+    return _broker;
   }
   
   /**
@@ -60,7 +66,7 @@ public class AbstractBroker implements ResourceBroker {
   /**
    * Basic presence
    */
-  public void onPresence(String from, Serializable []data)
+  public void sendPresence(String to, String from, Serializable []data)
   {
 
   }
@@ -74,7 +80,7 @@ public class AbstractBroker implements ResourceBroker {
    */
   public void sendMessage(String to, String from, Serializable value)
   {
-    _server.sendMessage(to, from, value);
+    _broker.sendMessage(to, from, value);
   }
 
   //
@@ -86,7 +92,7 @@ public class AbstractBroker implements ResourceBroker {
    */
   public void queryGet(long id, String to, String from, Serializable query)
   {
-    _server.queryGet(id, to, from, query);
+    _broker.sendQueryGet(id, to, from, query);
   }
 
   /**
@@ -94,7 +100,7 @@ public class AbstractBroker implements ResourceBroker {
    */
   public void querySet(long id, String to, String from, Serializable query)
   {
-    _server.querySet(id, to, from, query);
+    _broker.sendQuerySet(id, to, from, query);
   }
 
   /**
@@ -105,8 +111,8 @@ public class AbstractBroker implements ResourceBroker {
 			  String from,
 			  Serializable value)
   {
-    System.out.println("QR: " + _server + " " + to + " " + value);
-    _server.queryResult(id, to, from, value);
+    System.out.println("QR: " + _broker + " " + to + " " + value);
+    _broker.sendQueryResult(id, to, from, value);
   }
 
   /**
@@ -118,7 +124,7 @@ public class AbstractBroker implements ResourceBroker {
 			 Serializable query,
 			 HmppError error)
   {
-    _server.queryError(id, to, from, query, error);
+    _broker.sendQueryError(id, to, from, query, error);
   }
 
   //
@@ -130,7 +136,7 @@ public class AbstractBroker implements ResourceBroker {
    */
   public void presence(String to, String from, Serializable []data)
   {
-    _server.presence(to, from, data);
+    _broker.sendPresence(to, from, data);
   }
 
   /**
@@ -138,7 +144,7 @@ public class AbstractBroker implements ResourceBroker {
    */
   public void presenceProbe(String to, String from, Serializable []data)
   {
-    _server.presenceProbe(to, from, data);
+    _broker.sendPresenceProbe(to, from, data);
   }
 
   /**
@@ -146,7 +152,7 @@ public class AbstractBroker implements ResourceBroker {
    */
   public void presenceUnavailable(String to, String from, Serializable []data)
   {
-    _server.presenceUnavailable(to, from, data);
+    _broker.sendPresenceUnavailable(to, from, data);
   }
 
   /**
@@ -154,7 +160,7 @@ public class AbstractBroker implements ResourceBroker {
    */
   public void presenceSubscribe(String to, String from, Serializable []data)
   {
-    _server.presenceSubscribe(to, from, data);
+    _broker.sendPresenceSubscribe(to, from, data);
   }
 
   /**
@@ -162,7 +168,7 @@ public class AbstractBroker implements ResourceBroker {
    */
   public void presenceSubscribed(String to, String from, Serializable []data)
   {
-    _server.presenceSubscribed(to, from, data);
+    _broker.sendPresenceSubscribed(to, from, data);
   }
 
   /**
@@ -170,7 +176,7 @@ public class AbstractBroker implements ResourceBroker {
    */
   public void presenceUnsubscribe(String to, String from, Serializable []data)
   {
-    _server.presenceUnsubscribe(to, from, data);
+    _broker.sendPresenceUnsubscribe(to, from, data);
   }
 
   /**
@@ -179,7 +185,7 @@ public class AbstractBroker implements ResourceBroker {
   public void presenceUnsubscribed(String to, String from,
 				   Serializable []data)
   {
-    _server.presenceUnsubscribed(to, from, data);
+    _broker.sendPresenceUnsubscribed(to, from, data);
   }
 
   /**
@@ -189,6 +195,6 @@ public class AbstractBroker implements ResourceBroker {
 			    Serializable []data,
 			    HmppError error)
   {
-    _server.presenceError(to, from, data, error);
+    _broker.sendPresenceError(to, from, data, error);
   }
 }

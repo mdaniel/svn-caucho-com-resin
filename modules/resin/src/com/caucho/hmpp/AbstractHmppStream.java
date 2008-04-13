@@ -31,45 +31,12 @@ package com.caucho.hmpp;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.logging.*;
 
 /**
  * Configuration for a service
  */
-public class AbstractResource implements HmppResource
+public class AbstractHmppStream implements HmppStream
 {
-  private static final Logger log
-    = Logger.getLogger(AbstractResource.class.getName());
-  
-  private String _jid;
-
-  protected void setJid(String jid)
-  {
-    _jid = jid;
-  }
-
-  /**
-   * Returns the jid
-   */
-  public String getJid()
-  {
-    return _jid;
-  }
-
-  /**
-   * Called when an instance logs in
-   */
-  public void onLogin(String jid)
-  {
-  }
-
-  /**
-   * Called when an instance logs out
-   */
-  public void onLogout(String jid)
-  {
-  }
-  
   /**
    * Callback to handle messages
    * 
@@ -77,11 +44,11 @@ public class AbstractResource implements HmppResource
    * @param from the source JID
    * @param value the message payload
    */
-  public void onMessage(String to, String from, Serializable value)
+  public void sendMessage(String to, String from, Serializable value)
   {
   }
   
-  public boolean onQueryGet(long id,
+  public boolean sendQueryGet(long id,
 			    String to,
 			    String from,
 			    Serializable query)
@@ -89,7 +56,7 @@ public class AbstractResource implements HmppResource
     return false;
   }
   
-  public boolean onQuerySet(long id,
+  public boolean sendQuerySet(long id,
 			    String to,
 			    String from,
 			    Serializable query)
@@ -97,14 +64,14 @@ public class AbstractResource implements HmppResource
     return false;
   }
   
-  public void onQueryResult(long id,
+  public void sendQueryResult(long id,
 			    String to,
 			    String from,
 			    Serializable value)
   {
   }
   
-  public void onQueryError(long id,
+  public void sendQueryError(long id,
 			   String to,
 			   String from,
 			   Serializable query,
@@ -115,7 +82,7 @@ public class AbstractResource implements HmppResource
   /**
    * General presence, for clients announcing availability
    */
-  public void onPresence(String to,
+  public void sendPresence(String to,
 			 String from,
 			 Serializable []data)
   {
@@ -124,7 +91,7 @@ public class AbstractResource implements HmppResource
   /**
    * General presence, for clients announcing unavailability
    */
-  public void onPresenceUnavailable(String to,
+  public void sendPresenceUnavailable(String to,
 				    String from,
 				    Serializable []data)
   {
@@ -133,7 +100,7 @@ public class AbstractResource implements HmppResource
   /**
    * Presence probe from the server to a client
    */
-  public void onPresenceProbe(String to,
+  public void sendPresenceProbe(String to,
 			      String from,
 			      Serializable []data)
   {
@@ -142,7 +109,7 @@ public class AbstractResource implements HmppResource
   /**
    * A subscription request from a client
    */
-  public void onPresenceSubscribe(String to,
+  public void sendPresenceSubscribe(String to,
 				  String from,
 				  Serializable []data)
   {
@@ -151,7 +118,7 @@ public class AbstractResource implements HmppResource
   /**
    * A subscription response to a client
    */
-  public void onPresenceSubscribed(String to,
+  public void sendPresenceSubscribed(String to,
 				   String from,
 				   Serializable []data)
   {
@@ -160,7 +127,7 @@ public class AbstractResource implements HmppResource
   /**
    * An unsubscription request from a client
    */
-  public void onPresenceUnsubscribe(String to,
+  public void sendPresenceUnsubscribe(String to,
 				    String from,
 				    Serializable []data)
   {
@@ -169,7 +136,7 @@ public class AbstractResource implements HmppResource
   /**
    * A unsubscription response to a client
    */
-  public void onPresenceUnsubscribed(String to,
+  public void sendPresenceUnsubscribed(String to,
 				     String from,
 				     Serializable []data)
   {
@@ -178,29 +145,10 @@ public class AbstractResource implements HmppResource
   /**
    * An error response to a client
    */
-  public void onPresenceError(String to,
+  public void sendPresenceError(String to,
 			      String from,
 			      Serializable []data,
 			      HmppError error)
   {
-  }
-
-  //
-  // client presence
-  //
-
-  /**
-   * Client request for presence
-   */
-  public void onClientPresenceSubscribe(String to,
-					String from,
-					Serializable []data)
-  {
-    log.fine(this + " onClientPresenceSubscribe to=" + to + " from=" + from);
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _jid + "]";
   }
 }

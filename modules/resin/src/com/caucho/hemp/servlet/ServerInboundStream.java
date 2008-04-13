@@ -29,9 +29,9 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.hmpp.HmppSession;
-import com.caucho.hmpp.HmppBroker;
-import com.caucho.hmpp.packet.PacketHandler;
+import com.caucho.hmpp.HmppConnection;
+import com.caucho.hmpp.HmppConnectionFactory;
+import com.caucho.hmpp.HmppStream;
 import com.caucho.hmpp.packet.Packet;
 import com.caucho.hmpp.HmppError;
 import java.io.*;
@@ -47,24 +47,25 @@ import com.caucho.vfs.*;
 /**
  * Main protocol handler for the HTTP version of HeMPP.
  */
-public class ServerPacketHandler
-  implements TcpConnectionHandler, PacketHandler
+public class ServerInboundStream
+  implements TcpConnectionHandler, HmppStream
 {
   private static final Logger log
-    = Logger.getLogger(ServerPacketHandler.class.getName());
+    = Logger.getLogger(ServerInboundStream.class.getName());
   
-  private HmppBroker _manager;
-  private HmppSession _session;
+  private HmppConnectionFactory _manager;
+  private HmppConnection _conn;
+  private HmppStream _broker;
 
   private Hessian2StreamingInput _in;
   private Hessian2StreamingOutput _out;
 
-  private HmppServiceHandler _callbackHandler;
-  private AuthPacketHandler _authHandler;
+  private ServerOutboundStream _callbackHandler;
+  private AuthInboundStream _authHandler;
 
   private String _jid;
 
-  ServerPacketHandler(HmppBroker manager, ReadStream rs, WriteStream ws)
+  ServerInboundStream(HmppConnectionFactory manager, ReadStream rs, WriteStream ws)
   {
     _manager = manager;
 
@@ -79,8 +80,8 @@ public class ServerPacketHandler
     _in = new Hessian2StreamingInput(is);
     _out = new Hessian2StreamingOutput(os);
 
-    _callbackHandler = new HmppServiceHandler(this, _out);
-    _authHandler = new AuthPacketHandler(this, _callbackHandler);
+    _callbackHandler = new ServerOutboundStream(this, _out);
+    _authHandler = new AuthInboundStream(this, _callbackHandler);
   }
 
   protected String getJid()
@@ -112,7 +113,7 @@ public class ServerPacketHandler
     if (log.isLoggable(Level.FINER))
       log.finer(this + " receive " + packet);
 
-    if (_session != null)
+    if (_conn != null)
       packet.dispatch(this);
     else
       packet.dispatch(_authHandler);
@@ -131,12 +132,14 @@ public class ServerPacketHandler
   {
     String password = (String) credentials;
     
-    _session = _manager.createSession(uid, password);
-    _session.setMessageHandler(_callbackHandler);
-    _session.setQueryHandler(_callbackHandler);
-    _session.setPresenceHandler(_callbackHandler);
+    _conn = _manager.getConnection(uid, password);
+    _conn.setMessageHandler(_callbackHandler);
+    _conn.setQueryHandler(_callbackHandler);
+    _conn.setPresenceHandler(_callbackHandler);
 
-    _jid = _session.getJid();
+    _jid = _conn.getJid();
+    
+    _broker = _conn.getStream();
 
     return _jid;
   }
@@ -144,11 +147,11 @@ public class ServerPacketHandler
   /**
    * Handles a message
    */
-  public void onMessage(String to,
-			String from,
-			Serializable value)
+  public void sendMessage(String to,
+			  String from,
+			  Serializable value)
   {
-    _session.sendMessage(to, value);
+    _broker.sendMessage(to, _jid, value);
   }
   
   /**
@@ -157,12 +160,12 @@ public class ServerPacketHandler
    * The get handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public boolean onQueryGet(long id,
-			    String to,
-			    String from,
-			    Serializable value)
+  public boolean sendQueryGet(long id,
+			      String to,
+			      String from,
+			      Serializable value)
   {
-    _session.queryGet(id, to, value);
+    _broker.sendQueryGet(id, to, _jid, value);
     
     return true;
   }
@@ -173,12 +176,12 @@ public class ServerPacketHandler
    * The set handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public boolean onQuerySet(long id,
-			    String to,
-			    String from,
-			    Serializable value)
+  public boolean sendQuerySet(long id,
+			      String to,
+			      String from,
+			      Serializable value)
   {
-    _session.querySet(id, to, value);
+    _broker.sendQuerySet(id, to, _jid, value);
     
     return true;
   }
@@ -188,12 +191,12 @@ public class ServerPacketHandler
    *
    * The result id will match a pending get or set.
    */
-  public void onQueryResult(long id,
-			    String to,
-			    String from,
-			    Serializable value)
+  public void sendQueryResult(long id,
+			      String to,
+			      String from,
+			      Serializable value)
   {
-    _session.queryResult(id, to, from, value);
+    _broker.sendQueryResult(id, to, _jid, value);
   }
   
   /**
@@ -201,13 +204,13 @@ public class ServerPacketHandler
    *
    * The result id will match a pending get or set.
    */
-  public void onQueryError(long id,
-			   String to,
-			   String from,
-			   Serializable value,
-			   HmppError error)
+  public void sendQueryError(long id,
+			     String to,
+			     String from,
+			     Serializable value,
+			     HmppError error)
   {
-    _session.queryError(id, to, from, value, error);
+    _broker.sendQueryError(id, to, _jid, value, error);
   }
   
   /**
@@ -216,17 +219,12 @@ public class ServerPacketHandler
    * If the handler deals with clients, the "from" value should be ignored
    * and replaced by the client's jid.
    */
-  public void onPresence(String to,
-			 String from,
-			 Serializable []data)
+  public void sendPresence(String to,
+			   String from,
+			   Serializable []data)
 
   {
-    System.out.println("ON-PRESENCE: " + to);
-
-    if (to != null)
-      _session.presence(to, data);
-    else
-      _session.presence(data);
+    _broker.sendPresence(to, _jid, data);
   }
   
   /**
@@ -235,72 +233,72 @@ public class ServerPacketHandler
    * If the handler deals with clients, the "from" value should be ignored
    * and replaced by the client's jid.
    */
-  public void onPresenceUnavailable(String to,
-				    String from,
-				    Serializable []data)
+  public void sendPresenceUnavailable(String to,
+				      String from,
+				      Serializable []data)
   {
-    _session.presenceUnavailable(to, data);
+    _broker.sendPresenceUnavailable(to, _jid, data);
   }
   
   /**
    * Handles a presence probe from another server
    */
-  public void onPresenceProbe(String to,
+  public void sendPresenceProbe(String to,
 			      String from,
 			      Serializable []data)
   {
-    _session.presenceProbe(to, data);
+    _broker.sendPresenceProbe(to, _jid, data);
   }
   
   /**
    * Handles a presence subscribe request from a client
    */
-  public void onPresenceSubscribe(String to,
-				  String from,
-				  Serializable []data)
+  public void sendPresenceSubscribe(String to,
+				    String from,
+				    Serializable []data)
   {
-    _session.presenceSubscribe(to, data);
+    _broker.sendPresenceSubscribe(to, _jid, data);
   }
   
   /**
    * Handles a presence subscribed result to a client
    */
-  public void onPresenceSubscribed(String to,
-				   String from,
-				   Serializable []data)
+  public void sendPresenceSubscribed(String to,
+				     String from,
+				     Serializable []data)
   {
-    _session.presenceSubscribed(to, data);
+    _broker.sendPresenceSubscribed(to, _jid, data);
   }
   
   /**
    * Handles a presence unsubscribe request from a client
    */
-  public void onPresenceUnsubscribe(String to,
-				    String from,
-				    Serializable []data)
+  public void sendPresenceUnsubscribe(String to,
+				      String from,
+				      Serializable []data)
   {
-    _session.presenceUnsubscribe(to, data);
+    _broker.sendPresenceUnsubscribe(to, _jid, data);
   }
   
   /**
    * Handles a presence unsubscribed result to a client
    */
-  public void onPresenceUnsubscribed(String to,
-				     String from,
-				     Serializable []data)
+  public void sendPresenceUnsubscribed(String to,
+				       String from,
+				       Serializable []data)
   {
-    _session.presenceUnsubscribed(to, data);
+    _broker.sendPresenceUnsubscribed(to, _jid, data);
   }
   
   /**
    * Handles a presence unsubscribed result to a client
    */
-  public void onPresenceError(String to,
+  public void sendPresenceError(String to,
 			      String from,
 			      Serializable []data,
 			      HmppError error)
   {
-    _session.presenceError(to, data, error);
+    _broker.sendPresenceError(to, _jid, data, error);
   }
 
   public void close()
@@ -323,6 +321,6 @@ public class ServerPacketHandler
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _session + "]";
+    return getClass().getSimpleName() + "[" + _conn + "]";
   }
 }

@@ -29,6 +29,7 @@
 
 package com.caucho.hmpp.packet;
 
+import com.caucho.hmpp.HmppStream;
 import com.caucho.hmpp.packet.Presence;
 import java.io.Serializable;
 
@@ -60,8 +61,8 @@ public class PresenceUnsubscribed extends Presence {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(PacketHandler handler)
+  public void dispatch(HmppStream handler)
   {
-    handler.onPresenceUnsubscribed(getTo(), getFrom(), getData());
+    handler.sendPresenceUnsubscribed(getTo(), getFrom(), getData());
   }
 }

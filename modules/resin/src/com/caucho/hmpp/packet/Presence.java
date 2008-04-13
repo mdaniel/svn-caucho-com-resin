@@ -29,6 +29,7 @@
 
 package com.caucho.hmpp.packet;
 
+import com.caucho.hmpp.HmppStream;
 import java.io.Serializable;
 
 /**
@@ -94,9 +95,9 @@ public class Presence extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(PacketHandler handler)
+  public void dispatch(HmppStream handler)
   {
-    handler.onPresence(getTo(), getFrom(), _data);
+    handler.sendPresence(getTo(), getFrom(), _data);
   }
 
   @Override

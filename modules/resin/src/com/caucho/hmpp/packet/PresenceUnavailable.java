@@ -29,6 +29,7 @@
 
 package com.caucho.hmpp.packet;
 
+import com.caucho.hmpp.HmppStream;
 import java.io.Serializable;
 
 /**
@@ -79,8 +80,8 @@ public class PresenceUnavailable extends Presence {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(PacketHandler handler)
+  public void dispatch(HmppStream handler)
   {
-    handler.onPresenceUnavailable(getTo(), getFrom(), getData());
+    handler.sendPresenceUnavailable(getTo(), getFrom(), getData());
   }
 }
