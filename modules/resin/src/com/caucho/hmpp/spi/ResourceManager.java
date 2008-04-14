@@ -31,7 +31,6 @@ package com.caucho.hmpp.spi;
 
 import com.caucho.hmpp.spi.HmppResource;
 
-import com.caucho.hmpp.HmppStream;
 import java.io.Serializable;
 
 /**
@@ -41,7 +40,7 @@ public interface ResourceManager {
   /**
    * Sets the server to send messages
    */
-  public void setBroker(HmppStream broker);
+  public void setBroker(HmppBroker broker);
   
   /**
    * Returns the resource with the given name, or null if this is not

@@ -74,6 +74,14 @@ public class HempBroker implements HmppBroker {
    */
   public void addBroker(ResourceManager resourceManager)
   {
+    addResourceManager(resourceManager);
+  }
+  
+  /**
+   * Adds a broker implementation, e.g. the IM broker.
+   */
+  public void addResourceManager(ResourceManager resourceManager)
+  {
     ResourceManager []resourceManagerList = new ResourceManager[_resourceManagerList.length + 1];
     System.arraycopy(_resourceManagerList, 0, resourceManagerList, 0, _resourceManagerList.length);
     resourceManagerList[resourceManagerList.length - 1] = resourceManager;
@@ -319,8 +327,9 @@ public class HempBroker implements HmppBroker {
 
     if (stream != null)
       stream.sendMessage(to, from, value);
-    else
-      throw new RuntimeException(L.l("'{0}' is an unknown stream", to));
+    else {
+      log.fine(this + " sendMessage to=" + to + " is an unknown stream");
+    }
   }
 
   /**
@@ -373,25 +382,41 @@ public class HempBroker implements HmppBroker {
   {
     HmppStream stream = getStream(to);
 
-    if (stream != null) {
-      // XXX: error
-      stream.sendQuerySet(id, to, from, query);
+    if (stream == null) {
+      if (log.isLoggable(Level.FINE)) {
+	log.fine(this + " querySet to unknown stream '" + to
+		 + "' from=" + from);
+      }
+
+      String msg = L.l("'{0}' is an unknown service for querySet", to);
+    
+      HmppError error = new HmppError(HmppError.TYPE_CANCEL,
+				      HmppError.SERVICE_UNAVAILABLE,
+				      msg);
+				    
+      sendQueryError(id, from, to, query, error);
+
       return true;
     }
 
+    if (stream.sendQuerySet(id, to, from, query))
+      return true;
+
     if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " querySet to unknown stream '" + to
-	       + "' from=" + from);
+      log.fine(this + " querySet with unknown feature to=" + to
+	       + " from=" + from + " resource=" + stream
+	       + " query=" + query);
     }
 
-    String msg = L.l("'{0}' is an unknown service for querySet", to);
+    String msg = L.l("'{0}' is an unknown feature for querySet",
+		     query);
     
     HmppError error = new HmppError(HmppError.TYPE_CANCEL,
-				    HmppError.SERVICE_UNAVAILABLE,
+				    HmppError.FEATURE_NOT_IMPLEMENTED,
 				    msg);
 				    
     sendQueryError(id, from, to, query, error);
-    
+
     return true;
   }
 

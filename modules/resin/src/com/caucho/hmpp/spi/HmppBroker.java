@@ -37,6 +37,11 @@ import com.caucho.hmpp.*;
 public interface HmppBroker extends HmppStream, HmppConnectionFactory
 {
   /**
+   * Adds a resource manager
+   */
+  public void addResourceManager(ResourceManager manager);
+    
+  /**
    * Registers a resource
    */
   public HmppConnection registerResource(String jid, HmppResource resource);

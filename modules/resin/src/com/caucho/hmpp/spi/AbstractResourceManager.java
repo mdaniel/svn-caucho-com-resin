@@ -36,12 +36,12 @@ import java.io.Serializable;
  * Abstract manages resources
  */
 public class AbstractResourceManager implements ResourceManager {
-  private HmppStream _broker;
+  private HmppBroker _broker;
   
   /**
    * Sets the server to send messages
    */
-  public void setBroker(HmppStream broker)
+  public void setBroker(HmppBroker broker)
   {
     _broker = broker;
   }
@@ -49,7 +49,7 @@ public class AbstractResourceManager implements ResourceManager {
   /**
    * Sets the server to send messages
    */
-  public HmppStream getBroker()
+  public HmppBroker getBroker()
   {
     return _broker;
   }

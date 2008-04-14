@@ -33,9 +33,73 @@ import java.util.*;
 import java.io.Serializable;
 
 /**
- * Publish query
+ * Publish event
+ *
+ * http://jabber.org/protocol/pubsub#event
+ *
+ * <code><pre>
+ * element event {
+ *   collection?
+ *   | configuration?
+ *   | delete?
+ *   | items?
+ *   | purge?
+ *   | subscription?
+ * }
+ *
+ * element collection {
+ *   @node?,
+ *   (associate
+ *    | disaccociate
+ * }
+ *
+ * element associate {
+ *   @node
+ * }
+ *
+ * element disassociate {
+ *   @node
+ * }
+ *
+ * element configuration {
+ *   @node?
+ *   &amp; xdata?
+ * }
+ *
+ * element delete {
+ *   @node?
+ * }
+ *
+ * element items {
+ *   @node,
+ *   (item*
+ *    | retract*)
+ * }
+ *
+ * element item {
+ *   @id?,
+ *   @node?,
+ *   _extra?
+ * }
+ *
+ * element purge {
+ *   @node
+ * }
+ *
+ * element retract {
+ *   @id
+ * }
+ *
+ * element subscription {
+ *   @jid
+ *   &amp @expiry?
+ *   &amp @node?
+ *   &amp @subid?
+ *   &amp @subscription?
+ * }
+ * </pre></code>
  */
-public class PubSubPublish extends PubSubQuery {
+public class PubSubEventMessage implements Serializable {
   private static final PubSubItem []NULL_ITEMS = new PubSubItem[0];
   
   private String _node;
@@ -43,23 +107,16 @@ public class PubSubPublish extends PubSubQuery {
   private PubSubItem []_items = NULL_ITEMS;
   private String _subid;
 
-  public PubSubPublish()
+  public PubSubEventMessage()
   {
   }
 
-  public PubSubPublish(String node)
-  {
-    _node = node;
-  }
-
-  public PubSubPublish(String node, Serializable value)
+  public PubSubEventMessage(String node)
   {
     _node = node;
-
-    _items = new PubSubItem[] { new PubSubItem(value) };
   }
 
-  public PubSubPublish(String node, PubSubItem []items)
+  public PubSubEventMessage(String node, PubSubItem []items)
   {
     _node = node;
     _items = items;
@@ -82,6 +139,20 @@ public class PubSubPublish extends PubSubQuery {
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _node + "]";
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[node=");
+    sb.append(_node);
+
+    if (_items != null) {
+      for (PubSubItem item : _items) {
+	sb.append(",");
+	sb.append(item);
+      }
+    }
+    sb.append("]");
+
+    return sb.toString();
   }
 }

@@ -36,8 +36,8 @@ import java.util.*;
  * Publish item
  */
 public class PubSubItem implements Serializable {
-  private String id;
-  private Serializable value;
+  private String _id;
+  private Serializable _value;
 
   public PubSubItem()
   {
@@ -45,27 +45,27 @@ public class PubSubItem implements Serializable {
 
   public PubSubItem(Serializable value)
   {
-    this.value = value;
+    _value = value;
   }
 
   public PubSubItem(String id, Serializable value)
   {
-    this.id = id;
-    this.value = value;
+    _id = id;
+    _value = value;
   }
 
   public String getId()
   {
-    return this.id;
+    return _id;
   }
 
   public Serializable getValue()
   {
-    return this.value;
+    return _value;
   }
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + this.id + "]";
+    return getClass().getSimpleName() + "[" + _id + "]";
   }
 }

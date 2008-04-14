@@ -116,6 +116,11 @@ public class AbstractHmppResource implements HmppResource
 			    String from,
 			    Serializable query)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendQuerySet id=" + id + " to=" + to
+		+ " from=" + from + logValue(query));
+    }
+    
     return false;
   }
   
@@ -124,6 +129,11 @@ public class AbstractHmppResource implements HmppResource
 			    String from,
 			    Serializable query)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendQuerySet id=" + id + " to=" + to
+		+ " from=" + from + logValue(query));
+    }
+    
     return false;
   }
   

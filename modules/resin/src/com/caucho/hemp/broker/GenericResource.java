@@ -66,7 +66,7 @@ public class GenericResource extends AbstractHmppResource
     return _conn;
   }
 
-  protected HmppStream getToBroker()
+  public HmppStream getToBroker()
   {
     return _toBroker;
   }

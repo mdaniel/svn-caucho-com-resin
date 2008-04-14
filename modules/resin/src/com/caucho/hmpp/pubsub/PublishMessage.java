@@ -33,33 +33,53 @@ import java.util.*;
 import java.io.Serializable;
 
 /**
- * Publish query
+ * Publish event
+ *
+ * http://jabber.org/protocol/pubsub#event
+ *
+ * <code><pre>
+ * element event {
+ *   collection?
+ *   | configuration?
+ *   | delete?
+ *   | items?
+ *   | purge?
+ *   | subscription?
+ * }
+ *
+ * element items {
+ *   @node,
+ *   (item*
+ *    | retract*)
+ * }
+ *
+ * element item {
+ *   @id?,
+ *   @node?,
+ *   _extra?
+ * }
+ * </pre></code>
  */
-public class PubSubPublish extends PubSubQuery {
+public class PublishMessage implements Serializable {
   private static final PubSubItem []NULL_ITEMS = new PubSubItem[0];
   
   private String _node;
   
   private PubSubItem []_items = NULL_ITEMS;
-  private String _subid;
 
-  public PubSubPublish()
+  /**
+   * Hessian null constructor
+   */
+  private PublishMessage()
   {
   }
 
-  public PubSubPublish(String node)
-  {
-    _node = node;
-  }
-
-  public PubSubPublish(String node, Serializable value)
+  public PublishMessage(String node)
   {
     _node = node;
-
-    _items = new PubSubItem[] { new PubSubItem(value) };
   }
 
-  public PubSubPublish(String node, PubSubItem []items)
+  public PublishMessage(String node, PubSubItem []items)
   {
     _node = node;
     _items = items;
@@ -70,11 +90,6 @@ public class PubSubPublish extends PubSubQuery {
     return _node;
   }
 
-  public String getSubId()
-  {
-    return _subid;
-  }
-
   public PubSubItem []getItems()
   {
     return _items;
@@ -82,6 +97,20 @@ public class PubSubPublish extends PubSubQuery {
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _node + "]";
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[node=");
+    sb.append(_node);
+
+    if (_items != null) {
+      for (PubSubItem item : _items) {
+	sb.append(",");
+	sb.append(item);
+      }
+    }
+    sb.append("]");
+
+    return sb.toString();
   }
 }
