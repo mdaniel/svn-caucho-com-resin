@@ -30,7 +30,6 @@
 package com.caucho.hemp.servlet;
 
 import com.caucho.hmpp.HmppConnection;
-import com.caucho.hmpp.HmppConnectionFactory;
 import com.caucho.hmpp.HmppStream;
 import com.caucho.hmpp.packet.Packet;
 import com.caucho.hmpp.HmppError;
@@ -39,8 +38,8 @@ import java.util.logging.*;
 import javax.servlet.*;
 
 import com.caucho.hemp.*;
-import com.caucho.hemp.service.*;
 import com.caucho.hessian.io.*;
+import com.caucho.hmpp.spi.HmppBroker;
 import com.caucho.server.connection.*;
 import com.caucho.vfs.*;
 
@@ -53,9 +52,9 @@ public class ServerInboundStream
   private static final Logger log
     = Logger.getLogger(ServerInboundStream.class.getName());
   
-  private HmppConnectionFactory _manager;
+  private HmppBroker _broker;
   private HmppConnection _conn;
-  private HmppStream _broker;
+  private HmppStream _toBroker;
 
   private Hessian2StreamingInput _in;
   private Hessian2StreamingOutput _out;
@@ -65,9 +64,9 @@ public class ServerInboundStream
 
   private String _jid;
 
-  ServerInboundStream(HmppConnectionFactory manager, ReadStream rs, WriteStream ws)
+  ServerInboundStream(HmppBroker broker, ReadStream rs, WriteStream ws)
   {
-    _manager = manager;
+    _broker = broker;
 
     InputStream is = rs;
     OutputStream os = ws;
@@ -132,14 +131,14 @@ public class ServerInboundStream
   {
     String password = (String) credentials;
     
-    _conn = _manager.getConnection(uid, password);
+    _conn = _broker.getConnection(uid, password);
     _conn.setMessageHandler(_callbackHandler);
     _conn.setQueryHandler(_callbackHandler);
     _conn.setPresenceHandler(_callbackHandler);
 
     _jid = _conn.getJid();
     
-    _broker = _conn.getStream();
+    _toBroker = _conn.getStream();
 
     return _jid;
   }
@@ -151,7 +150,7 @@ public class ServerInboundStream
 			  String from,
 			  Serializable value)
   {
-    _broker.sendMessage(to, _jid, value);
+    _toBroker.sendMessage(to, _jid, value);
   }
   
   /**
@@ -165,7 +164,7 @@ public class ServerInboundStream
 			      String from,
 			      Serializable value)
   {
-    _broker.sendQueryGet(id, to, _jid, value);
+    _toBroker.sendQueryGet(id, to, _jid, value);
     
     return true;
   }
@@ -181,7 +180,7 @@ public class ServerInboundStream
 			      String from,
 			      Serializable value)
   {
-    _broker.sendQuerySet(id, to, _jid, value);
+    _toBroker.sendQuerySet(id, to, _jid, value);
     
     return true;
   }
@@ -196,7 +195,7 @@ public class ServerInboundStream
 			      String from,
 			      Serializable value)
   {
-    _broker.sendQueryResult(id, to, _jid, value);
+    _toBroker.sendQueryResult(id, to, _jid, value);
   }
   
   /**
@@ -210,7 +209,7 @@ public class ServerInboundStream
 			     Serializable value,
 			     HmppError error)
   {
-    _broker.sendQueryError(id, to, _jid, value, error);
+    _toBroker.sendQueryError(id, to, _jid, value, error);
   }
   
   /**
@@ -224,7 +223,7 @@ public class ServerInboundStream
 			   Serializable []data)
 
   {
-    _broker.sendPresence(to, _jid, data);
+    _toBroker.sendPresence(to, _jid, data);
   }
   
   /**
@@ -237,7 +236,7 @@ public class ServerInboundStream
 				      String from,
 				      Serializable []data)
   {
-    _broker.sendPresenceUnavailable(to, _jid, data);
+    _toBroker.sendPresenceUnavailable(to, _jid, data);
   }
   
   /**
@@ -247,7 +246,7 @@ public class ServerInboundStream
 			      String from,
 			      Serializable []data)
   {
-    _broker.sendPresenceProbe(to, _jid, data);
+    _toBroker.sendPresenceProbe(to, _jid, data);
   }
   
   /**
@@ -257,7 +256,7 @@ public class ServerInboundStream
 				    String from,
 				    Serializable []data)
   {
-    _broker.sendPresenceSubscribe(to, _jid, data);
+    _toBroker.sendPresenceSubscribe(to, _jid, data);
   }
   
   /**
@@ -267,7 +266,7 @@ public class ServerInboundStream
 				     String from,
 				     Serializable []data)
   {
-    _broker.sendPresenceSubscribed(to, _jid, data);
+    _toBroker.sendPresenceSubscribed(to, _jid, data);
   }
   
   /**
@@ -277,7 +276,7 @@ public class ServerInboundStream
 				      String from,
 				      Serializable []data)
   {
-    _broker.sendPresenceUnsubscribe(to, _jid, data);
+    _toBroker.sendPresenceUnsubscribe(to, _jid, data);
   }
   
   /**
@@ -287,7 +286,7 @@ public class ServerInboundStream
 				       String from,
 				       Serializable []data)
   {
-    _broker.sendPresenceUnsubscribed(to, _jid, data);
+    _toBroker.sendPresenceUnsubscribed(to, _jid, data);
   }
   
   /**
@@ -298,7 +297,7 @@ public class ServerInboundStream
 			      Serializable []data,
 			      HmppError error)
   {
-    _broker.sendPresenceError(to, _jid, data, error);
+    _toBroker.sendPresenceError(to, _jid, data, error);
   }
 
   public void close()

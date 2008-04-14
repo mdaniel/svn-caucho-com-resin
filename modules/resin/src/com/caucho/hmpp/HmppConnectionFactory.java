@@ -40,9 +40,4 @@ public interface HmppConnectionFactory
    * Creates a session
    */
   public HmppConnection getConnection(String uid, String password);
-  
-  /**
-   * Registers a resource
-   */
-  public HmppConnection registerResource(String jid, HmppResource resource);
 }

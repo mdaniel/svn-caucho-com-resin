@@ -36,10 +36,23 @@ import java.util.*;
  * Muc query
  */
 public class MucStatus implements java.io.Serializable {
-  private int code;
-  
-  public MucStatus()
+  private int _code;
+
+  /**
+   * Hessian zero-arg constructor
+   */
+  private MucStatus()
   {
+  }
+  
+  public MucStatus(int code)
+  {
+    _code = code;
+  }
+
+  public int getCode()
+  {
+    return _code;
   }
   
   public String toString()

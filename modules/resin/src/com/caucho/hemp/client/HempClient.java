@@ -35,7 +35,6 @@ import com.caucho.hmpp.packet.*;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.hemp.*;
-import com.caucho.hemp.service.*;
 import com.caucho.hessian.io.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;

@@ -37,7 +37,6 @@ import javax.servlet.*;
 import com.caucho.hmpp.*;
 import com.caucho.hmpp.auth.*;
 import com.caucho.hmpp.spi.*;
-import com.caucho.hemp.service.*;
 import com.caucho.hessian.io.*;
 import com.caucho.server.connection.*;
 import com.caucho.vfs.*;

@@ -73,21 +73,15 @@ public class ImResource extends AbstractHmppResource
   }
 
   /**
-   * Creates an outbound filter
-   */
-  public HmppStream getOutboundFilter(HmppStream stream)
-  {
-    return new ImOutboundFilter(stream, this);
-  }
-
-  /**
    * Creates an inbound filter
    */
+  @Override
   public HmppStream getInboundFilter(HmppStream stream)
   {
     return new ImInboundFilter(stream, this);
   }
 
+  @Override
   public void onLogin(String jid)
   {
     if (log.isLoggable(Level.FINER))
@@ -102,6 +96,7 @@ public class ImResource extends AbstractHmppResource
     }
   }
 
+  @Override
   public void onLogout(String jid)
   {
     if (log.isLoggable(Level.FINER))
@@ -115,6 +110,7 @@ public class ImResource extends AbstractHmppResource
     }
   }
 
+  @Override
   public void sendMessage(String to, String from, Serializable value)
   {
     String []jids = _jids;
@@ -125,6 +121,7 @@ public class ImResource extends AbstractHmppResource
     }
   }
   
+  @Override
   public boolean sendQueryGet(long id,
 			    String to,
 			    String from,
@@ -147,6 +144,7 @@ public class ImResource extends AbstractHmppResource
     return false;
   }
   
+  @Override
   public boolean sendQuerySet(long id,
 			    String to,
 			    String from,
@@ -227,6 +225,7 @@ public class ImResource extends AbstractHmppResource
     }
   }
 
+  @Override
   public void sendPresenceSubscribe(String to,
 				    String from,
 				    Serializable []data)
@@ -247,6 +246,7 @@ public class ImResource extends AbstractHmppResource
     }
   }
 
+  @Override
   public void sendPresenceSubscribed(String to,
 				     String from,
 				     Serializable []data)

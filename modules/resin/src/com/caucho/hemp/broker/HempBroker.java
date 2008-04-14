@@ -27,13 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.manager;
+package com.caucho.hemp.broker;
 
 import com.caucho.hmpp.HmppConnection;
-import com.caucho.hmpp.HmppConnectionFactory;
 import com.caucho.hmpp.HmppError;
 import com.caucho.hemp.*;
-import com.caucho.hemp.service.*;
 import com.caucho.hmpp.spi.HmppResource;
 import com.caucho.hmpp.HmppStream;
 import com.caucho.hmpp.spi.*;
@@ -48,10 +46,10 @@ import java.io.Serializable;
 /**
  * Broker
  */
-public class HempManager implements HmppConnectionFactory, HmppStream {
+public class HempBroker implements HmppBroker {
   private static final Logger log
-    = Logger.getLogger(HempManager.class.getName());
-  private static final L10N L = new L10N(HempManager.class);
+    = Logger.getLogger(HempBroker.class.getName());
+  private static final L10N L = new L10N(HempBroker.class);
   
   // outbound streams
   private final HashMap<String,WeakReference<HmppStream>> _streamMap
@@ -211,6 +209,12 @@ public class HempManager implements HmppConnectionFactory, HmppStream {
       
       if (stream != null)
         stream.sendPresence(to, from, data);
+      else {
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " sendPresence (no resource) to=" + to
+		    + " from=" + from);
+	}
+      }
     }
   }
 
@@ -458,6 +462,25 @@ public class HempManager implements HmppConnectionFactory, HmppStream {
     }
 
     HmppResource resource = lookupResource(jid);
+
+    if (resource == null) {
+      int p;
+
+      if ((p = jid.indexOf('/')) > 0) {
+	String uid = jid.substring(0, p);
+	HmppResource user = getResource(uid);
+
+	if (user != null)
+	  resource = user.lookupResource(jid);
+      }
+      else if ((p = jid.indexOf('@')) > 0) {
+	String domainName = jid.substring(p + 1);
+	HmppResource domain = getResource(domainName);
+
+	if (domain != null)
+	  resource = domain.lookupResource(jid);
+      }
+    }
 
     if (resource != null) {
       synchronized (_resourceMap) {

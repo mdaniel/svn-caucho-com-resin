@@ -35,11 +35,10 @@ import com.caucho.hmpp.disco.*;
 import com.caucho.hmpp.im.*;
 import java.util.*;
 import java.util.logging.*;
-import java.io.Serializable;
 
 
 /**
- * Filter on outbound requests
+ * Filter on outbound requests (needed to support privacy)
  */
 public class ImOutboundFilter extends AbstractHmppFilter
 {

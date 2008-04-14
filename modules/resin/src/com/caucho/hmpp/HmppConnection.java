@@ -31,7 +31,6 @@ package com.caucho.hmpp;
 
 import java.io.Serializable;
 
-import com.caucho.hemp.service.*;
 import com.caucho.util.*;
 
 /**

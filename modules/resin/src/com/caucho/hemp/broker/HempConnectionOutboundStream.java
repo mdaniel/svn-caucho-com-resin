@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.manager;
+package com.caucho.hemp.broker;
 
 import com.caucho.hmpp.PresenceStream;
 import com.caucho.hmpp.MessageStream;
@@ -35,7 +35,6 @@ import com.caucho.hmpp.QueryStream;
 import com.caucho.hmpp.HmppError;
 
 import com.caucho.hemp.*;
-import com.caucho.hemp.service.*;
 import com.caucho.hmpp.HmppStream;
 import com.caucho.util.*;
 import java.io.Serializable;

@@ -41,6 +41,12 @@ public interface HmppResource extends HmppStream
    * Returns the resource's preferred jid.
    */
   public String getJid();
+  
+  /**
+   * Returns a subresource, e.g. if the resource is room@domain, then
+   * it might return a resource for room@domain/nick
+   */
+  public HmppResource lookupResource(String jid);
 
   /**
    * Called when an instance logs in

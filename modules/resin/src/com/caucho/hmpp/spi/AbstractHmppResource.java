@@ -59,6 +59,14 @@ public class AbstractHmppResource implements HmppResource
   }
 
   /**
+   * Looks up a sub-resource
+   */
+  public HmppResource lookupResource(String jid)
+  {
+    return null;
+  }
+
+  /**
    * Creates an outbound filter
    */
   public HmppStream getOutboundFilter(HmppStream stream)
@@ -97,6 +105,10 @@ public class AbstractHmppResource implements HmppResource
    */
   public void sendMessage(String to, String from, Serializable value)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendMessage to=" + to + " from=" + from
+		+ logValue(value));
+    }
   }
   
   public boolean sendQueryGet(long id,
@@ -137,6 +149,10 @@ public class AbstractHmppResource implements HmppResource
 			 String from,
 			 Serializable []data)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendPresence to=" + to + " from=" + from
+		+ logData(data));
+    }
   }
 
   /**
@@ -201,6 +217,37 @@ public class AbstractHmppResource implements HmppResource
 			      Serializable []data,
 			      HmppError error)
   {
+  }
+
+  private String logValue(Serializable value)
+  {
+    if (value == null)
+      return "";
+    else
+      return " value=" + value.getClass().getSimpleName();
+  }
+
+  private String logData(Serializable []data)
+  {
+    if (data == null)
+      return "";
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("[");
+
+    for (int i = 0; i < data.length; i++) {
+      if (i != 0)
+	sb.append(", ");
+
+      if (data[i] != null)
+	sb.append(data[i].getClass().getSimpleName());
+      else
+	sb.append("null");
+    }
+
+    sb.append("]");
+
+    return sb.toString();
   }
 
   //

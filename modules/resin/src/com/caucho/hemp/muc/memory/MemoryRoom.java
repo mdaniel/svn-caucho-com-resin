@@ -29,14 +29,159 @@
 
 package com.caucho.hemp.muc.memory;
 
-import com.caucho.hemp.service.*;
+import com.caucho.hemp.broker.GenericResource;
+import com.caucho.hmpp.*;
+import com.caucho.hmpp.im.*;
+import com.caucho.hmpp.muc.*;
+import com.caucho.hmpp.spi.*;
+import java.io.Serializable;
+import java.util.*;
 import java.util.logging.*;
 
 /**
- * Configuration for a service
+ * Multiuser chat room (xep-0045)
  */
-public class MemoryRoom extends GenericService
+public class MemoryRoom extends GenericResource
 {
   private static final Logger log
     = Logger.getLogger(MemoryRoom.class.getName());
+
+  private static final String MUC_PERSISTENT_FEATURE
+    = "muc_persistent";
+
+  private HashMap<String,MemoryNick> _nicknameMap
+    = new HashMap<String,MemoryNick>();
+
+  private ArrayList<MemoryNick> _users
+    = new ArrayList<MemoryNick>();
+
+  private MemoryNick []_userArray = new MemoryNick[0];
+
+  @Override
+  protected String getDiscoCategory()
+  {
+    return "conference";
+  }
+
+  @Override
+  protected String getDiscoType()
+  {
+    return "text";
+  }
+
+  @Override
+  protected void getDiscoFeatureNames(ArrayList<String> featureNames)
+  {
+    super.getDiscoFeatureNames(featureNames);
+    
+    featureNames.add(MUC_PERSISTENT_FEATURE);
+  }
+
+  @Override
+  public HmppResource lookupResource(String jid)
+  {
+    synchronized (_nicknameMap) {
+      MemoryNick nick = _nicknameMap.get(jid);
+
+      if (nick == null) {
+	nick = new MemoryNick(this, jid);
+	_nicknameMap.put(jid, nick);
+      }
+
+      return nick;
+    }
+  }
+
+  @Override
+  public void sendMessage(String to, String from, Serializable value)
+  {
+    MemoryNick nick = getNick(from);
+
+    if (nick == null) {
+      log.warning(this + " sendMessage unknown user from=" + from);
+      return;
+    }
+
+    if (! (value instanceof ImMessage)) {
+      log.fine(this + " sendMessage with unknown value from=" + from
+	       + " value=" + value);
+      return;
+    }
+
+    ImMessage msg = (ImMessage) value;
+
+    if (! "groupchat".equals(msg.getType())) {
+      log.fine(this + " sendMessage expects 'groupchat' at type='"
+	       + msg.getType() + "' from='" + from + "'");
+      return;
+    }
+
+    // XXX: check for voice
+
+    MemoryNick []users = _userArray;
+    for (MemoryNick user : users) {
+      getToBroker().sendMessage(user.getUserJid(), nick.getJid(), msg);
+    }
+  }
+
+  public MemoryNick getNick(String from)
+  {
+    MemoryNick []users = _userArray;
+    for (MemoryNick user : users) {
+      if (user.getUserJid().equals(from))
+	return user;
+    }
+
+    return null;
+  }
+
+  public HmppStream getToBroker()
+  {
+    return super.getToBroker();
+  }
+
+  protected void addPresence(MemoryNick nick)
+  {
+    synchronized (_users) {
+      if (! _users.contains(nick)) {
+	_users.add(nick);
+	_userArray = new MemoryNick[_users.size()];
+	_users.toArray(_userArray);
+
+	if (log.isLoggable(Level.FINE))
+	  log.fine(this + " addPresence " + nick);
+      }
+    }
+
+    MemoryNick []users = _userArray;
+
+    // send information to the user about the current users
+    for (MemoryNick user : users) {
+      if (user == nick)
+	continue;
+
+      MucUserPresence presenceData = user.toPresenceData();
+
+      getToBroker().sendPresence(nick.getUserJid(), user.getJid(),
+				 new Serializable[] { presenceData });
+    }
+
+    // send presence about the new user to the current users
+    for (MemoryNick user : users) {
+      if (user == nick)
+	continue;
+
+      MucUserPresence presenceData = user.toPresenceData();
+
+      getToBroker().sendPresence(user.getUserJid(), nick.getJid(),
+				 new Serializable[] { presenceData });
+    }
+
+    // send presence about the user to itself
+    MucUserPresence presenceData = nick.toPresenceData();
+    presenceData.setStatus(new int[] { 110 });
+
+    getToBroker().sendPresence(nick.getUserJid(), nick.getJid(),
+			       new Serializable[] { presenceData });
+  }
 }

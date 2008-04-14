@@ -65,6 +65,9 @@ import java.util.*;
  * </ul>
  */
 public class DiscoInfoQuery implements java.io.Serializable {
+  public static final String FEATURE
+    = "http://jabber.org/protocol/disco#info";
+  
   private String _node;
   
   private DiscoIdentity []_identity;

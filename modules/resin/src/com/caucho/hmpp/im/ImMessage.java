@@ -42,8 +42,8 @@ public class ImMessage implements Serializable {
   // chat, groupchat, headline, normal
   private String _type;
   
-  private String []_subject;
-  private String []_body;
+  private Text []_subject;
+  private Text []_body;
   private String _thread;
 
   private Serializable []_extra;
@@ -52,11 +52,15 @@ public class ImMessage implements Serializable {
   {
   }
 
-  public ImMessage(String to, String from, String type)
+  public ImMessage(String type)
   {
-    _to = to;
-    _from = from;
     _type = type;
+  }
+
+  public ImMessage(String type, String body)
+  {
+    _type = type;
+    _body = new Text[] { new Text(body) };
   }
 
   public String getType()
@@ -64,9 +68,29 @@ public class ImMessage implements Serializable {
     return _type;
   }
 
+  public String getBodyString()
+  {
+    if (_body == null || _body.length == 0)
+      return null;
+    else
+      return _body[0].getValue();
+  }
+
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _type + "]";
+    StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+    sb.append(_type);
+
+    if (_body != null && _body.length != 0) {
+      sb.append(",body='");
+      sb.append(getBodyString());
+      sb.append("'");
+    }
+    sb.append("]");
+    
+    return sb.toString();
   }
 }

@@ -53,10 +53,11 @@ public class MucUserPresence implements java.io.Serializable {
 
   // "admin", "member", "none", "outcast", "owner"
   private String _affiliation;
-  private String _jid;
-  private String _nick;
   // "moderator", "none", "participant", "visitor"
   private String _role;
+  
+  private String _jid;
+  private String _nick;
   
   private MucDecline _decline;
   private MucDestroy _destroy;
@@ -68,13 +69,77 @@ public class MucUserPresence implements java.io.Serializable {
   public MucUserPresence()
   {
   }
+
+  public String getAffiliation()
+  {
+    return _affiliation;
+  }
+
+  public void setAffiliation(String affiliation)
+  {
+    _affiliation = affiliation;
+  }
+
+  public String getRole()
+  {
+    return _role;
+  }
+
+  public void setRole(String role)
+  {
+    _role = role;
+  }
+
+  public void setStatus(int []status)
+  {
+    if (status == null) {
+      _status = null;
+      return;
+    }
+
+    _status = new MucStatus[status.length];
+    
+    for (int i = 0; i < status.length; i++) {
+      _status[i] = new MucStatus(status[i]);
+    }
+  }
+
+  public void setStatus(MucStatus []status)
+  {
+    _status = status;
+  }
+
+  public MucStatus []getStatus()
+  {
+    return _status;
+  }
   
   public String toString()
   {
-    return (getClass().getSimpleName()
-	    + "[" + _actor
-            + ",nick=" + _nick
-            + ",affiliation=" + _affiliation
-            + ",role=" + _role + "]");
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+    sb.append("affiliation=");
+    sb.append(_affiliation);
+    sb.append(",role=");
+    sb.append(_role);
+
+    if (_status != null) {
+      sb.append(",status=[");
+      
+      for (int i = 0; i < _status.length; i++) {
+	if (i != 0)
+	  sb.append(",");
+	
+	sb.append(_status[i].getCode());
+      }
+      
+      sb.append("]");
+    }
+
+    sb.append("]");
+
+    return sb.toString();
   }
 }

@@ -27,8 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.manager;
+package com.caucho.hemp.broker;
 
+import com.caucho.hemp.broker.HempConnectionOutboundStream;
+import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hmpp.spi.HmppResource;
 import com.caucho.hmpp.*;
 
@@ -45,7 +47,7 @@ public class HempConnectionImpl implements HmppConnection {
   
   private static final L10N L = new L10N(HempConnectionImpl.class);
   
-  private final HempManager _manager;
+  private final HempBroker _broker;
   private final HempConnectionOutboundStream _handler;
   
   private final String _jid;
@@ -60,9 +62,9 @@ public class HempConnectionImpl implements HmppConnection {
 
   private boolean _isClosed;
 
-  HempConnectionImpl(HempManager manager, String jid)
+  HempConnectionImpl(HempBroker manager, String jid)
   {
-    _manager = manager;
+    _broker = manager;
     _jid = jid;
 
     _handler = new HempConnectionOutboundStream(this);
@@ -78,7 +80,7 @@ public class HempConnectionImpl implements HmppConnection {
     _resource = manager.getResource(uid);
 
     if (_resource != null) {
-      _inboundFilter = _resource.getInboundFilter(_manager);
+      _inboundFilter = _resource.getInboundFilter(_broker);
       _inboundStream = _inboundFilter;
       
       _outboundFilter = _resource.getOutboundFilter(null);
@@ -150,7 +152,7 @@ public class HempConnectionImpl implements HmppConnection {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    //return _manager.query(_jid, to, query);
+    //return _broker.query(_jid, to, query);
     return null;
   }
 
@@ -162,7 +164,7 @@ public class HempConnectionImpl implements HmppConnection {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    //return _manager.query(_jid, to, query);
+    //return _broker.query(_jid, to, query);
     return null;
   }
 
@@ -298,7 +300,7 @@ public class HempConnectionImpl implements HmppConnection {
   {
     _isClosed = true;
     
-    _manager.close(_jid);
+    _broker.close(_jid);
   }
 
   @Override
