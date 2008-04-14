@@ -101,7 +101,7 @@ public class ApplicationConfig
   public void setActionListener(Class actionListener)
     throws ConfigException
   {
-    Config.validate(actionListener, ActionListener.class);
+    Config.validate(actionListener, ActionListener.class, ActionListener.class);
 
     _actionListener = actionListener;
   }
@@ -286,6 +286,43 @@ public class ApplicationConfig
 
     if (_defaultRenderKitId != null)
       app.setDefaultRenderKitId(_defaultRenderKitId); 
+
+    if (_actionListener != null) {
+      ActionListener listener = null;
+      
+      try {
+	Constructor ctor
+	  = _actionListener.getConstructor(new Class [] { ActionListener.class });
+
+	ActionListener oldListener = app.getActionListener();
+
+	listener = (ActionListener) ctor.newInstance(oldListener);
+      }
+      catch (NoSuchMethodException e) {
+      }
+      catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+
+      if (listener == null) {
+	try {
+	  listener = (ActionListener) _actionListener.newInstance();
+	}
+	catch (RuntimeException e) {
+	  throw e;
+	}
+	catch (Exception e) {
+	  throw ConfigException.create(e);
+	}
+      }
+
+      if (listener != null) {
+	app.setActionListener(listener);
+	log.fine(L.l("JSF[] using '{0}' as action-listener", listener));
+      }
+    }
 
     if (_viewHandler != null) {
       ViewHandler handler = null;
