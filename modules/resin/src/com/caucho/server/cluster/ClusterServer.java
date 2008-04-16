@@ -327,6 +327,13 @@ public class ClusterServer {
   /**
    * Arguments on boot
    */
+  public void addJvmClasspath(String args)
+  {
+  }
+
+  /**
+   * Arguments on boot
+   */
   public void addWatchdogArg(String args)
   {
   }

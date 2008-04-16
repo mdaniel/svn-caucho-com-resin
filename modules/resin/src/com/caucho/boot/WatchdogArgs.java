@@ -361,28 +361,49 @@ class WatchdogArgs
   {
     ArrayList<String> classPath = new ArrayList<String>();
 
+    return calculateClassPath(classPath, resinHome);
+  }
+
+  static String calculateClassPath(ArrayList<String> classPath,
+				   Path resinHome)
+    throws IOException
+  {
+    String oldClassPath = System.getProperty("java.class.path");
+    if (oldClassPath != null) {
+      for (String item : oldClassPath.split("[" + File.pathSeparatorChar + "]")) {
+	addClassPath(classPath, item);
+      }
+    }
+
+    oldClassPath = System.getenv("CLASSPATH");
+    if (oldClassPath != null) {
+      for (String item : oldClassPath.split("[" + File.pathSeparatorChar + "]")) {
+	addClassPath(classPath, item);
+      }
+    }
+
     Path javaHome = Vfs.lookup(System.getProperty("java.home"));
 
     if (javaHome.lookup("lib/tools.jar").canRead())
-      classPath.add(javaHome.lookup("lib/tools.jar").getNativePath());
+      addClassPath(classPath, javaHome.lookup("lib/tools.jar").getNativePath());
     else if (javaHome.getTail().startsWith("jre")) {
       String tail = javaHome.getTail();
       tail = "jdk" + tail.substring(3);
       Path jdkHome = javaHome.getParent().lookup(tail);
 
       if (jdkHome.lookup("lib/tools.jar").canRead())
-	classPath.add(jdkHome.lookup("lib/tools.jar").getNativePath());
+	addClassPath(classPath, jdkHome.lookup("lib/tools.jar").getNativePath());
     }
     
     if (javaHome.lookup("../lib/tools.jar").canRead())
-      classPath.add(javaHome.lookup("../lib/tools.jar").getNativePath());
+      addClassPath(classPath, javaHome.lookup("../lib/tools.jar").getNativePath());
 
     Path resinLib = resinHome.lookup("lib");
 
     if (resinLib.lookup("pro.jar").canRead())
-      classPath.add(resinLib.lookup("pro.jar").getNativePath());
-    classPath.add(resinLib.lookup("resin.jar").getNativePath());
-    classPath.add(resinLib.lookup("jaxrpc-15.jar").getNativePath());
+      addClassPath(classPath, resinLib.lookup("pro.jar").getNativePath());
+    addClassPath(classPath, resinLib.lookup("resin.jar").getNativePath());
+    addClassPath(classPath, resinLib.lookup("jaxrpc-15.jar").getNativePath());
 		  
     String []list = resinLib.list();
 
@@ -395,7 +416,7 @@ class WatchdogArgs
       String pathName = item.getNativePath();
 
       if (! classPath.contains(pathName))
-	classPath.add(pathName);
+	addClassPath(classPath, pathName);
     }
 
     String cp = "";
@@ -408,6 +429,12 @@ class WatchdogArgs
     }
 
     return cp;
+  }
+
+  private static void addClassPath(ArrayList<String> cp, String item)
+  {
+    if (! cp.contains(item))
+      cp.add(item);
   }
 
   public class ResinBootELContext

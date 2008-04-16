@@ -148,6 +148,14 @@ public class Watchdog
   }
 
   /**
+   * Returns the JVM classpath for the instance
+   */
+  public ArrayList<String> getJvmClasspath()
+  {
+    return _config.getJvmClasspath();
+  }
+
+  /**
    * Returns the setuid user name.
    */
   public String getUserName()

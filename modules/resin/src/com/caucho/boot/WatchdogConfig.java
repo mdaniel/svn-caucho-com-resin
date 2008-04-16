@@ -37,6 +37,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import java.lang.reflect.*;
+import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -60,8 +61,8 @@ public class WatchdogConfig
   private Path _javaHome;
   private Path _javaExe;
   private ArrayList<String> _jvmArgs = new ArrayList<String>();
-  private ArrayList<String> _watchdogJvmArgs
-    = new ArrayList<String>();
+  private ArrayList<String> _jvmClasspath = new ArrayList<String>();
+  private ArrayList<String> _watchdogJvmArgs = new ArrayList<String>();
   private Path _resinHome;
   private Path _resinRoot;
   private Path _resinConf;
@@ -151,6 +152,23 @@ public class WatchdogConfig
   public ArrayList<String> getJvmArgs()
   {
     return _jvmArgs;
+  }
+
+  
+  public void addJvmClasspath(String item)
+  {
+    if (item == null)
+      return;
+
+    for (String cp : item.split("[" + File.pathSeparatorChar + "]")) {
+      if (! _jvmClasspath.contains(cp))
+	_jvmClasspath.add(cp);
+    }
+  }
+  
+  public ArrayList<String> getJvmClasspath()
+  {
+    return _jvmClasspath;
   }
 
   

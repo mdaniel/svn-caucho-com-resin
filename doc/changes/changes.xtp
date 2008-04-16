@@ -12,6 +12,10 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>quercus: xml_parse needs to allow unassigned character values for Mediawiki import/export (#2592)</li>
+<li>quercus: DOM constants needed for Mediawiki 1.12</li>
+<li>watchdog: add &lt;jvm-classpath></li>
+<li>(2008-04-16) quercus: json was not working with SimpleXmlElement (#2569, rep by Matthew Schmidt)</li>
 <li>quercus: xml_get_current_column_number (#2574, #2604, rep by P Fischer)</li>
 <li>amber: @OneToOne persist cascade issues (#2599, rep by tsv)</li>
 <li>amber: startup timing issues.  the codegen must occur before the database is selected</li>

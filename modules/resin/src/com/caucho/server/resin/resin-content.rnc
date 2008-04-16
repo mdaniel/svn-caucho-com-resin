@@ -608,11 +608,14 @@ r_server-Basis =
 
   & r_http*
 
-  & (attribute java-exe { string }
-     | element java-exe { string })?
-
   & (attribute jvm-arg { string }
      | element jvm-arg { string })*
+
+  & (attribute jvm-classpath { string }
+     | element jvm-classpath { string })*
+
+  & (attribute java-exe { string }
+     | element java-exe { string })?
 
   & r_keepalive-connection-time-max?
 

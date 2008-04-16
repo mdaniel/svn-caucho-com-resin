@@ -265,6 +265,27 @@ the command line, typically -X memory parameters and -D defines.</p>
 
 </defun>
 
+<defun title="&lt;jvm-classpath>" version="Resin 3.1">
+<parents>server</parents>
+
+<p>&lt;jvm-classpath> adds a classpath entry when starting the JVM.</p>
+
+<example title="adding a classpath">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="web-tier">
+    &lt;server-default>
+      &lt;jvm-classpath>/tmp/test-classpath;/jvm-classpath>
+    &lt;/server-default>
+
+    &lt;server id="app-a" address="192.168.2.10"/>
+
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</defun>
+
 <defun title="&lt;keepalive-max>" version="Resin 3.1">
 <parents>server</parents>
 

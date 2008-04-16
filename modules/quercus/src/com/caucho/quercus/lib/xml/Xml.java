@@ -713,24 +713,35 @@ public class Xml {
       args[0] = _parser;
 
       String eName = lName; // element name
-      if ("".equals(eName)) eName = qName;
-      if (_xmlOptionCaseFolding) eName = eName.toUpperCase();
+      if ("".equals(eName))
+	eName = qName;
+      
+      if (_xmlOptionCaseFolding)
+	eName = eName.toUpperCase();
+      
       args[1] = _env.createString(eName);
 
       // turn attrs into an array of name, value pairs
       args[2] = new ArrayValueImpl();
       for (int i = 0; i < attrs.getLength(); i++) {
         String aName = attrs.getLocalName(i); // Attr name
-        if ("".equals(aName)) aName = attrs.getQName(i);
-        if (_xmlOptionCaseFolding) aName = aName.toUpperCase();
+	
+        if ("".equals(aName))
+	  aName = attrs.getQName(i);
+	
+        if (_xmlOptionCaseFolding)
+	  aName = aName.toUpperCase();
+	
         args[2].put(_env.createString(aName), _env.createString(attrs.getValue(i)));
       }
 
       try {
         if (_startElementHandler != null)
           _startElementHandler.call(_env,args);
-        else
-          throw new Exception("start element handler is not set");
+        else {
+	  if (log.isLoggable(Level.FINER))
+	    log.finer(this + " startElement " + qName);
+	}
       } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
@@ -757,8 +768,10 @@ public class Xml {
 
         if (_endElementHandler != null)
           _endElementHandler.call(_env, _parser, _env.createString(eName));
-        else
-          throw new Exception("end element handler is not set");
+        else {
+	  if (log.isLoggable(Level.FINER))
+	    log.finer(this + " endElement " + sName);
+	}
       } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
@@ -773,20 +786,24 @@ public class Xml {
      * @param length
      * @throws SAXException
      */
-    public void characters(char[] ch,
+    public void characters(char[] buf,
                            int start,
                            int length)
       throws SAXException
     {
-      String s = new String(ch,start,length);
+      String s = new String(buf, start, length);
 
       try {
         if (_characterDataHandler != null)
-          _characterDataHandler.call(_env, _parser, _env.createString(s));
+          _characterDataHandler.call(_env, _parser,
+				     _env.createString(buf, start, length));
         else if (_defaultHandler != null)
           _defaultHandler.call(_env, _parser, _env.createString(s));
-        else
-          throw new Exception("neither character data handler nor default handler is set");
+        else {
+	  if (log.isLoggable(Level.FINER))
+	    log.finer(this + " characters '"
+		      + new String(buf, start, length) + "'");
+	}
       } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
@@ -804,10 +821,15 @@ public class Xml {
       throws SAXException
     {
       try {
-        if (_processingInstructionHandler != null)
-          _processingInstructionHandler.call(_env, _parser, _env.createString(target), _env.createString(data));
-        else
-          throw new Exception("processing instruction handler is not set");
+        if (_processingInstructionHandler != null) {
+          _processingInstructionHandler.call(_env, _parser,
+					     _env.createString(target),
+					     _env.createString(data));
+	}
+        else {
+	  if (log.isLoggable(Level.FINER))
+	    log.finer(this + " processingInstruction " + target);
+	}
       } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
@@ -827,8 +849,10 @@ public class Xml {
       try {
         if (_startNamespaceDeclHandler != null)
           _startNamespaceDeclHandler.call(_env, _env.createString(prefix), _env.createString(uri));
-        else
-          throw new Exception("start namespace decl handler is not set");
+        else {
+	  if (log.isLoggable(Level.FINER))
+	    log.finer(this + " startPrefixMapping " + prefix + " " + uri);
+	}
       } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
@@ -847,8 +871,10 @@ public class Xml {
       try {
         if (_endNamespaceDeclHandler != null)
           _endNamespaceDeclHandler.call(_env, _env.createString(prefix));
-        else
-          throw new Exception("end namespace decl handler is not set");
+        else {
+	  if (log.isLoggable(Level.FINER))
+	    log.finer(this + " endPrefixMapping");
+	}
       } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
@@ -868,8 +894,10 @@ public class Xml {
                                     _env.createString(""),
                                     _env.createString(systemId),
                                     _env.createString(publicId));
-        else
-          throw new Exception("notation declaration handler is not set");
+        else {
+	  if (log.isLoggable(Level.FINER))
+	    log.finer(this + " notation " + name);
+	}
       } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
@@ -903,8 +931,10 @@ public class Xml {
       try {
         if (_unparsedEntityDeclHandler != null)
           _unparsedEntityDeclHandler.call(_env, args);
-        else
-          throw new Exception("unparsed entity declaration handler is not set");
+        else {
+	  if (log.isLoggable(Level.FINER))
+	    log.finer(this + " unparsedEntity " + name);
+	}
       } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));

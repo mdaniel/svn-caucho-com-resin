@@ -384,8 +384,11 @@ class WatchdogProcess
 
     Path resinHome = _watchdog.getResinHome();
     Path resinRoot = _watchdog.getResinRoot();
-	
-    String classPath = WatchdogArgs.calculateClassPath(resinHome);
+
+    ArrayList<String> classPathList = new ArrayList<String>();
+    classPathList.addAll(_watchdog.getJvmClasspath());
+    String classPath
+      = WatchdogArgs.calculateClassPath(classPathList, resinHome);
 
     HashMap<String,String> env = new HashMap<String,String>();
 

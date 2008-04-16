@@ -1073,6 +1073,11 @@ to launch the JVM</td>
   <td></td>
 </tr>
 <tr>
+  <td>jvm-classpath</td>
+  <td>Adds a JVM classpath when the watchdog launches Resin.</td>
+  <td></td>
+</tr>
+<tr>
   <td>keepalive-connection-time-max</td>
   <td>The total time a connection can be used for requests and keepalives</td>
   <td>10min</td>
@@ -1201,6 +1206,7 @@ element server {
   &amp; http*
   &amp; java-exe?
   &amp; jvm-arg?
+  &amp; jvm-classpath?
   &amp; keepalive-connection-time-max?
   &amp; keepalive-max?
   &amp; keepalive-select-enable?
