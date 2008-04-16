@@ -188,6 +188,16 @@ public class StatefulMethod extends BusinessMethodGenerator
   /**
    * Generates the underlying bean instance
    */
+  @Override
+  protected String getSuper()
+    throws IOException
+  {
+    return "_bean";
+  }
+
+  /**
+   * Generates the underlying bean instance
+   */
   protected void generatePostCall(JavaWriter out)
     throws IOException
   {

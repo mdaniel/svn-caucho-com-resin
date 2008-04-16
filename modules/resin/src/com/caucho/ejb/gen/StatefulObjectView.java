@@ -50,6 +50,48 @@ abstract public class StatefulObjectView extends StatefulView {
     super(bean, api);
   }
 
+  /**
+   * Generates the view code.
+   */
+  public void generateBean(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public static class " + getBeanClassName());
+    out.println("  extends " + getEjbClass().getName());
+    out.println("{");
+    out.pushDepth();
+    
+    out.println("private transient " + getViewClassName() + " _context;");
+
+    HashMap map = new HashMap();
+    
+    generateBusinessPrologue(out, map);    
+    //_postConstructInterceptor.generatePrologue(out, map);
+    //_preDestroyInterceptor.generatePrologue(out, map);
+
+    out.println();
+    out.println(getBeanClassName() + "(" + getViewClassName() + " context)");
+    out.println("{");
+    out.pushDepth();
+    out.println("_context = context;");
+
+    map = new HashMap();
+    generateBusinessConstructor(out, map);    
+    //_postConstructInterceptor.generateConstructor(out, map);
+    //_preDestroyInterceptor.generateConstructor(out, map);
+
+    //_postConstructInterceptor.generateCall(out);
+
+    out.popDepth();
+    out.println("}");
+
+    // generateBusinessMethods(out);
+    
+    out.popDepth();
+    out.println("}");
+  }
+
   @Override
   protected BusinessMethodGenerator
     createMethod(ApiMethod apiMethod, int index)

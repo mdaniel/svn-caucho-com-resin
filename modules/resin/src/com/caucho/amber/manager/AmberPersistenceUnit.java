@@ -109,7 +109,7 @@ public class AmberPersistenceUnit {
 
   private JdbcMetaData _jdbcMetaData;
 
-  private boolean _createDatabaseTables;
+  private Boolean _createDatabaseTables;
   private boolean _validateDatabaseTables = true;
 
   // private long _tableCacheTimeout = 250;
@@ -198,8 +198,6 @@ public class AmberPersistenceUnit {
     _dataSource = container.getDataSource();
     _xaDataSource = container.getXADataSource();
     _readDataSource = container.getReadDataSource();
-
-    _createDatabaseTables = container.getCreateDatabaseTables();
 
     _configManager = new AmberConfigManager(this);
 
@@ -372,7 +370,10 @@ public class AmberPersistenceUnit {
    */
   public boolean getCreateDatabaseTables()
   {
-    return _createDatabaseTables;
+    if (_createDatabaseTables != null)
+      return _createDatabaseTables;
+    else
+      return _amberContainer.getCreateDatabaseTables();
   }
 
   /**

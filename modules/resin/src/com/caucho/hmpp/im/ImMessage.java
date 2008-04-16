@@ -52,9 +52,10 @@ public class ImMessage implements Serializable {
   {
   }
 
-  public ImMessage(String type)
+  public ImMessage(String body)
   {
-    _type = type;
+    _type = "chat";
+    _body = new Text[] { new Text(body) };
   }
 
   public ImMessage(String type, String body)

@@ -12,6 +12,8 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>amber: @OneToOne persist cascade issues (#2599, rep by tsv)</li>
+<li>amber: startup timing issues.  the codegen must occur before the database is selected</li>
 <li>jsp: body tag interaction with jsp:include and i18n (#2581, rep by T Fukuda)</li>
 <li>(2008-04-11) response.sendRedirect should encode in utf-8 (#2580, rep by Sanjeev)</li>
 <li>admin: added .war manifest as a JMX value (#2462)</li>

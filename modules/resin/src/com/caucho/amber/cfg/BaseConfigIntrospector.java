@@ -916,6 +916,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     else {
       JdbcMetaData metaData = null;
 
+      /* XXX: validation needs to occur later
       try {
         metaData = persistenceUnit.getMetaData();
       } catch (ConfigException e) {
@@ -923,19 +924,24 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       } catch (Exception e) {
         throw new ConfigException(L.l("Unable to get meta data for database. Meta data is needed for generated values."), e);
       }
+      */
 
       if (GenerationType.IDENTITY.equals(gen.get("strategy"))) {
+	/* XXX: validation later
         if (! metaData.supportsIdentity())
           throw new ConfigException(L.l("'{0}' does not support identity.",
                                         metaData.getDatabaseName()));
+	*/
 
         keyColumn.setGeneratorType("identity");
         idField.setGenerator("identity");
       }
       else if (GenerationType.SEQUENCE.equals(gen.get("strategy"))) {
+	/* XXX: validation later
         if (! metaData.supportsSequences())
           throw new ConfigException(L.l("'{0}' does not support sequence.",
                                         metaData.getDatabaseName()));
+	*/
 
         addSequenceIdGenerator(persistenceUnit, idField, gen);
       }
@@ -943,6 +949,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         addTableIdGenerator(persistenceUnit, idField, id);
       }
       else if (GenerationType.AUTO.equals(gen.get("strategy"))) {
+        keyColumn.setGeneratorType("auto");
+        idField.setGenerator("auto");
+
+	/* XXX: validation later
         if (metaData.supportsIdentity()) {
           keyColumn.setGeneratorType("identity");
           idField.setGenerator("identity");
@@ -953,6 +963,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         else {
           addTableIdGenerator(persistenceUnit, idField, id);
         }
+	*/
       }
     }
 

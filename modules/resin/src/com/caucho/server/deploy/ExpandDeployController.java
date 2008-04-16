@@ -133,7 +133,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     if (_manifest == null)
       return null;
     
-    HashMap<String,String> map = new HashMap<String,String>();
+    Map<String,String> map = new TreeMap<String,String>();
 
     Attributes attr = _manifest.getMainAttributes();
 

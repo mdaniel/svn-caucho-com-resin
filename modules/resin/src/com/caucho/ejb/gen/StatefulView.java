@@ -69,6 +69,11 @@ abstract public class StatefulView extends View {
 
   abstract protected String getViewClassName();
 
+  protected String getBeanClassName()
+  {
+    return getApi().getSimpleName() + "__Bean";
+  }
+
   /**
    * Returns the introspected methods
    */
@@ -130,6 +135,8 @@ abstract public class StatefulView extends View {
   public void generate(JavaWriter out)
     throws IOException
   {
+    generateBean(out);
+    
     out.println();
     out.println("public static class " + getViewClassName());
 
@@ -146,15 +153,24 @@ abstract public class StatefulView extends View {
     out.println("}");
   }
 
+  protected void generateBean(JavaWriter out)
+    throws IOException
+  {
+  }
+
   protected void generateClassContent(JavaWriter out)
     throws IOException
   {
     out.println("private StatefulContext _context;");
     out.println("private StatefulServer _server;");
-    out.println("private " + getEjbClass().getName() + " _bean;");
+    out.println("private " + getBeanClassName() + " _bean;");
     out.println("private boolean _isActive;");
+
+    out.println();
+    out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
+    out.println("  = new com.caucho.ejb3.xa.XAManager();");
     
-    generateBusinessPrologue(out);
+    //generateBusinessPrologue(out);
 
     out.println();
     out.println(getViewClassName() + "(StatefulServer server)");
@@ -175,8 +191,7 @@ abstract public class StatefulView extends View {
     
     generateSuper(out, "server");
     out.println("_server = server;");
-    out.println("_bean = new " + getEjbClass().getName() + "();");
-    generateBusinessConstructor(out);
+    out.println("_bean = new " + getBeanClassName() + "(this);");
 
     out.popDepth();
     out.println("}");
@@ -186,12 +201,14 @@ abstract public class StatefulView extends View {
     out.println();
     out.println("public " + getViewClassName()
 		+ "(StatefulServer server, "
-		+ getEjbClass().getName() + " bean)");
+		+ getBeanClassName() + " bean)");
     out.println("{");
     generateSuper(out, "server");
     out.println("  _server = server;");
     out.println("  _bean = bean;");
-    generateBusinessConstructor(out);
+    
+    // generateBusinessConstructor(out);
+    
     out.println("}");
 
     out.println();

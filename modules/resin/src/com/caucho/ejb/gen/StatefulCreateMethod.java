@@ -130,6 +130,12 @@ public class StatefulCreateMethod extends BusinessMethodGenerator
     out.print("bean");
   }
 
+  @Override
+  protected String getSuper()
+  {
+    return "bean";
+  }
+
   /**
    * Generates the underlying bean instance
    */

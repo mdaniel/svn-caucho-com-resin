@@ -274,15 +274,20 @@ public class Column {
       sqlType = _type.generateCreateColumnSQL(manager, _length, _precision, _scale);
     }
 
-    if ("identity".equals(_generatorType)) {
+    String generatorType = _generatorType;
+    
+    if ("auto".equals(_generatorType)
+	&& manager.getMetaData().supportsIdentity())
+      generatorType = "identity";
+
+    if ("identity".equals(generatorType))
       cb.append(manager.getMetaData().createIdentitySQL(sqlType));
-    } else {
+    else
       cb.append(sqlType);
-    }
 
     if (isPrimaryKey()) {
       cb.append(" primary key");
-    } else if (! "identity".equals(_generatorType)) {
+    } else if (! "identity".equals(generatorType)) {
       if (isNotNull())
         cb.append(" not null");
       if (isUnique())

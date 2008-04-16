@@ -179,7 +179,7 @@ public class HempBroker implements HmppBroker {
     }
 
     if (log.isLoggable(Level.FINE))
-      log.fine(conn + " created");
+      log.fine(this + " register jid=" + jid + " " + resource);
 
     return conn;
   }
@@ -205,6 +205,7 @@ public class HempBroker implements HmppBroker {
    */
   public void sendPresence(String to, String from, Serializable []data)
   {
+    /*
     if (to == null) {
       ResourceManager []resourceManagers = _resourceManagerList;
 
@@ -213,15 +214,15 @@ public class HempBroker implements HmppBroker {
       }
     }
     else {
-      HmppStream stream = getStream(to);
-      
-      if (stream != null)
-        stream.sendPresence(to, from, data);
-      else {
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " sendPresence (no resource) to=" + to
-		    + " from=" + from);
-	}
+    */
+    HmppStream stream = getStream(to);
+
+    if (stream != null)
+      stream.sendPresence(to, from, data);
+    else {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(this + " sendPresence (no resource) to=" + to
+		  + " from=" + from);
       }
     }
   }

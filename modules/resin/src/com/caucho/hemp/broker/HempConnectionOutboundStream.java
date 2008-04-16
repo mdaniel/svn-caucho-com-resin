@@ -181,6 +181,9 @@ class HempConnectionOutboundStream implements HmppStream {
     QueryStream handler = _queryHandler;
 
     if (handler == null) {
+      if (_conn.onQueryResult(id, to, from, value))
+	return;
+      
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " sendQueryResult (no handler) to=" + to + " from=" + from);
       return;
@@ -201,6 +204,9 @@ class HempConnectionOutboundStream implements HmppStream {
     QueryStream handler = _queryHandler;
 
     if (handler == null) {
+      if (_conn.onQueryError(id, to, from, query, error))
+	return;
+      
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " sendQueryError (no handler) to=" + to + " from=" + from);
       return;

@@ -474,10 +474,14 @@ public class KeyPropertyField extends PropertyField implements IdField {
     if ("identity".equals(_generator))
       return;
     else if (_generator != null) {
+      // XXX: logic change since the class needs to be enhanced before
+      // the driver
+      /*
       if (getEntitySourceType().getGenerator(getName()) == null)
         throw new IllegalStateException("no sequence generator for " + getName());
+      */
 
-      out.println("if (" + getType().generateIsNull(generateSuperGetter("this")) + ") {");
+      out.println("if (" + getType().generateIsNull(generateSuperGetter("this")) + " && home.isSequenceGenerator()) {");
       out.pushDepth();
 
       String id = "home.nextGeneratorId(aConn, \"" + getName() + "\")";
@@ -522,12 +526,12 @@ public class KeyPropertyField extends PropertyField implements IdField {
   public void generateSetGeneratedKeys(JavaWriter out, String pstmt)
     throws IOException
   {
-    if (! "identity".equals(_generator))
+    if (! ("identity".equals(_generator) || "auto".equals(_generator)))
       return;
 
     out.print("if (");
     out.print(getType().generateIsNull(generateSuperGetter("this")));
-    out.println(") {");
+    out.println(" && __caucho_home.isIdentityGenerator()) {");
     out.pushDepth();
 
     String var = "__caucho_rs_" + out.generateId();

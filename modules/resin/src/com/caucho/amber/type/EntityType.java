@@ -143,6 +143,9 @@ public class EntityType extends BeanType {
 
   private int _flushPriority;
 
+  private boolean _isIdentityGenerator;
+  private boolean _isSequenceGenerator;
+
 
   public EntityType(AmberPersistenceUnit amberPersistenceUnit)
   {
@@ -802,21 +805,6 @@ public class EntityType extends BeanType {
       field.init();
     }
 
-    // XXX: really needs to be called from the table-init code
-    for (IdGenerator idGen : _idGenMap.values()) {
-      try {
-	if (idGen instanceof SequenceIdGenerator) {
-	  ((SequenceIdGenerator) idGen).init(_amberPersistenceUnit);
-	}
-	else if (idGen instanceof AmberTableGenerator) {
-	  // jpa/0g60
-	  ((AmberTableGenerator) idGen).init(_amberPersistenceUnit);
-	}
-      } catch (SQLException e) {
-	throw ConfigException.create(e);
-      }
-    }
-
     if (getMappedSuperclassFields() == null)
       return;
 
@@ -863,10 +851,60 @@ public class EntityType extends BeanType {
   {
     init();
 
+    startGenerator();
+
     startImpl();
 
     if (! _lifecycle.toActive())
       return;
+  }
+
+  private void startGenerator()
+  {
+    IdField idGenField = getId().getGeneratedIdField();
+    
+    if (getPersistenceUnit().getMetaData().supportsIdentity())
+      _isIdentityGenerator = true;
+    
+    if (! getId().isIdentityGenerator())
+      _isIdentityGenerator = false;
+    
+    if (getPersistenceUnit().getMetaData().supportsSequences())
+      _isSequenceGenerator = true;
+    
+    if (_isIdentityGenerator)
+      _isSequenceGenerator = false;
+
+    if (! _isIdentityGenerator
+	&& idGenField != null
+	&& getGenerator(idGenField.getName()) == null) {
+      IdGenerator gen;
+      
+      if (_isSequenceGenerator) {
+	String name = getTable().getName() + "_cseq";
+	
+	gen = getPersistenceUnit().createSequenceGenerator(name, 1);
+      }
+      else
+	gen = getPersistenceUnit().getTableGenerator("caucho");
+
+      _idGenMap.put(idGenField.getName(), gen);
+    }
+
+    // XXX: really needs to be called from the table-init code
+    for (IdGenerator idGen : _idGenMap.values()) {
+      try {
+	if (idGen instanceof SequenceIdGenerator) {
+	  ((SequenceIdGenerator) idGen).init(_amberPersistenceUnit);
+	}
+	else if (idGen instanceof AmberTableGenerator) {
+	  // jpa/0g60
+	  ((AmberTableGenerator) idGen).init(_amberPersistenceUnit);
+	}
+      } catch (SQLException e) {
+	throw ConfigException.create(e);
+      }
+    }
   }
 
   private void startImpl()
@@ -1073,6 +1111,22 @@ public class EntityType extends BeanType {
     throws SQLException
   {
     return getHome().loadFull(aConn, rs, index);
+  }
+
+  /**
+   * Returns true for sequence generator
+   */
+  public boolean isSequenceGenerator()
+  {
+    return _isSequenceGenerator;
+  }
+
+  /**
+   * Returns true for sequence generator
+   */
+  public boolean isIdentityGenerator()
+  {
+    return _isIdentityGenerator;
   }
 
   /**

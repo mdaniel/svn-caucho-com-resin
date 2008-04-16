@@ -112,4 +112,84 @@ public class AuthInboundStream extends AbstractHmppStream
     
     return true;
   }
+  /**
+   * General presence, for clients announcing availability
+   */
+  public void sendPresence(String to,
+			   String from,
+			   Serializable []data)
+  {
+    log.fine(this + " sendPresence requires login first");
+  }
+
+  /**
+   * General presence, for clients announcing unavailability
+   */
+  public void sendPresenceUnavailable(String to,
+				      String from,
+				      Serializable []data)
+  {
+    log.fine(this + " sendPresenceUnavailable requires login first");
+  }
+
+  /**
+   * Presence probe from the server to a client
+   */
+  public void sendPresenceProbe(String to,
+			        String from,
+			        Serializable []data)
+  {
+    log.fine(this + " sendPresenceProbe requires login first");
+  }
+
+  /**
+   * A subscription request from a client
+   */
+  public void sendPresenceSubscribe(String to,
+				    String from,
+				    Serializable []data)
+  {
+    log.fine(this + " sendPresenceSubscribe requires login first");
+  }
+
+  /**
+   * A subscription response to a client
+   */
+  public void sendPresenceSubscribed(String to,
+				     String from,
+				     Serializable []data)
+  {
+    log.fine(this + " sendPresenceSubscribed requires login first");
+  }
+
+  /**
+   * An unsubscription request from a client
+   */
+  public void sendPresenceUnsubscribe(String to,
+				      String from,
+				      Serializable []data)
+  {
+    log.fine(this + " sendPresenceUnsubscribe requires login first");
+  }
+
+  /**
+   * A unsubscription response to a client
+   */
+  public void sendPresenceUnsubscribed(String to,
+				       String from,
+				       Serializable []data)
+  {
+    log.fine(this + " sendPresenceUnsubscribed requires login first");
+  }
+
+  /**
+   * An error response to a client
+   */
+  public void sendPresenceError(String to,
+			        String from,
+			        Serializable []data,
+			        HmppError error)
+  {
+    log.fine(this + " sendPresenceError requires login first");
+  }
 }

@@ -36,6 +36,7 @@ import com.caucho.hmpp.*;
 
 import com.caucho.util.*;
 import java.io.Serializable;
+import java.util.*;
 import java.util.logging.*;
 
 /**
@@ -51,6 +52,11 @@ public class HempConnectionImpl implements HmppConnection {
   private final HempConnectionOutboundStream _handler;
   
   private final String _jid;
+
+  private HashMap<Long,QueryItem> _queryMap
+    = new HashMap<Long,QueryItem>();
+
+  private long _qId;
   
   private HmppStream _inboundFilter;
   private HmppStream _outboundFilter;
@@ -145,27 +151,127 @@ public class HempConnectionImpl implements HmppConnection {
   //
 
   /**
-   * Queries the service
+   * Sends a query-set packet to the server
    */
-  public Serializable queryGet(String to, Serializable query)
+  public Serializable queryGet(String to,
+			       Serializable query)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    //return _broker.query(_jid, to, query);
-    return null;
+    WaitQueryCallback callback = new WaitQueryCallback();
+
+    queryGet(to, query, callback, null);
+
+    if (callback.waitFor())
+      return callback.getResult();
+    else
+      throw new RuntimeException(String.valueOf(callback.getError()));
   }
 
- /**
-   * Queries the service
+  /**
+   * Sends a query-get packet to the server
    */
-  public Serializable querySet(String to, Serializable query)
+  public void queryGet(String to,
+		       Serializable value,
+		       QueryCallback callback,
+		       Object handback)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    //return _broker.query(_jid, to, query);
-    return null;
+    long id;
+      
+    synchronized (this) {
+      id = _qId++;
+
+      _queryMap.put(id, new QueryItem(id, callback, handback));
+    }
+
+    getStream().sendQueryGet(id, to, _jid, value);
+  }
+
+  /**
+   * Sends a query-set packet to the server
+   */
+  public Serializable querySet(String to,
+			       Serializable query)
+  {
+    if (_isClosed)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    WaitQueryCallback callback = new WaitQueryCallback();
+
+    querySet(to, query, callback, null);
+
+    if (callback.waitFor())
+      return callback.getResult();
+    else
+      throw new RuntimeException(String.valueOf(callback.getError()));
+  }
+
+  /**
+   * Sends a query-set packet to the server
+   */
+  public void querySet(String to,
+		       Serializable value,
+		       QueryCallback callback,
+		       Object handback)
+  {
+    if (_isClosed)
+      throw new IllegalStateException(L.l("session is closed"));
+    
+    long id;
+      
+    synchronized (this) {
+      id = _qId++;
+
+      _queryMap.put(id, new QueryItem(id, callback, handback));
+    }
+
+    getStream().sendQuerySet(id, to, _jid, value);
+  }
+
+  /**
+   * Callback for the response
+   */
+  boolean onQueryResult(long id, String to, String from, Serializable value)
+  {
+    QueryItem item = null;
+    
+    synchronized (this) {
+      item = _queryMap.remove(id);
+    }
+
+    if (item != null) {
+      item.onQueryResult(to, from, value);
+      return true;
+    }
+    else
+      return false;
+  }
+
+  /**
+   * Callback for the response
+   */
+  boolean onQueryError(long id,
+		       String to,
+		       String from,
+		       Serializable value,
+		       HmppError error)
+  {
+    QueryItem item = null;
+    
+    synchronized (this) {
+      item = _queryMap.remove(id);
+    }
+
+    if (item != null) {
+      item.onQueryError(to, from, value, error);
+      return true;
+    }
+    else
+      return false;
   }
 
   //
@@ -316,5 +422,92 @@ public class HempConnectionImpl implements HmppConnection {
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _jid + "]";
+  }
+
+  static class QueryItem {
+    private final long _id;
+    private final QueryCallback _callback;
+    private final Object _handback;
+
+    QueryItem(long id, QueryCallback callback, Object handback)
+    {
+      _id = id;
+      _callback = callback;
+      _handback = handback;
+    }
+
+    void onQueryResult(String to, String from, Serializable value)
+    {
+      if (_callback != null)
+	_callback.onQueryResult(to, from, value, _handback);
+    }
+
+    void onQueryError(String to,
+		      String from,
+		      Serializable value,
+		      HmppError error)
+    {
+      if (_callback != null)
+	_callback.onQueryError(to, from, value, error, _handback);
+    }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _id + "," + _callback + "]";
+    }
+  }
+
+  static class WaitQueryCallback implements QueryCallback {
+    private Serializable _result;
+    private HmppError _error;
+    private boolean _isResult;
+
+    public Serializable getResult()
+    {
+      return _result;
+    }
+    
+    public HmppError getError()
+    {
+      return _error;
+    }
+
+    boolean waitFor()
+    {
+      try {
+	synchronized (this) {
+	  if (! _isResult)
+	    this.wait(10000);
+	}
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+
+      return _isResult;
+    }
+    
+    public void onQueryResult(String fromJid, String toJid,
+			      Serializable value, Object handback)
+    {
+      _result = value;
+
+      synchronized (this) {
+	_isResult = true;
+	notifyAll();
+      }
+    }
+  
+    public void onQueryError(String fromJid, String toJid,
+			     Serializable value, HmppError error,
+			     Object handback)
+    {
+      _error = error;
+
+      synchronized (this) {
+	_isResult = true;
+	notifyAll();
+      }
+    }
   }
 }

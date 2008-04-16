@@ -71,6 +71,11 @@ public class GenericResource extends AbstractHmppResource
     return _toBroker;
   }
 
+  public HmppStream getStream()
+  {
+    return _toBroker;
+  }
+
   @PostConstruct
   protected void init()
   {
@@ -102,7 +107,24 @@ public class GenericResource extends AbstractHmppResource
       return true;
     }
 
+    Serializable result = doQueryGet(to, from, value);
+
+    if (result != null) {
+      _toBroker.sendQueryResult(id, from, to, result);
+      return true;
+    }
+
     return false;
+  }
+
+  protected Serializable doQueryGet(String to, String from, Serializable value)
+  {
+    return null;
+  }
+
+  protected Serializable doQuerySet(String to, String from, Serializable value)
+  {
+    return null;
   }
 
   /**

@@ -1264,39 +1264,46 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("String sql;");
 
     boolean isAutoInsert = false;
-
-    // jpa/0gg0, jpa/0gh0
+    
     if (_entityType.getId() != null
 	&& ! isAbstract
 	&& _entityType.getId().isIdentityGenerator()) {
       isAutoInsert = true;
-
-      out.print("sql = \"");
-      out.printJavaString(_entityType.generateAutoCreateSQL(table));
-      out.println("\";");
     }
+    
+    out.println("int index = 1;");
 
     _entityType.getId().generateCheckCreateKey(out);
 
-    if (! isAutoInsert) {
+    out.println("java.sql.PreparedStatement pstmt;");
+
+    // jpa/0gg0, jpa/0gh0
+    if (isAutoInsert) {
+      out.println("if (__caucho_home.isIdentityGenerator()) {");
+      out.pushDepth();
+      
       out.print("sql = \"");
-      out.printJavaString(_entityType.generateCreateSQL(table));
+      out.printJavaString(_entityType.generateAutoCreateSQL(table));
       out.println("\";");
+
+      out.println("pstmt = aConn.prepareInsertStatement(sql, true);");
+      out.popDepth();
+      out.println("} else {");
+      out.pushDepth();
     }
 
-    out.println();
-    if (isAutoInsert)
-      out.println("java.sql.PreparedStatement pstmt = aConn.prepareInsertStatement(sql, true);");
-    else
-      out.println("java.sql.PreparedStatement pstmt = aConn.prepareInsertStatement(sql, false);");
-
-    out.println("int index = 1;");
-
-    if (! isAutoInsert) {
-      out.println();
-      _entityType.getId().generateSetInsert(out, "pstmt", "index");
+    out.print("sql = \"");
+    out.printJavaString(_entityType.generateCreateSQL(table));
+    out.println("\";");
+    
+    out.println("pstmt = aConn.prepareInsertStatement(sql, false);");
+    
+    if (isAutoInsert) {
+      out.popDepth();
+      out.println("}");
     }
 
+    _entityType.getId().generateSetInsert(out, "pstmt", "index");
     _entityType.generateInsertSet(out, table, "pstmt", "index", "super");
 
     out.println();
@@ -1415,13 +1422,6 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println();
     generateLogFine(out, " amber create");
-    
-    /*
-    out.println();
-    out.println("if (! aConn.isActiveTransaction()) {");
-    out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL;");
-    out.println("}");
-    */
 
     out.println();
     out.println("return false;");
