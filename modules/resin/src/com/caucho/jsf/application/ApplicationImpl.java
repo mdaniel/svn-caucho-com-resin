@@ -42,6 +42,7 @@ import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 
 import javax.el.*;
+import javax.el.PropertyNotFoundException;
 import javax.faces.FacesException;
 import javax.faces.application.Application;
 import javax.faces.application.NavigationHandler;
@@ -51,12 +52,7 @@ import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.*;
-import javax.faces.el.MethodBinding;
-import javax.faces.el.PropertyResolver;
-import javax.faces.el.ReferenceSyntaxException;
-import javax.faces.el.ValueBinding;
-import javax.faces.el.VariableResolver;
-import javax.faces.el.EvaluationException;
+import javax.faces.el.*;
 import javax.faces.event.ActionListener;
 import javax.faces.validator.DoubleRangeValidator;
 import javax.faces.validator.LengthValidator;
@@ -123,6 +119,8 @@ public class ApplicationImpl
   private String _messageBundle;
 
   private boolean _isInit;
+
+  private PropertyResolver _legacyPropertyResolver;
 
   public ApplicationImpl()
   {
@@ -425,9 +423,17 @@ public class ApplicationImpl
   @Deprecated
   public void setPropertyResolver(PropertyResolver resolver)
   {
-    _propertyResolver = resolver;
+    _legacyPropertyResolver = resolver;
 
     addELResolver(new ELResolverAdapter(resolver));
+  }
+
+  public PropertyResolver getLegacyPropertyResolver()
+  {
+    if (_legacyPropertyResolver == null)
+      _legacyPropertyResolver = new DummyPropertyResolverImpl();
+    
+    return _legacyPropertyResolver;
   }
 
   @Deprecated
@@ -1234,5 +1240,92 @@ public class ApplicationImpl
       }
     }
   }
-  
+
+
+  public static class DummyPropertyResolverImpl
+    extends PropertyResolver
+  {
+
+    public Object getValue(Object base, Object property)
+      throws EvaluationException, javax.faces.el.PropertyNotFoundException
+    {
+      FacesContext context = FacesContext.getCurrentInstance();
+
+      context.getELContext().setPropertyResolved(false);
+      
+      return null;
+    }
+
+
+    public Object getValue(Object base, int index)
+      throws EvaluationException, javax.faces.el.PropertyNotFoundException
+    {
+      FacesContext context = FacesContext.getCurrentInstance();
+
+      context.getELContext().setPropertyResolved(false);
+
+      return null;
+    }
+
+
+    public void setValue(Object base, Object property, Object value)
+      throws EvaluationException, javax.faces.el.PropertyNotFoundException
+    {
+      FacesContext context = FacesContext.getCurrentInstance();
+
+      context.getELContext().setPropertyResolved(false);
+    }
+
+    public void setValue(Object base, int index, Object value)
+      throws EvaluationException, javax.faces.el.PropertyNotFoundException
+    {
+      FacesContext context = FacesContext.getCurrentInstance();
+
+      context.getELContext().setPropertyResolved(false);
+    }
+
+    public boolean isReadOnly(Object base, Object property)
+      throws EvaluationException, javax.faces.el.PropertyNotFoundException
+    {
+      FacesContext context = FacesContext.getCurrentInstance();
+
+      context.getELContext().setPropertyResolved(false);
+
+      return false;
+    }
+
+    public boolean isReadOnly(Object base, int index)
+      throws EvaluationException, javax.faces.el.PropertyNotFoundException
+    {
+      FacesContext context = FacesContext.getCurrentInstance();
+
+      context.getELContext().setPropertyResolved(false);
+
+      return false;
+    }
+
+
+    public Class getType(Object base, Object property)
+      throws EvaluationException, javax.faces.el.PropertyNotFoundException
+    {
+      FacesContext context = FacesContext.getCurrentInstance();
+
+      context.getELContext().setPropertyResolved(false);
+
+      return null;
+    }
+
+    public Class getType(Object base, int index)
+      throws EvaluationException, javax.faces.el.PropertyNotFoundException
+    {
+      FacesContext context = FacesContext.getCurrentInstance();
+
+      context.getELContext().setPropertyResolved(false);
+      
+      return null;
+    }
+
+  }
 }
+
+

@@ -49,6 +49,7 @@ import javax.xml.bind.annotation.*;
 
 import com.caucho.config.*;
 import com.caucho.util.*;
+import com.caucho.jsf.application.ApplicationImpl;
 
 public class ApplicationConfig
 {
@@ -279,7 +280,7 @@ public class ApplicationConfig
     _localeConfig = config;
   }
 
-  public void configure(Application app)
+  public void configure(ApplicationImpl app)
   {
     if (_localeConfig != null)
       _localeConfig.configure(app);
@@ -433,7 +434,7 @@ public class ApplicationConfig
 	Constructor ctor =
 	  _propertyResolver.getConstructor(PropertyResolver.class);
 
-	PropertyResolver oldPropertyResolver = app.getPropertyResolver();
+	PropertyResolver oldPropertyResolver = app.getLegacyPropertyResolver();
 
 	propertyResolver =
 	  (PropertyResolver) ctor.newInstance(oldPropertyResolver);
