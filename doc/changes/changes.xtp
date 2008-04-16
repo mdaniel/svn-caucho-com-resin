@@ -12,6 +12,7 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>quercus: xml_get_current_column_number (#2574, #2604, rep by P Fischer)</li>
 <li>amber: @OneToOne persist cascade issues (#2599, rep by tsv)</li>
 <li>amber: startup timing issues.  the codegen must occur before the database is selected</li>
 <li>jsp: body tag interaction with jsp:include and i18n (#2581, rep by T Fukuda)</li>

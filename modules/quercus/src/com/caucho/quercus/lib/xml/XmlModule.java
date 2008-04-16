@@ -157,6 +157,39 @@ public class XmlModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns the parser's byte
+   */
+  public Value xml_get_current_byte_index(Xml parser)
+  {
+    if (parser == null)
+      return BooleanValue.FALSE;
+
+    return LongValue.create(parser.getByteIndex());
+  }
+
+  /**
+   * Returns the parser's line
+   */
+  public Value xml_get_current_line_number(Xml parser)
+  {
+    if (parser == null)
+      return BooleanValue.FALSE;
+
+    return LongValue.create(parser.getLine());
+  }
+
+  /**
+   * Returns the parser's column
+   */
+  public Value xml_get_current_column_number(Xml parser)
+  {
+    if (parser == null)
+      return BooleanValue.FALSE;
+
+    return LongValue.create(parser.getColumn());
+  }
+
+  /**
    * Returns the error code for xml parser
    */
   public Value xml_get_error_code(Xml parser)
@@ -194,9 +227,9 @@ public class XmlModule extends AbstractQuercusModule {
    * @throws Exception
    */
   public int xml_parse(Env env,
-                           @NotNull Xml parser,
-                           String data,
-                           @Optional("true") boolean isFinal)
+		       @NotNull Xml parser,
+		       String data,
+		       @Optional("true") boolean isFinal)
   {
     if (parser == null)
       return 0;

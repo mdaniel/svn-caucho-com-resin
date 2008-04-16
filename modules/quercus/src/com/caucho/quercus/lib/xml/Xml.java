@@ -34,9 +34,7 @@ import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.env.*;
 import com.caucho.util.L10N;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -107,6 +105,7 @@ public class Xml {
   SAXParserFactory _factory = SAXParserFactory.newInstance();
 
   private StringBuilder _xmlString = new StringBuilder();
+  private XmlHandler _xmlHandler;
 
   public Xml(Env env,
              String outputEncoding,
@@ -116,6 +115,27 @@ public class Xml {
     _xmlOptionTargetEncoding = outputEncoding;
     _parser = _env.wrapJava(this);
     _separator = separator;
+  }
+
+  public int getLine()
+  {
+    if (_xmlHandler != null)
+      return _xmlHandler.getLine();
+    else
+      return 0;
+  }
+
+  public int getColumn()
+  {
+    if (_xmlHandler != null)
+      return _xmlHandler.getColumn();
+    else
+      return 0;
+  }
+
+  public int getByteIndex()
+  {
+    return 0;
   }
 
   public int getErrorCode()
@@ -345,9 +365,11 @@ public class Xml {
       try {
         _errorCode = XmlModule.XML_ERROR_NONE;
         _errorString = null;
-    
+
+	_xmlHandler = new XmlHandler();
+	
         SAXParser saxParser = _factory.newSAXParser();
-        saxParser.parse(is, new XmlHandler());
+        saxParser.parse(is, _xmlHandler);
       } catch (Exception e) {
         _errorCode = XmlModule.XML_ERROR_SYNTAX;
 
@@ -479,11 +501,34 @@ public class Xml {
 
     private int _valueArrayIndex = 0;
 
+    private Locator _locator;
+
     public StructHandler(ArrayValueImpl valueArray,
                          ArrayValueImpl indexArray)
     {
       _valueArray = valueArray;
       _indexArray = indexArray;
+    }
+
+    public void setDocumentLocator(Locator locator)
+    {
+      _locator = locator;
+    }
+
+    public int getLine()
+    {
+      if (_locator != null)
+	return _locator.getLineNumber();
+      else
+	return 0;
+    }
+
+    public int getColumn()
+    {
+      if (_locator != null)
+	return _locator.getColumnNumber();
+      else
+	return 0;
     }
 
     /**
@@ -616,6 +661,28 @@ public class Xml {
   }
 
   class XmlHandler extends DefaultHandler {
+    private Locator _locator;
+
+    public void setDocumentLocator(Locator locator)
+    {
+      _locator = locator;
+    }
+
+    public int getLine()
+    {
+      if (_locator != null)
+	return _locator.getLineNumber();
+      else
+	return 0;
+    }
+
+    public int getColumn()
+    {
+      if (_locator != null)
+	return _locator.getColumnNumber();
+      else
+	return 0;
+    }
 
     /**
      * wrapper for _startElementHandler.  creates Value[] args
@@ -663,8 +730,8 @@ public class Xml {
         if (_startElementHandler != null)
           _startElementHandler.call(_env,args);
         else
-          throw new Throwable("start element handler is not set");
-      } catch (Throwable t) {
+          throw new Exception("start element handler is not set");
+      } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
       }
@@ -691,8 +758,8 @@ public class Xml {
         if (_endElementHandler != null)
           _endElementHandler.call(_env, _parser, _env.createString(eName));
         else
-          throw new Throwable("end element handler is not set");
-      } catch (Throwable t) {
+          throw new Exception("end element handler is not set");
+      } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
       }
@@ -719,8 +786,8 @@ public class Xml {
         else if (_defaultHandler != null)
           _defaultHandler.call(_env, _parser, _env.createString(s));
         else
-          throw new Throwable("neither character data handler nor default handler is set");
-      } catch (Throwable t) {
+          throw new Exception("neither character data handler nor default handler is set");
+      } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
       }
@@ -740,8 +807,8 @@ public class Xml {
         if (_processingInstructionHandler != null)
           _processingInstructionHandler.call(_env, _parser, _env.createString(target), _env.createString(data));
         else
-          throw new Throwable("processing instruction handler is not set");
-      } catch (Throwable t) {
+          throw new Exception("processing instruction handler is not set");
+      } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
       }
@@ -761,8 +828,8 @@ public class Xml {
         if (_startNamespaceDeclHandler != null)
           _startNamespaceDeclHandler.call(_env, _env.createString(prefix), _env.createString(uri));
         else
-          throw new Throwable("start namespace decl handler is not set");
-      } catch (Throwable t) {
+          throw new Exception("start namespace decl handler is not set");
+      } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
       }
@@ -781,8 +848,8 @@ public class Xml {
         if (_endNamespaceDeclHandler != null)
           _endNamespaceDeclHandler.call(_env, _env.createString(prefix));
         else
-          throw new Throwable("end namespace decl handler is not set");
-      } catch (Throwable t) {
+          throw new Exception("end namespace decl handler is not set");
+      } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
       }
@@ -802,8 +869,8 @@ public class Xml {
                                     _env.createString(systemId),
                                     _env.createString(publicId));
         else
-          throw new Throwable("notation declaration handler is not set");
-      } catch (Throwable t) {
+          throw new Exception("notation declaration handler is not set");
+      } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
       }
@@ -838,7 +905,7 @@ public class Xml {
           _unparsedEntityDeclHandler.call(_env, args);
         else
           throw new Exception("unparsed entity declaration handler is not set");
-      } catch (Throwable t) {
+      } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
       }
