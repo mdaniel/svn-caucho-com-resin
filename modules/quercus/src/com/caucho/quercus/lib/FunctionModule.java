@@ -34,6 +34,7 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.annotation.VariableArguments;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -98,15 +99,14 @@ public class FunctionModule extends AbstractQuercusModule {
                                       String args,
                                       String code)
   {
-    if (log.isLoggable(Level.FINER))
-      log.finer(code);
-
     try {
-      Quercus quercus = env.getQuercus();
+      AbstractFunction fun = env.createAnonymousFunction(args, code);
       
-      return quercus.parseFunction(args, code);
+      return new CallbackFunction(fun, fun.getName());
     } catch (IOException e) {
-      throw new QuercusException(e);
+      env.warning(e.getMessage());
+
+      return BooleanValue.FALSE;
     }
   }
 

@@ -197,6 +197,10 @@ public class Env {
 
   // Function map
   public AbstractFunction []_fun;
+  
+  // anonymous functions created by create_function()
+  public HashMap<String, AbstractFunction> _anonymousFunMap;
+  
   // Class map
   public ClassDef []_classDef;
   public QuercusClass []_qClass;
@@ -2506,10 +2510,18 @@ public class Env {
       if (id < _fun.length && ! (_fun[id] instanceof UndefinedFunction))
 	return _fun[id];
       else
-	return null;
+        return null;
     }
-	
-    return _quercus.findLowerFunctionImpl(name);
+    
+    fun = _quercus.findLowerFunctionImpl(name);
+    
+    if (fun != null)
+      return fun;
+    
+    if (_anonymousFunMap != null)
+      return _anonymousFunMap.get(name);
+      
+    return null;
   }
   
   public AbstractFunction getFunction(String name)
@@ -2569,6 +2581,23 @@ public class Env {
     _fun[id] = fun;
 
     return BooleanValue.TRUE;
+  }
+  
+  public AbstractFunction createAnonymousFunction(String args, String code)
+    throws IOException
+  {
+    log.log(Level.FINE, code);
+
+    if (_anonymousFunMap == null)
+      _anonymousFunMap = new HashMap<String, AbstractFunction>();
+
+    // PHP naming style for anonymous functions
+    String name = "\u0000lamba" + (_anonymousFunMap.size() + 1);
+    
+    AbstractFunction fun = getQuercus().parseFunction(name, args, code);
+
+    _anonymousFunMap.put(name, fun);
+    return fun;
   }
 
   /**

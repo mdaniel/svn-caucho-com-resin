@@ -92,6 +92,21 @@ public final class UnserializeReader {
 
         return s;
       }
+    case 'u':
+    case 'U':
+      {
+        expect(':');
+        int len = (int) readInt();
+        expect(':');
+        expect('"');
+
+        StringValue s = readUnicodeValue(env, len);
+
+        expect('"');
+        expect(';');
+
+        return s;
+      }
 
     case 'i':
       {
@@ -319,6 +334,15 @@ public final class UnserializeReader {
   public final StringValue readStringValue(Env env, int len)
   {
     StringValue s = env.createString(_buffer, _index, len);
+
+    _index += len;
+
+    return s;
+  }
+  
+  public final StringValue readUnicodeValue(Env env, int len)
+  {
+    StringValue s = new UnicodeBuilderValue(_buffer, _index, len);
 
     _index += len;
 

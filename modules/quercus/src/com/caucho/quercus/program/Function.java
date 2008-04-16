@@ -81,11 +81,11 @@ public class Function extends AbstractFunction {
   }
 
   public Function(ExprFactory exprFactory,
-		  Location location,
+                  Location location,
                   String name,
                   FunctionInfo info,
-                  ArrayList<Arg> argList,
-                  ArrayList<Statement> statementList)
+                  Arg []args,
+                  Statement []statements)
   {
     super(location);
     
@@ -94,11 +94,9 @@ public class Function extends AbstractFunction {
     _info.setFunction(this);
     _isReturnsReference = info.isReturnsReference();
 
-    _args = new Arg[argList.size()];
-    argList.toArray(_args);
-
-    Statement []statements = new Statement[statementList.size()];
-    statementList.toArray(statements);
+    _args = new Arg[args.length];
+    
+    System.arraycopy(args, 0, _args, 0, args.length);
 
     _statement = exprFactory.createBlock(location, statements);
 

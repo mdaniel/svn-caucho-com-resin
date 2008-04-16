@@ -928,7 +928,7 @@ public class OracleOciLob {
   }
 
   private StringValue readInternalClob(Env env,
-				       long length)
+                                       long length)
   {
     try {
       StringValue sb = env.createUnicodeBuilder();
@@ -938,7 +938,7 @@ public class OracleOciLob {
       reader.skip(_currentPointer);
 
       if (length < 0)
-	length = Integer.MAX_VALUE;
+        length = Integer.MAX_VALUE;
 
       sb.append(reader, length);
 

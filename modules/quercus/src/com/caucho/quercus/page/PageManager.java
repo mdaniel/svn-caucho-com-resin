@@ -176,18 +176,19 @@ public class PageManager
       program = _programCache.get(path);
 
       if (program == null || program.isModified()) {
-	clearProgram(path, program);
+        clearProgram(path, program);
 	
-	program = QuercusParser.parse(_quercus,
-				      path,
-				      _quercus.getScriptEncoding(),
-				      fileName,
-				      line);
-	_programCache.put(path, program);
+        program = QuercusParser.parse(_quercus,
+                                      path,
+                                      _quercus.getScriptEncoding(),
+                                      fileName,
+                                      line);
+        
+        _programCache.put(path, program);
       }
 
       if (program.getCompiledPage() != null) {
-	return program.getCompiledPage();
+        return program.getCompiledPage();
       }
 
       return compilePage(program, path);

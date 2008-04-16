@@ -58,12 +58,12 @@ public class ObjectMethod extends Function {
   }
 
   public ObjectMethod(ExprFactory exprFactory,
-		      Location location,
+                      Location location,
                       InterpretedClassDef quercusClass,
                       String name,
                       FunctionInfo info,
-                      ArrayList<Arg> argList,
-                      ArrayList<Statement> statementList)
+                      Arg []argList,
+                      Statement []statementList)
   {
     super(exprFactory, location, name, info, argList, statementList);
     _quercusClass = quercusClass;

@@ -923,10 +923,10 @@ public class Quercus
    * @return the parsed program
    * @throws IOException
    */
-  public Value parseFunction(String args, String code)
+  public AbstractFunction parseFunction(String name, String args, String code)
     throws IOException
   {
-    return QuercusParser.parseFunction(this, args, code);
+    return QuercusParser.parseFunction(this, name, args, code);
   }
 
   /**

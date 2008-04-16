@@ -85,6 +85,25 @@ public class CallbackFunction extends Callback {
 
     //return _isInvalid;
   }
+  
+  /**
+   * Serializes the value.
+   */
+  public void serialize(StringBuilder sb)
+  {
+    String name;
+    
+    if (_fun != null)
+      name = _fun.getName();
+    else
+      name = _funName;
+    
+    sb.append("S:");
+    sb.append(name.length());
+    sb.append(":\"");
+    sb.append(name);
+    sb.append("\";");
+  }
 
   /**
    * Evaluates the callback with no arguments.

@@ -1199,10 +1199,10 @@ public class ExprFactory {
    * Creates a new function definition.
    */
   public Function createFunction(Location loc,
-				 String name,
-				 FunctionInfo info,
-				 ArrayList<Arg> argList,
-				 ArrayList<Statement> statementList)
+                                 String name,
+                                 FunctionInfo info,
+                                 Arg []argList,
+                                 Statement []statementList)
   {
     return new Function(this, loc, name, info, argList, statementList);
   }
@@ -1211,11 +1211,11 @@ public class ExprFactory {
    * Creates a new object method definition.
    */
   public Function createObjectMethod(Location loc,
-					 InterpretedClassDef cl,
-					 String name,
-					 FunctionInfo info,
-					 ArrayList<Arg> argList,
-					 ArrayList<Statement> statementList)
+                                     InterpretedClassDef cl,
+                                     String name,
+                                     FunctionInfo info,
+                                     Arg []argList,
+                                     Statement []statementList)
   {
     return new ObjectMethod(this, loc, cl, name, info, argList, statementList);
   }
@@ -1224,10 +1224,10 @@ public class ExprFactory {
    * Creates a new object method definition.
    */
   public Function createMethodDeclaration(Location loc,
-					 InterpretedClassDef cl,
-					 String name,
-					 FunctionInfo info,
-					 ArrayList<Arg> argList)
+                                          InterpretedClassDef cl,
+                                          String name,
+                                          FunctionInfo info,
+                                          Arg []argList)
   {
     return new MethodDeclaration(this, loc, cl, name, info, argList);
   }

@@ -515,7 +515,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
    */
   public void serialize(StringBuilder sb)
   {
-    sb.append("s:");
+    sb.append("U:");
     sb.append(_length);
     sb.append(":\"");
     sb.append(_buffer, 0, _length);

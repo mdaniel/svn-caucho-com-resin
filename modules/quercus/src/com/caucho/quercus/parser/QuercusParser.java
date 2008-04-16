@@ -43,6 +43,7 @@ import com.caucho.vfs.*;
 import java.io.CharConversionException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 /**
  * Parses a PHP program.
@@ -341,7 +342,10 @@ public class QuercusParser {
     return parser.parseCode().createExprReturn();
   }
   
-  public static Value parseFunction(Quercus quercus, String args, String code)
+  public static AbstractFunction parseFunction(Quercus quercus,
+                                               String name,
+                                               String args,
+                                               String code)
     throws IOException
   {
     Path argPath = new StringPath(args);
@@ -349,9 +353,9 @@ public class QuercusParser {
 
     QuercusParser parser = new QuercusParser(quercus);
 
-    Function fun = parser.parseFunction(argPath, codePath);
+    Function fun = parser.parseFunction(name, argPath, codePath);
 
-    return new CallbackFunction(fun);
+    return fun;
   }
   
   public static Expr parse(Quercus quercus, String str)
@@ -448,29 +452,28 @@ public class QuercusParser {
 			      _factory.createBlock(location, stmtList));
   }
 
-  Function parseFunction(Path argPath, Path codePath)
+  Function parseFunction(String name, Path argPath, Path codePath)
     throws IOException
   {
-    _function = new FunctionInfo(_quercus, "anonymous");
-    // XXX: need param or better function name for non-global?
+    _function = new FunctionInfo(_quercus, name);
     _function.setGlobal(false);
     _function.setPageMain(true);
 
     init(argPath);
 
-    ArrayList<Arg> args = parseFunctionArgDefinition();
+    Arg []args = parseFunctionArgDefinition();
       
     init(codePath);
       
-    ArrayList<Statement> statementList;
+    ArrayList<Statement> statementList = parseStatementList();
 
-    statementList = parseStatementList();
-
+    Statement [] statements = (Statement []) statementList.toArray();
+    
     return _factory.createFunction(Location.UNKNOWN,
-				   "anonymous",
-				   _function,
-				   args,
-				   statementList);
+                                   name,
+                                   _function,
+                                   args,
+                                   statements);
   }
 
   /**
@@ -506,13 +509,28 @@ public class QuercusParser {
     return _factory.createBlock(location, statements);
   }
 
+  /*
+   * Parses a statement list.
+   */
+  private Statement []parseStatements()
+    throws IOException
+  {
+    ArrayList<Statement> statementList = parseStatementList();
+    
+    Statement []statements = new Statement[statementList.size()];
+    
+    statementList.toArray(statements);
+    
+    return statements;
+  }
+  
   /**
    * Parses a statement list.
    */
   private ArrayList<Statement> parseStatementList()
     throws IOException
   {
-    ArrayList<Statement> statements = new ArrayList<Statement>();
+    ArrayList<Statement> statementList = new ArrayList<Statement>();
 
     while (true) {
       Location location = getLocation();
@@ -521,21 +539,21 @@ public class QuercusParser {
 
       switch (token) {
       case -1:
-	return statements;
+        return statementList;
 
       case ';':
 	break;
 
       case ECHO:
-	parseEcho(statements);
+	parseEcho(statementList);
 	break;
 
       case PRINT:
-	statements.add(parsePrint());
+	statementList.add(parsePrint());
 	break;
 
       case UNSET:
-	parseUnset(statements);
+	parseUnset(statementList);
 	break;
 
       case ABSTRACT:
@@ -572,83 +590,83 @@ public class QuercusParser {
           Function fun = parseFunctionDefinition(M_STATIC);
 
 	  if (! _isTop) {
-	    statements.add(_factory.createFunctionDef(functionLocation, fun));
+	    statementList.add(_factory.createFunctionDef(functionLocation, fun));
 	  }
 	}
 	break;
 
       case CLASS:
 	// parseClassDefinition(0);
-	statements.add(parseClassDefinition(0));
+	statementList.add(parseClassDefinition(0));
 	break;
 
       case INTERFACE:
 	// parseClassDefinition(M_INTERFACE);
-	statements.add(parseClassDefinition(M_INTERFACE));
+	statementList.add(parseClassDefinition(M_INTERFACE));
 	break;
 
       case IF:
-	statements.add(parseIf());
+	statementList.add(parseIf());
 	break;
 
       case SWITCH:
-	statements.add(parseSwitch());
+	statementList.add(parseSwitch());
 	break;
 
       case WHILE:
-	statements.add(parseWhile());
+	statementList.add(parseWhile());
 	break;
 
       case DO:
-	statements.add(parseDo());
+	statementList.add(parseDo());
 	break;
 
       case FOR:
-	statements.add(parseFor());
+	statementList.add(parseFor());
 	break;
 
       case FOREACH:
-	statements.add(parseForeach());
+	statementList.add(parseForeach());
 	break;
 
       case PHP_END:
-	return statements;
+	return statementList;
 
       case RETURN:
-	statements.add(parseReturn());
+	statementList.add(parseReturn());
 	break;
 
       case THROW:
-	statements.add(parseThrow());
+	statementList.add(parseThrow());
 	break;
 
       case BREAK:
-	statements.add(parseBreak());
+	statementList.add(parseBreak());
 	break;
 
       case CONTINUE:
-	statements.add(parseContinue());
+	statementList.add(parseContinue());
 	break;
 
       case GLOBAL:
-	statements.add(parseGlobal());
+	statementList.add(parseGlobal());
 	break;
 	
       case STATIC:
-	statements.add(parseStatic());
+	statementList.add(parseStatic());
 	break;
 	
       case TRY:
-	statements.add(parseTry());
+	statementList.add(parseTry());
 	break;
 
       case '{':
 	{
-	  ArrayList<Statement> statementList = parseStatementList();
+	  ArrayList<Statement> enclosedStatementList = parseStatementList();
 
 	  expect('}');
-
-	  statements.addAll(statementList);
+	  
+	  statementList.addAll(enclosedStatementList);
 	}
 	break;
 
@@ -663,17 +681,17 @@ public class QuercusParser {
       case ENDFOREACH:
       case ENDSWITCH:
 	_peekToken = token;
-	return statements;
+	return statementList;
 
       case TEXT:
 	if (_lexeme.length() > 0) {
-	  statements.add(_factory.createText(location, _lexeme));
+	  statementList.add(_factory.createText(location, _lexeme));
 	}
 	break;
 
       case TEXT_PHP:
 	if (_lexeme.length() > 0) {
-	  statements.add(_factory.createText(location, _lexeme));
+	  statementList.add(_factory.createText(location, _lexeme));
 	}
 
 	_peekToken = parseToken();
@@ -685,16 +703,16 @@ public class QuercusParser {
 	
       case TEXT_ECHO:
 	if (_lexeme.length() > 0)
-	  statements.add(_factory.createText(location, _lexeme));
+	  statementList.add(_factory.createText(location, _lexeme));
 
-	parseEcho(statements);
+	parseEcho(statementList);
 
 	break;
 
       default:
 	_peekToken = token;
 	
-	statements.add(parseExprStatement());
+	statementList.add(parseExprStatement());
 	break;
       }
     }
@@ -1542,13 +1560,13 @@ public class QuercusParser {
 
       expect('(');
 
-      ArrayList<Arg> args = parseFunctionArgDefinition();
+      Arg []args = parseFunctionArgDefinition();
       
       expect(')');
       
       if (_classDef != null &&
           "__call".equals(name) &&
-          args.size() != 2)
+          args.length != 2)
       {
         throw error(L.l("{0}::{1} must have exactly two arguments defined",
                         _classDef.getName(), name));
@@ -1566,9 +1584,7 @@ public class QuercusParser {
       else {
 	expect('{');
       
-	ArrayList<Statement> statementList;
-
-	statementList = parseStatementList();
+	Statement []statements = parseStatements();
     
 	expect('}');
 
@@ -1576,11 +1592,11 @@ public class QuercusParser {
       function = _factory.createObjectMethod(location,
                                              _classDef,
                                              name, _function,
-                                             args, statementList);
+                                             args, statements);
 	else
 	  function = _factory.createFunction(location, name,
 					     _function, args,
-					     statementList);
+					     statements);
       }
 
       function.setGlobal(oldTop);
@@ -1608,10 +1624,10 @@ public class QuercusParser {
     }
   }
 
-  private ArrayList<Arg> parseFunctionArgDefinition()
+  private Arg []parseFunctionArgDefinition()
     throws IOException
   {
-    ArrayList<Arg> args = new ArrayList<Arg>();
+    LinkedHashMap<String, Arg> argMap = new LinkedHashMap<String, Arg>();
 
     while (true) {
       int token = parseToken();
@@ -1652,11 +1668,15 @@ public class QuercusParser {
 
       Arg arg = new Arg(argName, defaultExpr, isReference);
 
-      args.add(arg);
+      if (argMap.get(argName) != null && _quercus.isStrict()) {
+        throw error(L.l("aliasing of function argument '{0}'", argName));
+      }
+      
+      argMap.put(argName, arg);
 
       VarInfo var = _function.createVar(argName);
       var.setArgument(true);
-      var.setArgumentIndex(args.size() - 1);
+      var.setArgumentIndex(argMap.size() - 1);
 
       if (isReference)
 	var.setRefArgument();
@@ -1667,7 +1687,9 @@ public class QuercusParser {
       }
     }
 
-    return args;
+    Arg [] args = new Arg[argMap.size()];
+    
+    return  argMap.values().toArray(args);
   }
   
   /**

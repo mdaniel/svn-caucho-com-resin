@@ -1173,7 +1173,7 @@ public class StringBuilderValue
   {
     // php/4407 - oracle clob callback passes very long length
 
-    int sublen = Math.min(8192, (int) length);
+    int sublen = (int) Math.min(8192L, length);
 
     try {
       while (length > 0) {
@@ -1258,7 +1258,7 @@ public class StringBuilderValue
    */
   public void serialize(StringBuilder sb)
   {
-    sb.append("S:");
+    sb.append("s:");
     sb.append(_length);
     sb.append(":\"");
     sb.append(toString());
