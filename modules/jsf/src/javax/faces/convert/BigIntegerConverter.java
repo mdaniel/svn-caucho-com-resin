@@ -70,7 +70,9 @@ public class BigIntegerConverter implements Converter
 				getExample(),
 				Util.getLabel(context, component));
 
-      FacesMessage msg = new FacesMessage(summary, detail);
+      FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                          summary,
+                                          detail);
 
       throw new ConverterException(msg, e);
     }

@@ -101,20 +101,16 @@ class HtmlInputHiddenRenderer extends Renderer
 
       Object value = htmlInput.getValue();
 
-      if (value == null)
-	return;
-
-      out.writeAttribute("value", String.valueOf(value), "value");
+      if (value != null)
+        out.writeAttribute("value", String.valueOf(value), "value");
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
 
       Object value = attrMap.get("value");
 
-      if (value == null)
-	return;
-
-      out.writeAttribute("value", String.valueOf(value), "value");
+      if (value != null)
+        out.writeAttribute("value", String.valueOf(value), "value");
     }
 
     out.endElement("input");

@@ -116,7 +116,9 @@ public class LongRangeValidator
 	
 	String detail = summary;
 
-	FacesMessage msg = new FacesMessage(summary, detail);
+        FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                            summary,
+                                            detail);
 	
 	throw new ValidatorException(msg, e);
       }
@@ -129,7 +131,9 @@ public class LongRangeValidator
 	
       String detail = summary;
 
-      FacesMessage msg = new FacesMessage(summary, detail);
+      FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                          summary,
+                                          detail);
 	
       throw new ValidatorException(msg);
     }
@@ -144,7 +148,9 @@ public class LongRangeValidator
 	
       String detail = summary;
 
-      FacesMessage msg = new FacesMessage(summary, detail);
+      FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                          summary,
+                                          detail);
 	
       throw new ValidatorException(msg);
     }
@@ -157,7 +163,9 @@ public class LongRangeValidator
 	
       String detail = summary;
 
-      FacesMessage msg = new FacesMessage(summary, detail);
+      FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                          summary,
+                                          detail);
 	
       throw new ValidatorException(msg);
     }

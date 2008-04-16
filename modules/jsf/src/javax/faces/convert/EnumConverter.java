@@ -152,7 +152,7 @@ public class EnumConverter
                               value,
                               Util.getLabel(context, component));
 
-    return new FacesMessage(summary, detail);
+    return new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, detail);
   }
 
   private FacesMessage createFacesMessageForEnum(FacesContext context,
@@ -173,8 +173,7 @@ public class EnumConverter
                               getExample(),
                               Util.getLabel(context, component));
 
-    FacesMessage msg = new FacesMessage(summary, detail);
-    return msg;
+    return new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, detail);
   }
 
   private Object getExample()

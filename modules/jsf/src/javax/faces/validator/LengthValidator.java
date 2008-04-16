@@ -114,7 +114,9 @@ public class LengthValidator
 	
       String detail = summary;
 
-      FacesMessage msg = new FacesMessage(summary, detail);
+      FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                          summary,
+                                          detail);
 	
       throw new ValidatorException(msg);
     }
@@ -127,7 +129,9 @@ public class LengthValidator
 	
       String detail = summary;
 
-      FacesMessage msg = new FacesMessage(summary, detail);
+      FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                          summary,
+                                          detail);
 	
       throw new ValidatorException(msg);
     }

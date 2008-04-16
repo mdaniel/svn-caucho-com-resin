@@ -580,7 +580,7 @@ public class UIInput extends UIOutput
 
 	String detail = summary;
 
-	msg = new FacesMessage(summary, detail);
+        msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, detail);
       }
       else if (converterMessage != null) {
 	msg.setSummary(converterMessage);
@@ -650,7 +650,10 @@ public class UIInput extends UIOutput
   {
     if (! isValid()) {
     }
-    else if (value != null && ! "".equals(value)) {
+    else if (value != null &&
+             ! "".equals(value) &&
+             ! (value.getClass().isArray() &&
+               java.lang.reflect.Array.getLength(value) == 0)) {
       for (Validator validator : getValidators()) {
 	try {
 	  validator.validate(context, this, value);
@@ -674,7 +677,9 @@ public class UIInput extends UIOutput
 	      detail = e.toString();
 	    }
 
-	    msg = new FacesMessage(summary, detail);
+            msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                   summary,
+                                   detail);
 	  }
 	  else {
 	    if (validatorMessage != null) {
@@ -694,7 +699,9 @@ public class UIInput extends UIOutput
       String requiredMessage = getRequiredMessage();
 
       if (requiredMessage != null)
-	msg = new FacesMessage(requiredMessage, requiredMessage);
+        msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                               requiredMessage,
+                               requiredMessage);
       else {
 	String summary = Util.l10n(context,
 				   REQUIRED_MESSAGE_ID,
@@ -702,7 +709,7 @@ public class UIInput extends UIOutput
 				   Util.getLabel(context, this));
 
 	String detail = summary;
-	msg = new FacesMessage(summary, detail);
+	msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, detail);
       }
 
       context.addMessage(getClientId(context), msg);
