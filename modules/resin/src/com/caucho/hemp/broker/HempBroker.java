@@ -480,6 +480,9 @@ public class HempBroker implements HmppBroker {
 
   protected HmppResource getResource(String jid)
   {
+    if (jid == null)
+      return null;
+    
     synchronized (_resourceMap) {
       WeakReference<HmppResource> ref = _resourceMap.get(jid);
 

@@ -470,22 +470,28 @@ public abstract class JdbcConnectionResource
                                             String table)
     throws SQLException
   {
-    if (table == null || table.equals(""))
-      return null;
+    try {
+      if (table == null || table.equals(""))
+	return null;
     
-    TableKey key = new TableKey(getURL(), catalog, schema, table);
+      TableKey key = new TableKey(getURL(), catalog, schema, table);
 
-    // XXX: needs invalidation on DROP or ALTER
-    JdbcTableMetaData tableMd = _tableMetadataMap.get(key);
+      // XXX: needs invalidation on DROP or ALTER
+      JdbcTableMetaData tableMd = _tableMetadataMap.get(key);
     
-    if (tableMd != null && tableMd.isValid())
+      if (tableMd != null && tableMd.isValid())
+	return tableMd;
+    
+      tableMd = new JdbcTableMetaData(catalog, schema, table, getMetaData());
+
+      _tableMetadataMap.put(key, tableMd);
+
       return tableMd;
-    
-    tableMd = new JdbcTableMetaData(catalog, schema, table, getMetaData());
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
 
-    _tableMetadataMap.put(key, tableMd);
-
-    return tableMd;
+      return null;
+    }
   }
 
   private DatabaseMetaData getMetaData()

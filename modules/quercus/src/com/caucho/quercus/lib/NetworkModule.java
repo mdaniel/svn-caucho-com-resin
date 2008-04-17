@@ -123,13 +123,35 @@ public class NetworkModule extends AbstractQuercusModule {
    * Opens a socket
    */
   public static SocketInputOutput fsockopen(Env env,
-                                          String host,
-                                          @Optional("80") int port,
-                                          @Optional @Reference Value errno,
-                                          @Optional @Reference Value errstr,
-                                          @Optional double timeout)
+					    String host,
+					    @Optional int port,
+					    @Optional @Reference Value errno,
+					    @Optional @Reference Value errstr,
+					    @Optional double timeout)
   {
     try {
+      if (host == null)
+	return null;
+      
+      String scheme = null;
+      int p = host.indexOf("://");
+      if (p > 0) {
+	scheme = host.substring(0, p);
+	host = host.substring(p + 3);
+      }
+
+      p = host.indexOf(':');
+      if (p > 0) {
+	String portStr = host.substring(p + 1);
+	host = host.substring(0, p);
+	
+	if (port == 0)
+	  port = Integer.parseInt(portStr);
+      }
+
+      if (port == 0)
+	port = 80;
+      
       Socket s = new Socket(host, port);
 
       if (timeout > 0)

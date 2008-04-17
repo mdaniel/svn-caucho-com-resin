@@ -331,15 +331,19 @@ public class ResinModule
    * @param v the variable to print
    * @return the escaped stringPhp
    */
-  public static Value resin_var_dump(Env env, @ReadOnly Value v)
+  public static Value resin_var_dump(Env env, @ReadOnly Value []args)
   {
     try {
       WriteStream out = Vfs.openWrite("stdout:");
 
-      if (v != null)
-	v.varDump(env, out, 0, new IdentityHashMap<Value,String>());
+      if (args != null) {
+	for (Value v : args) {
+	  if (v != null)
+	    v.varDump(env, out, 0, new IdentityHashMap<Value,String>());
 
-      out.println();
+	  out.println();
+	}
+      }
 
       out.close();
 

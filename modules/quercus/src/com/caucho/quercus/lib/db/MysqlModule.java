@@ -412,13 +412,18 @@ public class MysqlModule extends AbstractQuercusModule {
 
       String catalogName = md.getCatalogName(jdbcField);
       String tableName = md.getTableName(jdbcField);
+      String schemaName = md.getSchemaName(jdbcField);
       String columnName = md.getColumnName(jdbcField);
+
+      if (schemaName == null || "".equals(schemaName))
+	schemaName = tableName;
 
       // some information is not available from the ResultSetMetaData
       JdbcColumnMetaData columnMd = null;
 
       JdbcConnectionResource conn = getConnection(env).validateConnection();
 
+      // php/141p
       JdbcTableMetaData tableMd
         = conn.getTableMetaData(catalogName, null, tableName);
 

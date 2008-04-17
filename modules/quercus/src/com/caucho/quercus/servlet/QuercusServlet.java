@@ -311,7 +311,9 @@ public class QuercusServlet
     else if ("ini-file".equals(paramName)) {
       Quercus quercus = getQuercus();
 
-      Path path = quercus.getPwd().lookup(paramValue);
+      String realPath = getServletContext().getRealPath(paramValue);
+
+      Path path = quercus.getPwd().lookup(realPath);
 
       setIniFile(path);
     }

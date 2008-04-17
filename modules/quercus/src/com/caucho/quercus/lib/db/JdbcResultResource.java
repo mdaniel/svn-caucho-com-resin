@@ -67,6 +67,7 @@ public class JdbcResultResource {
 
   private Statement _stmt;
   protected ResultSet _rs;
+  private boolean _isValid;
   private int _fieldOffset;
   private JdbcConnectionResource _conn;
   private Env _env;
@@ -152,28 +153,29 @@ public class JdbcResultResource {
   {
     try {
       if (_rs.next()) {
+	_isValid = true;
+	
         ArrayValue array = new ArrayValueImpl();
 
-        if (_metaData == null)
-          _metaData = _rs.getMetaData();
+	ResultSetMetaData md = getMetaData();
 
-        int count = _metaData.getColumnCount();
+        int count = md.getColumnCount();
 
         if ((type & FETCH_ASSOC) != 0) {
           _columnNames = new Value[count];
 
           for (int i = 0; i < count; i++) {
-	    String columnName = _metaData.getColumnLabel(i + 1);
+	    String columnName = md.getColumnLabel(i + 1);
 
 	    if (columnName == null)
-	      _metaData.getColumnName(i + 1);
+	      md.getColumnName(i + 1);
 	    
             _columnNames[i] = env.createString(columnName);
 	  }
         }
 
         for (int i = 0; i < count; i++) {
-          Value value = getColumnValue(env, _rs, _metaData, i + 1);
+          Value value = getColumnValue(env, _rs, md, i + 1);
 
           if ((type & FETCH_NUM) != 0)
             array.put(LongValue.create(i), value);
@@ -227,7 +229,11 @@ public class JdbcResultResource {
     LongValue zero = new LongValue(0);
 
     try {
-      _rs.next();
+      if (! _isValid) {
+	_isValid = true;
+	_rs.next();
+      }
+      
       result.putField(env, "name", env.createString(_rs.getString(1)));
       result.putField(env, "table", env.createString(tableName));
       result.putField(env, "max_length", new LongValue(maxLength));
@@ -287,16 +293,17 @@ public class JdbcResultResource {
   {
     try {
       if (_rs.next()) {
+	_isValid = true;
+	
         Value result = env.createObject();
 
-        if (_metaData == null)
-          _metaData = _rs.getMetaData();
+	ResultSetMetaData md = getMetaData();
 
-        int count = _metaData.getColumnCount();
+        int count = md.getColumnCount();
 
         for (int i = 0; i < count; i++) {
-          String name = _metaData.getColumnName(i + 1);
-          Value value = getColumnValue(env, _rs, _metaData, i + 1);
+          String name = md.getColumnName(i + 1);
+          Value value = getColumnValue(env, _rs, md, i + 1);
 
 
           result.putField(env, name, value);
@@ -579,13 +586,12 @@ public class JdbcResultResource {
   public Value getFieldCatalog(int fieldOffset)
   {
     try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
+      ResultSetMetaData md = getMetaData();
 
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
+      if (md.getColumnCount() <= fieldOffset || fieldOffset < 0)
         return BooleanValue.FALSE;
       else
-        return _env.createString(_metaData.getCatalogName(fieldOffset + 1));
+        return _env.createString(md.getCatalogName(fieldOffset + 1));
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -614,10 +620,9 @@ public class JdbcResultResource {
   protected boolean isValidFieldOffset(int fieldOffset)
   {
     try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
+      ResultSetMetaData md = getMetaData();
 
-      if (fieldOffset < 0 || fieldOffset >= _metaData.getColumnCount())
+      if (fieldOffset < 0 || md.getColumnCount() <= fieldOffset)
         return false;
       else
         return true;
@@ -660,15 +665,14 @@ public class JdbcResultResource {
   public Value getFieldLength(Env env, int fieldOffset)
   {
     try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
+      ResultSetMetaData md = getMetaData();
 
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
+      if (md.getColumnCount() <= fieldOffset || fieldOffset < 0) {
         env.invalidArgument("field", fieldOffset);
         return BooleanValue.FALSE;
       }
       else
-        return new LongValue((long) _metaData.getPrecision(fieldOffset + 1));
+        return new LongValue((long) md.getPrecision(fieldOffset + 1));
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -688,15 +692,14 @@ public class JdbcResultResource {
   {
 
     try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
-
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
+      ResultSetMetaData md = getMetaData();
+      
+      if (md.getColumnCount() <= fieldOffset || fieldOffset < 0) {
         env.invalidArgument("field", fieldOffset);
         return BooleanValue.FALSE;
       }
       else
-        return env.createString(_metaData.getColumnName(fieldOffset + 1));
+        return env.createString(md.getColumnName(fieldOffset + 1));
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -714,14 +717,12 @@ public class JdbcResultResource {
   {
 
     try {
+      ResultSetMetaData md = getMetaData();
 
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
-
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
+      if (md.getColumnCount() <= fieldOffset || fieldOffset < 0)
         return BooleanValue.FALSE;
       else
-        return _env.createString(_metaData.getColumnLabel(fieldOffset + 1));
+        return _env.createString(md.getColumnLabel(fieldOffset + 1));
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -739,15 +740,14 @@ public class JdbcResultResource {
   public Value getFieldNotNull(Env env, int fieldOffset)
   {
     try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
+      ResultSetMetaData md = getMetaData();
 
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
+      if (md.getColumnCount() <= fieldOffset || fieldOffset < 0) {
         env.invalidArgument("field", fieldOffset);
         return BooleanValue.FALSE;
       }
       else
-        if  (_metaData.isNullable(fieldOffset + 1) == ResultSetMetaData.columnNoNulls)
+        if  (md.isNullable(fieldOffset + 1) == ResultSetMetaData.columnNoNulls)
           return LongValue.ONE;
         else
           return LongValue.ZERO;
@@ -776,13 +776,12 @@ public class JdbcResultResource {
   public Value getFieldScale(int fieldOffset)
   {
     try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
+      ResultSetMetaData md = getMetaData();
 
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0)
+      if (md.getColumnCount() <= fieldOffset || fieldOffset < 0)
         return BooleanValue.FALSE;
       else
-        return new LongValue((long) _metaData.getScale(fieldOffset + 1));
+        return new LongValue((long) md.getScale(fieldOffset + 1));
 
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -800,15 +799,44 @@ public class JdbcResultResource {
   public Value getFieldTable(Env env, int fieldOffset)
   {
     try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
+      ResultSetMetaData md = getMetaData();
 
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
+      if (md.getColumnCount() <= fieldOffset || fieldOffset < 0) {
         env.invalidArgument("field", fieldOffset);
         return BooleanValue.FALSE;
       }
       else {
-        String tableName = _metaData.getTableName(fieldOffset + 1);
+        String tableName = md.getTableName(fieldOffset + 1);
+
+        if (tableName == null || tableName.equals(""))
+          return BooleanValue.FALSE;
+        else
+          return env.createString(tableName);
+      }
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+      return BooleanValue.FALSE;
+    }
+  }
+
+  /**
+   * Returns the table corresponding to the field.
+   *
+   * @param env the PHP executing environment
+   * @param fieldOffset the field number
+   * @return the field table name
+   */
+  public Value getFieldSchema(Env env, int fieldOffset)
+  {
+    try {
+      ResultSetMetaData md = getMetaData();
+      
+      if (md.getColumnCount() <= fieldOffset || fieldOffset < 0) {
+        env.invalidArgument("schema", fieldOffset);
+        return BooleanValue.FALSE;
+      }
+      else {
+        String tableName = md.getSchemaName(fieldOffset + 1);
 
         if (tableName == null || tableName.equals(""))
           return BooleanValue.FALSE;
@@ -832,16 +860,14 @@ public class JdbcResultResource {
   public Value getFieldType(Env env, int fieldOffset)
   {
     try {
+      ResultSetMetaData md = getMetaData();
 
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
-
-      if (_metaData.getColumnCount() <= fieldOffset || fieldOffset < 0) {
+      if (md.getColumnCount() <= fieldOffset || fieldOffset < 0) {
         env.invalidArgument("field", fieldOffset);
         return BooleanValue.FALSE;
       }
       else {
-        int jdbcType = _metaData.getColumnType(fieldOffset + 1);
+        int jdbcType = md.getColumnType(fieldOffset + 1);
         return env.createString(getFieldType(fieldOffset, jdbcType));
       }
     } catch (Exception e) {
@@ -912,11 +938,9 @@ public class JdbcResultResource {
   protected Value getJdbcType(int fieldOffset)
   {
     try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
+      ResultSetMetaData md = getMetaData();
 
-      return new LongValue(_metaData.getColumnType(fieldOffset + 1));
-
+      return new LongValue(md.getColumnType(fieldOffset + 1));
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -937,10 +961,9 @@ public class JdbcResultResource {
     ArrayValue array = new ArrayValueImpl();
 
     try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
+      ResultSetMetaData md = getMetaData();
 
-      int numColumns = _metaData.getColumnCount();
+      int numColumns = md.getColumnCount();
 
       for (int i = 1; i <= numColumns; i++) {
         array.put(new LongValue(_rs.getObject(i).toString().length()));
@@ -963,6 +986,17 @@ public class JdbcResultResource {
   public ResultSetMetaData getMetaData()
     throws SQLException
   {
+    if (_metaData != null)
+      return _metaData;
+
+    /*
+    if (_rs != null && ! _isValid) {
+      if (! _rs.next())
+	return null;
+      _isValid = true;
+    }
+    */
+    
     if (_metaData == null && _rs != null)
       _metaData = _rs.getMetaData();
 
@@ -980,10 +1014,9 @@ public class JdbcResultResource {
     try {
       Value result = NullValue.NULL;
 
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
+      ResultSetMetaData md = getMetaData();
 
-      int count = _metaData.getColumnCount();
+      int count = md.getColumnCount();
 
       if (count != 0) {
         result = new LongValue((long) count);
@@ -1058,7 +1091,7 @@ public class JdbcResultResource {
       if (field.isNumberConvertible())
         colNumber = field.toInt();
       else
-        colNumber = getColumnNumber(field.toString(), _metaData);
+        colNumber = getColumnNumber(field.toString(), md);
 
       if (colNumber < 0 || colNumber >= md.getColumnCount()) {
         env.invalidArgument("field", field);
@@ -1077,7 +1110,7 @@ public class JdbcResultResource {
         return BooleanValue.FALSE;
       }
 
-      return getColumnValue(env, _rs, _metaData, colNumber + 1);
+      return getColumnValue(env, _rs, md, colNumber + 1);
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;

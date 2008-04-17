@@ -124,10 +124,9 @@ public class MysqliResult extends JdbcResultResource {
   public ArrayValue fetch_array(Env env,
                                 @Optional("MYSQLI_BOTH") int type)
   {
-    if (type != MysqlModule.MYSQL_ASSOC &&
-        type != MysqlModule.MYSQL_BOTH &&
-        type != MysqlModule.MYSQL_NUM)
-    {
+    if (type != MysqlModule.MYSQL_ASSOC
+	&& type != MysqlModule.MYSQL_BOTH
+	&& type != MysqlModule.MYSQL_NUM) {
       env.warning(L.l("invalid result_type"));
       return null;
     }
@@ -255,51 +254,57 @@ public class MysqliResult extends JdbcResultResource {
   protected Value fetchFieldDirect(Env env,
                                    int fieldOffset)
   {
-    Value fieldTable;
-    Value fieldName;
-    Value fieldAlias;
-    Value fieldJdbcType;
-    String fieldMysqlType;
-    Value fieldLength;
-    Value fieldScale;
-    Value fieldCatalog;
-
     if (! isValidFieldOffset(fieldOffset)) {
       // php/1f77 : No warning printed for invalid index
 
       return BooleanValue.FALSE;
     }
 
-    if (((fieldTable = getFieldTable(env, fieldOffset)) == BooleanValue.FALSE)
-      || ((fieldName = getFieldName(env, fieldOffset)) == BooleanValue.FALSE)
-      || ((fieldAlias = getFieldNameAlias(fieldOffset)) == BooleanValue.FALSE)
-      || ((fieldJdbcType = getJdbcType(fieldOffset)) == BooleanValue.FALSE)
-      || ((fieldMysqlType = getMysqlType(fieldOffset)) == null)
-      || ((fieldLength = getFieldLength(env, fieldOffset)) == BooleanValue.FALSE)
-      || ((fieldScale = getFieldScale(fieldOffset)) == BooleanValue.FALSE)
-      || ((fieldCatalog = getFieldCatalog(fieldOffset)) == BooleanValue.FALSE)) {
+    try {
+      ResultSetMetaData md = getMetaData();
+
+      if (md == null)
+	return BooleanValue.FALSE;
+	
+      int offset = fieldOffset + 1;
+
+      if (offset < 1 || md.getColumnCount() < offset)
+	return BooleanValue.FALSE;
+
+      int jdbcType = md.getColumnType(offset);
+      String catalogName = md.getCatalogName(offset);
+      String fieldTable = md.getTableName(offset);
+      String fieldSchema = md.getSchemaName(offset);
+      String fieldName = md.getColumnName(offset);
+      String fieldAlias = md.getColumnLabel(offset);
+      String fieldMysqlType = md.getColumnTypeName(offset);
+      int fieldLength = md.getPrecision(offset);
+      int fieldScale = md.getScale(offset);
+
+      String sql = "SHOW FULL COLUMNS FROM " + fieldTable + " LIKE \'" + fieldName + "\'";
+
+      MysqliResult metaResult;
+
+      metaResult = ((Mysqli) getConnection()).metaQuery(env,
+							sql,
+							catalogName);
+
+      if (metaResult == null)
+	return BooleanValue.FALSE;
+
+      return metaResult.fetchFieldImproved(env,
+					   fieldLength,
+					   fieldAlias,
+					   fieldName,
+					   fieldTable,
+					   jdbcType,
+					   fieldMysqlType,
+					   fieldScale);
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+
       return BooleanValue.FALSE;
     }
-
-    String sql = "SHOW FULL COLUMNS FROM " + fieldTable + " LIKE \'" + fieldName + "\'";
-
-    MysqliResult metaResult;
-
-    metaResult = ((Mysqli) getConnection()).metaQuery(env,
-                                                      sql,
-                                                      fieldCatalog.toString());
-
-    if (metaResult == null)
-      return BooleanValue.FALSE;
-
-    return metaResult.fetchFieldImproved(env,
-                                         fieldLength.toInt(),
-                                         fieldAlias.toString(),
-                                         fieldName.toString(),
-                                         fieldTable.toString(),
-                                         fieldJdbcType.toInt(),
-                                         fieldMysqlType,
-                                         fieldScale.toInt());
   }
 
   /**
@@ -336,8 +341,7 @@ public class MysqliResult extends JdbcResultResource {
     Value result = env.createObject();
 
     try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
+      ResultSetMetaData md = getMetaData();
 
       _rs.next();
       result.putField(env, "name", env.createString(name));
@@ -618,10 +622,9 @@ public class MysqliResult extends JdbcResultResource {
   protected String getMysqlType(int fieldOffset)
   {
     try {
-      if (_metaData == null)
-        _metaData = _rs.getMetaData();
+      ResultSetMetaData md = getMetaData();
 
-      return _metaData.getColumnTypeName(fieldOffset + 1);
+      return md.getColumnTypeName(fieldOffset + 1);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return null;
