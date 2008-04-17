@@ -620,7 +620,7 @@ public class OptionsModule extends AbstractQuercusModule {
       if (hasRequest(env))
         env.print("<pre>");
       
-      VariableModule.var_dump(env, escape(env, value));
+      VariableModule.var_dump(env, escape(env, value), null);
       
       if (hasRequest(env))
         env.print("</pre>");
