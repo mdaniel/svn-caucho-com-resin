@@ -315,7 +315,30 @@ public class MysqlModule extends AbstractQuercusModule {
 
   public static StringValue mysql_escape_string(Env env, StringValue unescapedString)
   {
-    return mysql_real_escape_string(env, unescapedString, null);
+    StringValue sb = unescapedString.createStringBuilder();
+    
+    int len = unescapedString.length();
+
+    for (int i = 0; i < len; i++) {
+      char ch = unescapedString.charAt(i);
+      
+      switch(ch) {
+        case 0:
+        case '\n':
+        case '\r':
+        case '\\':
+        case '\'':
+        case '"':
+        case 0x1A:
+          sb.append('\\');
+          sb.append(ch);
+          break;
+        default:
+          sb.append(ch);
+      }
+    }
+    
+    return sb;
   }
 
   /**

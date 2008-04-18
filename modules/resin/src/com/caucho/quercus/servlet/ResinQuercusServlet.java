@@ -118,6 +118,9 @@ public class ResinQuercusServlet extends QuercusServletImpl
 
         ws = Vfs.openWrite(out);
       }
+      
+      // php/6006
+      ws.setNewlineString("\n");
 
       Quercus quercus = getQuercus();
       

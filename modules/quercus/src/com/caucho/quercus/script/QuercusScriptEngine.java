@@ -85,6 +85,8 @@ public class QuercusScriptEngine
         WriterStreamImpl s = new WriterStreamImpl();
         s.setWriter(writer);
         WriteStream os = new WriteStream(s);
+        
+        os.setNewlineString("\n");
 
         try {
           os.setEncoding("iso-8859-1");

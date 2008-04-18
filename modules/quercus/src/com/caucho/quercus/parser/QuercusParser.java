@@ -465,9 +465,7 @@ public class QuercusParser {
       
     init(codePath);
       
-    ArrayList<Statement> statementList = parseStatementList();
-
-    Statement [] statements = (Statement []) statementList.toArray();
+    Statement []statements = parseStatements();
     
     return _factory.createFunction(Location.UNKNOWN,
                                    name,

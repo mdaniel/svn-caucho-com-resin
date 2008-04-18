@@ -428,29 +428,30 @@ public class JavaValue extends ObjectValue
   public void serialize(StringBuilder sb)
   {
     String name = _classDef.getSimpleName();
-
-    Env env = Env.getInstance();
-    TreeMap<Value,Value> map = new TreeMap<Value,Value>();
     
     Set<? extends Map.Entry<Value,Value>> entrySet = entrySet();
 
-    sb.append("O:");
-    sb.append(name.length());
-    sb.append(":\"");
-    sb.append(name);
-    sb.append("\":");
-    sb.append(entrySet.size());
-    sb.append(":{");
+    if (entrySet != null) {
+      sb.append("O:");
+      sb.append(name.length());
+      sb.append(":\"");
+      sb.append(name);
+      sb.append("\":");
+      sb.append(entrySet.size());
+      sb.append(":{");
 
-    boolean isFirst = true;
-    for (Map.Entry<Value,Value> entry : entrySet) {
-      entry.getKey().serialize(sb);
-      entry.getValue().serialize(sb);
+      for (Map.Entry<Value,Value> entry : entrySet) {
+        entry.getKey().serialize(sb);
+        entry.getValue().serialize(sb);
+      }
 
-      isFirst = false;
+      sb.append("}");
+    }
+    else {
+      // php/121f
+      sb.append("i:0;");
     }
 
-    sb.append("}");
   }
 
   /**

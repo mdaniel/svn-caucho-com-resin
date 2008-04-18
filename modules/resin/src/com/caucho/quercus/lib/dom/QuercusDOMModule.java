@@ -33,6 +33,7 @@ import java.io.IOException;
 
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.UnimplementedException;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
@@ -92,6 +93,9 @@ public class QuercusDOMModule
 
   public static DOMElement dom_import_simplexml(Env env, SimpleXMLElement node)
   {
+    if (node == null)
+      return null;
+    
     DOMDocument document = DOMDocument.__construct(env, "1.0", null);
     
     StringValue xml = node.asXML(env);

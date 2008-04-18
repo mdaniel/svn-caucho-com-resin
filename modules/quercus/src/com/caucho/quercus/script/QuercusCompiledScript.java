@@ -68,6 +68,8 @@ public class QuercusCompiledScript extends CompiledScript {
       if (writer != null) {
 	ReaderWriterStream s = new ReaderWriterStream(null, writer);
 	WriteStream os = new WriteStream(s);
+	
+	os.setNewlineString("\n");
     
 	try {
 	  os.setEncoding("utf-8");

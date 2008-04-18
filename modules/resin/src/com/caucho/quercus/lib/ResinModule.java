@@ -335,6 +335,8 @@ public class ResinModule
   {
     try {
       WriteStream out = Vfs.openWrite("stdout:");
+      
+      out.setNewlineString("\n");
 
       if (args != null) {
 	for (Value v : args) {

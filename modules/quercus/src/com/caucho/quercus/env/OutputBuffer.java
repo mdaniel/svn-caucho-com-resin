@@ -80,6 +80,8 @@ public class OutputBuffer {
 
     _tempStream = new TempStream();
     _out = new WriteStream(_tempStream);
+    
+    _out.setNewlineString("\n");
 
     String encoding = env.getOutputEncoding();
 

@@ -561,6 +561,8 @@ public class VariableModule extends AbstractQuercusModule {
         StringWriter writer = new StringWriter();
         out = writer.openWrite();
         
+        out.setNewlineString("\n");
+        
         v.printR(env, out, 0, new IdentityHashMap<Value, String>());
         
         return env.createString(writer.getString());

@@ -136,6 +136,8 @@ public class QuercusServletImpl
       }
       
       ws = new WriteStream(out);
+      
+      ws.setNewlineString("\n");
 
       Quercus quercus = getQuercus();
       quercus.setServletContext(_servletContext);
