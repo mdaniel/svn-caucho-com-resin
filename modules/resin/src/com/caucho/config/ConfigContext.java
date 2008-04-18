@@ -31,6 +31,7 @@ import com.caucho.config.program.NodeBuilderChildProgram;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.Validator;
 import com.caucho.config.type.*;
+import com.caucho.config.types.*;
 import com.caucho.config.attribute.*;
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
@@ -66,6 +67,10 @@ public class ConfigContext {
   private final static QName RESIN_CLASS = new QName("resin:class", null);
   private final static QName RESIN_CLASS_NS
     = new QName("resin:class", "http://caucho.com/ns/resin/core");
+
+  private final static QName RESIN_PARAM = new QName("resin:param", null);
+  private final static QName RESIN_PARAM_NS
+    = new QName("resin:param", "http://caucho.com/ns/resin/core");
   
   private final static QName TEXT = new QName("#text");
   private final static QName VALUE = new QName("value");
@@ -231,7 +236,7 @@ public class ConfigContext {
     throws LineConfigException
   {
     if (bean == null)
-      throw new NullPointerException();
+      throw new NullPointerException(L.l("unexpected null bean at node '{0}'", top));
     
     ConfigContext oldBuilder = _currentBuilder.get();
     try {
@@ -319,7 +324,7 @@ public class ConfigContext {
       
       type.beforeConfigure(this, bean, attribute);
 
-      configureChildNode(attribute, qName, bean, type);
+      configureChildNode(attribute, qName, bean, type, false);
       
       type.afterConfigure(this, bean);
     }
@@ -362,7 +367,7 @@ public class ConfigContext {
            childNode = childNode.getNextSibling()) {
         QName qName = ((QAbstractNode) childNode).getQName();
         
-        configureChildNode(childNode, qName, bean, type);
+        configureChildNode(childNode, qName, bean, type, false);
       }
 
       type.afterConfigure(this, bean);
@@ -398,7 +403,7 @@ public class ConfigContext {
         Attr attr = (Attr) child;
         QName qName = ((QNode) attr).getQName();
         
-        configureChildNode(attr, qName, bean, type);
+        configureChildNode(attr, qName, bean, type, false);
       }
     }
     else {
@@ -409,7 +414,7 @@ public class ConfigContext {
           Attr attr = (Attr) attrList.item(i);
           QName qName = ((QNode) attr).getQName();
 
-          configureChildNode(attr, qName, bean, type);
+          configureChildNode(attr, qName, bean, type, false);
         }
       }
     }
@@ -418,12 +423,12 @@ public class ConfigContext {
   private void configureChildNode(Node childNode,
                                   QName qName,
                                   Object bean,
-                                  ConfigType type)
+                                  ConfigType type,
+				  boolean allowParam)
     throws Exception
   {
-    if (childNode instanceof Attr
-        && (qName.getName().startsWith("xmlns")
-            || _resinClassSet.contains(qName))) {
+    if (qName.getName().startsWith("xmlns")
+	|| ! allowParam && _resinClassSet.contains(qName)) {
       return;
     }
 
@@ -459,17 +464,22 @@ public class ConfigContext {
       }
 
       ConfigType childType = null;
-
-      if (childNode instanceof Element)
-	childType = createResinType(attrStrategy, (Element) childNode);
-
       Object childBean;
+
+      if (childNode instanceof Element) {
+	childBean = createResinType(attrStrategy.getConfigType(),
+				    (Element) childNode);
+
+	if (childBean != null) {
+	  attrStrategy.setValue(bean, qName, childBean);
+	  return;
+	}
+      }
+
       String text;
 
-      if (childType != null)
-	childBean = childType.create(bean);
-      else if (attrStrategy.isAllowText()
-	       && (text = getTextValue(childNode)) != null) {
+      if (attrStrategy.isAllowText()
+	  && (text = getTextValue(childNode)) != null) {
 	boolean isTrim = isTrim(childNode);
 	  
 	if (isEL() && attrStrategy.isEL()
@@ -477,7 +487,7 @@ public class ConfigContext {
 	  if (isTrim)
 	    text = text.trim();
 	  
-	  Object elValue = eval(attrStrategy, text);
+	  Object elValue = eval(attrStrategy.getConfigType(), text);
 
 	  // ioc/2410
 	  if (elValue != NULL)
@@ -500,7 +510,7 @@ public class ConfigContext {
 	if (childNode instanceof Element)
 	  configureNode(childNode, childBean, childBeanType);
 	else
-	  configureChildNode(childNode, TEXT, childBean, childBeanType);
+	  configureChildNode(childNode, TEXT, childBean, childBeanType, false);
 
 	childBeanType.init(childBean);
 
@@ -537,6 +547,86 @@ public class ConfigContext {
 	}
 	else
 	  attrStrategy.setText(bean, qName, textValue);
+      }
+    } catch (LineConfigException e) {
+      throw e;
+    } catch (Exception e) {
+      throw error(e, childNode);
+    }
+  }
+  
+  public Object create(Node childNode, ConfigType type)
+    throws ConfigException
+  {
+    if (childNode instanceof Element) {
+      Object childBean = createResinType(type, (Element) childNode);
+
+      if (childBean != null)
+	return childBean;
+    }
+
+    try {
+      Object childBean;
+      String text;
+
+      if ((text = getTextValue(childNode)) != null) {
+	boolean isTrim = isTrim(childNode);
+	  
+	if (isEL() && type.isEL()
+	    && (text.indexOf("#{") >= 0 || text.indexOf("${") >= 0)) {
+	  if (isTrim)
+	    text = text.trim();
+	  
+	  Object elValue = eval(type, text);
+
+	  // ioc/2410
+	  if (elValue != NULL)
+	    return elValue;
+	  else
+	    return null;
+	}
+	else {
+	  return text;
+	}
+      }
+      else
+	childBean = type.create(null);
+
+      if (childBean != null) {
+	ConfigType childBeanType = TypeFactory.getType(childBean.getClass());
+	
+	if (childNode instanceof Element)
+	  configureNode(childNode, childBean, childBeanType);
+	else
+	  configureChildNode(childNode, TEXT, childBean, childBeanType, false);
+
+	childBeanType.init(childBean);
+
+	return childBeanType.replaceObject(childBean);
+      }
+      /*
+      else if ((childBean = getElementValue(attrStrategy, childNode)) != null) {
+	if (childBean != NULL)
+	  attrStrategy.setValue(bean, qName, childBean);
+	else
+	  attrStrategy.setValue(bean, qName, null);
+      }
+      */
+      else {
+	String textValue;
+
+	if (type.isNoTrim())
+	  textValue = textValueNoTrim(childNode);
+	else
+	  textValue = textValue(childNode);
+
+	if (isEL() && type.isEL() && textValue.indexOf("${") >= 0) {
+	  Object value = type.valueOf(evalObject(textValue));
+	  
+	  return value;
+	}
+	else
+	  return type.valueOf(textValue);
       }
     } catch (LineConfigException e) {
       throw e;
@@ -701,12 +791,9 @@ public class ConfigContext {
   /**
    * Create a custom resin:type value.
    */
-  ConfigType createResinType(Attribute attrStrategy, Element node)
-    throws Exception
+  Object createResinType(ConfigType childType, Element node)
   {
-    ConfigType childType = attrStrategy.getConfigType();
-    
-    String type = null;
+    String typeName = null;
 
     if (node instanceof QAttributedNode) {
       Node child = ((QAttributedNode) node).getFirstAttribute();
@@ -716,7 +803,7 @@ public class ConfigContext {
         QName qName = ((QNode) attr).getQName();
 
 	if (_resinClassSet.contains(qName)) {
-	  type = attr.getValue();
+	  typeName = attr.getValue();
 	  break;
 	}
       }
@@ -730,20 +817,41 @@ public class ConfigContext {
           QName qName = ((QNode) attr).getQName();
 
 	  if (_resinClassSet.contains(qName)) {
-	    type = attr.getValue();
+	    typeName = attr.getValue();
 	    break;
 	  }
         }
       }
     }
 
-    if (type != null) {
+    if (typeName != null) {
       try {
 	ClassLoader loader = Thread.currentThread().getContextClassLoader();
 	
-	Class cl = Class.forName(type, false, loader);
+	Class cl = Class.forName(typeName, false, loader);
 
-	return TypeFactory.getType(cl);
+	ConfigType beanConfigType = TypeFactory.getType(BeanConfig.class);
+	InterfaceConfig cfg = new InterfaceConfig(cl);
+	cfg.setClass(cl);
+
+	for (Node childNode = node.getFirstChild();
+	     childNode != null;
+	     childNode = childNode.getNextSibling()) {
+	  QName qName = ((QAbstractNode) childNode).getQName();
+        
+	  if (qName.equals(RESIN_PARAM)
+	      || qName.equals(RESIN_PARAM_NS)) {
+	    configureChildNode(childNode, qName, cfg, beanConfigType, true);
+	  }
+	}
+
+	cfg.init();
+
+	Object bean = cfg.replaceObject();
+
+	configureBean(bean, node);
+	
+	return bean;
       } catch (Exception e) {
 	throw ConfigException.create(e);
       }
@@ -857,7 +965,7 @@ public class ConfigContext {
       // server/12h6
       if (data != null && isEL() && attr.isEL()
 	  && (data.indexOf("#{") >= 0 || data.indexOf("${") >= 0)) {
-	return eval(attr, data);
+	return eval(attr.getConfigType(), data);
       }
 
       return null;
@@ -925,6 +1033,10 @@ public class ConfigContext {
 
     Element elt = (Element) node;
 
+    // ioc/2235
+    if (elt.getAttributes().getLength() > 0)
+      return null;
+
     for (Node child = elt.getFirstChild();
 	 child != null;
 	 child = child.getNextSibling()) {
@@ -946,7 +1058,7 @@ public class ConfigContext {
     return null;
   }
 
-  private Object eval(Attribute attr, String data)
+  private Object eval(ConfigType type, String data)
   {
     ELContext elContext = getELContext();
     
@@ -954,7 +1066,7 @@ public class ConfigContext {
     
     Expr expr = parser.parse();
 
-    Object value = attr.getConfigType().valueOf(elContext, expr);
+    Object value = type.valueOf(elContext, expr);
 
     if (value != null)
       return value;
@@ -1251,6 +1363,8 @@ public class ConfigContext {
     _resinClassSet.add(RESIN_CLASS);
     _resinClassSet.add(RESIN_TYPE_NS);
     _resinClassSet.add(RESIN_TYPE);
+    _resinClassSet.add(RESIN_PARAM_NS);
+    // _resinClassSet.add(RESIN_PARAM);
     _resinClassSet.add(new QName("resin:type", "http://caucho.com/ns/resin"));
     _resinClassSet.add(new QName("resin:class", "http://caucho.com/ns/resin"));
   }

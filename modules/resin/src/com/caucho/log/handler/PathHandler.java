@@ -208,9 +208,11 @@ public class PathHandler extends Handler {
       Throwable thrown = record.getThrown();
 
       synchronized (_os) {
+	/*
 	if (_timestamp != null) {
 	  _os.print(_timestamp);
 	}
+	*/
       
 	if (thrown != null) {
 	  if (message != null

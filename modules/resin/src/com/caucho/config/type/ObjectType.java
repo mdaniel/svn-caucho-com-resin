@@ -32,7 +32,7 @@ package com.caucho.config.type;
 /**
  * Represents a Object type.
  */
-public final class ObjectType extends ConfigType
+public final class ObjectType extends InterfaceType
 {
   public static final ObjectType TYPE = new ObjectType();
   
@@ -41,6 +41,7 @@ public final class ObjectType extends ConfigType
    */
   private ObjectType()
   {
+    super(Object.class);
   }
   
   /**

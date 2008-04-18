@@ -32,6 +32,7 @@ package com.caucho.webbeans.component;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.type.*;
 import com.caucho.config.types.*;
 import com.caucho.ejb3.gen.*;
 import com.caucho.util.*;
@@ -61,6 +62,7 @@ public class ClassComponent extends ComponentImpl {
   private boolean _isBound;
 
   private Constructor _ctor;
+  private ConfigProgram []_newArgs;
   private ComponentImpl []_ctorArgs;
 
   private Object _scopeAdapter;
@@ -102,6 +104,17 @@ public class ClassComponent extends ComponentImpl {
   public Class getMBeanInterface()
   {
     return _mbeanInterface;
+  }
+
+  /**
+   * Sets the init program.
+   */
+  public void setNewArgs(ArrayList<ConfigProgram> args)
+  {
+    if (args != null) {
+      _newArgs = new ConfigProgram[args.size()];
+      args.toArray(_newArgs);
+    }
   }
 
   public void init()
@@ -207,7 +220,11 @@ public class ClassComponent extends ComponentImpl {
       Constructor second = null;
 
       for (Constructor ctor : _cl.getDeclaredConstructors()) {
-	if (best == null) {
+	if (_newArgs != null
+	    && ctor.getParameterTypes().length != _newArgs.length) {
+	  continue;
+	}
+	else if (best == null) {
 	  best = ctor;
 	}
 	else if (hasBindingAnnotation(ctor)) {
@@ -416,7 +433,17 @@ public class ClassComponent extends ComponentImpl {
 	ComponentImpl []ctorArgs = new ComponentImpl[param.length];
 
 	for (int i = 0; i < param.length; i++) {
-	  ctorArgs[i] = _webbeans.bindParameter(loc, param[i], paramAnn[i]);
+	  ComponentImpl arg;
+	  
+	  if (_newArgs != null && i < _newArgs.length) {
+	    ConfigProgram argProgram = _newArgs[i];
+	    ConfigType type = TypeFactory.getType(param[i]);
+
+	    ctorArgs[i] = createArg(type, argProgram);
+	  }
+
+	  if (ctorArgs[i] == null)
+	    ctorArgs[i] = _webbeans.bindParameter(loc, param[i], paramAnn[i]);
 
 	  if (ctorArgs[i] == null)
 	    throw new ConfigException(L.l("{0} does not have valid arguments",
@@ -463,6 +490,16 @@ public class ClassComponent extends ComponentImpl {
     }
   }
 
+  protected ComponentImpl createArg(ConfigType type, ConfigProgram program)
+  {
+    Object value = program.configure(type);
+
+    if (value != null)
+      return new SingletonComponent(getWebBeans(), value);
+    else
+      return null;
+  }
+  
   /**
    * Introspects the methods for any @Produces
    */

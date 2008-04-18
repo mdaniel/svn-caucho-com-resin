@@ -30,6 +30,7 @@
 package com.caucho.config.program;
 
 import com.caucho.config.*;
+import com.caucho.config.type.*;
 import com.caucho.webbeans.context.DependentScope;
 
 /**
@@ -86,6 +87,19 @@ public abstract class ConfigProgram {
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+  }
+
+  final
+  public Object configure(ConfigType type)
+    throws ConfigException
+  {
+    return configure(type, ConfigContext.create());
+  }
+
+  public Object configure(ConfigType type, ConfigContext env)
+    throws ConfigException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public void init(Object bean)

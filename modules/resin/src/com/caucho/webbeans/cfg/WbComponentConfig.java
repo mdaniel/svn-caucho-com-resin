@@ -70,7 +70,8 @@ public class WbComponentConfig {
     = new ArrayList<WbBinding>();
 
   private Class _scope;
-  
+
+  private ArrayList<ConfigProgram> _newArgs;
   private ContainerProgram _init;
 
   protected ComponentImpl _comp;
@@ -229,6 +230,17 @@ public class WbComponentConfig {
   }
 
   /**
+   * Sets any new values
+   */
+  public void addParam(ConfigProgram param)
+  {
+    if (_newArgs == null)
+      _newArgs = new ArrayList<ConfigProgram>();
+
+    _newArgs.add(param);
+  }
+
+  /**
    * Sets the init program.
    */
   public void setInit(ContainerProgram init)
@@ -325,6 +337,9 @@ public class WbComponentConfig {
 
     if (_scope != null)
       comp.setScope(_webbeans.getScopeContext(_scope));
+
+    if (_newArgs != null)
+      comp.setNewArgs(_newArgs);
 
     if (_init != null)
       comp.setInit(_init);

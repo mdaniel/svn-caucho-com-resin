@@ -41,7 +41,7 @@ import javax.webbeans.*;
  * Represents an interface.  The interface will try to lookup the
  * value in webbeans.
  */
-public final class InterfaceType extends ConfigType
+public class InterfaceType extends ConfigType
 {
   private static final L10N L = new L10N(InterfaceType.class);
 
@@ -72,6 +72,28 @@ public final class InterfaceType extends ConfigType
     InterfaceConfig cfg = new InterfaceConfig(_type, _type.getSimpleName());
     
     return cfg;
+  }
+  
+  /**
+   * Replace the type with the generated object
+   */
+  public void init(Object bean)
+  {
+    if (bean instanceof InterfaceConfig)
+      ((InterfaceConfig) bean).init();
+    else
+      super.init(bean);
+  }
+  
+  /**
+   * Replace the type with the generated object
+   */
+  public Object replaceObject(Object bean)
+  {
+    if (bean instanceof InterfaceConfig)
+      return ((InterfaceConfig) bean).replaceObject();
+    else
+      return bean;
   }
   
   /**

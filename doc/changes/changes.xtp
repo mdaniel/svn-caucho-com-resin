@@ -12,7 +12,8 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
-<li>quercus: fsockopen allows host:port as the host string (#2603, rep by billybigpotatoes)</li>
+<li>resin-ioc: add resin:param to allow custom constructors (#2414)</li>
+<li>(2008-04-17) quercus: fsockopen allows host:port as the host string (#2603, rep by billybigpotatoes)</li>
 <li>quercus: use getRealPath for php-ini in QuercusServlet (#2605, rep by sgraf)</li>
 <li>quercus: var_dump takes multiple args (#2508, rep by etzel)</li>
 <li>quercus: mysql_fetch_field updates to handle table aliasing</li>

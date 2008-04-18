@@ -125,6 +125,14 @@ public class TypeFactory implements AddLoaderListener
     return factory.getConfigTypeImpl(type);
   }
 
+  /**
+   * Returns the appropriate strategy.
+   */
+  public static ConfigType getType(Type type)
+  {
+    return getType((Class) type);
+  }
+
   public static TypeFactory create()
   {
     return getFactory();
@@ -347,8 +355,10 @@ public class TypeFactory implements AddLoaderListener
       
       return new ArrayType(getType(compType), compType);
     }
-    else if (type.isInterface() || Modifier.isAbstract(type.getModifiers()))
+    else if (type.isInterface()
+	     || Modifier.isAbstract(type.getModifiers())) {
       return new InterfaceType(type);
+    }
     else
       return new BeanType(type);
   }
