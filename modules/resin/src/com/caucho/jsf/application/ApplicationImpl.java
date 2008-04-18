@@ -121,6 +121,7 @@ public class ApplicationImpl
   private boolean _isInit;
 
   private PropertyResolver _legacyPropertyResolver;
+  private VariableResolver _legacyVariableResolver;
 
   public ApplicationImpl()
   {
@@ -423,15 +424,18 @@ public class ApplicationImpl
   @Deprecated
   public void setPropertyResolver(PropertyResolver resolver)
   {
-    _legacyPropertyResolver = resolver;
+    if (_legacyPropertyResolver == null ||
+        _legacyPropertyResolver instanceof DummyPropertyResolver) {
+       addELResolver(new PropertyResolverChainWrapper());
+    }
 
-    addELResolver(new ELResolverAdapter(resolver));
+    _legacyPropertyResolver = resolver;
   }
 
   public PropertyResolver getLegacyPropertyResolver()
   {
     if (_legacyPropertyResolver == null)
-      _legacyPropertyResolver = new DummyPropertyResolverImpl();
+      _legacyPropertyResolver = new DummyPropertyResolver();
     
     return _legacyPropertyResolver;
   }
@@ -448,9 +452,20 @@ public class ApplicationImpl
   @Deprecated
   public void setVariableResolver(VariableResolver resolver)
   {
-    _variableResolver = resolver;
+    if (_legacyVariableResolver == null ||
+        _legacyVariableResolver instanceof DummyVariableResolver) {
+      addELResolver(new VariableResolverChainWrapper());
+    }
+
+    _legacyVariableResolver = resolver;
   }
 
+  public VariableResolver getLegacyVariableResolver(){
+    if (_legacyVariableResolver == null)
+      _legacyVariableResolver = new DummyVariableResolver();
+
+    return _legacyVariableResolver;
+  }
   /**
    * @Since 1.2
    */
@@ -1095,14 +1110,95 @@ public class ApplicationImpl
     }
   }
 
-  static class ELResolverAdapter
+
+  class VariableResolverChainWrapper
+    extends ELResolver {
+
+    VariableResolverChainWrapper()
+    {
+    }
+
+    public Class<?> getCommonPropertyType(ELContext context, Object base)
+    {
+      if (base == null)
+        return String.class;
+      else
+        return null;
+    }
+
+    public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context,
+                                                             Object base)
+    {
+      return null;
+    }
+
+    public Class<?> getType(ELContext context, Object base, Object property)
+    {
+      if (base == null && property == null)
+        throw new PropertyNotFoundException();
+
+       return null;
+    }
+
+    public Object getValue(ELContext context, Object base, Object property)
+      throws PropertyNotFoundException, ELException
+    {
+      if (base != null)
+        return null;
+
+      if (property == null && base == null)
+        throw new PropertyNotFoundException();
+
+      context.setPropertyResolved(true);
+
+      FacesContext facesContext = FacesContext.getCurrentInstance();
+
+      try {
+        return _legacyVariableResolver.resolveVariable(facesContext,
+                                                       (String) property);
+      }
+      catch (EvaluationException e) {
+        context.setPropertyResolved(false);
+
+        throw new ELException(e);
+      } catch (RuntimeException e) {
+        context.setPropertyResolved(false);
+
+        throw e;
+      } catch (Exception e){
+        context.setPropertyResolved(false);
+
+        throw new ELException(e);
+      }      
+    }
+
+    public boolean isReadOnly(ELContext context, Object base, Object property)
+      throws PropertyNotFoundException, ELException
+    {
+      if (base == null && property == null)
+        throw new PropertyNotFoundException();
+      
+      return false;
+    }
+
+    public void setValue(ELContext context,
+                         Object base,
+                         Object property,
+                         Object value)
+      throws
+      PropertyNotFoundException, PropertyNotWritableException, ELException
+    {
+      if (base == null && property == null)
+        throw new PropertyNotFoundException();
+    }
+  }
+  
+  class PropertyResolverChainWrapper
     extends ELResolver
   {
-    PropertyResolver _delegate;
 
-    ELResolverAdapter(PropertyResolver delegate)
+    PropertyResolverChainWrapper()
     {
-      _delegate = delegate;
     }
 
     public Class<?> getCommonPropertyType(ELContext context, Object base)
@@ -1126,9 +1222,9 @@ public class ApplicationImpl
 
       try {
 	if (base.getClass().isArray() || base instanceof List)
-	  return _delegate.getType(base, ((Long) property).intValue());
+	  return _legacyPropertyResolver.getType(base, ((Long) property).intValue());
 	else
-	  return _delegate.getType(base, property);
+	  return _legacyPropertyResolver.getType(base, property);
       }
       catch (PropertyNotFoundException e) {
 	context.setPropertyResolved(false);
@@ -1157,9 +1253,9 @@ public class ApplicationImpl
 
       try {
 	if (base.getClass().isArray() || base instanceof List)
-	  return _delegate.getValue(base, ((Long) property).intValue());
+	  return _legacyPropertyResolver.getValue(base, ((Long) property).intValue());
 	else
-	  return _delegate.getValue(base, property);
+	  return _legacyPropertyResolver.getValue(base, property);
       }
       catch (PropertyNotFoundException e) {
 	context.setPropertyResolved(false);
@@ -1186,9 +1282,9 @@ public class ApplicationImpl
       
       try {
 	if (base.getClass().isArray() || base instanceof List)
-	  return _delegate.isReadOnly(base, ((Long) property).intValue());
+	  return _legacyPropertyResolver.isReadOnly(base, ((Long) property).intValue());
 	else
-	  return _delegate.isReadOnly(base, property);
+	  return _legacyPropertyResolver.isReadOnly(base, property);
       }
       catch (PropertyNotFoundException e) {
 	context.setPropertyResolved(false);
@@ -1219,9 +1315,9 @@ public class ApplicationImpl
 
       try {
 	if (base.getClass().isArray() || base instanceof List)
-	  _delegate.setValue(base, ((Long) property).intValue(), value);
+	  _legacyPropertyResolver.setValue(base, ((Long) property).intValue(), value);
 	else
-	  _delegate.setValue(base, property, value);
+	  _legacyPropertyResolver.setValue(base, property, value);
       }
       catch (PropertyNotFoundException e) {
 	context.setPropertyResolved(false);
@@ -1242,7 +1338,7 @@ public class ApplicationImpl
   }
 
 
-  public static class DummyPropertyResolverImpl
+  static class DummyPropertyResolver
     extends PropertyResolver
   {
 
@@ -1324,7 +1420,16 @@ public class ApplicationImpl
       
       return null;
     }
+  }
 
+  static class DummyVariableResolver extends VariableResolver {
+    public Object resolveVariable(FacesContext context, String name)
+      throws EvaluationException
+    {
+      context.getELContext().setPropertyResolved(false);
+
+      return null;
+    }
   }
 }
 

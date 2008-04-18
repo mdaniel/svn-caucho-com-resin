@@ -244,7 +244,9 @@ public class ApplicationConfig
   public void setVariableResolver(Class variableResolver)
     throws ConfigException
   {
-    Config.validate(variableResolver, VariableResolver.class);
+    Config.validate(variableResolver,
+                    VariableResolver.class,
+                    VariableResolver.class);
     
     _variableResolver = variableResolver;
   }
@@ -464,6 +466,46 @@ public class ApplicationConfig
 	app.setPropertyResolver(propertyResolver);
 	log.fine(L.l("JSF[] using '{0}' as property-resolver",
 		     propertyResolver));
+      }
+    }
+
+    if (_variableResolver != null) {
+      VariableResolver variableResolver = null;
+
+      try {
+	Constructor ctor =
+	  _variableResolver.getConstructor(VariableResolver.class);
+
+	VariableResolver oldVariableResolver = app.getLegacyVariableResolver();
+
+        variableResolver =
+	  (VariableResolver) ctor.newInstance(oldVariableResolver);
+      }
+      catch (NoSuchMethodException e) {
+      }
+      catch (RuntimeException e) {
+	throw e;
+      }
+      catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+
+      if (variableResolver == null) {
+	try {
+	  variableResolver = (VariableResolver) _variableResolver.newInstance();
+	}
+	catch (RuntimeException e) {
+	  throw e;
+	}
+	catch (Exception e) {
+	  throw ConfigException.create(e);
+	}
+      }
+
+      if (variableResolver != null) {
+	app.setVariableResolver(variableResolver);
+	log.fine(L.l("JSF[] using '{0}' as variable-resolver",
+		     variableResolver));
       }
     }
   }
