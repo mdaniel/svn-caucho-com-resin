@@ -103,9 +103,9 @@ public class HempBroker implements HmppBroker {
 
     HempConnectionImpl conn = new HempConnectionImpl(this, jid);
 
-    synchronized (_streamMap) {
-      HmppStream streamHandler = conn.getStreamHandler();
+    HmppStream streamHandler = conn.getStreamHandler();
       
+    synchronized (_streamMap) {
       _streamMap.put(jid, new WeakReference<HmppStream>(streamHandler));
     }
 
@@ -167,15 +167,16 @@ public class HempBroker implements HmppBroker {
       
       _resourceMap.put(jid, new WeakReference<HmppResource>(resource));
     }
-
+    
     synchronized (_streamMap) {
       WeakReference<HmppStream> oldRef = _streamMap.get(jid);
 
       if (oldRef != null && oldRef.get() != null)
 	throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
 					    jid));
-      
-      _streamMap.put(jid, new WeakReference<HmppStream>(resource));
+
+      HmppStream stream = resource.getCallbackStream();
+      _streamMap.put(jid, new WeakReference<HmppStream>(stream));
     }
 
     if (log.isLoggable(Level.FINE))
@@ -469,9 +470,10 @@ public class HempBroker implements HmppBroker {
 	if (ref != null)
 	  return ref.get();
 
-	_streamMap.put(jid, new WeakReference<HmppStream>(resource));
+	HmppStream stream = resource.getCallbackStream();
+	_streamMap.put(jid, new WeakReference<HmppStream>(stream));
 
-	return resource;
+	return stream;
       }
     }
     else

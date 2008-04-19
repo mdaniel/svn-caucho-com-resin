@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.pubsub.memory;
 
-import com.caucho.hemp.broker.GenericResource;
+import com.caucho.hemp.broker.GenericService;
 import com.caucho.hmpp.*;
 import com.caucho.hmpp.pubsub.*;
 import com.caucho.hmpp.spi.*;
@@ -41,7 +41,7 @@ import java.util.logging.*;
  * pub/sub (xep-0060)
  * http://www.xmpp.org/extensions/xep-0060.html
  */
-public class MemoryPubSub extends GenericResource
+public class MemoryPubSub extends GenericService
 {
   private static final Logger log
     = Logger.getLogger(MemoryPubSub.class.getName());

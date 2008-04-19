@@ -29,7 +29,6 @@
 
 package com.caucho.hemp.muc.memory;
 
-import com.caucho.hemp.broker.GenericResource;
 import com.caucho.hmpp.spi.*;
 import com.caucho.hmpp.muc.*;
 import com.caucho.hmpp.im.*;
@@ -40,7 +39,7 @@ import java.util.logging.*;
 /**
  * Multiuser chat room nick (xep-0045)
  */
-public class MemoryNick extends AbstractHmppResource
+public class MemoryNick extends AbstractHmppService
 {
   private static final Logger log
     = Logger.getLogger(MemoryNick.class.getName());

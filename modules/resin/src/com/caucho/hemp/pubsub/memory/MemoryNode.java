@@ -29,7 +29,6 @@
 
 package com.caucho.hemp.pubsub.memory;
 
-import com.caucho.hemp.broker.GenericResource;
 import com.caucho.hmpp.*;
 import com.caucho.hmpp.pubsub.*;
 import com.caucho.hmpp.spi.*;

@@ -179,7 +179,7 @@ public class HempTopic extends AbstractTopic
     // _xmppNode.send(session, msg, timeout);
   }
 
-  class TopicResource extends AbstractHmppResource {
+  class TopicResource extends AbstractHmppService {
   }
 }
 

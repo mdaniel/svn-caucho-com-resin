@@ -45,16 +45,18 @@ import javax.webbeans.*;
 /**
  * Configuration for a service
  */
-public class GenericResource extends AbstractHmppResource
+public class GenericService extends AbstractHmppService
 {
-  private static final L10N L = new L10N(GenericResource.class);
+  private static final L10N L = new L10N(GenericService.class);
   private static final Logger log
-    = Logger.getLogger(GenericResource.class.getName());
+    = Logger.getLogger(GenericService.class.getName());
   
   private @In HmppBroker _broker;
   
   private HmppConnection _conn;
   private HmppStream _toBroker;
+
+  private HmppStream _queue;
   
   public void setName(String name)
   {
@@ -83,12 +85,24 @@ public class GenericResource extends AbstractHmppResource
       throw new ConfigException(L.l("{0} requires a jid",
 				    getClass().getSimpleName()));
 
+    _queue = createQueue(this);
+    
     _conn = _broker.registerResource(getJid(), this);
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " init");
 
     _toBroker = _conn.getStream();
+  }
+
+  protected HmppStream createQueue(HmppStream stream)
+  {
+    return new HempMemoryQueue(stream);
+  }
+
+  public HmppStream getCallbackStream()
+  {
+    return _queue;
   }
 
   //

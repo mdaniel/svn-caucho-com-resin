@@ -32,7 +32,7 @@ package com.caucho.hemp.im;
 import com.caucho.hmpp.*;
 import com.caucho.hmpp.disco.*;
 import com.caucho.hmpp.im.*;
-import com.caucho.hmpp.spi.AbstractHmppResource;
+import com.caucho.hmpp.spi.*;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.*;
@@ -41,7 +41,7 @@ import java.util.logging.*;
 /**
  * Resource representing an IM user
  */
-public class ImResource extends AbstractHmppResource
+public class ImResource extends AbstractHmppService
 {
   private static final Logger log
     = Logger.getLogger(ImResource.class.getName());

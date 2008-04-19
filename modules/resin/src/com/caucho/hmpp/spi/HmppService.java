@@ -35,43 +35,6 @@ import com.caucho.hmpp.*;
  * Low-level callback to handle packet events.  Each method corresponds to
  * a packet class.
  */
-public interface HmppResource
+public interface HmppService extends HmppResource, HmppStream
 {
-  /**
-   * Returns the resource's preferred jid.
-   */
-  public String getJid();
-  
-  /**
-   * Returns a subresource, e.g. if the resource is room@domain, then
-   * it might return a resource for room@domain/nick
-   */
-  public HmppResource lookupResource(String jid);
-
-  /**
-   * Called when an instance logs in
-   */
-  public void onLogin(String jid);
-
-  /**
-   * Called when an instance logs out
-   */
-  public void onLogout(String jid);
-
-  /**
-   * Returns the resource's stream
-   */
-  public HmppStream getCallbackStream();
-  
-  /**
-   * Returns a filter for inbound calls, i.e. from back from the
-   * router.
-   */
-  public HmppStream getOutboundFilter(HmppStream stream);
-
-  /**
-   * Returns a filter for outbound calls, i.e. before going through the
-   * router.
-   */
-  public HmppStream getInboundFilter(HmppStream stream);
 }

@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.muc.memory;
 
-import com.caucho.hemp.broker.GenericResource;
+import com.caucho.hemp.broker.GenericService;
 import com.caucho.hmpp.*;
 import com.caucho.hmpp.im.*;
 import com.caucho.hmpp.muc.*;
@@ -41,7 +41,7 @@ import java.util.logging.*;
 /**
  * Multiuser chat room (xep-0045)
  */
-public class MemoryRoom extends GenericResource
+public class MemoryRoom extends GenericService
 {
   private static final Logger log
     = Logger.getLogger(MemoryRoom.class.getName());
