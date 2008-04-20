@@ -330,7 +330,26 @@ public class HempBroker implements HmppBroker {
     if (stream != null)
       stream.sendMessage(to, from, value);
     else {
-      log.fine(this + " sendMessage to=" + to + " is an unknown stream");
+      log.fine(this + " sendMessage to=" + to + " from=" + from
+	       + " is an unknown stream");
+    }
+  }
+
+  /**
+   * Sends a message
+   */
+  public void sendMessageError(String to,
+			       String from,
+			       Serializable value,
+			       HmppError error)
+  {
+    HmppStream stream = getStream(to);
+
+    if (stream != null)
+      stream.sendMessageError(to, from, value, error);
+    else {
+      log.fine(this + " sendMessageError to=" + to + " from=" + from
+	       + " error=" + error + " is an unknown stream");
     }
   }
 

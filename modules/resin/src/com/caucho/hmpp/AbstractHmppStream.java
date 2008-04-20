@@ -31,12 +31,16 @@ package com.caucho.hmpp;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.logging.*;
 
 /**
  * Configuration for a service
  */
 public class AbstractHmppStream implements HmppStream
 {
+  private static final Logger log
+    = Logger.getLogger(AbstractHmppStream.class.getName());
+  
   /**
    * Callback to handle messages
    * 
@@ -46,6 +50,28 @@ public class AbstractHmppStream implements HmppStream
    */
   public void sendMessage(String to, String from, Serializable value)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendMessage to=" + to + " from=" + from
+		+ " value=" + value);
+    }
+  }
+  
+  /**
+   * Callback to handle messages
+   * 
+   * @param to the target JID
+   * @param from the source JID
+   * @param value the message payload
+   */
+  public void sendMessageError(String to,
+			       String from,
+			       Serializable value,
+			       HmppError error)
+  {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendMessageError to=" + to + " from=" + from
+		+ " error=" + error);
+    }
   }
   
   public boolean sendQueryGet(long id,
@@ -53,6 +79,12 @@ public class AbstractHmppStream implements HmppStream
 			    String from,
 			    Serializable query)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendQueryGet id=" + id
+		+ " to=" + to + " from=" + from
+		+ " query=" + query);
+    }
+    
     return false;
   }
   
@@ -61,6 +93,12 @@ public class AbstractHmppStream implements HmppStream
 			    String from,
 			    Serializable query)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendQuerySet id=" + id
+		+ " to=" + to + " from=" + from
+		+ " query=" + query);
+    }
+    
     return false;
   }
   
@@ -69,14 +107,24 @@ public class AbstractHmppStream implements HmppStream
 			    String from,
 			    Serializable value)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendQueryResult id=" + id
+		+ " to=" + to + " from=" + from
+		+ " value=" + value);
+    }
   }
   
   public void sendQueryError(long id,
-			   String to,
-			   String from,
-			   Serializable query,
-			   HmppError error)
+			     String to,
+			     String from,
+			     Serializable query,
+			     HmppError error)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendQueryError id=" + id
+		+ " to=" + to + " from=" + from
+		+ " error=" + error);
+    }
   }
   
   /**
@@ -86,6 +134,9 @@ public class AbstractHmppStream implements HmppStream
 			 String from,
 			 Serializable []data)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendPresence to=" + to + " from=" + from);
+    }
   }
 
   /**
@@ -95,15 +146,21 @@ public class AbstractHmppStream implements HmppStream
 				    String from,
 				    Serializable []data)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendPresenceUnavailable to=" + to + " from=" + from);
+    }
   }
 
   /**
    * Presence probe from the server to a client
    */
   public void sendPresenceProbe(String to,
-			      String from,
-			      Serializable []data)
+				String from,
+				Serializable []data)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendPresenceProbe to=" + to + " from=" + from);
+    }
   }
 
   /**
@@ -113,6 +170,9 @@ public class AbstractHmppStream implements HmppStream
 				  String from,
 				  Serializable []data)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendPresenceSubscribe to=" + to + " from=" + from);
+    }
   }
 
   /**
@@ -122,6 +182,9 @@ public class AbstractHmppStream implements HmppStream
 				   String from,
 				   Serializable []data)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendPresenceSubscribed to=" + to + " from=" + from);
+    }
   }
 
   /**
@@ -131,6 +194,9 @@ public class AbstractHmppStream implements HmppStream
 				    String from,
 				    Serializable []data)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendPresenceUnsubscribe to=" + to + " from=" + from);
+    }
   }
 
   /**
@@ -140,6 +206,9 @@ public class AbstractHmppStream implements HmppStream
 				     String from,
 				     Serializable []data)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendPresenceUnsubscribed to=" + to + " from=" + from);
+    }
   }
 
   /**
@@ -150,5 +219,9 @@ public class AbstractHmppStream implements HmppStream
 			      Serializable []data,
 			      HmppError error)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendPresenceError to=" + to + " from=" + from
+		+ " error=" + error);
+    }
   }
 }

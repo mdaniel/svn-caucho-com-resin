@@ -27,18 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.client;
+package com.caucho.hmpp.client;
 
 import com.caucho.hmpp.*;
 import com.caucho.hmpp.HmppStream;
 import com.caucho.hmpp.packet.Packet;
 import com.caucho.hmpp.HmppError;
-import com.caucho.server.connection.*;
-import com.caucho.server.port.*;
 import com.caucho.hemp.*;
 import com.caucho.hessian.io.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
 
 import java.io.*;
 import java.net.*;
@@ -55,14 +51,16 @@ class ClientInboundStream implements Runnable, HmppStream {
 
   private static long _gId;
   
-  private HempClient _client;
+  private HmppClient _client;
+  private HmppStream _clientStream;
   private ClassLoader _loader;
   
   private boolean _isFinest;
 
-  ClientInboundStream(HempClient client)
+  ClientInboundStream(HmppClient client)
   {
     _client = client;
+    _clientStream = client.getStream();
     _loader = Thread.currentThread().getContextClassLoader();
   }
 
@@ -131,22 +129,42 @@ class ClientInboundStream implements Runnable, HmppStream {
   }
   
   /**
+   * Handles a message
+   */
+  public void sendMessageError(String to,
+			       String from,
+			       Serializable value,
+			       HmppError error)
+  {
+    MessageStream handler = _client.getMessageHandler();
+
+    if (handler != null)
+      handler.sendMessageError(to, from, value, error);
+    else {
+      if (log.isLoggable(Level.FINER))
+	log.finer(this + " sendMessageError to=" + to + " from=" + from
+		  + " error=" + error);
+    }
+  }
+  
+  /**
    * Handles a get query.
    *
    * The get handler must respond with either
    * a QueryResult or a QueryError 
    */
   public boolean sendQueryGet(long id,
-		  	    String to,
-			    String from,
-			    Serializable value)
+			      String to,
+			      String from,
+			      Serializable value)
   {
     QueryStream handler = _client.getQueryHandler();
 
     if (handler == null || ! handler.sendQueryGet(id, to, from, value)) {
-      _client.queryError(id, from, value,
-			 new HmppError("unknown",
-				       "no onQueryGet handling " + value.getClass().getName()));
+      String msg = "no sendQueryGet handling " + value.getClass().getName();
+      HmppError error = new HmppError("unknown", msg);
+      
+      _clientStream.sendQueryError(id, from, to, value, error);
     }
     
     return true;
@@ -166,9 +184,10 @@ class ClientInboundStream implements Runnable, HmppStream {
     QueryStream handler = _client.getQueryHandler();
 
     if (handler == null || ! handler.sendQuerySet(id, to, from, value)) {
-      _client.queryError(id, from, value,
-			 new HmppError("unknown",
-				       "no onQuerySet handling " + value.getClass().getName()));
+      String msg = "no sendQuerySet handling " + value.getClass().getName();
+      HmppError error = new HmppError("unknown", msg);
+      
+      _clientStream.sendQueryError(id, from, to, value, error);
     }
     
     return true;

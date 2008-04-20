@@ -29,38 +29,26 @@
 
 package com.caucho.hmpp;
 
-import java.io.Serializable;
-
 /**
- * MessageStream is a callback for handling unidirectional messages.
- * 
- * Messages in HMPP consist of a target JID (to), a source JID (from), and
- * a payload (value).
- * 
- * The payload is typed according to the application, so an IM application
- * might use a payload called ImMessage, while a game might have MoveMessage,
- * FireLaserMessage, etc.
+ * HMPP wrapper
  */
-public interface MessageStream {
-  /**
-   * Sends a message packet
-   * 
-   * @param to the target JID
-   * @param from the source JID
-   * @param value the message payload
-   */
-  public void sendMessage(String to, String from, Serializable value);
-  
-  /**
-   * Sends a message error packet
-   * 
-   * @param to the target JID
-   * @param from the source JID
-   * @param value the message payload
-   * @param error the message error
-   */
-  public void sendMessageError(String to,
-			       String from,
-			       Serializable value,
-			       HmppError error);
+public class HmppProtocolException extends HmppException {
+  public HmppProtocolException()
+  {
+  }
+
+  public HmppProtocolException(String msg)
+  {
+    super(msg);
+  }
+
+  public HmppProtocolException(Throwable e)
+  {
+    super(e);
+  }
+
+  public HmppProtocolException(String msg, Throwable e)
+  {
+    super(msg, e);
+  }
 }

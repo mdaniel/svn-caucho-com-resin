@@ -29,21 +29,24 @@
 
 package com.caucho.hmpp.packet;
 
+import com.caucho.hmpp.HmppError;
 import com.caucho.hmpp.HmppStream;
 import java.io.Serializable;
 
 /**
- * Unidirectional message with a value.
+ * Unidirectional message with an error
  */
-public class Message extends Packet {
+public class MessageError extends Packet {
   private final Serializable _value;
+  private final HmppError _error;
 
   /**
    * zero-arg constructor for Hessian
    */
-  protected Message()
+  private MessageError()
   {
     _value = null;
+    _error = null;
   }
 
   /**
@@ -51,38 +54,15 @@ public class Message extends Packet {
    *
    * @param to the target jid
    */
-  public Message(String to)
-  {
-    super(to);
-
-    _value = null;
-  }
-
-  /**
-   * An message to a destination
-   *
-   * @param to the target jid
-   * @param value the message content
-   */
-  public Message(String to, Serializable value)
-  {
-    super(to);
-
-    _value = value;
-  }
-
-  /**
-   * An message to a destination with a source jid.
-   *
-   * @param to the target jid
-   * @param from the source jid
-   * @param value the message content
-   */
-  public Message(String to, String from, Serializable value)
+  public MessageError(String to,
+		      String from,
+		      Serializable value,
+		      HmppError error)
   {
     super(to, from);
 
-    _value = value;
+    _value = null;
+    _error = null;
   }
 
   /**
@@ -94,12 +74,20 @@ public class Message extends Packet {
   }
 
   /**
+   * Returns the message error
+   */
+  public HmppError getError()
+  {
+    return _error;
+  }
+
+  /**
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
   public void dispatch(HmppStream handler)
   {
-    handler.sendMessage(getTo(), getFrom(), _value);
+    handler.sendMessageError(getTo(), getFrom(), getValue(), _error);
   }
 
   @Override
@@ -120,9 +108,7 @@ public class Message extends Packet {
       sb.append(getFrom());
     }
 
-    if (_value != null) {
-      sb.append("," + _value.getClass().getName());
-    }
+    sb.append("," + _error);
     sb.append("]");
     
     return sb.toString();

@@ -27,9 +27,8 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmpp.spi;
+package com.caucho.hmpp;
 
-import com.caucho.hmpp.*;
 import java.io.Serializable;
 import java.util.*;
 
@@ -51,7 +50,7 @@ public class AbstractHmppFilter implements HmppStream
   }
   
   /**
-   * Callback to handle messages
+   * Sends a unidirectional message
    * 
    * @param to the target JID
    * @param from the source JID
@@ -60,6 +59,21 @@ public class AbstractHmppFilter implements HmppStream
   public void sendMessage(String to, String from, Serializable value)
   {
     _next.sendMessage(to, from, value);
+  }
+  
+  /**
+   * Sends a unidirectional message error
+   * 
+   * @param to the target JID
+   * @param from the source JID
+   * @param value the message payload
+   */
+  public void sendMessageError(String to,
+			       String from,
+			       Serializable value,
+			       HmppError error)
+  {
+    _next.sendMessageError(to, from, value, error);
   }
   
   public boolean sendQueryGet(long id,

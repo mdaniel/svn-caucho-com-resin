@@ -154,6 +154,17 @@ public class ServerInboundStream
   }
   
   /**
+   * Handles a message
+   */
+  public void sendMessageError(String to,
+			       String from,
+			       Serializable value,
+			       HmppError error)
+  {
+    _toBroker.sendMessageError(to, _jid, value, error);
+  }
+  
+  /**
    * Handles a get query.
    *
    * The get handler must respond with either

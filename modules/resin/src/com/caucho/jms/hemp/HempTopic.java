@@ -172,6 +172,16 @@ public class HempTopic extends AbstractTopic
     }
   }
 
+  public void sendMessageError(String to,
+			       String from,
+			       Serializable value,
+			       HmppError error)
+  {
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " sendMessageError to=" + to + " from=" + from +
+		" error=" + error);
+  }
+
   @Override
   public void send(JmsSession session, MessageImpl msg, long timeout)
     throws JMSException

@@ -74,6 +74,26 @@ public class ServerOutboundStream implements HmppStream
     }
   }
   
+  public void sendMessageError(String to,
+			       String from,
+			       Serializable value,
+			       HmppError error)
+  {
+    try {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(_packetHandler + " send error message to=" + to
+		  + " from=" + from + " error=" + error);
+      }
+      
+      _out.writeObject(new MessageError(to, from, value, error));
+      _out.flush();
+    } catch (IOException e) {
+      _packetHandler.close();
+      
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+  
   public boolean sendQueryGet(long id,
 		              String to,
 		              String from,

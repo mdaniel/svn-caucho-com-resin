@@ -29,7 +29,6 @@
 
 package com.caucho.hemp.im;
 
-import com.caucho.hmpp.spi.AbstractHmppFilter;
 import com.caucho.hmpp.*;
 import com.caucho.hmpp.disco.*;
 import com.caucho.hmpp.im.*;

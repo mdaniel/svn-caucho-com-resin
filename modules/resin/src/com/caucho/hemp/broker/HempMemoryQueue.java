@@ -75,37 +75,63 @@ public class HempMemoryQueue implements HmppStream, Runnable {
   }
 
   /**
+   * Sends a message
+   */
+  public void sendMessageError(String to,
+			       String from,
+			       Serializable value,
+			       HmppError error)
+  {
+    enqueue(new MessageError(to, from, value, error));
+  }
+
+  /**
    * Query an entity
    */
-  public boolean sendQueryGet(long id, String to, String from, Serializable query)
+  public boolean sendQueryGet(long id,
+			      String to,
+			      String from,
+			      Serializable query)
   {
+    enqueue(new QueryGet(id, to, from, query));
+    
     return true;
   }
 
   /**
    * Query an entity
    */
-  public boolean sendQuerySet(long id, String to, String from, Serializable query)
+  public boolean sendQuerySet(long id,
+			      String to,
+			      String from,
+			      Serializable query)
   {
+    enqueue(new QuerySet(id, to, from, query));
+    
     return true;
   }
 
   /**
    * Query an entity
    */
-  public void sendQueryResult(long id, String to, String from, Serializable value)
+  public void sendQueryResult(long id,
+			      String to,
+			      String from,
+			      Serializable value)
   {
+    enqueue(new QueryResult(id, to, from, value));
   }
 
   /**
    * Query an entity
    */
   public void sendQueryError(long id,
-			 String to,
-			 String from,
-			 Serializable query,
-			 HmppError error)
+			     String to,
+			     String from,
+			     Serializable query,
+			     HmppError error)
   {
+    enqueue(new QueryError(id, to, from, query, error));
   }
 
   /**
@@ -113,6 +139,7 @@ public class HempMemoryQueue implements HmppStream, Runnable {
    */
   public void sendPresence(String to, String from, Serializable []data)
   {
+    enqueue(new Presence(to, from, data));
   }
 
   /**
@@ -122,6 +149,7 @@ public class HempMemoryQueue implements HmppStream, Runnable {
 				      String from,
 				      Serializable []data)
   {
+    enqueue(new PresenceUnavailable(to, from, data));
   }
 
   /**
@@ -131,6 +159,7 @@ public class HempMemoryQueue implements HmppStream, Runnable {
 			        String from,
 			        Serializable []data)
   {
+    enqueue(new PresenceProbe(to, from, data));
   }
 
   /**
@@ -140,6 +169,7 @@ public class HempMemoryQueue implements HmppStream, Runnable {
 				    String from,
 				    Serializable []data)
   {
+    enqueue(new PresenceSubscribe(to, from, data));
   }
 
   /**
@@ -149,6 +179,7 @@ public class HempMemoryQueue implements HmppStream, Runnable {
 				     String from,
 				     Serializable []data)
   {
+    enqueue(new PresenceSubscribed(to, from, data));
   }
 
   /**
@@ -158,6 +189,7 @@ public class HempMemoryQueue implements HmppStream, Runnable {
 				      String from,
 				      Serializable []data)
   {
+    enqueue(new PresenceUnsubscribe(to, from, data));
   }
   
   /**
@@ -167,6 +199,7 @@ public class HempMemoryQueue implements HmppStream, Runnable {
 				       String from,
 				       Serializable []data)
   {
+    enqueue(new PresenceUnsubscribed(to, from, data));
   }
 
   /**
@@ -177,6 +210,7 @@ public class HempMemoryQueue implements HmppStream, Runnable {
 			        Serializable []data,
 			        HmppError error)
   {
+    enqueue(new PresenceError(to, from, data, error));
   }
 
   protected HmppStream getStream()
@@ -233,7 +267,7 @@ public class HempMemoryQueue implements HmppStream, Runnable {
     
     synchronized (this) {
       if (_head == _tail) {
-	_threadSemaphore--;
+	_threadSemaphore++;
 	
 	return null;
       }

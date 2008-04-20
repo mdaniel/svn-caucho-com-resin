@@ -30,9 +30,10 @@
 package com.caucho.hmpp;
 
 import java.io.Serializable;
+import java.util.logging.*;
 
 /**
- * MessageStream is a callback for handling unidirectional messages.
+ * MessageStream is the HMPP stream interface for unidirectional messages.
  * 
  * Messages in HMPP consist of a target JID (to), a source JID (from), and
  * a payload (value).
@@ -42,6 +43,9 @@ import java.io.Serializable;
  * FireLaserMessage, etc.
  */
 public class AbstractMessageStream implements MessageStream {
+  private static final Logger log
+    = Logger.getLogger(AbstractMessageStream.class.getName());
+  
   /**
    * Callback to handle messages
    * 
@@ -51,5 +55,34 @@ public class AbstractMessageStream implements MessageStream {
    */
   public void sendMessage(String to, String from, Serializable value)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendMessage to=" + to + " from=" + from
+		+ " value=" + value);
+    }
+  }
+  
+  /**
+   * Handlers an error message
+   * 
+   * @param to the target JID
+   * @param from the source JID
+   * @param value the message payload
+   * @param error the message error
+   */
+  public void sendMessageError(String to,
+			       String from,
+			       Serializable value,
+			       HmppError error)
+  {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendMessageError to=" + to + " from=" + from
+		+ " error=" + error);
+    }
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }

@@ -65,6 +65,24 @@ public class AbstractHmppService extends AbstractHmppResource
     }
   }
   
+  /**
+   * Callback to handle messages
+   * 
+   * @param to the target JID
+   * @param from the source JID
+   * @param value the message payload
+   */
+  public void sendMessageError(String to,
+			       String from,
+			       Serializable value,
+			       HmppError error)
+  {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendMessageError to=" + to + " from=" + from
+		+ " error=" + error);
+    }
+  }
+  
   public boolean sendQueryGet(long id,
 			    String to,
 			    String from,

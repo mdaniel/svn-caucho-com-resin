@@ -108,6 +108,26 @@ class HempConnectionOutboundStream implements HmppStream {
     handler.sendMessage(to, from, value);
   }
 
+  /**
+   * Forwards the message
+   */
+  public void sendMessageError(String to,
+			       String from,
+			       Serializable value,
+			       HmppError error)
+  {
+    MessageStream handler = _messageHandler;
+
+    if (handler == null) {
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " sendMessageError (no handler) to=" + to
+		 + " from=" + from + " error=" + error);
+      return;
+    }
+    
+    handler.sendMessageError(to, from, value, error);
+  }
+
   //
   // Query/RPC handling
   //
