@@ -12,6 +12,7 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>jsf: JSF simple example not working (#2388, rep by pthl)</li>
 <li>quercus: support for (?i) subexpressions (#2614, rep by Paul Fischer)</li>
 <li>servlet: GzipFilter fix for allow-content-type (#2608, rep by azenkov)</li>
 <li>resin-ioc: add resin:param to allow custom constructors (#2414)</li>
