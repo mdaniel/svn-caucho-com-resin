@@ -458,7 +458,7 @@ public class SelectQuery extends AbstractQuery {
 
       AmberExpr expr = _resultList.get(i);
 
-      if ((_groupList == null) && (expr instanceof LoadEntityExpr))
+      if (_groupList == null && expr instanceof LoadEntityExpr)
         ((LoadEntityExpr) expr).generateSelect(cb, fullSelect);
       else
         expr.generateSelect(cb);

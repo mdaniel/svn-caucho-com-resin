@@ -326,6 +326,42 @@ class Regcomp {
 	  case 'P':
 	    pattern.read();
 	    return parseNamedGroup(pattern, tail);
+
+	  case 'm': case 's': case 'i': case 'x': case 'g':
+	  case 'U': case 'X':
+	    {
+	      int flags = _flags;
+	      
+	      while ((ch = pattern.read()) > 0 && ch != ')') {
+		switch (ch) {
+		case 'm': _flags |= MULTILINE; break;
+		case 's': _flags |= SINGLE_LINE; break;
+		case 'i': _flags |= IGNORE_CASE; break;
+		case 'x': _flags |= IGNORE_WS; break;
+		case 'g': _flags |= GLOBAL; break;
+		case 'U': _flags |= UNGREEDY; break;
+		case 'X': _flags |= STRICT; break;
+		case ':':
+		  {
+		    RegexpNode node = parseGroup(pattern, tail, 0);
+		    _flags = flags;
+		    return node;
+		  }
+		default:
+		  throw error(L.l("'{0}' is an unknown (? code", String.valueOf((char) ch)));
+		}
+	      }
+
+	      if (ch != ')')
+		throw error(L.l("expected ')' at '{0}'",
+				String.valueOf((char) ch)));
+	      
+	      RegexpNode node = parseRec(pattern, tail);
+
+	      _flags = flags;
+
+	      return node;
+	    }
 	    
 	  default:
 	    throw error(L.l("'{0}' is an unknown (? code", String.valueOf((char) pattern.peek())));

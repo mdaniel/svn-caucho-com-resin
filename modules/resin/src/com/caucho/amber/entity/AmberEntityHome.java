@@ -300,14 +300,18 @@ public class AmberEntityHome implements Comparable {
     if (_homeBean == null && _configException != null)
       throw _configException;
 
-    Entity cacheEntity;
+    Entity entity;
 
-    cacheEntity = (Entity) _homeBean.__caucho_home_find(aConn, this, key);
+    entity = (Entity) _homeBean.__caucho_home_find(aConn, this, key);
 
-    if (cacheEntity != null)
-      return new CacheableEntityItem(this, cacheEntity);
-    else
+    // jpa/0l43 - with inheritance, an XA entity creates XAEntityItem
+    // to avoid double loading
+    if (entity == null)
       return null;
+    else if (aConn.isActiveTransaction())
+      return new XAEntityItem(this, entity);
+    else
+      return new CacheableEntityItem(this, entity);
   }
 
   /**

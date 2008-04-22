@@ -240,8 +240,10 @@ public class KeyPropertyField extends PropertyField implements IdField {
     if ("super".equals(objThis))
       objThis = "this";
     
-    if (isFieldAccess())
-      return objThis + "." + getName() + " = " + value;
+    if (isFieldAccess()) {
+      // jpa/0l05
+      return generateSuperSetter(objThis, value);
+    }
     else
       return objThis + "." + getSetterName() + "(" + value + ")";
   }
@@ -442,16 +444,17 @@ public class KeyPropertyField extends PropertyField implements IdField {
     String value = generateSuperGetter("this");
 
     if (isAutoGenerate()) {
-      out.println("if (" + getType().generateIsNull(value) + ") {");
-      out.pushDepth();
-
-      getType().generateSetNull(out, pstmt, index);
-
-      out.popDepth();
-      out.println("} else {");
+      out.println("if (! (" + getType().generateIsNull(value) + ")) {");
       out.pushDepth();
 
       generateStatementSet(out, pstmt, index);
+
+      out.popDepth();
+
+      out.println("} else if (! __caucho_home.isIdentityGenerator()) {");
+      out.pushDepth();
+
+      getType().generateSetNull(out, pstmt, index);
 
       out.popDepth();
       out.println("}");
@@ -530,8 +533,8 @@ public class KeyPropertyField extends PropertyField implements IdField {
       return;
 
     out.print("if (");
-    out.print(getType().generateIsNull(generateSuperGetter("this")));
-    out.println(" && __caucho_home.isIdentityGenerator()) {");
+    out.println(getType().generateIsNull(generateSuperGetter("this")));
+    out.println("    && __caucho_home.isIdentityGenerator()) {");
     out.pushDepth();
 
     String var = "__caucho_rs_" + out.generateId();

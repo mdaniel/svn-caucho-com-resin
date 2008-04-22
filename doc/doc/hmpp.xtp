@@ -1,0 +1,448 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>HMPP</title>
+    <type>contents</type>
+
+    <description>
+      <p>
+      HMPP (Hessian Messaging and Presence Protocol) is an asynchronous,
+      bidirectional messaging framework, based on the <a href="http://hessian.caucho.com/">Hessian</a> protocol.
+      </p>
+    </description>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Quick Start">
+
+<s2 title="Server sendMessage example">
+
+<p>Sending a message from a servlet to an internal service is a
+basic HMPP use case.  The message service implements the
+<code>sendMessage</code> method to receive messages.  Since HMPP is
+a streaming API like <code>java.io.OutputStream</code>, the sending
+method is the same as the receiving method, <code>sendMessage</code>.</p>
+
+<p>HMPP messages are addressed using a JID (Jabber ID), which looks like
+<code>user@domain</code> or <code>user@domain/resource</code>.  The
+second <code>user@domain/resource</code> is used for temporary
+client agent addresses, e.g. a user logged into messaging with
+a cellphone.</p>
+
+<p>In the example, the servlet obtains a <code>HmppConnection</code> using
+the Web Beans <code>@javax.webbeans.In</code> injection annotation, and
+sends the message.</p>
+
+<p>By extending <code>GenericService</code>, the service automatically gains
+a queuing ability.  The broker will queue the message and spawn a new thread
+before calling the service's <code>sendMessage</code>, in order to isolate
+the receiver from the sender.  Advanced applications can disable the
+queue if appropriate.</p>
+
+<example title="LogService.java">
+package example;
+
+import com.caucho.hemp.broker.GenericService;
+import java.io.Serializable;
+import java.util.logging.*;
+
+public class LogService extends GenericService
+{
+  private static final Logger log
+    = Logger.getLogger(LogService.class.getName());
+
+  @Override
+  public void sendMessage(String to, String from, Serializable value)
+  {
+    log.info(this + " sendMessage from=" + from + " value=" + value);
+  }
+}
+</example>
+
+<example title="TestServlet.java">
+package example;
+
+import javax.servlet.*;
+import javax.webbeans.In;
+import com.caucho.hmpp.HmppConnectionFactory;
+import com.caucho.hmpp.HmppConnection;
+
+public class TestServlet extends GenericServlet
+{
+  @In HmppConnectionFactory _factory;
+
+  public void service(ServletRequest req, ServletResponse response)
+  {
+    HmppConnection conn = _factory.getConnection("demo@localhost", null);
+
+    try {
+      conn.sendMessage("test@localhost", "Hello, world!");
+    } finally {
+      conn.close();
+    }
+  }
+}
+</example>
+
+
+<example title="WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+    &lt;bean class="com.caucho.hemp.broker.HempBroker"/>
+
+    &lt;bean name="test@localhost" class="example.LogService"/>
+
+&lt;/web-app>
+</example>
+
+</s2>
+
+<s2 title="Client queryGet (RPC) example">
+
+<p>Remote calls are another primary use for HMPP.  In this example, we
+just query a service for some basic information.  In HMPP, queries
+are bidirections: the server can also query the client.  And the application
+can also use the messaging in the previous example.</p>
+
+<example title="TestService.java">
+package example;
+
+import com.caucho.hemp.broker.GenericService;
+import java.io.Serializable;
+import java.util.logging.*;
+
+public class TestService extends GenericService
+{
+  private static final Logger log
+    = Logger.getLogger(LogService.class.getName());
+
+  @Override
+  public boolean sendQueryGet(long id, String to, String from,
+                              Serializable query)
+  {
+    if (query instanceof TestQuery) {
+      getStream().sendQueryResult(id, to, from, "hello response");
+    }
+    else {
+      return super.sendQueryGet(id, to, from, query);
+    }
+  }
+}
+</example>
+
+<example title="TestClient.java">
+package example;
+
+import com.caucho.hmpp.client.HmppClient;
+
+public class TestClient
+{
+  public static void main(String []args)
+    throws Exception
+  {
+    HmppClient client = new HmppClient("http://localhost:8080/hmpp");
+    client.connect();
+    client.login("user@localhost", null);
+
+    Object value = client.queryGet("test@localhost", new TestQuery());
+
+    System.out.println(value);
+
+    client.close();
+  }
+}
+</example>
+
+
+<example title="WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+    &lt;bean class="com.caucho.hemp.broker.HempBroker"/>
+
+    &lt;bean name="test@localhost" class="example.TestService"/>
+
+    &lt;servlet-mapping url-pattern="/hmpp"
+                      servlet-class="com.caucho.hemp.servlet.HempServlet"/>
+
+&lt;/web-app>
+</example>
+
+</s2>
+
+</s1>
+
+<s1 title="API">
+
+<s2 title="Client API">
+
+<s3 title="HmppConnection">
+
+<example title="HmppConnection">
+package com.caucho.hmpp;
+
+public interface HmppConnection
+{
+  String getJid();
+
+  boolean isClosed();
+  void close();
+  
+  void setMessageHandler(MessageStream handler);
+  void setQueryHandler(QueryStream handler);
+  void setPresenceHandler(PresenceStream handler);
+
+  void sendMessage(String to, Serializable value);
+
+  Serializable queryGet(String to, Serializable query);
+  Serializable querySet(String to, Serializable query);
+
+  void queryGet(String to, Serializable query, QueryCallback callback);
+  void querySet(String to, Serializable query, QueryCallback callback);
+
+  void presence(Serializable []data);
+  void presence(String to, Serializable []data);
+  void presenceUnavailable(Serializable []data);
+  void presenceUnavailable(String to, Serializable []data);
+  void presenceProbe(String to, Serializable []data);
+  void presenceSubscribe(String to, Serializable []data);
+  void presenceSubscribed(String to, Serializable []data);
+  void presenceUnsubscribe(String to, Serializable []data);
+  void presenceUnsubscribed(String to, Serializable []data);
+  void presenceError(String to, Serializable []data, HmppError error);
+  
+  HmppStream getStream();
+}
+</example>
+
+</s3>
+
+<s3 title="HmppConnectionFactory">
+
+<example title="HmppConnectionFactory">
+package com.caucho.hmpp;
+
+public interface HmppConnectionFactory
+{
+  HmppConnection getConnection(String uid, String password);
+}
+</example>
+
+</s3>
+<s3 title="QueryCallback">
+
+<example title="QueryCallback">
+package com.caucho.hmpp;
+
+public interface QueryCallback
+{
+  void onQueryResult(String to, String from, Serializable value);
+  
+  void onQueryError(String to, String from, Serializable value,
+                    HmppError error);
+}
+</example>
+</s3>
+
+</s2>
+
+<s2 title="Remote Client API">
+
+<s3 title="HmppClient">
+
+<example title="HmppClient">
+package com.caucho.hmpp;
+
+public class HmppClient implements HmppConnection
+{
+  public HmppClient(String url);
+
+  public void connect() throws IOException;
+
+  public void login(String uid, String password);
+
+  // HmppConnection methods
+  String getJid();
+
+  boolean isClosed();
+  void close();
+  
+  void setMessageHandler(MessageStream handler);
+  void setQueryHandler(QueryStream handler);
+  void setPresenceHandler(PresenceStream handler);
+
+  void sendMessage(String to, Serializable value);
+
+  Serializable queryGet(String to, Serializable query);
+  Serializable querySet(String to, Serializable query);
+
+  void queryGet(String to, Serializable query, QueryCallback callback);
+  void querySet(String to, Serializable query, QueryCallback callback);
+
+  void presence(Serializable []data);
+  void presence(String to, Serializable []data);
+  void presenceUnavailable(Serializable []data);
+  void presenceUnavailable(String to, Serializable []data);
+  void presenceProbe(String to, Serializable []data);
+  void presenceSubscribe(String to, Serializable []data);
+  void presenceSubscribed(String to, Serializable []data);
+  void presenceUnsubscribe(String to, Serializable []data);
+  void presenceUnsubscribed(String to, Serializable []data);
+  void presenceError(String to, Serializable []data, HmppError error);
+  
+  HmppStream getStream();
+}
+</example>
+</s3>
+
+</s2>
+
+<s2 title="Protocol(Packet) API">
+
+<s3 title="MessageStream">
+
+<example title="MessageStream">
+package com.caucho.hmpp;
+
+public interface MessageStream
+{
+  public void sendMessage(String to, String from, Serializable value);
+  
+  public void sendMessageError(String to, String from, Serializable value,
+			       HmppError error);
+}
+</example>
+
+</s3>
+
+<s3 title="QueryStream">
+
+<example title="QueryStream">
+package com.caucho.hmpp;
+
+public interface QueryStream
+{
+  boolean sendQueryGet(long id, String to, String from, Serializable query);
+  boolean sendQuerySet(long id, String to, String from, Serializable query);
+
+  void sendQueryResult(long id, String to, String from, Serializable value);
+  void sendQueryError(long id, String to, String from, Serializable query,
+                      HmppError error);
+}
+</example>
+
+</s3>
+
+<s3 title="PresenceStream">
+
+<example title="PresenceStream">
+package com.caucho.hmpp;
+
+public interface PresenceStream
+{
+  void sendPresence(String to, String from, Serializable []data);
+  void sendPresenceUnavailable(String to, String from, Serializable []data);
+  void sendPresenceProbe(String to, String from, Serializable []data);
+  void sendPresenceSubscribe(String to, String from, Serializable []data);
+  void sendPresenceSubscribed(String to, String from, Serializable []data);
+  void sendPresenceUnsubscribe(String to, String from, Serializable []data);
+  void sendPresenceUnsubscribed(String to, String from, Serializable []data);
+  void sendPresenceError(String to, String from, Serializable []data,
+                         HmppError error);
+}
+</example>
+
+</s3>
+
+<s3 title="HmppStream">
+
+<example title="HmppStream">
+package com.caucho.hmpp;
+
+public interface HmppStream
+  extends MessageStream, QueryStream, PresenceStream
+{
+}
+</example>
+
+</s3>
+
+</s2>
+
+<s2 title="Service APIs">
+
+<s3 title="HmppBroker">
+
+<example title="HmppBroker">
+package com.caucho.hmpp;
+
+public interface HmppBroker
+  extends HmppStream, HmppConnectionFactory
+{
+  void addResourceManager(ResourceManager manager);
+    
+  HmppConnection registerResource(String jid, HmppResource resource);
+}
+</example>
+
+</s3>
+
+<s3 title="HmppResource">
+
+<example title="HmppResource">
+package com.caucho.hmpp;
+
+public interface HmppResource
+{
+  public String getJid();
+  
+  public HmppResource lookupResource(String jid);
+
+  public void onLogin(String jid);
+  public void onLogout(String jid);
+
+  public HmppStream getCallbackStream();
+  
+  public HmppStream getOutboundFilter(HmppStream stream);
+  public HmppStream getInboundFilter(HmppStream stream);
+}
+</example>
+
+</s3>
+
+<s3 title="ResourceManager">
+
+<example title="ResourceManager">
+package com.caucho.hmpp;
+
+public interface ResourceManager
+{
+  public void setBroker(HmppBroker broker);
+  
+  public HmppResource lookupResource(String jid);
+}
+</example>
+
+</s3>
+
+<s3 title="HmppService">
+
+<example title="HmppService">
+package com.caucho.hmpp;
+
+public interface HmppService
+  extends HmppResource, HmppStream
+{
+}
+</example>
+
+</s3>
+
+</s2>
+
+</s1>
+
+  </body>
+</document>

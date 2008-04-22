@@ -32,25 +32,32 @@ package com.caucho.amber.cfg;
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.bytecode.JClass;
+import com.caucho.naming.*;
 import com.caucho.config.*;
 import com.caucho.loader.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
 import javax.sql.DataSource;
+import javax.naming.*;
 import javax.persistence.spi.*;
 import java.lang.instrument.*;
 import java.security.*;
 import java.net.URL;
 import java.util.*;
+import java.util.logging.*;
 
 /**
  * <persistence-unit> tag in the persistence.xml
  */
 public class PersistenceUnitConfig implements PersistenceUnitInfo {
   private static final L10N L = new L10N(PersistenceUnitConfig.class);
+  private static final Logger log
+    = Logger.getLogger(PersistenceUnitConfig.class.getName());
   private String _name;
   private Class _provider;
+  private String _jtaDataSourceName;
+  private String _nonJtaDataSourceName;
   private DataSource _jtaDataSource;
   private DataSource _nonJtaDataSource;
   private boolean _isExcludeUnlistedClasses;
@@ -154,9 +161,9 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Sets the transactional data source.
    */
-  public void setJtaDataSource(DataSource ds)
+  public void setJtaDataSource(String ds)
   {
-    _jtaDataSource = ds;
+    _jtaDataSourceName = ds;
   }
 
   /**
@@ -164,15 +171,29 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
    */
   public DataSource getJtaDataSource()
   {
+    if (_jtaDataSourceName == null)
+      return null;
+    
+    if (_jtaDataSource == null)
+      _jtaDataSource = loadDataSource(_jtaDataSourceName);
+    
     return _jtaDataSource;
+  }
+
+  /**
+   * Gets the transactional data source.
+   */
+  public String getJtaDataSourceName()
+  {
+    return _jtaDataSourceName;
   }
 
   /**
    * Sets the non-transactional data source.
    */
-  public void setNonJtaDataSource(DataSource ds)
+  public void setNonJtaDataSource(String ds)
   {
-    _nonJtaDataSource = ds;
+    _nonJtaDataSourceName = ds;
   }
 
   /**
@@ -180,6 +201,12 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
    */
   public DataSource getNonJtaDataSource()
   {
+    if (_nonJtaDataSourceName == null)
+      return null;
+    
+    if (_nonJtaDataSource == null)
+      _nonJtaDataSource = loadDataSource(_nonJtaDataSourceName);
+    
     return _nonJtaDataSource;
   }
 
@@ -280,10 +307,11 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
 
     unit.setJPA(true);
 
-    if (_jtaDataSource != null)
-      unit.setJtaDataSource(_jtaDataSource);
-    if (_nonJtaDataSource != null)
-      unit.setNonJtaDataSource(_nonJtaDataSource);
+    if (_jtaDataSourceName != null)
+      unit.setJtaDataSourceName(_jtaDataSourceName);
+    
+    if (_nonJtaDataSourceName != null)
+      unit.setNonJtaDataSourceName(_nonJtaDataSourceName);
 
     unit.setEntityMappingsList(entityMappings);
 
@@ -401,6 +429,16 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   public String toString()
   {
     return "PersistenceUnitConfig[" + _name + "]";
+  }
+
+  protected DataSource loadDataSource(String name)
+  {
+    DataSource ds = (DataSource) Jndi.lookup(name);
+
+    if (ds != null)
+      return ds;
+
+    return null;
   }
 
   public class PropertiesConfig {

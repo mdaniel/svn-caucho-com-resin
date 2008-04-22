@@ -98,13 +98,11 @@ public class StatefulCreateMethod extends BusinessMethodGenerator
     out.pushDepth();
     out.println("thread.setContextClassLoader(getStatefulServer().getClassLoader());");
     
-    out.printClass(_bean.getEjbClass().getJavaClass());
-    out.print(" bean = new ");
-    out.printClass(_bean.getEjbClass().getJavaClass());
-    out.println("();");
-
     out.println(_objectView.getViewClassName() + " remote ="
-		+ " new " + _objectView.getViewClassName() + "(getStatefulServer(), bean);");
+		+ " new " + _objectView.getViewClassName() + "(getStatefulServer(), (ConfigContext) null);");
+    
+    out.print(_objectView.getBeanClassName());
+    out.print(" bean = remote._bean;");
 
     out.println("StatefulContext context = new " + _bean.getFullClassName() + "(_context, remote);");
     out.println("remote.__caucho_setContext(context);");

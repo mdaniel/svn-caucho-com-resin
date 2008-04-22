@@ -515,24 +515,31 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     ArrayList<URL> urlList = new ArrayList<URL>(_pendingScanUrls);
     _pendingScanUrls.clear();
 
-    if (_scanListeners != null && urlList.size() > 0) {
-      try {
-	make();
-      } catch (Exception e) {
-	log().log(Level.WARNING, e.toString(), e);
+    try {
+      if (_scanListeners != null && urlList.size() > 0) {
+	try {
+	  make();
+	} catch (Exception e) {
+	  log().log(Level.WARNING, e.toString(), e);
 	
-	if (_configException == null)
-	  _configException = e;
-      }
+	  if (_configException == null)
+	    _configException = e;
+	}
       
-      ScanManager scanManager = new ScanManager(_scanListeners);
+	ScanManager scanManager = new ScanManager(_scanListeners);
       
-      for (URL url : urlList) {
-	scanManager.scan(this, url);
+	for (URL url : urlList) {
+	  scanManager.scan(this, url);
+	}
       }
-    }
 
-    configureEnhancerEvent();
+      configureEnhancerEvent();
+    } catch (Exception e) {
+      log().log(Level.WARNING, e.toString(), e);
+	
+      if (_configException == null)
+	_configException = e;
+    }
   }
 
   /**

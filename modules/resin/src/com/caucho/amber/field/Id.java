@@ -164,12 +164,16 @@ public class Id {
 
   public boolean isIdentityGenerator()
   {
-    if (_keys.size() != 1)
-      return false;
+    for (IdField key : _keys) {
+      String generator = _keys.get(0).getGenerator();
 
-    String generator =_keys.get(0).getGenerator();
+      if (generator == null)
+	continue;
+      
+      return "auto".equals(generator) || "identity".equals(generator);
+    }
 
-    return "auto".equals(generator) || "identity".equals(generator);
+    return false;
   }
 
   public IdField getGeneratedIdField()

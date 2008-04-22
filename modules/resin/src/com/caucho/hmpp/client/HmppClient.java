@@ -444,7 +444,7 @@ public class HmppClient implements HmppConnection {
   {
     WaitQueryCallback callback = new WaitQueryCallback();
 
-    queryGet(to, query, callback, null);
+    queryGet(to, query, callback);
 
     if (callback.waitFor())
       return callback.getResult();
@@ -457,15 +457,14 @@ public class HmppClient implements HmppConnection {
    */
   public void queryGet(String to,
 		       Serializable value,
-		       QueryCallback callback,
-		       Object handback)
+		       QueryCallback callback)
   {
     long id;
       
     synchronized (this) {
       id = _qId++;
 
-      _queryMap.put(id, new QueryItem(id, callback, handback));
+      _queryMap.put(id, new QueryItem(id, callback));
     }
 
     HmppStream stream = _clientStream;
@@ -484,7 +483,7 @@ public class HmppClient implements HmppConnection {
   {
     WaitQueryCallback callback = new WaitQueryCallback();
 
-    querySet(to, query, callback, null);
+    querySet(to, query, callback);
 
     if (callback.waitFor())
       return callback.getResult();
@@ -497,15 +496,14 @@ public class HmppClient implements HmppConnection {
    */
   public void querySet(String to,
 		       Serializable value,
-		       QueryCallback callback,
-		       Object handback)
+		       QueryCallback callback)
   {
     long id;
       
     synchronized (this) {
       id = _qId++;
 
-      _queryMap.put(id, new QueryItem(id, callback, handback));
+      _queryMap.put(id, new QueryItem(id, callback));
     }
 
     HmppStream stream = _clientStream;
@@ -647,19 +645,17 @@ public class HmppClient implements HmppConnection {
   static class QueryItem {
     private final long _id;
     private final QueryCallback _callback;
-    private final Object _handback;
 
-    QueryItem(long id, QueryCallback callback, Object handback)
+    QueryItem(long id, QueryCallback callback)
     {
       _id = id;
       _callback = callback;
-      _handback = handback;
     }
 
     void onQueryResult(String to, String from, Serializable value)
     {
       if (_callback != null)
-	_callback.onQueryResult(to, from, value, _handback);
+	_callback.onQueryResult(to, from, value);
     }
 
     void onQueryError(String to,
@@ -668,7 +664,7 @@ public class HmppClient implements HmppConnection {
 		      HmppError error)
     {
       if (_callback != null)
-	_callback.onQueryError(to, from, value, error, _handback);
+	_callback.onQueryError(to, from, value, error);
     }
     
     @Override
@@ -708,7 +704,7 @@ public class HmppClient implements HmppConnection {
     }
     
     public void onQueryResult(String fromJid, String toJid,
-			      Serializable value, Object handback)
+			      Serializable value)
     {
       _result = value;
 
@@ -719,8 +715,7 @@ public class HmppClient implements HmppConnection {
     }
   
     public void onQueryError(String fromJid, String toJid,
-			     Serializable value, HmppError error,
-			     Object handback)
+			     Serializable value, HmppError error)
     {
       _error = error;
 

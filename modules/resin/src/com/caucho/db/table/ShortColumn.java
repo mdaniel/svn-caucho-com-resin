@@ -139,7 +139,7 @@ class ShortColumn extends Column {
     value = (block[offset++] & 0xff) << 8;
     value |= (block[offset++] & 0xff);
 
-    return value;
+    return (short) value;
   }
   
   /**

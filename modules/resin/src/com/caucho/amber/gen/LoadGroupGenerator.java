@@ -75,7 +75,7 @@ public class LoadGroupGenerator extends ClassComponent {
 
     out.println("boolean isLoaded = (__caucho_loadMask_" + group
                 + " & " + mask + "L) != 0;");
-
+    
     // jpa/0ge2: MappedSuperclassType
     if (_entityType.getTable() != null) {
 

@@ -187,11 +187,9 @@ abstract public class LoadExpr extends AbstractAmberExpr {
     if (_rootItem != null) {
       EntityType parentType = (EntityType) type;
 
-      while (parentType.getParentType() != null) {
-        if (parentType.getParentType() instanceof EntityType)
-          parentType = parentType.getParentType();
-        else
-          break;
+      while (parentType.getParentType() != null
+	     && parentType.getParentType() instanceof EntityType) {
+	parentType = parentType.getParentType();
       }
 
       item = _rootItem;
@@ -242,5 +240,10 @@ abstract public class LoadExpr extends AbstractAmberExpr {
   public void generateHaving(CharBuffer cb, String fieldName)
   {
     generateWhere(cb, fieldName);
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _expr + "," + getType() + "]";
   }
 }

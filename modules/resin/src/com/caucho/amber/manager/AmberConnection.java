@@ -930,7 +930,7 @@ public class AmberConnection
       throw new AmberObjectNotFoundException("amber find: no matching object " + cl.getName() + "[" + key + "]");
     }
 
-    if (! isActiveTransaction())
+    if (cacheItem instanceof CacheableEntityItem)
       cacheItem = _persistenceUnit.putEntity(cl, key, cacheItem);
 
     return cacheItem;

@@ -136,6 +136,15 @@
       <item link="burlap-notes.xtp" title="Burlap Design Notes"/>
       <item link="hessian-messaging.xtp" title="Hessian Messaging"/>
     </item>
+
+    <!--
+       - HMPP
+      -->
+    <item link="hmpp.xtp" title="HMPP"/>
+
+    <!--
+       - IoC
+      -->
 	  
     <item link="resin-ioc.xtp" title="IoC"
           description="Resin's IoC/Dependency Injection"/>

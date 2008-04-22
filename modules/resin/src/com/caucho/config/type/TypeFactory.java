@@ -830,7 +830,7 @@ public class TypeFactory implements AddLoaderListener
     _primitiveTypes.put(Date.class, DateType.TYPE);
     _primitiveTypes.put(Properties.class, PropertiesType.TYPE);
     
-    _primitiveTypes.put(DataSource.class, DataSourceType.TYPE);
+    // _primitiveTypes.put(DataSource.class, DataSourceType.TYPE);
     
     _primitiveTypes.put(MethodExpression.class, MethodExpressionType.TYPE);
   }

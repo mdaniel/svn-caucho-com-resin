@@ -12,6 +12,8 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>quercus: support for (?i) subexpressions (#2614, rep by Paul Fischer)</li>
+<li>servlet: GzipFilter fix for allow-content-type (#2608, rep by azenkov)</li>
 <li>resin-ioc: add resin:param to allow custom constructors (#2414)</li>
 <li>(2008-04-17) quercus: fsockopen allows host:port as the host string (#2603, rep by billybigpotatoes)</li>
 <li>quercus: use getRealPath for php-ini in QuercusServlet (#2605, rep by sgraf)</li>

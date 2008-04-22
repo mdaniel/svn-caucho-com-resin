@@ -98,7 +98,17 @@ public interface HmppConnection {
   /**
    * Queries the service
    */
+  public void queryGet(String to, Serializable query, QueryCallback callback);
+
+  /**
+   * Queries the service
+   */
   public Serializable querySet(String to, Serializable query);
+
+  /**
+   * Queries the service
+   */
+  public void querySet(String to, Serializable query, QueryCallback callback);
 
   //
   // presence handling

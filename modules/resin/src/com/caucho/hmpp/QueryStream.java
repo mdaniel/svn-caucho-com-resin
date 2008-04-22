@@ -98,8 +98,8 @@ public interface QueryStream {
    * @param error additional error information
    */
   public void sendQueryError(long id,
-			     String fromJid,
-			     String toJid,
+			     String to,
+			     String from,
 			     Serializable query,
 			     HmppError error);
 }

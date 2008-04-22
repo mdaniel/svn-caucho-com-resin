@@ -47,6 +47,7 @@ import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
 import com.caucho.bytecode.*;
 import com.caucho.config.ConfigException;
+import com.caucho.jdbc.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.ClassComponent;
 import com.caucho.lifecycle.Lifecycle;
@@ -862,21 +863,36 @@ public class EntityType extends BeanType {
   private void startGenerator()
   {
     IdField idGenField = getId().getGeneratedIdField();
-    
-    if (getPersistenceUnit().getMetaData().supportsIdentity())
-      _isIdentityGenerator = true;
-    
-    if (! getId().isIdentityGenerator())
+
+    if (idGenField == null)
+      return;
+
+    JdbcMetaData md = getPersistenceUnit().getMetaData();
+
+    if ("sequence".equals(idGenField.getGenerator())) {
       _isIdentityGenerator = false;
-    
-    if (getPersistenceUnit().getMetaData().supportsSequences())
       _isSequenceGenerator = true;
-    
-    if (_isIdentityGenerator)
+
+      if (! md.supportsSequences())
+	throw new ConfigException(L.l("'{0}' does not support sequences",
+				      md.getDatabaseName()));
+    }
+    else if ("identity".equals(idGenField.getGenerator())) {
+      _isIdentityGenerator = true;
       _isSequenceGenerator = false;
 
+      if (! md.supportsIdentity())
+	throw new ConfigException(L.l("'{0}' does not support identity",
+				      md.getDatabaseName()));
+    }
+    else if ("auto".equals(idGenField.getGenerator())) {
+      if (md.supportsIdentity())
+	_isIdentityGenerator = true;
+      else if (md.supportsSequences())
+	_isSequenceGenerator = true;
+    }
+
     if (! _isIdentityGenerator
-	&& idGenField != null
 	&& getGenerator(idGenField.getName()) == null) {
       IdGenerator gen;
       
@@ -1134,6 +1150,7 @@ public class EntityType extends BeanType {
    */
   public void setGenerator(String name, IdGenerator gen)
   {
+    Thread.dumpStack();
     _idGenMap.put(name, gen);
   }
 
@@ -1290,7 +1307,7 @@ public class EntityType extends BeanType {
    */
   public String generateLoadSelect(String id)
   {
-    return generateLoadSelect(getTable(), id, 0);
+    return generateLoadSelect(getTable(), id);
   }
 
   /**
@@ -1298,47 +1315,41 @@ public class EntityType extends BeanType {
    */
   public String generateLoadSelect(Table table, String id)
   {
-    return generateLoadSelect(table, id, 0);
+    StringBuilder sb = new StringBuilder();
+
+    // jpa/0l11
+    if (getTable() == table && getDiscriminator() != null) {
+      if (id != null) {
+        if (getDiscriminator().getTable() == getTable()) {
+          sb.append(id + ".");
+          sb.append(getDiscriminator().getName());
+        }
+        else {
+          // jpa/0l4b
+          sb.append("'" + getDiscriminatorValue() + "'");
+        }
+      }
+    }
+
+    generateLoadSelect(sb, table, id, 0);
+
+    if (sb.length() > 0)
+      return sb.toString();
+    else
+      return null;
   }
 
   /**
    * Generates the select clause for a load.
    */
   @Override
-  public String generateLoadSelect(Table table, String id, int loadGroup)
+  public void generateLoadSelect(StringBuilder sb, Table table,
+				 String id, int loadGroup)
   {
-    CharBuffer cb = CharBuffer.allocate();
-
-    boolean hasSelect = false;
-
-    // jpa/0l11
-    if (getTable() == table && loadGroup == 0 && getDiscriminator() != null) {
-      if (id != null) {
-        if (getDiscriminator().getTable() == getTable()) {
-          cb.append(id + ".");
-          cb.append(getDiscriminator().getName());
-        }
-        else {
-          // jpa/0l4b
-          cb.append("'" + getDiscriminatorValue() + "'");
-        }
-      }
-
-      hasSelect = true;
-    }
-
-    String propSelect = super.generateLoadSelect(table,
-                                                 id,
-                                                 loadGroup,
-                                                 hasSelect);
-    // jpa/0s26
-    if (propSelect != null)
-      cb.append(propSelect);
-
-    if (cb.length() == 0)
-      return null;
-    else
-      return cb.close();
+    if (_parentType != null)
+      _parentType.generateLoadSelect(sb, table, id, loadGroup);
+    
+    super.generateLoadSelect(sb, table, id, loadGroup);
   }
 
   /**
@@ -1372,7 +1383,7 @@ public class EntityType extends BeanType {
     ArrayList<String> idColumns = new ArrayList<String>();
 
     for (IdField field : getId().getKeys()) {
-      if (isAuto && "identity".equals(field.getGenerator()))
+      if (isAuto && field.getGenerator() != null)
 	continue;
       
       for (Column key : field.getColumns()) {

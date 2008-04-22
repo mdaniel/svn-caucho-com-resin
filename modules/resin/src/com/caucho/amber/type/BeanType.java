@@ -282,13 +282,11 @@ abstract public class BeanType extends AbstractEnhancedType {
   /**
    * Generates the select clause for a load.
    */
-  public String generateLoadSelect(Table table,
-                                   String id,
-                                   int loadGroup,
-                                   boolean hasSelect)
+  public void generateLoadSelect(StringBuilder sb,
+				 Table table,
+				 String id,
+				 int loadGroup)
   {
-    CharBuffer cb = CharBuffer.allocate();
-
     // jpa/0l14, jpa/0ge3
     for (AmberField field : getFields()) {
       // jpa/0gg3
@@ -296,19 +294,13 @@ abstract public class BeanType extends AbstractEnhancedType {
 	String propSelect = field.generateLoadSelect(table, id);
 
 	if (propSelect != null) {
-	  if (hasSelect)
-	    cb.append(", ");
-	  hasSelect = true;
+	  if (sb.length() > 0)
+	    sb.append(", ");
 
-	  cb.append(propSelect);
+	  sb.append(propSelect);
 	}
       }
     }
-
-    if (cb.length() == 0)
-      return null;
-    else
-      return cb.close();
   }
 
   /**
@@ -355,7 +347,14 @@ abstract public class BeanType extends AbstractEnhancedType {
                                    String id,
                                    int loadGroup)
   {
-    return generateLoadSelect(table, id, loadGroup, false);
+    StringBuilder sb = new StringBuilder();
+    
+    generateLoadSelect(sb, table, id, loadGroup);
+
+    if (sb.length() > 0)
+      return sb.toString();
+    else
+      return null;
   }
 
   /**

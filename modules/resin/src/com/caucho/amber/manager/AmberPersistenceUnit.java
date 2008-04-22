@@ -102,6 +102,9 @@ public class AmberPersistenceUnit {
   // data source for requests in a transaction
   private DataSource _xaDataSource;
 
+  private String _jtaDataSourceName;
+  private String _nonJtaDataSourceName;
+  
   // persistence.xml jta-data-source
   private DataSource _jtaDataSource;
   // persistence.xml non-jta-data-source
@@ -316,6 +319,22 @@ public class AmberPersistenceUnit {
   public DataSource getXADataSource()
   {
     return _xaDataSource;
+  }
+
+  /**
+   * Sets the persistence.xml jta data source.
+   */
+  public void setJtaDataSourceName(String name)
+  {
+    _jtaDataSourceName = name;
+  }
+
+  /**
+   * Sets the persistence.xml non-jta data source.
+   */
+  public void setNonJtaDataSourceName(String name)
+  {
+    _nonJtaDataSourceName = name;
   }
 
   /**
@@ -1357,6 +1376,11 @@ public class AmberPersistenceUnit {
 
       _lazyHomeInit.clear();
     }
+
+    if (_jtaDataSourceName != null && _jtaDataSource == null)
+      _jtaDataSource = (DataSource) Jndi.lookup(_jtaDataSourceName);
+    if (_nonJtaDataSourceName != null && _nonJtaDataSource == null)
+      _nonJtaDataSource = (DataSource) Jndi.lookup(_nonJtaDataSourceName);
 
     initTables();
 

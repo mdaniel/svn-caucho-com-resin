@@ -1003,9 +1003,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     if (name == null || "".equals(name))
       name = idField.getEntitySourceType().getTable().getName() + "_cseq";
 
-    IdGenerator gen = persistenceUnit.createSequenceGenerator(name, 1);
+    //IdGenerator gen = persistenceUnit.createSequenceGenerator(name, 1);
 
-    idField.getEntitySourceType().setGenerator(idField.getName(), gen);
+    //idField.getEntitySourceType().setGenerator(idField.getName(), gen);
   }
 
   void addTableIdGenerator(AmberPersistenceUnit persistenceUnit,

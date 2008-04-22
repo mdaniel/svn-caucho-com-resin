@@ -849,7 +849,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.pushDepth();
-
+    
     int index = _entityType.generateLoad(out, "rs", "index", 0, 0);
 
     out.println("__caucho_loadMask_0 |= 1L;");
@@ -1352,7 +1352,6 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("Object pk = null;");
 
     if (! id.isEmbeddedId()) {
-
       ArrayList<IdField> keys = id.getKeys();
 
       for (IdField key : keys) {

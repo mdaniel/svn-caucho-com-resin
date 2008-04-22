@@ -35,10 +35,8 @@ import java.io.Serializable;
  * callback for a query
  */
 public interface QueryCallback {
-  public void onQueryResult(String to, String from,
-			    Serializable value, Object handback);
+  public void onQueryResult(String to, String from, Serializable value);
   
   public void onQueryError(String to, String from,
-			   Serializable value, HmppError error,
-			   Object handback);
+			   Serializable value, HmppError error);
 }

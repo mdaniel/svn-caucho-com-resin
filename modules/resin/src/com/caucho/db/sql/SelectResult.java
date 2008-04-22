@@ -214,8 +214,7 @@ public class SelectResult {
       
     case Column.SHORT:
       {
-	int value = ((read() << 8)
-		     + (read()));
+	int value = (short) ((read() << 8) + (read()));
 
 	return String.valueOf(value);
       }
@@ -300,8 +299,8 @@ public class SelectResult {
       
     case Column.SHORT:
       {
-	int value = ((read() << 8)
-		     + (read()));
+	int value = (short) ((read() << 8)
+			     + (read()));
 
 	return value;
       }
@@ -373,8 +372,8 @@ public class SelectResult {
       
     case Column.SHORT:
       {
-	int value = ((read() << 8)
-		     + (read()));
+	int value = (short) ((read() << 8)
+			     + (read()));
 
 	return value;
       }
@@ -446,8 +445,8 @@ public class SelectResult {
       
     case Column.SHORT:
       {
-	int value = ((read() << 8)
-		     + (read()));
+	int value = (short) ((read() << 8)
+			     + (read()));
 
 	return value;
       }
