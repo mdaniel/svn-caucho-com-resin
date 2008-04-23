@@ -424,6 +424,37 @@ it already knows where to get the <code>ConnectionFactory</code>.</p>
 &lt;/web-app>
 </example>
 
+<s2 title="BlockingQueue for 3rd party JMS">
+
+<p>The <code>BlockingQueue</code> API is also available for other JMS
+providers.  You'll need to configure a <code>JmsBlockingQueue</code> in
+the resin-web.xml to take advantage of it.</p>
+
+<example title="Example: BlockingQueue WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;resource-adapter class="org.apache.activemq.ra.ActiveMQResourceAdapter">
+      &lt;init server-url="vm://localhost"/>
+  &lt;/resource-adapter>
+
+   &lt;connection-factory uri="activemq:" name="factory"/>
+ 
+   &lt;jms-queue uri="activemq:" name="queue">
+       &lt;init physicalName="queue.test"/>
+   &lt;/jms-queue>
+ 
+  &lt;bean name="test" class="com.caucho.jms.queue.JmsBlockingQueue">
+    &lt;init>
+      &lt;factory>${factory}&lt;/factory>
+      &lt;destination>${queue}&lt;/destination>
+    &lt;/init>
+  &lt;/bean>
+
+&lt;/web-app>
+</example>
+
+</s2>
+
 </s1>
 
 <s1 title="Message Driven Beans">

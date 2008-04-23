@@ -257,7 +257,7 @@ public class LruCache<K,V> {
 	   item != null;
 	   item = item._nextHash) {
 	// matching item gets replaced
-	if (item._key == key || okey.equals(item._key)) {
+	if (item._key == okey || okey.equals(item._key)) {
 	  updateLru(item);
 
 	  oldValue = item._value;
@@ -275,7 +275,7 @@ public class LruCache<K,V> {
       if (item == null) {
 	CacheItem<K,V> next = _entries[hash];
 	
-	item = new CacheItem<K,V>(key, value);
+	item = new CacheItem<K,V>(okey, value);
 	
 	item._nextHash = next;
 	if (next != null)
@@ -561,6 +561,9 @@ public class LruCache<K,V> {
 
     CacheItem(K key, V value)
     {
+      if (key == null)
+	throw new NullPointerException();
+      
       _key = key;
       _value = value;
       _hitCount = 1;

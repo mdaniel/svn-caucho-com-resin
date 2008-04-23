@@ -297,13 +297,135 @@ public class WatchdogConfig
   {
     _watchdogAddress = addr;
   }
+
+  public void setAcceptListenBacklog(ConfigProgram program)
+  {
+  }
+
+  public void setAcceptThreadMin(ConfigProgram program)
+  {
+  }
+
+  public void setAcceptThreadMax(ConfigProgram program)
+  {
+  }
+
+  public void setKeepaliveMax(ConfigProgram program)
+  {
+  }
+
+  public void setKeepaliveConnectionTimeMax(ConfigProgram program)
+  {
+  }
+
+  public void setKeepaliveSelectEnable(ConfigProgram program)
+  {
+  }
+
+  public void setKeepaliveSelectMax(ConfigProgram program)
+  {
+  }
+
+  public void setKeepaliveThreadTimeout(ConfigProgram program)
+  {
+  }
+
+  public void setKeepaliveTimeout(ConfigProgram program)
+  {
+  }
+
+  public void setAddress(ConfigProgram program)
+  {
+  }
+
+  public void setBackup(ConfigProgram program)
+  {
+  }
+
+  public void setLoadBalanceConnectTimeout(ConfigProgram program)
+  {
+  }
+
+  public void setLoadBalanceSocketTimeout(ConfigProgram program)
+  {
+  }
+
+  public void setLoadBalanceIdleTime(ConfigProgram program)
+  {
+  }
+
+  public void setLoadBalanceRecoverTime(ConfigProgram program)
+  {
+  }
+
+  public void setLoadBalanceWarmupTime(ConfigProgram program)
+  {
+  }
+
+  public void setLoadBalanceWeight(ConfigProgram program)
+  {
+  }
+
+  public void setManagement(ConfigProgram program)
+  {
+  }
+
+  public void setMemoryFreeMin(ConfigProgram program)
+  {
+  }
+
+  public void addProtocol(ConfigProgram program)
+  {
+  }
+
+  public void setPort(int port)
+  {
+  }
+
+  public void addClusterPort(ConfigProgram program)
+  {
+  }
+
+  public void setRedeployMode(ConfigProgram program)
+  {
+  }
+
+  public void setShutdownWaitMax(ConfigProgram program)
+  {
+  }
+
+  public void setSocketTimeout(ConfigProgram program)
+  {
+  }
+
+  public void setSuspendTimeMax(ConfigProgram program)
+  {
+  }
+
+  public void setThreadMax(ConfigProgram program)
+  {
+  }
+
+  public void setThreadExecutorTaskMax(ConfigProgram program)
+  {
+  }
+
+  public void setThreadIdleMin(ConfigProgram program)
+  {
+  }
+
+  public void setThreadIdleMax(ConfigProgram program)
+  {
+  }
   
   /**
    * Ignore items we can't understand.
    */
+  /*
   public void addBuilderProgram(ConfigProgram program)
   {
   }
+  */
 
   WatchdogArgs getArgs()
   {

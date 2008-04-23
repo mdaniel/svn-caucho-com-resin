@@ -372,7 +372,7 @@ public class ClassComponent extends ComponentImpl {
 	bind();
       
       Object []args;
-      if (_ctorArgs.length > 0) {
+      if (_ctorArgs != null && _ctorArgs.length > 0) {
 	args = new Object[_ctorArgs.length];
 
 	for (int i = 0; i < args.length; i++)

@@ -286,7 +286,10 @@ if test -z "${apache_include}" -a -r "${apache_dir}/include/httpd.h"; then
   apache_include=${apache_dir}/include
 fi
 
-APACHE_INC="-I${apache_include}"
+if test -n "${apache_include}"; then	
+  APACHE_INC="-I${apache_include}"
+fi
+  
 #
 # deal with stronghold
 #
@@ -854,6 +857,11 @@ elif test -r "/System/Library/Frameworks/JavaVM.framework/Headers/jni_md.h"; the
   echo "checking for JNI in /System/Library/Frameworks/JavaVM.framework/Headers ... found"
   JNI_INCLUDE="-I/System/Library/Frameworks/JavaVM.framework/Headers"
   JNI=yes
+elif test -r "$JAVA_HOME/../Headers/jni_md.h"; then
+  # Darwin
+  echo "checking for JNI in $JAVA_HOME/../Headers ... found"
+  JNI_INCLUDE="-I$JAVA_HOME/../Headers"
+  JNI=yes
 elif test -r "$JAVA_HOME/include/jni.h"; then
   JNI_INCLUDE="-I$JAVA_HOME/include"
   JNI=yes
@@ -867,9 +875,17 @@ if test -r "$JAVA_HOME/include/jvmti.h"; then
   echo "Using JVMTI for class reloading"
   
   CFLAGS="$CFLAGS -DHAS_JVMTI"
+elif test -r "$JAVA_HOME/../Headers/jvmti.h"; then
+  echo "Using JVMTI for class reloading"
+  
+  CFLAGS="$CFLAGS -DHAS_JVMTI"
 fi
 
 if test -r "$JAVA_HOME/include/jvmdi.h"; then
+  echo "Using JVMDI for class reloading"
+  
+  CFLAGS="$CFLAGS -DHAS_JVMDI"
+elif test -r "$JAVA_HOME/../Headers/jvmdi.h"; then
   echo "Using JVMDI for class reloading"
   
   CFLAGS="$CFLAGS -DHAS_JVMDI"

@@ -134,6 +134,8 @@ public class StatefulGenerator extends SessionGenerator {
 
     generateCreateProvider(out);
     generateViews(out);
+
+    generateDependency(out);
     
     out.popDepth();
     out.println("}");

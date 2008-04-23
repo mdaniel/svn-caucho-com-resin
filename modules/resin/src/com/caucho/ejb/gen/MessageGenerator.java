@@ -242,6 +242,8 @@ public class MessageGenerator extends BeanGenerator {
     */
 
     generateViews(out);
+
+    generateDependency(out);
     
     out.popDepth();
     out.println("}");

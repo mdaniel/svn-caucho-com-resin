@@ -12,6 +12,14 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>LruCache issue with nullpointer key (#2621, rep by zhaoxingyun)</li>
+<li>ssl: config error message needs to be logged at cluster level (#2602)</li>
+<li>boot: jvm-arg inside resin:if was throwing config exceptions (#2617, rep by Mattias Jiderhamn)</li>
+<li>jca: add max-connections and max-active-time to connection-factory (#2618, rep by wesley)</li>
+<li>jms: add com.caucho.jms.queue.JmsBlockingQueue for 3rd party jms (#2619, rep by wesley)</li>
+<li>servlet: update cache clearing/timing to avoid servlet-mapping race condition (#2611, rep by Charles Lyons)</li>
+<li>configure: add $JAVA_HOME/../Headers/jvmti.h check for MacOS-X (#2612, rep by markus)</li>
+<li>ejb: add class dependency checking for generated beans (#2600, rep by Carljohan Carlsson)</li>
 <li>jsf: JSF simple example not working (#2388, rep by pthl)</li>
 <li>quercus: support for (?i) subexpressions (#2614, rep by Paul Fischer)</li>
 <li>servlet: GzipFilter fix for allow-content-type (#2608, rep by azenkov)</li>

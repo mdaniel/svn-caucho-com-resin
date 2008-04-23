@@ -316,6 +316,62 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
+   * Arguments on boot
+   */
+  public void addJavaExe(String args)
+  {
+  }
+
+  /**
+   * Arguments on boot
+   */
+  public void addJvmArg(String args)
+  {
+  }
+
+  /**
+   * Arguments on boot
+   */
+  public void addJvmClasspath(String args)
+  {
+  }
+
+  /**
+   * Arguments on boot
+   */
+  public void addWatchdogArg(String args)
+  {
+  }
+
+  /**
+   * Arguments on boot
+   */
+  public void addWatchdogJvmArg(String args)
+  {
+  }
+
+  /**
+   * Arguments on boot
+   */
+  public void addWatchdogPassword(String args)
+  {
+  }
+
+  /**
+   * Arguments on boot
+   */
+  public void addWatchdogPort(int port)
+  {
+  }
+
+  /**
+   * Arguments on boot
+   */
+  public void addWatchdogAddress(String addr)
+  {
+  }
+
+  /**
    * Sets the minimum free memory after a GC
    */
   public void setMemoryFreeMin(Bytes min)
@@ -1266,10 +1322,14 @@ public class Server extends ProtocolDispatchServer
       
       _lifecycle.toActive();
     } catch (RuntimeException e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
       _lifecycle.toError();
       
       throw e;
     } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
       _lifecycle.toError();
       
       // if the server can't start, it needs to completely fail, especially

@@ -51,6 +51,8 @@ abstract public class View {
   {
     _bean = bean;
     _api = api;
+
+    _bean.addDependency(api.getJavaClass());
   }
 
   /**

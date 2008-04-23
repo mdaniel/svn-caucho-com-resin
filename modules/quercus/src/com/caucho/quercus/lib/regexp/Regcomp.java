@@ -231,7 +231,7 @@ class Regcomp {
 	  switch (pattern.peek()) {
 	  case ':':
 	    pattern.read();
-	    return parseGroup(pattern, tail, 0);
+	    return parseGroup(pattern, tail, 0, _flags);
 	    
 	  case '#':
 	    parseCommentGroup(pattern);
@@ -321,7 +321,7 @@ class Regcomp {
 	  // XXX: once-only subpatterns (mostly an optimization feature)
 	  case '>':
 	    pattern.read();
-	    return parseGroup(pattern, tail, 0);
+	    return parseGroup(pattern, tail, 0, _flags);
 
 	  case 'P':
 	    pattern.read();
@@ -343,9 +343,7 @@ class Regcomp {
 		case 'X': _flags |= STRICT; break;
 		case ':':
 		  {
-		    RegexpNode node = parseGroup(pattern, tail, 0);
-		    _flags = flags;
-		    return node;
+		    return parseGroup(pattern, tail, 0, flags);
 		  }
 		default:
 		  throw error(L.l("'{0}' is an unknown (? code", String.valueOf((char) ch)));
@@ -368,7 +366,7 @@ class Regcomp {
 	  }
 	  
 	default:
-	  return parseGroup(pattern, tail, _nGroup++);
+	  return parseGroup(pattern, tail, _nGroup++, _flags);
 	}
       }
 
@@ -494,7 +492,7 @@ class Regcomp {
       _groupNameMap.put(group, new StringBuilderValue(name));
       _groupNameReverseMap.put(new StringBuilderValue(name), group);
 
-      return parseGroup(pattern, tail, group);
+      return parseGroup(pattern, tail, group, _flags);
     }
     else
       throw error(L.l("Expected '(?:P=name' or '(?:P<name' for named group"));
@@ -555,7 +553,7 @@ class Regcomp {
   }
 
   private RegexpNode parseGroup(PeekStream pattern, RegexpNode tail,
-				int group)
+				int group, int oldFlags)
     throws IllegalRegexpException
   {
     RegexpNode.GroupHead groupHead = new RegexpNode.GroupHead(group);
@@ -575,6 +573,8 @@ class Regcomp {
 
     if (ch != ')')
       throw error(L.l("expected ')'"));
+
+    _flags = oldFlags;
 
     _groupTail = oldTail;
 

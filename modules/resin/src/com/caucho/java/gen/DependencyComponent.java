@@ -50,8 +50,8 @@ public class DependencyComponent extends ClassComponent {
   
   private Path _searchPath;
 
-  private ArrayList<PersistentDependency> _dependList =
-    new ArrayList<PersistentDependency>();
+  private ArrayList<PersistentDependency> _dependList
+    = new ArrayList<PersistentDependency>();
 
   /**
    * Sets the search path.

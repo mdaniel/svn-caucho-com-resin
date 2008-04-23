@@ -524,6 +524,16 @@ r_component = element component {
   <td>true</td>
 </tr>
 <tr>
+  <td>max-active-time</td>
+  <td>Configures the maximum time allowed for a connection</td>
+  <td>infinite</td>
+</tr>
+<tr>
+  <td>max-connections</td>
+  <td>Configures the maximum connections available</td>
+  <td>1024</td>
+</tr>
+<tr>
   <td>jndi-name</td>
   <td>JNDI name for the <code>ConnectionFactory</code></td>
   <td></td>
@@ -559,6 +569,8 @@ r_connection-factory = element connection-factory {
   &amp; r_name?
 
   &amp; local-transaction-optimization?
+  &amp; max-active-time?
+  &amp; max-connections?
   &amp; resource-adapter?
   &amp; shareable?
 }

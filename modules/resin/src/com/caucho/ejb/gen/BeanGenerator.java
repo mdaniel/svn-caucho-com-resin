@@ -30,9 +30,11 @@
 package com.caucho.ejb.gen;
 
 import com.caucho.ejb.cfg.*;
+import com.caucho.make.*;
 import com.caucho.util.L10N;
 import com.caucho.java.*;
 import com.caucho.java.gen.*;
+import com.caucho.vfs.*;
 
 import java.io.*;
 import java.lang.reflect.*;
@@ -47,6 +49,8 @@ abstract public class BeanGenerator extends GenClass {
   private static final L10N L = new L10N(BeanGenerator.class);
 
   protected final ApiClass _ejbClass;
+
+  protected DependencyComponent _dependency = new DependencyComponent();
   
   private Method _aroundInvokeMethod;
 
@@ -58,6 +62,8 @@ abstract public class BeanGenerator extends GenClass {
     super(fullClassName);
     
     _ejbClass = ejbClass;
+
+    addDependency(ejbClass.getJavaClass());
   }
 
   protected ApiClass getEjbClass()
@@ -93,6 +99,16 @@ abstract public class BeanGenerator extends GenClass {
    */
   public void addLocal(ApiClass localApi)
   {
+  }
+
+  protected void addDependency(PersistentDependency depend)
+  {
+    _dependency.addDependency(depend);
+  }
+
+  protected void addDependency(Class cl)
+  {
+    _dependency.addDependency(new ClassDependency(cl));
   }
 
   /**
@@ -190,6 +206,12 @@ abstract public class BeanGenerator extends GenClass {
 
       view.generateDestroy(out);
     }
+  }
+
+  protected void generateDependency(JavaWriter out)
+    throws IOException
+  {
+    _dependency.generate(out);
   }
 
   /**

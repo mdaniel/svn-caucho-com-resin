@@ -107,6 +107,8 @@ public class StatelessGenerator extends SessionGenerator {
     
     generateViews(out);
     
+    generateDependency(out);
+    
     out.popDepth();
     out.println("}");
   }

@@ -202,6 +202,7 @@ public class WebApp extends ServletContextImpl
 
   private UrlMap<CacheMapping> _cacheMappingMap = new UrlMap<CacheMapping>();
 
+  private final Object _dispatcherCacheLock = new Object();
   private LruCache<String,RequestDispatcherImpl> _dispatcherCache;
 
   // login configuration factory for lazy start
@@ -1863,16 +1864,15 @@ public class WebApp extends ServletContextImpl
         setConfigException(e);
       }
 
-      _lifecycle.toActive();
-
       if (_parent instanceof Host) {
         Host host = (Host) _parent;
 
         host.setConfigETag(null);
       }
 
-      if (_parent != null)
-        _parent.clearCache();
+      _lifecycle.toActive();
+
+      clearCache();
 
       isOkay = true;
     } finally {
@@ -2113,13 +2113,12 @@ public class WebApp extends ServletContextImpl
    */
   public void clearCache()
   {
+    getDispatchServer().clearCache();
+    
     // server/1kg1
-    synchronized(this) {
-      synchronized(_filterChainCache) {
-        getDispatchServer().clearCache();
-        _filterChainCache.clear();
-        _dispatcherCache = null;
-      }
+    synchronized (_filterChainCache) {
+      _filterChainCache.clear();
+      _dispatcherCache = null;
     }
   }
   /**
@@ -2240,7 +2239,11 @@ public class WebApp extends ServletContextImpl
       decoder.splitQuery(forwardInvocation, rawURI);
       decoder.splitQuery(errorInvocation, rawURI);
 
-      if (_parent != null) {
+      if (! _lifecycle.waitForActive(_activeWaitTime)) {
+	throw new IllegalStateException(L.l("'{0}' is restarting and it not yet ready to receive requests",
+					    _contextPath));
+      }
+      else if (_parent != null) {
         _parent.buildIncludeInvocation(includeInvocation);
         _parent.buildForwardInvocation(forwardInvocation);
         _parent.buildErrorInvocation(errorInvocation);
@@ -2347,7 +2350,11 @@ public class WebApp extends ServletContextImpl
       decoder.splitQuery(loginInvocation, rawURI);
       decoder.splitQuery(errorInvocation, rawURI);
 
-      if (_parent != null) {
+      if (! _lifecycle.waitForActive(_activeWaitTime)) {
+	throw new IllegalStateException(L.l("'{0}' is restarting and it not yet ready to receive requests",
+					    _contextPath));
+      }
+      else if (_parent != null) {
         _parent.buildInvocation(loginInvocation);
         _parent.buildErrorInvocation(errorInvocation);
       }
@@ -2745,8 +2752,7 @@ public class WebApp extends ServletContextImpl
     if (! _lifecycle.toDestroy())
       return;
 
-    if (_parent != null)
-      _parent.clearCache();
+    clearCache();
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();

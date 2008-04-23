@@ -78,6 +78,9 @@ public class ConnectionFactoryConfig extends BeanConfig {
 
   private ResourceAdapter _ra;
 
+  private int _maxConnections = 1024;
+  private long _maxActiveTime = Integer.MAX_VALUE;
+
   public ConnectionFactoryConfig()
   {
     setBeanConfigClass(ManagedConnectionFactory.class);
@@ -92,6 +95,16 @@ public class ConnectionFactoryConfig extends BeanConfig {
   public void setResourceAdapter(ResourceAdapter ra)
   {
     _ra = ra;
+  }
+
+  public void setMaxConnections(int max)
+  {
+    _maxConnections = max;
+  }
+
+  public void setMaxActiveTime(Period period)
+  {
+    _maxActiveTime = period.getPeriod();
   }
 
   public void init()
@@ -124,6 +137,9 @@ public class ConnectionFactoryConfig extends BeanConfig {
 
     if (getName() != null)
       cm.setName(getName());
+
+    cm.setMaxConnections(_maxConnections);
+    cm.setMaxActiveTime(_maxActiveTime);
 
     ResourceArchive rar = null;
 

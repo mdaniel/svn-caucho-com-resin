@@ -154,26 +154,6 @@ public class ServletMapper {
       throw new ServletException(e);
     }
   }
-
-  /**
-   * Adds a servlet mapping
-   */
-  /*
-  public void addServletRegexp(ServletMapping servletRegexp)
-    throws ServletException
-  {
-    try {
-      String regexp = servletRegexp.getURLRegexp();
-
-      _servletMap.addRegexp(regexp, regexp);
-      _regexpMap.put(regexp, servletRegexp);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new ServletException(e);
-    }
-  }
-  */
   
   /**
    * Sets the default servlet.

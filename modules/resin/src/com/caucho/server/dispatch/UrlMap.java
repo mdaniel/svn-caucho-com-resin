@@ -30,7 +30,7 @@
 package com.caucho.server.dispatch;
 
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.CharBuffer;
+import com.caucho.util.*;
 
 import javax.servlet.ServletException;
 import java.util.ArrayList;
@@ -47,6 +47,8 @@ import java.util.regex.PatternSyntaxException;
  * *.jsp      -- matches anything with the .jsp suffix
  */
 public class UrlMap<E> {
+  private static final L10N L = new L10N(UrlMap.class);
+  
   // List of matching regular expressions
   private ArrayList<RegexpEntry<E>> _regexps;
   // If true, use the shortest match
@@ -102,8 +104,8 @@ public class UrlMap<E> {
   public void addMap(String pattern, String flags, E value)
     throws PatternSyntaxException
   {
-    if (pattern.length() == 0 ||
-        pattern.length() == 1 && pattern.charAt(0) == '/') {
+    if (pattern.length() == 0
+	|| pattern.length() == 1 && pattern.charAt(0) == '/') {
       addRegexp(-1, "", flags, value, true);
       return;
     }
@@ -153,9 +155,9 @@ public class UrlMap<E> {
         if (i == 0)
           isShort = true;
       }
-      else if (ch == '.' || ch == '[' || ch == '^' || ch == '$' ||
-               ch == '{' || ch == '}' || ch == '|' ||
-               ch == '(' || ch == ')' || ch == '?') {
+      else if (ch == '.' || ch == '[' || ch == '^' || ch == '$'
+	       || ch == '{' || ch == '}' || ch == '|'
+	       || ch == '(' || ch == ')' || ch == '?') {
         cb.append('\\');
         cb.append(ch);
       }
@@ -171,8 +173,8 @@ public class UrlMap<E> {
 
     if (prefixLength < 0)
       prefixLength = pattern.length();
-    else if (prefixLength < pattern.length() &&
-             pattern.charAt(prefixLength) == '/')
+    else if (prefixLength < pattern.length()
+	     && pattern.charAt(prefixLength) == '/')
       prefixLength--;
 
     if (cb.length() > 0 && cb.charAt(0) == '/')
@@ -183,8 +185,8 @@ public class UrlMap<E> {
 
   public static String urlPatternToRegexpPattern(String pattern)
   {
-    if (pattern.length() == 0 ||
-        pattern.length() == 1 && pattern.charAt(0) == '/') {
+    if (pattern.length() == 0
+	|| pattern.length() == 1 && pattern.charAt(0) == '/') {
       return "^.*$";
     }
 
@@ -215,9 +217,9 @@ public class UrlMap<E> {
         isExact = false;
         cb.append(".*");
       }
-      else if (ch == '.' || ch == '[' || ch == '^' || ch == '$' ||
-               ch == '{' || ch == '}' || ch == '|' ||
-               ch == '(' || ch == ')' || ch == '?') {
+      else if (ch == '.' || ch == '[' || ch == '^' || ch == '$'
+	       || ch == '{' || ch == '}' || ch == '|'
+	       || ch == '(' || ch == ')' || ch == '?') {
         cb.append('\\');
         cb.append(ch);
       }
@@ -246,8 +248,8 @@ public class UrlMap<E> {
                            E value)
     throws PatternSyntaxException, ServletException
   {
-    if (pattern.length() == 0 ||
-        pattern.length() == 1 && pattern.charAt(0) == '/') {
+    if (pattern.length() == 0
+	|| pattern.length() == 1 && pattern.charAt(0) == '/') {
       addRegexp(-1, "^.*$", flags, value, true);
       return;
     }
@@ -276,12 +278,13 @@ public class UrlMap<E> {
         if (i > 0 && i + 1 == length && pattern.charAt(i - 1) == '/') {
           cb.append(".*");
         }
-        else if (i == 0 && length > 1 && pattern.charAt(1) == '.' &&
-                 pattern.lastIndexOf('/') < 0) {
+        else if (i == 0 && length > 1 && pattern.charAt(1) == '.'
+		 && pattern.lastIndexOf('/') < 0) {
           cb.append(".*");
         }
         else
-          throw new ServletException("illegal url-pattern `" + pattern + "'");
+          throw new ServletException(L.l("illegal url-pattern '{0}'",
+					 pattern));
         break;
         
       case '.': case '[': case '^': case '$': 
@@ -411,11 +414,11 @@ public class UrlMap<E> {
     for (int i = 0; i < _regexps.size(); i++) {
       RegexpEntry<E> entry = _regexps.get(i);
 
-      if ("plugin_match".equals(entry._value)  ||
-	  "plugin-match".equals(entry._value))
+      if ("plugin_match".equals(entry._value)
+	  || "plugin-match".equals(entry._value))
 	continue;
-      if ("plugin_ignore".equals(entry._value) ||
-	  "plugin-ignore".equals(entry._value))
+      if ("plugin_ignore".equals(entry._value)
+	  || "plugin-ignore".equals(entry._value))
 	continue;
       if (entry._prefixLength < bestPrefixLength)
         continue;
@@ -438,6 +441,7 @@ public class UrlMap<E> {
           vars.clear();
 
           vars.add(uri.substring(0, end));
+	  
           for (int j = 1; j <= matcher.groupCount(); j++)
             vars.add(matcher.group(j));
         }
@@ -445,9 +449,11 @@ public class UrlMap<E> {
         best = entry._value;
         bestPrefixLength = entry._prefixLength;
         bestMaxLength = length;
+	
         if (! entry.isShortMatch())
           bestMinLength = length;
-        if (entry._prefixLength > bestMinLength)
+	
+        if (bestMinLength < entry._prefixLength)
           bestMinLength = entry._prefixLength;
       }
     }
