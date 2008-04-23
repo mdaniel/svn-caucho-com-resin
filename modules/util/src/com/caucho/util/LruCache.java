@@ -275,7 +275,7 @@ public class LruCache<K,V> {
       if (item == null) {
 	CacheItem<K,V> next = _entries[hash];
 	
-	item = new CacheItem<K,V>(okey, value);
+	item = new CacheItem<K,V>((K) okey, value);
 	
 	item._nextHash = next;
 	if (next != null)
@@ -750,8 +750,13 @@ public class LruCache<K,V> {
     {
       if (_i < _entries.length) {
 	CacheItem<K,V> entry = _entries[_i];
-	
-	return entry != null ? entry._key : null;
+
+	if (entry == null)
+	  return null;
+	else if (entry._key == NULL)
+	  return null;
+	else
+	  return entry._key;
       }
 
       return null;
