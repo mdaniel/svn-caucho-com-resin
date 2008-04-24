@@ -158,10 +158,12 @@ public class JmsResourceAdapter implements ResourceAdapter {
 				   ActivationSpec spec)
   {
     try {
-      ArrayList<Consumer> consumers = new ArrayList<Consumer>(_consumers);
+      ArrayList<Consumer> consumers = _consumers;
       _consumers = null;
 
       if (consumers != null) {
+	consumers = new ArrayList<Consumer>(consumers);
+	
 	for (Consumer consumer : consumers) {
 	  consumer.destroy();
 	}

@@ -564,18 +564,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       if (_status != Status.STATUS_ACTIVE) {
         switch (_status) {
         case Status.STATUS_MARKED_ROLLBACK:
-	  try {
-	    callBeforeCompletion();
-	  } catch (Exception e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  } finally {
-	    rollbackInt();
-	  }
-	  
-          if (_rollbackException != null)
-            throw new RollbackExceptionWrapper(_rollbackException);
-          else
-            throw new RollbackException(L.l("Transaction has been marked rolled back."));
+	  break;
 
         case Status.STATUS_NO_TRANSACTION:
           throw new IllegalStateException(L.l("Can't commit outside of a transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back."));
@@ -601,6 +590,15 @@ public class TransactionImpl implements Transaction, AlarmListener {
 	rollbackInt();
       
 	throw new RollbackException(e);
+      }
+
+      if (_status == Status.STATUS_MARKED_ROLLBACK) {
+	rollbackInt();
+	
+	if (_rollbackException != null)
+	  throw new RollbackExceptionWrapper(_rollbackException);
+	else
+	  throw new RollbackException(L.l("Transaction has been marked rolled back."));
       }
 
       if (_resourceCount > 0) {

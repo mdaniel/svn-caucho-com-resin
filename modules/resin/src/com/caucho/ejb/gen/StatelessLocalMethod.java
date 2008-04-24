@@ -92,6 +92,7 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
 
     out.println();
     out.println(_beanClassName + " bean = _ejb_begin();");
+    out.println("boolean isValid = false;");
     out.println();
     out.println("try {");
     out.pushDepth();
@@ -119,6 +120,15 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
   /**
    * Generates the underlying bean instance
    */
+  protected void generatePreReturn(JavaWriter out)
+    throws IOException
+  {
+    out.println("isValid = true;");
+  }
+
+  /**
+   * Generates the underlying bean instance
+   */
   protected void generatePostCall(JavaWriter out)
     throws IOException
   {
@@ -126,8 +136,9 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
     out.println("} finally {");
     out.println("  thread.setContextClassLoader(oldLoader);");
 
-    out.println("if (bean != null)");
-    out.println("  _ejb_free(bean);");
+    out.println("  if (bean == null) {");
+    out.println("  } else if (isValid)");
+    out.println("    _ejb_free(bean);");
     
     out.println("}");
   }

@@ -366,6 +366,8 @@ public class BusinessMethodGenerator implements EjbCallChain {
     }
     
     out.println(");");
+
+    generatePreReturn(out);
     
     if (! void.class.equals(_implMethod.getReturnType()))
       out.println("return result;");
@@ -395,6 +397,14 @@ public class BusinessMethodGenerator implements EjbCallChain {
     throws IOException
   {
     out.print("this");
+  }
+
+  /**
+   * Generates the underlying bean instance
+   */
+  protected void generatePreReturn(JavaWriter out)
+    throws IOException
+  {
   }
 
   /**

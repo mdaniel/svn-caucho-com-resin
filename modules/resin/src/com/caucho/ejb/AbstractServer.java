@@ -616,7 +616,7 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public void remove(Object primaryKey)
   {
-    throw new UnsupportedOperationException();
+    //throw new UnsupportedOperationException();
   }
 
   /**
