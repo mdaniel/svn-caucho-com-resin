@@ -35,6 +35,8 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ConnectionPoolMXBean;
 import com.caucho.sql.ManagedConnectionImpl;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
@@ -67,7 +69,8 @@ public class ConnectionPool extends AbstractManagedObject
   private static final Logger log
     = Logger.getLogger(ConnectionPool.class.getName());
 
-  private static int _idGen;
+  private static EnvironmentLocal<Integer> _idGen
+    = new EnvironmentLocal<Integer>();
 
   private String _name;
 
@@ -475,8 +478,20 @@ public class ConnectionPool extends AbstractManagedObject
     if (! _lifecycle.toInit())
       return null;
 
-    if (_name == null)
-      _name = "connection-pool-" + _idGen++;
+    if (_name == null) {
+      synchronized (_idGen) {
+	Integer v = _idGen.get();
+	
+	if (v == null)
+	  v = 1;
+	else
+	  v += 1;
+	
+	_idGen.set(v);
+	
+	_name = mcf.getClass().getSimpleName() + "-" + v;
+      }
+    }
 
     if (_tm == null)
       throw new ConfigException(L.l("the connection manager needs a transaction manager."));

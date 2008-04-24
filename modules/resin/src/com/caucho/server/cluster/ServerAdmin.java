@@ -306,7 +306,10 @@ public class ServerAdmin extends AbstractEmitterObject
    */
   public long getRuntimeMemory()
   {
-    return Runtime.getRuntime().totalMemory();
+    if (Alarm.isTest())
+      return 666;
+    else
+      return Runtime.getRuntime().totalMemory();
   }
 
   /**
@@ -314,7 +317,10 @@ public class ServerAdmin extends AbstractEmitterObject
    */
   public long getRuntimeMemoryFree()
   {
-    return Runtime.getRuntime().freeMemory();
+    if (Alarm.isTest())
+      return 666;
+    else
+      return Runtime.getRuntime().freeMemory();
   }
 
   /**

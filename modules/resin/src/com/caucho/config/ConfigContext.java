@@ -471,6 +471,12 @@ public class ConfigContext {
 				    (Element) childNode);
 
 	if (childBean != null) {
+	  ConfigType childBeanType = TypeFactory.getType(childBean.getClass());
+	
+	  childBeanType.init(childBean);
+
+	  childBean = childBeanType.replaceObject(childBean);
+	  
 	  attrStrategy.setValue(bean, qName, childBean);
 	  return;
 	}
@@ -561,8 +567,13 @@ public class ConfigContext {
     if (childNode instanceof Element) {
       Object childBean = createResinType(type, (Element) childNode);
 
-      if (childBean != null)
-	return childBean;
+      if (childBean != null) {
+	ConfigType childBeanType = TypeFactory.getType(childBean.getClass());
+	
+	childBeanType.init(childBean);
+
+	return childBeanType.replaceObject(childBean);
+      }
     }
 
     try {

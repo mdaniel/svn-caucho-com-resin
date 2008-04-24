@@ -720,7 +720,9 @@ r_rewrite-Group =
   & (attribute regexp { string }
     | element regexp { string }
     | attribute url-regexp { string }
-    | element url-regexp { string })?)
+    | element url-regexp { string }
+    | attribute full-url-regexp { string }
+    | element full-url-regexp { string })?)
 
 r_rewrite-real-path = element rewrite-real-path {
   (element rewrite {

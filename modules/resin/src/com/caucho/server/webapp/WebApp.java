@@ -2018,6 +2018,8 @@ public class WebApp extends ServletContextImpl
         return invocation;
       }
       else if (! _lifecycle.waitForActive(_activeWaitTime)) {
+	if (log.isLoggable(Level.FINE))
+	  log.fine(this + " returned 503 busy for '" + invocation.getRawURI() + "'");
         int code = HttpServletResponse.SC_SERVICE_UNAVAILABLE;
         chain = new ErrorFilterChain(code);
         invocation.setFilterChain(chain);
@@ -2113,7 +2115,15 @@ public class WebApp extends ServletContextImpl
    */
   public void clearCache()
   {
-    getDispatchServer().clearCache();
+    DispatchServer server = getDispatchServer();
+
+    if (server != null)
+      server.clearCache();
+    
+    WebAppContainer parent = _parent;
+
+    if (parent != null)
+      parent.clearCache();
     
     // server/1kg1
     synchronized (_filterChainCache) {
@@ -2239,14 +2249,14 @@ public class WebApp extends ServletContextImpl
       decoder.splitQuery(forwardInvocation, rawURI);
       decoder.splitQuery(errorInvocation, rawURI);
 
-      if (! _lifecycle.waitForActive(_activeWaitTime)) {
-	throw new IllegalStateException(L.l("'{0}' is restarting and it not yet ready to receive requests",
-					    _contextPath));
-      }
-      else if (_parent != null) {
+      if (_parent != null) {
         _parent.buildIncludeInvocation(includeInvocation);
         _parent.buildForwardInvocation(forwardInvocation);
         _parent.buildErrorInvocation(errorInvocation);
+      }
+      else if (! _lifecycle.waitForActive(_activeWaitTime)) {
+	throw new IllegalStateException(L.l("'{0}' is restarting and is not yet ready to receive requests",
+					    _contextPath));
       }
       else {
         FilterChain chain = _servletMapper.mapServlet(includeInvocation);
@@ -2270,6 +2280,8 @@ public class WebApp extends ServletContextImpl
       getDispatcherCache().put(url, disp);
 
       return disp;
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -2408,6 +2420,9 @@ public class WebApp extends ServletContextImpl
   @Override
   public String getRealPath(String uri)
   {
+    if (uri == null)
+      throw new NullPointerException();
+    
     String realPath = _realPathCache.get(uri);
 
     if (realPath != null)

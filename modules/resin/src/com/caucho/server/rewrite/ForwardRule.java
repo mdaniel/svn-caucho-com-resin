@@ -39,6 +39,7 @@ public class ForwardRule
   extends AbstractRuleWithConditions
 {
   private String _target;
+  private String _targetHost;
 
   protected ForwardRule(RewriteDispatch rewriteDispatch)
   {
@@ -53,6 +54,11 @@ public class ForwardRule
   public void setTarget(String target)
   {
     _target = target;
+  }
+
+  public void setTargetHost(String target)
+  {
+    _targetHost = target;
   }
 
   @Override

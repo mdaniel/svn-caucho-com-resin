@@ -564,7 +564,14 @@ public class TransactionImpl implements Transaction, AlarmListener {
       if (_status != Status.STATUS_ACTIVE) {
         switch (_status) {
         case Status.STATUS_MARKED_ROLLBACK:
-          rollbackInt();
+	  try {
+	    callBeforeCompletion();
+	  } catch (Exception e) {
+	    log.log(Level.WARNING, e.toString(), e);
+	  } finally {
+	    rollbackInt();
+	  }
+	  
           if (_rollbackException != null)
             throw new RollbackExceptionWrapper(_rollbackException);
           else
@@ -837,6 +844,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
       try {
         sync.beforeCompletion();
       } catch (RuntimeException e) {
+	setRollbackOnly(e);
+	
         throw new RollbackException(e);
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);

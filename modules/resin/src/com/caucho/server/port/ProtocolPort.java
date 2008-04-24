@@ -97,8 +97,9 @@ public class ProtocolPort extends Port
   {
     if (_protocolClass != null) {
       WebBeansContainer webBeans = WebBeansContainer.create();
-      
-      Protocol protocol = (Protocol) webBeans.createTransientObject(_protocolClass);
+
+      Protocol protocol
+	= (Protocol) webBeans.createTransientObjectNoInit(_protocolClass);
       
       if (_init != null)
 	_init.configure(protocol);

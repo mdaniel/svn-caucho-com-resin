@@ -149,7 +149,7 @@ public class ResinBoot {
 	String status = _client.statusWatchdog();
 	
 	System.out.println(L().l("Resin/{0} status for watchdog at {1}:{2}",
-				 Version.VERSION, _client.getId(),
+				 Version.VERSION,
 				 _client.getWatchdogAddress(),
 				 _client.getWatchdogPort()));
         System.out.println(status);

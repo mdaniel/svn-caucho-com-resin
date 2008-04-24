@@ -171,7 +171,7 @@ public class LruCache<K,V> {
       for (CacheItem<K,V> item = _entries[hash];
 	   item != null;
 	   item = item._nextHash) {
-	if (item._key == key || item._key.equals(key)) {
+	if (item._key == okey || item._key.equals(okey)) {
 	  updateLru(item);
 
 	  _hitCount++;

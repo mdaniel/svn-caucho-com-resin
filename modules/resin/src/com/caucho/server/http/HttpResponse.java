@@ -207,7 +207,8 @@ public class HttpResponse extends AbstractHttpResponse
     if (statusCode >= 400) {
       removeHeader("ETag");
       removeHeader("Last-Modified");
-    } else if (statusCode == SC_NOT_MODIFIED || statusCode == SC_NO_CONTENT) {
+    } else if (statusCode == SC_NOT_MODIFIED
+	       || statusCode == SC_NO_CONTENT) {
       // php/1b0k
 
       contentType = null;

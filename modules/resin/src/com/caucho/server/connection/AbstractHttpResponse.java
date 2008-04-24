@@ -1037,8 +1037,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     int ch;
 
     for (i = 0;
-	 i < length && value.charAt(i) != ';' &&
-	   ! Character.isWhitespace(value.charAt(i));
+	 i < length && value.charAt(i) != ';'
+	   && ! Character.isWhitespace(value.charAt(i));
 	 i++) {
     }
 
