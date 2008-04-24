@@ -97,7 +97,7 @@ public class Message extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(HmppStream handler)
+  public void dispatch(HmppStream handler, HmppStream toSource)
   {
     handler.sendMessage(getTo(), getFrom(), _value);
   }

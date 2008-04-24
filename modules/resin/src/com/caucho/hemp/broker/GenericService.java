@@ -85,19 +85,19 @@ public class GenericService extends AbstractHmppService
       throw new ConfigException(L.l("{0} requires a jid",
 				    getClass().getSimpleName()));
 
-    _queue = createQueue(this);
-    
     _conn = _broker.registerResource(getJid(), this);
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " init");
 
     _toBroker = _conn.getStream();
+    
+    _queue = createQueue(this);
   }
 
   protected HmppStream createQueue(HmppStream stream)
   {
-    return new HempMemoryQueue(stream);
+    return new HempMemoryQueue(stream, _toBroker);
   }
 
   public HmppStream getCallbackStream()

@@ -148,7 +148,7 @@ public class HempTopic extends AbstractTopic
     _subscriptionList.remove(queue);
   }
 
-  public void sendMessage(String fromJit, String toJid, Serializable value)
+  public void sendMessage(String to, String from, Serializable value)
   {
     try {
       javax.jms.Message msg = null;
@@ -190,6 +190,10 @@ public class HempTopic extends AbstractTopic
   }
 
   class TopicResource extends AbstractHmppService {
+    public void sendMessage(String to, String from, Serializable msg)
+    {
+      HempTopic.this.sendMessage(to, from, msg);
+    }
   }
 }
 

@@ -103,9 +103,10 @@ public class QueryError extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(HmppStream handler)
+  public void dispatch(HmppStream handler, HmppStream toSource)
   {
-    handler.sendQueryError(getId(), getTo(), getFrom(), getValue(), getError());
+    handler.sendQueryError(getId(), getTo(), getFrom(),
+			   getValue(), getError());
   }
 
   @Override

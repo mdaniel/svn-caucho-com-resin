@@ -71,7 +71,7 @@ public class PresenceSubscribe extends Presence {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(HmppStream handler)
+  public void dispatch(HmppStream handler, HmppStream toSource)
   {
     handler.sendPresenceSubscribe(getTo(), getFrom(), getData());
   }

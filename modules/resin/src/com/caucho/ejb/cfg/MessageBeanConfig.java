@@ -122,6 +122,8 @@ public class MessageBeanConfig extends AbstractBeanConfig
     String loc = getInstanceClass().getName() + ": ";
     WebBeansContainer webBeans = WebBeansContainer.create();
 
+    bean.setMessageConsumerMax(_messageConsumerMax);
+    
     if (_destination != null) {
       bean.setDestinationValue((Destination) _destination);
     }
@@ -147,8 +149,6 @@ public class MessageBeanConfig extends AbstractBeanConfig
 				      _destinationType.getName()));
 
       bean.setDestinationValue((Destination) destComp.get());
-
-      bean.setMessageConsumerMax(_messageConsumerMax);
 
       ComponentImpl comp = webBeans.bind(loc, ConnectionFactory.class);
 

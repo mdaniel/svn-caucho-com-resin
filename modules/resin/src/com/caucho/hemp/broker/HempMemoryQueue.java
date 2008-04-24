@@ -53,6 +53,7 @@ public class HempMemoryQueue implements HmppStream, Runnable {
   private final ClassLoader _loader
     = Thread.currentThread().getContextClassLoader();
   private final HmppStream _target;
+  private final HmppStream _toSource;
 
   private int _threadSemaphore;
 
@@ -60,9 +61,16 @@ public class HempMemoryQueue implements HmppStream, Runnable {
   private int _head;
   private int _tail;
 
-  public HempMemoryQueue(HmppStream target)
+  public HempMemoryQueue(HmppStream target, HmppStream toSource)
   {
+    if (target == null)
+      throw new NullPointerException();
+
+    if (toSource == null)
+      throw new NullPointerException();
+    
     _target = target;
+    _toSource = toSource;
     _threadSemaphore = 1;
   }
 
@@ -293,7 +301,7 @@ public class HempMemoryQueue implements HmppStream, Runnable {
 	if (log.isLoggable(Level.FINER))
 	  log.finer(this + " dequeue " + packet);
 	
-	packet.dispatch(getStream());
+	packet.dispatch(getStream(), _toSource);
 	
 	isValid = true;
       } catch (Exception e) {

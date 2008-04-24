@@ -113,9 +113,9 @@ public class ServerInboundStream
       log.finer(this + " receive " + packet);
 
     if (_conn != null)
-      packet.dispatch(this);
+      packet.dispatch(this, _toBroker);
     else
-      packet.dispatch(_authHandler);
+      packet.dispatch(_authHandler, _toBroker);
 
     return true;
   }

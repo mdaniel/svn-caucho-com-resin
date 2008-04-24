@@ -29,7 +29,7 @@
 
 package com.caucho.hmpp.packet;
 
-import com.caucho.hmpp.HmppStream;
+import com.caucho.hmpp.*;
 import java.io.Serializable;
 
 /**
@@ -102,9 +102,13 @@ public class QuerySet extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(HmppStream handler)
+  public void dispatch(HmppStream handler, HmppStream toSource)
   {
-    handler.sendQuerySet(getId(), getTo(), getFrom(), getValue());
+    if (! handler.sendQuerySet(getId(), getTo(), getFrom(), getValue())) {
+      toSource.sendQueryError(getId(), getFrom(), getTo(), getValue(),
+			      new HmppError(HmppError.TYPE_CANCEL,
+					    HmppError.ITEM_NOT_FOUND));
+    }
   }
 
   @Override

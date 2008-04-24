@@ -112,4 +112,20 @@ public class UnarySelector extends Selector  {
       throw new JMSException("NOTONE");
     }
   }
+
+  public String toString()
+  {
+    switch (_token) {
+    case SelectorParser.NOT:
+      return "not(" + _expr + ")";
+    case SelectorParser.NULL:
+      return "(" + _expr + " is null)";
+    case '+':
+      return "+ (" + _expr + ")";
+    case '-':
+      return "- (" + _expr + ")";
+    default:
+      return super.toString();
+    }
+  }
 }

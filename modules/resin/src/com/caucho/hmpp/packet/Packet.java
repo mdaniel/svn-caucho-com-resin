@@ -92,7 +92,7 @@ public class Packet implements java.io.Serializable
   /**
    * SPI method to dispatch the packet to the proper handler
    */
-  public void dispatch(HmppStream handler)
+  public void dispatch(HmppStream handler, HmppStream toSource)
   {
   }
 

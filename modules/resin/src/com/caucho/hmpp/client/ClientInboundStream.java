@@ -112,7 +112,7 @@ class ClientInboundStream implements Runnable, HmppStream {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " receive " + packet);
 
-    packet.dispatch(this);
+    packet.dispatch(this, _clientStream);
   }
   
   /**
