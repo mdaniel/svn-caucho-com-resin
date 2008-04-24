@@ -171,8 +171,11 @@ public class InterfaceConfig extends BeanConfig {
 	throw new ConfigException(L.l("'{0}' is an unknown bean",
 				      _valueName));
     }
-    else
+    else if (getClassType() != null)
       super.init();
+    else {
+      // ioc/2130
+    }
   }
   
 
@@ -181,6 +184,16 @@ public class InterfaceConfig extends BeanConfig {
   {
     if (_isDeploy)
       super.deploy();
+  }
+
+  public Object getObject()
+  {
+    if (getClassType() != null)
+      return super.getObject();
+    else if (getBeanConfigClass().isAssignableFrom(String.class))
+      return _valueName;
+    else
+      return null;
   }
 
   /**
