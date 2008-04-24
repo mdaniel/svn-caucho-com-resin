@@ -146,12 +146,11 @@ public class FacesServletImpl extends GenericServlet
       factoryObj = FactoryFinder.getFactory(factoryName);
     } catch (FacesException e) {
     }
-    
+
+    FactoryFinder.setFactory(factoryName, defaultName);
+
     if (factoryObj == null) {
       factory = getServiceFactory(factoryName);
-      
-      if (factory == null || "".equals(factory))
-	factory = defaultName;
       
       FactoryFinder.setFactory(factoryName, factory);
     }
