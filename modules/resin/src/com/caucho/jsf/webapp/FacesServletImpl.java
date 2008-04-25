@@ -147,12 +147,14 @@ public class FacesServletImpl extends GenericServlet
     } catch (FacesException e) {
     }
 
-    FactoryFinder.setFactory(factoryName, defaultName);
 
     if (factoryObj == null) {
+      FactoryFinder.setFactory(factoryName, defaultName);
+
       factory = getServiceFactory(factoryName);
-      
-      FactoryFinder.setFactory(factoryName, factory);
+
+      if (factory != null && ! "".equals(factory))
+        FactoryFinder.setFactory(factoryName, factory);
     }
   }
 
