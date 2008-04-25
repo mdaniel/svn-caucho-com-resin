@@ -111,8 +111,8 @@ public class Mysqli extends JdbcConnectionResource {
       hostStr = host.toString();
 
     connectInternal(env, hostStr, user.toString(), password.toString(),
-		    db.toString(), port, socket.toString(),
-		    0, null, null);
+                    db.toString(), port, socket.toString(),
+                    0, null, null);
   }
 
   /**
@@ -146,96 +146,122 @@ public class Mysqli extends JdbcConnectionResource {
   {
     super(env);
   }
-
+  
   /**
    * Verify that the ConnectorJ driver version is 3.1.14 or newer.
    * Older versions of this driver return incorrect type information
    * and suffer from encoding related bugs.
    */
-
   protected static void checkDriverVersion(Env env, Connection conn)
     throws SQLException
   {
-    if (_checkedDriverVersion == null) {
-      synchronized (_checkDriverLock) {
-        DatabaseMetaData databaseMetaData = null;
+    if (_checkedDriverVersion != null)
+      return;
+    
+    synchronized(_checkDriverLock) {
+      // required if statement to prevent multiple checks
+      if (_checkedDriverVersion == null) {
+        _checkedDriverVersion = checkDriverVersionImpl(env, conn);
 
-        try {
-          databaseMetaData = conn.getMetaData();
-        } catch (SQLException e) {
-          log.log(Level.FINE, e.toString(), e);
-        }
-
-        // If getMetaData() returns null or raises a SQLException,
-        // then we can't verify the driver version.
-
-        if (databaseMetaData == null) {
-          _checkedDriverVersion = "";
+        if (_checkedDriverVersion.length() != 0)
           return;
+        
+        String message = "Unable to detect MySQL Connector/J JDBC driver " +
+                         "version.  The recommended JDBC version is 3.1.14.";
+
+        log.log(Level.WARNING, message);
+        env.warning(message);
+      }
+    }
+  }
+
+
+  private static String checkDriverVersionImpl(Env env, Connection conn)
+    throws SQLException
+  {
+    DatabaseMetaData databaseMetaData = null;
+
+    try {
+      databaseMetaData = conn.getMetaData();
+    } catch (SQLException e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    // If getMetaData() returns null or raises a SQLException,
+    // then we can't verify the driver version.
+
+    if (databaseMetaData == null)
+      return "";
+
+    String fullVersion = null;
+
+    try {
+      fullVersion = databaseMetaData.getDriverVersion();
+    } catch (SQLException e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    // If getDriverVersion() returns null or raises a SQLException,
+    // then we can't verify the driver version.
+
+    if (fullVersion == null) {
+      return "";
+    }
+
+    String version = fullVersion;
+
+    // Extract full version number.
+
+    int start;
+    int end = version.indexOf(' ');
+
+    String checkedDriverVersion = "";
+    
+    if (end != -1) {
+      version = version.substring(0, end);
+
+      start = version.lastIndexOf('-');
+
+      if (start != -1) {
+        version = version.substring(start + 1);
+
+        // version string should look like "3.1.14"
+        int major;
+        int minor;
+        int release;
+
+        start = version.indexOf('.');
+        end = version.lastIndexOf('.');
+
+        major = Integer.valueOf(version.substring(0, start));
+        minor = Integer.valueOf(version.substring(start+1, end));
+        release = Integer.valueOf(version.substring(end+1));
+
+        checkedDriverVersion = major + "." + minor + "." + release;
+        
+        if (major == 3 && (minor > 1 || minor == 1 && release >= 14)) {
         }
-
-        String fullVersion = null;
-
-        try {
-          fullVersion = databaseMetaData.getDriverVersion();
-        } catch (SQLException e) {
-          log.log(Level.FINE, e.toString(), e);
+        else if (major > 3) {
+          String message = L.l("Your MySQL Connector/J JDBC {0} driver may " +
+                               "have issues with column/table aliases and " +
+                               "DESCRIBE statements.  The recommended " +
+                               "JDBC version is 3.1.14.", version);
+          
+          log.log(Level.WARNING, message);
+          env.warning(message);
         }
+        else {
+          String message = L.l("Your MySQL Connector/J JDBC {0} driver may " +
+                               "have issues with character encoding.  The " +
+                               "recommended JDBC version is 3.1.14.", version);
 
-        // If getDriverVersion() returns null or raises a SQLException,
-        // then we can't verify the driver version.
-
-        if (fullVersion == null) {
-          _checkedDriverVersion = "";
-          return;
-        }
-
-        String version = fullVersion;
-
-        // Extract full version number.
-
-        boolean valid = false;
-
-        int start;
-        int end = version.indexOf(' ');
-
-        if (end != -1) {
-          version = version.substring(0, end);
-
-          start = version.lastIndexOf('-');
-
-          if (start != -1) {
-            version = version.substring(start + 1);
-
-            // version string should look like "3.1.14"
-
-            int major;
-            int minor;
-            int release;
-
-            start = version.indexOf('.');
-            end = version.lastIndexOf('.');
-
-            major = Integer.valueOf(version.substring(0, start));
-            minor = Integer.valueOf(version.substring(start+1, end));
-            release = Integer.valueOf(version.substring(end+1));
-
-            if ((major > 3) ||
-                ((major == 3) && (minor >= 1) && (release >= 14))) {
-              valid = true;
-              _checkedDriverVersion = major + "." + minor + "." + release;
-            }
-          }
-        }
-
-        if (! valid) {
-	  conn.close();
-	  
-          throw new SQLException(L.l("invalid Connector/J version '{0}' found in '{1}' must be 3.1.14 or newer",
-				     version, fullVersion));
+         log.log(Level.WARNING, message);
+         env.warning(message);
         }
       }
     }
+    
+    return checkedDriverVersion;
   }
 
   public String getResourceType()
@@ -247,15 +273,15 @@ public class Mysqli extends JdbcConnectionResource {
    * Connects to the underlying database.
    */
   protected Connection connectImpl(Env env,
-				   String host,
-				   String userName,
-				   String password,
-				   String dbname,
-				   int port,
-				   String socket,
-				   int flags,
-				   String driver,
-				   String url)
+                                   String host,
+                                   String userName,
+                                   String password,
+                                   String dbname,
+                                   int port,
+                                   String socket,
+                                   int flags,
+                                   String driver,
+                                   String url)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));
@@ -289,45 +315,46 @@ public class Mysqli extends JdbcConnectionResource {
 
         // Ignore MYSQL_CLIENT_LOCAL_FILES and MYSQL_CLIENT_IGNORE_SPACE flags.
 
-	if ((flags & MysqliModule.MYSQL_CLIENT_INTERACTIVE) != 0) {
+        if ((flags & MysqliModule.MYSQL_CLIENT_INTERACTIVE) != 0) {
           char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
 
           urlBuilder.append(sep);
           urlBuilder.append("interactiveClient=true");
-	}
+        }
 
-	if ((flags & MysqliModule.MYSQL_CLIENT_COMPRESS) != 0) {
+        if ((flags & MysqliModule.MYSQL_CLIENT_COMPRESS) != 0) {
           char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
 
           urlBuilder.append(sep);
           urlBuilder.append("useCompression=true");
-	}
+        }
 
-	if ((flags & MysqliModule.MYSQL_CLIENT_SSL) != 0) {
+        if ((flags & MysqliModule.MYSQL_CLIENT_SSL) != 0) {
           char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
 
           urlBuilder.append(sep);
           urlBuilder.append("useSSL=true");
-	}
+        }
 
-	url = urlBuilder.toString();
-
-	// Explicitly indicate that iso-8859-1 encoding should
-	// be used as the default driver encoding. We don't want the
-	// driver to use its version of Cp1252 because that encoding
-	// does not support byte values in the range 0x80 to 0x9f.
-	//
-	// php/144b
-
-	if (true) {
-	  char sep = url.indexOf('?') < 0 ? '?' : '&';
-
-	  url += sep + "characterEncoding=ISO8859_1";
-	}
+	    // Explicitly indicate that iso-8859-1 encoding should
+        // be used as the default driver encoding. We don't want the
+        // driver to use its version of Cp1252 because that encoding
+        // does not support byte values in the range 0x80 to 0x9f.
+        //
+        // php/144b
+        char sep = urlBuilder.indexOf("?") < 0 ? '?' : '&';
+        urlBuilder.append(sep + "characterEncoding=ISO8859_1");
+        //urlBuilder.append("&useInformationSchema=true");
+        
+        // required to get the result table name alias,
+        // doesn't work in mysql JDBC 5.1.6, but set it anyways in case
+        // the mysql guys fix it
+        //
+        // php/141p
+        urlBuilder.append("&useOldAliasMetadataBehavior=true");
+	
+        url = urlBuilder.toString();
       }
-
-      // Check in connection pool, otherwise open a new connection
-
       Connection jConn = env.getConnection(driver, url, userName, password);
 
       checkDriverVersion(env, jConn);
@@ -397,17 +424,15 @@ public class Mysqli extends JdbcConnectionResource {
       userStr = user.toString();
     }
 
-    if (password.length() == 0) {
+    if (password.length() == 0)
       passwordStr = getPassword();
-    } else {
+    else
       passwordStr = password.toString();
-    }
 
-    if (db.length() == 0) {
+    if (db.length() == 0)
       dbStr = getCatalog().toString();
-    } else {
+    else
       dbStr = db.toString();
-    }
 
     return connectInternal(getEnv(), _host, userStr, passwordStr,
                            dbStr, _port, _socket, _flags, _driver, _url);
@@ -741,7 +766,7 @@ public class Mysqli extends JdbcConnectionResource {
         ResultSet rs = stmt.executeQuery("SELECT @@identity");
 
         if (rs.next())
-          return new LongValue(rs.getLong(1));
+          return LongValue.create(rs.getLong(1));
         else
           return BooleanValue.FALSE;
       } finally {
@@ -873,6 +898,8 @@ public class Mysqli extends JdbcConnectionResource {
       log.log(Level.FINEST, e.toString(), e);
       return BooleanValue.FALSE;
     } catch (IllegalStateException e) {
+      log.log(Level.FINEST, e.toString(), e);
+      
       // #2184, some drivers return this on closed connection
       saveErrors(new SQLExceptionWrapper(e));
 
@@ -891,7 +918,7 @@ public class Mysqli extends JdbcConnectionResource {
                             StringValue query)
   {
     // Assume that the query argument contains just one query. Reuse the
-    // result managemenet logic in multiQuery(), so that a future call to
+    // result management logic in multiQuery(), so that a future call to
     // mysqli_store_result() will work as expected.
 
     return multiQuery(env, query);
@@ -1052,7 +1079,7 @@ public class Mysqli extends JdbcConnectionResource {
           str.append(rs.getString(2));
         }
 
-        return new UnicodeValueImpl(str.toString());
+        return env.createString(str.toString());
       } finally {
         if (stmt != null)
           stmt.close();
@@ -1116,7 +1143,6 @@ public class Mysqli extends JdbcConnectionResource {
     return ((Mysqli) validateConnection()).storeResult();
   }
 
-
   /**
    * Quercus function to get the field 'thread_id'.
    */
@@ -1149,7 +1175,7 @@ public class Mysqli extends JdbcConnectionResource {
         ResultSet rs = stmt.executeQuery("SELECT CONNECTION_ID()");
 
         if (rs.next())
-          return new LongValue(rs.getLong(1));
+          return LongValue.create(rs.getLong(1));
         else
           return BooleanValue.FALSE;
       } finally {

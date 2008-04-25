@@ -435,11 +435,14 @@ public class MysqlModule extends AbstractQuercusModule {
 
       String catalogName = md.getCatalogName(jdbcField);
       String tableName = md.getTableName(jdbcField);
+      
       String schemaName = md.getSchemaName(jdbcField);
+      
       String columnName = md.getColumnName(jdbcField);
-
+      String columnLabel = md.getColumnLabel(jdbcField);
+      
       if (schemaName == null || "".equals(schemaName))
-	schemaName = tableName;
+        schemaName = tableName;
 
       // some information is not available from the ResultSetMetaData
       JdbcColumnMetaData columnMd = null;
@@ -486,7 +489,7 @@ public class MysqlModule extends AbstractQuercusModule {
 
       ObjectValue fieldResult = env.createObject();
 
-      fieldResult.putField(env, "name", columnName);
+      fieldResult.putField(env, "name", columnLabel);
       fieldResult.putField(env, "table", tableName);
       fieldResult.putField(env, "def", "");
       fieldResult.putField(env, "max_length", maxLength);

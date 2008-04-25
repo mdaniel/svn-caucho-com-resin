@@ -244,7 +244,7 @@ public class Quercus
 
   public String getVersion()
   {
-    return "Open Source 3.1.2";
+    return "Open Source 3.1.6";
   }
 
   public String getVersionDate()
@@ -371,8 +371,11 @@ public class Quercus
     _scriptEncoding = encoding;
   }
 
-  // Get or Set the Mysql client version property.
-
+  /*
+   * Returns the mysql version to report to to PHP applications.
+   * It is user set-able to allow cloaking of the underlying mysql
+   * JDBC driver version for application compatibility.
+   */
   public String getMysqlVersion()
   {
     return _mySqlVersion;

@@ -175,7 +175,7 @@ public class MbstringModule
     String encoding = getEncoding(env);
 
     try {
-      return IconvUtility.decodeMime(env, str, encoding);
+      return QuercusMimeUtility.decodeMime(env, str, encoding);
 
     } catch (UnsupportedEncodingException e) {
       throw new QuercusModuleException(e.getMessage());
@@ -225,11 +225,11 @@ public class MbstringModule
     charset = getEncoding(env, charset);
 
     try {
-      String mime = IconvUtility.encodeMimeWord(str.toString(),
-                                                charset,
-                                                transfer_encoding,
-                                                linefeed,
-                                                76);
+      String mime = QuercusMimeUtility.encodeMimeWord(str.toString(),
+                                                      charset,
+                                                      transfer_encoding,
+                                                      linefeed,
+                                                      76);
       return env.createString(mime);
 
     } catch (UnsupportedEncodingException e) {
@@ -1152,7 +1152,7 @@ public class MbstringModule
                               String destEncoding)
   {
     try {
-      return IconvUtility.decodeEncode(env, val, srcEncoding, destEncoding);
+      return UnicodeUtility.decodeEncode(env, val, srcEncoding, destEncoding);
     } catch (UnsupportedEncodingException e) {
       throw new QuercusModuleException(e.getMessage());
     }

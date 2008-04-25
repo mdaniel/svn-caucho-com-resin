@@ -33,15 +33,11 @@ import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.module.IniDefinition;
+import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.util.L10N;
 
-import javax.mail.Header;
-import javax.mail.MessagingException;
-import javax.mail.internet.InternetHeaders;
 import java.io.UnsupportedEncodingException;
-import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 /**
@@ -61,7 +57,7 @@ public class UnicodeModule extends AbstractQuercusModule {
   
   public static final int ICONV_MIME_DECODE_STRICT = 1;
   public static final int ICONV_MIME_DECODE_CONTINUE_ON_ERROR = 2;
-
+  
   private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
   /**
@@ -89,263 +85,6 @@ public class UnicodeModule extends AbstractQuercusModule {
                                           String encoding)
   {
     return str.toBinaryValue(env, encoding);
-  }
-
-  /**
-   * Returns the current encoding.
-   *
-   * @param env
-   * @param type setting to return
-   * @return iconv environment settings
-   */
-  public static Value iconv_get_encoding(Env env,
-                       @Optional("all") String type)
-  {
-    type = type.toLowerCase();
-
-    if ("all".equals(type)) {
-      ArrayValue array = new ArrayValueImpl();
-      array.put(env, "input_encoding",
-		env.getIniString("iconv.input_encoding"));
-      array.put(env, "output_encoding",
-		env.getIniString("iconv.output_encoding"));
-      array.put(env, "internal_encoding",
-		env.getIniString("iconv.internal_encoding"));
-      return array;
-    }
-
-    if ("input_encoding".equals(type))
-      return env.createString(env.getIniString("iconv.input_encoding"));
-    else if ("output_encoding".equals(type))
-      return env.createString(env.getIniString("iconv.output_encoding"));
-    else if ("internal_encoding".equals(type))
-      return env.createString(env.getIniString("iconv.internal_encoding"));
-
-    return BooleanValue.FALSE;
-  }
-
-  /**
-   * Decodes all the headers and place them in an array.
-   * Use iconv.internal_encoding.
-   * XXX: mode, line-length, line-break-chars
-   *
-   * @param env
-   * @param encoded_headers
-   * @param mode controls error recovery
-   * @param charset
-   */
-  public static Value iconv_mime_decode_headers(Env env,
-                       StringValue encoded_headers,
-                       @Optional() int mode,
-                       @Optional() String charset)
-  {
-    if (charset.length() == 0)
-      charset = env.getIniString("iconv.internal_encoding");
-
-    try {
-      return decodeMimeHeaders(env, encoded_headers, charset);
-    }
-    catch (UnsupportedEncodingException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-      env.warning(L.l(e.getMessage()));
-    }
-    catch (MessagingException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-      env.warning(L.l(e.getMessage()));
-    }
-
-    return BooleanValue.FALSE;
-  }
-
-  private static Value decodeMimeHeaders(Env env,
-                              StringValue encodedHeaders,
-                              String charset)
-    throws MessagingException, UnsupportedEncodingException
-  {
-    ArrayValue headers = new ArrayValueImpl();
-
-    Enumeration<Header> enumeration
-        = new InternetHeaders(encodedHeaders.toInputStream()).getAllHeaders();
-
-    while (enumeration.hasMoreElements()) {
-      Header header = enumeration.nextElement();
-
-      StringValue name
-          = IconvUtility.decodeMime(env, header.getName(), charset);
-      StringValue val
-          = IconvUtility.decodeMime(env, header.getValue(), charset);
-
-      Value headerName;
-      if ((headerName = headers.containsKey(name)) == null) {
-        headers.put(name, val);
-        continue;
-      }
-
-      ArrayValue inner;
-      if (headerName.isArray()) {
-        inner = headerName.toArrayValue(env);
-      }
-      else {
-        inner = new ArrayValueImpl();
-        inner.put(headerName);
-      }
-
-      inner.put(val);
-      headers.put(name, inner);
-    }
-
-    return headers;
-  }
-
-  /**
-   * Uses iconv.internal_encoding.
-   *
-   * XXX: mode ignored
-   *
-   * @param env
-   * @param encoded_header
-   * @param mode controls error recovery
-   * @param charset to encode resultant 
-   */
-  public static Value iconv_mime_decode(Env env,
-                              StringValue encoded_header,
-                              @Optional("1") int mode,
-                              @Optional("") String charset)
-  {
-    if (charset.length() == 0)
-      charset = env.getIniString("iconv.internal_encoding");
-
-    try {
-      Enumeration<String> enumeration = new InternetHeaders(
-          encoded_header.toInputStream()).getAllHeaderLines();
-
-      if (! enumeration.hasMoreElements()) {
-        env.warning(L.l("Error parsing header."));
-        return BooleanValue.FALSE;
-      }
-
-      return IconvUtility.decodeMime(env, enumeration.nextElement(), charset);
-
-    }
-    catch (MessagingException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-      env.warning(L.l(e.getMessage()));
-    }
-    catch (UnsupportedEncodingException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-      env.warning(L.l(e.getMessage()));
-    }
-
-    return BooleanValue.FALSE;
-  }
-
-  /**
-   * Encodes a MIME header.
-   *
-   * XXX: preferences
-   *
-   * @param field_name header field name
-   * @param field_value header field value
-   * @param preferences
-   */
-  public static Value iconv_mime_encode(Env env,
-                              StringValue field_name,
-                              StringValue field_value,
-                              @Optional() ArrayValue preferences)
-  {
-    try {
-      String scheme = "B";
-      String lineBreakChars = "\r\n";
-      String inCharset = env.getIniString("iconv.internal_encoding");
-      String outCharset = inCharset;
-      int lineLength = 76;
-
-      if (preferences != null) {
-        Value tmp = env.createString("scheme");
-        if ((tmp = preferences.get(tmp)).isset())
-          scheme = tmp.toString();
-
-        tmp = env.createString("line-break-chars");
-        if ((tmp = preferences.get(tmp)).isset())
-          lineBreakChars = tmp.toString();
-
-        tmp = env.createString("input-charset");
-        if ((tmp = preferences.get(tmp)).isset())
-          inCharset = tmp.toString();
-
-        tmp = env.createString("output-charset");
-        if ((tmp = preferences.get(tmp)).isset())
-          outCharset = tmp.toString();
-
-        tmp = env.createString("line-length");
-        if ((tmp = preferences.get(tmp)).isset()) {
-        if (tmp.isLongConvertible())
-          lineLength = (int)tmp.toLong();
-        }
-      }
-
-      return IconvUtility.encodeMime(env,
-                                     field_name,
-                                     field_value,
-                                     inCharset,
-                                     outCharset,
-                                     scheme,
-                                     lineBreakChars,
-                                     lineLength);
-
-    }
-    catch (UnsupportedEncodingException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-      env.warning(L.l(e.getMessage()));
-
-      return BooleanValue.FALSE;
-    }
-  }
-
-  /**
-   * Sets the current encoding.
-   * @param env
-   * @param type
-   * @param charset
-   */
-  public static BooleanValue iconv_set_encoding(Env env,
-                       String type,
-                       StringValue charset)
-  {
-    type = type.toLowerCase();
-
-    if ("input_encoding".equals(type)) {
-      env.setIni("iconv.input_encoding", charset);
-      return BooleanValue.TRUE;
-    }
-    else if ("output_encoding".equals(type)) {
-      env.setIni("iconv.output_encoding", charset);
-      return BooleanValue.TRUE;
-    }
-    else if ("internal_encoding".equals(type)) {
-      env.setIni("iconv.internal_encoding", charset);
-      return BooleanValue.TRUE;
-    }
-
-    return BooleanValue.FALSE;
-  }
-
-  /**
-   * Returns the length of the decoded string.
-   * Uses iconv.internal_encoding.
-   *
-   * @param env
-   * @param str
-   * @param charset
-   */
-  public static Value iconv_strlen(Env env,
-                       StringValue str,
-                       @Optional("") String charset)
-  {
-    if (charset.length() == 0 )
-      charset = env.getIniString("iconv.internal_encoding");
-
-    return LongValue.create(str.convertToUnicode(env, charset).length());
   }
 
   /**
@@ -475,7 +214,7 @@ public class UnicodeModule extends AbstractQuercusModule {
     }
 
     try {
-      return IconvUtility.decodeEncode(env, str, in_charset, out_charset);
+      return UnicodeUtility.decodeEncode(env, str, in_charset, out_charset);
     }
     catch (UnsupportedEncodingException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -492,7 +231,206 @@ public class UnicodeModule extends AbstractQuercusModule {
     throw new UnimplementedException("ob_iconv_handler");
   }
 
+  /**
+   * Returns the current encoding.
+   *
+   * @param env
+   * @param type setting to return
+   * @return iconv environment settings
+   */
+  public static Value iconv_get_encoding(Env env,
+                       @Optional("all") String type)
+  {
+    type = type.toLowerCase();
 
+    if ("all".equals(type)) {
+      ArrayValue array = new ArrayValueImpl();
+      array.put(env, "input_encoding",
+        env.getIniString("iconv.input_encoding"));
+      array.put(env, "output_encoding",
+        env.getIniString("iconv.output_encoding"));
+      array.put(env, "internal_encoding",
+        env.getIniString("iconv.internal_encoding"));
+      return array;
+    }
+
+    if ("input_encoding".equals(type))
+      return env.createString(env.getIniString("iconv.input_encoding"));
+    else if ("output_encoding".equals(type))
+      return env.createString(env.getIniString("iconv.output_encoding"));
+    else if ("internal_encoding".equals(type))
+      return env.createString(env.getIniString("iconv.internal_encoding"));
+
+    return BooleanValue.FALSE;
+  }
+  
+  /**
+   * Sets the current encoding.
+   * @param env
+   * @param type
+   * @param charset
+   */
+  public static BooleanValue iconv_set_encoding(Env env,
+                       String type,
+                       StringValue charset)
+  {
+    type = type.toLowerCase();
+
+    if ("input_encoding".equals(type)) {
+      env.setIni("iconv.input_encoding", charset);
+      return BooleanValue.TRUE;
+    }
+    else if ("output_encoding".equals(type)) {
+      env.setIni("iconv.output_encoding", charset);
+      return BooleanValue.TRUE;
+    }
+    else if ("internal_encoding".equals(type)) {
+      env.setIni("iconv.internal_encoding", charset);
+      return BooleanValue.TRUE;
+    }
+
+    return BooleanValue.FALSE;
+  }
+  
+  /**
+   * Returns the length of the decoded string.
+   * Uses iconv.internal_encoding.
+   *
+   * @param env
+   * @param str
+   * @param charset
+   */
+  public static Value iconv_strlen(Env env,
+                       StringValue str,
+                       @Optional("") String charset)
+  {
+    if (charset.length() == 0 )
+      charset = env.getIniString("iconv.internal_encoding");
+
+    return LongValue.create(str.convertToUnicode(env, charset).length());
+  }
+  
+  /**
+   * Encodes a MIME header.
+   *
+   * XXX: preferences
+   *
+   * @param fieldName header field name
+   * @param fieldValue header field value
+   * @param preferences
+   */
+  public static Value iconv_mime_encode(Env env,
+                              StringValue fieldName,
+                              StringValue fieldValue,
+                              @Optional() ArrayValue preferences)
+  {
+    try {
+      String scheme = "B";
+      String lineBreakChars = "\r\n";
+      String inCharset = env.getIniString("iconv.internal_encoding");
+      String outCharset = inCharset;
+      int lineLength = 76;
+
+      if (preferences != null) {
+        Value tmp = env.createString("scheme");
+        if ((tmp = preferences.get(tmp)).isset())
+          scheme = tmp.toString();
+
+        tmp = env.createString("line-break-chars");
+        if ((tmp = preferences.get(tmp)).isset())
+          lineBreakChars = tmp.toString();
+
+        tmp = env.createString("input-charset");
+        if ((tmp = preferences.get(tmp)).isset())
+          inCharset = tmp.toString();
+
+        tmp = env.createString("output-charset");
+        if ((tmp = preferences.get(tmp)).isset())
+          outCharset = tmp.toString();
+
+        tmp = env.createString("line-length");
+        if ((tmp = preferences.get(tmp)).isset()) {
+        if (tmp.isLongConvertible())
+          lineLength = (int)tmp.toLong();
+        }
+      }
+
+      return QuercusMimeUtility.encodeMime(env,
+                                           fieldName,
+                                           fieldValue,
+                                           inCharset,
+                                           outCharset,
+                                           scheme,
+                                           lineBreakChars,
+                                           lineLength);
+
+    }
+    catch (UnsupportedEncodingException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l(e.getMessage()));
+
+      return BooleanValue.FALSE;
+    }
+  }
+  
+  /**
+   * Decodes all the headers and place them in an array.
+   * Use iconv.internal_encoding.
+   * XXX: mode, line-length, line-break-chars
+   *
+   * @param env
+   * @param encoded_headers
+   * @param mode controls error recovery
+   * @param charset
+   */
+  public static Value iconv_mime_decode_headers(Env env,
+                                                StringValue encoded_headers,
+                                                @Optional() int mode,
+                                                @Optional() String charset)
+  {
+    if (charset.length() == 0)
+      charset = env.getIniString("iconv.internal_encoding");
+
+    try {
+      return QuercusMimeUtility.decodeMimeHeaders(env, encoded_headers, charset);
+    }
+    catch (UnsupportedEncodingException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l(e.getMessage()));
+    }
+
+    return BooleanValue.FALSE;
+  }
+  
+  /**
+   * Uses iconv.internal_encoding.
+   *
+   * XXX: mode ignored
+   *
+   * @param env
+   * @param encoded_header
+   * @param mode controls error recovery
+   * @param charset to encode resultant 
+   */
+  public static Value iconv_mime_decode(Env env,
+                              StringValue encodedHeader,
+                              @Optional("1") int mode,
+                              @Optional("") String charset)
+  {
+    if (charset.length() == 0)
+      charset = env.getIniString("iconv.internal_encoding");
+
+    try {
+      return QuercusMimeUtility.decodeMime(env, encodedHeader, charset);
+    }
+    catch (UnsupportedEncodingException e) {
+      env.warning(e);
+      log.log(Level.FINE, e.getMessage(), e);
+      
+      return BooleanValue.FALSE;
+    }
+  }
+  
   static final IniDefinition INI_ICONV_INPUT_ENCODING
     = _iniDefinitions.add("iconv.input_encoding", "utf-8", PHP_INI_ALL);
   static final IniDefinition INI_ICONV_OUTPUT_ENCODING
@@ -501,4 +439,4 @@ public class UnicodeModule extends AbstractQuercusModule {
     = _iniDefinitions.add("iconv.internal_encoding", "utf-8", PHP_INI_ALL);
 }
 
-// XXX: "//TRANSLIT" and "//IGNORE" charset suffixes
+//XXX: "//TRANSLIT" and "//IGNORE" charset suffixes

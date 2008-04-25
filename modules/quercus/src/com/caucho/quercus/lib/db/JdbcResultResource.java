@@ -153,11 +153,11 @@ public class JdbcResultResource {
   {
     try {
       if (_rs.next()) {
-	_isValid = true;
+        _isValid = true;
 	
         ArrayValue array = new ArrayValueImpl();
 
-	ResultSetMetaData md = getMetaData();
+        ResultSetMetaData md = getMetaData();
 
         int count = md.getColumnCount();
 
@@ -165,13 +165,10 @@ public class JdbcResultResource {
           _columnNames = new Value[count];
 
           for (int i = 0; i < count; i++) {
-	    String columnName = md.getColumnLabel(i + 1);
-
-	    if (columnName == null)
-	      md.getColumnName(i + 1);
+            String columnName = md.getColumnLabel(i + 1);
 	    
             _columnNames[i] = env.createString(columnName);
-	  }
+          }
         }
 
         for (int i = 0; i < count; i++) {
@@ -293,18 +290,17 @@ public class JdbcResultResource {
   {
     try {
       if (_rs.next()) {
-	_isValid = true;
+        _isValid = true;
 	
         Value result = env.createObject();
 
-	ResultSetMetaData md = getMetaData();
+        ResultSetMetaData md = getMetaData();
 
         int count = md.getColumnCount();
 
         for (int i = 0; i < count; i++) {
-          String name = md.getColumnName(i + 1);
+          String name = md.getColumnLabel(i + 1);
           Value value = getColumnValue(env, _rs, md, i + 1);
-
 
           result.putField(env, name, value);
         }
@@ -389,20 +385,22 @@ public class JdbcResultResource {
                               ResultSetMetaData rsmd)
     throws SQLException
   {
-
     int numColumns = rsmd.getColumnCount();
 
     if (colName.indexOf('.') == -1) {
       for (int i = 1; i <= numColumns; i++) {
-        if (colName.equals(rsmd.getColumnName(i)))
+        if (colName.equals(rsmd.getColumnLabel(i)))
           return (i - 1);
       }
+      
       return -1;
-    } else {
+    }
+    else {
       for (int i = 1; i <= numColumns; i++) {
-        if (colName.equals(rsmd.getTableName(i) + '.' + rsmd.getColumnName(i)))
+        if (colName.equals(rsmd.getTableName(i) + '.' + rsmd.getColumnLabel(i)))
           return (i - 1);
       }
+      
       return -1;
     }
 
@@ -699,7 +697,7 @@ public class JdbcResultResource {
         return BooleanValue.FALSE;
       }
       else
-        return env.createString(md.getColumnName(fieldOffset + 1));
+        return env.createString(md.getColumnLabel(fieldOffset + 1));
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;

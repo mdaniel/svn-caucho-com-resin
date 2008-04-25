@@ -447,14 +447,14 @@ public class JdbcStatementResource {
 
     _stmtType = _query;
     _stmtType = _stmtType.replaceAll("\\s+.*", "");
-    if (_stmtType.equals("")) {
+    
+    if (_stmtType.length() == 0)
       _stmtType = "UNKNOWN";
-    } else {
+    else {
       _stmtType = _stmtType.toUpperCase();
       String s = _stmtType.replaceAll("(SELECT|UPDATE|DELETE|INSERT|CREATE|DROP|ALTER|BEGIN|DECLARE)", "");
-      if (!s.equals("")) {
+      if (! s.equals(""))
         _stmtType = "UNKNOWN";
-      }
     }
 
     return _stmtType;
@@ -512,7 +512,6 @@ public class JdbcStatementResource {
   public boolean prepare(Env env, StringValue query)
   {
     try {
-
       if (_stmt != null)
         _stmt.close();
 
@@ -555,7 +554,6 @@ public class JdbcStatementResource {
   public boolean prepareStatement(Env env, String query)
   {
     try {
-
       if (_stmt != null)
         _stmt.close();
 
@@ -568,8 +566,8 @@ public class JdbcStatementResource {
       
       if (this instanceof OracleStatement) {
         _stmt = conn.prepareCall(query,
-                                ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                ResultSet.CONCUR_READ_ONLY);
+                                 ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                 ResultSet.CONCUR_READ_ONLY);
       } else {
         _stmt = conn.prepareStatement(query,
                                       ResultSet.TYPE_SCROLL_INSENSITIVE,
@@ -689,7 +687,7 @@ public class JdbcStatementResource {
               if (s.charAt(0) == '$')
                 s = s.substring(1);
               else
-                money = "$"+money;
+                money = "$" + money;
 
               try {
                 // This will throw an exception if not double while
