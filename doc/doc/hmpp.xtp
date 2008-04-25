@@ -222,13 +222,43 @@ value.  Example messages could be IM text messages, administration console
 graph, game updates, or updated stock quotes.  Since HMPP is bidirectional,
 messages can flow to and from any client.</p>
 
+<ul>
+<li>Message - sends a message to a resource</li>
+<li>MessageError - sends a message error to a resource</li>
+</ul>
+
 </s2>
 
 <s2 title="Query Packets">
 
+<p>Query packages are RPC get and set packets with a matching response
+or error.  Because the query will always have a matching response packet
+or an error packet, clients can either block for the result or
+attach a callback.</p>
+
+<p>Like the other packets, queries are bidirectional, so a service can query
+a client as well as the usual client querying the server.</p>
+
+<p>Query packets have an associated <var>id</var> field to match requests
+with responses.  The client will increment the <var>id</var> for each
+new query.</p>
+
+<ul>
+<li>QueryGet - sends an information request</li>
+<li>QuerySet - sends an action query </li>
+<li>QueryResponse - returns a response</li>
+<li>QueryError - returns an error</li>
+</ul>
+
 </s2>
 
 <s2 title="Presence Packets">
+
+<p>Presence packets send specialized information for subscription
+notification.  Many applications will not need to use any presence
+packets at all.</p>
+
+
 
 </s2>
 

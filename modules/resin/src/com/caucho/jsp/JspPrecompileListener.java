@@ -44,9 +44,15 @@ import java.util.logging.Logger;
  * Precompiles jsp files.
  */
 public class JspPrecompileListener extends JspPrecompileResource
-  implements ServletContextListener {
+  implements ServletContextListener
+{
   private static final L10N L = new L10N(JspPrecompileListener.class);
-  private static final Logger log = Log.open(JspPrecompileListener.class);
+  private static final Logger log
+    = Logger.getLogger(JspPrecompileListener.class.getName());
+
+  public JspPrecompileListener()
+  {
+  }
   
   /**
    * Adds a new extension to precompile.

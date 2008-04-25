@@ -29,10 +29,7 @@
 
 package com.caucho.hemp.client;
 
-import com.caucho.hmpp.*;
-import com.caucho.hmpp.auth.*;
-import com.caucho.hmpp.client.*;
-import com.caucho.hmpp.packet.*;
+import com.caucho.hmtp.client.HmtpClient;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.hemp.*;
@@ -49,7 +46,7 @@ import java.util.logging.*;
 /**
  * HMPP client protocol
  */
-public class HempClient extends HmppClient {
+public class HempClient extends HmtpClient {
   private static final L10N L = new L10N(HempClient.class);
   private static final Logger log
     = Logger.getLogger(HempClient.class.getName());

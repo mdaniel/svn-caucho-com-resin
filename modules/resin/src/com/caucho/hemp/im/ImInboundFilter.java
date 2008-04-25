@@ -29,9 +29,8 @@
 
 package com.caucho.hemp.im;
 
-import com.caucho.hmpp.*;
-import com.caucho.hmpp.disco.*;
-import com.caucho.hmpp.im.*;
+import com.caucho.hmtp.HmtpStream;
+import com.caucho.hmtp.AbstractHmtpFilter;
 import java.util.*;
 import java.util.logging.*;
 import java.io.Serializable;
@@ -40,11 +39,11 @@ import java.io.Serializable;
 /**
  * Filter on inbound requests
  */
-public class ImInboundFilter extends AbstractHmppFilter
+public class ImInboundFilter extends AbstractHmtpFilter
 {
-  private ImResource _resource;
+  private ImUserService _resource;
   
-  public ImInboundFilter(HmppStream next, ImResource resource)
+  public ImInboundFilter(HmtpStream next, ImUserService resource)
   {
     super(next);
 

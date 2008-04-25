@@ -29,10 +29,14 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.hemp.broker.HempConnectionOutboundStream;
-import com.caucho.hemp.broker.HempBroker;
-import com.caucho.hmpp.spi.HmppResource;
-import com.caucho.hmpp.*;
+import com.caucho.hmtp.QueryStream;
+import com.caucho.hmtp.QueryCallback;
+import com.caucho.hmtp.PresenceStream;
+import com.caucho.hmtp.MessageStream;
+import com.caucho.hmtp.HmtpStream;
+import com.caucho.hmtp.HmtpError;
+import com.caucho.hmtp.HmtpConnection;
+import com.caucho.hmtp.spi.HmtpResource;
 
 import com.caucho.util.*;
 import java.io.Serializable;
@@ -42,7 +46,7 @@ import java.util.logging.*;
 /**
  * Manager
  */
-public class HempConnectionImpl implements HmppConnection {
+public class HempConnectionImpl implements HmtpConnection {
   private static final Logger log
     = Logger.getLogger(HempConnectionImpl.class.getName());
   
@@ -58,13 +62,13 @@ public class HempConnectionImpl implements HmppConnection {
 
   private long _qId;
   
-  private HmppStream _inboundFilter;
-  private HmppStream _outboundFilter;
+  private HmtpStream _inboundFilter;
+  private HmtpStream _outboundFilter;
   
-  private HmppStream _inboundStream;
-  private HmppStream _outboundStream;
+  private HmtpStream _inboundStream;
+  private HmtpStream _outboundStream;
   
-  private HmppResource _resource;
+  private HmtpResource _resource;
 
   private boolean _isClosed;
 
@@ -106,7 +110,7 @@ public class HempConnectionImpl implements HmppConnection {
     return _handler;
   }
   
-  public HmppStream getStream()
+  public HmtpStream getStream()
   {
     return _inboundStream;
   }
@@ -256,7 +260,7 @@ public class HempConnectionImpl implements HmppConnection {
 		       String to,
 		       String from,
 		       Serializable value,
-		       HmppError error)
+		       HmtpError error)
   {
     QueryItem item = null;
     
@@ -381,7 +385,7 @@ public class HempConnectionImpl implements HmppConnection {
    */
   public void presenceError(String to,
 			    Serializable []data,
-			    HmppError error)
+			    HmtpError error)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -441,7 +445,7 @@ public class HempConnectionImpl implements HmppConnection {
     void onQueryError(String to,
 		      String from,
 		      Serializable value,
-		      HmppError error)
+		      HmtpError error)
     {
       if (_callback != null)
 	_callback.onQueryError(to, from, value, error);
@@ -456,7 +460,7 @@ public class HempConnectionImpl implements HmppConnection {
 
   static class WaitQueryCallback implements QueryCallback {
     private Serializable _result;
-    private HmppError _error;
+    private HmtpError _error;
     private boolean _isResult;
 
     public Serializable getResult()
@@ -464,7 +468,7 @@ public class HempConnectionImpl implements HmppConnection {
       return _result;
     }
     
-    public HmppError getError()
+    public HmtpError getError()
     {
       return _error;
     }
@@ -495,7 +499,7 @@ public class HempConnectionImpl implements HmppConnection {
     }
   
     public void onQueryError(String fromJid, String toJid,
-			     Serializable value, HmppError error)
+			     Serializable value, HmtpError error)
     {
       _error = error;
 

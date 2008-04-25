@@ -29,9 +29,23 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.hmpp.*;
-import com.caucho.hmpp.packet.*;
-import com.caucho.hmpp.spi.*;
+import com.caucho.hmtp.packet.QuerySet;
+import com.caucho.hmtp.packet.QueryResult;
+import com.caucho.hmtp.packet.QueryGet;
+import com.caucho.hmtp.packet.QueryError;
+import com.caucho.hmtp.packet.PresenceUnsubscribed;
+import com.caucho.hmtp.packet.PresenceUnsubscribe;
+import com.caucho.hmtp.packet.PresenceUnavailable;
+import com.caucho.hmtp.packet.PresenceSubscribed;
+import com.caucho.hmtp.packet.PresenceSubscribe;
+import com.caucho.hmtp.packet.PresenceProbe;
+import com.caucho.hmtp.packet.PresenceError;
+import com.caucho.hmtp.packet.Presence;
+import com.caucho.hmtp.packet.Packet;
+import com.caucho.hmtp.packet.MessageError;
+import com.caucho.hmtp.packet.Message;
+import com.caucho.hmtp.HmtpStream;
+import com.caucho.hmtp.HmtpError;
 import com.caucho.server.resin.*;
 import com.caucho.server.util.*;
 import com.caucho.util.*;
@@ -44,7 +58,7 @@ import java.io.Serializable;
 /**
  * Queue of hmpp packets
  */
-public class HempMemoryQueue implements HmppStream, Runnable {
+public class HempMemoryQueue implements HmtpStream, Runnable {
   private static final Logger log
     = Logger.getLogger(HempMemoryQueue.class.getName());
   private static final L10N L = new L10N(HempMemoryQueue.class);
@@ -52,8 +66,8 @@ public class HempMemoryQueue implements HmppStream, Runnable {
   private final Executor _executor = ScheduledThreadPool.getLocal();
   private final ClassLoader _loader
     = Thread.currentThread().getContextClassLoader();
-  private final HmppStream _target;
-  private final HmppStream _toSource;
+  private final HmtpStream _target;
+  private final HmtpStream _toSource;
 
   private int _threadSemaphore;
 
@@ -61,7 +75,7 @@ public class HempMemoryQueue implements HmppStream, Runnable {
   private int _head;
   private int _tail;
 
-  public HempMemoryQueue(HmppStream target, HmppStream toSource)
+  public HempMemoryQueue(HmtpStream target, HmtpStream toSource)
   {
     if (target == null)
       throw new NullPointerException();
@@ -88,7 +102,7 @@ public class HempMemoryQueue implements HmppStream, Runnable {
   public void sendMessageError(String to,
 			       String from,
 			       Serializable value,
-			       HmppError error)
+			       HmtpError error)
   {
     enqueue(new MessageError(to, from, value, error));
   }
@@ -137,7 +151,7 @@ public class HempMemoryQueue implements HmppStream, Runnable {
 			     String to,
 			     String from,
 			     Serializable query,
-			     HmppError error)
+			     HmtpError error)
   {
     enqueue(new QueryError(id, to, from, query, error));
   }
@@ -216,12 +230,12 @@ public class HempMemoryQueue implements HmppStream, Runnable {
   public void sendPresenceError(String to,
 			        String from,
 			        Serializable []data,
-			        HmppError error)
+			        HmtpError error)
   {
     enqueue(new PresenceError(to, from, data, error));
   }
 
-  protected HmppStream getStream()
+  protected HmtpStream getStream()
   {
     return _target;
   }

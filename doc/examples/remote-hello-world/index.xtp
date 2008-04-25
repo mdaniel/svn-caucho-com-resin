@@ -155,7 +155,7 @@ Finally, a SOAP interface is available, using CXF or XFire.
 
   &lt;servlet-mapping url-pattern="/hello/hessian/*"
                    servlet-class="example.HelloServiceImpl">
-    &lt;protocol type="hessian"/>
+    &lt;protocol uri="hessian:"/>
   &lt;/servlet-mapping>
 
 &lt;/web-app>

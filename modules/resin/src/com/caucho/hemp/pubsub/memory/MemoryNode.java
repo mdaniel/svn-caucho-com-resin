@@ -29,11 +29,9 @@
 
 package com.caucho.hemp.pubsub.memory;
 
-import com.caucho.hmpp.*;
-import com.caucho.hmpp.pubsub.*;
-import com.caucho.hmpp.spi.*;
+import com.caucho.hmtp.pubsub.PublishMessage;
+import com.caucho.hmtp.pubsub.PubSubItem;
 import com.caucho.util.*;
-import java.io.Serializable;
 import java.util.*;
 import java.util.logging.*;
 
@@ -120,6 +118,7 @@ public class MemoryNode
     return cb.toString();
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getName() + "]";

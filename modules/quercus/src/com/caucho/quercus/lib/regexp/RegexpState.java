@@ -98,6 +98,9 @@ public class RegexpState {
 
   public boolean find()
   {
+    if (log.isLoggable(Level.FINEST))
+      log.finest(this + " find()");
+    
     int minLength = _regexp._minLength;
     boolean []firstSet = _regexp._firstSet;
     int length = _subject.length();
@@ -142,6 +145,9 @@ public class RegexpState {
 
   public int find(Env env, StringValue subject, int first)
   {
+    if (log.isLoggable(Level.FINEST))
+      log.finest(this + " find(" + subject + ")");
+    
     subject = _regexp.convertSubject(env, subject);
     
     _subject = subject;
@@ -157,6 +163,9 @@ public class RegexpState {
    */
   public int exec(Env env, StringValue subject, int start)
   { 
+    if (log.isLoggable(Level.FINEST))
+      log.finest(this + " exec(" + subject + ")");
+    
     subject = _regexp.convertSubject(env, subject);
 
     clearGroup();
@@ -304,5 +313,10 @@ public class RegexpState {
     StringValue result = _subject.substring(start, end);
 
     return _regexp.convertResult(env, result);
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _regexp + "]";
   }
 }

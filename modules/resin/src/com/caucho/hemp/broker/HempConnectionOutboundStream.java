@@ -29,13 +29,13 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.hmpp.PresenceStream;
-import com.caucho.hmpp.MessageStream;
-import com.caucho.hmpp.QueryStream;
-import com.caucho.hmpp.HmppError;
+import com.caucho.hmtp.PresenceStream;
+import com.caucho.hmtp.MessageStream;
+import com.caucho.hmtp.QueryStream;
+import com.caucho.hmtp.HmtpError;
 
 import com.caucho.hemp.*;
-import com.caucho.hmpp.HmppStream;
+import com.caucho.hmtp.HmtpStream;
 import com.caucho.util.*;
 import java.io.Serializable;
 import java.util.logging.*;
@@ -43,7 +43,7 @@ import java.util.logging.*;
 /**
  * Handles packets sent to the connection
  */
-class HempConnectionOutboundStream implements HmppStream {
+class HempConnectionOutboundStream implements HmtpStream {
   private static final Logger log
     = Logger.getLogger(HempConnectionOutboundStream.class.getName());
   
@@ -114,7 +114,7 @@ class HempConnectionOutboundStream implements HmppStream {
   public void sendMessageError(String to,
 			       String from,
 			       Serializable value,
-			       HmppError error)
+			       HmtpError error)
   {
     MessageStream handler = _messageHandler;
 
@@ -151,9 +151,9 @@ class HempConnectionOutboundStream implements HmppStream {
     if (handler.sendQueryGet(id, to, from, query))
       return true;
 
-    HmppError error = 
-      new HmppError(HmppError.TYPE_CANCEL,
-	            HmppError.FEATURE_NOT_IMPLEMENTED,
+    HmtpError error = 
+      new HmtpError(HmtpError.TYPE_CANCEL,
+	            HmtpError.FEATURE_NOT_IMPLEMENTED,
 		    "unknown query: " + query.getClass().getName());
     
      _conn.getStream().sendQueryError(id, from, to, query, error);
@@ -180,9 +180,9 @@ class HempConnectionOutboundStream implements HmppStream {
     if (handler.sendQuerySet(id, to, from, query))
       return true;
 
-    HmppError error =
-      new HmppError(HmppError.TYPE_CANCEL,
-		    HmppError.FEATURE_NOT_IMPLEMENTED,
+    HmtpError error =
+      new HmtpError(HmtpError.TYPE_CANCEL,
+		    HmtpError.FEATURE_NOT_IMPLEMENTED,
 		    "unknown query: " + query.getClass().getName());
     
     _conn.getStream().sendQueryError(id, from, to, query, error);
@@ -219,7 +219,7 @@ class HempConnectionOutboundStream implements HmppStream {
 		           String to,
 		           String from,
 		           Serializable query,
-		           HmppError error)
+		           HmtpError error)
   {
     QueryStream handler = _queryHandler;
 
@@ -369,7 +369,7 @@ class HempConnectionOutboundStream implements HmppStream {
   public void sendPresenceError(String to,
 			      String from,
 			      Serializable []data,
-                              HmppError error)
+                              HmtpError error)
   {
     PresenceStream handler = _presenceHandler;
 

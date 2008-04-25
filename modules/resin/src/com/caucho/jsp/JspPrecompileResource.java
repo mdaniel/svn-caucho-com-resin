@@ -137,7 +137,7 @@ public class JspPrecompileResource {
       contextPath = contextPath + "/";
     
     Path pwd = Vfs.lookup();
-    
+
     for (int i = 0; i < paths.size(); i++) {
       Path path = paths.get(i);
 

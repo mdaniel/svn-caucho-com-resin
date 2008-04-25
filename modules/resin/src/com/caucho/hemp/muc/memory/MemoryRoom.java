@@ -29,11 +29,11 @@
 
 package com.caucho.hemp.muc.memory;
 
+import com.caucho.hmtp.muc.MucUserPresence;
+import com.caucho.hmtp.spi.HmtpResource;
+import com.caucho.hmtp.im.ImMessage;
+import com.caucho.hmtp.HmtpStream;
 import com.caucho.hemp.broker.GenericService;
-import com.caucho.hmpp.*;
-import com.caucho.hmpp.im.*;
-import com.caucho.hmpp.muc.*;
-import com.caucho.hmpp.spi.*;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.*;
@@ -78,7 +78,7 @@ public class MemoryRoom extends GenericService
   }
 
   @Override
-  public HmppResource lookupResource(String jid)
+  public HmtpResource lookupResource(String jid)
   {
     synchronized (_nicknameMap) {
       MemoryNick nick = _nicknameMap.get(jid);
@@ -135,7 +135,7 @@ public class MemoryRoom extends GenericService
     return null;
   }
 
-  public HmppStream getToBroker()
+  public HmtpStream getToBroker()
   {
     return super.getToBroker();
   }

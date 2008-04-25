@@ -29,14 +29,15 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.hmpp.HmppError;
+import com.caucho.hmtp.auth.AuthResult;
+import com.caucho.hmtp.auth.AuthQuery;
+import com.caucho.hmtp.HmtpStream;
+import com.caucho.hmtp.AbstractHmtpStream;
+import com.caucho.hmtp.HmtpError;
 import java.io.*;
 import java.util.logging.*;
 import javax.servlet.*;
 
-import com.caucho.hmpp.*;
-import com.caucho.hmpp.auth.*;
-import com.caucho.hmpp.spi.*;
 import com.caucho.hessian.io.*;
 import com.caucho.server.connection.*;
 import com.caucho.vfs.*;
@@ -44,15 +45,15 @@ import com.caucho.vfs.*;
 /**
  * Main protocol handler for the HTTP version of HeMPP.
  */
-public class AuthInboundStream extends AbstractHmppStream
+public class AuthInboundStream extends AbstractHmtpStream
 {
   private static final Logger log
     = Logger.getLogger(AuthInboundStream.class.getName());
 
   private ServerInboundStream _manager;
-  private HmppStream _broker;
+  private HmtpStream _broker;
 
-  AuthInboundStream(ServerInboundStream manager, HmppStream server)
+  AuthInboundStream(ServerInboundStream manager, HmtpStream server)
   {
     _manager = manager;
     _broker = server;
@@ -71,8 +72,8 @@ public class AuthInboundStream extends AbstractHmppStream
 			    Serializable value)
   {
     _broker.sendQueryError(id, from, to, value, 
-		           new HmppError(HmppError.TYPE_CANCEL,
-				         HmppError.FORBIDDEN));
+		           new HmtpError(HmtpError.TYPE_CANCEL,
+				         HmtpError.FORBIDDEN));
       
     return true;
   }
@@ -100,14 +101,14 @@ public class AuthInboundStream extends AbstractHmppStream
 	_broker.sendQueryResult(id, from, to, new AuthResult(jid));
       else
 	_broker.sendQueryError(id, from, to, value,
-			       new HmppError(HmppError.TYPE_AUTH,
-					     HmppError.FORBIDDEN));
+			       new HmtpError(HmtpError.TYPE_AUTH,
+					     HmtpError.FORBIDDEN));
     }
     else {
       // XXX: auth
       _broker.sendQueryError(id, from, to, value,
-			     new HmppError(HmppError.TYPE_CANCEL,
-				           HmppError.FORBIDDEN));
+			     new HmtpError(HmtpError.TYPE_CANCEL,
+				           HmtpError.FORBIDDEN));
     }
     
     return true;
@@ -188,7 +189,7 @@ public class AuthInboundStream extends AbstractHmppStream
   public void sendPresenceError(String to,
 			        String from,
 			        Serializable []data,
-			        HmppError error)
+			        HmtpError error)
   {
     log.fine(this + " sendPresenceError requires login first");
   }

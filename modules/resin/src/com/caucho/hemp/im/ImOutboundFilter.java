@@ -29,9 +29,8 @@
 
 package com.caucho.hemp.im;
 
-import com.caucho.hmpp.*;
-import com.caucho.hmpp.disco.*;
-import com.caucho.hmpp.im.*;
+import com.caucho.hmtp.HmtpStream;
+import com.caucho.hmtp.AbstractHmtpFilter;
 import java.util.*;
 import java.util.logging.*;
 
@@ -39,11 +38,11 @@ import java.util.logging.*;
 /**
  * Filter on outbound requests (needed to support privacy)
  */
-public class ImOutboundFilter extends AbstractHmppFilter
+public class ImOutboundFilter extends AbstractHmtpFilter
 {
-  private ImResource _resource;
+  private ImUserService _resource;
   
-  public ImOutboundFilter(HmppStream next, ImResource resource)
+  public ImOutboundFilter(HmtpStream next, ImUserService resource)
   {
     super(next);
 

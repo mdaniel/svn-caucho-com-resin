@@ -258,6 +258,12 @@ public class WatchdogClient
       log.log(Level.FINE, e.toString(), e);
     }
 
+    try {
+      Thread.sleep(5000);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
     startWatchdog(argv);
   }
 
@@ -365,6 +371,9 @@ public class WatchdogClient
 	list.add(argv[i].substring(2));
       }
     }
+
+    // #2566
+    list.add("-Xrs");
 
     if (! _config.hasWatchdogXss())
       list.add("-Xss256k");

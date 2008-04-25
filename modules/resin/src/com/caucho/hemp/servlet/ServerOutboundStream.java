@@ -29,20 +29,31 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.hmpp.HmppStream;
-import com.caucho.hmpp.packet.*;
-import com.caucho.hmpp.HmppError;
+import com.caucho.hmtp.packet.QuerySet;
+import com.caucho.hmtp.packet.QueryResult;
+import com.caucho.hmtp.packet.QueryGet;
+import com.caucho.hmtp.packet.QueryError;
+import com.caucho.hmtp.packet.PresenceUnsubscribed;
+import com.caucho.hmtp.packet.PresenceUnsubscribe;
+import com.caucho.hmtp.packet.PresenceUnavailable;
+import com.caucho.hmtp.packet.PresenceSubscribed;
+import com.caucho.hmtp.packet.PresenceSubscribe;
+import com.caucho.hmtp.packet.PresenceProbe;
+import com.caucho.hmtp.packet.PresenceError;
+import com.caucho.hmtp.packet.Presence;
+import com.caucho.hmtp.packet.MessageError;
+import com.caucho.hmtp.packet.Message;
+import com.caucho.hmtp.HmtpStream;
+import com.caucho.hmtp.HmtpError;
 import java.io.*;
 import java.util.logging.*;
 
 import com.caucho.hessian.io.*;
-import com.caucho.hmpp.*;
-import com.caucho.hmpp.spi.*;
 
 /**
  * Handles callbacks for a hmpp service
  */
-public class ServerOutboundStream implements HmppStream
+public class ServerOutboundStream implements HmtpStream
 {
   private static final Logger log
     = Logger.getLogger(ServerOutboundStream.class.getName());
@@ -77,7 +88,7 @@ public class ServerOutboundStream implements HmppStream
   public void sendMessageError(String to,
 			       String from,
 			       Serializable value,
-			       HmppError error)
+			       HmtpError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -162,7 +173,7 @@ public class ServerOutboundStream implements HmppStream
 			     String to,
 			     String from,
 			     Serializable query,
-			     HmppError error)
+			     HmtpError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -338,7 +349,7 @@ public class ServerOutboundStream implements HmppStream
   public void sendPresenceError(String to,
 			        String from,
 			        Serializable []data,
-			        HmppError error)
+			        HmtpError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {

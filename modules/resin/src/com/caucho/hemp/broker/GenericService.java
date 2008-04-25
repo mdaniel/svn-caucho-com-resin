@@ -29,11 +29,14 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.hmpp.HmppConnection;
+import com.caucho.hmtp.spi.HmtpBroker;
+import com.caucho.hmtp.spi.AbstractHmtpService;
+import com.caucho.hmtp.disco.DiscoInfoQuery;
+import com.caucho.hmtp.disco.DiscoIdentity;
+import com.caucho.hmtp.disco.DiscoFeature;
+import com.caucho.hmtp.HmtpStream;
+import com.caucho.hmtp.HmtpConnection;
 import com.caucho.config.*;
-import com.caucho.hmpp.*;
-import com.caucho.hmpp.disco.*;
-import com.caucho.hmpp.spi.*;
 import com.caucho.util.*;
 
 import java.io.Serializable;
@@ -45,35 +48,35 @@ import javax.webbeans.*;
 /**
  * Configuration for a service
  */
-public class GenericService extends AbstractHmppService
+public class GenericService extends AbstractHmtpService
 {
   private static final L10N L = new L10N(GenericService.class);
   private static final Logger log
     = Logger.getLogger(GenericService.class.getName());
   
-  private @In HmppBroker _broker;
+  private @In HmtpBroker _broker;
   
-  private HmppConnection _conn;
-  private HmppStream _toBroker;
+  private HmtpConnection _conn;
+  private HmtpStream _toBroker;
 
-  private HmppStream _queue;
+  private HmtpStream _queue;
   
   public void setName(String name)
   {
     setJid(name);
   }
   
-  protected HmppConnection getConnection()
+  protected HmtpConnection getConnection()
   {
     return _conn;
   }
 
-  public HmppStream getToBroker()
+  public HmtpStream getToBroker()
   {
     return _toBroker;
   }
 
-  public HmppStream getStream()
+  public HmtpStream getStream()
   {
     return _toBroker;
   }
@@ -95,12 +98,12 @@ public class GenericService extends AbstractHmppService
     _queue = createQueue(this);
   }
 
-  protected HmppStream createQueue(HmppStream stream)
+  protected HmtpStream createQueue(HmtpStream stream)
   {
     return new HempMemoryQueue(stream, _toBroker);
   }
 
-  public HmppStream getCallbackStream()
+  public HmtpStream getCallbackStream()
   {
     return _queue;
   }

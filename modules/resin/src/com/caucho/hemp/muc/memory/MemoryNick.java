@@ -29,9 +29,9 @@
 
 package com.caucho.hemp.muc.memory;
 
-import com.caucho.hmpp.spi.*;
-import com.caucho.hmpp.muc.*;
-import com.caucho.hmpp.im.*;
+import com.caucho.hmtp.muc.MucUserPresence;
+import com.caucho.hmtp.spi.AbstractHmtpService;
+import com.caucho.hmtp.im.ImMessage;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.*;
@@ -39,7 +39,7 @@ import java.util.logging.*;
 /**
  * Multiuser chat room nick (xep-0045)
  */
-public class MemoryNick extends AbstractHmppService
+public class MemoryNick extends AbstractHmtpService
 {
   private static final Logger log
     = Logger.getLogger(MemoryNick.class.getName());

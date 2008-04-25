@@ -29,17 +29,17 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.hmpp.HmppConnection;
-import com.caucho.hmpp.HmppStream;
-import com.caucho.hmpp.packet.Packet;
-import com.caucho.hmpp.HmppError;
+import com.caucho.hmtp.HmtpConnection;
+import com.caucho.hmtp.HmtpStream;
+import com.caucho.hmtp.packet.Packet;
+import com.caucho.hmtp.HmtpError;
 import java.io.*;
 import java.util.logging.*;
 import javax.servlet.*;
 
 import com.caucho.hemp.*;
 import com.caucho.hessian.io.*;
-import com.caucho.hmpp.spi.HmppBroker;
+import com.caucho.hmtp.spi.HmtpBroker;
 import com.caucho.server.connection.*;
 import com.caucho.vfs.*;
 
@@ -47,14 +47,14 @@ import com.caucho.vfs.*;
  * Main protocol handler for the HTTP version of HeMPP.
  */
 public class ServerInboundStream
-  implements TcpConnectionHandler, HmppStream
+  implements TcpConnectionHandler, HmtpStream
 {
   private static final Logger log
     = Logger.getLogger(ServerInboundStream.class.getName());
   
-  private HmppBroker _broker;
-  private HmppConnection _conn;
-  private HmppStream _toBroker;
+  private HmtpBroker _broker;
+  private HmtpConnection _conn;
+  private HmtpStream _toBroker;
 
   private Hessian2StreamingInput _in;
   private Hessian2StreamingOutput _out;
@@ -64,7 +64,7 @@ public class ServerInboundStream
 
   private String _jid;
 
-  ServerInboundStream(HmppBroker broker, ReadStream rs, WriteStream ws)
+  ServerInboundStream(HmtpBroker broker, ReadStream rs, WriteStream ws)
   {
     _broker = broker;
 
@@ -159,7 +159,7 @@ public class ServerInboundStream
   public void sendMessageError(String to,
 			       String from,
 			       Serializable value,
-			       HmppError error)
+			       HmtpError error)
   {
     _toBroker.sendMessageError(to, _jid, value, error);
   }
@@ -218,7 +218,7 @@ public class ServerInboundStream
 			     String to,
 			     String from,
 			     Serializable value,
-			     HmppError error)
+			     HmtpError error)
   {
     _toBroker.sendQueryError(id, to, _jid, value, error);
   }
@@ -306,7 +306,7 @@ public class ServerInboundStream
   public void sendPresenceError(String to,
 			      String from,
 			      Serializable []data,
-			      HmppError error)
+			      HmtpError error)
   {
     _toBroker.sendPresenceError(to, _jid, data, error);
   }
