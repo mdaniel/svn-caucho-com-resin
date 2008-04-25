@@ -29,17 +29,12 @@
 
 package com.caucho.jsf.el;
 
-import com.caucho.el.AbstractVariableResolver;
-import com.caucho.jsp.el.*;
 import com.caucho.jsf.cfg.*;
 import com.caucho.util.*;
 
 import javax.el.*;
-import javax.faces.application.*;
-import javax.faces.component.*;
 import javax.faces.context.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.faces.FacesException;
 
 import java.beans.FeatureDescriptor;
 import java.util.*;
@@ -133,7 +128,7 @@ public class ManagedBeanELResolver extends ELResolver {
 
 	try {
 	  if (scope.containsBean(key))
-	    throw new ELException(L.l("'{0}' is a circular managed bean reference.",
+	    throw new FacesException(L.l("'{0}' is a circular managed bean reference.",
 				      key));
 
 	  scope.addBean(key);
