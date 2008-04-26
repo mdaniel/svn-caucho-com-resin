@@ -53,6 +53,9 @@ public class QuercusProgram {
   private QuercusPage _compiledPage;
   
   private Path _sourceFile;
+  
+  private boolean _isCompiling;
+  private boolean _isCompilable = true;
 
   private HashMap<String,Function> _functionMap;
   private HashMap<String,Function> _functionMapLowerCase
@@ -125,6 +128,38 @@ public class QuercusProgram {
   public Statement getStatement()
   {
     return _statement;
+  }
+  
+  /*
+   * Set to true if this page is being compiled.
+   */
+  public void setCompiling(boolean isCompiling)
+  {
+    _isCompiling = isCompiling;
+  }
+  
+  /*
+   * Returns true if this page is being compiled.
+   */
+  public boolean isCompiling()
+  {
+    return _isCompiling;
+  }
+  
+  /*
+   * Set to false if page cannot be compiled.
+   */
+  public void setCompilable(boolean isCompilable)
+  {
+    _isCompilable = isCompilable;
+  }
+  
+  /*
+   * Returns true if the page can be compiled or it is unknown.
+   */
+  public boolean isCompilable()
+  {
+    return _isCompilable;
   }
 
   /**

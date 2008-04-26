@@ -35,6 +35,7 @@ import com.caucho.quercus.annotation.Name;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Quercus functions to get information about the Quercus environment.
@@ -98,10 +99,39 @@ public class QuercusModule extends AbstractQuercusModule
   /**
    * Returns the HttpServletRequest associated with this Env.
    */
+  @Deprecated
   @Name("quercus_get_request")
   public static HttpServletRequest get_request(Env env)
   {
     return env.getRequest();
+  }
+  
+  /**
+   * Returns the HttpServletRequest associated with this Env.
+   */
+  @Name("quercus_servlet_request")
+  public static HttpServletRequest get_servlet_request(Env env)
+  {
+    return env.getRequest();
+  }
+  
+  /**
+   * Returns the HttpServletResponse associated with this Env.
+   */
+  @Deprecated
+  @Name("quercus_get_response")
+  public static HttpServletResponse get_response(Env env)
+  {
+    return env.getResponse();
+  }
+  
+  /**
+   * Returns the HttpServletResponse associated with this Env.
+   */
+  @Name("quercus_servlet_response")
+  public static HttpServletResponse get_servlet_response(Env env)
+  {
+    return env.getResponse();
   }
   
   /*

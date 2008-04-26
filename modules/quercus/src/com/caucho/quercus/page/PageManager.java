@@ -32,12 +32,12 @@ package com.caucho.quercus.page;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.QuercusProgram;
+import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.IOExceptionWrapper;
 import com.caucho.vfs.Path;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.logging.*;
 
 /**
@@ -48,9 +48,11 @@ public class PageManager
   private static final Logger log
     = Logger.getLogger(PageManager.class.getName());
 
+  protected static final L10N L = new L10N(PageManager.class);
+  
   private final Quercus _quercus;
   
-  private Path _pwd;
+  //private Path _pwd;
   private boolean _isLazyCompile;
   private boolean _isCompile;
 
@@ -175,9 +177,22 @@ public class PageManager
 
       program = _programCache.get(path);
 
+      if (program != null) {
+        if (program.isCompilable()) {
+        }
+        else if (program.isModified())
+          program.setCompilable(true);
+        else {
+          if (log.isLoggable(Level.FINE))
+            log.fine(L.l("Quercus[{0}] loading interpreted page", path));
+          
+          return new InterpretedPage(program);
+        }
+      }
+
       if (program == null || program.isModified()) {
         clearProgram(path, program);
-	
+
         program = QuercusParser.parse(_quercus,
                                       path,
                                       _quercus.getScriptEncoding(),
@@ -187,9 +202,8 @@ public class PageManager
         _programCache.put(path, program);
       }
 
-      if (program.getCompiledPage() != null) {
+      if (program.getCompiledPage() != null)
         return program.getCompiledPage();
-      }
 
       return compilePage(program, path);
     } catch (IOException e) {
@@ -213,7 +227,7 @@ public class PageManager
   protected QuercusPage compilePage(QuercusProgram program, Path path)
   {
     if (log.isLoggable(Level.FINE))
-      log.fine("Quercus[" + path + "] loading interpreted page");
+      log.fine(L.l("Quercus[{0}] loading interpreted page", path));
     
     return new InterpretedPage(program);
   }

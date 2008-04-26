@@ -35,6 +35,7 @@ import com.caucho.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -528,25 +529,34 @@ public class JdbcResultResource {
         }
 
       case Types.LONGVARCHAR:
-        {
-          StringValue bb = env.createUnicodeBuilder();
-
-          InputStream is = rs.getBinaryStream(column);
-
-          if (is == null || rs.wasNull())
-            return NullValue.NULL;
-
-	  try {
-	    bb.appendReadAll(is, Long.MAX_VALUE);
-          } catch (RuntimeException e) {
-            log.log(Level.WARNING, e.toString(), e);
-
-            return NullValue.NULL;
+      {
+        StringValue bb = env.createUnicodeBuilder();
+        
+        try {
+          if (bb.isUnicode()) {
+            Reader reader = rs.getCharacterStream(column);
+            
+            if (reader == null || rs.wasNull())
+              return NullValue.NULL;
+            
+            bb.append(reader);
           }
+          else {
+            InputStream is = rs.getBinaryStream(column);
+            
+            if (is == null || rs.wasNull())
+              return NullValue.NULL;
+            
+            bb.appendReadAll(is, Long.MAX_VALUE);
+          }
+        } catch (RuntimeException e) {
+          log.log(Level.WARNING, e.toString(), e);
 
-          return bb;
+          return NullValue.NULL;
         }
 
+        return bb;
+      }
       default:
         {
           String strValue = rs.getString(column);
@@ -557,6 +567,10 @@ public class JdbcResultResource {
             return env.createString(strValue);
         }
       }
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+      
+      return NullValue.NULL;
     } catch (SQLException e) {
       // php/141e
       log.log(Level.FINE, e.toString(), e);
