@@ -35,7 +35,7 @@ import java.io.Serializable;
 /**
  * Handling query packets
  */
-public interface QueryStream {
+public interface HmtpQueryStream {
   /**
    * Handles a query information request (get), returning true if this
    * handler understands the query class, and false if it does not.

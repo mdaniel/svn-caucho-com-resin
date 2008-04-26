@@ -63,18 +63,18 @@ public interface HmtpConnection {
   /**
    * Registers the message handler
    */
-  public void setMessageHandler(MessageStream handler);
+  public void setMessageHandler(HmtpMessageStream handler);
 
   /**
    * Registers the query handler
    */
-  public void setQueryHandler(QueryStream handler);
+  public void setQueryHandler(HmtpQueryStream handler);
   
   /**
    * Sets the presence listener.  The handler will process presence
    * events sent by the server and other clients
    */
-  public void setPresenceHandler(PresenceStream handler);
+  public void setPresenceHandler(HmtpPresenceStream handler);
 
 
   //
@@ -98,7 +98,7 @@ public interface HmtpConnection {
   /**
    * Queries the service
    */
-  public void queryGet(String to, Serializable query, QueryCallback callback);
+  public void queryGet(String to, Serializable query, HmtpQueryCallback callback);
 
   /**
    * Queries the service
@@ -108,7 +108,7 @@ public interface HmtpConnection {
   /**
    * Queries the service
    */
-  public void querySet(String to, Serializable query, QueryCallback callback);
+  public void querySet(String to, Serializable query, HmtpQueryCallback callback);
 
   //
   // presence handling

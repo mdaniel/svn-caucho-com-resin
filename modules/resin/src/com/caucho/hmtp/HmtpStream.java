@@ -34,6 +34,6 @@ package com.caucho.hmtp;
  * a packet class.
  */
 public interface HmtpStream 
-  extends MessageStream, QueryStream, PresenceStream
+  extends HmtpMessageStream, HmtpQueryStream, HmtpPresenceStream
 {
 }

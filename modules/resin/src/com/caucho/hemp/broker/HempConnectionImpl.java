@@ -29,10 +29,10 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.hmtp.QueryStream;
-import com.caucho.hmtp.QueryCallback;
-import com.caucho.hmtp.PresenceStream;
-import com.caucho.hmtp.MessageStream;
+import com.caucho.hmtp.HmtpQueryStream;
+import com.caucho.hmtp.HmtpQueryCallback;
+import com.caucho.hmtp.HmtpPresenceStream;
+import com.caucho.hmtp.HmtpMessageStream;
 import com.caucho.hmtp.HmtpStream;
 import com.caucho.hmtp.HmtpError;
 import com.caucho.hmtp.HmtpConnection;
@@ -88,7 +88,7 @@ public class HempConnectionImpl implements HmtpConnection
     if (p > 0)
       uid = uid.substring(0, p);
 
-    _resource = manager.getResource(uid);
+    _resource = manager.getService(uid);
 
     if (_resource != null) {
       _brokerFilter = _resource.getBrokerFilter(_broker);
@@ -119,7 +119,7 @@ public class HempConnectionImpl implements HmtpConnection
   /**
    * Registers the listener
    */
-  public void setMessageHandler(MessageStream handler)
+  public void setMessageHandler(HmtpMessageStream handler)
   {
     _handler.setMessageHandler(handler);
   }
@@ -127,7 +127,7 @@ public class HempConnectionImpl implements HmtpConnection
   /**
    * Registers the listener
    */
-  public void setQueryHandler(QueryStream handler)
+  public void setQueryHandler(HmtpQueryStream handler)
   {
     _handler.setQueryHandler(handler);
   }
@@ -135,7 +135,7 @@ public class HempConnectionImpl implements HmtpConnection
   /**
    * Sets the presence listener
    */
-  public void setPresenceHandler(PresenceStream handler)
+  public void setPresenceHandler(HmtpPresenceStream handler)
   {
     _handler.setPresenceHandler(handler);
   }
@@ -179,7 +179,7 @@ public class HempConnectionImpl implements HmtpConnection
    */
   public void queryGet(String to,
 		       Serializable value,
-		       QueryCallback callback)
+		       HmtpQueryCallback callback)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -219,7 +219,7 @@ public class HempConnectionImpl implements HmtpConnection
    */
   public void querySet(String to,
 		       Serializable value,
-		       QueryCallback callback)
+		       HmtpQueryCallback callback)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -429,9 +429,9 @@ public class HempConnectionImpl implements HmtpConnection
 
   static class QueryItem {
     private final long _id;
-    private final QueryCallback _callback;
+    private final HmtpQueryCallback _callback;
 
-    QueryItem(long id, QueryCallback callback)
+    QueryItem(long id, HmtpQueryCallback callback)
     {
       _id = id;
       _callback = callback;
@@ -459,7 +459,7 @@ public class HempConnectionImpl implements HmtpConnection
     }
   }
 
-  static class WaitQueryCallback implements QueryCallback {
+  static class WaitQueryCallback implements HmtpQueryCallback {
     private Serializable _result;
     private HmtpError _error;
     private boolean _isResult;

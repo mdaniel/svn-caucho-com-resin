@@ -31,10 +31,10 @@ package com.caucho.hmtp.client;
 
 import com.caucho.hmtp.auth.AuthResult;
 import com.caucho.hmtp.auth.AuthQuery;
-import com.caucho.hmtp.QueryStream;
-import com.caucho.hmtp.QueryCallback;
-import com.caucho.hmtp.PresenceStream;
-import com.caucho.hmtp.MessageStream;
+import com.caucho.hmtp.HmtpQueryStream;
+import com.caucho.hmtp.HmtpQueryCallback;
+import com.caucho.hmtp.HmtpPresenceStream;
+import com.caucho.hmtp.HmtpMessageStream;
 import com.caucho.hmtp.HmtpStream;
 import com.caucho.hmtp.HmtpError;
 import com.caucho.hmtp.HmtpConnection;
@@ -70,9 +70,9 @@ public class HmtpClient implements HmtpConnection {
   private ClientBrokerStream _clientStream;
   private String _jid;
 
-  private MessageStream _messageHandler;
-  private QueryStream _queryHandler;
-  private PresenceStream _presenceHandler;
+  private HmtpMessageStream _messageHandler;
+  private HmtpQueryStream _queryHandler;
+  private HmtpPresenceStream _presenceHandler;
 
   private HashMap<Long,QueryItem> _queryMap
     = new HashMap<Long,QueryItem>();
@@ -246,7 +246,7 @@ public class HmtpClient implements HmtpConnection {
   /**
    * Sets the message listener
    */
-  public void setMessageHandler(MessageStream listener)
+  public void setMessageHandler(HmtpMessageStream listener)
   {
     _messageHandler = listener;
   }
@@ -254,7 +254,7 @@ public class HmtpClient implements HmtpConnection {
   /**
    * Gets the message listener
    */
-  public MessageStream getMessageHandler()
+  public HmtpMessageStream getMessageHandler()
   {
     return _messageHandler;
   }
@@ -262,7 +262,7 @@ public class HmtpClient implements HmtpConnection {
   /**
    * Sets the presence handler
    */
-  public void setPresenceHandler(PresenceStream handler)
+  public void setPresenceHandler(HmtpPresenceStream handler)
   {
     _presenceHandler = handler;
   }
@@ -270,7 +270,7 @@ public class HmtpClient implements HmtpConnection {
   /**
    * Gets the message listener
    */
-  public PresenceStream getPresenceHandler()
+  public HmtpPresenceStream getPresenceHandler()
   {
     return _presenceHandler;
   }
@@ -429,7 +429,7 @@ public class HmtpClient implements HmtpConnection {
   /**
    * Sets the query handler
    */
-  public void setQueryHandler(QueryStream handler)
+  public void setQueryHandler(HmtpQueryStream handler)
   {
     _queryHandler = handler;
   }
@@ -437,7 +437,7 @@ public class HmtpClient implements HmtpConnection {
   /**
    * Gets the query handler
    */
-  public QueryStream getQueryHandler()
+  public HmtpQueryStream getQueryHandler()
   {
     return _queryHandler;
   }
@@ -463,7 +463,7 @@ public class HmtpClient implements HmtpConnection {
    */
   public void queryGet(String to,
 		       Serializable value,
-		       QueryCallback callback)
+		       HmtpQueryCallback callback)
   {
     long id;
       
@@ -502,7 +502,7 @@ public class HmtpClient implements HmtpConnection {
    */
   public void querySet(String to,
 		       Serializable value,
-		       QueryCallback callback)
+		       HmtpQueryCallback callback)
   {
     long id;
       
@@ -650,9 +650,9 @@ public class HmtpClient implements HmtpConnection {
 
   static class QueryItem {
     private final long _id;
-    private final QueryCallback _callback;
+    private final HmtpQueryCallback _callback;
 
-    QueryItem(long id, QueryCallback callback)
+    QueryItem(long id, HmtpQueryCallback callback)
     {
       _id = id;
       _callback = callback;
@@ -680,7 +680,7 @@ public class HmtpClient implements HmtpConnection {
     }
   }
 
-  static class WaitQueryCallback implements QueryCallback {
+  static class WaitQueryCallback implements HmtpQueryCallback {
     private Serializable _result;
     private HmtpError _error;
     private boolean _isResult;

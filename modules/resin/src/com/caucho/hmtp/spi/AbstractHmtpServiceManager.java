@@ -35,7 +35,7 @@ import java.io.Serializable;
 /**
  * Abstract manages resources
  */
-public class AbstractResourceManager implements ResourceManager {
+public class AbstractHmtpServiceManager implements HmtpServiceManager {
   private HmtpBroker _broker;
   
   /**

@@ -27,24 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.spi;
+package com.caucho.hmtp;
 
-import com.caucho.hmtp.HmtpStream;
-import com.caucho.hmtp.HmtpConnectionFactory;
-import com.caucho.hmtp.HmtpConnection;
+import com.caucho.hmtp.HmtpError;
+import java.io.Serializable;
 
 /**
- * Broker implementation
+ * callback for a query
  */
-public interface HmtpBroker extends HmtpStream, HmtpConnectionFactory
-{
-  /**
-   * Adds a resource manager
-   */
-  public void addResourceManager(HmtpServiceManager manager);
-    
-  /**
-   * Registers a resource
-   */
-  public HmtpConnection registerResource(String jid, HmtpService resource);
+public interface HmtpQueryCallback {
+  public void onQueryResult(String to, String from, Serializable value);
+  
+  public void onQueryError(String to, String from,
+			   Serializable value, HmtpError error);
 }

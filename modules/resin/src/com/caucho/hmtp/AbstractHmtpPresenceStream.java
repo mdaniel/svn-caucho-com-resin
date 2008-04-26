@@ -29,7 +29,6 @@
 
 package com.caucho.hmtp;
 
-import com.caucho.hmtp.HmtpError;
 import java.io.Serializable;
 import java.util.*;
 import javax.webbeans.*;
@@ -37,62 +36,78 @@ import javax.webbeans.*;
 /**
  * Configuration for a service
  */
-public interface PresenceStream
+public class AbstractHmtpPresenceStream implements HmtpPresenceStream
 {
   /**
    * General presence, for clients announcing availability
    */
   public void sendPresence(String to,
-			   String from,
-			   Serializable []data);
+			 String from,
+			 Serializable []data)
+  {
+  }
 
   /**
    * General presence, for clients announcing unavailability
    */
   public void sendPresenceUnavailable(String to,
-				      String from,
-				      Serializable []data);
+				    String from,
+				    Serializable []data)
+  {
+  }
 
   /**
    * Presence probe from the server to a client
    */
   public void sendPresenceProbe(String to,
-			        String from,
-			        Serializable []data);
+			      String from,
+			      Serializable []data)
+  {
+  }
 
   /**
    * A subscription request from a client
    */
   public void sendPresenceSubscribe(String to,
-				    String from,
-				    Serializable []data);
+				  String from,
+				  Serializable []data)
+  {
+  }
 
   /**
    * A subscription response to a client
    */
   public void sendPresenceSubscribed(String to,
-				     String from,
-				     Serializable []data);
+				   String from,
+				   Serializable []data)
+  {
+  }
 
   /**
    * An unsubscription request from a client
    */
   public void sendPresenceUnsubscribe(String to,
-				      String from,
-				      Serializable []data);
+				    String from,
+				    Serializable []data)
+  {
+  }
 
   /**
    * A unsubscription response to a client
    */
   public void sendPresenceUnsubscribed(String to,
-				       String from,
-				       Serializable []data);
+				     String from,
+				     Serializable []data)
+  {
+  }
 
   /**
    * An error response to a client
    */
   public void sendPresenceError(String to,
-			        String from,
-			        Serializable []data,
-			        HmtpError error);
+			      String from,
+			      Serializable []data,
+			      HmtpError error)
+  {
+  }
 }

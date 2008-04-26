@@ -34,7 +34,7 @@ import java.io.Serializable;
 /**
  * Configuration for a service
  */
-public class AbstractQueryStream implements QueryStream {
+public class AbstractHmtpQueryStream implements HmtpQueryStream {
   public boolean sendQueryGet(long id,
 			    String to,
 			    String from,

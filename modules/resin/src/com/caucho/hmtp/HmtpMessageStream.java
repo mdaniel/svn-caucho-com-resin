@@ -27,30 +27,41 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.spi;
+package com.caucho.hmtp;
 
-import com.caucho.hmtp.spi.HmtpBroker;
-import com.caucho.hmtp.spi.HmtpService;
-
+import com.caucho.hmtp.HmtpError;
 import java.io.Serializable;
 
 /**
- * Managed a collection of resources
+ * HmtpMessageStream is a callback for handling unidirectional messages.
+ * 
+ * Messages in HMPP consist of a target JID (to), a source JID (from), and
+ * a payload (value).
+ * 
+ * The payload is typed according to the application, so an IM application
+ * might use a payload called ImMessage, while a game might have MoveMessage,
+ * FireLaserMessage, etc.
  */
-public interface ResourceManager {
+public interface HmtpMessageStream {
   /**
-   * Sets the server to send messages
+   * Sends a message packet
+   * 
+   * @param to the target JID
+   * @param from the source JID
+   * @param value the message payload
    */
-  public void setBroker(HmtpBroker broker);
+  public void sendMessage(String to, String from, Serializable value);
   
   /**
-   * Returns the resource with the given name, or null if this is not
-   * a known resource
+   * Sends a message error packet
+   * 
+   * @param to the target JID
+   * @param from the source JID
+   * @param value the message payload
+   * @param error the message error
    */
-  public HmtpService lookupResource(String jid);
-
-  /**
-   * Basic presence
-   */
-  public void sendPresence(String to, String from, Serializable []data);
+  public void sendMessageError(String to,
+			       String from,
+			       Serializable value,
+			       HmtpError error);
 }

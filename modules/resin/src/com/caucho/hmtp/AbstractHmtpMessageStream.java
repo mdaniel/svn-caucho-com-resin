@@ -29,31 +29,40 @@
 
 package com.caucho.hmtp;
 
-import com.caucho.hmtp.HmtpError;
 import java.io.Serializable;
+import java.util.logging.*;
 
 /**
- * MessageStream is a callback for handling unidirectional messages.
+ * HmtpMessageStream is the HMTP stream interface for unidirectional messages.
  * 
- * Messages in HMPP consist of a target JID (to), a source JID (from), and
+ * Messages in HMTP consist of a target JID (to), a source JID (from), and
  * a payload (value).
  * 
  * The payload is typed according to the application, so an IM application
  * might use a payload called ImMessage, while a game might have MoveMessage,
  * FireLaserMessage, etc.
  */
-public interface MessageStream {
+public class AbstractHmtpMessageStream implements HmtpMessageStream {
+  private static final Logger log
+    = Logger.getLogger(AbstractHmtpMessageStream.class.getName());
+  
   /**
-   * Sends a message packet
+   * Callback to handle messages
    * 
    * @param to the target JID
    * @param from the source JID
    * @param value the message payload
    */
-  public void sendMessage(String to, String from, Serializable value);
+  public void sendMessage(String to, String from, Serializable value)
+  {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendMessage to=" + to + " from=" + from
+		+ " value=" + value);
+    }
+  }
   
   /**
-   * Sends a message error packet
+   * Handlers an error message
    * 
    * @param to the target JID
    * @param from the source JID
@@ -63,5 +72,17 @@ public interface MessageStream {
   public void sendMessageError(String to,
 			       String from,
 			       Serializable value,
-			       HmtpError error);
+			       HmtpError error)
+  {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " sendMessageError to=" + to + " from=" + from
+		+ " error=" + error);
+    }
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }

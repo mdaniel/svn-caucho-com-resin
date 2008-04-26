@@ -27,17 +27,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.hmtp.spi;
 
-import com.caucho.hmtp.HmtpError;
+import com.caucho.hmtp.spi.HmtpBroker;
+import com.caucho.hmtp.spi.HmtpService;
+
 import java.io.Serializable;
 
 /**
- * callback for a query
+ * Managed a collection of resources
  */
-public interface QueryCallback {
-  public void onQueryResult(String to, String from, Serializable value);
+public interface HmtpServiceManager {
+  /**
+   * Sets the server to send messages
+   */
+  public void setBroker(HmtpBroker broker);
   
-  public void onQueryError(String to, String from,
-			   Serializable value, HmtpError error);
+  /**
+   * Returns the resource with the given name, or null if this is not
+   * a known resource
+   */
+  public HmtpService lookupResource(String jid);
+
+  /**
+   * Basic presence
+   */
+  public void sendPresence(String to, String from, Serializable []data);
 }

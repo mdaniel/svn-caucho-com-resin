@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.hmtp.spi.ResourceManager;
+import com.caucho.hmtp.spi.HmtpServiceManager;
 import com.caucho.hmtp.spi.HmtpBroker;
 import com.caucho.hmtp.HmtpConnection;
 import com.caucho.hmtp.HmtpError;
@@ -66,7 +66,7 @@ public class HempBroker implements HmtpBroker
   private String _domain = "localhost";
   private String _managerJid = "localhost";
 
-  private ResourceManager []_resourceManagerList = new ResourceManager[0];
+  private HmtpServiceManager []_resourceManagerList = new HmtpServiceManager[0];
 
   //
   // configuration
@@ -75,7 +75,7 @@ public class HempBroker implements HmtpBroker
   /**
    * Adds a broker implementation, e.g. the IM broker.
    */
-  public void addBroker(ResourceManager resourceManager)
+  public void addBroker(HmtpServiceManager resourceManager)
   {
     addResourceManager(resourceManager);
   }
@@ -83,9 +83,9 @@ public class HempBroker implements HmtpBroker
   /**
    * Adds a broker implementation, e.g. the IM broker.
    */
-  public void addResourceManager(ResourceManager resourceManager)
+  public void addResourceManager(HmtpServiceManager resourceManager)
   {
-    ResourceManager []resourceManagerList = new ResourceManager[_resourceManagerList.length + 1];
+    HmtpServiceManager []resourceManagerList = new HmtpServiceManager[_resourceManagerList.length + 1];
     System.arraycopy(_resourceManagerList, 0, resourceManagerList, 0, _resourceManagerList.length);
     resourceManagerList[resourceManagerList.length - 1] = resourceManager;
     _resourceManagerList = resourceManagerList;
@@ -119,7 +119,7 @@ public class HempBroker implements HmtpBroker
     if (p > 0) {
       String owner = jid.substring(0, p);
       
-      HmtpService resource = getResource(owner);
+      HmtpService resource = getService(owner);
 
       if (resource != null)
 	resource.onLogin(jid);
@@ -211,9 +211,9 @@ public class HempBroker implements HmtpBroker
   {
     /*
     if (to == null) {
-      ResourceManager []resourceManagers = _resourceManagerList;
+      HmtpServiceManager []resourceManagers = _resourceManagerList;
 
-      for (ResourceManager manager : resourceManagers) {
+      for (HmtpServiceManager manager : resourceManagers) {
         manager.sendPresence(to, from, data);
       }
     }
@@ -483,7 +483,7 @@ public class HempBroker implements HmtpBroker
 	return ref.get();
     }
 
-    HmtpService resource = getResource(jid);
+    HmtpService resource = getService(jid);
 
     if (resource != null) {
       synchronized (_agentMap) {
@@ -502,7 +502,7 @@ public class HempBroker implements HmtpBroker
       return null;
   }
 
-  protected HmtpService getResource(String jid)
+  protected HmtpService getService(String jid)
   {
     if (jid == null)
       return null;
@@ -521,14 +521,14 @@ public class HempBroker implements HmtpBroker
 
       if ((p = jid.indexOf('/')) > 0) {
 	String uid = jid.substring(0, p);
-	HmtpService user = getResource(uid);
+	HmtpService user = getService(uid);
 
 	if (user != null)
 	  resource = user.lookupResource(jid);
       }
       else if ((p = jid.indexOf('@')) > 0) {
 	String domainName = jid.substring(p + 1);
-	HmtpService domain = getResource(domainName);
+	HmtpService domain = getService(domainName);
 
 	if (domain != null)
 	  resource = domain.lookupResource(jid);
@@ -553,7 +553,7 @@ public class HempBroker implements HmtpBroker
 
   protected HmtpService lookupResource(String jid)
   {
-    for (ResourceManager manager : _resourceManagerList) {
+    for (HmtpServiceManager manager : _resourceManagerList) {
       HmtpService resource = manager.lookupResource(jid);
 
       if (resource != null)
@@ -572,7 +572,7 @@ public class HempBroker implements HmtpBroker
     if (p > 0) {
       String owner = jid.substring(0, p);
       
-      HmtpService resource = getResource(owner);
+      HmtpService resource = getService(owner);
 
       if (resource != null) {
 	try {

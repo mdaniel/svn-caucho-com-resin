@@ -33,13 +33,12 @@ import com.caucho.hmtp.HmtpAgentStream;
 import com.caucho.hmtp.HmtpStream;
 
 /**
- * Low-level callback to handle packet events.  Each method corresponds to
- * a packet class.
+ * HmtpService is a registered service.
  */
 public interface HmtpService
 {
   /**
-   * Returns the resource's preferred jid.
+   * Returns the service's preferred jid.
    */
   public String getJid();
   
@@ -60,7 +59,7 @@ public interface HmtpService
   public void onLogout(String jid);
 
   /**
-   * Returns the resource's agent stream
+   * Returns the service's agent stream
    */
   public HmtpAgentStream getAgentStream();
   

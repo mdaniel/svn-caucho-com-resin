@@ -38,10 +38,10 @@ import java.util.logging.*;
 /**
  * Configuration for a service
  */
-abstract public class AbstractHmtpResource implements HmtpService
+abstract public class AbstractHmtpService implements HmtpService
 {
   private static final Logger log
-    = Logger.getLogger(AbstractHmtpResource.class.getName());
+    = Logger.getLogger(AbstractHmtpService.class.getName());
   
   private String _jid;
 

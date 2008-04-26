@@ -42,7 +42,7 @@ import java.io.Serializable;
  * interfaces in a single class.  This abstract class simplifies the
  * implementation of this kind of service.
  */
-public class SimpleHmtpService extends AbstractHmtpResource
+public class SimpleHmtpService extends AbstractHmtpService
   implements HmtpAgentStream
 {
   private static final Logger log
