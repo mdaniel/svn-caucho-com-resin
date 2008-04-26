@@ -29,12 +29,49 @@
 
 package com.caucho.hmtp.spi;
 
+import com.caucho.hmtp.HmtpAgentStream;
 import com.caucho.hmtp.HmtpStream;
 
 /**
  * Low-level callback to handle packet events.  Each method corresponds to
  * a packet class.
  */
-public interface HmtpService extends HmtpResource, HmtpStream
+public interface HmtpService
 {
+  /**
+   * Returns the resource's preferred jid.
+   */
+  public String getJid();
+  
+  /**
+   * Returns a subresource, e.g. if the resource is room@domain, then
+   * it might return a resource for room@domain/nick
+   */
+  public HmtpService lookupResource(String jid);
+
+  /**
+   * Called when an agent logs in
+   */
+  public void onLogin(String jid);
+
+  /**
+   * Called when an agent logs out
+   */
+  public void onLogout(String jid);
+
+  /**
+   * Returns the resource's agent stream
+   */
+  public HmtpAgentStream getAgentStream();
+  
+  /**
+   * Returns a filter for outbound calls, i.e. filtering messages to the agent.
+   */
+  public HmtpAgentStream getAgentFilter(HmtpAgentStream stream);
+
+  /**
+   * Returns a filter for inbound calls, i.e. filtering messages to the broker
+   * from the agent.
+   */
+  public HmtpStream getBrokerFilter(HmtpStream stream);
 }
