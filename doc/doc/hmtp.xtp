@@ -1,13 +1,14 @@
 <document>
   <header>
     <product>resin</product>
-    <title>HMPP</title>
+    <title>HMTP</title>
     <type>contents</type>
 
     <description>
       <p>
-      HMPP (Hessian Messaging and Presence Protocol) is an asynchronous,
-      bidirectional messaging framework, based on the <a href="http://hessian.caucho.com/">Hessian</a> protocol.
+      HMTP (Hessian Message Transport Protocol) is an asynchronous,
+      object-oriented messaging framework, designed around small, interactive
+      message packets, a brokered-agent topology and based on the <a href="http://hessian.caucho.com/">Hessian</a> protocol and <a href="http://xmpp.org">XMPP</a> (Jabber).
       </p>
     </description>
   </header>
@@ -21,18 +22,18 @@
 <s2 title="Server sendMessage example">
 
 <p>Sending a message from a servlet to an internal service is a
-basic HMPP use case.  The message service implements the
-<code>sendMessage</code> method to receive messages.  Since HMPP is
+basic HMTP use case.  The message service implements the
+<code>sendMessage</code> method to receive messages.  Since HMTP is
 a streaming API like <code>java.io.OutputStream</code>, the sending
 method is the same as the receiving method, <code>sendMessage</code>.</p>
 
-<p>HMPP messages are addressed using a JID (Jabber ID), which looks like
+<p>HMTP messages are addressed using a JID (Jabber ID), which looks like
 <code>user@domain</code> or <code>user@domain/resource</code>.  The
 second <code>user@domain/resource</code> is used for temporary
 client agent addresses, e.g. a user logged into messaging with
 a cellphone.</p>
 
-<p>In the example, the servlet obtains a <code>HmppConnection</code> using
+<p>In the example, the servlet obtains a <code>HmtpConnection</code> using
 the Web Beans <code>@javax.webbeans.In</code> injection annotation, and
 sends the message.</p>
 
@@ -67,16 +68,16 @@ package example;
 
 import javax.servlet.*;
 import javax.webbeans.In;
-import com.caucho.hmpp.HmppConnectionFactory;
-import com.caucho.hmpp.HmppConnection;
+import com.caucho.hmtp.HmtpConnectionFactory;
+import com.caucho.hmtp.HmtpConnection;
 
 public class TestServlet extends GenericServlet
 {
-  @In HmppConnectionFactory _factory;
+  @In HmtpConnectionFactory _factory;
 
   public void service(ServletRequest req, ServletResponse response)
   {
-    HmppConnection conn = _factory.getConnection("demo@localhost", null);
+    HmtpConnection conn = _factory.getConnection("demo@localhost", null);
 
     try {
       conn.sendMessage("test@localhost", "Hello, world!");
@@ -102,8 +103,8 @@ public class TestServlet extends GenericServlet
 
 <s2 title="Client queryGet (RPC) example">
 
-<p>Remote calls are another primary use for HMPP.  In this example, we
-just query a service for some basic information.  In HMPP, queries
+<p>Remote calls are another primary use for HMTP.  In this example, we
+just query a service for some basic information.  In HMTP, queries
 are bidirections: the server can also query the client.  And the application
 can also use the messaging in the previous example.</p>
 
@@ -136,14 +137,14 @@ public class TestService extends GenericService
 <example title="TestClient.java">
 package example;
 
-import com.caucho.hmpp.client.HmppClient;
+import com.caucho.hmtp.client.HmtpClient;
 
 public class TestClient
 {
   public static void main(String []args)
     throws Exception
   {
-    HmppClient client = new HmppClient("http://localhost:8080/hmpp");
+    HmtpClient client = new HmtpClient("http://localhost:8080/hmtp");
     client.connect();
     client.login("user@localhost", null);
 
@@ -164,7 +165,7 @@ public class TestClient
 
     &lt;bean name="test@localhost" class="example.TestService"/>
 
-    &lt;servlet-mapping url-pattern="/hmpp"
+    &lt;servlet-mapping url-pattern="/hmtp"
                       servlet-class="com.caucho.hemp.servlet.HempServlet"/>
 
 &lt;/web-app>
@@ -174,23 +175,65 @@ public class TestClient
 
 </s1>
 
+<s1 title="Brokered Agent Messaging (BAM)">
+
+<p>Applications using HMTP will generally follow a Brokered Agent
+Messaging pattern, which is basically a hub-and-spoke messaging topology where
+the agents act as dynamic services: joining and detaching from the broker
+as the application progresses.</p>
+
+<p>Services and clients register one or more agents with the HmtpBroker and
+then send messages between the agents.  Each remote client will register
+a local agent with the local HMTP broker.  Services will register one or
+more agents with the broker.   In a tic-tac-toe game, the game
+instance might register two agents: one for each player in a particular
+game.</p>
+
+<figure title="Tic-Tac-Toe Agents" src="tictactoe-game.png"/>
+
+<p>The diagram above has four agents: two agents for the game's players, and
+one agent for each logged-in user.  <var>tictactoe@host.com/1</var> is the game's agent
+for player #1, and <var>harry@host.com/x</var> is Harry's agent for his
+flash client.  In the tic-tac-toe game, each user's agent talks to the
+matching game player, so <var>harry@host.com/x</var> always
+talks to <var>tictactoe@host.com/1</var>, and <var>draco@host.com/y</var>
+always talks to <var>tictactoe@host.com/1</var>.</p>
+
+<p>The game's agents are ephemeral.  When a new game begins, a 
+<code>TicTacTocGame</code> instance registers two new agents for the
+new game, with unique names, e.g. <var>tictactoe@host.com/3</var> and
+<var>tictactoe@host.com/4</var>.  When the game ends, the instance will
+unregister its agents.</p>
+
+<p>Because the game's agents are only created when a game begins, the
+tic-tac-toe game has a persistent agent for registration,
+<var>tictactoe@host.com</var>.  When Harry logs on, the client will
+send a query to <var>tictactoe@host.com</var> asking for a new game.  As soon
+as Draco asks for a match, the registration server will create a new
+game instance and tell Harry's client the name of his
+player agent, <var>tictactoe@host.com/1</var>.</p>
+
+<figure title="Tic-Tac-Toe Registration" src="tictactoe-registration.png"/>
+
+</s1>
+
 <s1 title="XMPP (Jabber)">
 
-<p>HMPP is an adaptation of the <a href="http://xmpp.org">XMPP</a> (Jabber)
+<p>HMTP is an adaptation of the <a href="http://xmpp.org">XMPP</a> (Jabber)
 instant messaging protocol.  Where XMPP (Xml Messaging and Presence Protocol)
-is based on XML, HMPP (Hessian Messaging and Presence Protocol) is
-based on HMPP.  Because HMPP is designed to follow XMPP, its architecture and
-protocols are essentially identical until the very lowest layer, where HMPP
-substitutes Hessian for XML.</p>
+is based on XML, HMTP (Hessian Message Transport Presence Protocol) is
+based on Hessian.  Because HMTP is designed to follow XMPP, its
+architecture and protocols are essentially identical until the very
+lowest layer, where HMTP substitutes Hessian for XML.</p>
 
 <p>Because of the close relationship to XMPP, you may want to browse the
-XMPP specifications for a deeper understanding of how HMPP works.  Since
+XMPP specifications for a deeper understanding of how HMTP works.  Since
 XMPP is only a wire protocol, not an API, it does not include all of the
-HMPP classes, but the architecture remains the same.</p>
+HMTP classes, but the architecture remains the same.</p>
 
-<p>The primary advantages HMPP offers over XMPP include the performance
+<p>The primary advantages HMTP offers over XMPP include the performance
 advantages of Hessian over XML, and more importantly a more strict layering
-than XMPP provides.  Because the payloads of the HMPP messages are all
+than XMPP provides.  Because the payloads of the HMTP messages are all
 <code>Serializable</code>, applications have enormous flexibility in
 developing their own messages using application objects.  In contrast,
 XMPP messages are always XML, so applications are not only restricted to
@@ -200,7 +243,7 @@ XML data, but also must create their own XML parsers and formatters.</p>
 
 <s1 title="Packet types">
 
-<p>HMPP provides three categories of packets: messages, queries (rpc), and
+<p>HMTP provides three categories of packets: messages, queries (rpc), and
 presence announcements.  Messages and queries are typically the bulk of the
 packets, while presence announcements are used rarely.</p>
 
@@ -217,9 +260,9 @@ his presence.</p>
 <s2 title="Message Packets">
 
 <p>The main Message packet contains a target ("to"), a sender ("from"),
-and a payload ("value").  In HMPP, the payload can be any serializable
+and a payload ("value").  In HMTP, the payload can be any serializable
 value.  Example messages could be IM text messages, administration console
-graph, game updates, or updated stock quotes.  Since HMPP is bidirectional,
+graph, game updates, or updated stock quotes.  Since HMTP is bidirectional,
 messages can flow to and from any client.</p>
 
 <ul>
@@ -266,7 +309,7 @@ packets at all.</p>
 
 <s1 title="Addressing (JIDs)">
 
-<p>HMPP resources all have unique identifiers called JIDs (Jabber IDs).
+<p>HMTP resources all have unique identifiers called JIDs (Jabber IDs).
 The id looks like:</p>
 
 <def title="JID format">
@@ -286,7 +329,7 @@ The id looks like:</p>
 </tr>
 <tr>
   <td>ferg@foo.com/xB8</td>
-  <td>User login agent, i.e. the HMPP address corresponding to a logged
+  <td>User login agent, i.e. the HMTP address corresponding to a logged
 in IM session.</td>
 </tr>
 <tr>
@@ -333,12 +376,12 @@ in IM session.</td>
 
 <s2 title="Client API">
 
-<s3 title="HmppConnection">
+<s3 title="HmtpConnection">
 
-<def title="HmppConnection">
-package com.caucho.hmpp;
+<def title="HmtpConnection">
+package com.caucho.hmtp;
 
-public interface HmppConnection
+public interface HmtpConnection
 {
   String getJid();
 
@@ -366,22 +409,22 @@ public interface HmppConnection
   void presenceSubscribed(String to, Serializable []data);
   void presenceUnsubscribe(String to, Serializable []data);
   void presenceUnsubscribed(String to, Serializable []data);
-  void presenceError(String to, Serializable []data, HmppError error);
+  void presenceError(String to, Serializable []data, HmtpError error);
   
-  HmppStream getStream();
+  HmtpStream getStream();
 }
 </def>
 
 </s3>
 
-<s3 title="HmppConnectionFactory">
+<s3 title="HmtpConnectionFactory">
 
-<def title="HmppConnectionFactory">
-package com.caucho.hmpp;
+<def title="HmtpConnectionFactory">
+package com.caucho.hmtp;
 
-public interface HmppConnectionFactory
+public interface HmtpConnectionFactory
 {
-  HmppConnection getConnection(String uid, String password);
+  HmtpConnection getConnection(String uid, String password);
 }
 </def>
 
@@ -389,14 +432,14 @@ public interface HmppConnectionFactory
 <s3 title="QueryCallback">
 
 <def title="QueryCallback">
-package com.caucho.hmpp;
+package com.caucho.hmtp;
 
 public interface QueryCallback
 {
   void onQueryResult(String to, String from, Serializable value);
   
   void onQueryError(String to, String from, Serializable value,
-                    HmppError error);
+                    HmtpError error);
 }
 </def>
 </s3>
@@ -405,20 +448,20 @@ public interface QueryCallback
 
 <s2 title="Remote Client API">
 
-<s3 title="HmppClient">
+<s3 title="HmtpClient">
 
-<def title="HmppClient">
-package com.caucho.hmpp;
+<def title="HmtpClient">
+package com.caucho.hmtp;
 
-public class HmppClient implements HmppConnection
+public class HmtpClient implements HmtpConnection
 {
-  public HmppClient(String url);
+  public HmtpClient(String url);
 
   public void connect() throws IOException;
 
   public void login(String uid, String password);
 
-  // HmppConnection methods
+  // HmtpConnection methods
   String getJid();
 
   boolean isClosed();
@@ -445,9 +488,9 @@ public class HmppClient implements HmppConnection
   void presenceSubscribed(String to, Serializable []data);
   void presenceUnsubscribe(String to, Serializable []data);
   void presenceUnsubscribed(String to, Serializable []data);
-  void presenceError(String to, Serializable []data, HmppError error);
+  void presenceError(String to, Serializable []data, HmtpError error);
   
-  HmppStream getStream();
+  HmtpStream getStream();
 }
 </def>
 </s3>
@@ -459,14 +502,14 @@ public class HmppClient implements HmppConnection
 <s3 title="MessageStream">
 
 <def title="MessageStream">
-package com.caucho.hmpp;
+package com.caucho.hmtp;
 
 public interface MessageStream
 {
   public void sendMessage(String to, String from, Serializable value);
   
   public void sendMessageError(String to, String from, Serializable value,
-			       HmppError error);
+			       HmtpError error);
 }
 </def>
 
@@ -475,7 +518,7 @@ public interface MessageStream
 <s3 title="QueryStream">
 
 <def title="QueryStream">
-package com.caucho.hmpp;
+package com.caucho.hmtp;
 
 public interface QueryStream
 {
@@ -484,7 +527,7 @@ public interface QueryStream
 
   void sendQueryResult(long id, String to, String from, Serializable value);
   void sendQueryError(long id, String to, String from, Serializable query,
-                      HmppError error);
+                      HmtpError error);
 }
 </def>
 
@@ -493,7 +536,7 @@ public interface QueryStream
 <s3 title="PresenceStream">
 
 <def title="PresenceStream">
-package com.caucho.hmpp;
+package com.caucho.hmtp;
 
 public interface PresenceStream
 {
@@ -505,18 +548,18 @@ public interface PresenceStream
   void sendPresenceUnsubscribe(String to, String from, Serializable []data);
   void sendPresenceUnsubscribed(String to, String from, Serializable []data);
   void sendPresenceError(String to, String from, Serializable []data,
-                         HmppError error);
+                         HmtpError error);
 }
 </def>
 
 </s3>
 
-<s3 title="HmppStream">
+<s3 title="HmtpStream">
 
-<def title="HmppStream">
-package com.caucho.hmpp;
+<def title="HmtpStream">
+package com.caucho.hmtp;
 
-public interface HmppStream
+public interface HmtpStream
   extends MessageStream, QueryStream, PresenceStream
 {
 }
@@ -528,40 +571,40 @@ public interface HmppStream
 
 <s2 title="Service APIs">
 
-<s3 title="HmppBroker">
+<s3 title="HmtpBroker">
 
-<def title="HmppBroker">
-package com.caucho.hmpp;
+<def title="HmtpBroker">
+package com.caucho.hmtp;
 
-public interface HmppBroker
-  extends HmppStream, HmppConnectionFactory
+public interface HmtpBroker
+  extends HmtpStream, HmtpConnectionFactory
 {
   void addResourceManager(ResourceManager manager);
     
-  HmppConnection registerResource(String jid, HmppResource resource);
+  HmtpConnection registerResource(String jid, HmtpResource resource);
 }
 </def>
 
 </s3>
 
-<s3 title="HmppResource">
+<s3 title="HmtpResource">
 
-<def title="HmppResource">
-package com.caucho.hmpp;
+<def title="HmtpResource">
+package com.caucho.hmtp;
 
-public interface HmppResource
+public interface HmtpResource
 {
   public String getJid();
   
-  public HmppResource lookupResource(String jid);
+  public HmtpResource lookupResource(String jid);
 
   public void onLogin(String jid);
   public void onLogout(String jid);
 
-  public HmppStream getCallbackStream();
+  public HmtpStream getCallbackStream();
   
-  public HmppStream getOutboundFilter(HmppStream stream);
-  public HmppStream getInboundFilter(HmppStream stream);
+  public HmtpStream getOutboundFilter(HmtpStream stream);
+  public HmtpStream getInboundFilter(HmtpStream stream);
 }
 </def>
 
@@ -570,25 +613,25 @@ public interface HmppResource
 <s3 title="ResourceManager">
 
 <def title="ResourceManager">
-package com.caucho.hmpp;
+package com.caucho.hmtp;
 
 public interface ResourceManager
 {
-  public void setBroker(HmppBroker broker);
+  public void setBroker(HmtpBroker broker);
   
-  public HmppResource lookupResource(String jid);
+  public HmtpResource lookupResource(String jid);
 }
 </def>
 
 </s3>
 
-<s3 title="HmppService">
+<s3 title="HmtpService">
 
-<def title="HmppService">
-package com.caucho.hmpp;
+<def title="HmtpService">
+package com.caucho.hmtp;
 
-public interface HmppService
-  extends HmppResource, HmppStream
+public interface HmtpService
+  extends HmtpResource, HmtpStream
 {
 }
 </def>

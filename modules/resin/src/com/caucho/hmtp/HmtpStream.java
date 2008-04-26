@@ -30,7 +30,7 @@
 package com.caucho.hmtp;
 
 /**
- * ILow-level callback to handle packet events.  Each method corresponds to
+ * Main agent callback to handle packet events.  Each method corresponds to
  * a packet class.
  */
 public interface HmtpStream 

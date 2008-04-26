@@ -138,9 +138,9 @@
     </item>
 
     <!--
-       - HMPP
+       - HMTP
       -->
-    <item link="hmpp.xtp" title="HMPP"/>
+    <item link="hmtp.xtp" title="HMTP"/>
 
     <!--
        - IoC

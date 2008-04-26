@@ -104,7 +104,7 @@ public class MemoryNode
     PublishMessage msg = new PublishMessage(getName(), items);
 
     for (String jid : _subscriberList) {
-      _service.getToBroker().sendMessage(jid, _service.getJid(), msg);
+      _service.getBrokerStream().sendMessage(jid, _service.getJid(), msg);
     }
   }
 

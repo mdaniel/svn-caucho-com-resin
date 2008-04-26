@@ -38,7 +38,7 @@ import com.caucho.util.*;
  */
 public interface HmtpConnection {
   /**
-   * Returns the session's jid
+   * Returns the connection agent's jid
    */
   public String getJid();
 
@@ -175,5 +175,5 @@ public interface HmtpConnection {
   /**
    * returns the underlying, low-level stream
    */
-  public HmtpStream getStream();
+  public HmtpStream getBrokerStream();
 }

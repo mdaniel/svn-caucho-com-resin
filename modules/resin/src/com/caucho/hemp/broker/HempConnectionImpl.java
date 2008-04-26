@@ -36,7 +36,7 @@ import com.caucho.hmtp.MessageStream;
 import com.caucho.hmtp.HmtpStream;
 import com.caucho.hmtp.HmtpError;
 import com.caucho.hmtp.HmtpConnection;
-import com.caucho.hmtp.spi.HmtpResource;
+import com.caucho.hmtp.spi.HmtpService;
 
 import com.caucho.util.*;
 import java.io.Serializable;
@@ -46,14 +46,15 @@ import java.util.logging.*;
 /**
  * Manager
  */
-public class HempConnectionImpl implements HmtpConnection {
+public class HempConnectionImpl implements HmtpConnection
+{
   private static final Logger log
     = Logger.getLogger(HempConnectionImpl.class.getName());
   
   private static final L10N L = new L10N(HempConnectionImpl.class);
   
   private final HempBroker _broker;
-  private final HempConnectionOutboundStream _handler;
+  private final HempConnectionAgentStream _handler;
   
   private final String _jid;
 
@@ -62,13 +63,13 @@ public class HempConnectionImpl implements HmtpConnection {
 
   private long _qId;
   
-  private HmtpStream _inboundFilter;
-  private HmtpStream _outboundFilter;
+  private HmtpStream _brokerFilter;
+  // private HmtpAgentStream _agentFilter;
   
-  private HmtpStream _inboundStream;
-  private HmtpStream _outboundStream;
+  private HmtpStream _brokerStream;
+  // private HmtpAgentStream _agentStream;
   
-  private HmtpResource _resource;
+  private HmtpService _resource;
 
   private boolean _isClosed;
 
@@ -77,10 +78,10 @@ public class HempConnectionImpl implements HmtpConnection {
     _broker = manager;
     _jid = jid;
 
-    _handler = new HempConnectionOutboundStream(this);
+    _handler = new HempConnectionAgentStream(this);
 
-    _inboundStream = manager;
-    _outboundStream = _handler;
+    _brokerStream = manager;
+    // _agentStream = _handler;
     
     String uid = jid;
     int p = uid.indexOf('/');
@@ -90,10 +91,10 @@ public class HempConnectionImpl implements HmtpConnection {
     _resource = manager.getResource(uid);
 
     if (_resource != null) {
-      _inboundFilter = _resource.getInboundFilter(_broker);
-      _inboundStream = _inboundFilter;
+      _brokerFilter = _resource.getBrokerFilter(_broker);
+      _brokerStream = _brokerFilter;
       
-      _outboundFilter = _resource.getOutboundFilter(null);
+      // _agentFilter = _resource.getAgentFilter(_handler);
     }
   }
 
@@ -105,14 +106,14 @@ public class HempConnectionImpl implements HmtpConnection {
     return _jid;
   }
 
-  HempConnectionOutboundStream getStreamHandler()
+  HempConnectionAgentStream getAgentStreamHandler()
   {
     return _handler;
   }
   
-  public HmtpStream getStream()
+  public HmtpStream getBrokerStream()
   {
-    return _inboundStream;
+    return _brokerStream;
   }
 
   /**
@@ -147,7 +148,7 @@ public class HempConnectionImpl implements HmtpConnection {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
 
-    _inboundStream.sendMessage(to, _jid, msg);
+    _brokerStream.sendMessage(to, _jid, msg);
   }
 
   //
@@ -191,7 +192,7 @@ public class HempConnectionImpl implements HmtpConnection {
       _queryMap.put(id, new QueryItem(id, callback));
     }
 
-    getStream().sendQueryGet(id, to, _jid, value);
+    getBrokerStream().sendQueryGet(id, to, _jid, value);
   }
 
   /**
@@ -231,7 +232,7 @@ public class HempConnectionImpl implements HmtpConnection {
       _queryMap.put(id, new QueryItem(id, callback));
     }
 
-    getStream().sendQuerySet(id, to, _jid, value);
+    getBrokerStream().sendQuerySet(id, to, _jid, value);
   }
 
   /**
@@ -288,7 +289,7 @@ public class HempConnectionImpl implements HmtpConnection {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _inboundStream.sendPresence(null, _jid, data);
+    _brokerStream.sendPresence(null, _jid, data);
   }
 
   /**
@@ -299,7 +300,7 @@ public class HempConnectionImpl implements HmtpConnection {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
 
-    _inboundStream.sendPresence(to, _jid, data);
+    _brokerStream.sendPresence(to, _jid, data);
   }
 
   /**
@@ -310,7 +311,7 @@ public class HempConnectionImpl implements HmtpConnection {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
 
-    _inboundStream.sendPresenceUnavailable(null, _jid, data);
+    _brokerStream.sendPresenceUnavailable(null, _jid, data);
  }
   
   /**
@@ -321,7 +322,7 @@ public class HempConnectionImpl implements HmtpConnection {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _inboundStream.sendPresenceUnavailable(to, _jid, data);
+    _brokerStream.sendPresenceUnavailable(to, _jid, data);
   }
 
   /**
@@ -332,7 +333,7 @@ public class HempConnectionImpl implements HmtpConnection {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _inboundStream.sendPresenceProbe(to, _jid, data);
+    _brokerStream.sendPresenceProbe(to, _jid, data);
   }
 
 
@@ -344,7 +345,7 @@ public class HempConnectionImpl implements HmtpConnection {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
 
-    _inboundStream.sendPresenceSubscribe(to, _jid, data);
+    _brokerStream.sendPresenceSubscribe(to, _jid, data);
   }
 
   /**
@@ -355,7 +356,7 @@ public class HempConnectionImpl implements HmtpConnection {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _inboundStream.sendPresenceSubscribed(to, _jid, data);
+    _brokerStream.sendPresenceSubscribed(to, _jid, data);
   }
 
   /**
@@ -366,7 +367,7 @@ public class HempConnectionImpl implements HmtpConnection {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _inboundStream.sendPresenceUnsubscribe(to, _jid, data);
+    _brokerStream.sendPresenceUnsubscribe(to, _jid, data);
   }
 
   /**
@@ -377,7 +378,7 @@ public class HempConnectionImpl implements HmtpConnection {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _inboundStream.sendPresenceUnsubscribed(to, _jid, data);
+    _brokerStream.sendPresenceUnsubscribed(to, _jid, data);
   }
 
   /**
@@ -390,7 +391,7 @@ public class HempConnectionImpl implements HmtpConnection {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _inboundStream.sendPresenceError(to, _jid, data, error);
+    _brokerStream.sendPresenceError(to, _jid, data, error);
   }
  
   /**

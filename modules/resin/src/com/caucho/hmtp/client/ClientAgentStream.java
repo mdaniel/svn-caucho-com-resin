@@ -46,9 +46,9 @@ import java.util.logging.*;
 /**
  * HMTP client protocol
  */
-class ClientInboundStream implements Runnable, HmtpStream {
+class ClientAgentStream implements Runnable, HmtpStream {
   private static final Logger log
-    = Logger.getLogger(ClientInboundStream.class.getName());
+    = Logger.getLogger(ClientAgentStream.class.getName());
 
   private static long _gId;
   
@@ -58,10 +58,10 @@ class ClientInboundStream implements Runnable, HmtpStream {
   
   private boolean _isFinest;
 
-  ClientInboundStream(HmtpClient client)
+  ClientAgentStream(HmtpClient client)
   {
     _client = client;
-    _clientStream = client.getStream();
+    _clientStream = client.getBrokerStream();
     _loader = Thread.currentThread().getContextClassLoader();
   }
 

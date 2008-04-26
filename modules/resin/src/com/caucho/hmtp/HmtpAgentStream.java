@@ -30,15 +30,9 @@
 package com.caucho.hmtp;
 
 /**
- * The HmtpConnectionFactory creates new instances of a HmtpConnection
- * for clients.  The getConnection will automatically register an
- * agent associated with the connection.  When the connection closes,
- * it will unregister the connection's agent.
+ * Represents a stream to an agent.
  */
-public interface HmtpConnectionFactory
+public interface HmtpAgentStream extends HmtpStream 
 {
-  /**
-   * Creates a session
-   */
-  public HmtpConnection getConnection(String uid, String password);
+  public String getJid();
 }

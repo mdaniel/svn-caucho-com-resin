@@ -29,6 +29,7 @@
 
 package com.caucho.hemp.broker;
 
+import com.caucho.hmtp.HmtpAgentStream;
 import com.caucho.hmtp.packet.*;
 import com.caucho.hmtp.spi.*;
 import com.caucho.hmtp.HmtpStream;
@@ -43,9 +44,10 @@ import java.lang.ref.*;
 import java.io.Serializable;
 
 /**
- * Queue of hmpp packets
+ * Queue of hmtp packets
  */
-public class HempMemoryQueue implements HmtpStream, Runnable {
+public class HempMemoryQueue implements HmtpAgentStream, Runnable
+{
   private static final Logger log
     = Logger.getLogger(HempMemoryQueue.class.getName());
   private static final L10N L = new L10N(HempMemoryQueue.class);
@@ -53,7 +55,7 @@ public class HempMemoryQueue implements HmtpStream, Runnable {
   private final Executor _executor = ScheduledThreadPool.getLocal();
   private final ClassLoader _loader
     = Thread.currentThread().getContextClassLoader();
-  private final HmtpStream _target;
+  private final HmtpAgentStream _agent;
   private final HmtpBroker _broker;
 
   private int _threadSemaphore;
@@ -62,17 +64,25 @@ public class HempMemoryQueue implements HmtpStream, Runnable {
   private int _head;
   private int _tail;
 
-  public HempMemoryQueue(HmtpStream target, HmtpBroker broker)
+  public HempMemoryQueue(HmtpAgentStream agent, HmtpBroker broker)
   {
-    if (target == null)
+    if (agent == null)
       throw new NullPointerException();
 
     if (broker == null)
       throw new NullPointerException();
     
-    _target = target;
+    _agent = agent;
     _broker = broker;
     _threadSemaphore = 1;
+  }
+  
+  /**
+   * Returns the agent's jid
+   */
+  public String getJid()
+  {
+    return _agent.getJid();
   }
 
   /**
@@ -224,7 +234,7 @@ public class HempMemoryQueue implements HmtpStream, Runnable {
 
   protected HmtpStream getStream()
   {
-    return _target;
+    return _agent;
   }
 
   protected void enqueue(Packet packet)
@@ -322,6 +332,6 @@ public class HempMemoryQueue implements HmtpStream, Runnable {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _target + "]";
+    return getClass().getSimpleName() + "[" + _agent + "]";
   }
 }

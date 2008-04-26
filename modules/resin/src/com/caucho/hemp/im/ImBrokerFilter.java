@@ -27,52 +27,57 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.pubsub;
+package com.caucho.hemp.im;
 
+import com.caucho.hmtp.HmtpStream;
+import com.caucho.hmtp.AbstractHmtpFilter;
 import java.util.*;
+import java.util.logging.*;
+import java.io.Serializable;
+
 
 /**
- * Subscribe query
+ * Filter on inbound requests
  */
-public class PubSubSubscribe extends PubSubQuery {
-  private final String jid;
-  private final String node;
-
-  public PubSubSubscribe()
+public class ImBrokerFilter extends AbstractHmtpFilter
+{
+  private ImUserService _resource;
+  
+  public ImBrokerFilter(HmtpStream next, ImUserService resource)
   {
-    this.jid = null;
-    this.node = null;
-  }
+    super(next);
 
-  public PubSubSubscribe(String jid)
-  {
-    this.jid = jid;
-    this.node = null;
-  }
-
-  public PubSubSubscribe(String jid, String node)
-  {
-    this.jid = jid;
-    this.node = node;
-  }
-
-  public String getJid()
-  {
-    return this.jid;
-  }
-
-  public String getNode()
-  {
-    return this.node;
+    _resource = resource;
   }
 
   @Override
-  public String toString()
+  public void sendPresence(String to,
+			   String from,
+			   Serializable []data)
   {
-    if (this.node != null)
-      return (getClass().getSimpleName() + "[" + this.jid
-	      + ",node=" + this.node + "]");
+    if (to != null)
+      getNext().sendPresence(to, _resource.getJid(), data);
     else
-      return getClass().getSimpleName() + "[" + this.jid + "]";
+      _resource.sendPresence(from, data);
+  }
+
+  @Override
+  public void sendPresenceSubscribe(String to,
+				    String from,
+				    Serializable []data)
+  {
+    if (_resource.rosterSubscribeTo(to, from, data)) {
+      getNext().sendPresenceSubscribe(to, _resource.getJid(), data);
+    }
+  }
+
+  @Override
+  public void sendPresenceSubscribed(String to,
+				     String from,
+				     Serializable []data)
+  {
+    if (_resource.rosterSubscribedTo(to, from, data)) {
+      getNext().sendPresenceSubscribed(to, _resource.getJid(), data);
+    }
   }
 }

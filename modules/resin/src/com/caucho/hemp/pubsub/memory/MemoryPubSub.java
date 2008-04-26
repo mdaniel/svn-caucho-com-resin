@@ -108,7 +108,7 @@ public class MemoryPubSub extends GenericService
       MemoryNode node = getNode(publish.getNode());
 
       if (node == null) {
-	getToBroker().sendQueryError(id, from, to, query,
+	getBrokerStream().sendQueryError(id, from, to, query,
 				     new HmtpError(HmtpError.TYPE_CANCEL,
 						   "no-node"));
 	return true;
@@ -116,7 +116,7 @@ public class MemoryPubSub extends GenericService
 
       node.publish(publish.getItems());
       
-      getToBroker().sendQueryResult(id, from, to, null);
+      getBrokerStream().sendQueryResult(id, from, to, null);
 
       return true;
     }

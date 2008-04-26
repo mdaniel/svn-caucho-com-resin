@@ -29,7 +29,6 @@
 
 package com.caucho.hmtp.pubsub;
 
-import com.caucho.hmtp.pubsub.PubSubItem;
 import java.util.*;
 import java.io.Serializable;
 

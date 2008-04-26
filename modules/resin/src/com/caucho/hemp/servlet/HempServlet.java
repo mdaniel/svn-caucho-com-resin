@@ -77,6 +77,6 @@ public class HempServlet extends GenericServlet {
     ReadStream is = req.getConnection().getReadStream();
     WriteStream os = req.getConnection().getWriteStream();
 
-    res.upgradeProtocol(new ServerInboundStream(_broker, is, os));
+    res.upgradeProtocol(new ServerBrokerStream(_broker, is, os));
   }
 }

@@ -57,9 +57,9 @@ import java.util.logging.*;
 /**
  * HMTP client protocol
  */
-public class HmtpClientStream implements HmtpStream {
+public class ClientBrokerStream implements HmtpStream {
   private static final Logger log
-    = Logger.getLogger(HmtpClientStream.class.getName());
+    = Logger.getLogger(ClientBrokerStream.class.getName());
 
   private InputStream _is;
   private OutputStream _os;
@@ -69,7 +69,7 @@ public class HmtpClientStream implements HmtpStream {
 
   private boolean _isFinest;
 
-  public HmtpClientStream(InputStream is, OutputStream os)
+  public ClientBrokerStream(InputStream is, OutputStream os)
   {
     _is = is;
     _os = os;

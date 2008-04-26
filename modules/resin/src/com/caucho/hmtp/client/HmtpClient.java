@@ -67,7 +67,7 @@ public class HmtpClient implements HmtpConnection {
   protected InputStream _is;
   protected OutputStream _os;
 
-  private HmtpClientStream _clientStream;
+  private ClientBrokerStream _clientStream;
   private String _jid;
 
   private MessageStream _messageHandler;
@@ -161,9 +161,9 @@ public class HmtpClient implements HmtpConnection {
 	  log.fine(this + " " + result);
       }
 
-      _clientStream = new HmtpClientStream(_is, _os);
+      _clientStream = new ClientBrokerStream(_is, _os);
 
-      executeThread(new ClientInboundStream(this));
+      executeThread(new ClientAgentStream(this));
     }
     else {
       if (log.isLoggable(Level.FINE))
@@ -278,7 +278,7 @@ public class HmtpClient implements HmtpConnection {
   /**
    * Returns the client stream
    */
-  public HmtpStream getStream()
+  public HmtpStream getBrokerStream()
   {
     return _clientStream;
   }
@@ -581,7 +581,7 @@ public class HmtpClient implements HmtpConnection {
   public void flush()
     throws IOException
   {
-    HmtpClientStream stream = _clientStream;
+    ClientBrokerStream stream = _clientStream;
 
     if (stream != null)
       stream.flush();
@@ -601,7 +601,7 @@ public class HmtpClient implements HmtpConnection {
       Socket s;
       InputStream is;
       OutputStream os;
-      HmtpClientStream stream;
+      ClientBrokerStream stream;
       
       synchronized (this) {
 	s = _s;

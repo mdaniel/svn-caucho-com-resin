@@ -29,8 +29,8 @@
 
 package com.caucho.hmtp.spi;
 
+import com.caucho.hmtp.HmtpAgentStream;
 import com.caucho.hmtp.HmtpStream;
-import com.caucho.hmtp.spi.HmtpResource;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.*;
@@ -38,7 +38,7 @@ import java.util.logging.*;
 /**
  * Configuration for a service
  */
-abstract public class AbstractHmtpResource implements HmtpResource
+abstract public class AbstractHmtpResource implements HmtpService
 {
   private static final Logger log
     = Logger.getLogger(AbstractHmtpResource.class.getName());
@@ -61,17 +61,20 @@ abstract public class AbstractHmtpResource implements HmtpResource
   /**
    * Looks up a sub-resource
    */
-  public HmtpResource lookupResource(String jid)
+  public HmtpService lookupResource(String jid)
   {
     return null;
   }
 
-  abstract public HmtpStream getCallbackStream();
+  /**
+   * Returns the stream to the service's agent
+   */
+  abstract public HmtpAgentStream getAgentStream();
 
   /**
    * Creates an outbound filter
    */
-  public HmtpStream getOutboundFilter(HmtpStream stream)
+  public HmtpAgentStream getAgentFilter(HmtpAgentStream stream)
   {
     return stream;
   }
@@ -79,23 +82,29 @@ abstract public class AbstractHmtpResource implements HmtpResource
   /**
    * Creates an inbound filter
    */
-  public HmtpStream getInboundFilter(HmtpStream stream)
+  public HmtpStream getBrokerFilter(HmtpStream stream)
   {
     return stream;
   }
 
   /**
-   * Called when an instance logs in
+   * Called when an agent logs in
+   * 
+   * @jid the jid of the agent logging in.
    */
   public void onLogin(String jid)
   {
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " onLogin(" + jid + ")");
   }
 
   /**
-   * Called when an instance logs out
+   * Called when an agent logs out
    */
   public void onLogout(String jid)
   {
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " onLogout(" + jid + ")");
   }
 
   protected String logValue(Serializable value)
@@ -129,22 +138,9 @@ abstract public class AbstractHmtpResource implements HmtpResource
     return sb.toString();
   }
 
-  //
-  // client presence
-  //
-
-  /**
-   * Client request for presence
-   */
-  public void onClientPresenceSubscribe(String to,
-					String from,
-					Serializable []data)
-  {
-    log.fine(this + " onClientPresenceSubscribe to=" + to + " from=" + from);
-  }
-
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _jid + "]";
+    return getClass().getSimpleName() + "[" + getJid() + "]";
   }
 }

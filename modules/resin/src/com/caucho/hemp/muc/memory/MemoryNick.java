@@ -30,7 +30,7 @@
 package com.caucho.hemp.muc.memory;
 
 import com.caucho.hmtp.muc.MucUserPresence;
-import com.caucho.hmtp.spi.AbstractHmtpService;
+import com.caucho.hmtp.spi.SimpleHmtpService;
 import com.caucho.hmtp.im.ImMessage;
 import java.io.Serializable;
 import java.util.*;
@@ -39,7 +39,7 @@ import java.util.logging.*;
 /**
  * Multiuser chat room nick (xep-0045)
  */
-public class MemoryNick extends AbstractHmtpService
+public class MemoryNick extends SimpleHmtpService
 {
   private static final Logger log
     = Logger.getLogger(MemoryNick.class.getName());
@@ -96,7 +96,7 @@ public class MemoryNick extends AbstractHmtpService
 
     // XXX: check for voice
 
-    _room.getToBroker().sendMessage(getUserJid(), user.getJid(), msg);
+    _room.getBrokerStream().sendMessage(getUserJid(), user.getJid(), msg);
   }
 
   @Override

@@ -30,7 +30,7 @@
 package com.caucho.hemp.muc.memory;
 
 import com.caucho.hmtp.muc.MucUserPresence;
-import com.caucho.hmtp.spi.HmtpResource;
+import com.caucho.hmtp.spi.HmtpService;
 import com.caucho.hmtp.im.ImMessage;
 import com.caucho.hmtp.HmtpStream;
 import com.caucho.hemp.broker.GenericService;
@@ -78,7 +78,7 @@ public class MemoryRoom extends GenericService
   }
 
   @Override
-  public HmtpResource lookupResource(String jid)
+  public HmtpService lookupResource(String jid)
   {
     synchronized (_nicknameMap) {
       MemoryNick nick = _nicknameMap.get(jid);
@@ -120,7 +120,7 @@ public class MemoryRoom extends GenericService
 
     MemoryNick []users = _userArray;
     for (MemoryNick user : users) {
-      getToBroker().sendMessage(user.getUserJid(), nick.getJid(), msg);
+      getBrokerStream().sendMessage(user.getUserJid(), nick.getJid(), msg);
     }
   }
 
@@ -135,9 +135,9 @@ public class MemoryRoom extends GenericService
     return null;
   }
 
-  public HmtpStream getToBroker()
+  public HmtpStream getBrokerStream()
   {
-    return super.getToBroker();
+    return super.getBrokerStream();
   }
 
   protected void addPresence(MemoryNick nick)
@@ -162,7 +162,7 @@ public class MemoryRoom extends GenericService
 
       MucUserPresence presenceData = user.toPresenceData();
 
-      getToBroker().sendPresence(nick.getUserJid(), user.getJid(),
+      getBrokerStream().sendPresence(nick.getUserJid(), user.getJid(),
 				 new Serializable[] { presenceData });
     }
 
@@ -173,7 +173,7 @@ public class MemoryRoom extends GenericService
 
       MucUserPresence presenceData = user.toPresenceData();
 
-      getToBroker().sendPresence(user.getUserJid(), nick.getJid(),
+      getBrokerStream().sendPresence(user.getUserJid(), nick.getJid(),
 				 new Serializable[] { presenceData });
     }
 
@@ -181,7 +181,7 @@ public class MemoryRoom extends GenericService
     MucUserPresence presenceData = nick.toPresenceData();
     presenceData.setStatus(new int[] { 110 });
 
-    getToBroker().sendPresence(nick.getUserJid(), nick.getJid(),
+    getBrokerStream().sendPresence(nick.getUserJid(), nick.getJid(),
 			       new Serializable[] { presenceData });
   }
 }

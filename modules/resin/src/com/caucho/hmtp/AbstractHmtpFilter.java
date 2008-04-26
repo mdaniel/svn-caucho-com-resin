@@ -33,7 +33,8 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Configuration for a service
+ * Abstrat implementation of a HtmpStream filter.  The default operation
+ * of most methods is to forward the request to the next stream.
  */
 public class AbstractHmtpFilter implements HmtpStream
 {

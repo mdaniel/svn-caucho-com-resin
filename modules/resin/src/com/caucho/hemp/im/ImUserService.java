@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.im;
 
-import com.caucho.hmtp.spi.AbstractHmtpService;
+import com.caucho.hmtp.spi.SimpleHmtpService;
 import com.caucho.hmtp.im.RosterQuery;
 import com.caucho.hmtp.im.RosterItem;
 import com.caucho.hmtp.disco.DiscoInfoQuery;
@@ -44,7 +44,7 @@ import java.util.logging.*;
 /**
  * Resource representing an IM user
  */
-public class ImUserService extends AbstractHmtpService
+public class ImUserService extends SimpleHmtpService
 {
   private static final Logger log
     = Logger.getLogger(ImUserService.class.getName());
@@ -79,9 +79,9 @@ public class ImUserService extends AbstractHmtpService
    * Creates an inbound filter
    */
   @Override
-  public HmtpStream getInboundFilter(HmtpStream stream)
+  public HmtpStream getBrokerFilter(HmtpStream stream)
   {
-    return new ImInboundFilter(stream, this);
+    return new ImBrokerFilter(stream, this);
   }
 
   @Override

@@ -53,15 +53,15 @@ import com.caucho.hessian.io.*;
 /**
  * Handles callbacks for a hmpp service
  */
-public class ServerOutboundStream implements HmtpStream
+public class ServerAgentStream implements HmtpStream
 {
   private static final Logger log
-    = Logger.getLogger(ServerOutboundStream.class.getName());
+    = Logger.getLogger(ServerAgentStream.class.getName());
 
-  private ServerInboundStream _packetHandler;
+  private ServerBrokerStream _packetHandler;
   private Hessian2StreamingOutput _out;
 
-  ServerOutboundStream(ServerInboundStream packetHandler,
+  ServerAgentStream(ServerBrokerStream packetHandler,
 		     Hessian2StreamingOutput out)
   {
     _packetHandler = packetHandler;

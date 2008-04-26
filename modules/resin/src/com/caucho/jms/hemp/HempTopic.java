@@ -30,7 +30,7 @@
 package com.caucho.jms.hemp;
 
 import com.caucho.hmtp.spi.HmtpBroker;
-import com.caucho.hmtp.spi.AbstractHmtpService;
+import com.caucho.hmtp.spi.SimpleHmtpService;
 import com.caucho.hmtp.HmtpError;
 import com.caucho.hmtp.HmtpConnection;
 import java.util.ArrayList;
@@ -190,7 +190,7 @@ public class HempTopic extends AbstractTopic
     // _xmppNode.send(session, msg, timeout);
   }
 
-  class TopicResource extends AbstractHmtpService {
+  class TopicResource extends SimpleHmtpService {
     public void sendMessage(String to, String from, Serializable msg)
     {
       HempTopic.this.sendMessage(to, from, msg);

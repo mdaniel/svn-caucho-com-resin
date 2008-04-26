@@ -30,13 +30,15 @@
 package com.caucho.hemp.broker;
 
 import com.caucho.hmtp.spi.HmtpBroker;
-import com.caucho.hmtp.spi.AbstractHmtpService;
 import com.caucho.hmtp.disco.DiscoInfoQuery;
 import com.caucho.hmtp.disco.DiscoIdentity;
 import com.caucho.hmtp.disco.DiscoFeature;
 import com.caucho.hmtp.HmtpStream;
 import com.caucho.hmtp.HmtpConnection;
 import com.caucho.config.*;
+import com.caucho.hmtp.AbstractHmtpAgentStream;
+import com.caucho.hmtp.HmtpAgentStream;
+import com.caucho.hmtp.spi.HmtpService;
 import com.caucho.util.*;
 
 import java.io.Serializable;
@@ -46,9 +48,10 @@ import javax.annotation.*;
 import javax.webbeans.*;
 
 /**
- * Configuration for a service
+ * GenericService implementation to simplify configuring a service.
  */
-public class GenericService extends AbstractHmtpService
+public class GenericService extends AbstractHmtpAgentStream
+  implements HmtpService
 {
   private static final L10N L = new L10N(GenericService.class);
   private static final Logger log
@@ -56,14 +59,24 @@ public class GenericService extends AbstractHmtpService
   
   private @In HmtpBroker _broker;
   
+  private String _jid;
+  
   private HmtpConnection _conn;
-  private HmtpStream _toBroker;
+  private HmtpStream _brokerStream;
 
-  private HmtpStream _queue;
+  private HmtpAgentStream _agentStream;
   
   public void setName(String name)
   {
-    setJid(name);
+    _jid = name;
+  }
+  
+  /**
+   * Returns the service's jid.
+   */
+  public String getJid()
+  {
+    return _jid;
   }
   
   protected HmtpConnection getConnection()
@@ -71,14 +84,9 @@ public class GenericService extends AbstractHmtpService
     return _conn;
   }
 
-  public HmtpStream getToBroker()
+  public HmtpStream getBrokerStream()
   {
-    return _toBroker;
-  }
-
-  public HmtpStream getStream()
-  {
-    return _toBroker;
+    return _brokerStream;
   }
 
   @PostConstruct
@@ -88,26 +96,76 @@ public class GenericService extends AbstractHmtpService
       throw new ConfigException(L.l("{0} requires a jid",
 				    getClass().getSimpleName()));
 
-    _queue = createQueue(this);
+    _agentStream = createQueue(this);
 
     _conn = _broker.registerResource(getJid(), this);
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " init");
 
-    _toBroker = _conn.getStream();
+    _brokerStream = _conn.getBrokerStream();
   }
 
-  protected HmtpStream createQueue(HmtpStream stream)
+  protected HmtpAgentStream createQueue(HmtpAgentStream stream)
   {
     return new HempMemoryQueue(stream, _broker);
   }
 
-  public HmtpStream getCallbackStream()
+  @Override
+  public HmtpAgentStream getAgentStream()
   {
-    return _queue;
+    return _agentStream;
   }
-
+  
+  //
+  // HmtpService API
+  //
+  
+  /**
+   * Create a filter for requests sent to the service's agent.
+   */
+  public HmtpAgentStream getAgentFilter(HmtpAgentStream agentStream)
+  {
+    return agentStream;
+  }
+  
+  /**
+   * Create a filter for requests sent by the service to the broker.
+   */
+  public HmtpStream getBrokerFilter(HmtpStream brokerStream)
+  {
+    return brokerStream;
+  }
+  
+  /**
+   * Callback when a child agent logs in.
+   */
+  public void onLogin(String jid)
+  {
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " onLogin(" + jid + ")");
+  }
+  
+  /**
+   * Callback when a child agent logs out.
+   */
+  public void onLogout(String jid)
+  {
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " onLogout(" + jid + ")");
+  }
+  
+  /**
+   * Returns a child agent given a jid.
+   */
+  public HmtpService lookupResource(String jid)
+  {
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " lookupResource(" + jid + ")");
+    
+    return null;
+  }
+  
   //
   // queries
   //
@@ -117,7 +175,7 @@ public class GenericService extends AbstractHmtpService
 			      Serializable value)
   {
     if (value instanceof DiscoInfoQuery) {
-      _toBroker.sendQueryResult(id, from, to,
+      _brokerStream.sendQueryResult(id, from, to,
 				new DiscoInfoQuery(getDiscoIdentity(),
 						   getDiscoFeatures()));
 
@@ -127,7 +185,7 @@ public class GenericService extends AbstractHmtpService
     Serializable result = doQueryGet(to, from, value);
 
     if (result != null) {
-      _toBroker.sendQueryResult(id, from, to, result);
+      _brokerStream.sendQueryResult(id, from, to, result);
       return true;
     }
 

@@ -46,11 +46,11 @@ import com.caucho.vfs.*;
 /**
  * Main protocol handler for the HTTP version of HeMPP.
  */
-public class ServerInboundStream
+public class ServerBrokerStream
   implements TcpConnectionHandler, HmtpStream
 {
   private static final Logger log
-    = Logger.getLogger(ServerInboundStream.class.getName());
+    = Logger.getLogger(ServerBrokerStream.class.getName());
   
   private HmtpBroker _broker;
   private HmtpConnection _conn;
@@ -59,12 +59,12 @@ public class ServerInboundStream
   private Hessian2StreamingInput _in;
   private Hessian2StreamingOutput _out;
 
-  private ServerOutboundStream _callbackHandler;
-  private AuthInboundStream _authHandler;
+  private ServerAgentStream _callbackHandler;
+  private AuthBrokerStream _authHandler;
 
   private String _jid;
 
-  ServerInboundStream(HmtpBroker broker, ReadStream rs, WriteStream ws)
+  ServerBrokerStream(HmtpBroker broker, ReadStream rs, WriteStream ws)
   {
     _broker = broker;
 
@@ -79,8 +79,8 @@ public class ServerInboundStream
     _in = new Hessian2StreamingInput(is);
     _out = new Hessian2StreamingOutput(os);
 
-    _callbackHandler = new ServerOutboundStream(this, _out);
-    _authHandler = new AuthInboundStream(this, _callbackHandler);
+    _callbackHandler = new ServerAgentStream(this, _out);
+    _authHandler = new AuthBrokerStream(this, _callbackHandler);
   }
 
   protected String getJid()
@@ -138,7 +138,7 @@ public class ServerInboundStream
 
     _jid = _conn.getJid();
     
-    _toBroker = _conn.getStream();
+    _toBroker = _conn.getBrokerStream();
 
     return _jid;
   }

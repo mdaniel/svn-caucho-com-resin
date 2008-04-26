@@ -35,7 +35,7 @@ import com.caucho.hmtp.QueryStream;
 import com.caucho.hmtp.HmtpError;
 
 import com.caucho.hemp.*;
-import com.caucho.hmtp.HmtpStream;
+import com.caucho.hmtp.HmtpAgentStream;
 import com.caucho.util.*;
 import java.io.Serializable;
 import java.util.logging.*;
@@ -43,21 +43,32 @@ import java.util.logging.*;
 /**
  * Handles packets sent to the connection
  */
-class HempConnectionOutboundStream implements HmtpStream {
+class HempConnectionAgentStream implements HmtpAgentStream
+{
   private static final Logger log
-    = Logger.getLogger(HempConnectionOutboundStream.class.getName());
+    = Logger.getLogger(HempConnectionAgentStream.class.getName());
   
-  private static final L10N L = new L10N(HempConnectionOutboundStream.class);
+  private static final L10N L = new L10N(HempConnectionAgentStream.class);
 
   private final HempConnectionImpl _conn;
+  private final String _jid;
 
   private MessageStream _messageHandler;
   private QueryStream _queryHandler;
   private PresenceStream _presenceHandler;
 
-  HempConnectionOutboundStream(HempConnectionImpl conn)
+  HempConnectionAgentStream(HempConnectionImpl conn)
   {
     _conn = conn;
+    _jid = conn.getJid();
+  }
+  
+  /**
+   * Returns the agent's jid
+   */
+  public String getJid()
+  {
+    return _jid;
   }
 
   //
@@ -156,7 +167,7 @@ class HempConnectionOutboundStream implements HmtpStream {
 	            HmtpError.FEATURE_NOT_IMPLEMENTED,
 		    "unknown query: " + query.getClass().getName());
     
-     _conn.getStream().sendQueryError(id, from, to, query, error);
+     _conn.getBrokerStream().sendQueryError(id, from, to, query, error);
    
     return true;
   }
@@ -185,7 +196,7 @@ class HempConnectionOutboundStream implements HmtpStream {
 		    HmtpError.FEATURE_NOT_IMPLEMENTED,
 		    "unknown query: " + query.getClass().getName());
     
-    _conn.getStream().sendQueryError(id, from, to, query, error);
+    _conn.getBrokerStream().sendQueryError(id, from, to, query, error);
 
     return true;
   }
@@ -385,6 +396,6 @@ class HempConnectionOutboundStream implements HmtpStream {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _conn.getJid() + "]";
+    return getClass().getSimpleName() + "[" + getJid() + "]";
   }
 }

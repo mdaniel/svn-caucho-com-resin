@@ -58,7 +58,7 @@ public class AbstractResourceManager implements ResourceManager {
    * Returns the resource with the given name, or null if this is not
    * a known resource
    */
-  public HmtpResource lookupResource(String jid)
+  public HmtpService lookupResource(String jid)
   {
     return null;
   }

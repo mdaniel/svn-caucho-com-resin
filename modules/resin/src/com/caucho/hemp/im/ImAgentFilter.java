@@ -29,55 +29,23 @@
 
 package com.caucho.hemp.im;
 
-import com.caucho.hmtp.HmtpStream;
-import com.caucho.hmtp.AbstractHmtpFilter;
+import com.caucho.hmtp.AbstractHmtpAgentFilter;
+import com.caucho.hmtp.HmtpAgentStream;
 import java.util.*;
 import java.util.logging.*;
-import java.io.Serializable;
 
 
 /**
- * Filter on inbound requests
+ * Filter on outbound requests (needed to support privacy)
  */
-public class ImInboundFilter extends AbstractHmtpFilter
+public class ImAgentFilter extends AbstractHmtpAgentFilter
 {
   private ImUserService _resource;
   
-  public ImInboundFilter(HmtpStream next, ImUserService resource)
+  public ImAgentFilter(HmtpAgentStream next, ImUserService resource)
   {
     super(next);
 
     _resource = resource;
-  }
-
-  @Override
-  public void sendPresence(String to,
-			   String from,
-			   Serializable []data)
-  {
-    if (to != null)
-      getNext().sendPresence(to, _resource.getJid(), data);
-    else
-      _resource.sendPresence(from, data);
-  }
-
-  @Override
-  public void sendPresenceSubscribe(String to,
-				    String from,
-				    Serializable []data)
-  {
-    if (_resource.rosterSubscribeTo(to, from, data)) {
-      getNext().sendPresenceSubscribe(to, _resource.getJid(), data);
-    }
-  }
-
-  @Override
-  public void sendPresenceSubscribed(String to,
-				     String from,
-				     Serializable []data)
-  {
-    if (_resource.rosterSubscribedTo(to, from, data)) {
-      getNext().sendPresenceSubscribed(to, _resource.getJid(), data);
-    }
   }
 }

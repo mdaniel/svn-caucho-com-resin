@@ -29,24 +29,29 @@
 
 package com.caucho.hmtp.spi;
 
+import com.caucho.hmtp.HmtpAgentStream;
 import com.caucho.hmtp.HmtpStream;
 import com.caucho.hmtp.HmtpError;
 import java.util.logging.*;
 import java.io.Serializable;
 
 /**
- * Configuration for a service
+ * Abstract class for a service that implements its own HmtpAgentStream.
+ * 
+ * Simple services will implement both the HmtpService and HmtpAgentStream
+ * interfaces in a single class.  This abstract class simplifies the
+ * implementation of this kind of service.
  */
-public class AbstractHmtpService extends AbstractHmtpResource
-  implements HmtpService
+public class SimpleHmtpService extends AbstractHmtpResource
+  implements HmtpAgentStream
 {
   private static final Logger log
-    = Logger.getLogger(AbstractHmtpService.class.getName());
+    = Logger.getLogger(SimpleHmtpService.class.getName());
   
   /**
    * Returns the resource's stream
    */
-  public HmtpStream getCallbackStream()
+  public HmtpAgentStream getAgentStream()
   {
     return this;
   }

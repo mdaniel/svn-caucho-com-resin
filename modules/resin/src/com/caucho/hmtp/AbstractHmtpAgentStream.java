@@ -29,16 +29,27 @@
 
 package com.caucho.hmtp;
 
+import java.io.Serializable;
+import java.util.*;
+import java.util.logging.*;
+
 /**
- * The HmtpConnectionFactory creates new instances of a HmtpConnection
- * for clients.  The getConnection will automatically register an
- * agent associated with the connection.  When the connection closes,
- * it will unregister the connection's agent.
+ * Abstract implemention of a HmtpAgentStream
  */
-public interface HmtpConnectionFactory
+abstract public class AbstractHmtpAgentStream extends AbstractHmtpStream
+  implements HmtpAgentStream
 {
   /**
-   * Creates a session
+   * Returns the agent's jid
    */
-  public HmtpConnection getConnection(String uid, String password);
+  abstract public String getJid();
+
+  /**
+   * Returns a debug string of the stream.
+   */
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getJid() + "]";
+  }
 }

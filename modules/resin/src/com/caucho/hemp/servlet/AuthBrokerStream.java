@@ -45,15 +45,15 @@ import com.caucho.vfs.*;
 /**
  * Main protocol handler for the HTTP version of HeMPP.
  */
-public class AuthInboundStream extends AbstractHmtpStream
+public class AuthBrokerStream extends AbstractHmtpStream
 {
   private static final Logger log
-    = Logger.getLogger(AuthInboundStream.class.getName());
+    = Logger.getLogger(AuthBrokerStream.class.getName());
 
-  private ServerInboundStream _manager;
+  private ServerBrokerStream _manager;
   private HmtpStream _broker;
 
-  AuthInboundStream(ServerInboundStream manager, HmtpStream server)
+  AuthBrokerStream(ServerBrokerStream manager, HmtpStream server)
   {
     _manager = manager;
     _broker = server;

@@ -27,25 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.im;
+package com.caucho.hmtp;
 
-import com.caucho.hmtp.HmtpStream;
-import com.caucho.hmtp.AbstractHmtpFilter;
+import java.io.Serializable;
 import java.util.*;
-import java.util.logging.*;
-
 
 /**
- * Filter on outbound requests (needed to support privacy)
+ * Abstrat implementation of a HtmpStream filter.  The default operation
+ * of most methods is to forward the request to the next stream.
  */
-public class ImOutboundFilter extends AbstractHmtpFilter
+public class AbstractHmtpAgentFilter extends AbstractHmtpFilter
+  implements HmtpAgentStream
 {
-  private ImUserService _resource;
-  
-  public ImOutboundFilter(HmtpStream next, ImUserService resource)
+  private final String _jid;
+
+  protected AbstractHmtpAgentFilter(HmtpAgentStream next)
   {
     super(next);
 
-    _resource = resource;
+    _jid = next.getJid();
+  }
+
+  public String getJid()
+  {
+    return _jid;
   }
 }

@@ -46,5 +46,5 @@ public interface HmtpBroker extends HmtpStream, HmtpConnectionFactory
   /**
    * Registers a resource
    */
-  public HmtpConnection registerResource(String jid, HmtpResource resource);
+  public HmtpConnection registerResource(String jid, HmtpService resource);
 }

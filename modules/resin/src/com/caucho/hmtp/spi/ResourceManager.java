@@ -30,7 +30,7 @@
 package com.caucho.hmtp.spi;
 
 import com.caucho.hmtp.spi.HmtpBroker;
-import com.caucho.hmtp.spi.HmtpResource;
+import com.caucho.hmtp.spi.HmtpService;
 
 import java.io.Serializable;
 
@@ -47,7 +47,7 @@ public interface ResourceManager {
    * Returns the resource with the given name, or null if this is not
    * a known resource
    */
-  public HmtpResource lookupResource(String jid);
+  public HmtpService lookupResource(String jid);
 
   /**
    * Basic presence
