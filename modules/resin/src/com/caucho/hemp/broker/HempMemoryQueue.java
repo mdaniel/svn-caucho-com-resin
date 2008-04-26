@@ -29,21 +29,8 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.hmtp.packet.QuerySet;
-import com.caucho.hmtp.packet.QueryResult;
-import com.caucho.hmtp.packet.QueryGet;
-import com.caucho.hmtp.packet.QueryError;
-import com.caucho.hmtp.packet.PresenceUnsubscribed;
-import com.caucho.hmtp.packet.PresenceUnsubscribe;
-import com.caucho.hmtp.packet.PresenceUnavailable;
-import com.caucho.hmtp.packet.PresenceSubscribed;
-import com.caucho.hmtp.packet.PresenceSubscribe;
-import com.caucho.hmtp.packet.PresenceProbe;
-import com.caucho.hmtp.packet.PresenceError;
-import com.caucho.hmtp.packet.Presence;
-import com.caucho.hmtp.packet.Packet;
-import com.caucho.hmtp.packet.MessageError;
-import com.caucho.hmtp.packet.Message;
+import com.caucho.hmtp.packet.*;
+import com.caucho.hmtp.spi.*;
 import com.caucho.hmtp.HmtpStream;
 import com.caucho.hmtp.HmtpError;
 import com.caucho.server.resin.*;
@@ -67,7 +54,7 @@ public class HempMemoryQueue implements HmtpStream, Runnable {
   private final ClassLoader _loader
     = Thread.currentThread().getContextClassLoader();
   private final HmtpStream _target;
-  private final HmtpStream _toSource;
+  private final HmtpBroker _broker;
 
   private int _threadSemaphore;
 
@@ -75,16 +62,16 @@ public class HempMemoryQueue implements HmtpStream, Runnable {
   private int _head;
   private int _tail;
 
-  public HempMemoryQueue(HmtpStream target, HmtpStream toSource)
+  public HempMemoryQueue(HmtpStream target, HmtpBroker broker)
   {
     if (target == null)
       throw new NullPointerException();
 
-    if (toSource == null)
+    if (broker == null)
       throw new NullPointerException();
     
     _target = target;
-    _toSource = toSource;
+    _broker = broker;
     _threadSemaphore = 1;
   }
 
@@ -315,7 +302,7 @@ public class HempMemoryQueue implements HmtpStream, Runnable {
 	if (log.isLoggable(Level.FINER))
 	  log.finer(this + " dequeue " + packet);
 	
-	packet.dispatch(getStream(), _toSource);
+	packet.dispatch(getStream(), _broker);
 	
 	isValid = true;
       } catch (Exception e) {

@@ -68,7 +68,7 @@ public class HempServlet extends GenericServlet {
 
     String upgrade = req.getHeader("Upgrade");
 
-    if (! "HMPP/0.9".equals(upgrade)) {
+    if (! "HMTP/0.9".equals(upgrade)) {
       // eventually can use alt method
       res.sendError(HttpServletResponse.SC_NOT_FOUND);
       return;

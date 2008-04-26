@@ -1,4 +1,4 @@
 event=com.caucho.log.handler.EventHandler
 jms=com.caucho.log.handler.JmsHandler
-hmpp=com.caucho.log.handler.HmppHandler
+hmtp=com.caucho.log.handler.HmtpHandler
 
