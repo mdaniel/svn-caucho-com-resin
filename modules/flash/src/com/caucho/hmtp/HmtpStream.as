@@ -49,31 +49,9 @@
 
 package com.caucho.hmtp
 {
-  public interface HmppConnection {
-    function get jid():String;
-    function isClosed():Boolean;
-    function close():void;
-
-    function sendMessage(to:String, value:Object):void;
-    function queryGet(to:String, value:Object,
-                      callback:QueryCallback, handback:Object):void
-    function querySet(to:String, value:Object,
-                      callback:QueryCallback, handback:Object):void
-    
-    /*
-    function presence(data:Array):void;
-    function presence(to:String, data:Array):void;
-    function presenceUnavailable(data:Array):void;
-    function presenceUnavailable(to:String, data:Array):void;
-    function presenceProbe(to:String, data:Array):void;
-    function presenceSubscribe(to:String, data:Array):void;
-    function presenceSubscribed(to:String, data:Array):void;
-    function presenceUnsubscribe(to:String, data:Array):void;
-    function presenceUnsubscribed(to:String, data:Array):void;
-    function presenceError(to:String, data:Array, error:HmppError):void;
-    */
-
-    function get stream():HmppStream;
+  public interface HmtpStream 
+    extends MessageStream, QueryStream//, PresenceStream 
+  {
   }
 }
 

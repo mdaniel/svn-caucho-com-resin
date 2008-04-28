@@ -47,7 +47,7 @@
  * 
  */
 
-package com.caucho.hmpp.packet
+package com.caucho.hmtp.packet
 {
   public class QueryGet extends Packet {
     public static const QUERY_GET:String = "queryGet";

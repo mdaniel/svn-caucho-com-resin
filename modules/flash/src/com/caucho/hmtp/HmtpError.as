@@ -49,7 +49,7 @@
 
 package com.caucho.hmtp
 {
-  public class HmppError
+  public class HmtpError
   {
     /**
      * Retry after providing credentials
@@ -234,7 +234,7 @@ package com.caucho.hmtp
 
     public function toString():String
     {
-      return "HmppError[type=" + _type + 
+      return "HmtpError[type=" + _type + 
                      ", group=" + _group + 
                      ", text=" + _text + 
                      ", data=" + _data + 

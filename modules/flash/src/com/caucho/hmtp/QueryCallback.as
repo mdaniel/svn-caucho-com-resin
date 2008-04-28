@@ -73,6 +73,6 @@ package com.caucho.hmtp
                            value:Object, handback:Object):void;
 
     function onQueryError(to:String, from:String, 
-                          value:Object, error:HmppError, handback:Object):void;
+                          value:Object, error:HmtpError, handback:Object):void;
   }
 }

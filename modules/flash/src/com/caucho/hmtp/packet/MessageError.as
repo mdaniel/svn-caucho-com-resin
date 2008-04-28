@@ -47,18 +47,18 @@
  * 
  */
 
-package com.caucho.hmpp.packet
+package com.caucho.hmtp.packet
 {
-  import com.caucho.hmpp.*;
+  import com.caucho.hmtp.*;
 
   public class MessageError extends Packet {
     public const MESSAGE_ERROR:String = "messageError";
 
     private var _value:Object;
-    private var _error:HmppError;
+    private var _error:HmtpError;
 
     public function MessageError(to:String, from:String, 
-                                 value:Object, error:HmppError)
+                                 value:Object, error:HmtpError)
     {
       super(MESSAGE_ERROR, to, from);
 
@@ -71,7 +71,7 @@ package com.caucho.hmpp.packet
       return _value;
     }
 
-    public function get error():HmppError
+    public function get error():HmtpError
     {
       return _error;
     }

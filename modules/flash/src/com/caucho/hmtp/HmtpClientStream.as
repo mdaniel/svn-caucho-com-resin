@@ -49,9 +49,85 @@
 
 package com.caucho.hmtp
 {
-  public interface HmppStream 
-    extends MessageStream, QueryStream//, PresenceStream 
-  {
+  import flash.net.Socket;
+
+  import hessian.io.Hessian2StreamingInput;
+  import hessian.io.Hessian2StreamingOutput;
+
+  import com.caucho.hmtp.packet.*;
+
+  public class HmtpClientStream implements HmtpStream {
+    private var _socket:Socket;
+    private var _input:Hessian2StreamingInput = new Hessian2StreamingInput();
+    private var _output:Hessian2StreamingOutput = new Hessian2StreamingOutput();
+
+    public function HmtpClientStream(socket:Socket):void
+    {
+      _socket = socket;
+
+      _output.init(_socket);
+    }
+
+    public function get input():Hessian2StreamingInput
+    {
+      return _input;
+    }
+
+    public function sendMessage(to:String, from:String, value:Object):void
+    {
+      if (_output != null) {
+        _output.writeObject(new Message(to, from, value));
+      }
+    }
+
+    public function sendMessageError(to:String, from:String, value:Object,
+                                     error:HmtpError):void
+    {
+      if (_output != null) {
+        _output.writeObject(new MessageError(to, from, value, error));
+      }
+    }
+
+    public function sendQueryGet(id:Number, 
+                                 to:String, from:String, 
+                                 query:Object):void
+    {
+      if (_output != null) {
+        _output.writeObject(new QueryGet(id, to, from, query));
+      }
+    }
+
+    public function sendQuerySet(id:Number, 
+                                 to:String, from:String, 
+                                 query:Object):void
+    {
+      if (_output != null) {
+        _output.writeObject(new QuerySet(id, to, from, query));
+      }
+    }
+
+    public function sendQueryResult(id:Number, 
+                                    to:String, from:String, 
+                                    value:Object):void
+    {
+      if (_output != null) {
+        _output.writeObject(new QueryResult(id, to, from, value));
+      }
+    }
+
+    public function sendQueryError(id:Number, 
+                                   to:String, from:String, 
+                                   value:Object, error:HmtpError):void
+    {
+      if (_output != null) {
+        _output.writeObject(new QueryError(id, to, from, value, error));
+      }
+    }
+
+    public function close():void
+    {
+      _socket.close();
+      _output = null;
+    }
   }
 }
-

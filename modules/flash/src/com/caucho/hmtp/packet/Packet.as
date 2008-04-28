@@ -47,7 +47,7 @@
  * 
  */
 
-package com.caucho.hmpp.packet
+package com.caucho.hmtp.packet
 {
   import flash.events.Event;
 

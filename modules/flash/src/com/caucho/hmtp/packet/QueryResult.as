@@ -47,7 +47,7 @@
  * 
  */
 
-package com.caucho.hmpp.packet
+package com.caucho.hmtp.packet
 {
   public class QueryResult extends Packet {
     public const QUERY_RESULT:String = "queryResult";

@@ -47,7 +47,7 @@
  * 
  */
 
-package com.caucho.hmpp.packet
+package com.caucho.hmtp.packet
 {
   public class Message extends Packet {
     public const MESSAGE:String = "message";

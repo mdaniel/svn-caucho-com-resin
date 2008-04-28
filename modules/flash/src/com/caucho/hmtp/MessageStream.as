@@ -52,7 +52,7 @@ package com.caucho.hmtp
   public interface MessageStream {
     function sendMessage(to:String, from:String, value:Object):void;
     function sendMessageError(to:String, from:String, value:Object,
-                              error:HmppError):void;
+                              error:HmtpError):void;
   }
 }
 

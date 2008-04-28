@@ -69,8 +69,8 @@ package com.caucho.hmtp
   import mx.core.Application;
   import mx.utils.URLUtil;
 
-  public class HmppClient extends EventDispatcher 
-                          implements HmppConnection 
+  public class HmtpClient extends EventDispatcher 
+                          implements HmtpConnection 
   {
     public static const MESSAGE:String = "message";
     public static const QUERY:String = "query";
@@ -95,7 +95,7 @@ package com.caucho.hmtp
     private var _headerHistory:Array = new Array(4);
     private var _httpStatus:String = "";
 
-    private var _stream:HmppClientStream;
+    private var _stream:HmtpClientStream;
 
     private var _queryId:int = 0;
     private var _outstandingQueries:Object = new Object();
@@ -106,7 +106,7 @@ package com.caucho.hmtp
      * @param url  The URL of the destination service.
      *
      */
-    public function HmppClient(url:String):void
+    public function HmtpClient(url:String):void
     {
       _url = url;
       parseURL(url);
@@ -172,14 +172,14 @@ package com.caucho.hmtp
       _socket = new Socket(_host, _port);
       _socket.addEventListener(Event.CONNECT, handleConnect);
 
-      _stream = new HmppClientStream(_socket);
+      _stream = new HmtpClientStream(_socket);
     }
     
     private function handleConnect(event:Event):void
     {
       _socket.writeUTFBytes("POST " + _path + "/hemp HTTP/1.1\r\n");
       _socket.writeUTFBytes("Host: " + _to + ":" + _port + "\r\n");
-      _socket.writeUTFBytes("Upgrade: HMPP/0.9\r\n");
+      _socket.writeUTFBytes("Upgrade: HMTP/0.9\r\n");
       _socket.writeUTFBytes("Content-Length: 0\r\n");
       _socket.writeUTFBytes("\r\n");
       _socket.addEventListener(ProgressEvent.SOCKET_DATA, handleData);
@@ -354,7 +354,7 @@ package com.caucho.hmtp
       stream.sendQuerySet(queryId, to, null, value);
     }
 
-    public function get stream():HmppStream
+    public function get stream():HmtpStream
     {
       return _stream;
     }
@@ -394,7 +394,7 @@ class LoginCallback implements com.caucho.hmtp.QueryCallback {
   }
 
   public function onQueryError(to:String, from:String,
-                               value:Object, error:com.caucho.hmtp.HmppError,
+                               value:Object, error:com.caucho.hmtp.HmtpError,
                                handback:Object):void
   {
     handback.dispatchEvent(new com.caucho.hmtp.auth.LoginFailureEvent());

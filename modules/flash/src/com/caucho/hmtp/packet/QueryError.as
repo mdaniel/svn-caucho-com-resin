@@ -47,21 +47,21 @@
  * 
  */
 
-package com.caucho.hmpp.packet
+package com.caucho.hmtp.packet
 {
-  import com.caucho.hmpp.*;
+  import com.caucho.hmtp.*;
 
   public class QueryError extends Packet {
     public const QUERY_ERROR:String = "queryError";
 
     public var _id:Number;
     public var _value:Object;
-    public var _error:HmppError;
+    public var _error:HmtpError;
 
     public function QueryError(id:Number = 0, 
                                to:String = "", from:String = "", 
                                value:Object = null, 
-                               error:HmppError = null):void
+                               error:HmtpError = null):void
     {
       super(QUERY_ERROR, to, from);
 
@@ -80,7 +80,7 @@ package com.caucho.hmpp.packet
       return _value;
     }
 
-    public function get error():HmppError
+    public function get error():HmtpError
     {
       return _error;
     }

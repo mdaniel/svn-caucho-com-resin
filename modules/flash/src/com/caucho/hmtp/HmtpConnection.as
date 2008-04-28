@@ -49,85 +49,31 @@
 
 package com.caucho.hmtp
 {
-  import flash.net.Socket;
+  public interface HmtpConnection {
+    function get jid():String;
+    function isClosed():Boolean;
+    function close():void;
 
-  import hessian.io.Hessian2StreamingInput;
-  import hessian.io.Hessian2StreamingOutput;
+    function sendMessage(to:String, value:Object):void;
+    function queryGet(to:String, value:Object,
+                      callback:QueryCallback, handback:Object):void
+    function querySet(to:String, value:Object,
+                      callback:QueryCallback, handback:Object):void
+    
+    /*
+    function presence(data:Array):void;
+    function presence(to:String, data:Array):void;
+    function presenceUnavailable(data:Array):void;
+    function presenceUnavailable(to:String, data:Array):void;
+    function presenceProbe(to:String, data:Array):void;
+    function presenceSubscribe(to:String, data:Array):void;
+    function presenceSubscribed(to:String, data:Array):void;
+    function presenceUnsubscribe(to:String, data:Array):void;
+    function presenceUnsubscribed(to:String, data:Array):void;
+    function presenceError(to:String, data:Array, error:HmtpError):void;
+    */
 
-  import com.caucho.hmtp.packet.*;
-
-  public class HmppClientStream implements HmppStream {
-    private var _socket:Socket;
-    private var _input:Hessian2StreamingInput = new Hessian2StreamingInput();
-    private var _output:Hessian2StreamingOutput = new Hessian2StreamingOutput();
-
-    public function HmppClientStream(socket:Socket):void
-    {
-      _socket = socket;
-
-      _output.init(_socket);
-    }
-
-    public function get input():Hessian2StreamingInput
-    {
-      return _input;
-    }
-
-    public function sendMessage(to:String, from:String, value:Object):void
-    {
-      if (_output != null) {
-        _output.writeObject(new Message(to, from, value));
-      }
-    }
-
-    public function sendMessageError(to:String, from:String, value:Object,
-                                     error:HmppError):void
-    {
-      if (_output != null) {
-        _output.writeObject(new MessageError(to, from, value, error));
-      }
-    }
-
-    public function sendQueryGet(id:Number, 
-                                 to:String, from:String, 
-                                 query:Object):void
-    {
-      if (_output != null) {
-        _output.writeObject(new QueryGet(id, to, from, query));
-      }
-    }
-
-    public function sendQuerySet(id:Number, 
-                                 to:String, from:String, 
-                                 query:Object):void
-    {
-      if (_output != null) {
-        _output.writeObject(new QuerySet(id, to, from, query));
-      }
-    }
-
-    public function sendQueryResult(id:Number, 
-                                    to:String, from:String, 
-                                    value:Object):void
-    {
-      if (_output != null) {
-        _output.writeObject(new QueryResult(id, to, from, value));
-      }
-    }
-
-    public function sendQueryError(id:Number, 
-                                   to:String, from:String, 
-                                   value:Object, error:HmppError):void
-    {
-      if (_output != null) {
-        _output.writeObject(new QueryError(id, to, from, value, error));
-      }
-    }
-
-    public function close():void
-    {
-      _socket.close();
-      _output = null;
-    }
+    function get stream():HmtpStream;
   }
 }
+

@@ -47,7 +47,7 @@
  * 
  */
 
-package com.caucho.hmpp.packet
+package com.caucho.hmtp.packet
 {
   public class QuerySet extends Packet {
     public const QUERY_SET:String = "querySet";

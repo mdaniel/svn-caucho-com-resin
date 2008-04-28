@@ -55,7 +55,7 @@ package com.caucho.hmtp
     function sendQuerySet(id:Number, to:String, from:String, query:Object):void;
 
     function sendQueryError(id:Number, to:String, from:String, 
-                            query:Object, error:HmppError):void;
+                            query:Object, error:HmtpError):void;
   }
 }
 
