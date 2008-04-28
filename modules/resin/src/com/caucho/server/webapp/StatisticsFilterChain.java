@@ -32,6 +32,7 @@ package com.caucho.server.webapp;
 
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.Connection;
+import com.caucho.server.dispatch.*;
 import com.caucho.server.port.TcpConnection;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.ClientDisconnectException;
@@ -42,8 +43,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 
-public class StatisticsFilterChain
-  implements FilterChain
+public class StatisticsFilterChain extends AbstractFilterChain
 {
   private final FilterChain _next;
   private WebApp _webApp;
@@ -77,8 +77,7 @@ public class StatisticsFilterChain
 
         try {
           _next.doFilter(request, response);
-        }
-        catch (ClientDisconnectException ex) {
+        } catch (ClientDisconnectException ex) {
           clientDisconnectException = ex;
         }
 
@@ -91,10 +90,11 @@ public class StatisticsFilterChain
 
         if (clientDisconnectException != null)
           throw clientDisconnectException;
+
+	return;
       }
     }
-    else {
-      _next.doFilter(request, response);
-    }
+
+    _next.doFilter(request, response);
   }
 }

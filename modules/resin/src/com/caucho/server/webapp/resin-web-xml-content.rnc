@@ -1166,6 +1166,9 @@ r_web-app-Basis =
 
   & r_shutdown-wait-max?
 
+  & (attribute statistics-enable { r_boolean-Type }
+     | element statistics-enable { r_boolean-Type })?
+
   & r_strict-mapping?
 
   & r_taglib*

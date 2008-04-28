@@ -2139,6 +2139,21 @@ element shutdown-wait-max {
 
 </defun>
 
+<defun title="&lt;statistics-enable>">
+<default>false</default>
+
+<p>&lt;statistics-enable> enables more detailed statistics for the
+<code>WebAppMXBean</code> administration.  The statistics gathering
+is disabled by default for performance reasons.</p>
+
+<def title="&lt;statistics-enable> schema">
+element statistics-enable {
+  r_boolean-Type
+}
+</def>
+
+</defun>
+
 <defun title="&lt;strict-mapping>" version="Resin 1.2" type="defun">
 <default>false, allowing /foo/bar.jsp/foo.</default>
 <p>Forces servlet-mapping to follow strict Servlet 2.2, disallowing

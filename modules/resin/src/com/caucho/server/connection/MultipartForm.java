@@ -109,7 +109,7 @@ class MultipartForm {
         }
 
         if (uploadMax > 0 && uploadMax < tempFile.getLength()) {
-          String msg = L.l("multipart form data `{0}' too large",
+          String msg = L.l("multipart form data '{0}' too large",
                            "" + tempFile.getLength());
           request.setAttribute("caucho.multipart.form.error", msg);
           request.setAttribute("caucho.multipart.form.error.size",
@@ -131,18 +131,19 @@ class MultipartForm {
           throw new IOException(msg);
 	}
 
-	// server/136u
-	/*
-        addTable(table, name, tempFile.getNativePath());
-        addTable(table, name + ".file", tempFile.getNativePath());
-        addTable(table, name + ".filename", filename);
-        addTable(table, name + ".content-type", contentType);
-	*/
-
-	table.put(name, new String[] { tempFile.getNativePath() });
-        table.put(name + ".file", new String[] { tempFile.getNativePath() });
-        table.put(name + ".filename", new String[] { filename });
-        table.put(name + ".content-type", new String[] { contentType });
+	// server/136u, server/136v, #2578
+	if (table.get(name + ".filename") == null) {
+	  table.put(name, new String[] { tempFile.getNativePath() });
+	  table.put(name + ".file", new String[] { tempFile.getNativePath() });
+	  table.put(name + ".filename", new String[] { filename });
+	  table.put(name + ".content-type", new String[] { contentType });
+	}
+	else {
+	  addTable(table, name, tempFile.getNativePath());
+	  addTable(table, name + ".file", tempFile.getNativePath());
+	  addTable(table, name + ".filename", filename);
+	  addTable(table, name + ".content-type", contentType);
+	}
         
         if (log.isLoggable(Level.FINE))
           log.fine("mp-file: " + name + "(filename:" + filename + ")");

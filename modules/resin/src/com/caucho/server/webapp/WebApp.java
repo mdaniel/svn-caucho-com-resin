@@ -284,6 +284,8 @@ public class WebApp extends ServletContextImpl
 
   private ArrayList<String> _regexp;
 
+  private boolean _isStatisticsEnabled;
+
   private long _shutdownWaitTime = 15000L;
   private long _activeWaitTime = 15000L;
 
@@ -520,6 +522,14 @@ public class WebApp extends ServletContextImpl
   public String getSchema()
   {
     return "com/caucho/server/webapp/resin-web-xml.rnc";
+  }
+
+  /**
+   * Enables detailed statistics
+   */
+  public void setStatisticsEnable(boolean isEnable)
+  {
+    _isStatisticsEnabled = isEnable;
   }
 
   /**
@@ -2071,7 +2081,7 @@ public class WebApp extends ServletContextImpl
         if (_cache != null)
           chain = _cache.createFilterChain(chain, this);
 
-        if (CauchoSystem.isDetailedStatistics())
+        if (_isStatisticsEnabled)
           chain = new StatisticsFilterChain(chain, this);
 
         WebAppFilterChain webAppChain = new WebAppFilterChain(chain, this);

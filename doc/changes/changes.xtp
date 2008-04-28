@@ -12,6 +12,8 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>multipart form not properly handling multiple uploads (#2578, rep by waiwong)</li>
+<li>admin: web-app added statistics-enable to enable web-app statistics (#2625, rep by Marty Messer)</li>
 <li>(2008-04-26) jsp: JspPrecompileListener not properly handling &lt;fileset> (#2615, rep by stbu)</li>
 <li>boot: WatchdogClient.launchManager needs -Xrs for windows (#2566, rep by mledom)</li>
 <li>boot: watchdog restart requires delay between stop and start (#2564)</li>
