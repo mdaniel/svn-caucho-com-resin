@@ -21,21 +21,65 @@
 
 <s2 title="Server sendMessage example">
 
-<p>Sending a message from a servlet to an internal service is a
-basic HMTP use case.  The message service implements the
-<code>sendMessage</code> method to receive messages.  Since HMTP is
-a streaming API like <code>java.io.OutputStream</code>, the sending
-method is the same as the receiving method, <code>sendMessage</code>.</p>
+<p>Sending a message from one agent to another is a basic HMTP use case.
+Typical applications include chat text, game updates, Atom/RSS updates,
+pub/sub messaging, and event notification for administration consoles.
+In this example, a servlet send a message to an internal logging service.</p>
 
-<p>HMTP messages are addressed using a JID (Jabber ID), which looks like
+<p>The sending agent sends a message using <code>sendMessage</code> with
+the jid address of the target agent (to), and a message payload.
+The receiving agent implements the <code>sendMessage</code> method to
+receive messages.  Since HMTP is a streaming API like
+<code>java.io.OutputStream</code>, the sending method is the same as
+the receiving method, <code>sendMessage</code>.</p>
+
+<p>HMTP messages use a JID (Jabber ID) for addressing, which looks like
 <code>user@domain</code> or <code>user@domain/resource</code>.  The
-second <code>user@domain/resource</code> is used for temporary
-client agent addresses, e.g. a user logged into messaging with
-a cellphone.</p>
+second <code>user@domain/resource</code> is used for dynamic
+agent, e.g. a user logged into messaging with a cellphone.</p>
 
-<p>In the example, the servlet obtains a <code>HmtpConnection</code> using
-the Web Beans <code>@javax.webbeans.In</code> injection annotation, and
-sends the message.</p>
+<p>The message payload can be any serializable object.  Because Hessian
+is available for many languages, the message can easily interoperate with
+RIA platforms like Flash.</p>
+
+<p>Since HMTP uses a broker/agent or hub-and-spoke messaging model, all
+messages go through the broker to be routed to the target agent.  Each
+service and client will register an agent with the broker and receive
+a unique JID for the routing.</p>
+
+<figure src="hmtp-log.png"/>
+
+<p>In the example, the servlet creates a <code>HmtpConnection</code> from
+a <code>HmtpConnectionFactory</code> and sends the message.  Opening
+a connection registers an agent with the broker.  When the connection
+closes, it will unregister the agent.  The Web Beans
+<code>@javax.webbeans.In</code> injection annotation provides access
+to the <code>HmtpConnectionFactory</code>.</p>
+
+<example title="TestServlet.java">
+package example;
+
+import javax.servlet.*;
+import javax.webbeans.In;
+import com.caucho.hmtp.HmtpConnectionFactory;
+import com.caucho.hmtp.HmtpConnection;
+
+public class TestServlet extends GenericServlet
+{
+  @In HmtpConnectionFactory _factory;
+
+  public void service(ServletRequest req, ServletResponse response)
+  {
+    HmtpConnection conn = _factory.getConnection("demo@localhost", null);
+
+    try {
+      conn.sendMessage("test@localhost", "Hello, world!");
+    } finally {
+      conn.close();
+    }
+  }
+}
+</example>
 
 <p>By extending <code>GenericService</code>, the service automatically gains
 a queuing ability.  The broker will queue the message and spawn a new thread
@@ -63,31 +107,10 @@ public class LogService extends GenericService
 }
 </example>
 
-<example title="TestServlet.java">
-package example;
-
-import javax.servlet.*;
-import javax.webbeans.In;
-import com.caucho.hmtp.HmtpConnectionFactory;
-import com.caucho.hmtp.HmtpConnection;
-
-public class TestServlet extends GenericServlet
-{
-  @In HmtpConnectionFactory _factory;
-
-  public void service(ServletRequest req, ServletResponse response)
-  {
-    HmtpConnection conn = _factory.getConnection("demo@localhost", null);
-
-    try {
-      conn.sendMessage("test@localhost", "Hello, world!");
-    } finally {
-      conn.close();
-    }
-  }
-}
-</example>
-
+<p>The HMTP configuration consists of the broker and the service
+configured with <a href="resin-ioc.xtp">Resin IoC</a>.  Because
+the <code>LogService</code> extends <code>GenericService</code>, it
+will automatically register itself with the broker.</p>
 
 <example title="WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -105,8 +128,10 @@ public class TestServlet extends GenericServlet
 
 <p>Remote calls are another primary use for HMTP.  In this example, we
 just query a service for some basic information.  In HMTP, queries
-are bidirections: the server can also query the client.  And the application
+are bidirectional: the server can also query the client.  And the application
 can also use the messaging in the previous example.</p>
+
+<figure src="hmtp-client.png"/>
 
 <example title="TestService.java">
 package example;
@@ -223,7 +248,7 @@ player agent, <var>tictactoe@host.com/1</var>.</p>
 
 <p>HMTP is an adaptation of the <a href="http://xmpp.org">XMPP</a> (Jabber)
 instant messaging protocol.  Where XMPP (Xml Messaging and Presence Protocol)
-is based on XML, HMTP (Hessian Message Transport Presence Protocol) is
+is based on XML, HMTP (Hessian Message Transport Protocol) is
 based on Hessian.  Because HMTP is designed to follow XMPP, its
 architecture and protocols are essentially identical until the very
 lowest layer, where HMTP substitutes Hessian for XML.</p>
@@ -302,6 +327,17 @@ new query.</p>
 <p>Presence packets send specialized information for subscription
 notification.  Many applications will not need to use any presence
 packets at all.</p>
+
+<ul>
+<li>Presense - sends a presence (login) notification</li>
+<li>PresenseUnavailable - sends unavailable (logout) notification</li>
+<li>PresenseProbe - query probe for IM clients</li>
+<li>PresenseSubscribe - request to subscribe to a service</li>
+<li>PresenseSubscribed - acknowledgement of a subscription</li>
+<li>PresenseUnsubscribe - notification of an unsubscription</li>
+<li>PresenseUnsubscribed - notification of an unsubscription</li>
+<li>PresenseError - error message</li>
+</ul>
 
 
 </s2>
