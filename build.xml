@@ -1324,6 +1324,9 @@
   </target>
 
   <target name="hessian-flash" depends="init">
+    <taskdef resource="flexTasks.tasks" classpath="${ant.home}/lib/flexTasks.jar" />
+    <property name="FLEX_HOME" value="${user.home}/flash"/>
+
     <property name="dist.name" value="${shortproduct}-${version}"/>
     <mkdir dir="${dist}/${dist.name}"/>
     
@@ -1354,6 +1357,19 @@
                   hessian/io/*.as 
                   hessian/events/*.as 
                   hessian/mxml/*.as"/>
+    </compc>
+
+    <compc output="${dist}/${dist.name}/hemp-flex-${version}.swc">
+      <source-path path-element="${modules}/flash/src"/>
+      <include-sources 
+        dir="${modules}/flash/src" 
+        includes="com/caucho/hmtp/*.as 
+                  com/caucho/hmtp/auth/*.as 
+                  com/caucho/hmtp/events/*.as 
+                  com/caucho/hmtp/packet/*.as"/>
+      <compiler.include-libraries dir="${dist}/${dist.name}" append="true">
+        <include name="hessian-flex-${version}.swc" />
+      </compiler.include-libraries>
     </compc>
 
     <jar destfile="${dist}/${dist.name}/hessian-flex-${version}-src.jar">
