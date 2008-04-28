@@ -31,20 +31,29 @@ package com.caucho.hmtp.spi;
 
 import com.caucho.hmtp.HmtpStream;
 import com.caucho.hmtp.HmtpConnectionFactory;
-import com.caucho.hmtp.HmtpConnection;
 
 /**
- * Broker implementation
+ * HmtpBroker is the hub which routes messages to agents.
  */
-public interface HmtpBroker extends HmtpStream, HmtpConnectionFactory
+public interface HmtpBroker extends HmtpConnectionFactory
 {
   /**
-   * Adds a resource manager
+   * Returns the stream to the broker
    */
-  public void addResourceManager(HmtpServiceManager manager);
-    
+  public HmtpStream getBrokerStream();
+  
   /**
-   * Registers a resource
+   * Registers a service
    */
-  public HmtpConnection registerResource(String jid, HmtpService resource);
+  public void addService(HmtpService service);
+  
+  /**
+   * Removes a service
+   */
+  public void removeService(HmtpService service);
+  
+  /**
+   * Registers a service manager
+   */
+  public void addServiceManager(HmtpServiceManager manager);   
 }

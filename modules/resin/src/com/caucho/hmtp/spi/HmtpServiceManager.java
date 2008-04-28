@@ -29,28 +29,14 @@
 
 package com.caucho.hmtp.spi;
 
-import com.caucho.hmtp.spi.HmtpBroker;
-import com.caucho.hmtp.spi.HmtpService;
-
-import java.io.Serializable;
-
 /**
- * Managed a collection of resources
+ * Manages a dynamic collection of services
  */
-public interface HmtpServiceManager {
+public interface HmtpServiceManager
+{
   /**
-   * Sets the server to send messages
+   * Returns the service with the given name, or null if this is not
+   * a known service
    */
-  public void setBroker(HmtpBroker broker);
-  
-  /**
-   * Returns the resource with the given name, or null if this is not
-   * a known resource
-   */
-  public HmtpService lookupResource(String jid);
-
-  /**
-   * Basic presence
-   */
-  public void sendPresence(String to, String from, Serializable []data);
+  public HmtpService findService(String jid);
 }

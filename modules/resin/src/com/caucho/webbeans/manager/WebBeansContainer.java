@@ -703,6 +703,19 @@ public class WebBeansContainer
   {
     return bind("", apiType, bindingTypes);
   }
+
+  /**
+   * Returns the component which matches the apiType and binding types
+   */
+  public <T> T getByType(Class<T> apiType, Annotation...bindingTypes)
+  {
+    ComponentFactory<T> factory =  bind("", apiType, bindingTypes);
+
+    if (factory != null)
+      return factory.get();
+    else
+      return null;
+  }
   
   public void addContext(Class<Annotation> scopeType, Context context)
   {

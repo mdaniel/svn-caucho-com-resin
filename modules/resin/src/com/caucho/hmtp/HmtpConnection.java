@@ -34,11 +34,11 @@ import java.io.Serializable;
 import com.caucho.util.*;
 
 /**
- * Manager
+ * HmtpConnection is a client connection to an agent
  */
 public interface HmtpConnection {
   /**
-   * Returns the connection agent's jid
+   * Returns the agent's jid
    */
   public String getJid();
 
@@ -173,7 +173,7 @@ public interface HmtpConnection {
 			    HmtpError error);
   
   /**
-   * returns the underlying, low-level stream
+   * Returns the underlying, low-level stream to the broker
    */
   public HmtpStream getBrokerStream();
 }

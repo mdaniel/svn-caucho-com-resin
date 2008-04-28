@@ -34,6 +34,7 @@ import com.caucho.hmtp.spi.HmtpService;
 import com.caucho.hmtp.im.ImMessage;
 import com.caucho.hmtp.HmtpStream;
 import com.caucho.hemp.broker.GenericService;
+import com.caucho.hmtp.HmtpAgentStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.*;
@@ -78,7 +79,7 @@ public class MemoryRoom extends GenericService
   }
 
   @Override
-  public HmtpService lookupResource(String jid)
+  public HmtpAgentStream findAgent(String jid)
   {
     synchronized (_nicknameMap) {
       MemoryNick nick = _nicknameMap.get(jid);
@@ -88,7 +89,7 @@ public class MemoryRoom extends GenericService
 	_nicknameMap.put(jid, nick);
       }
 
-      return nick;
+      return nick.getAgentStream();
     }
   }
 

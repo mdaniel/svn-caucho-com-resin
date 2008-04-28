@@ -48,7 +48,7 @@ import java.io.Serializable;
 /**
  * Broker
  */
-public class HempBroker implements HmtpBroker
+public class HempBroker implements HmtpBroker, HmtpStream
 {
   private static final Logger log
     = Logger.getLogger(HempBroker.class.getName());
@@ -58,7 +58,10 @@ public class HempBroker implements HmtpBroker
   private final HashMap<String,WeakReference<HmtpAgentStream>> _agentMap
     = new HashMap<String,WeakReference<HmtpAgentStream>>();
   
-  private final HashMap<String,WeakReference<HmtpService>> _resourceMap
+  private final HashMap<String,HmtpService> _serviceMap
+    = new HashMap<String,HmtpService>();
+  
+  private final HashMap<String,WeakReference<HmtpService>> _serviceCache
     = new HashMap<String,WeakReference<HmtpService>>();
   
   private String _serverId = Resin.getCurrent().getServerId();
@@ -66,31 +69,29 @@ public class HempBroker implements HmtpBroker
   private String _domain = "localhost";
   private String _managerJid = "localhost";
 
-  private HmtpServiceManager []_resourceManagerList = new HmtpServiceManager[0];
+  private HmtpServiceManager []_serviceManagerList = new HmtpServiceManager[0];
+  
+  /**
+   * Returns the stream to the broker
+   */
+  public HmtpStream getBrokerStream()
+  {
+    return this;
+  }
 
   //
   // configuration
   //
-
-  /**
-   * Adds a broker implementation, e.g. the IM broker.
-   */
-  public void addBroker(HmtpServiceManager resourceManager)
-  {
-    addResourceManager(resourceManager);
-  }
   
   /**
    * Adds a broker implementation, e.g. the IM broker.
    */
-  public void addResourceManager(HmtpServiceManager resourceManager)
+  public void addServiceManager(HmtpServiceManager serviceManager)
   {
-    HmtpServiceManager []resourceManagerList = new HmtpServiceManager[_resourceManagerList.length + 1];
-    System.arraycopy(_resourceManagerList, 0, resourceManagerList, 0, _resourceManagerList.length);
-    resourceManagerList[resourceManagerList.length - 1] = resourceManager;
-    _resourceManagerList = resourceManagerList;
-    
-    resourceManager.setBroker(this);
+    HmtpServiceManager []serviceManagerList = new HmtpServiceManager[_serviceManagerList.length + 1];
+    System.arraycopy(_serviceManagerList, 0, serviceManagerList, 0, _serviceManagerList.length);
+    serviceManagerList[serviceManagerList.length - 1] = serviceManager;
+    _serviceManagerList = serviceManagerList;
   }
 
   //
@@ -119,10 +120,10 @@ public class HempBroker implements HmtpBroker
     if (p > 0) {
       String owner = jid.substring(0, p);
       
-      HmtpService resource = getService(owner);
+      HmtpService resource = findService(owner);
 
       if (resource != null)
-	resource.onLogin(jid);
+	resource.onAgentStart(jid);
     }
 
     return conn;
@@ -142,33 +143,21 @@ public class HempBroker implements HmtpBroker
   }
   
   /**
-   * Registers a resource
+   * Registers a service
    */
-  public HmtpConnection registerResource(String name, HmtpService resource)
+  public void addService(HmtpService service)
   {
-    String jid;
-    
-    int p;
-    if ((p = name.indexOf('/')) > 0) {
-      jid = name;
-    }
-    else if ((p = name.indexOf('@')) > 0) {
-      jid = name;
-    }
-    else {
-      jid = name + "@" + getDomain();
-    }
+    String jid = service.getJid();
 
-    HempConnectionImpl conn = new HempConnectionImpl(this, jid);
+    synchronized (_serviceMap) {
+      HmtpService oldService = _serviceMap.get(jid);
 
-    synchronized (_resourceMap) {
-      WeakReference<HmtpService> oldRef = _resourceMap.get(jid);
-
-      if (oldRef != null && oldRef.get() != null)
+      if (oldService != null)
 	throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
 					    jid));
       
-      _resourceMap.put(jid, new WeakReference<HmtpService>(resource));
+      _serviceMap.put(jid, service);
+      _serviceCache.put(jid, new WeakReference<HmtpService>(service));
     }
     
     synchronized (_agentMap) {
@@ -178,14 +167,35 @@ public class HempBroker implements HmtpBroker
 	throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
 					    jid));
 
-      HmtpAgentStream agentStream = resource.getAgentStream();
+      HmtpAgentStream agentStream = service.getAgentStream();
       _agentMap.put(jid, new WeakReference<HmtpAgentStream>(agentStream));
     }
 
     if (log.isLoggable(Level.FINE))
-      log.fine(this + " register jid=" + jid + " " + resource);
+      log.fine(this + " addService jid=" + jid + " " + service);
+ }
+  
+  /**
+   * Removes a service
+   */
+  public void removeService(HmtpService service)
+  {
+    String jid = service.getJid();
+    
+    synchronized (_serviceMap) {
+      _serviceMap.remove(jid);
+    }
+    
+    synchronized (_serviceCache) {
+      _serviceCache.remove(jid);
+    }
+    
+    synchronized (_agentMap) {
+      _agentMap.remove(jid);
+    }
 
-    return conn;
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " removeService jid=" + jid + " " + service);
   }
 
   /**
@@ -211,7 +221,7 @@ public class HempBroker implements HmtpBroker
   {
     /*
     if (to == null) {
-      HmtpServiceManager []resourceManagers = _resourceManagerList;
+      HmtpServiceManager []resourceManagers = _serviceManagerList;
 
       for (HmtpServiceManager manager : resourceManagers) {
         manager.sendPresence(to, from, data);
@@ -219,7 +229,7 @@ public class HempBroker implements HmtpBroker
     }
     else {
     */
-    HmtpStream stream = getAgentStream(to);
+    HmtpStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendPresence(to, from, data);
@@ -238,7 +248,7 @@ public class HempBroker implements HmtpBroker
 				      String from,
 				      Serializable []data)
   {
-    HmtpStream stream = getAgentStream(to);
+    HmtpStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendPresenceUnavailable(to, from, data);
@@ -251,7 +261,7 @@ public class HempBroker implements HmtpBroker
 			        String from,
 			        Serializable []data)
   {
-    HmtpStream stream = getAgentStream(to);
+    HmtpStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendPresenceProbe(to, from, data);
@@ -264,7 +274,7 @@ public class HempBroker implements HmtpBroker
 				    String from,
 				    Serializable []data)
   {
-    HmtpStream stream = getAgentStream(to);
+    HmtpStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendPresenceSubscribe(to, from, data);
@@ -277,7 +287,7 @@ public class HempBroker implements HmtpBroker
 				     String from,
 				     Serializable []data)
   {
-    HmtpStream stream = getAgentStream(to);
+    HmtpStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendPresenceSubscribed(to, from, data);
@@ -290,7 +300,7 @@ public class HempBroker implements HmtpBroker
 				      String from,
 				      Serializable []data)
   {
-    HmtpStream stream = getAgentStream(to);
+    HmtpStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendPresenceUnsubscribe(to, from, data);
@@ -303,7 +313,7 @@ public class HempBroker implements HmtpBroker
 				       String from,
 				       Serializable []data)
   {
-    HmtpStream stream = getAgentStream(to);
+    HmtpStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendPresenceUnsubscribed(to, from, data);
@@ -317,7 +327,7 @@ public class HempBroker implements HmtpBroker
 			        Serializable []data,
 			        HmtpError error)
   {
-    HmtpStream stream = getAgentStream(to);
+    HmtpStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendPresenceError(to, from, data, error);
@@ -328,7 +338,7 @@ public class HempBroker implements HmtpBroker
    */
   public void sendMessage(String to, String from, Serializable value)
   {
-    HmtpStream stream = getAgentStream(to);
+    HmtpStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendMessage(to, from, value);
@@ -346,7 +356,7 @@ public class HempBroker implements HmtpBroker
 			       Serializable value,
 			       HmtpError error)
   {
-    HmtpStream stream = getAgentStream(to);
+    HmtpStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendMessageError(to, from, value, error);
@@ -361,7 +371,7 @@ public class HempBroker implements HmtpBroker
    */
   public boolean sendQueryGet(long id, String to, String from, Serializable query)
   {
-    HmtpStream stream = getAgentStream(to);
+    HmtpStream stream = findAgent(to);
 
     if (stream != null) {
       if (! stream.sendQueryGet(id, to, from, query)) {
@@ -404,7 +414,7 @@ public class HempBroker implements HmtpBroker
    */
   public boolean sendQuerySet(long id, String to, String from, Serializable query)
   {
-    HmtpStream stream = getAgentStream(to);
+    HmtpStream stream = findAgent(to);
 
     if (stream == null) {
       if (log.isLoggable(Level.FINE)) {
@@ -449,7 +459,7 @@ public class HempBroker implements HmtpBroker
    */
   public void sendQueryResult(long id, String to, String from, Serializable value)
   {
-    HmtpStream stream = getAgentStream(to);
+    HmtpStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendQueryResult(id, to, from, value);
@@ -466,7 +476,7 @@ public class HempBroker implements HmtpBroker
 			 Serializable query,
 			 HmtpError error)
   {
-    HmtpStream stream = getAgentStream(to);
+    HmtpStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendQueryError(id, to, from, query, error);
@@ -474,7 +484,7 @@ public class HempBroker implements HmtpBroker
       throw new RuntimeException(L.l("{0} is an unknown entity", to));
   }
 
-  protected HmtpAgentStream getAgentStream(String jid)
+  protected HmtpAgentStream findAgent(String jid)
   {
     synchronized (_agentMap) {
       WeakReference<HmtpAgentStream> ref = _agentMap.get(jid);
@@ -483,16 +493,23 @@ public class HempBroker implements HmtpBroker
 	return ref.get();
     }
 
-    HmtpService resource = getService(jid);
+    HmtpAgentStream agentStream;
+    HmtpService service = findService(jid);
+    
+    if (service == null)
+      return null;
+    else if (jid.equals(service.getJid()))
+      agentStream = service.getAgentStream();
+    else
+      agentStream = service.findAgent(jid);
 
-    if (resource != null) {
+    if (agentStream != null) {
       synchronized (_agentMap) {
 	WeakReference<HmtpAgentStream> ref = _agentMap.get(jid);
 
 	if (ref != null)
 	  return ref.get();
 
-	HmtpAgentStream agentStream = resource.getAgentStream();
 	_agentMap.put(jid, new WeakReference<HmtpAgentStream>(agentStream));
 
 	return agentStream;
@@ -502,62 +519,54 @@ public class HempBroker implements HmtpBroker
       return null;
   }
 
-  protected HmtpService getService(String jid)
+  protected HmtpService findService(String jid)
   {
     if (jid == null)
       return null;
     
-    synchronized (_resourceMap) {
-      WeakReference<HmtpService> ref = _resourceMap.get(jid);
+    synchronized (_serviceCache) {
+      WeakReference<HmtpService> ref = _serviceCache.get(jid);
 
       if (ref != null)
 	return ref.get();
     }
 
-    HmtpService resource = lookupResource(jid);
-
-    if (resource == null) {
-      int p;
-
-      if ((p = jid.indexOf('/')) > 0) {
-	String uid = jid.substring(0, p);
-	HmtpService user = getService(uid);
-
-	if (user != null)
-	  resource = user.lookupResource(jid);
-      }
-      else if ((p = jid.indexOf('@')) > 0) {
-	String domainName = jid.substring(p + 1);
-	HmtpService domain = getService(domainName);
-
-	if (domain != null)
-	  resource = domain.lookupResource(jid);
-      }
-    }
-
-    if (resource != null) {
-      synchronized (_resourceMap) {
-	WeakReference<HmtpService> ref = _resourceMap.get(jid);
+    HmtpService service = findServiceFromManager(jid);
+    
+    if (service != null) {
+      synchronized (_serviceCache) {
+	WeakReference<HmtpService> ref = _serviceCache.get(jid);
 
 	if (ref != null)
 	  return ref.get();
 
-	_resourceMap.put(jid, new WeakReference<HmtpService>(resource));
+	_serviceCache.put(jid, new WeakReference<HmtpService>(service));
 
-	return resource;
+	return service;
       }
+    }
+    
+    int p;
+
+    if ((p = jid.indexOf('/')) > 0) {
+      String uid = jid.substring(0, p);
+      return findService(uid);
+    }
+    else if ((p = jid.indexOf('@')) > 0) {
+      String domainName = jid.substring(p + 1);
+      return findService(domainName);
     }
     else
       return null;
   }
 
-  protected HmtpService lookupResource(String jid)
+  protected HmtpService findServiceFromManager(String jid)
   {
-    for (HmtpServiceManager manager : _resourceManagerList) {
-      HmtpService resource = manager.lookupResource(jid);
+    for (HmtpServiceManager manager : _serviceManagerList) {
+      HmtpService service = manager.findService(jid);
 
-      if (resource != null)
-	return resource;
+      if (service != null)
+	return service;
     }
 
     return null;
@@ -566,25 +575,25 @@ public class HempBroker implements HmtpBroker
   /**
    * Closes a connection
    */
-  void close(String jid)
+  void closeAgent(String jid)
   {
     int p = jid.indexOf('/');
     if (p > 0) {
       String owner = jid.substring(0, p);
       
-      HmtpService resource = getService(owner);
+      HmtpService service = findService(owner);
 
-      if (resource != null) {
+      if (service != null) {
 	try {
-	  resource.onLogout(jid);
+	  service.onAgentStop(jid);
 	} catch (Exception e) {
 	  log.log(Level.FINE, e.toString(), e);
 	}
       }
     }
     
-    synchronized (_resourceMap) {
-      _resourceMap.remove(jid);
+    synchronized (_serviceCache) {
+      _serviceCache.remove(jid);
     }
     
     synchronized (_agentMap) {

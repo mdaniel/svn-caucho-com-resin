@@ -55,8 +55,8 @@ public class HempMemoryQueue implements HmtpAgentStream, Runnable
   private final Executor _executor = ScheduledThreadPool.getLocal();
   private final ClassLoader _loader
     = Thread.currentThread().getContextClassLoader();
-  private final HmtpAgentStream _agent;
-  private final HmtpBroker _broker;
+  private final HmtpAgentStream _agentStream;
+  private final HmtpStream _brokerStream;
 
   private int _threadSemaphore;
 
@@ -64,16 +64,16 @@ public class HempMemoryQueue implements HmtpAgentStream, Runnable
   private int _head;
   private int _tail;
 
-  public HempMemoryQueue(HmtpAgentStream agent, HmtpBroker broker)
+  public HempMemoryQueue(HmtpAgentStream agentStream, HmtpStream brokerStream)
   {
-    if (agent == null)
+    if (agentStream == null)
       throw new NullPointerException();
 
-    if (broker == null)
+    if (brokerStream == null)
       throw new NullPointerException();
     
-    _agent = agent;
-    _broker = broker;
+    _agentStream = agentStream;
+    _brokerStream = brokerStream;
     _threadSemaphore = 1;
   }
   
@@ -82,7 +82,7 @@ public class HempMemoryQueue implements HmtpAgentStream, Runnable
    */
   public String getJid()
   {
-    return _agent.getJid();
+    return _agentStream.getJid();
   }
 
   /**
@@ -234,7 +234,7 @@ public class HempMemoryQueue implements HmtpAgentStream, Runnable
 
   protected HmtpStream getStream()
   {
-    return _agent;
+    return _agentStream;
   }
 
   protected void enqueue(Packet packet)
@@ -312,7 +312,7 @@ public class HempMemoryQueue implements HmtpAgentStream, Runnable
 	if (log.isLoggable(Level.FINER))
 	  log.finer(this + " dequeue " + packet);
 	
-	packet.dispatch(getStream(), _broker);
+	packet.dispatch(getStream(), _brokerStream);
 	
 	isValid = true;
       } catch (Exception e) {
@@ -332,6 +332,6 @@ public class HempMemoryQueue implements HmtpAgentStream, Runnable
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _agent + "]";
+    return getClass().getSimpleName() + "[" + _agentStream + "]";
   }
 }

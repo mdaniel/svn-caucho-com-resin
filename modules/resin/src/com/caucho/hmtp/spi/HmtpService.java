@@ -38,30 +38,30 @@ import com.caucho.hmtp.HmtpStream;
 public interface HmtpService
 {
   /**
-   * Returns the service's preferred jid.
+   * Returns the service's jid.
    */
   public String getJid();
-  
-  /**
-   * Returns a subresource, e.g. if the resource is room@domain, then
-   * it might return a resource for room@domain/nick
-   */
-  public HmtpService lookupResource(String jid);
-
-  /**
-   * Called when an agent logs in
-   */
-  public void onLogin(String jid);
-
-  /**
-   * Called when an agent logs out
-   */
-  public void onLogout(String jid);
 
   /**
    * Returns the service's agent stream
    */
   public HmtpAgentStream getAgentStream();
+  
+  /**
+   * Returns an agent, e.g. if the resource is room@domain, then
+   * it might return a resource for room@domain/nick
+   */
+  public HmtpAgentStream findAgent(String jid);
+
+  /**
+   * Called when an agent logs in
+   */
+  public void onAgentStart(String jid);
+
+  /**
+   * Called when an agent logs out
+   */
+  public void onAgentStop(String jid);
   
   /**
    * Returns a filter for outbound calls, i.e. filtering messages to the agent.

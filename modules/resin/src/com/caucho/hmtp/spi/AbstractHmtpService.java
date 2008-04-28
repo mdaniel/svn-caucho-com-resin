@@ -61,7 +61,7 @@ abstract public class AbstractHmtpService implements HmtpService
   /**
    * Looks up a sub-resource
    */
-  public HmtpService lookupResource(String jid)
+  public HmtpAgentStream findAgent(String jid)
   {
     return null;
   }
@@ -92,7 +92,7 @@ abstract public class AbstractHmtpService implements HmtpService
    * 
    * @jid the jid of the agent logging in.
    */
-  public void onLogin(String jid)
+  public void onAgentStart(String jid)
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " onLogin(" + jid + ")");
@@ -101,7 +101,7 @@ abstract public class AbstractHmtpService implements HmtpService
   /**
    * Called when an agent logs out
    */
-  public void onLogout(String jid)
+  public void onAgentStop(String jid)
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " onLogout(" + jid + ")");

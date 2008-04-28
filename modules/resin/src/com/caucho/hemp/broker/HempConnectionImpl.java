@@ -88,7 +88,7 @@ public class HempConnectionImpl implements HmtpConnection
     if (p > 0)
       uid = uid.substring(0, p);
 
-    _resource = manager.getService(uid);
+    _resource = manager.findService(uid);
 
     if (_resource != null) {
       _brokerFilter = _resource.getBrokerFilter(_broker);
@@ -409,7 +409,7 @@ public class HempConnectionImpl implements HmtpConnection
   {
     _isClosed = true;
     
-    _broker.close(_jid);
+    _broker.closeAgent(_jid);
   }
 
   @Override

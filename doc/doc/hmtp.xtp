@@ -125,7 +125,9 @@ public class TestService extends GenericService
                               Serializable query)
   {
     if (query instanceof TestQuery) {
-      getStream().sendQueryResult(id, to, from, "hello response");
+      getBrokerStream().sendQueryResult(id, to, from, "hello response");
+
+      return true;
     }
     else {
       return super.sendQueryGet(id, to, from, query);
@@ -302,7 +304,6 @@ notification.  Many applications will not need to use any presence
 packets at all.</p>
 
 
-
 </s2>
 
 </s1>
@@ -388,9 +389,9 @@ public interface HmtpConnection
   boolean isClosed();
   void close();
   
-  void setMessageHandler(MessageStream handler);
-  void setQueryHandler(QueryStream handler);
-  void setPresenceHandler(PresenceStream handler);
+  void setMessageHandler(HmtpMessageStream handler);
+  void setQueryHandler(HmtpQueryStream handler);
+  void setPresenceHandler(HmtpPresenceStream handler);
 
   void sendMessage(String to, Serializable value);
 
@@ -411,7 +412,7 @@ public interface HmtpConnection
   void presenceUnsubscribed(String to, Serializable []data);
   void presenceError(String to, Serializable []data, HmtpError error);
   
-  HmtpStream getStream();
+  HmtpStream getBrokerStream();
 }
 </def>
 
@@ -429,12 +430,12 @@ public interface HmtpConnectionFactory
 </def>
 
 </s3>
-<s3 title="QueryCallback">
+<s3 title="HmtpQueryCallback">
 
 <def title="QueryCallback">
 package com.caucho.hmtp;
 
-public interface QueryCallback
+public interface HmtpQueryCallback
 {
   void onQueryResult(String to, String from, Serializable value);
   
@@ -467,17 +468,17 @@ public class HmtpClient implements HmtpConnection
   boolean isClosed();
   void close();
   
-  void setMessageHandler(MessageStream handler);
-  void setQueryHandler(QueryStream handler);
-  void setPresenceHandler(PresenceStream handler);
+  void setMessageHandler(HmtpMessageStream handler);
+  void setQueryHandler(HmtpQueryStream handler);
+  void setPresenceHandler(HmtpPresenceStream handler);
 
   void sendMessage(String to, Serializable value);
 
   Serializable queryGet(String to, Serializable query);
   Serializable querySet(String to, Serializable query);
 
-  void queryGet(String to, Serializable query, QueryCallback callback);
-  void querySet(String to, Serializable query, QueryCallback callback);
+  void queryGet(String to, Serializable query, HmtpQueryCallback callback);
+  void querySet(String to, Serializable query, HmtpQueryCallback callback);
 
   void presence(Serializable []data);
   void presence(String to, Serializable []data);
@@ -490,7 +491,7 @@ public class HmtpClient implements HmtpConnection
   void presenceUnsubscribed(String to, Serializable []data);
   void presenceError(String to, Serializable []data, HmtpError error);
   
-  HmtpStream getStream();
+  HmtpStream getBrokerStream();
 }
 </def>
 </s3>
@@ -499,12 +500,12 @@ public class HmtpClient implements HmtpConnection
 
 <s2 title="Protocol(Packet) API">
 
-<s3 title="MessageStream">
+<s3 title="HmtpMessageStream">
 
-<def title="MessageStream">
+<def title="HmtpMessageStream">
 package com.caucho.hmtp;
 
-public interface MessageStream
+public interface HmtpMessageStream
 {
   public void sendMessage(String to, String from, Serializable value);
   
@@ -515,12 +516,12 @@ public interface MessageStream
 
 </s3>
 
-<s3 title="QueryStream">
+<s3 title="HmtpQueryStream">
 
-<def title="QueryStream">
+<def title="HmtpQueryStream">
 package com.caucho.hmtp;
 
-public interface QueryStream
+public interface HmtpQueryStream
 {
   boolean sendQueryGet(long id, String to, String from, Serializable query);
   boolean sendQuerySet(long id, String to, String from, Serializable query);
@@ -533,12 +534,12 @@ public interface QueryStream
 
 </s3>
 
-<s3 title="PresenceStream">
+<s3 title="HmtpPresenceStream">
 
-<def title="PresenceStream">
+<def title="HmtpPresenceStream">
 package com.caucho.hmtp;
 
-public interface PresenceStream
+public interface HmtpPresenceStream
 {
   void sendPresence(String to, String from, Serializable []data);
   void sendPresenceUnavailable(String to, String from, Serializable []data);
@@ -560,8 +561,21 @@ public interface PresenceStream
 package com.caucho.hmtp;
 
 public interface HmtpStream
-  extends MessageStream, QueryStream, PresenceStream
+  extends HmtpMessageStream, HmtpQueryStream, HmtpPresenceStream
 {
+}
+</def>
+
+</s3>
+
+<s3 title="HmtpAgentStream">
+
+<def title="HmtpAgentStream">
+package com.caucho.hmtp;
+
+public interface HmtpAgentStream extends HmtpStream
+{
+  Strin getJid();
 }
 </def>
 
@@ -576,50 +590,14 @@ public interface HmtpStream
 <def title="HmtpBroker">
 package com.caucho.hmtp;
 
-public interface HmtpBroker
-  extends HmtpStream, HmtpConnectionFactory
+public interface HmtpBroker extends HmtpConnectionFactory
 {
-  void addResourceManager(ResourceManager manager);
-    
-  HmtpConnection registerResource(String jid, HmtpResource resource);
-}
-</def>
+  HmtpStream getBrokerStream();
 
-</s3>
+  void addService(HmtpService service);
+  void removeService(HmtpService service);
 
-<s3 title="HmtpResource">
-
-<def title="HmtpResource">
-package com.caucho.hmtp;
-
-public interface HmtpResource
-{
-  public String getJid();
-  
-  public HmtpResource lookupResource(String jid);
-
-  public void onLogin(String jid);
-  public void onLogout(String jid);
-
-  public HmtpStream getCallbackStream();
-  
-  public HmtpStream getOutboundFilter(HmtpStream stream);
-  public HmtpStream getInboundFilter(HmtpStream stream);
-}
-</def>
-
-</s3>
-
-<s3 title="ResourceManager">
-
-<def title="ResourceManager">
-package com.caucho.hmtp;
-
-public interface ResourceManager
-{
-  public void setBroker(HmtpBroker broker);
-  
-  public HmtpResource lookupResource(String jid);
+  void addServiceManager(ServiceManager manager);
 }
 </def>
 
@@ -631,8 +609,31 @@ public interface ResourceManager
 package com.caucho.hmtp;
 
 public interface HmtpService
-  extends HmtpResource, HmtpStream
 {
+  public String getJid();
+  
+  public HmtpAgentStream getAgentStream();
+  
+  public HmtpAgentStream findAgent(String jid);
+
+  public void onAgentStart(String jid);
+  public void onAgentStop(String jid);
+
+  public HmtpAgentStream getAgentFilter(HmtpAgentStream stream);
+  public HmtpStream getBrokerFilter(HmtpStream stream);
+}
+</def>
+
+</s3>
+
+<s3 title="ServiceManager">
+
+<def title="ServiceManager">
+package com.caucho.hmtp;
+
+public interface ServiceManager
+{
+  public HmtpService findService(String jid);
 }
 </def>
 

@@ -98,17 +98,17 @@ public class GenericService extends AbstractHmtpAgentStream
 
     _agentStream = createQueue(this);
 
-    _conn = _broker.registerResource(getJid(), this);
+    _broker.addService(this);
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " init");
 
-    _brokerStream = _conn.getBrokerStream();
+    _brokerStream = _broker.getBrokerStream();
   }
 
   protected HmtpAgentStream createQueue(HmtpAgentStream stream)
   {
-    return new HempMemoryQueue(stream, _broker);
+    return new HempMemoryQueue(stream, _broker.getBrokerStream());
   }
 
   @Override
@@ -140,28 +140,28 @@ public class GenericService extends AbstractHmtpAgentStream
   /**
    * Callback when a child agent logs in.
    */
-  public void onLogin(String jid)
+  public void onAgentStart(String jid)
   {
     if (log.isLoggable(Level.FINER))
-      log.finer(this + " onLogin(" + jid + ")");
+      log.finer(this + " onAgentStart(" + jid + ")");
   }
   
   /**
    * Callback when a child agent logs out.
    */
-  public void onLogout(String jid)
+  public void onAgentStop(String jid)
   {
     if (log.isLoggable(Level.FINER))
-      log.finer(this + " onLogout(" + jid + ")");
+      log.finer(this + " onAgentStop(" + jid + ")");
   }
   
   /**
    * Returns a child agent given a jid.
    */
-  public HmtpService lookupResource(String jid)
+  public HmtpAgentStream findAgent(String jid)
   {
     if (log.isLoggable(Level.FINER))
-      log.finer(this + " lookupResource(" + jid + ")");
+      log.finer(this + " findAgent(" + jid + ")");
     
     return null;
   }

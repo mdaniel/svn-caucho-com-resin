@@ -85,7 +85,7 @@ public class ImUserService extends SimpleHmtpService
   }
 
   @Override
-  public void onLogin(String jid)
+  public void onAgentStart(String jid)
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " login(" + jid + ")");
@@ -100,7 +100,7 @@ public class ImUserService extends SimpleHmtpService
   }
 
   @Override
-  public void onLogout(String jid)
+  public void onAgentStop(String jid)
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " logout(" + jid + ")");

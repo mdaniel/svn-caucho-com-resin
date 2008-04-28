@@ -31,8 +31,7 @@ package com.caucho.jms.hemp;
 
 import com.caucho.hmtp.spi.HmtpBroker;
 import com.caucho.hmtp.spi.SimpleHmtpService;
-import com.caucho.hmtp.HmtpError;
-import com.caucho.hmtp.HmtpConnection;
+import com.caucho.hmtp.*;
 import java.util.ArrayList;
 import java.util.logging.*;
 
@@ -64,11 +63,12 @@ public class HempTopic extends AbstractTopic
     = new ArrayList<AbstractQueue>();
 
   private HmtpBroker _broker;
-  private HmtpConnection _session;
+  private HmtpStream _brokerStream;
 
   private TopicResource _resource = new TopicResource();
 
   private int _id;
+  private boolean _isInit;
 
   /**
    * Sets the broker
@@ -107,10 +107,21 @@ public class HempTopic extends AbstractTopic
 
       if (_broker == null)
 	throw new ConfigException(L.l("Need xmpp protocol"));
+
+      _brokerStream = _broker.getBrokerStream();
     }
 
-    if (_session == null) {
-      _session = _broker.registerResource(getName(), _resource);
+    String jid = getName();
+
+    /*
+    if (jid.indexOf('/') < 0 && jid.indexOf('@') < 0)
+      jid = getName() + "@" + _broker.getDomain();
+    */
+
+    if (! _isInit) {
+      _isInit = true;
+      _resource.setJid(jid);
+      _broker.addService(_resource);
     }
   }
 
@@ -191,6 +202,11 @@ public class HempTopic extends AbstractTopic
   }
 
   class TopicResource extends SimpleHmtpService {
+    protected void setJid(String jid)
+    {
+      super.setJid(jid);
+    }
+    
     public void sendMessage(String to, String from, Serializable msg)
     {
       HempTopic.this.sendMessage(to, from, msg);
