@@ -142,7 +142,7 @@ abstract public class StatefulView extends View {
 
     generateExtends(out);
     
-    out.print("  implements " + getApi().getName());
+    out.print("  implements " + getApi().getDeclarationName());
     out.println(", StatefulProvider");
     out.println("{");
     out.pushDepth();

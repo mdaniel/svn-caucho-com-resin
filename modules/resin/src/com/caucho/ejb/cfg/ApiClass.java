@@ -47,7 +47,12 @@ public class ApiClass {
     = new ApiClass(javax.ejb.EntityBean.class);
 
   private Class _apiClass;
+  private HashMap<String,Type> _typeMap;
+  private ArrayList<Type> _typeParam;
+    
   private ArrayList<ApiMethod> _methods = new ArrayList<ApiMethod>();
+
+  private ArrayList<ApiClass> _interfaces = new ArrayList<ApiClass>();
   
   /**
    * Creates a new api class
@@ -56,13 +61,42 @@ public class ApiClass {
    */
   public ApiClass(Class apiClass)
   {
+    this(apiClass, null);
+  }
+  
+  /**
+   * Creates a new api class
+   *
+   * @param topClass the api class
+   */
+  public ApiClass(Class apiClass, HashMap<String,Type> parentTypeMap)
+  {
     if (apiClass == null)
       throw new NullPointerException();
     
     _apiClass = apiClass;
 
-    HashMap<String,Type> typeMap = new HashMap<String,Type>();
-    introspectClass(apiClass, typeMap);
+    _typeMap = new HashMap<String,Type>();
+
+    if (parentTypeMap != null) {
+      _typeMap.putAll(parentTypeMap);
+    }
+
+    introspectClass(apiClass, _typeMap);
+  }
+  
+  /**
+   * Creates a new api class
+   *
+   * @param topClass the api class
+   */
+  public ApiClass(Class apiClass,
+		  HashMap<String,Type> parentTypeMap,
+		  ArrayList<Type> param)
+  {
+    this(apiClass, parentTypeMap);
+
+    _typeParam = param;
   }
 
   /**
@@ -79,6 +113,50 @@ public class ApiClass {
   public String getSimpleName()
   {
     return _apiClass.getSimpleName();
+  }
+
+  /**
+   * Returns the declaration name
+   */
+  public String getDeclarationName()
+  {
+    if (_typeParam == null || _typeParam.size() == 0)
+      return _apiClass.getName();
+    
+    StringBuilder sb = new StringBuilder();
+    sb.append(_apiClass.getName());
+    sb.append("<");
+
+    for (int i = 0; i < _typeParam.size(); i++) {
+      if (i != 0)
+	sb.append(",");
+
+      Type type = (Type) _typeParam.get(i);
+
+      if (type instanceof Class) {
+	sb.append(((Class) type).getName());
+      }
+      else if (type instanceof ParameterizedType) {
+	ParameterizedType pType = (ParameterizedType) type;
+	Class rawType = (Class) pType.getRawType();
+
+	sb.append(rawType.getName());
+      }
+      else
+	throw new UnsupportedOperationException();
+    }
+    
+    sb.append(">");
+
+    return sb.toString();
+  }
+
+  /**
+   * Returns the type map
+   */
+  public HashMap<String,Type> getTypeMap()
+  {
+    return _typeMap;
   }
 
   public Class getJavaClass()
@@ -137,9 +215,10 @@ public class ApiClass {
   /**
    * Returns the interfaces (should be ApiClass?)
    */
-  public Class []getInterfaces()
+  public ArrayList<ApiClass> getInterfaces()
   {
-    return _apiClass.getInterfaces();
+    // return _apiClass.getInterfaces();
+    return _interfaces;
   }
 
   public Constructor getConstructor(Class []param)
@@ -227,17 +306,23 @@ public class ApiClass {
     introspectGenericClass(cl.getGenericSuperclass(), typeMap);
 
     for (Type subClass : cl.getGenericInterfaces()) {
-      introspectGenericClass(subClass, typeMap);
+      ApiClass iface = introspectGenericClass(subClass, typeMap);
+
+      if (cl == _apiClass && iface != null)
+	_interfaces.add(iface);
     }
   }
 
-  private void introspectGenericClass(Type type, HashMap<String,Type> typeMap)
+  private ApiClass introspectGenericClass(Type type,
+					  HashMap<String,Type> typeMap)
   {
     if (type == null)
-      return;
+      return null;
 
     if (type instanceof Class) {
       introspectClass((Class) type, typeMap);
+
+      return new ApiClass((Class) type);
     }
     else if (type instanceof ParameterizedType) {
       ParameterizedType pType = (ParameterizedType) type;
@@ -247,6 +332,7 @@ public class ApiClass {
       TypeVariable []params = rawType.getTypeParameters();
 
       HashMap<String,Type> subMap = new HashMap<String,Type>(typeMap);
+      ArrayList<Type> paramList = new ArrayList<Type>();
 
       for (int i = 0; i < params.length; i++) {
 	TypeVariable param = params[i];
@@ -260,10 +346,16 @@ public class ApiClass {
 	}
 
 	subMap.put(param.getName(), arg);
+
+	paramList.add(arg);
       }
 
       introspectClass(rawType, subMap);
+
+      return new ApiClass(rawType, subMap, paramList);
     }
+    else
+      return null;
   }
 
   public String toString()

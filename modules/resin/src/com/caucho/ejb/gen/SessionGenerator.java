@@ -304,28 +304,29 @@ abstract public class SessionGenerator extends BeanGenerator {
     
     boolean hasRemote = remote != null;
 
-    Class []apiClasses = getEjbClass().getInterfaces();
-    for (Class api : apiClasses) {
-      if (api.isAnnotationPresent(Local.class))
-	apiList.add(new ApiClass(api));
-      if (api.isAnnotationPresent(Remote.class))
+    for (ApiClass api : getEjbClass().getInterfaces()) {
+      if (api.getJavaClass().isAnnotationPresent(Local.class))
+	apiList.add(api);
+      if (api.getJavaClass().isAnnotationPresent(Remote.class))
 	hasRemote = true;
     }
 
     if (apiList.size() > 0 || hasRemote)
       return apiList;
 
-    Class singleApi = null;
-    for (Class api : apiClasses) {
-      if (api.equals(java.io.Serializable.class))
+    ApiClass singleApi = null;
+    for (ApiClass api : getEjbClass().getInterfaces()) {
+      Class javaApi = api.getJavaClass();
+      
+      if (javaApi.equals(java.io.Serializable.class))
 	continue;
-      if (api.equals(java.io.Externalizable.class))
+      if (javaApi.equals(java.io.Externalizable.class))
 	continue;
-      if (api.equals(javax.ejb.SessionBean.class))
+      if (javaApi.equals(javax.ejb.SessionBean.class))
 	continue;
-      if (api.getName().startsWith("javax.ejb."))
+      if (javaApi.getName().startsWith("javax.ejb."))
 	continue;
-      if (api.isAnnotationPresent(Remote.class)) {
+      if (javaApi.isAnnotationPresent(Remote.class)) {
 	continue;
       }
 
@@ -340,7 +341,7 @@ abstract public class SessionGenerator extends BeanGenerator {
     }
 
     if (singleApi != null) {
-      apiList.add(new ApiClass(singleApi));
+      apiList.add(singleApi);
       
       return apiList;
     }
@@ -368,17 +369,18 @@ abstract public class SessionGenerator extends BeanGenerator {
       return apiList;
     }
 
-    Class []apiClasses = getEjbClass().getInterfaces();
-    for (Class api : apiClasses) {
-      if (java.io.Serializable.class.equals(api))
+    for (ApiClass api : getEjbClass().getInterfaces()) {
+      Class javaApi = api.getJavaClass();
+      
+      if (java.io.Serializable.class.equals(javaApi))
 	continue;
-      else if (java.io.Externalizable.class.equals(api))
+      else if (java.io.Externalizable.class.equals(javaApi))
 	continue;
-      else if (api.getName().startsWith("javax.ejb"))
+      else if (javaApi.getName().startsWith("javax.ejb"))
 	continue;
       
-      if (api.isAnnotationPresent(Remote.class) || remote != null)
-	apiList.add(new ApiClass(api));
+      if (javaApi.isAnnotationPresent(Remote.class) || remote != null)
+	apiList.add(api);
     }
 
     if (apiList.size() > 0)

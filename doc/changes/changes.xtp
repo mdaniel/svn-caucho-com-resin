@@ -12,6 +12,7 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>boot: update startup log message for better VM version logging (#2633, rep by stbu)</li>
 <li>multipart form not properly handling multiple uploads (#2578, rep by waiwong)</li>
 <li>admin: web-app added statistics-enable to enable web-app statistics (#2625, rep by Marty Messer)</li>
 <li>(2008-04-26) jsp: JspPrecompileListener not properly handling &lt;fileset> (#2615, rep by stbu)</li>

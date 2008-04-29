@@ -49,6 +49,16 @@ a unique JID for the routing.</p>
 
 <figure src="hmtp-log.png"/>
 
+<p>Writing a HMTP client involves the following steps:</p>
+
+<ol>
+<li>Obtaining the <code>HmtpConnectionFactory</code> (usually with @In)</li>
+<li>Creating a <code>HmtpConnection</code> (which automatically registers an agent)</li>
+<li>Optionally: setting message handlers to receive messages</li>
+<li>Sending messages</li>
+<li>Close the connection</li>
+</ol>
+
 <p>In the example, the servlet creates a <code>HmtpConnection</code> from
 a <code>HmtpConnectionFactory</code> and sends the message.  Opening
 a connection registers an agent with the broker.  When the connection
@@ -80,6 +90,17 @@ public class TestServlet extends GenericServlet
   }
 }
 </example>
+
+<p>Writing a HMTP Service involves the following steps:</p>
+
+<ol>
+<li>Implementing <code>HmtpService</code> (usually by extending <code>GenericService</code>)</li>
+<li>Getting the <code>HmtpBroker</code> (either with <code>@In</code> or done by <code>GenericService</code> automatically)</li>
+<li>Registering the <code>HmtpService</code> with <code>HmtpBroker</code> using <code>addService</code> (done by <code>GenericService</code> automatically)</li>
+<li>Receiving messages to the implemented <code>HmtpAgentStream</code> (or overriding <code>HmtpStream</code> methods in <code>GenericService</code>)</li>
+<li>Sending messages to other agents using the
+broker's <code>getBrokerStream</code>.</li>
+</ol>
 
 <p>By extending <code>GenericService</code>, the service automatically gains
 a queuing ability.  The broker will queue the message and spawn a new thread
@@ -133,6 +154,18 @@ can also use the messaging in the previous example.</p>
 
 <figure src="hmtp-client.png"/>
 
+<p>To implement the server side of an RPC call, the service implements
+<code>sendQueryGet</code> or <code>sendQuerySet</code>, and examines the
+query to see if it understands the query class.  If the service does not
+understand the query, it will return false (or call the super
+method for <code>GenericService</code>).  If a query returns true, it
+must either send a query response or query error with
+the same <code>id</code>, so the waiting client will always receive a
+response.</p>
+
+<p>The type-based query system gives enormous flexibility in creating services.
+Services can be mash-ups of capabilities just by adding new query types.</p>
+
 <example title="TestService.java">
 package example;
 
@@ -161,6 +194,20 @@ public class TestService extends GenericService
 }
 </example>
 
+<p>The remote client, <code>HmtpClient</code>, extends
+the <code>HmtpConnection</code> API to provide extra calls for connecting
+and logging on to the server.  The message passing calls are identical.</p>
+
+<p>When you create a <code>HmtpClient</code>, you'll send it the URL
+of the HMTP service, then call <code>connect()</code> and <code>login</code>
+to authenticate.  The <code>login()</code> method will register an
+agent with the broker, letting the client send and receive messages.</p>
+
+<p>This example sends a RPC query to <var>test@localhost</var>.
+RPC calls in HMTP are typed.  Each query class might execute a different
+query on the server.  In this case we create a trivial <code>TestQuery</code>.
+</p>
+
 <example title="TestClient.java">
 package example;
 
@@ -184,6 +231,13 @@ public class TestClient
 }
 </example>
 
+<p>The configuration for a remote service now has three components:</p>
+
+<ol>
+<li>The <code>HmtpBroker</code>, implemented by HempBroker</li>
+<li>Any registered <code>HmtpService</code>, e.g. the TestService</li>
+<li>The exposed HMTP service, implemented with <code>HempServlet</code></li>
+</ol>
 
 <example title="WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -193,7 +247,7 @@ public class TestClient
     &lt;bean name="test@localhost" class="example.TestService"/>
 
     &lt;servlet-mapping url-pattern="/hmtp"
-                      servlet-class="com.caucho.hemp.servlet.HempServlet"/>
+                     servlet-class="com.caucho.hemp.servlet.HempServlet"/>
 
 &lt;/web-app>
 </example>
@@ -414,6 +468,19 @@ in IM session.</td>
 <s2 title="Client API">
 
 <s3 title="HmtpConnection">
+
+<p><code>HmtpConnection</code> is the primary client interface for both
+local and remote clients.  Messages are sent using the
+<code>HmtpConnection</code> methods.  Messages are received by
+setting a handler: HmtpMessageStream, HmtpQueryStream, or HmtpPresenceStream.</p>
+
+<p>An active <code>HmtpConnection</code> has an associated agent registered
+with the broker.  The agent's jid is available with the <code>getJid()</code>
+call.</p>
+
+<p>For clients that need low-level access to the broker stream, e.g. to
+implement an RPC/Query handler, <code>getBrokerStream()</code> returns
+the underlying stream.</p>
 
 <def title="HmtpConnection">
 package com.caucho.hmtp;

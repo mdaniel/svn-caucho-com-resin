@@ -367,7 +367,9 @@ public class BusinessMethodGenerator implements EjbCallChain {
     
     out.println(");");
 
-    generatePreReturn(out);
+    // ejb/12b0
+    if (! "super".equals(superVar))
+      generatePreReturn(out);
     
     if (! void.class.equals(_implMethod.getReturnType()))
       out.println("return result;");

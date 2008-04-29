@@ -310,6 +310,10 @@ public class WatchdogConfig
   {
   }
 
+  public void setBindPortsAfterStart(ConfigProgram program)
+  {
+  }
+
   public void setKeepaliveMax(ConfigProgram program)
   {
   }

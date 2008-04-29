@@ -236,7 +236,7 @@ public class StatelessObjectView extends StatelessView {
     out.println();
     out.println("public static class " + getViewClassName());
     generateExtends(out);
-    out.print("  implements " + getApi().getName());
+    out.print("  implements " + getApi().getDeclarationName());
     out.println(", StatelessProvider");
     out.println("{");
     out.pushDepth();

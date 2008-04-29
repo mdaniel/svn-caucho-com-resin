@@ -359,6 +359,8 @@ public class InterceptorCallChain extends AbstractCallChain {
       out.print("a" + i + ", ");
     }
     out.println("}).proceed();");
+
+    _next.generatePreReturn(out);
     
     if (! void.class.equals(_implMethod.getReturnType())) {
       out.println("return result;");
