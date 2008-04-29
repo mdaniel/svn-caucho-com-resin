@@ -261,14 +261,12 @@ public class EjbSessionBean extends EjbBean {
       return;
     */
 
-    Class []ifs = type.getInterfaces();
-
     ArrayList<ApiClass> interfaceList = new ArrayList<ApiClass>();
 
-    for (int i = 0; i < ifs.length; i++) {
-      ApiClass localApi = new ApiClass(ifs[i]);
-
-      Local local = (Local) ifs[i].getAnnotation(Local.class);
+    for (ApiClass localApi : type.getInterfaces()) {
+      Class javaApi = localApi.getJavaClass();
+      
+      Local local = (Local) javaApi.getAnnotation(Local.class);
 
       if (local != null) {
         setLocalWrapper(localApi);
@@ -276,23 +274,23 @@ public class EjbSessionBean extends EjbBean {
       }
 
       javax.ejb.Remote remote
-	= (javax.ejb.Remote) ifs[i].getAnnotation(javax.ejb.Remote.class);
+	= (javax.ejb.Remote) javaApi.getAnnotation(javax.ejb.Remote.class);
 
-      if (remote != null || java.rmi.Remote.class.isAssignableFrom(ifs[i])) {
+      if (remote != null || java.rmi.Remote.class.isAssignableFrom(javaApi)) {
         setRemoteWrapper(localApi);
         continue;
       }
 
-      if (ifs[i].getName().equals("java.io.Serializable"))
+      if (javaApi.getName().equals("java.io.Serializable"))
         continue;
 
-      if (ifs[i].getName().equals("java.io.Externalizable"))
+      if (javaApi.getName().equals("java.io.Externalizable"))
         continue;
 
-      if (ifs[i].getName().startsWith("javax.ejb"))
+      if (javaApi.getName().startsWith("javax.ejb"))
         continue;
 
-      if (ifs[i].getName().equals("java.rmi.Remote"))
+      if (javaApi.getName().equals("java.rmi.Remote"))
         continue;
 
       if (! interfaceList.contains(localApi))
