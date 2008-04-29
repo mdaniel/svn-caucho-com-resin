@@ -501,8 +501,8 @@ public interface HmtpConnection
   Serializable queryGet(String to, Serializable query);
   Serializable querySet(String to, Serializable query);
 
-  void queryGet(String to, Serializable query, QueryCallback callback);
-  void querySet(String to, Serializable query, QueryCallback callback);
+  void queryGet(String to, Serializable query, HmtpQueryCallback callback);
+  void querySet(String to, Serializable query, HmtpQueryCallback callback);
 
   void presence(Serializable []data);
   void presence(String to, Serializable []data);
@@ -523,6 +523,10 @@ public interface HmtpConnection
 
 <s3 title="HmtpConnectionFactory">
 
+<p>The <code>HmtpConnectionFactory</code> produces <code>HmtpConnection</code>
+agents for client code.  Typically, the factory implementation will be
+a <code>HmtpBroker</code>, although that is not required by the clients.</p>
+
 <def title="HmtpConnectionFactory">
 package com.caucho.hmtp;
 
@@ -533,7 +537,12 @@ public interface HmtpConnectionFactory
 </def>
 
 </s3>
+
 <s3 title="HmtpQueryCallback">
+
+<p><code>HmtpQueryCallback</code> is used for callback-style RPC.  When
+the query response completes, the agent will call
+the <code>HmtpQueryCallback</code> with the query's response.</p>
 
 <def title="QueryCallback">
 package com.caucho.hmtp;
@@ -551,6 +560,13 @@ public interface HmtpQueryCallback
 </s2>
 
 <s2 title="Remote Client API">
+
+<p><code>HmtpClient</code> is the remote client API for Java clients.  Most
+of the methods are extended from <code>HmtpConnection</code>.  The additional
+method provide some control for connection and login.  Once the client
+is logged in, applications will typically use
+<code>HmtpConnection</code> methods to send messages and set handlers
+to receive messages.</p>
 
 <s3 title="HmtpClient">
 
@@ -605,6 +621,11 @@ public class HmtpClient implements HmtpConnection
 
 <s3 title="HmtpMessageStream">
 
+<p>Applications will implement <code>HmtpMessageStream</code> to receive
+unidirectional messages from the agent.  Typically, applications will extends
+<code>AbstractHmtpMessageStream</code> instead of implementing
+<code>HmtpMessageStream</code> directly.</p>
+
 <def title="HmtpMessageStream">
 package com.caucho.hmtp;
 
@@ -620,6 +641,12 @@ public interface HmtpMessageStream
 </s3>
 
 <s3 title="HmtpQueryStream">
+
+<p>Applications will implement <code>HmtpQueryStream</code> to receive
+RPC calls and responses from the agent.  If the application implements
+<code>sendQueryGet</code>, it must either send a <code>QueryResponse</code>
+to the sender, or send a <code>QueryError</code> or return false from
+the method.  Queries will always have a response or an error.</p>
 
 <def title="HmtpQueryStream">
 package com.caucho.hmtp;
@@ -638,6 +665,13 @@ public interface HmtpQueryStream
 </s3>
 
 <s3 title="HmtpPresenceStream">
+
+<p>The presence methods implement the specialized subscription and
+presence messages.  IM applications use presence messages
+to announce availability to people in a buddy list (roster).</p>
+
+<p>Publish/Subscribe applications can also use subscription packets
+to subscribe and unsubscribe from the publishing service.</p>
 
 <def title="HmtpPresenceStream">
 package com.caucho.hmtp;
@@ -660,6 +694,10 @@ public interface HmtpPresenceStream
 
 <s3 title="HmtpStream">
 
+<p><code>HmtpStream</code> is the core streaming API for the broker and
+its registered agents.  It is simply a combination of all the message,
+query and presence packets.</p>
+
 <def title="HmtpStream">
 package com.caucho.hmtp;
 
@@ -672,6 +710,9 @@ public interface HmtpStream
 </s3>
 
 <s3 title="HmtpAgentStream">
+
+<p><code>HmtpAgentStream</code> marks a stream toward an agent, extending
+<code>HmtpStream</code> and returning the agent's jid.</p>
 
 <def title="HmtpAgentStream">
 package com.caucho.hmtp;
@@ -690,6 +731,18 @@ public interface HmtpAgentStream extends HmtpStream
 
 <s3 title="HmtpBroker">
 
+<p><code>HmtpBroker</code> is the central player in the HMTP server.
+It's responsible for routing messages between the agents, for any
+forwarding to remote servers, and managing dynamic agents and services.
+</p>
+
+<p>For all that responsibility, the API is fairly simple.  The
+<code>HmtpBroker</code> extends <code>HmtpConnectionFactory</code>,
+enabling client agents, and allows custom <code>HmtpService</code>
+services to be implemented.  Most importantly, it implements a
+broker stream (<code>HmtpStream</code>) which serves as the destination
+for all inbound messages.</p>
+
 <def title="HmtpBroker">
 package com.caucho.hmtp;
 
@@ -707,6 +760,22 @@ public interface HmtpBroker extends HmtpConnectionFactory
 </s3>
 
 <s3 title="HmtpService">
+
+<p><code>HmtpService</code> represents a registered, persistent
+service with a known jid address.  Typically the services will be
+registered in a configuration file, although they can also be
+created dynamically using the <code>HmtpServiceManager</code>.
+Most applications will extend the <code>GenericService</code>
+instead of implementing <code>HmtpService</code> directly.</p>
+
+<p>The key methods are <code>getJid</code> and <code>getAgentStream</code>.
+The jid is used for registration with the <code>HmtpBroker</code> and
+<code>getAgentStream</code> is used to receive any messages.</p>
+
+<p>The additional methods are used for specialized applications like
+instant messaging and multiuser-chat, to manage clients logging in.</p>
+
+
 
 <def title="HmtpService">
 package com.caucho.hmtp;
