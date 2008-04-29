@@ -54,7 +54,8 @@ package com.caucho.hmtp.packet
 
     public var _value:Object;
 
-    public function Message(to:String, from:String, value:Object)
+    public function Message(to:String = "", from:String = "", 
+                            value:Object = null)
     {
       super(MESSAGE, to, from);
 
