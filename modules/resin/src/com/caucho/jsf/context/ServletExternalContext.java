@@ -442,16 +442,20 @@ public class ServletExternalContext extends ExternalContext {
     
     public Object put(String key, Object value)
     {
+      Object oldValue = _webApp.getAttribute(key);
+
       _webApp.setAttribute(key, value);
 
-      return null;
+      return oldValue;
     }
     
     public Object remove(String key)
     {
+      Object value = _webApp.getAttribute(key);
+
       _webApp.removeAttribute(key);
 
-      return null;
+      return value;
     }
 
     public Enumeration getNames()
@@ -475,16 +479,20 @@ public class ServletExternalContext extends ExternalContext {
     
     public Object put(String key, Object value)
     {
+      Object oldValue = _session.getAttribute(key);
+
       _session.setAttribute(key, value);
 
-      return null;
+      return oldValue;
     }
     
     public Object remove(String key)
     {
+      Object value = _session.getAttribute(key);
+
       _session.removeAttribute(key);
 
-      return null;
+      return value;
     }
 
     public Enumeration getNames()
@@ -501,16 +509,20 @@ public class ServletExternalContext extends ExternalContext {
     
     public Object put(String key, Object value)
     {
+      Object oldValue = _request.getAttribute(key);
+
       _request.setAttribute(key, value);
 
-      return null;
+      return oldValue;
     }
     
     public Object remove(String key)
     {
+      Object value = _request.getAttribute(key);
+
       _request.removeAttribute(key);
 
-      return null;
+      return value;
     }
 
     public Enumeration getNames()
