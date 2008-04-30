@@ -464,7 +464,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Sets the select-based keepalive timeout
    */
-  public void getKeepaliveSelectThreadTimeout(Period period)
+  public void setKeepaliveSelectThreadTimeout(Period period)
   {
     _keepaliveSelectThreadTimeout = period.getPeriod();
   }

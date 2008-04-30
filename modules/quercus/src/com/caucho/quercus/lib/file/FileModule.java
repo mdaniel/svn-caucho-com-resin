@@ -1928,6 +1928,9 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static boolean is_writeable(Path path)
   {
+    if (path == null)
+      return false;
+    
     return is_writable(path);
   }
 
@@ -2179,8 +2182,39 @@ public class FileModule extends AbstractQuercusModule {
     else {
       StringBuilder sb = new StringBuilder();
 
-      for (; ch >= 0 && ch != '\r' && ch != '\n'; ch = is.read()) {
-	sb.append((char) ch);
+      for (;
+	   ch >= 0 && ch != '\r' && ch != '\n';
+	   ch = is.read()) {
+	
+	if (ch == ';') {
+	  skipToEndOfLine(ch, is);
+	  break;
+	}
+	else if (ch == '$') {
+	  int peek = is.read();
+
+	  if (peek == '{') {
+	    StringBuilder var = new StringBuilder();
+
+	    for (ch = is.read();
+		 ch >= 0 && ch != '\r' && ch != '\n' && ch != '}';
+		 ch = is.read()) {
+	      var.append((char) ch);
+	    }
+	    
+	    Value value = env.getIni(var.toString());
+
+	    if (value != null)
+	      sb.append(value);
+	  }
+	  else {
+	    sb.append('$');
+	    is.unread();
+	  }
+
+	}
+	else
+	  sb.append((char) ch);
       }
 
       String value = sb.toString().trim();

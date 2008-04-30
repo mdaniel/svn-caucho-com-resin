@@ -451,6 +451,31 @@ public class JspCompilerInstance {
     if (_page != null)
       throw new IllegalStateException("JspCompilerInstance cannot be reused");
 
+    parse();
+
+    try {
+      JspGenerator generator = _jspBuilder.getGenerator();
+      generator.setJspCompilerInstance(this);
+
+      for (int i = 0; i < _dependList.size(); i++)
+	generator.addDepend(_dependList.get(i));
+
+      generator.validate();
+
+      generator.generate(_jspPath, _className);
+
+      return generator;
+    } catch (IOException e) {
+      JspParseException exn = new JspParseException(e);
+      exn.setErrorPage(_parseState.getErrorPage());
+
+      throw exn;
+    }
+  }
+  
+  public void parse()
+    throws Exception
+  {
     boolean isXml = _parseState.isXml();
     boolean isForbidXml = _parseState.isForbidXml();
 
@@ -496,18 +521,6 @@ public class JspCompilerInstance {
 	_parser.parse(parseState.getResourceManager().resolvePath(coda),
 		      coda);
       }
-
-      JspGenerator generator = _jspBuilder.getGenerator();
-      generator.setJspCompilerInstance(this);
-
-      for (int i = 0; i < _dependList.size(); i++)
-	generator.addDepend(_dependList.get(i));
-
-      generator.validate();
-
-      generator.generate(_jspPath, _className);
-
-      return generator;
     } catch (JspParseException e) {
       e.setErrorPage(_parseState.getErrorPage());
       throw e;

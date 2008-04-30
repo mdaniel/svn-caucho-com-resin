@@ -948,7 +948,7 @@ public class OptionsModule extends AbstractQuercusModule {
   static final IniDefinition INI_ALLOW_WEBDAV_METHODS
     = _iniDefinitions.add("allow_webdav_methods", false, PHP_INI_ALL);
   static final IniDefinition INI_MEMORY_LIMIT
-    = _iniDefinitions.add("memory_limit", "-1", PHP_INI_ALL);
+    = _iniDefinitions.add("memory_limit", "512M", PHP_INI_ALL);
 
   // unsupported
   static final IniDefinition MAGIC_QUOTES_RUNTIME

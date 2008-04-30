@@ -459,28 +459,57 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Output image to browser or file
    */
-  public static boolean imagegif(Env env, QuercusImage image)
+  public static boolean imagegif(Env env, QuercusImage image,
+				 @Optional Path path)
   {
     try {
-      ImageIO.write(image._bufferedImage, "gif", env.getOut());
+      if (path != null) {
+	WriteStream os = path.openWrite();
+	
+	try {
+	  ImageIO.write(image._bufferedImage, "gif", os);
+	} finally {
+	  os.close();
+	}
+      }
+      else
+	ImageIO.write(image._bufferedImage, "gif", env.getOut());
+      
       return true;
     }
     catch (IOException e) {
-      throw new QuercusModuleException(e);
+      log.log(Level.FINE, e.toString(), e);
+      
+      return false;
     }
   }
 
   /**
    * Output a PNG image to either the browser or a file
    */
-  public static boolean imagepng(Env env, QuercusImage image)
+  public static boolean imagepng(Env env,
+				 QuercusImage image,
+				 @Optional Path path)
   {
     try {
-      ImageIO.write(image._bufferedImage, "png", env.getOut());
+      if (path != null) {
+	WriteStream os = path.openWrite();
+	
+	try {
+	  ImageIO.write(image._bufferedImage, "png", os);
+	} finally {
+	  os.close();
+	}
+      }
+      else
+	ImageIO.write(image._bufferedImage, "png", env.getOut());
+      
       return true;
     }
     catch (IOException e) {
-      throw new QuercusModuleException(e);
+      log.log(Level.FINE, e.toString(), e);
+      
+      return false;
     }
   }
 
@@ -495,6 +524,7 @@ public class ImageModule extends AbstractQuercusModule {
     try {
       if (path != null) {
 	WriteStream os = path.openWrite();
+	
 	try {
 	  ImageIO.write(image._bufferedImage, "jpeg", os);
 	} finally {
@@ -503,6 +533,7 @@ public class ImageModule extends AbstractQuercusModule {
       }
       else
 	ImageIO.write(image._bufferedImage, "jpeg", env.getOut());
+      
       return true;
     }
     catch (IOException e) {

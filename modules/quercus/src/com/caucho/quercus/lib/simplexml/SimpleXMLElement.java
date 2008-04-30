@@ -883,7 +883,12 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
    */
   public SimpleXMLElement __getField(String name)
   {
-    return new SelectedXMLElement(getElement(name));
+    SimpleXMLElement elt = getElement(name);
+
+    if (elt != null)
+      return elt;
+    else
+      return new SelectedXMLElement(elt);
   }
   
   /**

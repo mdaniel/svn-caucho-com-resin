@@ -314,6 +314,10 @@ public class WatchdogConfig
   {
   }
 
+  public void setConnectionMax(ConfigProgram program)
+  {
+  }
+
   public void setKeepaliveMax(ConfigProgram program)
   {
   }
@@ -327,6 +331,10 @@ public class WatchdogConfig
   }
 
   public void setKeepaliveSelectMax(ConfigProgram program)
+  {
+  }
+
+  public void setKeepaliveSelectThreadTimeout(ConfigProgram program)
   {
   }
 
@@ -419,6 +427,10 @@ public class WatchdogConfig
   }
 
   public void setThreadIdleMax(ConfigProgram program)
+  {
+  }
+
+  public void setWatchdogArg(ConfigProgram program)
   {
   }
   

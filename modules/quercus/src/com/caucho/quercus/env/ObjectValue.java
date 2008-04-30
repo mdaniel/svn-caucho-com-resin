@@ -370,8 +370,10 @@ abstract public class ObjectValue extends Value {
   @Override
   public boolean eq(Value rValue)
   {
-    if (rValue.isObject())
-      return cmpObject((ObjectValue)rValue) == 0;
+    rValue = rValue.toValue();
+    
+    if (rValue instanceof ObjectValue)
+      return cmpObject((ObjectValue) rValue) == 0;
     else
       return super.eq(rValue);
   }

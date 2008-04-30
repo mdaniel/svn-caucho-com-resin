@@ -31,7 +31,6 @@ package com.caucho.server.dispatch;
 
 import com.caucho.jsp.Page;
 import com.caucho.jsp.QServlet;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.servlet.FilterChain;
@@ -46,6 +45,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Represents the final servlet in a filter chain.
@@ -177,6 +177,9 @@ public class PageFilterChain implements FilterChain
       else if (errorUri != null) {
 	//throw new FileNotFoundException(errorUri);
 	throw notFound;
+      }
+      else {
+	log.log(Level.FINER, notFound.toString(), notFound);
       }
 	
       ((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);
