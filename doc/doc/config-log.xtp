@@ -791,11 +791,13 @@ definition in the <a config-tag="server"/> that the host is
 in.</p>
 
 <deftable-childtags>
-<tr><td>path
-    </td><td>Output path for the log entries, see 
+<tr>
+  <td>path</td>
+  <td>Output path for the log entries, see 
         <a href="#path">"Log Paths"</a>.
-    </td><td>required
-</td></tr>
+  </td>
+  <td>required</td>
+</tr>
 <tr>
   <td>path-format</td>
   <td>Selects a format for generating path names.  The syntax is the same as for archive-format</td>

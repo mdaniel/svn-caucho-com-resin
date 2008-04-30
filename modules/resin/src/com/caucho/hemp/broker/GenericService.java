@@ -111,7 +111,6 @@ public class GenericService extends AbstractHmtpAgentStream
     return new HempMemoryQueue(stream, _broker.getBrokerStream());
   }
 
-  @Override
   public HmtpAgentStream getAgentStream()
   {
     return _agentStream;
