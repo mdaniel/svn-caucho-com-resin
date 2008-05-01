@@ -4365,22 +4365,17 @@ public class Env {
   {
     int mask = 1 << code;
 
-    if (location == null)
-      location = getLocation();
-
-    String locationMessagePrefix = loc;
-
-    if (loc.equals(""))
-      locationMessagePrefix = location.getMessagePrefix();
-
-    if (code >= 0 && code < _errorHandlers.length &&
-        _errorHandlers[code] != null) {
+    if (code >= 0 && code < _errorHandlers.length
+	&& _errorHandlers[code] != null) {
       Callback handler = _errorHandlers[code];
 
       try {
         _errorHandlers[code] = null;
 
         Value fileNameV = NullValue.NULL;
+
+	if (location == null)
+	  location = getLocation();
 
         String fileName = location.getFileName();
 
@@ -4412,7 +4407,8 @@ public class Env {
 
     if ((_errorMask & mask) != 0) {
       try {
-	String fullMsg = locationMessagePrefix + getCodeName(mask) + msg;
+	String fullMsg = (getLocationPrefix(location, loc)
+			  + getCodeName(mask) + msg);
 
 	if (getIniBoolean("track_errors"))
 	  setGlobalValue("php_errormsg", createString(fullMsg));
@@ -4432,21 +4428,38 @@ public class Env {
 
     if ((mask & (E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR)) != 0)
     {
-      if (! "".equals(locationMessagePrefix)) {
+      String locPrefix = getLocationPrefix(location, loc);
+      
+      if (! "".equals(locPrefix)) {
 	/*
         throw new QuercusLineExitException(getLocation() +
                                               getCodeName(mask) +
                                               msg);
 	*/
-        throw new QuercusErrorException(locationMessagePrefix +
-                                       getCodeName(mask) +
-                                       msg);
+        throw new QuercusErrorException(locPrefix
+					+ getCodeName(mask)
+					+ msg);
       }
       else
         throw new QuercusErrorException(msg);
     }
 
     return NullValue.NULL;
+  }
+
+  /**
+   * Returns the displayable location prefix.  This may be slow
+   * for compiled-mode because of the need to match line numbers.
+   */
+  private String getLocationPrefix(Location location, String loc)
+  {
+    if (loc != null && ! "".equals(loc))
+      return loc;
+    
+    if (location == null)
+      location = getLocation();
+
+    return location.getMessagePrefix();
   }
 
   /**

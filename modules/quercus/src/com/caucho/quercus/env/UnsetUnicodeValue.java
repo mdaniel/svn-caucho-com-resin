@@ -48,14 +48,6 @@ public class UnsetUnicodeValue
   }
   
   /**
-   * Returns the length of the string.
-   */
-  public int length()
-  {
-    return -1;
-  }
-  
-  /**
    * Returns the character at an index
    */
   @Override

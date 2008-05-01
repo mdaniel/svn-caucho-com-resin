@@ -2479,11 +2479,11 @@ public class StringModule extends AbstractQuercusModule {
 
       for (Map.Entry<Value, Value> entry : subjectArray.entrySet()) {
         Value result = strReplaceImpl(env,
-                  search,
-                  replace,
-                  entry.getValue().toStringValue(),
-                  count,
-                  isInsensitive);
+				      search,
+				      replace,
+				      entry.getValue().toStringValue(),
+				      count,
+				      isInsensitive);
 
         resultArray.append(entry.getKey(), result);
       }

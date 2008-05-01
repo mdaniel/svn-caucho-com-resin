@@ -35,11 +35,15 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.logging.*;
 
 /**
  * Represents a JDBC column metadata
  */
 public class JdbcTableMetaData {
+  private static final Logger log
+    = Logger.getLogger(JdbcTableMetaData.class.getName());
+  
   private final String _catalog;
   private final String _schema;
   private final String _name;
@@ -75,16 +79,21 @@ public class JdbcTableMetaData {
 
       rs.close();
 
-      rs = md.getPrimaryKeys(_catalog, _schema, _name);
-      while (rs.next()) {
-	// COLUMN_NAME
-	String columnName = rs.getString(4);
+      try {
+	rs = md.getPrimaryKeys(_catalog, _schema, _name);
+	while (rs.next()) {
+	  // COLUMN_NAME
+	  String columnName = rs.getString(4);
 
-	JdbcColumnMetaData column = _columnMap.get(columnName);
+	  JdbcColumnMetaData column = _columnMap.get(columnName);
 
-	column.setPrimaryKey(true);
+	  column.setPrimaryKey(true);
+	}
+      } catch (SQLException e) {
+	log.log(Level.FINE, e.toString(), e);
+      } finally {
+	rs.close();
       }
-      rs.close();
 
       rs = md.getIndexInfo(_catalog, _schema, _name, false, true);
       while (rs.next()) {
@@ -95,6 +104,8 @@ public class JdbcTableMetaData {
 
 	column.setIndex(true);
       }
+    } catch (Exception e) {
+      e.printStackTrace();
     } finally {
       rs.close();
     }

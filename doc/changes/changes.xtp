@@ -12,7 +12,7 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
-<li>quercus: SimpleXMLElement getField could throw NPE (rep by Matthew Schmidt)</li>
+<li>(2008-04-30) quercus: SimpleXMLElement getField could throw NPE (rep by Matthew Schmidt)</li>
 <li>jsp: permission issues with WEB-INF/work could cause 404 instead of servlet exception (#2635, rep by mauricev)</li>
 <li>boot: updates for missing configuration attributes</li>
 <li>boot: update startup log message for better VM version logging (#2633, rep by stbu)</li>

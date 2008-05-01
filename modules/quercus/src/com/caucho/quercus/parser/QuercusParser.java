@@ -1686,8 +1686,10 @@ public class QuercusParser {
     }
 
     Arg [] args = new Arg[argMap.size()];
-    
-    return  argMap.values().toArray(args);
+
+    argMap.values().toArray(args);
+
+    return args;
   }
   
   /**

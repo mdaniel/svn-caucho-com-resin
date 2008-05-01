@@ -343,9 +343,9 @@ class RegexpNode {
     int match(StringValue string, int offset, RegexpState state)
     {
       if (offset == 0)
-	  return offset;
-	else
-	  return -1;
+	return offset;
+      else
+	return -1;
     }
   }
   
@@ -354,9 +354,9 @@ class RegexpNode {
     int match(StringValue string, int offset, RegexpState state)
     {
       if (offset == 0 || string.charAt(offset - 1) == '\n')
-	  return offset;
-	else
-	  return -1;
+	return offset;
+      else
+	return -1;
     }
   }
   

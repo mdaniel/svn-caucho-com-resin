@@ -553,7 +553,7 @@ public class StringBuilderValue
    * Returns the length of the string.
    */
   @Override
-  public int length()
+  public final int length()
   {
     return _length;
   }
@@ -562,7 +562,7 @@ public class StringBuilderValue
    * Returns the character at a particular location
    */
   @Override
-  public char charAt(int index)
+  public final char charAt(int index)
   {
     return _buffer[index];
   }

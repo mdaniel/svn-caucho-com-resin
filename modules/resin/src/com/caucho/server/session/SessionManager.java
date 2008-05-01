@@ -1723,7 +1723,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
     if (_admin != null)
       _admin.unregister();
 
-    _sessionList = null;
+    _sessionList = new ArrayList<SessionImpl>();
 
     /*
     if (_clusterManager != null)

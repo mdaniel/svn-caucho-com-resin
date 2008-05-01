@@ -798,12 +798,18 @@ public interface HmtpService
 
 </s3>
 
-<s3 title="ServiceManager">
+<s3 title="HmtpServiceManager">
 
-<def title="ServiceManager">
+<p><code>HmtpServiceManager</code> is a specialized manager for finding
+persistent sessions.  In instant messaging, for example, the registered
+users might be stored in a database.  When a message goes to
+harry@host.com, the <code>HmtpServiceManager</code> will lookup the
+appropriate user.</p>
+
+<def title="HmtpServiceManager">
 package com.caucho.hmtp;
 
-public interface ServiceManager
+public interface HmtpServiceManager
 {
   public HmtpService findService(String jid);
 }
