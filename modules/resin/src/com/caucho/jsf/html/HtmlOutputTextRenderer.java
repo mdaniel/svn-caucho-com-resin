@@ -97,8 +97,11 @@ class HtmlOutputTextRenderer extends HtmlRenderer
 	escape = escapeValue;
       else
 	escape = true;
-      
-      value = attrMap.get("value");
+
+      if (component instanceof UIOutput)
+        value = ((UIOutput) component).getValue();
+      else
+        value = attrMap.get("value");
     }
 
     boolean hasSpan = false;
