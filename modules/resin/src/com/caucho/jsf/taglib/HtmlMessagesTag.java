@@ -44,6 +44,9 @@ import javax.servlet.jsp.tagext.*;
  * The h:messages tag
  */
 public class HtmlMessagesTag extends HtmlStyleBaseTag {
+
+  private ValueExpression _globalOnly;
+
   public String getComponentType()
   {
     return HtmlMessages.COMPONENT_TYPE;
@@ -52,5 +55,19 @@ public class HtmlMessagesTag extends HtmlStyleBaseTag {
   public String getRendererType()
   {
     return "javax.faces.Messages";
+  }
+
+  public void setGlobalOnly(ValueExpression globalOnly)
+  {
+    _globalOnly = globalOnly;
+  }
+
+  @Override
+  protected void setProperties(UIComponent component)
+  {
+    super.setProperties(component);
+
+    if (_globalOnly != null)
+      component.setValueExpression("globalOnly", _globalOnly);
   }
 }
