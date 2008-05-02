@@ -589,18 +589,88 @@ space pad the values and make the results look a little nicer:</p>
 
 </s3> <!-- Format-String -->
 
+</s2>
 
-<s3 title="com.caucho.log.SyslogHandler">
+<s2 title="Log Handlers">
+
+<p>Resin provides a number of predefined custom log handlers for common
+logging patterns, including sending messages to JMS, <a href="hmtp">HMTP</a>,
+and the syslog service.  Creating your own custom handler is also
+straightforward.</p>
+
+<s3 title="EventHandler, uri='event:'">
+
+<p>The event handler publishes a <code>LogEvent</code> to the WebBeans event
+system.  Any WebBeans component with an <code>@Observes</code> method for
+<code>LogEvent</code> will receive the notifications.  The log handler
+classname is <code>com.caucho.log.handler.EventHandler</code> and the
+shortcut is uri="event:".</p>
+
+<example title="Example: event handler configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;log-handler name="com.foo" level="warning" uri="event:"/>
+
+&lt;/web-app>
+</example>
+
+</s3>
+
+<s3 title="HmtpHandler, uri='hmtp:'">
+
+<p>The HMTP handler publishes the log message to a <a href="hmtp.xtp">HMTP</a>
+agent.  The agent can be a custom HMTP service to process log messages.
+The <code>HmtpHandler</code> needs a JID (Jabber id) as the address of the
+target service.</p>
+
+<example title="Example: HMTP handler configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;log-handler name="com.foo" level="warning" uri="hmtp:">
+    &lt;init>
+       &lt;to>test@localhost&lt;/to>
+   &lt;/init>
+  &lt;/log-handler>
+
+&lt;/web-app>
+</example>
+
+</s3>
+
+<s3 title="JmsHandler, uri='jms:'">
+
+<p>The JMS handler publishes the log message to a
+<a href="resin-messaging.xtp">JMS</a> queue.</p>
+
+<example title="Example: JMS handler configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-queue name="myQueue" uri="memory:"/>
+
+  &lt;log-handler name="com.foo" level="warning" uri="jms:">
+    &lt;init>
+       &lt;target>${myQueue}&lt;/target>
+   &lt;/init>
+  &lt;/log-handler>
+
+&lt;/web-app>
+</example>
+
+</s3>
+
+<s3 title="SyslogHandler, uri='syslog:'">
 
 <p>On Unix systems, the SyslogHandler lets you log messages to syslog.</p>
 
-<example>
-&lt;log name="" level="warning"&gt;
-  &lt;handler resin:type="com.caucho.log.SyslogHandler"&gt;
-    &lt;facility&gt;daemon&lt;/facility&gt;
-    &lt;severity&gt;notice&lt;/severity&gt;
-  &lt;/handler&gt;
-&lt;/log&gt;
+<example title="Example: syslog configuration">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+&lt;log-handler name="" level="warning" uri="syslog:"&gt;
+    &lt;init>
+      &lt;facility&gt;daemon&lt;/facility&gt;
+      &lt;severity&gt;notice&lt;/severity&gt;
+    &lt;/init>
+&lt;/log-handler&gt;
 </example>
 
 <p>The possible values for <var>facility</var> are user, mail, daemon, auth, lpr,
@@ -613,7 +683,82 @@ warning, notice, info, debug. The default is <i>info</i>.</p>
 <p>See also `<code>man 3 syslog</code>' and `<code>man syslog.conf</code>'.
 </p></s3>
 
-</s2> <!-- log  ...  -->
+<s3 title="custom handler">
+
+<example title="Example: custom formatter configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;log-handler name="" level="warning" class="demo.MyHandler"/&gt;
+  
+&lt;/web-app>
+</example>
+
+<example title="Example: MyHandler.java">
+package demo;
+
+import java.util.logging.*;
+
+public class MyHandler extends Handler
+{
+  @Override
+  public void publish(LogRecord record)
+  {
+    System.out.println(getFormatter().format(record));
+  }
+  
+  @Override
+  public void flush();
+  {
+  }
+  
+  @Override
+  public void close();
+  {
+  }
+}
+</example>
+
+</s3>
+
+</s2> <!-- handler -->
+
+<s2 title="Log Formatting">
+
+<p>Sites may wish to change the formatting of log messages to gather information
+more appropriate for the site.  The formatter can be custom-configured just like
+the handlers.</p>
+
+<s3 title="custom handler">
+
+<example title="Example: custom formatter configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;log-handler name="com.foo" level="warning" path="WEB-INF/log.log"&gt;
+    &lt;formatter class="qa.MyFormatter"/>
+  &lt;/log-handler>
+  
+&lt;/web-app>
+</example>
+
+<example title="Example: MyFormatter.java">
+package demo;
+
+import java.util.logging.*;
+
+public class MyFormatter extends Formatter
+{
+  @Override
+  public String format(LogRecord record)
+  {
+    return "[" + record.getLevel() + "] " + record.getMessage();
+  }
+}
+</example>
+
+</s3>
+
+</s2> <!-- formatter -->
+
 </s1> <!-- java.util.logging  -->
 
 <s1 title="Standard Output Redirection">

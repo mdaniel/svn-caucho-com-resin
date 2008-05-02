@@ -347,8 +347,8 @@ public class BusinessMethodGenerator implements EjbCallChain {
   public void generateCall(JavaWriter out, String superVar)
     throws IOException
   {
-    if (! void.class.equals(_implMethod.getReturnType())) {
-      out.printClass(_implMethod.getReturnType());
+    if (! void.class.equals(_apiMethod.getReturnType())) {
+      out.printClass(_apiMethod.getReturnType());
       out.println(" result;");
     }
     
