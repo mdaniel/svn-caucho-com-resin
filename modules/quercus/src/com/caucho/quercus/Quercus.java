@@ -995,18 +995,18 @@ public class Quercus
       int id = _functionNameMap.get(name);
 
       if (id < 0) {
-	id = _functionNameMap.size();
+        id = _functionNameMap.size();
 
-	_functionNameMap.put(name, id);
+        _functionNameMap.put(name, id);
 
-	if (_functionMap.length <= id) {
-	  AbstractFunction []functionMap = new AbstractFunction[id + 256];
-	  System.arraycopy(_functionMap, 0,
-			   functionMap, 0, _functionMap.length);
-	  _functionMap = functionMap;
-	}
+        if (_functionMap.length <= id) {
+          AbstractFunction []functionMap = new AbstractFunction[id + 256];
+          System.arraycopy(_functionMap, 0,
+                   functionMap, 0, _functionMap.length);
+          _functionMap = functionMap;
+        }
 
-	_functionMap[id] = new UndefinedFunction(name);
+        _functionMap[id] = new UndefinedFunction(name);
       }
 
       return id;

@@ -2533,6 +2533,27 @@ public class Env {
     else
       throw createErrorException(L.l("'{0}' is an unknown function.", name));
   }
+  
+  public int getFunctionId(String name)
+  {
+    int id = _quercus.getFunctionId(name);
+    
+    AbstractFunction []defFuns = _quercus.getFunctionMap();
+    
+    if (_fun.length != defFuns.length) {
+      _fun = new AbstractFunction[defFuns.length];
+      System.arraycopy(defFuns, 0, _fun, 0, defFuns.length);
+    }
+    else
+      _fun[id] = defFuns[id];
+    
+    return id;
+  }
+  
+  public int getFunctionIdCount()
+  {
+    return _quercus.getFunctionIdCount();
+  }
 
   /**
    * Finds the java reflection method for the function with the given name.
@@ -3680,6 +3701,8 @@ public class Env {
         return NullValue.NULL;
       else if (page == null || page.isModified(this)) {
         page = _quercus.parse(path);
+        
+        page.init(this);
         
         page.importDefinitions(this);
         

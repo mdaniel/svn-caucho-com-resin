@@ -53,6 +53,28 @@ public class FunctionModule extends AbstractQuercusModule {
   /**
    * Calls a user function
    */
+  public static Value call_user_method(Env env,
+                                       String name,
+                                       Value obj,
+                                       Value []args)
+  {
+    if (obj.isObject()) {
+      AbstractFunction fun = obj.findFunction(name);
+      
+      return fun.callMethod(env, obj, args).copyReturn();
+    }
+    else {
+      QuercusClass cls = env.findClass(obj.toString());
+      
+      AbstractFunction fun = cls.findFunction(name);
+      
+      return fun.call(env, args).copyReturn();
+    }
+  }
+  
+  /**
+   * Calls a user function
+   */
   public static Value call_user_func(Env env,
                                      Callback function,
                                      Value []args)

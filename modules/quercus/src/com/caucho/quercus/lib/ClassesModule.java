@@ -61,7 +61,7 @@ public class ClassesModule extends AbstractQuercusModule {
     QuercusClass cl =  env.findClass(className, useAutoload);
 
     // php/[03]9m1
-    return cl != null && !cl.isInterface();
+    return cl != null && ! cl.isInterface();
   }
 
   /**

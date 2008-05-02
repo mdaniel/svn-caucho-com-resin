@@ -514,10 +514,16 @@ public class OptionsModule extends AbstractQuercusModule {
 
   public static void phpinfo(Env env, @Optional("-1") int what)
   {
+    if (hasRequest(env))
+      env.println("<html><body>");
+    
     if ((what & INFO_GENERAL) != 0)
       phpinfoGeneral(env);
     if ((what & INFO_VARIABLES) != 0)
       phpinfoVariables(env);
+    
+    if (hasRequest(env))
+      env.println("</body></html>");
   }
 
   private static void phpinfoGeneral(Env env)
