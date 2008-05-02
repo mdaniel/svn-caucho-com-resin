@@ -2043,11 +2043,13 @@ public class WebApp extends ServletContextImpl
         // jsp/1910 - can't cache jsp_precompile
         String query = invocation.getQueryString();
 
-        boolean isPrecompile = false;
+        boolean isCache = true;
         if (query != null && query.indexOf("jsp_precompile") >= 0)
-          isPrecompile = true;
+          isCache = false;
+	else if (_rewriteDispatch != null)
+	  isCache = false;
 
-        if (! isPrecompile)
+        if (isCache)
           entry = _filterChainCache.get(invocation.getContextURI());
 
         if (entry != null && ! entry.isModified()) {
@@ -2069,7 +2071,7 @@ public class WebApp extends ServletContextImpl
           entry = new FilterChainEntry(chain, invocation);
           chain = entry.getFilterChain();
 
-          if (! isPrecompile)
+          if (isCache)
             _filterChainCache.put(invocation.getContextURI(), entry);
         }
 

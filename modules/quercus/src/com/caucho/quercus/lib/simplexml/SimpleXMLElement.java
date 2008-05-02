@@ -886,9 +886,9 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     SimpleXMLElement elt = getElement(name);
 
     if (elt != null)
-      return elt;
-    else
       return new SelectedXMLElement(elt);
+    else
+      return elt;
   }
   
   /**
