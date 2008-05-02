@@ -207,6 +207,8 @@ public class FacesContextELResolver extends CompositeELResolver {
   @Override
   public Class getType(ELContext env, Object base, Object property)
   {
+    env.setPropertyResolved(false);
+    
     for (int i = 0; i < _customResolvers.length; i++) {
       Class type = _customResolvers[i].getType(env, base, property);
 
