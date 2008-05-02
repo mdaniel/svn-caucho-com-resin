@@ -30,9 +30,7 @@
 package com.caucho.quercus.program;
 
 import com.caucho.quercus.Quercus;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.vfs.BasicDependencyContainer;
 import com.caucho.vfs.Depend;
@@ -276,7 +274,7 @@ public class QuercusProgram {
     if (value != null)
       return value;
     else
-      return LongValue.ONE;
+      return NullValue.NULL;
   }
 
   /**
