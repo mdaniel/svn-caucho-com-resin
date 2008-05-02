@@ -12,6 +12,7 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>quercus: $SERVER['REQUEST_URI'] calculation with forward [clean_urls on drupal] (rep by Matthew Schmidt)</li>
 <li>rewrite: forwards with query improperly cached (rep by Matthew Schmidt)</li>
 <li>(2008-04-30) quercus: SimpleXMLElement getField could throw NPE (rep by Matthew Schmidt)</li>
 <li>jsp: permission issues with WEB-INF/work could cause 404 instead of servlet exception (#2635, rep by mauricev)</li>

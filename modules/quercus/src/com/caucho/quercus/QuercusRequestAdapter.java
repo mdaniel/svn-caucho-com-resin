@@ -34,19 +34,28 @@ import javax.servlet.http.HttpServletRequest;
 public class QuercusRequestAdapter
 {
   public static String REQUEST_URI = "javax.servlet.include.request_uri";
+  public static String FWD_REQUEST_URI = "javax.servlet.forward.request_uri";
   public static String CONTEXT_PATH = "javax.servlet.include.context_path";
   public static String SERVLET_PATH = "javax.servlet.include.servlet_path";
   public static String PATH_INFO = "javax.servlet.include.path_info";
   public static String QUERY_STRING = "javax.servlet.include.query_string";
+  public static String FWD_QUERY_STRING = "javax.servlet.forward.query_string";
   
   public static String getPageURI(HttpServletRequest request)
   {
     String uri = (String) request.getAttribute(REQUEST_URI);
-    
+
     if (uri != null)
       return uri;
-    else
-      return request.getRequestURI();
+    else {
+      // php/0829
+      uri = (String) request.getAttribute(FWD_REQUEST_URI);
+
+      if (uri != null)
+	return uri;
+      else
+	return request.getRequestURI();
+    }
   }
   
   public static String getPageContextPath(HttpServletRequest request)
@@ -97,7 +106,14 @@ public class QuercusRequestAdapter
     
     if (uri != null)
       return (String) request.getAttribute(QUERY_STRING);
-    else
-      return request.getQueryString();
+    else {
+      // php/0829
+      uri = (String) request.getAttribute(FWD_REQUEST_URI);
+
+      if (uri != null)
+	return (String) request.getAttribute(FWD_QUERY_STRING);
+      else
+	return request.getQueryString();
+    }
   }
 }
