@@ -2537,16 +2537,19 @@ public class Env {
   public int getFunctionId(String name)
   {
     int id = _quercus.getFunctionId(name);
-    
-    AbstractFunction []defFuns = _quercus.getFunctionMap();
-    
-    if (_fun.length != defFuns.length) {
-      _fun = new AbstractFunction[defFuns.length];
-      System.arraycopy(defFuns, 0, _fun, 0, defFuns.length);
+
+    if (_fun.length <= id) {
+      AbstractFunction []oldFun = _fun;
+      
+      _fun = new AbstractFunction[id + 256];
+      System.arraycopy(oldFun, 0, _fun, 0, oldFun.length);
     }
-    else
+
+    AbstractFunction []defFuns = _quercus.getFunctionMap();
+
+    if (_fun[id] == null)
       _fun[id] = defFuns[id];
-    
+
     return id;
   }
   

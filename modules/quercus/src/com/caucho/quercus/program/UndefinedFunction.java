@@ -60,5 +60,10 @@ public class UndefinedFunction extends AbstractFunction {
   {
     return env.error(L.l("'{0}' is an unknown function.", _name));
   }
+  
+  public String toString()
+  {
+    return "UndefinedFunction[" + _name + "]";
+  }
 }
 
