@@ -1261,20 +1261,20 @@ public class Server extends ProtocolDispatchServer
       if (! Alarm.isTest()) {
         log.info("");
 
-        log.info(System.getProperty("os.name") + " "
-		 + System.getProperty("os.version") + " "
-		 + System.getProperty("os.arch"));
+        log.info(System.getProperty("os.name")
+		 + " " + System.getProperty("os.version")
+		 + " " + System.getProperty("os.arch"));
 
-	log.info(System.getProperty("java.runtime.name") + " "
-		 + System.getProperty("java.runtime.version")
-		 + System.getProperty("file.encoding") + ", "
-		 + System.getProperty("user.language"));
+	log.info(System.getProperty("java.runtime.name")
+		 + " " + System.getProperty("java.runtime.version")
+		 + ", " + System.getProperty("file.encoding")
+		 + ", " + System.getProperty("user.language"));
 		 
-        log.info(System.getProperty("java.vm.name") + " "
-		 + System.getProperty("java.vm.version") + ", "
-		 + System.getProperty("sun.arch.data.model") + ", "
-		 + System.getProperty("java.vm.info") + ", "
-		 + System.getProperty("java.vm.vendor"));
+        log.info(System.getProperty("java.vm.name")
+		 + " " + System.getProperty("java.vm.version")
+		 + ", " + System.getProperty("sun.arch.data.model")
+		 + ", " + System.getProperty("java.vm.info")
+		 + ", " + System.getProperty("java.vm.vendor"));
 
         log.info("user.name: " + System.getProperty("user.name"));
 

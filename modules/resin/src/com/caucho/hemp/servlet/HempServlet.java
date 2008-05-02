@@ -37,6 +37,7 @@ import com.caucho.hemp.*;
 import com.caucho.hmtp.spi.HmtpBroker;
 import com.caucho.server.connection.*;
 import com.caucho.vfs.*;
+import com.caucho.webbeans.manager.*;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -53,8 +54,11 @@ public class HempServlet extends GenericServlet {
   @Override
   public void init()
   {
-    if (_broker == null)
-      _broker = new HempBroker();
+    if (_broker == null) {
+      WebBeansContainer webBeans = WebBeansContainer.create();
+      
+      _broker = webBeans.getByType(HmtpBroker.class);
+    }
   }
   
   /**

@@ -33,12 +33,9 @@
   <!-- 
      - run() the PeriodicTask every minute 
     -->
-  <bean class="com.caucho.resources.CronResource">
-    <init>
-      <cron>*</cron>
-      <work>${periodicTask}</work>
-    </init>
-  </bean>
+  <scheduled-task class="example.PeriodicTask">
+    <cron>*</cron>
+  </scheduled-task>
 
   <!-- 
      - filter to show an unavailable page if the PeriodicTask is active 

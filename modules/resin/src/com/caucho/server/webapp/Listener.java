@@ -123,10 +123,16 @@ public class Listener extends DescriptionGroupConfig {
 
     WebBeansContainer webBeans = WebBeansContainer.create();
     
-    _object = webBeans.createTransientObjectNoInit(_listenerClass);
+    if (_init != null) {
+      _object = webBeans.createTransientObjectNoInit(_listenerClass);
 
-    if (_init != null)
       _init.configure(_object);
+
+      _init.init(_object);
+    }
+    else {
+      _object = webBeans.createTransientObject(_listenerClass);
+    }
 
     return _object;
   }

@@ -622,7 +622,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
       if (isResume) {
 	ConnectionController controller = getController();
 
-	if (controller.isDuplex()) {
+	if (controller != null && controller.isDuplex()) {
 	  TcpConnectionController duplex
 	    = (TcpConnectionController) controller;
 

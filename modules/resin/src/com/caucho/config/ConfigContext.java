@@ -472,8 +472,9 @@ public class ConfigContext {
 
 	if (childBean != null) {
 	  ConfigType childBeanType = TypeFactory.getType(childBean.getClass());
-	
-	  childBeanType.init(childBean);
+
+	  // server/02e3
+	  // childBeanType.init(childBean);
 
 	  childBean = childBeanType.replaceObject(childBean);
 	  

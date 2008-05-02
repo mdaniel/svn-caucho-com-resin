@@ -106,7 +106,7 @@ public class BooleanValue extends Value
   /**
    * Converts to a boolean.
    */
-  public boolean toBoolean()
+  public final boolean toBoolean()
   {
     return _value;
   }
