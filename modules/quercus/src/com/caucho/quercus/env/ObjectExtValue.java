@@ -999,7 +999,6 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value copyTree(Env env)
   {
-    // XXX:
     // return new ObjectExtValue(env, map, _cl, getArray());
 
     return this;
