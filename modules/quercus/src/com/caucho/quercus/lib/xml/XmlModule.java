@@ -233,6 +233,8 @@ public class XmlModule extends AbstractQuercusModule {
   {
     if (parser == null)
       return 0;
+    else if (data == null || data.length() == 0)
+      return 0;
 
     try {
       return parser.xml_parse(env, data, isFinal);

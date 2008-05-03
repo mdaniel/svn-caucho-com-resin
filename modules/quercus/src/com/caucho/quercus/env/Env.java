@@ -2534,6 +2534,20 @@ public class Env {
       throw createErrorException(L.l("'{0}' is an unknown function.", name));
   }
   
+  public void updateFunction(int id, AbstractFunction fun)
+  {
+    if (_fun.length <= id) {
+      AbstractFunction []oldFun = _fun;
+      
+      _fun = new AbstractFunction[id + 256];
+      System.arraycopy(oldFun, 0, _fun, 0, oldFun.length);
+    }
+
+    if (_fun[id] == null)
+      _fun[id] = fun;
+  }
+  
+  /*
   public int getFunctionId(String name)
   {
     int id = _quercus.getFunctionId(name);
@@ -2557,6 +2571,7 @@ public class Env {
   {
     return _quercus.getFunctionIdCount();
   }
+  */
 
   /**
    * Finds the java reflection method for the function with the given name.
