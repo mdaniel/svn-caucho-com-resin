@@ -96,7 +96,7 @@ public class MailModule extends AbstractQuercusModule {
       String password = env.getIniString("smtp_password");
 
       if (password != null && ! "".equals(password))
-        props.put( "mail.smtp.auth", "true");
+        props.put("mail.smtp.auth", "true");
  
       Session mailSession = Session.getInstance(props, null);
       smtp = mailSession.getTransport("smtp");

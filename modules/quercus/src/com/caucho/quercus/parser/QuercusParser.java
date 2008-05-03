@@ -4588,10 +4588,15 @@ public class QuercusParser {
         case 'n':
           _sb.append('\n');
           break;
-        case '\\':
-        case '$':
         case '"':
         case '`':
+	  if (_heredocEnd != null)
+	    _sb.append('\\');
+	  
+          _sb.append((char) ch);
+          break;
+        case '$':
+        case '\\':
           _sb.append((char) ch);
           break;
         case 'x':
@@ -4612,7 +4617,7 @@ public class QuercusParser {
 	case '{':
 	  ch = read();
 	  _peek = ch;
-	  if (ch == '$')
+	  if (ch == '$' && _heredocEnd == null)
 	    _sb.append('{');
 	  else
 	    _sb.append("\\{");
