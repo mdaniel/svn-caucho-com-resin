@@ -31,6 +31,7 @@ package com.caucho.config.type;
 
 import com.caucho.config.*;
 import com.caucho.config.types.*;
+import com.caucho.naming.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.manager.*;
@@ -116,6 +117,11 @@ public class InterfaceType extends ConfigType
 
     if (factory != null)
       return factory.get();
+
+    Object value = Jndi.lookup(text);
+
+    if (value != null)
+      return value;
 
     throw new ConfigException(L.l("{0}: '{1}' is an unknown bean.",
 				  _type.getName(), text));

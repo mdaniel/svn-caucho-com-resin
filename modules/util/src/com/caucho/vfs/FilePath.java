@@ -570,15 +570,15 @@ public class FilePath extends FilesystemPath {
     int len = path.length();
     int p = path.indexOf("/aux");
     int ch;
-    if (p >= 0 && (p + 4 >= len || path.charAt(p + 4) == '.'))
+    if (p >= 0 && (len <= p + 4 || path.charAt(p + 4) == '.'))
       return true;
     
     p = path.indexOf("/con");
-    if (p >= 0 && (p + 4 >= len || path.charAt(p + 4) == '.'))
+    if (p >= 0 && (len <= p + 4 || path.charAt(p + 4) == '.'))
       return true;
     
     p = path.indexOf("/nul");
-    if (p >= 0 && (p + 4 >= len || path.charAt(p + 4) == '.'))
+    if (p >= 0 && (len <= p + 4 || path.charAt(p + 4) == '.'))
       return true;
 
     return false;

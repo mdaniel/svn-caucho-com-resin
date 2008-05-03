@@ -4,7 +4,7 @@
         <description>
           <p>WebBeans (JSR-299) gives JSF a solid foundation for
 its component model, based on WebBeans' typesafe IoC capabilities
-and annotation-based discoverty. </p>
+and annotation-based discovery. </p>
         </description>
     <type>tutorial</type>
     <tutorial-startpage>test.jsf</tutorial-startpage>

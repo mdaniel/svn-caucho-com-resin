@@ -292,9 +292,10 @@ public final class UnserializeReader {
     int ch = _buffer[_index++];
 
     if (ch != expectCh) {
-      throw new IOException(L.l("expected '{0}' at '{1}'",
+      throw new IOException(L.l("expected '{0}' at '{1}' (0x{2})",
                                 String.valueOf((char) expectCh),
-                                String.valueOf((char) ch)));
+                                String.valueOf((char) ch),
+				Integer.toHexValue(ch)));
     }
   }
 

@@ -31,14 +31,20 @@ package com.caucho.config.types;
 
 import com.caucho.config.types.BeanConfig;
 import com.caucho.config.*;
+import com.caucho.naming.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.manager.*;
 import com.caucho.util.L10N;
+
+import java.util.logging.*;
 
 /**
  * Configures an interface type.  Allows class and uri syntax
  */
 public class InterfaceConfig extends BeanConfig {
+  private static final Logger log
+    = Logger.getLogger(InterfaceConfig.class.getName());
+  
   private static final L10N L = new L10N(InterfaceConfig.class);
 
   private boolean _isDeploy;
@@ -167,7 +173,11 @@ public class InterfaceConfig extends BeanConfig {
       
       _comp = webBeans.findByName(_valueName);
 
-      if (_comp == null)
+      if (_comp == null) {
+	_value = Jndi.lookup(_valueName);
+      }
+
+      if (_comp == null && _value == null)
 	throw new ConfigException(L.l("'{0}' is an unknown bean",
 				      _valueName));
     }
@@ -188,7 +198,9 @@ public class InterfaceConfig extends BeanConfig {
 
   public Object getObject()
   {
-    if (getClassType() != null)
+    if (_value != null)
+      return _value;
+    else if (getClassType() != null)
       return super.getObject();
     else if (getBeanConfigClass().isAssignableFrom(String.class))
       return _valueName;
