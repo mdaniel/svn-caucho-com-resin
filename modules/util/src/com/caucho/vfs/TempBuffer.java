@@ -32,11 +32,14 @@ package com.caucho.vfs;
 import com.caucho.util.FreeList;
 
 import java.io.IOException;
+import java.util.logging.*;
 
 /**
  * Pooled temporary byte buffer.
  */
 public class TempBuffer {
+  private static Logger _log;
+  
   private static FreeList<TempBuffer> _freeList = new FreeList<TempBuffer>(32);
   public static final int SIZE = 16 * 1024;
 
@@ -45,6 +48,8 @@ public class TempBuffer {
   int _offset;
   int _length;
   int _bufferCount;
+
+  private boolean _isFree;
 
   /**
    * Create a new TempBuffer.
@@ -64,6 +69,7 @@ public class TempBuffer {
     if (next == null)
       return new TempBuffer(SIZE);
 
+    next._isFree = false;
     next._next = null;
 
     next._offset = 0;
@@ -184,8 +190,18 @@ public class TempBuffer {
   {
     buf._next = null;
 
-    if (buf._buf.length == SIZE)
+    if (buf._buf.length == SIZE) {
+      if (buf._isFree) {
+	RuntimeException e
+	  = new IllegalStateException("illegal TempBuffer.free.  Please report at http://bugs.caucho.com");
+	log().log(Level.SEVERE, e.toString(), e);
+	throw e;
+      }
+
+      buf._isFree = true;
+      
       _freeList.free(buf);
+    }
   }
 
   public static void freeAll(TempBuffer buf)
@@ -193,9 +209,30 @@ public class TempBuffer {
     while (buf != null) {
       TempBuffer next = buf._next;
       buf._next = null;
-      if (buf._buf.length == SIZE)
-        _freeList.free(buf);
+      
+      if (buf._buf.length == SIZE) {
+	if (buf._isFree) {
+	  RuntimeException e
+	    = new IllegalStateException("illegal TempBuffer.free.  Please report at http://bugs.caucho.com");
+	  
+	  log().log(Level.SEVERE, e.toString(), e);
+	  throw e;
+	}
+
+	buf._isFree = true;
+      
+	_freeList.free(buf);
+      }
+      
       buf = next;
     }
+  }
+
+  private static Logger log()
+  {
+    if (_log == null)
+      _log = Logger.getLogger(TempBuffer.class.getName());
+
+    return _log;
   }
 }

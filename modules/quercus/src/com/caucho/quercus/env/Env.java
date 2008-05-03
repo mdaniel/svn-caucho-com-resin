@@ -4804,8 +4804,6 @@ public class Env {
       while (_outputBuffer != null) {
         popOutputBuffer();
       }
-
-      _freeFunList.free(_fun);
     }
     //catch (Exception e) {
       //throw new RuntimeException(e);
@@ -4850,6 +4848,11 @@ public class Env {
           log.log(Level.FINER, e.toString(), e);
         }
       }
+
+      AbstractFunction []fun = _fun;
+      _fun = null;
+      if (fun != null)
+	_freeFunList.free(fun);
     }
   }
 

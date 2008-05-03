@@ -135,7 +135,7 @@ public class Quercus
   private ClassDef []_classMap = new ClassDef[256];
   
   private IntMap _constantNameMap = new IntMap(8192);
-  
+
   private IntMap _functionNameMap = new IntMap(8192);
   private AbstractFunction []_functionMap = new AbstractFunction[256];
 
@@ -1002,7 +1002,7 @@ public class Quercus
         if (_functionMap.length <= id) {
           AbstractFunction []functionMap = new AbstractFunction[id + 256];
           System.arraycopy(_functionMap, 0,
-                   functionMap, 0, _functionMap.length);
+			   functionMap, 0, _functionMap.length);
           _functionMap = functionMap;
         }
 
@@ -1021,9 +1021,8 @@ public class Quercus
     if (! isStrict())
       name = name.toLowerCase();
 
-    synchronized (_functionNameMap) {
-      return _functionNameMap.get(name);
-    }
+    // IntMap is internally synchronized
+    return _functionNameMap.get(name);
   }
 
   /**
@@ -1410,39 +1409,45 @@ public class Quercus
   private void introspectPhpModuleClass(Class cl)
     throws IllegalAccessException, InstantiationException, ConfigException
   {
-    log.finer("Quercus loading module " + cl.getName());
-
-    QuercusModule module = (QuercusModule) cl.newInstance();
-
-    ModuleContext context = getLocalContext();
-
-    ModuleInfo info = context.addModule(module.getClass().getName(),
-					module);
-
-    _modules.put(info.getName(), info);
-
-    if (info.getModule() instanceof ModuleStartupListener)
-      _moduleStartupListeners.add((ModuleStartupListener)info.getModule());
-
-    for (String ext : info.getLoadedExtensions())
-      _extensionSet.add(ext);
-
-    Map<String, Value> map = info.getConstMap();
-
-    if (map != null)
-      _constMap.putAll(map);
-
-    _iniDefinitions.addAll(info.getIniDefinitions());
-
-    for (Map.Entry<String, AbstractFunction> entry : info.getFunctions().entrySet()) {
-      String funName = entry.getKey();
-      AbstractFunction fun = entry.getValue();
+    synchronized (_modules) {
+      if (_modules.get(cl.getName()) != null)
+	return;
       
-      _funMap.put(funName, fun);
-      _lowerFunMap.put(funName.toLowerCase(), fun);
+      log.finer("Quercus loading module " + cl.getName());
+
+      QuercusModule module = (QuercusModule) cl.newInstance();
+
+      ModuleContext context = getLocalContext();
+
+      ModuleInfo info = context.addModule(cl.getName(), module);
+
+      _modules.put(cl.getName(), info);
+
+      if (info.getModule() instanceof ModuleStartupListener)
+	_moduleStartupListeners.add((ModuleStartupListener)info.getModule());
+
+      for (String ext : info.getLoadedExtensions())
+	_extensionSet.add(ext);
+
+      Map<String, Value> map = info.getConstMap();
+
+      if (map != null)
+	_constMap.putAll(map);
+
+      _iniDefinitions.addAll(info.getIniDefinitions());
+
+      synchronized (_functionNameMap) {
+	for (Map.Entry<String, AbstractFunction> entry : info.getFunctions().entrySet()) {
+	  String funName = entry.getKey();
+	  AbstractFunction fun = entry.getValue();
       
-      int id = getFunctionId(funName);
-      _functionMap[id] = fun;
+	  _funMap.put(funName, fun);
+	  _lowerFunMap.put(funName.toLowerCase(), fun);
+      
+	  int id = getFunctionId(funName);
+	  _functionMap[id] = fun;
+	}
+      }
     }
   }
 

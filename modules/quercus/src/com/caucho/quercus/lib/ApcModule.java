@@ -133,7 +133,7 @@ public class ApcModule extends AbstractQuercusModule {
     Value value = entry.getValue();
 
     if (entry.isValid() && value != null)
-      return value.copy(env);
+      return value.copyTree(env);
     else
       return BooleanValue.FALSE;
   }
@@ -180,7 +180,7 @@ public class ApcModule extends AbstractQuercusModule {
   public Value apc_store(Env env, String key, Value value,
                          @Optional("0") int ttl)
   {
-    _cache.put(key, new Entry(value.copy(env), ttl));
+    _cache.put(key, new Entry(value.copyTree(env), ttl));
 
     return BooleanValue.TRUE;
   }
@@ -194,7 +194,7 @@ public class ApcModule extends AbstractQuercusModule {
       _value = value;
 
       if (ttl <= 0)
-        _expire = Long.MAX_VALUE;
+        _expire = Long.MAX_VALUE / 2;
       else
         _expire = Alarm.getCurrentTime() + ttl * 1000L;
     }

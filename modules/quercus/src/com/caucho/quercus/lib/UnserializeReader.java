@@ -295,7 +295,7 @@ public final class UnserializeReader {
       throw new IOException(L.l("expected '{0}' at '{1}' (0x{2})",
                                 String.valueOf((char) expectCh),
                                 String.valueOf((char) ch),
-				Integer.toHexValue(ch)));
+				Integer.toHexString(ch)));
     }
   }
 

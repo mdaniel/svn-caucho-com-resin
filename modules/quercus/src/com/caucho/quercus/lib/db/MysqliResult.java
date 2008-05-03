@@ -548,16 +548,16 @@ public class MysqliResult extends JdbcResultResource {
       final boolean isTimestamp = (jdbcType == Types.TIMESTAMP) &&
         mysqlType.equals("TIMESTAMP");
 
-      if (isInResultString(2, "blob") ||
-          (jdbcType == Types.LONGVARCHAR)) {
+      if (isInResultString(2, "blob")
+	  || (jdbcType == Types.LONGVARCHAR)) {
         if (flags.length() > 0)
           flags.append(' ');
         flags.append("blob");
       }
 
-      if (isInResultString(2, "unsigned") ||
-          (jdbcType == Types.BIT && mysqlType.equals("BIT")) ||
-          isTimestamp) {
+      if (isInResultString(2, "unsigned")
+	  || (jdbcType == Types.BIT && mysqlType.equals("BIT"))
+	  || isTimestamp) {
         if (flags.length() > 0)
           flags.append(' ');
         flags.append("unsigned");

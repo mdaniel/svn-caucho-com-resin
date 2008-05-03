@@ -518,7 +518,7 @@ public class JdbcResultResource {
             return NullValue.NULL;
 
 	  try {
-	    bb.appendReadAll(is, Long.MAX_VALUE);
+	    bb.appendReadAll(is, Long.MAX_VALUE / 2);
           } catch (RuntimeException e) {
             log.log(Level.WARNING, e.toString(), e);
 

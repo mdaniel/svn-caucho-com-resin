@@ -51,10 +51,10 @@ public class ModuleInfo {
   private static final Logger log
     = Logger.getLogger(ModuleInfo.class.getName());
 
-  private ModuleContext _context;
+  private final ModuleContext _context;
 
-  private String _name;
-  private QuercusModule _module;
+  private final String _name;
+  private final QuercusModule _module;
 
   private HashSet<String> _extensionSet
     = new HashSet<String>();
@@ -69,11 +69,6 @@ public class ModuleInfo {
   
   private HashSet<String> _extensionClassMap
     = new HashSet<String>();
-
-  public void addExtensionClass(String name)
-  {
-    _extensionClassMap.add(name);
-  }
   
   /**
    * Constructor.
@@ -96,6 +91,11 @@ public class ModuleInfo {
   public String getName()
   {
     return _name;
+  }
+
+  public void addExtensionClass(String name)
+  {
+    _extensionClassMap.add(name);
   }
 
   public QuercusModule getModule()
