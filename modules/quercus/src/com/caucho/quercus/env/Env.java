@@ -3548,7 +3548,7 @@ public class Env {
       qClass = qClassRef.get();
 
       if (qClass != null) {
-        return qClass;
+        return new QuercusClass(qClass, parent);
       }
     }
 

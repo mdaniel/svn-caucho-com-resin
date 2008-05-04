@@ -12,6 +12,8 @@
 
 <s2 title="3.1.6 snapshot">
 <ul>
+<li>quercus: class static field syncronization issues</li>
+<li>quercus: initialization syncronization issues</li>
 <li>ioc: data-source not properly using JNDI lookup (rep by Stargazer)</li>
 <li>(2008-05-02) quercus: eval must return null for missing return (rep by Matthew Schmidt)</li>
 <li>quercus: $SERVER['REQUEST_URI'] calculation with forward [clean_urls on drupal] (rep by Matthew Schmidt)</li>

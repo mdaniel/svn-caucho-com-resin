@@ -75,6 +75,11 @@ public class StubServletRequest extends AbstractHttpRequest {
       return (Enumeration) NullEnumeration.create();
   }
   
+  public Enumeration<String> getHeaderNames()
+  {
+    return (Enumeration) NullEnumeration.create();
+  }
+  
   public void setAttribute(String name, Object value)
   {
     if (_attributes == null)

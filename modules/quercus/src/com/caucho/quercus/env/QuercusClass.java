@@ -53,8 +53,9 @@ import java.util.logging.Logger;
  * Represents a Quercus runtime class.
  */
 public class QuercusClass {
-  private final L10N L = new L10N(QuercusClass.class);
-  private final Logger log = Logger.getLogger(QuercusClass.class.getName());
+  private static final L10N L = new L10N(QuercusClass.class);
+  private static final Logger log
+    = Logger.getLogger(QuercusClass.class.getName());
 
   private final JavaClassDef _javaClassDef;
   private final ClassDef _classDef;
@@ -76,17 +77,13 @@ public class QuercusClass {
   private TraversableDelegate _traversableDelegate;
   private CountDelegate _countDelegate;
 
-  private final ArrayList<InstanceInitializer> _initializers
-    = new ArrayList<InstanceInitializer>();
+  private final ArrayList<InstanceInitializer> _initializers;
   
-  private final ArrayList<StringValue> _fieldNames
-    = new ArrayList<StringValue>();
+  private final ArrayList<StringValue> _fieldNames;
   
-  private final IntMap _fieldMap
-    = new IntMap();
+  private final IntMap _fieldMap;
   
-  private final HashMap<StringValue,Expr> _fieldInitMap
-    = new HashMap<StringValue,Expr>();
+  private final HashMap<StringValue,Expr> _fieldInitMap;
 
   /*
   private final IdentityHashMap<String,AbstractFunction> _methodMap
@@ -96,14 +93,11 @@ public class QuercusClass {
     = new HashMap<String,AbstractFunction>();
   */
   
-  private final MethodMap<AbstractFunction> _methodMap
-    = new MethodMap<AbstractFunction>();
+  private final MethodMap<AbstractFunction> _methodMap;
 
-  private final HashMap<String,Expr> _constMap
-    = new HashMap<String,Expr>();
+  private final HashMap<String,Expr> _constMap;
 
-  private final HashMap<String,ArrayList<StaticField>> _staticFieldExprMap
-    = new LinkedHashMap<String,ArrayList<StaticField>>();
+  private final HashMap<String,ArrayList<StaticField>> _staticFieldExprMap;
 
   private final HashMap<String,Value> _staticFieldMap
     = new LinkedHashMap<String,Value>();
@@ -121,6 +115,17 @@ public class QuercusClass {
   {
     _classDef = classDef;
     _parent = parent;
+    
+    _initializers = new ArrayList<InstanceInitializer>();
+    _fieldNames = new ArrayList<StringValue>();
+    _fieldMap = new IntMap();
+  
+    _fieldInitMap = new HashMap<StringValue,Expr>();
+    _methodMap = new MethodMap<AbstractFunction>();
+
+    _constMap = new HashMap<String,Expr>();
+
+    _staticFieldExprMap = new LinkedHashMap<String,ArrayList<StaticField>>();
 
     JavaClassDef javaClassDef = null;
 
@@ -195,6 +200,40 @@ public class QuercusClass {
     
     if (_constructor == null && parent != null)
       _constructor = parent.getConstructor();
+  }
+
+  /**
+   * Copy based on a cached value
+   */
+  public QuercusClass(QuercusClass cacheClass, QuercusClass parent)
+  {
+    _javaClassDef = cacheClass._javaClassDef;
+    _classDef = cacheClass._classDef;
+
+    _isJavaWrapper = cacheClass._isJavaWrapper;
+    _classDefList = cacheClass._classDefList;
+
+    _parent = parent;
+
+    _constructor = cacheClass._constructor;
+    
+    _fieldGet = cacheClass._fieldGet;
+    _fieldSet = cacheClass._fieldSet;
+  
+    _call = cacheClass._call;
+
+    _arrayDelegate = cacheClass._arrayDelegate;
+    _traversableDelegate = cacheClass._traversableDelegate;
+    _countDelegate = cacheClass._countDelegate;
+
+    _initializers = cacheClass._initializers;
+  
+    _fieldNames = cacheClass._fieldNames;
+    _fieldMap = cacheClass._fieldMap;
+    _fieldInitMap = cacheClass._fieldInitMap;
+    _methodMap = cacheClass._methodMap;
+    _constMap = cacheClass._constMap;
+    _staticFieldExprMap = cacheClass._staticFieldExprMap;
   }
 
   public ClassDef getClassDef()
