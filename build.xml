@@ -1329,7 +1329,7 @@
     <property name="dist.name" value="${shortproduct}-${version}"/>
     <mkdir dir="${dist}/${dist.name}"/>
     
-    <compc output="${dist}/${dist.name}/hessian-flash-${version}.swc">
+    <compc output="${modules}/flash/build/hessian-flash.swc">
       <source-path path-element="${modules}/flash/src"/>
       <include-sources 
         dir="${modules}/flash/src" 
@@ -1348,7 +1348,7 @@
                   hessian/events/*.as "/>
     </compc>
 
-    <compc output="${dist}/${dist.name}/hessian-flex-${version}.swc">
+    <compc output="${modules}/flash/build/hessian-flex.swc">
       <source-path path-element="${modules}/flash/src"/>
       <include-sources 
         dir="${modules}/flash/src" 
@@ -1358,7 +1358,7 @@
                   hessian/mxml/*.as"/>
     </compc>
 
-    <compc output="${dist}/${dist.name}/hemp-flex-${version}.swc">
+    <compc output="${modules}/flash/build/hemp-flex.swc">
       <source-path path-element="${modules}/flash/src"/>
       <include-sources 
         dir="${modules}/flash/src" 
@@ -1366,8 +1366,8 @@
                   com/caucho/hmtp/auth/*.as 
                   com/caucho/hmtp/events/*.as 
                   com/caucho/hmtp/packet/*.as"/>
-      <compiler.include-libraries dir="${dist}/${dist.name}" append="true">
-        <include name="hessian-flex-${version}.swc" />
+      <compiler.include-libraries dir="${modules}/flash/build" append="true">
+        <include name="hessian-flex.swc" />
       </compiler.include-libraries>
     </compc>
 

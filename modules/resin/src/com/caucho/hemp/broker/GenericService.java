@@ -68,7 +68,12 @@ public class GenericService extends AbstractHmtpAgentStream
   
   public void setName(String name)
   {
-    _jid = name;
+    setJid(name);
+  }
+
+  public void setJid(String jid)
+  {
+    _jid = jid;
   }
   
   /**
@@ -77,6 +82,16 @@ public class GenericService extends AbstractHmtpAgentStream
   public String getJid()
   {
     return _jid;
+  }
+
+  public void setBroker(HmtpBroker broker)
+  {
+    _broker = broker;
+  }
+
+  protected HmtpBroker getBroker()
+  {
+    return _broker;
   }
   
   protected HmtpConnection getConnection()
@@ -90,7 +105,7 @@ public class GenericService extends AbstractHmtpAgentStream
   }
 
   @PostConstruct
-  protected void init()
+  public void init()
   {
     if (getJid() == null)
       throw new ConfigException(L.l("{0} requires a jid",
@@ -247,7 +262,11 @@ public class GenericService extends AbstractHmtpAgentStream
   @PreDestroy
   protected void destroy()
   {
-    _conn.close();
+    HmtpConnection conn = _conn;
+    _conn = null;
+
+    if (conn != null)
+      conn.close();
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " destroy");

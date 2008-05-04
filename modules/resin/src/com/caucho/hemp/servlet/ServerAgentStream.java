@@ -156,7 +156,7 @@ public class ServerAgentStream implements HmtpStream
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " queryResult to=" + to
+	log.finer(_packetHandler + " queryResult id=" + id + " to=" + to
 		  + " from=" + from);
       }
       

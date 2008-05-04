@@ -117,6 +117,7 @@ public class StubServletRequest extends AbstractHttpRequest {
   }
   public String getRemoteAddr() { return "127.0.0.1"; }
   public String getRemoteHost() { return "127.0.0.1"; }
+  public int getRemotePort() { return 6666; }
   public String getScheme() { return "cron"; }
   public String getServerName() { return "127.0.0.1"; }
   public int getServerPort() { return 0; }

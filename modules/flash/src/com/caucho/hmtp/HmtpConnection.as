@@ -56,9 +56,9 @@ package com.caucho.hmtp
 
     function sendMessage(to:String, value:Object):void;
     function queryGet(to:String, value:Object,
-                      callback:QueryCallback, handback:Object):void
+                      onResult:Function, onError:Function):void
     function querySet(to:String, value:Object,
-                      callback:QueryCallback, handback:Object):void
+                      onResult:Function, onError:Function):void
     
     /*
     function presence(data:Array):void;

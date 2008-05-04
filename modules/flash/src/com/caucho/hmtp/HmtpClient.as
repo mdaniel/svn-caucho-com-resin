@@ -244,8 +244,7 @@ package com.caucho.hmtp
           bundle = 
             QueryCallbackBundle(_outstandingQueries[queryResult.id.toString()]);
 
-          bundle.callback.onQueryResult(queryResult.to, queryResult.from,
-                                        queryResult.value, bundle.handback);
+          bundle.onResult(queryResult.to, queryResult.from, queryResult.value);
         }
         else {
           trace("Recieved unknown QueryResult: " + queryResult.id);
@@ -258,9 +257,8 @@ package com.caucho.hmtp
           bundle = 
             QueryCallbackBundle(_outstandingQueries[queryError.id.toString()]);
 
-          bundle.callback.onQueryError(queryError.to, queryError.from,
-                                       queryError.value, queryError.error,
-                                       bundle.handback);
+          bundle.onError(queryError.to, queryError.from,
+                         queryError.value, queryError.error);
         }
         else {
           trace("Recieved unknown QueryError: " + queryError.id);
@@ -304,8 +302,7 @@ package com.caucho.hmtp
 
     public function login(uid:String, password:String):void
     {
-      var callback:LoginCallback = new LoginCallback();
-      querySet("", new AuthQuery(uid, password), callback, this);
+      querySet("", new AuthQuery(uid, password), onLoginResult, onLoginError);
     }
 
     public function get jid():String
@@ -335,21 +332,23 @@ package com.caucho.hmtp
     }
 
     public function queryGet(to:String, value:Object, 
-                             callback:QueryCallback, handback:Object):void
+                             onResult:Function, onError:Function):void
     {
       var queryId:int = _queryId++;
-      _outstandingQueries[queryId.toString()] = 
-        new QueryCallbackBundle(callback, handback);
+
+      _outstandingQueries[queryId.toString()]
+        = new QueryCallbackBundle(onResult, onError);
 
       stream.sendQueryGet(queryId, to, null, value);
     }
 
     public function querySet(to:String, value:Object,
-                             callback:QueryCallback, handback:Object):void
+                             onResult:Function, onError:Function):void
     {
       var queryId:int = _queryId++;
-      _outstandingQueries[queryId.toString()] = 
-        new QueryCallbackBundle(callback, handback);
+
+      _outstandingQueries[queryId.toString()]
+        = new QueryCallbackBundle(onResult, onError);
 
       stream.sendQuerySet(queryId, to, null, value);
     }
@@ -358,45 +357,42 @@ package com.caucho.hmtp
     {
       return _stream;
     }
+
+    private function onLoginResult(to:String, from:String, value:Object):void
+    {
+      var result:com.caucho.hmtp.auth.AuthResult
+        = com.caucho.hmtp.auth.AuthResult(value);
+
+      this.jid = result.jid;
+      dispatchEvent(new com.caucho.hmtp.auth.LoginSuccessEvent());
+    }
+
+    private function onLoginError(to:String, from:String,
+                                  value:Object, error:HmtpError):void
+    {
+      dispatchEvent(new com.caucho.hmtp.auth.LoginFailureEvent());
+    }
   }
 }
 
 class QueryCallbackBundle {
-  private var _callback:com.caucho.hmtp.QueryCallback;
-  private var _handback:Object;
+  private var _onResult:Function;
+  private var _onError:Function;
 
-  public function QueryCallbackBundle(callback:com.caucho.hmtp.QueryCallback, 
-                                      handback:Object):void
+  public function QueryCallbackBundle(onResult:Function,
+                                      onError:Function):void
   {
-    _callback = callback;
-    _handback = handback;
+    _onResult = onResult;
+    _onError = onError;
   }
 
-  public function get callback():com.caucho.hmtp.QueryCallback
+  public function get onResult():Function
   {
-    return _callback;
+    return _onResult;
   }
 
-  public function get handback():Object
+  public function get onError():Function
   {
-    return _handback;
-  }
-}
-
-class LoginCallback implements com.caucho.hmtp.QueryCallback {
-  public function onQueryResult(to:String, from:String,
-                                value:Object, handback:Object):void
-  {
-    var result:com.caucho.hmtp.auth.AuthResult = 
-      com.caucho.hmtp.auth.AuthResult(value);
-    handback.jid = result.jid;
-    handback.dispatchEvent(new com.caucho.hmtp.auth.LoginSuccessEvent());
-  }
-
-  public function onQueryError(to:String, from:String,
-                               value:Object, error:com.caucho.hmtp.HmtpError,
-                               handback:Object):void
-  {
-    handback.dispatchEvent(new com.caucho.hmtp.auth.LoginFailureEvent());
+    return _onError;
   }
 }
