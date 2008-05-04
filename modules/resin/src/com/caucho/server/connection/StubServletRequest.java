@@ -75,11 +75,6 @@ public class StubServletRequest extends AbstractHttpRequest {
       return (Enumeration) NullEnumeration.create();
   }
   
-  public Enumeration<String> getHeaderNames()
-  {
-    return (Enumeration) NullEnumeration.create();
-  }
-  
   public void setAttribute(String name, Object value)
   {
     if (_attributes == null)
@@ -152,8 +147,16 @@ public class StubServletRequest extends AbstractHttpRequest {
   public String getHeader(String header) { return null; }
   public int getIntHeader(String header) { return 0; }
   public long getDateHeader(String header) { return 0; }
-  public Enumeration getHeaders(String header) { return null; }
-  public Enumeration getHeaderNames() { return null; }
+  
+  public Enumeration getHeaders(String header)
+  {
+    return (Enumeration) NullEnumeration.create();
+  }
+  
+  public Enumeration<String> getHeaderNames()
+  {
+    return (Enumeration) NullEnumeration.create();
+  }
 
   public String getAuthType() { return null; }
   public String getRemoteUser() { return null; }
