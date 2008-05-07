@@ -92,14 +92,12 @@ public class ServerBrokerStream
 			     TcpDuplexController controller)
     throws IOException
   {
-    System.out.println("SERVICE:" + in);
     Hessian2StreamingInput in = _in;
 
     if (in == null)
       return false;
 
     Object obj = in.readObject();
-    System.out.println("OBJ: " + obj);
     
     Packet packet = (Packet) obj;
 
