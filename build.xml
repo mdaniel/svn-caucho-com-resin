@@ -64,7 +64,7 @@
     <condition property="maven.version" value="${version}">
       <isset property="version"/>
     </condition>
-    <property name="maven.version" value="3.1-SNAPSHOT"/>
+    <property name="maven.version" value="3.2-SNAPSHOT"/>
     
     <condition property="maven.metadata.template" value="release">
       <isset property="version"/>
@@ -77,7 +77,7 @@
     <property name="maven.m2" value="m2-snapshot"/>
     <property name="maven.root" value="${dist}/${maven.m2}"/>
     
-    <property name="version" value="3.1.s${snapshotdate}"/>
+    <property name="version" value="3.2.s${snapshotdate}"/>
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <mkdir dir="${build}"/>
@@ -1091,22 +1091,22 @@
       </fileset>
     </jar>
 
-    <copy tofile="${dist}/quercus-3_1-snap.war"
+    <copy tofile="${dist}/quercus-3_2-snap.war"
           file="${dist}/quercus-${version}.war"/>
 
-    <copy tofile="${dist}/quercus-3_1-snap-src.jar"
+    <copy tofile="${dist}/quercus-3_2-snap-src.jar"
           file="${dist}/quercus-${version}-src.jar"/>
 
-    <copy tofile="${dist}/${shortproduct}-3_1-snap.zip"
+    <copy tofile="${dist}/${shortproduct}-3_2-snap.zip"
           file="${dist}/${shortproduct}-${version}.zip"/>
 
-    <copy tofile="${dist}/${shortproduct}-3_1-snap.tar.gz"
+    <copy tofile="${dist}/${shortproduct}-3_2-snap.tar.gz"
           file="${dist}/${shortproduct}-${version}.tar.gz"/>
 
-    <copy tofile="${dist}/${shortproduct}-3_1-snap-src.zip"
+    <copy tofile="${dist}/${shortproduct}-3_2-snap-src.zip"
           file="${dist}/${shortproduct}-${version}-src.zip"/>
 
-    <copy tofile="${dist}/${shortproduct}-3_1-snap-src.tar.gz"
+    <copy tofile="${dist}/${shortproduct}-3_2-snap-src.tar.gz"
           file="${dist}/${shortproduct}-${version}-src.tar.gz"/>
   </target>
 

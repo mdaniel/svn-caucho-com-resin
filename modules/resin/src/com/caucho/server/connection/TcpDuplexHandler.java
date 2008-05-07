@@ -36,11 +36,12 @@ import com.caucho.vfs.*;
 /**
  * Application handler for a bidirectional tcp stream
  *
- * The read and write callbacks are on different threads.
- * The ReadStream and WriteStream must not be passed to different
- * threads or stored in objects
+ * The read stream should only be read by the <code>serviceRead</code> method.
+ * 
+ * The write stream must be synchronized if it's every written by a thread
+ * other than the <code>serviceRead</code>
  */
-public interface TcpConnectionHandler
+public interface TcpDuplexHandler
 {
   /**
    * services a read packet
@@ -48,10 +49,6 @@ public interface TcpConnectionHandler
    * @return true to continue the connection, false to kill it
    */
   public boolean serviceRead(ReadStream is,
-			     TcpConnectionController controller)
-    throws IOException;
-  
-  public boolean serviceWrite(WriteStream os,
-			      TcpConnectionController controller)
+			     TcpDuplexController controller)
     throws IOException;
 }

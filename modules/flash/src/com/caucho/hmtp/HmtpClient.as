@@ -328,7 +328,7 @@ package com.caucho.hmtp
 
     public function sendMessage(to:String, value:Object):void
     {
-      stream.sendMessage(to, null, value);
+      _stream.sendMessage(to, null, value);
     }
 
     public function queryGet(to:String, value:Object, 
@@ -339,7 +339,7 @@ package com.caucho.hmtp
       _outstandingQueries[queryId.toString()]
         = new QueryCallbackBundle(onResult, onError);
 
-      stream.sendQueryGet(queryId, to, null, value);
+      _stream.sendQueryGet(queryId, to, null, value);
     }
 
     public function querySet(to:String, value:Object,
@@ -350,7 +350,7 @@ package com.caucho.hmtp
       _outstandingQueries[queryId.toString()]
         = new QueryCallbackBundle(onResult, onError);
 
-      stream.sendQuerySet(queryId, to, null, value);
+      _stream.sendQuerySet(queryId, to, null, value);
     }
 
     public function get stream():HmtpStream

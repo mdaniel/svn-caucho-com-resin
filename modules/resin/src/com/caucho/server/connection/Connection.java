@@ -151,7 +151,7 @@ public abstract class Connection
   /**
    * Connection controller.
    */
-  void setController(ConnectionController controller)
+  protected void setController(ConnectionController controller)
   {
     synchronized (this) {
       if (_controller != null)

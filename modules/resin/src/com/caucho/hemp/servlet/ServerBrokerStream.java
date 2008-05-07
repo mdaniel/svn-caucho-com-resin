@@ -47,7 +47,7 @@ import com.caucho.vfs.*;
  * Main protocol handler for the HTTP version of HeMPP.
  */
 public class ServerBrokerStream
-  implements TcpConnectionHandler, HmtpStream
+  implements TcpDuplexHandler, HmtpStream
 {
   private static final Logger log
     = Logger.getLogger(ServerBrokerStream.class.getName());
@@ -89,15 +89,17 @@ public class ServerBrokerStream
   }
   
   public boolean serviceRead(ReadStream is,
-			     TcpConnectionController controller)
+			     TcpDuplexController controller)
     throws IOException
   {
+    System.out.println("SERVICE:" + in);
     Hessian2StreamingInput in = _in;
 
     if (in == null)
       return false;
 
     Object obj = in.readObject();
+    System.out.println("OBJ: " + obj);
     
     Packet packet = (Packet) obj;
 
@@ -121,7 +123,7 @@ public class ServerBrokerStream
   }
   
   public boolean serviceWrite(WriteStream os,
-			      TcpConnectionController controller)
+			      TcpDuplexController controller)
     throws IOException
   {
     return false;

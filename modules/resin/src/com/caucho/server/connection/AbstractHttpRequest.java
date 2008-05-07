@@ -34,7 +34,6 @@ import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextProvider;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.port.Port;
 import com.caucho.server.port.TcpConnection;
 import com.caucho.server.security.AbstractAuthenticator;
 import com.caucho.server.security.AbstractLogin;
@@ -2462,7 +2461,7 @@ public abstract class AbstractHttpRequest
     if (tcpConn == null)
       return true;
 
-    if (! tcpConn.allowKeepalive())
+    if (! tcpConn.toKeepalive())
       _keepalive = false;
 
     return _keepalive;

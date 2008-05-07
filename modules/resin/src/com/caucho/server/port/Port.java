@@ -29,7 +29,6 @@
 
 package com.caucho.server.port;
 
-import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.*;
 import com.caucho.config.types.*;
@@ -38,10 +37,7 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
-import com.caucho.log.Log;
 import com.caucho.management.server.PortMXBean;
-import com.caucho.server.connection.ConnectionController;
-import com.caucho.server.connection.TcpConnectionController;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.*;
@@ -91,6 +87,9 @@ public class Port
   // The port
   private int _port;
 
+  // URL for debugging
+  private String _url;
+
   // The protocol
   private Protocol _protocol;
 
@@ -137,14 +136,11 @@ public class Port
   // the selection manager
   private AbstractSelectManager _selectManager;
 
+  // server push (comet) suspend list
   private ArrayList<TcpConnection> _suspendList
     = new ArrayList<TcpConnection>();
 
   private Alarm _suspendAlarm;
-
-  // duplex
-  private ArrayList<TcpConnection> _writeSuspendList
-    = new ArrayList<TcpConnection>();
 
   // statistics
 
@@ -687,7 +683,7 @@ public class Port
    */
   public int getDuplexCount()
   {
-    return _writeSuspendList.size();
+    return 0;
   }
 
   public long getLifetimeRequestCount()
@@ -908,6 +904,29 @@ public class Port
 
     if (_server instanceof EnvironmentBean)
       Environment.addEnvironmentListener(this, ((EnvironmentBean) _server).getClassLoader());
+
+    StringBuilder url = new StringBuilder();
+
+    if (_protocol != null)
+      url.append(_protocol.getProtocolName());
+    else
+      url.append("unknown");
+    url.append("://");
+
+    if (getAddress() != null)
+      url.append(getAddress());
+    else
+      url.append("*");
+    url.append(":");
+    url.append(getPort());
+
+    if (_serverId != null && ! "".equals(_serverId)) {
+      url.append("(");
+      url.append(_serverId);
+      url.append(")");
+    }
+
+    _url = url.toString();
   }
 
   /**
@@ -1146,21 +1165,26 @@ public class Port
   {
     return _selectManager;
   }
-
+ 
   /**
    * Accepts a new connection.
+   * 
+   * @param isStart boolean to mark the first request on the thread for
+   *   bookkeeping.
    */
-  public boolean accept(TcpConnection conn, boolean isFirst)
+  public boolean accept(TcpConnection conn, boolean isStart)
   {
     try {
       synchronized (this) {
         _idleThreadCount++;
 
-        if (isFirst) {
+        if (isStart) {
           _startThreadCount--;
 
           if (_startThreadCount < 0) {
-            Thread.dumpStack();
+	    _startThreadCount = 0;
+	    log.warning(conn + " _startThreadCount assertion failure");
+	    conn.getStartThread().printStackTrace();
           }
         }
 
@@ -1308,7 +1332,7 @@ public class Port
         int count = _keepaliveCount;
         _keepaliveCount = 0;
 
-        log.warning("internal error: negative keepalive count " + count);
+        log.warning(conn + " internal error: negative keepalive count " + count);
       }
     }
   }
@@ -1354,7 +1378,7 @@ public class Port
     }
 
     if (isResume) {
-      ThreadPool.getThreadPool().schedule(conn);
+      ThreadPool.getThreadPool().schedule(conn.getResumeTask());
       return true;
     }
     else
@@ -1372,7 +1396,7 @@ public class Port
   }
 
   /**
-   * Suspends the controller (for comet-style ajax)
+   * Resumes the controller (for comet-style ajax)
    */
   boolean resume(TcpConnection conn)
   {
@@ -1384,101 +1408,9 @@ public class Port
     }
 
     if (conn != null)
-      ThreadPool.getThreadPool().schedule(conn);
+      ThreadPool.getThreadPool().schedule(conn.getResumeTask());
 
     return true;
-  }
-
-  /**
-   * Registers the controller for TCP full duplex
-   */
-  boolean registerDuplex(TcpConnection conn)
-  {
-    ConnectionController connController = conn.getController();
-
-    if (! (connController instanceof TcpConnectionController)) {
-      log.warning(connController + " should be duplex TcpConnectionConroller");
-      return false;
-    }
-    
-    TcpConnectionController tcpController
-      = (TcpConnectionController) connController;
-
-    boolean isResumeWrite = false;
-
-    synchronized (_writeSuspendList) {
-      if (conn.isWake()) {
-	isResumeWrite = true;
-	conn.setResume();
-      }
-      else if (conn.isComet()) {
-	_writeSuspendList.add(conn);
-      }
-      else
-	return false;
-    }
-
-    if (isResumeWrite) {
-      Runnable writeTask = tcpController.getWriteTask();
-
-      if (writeTask == null)
-	return false;
-      
-      ThreadPool.getThreadPool().schedule(writeTask);
-    }
-
-    Runnable readTask = tcpController.getReadTask();
-
-    if (readTask == null)
-      return false;
-
-    // XXX: check for data
-    ThreadPool.getThreadPool().schedule(readTask);
-
-    return true;
-  }
-
-  boolean suspendWrite(TcpConnection conn)
-  {
-    boolean isResumeWrite = false;
-
-    synchronized (_writeSuspendList) {
-      if (conn.isWake()) {
-	conn.setResume();
-	return false;
-      }
-      else if (conn.isComet()) {
-	_writeSuspendList.add(conn);
-	return true;
-      }
-      else
-	return true;
-    }
-  }
-
-  /**
-   * Suspends the controller (for duplex protocols)
-   */
-  boolean resumeWrite(TcpConnection conn, ConnectionController controller)
-  {
-    TcpConnectionController tcpController
-      = (TcpConnectionController) controller;
-    
-    synchronized (_suspendList) {
-      if (! _writeSuspendList.remove(conn))
-	return false;
-      
-      conn.setResume();
-    }
-
-    Runnable writeTask = tcpController.getWriteTask();
-
-    if (writeTask != null) {
-      ThreadPool.getThreadPool().schedule(writeTask);
-      return true;
-    }
-    else
-      return false;
   }
 
   /**
@@ -1525,10 +1457,16 @@ public class Port
             conn = new TcpConnection(this, _serverSocket.createSocket());
             conn.setRequest(_protocol.createRequest(conn));
           }
+	  else {
+	    // XXX: remove when 3.2 stable
+	    if (! conn._isFree) {
+	      log.warning(conn + " unfree allocate");
+	      Thread.dumpStack();
+	    }
+	    conn._isFree = false;
+	  }
 
-	  conn.start();
-
-          ThreadPool.getThreadPool().schedule(conn);
+          ThreadPool.getThreadPool().schedule(conn.getReadTask());
         }
       } catch (Throwable e) {
         e.printStackTrace();
@@ -1568,8 +1506,15 @@ public class Port
   {
     closeConnection(conn);
 
-    if (! _freeConn.free(conn))
-      conn.destroy();
+    // XXX: remove when 3.2 stable
+    if (conn._isFree) {
+      log.warning(conn + " double free");
+      Thread.dumpStack();
+      return;
+    }
+    conn._isFree = true;
+
+    _freeConn.free(conn);
   }
 
   /**
@@ -1702,9 +1647,16 @@ public class Port
     log.finest(this + " closed");
   }
 
+  public String toURL()
+  {
+    return _url;
+  }
+    
+
+  @Override
   public String toString()
   {
-    return "Port[" + getAddress() + ":" + getPort() + "]";
+    return getClass().getSimpleName() + "[" + _url + "]";
   }
 
   public class SuspendReaper implements AlarmListener {
@@ -1734,7 +1686,7 @@ public class Port
 	    TcpConnection conn = oldList.get(i);
 
 	    if (log.isLoggable(Level.FINE))
-	      log.fine(this + " comet idle timeout " + conn);
+	      log.fine(this + " suspend idle timeout " + conn);
 	    
 	    conn.destroy();
 	  }

@@ -29,7 +29,6 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.log.Log;
 import com.caucho.server.cache.AbstractCacheEntry;
 import com.caucho.server.cache.AbstractCacheFilterChain;
 import com.caucho.server.dispatch.BadRequestException;
@@ -2118,7 +2117,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return null;
   }
 
-  public void upgradeProtocol(TcpConnectionHandler handler)
+  public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
   {
     throw new IllegalStateException(L.l("'{0}' does not support upgrading",
 					this));

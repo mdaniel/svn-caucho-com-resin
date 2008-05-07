@@ -106,21 +106,24 @@ public class HttpResponse extends AbstractHttpResponse
    * Upgrade protocol
    */
   @Override
-  public void upgradeProtocol(TcpConnectionHandler handler)
+  public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
   {
-    TcpConnectionController controller
-      = new TcpConnectionController(getOriginalRequest(), handler);
+    TcpDuplexController controller
+      = new TcpDuplexController(getOriginalRequest(), handler);
     
     setStatus(101);
     setContentLength(0);
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " upgrade HTTP to " + handler);
+    
+    return controller;
   }
 
   /**
    * Return true for the top request.
    */
+  @Override
   public boolean isTop()
   {
     if (! (_request instanceof AbstractHttpRequest))

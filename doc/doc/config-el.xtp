@@ -1,5 +1,1 @@
-<document>
-<header>
-  <moved href="config-control.xtp"/>
-</header>
-</document>
+<document redirect="config-control.xtp"/>

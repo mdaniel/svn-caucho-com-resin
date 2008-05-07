@@ -29,7 +29,6 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.hemp.broker.HempBroker;
 import java.io.*;
 import javax.servlet.*;
 
@@ -81,6 +80,9 @@ public class HempServlet extends GenericServlet {
     ReadStream is = req.getConnection().getReadStream();
     WriteStream os = req.getConnection().getWriteStream();
 
-    res.upgradeProtocol(new ServerBrokerStream(_broker, is, os));
+    TcpDuplexController controller
+      = res.upgradeProtocol(new ServerBrokerStream(_broker, is, os));
+    
+    controller.setIdleTimeMax(30 * 60 * 1000L);
   }
 }

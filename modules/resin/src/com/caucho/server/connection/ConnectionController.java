@@ -29,20 +29,8 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.loader.Environment;
-import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.TcpConnectionMXBean;
-import com.caucho.util.Alarm;
-import com.caucho.util.ThreadPool;
-import com.caucho.util.ThreadTask;
-import com.caucho.vfs.ClientDisconnectException;
-import com.caucho.vfs.QSocket;
-import com.caucho.vfs.ReadStream;
 
-import java.io.IOException;
-import java.net.InetAddress;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
