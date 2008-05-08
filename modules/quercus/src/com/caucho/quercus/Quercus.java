@@ -1305,7 +1305,9 @@ public class Quercus
    */
   public Object getSpecial(String key)
   {
-    return _specialMap.get(key);
+    synchronized (_specialMap) {
+      return _specialMap.get(key);
+    }
   }
 
   /**
@@ -1313,7 +1315,9 @@ public class Quercus
    */
   public void setSpecial(String key, Object value)
   {
-    _specialMap.put(key, value);
+    synchronized (_specialMap) {
+      _specialMap.put(key, value);
+    }
   }
 
   /**

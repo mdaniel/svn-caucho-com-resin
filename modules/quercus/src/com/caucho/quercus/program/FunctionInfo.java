@@ -77,7 +77,7 @@ public class FunctionInfo
 
   public FunctionInfo copy()
   {
-    FunctionInfo copy = new FunctionInfo(_quercus, _name);
+    FunctionInfo copy = createCopy();
 
     copy._varMap.putAll(_varMap);
     copy._tempVarList.addAll(_tempVarList);
@@ -96,11 +96,16 @@ public class FunctionInfo
 
     return copy;
   }
+  
+  protected FunctionInfo createCopy()
+  {
+    return new FunctionInfo(_quercus, _name);
+  }
 
   /**
    * Returns the owning quercus.
    */
-  public Quercus getPhp()
+  public Quercus getQuercus()
   {
     return _quercus;
   }
@@ -315,7 +320,7 @@ public class FunctionInfo
     VarInfo var = _varMap.get(name);
 
     if (var == null) {
-      var = new VarInfo(name, this);
+      var = createVarInfo(name);
 
       if (_isGlobal)
 	var.setGlobal();
@@ -327,6 +332,11 @@ public class FunctionInfo
     }
 
     return var;
+  }
+  
+  protected VarInfo createVarInfo(String name)
+  {
+    return new VarInfo(name, this);
   }
 
   /**

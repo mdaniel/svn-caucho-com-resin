@@ -80,6 +80,7 @@ public abstract class JdbcConnectionResource
   protected int _flags;
   protected String _socket;
 
+  private String _catalog;
   private boolean _isCatalogOptimEnabled = false;
   private boolean _isCloseOnClose = true;
 
@@ -134,7 +135,7 @@ public abstract class JdbcConnectionResource
 
   public String getDbName()
   {
-    return getCatalog().toString();
+    return _catalog;
   }
 
   public int getPort()
@@ -192,6 +193,11 @@ public abstract class JdbcConnectionResource
     _driver = driver;
     _url = url;
 
+    if (dbname == null)
+      dbname = "";
+    
+    _catalog = dbname;
+
     Connection conn = connectImpl(env, host, userName, password,
 				  dbname, port, socket, flags, driver, url);
 
@@ -201,6 +207,13 @@ public abstract class JdbcConnectionResource
       _isConnected = true;
 
       _env.addCleanup(this);
+
+      try {
+	if ("".equals(_catalog)) 
+	  _catalog = conn.getCatalog();
+      } catch (SQLException e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
     }
 
     return conn != null;
@@ -327,15 +340,7 @@ public abstract class JdbcConnectionResource
    */
   protected Value getCatalog()
   {
-    clearErrors();
-
-    try {
-      return _env.createString(_conn.getCatalog());
-    } catch (SQLException e) {
-      saveErrors(e);
-      log.log(Level.FINEST, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
+    return _env.createString(_catalog);
   }
 
   /**
@@ -713,7 +718,7 @@ public abstract class JdbcConnectionResource
             if (tok != null) {
               String dbname = tok.toUnquotedString();
 
-              if (getCatalog().toString().equals(dbname)) {
+              if (dbname.equals(_catalog)) {
                 try {
                   setCatalog(null);
                 } catch (SQLException e) {
@@ -878,6 +883,9 @@ public abstract class JdbcConnectionResource
   public void setCatalog(String name)
     throws SQLException
   {
+    if (_catalog.equals(name))
+      return;
+
     clearErrors();
 
     if (! _isUsed && _isCatalogOptimEnabled) {
@@ -891,20 +899,14 @@ public abstract class JdbcConnectionResource
       if (conn != null)
         conn.close();
 
-      connectInternal(_env,
-		      _host,
-		      _userName,
-		      _password,
-		      name,
-		      _port,
-		      _socket,
-		      _flags,
-		      _driver,
-		      _url);
+      connectInternal(_env, _host, _userName, _password, name,
+		      _port, _socket, _flags, _driver, _url);
     }
     else {
       _conn.setCatalog(name);
     }
+    
+    _catalog = name;
   }
 
   /**

@@ -785,7 +785,6 @@ public class TcpConnection extends Connection
 	port.keepaliveEnd(this);
       }
 
-      Thread.dumpStack();
       if (log.isLoggable(Level.FINER)) {
 	if (port != null)
 	  log.finer(dbgId() + "closing connection " + this + ", total=" + port.getConnectionCount());

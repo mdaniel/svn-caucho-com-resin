@@ -1358,8 +1358,22 @@ public class StringBuilderValue
     hash = 37;
 
     int length = _length;
-
     char []buffer = _buffer;
+
+    if (length > 256) {
+      for (int i = 127; i >= 0; i--) {
+	hash = 65521 * hash + buffer[i];
+      }
+
+      for (int i = length - 128; i < length; i++) {
+	hash = 65521 * hash + buffer[i];
+      }
+
+      _hashCode = hash;
+
+      return hash;
+    }
+
     for (int i = length - 1; i >= 0; i--) {
       hash = 65521 * hash + buffer[i];
     }

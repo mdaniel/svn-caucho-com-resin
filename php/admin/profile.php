@@ -241,11 +241,11 @@ function is_keepalive($stackTrace)
 {
   for ($i = 0; $i < sizeof($stackTrace); $i++) {
     if ($stackTrace[$i]->className != "com.caucho.server.port.TcpConnection"
-        || $stackTrace[$i]->methodName != "run") {
+        || $stackTrace[$i]->methodName != "handleConnection") {
       continue;
     }
     else if ($stackTrace[$i - 1]->className == "com.caucho.server.port.TcpConnection"
-             && $stackTrace[$i - 1]->methodName == "waitForKeepalive") {
+             && $stackTrace[$i - 1]->methodName == "keepaliveRead") {
       return true;
     }
     else if ($stackTrace[$i - 1]->className == "com.caucho.vfs.ReadStream"

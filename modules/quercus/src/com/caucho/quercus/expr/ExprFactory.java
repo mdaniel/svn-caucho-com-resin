@@ -30,6 +30,7 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.Quercus;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.*;
@@ -1195,6 +1196,18 @@ public class ExprFactory {
     return new ClassDefStatement(loc, cl);
   }
 
+  //
+  // functions
+  //
+  
+  /**
+   * Creates a new FunctionInfo
+   */
+  public FunctionInfo createFunctionInfo(Quercus quercus, String name)
+  {
+    return new FunctionInfo(quercus, name);
+  }
+  
   /**
    * Creates a new function definition.
    */

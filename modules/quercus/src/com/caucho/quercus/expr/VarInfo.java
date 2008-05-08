@@ -40,24 +40,11 @@ public class VarInfo {
   private final String _name;
   
   private boolean _isGlobal;
-  private boolean _isArgument;
-  private boolean _isRefArgument;
-  private boolean _isAssigned;
-  
-  // true if the variable is a reference
-  private boolean _isReference;
-
-  // XXX: move to arg?
-  private int _argumentIndex;
 
   public VarInfo(String name, FunctionInfo function)
   {
     _name = name.intern();
     _function = function;
-
-    if (function != null && function.isPageMain()) {
-      _isReference = true;
-    }
   }
 
   /**
@@ -92,137 +79,11 @@ public class VarInfo {
     _isGlobal = true;
   }
 
-  /**
-   * True if the variable is variable
-   */
-  public boolean isVariable()
-  {
-    // php/3251
-    return _function != null && (_function.isUsesSymbolTable() ||
-				 _function.isVariableVar());
-  }
-
-  /**
-   * True if the variable is a function argument
-   */
-  public boolean isArgument()
-  {
-    return _isArgument;
-  }
-
-  /**
-   * True if the variable is a function argument
-   */
-  public void setArgument(boolean isArgument)
-  {
-    _isArgument = isArgument;
-  }
-
-  /**
-   * Sets the argument index
-   */
-  public void setArgumentIndex(int index)
-  {
-    _argumentIndex = index;
-  }
-
-  /**
-   * Returns the argument indext
-   */
-  public int getArgumentIndex()
-  {
-    return _argumentIndex;
-  }
-
-  /**
-   * True if the variable is a reference function argument
-   */
-  public boolean isRefArgument()
-  {
-    return _isRefArgument;
-  }
-
-  /**
-   * True if the variable is a reference function argument
-   */
-  public void setRefArgument()
-  {
-    _isRefArgument = true;
-    
-    setReference();
-  }
-
-  /**
-   * True if the variable is assigned in the function.
-   */
-  public boolean isAssigned()
-  {
-    return _isAssigned;
-  }
-
-  /**
-   * True if the variable is assigned in the function.
-   */
-  public void setAssigned()
-  {
-    _isAssigned = true;
-
-    if (isReference()) {
-      // php/3a7c
-      setModified();
-    }
-  }
-
-  /**
-   * True if the Java variable only contains PHP values.
-   */
-  public boolean isValue()
-  {
-    // php/3a71
-    // php/3435
-    return ! (_isArgument || _isReference || isGlobal() || isVariable());
-  }
-  
-  /**
-   * True if the variable is used as a reference in the function.
-   */
-  public boolean isReference()
-  {
-    // php/3a70 vs php/3995
-    return (_isReference || isGlobal() || isArgument() || isVariable());
-  }
-
-  /**
-   * True if the variable is assigned in the function.
-   */
-  public void setReference()
-  {
-    _isReference = true;
-
-    if (_isAssigned)
-      setModified();
-  }
-
-  /**
-   * Returns true for a read-only variable, i.e. one that doesn't
-   * need to be copied as an argument.
-   */
-  public boolean isReadOnly()
-  {
-    return _function.isReadOnly();
-  }
-
-  /**
-   * Sets as modified.
-   */
-  public void setModified()
-  {
-    _function.setModified();
-  }
-
+ 
+  @Override
   public String toString()
   {
-    return "VarInfo[" + _name + "]";
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 }
 

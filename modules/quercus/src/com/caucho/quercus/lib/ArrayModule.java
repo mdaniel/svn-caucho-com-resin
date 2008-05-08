@@ -644,7 +644,7 @@ public class ArrayModule
 
     if (callback != null) {
 
-      if (!callback.isValid()) {
+      if (! callback.isValid()) {
         env.warning("The second argument, '" + ((CallbackFunction) callback).getFunctionName() + "', should be a valid callback");
         return NullValue.NULL;
       }
@@ -663,7 +663,7 @@ public class ArrayModule
           }
         }
       }
-      catch (Throwable t) {
+      catch (Exception t) {
         log.log(Level.WARNING, t.toString(), t);
         env.warning("An error occurred while invoking the filter callback");
 
@@ -808,7 +808,7 @@ public class ArrayModule
         // XXX: will this callback modify the array?
         result = callback.call(env, result, entry.getValue());
       }
-      catch (Throwable t) {
+      catch (Exception t) {
         // XXX: may be used for error checking later
         log.log(Level.WARNING, t.toString(), t);
         env.warning("An error occurred while invoking the reduction callback");
@@ -2771,7 +2771,7 @@ case SORT_NUMERIC:
     try {
       cmp = env.createCallback(callbackValue);
     }
-    catch (Throwable t) {
+    catch (Exception t) {
       log.log(Level.WARNING, t.toString(), t);
 
       env.warning("Not a valid callback " + callbackValue.toString());
@@ -2805,7 +2805,7 @@ case SORT_NUMERIC:
           try {
             isFound = cmp.call(env, entryValue, entry.getValue()).toLong() == 0;
           }
-          catch (Throwable t) {
+          catch (Exception t) {
             log.log(Level.WARNING, t.toString(), t);
 
             env.warning("An error occurred while invoking the filter callback");
@@ -2861,7 +2861,7 @@ case SORT_NUMERIC:
     try {
       cmp = env.createCallback(callbackValue);
     }
-    catch (Throwable t) {
+    catch (Exception t) {
       log.log(Level.WARNING, t.toString(), t);
 
       env.warning("Not a valid callback " + callbackValue.toString());
@@ -2903,7 +2903,7 @@ case SORT_NUMERIC:
 
             isFound = keyFound && valueFound;
           }
-          catch (Throwable t) {
+          catch (Exception t) {
             log.log(Level.WARNING, t.toString(), t);
 
             env.warning("An error occurred while invoking the filter callback");
@@ -2959,7 +2959,7 @@ case SORT_NUMERIC:
     try {
       cmpValue = env.createCallback(callbackValue);
     }
-    catch (Throwable t) {
+    catch (Exception t) {
       log.log(Level.WARNING, t.toString(), t);
 
       env.warning("Not a valid callback " + callbackValue.toString());
@@ -2980,7 +2980,7 @@ case SORT_NUMERIC:
     try {
       cmpKey = env.createCallback(callbackKey);
     }
-    catch (Throwable t) {
+    catch (Exception t) {
       log.log(Level.WARNING, t.toString(), t);
 
       env.warning("Not a valid callback " + callbackKey.toString());

@@ -411,7 +411,7 @@ public class QuercusParser {
   public QuercusProgram parse()
     throws IOException
   {
-    _function = new FunctionInfo(_quercus, "");
+    _function = getFactory().createFunctionInfo(_quercus, "");
     _function.setPageMain(true);
 
     // quercus/0b0d
@@ -437,7 +437,7 @@ public class QuercusParser {
   QuercusProgram parseCode()
     throws IOException
   {
-    _function = new FunctionInfo(_quercus, "eval");
+    _function = getFactory().createFunctionInfo(_quercus, "eval");
     // XXX: need param or better function name for non-global?
     _function.setGlobal(false);
 
@@ -455,7 +455,7 @@ public class QuercusParser {
   Function parseFunction(String name, Path argPath, Path codePath)
     throws IOException
   {
-    _function = new FunctionInfo(_quercus, name);
+    _function = getFactory().createFunctionInfo(_quercus, name);
     _function.setGlobal(false);
     _function.setPageMain(true);
 
@@ -943,7 +943,7 @@ public class QuercusParser {
 	VarExpr var = (VarExpr) expr;
 
 	// php/3a6g, php/3a58
-	var.getVarInfo().setReference();
+	var.getVarInfo().setGlobal();
 
 	statementList.add(_factory.createGlobal(location, var));
       }
@@ -992,7 +992,7 @@ public class QuercusParser {
 	token = parseToken();
       }
 
-      var.getVarInfo().setReference();
+      // var.getVarInfo().setReference();
       statementList.add(_factory.createStatic(location, var, init));
       
       if (token != ',') {
@@ -1548,7 +1548,7 @@ public class QuercusParser {
 			  name));
       }
 
-      _function = new FunctionInfo(_quercus, name);
+      _function = getFactory().createFunctionInfo(_quercus, name);
       _function.setDeclaringClass(_classDef);
       _function.setPageStatic(oldTop);
       
@@ -1673,11 +1673,6 @@ public class QuercusParser {
       argMap.put(argName, arg);
 
       VarInfo var = _function.createVar(argName);
-      var.setArgument(true);
-      var.setArgumentIndex(argMap.size() - 1);
-
-      if (isReference)
-	var.setRefArgument();
       
       if (token != ',') {
 	_peekToken = token;
@@ -5236,6 +5231,7 @@ public class QuercusParser {
       return (s1 == null || s2 == null) ?  s1 == s2 : s1.equals(s2);
     }
 
+    @Override
     public String toString()
     {
       return _fileName + ":" + _lineNumber + ": ";

@@ -56,7 +56,12 @@ public class SpyDataSource {
    */
   public SpyDataSource(String name)
   {
-    if (name != null)
+    if (name == null)
+      name = "";
+    else if (name.indexOf('?') >= 0)
+      name = name.substring(0, name.indexOf('?'));
+    
+    if (! "".equals(name))
       _name = name + ".";
     else
       _name = "";

@@ -98,9 +98,10 @@ public class VarExpr
   /**
    * Creates the assignment.
    */
+  @Override
   public Expr createAssign(QuercusParser parser, Expr value)
   {
-    _var.setAssigned();
+    // _var.setAssigned();
 
     return super.createAssign(parser, value);
   }
@@ -108,19 +109,21 @@ public class VarExpr
   /**
    * Creates the assignment.
    */
+  @Override
   public void assign(QuercusParser parser)
   {
-    _var.setAssigned();
+    // _var.setAssigned();
   }
 
   /**
    * Creates the assignment.
    */
+  @Override
   public Expr createAssignRef(QuercusParser parser,
                               Expr value
   )
   {
-    _var.setAssigned();
+    // _var.setAssigned();
 
     return super.createAssignRef(parser, value);
   }
@@ -152,6 +155,7 @@ public class VarExpr
    * @param env the calling environment.
    * @return the expression value.
    */
+  @Override
   public Value evalCopy(Env env)
   {
     Value v = eval(env);
@@ -165,6 +169,7 @@ public class VarExpr
    * @param env the calling environment.
    * @return the expression value.
    */
+  @Override
   public Value evalArray(Env env)
   {
     Value value;

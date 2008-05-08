@@ -29,14 +29,11 @@
 
 package com.caucho.quercus.lib.regexp;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.logging.*;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.util.*;
 
 public class RegexpState {
@@ -103,6 +100,7 @@ public class RegexpState {
     
     int minLength = _regexp._minLength;
     boolean []firstSet = _regexp._firstSet;
+
     int length = _subject.length();
 
     for (; _first + minLength <= length; _first++) {
@@ -114,7 +112,7 @@ public class RegexpState {
       }
 
       clearGroup();
-      int offset = _regexp._prog.match(_subject, _first, this);
+      int offset = _regexp._prog.match(_subject, length, _first, this);
 
       if (offset >= 0) {
         _groupBegin[0] = _first;
@@ -155,7 +153,7 @@ public class RegexpState {
     _first = first;
     clearGroup();
 
-    return _regexp._prog.match(_subject, first, this);
+    return _regexp._prog.match(_subject, subject.length(), first, this);
   }
   
   /**
@@ -174,6 +172,7 @@ public class RegexpState {
     _first = start;
 
     _subject = subject;
+    int subjectLength = subject.length();
 
     int minLength = _regexp._minLength;
     boolean []firstSet = _regexp._firstSet;
@@ -188,7 +187,7 @@ public class RegexpState {
 	  continue;
       }
       
-      int value = prog.match(subject, start, this);
+      int value = prog.match(subject, subjectLength, start, this);
 
       if (value >= 0) {
 	_groupBegin[0] = start;
@@ -315,6 +314,7 @@ public class RegexpState {
     return _regexp.convertResult(env, result);
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _regexp + "]";
