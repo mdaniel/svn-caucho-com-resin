@@ -34,12 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.CharBuffer;
@@ -57,10 +52,12 @@ public class SplModule extends AbstractQuercusModule
   }
   
   public static boolean spl_autoload_register(Env env,
-                                              @Optional String fun)
+                                              @Optional Callback fun)
   {
+    /*
     if (fun == null || fun.length() == 0)
       fun = "spl_autoload";
+    */
     
     env.addAutoloadFunction(fun);
     
@@ -68,7 +65,7 @@ public class SplModule extends AbstractQuercusModule
   }
   
   public static boolean spl_autoload_unregister(Env env,
-                                                String fun)
+                                                Callback fun)
   {
     env.removeAutoloadFunction(fun);
     
@@ -77,16 +74,18 @@ public class SplModule extends AbstractQuercusModule
   
   public static Value spl_autoload_functions(Env env)
   {
-    LinkedHashMap<String, AbstractFunction> funMap
-      = env.getAutoloadFunctions();
+    ArrayList<Callback> funList = env.getAutoloadFunctions();
     
-    if (funMap == null)
+    if (funList == null)
       return BooleanValue.FALSE;
     
     ArrayValue array = new ArrayValueImpl();
-    
-    for (Map.Entry<String, AbstractFunction> entry : funMap.entrySet()) {
-      array.put(entry.getKey());
+
+    int size = funList.size();
+    for (int i = 0; i < size; i++) {
+      Callback cb = funList.get(i);
+      
+      array.put(env.createString(cb.toString()));
     }
     
     return array;

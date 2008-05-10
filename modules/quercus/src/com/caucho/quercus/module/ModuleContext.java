@@ -164,44 +164,46 @@ public class ModuleContext
 	   IllegalAccessException,
 	   InstantiationException
   {
-    JavaClassDef def = _javaClassWrappers.get(name);
+    synchronized (_javaClassWrappers) {
+      JavaClassDef def = _javaClassWrappers.get(name);
 
-    if (def == null) {
-      if (log.isLoggable(Level.FINEST)) {
-        if (extension == null)
-          log.finest(L.l("PHP loading class {0} with type {1}", name, type.getName()));
-        else
-          log.finest(L.l("PHP loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
+      if (def == null) {
+	if (log.isLoggable(Level.FINEST)) {
+	  if (extension == null)
+	    log.finest(L.l("PHP loading class {0} with type {1}", name, type.getName()));
+	  else
+	    log.finest(L.l("PHP loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
+	}
+
+	if (javaClassDefClass != null) {
+	  Constructor constructor
+	    =  javaClassDefClass.getConstructor(ModuleContext.class,
+						String.class,
+						Class.class);
+
+	  def = (JavaClassDef) constructor.newInstance(this, name, type);
+	}
+	else {
+	  def = JavaClassDef.create(this, name, type);
+
+	  if (def == null)
+	    def = createDefaultJavaClassDef(name, type, extension);
+	}
+
+	_javaClassWrappers.put(name, def);
+	_lowerJavaClassWrappers.put(name.toLowerCase(), def);
+
+	_staticClasses.put(name, def);
+	_lowerStaticClasses.put(name.toLowerCase(), def);
+
+	// def.introspect();
+
+	if (extension != null)
+	  _extensionSet.add(extension);
       }
 
-      if (javaClassDefClass != null) {
-        Constructor constructor
-          =  javaClassDefClass.getConstructor(ModuleContext.class,
-                                              String.class,
-                                              Class.class);
-
-        def = (JavaClassDef) constructor.newInstance(this, name, type);
-      }
-      else {
-        def = JavaClassDef.create(this, name, type);
-
-        if (def == null)
-          def = createDefaultJavaClassDef(name, type, extension);
-      }
-
-      _javaClassWrappers.put(name, def);
-      _lowerJavaClassWrappers.put(name.toLowerCase(), def);
-
-      _staticClasses.put(name, def);
-      _lowerStaticClasses.put(name.toLowerCase(), def);
-
-      // def.introspect();
-
-      if (extension != null)
-        _extensionSet.add(extension);
+      return def;
     }
-
-    return def;
   }
 
   /**
@@ -209,19 +211,21 @@ public class ModuleContext
    */
   public JavaClassDef getJavaClassDefinition(Class type, String className)
   {
-    JavaClassDef def = _javaClassWrappers.get(className);
+    synchronized (_javaClassWrappers) {
+      JavaClassDef def = _javaClassWrappers.get(className);
 
-    if (def != null)
+      if (def != null)
+	return def;
+
+      def = JavaClassDef.create(this, className, type);
+
+      if (def == null)
+	def = createDefaultJavaClassDef(className, type);
+
+      _javaClassWrappers.put(className, def);
+
       return def;
-
-    def = JavaClassDef.create(this, className, type);
-
-    if (def == null)
-      def = createDefaultJavaClassDef(className, type);
-
-    _javaClassWrappers.put(className, def);
-
-    return def;
+    }
   }
   
   /**
@@ -229,35 +233,37 @@ public class ModuleContext
    */
   public JavaClassDef getJavaClassDefinition(String className)
   {
-    JavaClassDef def = _javaClassWrappers.get(className);
+    synchronized (_javaClassWrappers) {
+      JavaClassDef def = _javaClassWrappers.get(className);
 
-    if (def != null)
-      return def;
-
-    try {
-      Class type;
+      if (def != null)
+	return def;
 
       try {
-        type = Class.forName(className, false, _loader);
+	Class type;
+
+	try {
+	  type = Class.forName(className, false, _loader);
+	}
+	catch (ClassNotFoundException e) {
+	  throw new ClassNotFoundException(L.l("`{0}' not valid: {1}", className, e.toString()), e);
+	}
+
+	def = JavaClassDef.create(this, className, type);
+
+	if (def == null)
+	  def = createDefaultJavaClassDef(className, type);
+
+	_javaClassWrappers.put(className, def);
+
+	// def.introspect();
+
+	return def;
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new QuercusRuntimeException(e);
       }
-      catch (ClassNotFoundException e) {
-        throw new ClassNotFoundException(L.l("`{0}' not valid: {1}", className, e.toString()), e);
-      }
-
-      def = JavaClassDef.create(this, className, type);
-
-      if (def == null)
-        def = createDefaultJavaClassDef(className, type);
-
-      _javaClassWrappers.put(className, def);
-
-      // def.introspect();
-
-      return def;
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new QuercusRuntimeException(e);
     }
   }
 
@@ -266,12 +272,9 @@ public class ModuleContext
    */
   public JavaClassDef getJavaClassDefinition(Class javaClass)
   {
-    for (JavaClassDef javaClassDef : _javaClassWrappers.values()) {
-      if (javaClassDef.getType() == javaClass)
-        return javaClassDef;
+    synchronized (_javaClassWrappers) {
+      return _javaClassWrappers.get(javaClass.getName());
     }
-
-    return null;
   }
 
 
@@ -293,10 +296,12 @@ public class ModuleContext
    */
   public ClassDef findJavaClassWrapper(String name)
   {
-    ClassDef def = _javaClassWrappers.get(name);
+    synchronized (_javaClassWrappers) {
+      ClassDef def = _javaClassWrappers.get(name);
 
-    if (def != null)
-      return def;
+      if (def != null)
+	return def;
+    }
 
     return _lowerJavaClassWrappers.get(name.toLowerCase());
   }

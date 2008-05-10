@@ -1027,11 +1027,6 @@ public class TcpConnection extends Connection
 	_state = _state.toAccept();
 
         while (! _state.isClosed()) {
-	  if (_readTask != _keepaliveTask) {
-	    System.out.println(TcpConnection.this + " bad task");
-	    Thread.dumpStack();
-	  }
-	  
           _state = _state.toAccept();
           
           if (! _port.accept(TcpConnection.this, isStart)) {

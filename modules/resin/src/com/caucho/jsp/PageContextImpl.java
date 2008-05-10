@@ -1954,7 +1954,14 @@ public class PageContextImpl extends PageContext
   public class PageELContext extends ServletELContext {
     public PageELContext()
     {
-      putContext(JspContext.class, PageContextImpl.this);
+    }
+
+    public Object getContext(Class key)
+    {
+      if (key == JspContext.class)
+	return PageContextImpl.class;
+      else
+	return super.getContext(key);
     }
     
     public PageContextImpl getPageContext()

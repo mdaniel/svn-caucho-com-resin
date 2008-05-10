@@ -165,7 +165,9 @@ public class HttpResponse extends AbstractHttpResponse
    *
    * @return true if the data in the request should use chunked encoding.
    */
-  protected boolean writeHeadersInt(WriteStream os, int length)
+  protected boolean writeHeadersInt(WriteStream os,
+				    int length,
+				    boolean isHead)
     throws IOException
   {
     boolean isChunked = false;
@@ -267,6 +269,7 @@ public class HttpResponse extends AbstractHttpResponse
     }
 
     long now = Alarm.getCurrentTime();
+    size = _cookiesOut.size();
     for (int i = 0; i < _cookiesOut.size(); i++) {
       Cookie cookie = _cookiesOut.get(i);
       int cookieVersion = cookie.getVersion();
@@ -406,7 +409,7 @@ public class HttpResponse extends AbstractHttpResponse
 
     if (HttpRequest.HTTP_1_1 <= version
         && ! hasContentLength
-        && ! isHead()) {
+        && ! isHead) {
       os.print("\r\nTransfer-Encoding: chunked");
       isChunked = true;
 

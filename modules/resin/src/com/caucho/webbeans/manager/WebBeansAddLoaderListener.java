@@ -44,7 +44,8 @@ public class WebBeansAddLoaderListener implements AddLoaderListener
   {
     WebBeansContainer container = WebBeansContainer.create(loader);
 
-    container.update();
+    // jpa/0046
+    // container.update();
   }
 
   public boolean equals(Object o)

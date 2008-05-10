@@ -473,7 +473,12 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     if (_scanListeners == null)
       _scanListeners = new ArrayList<ScanListener>();
 
-    _scanListeners.add(listener);
+    int i = 0;
+    for (; i < _scanListeners.size(); i++) {
+      if (listener.getPriority() < _scanListeners.get(i).getPriority())
+	break;
+    }
+    _scanListeners.add(i, listener);
     
     ArrayList<URL> urlList = new ArrayList<URL>();
     for (URL url : getURLs()) {
@@ -512,6 +517,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   @Override
   public void scan()
   {
+    configureEnhancerEvent();
+    
     ArrayList<URL> urlList = new ArrayList<URL>(_pendingScanUrls);
     _pendingScanUrls.clear();
 
@@ -533,7 +540,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 	}
       }
 
-      configureEnhancerEvent();
+      // configureEnhancerEvent();
     } catch (Exception e) {
       log().log(Level.WARNING, e.toString(), e);
 	

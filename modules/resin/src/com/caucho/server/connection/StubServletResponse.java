@@ -58,7 +58,7 @@ public class StubServletResponse extends AbstractHttpResponse {
     return null;
   }
   
-  public boolean writeHeadersInt(WriteStream out, int length)
+  public boolean writeHeadersInt(WriteStream out, int length, boolean isHead)
   {
     return false;
   }

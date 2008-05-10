@@ -64,7 +64,9 @@ public class HmuxResponse extends AbstractHttpResponse {
     }
   }
   
-  protected boolean writeHeadersInt(WriteStream os, int length)
+  protected boolean writeHeadersInt(WriteStream os,
+				    int length,
+				    boolean isHead)
     throws IOException
   {
     CharBuffer cb = _cb;
@@ -95,7 +97,8 @@ public class HmuxResponse extends AbstractHttpResponse {
     _req.writeString(HmuxRequest.HMUX_META_HEADER, "cpu-load");
     _req.writeString(HmuxRequest.HMUX_STRING, String.valueOf(load));
 
-    for (int i = 0; i < _headerKeys.size(); i++) {
+    int size = _headerKeys.size();
+    for (int i = 0; i < size; i++) {
       String key = (String) _headerKeys.get(i);
       String value = (String) _headerValues.get(i);
 
@@ -114,7 +117,8 @@ public class HmuxResponse extends AbstractHttpResponse {
     }
 
     long now = Alarm.getCurrentTime();
-    for (int i = 0; i < _cookiesOut.size(); i++) {
+    size = _cookiesOut.size();
+    for (int i = 0; i < size; i++) {
       Cookie cookie = (Cookie) _cookiesOut.get(i);
       int cookieVersion = cookie.getVersion();
 

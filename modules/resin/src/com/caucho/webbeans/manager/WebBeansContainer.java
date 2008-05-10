@@ -1128,6 +1128,14 @@ public class WebBeansContainer
   //
 
   /**
+   * Since webbeans doesn't enhance, it's priority 1
+   */
+  public int getPriority()
+  {
+    return 1;
+  }
+
+  /**
    * Returns true if the root is a valid scannable root.
    */
   public boolean isRootScannable(Path root)
@@ -1148,7 +1156,7 @@ public class WebBeansContainer
     else {
       if (log.isLoggable(Level.FINER))
 	log.finer("WebBeans scanning " + root.getURL());
-      
+
       context.setScanComplete(true);
       return true;
     }

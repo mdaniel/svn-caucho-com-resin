@@ -38,6 +38,14 @@ import com.caucho.vfs.Path;
  */
 public interface ScanListener {
   /**
+   * Returns the listener's priority.
+   *
+   *  0 is an enhancer like Amber
+   *  1 is an extender like WebBeans
+   */
+  public int getPriority();
+  
+  /**
    * Called to check if the archive should be scan.
    */
   public boolean isRootScannable(Path root);

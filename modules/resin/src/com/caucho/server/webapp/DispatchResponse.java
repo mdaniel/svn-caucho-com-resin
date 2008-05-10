@@ -136,7 +136,7 @@ class DispatchResponse extends AbstractHttpResponse
   /**
    * included() responses don't print the headers.
    */
-  protected boolean writeHeadersInt(WriteStream os, int length)
+  protected boolean writeHeadersInt(WriteStream os, int length, boolean isHead)
     throws IOException
   {
     return false;

@@ -151,7 +151,7 @@ public class HttpRequest extends AbstractHttpRequest
    */
   public final boolean isWaitForRead()
   {
-    return true;
+    return false;
   }
   
   /**
@@ -1166,8 +1166,8 @@ public class HttpRequest extends AbstractHttpRequest
     rawRead.setSibling(null);
 
     String te;
-    if (contentLength < 0 && HTTP_1_1 <= getVersion() &&
-	(te = getHeader("Transfer-Encoding")) != null) {
+    if (contentLength < 0 && HTTP_1_1 <= getVersion()
+	&& (te = getHeader("Transfer-Encoding")) != null) {
       _chunkedInputStream.init(rawRead);
       readStream.init(_chunkedInputStream, null);
       return true;

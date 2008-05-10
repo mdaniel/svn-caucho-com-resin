@@ -107,6 +107,7 @@ public abstract class AbstractHttpRequest
 
   private static final char []CONNECTION = "connection".toCharArray();
   private static final char []COOKIE = "cookie".toCharArray();
+  private static final char []CONTENT_LENGTH = "content-length".toCharArray();
   private static final char []EXPECT = "expect".toCharArray();
   private static final char []HOST = "host".toCharArray();
   
@@ -150,6 +151,8 @@ public abstract class AbstractHttpRequest
   private boolean _isSessionIdFromCookie;
   
   protected int _sessionGroup;
+
+  private long _contentLength;
 
   private boolean _sessionIsLoaded;
   private SessionImpl _session;
@@ -269,6 +272,8 @@ public abstract class AbstractHttpRequest
     
     _cookiesIn = null;
     _cookies.clear();
+
+    _contentLength = -1;
 
     _sessionGroup = -1;
     _session = null;
@@ -739,16 +744,29 @@ public abstract class AbstractHttpRequest
     switch (key1) {
     case 'c':
     case 'C':
-      if (keyLen == CONNECTION.length &&
-	  match(keyBuf, keyOff, keyLen, CONNECTION)) {
+      if (keyLen == CONNECTION.length
+	  && match(keyBuf, keyOff, keyLen, CONNECTION)) {
 	if (match(value.getBuffer(), value.getOffset(), value.length(),
 		  CLOSE)) {
 	  connectionClose();
 	}
       }
-      else if (keyLen == COOKIE.length &&
-	       match(keyBuf, keyOff, keyLen, COOKIE)) {
+      else if (keyLen == COOKIE.length
+	       && match(keyBuf, keyOff, keyLen, COOKIE)) {
 	fillCookie(_cookies, value);
+      }
+      else if (keyLen == CONTENT_LENGTH.length
+	       && match(keyBuf, keyOff, keyLen, CONTENT_LENGTH)) {
+	long contentLength = 0;
+	int i = 0;
+	int ch;
+
+	int length = value.length();
+	for (; i < length && (ch = value.charAt(i)) >= '0' && ch <= '9'; i++)
+	  contentLength = 10 * contentLength + ch - '0';
+
+	if (i > 0)
+	  _contentLength = contentLength;
       }
       return true;
       
@@ -916,20 +934,7 @@ public abstract class AbstractHttpRequest
    */
   public int getContentLength()
   {
-    CharSegment cl = getHeaderBuffer("Content-Length");
-
-    if (cl == null)
-      return -1;
-
-    int value = 0;
-    int i = 0;
-    int ch;
-
-    int length = cl.length();
-    for (; i < length && (ch = cl.charAt(i)) >= '0' && ch <= '9'; i++)
-      value = 10 * value + ch - '0';
- 
-    return i == 0 ? -1 : value;
+    return (int) _contentLength;
   }
 
   /**
@@ -937,20 +942,7 @@ public abstract class AbstractHttpRequest
    */
   public long getLongContentLength()
   {
-    CharSegment cl = getHeaderBuffer("Content-Length");
-
-    if (cl == null)
-      return -1;
-
-    long value = 0;
-    int i = 0;
-    int ch;
-
-    int length = cl.length();
-    for (; i < length && (ch = cl.charAt(i)) >= '0' && ch <= '9'; i++)
-      value = 10 * value + ch - '0';
- 
-    return i == 0 ? -1 : value;
+    return _contentLength;
   }
 
   /**
@@ -1033,7 +1025,8 @@ public abstract class AbstractHttpRequest
     _readEncoding = encoding;
     
     try {
-      getStream(true).setEncoding(_readEncoding);
+      if (_hasReadStream)
+	_readStream.setEncoding(_readEncoding);
     } catch (UnsupportedEncodingException e) {
       throw e;
     } catch (java.nio.charset.UnsupportedCharsetException e) {

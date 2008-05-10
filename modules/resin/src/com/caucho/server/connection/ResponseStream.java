@@ -160,7 +160,7 @@ class ResponseStream extends ToByteResponseStream {
     _bufferSize = 0;
   }
 
-  public boolean isHead()
+  public final boolean isHead()
   {
     return _isHead;
   }

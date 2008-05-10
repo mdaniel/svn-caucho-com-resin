@@ -125,6 +125,9 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   
   private ArrayList<AmberPersistenceUnit> _pendingUnitList
     = new ArrayList<AmberPersistenceUnit>();
+
+  private ArrayList<LazyEntityManagerFactory> _pendingFactoryList
+    = new ArrayList<LazyEntityManagerFactory>();
   
   private HashSet<URL> _persistenceURLSet = new HashSet<URL>();
 
@@ -826,6 +829,14 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
       ArrayList<AmberPersistenceUnit> unitList
 	= new ArrayList<AmberPersistenceUnit>(_pendingUnitList);
       _pendingUnitList.clear();
+
+      ArrayList<LazyEntityManagerFactory> lazyEmfList
+	= new ArrayList<LazyEntityManagerFactory>(_pendingFactoryList);
+      _pendingFactoryList.clear();
+      
+      for (LazyEntityManagerFactory lazyEmf : lazyEmfList) {
+	lazyEmf.init();
+      }
       
       for (AmberPersistenceUnit unit : unitList) {
 	unit.initEntityHomes();
@@ -847,31 +858,23 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
 
       PersistenceProvider provider = (PersistenceProvider) cl.newInstance();
 
-      EntityManagerFactory factory;
-
-      Map props = null;
-      factory = provider.createContainerEntityManagerFactory(unit, null);
-
       String unitName = unit.getName();
-
-      if (factory == null)
-	throw new ConfigException(L.l("'{0}' must return an EntityManagerFactory",
-				      provider.getClass().getName()));
-
-      if (log.isLoggable(Level.FINE)) {
-	log.fine(L.l("Amber creating persistence unit '{0}' created with provider '{1}'",
-		     unitName, provider.getClass().getName()));
+      Map props = null;
+      
+      synchronized (this) {
+	LazyEntityManagerFactory lazyFactory
+	  = new LazyEntityManagerFactory(unit, provider, props);
+	
+	_pendingFactoryList.add(lazyFactory);
       }
       
-      _factoryMap.put(unitName, factory);
       EntityManagerTransactionProxy persistenceContext
-	= new EntityManagerTransactionProxy(factory, props);
+	= new EntityManagerTransactionProxy(this, unitName, props);
       
       _persistenceContextMap.put(unitName, persistenceContext);
 
-
       WebBeansContainer webBeans = WebBeansContainer.create(_parentLoader);
-      webBeans.addComponent(new EntityManagerFactoryComponent(provider, unit, unitName, factory));
+      webBeans.addComponent(new EntityManagerFactoryComponent(this, provider, unit));
       webBeans.addComponent(new PersistenceContextComponent(unitName, persistenceContext));
     } catch (RuntimeException e) {
       throw e;
@@ -986,6 +989,14 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   //
 
   /**
+   * Since Amber enhances it's priority 0
+   */
+  public int getPriority()
+  {
+    return 0;
+  }
+
+  /**
    * Returns true if the root is a valid scannable root.
    */
   public boolean isRootScannable(Path root)
@@ -1006,7 +1017,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     else {
       if (log.isLoggable(Level.FINER))
 	log.finer(this + " scanning " + root);
-      
+
       context.setScanComplete(true);
       
       return true;
@@ -1073,5 +1084,45 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   public String toString()
   {
     return "AmberContainer[" + _parentLoader.getId() + "]";
+  }
+
+  class LazyEntityManagerFactory {
+    private final PersistenceUnitConfig _unit;
+    private final PersistenceProvider _provider;
+    private final Map _props;
+
+    LazyEntityManagerFactory(PersistenceUnitConfig unit,
+			     PersistenceProvider provider,
+			     Map props)
+    {
+      _unit = unit;
+      _provider = provider;
+      _props = props;
+    }
+
+    void init()
+    {
+      synchronized (AmberContainer.this) {
+	String unitName = _unit.getName();
+	
+	EntityManagerFactory factory = _factoryMap.get(unitName);
+
+	if (factory == null) {
+	  factory
+	    = _provider.createContainerEntityManagerFactory(_unit, _props);
+
+	  if (factory == null)
+	    throw new ConfigException(L.l("'{0}' must return an EntityManagerFactory",
+					  _provider.getClass().getName()));
+
+	  if (log.isLoggable(Level.FINE)) {
+	    log.fine(L.l("Amber creating persistence unit '{0}' created with provider '{1}'",
+			 unitName, _provider.getClass().getName()));
+	  }
+
+	  _factoryMap.put(unitName, factory);
+	}
+      }
+    }
   }
 }

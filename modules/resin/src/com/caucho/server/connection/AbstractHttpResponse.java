@@ -1726,8 +1726,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     // server/1373 for getBufferSize()
     boolean canCache = startCaching(true);
     _isHeaderWritten = true;
+    boolean isHead = false;
     
     if (_request.getMethod().equals("HEAD")) {
+      isHead = true;
       _originalResponseStream.setHead();
     }
 
@@ -1778,7 +1780,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       addCookie(cookie);
     }
 
-    _isChunked = writeHeadersInt(os, length);
+    _isChunked = writeHeadersInt(os, length, isHead);
 
     return _isChunked;
   }
@@ -1913,7 +1915,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     return false;
   }
 
-  abstract protected boolean writeHeadersInt(WriteStream os, int length)
+  abstract protected boolean writeHeadersInt(WriteStream os,
+					     int length,
+					     boolean isHead)
     throws IOException;
 
   /**

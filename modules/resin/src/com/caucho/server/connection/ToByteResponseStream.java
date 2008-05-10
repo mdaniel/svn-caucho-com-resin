@@ -157,7 +157,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Returns the char buffer.
    */
-  public char []getCharBuffer()
+  public final char []getCharBuffer()
   {
     return _charBuffer;
   }

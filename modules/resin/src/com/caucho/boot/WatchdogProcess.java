@@ -423,7 +423,7 @@ class WatchdogProcess
     // #2567
     list.add("-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl");
     list.add("-Djava.awt.headless=true");
-    list.add("-Dresin.home=" + resinHome.getPath());
+    list.add("-Dresin.home=" + resinHome.getFullPath());
 
     if (! _watchdog.hasXss())
       list.add("-Xss1m");
@@ -460,6 +460,11 @@ class WatchdogProcess
     }
     
     list.add("com.caucho.server.resin.Resin");
+    
+    if (resinRoot != null) {
+      list.add("--root-directory");
+      list.add(resinRoot.getFullPath());
+    }
 
     if (_watchdog.getResinConf() != null) {
       list.add("-conf");

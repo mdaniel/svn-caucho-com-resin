@@ -395,6 +395,14 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   //
 
   /**
+   * Since EJB doesn't bytecode enhance, it's priority 1
+   */
+  public int getPriority()
+  {
+    return 1;
+  }
+
+  /**
    * Adds a root URL
    */
   public void addRoot(Path root)
