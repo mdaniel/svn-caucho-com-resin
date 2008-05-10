@@ -13,6 +13,7 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>quercus: mantis issue with compress_handler missing (ob_start callback) (#2575, rep by stargazer)</li>
 <li>quercus: spl_autoload_register needs callback argument (#2590, #2192, rep by mikebevz)</li>
 <li>webbeans: amber loading timing issue with webbeans (#2642, rep by markus)</li>
 <li>quercus: missing synchronization on getJavaClassDefinition (#2632, rep by stbu)</li>
