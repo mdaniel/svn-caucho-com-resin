@@ -60,13 +60,6 @@ public class CallbackFunction extends Callback {
     _fun = fun;
     _funName = funName;
   }
-/*
-  public CallbackFunction(String funName, boolean isInvalid)
-  {
-    _funName = funName;
-    _isInvalid = isInvalid;
-  }
-  */
 
   /**
    * Allow subclasses to set the abstract function directly.

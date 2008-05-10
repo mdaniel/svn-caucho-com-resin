@@ -268,7 +268,7 @@ public class OutputBuffer {
    */
   private boolean callCallback()
   {
-    if (_callback == null)
+    if (_callback == null || ! _callback.isValid())
       return false;
 
     Value result = 
