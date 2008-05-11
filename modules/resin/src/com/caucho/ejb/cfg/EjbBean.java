@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.ejb.cfg21.EjbHomeView;
 import com.caucho.bytecode.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
@@ -38,17 +37,11 @@ import com.caucho.config.LineConfigException;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.types.*;
 import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.amber.AmberConfig;
 import com.caucho.ejb.gen.*;
-import com.caucho.ejb.gen21.BeanAssembler;
-import com.caucho.ejb.gen21.ViewClass;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.java.gen.BaseClass;
-import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.java.gen.MethodCallChain;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.ClassDependency;
@@ -161,10 +154,7 @@ public class EjbBean extends DescriptionGroupConfig
     _ejbModuleName = ejbModuleName;
 
     _loader = ejbConfig.getEjbContainer().getClassLoader();
-
-    // TCK ejb30/tx: ejb/0f14 vs ejb/02a0
-    getEjbContainer().getTransactionManager().setEJB3(isEJB3());
-  }
+ }
 
   public EjbConfig getConfig()
   {
@@ -1152,14 +1142,6 @@ public class EjbBean extends DescriptionGroupConfig
   }
 
   /**
-   * Configure for amber.
-   */
-  public void configureAmber(AmberConfig config)
-    throws ConfigException
-  {
-  }
-
-  /**
    * Creates the views.
    */
   protected void createViews21()
@@ -1222,34 +1204,6 @@ public class EjbBean extends DescriptionGroupConfig
       }
     }
     */
-  }
-
-  /**
-   * Creates a home view.
-   */
-  protected EjbHomeView createHomeView(ApiClass homeClass, String prefix)
-    throws ConfigException
-  {
-    return new EjbHomeView(this, homeClass, prefix);
-  }
-
-  /**
-   * Creates an object view.
-   */
-  protected EjbObjectView createObjectView(ArrayList<ApiClass> apiList,
-                                           String prefix,
-                                           String suffix)
-    throws ConfigException
-  {
-    return new EjbObjectView(this, apiList, prefix, suffix, false);
-  }
-  
-  protected EjbObjectView createRemoteObjectView(ArrayList<ApiClass> apiList,
-						 String prefix,
-						 String suffix)
-    throws ConfigException
-  {
-    return new EjbObjectView(this, apiList, prefix, suffix, true);
   }
 
   /**
@@ -1577,90 +1531,7 @@ public class EjbBean extends DescriptionGroupConfig
   public GenClass assembleGenerator(String fullClassName)
     throws NoSuchMethodException, ConfigException
   {
-    int p = fullClassName.lastIndexOf('.');
-    String className = fullClassName;
-    if (p > 0)
-      className = fullClassName.substring(p + 1);
-
-    BeanAssembler assembler = createAssembler(fullClassName);
-
-    if (assembler == null)
-      return null;
-
-    addImports(assembler);
-
-    assembler.addHeaderComponent(getEJBClassWrapper(),
-                                 fullClassName,
-                                 getFullImplName());
-
-    assembleMethods(assembler, fullClassName);
-
-    // getEJBClassName());
-
-    assembleViews(assembler, fullClassName);
-    
-    /*
-    if (_remoteHomeView != null)
-      _remoteHomeView.assembleView(assembler, fullClassName);
-
-    if (_remoteView21 != null)
-      _remoteView21.assembleView(assembler, fullClassName);
-
-    if (_remoteView != null)
-      _remoteView.assembleView(assembler, fullClassName);
-
-    if (_localHomeView != null)
-      _localHomeView.assembleView(assembler, fullClassName);
-
-    if (_localView21 != null)
-      _localView21.assembleView(assembler, fullClassName);
-
-    if (_localView != null)
-      _localView.assembleView(assembler, fullClassName);
-      */
-    for (PersistentDependency depend : _dependList) {
-      assembler.addDependency(depend);
-    }
-
-    assembler.addDependency(new ClassDependency(_ejbClass.getJavaClass()));
-
-    if (_remoteHome != null)
-      assembler.addDependency(new ClassDependency(_remoteHome.getJavaClass()));
-
-    for (ApiClass remote : _remoteList) {
-      assembler.addDependency(new ClassDependency(remote.getJavaClass()));
-    }
-
-    if (_localHome != null)
-      assembler.addDependency(new ClassDependency(_localHome.getJavaClass()));
-
-    for (ApiClass local : _localList) {
-      assembler.addDependency(new ClassDependency(local.getJavaClass()));
-    }
-
-    return assembler.getAssembledGenerator();
-  }
-
-  /**
-   * Adds the assemblers.
-   */
-  protected void addImports(BeanAssembler assembler)
-  {
-    assembler.addImport("javax.ejb.*");
-    assembler.addImport("com.caucho.vfs.*");
-
-    assembler.addImport("com.caucho.ejb.xa.EjbTransactionManager");
-    assembler.addImport("com.caucho.ejb.xa.TransactionContext");
-
-    assembler.addImport("com.caucho.ejb.AbstractContext");
-  }
-
-  /**
-   * Creates the assembler for the bean.
-   */
-  protected BeanAssembler createAssembler(String fullClassName)
-  {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -1690,27 +1561,6 @@ public class EjbBean extends DescriptionGroupConfig
   }
 
   /**
-   * Assembles the generator methods.
-   */
-  protected void assembleMethods(BeanAssembler assembler,
-                                 String fullClassName)
-    throws ConfigException
-  {
-    for (EjbBaseMethod method : _methodMap.values()) {
-      assembler.addMethod(method.assemble(assembler, fullClassName));
-    }
-  }
-
-  /**
-   * Assembles the generator methods.
-   */
-  protected void assembleViews(BeanAssembler assembler,
-                                 String fullClassName)
-    throws ConfigException
-  {
-  }
-
-  /**
    * Introspects an ejb method.
    */
   protected EjbBaseMethod introspectEJBMethod(ApiMethod method)
@@ -1725,126 +1575,6 @@ public class EjbBean extends DescriptionGroupConfig
   protected void validateImplMethod(ApiMethod method)
     throws ConfigException
   {
-  }
-
-  /**
-   * Assembles methods.
-   */
-  protected void assembleMethods(BeanAssembler assembler,
-                                 ViewClass view,
-                                 String contextClassName,
-                                 ArrayList<ApiMethod> methods,
-                                 String prefix)
-    throws NoSuchMethodException
-  {
-    for (ApiMethod method : methods) {
-      String className = method.getDeclaringClass().getName();
-      String methodName = method.getName();
-      Class []args = method.getParameterTypes();
-
-      if (className.startsWith("javax.ejb.")) {
-      }
-      /*
-      else if (isOld(methods, method, i)) {
-      }
-      */
-      else if (methodName.equals("equals") && args.length == 1
-	       && args[0].equals(Object.class)) {
-      }
-      else if (methodName.equals("hashCode") && args.length == 0) {
-      }
-      else {
-        ApiMethod beanMethod = null;
-
-        ApiClass ejbClass = getEJBClassWrapper();
-
-        beanMethod = ejbClass.getMethod(method.getName(),
-                                        method.getParameterTypes());
-
-        if (beanMethod == null)
-          throw new NoSuchMethodException("Can't find public method " +
-                                          method.getFullName());
-
-        CallChain call = new MethodCallChain(beanMethod.getMethod());
-        call = view.createPoolChain(call, null);
-        call = getTransactionChain(call, beanMethod, method, prefix);
-        call = getSecurityChain(call, beanMethod, prefix);
-
-        view.addMethod(new BaseMethod(method.getMethod(), call));
-      }
-    }
-  }
-
-  protected void assembleHomeMethods(BeanAssembler assembler,
-                                     BaseClass baseClass,
-                                     String contextClassName,
-                                     ApiClass homeClass,
-                                     String prefix)
-    throws NoSuchMethodException
-  {
-    for (ApiMethod method : homeClass.getMethods()) {
-      String className = method.getDeclaringClass().getName();
-      String methodName = method.getName();
-
-      if (className.startsWith("javax.ejb.")) {
-      }
-      /*
-      else if (isOld(methods, method, i)) {
-      }
-      */
-      else if (methodName.startsWith("create")) {
-        ApiMethod beanMethod = null;
-
-        String name = ("ejbCreate" + Character.toUpperCase(methodName.charAt(0))
-                       + methodName.substring(1));
-
-	beanMethod
-	  = getEJBClassWrapper().getMethod(name, method.getParameterTypes());
-
-        /*
-          baseClass.addMethod(assembler.createCreateMethod(methods[i],
-          contextClassName,
-          prefix));
-        */
-
-        /*
-          if (isStateless()) {
-          }
-          else {
-          CallChain call = new MethodCallChain(beanMethod);
-          call = getTransactionChain(call, beanMethod, prefix);
-
-          baseClass.addMethod(new BaseMethod(methods[i], call));
-          }
-        */
-	/*
-          CallChain call = new MethodCallChain(beanMethod);
-          call = getTransactionChain(call, beanMethod, prefix);
-
-          baseClass.addMethod(new BaseMethod(methods[i], call));
-	*/
-
-        //printCreate(methods[i], prefix);
-      }
-      else if (methodName.startsWith("find")) {
-        //printFind(methods[i], prefix);
-      }
-      else {
-        ApiMethod beanMethod = null;
-
-        String name = ("ejbHome" + Character.toUpperCase(methodName.charAt(0))
-                       + methodName.substring(1));
-
-	beanMethod
-	  = getEJBClassWrapper().getMethod(name, method.getParameterTypes());
-
-        CallChain call = new MethodCallChain(beanMethod.getMethod());
-        call = getTransactionChain(call, beanMethod, method, prefix);
-        call = getSecurityChain(call, beanMethod, prefix);
-
-        baseClass.addMethod(new BaseMethod(method.getMethod(), call));
-      }
-    }
   }
 
   public CallChain getTransactionChain(CallChain next,

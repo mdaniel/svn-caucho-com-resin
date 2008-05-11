@@ -31,7 +31,6 @@ package com.caucho.server.webbeans;
 
 import com.caucho.ejb.timer.EjbTimerService;
 import com.caucho.jca.UserTransactionProxy;
-import com.caucho.jms.JmsConnectionFactory;
 import com.caucho.jmx.Jmx;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
@@ -80,16 +79,6 @@ public class ResinWebBeansProducer
   public MBeanServer getMBeanServer()
   {
     return Jmx.getGlobalMBeanServer();
-  }
-  
-  /**
-   * Returns the corba ORB
-   */
-  @Produces
-  @Standard
-  public org.omg.CORBA.ORB getORB()
-  {
-    return new com.caucho.iiop.orb.ORBImpl();
   }
   
   /**

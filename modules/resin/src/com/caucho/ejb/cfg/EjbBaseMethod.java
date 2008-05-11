@@ -29,10 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.ConfigException;
-import com.caucho.ejb.cfg.*;
-import com.caucho.ejb.gen21.BeanAssembler;
-import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;
 
 /**
@@ -74,15 +70,6 @@ public class EjbBaseMethod {
   public ApiMethod getMethod()
   {
     return _method;
-  }
-
-  /**
-   * Assembles the method.
-   */
-  public BaseMethod assemble(BeanAssembler assembler, String fullClassName)
-    throws ConfigException
-  {
-    return null;
   }
 
   /**

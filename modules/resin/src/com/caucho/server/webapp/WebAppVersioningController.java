@@ -29,25 +29,11 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.config.types.PathBuilder;
-import com.caucho.log.Log;
-import com.caucho.management.j2ee.J2EEManagedObject;
-import com.caucho.management.j2ee.WebModule;
-import com.caucho.server.deploy.DeployConfig;
-import com.caucho.server.deploy.DeployControllerAdmin;
-import com.caucho.server.deploy.EnvironmentDeployController;
-import com.caucho.server.host.Host;
-import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
-import com.caucho.vfs.Path;
 
-import javax.servlet.jsp.el.ELException;
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * A configuration entry for a versioning web-app.
@@ -189,6 +175,7 @@ public class WebAppVersioningController extends WebAppController {
   /**
    * Initialize the controller.
    */
+  @Override
   protected void initBegin()
   {
     /*
@@ -239,6 +226,7 @@ public class WebAppVersioningController extends WebAppController {
   /**
    * Returns a printable view.
    */
+  @Override
   public String toString()
   {
     return "WebAppVersioningController" +  "[" + getId() + "]";

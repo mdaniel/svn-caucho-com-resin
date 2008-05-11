@@ -29,7 +29,6 @@
 
 package com.caucho.ejb;
 
-import com.caucho.amber.cfg.EntityIntrospector;
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.PersistenceEnvironmentListener;
 import com.caucho.config.ConfigException;
@@ -37,19 +36,14 @@ import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.JndiBuilder;
 import com.caucho.config.types.PathPatternType;
 import com.caucho.config.types.Period;
-import com.caucho.ejb.cfg.EjbMethod;
-import com.caucho.ejb.cfg.MessageDestination;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.ejb.metadata.Bean;
-import com.caucho.ejb.protocol.ProtocolContainer;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.log.Log;
-import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.MergePath;
@@ -58,7 +52,6 @@ import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
 import javax.jms.ConnectionFactory;
-import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.util.ArrayList;
@@ -423,38 +416,6 @@ public class EJBServer
     throws ConfigException, NamingException
   {
     _ejbContainer.setMessageConsumerMax(consumerMax);
-  }
-
-  /**
-   * Gets the entity cache size.
-   */
-  public int getEntityCacheSize()
-  {
-    return _ejbContainer.getEntityCache().getCacheSize();
-  }
-
-  /**
-   * Sets the entity cache size.
-   */
-  public void setCacheSize(int size)
-  {
-    _ejbContainer.getEntityCache().setCacheSize(size);
-  }
-
-  /**
-   * Gets the entity cache timeout.
-   */
-  public long getEntityCacheTimeout()
-  {
-    return _ejbContainer.getEntityCache().getCacheTimeout();
-  }
-
-  /**
-   * Sets the entity cache timeout.
-   */
-  public void setCacheTimeout(Period timeout)
-  {
-    _ejbContainer.getEntityCache().setCacheTimeout(timeout.getPeriod());
   }
 
   /**

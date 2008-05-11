@@ -87,11 +87,6 @@ public class EjbProtocolManager {
     _ejbContainer = ejbContainer;
     _loader = _ejbContainer.getClassLoader();
 
-    ProtocolContainer iiop = IiopProtocolContainer.createProtocolContainer();
-
-    if (iiop != null)
-      _protocolMap.put("iiop", iiop);
-
     EjbContainer parent = ejbContainer.getParent();
     if (parent != null) {
       _localJndiPrefix = parent.getProtocolManager().getLocalJndiPrefix();

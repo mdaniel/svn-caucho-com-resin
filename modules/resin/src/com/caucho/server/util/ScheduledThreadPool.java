@@ -312,7 +312,7 @@ public class ScheduledThreadPool
     if (_isShutdown)
       throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
 
-    long initialExpires = Alarm.getCurrentTime() + unit.toMillis(initialDelay);
+    long initialExpires = Alarm.getExactTime() + unit.toMillis(initialDelay);
     
     AlarmFuture future = new AlarmFuture(_loader,
 					 command,
@@ -670,7 +670,7 @@ public class ScheduledThreadPool
 
     void queue()
     {
-      _alarm.queue(_initialExpires - Alarm.getCurrentTime());
+      _alarm.queueAt(_initialExpires);
     }
 
     public boolean isCancelled()
@@ -805,21 +805,16 @@ public class ScheduledThreadPool
 	  }
 	  else if (_period > 0) {
             long now = Alarm.getCurrentTime();
-	    long time = now - _initialExpires;
-	    long modTime = time % _period;
+	    long next;
 
-	    if (modTime > 0) {
-              long delta = (_period - modTime);
-              
-	      _nextTime = now + delta;
+	    do {
+	      next = _initialExpires + _alarmCount * _period;
 
-	      _alarm.queue(delta);
-	    }
-	    else {
-	      _nextTime = now + _period;
-	      
-	      _alarm.queue(_period);
-	    }
+	      if (next < now)
+		_alarmCount++;
+	    } while (next < now);
+
+	    _alarm.queueAt(next);
 	  }
 	  else {
 	    _isDone = true;

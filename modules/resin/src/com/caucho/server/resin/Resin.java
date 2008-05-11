@@ -49,8 +49,6 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.EnvironmentProperties;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.log.RotateStream;
-import com.caucho.management.j2ee.J2EEDomain;
-import com.caucho.management.j2ee.JVM;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ResinMXBean;
 import com.caucho.management.server.ThreadPoolMXBean;
@@ -141,8 +139,6 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private long _initialStartTime;
   private long _startTime;
-  private J2EEDomain _j2eeDomainManagedObject;
-  private JVM _jvmManagedObject;
 
   private String _configFile;
   private String _configServer;

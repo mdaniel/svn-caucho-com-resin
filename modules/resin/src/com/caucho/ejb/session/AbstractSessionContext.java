@@ -30,7 +30,6 @@ package com.caucho.ejb.session;
 
 import com.caucho.config.*;
 import com.caucho.ejb.AbstractContext;
-import com.caucho.ejb.xa.*;
 import com.caucho.util.*;
 
 import javax.ejb.*;

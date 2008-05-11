@@ -28,9 +28,6 @@
 
 package com.caucho.jms;
 
-import com.caucho.config.ConfigException;
-import com.caucho.management.j2ee.J2EEManagedObject;
-import com.caucho.management.j2ee.JMSResource;
 import com.caucho.jms.memory.*;
 import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
@@ -38,12 +35,6 @@ import com.caucho.jms.connection.ConnectionFactoryImpl;
 import com.caucho.util.L10N;
 
 import javax.jms.*;
-import javax.sql.DataSource;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 

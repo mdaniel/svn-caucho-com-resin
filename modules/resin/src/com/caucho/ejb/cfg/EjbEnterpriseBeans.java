@@ -28,8 +28,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.ejb.cfg21.EjbEntityConfigProxy;
-import com.caucho.ejb.cfg21.EjbEntityBean;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
@@ -59,19 +57,6 @@ public class EjbEnterpriseBeans {
     EjbSessionBean session = sessionProxy.getSession();
 
     _config.setBeanConfig(session.getEJBName(), session);
-  }
-
-  public EjbEntityConfigProxy createEntity()
-  {
-    return new EjbEntityConfigProxy(_config, _ejbModuleName);
-  }
-  
-  public void addEntity(EjbEntityConfigProxy entityProxy)
-    throws ConfigException
-  {
-    EjbEntityBean entity = entityProxy.getEntity();
-
-    _config.setBeanConfig(entity.getEJBName(), entity);
   }
 
   public EjbBeanConfigProxy createEjbBean()

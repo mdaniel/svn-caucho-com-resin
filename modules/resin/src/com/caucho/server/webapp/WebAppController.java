@@ -31,8 +31,6 @@ package com.caucho.server.webapp;
 
 import com.caucho.config.types.PathBuilder;
 import com.caucho.log.Log;
-import com.caucho.management.j2ee.J2EEManagedObject;
-import com.caucho.management.j2ee.WebModule;
 import com.caucho.server.deploy.DeployConfig;
 import com.caucho.server.deploy.DeployControllerAdmin;
 import com.caucho.server.deploy.EnvironmentDeployController;
@@ -294,11 +292,13 @@ public class WebAppController
     return _isDynamicDeploy;
   }
 
+  @Override
   protected String getMBeanTypeName()
   {
     return "WebApp";
   }
 
+  @Override
   protected String getMBeanId()
   {
     String name = getId();
@@ -367,8 +367,6 @@ public class WebAppController
   protected void initEnd()
   {
     super.initEnd();
-
-    J2EEManagedObject.register(new WebModule(this));
   }
 
   /**
@@ -382,6 +380,7 @@ public class WebAppController
   /**
    * Returns true if the controller matches.
    */
+  @Override
   public boolean isNameMatch(String url)
   {
     if (CauchoSystem.isCaseInsensitive())
@@ -437,6 +436,7 @@ public class WebAppController
   /**
    * Returns the webApp object.
    */
+  @Override
   public boolean destroy()
   {
     if (! super.destroy())
@@ -479,6 +479,7 @@ public class WebAppController
   /**
    * Initialize the controller.
    */
+  @Override
   protected void initBegin()
   {
     getVariableMap().put("app-dir", getRootDirectory());
@@ -486,6 +487,7 @@ public class WebAppController
     super.initBegin();
   }
 
+  @Override
   protected void fillInitList(ArrayList<DeployConfig> initList)
   {
     if (_container != null) {
@@ -512,6 +514,7 @@ public class WebAppController
   /**
    * Creates the webApp.
    */
+  @Override
   protected void configureInstanceVariables(WebApp app)
     throws Throwable
   {
@@ -536,6 +539,7 @@ public class WebAppController
     super.configureInstanceVariables(app);
   }
   
+  @Override
   protected void extendJMXContext(Map<String,String> context)
   {
     context.put("WebApp", getMBeanId());
@@ -565,6 +569,7 @@ public class WebAppController
   /**
    * Override to prevent removing of special files.
    */
+  @Override
   protected void removeExpandFile(Path path, String relPath)
     throws IOException
   {
@@ -641,6 +646,7 @@ public class WebAppController
   /**
    * Returns a printable view.
    */
+  @Override
   public String toString()
   {
     if (com.caucho.util.Alarm.isTest())
@@ -711,6 +717,7 @@ public class WebAppController
       return _version;
     }
 
+    @Override
     public String toString()
     {
       return "WebApp[" + getURL() + "]";

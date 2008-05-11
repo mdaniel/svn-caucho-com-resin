@@ -39,9 +39,7 @@ import com.caucho.config.*;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.cfg.EjbConfigManager;
 import com.caucho.ejb.cfg.EjbRootConfig;
-import com.caucho.ejb.entity.EntityCache;
 import com.caucho.ejb.protocol.EjbProtocolManager;
-import com.caucho.ejb.xa.EjbTransactionManager;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.ScanListener;
@@ -66,10 +64,8 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   private final EjbContainer _parentContainer;
 
   private final EjbConfigManager _configManager;
-  private final EjbTransactionManager _transactionManager;
   private final EjbProtocolManager _protocolManager;
-  private final EntityCache _entityCache;
-
+  
   private AmberPersistenceUnit _ejbPersistenceUnit;
 
   private HashSet<String> _ejbUrls = new HashSet<String>();
@@ -104,15 +100,11 @@ public class EjbContainer implements ScanListener, EnvironmentListener
     if (_parentContainer != null)
       copyContainerDefaults(_parentContainer);
 
-    _transactionManager = new EjbTransactionManager(this);
-
     // _ejbAdmin = new EJBAdmin(this);
 
     _protocolManager = new EjbProtocolManager(this);
 
     _configManager = new EjbConfigManager(this);
-
-    _entityCache = new EntityCache();
 
     _workDir = WorkDir.getLocalWorkDir().lookup("ejb");
 
@@ -200,22 +192,6 @@ public class EjbContainer implements ScanListener, EnvironmentListener
   public EjbProtocolManager getProtocolManager()
   {
     return _protocolManager;
-  }
-
-  /**
-   * Returns the transaction manager.
-   */
-  public EjbTransactionManager getTransactionManager()
-  {
-    return _transactionManager;
-  }
-
-  /**
-   * Returns the entity cache.
-   */
-  public EntityCache getEntityCache()
-  {
-    return _entityCache;
   }
 
   /**

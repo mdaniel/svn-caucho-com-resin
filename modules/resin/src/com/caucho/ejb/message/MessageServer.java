@@ -33,7 +33,6 @@ import com.caucho.config.*;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.ejb.xa.*;
 import com.caucho.jca.*;
 import com.caucho.util.L10N;
 import com.caucho.webbeans.component.*;

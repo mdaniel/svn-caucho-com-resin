@@ -42,8 +42,6 @@ import com.caucho.ejb.session.AbstractSessionContext;
 import com.caucho.ejb.session.SessionServer;
 import com.caucho.ejb.session.StatelessServer;
 import com.caucho.ejb.timer.EjbTimerService;
-import com.caucho.ejb.xa.EjbTransactionManager;
-import com.caucho.ejb.xa.TransactionContext;
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.DynamicClassLoader;
@@ -798,26 +796,6 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   abstract public AbstractContext getContext(Object key, boolean forceLoad)
     throws FinderException;
-
-  /**
-   * Returns the currrent transaction context.
-   *
-   * @return the transaction context for the request
-   */
-  public EjbTransactionManager getTransactionManager()
-  {
-    return _ejbContainer.getTransactionManager();
-  }
-
-  /**
-   * Returns the currrent transaction context.
-   *
-   * @return the transaction context for the request
-   */
-  public TransactionContext getTransaction()
-  {
-    return _ejbContainer.getTransactionManager().getTransactionContext();
-  }
 
   /**
    * Sets the init program.

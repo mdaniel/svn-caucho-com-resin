@@ -28,7 +28,6 @@
 
 package com.caucho.ejb;
 
-import com.caucho.ejb.xa.TransactionContext;
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextException;
 import com.caucho.util.L10N;
@@ -330,12 +329,7 @@ abstract public class AbstractContext implements EJBContext {
     if (! getServer().isContainerTransaction())
       throw new IllegalStateException("getRollbackOnly() is only allowed with container-managed transaction");
 
-    TransactionContext trans = getServer().getTransaction();
-
-    if (trans != null)
-      return trans.getRollbackOnly();
-    else
-      throw new IllegalStateException("invalid transaction");
+    throw new IllegalStateException("invalid transaction");
   }
 
   /**

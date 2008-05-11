@@ -52,6 +52,7 @@ public class Alarm implements ThreadTask {
   static private Object _queueLock = new Object();
   
   static private AlarmThread _alarmThread;
+  static private CoordinatorThread _coordinatorThread;
 
   static private Alarm []_heap = new Alarm[256];
   static private int _heapTop;
@@ -190,6 +191,11 @@ public class Alarm implements ThreadTask {
 	_alarmThread = new AlarmThread();
 	_alarmThread.start();
       }
+      
+      if (_coordinatorThread == null && ! isTest()) {
+	_coordinatorThread = new CoordinatorThread();
+	_coordinatorThread.start();
+      }
     }
   }
 
@@ -318,7 +324,30 @@ public class Alarm implements ThreadTask {
       if (_heapIndex > 0)
 	dequeueImpl(this);
 
-      long wakeTime = delta + getCurrentTime();
+      long wakeTime;
+
+      if (delta >= 1000)
+	wakeTime = delta + getCurrentTime();
+      else
+	wakeTime = delta + getExactTime();
+      
+      _wakeTime = wakeTime;
+
+      insertImpl(this);
+    }
+  }
+
+  /**
+   * Queue the alarm for wakeup.
+   *
+   * @param delta time in milliseconds to wake
+   */
+  public void queueAt(long wakeTime)
+  {
+    synchronized (_queueLock) {
+      if (_heapIndex > 0)
+	dequeueImpl(this);
+      
       _wakeTime = wakeTime;
 
       insertImpl(this);
@@ -393,7 +422,7 @@ public class Alarm implements ThreadTask {
    */
   static Alarm extractAlarm()
   {
-    long now = getCurrentTime();
+    long now = getExactTime();
 
     synchronized (_queueLock) {
       Alarm []heap = _heap;
@@ -408,6 +437,25 @@ public class Alarm implements ThreadTask {
       dequeueImpl(alarm);
 
       return alarm;
+    }
+  }
+
+  /**
+   * Returns the next alarm ready to run
+   */
+  static long nextAlarmTime()
+  {
+    synchronized (_queueLock) {
+      Alarm []heap = _heap;
+
+      Alarm alarm = heap[1];
+
+      if (alarm == null) {
+	return getCurrentTime() + 12000;
+      }
+      else {
+	return alarm._wakeTime;
+      }
     }
   }
 
@@ -429,10 +477,11 @@ public class Alarm implements ThreadTask {
     Alarm []heap = _heap;
 
     int i = ++_heapTop;
-    int parent;
-    Alarm alarm;
+    int parent = 0;
+    Alarm alarm = null;
     long wakeTime = item._wakeTime;
 
+    long now = getExactTime();
     while (i > 1 && wakeTime < (alarm = heap[parent = (i >> 1)])._wakeTime) {
       heap[i] = alarm;
       alarm._heapIndex = i;
@@ -442,6 +491,12 @@ public class Alarm implements ThreadTask {
     heap[i] = item;
     item._heapIndex = i;
 
+    if (i == 1 && _coordinatorThread != null) {
+      synchronized (_coordinatorThread) {
+	_coordinatorThread.notifyAll();
+      }
+    }
+    
     if (_heapTop < i)
       throw new IllegalStateException();
   }
@@ -465,7 +520,7 @@ public class Alarm implements ThreadTask {
       throw new IllegalStateException();
 
     int size = _heapTop--;
-    
+
     heap[i] = heap[size];
     heap[i]._heapIndex = i;
     heap[size] = null;
@@ -570,8 +625,12 @@ public class Alarm implements ThreadTask {
   }
 
   static class AlarmThread extends Thread {
-    private CoordinatorTask _coordinator = new CoordinatorTask();
-
+    AlarmThread()
+    {
+      super("resin-timer");
+      setDaemon(true);
+    }
+    
     public void run()
     {
       while (true) {
@@ -580,39 +639,19 @@ public class Alarm implements ThreadTask {
 	    _currentTime = _testTime;
 	  else
 	    _currentTime = System.currentTimeMillis();
-
-	  _coordinator.schedule();
 	
-	  Thread.sleep(500);
+	  Thread.sleep(250);
 	} catch (Throwable e) {
 	}
       }
     }
+  }
 
-    AlarmThread()
+  static class CoordinatorThread extends Thread {
+    CoordinatorThread()
     {
       super("resin-alarm");
       setDaemon(true);
-    }
-  }
-
-  private static class CoordinatorTask implements ThreadTask {
-    private boolean _isRunning;
-    
-    /**
-     * schedules the task.
-     */
-    void schedule()
-    {
-      boolean isRunning;
-
-      synchronized (this) {
-	isRunning = _isRunning;
-	_isRunning = true;
-      }
-      
-      if (! isRunning)
-	ThreadPool.getThreadPool().schedulePriority(this);
     }
     
     /**
@@ -620,30 +659,38 @@ public class Alarm implements ThreadTask {
      */
     public void run()
     {
-      try {
-	Thread thread = Thread.currentThread();
-	// String oldName = thread.getName();
-      
-	// thread.setName("alarm-coordinator");
-      
-	Alarm alarm;
+      Thread thread = Thread.currentThread();
+      thread.setName("alarm-coordinator");
 
-	while ((alarm = Alarm.extractAlarm()) != null) {
-	  // throttle alarm invocations by 5ms so quick alarms don't need
-	  // extra threads
-	  if (_concurrentAlarmThrottle < _runningAlarmCount) {
-	    try {
-	      Thread.sleep(5);
-	    } catch (Throwable e) {
+      while (true) {
+	try {
+	  Alarm alarm;
+
+	  if ((alarm = Alarm.extractAlarm()) != null) {
+	    // throttle alarm invocations by 5ms so quick alarms don't need
+	    // extra threads
+	    if (_concurrentAlarmThrottle < _runningAlarmCount) {
+	      try {
+		Thread.sleep(5);
+	      } catch (Throwable e) {
+	      }
 	    }
+
+	    ThreadPool.getThreadPool().startPriority(alarm);
 	  }
 
-	  ThreadPool.getThreadPool().startPriority(alarm);
-	}
+	  synchronized (this) {
+	    long next = nextAlarmTime();
+	    long now = System.currentTimeMillis();
 
-	// thread.setName(oldName);
-      } finally {
-	_isRunning = false;
+	    if (now < next) {
+	      wait(next - now);
+	    }
+	    now = System.currentTimeMillis();
+	  }
+	} catch (Throwable e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
       }
     }
   }

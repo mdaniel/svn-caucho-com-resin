@@ -35,8 +35,6 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.types.InitParam;
-import com.caucho.management.j2ee.J2EEManagedObject;
-import com.caucho.management.j2ee.JDBCDriver;
 import com.caucho.naming.Jndi;
 import com.caucho.tools.profiler.ConnectionPoolDataSourceWrapper;
 import com.caucho.tools.profiler.DriverWrapper;
@@ -497,8 +495,6 @@ public class DriverConfig
     if (_info.size() != 0) {
       validateInitParam();
     }
-
-    J2EEManagedObject.register(new JDBCDriver(this));
   }
 
   Lifecycle getLifecycle()

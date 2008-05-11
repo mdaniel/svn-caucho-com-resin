@@ -92,7 +92,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, hessian, jws, ejb, jpa, j2ee-management, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-util, resin-deploy, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext">
+          depends="init, hessian, jws, ejb, jpa, j2ee-management, jca, jms, jsdk, jstl, jcache, jsf, jta, portlet, script, resin-util, resin-deploy, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext">
   </target>
 
   <target name="ant" depends="init">
@@ -132,6 +132,48 @@
       <param name="module.jar" value="hessian.jar"/>
       <param name="javac.source" value="1.5"/>
     </antcall>
+  </target>
+
+  <target name="javaee" 
+          depends="init, jws, ejb, jpa, jca, jms, jsdk, jstl, jcache, jsf, jta, webbeans">
+    <jar jarfile="${lib}/javaee-16.jar">
+      <fileset dir="${modules}/ejb/build">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+      </fileset>
+      <fileset dir="${modules}/jca/build">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+      </fileset>
+      <fileset dir="${modules}/jms/build">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+      </fileset>
+      <fileset dir="${modules}/jpa/build">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+      </fileset>
+      <fileset dir="${modules}/jsdk/build">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+      </fileset>
+      <fileset dir="${modules}/jsf/build">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+      </fileset>
+      <fileset dir="${modules}/jstl/build">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+      </fileset>
+      <fileset dir="${modules}/jta/build">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+      </fileset>
+      <fileset dir="${modules}/webbeans/build">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+      </fileset>
+    </jar>
   </target>
 
   <target name="j2ee-deploy" depends="init">
@@ -323,6 +365,13 @@
     </antcall>
   </target>
 
+  <target name="jcache" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jcache"/>
+      <param name="module.jar" value="jcache-16.jar"/>
+    </antcall>
+  </target>
+
   <target name="webbeans" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="webbeans"/>
@@ -354,7 +403,7 @@
     </copy>
   </target>
 
-  <target name="resin-dev" depends="init, compat, ejb, hessian, jca, jms, jsdk, jstl, jsf, jta, j2ee-management, portlet, script, resin-deploy, resin-util, webbeans, version">
+  <target name="resin-dev" depends="init, compat, ejb, hessian, jcache, jca, jms, jsdk, jstl, jsf, jta, j2ee-management, portlet, script, resin-deploy, resin-util, webbeans, version">
 
     <!-- build module -->
 
@@ -592,6 +641,7 @@
 
       <packageset dir="${modules}/jsdk/src"/>
       <packageset dir="${modules}/ejb/src"/>
+      <packageset dir="${modules}/jcache/src"/>
       <packageset dir="${modules}/jpa/src"/>
       <!--
       <packageset dir="${modules}/j2ee-deploy/src"/>
@@ -792,6 +842,7 @@
         <include name="lib/aopalliance.jar"/>
         <include name="lib/activation.jar"/>
         <include name="lib/javamail-14.jar"/>
+        <include name="lib/jcache.jar"/>
         <include name="lib/ejb-15.jar"/>
         <include name="lib/hessian.jar"/>
         <!--
@@ -1152,6 +1203,12 @@
       <param name="module.name" value="jca"/>
       <param name="jar.name" value="jca-15.jar"/>
       <param name="maven.name" value="resin-jca"/>
+    </antcall>
+
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="jcache"/>
+      <param name="jar.name" value="jcache-16.jar"/>
+      <param name="maven.name" value="resin-jcache"/>
     </antcall>
 
     <antcall target="maven2-module" inheritRefs="true">

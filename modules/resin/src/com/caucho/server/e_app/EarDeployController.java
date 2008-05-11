@@ -30,8 +30,6 @@
 package com.caucho.server.e_app;
 
 import com.caucho.log.Log;
-import com.caucho.management.j2ee.J2EEApplication;
-import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.server.deploy.DeployControllerAdmin;
 import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.webapp.WebAppContainer;
@@ -63,8 +61,7 @@ public class EarDeployController
   private ArrayList<EarConfig> _eAppDefaults = new ArrayList<EarConfig>();
 
   private EarAdmin _admin = new EarAdmin(this);
-  private J2EEApplication _j2eeAdmin;
-
+ 
   EarDeployController(String name,
                       WebAppContainer container, EarConfig config)
   {
@@ -128,9 +125,6 @@ public class EarDeployController
   protected void initEnd()
   {
     super.initEnd();
-
-    _j2eeAdmin = new J2EEApplication(this);
-    J2EEManagedObject.register(_j2eeAdmin);
   }
 
   /**
@@ -180,7 +174,6 @@ public class EarDeployController
 
     try {
       thread.setContextClassLoader(getParentClassLoader());
-      J2EEManagedObject.unregister(_j2eeAdmin);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

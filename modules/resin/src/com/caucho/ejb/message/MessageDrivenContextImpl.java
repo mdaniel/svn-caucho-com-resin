@@ -31,7 +31,6 @@ package com.caucho.ejb.message;
 
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.xa.TransactionContext;
 import com.caucho.transaction.*;
 import com.caucho.util.L10N;
 

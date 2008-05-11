@@ -35,10 +35,6 @@ import com.caucho.config.types.Period;
 import com.caucho.jca.ConnectionPool;
 import com.caucho.jca.ResourceManagerImpl;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.log.Log;
-import com.caucho.management.j2ee.J2EEManagedObject;
-import com.caucho.management.j2ee.JDBCDataSource;
-import com.caucho.management.j2ee.JDBCResource;
 import com.caucho.naming.Jndi;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
@@ -688,10 +684,7 @@ public class DBPool
       WebBeansContainer.create().addSingleton(this, name);
     else
       WebBeansContainer.create().addSingleton(this);
-
-    J2EEManagedObject.register(new JDBCResource(this));
-    J2EEManagedObject.register(new JDBCDataSource(this));
-  }
+ }
 
   /**
    * Returns a new or pooled connection.

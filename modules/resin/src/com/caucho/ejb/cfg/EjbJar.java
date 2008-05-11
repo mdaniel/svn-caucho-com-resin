@@ -28,7 +28,6 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.ejb.cfg21.CmpRelation;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.config.types.Signature;
@@ -189,17 +188,6 @@ public class EjbJar extends DescriptionGroupConfig {
     Relationships(EjbConfig config)
     {
       _config = config;
-    }
-
-    public CmpRelation createEjbRelation()
-    {
-      return new CmpRelation(_config);
-    }
-
-    public void addEjbRelation(CmpRelation rel)
-      throws ConfigException
-    {
-      _config.addRelation(rel);
     }
   }
 }

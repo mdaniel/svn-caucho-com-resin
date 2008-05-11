@@ -29,14 +29,12 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.ejb.cfg21.EjbHomeView;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.types.EnvEntry;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.gen.BeanGenerator;
-import com.caucho.ejb.gen21.BeanAssembler;
 import com.caucho.ejb.gen.SessionGenerator;
 import com.caucho.ejb.gen.StatefulGenerator;
 import com.caucho.ejb.gen.StatelessGenerator;
@@ -337,49 +335,6 @@ public class EjbSessionBean extends EjbBean {
       Class home = remoteHomeAnn.value();
       setHome(home);
     }
-  }
-
-  /**
-   * Creates the assembler for the bean.
-   */
-  protected BeanAssembler createAssembler(String fullClassName)
-  {
-    throw new IllegalStateException(getClass().getName());
-  }
-
-  /**
-   * Adds the assemblers.
-   */
-  protected void addImports(BeanAssembler assembler)
-  {
-    super.addImports(assembler);
-
-    if (isStateless()) {
-      assembler.addImport("com.caucho.ejb.session.StatelessServer");
-      assembler.addImport("com.caucho.ejb.session.AbstractStatelessContext");
-      assembler.addImport("com.caucho.ejb.session.StatelessHome");
-      assembler.addImport("com.caucho.ejb.session.StatelessObject21");
-      assembler.addImport("com.caucho.ejb.session.StatelessObject");
-    }
-    else {
-      assembler.addImport("com.caucho.ejb.session.SessionServer");
-      assembler.addImport("com.caucho.ejb.session.AbstractSessionContext");
-      assembler.addImport("com.caucho.ejb.session.SessionHome");
-      assembler.addImport("com.caucho.ejb.session.SessionObject21");
-      assembler.addImport("com.caucho.ejb.session.SessionObject");
-    }
-  }
-
-  /**
-   * Creates the views.
-   */
-  protected EjbHomeView createHomeView(ApiClass homeClass, String prefix)
-    throws ConfigException
-  {
-    if (isStateless())
-      return new EjbStatelessHomeView(this, homeClass, prefix);
-    else
-      return new EjbSessionHomeView(this, homeClass, prefix);
   }
 
   /**

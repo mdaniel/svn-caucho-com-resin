@@ -29,8 +29,6 @@
 package com.caucho.jms.connection;
 
 import com.caucho.config.ConfigException;
-import com.caucho.management.j2ee.J2EEManagedObject;
-import com.caucho.management.j2ee.JMSResource;
 import com.caucho.jms.memory.*;
 import com.caucho.util.L10N;
 import com.caucho.webbeans.component.HandleAware;
