@@ -2379,10 +2379,12 @@ public class QuercusParser {
       token = parseToken();
       _peekToken = token;
 
-      if (token == '$')
-        return _factory.createInstanceOfVar(expr, parseShiftExpr());
+      Expr classNameExpr = parseShiftExpr();
+      
+      if (classNameExpr instanceof ConstExpr)
+        return _factory.createInstanceOf(expr, classNameExpr.toString());
       else
-        return _factory.createInstanceOf(expr, parseIdentifier());
+        return _factory.createInstanceOfVar(expr, classNameExpr);
       
     default:
       _peekToken = token;
