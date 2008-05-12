@@ -43,6 +43,7 @@ import java.util.Iterator;
 public class InterleaveItem extends Item {
   protected final static L10N L = new L10N(InterleaveItem.class);
 
+  private boolean _allEmpty = true;
   private ArrayList<Item> _items = new ArrayList<Item>();
 
   public InterleaveItem()
@@ -61,8 +62,10 @@ public class InterleaveItem extends Item {
 
   public void addItem(Item item)
   {
-    if (item == null)
+    if (item == null) {
+      _allEmpty = false;
       return;
+    }
     else if (item instanceof EmptyItem) {
       return;
     }
@@ -111,13 +114,14 @@ public class InterleaveItem extends Item {
     }
     */
 
+    _allEmpty = false;
     _items.add(item);
   }
 
   public Item getMin()
   {
     if (_items.size() == 0)
-      return null;
+      return _allEmpty ? EmptyItem.create() : null;
     else if (_items.size() == 1)
       return _items.get(0);
     else
@@ -483,6 +487,11 @@ public class InterleaveItem extends Item {
     }
 
     return true;
+  }
+
+  public String toString()
+  {
+    return "InterleaveItem" + _items;
   }
 }
 

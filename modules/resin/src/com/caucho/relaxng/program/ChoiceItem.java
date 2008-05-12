@@ -102,8 +102,8 @@ public class ChoiceItem extends Item {
         }
       }
       
-      if (item instanceof GroupItem &&
-          subItem instanceof GroupItem) {
+      if (item instanceof GroupItem
+	  && subItem instanceof GroupItem) {
         GroupItem group1 = (GroupItem) item;
         GroupItem group2 = (GroupItem) subItem;
 
@@ -127,8 +127,8 @@ public class ChoiceItem extends Item {
       return null;
     else if (_allowEmpty && _items.size() == 0)
       return EmptyItem.create();
-    else if (_items.size() == 1 &&
-             (! _allowEmpty || _items.get(0).allowEmpty()))
+    else if (_items.size() == 1
+	     && (! _allowEmpty || _items.get(0).allowEmpty()))
       return _items.get(0);
     else
       return this;
@@ -516,6 +516,10 @@ public class ChoiceItem extends Item {
       if (i != 0)
         sb.append(", ");
       sb.append(_items.get(i));
+    }
+
+    if (_allowEmpty) {
+      sb.append(",empty");
     }
 
     sb.append("]");

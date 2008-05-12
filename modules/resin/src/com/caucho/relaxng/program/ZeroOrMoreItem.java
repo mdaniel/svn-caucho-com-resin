@@ -84,7 +84,7 @@ public class ZeroOrMoreItem extends Item {
    */
   public Iterator<Item> getItemsIterator()
   {
-    return itemIterator( _item );
+    return itemIterator(_item);
   }
 
   /**

@@ -31,6 +31,7 @@ package com.caucho.loader;
 
 import com.caucho.config.ConfigException;
 import com.caucho.loader.enhancer.EnhancerManager;
+import com.caucho.loader.ivy.IvyLoader;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -86,6 +87,14 @@ public class ClassLoaderConfig {
    * Adds a simple class loader.
    */
   public void addSimpleLoader(SimpleLoader loader)
+  {
+    _classLoader.addLoader(loader, _index++);
+  }
+
+  /**
+   * Adds an ivy class loader.
+   */
+  public void addIvyLoader(IvyLoader loader)
   {
     _classLoader.addLoader(loader, _index++);
   }

@@ -235,8 +235,9 @@ public class InElementItem extends Item {
   {
     Item nextElt = _eltItem.attributeEnd();
 
-    if (nextElt == null)
+    if (nextElt == null) {
       return null;
+    }
     else if (nextElt == _eltItem)
       return this;
     else

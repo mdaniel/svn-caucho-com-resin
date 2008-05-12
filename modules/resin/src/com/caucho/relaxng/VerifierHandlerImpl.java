@@ -238,12 +238,15 @@ public class VerifierHandlerImpl extends DefaultHandler
       }
 
       newItem = _item.attributeEnd();
-      if (newItem == null)
+      if (newItem == null) {
+	System.out.println("ITEM: " + _item);
         throw new RelaxException(L.l("<{0}> expects more attributes.{1}",
                                      qName, 
 				     attributeMessageDetail(_item,
-							      parentItem,
-							      qName, null)));
+							    parentItem,
+							    qName, null)));
+      }
+      
       _item = newItem;
     } catch (Exception e) {
       error(e);

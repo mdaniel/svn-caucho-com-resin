@@ -92,7 +92,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, hessian, jws, ejb, jpa, j2ee-management, jca, jms, jsdk, jstl, jcache, jsf, jta, portlet, script, resin-util, resin-deploy, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext">
+          depends="init, hessian, jws, ejb, jpa, jca, jms, jsdk, jstl, jcache, jsf, jta, portlet, script, resin-util, resin-deploy, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext">
   </target>
 
   <target name="ant" depends="init">
@@ -403,7 +403,7 @@
     </copy>
   </target>
 
-  <target name="resin-dev" depends="init, compat, ejb, hessian, jcache, jca, jms, jsdk, jstl, jsf, jta, j2ee-management, portlet, script, resin-deploy, resin-util, webbeans, version">
+  <target name="resin-dev" depends="init, compat, ejb, hessian, jcache, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-deploy, resin-util, webbeans, version">
 
     <!-- build module -->
 
@@ -639,15 +639,13 @@
       source="1.5"
       splitindex="yes">
 
-      <packageset dir="${modules}/jsdk/src"/>
       <packageset dir="${modules}/ejb/src"/>
+      <packageset dir="${modules}/jsdk/src"/>
       <packageset dir="${modules}/jcache/src"/>
       <packageset dir="${modules}/jpa/src"/>
       <!--
       <packageset dir="${modules}/j2ee-deploy/src"/>
-      -->
       <packageset dir="${modules}/j2ee-management/src"/>
-      <!--
       <packageset dir="${modules}/jaf/src"/>
       -->
       <packageset dir="${modules}/jaxrpc/src"/>
@@ -855,7 +853,9 @@
         <include name="lib/jaxws-api.jar"/>
         <include name="lib/jws-15.jar"/>
         <include name="lib/jpa-15.jar"/>
+	<!--
         <include name="lib/j2ee-management-10.jar"/>
+	-->
         <include name="lib/jca-15.jar"/>
         <include name="lib/jms-11.jar"/>
         <include name="lib/jsdk-15.jar"/>
