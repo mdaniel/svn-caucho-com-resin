@@ -44,6 +44,7 @@ public class FacesSelectItemTag extends UIComponentELTag
   private ValueExpression _itemEscaped;
   private ValueExpression _itemLabel;
   private ValueExpression _itemValue;
+  private ValueExpression _value;
   private String _id;
 
   public String getComponentType()
@@ -91,6 +92,16 @@ public class FacesSelectItemTag extends UIComponentELTag
     _itemEscaped = escape;
   }
 
+  public ValueExpression getValue()
+  {
+    return _value;
+  }
+
+  public void setValue(ValueExpression value)
+  {
+    _value = value;
+  }
+
   /**
    * Sets the overridden properties of the tag
    */
@@ -113,6 +124,9 @@ public class FacesSelectItemTag extends UIComponentELTag
 
     if (_itemValue != null)
       component.setValueExpression("itemValue", _itemValue);
+
+    if (_value != null)
+      component.setValueExpression("value", _value);
   }
 
   public void release()
@@ -122,6 +136,7 @@ public class FacesSelectItemTag extends UIComponentELTag
     _itemEscaped = null;
     _itemLabel = null;
     _itemValue = null;
+    _value = null;
 
     super.release();
   }

@@ -235,6 +235,8 @@ class HtmlDataTableRenderer extends BaseRenderer
     String footerClass;
     String columnClasses;
     String rowClasses;
+    int first = 0;
+    int rows = 0;
 
     UIData uiData = (UIData) component;
 
@@ -247,6 +249,8 @@ class HtmlDataTableRenderer extends BaseRenderer
       footerClass = html.getFooterClass();
       columnClasses = html.getColumnClasses();
       rowClasses = html.getRowClasses();
+      first = html.getFirst();
+      rows = html.getRows();
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
@@ -444,62 +448,62 @@ class HtmlDataTableRenderer extends BaseRenderer
     if (footer != null && footer.isRendered() || hasColumnFooter)
       out.endElement("tfoot");
 
-    int count = 0;
-
     int dataCount = uiData.getRowCount();
 
-    if (dataCount > 0)
+    if (rows > 0 && (first + rows) < dataCount)
+      dataCount = first + rows;
+
+    if ((dataCount - first) > 0) {
       out.startElement("tbody", uiData);
-    
-    for (int row = 0; row < dataCount; row++) {
-      uiData.setRowIndex(row);
-      
-      out.startElement("tr", uiData);
-      
-      if (rowClassArray != null) {
-	String v = rowClassArray[row % rowClassArray.length];
-	  
-	out.writeAttribute("class", v, "rowClasses");
+
+      for (int row = first; row < dataCount; row++) {
+        uiData.setRowIndex(row);
+
+        out.startElement("tr", uiData);
+
+        if (rowClassArray != null) {
+          String v = rowClassArray [row % rowClassArray.length];
+
+          out.writeAttribute("class", v, "rowClasses");
+        }
+
+        for (int i = 0; i < size; i++) {
+          UIComponent child = children.get(i);
+
+          if (!child.isRendered())
+            continue;
+
+          out.startElement("td", child);
+
+          if (columnClassArray != null) {
+            String v = columnClassArray [i % columnClassArray.length];
+
+            out.writeAttribute("class", v, "columnClasses");
+          }
+
+          if (child instanceof UIColumn) {
+            int subCount = child.getChildCount();
+
+            for (int j = 0; j < subCount; j++) {
+              UIComponent subChild = child.getChildren().get(j);
+
+              subChild.encodeBegin(context);
+              subChild.encodeChildren(context);
+              subChild.encodeEnd(context);
+            }
+          }
+          else {
+            child.encodeBegin(context);
+            child.encodeChildren(context);
+            child.encodeEnd(context);
+          }
+          out.endElement("td");
+        }
+
+        out.endElement("tr");
       }
-
-      for (int i = 0; i < size; i++) {
-	UIComponent child = children.get(i);
-
-	if (! child.isRendered())
-	  continue;
-
-	out.startElement("td", child);
-
-	if (columnClassArray != null) {
-	  String v = columnClassArray[i % columnClassArray.length];
-	  
-	  out.writeAttribute("class", v, "columnClasses");
-	}
-      
-	if (child instanceof UIColumn) {
-	  int subCount = child.getChildCount();
-	
-	  for (int j = 0; j < subCount; j++) {
-	    UIComponent subChild = child.getChildren().get(j);
-	  
-	    subChild.encodeBegin(context);
-	    subChild.encodeChildren(context);
-	    subChild.encodeEnd(context);
-	  }
-	}
-	else {
-	  child.encodeBegin(context);
-	  child.encodeChildren(context);
-	  child.encodeEnd(context);
-	}
-	out.endElement("td");
-      }
-      
-      out.endElement("tr");
-    }
-
-    if (dataCount > 0)
       out.endElement("tbody");
+    }
 
     uiData.setRowIndex(-1);
   }

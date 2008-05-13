@@ -47,6 +47,8 @@ import javax.servlet.jsp.tagext.*;
 public class HtmlCommandButtonTag extends HtmlStyleBaseTag {
   private MethodExpression _action;
   private ActionListener _actionListener;
+  private ValueExpression _label;
+  private ValueExpression _immediate;
     
   public String getComponentType()
   {
@@ -61,6 +63,31 @@ public class HtmlCommandButtonTag extends HtmlStyleBaseTag {
   public void setAction(MethodExpression expr)
   {
     _action = expr;
+  }
+
+  public MethodExpression getAction()
+  {
+    return _action;
+  }
+
+  public ValueExpression getLabel()
+  {
+    return _label;
+  }
+
+  public void setLabel(ValueExpression label)
+  {
+    _label = label;
+  }
+
+  public ValueExpression getImmediate()
+  {
+    return _immediate;
+  }
+
+  public void setImmediate(ValueExpression immediate)
+  {
+    _immediate = immediate;
   }
 
   public void setActionListener(MethodExpression expr)
@@ -81,6 +108,11 @@ public class HtmlCommandButtonTag extends HtmlStyleBaseTag {
     if (_action != null)
       command.setActionExpression(_action);
 
+    if (_label != null)
+      command.setValueExpression("label", _label);
+
+    if (_immediate != null)
+      command.setValueExpression("immediate", _immediate);
 
     if (_actionListener != null) {
       ActionListener actionListener = null;
@@ -96,5 +128,16 @@ public class HtmlCommandButtonTag extends HtmlStyleBaseTag {
       if (actionListener == null)
         command.addActionListener(_actionListener);
     }
+  }
+
+  @Override
+  public void release()
+  {
+    _action = null;
+    _actionListener = null;
+    _label = null;
+    _immediate = null;
+    
+    super.release();
   }
 }

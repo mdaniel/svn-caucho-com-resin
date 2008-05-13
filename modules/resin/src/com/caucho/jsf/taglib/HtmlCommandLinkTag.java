@@ -48,7 +48,9 @@ public class HtmlCommandLinkTag extends HtmlStyleBaseTag {
   private MethodExpression _action;
   
   private ActionListener _actionListener;
-    
+
+  private ValueExpression _immediate;
+
   public String getComponentType()
   {
     return HtmlCommandLink.COMPONENT_TYPE;
@@ -62,6 +64,21 @@ public class HtmlCommandLinkTag extends HtmlStyleBaseTag {
   public void setAction(MethodExpression expr)
   {
     _action = expr;
+  }
+
+  public MethodExpression getAction()
+  {
+    return _action;
+  }
+
+  public ValueExpression getImmediate()
+  {
+    return _immediate;
+  }
+
+  public void setImmediate(ValueExpression immediate)
+  {
+    _immediate = immediate;
   }
 
   public void setActionListener(MethodExpression expr)
@@ -82,6 +99,9 @@ public class HtmlCommandLinkTag extends HtmlStyleBaseTag {
     if (_action != null)
       command.setActionExpression(_action);
 
+    if (_immediate != null)
+      component.setValueExpression("immediate", _immediate);
+
     if (_actionListener != null) {
       ActionListener actionListener = null;
 
@@ -96,5 +116,15 @@ public class HtmlCommandLinkTag extends HtmlStyleBaseTag {
       if (actionListener == null)
         command.addActionListener(_actionListener);
     }
+  }
+
+  public void release()
+  {
+
+    this._actionListener = null;
+    this._action = null;
+    this._immediate = null;
+
+    super.release();
   }
 }
