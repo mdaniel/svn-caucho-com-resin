@@ -45,7 +45,9 @@ import javax.servlet.jsp.tagext.*;
  */
 public class HtmlDataTableTag extends HtmlStyleBaseTag {
   private String _var;
-  
+  private ValueExpression _first;
+  private ValueExpression _rows;
+
   public String getComponentType()
   {
     return HtmlDataTable.COMPONENT_TYPE;
@@ -60,7 +62,27 @@ public class HtmlDataTableTag extends HtmlStyleBaseTag {
   {
     _var = var;
   }
-  
+
+  public ValueExpression getFirst()
+  {
+    return _first;
+  }
+
+  public void setFirst(ValueExpression first)
+  {
+    _first = first;
+  }
+
+  public ValueExpression getRows()
+  {
+    return _rows;
+  }
+
+  public void setRows(ValueExpression rows)
+  {
+    _rows = rows;
+  }
+
   /**
    * Sets the overridden properties of the tag
    */
@@ -69,7 +91,21 @@ public class HtmlDataTableTag extends HtmlStyleBaseTag {
   {
     super.setProperties(component);
 
+    if (_first != null)
+      component.setValueExpression("first", _first);
+
+    if (_rows != null)
+      component.setValueExpression("rows", _rows);
+
     if (_var != null)
       ((UIData) component).setVar(_var);
+  }
+
+  public void release()
+  {
+    _first = null;
+    _rows = null;
+
+    super.release();
   }
 }

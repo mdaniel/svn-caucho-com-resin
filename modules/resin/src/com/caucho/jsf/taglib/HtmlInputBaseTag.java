@@ -157,6 +157,22 @@ public class HtmlInputBaseTag
 	_valueChangeExpression);
   }
 
+  public ValueExpression getImmediate()
+  {
+    if (_map != null)
+      return _map.get("immediate");
+
+    return null;
+  }
+
+    public void setImmediate(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String, ValueExpression>();
+
+    _map.put("immediate", value);
+  }
+
   @Override
   protected void setProperties(UIComponent component)
   {
