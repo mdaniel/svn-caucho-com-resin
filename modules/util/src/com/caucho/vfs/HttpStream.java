@@ -360,8 +360,22 @@ class HttpStream extends StreamImpl {
         }
       }
     }
-    else
-      _attributes.put(name.toLowerCase(), value);
+    else {
+      Object oldValue = _attributes.put(name.toLowerCase(), value);
+
+      if (oldValue instanceof String[]) {
+	String []old = (String []) oldValue;
+	String []newValue = new String[old.length + 1];
+	System.arraycopy(old, 0, newValue, 0, old.length);
+	newValue[old.length] = String.valueOf(value);
+	_attributes.put(name.toLowerCase(), newValue);
+      }
+      else if (oldValue != null) {
+	String []newValue = new String[] { String.valueOf(oldValue),
+					   String.valueOf(value) };
+	_attributes.put(name.toLowerCase(), newValue);
+      }
+    }
   }
 
   /**
@@ -556,8 +570,12 @@ class HttpStream extends StreamImpl {
       _ws.print(_path.getQuery());
     }
     _ws.print(" HTTP/1.1\r\n");
+    Object host = getAttribute("host");
     _ws.print("Host: ");
-    if (_virtualHost != null)
+    if (host != null) {
+      _ws.print(host);
+    }
+    else if (_virtualHost != null)
       _ws.print(_virtualHost);
     else {
       _ws.print(_path.getHost());
@@ -576,8 +594,17 @@ class HttpStream extends StreamImpl {
     Iterator iter = getAttributeNames();
     while (iter.hasNext()) {
       String name = (String) iter.next();
-      if (_reserved.get(name.toLowerCase()) == null)
-	_ws.print(name + ": " + getAttribute(name) + "\r\n");
+      if (_reserved.get(name.toLowerCase()) == null) {
+	Object value = getAttribute(name);
+	if (value instanceof String[]) {
+	  String []values = (String []) value;
+	  for (int i = 0; i < values.length; i++) {
+	    _ws.print(name + ": " + values[i] + "\r\n");
+	  }
+	}
+	else
+	  _ws.print(name + ": " + value + "\r\n");
+      }
     }
     if (! _isKeepalive)
       _ws.print("Connection: close\r\n");

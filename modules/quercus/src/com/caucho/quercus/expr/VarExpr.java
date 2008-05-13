@@ -290,10 +290,13 @@ public class VarExpr
    */
   public void evalUnset(Env env)
   {
+    // php/023b
+    /*
     if (getVarInfo().isGlobal())
       env.unsetGlobalVar(_name);
     else
-      env.unsetLocalVar(_name);
+    */
+    env.unsetLocalVar(_name);
   }
 
   public int hashCode()

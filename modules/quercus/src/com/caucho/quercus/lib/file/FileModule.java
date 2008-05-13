@@ -404,7 +404,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     // quercus/160m
 
-    if (!directory.canRead()) {
+    if (! directory.canRead()) {
       env.warning(L.l("{0} cannot be read", directory.getFullPath()));
 
       return BooleanValue.FALSE;
@@ -422,7 +422,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     // quercus/160n
 
-    if (!directory.canRead()) {
+    if (! directory.canRead()) {
       env.warning(L.l("{0} cannot be read", directory.getFullPath()));
 
       return BooleanValue.FALSE;
@@ -736,7 +736,7 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value fileatime(Env env, Path path)
   {
-    if (!path.canRead()) {
+    if (! path.canRead()) {
       env.warning(L.l("{0} cannot be read", path.getFullPath()));
       return BooleanValue.FALSE;
     }
@@ -756,7 +756,7 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value filectime(Env env, Path path)
   {
-    if (!path.canRead()) {
+    if (! path.canRead()) {
       env.warning(L.l("{0} cannot be read", path.getFullPath()));
       return BooleanValue.FALSE;
     }
@@ -776,7 +776,7 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value filegroup(Env env, Path path)
   {
-    if (!path.canRead()) {
+    if (! path.canRead()) {
       env.warning(L.l("{0} cannot be read", path.getFullPath()));
       return BooleanValue.FALSE;
     }
@@ -791,7 +791,7 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value fileinode(Env env, Path path)
   {
-    if (!path.canRead()) {
+    if (! path.canRead()) {
       env.warning(L.l("{0} cannot be read", path.getFullPath()));
       return BooleanValue.FALSE;
     }
@@ -842,11 +842,6 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value fileperms(Env env, Path path)
   {
-    if (!path.canRead()) {
-      env.warning(L.l("{0} cannot be read", path.getFullPath()));
-      return BooleanValue.FALSE;
-    }
-
     return new LongValue(path.getMode());
   }
 
@@ -2541,12 +2536,12 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param dirV the directory resource
    */
-  public static void closedir(Env env, @NotNull DirectoryValue dirV)
+  public static Value closedir(Env env, @NotNull DirectoryValue dirV)
   {
-    if (dirV == null)
-      return;
-    
-    dirV.close();
+    if (dirV != null)
+      dirV.close();
+
+    return NullValue.NULL;
   }
 
   /**

@@ -52,6 +52,8 @@ public class IvyManager {
   
   private ArrayList<IvyDependency> _dependencyList
     = new ArrayList<IvyDependency>();
+
+  private boolean _isModified;
   
   private ArrayList<Path> _jarList = new ArrayList<Path>();
 
@@ -70,7 +72,7 @@ public class IvyManager {
 
   void init()
   {
-    if (_cacheList == null) {
+    if (_cacheList.size() == 0) {
       IvyCache cache = new IvyCache(this);
       cache.init();
       
@@ -97,6 +99,7 @@ public class IvyManager {
     config.configure(module, ivyFile, SCHEMA);
 
     _moduleList.add(module);
+    _isModified = true;
 
     return module;
   }
@@ -113,21 +116,29 @@ public class IvyManager {
 
   public ArrayList<Path> resolve()
   {
-    ArrayList<IvyModule> list = new ArrayList<IvyModule>(_moduleList);
+    while (_isModified) {
+      _isModified = false;
+      
+      ArrayList<IvyModule> list = new ArrayList<IvyModule>(_moduleList);
     
-    for (IvyModule module : list) {
-      for (IvyDependency depend : module.getDependencyList()) {
-	resolve(depend);
+      for (IvyModule module : list) {
+	for (IvyDependency depend : module.getDependencyList()) {
+	  resolve(depend);
+	}
       }
-    }
+      System.out.println("LIST: " + _dependencyList);
+      System.out.println("CACHE: " + _cacheList);
+      ArrayList<IvyDependency> depList
+	= new ArrayList<IvyDependency>(_dependencyList);
+      for (IvyDependency dependency : depList) {
+	for (IvyCache cache : _cacheList) {
+	  Path path = dependency.resolve(cache);
 
-    for (IvyDependency dependency : _dependencyList) {
-      for (IvyCache cache : _cacheList) {
-	Path path = dependency.resolve(cache);
-
-	if (path != null && path.canRead()) {
-	  addJar(path);
-	  break;
+	  System.out.println("PATH: " + path + " " + dependency);
+	  if (path != null && path.canRead()) {
+	    addJar(path);
+	    break;
+	  }
 	}
       }
     }
@@ -158,6 +169,7 @@ public class IvyManager {
       }
     }
 
+    _isModified = true;
     _dependencyList.add(dependency);
 
     return dependency;
@@ -176,5 +188,33 @@ public class IvyManager {
   public String toString()
   {
     return getClass().getSimpleName() + "[]";
+  }
+
+  static class IvyModuleKey {
+    private String _org;
+    private String _name;
+
+    IvyModuleKey(String org, String name)
+    {
+      _org = org;
+      _name = name;
+    }
+
+    public int hashCode()
+    {
+      return _org.hashCode() * 6551 + _name.hashCode();
+    }
+
+    public boolean equals(Object o)
+    {
+      if (this == o)
+	return true;
+      else if (! (o instanceof IvyModuleKey))
+	return false;
+
+      IvyModuleKey key = (IvyModuleKey) o;
+
+      return _org.equals(key._org) && _name.equals(key._name);
+    }
   }
 }

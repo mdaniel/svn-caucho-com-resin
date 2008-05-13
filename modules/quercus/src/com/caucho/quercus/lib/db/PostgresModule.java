@@ -2833,12 +2833,13 @@ public class PostgresModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public static String pg_result_error(Env env,
-                                       @NotNull PostgresResult result)
+                                       @Optional PostgresResult result)
   {
     try {
-
-      return result.getConnection().getErrorMessage();
-
+      if (result != null)
+	return result.getConnection().getErrorMessage();
+      else
+	return null;
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return null;

@@ -213,9 +213,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
 
     _rolloverLog.init();
 
-    long now = Alarm.getCurrentTime();
-    
-    _alarm.queue(_rolloverLog.getNextRolloverCheckTime() - now);
+    _alarm.queueAt(_rolloverLog.getNextRolloverCheckTime());
   }
 
   /**
@@ -264,9 +262,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
     _rolloverLog.flush();
     _rolloverLog.rollover();
 
-    long now = Alarm.getCurrentTime();
-
-    _alarm.queue(_rolloverLog.getNextRolloverCheckTime() - now);
+    _alarm.queueAt(_rolloverLog.getNextRolloverCheckTime());
   }
 
   /**
@@ -286,9 +282,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       if (! _isClosed) {
-	long now = Alarm.getCurrentTime();
-
-	_alarm.queue(_rolloverLog.getNextRolloverCheckTime() - now);
+	_alarm.queueAt(_rolloverLog.getNextRolloverCheckTime());
       }
     }
   }

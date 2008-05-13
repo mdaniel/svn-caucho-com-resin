@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.i18n;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
@@ -74,8 +75,8 @@ public class UnicodeModule extends AbstractQuercusModule {
   }
 
   public static StringValue unicode_decode(Env env,
-                              BytesValue str,
-                              String encoding)
+					   BytesValue str,
+					   String encoding)
   {
     return str.convertToUnicode(env, encoding);
   }
@@ -91,18 +92,13 @@ public class UnicodeModule extends AbstractQuercusModule {
    * Returns the first occurence of the substring in the haystack.
    * Uses iconv.internal_encoding.
    *
-   * @param env
-   * @param haystack
-   * @param needle
-   * @param offset
-   * @param charset
    * @return first occurence of needle in haystack, FALSE otherwise
    */
   public static Value iconv_strpos(Env env,
-                       StringValue haystack,
-                       StringValue needle,
-                       @Optional("0") int offset,
-                       @Optional("") String charset)
+				   StringValue haystack,
+				   StringValue needle,
+				   @Optional("0") int offset,
+				   @Optional("") String charset)
   {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
@@ -122,17 +118,14 @@ public class UnicodeModule extends AbstractQuercusModule {
    * Returns the last occurence of the substring in the haystack.
    * Uses iconv.internal_encoding.
    *
-   * @param env
-   * @param haystack
-   * @param needle
    * @param charset encoding of StringValue arguments
    *
    * @return last occurence of needle in haystack, FALSE otherwise
    */
   public static Value iconv_strrpos(Env env,
-                       StringValue haystack,
-                       StringValue needle,
-                       @Optional("") String charset)
+				    StringValue haystack,
+				    StringValue needle,
+				    @Optional("") String charset)
   {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
@@ -398,6 +391,9 @@ public class UnicodeModule extends AbstractQuercusModule {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(L.l(e.getMessage()));
     }
+    catch (NoClassDefFoundError e) {
+      throw new QuercusException(L.l("mime_decode requires javamail.jar"));
+    }
 
     return BooleanValue.FALSE;
   }
@@ -413,9 +409,9 @@ public class UnicodeModule extends AbstractQuercusModule {
    * @param charset to encode resultant 
    */
   public static Value iconv_mime_decode(Env env,
-                              StringValue encodedHeader,
-                              @Optional("1") int mode,
-                              @Optional("") String charset)
+					StringValue encodedHeader,
+					@Optional("1") int mode,
+					@Optional("") String charset)
   {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");

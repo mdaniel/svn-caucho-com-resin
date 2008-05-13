@@ -139,7 +139,7 @@ public class IvyCache {
   public void init()
   {
     if (_defaultCacheDir == null) {
-      Path userDir = Vfs.lookup(System.getProperty("user.dir"));
+      Path userDir = Vfs.lookup(System.getProperty("user.home"));
       _defaultCacheDir = userDir.lookup(".ivy2/cache");
       
       log.fine("ivy-loader using " + _defaultCacheDir);
@@ -153,5 +153,10 @@ public class IvyCache {
 
     if (_ivyPattern == null)
       _ivyPattern = new IvyPattern(IVY_PATTERN);
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _defaultCacheDir + "]";
   }
 }

@@ -14,6 +14,11 @@ boolean-Type = string
 
 conf =  element conf {
   attribute name { string }
+  & attribute description { string }?
+  & attribute visibility { string }?
+  & attribute extends { string }?
+  & attribute transitive { string }?
+  & attribute deprecated { string }?
 
   & ivy-include*
 

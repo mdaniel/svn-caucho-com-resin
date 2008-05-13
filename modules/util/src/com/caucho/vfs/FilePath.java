@@ -314,7 +314,7 @@ public class FilePath extends FilesystemPath {
       perms += 0444;
 
     if (canWrite())
-      perms += 0222;
+      perms += 0220;
 
     return perms;
   }

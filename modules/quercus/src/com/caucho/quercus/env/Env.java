@@ -1605,7 +1605,10 @@ public class Env {
    */
   public final Var unsetGlobalVar(String name)
   {
-    _globalMap.remove(name);
+    Var oldVar = _globalMap.remove(name);
+
+    if (oldVar != null)
+      oldVar.set(UnsetValue.UNSET);
 
     return null;
   }

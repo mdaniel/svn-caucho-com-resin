@@ -13,6 +13,17 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>quercus: new self needs to create the owning class (#2550, rep by mardala)</li>
+<li>quercus: top-level var not properly analyzed (#2303, rep by Dan)</li>
+<li>quercus: unset of global variables (#2259, rep by koreth)</li>
+<li>quercus: parser needs to use _peek instead of is.unread() for backtrack (#2432, rep by dkyriakis)</li>
+<li>quercus: fileperms on non-jni needs umask 002 (#2620, rep by B Youngblood)</li>
+<li>quercus: improved error message when javamail.jar missing (#2616, rep by B Youngblood)</li>
+<li>quercus: ctype fixes (#2436, rep by artenberg)</li>
+<li>proxy: ProxyServlet support for virtual hosts (#2639, rep by remilon)</li>
+<li>proxy: ProxyServlet support for x-forwarded-for (#2638, rep by remilon)</li>
+<li>proxy: ProxyServlet was not properly passing repeated headers (#2637, rep by remilon)</li>
+<li>admin: ping thread failure should only send page results at fine level (#2640, rep by remilon)</li>
 <li>quercus: mantis issue with compress_handler missing (ob_start callback) (#2575, rep by stargazer)</li>
 <li>quercus: spl_autoload_register needs callback argument (#2590, #2192, rep by mikebevz)</li>
 <li>webbeans: amber loading timing issue with webbeans (#2642, rep by markus)</li>

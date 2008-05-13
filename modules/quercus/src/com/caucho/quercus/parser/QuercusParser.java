@@ -3465,17 +3465,22 @@ public class QuercusParser {
     String name = null;
     Expr nameExpr = null;
 
-      boolean isNewExpr = _isNewExpr;
-      _isNewExpr = true;
+    boolean isNewExpr = _isNewExpr;
+    _isNewExpr = true;
 
-      //nameExpr = parseTermBase();
-      nameExpr = parseTermDeref();
+    //nameExpr = parseTermBase();
+    nameExpr = parseTermDeref();
 
-      _isNewExpr = isNewExpr;
+    _isNewExpr = isNewExpr;
     
     // XX: unicode issues?
-    if (nameExpr.isLiteral())
+    if (nameExpr.isLiteral() || nameExpr instanceof ConstExpr) {
       name = nameExpr.evalConstant().toString();
+
+      // php/0957
+      if ("self".equals(name) && _classDef != null)
+	name = _classDef.getName();
+    }
 
     int token = parseToken();
     
@@ -3756,14 +3761,14 @@ public class QuercusParser {
 	  if (ch != '?') {
 	  }
 	  else if ((ch = readByte()) != '>') {
-	    _is.unread();
+	    _peek = ch;
 	  }
 	  else {
 	    ch = readByte();
 	    if (ch == '\r')
 	      ch = readByte();
 	    if (ch != '\n')
-	      _is.unread();
+	      _peek = ch;
     
 	    return parsePhpText();
 	  }
@@ -3856,7 +3861,7 @@ public class QuercusParser {
 	        if (ch == '\r')
 	          ch = readByte();
 	        if (ch != '\n')
-	          _is.unread();
+	          _peek = ch;
 		
 		return parsePhpText();
 	      }

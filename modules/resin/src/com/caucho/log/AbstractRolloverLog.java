@@ -286,7 +286,7 @@ public class AbstractRolloverLog {
   public void init()
     throws IOException
   {
-    long now = Alarm.getCurrentTime();
+    long now = Alarm.getExactTime();
     
     _nextRolloverCheckTime = now + _rolloverCheckPeriod;
 
@@ -320,7 +320,7 @@ public class AbstractRolloverLog {
     else
       _archiveFormat = _rolloverPrefix + ".%Y%m%d.%H%M";
 
-    rolloverLog(now);
+    rolloverLog();
   }
 
   public long getNextRolloverCheckTime()
@@ -343,7 +343,7 @@ public class AbstractRolloverLog {
     long now = Alarm.getCurrentTime();
 
     if (_nextPeriodEnd <= now || _nextRolloverCheckTime <= now) {
-      rolloverLog(now);
+      rolloverLog();
       return true;
     }
     else
@@ -403,15 +403,17 @@ public class AbstractRolloverLog {
    *
    * @param now current time in milliseconds.
    */
-  protected void rolloverLog(long now)
+  protected void rolloverLog()
   {
+    long now = Alarm.getExactTime();
+    
     boolean isRollingOver = false;
     
     try {
       Path savedPath = null;
 
       synchronized (this) {
-	if (_isRollingOver || now <= _nextRolloverCheckTime)
+	if (_isRollingOver || now < _nextRolloverCheckTime)
 	  return;
 
 	_isRollingOver = isRollingOver = true;

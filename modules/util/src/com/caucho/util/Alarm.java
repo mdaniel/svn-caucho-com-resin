@@ -45,6 +45,9 @@ public class Alarm implements ThreadTask {
   
   static private final Integer timeLock = new Integer(0);
 
+  static private final ClassLoader _systemLoader
+    = ClassLoader.getSystemClassLoader();
+
   static private volatile long _currentTime = System.currentTimeMillis();
 
   static private int _concurrentAlarmThrottle = 5;
@@ -221,7 +224,9 @@ public class Alarm implements ThreadTask {
    */
   public static long getCurrentTime()
   {
-    if (_alarmThread != null)
+    if (_testTime > 0)
+      return _testTime;
+    else if (_alarmThread != null)
       return _currentTime;
     else
       return System.currentTimeMillis();
@@ -398,12 +403,12 @@ public class Alarm implements ThreadTask {
     if (loader != null)
       thread.setContextClassLoader(loader);
     else
-      thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+      thread.setContextClassLoader(_systemLoader);
 
     try {
       listener.handleAlarm(this);
     } finally {
-      thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+      thread.setContextClassLoader(_systemLoader);
     }
   }
 
@@ -422,9 +427,9 @@ public class Alarm implements ThreadTask {
    */
   static Alarm extractAlarm()
   {
-    long now = getExactTime();
-
     synchronized (_queueLock) {
+      long now = getExactTime();
+
       Alarm []heap = _heap;
 
       Alarm alarm = heap[1];

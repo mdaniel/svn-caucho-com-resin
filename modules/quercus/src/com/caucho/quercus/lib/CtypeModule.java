@@ -277,37 +277,40 @@ public class CtypeModule
 
   public static boolean isalnum(int ch)
   {
-    return Character.isLetterOrDigit(ch);
+    return ('a' <= ch && ch <= 'z'
+	    || 'A' <= ch && ch <= 'Z'
+	    || '0' <= ch && ch <= '9');
   }
 
   public static boolean isalpha(int ch)
   {
-    return Character.isLetter(ch);
+    return ('a' <= ch && ch <= 'z'
+	    || 'A' <= ch && ch <= 'Z');
   }
 
   public static boolean iscntrl(int ch)
   {
-    return Character.isISOControl(ch);
+    return (0 <= ch && ch <= 31 || ch == 127);
   }
 
   public static boolean isdigit(int ch)
   {
-    return Character.isDigit(ch);
+    return ('0' <= ch && ch <= '9');
   }
 
   public static boolean isgraph(int ch)
   {
-    return isprint(ch) && !isspace(ch);
+    return ('!' <= ch && ch <= '~');
   }
 
   public static boolean islower(int ch)
   {
-    return Character.isLowerCase(ch);
+    return ('a' <= ch && ch <= 'z');
   }
 
   public static boolean isprint(int ch)
   {
-    return Character.isValidCodePoint(ch) && !Character.isISOControl(ch);
+    return (' ' <= ch && ch <= '~');
   }
 
   public static boolean ispunct(int ch)
@@ -317,12 +320,12 @@ public class CtypeModule
 
   public static boolean isspace(int ch)
   {
-    return Character.isSpaceChar(ch);
+    return ch == ' ' || 9 <= ch && ch <= 13;
   }
 
   public static boolean isupper(int ch)
   {
-    return Character.isUpperCase(ch);
+    return ('A' <= ch && ch <= 'Z');
   }
 
   public static boolean isxdigit(int ch)
