@@ -249,14 +249,12 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
   private void writeBuffer(AccessLogBuffer buffer)
     throws IOException
   {
-    long now = Alarm.getCurrentTime();
-
     write(buffer.getBuffer(), 0, buffer.getLength());
     super.flush();
     
     _freeBuffers.free(buffer);
     
-    rolloverLog(now);
+    rolloverLog();
   }
 
   /**
