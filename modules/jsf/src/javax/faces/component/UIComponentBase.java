@@ -855,16 +855,57 @@ public abstract class UIComponentBase extends UIComponent
       rendererString = _rendererType;
 
     Object []savedListeners = saveListeners(context);
+
+    Object []savedBindings = saveBindings(context);
     
     return new Object[] {
       _id,
-      _bindings,
+      savedBindings,
       _isRendered,
       rendererCode,
       rendererString,
       (_attributeMap != null ? _attributeMap.saveState(context) : null),
       savedListeners,
     };
+  }
+
+  private Object []saveBindings(FacesContext context) {
+    if (_bindings == null)
+      return null;
+
+    Set<String> keys = _bindings.keySet();
+    Object [] result = new Object [keys.size() * 2];
+
+    int index = 0;
+    for (String key : keys) {
+      result [index++] = key;
+
+      ValueExpression valueExpression = _bindings.get(key);
+
+      result [index++] = saveAttachedState(context, valueExpression);
+    }
+
+    return result;
+  }
+
+  private void restoreBindings(FacesContext context, Object stateObj) {
+    Object [] state = (Object []) stateObj;
+
+    if (state.length == 0) return;
+
+    _bindings = new HashMap<String, ValueExpression>();
+
+
+    for (int i = 0; i < state.length / 2; i++) {
+      int index = i * 2;
+
+      String key = (String) state[index];
+
+      ValueExpression valueExpression 
+        = (ValueExpression) restoreAttachedState(context, state [index + 1]);
+
+      _bindings.put(key, valueExpression);
+    }
   }
 
   private Object []saveListeners(FacesContext context)
@@ -897,7 +938,11 @@ public abstract class UIComponentBase extends UIComponent
     Object []state = (Object []) stateObj;
 
     _id = (String) state[0];
-    _bindings = (Map) state[1];
+
+    Object []savedBindings = (Object[]) state[1];
+
+    if (savedBindings != null)
+      restoreBindings(context, savedBindings);
 
     if (_bindings != null) {
       for (Map.Entry<String,ValueExpression> entry : _bindings.entrySet()) {
@@ -1508,9 +1553,16 @@ public abstract class UIComponentBase extends UIComponent
     }
   }
 
-  private static class ValueExpressionAdapter extends ValueExpression
+  private static class ValueExpressionAdapter
+    extends ValueExpression
+    implements StateHolder
   {
-    private final ValueBinding _binding;
+    private ValueBinding _binding;
+    private boolean _isTransient;
+
+    ValueExpressionAdapter()
+    {
+    }
 
     ValueExpressionAdapter(ValueBinding binding)
     {
@@ -1570,6 +1622,26 @@ public abstract class UIComponentBase extends UIComponent
     public String getExpressionString()
     {
       return _binding.getExpressionString();
+    }
+
+    public Object saveState(FacesContext context)
+    {
+      return saveAttachedState(context, _binding);
+    }
+
+    public void restoreState(FacesContext context, Object state)
+    {
+      _binding = (ValueBinding) restoreAttachedState(context, state);
+    }
+
+    public boolean isTransient()
+    {
+      return _isTransient;
+    }
+
+    public void setTransient(boolean isTransient)
+    {
+      _isTransient = isTransient;
     }
 
     public String toString()
