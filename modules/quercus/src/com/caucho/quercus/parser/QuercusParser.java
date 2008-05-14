@@ -2376,9 +2376,6 @@ public class QuercusParser {
     case INSTANCEOF:
       Location location = getLocation();
 
-      token = parseToken();
-      _peekToken = token;
-
       Expr classNameExpr = parseShiftExpr();
       
       if (classNameExpr instanceof ConstExpr)

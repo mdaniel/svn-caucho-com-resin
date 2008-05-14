@@ -393,6 +393,13 @@ public class IniDefinition {
                     int scope,
                     Value value)
     {
+      
+      // php/1a17
+      // XXX: Env may not be around yet, so need another way to notify user
+      //      of unsupported options
+      if (true)
+        return;
+      
       // php/1a0u
       // don't send a warning if it's being turned off (for Drupal)
       // XXX: send notice instead?
