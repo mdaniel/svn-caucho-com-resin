@@ -52,8 +52,9 @@ abstract public class Column {
   public final static int DATE = 5;
   public final static int BLOB = 6;
   public final static int NUMERIC = 7;
-  public final static int VARBINARY = 8;
-  public final static int SHORT = 9;
+  public final static int BINARY = 8;
+  public final static int VARBINARY = 9;
+  public final static int SHORT = 10;
   
   private final Row _row;
   private final String _name;

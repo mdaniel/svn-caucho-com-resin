@@ -872,6 +872,16 @@ public class SelectResult {
   }
 
   /**
+   * Writes a binary.
+   */
+  public void writeBinary(byte []buffer, int offset, int length)
+  {
+    write(Column.BINARY);
+    write(length);
+    write(buffer, offset, length);
+  }
+
+  /**
    * Writes a string.
    */
   public void writeBlock(int code, byte []buffer, int offset, int length)

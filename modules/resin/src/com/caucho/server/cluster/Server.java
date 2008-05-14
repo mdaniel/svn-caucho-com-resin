@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
+import com.caucho.hmtp.HmtpStream;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
@@ -170,7 +171,7 @@ public class Server extends ProtocolDispatchServer
   {
     if (clusterServer == null)
       throw new NullPointerException();
-    
+
     _clusterServer = clusterServer;
     _resin = _clusterServer.getCluster().getResin();
 
@@ -235,6 +236,22 @@ public class Server extends ProtocolDispatchServer
   public void setConfigException(Throwable exn)
   {
     _configException = exn;
+  }
+
+  /**
+   * Returns the resin server
+   */
+  protected Resin getResin()
+  {
+    return _resin;
+  }
+
+  /**
+   * Returns the cluster server
+   */
+  protected ClusterServer getClusterServer()
+  {
+    return _clusterServer;
   }
 
   //
@@ -1594,6 +1611,14 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
+   * Returns any HMTP stream
+   */
+  public HmtpStream getHmtpStream()
+  {
+    return null;
+  }
+
+  /**
    * Closes the server.
    */
   public void stop()
@@ -1712,7 +1737,7 @@ public class Server extends ProtocolDispatchServer
 
   public String toString()
   {
-    return ("Server[id=" + getServerId()
+    return (getClass().getSimpleName() + "[id=" + getServerId()
 	    + ",cluster=" + _clusterServer.getCluster().getId() + "]");
   }
 

@@ -64,6 +64,8 @@ public class ClusterServer {
 
   private int _index;
 
+  private boolean _isDynamic;
+
   private ClusterPort _clusterPort;
   private ServerConnector _serverConnector;
 
@@ -191,6 +193,22 @@ public class ClusterServer {
   }
 
   /**
+   * True for a dynamic server
+   */
+  public void setDynamic(boolean isDynamic)
+  {
+    _isDynamic = isDynamic;
+  }
+
+  /**
+   * True for a dynamic server
+   */
+  public boolean isDynamic()
+  {
+    return _isDynamic;
+  }
+
+  /**
    * Sets the loadBalance connection time.
    */
   public void setLoadBalanceConnectTimeout(Period period)
@@ -240,10 +258,10 @@ public class ClusterServer {
   {
     if (_loadBalanceIdleTime != DEFAULT)
       return _loadBalanceIdleTime;
-    else if (_keepaliveTimeout < 10000L)
-      return _keepaliveTimeout - 2000L;
-    else
+    else if (_keepaliveTimeout < 15000L)
       return _keepaliveTimeout - 5000L;
+    else
+      return _keepaliveTimeout - 10000L;
   }
 
   /**

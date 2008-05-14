@@ -29,9 +29,11 @@
 
 package com.caucho.server.hmux;
 
-import com.caucho.log.Log;
+import com.caucho.hessian.io.*;
+import com.caucho.hmtp.HmtpStream;
 import com.caucho.server.cluster.BackingManager;
 import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.dispatch.DispatchServer;
@@ -40,24 +42,17 @@ import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.http.InvocationKey;
 import com.caucho.server.port.ServerRequest;
 import com.caucho.server.webapp.ErrorPageManager;
-import com.caucho.util.ByteBuffer;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.CharSegment;
+import com.caucho.util.*;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.StreamImpl;
 import com.caucho.vfs.WriteStream;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
+import java.io.*;
 import java.net.InetAddress;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -132,6 +127,7 @@ import java.util.logging.Logger;
 public class HmuxRequest extends AbstractHttpRequest
   implements ServerRequest
 {
+  private static final L10N L = new L10N(HmuxRequest.class);
   private static final Logger log
     = Logger.getLogger(HmuxRequest.class.getName());
 
@@ -186,6 +182,13 @@ public class HmuxRequest extends AbstractHttpRequest
   // other, specialized protocols
   public static final int CSE_QUERY =           'Q';
   public static final int CSE_PING =            'P';
+
+  public static final int HMTP_MESSAGE =        '0';
+  public static final int HMTP_QUERY_GET =      '1';
+  public static final int HMTP_QUERY_SET =      '2';
+  public static final int HMTP_RESPONSE =       '3';
+  public static final int HMTP_ERROR =          '4';
+  public static final int HMTP_PACKET =         '5';
 
   public static final int HMUX_CLUSTER_PROTOCOL = 0x101;
   public static final int HMUX_DISPATCH_PROTOCOL = 0x102;
@@ -249,6 +252,10 @@ public class HmuxRequest extends AbstractHttpRequest
   private CharBuffer _cb2;
   private boolean _hasRequest;
 
+  private Hessian2StreamingInput _in;
+  private Hessian2StreamingOutput _out;
+
+  private Server _server;
   private AbstractClusterRequest _clusterRequest;
   private HmuxDispatchRequest _dispatchRequest;
   private BackingManager _backingManager;
@@ -264,6 +271,8 @@ public class HmuxRequest extends AbstractHttpRequest
 		     HmuxProtocol protocol)
   {
     super(server, conn);
+
+    _server = (Server) server;
     
     _hmuxProtocol = protocol;
 
@@ -351,7 +360,11 @@ public class HmuxRequest extends AbstractHttpRequest
 
     _serverType = 0;
     _uri.setLength(0);
-    
+
+    // clear the hessian stream to clear the references
+    _in = null;
+    _out = null;
+
     boolean hasRequest = false;
     
     try {
@@ -899,6 +912,35 @@ public class HmuxRequest extends AbstractHttpRequest
 	  log.fine(dbgId() + (char) code + " post-data: " + len);
 	return hasURI;
 
+      case HMTP_MESSAGE:
+	{
+	  len = (is.read() << 8) + is.read();
+
+	  readHmtpMessage(is);
+	  hasURI = true;
+	  break;
+	}
+
+      case HMTP_QUERY_GET:
+	{
+	  len = (is.read() << 8) + is.read();
+	  long id = readLong(is);
+
+	  readHmtpQueryGet(is, id);
+	  hasURI = true;
+	  break;
+	}
+
+      case HMTP_QUERY_SET:
+	{
+	  len = (is.read() << 8) + is.read();
+	  long id = readLong(is);
+
+	  readHmtpQuerySet(is, id);
+	  hasURI = true;
+	  break;
+	}
+
       default:
         len = (is.read() << 8) + is.read();
 
@@ -937,6 +979,99 @@ public class HmuxRequest extends AbstractHttpRequest
     throws IOException
   {
     return ((_rawRead.read() << 8) + _rawRead.read());
+  }
+
+  private void readHmtpMessage(ReadStream is)
+    throws IOException
+  {
+    String to = readString(is);
+    String from = readString(is);
+
+    Serializable query = (Serializable) readObject();
+
+    HmtpStream hmtpStream = _server.getHmtpStream();
+
+    if (log.isLoggable(Level.FINER))
+      log.fine(dbgId() + (char) HMTP_QUERY_GET + " hmtp message"
+	       + " to=" + to + " from=" + from + " " + query);
+
+    if (hmtpStream != null) {
+      hmtpStream.sendMessage(to, from, query);
+    }
+  }
+
+  private void readHmtpQueryGet(ReadStream is, long id)
+    throws IOException
+  {
+    String to = readString(is);
+    String from = readString(is);
+
+    Serializable query = (Serializable) readObject();
+
+    HmtpStream hmtpStream = _server.getHmtpStream();
+
+    if (log.isLoggable(Level.FINER))
+      log.fine(dbgId() + (char) HMTP_QUERY_GET + " hmtp queryGet id=" + id
+	       + " to=" + to + " from=" + from + " " + query);
+
+    if (hmtpStream != null) {
+      hmtpStream.sendQueryGet(id, to, from, query);
+    }
+  }
+
+  private void readHmtpQuerySet(ReadStream is, long id)
+    throws IOException
+  {
+    String to = readString(is);
+    String from = readString(is);
+
+    Serializable query = (Serializable) readObject();
+
+    HmtpStream hmtpStream = _server.getHmtpStream();
+
+    if (log.isLoggable(Level.FINER))
+      log.fine(dbgId() + (char) HMTP_QUERY_SET + " hmtp query id=" + id
+	       + " to=" + to + " from=" + from + " " + query);
+
+    if (hmtpStream != null) {
+      hmtpStream.sendQuerySet(id, to, from, query);
+    }
+  }
+
+  private Object readObject()
+    throws IOException
+  {
+    if (_in == null)
+      _in = new Hessian2StreamingInput(_rawRead);
+
+    return _in.readObject();
+  }
+
+  private String readString(ReadStream is)
+    throws IOException
+  {
+    int code = is.read();
+    if (code != HMUX_STRING)
+      throw new IOException(L.l("expected string at " + (char) code));
+    
+    int len = (is.read() << 8) + is.read();
+    _cb1.clear();
+    _rawRead.readAll(_cb1, len);
+
+    return _cb1.toString();
+  }
+
+  private long readLong(ReadStream is)
+    throws IOException
+  {
+    return ((is.read() << 56)
+	    | (is.read() << 48)
+	    | (is.read() << 40)
+	    | (is.read() << 32)
+	    | (is.read() << 24)
+	    | (is.read() << 16)
+	    | (is.read() << 8)
+	    | (is.read()));
   }
 
   /**

@@ -29,24 +29,29 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.log.Log;
+import com.caucho.hessian.io.*;
+import com.caucho.server.hmux.*;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.*;
+import java.util.logging.*;
 
 /**
  * Defines a connection to the client.
  */
 public class ClusterStream {
-  static protected final Logger log = Log.open(ClusterStream.class);
+  static protected final Logger log
+    = Logger.getLogger(ClusterStream.class.getName());
 
   private ServerConnector _srun;
 
   private ReadStream _is;
   private WriteStream _os;
+
+  private Hessian2StreamingInput _in;
+  private Hessian2StreamingOutput _out;
 
   private long _freeTime;
 
@@ -91,6 +96,28 @@ public class ClusterStream {
   }
 
   /**
+   * Returns the hessian input stream
+   */
+  public Hessian2StreamingInput getHessianInputStream()
+  {
+    if (_in == null)
+      _in = new Hessian2StreamingInput(_is);
+
+    return _in;
+  }
+
+  /**
+   * Returns the hessian output stream
+   */
+  public Hessian2StreamingOutput getHessianOutputStream()
+  {
+    if (_out == null)
+      _out = new Hessian2StreamingOutput(_os);
+
+    return _out;
+  }
+
+  /**
    * Returns the free time, i.e. the time the connection was last idle.
    */
   public long getFreeTime()
@@ -113,6 +140,53 @@ public class ClusterStream {
   {
     return (_srun.getLoadBalanceIdleTime()
 	    < Alarm.getCurrentTime() - _freeTime + 2000L);
+  }
+
+  public boolean sendMessage(String to, String from,
+			     Serializable query)
+    throws IOException
+  {
+    WriteStream out = getWriteStream();
+
+    out.write(HmuxRequest.HMTP_MESSAGE);
+    out.write(0);
+    out.write(0);
+
+    writeString(out, to);
+    writeString(out, from);
+
+    Hessian2StreamingOutput hOut = getHessianOutputStream();
+
+    hOut.writeObject(query);
+
+    out.write(HmuxRequest.HMUX_QUIT);
+    out.flush();
+
+    return true;
+  }
+
+  public boolean sendQuerySet(long id, String to, String from,
+			      Serializable query)
+    throws IOException
+  {
+    WriteStream out = getWriteStream();
+
+    out.write(HmuxRequest.HMTP_QUERY_SET);
+    out.write(0);
+    out.write(8);
+
+    writeLong(out, id);
+    writeString(out, to);
+    writeString(out, from);
+
+    Hessian2StreamingOutput hOut = getHessianOutputStream();
+
+    hOut.writeObject(query);
+
+    out.write(HmuxRequest.HMUX_QUIT);
+    out.flush();
+
+    return true;
   }
 
   /**
@@ -176,6 +250,30 @@ public class ClusterStream {
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
+  }
+
+  private void writeLong(WriteStream out, long id)
+    throws IOException
+  {
+    out.write((int) (id >> 56));
+    out.write((int) (id >> 48));
+    out.write((int) (id >> 40));
+    out.write((int) (id >> 32));
+    out.write((int) (id >> 24));
+    out.write((int) (id >> 16));
+    out.write((int) (id >> 8));
+    out.write((int) id);
+  }
+
+  private void writeString(WriteStream out, String s)
+    throws IOException
+  {
+    int len = s.length();
+    
+    out.write(HmuxRequest.HMUX_STRING);
+    out.write(len >> 8);
+    out.write(len);
+    out.print(s);
   }
 
   public String toString()

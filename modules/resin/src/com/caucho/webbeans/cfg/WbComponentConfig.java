@@ -45,6 +45,7 @@ import java.beans.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.annotation.*;
 import javax.ejb.*;
@@ -322,7 +323,9 @@ public class WbComponentConfig {
     if (_name != null) {
       comp.setName(_name);
 
-      addOptionalStringProperty("name", _name);
+      // server/2n00
+      if (! Map.class.isAssignableFrom(_cl))
+	addOptionalStringProperty("name", _name);
     }
 
     if (getMBeanName() != null)

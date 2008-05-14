@@ -62,6 +62,21 @@ public class IvyPattern {
     return sb.toString();
   }
 
+  public String resolveRevisions(Map<String,String> props)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    for (Segment segment : _segments) {
+      if (segment instanceof VarSegment
+	  && "revision".equals(((VarSegment) segment).getVar()))
+	return sb.toString();
+      
+      segment.resolve(sb, props);
+    }
+
+    return null;
+  }
+
   private void parse(String pattern)
   {
     int len = pattern.length();
@@ -113,6 +128,11 @@ public class IvyPattern {
     VarSegment(String var)
     {
       _var = var;
+    }
+
+    String getVar()
+    {
+      return _var;
     }
     
     public void resolve(StringBuilder sb, Map<String,String> props)

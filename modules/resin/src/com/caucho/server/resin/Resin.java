@@ -113,6 +113,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   private boolean _isGlobal;
 
   private String _serverId = "";
+  private DynamicServer _dynamicServer;
 
   private Path _resinHome;
   private Path _rootDirectory;
@@ -337,6 +338,18 @@ public class Resin implements EnvironmentBean, SchemaBean
   }
 
   /**
+   * Sets the server id.
+   */
+  public void addDynamicServer(String clusterId, String address, int port)
+  {
+    _dynamicServer = new DynamicServer(clusterId, address, port);
+      
+    String id = address + ":" + port;
+
+    setServerId(id);
+  }
+
+  /**
    * Returns the server id.
    */
   public String getDisplayServerId()
@@ -385,6 +398,17 @@ public class Resin implements EnvironmentBean, SchemaBean
   public Path getRootDirectory()
   {
     return _rootDirectory;
+  }
+
+  /**
+   * Returns the admin directory
+   */
+  public Path getAdminPath()
+  {
+    if (_management != null)
+      return _management.getPath();
+    else
+      return getRootDirectory().lookup("admin");
   }
 
   /**
@@ -684,12 +708,33 @@ public class Resin implements EnvironmentBean, SchemaBean
       // force a GC on start
       System.gc();
 
+      ClusterServer clusterServer = null;
+
+      if (_dynamicServer != null) {
+	clusterServer = findClusterServer(_serverId);
+
+	if (clusterServer != null)
+	  throw new ConfigException(L().l("dynamic-server '{0}' must not have a static configuration configured in the resin.conf.",
+					  _serverId));
+
+	Cluster cluster = findCluster(_dynamicServer.getCluster());
+
+	if (cluster == null) {
+	  throw new ConfigException(L().l("dynamic-server cluster '{0}' does not exist.  Dynamic servers must be added to an existing cluster.",
+					  _dynamicServer.getCluster()));
+	}
+
+	cluster.addDynamicServer(_serverId,
+				 _dynamicServer.getAddress(),
+				 _dynamicServer.getPort());
+      }
+
       // XXX: get the server
       for (Cluster cluster : _clusters) {
 	cluster.start();
       }
 
-      ClusterServer clusterServer = findClusterServer(_serverId);
+      clusterServer = findClusterServer(_serverId);
 
       if (clusterServer == null)
 	throw new ConfigException(L().l("server-id '{0}' has no matching <server> definition.",
@@ -1776,6 +1821,34 @@ public class Resin implements EnvironmentBean, SchemaBean
       EnvironmentStream.logStderr("closing server");
       
       _resin.destroy();
+    }
+  }
+
+  static class DynamicServer {
+    private final String _cluster;
+    private final String _address;
+    private final int _port;
+
+    DynamicServer(String cluster, String address, int port)
+    {
+      _cluster = cluster;
+      _address = address;
+      _port = port;
+    }
+
+    String getCluster()
+    {
+      return _cluster;
+    }
+
+    String getAddress()
+    {
+      return _address;
+    }
+
+    int getPort()
+    {
+      return _port;
     }
   }
 }

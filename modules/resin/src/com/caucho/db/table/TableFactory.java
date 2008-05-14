@@ -90,9 +90,22 @@ public class TableFactory {
   }
 
   /**
-   * Adds a varbinary
+   * Adds a binary
    */
   public Column addVarbinary(String name, int size)
+  {
+    _row.allocateColumn();
+    
+    if (size <= 128)
+      return _row.addColumn(new VarBinaryColumn(_row, name, size));
+    else
+      return _row.addColumn(new BlobColumn(_row, name));
+  }
+
+  /**
+   * Adds a binary
+   */
+  public Column addBinary(String name, int size)
   {
     _row.allocateColumn();
     

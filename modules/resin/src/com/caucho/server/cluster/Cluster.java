@@ -55,6 +55,7 @@ import javax.management.ObjectName;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.lang.reflect.*;
 
 /**
  * Defines a set of clustered servers.
@@ -112,6 +113,8 @@ public class Cluster
 
   private Server _server;
 
+  private long _version;
+
   private volatile boolean _isClosed;
 
   public Cluster(Resin resin)
@@ -138,6 +141,16 @@ public class Cluster
    * Returns the currently active local cluster.
    */
   public static Cluster getLocal()
+  {
+    Cluster cluster = _clusterLocal.get();
+
+    return cluster;
+  }
+
+  /**
+   * Returns the currently active local cluster.
+   */
+  public static Cluster getCurrent()
   {
     Cluster cluster = _clusterLocal.get();
 
@@ -218,6 +231,14 @@ public class Cluster
   }
 
   /**
+   * Returns the version
+   */
+  public long getVersion()
+  {
+    return _version;
+  }
+
+  /**
    * Returns the admin.
    */
   public ClusterMXBean getAdmin()
@@ -241,10 +262,31 @@ public class Cluster
   }
 
   /**
+   * Finds the first server with the given server-id.
+   */
+  public ClusterServer findServer(String address, int port)
+  {
+    for (int i = _serverList.size() - 1; i >= 0; i--) {
+      ClusterServer server = _serverList.get(i);
+
+      if (server == null)
+	continue;
+
+      ClusterPort clusterPort = server.getClusterPort();
+      
+      if (clusterPort.getAddress().equals(address)
+	  && clusterPort.getPort() == port) {
+        return server;
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Adds a new server to the cluster.
    */
   public void addServerDefault(ContainerProgram program)
-    throws Throwable
   {
     _serverDefaultList.add(program);
   }
@@ -253,7 +295,6 @@ public class Cluster
    * Adds a new server to the cluster.
    */
   public Machine createMachine()
-    throws Exception
   {
     Machine machine = new Machine(this);
 
@@ -266,7 +307,6 @@ public class Cluster
    * Adds a new server to the cluster.
    */
   public ClusterServer createServer()
-    throws Exception
   {
     Machine machine = createMachine();
   
@@ -306,6 +346,62 @@ public class Cluster
       
       webBeans.addSingletonByName(new ServerVar(server), "server");
     }
+  }
+
+  /**
+   * Adds a new server to the cluster.
+   */
+  public void addDynamicServer(String serverId, String address, int port)
+    throws ConfigException
+  {
+    try {
+      ClusterServer oldServer = findServer(serverId);
+
+      if (oldServer != null) {
+	throw new ConfigException(L.l("duplicate <server> with id='{0}'",
+				      serverId));
+      }
+
+      ClusterServer server = createServer();
+      server.setId(serverId);
+
+      server.setAddress(address);
+      server.setPort(port);
+
+      server.setDynamic(true);
+
+      addServer(server);
+      
+      server.init();
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  /**
+   * Adds a new server to the cluster.
+   */
+  public void addDynamicServer(ClusterServer server)
+    throws ConfigException
+  {
+    try {
+      synchronized (this) {
+	for (ConfigProgram program : _serverDefaultList)
+	  program.configure(server);
+    
+	server.init();
+      
+	// XXX: default config
+	addServer(server);
+
+	_version++;
+      }
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " add dynamic server " + server);
   }
 
   /**
@@ -703,7 +799,20 @@ public class Cluster
       if (_server != null)
 	return _server;
 
-      Server server = new Server(clusterServer);
+      Server server = null;
+
+      try {
+	Class proServer = Class.forName("com.caucho.server.cluster.ProServer");
+
+	Constructor ctor = proServer.getConstructor(new Class[] { ClusterServer.class });
+
+	server = (Server) ctor.newInstance(clusterServer);
+      } catch (Exception e) {
+	log.log(Level.FINER, e.toString(), e);
+      }
+
+      if (server == null)
+	server = new Server(clusterServer);
 
       _serverProgram.configure(server);
 

@@ -48,24 +48,24 @@ class BinaryColumn extends Column {
     = Logger.getLogger(BinaryColumn.class.getName());
   private static final L10N L = new L10N(BinaryColumn.class);
   
-  private final int _maxLength;
+  private final int _length;
 
   /**
    * Creates a binary column.
    *
    * @param columnOffset the offset within the row
-   * @param maxLength the maximum length of the binary
+   * @param length the length of the binary
    */
-  BinaryColumn(Row row, String name, int maxLength)
+  BinaryColumn(Row row, String name, int length)
   {
     super(row, name);
 
-    if (maxLength < 0)
+    if (length < 0)
       throw new IllegalArgumentException("length must be non-negative");
-    else if (255 < maxLength)
+    else if (255 < length)
       throw new IllegalArgumentException("length too big");
     
-    _maxLength = maxLength;
+    _length = length;
   }
 
   /**
@@ -73,7 +73,7 @@ class BinaryColumn extends Column {
    */
   public int getTypeCode()
   {
-    return VARBINARY;
+    return BINARY;
   }
 
   /**
@@ -89,7 +89,7 @@ class BinaryColumn extends Column {
    */
   public int getDeclarationSize()
   {
-    return _maxLength;
+    return _length;
   }
 
   /**
@@ -97,7 +97,7 @@ class BinaryColumn extends Column {
    */
   public int getLength()
   {
-    return _maxLength + 1;
+    return _length;
   }
 
   /**
@@ -105,7 +105,7 @@ class BinaryColumn extends Column {
    */
   public KeyCompare getIndexKeyCompare()
   {
-    return new BinaryKeyCompare();
+    return new BinaryKeyCompare(_length);
   }
 
   /**
@@ -125,9 +125,8 @@ class BinaryColumn extends Column {
     }
 
     int len = str.length();
-    int maxOffset = offset + _maxLength + 1;
+    int maxOffset = offset + _length;
 
-    int lenOffset = offset++;
     for (int i = 0; i < len && offset < maxOffset; i++) {
       int ch = str.charAt(i);
 
@@ -143,7 +142,6 @@ class BinaryColumn extends Column {
 	block[offset++] = (byte) (0x80 + (ch & 0x3f));
       }
     }
-    block[lenOffset] = (byte) (offset - lenOffset - 1);
 
     setNonNull(block, rowOffset);
   }
@@ -154,11 +152,11 @@ class BinaryColumn extends Column {
       return null;
     
     int startOffset = rowOffset + _columnOffset;
-    int len = block[startOffset] & 0xff;
+    int len = _length;
 
     StringBuffer sb = new StringBuffer();
 
-    int offset = startOffset + 1;
+    int offset = startOffset;
     int endOffset = offset + len;
     int i = 0;
     while (offset < endOffset) {
@@ -212,15 +210,9 @@ class BinaryColumn extends Column {
       return false;
 
     int startOffset1 = rowOffset1 + _columnOffset;
-    int len1 = block1[startOffset1] & 0xff;
-
     int startOffset2 = rowOffset2 + _columnOffset;
-    int len2 = block2[startOffset2] & 0xff;
 
-    if (len1 != len2)
-      return false;
-
-    for (int i = len1; i > 0; i--) {
+    for (int i = _length - 1; i >= 0; i--) {
       if (block1[startOffset1 + i] != block2[startOffset2 + i])
 	return false;
     }
@@ -238,13 +230,12 @@ class BinaryColumn extends Column {
       return false;
 
     int startOffset = rowOffset + _columnOffset;
-    int len = block[startOffset] & 0xff;
 
-    if (len != length)
+    if (_length != length)
       return false;
 
-    int blockOffset = startOffset + 1;
-    int endOffset = blockOffset + len;
+    int blockOffset = startOffset;
+    int endOffset = blockOffset + _length;
     while (blockOffset < endOffset) {
       if (block[blockOffset++] != buffer[offset++])
 	return false;
@@ -261,13 +252,12 @@ class BinaryColumn extends Column {
       return false;
     
     int startOffset = rowOffset + _columnOffset;
-    int len = block[startOffset] & 0xff;
 
     int strLength = value.length();
     int strOffset = 0;
 
-    int offset = startOffset + 1;
-    int endOffset = offset + len;
+    int offset = startOffset;
+    int endOffset = offset + _length;
     while (offset < endOffset && strOffset < strLength) {
       char ch = value.charAt(strOffset++);
       
@@ -313,12 +303,10 @@ class BinaryColumn extends Column {
       return 0;
 
     int startOffset = rowOffset + _columnOffset;
-    // static length for now
-    int len = getLength();
 
-    System.arraycopy(block, startOffset, buffer, bufferOffset, len);
+    System.arraycopy(block, startOffset, buffer, bufferOffset, _length);
 
-    return len;
+    return _length;
   }
   
   /**
@@ -374,8 +362,8 @@ class BinaryColumn extends Column {
   public String toString()
   {
     if (getIndex() != null)
-      return "VarBinaryColumn[" + getName() + ",index]";
+      return "BinaryColumn[" + getName() + ",index]";
     else
-      return "VarBinaryColumn[" + getName() + "]";
+      return "BinaryColumn[" + getName() + "]";
   }
 }

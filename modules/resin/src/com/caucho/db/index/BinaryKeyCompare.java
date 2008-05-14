@@ -33,20 +33,22 @@ package com.caucho.db.index;
  * Compares two keys.
  */
 public class BinaryKeyCompare extends KeyCompare {
+  private final int _length;
+
+  public BinaryKeyCompare(int length)
+  {
+    _length = length;
+  }
+  
   /**
    * Compares the key to the block data.
    */
   public int compare(byte []keyBuffer, int keyOffset,
 		     byte []block, int offset, int length)
   {
-    int keyLen = keyBuffer[keyOffset] & 0xff;
-    int blockLen = block[offset] & 0xff;
-
-    int end = keyLen;
-    if (blockLen < end)
-      end = blockLen;
+    int end = _length;
     
-    for (int i = 1; i <= end; i++) {
+    for (int i = 0; i < end; i++) {
       int ch1 = keyBuffer[keyOffset + i] & 0xff;
       int ch2 = block[offset + i] & 0xff;
 
@@ -56,25 +58,17 @@ public class BinaryKeyCompare extends KeyCompare {
 	return 1;
     }
 
-    if (keyLen == blockLen)
-      return 0;
-
-    if (keyLen < blockLen)
-      return -1;
-    else if (blockLen < keyLen)
-      return 1;
-    else
-      return 0;
+    return 0;
   }
 
   public String toString(byte []buffer, int offset, int length)
   {
     StringBuilder sb = new StringBuilder();
     
-    int keyLen = buffer[offset];
+    int keyLen = _length;
 
     for (int j = 0; j < keyLen; j++) {
-      int ch = buffer[offset + 1 + j] & 0xff;
+      int ch = buffer[offset + j] & 0xff;
 
       if (ch == 0)
 	break;

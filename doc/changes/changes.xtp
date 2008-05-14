@@ -13,6 +13,8 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>load balance: update load-balance-idle-time heuristic to increase gap to keepalive (#2660)</li>
+<li>mod_caucho: build issue with Apache 1.3 (#2655, rep by maxpil)</li>
 <li>quercus: new self needs to create the owning class (#2550, rep by mardala)</li>
 <li>quercus: top-level var not properly analyzed (#2303, rep by Dan)</li>
 <li>quercus: unset of global variables (#2259, rep by koreth)</li>

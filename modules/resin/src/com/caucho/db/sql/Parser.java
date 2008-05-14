@@ -779,6 +779,12 @@ public class Parser {
 
       factory.addVarbinary(name, length);
     }
+    else if (type.equalsIgnoreCase("binary")) {
+      if (length < 0)
+	throw error(L.l("BINARY needs a defined length"));
+
+      factory.addBinary(name, length);
+    }
     else if (type.equalsIgnoreCase("blob")) {
       factory.addBlob(name);
     }

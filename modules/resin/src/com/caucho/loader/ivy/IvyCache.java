@@ -135,6 +135,38 @@ public class IvyCache {
       return null;
   }
 
+  /**
+   * Finds a dependency in the cache
+   */
+  public void resolveVersions(ArrayList<String> versions,
+			      IvyDependency dependency)
+  {
+    String org = dependency.getOrg();
+    String name = dependency.getName();
+    String artifact = dependency.getArtifact();
+    String rev = dependency.getRev();
+
+    if (artifact == null)
+      artifact = name;
+
+    HashMap<String,String> props = new HashMap<String,String>();
+    props.put("organisation", org);
+    props.put("module", name);
+    props.put("artifact", artifact);
+
+    if (rev != null)
+      props.put("revision", rev);
+    
+    props.put("type", "ivy");
+    props.put("ext", "xml");
+
+    String pathName = _artifactPattern.resolveRevisions(props);
+
+    System.out.println("PATH: " + pathName);
+
+    Path path = _repositoryCacheDir.lookup(pathName);
+  }
+
   @PostConstruct
   public void init()
   {

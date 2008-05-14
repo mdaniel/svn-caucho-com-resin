@@ -48,6 +48,9 @@ public class IvyManager {
   
   private Path _ivyFile;
 
+  private HashMap<IvyModuleKey,String[]> _versionMap
+    = new HashMap<IvyModuleKey,String[]>();
+
   private ArrayList<IvyModule> _moduleList = new ArrayList<IvyModule>();
   
   private ArrayList<IvyDependency> _dependencyList
@@ -169,10 +172,26 @@ public class IvyManager {
       }
     }
 
+    IvyModuleKey key = new IvyModuleKey(dependency.getOrg(),
+					dependency.getName());
+
+    String []versions = getVersions(dependency);
+    
     _isModified = true;
     _dependencyList.add(dependency);
 
     return dependency;
+  }
+
+  private String []getVersions(IvyDependency dependency)
+  {
+    ArrayList<String> versions = new ArrayList<String>();
+
+    for (IvyCache cache : _cacheList) {
+      cache.resolveVersions(versions, dependency);
+    }
+
+    return new String[0];
   }
 
   void addJar(Path path)
