@@ -48,6 +48,7 @@ import javax.faces.application.Application;
 import javax.faces.application.NavigationHandler;
 import javax.faces.application.StateManager;
 import javax.faces.application.ViewHandler;
+import javax.faces.application.ResourceHandler;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.context.FacesContext;
@@ -72,6 +73,7 @@ public class ApplicationImpl
   private ActionListener _actionListener;
   private StateManager _stateManager;
   private ViewHandler _viewHandler;
+  private ResourceHandler _resourceHandler;
   private NavigationHandler _navigationHandler;
   final private NavigationHandlerImpl _defaultNavigationHandler;
 
@@ -139,6 +141,7 @@ public class ApplicationImpl
 					     _bundleResolver);
 
     setViewHandler(new JspViewHandler());
+    setResourceHandler(new ResourceHandlerImpl());
     setStateManager(new SessionStateManager());
 
     appContext.addELResolver(new FacesJspELResolver(this));
@@ -537,6 +540,17 @@ public class ApplicationImpl
       throw new NullPointerException();
 
     _viewHandler = handler;
+  }
+
+  @Override
+  public ResourceHandler getResourceHandler()
+  {
+    return _resourceHandler;
+  }
+
+  public void setResourceHandler(ResourceHandler resourceHandler)
+  {
+    _resourceHandler = resourceHandler;
   }
 
   public StateManager getStateManager()

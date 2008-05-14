@@ -206,4 +206,11 @@ public abstract class Application
   @Deprecated
   public abstract ValueBinding createValueBinding(String ref)
     throws ReferenceSyntaxException;
+
+  /**
+   * @Since 2.0
+   */
+  public ResourceHandler getResourceHandler(){
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 }

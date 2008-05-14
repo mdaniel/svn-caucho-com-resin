@@ -69,6 +69,8 @@ public class ApplicationConfig
   private Class _navigationHandler;
   
   private Class _viewHandler;
+
+  private Class _resourceHandler;
   
   private Class _stateManager;
   
@@ -165,9 +167,36 @@ public class ApplicationConfig
     _viewHandler = viewHandler;
   }
 
-  private Class getViewHandler()
+  public void setResourceHandler(Class resourceHandler)
+    throws ConfigException
   {
-    return _viewHandler;
+    if (! ResourceHandler.class.isAssignableFrom(resourceHandler))
+      throw new ConfigException(L.l("resource-handler '{0}' must extend javax.faces.application.ResourceHandler",
+                                resourceHandler.getName()));
+
+    Constructor ctor = null;
+
+    try {
+      ctor = resourceHandler.getConstructor(new Class[]{ ResourceHandler.class });
+    }
+    catch (NoSuchMethodException e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    try {
+      if (ctor == null)
+        ctor = resourceHandler.getConstructor(new Class[]{});
+    }
+    catch (NoSuchMethodException e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    if (ctor == null)
+      throw new ConfigException(L.l("resource-handler '{0}' must have either a zero-arg constructor or a constructor with a single ResorceHandler argument.",
+                                    resourceHandler.getName()));
+
+    _resourceHandler = resourceHandler;
+
   }
 
   public void setStateManager(Class stateManager)
@@ -357,6 +386,44 @@ public class ApplicationConfig
       if (handler != null) {
         app.setViewHandler(handler);
 	log.fine(L.l("JSF[] using '{0}' as view-handler", handler));
+      }
+    }
+
+    if (_resourceHandler != null) {
+      ResourceHandler handler = null;
+
+      try {
+        Constructor ctor = _resourceHandler.getConstructor(new Class []{
+          ResourceHandler.class});
+
+        ResourceHandler oldHanlder = app.getResourceHandler();
+
+        handler = (ResourceHandler) ctor.newInstance(oldHanlder);
+      }
+      catch (NoSuchMethodException e) {
+      }
+      catch (RuntimeException e) {
+        throw e;
+      }
+      catch (Exception e) {
+        throw ConfigException.create(e);
+      }
+
+      if (handler == null) {
+        try {
+          handler = (ResourceHandler) _resourceHandler.newInstance();
+        }
+        catch (RuntimeException e) {
+          throw e;
+        }
+        catch (Exception e) {
+          throw ConfigException.create(e);
+        }
+      }
+
+      if (handler != null) {
+        app.setResourceHandler(handler);
+        log.fine(L.l("JSF[] using '{0}' as resource-handler", handler));
       }
     }
 
