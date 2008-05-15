@@ -31,6 +31,7 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.lib.SerializeMap;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
 
@@ -1471,6 +1472,30 @@ public class Var extends Value
   public void serialize(StringBuilder sb)
   {
     _value.serialize(sb);
+  }
+  
+  /*
+   * Serializes the value.
+   * 
+   * @param sb holds result of serialization
+   * @param serializeMap holds reference indexes
+   */
+  @Override
+  public void serialize(StringBuilder sb,
+                        SerializeMap serializeMap)
+  {
+    Integer index = serializeMap.get(this);
+
+    if (index != null) {
+      sb.append("R:");
+      sb.append(index);
+      sb.append(";");
+    }
+    else {
+      serializeMap.put(this);
+      
+      _value.serialize(sb, serializeMap);
+    }
   }
 
   @Override

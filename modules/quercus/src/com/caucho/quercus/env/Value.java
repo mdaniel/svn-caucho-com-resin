@@ -33,6 +33,7 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.lib.SerializeMap;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
@@ -2201,6 +2202,19 @@ abstract public class Value implements java.io.Serializable
   public void serialize(StringBuilder sb)
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /*
+   * Serializes the value.
+   * 
+   * @param sb holds result of serialization
+   * @param serializeMap holds reference indexes
+   */
+  public void serialize(StringBuilder sb, SerializeMap serializeMap)
+  {
+    serializeMap.incrementIndex();
+    
+    serialize(sb);
   }
 
   /**

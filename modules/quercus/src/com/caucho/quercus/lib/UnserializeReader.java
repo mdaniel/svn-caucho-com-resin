@@ -30,10 +30,13 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.*;
+import com.caucho.util.IntMap;
+import com.caucho.util.IntSet;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 public final class UnserializeReader {
@@ -49,17 +52,250 @@ public final class UnserializeReader {
 
   private int _index;
   private StringKey _key = new StringKey();
+  
+  private ArrayList<Value> _valueList
+    = new ArrayList<Value>();
+  
+  private int _valueCount = 0;
+  
+  private ArrayList<Boolean> _referenceList
+    = new ArrayList<Boolean>();
+  
+  private boolean _hasReference;
 
   public UnserializeReader(StringValue s)
   {
     _buffer = s.toCharArray();
-    _length = s.length();
+    _length = _buffer.length;
+  }
+  
+  public UnserializeReader(StringValue s, boolean hasReference)
+    throws IOException
+  {
+    this(s);
+    
+    populateReferenceList();
+    
+    _index = 0;
+    _hasReference = true;
   }
 
   public UnserializeReader(String s)
   {
     _buffer = s.toCharArray();
-    _length = s.length();
+    _length = _buffer.length;
+  }
+  
+  public UnserializeReader(String s, boolean hasReference)
+    throws IOException
+  {
+    this(s);
+    
+    populateReferenceList();
+    
+    _index = 0;
+    _hasReference = true;
+  }
+
+  private void populateReferenceList()
+    throws IOException
+  {
+    int ch = read();
+
+    switch (ch) {
+      case 'b':
+      {
+        _referenceList.add(Boolean.FALSE);
+        
+        expect(':');
+        for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
+        }
+        
+        return;
+      }
+
+      case 's':
+      case 'S':
+      {
+        _referenceList.add(Boolean.FALSE);
+        
+        expect(':');
+        int len = (int) readInt();
+        expect(':');
+        expect('"');
+
+        _index += len;
+
+        expect('"');
+        expect(';');
+        
+        return;
+      }
+      case 'u':
+      case 'U':
+      {
+        _referenceList.add(Boolean.FALSE);
+        
+        expect(':');
+        int len = (int) readInt();
+        expect(':');
+        expect('"');
+
+        _index += len;
+
+        expect('"');
+        expect(';');
+        
+        return;
+      }
+
+      case 'i':
+      {
+        _referenceList.add(Boolean.FALSE);
+        
+        expect(':');
+
+        for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
+        }
+        
+        return;
+      }
+
+      case 'd':
+      {
+        _referenceList.add(Boolean.FALSE);
+        
+        expect(':');
+
+        for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
+        }
+        
+        return;
+      }
+
+      case 'a':
+      {
+        _referenceList.add(Boolean.FALSE);
+        
+        expect(':');
+        int len = (int) readInt();
+        expect(':');
+        expect('{');
+
+        for (int i = 0; i < len; i++) {
+          switch (read()) {
+          case 's':
+            {
+              expect(':');
+              int keyLen = (int) readInt();
+              expect(':');
+              expect('"');
+
+              _index += keyLen;
+
+              expect('"');
+              expect(';');
+              
+              break;
+              
+            }
+
+          case 'i':
+            {
+              expect(':');
+
+              for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
+              }
+              
+              break;
+            }
+          }
+
+          populateReferenceList();
+        }
+
+        expect('}');
+        
+        return;
+      }
+
+      case 'O':
+      {
+        _referenceList.add(Boolean.FALSE);
+        
+        expect(':');
+        int len = (int) readInt();
+        expect(':');
+        expect('"');
+
+        _index += len;
+
+        expect('"');
+        expect(':');
+        int count = (int) readInt();
+        expect(':');
+        expect('{');
+
+        for (int i = 0; i < count; i++) {
+          switch (read()) {
+            case 's':
+              {
+                expect(':');
+                int keyLen = (int) readInt();
+                expect(':');
+                expect('"');
+
+                _index += keyLen;
+
+                expect('"');
+                expect(';');
+                
+                break;
+              }
+
+            case 'i':
+              {
+                expect(':');
+
+                for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
+                }
+                
+                break;
+              }
+          }
+
+          populateReferenceList();
+        }
+
+        expect('}');
+        
+        return;
+      }
+
+      case 'N':
+      {
+        _referenceList.add(Boolean.FALSE);
+        
+        expect(';');
+        
+        return;
+      }
+
+      case 'R':
+      {
+        _referenceList.add(Boolean.FALSE);
+        
+        expect(':');
+
+        int value = (int) readInt();
+
+        expect(';');
+        
+        _referenceList.set(value - 1, Boolean.TRUE);
+        
+        return;
+      }
+    }
   }
 
   public Value unserialize(Env env)
@@ -73,8 +309,15 @@ public final class UnserializeReader {
         expect(':');
         long v = readInt();
         expect(';');
-
-        return v == 0 ? BooleanValue.FALSE : BooleanValue.TRUE;
+        
+        Value value = v == 0 ? BooleanValue.FALSE : BooleanValue.TRUE;
+        
+        if (_hasReference)
+          value = createReference(value);
+        
+        _valueList.add(value);
+        
+        return value;
       }
 
     case 's':
@@ -85,12 +328,17 @@ public final class UnserializeReader {
         expect(':');
         expect('"');
 
-        StringValue s = readStringValue(env, len);
+        Value value = readStringValue(env, len);
 
         expect('"');
         expect(';');
+        
+        if (_hasReference)
+          value = createReference(value);
+        
+        _valueList.add(value);
 
-        return s;
+        return value;
       }
     case 'u':
     case 'U':
@@ -100,23 +348,35 @@ public final class UnserializeReader {
         expect(':');
         expect('"');
 
-        StringValue s = readUnicodeValue(env, len);
+        Value value = readUnicodeValue(env, len);
 
         expect('"');
         expect(';');
+        
+        if (_hasReference)
+          value = createReference(value);
+        
+        _valueList.add(value);
 
-        return s;
+        return value;
       }
 
     case 'i':
       {
         expect(':');
 
-        long value = readInt();
+        long l = readInt();
 
         expect(';');
+        
+        Value value = LongValue.create(l); 
+        
+        if (_hasReference)
+          value = createReference(value);
+        
+        _valueList.add(value);
 
-        return LongValue.create(value);
+        return value;
       }
 
     case 'd':
@@ -131,7 +391,14 @@ public final class UnserializeReader {
         if (ch != ';')
           throw new IOException(L.l("expected ';'"));
 
-        return new DoubleValue(Double.parseDouble(sb.toString()));
+        Value value = new DoubleValue(Double.parseDouble(sb.toString()));
+        
+        if (_hasReference)
+          value = createReference(value);
+        
+        _valueList.add(value);
+        
+        return value;
       }
 
     case 'a':
@@ -141,7 +408,13 @@ public final class UnserializeReader {
         expect(':');
         expect('{');
         
-        ArrayValue array = new ArrayValueImpl((int) len);
+        Value array = new ArrayValueImpl((int) len);
+
+        if (_hasReference)
+          array = createReference(array);
+        
+        _valueList.add(array);
+        
         for (int i = 0; i < len; i++) {
           Value key = unserializeKey(env);
           Value value = unserialize(env);
@@ -183,7 +456,12 @@ public final class UnserializeReader {
 		       "__Quercus_Incomplete_Class_name",
 		       env.createString(className));
         }
-	
+        
+        if (_hasReference)
+          obj = createReference(obj);
+        
+        _valueList.add(obj);
+
         for (int i = 0; i < count; i++) {
           String key = unserializeString();
           Value value = unserialize(env);
@@ -199,13 +477,38 @@ public final class UnserializeReader {
     case 'N':
       {
         expect(';');
+        
+        Value value = NullValue.NULL;
+        
+        if (_hasReference)
+          value = createReference(value);
+        
+        _valueList.add(value);
 
-        return NullValue.NULL;
+        return value;
+      }
+    case 'R':
+      {
+        expect(':');
+
+        int value = (int) readInt();
+
+        expect(';');
+
+        return _valueList.get(value - 1);
       }
 
     default:
       return BooleanValue.FALSE;
     }
+  }
+  
+  public Value createReference(Value value)
+  {
+    if (_referenceList.get(_valueCount++) == Boolean.FALSE)
+      return value;
+    else
+      return new Var(value);
   }
 
   public Value unserializeKey(Env env)
@@ -295,7 +598,7 @@ public final class UnserializeReader {
       throw new IOException(L.l("expected '{0}' at '{1}' (0x{2})",
                                 String.valueOf((char) expectCh),
                                 String.valueOf((char) ch),
-				Integer.toHexString(ch)));
+                                Integer.toHexString(ch)));
     }
   }
 
@@ -372,7 +675,8 @@ public final class UnserializeReader {
     _index--;
   }
 
-  public final static class StringKey {
+  public final static class StringKey
+  {
     char []_buffer;
     int _offset;
     int _length;

@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.StringLiteralExpr;
+import com.caucho.quercus.lib.SerializeMap;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
 
@@ -40,6 +41,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.AbstractSet;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -1023,11 +1025,15 @@ public class ObjectExtValue extends ObjectValue
 
   // XXX: need to check the other copy, e.g. for sessions
 
-  /**
+  /*
    * Serializes the value.
+   * 
+   * @param sb holds result of serialization
+   * @param serializeMap holds reference indexes
    */
   @Override
-  public void serialize(StringBuilder sb)
+  public void serialize(StringBuilder sb,
+                        SerializeMap serializeMap)
   {
     sb.append("O:");
     sb.append(_quercusClass.getName().length());
@@ -1036,6 +1042,8 @@ public class ObjectExtValue extends ObjectValue
     sb.append("\":");
     sb.append(getSize());
     sb.append(":{");
+    
+    serializeMap.incrementIndex();
 
     for (Map.Entry<Value,Value> entry : entrySet()) {
       Value key = entry.getKey();
@@ -1046,7 +1054,9 @@ public class ObjectExtValue extends ObjectValue
       sb.append(key);
       sb.append("\";");
 
-      entry.getValue().serialize(sb);
+      Value value = ((Entry) entry).getRawValue();
+      
+      value.serialize(sb, serializeMap);
     }
 
     sb.append("}");
@@ -1424,6 +1434,11 @@ public class ObjectExtValue extends ObjectValue
     public Value getValue()
     {
       return _value.toValue();
+    }
+    
+    public Value getRawValue()
+    {
+      return _value;
     }
 
     public Value getKey()

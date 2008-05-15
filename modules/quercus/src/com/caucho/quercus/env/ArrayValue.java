@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
+import com.caucho.quercus.lib.SerializeMap;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -947,19 +948,24 @@ abstract public class ArrayValue extends Value {
     }
   }
 
-  /**
+  /*
    * Serializes the value.
+   * 
+   * @param sb holds result of serialization
+   * @param serializeMap holds reference indexes
    */
   @Override
-  public void serialize(StringBuilder sb)
+  public void serialize(StringBuilder sb, SerializeMap serializeMap)
   {
     sb.append("a:");
     sb.append(getSize());
     sb.append(":{");
+    
+    serializeMap.incrementIndex();
 
     for (Entry entry = getHead(); entry != null; entry = entry._next) {
       entry.getKey().serialize(sb);
-      entry.getValue().serialize(sb);
+      entry.getRawValue().serialize(sb, serializeMap);
     }
 
     sb.append("}");

@@ -593,7 +593,7 @@ public class VariableModule extends AbstractQuercusModule {
   {
     StringBuilder sb = new StringBuilder();
 
-    v.serialize(sb);
+    v.serialize(sb, new SerializeMap());
 
     return sb.toString();
   }
@@ -653,18 +653,25 @@ public class VariableModule extends AbstractQuercusModule {
    */
   public static Value unserialize(Env env, StringValue s)
   {
-    Value v = _unserializeCache.get(s);
-
-    if (v != null) {
-      // return v.copy(env);
-      return v.copyTree(env);
-    }
+    // cannot cache references
+    boolean isCacheable = s.indexOf("R:") < 0;
     
+    Value v = null;
+    
+    if (isCacheable) {
+      v = _unserializeCache.get(s);
+      
+      if (v != null) {
+        // return v.copy(env);
+        return v.copyTree(env);
+      }
+    }
+
     try {
-      UnserializeReader is = new UnserializeReader(s);
+      UnserializeReader is = new UnserializeReader(s, ! isCacheable);
 
       v = is.unserialize(env);
-    } catch (Exception e) {
+    } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 
       env.notice(e.toString());
@@ -672,8 +679,10 @@ public class VariableModule extends AbstractQuercusModule {
       v = BooleanValue.FALSE;
     }
 
-    // _unserializeCache.put(s, v.copy(env));
-    _unserializeCache.put(s, v.copyTree(env));
+    if (isCacheable) {
+      // _unserializeCache.put(s, v.copy(env));
+      _unserializeCache.put(s, v.copyTree(env));
+    }
 
     return v;
   }
