@@ -56,6 +56,7 @@ public class ResinQuercus extends Quercus
     = new EnvironmentLocal<ModuleContext>();
 
   private WebApp _webApp;
+  private long _dependencyCheckInterval = 2000L;
   
   /**
    * Constructor.
@@ -66,6 +67,10 @@ public class ResinQuercus extends Quercus
 
     setPwd(Vfs.lookup());
     setWorkDir(WorkDir.getLocalWorkDir());
+
+    EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
+    if (loader != null)
+      _dependencyCheckInterval = loader.getDependencyCheckInterval();
   }
 
   public void setWebApp(WebApp webApp)
@@ -115,6 +120,12 @@ public class ResinQuercus extends Quercus
       return _webApp.getSessionManager();
     else
       return null;
+  }
+
+  @Override
+  public long getDependencyCheckInterval()
+  {
+    return _dependencyCheckInterval;
   }
 
   @Override

@@ -13,6 +13,9 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>quercus: tempnam was not allowing short prefix for Seagull (#2663, rep by falko)</li>
+<li>quercus: cache include miss (#2196, rep by koreth)</li>
+<li>quercus: timestamp handling of 0000-00-00 with mysql driver (#2609, rep by sgraf)</li>
 <li>load balance: update load-balance-idle-time heuristic to increase gap to keepalive (#2660)</li>
 <li>mod_caucho: build issue with Apache 1.3 (#2655, rep by maxpil)</li>
 <li>quercus: new self needs to create the owning class (#2550, rep by mardala)</li>

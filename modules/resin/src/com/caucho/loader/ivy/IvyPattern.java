@@ -62,19 +62,20 @@ public class IvyPattern {
     return sb.toString();
   }
 
-  public String resolveRevisions(Map<String,String> props)
+  public String resolveRevisionPath(Map<String,String> props)
   {
     StringBuilder sb = new StringBuilder();
 
     for (Segment segment : _segments) {
       if (segment instanceof VarSegment
-	  && "revision".equals(((VarSegment) segment).getVar()))
-	return sb.toString();
-      
-      segment.resolve(sb, props);
+	  && "revision".equals(((VarSegment) segment).getVar())) {
+	sb.append("[revision]");
+      }
+      else
+	segment.resolve(sb, props);
     }
 
-    return null;
+    return sb.toString();
   }
 
   private void parse(String pattern)

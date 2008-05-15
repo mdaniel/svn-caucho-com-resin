@@ -45,6 +45,8 @@ public class IvyDependency {
   private String _name;
   private String _rev = "latest";
 
+  private String []_versions;
+
   /**
    * The artifact name
    */
@@ -108,6 +110,14 @@ public class IvyDependency {
   {
     return _rev;
   }
+
+  /**
+   * Sets the versions
+   */
+  public void setVersions(String []versions)
+  {
+    _versions = versions;
+  }
   
   /**
    * Ignore unknown properties
@@ -124,7 +134,34 @@ public class IvyDependency {
 
   public Path resolve(IvyCache cache)
   {
-    return cache.resolve(this);
+    Path path = cache.resolve(this);
+
+    if (path != null)
+      return path;
+
+    if (_versions == null)
+      return null;
+
+    Path bestPath = null;
+    String bestVersion = null;
+    
+    for (String version : _versions) {
+      path = cache.resolve(this, version);
+
+      if (path == null)
+	continue;
+      else if (bestPath == null) {
+	bestPath = path;
+	bestVersion = version;
+      }
+      else if (new IvyRevision(bestVersion).compareTo(new IvyRevision(version)) < 0) {
+	bestPath = path;
+	bestVersion = version;
+      }
+      
+    }
+
+    return bestPath;
   }
 
   public IvyDependency merge(IvyDependency dep)

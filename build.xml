@@ -351,9 +351,11 @@
   </target>
   
   <target name="support" depends="init, compat">
+    <mkdir dir="plugins"/>
+    
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="support"/>
-      <param name="module.jar" value="resin-support.jar"/>
+      <param name="module.jar" value="../plugins/resin-support.jar"/>
     </antcall>
   </target>
 

@@ -41,6 +41,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.sql.Time;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -557,6 +560,16 @@ public class JdbcResultResource {
 
         return bb;
       }
+
+      case Types.TIME:
+	return getColumnTime(env, rs, column);
+	
+      case Types.TIMESTAMP:
+	return getColumnTimestamp(env, rs, column);
+	
+      case Types.DATE:
+	return getColumnDate(env, rs, column);
+	
       default:
         {
           String strValue = rs.getString(column);
@@ -576,6 +589,47 @@ public class JdbcResultResource {
       log.log(Level.FINE, e.toString(), e);
 
       return NullValue.NULL;
+    }
+  }
+
+  protected Value getColumnTime(Env env, ResultSet rs, int column)
+    throws SQLException
+  {
+    Time time = rs.getTime(column);
+    
+    if (time == null)
+      return NullValue.NULL;
+    else
+      return env.createString(String.valueOf(time));
+  }
+
+  protected Value getColumnDate(Env env, ResultSet rs, int column)
+    throws SQLException
+  {
+    Date date = rs.getDate(column);
+    
+    if (date == null)
+      return NullValue.NULL;
+    else
+      return env.createString(String.valueOf(date));
+  }
+
+  protected Value getColumnTimestamp(Env env, ResultSet rs, int column)
+    throws SQLException
+  {
+    try {
+      Timestamp timestamp = rs.getTimestamp(column);
+
+      if (timestamp == null)
+	return NullValue.NULL;
+      else
+	return env.createString(String.valueOf(timestamp));
+    } catch (SQLException e) {
+      if (log.isLoggable(Level.FINE))
+	log.log(Level.FINE, e.toString(), e);
+
+      // php/1f0a - mysql jdbc driver issue with zero timestamp
+      return env.createString("0000-00-00 00:00:00");
     }
   }
 

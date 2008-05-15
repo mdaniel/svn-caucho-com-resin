@@ -3789,9 +3789,14 @@ public class Env {
     if (path == null) {
       path = lookupIncludeImpl(include, pwd, scriptPwd);
 
-      if (path != null)
-	_quercus.putIncludeCache(include, includePath, pwd, scriptPwd, path);
+      if (path == null)
+	path = NullPath.NULL;
+      
+      _quercus.putIncludeCache(include, includePath, pwd, scriptPwd, path);
     }
+
+    if (path == NullPath.NULL)
+      path = null;
 
     _includePath = includePath;
     _includePathIniCount = _iniCount;

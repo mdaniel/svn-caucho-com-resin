@@ -33,8 +33,8 @@ import java.util.*;
 import java.util.logging.*;
 import javax.annotation.*;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.config.*;
+import com.caucho.vfs.*;
 
 /**
  * IvyCache configuration
@@ -75,10 +75,17 @@ public class IvyCache {
    */
   public Path resolve(IvyDependency dependency)
   {
+    return resolve(dependency, dependency.getRev());
+  }
+    
+  /**
+   * Finds a dependency in the cache
+   */
+  public Path resolve(IvyDependency dependency, String rev)
+  {
     String org = dependency.getOrg();
     String name = dependency.getName();
     String artifact = dependency.getArtifact();
-    String rev = dependency.getRev();
 
     if (artifact == null)
       artifact = name;
@@ -139,7 +146,7 @@ public class IvyCache {
    * Finds a dependency in the cache
    */
   public void resolveVersions(ArrayList<String> versions,
-			      IvyDependency dependency)
+			       IvyDependency dependency)
   {
     String org = dependency.getOrg();
     String name = dependency.getName();
@@ -160,11 +167,49 @@ public class IvyCache {
     props.put("type", "ivy");
     props.put("ext", "xml");
 
-    String pathName = _artifactPattern.resolveRevisions(props);
+    String pathName = _ivyPattern.resolveRevisionPath(props);
 
-    System.out.println("PATH: " + pathName);
+    int revIndex = pathName.indexOf("[revision]");
+    if (revIndex < 0)
+      return;
+    
+    int tail = pathName.indexOf('/', revIndex);
+
+    if (tail > 0)
+      pathName = pathName.substring(0, tail);
+
+    int head = pathName.lastIndexOf('/');
+    String segment;
+    
+    if (head > 0) {
+      segment = pathName.substring(head + 1);
+      pathName = pathName.substring(0, head);
+    }
+    else {
+      pathName = ".";
+      segment = pathName;
+    }
+
+    revIndex = segment.indexOf("[revision]");
+    String prefix = segment.substring(0, revIndex);
+    String suffix = segment.substring(revIndex + "[revision]".length());
 
     Path path = _repositoryCacheDir.lookup(pathName);
+    
+    try {
+      for (String item : path.list()) {
+	if (item.startsWith(prefix) && item.endsWith(suffix)) {
+	  int len = item.length() - suffix.length();
+	
+	  String revName = item.substring(prefix.length(), len);
+
+	  if (! versions.contains(revName))
+	    versions.add(revName);
+	}
+      }
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
 
   @PostConstruct

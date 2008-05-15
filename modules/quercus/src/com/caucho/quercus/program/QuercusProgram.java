@@ -84,6 +84,7 @@ public class QuercusProgram {
 			Statement statement)
   {
     _quercus = quercus;
+    _depend.setCheckInterval(quercus.getDependencyCheckInterval());
 
     _sourceFile = sourceFile;
     if (sourceFile != null)

@@ -242,6 +242,11 @@ public class Quercus
     return "JSESSIONID";
   }
 
+  public long getDependencyCheckInterval()
+  {
+    return 2000L;
+  }
+
   public String getVersion()
   {
     return "Open Source 3.1.6";

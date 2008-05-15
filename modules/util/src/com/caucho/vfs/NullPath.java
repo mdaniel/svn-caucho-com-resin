@@ -31,6 +31,8 @@ package com.caucho.vfs;
 import java.util.Map;
 
 public class NullPath extends Path {
+  public static final Path NULL = new NullPath("null:");
+  
   private String _url;
 
   public NullPath(String url)

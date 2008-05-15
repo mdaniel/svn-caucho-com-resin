@@ -274,8 +274,8 @@ public class Mcrypt {
 
   private boolean isPadded()
   {
-    return (McryptModule.MCRYPT_DES.equals(_algorithm) ||
-	    McryptModule.MCRYPT_3DES.equals(_algorithm));
+    return (McryptModule.MCRYPT_DES.equals(_algorithm)
+	    || McryptModule.MCRYPT_3DES.equals(_algorithm));
   }
 
   /**

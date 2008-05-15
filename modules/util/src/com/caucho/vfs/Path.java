@@ -1162,8 +1162,8 @@ public abstract class Path {
    */
   public Path createTempFile(String prefix, String suffix) throws IOException
   {
-    if (prefix == null || prefix.length () < 3)
-      throw new IllegalArgumentException("prefix too short: " + prefix);
+    if (prefix == null || prefix.length () == 0)
+      prefix = "t";
 
     if (suffix == null)
       suffix = ".tmp";

@@ -129,15 +129,13 @@ public class IvyManager {
 	  resolve(depend);
 	}
       }
-      System.out.println("LIST: " + _dependencyList);
-      System.out.println("CACHE: " + _cacheList);
+
       ArrayList<IvyDependency> depList
 	= new ArrayList<IvyDependency>(_dependencyList);
       for (IvyDependency dependency : depList) {
 	for (IvyCache cache : _cacheList) {
 	  Path path = dependency.resolve(cache);
 
-	  System.out.println("PATH: " + path + " " + dependency);
 	  if (path != null && path.canRead()) {
 	    addJar(path);
 	    break;
@@ -176,6 +174,8 @@ public class IvyManager {
 					dependency.getName());
 
     String []versions = getVersions(dependency);
+
+    dependency.setVersions(versions);
     
     _isModified = true;
     _dependencyList.add(dependency);
@@ -191,15 +191,16 @@ public class IvyManager {
       cache.resolveVersions(versions, dependency);
     }
 
-    return new String[0];
+    String []versionArray = new String[versions.size()];
+
+    versions.toArray(versionArray);
+    
+    return versionArray;
   }
 
   void addJar(Path path)
   {
     if (! _jarList.contains(path)) {
-      if (log.isLoggable(Level.FINE))
-	log.fine(this + " adding " + path);
-      
       _jarList.add(path);
     }
   }
