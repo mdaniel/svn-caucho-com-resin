@@ -213,4 +213,11 @@ public abstract class Application
   public ResourceHandler getResourceHandler(){
     throw new UnsupportedOperationException(getClass().getName());
   }
+
+  /**
+   * @Since 2.0
+   */
+  public ProjectStage getProjectStage() {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 }

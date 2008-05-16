@@ -49,6 +49,7 @@ import javax.faces.application.NavigationHandler;
 import javax.faces.application.StateManager;
 import javax.faces.application.ViewHandler;
 import javax.faces.application.ResourceHandler;
+import javax.faces.application.ProjectStage;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.context.FacesContext;
@@ -61,14 +62,20 @@ import javax.faces.validator.LongRangeValidator;
 import javax.faces.validator.Validator;
 import javax.servlet.jsp.JspApplicationContext;
 import javax.servlet.jsp.JspFactory;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.lang.reflect.Constructor;
 import java.util.*;
+import java.util.logging.Logger;
 import java.beans.FeatureDescriptor;
 
 public class ApplicationImpl
   extends Application
 {
   private static final L10N L = new L10N(ApplicationImpl.class);
+
+  private static final Logger log
+    = Logger.getLogger(ApplicationImpl.class.getName());
 
   private ActionListener _actionListener;
   private StateManager _stateManager;
@@ -124,6 +131,8 @@ public class ApplicationImpl
 
   private PropertyResolver _legacyPropertyResolver;
   private VariableResolver _legacyVariableResolver;
+
+  private ProjectStage _projectStage;
 
   public ApplicationImpl()
   {
@@ -958,6 +967,41 @@ public class ApplicationImpl
     return expr.getValue(elContext);
   }
 
+  @Override
+  public ProjectStage getProjectStage()
+  {
+    if (_projectStage == null) {
+      String stage = null;
+
+      try {
+       stage
+         = (String) new InitialContext().lookup(ProjectStage.PROJECT_STAGE_JNDI_NAME);
+      }
+      catch (NamingException e) {
+      }
+
+      if (stage == null) {
+        stage = FacesContext.getCurrentInstance()
+          .getExternalContext()
+          .getInitParameter(ProjectStage.PROJECT_STAGE_PARAM_NAME);
+      }
+
+      if (stage != null) {
+        try {
+          _projectStage = ProjectStage.valueOf(ProjectStage.class, stage);
+        }
+        catch (IllegalArgumentException e) {
+          log.fine(L.l("Can't convert '{0}' to ProjectStage", stage));
+        }
+      }
+
+      if (_projectStage == null)
+        _projectStage = ProjectStage.Production;
+    }
+
+    return _projectStage;
+  }
+
   public void initRequest()
   {
     _isInit = true;
@@ -1446,5 +1490,3 @@ public class ApplicationImpl
     }
   }
 }
-
-
