@@ -4021,10 +4021,11 @@ public class Env {
     else if (cl.isAssignableFrom(value.getClass()))
       return value;
     else {
-      error(L.l("{0} ({1}) is not assignable to {2}",
+      // php/3cr2
+      warning(L.l("{0} ({1}) is not assignable to {2}",
                 value, value.getClass().getName(), cl.getName()));
 
-      return value;
+      return null;
     }
   }
 
