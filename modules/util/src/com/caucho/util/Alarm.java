@@ -325,6 +325,8 @@ public class Alarm implements ThreadTask {
    */
   public void queue(long delta)
   {
+    boolean isNotify = false;
+    
     synchronized (_queueLock) {
       if (_heapIndex > 0)
 	dequeueImpl(this);
@@ -338,7 +340,13 @@ public class Alarm implements ThreadTask {
       
       _wakeTime = wakeTime;
 
-      insertImpl(this);
+      isNotify = insertImpl(this);
+    }
+
+    if (isNotify) {
+      synchronized (_coordinatorThread) {
+	_coordinatorThread.notifyAll();
+      }
     }
   }
 
@@ -349,13 +357,21 @@ public class Alarm implements ThreadTask {
    */
   public void queueAt(long wakeTime)
   {
+    boolean isNotify = false;
+    
     synchronized (_queueLock) {
       if (_heapIndex > 0)
 	dequeueImpl(this);
       
       _wakeTime = wakeTime;
 
-      insertImpl(this);
+      isNotify = insertImpl(this);
+    }
+    
+    if (isNotify) {
+      synchronized (_coordinatorThread) {
+	_coordinatorThread.notifyAll();
+      }
     }
   }
 
@@ -467,7 +483,7 @@ public class Alarm implements ThreadTask {
   /**
    * Removes the alarm item.  Must be called from within the heap lock.
    */
-  private static void insertImpl(Alarm item)
+  private static boolean insertImpl(Alarm item)
   {
     if (item._heapIndex != 0)
       throw new IllegalStateException();
@@ -495,15 +511,11 @@ public class Alarm implements ThreadTask {
 
     heap[i] = item;
     item._heapIndex = i;
-
-    if (i == 1 && _coordinatorThread != null) {
-      synchronized (_coordinatorThread) {
-	_coordinatorThread.notifyAll();
-      }
-    }
     
     if (_heapTop < i)
       throw new IllegalStateException();
+
+    return (i == 1 && _coordinatorThread != null);
   }
 
   /**

@@ -49,28 +49,6 @@ public class FunctionModule extends AbstractQuercusModule {
 
   private static final Logger log
     = Logger.getLogger(FunctionModule.class.getName());
-
-  /**
-   * Calls a user function
-   */
-  public static Value call_user_method(Env env,
-                                       String name,
-                                       Value obj,
-                                       Value []args)
-  {
-    if (obj.isObject()) {
-      AbstractFunction fun = obj.findFunction(name);
-      
-      return fun.callMethod(env, obj, args).copyReturn();
-    }
-    else {
-      QuercusClass cls = env.findClass(obj.toString());
-      
-      AbstractFunction fun = cls.findFunction(name);
-      
-      return fun.call(env, args).copyReturn();
-    }
-  }
   
   /**
    * Calls a user function
@@ -133,14 +111,6 @@ public class FunctionModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array of the defined functions
-   */
-  public static Value get_defined_functions(Env env)
-  {
-    return env.getDefinedFunctions();
-  }
-
-  /**
    * Returns the nth function argument.
    */
   @VariableArguments
@@ -197,6 +167,14 @@ public class FunctionModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns an array of the defined functions
+   */
+  public static Value get_defined_functions(Env env)
+  {
+    return env.getDefinedFunctions();
+  }
+
+  /**
    * Registers a shutdown function.
    */
   public static Value register_shutdown_function(Env env,
@@ -207,4 +185,7 @@ public class FunctionModule extends AbstractQuercusModule {
 
     return NullValue.NULL;
   }
+
+  // XXX: register_tick_function
+  // XXX: unregister_tick_function
 }

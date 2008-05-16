@@ -52,7 +52,31 @@ public class ClassesModule extends AbstractQuercusModule {
     = Logger.getLogger(ClassesModule.class.getName());
 
   /**
-   * Returns true if the class exists.
+   * Calls a user function
+   */
+  public static Value call_user_method(Env env,
+                                       String name,
+                                       Value obj,
+                                       Value []args)
+  {
+    if (obj.isObject()) {
+      AbstractFunction fun = obj.findFunction(name);
+      
+      return fun.callMethod(env, obj, args).copyReturn();
+    }
+    else {
+      QuercusClass cls = env.findClass(obj.toString());
+      
+      AbstractFunction fun = cls.findFunction(name);
+      
+      return fun.call(env, args).copyReturn();
+    }
+  }
+
+  // XXX: call_user_method_array
+  
+  /**
+   * returns true if the class exists.
    */
   public boolean class_exists(Env env,
                               String className,
@@ -156,6 +180,8 @@ public class ClassesModule extends AbstractQuercusModule {
     return env.getDeclaredClasses();
   }
 
+  // XXX: get_declared_interfaces
+
   /**
    * Returns the object's variables
    */
@@ -258,4 +284,6 @@ public class ClassesModule extends AbstractQuercusModule {
   {
     return obj.findFunction(methodName.intern()) != null;
   }
+
+  // XXX: property_exists
 }

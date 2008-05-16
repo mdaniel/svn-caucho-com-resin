@@ -1710,8 +1710,13 @@ public class Quercus
     */
   }
 
+  public void start()
+  {
+  }
+
   public void close()
   {
+    _sessionManager.close();
     _pageManager.close();
   }
 

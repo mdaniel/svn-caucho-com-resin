@@ -186,7 +186,7 @@ public class HmuxRequest extends AbstractHttpRequest
   public static final int HMTP_MESSAGE =        '0';
   public static final int HMTP_QUERY_GET =      '1';
   public static final int HMTP_QUERY_SET =      '2';
-  public static final int HMTP_RESPONSE =       '3';
+  public static final int HMTP_QUERY_RESULT =   '3';
   public static final int HMTP_ERROR =          '4';
   public static final int HMTP_PACKET =         '5';
 
@@ -941,6 +941,16 @@ public class HmuxRequest extends AbstractHttpRequest
 	  break;
 	}
 
+      case HMTP_QUERY_RESULT:
+	{
+	  len = (is.read() << 8) + is.read();
+	  long id = readLong(is);
+
+	  readHmtpQueryResult(is, id);
+	  hasURI = true;
+	  break;
+	}
+
       default:
         len = (is.read() << 8) + is.read();
 
@@ -1030,11 +1040,30 @@ public class HmuxRequest extends AbstractHttpRequest
     HmtpStream hmtpStream = _server.getHmtpStream();
 
     if (log.isLoggable(Level.FINER))
-      log.fine(dbgId() + (char) HMTP_QUERY_SET + " hmtp query id=" + id
+      log.fine(dbgId() + (char) HMTP_QUERY_SET + ": hmtp query id=" + id
 	       + " to=" + to + " from=" + from + " " + query);
 
     if (hmtpStream != null) {
       hmtpStream.sendQuerySet(id, to, from, query);
+    }
+  }
+
+  private void readHmtpQueryResult(ReadStream is, long id)
+    throws IOException
+  {
+    String to = readString(is);
+    String from = readString(is);
+
+    Serializable value = (Serializable) readObject();
+
+    HmtpStream hmtpStream = _server.getHmtpStream();
+
+    if (log.isLoggable(Level.FINER))
+      log.fine(dbgId() + (char) HMTP_QUERY_RESULT + ": hmtp queryResult id=" + id
+	       + " to=" + to + " from=" + from + " " + value);
+
+    if (hmtpStream != null) {
+      hmtpStream.sendQueryResult(id, to, from, value);
     }
   }
 
@@ -1064,14 +1093,14 @@ public class HmuxRequest extends AbstractHttpRequest
   private long readLong(ReadStream is)
     throws IOException
   {
-    return ((is.read() << 56)
-	    | (is.read() << 48)
-	    | (is.read() << 40)
-	    | (is.read() << 32)
-	    | (is.read() << 24)
-	    | (is.read() << 16)
-	    | (is.read() << 8)
-	    | (is.read()));
+    return (((long) is.read() << 56)
+	    + ((long) is.read() << 48)
+	    + ((long) is.read() << 40)
+	    + ((long) is.read() << 32)
+	    + ((long) is.read() << 24)
+	    + ((long) is.read() << 16)
+	    + ((long) is.read() << 8)
+	    + ((long) is.read()));
   }
 
   /**

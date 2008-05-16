@@ -431,8 +431,8 @@ public class SessionModule extends AbstractQuercusModule
     // Use URL rewriting to transmit session id
     //
 
-    if (env.getIniBoolean("session.use_trans_sid") &&
-        ! env.getIniBoolean("session.use_only_cookies")) {
+    if (env.getIniBoolean("session.use_trans_sid")
+	&& ! env.getIniBoolean("session.use_only_cookies")) {
       if (sessionId == null) {
         if (sessionIdValue != null)
           sessionId = sessionIdValue.toString();
@@ -516,6 +516,7 @@ public class SessionModule extends AbstractQuercusModule
             false);
 
     Cookie cookie = new Cookie(cookieName, sessionId);
+    // #2649
     cookie.setVersion(1);
 
     if (response.isCommitted()) {

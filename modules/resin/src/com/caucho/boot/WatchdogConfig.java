@@ -386,10 +386,6 @@ public class WatchdogConfig
   {
   }
 
-  public void addProtocol(ConfigProgram program)
-  {
-  }
-
   public void setPort(int port)
   {
   }

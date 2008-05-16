@@ -161,28 +161,6 @@ public class OptionsModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns true if the given extension is loaded
-   */
-  public static boolean extension_loaded(Env env, String ext)
-  {
-    return env.isExtensionLoaded(ext);
-  }
-
-  /**
-   * Returns true if the given extension is loaded
-   */
-  public static Value get_loaded_extensions(Env env)
-  {
-    ArrayValue value = new ArrayValueImpl();
-
-    for (String ext : env.getLoadedExtensions()) {
-      value.put(ext);
-    }
-
-    return value;
-  }
-
-  /**
    * Stubs the dl.
    */
   public static boolean dl(Env env, String dl)
@@ -193,39 +171,11 @@ public class OptionsModule extends AbstractQuercusModule {
   }
 
   /**
-   * Sets an environment name/value pair.
+   * Returns true if the given extension is loaded
    */
-  public static boolean putenv(Env env, StringValue settings)
+  public static boolean extension_loaded(Env env, String ext)
   {
-    int eqIndex = settings.indexOf('=');
-
-    if (eqIndex < 0)
-      return false;
-
-    StringValue key = settings.substring(0, eqIndex);
-    StringValue val = settings.substring(eqIndex + 1);
-
-    env.getQuercus().setServerEnv(key, val);
-
-    return true;
-  }
-
-  /**
-   * Gets an environment value.
-   */
-  public static Value getenv(Env env, StringValue key)
-  {
-    Value val = env.getQuercus().getServerEnv(key);
-
-    if (val == null) {
-      ArrayValue serverVars = env.getGlobalVar("_SERVER").toArrayValue(env);
-      val = serverVars.get(key);
-    }
-
-    if (val == null || ! val.isset())
-      return BooleanValue.FALSE;
-
-    return val;
+    return env.isExtensionLoaded(ext);
   }
 
   /**
@@ -260,6 +210,14 @@ public class OptionsModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns extension function with a given name.
+   */
+  public static Value get_extension_funcs(Env env, String name)
+  {
+    return env.getExtensionFuncs(name);
+  }
+
+  /**
    * Returns the include path
    */
   public static Value get_include_path(Env env)
@@ -268,11 +226,25 @@ public class OptionsModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns extension function with a given name.
+   * Returns an array of all the included path.
    */
-  public static Value get_extension_funcs(Env env, String name)
+  public static ArrayValue get_included_files(Env env)
   {
-    return env.getExtensionFuncs(name);
+    return env.getIncludedFiles();
+  }
+
+  /**
+   * Returns true if the given extension is loaded
+   */
+  public static Value get_loaded_extensions(Env env)
+  {
+    ArrayValue value = new ArrayValueImpl();
+
+    for (String ext : env.getLoadedExtensions()) {
+      value.put(ext);
+    }
+
+    return value;
   }
 
   /**
@@ -294,11 +266,29 @@ public class OptionsModule extends AbstractQuercusModule {
   }
 
   /**
-   * Gets the magic quotes value.
+   * Returns an array of all the included path.
    */
-  public static Value magic_quotes_runtime(Env env)
+  public static ArrayValue get_required_files(Env env)
   {
-    return BooleanValue.FALSE; // PHP 6 removes, so we don't support
+    return get_included_files(env);
+  }
+
+  /**
+   * Gets an environment value.
+   */
+  public static Value getenv(Env env, StringValue key)
+  {
+    Value val = env.getQuercus().getServerEnv(key);
+
+    if (val == null) {
+      ArrayValue serverVars = env.getGlobalVar("_SERVER").toArrayValue(env);
+      val = serverVars.get(key);
+    }
+
+    if (val == null || ! val.isset())
+      return BooleanValue.FALSE;
+
+    return val;
   }
 
   /**
@@ -340,6 +330,8 @@ public class OptionsModule extends AbstractQuercusModule {
   {
     return Thread.currentThread().getId();
   }
+
+  // XXX: getopt
 
   /**
    * Stub value for getrusage.
@@ -408,7 +400,7 @@ public class OptionsModule extends AbstractQuercusModule {
    * @param extension assumes ini values are prefixed by extension names.
    */
   public static Value ini_get_all(Env env,
-                       @Optional() String extension)
+				  @Optional() String extension)
   {
     if (extension.length() > 0) {
       if (! env.isExtensionLoaded(extension)) {
@@ -483,6 +475,14 @@ public class OptionsModule extends AbstractQuercusModule {
   }
 
   /**
+   * Gets the magic quotes value.
+   */
+  public static Value magic_quotes_runtime(Env env)
+  {
+    return BooleanValue.FALSE; // PHP 6 removes, so we don't support
+  }
+
+  /**
    * Stub value for memory get usage.
    */
   public static Value memory_get_peak_usage(Env env, @Optional boolean real)
@@ -504,12 +504,53 @@ public class OptionsModule extends AbstractQuercusModule {
       return LongValue.create(Runtime.getRuntime().maxMemory());
   }
 
+  // XXX: php_ini_loaded_file
+  // XXX: php_ini_scanned_files
+  // XXX: php_logo_guid
+  // XXX: phpcredits
+
   /**
    * Returns the sapi type.
    */
   public static String php_sapi_name()
   {
     return "apache";
+  }
+
+  /**
+   * Returns system information
+   */
+  public static String php_uname(@Optional("'a'") String mode)
+  {
+    // XXX: stubbed
+
+    if (mode == null || mode.equals(""))
+      mode = "a";
+
+    switch (mode.charAt(0)) {
+    case 's':
+      return PHP_OS;
+
+    case 'n':
+      return "localhost";
+
+    case 'r':
+      return "2.4.0";
+
+    case 'v':
+      return "Version 2.4.0";
+
+    case 'm':
+      return "i386";
+
+    case 'a':
+    default:
+      return (php_uname("s") + " " +
+              php_uname("n") + " " +
+              php_uname("r") + " " +
+              php_uname("v") + " " +
+              php_uname("m"));
+    }
   }
 
   public static void phpinfo(Env env, @Optional("-1") int what)
@@ -632,85 +673,6 @@ public class OptionsModule extends AbstractQuercusModule {
         env.print("</pre>");
     }
   }
-  
-  private static boolean hasRequest(Env env)
-  {
-    return env.getRequest() != null;
-  }
-  
-  private static Value escape(Env env, Value value)
-  {
-    if (value.isArray()) {
-      ArrayValue array = value.toArrayValue(env);
-      
-      ArrayValue result = new ArrayValueImpl();
-      
-      for (Map.Entry<Value,Value> entry : array.entrySet()) {
-        Value key = escape(env, entry.getKey());
-        Value val = escape(env, entry.getValue());
-        
-        result.put(key, val);
-      }
-      
-      return result;
-    }
-    else if (value.isObject()) {
-      ObjectValue obj = (ObjectValue)value.toObject(env);
-      
-      ObjectValue result = new ObjectExtValue(obj.getQuercusClass());
-      
-      for (Map.Entry<Value,Value> entry : obj.entrySet()) {
-        Value key = escape(env, entry.getKey());
-        Value val = escape(env, entry.getValue());
-        
-        result.putField(env, key.toString(), val);
-      }
-      
-      return result;
-    }
-    else {
-      return HtmlModule.htmlspecialchars(env,
-                                         value.toStringValue(),
-                                         HtmlModule.ENT_COMPAT,
-                                         null);
-    }
-  }
-
-  /**
-   * Returns system information
-   */
-  public static String php_uname(@Optional("'a'") String mode)
-  {
-    // XXX: stubbed
-
-    if (mode == null || mode.equals(""))
-      mode = "a";
-
-    switch (mode.charAt(0)) {
-    case 's':
-      return PHP_OS;
-
-    case 'n':
-      return "localhost";
-
-    case 'r':
-      return "2.4.0";
-
-    case 'v':
-      return "Version 2.4.0";
-
-    case 'm':
-      return "i386";
-
-    case 'a':
-    default:
-      return (php_uname("s") + " " +
-              php_uname("n") + " " +
-              php_uname("r") + " " +
-              php_uname("v") + " " +
-              php_uname("m"));
-    }
-  }
 
   /**
    * Returns the quercus version.
@@ -721,11 +683,21 @@ public class OptionsModule extends AbstractQuercusModule {
   }
 
   /**
-   * Sets the include path
+   * Sets an environment name/value pair.
    */
-  public static String set_include_path(Env env, String includePath)
+  public static boolean putenv(Env env, StringValue settings)
   {
-    return env.setIncludePath(includePath);
+    int eqIndex = settings.indexOf('=');
+
+    if (eqIndex < 0)
+      return false;
+
+    StringValue key = settings.substring(0, eqIndex);
+    StringValue val = settings.substring(eqIndex + 1);
+
+    env.getQuercus().setServerEnv(key, val);
+
+    return true;
   }
 
   /**
@@ -739,11 +711,11 @@ public class OptionsModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array of all the included path.
+   * Sets the include path
    */
-  public static ArrayValue get_included_files(Env env)
+  public static String set_include_path(Env env, String includePath)
   {
-    return env.getIncludedFiles();
+    return env.setIncludePath(includePath);
   }
   
   /**
@@ -752,16 +724,6 @@ public class OptionsModule extends AbstractQuercusModule {
   public static Value set_magic_quotes_runtime(Env env, Value value)
   {
     return BooleanValue.FALSE; // PHP 6 removes magic_quotes
-  }
-  
-  /*
-   * Returns the directory used for temp files like uploads.
-   */
-  public static String sys_get_temp_dir(Env env)
-  {
-    Path tmp = env.getTempDirectory();
-    
-    return tmp.getNativePath() + Path.getFileSeparatorChar();
   }
 
   /**
@@ -774,6 +736,16 @@ public class OptionsModule extends AbstractQuercusModule {
     env.setTimeLimit(seconds * 1000L);
 
     return NullValue.NULL;
+  }
+  
+  /*
+   * Returns the directory used for temp files like uploads.
+   */
+  public static String sys_get_temp_dir(Env env)
+  {
+    Path tmp = env.getTempDirectory();
+    
+    return tmp.getNativePath() + Path.getFileSeparatorChar();
   }
 
   /**
@@ -815,6 +787,9 @@ public class OptionsModule extends AbstractQuercusModule {
         return new LongValue(1);
     }
   }
+
+  // XXX: zend_logo_guid
+  // XXX: zend_thread_id
 
   public static String zend_version()
   {
@@ -869,6 +844,49 @@ public class OptionsModule extends AbstractQuercusModule {
     }
 
     return expand;
+  }
+  
+  private static boolean hasRequest(Env env)
+  {
+    return env.getRequest() != null;
+  }
+  
+  private static Value escape(Env env, Value value)
+  {
+    if (value.isArray()) {
+      ArrayValue array = value.toArrayValue(env);
+      
+      ArrayValue result = new ArrayValueImpl();
+      
+      for (Map.Entry<Value,Value> entry : array.entrySet()) {
+        Value key = escape(env, entry.getKey());
+        Value val = escape(env, entry.getValue());
+        
+        result.put(key, val);
+      }
+      
+      return result;
+    }
+    else if (value.isObject()) {
+      ObjectValue obj = (ObjectValue)value.toObject(env);
+      
+      ObjectValue result = new ObjectExtValue(obj.getQuercusClass());
+      
+      for (Map.Entry<Value,Value> entry : obj.entrySet()) {
+        Value key = escape(env, entry.getKey());
+        Value val = escape(env, entry.getValue());
+        
+        result.putField(env, key.toString(), val);
+      }
+      
+      return result;
+    }
+    else {
+      return HtmlModule.htmlspecialchars(env,
+                                         value.toStringValue(),
+                                         HtmlModule.ENT_COMPAT,
+                                         null);
+    }
   }
 
   private static int compareTo(ArrayList<Value> a, ArrayList<Value> b)

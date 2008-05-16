@@ -46,7 +46,7 @@ import java.util.logging.Logger;
  * Stripped down version of com.caucho.server.session.SessionManager,
  * customized to PHP instead of J2EE sessions.
  */
-public class QuercusSessionManager {
+public class QuercusSessionManager implements AlarmListener {
   static protected final L10N L = new L10N(QuercusSessionManager.class);
   static protected final Logger log
     = Logger.getLogger(QuercusSessionManager.class.getName());
@@ -384,8 +384,9 @@ public class QuercusSessionManager {
       throw new IllegalStateException(key + " != " + session.getId());
 
     if (session != null) {
-      if (session.inUse())
+      if (session.inUse()) {
         return (SessionArrayValue)session.copy(env);
+      }
     }
 
     if (session == null)
@@ -402,7 +403,7 @@ public class QuercusSessionManager {
 
     if (! isNew)
       session.setAccess(now);
-
+    
     return (SessionArrayValue)session.copy(env);
   }
 
@@ -526,10 +527,8 @@ public class QuercusSessionManager {
         }
       }
     } finally {
-      /*
       if (! _isClosed)
-        _alarm.queue(60000);
-      */
+        alarm.queue(60000);
     }
   }
 

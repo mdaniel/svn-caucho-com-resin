@@ -56,7 +56,7 @@ public class RegexpModule
   
   public String []getLoadedExtensions()
   {
-    return new String[] { "pcre" };
+    return new String[] { "ereg", "pcre" };
   }
 
   /**

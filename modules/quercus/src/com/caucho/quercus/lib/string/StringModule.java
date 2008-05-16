@@ -563,6 +563,8 @@ public class StringModule extends AbstractQuercusModule {
     return Crypt.crypt(string, salt);
   }
 
+  // XXX: echo
+
   /**
    * Explodes a string into an array
    *
@@ -622,6 +624,14 @@ public class StringModule extends AbstractQuercusModule {
     return FileModule.fwrite(env, os, value.toInputStream(),
 			     Integer.MAX_VALUE);
   }
+
+  // XXX: get_html_translation_table
+  // XXX: hebrev
+  // XXX: hebrevc
+  // XXX: html_entity_decode
+  // XXX: htmlentities
+  // XXX: htmlspecialchars_decode
+  // XXX: htmlspecialchars
 
   /**
    * implodes an array into a string
@@ -683,6 +693,87 @@ public class StringModule extends AbstractQuercusModule {
                            Value piecesV)
   {
     return implode(env, glueV, piecesV);
+  }
+
+  // XXX: lcfirst
+  // XXX: levenshtein
+
+  /**
+   * Gets locale-specific symbols.
+   */
+  public static ArrayValue localeconv(Env env)
+  {
+    ArrayValueImpl array = new ArrayValueImpl();
+
+    Locale money = env.getLocaleInfo().getMonetary();
+    
+    DecimalFormatSymbols decimal = new DecimalFormatSymbols(money);
+    Currency currency = NumberFormat.getInstance(money).getCurrency();
+    
+    array.put(env.createString("decimal_point"),
+	      env.createString(decimal.getDecimalSeparator()));
+    array.put(env.createString("thousands_sep"),
+	      env.createString(decimal.getGroupingSeparator()));
+    //array.put("grouping", "");
+    array.put(env.createString("int_curr_symbol"),
+	      env.createString(decimal.getInternationalCurrencySymbol()));
+    array.put(env.createString("currency_symbol"),
+	      env.createString(decimal.getCurrencySymbol()));
+    array.put(env.createString("mon_decimal_point"),
+	      env.createString(decimal.getMonetaryDecimalSeparator()));
+    array.put(env.createString("mon_thousands_sep"),
+	      env.createString(decimal.getGroupingSeparator()));
+    //array.put("mon_grouping", "");
+    array.put(env.createString("positive_sign"), env.createEmptyString());
+    array.put(env.createString("negative_sign"),
+	      env.createString(decimal.getMinusSign()));
+    array.put(env.createString("int_frac_digits"),
+	      LongValue.create(currency.getDefaultFractionDigits()));
+    array.put(env.createString("frac_digits"),
+	      LongValue.create(currency.getDefaultFractionDigits()));
+    //array.put("p_cs_precedes", "");
+    //array.put("p_sep_by_space", "");
+    //array.put("n_cs_precedes", "");
+    //array.put("n_sep_by_space", "");
+    //array.put("p_sign_posn", "");
+    //array.put("n_sign_posn", "");
+    
+    return array;
+  }
+
+  /**
+   * Removes leading whitespace.
+   *
+   * @param string the string to be trimmed
+   * @param characters optional set of characters to trim
+   * @return the trimmed string
+   */
+  public static StringValue ltrim(Env env,
+				  StringValue string,
+				  @Optional String characters)
+  {
+    if (characters == null)
+      characters = "";
+
+    boolean []trim;
+
+    if (characters.equals(""))
+      trim = TRIM_WHITESPACE;
+    else
+      trim = parseCharsetBitmap(characters);
+
+    for (int i = 0; i < string.length(); i++) {
+      char ch = string.charAt(i);
+
+      if (ch >= 256 || ! trim[ch]) {
+        if (i == 0)
+          return string;
+        else
+          return string.substring(i);
+      }
+    }
+
+    return env.createEmptyString();
   }
 
   /**
@@ -777,21 +868,6 @@ public class StringModule extends AbstractQuercusModule {
     }
 
     return sb;
-  }
-
-  /**
-   * Returns a formatted money value.
-   *
-   * @param format the format
-   * @param value the value
-   *
-   * @return a string of formatted values
-   */
-  public static String money_format(Env env, String format, double value)
-  {
-    Locale monetaryLocale = env.getLocaleInfo().getMonetary();
-
-    return NumberFormat.getCurrencyInstance(monetaryLocale).format(value);
   }
 
   /**
@@ -1154,6 +1230,24 @@ public class StringModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns a formatted money value.
+   *
+   * @param format the format
+   * @param value the value
+   *
+   * @return a string of formatted values
+   */
+  public static String money_format(Env env, String format, double value)
+  {
+    Locale monetaryLocale = env.getLocaleInfo().getMonetary();
+
+    return NumberFormat.getCurrencyInstance(monetaryLocale).format(value);
+  }
+
+  // XXX: nl_langinfo
+  // XXX: nl2br
+
+  /**
    * Returns a formatted number.
    *
    * @param value the value
@@ -1298,36 +1392,23 @@ public class StringModule extends AbstractQuercusModule {
 
     return 1;
   }
-
+  
   /**
-   * Escapes meta characters.
+   * print to the output with a formatter
    *
-   * @param string the string to be quoted
+   * @param env the quercus environment
+   * @param format the format string
+   * @param args the format arguments
    *
-   * @return the quoted
+   * @return the formatted string
    */
-  public static Value quotemeta(StringValue string)
+  public static int printf(Env env, StringValue format, Value []args)
   {
-    int len = string.length();
-    
-    StringValue sb = string.createStringBuilder(len * 5 / 4);
+    Value str = sprintf(format, args);
 
-    for (int i = 0; i < len; i++) {
-      char ch = string.charAt(i);
+    str.print(env);
 
-      switch (ch) {
-      case '.': case '\\': case '+': case '*': case '?':
-      case '[': case '^': case ']': case '(': case ')': case '$':
-        sb.append("\\");
-        sb.append(ch);
-        break;
-      default:
-        sb.append(ch);
-        break;
-      }
-    }
-
-    return sb;
+    return str.length();
   }
 
   /**
@@ -1373,6 +1454,37 @@ public class StringModule extends AbstractQuercusModule {
     return sb.toString();
   }
 
+  /**
+   * Escapes meta characters.
+   *
+   * @param string the string to be quoted
+   *
+   * @return the quoted
+   */
+  public static Value quotemeta(StringValue string)
+  {
+    int len = string.length();
+    
+    StringValue sb = string.createStringBuilder(len * 5 / 4);
+
+    for (int i = 0; i < len; i++) {
+      char ch = string.charAt(i);
+
+      switch (ch) {
+      case '.': case '\\': case '+': case '*': case '?':
+      case '[': case '^': case ']': case '(': case ')': case '$':
+        sb.append("\\");
+        sb.append(ch);
+        break;
+      default:
+        sb.append(ch);
+        break;
+      }
+    }
+
+    return sb;
+  }
+
   private static final boolean[]TRIM_WHITESPACE = new boolean[256];
 
   static {
@@ -1382,41 +1494,6 @@ public class StringModule extends AbstractQuercusModule {
     TRIM_WHITESPACE['\t'] = true;
     TRIM_WHITESPACE['\r'] = true;
     TRIM_WHITESPACE['\n'] = true;
-  }
-
-  /**
-   * Removes leading whitespace.
-   *
-   * @param string the string to be trimmed
-   * @param characters optional set of characters to trim
-   * @return the trimmed string
-   */
-  public static StringValue ltrim(Env env,
-				  StringValue string,
-				  @Optional String characters)
-  {
-    if (characters == null)
-      characters = "";
-
-    boolean []trim;
-
-    if (characters.equals(""))
-      trim = TRIM_WHITESPACE;
-    else
-      trim = parseCharsetBitmap(characters);
-
-    for (int i = 0; i < string.length(); i++) {
-      char ch = string.charAt(i);
-
-      if (ch >= 256 || ! trim[ch]) {
-        if (i == 0)
-          return string;
-        else
-          return string.substring(i);
-      }
-    }
-
-    return env.createEmptyString();
   }
 
   /**
@@ -1592,49 +1669,6 @@ public class StringModule extends AbstractQuercusModule {
   }
 
   /**
-   * Gets locale-specific symbols.
-   */
-  public static ArrayValue localeconv(Env env)
-  {
-    ArrayValueImpl array = new ArrayValueImpl();
-
-    Locale money = env.getLocaleInfo().getMonetary();
-    
-    DecimalFormatSymbols decimal = new DecimalFormatSymbols(money);
-    Currency currency = NumberFormat.getInstance(money).getCurrency();
-    
-    array.put(env.createString("decimal_point"),
-	      env.createString(decimal.getDecimalSeparator()));
-    array.put(env.createString("thousands_sep"),
-	      env.createString(decimal.getGroupingSeparator()));
-    //array.put("grouping", "");
-    array.put(env.createString("int_curr_symbol"),
-	      env.createString(decimal.getInternationalCurrencySymbol()));
-    array.put(env.createString("currency_symbol"),
-	      env.createString(decimal.getCurrencySymbol()));
-    array.put(env.createString("mon_decimal_point"),
-	      env.createString(decimal.getMonetaryDecimalSeparator()));
-    array.put(env.createString("mon_thousands_sep"),
-	      env.createString(decimal.getGroupingSeparator()));
-    //array.put("mon_grouping", "");
-    array.put(env.createString("positive_sign"), env.createEmptyString());
-    array.put(env.createString("negative_sign"),
-	      env.createString(decimal.getMinusSign()));
-    array.put(env.createString("int_frac_digits"),
-	      LongValue.create(currency.getDefaultFractionDigits()));
-    array.put(env.createString("frac_digits"),
-	      LongValue.create(currency.getDefaultFractionDigits()));
-    //array.put("p_cs_precedes", "");
-    //array.put("p_sep_by_space", "");
-    //array.put("n_cs_precedes", "");
-    //array.put("n_sep_by_space", "");
-    //array.put("p_sign_posn", "");
-    //array.put("n_sign_posn", "");
-    
-    return array;
-  }
-
-  /**
    * returns the md5 hash
    *
    * @param source the string
@@ -1717,6 +1751,232 @@ public class StringModule extends AbstractQuercusModule {
     }
   }
 
+  // XXX: similar_text
+
+  private static final char[] SOUNDEX_VALUES = "01230120022455012623010202".toCharArray();
+
+  public static Value soundex(StringValue string)
+  {
+    int length = string.length();
+
+    if (length == 0)
+      return BooleanValue.FALSE;
+
+    StringValue result = string.createStringBuilder();
+
+    int count = 0;
+    char lastCode = 0;
+
+
+    for (int i = 0; i < length && count < 4; i++) {
+      char ch = toUpperCase(string.charAt(i));
+
+      if ('A' <= ch  && ch <= 'Z') {
+        char code = SOUNDEX_VALUES[ch - 'A'];
+
+        if (count == 0) {
+          result.append(ch);
+          count++;
+        }
+        else if (code != '0' && code != lastCode) {
+          result.append(code);
+          count++;
+        }
+
+        lastCode = code;
+      }
+    }
+
+    for (; count < 4; count++) {
+      result.append('0');
+    }
+
+    return result;
+  }
+
+  /**
+   * Print to a string with a formatter
+   *
+   * @param format the format string
+   * @param args the format arguments
+   *
+   * @return the formatted string
+   */
+  public static Value sprintf(StringValue format, Value []args)
+  {
+    ArrayList<PrintfSegment> segments = parsePrintfFormat(format);
+
+    StringValue sb = format.createStringBuilder();
+
+    for (PrintfSegment segment : segments)
+      segment.apply(sb, args);
+
+    return sb;
+  }
+
+  private static ArrayList<PrintfSegment> parsePrintfFormat(StringValue format)
+  { 
+    ArrayList<PrintfSegment> segments = new ArrayList<PrintfSegment>();
+
+    StringBuilder sb = new StringBuilder();
+    StringBuilder flags = new StringBuilder();
+
+    int length = format.length();
+    int index = 0;
+
+    for (int i = 0; i < length; i++) {
+      char ch = format.charAt(i);
+
+      if (i + 1 < length && ch == '%') {
+        // The C printf silently ignores invalid flags, so we need to
+        // remove them if present.
+
+        sb.append(ch);
+
+        boolean isLeft = false;
+        boolean isAlt = false;
+        boolean isZero = false;
+
+        flags.setLength(0);
+
+        int j = i + 1;
+
+        loop:
+        for (; j < length; j++) {
+          ch = format.charAt(j);
+
+          switch (ch) {
+          case '-':
+            isLeft = true;
+            break;
+          case '#':
+            isAlt = true;
+            break;
+          case '0':
+            isZero = true;
+            flags.append(ch);
+            break;
+          case '+': case ' ': case ',': case '(':
+            flags.append(ch);
+            break;
+          default:
+            break loop;
+          }
+        }
+
+        int head = j;
+        loop:
+        for (; j < length; j++) {
+          ch = format.charAt(j);
+
+          switch (ch) {
+          case '%':
+            i = j;
+            segments.add(new TextPrintfSegment(sb));
+            sb.setLength(0);
+            break loop;
+
+          case '0': case '1': case '2': case '3': case '4':
+          case '5': case '6': case '7': case '8': case '9':
+          case '.': case '$':
+            break;
+
+          case 'b': case 'B':
+            if (isLeft)
+              sb.append('-');
+            if (isAlt)
+              sb.append('#');
+            sb.append(format, head, j);
+            sb.append(ch);
+            i = j;
+            break loop;
+
+          case 's': case 'S':
+            sb.setLength(sb.length() - 1);
+            segments.add(new StringPrintfSegment(sb,
+                                                 isLeft || isAlt,
+                                                 isZero,
+                                                 ch == 'S',
+                                                 format.substring(head, j).toString(),
+                                                 index++));
+            sb.setLength(0);
+            i = j;
+            break loop;
+
+          case 'c': case 'C':
+            sb.setLength(sb.length() - 1);
+            segments.add(new CharPrintfSegment(sb,
+                                               isLeft || isAlt,
+                                               isZero,
+                                               ch == 'C',
+                                               format.substring(head, j).toString(),
+                                               index++));
+            sb.setLength(0);
+            i = j;
+            break loop;
+
+	  case 'i': case 'u':
+	    ch = 'd';
+          case 'd': case 'x': case 'o': case 'X':
+            sb.setLength(sb.length() - 1);
+	    if (sb.length() > 0)
+	      segments.add(new TextPrintfSegment(sb));
+            sb.setLength(0);
+	    
+            if (isLeft)
+              sb.append('-');
+            if (isAlt)
+              sb.append('#');
+            sb.append(flags);
+            sb.append(format, head, j);
+            sb.append(ch);
+
+            segments.add(LongPrintfSegment.create(sb.toString(), index++));
+            sb.setLength(0);
+            i = j;
+            break loop;
+
+          case 'e': case 'E': case 'f': case 'g': case 'G':
+            sb.setLength(sb.length() - 1);
+	    if (sb.length() > 0)
+	      segments.add(new TextPrintfSegment(sb));
+            sb.setLength(0);
+
+            if (isLeft)
+              sb.append('-');
+            if (isAlt)
+              sb.append('#');
+            sb.append(flags);
+            sb.append(format, head, j);
+            sb.append(ch);
+
+            segments.add(new DoublePrintfSegment(sb.toString(), index++));
+            sb.setLength(0);
+            i = j;
+            break loop;
+
+          default:
+            if (isLeft)
+              sb.append('-');
+            if (isAlt)
+              sb.append('#');
+            sb.append(flags);
+            sb.append(format, head, j);
+            sb.append(ch);
+            i = j;
+            break loop;
+          }
+        }
+      } else
+        sb.append(ch);
+    }
+
+    if (sb.length() > 0)
+      segments.add(new TextPrintfSegment(sb));
+
+    return segments;
+  }
+  
   /**
    * scans a string
    *
@@ -2103,248 +2363,8 @@ public class StringModule extends AbstractQuercusModule {
 
     return i;
   }
-  
-  /**
-   * print to the output with a formatter
-   *
-   * @param env the quercus environment
-   * @param format the format string
-   * @param args the format arguments
-   *
-   * @return the formatted string
-   */
-  public static int printf(Env env, StringValue format, Value []args)
-  {
-    Value str = sprintf(format, args);
 
-    str.print(env);
-
-    return str.length();
-  }
-
-  private static final char[] SOUNDEX_VALUES = "01230120022455012623010202".toCharArray();
-
-  public static Value soundex(StringValue string)
-  {
-    int length = string.length();
-
-    if (length == 0)
-      return BooleanValue.FALSE;
-
-    StringValue result = string.createStringBuilder();
-
-    int count = 0;
-    char lastCode = 0;
-
-
-    for (int i = 0; i < length && count < 4; i++) {
-      char ch = toUpperCase(string.charAt(i));
-
-      if ('A' <= ch  && ch <= 'Z') {
-        char code = SOUNDEX_VALUES[ch - 'A'];
-
-        if (count == 0) {
-          result.append(ch);
-          count++;
-        }
-        else if (code != '0' && code != lastCode) {
-          result.append(code);
-          count++;
-        }
-
-        lastCode = code;
-      }
-    }
-
-    for (; count < 4; count++) {
-      result.append('0');
-    }
-
-    return result;
-  }
-
-  /**
-   * Print to a string with a formatter
-   *
-   * @param format the format string
-   * @param args the format arguments
-   *
-   * @return the formatted string
-   */
-  public static Value sprintf(StringValue format, Value []args)
-  {
-    ArrayList<PrintfSegment> segments = parsePrintfFormat(format);
-
-    StringValue sb = format.createStringBuilder();
-
-    for (PrintfSegment segment : segments)
-      segment.apply(sb, args);
-
-    return sb;
-  }
-
-  private static ArrayList<PrintfSegment> parsePrintfFormat(StringValue format)
-  { 
-    ArrayList<PrintfSegment> segments = new ArrayList<PrintfSegment>();
-
-    StringBuilder sb = new StringBuilder();
-    StringBuilder flags = new StringBuilder();
-
-    int length = format.length();
-    int index = 0;
-
-    for (int i = 0; i < length; i++) {
-      char ch = format.charAt(i);
-
-      if (i + 1 < length && ch == '%') {
-        // The C printf silently ignores invalid flags, so we need to
-        // remove them if present.
-
-        sb.append(ch);
-
-        boolean isLeft = false;
-        boolean isAlt = false;
-        boolean isZero = false;
-
-        flags.setLength(0);
-
-        int j = i + 1;
-
-        loop:
-        for (; j < length; j++) {
-          ch = format.charAt(j);
-
-          switch (ch) {
-          case '-':
-            isLeft = true;
-            break;
-          case '#':
-            isAlt = true;
-            break;
-          case '0':
-            isZero = true;
-            flags.append(ch);
-            break;
-          case '+': case ' ': case ',': case '(':
-            flags.append(ch);
-            break;
-          default:
-            break loop;
-          }
-        }
-
-        int head = j;
-        loop:
-        for (; j < length; j++) {
-          ch = format.charAt(j);
-
-          switch (ch) {
-          case '%':
-            i = j;
-            segments.add(new TextPrintfSegment(sb));
-            sb.setLength(0);
-            break loop;
-
-          case '0': case '1': case '2': case '3': case '4':
-          case '5': case '6': case '7': case '8': case '9':
-          case '.': case '$':
-            break;
-
-          case 'b': case 'B':
-            if (isLeft)
-              sb.append('-');
-            if (isAlt)
-              sb.append('#');
-            sb.append(format, head, j);
-            sb.append(ch);
-            i = j;
-            break loop;
-
-          case 's': case 'S':
-            sb.setLength(sb.length() - 1);
-            segments.add(new StringPrintfSegment(sb,
-                                                 isLeft || isAlt,
-                                                 isZero,
-                                                 ch == 'S',
-                                                 format.substring(head, j).toString(),
-                                                 index++));
-            sb.setLength(0);
-            i = j;
-            break loop;
-
-          case 'c': case 'C':
-            sb.setLength(sb.length() - 1);
-            segments.add(new CharPrintfSegment(sb,
-                                               isLeft || isAlt,
-                                               isZero,
-                                               ch == 'C',
-                                               format.substring(head, j).toString(),
-                                               index++));
-            sb.setLength(0);
-            i = j;
-            break loop;
-
-	  case 'i': case 'u':
-	    ch = 'd';
-          case 'd': case 'x': case 'o': case 'X':
-            sb.setLength(sb.length() - 1);
-	    if (sb.length() > 0)
-	      segments.add(new TextPrintfSegment(sb));
-            sb.setLength(0);
-	    
-            if (isLeft)
-              sb.append('-');
-            if (isAlt)
-              sb.append('#');
-            sb.append(flags);
-            sb.append(format, head, j);
-            sb.append(ch);
-
-            segments.add(LongPrintfSegment.create(sb.toString(), index++));
-            sb.setLength(0);
-            i = j;
-            break loop;
-
-          case 'e': case 'E': case 'f': case 'g': case 'G':
-            sb.setLength(sb.length() - 1);
-	    if (sb.length() > 0)
-	      segments.add(new TextPrintfSegment(sb));
-            sb.setLength(0);
-
-            if (isLeft)
-              sb.append('-');
-            if (isAlt)
-              sb.append('#');
-            sb.append(flags);
-            sb.append(format, head, j);
-            sb.append(ch);
-
-            segments.add(new DoublePrintfSegment(sb.toString(), index++));
-            sb.setLength(0);
-            i = j;
-            break loop;
-
-          default:
-            if (isLeft)
-              sb.append('-');
-            if (isAlt)
-              sb.append('#');
-            sb.append(flags);
-            sb.append(format, head, j);
-            sb.append(ch);
-            i = j;
-            break loop;
-          }
-        }
-      } else
-        sb.append(ch);
-    }
-
-    if (sb.length() > 0)
-      segments.add(new TextPrintfSegment(sb));
-
-    return segments;
-  }
+  // XXX: str_getcsv
 
   /**
    * replaces substrings.
@@ -2865,6 +2885,16 @@ public class StringModule extends AbstractQuercusModule {
   }
 
   /**
+   * Finds the index of a substring
+   *
+   * @param env the calling environment
+   */
+  public static Value strchr(Env env, StringValue haystack, Value needle)
+  { 
+    return strstr(env, haystack, needle);
+  }
+
+  /**
    * Case-sensitive comparison
    *
    * @param a left value
@@ -2897,16 +2927,6 @@ public class StringModule extends AbstractQuercusModule {
       return -1;
     else
       return 1;
-  }
-
-  /**
-   * Finds the index of a substring
-   *
-   * @param env the calling environment
-   */
-  public static Value strchr(Env env, StringValue haystack, Value needle)
-  { 
-    return strstr(env, haystack, needle);
   }
 
   /**
@@ -2987,6 +3007,206 @@ public class StringModule extends AbstractQuercusModule {
     }
 
     return result;
+  }
+
+  /**
+   * Strip out the backslashes, recognizing the escape sequences, octal,
+   * and hexadecimal representations.
+   *
+   * @param source the string to clean
+   * @see #addcslashes
+   */
+  public static String stripcslashes(String source)
+  {
+    if (source == null)
+      source = "";
+    
+    StringBuilder result = new StringBuilder(source.length());
+
+    int length = source.length();
+
+    for (int i = 0; i < length; i++) {
+      int ch = source.charAt(i);
+
+      if (ch == '\\') {
+        i++;
+
+        if (i == length)
+          ch = '\\';
+        else {
+          ch = source.charAt(i);
+
+          switch (ch) {
+          case 'a':
+            ch = 0x07;
+            break;
+          case 'b':
+            ch = '\b';
+            break;
+          case 't':
+            ch = '\t';
+            break;
+          case 'n':
+            ch = '\n';
+            break;
+          case 'v':
+            ch = 0xb;
+            break;
+          case 'f':
+            ch = '\f';
+            break;
+          case 'r':
+            ch = '\r';
+            break;
+          case 'x':
+            // up to two digits for a hex number
+            if (i + 1 == length)
+              break;
+
+            int digitValue = hexToDigit(source.charAt(i + 1));
+
+            if (digitValue < 0)
+              break;
+
+            ch = digitValue;
+            i++;
+
+            if (i + 1 == length)
+              break;
+
+            digitValue = hexToDigit(source.charAt(i + 1));
+
+            if (digitValue < 0)
+              break;
+
+            ch = ((ch << 4) | digitValue);
+            i++;
+
+            break;
+          default:
+            // up to three digits from 0 to 7 for an octal number
+            digitValue = octToDigit((char) ch);
+
+            if (digitValue < 0)
+              break;
+
+            ch = digitValue;
+
+            if (i + 1 == length)
+              break;
+
+            digitValue = octToDigit(source.charAt(i + 1));
+
+            if (digitValue < 0)
+              break;
+
+            ch = ((ch << 3) | digitValue);
+            i++;
+
+            if (i + 1 == length)
+              break;
+
+            digitValue = octToDigit(source.charAt(i + 1));
+
+            if (digitValue < 0)
+              break;
+
+            ch = ((ch << 3) | digitValue);
+            i++;
+          }
+        }
+      } // if ch == '/'
+
+      result.append((char) ch);
+    }
+
+    return result.toString();
+  }
+
+  /**
+   * Returns the position of a substring, testing case insensitive.
+   *
+   * @param haystack the full argument to check
+   * @param needleV the substring argument to check
+   * @param offsetV optional starting position
+   */
+  public static Value stripos(StringValue haystack,
+			      Value needleV,
+			      @Optional int offset)
+  {
+    StringValue needle;
+
+    if (needleV instanceof StringValue)
+      needle = (StringValue) needleV;
+    else
+      needle = StringValue.create((char) needleV.toInt());
+
+    haystack = haystack.toLowerCase();
+    needle = needle.toLowerCase();
+
+    int pos = haystack.indexOf(needle, offset);
+
+    if (pos < 0)
+      return BooleanValue.FALSE;
+    else
+      return LongValue.create(pos);
+  }
+
+  /**
+   * Strips out the backslashes.
+   *
+   * @param string the string to clean
+   */
+  public static StringValue stripslashes(StringValue string)
+  { 
+    StringValue sb = string.createStringBuilder();
+    int len = string.length();
+
+    for (int i = 0; i < len; i++) {
+      char ch = string.charAt(i);
+
+      if (ch == '\\') {
+        if (i + 1 < len) {
+          sb.append(string.charAt(i + 1));
+          i++;
+        }
+      }
+      else
+        sb.append(ch);
+    }
+
+    return sb;
+  }
+
+  /**
+   * Finds the first instance of a substring, testing case insensitively
+   *
+   * @param haystack the string to search in
+   * @param needleV the string to search for
+   * @return the trailing match or FALSE
+   */
+  public static Value stristr(StringValue haystack,
+                              Value needleV)
+  {
+    CharSequence needleLower;
+
+    if (needleV instanceof StringValue) {
+      needleLower = ((StringValue) needleV).toLowerCase();
+    }
+    else {
+      char lower = Character.toLowerCase((char) needleV.toLong());
+      
+      needleLower = String.valueOf(lower);
+    }
+
+    StringValue haystackLower = haystack.toLowerCase();
+
+    int i = haystackLower.indexOf(needleLower);
+
+    if (i >= 0)
+      return haystack.substring(i);
+    else
+      return BooleanValue.FALSE;
   }
 
   /**
@@ -3218,206 +3438,6 @@ public class StringModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns the position of a substring, testing case insensitive.
-   *
-   * @param haystack the full argument to check
-   * @param needleV the substring argument to check
-   * @param offsetV optional starting position
-   */
-  public static Value stripos(StringValue haystack,
-			      Value needleV,
-			      @Optional int offset)
-  {
-    StringValue needle;
-
-    if (needleV instanceof StringValue)
-      needle = (StringValue) needleV;
-    else
-      needle = StringValue.create((char) needleV.toInt());
-
-    haystack = haystack.toLowerCase();
-    needle = needle.toLowerCase();
-
-    int pos = haystack.indexOf(needle, offset);
-
-    if (pos < 0)
-      return BooleanValue.FALSE;
-    else
-      return LongValue.create(pos);
-  }
-
-  /**
-   * Strip out the backslashes, recognizing the escape sequences, octal,
-   * and hexadecimal representations.
-   *
-   * @param source the string to clean
-   * @see #addcslashes
-   */
-  public static String stripcslashes(String source)
-  {
-    if (source == null)
-      source = "";
-    
-    StringBuilder result = new StringBuilder(source.length());
-
-    int length = source.length();
-
-    for (int i = 0; i < length; i++) {
-      int ch = source.charAt(i);
-
-      if (ch == '\\') {
-        i++;
-
-        if (i == length)
-          ch = '\\';
-        else {
-          ch = source.charAt(i);
-
-          switch (ch) {
-          case 'a':
-            ch = 0x07;
-            break;
-          case 'b':
-            ch = '\b';
-            break;
-          case 't':
-            ch = '\t';
-            break;
-          case 'n':
-            ch = '\n';
-            break;
-          case 'v':
-            ch = 0xb;
-            break;
-          case 'f':
-            ch = '\f';
-            break;
-          case 'r':
-            ch = '\r';
-            break;
-          case 'x':
-            // up to two digits for a hex number
-            if (i + 1 == length)
-              break;
-
-            int digitValue = hexToDigit(source.charAt(i + 1));
-
-            if (digitValue < 0)
-              break;
-
-            ch = digitValue;
-            i++;
-
-            if (i + 1 == length)
-              break;
-
-            digitValue = hexToDigit(source.charAt(i + 1));
-
-            if (digitValue < 0)
-              break;
-
-            ch = ((ch << 4) | digitValue);
-            i++;
-
-            break;
-          default:
-            // up to three digits from 0 to 7 for an octal number
-            digitValue = octToDigit((char) ch);
-
-            if (digitValue < 0)
-              break;
-
-            ch = digitValue;
-
-            if (i + 1 == length)
-              break;
-
-            digitValue = octToDigit(source.charAt(i + 1));
-
-            if (digitValue < 0)
-              break;
-
-            ch = ((ch << 3) | digitValue);
-            i++;
-
-            if (i + 1 == length)
-              break;
-
-            digitValue = octToDigit(source.charAt(i + 1));
-
-            if (digitValue < 0)
-              break;
-
-            ch = ((ch << 3) | digitValue);
-            i++;
-          }
-        }
-      } // if ch == '/'
-
-      result.append((char) ch);
-    }
-
-    return result.toString();
-  }
-
-  /**
-   * Strips out the backslashes.
-   *
-   * @param string the string to clean
-   */
-  public static StringValue stripslashes(StringValue string)
-  { 
-    StringValue sb = string.createStringBuilder();
-    int len = string.length();
-
-    for (int i = 0; i < len; i++) {
-      char ch = string.charAt(i);
-
-      if (ch == '\\') {
-        if (i + 1 < len) {
-          sb.append(string.charAt(i + 1));
-          i++;
-        }
-      }
-      else
-        sb.append(ch);
-    }
-
-    return sb;
-  }
-
-  /**
-   * Finds the first instance of a substring, testing case insensitively
-   *
-   * @param haystack the string to search in
-   * @param needleV the string to search for
-   * @return the trailing match or FALSE
-   */
-  public static Value stristr(StringValue haystack,
-                              Value needleV)
-  {
-    CharSequence needleLower;
-
-    if (needleV instanceof StringValue) {
-      needleLower = ((StringValue) needleV).toLowerCase();
-    }
-    else {
-      char lower = Character.toLowerCase((char) needleV.toLong());
-      
-      needleLower = String.valueOf(lower);
-    }
-
-    StringValue haystackLower = haystack.toLowerCase();
-
-    int i = haystackLower.indexOf(needleLower);
-
-    if (i >= 0)
-      return haystack.substring(i);
-    else
-      return BooleanValue.FALSE;
-  }
-
-  /**
    * Finds the last instance of a substring
    *
    * @param haystack the string to search in
@@ -3458,38 +3478,6 @@ public class StringModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns the position of a substring.
-   *
-   * @param haystack the string to search in
-   * @param needleV the string to search for
-   */
-  public static Value strrpos(StringValue haystack,
-                              Value needleV,
-                              @Optional Value offsetV)
-  {
-    StringValue needle;
-
-    if (needleV instanceof StringValue)
-      needle = needleV.toStringValue();
-    else
-      needle = StringValue.create((char) needleV.toInt());
-
-    int offset;
-
-    if (offsetV instanceof DefaultValue)
-      offset = haystack.length();
-    else
-      offset = offsetV.toInt();
-
-    int pos = haystack.lastIndexOf(needle, offset);
-
-    if (pos < 0)
-      return BooleanValue.FALSE;
-    else
-      return new LongValue(pos);
-  }
-
-  /**
    * Returns the position of a substring, testing case-insensitive.
    *
    * @param haystack the full string to test
@@ -3519,6 +3507,38 @@ public class StringModule extends AbstractQuercusModule {
 
     haystack = haystack.toLowerCase();
     needle = needle.toLowerCase();
+
+    int pos = haystack.lastIndexOf(needle, offset);
+
+    if (pos < 0)
+      return BooleanValue.FALSE;
+    else
+      return new LongValue(pos);
+  }
+
+  /**
+   * Returns the position of a substring.
+   *
+   * @param haystack the string to search in
+   * @param needleV the string to search for
+   */
+  public static Value strrpos(StringValue haystack,
+                              Value needleV,
+                              @Optional Value offsetV)
+  {
+    StringValue needle;
+
+    if (needleV instanceof StringValue)
+      needle = needleV.toStringValue();
+    else
+      needle = StringValue.create((char) needleV.toInt());
+
+    int offset;
+
+    if (offsetV instanceof DefaultValue)
+      offset = haystack.length();
+    else
+      offset = offsetV.toInt();
 
     int pos = haystack.lastIndexOf(needle, offset);
 

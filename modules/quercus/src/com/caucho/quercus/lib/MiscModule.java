@@ -67,6 +67,10 @@ public class MiscModule extends AbstractQuercusModule {
   private static final Logger log
     = Logger.getLogger(MiscModule.class.getName());
 
+  // XXX: connection_aborted
+  // XXX: connection_status
+  // XXX: connection_timeout
+
   /**
    * Escapes characters in a string.
    */
@@ -166,6 +170,300 @@ public class MiscModule extends AbstractQuercusModule {
   }
 
   /**
+   * Execute a system command.
+   */
+  public static String exec(Env env, String command,
+			    @Optional Value output,
+			    @Optional @Reference Value result)
+  {
+    try {
+      String []args = new String[3];
+
+      if (Path.isWindows()) {
+        args[0] = "cmd";
+        args[1] = "/c";
+      }
+      else {
+        args[0] = "sh";
+        args[1] = "-c";
+      }
+
+      args[2] = command;
+      
+      Process process = Runtime.getRuntime().exec(args);
+
+      InputStream is = process.getInputStream();
+      InputStream es = process.getErrorStream();
+      OutputStream os = process.getOutputStream();
+      os.close();
+
+      StringBuilder sb = new StringBuilder();
+      String line = "";
+
+      int ch;
+      boolean hasCr = false;
+      while ((ch = is.read()) >= 0) {
+        if (ch == '\n') {
+          if (! hasCr) {
+            line = sb.toString();
+            sb.setLength(0);
+            if (output != null)
+              output.put(env.createString(line));
+          }
+          hasCr = false;
+        }
+        else if (ch == '\r') {
+          line = sb.toString();
+          sb.setLength(0);
+          output.put(env.createString(line));
+          hasCr = true;
+        }
+        else
+          sb.append((char) ch);
+      }
+
+      if (sb.length() > 0) {
+        line = sb.toString();
+        sb.setLength(0);
+        output.put(env.createString(line));
+      }
+
+      is.close();
+      
+      env.getOut().writeStream(es);
+      es.close();
+
+      int status = process.waitFor();
+
+      result.set(new LongValue(status));
+
+      return line;
+    } catch (Exception e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e.getMessage(), e);
+
+      return null;
+    }
+  }
+
+  /**
+   * Returns an array detailing what the browser is capable of.
+   * A general browscap.ini file can be used.
+   *
+   * @param env
+   * @param user_agent
+   * @param return_array
+   */
+  public static Value get_browser(
+                       Env env,
+                       @Optional() String user_agent,
+                       @Optional() boolean return_array)
+  {
+    if (user_agent == null ||
+        user_agent.length() == 0) 
+      user_agent = env.getRequest().getHeader("User-Agent");
+
+    if (user_agent == null) {
+      env.warning(L.l("HTTP_USER_AGENT not set."));
+      return BooleanValue.FALSE;
+    }
+
+    Value browscap = env.getConfigVar("browscap");
+    if (browscap == null) {
+      env.warning(L.l("Browscap path not set in PHP.ini."));
+      return BooleanValue.FALSE;
+    }
+
+    Path path = env.lookup(browscap.toString());
+    if (path == null) {
+      env.warning(L.l("Browscap file not found."));
+      return BooleanValue.FALSE;
+    }
+
+    Value ini = FileModule.parse_ini_file(env, path, true);
+    if (ini == BooleanValue.FALSE)
+      return BooleanValue.FALSE;
+
+    return getBrowserReport(
+        env, ini.toArrayValue(env), user_agent, return_array);
+  }
+
+  private static Value getBrowserReport(
+                       Env env,
+                       ArrayValue browsers,
+                       String user_agent,
+                       boolean return_array)
+  {
+    StringValue patternMatched = StringValue.EMPTY;
+    String regExpMatched = null;
+
+    for (Map.Entry<Value,Value> entry : browsers.entrySet()) {
+      StringValue pattern = entry.getKey().toStringValue();
+      
+      if (pattern.toString().equals(user_agent)) {
+        patternMatched = pattern;
+        regExpMatched = null;
+        break;
+      }
+
+      String regExp = formatBrowscapRegexp(pattern);
+      Matcher m = Pattern.compile(regExp).matcher(user_agent);
+
+      // Want the longest matching pattern.
+      if (m.matches()) {
+        if (pattern.length() > patternMatched.length()) {
+          patternMatched = pattern;
+          regExpMatched = regExp;
+        }
+      }
+    }
+
+    if (patternMatched.length() == 0)
+      return BooleanValue.FALSE;
+
+    return prepareBrowserReport(env, browsers, patternMatched, regExpMatched,
+        user_agent, return_array);
+  }
+
+  private static Value prepareBrowserReport(
+                       Env env,
+                       ArrayValue browsers,
+                       StringValue patternMatched, 
+                       String regExpMatched,
+                       String user_agent,
+                       boolean return_array)
+  {
+    ArrayValue capabilities = browsers.get(patternMatched).toArrayValue(env);
+
+    if (regExpMatched == null)
+      capabilities.put(env.createString("browser_name_regex"),
+		       patternMatched);
+    else
+      capabilities.put("browser_name_regex", regExpMatched);
+    capabilities.put(env.createString("browser_name_pattern"), patternMatched);
+
+    addBrowserCapabilities(env, browsers,
+			   capabilities.get(env.createString("parent")),
+			   capabilities);
+
+    if (return_array) {
+      ArrayValue array = new ArrayValueImpl();
+      array.put(env.createString(user_agent), capabilities);
+      return array;
+    }
+
+    ObjectValue object = env.createObject();
+    for (Map.Entry<Value,Value> entry : capabilities.entrySet()) {
+      object.putField(env, entry.getKey().toString(), entry.getValue());
+    }
+    
+    return object;
+  }
+  
+  private static void addBrowserCapabilities(
+                       Env env,
+                       ArrayValue browsers,
+                       Value browser,
+                       ArrayValue cap)
+  {
+    if (browser == UnsetValue.UNSET)
+      return;
+
+    Value field = null;
+    if ((field = browsers.get(browser)) == UnsetValue.UNSET)
+      return;
+
+    ArrayValue browserCapabilities = field.toArrayValue(env);
+    StringValue parentString = env.createString("parent");
+    
+    for (Map.Entry<Value,Value> entry : browserCapabilities.entrySet()) {
+      Value key = entry.getKey();
+
+      if (key.equals(parentString)) {
+        addBrowserCapabilities(
+            env, browsers, entry.getValue(), cap);
+      }
+      else if (cap.containsKey(key) == null)
+        cap.put(key, entry.getValue());
+    }
+  }
+
+  private static String formatBrowscapRegexp(StringValue key)
+  {
+    int length = key.length();
+  
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < length; i++) {
+      char ch = key.charAt(i);
+      switch (ch) {
+        case '*':
+          sb.append('.');
+          sb.append('*');
+          break;
+        case '?':
+          sb.append('.');
+          break;
+        case '.':
+          sb.append('\\');
+          sb.append('.');
+          break;
+        case '+':
+          sb.append('\\');
+          sb.append('+');
+          break;
+        case '(':
+          sb.append('\\');
+          sb.append('(');
+          break;
+         case ')':
+          sb.append('\\');
+          sb.append(')');
+          break;
+        case '{':
+          sb.append('\\');
+          sb.append('{');
+          break;
+         case '}':
+          sb.append('\\');
+          sb.append('}');
+          break;
+        case ']':
+          sb.append('\\');
+          sb.append(']');
+          break;
+        case '[':
+          sb.append('\\');
+          sb.append('[');
+          break;
+        case '\\':
+          sb.append('\\');
+          sb.append('\\');
+          break;
+        case '^':
+          sb.append('\\');
+          sb.append('^');
+          break;
+        case '$':
+          sb.append('\\');
+          sb.append('$');
+          break;
+        case '&':
+          sb.append('\\');
+          sb.append('&');
+          break;
+        case '|':
+          sb.append('\\');
+          sb.append('|');
+          break;
+        default:
+          sb.append(ch);
+      }
+    }
+    
+    return sb.toString();
+  }
+
+  /**
    * packs the format into a binary.
    */
   public Value pack(Env env, String format, Value []args)
@@ -246,83 +544,6 @@ public class MiscModule extends AbstractQuercusModule {
       return NullValue.NULL;
     } catch (IOException e) {
       throw new QuercusModuleException(e);
-    }
-  }
-
-  /**
-   * Execute a system command.
-   */
-  public static String exec(Env env, String command,
-			    @Optional Value output,
-			    @Optional @Reference Value result)
-  {
-    try {
-      String []args = new String[3];
-
-      if (Path.isWindows()) {
-        args[0] = "cmd";
-        args[1] = "/c";
-      }
-      else {
-        args[0] = "sh";
-        args[1] = "-c";
-      }
-
-      args[2] = command;
-      
-      Process process = Runtime.getRuntime().exec(args);
-
-      InputStream is = process.getInputStream();
-      InputStream es = process.getErrorStream();
-      OutputStream os = process.getOutputStream();
-      os.close();
-
-      StringBuilder sb = new StringBuilder();
-      String line = "";
-
-      int ch;
-      boolean hasCr = false;
-      while ((ch = is.read()) >= 0) {
-        if (ch == '\n') {
-          if (! hasCr) {
-            line = sb.toString();
-            sb.setLength(0);
-            if (output != null)
-              output.put(env.createString(line));
-          }
-          hasCr = false;
-        }
-        else if (ch == '\r') {
-          line = sb.toString();
-          sb.setLength(0);
-          output.put(env.createString(line));
-          hasCr = true;
-        }
-        else
-          sb.append((char) ch);
-      }
-
-      if (sb.length() > 0) {
-        line = sb.toString();
-        sb.setLength(0);
-        output.put(env.createString(line));
-      }
-
-      is.close();
-      
-      env.getOut().writeStream(es);
-      es.close();
-
-      int status = process.waitFor();
-
-      result.set(new LongValue(status));
-
-      return line;
-    } catch (Exception e) {
-      log.log(Level.FINE, e.getMessage(), e);
-      env.warning(e.getMessage(), e);
-
-      return null;
     }
   }
 
@@ -664,223 +885,6 @@ public class MiscModule extends AbstractQuercusModule {
     }
 
     return seconds;
-  }
-
-  /**
-   * Returns an array detailing what the browser is capable of.
-   * A general browscap.ini file can be used.
-   *
-   * @param env
-   * @param user_agent
-   * @param return_array
-   */
-  public static Value get_browser(
-                       Env env,
-                       @Optional() String user_agent,
-                       @Optional() boolean return_array)
-  {
-    if (user_agent == null ||
-        user_agent.length() == 0) 
-      user_agent = env.getRequest().getHeader("User-Agent");
-
-    if (user_agent == null) {
-      env.warning(L.l("HTTP_USER_AGENT not set."));
-      return BooleanValue.FALSE;
-    }
-
-    Value browscap = env.getConfigVar("browscap");
-    if (browscap == null) {
-      env.warning(L.l("Browscap path not set in PHP.ini."));
-      return BooleanValue.FALSE;
-    }
-
-    Path path = env.lookup(browscap.toString());
-    if (path == null) {
-      env.warning(L.l("Browscap file not found."));
-      return BooleanValue.FALSE;
-    }
-
-    Value ini = FileModule.parse_ini_file(env, path, true);
-    if (ini == BooleanValue.FALSE)
-      return BooleanValue.FALSE;
-
-    return getBrowserReport(
-        env, ini.toArrayValue(env), user_agent, return_array);
-  }
-
-  private static Value getBrowserReport(
-                       Env env,
-                       ArrayValue browsers,
-                       String user_agent,
-                       boolean return_array)
-  {
-    StringValue patternMatched = StringValue.EMPTY;
-    String regExpMatched = null;
-
-    for (Map.Entry<Value,Value> entry : browsers.entrySet()) {
-      StringValue pattern = entry.getKey().toStringValue();
-      
-      if (pattern.toString().equals(user_agent)) {
-        patternMatched = pattern;
-        regExpMatched = null;
-        break;
-      }
-
-      String regExp = formatBrowscapRegexp(pattern);
-      Matcher m = Pattern.compile(regExp).matcher(user_agent);
-
-      // Want the longest matching pattern.
-      if (m.matches()) {
-        if (pattern.length() > patternMatched.length()) {
-          patternMatched = pattern;
-          regExpMatched = regExp;
-        }
-      }
-    }
-
-    if (patternMatched.length() == 0)
-      return BooleanValue.FALSE;
-
-    return prepareBrowserReport(env, browsers, patternMatched, regExpMatched,
-        user_agent, return_array);
-  }
-
-  private static Value prepareBrowserReport(
-                       Env env,
-                       ArrayValue browsers,
-                       StringValue patternMatched, 
-                       String regExpMatched,
-                       String user_agent,
-                       boolean return_array)
-  {
-    ArrayValue capabilities = browsers.get(patternMatched).toArrayValue(env);
-
-    if (regExpMatched == null)
-      capabilities.put(env.createString("browser_name_regex"),
-		       patternMatched);
-    else
-      capabilities.put("browser_name_regex", regExpMatched);
-    capabilities.put(env.createString("browser_name_pattern"), patternMatched);
-
-    addBrowserCapabilities(env, browsers,
-			   capabilities.get(env.createString("parent")),
-			   capabilities);
-
-    if (return_array) {
-      ArrayValue array = new ArrayValueImpl();
-      array.put(env.createString(user_agent), capabilities);
-      return array;
-    }
-
-    ObjectValue object = env.createObject();
-    for (Map.Entry<Value,Value> entry : capabilities.entrySet()) {
-      object.putField(env, entry.getKey().toString(), entry.getValue());
-    }
-    
-    return object;
-  }
-  
-  private static void addBrowserCapabilities(
-                       Env env,
-                       ArrayValue browsers,
-                       Value browser,
-                       ArrayValue cap)
-  {
-    if (browser == UnsetValue.UNSET)
-      return;
-
-    Value field = null;
-    if ((field = browsers.get(browser)) == UnsetValue.UNSET)
-      return;
-
-    ArrayValue browserCapabilities = field.toArrayValue(env);
-    StringValue parentString = env.createString("parent");
-    
-    for (Map.Entry<Value,Value> entry : browserCapabilities.entrySet()) {
-      Value key = entry.getKey();
-
-      if (key.equals(parentString)) {
-        addBrowserCapabilities(
-            env, browsers, entry.getValue(), cap);
-      }
-      else if (cap.containsKey(key) == null)
-        cap.put(key, entry.getValue());
-    }
-  }
-
-  private static String formatBrowscapRegexp(StringValue key)
-  {
-    int length = key.length();
-  
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < length; i++) {
-      char ch = key.charAt(i);
-      switch (ch) {
-        case '*':
-          sb.append('.');
-          sb.append('*');
-          break;
-        case '?':
-          sb.append('.');
-          break;
-        case '.':
-          sb.append('\\');
-          sb.append('.');
-          break;
-        case '+':
-          sb.append('\\');
-          sb.append('+');
-          break;
-        case '(':
-          sb.append('\\');
-          sb.append('(');
-          break;
-         case ')':
-          sb.append('\\');
-          sb.append(')');
-          break;
-        case '{':
-          sb.append('\\');
-          sb.append('{');
-          break;
-         case '}':
-          sb.append('\\');
-          sb.append('}');
-          break;
-        case ']':
-          sb.append('\\');
-          sb.append(']');
-          break;
-        case '[':
-          sb.append('\\');
-          sb.append('[');
-          break;
-        case '\\':
-          sb.append('\\');
-          sb.append('\\');
-          break;
-        case '^':
-          sb.append('\\');
-          sb.append('^');
-          break;
-        case '$':
-          sb.append('\\');
-          sb.append('$');
-          break;
-        case '&':
-          sb.append('\\');
-          sb.append('&');
-          break;
-        case '|':
-          sb.append('\\');
-          sb.append('|');
-          break;
-        default:
-          sb.append(ch);
-      }
-    }
-    
-    return sb.toString();
   }
 
   /**

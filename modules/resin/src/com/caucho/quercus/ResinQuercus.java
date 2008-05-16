@@ -35,8 +35,7 @@ import com.caucho.quercus.module.ResinModuleContext;
 import com.caucho.server.webapp.*;
 import com.caucho.server.session.*;
 import com.caucho.sql.*;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
+import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.java.*;
 
@@ -50,7 +49,8 @@ import java.util.logging.Logger;
 public class ResinQuercus extends Quercus
 {
   private static L10N L = new L10N(ResinQuercus.class);
-  private static final Logger log = Log.open(ResinQuercus.class);
+  private static final Logger log
+    = Logger.getLogger(ResinQuercus.class.getName());
   
   private static EnvironmentLocal<ModuleContext> _localModuleContext
     = new EnvironmentLocal<ModuleContext>();
@@ -197,6 +197,12 @@ public class ResinQuercus extends Quercus
   public boolean isResin()
   {
     return true;
+  }
+
+  @Override
+  public void start()
+  {
+    new Alarm(getQuercusSessionManager()).queue(60000);
   }
 }
 

@@ -626,6 +626,14 @@ public class Var extends Value
   }
 
   /**
+   * Clone for the clone keyword
+   */
+  public Value clone()
+  {
+    return _value.clone();
+  }
+
+  /**
    * Copy the value as an array item.
    */
   @Override

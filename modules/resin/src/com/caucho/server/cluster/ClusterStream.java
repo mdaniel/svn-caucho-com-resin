@@ -165,6 +165,30 @@ public class ClusterStream {
     return true;
   }
 
+  public boolean sendQueryGet(long id, String to, String from,
+			      Serializable query)
+    throws IOException
+  {
+    WriteStream out = getWriteStream();
+
+    out.write(HmuxRequest.HMTP_QUERY_GET);
+    out.write(0);
+    out.write(8);
+
+    writeLong(out, id);
+    writeString(out, to);
+    writeString(out, from);
+
+    Hessian2StreamingOutput hOut = getHessianOutputStream();
+
+    hOut.writeObject(query);
+
+    out.write(HmuxRequest.HMUX_QUIT);
+    out.flush();
+
+    return true;
+  }
+
   public boolean sendQuerySet(long id, String to, String from,
 			      Serializable query)
     throws IOException
@@ -172,6 +196,30 @@ public class ClusterStream {
     WriteStream out = getWriteStream();
 
     out.write(HmuxRequest.HMTP_QUERY_SET);
+    out.write(0);
+    out.write(8);
+
+    writeLong(out, id);
+    writeString(out, to);
+    writeString(out, from);
+
+    Hessian2StreamingOutput hOut = getHessianOutputStream();
+
+    hOut.writeObject(query);
+
+    out.write(HmuxRequest.HMUX_QUIT);
+    out.flush();
+
+    return true;
+  }
+
+  public boolean sendQueryResult(long id, String to, String from,
+				 Serializable query)
+    throws IOException
+  {
+    WriteStream out = getWriteStream();
+
+    out.write(HmuxRequest.HMTP_QUERY_RESULT);
     out.write(0);
     out.write(8);
 

@@ -1258,7 +1258,8 @@ public class Env {
 
     _javaSession = _request.getSession(true);
 
-    if (create && _javaSession.getId().length() >= 3 && sessionId.length() >= 3)
+    if (create && _javaSession.getId().length() >= 3
+	&& sessionId.length() >= 3)
       sessionId = _javaSession.getId().substring(0, 3) + sessionId.substring(3);
 
     SessionArrayValue session = _quercus.loadSession(this, sessionId);
@@ -3789,10 +3790,13 @@ public class Env {
     if (path == null) {
       path = lookupIncludeImpl(include, pwd, scriptPwd);
 
+      /*
       if (path == null)
 	path = NullPath.NULL;
-      
-      _quercus.putIncludeCache(include, includePath, pwd, scriptPwd, path);
+      */
+
+      if (path != null)
+	_quercus.putIncludeCache(include, includePath, pwd, scriptPwd, path);
     }
 
     if (path == NullPath.NULL)
@@ -4894,8 +4898,10 @@ public class Env {
       else {
         _quercus.saveSession(this, session);
 
-        setGlobalValue("_SESSION", session.copy(this));
-        setGlobalValue("HTTP_SESSION_VARS", session.copy(this));
+	Value sessionCopy = session.copy(this);
+	
+        setGlobalValue("_SESSION", sessionCopy);
+        setGlobalValue("HTTP_SESSION_VARS", sessionCopy);
       }
     }
   }
