@@ -129,7 +129,7 @@ class IndexExpr extends RowIterateExpr {
   {
     byte []buffer = context.getBuffer();
 
-    int length = _expr.evalToBuffer(context, buffer, _column.getTypeCode());
+    int length = _expr.evalToBuffer(context, buffer, 0, _column.getTypeCode());
 
     if (length <= 0)
       return 0;

@@ -202,6 +202,7 @@ public class SelectQuery extends Query {
     if (start(rows, rowLength, context, xa)) {
       do {
 	result.startRow();
+
 	for (int i = 0; i < _results.length; i++) {
 	  _results[i].evalToResult(context, result);
 	}

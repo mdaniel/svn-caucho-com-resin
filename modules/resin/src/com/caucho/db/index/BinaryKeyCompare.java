@@ -70,24 +70,18 @@ public class BinaryKeyCompare extends KeyCompare {
     for (int j = 0; j < keyLen; j++) {
       int ch = buffer[offset + j] & 0xff;
 
-      if (ch == 0)
-	break;
+      int d1 = (ch >> 4) & 0xf;
+      int d2 = (ch >> 4) & 0xf;
 
-      if (ch < 0x80)
-	sb.append((char) ch);
-      else if ((ch & 0xe0) == 0xc0) {
-	int ch1 = buffer[offset + 1 + j] & 0xff;
-	sb.append((char) (((ch & 0x0f) << 6) + (ch & 0x3f)));
-	j++;
-      }
-      else {
-	int ch2 = buffer[offset + 1 + j] & 0xff;
-	int ch3 = buffer[offset + 2 + j] & 0xff;
-	sb.append((char) (((ch & 0x0f) << 12)
-			  + ((ch & 0x3f) << 6)
-			  + ((ch & 0x3f))));
-	j += 2;
-      }
+      if (d1 < 10)
+	sb.append((char) ('0' + d1));
+      else
+	sb.append((char) ('a' + d1 - 10));
+
+      if (d2 < 10)
+	sb.append((char) ('0' + d2));
+      else
+	sb.append((char) ('a' + d2 - 10));
     }
 
     return sb.toString();

@@ -196,8 +196,10 @@ class BinaryColumn extends Column {
   {
     if (expr.isNull(null))
       setNull(block, rowOffset);
-    else
-      setString(xa, block, rowOffset, expr.evalString(context));
+    else {
+      expr.evalToBuffer(context, block, rowOffset + _columnOffset);
+      setNonNull(block, rowOffset);
+    }
   }
 
   /**
@@ -274,6 +276,7 @@ class BinaryColumn extends Column {
   /**
    * Evaluates the column to a stream.
    */
+  @Override
   public void evalToResult(byte []block, int rowOffset, SelectResult result)
   {
     if (isNull(block, rowOffset)) {
@@ -282,7 +285,7 @@ class BinaryColumn extends Column {
     }
 
     // XXX: add writeVarBinary to SelectResult
-    result.writeString(getString(block, rowOffset));
+    result.writeBinary(block, rowOffset + _columnOffset, getLength());
   }
   
   /**
@@ -307,6 +310,20 @@ class BinaryColumn extends Column {
     System.arraycopy(block, startOffset, buffer, bufferOffset, _length);
 
     return _length;
+  }
+
+  /**
+   * Sets based on an iterator.
+   */
+  public void set(Transaction xa,
+		  TableIterator iter, Expr expr, QueryContext context)
+    throws SQLException
+  {
+    expr.evalToBuffer(context,
+		      iter.getBuffer(), iter.getRowOffset() + _columnOffset);
+    setNonNull(iter.getBuffer(), iter.getRowOffset());
+    
+    iter.setDirty();
   }
   
   /**

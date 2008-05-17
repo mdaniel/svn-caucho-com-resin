@@ -139,6 +139,16 @@ class ColumnExpr extends Expr {
     return row.getDouble(_column);
   }
 
+  @Override
+  public int evalToBuffer(QueryContext context, byte []buffer, int offset)
+    throws SQLException
+  {
+    TableIterator []rows = context.getTableIterators();
+    TableIterator row = rows[_tableIndex];
+
+    return row.getBuffer(_column, buffer, offset);
+  }
+
   /**
    * Evaluates the expression, writing to the result stream.
    *

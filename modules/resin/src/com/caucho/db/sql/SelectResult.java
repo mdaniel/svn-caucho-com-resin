@@ -283,6 +283,39 @@ public class SelectResult {
   }
 
   /**
+   * Returns the string value of the given index.
+   */
+  public byte [] getBytes(int index)
+    throws SQLException
+  {
+    _wasNull = false;
+
+    setColumn(index);
+
+    int type = read();
+    
+    switch (type) {
+    case Column.NONE:
+      _wasNull = true;
+      return null;
+
+    case Column.BINARY:
+      {
+	int len = read();
+	
+	byte []bytes = new byte[len];
+
+	read(bytes, 0, len);
+
+	return bytes;
+      }
+
+    default:
+      throw new RuntimeException("unknown column type:" + type + " column:" + index);
+    }
+  }
+
+  /**
    * Returns the integer value of the column.
    */
   public int getInt(int index)

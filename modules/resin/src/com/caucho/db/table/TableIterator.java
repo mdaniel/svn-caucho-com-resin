@@ -418,6 +418,15 @@ public class TableIterator {
   /**
    * Evaluates the row to the result.
    */
+  public int getBuffer(Column column, byte []buffer, int offset)
+    throws SQLException
+  {
+    return column.evalToBuffer(_buffer, _rowOffset, buffer, offset);
+  }
+
+  /**
+   * Evaluates the row to the result.
+   */
   public void evalToResult(Column column, SelectResult result)
     throws SQLException
   {

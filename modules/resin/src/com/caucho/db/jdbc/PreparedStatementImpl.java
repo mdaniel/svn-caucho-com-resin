@@ -146,9 +146,7 @@ public class PreparedStatementImpl extends StatementImpl
     throws SQLException
   {
     if (x != null) {
-      ByteArrayInputStream bis = new ByteArrayInputStream(x);
-    
-      _query.setBinaryStream(parameter, bis, x.length);
+      _query.setBytes(parameter, x);
     }
     else
       setNull(parameter, 0);

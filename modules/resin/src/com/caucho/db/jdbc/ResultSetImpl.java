@@ -224,6 +224,15 @@ public class ResultSetImpl extends AbstractResultSet {
   /**
    * Returns the blob value for the column.
    */
+  public byte []getBytes(int columnIndex)
+    throws SQLException
+  {
+    return _rs.getBytes(columnIndex - 1);
+  }
+
+  /**
+   * Returns the blob value for the column.
+   */
   public Blob getBlob(int columnIndex)
     throws SQLException
   {

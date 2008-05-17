@@ -47,6 +47,7 @@ class ParamExpr extends Expr {
   private static final int DOUBLE = LONG + 1;
   private static final int DATE = DOUBLE + 1;
   private static final int BINARY = DATE + 1;
+  private static final int BYTES = BINARY + 1;
 
   private int _index;
   
@@ -58,6 +59,7 @@ class ParamExpr extends Expr {
   
   private InputStream _binaryStream;
   private int _streamLength;
+  private byte []_bytes;
 
   ParamExpr(int index)
   {
@@ -90,6 +92,9 @@ class ParamExpr extends Expr {
 
     case BINARY:
       return java.io.InputStream.class;
+
+    case BYTES:
+      return byte[].class;
       
     default:
       return Object.class;
@@ -172,7 +177,16 @@ class ParamExpr extends Expr {
   }
 
   /**
-   * Evaluates the expression as a string.
+   * Sets the value as a stream.
+   */
+  public void setBytes(byte []bytes)
+  {
+    _type = BYTES;
+    _bytes = bytes;
+  }
+
+  /**
+   * Checks if the value is null
    *
    * @param rows the current database tuple
    *
@@ -349,6 +363,49 @@ class ParamExpr extends Expr {
     default:
       throw new UnsupportedOperationException();
     }
+  }
+  
+  /**
+   * Evaluates the expression to a buffer
+   *
+   * @param result the result buffer
+   *
+   * @return the length of the result
+   */
+  public int evalToBuffer(QueryContext context,
+			  byte []buffer,
+			  int offset)
+    throws SQLException
+  {
+    if (_type == BYTES) {
+      System.arraycopy(_bytes, 0, buffer, offset, _bytes.length);
+
+      return _bytes.length;
+    }
+    else
+      return evalToBuffer(context, buffer, offset, _type);
+  }
+  
+  /**
+   * Evaluates the expression to a buffer
+   *
+   * @param result the result buffer
+   *
+   * @return the length of the result
+   */
+  public int evalToBuffer(QueryContext context,
+			  byte []buffer,
+			  int offset,
+			  int typecode)
+    throws SQLException
+  {
+    if (_type == BYTES) {
+      System.arraycopy(_bytes, 0, buffer, offset, _bytes.length);
+
+      return _bytes.length;
+    }
+    else
+      return evalToBuffer(context, buffer, offset, typecode);
   }
 
   public String toString()

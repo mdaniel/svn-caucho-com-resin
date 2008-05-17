@@ -332,7 +332,23 @@ abstract public class Expr {
    */
   public int evalToBuffer(QueryContext context,
 			  byte []buffer,
-			  int columnType)
+			  int offset)
+    throws SQLException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Evaluates the expression to a buffer
+   *
+   * @param result the result buffer
+   *
+   * @return the length of the result
+   */
+  protected int evalToBuffer(QueryContext context,
+			     byte []buffer,
+			     int off,
+			     int columnType)
     throws SQLException
   {
     switch (columnType) {
@@ -374,8 +390,8 @@ abstract public class Expr {
 	  return -1;
 	
 	int length = v.length();
-	int offset = 0;
 
+	int offset = 0;
 	buffer[offset++] = (byte) length;
 	for (int i = 0; i < length; i++) {
 	  int ch = v.charAt(i);
@@ -417,9 +433,8 @@ abstract public class Expr {
 	return offset;
       }
       
-      
     default:
-      throw new UnsupportedOperationException("unknown column: " + columnType);
+      throw new UnsupportedOperationException(getClass().getName() + " unknown column: " + columnType);
     }
   }
 

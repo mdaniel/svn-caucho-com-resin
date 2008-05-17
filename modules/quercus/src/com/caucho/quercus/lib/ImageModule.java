@@ -723,7 +723,8 @@ public class ImageModule extends AbstractQuercusModule {
     try {
       return new QuercusImage(env, filename);
     } catch (Exception e) {
-      env.warning(L.l("Can't open {0} as a jpeg image", filename));
+      env.warning(L.l("Can't open {0} as a jpeg image.\n{1}",
+		      filename, e));
       log.log(Level.FINE, e.toString(), e);
 
       return null;

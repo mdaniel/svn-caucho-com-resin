@@ -621,6 +621,14 @@ abstract public class Query {
   }
 
   /**
+   * Sets the indexed parameter as a bytes
+   */
+  public void setBytes(int index, byte []bytes)
+  {
+    _params[index - 1].setBytes(bytes);
+  }
+
+  /**
    * Executes the query.
    */
   abstract public void execute(QueryContext queryCtx, Transaction xa)
