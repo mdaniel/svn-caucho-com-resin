@@ -136,7 +136,7 @@ public class ResourceHandlerImpl
   {
     String locale = null;
 
-    Path path = null;
+    Path result = null;
 
     if (libraryName != null) {
       Path libPath = root.lookup((locale == null ? "./" : "./" + locale + "/") +
@@ -147,61 +147,68 @@ public class ResourceHandlerImpl
 
         String version = null;
 
+        Path base = null;
         for (String s : paths) {
           Path test = libPath.lookup("./" + s + "/" + resourceName);
 
           if (test.exists() && (test.isFile() || test.list().length > 0)) {
 
             if (version == null || compareVersions(s, version) > 0) {
-              path = test;
+              base = test;
               version = s;
             }
           }
         }
 
-        if (path == null) {
-          path = libPath.lookup("./" + resourceName);
+        if (base == null) {
+          Path temp = libPath.lookup("./" + resourceName);
+
+          if (temp.exists() && temp.isFile())
+            result = temp;
         }
-        else if (path != null && path.isDirectory()) {
-          paths = path.list();
+        else if (base != null && base.isDirectory()) {
+          paths = result.list();
 
           version = null;
 
           for (String s : paths) {
-            Path test = path.lookup("./" + s);
+            Path test = result.lookup("./" + s);
 
             if (test.isFile() &&
                 (version == null || compareVersions(s, version) > 0)) {
-              path = test;
+              result = test;
               version = s;
             }
           }
         }
-
       }
     }
     else {
-      path = root.lookup((locale == null ? "./" : "./" + locale + "/") +
-                         resourceName);
 
-      if (path != null && path.isDirectory()) {
-        String[] paths = path.list();
+      Path base = root.lookup((locale == null ? "./" : "./" + locale + "/") +
+                              resourceName);
+
+      if (base.isDirectory()) {
+        String[] paths = result.list();
 
         String version = null;
 
         for (String s : paths) {
-          Path test = path.lookup("./" + s);
+          Path test = result.lookup("./" + s);
 
           if (test.isFile() &&
               (version == null || compareVersions(s, version) > 0)) {
-            path = test;
+            result = test;
             version = s;
           }
         }
       }
+      else if (base.isFile()) {
+        result = base;
+      }
     }
-    
-    return path;
+
+    return result;
   }
 
   public int compareVersions(String ver1, String ver2)
