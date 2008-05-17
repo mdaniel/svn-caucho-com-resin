@@ -405,7 +405,6 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public Path getAdminPath()
   {
-    System.out.println("ADMIN: " + _management + " " + getRootDirectory());
     if (_management != null)
       return _management.getPath();
     else

@@ -405,7 +405,7 @@ class ParamExpr extends Expr {
       return _bytes.length;
     }
     else
-      return evalToBuffer(context, buffer, offset, typecode);
+      return super.evalToBuffer(context, buffer, offset, typecode);
   }
 
   public String toString()

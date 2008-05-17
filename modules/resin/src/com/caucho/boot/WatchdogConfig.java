@@ -32,6 +32,7 @@ package com.caucho.boot;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.server.port.Port;
+import com.caucho.server.port.ProtocolPort;
 import com.caucho.util.*;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -201,10 +202,14 @@ public class WatchdogConfig
   /**
    * Adds a custom-protocol port.
    */
-  public void addProtocol(Port port)
+  public Port createProtocol()
     throws ConfigException
   {
+    ProtocolPort port = new ProtocolPort();
+
     _ports.add(port);
+
+    return port;
   }
   
   /**
