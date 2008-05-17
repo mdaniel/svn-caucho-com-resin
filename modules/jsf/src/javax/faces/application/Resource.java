@@ -25,25 +25,61 @@
  *
  * @author Alex Rojkov
  */
+
 package javax.faces.application;
 
 import javax.faces.context.FacesContext;
+import java.io.InputStream;
+import java.io.IOException;
+import java.util.Map;
+import java.net.URL;
 
-public abstract class ResourceHandler {
+/**
+ * Since 2.0
+ */
+public abstract class Resource {
+  private String _resourceName;
+  private String _libraryName;
+  private String _contentType;
+
+  public String getResourceName()
+  {
+    return _resourceName;
+  }
+
+  public void setResourceName(String resourceName)
+  {
+    _resourceName = resourceName;
+  }
+
+  public String getLibraryName()
+  {
+    return _libraryName;
+  }
+
+  public void setLibraryName(String libraryName)
+  {
+    _libraryName = libraryName;
+  }
+
+  public String getContentType()
+  {
+    return _contentType;
+  }
+
+  public void setContentType(String contentType)
+  {
+    _contentType = contentType;
+  }
+
+  public abstract InputStream getInputStream() throws IOException;
+
+  public abstract String getRequestPath();
+
+  public abstract Map<String, String> getResponseHeaders();
+
+  public abstract URL getURL();
+
+  public abstract boolean userAgentNeedsUpdate(FacesContext context);
   
-  public static final String RESOURCE_IDENTIFIER = "/javax.faces.resource";
-
-  public static final String LOCALE_PREFIX = "javax.faces.resource.localePrefix";
-
-  public static final String RESOURCE_EXCLUDES_PARAM_NAME = "javax.faces.RESOURCE_EXCLUDES";
-
-  public static final String RESOURCE_EXCLUDES_DEFAULT_VALUE = ".class .jsp .jspx .properties .xhtml";
-
-  public abstract Resource createResource(String resourceName);
-
-  public abstract Resource createResource(String resourceName, String libraryName);
-
-  public abstract Resource createResource(String resourceName, String libraryName, String contentType);
-
-  public abstract boolean isResourceRequest(FacesContext context);
 }
