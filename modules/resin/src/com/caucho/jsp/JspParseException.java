@@ -36,7 +36,8 @@ import com.caucho.util.LineCompileException;
 import javax.servlet.ServletException;
 
 public class JspParseException extends ServletException
-  implements CompileException, LineMapException {
+  implements CompileException, LineMapException
+{
   private String _errorPage;
   private LineMap _lineMap;
 

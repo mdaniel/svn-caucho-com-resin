@@ -33,6 +33,7 @@ import com.caucho.vfs.TempBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.InputStream;
 import java.util.logging.Logger;
 
 public class BlobOutputStream extends OutputStream {
@@ -142,6 +143,25 @@ public class BlobOutputStream extends OutputStream {
       _offset += sublen;
 
       length -= sublen;
+    }
+  }
+
+  public void writeFromStream(InputStream is)
+    throws IOException
+  {
+    while (true) {
+      if (_bufferEnd <= _offset) {
+	flushBlock();
+      }
+
+      int sublen = _bufferEnd - _offset;
+
+      sublen = is.read(_buffer, _offset, sublen);
+
+      if (sublen < 0)
+	return;
+
+      _offset += sublen;
     }
   }
 

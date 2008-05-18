@@ -174,10 +174,7 @@ class BlobColumn extends Column {
       os = new BlobOutputStream(xa, getTable(),
 				block, rowOffset + _columnOffset);
 
-      int data;
-      while ((data = value.read()) >= 0) {
-	os.write(data);
-      }
+      os.writeFromStream(value);
 
       os.close();
       value.close();

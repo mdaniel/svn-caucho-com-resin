@@ -71,7 +71,7 @@ public class BinaryKeyCompare extends KeyCompare {
       int ch = buffer[offset + j] & 0xff;
 
       int d1 = (ch >> 4) & 0xf;
-      int d2 = (ch >> 4) & 0xf;
+      int d2 = (ch) & 0xf;
 
       if (d1 < 10)
 	sb.append((char) ('0' + d1));
