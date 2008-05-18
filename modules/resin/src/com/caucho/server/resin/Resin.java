@@ -390,6 +390,8 @@ public class Resin implements EnvironmentBean, SchemaBean
   public void setRootDirectory(Path root)
   {
     _rootDirectory = root;
+
+    Vfs.setPwd(root);
   }
 
   /**
@@ -724,6 +726,11 @@ public class Resin implements EnvironmentBean, SchemaBean
 					  _dynamicServer.getCluster()));
 	}
 
+	if (! cluster.isDynamicServerEnable()) {
+	  throw new ConfigException(L().l("cluster '{0}' does not allow dynamic servers.  Add a <dynamic-server-enable/> tag to the <cluster> to enable it.",
+					  cluster.getId()));
+	}
+
 	cluster.addDynamicServer(_serverId,
 				 _dynamicServer.getAddress(),
 				 _dynamicServer.getPort());
@@ -925,6 +932,25 @@ public class Resin implements EnvironmentBean, SchemaBean
 	       || argv[i].equals("--config-server")) {
         _configServer = argv[i + 1];
         i += 2;
+      }
+      else if (i + 1 < len
+	       && (argv[i].equals("-dynamic-server")
+		   || argv[i].equals("--dynamic-server"))) {
+	String []values = argv[i + 1].split(":");
+
+	if (values.length != 3) {
+	  System.out.println("-dynamic-server requires 'cluster:address:port' at '" + argv[i + 1] + "'");
+
+	  System.exit(66);
+	}
+	
+	String clusterId = values[0];
+	String address = values[1];
+	int port = Integer.parseInt(values[2]);
+
+	addDynamicServer(clusterId, address, port);
+
+	i += 2;
       }
       else if (i + 1 < len
 	       && (argv[i].equals("-server")
@@ -1145,7 +1171,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
     if (_configFile != null) {
       if (log().isLoggable(Level.FINER))
-        log().log(Level.FINER, "looking for conf in " +  pwd.lookup(_configFile));
+        log().finer(this + " looking for conf in " +  pwd.lookup(_configFile));
 
       resinConf = pwd.lookup(_configFile);
     }
@@ -1155,14 +1181,14 @@ public class Resin implements EnvironmentBean, SchemaBean
 
     if (resinConf == null || !resinConf.exists()) {
       if (log().isLoggable(Level.FINER))
-        log().log(Level.FINER, "looking for conf in " +  _rootDirectory.lookup(_configFile));
+        log().finer(this + " looking for conf in " +  _rootDirectory.lookup(_configFile));
 
       resinConf = _rootDirectory.lookup(_configFile);
     }
 
     if (!resinConf.exists() && ! _resinHome.equals(_rootDirectory)) {
       if (log().isLoggable(Level.FINER))
-        log().log(Level.FINER, "looking for conf in " +  _resinHome.lookup(_configFile));
+        log().finer(this + " looking for conf in " +  _resinHome.lookup(_configFile));
 
       resinConf = _resinHome.lookup(_configFile);
     }
@@ -1178,6 +1204,8 @@ public class Resin implements EnvironmentBean, SchemaBean
     setResinProfessional(isResinProfessional);
 
     _mainThread.setContextClassLoader(_systemClassLoader);
+
+    Vfs.setPwd(getRootDirectory());
 
     Config config = new Config();
     // server/10hc

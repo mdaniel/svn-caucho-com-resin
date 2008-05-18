@@ -1353,11 +1353,14 @@ public class FileModule extends AbstractQuercusModule {
           env.warning(L.l("{0} cannot be read", filename));
 
           return null;
-        } else if (! path.exists()) {
+	}
+	// server/2l80
+        /* else if (! path.exists()) {
           env.warning(L.l("{0} cannot be read", path.getFullPath()));
 
           return null;
         }
+	  */
 
         try {
           BinaryInput input;

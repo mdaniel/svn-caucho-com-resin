@@ -32,6 +32,11 @@ class WatchdogArgs
   private boolean _isVerbose;
   private StartMode _startMode = StartMode.DIRECT;
 
+  private boolean _isDynamicServer;
+  private String _dynamicCluster;
+  private String _dynamicAddress;
+  private int _dynamicPort;
+
   WatchdogArgs(String[] argv)
   {
     super();
@@ -81,6 +86,26 @@ class WatchdogArgs
   String[] getArgv()
   {
     return _argv;
+  }
+
+  boolean isDynamicServer()
+  {
+    return _isDynamicServer;
+  }
+
+  String getDynamicCluster()
+  {
+    return _dynamicCluster;
+  }
+
+  String getDynamicAddress()
+  {
+    return _dynamicAddress;
+  }
+
+  int getDynamicPort()
+  {
+    return _dynamicPort;
   }
 
   boolean isVerbose()
@@ -152,6 +177,22 @@ class WatchdogArgs
 
       if ("-conf".equals(arg) || "--conf".equals(arg)) {
         resinConf = argv[i + 1];
+        i++;
+      }
+      else if ("-dynamic-server".equals(arg)
+	       || "--dynamic-server".equals(arg)) {
+	String []str = argv[i + 1].split(":");
+
+	if (str.length != 3) {
+	  System.out.println(L().l("-dynamic server requires 'cluster:address:port' at '{0}'", argv[i + 1]));
+	  System.exit(1);
+	}
+
+	_isDynamicServer = true;
+	_dynamicCluster = str[0];
+	_dynamicAddress = str[1];
+	_dynamicPort = Integer.parseInt(str[2]);
+
         i++;
       }
       else if ("-fine".equals(arg) || "--fine".equals(arg)) {

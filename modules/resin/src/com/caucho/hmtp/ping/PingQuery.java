@@ -27,23 +27,34 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.management.server;
+package com.caucho.hmtp.ping;
 
-import com.caucho.jmx.Description;
-import com.caucho.jmx.Units;
-
-import java.util.Date;
+import java.io.Serializable;
+import java.util.*;
 
 /**
- * A client-view of a cluster's server.  The load balancer and
- * persistent store will use the ClusterClient to communicate to
- * other servers in the cluster.
+ * Ping (urn:xmpp:ping defined in XEP-0199)
+ * http://www.xmpp.org/extensions/xep-0199.html
  *
- * The JMX name looks like:
- * <pre>
- *   resin:type=ServerConnectorn,name=web-a
- * </pre>
+ * <code><pre>
+ * element ping {
+ * }
+ * </pre></code>
+ *
+ * The disco feature is
+ *
+ * <code><pre>
+ * &lt;feature var='urn:xmpp:ping'/>
+ * </pre></code>
  */
-@Description("Client-view of a cluster's server, i.e. a target server with which this instance can communicate")
-public interface ServerConnectorMXBean extends ClusterServerMXBean {
+public class PingQuery implements Serializable {
+  public PingQuery()
+  {
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName();
+  }
 }

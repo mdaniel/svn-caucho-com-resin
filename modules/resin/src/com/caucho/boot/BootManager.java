@@ -49,6 +49,9 @@ public class BootManager implements EnvironmentBean
   
   private ArrayList<ContainerProgram> _clusterDefaultList
     = new ArrayList<ContainerProgram>();
+
+  private ArrayList<ClusterConfig> _clusterList
+    = new ArrayList<ClusterConfig>();
   
   private HashMap<String,WatchdogClient> _watchdogMap
     = new HashMap<String,WatchdogClient>();
@@ -147,6 +150,43 @@ public class BootManager implements EnvironmentBean
   }
 
   /**
+   * Finds a server.
+   */
+  public WatchdogClient addDynamicClient(WatchdogArgs args)
+  {
+    if (! args.isDynamicServer())
+      throw new IllegalStateException();
+
+    String clusterId = args.getDynamicCluster();
+    String address = args.getDynamicAddress();
+    int port = args.getDynamicPort();
+
+    ClusterConfig cluster = findCluster(clusterId);
+
+    if (cluster == null)
+      throw new ConfigException(L.l("'{0}' is an unknown cluster. -dynamic-server must specify an existing cluster",
+				    clusterId));
+
+    if (! cluster.isDynamicServerEnable()) {
+      throw new ConfigException(L.l("cluster '{0}' does not have <dynamic-server-enable>. -dynamic-server requires a <dynamic-server-enable> tag.",
+				    clusterId));
+    }
+
+    WatchdogConfig config = cluster.createServer();
+    config.setId(address + "-" + port);
+    config.setDynamic(true);
+    config.setAddress(address);
+    config.setPort(port);
+
+    cluster.addServer(config);
+
+    WatchdogClient client = new WatchdogClient(BootManager.this, config);
+    addClient(client);
+
+    return client;
+  }
+
+  /**
    * Creates the watchdog-manager config
    */
   public WatchdogManagerConfig createWatchdogManager()
@@ -170,8 +210,22 @@ public class BootManager implements EnvironmentBean
 
     for (int i = 0; i < _clusterDefaultList.size(); i++)
       _clusterDefaultList.get(i).configure(cluster);
+
+    _clusterList.add(cluster);
     
     return cluster;
+  }
+
+  ClusterConfig findCluster(String id)
+  {
+    for (int i = 0; i < _clusterList.size(); i++) {
+      ClusterConfig cluster = _clusterList.get(i);
+
+      if (id.equals(cluster.getId()))
+	return cluster;
+    }
+
+    return null;
   }
 
   public ServerCompatConfig createServer()
@@ -254,8 +308,30 @@ public class BootManager implements EnvironmentBean
   }
 
   public class ClusterConfig {
+    private String _id = "";
+    private boolean _isDynamicServerEnable;
     private ArrayList<ContainerProgram> _serverDefaultList
       = new ArrayList<ContainerProgram>();
+
+    public void setId(String id)
+    {
+      _id = id;
+    }
+
+    public String getId()
+    {
+      return _id;
+    }
+
+    public void setDynamicServerEnable(boolean isEnabled)
+    {
+      _isDynamicServerEnable = isEnabled;
+    }
+
+    public boolean isDynamicServerEnable()
+    {
+      return _isDynamicServerEnable;
+    }
 
     /**
      * Adds a new server to the cluster.

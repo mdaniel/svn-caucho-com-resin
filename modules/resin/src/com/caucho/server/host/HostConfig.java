@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
  */
 public class HostConfig extends DeployConfig {
   static final L10N L = new L10N(HostConfig.class);
-  static final Logger log = Log.open(HostConfig.class);
+  static final Logger log = Logger.getLogger(HostConfig.class.getName());
 
   // The raw host aliases
   private ArrayList<String> _hostAliases = new ArrayList<String>();

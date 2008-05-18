@@ -1301,6 +1301,7 @@ public class Server extends ProtocolDispatchServer
           log.info("resin.home = " + resin.getResinHome().getNativePath());
           log.info("resin.root = " + resin.getRootDirectory().getNativePath());
           log.info("resin.conf = " + resin.getResinConf());
+          log.info("-server = '" + resin.getServerId() + "'");
         }
         else {
           log.info("resin.home = " + System.getProperty("resin.home"));
@@ -1616,6 +1617,19 @@ public class Server extends ProtocolDispatchServer
   public HmtpStream getHmtpStream()
   {
     return null;
+  }
+  
+  public void addDynamicServer(String clusterId,
+			       String serverId,
+			       String address,
+			       int port)
+  {
+  }
+  
+  public void removeDynamicServer(String clusterId,
+				  String address,
+				  int port)
+  {
   }
 
   /**

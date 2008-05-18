@@ -178,6 +178,11 @@ public class ServerConnector
     return _server.getId();
   }
 
+  public ClusterServer getServer()
+  {
+    return _server;
+  }
+
   /**
    * Returns the index of this connection in the connection group.
    */
@@ -200,6 +205,14 @@ public class ServerConnector
   public int getPort()
   {
     return _port.getPort();
+  }
+
+  /**
+   * Returns true for a dynamic server
+   */
+  public boolean isDynamicServer()
+  {
+    return _server.isDynamic();
   }
 
   /**

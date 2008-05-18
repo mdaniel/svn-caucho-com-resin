@@ -1422,7 +1422,7 @@ public class Quercus
       if (_modules.get(cl.getName()) != null)
 	return;
       
-      log.finer("Quercus loading module " + cl.getName());
+      log.finest("Quercus loading module " + cl.getName());
 
       QuercusModule module = (QuercusModule) cl.newInstance();
 

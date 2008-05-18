@@ -273,8 +273,6 @@ public class WatchdogManager extends ProtocolDispatchServer {
   {
     WatchdogArgs args = new WatchdogArgs(argv);
 
-    String serverId = args.getServerId();
-
     Vfs.setPwd(_args.getRootDirectory());
 
     try {
@@ -282,6 +280,11 @@ public class WatchdogManager extends ProtocolDispatchServer {
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+    
+    String serverId = args.getServerId();
+
+    if (args.isDynamicServer())
+      serverId = args.getDynamicAddress() + "-" + args.getDynamicPort();
     
     Watchdog watchdog = _watchdogMap.get(serverId);
 
@@ -337,6 +340,25 @@ public class WatchdogManager extends ProtocolDispatchServer {
     config.configure(resin,
 		     args.getResinConf(),
 		     "com/caucho/server/resin/resin.rnc");
+
+    if (args.isDynamicServer()) {
+      String clusterId = args.getDynamicCluster();
+      String address = args.getDynamicAddress();
+      int port = args.getDynamicPort();
+
+      ClusterConfig cluster = resin.findCluster(clusterId);
+
+      if (cluster == null) {
+	throw new ConfigException(L().l("'{0}' is an unknown cluster",
+				      clusterId));
+      }
+      
+      WatchdogConfig server = cluster.createServer();
+      server.setId(address + "-" + port);
+      server.setAddress(address);
+      server.setPort(port);
+      cluster.addServer(server);
+    }
   }
 
   public static void main(String []argv)
@@ -374,6 +396,9 @@ public class WatchdogManager extends ProtocolDispatchServer {
     
     private ArrayList<ContainerProgram> _clusterDefaultList
       = new ArrayList<ContainerProgram>();
+
+    private ArrayList<ClusterConfig> _clusterList
+      = new ArrayList<ClusterConfig>();
 
     ResinConfig()
     {
@@ -422,8 +447,22 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
       for (int i = 0; i < _clusterDefaultList.size(); i++)
 	_clusterDefaultList.get(i).configure(cluster);
+
+      _clusterList.add(cluster);
     
       return cluster;
+    }
+
+    public ClusterConfig findCluster(String id)
+    {
+      for (int i = 0; i < _clusterList.size(); i++) {
+	ClusterConfig cluster = _clusterList.get(i);
+	
+	if (id.equals(cluster.getId()))
+	  return cluster;
+      }
+
+      return null;
     }
 
     public ServerCompatConfig createServer()
@@ -490,6 +529,8 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
   public class ClusterConfig {
     private ResinConfig _resin;
+
+    private String _id;
     
     private ArrayList<ContainerProgram> _serverDefaultList
       = new ArrayList<ContainerProgram>();
@@ -497,6 +538,16 @@ public class WatchdogManager extends ProtocolDispatchServer {
     ClusterConfig(ResinConfig resin)
     {
       _resin = resin;
+    }
+
+    public void setId(String id)
+    {
+      _id = id;
+    }
+
+    public String getId()
+    {
+      return _id;
     }
 
     /**

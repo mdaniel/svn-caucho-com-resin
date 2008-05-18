@@ -65,11 +65,11 @@ public interface ClusterMXBean extends ManagedObjectMXBean {
    * are used to create outbound connections to communicate with
    * members of the cluster.
    */
-  @Description("The ServerConnectors that are used to create" +
+  @Description("The ClusterServers that are used to create" +
                " outbound connections to communicate with" +
                " members of the cluster")
-  public ServerConnectorMXBean []getServers();
-  
+  public ClusterServerMXBean []getServers();
+
   /**
    * Returns a list of the ObjectNames for the virtual hosts.
    */
@@ -83,4 +83,14 @@ public interface ClusterMXBean extends ManagedObjectMXBean {
   @Description("The PersistentStore saves persistent and distributed session" +
 	       " information")
   public PersistentStoreMXBean getPersistentStore();
+
+  //
+  // operations
+  //
+
+  /**
+   * Adds a new dynamic server to the cluster
+   */
+  @Description("Adds a dynamic server")
+  public void addDynamicServer(String id, String address, int port);
 }

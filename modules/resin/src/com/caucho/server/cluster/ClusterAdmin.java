@@ -103,6 +103,16 @@ public class ClusterAdmin extends AbstractManagedObject
     return serverMBeans;
   }
 
+  /**
+   * Adds a new dynamic server
+   */
+  public void addDynamicServer(String id, String address, int port)
+  {
+    Server server = _cluster.getResin().getServer();
+    
+    server.addDynamicServer(_cluster.getId(), id, address, port);
+  }
+
   public String toString()
   {
     return "ClusterAdmin[" + getObjectName() + "]";

@@ -94,6 +94,14 @@ public class ServerConnectorAdmin extends AbstractManagedObject
     return _client.getPort();
   }
 
+  /**
+   * Returns true for a dynamic server
+   */
+  public boolean isDynamicServer()
+  {
+    return _client.isDynamicServer();
+  }
+
   //
   // Client connection/load-balancing parameters
   //
@@ -231,6 +239,22 @@ public class ServerConnectorAdmin extends AbstractManagedObject
     return _client.canConnect();
   }
 
+  /**
+   * Remove the server as a dynamic server
+   */
+  public void removeDynamicServer()
+  {
+    ClusterServer clusterServer = _client.getServer();
+    ClusterPort port = clusterServer.getClusterPort();
+    
+    Cluster cluster = clusterServer.getCluster();
+    Server server = cluster.getResin().getServer();
+
+    server.removeDynamicServer(cluster.getId(),
+			       port.getAddress(),
+			       port.getPort());
+  }
+
   protected void register()
   {
     registerSelf();
@@ -238,6 +262,6 @@ public class ServerConnectorAdmin extends AbstractManagedObject
 
   public String toString()
   {
-    return "ClusterClientAdmin[" + getObjectName() + "]";
+    return getClass().getSimpleName() +  "[" + getObjectName() + "]";
   }
 }

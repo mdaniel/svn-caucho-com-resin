@@ -76,6 +76,10 @@ public class WatchdogConfig
   private Path _chroot;
   private Path _pwd;
 
+  private boolean _isDynamic;
+  private String _address;
+  private int _port;
+
   private String _watchdogAddress = "127.0.0.1";
   private int _watchdogPort;
 
@@ -113,6 +117,11 @@ public class WatchdogConfig
   String []getArgv()
   {
     return _args.getArgv();
+  }
+
+  public void setDynamic(boolean isDynamic)
+  {
+    _isDynamic = isDynamic;
   }
 
   public void setVerbose(boolean isVerbose)
@@ -155,7 +164,6 @@ public class WatchdogConfig
     return _jvmArgs;
   }
 
-  
   public void addJvmClasspath(String item)
   {
     if (item == null)
@@ -351,8 +359,9 @@ public class WatchdogConfig
   {
   }
 
-  public void setAddress(ConfigProgram program)
+  public void setAddress(String address)
   {
+    _address = address;
   }
 
   public void setBackup(ConfigProgram program)
@@ -393,6 +402,7 @@ public class WatchdogConfig
 
   public void setPort(int port)
   {
+    _port = port;
   }
 
   public void addClusterPort(ConfigProgram program)

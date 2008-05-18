@@ -220,6 +220,8 @@ class WatchdogProcess
       String id = _watchdog.getId();
       Path jvmPath = _watchdog.getLogPath();
 
+      log.warning("JVM: " + jvmPath.getNativePath());
+
       try {
 	Path dir = jvmPath.getParent();
 	    

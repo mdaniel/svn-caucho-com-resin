@@ -45,7 +45,7 @@ r_cluster-default = element cluster-default {
 }
 
 ## <cluster> basic contents
-r_cluster-Basis =
+r_cluster-Content =
   r_env-Basis
 
   & r_access-log?
@@ -54,6 +54,9 @@ r_cluster-Basis =
 
   & (attribute connection-error-page { string }
      | element connection-error-page { string })?
+
+  & (attribute dynamic-server-enable { r_boolean-Type }
+     | element dynamic-server-enable { r_boolean-Type })?
 
   & r_ear-default*
 
@@ -108,18 +111,12 @@ r_cluster-Basis =
 
   & r_web-app-default*
 
-## <cluster> flow control
-r_cluster-Flow =
-  r_cluster-Basis
-
-  & element rcore:if { rcore_if-Args, r_cluster-Flow }*
+  & element rcore:if { rcore_if-Args, r_cluster-Content }*
 
   & element rcore:choose {
-      element rcore:when { rcore_when-Args, r_cluster-Flow }+,
-      element rcore:otherwise { r_cluster-Flow }?
+      element rcore:when { rcore_when-Args, r_cluster-Content }+,
+      element rcore:otherwise { r_cluster-Content }?
     }*
-
-r_cluster-Content = r_cluster-Flow
 
 r_cluster-port = element cluster-port {
   r_port-Content

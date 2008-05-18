@@ -100,6 +100,8 @@ public class Cluster
 
   private StoreManager _clusterStore;
 
+  private boolean _isDynamicServerEnable = false;
+
   // compatibility with 3.0
   private long _clientMaxIdleTime = 30000L;
   private long _clientFailRecoverTime = 15000L;
@@ -231,6 +233,22 @@ public class Cluster
   }
 
   /**
+   * Enables dynamic servers
+   */
+  public void setDynamicServerEnable(boolean isEnable)
+  {
+    _isDynamicServerEnable = isEnable;
+  }
+
+  /**
+   * Enables dynamic servers
+   */
+  public boolean isDynamicServerEnable()
+  {
+    return _isDynamicServerEnable;
+  }
+
+  /**
    * Returns the version
    */
   public long getVersion()
@@ -354,12 +372,25 @@ public class Cluster
   public void addDynamicServer(String serverId, String address, int port)
     throws ConfigException
   {
+    if (! isDynamicServerEnable()) {
+      log.warning(this + " forbidden dynamic-server add id=" + serverId
+		  + " " + address + ":" + port);
+      return;
+    }
+    
     try {
       ClusterServer oldServer = findServer(serverId);
 
       if (oldServer != null) {
-	throw new ConfigException(L.l("duplicate <server> with id='{0}'",
+	throw new ConfigException(L.l("duplicate server with id='{0}'",
 				      serverId));
+      }
+      
+      oldServer = findServer(address, port);
+
+      if (oldServer != null) {
+	throw new ConfigException(L.l("duplicate server with '{0}:{1}'",
+				      address, port));
       }
 
       ClusterServer server = createServer();
@@ -373,6 +404,8 @@ public class Cluster
       addServer(server);
       
       server.init();
+
+      log.info(this + " add dynamic server " + server);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
@@ -402,6 +435,35 @@ public class Cluster
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " add dynamic server " + server);
+  }
+
+  /**
+   * Adds a new server to the cluster.
+   */
+  public void removeDynamicServer(ClusterServer server)
+    throws ConfigException
+  {
+    if (! isDynamicServerEnable()) {
+      log.warning(this + " forbidden dynamic-server remove " + server);
+      return;
+    }
+    
+    try {
+      synchronized (this) {
+	// XXX: default config
+	
+	_serverList.remove(server);
+	_serverArray = new ClusterServer[_serverList.size()];
+	_serverList.toArray(_serverArray);
+
+	_version++;
+      }
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " remove dynamic server " + server);
   }
 
   /**

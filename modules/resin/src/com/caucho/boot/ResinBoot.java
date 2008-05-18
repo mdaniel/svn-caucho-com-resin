@@ -123,11 +123,16 @@ public class ResinBoot {
     config.configure(bootManager, _args.getResinConf(),
                      "com/caucho/server/resin/resin.rnc");
 
-    _client = bootManager.findClient(_args.getServerId());
+    if (_args.isDynamicServer()) {
+      _client = bootManager.addDynamicClient(_args);
+    }
+    else {
+      _client = bootManager.findClient(_args.getServerId());
 
-    if (_client == null)
-      throw new ConfigException(L().l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
-                                      Version.VERSION, _args.getServerId(), _args.getResinConf()));
+      if (_client == null)
+	throw new ConfigException(L().l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
+					Version.VERSION, _args.getServerId(), _args.getResinConf()));
+    }
 
     Path logDirectory = bootManager.getLogDirectory();
     if (! logDirectory.exists()) {
@@ -257,7 +262,7 @@ public class ResinBoot {
       try {
 	_client.shutdown();
 
-	System.err.println(L().l("Resin/{0} shutdown ResinWatchdogManager",
+	System.out.println(L().l("Resin/{0} shutdown ResinWatchdogManager",
 				 Version.VERSION));
       } catch (Exception e) {
 	System.err.println(L().l("Resin/{0} can't shutdown ResinWatchdogManager.\n{1}",
