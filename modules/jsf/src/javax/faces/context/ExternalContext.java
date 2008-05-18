@@ -28,6 +28,8 @@
 
 package javax.faces.context;
 
+import com.caucho.quercus.module.IniDefinition;
+
 import java.io.*;
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -175,4 +177,11 @@ public abstract class ExternalContext {
 
   public abstract void redirect(String url)
     throws IOException;
+
+  /**
+   * @Since 2.0
+   */
+  public String getMimeType(String file) {
+    throw new UnsupportedOperationException();
+  }
 }

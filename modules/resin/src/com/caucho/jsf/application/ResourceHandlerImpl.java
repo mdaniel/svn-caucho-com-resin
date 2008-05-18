@@ -36,6 +36,7 @@ import com.caucho.util.L10N;
 import javax.faces.application.ResourceHandler;
 import javax.faces.application.Resource;
 import javax.faces.context.FacesContext;
+import javax.faces.context.ExternalContext;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.regex.Pattern;
@@ -91,10 +92,20 @@ public class ResourceHandlerImpl
                       libraryName));
       }
       else {
+        if (contentType == null) {
+          ExternalContext context = FacesContext.getCurrentInstance()
+            .getExternalContext();
+
+          resource = new ResourceImpl(path,
+                                      resourceName,
+                                      libraryName,
+                                      context.getMimeType(resourceName));
+        } else {
         resource = new ResourceImpl(path,
                                     resourceName,
                                     libraryName,
                                     contentType);
+        }
       }
     }
     catch (IOException e) {
@@ -165,14 +176,20 @@ public class ResourceHandlerImpl
 
           if (temp.exists() && temp.isFile())
             result = temp;
+          else
+            base = temp;
+        } else if (base.isFile()) {
+          result = base;
         }
-        else if (base != null && base.isDirectory()) {
-          paths = result.list();
+
+
+        if (result == null && base != null && base.isDirectory()) {
+          paths = base.list();
 
           version = null;
 
           for (String s : paths) {
-            Path test = result.lookup("./" + s);
+            Path test = base.lookup("./" + s);
 
             if (test.isFile() &&
                 (version == null || compareVersions(s, version) > 0)) {
@@ -189,12 +206,12 @@ public class ResourceHandlerImpl
                               resourceName);
 
       if (base.isDirectory()) {
-        String[] paths = result.list();
+        String[] paths = base.list();
 
         String version = null;
 
         for (String s : paths) {
-          Path test = result.lookup("./" + s);
+          Path test = base.lookup("./" + s);
 
           if (test.isFile() &&
               (version == null || compareVersions(s, version) > 0)) {
