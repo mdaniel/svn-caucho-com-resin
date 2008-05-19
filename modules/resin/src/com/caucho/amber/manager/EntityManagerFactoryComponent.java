@@ -39,31 +39,31 @@ import com.caucho.webbeans.component.*;
  * The Entity manager webbeans component
  */
 public class EntityManagerFactoryComponent extends FactoryComponent {
-  private PersistenceProvider _provider;
-  private PersistenceUnitConfig _unit;
-  private String _unitName;
+  private final AmberContainer _amber;
+  private final PersistenceProvider _provider;
+  private final PersistenceUnitConfig _unit;
+  private final String _unitName;
   private EntityManagerFactory _factory;
 
-  public EntityManagerFactoryComponent(PersistenceProvider provider,
-				       PersistenceUnitConfig unit,
-				       String unitName,
-				       EntityManagerFactory factory)
+  public EntityManagerFactoryComponent(AmberContainer amber,
+                                       PersistenceProvider provider,
+				       PersistenceUnitConfig unit)
   {
-    super(EntityManagerFactory.class, unitName);
+    super(EntityManagerFactory.class, unit.getName());
 
+    _amber = amber;
     _provider = provider;
     _unit = unit;
-    _unitName = unitName;
-    _factory = factory;
-
-    // jpa/2110
-    if (_factory == null)
-      _factory = _provider.createContainerEntityManagerFactory(_unit, null);
+    _unitName = unit.getName();
   }
 
   @Override
   public Object create()
   {
+    // jpa/2110
+    if (_factory == null)
+      _factory = _amber.getEntityManagerFactory(_unit.getName());
+    
     return _factory;
   }
 }

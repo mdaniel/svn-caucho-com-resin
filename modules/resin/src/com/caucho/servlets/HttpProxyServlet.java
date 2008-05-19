@@ -169,12 +169,18 @@ public class HttpProxyServlet extends GenericServlet {
     try {
       ws.setAttribute("method", req.getMethod());
 
+      ws.setAttribute("X-Forwarded-For", String.valueOf(req.getRemoteAddr()));
+
       Enumeration e = req.getHeaderNames();
       while (e.hasMoreElements()) {
 	String name = (String) e.nextElement();
-	String value = req.getHeader(name);
 
-	ws.setAttribute(name, value);
+	Enumeration e1 = req.getHeaders(name);
+	while (e1.hasMoreElements()) {
+  	  String value = (String) e1.nextElement();
+
+  	  ws.setAttribute(name, value);
+	}
       }
       
       InputStream is = req.getInputStream();

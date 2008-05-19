@@ -233,7 +233,7 @@ public class Env {
   private HashSet<String> _autoloadClasses
     = new HashSet<String>();
   
-  private LinkedHashMap<String, AbstractFunction> _autoloadFunctionMap;
+  private ArrayList<Callback> _autoloadList;
 
   private long _startTime;
   private long _timeLimit = 600000L;
@@ -3366,21 +3366,26 @@ public class Env {
       return createQuercusClass(staticClass, null); // XXX: cache
 
     if (useAutoload) {
+      StringBuilderValue nameString = new StringBuilderValue(name);
+      
       if (! _autoloadClasses.contains(name)) {
         try {
           _autoloadClasses.add(name);
 
-          if (_autoloadFunctionMap != null) {
-            for (Map.Entry<String, AbstractFunction> entry
-                 : _autoloadFunctionMap.entrySet()) {
-              entry.getValue().call(this, new StringBuilderValue(name));
+	  int size = _autoloadList != null ? _autoloadList.size() : 0;
+
+	  for (int i = 0; i < size; i++) {
+	    Callback cb = _autoloadList.get(i);
+
+	    if (cb.call(this, nameString).toBoolean()) {
+	      QuercusClass cls = createClassImpl(name, false, useImport);
               
-              QuercusClass cls = createClassImpl(name, false, useImport);
-              
-              if (cls != null)
-                break;
-            }
-          } else {
+	      if (cls != null)
+		return cls;
+	    }
+	  }
+
+	  if (size == 0) {
             if (_autoload == null)
               _autoload = findFunction("__autoload");
             
@@ -3419,34 +3424,34 @@ public class Env {
   /*
    * Registers an SPL autoload function.
    */
-  public void addAutoloadFunction(String name)
+  public void addAutoloadFunction(Callback fun)
   {
-    if (_autoloadFunctionMap == null)
-      _autoloadFunctionMap = new LinkedHashMap<String, AbstractFunction>();
+    if (_autoloadList == null)
+      _autoloadList = new ArrayList<Callback>();
 
-    _autoloadFunctionMap.put(name, getFunction(name));
+    _autoloadList.add(fun);
   }
   
   /*
    * Unregisters an SPL autoload function.
    */
-  public void removeAutoloadFunction(String fun)
+  public void removeAutoloadFunction(Callback fun)
   {
-    if (_autoloadFunctionMap != null) {
-      _autoloadFunctionMap.remove(fun);
+    if (_autoloadList != null) {
+      _autoloadList.remove(fun);
       
       //restore original __autoload functionality
-      if (_autoloadFunctionMap.size() == 0)
-        _autoloadFunctionMap = null;
+      if (_autoloadList.size() == 0)
+        _autoloadList = null;
     }
   }
   
   /*
    * Returns the registered SPL autoload functions.
    */
-  public LinkedHashMap<String, AbstractFunction> getAutoloadFunctions()
+  public ArrayList<Callback> getAutoloadFunctions()
   {
-    return _autoloadFunctionMap;
+    return _autoloadList;
   }
 
   /**
@@ -4004,10 +4009,10 @@ public class Env {
     else if (cl.isAssignableFrom(value.getClass()))
       return value;
     else {
-      error(L.l("{0} ({1}) is not assignable to {2}",
+      warning(L.l("{0} ({1}) is not assignable to {2}",
                 value, value.getClass().getName(), cl.getName()));
 
-      return value;
+      return null;
     }
   }
 

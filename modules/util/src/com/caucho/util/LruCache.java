@@ -418,7 +418,7 @@ public class LruCache<K,V> {
     if (okey == null)
       okey = NULL;
     
-    int hash = key.hashCode() & _mask;
+    int hash = okey.hashCode() & _mask;
 
     V value = null;
 

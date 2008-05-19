@@ -50,8 +50,10 @@ public class EntityManagerTransactionProxy
   private static final Logger log
     = Logger.getLogger(EntityManagerTransactionProxy.class.getName());
 
-  private final EntityManagerFactory _emf;
+  private final AmberContainer _amber;
+  private final String _unitName;
   private final Map _props;
+  private EntityManagerFactory _emf;
 
   private final UserTransactionProxy _ut;
 
@@ -60,10 +62,12 @@ public class EntityManagerTransactionProxy
 
   private Object _serializationHandle;
 
-  public EntityManagerTransactionProxy(EntityManagerFactory emf,
+  public EntityManagerTransactionProxy(AmberContainer amber,
+                                       String unitName,
 				       Map props)
   {
-    _emf = emf;
+    _amber = amber;
+    _unitName = unitName;
     _props = props;
     
     _ut = UserTransactionProxy.getCurrent();
@@ -264,6 +268,10 @@ public class EntityManagerTransactionProxy
       return em;
 
     try {
+      if (_emf == null) {
+        _emf = _amber.getEntityManagerFactory(_unitName);
+      }
+      
       Transaction xa = _ut.getTransaction();
 
       if (xa != null) {
@@ -313,9 +321,10 @@ public class EntityManagerTransactionProxy
     return _serializationHandle;
   }
 
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _emf + "]";
+    return getClass().getSimpleName() + "[" + _unitName + "," + _emf + "]";
   }
 
   class EntityManagerSynchronization implements Synchronization {

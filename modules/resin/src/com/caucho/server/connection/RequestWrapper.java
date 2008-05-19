@@ -94,14 +94,14 @@ public class RequestWrapper implements ServletRequest {
    */
   public String getProtocol()
   {
-    return _request.getProtocol();
+    return getRequest().getProtocol();
   }
   /**
    * Returns the request scheme, e.g. "http"
    */
   public String getScheme()
   {
-    return _request.getScheme();
+    return getRequest().getScheme();
   }
   /**
    * Returns the server name handling the request.  When using virtual hosts,
@@ -109,21 +109,21 @@ public class RequestWrapper implements ServletRequest {
    */
   public String getServerName()
   {
-    return _request.getServerName();
+    return getRequest().getServerName();
   }
   /**
    * Returns the server port handling the request, e.g. 80.
    */
   public int getServerPort()
   {
-    return _request.getServerPort();
+    return getRequest().getServerPort();
   }
   /**
    * Returns the IP address of the remote host, i.e. the client browser.
    */
   public String getRemoteAddr()
   {
-    return _request.getRemoteAddr();
+    return getRequest().getRemoteAddr();
   }
   
   /**
@@ -131,7 +131,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public String getRemoteHost()
   {
-    return _request.getRemoteHost();
+    return getRequest().getRemoteHost();
   }
   
   /**
@@ -141,7 +141,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public int getRemotePort()
   {
-    return _request.getRemotePort();
+    return getRequest().getRemotePort();
   }
   
   /**
@@ -149,7 +149,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public String getLocalAddr()
   {
-    return _request.getLocalAddr();
+    return getRequest().getLocalAddr();
   }
   
   /**
@@ -157,7 +157,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public String getLocalName()
   {
-    return _request.getLocalName();
+    return getRequest().getLocalName();
   }
   
   /**
@@ -165,7 +165,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public int getLocalPort()
   {
-    return _request.getLocalPort();
+    return getRequest().getLocalPort();
   }
   
   /**
@@ -180,7 +180,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public String getParameter(String name)
   {
-    return _request.getParameter(name);
+    return getRequest().getParameter(name);
   }
   /**
    * Returns the parameter map request parameters.  By default, returns
@@ -188,7 +188,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public Map getParameterMap()
   {
-    return _request.getParameterMap();
+    return getRequest().getParameterMap();
   }
   /**
    * Returns all values of a form parameter.
@@ -202,13 +202,13 @@ public class RequestWrapper implements ServletRequest {
    */
   public String []getParameterValues(String name)
   {
-    return _request.getParameterValues(name);
+    return getRequest().getParameterValues(name);
   }
   /**
    * Returns an enumeration of all form parameter names.
    *
    * <code><pre>
-   * Enumeration e = _request.getParameterNames();
+   * Enumeration e = getRequest().getParameterNames();
    * while (e.hasMoreElements()) {
    *   String name = (String) e.nextElement();
    *   out.println(name + ": " + request.getParameter(name));
@@ -217,7 +217,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public Enumeration getParameterNames()
   {
-    return _request.getParameterNames();
+    return getRequest().getParameterNames();
   }
   /**
    * Returns an InputStream to retrieve POST data from the request.
@@ -227,7 +227,7 @@ public class RequestWrapper implements ServletRequest {
   public ServletInputStream getInputStream()
     throws IOException
   {
-    return _request.getInputStream();
+    return getRequest().getInputStream();
   }
   /**
    * Returns a reader to read POSTed data.  Character encoding is
@@ -237,14 +237,14 @@ public class RequestWrapper implements ServletRequest {
   public BufferedReader getReader()
     throws IOException, IllegalStateException
   {
-    return _request.getReader();
+    return getRequest().getReader();
   }
   /**
    * Returns the character encoding of the POSTed data.
    */
   public String getCharacterEncoding()
   {
-    return _request.getCharacterEncoding();
+    return getRequest().getCharacterEncoding();
   }
   /**
    * Sets the character encoding to be used for forms and getReader.
@@ -252,7 +252,7 @@ public class RequestWrapper implements ServletRequest {
   public void setCharacterEncoding(String encoding)
     throws UnsupportedEncodingException
   {
-    _request.setCharacterEncoding(encoding);
+    getRequest().setCharacterEncoding(encoding);
   }
   /**
    * Returns the content length of the data.  This value may differ from
@@ -265,35 +265,35 @@ public class RequestWrapper implements ServletRequest {
    */
   public int getContentLength()
   {
-    return _request.getContentLength();
+    return getRequest().getContentLength();
   }
   /**
    * Returns the request's mime-type.
    */
   public String getContentType()
   {
-    return _request.getContentType();
+    return getRequest().getContentType();
   }
   /**
    * Returns the request's preferred locale.
    */
   public Locale getLocale()
   {
-    return _request.getLocale();
+    return getRequest().getLocale();
   }
   /**
    * Returns an enumeration of all locales acceptable by the client.
    */
   public Enumeration getLocales()
   {
-    return _request.getLocales();
+    return getRequest().getLocales();
   }
   /**
    * Returns true if the connection is secure, e.g. it uses SSL.
    */
   public boolean isSecure()
   {
-    return _request.isSecure();
+    return getRequest().isSecure();
   }
   /**
    * Returns an attribute value.
@@ -303,7 +303,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public Object getAttribute(String name)
   {
-    return _request.getAttribute(name);
+    return getRequest().getAttribute(name);
   }
   /**
    * Sets an attribute value.
@@ -313,14 +313,14 @@ public class RequestWrapper implements ServletRequest {
    */
   public void setAttribute(String name, Object o)
   {
-    _request.setAttribute(name, o);
+    getRequest().setAttribute(name, o);
   }
   /**
    * Enumerates all attribute names in the request.
    */
   public Enumeration getAttributeNames()
   {
-    return _request.getAttributeNames();
+    return getRequest().getAttributeNames();
   }
   /**
    * Removes the given attribute.
@@ -329,7 +329,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public void removeAttribute(String name)
   {
-    _request.removeAttribute(name);
+    getRequest().removeAttribute(name);
   }
   /**
    * Returns a request dispatcher for later inclusion or forwarding.  This
@@ -353,7 +353,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public RequestDispatcher getRequestDispatcher(String uri)
   {
-    return _request.getRequestDispatcher(uri);
+    return getRequest().getRequestDispatcher(uri);
   }
   
   /**
@@ -361,7 +361,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public String getRealPath(String uri)
   {
-    return _request.getRealPath(uri);
+    return getRequest().getRealPath(uri);
   }
   
   /**
@@ -371,14 +371,14 @@ public class RequestWrapper implements ServletRequest {
    */
   public String getMethod()
   {
-    return _request.getMethod();
+    return getRequest().getMethod();
   }
   /**
    * Returns the entire request URI
    */
   public String getRequestURI()
   {
-    return _request.getRequestURI();
+    return getRequest().getRequestURI();
   }
   /**
    * Reconstructs the URL the client used for the request.
@@ -387,7 +387,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public StringBuffer getRequestURL()
   {
-    return _request.getRequestURL();
+    return getRequest().getRequestURL();
   }
   /**
    * Returns the part of the URI corresponding to the application's
@@ -399,7 +399,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public String getContextPath()
   {
-    return _request.getContextPath();
+    return getRequest().getContextPath();
   }
   /**
    * Returns the URI part corresponding to the selected servlet.
@@ -415,7 +415,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public String getServletPath()
   {
-    return _request.getServletPath();
+    return getRequest().getServletPath();
   }
   /**
    * Returns the URI part after the selected servlet and null if there
@@ -431,7 +431,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public String getPathInfo()
   {
-    return _request.getPathInfo();
+    return getRequest().getPathInfo();
   }
   /**
    * Returns the physical path name for the path info.
@@ -442,7 +442,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public String getPathTranslated()
   {
-    return _request.getPathTranslated();
+    return getRequest().getPathTranslated();
   }
   /**
    * Returns the request's query string.  Form based servlets will use
@@ -452,7 +452,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public String getQueryString()
   {
-    return _request.getQueryString();
+    return getRequest().getQueryString();
   }
   /**
    * Returns the first value for a request header.
@@ -468,7 +468,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public String getHeader(String name)
   {
-    return _request.getHeader(name);
+    return getRequest().getHeader(name);
   }
   /**
    * Returns all the values for a request header.  In some rare cases,
@@ -479,14 +479,14 @@ public class RequestWrapper implements ServletRequest {
    */
   public Enumeration getHeaders(String name)
   {
-    return _request.getHeaders(name);
+    return getRequest().getHeaders(name);
   }
   /**
    * Returns an enumeration of all headers sent by the client.
    */
   public Enumeration getHeaderNames()
   {
-    return _request.getHeaderNames();
+    return getRequest().getHeaderNames();
   }
   /**
    * Converts a header value to an integer.
@@ -496,13 +496,13 @@ public class RequestWrapper implements ServletRequest {
    */
   public int getIntHeader(String name)
   {
-    return _request.getIntHeader(name);
+    return getRequest().getIntHeader(name);
   }
   /**
    * Converts a date header to milliseconds since the epoch.
    *
    * <pre><code>
-   * long mod = _request.getDateHeader("If-Modified-Since");
+   * long mod = getRequest().getDateHeader("If-Modified-Since");
    * </code></pre>
    *
    * @param name the header name
@@ -510,14 +510,14 @@ public class RequestWrapper implements ServletRequest {
    */
   public long getDateHeader(String name)
   {
-    return _request.getDateHeader(name);
+    return getRequest().getDateHeader(name);
   }
   /**
    * Returns an array of all cookies sent by the client.
    */
   public Cookie []getCookies()
   {
-    return _request.getCookies();
+    return getRequest().getCookies();
   }
   /**
    * Returns a session.  If no session exists and create is true, then
@@ -527,7 +527,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public HttpSession getSession(boolean create)
   {
-    return _request.getSession(create);
+    return getRequest().getSession(create);
   }
   /**
    * Returns the current session, creating one if necessary.
@@ -546,49 +546,49 @@ public class RequestWrapper implements ServletRequest {
    */
   public String getRequestedSessionId()
   {
-    return _request.getRequestedSessionId();
+    return getRequest().getRequestedSessionId();
   }
   /**
    * Returns true if the session is valid.
    */
   public boolean isRequestedSessionIdValid()
   {
-    return _request.isRequestedSessionIdValid();
+    return getRequest().isRequestedSessionIdValid();
   }
   /**
    * Returns true if the session came from a cookie.
    */
   public boolean isRequestedSessionIdFromCookie()
   {
-    return _request.isRequestedSessionIdFromCookie();
+    return getRequest().isRequestedSessionIdFromCookie();
   }
   /**
    * Returns true if the session came URL-encoding.
    */
   public boolean isRequestedSessionIdFromURL()
   {
-    return _request.isRequestedSessionIdFromURL();
+    return getRequest().isRequestedSessionIdFromURL();
   }
   /**
    * Returns the auth type, e.g. basic.
    */
   public String getAuthType()
   {
-    return _request.getAuthType();
+    return getRequest().getAuthType();
   }
   /**
    * Returns the remote user if authenticated.
    */
   public String getRemoteUser()
   {
-    return _request.getRemoteUser();
+    return getRequest().getRemoteUser();
   }
   /**
    * Returns true if the user is in the given role.
    */
   public boolean isUserInRole(String role)
   {
-    return _request.isUserInRole(role);
+    return getRequest().isUserInRole(role);
   }
   
   /**
@@ -596,7 +596,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public Principal getUserPrincipal()
   {
-    return _request.getUserPrincipal();
+    return getRequest().getUserPrincipal();
   }
   
   /**
@@ -604,7 +604,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public boolean isRequestedSessionIdFromUrl()
   {
-    return _request.isRequestedSessionIdFromUrl();
+    return getRequest().isRequestedSessionIdFromUrl();
   }
 
   /**

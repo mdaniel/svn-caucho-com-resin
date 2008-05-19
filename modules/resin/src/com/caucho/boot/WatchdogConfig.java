@@ -476,6 +476,11 @@ public class WatchdogConfig
       return _args.getResinHome();
   }
 
+  public void setResinRoot(Path root)
+  {
+    _resinRoot = root;
+  }
+
   Path getResinRoot()
   {
     if (_resinRoot != null)

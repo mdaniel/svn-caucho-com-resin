@@ -258,7 +258,7 @@ cse_config_server_command(cmd_parms *cmd, void *mconfig,
   /*
   cse_add_host(&config->config_cluster, host_arg, port);
   */
-  cse_add_config_server(config, host_arg, port);
+  cse_add_config_server(config->p, config, host_arg, port);
 
   return 0;
 }
@@ -330,7 +330,7 @@ cse_host_command(cmd_parms *cmd, void *mconfig, char *host_arg, char *port_arg)
     config->manual_host = host;
   }
 
-  cse_add_host(&host->cluster, host_arg, port);
+  cse_add_host(config->p, &host->cluster, host_arg, port);
 
   return 0;
 }
@@ -362,7 +362,7 @@ cse_backup_command(cmd_parms *cmd, void *mconfig,
     config->manual_host = host;
   }
 
-  cse_add_backup(&host->cluster, host_arg, port);
+  cse_add_backup(config->p, &host->cluster, host_arg, port);
 
   return 0;
 }

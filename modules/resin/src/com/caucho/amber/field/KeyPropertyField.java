@@ -191,7 +191,6 @@ public class KeyPropertyField extends PropertyField implements IdField {
   {
     super.generatePrologue(out, completedSet);
 
-    /*
     if (isAbstract()) {
       out.println();
 
@@ -207,7 +206,6 @@ public class KeyPropertyField extends PropertyField implements IdField {
       out.println("  " + getFieldName() + " = v;");
       out.println("}");
     }
-    */
   }
 
   //

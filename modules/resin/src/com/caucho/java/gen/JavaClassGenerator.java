@@ -247,6 +247,13 @@ public class JavaClassGenerator {
     }
   }
 
+  public Path getClassFilePath(String className)
+  {
+    String classPathName = className.replace('.', '/') + ".class";
+    
+    return getWorkDir().lookup(classPathName);
+  }
+
   /**
    * Call to generate the java source.
    */
