@@ -29,12 +29,8 @@
 
 package com.caucho.server.connection;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.servlet.*;
+import javax.servlet.http.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -605,6 +601,102 @@ public class RequestWrapper implements ServletRequest {
   public boolean isRequestedSessionIdFromUrl()
   {
     return getRequest().isRequestedSessionIdFromUrl();
+  }
+
+  /**
+   * Returns the servlet context for the request
+   *
+   * @since Servlet 3.0
+   */
+  public ServletContext getServletContext()
+  {
+    return null;
+  }
+
+  /**
+   * Returns the servlet response for the request
+   *
+   * @since Servlet 3.0
+   */
+  public ServletResponse getServletResponse()
+  {
+    return null;
+  }
+
+  /**
+   * Suspend the request
+   *
+   * @since Servlet 3.0
+   */
+  public void suspend(long timeout)
+  {
+  }
+
+  /**
+   * Suspend the request
+   *
+   * @since Servlet 3.0
+   */
+  public void suspend()
+  {
+  }
+
+  /**
+   * Resume the request
+   *
+   * @since Servlet 3.0
+   */
+  public void resume()
+  {
+  }
+
+  /**
+   * Complete the request
+   *
+   * @since Servlet 3.0
+   */
+  public void complete()
+  {
+  }
+
+  /**
+   * Returns true if the servlet is suspended
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isSuspended()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the servlet is resumed
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isResumed()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the servlet timed out
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isTimeout()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true for the initial dispatch
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isInitial()
+  {
+    return true;
   }
 
   /**

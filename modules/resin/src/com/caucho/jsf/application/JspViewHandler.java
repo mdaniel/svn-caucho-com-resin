@@ -382,7 +382,7 @@ public class JspViewHandler extends ViewHandler
 
     extContext.dispatch(viewId);
 
-    String tail = resWrapper.complete();
+    String tail = resWrapper.completeJsf();
 
     extContext.setResponse(response);
 

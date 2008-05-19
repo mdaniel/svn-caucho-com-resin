@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2003 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,13 +19,12 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
- *
- * $Id: ServletResponseWrapper.java,v 1.2 2004/09/29 00:12:46 cvs Exp $
  */
 
 package javax.servlet;
@@ -229,5 +228,35 @@ public class ServletResponseWrapper implements ServletResponse {
   public void setContentLength(int len)
   {
     _response.setContentLength(len);
+  }
+
+  /**
+   * Disables the response
+   *
+   * @since Servlet 3.0
+   */
+  public void disable()
+  {
+    _response.disable();
+  }
+
+  /**
+   * Enables the response
+   *
+   * @since Servlet 3.0
+   */
+  public void enable()
+  {
+    _response.enable();
+  }
+
+  /**
+   * Returns true if the response is disabled
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isDisabled()
+  {
+    return _response.isDisabled();
   }
 }

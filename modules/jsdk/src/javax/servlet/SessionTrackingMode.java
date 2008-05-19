@@ -27,33 +27,15 @@
  * @author Scott Ferguson
  */
 
-package javax.servlet.http;
-
-import java.util.EventListener;
+package javax.servlet;
 
 /**
- * Interface for a listener receiving events when a session is
- * created or displayed.
+ * Tracking mode for sessions
  *
- * @since Servlet 2.3
+ * @since servlet 3.0
  */
-public interface HttpSessionAttributeListener extends EventListener {
-  /**
-   * Callback after the session attribute has been added
-   *
-   * @param event the event for the session attribute change
-   */
-  public void attributeAdded(HttpSessionBindingEvent event);
-  /**
-   * Callback after the session attribute has been removed
-   *
-   * @param event the event for the session attribute change
-   */
-  public void attributeRemoved(HttpSessionBindingEvent event);
-  /**
-   * Callback after the session attribute has been replaced
-   *
-   * @param event the event for the session attribute change
-   */
-  public void attributeReplaced(HttpSessionBindingEvent event);
+public enum SessionTrackingMode {
+  COOKIE,
+  SSL,
+  URL
 }

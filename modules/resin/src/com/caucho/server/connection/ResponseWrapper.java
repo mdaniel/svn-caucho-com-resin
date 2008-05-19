@@ -29,10 +29,8 @@
 
 package com.caucho.server.connection;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.*;
+import javax.servlet.http.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
@@ -416,5 +414,33 @@ public class ResponseWrapper implements ServletResponse {
   {
     if (_response instanceof CauchoResponse)
       ((CauchoResponse) _response).addFooter(key, value);
+  }
+
+  /**
+   * Disables the response
+   *
+   * @since Servlet 3.0
+   */
+  public void disable()
+  {
+  }
+
+  /**
+   * Enables the response
+   *
+   * @since Servlet 3.0
+   */
+  public void enable()
+  {
+  }
+
+  /**
+   * Returns true if the response is disabled
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isDisabled()
+  {
+    return false;
   }
 }

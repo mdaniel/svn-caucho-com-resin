@@ -295,4 +295,74 @@ public interface ServletRequest {
    * Returns the path of the URI.
    */
   public String getRealPath(String uri);
+
+  /**
+   * Returns the servlet context for the request
+   *
+   * @since Servlet 3.0
+   */
+  public ServletContext getServletContext();
+
+  /**
+   * Returns the servlet response for the request
+   *
+   * @since Servlet 3.0
+   */
+  public ServletResponse getServletResponse();
+
+  /**
+   * Suspend the request
+   *
+   * @since Servlet 3.0
+   */
+  public void suspend(long timeout);
+
+  /**
+   * Suspend the request
+   *
+   * @since Servlet 3.0
+   */
+  public void suspend();
+
+  /**
+   * Resume the request
+   *
+   * @since Servlet 3.0
+   */
+  public void resume();
+
+  /**
+   * Complete the request
+   *
+   * @since Servlet 3.0
+   */
+  public void complete();
+
+  /**
+   * Returns true if the servlet is suspended
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isSuspended();
+
+  /**
+   * Returns true if the servlet is resumed
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isResumed();
+
+  /**
+   * Returns true if the servlet timed out
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isTimeout();
+
+  /**
+   * Returns true for the initial dispatch
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isInitial();
 }

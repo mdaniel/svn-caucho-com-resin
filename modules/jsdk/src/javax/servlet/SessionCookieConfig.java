@@ -29,51 +29,75 @@
 
 package javax.servlet;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Locale;
+
 /**
- * The event class for changes to servlet context attributes.
+ * Configuration for cookie handling
  *
- * @since Servlet 2.3
+ * @since servlet 3.0
  */
-public class ServletContextAttributeEvent extends ServletContextEvent {
-  // The name of the changed attribute
-  private String name;
-  // The value of the changed attribute
-  private Object value;
-  /**
-   * Creates a ServletContextAttributeEvent for the changed application.
-   *
-   * @param application the servlet context that has changed.
-   * @param name the name of the attribute that changed
-   * @param value the value of the attribute that changed
-   */
-  public ServletContextAttributeEvent(ServletContext application,
-                                      String name,
-                                      Object value)
-  {
-    super(application);
+public class SessionCookieConfig {
+  private String _domain;
+  private String _comment;
+  private String _path;
+  private boolean _isHttpOnly;
+  private boolean _isSecure;
 
-    this.name = name;
-    this.value = value;
+  /**
+   * Create the new configuration.
+   */
+  public SessionCookieConfig(String domain,
+			     String path,
+			     String comment,
+			     boolean isHttpOnly,
+			     boolean isSecure)
+  {
+    _domain = domain;
+    _path = path;
+    _comment = comment;
+    _isHttpOnly = isHttpOnly;
+    _isSecure = isSecure;
   }
 
   /**
-   * Returns the name of the attribute that changed.
+   * Returns the default cookie comment
    */
-  public String getName()
+  public String getComment()
   {
-    return name;
+    return _comment;
   }
+
   /**
-   * Returns the value of the attribute that changed.
-   *
-   * <table>
-   * <tr><td>add<td>the new value
-   * <tr><td>remove<td>the old value
-   * <tr><td>replace<td>the old value
-   * </table>
+   * Returns the default cookie domain
    */
-  public Object getValue()
+  public String getDomain()
   {
-    return value;
+    return _domain;
+  }
+
+  /**
+   * Returns the default cookie path
+   */
+  public String getPath()
+  {
+    return _path;
+  }
+
+  /**
+   * Returns the default cookie HttpOnly value
+   */
+  public boolean isHttpOnly()
+  {
+    return _isHttpOnly;
+  }
+
+  /**
+   * Returns the default cookie Secure value
+   */
+  public boolean isSecure()
+  {
+    return _isSecure;
   }
 }

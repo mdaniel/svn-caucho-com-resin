@@ -1659,6 +1659,34 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     return _originalResponseStream.getContentLength();
   }
 
+  /**
+   * Disables the response
+   *
+   * @since Servlet 3.0
+   */
+  public void disable()
+  {
+  }
+
+  /**
+   * Enables the response
+   *
+   * @since Servlet 3.0
+   */
+  public void enable()
+  {
+  }
+
+  /**
+   * Returns true if the response is disabled
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isDisabled()
+  {
+    return false;
+  }
+
   public boolean disableHeaders(boolean disable)
   {
     boolean old = _disableHeaders;

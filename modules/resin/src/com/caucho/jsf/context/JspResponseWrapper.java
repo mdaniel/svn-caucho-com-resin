@@ -295,7 +295,7 @@ public class JspResponseWrapper extends ResponseWrapper
     rs.close();
   }
 
-  public String complete()
+  public String completeJsf()
     throws IOException
   {
     WriteStream out = _out;

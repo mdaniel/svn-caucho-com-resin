@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2003 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,13 +19,12 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
- *
- * $Id: ServletRequestWrapper.java,v 1.2 2004/09/29 00:12:46 cvs Exp $
  */
 
 package javax.servlet;
@@ -354,5 +353,105 @@ public class ServletRequestWrapper implements ServletRequest {
   public String getRealPath(String uri)
   {
     return _request.getRealPath(uri);
+  }
+
+  /**
+   * Returns the servlet context for the request
+   *
+   * @since Servlet 3.0
+   */
+  public ServletContext getServletContext()
+  {
+    return _request.getServletContext();
+  }
+
+  /**
+   * Returns the servlet response for the request
+   *
+   * @since Servlet 3.0
+   */
+  public ServletResponse getServletResponse()
+  {
+    return _request.getServletResponse();
+  }
+
+  /**
+   * Suspend the request
+   *
+   * @since Servlet 3.0
+   */
+  public void suspend(long timeout)
+  {
+    _request.suspend(timeout);
+  }
+
+  /**
+   * Suspend the request
+   *
+   * @since Servlet 3.0
+   */
+  public void suspend()
+  {
+    _request.suspend();
+  }
+
+  /**
+   * Resume the request
+   *
+   * @since Servlet 3.0
+   */
+  public void resume()
+  {
+    _request.resume();
+  }
+
+  /**
+   * Complete the request
+   *
+   * @since Servlet 3.0
+   */
+  public void complete()
+  {
+    _request.complete();
+  }
+
+  /**
+   * Returns true if the servlet is suspended
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isSuspended()
+  {
+    return _request.isSuspended();
+  }
+
+  /**
+   * Returns true if the servlet is resumed
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isResumed()
+  {
+    return _request.isResumed();
+  }
+
+  /**
+   * Returns true if the servlet timed out
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isTimeout()
+  {
+    return _request.isTimeout();
+  }
+
+  /**
+   * Returns true for the initial dispatch
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isInitial()
+  {
+    return _request.isInitial();
   }
 }

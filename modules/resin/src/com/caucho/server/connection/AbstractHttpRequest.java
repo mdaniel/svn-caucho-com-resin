@@ -52,6 +52,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequestAttributeEvent;
 import javax.servlet.ServletRequestAttributeListener;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -259,7 +260,7 @@ public abstract class AbstractHttpRequest
   protected void start()
     throws IOException
   {
-    resume();
+    startResume();
     
     _invocation = null;
 
@@ -305,7 +306,7 @@ public abstract class AbstractHttpRequest
    *
    * @param s the raw connection stream
    */
-  protected void resume()
+  protected void startResume()
     throws IOException
   {
     _oldProvider = SecurityContext.setProvider(this);
@@ -2305,7 +2306,105 @@ public abstract class AbstractHttpRequest
     return _conn.isSecure();
   }
 
+  /**
+   * Returns the servlet context for the request
+   *
+   * @since Servlet 3.0
+   */
+  public ServletContext getServletContext()
+  {
+    return null;
+  }
+
+  /**
+   * Returns the servlet response for the request
+   *
+   * @since Servlet 3.0
+   */
+  public ServletResponse getServletResponse()
+  {
+    return null;
+  }
+
+  /**
+   * Suspend the request
+   *
+   * @since Servlet 3.0
+   */
+  public void suspend(long timeout)
+  {
+  }
+
+  /**
+   * Suspend the request
+   *
+   * @since Servlet 3.0
+   */
+  public void suspend()
+  {
+  }
+
+  /**
+   * Resume the request
+   *
+   * @since Servlet 3.0
+   */
+  public void resume()
+  {
+  }
+
+  /**
+   * Complete the request
+   *
+   * @since Servlet 3.0
+   */
+  public void complete()
+  {
+  }
+
+  /**
+   * Returns true if the servlet is suspended
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isSuspended()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the servlet is resumed
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isResumed()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the servlet timed out
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isTimeout()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true for the initial dispatch
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isInitial()
+  {
+    return true;
+  }
+
+  //
   // internal goodies
+  //
 
   /**
    * Returns the request's invocation.

@@ -20,40 +20,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.servlet.http;
+package javax.servlet;
 
-import java.util.EventListener;
-
-/**
- * Interface for a listener receiving events when a session is
- * created or displayed.
- *
- * @since Servlet 2.3
- */
-public interface HttpSessionAttributeListener extends EventListener {
-  /**
-   * Callback after the session attribute has been added
-   *
-   * @param event the event for the session attribute change
-   */
-  public void attributeAdded(HttpSessionBindingEvent event);
-  /**
-   * Callback after the session attribute has been removed
-   *
-   * @param event the event for the session attribute change
-   */
-  public void attributeRemoved(HttpSessionBindingEvent event);
-  /**
-   * Callback after the session attribute has been replaced
-   *
-   * @param event the event for the session attribute change
-   */
-  public void attributeReplaced(HttpSessionBindingEvent event);
+public enum DispatcherType {
+  ERROR,
+  FORWARD,
+  INCLUDE,
+  REQUEST
 }

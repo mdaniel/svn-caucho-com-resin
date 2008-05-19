@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2003 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -50,4 +51,25 @@ public interface ServletRequestListener extends EventListener {
    * @param event the event for the context destruction
    */
   public void requestDestroyed(ServletRequestEvent event);
+
+  /**
+   * Callback when the request has completed.
+   *
+   * @since Servlet 3.0
+   */
+  public void requestCompleted(ServletRequestEvent event);
+
+  /**
+   * Callback when the request has been resume.
+   *
+   * @since Servlet 3.0
+   */
+  public void requestResumed(ServletRequestEvent event);
+
+  /**
+   * Callback when the request has been suspended.
+   *
+   * @since Servlet 3.0
+   */
+  public void requestSuspended(ServletRequestEvent event);
 }

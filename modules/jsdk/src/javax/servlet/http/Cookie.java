@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2001 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -60,15 +61,16 @@ package javax.servlet.http;
  * </pre></code>
  */
 public class Cookie implements Cloneable {
-  private String key;
-  private String value;
-  private String comment;
-  private int maxAge = -1;
-  private String path;
-  private boolean secure;
-  private String name;
-  private String domain;
-  private int version = 0;
+  private String _key;
+  private String _value;
+  private String _comment;
+  private int _maxAge = -1;
+  private String _path;
+  private boolean _secure;
+  private String _name;
+  private String _domain;
+  private int _version = 0;
+  private boolean _isHttpOnly;
 
   /**
    * Create a new cookie with the specified name and value.
@@ -90,8 +92,8 @@ public class Cookie implements Cloneable {
         throw new IllegalArgumentException("cookie can't start with '$'");
     }
 
-    this.name = name;
-    this.value = value;
+    _name = name;
+    _value = value;
   }
 
   /**
@@ -101,7 +103,7 @@ public class Cookie implements Cloneable {
    */
   public void setComment(String comment)
   {
-    this.comment = comment;
+    _comment = comment;
   }
 
   /**
@@ -109,7 +111,7 @@ public class Cookie implements Cloneable {
    */
   public String getComment()
   {
-    return comment;
+    return _comment;
   }
 
   /**
@@ -124,7 +126,7 @@ public class Cookie implements Cloneable {
    */
   public void setDomain(String domain)
   {
-    this.domain = domain;
+    _domain = domain;
   }
 
   /**
@@ -132,7 +134,27 @@ public class Cookie implements Cloneable {
    */
   public String getDomain()
   {
-    return domain;
+    return _domain;
+  }
+
+  /**
+   * True for HttpOnly request
+   *
+   * @since Servlet 3.0
+   */
+  public boolean isHttpOnly()
+  {
+    return _isHttpOnly;
+  }
+
+  /**
+   * True for HttpOnly request
+   *
+   * @since Servlet 3.0
+   */
+  public void setHttpOnly(boolean isHttpOnly)
+  {
+    _isHttpOnly = isHttpOnly;
   }
 
   /**
@@ -145,7 +167,7 @@ public class Cookie implements Cloneable {
    */
   public void setMaxAge(int maxAge)
   {
-    this.maxAge = maxAge;
+    _maxAge = maxAge;
   }
 
   /**
@@ -153,7 +175,7 @@ public class Cookie implements Cloneable {
    */
   public int getMaxAge()
   {
-    return maxAge;
+    return _maxAge;
   }
 
   /**
@@ -162,7 +184,7 @@ public class Cookie implements Cloneable {
    */
   public void setPath(String path)
   {
-    this.path = path;
+    _path = path;
   }
 
   /**
@@ -170,7 +192,7 @@ public class Cookie implements Cloneable {
    */
   public String getPath()
   {
-    return path;
+    return _path;
   }
 
   /**
@@ -179,7 +201,7 @@ public class Cookie implements Cloneable {
    */
   public void setSecure(boolean secure)
   {
-    this.secure = secure;
+    _secure = secure;
   }
 
   /**
@@ -187,7 +209,7 @@ public class Cookie implements Cloneable {
    */
   public boolean getSecure()
   {
-    return secure;
+    return _secure;
   }
 
   /**
@@ -195,7 +217,7 @@ public class Cookie implements Cloneable {
    */
   public String getName()
   {
-    return name;
+    return _name;
   }
 
   /**
@@ -204,7 +226,7 @@ public class Cookie implements Cloneable {
    */
   public void setValue(String value)
   {
-    this.value = value;
+    _value = value;
   }
 
   /**
@@ -212,7 +234,7 @@ public class Cookie implements Cloneable {
    */
   public String getValue()
   {
-    return value;
+    return _value;
   }
 
   /**
@@ -220,7 +242,7 @@ public class Cookie implements Cloneable {
    */
   public int getVersion()
   {
-    return version;
+    return _version;
   }
 
   /**
@@ -228,7 +250,7 @@ public class Cookie implements Cloneable {
    */
   public void setVersion(int version)
   {
-    this.version = version;
+    _version = version;
   }
 
   /**
@@ -249,15 +271,17 @@ public class Cookie implements Cloneable {
   public String toString()
   {
     StringBuffer sb = new StringBuffer();
-    sb.append("[Cookie " + name + "=" + value);
-    if (path != null)
-      sb.append(" path=" + path);
-    if (domain != null)
-      sb.append(" domain=" + domain);
-    if (maxAge > 0)
-      sb.append(" max-age=" + maxAge);
-    if (secure)
-      sb.append(" secure");
+    sb.append("Cookie[" + _name + "=" + _value);
+    if (_path != null)
+      sb.append(",path=" + _path);
+    if (_domain != null)
+      sb.append(",domain=" + _domain);
+    if (_maxAge > 0)
+      sb.append(",max-age=" + _maxAge);
+    if (_secure)
+      sb.append(",secure");
+    if (_isHttpOnly)
+      sb.append(",httpOnly");
     sb.append("]");
     return sb.toString();
   }
