@@ -28,8 +28,6 @@
 
 package javax.faces.context;
 
-import com.caucho.quercus.module.IniDefinition;
-
 import java.io.*;
 import java.net.URL;
 import java.net.MalformedURLException;
