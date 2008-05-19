@@ -32,7 +32,6 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
-import com.caucho.quercus.lib.SerializeMap;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;

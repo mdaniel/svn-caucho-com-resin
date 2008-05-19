@@ -185,6 +185,7 @@ public final class UnserializeReader {
         for (int i = 0; i < len; i++) {
           switch (read()) {
           case 's':
+          case 'S':
             {
               expect(':');
               int keyLen = (int) readInt();
@@ -518,6 +519,7 @@ public final class UnserializeReader {
 
     switch (ch) {
     case 's':
+    case 'S':
       {
         expect(':');
         int len = (int) readInt();

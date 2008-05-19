@@ -26,25 +26,16 @@
  *
  * @author Nam Nguyen
  */
-package com.caucho.quercus.lib;
+package com.caucho.quercus.env;
 
-import com.caucho.quercus.env.*;
-import com.caucho.util.IntMap;
-import com.caucho.util.IntSet;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.Logger;
+import java.util.IdentityHashMap;
 
 /*
  * Holds reference indexes for serialization.
  */
 public final class SerializeMap {
-  private HashMap<Var, Integer> _varMap
-    = new HashMap<Var, Integer>();
+  private IdentityHashMap<Var, Integer> _varMap
+    = new IdentityHashMap<Var, Integer>();
   
   // serialization index for references
   private int _index = 1;
