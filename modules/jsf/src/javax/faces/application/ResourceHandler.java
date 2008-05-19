@@ -28,6 +28,7 @@
 package javax.faces.application;
 
 import javax.faces.context.FacesContext;
+import java.io.IOException;
 
 public abstract class ResourceHandler {
   
@@ -44,6 +45,9 @@ public abstract class ResourceHandler {
   public abstract Resource createResource(String resourceName, String libraryName);
 
   public abstract Resource createResource(String resourceName, String libraryName, String contentType);
+
+  public abstract void handleResourceRequest(FacesContext context)
+    throws IOException;
 
   public abstract boolean isResourceRequest(FacesContext context);
 }

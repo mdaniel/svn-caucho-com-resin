@@ -32,16 +32,22 @@ import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
 import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
+import com.caucho.util.QDate;
 
 import javax.faces.application.ResourceHandler;
 import javax.faces.application.Resource;
+import javax.faces.application.Application;
+import javax.faces.application.ProjectStage;
 import javax.faces.context.FacesContext;
-import javax.faces.context.ExternalContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.regex.Pattern;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.MissingResourceException;
 import java.net.URL;
 
 public class ResourceHandlerImpl
@@ -53,7 +59,14 @@ public class ResourceHandlerImpl
     = Logger.getLogger(ResourceHandlerImpl.class.getName());
 
   private Pattern _versionPattern = Pattern.compile("[.|_|\\-]");
-  private LruCache<String, Resource> _resourceCache;
+
+  private QDate _calendar = new QDate();
+  private LruCache<String, ResourceImpl> _resourceCache;
+
+  public ResourceHandlerImpl()
+  {
+    _resourceCache = new LruCache<String, ResourceImpl>(1024);
+  }
 
   public Resource createResource(String resourceName)
   {
@@ -74,37 +87,105 @@ public class ResourceHandlerImpl
   }
 
 
-  public Resource createResource(String resourceName,
-                                 String libraryName,
-                                 String contentType)
+  public Resource createResource(final String resourceName,
+                                 final String libraryName,
+                                 final String contentType)
+  {
+    if (resourceName == null)
+      throw new NullPointerException();
+
+    FacesContext context = FacesContext.getCurrentInstance();
+
+    Application app = context.getApplication();
+
+    String locale = null;
+
+    String appBundle = app.getMessageBundle();
+
+    if (appBundle != null) {
+      Locale l = app.getViewHandler().calculateLocale(context);
+
+      try {
+        ResourceBundle bundle
+          = ResourceBundle.getBundle(appBundle,
+                                     l,
+                                     Thread.currentThread().getContextClassLoader());
+
+        if (bundle != null) {
+          locale = bundle.getString(ResourceHandler.LOCALE_PREFIX);
+        }
+      }
+      catch (MissingResourceException e) {
+        log.log(Level.FINER,
+                L.l("Can't find bundle for base name '{0}', locale {1}",
+                    appBundle,
+                    l),
+                e);
+      }
+    }
+
+    return createResource(context,
+                          resourceName,
+                          libraryName,
+                          contentType,
+                          locale);
+  }
+
+  public Resource createResource(FacesContext context,
+                                 final String resourceName,
+                                 final String libraryName,
+                                 final String contentType,
+                                 final String locale)
   {
     if (resourceName == null)
       throw new NullPointerException();
 
     ResourceImpl resource = null;
     try {
+      String cacheKey = (locale == null ? "" : locale) +
+                        ':' +
+                        resourceName +
+                        ':' +
+                        libraryName;
 
-      Path path = locateResource(resourceName, libraryName);
+      resource = _resourceCache.get(cacheKey);
 
-      if (path == null) {
-        log.finer(L.l("Unable to load resource '{0}' from library '{1}'",
-                      resourceName,
-                      libraryName));
-      }
-      else {
-        if (contentType == null) {
-          ExternalContext context = FacesContext.getCurrentInstance()
-            .getExternalContext();
+      if (resource == null || resource.needsUpdate()) {
 
-          resource = new ResourceImpl(path,
-                                      resourceName,
-                                      libraryName,
-                                      context.getMimeType(resourceName));
-        } else {
-        resource = new ResourceImpl(path,
-                                    resourceName,
-                                    libraryName,
-                                    contentType);
+        Path path = locateResource(resourceName, libraryName, locale);
+
+        if (path == null) {
+          log.finer(L.l("Unable to load resource '{0}' from library '{1}'",
+                        resourceName,
+                        libraryName));
+
+          _resourceCache.remove(cacheKey);
+
+          resource = null;
+        }
+        else {
+          final String mimeType;
+
+          if (contentType == null)
+            mimeType = context.getExternalContext().getMimeType(resourceName);
+          else
+            mimeType = contentType;
+
+
+          if (resource != null)
+            resource.update(path);
+          else {
+            resource = new ResourceImpl(path,
+                                        _calendar,
+                                        resourceName,
+                                        libraryName,
+                                        mimeType);
+            
+            Application app = context.getApplication();
+
+            if (app.getProjectStage() != ProjectStage.Development)
+              _resourceCache.put(cacheKey, resource);
+          }
         }
       }
     }
@@ -116,15 +197,19 @@ public class ResourceHandlerImpl
               e);
     }
 
+
     return resource;
   }
 
-  private Path locateResource(String resourceName, String libraryName)
+  private Path locateResource(String resourceName,
+                              String libraryName,
+                              String locale)
     throws IOException
   {
     Path path = locateResource(Vfs.lookup("resources"),
                                resourceName,
-                               libraryName);
+                               libraryName,
+                               locale);
 
     if (path == null) {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -134,7 +219,8 @@ public class ResourceHandlerImpl
       if (url != null)
         path = locateResource(Vfs.lookup(url.toString()),
                               resourceName,
-                              libraryName);
+                              libraryName,
+                              locale);
     }
 
     return path;
@@ -142,10 +228,10 @@ public class ResourceHandlerImpl
 
   private Path locateResource(final Path root,
                               String resourceName,
-                              String libraryName)
+                              String libraryName,
+                              String locale)
     throws IOException
   {
-    String locale = null;
 
     Path result = null;
 
@@ -178,7 +264,8 @@ public class ResourceHandlerImpl
             result = temp;
           else
             base = temp;
-        } else if (base.isFile()) {
+        }
+        else if (base.isFile()) {
           result = base;
         }
 
@@ -275,6 +362,67 @@ public class ResourceHandlerImpl
     else
       return request.getServletPath().startsWith(RESOURCE_IDENTIFIER);
   }
+
+  public void handleResourceRequest(FacesContext context)
+    throws IOException
+  {
+    HttpServletRequest request
+      = (HttpServletRequest) context.getExternalContext().getRequest();
+
+    HttpServletResponse response
+      = (HttpServletResponse) context.getExternalContext().getResponse();
+
+    String resourceName;
+
+    String pathInfo = request.getPathInfo();
+
+    if (pathInfo == null) {
+      String servletPath = request.getServletPath();
+
+      int extIdx = servletPath.lastIndexOf('.');
+
+      resourceName = servletPath.substring(servletPath.indexOf(
+        RESOURCE_IDENTIFIER) + RESOURCE_IDENTIFIER.length(), extIdx);
+    }
+    else {
+      resourceName = pathInfo.substring(pathInfo.indexOf(RESOURCE_IDENTIFIER) +
+                                        RESOURCE_IDENTIFIER.length());
+    }
+
+    String temp = request.getParameter("ln");
+
+    String libraryName;
+    String locale;
+
+    if (temp != null && ! "".equals(temp))
+      libraryName = temp;
+    else
+      libraryName = null;
+
+    temp = request.getParameter("loc");
+
+    if (temp != null && ! "".equals(temp))
+      locale = temp;
+    else
+      locale = null;
+
+    Resource resource = createResource(context,
+                                       resourceName,
+                                       libraryName,
+                                       null,
+                                       locale);
+
+    if (resource != null){
+      if (resource instanceof ResourceImpl) {
+        ((ResourceImpl)resource).writeToStream(response.getOutputStream());
+      } else {
+        throw new UnsupportedOperationException();
+      }
+    } else {
+      throw new RuntimeException("404");
+    }
+  }
+
 
   public String toString()
   {

@@ -29,6 +29,10 @@
 package com.caucho.jsf.application;
 
 import com.caucho.vfs.Path;
+import com.caucho.util.QDate;
+import com.caucho.util.Alarm;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.Base64;
 
 import javax.faces.application.Resource;
 import javax.faces.context.FacesContext;
@@ -40,18 +44,28 @@ import java.net.URL;
 
 public class ResourceImpl extends Resource {
 
+  private final static long UPDATE_INTERVAL = 300000L;
+
   private Path _path;
+  private QDate _calendar;
+  private long _lastCheck;
+  private long _lastModified;
+  private long _length;
+  private String _lastModifiedString;
 
   public ResourceImpl(Path path,
+                      QDate calendar,
                       String resourceName,
                       String libraryName,
                       String contentType)
   {
-    _path = path;
+    _calendar = calendar;
 
     setResourceName(resourceName);
     setLibraryName(libraryName);
     setContentType(contentType);
+
+    update(path);
   }
 
   public InputStream getInputStream() throws IOException
@@ -91,5 +105,29 @@ public class ResourceImpl extends Resource {
     if (true) throw new UnsupportedOperationException("unimplemented");
 
     return false;
+  }
+
+  public boolean needsUpdate() {
+    return (_lastCheck + UPDATE_INTERVAL < Alarm.getCurrentTime());
+  }
+
+  public void update(Path path) {
+
+    long lastModified = path.getLastModified();
+    long length = path.getLength();
+
+    if (lastModified != _lastModified || length != _length) {
+      _lastModified = lastModified;
+      _length = length;
+
+      synchronized (_calendar) {
+        _calendar.setGMTTime(lastModified);
+        _lastModifiedString = _calendar.printDate();
+      }
+    }
+
+    _lastCheck = Alarm.getCurrentTime();
+
+    _path = path;
   }
 }
