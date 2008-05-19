@@ -266,7 +266,10 @@ if test -z "${apache_include}" -a -r "${apache_dir}/include/httpd.h"; then
   apache_include=${apache_dir}/include
 fi
 
-APACHE_INC="-I${apache_include}"
+if test -n "${apache_include}"; then
+  APACHE_INC="-I${apache_include}"
+fi  
+  
 #
 # deal with stronghold
 #

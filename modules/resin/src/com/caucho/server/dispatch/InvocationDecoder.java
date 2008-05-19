@@ -394,6 +394,13 @@ public class InvocationDecoder {
 	while (isWindows && cb.getLength() > 0 &&
 	       ((ch = cb.getLastChar()) == '.' || ch == ' ')) {
 	  cb.setLength(cb.getLength() - 1);
+
+	  if (cb.getLength() > 0
+	      && (ch = cb.getLastChar()) == '/' || ch == '\\') {
+	    cb.setLength(cb.getLength() - 1);
+	    // server/003n
+	    continue;
+	  }
 	}
 
 	cb.append('/');
