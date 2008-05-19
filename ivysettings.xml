@@ -1,0 +1,16 @@
+<ivysettings>
+  <resolvers>
+    <ibiblio name="default" root="http://repo1.maven.org/maven2/"
+       m2compatible="true"/>
+    <ibiblio name="ibiblio" root="http://repo1.maven.org/maven2/"/>
+
+    <ibiblio name="jboss" m2compatible="true"
+       root="http://repository.jboss.com/maven2/"/>
+  </resolvers>
+
+    <modules>
+       <module organisation="hibernate.*" name=".*" resolver="jboss"/>
+       <module organisation="jboss.*" name=".*" resolver="jboss"/>
+       <module organisation=".*" name=".*" resolver="default"/>
+    </modules>
+</ivysettings>

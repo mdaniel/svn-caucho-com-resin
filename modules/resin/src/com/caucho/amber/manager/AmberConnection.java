@@ -433,21 +433,19 @@ public class AmberConnection
 
       T entity = (T) load(entityClass, primaryKey, true);
 
+      // jpa/0j07
+      /*
       if (! isActiveTransaction()) {
         // jpa/0o00
         detach();
       }
+      */
 
       return entity;
     } catch (AmberObjectNotFoundException e) {
-      if (_persistenceUnit.isJPA()) {
-        // JPA: should not throw at all, returns null only.
-        // log.log(Level.FINER, e.toString(), e);
-        return null;
-      }
-
-      // ejb/0604
-      throw e;
+      // JPA: should not throw at all, returns null only.
+      // log.log(Level.FINER, e.toString(), e);
+      return null;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
