@@ -27,6 +27,7 @@
 
 <s2 title="3.1.6">
 <ul>
+<li>jsf: delegation support for application/action-listener(#2585, rep by Andreas Fisher)</li>
 <li>quercus: class static field syncronization issues</li>
 <li>quercus: initialization syncronization issues</li>
 <li>ioc: data-source not properly using JNDI lookup (rep by Stargazer)</li>
