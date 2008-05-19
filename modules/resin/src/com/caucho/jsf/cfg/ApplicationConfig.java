@@ -313,6 +313,9 @@ public class ApplicationConfig
 
   public void configure(ApplicationImpl app)
   {
+    if (_messageBundle != null)
+      app.setMessageBundle(_messageBundle);
+    
     if (_localeConfig != null)
       _localeConfig.configure(app);
 
