@@ -29,20 +29,10 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.log.Log;
 import com.caucho.util.Alarm;
-import com.caucho.vfs.Crc64Stream;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.VfsStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.NotSerializableException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
+import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,14 +40,14 @@ import java.util.logging.Logger;
  * Data for the cluster's object.
  */
 public class ClusterObject {
-  private static final Logger log = Log.open(ClusterObject.class);
+  private static final Logger log
+    = Logger.getLogger(ClusterObject.class.getName());
 
+  private final HashKey _id;
+  private final HashKey _storeId;
+  
   private final StoreManager _storeManager;
   private final Store _store;
-  private final String _storeId;
-  private final String _objectId;
-
-  private final String _uniqueId;
 
   private ObjectManager _objectManager;
 
@@ -78,25 +68,24 @@ public class ClusterObject {
 
   ClusterObject(StoreManager storeManager,
 		Store store,
-		String objectId)
+		HashKey id)
   {
+    _id = id;
+    _storeId = store.getId();
+    
     _storeManager = storeManager;
     _objectManager = store.getObjectManager();
     _store = store;
     _maxIdleTime = _store.getMaxIdleTime();
 
-    _storeId = store.getId();
-    _objectId = objectId;
-    _uniqueId = _storeId + ';' + objectId;
-
-    _isPrimary = isPrimary(_objectId);
+    _isPrimary = false; // XXX: isPrimary(_objectId);
     
     _expireInterval = getMaxIdleTime() + getAccessWindow();
   }
 
   ClusterObject(StoreManager storeManager,
-		String storeId,
-		String objectId)
+		HashKey storeId,
+		HashKey objectId)
   {
     _storeManager = storeManager;
     _objectManager = null;
@@ -105,10 +94,9 @@ public class ClusterObject {
     _maxIdleTime = _storeManager.getMaxIdleTime();
 
     _storeId = storeId;
-    _objectId = objectId;
-    _uniqueId = _storeId + ';' + objectId;
+    _id = objectId;
 
-    _isPrimary = isPrimary(_objectId);
+    _isPrimary = false; // XXX: isPrimary(_objectId);
 
     _expireInterval = getMaxIdleTime() + getAccessWindow();
   }
@@ -149,7 +137,7 @@ public class ClusterObject {
   /**
    * Returns the store id.
    */
-  public String getStoreId()
+  public HashKey getStoreId()
   {
     return _storeId;
   }
@@ -157,17 +145,9 @@ public class ClusterObject {
   /**
    * Returns the object id.
    */
-  public String getObjectId()
+  public HashKey getObjectId()
   {
-    return _objectId;
-  }
-
-  /**
-   * Returns the unique id.
-   */
-  public String getUniqueId()
-  {
-    return _uniqueId;
+    return _id;
   }
 
   /**
@@ -245,6 +225,55 @@ public class ClusterObject {
   public void setValid()
   {
     _isValid = true;
+  }
+  
+  /**
+   * Returns the primary index for the object
+   */
+  public int getPrimaryIndex()
+  {
+    return 0;
+  }
+  
+  /**
+   * Returns the secondary server for the object
+   */
+  public int getSecondaryIndex()
+  {
+    return 0;
+  }
+  
+  /**
+   * Returns the tertiary server for the object
+   */
+  public int getTertiaryIndex()
+  {
+    return 0;
+  }
+
+   
+  /**
+   * Returns the primary server for the object
+   */
+  public ClusterServer getPrimaryServer()
+  {
+    return null;
+  }
+  
+  /**
+   * Returns the secondary server for the object
+   */
+  public ClusterServer getSecondaryServer()
+  {
+    return null;
+  }
+  
+  /**
+   * Returns the tertiary server for the object
+   */
+  public ClusterServer getTertiaryServer()
+  {
+    return null;
   }
 
   /**
@@ -334,7 +363,7 @@ public class ClusterObject {
 
     if (getAccessWindow() <= now - _accessTime) {
       try {
-	_storeManager.accessImpl(getObjectId(), getUniqueId());
+	_storeManager.accessImpl(getObjectId());
       } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
@@ -367,7 +396,7 @@ public class ClusterObject {
     try {
       _expireInterval = expireInterval;
       
-      _storeManager.setExpireInterval(getUniqueId(), expireInterval);
+      _storeManager.setExpireInterval(getObjectId(), expireInterval);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -430,23 +459,6 @@ public class ClusterObject {
   }
 
   /**
-   * Writes updated values
-   */
-  public void write(InputStream is)
-    throws IOException
-  {
-  }
-
-  /**
-   * Reads the current value
-   */
-  public ReadStream openRead()
-    throws IOException
-  {
-    return null;
-  }
-
-  /**
    * Removes the object from the cluster.
    */
   public void remove()
@@ -467,24 +479,5 @@ public class ClusterObject {
    */
   public void removeImpl()
   {
-  }
-
-  static class DistributedObjectInputStream extends ObjectInputStream {
-    DistributedObjectInputStream(InputStream is)
-      throws IOException
-    {
-      super(is);
-    }
-
-    protected Class resolveClass(ObjectStreamClass v)
-      throws IOException, ClassNotFoundException
-    {
-      String name = v.getName();
-
-      Thread thread = Thread.currentThread();
-      ClassLoader loader = thread.getContextClassLoader();
-
-      return Class.forName(name, false, loader);
-    }
   }
 }

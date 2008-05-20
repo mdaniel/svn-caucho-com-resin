@@ -31,7 +31,6 @@ package com.caucho.server.hmux;
 
 import com.caucho.hessian.io.*;
 import com.caucho.hmtp.HmtpStream;
-import com.caucho.server.cluster.BackingManager;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.AbstractHttpRequest;
@@ -258,7 +257,6 @@ public class HmuxRequest extends AbstractHttpRequest
   private Server _server;
   private AbstractClusterRequest _clusterRequest;
   private HmuxDispatchRequest _dispatchRequest;
-  private BackingManager _backingManager;
   private Cluster _cluster;
 
   private HmuxProtocol _hmuxProtocol;
@@ -553,6 +551,7 @@ public class HmuxRequest extends AbstractHttpRequest
    * Returns true for the top-level request, but false for any include()
    * or forward()
    */
+  @Override
   public boolean isTop()
   {
     return true;
@@ -566,6 +565,7 @@ public class HmuxRequest extends AbstractHttpRequest
   /**
    * Clears variables at the start of a new request.
    */
+  @Override
   protected void start()
     throws IOException
   {
@@ -1145,6 +1145,7 @@ public class HmuxRequest extends AbstractHttpRequest
   /**
    * Returns a char buffer containing the host.
    */
+  @Override
   protected CharBuffer getHost()
   {
     if (_host.length() > 0)
@@ -1187,6 +1188,7 @@ public class HmuxRequest extends AbstractHttpRequest
   /**
    * Returns true if the request is secure.
    */
+  @Override
   public boolean isSecure()
   {
     return _isSecure;
@@ -1204,6 +1206,7 @@ public class HmuxRequest extends AbstractHttpRequest
       return null;
   }
 
+  @Override
   public CharSegment getHeaderBuffer(String key)
   {
     for (int i = 0; i < _headerSize; i++) {
@@ -1247,6 +1250,7 @@ public class HmuxRequest extends AbstractHttpRequest
     return null;
   }
 
+  @Override
   public void setHeader(String key, String value)
   {
     if (_headerKeys.length <= _headerSize)
@@ -1259,6 +1263,7 @@ public class HmuxRequest extends AbstractHttpRequest
     _headerSize++;
   }
 
+  @Override
   public void getHeaderBuffers(String key, ArrayList<CharSegment> values)
   {
     CharBuffer cb = _cb;
@@ -1288,6 +1293,7 @@ public class HmuxRequest extends AbstractHttpRequest
    * Because IIS already escapes the URI before sending it, the URI
    * needs to be re-escaped.
    */
+  @Override
   public String getRequestURI() 
   {
     if (_serverType == 'R')
@@ -1335,6 +1341,7 @@ public class HmuxRequest extends AbstractHttpRequest
   /**
    * Returns the server name.
    */
+  @Override
   public String getServerName()
   {
     CharBuffer host = getHost();
@@ -1350,6 +1357,7 @@ public class HmuxRequest extends AbstractHttpRequest
       return host.toString();
   }
 
+  @Override
   public int getServerPort()
   {
     int len = _serverPort.length();
@@ -1362,6 +1370,7 @@ public class HmuxRequest extends AbstractHttpRequest
     return port;
   }
 
+  @Override
   public String getRemoteAddr()
   {
     return _remoteAddr.toString();
@@ -1372,6 +1381,7 @@ public class HmuxRequest extends AbstractHttpRequest
     cb.append(_remoteAddr);
   }
 
+  @Override
   public int printRemoteAddr(byte []buffer, int offset)
     throws IOException
   {
@@ -1384,6 +1394,7 @@ public class HmuxRequest extends AbstractHttpRequest
     return offset + len;
   }
 
+  @Override
   public String getRemoteHost()
   {
     return _remoteHost.toString();
@@ -1392,6 +1403,7 @@ public class HmuxRequest extends AbstractHttpRequest
   /**
    * Called for a connection: close
    */
+  @Override
   protected void connectionClose()
   {
     // ignore for hmux
@@ -1483,6 +1495,7 @@ public class HmuxRequest extends AbstractHttpRequest
   {
   }
 
+  @Override
   public final String dbgId()
   {
     String id = _server.getServerId();
@@ -1493,6 +1506,7 @@ public class HmuxRequest extends AbstractHttpRequest
       return "Hmux[" + id + ":" + getConnection().getId() + "] ";
   }
 
+  @Override
   public String toString()
   {
     return "HmuxRequest" + dbgId();
@@ -1539,11 +1553,13 @@ public class HmuxRequest extends AbstractHttpRequest
       _isClientClosed = isClientClosed;
     }
 
+    @Override
     public boolean canRead()
     {
       return true;
     }
 
+    @Override
     public int getAvailable()
     {
       return _pendingData;
@@ -1552,6 +1568,7 @@ public class HmuxRequest extends AbstractHttpRequest
     /**
      * Reads available data.  If the data needs an ack, then do so.
      */
+    @Override
     public int read(byte []buf, int offset, int length)
       throws IOException
     {
@@ -1636,6 +1653,7 @@ public class HmuxRequest extends AbstractHttpRequest
       return readLen;
     }
 
+    @Override
     public boolean canWrite()
     {
       return true;
@@ -1644,6 +1662,7 @@ public class HmuxRequest extends AbstractHttpRequest
     /**
      * Send data back to the web server
      */
+    @Override
     public void write(byte []buf, int offset, int length, boolean isEnd)
       throws IOException
     {
@@ -1675,6 +1694,7 @@ public class HmuxRequest extends AbstractHttpRequest
       }
     }
 
+    @Override
     public void flush()
       throws IOException
     {
@@ -1687,6 +1707,7 @@ public class HmuxRequest extends AbstractHttpRequest
       _os.flush();
     }
 
+    @Override
     public void close()
       throws IOException
     {

@@ -34,7 +34,6 @@ import com.caucho.db.jdbc.DataSourceImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -128,8 +127,8 @@ public class FileBacking {
     
     _loadQuery = "SELECT access_time,data FROM " + _tableName + " WHERE id=? AND is_valid=1";
     _insertQuery = ("INSERT into " + _tableName
-		    + " (id,is_valid,data,mod_time,access_time,expire_interval,server1,server2,server3) "
-		    + "VALUES(?,1,?,?,?,?,?,?,?)");
+		    + " (id,store_id,is_valid,data,mod_time,access_time,expire_interval,server1,server2,server3) "
+		    + "VALUES(?,?,1,?,?,?,?,?,?,?)");
     _updateQuery = "UPDATE " + _tableName + " SET data=?, mod_time=?, access_time=?,is_valid=1 WHERE id=?";
     _accessQuery = "UPDATE " + _tableName + " SET access_time=? WHERE id=?";
     _setExpiresQuery = "UPDATE " + _tableName + " SET expire_interval=? WHERE id=?";
@@ -185,7 +184,7 @@ public class FileBacking {
       boolean hasDatabase = false;
 
       try {
-	String sql = "SELECT expire_interval,is_valid FROM " + _tableName + " WHERE 1=0";
+	String sql = "SELECT expire_interval,store_id,is_valid FROM " + _tableName + " WHERE 1=0";
 
 	ResultSet rs = stmt.executeQuery(sql);
 	rs.next();
@@ -203,17 +202,19 @@ public class FileBacking {
 	log.log(Level.FINEST, e.toString(), e);
       }
 
-      String sql = ("CREATE TABLE " + _tableName + " (\n" +
-		    "  id VARBINARY(64) PRIMARY KEY,\n" +
-		    "  is_valid BIT,\n" +
-		    "  data BLOB,\n" +
-		    "  expire_interval INTEGER,\n" +
-		    "  access_time INTEGER,\n" +
-		    "  mod_time INTEGER,\n" +
-		    "  mod_count BIGINT,\n" +
-		    "  server1 INTEGER,\n" +
-		    "  server2 INTEGER,\n" + 
-		    "  server3 INTEGER)");
+      String sql = ("CREATE TABLE " + _tableName + " (\n"
+                    + "  id BINARY(20) PRIMARY KEY,\n"
+                    + "  store_id BINARY(20),\n"
+		    + "  is_valid BIT,\n"
+                    + "  data_hash BINARY(20),\n"
+		    + "  data BLOB,\n"
+		    + "  expire_interval INTEGER,\n"
+		    + "  access_time INTEGER,\n"
+		    + "  mod_time INTEGER,\n"
+		    + "  mod_count BIGINT,\n"
+		    + "  server1 INTEGER,\n"
+		    + "  server2 INTEGER,\n" 
+		    + "  server3 INTEGER)");
 
       log.fine(sql);
 
@@ -292,12 +293,12 @@ public class FileBacking {
   public boolean loadSelf(ClusterObject clusterObj, Object obj)
     throws Exception
   {
-    String uniqueId = clusterObj.getUniqueId();
+    HashKey objectId = clusterObj.getObjectId();
 
     ClusterConnection conn = getConnection();
     try {
       PreparedStatement stmt = conn.prepareLoad();
-      stmt.setString(1, uniqueId);
+      stmt.setBytes(1, objectId.getHash());
 
       ResultSet rs = stmt.executeQuery();
       boolean validLoad = false;
@@ -309,7 +310,7 @@ public class FileBacking {
         InputStream is = rs.getBinaryStream(2);
 
         if (log.isLoggable(Level.FINE))
-          log.fine(this + " load " + uniqueId);
+          log.fine(this + " load key=" + objectId);
       
         validLoad = clusterObj.load(is, obj);
 
@@ -319,7 +320,7 @@ public class FileBacking {
         is.close();
       }
       else if (log.isLoggable(Level.FINE))
-        log.fine(this + " load: no local object loaded for " + uniqueId);
+        log.fine(this + " load: no local object loaded for " + objectId);
       else {
 	// System.out.println("NO-LOAD: " + uniqueId);
       }
@@ -337,7 +338,7 @@ public class FileBacking {
    *
    * @param obj the object to store.
    */
-  public void updateAccess(String uniqueId)
+  public void updateAccess(HashKey id)
     throws Exception
   {
     ClusterConnection conn = getConnection();
@@ -348,13 +349,13 @@ public class FileBacking {
       long now = Alarm.getCurrentTime();
       int nowMinutes = (int) (now / 60000L);
       stmt.setInt(1, nowMinutes);
-      stmt.setString(2, uniqueId);
+      stmt.setBytes(2, id.getHash());
 
       int count = stmt.executeUpdate();
 
       if (count > 0) {
 	if (log.isLoggable(Level.FINE)) 
-	  log.fine(this + " access " + uniqueId);
+	  log.fine(this + " access " + id);
 	return;
       }
     } finally {
@@ -367,7 +368,7 @@ public class FileBacking {
    *
    * @param obj the object to store.
    */
-  public void setExpireInterval(String uniqueId, long expireInterval)
+  public void setExpireInterval(HashKey id, long expireInterval)
     throws Exception
   {
     ClusterConnection conn = getConnection();
@@ -377,13 +378,13 @@ public class FileBacking {
 
       int expireMinutes = (int) (expireInterval / 60000L);
       stmt.setInt(1, expireMinutes);
-      stmt.setString(2, uniqueId);
+      stmt.setBytes(2, id.getHash());
 
       int count = stmt.executeUpdate();
 
       if (count > 0) {
 	if (log.isLoggable(Level.FINE)) 
-	  log.fine(this + " set expire interval: " + uniqueId + " " + expireInterval);
+	  log.fine(this + " set expire interval " + expireInterval + " for " + id);
 	return;
       }
     } finally {
@@ -394,19 +395,19 @@ public class FileBacking {
   /**
    * Removes the named object from the store.
    */
-  public void remove(String uniqueId)
+  public void remove(HashKey id)
     throws Exception
   {
     ClusterConnection conn = getConnection();
     
     try {
       PreparedStatement pstmt = conn.prepareInvalidate();
-      pstmt.setString(1, uniqueId);
+      pstmt.setBytes(1, id.getHash());
 
       int count = pstmt.executeUpdate();
       
       if (log.isLoggable(Level.FINE))
-        log.fine(this + " remove " + uniqueId);
+        log.fine(this + " remove " + id);
     } finally {
       conn.close();
     }
@@ -415,7 +416,7 @@ public class FileBacking {
   /**
    * Reads from the store.
    */
-  public long read(String uniqueId, WriteStream os)
+  public long read(HashKey id, WriteStream os)
     throws IOException
   {
     Connection conn = null;
@@ -423,7 +424,7 @@ public class FileBacking {
       conn = _dataSource.getConnection();
 
       PreparedStatement pstmt = conn.prepareStatement(_loadQuery);
-      pstmt.setString(1, uniqueId);
+      pstmt.setBytes(1, id.getHash());
 
       ResultSet rs = pstmt.executeQuery();
       if (rs.next()) {
@@ -453,12 +454,12 @@ public class FileBacking {
   /**
    * Stores the cluster object on the local store.
    *
-   * @param uniqueId the object's unique id.
-   * @param id the input stream to the serialized object
+   * @param id the object's unique id.
+   * @param is the input stream to the serialized object
    * @param length the length object the serialized object
    * @param expireInterval how long the object lives w/o access
    */
-  public void storeSelf(String uniqueId,
+  public void storeSelf(HashKey id, HashKey storeId,
 			ReadStream is, int length,
 			long expireInterval,
 			int primary, int secondary, int tertiary)
@@ -471,9 +472,9 @@ public class FileBacking {
       // The binary stream can be reused because it won't actually be
       // read on a failure
 
-      if (storeSelfUpdate(conn, uniqueId, is, length)) {
+      if (storeSelfUpdate(conn, id, is, length)) {
       }
-      else if (storeSelfInsert(conn, uniqueId, is, length, expireInterval,
+      else if (storeSelfInsert(conn, id, storeId, is, length, expireInterval,
 			       primary, secondary, tertiary)) {
       }
       else {
@@ -504,11 +505,11 @@ public class FileBacking {
    * Stores the cluster object on the local store using an update query.
    *
    * @param conn the database connection
-   * @param uniqueId the object's unique id.
+   * @param id the object's unique id.
    * @param id the input stream to the serialized object
    * @param length the length object the serialized object
    */
-  private boolean storeSelfUpdate(ClusterConnection conn, String uniqueId,
+  private boolean storeSelfUpdate(ClusterConnection conn, HashKey id,
 				  ReadStream is, int length)
   {
     try {
@@ -519,13 +520,13 @@ public class FileBacking {
       int nowMinutes = (int) (now / 60000L);
       stmt.setInt(2, nowMinutes);
       stmt.setInt(3, nowMinutes);
-      stmt.setString(4, uniqueId);
+      stmt.setBytes(4, id.getHash());
 
       int count = stmt.executeUpdate();
         
       if (count > 0) {
 	if (log.isLoggable(Level.FINE)) 
-	  log.fine(this + " update " + uniqueId + " length:" + length);
+	  log.fine(this + " update " + id + " length:" + length);
 	  
 	return true;
       }
@@ -536,7 +537,8 @@ public class FileBacking {
     return false;
   }
   
-  private boolean storeSelfInsert(ClusterConnection conn, String uniqueId,
+  private boolean storeSelfInsert(ClusterConnection conn, 
+                                  HashKey id, HashKey storeId,
 				  ReadStream is, int length,
 				  long expireInterval,
 				  int primary, int secondary, int tertiary)
@@ -544,24 +546,25 @@ public class FileBacking {
     try {
       PreparedStatement stmt = conn.prepareInsert();
         
-      stmt.setString(1, uniqueId);
+      stmt.setBytes(1, id.getHash());
+      stmt.setBytes(2, storeId.getHash());
 
-      stmt.setBinaryStream(2, is, length);
+      stmt.setBinaryStream(3, is, length);
       
       int nowMinutes = (int) (Alarm.getCurrentTime() / 60000L);
       
-      stmt.setInt(3, nowMinutes);
       stmt.setInt(4, nowMinutes);
-      stmt.setInt(5, (int) (expireInterval / 60000L));
+      stmt.setInt(5, nowMinutes);
+      stmt.setInt(6, (int) (expireInterval / 60000L));
 
-      stmt.setInt(6, primary);
-      stmt.setInt(7, secondary);
-      stmt.setInt(8, tertiary);
+      stmt.setInt(7, primary);
+      stmt.setInt(8, secondary);
+      stmt.setInt(9, tertiary);
 
       stmt.executeUpdate();
         
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " insert " + uniqueId + " length:" + length);
+	log.fine(this + " insert " + id + " length:" + length);
 
       return true;
     } catch (SQLException e) {
@@ -652,6 +655,7 @@ public class FileBacking {
     return cb.toString();
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() +  "[" + _tableName + "]";

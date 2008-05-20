@@ -72,7 +72,7 @@ import java.util.logging.Logger;
 /**
  * Manages sessions in a web-app.
  */
-public final class SessionManager implements ObjectManager, AlarmListener
+public final class SessionManager implements AlarmListener
 {
   static protected final L10N L = new L10N(SessionManager.class);
   static protected final Logger log
@@ -145,6 +145,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   private int _sessionSaveMode = SAVE_AFTER_REQUEST;
 
   //private SessionStore sessionStore;
+  private SessionObjectManager _objectManager;
   private StoreManager _storeManager;
 
   // If true, serialization errors should not be logged
@@ -344,14 +345,13 @@ public final class SessionManager implements ObjectManager, AlarmListener
   /**
    * Sets the persistent store.
    */
-  public void setPersistentStore(JndiBuilder store)
-    throws javax.naming.NamingException, ConfigException
+  public void setPersistentStore(StoreManager store)
+    throws ConfigException
   {
-    _storeManager = (StoreManager) store.getObject();
+    _storeManager = store;
 
     if (_storeManager == null)
-      throw new ConfigException(L.l("{0} is an unknown persistent store.",
-				    store.getJndiName()));
+      throw new ConfigException(L.l("unknown persistent store."));
   }
 
   /**
@@ -1112,7 +1112,10 @@ public final class SessionManager implements ObjectManager, AlarmListener
     }
 
     if (_storeManager != null) {
-      _sessionStore = _storeManager.createStore(_distributionId, this);
+      _objectManager = new SessionObjectManager(this);
+      
+      _sessionStore = _storeManager.createStore(_distributionId,
+						_objectManager);
       _sessionStore.setMaxIdleTime(_sessionTimeout);
       
       if (_alwaysLoadSession == SET_TRUE)
@@ -1436,13 +1439,6 @@ public final class SessionManager implements ObjectManager, AlarmListener
   }
 
   /**
-   * Notification from the cluster.
-   */
-  public void notifyUpdate(String id)
-  {
-  }
-
-  /**
    * Converts an integer to a printable character
    */
   private static char convert(long code)
@@ -1528,67 +1524,6 @@ public final class SessionManager implements ObjectManager, AlarmListener
   void removeSession(SessionImpl session)
   {
     _sessions.remove(session.getId());
-  }
-
-  /**
-   * Loads the session.
-   *
-   * @param in the input stream containing the serialized session
-   * @param obj the session object to be deserialized
-   */
-  public void load(InputStream is, Object obj)
-    throws IOException
-  {
-    SessionImpl session = (SessionImpl) obj;
-
-    if (_isHessianSerialization) {
-      Hessian2Input in = new Hessian2Input(is);
-
-      session.load(in);
-
-      in.close();
-    }
-    else {
-      ObjectInputStream in = new DistributedObjectInputStream(is);
-
-      session.load(in);
-
-      in.close();
-    }
-  }
-
-  /**
-   * Checks if the session is empty.
-   */
-  public boolean isEmpty(Object obj)
-  {
-    SessionImpl session = (SessionImpl) obj;
-
-    return session.isEmpty();
-  }
-
-  /**
-   * Saves the session.
-   */
-  public void store(OutputStream os, Object obj)
-    throws IOException
-  {
-    SessionImpl session = (SessionImpl) obj;
-
-    if (_isHessianSerialization) {
-      Hessian2Output out = new Hessian2Output(os);
-
-      session.store(out);
-
-      out.close();
-    }
-    else {
-      ObjectOutputStream out = new ObjectOutputStream(os);
-
-      session.store(out);
-
-      out.close();
-    }
   }
 
   /**
@@ -1738,28 +1673,6 @@ public final class SessionManager implements ObjectManager, AlarmListener
       return "SessionManager[" + _webApp.getContextPath() + "]";
     else
       return "SessionManager[]";
-  }
-
-  static class DistributedObjectInputStream extends ObjectInputStream {
-    private ClassLoader _loader;
-    
-    DistributedObjectInputStream(InputStream is)
-      throws IOException
-    {
-      super(is);
-
-      Thread thread = Thread.currentThread();
-      _loader = thread.getContextClassLoader();
-    }
-
-    @Override
-    protected Class resolveClass(ObjectStreamClass v)
-      throws IOException, ClassNotFoundException
-    {
-      String name = v.getName();
-
-      return Class.forName(name, false, _loader);
-    }
   }
 
   static {

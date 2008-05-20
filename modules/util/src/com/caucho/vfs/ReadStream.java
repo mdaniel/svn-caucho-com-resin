@@ -859,6 +859,38 @@ public final class ReadStream extends InputStream
       cb.append((char) ch);
     }
   }
+  
+  //
+  // data api
+  //
+  
+  /**
+   * Reads a 4-byte network encoded integer
+   */
+  public int readInt()
+    throws IOException
+  {
+    return ((read() << 24)
+            + (read() << 16)
+            + (read() << 8)
+            + (read()));
+  }
+ 
+  /**
+   * Reads an 8-byte network encoded long
+   */
+  public long readLong()
+    throws IOException
+  {
+    return (((long) read() << 56)
+            + ((long) read() << 48)
+            + ((long) read() << 40)
+            + ((long) read() << 32)
+            + ((long) read() << 24)
+            + ((long) read() << 16)
+            + ((long) read() << 8)
+            + ((long) read()));
+  }
 
   /**
    * Copies this stream to the output stream.

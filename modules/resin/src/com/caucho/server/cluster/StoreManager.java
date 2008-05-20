@@ -53,7 +53,8 @@ import java.util.logging.Logger;
  * Base class for distributed stores.
  */
 abstract public class StoreManager
-  implements AlarmListener, EnvironmentListener, ClassLoaderListener {
+  implements AlarmListener, EnvironmentListener, ClassLoaderListener 
+{
   private static final Logger log
     = Logger.getLogger(StoreManager.class.getName());
   private static final L10N L = new L10N(StoreManager.class);
@@ -62,6 +63,8 @@ abstract public class StoreManager
 
   private Cluster _cluster;
   private String _serverId;
+  
+  private HashManager _hashManager;
   
   protected int _selfIndex;
   private ClusterServer []_serverList;
@@ -75,8 +78,8 @@ abstract public class StoreManager
   protected boolean _isAlwaysLoad;
   protected boolean _isAlwaysSave;
   
-  protected HashMap<String,Store> _storeMap;
-  protected LruCache<String,ClusterObject> _clusterObjects;
+  protected HashMap<HashKey,Store> _storeMap;
+  protected LruCache<HashKey,ClusterObject> _clusterObjects;
 
   private final Lifecycle _lifecycle = new Lifecycle(log, toString());
 
@@ -92,11 +95,12 @@ abstract public class StoreManager
 
   protected StoreManager()
   {
-    _clusterObjects = new LruCache<String,ClusterObject>(4096);
+    _hashManager = new HashManager();
+    _storeMap = new HashMap<HashKey,Store>();
+    
+    _clusterObjects = new LruCache<HashKey,ClusterObject>(4096);
     _clusterObjects.setEnableListeners(false);
     
-    _storeMap = new HashMap<String,Store>();
-
     _alarm = new Alarm(this);
 
     Environment.addClassLoaderListener(this);
@@ -269,8 +273,10 @@ abstract public class StoreManager
    */
   public Store createStore(String storeId, ObjectManager objectManager)
   {
-    Store store = getStore(storeId);
-
+    HashKey storeKey = _hashManager.generateHash(storeId);
+    
+    Store store = getStore(storeKey);
+    store.setName(storeId);
     store.setObjectManager(objectManager);
 
     return store;
@@ -283,9 +289,9 @@ abstract public class StoreManager
    *
    * @param storeId the persistent domain.
    */
-  public Store removeStore(String storeId)
+  public Store removeStore(HashKey storeKey)
   {
-    Store store = getStore(storeId);
+    Store store = getStore(storeKey);
 
     store.setObjectManager(null);
 
@@ -299,13 +305,15 @@ abstract public class StoreManager
    *
    * @param storeId the persistent domain.
    */
-  public Store getStore(String storeId)
+  public Store getStore(HashKey storeKey)
   {
     synchronized (_storeMap) {
-      Store store = _storeMap.get(storeId);
+      Store store = _storeMap.get(storeKey);
+      
       if (store == null) {
-	store = new Store(storeId, this);
-	_storeMap.put(storeId, store);
+	store = new Store(storeKey, this);
+        
+	_storeMap.put(storeKey, store);
       }
 
       return store;
@@ -430,7 +438,7 @@ abstract public class StoreManager
   }
 
   /**
-   * Loads object access time.
+   * Loads an object from the backing store.
    *
    * @param obj the object to update.
    */
@@ -443,15 +451,15 @@ abstract public class StoreManager
    * @param storeId the identifier of the storage group
    * @param obj the object to update.
    */
-  public void access(String uniqueId)
+  public void access(HashKey objectId)
     throws Exception
   {
-    ClusterObject obj = getClusterObject(uniqueId);
+    ClusterObject obj = getClusterObject(objectId);
 
     if (obj != null)
       obj.access();
     else
-      accessImpl(obj.getObjectId(), uniqueId);
+      accessImpl(obj.getObjectId());
   }
 
   /**
@@ -471,7 +479,7 @@ abstract public class StoreManager
    *
    * @param uniqueId the identifier of the object.
    */
-  abstract public void accessImpl(String objectId, String uniqueId)
+  abstract public void accessImpl(HashKey objectId)
     throws Exception;
   
   /**
@@ -480,21 +488,21 @@ abstract public class StoreManager
    * @param uniqueId the identifier of the object.
    * @param long the time in ms for the expire
    */
-  public void setExpireInterval(String uniqueId, long expires)
+  public void setExpireInterval(HashKey uniqueId, long expires)
     throws Exception
   {
   }
 
   /**
-   * When the object is no longer valid, remove it from the backing store.
+   * Updates the object access time.
    *
-   * @param storeId the identifier of the storeage group
+   * @param storeId the identifier of the storage group
    * @param objectId the identifier of the object to remove
    */
-  public void update(String storeId, String objectId)
+  public void update(HashKey objectId)
     throws Exception
   {
-    ClusterObject obj = getClusterObject(storeId, objectId);
+    ClusterObject obj = getClusterObject(objectId);
 
     if (obj != null)
       obj.update();
@@ -505,7 +513,7 @@ abstract public class StoreManager
    *
    * @param uniqueId the identifier of the storage group
    */
-  public void updateOwner(String objectId, String uniqueId)
+  public void updateOwner(HashKey objectId)
     throws Exception
   {
     
@@ -517,17 +525,17 @@ abstract public class StoreManager
    * @param storeId the identifier of the storage group
    * @param obj the object to store.
    */
-  public void store(Store store, String id, Object obj)
+  public void store(Store store, HashKey objectId, Object obj)
     throws IOException
   {
-    ClusterObject clusterObj = getClusterObject(store, id);
+    ClusterObject clusterObj = getClusterObject(objectId);
 
     if (clusterObj != null) {
     }
     else if (store.getObjectManager().isEmpty(obj))
       return;
     else
-      clusterObj = createClusterObject(store, id);
+      clusterObj = createClusterObject(store, objectId);
     
     clusterObj.store(obj);
   }
@@ -540,14 +548,25 @@ abstract public class StoreManager
    */
   ClusterObject createClusterObject(Store store, String id)
   {
-    try {
-      String uniqueId = store.getId() + ';' + id;
+    HashKey key = _hashManager.generateHash(store.getId(), id);
 
-      synchronized (this) {
-	ClusterObject clusterObj = _clusterObjects.get(uniqueId);
+    return createClusterObject(store, key);
+  }
+ 
+  /**
+   * Returns the cluster object.
+   *
+   * @param storeId the identifier of the storage group
+   * @param obj the object to store.
+   */
+  ClusterObject createClusterObject(Store store, HashKey key)
+  {
+    try {
+      synchronized (_clusterObjects) {
+	ClusterObject clusterObj = _clusterObjects.get(key);
 	if (clusterObj == null) {
-	  clusterObj = create(store, id);
-	  _clusterObjects.put(clusterObj.getUniqueId(), clusterObj);
+	  clusterObj = create(store, key);
+	  _clusterObjects.put(key, clusterObj);
 	}
 
 	return clusterObj;
@@ -576,9 +595,11 @@ abstract public class StoreManager
    * @param storeId the identifier of the storage group
    * @param obj the object to store.
    */
-  ClusterObject getClusterObject(String storeId, String id)
+  ClusterObject getClusterObject(HashKey key)
   {
-    return getClusterObject(makeUniqueId(storeId, id));
+    synchronized (_clusterObjects) {
+      return _clusterObjects.get(key);
+    }
   }
 
   /**
@@ -587,30 +608,19 @@ abstract public class StoreManager
    * @param storeId the identifier of the storage group
    * @param obj the object to store.
    */
-  ClusterObject getClusterObject(String uniqueId)
+  ClusterObject removeClusterObject(HashKey key)
   {
-    return _clusterObjects.get(uniqueId);
-  }
-
-  /**
-   * Returns the cluster object.
-   *
-   * @param storeId the identifier of the storage group
-   * @param obj the object to store.
-   */
-  ClusterObject removeClusterObject(String storeId, String id)
-  {
-    synchronized (this) {
-      return _clusterObjects.remove(makeUniqueId(storeId, id));
+    synchronized (_clusterObjects) {
+      return _clusterObjects.remove(key);
     }
   }
   
   /**
    * Creates the cluster object.
    */
-  ClusterObject create(Store store, String id)
+  ClusterObject create(Store store, HashKey key)
   {
-    return new ClusterObject(this, store, id);
+    return new ClusterObject(this, store, key);
   }
   
   /**
@@ -666,9 +676,9 @@ abstract public class StoreManager
   /**
    * Returns the unique id.
    */
-  private String makeUniqueId(Store store, String objectId)
+  private HashKey makeUniqueId(Store store, String objectId)
   {
-    return store.getId() + ';' + objectId;
+    return _hashManager.generateHash(store.getId(), objectId);
   }
 
   /**

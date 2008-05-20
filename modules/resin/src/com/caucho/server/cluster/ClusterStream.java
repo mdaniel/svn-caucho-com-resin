@@ -153,8 +153,8 @@ public class ClusterStream {
     out.write(0);
     out.write(0);
 
-    writeString(out, to);
-    writeString(out, from);
+    writeString(to);
+    writeString(from);
 
     Hessian2StreamingOutput hOut = getHessianOutputStream();
 
@@ -176,9 +176,9 @@ public class ClusterStream {
     out.write(0);
     out.write(8);
 
-    writeLong(out, id);
-    writeString(out, to);
-    writeString(out, from);
+    writeLong(id);
+    writeString(to);
+    writeString(from);
 
     Hessian2StreamingOutput hOut = getHessianOutputStream();
 
@@ -200,9 +200,9 @@ public class ClusterStream {
     out.write(0);
     out.write(8);
 
-    writeLong(out, id);
-    writeString(out, to);
-    writeString(out, from);
+    writeLong(id);
+    writeString(to);
+    writeString(from);
 
     Hessian2StreamingOutput hOut = getHessianOutputStream();
 
@@ -224,9 +224,9 @@ public class ClusterStream {
     out.write(0);
     out.write(8);
 
-    writeLong(out, id);
-    writeString(out, to);
-    writeString(out, from);
+    writeLong(id);
+    writeString(to);
+    writeString(from);
 
     Hessian2StreamingOutput hOut = getHessianOutputStream();
 
@@ -301,30 +301,127 @@ public class ClusterStream {
     }
   }
 
-  private void writeLong(WriteStream out, long id)
+  /**
+   * Writes a hmux yield to the target.
+   */
+  public void writeQuit()
     throws IOException
   {
-    out.write((int) (id >> 56));
-    out.write((int) (id >> 48));
-    out.write((int) (id >> 40));
-    out.write((int) (id >> 32));
-    out.write((int) (id >> 24));
-    out.write((int) (id >> 16));
-    out.write((int) (id >> 8));
-    out.write((int) id);
+    _os.write(HmuxRequest.HMUX_QUIT);
   }
 
-  private void writeString(WriteStream out, String s)
+  /**
+   * Writes a hmux yield to the target, used for unidirectional messages
+   */
+  public void writeYield()
+    throws IOException
+  {
+    _os.write(HmuxRequest.HMUX_YIELD);
+  }
+
+  /**
+   * Writes a hmux int to the target.
+   */
+  public void writeInt(int code, int value)
+    throws IOException
+  {
+    WriteStream os = _os;
+    
+    os.write(code);
+    os.write(0);
+    os.write(4);
+    os.write(value >> 24);
+    os.write(value >> 16);
+    os.write(value >> 8);
+    os.write(value);
+  }
+
+  public void writeLong(long id)
+    throws IOException
+  {
+    WriteStream os = _os;
+    
+    os.write((int) (id >> 56));
+    os.write((int) (id >> 48));
+    os.write((int) (id >> 40));
+    os.write((int) (id >> 32));
+    os.write((int) (id >> 24));
+    os.write((int) (id >> 16));
+    os.write((int) (id >> 8));
+    os.write((int) id);
+  }
+
+  public void writeLong(int code, long id)
+    throws IOException
+  {
+    WriteStream os = _os;
+    
+    os.write(code);
+    os.write((int) (id >> 56));
+    os.write((int) (id >> 48));
+    os.write((int) (id >> 40));
+    os.write((int) (id >> 32));
+    os.write((int) (id >> 24));
+    os.write((int) (id >> 16));
+    os.write((int) (id >> 8));
+    os.write((int) id);
+  }
+
+  public void writeString(String s)
     throws IOException
   {
     int len = s.length();
+
+    WriteStream os = _os;
     
-    out.write(HmuxRequest.HMUX_STRING);
-    out.write(len >> 8);
-    out.write(len);
-    out.print(s);
+    os.write(HmuxRequest.HMUX_STRING);
+    os.write(len >> 8);
+    os.write(len);
+    os.print(s);
   }
 
+  public void writeString(int code, String s)
+    throws IOException
+  {
+    int len = s.length();
+
+    WriteStream os = _os;
+
+    os.write(code);
+    os.write(len >> 8);
+    os.write(len);
+    os.print(s);
+  }
+
+  /**
+   * Writes a hmux string to the target.
+   */
+  public void writeBinary(int code, byte []value)
+    throws IOException
+  {
+    int len = value.length;
+
+    WriteStream os = _os;
+    os.write(code);
+    os.write(len >> 8);
+    os.write(len);
+    os.write(value, 0, len);
+  }
+
+  /**
+   * Writes a hmux string to the target.
+   */
+  public void writeBinary(int code, byte []value, int offset, int len)
+    throws IOException
+  {
+    WriteStream os = _os;
+    os.write(code);
+    os.write(len >> 8);
+    os.write(len);
+    os.write(value, offset, len);
+  }
+
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _debugId + "]";

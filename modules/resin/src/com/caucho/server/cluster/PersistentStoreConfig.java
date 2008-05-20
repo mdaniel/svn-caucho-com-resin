@@ -82,7 +82,7 @@ public class PersistentStoreConfig {
 				      type));
     }
     else if (type.equals("file"))
-      _store = new FileStore();
+      _store = new FileStoreManager();
     else if (type.equals("cluster") || type.equals("tcp")) {
       if (cluster == null)
 	throw new ConfigException(L.l("Cluster store needs a defined <cluster>.  Use 'file' for single-machine persistence."));

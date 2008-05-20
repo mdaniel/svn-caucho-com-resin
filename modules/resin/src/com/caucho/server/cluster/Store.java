@@ -29,21 +29,23 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
 
 /**
- * Application view of the store.
+ * Application view of the store, e.g. a specific session manager.
  */
 public class Store {
-  static protected final Logger log = Log.open(Store.class);
+  static protected final Logger log
+    = Logger.getLogger(Store.class.getName());
   static final L10N L = new L10N(Store.class);
 
+  private final HashKey _id;
+  
   private StoreManager _storeManager;
   private ObjectManager _objectManager;
-  private String _storeId;
+  private String _name;
   private long _maxIdleTime;
 
   private boolean _isAlwaysLoad;
@@ -56,9 +58,9 @@ public class Store {
    * @param objectManager the application's object manager, e.g. the SessionManager
    * @param storeManager the persistent store manater
    */
-  Store(String storeId, StoreManager storeManager)
+  Store(HashKey id, StoreManager storeManager)
   {
-    _storeId = mangleId(storeId);
+    _id = id;
     _storeManager = storeManager;
 
     _maxIdleTime = storeManager.getMaxIdleTime();
@@ -70,9 +72,25 @@ public class Store {
   /**
    * Gets the store identifier.
    */
-  public String getId()
+  public HashKey getId()
   {
-    return _storeId;
+    return _id;
+  }
+  
+  /**
+   * Gets the store name
+   */
+  public String getName()
+  {
+    return _name;
+  }
+  
+  /**
+   * Sets the store name
+   */
+  public void setName(String name)
+  {
+    _name = name;
   }
 
   /**

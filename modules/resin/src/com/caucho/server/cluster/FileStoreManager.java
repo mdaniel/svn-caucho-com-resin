@@ -40,16 +40,16 @@ import java.util.logging.*;
 /**
  * Class storing distributed objects based on the filesystem.
  */
-public class FileStore extends StoreManager {
+public class FileStoreManager extends StoreManager {
   private final static Logger log
-    = Logger.getLogger(FileStore.class.getName());
+    = Logger.getLogger(FileStoreManager.class.getName());
   
   private final FileBacking _backing = new FileBacking();
 
   /**
    * Create a new file-based persistent store.
    */
-  public FileStore()
+  public FileStoreManager()
   {
   }
 
@@ -134,7 +134,7 @@ public class FileStore extends StoreManager {
    * Creates the cluster object.
    */
   @Override
-  ClusterObject create(Store store, String id)
+  ClusterObject create(Store store, HashKey id)
   {
     return new ClusterObject(this, store, id);
   }
@@ -169,11 +169,11 @@ public class FileStore extends StoreManager {
     int length = tempStream.getLength();
     ReadStream is = tempStream.openReadAndSaveBuffer();
     try {
-      _backing.storeSelf(obj.getUniqueId(), is, length,
+      _backing.storeSelf(obj.getObjectId(), obj.getStoreId(), is, length,
 			 obj.getExpireInterval(), 0, 0, 0);
 
       if (log.isLoggable(Level.FINE))
-        log.fine("file store: " + obj.getUniqueId() + " length=" +
+        log.fine("file store: " + obj.getObjectId() + " length=" +
                  length);
     } finally {
       is.close();
@@ -186,10 +186,10 @@ public class FileStore extends StoreManager {
    * @param uniqueId the identifier of the object.
    */
   @Override
-  public void accessImpl(String objectId, String uniqueId)
+  public void accessImpl(HashKey objectId)
     throws Exception
   {
-    _backing.updateAccess(uniqueId);
+    _backing.updateAccess(objectId);
   }
   
   /**
@@ -199,10 +199,10 @@ public class FileStore extends StoreManager {
    * @param long the time in ms for the expire
    */
   @Override
-  public void setExpireInterval(String uniqueId, long expires)
+  public void setExpireInterval(HashKey objectId, long expires)
     throws Exception
   {
-    _backing.setExpireInterval(uniqueId, expires);
+    _backing.setExpireInterval(objectId, expires);
   }
 
   /**
@@ -212,8 +212,8 @@ public class FileStore extends StoreManager {
   public void remove(ClusterObject obj)
     throws Exception
   {
-    removeClusterObject(obj.getStoreId(), obj.getObjectId());
+    removeClusterObject(obj.getObjectId());
 
-    _backing.remove(obj.getUniqueId());
+    _backing.remove(obj.getObjectId());
   }
 }
