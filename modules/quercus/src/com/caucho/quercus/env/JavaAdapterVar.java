@@ -45,7 +45,6 @@ import java.util.*;
  */
 public class JavaAdapterVar extends Var
 {
-  
   private JavaAdapter _adapter;
   private Value _key;
 
@@ -1319,9 +1318,9 @@ public class JavaAdapterVar extends Var
    * Serializes the value.
    */
   @Override
-  public void serialize(StringBuilder sb)
+  public void serialize(StringBuilder sb, SerializeMap map)
   {
-    getValue().serialize(sb);
+    getValue().serialize(sb, map);
   }
 
   @Override

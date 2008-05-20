@@ -425,7 +425,7 @@ public class JavaValue extends ObjectValue
    * Serializes the value.
    */
   @Override
-  public void serialize(StringBuilder sb)
+  public void serialize(StringBuilder sb, SerializeMap map)
   {
     String name = _classDef.getSimpleName();
     
@@ -442,7 +442,7 @@ public class JavaValue extends ObjectValue
 
       for (Map.Entry<Value,Value> entry : entrySet) {
         entry.getKey().serialize(sb);
-        entry.getValue().serialize(sb);
+        entry.getValue().serialize(sb, map);
       }
 
       sb.append("}");

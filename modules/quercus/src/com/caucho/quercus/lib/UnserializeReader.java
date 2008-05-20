@@ -605,10 +605,18 @@ public final class UnserializeReader {
     int ch = _buffer[_index++];
 
     if (ch != expectCh) {
-      throw new IOException(L.l("expected '{0}' at '{1}' (0x{2})",
+      String context = String.valueOf((char) ch);
+      
+      if (_index - 2 >= 0)
+        context = _buffer[_index - 2] + context;
+      if (_index < _buffer.length)
+        context += _buffer[_index];
+      
+      throw new IOException(L.l("expected '{0}' at '{1}' (0x{2}) (context '{3}')",
                                 String.valueOf((char) expectCh),
                                 String.valueOf((char) ch),
-                                Integer.toHexString(ch)));
+                                Integer.toHexString(ch),
+                                context));
     }
   }
 

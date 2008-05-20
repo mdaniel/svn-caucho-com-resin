@@ -487,7 +487,7 @@ public class CompiledObjectValue extends ObjectValue
    * Serializes the value.
    */
   @Override
-  public void serialize(StringBuilder sb)
+  public void serialize(StringBuilder sb, SerializeMap map)
   {
     sb.append("O:");
     sb.append(_quercusClass.getName().length());
@@ -514,7 +514,7 @@ public class CompiledObjectValue extends ObjectValue
 	sb.append(key);
 	sb.append("\";");
 
-	_fields[i].serialize(sb);
+	_fields[i].serialize(sb, map);
       }
     }
 
@@ -530,7 +530,7 @@ public class CompiledObjectValue extends ObjectValue
 	sb.append(key);
 	sb.append("\";");
 
-	entry.getValue().serialize(sb);
+	entry.getValue().serialize(sb, map);
       }
     }
 

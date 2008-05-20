@@ -122,11 +122,14 @@ public class SessionArrayValue extends ArrayValueWrapper
     StringBuilder sb = new StringBuilder();
     ArrayValue array = getArray();
 
+    SerializeMap serializeMap = new SerializeMap();
+    
     synchronized (array) {
       for (Map.Entry<Value,Value> entry : array.entrySet()) {
         sb.append(entry.getKey().toString());
         sb.append("|");
-        entry.getValue().serialize(sb);
+
+        entry.getValue().serialize(sb, serializeMap);
       }
     }
 
