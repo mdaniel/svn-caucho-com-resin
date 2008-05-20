@@ -176,6 +176,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   /**
    * Initialize the environment.
    */
+  @Override
   public void init()
   {
     super.init();
@@ -504,6 +505,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   /**
    * Called when the <class-loader> completes.
    */
+  @Override
   public void validate()
   {
     super.validate();
@@ -593,6 +595,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    *
    * The resources are closed in the reverse order that they're started
    */
+  @Override
   public void stop()
   {
     if (! _lifecycle.toDestroy())
@@ -652,6 +655,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   /**
    * Destroys the class loader.
    */
+  @Override
   public void destroy()
   {
     try {
@@ -679,6 +683,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     }
   }
 
+  @Override
   public String toString()
   {
     if (getId() != null)

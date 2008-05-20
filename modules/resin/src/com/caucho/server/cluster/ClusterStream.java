@@ -45,7 +45,7 @@ public class ClusterStream {
   static protected final Logger log
     = Logger.getLogger(ClusterStream.class.getName());
 
-  private ServerConnector _srun;
+  private ServerPool _pool;
 
   private ReadStream _is;
   private WriteStream _os;
@@ -57,22 +57,22 @@ public class ClusterStream {
 
   private String _debugId;
 
-  ClusterStream(int count, ServerConnector client,
+  ClusterStream(ServerPool pool, int count, 
 		ReadStream is, WriteStream os)
   {
-    _srun = client;
+    _pool = pool;
     _is = is;
     _os = os;
 
-    _debugId = "[" + client.getDebugId() + ":" + count + "]";
+    _debugId = "[" + pool.getDebugId() + ":" + count + "]";
   }
 
   /**
-   * Returns the cluster server.
+   * Returns the owning pool
    */
-  public ServerConnector getServer()
+  public ServerPool getPool()
   {
-    return _srun;
+    return _pool;
   }
 
   /**
@@ -138,8 +138,9 @@ public class ClusterStream {
    */
   public boolean isLongIdle()
   {
-    return (_srun.getLoadBalanceIdleTime()
-	    < Alarm.getCurrentTime() - _freeTime + 2000L);
+    long now = Alarm.getCurrentTime();
+    
+    return (_pool.getLoadBalanceIdleTime() < now - _freeTime + 2000L);
   }
 
   public boolean sendMessage(String to, String from,
@@ -250,7 +251,7 @@ public class ClusterStream {
    */
   public void clearRecycle()
   {
-    _srun.clearRecycle();
+    _pool.clearRecycle();
   }
 
   /**
@@ -263,13 +264,13 @@ public class ClusterStream {
     if (_is != null && _freeTime <= 0)
       _freeTime = _is.getReadTime();
 
-    _srun.free(this);
+    _pool.free(this);
   }
 
   public void close()
   {
     if (_is != null)
-      _srun.close(this);
+      _pool.close(this);
 
     closeImpl();
   }
@@ -326,6 +327,6 @@ public class ClusterStream {
 
   public String toString()
   {
-    return "ClusterStream[" + _debugId + "]";
+    return getClass().getSimpleName() + "[" + _debugId + "]";
   }
 }

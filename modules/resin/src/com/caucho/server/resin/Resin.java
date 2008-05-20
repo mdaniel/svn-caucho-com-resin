@@ -390,8 +390,6 @@ public class Resin implements EnvironmentBean, SchemaBean
   public void setRootDirectory(Path root)
   {
     _rootDirectory = root;
-
-    Vfs.setPwd(root);
   }
 
   /**

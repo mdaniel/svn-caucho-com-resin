@@ -42,17 +42,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Defines a member of the cluster.
- *
- * A {@link ClusterClient} obtained with {@link #getClient} is used to actually
- * communicate with this ClusterServer when it is active in another instance of
- * Resin .
+ * A pool of connections to a Resin server.
  */
-public class ServerConnector
+public class ServerPool
 {
   private static final Logger log
-    = Logger.getLogger(ServerConnector.class.getName());
-  private static final L10N L = new L10N(ServerConnector.class);
+    = Logger.getLogger(ServerPool.class.getName());
+  private static final L10N L = new L10N(ServerPool.class);
 
   private static final int ST_NEW = 0;
   private static final int ST_STANDBY = 1;
@@ -71,19 +67,25 @@ public class ServerConnector
   private static final int []WARMUP_CONNECTION_MAX
     = new int[] { 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 8, 8, 16, 32, 64, 128 };
 
-  private ClusterServer _server;
-  private ClusterPort _port;
+  private final String _serverId;
+  private final String _targetId;
 
-  private ObjectName _objectName;
-
-  private Cluster _cluster;
-  private Path _tcpPath;
-
-  private ServerConnectorAdmin _admin;
+  private final String _address;
+  private final int _port;
+  private final boolean _isSecure;
 
   private String _debugId;
+  
+  private Path _tcpPath;
 
   private int _maxConnections = Integer.MAX_VALUE / 2;
+
+  private long _loadBalanceConnectTimeout = 5000;
+  private long _loadBalanceSocketTimeout = 30000;
+  private long _loadBalanceIdleTime = 10000;
+  private long _loadBalanceRecoverTime = 15000;
+  private long _loadBalanceWarmupTime = 60000;
+  private int _loadBalanceWeight = 100;
   
   private ClusterStream []_idle = new ClusterStream[64];
   private volatile int _idleHead;
@@ -92,7 +94,6 @@ public class ServerConnector
 
   private int _streamCount;
 
-  private long _warmupTime;
   private long _warmupChunkTime;
   
   private long _failRecoverTime;
@@ -131,45 +132,35 @@ public class ServerConnector
   private volatile double _cpuLoadAvg;
   private volatile long _cpuSetTime;
 
-  private ServerPool _serverPool;
-
-  public ServerConnector(ClusterServer server)
+  public ServerPool(String serverId,
+		    String targetId,
+		    String address,
+		    int port,
+		    boolean isSecure)
   {
-    _server = server;
-    _cluster = _server.getCluster();
-    _port = server.getClusterPort();
+    _serverId = serverId;
+    _targetId = targetId;
+    _debugId = _serverId + "->" + _targetId;
+    _address = address;
+    _port = port;
+    _isSecure = isSecure;
   }
 
-  /**
-   * Gets the owning cluster.
-   */
-  public Cluster getCluster()
+  public ServerPool(String serverId,
+		    ClusterServer server)
   {
-    return _cluster;
-  }
+    this(serverId,
+	 server.getId(),
+	 server.getClusterPort().getAddress(),
+	 server.getClusterPort().getPort(),
+	 server.getClusterPort().isSSL());
 
-  /**
-   * Returns the object name.
-   */
-  public ObjectName getObjectName()
-  {
-    return _objectName;
-  }
-
-  /**
-   * Returns the admin.
-   */
-  public ServerConnectorMXBean getAdmin()
-  {
-    return _admin;
-  }
-
-  /**
-   * Gets the cluster port.
-   */
-  public ClusterPort getClusterPort()
-  {
-    return _port;
+    _loadBalanceConnectTimeout = server.getLoadBalanceConnectTimeout();
+    _loadBalanceSocketTimeout = server.getLoadBalanceSocketTimeout();
+    _loadBalanceIdleTime = server.getLoadBalanceIdleTime();
+    _loadBalanceRecoverTime = server.getLoadBalanceRecoverTime();
+    _loadBalanceWarmupTime = server.getLoadBalanceWarmupTime();
+    _loadBalanceWeight = server.getLoadBalanceWeight();
   }
 
   /**
@@ -177,20 +168,15 @@ public class ServerConnector
    */
   public String getId()
   {
-    return _server.getId();
-  }
-
-  public ClusterServer getServer()
-  {
-    return _server;
+    return _targetId;
   }
 
   /**
-   * Returns the index of this connection in the connection group.
+   * Returns the debug id.
    */
-  public int getIndex()
+  public String getDebugId()
   {
-    return _server.getIndex();
+    return _debugId;
   }
 
   /**
@@ -198,7 +184,7 @@ public class ServerConnector
    */
   public String getAddress()
   {
-    return _port.getAddress();
+    return _address;
   }
 
   /**
@@ -206,65 +192,87 @@ public class ServerConnector
    */
   public int getPort()
   {
-    return _port.getPort();
+    return _port;
   }
 
   /**
-   * Returns true for a dynamic server
-   */
-  public boolean isDynamicServer()
-  {
-    return _server.isDynamic();
-  }
-
-  /**
-   * Returns the time in milliseconds for the slow start throttling.
-   */
-  public long getLoadBalanceWarmupTime()
-  {
-    return _server.getLoadBalanceWarmupTime();
-  }
-
-  /**
-   * Returns the socket timeout when connecting to the
-   * target server.
+   * The socket timeout when connecting to the target server.
    */
   public long getLoadBalanceConnectTimeout()
   {
-    return _server.getLoadBalanceConnectTimeout();
+    return _loadBalanceConnectTimeout;
   }
 
   /**
-   * Returns the socket timeout when reading from the
-   * target server.
+   * The socket timeout when connecting to the target server.
+   */
+  public void setLoadBalanceConnectTimeout(long timeout)
+  {
+    _loadBalanceConnectTimeout = timeout;
+  }
+
+  /**
+   * The socket timeout when reading from the target server.
    */
   public long getLoadBalanceSocketTimeout()
   {
-    return _server.getLoadBalanceSocketTimeout();
+    return _loadBalanceSocketTimeout;
   }
 
   /**
-   * Returns how long the connection can be cached in the free pool.
+   * The socket timeout when reading from the target server.
+   */
+  public void setLoadBalanceSocketTimeout(long timeout)
+  {
+    _loadBalanceSocketTimeout = timeout;
+  }
+
+  /**
+   * How long the connection can be cached in the free pool.
    */
   public long getLoadBalanceIdleTime()
   {
-    return _server.getLoadBalanceIdleTime();
+    return _loadBalanceIdleTime;
+  }
+
+  /**
+   * How long the connection can be cached in the free pool.
+   */
+  public void setLoadBalanceIdleTime(long timeout)
+  {
+    _loadBalanceIdleTime = timeout;
   }
 
   /**
    * Returns how long the connection will be treated as dead.
    */
-  public long getLoadBalanceRecoverTime()
+  public void setLoadBalanceRecoverTime(long timeout)
   {
-    return _server.getLoadBalanceRecoverTime();
+    _loadBalanceRecoverTime = timeout;
   }
 
   /**
-   * Returns the load balance weight.
+   * Returns the time in milliseconds for the slow start throttling.
+   */
+  public void setLoadBalanceWarmupTime(long timeout)
+  {
+    _loadBalanceWarmupTime = timeout;
+  }
+
+  /**
+   * The load balance weight.
    */
   public int getLoadBalanceWeight()
   {
-    return _server.getLoadBalanceWeight();
+    return _loadBalanceWeight;
+  }
+
+  /**
+   * The load balance weight.
+   */
+  public void setLoadBalanceWeight(int weight)
+  {
+    _loadBalanceWeight = weight;
   }
 
   /**
@@ -273,13 +281,11 @@ public class ServerConnector
   public void init()
     throws Exception
   {
-    _warmupTime = _server.getLoadBalanceWarmupTime();
-    _warmupChunkTime = _warmupTime / WARMUP_MAX;
+    _warmupChunkTime = _loadBalanceWarmupTime / WARMUP_MAX;
     if (_warmupChunkTime <= 0)
       _warmupChunkTime = 1;
-      
-    _failRecoverTime = _server.getLoadBalanceRecoverTime();
-    _failChunkTime = _failRecoverTime / WARMUP_MAX;
+    
+    _failChunkTime = _loadBalanceRecoverTime / WARMUP_MAX;
     if (_failChunkTime <= 0)
       _failChunkTime = 1;
 
@@ -291,38 +297,12 @@ public class ServerConnector
       address = "localhost";
 
     HashMap<String,Object> attr = new HashMap<String,Object>();
-    attr.put("connect-timeout", new Long(getLoadBalanceConnectTimeout()));
+    attr.put("connect-timeout", new Long(_loadBalanceConnectTimeout));
 
-    if (_port.isSSL())
-      _tcpPath = Vfs.lookup("tcps://" + address + ":" + getPort(), attr);
+    if (_isSecure)
+      _tcpPath = Vfs.lookup("tcps://" + address + ":" + _port, attr);
     else
-      _tcpPath = Vfs.lookup("tcp://" + address + ":" + getPort(), attr);
-
-    _admin = new ServerConnectorAdmin(this);
-
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-    try {
-      Resin resin = Resin.getLocal();
-
-      if (resin != null)
-	thread.setContextClassLoader(resin.getClassLoader());
-      
-      String name = getId();
-
-      if (name == null)
-        name = "";
-
-    } catch (Exception e) {
-      log.log(Level.FINER, e.toString(), e);
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-  }
-
-  public void register()
-  {
-    _admin.register();
+      _tcpPath = Vfs.lookup("tcp://" + address + ":" + _port, attr);
   }
 
   /**
@@ -464,30 +444,6 @@ public class ServerConnector
       return avg;
     else
       return avg * 10000L / (now - time);
-  }
-
-  /**
-   * Returns the debug id.
-   */
-  public String getDebugId()
-  {
-    if (_debugId == null) {
-      String selfId = null;
-      Cluster localCluster = Cluster.getLocal();
-      if (localCluster != null)
-	selfId = localCluster.getId();
-
-      if (selfId == null || selfId.equals(""))
-	selfId = "default";
-
-      String targetId = _server.getId();
-      if (targetId == null || targetId.equals(""))
-	targetId = String.valueOf(_server.getIndex());
-
-      _debugId = selfId + "->" + targetId;
-    }
-    
-    return _debugId;
   }
 
   /**
@@ -888,7 +844,7 @@ public class ServerConnector
         _idle[_idleHead] = null;
         _idleHead = (_idleHead + _idle.length - 1) % _idle.length;
 
-        if (now < freeTime + _server.getLoadBalanceIdleTime()) {
+        if (now < freeTime + _loadBalanceIdleTime) {
           _activeCount++;
 	  _keepaliveCountTotal++;
 
@@ -920,24 +876,22 @@ public class ServerConnector
     try {
       ReadWritePair pair = openTCPPair();
       ReadStream rs = pair.getReadStream();
-      rs.setAttribute("timeout", new Integer((int) getLoadBalanceSocketTimeout()));
+      rs.setAttribute("timeout", new Integer((int) _loadBalanceSocketTimeout));
 
       synchronized (this) {
         _activeCount++;
 	_connectCountTotal++;
       }
 
-      ClusterStream stream = null;
-      /* new ClusterStream(_streamCount++, this,
+      ClusterStream stream = new ClusterStream(this, _streamCount++,
 					       rs, pair.getWriteStream());
-      */
       
       if (log.isLoggable(Level.FINER))
 	log.finer("connect " + stream);
 
       if (_firstSuccessTime <= 0) {
 	if (ST_STARTING <= _state && _state < ST_ACTIVE) {
-	  if (_warmupTime > 0)
+	  if (_loadBalanceWarmupTime > 0)
 	    _state = ST_WARMUP;
 	  else
 	    _state = ST_ACTIVE;
@@ -1016,7 +970,7 @@ public class ServerConnector
     updateWarmup();
 
     long now = Alarm.getCurrentTime();
-    long maxIdleTime = _server.getLoadBalanceIdleTime();
+    long maxIdleTime = _loadBalanceIdleTime;
     ClusterStream oldStream = null;
     
     do {
@@ -1185,10 +1139,8 @@ public class ServerConnector
   @Override
   public String toString()
   {
-    return ("ServerConnector[id=" + getId() +
-            " index=" + _port.getIndex() +
-            " address=" + _port.getAddress() + ":" + _port.getPort() +
-            " cluster=" + _cluster.getId() + "]");
+    return (getClass().getSimpleName()
+	    + "[" + getDebugId()
+	    + "," + _address + ":" + _port + "]");
   }
-
 }

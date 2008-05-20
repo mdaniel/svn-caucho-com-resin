@@ -823,7 +823,7 @@ public abstract class Path {
 
   public int getOwner()
   {
-    return 0;
+    return getUser();
   }
 
   /**

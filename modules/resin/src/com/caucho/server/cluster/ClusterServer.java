@@ -34,13 +34,13 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.lifecycle.StartLifecycleException;
-import com.caucho.log.Log;
+import com.caucho.management.server.ClusterServerMXBean;
 import com.caucho.server.http.HttpProtocol;
 import com.caucho.server.port.*;
+import com.caucho.server.resin.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.QServerSocket;
 
-import javax.management.ObjectName;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -53,8 +53,9 @@ import java.util.logging.Logger;
  * Resin .
  */
 public class ClusterServer {
-  private static final Logger log = Log.open(ClusterServer.class);
   private static final L10N L = new L10N(ClusterServer.class);
+  private static final Logger log
+    = Logger.getLogger(ClusterServer.class.getName());
 
   private static final long DEFAULT = 0xcafebabe;
 
@@ -67,7 +68,7 @@ public class ClusterServer {
   private boolean _isDynamic;
 
   private ClusterPort _clusterPort;
-  private ServerConnector _serverConnector;
+  private ServerPool _serverPool;
 
   private long _socketTimeout = 65000L;
   private long _keepaliveTimeout = 15000L;
@@ -85,6 +86,8 @@ public class ClusterServer {
     = new ContainerProgram();
 
   private ArrayList<Port> _ports = new ArrayList<Port>();
+  
+  private ClusterServerAdmin _admin = new ClusterServerAdmin(this);
 
   public ClusterServer(Cluster cluster)
   {
@@ -99,15 +102,12 @@ public class ClusterServer {
 
     _clusterPort = new ClusterPort(this);
     _ports.add(_clusterPort);
-    
-    _serverConnector = new ServerConnector(this);
   }
 
   public ClusterServer(Cluster cluster, boolean test)
   {
     _cluster = cluster;
     _clusterPort = new ClusterPort(this);
-    _serverConnector = new ServerConnector(this);
   }
 
   /**
@@ -513,10 +513,10 @@ public class ClusterServer {
   /**
    * Returns the server connector.
    */
-  public ServerConnector getServerConnector()
+  public ServerPool getServerPool()
   {
     if (_cluster.getSelfServer() != this)
-      return _serverConnector;
+      return _serverPool;
     else
       return null;
   }
@@ -546,8 +546,10 @@ public class ClusterServer {
     _clusterPort.init();
 
     if (_cluster != null) {
-      _serverConnector.init();
-      _serverConnector.register();
+      _serverPool = new ServerPool(Resin.getCurrent().getServerId(), this);
+      _serverPool.init();
+
+      _admin.register();
     }
   }
 
@@ -577,14 +579,24 @@ public class ClusterServer {
     _cluster.generateBackupCode(cb, generateBackupCode());
   }
 
+  //
+  // admin
+  //
+  /**
+   * Returns the admin object
+   */
+  public ClusterServerMXBean getAdmin()
+  {
+    return _admin;
+  }
 
   /**
    * Close any ports.
    */
   public void close()
   {
-    if (_serverConnector != null)
-      _serverConnector.close();
+    if (_serverPool != null)
+      _serverPool.close();
   }
 
   @Override

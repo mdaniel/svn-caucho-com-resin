@@ -31,7 +31,6 @@ package com.caucho.loader;
 
 import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.enhancer.ByteCodeEnhancer;
 import com.caucho.loader.enhancer.EnhancerRuntimeException;
 import com.caucho.make.AlwaysModified;
 import com.caucho.make.DependencyContainer;
@@ -47,7 +46,6 @@ import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 
-import javax.annotation.PostConstruct;
 import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
@@ -144,7 +142,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   private WeakCloseListener _closeListener;
 
   // Lifecycle
-  protected final Lifecycle _lifecycle = new Lifecycle();
+  private final Lifecycle _lifecycle = new Lifecycle();
 
   private boolean _hasNewLoader = true;
 
@@ -537,6 +535,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Returns the URLs.
    */
+  @Override
   public URL []getURLs()
   {
     return _urls;
@@ -809,6 +808,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Returns the permission collection for the given code source.
    */
+  @Override
   protected PermissionCollection getPermissions(CodeSource codeSource)
   {
     PermissionCollection perms = super.getPermissions(codeSource);
@@ -1137,6 +1137,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Defines a new package.
    */
+  @Override
   protected Package definePackage(String name,
                                   String a1, String a2, String a3,
                                   String b1, String b2, String b3,
@@ -1194,6 +1195,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
   }
 
+  @Override
   public Class<?> loadClass(String name) throws ClassNotFoundException
   {
     // the Sun JDK implementation of ClassLoader delegates this call
@@ -1210,6 +1212,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    *
    * @return the loaded classes
    */
+  @Override
   protected Class loadClass(String name, boolean resolve)
     throws ClassNotFoundException
   {
@@ -1312,6 +1315,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    *
    * @return the loaded class
    */
+  @Override
   protected Class findClass(String name)
     throws ClassNotFoundException
   {
@@ -1550,6 +1554,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    *
    * @param name name of the resource
    */
+  @Override
   public URL getResource(String name)
   {
     if (_resourceCache == null) {
@@ -1644,6 +1649,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    *
    * @return an input stream to the resource
    */
+  @Override
   public InputStream getResourceAsStream(String name)
   {
     if (name.startsWith("/"))
@@ -1708,6 +1714,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Returns an enumeration of matching resources.
    */
+  @Override
   public Enumeration<URL> findResources(String name)
   {
     if (name.startsWith("/"))
@@ -1736,6 +1743,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Returns the full library path for the name.
    */
+  @Override
   public String findLibrary(String name)
   {
     String systemName = System.mapLibraryName(name);
@@ -1962,6 +1970,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     _lifecycle.copyState(source._lifecycle);
   }
 
+  @Override
   public String toString()
   {
     if (_id != null)

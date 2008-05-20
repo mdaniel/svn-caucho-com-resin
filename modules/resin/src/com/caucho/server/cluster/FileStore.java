@@ -35,12 +35,15 @@ import com.caucho.vfs.TempStream;
 import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
-import java.util.logging.Level;
+import java.util.logging.*;
 
 /**
  * Class storing distributed objects based on the filesystem.
  */
 public class FileStore extends StoreManager {
+  private final static Logger log
+    = Logger.getLogger(FileStore.class.getName());
+  
   private final FileBacking _backing = new FileBacking();
 
   /**

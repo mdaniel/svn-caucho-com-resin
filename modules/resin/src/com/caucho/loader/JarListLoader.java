@@ -119,6 +119,19 @@ abstract public class JarListLoader extends Loader implements Dependency {
 
   protected void addJar(Path jar)
   {
+    if (! jar.exists()) {
+      log.fine(jar.getTail() + " does not exist"
+		  + " (path=" + jar.getNativePath() + ")");
+      return;
+    }
+    else if (! jar.canRead()) {
+      log.warning(jar.getTail() + " is unreadable"
+		  + " (uid=" + jar.getUser() + " mode="
+		  + String.format("%o", jar.getMode())
+		  + " path=" + jar.getNativePath() + ")");
+      return;
+    }
+    
     JarPath jarPath = JarPath.create(jar);
     JarEntry jarEntry = new JarEntry(jarPath);
     _jarList.add(jarEntry);

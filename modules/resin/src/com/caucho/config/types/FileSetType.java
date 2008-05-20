@@ -151,7 +151,9 @@ public class FileSetType {
 	log.log(Level.WARNING, e.toString(), e);
       }
     }
-    else if (path.canRead()) {
+    else if (path.exists()) {
+      // server/2438 - logging on unreadable
+      //  if (path.canRead()) {
       if (isMatch(path, prefix)) {
 	String suffix = "";
 	String fullPath = path.getPath();

@@ -58,51 +58,15 @@ public class WebAppVersioningController extends WebAppController {
   private boolean _isModified = true;
 
 
-  public WebAppVersioningController(String contextPath,
+  public WebAppVersioningController(String name,
+				    String contextPath,
 				    WebAppExpandDeployGenerator generator,
 				    WebAppContainer container)
   {
-    super(contextPath, contextPath, null, container);
+    super(name, contextPath, null, container);
 
     _generator = generator;
   }
-
-  /**
-   * Merges two entries.
-   */
-  /*
-  protected WebAppController merge(WebAppController newController)
-  {
-    if (getConfig() != null && getConfig().getURLRegexp() != null)
-      return newController;
-    else if (newController.getConfig() != null &&
-	     newController.getConfig().getURLRegexp() != null)
-      return this;
-    else {
-      Thread thread = Thread.currentThread();
-      ClassLoader oldLoader = thread.getContextClassLoader();
-
-      try {
-	thread.setContextClassLoader(getParentClassLoader());
-
-	//  The contextPath comes from current web-app
-	WebAppController mergedController
-	  = new WebAppController(getContextPath(),
-				 getRootDirectory(),
-				 _container);
-
-	// server/1h1{2,3}
-	// This controller overrides configuration from the new controller
-	mergedController.mergeController(this);
-	mergedController.mergeController(newController);
-
-	return mergedController;
-      } finally {
-	thread.setContextClassLoader(oldLoader);
-      }
-    }
-  }
-  */
 
   void setModified(boolean isModified)
   {
@@ -229,7 +193,7 @@ public class WebAppVersioningController extends WebAppController {
   @Override
   public String toString()
   {
-    return "WebAppVersioningController" +  "[" + getId() + "]";
+    return getClass().getSimpleName() +  "[" + getId() + "]";
   }
 
   static class VersionNameComparator implements Comparator<String>

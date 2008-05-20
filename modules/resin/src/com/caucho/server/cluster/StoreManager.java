@@ -54,9 +54,9 @@ import java.util.logging.Logger;
  */
 abstract public class StoreManager
   implements AlarmListener, EnvironmentListener, ClassLoaderListener {
-  static protected final Logger log
+  private static final Logger log
     = Logger.getLogger(StoreManager.class.getName());
-  static final L10N L = new L10N(StoreManager.class);
+  private static final L10N L = new L10N(StoreManager.class);
   
   private static int DECODE[];
 
@@ -64,7 +64,7 @@ abstract public class StoreManager
   private String _serverId;
   
   protected int _selfIndex;
-  private ServerConnector []_serverList;
+  private ClusterServer []_serverList;
   
   private Alarm _alarm;
   
@@ -341,10 +341,10 @@ abstract public class StoreManager
 
       ClusterServer []serverList = _cluster.getServerList();
       
-      _serverList = new ServerConnector[serverList.length];
+      _serverList = new ClusterServer[serverList.length];
 
       for (int i = 0; i < serverList.length; i++) {
-	_serverList[i] = serverList[i].getServerConnector();
+	_serverList[i] = serverList[i];
       }
     }
 
@@ -365,10 +365,10 @@ abstract public class StoreManager
     
     // notify the siblings that we're awake
     if (_serverList != null) {
-      ServerConnector []serverList = _serverList;
+      ClusterServer []serverList = _serverList;
 
       for (int i = 0; i < serverList.length; i++) {
-	ServerConnector server = serverList[i];
+	ServerPool server = serverList[i].getServerPool();
 
 	if (server == null)
 	  continue;
@@ -690,7 +690,7 @@ abstract public class StoreManager
   /**
    * Returns the list of cluster servers.
    */
-  protected ServerConnector []getServerList()
+  protected ClusterServer []getServerList()
   {
     return _serverList;
   }
@@ -698,14 +698,14 @@ abstract public class StoreManager
   /**
    * Returns the cluster server which owns the object
    */
-  protected ServerConnector getOwningServer(String objectId)
+  protected ClusterServer getOwningServer(String objectId)
   {
     if (_cluster == null)
       return null;
     
     char ch = objectId.charAt(0);
     
-    ServerConnector []serverList = _serverList;
+    ClusterServer []serverList = _serverList;
 
     if (serverList.length > 0) {
       int srunIndex = decode(ch) % serverList.length;
@@ -768,6 +768,7 @@ abstract public class StoreManager
     _alarm.dequeue();
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _serverId + "]";

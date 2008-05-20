@@ -32,6 +32,7 @@ package com.caucho.server.cluster;
 
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ClusterMXBean;
+import com.caucho.management.server.ClusterServerMXBean;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.management.server.PersistentStoreMXBean;
 import com.caucho.management.server.PortMXBean;
@@ -78,7 +79,7 @@ public class ClusterAdmin extends AbstractManagedObject
     return new HostMXBean[0];
   }
 
-  public ServerConnectorMXBean []getServers()
+  public ClusterServerMXBean []getServers()
   {
     ClusterServer selfServer = _cluster.getSelfServer();
 
@@ -89,7 +90,7 @@ public class ClusterAdmin extends AbstractManagedObject
     if (selfServer != null)
       len--;
 
-    ServerConnectorMXBean []serverMBeans = new ServerConnectorMXBean[len];
+    ClusterServerMXBean []serverMBeans = new ClusterServerMXBean[len];
 
     int j = 0;
 
@@ -97,7 +98,7 @@ public class ClusterAdmin extends AbstractManagedObject
       ClusterServer server = serverList[i];
 
       if (server != selfServer)
-        serverMBeans[j++] = server.getServerConnector().getAdmin();
+        serverMBeans[j++] = server.getAdmin();
     }
 
     return serverMBeans;
@@ -113,8 +114,9 @@ public class ClusterAdmin extends AbstractManagedObject
     server.addDynamicServer(_cluster.getId(), id, address, port);
   }
 
+  @Override
   public String toString()
   {
-    return "ClusterAdmin[" + getObjectName() + "]";
+    return getClass().getSimpleName() + "[" + getObjectName() + "]";
   }
 }

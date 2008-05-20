@@ -13,6 +13,8 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>classloader: add log when .jar is not readable (#2669, rep by chris_se)</li>
+<li>webapp: versioning wasn't handling ROOT-1.0.war properly (#2668, rep by A Servidio)</li>
 <li>windows: invocation decoding fixes</li>
 <li>(2008-05-17) quercus: cast with ResourceValue was sending fatal error instead of warning</li>
 <li>quercus: tempnam was not allowing short prefix for Seagull (#2663, rep by falko)</li>
