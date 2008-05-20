@@ -30,6 +30,8 @@ package com.caucho.jsf.application;
 
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.StreamImpl;
+import com.caucho.vfs.TempBuffer;
 import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
@@ -42,12 +44,16 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.regex.Pattern;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.MissingResourceException;
+import java.util.Map;
 import java.net.URL;
 
 public class ResourceHandlerImpl
@@ -150,7 +156,7 @@ public class ResourceHandlerImpl
 
       resource = _resourceCache.get(cacheKey);
 
-      if (resource == null || resource.needsUpdate()) {
+      if (resource == null || resource.isStale()) {
 
         Path path = locateResource(resourceName, libraryName, locale);
 
@@ -171,7 +177,6 @@ public class ResourceHandlerImpl
           else
             mimeType = contentType;
 
-
           if (resource != null)
             resource.update(path);
           else {
@@ -180,7 +185,7 @@ public class ResourceHandlerImpl
                                         resourceName,
                                         libraryName,
                                         mimeType);
-            
+
             Application app = context.getApplication();
 
             if (app.getProjectStage() != ProjectStage.Development)
@@ -240,7 +245,7 @@ public class ResourceHandlerImpl
                                  libraryName);
 
       if (libPath.exists()) {
-        String[] paths = libPath.list();
+        String []paths = libPath.list();
 
         String version = null;
 
@@ -293,7 +298,7 @@ public class ResourceHandlerImpl
                               resourceName);
 
       if (base.isDirectory()) {
-        String[] paths = base.list();
+        String []paths = base.list();
 
         String version = null;
 
@@ -317,9 +322,9 @@ public class ResourceHandlerImpl
 
   public int compareVersions(String ver1, String ver2)
   {
-    String[] ver1Parts = _versionPattern.split(ver1);
+    String []ver1Parts = _versionPattern.split(ver1);
 
-    String[] ver2Parts = _versionPattern.split(ver2);
+    String []ver2Parts = _versionPattern.split(ver2);
 
     int len;
     if (ver1Parts.length > ver2Parts.length)
@@ -329,9 +334,9 @@ public class ResourceHandlerImpl
 
 
     for (int i = 0; i < len; i++) {
-      char[] ver1Part = ver1Parts[i].toCharArray();
+      char []ver1Part = ver1Parts[i].toCharArray();
 
-      char[] ver2Part = ver2Parts[i].toCharArray();
+      char []ver2Part = ver2Parts[i].toCharArray();
 
       if (ver1Part.length == ver2Part.length) {
         for (int j = 0; j < ver2Part.length; j++) {
@@ -372,6 +377,17 @@ public class ResourceHandlerImpl
     HttpServletResponse response
       = (HttpServletResponse) context.getExternalContext().getResponse();
 
+    String method = request.getMethod();
+    if (!method.equalsIgnoreCase("GET") &&
+        !method.equalsIgnoreCase("POST") &&
+        !method.equalsIgnoreCase("HEAD")) {
+      response.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED,
+                         "Method not implemented");
+
+      return;
+    }
+
+
     String resourceName;
 
     String pathInfo = request.getPathInfo();
@@ -394,32 +410,75 @@ public class ResourceHandlerImpl
     String libraryName;
     String locale;
 
-    if (temp != null && ! "".equals(temp))
+    if (temp != null && !"".equals(temp))
       libraryName = temp;
     else
       libraryName = null;
 
     temp = request.getParameter("loc");
 
-    if (temp != null && ! "".equals(temp))
+    if (temp != null && !"".equals(temp))
       locale = temp;
     else
       locale = null;
 
-    Resource resource = createResource(context,
-                                       resourceName,
-                                       libraryName,
-                                       null,
-                                       locale);
+    final Resource resource;
 
-    if (resource != null){
-      if (resource instanceof ResourceImpl) {
-        ((ResourceImpl)resource).writeToStream(response.getOutputStream());
-      } else {
-        throw new UnsupportedOperationException();
+    if (locale != null)
+      resource = createResource(context,
+                                resourceName,
+                                libraryName,
+                                null,
+                                locale);
+    else
+      resource = createResource(resourceName, libraryName);
+
+    if (resource != null) {
+      Map<String, String> headers = resource.getResponseHeaders();
+
+      for (Map.Entry<String, String> entry : headers.entrySet()) {
+        response.setHeader(entry.getKey(), entry.getValue());
       }
-    } else {
-      throw new RuntimeException("404");
+
+      response.setContentType(resource.getContentType());
+
+      if (resource instanceof ResourceImpl) {
+        ResourceImpl resourceImpl = (ResourceImpl) resource;
+        response.setContentLength((int) resourceImpl.getLength());
+
+        if (resourceImpl.userAgentNeedsUpdate(context)) {
+          if (!method.equalsIgnoreCase("HEAD"))
+            resourceImpl.writeToStream(response.getOutputStream());
+        }
+        else {
+          response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+        }
+      }
+      else {
+        InputStream is = resource.getInputStream();
+        OutputStream os = response.getOutputStream();
+
+        TempBuffer tempBuffer = TempBuffer.allocate();
+
+        try {
+          byte []buffer = tempBuffer.getBuffer();
+          int length = buffer.length;
+          int len;
+
+          while ((len = is.read(buffer, 0, length)) > 0)
+            os.write(buffer, 0, len);
+        }
+        finally {
+          TempBuffer.free(tempBuffer);
+          tempBuffer = null;
+
+          is.close();
+        }
+
+      }
+    }
+    else {
+      response.sendError(HttpServletResponse.SC_NOT_FOUND);
     }
   }
 

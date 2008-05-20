@@ -33,6 +33,7 @@ import com.caucho.util.QDate;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.Base64;
+import com.caucho.util.L10N;
 
 import javax.faces.application.Resource;
 import javax.faces.context.FacesContext;
@@ -40,9 +41,19 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.net.URL;
 
-public class ResourceImpl extends Resource {
+public class ResourceImpl
+  extends Resource
+{
+
+  private static final L10N L = new L10N(ResourceHandlerImpl.class);
+
+  private static final Logger log
+    = Logger.getLogger(ResourceHandlerImpl.class.getName());
 
   private final static long UPDATE_INTERVAL = 300000L;
 
@@ -52,6 +63,7 @@ public class ResourceImpl extends Resource {
   private long _lastModified;
   private long _length;
   private String _lastModifiedString;
+  private String _etag;
 
   public ResourceImpl(Path path,
                       QDate calendar,
@@ -68,7 +80,8 @@ public class ResourceImpl extends Resource {
     update(path);
   }
 
-  public InputStream getInputStream() throws IOException
+  public InputStream getInputStream()
+    throws IOException
   {
     return _path.openRead();
   }
@@ -88,9 +101,12 @@ public class ResourceImpl extends Resource {
 
   public Map<String, String> getResponseHeaders()
   {
-    if (true) throw new UnsupportedOperationException("unimplemented");
+    Map<String, String> result = new HashMap<String, String>();
 
-    return null;
+    result.put("ETag", _etag);
+    result.put("Last-Modified", _lastModifiedString);
+    
+    return result;
   }
 
   public URL getURL()
@@ -102,17 +118,34 @@ public class ResourceImpl extends Resource {
 
   public boolean userAgentNeedsUpdate(FacesContext context)
   {
-    if (true) throw new UnsupportedOperationException("unimplemented");
+    String ifModifiedSince = context.getExternalContext().getRequestHeaderMap().get("If-Modified-Since");
 
-    return false;
+    if (ifModifiedSince == null || "".equals(ifModifiedSince)) return true;
+
+    long lastModified = 0;
+    try {
+      lastModified = _calendar.parseDate(ifModifiedSince);
+    }
+    catch (Exception e) {
+      log.log(Level.FINER, L.l("Can't parse date '{0}'", ifModifiedSince), e);
+      return true;
+    }
+    
+    return lastModified != _lastModified;
   }
 
-  public boolean needsUpdate() {
+  public long getLength()
+  {
+    return _length;
+  }
+
+  public boolean isStale()
+  {
     return (_lastCheck + UPDATE_INTERVAL < Alarm.getCurrentTime());
   }
 
-  public void update(Path path) {
-
+  public void update(Path path)
+  {
     long lastModified = path.getLastModified();
     long length = path.getLength();
 
@@ -120,14 +153,24 @@ public class ResourceImpl extends Resource {
       _lastModified = lastModified;
       _length = length;
 
+      CharBuffer cb = new CharBuffer();
+      cb.append('"');
+      Base64.encode(cb, path.getCrc64());
+      cb.append('"');
+      _etag = cb.close();
+
       synchronized (_calendar) {
         _calendar.setGMTTime(lastModified);
         _lastModifiedString = _calendar.printDate();
       }
     }
 
+    if (getContentType() == null || "".equals(getContentType()))
+      setContentType(path.getContentType());
+
     _lastCheck = Alarm.getCurrentTime();
 
     _path = path;
+
   }
 }
