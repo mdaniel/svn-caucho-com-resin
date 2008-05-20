@@ -54,7 +54,9 @@ package com.caucho.hmpp.packet
 
     public var _value:Object;
 
-    public function Message(to:String, from:String, value:Object)
+    public function Message(to:String = "", 
+                            from:String = "", 
+                            value:Object = null)
     {
       super(MESSAGE, to, from);
 
@@ -64,6 +66,11 @@ package com.caucho.hmpp.packet
     public function get value():Object
     {
       return _value;
+    }
+
+    public override function toString():String
+    {
+      return "Message[to=" + _to + ", from=" + _from + " value=" + _value + "]";
     }
   }
 }

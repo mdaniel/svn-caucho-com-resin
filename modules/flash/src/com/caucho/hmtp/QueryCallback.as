@@ -64,9 +64,6 @@ package com.caucho.hmtp
 
   import com.caucho.hmtp.packet.Packet;
 
-  import mx.core.Application;
-  import mx.utils.URLUtil;
-
   public interface QueryCallback
   {
     function onQueryResult(to:String, from:String, 

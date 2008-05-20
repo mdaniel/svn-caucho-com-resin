@@ -66,9 +66,6 @@ package com.caucho.hmtp
   import com.caucho.hmtp.auth.*;
   import com.caucho.hmtp.packet.*;
 
-  import mx.core.Application;
-  import mx.utils.URLUtil;
-
   public class HmtpClient extends EventDispatcher 
                           implements HmtpConnection 
   {
@@ -83,11 +80,10 @@ package com.caucho.hmtp
     private var _port:int;
     private var _path:String;
 
-    private var _to:String;
-
     private var _jid:String;
 
     private var _policyPort:int = -1;
+    private var _policyUrl:String = null;
     private var _socket:Socket = new Socket();
 
     private var _readHTTPHeader:Boolean = false;
@@ -159,15 +155,20 @@ package com.caucho.hmtp
 
     public function connect():void
     {
-      /* TODO
-      var policyUrl:URL = 
-        new URL(URLUtil.getFullURL(Application.application.url, destination));
+      if (_policyPort != -1) {
+        var policy:String = "xmlsocket://" + _host + ":" + _policyPort;
 
-      var policy:String = "xmlsocket://" + policyUrl.host + ":" + 
-                          (_policyPort < 0 ? policyUrl.port : _policyPort);
+        Security.loadPolicyFile(policy);
+      }
+      else if (_policyUrl != null) {
+        Security.loadPolicyFile(_policyUrl);
+      }
+      else {
+        Security.loadPolicyFile(_scheme + "://" + _host + ":" + _port + 
+                                "/crossdomain.xml");
+      }
 
-      Security.loadPolicyFile(policy);
-      */
+      trace("host = " + _host + " port = " + _port);
 
       _socket = new Socket(_host, _port);
       _socket.addEventListener(Event.CONNECT, handleConnect);
@@ -178,7 +179,7 @@ package com.caucho.hmtp
     private function handleConnect(event:Event):void
     {
       _socket.writeUTFBytes("POST " + _path + "/hemp HTTP/1.1\r\n");
-      _socket.writeUTFBytes("Host: " + _to + ":" + _port + "\r\n");
+      _socket.writeUTFBytes("Host: " + _host + ":" + _port + "\r\n");
       _socket.writeUTFBytes("Upgrade: HMTP/0.9\r\n");
       _socket.writeUTFBytes("Content-Length: 0\r\n");
       _socket.writeUTFBytes("\r\n");
@@ -284,6 +285,20 @@ package com.caucho.hmtp
                                           msg.value, msg.error);
         }
       }*/
+    }
+
+    /**
+     * Sets the port on which the XMLSocket server is listening to serve
+     * the policy file.
+     */
+    public function get policyUrl():String
+    {
+      return _policyUrl;
+    }
+
+    public function set policyUrl(url:String):void
+    {
+      _policyUrl = url;
     }
 
     /**

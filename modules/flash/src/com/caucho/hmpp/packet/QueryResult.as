@@ -73,6 +73,14 @@ package com.caucho.hmpp.packet
     {
       return _value;
     }
+
+    public override function toString():String
+    {
+      return "QueryResult[id=" + _id + 
+                       ", to=" + _to + 
+                       ", from=" + _from + 
+                       " value=" + _value + "]";
+    }
   }
 }
 
