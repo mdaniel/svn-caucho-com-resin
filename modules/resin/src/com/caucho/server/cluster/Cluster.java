@@ -33,7 +33,6 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
-import com.caucho.config.types.Period;
 import com.caucho.jmx.Jmx;
 import com.caucho.lifecycle.StartLifecycleException;
 import com.caucho.loader.DynamicClassLoader;
@@ -101,14 +100,6 @@ public class Cluster
   private StoreManager _clusterStore;
 
   private boolean _isDynamicServerEnable = false;
-
-  // compatibility with 3.0
-  private long _clientMaxIdleTime = 30000L;
-  private long _clientFailRecoverTime = 15000L;
-  private long _clientWarmupTime = 60000L;
-
-  private long _clientReadTimeout = 60000L;
-  private long _clientConnectTimeout = 5000L;
 
   private ContainerProgram _serverProgram
     = new ContainerProgram();
@@ -502,113 +493,6 @@ public class Cluster
     _clusterStore = store;
   }
 
-  /**
-   * Sets the max-idle time.
-   */
-  public void setClientMaxIdleTime(Period period)
-  {
-    _clientMaxIdleTime = period.getPeriod();
-  }
-
-  /**
-   * Gets the live time.
-   */
-  public long getClientMaxIdleTime()
-  {
-    return _clientMaxIdleTime;
-  }
-
-  /**
-   * Sets the live time.
-   *
-   * @deprecated
-   */
-  public void setClientLiveTime(Period period)
-  {
-    setClientMaxIdleTime(period);
-  }
-
-  /**
-   * Sets the client connection fail-recover time.
-   */
-  public void setClientFailRecoverTime(Period period)
-  {
-    _clientFailRecoverTime = period.getPeriod();
-  }
-
-  /**
-   * Gets the client fail-recover time.
-   */
-  public long getClientFailRecoverTime()
-  {
-    return _clientFailRecoverTime;
-  }
-
-  /**
-   * Sets the dead time.
-   *
-   * @deprecated
-   */
-  public void setClientDeadTime(Period period)
-  {
-    setClientFailRecoverTime(period);
-  }
-
-  /**
-   * Sets the client warmup time.
-   */
-  public void setClientWarmupTime(Period period)
-  {
-    _clientWarmupTime = period.getPeriod();
-  }
-
-  /**
-   * Gets the client warmup time.
-   */
-  public long getClientWarmupTime()
-  {
-    return _clientWarmupTime;
-  }
-
-  /**
-   * Sets the connect timeout.
-   */
-  public void setClientConnectTimeout(Period period)
-  {
-    _clientConnectTimeout = period.getPeriod();
-  }
-
-  /**
-   * Gets the connect timeout.
-   */
-  public long getClientConnectTimeout()
-  {
-    return _clientConnectTimeout;
-  }
-
-  /**
-   * Sets the read timeout.
-   */
-  public void setClientReadTimeout(Period period)
-  {
-    _clientReadTimeout = period.getPeriod();
-  }
-
-  /**
-   * Gets the read timeout.
-   */
-  public long getClientReadTimeout()
-  {
-    return _clientReadTimeout;
-  }
-
-  /**
-   * Sets the write timeout.
-   */
-  public void setClientWriteTimeout(Period period)
-  {
-  }
-
   public StoreManager createJdbcStore()
     throws ConfigException
   {
@@ -716,22 +600,16 @@ public class Cluster
     if (serverId == null)
       serverId = "";
 
-    boolean isActive;
-
     ClusterServer self = findServer(serverId);
 
     if (self != null) {
       _clusterLocal.set(this);
-      isActive = true;
     }
     else if (_clusterLocal.get() == null && _serverList.size() == 0) {
       // if it's the empty cluster, add it
       _clusterLocal.set(this);
-      isActive = true;
     }
-    else
-      isActive = false;
-
+ 
     try {
       String name = _id;
 
@@ -885,6 +763,10 @@ public class Cluster
       return server;
     }
   }
+  
+  //
+  // persistent store support
+  //
 
   /**
    * Generate the primary, secondary, tertiary, returning the value encoded
@@ -974,6 +856,11 @@ public class Cluster
     addDigit(cb, (int) ((backupCode >> 16) & 0xffff));
     addDigit(cb, (int) ((backupCode >> 32) & 0xffff));
   }
+  
+  public void generateBackup(StringBuilder sb, int index)
+  {
+    generateBackupCode(sb, generateBackupCode(index));
+  }
 
   /**
    * Returns the primary server.
@@ -1051,6 +938,75 @@ public class Cluster
       return srunList[index];
     else
       return null;
+  }
+
+  /**
+   * Returns the primary server.
+   */
+  public int getPrimaryIndex(String id, int offset)
+  {
+    ClusterServer []srunList = getServerList();
+    int srunLength = srunList.length;
+
+    int index = 0;
+
+    if (srunLength < 64) {
+      index = decode(id.charAt(offset + 0));
+    }
+    else {
+      int d1 = decode(id.charAt(offset + 0));
+      int d2 = decode(id.charAt(offset + 1));
+      
+      index = d1 * 64 + d2;
+    }
+
+    return index;
+  }
+
+  /**
+   * Returns the secondary server.
+   */
+  public int getSecondaryIndex(String id, int offset)
+  {
+    ClusterServer []srunList = getServerList();
+    int srunLength = srunList.length;
+
+    int index = 0;
+
+    if (srunLength < 64) {
+      index = decode(id.charAt(offset + 1));
+    }
+    else {
+      int d1 = decode(id.charAt(offset + 2));
+      int d2 = decode(id.charAt(offset + 3));
+      
+      index = d1 * 64 + d2;
+    }
+
+    return index;
+  }
+
+  /**
+   * Returns the tertiary server.
+   */
+  public int getTertiaryIndex(String id, int offset)
+  {
+    ClusterServer []srunList = getServerList();
+    int srunLength = srunList.length;
+
+    int index = 0;
+
+    if (srunLength < 64) {
+      index = decode(id.charAt(offset + 2));
+    }
+    else {
+      int d1 = decode(id.charAt(offset + 4));
+      int d2 = decode(id.charAt(offset + 5));
+      
+      index = d1 * 64 + d2;
+    }
+
+    return index;
   }
 
   private void addDigit(StringBuilder cb, int digit)
@@ -1140,11 +1096,11 @@ public class Cluster
     }
   }
 
+  @Override
   public String toString()
   {
     return "Cluster[" + _id + "]";
   }
-
 
   /**
    * Converts an integer to a printable character

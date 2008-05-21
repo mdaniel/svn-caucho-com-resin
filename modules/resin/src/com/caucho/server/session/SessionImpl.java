@@ -110,14 +110,8 @@ public class SessionImpl implements HttpSession, CacheListener {
     _id = id;
 
     // Finds the owning JVM from the session encoding
-    char ch = id.charAt(0);
-    int length = manager.getSrunLength();
-
-    if (length > 0)
-      _srunIndex = SessionManager.decode(ch) % length;
-    else
-      _srunIndex = 0;
-
+    _srunIndex = manager.getObjectManager().getPrimaryIndex(id);
+ 
     _values = createValueMap();
 
     if (log.isLoggable(Level.FINE))

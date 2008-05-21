@@ -40,12 +40,15 @@ public final class SessionObjectManager implements ObjectManager
 {
   private final SessionManager _sessionManager;
 
+  private Cluster _cluster;
+ 
   /**
    * Creates and initializes a new session object manager
    */
   public SessionObjectManager(SessionManager sessionManager)
   {
     _sessionManager = sessionManager;
+    _cluster = Cluster.getCurrent();
   }
   /**
    * Returns the maximum idle time.
@@ -130,6 +133,24 @@ public final class SessionObjectManager implements ObjectManager
     throws IOException
   {
     _sessionManager.notifyRemove(objectId);
+  }
+  
+  int getPrimaryIndex(String id)
+  {
+    return _cluster.getPrimaryIndex(id, 0);
+  }
+
+  boolean isInSessionGroup(String id)
+  {
+    int index = _cluster.getPrimaryIndex(id, 0);
+  
+    ClusterServer []serverList = _cluster.getServerList();
+    for (ClusterServer server : serverList) {
+     if (server != null && index == server.getIndex())
+        return true;
+    }
+    
+    return false;
   }
 
   static class DistributedObjectInputStream extends ObjectInputStream {

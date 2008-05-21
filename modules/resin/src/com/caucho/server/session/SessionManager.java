@@ -31,14 +31,12 @@ package com.caucho.server.session;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.types.JndiBuilder;
 import com.caucho.config.types.Period;
 import com.caucho.hessian.io.*;
 import com.caucho.management.server.SessionManagerMXBean;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterObject;
 import com.caucho.server.cluster.ClusterServer;
-import com.caucho.server.cluster.ObjectManager;
 import com.caucho.server.cluster.Store;
 import com.caucho.server.cluster.StoreManager;
 import com.caucho.server.dispatch.DispatchServer;
@@ -50,8 +48,6 @@ import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.util.RandomUtil;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -70,7 +66,7 @@ import java.util.logging.Logger;
 // import com.caucho.server.http.VirtualHost;
 
 /**
- * Manages sessions in a web-app.
+ * Manages sessions in a web-webApp.
  */
 public final class SessionManager implements AlarmListener
 {
@@ -91,13 +87,13 @@ public final class SessionManager implements AlarmListener
   private static final int SAVE_AFTER_REQUEST = 0x4;
   private static final int SAVE_ON_SHUTDOWN = 0x8;
   
-  private static final int DECODE[];
-  
-  private WebApp _webApp;
+  private final WebApp _webApp;
   private final SessionManagerAdmin _admin;
-
-  // factory for creating sessions
-  // private SessionFactory _sessionFactory;
+  
+  private final Cluster _cluster;
+  private final int _selfIndex;
+  
+  private final SessionObjectManager _objectManager;
 
   // active sessions
   private LruCache<String,SessionImpl> _sessions;
@@ -145,13 +141,12 @@ public final class SessionManager implements AlarmListener
   private int _sessionSaveMode = SAVE_AFTER_REQUEST;
 
   //private SessionStore sessionStore;
-  private SessionObjectManager _objectManager;
   private StoreManager _storeManager;
 
   // If true, serialization errors should not be logged
   // XXX: changed for JSF
   private boolean _ignoreSerializationErrors = true;
-  private boolean _isHessianSerialization = false;
+  private boolean _isHessianSerialization = true;
 
   // List of the HttpSessionListeners from the configuration file
   private ArrayList<HttpSessionListener> _listeners;
@@ -171,19 +166,9 @@ public final class SessionManager implements AlarmListener
   private int _alwaysLoadSession;
   private int _alwaysSaveSession;
 
-  private boolean _distributedRing;
-  private Path _persistentPath;
-
   private boolean _isClosed;
 
   private String _distributionId;
-  private Cluster _cluster;
-  private ClusterServer _selfServer;
-  private ClusterServer []_srunGroup = new ClusterServer[0];
-
-  private int _srunIndex;
-  private int _srunLength;
-  private int _machineLength;
 
   private Alarm _alarm = new Alarm(this);
 
@@ -196,15 +181,18 @@ public final class SessionManager implements AlarmListener
   /**
    * Creates and initializes a new session manager
    *
-   * @param app the web-app webApp
-   * @param registry the web-app configuration node
+   * @param webApp the web-webApp webApp
    */
-  public SessionManager(WebApp app)
+  public SessionManager(WebApp webApp)
     throws Exception
   {
-    _webApp = app;
+    _webApp = webApp;
+    
+    _cluster = webApp.getCluster();
+    _selfIndex = _cluster.getSelfServer().getIndex();
+    _objectManager = new SessionObjectManager(this);
 
-    DispatchServer server = app.getDispatchServer();
+    DispatchServer server = webApp.getDispatchServer();
     if (server != null) {
       InvocationDecoder decoder = server.getInvocationDecoder();
 
@@ -214,12 +202,9 @@ public final class SessionManager implements AlarmListener
       _cookieName = decoder.getSessionCookie();
       _sslCookieName = decoder.getSSLSessionCookie();
     }
-    
-    // this.server = app.getVirtualHost().getServer();
-    // this.srunIndex = server.getSrunIndex();
 
-    String hostName = app.getHostName();
-    String contextPath = app.getContextPath();
+    String hostName = webApp.getHostName();
+    String contextPath = webApp.getContextPath();
     
     if (hostName == null || hostName.equals(""))
       hostName = "default";
@@ -228,8 +213,6 @@ public final class SessionManager implements AlarmListener
 
     if (_distributionId == null)
       _distributionId = name;
-
-    _persistentPath = Vfs.lookup("WEB-INF/sessions");
 
     _admin = new SessionManagerAdmin(this);
   }
@@ -240,34 +223,6 @@ public final class SessionManager implements AlarmListener
   public SessionManagerMXBean getAdmin()
   {
     return _admin;
-  }
-
-  /**
-   * Gets the cluster.
-   */
-  protected Cluster getCluster()
-  {
-    synchronized (this) {
-      if (_cluster == null) {
-	_cluster = Cluster.getLocal();
-	ClusterServer selfServer = null;
-
-	if (_cluster != null) {
-	  _machineLength = _cluster.getMachineList().size();
-	  _srunLength = _cluster.getServerList().length;
-	  
-	  selfServer = _cluster.getSelfServer();
-	  _selfServer = selfServer;
-
-	  if (selfServer != null) {
-	    _srunGroup = _cluster.getServerList();
-	    _srunIndex = selfServer.getIndex();
-	  }
-	}
-      }
-    }
-
-    return _cluster;
   }
 
   /**
@@ -340,6 +295,14 @@ public final class SessionManager implements AlarmListener
   ServletAuthenticator getAuthenticator()
   {
     return _webApp.getAuthenticator();
+  }
+  
+  /**
+   * Returns the object manager
+   */
+  SessionObjectManager getObjectManager()
+  {
+    return _objectManager;
   }
 
   /**
@@ -424,6 +387,14 @@ public final class SessionManager implements AlarmListener
   public boolean isSaveAfterRequest()
   {
     return (_sessionSaveMode & SAVE_AFTER_REQUEST) != 0;
+  }
+  
+  /**
+   * Determines how many digits are used to encode the server
+   */
+  boolean isTwoDigitSessionIndex()
+  {
+   return _isTwoDigitSessionIndex;
   }
 
   /**
@@ -696,35 +667,6 @@ public final class SessionManager implements AlarmListener
   }
 
   /**
-   * Returns the owning server.
-   */
-  ClusterServer getServer(int index)
-  {
-    Cluster cluster = getCluster();
-    
-    if (cluster != null)
-      return cluster.getServer(index);
-    else
-      return null;
-  }
-  
-  /**
-   * Returns the index of this JVM in the ring.
-   */
-  public int getSrunIndex()
-  {
-    return _srunIndex;
-  }
-  
-  /**
-   * Returns the number of sruns in the cluster
-   */
-  public int getSrunLength()
-  {
-    return _srunLength;
-  }
-
-  /**
    * Returns true if the sessions are closed.
    */
   public boolean isClosed()
@@ -738,73 +680,16 @@ public final class SessionManager implements AlarmListener
   public StoreManager createFileStore()
     throws ConfigException
   {
-    Cluster cluster = getCluster();
-
-    if (cluster == null)
-      throw new ConfigException(L.l("<file-store> needs a defined <cluster>."));
-    
-    if (cluster.getStore() != null)
+    if (_cluster.getStore() != null)
       throw new ConfigException(L.l("<file-store> may not be used with a defined <persistent-store>.  Use <use-persistent-store> instead."));
 
-    StoreManager fileStore = cluster.createPrivateFileStore();
+    StoreManager fileStore = _cluster.createPrivateFileStore();
     
     _storeManager = fileStore;
 
     _isWebAppStore = true;
 
     return fileStore;
-  }
-
-  /**
-   * Sets the jdbc store.
-   */
-  public StoreManager createJdbcStore()
-    throws ConfigException
-  {
-    Cluster cluster = getCluster();
-
-    if (cluster == null)
-      throw new ConfigException(L.l("<jdbc-store> needs a defined <cluster>."));
-    
-    if (cluster.getStore() != null)
-      throw new ConfigException(L.l("<jdbc-store> may not be used with a defined <persistent-store>.  Use <use-persistent-store> instead."));
-    
-    _storeManager = cluster.createJdbcStore();
-
-    _isWebAppStore = true;
-
-    return _storeManager;
-  }
-
-  /**
-   * Sets the tcp store.
-   */
-  public void setTcpStore(boolean isEnable)
-    throws Exception
-  {
-    setClusterStore(isEnable);
-  }
-
-  /**
-   * Sets the cluster store.
-   */
-  public void setClusterStore(boolean isEnable)
-    throws Exception
-  {
-    if (! isEnable)
-      return;
-    
-    Cluster cluster = getCluster();
-
-    if (cluster == null)
-      throw new ConfigException(L.l("<cluster-store> needs a defined <cluster>."));
-    
-    StoreManager store = cluster.getStore();
-
-    if (store == null)
-      throw new ConfigException(L.l("cluster-store in <session-config> requires a configured cluster-store in the <cluster>"));
-    
-    _storeManager = store;
   }
 
   /**
@@ -815,13 +700,8 @@ public final class SessionManager implements AlarmListener
   {
     if (! enable)
       return;
-
-    Cluster cluster = getCluster();
-
-    if (cluster == null)
-      throw new ConfigException(L.l("<use-persistent-store> needs a defined <cluster>."));
-    
-    StoreManager store = cluster.getStore();
+   
+    StoreManager store = _cluster.getStore();
 
     if (store == null) {
       try {
@@ -844,14 +724,6 @@ public final class SessionManager implements AlarmListener
       throw new ConfigException(L.l("use-persistent-store may not be used with <jdbc-store> or <file-store>."));
     
     _storeManager = store;
-  }
-
-  /**
-   * Returns the session factory.
-   */
-  public void setPersistentPath(Path path)
-  {
-    _persistentPath = path;
   }
 
   public String getDistributionId()
@@ -1090,9 +962,6 @@ public final class SessionManager implements AlarmListener
     _sessions = new LruCache<String,SessionImpl>(_sessionMax);
     _sessionIter = _sessions.values();
 
-    if (_cluster == null)
-      getCluster();
-
     if (_isWebAppStore) {
       // for backward compatibility
       
@@ -1112,8 +981,6 @@ public final class SessionManager implements AlarmListener
     }
 
     if (_storeManager != null) {
-      _objectManager = new SessionObjectManager(this);
-      
       _sessionStore = _storeManager.createStore(_distributionId,
 						_objectManager);
       _sessionStore.setMaxIdleTime(_sessionTimeout);
@@ -1162,7 +1029,8 @@ public final class SessionManager implements AlarmListener
     String id = oldId;
 
     if (id == null || id.length() < 4
-	|| ! isInSessionGroup(id) || ! reuseSessionId(fromCookie)) {
+	|| ! _objectManager.isInSessionGroup(id)
+        || ! reuseSessionId(fromCookie)) {
       id = createSessionId(request, true);
     }
 
@@ -1226,10 +1094,10 @@ public final class SessionManager implements AlarmListener
 
   public String createSessionIdImpl(HttpServletRequest request)
   {
-    StringBuffer cb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     // this section is the host specific session index
     // the most random bit is the high bit
-    int index = _srunIndex;
+    int index = _selfIndex;
 
     // look at caucho.session-server-id for a hint of the owner
     Object owner = request.getAttribute("caucho.session-server-id");
@@ -1237,8 +1105,6 @@ public final class SessionManager implements AlarmListener
     }
     else if (owner instanceof Number) {
       index = ((Number) owner).intValue();
-      if (_srunLength <= index)
-	index = _srunIndex;
     }
     else if (owner instanceof String) {
       ClusterServer server = _cluster.getServer((String) owner);
@@ -1252,21 +1118,21 @@ public final class SessionManager implements AlarmListener
 
     int length = _cookieLength;
 
-    addBackup(cb, index);
+    _cluster.generateBackup(sb, index);
 
-    length -= cb.length();
+    length -= sb.length();
 
     long random = RandomUtil.getRandomLong();
 
     for (int i = 0; i < 11 && length-- > 0; i++) {
-      cb.append(convert(random));
+      sb.append(convert(random));
       random = random >> 6;
     }
 
     if (length > 0) {
       long time = Alarm.getCurrentTime();
       for (int i = 0; i < 7 && length-- > 0; i++) {
-        cb.append(convert(time));
+        sb.append(convert(time));
         time = time >> 6;
       }
     }
@@ -1274,44 +1140,17 @@ public final class SessionManager implements AlarmListener
     while (length > 0) {
       random = RandomUtil.getRandomLong();
       for (int i = 0; i < 11 && length-- > 0; i++) {
-        cb.append(convert(random));
+        sb.append(convert(random));
         random = random >> 6;
       }
     }
 
     if (_isAppendServerIndex) {
-      cb.append('.');
-      cb.append((index + 1));
+      sb.append('.');
+      sb.append((index + 1));
     }
 
-    return cb.toString();
-  }
-
-  /**
-   * Adds the primary/backup/third digits to the session id.
-   */
-  private void addBackup(StringBuffer cb, int index)
-  {
-    long backupCode;
-
-    if (_selfServer != null)
-      backupCode = _selfServer.getCluster().generateBackupCode(index);
-    else
-      backupCode = 0x000200010000L;
-    
-    addDigit(cb, (int) (backupCode & 0xffff));
-    addDigit(cb, (int) ((backupCode >> 16) & 0xffff));
-    addDigit(cb, (int) ((backupCode >> 32) & 0xffff));
-  }
-
-  private void addDigit(StringBuffer cb, int digit)
-  {
-    if (_srunLength <= 64 && ! _isTwoDigitSessionIndex)
-      cb.append(convert(digit));
-    else {
-      cb.append(convert(digit / 64));
-      cb.append(convert(digit));
-    }
+    return sb.toString();
   }
 
   /**
@@ -1346,7 +1185,7 @@ public final class SessionManager implements AlarmListener
     }
     
     if (session == null && _sessionStore != null) {
-      if (! isInSessionGroup(key))
+      if (! _objectManager.isInSessionGroup(key))
 	return null;
 
       session = create(key, now, create);
@@ -1386,23 +1225,6 @@ public final class SessionManager implements AlarmListener
     return session;
   }
 
-  public boolean isInSessionGroup(String id)
-  {
-    if (_srunLength == 0 || _srunGroup.length == 0)
-      return true;
-
-    int group = decode(id.charAt(0)) % _srunLength;
-
-    for (int i = _srunGroup.length - 1; i >= 0; i--) {
-      ClusterServer server = _srunGroup[i];
-      
-      if (server != null && group == server.getIndex())
-        return true;
-    }
-    
-    return false;
-  }
-
   /**
    * Creates a session.  It's already been established that the
    * key does not currently have a session.
@@ -1411,18 +1233,18 @@ public final class SessionManager implements AlarmListener
   {
     SessionImpl session = new SessionImpl(this, key, now);
 
+    Store sessionStore = _sessionStore;
+    if (sessionStore != null) {
+      ClusterObject clusterObject = sessionStore.createClusterObject(key);
+      session.setClusterObject(clusterObject);
+    }
+
     // If another thread has created and stored a new session,
     // putIfNew will return the old session
     session = _sessions.putIfNew(key, session);
 
     if (! key.equals(session.getId()))
       throw new IllegalStateException(key + " != " + session.getId());
-
-    Store sessionStore = _sessionStore;
-    if (sessionStore != null) {
-      ClusterObject clusterObject = sessionStore.createClusterObject(key);
-      session.setClusterObject(clusterObject);
-    }
 
     return session;
   }
@@ -1436,30 +1258,6 @@ public final class SessionManager implements AlarmListener
 
     if (session != null)
       session.invalidateLru();
-  }
-
-  /**
-   * Converts an integer to a printable character
-   */
-  private static char convert(long code)
-  {
-    code = code & 0x3f;
-    
-    if (code < 26)
-      return (char) ('a' + code);
-    else if (code < 52)
-      return (char) ('A' + code - 26);
-    else if (code < 62)
-      return (char) ('0' + code - 52);
-    else if (code == 62)
-      return '_';
-    else
-      return '-';
-  }
-
-  public static int decode(int code)
-  {
-    return DECODE[code & 0x7f];
   }
 
   private void handleCreateListeners(SessionImpl session)
@@ -1579,7 +1377,7 @@ public final class SessionManager implements AlarmListener
 	    // XXX: server/12cg - single signon shouldn't logout
      	    session.invalidateTimeout();
 	  }
-	  else if (session.getSrunIndex() != _srunIndex && _srunIndex >= 0) {
+	  else if (session.getSrunIndex() != _selfIndex && _selfIndex >= 0) {
             if (log.isLoggable(Level.FINE))
               log.fine(session + " timeout (backup)");
             
@@ -1666,18 +1464,28 @@ public final class SessionManager implements AlarmListener
     */
   }
 
+  /**
+   * Converts an integer to a printable character
+   */
+  private static char convert(long code)
+  {
+    code = code & 0x3f;
+    
+    if (code < 26)
+      return (char) ('a' + code);
+    else if (code < 52)
+      return (char) ('A' + code - 26);
+    else if (code < 62)
+      return (char) ('0' + code - 52);
+    else if (code == 62)
+      return '_';
+    else
+      return '-';
+  }
+
   @Override
   public String toString()
   {
-    if (_webApp != null)
-      return "SessionManager[" + _webApp.getContextPath() + "]";
-    else
-      return "SessionManager[]";
-  }
-
-  static {
-    DECODE = new int[128];
-    for (int i = 0; i < 64; i++)
-      DECODE[(int) convert(i)] = i;
+    return getClass().getSimpleName() + "[" + _webApp.getContextPath() + "]";
   }
 }
