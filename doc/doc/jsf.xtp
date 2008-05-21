@@ -31,14 +31,14 @@
       <p>A JSF page may produce state that depending on the functionality of
         the page can be quite large as in the number of components and in the
         sheer volume of data associated with them. When serialized for sending
-        to the client or sharing across servers in the cluster smaller state
+        to the client or replicating across servers in the cluster smaller state
         will produce numerous benefits ranging from more efficient use of
         bandwidth to lower memory requirements and lower CPU usage.
       </p>
 
       <p>To achieve smaller size Resin's JSF State Management uses Hessian
         Serialization for packaging objects composing JSF state into
-        a transferable network object. As opposed to Java Serialization Hessian
+        a network-transferable object. As opposed to Java Serialization Hessian
         takes advantage of a more compact storage scheme specified for Hessian Protocol.
       </p>
     </s1>
