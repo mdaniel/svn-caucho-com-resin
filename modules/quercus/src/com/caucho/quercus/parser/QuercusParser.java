@@ -3145,21 +3145,23 @@ public class QuercusParser {
         if (expr instanceof ConstExpr) {
           String type = ((ConstExpr) expr).getVar();
           
-          if ("bool".equals(type) || "boolean".equals(type))
+          if ("bool".equalsIgnoreCase(type)
+              || "boolean".equalsIgnoreCase(type))
             return _factory.createToBoolean(parseTerm());
-          else if ("int".equals(type) || "integer".equals(type))
+          else if ("int".equalsIgnoreCase(type)
+                   || "integer".equalsIgnoreCase(type))
             return _factory.createToLong(parseTerm());
-          else if ("float".equals(type)
-                || "double".equals(type)
-                || "real".equals(type))
+          else if ("float".equalsIgnoreCase(type)
+                || "double".equalsIgnoreCase(type)
+                || "real".equalsIgnoreCase(type))
             return _factory.createToDouble(parseTerm());
-          else if ("string".equals(type))
+          else if ("string".equalsIgnoreCase(type))
             return _factory.createToString(parseTerm());
-          else if ("binary".equals(type))
+          else if ("binary".equalsIgnoreCase(type))
             return _factory.createToBinary(parseTerm());
-          else if ("unicode".equals(type))
+          else if ("unicode".equalsIgnoreCase(type))
             return _factory.createToUnicode(parseTerm());
-          else if ("object".equals(type))
+          else if ("object".equalsIgnoreCase(type))
             return _factory.createToObject(parseTerm());
           else if ("array".equalsIgnoreCase(type))
             return _factory.createToArray(parseTerm());
