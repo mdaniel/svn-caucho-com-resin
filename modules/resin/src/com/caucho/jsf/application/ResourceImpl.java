@@ -36,15 +36,22 @@ import com.caucho.util.Base64;
 import com.caucho.util.L10N;
 
 import javax.faces.application.Resource;
+import javax.faces.application.ResourceHandler;
+import javax.faces.application.Application;
 import javax.faces.context.FacesContext;
+import javax.faces.context.ExternalContext;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.MissingResourceException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.net.URL;
+import java.net.MalformedURLException;
 
 public class ResourceImpl
   extends Resource
@@ -64,6 +71,7 @@ public class ResourceImpl
   private long _length;
   private String _lastModifiedString;
   private String _etag;
+  private URL _url;
 
   public ResourceImpl(Path path,
                       QDate calendar,
@@ -94,9 +102,71 @@ public class ResourceImpl
 
   public String getRequestPath()
   {
-    if (true) throw new UnsupportedOperationException("unimplemented");
+    ExternalContext extContext = FacesContext.getCurrentInstance()
+      .getExternalContext();
 
-    return null;
+    String pathInfo = extContext.getRequestPathInfo();
+    String servletPath = extContext.getRequestServletPath();
+
+    FacesContext context = FacesContext.getCurrentInstance();
+
+    Application app = context.getApplication();
+
+    String locale = null;
+
+    String appBundle = app.getMessageBundle();
+
+    if (appBundle != null) {
+      Locale l = app.getViewHandler().calculateLocale(context);
+
+      try {
+        ResourceBundle bundle
+          = ResourceBundle.getBundle(appBundle,
+                                     l,
+                                     Thread.currentThread().getContextClassLoader());
+
+        if (bundle != null) {
+          locale = bundle.getString(ResourceHandler.LOCALE_PREFIX);
+        }
+      }
+      catch (MissingResourceException e) {
+        log.log(Level.FINER,
+                L.l("Can't find bundle for base name '{0}', locale {1}",
+                    appBundle,
+                    l),
+                e);
+      }
+    }
+
+    String requestPath;
+
+    StringBuilder params = new StringBuilder();
+    if (locale != null)
+      params.append("?loc=" + locale);
+
+    if (getLibraryName() != null)
+      params.append(params.length() == 0 ? "?" : "&")
+        .append("ln=")
+        .append(getLibraryName());
+
+
+    if (pathInfo == null) {
+      String suffix = servletPath.substring(servletPath.lastIndexOf('.'));
+      requestPath = extContext.getRequestContextPath() +
+                    ResourceHandler.RESOURCE_IDENTIFIER +
+                    '/' + getResourceName() +
+                    suffix + params.toString();
+    }
+    else {
+      requestPath = extContext.getRequestContextPath() +
+                    servletPath +
+                    ResourceHandler.RESOURCE_IDENTIFIER +
+                    '/' + getResourceName() +
+                    params.toString();
+
+    }
+
+    return requestPath;
   }
 
   public Map<String, String> getResponseHeaders()
@@ -105,20 +175,29 @@ public class ResourceImpl
 
     result.put("ETag", _etag);
     result.put("Last-Modified", _lastModifiedString);
-    
+
     return result;
   }
 
   public URL getURL()
   {
-    if (true) throw new UnsupportedOperationException("unimplemented");
-
-    return null;
+    if (_url == null)
+      try {
+        _url = new URL(_path.getURL());
+      }
+      catch (MalformedURLException e) {
+        log.log(Level.FINER,
+                L.l("Can't create an instance of URL {0}", _path.getURL()),
+                e);
+      }
+    return _url;
   }
 
   public boolean userAgentNeedsUpdate(FacesContext context)
   {
-    String ifModifiedSince = context.getExternalContext().getRequestHeaderMap().get("If-Modified-Since");
+    String ifModifiedSince = context.getExternalContext()
+      .getRequestHeaderMap()
+      .get("If-Modified-Since");
 
     if (ifModifiedSince == null || "".equals(ifModifiedSince)) return true;
 
@@ -130,7 +209,7 @@ public class ResourceImpl
       log.log(Level.FINER, L.l("Can't parse date '{0}'", ifModifiedSince), e);
       return true;
     }
-    
+
     return lastModified != _lastModified;
   }
 
@@ -139,12 +218,12 @@ public class ResourceImpl
     return _length;
   }
 
-  public boolean isStale()
+  boolean isStale()
   {
     return (_lastCheck + UPDATE_INTERVAL < Alarm.getCurrentTime());
   }
 
-  public void update(Path path)
+  void update(Path path)
   {
     long lastModified = path.getLastModified();
     long length = path.getLength();

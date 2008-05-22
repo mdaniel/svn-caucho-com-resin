@@ -50,4 +50,6 @@ public abstract class ResourceHandler {
     throws IOException;
 
   public abstract boolean isResourceRequest(FacesContext context);
+
+  public abstract String getRendererTypeForResourceName(String resourceName);
 }

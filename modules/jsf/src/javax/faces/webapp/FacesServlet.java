@@ -134,9 +134,17 @@ public final class FacesServlet implements Servlet
 						     req,
 						     res,
 						     _lifecycle);
+      ResourceHandler resourceHandler
+        = context.getApplication().getResourceHandler();
 
-      _lifecycle.execute(context);
-      _lifecycle.render(context);
+      if (resourceHandler.isResourceRequest(context)) {
+        resourceHandler.handleResourceRequest(context);
+      }
+      else {
+        _lifecycle.execute(context);
+        _lifecycle.render(context);
+      }
+
     } catch (FacesException e) {
       throw new ServletException(e);
     } finally {

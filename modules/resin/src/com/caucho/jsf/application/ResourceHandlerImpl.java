@@ -28,33 +28,33 @@
 
 package com.caucho.jsf.application;
 
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.StreamImpl;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
 import com.caucho.util.QDate;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.Vfs;
 
-import javax.faces.application.ResourceHandler;
-import javax.faces.application.Resource;
 import javax.faces.application.Application;
 import javax.faces.application.ProjectStage;
+import javax.faces.application.Resource;
+import javax.faces.application.ResourceHandler;
+import javax.faces.application.ViewHandler;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.regex.Pattern;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.MissingResourceException;
-import java.util.Map;
 import java.net.URL;
+import java.util.Locale;
+import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 public class ResourceHandlerImpl
   extends ResourceHandler
@@ -357,25 +357,26 @@ public class ResourceHandlerImpl
 
   public boolean isResourceRequest(FacesContext context)
   {
-    HttpServletRequest request
-      = (HttpServletRequest) context.getExternalContext().getRequest();
+    ExternalContext extContext = context.getExternalContext();
 
-    String pathInfo = request.getPathInfo();
+    String pathInfo = extContext.getRequestPathInfo();
 
     if (pathInfo != null)
-      return pathInfo.startsWith(RESOURCE_IDENTIFIER);
+      return pathInfo.indexOf(RESOURCE_IDENTIFIER) > -1;
     else
-      return request.getServletPath().startsWith(RESOURCE_IDENTIFIER);
+      return extContext.getRequestServletPath().indexOf(RESOURCE_IDENTIFIER) >
+             -1;
   }
 
   public void handleResourceRequest(FacesContext context)
     throws IOException
   {
-    HttpServletRequest request
-      = (HttpServletRequest) context.getExternalContext().getRequest();
+    ExternalContext extContext = context.getExternalContext();
+
+    HttpServletRequest request = (HttpServletRequest) extContext.getRequest();
 
     HttpServletResponse response
-      = (HttpServletResponse) context.getExternalContext().getResponse();
+      = (HttpServletResponse) extContext.getResponse();
 
     String method = request.getMethod();
     if (!method.equalsIgnoreCase("GET") &&
@@ -391,9 +392,9 @@ public class ResourceHandlerImpl
     String resourceName;
 
     String pathInfo = request.getPathInfo();
+    String servletPath = request.getServletPath();
 
     if (pathInfo == null) {
-      String servletPath = request.getServletPath();
 
       int extIdx = servletPath.lastIndexOf('.');
 
@@ -401,8 +402,30 @@ public class ResourceHandlerImpl
         RESOURCE_IDENTIFIER) + RESOURCE_IDENTIFIER.length(), extIdx);
     }
     else {
-      resourceName = pathInfo.substring(pathInfo.indexOf(RESOURCE_IDENTIFIER) +
-                                        RESOURCE_IDENTIFIER.length());
+      if ("".equals(servletPath)) {
+        String suffix
+          = extContext.getInitParameter(ViewHandler.DEFAULT_SUFFIX_PARAM_NAME);
+
+        if (suffix == null)
+          suffix = ViewHandler.DEFAULT_SUFFIX;
+
+        if (pathInfo.endsWith(suffix)) {
+          resourceName
+            = pathInfo.substring(pathInfo.indexOf(RESOURCE_IDENTIFIER) +
+                                 RESOURCE_IDENTIFIER.length(),
+                                 pathInfo.length() - suffix.length());
+        }
+        else {
+          resourceName
+            = pathInfo.substring(pathInfo.indexOf(RESOURCE_IDENTIFIER) +
+                                 RESOURCE_IDENTIFIER.length());
+        }
+      }
+      else {
+        resourceName
+          = pathInfo.substring(pathInfo.indexOf(RESOURCE_IDENTIFIER) +
+                               RESOURCE_IDENTIFIER.length());
+      }
     }
 
     String temp = request.getParameter("ln");
@@ -482,6 +505,25 @@ public class ResourceHandlerImpl
     }
   }
 
+  public String getRendererTypeForResourceName(String resourceName)
+  {
+    if (resourceName == null)
+      return null;
+
+    int suffixIdx = resourceName.lastIndexOf('.');
+
+    if (suffixIdx == -1)
+      return null;
+
+    String suffix = resourceName.substring(suffixIdx);
+
+    if (".js".equalsIgnoreCase(suffix))
+      return ("javax.faces.resource.Script");
+    else if (".css".equalsIgnoreCase(suffix))
+      return "javax.faces.resource.Stylesheet";
+    else
+      return null;
+  }
 
   public String toString()
   {
