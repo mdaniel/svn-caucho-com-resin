@@ -184,65 +184,12 @@ public class Store {
   /**
    * Returns a ClusterObject.
    */
-  public ClusterObject createClusterObject(String objectId)
+  public ClusterObject createClusterObject(String objectId,
+                                           int primary,
+                                           int secondary,
+                                           int tertiary)
   {
-    return _storeManager.createClusterObject(this, objectId);
-  }
-  
-  /**
-   * Updates the object's access time.
-   *
-   * @param obj the object to update.
-   */
-  public void access(String objectId)
-    throws Exception
-  {
-    _storeManager.access(this, objectId);
-  }
-
-  /**
-   * When the object is no longer valid, remove it from the backing store.
-   *
-   * @param key the object's id
-   */
-  public void remove(String objectId)
-    throws Exception
-  {
-    _storeManager.remove(this, objectId);
-  }
-
-  /**
-   * When the object is no longer valid, remove it from the backing store.
-   *
-   * @param key the object's id
-   */
-  void notifyRemove(String objectId)
-    throws Exception
-  {
-    if (_objectManager != null)
-      _objectManager.notifyRemove(objectId);
-  }
-
-  /**
-   * Returns the mangled id.
-   */
-  static private String mangleId(String id)
-  {
-    StringBuilder cb = new StringBuilder();
-
-    for (int i = 0; i < id.length(); i++) {
-      char ch = id.charAt(i);
-
-      if (ch == '/')
-	cb.append("__");
-      else if (ch == ':')
-	cb.append("_0");
-      else if (ch == '_')
-	cb.append("_1");
-      else
-	cb.append(ch);
-    }
-
-    return cb.toString();
+    return _storeManager.createClusterObject(this, objectId,
+                                             primary, secondary, tertiary);
   }
 }

@@ -6,10 +6,10 @@
 
 <s1 title="Resin Change Log">
 
-<p>
-<a href="changes-2.xtp">Resin 2.1 changes</a>
-<a href="changes-31.xtp">Resin 3.1 changes</a>
-</p>
+<ul>
+<li><a href="changes-2.xtp">Resin 2.1 changes</a></li>
+<li><a href="changes-31.xtp">Resin 3.1 changes</a></li>
+</ul>
 
 <s2 title="3.2.0 snapshot">
 <ul>

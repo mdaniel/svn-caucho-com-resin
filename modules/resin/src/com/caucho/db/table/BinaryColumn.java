@@ -162,21 +162,18 @@ class BinaryColumn extends Column {
     while (offset < endOffset) {
       int ch1 = block[offset++] & 0xff;
 
-      if (ch1 < 0x80)
-	sb.append((char) ch1);
-      else if ((ch1 & 0xe0) == 0xc0) {
-	int ch2 = block[offset++] & 0xff;
-	
-	sb.append((char) ((ch1 & 0x1f) << 6) + (ch2 & 0x3f));
-      }
-      else {
-	int ch2 = block[offset++] & 0xff;
-	int ch3 = block[offset++] & 0xff;
-	
-	sb.append((char) ((ch1 & 0x0f) << 12)
-		  + ((ch2 & 0x3f) << 6)
-		  + ((ch3 & 0x3f)));
-      }
+      int d1 = ch1 >> 4;
+      int d2 = ch1 >> 4;
+
+      if (d1 < 10)
+	sb.append((char) ('0' + d1));
+      else
+	sb.append((char) ('a' + d1 - 10));
+
+      if (d2 < 10)
+	sb.append((char) ('0' + d2));
+      else
+	sb.append((char) ('a' + d2 - 10));
     }
 
     return sb.toString();

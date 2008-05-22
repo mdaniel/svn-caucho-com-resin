@@ -42,6 +42,11 @@ public interface ObjectManager {
   public long getMaxIdleTime();
   
   /**
+   * Creates the cluster object
+   */
+  public ClusterObject createClusterObject(String id);
+  
+  /**
    * Loads the object from the input stream.
    */
   public void load(InputStream in, Object object)

@@ -41,6 +41,7 @@ public final class SessionObjectManager implements ObjectManager
   private final SessionManager _sessionManager;
 
   private Cluster _cluster;
+  private Store _store;
  
   /**
    * Creates and initializes a new session object manager
@@ -50,12 +51,38 @@ public final class SessionObjectManager implements ObjectManager
     _sessionManager = sessionManager;
     _cluster = Cluster.getCurrent();
   }
+
+  /**
+   * Sets the store
+   */
+  public void setStore(Store store)
+  {
+    _store = store;
+  }
+  
   /**
    * Returns the maximum idle time.
    */
   public long getMaxIdleTime()
   {
     return _sessionManager.getMaxIdleTime();
+  }
+  
+  /**
+   * Creates the cluster object
+   */
+  @Override
+  public ClusterObject createClusterObject(String id)
+  {
+    if (_store != null) {
+      int primary = _cluster.getPrimaryIndex(id, 0);
+      int secondary = _cluster.getSecondaryIndex(id, 0);
+      int tertiary = _cluster.getTertiaryIndex(id, 0);
+   
+      return _store.createClusterObject(id, primary, secondary, tertiary);
+    }
+    else
+      return null;
   }
 
   /**

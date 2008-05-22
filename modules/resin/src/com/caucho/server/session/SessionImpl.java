@@ -32,6 +32,7 @@ package com.caucho.server.session;
 import com.caucho.hessian.io.*;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.cluster.ClusterObject;
+import com.caucho.server.cluster.ObjectManager;
 import com.caucho.server.cluster.Store;
 import com.caucho.server.security.AbstractAuthenticator;
 import com.caucho.server.security.ServletAuthenticator;
@@ -63,7 +64,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
   // the owning session manager
   protected SessionManager _manager;
-  // the session store
+  // the session objectStore
 
   // Map containing the actual values.
   protected Map<String,Object> _values;
@@ -89,9 +90,6 @@ public class SessionImpl implements HttpSession, CacheListener {
   // The logged-in user
   private Principal _user;
 
-  // index of the owning srun
-  private int _srunIndex = -1;
-
   /**
    * Create a new session object.
    *
@@ -110,7 +108,8 @@ public class SessionImpl implements HttpSession, CacheListener {
     _id = id;
 
     // Finds the owning JVM from the session encoding
-    _srunIndex = manager.getObjectManager().getPrimaryIndex(id);
+    ObjectManager objectManager = manager.getObjectManager();
+    _clusterObject = objectManager.createClusterObject(id);
  
     _values = createValueMap();
 
@@ -144,7 +143,10 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   int getSrunIndex()
   {
-    return _srunIndex;
+    if (_clusterObject != null)
+      return _clusterObject.getPrimaryIndex();
+    else
+      return 0;
   }
 
   /**
@@ -154,11 +156,11 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     _clusterObject = clusterObject;
     if (clusterObject != null)
-      clusterObject.update();
+      clusterObject.objectInvalidated();
   }
 
   /**
-   * Returns the last access time.
+   * Returns the last objectAccess time.
    */
   public long getLastAccessedTime()
   {
@@ -286,7 +288,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
   /**
    * Sets a session attribute.  If the value is a listener, notify it
-   * of the change.  If the value has changed mark the session as changed
+   * of the objectModified.  If the value has changed mark the session as changed
    * for persistent sessions.
    *
    * @param name the name of the attribute
@@ -315,7 +317,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     // server/017p
     if (_clusterObject != null) // && value != oldValue)
-      _clusterObject.change();
+      _clusterObject.objectModified();
 
     if (oldValue instanceof HttpSessionBindingListener) {
       HttpSessionBindingListener listener;
@@ -357,7 +359,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   }
 
   /**
-   * Create the map used to store values.
+   * Create the map used to objectStore values.
    */
   protected Map<String,Object> createValueMap()
   {
@@ -366,9 +368,9 @@ public class SessionImpl implements HttpSession, CacheListener {
 
   /**
    * Remove a session attribute.  If the value is a listener, notify it
-   * of the change.
+   * of the objectModified.
    *
-   * @param name the name of the attribute to remove
+   * @param name the name of the attribute to objectRemove
    */
   public void removeAttribute(String name)
   {
@@ -382,7 +384,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     }
 
     if (_clusterObject != null && oldValue != null)
-      _clusterObject.change();
+      _clusterObject.objectModified();
 
     notifyValueUnbound(name, oldValue);
   }
@@ -637,7 +639,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
   /**
    * Invalidate the session, removing it from the manager,
-   * unbinding the values, and removing it from the store.
+   * unbinding the values, and removing it from the objectStore.
    */
   private void invalidateImpl(Logout logout)
   {
@@ -650,7 +652,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       // _clusterObject = null;
 
       if (clusterObject != null && _isInvalidating)
-	clusterObject.remove();
+	clusterObject.objectRemove();
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -666,13 +668,13 @@ public class SessionImpl implements HttpSession, CacheListener {
     ClusterObject clusterObject = _clusterObject;
     if (_isValid && ! _isInvalidating && clusterObject != null) {
       if (_manager.isSaveOnlyOnShutdown()) {
-	clusterObject.update();
-
 	try {
-	  clusterObject.store(this);
+	  clusterObject.objectStore(this);
 	} catch (Exception e) {
 	  log.log(Level.WARNING, this + ": can't serialize session", e);
 	}
+        
+	clusterObject.objectInvalidated();
       }
     }
 
@@ -698,7 +700,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     _creationTime = now;
 
     if (_clusterObject != null)
-      _clusterObject.setValid();
+      _clusterObject.objectCreate();
   }
 
   /**
@@ -764,8 +766,9 @@ public class SessionImpl implements HttpSession, CacheListener {
       return true;
 
     ClusterObject clusterObject = _clusterObject;
+
     if (clusterObject != null)
-      isValid = clusterObject.load(this);
+      isValid = clusterObject.objectLoad(this);
     else
       isValid = true;
 
@@ -811,7 +814,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     }
 
     if (clusterObject != null)
-      clusterObject.update();
+      clusterObject.objectInvalidated();
 
     // server/015a
     for (int i = 0; i < names.size(); i++) {
@@ -856,7 +859,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   }
 
   /*
-   * Set the current access time to now.
+   * Set the current objectAccess time to now.
    */
   void setAccess(long now)
   {
@@ -867,7 +870,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     _isNew = false;
 
     if (_clusterObject != null)
-      _clusterObject.access();
+      _clusterObject.objectAccess();
 
     _accessTime = now;
   }
@@ -943,7 +946,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     try {
       ClusterObject clusterObject = _clusterObject;
       if (clusterObject != null) {
-	clusterObject.store(this);
+	clusterObject.objectStore(this);
       }
     } catch (Throwable e) {
       log.log(Level.WARNING, this + ": can't serialize session", e);
@@ -959,8 +962,8 @@ public class SessionImpl implements HttpSession, CacheListener {
       ClusterObject clusterObject = _clusterObject;
 
       if (clusterObject != null) {
-	clusterObject.change();
-	clusterObject.store(this);
+	clusterObject.objectModified();
+	clusterObject.objectStore(this);
       }
     } catch (Throwable e) {
       log.log(Level.WARNING, this + ": can't serialize session", e);
@@ -1111,7 +1114,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     HttpSessionEvent event = null;
     
     synchronized (_values) {
-      // server/017u, #1820 - load does not trigger callbacks
+      // server/017u, #1820 - loadImpl does not trigger callbacks
       _values.clear();
 
       try {

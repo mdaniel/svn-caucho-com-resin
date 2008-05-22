@@ -170,7 +170,7 @@ public final class SessionManager implements AlarmListener
 
   private String _distributionId;
 
-  private Alarm _alarm = new Alarm(this);
+  private Alarm _alarm;
 
   // statistics
   private Object _statisticsLock = new Object();
@@ -213,7 +213,8 @@ public final class SessionManager implements AlarmListener
 
     if (_distributionId == null)
       _distributionId = name;
-
+    
+    _alarm = new Alarm(this);
     _admin = new SessionManagerAdmin(this);
   }
 
@@ -954,11 +955,6 @@ public final class SessionManager implements AlarmListener
 	&& (_alwaysSaveSession == SET_TRUE
 	    || _alwaysLoadSession == SET_TRUE))
       throw new ConfigException(L.l("save-mode='on-shutdown' cannot be used with <always-save-session/> or <always-load-session/>"));
-  }
-
-  public void start()
-    throws Exception
-  {
     _sessions = new LruCache<String,SessionImpl>(_sessionMax);
     _sessionIter = _sessions.values();
 
@@ -996,6 +992,12 @@ public final class SessionManager implements AlarmListener
 	_sessionStore.setAlwaysSave(false);
     }
 
+    _objectManager.setStore(_sessionStore);
+  }
+
+  public void start()
+    throws Exception
+  {
     _alarm.queue(60000);
   }
 
@@ -1116,9 +1118,9 @@ public final class SessionManager implements AlarmListener
     if (index < 0)
       index = 0;
 
-    int length = _cookieLength;
-
     _cluster.generateBackup(sb, index);
+
+    int length = _cookieLength;
 
     length -= sb.length();
 
@@ -1233,11 +1235,13 @@ public final class SessionManager implements AlarmListener
   {
     SessionImpl session = new SessionImpl(this, key, now);
 
+    /*
     Store sessionStore = _sessionStore;
     if (sessionStore != null) {
       ClusterObject clusterObject = sessionStore.createClusterObject(key);
       session.setClusterObject(clusterObject);
     }
+     */
 
     // If another thread has created and stored a new session,
     // putIfNew will return the old session

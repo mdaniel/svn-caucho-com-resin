@@ -905,7 +905,10 @@ public class ServerPool
       
       return stream;
     } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
+      if (log.isLoggable(Level.FINEST))
+	log.log(Level.FINEST, this + " " + e.toString(), e);
+      else
+	log.finer(this + " " + e.toString());
 
       failConnect();
       

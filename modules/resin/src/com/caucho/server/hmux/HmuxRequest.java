@@ -142,6 +142,7 @@ public class HmuxRequest extends AbstractHttpRequest
   public static final int HMUX_URI =            'U';
   public static final int HMUX_STRING =         'S';
   public static final int HMUX_HEADER =         'H';
+  public static final int HMUX_BINARY =         'B';
   public static final int HMUX_PROTOCOL =       'P';
   public static final int HMUX_META_HEADER =    'M';
   

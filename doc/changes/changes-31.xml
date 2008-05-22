@@ -1,0 +1,27 @@
+<document>
+<header>
+<title>Resin Change Log</title>
+</header>
+<body>
+
+<s1 title="Resin Change Log">
+
+<p>
+<a href="changes-2.xtp">Resin 2.1 changes</a>
+<a href="changes-31.xtp">Resin 3.1 changes</a>
+</p>
+
+<s2 title="3.2 snapshot">
+<ul>
+<li>LruCache exception for nullpointer (rep by Johan Reynaert)</li>
+</ul>
+</s2>
+
+<p>
+<a href="changes-31.xtp">Resin 3.1 changes</a>
+<a href="changes-2.xtp">Resin 1.2 changes</a>
+<a href="changes-1.xtp">older changes</a>
+</p>
+</s1>
+</body>
+</document>

@@ -50,53 +50,78 @@ public class ClusterObject {
   private final Store _store;
 
   private ObjectManager _objectManager;
+  
+  private int _primary;
+  private int _secondary;
+  private int _tertiary;
 
-  private boolean _isPrimary;
   private long _maxIdleTime;
   
   private long _expireInterval = -1;
 
   private long _accessTime;
 
-  private long _crc = -1;
+  private byte []_dataHash;
 
-  private boolean _isSerializable = true;
-  // true if the current data is valid and up to date
-  private boolean _isValid = true;
-  private boolean _isChanged = false;
+  // the object's obj is current with the persistent objectStore
+  private boolean _isValid = false;
+  // the object's obj has been modified, but not saved
+  private boolean _isDirty = false;
+  // the object has been removed
   private boolean _isDead = false;
-
-  ClusterObject(StoreManager storeManager,
-		Store store,
-		HashKey id)
+  
+  // unserializable objects are skipped
+  private boolean _isSerializable = true;
+  
+  /**
+   * Creates a new cluster object
+   * 
+   * @param objectStore the owning objectStore
+   * @param id the object's unique identity
+   * @param primary the primary owning server
+   * @param secondary the secondary backup
+   * @param tertiary the tertiary backup
+   */
+  ClusterObject(Store store,
+		HashKey id,
+                int primary,
+                int secondary,
+                int tertiary)
   {
     _id = id;
     _storeId = store.getId();
     
-    _storeManager = storeManager;
+    _storeManager = store.getStoreManager();
     _objectManager = store.getObjectManager();
     _store = store;
     _maxIdleTime = _store.getMaxIdleTime();
-
-    _isPrimary = false; // XXX: isPrimary(_objectId);
     
+    _primary = primary;
+    _secondary = secondary;
+    _tertiary = tertiary;
+  
     _expireInterval = getMaxIdleTime() + getAccessWindow();
   }
 
   ClusterObject(StoreManager storeManager,
 		HashKey storeId,
-		HashKey objectId)
+		HashKey objectId,
+                int primary,
+                int secondary,
+                int tertiary)
   {
     _storeManager = storeManager;
     _objectManager = null;
     _store = null;
+    
+    _primary = primary;
+    _secondary = secondary;
+    _tertiary = tertiary;
 
     _maxIdleTime = _storeManager.getMaxIdleTime();
 
     _storeId = storeId;
     _id = objectId;
-
-    _isPrimary = false; // XXX: isPrimary(_objectId);
 
     _expireInterval = getMaxIdleTime() + getAccessWindow();
   }
@@ -106,20 +131,22 @@ public class ClusterObject {
     _objectManager = objectManager;
   }
 
-  // XXX: move to store manager?
-  private boolean isPrimary(String id)
+  // XXX: move to objectStore manager?
+  private boolean isPrimary()
   {
     if (_store != null && _store.isAlwaysLoad())
       return false;
     
     else if (_store == null && _storeManager.isAlwaysLoad())
       return false;
-
-    return _storeManager.isPrimary(id);
-  }
+    
+    Cluster cluster = _storeManager.getCluster();
+    
+    return cluster.getSelfServer().getIndex() == _primary;
+ }
 
   /**
-   * Returns the store.
+   * Returns the objectStore.
    */
   public Store getStore()
   {
@@ -127,7 +154,7 @@ public class ClusterObject {
   }
 
   /**
-   * Returns the store manager.
+   * Returns the objectStore manager.
    */
   public StoreManager getStoreManager()
   {
@@ -135,7 +162,7 @@ public class ClusterObject {
   }
 
   /**
-   * Returns the store id.
+   * Returns the objectStore id.
    */
   public HashKey getStoreId()
   {
@@ -149,6 +176,37 @@ public class ClusterObject {
   {
     return _id;
   }
+
+  /**
+   * Sets the objectAccess time.
+   */
+  public void setAccessTime(long accessTime)
+  {
+    _accessTime = accessTime;
+  }
+
+  /**
+   * Sets the max objectAccess time.
+   */
+  public long getExpireInterval()
+  {
+    return _expireInterval;
+  }
+
+  /**
+   * Sets the max objectAccess time.
+   */
+  public void setExpireInterval(long expireInterval)
+  {
+    try {
+      _expireInterval = expireInterval;
+      
+      _storeManager.setExpireInterval(getObjectId(), expireInterval);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
 
   /**
    * Returns the max idle time.
@@ -167,7 +225,7 @@ public class ClusterObject {
   }
 
   /**
-   * Returns the access window.
+   * Returns the objectAccess window.
    */
   public long getAccessWindow()
   {
@@ -180,51 +238,11 @@ public class ClusterObject {
   }
 
   /**
-   * Sets true for the primary server.
-   */
-  public void setPrimary(boolean primary)
-  {
-    _isPrimary = primary;
-  }
-
-  /**
-   * Returns the object's saved CRC value.
-   */
-  long getCRC()
-  {
-    return _crc;
-  }
-
-  /**
-   * Sets the object's saved CRC value.
-   */
-  void setCRC(long crc)
-  {
-    _crc = crc;
-  }
-
-  /**
    * Returns true if the object has up-to-date loaded values
    */
   boolean isValid()
   {
     return _isValid;
-  }
-
-  /**
-   * Sets the object's saved update count
-   */
-  void setValid(boolean isValid)
-  {
-    _isValid = isValid;
-  }
-
-  /**
-   * Sets the object's saved update count
-   */
-  public void setValid()
-  {
-    _isValid = true;
   }
   
   /**
@@ -232,7 +250,7 @@ public class ClusterObject {
    */
   public int getPrimaryIndex()
   {
-    return 0;
+    return _primary;
   }
   
   /**
@@ -240,7 +258,7 @@ public class ClusterObject {
    */
   public int getSecondaryIndex()
   {
-    return 0;
+    return _secondary;
   }
   
   /**
@@ -248,7 +266,7 @@ public class ClusterObject {
    */
   public int getTertiaryIndex()
   {
-    return 0;
+    return _tertiary;
   }
 
    
@@ -257,7 +275,13 @@ public class ClusterObject {
    */
   public ClusterServer getPrimaryServer()
   {
-    return null;
+    Cluster cluster = _storeManager.getCluster();
+    ClusterServer []serverList = cluster.getServerList();
+    
+    if (serverList.length > 1)
+      return serverList[_primary % serverList.length];
+    else
+      return null;
   }
   
   /**
@@ -265,7 +289,13 @@ public class ClusterObject {
    */
   public ClusterServer getSecondaryServer()
   {
-    return null;
+    Cluster cluster = _storeManager.getCluster();
+    ClusterServer []serverList = cluster.getServerList();
+    
+    if (serverList.length > 1)
+      return serverList[_secondary % serverList.length];
+    else
+      return null;
   }
   
   /**
@@ -273,16 +303,63 @@ public class ClusterObject {
    */
   public ClusterServer getTertiaryServer()
   {
-    return null;
+    Cluster cluster = _storeManager.getCluster();
+    ClusterServer []serverList = cluster.getServerList();
+    
+    if (serverList.length > 1)
+      return serverList[_tertiary % serverList.length];
+    else
+      return null;
+  }
+  
+  //
+  // Object API
+  // Called by the object itself (e.g. the session) to invalidate its own state
+  //
+
+  /**
+   * Called by the object when it is accessed to invalidate the access time.
+   */
+  public void objectAccess()
+  {
+    long now = Alarm.getCurrentTime();
+
+    if (getAccessWindow() <= now - _accessTime) {
+      try {
+	_storeManager.accessImpl(getObjectId());
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+
+      _accessTime = now;
+    }
+  }
+
+ 
+  /**
+   * Called when the object is newly created.
+   */
+  public void objectCreate()
+  {
+    _isValid = true;
+  }
+  
+  /**
+   * Marks that the object no longer contains valid data 
+   */
+  public void objectInvalidated()
+  {
+    _isValid = false;
   }
 
   /**
-   * Loads the object from the cluster.  If the object fails to load,
-   * its contents may be in an inconsistent state.
+   * Called by the object to load itself from the cluster. 
+   * If the object fails to load, its contents may be in an
+   * inconsistent state.
    *
    * @return true on success.
    */
-  public boolean load(Object obj)
+  public boolean objectLoad(Object obj)
   {
     if (! _isSerializable)
       return true;
@@ -290,7 +367,9 @@ public class ClusterObject {
     if (_isDead)
       return false;
 
-    if (_isPrimary && _isValid)
+    // if the object is valid and the authoritative copy, it can
+    // be returned directly
+    if (_isValid && isPrimary())
       return true;
 
     try {
@@ -300,64 +379,147 @@ public class ClusterObject {
 	return true;
       }
       else {
-	_crc = -1;
+	_dataHash = null;
 	return false;
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
-      _crc = -1;
+      _dataHash = null;
 
       return false;
     } finally {
-      _isChanged = false;
+      _isDirty = false;
     }
   }
 
   /**
-   * Loads the object, called from the store.
+   * Signals that the object has been changed by the application, i.e.
+   * that the object needs to be saved to the persistent objectStore.
    */
-  boolean load(InputStream is, Object obj)
+  public void objectModified()
+  {
+    _isDirty = true;
+  }
+
+  /**
+   * Called by the object to remove itself from the cluster.
+   */
+  public void objectRemove()
+  {
+    try {
+      if (_isDead)
+	return;
+      _isDead = true;
+
+      _storeManager.remove(this);
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+  
+  /**
+   * Called by the object to save itself to the cluster.
+   */
+  public void objectStore(Object obj)
     throws IOException
   {
-    VfsStream streamImpl = new VfsStream(is, null);
+    if (! _isSerializable)
+      return;
 
-    Crc64Stream crcStream = new Crc64Stream(streamImpl);
+    // if the object is not the owner, the value is no longer valid
+    if (! isPrimary()) {
+      _isValid = false;
+    }
 
-    ReadStream crcIs = new ReadStream(crcStream);
+    if (! _isDirty && ! _store.isAlwaysSave())
+      return;
 
-    _objectManager.load(crcIs, obj);
+    _isDirty = false;
 
-    _isValid = true;
-    _crc = crcStream.getCRC();
+    TempOutputStream tempStream = new TempOutputStream();
 
-    crcIs.close();
+    try {
+      DigestOutputStream digestStream = new DigestOutputStream(tempStream);
 
+      _objectManager.store(digestStream, obj);
+
+      digestStream.close();
+ 
+      byte []dataHash = digestStream.getDigest();
+
+      if (isMatch(dataHash, _dataHash))
+	return;
+
+      _dataHash = dataHash;
+
+      _storeManager.store(this, tempStream, dataHash);
+
+      if (isPrimary())
+	_isValid = true;
+
+      _accessTime = Alarm.getCurrentTime();
+    } catch (NotSerializableException e) {
+      log.warning(e.toString());
+      _isSerializable = false;
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+
+      _isValid = false;
+    } finally {
+      tempStream.destroy();
+    }
+  }
+  
+  private static boolean isMatch(byte []a, byte []b)
+  {
+    if (a == null || b == null)
+      return false;
+    
+    int len = a.length;
+    
+    if (len != b.length)
+      return false;
+    
+    for (int i = len - 1; i >= 0; i--) {
+      if (a[i] != b[i])
+        return false;
+    }
+    
+    return true;
+  }
+  
+  //
+  // Cluster API
+  // Called by the clustering to invalidate the object's state
+  //
+
+  /**
+   * Loads the object, called from the objectStore.
+   */
+  boolean loadImpl(InputStream is, Object value, byte []dataHash)
+    throws IOException
+  {
+    _objectManager.load(is, value);
+
+    _dataHash = dataHash;
+ 
     return true;
   }
 
   /**
    * Signals that the object has been updated externally, i.e.
-   * that the persistent store now has a more current version of
+   * that the persistent objectStore now has a more current version of
    * the object's data.
    */
-  public void update()
+  public void updateImpl()
   {
     _isValid = false;
   }
-
+  
   /**
-   * Signals that the object has been changed by the application, i.e.
-   * that the object needs to be saved to the persistent store.
+   * Called when the object is accessed to updateImpl the objectAccess time.
    */
-  public void change()
-  {
-    _isChanged = true;
-  }
-
-  /**
-   * Marks the object as accessed.
-   */
-  public void access()
+  public void accessImpl()
   {
     long now = Alarm.getCurrentTime();
 
@@ -373,111 +535,15 @@ public class ClusterObject {
   }
 
   /**
-   * Sets the access time.
-   */
-  public void setAccessTime(long accessTime)
-  {
-    _accessTime = accessTime;
-  }
-
-  /**
-   * Sets the max access time.
-   */
-  public long getExpireInterval()
-  {
-    return _expireInterval;
-  }
-
-  /**
-   * Sets the max access time.
-   */
-  public void setExpireInterval(long expireInterval)
-  {
-    try {
-      _expireInterval = expireInterval;
-      
-      _storeManager.setExpireInterval(getObjectId(), expireInterval);
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-  }
-
-  /**
-   * Saves the object to the cluster.
-   */
-  public void store(Object obj)
-    throws IOException
-  {
-    if (! _isSerializable)
-      return;
-
-    boolean isValid = _isValid;
-
-    if (! _isPrimary) {
-      _isValid = false;
-    }
-
-    if (! _isChanged && ! _store.isAlwaysSave())
-      return;
-
-    _isChanged = false;
-
-    TempStream tempStream = new TempStream();
-
-    try {
-      Crc64Stream crcStream = new Crc64Stream(tempStream);
-      WriteStream os = new WriteStream(crcStream);
-
-      _objectManager.store(os, obj);
-
-      os.close();
-      os = null;
-
-      long crc = crcStream.getCRC();
-
-      if (crc == _crc)
-	return;
-
-      _crc = crc;
-
-      _storeManager.store(this, tempStream, crc);
-
-      if (_isPrimary)
-	_isValid = true;
-
-      _accessTime = Alarm.getCurrentTime();
-    } catch (NotSerializableException e) {
-      log.warning(e.toString());
-      _isSerializable = false;
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-
-      _isValid = false;
-    } finally {
-      tempStream.destroy();
-    }
-  }
-
-  /**
-   * Removes the object from the cluster.
-   */
-  public void remove()
-  {
-    try {
-      if (_isDead)
-	return;
-      _isDead = true;
-
-      _storeManager.remove(this);
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-  }
-
-  /**
    * Removes the object from the cluster.
    */
   public void removeImpl()
   {
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _id + "]";
   }
 }

@@ -173,6 +173,18 @@ public class TempStream extends StreamImpl
     
     rs.init(tempReadStream, null);
   }
+  
+  public InputStream openInputStream()
+    throws IOException
+  {
+    close();
+    
+    TempBuffer head = _head;
+    _head = null;
+    _tail = null;
+    
+    return new TempInputStream(head);
+  }
 
   /**
    * Returns the head buffer.

@@ -50,8 +50,12 @@ public class HashKey {
 
   public static String toString(byte []hash)
   {
+    return toString(hash, hash.length);
+  }
+  
+  public static String toString(byte []hash, int len)
+  {
     StringBuilder sb = new StringBuilder();
-    int len = hash.length;
 
     for (int i = 0; i < len; i++) {
       int d1 = (hash[i] >> 4) & 0xf;
@@ -121,6 +125,6 @@ public class HashKey {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + toString(_hash) + "]";
+    return getClass().getSimpleName() + "[" + toString(_hash, 4) + "]";
   }
 }

@@ -502,7 +502,7 @@ public class Cluster
     StoreManager store = null;
 
     try {
-      Class cl = Class.forName("com.caucho.server.cluster.JdbcStore");
+      Class cl = Class.forName("com.caucho.server.cluster.JdbcStoreManager");
 
       store = (StoreManager) cl.newInstance();
 
@@ -538,7 +538,7 @@ public class Cluster
     StoreManager store = null;
 
     try {
-      Class cl = Class.forName("com.caucho.server.cluster.FileStore");
+      Class cl = Class.forName("com.caucho.server.cluster.FileStoreManager");
 
       store = (StoreManager) cl.newInstance();
 
@@ -564,7 +564,7 @@ public class Cluster
     StoreManager store = null;
 
     try {
-      Class cl = Class.forName("com.caucho.server.cluster.ClusterStore");
+      Class cl = Class.forName("com.caucho.server.cluster.ClusterStoreManager");
 
       store = (StoreManager) cl.newInstance();
 
@@ -1041,6 +1041,16 @@ public class Cluster
     try {
       if (_clusterStore != null)
         _clusterStore.start();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  public void startClusterUpdate()
+  {
+    try {
+      if (_clusterStore != null)
+        _clusterStore.startUpdate();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

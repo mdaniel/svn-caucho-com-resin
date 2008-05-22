@@ -29,11 +29,10 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.Vfs;
+import com.caucho.config.*;
+import com.caucho.vfs.*;
 
+import java.io.InputStream;
 import javax.annotation.PostConstruct;
 import java.util.logging.*;
 
@@ -47,14 +46,14 @@ public class FileStoreManager extends StoreManager {
   private final FileBacking _backing = new FileBacking();
 
   /**
-   * Create a new file-based persistent store.
+   * Create a new file-based persistent objectStore.
    */
   public FileStoreManager()
   {
   }
 
   /**
-   * Sets the file store's path.
+   * Sets the file objectStore's path.
    */
   public void setPath(Path path)
   {
@@ -77,20 +76,23 @@ public class FileStoreManager extends StoreManager {
   @PostConstruct
   @Override
   public boolean init()
-    throws Exception
   {
     if (! super.init())
       return false;
-    
-    String serverId = Cluster.getServerId();
-    
-    String tableName = _backing.serverNameToTableName(serverId);
-    
-    _backing.setTableName(tableName);
 
-    _backing.init(1);
+    try {
+      String serverId = Cluster.getServerId();
+    
+      String tableName = _backing.serverNameToTableName(serverId);
+    
+      _backing.setTableName(tableName);
 
-    return true;
+      _backing.init(1);
+
+      return true;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
 
   /**
@@ -129,15 +131,6 @@ public class FileStoreManager extends StoreManager {
   {
     return true;
   }
-  
-  /**
-   * Creates the cluster object.
-   */
-  @Override
-  ClusterObject create(Store store, HashKey id)
-  {
-    return new ClusterObject(this, store, id);
-  }
 
   /**
    * Loads the session from the filesystem.
@@ -155,21 +148,22 @@ public class FileStoreManager extends StoreManager {
    *
    * @param obj the object to save
    * @param tempStream stream to the serialized object
-   * @param crc digest of the serialized stream
+   * @param dataHash sha-1 hash of the datam
    * @param updateCount how many times the object has been updated
    */
   public void store(ClusterObject obj,
-		    TempStream tempStream,
-		    long crc)
+		    TempOutputStream tempStream,
+		    byte []dataHash)
     throws Exception
   {
-    if (crc == 0)
+    if (dataHash == null)
       return;
 
     int length = tempStream.getLength();
-    ReadStream is = tempStream.openReadAndSaveBuffer();
+    InputStream is = tempStream.openInputStreamNoFree();
     try {
-      _backing.storeSelf(obj.getObjectId(), obj.getStoreId(), is, length,
+      _backing.storeSelf(obj.getObjectId(), obj.getStoreId(),
+                         is, length, dataHash,
 			 obj.getExpireInterval(), 0, 0, 0);
 
       if (log.isLoggable(Level.FINE))
@@ -181,7 +175,7 @@ public class FileStoreManager extends StoreManager {
   }
   
   /**
-   * Updates the object's access time in the persistent store.
+   * Updates the object's objectAccess time in the persistent objectStore.
    *
    * @param uniqueId the identifier of the object.
    */
@@ -206,7 +200,7 @@ public class FileStoreManager extends StoreManager {
   }
 
   /**
-   * When the session is no longer valid, remove it from the backing store.
+   * When the session is no longer valid, objectRemove it from the backing objectStore.
    */
   @Override
   public void remove(ClusterObject obj)

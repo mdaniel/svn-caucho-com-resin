@@ -87,6 +87,7 @@ public class TempOutputStream extends OutputStream
     _head._bufferCount++;
   }
 
+  @Override
   public void flush()
     throws IOException
   {
@@ -127,6 +128,19 @@ public class TempOutputStream extends OutputStream
     _tail = null;
     
     return new TempInputStream(head);
+  }
+
+  /**
+   * Opens a read stream to the buffer.
+   */
+  public InputStream openInputStreamNoFree()
+    throws IOException
+  {
+    close();
+
+    TempBuffer head = _head;
+    
+    return new TempInputStreamNoFree(head);
   }
 
   /**

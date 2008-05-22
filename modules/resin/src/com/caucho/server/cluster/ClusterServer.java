@@ -86,6 +86,8 @@ public class ClusterServer {
     = new ContainerProgram();
 
   private ArrayList<Port> _ports = new ArrayList<Port>();
+
+  private boolean _isSelf;
   
   private ClusterServerAdmin _admin = new ClusterServerAdmin(this);
 
@@ -503,6 +505,14 @@ public class ClusterServer {
   }
 
   /**
+   * Returns true for the self server
+   */
+  public boolean isSelf()
+  {
+    return _isSelf;
+  }
+
+  /**
    * Returns true for secure.
    */
   public boolean isSSL()
@@ -559,6 +569,8 @@ public class ClusterServer {
   public Server startServer()
     throws StartLifecycleException
   {
+    _isSelf = true;
+    
     return _cluster.startServer(this);
   }
 

@@ -552,8 +552,9 @@ public class ConfigContext {
 	  
 	  attrStrategy.setValue(bean, qName, value);
 	}
-	else
+	else {
 	  attrStrategy.setText(bean, qName, textValue);
+	}
       }
     } catch (LineConfigException e) {
       throw e;

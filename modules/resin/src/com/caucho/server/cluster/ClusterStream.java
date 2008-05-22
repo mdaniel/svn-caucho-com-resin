@@ -317,6 +317,7 @@ public class ClusterStream {
     throws IOException
   {
     _os.write(HmuxRequest.HMUX_YIELD);
+    _os.flush();
   }
 
   /**
@@ -357,6 +358,8 @@ public class ClusterStream {
     WriteStream os = _os;
     
     os.write(code);
+    os.write(0);
+    os.write(8);
     os.write((int) (id >> 56));
     os.write((int) (id >> 48));
     os.write((int) (id >> 40));

@@ -772,6 +772,18 @@ public class Resin implements EnvironmentBean, SchemaBean
       return;
   }
 
+  public boolean isDynamicServer()
+  {
+    for (int i = 0; i < _clusters.size(); i++) {
+      Cluster cluster = _clusters.get(i);
+
+      if (cluster.isDynamicServerEnable())
+	return true;
+    }
+
+    return false;
+  }
+
   public Cluster findCluster(String id)
   {
     for (int i = 0; i < _clusters.size(); i++) {

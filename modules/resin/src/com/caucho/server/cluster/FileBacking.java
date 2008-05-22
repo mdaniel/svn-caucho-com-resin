@@ -41,6 +41,7 @@ import com.caucho.vfs.WriteStream;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -51,7 +52,7 @@ import java.util.logging.Logger;
 
 
 /**
- * Manages the backing for the file store.
+ * Manages the backing for the file objectStore.
  */
 public class FileBacking {
   private static final L10N L = new L10N(FileBacking.class);
@@ -66,10 +67,16 @@ public class FileBacking {
   private Path _path;
 
   private DataSource _dataSource;
+  
+  // version identifier for this instance of the backing. Each new start
+  // will increment the version
+  private int _version = 1;
 
   private String _tableName;
   private String _loadQuery;
+  private String _loadIfVersionQuery;
   private String _updateQuery;
+  private String _updateMetadataQuery;
   private String _accessQuery;
   private String _setExpiresQuery;
   private String _insertQuery;
@@ -125,16 +132,31 @@ public class FileBacking {
     if (length <= 0)
       length = 1;
     
-    _loadQuery = "SELECT access_time,data FROM " + _tableName + " WHERE id=? AND is_valid=1";
+    _loadQuery = ("SELECT access_time,data_hash,data"
+		  + " FROM " + _tableName
+		  + " WHERE id=? AND is_valid=1");
+    
+    _loadIfVersionQuery = ("SELECT access_time,data_hash,data"
+			   + " FROM " + _tableName
+			   + " WHERE id=? AND is_valid=1 AND version=?");
+    
     _insertQuery = ("INSERT into " + _tableName
-		    + " (id,store_id,is_valid,data,mod_time,access_time,expire_interval,server1,server2,server3) "
-		    + "VALUES(?,?,1,?,?,?,?,?,?,?)");
-    _updateQuery = "UPDATE " + _tableName + " SET data=?, mod_time=?, access_time=?,is_valid=1 WHERE id=?";
+		    + " (id,store_id,is_valid,data_hash,data,mod_time,access_time,expire_interval,server1,server2,server3,version) "
+		    + "VALUES(?,?,1,?,?,?,?,?,?,?,?,?)");
+    
+    _updateQuery = ("UPDATE " + _tableName
+		    + " SET data_hash=?, data=?, mod_time=?, access_time=?,is_valid=1,version=?"
+		    + " WHERE id=?");
+    
+    _updateMetadataQuery = ("UPDATE " + _tableName
+		            + " SET is_valid=0"
+   		            + " WHERE id=? AND data_hash <> ?");
+
     _accessQuery = "UPDATE " + _tableName + " SET access_time=? WHERE id=?";
     _setExpiresQuery = "UPDATE " + _tableName + " SET expire_interval=? WHERE id=?";
     _invalidateQuery = "UPDATE " + _tableName + " SET is_valid=0 WHERE id=?";
 
-    // access window is 1/4 the expire interval
+    // objectAccess window is 1/4 the expire interval
     _timeoutQuery = ("DELETE FROM " + _tableName
 		     + " WHERE access_time + 5 * expire_interval / 4 < ?");
 
@@ -158,6 +180,8 @@ public class FileBacking {
     _dataSource = dataSource;
 
     initDatabase();
+    
+    initVersion();
 
     return true;
   }
@@ -181,10 +205,9 @@ public class FileBacking {
     try {
       Statement stmt = conn.createStatement();
       
-      boolean hasDatabase = false;
-
       try {
-	String sql = "SELECT expire_interval,store_id,is_valid FROM " + _tableName + " WHERE 1=0";
+	String sql = ("SELECT expire_interval,store_id,is_valid,version"
+                      + " FROM " + _tableName + " WHERE 1=0");
 
 	ResultSet rs = stmt.executeQuery(sql);
 	rs.next();
@@ -205,16 +228,81 @@ public class FileBacking {
       String sql = ("CREATE TABLE " + _tableName + " (\n"
                     + "  id BINARY(20) PRIMARY KEY,\n"
                     + "  store_id BINARY(20),\n"
-		    + "  is_valid BIT,\n"
                     + "  data_hash BINARY(20),\n"
 		    + "  data BLOB,\n"
+                    + "  version INTEGER,\n"
 		    + "  expire_interval INTEGER,\n"
 		    + "  access_time INTEGER,\n"
 		    + "  mod_time INTEGER,\n"
-		    + "  mod_count BIGINT,\n"
-		    + "  server1 INTEGER,\n"
-		    + "  server2 INTEGER,\n" 
-		    + "  server3 INTEGER)");
+		    + "  server1 SMALLINT,\n"
+		    + "  server2 SMALLINT,\n" 
+		    + "  server3 SMALLINT,\n"
+                    + "  is_valid BIT)");
+
+
+      log.fine(sql);
+
+      stmt.executeUpdate(sql);
+    } finally {
+      conn.close();
+    }
+  }
+
+  /**
+   * Finds the old version id from the database.
+   */
+  private void initVersion()
+    throws Exception
+  {
+    Connection conn = _dataSource.getConnection();
+
+    try {
+      Statement stmt = conn.createStatement();
+      
+      try {
+	String sql = ("select max(version)" + " from " + _tableName);
+
+	ResultSet rs = stmt.executeQuery(sql);
+
+        if (rs.next()) {
+          _version = rs.getInt(1) + 1;
+        }
+	rs.close();
+        
+        // rollover
+        if (Integer.MAX_VALUE / 2 < _version) {
+          sql = "update " + _tableName + " set version=0";
+          stmt.executeUpdate(sql);
+          
+          _version = 1;
+        }
+        
+	return;
+      } catch (Exception e) {
+	log.log(Level.FINEST, e.toString(), e);
+	log.finer(this + " " + e.toString());
+      }
+
+      try {
+	stmt.executeQuery("DROP TABLE " + _tableName);
+      } catch (Exception e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
+
+      String sql = ("CREATE TABLE " + _tableName + " (\n"
+                    + "  id BINARY(20) PRIMARY KEY,\n"
+                    + "  store_id BINARY(20),\n"
+                    + "  data_hash BINARY(20),\n"
+		    + "  data BLOB,\n"
+                    + "  version INTEGER,\n"
+		    + "  expire_interval INTEGER,\n"
+		    + "  access_time INTEGER,\n"
+		    + "  mod_time INTEGER,\n"
+		    + "  server1 SMALLINT,\n"
+		    + "  server2 SMALLINT,\n" 
+		    + "  server3 SMALLINT,\n"
+                    + "  is_valid BIT)");
+
 
       log.fine(sql);
 
@@ -284,21 +372,57 @@ public class FileBacking {
   }
 
   /**
-   * Load the session from the jdbc store.
+   * Load the session from the jdbc objectStore.
    *
    * @param session the session to fill.
    *
-   * @return true if the load was valid.
+   * @return true if the loadImpl was valid.
    */
   public boolean loadSelf(ClusterObject clusterObj, Object obj)
+    throws Exception
+  {
+    return loadSelfImpl(clusterObj, obj, false);
+  }
+
+  /**
+   * Load the session from the jdbc objectStore.
+   *
+   * @param session the session to fill.
+   *
+   * @return true if the loadImpl was valid.
+   */
+  public boolean loadSelfIfVersion(ClusterObject clusterObj, Object obj)
+    throws Exception
+  {
+    return loadSelfImpl(clusterObj, obj, true);
+  }
+
+  /**
+   * Load the session from the jdbc objectStore.
+   *
+   * @param session the session to fill.
+   *
+   * @return true if the loadImpl was valid.
+   */
+  private boolean loadSelfImpl(ClusterObject clusterObj, Object obj,
+			       boolean isVersion)
     throws Exception
   {
     HashKey objectId = clusterObj.getObjectId();
 
     ClusterConnection conn = getConnection();
     try {
-      PreparedStatement stmt = conn.prepareLoad();
-      stmt.setBytes(1, objectId.getHash());
+      PreparedStatement stmt;
+
+      if (isVersion) {
+	stmt = conn.prepareLoadIfVersion();
+	stmt.setBytes(1, objectId.getHash());
+	stmt.setInt(2, _version);
+      }
+      else {
+	stmt = conn.prepareLoad();
+	stmt.setBytes(1, objectId.getHash());
+      }
 
       ResultSet rs = stmt.executeQuery();
       boolean validLoad = false;
@@ -306,13 +430,13 @@ public class FileBacking {
       if (rs.next()) {
 	//System.out.println("LOAD: " + uniqueId);
 	long accessTime = rs.getInt(1) * 60000L;
-	
-        InputStream is = rs.getBinaryStream(2);
+	byte []digest = rs.getBytes(2);
+        InputStream is = rs.getBinaryStream(3);
 
         if (log.isLoggable(Level.FINE))
           log.fine(this + " load key=" + objectId);
       
-        validLoad = clusterObj.load(is, obj);
+        validLoad = clusterObj.loadImpl(is, obj, digest);
 
 	if (validLoad)
 	  clusterObj.setAccessTime(accessTime);
@@ -334,9 +458,9 @@ public class FileBacking {
   }
 
   /**
-   * Updates the object's access time.
+   * Updates the object's objectAccess time.
    *
-   * @param obj the object to store.
+   * @param obj the object to objectStore.
    */
   public void updateAccess(HashKey id)
     throws Exception
@@ -366,7 +490,7 @@ public class FileBacking {
   /**
    * Sets the object's expire_interval.
    *
-   * @param obj the object to store.
+   * @param obj the object to objectStore.
    */
   public void setExpireInterval(HashKey id, long expireInterval)
     throws Exception
@@ -393,7 +517,7 @@ public class FileBacking {
   }
 
   /**
-   * Removes the named object from the store.
+   * Removes the named object from the objectStore.
    */
   public void remove(HashKey id)
     throws Exception
@@ -414,12 +538,14 @@ public class FileBacking {
   }
 
   /**
-   * Reads from the store.
+   * Reads from the objectStore.
    */
-  public long read(HashKey id, WriteStream os)
+  public byte [] read(HashKey id, WriteStream os)
     throws IOException
   {
     Connection conn = null;
+    byte []digest = null;
+    
     try {
       conn = _dataSource.getConnection();
 
@@ -429,14 +555,14 @@ public class FileBacking {
       ResultSet rs = pstmt.executeQuery();
       if (rs.next()) {
 	long accessTime = rs.getInt(1) * 60000L;
-	
-	InputStream is = rs.getBinaryStream(2);
+	digest = rs.getBytes(2);
+	InputStream is = rs.getBinaryStream(3);
 
 	os.writeStream(is);
 
 	is.close();
 
-	return accessTime;
+	return digest;
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -448,48 +574,48 @@ public class FileBacking {
       }
     }
 
-    return -1;
+    return digest;
   }
 
   /**
-   * Stores the cluster object on the local store.
+   * Stores the cluster object on the local objectStore.
    *
    * @param id the object's unique id.
    * @param is the input stream to the serialized object
    * @param length the length object the serialized object
-   * @param expireInterval how long the object lives w/o access
+   * @param expireInterval how long the object lives w/o objectAccess
    */
   public void storeSelf(HashKey id, HashKey storeId,
-			ReadStream is, int length,
-			long expireInterval,
+			InputStream is, int length,
+                        byte []dataHash, long expireInterval,
 			int primary, int secondary, int tertiary)
   {
     ClusterConnection conn = null;
 
     try {
       conn = getConnection();
-      // Try to update first, and insert if fail.
+      // Try to updateImpl first, and insert if fail.
       // The binary stream can be reused because it won't actually be
       // read on a failure
 
-      if (storeSelfUpdate(conn, id, is, length)) {
+      if (storeSelfUpdate(conn, id, is, length, dataHash)) {
       }
-      else if (storeSelfInsert(conn, id, storeId, is, length, expireInterval,
-			       primary, secondary, tertiary)) {
+      else if (storeSelfInsert(conn, id, storeId, is, length, dataHash,
+                               expireInterval, primary, secondary, tertiary)) {
       }
       else {
-	// XXX: For now, avoid this case since the self-update query doesn't
-	// check for any update count, i.e. it can't tell which update is
-	// the most recent.  Also, the input stream would need to change
+	// XXX: For now, avoid this case since the self-updateImpl query doesn't
+	// check for any updateImpl count, i.e. it can't tell which updateImpl is
+	// the most recent.  Also, the input stream would need to objectModified
 	// to a tempStream to allow the re-write
 	
 	/*
 	if (storeSelfUpdate(conn, uniqueId, is, length)) {
-	  // The second update is for the rare case where
-	  // two threads try to update the database simultaneously
+	  // The second updateImpl is for the rare case where
+	  // two threads try to updateImpl the database simultaneously
 	}
 	else {
-	  log.fine(L.l("Can't store session {0}", uniqueId));
+	  log.fine(L.l("Can't objectStore session {0}", uniqueId));
 	}
 	*/
       }
@@ -502,31 +628,34 @@ public class FileBacking {
   }
   
   /**
-   * Stores the cluster object on the local store using an update query.
+   * Stores the cluster object on the local objectStore using an updateImpl query.
    *
    * @param conn the database connection
    * @param id the object's unique id.
-   * @param id the input stream to the serialized object
+   * @param is the input stream to the serialized object
    * @param length the length object the serialized object
    */
   private boolean storeSelfUpdate(ClusterConnection conn, HashKey id,
-				  ReadStream is, int length)
+				  InputStream is, int length, byte []dataHash)
   {
     try {
       PreparedStatement stmt = conn.prepareUpdate();
-      stmt.setBinaryStream(1, is, length);
+      stmt.setBytes(1, dataHash);
+      stmt.setBinaryStream(2, is, length);
 
       long now = Alarm.getCurrentTime();
       int nowMinutes = (int) (now / 60000L);
-      stmt.setInt(2, nowMinutes);
       stmt.setInt(3, nowMinutes);
-      stmt.setBytes(4, id.getHash());
+      stmt.setInt(4, nowMinutes);
+      stmt.setInt(5, _version);
+      
+      stmt.setBytes(6, id.getHash());
 
       int count = stmt.executeUpdate();
         
       if (count > 0) {
 	if (log.isLoggable(Level.FINE)) 
-	  log.fine(this + " update " + id + " length:" + length);
+	  log.fine(this + " save(update) " + id + " length:" + length);
 	  
 	return true;
       }
@@ -539,7 +668,7 @@ public class FileBacking {
   
   private boolean storeSelfInsert(ClusterConnection conn, 
                                   HashKey id, HashKey storeId,
-				  ReadStream is, int length,
+				  InputStream is, int length, byte []dataHash,
 				  long expireInterval,
 				  int primary, int secondary, int tertiary)
   {
@@ -549,22 +678,28 @@ public class FileBacking {
       stmt.setBytes(1, id.getHash());
       stmt.setBytes(2, storeId.getHash());
 
-      stmt.setBinaryStream(3, is, length);
+      if (dataHash == null)
+	throw new NullPointerException();
+      
+      stmt.setBytes(3, dataHash);
+      stmt.setBinaryStream(4, is, length);
       
       int nowMinutes = (int) (Alarm.getCurrentTime() / 60000L);
       
-      stmt.setInt(4, nowMinutes);
       stmt.setInt(5, nowMinutes);
-      stmt.setInt(6, (int) (expireInterval / 60000L));
+      stmt.setInt(6, nowMinutes);
+      stmt.setInt(7, (int) (expireInterval / 60000L));
 
-      stmt.setInt(7, primary);
-      stmt.setInt(8, secondary);
-      stmt.setInt(9, tertiary);
+      stmt.setInt(8, primary);
+      stmt.setInt(9, secondary);
+      stmt.setInt(10, tertiary);
+      
+      stmt.setInt(11, _version);
 
       stmt.executeUpdate();
         
       if (log.isLoggable(Level.FINE))
-	log.fine(this + " insert " + id + " length:" + length);
+	log.fine(this + " save(insert) " + id + " length:" + length);
 
       return true;
     } catch (SQLException e) {
@@ -574,6 +709,37 @@ public class FileBacking {
     }
 
     return false;
+  }
+
+  /**
+   * Invalidates the item if the hash does not match
+   *
+   * @param id the object's unique id.
+   * @param length the length object the serialized object
+   * @param expireInterval how long the object lives w/o objectAccess
+   */
+  public void updateSelf(HashKey id, byte []dataHash, long expireInterval)
+  {
+    ClusterConnection conn = null;
+
+    try {
+      conn = getConnection();
+      // Try to updateImpl first, and insert if fail.
+      // The binary stream can be reused because it won't actually be
+      // read on a failure
+
+      PreparedStatement stmt = conn.prepareUpdateMetadata();
+      
+      stmt.setBytes(1, id.getHash());
+      stmt.setBytes(2, dataHash);
+
+      stmt.executeUpdate();
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+    } finally {
+      if (conn != null)
+	conn.close();
+    }
   }
 
   //
@@ -664,10 +830,12 @@ public class FileBacking {
   class ClusterConnection {
     private Connection _conn;
     
-    private PreparedStatement _loadStatement;
-    private PreparedStatement _updateStatement;
-    private PreparedStatement _insertStatement;
     private PreparedStatement _accessStatement;
+    private PreparedStatement _loadStatement;
+    private PreparedStatement _loadIfVersionStatement;
+    private PreparedStatement _insertStatement;
+    private PreparedStatement _updateStatement;
+    private PreparedStatement _updateMetadataStatement;
     private PreparedStatement _setExpiresStatement;
     private PreparedStatement _invalidateStatement;
     private PreparedStatement _timeoutStatement;
@@ -687,6 +855,15 @@ public class FileBacking {
       return _loadStatement;
     }
 
+    PreparedStatement prepareLoadIfVersion()
+      throws SQLException
+    {
+      if (_loadIfVersionStatement == null)
+	_loadIfVersionStatement = _conn.prepareStatement(_loadIfVersionQuery);
+
+      return _loadIfVersionStatement;
+    }
+
     PreparedStatement prepareUpdate()
       throws SQLException
     {
@@ -703,6 +880,17 @@ public class FileBacking {
 	_insertStatement = _conn.prepareStatement(_insertQuery);
 
       return _insertStatement;
+    }
+
+    PreparedStatement prepareUpdateMetadata()
+      throws SQLException
+    {
+      if (_updateMetadataStatement == null) {
+	_updateMetadataStatement
+	  = _conn.prepareStatement(_updateMetadataQuery);
+      }
+
+      return _updateMetadataStatement;
     }
 
     PreparedStatement prepareAccess()

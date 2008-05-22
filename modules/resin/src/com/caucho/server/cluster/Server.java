@@ -1343,6 +1343,10 @@ public class Server extends ProtocolDispatchServer
       _alarm.queue(ALARM_INTERVAL);
       
       _lifecycle.toActive();
+
+      // dynamic updates from the cluster start after we're capable of
+      // handling messages
+      getCluster().startClusterUpdate();
     } catch (RuntimeException e) {
       log.log(Level.WARNING, e.toString(), e);
       

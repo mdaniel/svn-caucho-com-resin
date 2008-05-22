@@ -90,7 +90,7 @@ public class ResinSessionArrayValue extends SessionArrayValue
   public boolean load()
   {
     if (_clusterObject != null)
-      return _clusterObject.load(this);
+      return _clusterObject.objectLoad(this);
     else
       return true;
   }
@@ -103,9 +103,9 @@ public class ResinSessionArrayValue extends SessionArrayValue
       if (clusterObject != null) {
         // make sure the object always saves - PHP references can make changes
         // without directly calling on the session object
-        clusterObject.change(); 
+        clusterObject.objectModified(); 
 
-        clusterObject.store(this);
+        clusterObject.objectStore(this);
       }
     } catch (Exception e) {
       log.log(Level.WARNING, "Can't serialize session", e);
@@ -122,6 +122,6 @@ public class ResinSessionArrayValue extends SessionArrayValue
     _clusterObject = null;
 
     if (clusterObject != null)
-      clusterObject.remove();
+      clusterObject.objectRemove();
   }
 }

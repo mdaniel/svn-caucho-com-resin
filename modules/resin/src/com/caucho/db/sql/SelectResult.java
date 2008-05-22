@@ -792,6 +792,12 @@ public class SelectResult {
 
 	_offset += sublen;
 	break;
+	  
+      case Column.BINARY:
+	sublen = read();
+
+	_offset += sublen;
+	break;
 
       case Column.SHORT:
 	_offset += 2;
@@ -810,7 +816,7 @@ public class SelectResult {
 	break;
 	  
       default:
-	throw new RuntimeException("Unknown column: " + type);
+	throw new RuntimeException("Unknown column type: " + type);
       }
     }
   }

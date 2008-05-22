@@ -41,10 +41,10 @@ import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.vfs.TempOutputStream;
 import com.caucho.vfs.TempStream;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -131,7 +131,7 @@ abstract public class StoreManager
   }
 
   /**
-   * Set true if the store should always try to load the object.
+   * Set true if the objectStore should always try to loadImpl the object.
    */
   public void setAlwaysLoad(boolean alwaysLoad)
   {
@@ -139,7 +139,7 @@ abstract public class StoreManager
   }
 
   /**
-   * Set true if the store should always try to load the object.
+   * Set true if the objectStore should always try to loadImpl the object.
    */
   public boolean isAlwaysLoad()
   {
@@ -147,7 +147,7 @@ abstract public class StoreManager
   }
 
   /**
-   * Set true if the store should always try to store the object.
+   * Set true if the objectStore should always try to objectStore the object.
    */
   public void setAlwaysSave(boolean alwaysSave)
   {
@@ -155,7 +155,7 @@ abstract public class StoreManager
   }
 
   /**
-   * Set true if the store should always try to store the object.
+   * Set true if the objectStore should always try to objectStore the object.
    */
   public boolean isAlwaysSave()
   {
@@ -163,7 +163,7 @@ abstract public class StoreManager
   }
 
   /**
-   * Returns the length of time an idle object can remain in the store before
+   * Returns the length of time an idle object can remain in the objectStore before
    * being cleaned.
    */
   public long getMaxIdleTime()
@@ -172,7 +172,7 @@ abstract public class StoreManager
   }
 
   /**
-   * Sets the length of time an idle object can remain in the store before
+   * Sets the length of time an idle object can remain in the objectStore before
    * being cleaned.
    */
   public void setMaxIdleTime(Period maxIdleTime)
@@ -207,7 +207,7 @@ abstract public class StoreManager
   }
 
   /**
-   * Returns the length of time an idle object can remain in the store before
+   * Returns the length of time an idle object can remain in the objectStore before
    * being cleaned.
    */
   public long getAccessWindowTime()
@@ -225,7 +225,7 @@ abstract public class StoreManager
   //
 
   /**
-   * Returns the objects in the store
+   * Returns the objects in the objectStore
    */
   public long getObjectCount()
   {
@@ -241,7 +241,7 @@ abstract public class StoreManager
   }
 
   /**
-   * Returns the objects which failed to load.
+   * Returns the objects which failed to loadImpl.
    */
   public long getLoadFailCount()
   {
@@ -325,7 +325,6 @@ abstract public class StoreManager
    */
   @PostConstruct
   public boolean init()
-    throws Exception
   {
     if (! _lifecycle.toInit())
       return false;
@@ -356,14 +355,13 @@ abstract public class StoreManager
       }
     }
 
-
     Environment.addEnvironmentListener(this);
 
     return true;
   }
 
   /**
-   * Called to start the store.
+   * Called to start the objectStore.
    */
   public boolean start()
     throws Exception
@@ -396,9 +394,18 @@ abstract public class StoreManager
   }
 
   /**
+   * Called to start any invalidate processing
+   */
+  public boolean startUpdate()
+    throws Exception
+  {
+    return true;
+  }
+
+  /**
    * Cleans old objects.  Living objects corresponding to the old
    * objects are not cleared, since their timeout should be less than
-   * the store timeout.
+   * the objectStore timeout.
    */
   public void clearOldObjects()
     throws Exception
@@ -438,18 +445,18 @@ abstract public class StoreManager
   }
 
   /**
-   * Loads an object from the backing store.
+   * Loads an object from the backing objectStore.
    *
-   * @param obj the object to update.
+   * @param obj the object to updateImpl.
    */
   abstract protected boolean load(ClusterObject clusterObject, Object obj)
     throws Exception;
 
   /**
-   * Updates the object's access time.
+   * Updates the object's objectAccess time.
    *
    * @param storeId the identifier of the storage group
-   * @param obj the object to update.
+   * @param obj the object to updateImpl.
    */
   public void access(HashKey objectId)
     throws Exception
@@ -457,25 +464,25 @@ abstract public class StoreManager
     ClusterObject obj = getClusterObject(objectId);
 
     if (obj != null)
-      obj.access();
+      obj.accessImpl();
     else
       accessImpl(obj.getObjectId());
   }
 
   /**
-   * Updates the object's access time.
+   * Updates the object's objectAccess time.
    *
    * @param storeId the identifier of the storage group
-   * @param obj the object to update.
+   * @param obj the object to updateImpl.
    */
   public void access(Store store, String id)
     throws Exception
   {
-    getClusterObject(store, id).access();
+    getClusterObject(store, id).objectAccess();
   }
   
   /**
-   * Updates the object's access time in the persistent store.
+   * Updates the object's objectAccess time in the persistent objectStore.
    *
    * @param uniqueId the identifier of the object.
    */
@@ -494,18 +501,17 @@ abstract public class StoreManager
   }
 
   /**
-   * Updates the object access time.
+   * Notify the object that the data has changed.
    *
-   * @param storeId the identifier of the storage group
-   * @param objectId the identifier of the object to remove
+    * @param objectId the identifier of the object to notify
    */
-  public void update(HashKey objectId)
+  public void invalidate(HashKey objectId)
     throws Exception
   {
     ClusterObject obj = getClusterObject(objectId);
 
     if (obj != null)
-      obj.update();
+      obj.updateImpl();
   }
 
   /**
@@ -523,53 +529,84 @@ abstract public class StoreManager
    * Saves the object to the cluster.
    *
    * @param storeId the identifier of the storage group
-   * @param obj the object to store.
+   * @param obj the object to objectStore.
    */
-  public void store(Store store, HashKey objectId, Object obj)
+  /*
+  public void objectStore(Store objectStore, HashKey objectId, Object value)
     throws IOException
   {
     ClusterObject clusterObj = getClusterObject(objectId);
 
     if (clusterObj != null) {
     }
-    else if (store.getObjectManager().isEmpty(obj))
+    else if (objectStore.getObjectManager().isEmpty(value))
       return;
     else
-      clusterObj = createClusterObject(store, objectId);
+      clusterObj = createClusterObject(objectStore, objectId);
     
-    clusterObj.store(obj);
+    clusterObj.objectStore(value);
   }
+   */
 
   /**
    * Returns the cluster object.
    *
    * @param storeId the identifier of the storage group
-   * @param obj the object to store.
+   * @param obj the object to objectStore.
    */
-  ClusterObject createClusterObject(Store store, String id)
+  /*
+  ClusterObject createClusterObject(Store objectStore, String id)
+  {
+    HashKey key = _hashManager.generateHash(objectStore.getId(), id);
+
+    return createClusterObject(objectStore, key);
+  }
+   */
+
+  /**
+   * Creates the cluster object given the objectStore and id
+   *
+   * @param objectStore the owning persistent objectStore
+   * @param id the object's unique identifier in the objectStore
+   * @param primary the primary owning server
+   * @param secondary the secondary backup
+   * @param tertiary the tertiary backup
+   */
+  ClusterObject createClusterObject(Store store,
+                                    String id,
+                                    int primary,
+                                    int secondary,
+                                    int tertiary)
   {
     HashKey key = _hashManager.generateHash(store.getId(), id);
 
-    return createClusterObject(store, key);
+    return createClusterObject(store, key, primary, secondary, tertiary);
   }
  
   /**
    * Returns the cluster object.
    *
-   * @param storeId the identifier of the storage group
-   * @param obj the object to store.
+   * @param objectStore the owning cluster objectStore
+   * @param id the object's unique identifier
+   * @param primary the object's owning server
+   * @param secondary the object's secondary backup
+   * @param tertiary the object's tertiary backup
    */
-  ClusterObject createClusterObject(Store store, HashKey key)
+  ClusterObject createClusterObject(Store store, 
+                                    HashKey key,
+                                    int primary,
+                                    int secondary,
+                                    int tertiary)
   {
     try {
       synchronized (_clusterObjects) {
-	ClusterObject clusterObj = _clusterObjects.get(key);
-	if (clusterObj == null) {
-	  clusterObj = create(store, key);
-	  _clusterObjects.put(key, clusterObj);
+	ClusterObject object = _clusterObjects.get(key);
+	if (object == null) {
+	  object = create(store, key, primary, secondary, tertiary);
+	  _clusterObjects.put(key, object);
 	}
 
-	return clusterObj;
+	return object;
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -582,7 +619,7 @@ abstract public class StoreManager
    * Returns the cluster object.
    *
    * @param storeId the identifier of the storage group
-   * @param obj the object to store.
+   * @param obj the object to objectStore.
    */
   ClusterObject getClusterObject(Store store, String id)
   {
@@ -593,7 +630,7 @@ abstract public class StoreManager
    * Returns the cluster object.
    *
    * @param storeId the identifier of the storage group
-   * @param obj the object to store.
+   * @param obj the object to objectStore.
    */
   ClusterObject getClusterObject(HashKey key)
   {
@@ -606,7 +643,7 @@ abstract public class StoreManager
    * Returns the cluster object.
    *
    * @param storeId the identifier of the storage group
-   * @param obj the object to store.
+   * @param obj the object to objectStore.
    */
   ClusterObject removeClusterObject(HashKey key)
   {
@@ -618,20 +655,25 @@ abstract public class StoreManager
   /**
    * Creates the cluster object.
    */
-  ClusterObject create(Store store, HashKey key)
+  protected ClusterObject create(Store store, 
+                                 HashKey key,
+                                 int primary,
+                                 int secondary,
+                                 int tertiary)
   {
-    return new ClusterObject(this, store, key);
+    return new ClusterObject(store, key, primary, secondary, tertiary);
   }
   
   /**
-   * Save the object to the store.
+   * Save the object to the objectStore.
    *
-   * @param storeId the identifier of the storage group
-   * @param obj the object to store.
+   * @param clusterObject the distributed handle
+   * @param tempStream the byte stream to the saved data
+   * @param dataHash the sha-1 hash of the data
    */
   abstract protected void store(ClusterObject clusterObject,
-				TempStream tempStream,
-				long crc)
+				TempOutputStream tempStream,
+				byte []dataHash)
     throws Exception;
   
   /**
@@ -652,9 +694,9 @@ abstract public class StoreManager
   }
 
   /**
-   * When the object is no longer valid, remove it from the backing store.
+   * When the object is no longer valid, objectRemove it from the backing objectStore.
    *
-   * @param obj the object to remove
+   * @param obj the object to objectRemove
    */
   public void remove(ClusterObject obj)
     throws Exception
@@ -663,10 +705,10 @@ abstract public class StoreManager
   }
 
   /**
-   * When the object is no longer valid, remove it from the backing store.
+   * When the object is no longer valid, objectRemove it from the backing objectStore.
    *
-   * @param store the identifier of the storeage group
-   * @param objectId the identifier of the object to remove
+   * @param objectStore the identifier of the storeage group
+   * @param objectId the identifier of the object to objectRemove
    */
   public void remove(Store store, String objectId)
     throws Exception

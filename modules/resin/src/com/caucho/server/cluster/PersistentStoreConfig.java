@@ -67,7 +67,7 @@ public class PersistentStoreConfig {
     
     if (type.equals("jdbc")) {
       try {
-	Class cl = Class.forName("com.caucho.server.cluster.JdbcStore");
+	Class cl = Class.forName("com.caucho.server.cluster.JdbcStoreManager");
 	
 	_store = (StoreManager) cl.newInstance();
 
@@ -88,7 +88,7 @@ public class PersistentStoreConfig {
 	throw new ConfigException(L.l("Cluster store needs a defined <cluster>.  Use 'file' for single-machine persistence."));
       
       try {
-	Class cl = Class.forName("com.caucho.server.cluster.ClusterStore");
+	Class cl = Class.forName("com.caucho.server.cluster.ClusterStoreManager");
 
 	_store = (StoreManager) cl.newInstance();
 

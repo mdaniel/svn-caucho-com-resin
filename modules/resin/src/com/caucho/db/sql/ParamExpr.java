@@ -227,6 +227,28 @@ class ParamExpr extends Expr {
     case DOUBLE:
       return String.valueOf(_doubleValue);
 
+    case BYTES:
+    {
+      StringBuilder sb = new StringBuilder();
+      int len = _bytes.length;
+      for (int i = 0; i < len; i++) {
+	int d1 = (_bytes[i] >> 4) & 0xf;
+	int d2 = (_bytes[i]) & 0xf;
+
+	if (d1 < 10)
+	  sb.append((char) (d1 + '0'));
+	else
+	  sb.append((char) (d1 + 'a' - 10));
+
+	if (d2 < 10)
+	  sb.append((char) (d2 + '0'));
+	else
+	  sb.append((char) (d2 + 'a' - 10));
+      }
+
+      return sb.toString();
+    }
+
     default:
       throw new UnsupportedOperationException(String.valueOf(_type));
     }
