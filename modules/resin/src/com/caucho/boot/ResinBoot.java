@@ -103,10 +103,8 @@ public class ResinBoot {
                                       _args.getResinConf().getNativePath()));
     }
 
-    // XXX: set _isResinProfessional
-
     Config config = new Config();
-    BootManager bootManager = new BootManager(_args);
+    BootResinConfig bootManager = new BootResinConfig(_args);
 
     ResinELContext elContext = _args.getELContext();
 
@@ -128,13 +126,14 @@ public class ResinBoot {
     }
     else {
       _client = bootManager.findClient(_args.getServerId());
-
-      if (_client == null)
-	throw new ConfigException(L().l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
-					Version.VERSION, _args.getServerId(), _args.getResinConf()));
     }
 
-    Path logDirectory = bootManager.getLogDirectory();
+    if (_client == null) {
+      throw new ConfigException(L().l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
+			              Version.VERSION, _args.getServerId(), _args.getResinConf()));
+    }
+
+    Path logDirectory = _client.getLogDirectory();
     if (! logDirectory.exists()) {
       logDirectory.mkdirs();
 

@@ -627,6 +627,7 @@ public class WebBeansContainer
   public ComponentImpl findByName(String name)
   {
     ComponentImpl comp = _namedComponentMap.get(name);
+    
     if (comp != null)
       return comp;
     else if (_parent != null)

@@ -44,7 +44,7 @@ import java.lang.instrument.*;
  * From the perspective of the JDK, it's all one classloader.  Internally,
  * the class loader chain searches like a classpath.
  */
-public class ProLoader extends SecureClassLoader
+class ProLoader extends SecureClassLoader
 {
   private Path _resinHome;
   private Path _libexec;

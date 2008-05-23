@@ -1840,7 +1840,8 @@ public class WebApp extends ServletContextImpl
         _configException = Environment.getConfigException();
 
       try {
-        getSessionManager().start();
+	if (getSessionManager() != null)
+	  getSessionManager().start();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }

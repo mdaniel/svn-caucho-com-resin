@@ -31,22 +31,24 @@ package com.caucho.boot;
 
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
+import com.caucho.config.types.Bytes;
+import com.caucho.config.types.Period;
+import com.caucho.log.AbstractRolloverLog;
+import com.caucho.log.RotateStream;
 import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolPort;
 import com.caucho.util.*;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-import java.lang.reflect.*;
-import java.io.*;
-import java.net.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
  * Thread responsible for watching a backend server.
  */
-public class WatchdogConfig
+class WatchdogConfig
 {
   private static final L10N L
     = new L10N(WatchdogConfig.class);
@@ -58,6 +60,7 @@ public class WatchdogConfig
   private String _id = "";
 
   private WatchdogArgs _args;
+  private Path _rootDirectory;
 
   private Path _javaHome;
   private Path _javaExe;
@@ -67,7 +70,6 @@ public class WatchdogConfig
   private Path _resinHome;
   private Path _resinRoot;
   private Path _resinConf;
-  private Path _logPath;
 
   private boolean _is64bit;
   private boolean _hasXss;
@@ -83,6 +85,9 @@ public class WatchdogConfig
   private String _watchdogAddress = "127.0.0.1";
   private int _watchdogPort;
 
+  private WatchdogLog _watchdogLog;
+  private Path _logPath;
+
   private String _userName;
   private String _groupName;
 
@@ -95,11 +100,12 @@ public class WatchdogConfig
   private boolean _hasWatchdogXss;
   private boolean _hasWatchdogXmx;
 
-  WatchdogConfig(WatchdogArgs args)
+  WatchdogConfig(WatchdogArgs args, Path rootDirectory)
   {
     _args = args;
+    _rootDirectory = rootDirectory;
     
-    _pwd = Vfs.getPwd();
+    _pwd = Vfs.lookup();
 
     _is64bit = "64".equals(System.getProperty("sun.arch.data.model"));
   }
@@ -180,23 +186,6 @@ public class WatchdogConfig
     return _jvmClasspath;
   }
 
-  
-  public void addWatchdogJvmArg(String arg)
-  {
-    _watchdogJvmArgs.add(arg);
-
-    if (arg.equals("-d64"))
-      _isWatchdog64bit = true;
-    else if (arg.startsWith("-Xss"))
-      _hasWatchdogXss = true;
-    else if (arg.startsWith("-Xmx"))
-      _hasWatchdogXmx = true;
-  }
-  
-  public ArrayList<String> getWatchdogJvmArgs()
-  {
-    return _watchdogJvmArgs;
-  }
 
   /**
    * Adds a http.
@@ -265,7 +254,7 @@ public class WatchdogConfig
 
   public Path getRootDirectory()
   {
-    return _args.getRootDirectory();
+    return _rootDirectory;
   }
 
   public Path getLogDirectory()
@@ -274,8 +263,17 @@ public class WatchdogConfig
 
     if (logDirectory != null)
       return logDirectory;
+    
+    if (_watchdogLog != null && _watchdogLog.getDir() != null)
+      return _watchdogLog.getDir();
     else
       return getRootDirectory().lookup("log");
+  }
+  
+  void logInit(RotateStream log)
+  {
+    if (_watchdogLog != null)
+      _watchdogLog.logInit(log);
   }
   
   public long getShutdownWaitTime()
@@ -309,6 +307,31 @@ public class WatchdogConfig
   public void setWatchdogAddress(String addr)
   {
     _watchdogAddress = addr;
+  }
+  
+  public void addWatchdogJvmArg(String arg)
+  {
+    _watchdogJvmArgs.add(arg);
+
+    if (arg.equals("-d64"))
+      _isWatchdog64bit = true;
+    else if (arg.startsWith("-Xss"))
+      _hasWatchdogXss = true;
+    else if (arg.startsWith("-Xmx"))
+      _hasWatchdogXmx = true;
+  }
+  
+  public ArrayList<String> getWatchdogJvmArgs()
+  {
+    return _watchdogJvmArgs;
+  }
+
+  public WatchdogLog createWatchdogLog()
+  {
+    if (_watchdogLog == null)
+      _watchdogLog = new WatchdogLog();
+
+    return _watchdogLog;
   }
 
   public void setAcceptListenBacklog(ConfigProgram program)
@@ -497,7 +520,7 @@ public class WatchdogConfig
     if (_resinRoot != null)
       return _resinRoot;
     else
-      return _args.getRootDirectory();
+      return _rootDirectory;
   }
   
   /**
@@ -585,5 +608,57 @@ public class WatchdogConfig
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getId() + "]";
+  }
+
+  public class WatchdogLog {
+    private Path _dir;
+    
+    private Integer _rolloverCount;
+    private Period _rolloverPeriod;
+    private Bytes _rolloverSize;
+
+    public void setDir(Path dir)
+    {
+      _dir = dir;
+    }
+
+    Path getDir()
+    {
+      return _dir;
+    }
+
+    public void setRolloverCount(int count)
+    {
+      _rolloverCount = count;
+    }
+
+    public void setRolloverPeriod(Period period)
+    {
+      _rolloverPeriod = period;
+    }
+
+    public void setRolloverSize(Bytes size)
+    {
+      _rolloverSize = size;
+    }
+    
+    /**
+     * Initialize a log with the watchdog-log parameters
+     * 
+     * @param log the log to initialize
+     */
+    void logInit(RotateStream stream)
+    {
+      AbstractRolloverLog log = stream.getRolloverLog();
+      
+      if (_rolloverCount != null)
+        log.setRolloverCount(_rolloverCount);
+      
+      if (_rolloverPeriod != null)
+        log.setRolloverPeriod(_rolloverPeriod);
+      
+      if (_rolloverSize != null)
+        log.setRolloverSize(_rolloverSize);
+    }
   }
 }

@@ -31,11 +31,9 @@ package com.caucho.boot;
 
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.*;
-import com.caucho.vfs.Path;
 
 import java.lang.reflect.*;
 import java.net.*;
-import java.util.Date;
 import java.util.logging.*;
 
 /**

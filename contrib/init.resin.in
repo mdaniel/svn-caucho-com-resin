@@ -8,24 +8,30 @@
 # To install, configure this file as needed and copy init.resin
 # to /etc/rc.d/init.d as resin.  Then use "# /sbin/chkconfig resin reset"
 #
-JAVA_HOME=@JAVA_HOME@
-RESIN_HOME=@resin_home@
+JAVA_HOME="@JAVA_HOME@"
+RESIN_HOME="@resin_home@"
 
 export JAVA_HOME RESIN_HOME
 
-JAVA=$JAVA_HOME/bin/java
-#
-# If you want to start the entire Resin process as a different user,
-# set this to the user name.  If you need to bind to a protected port,
-# e.g. port 80, you can't use USER, but will need to use bin/resin.
-#
-USER=
+JAVA="$JAVA_HOME/bin/java"
 #
 # Set to the server id to start
 #
 #SERVER="-server app-a"
 #
-ARGS="-resin-home $RESIN_HOME $SERVER"
+# -resin-root /var/resin        -- the main data directory
+#
+RESIN_ROOT="@resin_root@"
+#
+# -conf /etc/resin/resin.conf   -- the main configuration file
+#
+RESIN_CONF="@resin_conf@"
+#
+# -log-directory /var/log/resin -- the main log directory
+#
+RESIN_LOG="@resin_log@"
+
+ARGS="-resin-home $RESIN_HOME $RESIN_CONF $RESIN_LOG $RESIN_ROOT $SERVER"
 
 if test -r /lib/lsb/init-functions; then
   . /lib/lsb/init-functions
@@ -62,19 +68,27 @@ case "$1" in
   start)
 	log_daemon_msg "Starting resin"
 	if test -n "$USER"; then
-  	  su $USER -c "$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start" 1>/dev/null 2>/dev/null
+  	  su $USER -c """$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start""" 1>/dev/null 2>/dev/null
 	else
-  	  $JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start 1>/dev/null 2>/dev/null
-        fi
+	    errors=`$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start 2>&1`
+	    if [ $? != 0 ]; then
+		log_daemon_msg $errors
+	    fi
+	fi
+
 	log_end_msg $?
 	;;
   stop)
 	log_daemon_msg "Stopping resin"
 	if test -n "$USER"; then
-  	  su $USER -c "$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS stop" 1>/dev/null 2>/dev/null
+  	  su $USER -c """$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS stop""" 1>/dev/null 2>/dev/null
 	else
-  	  $JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS stop 1>/dev/null 2>/dev/null
-        fi
+	    errors=`$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS stop 2>&1`
+	    if [ $? != 0 ]; then
+		log_daemon_msg $errors
+	    fi
+	fi
+	
 	log_end_msg $?
 	;;
   restart)
@@ -82,7 +96,7 @@ case "$1" in
 	$0 start
 	;;
   *)
-	echo "Usage: $0 {start|stop|restart}"
+	echo "Usage: $0 {start|stop|status|restart}"
 	exit 1
 esac
 

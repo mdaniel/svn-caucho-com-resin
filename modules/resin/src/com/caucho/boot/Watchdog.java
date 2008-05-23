@@ -29,15 +29,11 @@
 
 package com.caucho.boot;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.ConfigException;
-import com.caucho.lifecycle.Lifecycle;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.WatchdogMXBean;
 import com.caucho.server.port.Port;
 import com.caucho.util.*;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
 
 import java.lang.reflect.*;
 import java.net.*;
@@ -48,7 +44,7 @@ import java.util.logging.Logger;
 /**
  * Thread responsible for watching a backend server.
  */
-public class Watchdog
+class Watchdog
 {
   private static final L10N L = new L10N(Watchdog.class);
   private static final Logger log
@@ -67,10 +63,10 @@ public class Watchdog
   private int _startCount;
   private WatchdogAdmin _admin;
 
-  Watchdog(String id, WatchdogArgs args)
+  Watchdog(String id, WatchdogArgs args, Path rootDirectory)
   {
     _id = id;
-    _config = new WatchdogConfig(args);
+    _config = new WatchdogConfig(args, rootDirectory);
 
     _admin = new WatchdogAdmin();
   }

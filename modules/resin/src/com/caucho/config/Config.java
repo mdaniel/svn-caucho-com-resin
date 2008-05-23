@@ -132,13 +132,15 @@ public class Config {
    * Configures a bean with a configuration file.
    */
   public Object configure(Object obj, Path path)
-    throws ConfigException
+    throws ConfigException, IOException
   {
     try {
       QDocument doc = parseDocument(path, null);
 
       return configure(obj, doc.getDocumentElement());
     } catch (RuntimeException e) {
+      throw e;
+    } catch (IOException e) {
       throw e;
     } catch (Exception e) {
       throw ConfigException.create(e);

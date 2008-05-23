@@ -47,11 +47,11 @@ import java.util.logging.*;
 /**
  * Configuration for management.
  */
-public class ManagementConfig
+public class BootManagementConfig
 {
-  private static L10N L = new L10N(ManagementConfig.class);
+  private static L10N L = new L10N(BootManagementConfig.class);
   private static Logger log
-    = Logger.getLogger(ManagementConfig.class.getName());
+    = Logger.getLogger(BootManagementConfig.class.getName());
 
   private ManagementAuthenticator _auth;
 

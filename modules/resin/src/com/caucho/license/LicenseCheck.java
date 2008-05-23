@@ -47,7 +47,7 @@ public interface LicenseCheck {
    * Write log messages based on the licenses and the number of servers that
    * the user is attempting to use.
    */
-  public void doLogging(int serverCount);
+  public String doLogging(int serverCount);
 
   /**
    * Return a summary description of the licenses, suitable for presentation to

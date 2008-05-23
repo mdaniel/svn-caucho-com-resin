@@ -1109,7 +1109,7 @@ public class Cluster
   @Override
   public String toString()
   {
-    return "Cluster[" + _id + "]";
+    return getClass().getSimpleName() + "[" + _id + "]";
   }
 
   /**

@@ -54,14 +54,14 @@ import java.util.logging.Logger;
  * Client to a watchdog-manager, i.e. ResinBoot code to ask the
  * watchdog-manager to do something.
  */
-public class WatchdogClient
+class WatchdogClient
 {
   private static final L10N L
     = new L10N(WatchdogClient.class);
   private static final Logger log
     = Logger.getLogger(WatchdogClient.class.getName());
   
-  private final BootManager _bootManager;
+  private final BootResinConfig _bootManager;
   private String _id = "";
 
   private WatchdogConfig _config;
@@ -69,7 +69,7 @@ public class WatchdogClient
   
   private Boot _jniBoot;
 
-  WatchdogClient(BootManager bootManager, WatchdogConfig config)
+  WatchdogClient(BootResinConfig bootManager, WatchdogConfig config)
   {
     _bootManager = bootManager;
     _config = config;
@@ -399,6 +399,9 @@ public class WatchdogClient
       else
         list.add(argv[i]);
     }
+    
+    list.add("--log-directory");
+    list.add(getLogDirectory().getFullPath());
 
     builder = builder.command(list);
 

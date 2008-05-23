@@ -1293,7 +1293,7 @@ public class Server extends ProtocolDispatchServer
 		 + ", " + System.getProperty("java.vm.info")
 		 + ", " + System.getProperty("java.vm.vendor"));
 
-        log.info("user.name: " + System.getProperty("user.name"));
+	log.info("");
 
         Resin resin = Resin.getLocal();
 
@@ -1301,11 +1301,19 @@ public class Server extends ProtocolDispatchServer
           log.info("resin.home = " + resin.getResinHome().getNativePath());
           log.info("resin.root = " + resin.getRootDirectory().getNativePath());
           log.info("resin.conf = " + resin.getResinConf());
-          log.info("resin.serverId = '" + resin.getServerId() + "'");
+          log.info("");
+
+          log.info("server     = "
+		   + _clusterServer.getClusterPort().getAddress()
+		   + ":" + _clusterServer.getClusterPort().getPort()
+		   + " (" + getCluster().getId()
+		   + ":" + getServerId() + ")");
         }
         else {
           log.info("resin.home = " + System.getProperty("resin.home"));
         }
+	
+        log.info("user.name  = " + System.getProperty("user.name"));
 
         log.info("");
       }

@@ -77,7 +77,7 @@ import javax.management.ObjectName;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.net.BindException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -106,8 +106,6 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private final EnvironmentLocal<String> _serverIdLocal
     = new EnvironmentLocal<String>("caucho.server-id");
-
-  private ObjectName _objectName;
 
   private EnvironmentClassLoader _classLoader;
   private boolean _isGlobal;
@@ -141,6 +139,8 @@ public class Resin implements EnvironmentBean, SchemaBean
   private long _initialStartTime;
   private long _startTime;
 
+  private String _licenseErrorMessage;
+
   private String _configFile;
   private String _configServer;
 
@@ -156,6 +156,8 @@ public class Resin implements EnvironmentBean, SchemaBean
   private Management _management;
 
   private ThreadPoolAdmin _threadPoolAdmin;
+
+  private ObjectName _objectName;
   private ResinAdmin _resinAdmin;
 
   private InputStream _waitIn;
@@ -165,17 +167,27 @@ public class Resin implements EnvironmentBean, SchemaBean
   /**
    * Creates a new resin server.
    */
-  public Resin()
+  protected Resin()
   {
-    this(Thread.currentThread().getContextClassLoader());
+    this(Thread.currentThread().getContextClassLoader(), null);
   }
 
   /**
    * Creates a new resin server.
    */
-  public Resin(ClassLoader loader)
+  protected Resin(ClassLoader loader)
+  {
+    this(loader, null);
+  }
+
+  /**
+   * Creates a new resin server.
+   */
+  protected Resin(ClassLoader loader, String licenseErrorMessage)
   {
     _startTime = Alarm.getCurrentTime();
+
+    _licenseErrorMessage = licenseErrorMessage;
 
     DynamicClassLoader.setJarCacheEnabled(true);
     Environment.init();
@@ -264,6 +276,42 @@ public class Resin implements EnvironmentBean, SchemaBean
   }
 
   /**
+   * Creates a new Resin instance
+   */
+  public static Resin create()
+  {
+    return create(Thread.currentThread().getContextClassLoader());
+  }
+
+  /**
+   * Creates a new Resin instance
+   */
+  public static Resin create(ClassLoader loader)
+  {
+    String licenseErrorMessage = null;
+    
+    try {
+      Class cl = Class.forName("com.caucho.server.resin.ProResin");
+      Constructor ctor = cl.getConstructor(new Class[] { ClassLoader.class });
+
+      return (Resin) ctor.newInstance(loader); 
+    } catch (ConfigException e) {
+      log().log(Level.FINER, e.toString(), e);
+
+      licenseErrorMessage = e.getMessage();
+    } catch (Throwable e) {
+      log().log(Level.FINER, e.toString(), e);
+
+      String msg = L().l("  Using Resin(R) Open Source under the GNU Public License (GPL).\n" +
+			 "\n" +
+			 "  See http://www.caucho.com for information on Resin Professional,\n" +
+			 "  including caching, clustering, JNI acceleration, and OpenSSL integration.\n");
+    }
+
+    return new Resin(loader, licenseErrorMessage);
+  }
+
+  /**
    * Returns the resin server.
    */
   public static Resin getLocal()
@@ -300,6 +348,16 @@ public class Resin implements EnvironmentBean, SchemaBean
   public ThreadPoolMXBean getThreadPoolAdmin()
   {
     return _threadPoolAdmin;
+  }
+
+  protected String getLicenseMessage()
+  {
+    return null;
+  }
+
+  protected String getLicenseErrorMessage()
+  {
+    return _licenseErrorMessage;
   }
 
   /**
@@ -419,12 +477,9 @@ public class Resin implements EnvironmentBean, SchemaBean
     return _resinConf;
   }
 
-  /**
-   * Set true for Resin pro.
-   */
-  void setResinProfessional(boolean isPro)
+  protected String getResinName()
   {
-    _isResinProfessional = isPro;
+    return "Resin";
   }
 
   /**
@@ -432,7 +487,7 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public boolean isProfessional()
   {
-    return _isResinProfessional;
+    return false;
   }
 
   /**
@@ -456,12 +511,17 @@ public class Resin implements EnvironmentBean, SchemaBean
   public Cluster createCluster()
     throws ConfigException
   {
-    Cluster cluster = new Cluster(this);
+    Cluster cluster = instantiateCluster();
 
     for (int i = 0; i < _clusterDefaults.size(); i++)
       _clusterDefaults.get(i).configure(cluster);
 
     return cluster;
+  }
+
+  protected Cluster instantiateCluster()
+  {
+    return new Cluster(this);
   }
 
   public void addCluster(Cluster cluster)
@@ -975,7 +1035,9 @@ public class Resin implements EnvironmentBean, SchemaBean
 	i += 2;
       }
       else if (argv[i].equals("-root-directory")
-               || argv[i].equals("--root-directory")) {
+               || argv[i].equals("--root-directory")
+               || argv[i].equals("-resin-root")
+               || argv[i].equals("--resin-root")) {
         _rootDirectory = _resinHome.lookup(argv[i + 1]);
 
         i += 2;
@@ -1101,64 +1163,22 @@ public class Resin implements EnvironmentBean, SchemaBean
     System.out.println(com.caucho.Version.COPYRIGHT);
     System.out.println();
 
-    boolean isResinProfessional = false;
-
-    try {
-      Class cl = Class.forName("com.caucho.license.LicenseCheckImpl",
-			       false,
-			       ClassLoader.getSystemClassLoader());
-
-      LicenseCheck license = (LicenseCheck) cl.newInstance();
-
-      try {
-	license.validate(0);
-
-	license.doLogging(1);
-
-	license.validate(1);
-
-	isResinProfessional = true;
-	System.setProperty("isResinProfessional", "true");
-
-	Vfs.initJNI();
-
-	// license.doLogging(1);
-      } catch (Throwable e) {
-	String msg;
-
-	if (e instanceof ConfigException)
-	  msg = e.getMessage() + "\n";
-	else {
-	  e.printStackTrace();
-
-	  msg = e.toString() + "\n";
-
-	  log().log(Level.WARNING, e.toString(), e);
-	}
-
-	log().log(Level.FINE, e.toString(), e);
-
-	msg += L().l("\n" +
-		     "Using Resin Open Source under the GNU Public License (GPL).\n" +
-		     "\n" +
-		     "  See http://www.caucho.com for information on Resin Professional.\n");
-
-	log().warning(msg);
-	System.err.println(msg);
-      }
-    } catch (Throwable e) {
-      log().log(Level.FINER, e.toString(), e);
-
-      String msg = L().l("  Using Resin(R) Open Source under the GNU Public License (GPL).\n" +
-			 "\n" +
-			 "  See http://www.caucho.com for information on Resin Professional,\n" +
-			 "  including caching, clustering, JNI acceleration, and OpenSSL integration.\n");
-
-      log().warning(msg);
-      System.err.println(msg);
+    String licenseMessage = getLicenseMessage();
+    
+    if (licenseMessage != null) {
+      log().warning(licenseMessage);
+      System.out.println(licenseMessage);
     }
 
-    System.out.println("Starting Resin on " + QDate.formatLocal(Alarm.getCurrentTime()));
+    String licenseErrorMessage = getLicenseErrorMessage();
+    
+    if (licenseErrorMessage != null) {
+      log().warning(licenseErrorMessage);
+      System.err.println(licenseErrorMessage);
+    }
+
+    System.out.println("Starting " + getResinName()
+		       + " on " + QDate.formatLocal(_startTime));
     System.out.println();
 
     EnvironmentClassLoader.initializeEnvironment();
@@ -1210,8 +1230,6 @@ public class Resin implements EnvironmentBean, SchemaBean
     _resinConf = resinConf;
 
     // server.setServerRoot(_serverRoot);
-
-    setResinProfessional(isResinProfessional);
 
     _mainThread.setContextClassLoader(_systemClassLoader);
 
@@ -1432,7 +1450,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       EnvironmentClassLoader.initializeEnvironment();
       validateEnvironment();
 
-      final Resin resin = new Resin();
+      final Resin resin = Resin.create();
 
       resin.parseCommandLine(argv);
 

@@ -44,7 +44,7 @@ r_cluster-default = element cluster-default {
   r_cluster-Content
 }
 
-## <cluster> basic contents
+## <cluster> contents
 r_cluster-Content =
   r_env-Basis
 
@@ -345,17 +345,6 @@ r_management-Content =
       element rcore:otherwise { r_management-Content }?
     }*
 
-
-r_management-compat = element management {
-  r_path?
-
-  & (attribute remote-enable { r_boolean-Type }
-     | element remote-enable { r_boolean-Type })?
-
-  & (attribute remote-enable-password { string }
-     | element remote-enable-password { string })?
-}
-
 r_memory-free-min =
   attribute memory-free-min { string }
   | element memory-free-min { string }
@@ -509,13 +498,11 @@ r_protocol =
   }
 
 r_resin = element resin {
-  r_root-directory?,
-
   r_resin-Content
 }
 
-## <resin> basic contents
-r_resin-Basis = 
+## <resin> contents
+r_resin-Content = 
   r_env-Basis
 
   & r_cluster*
@@ -527,38 +514,21 @@ r_resin-Basis =
 
   & r_management?
 
-  & r_min-free-memory?
+  & r_root-directory?
 
   & r_security-manager?
 
   & (attribute security-provider { string }
-    | element security-provider { string })*
-
-  & r_server-Compat*
-
-  & (attribute shutdown-wait-max { r_period-Type }
-     | element shutdown-wait-max { r_period-Type })?
-
-  & r_thread-pool?
-
-  & r_transaction-manager?
+     | element security-provider { string })*
 
   & r_watchdog-manager?
 
-## <resin> flow control
-r_resin-Flow =
-  r_resin-Basis
-
-  & element rcore:env { rcore_env-Args, r_resin-Flow }*
-
-  & element rcore:if { rcore_if-Args, r_resin-Flow }*
+  & element rcore:if { rcore_if-Args, r_resin-Content }*
 
   & element rcore:choose {
-      element rcore:when { rcore_when-Args, r_resin-Flow }+,
-      element rcore:otherwise { r_resin-Flow }?
+      element rcore:when { rcore_when-Args, r_resin-Content }+,
+      element rcore:otherwise { r_resin-Content }?
     }*
-
-r_resin-Content = r_resin-Flow
 
 r_root-directory =
   attribute root-directory { string }
@@ -589,11 +559,9 @@ r_server-default = element server-default {
   r_server-Content
 }
 
-r_server-Basis =
-  r_group-name?
-
-  & (attribute backup { r_boolean-Type }
-     | element backup { r_boolean-Type })?
+r_server-Content =
+  (attribute backup { r_boolean-Type }
+   | element backup { r_boolean-Type })?
 
   & (attribute bind-ports-after-start { r_boolean-Type }
      | element bind-ports-after-start { r_boolean-Type })?
@@ -602,6 +570,8 @@ r_server-Basis =
 
   & (attribute connection-max { r_int-Type }
      | element connection-max { r_int-Type })?
+
+  & r_group-name?
 
   & r_http*
 
@@ -618,13 +588,13 @@ r_server-Basis =
 
   & r_keepalive-max?
 
-  & r_keepalive-timeout?
-
   & r_keepalive-select-enable?
 
   & r_keepalive-select-max?
 
   & r_keepalive-select-thread-timeout?
+
+  & r_keepalive-timeout?
 
   & (attribute load-balance-connect-timeout { r_period-Type }
      | element load-balance-connect-timeout { r_period-Type })?
@@ -646,6 +616,10 @@ r_server-Basis =
 
   & r_memory-free-min?
 
+  & r_ping*
+
+  & r_protocol*
+
   & (attribute shutdown-wait-max { r_period-Type }
      | element shutdown-wait-max { r_period-Type })?
 
@@ -660,10 +634,6 @@ r_server-Basis =
 
   & r_thread-idle-min?
 
-  & r_ping*
-
-  & r_protocol*
-
   & r_user-name?
 
   & (attribute watchdog-address { string }
@@ -675,23 +645,20 @@ r_server-Basis =
   & (attribute watchdog-jvm-arg { string }
      | element watchdog-jvm-arg { string })*
 
+  & r_watchdog-log?
+
   & (attribute watchdog-password { string }
      | element watchdog-password { string })?
 
   & (attribute watchdog-port { r_int-Type }
      | element watchdog-port { r_int-Type })?
 
-r_server-Flow =
-  r_server-Basis
-
-  & element rcore:if { rcore_if-Args, r_server-Flow }*
+  & element rcore:if { rcore_if-Args, r_server-Content }*
 
   & element rcore:choose {
-      element rcore:when { rcore_when-Args, r_server-Flow }+,
-      element rcore:otherwise { r_server-Flow }?
+      element rcore:when { rcore_when-Args, r_server-Content }+,
+      element rcore:otherwise { r_server-Content }?
     }*
-
-r_server-Content = r_server-Flow
 
 r_session-cookie = 
   attribute session-cookie { string }
@@ -777,6 +744,16 @@ r_user-name =
   attribute user-name { string }
   | element user-name { string }
 
+r_watchdog-log = element watchdog-log {
+  r_dir
+
+  & r_rollover-count?
+
+  & r_rollover-period?
+
+  & r_rollover-size?
+}
+
 r_watchdog-manager = element watchdog-manager {
   (attribute watchdog-address { string }
    | element watchdog-address { string })?
@@ -829,13 +806,6 @@ r_watchdog-Content =
 
    & r_user-name?
   )
-
-## backwards compat
-r_xa-log = element xa-log {
-  r_enable?
-
-  & r_path?
-}
 
 r_xa-log-service = element xa-log-service {
   r_enable?

@@ -237,17 +237,18 @@ public class ScheduledTask extends BeanConfig
       log.fine(this + " executing " + _task);
 
       _threadPool.execute(_task);
-    } catch (Throwable e) {
+
+      // XXX: needs QA
+      long now = Alarm.getCurrentTime();
+      long nextTime = _trigger.nextTime(now);
+
+      if (_isActive)
+	alarm.queue(nextTime - now);
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
-
-    long now = Alarm.getCurrentTime();
-    long nextTime = _trigger.nextTime(now);
-
-    if (_isActive)
-      alarm.queue(nextTime - now);
   }
 
   public void environmentBind(EnvironmentClassLoader loader)

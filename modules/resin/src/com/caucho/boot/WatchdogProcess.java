@@ -88,7 +88,7 @@ class WatchdogProcess
 
       int port = _ss.getLocalPort();
       
-      log.info(this + " starting Resin");
+      log.config(this + " starting Resin");
 
       jvmOut = createJvmOut();
 
@@ -220,8 +220,6 @@ class WatchdogProcess
       String id = _watchdog.getId();
       Path jvmPath = _watchdog.getLogPath();
 
-      log.warning("JVM: " + jvmPath.getNativePath());
-
       try {
 	Path dir = jvmPath.getParent();
 	    
@@ -241,6 +239,7 @@ class WatchdogProcess
       }
 
       RotateStream rotateStream = RotateStream.create(jvmPath);
+      _watchdog.getConfig().logInit(rotateStream);
       rotateStream.init();
       return rotateStream.getStream();
     }

@@ -281,6 +281,7 @@ class WatchdogArgs
     System.err.println(L().l(""));
     System.err.println(L().l("where options include:"));
     System.err.println(L().l("   -conf <file>          : select a configuration file"));
+    System.err.println(L().l("   -dynamic-server <cluster:address:port> : initialize a dynamic server"));
     System.err.println(L().l("   -log-directory <dir>  : select a logging directory"));
     System.err.println(L().l("   -resin-home <dir>     : select a resin home directory"));
     System.err.println(L().l("   -root-directory <dir> : select a root directory"));
@@ -389,10 +390,15 @@ class WatchdogArgs
 
   static Path calculateResinRoot(Path resinHome)
   {
-    String serverRoot = System.getProperty("server.root");
+    String resinRoot = System.getProperty("resin.root");
+    
+    if (resinRoot != null)
+      return Vfs.lookup(resinRoot);
+    
+    resinRoot = System.getProperty("server.root");
 
-    if (serverRoot != null)
-      return Vfs.lookup(serverRoot);
+    if (resinRoot != null)
+      return Vfs.lookup(resinRoot);
 
     return resinHome;
   }

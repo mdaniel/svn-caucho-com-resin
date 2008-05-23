@@ -219,6 +219,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
   /**
    * Returns the Path associated with the stream.
    */
+  @Override
   public Path getPath()
   {
     return _rolloverLog.getPath();
@@ -227,6 +228,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
   /**
    * True if the stream can write
    */
+  @Override
   public boolean canWrite()
   {
     return true;
@@ -235,6 +237,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
   /**
    * Writes to the stream
    */
+  @Override
   public void write(byte []buffer, int offset, int length, boolean isEnd)
     throws IOException
   {
@@ -256,6 +259,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
   /**
    * Flushes the underlying stream.
    */
+  @Override
   public void flush()
     throws IOException
   {
@@ -269,6 +273,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
    * The close call does nothing since the rotate stream is shared for
    * many logs.
    */
+  @Override
   public void close()
   {
   }
@@ -303,6 +308,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
   /**
    * finalize.
    */
+  @Override
   public void finalize()
   {
     closeImpl();

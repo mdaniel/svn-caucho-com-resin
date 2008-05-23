@@ -31,10 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.RawString;
-import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.*;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.log.LogConfig;
@@ -61,12 +58,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
 
 /**
  * Process responsible for watching a backend watchdog.
  */
-public class WatchdogManager extends ProtocolDispatchServer {
+class WatchdogManager extends ProtocolDispatchServer {
   private static L10N _L;
   private static Logger _log;
 
@@ -74,16 +70,12 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
   private WatchdogArgs _args;
 
-  private Lifecycle _lifecycle = new Lifecycle();
-
   private int _watchdogPort;
 
   private String _adminCookie;
-  private ManagementConfig _management;
+  private BootManagementConfig _management;
 
   private Server _dispatchServer;
-
-  private boolean _isWatchdogManagerConfig;
   
   private HashMap<String,Watchdog> _watchdogMap
     = new HashMap<String,Watchdog>();
@@ -99,9 +91,9 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
     Path logPath = getLogDirectory().lookup("watchdog-manager.log");
 
-    RotateStream stream = RotateStream.create(logPath);
-    stream.init();
-    WriteStream out = stream.getStream();
+    RotateStream logStream = RotateStream.create(logPath);
+    logStream.init();
+    WriteStream out = logStream.getStream();
     out.setDisableClose(true);
 
     EnvironmentStream.setStdout(out);
@@ -132,6 +124,8 @@ public class WatchdogManager extends ProtocolDispatchServer {
       throw new IllegalStateException(L().l("'{0}' is an unknown server",
 					    _args.getServerId()));
 
+    server.getConfig().logInit(logStream);
+    
     Cluster cluster = new Cluster();
     ClusterServer clusterServer = new ClusterServer(cluster);
 
@@ -236,6 +230,11 @@ public class WatchdogManager extends ProtocolDispatchServer {
     return _watchdogMap.get(id);
   }
   
+  /**
+   * Called from the Hessian API to report the status of the watchdog
+   * 
+   * @return a human-readable description of the current status
+   */
   String status()
   {
     StringBuilder sb = new StringBuilder();
@@ -268,6 +267,11 @@ public class WatchdogManager extends ProtocolDispatchServer {
     return sb.toString();
   }
 
+  /**
+   * Called from the Hessian API to start a server.
+   * 
+   * @param argv the command-line arguments to start the server
+   */
   void startServer(String []argv)
     throws ConfigException
   {
@@ -295,6 +299,11 @@ public class WatchdogManager extends ProtocolDispatchServer {
     watchdog.start();
   }
 
+  /**
+   * Called from the hessian API to gracefully stop a Resin instance
+   * 
+   * @param serverId the Resin instance to stop
+   */
   void stopServer(String serverId)
   {
     Watchdog watchdog = _watchdogMap.get(serverId);
@@ -306,6 +315,11 @@ public class WatchdogManager extends ProtocolDispatchServer {
     watchdog.stop();
   }
 
+  /**
+   * Called from the hessian API to forcibly kill a Resin instance
+   * 
+   * @param serverId the server id to kill
+   */
   void killServer(String serverId)
   {
     Watchdog watchdog = _watchdogMap.get(serverId);
@@ -317,6 +331,12 @@ public class WatchdogManager extends ProtocolDispatchServer {
     watchdog.kill();
   }
 
+  /**
+   * Called from the hessian API to restart a Resin instance.
+   * 
+   * @param serverId the server identifier to restart
+   * @param argv the command-line arguments to apply to the start
+   */
   void restartServer(String serverId, String []argv)
   {
     Watchdog server = _watchdogMap.get(serverId);
@@ -335,7 +355,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
     config.setIgnoreEnvironment(true);
 
     Vfs.setPwd(args.getRootDirectory());
-    ResinConfig resin = new ResinConfig(args);
+    BootResinConfig resin = new BootResinConfig(args);
 
     config.configure(resin,
 		     args.getResinConf(),
@@ -346,7 +366,7 @@ public class WatchdogManager extends ProtocolDispatchServer {
       String address = args.getDynamicAddress();
       int port = args.getDynamicPort();
 
-      ClusterConfig cluster = resin.findCluster(clusterId);
+      BootClusterConfig cluster = resin.findCluster(clusterId);
 
       if (cluster == null) {
 	throw new ConfigException(L().l("'{0}' is an unknown cluster",
@@ -359,8 +379,22 @@ public class WatchdogManager extends ProtocolDispatchServer {
       server.setPort(port);
       cluster.addServer(server);
     }
+
+    WatchdogConfig server = resin.findServer(args.getServerId());
+      
+    Watchdog watchdog = _watchdogMap.get(server.getId());
+      
+    if (watchdog == null)
+      _watchdogMap.put(server.getId(), new Watchdog(server));
+    else {
+      watchdog.setConfig(server);
+    }
   }
 
+  /**
+   * The launching program for the watchdog manager, generally called
+   * from ResinBoot.
+   */
   public static void main(String []argv)
     throws Exception
   {
@@ -382,289 +416,5 @@ public class WatchdogManager extends ProtocolDispatchServer {
       _log = Logger.getLogger(ResinBoot.class.getName());
 
     return _log;
-  }
-
-  //
-  // configuration classes
-  //
-  
-  /**
-   * Class for the initial WatchdogManager configuration. 
-   */
-  class ResinConfig {
-    private WatchdogArgs _args;
-    
-    private ArrayList<ContainerProgram> _clusterDefaultList
-      = new ArrayList<ContainerProgram>();
-
-    private ArrayList<ClusterConfig> _clusterList
-      = new ArrayList<ClusterConfig>();
-
-    ResinConfig()
-    {
-      _args = WatchdogManager.this._args;
-    }
-    
-    ResinConfig(WatchdogArgs args)
-    {
-      _args = args;
-    }
-
-    public WatchdogArgs getArgs()
-    {
-      return _args;
-    }
-
-    public String getId()
-    {
-      if (_args == null)
-	return "default";
-      else
-	return _args.getServerId();
-    }
-    
-    public void setManagement(ManagementConfig management)
-    {
-      if (_management == null)
-	_management = management;
-    }
-  
-    public void addClusterDefault(ContainerProgram program)
-    {
-      _clusterDefaultList.add(program);
-    }
-
-    public WatchdogManagerConfig createWatchdogManager()
-    {
-      _isWatchdogManagerConfig = true;
-      
-      return new WatchdogManagerConfig(this);
-    }
-
-    public ClusterConfig createCluster()
-    {
-      ClusterConfig cluster = new ClusterConfig(this);
-
-      for (int i = 0; i < _clusterDefaultList.size(); i++)
-	_clusterDefaultList.get(i).configure(cluster);
-
-      _clusterList.add(cluster);
-    
-      return cluster;
-    }
-
-    public ClusterConfig findCluster(String id)
-    {
-      for (int i = 0; i < _clusterList.size(); i++) {
-	ClusterConfig cluster = _clusterList.get(i);
-	
-	if (id.equals(cluster.getId()))
-	  return cluster;
-      }
-
-      return null;
-    }
-
-    public ServerCompatConfig createServer()
-    {
-      return new ServerCompatConfig();
-    }
-  
-    /**
-     * Ignore items we can't understand.
-     */
-    public void addBuilderProgram(ConfigProgram program)
-    {
-    }
-  }
-
-  public class WatchdogManagerConfig {
-    private ResinConfig _resin;
-    
-    private ArrayList<ContainerProgram> _watchdogDefaultList
-      = new ArrayList<ContainerProgram>();
-
-    WatchdogManagerConfig(ResinConfig resin)
-    {
-      _resin = resin;
-    }
-
-    public void setWatchdogPort(int port)
-    {
-      if (_args.getWatchdogPort() == 0)
-	_args.setWatchdogPort(port);
-    }
-
-    public void addWatchdogDefault(ContainerProgram program)
-    {
-      _watchdogDefaultList.add(program);
-    }
-
-    public WatchdogConfig createWatchdog()
-    {
-      WatchdogConfig config = new WatchdogConfig(_resin.getArgs());
-
-      for (int i = 0; i < _watchdogDefaultList.size(); i++)
-	_watchdogDefaultList.get(i).configure(config);
-
-      return config;
-    }
-
-    public void addWatchdog(WatchdogConfig config)
-      throws ConfigException
-    {
-      Watchdog watchdog = _watchdogMap.get(config.getId());
-      
-      if (watchdog == null)
-        _watchdogMap.put(config.getId(), new Watchdog(config));
-      else if (_resin.getId().equals(watchdog.getId()))
-        watchdog.setConfig(config);
-
-      /*
-	throw new ConfigException(L().l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",
-				      config.getId()));
-      */
-    }
-  }
-
-  public class ClusterConfig {
-    private ResinConfig _resin;
-
-    private String _id;
-    
-    private ArrayList<ContainerProgram> _serverDefaultList
-      = new ArrayList<ContainerProgram>();
-
-    ClusterConfig(ResinConfig resin)
-    {
-      _resin = resin;
-    }
-
-    public void setId(String id)
-    {
-      _id = id;
-    }
-
-    public String getId()
-    {
-      return _id;
-    }
-
-    /**
-     * Adds a new server to the cluster.
-     */
-    public void addServerDefault(ContainerProgram program)
-    {
-      _serverDefaultList.add(program);
-    }
-
-    public void addManagement(ManagementConfig management)
-    {
-      if (_management == null)
-        _management = management;
-    }
-
-    public WatchdogConfig createServer()
-    {
-      WatchdogConfig config = new WatchdogConfig(_resin.getArgs());
-
-      for (int i = 0; i < _serverDefaultList.size(); i++)
-	_serverDefaultList.get(i).configure(config);
-
-      return config;
-    }
-
-    public void addServer(WatchdogConfig config)
-      throws ConfigException
-    {
-      if (_isWatchdogManagerConfig)
-	return;
-      
-      Watchdog watchdog = _watchdogMap.get(config.getId());
-      
-      if (watchdog == null)
-        _watchdogMap.put(config.getId(), new Watchdog(config));
-      else {
-	if (_resin.getId().equals(config.getId()))
-	  watchdog.setConfig(config);
-      }
-    }
-  
-    /**
-     * Ignore items we can't understand.
-     */
-    public void addBuilderProgram(ConfigProgram program)
-    {
-    }
-  }
-
-  public class ServerCompatConfig {
-    public ClusterCompatConfig createCluster()
-    {
-      return new ClusterCompatConfig();
-    }
-    
-    public SrunCompatConfig createHttp()
-    {
-      return new SrunCompatConfig();
-    }
-    
-    /**
-     * Ignore items we can't understand.
-     */
-    public void addBuilderProgram(ConfigProgram program)
-    {
-    }
-  }
-
-  public class ClusterCompatConfig {
-    public SrunCompatConfig createSrun()
-    {
-      return new SrunCompatConfig();
-    }
-    
-    /**
-     * Ignore items we can't understand.
-     */
-    public void addBuilderProgram(ConfigProgram program)
-    {
-    }
-  }
-
-  public class SrunCompatConfig {
-    private String _id = "";
-
-    public void setId(String id)
-    {
-      _id = id;
-    }
-
-    public void setServerId(String id)
-    {
-      _id = id;
-    }
-    
-    /**
-     * Ignore items we can't understand.
-     */
-    public void addBuilderProgram(ConfigProgram program)
-    {
-    }
-
-    @PostConstruct
-    public void init()
-    {
-      if (_isWatchdogManagerConfig)
-	return;
-      
-      Watchdog server = findServer(_id);
-
-      if (server != null)
-	return;
-      
-      server = new Watchdog(_id, _args);
-      
-      _watchdogMap.put(_id, server);
-    }
   }
 }

@@ -189,7 +189,10 @@ public final class SessionManager implements AlarmListener
     _webApp = webApp;
     
     _cluster = webApp.getCluster();
-    _selfIndex = _cluster.getSelfServer().getIndex();
+    if (_cluster != null)
+      _selfIndex = _cluster.getSelfServer().getIndex();
+    else
+      _selfIndex = 0;
     _objectManager = new SessionObjectManager(this);
 
     DispatchServer server = webApp.getDispatchServer();

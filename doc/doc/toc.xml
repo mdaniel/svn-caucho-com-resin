@@ -150,6 +150,11 @@
           description="Resin's IoC/Dependency Injection"/>
 
     <!--
+       - JSF
+      -->
+    <item link="jsf.xtp" title="JSF"/>
+    
+    <!--
        - JSP
       -->
     <item link="jsp.xtp" title="JSP">

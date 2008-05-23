@@ -53,7 +53,7 @@
       <format property="vdate" pattern="yyyyMMdd'T'hhmmss"/>
     </tstamp>
     <tstamp>
-      <format property="snapshotdate" pattern="yyMMdd"/>
+      <format property="snapshotdate" pattern="yyyyMMdd"/>
     </tstamp>
   </target>
 
@@ -77,7 +77,7 @@
     <property name="maven.m2" value="m2-snapshot"/>
     <property name="maven.root" value="${dist}/${maven.m2}"/>
     
-    <property name="version" value="3.2.s${snapshotdate}"/>
+    <property name="version" value="3.2.${snapshotdate}"/>
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <mkdir dir="${build}"/>
@@ -230,7 +230,7 @@
   <target name="jsdk" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jsdk"/>
-      <param name="module.jar" value="jsdk-15.jar"/>
+      <param name="module.jar" value="jsdk-16.jar"/>
     </antcall>
   </target>
 
@@ -791,11 +791,83 @@
      <exec executable="autoconf"/>
   </target>
 
-  <target name="dist.build" 
-          depends="compile, support, configure, ant, maven-plugin, netbeans-plugin, webapps, win32, configure, javadoc, relaxng">
+  <target name="dist.jar"
+          depends="compile">
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <delete dir="${dist}/${dist.name}"/>
+    <mkdir dir="${dist}/${dist.name}/lib"/>
+
+    <!--
+       - javaee-16.jar
+      -->
+    <jar destfile="${dist}/${dist.name}/lib/javaee-16.jar">
+      <fileset dir="${modules}/ejb/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules}/jca/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules}/jms/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules}/jpa/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules}/jsdk/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+
+      <!--
+      <fileset dir="${modules}/jsf/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      -->
+      
+      <fileset dir="${modules}/jstl/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules}/jta/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules}/webbeans/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+    </jar>
+
+    <!--
+       - resin.jar
+      -->
+    <jar destfile="${dist}/${dist.name}/lib/resin.jar"
+         manifest="${modules}/resin/src/manifest">
+      <fileset dir="${modules}/resin/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules}/util/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules}/hessian/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${modules}/quercus/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+    </jar>
+  </target>
+  
+  <target name="dist.build" 
+          depends="compile, support, configure, ant, maven-plugin, netbeans-plugin, webapps, win32, configure, dist.jar, javadoc, relaxng">
+    <property name="dist.name" value="${shortproduct}-${version}"/>
+
     <mkdir dir="${dist}/${dist.name}"/>
     
     <copy tofile="${install}/conf/resin.conf.orig"
@@ -839,45 +911,40 @@
         <include name="xsd/**"/>
         <include name="automake/**"/>
 	
-        <include name="lib/aopalliance.jar"/>
         <include name="lib/activation.jar"/>
         <include name="lib/javamail-14.jar"/>
         <include name="lib/jcache.jar"/>
-        <include name="lib/ejb-15.jar"/>
-        <include name="lib/hessian.jar"/>
-        <!--
-        <include name="lib/jaxb-api.jar"/>
-        <include name="lib/jaxb-xjc.jar"/>
-        <include name="lib/jaxb-impl.jar"/>
-        <include name="lib/jaxb1-impl.jar"/>
-        -->
         <include name="lib/jaxrpc-15.jar"/>
+        <include name="lib/jsf-12.jar"/>
+        <include name="lib/webutil.jar"/>
+
+	<!--
+        <include name="lib/aopalliance.jar"/>
+        <include name="lib/portlet-10.jar"/>
+        <include name="lib/script-10.jar"/>
         <include name="lib/jaxws-api.jar"/>
         <include name="lib/jws-15.jar"/>
-        <include name="lib/jpa-15.jar"/>
-	<!--
-        <include name="lib/j2ee-management-10.jar"/>
+        <include name="lib/saaj.jar"/>
 	-->
+	
+        <!--
+        <include name="lib/ejb-15.jar"/>
+        <include name="lib/hessian.jar"/>
+        <include name="lib/jpa-15.jar"/>
         <include name="lib/jca-15.jar"/>
         <include name="lib/jms-11.jar"/>
-        <include name="lib/jsdk-15.jar"/>
-        <include name="lib/jsr88.jar"/>
+        <include name="lib/jsdk-16.jar"/>
         <include name="lib/jsf-12.jar"/>
         <include name="lib/jstl-11.jar"/>
         <include name="lib/jta-101.jar"/>
         <include name="lib/jws-15.jar"/>
-        <include name="lib/portlet-10.jar"/>
         <include name="lib/quercus.jar"/>
         <include name="lib/resin-deploy.jar"/>
         <include name="lib/resin-util.jar"/>
         <include name="lib/resin.jar"/>
-	<!--
         <include name="lib/resinboot.jar"/>
-	-->
-        <include name="lib/saaj.jar"/>
-        <include name="lib/script-10.jar"/>
         <include name="lib/webbeans-16.jar"/>
-        <include name="lib/webutil.jar"/>
+	-->
 
         <include name="webapps/resin-doc.war"/>
         <include name="webapps/ROOT/index.jsp"/>
@@ -956,7 +1023,6 @@
       <include name="${dist.name}/plugins/**"/>
       <include name="${dist.name}/ext-webapp-lib/**"/>
       <include name="${dist.name}/automake/**"/>
-      <include name="${dist.name}/bin/wrapper.pl.in"/>
 
       <include name="${dist.name}/LICENSE"/>
       <include name="${dist.name}/README"/>
@@ -1227,7 +1293,7 @@
 
     <antcall target="maven2-module" inheritRefs="true">
       <param name="module.name" value="jsdk"/>
-      <param name="jar.name" value="jsdk-15.jar"/>
+      <param name="jar.name" value="jsdk-16.jar"/>
       <param name="maven.name" value="resin-jsdk"/>
     </antcall>
 
@@ -1284,6 +1350,86 @@
       <param name="jar.name" value="webbeans-16.jar"/>
       <param name="maven.name" value="resin-webbeans"/>
     </antcall>
+  </target>
+
+  <target name="debian-perm">
+    <exec executable="cc">
+      <arg value="-o"/>
+      <arg value="debian-perm"/>
+      <arg value="c/debian-perm.c"/>
+    </exec>
+  </target>
+  
+  <!--
+     - debian
+    -->
+  <target name="debian" depends="compile,dist.jar">
+    <exec executable="debian-perm">
+      <arg value="-r"/>
+    </exec>
+      
+    <delete dir="dist-debian"/>
+    
+    <mkdir dir="dist-debian/etc/resin"/>
+    
+    <mkdir dir="dist-debian/usr/lib/resin/lib"/>
+    <mkdir dir="dist-debian/usr/lib/resin/libexec"/>
+    
+    <mkdir dir="dist-debian/var/log/resin"/>
+    
+    <mkdir dir="dist-debian/var/www/resin"/>
+    
+    <copy todir="dist-debian/etc/resin">
+      <fileset dir="${install}/conf">
+        <include name="resin.conf"/>
+        <include name="app-default.conf"/>
+      </fileset>
+    </copy>
+
+    <copy todir="dist-debian/usr/lib/resin" preservelastmodified="true">
+      <fileset dir="${dist}/${dist.name}">
+        <include name="lib/resin.jar"/>
+        <include name="lib/javaee-16.jar"/>
+      </fileset>
+      
+      <fileset dir="${install}">
+        <include name="lib/activation.jar"/>
+        <include name="lib/javamail-14.jar"/>
+        <include name="lib/jcache.jar"/>
+        <include name="lib/jaxrpc-15.jar"/>
+        <include name="lib/jsf-12.jar"/>
+        <include name="lib/webutil.jar"/>
+      </fileset>
+    </copy>
+    
+    <copy tofile="dist-debian/etc/init.d/resin"
+          file="${install}/contrib/init.resin.in"
+          preservelastmodified="true">
+      <filterset>
+        <filter token="JAVA_HOME" value="/usr/java"/>
+        <filter token="resin_home" value="/usr/lib/resin"/>
+        <filter token="resin_root" value="-root-directory /var/www/resin"/>
+        <filter token="resin_log" value="-log-directory /var/log/resin"/>
+        <filter token="resin_conf" value="-conf /etc/resin/resin.conf"/>
+      </filterset>
+    </copy>
+    
+    <chmod perm="ugo+rx">
+      <fileset dir="dist-debian">
+        <include name="etc/init.d/resin"/>
+      </fileset>
+    </chmod>
+
+    <copy file="${install}/debian/control"
+          tofile="dist-debian/DEBIAN/control"/>
+    
+    <exec executable="debian-perm"/>
+        
+    <exec executable="dpkg">
+      <arg value="-b"/>
+      <arg value="dist-debian"/>
+      <arg value="${dist}/resin_${version}-i386.deb"/>
+    </exec>
   </target>
 
   <target name="maven-rsync" depends="init,maven-dist">
