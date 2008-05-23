@@ -45,7 +45,7 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import java.util.regex.Pattern;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 import javax.annotation.*;
 import javax.el.*;
@@ -700,7 +700,11 @@ public class TypeFactory implements AddLoaderListener
       if (_isBeansLoaded.getAndSet(true))
 	return;
 
-      new Config().configure(this, _path);
+      try {
+	new Config().configure(this, _path);
+      } catch (IOException e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
     }
 
     public ConfigType getBean(String name)
