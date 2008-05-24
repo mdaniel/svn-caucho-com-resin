@@ -995,10 +995,6 @@ r_url-pattern =
             | element exclude-regexp { string }))*
     }
 
-r_url = 
-  attribute url { string }
-  | element url { string }
-
 r_url-regexp = 
   attribute url-regexp { string }
   | element url-regexp { string }

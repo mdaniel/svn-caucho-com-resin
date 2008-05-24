@@ -278,17 +278,9 @@ r_jsse-ssl = element jsse-ssl {
      | element verify-client { r_string-Group })?
 }
 
-r_keepalive-max =
-  attribute keepalive-max { string }
-  | element keepalive-max { string }
-
 r_keepalive-connection-time-max =
   attribute keepalive-connection-time-max { r_period-Type }
   | element keepalive-connection-time-max { r_period-Type }
-
-r_keepalive-timeout =
-  attribute keepalive-timeout { r_period-Type }
-  | element keepalive-timeout { r_period-Type }
 
 r_keepalive-select-thread-timeout =
   attribute keepalive-select-thread-timeout { r_period-Type }
@@ -529,10 +521,6 @@ r_resin-Content =
       element rcore:when { rcore_when-Args, r_resin-Content }+,
       element rcore:otherwise { r_resin-Content }?
     }*
-
-r_root-directory =
-  attribute root-directory { string }
-  | element root-directory { string }
 
 r_security-manager = 
   attribute security-manager { string }

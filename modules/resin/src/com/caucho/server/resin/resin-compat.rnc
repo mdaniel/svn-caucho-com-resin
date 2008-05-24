@@ -3,14 +3,8 @@ namespace rcore = "http://caucho.com/ns/resin/core"
 namespace local = ""
 namespace l = ""
 
-include "../webapp/resin-web-xml-content.rnc"
-include "../e_app/resin-ear-content.rnc"
-
-
 r_cluster-Compat = element cluster {
   (attribute id { string }?
-
-
      & r_cluster-port-Compat*)
 }
 

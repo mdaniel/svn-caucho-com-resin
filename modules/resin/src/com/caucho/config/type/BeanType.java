@@ -92,6 +92,7 @@ public class BeanType extends ConfigType
 
   private boolean _isIntrospecting;
   private boolean _isIntrospected;
+  private boolean _isIntrospectComplete;
   private ArrayList<BeanType> _pendingChildList = new ArrayList<BeanType>();
 
   public BeanType(Class beanClass)
@@ -328,10 +329,9 @@ public class BeanType extends ConfigType
   @Override
   public void introspect()
   {
-    if (_isIntrospected)
+    if (_isIntrospecting)
       return;
-    _isIntrospected = true;
-
+    
     _isIntrospecting = true;
     
     try {
@@ -339,23 +339,53 @@ public class BeanType extends ConfigType
       introspectParent();
 
       //Method []methods = _beanClass.getMethods();
-      Method []methods = _beanClass.getDeclaredMethods();
+      if (! _isIntrospected) {
+	_isIntrospected = true;
+
+	Method []methods = _beanClass.getDeclaredMethods();
     
-      introspectMethods(methods);
+	introspectMethods(methods);
 
-      InjectIntrospector.introspectInject(_injectList, _beanClass);
+	InjectIntrospector.introspectInject(_injectList, _beanClass);
 
-      InjectIntrospector.introspectInit(_initList, _beanClass);
+	InjectIntrospector.introspectInit(_initList, _beanClass);
+      }
     } finally {
       _isIntrospecting = false;
     }
 
+    introspectComplete();
+  }
+
+  private void introspectComplete()
+  {
     ArrayList<BeanType> childList = new ArrayList<BeanType>(_pendingChildList);
-    _pendingChildList.clear();
 
     // ioc/20h4
-    for (BeanType child : childList)
+    for (BeanType child : childList) {
       child.introspectParent();
+      child.introspectComplete();
+    }
+  }
+  
+  private boolean isIntrospecting()
+  {
+    if (_isIntrospecting)
+      return true;
+
+    Class parentClass = _beanClass.getSuperclass();
+    
+    if (parentClass != null) {
+      ConfigType parentType = TypeFactory.getType(parentClass);
+
+      if (parentType instanceof BeanType) {
+	BeanType parentBean = (BeanType) parentType;
+
+	return parentBean.isIntrospecting();
+      }
+    }
+
+    return false;
   }
 
   private void introspectParent()
@@ -368,13 +398,15 @@ public class BeanType extends ConfigType
       if (parentType instanceof BeanType) {
 	BeanType parentBean = (BeanType) parentType;
 
+	if (! parentBean._isIntrospected)
+	  parentBean.introspect();
+
 	// ioc/20h4
-	if (parentBean._isIntrospecting) {
-	  parentBean._pendingChildList.add(this);
+	if (parentBean.isIntrospecting()) {
+	  if (! parentBean._pendingChildList.contains(this))
+	    parentBean._pendingChildList.add(this);
 	  return;
 	}
-
-	parentBean.introspect();
 
 	if (_setParent == null)
 	  _setParent = parentBean._setParent;

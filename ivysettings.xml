@@ -11,6 +11,8 @@
     <modules>
        <module organisation="hibernate.*" name=".*" resolver="jboss"/>
        <module organisation="jboss.*" name=".*" resolver="jboss"/>
+       <module organisation="apache-.*" name=".*" resolver="jboss"/>
+       <module organisation="oswego-.*" name=".*" resolver="jboss"/>
        <module organisation=".*" name=".*" resolver="default"/>
     </modules>
 </ivysettings>
