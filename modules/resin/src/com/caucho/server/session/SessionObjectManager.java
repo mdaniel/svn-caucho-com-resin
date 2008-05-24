@@ -71,7 +71,6 @@ public final class SessionObjectManager implements ObjectManager
   /**
    * Creates the cluster object
    */
-  @Override
   public ClusterObject createClusterObject(String id)
   {
     if (_store != null) {
