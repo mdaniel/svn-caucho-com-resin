@@ -628,7 +628,7 @@ public class Jar implements CacheListener {
   {
     long now = Alarm.getCurrentTime();
 
-    if (now == _lastTime && ! Alarm.isTest())
+    if ((now - _lastTime < 1000) && ! Alarm.isTest())
       return true;
 
     long oldLastModified = _lastModified;

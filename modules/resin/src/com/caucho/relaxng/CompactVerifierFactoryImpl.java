@@ -28,6 +28,7 @@
 
 package com.caucho.relaxng;
 
+import com.caucho.config.ConfigException;
 import com.caucho.vfs.MergePath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -121,7 +122,7 @@ public class CompactVerifierFactoryImpl implements VerifierFactory {
     } catch (SAXException e) {
       throw e;
     } catch (Exception e) {
-      throw new SAXException(e);
+      throw ConfigException.create(e);
     }
   }
 }

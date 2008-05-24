@@ -189,7 +189,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
     _licenseErrorMessage = licenseErrorMessage;
 
-    DynamicClassLoader.setJarCacheEnabled(true);
+    // DynamicClassLoader.setJarCacheEnabled(true);
     Environment.init();
 
     if (loader == null)

@@ -41,6 +41,7 @@ import com.caucho.server.cluster.Store;
 import com.caucho.server.cluster.StoreManager;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.InvocationDecoder;
+import com.caucho.server.resin.Resin;
 import com.caucho.server.security.ServletAuthenticator;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
@@ -707,18 +708,9 @@ public final class SessionManager implements AlarmListener
    
     StoreManager store = _cluster.getStore();
 
-    if (store == null) {
-      try {
-	Context ic = new InitialContext();
-	store = (StoreManager) ic.lookup("java:comp/env/caucho/persistent-store");
-      } catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
-      }
-    }
-
     if (store != null) {
     }
-    else if (! Config.evalBoolean("${resin.isProfessional()}")) {
+    else if (! Resin.getCurrent().isProfessional()) {
       throw new ConfigException(L.l("use-persistent-store in <session-config> requires Resin professional."));
     }
     else

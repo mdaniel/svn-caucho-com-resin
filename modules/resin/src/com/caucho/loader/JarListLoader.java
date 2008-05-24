@@ -59,7 +59,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
   private DependencyContainer _dependencyList = new DependencyContainer();
 
   // Entry map
-  private HashMap<String,ArrayList<JarEntry>> _pathMap;
+  private HashMap<String,JarList> _pathMap;
 
   /**
    * Creates a new jar list loader.
@@ -138,43 +138,43 @@ abstract public class JarListLoader extends Loader implements Dependency {
 
     _dependencyList.add(new Depend(jarPath));
 
-    if (getLoader() != null)
-      getLoader().addURL(jarPath);
-
     if (_pathMap == null && DynamicClassLoader.isJarCacheEnabled())
-      _pathMap = new HashMap<String,ArrayList<JarEntry>>();
+      _pathMap = new HashMap<String,JarList>(8);
+
+    if (getLoader() != null) {
+      if (! getLoader().addURL(jarPath))
+	return;
+    }
 
     if (_pathMap != null) {
       ZipScanner scan = null;
       
       try {
-	HashMap<String,ArrayList<JarEntry>> pathMap = _pathMap;
+	HashMap<String,JarList> pathMap = _pathMap;
 
 	boolean isScan = true;
 	boolean isValidScan = false;
 
 	try {
-	  if (isScan && jar.canRead())
+	  if (isScan && jar.canRead()) {
 	    scan = new ZipScanner(jar);
+	  }
 	
 	  if (scan != null && scan.open()) {
 	    while (scan.next()) {
 	      String name = scan.getName();
 
-	      ArrayList<JarEntry> entryList = pathMap.get(name);
-	      if (entryList == null) {
-		entryList = new ArrayList<JarEntry>();
+	      JarList entryList = pathMap.get(name);
 
-		// server/249b
-		/*
+	      entryList = new JarList(jarEntry, entryList);
+
+	      pathMap.put(name, entryList);
+
+	      // server/249b
+	      /*
 		if (name.endsWith("/"))
-		  name = name.substring(0, name.length() - 1);
-		*/
-		
-		pathMap.put(name, entryList);
-	      }
-
-	      entryList.add(jarEntry);
+		name = name.substring(0, name.length() - 1);
+	      */
 	    }
 
 	    isValidScan = true;
@@ -193,20 +193,17 @@ abstract public class JarListLoader extends Loader implements Dependency {
 	    ZipEntry entry = e.nextElement();
 	    String name = entry.getName();
 
-	    ArrayList<JarEntry> entryList = pathMap.get(name);
-	    if (entryList == null) {
-	      entryList = new ArrayList<JarEntry>();
+	    JarList entryList = pathMap.get(name);
 
-	      // server/249b
-	      /*
+	    entryList = new JarList(jarEntry, entryList);
+
+	    // server/249b
+	    /*
 	      if (name.endsWith("/"))
 		name = name.substring(0, name.length() - 1);
-	      */
+	    */
 	      
-	      pathMap.put(name, entryList);
-	    }
-
-	    entryList.add(jarEntry);
+	    pathMap.put(name, entryList);
 	  }
 
 	  file.close();
@@ -250,10 +247,10 @@ abstract public class JarListLoader extends Loader implements Dependency {
     throws ClassNotFoundException
   {
     if (_pathMap != null) {
-      ArrayList<JarEntry> jarEntryList = _pathMap.get(pathName);
+      JarList jarEntryList = _pathMap.get(pathName);
 
       if (jarEntryList != null) {
-	JarEntry jarEntry = jarEntryList.get(0);
+	JarEntry jarEntry = jarEntryList.getEntry();
 	
 	Path filePath = jarEntry.getJarPath().lookup(pathName);
 
@@ -304,10 +301,10 @@ abstract public class JarListLoader extends Loader implements Dependency {
   public void getResources(Vector<URL> vector, String name)
   {
     if (_pathMap != null) {
-      ArrayList<JarEntry> jarEntryList = _pathMap.get(name);
+      JarList jarEntryList = _pathMap.get(name);
 
-      for (int i = 0; jarEntryList != null && i < jarEntryList.size(); i++) {
-	JarEntry jarEntry = jarEntryList.get(i);
+      for (; jarEntryList != null; jarEntryList = jarEntryList.getNext()) {
+	JarEntry jarEntry = jarEntryList.getEntry();
 	Path path = jarEntry.getJarPath();
 
 	path = path.lookup(name);
@@ -353,10 +350,10 @@ abstract public class JarListLoader extends Loader implements Dependency {
   public Path getPath(String pathName)
   {
     if (_pathMap != null) {
-      ArrayList<JarEntry> jarEntryList = _pathMap.get(pathName);
+      JarList jarEntryList = _pathMap.get(pathName);
 
       if (jarEntryList != null) {
-	return jarEntryList.get(0).getJarPath().lookup(pathName);
+	return jarEntryList.getEntry().getJarPath().lookup(pathName);
       }
     }
     else {
@@ -393,6 +390,27 @@ abstract public class JarListLoader extends Loader implements Dependency {
 
 	jarPath.closeJar();
       }
+    }
+  }
+
+  static class JarList {
+    JarEntry _entry;
+    JarList _next;
+
+    JarList(JarEntry entry, JarList next)
+    {
+      _entry = entry;
+      _next = next;
+    }
+
+    JarEntry getEntry()
+    {
+      return _entry;
+    }
+
+    JarList getNext()
+    {
+      return _next;
     }
   }
 }

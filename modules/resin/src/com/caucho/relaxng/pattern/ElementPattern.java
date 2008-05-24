@@ -39,8 +39,8 @@ public class ElementPattern extends Pattern {
   private String _defName;
   
   private NameClassPattern _name;
-  private GroupPattern _children = new GroupPattern();
-
+  //private GroupPattern _children = new GroupPattern();
+  private Pattern _children;
   private Item _item;
 
   /**
@@ -70,10 +70,12 @@ public class ElementPattern extends Pattern {
   /**
    * Returns the children pattern.
    */
+  /*
   public GroupPattern getChildren()
   {
     return _children;
   }
+  */
 
   /**
    * Returns true if it contains an element.
@@ -112,9 +114,21 @@ public class ElementPattern extends Pattern {
       throw new RelaxException(L.l("<element> must have <name> definitions before other children."));
     
     child.setParent(_children);
-    child.setElementName(_children.getElementName());
+    // XXX: (group always null?)
+    // child.setElementName(_children.getElementName());
 
-    _children.addChild(child);
+    if (_children == null)
+      _children = child;
+    else if (_children instanceof GroupPattern) {
+      GroupPattern group = (GroupPattern) _children;
+      group.addChild(child);
+    }
+    else {
+      GroupPattern group = new GroupPattern();
+      group.addChild(_children);
+      group.addChild(child);
+      _children = group;
+    }
   }
 
   /**
@@ -126,8 +140,8 @@ public class ElementPattern extends Pattern {
     if (_name == null)
       throw new RelaxException(L.l("<element> must have a <name> definition."));
     
-    if (_children.getSize() == 0)
-      throw new RelaxException(L.l("<element> tag `{0}' must have a child grammar production.",
+    if (_children == null)
+      throw new RelaxException(L.l("<element> tag '{0}' must have a child grammar production.",
                                    _name.toProduction()));
   }
 
@@ -172,7 +186,7 @@ public class ElementPattern extends Pattern {
    */
   public String toString()
   {
-    return "ElementPattern[" + _name + "]";
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 }
 

@@ -431,6 +431,13 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (_lifecycle.isDestroyed())
       throw new IllegalStateException(L().l("can't add roots after closing"));
 
+    URL url = pathToURL(root);
+
+    if (containsURL(url)) {
+      log().finer(this + " skipping duplicate URL " + url);
+      return;
+    }
+
     if (root instanceof JarPath
 	|| root.getPath().endsWith(".jar")
 	|| root.getPath().endsWith(".zip")) {
@@ -469,11 +476,25 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Adds the URL to the URLClassLoader.
    */
-  public void addURL(Path path)
+  public boolean addURL(Path path)
+  {
+    URL url = pathToURL(path);
+
+    if (url == null)
+      return false;
+    else if (containsURL(url))
+      return false;
+    else {
+      addURL(url);
+      return true;
+    }
+  }
+
+  private URL pathToURL(Path path)
   {
     try {
       if (path.getScheme().equals("memory"))
-        return;
+        return null;
 
       if (path.getScheme().equals("jar")) {
       }
@@ -482,12 +503,14 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       else if (! path.getURL().endsWith("/"))
         path = path.lookup("./");
 
-      addURL(new URL(path.getURL()));
+      return new URL(path.getURL());
     } catch (MalformedURLException e) {
       log().warning(e.toString());
     } catch (Exception e) {
       log().log(Level.WARNING, e.toString(), e);
     }
+
+    return null;
   }
 
   /**
@@ -539,6 +562,29 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   public URL []getURLs()
   {
     return _urls;
+  }
+
+  /**
+   * Returns true if the loader contains the url.
+   */
+  private boolean containsURL(URL url)
+  {
+    if (_urls != null) {
+      for (URL testURL : _urls) {
+	if (url.equals(testURL))
+	  return true;
+      }
+    }
+
+    ClassLoader parent = getParent();
+
+    if (parent instanceof DynamicClassLoader) {
+      DynamicClassLoader dynParent = (DynamicClassLoader) parent;
+
+      return dynParent.containsURL(url);
+    }
+
+    return false;
   }
 
   /**

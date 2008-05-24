@@ -92,11 +92,34 @@ public class ClassLoaderConfig {
   }
 
   /**
+   * Creates an ivy class loader.
+   */
+  public IvyLoader createIvyLoader()
+  {
+    IvyLoader loader = new IvyLoader();
+    
+    loader.setLoader(_classLoader);
+
+    return loader;
+  }
+
+  /**
    * Adds an ivy class loader.
    */
   public void addIvyLoader(IvyLoader loader)
   {
     _classLoader.addLoader(loader, _index++);
+  }
+
+  /**
+   * Adds a library loader, e.g. WEB-INF/lib
+   */
+  public LibraryLoader createLibraryLoader()
+  {
+    LibraryLoader loader = new LibraryLoader();
+    loader.setLoader(_classLoader);
+
+    return loader;
   }
 
   /**
@@ -118,6 +141,14 @@ public class ClassLoaderConfig {
   /**
    * Adds a tree loader.
    */
+  public TreeLoader createTreeLoader()
+  {
+    TreeLoader loader = new TreeLoader();
+    loader.setLoader(_classLoader);
+
+    return loader;
+  }
+
   public void addTreeLoader(TreeLoader loader)
   {
     _classLoader.addLoader(loader, _index++);

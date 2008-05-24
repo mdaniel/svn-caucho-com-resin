@@ -769,12 +769,16 @@ public class InjectIntrospector {
 
   private static boolean hasBindingAnnotation(Method method)
   {
-    if (method.isAnnotationPresent(Produces.class))
-      return false;
-    else if (method.isAnnotationPresent(Destroys.class))
-      return false;
-    else if (method.isAnnotationPresent(In.class))
-      return true;
+    for (Annotation ann : method.getAnnotations()) {
+      Class annType = ann.annotationType();
+      
+      if (annType.equals(Produces.class))
+	return false;
+      else if (annType.equals(Destroys.class))
+	return false;
+      else if (annType.equals(In.class))
+	return true;
+    }
 
     boolean hasBinding = false;
     for (Annotation []annList : method.getParameterAnnotations()) {

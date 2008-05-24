@@ -42,9 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.logging.*;
 
 public class ResinDocServlet extends HttpServlet {
@@ -122,6 +120,16 @@ public class ResinDocServlet extends HttpServlet {
       xmlOut.flush();
     } catch (ConfigException e) {
       throw e;
+    } catch (FileNotFoundException e) {
+      log.log(Level.FINER, e.toString(), e);
+
+      response.sendError(404);
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      log.warning(e.toString());
+
+      response.sendError(404);
     } catch (Exception e) {
       throw new ServletException("Error configuring document", e);
     }

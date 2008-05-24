@@ -68,6 +68,11 @@ public class BeanType extends ConfigType
   private HashMap<String,Attribute> _attributeMap
     = new HashMap<String,Attribute>();
 
+  /*
+  private HashMap<String,Method> _createMap
+    = new HashMap<String,Method>();
+  */
+
   private Constructor _stringConstructor;
   
   private Method _valueOf;
@@ -79,7 +84,6 @@ public class BeanType extends ConfigType
   private Attribute _addProgram;
   private Attribute _setProperty;
   
-
   private ComponentImpl _component;
 
   private ArrayList<ConfigProgram> _injectList
@@ -320,51 +324,84 @@ public class BeanType extends ConfigType
   @Override
   public void introspect()
   {
-    introspectMethods();
+    introspectParent();
+    
+    //Method []methods = _beanClass.getMethods();
+    Method []methods = _beanClass.getDeclaredMethods();
+    
+    introspectMethods(methods);
 
     InjectIntrospector.introspectInject(_injectList, _beanClass);
 
     InjectIntrospector.introspectInit(_initList, _beanClass);
   }
 
+  private void introspectParent()
+  {
+    Class parentClass = _beanClass.getSuperclass();
+    
+    if (parentClass != null) {
+      TypeFactory factory
+	= TypeFactory.getFactory(parentClass.getClassLoader());
+      ConfigType parentType = factory.getType(parentClass);
+
+      if (parentType instanceof BeanType) {
+	BeanType parentBean = (BeanType) parentType;
+
+	_setParent = parentBean._setParent;
+	_replaceObject = parentBean._replaceObject;
+	_setConfigLocation = parentBean._setConfigLocation;
+
+	_addText = parentBean._addText;
+	_addProgram = parentBean._addProgram;
+	_setProperty = parentBean._setProperty;
+
+	_nsAttributeMap.putAll(parentBean._nsAttributeMap);
+	_attributeMap.putAll(parentBean._attributeMap);
+      }
+    }
+  }
+
   /**
    * Introspect the beans methods for setters
    */
-  public void introspectMethods()
+  public void introspectMethods(Method []methods)
   {
-    try {
-      Method valueOf = _beanClass.getMethod("valueOf",
-					    new Class[] { String.class } );
-
-      if (Modifier.isStatic(valueOf.getModifiers()))
-	_valueOf = valueOf;
-    } catch (NoSuchMethodException e) {
-    }
-    
     try {
       _stringConstructor
 	= _beanClass.getConstructor(new Class[] { String.class } );
     } catch (NoSuchMethodException e) {
     }
-    
-    try {
-      Method replaceObject = _beanClass.getMethod("replaceObject",
-						  new Class[] { } );
 
-      _replaceObject = replaceObject;
-    } catch (NoSuchMethodException e) {
-    }
-    
-    for (Method method : _beanClass.getMethods()) {
+    HashMap<String,Method> createMap = new HashMap<String,Method>();
+    fillCreateMap(createMap, methods);
+
+    HashMap<String,Method> setterMap = new HashMap<String,Method>();
+    fillSetterMap(setterMap, methods);
+
+    for (Method method : methods) {
+      Class []paramTypes = method.getParameterTypes();
+
+      String name = method.getName();
+
+      if ("replaceObject".equals(name) && paramTypes.length == 0) {
+	_replaceObject = method;
+	continue;
+      }
+
+      if ("valueOf".equals(name)
+	  && paramTypes.length == 1
+	  && String.class.equals(paramTypes[0])
+	  && Modifier.isStatic(method.getModifiers())) {
+	_valueOf = method;
+	continue;
+      }
+      
       if (Modifier.isStatic(method.getModifiers()))
 	continue;
       
       if (! Modifier.isPublic(method.getModifiers()))
 	continue;
-
-      Class []paramTypes = method.getParameterTypes();
-
-      String name = method.getName();
 
       if ((name.equals("addBuilderProgram") || name.equals("addProgram"))
 	  && paramTypes.length == 1
@@ -395,7 +432,7 @@ public class BeanType extends ConfigType
       }
       else if ((name.startsWith("set") || name.startsWith("add"))
 	       && paramTypes.length == 1
-	       && findCreate(name.substring(3)) == null) {
+	       && createMap.get(name.substring(3)) == null) {
 	ConfigType type = TypeFactory.getType(paramTypes[0]);
 
 	String propName = toXmlName(name.substring(3));
@@ -430,7 +467,7 @@ public class BeanType extends ConfigType
 		&& ! void.class.equals(method.getReturnType()))) {
 	ConfigType type = TypeFactory.getType(method.getReturnType());
 
-	Method setter = findSetter(name.substring(6));
+	Method setter = setterMap.get(name.substring(6));
 
 	CreateAttribute attr = new CreateAttribute(method, type, setter);
 
@@ -441,11 +478,39 @@ public class BeanType extends ConfigType
     }
   }
 
-  private Method findCreate(String name)
+  private void fillCreateMap(HashMap<String,Method> createMap,
+			     Method []methods)
+  {
+    for (Method method : methods) {
+      String name = method.getName();
+
+      if (name.startsWith("create")
+	  && ! name.equals("create")
+	  && method.getParameterTypes().length == 0) {
+	createMap.put(name.substring("create".length()), method);
+      }
+    }
+  }
+
+  private void fillSetterMap(HashMap<String,Method> setterMap,
+			     Method []methods)
+  {
+    for (Method method : methods) {
+      String name = method.getName();
+
+      if (name.length() > 3
+	  && (name.startsWith("add") || name.startsWith("set"))
+	  && method.getParameterTypes().length == 1) {
+	setterMap.put(name.substring("set".length()), method);
+      }
+    }
+  }
+
+  private Method findCreate(Method []methods, String name)
   {
     String createName = "create" + name;
 
-    for (Method method : _beanClass.getMethods()) {
+    for (Method method : methods) {
       if (method.getParameterTypes().length != 0)
 	continue;
 

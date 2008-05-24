@@ -126,10 +126,7 @@ public class ZipScanner
 
     ReadStream is = _is;
     
-    if (is.read() != 0x50
-	|| is.read() != 0x4b
-	|| is.read() != 0x01
-	|| is.read() != 0x02) {
+    if (is.readInt() != 0x504b0102) {
       throw new IOException("illegal zip format");
     }
 
@@ -146,32 +143,12 @@ public class ZipScanner
 
     char []cbuf = _cbuf;
 
-    int k = 0;
-    for (int i = 0; i < nameLen; i++) {
-      int ch = is.read();
-
-      if (ch < 0x80)
-	cbuf[k++] = (char) ch;
-      else if ((ch & 0xe0) == 0xc0) {
-	int c2 = is.read();
-	i += 1;
-	cbuf[k++] = (char) (((ch & 0x1f) << 6) + (c2 & 0x3f));
-      }
-      else {
-	int c2 = is.read();
-	int c3 = is.read();
-	
-	i += 2;
-	cbuf[k++] = (char) (((ch & 0x1f) << 12)
-			    + ((c2 & 0x3f) << 6)
-			    + ((c3 & 0x3f)));
-      }
-    }
+    int k = is.readUTF8ByByteLength(cbuf, 0, nameLen);
 
     _name = new String(cbuf, 0, k);
 
-    is.skip(extraLen);
-    is.skip(commentLen);
+    if (extraLen + commentLen > 0)
+      is.skip(extraLen + commentLen);
     
     return true;
   }

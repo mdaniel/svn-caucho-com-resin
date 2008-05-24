@@ -295,13 +295,15 @@ public class ApiClass {
     if (cl == null)
       return;
 
+    HashSet<ApiMethod> methodSet = new HashSet<ApiMethod>();
+    
     for (Method method : cl.getDeclaredMethods()) {
       ApiMethod apiMethod = new ApiMethod(this, method, typeMap);
 
-      if (! _methods.contains(apiMethod)) {
-	_methods.add(apiMethod);
-      }
+      methodSet.add(apiMethod);
     }
+
+    _methods.addAll(methodSet);
 
     introspectGenericClass(cl.getGenericSuperclass(), typeMap);
 

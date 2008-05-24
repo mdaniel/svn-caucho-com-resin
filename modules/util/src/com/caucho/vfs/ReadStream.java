@@ -352,7 +352,7 @@ public final class ReadStream extends InputStream
   public long skip(long n)
     throws IOException
   {
-    long buffered = getBufferAvailable();
+    int buffered = _readLength - _readOffset;
 
     if (n < buffered) {
       _readOffset += n;
@@ -870,10 +870,18 @@ public final class ReadStream extends InputStream
   public int readInt()
     throws IOException
   {
-    return ((read() << 24)
-            + (read() << 16)
-            + (read() << 8)
-            + (read()));
+    if (_readOffset + 4 < _readLength) {
+      return (((_readBuffer[_readOffset++] & 0xff) << 24)
+	      + ((_readBuffer[_readOffset++] & 0xff) << 16)
+	      + ((_readBuffer[_readOffset++] & 0xff) << 8)
+	      + ((_readBuffer[_readOffset++] & 0xff)));
+    }
+    else {
+      return ((read() << 24)
+	      + (read() << 16)
+	      + (read() << 8)
+	      + (read()));
+    }
   }
  
   /**
@@ -890,6 +898,41 @@ public final class ReadStream extends InputStream
             + ((long) read() << 16)
             + ((long) read() << 8)
             + ((long) read()));
+  }
+  
+  /**
+   * Reads a utf-8 string
+   */
+  public int readUTF8ByByteLength(char []buffer, int offset, int byteLength)
+    throws IOException
+  {
+    int k = 0;
+    for (int i = 0; i < byteLength; i++) {
+      if (_readLength <= _readOffset) {
+	readBuffer();
+      }
+
+      int ch = _readBuffer[_readOffset++];
+
+      if (ch < 0x80)
+	buffer[k++] = (char) ch;
+      else if ((ch & 0xe0) == 0xc0) {
+	int c2 = read();
+	i += 1;
+	buffer[k++] = (char) (((ch & 0x1f) << 6) + (c2 & 0x3f));
+      }
+      else {
+	int c2 = read();
+	int c3 = read();
+	
+	i += 2;
+	buffer[k++] = (char) (((ch & 0x1f) << 12)
+			      + ((c2 & 0x3f) << 6)
+			      + ((c3 & 0x3f)));
+      }
+    }
+
+    return k;
   }
 
   /**

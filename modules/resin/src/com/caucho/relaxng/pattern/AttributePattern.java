@@ -39,7 +39,7 @@ import com.caucho.relaxng.program.Item;
 public class AttributePattern extends Pattern {
 
   private NameClassPattern _name;
-  private GroupPattern _children = new GroupPattern();
+  private Pattern _children;
 
   private Item _item;
 
@@ -61,10 +61,12 @@ public class AttributePattern extends Pattern {
   /**
    * Returns the children pattern.
    */
+  /*
   public GroupPattern getChildren()
   {
     return _children;
   }
+  */
 
   /**
    * Adds an element.
@@ -95,9 +97,21 @@ public class AttributePattern extends Pattern {
       throw new RelaxException(L.l("<attribute> must have a <name> definition before any children."));
     
     child.setParent(_children);
-    child.setElementName(_children.getElementName());
+    // XXX: (group always null?)
+    // child.setElementName(_children.getElementName());
 
-    _children.addChild(child);
+    if (_children == null)
+      _children = child;
+    else if (_children instanceof GroupPattern) {
+      GroupPattern group = (GroupPattern) _children;
+      group.addChild(child);
+    }
+    else {
+      GroupPattern group = new GroupPattern();
+      group.addChild(_children);
+      group.addChild(child);
+      _children = group;
+    }
   }
   
   /**
@@ -141,6 +155,10 @@ public class AttributePattern extends Pattern {
     AttributePattern elt = (AttributePattern) o;
 
     if (! _name.equals(elt._name))
+      return false;
+    else if (_children == elt._children)
+      return true;
+    else if (_children == null || elt._children == null)
       return false;
     else
       return _children.equals(elt._children);

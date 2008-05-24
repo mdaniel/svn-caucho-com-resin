@@ -357,9 +357,15 @@ class WatchdogManager extends ProtocolDispatchServer {
     Vfs.setPwd(args.getRootDirectory());
     BootResinConfig resin = new BootResinConfig(args);
 
+    /*
     config.configure(resin,
 		     args.getResinConf(),
 		     "com/caucho/server/resin/resin.rnc");
+    */
+    // The configuration file has already been validated by ResinBoot, so
+    // it doesn't need a second validation
+    config.configure(resin,
+		     args.getResinConf());
 
     if (args.isDynamicServer()) {
       String clusterId = args.getDynamicCluster();
@@ -398,6 +404,8 @@ class WatchdogManager extends ProtocolDispatchServer {
   public static void main(String []argv)
     throws Exception
   {
+    DynamicClassLoader.setJarCacheEnabled(false);
+      
     WatchdogManager manager = new WatchdogManager(argv);
     manager.startServer(argv);
   }

@@ -355,9 +355,11 @@ public class TypeFactory implements AddLoaderListener
       
       return new ArrayType(getType(compType), compType);
     }
-    else if (type.isInterface()
-	     || Modifier.isAbstract(type.getModifiers())) {
+    else if (type.isInterface()) {
       return new InterfaceType(type);
+    }
+    else if (Modifier.isAbstract(type.getModifiers())) {
+      return new AbstractBeanType(type);
     }
     else
       return new BeanType(type);
