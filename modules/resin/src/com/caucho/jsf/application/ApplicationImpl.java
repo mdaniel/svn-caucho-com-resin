@@ -557,6 +557,7 @@ public class ApplicationImpl
     return _resourceHandler;
   }
 
+  @Override
   public void setResourceHandler(ResourceHandler resourceHandler)
   {
     _resourceHandler = resourceHandler;

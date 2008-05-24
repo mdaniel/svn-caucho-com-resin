@@ -69,7 +69,7 @@ public abstract class Application
   public abstract void setPropertyResolver(PropertyResolver resolver);
 
   /**
-   * @Since 1.2
+   * @since 1.2
    */
   public ResourceBundle getResourceBundle(FacesContext ctx, String name)
   {
@@ -83,7 +83,7 @@ public abstract class Application
   public abstract void setVariableResolver(VariableResolver resolver);
 
   /**
-   * @Since 1.2
+   * @since 1.2
    */
   public void addELResolver(ELResolver resolver)
   {
@@ -91,7 +91,7 @@ public abstract class Application
   }
 
   /**
-   * @Since 1.2
+   * @since 1.2
    */
   public ELResolver getELResolver()
   {
@@ -119,7 +119,7 @@ public abstract class Application
     throws FacesException;
 
   /**
-   * @Since 1.2
+   * @since 1.2
    */
   public UIComponent createComponent(ValueExpression componentExpr,
 				     FacesContext context,
@@ -148,7 +148,7 @@ public abstract class Application
   public abstract Iterator<Class> getConverterTypes();
 
   /**
-   * @Since 1.2
+   * @since 1.2
    */
   public ExpressionFactory getExpressionFactory()
   {
@@ -173,7 +173,7 @@ public abstract class Application
   public abstract void setSupportedLocales(Collection<Locale> locales);
 
   /**
-   * @Since 1.2
+   * @since 1.2
    */
   public void addELContextListener(ELContextListener listener)
   {
@@ -181,7 +181,7 @@ public abstract class Application
   }
 
   /**
-   * @Since 1.2
+   * @since 1.2
    */
   public void removeELContextListener(ELContextListener listener)
   {
@@ -189,7 +189,7 @@ public abstract class Application
   }
 
   /**
-   * @Since 1.2
+   * @since 1.2
    */
   public ELContextListener []getELContextListeners()
   {
@@ -208,14 +208,21 @@ public abstract class Application
     throws ReferenceSyntaxException;
 
   /**
-   * @Since 2.0
+   * @since 2.0
    */
   public ResourceHandler getResourceHandler(){
     throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
-   * @Since 2.0
+   * @since 2.0
+   */
+  public void setResourceHandler(ResourceHandler resourceHandler){
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * @since 2.0
    */
   public ProjectStage getProjectStage() {
     throw new UnsupportedOperationException(getClass().getName());

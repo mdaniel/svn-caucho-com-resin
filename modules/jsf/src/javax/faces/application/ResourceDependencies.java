@@ -25,35 +25,21 @@
  *
  * @author Alex Rojkov
  */
+
 package javax.faces.application;
 
-import javax.faces.context.FacesContext;
-import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
 
 /**
  * @since 2.0
  */
+@Retention(value = RetentionPolicy.RUNTIME)
+@Target(value = ElementType.TYPE)
 
-public abstract class ResourceHandler {
-  
-  public static final String RESOURCE_IDENTIFIER = "/javax.faces.resource";
+public @interface ResourceDependencies {
 
-  public static final String LOCALE_PREFIX = "javax.faces.resource.localePrefix";
-
-  public static final String RESOURCE_EXCLUDES_PARAM_NAME = "javax.faces.RESOURCE_EXCLUDES";
-
-  public static final String RESOURCE_EXCLUDES_DEFAULT_VALUE = ".class .jsp .jspx .properties .xhtml";
-
-  public abstract Resource createResource(String resourceName);
-
-  public abstract Resource createResource(String resourceName, String libraryName);
-
-  public abstract Resource createResource(String resourceName, String libraryName, String contentType);
-
-  public abstract void handleResourceRequest(FacesContext context)
-    throws IOException;
-
-  public abstract boolean isResourceRequest(FacesContext context);
-
-  public abstract String getRendererTypeForResourceName(String resourceName);
+  ResourceDependency[] value();
 }

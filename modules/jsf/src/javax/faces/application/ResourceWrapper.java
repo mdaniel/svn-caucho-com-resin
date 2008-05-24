@@ -34,6 +34,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.net.URL;
 
+/**
+ * @since 2.0
+ */
 public abstract class ResourceWrapper
   extends Resource
 {
