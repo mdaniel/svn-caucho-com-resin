@@ -737,7 +737,7 @@
       <include name="${dist.name}/Makefile.in"/>
       <include name="${dist.name}/aclocal.m4"/>
 
-      <include name="modules/**/src/**"/>
+      <include name="${dist.name}/modules/c/src/**"/>
       <include name="${dist.name}/licenses"/>
       <include name="${dist.name}/keys"/>
     </patternset>
