@@ -775,45 +775,43 @@ public class TcpConnection extends Connection
     if (controller != null)
       controller.close();
     
-    if (! state.isClosed()) {
-      _isActive = false;
-      _isKeepalive = false;
+    _isActive = false;
+    _isKeepalive = false;
 
-      Port port = getPort();
+    Port port = getPort();
 
-      if (state.isKeepalive()) {
-	port.keepaliveEnd(this);
-      }
+    if (state.isKeepalive()) {
+      port.keepaliveEnd(this);
+    }
 
-      if (log.isLoggable(Level.FINER)) {
-	if (port != null)
-	  log.finer(dbgId() + "closing connection " + this + ", total=" + port.getConnectionCount());
-	else
-	  log.finer(dbgId() + "closing connection " + this);
-      }
-      _isWake = false;
+    if (log.isLoggable(Level.FINER)) {
+      if (port != null)
+	log.finer(dbgId() + "closing connection " + this + ", total=" + port.getConnectionCount());
+      else
+	log.finer(dbgId() + "closing connection " + this);
+    }
+    _isWake = false;
 
+    try {
+      getWriteStream().close();
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    try {
+      getReadStream().close();
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    if (socket != null) {
       try {
-        getWriteStream().close();
+	socket.close();
       } catch (Throwable e) {
-        log.log(Level.FINE, e.toString(), e);
+	log.log(Level.FINE, e.toString(), e);
       }
 
-      try {
-        getReadStream().close();
-      } catch (Throwable e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
-
-      if (socket != null) {
-	try {
-	  socket.close();
-	} catch (Throwable e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
-
-	getPort().closeSocket(socket);
-      }
+      getPort().closeSocket(socket);
     }
   }
 
