@@ -4,6 +4,7 @@
   <property file="local.properties"/>
 
   <property name="resindir" location="${basedir}/../resin"/>
+  <property name="prodir" location="${basedir}/../pro"/>
   
   <property name="install" location="${basedir}/"/>
   <property name="resin.install" location="${resindir}/"/>
@@ -445,21 +446,6 @@
        <arg line="${modules}/resin/classes/com/caucho/server/webapp/resin-web-xml.rnc"/>
        <arg line="xsd/resin-web-xml.xsd"/>
     </java>
-  </target>
-
-  <target name="configure">
-     <mkdir dir="automake"/>
-     <exec executable="aclocal"/>
-     <exec executable="libtoolize">
-        <arg line="-f -c"/>
-     </exec>
-     <exec executable="automake">
-        <arg line="-a -i -c"/>
-     </exec>
-     <exec executable="automake">
-        <arg line="-a -i -c --foreign"/>
-     </exec>
-     <exec executable="autoconf"/>
   </target>
   
   <!--

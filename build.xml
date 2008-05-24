@@ -791,8 +791,14 @@
   </target>
 
   <target name="dist" depends="dist.clean, configure, compile, update, artifacts, resin.dist.build, dist.package"/>
-  
+
   <target name="configure">
+     <copy tofile="modules/c/src/resin/Makefile.in"
+	   file="${prodir}/modules/c/src/resin/Makefile.in"/>
+     
+     <copy tofile="modules/c/src/resinssl/Makefile.in"
+	   file="${prodir}/modules/c/src/resinssl/Makefile.in"/>
+     
      <mkdir dir="automake"/>
      <exec executable="aclocal"/>
      <exec executable="libtoolize">
