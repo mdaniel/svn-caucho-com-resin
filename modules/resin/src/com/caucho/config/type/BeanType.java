@@ -90,6 +90,10 @@ public class BeanType extends ConfigType
     = new ArrayList<ConfigProgram>();
   private ArrayList<ConfigProgram> _initList = new ArrayList<ConfigProgram>();
 
+  private boolean _isIntrospecting;
+  private boolean _isIntrospected;
+  private ArrayList<BeanType> _pendingChildList = new ArrayList<BeanType>();
+
   public BeanType(Class beanClass)
   {
     _beanClass = beanClass;
@@ -324,16 +328,34 @@ public class BeanType extends ConfigType
   @Override
   public void introspect()
   {
-    introspectParent();
-    
-    //Method []methods = _beanClass.getMethods();
-    Method []methods = _beanClass.getDeclaredMethods();
-    
-    introspectMethods(methods);
+    if (_isIntrospected)
+      return;
+    _isIntrospected = true;
 
-    InjectIntrospector.introspectInject(_injectList, _beanClass);
+    _isIntrospecting = true;
+    
+    try {
+      // ioc/20h4 - after to deal with recursion
+      introspectParent();
 
-    InjectIntrospector.introspectInit(_initList, _beanClass);
+      //Method []methods = _beanClass.getMethods();
+      Method []methods = _beanClass.getDeclaredMethods();
+    
+      introspectMethods(methods);
+
+      InjectIntrospector.introspectInject(_injectList, _beanClass);
+
+      InjectIntrospector.introspectInit(_initList, _beanClass);
+    } finally {
+      _isIntrospecting = false;
+    }
+
+    ArrayList<BeanType> childList = new ArrayList<BeanType>(_pendingChildList);
+    _pendingChildList.clear();
+
+    // ioc/20h4
+    for (BeanType child : childList)
+      child.introspectParent();
   }
 
   private void introspectParent()
@@ -341,23 +363,46 @@ public class BeanType extends ConfigType
     Class parentClass = _beanClass.getSuperclass();
     
     if (parentClass != null) {
-      TypeFactory factory
-	= TypeFactory.getFactory(parentClass.getClassLoader());
-      ConfigType parentType = factory.getType(parentClass);
+      ConfigType parentType = TypeFactory.getType(parentClass);
 
       if (parentType instanceof BeanType) {
 	BeanType parentBean = (BeanType) parentType;
 
-	_setParent = parentBean._setParent;
-	_replaceObject = parentBean._replaceObject;
-	_setConfigLocation = parentBean._setConfigLocation;
+	// ioc/20h4
+	if (parentBean._isIntrospecting) {
+	  parentBean._pendingChildList.add(this);
+	  return;
+	}
 
-	_addText = parentBean._addText;
-	_addProgram = parentBean._addProgram;
-	_setProperty = parentBean._setProperty;
+	parentBean.introspect();
 
-	_nsAttributeMap.putAll(parentBean._nsAttributeMap);
-	_attributeMap.putAll(parentBean._attributeMap);
+	if (_setParent == null)
+	  _setParent = parentBean._setParent;
+	
+	if (_replaceObject == null)
+	  _replaceObject = parentBean._replaceObject;
+	
+	if (_setConfigLocation == null)
+	  _setConfigLocation = parentBean._setConfigLocation;
+
+	if (_addText == null)
+	  _addText = parentBean._addText;
+
+	if (_addProgram == null)
+	  _addProgram = parentBean._addProgram;
+
+	if (_setProperty == null)
+	  _setProperty = parentBean._setProperty;
+
+	for (Map.Entry<QName,Attribute> entry : parentBean._nsAttributeMap.entrySet()) {
+	  if (_nsAttributeMap.get(entry.getKey()) == null)
+	    _nsAttributeMap.put(entry.getKey(), entry.getValue());
+	}
+
+	for (Map.Entry<String,Attribute> entry : parentBean._attributeMap.entrySet()) {
+	  if (_attributeMap.get(entry.getKey()) == null)
+	    _attributeMap.put(entry.getKey(), entry.getValue());
+	}
       }
     }
   }

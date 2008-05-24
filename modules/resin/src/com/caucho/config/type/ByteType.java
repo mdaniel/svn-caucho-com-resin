@@ -42,7 +42,7 @@ public final class ByteType extends ConfigType
   public static final ByteType TYPE = new ByteType();
   
   private static final Byte ZERO = new Byte((byte) 0);
-  
+
   /**
    * The ByteType is a singleton
    */
