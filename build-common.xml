@@ -64,7 +64,7 @@
       <format property="vdate" pattern="yyyyMMdd'T'hhmmss"/>
     </tstamp>
     <tstamp>
-      <format property="snapshotdate" pattern="yyyyMMdd"/>
+      <format property="snapshotdate" pattern="yyMMdd"/>
     </tstamp>
   </target>
 
@@ -584,7 +584,7 @@
   </target>
   
   <target name="resin.dist.build" 
-          depends="compile, resin.dist.jar">
+          depends="compile, configure, resin.dist.jar">
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <mkdir dir="${dist}/${dist.name}"/>
@@ -752,6 +752,8 @@
       <include name="${dist.name}/aclocal.m4"/>
 
       <include name="modules/**/src/**"/>
+      <include name="${dist.name}/licenses"/>
+      <include name="${dist.name}/keys"/>
     </patternset>
 
     <patternset id="dist.bin">
@@ -761,12 +763,6 @@
       <include name="${dist.name}/bin/*.pl"/>
       <include name="${dist.name}/configure"/>
       <include name="${dist.name}/configure.ac"/>
-
-      <include name="${dist.name}/modules/c/src/common/**"/>
-      <include name="${dist.name}/modules/c/src/apache1/**"/>
-      <include name="${dist.name}/modules/c/src/apache2/**"/>
-      <include name="${dist.name}/modules/c/src/resin_os/**"/>
-      <include name="${dist.name}/modules/c/src/Makefile.in"/>
     </patternset>
 
     <patternset id="dist.src">
