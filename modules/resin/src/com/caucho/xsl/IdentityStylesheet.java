@@ -30,7 +30,7 @@ package com.caucho.xsl;
 
 import com.caucho.xml.QElement;
 import com.caucho.xml.XMLWriter;
-import com.caucho.xml.saaj.SOAPElementImpl;
+//import com.caucho.xml.saaj.SOAPElementImpl;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -97,6 +97,7 @@ public class IdentityStylesheet extends StylesheetImpl {
           applyNode(out, child);
         }
       }
+      /*
       else if (node instanceof SOAPElementImpl) {
         for (Node child = ((SOAPElementImpl) node).getFirstAttribute();
              child != null;
@@ -104,6 +105,7 @@ public class IdentityStylesheet extends StylesheetImpl {
           applyNode(out, child);
         }
       }
+      */
       else {
         NamedNodeMap attributes = ((Element) node).getAttributes();
 
