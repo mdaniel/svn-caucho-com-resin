@@ -625,6 +625,14 @@ public class Var extends Value
   }
 
   /**
+   * Copy for serialization
+   */
+  public Value copyTree(Env env, CopyRoot root)
+  {
+    return _value.copyTree(env, root);
+  }
+
+  /**
    * Clone for the clone keyword
    */
   public Value clone()

@@ -1045,6 +1045,7 @@ public class WebBeansContainer
   public void environmentBind(EnvironmentClassLoader loader)
   {
     update();
+    bind();
   }
 
   /**

@@ -52,6 +52,7 @@ public final class UnserializeReader {
 
   private int _index;
   private StringKey _key = new StringKey();
+
   
   private ArrayList<Value> _valueList
     = new ArrayList<Value>();
@@ -95,6 +96,227 @@ public final class UnserializeReader {
     
     _index = 0;
     _hasReference = true;
+  }
+
+  public Value unserialize(Env env)
+    throws IOException
+  {
+    int ch = read();
+
+    switch (ch) {
+    case 'b':
+      {
+        expect(':');
+        long v = readInt();
+        expect(';');
+        
+        Value value = v == 0 ? BooleanValue.FALSE : BooleanValue.TRUE;
+        
+        if (_hasReference) {
+          value = createReference(value);
+        
+	  _valueList.add(value);
+	}
+        
+        return value;
+      }
+
+    case 's':
+    case 'S':
+      {
+        expect(':');
+        int len = (int) readInt();
+        expect(':');
+        expect('"');
+
+        Value value = readStringValue(env, len);
+
+        expect('"');
+        expect(';');
+        
+        if (_hasReference) {
+          value = createReference(value);
+        
+	  _valueList.add(value);
+	}
+
+        return value;
+      }
+    case 'u':
+    case 'U':
+      {
+        expect(':');
+        int len = (int) readInt();
+        expect(':');
+        expect('"');
+
+        Value value = readUnicodeValue(env, len);
+
+        expect('"');
+        expect(';');
+        
+        if (_hasReference) {
+          value = createReference(value);
+        
+	  _valueList.add(value);
+	}
+
+        return value;
+      }
+
+    case 'i':
+      {
+        expect(':');
+
+        long l = readInt();
+
+        expect(';');
+        
+        Value value = LongValue.create(l); 
+        
+        if (_hasReference) {
+          value = createReference(value);
+        
+	  _valueList.add(value);
+	}
+
+        return value;
+      }
+
+    case 'd':
+      {
+        expect(':');
+
+        StringBuilder sb = new StringBuilder();
+        for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
+          sb.append((char) ch);
+        }
+
+        if (ch != ';')
+          throw new IOException(L.l("expected ';'"));
+
+        Value value = new DoubleValue(Double.parseDouble(sb.toString()));
+        
+        if (_hasReference) {
+          value = createReference(value);
+        
+	  _valueList.add(value);
+	}
+        
+        return value;
+      }
+
+    case 'a':
+      {
+        expect(':');
+        int len = (int) readInt();
+        expect(':');
+        expect('{');
+        
+        Value array = new ArrayValueImpl(len);
+
+        if (_hasReference) {
+          array = createReference(array);
+        
+	  _valueList.add(array);
+	}
+        
+        for (int i = 0; i < len; i++) {
+          Value key = unserializeKey(env);
+          Value value = unserialize(env);
+
+          array.put(key, value);
+        }
+
+        expect('}');
+
+        return array;
+      }
+
+    case 'O':
+      {
+        expect(':');
+        int len = (int) readInt();
+        expect(':');
+        expect('"');
+
+        String className = readString(len);
+
+        expect('"');
+        expect(':');
+        int count = (int) readInt();
+        expect(':');
+        expect('{');
+
+        QuercusClass qClass = env.findClass(className);
+        Value obj;
+
+        if (qClass != null)
+          obj = qClass.callNew(env, Env.EMPTY_VALUE);
+        else {
+          log.fine(L.l("{0} is an undefined class in unserialize",
+                   className));
+          
+          obj = env.createObject();
+          obj.putField(env,
+		       "__Quercus_Incomplete_Class_name",
+		       env.createString(className));
+        }
+        
+        if (_hasReference) {
+          obj = createReference(obj);
+        
+	  _valueList.add(obj);
+	}
+
+        for (int i = 0; i < count; i++) {
+          String key = unserializeString();
+          Value value = unserialize(env);
+
+          obj.putField(env, key, value);
+        }
+
+        expect('}');
+
+        return obj;
+      }
+
+    case 'N':
+      {
+        expect(';');
+        
+        Value value = NullValue.NULL;
+        
+        if (_hasReference) {
+          value = createReference(value);
+        
+	  _valueList.add(value);
+	}
+
+        return value;
+      }
+    case 'R':
+      {
+        expect(':');
+
+        int value = (int) readInt();
+
+        expect(';');
+
+        return _valueList.get(value - 1);
+      }
+
+    default:
+      return BooleanValue.FALSE;
+    }
+  }
+  
+  public Value createReference(Value value)
+  {
+    if (_referenceList.get(_valueCount++) == Boolean.FALSE)
+      return value;
+    else
+      return new Var(value);
   }
 
   private void populateReferenceList()
@@ -298,219 +520,6 @@ public final class UnserializeReader {
         return;
       }
     }
-  }
-
-  public Value unserialize(Env env)
-    throws IOException
-  {
-    int ch = read();
-
-    switch (ch) {
-    case 'b':
-      {
-        expect(':');
-        long v = readInt();
-        expect(';');
-        
-        Value value = v == 0 ? BooleanValue.FALSE : BooleanValue.TRUE;
-        
-        if (_hasReference)
-          value = createReference(value);
-        
-        _valueList.add(value);
-        
-        return value;
-      }
-
-    case 's':
-    case 'S':
-      {
-        expect(':');
-        int len = (int) readInt();
-        expect(':');
-        expect('"');
-
-        Value value = readStringValue(env, len);
-
-        expect('"');
-        expect(';');
-        
-        if (_hasReference)
-          value = createReference(value);
-        
-        _valueList.add(value);
-
-        return value;
-      }
-    case 'u':
-    case 'U':
-      {
-        expect(':');
-        int len = (int) readInt();
-        expect(':');
-        expect('"');
-
-        Value value = readUnicodeValue(env, len);
-
-        expect('"');
-        expect(';');
-        
-        if (_hasReference)
-          value = createReference(value);
-        
-        _valueList.add(value);
-
-        return value;
-      }
-
-    case 'i':
-      {
-        expect(':');
-
-        long l = readInt();
-
-        expect(';');
-        
-        Value value = LongValue.create(l); 
-        
-        if (_hasReference)
-          value = createReference(value);
-        
-        _valueList.add(value);
-
-        return value;
-      }
-
-    case 'd':
-      {
-        expect(':');
-
-        StringBuilder sb = new StringBuilder();
-        for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
-          sb.append((char) ch);
-        }
-
-        if (ch != ';')
-          throw new IOException(L.l("expected ';'"));
-
-        Value value = new DoubleValue(Double.parseDouble(sb.toString()));
-        
-        if (_hasReference)
-          value = createReference(value);
-        
-        _valueList.add(value);
-        
-        return value;
-      }
-
-    case 'a':
-      {
-        expect(':');
-        int len = (int) readInt();
-        expect(':');
-        expect('{');
-        
-        Value array = new ArrayValueImpl((int) len);
-
-        if (_hasReference)
-          array = createReference(array);
-        
-        _valueList.add(array);
-        
-        for (int i = 0; i < len; i++) {
-          Value key = unserializeKey(env);
-          Value value = unserialize(env);
-
-          array.put(key, value);
-        }
-
-        expect('}');
-
-        return array;
-      }
-
-    case 'O':
-      {
-        expect(':');
-        int len = (int) readInt();
-        expect(':');
-        expect('"');
-
-        String className = readString(len);
-
-        expect('"');
-        expect(':');
-        int count = (int) readInt();
-        expect(':');
-        expect('{');
-
-        QuercusClass qClass = env.findClass(className);
-        Value obj;
-
-        if (qClass != null)
-          obj = qClass.callNew(env, Env.EMPTY_VALUE);
-        else {
-          log.fine(L.l("{0} is an undefined class in unserialize",
-                   className));
-          
-          obj = env.createObject();
-          obj.putField(env,
-		       "__Quercus_Incomplete_Class_name",
-		       env.createString(className));
-        }
-        
-        if (_hasReference)
-          obj = createReference(obj);
-        
-        _valueList.add(obj);
-
-        for (int i = 0; i < count; i++) {
-          String key = unserializeString();
-          Value value = unserialize(env);
-
-          obj.putField(env, key, value);
-        }
-
-        expect('}');
-
-        return obj;
-      }
-
-    case 'N':
-      {
-        expect(';');
-        
-        Value value = NullValue.NULL;
-        
-        if (_hasReference)
-          value = createReference(value);
-        
-        _valueList.add(value);
-
-        return value;
-      }
-    case 'R':
-      {
-        expect(':');
-
-        int value = (int) readInt();
-
-        expect(';');
-
-        return _valueList.get(value - 1);
-      }
-
-    default:
-      return BooleanValue.FALSE;
-    }
-  }
-  
-  public Value createReference(Value value)
-  {
-    if (_referenceList.get(_valueCount++) == Boolean.FALSE)
-      return value;
-    else
-      return new Var(value);
   }
 
   public Value unserializeKey(Env env)

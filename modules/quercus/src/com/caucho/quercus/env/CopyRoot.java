@@ -29,21 +29,63 @@
 
 package com.caucho.quercus.env;
 
-public interface EnvCleanup {
+/**
+ * Root for saving copy information for the serialization cache.
+ */
+public class CopyRoot implements EnvCleanup
+{
+  private final UnserializeCacheEntry _entry;
+  
+  private Value _root;
+  private boolean _isModified;
 
-  /*
-   * This method is invoked after a Quercus request has been
-   * processed and the environment is being cleaned up.
-   * An object that implements the EnvCleanup interface
-   * will register itself with via Env.addCleanup() to
-   * ensure that resources are released when the script
-   * has finished executing. If an object's resources
-   * are explicitly cleaned up, the Env.removeCleanup()
-   * method should be invoked.
+  public CopyRoot(UnserializeCacheEntry entry)
+  {
+    _entry = entry;
+  }
+
+  /**
+   * Indicate that the contents are modified
    */
+  public void setModified()
+  {
+    _isModified = true;
+  }
+
+  /**
+   * True if it's modified
+   */
+  public boolean isModified()
+  {
+    return _isModified;
+  }
+
+  /**
+   * Returns the root
+   */
+  public Value getRoot()
+  {
+    return _root;
+  }
+
+  public void setRoot(Value root)
+  {
+    _root = root;
+
+    // clear when setting root since the unserialization process itself
+    // sets the modify flag
+    _isModified = false;
+  }
+
+  public void allocate(Env env)
+  {
+    env.addCleanup(this);
+  }
 
   public void cleanup()
-    throws Exception;
-
+    throws Exception
+  {
+    if (! _isModified)
+      _entry.free(this);
+  }
 }
-

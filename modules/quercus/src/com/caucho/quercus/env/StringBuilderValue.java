@@ -387,6 +387,15 @@ public class StringBuilderValue
   }
 
   /**
+   * Returns the length of the string.
+   */
+  @Override
+  public final boolean isEmpty()
+  {
+    return _length == 0;
+  }
+
+  /**
    * Writes to a stream
    */
   @Override
@@ -864,17 +873,18 @@ public class StringBuilderValue
   @Override
   public final StringValue append(char []buf, int offset, int length)
   {
-    if (_buffer.length < _length + length)
-      ensureCapacity(_length + length);
+    int end = _length + length;
+    
+    if (_buffer.length < end)
+      ensureCapacity(end);
 
     char []buffer = _buffer;
     int bufferLength = _length;
-
-    for (; length > 0; length--)
-      buffer[bufferLength++] = buf[offset++];
-
-    _buffer = buffer;
-    _length = bufferLength;
+    
+    while (--length >= 0)
+      buffer[bufferLength + length] = buf[offset + length];
+    
+    _length = end;
 
     return this;
   }
@@ -1081,8 +1091,10 @@ public class StringBuilderValue
    */
   public StringValue append(byte []buf, int offset, int length)
   {
-    if (_buffer.length < _length + length)
-      ensureCapacity(_length + length);
+    int end = _length + length;
+    
+    if (_buffer.length < end)
+      ensureCapacity(end);
 
     char []charBuffer = _buffer;
     int charLength = _length;
@@ -1091,7 +1103,7 @@ public class StringBuilderValue
       charBuffer[charLength + i] = (char) (buf[offset + i] & 0xff);
     }
 
-    _length += length;
+    _length = end;
 
     return this;
   }

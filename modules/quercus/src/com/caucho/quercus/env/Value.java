@@ -918,7 +918,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Copy for serialization
    */
-  public Value copyTree(Env env)
+  public Value copyTree(Env env, CopyRoot root)
   {
     return this;
   }

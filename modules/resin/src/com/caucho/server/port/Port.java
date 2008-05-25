@@ -1184,7 +1184,7 @@ public class Port
           if (_startThreadCount < 0) {
 	    _startThreadCount = 0;
 	    log.warning(conn + " _startThreadCount assertion failure");
-	    conn.getStartThread().printStackTrace();
+	    // conn.getStartThread().printStackTrace();
           }
         }
 

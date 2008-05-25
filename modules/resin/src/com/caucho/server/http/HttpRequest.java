@@ -151,7 +151,7 @@ public class HttpRequest extends AbstractHttpRequest
    */
   public final boolean isWaitForRead()
   {
-    return false;
+    return true;
   }
   
   /**
@@ -1454,7 +1454,7 @@ public class HttpRequest extends AbstractHttpRequest
     }
   }
   
-  public void protocolCloseEvent()
+  public final void protocolCloseEvent()
   {
   }
 

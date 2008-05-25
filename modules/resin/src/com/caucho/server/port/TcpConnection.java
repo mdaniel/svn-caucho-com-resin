@@ -281,7 +281,10 @@ public class TcpConnection extends Connection
   {
     if (_state.isClosed())
       Thread.dumpStack();
+    /* XXX: debugging
     setStartThread();
+    */
+    
     return _readTask;
   }
  
@@ -1025,7 +1028,8 @@ public class TcpConnection extends Connection
         _thread = thread;
 	_state = _state.toAccept();
 
-        while (! _state.isClosed()) {
+        // while (! _state.isClosed()) {
+        while (! _port.isClosed()) {
           _state = _state.toAccept();
           
           if (! _port.accept(TcpConnection.this, isStart)) {

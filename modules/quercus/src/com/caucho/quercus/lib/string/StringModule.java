@@ -586,6 +586,7 @@ public class StringModule extends AbstractQuercusModule {
     int tail;
 
     int i = 0;
+    int separatorLength = separator.length();
     while ((tail = string.indexOf(separator, head)) >= 0) {
       if (limit <= i + 1)
         break;
@@ -596,7 +597,7 @@ public class StringModule extends AbstractQuercusModule {
 
       array.put(key, chunk);
 
-      head = tail + separator.length();
+      head = tail + separatorLength;
     }
 
     LongValue key = LongValue.create(i);

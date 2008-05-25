@@ -57,8 +57,9 @@ public class VariableModule extends AbstractQuercusModule {
     = Logger.getLogger(VariableModule.class.getName());
   private static final L10N L = new L10N(VariableModule.class);
 
-  private static final LruCache<StringValue,Value> _unserializeCache
-    = new LruCache<StringValue,Value>(256);
+  private static final
+    LruCache<StringValue,UnserializeCacheEntry> _unserializeCache
+    = new LruCache<StringValue,UnserializeCacheEntry>(256);
 
   /**
    * Returns a constant
@@ -653,19 +654,19 @@ public class VariableModule extends AbstractQuercusModule {
    */
   public static Value unserialize(Env env, StringValue s)
   {
+    Value v = null;
+
+    UnserializeCacheEntry entry = _unserializeCache.get(s);
+
+    if (entry != null) {
+      v = entry.getValue(env);
+
+      if (v != null)
+	return v;
+    }
+    
     // cannot cache references
     boolean isCacheable = s.indexOf("R:") < 0;
-    
-    Value v = null;
-    
-    if (isCacheable) {
-      v = _unserializeCache.get(s);
-      
-      if (v != null) {
-        // return v.copy(env);
-        return v.copyTree(env);
-      }
-    }
 
     try {
       UnserializeReader is = new UnserializeReader(s, ! isCacheable);
@@ -680,8 +681,11 @@ public class VariableModule extends AbstractQuercusModule {
     }
 
     if (isCacheable) {
-      // _unserializeCache.put(s, v.copy(env));
-      _unserializeCache.put(s, v.copyTree(env));
+      entry = new UnserializeCacheEntry(v);
+      
+      _unserializeCache.put(s, entry);
+
+      return entry.getValue(env);
     }
 
     return v;

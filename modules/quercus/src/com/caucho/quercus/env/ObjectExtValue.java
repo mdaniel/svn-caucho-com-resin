@@ -76,6 +76,36 @@ public class ObjectExtValue extends ObjectValue
     _hashMask = _entries.length - 1;
   }
 
+  public ObjectExtValue(Env env, ObjectExtValue copy, CopyRoot root)
+  {
+    super(copy.getQuercusClass());
+
+    _methodMap = copy._methodMap;
+
+    _size = copy._size;
+    _isFieldInit = copy._isFieldInit;
+    
+    Entry []copyEntries = copy._entries;
+    
+    _entries = new Entry[copyEntries.length];
+    _hashMask = copy._hashMask;
+
+    int len = copyEntries.length;
+    for (int i = 0; i < len; i++) {
+      Entry entry = copyEntries[i];
+
+      for (; entry != null; entry = entry._next) {
+	Entry entryCopy = entry.copyTree(env, root);
+
+	entryCopy._next = _entries[i];
+	if (_entries[i] != null)
+	  _entries[i]._prev = entryCopy;
+
+	_entries[i] = entryCopy;
+      }
+    }
+  }
+
   private void init()
   {
     _entries = new Entry[DEFAULT_SIZE];
@@ -998,11 +1028,9 @@ public class ObjectExtValue extends ObjectValue
    * Copy for serialization
    */
   @Override
-  public Value copyTree(Env env)
+  public Value copyTree(Env env, CopyRoot root)
   {
-    // return new ObjectExtValue(env, map, _cl, getArray());
-
-    return this;
+    return new CopyObjectExtValue(env, this, root);
   }
 
   /**
@@ -1530,6 +1558,11 @@ public class ObjectExtValue extends ObjectValue
 	
         return var;
       }
+    }
+
+    Entry copyTree(Env env, CopyRoot root)
+    {
+      return new Entry(_key, _value.copyTree(env, root));
     }
 
     public int compareTo(Map.Entry<Value, Value> other)

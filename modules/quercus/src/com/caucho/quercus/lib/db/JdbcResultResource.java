@@ -517,7 +517,7 @@ public class JdbcResultResource {
 
           InputStream is = rs.getBinaryStream(column);
 
-          if (is == null || rs.wasNull())
+          if (is == null) // || rs.wasNull())
             return NullValue.NULL;
 
 	  try {
@@ -539,7 +539,7 @@ public class JdbcResultResource {
           if (bb.isUnicode()) {
             Reader reader = rs.getCharacterStream(column);
             
-            if (reader == null || rs.wasNull())
+            if (reader == null) // || rs.wasNull())
               return NullValue.NULL;
             
             bb.append(reader);
@@ -547,7 +547,7 @@ public class JdbcResultResource {
           else {
             InputStream is = rs.getBinaryStream(column);
             
-            if (is == null || rs.wasNull())
+            if (is == null) // || rs.wasNull())
               return NullValue.NULL;
             
             bb.appendReadAll(is, Long.MAX_VALUE);
@@ -574,7 +574,7 @@ public class JdbcResultResource {
         {
           String strValue = rs.getString(column);
 
-          if (strValue == null || rs.wasNull())
+          if (strValue == null) // || rs.wasNull())
             return NullValue.NULL;
           else
             return env.createString(strValue);

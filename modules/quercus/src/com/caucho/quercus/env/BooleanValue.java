@@ -47,7 +47,7 @@ public class BooleanValue extends Value
 
   private final boolean _value;
 
-  protected BooleanValue(boolean value)
+  private BooleanValue(boolean value)
   {
     _value = value;
   }
@@ -108,7 +108,7 @@ public class BooleanValue extends Value
    */
   public final boolean toBoolean()
   {
-    return _value;
+    return this == TRUE;
   }
 
   /**

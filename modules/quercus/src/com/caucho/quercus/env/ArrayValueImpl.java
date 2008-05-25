@@ -125,14 +125,16 @@ public class ArrayValueImpl extends ArrayValue
   }
 
   /**
-   * Copy for unserialization.  Unserialization is guaranteed to be a tree
+   * Copy for unserialization.
+   *
+   * XXX: need to update for references
    */
-  public ArrayValueImpl(Env env, ArrayValue copy)
+  protected ArrayValueImpl(Env env, ArrayValue copy, CopyRoot root)
   {
     this();
     
     for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
-      put(ptr._key, ptr._value.toValue().copyTree(env));
+      put(ptr._key, ptr._value.toValue().copyTree(env, root));
     }
   }
 
@@ -266,9 +268,9 @@ public class ArrayValueImpl extends ArrayValue
    * Copy for serialization
    */
   @Override
-  public Value copyTree(Env env)
+  public Value copyTree(Env env, CopyRoot root)
   {
-    return new ArrayValueImpl(env, this);
+    return new ArrayCopyValueImpl(env, this, root);
   }
   
   /**

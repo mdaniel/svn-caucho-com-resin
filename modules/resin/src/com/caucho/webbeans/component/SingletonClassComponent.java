@@ -136,6 +136,8 @@ public class SingletonClassComponent extends ClassComponent
     try {
       thread.setContextClassLoader(loader);
 
+      bind();
+
       value = super.init(value, env);
 
       try {

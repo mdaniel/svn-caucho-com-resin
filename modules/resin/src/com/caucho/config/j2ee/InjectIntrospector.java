@@ -182,8 +182,9 @@ public class InjectIntrospector {
     try {
       introspectInjectImpl(injectList, type);
     } catch (ClassNotFoundException e) {
+      log.warning(type + " injection " + e);
     } catch (NoClassDefFoundError e) {
-      // occurs in some TCK tests
+      log.warning(type + " injection " + e);
     }
   }
 
@@ -756,11 +757,13 @@ public class InjectIntrospector {
 
   private static boolean hasBindingAnnotation(Field field)
   {
-    if (field.isAnnotationPresent(In.class))
-      return true;
-
     for (Annotation ann : field.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+      Class annType = ann.annotationType();
+      
+      if (annType.equals(In.class))
+	return true;
+
+      if (annType.isAnnotationPresent(BindingType.class))
 	return true;
     }
 
@@ -786,11 +789,13 @@ public class InjectIntrospector {
         continue;
 
       for (Annotation ann : annList) {
-	if (ann.annotationType().equals(Observes.class))
+	Class annType = ann.annotationType();
+	
+	if (annType.equals(Observes.class))
 	  return false;
-	if (ann.annotationType().equals(Disposes.class))
+	if (annType.equals(Disposes.class))
 	  return false;
-        else if (ann.annotationType().isAnnotationPresent(BindingType.class))
+        else if (annType.isAnnotationPresent(BindingType.class))
 	  hasBinding = true;
       }
     }

@@ -130,10 +130,11 @@ public class ApcModule extends AbstractQuercusModule {
     if (entry == null)
       return BooleanValue.FALSE;
 
-    Value value = entry.getValue();
+    Value value = entry.getValue(env);
 
-    if (entry.isValid() && value != null)
-      return value.copyTree(env);
+    if (value != null) {
+      return value;
+    }
     else
       return BooleanValue.FALSE;
   }
@@ -180,18 +181,17 @@ public class ApcModule extends AbstractQuercusModule {
   public Value apc_store(Env env, String key, Value value,
                          @Optional("0") int ttl)
   {
-    _cache.put(key, new Entry(value.copyTree(env), ttl));
+    _cache.put(key, new Entry(env, value, ttl));
 
     return BooleanValue.TRUE;
   }
 
-  static class Entry {
-    private Value _value;
+  static class Entry extends UnserializeCacheEntry {
     private long _expire;
 
-    Entry(Value value, int ttl)
+    Entry(Env env, Value value, int ttl)
     {
-      _value = value;
+      super(env, value);
 
       if (ttl <= 0)
         _expire = Long.MAX_VALUE / 2;
@@ -204,14 +204,19 @@ public class ApcModule extends AbstractQuercusModule {
       if (Alarm.getCurrentTime() <= _expire)
         return true;
       else {
-        _value = null;
+	clear();
+
         return false;
       }
     }
 
-    public Value getValue()
+    public Value getValue(Env env)
     {
-      return _value;
+      if (Alarm.getCurrentTime() <= _expire)
+        return super.getValue(env);
+      else {
+        return null;
+      }
     }
   }
 
