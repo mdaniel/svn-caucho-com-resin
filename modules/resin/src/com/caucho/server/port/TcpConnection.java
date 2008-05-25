@@ -805,13 +805,14 @@ public class TcpConnection extends Connection
     }
 
     if (socket != null) {
+      getPort().closeSocket(socket);
+      
       try {
 	socket.close();
       } catch (Throwable e) {
 	log.log(Level.FINE, e.toString(), e);
       }
 
-      getPort().closeSocket(socket);
     }
   }
 
@@ -1049,6 +1050,8 @@ public class TcpConnection extends Connection
           if (result == RequestState.THREAD_DETACHED) {
             break;
           }
+
+	  close();
         }
         
         isValid = true;
