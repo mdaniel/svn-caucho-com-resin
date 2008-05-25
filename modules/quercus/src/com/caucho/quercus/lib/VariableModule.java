@@ -665,12 +665,13 @@ public class VariableModule extends AbstractQuercusModule {
 	return v;
     }
     
-    // cannot cache references
-    boolean isCacheable = s.indexOf("R:") < 0;
+    boolean useReference = s.indexOf("R:") > 0;
+
+    UnserializeReader is = null;
 
     try {
-      UnserializeReader is = new UnserializeReader(s, ! isCacheable);
-
+      is = new UnserializeReader(s, useReference);
+      
       v = is.unserialize(env);
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -680,7 +681,7 @@ public class VariableModule extends AbstractQuercusModule {
       v = BooleanValue.FALSE;
     }
 
-    if (isCacheable) {
+    if (! is.hasReference()) {
       entry = new UnserializeCacheEntry(v);
       
       _unserializeCache.put(s, entry);
