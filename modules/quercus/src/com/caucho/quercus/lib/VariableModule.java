@@ -91,43 +91,6 @@ public class VariableModule extends AbstractQuercusModule {
   }
 
   /**
-   * Prints a debug version of the variable
-   *
-   * @param env the quercus calling environment
-   * @param v the variable to print
-   * @return the escaped stringPhp
-   */
-  public static Value var_dump(Env env, @ReadOnly Value v, Value []args)
-  {
-    try {
-      if (v == null)
-	env.getOut().print("NULL#java");
-      else {
-	v.varDump(env, env.getOut(), 0,  new IdentityHashMap<Value,String>());
-          
-	env.getOut().println();
-      }
-      
-      if (args != null) {
-	for (Value value : args) {
-	  if (value == null)
-	    env.getOut().print("NULL#java");
-	  else {
-	    value.varDump(env, env.getOut(), 0,
-			  new IdentityHashMap<Value,String>());
-	    
-	    env.getOut().println();
-	  }
-	}
-      }
-
-      return NullValue.NULL;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
-  }
-
-  /**
    * Defines a constant
    *
    * @param env the quercus calling environment
@@ -213,15 +176,8 @@ public class VariableModule extends AbstractQuercusModule {
     return result;
   }
 
-  /**
-   * Returns the type string for the variable
-   */
-  public static String gettype(@ReadOnly Value v)
-  {
-    return v.getType();
-  }
-
-  public static Value get_resource_type(Value v)
+  // XXX: this doesn't look completed
+  public static Value get_resource_type(Env env, Value v)
   {
     if (! (v instanceof JavaValue))
       return BooleanValue.FALSE;
@@ -233,11 +189,19 @@ public class VariableModule extends AbstractQuercusModule {
 					  new Class[0]);
 
       if (m != null)
-	return StringValue.create(String.valueOf(m.invoke(obj)));
+	return env.createString(String.valueOf(m.invoke(obj)));
     } catch (Exception e) {
     }
     
-    return StringValue.create("Unknown");
+    return env.createString("Unknown");
+  }
+
+  /**
+   * Returns the type string for the variable
+   */
+  public static String gettype(@ReadOnly Value v)
+  {
+    return v.getType();
   }
 
   /**
@@ -304,6 +268,8 @@ public class VariableModule extends AbstractQuercusModule {
     return v.isArray();
   }
 
+  // XXX: is_binary
+
   /**
    * Returns true for a boolean
    *
@@ -318,25 +284,7 @@ public class VariableModule extends AbstractQuercusModule {
 	    : BooleanValue.FALSE);
   }
 
-  /**
-   * Returns true for a scalar
-   *
-   * @param v the value to test
-   *
-   * @return true for a scalar
-   */
-  public static boolean is_scalar(@ReadOnly Value v)
-  {
-    if (v==null)
-      return false;
-
-    Value value = v.toValue();
-    return
-      value instanceof DoubleValue ||
-      value instanceof StringValue ||
-      value instanceof LongValue ||
-      value instanceof BooleanValue;
-  }
+  // XXX: is_buffer
 
   /**
    * Returns the type string for the variable
@@ -509,7 +457,25 @@ public class VariableModule extends AbstractQuercusModule {
     return (value.toValue() instanceof JavaValue);
   }
 
-  // XXX: is_scalar
+  /**
+   * Returns true for a scalar
+   *
+   * @param v the value to test
+   *
+   * @return true for a scalar
+   */
+  public static boolean is_scalar(@ReadOnly Value v)
+  {
+    if (v==null)
+      return false;
+
+    Value value = v.toValue();
+    
+    return (value instanceof DoubleValue
+	    || value instanceof StringValue
+	    || value instanceof LongValue
+	    || value instanceof BooleanValue);
+  }
 
   /**
    * Returns true if the value is a string
@@ -519,27 +485,14 @@ public class VariableModule extends AbstractQuercusModule {
     return (value.toValue() instanceof StringValue);
   }
 
+  // XXX: is_unicode
+
   /**
    * Returns the type string for the variable
    */
   public static boolean isset(@ReadOnly Value v)
   {
     return v.isset();
-  }
-
-  /**
-   * Converts to a string
-   *
-   * @param env the quercus calling environment
-   * @param v the variable to convert
-   * @return the double value
-   */
-  public static Value strval(Env env, @ReadOnly Value v)
-  {
-    if (v instanceof StringValue)
-      return (StringValue) v;
-    else
-      return new UnicodeValueImpl(v.toString());
   }
 
   /**
@@ -650,6 +603,21 @@ public class VariableModule extends AbstractQuercusModule {
   }
 
   /**
+   * Converts to a string
+   *
+   * @param env the quercus calling environment
+   * @param v the variable to convert
+   * @return the double value
+   */
+  public static Value strval(Env env, @ReadOnly Value v)
+  {
+    if (v instanceof StringValue)
+      return (StringValue) v;
+    else
+      return new UnicodeValueImpl(v.toString());
+  }
+
+  /**
    * Unserializes the value from a string.
    */
   public static Value unserialize(Env env, StringValue s)
@@ -690,6 +658,45 @@ public class VariableModule extends AbstractQuercusModule {
     }
 
     return v;
+  }
+
+  // XXX: unset
+
+  /**
+   * Prints a debug version of the variable
+   *
+   * @param env the quercus calling environment
+   * @param v the variable to print
+   * @return the escaped stringPhp
+   */
+  public static Value var_dump(Env env, @ReadOnly Value v, Value []args)
+  {
+    try {
+      if (v == null)
+	env.getOut().print("NULL#java");
+      else {
+	v.varDump(env, env.getOut(), 0,  new IdentityHashMap<Value,String>());
+          
+	env.getOut().println();
+      }
+      
+      if (args != null) {
+	for (Value value : args) {
+	  if (value == null)
+	    env.getOut().print("NULL#java");
+	  else {
+	    value.varDump(env, env.getOut(), 0,
+			  new IdentityHashMap<Value,String>());
+	    
+	    env.getOut().println();
+	  }
+	}
+      }
+
+      return NullValue.NULL;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
   }
 
   /**

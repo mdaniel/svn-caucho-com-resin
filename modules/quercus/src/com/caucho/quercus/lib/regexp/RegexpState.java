@@ -127,7 +127,8 @@ public class RegexpState {
       }
     }
 
-    _first = _subject.length() + 1;
+    _first = length + 1;
+    
     return false;
   }
 
