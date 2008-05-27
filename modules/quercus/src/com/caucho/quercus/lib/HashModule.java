@@ -215,9 +215,6 @@ public class HashModule extends AbstractQuercusModule {
 
     return hash_final(env, context, isBinary);
   }
-  
-  // XXX: hash_hmac
-  // XXX: hash_hmac_file
 
   /**
    * Initialize a hash context.
