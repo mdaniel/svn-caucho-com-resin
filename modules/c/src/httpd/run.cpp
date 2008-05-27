@@ -147,15 +147,15 @@ spawn_java(char *exe, char **args)
 			Sleep(1000);
 		}
 
-		int sock = socket(AF_INET, SOCK_STREAM, 0);
-		if (sock < 0) {
+		int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+		if (sock < 0 || sock == INVALID_SOCKET) {
 			fprintf(err, "can't create socket\n");
 			return 1;
 		}
 
 		// make not inheritable
 		DuplicateHandle(GetCurrentProcess(), 
-						(HANDLE) _get_osfhandle(sock), 
+						(HANDLE) sock, 
 						GetCurrentProcess(), 
 						NULL, 
 						0,
