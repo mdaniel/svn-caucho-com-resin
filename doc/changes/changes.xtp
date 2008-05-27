@@ -13,7 +13,7 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
-<li>quercus: XMLWriter module</li>
+<li>quercus: XMLWriter module (#2218, rep by koreth)</li>
 <li>quercus: hash module (#2122, rep by koreth)</li>
 <li>boot: init.resin.in script updates for debian (#2647, rep by wirah)</li>
 <li>classloader: add log when .jar is not readable (#2669, rep by chris_se)</li>
