@@ -3338,6 +3338,21 @@ public class Env {
    *
    * @param name the class name
    * @param useAutoload use autoload to locate the class if necessary
+   * @return the found class or null if no class found.
+   */
+  public void addClass(String name, ClassDef def)
+  {
+    QuercusClass qClass = createQuercusClass(def, null);
+
+    _classMap.put(name, qClass);
+    _lowerClassMap.put(name.toLowerCase(), qClass);
+  }
+
+  /**
+   * Finds the class with the given name.
+   *
+   * @param name the class name
+   * @param useAutoload use autoload to locate the class if necessary
    * @param useImport import the class if necessary
    * 
    * @return the found class or null if no class found.

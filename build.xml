@@ -141,7 +141,7 @@
     </antcall>
   </target>
 
-  <target name="ejb" depends="init, jta, jaxrpc">
+  <target name="ejb" depends="init, jta">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="ejb"/>
       <param name="module.jar" value="ejb-15.jar"/>
@@ -1213,7 +1213,9 @@
         <include name="lib/activation.jar"/>
         <include name="lib/javamail-14.jar"/>
         <include name="lib/jcache.jar"/>
+	<!--
         <include name="lib/jaxrpc-15.jar"/>
+	-->
         <include name="lib/jsf-12.jar"/>
         <include name="lib/webutil.jar"/>
       </fileset>

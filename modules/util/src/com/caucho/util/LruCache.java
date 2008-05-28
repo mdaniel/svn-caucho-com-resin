@@ -112,6 +112,14 @@ public class LruCache<K,V> {
   }
 
   /**
+   * Returns the LRU cache capacity
+   */
+  public int getCapacity()
+  {
+    return _capacity;
+  }
+
+  /**
    * Clears the cache
    */
   public void clear()

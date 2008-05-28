@@ -444,7 +444,7 @@ public class QuercusParser {
     Location location = getLocation();
 
     ArrayList<Statement> stmtList = parseStatementList();
-    
+
     return new QuercusProgram(_quercus, _sourceFile,
 			      _globalScope.getFunctionMap(),
 			      _globalScope.getClassMap(),

@@ -13,6 +13,15 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>quercus: apc_cache_info (#2696, rep by koreth)</li>
+<li>quercus: apc size configurable with apc.user_cache_hint (#2698, rep by koreth)</li>
+<li>quercus: unserialize cache key needs to be a softreference</li>
+<li>quercus: add ttf image handling (#1398, #2197, rep by dberry, koreth, perololo)</li>
+<li>quercus: support class definition in eval (#2547, rep by dobes_vendermeer)</li>
+<li>quercus: xml_parser_get_option type not correct for XML_OPTION_CASE_FOLDING (#1503, rep by at4u)</li>
+<li>quercus: NPE in StaticMethodExpr (#2678, rep by Matthew Schmidt)</li>
+<li>quercus: imagestringup (#2673, rep by rwankar)</li>
+<li>hessian: HessianOutput.flush() needs os.flush (rep by Dinesh Bolkensteyn)</li>
 <li>quercus: XMLWriter module (#2218, rep by koreth)</li>
 <li>quercus: hash module (#2122, rep by koreth)</li>
 <li>boot: init.resin.in script updates for debian (#2647, rep by wirah)</li>

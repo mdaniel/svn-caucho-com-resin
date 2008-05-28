@@ -38,8 +38,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -51,8 +50,7 @@ public class ApcModule extends AbstractQuercusModule {
 
   private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
-
-  private LruCache<String,Entry> _cache = new LruCache<String,Entry>(4096);
+  private LruCache<String,Entry> _cache;
 
   private HashMap<String,Value> _constMap = new HashMap<String,Value>();
 
@@ -79,12 +77,56 @@ public class ApcModule extends AbstractQuercusModule {
   {
     ArrayValue value = new ArrayValueImpl();
 
-    value.put("num_slots", 1000);
-    value.put("ttl", 0);
-    value.put("num_hits", 0);
-    value.put("num_misses", 0);
-    value.put("start_time", 0);
-    value.put(env.createString("cache_list"), new ArrayValueImpl());
+    if (_cache != null) {
+      value.put("num_slots", _cache.getCapacity());
+      value.put("ttl", 0);
+      value.put("num_hits", _cache.getHitCount());
+      value.put("num_misses", _cache.getMissCount());
+      value.put("start_time", 0);
+    }
+    else {
+      value.put("num_slots", 0);
+      value.put("ttl", 0);
+      value.put("num_hits", 0);
+      value.put("num_misses", 0);
+      value.put("start_time", 0);
+    }
+
+    ArrayValueImpl cacheList = new ArrayValueImpl();
+    value.put(env.createString("cache_list"), cacheList);
+
+    if ("user".equals(type) && _cache != null) {
+      ArrayList<String> keys = new ArrayList<String>();
+      ArrayList<Entry> values = new ArrayList<Entry>();
+
+      synchronized (_cache) {
+	Iterator<LruCache.Entry<String,Entry>> iter = _cache.iterator();
+
+	while (iter.hasNext()) {
+	  LruCache.Entry<String,Entry> lruEntry = iter.next();
+	  
+	  keys.add(lruEntry.getKey());
+	  values.add(lruEntry.getValue());
+	}
+      }
+
+      for (int i = 0; i < keys.size(); i++) {
+	String key = keys.get(i);
+	Entry entryValue = values.get(i);
+
+	if (entryValue.isValid()) {
+	  ArrayValueImpl array = new ArrayValueImpl();
+	  cacheList.put(array);
+
+	  array.put(env.createString("info"), env.createString(key));
+	  array.put(env.createString("ttl"),
+		    LongValue.create(entryValue.getTTL()));
+	  array.put(env.createString("type"), env.createString("user"));
+	  array.put(env.createString("num_hits"),
+		    LongValue.create(entryValue.getHitCount()));
+	}
+      }
+    }
 
     return value;
   }
@@ -94,7 +136,8 @@ public class ApcModule extends AbstractQuercusModule {
    */
   public boolean apc_clear_cache(Env env, @Optional String type)
   {
-    _cache.clear();
+    if (_cache != null)
+      _cache.clear();
 
     return true;
   }
@@ -117,6 +160,9 @@ public class ApcModule extends AbstractQuercusModule {
    */
   public boolean apc_delete(Env env, String key)
   {
+    if (_cache == null)
+      return false;
+    
     return _cache.remove(key) != null;
   }
 
@@ -125,6 +171,9 @@ public class ApcModule extends AbstractQuercusModule {
    */
   public Value apc_fetch(Env env, String key)
   {
+    if (_cache == null)
+      return BooleanValue.FALSE;
+    
     Entry entry = _cache.get(key);
 
     if (entry == null)
@@ -181,13 +230,27 @@ public class ApcModule extends AbstractQuercusModule {
   public Value apc_store(Env env, String key, Value value,
                          @Optional("0") int ttl)
   {
+    if (_cache == null) {
+      long size = env.getIniLong("apc.user_entries_hint");
+
+      System.out.println("SIZE: " + size);
+      if (size <= 0)
+	size = 4096;
+
+      _cache = new LruCache<String,Entry>((int) size);
+    }
+    
     _cache.put(key, new Entry(env, value, ttl));
 
     return BooleanValue.TRUE;
   }
 
   static class Entry extends UnserializeCacheEntry {
+    private long _createTime;
+    private long _accessTime;
+    
     private long _expire;
+    private int _hitCount;
 
     Entry(Env env, Value value, int ttl)
     {
@@ -197,6 +260,21 @@ public class ApcModule extends AbstractQuercusModule {
         _expire = Long.MAX_VALUE / 2;
       else
         _expire = Alarm.getCurrentTime() + ttl * 1000L;
+
+      _createTime = Alarm.getCurrentTime();
+    }
+
+    public long getTTL()
+    {
+      if (_expire >= Long.MAX_VALUE / 2)
+	return 0;
+      else
+	return (_expire - Alarm.getCurrentTime()) / 1000L;
+    }
+
+    public long getHitCount()
+    {
+      return _hitCount;
     }
 
     public boolean isValid()
@@ -212,8 +290,12 @@ public class ApcModule extends AbstractQuercusModule {
 
     public Value getValue(Env env)
     {
-      if (Alarm.getCurrentTime() <= _expire)
+      if (Alarm.getCurrentTime() <= _expire) {
+	_accessTime = Alarm.getCurrentTime();
+	_hitCount++;
+	
         return super.getValue(env);
+      }
       else {
         return null;
       }
@@ -230,8 +312,12 @@ public class ApcModule extends AbstractQuercusModule {
     = _iniDefinitions.add("apc.optimization", false, PHP_INI_ALL);
   static final IniDefinition INI_APC_NUM_FILES_HINT
     = _iniDefinitions.add("apc.num_files_hint", 1000, PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_USER_ENTRIES_HINT
+    = _iniDefinitions.add("apc.user_entries_hint", 4096, PHP_INI_SYSTEM);
   static final IniDefinition INI_APC_TTL
     = _iniDefinitions.add("apc.ttl", 0, PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_USER_TTL
+    = _iniDefinitions.add("apc.user_ttl", 0, PHP_INI_SYSTEM);
   static final IniDefinition INI_APC_GC_TTL
     = _iniDefinitions.add("apc.gc_ttl", "3600", PHP_INI_SYSTEM);
   static final IniDefinition INI_APC_CACHE_BY_DEFAULT
@@ -246,4 +332,14 @@ public class ApcModule extends AbstractQuercusModule {
     = _iniDefinitions.add("apc.file_update_protection", "2", PHP_INI_SYSTEM);
   static final IniDefinition INI_APC_ENABLE_CLI
     = _iniDefinitions.add("apc.enable_cli", false, PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_MAX_FILE_SIZE
+    = _iniDefinitions.add("apc.max_file_size", "1M", PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_STAT
+    = _iniDefinitions.add("apc.stat", "1", PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_WRITE_LOCK
+    = _iniDefinitions.add("apc.write_lock", "1", PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_LOCALCACHE
+    = _iniDefinitions.add("apc.localcache", "0", PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_LOCALCACHE_SIZE
+    = _iniDefinitions.add("apc.localcache.size", "4096", PHP_INI_SYSTEM);
 }

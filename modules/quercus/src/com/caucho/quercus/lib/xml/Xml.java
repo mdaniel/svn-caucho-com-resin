@@ -463,11 +463,11 @@ public class Xml {
   {
     switch (option) {
       case XmlModule.XML_OPTION_CASE_FOLDING:
-        return (_xmlOptionCaseFolding ? BooleanValue.TRUE : BooleanValue.FALSE);
+        return (_xmlOptionCaseFolding ? LongValue.ONE : LongValue.ZERO);
       case XmlModule.XML_OPTION_SKIP_TAGSTART:
         return LongValue.create(_xmlOptionSkipTagstart);
       case XmlModule.XML_OPTION_SKIP_WHITE:
-        return (_xmlOptionSkipWhite ? BooleanValue.TRUE : BooleanValue.FALSE);
+        return (_xmlOptionSkipWhite ? LongValue.ONE : LongValue.ZERO);
       case XmlModule.XML_OPTION_TARGET_ENCODING:
         return _env.createString(_xmlOptionTargetEncoding);
       default:

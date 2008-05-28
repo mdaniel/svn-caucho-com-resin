@@ -42,6 +42,7 @@ import com.caucho.vfs.StringWriter;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.lang.ref.*;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -58,8 +59,8 @@ public class VariableModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(VariableModule.class);
 
   private static final
-    LruCache<StringValue,UnserializeCacheEntry> _unserializeCache
-    = new LruCache<StringValue,UnserializeCacheEntry>(256);
+    LruCache<UnserializeKey,UnserializeCacheEntry> _unserializeCache
+    = new LruCache<UnserializeKey,UnserializeCacheEntry>(256);
 
   /**
    * Returns a constant
@@ -624,7 +625,9 @@ public class VariableModule extends AbstractQuercusModule {
   {
     Value v = null;
 
-    UnserializeCacheEntry entry = _unserializeCache.get(s);
+    UnserializeKey key = new UnserializeKey(s);
+    
+    UnserializeCacheEntry entry = _unserializeCache.get(key);
 
     if (entry != null) {
       v = entry.getValue(env);
@@ -652,7 +655,7 @@ public class VariableModule extends AbstractQuercusModule {
     if (! is.hasReference()) {
       entry = new UnserializeCacheEntry(v);
       
-      _unserializeCache.put(s, entry);
+      _unserializeCache.put(key, entry);
 
       return entry.getValue(env);
     }
@@ -768,6 +771,41 @@ public class VariableModule extends AbstractQuercusModule {
     }
     else {
       v.print(env);
+    }
+  }
+
+  static class UnserializeKey {
+    private final SoftReference<StringValue> _stringRef;
+    private int _hash;
+
+    UnserializeKey(StringValue string)
+    {
+      _hash = string.hashCode();
+
+      _stringRef = new SoftReference<StringValue>(string);
+    }
+
+    public int hashCode()
+    {
+      return _hash;
+    }
+
+    public boolean equals(Object o)
+    {
+      if (this == o)
+	return true;
+      else if (! (o instanceof UnserializeKey))
+	return false;
+
+      UnserializeKey key = (UnserializeKey) o;
+
+      StringValue a = _stringRef.get();
+      StringValue b = key._stringRef.get();
+
+      if (a == null || b == null)
+	return false;
+
+      return a.equals(b);
     }
   }
 }

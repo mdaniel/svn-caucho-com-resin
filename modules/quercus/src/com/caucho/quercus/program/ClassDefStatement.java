@@ -46,25 +46,20 @@ public class ClassDefStatement extends Statement {
 
     _cl = cl;
   }
-  
+
+  @Override
   public Value execute(Env env)
   {
     // php/0cn2 - make sure interfaces have a QuercusClass
     for (String iface : _cl.getInterfaces()) {
-      QuercusClass cl  = env.findClass(iface);
+      QuercusClass cl = env.findClass(iface);
     }
 
-    /**
+    // php/1d1o
     if (env.findClass(_cl.getName()) == null) {
-
       // XXX: parent is null?
-      QuercusClass qClass = new QuercusClass(_cl, null);
-
-      qClass.validate(env);
-      //env.addClass(_cl.getName(), qClass);
-      throw new UnsupportedOperationException();
+      env.addClass(_cl.getName(), _cl);
     }
-     */
 
     return null;
   }
