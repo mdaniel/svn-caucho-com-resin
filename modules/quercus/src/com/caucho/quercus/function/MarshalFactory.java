@@ -76,7 +76,8 @@ public class MarshalFactory {
   {
     final Marshal marshal;
 
-    // optimized cases, new types should be added to JavaMarshall
+    System.out.println("M: " + argType);
+    // optimized cases, new types should be added to JavaMarshal
 
     if (String.class.equals(argType)) {
       marshal = StringMarshal.MARSHAL;
@@ -221,6 +222,10 @@ public class MarshalFactory {
       JavaClassDef javaDef = _moduleContext.getJavaClassDefinition(typeName);
 
       marshal = new JavaCollectionMarshal(javaDef, isNotNull, isNullAsFalse);
+    }
+    else if (Enum.class.isAssignableFrom(argType)) {
+      System.out.println("ENUM: " + argType);
+      marshal = new EnumMarshal(argType);
     }
     else {
       String typeName = argType.getName();

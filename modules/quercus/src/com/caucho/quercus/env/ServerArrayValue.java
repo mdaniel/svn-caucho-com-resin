@@ -41,6 +41,8 @@ import java.util.Set;
  * Represents the server
  */
 public class ServerArrayValue extends ArrayValueImpl {
+  private static final StringValue SERVER_ADDR_V
+    = new StringBuilderValue("SERVER_ADDR");
   private static final StringValue SERVER_NAME_V
     = new StringBuilderValue("SERVER_NAME");
   private static final StringValue SERVER_PORT_V
@@ -78,6 +80,12 @@ public class ServerArrayValue extends ArrayValueImpl {
   
   private static final StringValue PHP_SELF_V
     = new StringBuilderValue("PHP_SELF");
+  
+  private static final StringValue PHP_AUTH_USER_V
+    = new StringBuilderValue("PHP_AUTH_USER");
+  
+  private static final StringValue AUTH_TYPE_V
+    = new StringBuilderValue("AUTH_TYPE");
   
   private static final StringValue HTTPS_V
     = new StringBuilderValue("HTTPS");
@@ -211,6 +219,8 @@ public class ServerArrayValue extends ArrayValueImpl {
     HttpServletRequest request = _env.getRequest();
 
     if (request != null) {
+      super.put(SERVER_ADDR_V,
+                _env.createString(request.getLocalAddr()));
       super.put(SERVER_NAME_V,
                 _env.createString(request.getServerName()));
 
@@ -284,6 +294,15 @@ public class ServerArrayValue extends ArrayValueImpl {
         super.put(PHP_SELF_V, _env.createString(contextPath + servletPath));
       else
         super.put(PHP_SELF_V, _env.createString(contextPath + servletPath + pathInfo));
+
+      if (request.getAuthType() != null) {
+	super.put(AUTH_TYPE_V, _env.createString(request.getAuthType()));
+
+	if (request.getRemoteUser() != null) {
+	  super.put(PHP_AUTH_USER_V,
+		    _env.createString(request.getRemoteUser()));
+	}
+      }
 
       Enumeration e = request.getHeaderNames();
       while (e.hasMoreElements()) {

@@ -13,6 +13,9 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>(2008-05-28) quercus: support for Java enum arguments (#2493)</li>
+<li>quercus: xml_parse with BOM (#2680)</li>
+<li>quercus: SERVER_ADDR and PHP_AUTH_USER (#2699, rep by perololo)</li>
 <li>quercus: apc_cache_info (#2696, rep by koreth)</li>
 <li>quercus: apc size configurable with apc.user_cache_hint (#2698, rep by koreth)</li>
 <li>quercus: unserialize cache key needs to be a softreference</li>

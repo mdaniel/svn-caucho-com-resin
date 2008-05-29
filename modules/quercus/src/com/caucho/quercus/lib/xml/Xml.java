@@ -104,7 +104,7 @@ public class Xml {
 
   SAXParserFactory _factory = SAXParserFactory.newInstance();
 
-  private StringBuilder _xmlString = new StringBuilder();
+  private StringValue _xmlString;
   private XmlHandler _xmlHandler;
 
   public Xml(Env env,
@@ -351,14 +351,23 @@ public class Xml {
    * @throws ParserConfigurationException
    */
   public int xml_parse(Env env,
-                       String data,
+                       StringValue data,
                        @Optional("true") boolean isFinal)
     throws Exception
   {
+    if (_xmlString == null)
+      _xmlString = data.toStringBuilder();
+    
     _xmlString.append(data);
 
     if (isFinal) {
-      InputSource is = new InputSource(new StringReader(_xmlString.toString()));
+      InputSource is;
+
+      if (_xmlString.isUnicode())
+	is = new InputSource(_xmlString.toReader("utf-8"));
+      else
+	is = new InputSource(_xmlString.toInputStream());
+      
       if (_xmlOptionTargetEncoding == null)
         _xmlOptionTargetEncoding = is.getEncoding();
       
@@ -462,16 +471,16 @@ public class Xml {
   public Value xml_parser_get_option(int option)
   {
     switch (option) {
-      case XmlModule.XML_OPTION_CASE_FOLDING:
-        return (_xmlOptionCaseFolding ? LongValue.ONE : LongValue.ZERO);
-      case XmlModule.XML_OPTION_SKIP_TAGSTART:
-        return LongValue.create(_xmlOptionSkipTagstart);
-      case XmlModule.XML_OPTION_SKIP_WHITE:
-        return (_xmlOptionSkipWhite ? LongValue.ONE : LongValue.ZERO);
-      case XmlModule.XML_OPTION_TARGET_ENCODING:
-        return _env.createString(_xmlOptionTargetEncoding);
-      default:
-        return BooleanValue.FALSE;
+    case XmlModule.XML_OPTION_CASE_FOLDING:
+      return (_xmlOptionCaseFolding ? LongValue.ONE : LongValue.ZERO);
+    case XmlModule.XML_OPTION_SKIP_TAGSTART:
+      return LongValue.create(_xmlOptionSkipTagstart);
+    case XmlModule.XML_OPTION_SKIP_WHITE:
+      return (_xmlOptionSkipWhite ? LongValue.ONE : LongValue.ZERO);
+    case XmlModule.XML_OPTION_TARGET_ENCODING:
+      return _env.createString(_xmlOptionTargetEncoding);
+    default:
+      return BooleanValue.FALSE;
     }
   }
 
