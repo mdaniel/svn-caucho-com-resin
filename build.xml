@@ -1432,8 +1432,6 @@
   </target>
 
   <target name="clean" depends="init">
-    <delete dir="${build}"/>
-    <delete dir="${dist}"/>
     <delete>
       <fileset dir="${modules}">
         <include name="*/classes/**"/>
@@ -1445,6 +1443,8 @@
         <include name="**/*.class"/>
       </fileset>
     </delete>
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
   </target>
 
   <target name="distclean" depends="init, clean, win32clean">

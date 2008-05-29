@@ -107,7 +107,9 @@ public class PDOStatement
     if (isPrepared) {
       _statement = null;
       _preparedStatement = conn.prepareStatement(query);
-      _preparedStatement.setEscapeProcessing(false);
+
+      // php/1s41 - oracle can't handle this
+      //_preparedStatement.setEscapeProcessing(false);
     }
     else {
       _preparedStatement = null;
@@ -1303,7 +1305,9 @@ public class PDOStatement
         _preparedStatement.setDouble(index, value.toDouble());
       }
       else if (value instanceof LongValue) {
-        _preparedStatement.setLong(index, value.toLong());
+	long v = value.toLong();
+
+	_preparedStatement.setLong(index, v);
       }
       else if (value instanceof StringValue) {
         String string = value.toString();
@@ -1451,18 +1455,18 @@ public class PDOStatement
       throws SQLException
     {
       switch (_dataType) {
-        case PDO.PARAM_BOOL:
-        case PDO.PARAM_INT:
-        case PDO.PARAM_STR:
-          return setParameter(_index, _value.toValue(), _length);
-        case PDO.PARAM_LOB:
-          return setLobParameter(_index, _value.toValue(), _length);
-        case PDO.PARAM_NULL:
-          return setParameter(_index, NullValue.NULL, _length);
-        case PDO.PARAM_STMT:
-          throw new UnimplementedException("PDO.PARAM_STMT");
-        default:
-          throw new AssertionError();
+      case PDO.PARAM_BOOL:
+      case PDO.PARAM_INT:
+      case PDO.PARAM_STR:
+	return setParameter(_index, _value.toValue(), _length);
+      case PDO.PARAM_LOB:
+	return setLobParameter(_index, _value.toValue(), _length);
+      case PDO.PARAM_NULL:
+	return setParameter(_index, NullValue.NULL, _length);
+      case PDO.PARAM_STMT:
+	throw new UnimplementedException("PDO.PARAM_STMT");
+      default:
+	throw new AssertionError();
       }
     }
   }
