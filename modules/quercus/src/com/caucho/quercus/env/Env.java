@@ -37,6 +37,9 @@ import com.caucho.quercus.lib.ErrorModule;
 import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.lib.OptionsModule;
 import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.quercus.lib.file.PhpStderr;
+import com.caucho.quercus.lib.file.PhpStdin;
+import com.caucho.quercus.lib.file.PhpStdout;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.lib.string.StringUtility;
 import com.caucho.quercus.module.ModuleContext;
@@ -223,6 +226,9 @@ public class Env {
   private LinkedHashMap<Path,QuercusPage> _includeMap
     = new LinkedHashMap<Path,QuercusPage>();
   
+  private boolean _isAllowUrlInclude;
+  private boolean _isAllowUrlFopen;
+  
   private HashMap<StringValue,Path> _lookupCache
     = new HashMap<StringValue,Path>();
 
@@ -256,7 +262,9 @@ public class Env {
   private HttpServletRequest _request;
   private HttpServletResponse _response;
 
-  private ArrayValue _post;
+  private ArrayValue _postArray;
+  private String _postData;
+  
   private ArrayValue _files;
   private SessionArrayValue _session;
   private HttpSession _javaSession;
@@ -306,6 +314,9 @@ public class Env {
 
     _isStrict = quercus.isStrict();
     _isUnicodeSemantics = quercus.isUnicodeSemantics();
+    
+    _isAllowUrlInclude = quercus.isAllowUrlInclude();
+    _isAllowUrlFopen = quercus.isAllowUrlFopen();
 
     _page = page;
 
@@ -344,15 +355,17 @@ public class Env {
       _includeMap.put(_selfPath, _page);
     }
 
+    
     if (_request != null && _request.getMethod().equals("POST")) {
-      _post = new ArrayValueImpl();
+      _postArray = new ArrayValueImpl();
       _files = new ArrayValueImpl();
       Post.fillPost(this,
-                    _post,
+                    _postArray,
                     _files,
                     _request,
                     getIniBoolean("magic_quotes_gpc"));
     }
+    
 
     /*
     Cluster cluster = Cluster.getLocal();
@@ -371,7 +384,25 @@ public class Env {
       this.createString("PHP_VERSION"),
       OptionsModule.phpversion(this, null),
       true);
+    
+    // STDIN, STDOUT, STDERR
+    // php://stdin, php://stdout, php://stderr
+    if (response == null) {
+      VariableModule.define(this,
+                            this.createString("STDOUT"),
+                            wrapJava(new PhpStdout()),
+                            false);
+      
+      VariableModule.define(this,
+                            this.createString("STDERR"),
+                            wrapJava(new PhpStderr()),
+                            false);
 
+      VariableModule.define(this,
+                            this.createString("STDIN"),
+                            wrapJava(new PhpStdin(this)),
+                            false);
+    }
   }
 
   public Env(Quercus quercus)
@@ -587,6 +618,22 @@ public class Env {
   {
     _scriptContext = context;
   }
+  
+  /*
+   * Returns the post data.
+   */
+  public String getPostData()
+  {
+    return _postData;
+  }
+  
+  /*
+   * Sets the post data.
+   */
+  public void setPostData(String data)
+  {
+    _postData = data;
+  }
 
   /**
    * Returns true for strict mode.
@@ -594,6 +641,22 @@ public class Env {
   public final boolean isStrict()
   {
     return _isStrict;
+  }
+  
+  /*
+   * Returns true if allowed to include urls.
+   */
+  public boolean isAllowUrlInclude()
+  {
+    return _isAllowUrlInclude;
+  }
+  
+  /*
+   * Returns true if allowed to fopen urls.
+   */
+  public boolean isAllowUrlFopen()
+  {
+    return _isAllowUrlFopen;
   }
   
   public void start()
@@ -1738,8 +1801,8 @@ public class Env {
       if (! "POST".equals(_request.getMethod()))
         return var;
 
-      if (_post != null) {
-        for (Map.Entry<Value, Value> entry : _post.entrySet()) {
+      if (_postArray != null) {
+        for (Map.Entry<Value, Value> entry : _postArray.entrySet()) {
           post.put(entry.getKey(), entry.getValue());
         }
       }
@@ -1832,9 +1895,9 @@ public class Env {
                           isMagicQuotes);
       }
 
-      if (name.equals("_REQUEST") && _post != null) {
+      if (name.equals("_REQUEST") && _postArray != null) {
         
-        for (Map.Entry<Value, Value> entry : _post.entrySet()) {
+        for (Map.Entry<Value, Value> entry : _postArray.entrySet()) {
           Value key = entry.getKey();
           Value value = entry.getValue();
           
@@ -3726,10 +3789,8 @@ public class Env {
       }
 
       // php/0b2d
-      if (! "".equals(path.getScheme())
-          && ! "file".equals(path.getScheme())
-          && ! "memory".equals(path.getScheme())) {
-        String msg = (L.l("attempt to include {0}", path.getURL()));
+      if (! _isAllowUrlInclude && isUrl(path)) {
+        String msg = (L.l("not allowed to include url {0}", path.getURL()));
 	
         log.warning(dbgId() + msg);
         error(msg);
@@ -3755,6 +3816,24 @@ public class Env {
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
+  }
+  
+  /*
+   * Returns true if this path is likely to be a URL.
+   */
+  private boolean isUrl(Path path)
+  {
+    String scheme = path.getScheme();
+    
+    if ("".equals(scheme)
+        || "file".equals(scheme)
+        || "memory".equals(scheme))
+      return false;
+    
+    // XXX: too restrictive for filters
+    return ! "php".equals(scheme)
+           || "php://input".equals(path.toString())
+           || path.toString().startsWith("php://filter");
   }
 
   /**

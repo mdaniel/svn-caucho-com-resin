@@ -45,17 +45,28 @@ public class PhpProtocolWrapper extends ProtocolWrapper {
   {
   }
 
-  public BinaryStream fopen(Env env, StringValue path, StringValue mode, 
+  public BinaryStream fopen(Env env, StringValue pathV, StringValue mode, 
                             LongValue options)
   {
-    if (path.toString().equals("php://output")) {
+    String path = pathV.toString();
+    
+    if (path.equals("php://output"))
       return new PhpBinaryOutput(env);
-    } else {
-      env.warning(L.l("{0} is an unsupported or unknown path for this protocol",
-                      path.toString()));
-
-      return null;
+    else if (path.equals("php://input"))
+      return new PhpBinaryInput(env);
+    else if (env.getRequest() == null) {
+      if (path.equals("php://stdout"))
+        return new PhpStdout();
+      else if (path.equals("php://stderr"))
+        return new PhpStderr();
+      else if (path.equals("php://stdin"))
+        return new PhpStdin(env);
     }
+    
+    env.warning(L.l("{0} is an unsupported or unknown path for this protocol",
+                    path));
+
+    return null;
   }
 
   public Value opendir(Env env, StringValue path, LongValue flags)
@@ -99,30 +110,6 @@ public class PhpProtocolWrapper extends ProtocolWrapper {
     env.warning(L.l("stat not supported by protocol"));
 
     return BooleanValue.FALSE;
-  }
-
-  private class PhpBinaryOutput extends AbstractBinaryOutput {
-    private Env _env;
-
-    public PhpBinaryOutput(Env env)
-    {
-      _env = env;
-    }
-
-    /**
-     * Writes a buffer.
-     */
-    public void write(byte []buffer, int offset, int length)
-      throws IOException
-    {
-      _env.getOut().write(buffer, offset, length);
-    }
-
-    public void write(int b)
-      throws IOException
-    {
-      _env.getOut().write(b);
-    }
   }
 }
 

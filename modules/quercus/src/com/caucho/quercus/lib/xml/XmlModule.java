@@ -228,12 +228,12 @@ public class XmlModule extends AbstractQuercusModule {
    */
   public int xml_parse(Env env,
 		       @NotNull Xml parser,
-		       String data,
+		       StringValue data,
 		       @Optional("true") boolean isFinal)
   {
     if (parser == null)
       return 0;
-    else if (data == null || data.length() == 0)
+    else if (data.length() == 0)
       return 0;
 
     try {

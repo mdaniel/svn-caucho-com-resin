@@ -652,7 +652,7 @@ public class VariableModule extends AbstractQuercusModule {
       v = BooleanValue.FALSE;
     }
 
-    if (! is.hasReference()) {
+    if (! is.useReference()) {
       entry = new UnserializeCacheEntry(v);
       
       _unserializeCache.put(key, entry);

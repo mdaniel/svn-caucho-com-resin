@@ -51,7 +51,7 @@ import java.util.Map;
  */
 public class Post {
   static void fillPost(Env env,
-                       ArrayValue post, ArrayValue files,
+                       ArrayValue postArray, ArrayValue files,
                        HttpServletRequest request,
                        boolean addSlashesToValues)
   {
@@ -71,14 +71,18 @@ public class Post {
         else if (contentType.startsWith("application/x-www-form-urlencoded")) {
           is = request.getInputStream();
           
-          StringBuilder value = new StringBuilder();
+          StringBuilder sb = new StringBuilder();
           int ch;
 
           while ((ch = is.read()) >= 0) {
-            value.append((char) ch);
+            sb.append((char) ch);
           }
           
-          StringUtility.parseStr(env, value.toString(), post, false, encoding);
+          String body = sb.toString();
+          
+          env.setPostData(body);
+          
+          StringUtility.parseStr(env, body, postArray, false, encoding);
         }
         else if (contentType.startsWith("multipart/form-data")) {
           String boundary = getBoundary(contentType);
@@ -91,14 +95,14 @@ public class Post {
           if (encoding != null)
             ms.setEncoding(encoding);
 
-          readMultipartStream(env, ms, post, files, addSlashesToValues);
+          readMultipartStream(env, ms, postArray, files, addSlashesToValues);
 
           rs.close();
         }
         
-        if (post.getSize() == 0) {
+        if (postArray.getSize() == 0) {
           // needs to be last or else this function will consume the inputstream
-          putRequestMap(env, post, files, request, addSlashesToValues);
+          putRequestMap(env, postArray, files, request, addSlashesToValues);
         }
       }
       
@@ -115,7 +119,7 @@ public class Post {
 
   private static void readMultipartStream(Env env,
                                           MultipartStream ms,
-                                          ArrayValue post,
+                                          ArrayValue postArray,
                                           ArrayValue files,
                                           boolean addSlashesToValues)
     throws IOException
@@ -141,7 +145,8 @@ public class Post {
           value.append((char) ch);
         }
 
-        addFormValue(env, post, name, env.createString(value.toString()), null, addSlashesToValues);
+        addFormValue(env, postArray, name, env.createString(value.toString()),
+                     null, addSlashesToValues);
       }
       else {
         String tmpName = "";

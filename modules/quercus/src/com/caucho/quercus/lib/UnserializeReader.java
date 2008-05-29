@@ -63,7 +63,6 @@ public final class UnserializeReader {
     = new ArrayList<Boolean>();
   
   private boolean _useReference;
-  private boolean _hasReference;
 
   public UnserializeReader(StringValue s)
   {
@@ -88,7 +87,7 @@ public final class UnserializeReader {
     _length = _buffer.length;
   }
   
-  public UnserializeReader(String s, boolean hasReference)
+  public UnserializeReader(String s, boolean useReference)
     throws IOException
   {
     this(s);
@@ -99,9 +98,9 @@ public final class UnserializeReader {
     _useReference = true;
   }
 
-  boolean hasReference()
+  boolean useReference()
   {
-    return _hasReference;
+    return _useReference;
   }
 
   public Value unserialize(Env env)
@@ -303,7 +302,7 @@ public final class UnserializeReader {
       }
     case 'R':
       {
-	_hasReference = true;
+        _useReference = true;
 	
         expect(':');
 

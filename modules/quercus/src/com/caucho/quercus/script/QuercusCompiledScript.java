@@ -87,8 +87,8 @@ public class QuercusCompiledScript extends CompiledScript {
 
       env.setScriptContext(cxt);
 
-      // php/21
-      env.start();
+      // php/214g
+      //env.start();
 
       Object value = _program.execute(env).toJavaObject();
 

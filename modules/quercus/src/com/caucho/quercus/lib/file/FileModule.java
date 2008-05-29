@@ -43,7 +43,6 @@ import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.LockableStream;
 
@@ -107,7 +106,7 @@ public class FileModule extends AbstractQuercusModule {
   public static final int SEEK_SET = BinaryStream.SEEK_SET;
   public static final int SEEK_CUR = BinaryStream.SEEK_CUR;
   public static final int SEEK_END = BinaryStream.SEEK_END;
-
+  
   private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
   private static final HashMap<String,Value> _constMap
@@ -1341,10 +1340,15 @@ public class FileModule extends AbstractQuercusModule {
                                   LongValue.create(options));
       }
 
-      Path path;
+      Path path = env.getPwd().lookup(filename.toString());
 
-      path = env.getPwd().lookup(filename.toString());
+      if (! env.isAllowUrlFopen() && isUrl(path)) {
+        String msg = (L.l("not allowed to fopen url {0}", path.getURL()));
+        env.error(msg);
 
+        return null;
+      }
+      
       if (mode.startsWith("r")) {
         if (useIncludePath)
           path = env.lookupInclude(filename.toString());
@@ -1431,6 +1435,20 @@ public class FileModule extends AbstractQuercusModule {
 
       return null;
     }
+  }
+  
+  private static boolean isUrl(Path path)
+  {
+    String scheme = path.getScheme();
+    
+    if ("".equals(scheme)
+        || "file".equals(scheme)
+        || "memory".equals(scheme))
+      return false;
+    
+    // XXX: too restrictive for filters
+    return ! "php".equals(scheme)
+           || path.toString().startsWith("php://filter");
   }
 
   /**

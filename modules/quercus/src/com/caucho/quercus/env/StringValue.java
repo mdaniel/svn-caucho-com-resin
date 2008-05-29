@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.lib.file.BinaryInput;
@@ -39,6 +40,8 @@ import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
 
 import java.io.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.IdentityHashMap;
 
 /**
@@ -873,6 +876,31 @@ abstract public class StringValue extends Value implements CharSequence {
     sb.append(toString());
     sb.append("\";");
   }
+  
+  /*
+   * Returns a value to be used as a key for the deserialize cache.
+   */
+  /*
+  public StringValue toSerializeKey()
+  {
+    if (length() <= 4096)
+      return this;
+
+    try {
+      MessageDigest md = MessageDigest.getInstance("SHA1");
+
+      byte []buffer = toBytes();
+
+      md.update(buffer, 0, buffer.length);
+
+      //XXX: create a special serialize type?
+      return new StringBuilderValue(md.digest());
+
+    } catch (NoSuchAlgorithmException e) {
+      throw new QuercusException(e);
+    }
+  }
+  */
 
   //
   // append code

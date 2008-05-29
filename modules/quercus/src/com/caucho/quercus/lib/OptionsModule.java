@@ -110,7 +110,7 @@ public class OptionsModule extends AbstractQuercusModule {
 
       boolean result = value.toBoolean();
 
-      if (!result) {
+      if (! result) {
         env.warning(L.l("Assertion \"{0}\" failed", code));
         return NullValue.NULL;
       }

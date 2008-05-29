@@ -336,6 +336,22 @@ public class Quercus
 
     return value;
   }
+  
+  /*
+   * Returns true if URLs may be arguments of include().
+   */
+  public boolean isAllowUrlInclude()
+  {
+    return getIniBoolean("allow_url_include");
+  }
+  
+  /*
+   * Returns true if URLs may be arguments of fopen().
+   */
+  public boolean isAllowUrlFopen()
+  {
+    return getIniBoolean("allow_url_fopen");
+  }
 
   public StringValue createString(String v)
   {
