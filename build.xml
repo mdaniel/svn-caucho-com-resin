@@ -608,9 +608,7 @@
       <packageset dir="${modules}/portlet/src"/>
       <packageset dir="${modules}/quercus/src"/>
       <packageset dir="${modules}/resin/src"/>
-      <!--
       <packageset dir="${modules}/saaj/src"/>
-      -->
       <packageset dir="${modules}/script/src"/>
       <packageset dir="${modules}/unix/src"/>
       <packageset dir="${modules}/util/src"/>

@@ -1525,9 +1525,6 @@ public class Mysqli extends JdbcConnectionResource {
 
   public boolean close(Env env)
   {
-    if (_isPersistent)
-      return true;
-
     return super.close(env);
   }
 

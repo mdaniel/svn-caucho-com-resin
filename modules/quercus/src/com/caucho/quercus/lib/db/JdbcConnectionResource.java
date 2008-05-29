@@ -523,15 +523,8 @@ public abstract class JdbcConnectionResource
     if (_connectionLog)
       log.log(Level.FINER, "close()");
 
-    if (_isConnected) {
-      _isConnected = false;
-
-      // php/1418
-      if (! _isUsed || _isCloseOnClose) {
-        env.removeCleanup(this);
-        cleanup();
-      }
-    }
+    env.removeCleanup(this);
+    cleanup();
 
     return true;
   }
@@ -561,9 +554,7 @@ public abstract class JdbcConnectionResource
 
     try {
       Connection conn = _conn;
-
-      // XXX: since the above code doesn't check for _conn == null can't null
-      // _conn = null;
+      _conn = null;
 
       if (conn != null) {
         conn.close();

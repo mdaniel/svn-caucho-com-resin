@@ -193,17 +193,21 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
   // must be synchronized by _bufferLock.
   protected void flush()
   {
+    boolean isFlush = false;
+    
     synchronized (_bufferLock) {
       if (_length > 0) {
 	_logBuffer.setLength(_length);
 	_logBuffer = write(_logBuffer);
 	_buffer = _logBuffer.getBuffer();
 	_length = 0;
+	isFlush = true;
       }
     }
 
     try {
-      super.flush();
+      if (isFlush)
+	super.flush();
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
