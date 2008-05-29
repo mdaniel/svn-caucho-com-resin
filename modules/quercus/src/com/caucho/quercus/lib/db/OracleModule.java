@@ -635,22 +635,24 @@ public class OracleModule extends AbstractQuercusModule {
                                   @Optional String charset,
                                   @Optional("0") int sessionMode)
   {
-    // Note:  The second and subsequent calls to oci_connect() with the same parameters
-    // will return the connection handle returned from the first call. This means that
-    // queries issued against one handle are also applied to the other handles, because
-    // they are the same handle. (source: php.net)
+    // Note:  The second and subsequent calls to oci_connect() with the
+    // same parameters will return the connection handle returned from
+    // the first call. This means that queries issued against one handle
+    // are also applied to the other handles, because they are the same
+    // handle. (source: php.net)
 
     if (!((charset == null) || charset.length() == 0)) {
       throw new UnimplementedException("oci_connect with charset");
     }
 
-    if ((sessionMode == OCI_DEFAULT) ||
-        (sessionMode == OCI_SYSOPER) ||
-        (sessionMode == OCI_SYSDBA)) {
+    if (sessionMode == OCI_DEFAULT
+	|| sessionMode == OCI_SYSOPER
+	|| sessionMode == OCI_SYSDBA) {
       throw new UnimplementedException("oci_connect with session mode");
     }
 
-    return connectInternal(env, true, username, password, db, charset, sessionMode);
+    return connectInternal(env, true, username, password, db,
+			   charset, sessionMode);
   }
 
   /**
@@ -2236,9 +2238,11 @@ public class OracleModule extends AbstractQuercusModule {
 
     Oracle conn = null;
 
-    ConnectionInfo connectionInfo = (ConnectionInfo)env.getSpecialValue("caucho.oracle");
+    ConnectionInfo connectionInfo
+      = (ConnectionInfo) env.getSpecialValue("caucho.oracle");
 
-    if (reuseConnection && (connectionInfo != null) && url.equals(connectionInfo.getUrl())) {
+    if (reuseConnection && connectionInfo != null
+	&& url.equals(connectionInfo.getUrl())) {
       // Reuse the cached connection
       conn = connectionInfo.getConnection();
     } else {

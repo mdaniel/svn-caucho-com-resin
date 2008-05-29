@@ -13,6 +13,7 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>quercus: broken mysql_pconnect (#2671, rep by dberry)</li>
 <li>(2008-05-28) quercus: support for Java enum arguments (#2493)</li>
 <li>quercus: xml_parse with BOM (#2680)</li>
 <li>quercus: SERVER_ADDR and PHP_AUTH_USER (#2699, rep by perololo)</li>

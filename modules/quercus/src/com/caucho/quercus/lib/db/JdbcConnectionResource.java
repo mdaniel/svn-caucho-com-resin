@@ -85,9 +85,6 @@ public abstract class JdbcConnectionResource
   private boolean _isCloseOnClose = true;
 
   private boolean _isUsed;
-  private boolean _isConnected;
-
-  protected boolean _connectionLog = false;
 
   protected SqlParseToken _sqlParseToken = new SqlParseToken();
 
@@ -110,7 +107,7 @@ public abstract class JdbcConnectionResource
 
   public boolean isConnected()
   {
-    return _isConnected;
+    return _conn != null;
   }
 
   public Env getEnv()
@@ -154,17 +151,6 @@ public abstract class JdbcConnectionResource
   }
 
   /**
-   * Invoke this method to indicate that connection
-   * lifetime logging should be enabled. This method
-   * is used for regression testing connection lifetime.
-   */  
-
-  public void enableConnectionLog()
-  {
-    _connectionLog = true;
-  }
-
-  /**
    * Set the current underlying connection and
    * corresponding information: host, port and
    * database name.
@@ -203,8 +189,6 @@ public abstract class JdbcConnectionResource
 
     if (conn != null) {
       _conn = conn;
-
-      _isConnected = true;
 
       _env.addCleanup(this);
 
@@ -525,18 +509,8 @@ public abstract class JdbcConnectionResource
    */
   public boolean close(Env env)
   {
-    if (_connectionLog)
-      log.log(Level.FINER, "close()");
-
-    if (_isConnected) {
-      _isConnected = false;
-
-      // php/1418
-      if (! _isUsed || _isCloseOnClose) {
-        env.removeCleanup(this);
-        cleanup();
-      }
-    }
+    // php/1418
+    cleanup();
 
     return true;
   }
@@ -551,8 +525,8 @@ public abstract class JdbcConnectionResource
    */
   public void cleanup()
   {
-    if (_connectionLog)
-      log.log(Level.FINER, "cleanup()");
+    if (log.isLoggable(Level.FINER))
+      log.finer(this +  " cleanup()");
 
     try {
       Statement stmt = _stmt;
@@ -566,9 +540,7 @@ public abstract class JdbcConnectionResource
 
     try {
       Connection conn = _conn;
-
-      // XXX: since the above code doesn't check for _conn == null can't null
-      // _conn = null;
+      _conn = null;
 
       if (conn != null) {
         conn.close();
@@ -581,7 +553,7 @@ public abstract class JdbcConnectionResource
 
   public JdbcConnectionResource validateConnection()
   {
-    if (! _isConnected) {
+    if (_conn == null) {
       throw _env.createErrorException(L.l("Connection is not properly initialized {0}\nDriver {1}",
                                     _url, _driver));
     }
@@ -894,7 +866,6 @@ public abstract class JdbcConnectionResource
 
       Connection conn = _conn;
       _conn = null;
-      _isConnected = false;
 
       if (conn != null)
         conn.close();
@@ -922,7 +893,7 @@ public abstract class JdbcConnectionResource
    */
   public String toString()
   {
-    return _conn.toString();
+    return getClass().getSimpleName() + "[" + _conn + "]";
   }
 
   /**

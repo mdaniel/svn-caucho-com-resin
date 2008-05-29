@@ -381,7 +381,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Returns a row from the connection
    */
   @ReturnNullAsFalse
-  public static ArrayValue mysql_fetch_assoc(Env env, @NotNull MysqliResult result)
+  public static ArrayValue mysql_fetch_assoc(Env env,
+					     @NotNull MysqliResult result)
   {
     if (result == null)
       return null;
@@ -516,7 +517,9 @@ public class MysqlModule extends AbstractQuercusModule {
    * Returns true on update success, false on failure, and a result set
    * for a successful select
    */
-  public static Value mysql_query(Env env, StringValue sql, @Optional Mysqli conn)
+  public static Value mysql_query(Env env,
+				  StringValue sql,
+				  @Optional Mysqli conn)
   {
     if (conn == null)
       conn = getConnection(env);

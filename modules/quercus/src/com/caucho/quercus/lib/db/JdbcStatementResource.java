@@ -188,8 +188,11 @@ public class JdbcStatementResource {
   public void close()
   {
     try {
-      if (_rs != null)
-        _rs.close();
+      ResultSet rs = _rs;
+      _rs = null;
+      
+      if (rs != null)
+        rs.close();
 
       if (_stmt != null)
         _stmt.close();
@@ -284,7 +287,6 @@ public class JdbcStatementResource {
     throws SQLException
   {
     try {
-
       if (_stmt.execute()) {
         _conn.setAffectedRows(0);
         _rs = _stmt.getResultSet();
@@ -293,7 +295,6 @@ public class JdbcStatementResource {
       }
 
       return true;
-
     } catch (SQLException e) {
       _errorMessage = e.getMessage();
       _errorCode = e.getErrorCode();
@@ -309,6 +310,9 @@ public class JdbcStatementResource {
   public Value fetch(Env env)
   {
     try {
+      if (_rs == null)
+	return NullValue.NULL;
+      
       if (_rs.next()) {
         if (_metaData == null)
           _metaData = _rs.getMetaData();
@@ -336,12 +340,13 @@ public class JdbcStatementResource {
    */
   public boolean freeResult()
   {
-    if (_rs == null)
-      return true;
-
     try {
-      _rs.close();
+      ResultSet rs = _rs;
       _rs = null;
+
+      if (rs != null)
+	rs.close();
+
       if (_resultResource != null) {
         _resultResource.close();
         _resultResource = null;
@@ -405,7 +410,7 @@ public class JdbcStatementResource {
       return _resultResource;
     }
 
-    if ((_stmt == null) || (_rs == null))
+    if (_stmt == null || _rs == null)
       return null;
 
     _resultResource

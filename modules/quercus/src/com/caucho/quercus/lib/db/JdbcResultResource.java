@@ -81,8 +81,6 @@ public class JdbcResultResource {
 
   private int _affectedRows;
 
-  boolean _closed;
-
   /**
    * Constructor for JdbcResultResource
    *
@@ -96,7 +94,6 @@ public class JdbcResultResource {
                             JdbcConnectionResource conn)
   {
     _env = env;
-    _closed = false;
     _stmt = stmt;
     _rs = rs;
     _conn = conn;
@@ -113,7 +110,6 @@ public class JdbcResultResource {
                             JdbcConnectionResource conn)
   {
     _env = env;
-    _closed = true;
 
     _metaData = metaData;
     _conn = conn;
@@ -126,18 +122,18 @@ public class JdbcResultResource {
   public void close()
   {
     try {
-      if (_rs != null)
-        _rs.close();
+      ResultSet rs = _rs;
+      _rs = null;
+      
+      if (rs != null)
+        rs.close();
 
       _stmt = null;
       _env = null;
       _conn = null;
-
-      _closed = true;
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     }
-
   }
 
   /**
@@ -156,6 +152,9 @@ public class JdbcResultResource {
   public ArrayValue fetchArray(Env env, int type)
   {
     try {
+      if (_rs == null)
+	return null;
+      
       if (_rs.next()) {
         _isValid = true;
 	
@@ -225,6 +224,9 @@ public class JdbcResultResource {
                           String tableName,
                           String type)
   {
+    if (_rs == null)
+      return null;
+    
     ObjectValue result = env.createObject();
     LongValue one = new LongValue(1);
     LongValue zero = new LongValue(0);
@@ -292,6 +294,9 @@ public class JdbcResultResource {
    */
   public Value fetchObject(Env env)
   {
+    if (_rs == null)
+      return NullValue.NULL;
+    
     try {
       if (_rs.next()) {
         _isValid = true;
@@ -335,7 +340,8 @@ public class JdbcResultResource {
    *
    * @return the number of affected rows
    */
-  public int getAffectedRows() {
+  public int getAffectedRows()
+  {
     return _affectedRows;
   }
 
@@ -1297,7 +1303,7 @@ public class JdbcResultResource {
    */
   public Value toKey()
   {
-    // XXX: quercusbb seems to want this?
+    // XXX: phpbb seems to want this?
     return _env.createString("JdbcResultResource$" + System.identityHashCode(this));
   }
 
@@ -1308,7 +1314,10 @@ public class JdbcResultResource {
    */
   public String toString()
   {
-    return "com.caucho.quercus.resources.JdbcResultResource";
+    if (_rs != null)
+      return getClass().getSimpleName() +  "[" + _rs.getClass().getSimpleName() + "]";
+    else
+      return getClass().getSimpleName() +  "[]";
   }
 
   /**

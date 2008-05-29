@@ -238,7 +238,10 @@ public class Mysqli extends JdbcConnectionResource {
         release = Integer.valueOf(version.substring(end+1));
 
         checkedDriverVersion = major + "." + minor + "." + release;
-        
+
+	// This doesn't make sense.  We can't recommend avoiding the
+	// current version of the driver.
+	/*
         if (major == 3 && (minor > 1 || minor == 1 && release >= 14)) {
         }
         else if (major > 3) {
@@ -255,9 +258,10 @@ public class Mysqli extends JdbcConnectionResource {
                                "have issues with character encoding.  The " +
                                "recommended JDBC version is 3.1.14.", version);
 
-         log.log(Level.WARNING, message);
-         env.warning(message);
+          log.log(Level.WARNING, message);
+          env.warning(message);
         }
+	*/
       }
     }
     
@@ -311,8 +315,6 @@ public class Mysqli extends JdbcConnectionResource {
         urlBuilder.append("/");
         urlBuilder.append(dbname);
 
-        url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
-
         // Ignore MYSQL_CLIENT_LOCAL_FILES and MYSQL_CLIENT_IGNORE_SPACE flags.
 
         if ((flags & MysqliModule.MYSQL_CLIENT_INTERACTIVE) != 0) {
@@ -336,7 +338,8 @@ public class Mysqli extends JdbcConnectionResource {
           urlBuilder.append("useSSL=true");
         }
 
-	    // Explicitly indicate that iso-8859-1 encoding should
+	/*
+        // Explicitly indicate that iso-8859-1 encoding should
         // be used as the default driver encoding. We don't want the
         // driver to use its version of Cp1252 because that encoding
         // does not support byte values in the range 0x80 to 0x9f.
@@ -352,9 +355,11 @@ public class Mysqli extends JdbcConnectionResource {
         //
         // php/141p
         urlBuilder.append("&useOldAliasMetadataBehavior=true");
+	*/
 	
         url = urlBuilder.toString();
       }
+      
       Connection jConn = env.getConnection(driver, url, userName, password);
 
       checkDriverVersion(env, jConn);
@@ -1529,25 +1534,11 @@ public class Mysqli extends JdbcConnectionResource {
 
   public boolean close(Env env)
   {
+    /*
     if (_isPersistent)
       return true;
+    */
 
     return super.close(env);
-  }
-
-  public String toString()
-  {
-    StringBuilder desc = new StringBuilder();
-    desc.append("Mysqli[");
-
-    if (isConnected())
-      desc.append( getHost() );
-
-    desc.append("]");
-
-    if (_isPersistent)
-      desc.append(" persistent");
-
-    return desc.toString();
   }
 }
