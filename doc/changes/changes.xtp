@@ -13,6 +13,7 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>quercus: oci_new_connect was not working with a charset parameter (#2406, rep by ckchris)</li>
 <li>quercus: php://input for drupal (#2679, rep by M. Schmidt)</li>
 <li>quercus: allow_url_include and allow_url_fopen (#2690, rep by rhino4321)</li>
 <li>quercus: broken mysql_pconnect (#2671, rep by dberry)</li>

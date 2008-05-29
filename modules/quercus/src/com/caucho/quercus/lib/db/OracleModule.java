@@ -1391,17 +1391,14 @@ public class OracleModule extends AbstractQuercusModule {
                                       @Optional String charset,
                                       @Optional("0") int sessionMode)
   {
-    if (!((charset == null) || charset.length() == 0)) {
-      throw new UnimplementedException("oci_new_connect with charset");
+    if ((sessionMode == OCI_DEFAULT)
+	|| (sessionMode == OCI_SYSOPER)
+	|| (sessionMode == OCI_SYSDBA)) {
+      log.warning(L.l("oci_new_connect with session mode '{0}'", sessionMode));
     }
 
-    if ((sessionMode == OCI_DEFAULT) ||
-        (sessionMode == OCI_SYSOPER) ||
-        (sessionMode == OCI_SYSDBA)) {
-      throw new UnimplementedException("oci_new_connect with session mode");
-    }
-
-    return connectInternal(env, false, username, password, db, charset, sessionMode);
+    return connectInternal(env, false, username, password, db,
+			   charset, sessionMode);
   }
 
   /**
