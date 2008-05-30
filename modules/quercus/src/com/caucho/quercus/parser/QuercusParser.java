@@ -3369,37 +3369,36 @@ public class QuercusParser {
     int token = parseToken();
     
     Expr varExpr = null;
+    String var = null;
     if (token == '{') {
-      varExpr = parseTerm();
-
-      Expr fieldGet = _factory.createStaticFieldVarGet(getLocation(),
-                                                       className,
-                                                       varExpr);
+      varExpr = _factory.createVarVar(parseExpr());
       
       expect('}');
-      
-      return fieldGet;
     }
     else {
       _peekToken = token;
       
-      String var = parseIdentifier();
-      
-      _peekToken = parseToken();
-      if (_peekToken == '(' && ! _isNewExpr) {
-        parseToken();
-
-        varExpr = _factory.createVar(_function.createVar(var));
-        ArrayList<Expr> args = parseArgs();
-
-        return _factory.createStaticVarMethod(getLocation(), className,
-                                              varExpr, args);
-      }
-      else
-        return _factory.createStaticFieldGet(getLocation(), className, var);
+      var = parseIdentifier();
     }
+      
+    _peekToken = parseToken();
+    if (_peekToken == '(' && ! _isNewExpr) {
+      parseToken();
 
+      if (varExpr == null)
+	varExpr = _factory.createVar(_function.createVar(var));
+      ArrayList<Expr> args = parseArgs();
 
+      return _factory.createStaticVarMethod(getLocation(), className,
+					    varExpr, args);
+    }
+    else if (varExpr != null) {
+      return _factory.createStaticFieldVarGet(getLocation(),
+					      className, varExpr);
+    }
+    else {
+      return _factory.createStaticFieldGet(getLocation(), className, var);
+    }
   }
   
   private ArrayList<Expr> parseArgs()

@@ -873,11 +873,15 @@ public class OracleModule extends AbstractQuercusModule {
 
       resource = new JdbcResultResource(env, null, stmt.getResultSet(), null);
 
-      Value value = resource.fetchArray(env, JdbcResultResource.FETCH_ASSOC);
+      ArrayValue value
+	= resource.fetchArray(env, JdbcResultResource.FETCH_ASSOC);
 
       int curr = 0;
 
-      while(value != NullValue.NULL) {
+      if (maxrows == 0)
+	maxrows = Integer.MAX_VALUE / 2;
+
+      while (value != null && curr < maxrows) {
         newArray.put(LongValue.create(curr), value);
 
         curr++;

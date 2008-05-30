@@ -106,7 +106,17 @@ public class PDOStatement
 
     if (isPrepared) {
       _statement = null;
-      _preparedStatement = conn.prepareStatement(query);
+
+      int ch;
+      if (query.length() > 4
+	  && ((ch = query.charAt(0)) == 'c' || ch == 'C')
+	  && ((ch = query.charAt(1)) == 'a' || ch == 'A')
+	  && ((ch = query.charAt(2)) == 'l' || ch == 'L')
+	  && ((ch = query.charAt(3)) == 'l' || ch == 'L')) {
+	_preparedStatement = conn.prepareCall(query);
+      }
+      else
+	_preparedStatement = conn.prepareStatement(query);
 
       // php/1s41 - oracle can't handle this
       //_preparedStatement.setEscapeProcessing(false);
