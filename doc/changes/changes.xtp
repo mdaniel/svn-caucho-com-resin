@@ -13,6 +13,9 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>quercus: describe issues with mysql_fetch_field_direct (#2541, rep by jarmstrong)</li>
+<li>quercus: mysql longvarchar issues in JdbcResultResource (#2606, rep by sgraf)</li>
+<li>quercus: setEscapeProcessing(false) for prepared statement not allowed by oracle (#2267, rep by sergpro)</li>
 <li>quercus: oci_new_connect was not working with a charset parameter (#2406, rep by ckchris)</li>
 <li>quercus: php://input for drupal (#2679, rep by M. Schmidt)</li>
 <li>quercus: allow_url_include and allow_url_fopen (#2690, rep by rhino4321)</li>

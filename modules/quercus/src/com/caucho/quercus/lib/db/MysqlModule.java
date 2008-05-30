@@ -405,8 +405,8 @@ public class MysqlModule extends AbstractQuercusModule {
    *
    */
   public static Value mysql_fetch_field(Env env,
-                                 @NotNull MysqliResult result,
-                                 @Optional("-1") int fieldOffset)
+					@NotNull MysqliResult result,
+					@Optional("-1") int fieldOffset)
   {
     /**
      * ERRATA is also documented in php/142s.qa
@@ -438,12 +438,16 @@ public class MysqlModule extends AbstractQuercusModule {
       String tableName = md.getTableName(jdbcField);
       
       String schemaName = md.getSchemaName(jdbcField);
-      
+
       String columnName = md.getColumnName(jdbcField);
       String columnLabel = md.getColumnLabel(jdbcField);
       
       if (schemaName == null || "".equals(schemaName))
         schemaName = tableName;
+
+      if ((tableName == null || "".equals(tableName))
+	  && result.isLastSqlDescribe())
+	tableName = "COLUMNS";
 
       // some information is not available from the ResultSetMetaData
       JdbcColumnMetaData columnMd = null;

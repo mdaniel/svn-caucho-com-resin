@@ -84,9 +84,7 @@ public class Mysqli extends JdbcConnectionResource {
   private static String _checkedDriverVersion = null;
   private static Object _checkDriverLock = new Object();
 
-  private boolean _isPersistent = false;
-
-  private boolean _lastSQLWasUpdate = false;
+  private LastSqlType _lastSql;
 
   /**
     * This is the constructor for the mysqli class.
@@ -146,133 +144,17 @@ public class Mysqli extends JdbcConnectionResource {
   {
     super(env);
   }
-  
-  /**
-   * Verify that the ConnectorJ driver version is 3.1.14 or newer.
-   * Older versions of this driver return incorrect type information
-   * and suffer from encoding related bugs.
-   */
-  protected static void checkDriverVersion(Env env, Connection conn)
-    throws SQLException
-  {
-    if (_checkedDriverVersion != null)
-      return;
-    
-    synchronized(_checkDriverLock) {
-      // required if statement to prevent multiple checks
-      if (_checkedDriverVersion == null) {
-        _checkedDriverVersion = checkDriverVersionImpl(env, conn);
-
-        if (_checkedDriverVersion.length() != 0)
-          return;
-        
-        String message = "Unable to detect MySQL Connector/J JDBC driver " +
-                         "version.  The recommended JDBC version is 3.1.14.";
-
-        log.log(Level.WARNING, message);
-        env.warning(message);
-      }
-    }
-  }
-
-
-  private static String checkDriverVersionImpl(Env env, Connection conn)
-    throws SQLException
-  {
-    DatabaseMetaData databaseMetaData = null;
-
-    try {
-      databaseMetaData = conn.getMetaData();
-    } catch (SQLException e) {
-      log.log(Level.FINEST, e.toString(), e);
-    }
-
-    // If getMetaData() returns null or raises a SQLException,
-    // then we can't verify the driver version.
-
-    if (databaseMetaData == null)
-      return "";
-
-    String fullVersion = null;
-
-    try {
-      fullVersion = databaseMetaData.getDriverVersion();
-    } catch (SQLException e) {
-      log.log(Level.FINEST, e.toString(), e);
-    }
-
-    // If getDriverVersion() returns null or raises a SQLException,
-    // then we can't verify the driver version.
-
-    if (fullVersion == null) {
-      return "";
-    }
-
-    String version = fullVersion;
-
-    // Extract full version number.
-
-    int start;
-    int end = version.indexOf(' ');
-
-    String checkedDriverVersion = "";
-    
-    if (end != -1) {
-      version = version.substring(0, end);
-
-      start = version.lastIndexOf('-');
-
-      if (start != -1) {
-        version = version.substring(start + 1);
-
-        // version string should look like "3.1.14"
-        int major;
-        int minor;
-        int release;
-
-        start = version.indexOf('.');
-        end = version.lastIndexOf('.');
-
-        major = Integer.valueOf(version.substring(0, start));
-        minor = Integer.valueOf(version.substring(start+1, end));
-        release = Integer.valueOf(version.substring(end+1));
-
-        checkedDriverVersion = major + "." + minor + "." + release;
-
-	// This doesn't make sense.  We can't recommend avoiding the
-	// current version of the driver.
-	/*
-        if (major == 3 && (minor > 1 || minor == 1 && release >= 14)) {
-        }
-        else if (major > 3) {
-          String message = L.l("Your MySQL Connector/J JDBC {0} driver may " +
-                               "have issues with column/table aliases and " +
-                               "DESCRIBE statements.  The recommended " +
-                               "JDBC version is 3.1.14.", version);
-          
-          log.log(Level.WARNING, message);
-          env.warning(message);
-        }
-        else {
-          String message = L.l("Your MySQL Connector/J JDBC {0} driver may " +
-                               "have issues with character encoding.  The " +
-                               "recommended JDBC version is 3.1.14.", version);
-
-          log.log(Level.WARNING, message);
-          env.warning(message);
-        }
-	*/
-      }
-    }
-    
-    return checkedDriverVersion;
-  }
 
   public String getResourceType()
   {
     return "mysql link";
   }
 
+  public boolean isLastSqlDescribe()
+  {
+    return _lastSql == LastSqlType.DESCRIBE;
+  }
+  
   /**
    * Connects to the underlying database.
    */
@@ -338,7 +220,6 @@ public class Mysqli extends JdbcConnectionResource {
           urlBuilder.append("useSSL=true");
         }
 
-	/*
         // Explicitly indicate that iso-8859-1 encoding should
         // be used as the default driver encoding. We don't want the
         // driver to use its version of Cp1252 because that encoding
@@ -346,7 +227,8 @@ public class Mysqli extends JdbcConnectionResource {
         //
         // php/144b
         char sep = urlBuilder.indexOf("?") < 0 ? '?' : '&';
-        urlBuilder.append(sep + "characterEncoding=ISO8859_1");
+        urlBuilder.append(sep + "characterEncoding=UTF8");
+	/*
         //urlBuilder.append("&useInformationSchema=true");
         
         // required to get the result table name alias,
@@ -633,14 +515,14 @@ public class Mysqli extends JdbcConnectionResource {
       warnings++;
     }
 
-    if (_lastSQLWasUpdate)
+    if (_lastSql == LastSqlType.UPDATE)
       buff.append("Rows matched: ");
     else
       buff.append("Records: ");
 
     buff.append(matched);
 
-    if (_lastSQLWasUpdate) {
+    if (_lastSql == LastSqlType.UPDATE) {
       buff.append("  Changed: "); // PHP adds 2 spaces before Changed:
       buff.append(changed);
     } else {
@@ -648,7 +530,7 @@ public class Mysqli extends JdbcConnectionResource {
       buff.append(duplicates);
     }
 
-    if (_lastSQLWasUpdate)
+    if (_lastSql == LastSqlType.UPDATE)
       buff.append("  Warnings: "); // Only update has 2 spaces here
     else
       buff.append(" Warnings: ");
@@ -850,7 +732,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     clearErrors();
 
-    _lastSQLWasUpdate = false;
+    _lastSql = null;
 
     setResultResource(null);
 
@@ -864,9 +746,9 @@ public class Mysqli extends JdbcConnectionResource {
 
       SqlParseToken tok = parseSqlToken(sql, null);
 
-      if (tok != null &&
-          tok.matchesFirstChar('U', 'u') &&
-          tok.matchesToken("USE")) {
+      if (tok != null
+	  && tok.matchesFirstChar('U', 'u')
+	  && tok.matchesToken("USE")) {
         // Mysql "USE DBNAME" statement.
         //
         // The Mysql JDBC driver does not properly implement getCatalog()
@@ -888,12 +770,19 @@ public class Mysqli extends JdbcConnectionResource {
           return BooleanValue.TRUE;
         }
       }
-      else if (tok != null &&
-          tok.matchesFirstChar('U', 'u') &&
-          tok.matchesToken("UPDATE")) {
+      else if (tok != null
+	       && tok.matchesFirstChar('U', 'u')
+	       && tok.matchesToken("UPDATE")) {
         // SQL UPDATE statement
 
-        _lastSQLWasUpdate = true;
+        _lastSql = LastSqlType.UPDATE;
+      }
+      else if (tok != null
+	       && tok.matchesFirstChar('D', 'd')
+	       && tok.matchesToken("DESCRIBE")) {
+        // SQL DESCRIBE statement
+
+        _lastSql = LastSqlType.DESCRIBE;
       }
 
       return super.realQuery(env, sql);
@@ -1527,7 +1416,127 @@ public class Mysqli extends JdbcConnectionResource {
 
   public void setPersistent()
   {
-    _isPersistent = true;
+  }
+  
+  /**
+   * Verify that the ConnectorJ driver version is 3.1.14 or newer.
+   * Older versions of this driver return incorrect type information
+   * and suffer from encoding related bugs.
+   */
+  protected static void checkDriverVersion(Env env, Connection conn)
+    throws SQLException
+  {
+    if (_checkedDriverVersion != null)
+      return;
+    
+    synchronized(_checkDriverLock) {
+      // required if statement to prevent multiple checks
+      if (_checkedDriverVersion == null) {
+        _checkedDriverVersion = checkDriverVersionImpl(env, conn);
+
+        if (_checkedDriverVersion.length() != 0)
+          return;
+        
+        String message = "Unable to detect MySQL Connector/J JDBC driver " +
+                         "version.  The recommended JDBC version is 3.1.14.";
+
+        log.log(Level.WARNING, message);
+        env.warning(message);
+      }
+    }
+  }
+
+
+  private static String checkDriverVersionImpl(Env env, Connection conn)
+    throws SQLException
+  {
+    DatabaseMetaData databaseMetaData = null;
+
+    try {
+      databaseMetaData = conn.getMetaData();
+    } catch (SQLException e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    // If getMetaData() returns null or raises a SQLException,
+    // then we can't verify the driver version.
+
+    if (databaseMetaData == null)
+      return "";
+
+    String fullVersion = null;
+
+    try {
+      fullVersion = databaseMetaData.getDriverVersion();
+    } catch (SQLException e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    // If getDriverVersion() returns null or raises a SQLException,
+    // then we can't verify the driver version.
+
+    if (fullVersion == null) {
+      return "";
+    }
+
+    String version = fullVersion;
+
+    // Extract full version number.
+
+    int start;
+    int end = version.indexOf(' ');
+
+    String checkedDriverVersion = "";
+    
+    if (end != -1) {
+      version = version.substring(0, end);
+
+      start = version.lastIndexOf('-');
+
+      if (start != -1) {
+        version = version.substring(start + 1);
+
+        // version string should look like "3.1.14"
+        int major;
+        int minor;
+        int release;
+
+        start = version.indexOf('.');
+        end = version.lastIndexOf('.');
+
+        major = Integer.valueOf(version.substring(0, start));
+        minor = Integer.valueOf(version.substring(start+1, end));
+        release = Integer.valueOf(version.substring(end+1));
+
+        checkedDriverVersion = major + "." + minor + "." + release;
+
+	// This doesn't make sense.  We can't recommend avoiding the
+	// current version of the driver.
+	/*
+        if (major == 3 && (minor > 1 || minor == 1 && release >= 14)) {
+        }
+        else if (major > 3) {
+          String message = L.l("Your MySQL Connector/J JDBC {0} driver may " +
+                               "have issues with column/table aliases and " +
+                               "DESCRIBE statements.  The recommended " +
+                               "JDBC version is 3.1.14.", version);
+          
+          log.log(Level.WARNING, message);
+          env.warning(message);
+        }
+        else {
+          String message = L.l("Your MySQL Connector/J JDBC {0} driver may " +
+                               "have issues with character encoding.  The " +
+                               "recommended JDBC version is 3.1.14.", version);
+
+          log.log(Level.WARNING, message);
+          env.warning(message);
+        }
+	*/
+      }
+    }
+    
+    return checkedDriverVersion;
   }
 
   // Invoked to close a connection.
@@ -1541,4 +1550,10 @@ public class Mysqli extends JdbcConnectionResource {
 
     return super.close(env);
   }
+
+  public enum LastSqlType {
+    NONE,
+    UPDATE,
+    DESCRIBE
+  };
 }
