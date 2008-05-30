@@ -1802,6 +1802,10 @@ public class Quercus
     = _ini.add("include_path", ".", IniDefinition.PHP_INI_ALL);
   public static final IniDefinition INI_REGISTER_LONG_ARRAYS
     = _ini.add("register_long_arrays", true, IniDefinition.PHP_INI_PERDIR);
+  public static final IniDefinition INI_ALWAYS_POPULATE_RAW_POST_DATA
+    = _ini.add("always_populate_raw_post_data", false, IniDefinition.PHP_INI_PERDIR);
+  
+  // unicode ini
   public static final IniDefinition INI_UNICODE_SEMANTICS
     = _ini.add("unicode.semantics", false, IniDefinition.PHP_INI_SYSTEM);
   public static final IniDefinition INI_UNICODE_FALLBACK_ENCODING

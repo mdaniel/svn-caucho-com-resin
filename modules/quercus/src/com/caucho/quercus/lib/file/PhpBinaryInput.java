@@ -29,6 +29,7 @@
 package com.caucho.quercus.lib.file;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.StringStream;
 import com.caucho.vfs.VfsStream;
@@ -50,12 +51,12 @@ public class PhpBinaryInput extends AbstractBinaryInput
   {
     super(env);
     
-    String post = env.getPostData();
+    StringValue postV = env.getPostData();
     
-    if (post == null)
-      post = "";
+    if (postV == null)
+      postV = env.createEmptyString();
     
-    init(StringStream.open(post));
+    init(new ReadStream(new VfsStream(postV.toInputStream(), null)));
   }
   
   public String toString()

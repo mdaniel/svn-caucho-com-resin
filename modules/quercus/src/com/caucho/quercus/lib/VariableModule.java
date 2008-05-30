@@ -635,13 +635,11 @@ public class VariableModule extends AbstractQuercusModule {
       if (v != null)
 	return v;
     }
-    
-    boolean useReference = s.indexOf("R:") > 0;
 
     UnserializeReader is = null;
 
     try {
-      is = new UnserializeReader(s, useReference);
+      is = new UnserializeReader(s);
       
       v = is.unserialize(env);
     } catch (IOException e) {
@@ -652,7 +650,7 @@ public class VariableModule extends AbstractQuercusModule {
       v = BooleanValue.FALSE;
     }
 
-    if (! is.useReference()) {
+    if (is != null && ! is.useReference()) {
       entry = new UnserializeCacheEntry(v);
       
       _unserializeCache.put(key, entry);

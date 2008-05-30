@@ -66,28 +66,11 @@ public class Post {
 
         String contentType = request.getHeader("Content-Type");
 
-        if (contentType == null) {
-        }
-        else if (contentType.startsWith("application/x-www-form-urlencoded")) {
-          is = request.getInputStream();
-          
-          StringBuilder sb = new StringBuilder();
-          int ch;
-
-          while ((ch = is.read()) >= 0) {
-            sb.append((char) ch);
-          }
-          
-          String body = sb.toString();
-          
-          env.setPostData(body);
-          
-          StringUtility.parseStr(env, body, postArray, false, encoding);
-        }
-        else if (contentType.startsWith("multipart/form-data")) {
+        is = request.getInputStream();
+        
+        if (contentType != null
+            && contentType.startsWith("multipart/form-data")) {
           String boundary = getBoundary(contentType);
-
-          is = request.getInputStream();
 
           ReadStream rs = new ReadStream(new VfsStream(is, null));
           MultipartStream ms = new MultipartStream(rs, boundary);
@@ -98,6 +81,17 @@ public class Post {
           readMultipartStream(env, ms, postArray, files, addSlashesToValues);
 
           rs.close();
+        }
+        else {
+          StringValue bb = env.createBinaryBuilder();
+          
+          bb.appendReadAll(is, Integer.MAX_VALUE);
+          
+          env.setPostData(bb);
+          
+          if (contentType != null
+              && contentType.startsWith("application/x-www-form-urlencoded"))
+            StringUtility.parseStr(env, bb, postArray, false, encoding);
         }
         
         if (postArray.getSize() == 0) {
@@ -491,6 +485,7 @@ public class Post {
                                     HttpServletRequest request,
                                     boolean addSlashesToValues)
   {
+    // this call consumes the inputstream
     Map<String,String[]> map = request.getParameterMap();
 
     if (map == null)

@@ -48,7 +48,7 @@ public class StringUtility
   private static final L10N L = new L10N(StringModule.class);
   
   public static Value parseStr(Env env,
-                               String str,
+                               CharSequence str,
                                ArrayValue result,
                                boolean isRef,
                                String encoding)
@@ -62,7 +62,7 @@ public class StringUtility
   }
   
   public static Value parseStr(Env env,
-                               String str,
+                               CharSequence str,
                                ArrayValue result,
                                boolean isRef,
                                String encoding,
@@ -149,7 +149,7 @@ public class StringUtility
   }
 
   protected static int addQueryChar(ByteToChar byteToChar,
-                                    String str,
+                                    CharSequence str,
                                     int len,
                                     int i,
                                     int ch)

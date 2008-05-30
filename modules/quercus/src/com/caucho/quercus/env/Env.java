@@ -139,6 +139,7 @@ public class Env {
   private static final int HTTP_POST_FILES = 13;
   private static final int _ENV = 14;
   private static final int HTTP_SERVER_VARS = 15;
+  private static final int HTTP_RAW_POST_DATA = 16;
 
   private static final IntMap SPECIAL_VARS = new IntMap();
 
@@ -263,7 +264,7 @@ public class Env {
   private HttpServletResponse _response;
 
   private ArrayValue _postArray;
-  private String _postData;
+  private StringValue _postData;
   
   private ArrayValue _files;
   private SessionArrayValue _session;
@@ -622,7 +623,7 @@ public class Env {
   /*
    * Returns the post data.
    */
-  public String getPostData()
+  public StringValue getPostData()
   {
     return _postData;
   }
@@ -630,7 +631,7 @@ public class Env {
   /*
    * Sets the post data.
    */
-  public void setPostData(String data)
+  public void setPostData(StringValue data)
   {
     _postData = data;
   }
@@ -1926,6 +1927,22 @@ public class Env {
       return var;
     }
 
+    case HTTP_RAW_POST_DATA: {
+      if (! Quercus.INI_ALWAYS_POPULATE_RAW_POST_DATA.getAsBoolean(this))
+        return null;
+      
+      if (_postData == null)
+        return null;
+      
+      var = new Var();
+      
+      _globalMap.put(name, var);
+      
+      var.set(_postData);
+      
+      return var;
+    }
+    
     case HTTP_SERVER_VARS:
       if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
 	return null;
@@ -5131,6 +5148,7 @@ public class Env {
     SPECIAL_VARS.put("HTTP_COOKIE_VARS", HTTP_COOKIE_VARS);
     SPECIAL_VARS.put("HTTP_SERVER_VARS", HTTP_SERVER_VARS);
     SPECIAL_VARS.put("PHP_SELF", PHP_SELF);
+    SPECIAL_VARS.put("HTTP_RAW_POST_DATA", HTTP_RAW_POST_DATA);
   }
 }
 

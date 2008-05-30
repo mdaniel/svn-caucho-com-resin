@@ -52,12 +52,9 @@ public final class UnserializeReader {
 
   private int _index;
   private StringKey _key = new StringKey();
-
   
   private ArrayList<Value> _valueList
     = new ArrayList<Value>();
-  
-  private int _valueCount = 0;
   
   private ArrayList<Boolean> _referenceList
     = new ArrayList<Boolean>();
@@ -65,37 +62,23 @@ public final class UnserializeReader {
   private boolean _useReference;
 
   public UnserializeReader(StringValue s)
+    throws IOException
   {
     _buffer = s.toCharArray();
     _length = _buffer.length;
-  }
-  
-  public UnserializeReader(StringValue s, boolean useReference)
-    throws IOException
-  {
-    this(s);
     
-    populateReferenceList();
-    
-    _index = 0;
-    _useReference = true;
+    if (s.indexOf("R:") >= 0)
+      initReferenceList();
   }
 
   public UnserializeReader(String s)
+     throws IOException
   {
     _buffer = s.toCharArray();
     _length = _buffer.length;
-  }
-  
-  public UnserializeReader(String s, boolean useReference)
-    throws IOException
-  {
-    this(s);
     
-    populateReferenceList();
-    
-    _index = 0;
-    _useReference = true;
+    if (s.indexOf("R:") >= 0)
+      initReferenceList();
   }
 
   boolean useReference()
@@ -117,11 +100,8 @@ public final class UnserializeReader {
         
         Value value = v == 0 ? BooleanValue.FALSE : BooleanValue.TRUE;
         
-        if (_useReference) {
+        if (_useReference)
           value = createReference(value);
-        
-	  _valueList.add(value);
-	}
         
         return value;
       }
@@ -139,11 +119,8 @@ public final class UnserializeReader {
         expect('"');
         expect(';');
         
-        if (_useReference) {
+        if (_useReference)
           value = createReference(value);
-        
-	  _valueList.add(value);
-	}
 
         return value;
       }
@@ -160,11 +137,8 @@ public final class UnserializeReader {
         expect('"');
         expect(';');
         
-        if (_useReference) {
+        if (_useReference)
           value = createReference(value);
-        
-	  _valueList.add(value);
-	}
 
         return value;
       }
@@ -179,11 +153,8 @@ public final class UnserializeReader {
         
         Value value = LongValue.create(l); 
         
-        if (_useReference) {
+        if (_useReference)
           value = createReference(value);
-        
-	  _valueList.add(value);
-	}
 
         return value;
       }
@@ -202,11 +173,8 @@ public final class UnserializeReader {
 
         Value value = new DoubleValue(Double.parseDouble(sb.toString()));
         
-        if (_useReference) {
+        if (_useReference)
           value = createReference(value);
-        
-	  _valueList.add(value);
-	}
         
         return value;
       }
@@ -220,11 +188,8 @@ public final class UnserializeReader {
         
         Value array = new ArrayValueImpl(len);
 
-        if (_useReference) {
+        if (_useReference)
           array = createReference(array);
-        
-	  _valueList.add(array);
-	}
         
         for (int i = 0; i < len; i++) {
           Value key = unserializeKey(env);
@@ -268,11 +233,8 @@ public final class UnserializeReader {
 		       env.createString(className));
         }
         
-        if (_useReference) {
+        if (_useReference)
           obj = createReference(obj);
-        
-	  _valueList.add(obj);
-	}
 
         for (int i = 0; i < count; i++) {
           String key = unserializeString();
@@ -292,11 +254,8 @@ public final class UnserializeReader {
         
         Value value = NullValue.NULL;
         
-        if (_useReference) {
+        if (_useReference)
           value = createReference(value);
-        
-	  _valueList.add(value);
-	}
 
         return value;
       }
@@ -309,8 +268,10 @@ public final class UnserializeReader {
         int value = (int) readInt();
 
         expect(';');
-
-        return _valueList.get(value - 1);
+        
+        Value ref = _valueList.get(value - 1);
+        
+        return ref;
       }
 
     default:
@@ -320,12 +281,27 @@ public final class UnserializeReader {
   
   public Value createReference(Value value)
   {
-    if (_referenceList.get(_valueCount++) == Boolean.FALSE)
+    if (_referenceList.get(_valueList.size()) == Boolean.FALSE) {
+      
+      _valueList.add(value);
       return value;
-    else
-      return new Var(value);
+    }
+    else {
+      Var var = new Var(value);
+      
+      _valueList.add(var);
+      return var;
+    }
   }
 
+  private void initReferenceList()
+    throws IOException
+  {
+    populateReferenceList();
+    
+    _index = 0;
+  }
+  
   private void populateReferenceList()
     throws IOException
   {
@@ -514,6 +490,8 @@ public final class UnserializeReader {
 
       case 'R':
       {
+        _useReference = true;
+        
         _referenceList.add(Boolean.FALSE);
         
         expect(':');
