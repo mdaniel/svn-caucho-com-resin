@@ -227,4 +227,51 @@ public abstract class Application
   public ProjectStage getProjectStage() {
     throw new UnsupportedOperationException(getClass().getName());
   }
+
+  /**
+   * @since 2.0
+   */
+  public void subscribeToEvent(Class<? extends SystemEvent> systemEventClass,
+                               Class sourceClass,
+                               SystemEventListener listener)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+                                                      
+  /**
+   * @since 2.0
+   */
+  public void subscribeToEvent(Class<? extends SystemEvent> systemEventClass,
+                               SystemEventListener listener)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * @since 2.0
+   */
+  public void unsubscribeFromEvent(Class<? extends SystemEvent> systemEventClass,
+                                   Class sourceClass,
+                                   SystemEventListener listener)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * @since 2.0
+   */
+  public void unsubscribeFromEvent(Class<? extends SystemEvent> systemEventClass,
+                                   SystemEventListener listener)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * @since 2.0
+   */
+  public void publishEvent(Class<? extends SystemEvent> systemEventClass,
+                           SystemEventListenerHolder source)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 }
