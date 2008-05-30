@@ -13,6 +13,8 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>quercus: spl_autoload fixes (#2367, rep by Torsten)</li>
+<li>quercus: ArrayListAdapter must not copy list (#2657, rep by skleinjung)</li>
 <li>quercus: describe issues with mysql_fetch_field_direct (#2541, rep by jarmstrong)</li>
 <li>quercus: mysql longvarchar issues in JdbcResultResource (#2606, rep by sgraf)</li>
 <li>quercus: setEscapeProcessing(false) for prepared statement not allowed by oracle (#2267, rep by sergpro)</li>

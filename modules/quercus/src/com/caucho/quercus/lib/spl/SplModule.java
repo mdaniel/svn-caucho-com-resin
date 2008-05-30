@@ -58,6 +58,9 @@ public class SplModule extends AbstractQuercusModule
     if (fun == null || fun.length() == 0)
       fun = "spl_autoload";
     */
+
+    if (fun == null)
+      fun = new CallbackFunction(env, "spl_autoload");
     
     env.addAutoloadFunction(fun);
     
@@ -119,39 +122,19 @@ public class SplModule extends AbstractQuercusModule
     if (env.findClass(className, false) != null)
       return;
     
-    ArrayList<String> extensionList = new ArrayList<String>();
+    String []extensionList;
     
-    if (extensions == null) {
-      extensions = getAutoloadExtensions(env);
+    if (extensions == null || "".equals(extensions)) {
+      extensionList = new String[] { ".php", ".inc" };
     }
-    
-    if (extensions == DEFAULT_EXTENSIONS) {
-      extensionList.add(".php");
-      extensionList.add(".inc");
-    }
-    else {
-      int len = extensions.length();
-      
-      CharBuffer cb = CharBuffer.allocate();
-      for (int i = 0; i < len; i++) {
-        char ch = extensions.charAt(i);
-        
-        if (ch == ',')
-          extensionList.add(cb.toString());
-          cb.clear();
-      }
-      
-      if (cb.length() > 0)
-        extensionList.add(cb.toString());
-      
-      cb.free();
-    }
+    else
+      extensionList = extensions.split("[,\\s]+");
     
     String filePrefix = className.toLowerCase();
-    
+
     for (String ext : extensionList) {
       String filename = filePrefix + ext;
-      
+
       env.include(filename);
       
       QuercusClass cls = env.findClass(className, false);

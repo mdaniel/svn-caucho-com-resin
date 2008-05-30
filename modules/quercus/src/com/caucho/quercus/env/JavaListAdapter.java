@@ -235,24 +235,4 @@ public class JavaListAdapter
     
     return current();
   }
-  
-  /**
-   * Copy for assignment.
-   */
-  @Override
-  public Value copy()
-  {
-    try {
-      Class cl = _list.getClass();
-
-      List list = (List)cl.newInstance();
-
-      list.addAll(_list);
-
-      return new JavaListAdapter(getEnv(), list, getClassDef());
-    }
-    catch (Exception e) {
-      throw new QuercusRuntimeException(e);
-    }
-  }
 }

@@ -3476,12 +3476,12 @@ public class Env {
 	  for (int i = 0; i < size; i++) {
 	    Callback cb = _autoloadList.get(i);
 
-	    if (cb.call(this, nameString).toBoolean()) {
-	      QuercusClass cls = createClassImpl(name, false, useImport);
+	    cb.call(this, nameString);
+	    
+	    QuercusClass cls = createClassImpl(name, false, useImport);
               
-	      if (cls != null)
-		return cls;
-	    }
+	    if (cls != null)
+	      return cls;
 	  }
 
 	  if (size == 0) {
@@ -3525,6 +3525,9 @@ public class Env {
    */
   public void addAutoloadFunction(Callback fun)
   {
+    if (fun == null)
+      throw new NullPointerException();
+    
     if (_autoloadList == null)
       _autoloadList = new ArrayList<Callback>();
 
