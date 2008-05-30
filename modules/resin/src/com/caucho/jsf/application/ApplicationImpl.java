@@ -129,8 +129,8 @@ public class ApplicationImpl
   private HashMap<Class, Class> _converterClassMap
     = new HashMap<Class, Class>();
 
-  private HashMap<Class<? extends SystemEvent>, HashMap<Class, SystemEventListener[]>> _systemEventListenerMap
-    = new HashMap<Class<? extends SystemEvent>, HashMap<Class, SystemEventListener[]>>();
+  private HashMap<Class<? extends SystemEvent>, HashMap<Class, SystemEventListener []>> _systemEventListenerMap
+    = new HashMap<Class<? extends SystemEvent>, HashMap<Class, SystemEventListener []>>();
 
   private LruCache<Class<? extends SystemEvent>, LruCache<Class<? extends SystemEventListenerHolder>, Constructor>> _systemEventConstructorMap
     = new LruCache<Class<? extends SystemEvent>, LruCache<Class<? extends SystemEventListenerHolder>, Constructor>>(32);
@@ -1131,15 +1131,15 @@ public class ApplicationImpl
     List<SystemEventListener> sourceListeners
       = source.getListenersForEventClass(systemEventClass);
 
-    SystemEventListener[] appListenersForSourceClass = null;
+    SystemEventListener []appListenersForSourceClass = null;
 
-    HashMap<Class, SystemEventListener[]> map
+    HashMap<Class, SystemEventListener []> map
       = _systemEventListenerMap.get(systemEventClass);
 
     if (map != null)
       appListenersForSourceClass = map.get(source.getClass());
 
-    SystemEventListener[] appListeners = null;
+    SystemEventListener []appListeners = null;
 
     map = _systemEventListenerMap.get(systemEventClass);
 
@@ -1167,10 +1167,10 @@ public class ApplicationImpl
       Constructor ctor = constructorMap.get(sourceClass);
 
       if (ctor == null) {
-        Constructor[] constructors = systemEventClass.getConstructors();
+        Constructor []constructors = systemEventClass.getConstructors();
 
         for (Constructor constructor : constructors) {
-          Class[] params = constructor.getParameterTypes();
+          Class []params = constructor.getParameterTypes();
 
           if (params.length == 1) {
             if (sourceClass.equals(params[0])) {
@@ -1184,7 +1184,7 @@ public class ApplicationImpl
           constructors = systemEventClass.getConstructors();
 
           for (Constructor constructor : constructors) {
-            Class[] params = constructor.getParameterTypes();
+            Class []params = constructor.getParameterTypes();
 
             if (params.length == 1) {
               if (params[0].isAssignableFrom(sourceClass)) {
