@@ -43,10 +43,6 @@ public class ComponentSystemEvent
 
   public UIComponent getComponent()
   {
-    if (true) throw new UnsupportedOperationException(getClass().getName());
-
-    return null;
+    return (UIComponent) getSource();
   }
-
-
 }

@@ -31,7 +31,7 @@ package javax.faces.event;
 /**
  * @since 2.0
  */
-public interface ComponentSystemEventListener {
+public interface ComponentSystemEventListener extends FacesListener {
   void processEvent(ComponentSystemEvent event)
     throws AbortProcessingException;
 }

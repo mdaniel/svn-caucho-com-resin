@@ -1099,13 +1099,11 @@ public class ApplicationImpl
       SystemEventListener[] temp = listenerMap.get(sourceClass);
       
       for (int i = 0; i < temp.length; i++) {
-        SystemEventListener l = temp[i];
-        
-        if (listener.equals(l)) {
+        if (listener.equals(temp [i])) {
           SystemEventListener[] listeners = new SystemEventListener[temp.length - 1];
 
           System.arraycopy(temp, 0, listeners, 0, i);
-          System.arraycopy(temp, i, listeners, i, temp.length - (i + 1));
+          System.arraycopy(temp, i + 1, listeners, i, temp.length - (i + 1));
 
           listenerMap.put(sourceClass, listeners);
           

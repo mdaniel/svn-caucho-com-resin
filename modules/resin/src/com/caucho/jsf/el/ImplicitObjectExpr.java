@@ -34,9 +34,7 @@ import com.caucho.vfs.WriteStream;
 import javax.el.ELContext;
 import javax.el.ELException;
 import javax.faces.context.*;
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
+import javax.faces.component.UIComponent;
 import java.io.IOException;
 import java.util.*;
 
@@ -78,6 +76,8 @@ public class ImplicitObjectExpr extends Expr {
       return context.getExternalContext().getContext();
     case APPLICATION_SCOPE:
       return context.getExternalContext().getApplicationMap();
+    case COMPONENT:
+      return UIComponent.getCurrentComponent();
     case COOKIE:
       return context.getExternalContext().getRequestCookieMap();
     case FACES_CONTEXT:
@@ -126,6 +126,7 @@ public class ImplicitObjectExpr extends Expr {
   enum ImplicitEnum {
     APPLICATION,
     APPLICATION_SCOPE,
+    COMPONENT,
     COOKIE,
     FACES_CONTEXT,
     HEADER,
@@ -147,7 +148,9 @@ public class ImplicitObjectExpr extends Expr {
     _exprMap.put("applicationScope",
 		 new ImplicitObjectExpr("applicationScope",
 					ImplicitEnum.APPLICATION_SCOPE));
-    
+    _exprMap.put("component",
+		 new ImplicitObjectExpr("component",
+					ImplicitEnum.COMPONENT));
     _exprMap.put("cookie",
 		 new ImplicitObjectExpr("cookie",
 					ImplicitEnum.COOKIE));

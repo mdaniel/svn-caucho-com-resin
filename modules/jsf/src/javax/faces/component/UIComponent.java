@@ -28,8 +28,11 @@
 
 package javax.faces.component;
 
+import com.caucho.util.L10N;
+
 import java.io.*;
 import java.util.*;
+import java.util.logging.Logger;
 
 import javax.el.*;
 
@@ -39,8 +42,16 @@ import javax.faces.el.*;
 import javax.faces.event.*;
 import javax.faces.render.*;
 
-public abstract class UIComponent implements StateHolder
+public abstract class UIComponent
+  implements StateHolder, SystemEventListenerHolder
 {
+  private static final L10N L = new L10N(UIComponent.class);
+
+  private static final Logger log
+    = Logger.getLogger(UIComponent.class.getName());
+
+  private Map<Class<? extends SystemEvent>, ComponentSystemEventListener []> _componentEventListenerMap;
+
   public abstract Map<String,Object> getAttributes();
 
   @Deprecated
@@ -225,9 +236,202 @@ public abstract class UIComponent implements StateHolder
   protected abstract FacesContext getFacesContext();
 
   protected abstract Renderer getRenderer(FacesContext context);
+
+  /**
+   * @since 2.0
+   */
+  public void subscribeToEvent(FacesContext context,
+                               Class<? extends SystemEvent> eventClass,
+                               ComponentSystemEventListener componentListener)
+  {
+
+    if (context == null)
+      throw new NullPointerException();
+
+    if (eventClass == null)
+      throw new NullPointerException();
+
+    if (componentListener == null)
+      throw new NullPointerException();
+
+    if (_componentEventListenerMap == null)
+      _componentEventListenerMap
+        = new HashMap<Class<? extends SystemEvent>, ComponentSystemEventListener[]>();
+
+    ComponentSystemEventListener []listeners = _componentEventListenerMap.get(
+      eventClass);
+
+    if (listeners == null) {
+      listeners = new ComponentSystemEventListener[]{componentListener};
+    }
+    else {
+      ComponentSystemEventListener []temp
+        = new ComponentSystemEventListener [listeners.length + 1];
+
+      System.arraycopy(listeners, 0, temp, 0, listeners.length);
+
+      temp [temp.length - 1] = componentListener;
+
+      listeners = temp;
+    }
+
+    _componentEventListenerMap.put(eventClass, listeners);
+  }
+
+  public void unsubscribeFromEvent(FacesContext context,
+                                 Class<? extends SystemEvent> facesEventClass,
+                                 ComponentSystemEventListener listener) {
+    if (context == null)
+      throw new NullPointerException();
+
+    if (facesEventClass == null)
+      throw new NullPointerException();
+
+    if (listener == null)
+      throw new NullPointerException();
+
+    if (_componentEventListenerMap == null)
+      return;
+
+    ComponentSystemEventListener [] listeners
+      = _componentEventListenerMap.get(facesEventClass);
+
+    for (int i = 0; i < listeners.length; i++) {
+      if (listener.equals(listeners[i])) {
+        if (listeners.length == 1) {
+          _componentEventListenerMap.remove(facesEventClass);
+        }
+        else
+        {
+          ComponentSystemEventListener []temp = new ComponentSystemEventListener [listeners.length - 1];
+
+          System.arraycopy(listeners, 0, temp, 0, i);
+
+          System.arraycopy(listeners, i + 1, temp, i, listeners.length - (i + 1));
+
+          _componentEventListenerMap.put(facesEventClass, temp);
+        }
+        break;
+      }
+    }
+  }
+
+  public List<SystemEventListener> getListenersForEventClass(Class<? extends SystemEvent> facesEventClass)
+  {
+    if (facesEventClass == null)
+      throw new NullPointerException();
+
+    if (_componentEventListenerMap == null)
+      return new ArrayList<SystemEventListener>(0);
+
+    ComponentSystemEventListener [] listeners
+      = _componentEventListenerMap.get(facesEventClass);
+
+    if (listeners == null)
+      return new ArrayList<SystemEventListener>(0);
+
+    ArrayList<SystemEventListener> result
+      = new ArrayList<SystemEventListener>(listeners.length);
+
+    for (ComponentSystemEventListener listener : listeners) {
+      SystemEventListener systemEventListener
+        = new SystemEventListenerAdapter(listener, this.getClass());
+
+      result.add(systemEventListener);
+    }
+
+    return result;
+  }
+
+  /**
+   * @since 2.0
+   */
+  protected void pushComponentToEL(FacesContext context)
+  {
+    Map requestMap = context.getExternalContext().getRequestMap();
+
+    UIComponent[] components
+      = (UIComponent[]) requestMap.get("caucho.jsf.component.stack");
+
+    if (components == null) {
+      components = new UIComponent[]{this};
+    }
+    else {
+      UIComponent[] temp = new UIComponent[components.length + 1];
+
+      System.arraycopy(components, 0, temp, 0, components.length);
+
+      temp[temp.length - 1] = this;
+
+      components = temp;
+    }
+
+    requestMap.put("caucho.jsf.component.stack", components);
+  }
+
+  /**
+   * @since 2.0
+   */
+  protected void popComponentFromEL(FacesContext context)
+  {
+    Map requestMap = context.getExternalContext().getRequestMap();
+
+    UIComponent [] components
+      = (UIComponent []) requestMap.get("caucho.jsf.component.stack");
+
+    if (components == null ||
+        components.length == 0 ||
+        components [components.length - 1] != this) {
+      log.fine(L.l(
+        "UIComponent.popComponent expected to find self '{0}' on stack",
+        this));
+    }
+    else {
+      UIComponent []temp = new UIComponent [components.length - 1];
+
+      System.arraycopy(components, 0, temp, 0, temp.length);
+
+      requestMap.put("caucho.jsf.component.stack", temp);
+    }
+  }
+
+  /**
+   * @since 2.0
+   */
+  public static UIComponent getCurrentComponent() {
+    FacesContext context = FacesContext.getCurrentInstance();
+
+    UIComponent [] stack = (UIComponent []) context.getExternalContext()
+      .getRequestMap()
+      .get("caucho.jsf.component.stack");
+
+    if (stack == null || stack.length == 0)
+      return null;
+
+    return stack [stack.length - 1];
+  }
+
 }
 
-  
+class SystemEventListenerAdapter implements SystemEventListener {
+  private ComponentSystemEventListener _listener;
+  private Class _sourceClass;
 
-  
-  
+  SystemEventListenerAdapter(ComponentSystemEventListener listener,
+                             Class sourceClass)
+  {
+    _listener = listener;
+    _sourceClass = sourceClass;
+  }
+
+  public boolean isListenerForSource(Object source)
+  {
+    return _sourceClass.isAssignableFrom(source.getClass());
+  }
+
+  public void processEvent(SystemEvent event)
+    throws AbortProcessingException
+  {
+    _listener.processEvent((ComponentSystemEvent) event);
+  }
+}
