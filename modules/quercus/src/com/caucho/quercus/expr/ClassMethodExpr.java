@@ -95,11 +95,7 @@ public class ClassMethodExpr extends Expr {
     if (cl == null)
       throw env.createErrorException(L.l("{0} is an unknown class", _className));
 
-    AbstractFunction fun = cl.findFunction(_name);
-
-    if (fun == null)
-      throw env.createErrorException(L.l("{0}::{1} is an unknown method",
-				   _className, _name));
+    AbstractFunction fun = cl.getFunction(_name);
     
     Value []values = new Value[_args.length];
 

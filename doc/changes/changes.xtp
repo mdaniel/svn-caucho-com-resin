@@ -13,6 +13,7 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>quercus: grandparent super constructor callable by parent::B() (#2489)</li>
 <li>quercus: oci_fetch_all wasn't checking fetchArray return value properly (#1472, rep by osmedd)</li>
 <li>quercus: Foo:${${a}} support (#2666, rep by falko)</li>
 <li>quercus: spl_autoload fixes (#2367, rep by Torsten)</li>

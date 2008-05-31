@@ -98,17 +98,4 @@ public class PostgresResult extends JdbcResultResource {
 
     return _passedNullRow;
   }
-
-  /**
-   * Returns a string representation for this object.
-   *
-   * @return a string representation for this object
-   */
-  public String toString()
-  {
-    if (!_closed)
-      return "PostgresResult[" + super.toString() + "]";
-    else
-      return "PostgresResult[closed]";
-  }
 }

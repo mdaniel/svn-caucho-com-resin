@@ -39,6 +39,7 @@ import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.port.ServerRequest;
+import com.caucho.server.port.TcpServerRequest;
 import com.caucho.server.port.TcpConnection;
 import com.caucho.server.cluster.*;
 import com.caucho.server.webapp.*;
@@ -61,7 +62,7 @@ import java.util.logging.Logger;
  * Handles a new request from an HTTP connection.
  */
 public class HttpRequest extends AbstractHttpRequest
-  implements ServerRequest
+  implements TcpServerRequest
 {
   static final Logger log = Logger.getLogger(HttpRequest.class.getName());
 

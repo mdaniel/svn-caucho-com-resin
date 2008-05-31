@@ -34,6 +34,13 @@ import java.util.*;
 
 /**
  * language-encoded text value
+ *
+ * <pre>
+ * element subject {
+ *   attribute xml:lang?
+ *   &amp; string
+ * }
+ * </pre>
  */
 public class Text implements Serializable {
   private final String _value;

@@ -31,6 +31,7 @@ package com.caucho.server.http;
 
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.*;
+import com.caucho.server.port.*;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
@@ -109,7 +110,7 @@ public class HttpResponse extends AbstractHttpResponse
   public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
   {
     TcpDuplexController controller
-      = new TcpDuplexController(getOriginalRequest(), handler);
+      = new TcpDuplexController((TcpServerRequest) getOriginalRequest(), handler);
     
     setStatus(101);
     setContentLength(0);

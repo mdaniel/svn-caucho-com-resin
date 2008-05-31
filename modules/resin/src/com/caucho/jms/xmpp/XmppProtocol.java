@@ -29,6 +29,7 @@
 
 package com.caucho.jms.xmpp;
 
+import com.caucho.hmtp.spi.*;
 import com.caucho.jms.JmsConnectionFactory;
 import com.caucho.jms.message.MessageImpl;
 import com.caucho.jms.connection.JmsSession;
@@ -42,10 +43,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
 import javax.annotation.*;
-import javax.jms.Message;
-import javax.jms.TextMessage;
-import javax.jms.ObjectMessage;
-import javax.jms.JMSException;
+import javax.jms.*;
+import javax.webbeans.*;
 
 /*
  * XMPP protocol server
@@ -54,6 +53,8 @@ public class XmppProtocol extends Protocol
 {
   private static final Logger log
     = Logger.getLogger(XmppProtocol.class.getName());
+
+  @In private HmtpBroker _broker;
   
   private ClassLoader _loader;
 
@@ -81,6 +82,11 @@ public class XmppProtocol extends Protocol
   ClassLoader getClassLoader()
   {
     return _loader;
+  }
+
+  HmtpBroker getBroker()
+  {
+    return _broker;
   }
 
   @PostConstruct

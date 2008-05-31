@@ -33,14 +33,42 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * IM message
+ * IM message - RFC 3921
+ *
+ * <pre>
+ * element message{xmlns="jabber:client"} {
+ *   attribute from?
+ *   &amp; attribute to?
+ *   &amp; attribute id?
+ *   &amp; attribute type?
+ *
+ *   &amp; subject*
+ *   &amp; body*
+ *   &amp; thread?
+ *   &amp; other*
+ * }
+ *
+ * element body {
+ *   attribute xml:lang?
+ *   &amp; string
+ * }
+ *
+ * element subject {
+ *   attribute xml:lang?
+ *   &amp; string
+ * } 
+ *
+ * element thread {
+ *   &amp; string
+ * }
+ * </pre>
  */
 public class ImMessage implements Serializable {
   private String _to;
   private String _from;
 
-  // chat, groupchat, headline, normal
-  private String _type;
+  // chat, error, groupchat, headline, normal
+  private String _type = "normal";
   
   private Text []_subject;
   private Text []_body;
@@ -62,6 +90,23 @@ public class ImMessage implements Serializable {
   {
     _type = type;
     _body = new Text[] { new Text(body) };
+  }
+
+  public ImMessage(String to, String from, String type,
+		   Text []subject,
+		   Text []body,
+		   String thread,
+		   Serializable []extra)
+  {
+    _to = to;
+    _from = from;
+    _type = type;
+
+    _subject = subject;
+    _body = body;
+    _thread = thread;
+
+    _extra = extra;
   }
 
   public String getType()

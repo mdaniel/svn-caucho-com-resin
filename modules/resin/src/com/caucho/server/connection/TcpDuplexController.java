@@ -48,7 +48,7 @@ public class TcpDuplexController extends ConnectionController
 
   private ClassLoader _loader;
   
-  private AbstractHttpRequest _request;
+  private TcpServerRequest _request;
   private TcpConnection _conn;
   private long _maxIdleTime;
 
@@ -58,13 +58,7 @@ public class TcpDuplexController extends ConnectionController
   private TcpDuplexHandler _handler;
   private String _readThreadName;
 
-  public TcpDuplexController(ServletRequest request,
-                             TcpDuplexHandler handler)
-  {
-    this(getAbstractHttpRequest(request), handler);
-  }
-
-  public TcpDuplexController(AbstractHttpRequest request,
+  public TcpDuplexController(TcpServerRequest request,
 			     TcpDuplexHandler handler)
   {
     super(request.getConnection());
@@ -203,7 +197,7 @@ public class TcpDuplexController extends ConnectionController
   @Override
   public String toString()
   {
-    AbstractHttpRequest request = _request;
+    TcpServerRequest request = _request;
 
     if (request == null || request.getConnection() == null)
       return getClass().getSimpleName() + "[closed]";

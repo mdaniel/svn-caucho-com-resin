@@ -29,133 +29,80 @@
 
 package com.caucho.jms.xmpp;
 
-import com.caucho.jms.memory.*;
-import com.caucho.jms.message.*;
-import com.caucho.jms.connection.*;
-import com.caucho.hmtp.spi.HmtpBroker;
+import com.caucho.hmtp.*;
+import com.caucho.hmtp.im.*;
+import com.caucho.hmtp.spi.*;
 import com.caucho.server.connection.*;
-import com.caucho.server.port.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.xml.stream.*;
-
-import java.io.IOException;
-import java.util.concurrent.*;
+import java.io.*;
 import java.util.logging.*;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.ObjectMessage;
-import javax.jms.Session;
-import javax.jms.TextMessage;
+import javax.servlet.*;
 import javax.xml.stream.*;
 
 /**
- * XMPP protocol
+ * Protocol handler from the TCP/XMPP stream forwarding to the broker
  */
-public class XmppRequest implements TcpServerRequest, Runnable {
-  private static final L10N L = new L10N(XmppRequest.class);
+public class XmppBrokerStream
+  implements TcpDuplexHandler, HmtpStream
+{
   private static final Logger log
-    = Logger.getLogger(XmppRequest.class.getName());
-
-  private static final String STREAMS_NS = "http://etherx.jabber.org/streams";
-
-  private XmppProtocol _protocol;
-
-  private HmtpBroker _broker;
+    = Logger.getLogger(XmppBrokerStream.class.getName());
   
-  private TcpConnection _conn;
+  private HmtpBroker _broker;
+  private HmtpConnection _conn;
+  private HmtpStream _toBroker;
+
+  private HmtpStream _callbackHandler;
+  private HmtpStream _authHandler;
 
   private ReadStream _is;
   private WriteStream _os;
-
-  private volatile int _requestId;
-
-  private String _id;
-  private String _from;
-  private String _clientTo;
-  
-  private String _streamFrom;
-  private String _clientBind;
-
-  private String _name;
   
   private XMLStreamReaderImpl _in;
 
-  private boolean _isPresent;
-  private boolean _isThread;
+  private String _jid;
+  private long _requestId;
 
-  private final ThreadPool _threadPool;
-  private final BlockingQueue<Stanza> _outboundQueue
-    = new ArrayBlockingQueue<Stanza>(1024);
-
-  private State _state;
+  private String _name;
   private boolean _isFinest;
 
-  XmppRequest(XmppProtocol protocol, TcpConnection conn)
+  XmppBrokerStream(HmtpBroker broker,
+		   XMLStreamReaderImpl in, WriteStream os)
   {
-    _protocol = protocol;
-    _broker = protocol.getBroker();
-    _conn = conn;
-    _threadPool = ThreadPool.getThreadPool();
+    _broker = broker;
+
+    _in = in;
+    _os = os;
+
+    _callbackHandler = null;//new ServerAgentStream(this, _out);
+    _authHandler = null;//new AuthBrokerStream(this, _callbackHandler);
+
+    _isFinest = log.isLoggable(Level.FINEST);
+
+    System.out.println("START-ME-UP:");
+
+    login("test", "dummy", null);
   }
 
-  int getRequestId()
+  protected String getJid()
   {
-    return _requestId;
-  }
-
-  /**
-   * Returns the tcp connection
-   */
-  public TcpConnection getConnection()
-  {
-    return _conn;
+    return _jid;
   }
   
-  /**
-   * Initialize the connection.  At this point, the current thread is the
-   * connection thread.
-   */
-  public void init()
-  {
-  }
-
-  /**
-   * Return true if the connection should wait for a read before
-   * handling the request.
-   */
-  public boolean isWaitForRead()
-  {
-    return true;
-  }
-  
-  /**
-   * Handles a new connection.  The controlling TcpServer may call
-   * handleConnection again after the connection completes, so 
-   * the implementation must initialize any variables for each connection.
-   */
-  public boolean handleRequest()
+  public boolean serviceRead(ReadStream is,
+			     TcpDuplexController controller)
     throws IOException
   {
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
+    XMLStreamReaderImpl in = _in;
     
+    System.out.println("READs for an ex-leper");
+
+    if (in == null)
+      return false;
+
     try {
-      thread.setContextClassLoader(_protocol.getClassLoader());
-
-      _isFinest = log.isLoggable(Level.FINEST);
-      
-      if (_state == null) {
-	return handleInit();
-      }
-
-      TcpDuplexHandler handler = new XmppBrokerStream(_broker, _in, _os);
-      
-      TcpDuplexController controller = new TcpDuplexController(this, handler);
-
-      return true;
-      
-      /*
       int tag;
       
       while ((tag = _in.next()) > 0) {
@@ -201,130 +148,34 @@ public class XmppRequest implements TcpServerRequest, Runnable {
 	log.finest(this + " end of stream");
 
       return false;
-      */
-    } catch (XMLStreamException e) {
-      e.printStackTrace();
-      throw new IOExceptionWrapper(e);
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw e;
-    } catch (RuntimeException e) {
-      e.printStackTrace();
-      throw e;
-    } finally {
-      thread.setContextClassLoader(oldLoader);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+
+      return false;
     }
   }
-
-  private boolean handleInit()
-    throws IOException, XMLStreamException
+  
+  public boolean serviceWrite(WriteStream os,
+			      TcpDuplexController controller)
+    throws IOException
   {
-    _state = State.INIT;
+    return false;
+  }
 
-    StringBuilder sb = new StringBuilder();
-    Base64.encode(sb, RandomUtil.getRandomLong());
-    while (sb.charAt(sb.length() - 1) == '=')
-      sb.setLength(sb.length() - 1);
+  String login(String uid, Serializable credentials, String resource)
+  {
+    String password = (String) credentials;
     
-    _id = sb.toString();
+    _conn = _broker.getConnection(uid, password);
+    _conn.setMessageHandler(_callbackHandler);
+    _conn.setQueryHandler(_callbackHandler);
+    _conn.setPresenceHandler(_callbackHandler);
+
+    _jid = _conn.getJid();
     
-    int ch;
-      
-    _is = _conn.getReadStream();
-    _os = _conn.getWriteStream();
-      
-    _in = new XMLStreamReaderImpl(_is);
+    _toBroker = _conn.getBrokerStream();
 
-    int tag;
-    while ((tag = _in.next()) > 0
-	   && tag != XMLStreamConstants.START_ELEMENT) {
-      if (_isFinest)
-	debug(_in);
-    }
-    
-    if (_isFinest)
-      debug(_in);
-
-    String name = _in.getLocalName();
-      
-    if (! "stream".equals(name)) {
-      _os.print("<error><invalid-xml/></error>");
-      
-      if (log.isLoggable(Level.FINE))
-	log.fine(L.l("{0}: '{1}' is an unknown tag from {2}",
-		     this, name, _conn.getRemoteAddress()));
-      return false;
-    }
-    else if (! STREAMS_NS.equals(_in.getNamespaceURI())) {
-      _os.print("<error><bad-namespace-prefix/></error>");
-      
-      if (log.isLoggable(Level.FINE))
-	log.fine(L.l("{0}: xmlns='{1}' is an unknown namespace from {2}",
-		     this, name, _conn.getRemoteAddress()));
-      
-      return false;
-    }
-    /*
-    else if (! "jabber:client".equals(_in.getNamespaceURI(""))) {
-      _os.print("<error><bad-namespace-prefix/></error>");
-      
-      if (log.isLoggable(Level.FINE))
-	log.fine(L.l("{0}: xmlns='{1}' is an unknown namespace for '' from {2}",
-		     this, name, _conn.getRemoteAddress()));
-      
-      return false;
-    }
-    */
-    else if (! "1.0".equals(_in.getAttributeValue(null, "version"))) {
-      _os.print("<error><unsupported-version/></error>");
-      
-      if (log.isLoggable(Level.FINE))
-	log.fine(L.l("{0}: version='{1}' is an unknown version from {2}",
-		     this, _in.getAttributeValue(null, "version"),
-		     _conn.getRemoteAddress()));
-      
-      return false;
-    }
-
-    String to = null;
-      
-    for (int i = _in.getAttributeCount() - 1; i >= 0; i--) {
-      String localName = _in.getAttributeLocalName(i);
-      String value = _in.getAttributeValue(i);
-
-      if ("to".equals(localName))
-	to = value;
-    }
-
-    String from = _from;
-
-    if (from == null)
-      from = to;
-
-    if (from == null)
-      from = _conn.getLocalAddress().getHostAddress();
-      
-    _streamFrom = from;
-    _clientTo = from + "/" + _id;
-
-    _os.print("<stream:stream xmlns='jabber:client'");
-    _os.print(" xmlns:stream='http://etherx.jabber.org/streams'");
-    _os.print(" id='" + _id + "'");
-    _os.print(" from='" + from + "'");
-    _os.print(" version='1.0'>");
-      
-    // + "   <mechanism>DIGEST-MD5</mechanism>\n"
-    _os.print("<stream:features>");
-	      //		+ "<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'/>"
-    _os.print("<mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>");
-    _os.print("<mechanism>PLAIN</mechanism>");
-    _os.print("</mechanisms>");
-    _os.print("<auth xmlns='http://jabber.org/features/iq-auth'></auth>");
-    //_os.print("<register xmlns='http://jabber.org/features/iq-register'></register>");
-    _os.print("</stream:features>\n");
-    _os.flush();
-
-    return true;
+    return _jid;
   }
 
   private boolean handleStream()
@@ -342,20 +193,24 @@ public class XmppRequest implements TcpServerRequest, Runnable {
 	to = value;
     }
 
-    String from = _from;
-
+    String from = "localhost";
+    
+    /**
     if (from == null)
       from = to;
 
     if (from == null)
-      from = _conn.getLocalAddress().getHostAddress();
+      from = _broker.getJid();
+    */
 
+    long id = _requestId++;
+    
     if (log.isLoggable(Level.FINE))
-      log.fine(this + " stream open(from=" + from + " id=" + _id + ")");
+      log.fine(this + " stream open(from=" + from + " id=" + id + ")");
       
     _os.print("<stream:stream xmlns='jabber:client'");
     _os.print(" xmlns:stream='http://etherx.jabber.org/streams'");
-    _os.print(" id='" + _id + "'");
+    _os.print(" id='" + id + "'");
     _os.print(" from='" + from + "'");
     _os.print(" version='1.0'>");
       
@@ -397,16 +252,16 @@ public class XmppRequest implements TcpServerRequest, Runnable {
       
       skipToEnd("iq");
 
-      _clientBind = "test@" + _streamFrom + "/" + resource;
+      // _clientBind = "test@" + _streamFrom + "/" + resource;
 
       if (log.isLoggable(Level.FINE)) {
-	log.fine(this + " bind-result(jid=" + _clientBind
+	log.fine(this + " bind-result(jid=" + _jid
 		 + " id=" + id + " to=" + to + " from=" + from + ")");
       }
 	
-      _os.print("<iq type='result' id='" + id + "' to='" + _clientTo + "'>");
+      _os.print("<iq type='result' id='" + id + "' to='" + _jid + "'>");
       _os.print("<bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>");
-      _os.print("<jid>" + _clientBind + "</jid>");
+      _os.print("<jid>" + _jid + "</jid>");
       _os.print("</bind></iq>\n");
       _os.flush();
 
@@ -415,7 +270,7 @@ public class XmppRequest implements TcpServerRequest, Runnable {
     else if ("session".equals(_in.getLocalName())) {
       skipToEnd("iq");
       
-      _os.print("<iq type='result' id='" + id + "' from='" + _streamFrom + "'/>");
+      _os.print("<iq type='result' id='" + id + "' from='" + _jid + "'/>");
       _os.flush();
 
       return true;
@@ -425,7 +280,7 @@ public class XmppRequest implements TcpServerRequest, Runnable {
       skipToEnd("iq");
 
       
-      _os.print("<iq type='result' id='" + id + "' from='" + _streamFrom + "'>");
+      _os.print("<iq type='result' id='" + id + "' from='" + _jid + "'>");
       _os.print("<query xmlns='jabber:iq:roster'>");
 
       _os.print("<item jid='jimmy@localhost' name='Test' subscription='to'>");
@@ -514,20 +369,16 @@ public class XmppRequest implements TcpServerRequest, Runnable {
 
     expectEnd("presence", tag);
 
+    /*
     if (! _isPresent) {
       _isPresent = true;
       _protocol.addClient(this);
-
-      /*
-      _os.print("<iq from='jimmy@localhost' id='disco' type='get'>");
-      _os.print("<query xmlns='http://jabber.org/protocol/disco#info'/>");
-      _os.print("</iq>");
-      */
 
       _os.print("<presence from='jimmy@localhost'>");
       _os.print("<status>active</status>");
       _os.print("</presence>");
     }
+    */
 
     return true;
   }
@@ -539,16 +390,6 @@ public class XmppRequest implements TcpServerRequest, Runnable {
     String id = _in.getAttributeValue(null, "id");
     String from = _in.getAttributeValue(null, "from");
     String to = _in.getAttributeValue(null, "to");
-
-    XmppPubSubLeaf leaf = _protocol.getNode(to);
-
-    if (leaf == null) {
-      log.fine(this + " message send to '" + to + "' unknown user");
-      
-      skipToEnd("message");
-      
-      return true;
-    }
 
     int tag;
     String body = "";
@@ -576,6 +417,12 @@ public class XmppRequest implements TcpServerRequest, Runnable {
 
     expectEnd("message", tag);
 
+    ImMessage message = new ImMessage(type, body);
+
+    System.out.println("SEND-MESSAGE: " + message);
+    _toBroker.sendMessage(to, from, message);
+
+    /*
     try {
       ObjectMessageImpl msg = new ObjectMessageImpl();
       msg.setJMSMessageID("ID:xmpp-test");
@@ -589,6 +436,7 @@ public class XmppRequest implements TcpServerRequest, Runnable {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+    */
 
     return true;
   }
@@ -731,84 +579,186 @@ public class XmppRequest implements TcpServerRequest, Runnable {
   }
   
   /**
-   * Resumes processing after a wait.
+   * Handles a message
    */
-  public boolean handleResume()
-    throws IOException
+  public void sendMessage(String to,
+			  String from,
+			  Serializable value)
   {
-    return false;
+    _toBroker.sendMessage(to, _jid, value);
   }
-
+  
   /**
-   * Handles a close event when the connection is closed.
+   * Handles a message
    */
-  public void protocolCloseEvent()
+  public void sendMessageError(String to,
+			       String from,
+			       Serializable value,
+			       HmtpError error)
   {
-    _protocol.removeClient(this);
-    _requestId++;
+    _toBroker.sendMessageError(to, _jid, value, error);
+  }
+  
+  /**
+   * Handles a get query.
+   *
+   * The get handler must respond with either
+   * a QueryResult or a QueryError 
+   */
+  public boolean sendQueryGet(long id,
+			      String to,
+			      String from,
+			      Serializable value)
+  {
+    _toBroker.sendQueryGet(id, to, _jid, value);
     
-    _state = null;
-    _isPresent = false;
-
-    synchronized (this) {
-      _outboundQueue.clear();
-    }
+    return true;
   }
-
-  public void offer(int requestId, Stanza stanza)
+  
+  /**
+   * Handles a set query.
+   *
+   * The set handler must respond with either
+   * a QueryResult or a QueryError 
+   */
+  public boolean sendQuerySet(long id,
+			      String to,
+			      String from,
+			      Serializable value)
   {
-    synchronized (this) {
-      if (requestId != _requestId || ! _isPresent)
-	return;
-
-      if (_outboundQueue.offer(stanza)) {
-	if (! _isThread) {
-	  _isThread = true;
-	  _threadPool.schedule(this);
-	}
-      }
-    }
+    _toBroker.sendQuerySet(id, to, _jid, value);
+    
+    return true;
   }
-
-  public void run()
+  
+  /**
+   * Handles a query result.
+   *
+   * The result id will match a pending get or set.
+   */
+  public void sendQueryResult(long id,
+			      String to,
+			      String from,
+			      Serializable value)
   {
-    int id = _requestId;
+    _toBroker.sendQueryResult(id, to, _jid, value);
+  }
+  
+  /**
+   * Handles a query error.
+   *
+   * The result id will match a pending get or set.
+   */
+  public void sendQueryError(long id,
+			     String to,
+			     String from,
+			     Serializable value,
+			     HmtpError error)
+  {
+    _toBroker.sendQueryError(id, to, _jid, value, error);
+  }
+  
+  /**
+   * Handles a presence availability packet.
+   *
+   * If the handler deals with clients, the "from" value should be ignored
+   * and replaced by the client's jid.
+   */
+  public void sendPresence(String to,
+			   String from,
+			   Serializable []data)
 
-    while (id == _requestId) {
-      Stanza stanza = null;
-      
-      synchronized (this) {
-	stanza = _outboundQueue.poll();
+  {
+    _toBroker.sendPresence(to, _jid, data);
+  }
+  
+  /**
+   * Handles a presence unavailability packet.
+   *
+   * If the handler deals with clients, the "from" value should be ignored
+   * and replaced by the client's jid.
+   */
+  public void sendPresenceUnavailable(String to,
+				      String from,
+				      Serializable []data)
+  {
+    _toBroker.sendPresenceUnavailable(to, _jid, data);
+  }
+  
+  /**
+   * Handles a presence probe from another server
+   */
+  public void sendPresenceProbe(String to,
+			      String from,
+			      Serializable []data)
+  {
+    _toBroker.sendPresenceProbe(to, _jid, data);
+  }
+  
+  /**
+   * Handles a presence subscribe request from a client
+   */
+  public void sendPresenceSubscribe(String to,
+				    String from,
+				    Serializable []data)
+  {
+    _toBroker.sendPresenceSubscribe(to, _jid, data);
+  }
+  
+  /**
+   * Handles a presence subscribed result to a client
+   */
+  public void sendPresenceSubscribed(String to,
+				     String from,
+				     Serializable []data)
+  {
+    _toBroker.sendPresenceSubscribed(to, _jid, data);
+  }
+  
+  /**
+   * Handles a presence unsubscribe request from a client
+   */
+  public void sendPresenceUnsubscribe(String to,
+				      String from,
+				      Serializable []data)
+  {
+    _toBroker.sendPresenceUnsubscribe(to, _jid, data);
+  }
+  
+  /**
+   * Handles a presence unsubscribed result to a client
+   */
+  public void sendPresenceUnsubscribed(String to,
+				       String from,
+				       Serializable []data)
+  {
+    _toBroker.sendPresenceUnsubscribed(to, _jid, data);
+  }
+  
+  /**
+   * Handles a presence unsubscribed result to a client
+   */
+  public void sendPresenceError(String to,
+			      String from,
+			      Serializable []data,
+			      HmtpError error)
+  {
+    _toBroker.sendPresenceError(to, _jid, data, error);
+  }
 
-	if (stanza == null) {
-	  _isThread = false;
-	  return;
-	}
-      }
+  public void close()
+  {
+    XMLStreamReaderImpl in = _in;
+    _in = null;
 
-      try {
-	if (log.isLoggable(Level.FINER))
-	  log.finest(this + " send from=localhost/test to=" + _clientBind + " " + stanza);
-
-	stanza.print(_os, "localhost/test", _clientBind);
-	_os.flush();
-      } catch (IOException e) {
-	// XXX: should cause close?
-	
-	log.log(Level.FINER, e.toString(), e);
-      }
+    if (in != null) {
+      try { in.close(); } catch (Exception e) {}
     }
   }
 
+  @Override
   public String toString()
   {
-    if (_conn != null)
-      return getClass().getSimpleName() + "[" + _conn.getId() + "]";
-    else
-      return getClass().getSimpleName() + "[]";
+    return getClass().getSimpleName() + "[" + _conn + "]";
   }
-
-  enum State {
-    INIT
-  };
 }

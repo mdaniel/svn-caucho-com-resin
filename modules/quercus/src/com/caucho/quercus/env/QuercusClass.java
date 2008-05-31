@@ -830,6 +830,11 @@ public class QuercusClass {
     
     if (fun != null)
       return fun;
+    else if (getName().equalsIgnoreCase(toMethod(name, nameLen))
+	     && _parent != null) {
+      // php/093j
+      return _parent.getFunction(_parent.getName());
+    }
     else {
       throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown method",
 					getName(), toMethod(name, nameLen)));

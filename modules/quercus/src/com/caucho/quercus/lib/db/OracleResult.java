@@ -74,17 +74,4 @@ public class OracleResult extends JdbcResultResource {
   {
     super(env, metaData, conn);
   }
-
-  /**
-   * Returns a string representation for this object.
-   *
-   * @return a string representation for this object
-   */
-  public String toString()
-  {
-    if (!_closed)
-      return "OracleResult[" + super.toString() + "]";
-    else
-      return "OracleResult[closed]";
-  }
 }

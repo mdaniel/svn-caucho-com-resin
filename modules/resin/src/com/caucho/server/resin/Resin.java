@@ -37,6 +37,7 @@ import com.caucho.config.lib.*;
 import com.caucho.config.program.*;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
+import com.caucho.hemp.broker.HempBroker;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.license.LicenseCheck;
 import com.caucho.lifecycle.Lifecycle;
@@ -155,6 +156,9 @@ public class Resin implements EnvironmentBean, SchemaBean
   private Path _managementPath;
   private Management _management;
 
+  // XXX: might belong in other environment context
+  private HempBroker _broker;
+
   private ThreadPoolAdmin _threadPoolAdmin;
 
   private ObjectName _objectName;
@@ -249,6 +253,9 @@ public class Resin implements EnvironmentBean, SchemaBean
       webBeans.addSingleton(new JavaVar(), "java", Standard.class);
       webBeans.addSingleton(System.getProperties(), "system", Standard.class);
 
+      _broker = new HempBroker();
+      webBeans.addSingleton(_broker, "HmtpBroker", Standard.class);
+
       webBeans.addSingleton(new com.caucho.config.functions.FmtFunctions(), "fmt", Standard.class);
 
       ResinConfigLibrary.configure(webBeans);
@@ -289,12 +296,14 @@ public class Resin implements EnvironmentBean, SchemaBean
   public static Resin create(ClassLoader loader)
   {
     String licenseErrorMessage = null;
+
+    Resin resin = null;
     
     try {
       Class cl = Class.forName("com.caucho.server.resin.ProResin");
       Constructor ctor = cl.getConstructor(new Class[] { ClassLoader.class });
 
-      return (Resin) ctor.newInstance(loader); 
+      resin = (Resin) ctor.newInstance(loader); 
     } catch (ConfigException e) {
       log().log(Level.FINER, e.toString(), e);
 
@@ -308,7 +317,11 @@ public class Resin implements EnvironmentBean, SchemaBean
 			 "  including caching, clustering, JNI acceleration, and OpenSSL integration.\n");
     }
 
-    return new Resin(loader, licenseErrorMessage);
+    resin = new Resin(loader, licenseErrorMessage);
+
+    _resinLocal.set(resin, loader);
+
+    return resin;
   }
 
   /**
