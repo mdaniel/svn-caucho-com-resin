@@ -28,8 +28,6 @@
 
 package javax.faces.component;
 
-import com.caucho.util.L10N;
-
 import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
@@ -45,8 +43,6 @@ import javax.faces.render.*;
 public abstract class UIComponent
   implements StateHolder, SystemEventListenerHolder
 {
-  private static final L10N L = new L10N(UIComponent.class);
-
   private static final Logger log
     = Logger.getLogger(UIComponent.class.getName());
 
@@ -382,9 +378,7 @@ public abstract class UIComponent
     if (components == null ||
         components.length == 0 ||
         components [components.length - 1] != this) {
-      log.fine(L.l(
-        "UIComponent.popComponent expected to find self '{0}' on stack",
-        this));
+      log.fine("UIComponent.popComponent expected to find self '" + this + "' on stack");
     }
     else {
       UIComponent []temp = new UIComponent [components.length - 1];
