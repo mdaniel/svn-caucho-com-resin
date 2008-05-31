@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.xmpp;
+package com.caucho.xmpp;
 
+import com.caucho.xmpp.Stanza;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.util.*;
@@ -41,7 +42,13 @@ import java.util.logging.*;
 import javax.xml.stream.*;
 
 /**
- * XMPP protocol
+ * XMPP protocol item for successful authentication
  */
-public class EmptyStanza extends Stanza {
+public class SuccessStanza extends Stanza
+{
+  public SuccessStanza(XMLStreamReader in)
+    throws IOException, XMLStreamException
+  {
+    super(in);
+  }
 }

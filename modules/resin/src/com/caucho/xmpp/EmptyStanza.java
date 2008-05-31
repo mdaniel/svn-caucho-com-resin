@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.xmpp;
+package com.caucho.xmpp;
 
+import com.caucho.jms.xmpp.*;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.util.*;
@@ -41,17 +42,7 @@ import java.util.logging.*;
 import javax.xml.stream.*;
 
 /**
- * XMPP protocol item for successful query
+ * XMPP protocol
  */
-public class IqStanza extends Stanza
-{
-  public IqStanza()
-  {
-  }
-  
-  public IqStanza(XMLStreamReader in)
-    throws IOException, XMLStreamException
-  {
-    super(in);
-  }
+public class EmptyStanza extends Stanza {
 }

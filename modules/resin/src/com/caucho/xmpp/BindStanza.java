@@ -27,12 +27,25 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.xmpp;
+package com.caucho.xmpp;
+
+import com.caucho.jms.xmpp.*;
+import com.caucho.server.connection.*;
+import com.caucho.server.port.*;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
+
+import java.io.IOException;
+import java.net.*;
+import java.util.*;
+import java.util.logging.*;
+import javax.xml.stream.*;
 
 /**
- * XMPP protocol chat
+ * XMPP protocol
  */
-public enum ChatTypes {
-  chat,
-  headline
+public class BindStanza extends Stanza {
+  public BindStanza()
+  {
+  }
 }

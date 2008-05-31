@@ -27,8 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.xmpp;
+package com.caucho.xmpp;
 
+import com.caucho.jms.xmpp.*;
+import com.caucho.xmpp.MessageStanza;
 import com.caucho.bam.BamBroker;
 import com.caucho.jms.JmsConnectionFactory;
 import com.caucho.jms.message.MessageImpl;

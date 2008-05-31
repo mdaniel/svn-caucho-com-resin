@@ -27,8 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.xmpp;
+package com.caucho.xmpp;
 
+import com.caucho.xmpp.SuccessStanza;
+import com.caucho.xmpp.StreamStanza;
+import com.caucho.xmpp.Stanza;
+import com.caucho.xmpp.SessionStanza;
+import com.caucho.xmpp.IqErrorStanza;
+import com.caucho.xmpp.EmptyStanza;
+import com.caucho.xmpp.BindStanza;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.util.*;

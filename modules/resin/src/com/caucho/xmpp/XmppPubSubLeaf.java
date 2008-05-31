@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.xmpp;
+package com.caucho.xmpp;
 
+import com.caucho.xmpp.XmppProtocol;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.*;

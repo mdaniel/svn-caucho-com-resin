@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms.xmpp;
+package com.caucho.xmpp;
 
+import com.caucho.jms.xmpp.*;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.util.*;
@@ -41,11 +42,58 @@ import java.util.logging.*;
 import javax.xml.stream.*;
 
 /**
- * XMPP protocol item for successful query
+ * XMPP protocol
  */
-public class SessionStanza extends Stanza
-{
-  public SessionStanza()
+public class MessageStanza extends Stanza {
+  private String _subject;
+  private String _body;
+
+  public void setSubject(String subject)
   {
+    _subject = subject;
+  }
+
+  public void setBody(String body)
+  {
+    _body = body;
+  }
+
+  @Override
+  protected void print(WriteStream out, String from, String to)
+    throws IOException
+  {
+    out.print("<message");
+
+    if (from != null) {
+      out.print(" from='");
+      out.print(from);
+      out.print("'");
+    }
+
+    if (to != null) {
+      out.print(" to='");
+      out.print(to);
+      out.print("'");
+    }
+
+    out.print(" type='chat'");
+
+    out.print(">");
+
+    if (_subject != null) {
+      out.print("<subject>");
+      out.print(_subject);
+      out.print("</subject>");
+    }
+
+    if (_body != null) {
+      out.print("<body>");
+      out.print(_body);
+      out.print("</body>");
+    }
+
+    System.out.println("MSG: " + _body);
+
+    out.print("</message>");
   }
 }

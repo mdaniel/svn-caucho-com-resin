@@ -29,6 +29,8 @@
 
 package com.caucho.jms.xmpp;
 
+import com.caucho.xmpp.XmppPubSubLeaf;
+import com.caucho.xmpp.XmppProtocol;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.*;
