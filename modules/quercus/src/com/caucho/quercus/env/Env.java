@@ -659,6 +659,15 @@ public class Env {
   {
     return _isAllowUrlFopen;
   }
+
+  /**
+   * Returns the connection status
+   */
+  public int getConnectionStatus()
+  {
+    // always returns a valid value for now
+    return 0;
+  }
   
   public void start()
   {

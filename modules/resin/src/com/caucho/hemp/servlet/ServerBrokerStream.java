@@ -29,17 +29,17 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.hmtp.HmtpConnection;
-import com.caucho.hmtp.HmtpStream;
+import com.caucho.bam.BamConnection;
+import com.caucho.bam.BamStream;
 import com.caucho.hmtp.packet.Packet;
-import com.caucho.hmtp.HmtpError;
+import com.caucho.bam.BamError;
 import java.io.*;
 import java.util.logging.*;
 import javax.servlet.*;
 
 import com.caucho.hemp.*;
 import com.caucho.hessian.io.*;
-import com.caucho.hmtp.spi.HmtpBroker;
+import com.caucho.bam.BamBroker;
 import com.caucho.server.connection.*;
 import com.caucho.vfs.*;
 
@@ -47,14 +47,14 @@ import com.caucho.vfs.*;
  * Main protocol handler for the HTTP version of HeMPP.
  */
 public class ServerBrokerStream
-  implements TcpDuplexHandler, HmtpStream
+  implements TcpDuplexHandler, BamStream
 {
   private static final Logger log
     = Logger.getLogger(ServerBrokerStream.class.getName());
   
-  private HmtpBroker _broker;
-  private HmtpConnection _conn;
-  private HmtpStream _toBroker;
+  private BamBroker _broker;
+  private BamConnection _conn;
+  private BamStream _toBroker;
 
   private Hessian2StreamingInput _in;
   private Hessian2StreamingOutput _out;
@@ -64,7 +64,7 @@ public class ServerBrokerStream
 
   private String _jid;
 
-  ServerBrokerStream(HmtpBroker broker, ReadStream rs, WriteStream ws)
+  ServerBrokerStream(BamBroker broker, ReadStream rs, WriteStream ws)
   {
     _broker = broker;
 
@@ -159,7 +159,7 @@ public class ServerBrokerStream
   public void sendMessageError(String to,
 			       String from,
 			       Serializable value,
-			       HmtpError error)
+			       BamError error)
   {
     _toBroker.sendMessageError(to, _jid, value, error);
   }
@@ -218,7 +218,7 @@ public class ServerBrokerStream
 			     String to,
 			     String from,
 			     Serializable value,
-			     HmtpError error)
+			     BamError error)
   {
     _toBroker.sendQueryError(id, to, _jid, value, error);
   }
@@ -306,7 +306,7 @@ public class ServerBrokerStream
   public void sendPresenceError(String to,
 			      String from,
 			      Serializable []data,
-			      HmtpError error)
+			      BamError error)
   {
     _toBroker.sendPresenceError(to, _jid, data, error);
   }

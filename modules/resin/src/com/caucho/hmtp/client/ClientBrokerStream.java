@@ -43,9 +43,9 @@ import com.caucho.hmtp.packet.PresenceError;
 import com.caucho.hmtp.packet.Presence;
 import com.caucho.hmtp.packet.MessageError;
 import com.caucho.hmtp.packet.Message;
-import com.caucho.hmtp.HmtpStream;
-import com.caucho.hmtp.HmtpProtocolException;
-import com.caucho.hmtp.HmtpError;
+import com.caucho.bam.BamStream;
+import com.caucho.bam.BamProtocolException;
+import com.caucho.bam.BamError;
 import com.caucho.hessian.io.*;
 
 import java.io.*;
@@ -57,7 +57,7 @@ import java.util.logging.*;
 /**
  * HMTP client protocol
  */
-public class ClientBrokerStream implements HmtpStream {
+public class ClientBrokerStream implements BamStream {
   private static final Logger log
     = Logger.getLogger(ClientBrokerStream.class.getName());
 
@@ -107,7 +107,7 @@ public class ClientBrokerStream implements HmtpStream {
 	out.flush();
       }
     } catch (IOException e) {
-      throw new HmtpProtocolException(e);
+      throw new BamProtocolException(e);
     }
   }
 
@@ -117,7 +117,7 @@ public class ClientBrokerStream implements HmtpStream {
   public void sendMessageError(String to,
 			       String from,
 			       Serializable value,
-			       HmtpError error)
+			       BamError error)
   {
     try {
       Hessian2StreamingOutput out = _out;
@@ -127,7 +127,7 @@ public class ClientBrokerStream implements HmtpStream {
 	out.flush();
       }
     } catch (IOException e) {
-      throw new HmtpProtocolException(e);
+      throw new BamProtocolException(e);
     }
   }
 
@@ -153,7 +153,7 @@ public class ClientBrokerStream implements HmtpStream {
 
       return true;
     } catch (IOException e) {
-      throw new HmtpProtocolException(e);
+      throw new BamProtocolException(e);
     }
   }
 
@@ -175,7 +175,7 @@ public class ClientBrokerStream implements HmtpStream {
 
       return true;
     } catch (IOException e) {
-      throw new HmtpProtocolException(e);
+      throw new BamProtocolException(e);
     }
   }
 
@@ -195,7 +195,7 @@ public class ClientBrokerStream implements HmtpStream {
 	out.flush();
       }
     } catch (IOException e) {
-      throw new HmtpProtocolException(e);
+      throw new BamProtocolException(e);
     }
   }
 
@@ -206,7 +206,7 @@ public class ClientBrokerStream implements HmtpStream {
 			     String to,
 			     String from, 
 			     Serializable value,
-			     HmtpError error)
+			     BamError error)
   {
     try {
       Hessian2StreamingOutput out = _out;
@@ -239,7 +239,7 @@ public class ClientBrokerStream implements HmtpStream {
 	out.flush();
       }
     } catch (IOException e) {
-      throw new HmtpProtocolException(e);
+      throw new BamProtocolException(e);
     }
   }
 
@@ -258,7 +258,7 @@ public class ClientBrokerStream implements HmtpStream {
 	out.flush();
       }
     } catch (IOException e) {
-      throw new HmtpProtocolException(e);
+      throw new BamProtocolException(e);
     }
   }
 
@@ -277,7 +277,7 @@ public class ClientBrokerStream implements HmtpStream {
 	out.flush();
       }
     } catch (IOException e) {
-      throw new HmtpProtocolException(e);
+      throw new BamProtocolException(e);
     }
   }
 
@@ -296,7 +296,7 @@ public class ClientBrokerStream implements HmtpStream {
 	out.flush();
       }
     } catch (IOException e) {
-      throw new HmtpProtocolException(e);
+      throw new BamProtocolException(e);
     }
   }
 
@@ -315,7 +315,7 @@ public class ClientBrokerStream implements HmtpStream {
 	out.flush();
       }
     } catch (IOException e) {
-      throw new HmtpProtocolException(e);
+      throw new BamProtocolException(e);
     }
   }
 
@@ -334,7 +334,7 @@ public class ClientBrokerStream implements HmtpStream {
 	out.flush();
       }
     } catch (IOException e) {
-      throw new HmtpProtocolException(e);
+      throw new BamProtocolException(e);
     }
   }
 
@@ -353,7 +353,7 @@ public class ClientBrokerStream implements HmtpStream {
 	out.flush();
       }
     } catch (IOException e) {
-      throw new HmtpProtocolException(e);
+      throw new BamProtocolException(e);
     }
   }
 
@@ -363,7 +363,7 @@ public class ClientBrokerStream implements HmtpStream {
   public void sendPresenceError(String to,
 				String from,
 				Serializable []data,
-				HmtpError error)
+				BamError error)
   {
     try {
       Hessian2StreamingOutput out = _out;
@@ -373,7 +373,7 @@ public class ClientBrokerStream implements HmtpStream {
 	out.flush();
       }
     } catch (IOException e) {
-      throw new HmtpProtocolException(e);
+      throw new BamProtocolException(e);
     }
   }
 

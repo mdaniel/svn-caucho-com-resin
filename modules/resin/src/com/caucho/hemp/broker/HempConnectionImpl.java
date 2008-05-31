@@ -29,14 +29,14 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.hmtp.HmtpQueryStream;
-import com.caucho.hmtp.HmtpQueryCallback;
-import com.caucho.hmtp.HmtpPresenceStream;
-import com.caucho.hmtp.HmtpMessageStream;
-import com.caucho.hmtp.HmtpStream;
-import com.caucho.hmtp.HmtpError;
-import com.caucho.hmtp.HmtpConnection;
-import com.caucho.hmtp.spi.HmtpService;
+import com.caucho.bam.BamQueryStream;
+import com.caucho.bam.BamQueryCallback;
+import com.caucho.bam.BamPresenceStream;
+import com.caucho.bam.BamMessageStream;
+import com.caucho.bam.BamStream;
+import com.caucho.bam.BamError;
+import com.caucho.bam.BamConnection;
+import com.caucho.bam.BamService;
 
 import com.caucho.util.*;
 import java.io.Serializable;
@@ -46,7 +46,7 @@ import java.util.logging.*;
 /**
  * Manager
  */
-public class HempConnectionImpl implements HmtpConnection
+public class HempConnectionImpl implements BamConnection
 {
   private static final Logger log
     = Logger.getLogger(HempConnectionImpl.class.getName());
@@ -63,13 +63,13 @@ public class HempConnectionImpl implements HmtpConnection
 
   private long _qId;
   
-  private HmtpStream _brokerFilter;
+  private BamStream _brokerFilter;
   // private HmtpAgentStream _agentFilter;
   
-  private HmtpStream _brokerStream;
+  private BamStream _brokerStream;
   // private HmtpAgentStream _agentStream;
   
-  private HmtpService _resource;
+  private BamService _resource;
 
   private boolean _isClosed;
 
@@ -111,7 +111,7 @@ public class HempConnectionImpl implements HmtpConnection
     return _handler;
   }
   
-  public HmtpStream getBrokerStream()
+  public BamStream getBrokerStream()
   {
     return _brokerStream;
   }
@@ -119,7 +119,7 @@ public class HempConnectionImpl implements HmtpConnection
   /**
    * Registers the listener
    */
-  public void setMessageHandler(HmtpMessageStream handler)
+  public void setMessageHandler(BamMessageStream handler)
   {
     _handler.setMessageHandler(handler);
   }
@@ -127,7 +127,7 @@ public class HempConnectionImpl implements HmtpConnection
   /**
    * Registers the listener
    */
-  public void setQueryHandler(HmtpQueryStream handler)
+  public void setQueryHandler(BamQueryStream handler)
   {
     _handler.setQueryHandler(handler);
   }
@@ -135,7 +135,7 @@ public class HempConnectionImpl implements HmtpConnection
   /**
    * Sets the presence listener
    */
-  public void setPresenceHandler(HmtpPresenceStream handler)
+  public void setPresenceHandler(BamPresenceStream handler)
   {
     _handler.setPresenceHandler(handler);
   }
@@ -179,7 +179,7 @@ public class HempConnectionImpl implements HmtpConnection
    */
   public void queryGet(String to,
 		       Serializable value,
-		       HmtpQueryCallback callback)
+		       BamQueryCallback callback)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -219,7 +219,7 @@ public class HempConnectionImpl implements HmtpConnection
    */
   public void querySet(String to,
 		       Serializable value,
-		       HmtpQueryCallback callback)
+		       BamQueryCallback callback)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -261,7 +261,7 @@ public class HempConnectionImpl implements HmtpConnection
 		       String to,
 		       String from,
 		       Serializable value,
-		       HmtpError error)
+		       BamError error)
   {
     QueryItem item = null;
     
@@ -386,7 +386,7 @@ public class HempConnectionImpl implements HmtpConnection
    */
   public void presenceError(String to,
 			    Serializable []data,
-			    HmtpError error)
+			    BamError error)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -429,9 +429,9 @@ public class HempConnectionImpl implements HmtpConnection
 
   static class QueryItem {
     private final long _id;
-    private final HmtpQueryCallback _callback;
+    private final BamQueryCallback _callback;
 
-    QueryItem(long id, HmtpQueryCallback callback)
+    QueryItem(long id, BamQueryCallback callback)
     {
       _id = id;
       _callback = callback;
@@ -446,7 +446,7 @@ public class HempConnectionImpl implements HmtpConnection
     void onQueryError(String to,
 		      String from,
 		      Serializable value,
-		      HmtpError error)
+		      BamError error)
     {
       if (_callback != null)
 	_callback.onQueryError(to, from, value, error);
@@ -459,9 +459,9 @@ public class HempConnectionImpl implements HmtpConnection
     }
   }
 
-  static class WaitQueryCallback implements HmtpQueryCallback {
+  static class WaitQueryCallback implements BamQueryCallback {
     private Serializable _result;
-    private HmtpError _error;
+    private BamError _error;
     private boolean _isResult;
 
     public Serializable getResult()
@@ -469,7 +469,7 @@ public class HempConnectionImpl implements HmtpConnection
       return _result;
     }
     
-    public HmtpError getError()
+    public BamError getError()
     {
       return _error;
     }
@@ -500,7 +500,7 @@ public class HempConnectionImpl implements HmtpConnection
     }
   
     public void onQueryError(String fromJid, String toJid,
-			     Serializable value, HmtpError error)
+			     Serializable value, BamError error)
     {
       _error = error;
 

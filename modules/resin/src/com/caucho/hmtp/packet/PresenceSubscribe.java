@@ -29,7 +29,7 @@
 
 package com.caucho.hmtp.packet;
 
-import com.caucho.hmtp.HmtpStream;
+import com.caucho.bam.BamStream;
 import com.caucho.hmtp.packet.Presence;
 import java.io.Serializable;
 
@@ -71,7 +71,7 @@ public class PresenceSubscribe extends Presence {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(HmtpStream handler, HmtpStream toSource)
+  public void dispatch(BamStream handler, BamStream toSource)
   {
     handler.sendPresenceSubscribe(getTo(), getFrom(), getData());
   }

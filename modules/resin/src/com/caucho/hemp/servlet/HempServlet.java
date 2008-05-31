@@ -33,7 +33,7 @@ import java.io.*;
 import javax.servlet.*;
 
 import com.caucho.hemp.*;
-import com.caucho.hmtp.spi.HmtpBroker;
+import com.caucho.bam.BamBroker;
 import com.caucho.server.connection.*;
 import com.caucho.vfs.*;
 import com.caucho.webbeans.manager.*;
@@ -43,9 +43,9 @@ import javax.servlet.http.HttpServletResponse;
  * Main protocol handler for the HTTP version of HeMPP.
  */
 public class HempServlet extends GenericServlet {
-  private HmtpBroker _broker;
+  private BamBroker _broker;
 
-  public void setBroker(HmtpBroker broker)
+  public void setBroker(BamBroker broker)
   {
     _broker = broker;
   }
@@ -56,7 +56,7 @@ public class HempServlet extends GenericServlet {
     if (_broker == null) {
       WebBeansContainer webBeans = WebBeansContainer.create();
       
-      _broker = webBeans.getByType(HmtpBroker.class);
+      _broker = webBeans.getByType(BamBroker.class);
     }
   }
   

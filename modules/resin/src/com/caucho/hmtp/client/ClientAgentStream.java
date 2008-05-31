@@ -29,12 +29,12 @@
 
 package com.caucho.hmtp.client;
 
-import com.caucho.hmtp.HmtpQueryStream;
-import com.caucho.hmtp.HmtpPresenceStream;
-import com.caucho.hmtp.HmtpMessageStream;
-import com.caucho.hmtp.HmtpStream;
+import com.caucho.bam.BamQueryStream;
+import com.caucho.bam.BamPresenceStream;
+import com.caucho.bam.BamMessageStream;
+import com.caucho.bam.BamStream;
 import com.caucho.hmtp.packet.Packet;
-import com.caucho.hmtp.HmtpError;
+import com.caucho.bam.BamError;
 import com.caucho.hessian.io.*;
 
 import java.io.*;
@@ -46,14 +46,14 @@ import java.util.logging.*;
 /**
  * HMTP client protocol
  */
-class ClientAgentStream implements Runnable, HmtpStream {
+class ClientAgentStream implements Runnable, BamStream {
   private static final Logger log
     = Logger.getLogger(ClientAgentStream.class.getName());
 
   private static long _gId;
   
   private HmtpClient _client;
-  private HmtpStream _clientStream;
+  private BamStream _clientStream;
   private ClassLoader _loader;
   
   private boolean _isFinest;
@@ -123,7 +123,7 @@ class ClientAgentStream implements Runnable, HmtpStream {
 			String from,
 			Serializable value)
   {
-    HmtpMessageStream handler = _client.getMessageHandler();
+    BamMessageStream handler = _client.getMessageHandler();
 
     if (handler != null)
       handler.sendMessage(to, from, value);
@@ -135,9 +135,9 @@ class ClientAgentStream implements Runnable, HmtpStream {
   public void sendMessageError(String to,
 			       String from,
 			       Serializable value,
-			       HmtpError error)
+			       BamError error)
   {
-    HmtpMessageStream handler = _client.getMessageHandler();
+    BamMessageStream handler = _client.getMessageHandler();
 
     if (handler != null)
       handler.sendMessageError(to, from, value, error);
@@ -159,11 +159,11 @@ class ClientAgentStream implements Runnable, HmtpStream {
 			      String from,
 			      Serializable value)
   {
-    HmtpQueryStream handler = _client.getQueryHandler();
+    BamQueryStream handler = _client.getQueryHandler();
 
     if (handler == null || ! handler.sendQueryGet(id, to, from, value)) {
       String msg = "no sendQueryGet handling " + value.getClass().getName();
-      HmtpError error = new HmtpError("unknown", msg);
+      BamError error = new BamError("unknown", msg);
       
       _clientStream.sendQueryError(id, from, to, value, error);
     }
@@ -182,11 +182,11 @@ class ClientAgentStream implements Runnable, HmtpStream {
 			    String from,
 			    Serializable value)
   {
-    HmtpQueryStream handler = _client.getQueryHandler();
+    BamQueryStream handler = _client.getQueryHandler();
 
     if (handler == null || ! handler.sendQuerySet(id, to, from, value)) {
       String msg = "no sendQuerySet handling " + value.getClass().getName();
-      HmtpError error = new HmtpError("unknown", msg);
+      BamError error = new BamError("unknown", msg);
       
       _clientStream.sendQueryError(id, from, to, value, error);
     }
@@ -216,7 +216,7 @@ class ClientAgentStream implements Runnable, HmtpStream {
 			   String to,
 			   String from,
 			   Serializable value,
-			   HmtpError error)
+			   BamError error)
   {
     _client.onQueryError(id, to, from, value, error);
   }
@@ -231,7 +231,7 @@ class ClientAgentStream implements Runnable, HmtpStream {
 			 String from,
 			 Serializable []data)
   {
-    HmtpPresenceStream handler = _client.getPresenceHandler();
+    BamPresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
       handler.sendPresence(to, from, data);
@@ -247,7 +247,7 @@ class ClientAgentStream implements Runnable, HmtpStream {
 				    String from,
 				    Serializable []data)
   {
-    HmtpPresenceStream handler = _client.getPresenceHandler();
+    BamPresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
       handler.sendPresenceUnavailable(to, from, data);
@@ -260,7 +260,7 @@ class ClientAgentStream implements Runnable, HmtpStream {
 			      String from,
 			      Serializable []data)
   {
-    HmtpPresenceStream handler = _client.getPresenceHandler();
+    BamPresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
       handler.sendPresenceProbe(to, from, data);
@@ -273,7 +273,7 @@ class ClientAgentStream implements Runnable, HmtpStream {
 				  String from,
 				  Serializable []data)
   {
-    HmtpPresenceStream handler = _client.getPresenceHandler();
+    BamPresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
       handler.sendPresenceSubscribe(to, from, data);
@@ -286,7 +286,7 @@ class ClientAgentStream implements Runnable, HmtpStream {
 				   String from,
 				   Serializable []data)
   {
-    HmtpPresenceStream handler = _client.getPresenceHandler();
+    BamPresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
       handler.sendPresenceSubscribed(to, from, data);
@@ -299,7 +299,7 @@ class ClientAgentStream implements Runnable, HmtpStream {
 				    String from,
 				    Serializable []data)
   {
-    HmtpPresenceStream handler = _client.getPresenceHandler();
+    BamPresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
       handler.sendPresenceUnsubscribe(to, from, data);
@@ -312,7 +312,7 @@ class ClientAgentStream implements Runnable, HmtpStream {
 				     String from,
 				     Serializable []data)
   {
-    HmtpPresenceStream handler = _client.getPresenceHandler();
+    BamPresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
       handler.sendPresenceUnsubscribed(to, from, data);
@@ -324,9 +324,9 @@ class ClientAgentStream implements Runnable, HmtpStream {
   public void sendPresenceError(String to,
 			      String from,
 			      Serializable []data,
-			      HmtpError error)
+			      BamError error)
   {
-    HmtpPresenceStream handler = _client.getPresenceHandler();
+    BamPresenceStream handler = _client.getPresenceHandler();
 
     if (handler != null)
       handler.sendPresenceError(to, from, data, error);

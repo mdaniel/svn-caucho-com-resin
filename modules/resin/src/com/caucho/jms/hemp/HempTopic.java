@@ -29,9 +29,10 @@
 
 package com.caucho.jms.hemp;
 
-import com.caucho.hmtp.spi.HmtpBroker;
-import com.caucho.hmtp.spi.SimpleHmtpService;
-import com.caucho.hmtp.*;
+import com.caucho.bam.BamStream;
+import com.caucho.bam.BamError;
+import com.caucho.bam.BamBroker;
+import com.caucho.bam.SimpleBamService;
 import java.util.ArrayList;
 import java.util.logging.*;
 
@@ -52,7 +53,7 @@ import com.caucho.webbeans.manager.*;
  * Implements an hemp topic.
  */
 public class HempTopic extends AbstractTopic
-  implements com.caucho.hmtp.HmtpMessageStream
+  implements com.caucho.bam.BamMessageStream
 {
   private static final L10N L = new L10N(HempTopic.class);
   
@@ -62,8 +63,8 @@ public class HempTopic extends AbstractTopic
   private ArrayList<AbstractQueue> _subscriptionList
     = new ArrayList<AbstractQueue>();
 
-  private HmtpBroker _broker;
-  private HmtpStream _brokerStream;
+  private BamBroker _broker;
+  private BamStream _brokerStream;
 
   private TopicResource _resource = new TopicResource();
 
@@ -73,7 +74,7 @@ public class HempTopic extends AbstractTopic
   /**
    * Sets the broker
    */
-  public void setBroker(HmtpBroker broker)
+  public void setBroker(BamBroker broker)
   {
     _broker = broker;
   }
@@ -98,12 +99,12 @@ public class HempTopic extends AbstractTopic
     if (_broker == null) {
       WebBeansContainer container = WebBeansContainer.create();
 
-      ComponentFactory comp = container.resolveByType(HmtpBroker.class);
+      ComponentFactory comp = container.resolveByType(BamBroker.class);
 
       if (comp == null)
 	throw new ConfigException(L.l("hmpp protocol needs broker"));
     
-      _broker = (HmtpBroker) comp.get();
+      _broker = (BamBroker) comp.get();
 
       if (_broker == null)
 	throw new ConfigException(L.l("Need xmpp protocol"));
@@ -187,7 +188,7 @@ public class HempTopic extends AbstractTopic
   public void sendMessageError(String to,
 			       String from,
 			       Serializable value,
-			       HmtpError error)
+			       BamError error)
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " sendMessageError to=" + to + " from=" + from +
@@ -201,7 +202,7 @@ public class HempTopic extends AbstractTopic
     // _xmppNode.send(session, msg, timeout);
   }
 
-  class TopicResource extends SimpleHmtpService {
+  class TopicResource extends SimpleBamService {
     protected void setJid(String jid)
     {
       super.setJid(jid);

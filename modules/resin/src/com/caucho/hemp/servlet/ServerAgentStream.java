@@ -43,8 +43,8 @@ import com.caucho.hmtp.packet.PresenceError;
 import com.caucho.hmtp.packet.Presence;
 import com.caucho.hmtp.packet.MessageError;
 import com.caucho.hmtp.packet.Message;
-import com.caucho.hmtp.HmtpStream;
-import com.caucho.hmtp.HmtpError;
+import com.caucho.bam.BamStream;
+import com.caucho.bam.BamError;
 import java.io.*;
 import java.util.logging.*;
 
@@ -53,7 +53,7 @@ import com.caucho.hessian.io.*;
 /**
  * Handles callbacks for a hmpp service
  */
-public class ServerAgentStream implements HmtpStream
+public class ServerAgentStream implements BamStream
 {
   private static final Logger log
     = Logger.getLogger(ServerAgentStream.class.getName());
@@ -88,7 +88,7 @@ public class ServerAgentStream implements HmtpStream
   public void sendMessageError(String to,
 			       String from,
 			       Serializable value,
-			       HmtpError error)
+			       BamError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -173,7 +173,7 @@ public class ServerAgentStream implements HmtpStream
 			     String to,
 			     String from,
 			     Serializable query,
-			     HmtpError error)
+			     BamError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -349,7 +349,7 @@ public class ServerAgentStream implements HmtpStream
   public void sendPresenceError(String to,
 			        String from,
 			        Serializable []data,
-			        HmtpError error)
+			        BamError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {

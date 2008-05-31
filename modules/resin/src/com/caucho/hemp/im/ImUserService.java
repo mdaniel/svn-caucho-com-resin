@@ -29,13 +29,13 @@
 
 package com.caucho.hemp.im;
 
-import com.caucho.hmtp.spi.SimpleHmtpService;
-import com.caucho.hmtp.im.RosterQuery;
-import com.caucho.hmtp.im.RosterItem;
-import com.caucho.hmtp.disco.DiscoInfoQuery;
-import com.caucho.hmtp.disco.DiscoIdentity;
-import com.caucho.hmtp.disco.DiscoFeature;
-import com.caucho.hmtp.HmtpStream;
+import com.caucho.bam.SimpleBamService;
+import com.caucho.bam.im.RosterQuery;
+import com.caucho.bam.im.RosterItem;
+import com.caucho.bam.disco.DiscoInfoQuery;
+import com.caucho.bam.disco.DiscoIdentity;
+import com.caucho.bam.disco.DiscoFeature;
+import com.caucho.bam.BamStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.*;
@@ -44,12 +44,12 @@ import java.util.logging.*;
 /**
  * Resource representing an IM user
  */
-public class ImUserService extends SimpleHmtpService
+public class ImUserService extends SimpleBamService
 {
   private static final Logger log
     = Logger.getLogger(ImUserService.class.getName());
   
-  private HmtpStream _broker;
+  private BamStream _broker;
 
   private ArrayList<String> _jidList
     = new ArrayList<String>();
@@ -60,7 +60,7 @@ public class ImUserService extends SimpleHmtpService
   {
   }
   
-  public ImUserService(HmtpStream broker, String jid)
+  public ImUserService(BamStream broker, String jid)
   {
     if (broker == null)
       throw new NullPointerException("server may not be null");
@@ -79,7 +79,7 @@ public class ImUserService extends SimpleHmtpService
    * Creates an inbound filter
    */
   @Override
-  public HmtpStream getBrokerFilter(HmtpStream stream)
+  public BamStream getBrokerFilter(BamStream stream)
   {
     return new ImBrokerFilter(stream, this);
   }

@@ -29,7 +29,7 @@
 
 package com.caucho.jms.xmpp;
 
-import com.caucho.hmtp.spi.*;
+import com.caucho.bam.BamBroker;
 import com.caucho.jms.JmsConnectionFactory;
 import com.caucho.jms.message.MessageImpl;
 import com.caucho.jms.connection.JmsSession;
@@ -54,7 +54,7 @@ public class XmppProtocol extends Protocol
   private static final Logger log
     = Logger.getLogger(XmppProtocol.class.getName());
 
-  @In private HmtpBroker _broker;
+  @In private BamBroker _broker;
   
   private ClassLoader _loader;
 
@@ -84,7 +84,7 @@ public class XmppProtocol extends Protocol
     return _loader;
   }
 
-  HmtpBroker getBroker()
+  BamBroker getBroker()
   {
     return _broker;
   }

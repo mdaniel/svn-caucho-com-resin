@@ -29,8 +29,8 @@
 
 package com.caucho.log.handler;
 
-import com.caucho.hmtp.HmtpConnectionFactory;
-import com.caucho.hmtp.HmtpConnection;
+import com.caucho.bam.BamConnectionFactory;
+import com.caucho.bam.BamConnection;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.*;
 import com.caucho.log.*;
@@ -55,8 +55,8 @@ public class HmtpHandler extends Handler {
     = Logger.getLogger(HmtpHandler.class.getName());
   private static final L10N L = new L10N(HmtpHandler.class);
 
-  @In private HmtpConnectionFactory _factory;
-  private HmtpConnection _conn;
+  @In private BamConnectionFactory _factory;
+  private BamConnection _conn;
   
   private String _to;
 

@@ -29,7 +29,7 @@
 
 package com.caucho.hmtp.packet;
 
-import com.caucho.hmtp.HmtpStream;
+import com.caucho.bam.BamStream;
 
 /**
  * Base packet class.  Contains only a 'to' and a 'from' field.
@@ -92,7 +92,7 @@ public class Packet implements java.io.Serializable
   /**
    * SPI method to dispatch the packet to the proper handler
    */
-  public void dispatch(HmtpStream handler, HmtpStream toSource)
+  public void dispatch(BamStream handler, BamStream toSource)
   {
   }
 

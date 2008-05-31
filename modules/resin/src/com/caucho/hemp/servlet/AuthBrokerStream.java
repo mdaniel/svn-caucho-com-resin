@@ -31,9 +31,9 @@ package com.caucho.hemp.servlet;
 
 import com.caucho.hmtp.auth.AuthResult;
 import com.caucho.hmtp.auth.AuthQuery;
-import com.caucho.hmtp.HmtpStream;
-import com.caucho.hmtp.AbstractHmtpStream;
-import com.caucho.hmtp.HmtpError;
+import com.caucho.bam.BamStream;
+import com.caucho.bam.AbstractBamStream;
+import com.caucho.bam.BamError;
 import java.io.*;
 import java.util.logging.*;
 import javax.servlet.*;
@@ -45,15 +45,15 @@ import com.caucho.vfs.*;
 /**
  * Main protocol handler for the HTTP version of HeMPP.
  */
-public class AuthBrokerStream extends AbstractHmtpStream
+public class AuthBrokerStream extends AbstractBamStream
 {
   private static final Logger log
     = Logger.getLogger(AuthBrokerStream.class.getName());
 
   private ServerBrokerStream _manager;
-  private HmtpStream _broker;
+  private BamStream _broker;
 
-  AuthBrokerStream(ServerBrokerStream manager, HmtpStream server)
+  AuthBrokerStream(ServerBrokerStream manager, BamStream server)
   {
     _manager = manager;
     _broker = server;
@@ -72,8 +72,8 @@ public class AuthBrokerStream extends AbstractHmtpStream
 			    Serializable value)
   {
     _broker.sendQueryError(id, from, to, value, 
-		           new HmtpError(HmtpError.TYPE_CANCEL,
-				         HmtpError.FORBIDDEN));
+		           new BamError(BamError.TYPE_CANCEL,
+				         BamError.FORBIDDEN));
       
     return true;
   }
@@ -101,14 +101,14 @@ public class AuthBrokerStream extends AbstractHmtpStream
 	_broker.sendQueryResult(id, from, to, new AuthResult(jid));
       else
 	_broker.sendQueryError(id, from, to, value,
-			       new HmtpError(HmtpError.TYPE_AUTH,
-					     HmtpError.FORBIDDEN));
+			       new BamError(BamError.TYPE_AUTH,
+					     BamError.FORBIDDEN));
     }
     else {
       // XXX: auth
       _broker.sendQueryError(id, from, to, value,
-			     new HmtpError(HmtpError.TYPE_CANCEL,
-				           HmtpError.FORBIDDEN));
+			     new BamError(BamError.TYPE_CANCEL,
+				           BamError.FORBIDDEN));
     }
     
     return true;
@@ -189,7 +189,7 @@ public class AuthBrokerStream extends AbstractHmtpStream
   public void sendPresenceError(String to,
 			        String from,
 			        Serializable []data,
-			        HmtpError error)
+			        BamError error)
   {
     log.fine(this + " sendPresenceError requires login first");
   }

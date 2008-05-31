@@ -29,8 +29,8 @@
 
 package com.caucho.hmtp.packet;
 
-import com.caucho.hmtp.HmtpStream;
-import com.caucho.hmtp.HmtpError;
+import com.caucho.bam.BamStream;
+import com.caucho.bam.BamError;
 import java.io.Serializable;
 
 /**
@@ -103,12 +103,12 @@ public class QuerySet extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(HmtpStream handler, HmtpStream toSource)
+  public void dispatch(BamStream handler, BamStream toSource)
   {
     if (! handler.sendQuerySet(getId(), getTo(), getFrom(), getValue())) {
       toSource.sendQueryError(getId(), getFrom(), getTo(), getValue(),
-			      new HmtpError(HmtpError.TYPE_CANCEL,
-					    HmtpError.ITEM_NOT_FOUND));
+			      new BamError(BamError.TYPE_CANCEL,
+					    BamError.ITEM_NOT_FOUND));
     }
   }
 

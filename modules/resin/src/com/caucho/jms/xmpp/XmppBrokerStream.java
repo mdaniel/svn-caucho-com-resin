@@ -29,9 +29,11 @@
 
 package com.caucho.jms.xmpp;
 
-import com.caucho.hmtp.*;
-import com.caucho.hmtp.im.*;
-import com.caucho.hmtp.spi.*;
+import com.caucho.bam.BamStream;
+import com.caucho.bam.BamError;
+import com.caucho.bam.BamConnection;
+import com.caucho.bam.im.ImMessage;
+import com.caucho.bam.BamBroker;
 import com.caucho.server.connection.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
@@ -45,17 +47,17 @@ import javax.xml.stream.*;
  * Protocol handler from the TCP/XMPP stream forwarding to the broker
  */
 public class XmppBrokerStream
-  implements TcpDuplexHandler, HmtpStream
+  implements TcpDuplexHandler, BamStream
 {
   private static final Logger log
     = Logger.getLogger(XmppBrokerStream.class.getName());
   
-  private HmtpBroker _broker;
-  private HmtpConnection _conn;
-  private HmtpStream _toBroker;
+  private BamBroker _broker;
+  private BamConnection _conn;
+  private BamStream _toBroker;
 
-  private HmtpStream _callbackHandler;
-  private HmtpStream _authHandler;
+  private BamStream _callbackHandler;
+  private BamStream _authHandler;
 
   private ReadStream _is;
   private WriteStream _os;
@@ -68,7 +70,7 @@ public class XmppBrokerStream
   private String _name;
   private boolean _isFinest;
 
-  XmppBrokerStream(HmtpBroker broker,
+  XmppBrokerStream(BamBroker broker,
 		   XMLStreamReaderImpl in, WriteStream os)
   {
     _broker = broker;
@@ -594,7 +596,7 @@ public class XmppBrokerStream
   public void sendMessageError(String to,
 			       String from,
 			       Serializable value,
-			       HmtpError error)
+			       BamError error)
   {
     _toBroker.sendMessageError(to, _jid, value, error);
   }
@@ -653,7 +655,7 @@ public class XmppBrokerStream
 			     String to,
 			     String from,
 			     Serializable value,
-			     HmtpError error)
+			     BamError error)
   {
     _toBroker.sendQueryError(id, to, _jid, value, error);
   }
@@ -741,7 +743,7 @@ public class XmppBrokerStream
   public void sendPresenceError(String to,
 			      String from,
 			      Serializable []data,
-			      HmtpError error)
+			      BamError error)
   {
     _toBroker.sendPresenceError(to, _jid, data, error);
   }

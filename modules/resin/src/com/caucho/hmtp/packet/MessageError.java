@@ -29,8 +29,8 @@
 
 package com.caucho.hmtp.packet;
 
-import com.caucho.hmtp.HmtpError;
-import com.caucho.hmtp.HmtpStream;
+import com.caucho.bam.BamError;
+import com.caucho.bam.BamStream;
 import java.io.Serializable;
 
 /**
@@ -38,7 +38,7 @@ import java.io.Serializable;
  */
 public class MessageError extends Packet {
   private final Serializable _value;
-  private final HmtpError _error;
+  private final BamError _error;
 
   /**
    * zero-arg constructor for Hessian
@@ -57,7 +57,7 @@ public class MessageError extends Packet {
   public MessageError(String to,
 		      String from,
 		      Serializable value,
-		      HmtpError error)
+		      BamError error)
   {
     super(to, from);
 
@@ -76,7 +76,7 @@ public class MessageError extends Packet {
   /**
    * Returns the message error
    */
-  public HmtpError getError()
+  public BamError getError()
   {
     return _error;
   }
@@ -85,7 +85,7 @@ public class MessageError extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(HmtpStream handler, HmtpStream toSource)
+  public void dispatch(BamStream handler, BamStream toSource)
   {
     handler.sendMessageError(getTo(), getFrom(), getValue(), _error);
   }

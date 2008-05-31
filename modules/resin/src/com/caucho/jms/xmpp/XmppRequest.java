@@ -32,7 +32,7 @@ package com.caucho.jms.xmpp;
 import com.caucho.jms.memory.*;
 import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
-import com.caucho.hmtp.spi.HmtpBroker;
+import com.caucho.bam.BamBroker;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.util.*;
@@ -61,7 +61,7 @@ public class XmppRequest implements TcpServerRequest, Runnable {
 
   private XmppProtocol _protocol;
 
-  private HmtpBroker _broker;
+  private BamBroker _broker;
   
   private TcpConnection _conn;
 

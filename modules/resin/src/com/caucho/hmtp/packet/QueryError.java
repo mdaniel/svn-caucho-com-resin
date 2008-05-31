@@ -30,8 +30,8 @@
 package com.caucho.hmtp.packet;
 
 import com.caucho.hmtp.packet.Packet;
-import com.caucho.hmtp.HmtpStream;
-import com.caucho.hmtp.HmtpError;
+import com.caucho.bam.BamStream;
+import com.caucho.bam.BamError;
 import java.io.Serializable;
 
 /**
@@ -42,7 +42,7 @@ public class QueryError extends Packet {
   private final long _id;
   
   private final Serializable _value;
-  private final HmtpError _error;
+  private final BamError _error;
 
   /**
    * zero-arg constructor for Hessian
@@ -67,7 +67,7 @@ public class QueryError extends Packet {
 		    String to,
 		    String from,
 		    Serializable value,
-		    HmtpError error)
+		    BamError error)
   {
     super(to, from);
 
@@ -95,7 +95,7 @@ public class QueryError extends Packet {
   /**
    * Returns the query error
    */
-  public HmtpError getError()
+  public BamError getError()
   {
     return _error;
   }
@@ -104,7 +104,7 @@ public class QueryError extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(HmtpStream handler, HmtpStream toSource)
+  public void dispatch(BamStream handler, BamStream toSource)
   {
     handler.sendQueryError(getId(), getTo(), getFrom(),
 			   getValue(), getError());

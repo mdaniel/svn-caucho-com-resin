@@ -29,16 +29,16 @@
 
 package com.caucho.hmtp.packet;
 
-import com.caucho.hmtp.HmtpStream;
+import com.caucho.bam.BamStream;
 import com.caucho.hmtp.packet.Presence;
-import com.caucho.hmtp.HmtpError;
+import com.caucho.bam.BamError;
 import java.io.Serializable;
 
 /**
  * PresenceError returns an error response to a presence packet
  */
 public class PresenceError extends Presence {
-  private final HmtpError _error;
+  private final BamError _error;
   
   /**
    * zero-arg constructor for Hessian
@@ -59,7 +59,7 @@ public class PresenceError extends Presence {
   public PresenceError(String to,
 		       String from,
 		       Serializable []data,
-		       HmtpError error)
+		       BamError error)
   {
     super(to, from, data);
 
@@ -69,7 +69,7 @@ public class PresenceError extends Presence {
   /**
    * Returns the error information
    */
-  public HmtpError getError()
+  public BamError getError()
   {
     return _error;
   }
@@ -78,7 +78,7 @@ public class PresenceError extends Presence {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(HmtpStream handler, HmtpStream toSource)
+  public void dispatch(BamStream handler, BamStream toSource)
   {
     handler.sendPresenceError(getTo(), getFrom(), getData(), getError());
   }

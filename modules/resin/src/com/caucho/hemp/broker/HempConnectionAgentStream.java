@@ -29,13 +29,13 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.hmtp.HmtpPresenceStream;
-import com.caucho.hmtp.HmtpMessageStream;
-import com.caucho.hmtp.HmtpQueryStream;
-import com.caucho.hmtp.HmtpError;
+import com.caucho.bam.BamPresenceStream;
+import com.caucho.bam.BamMessageStream;
+import com.caucho.bam.BamQueryStream;
+import com.caucho.bam.BamError;
 
 import com.caucho.hemp.*;
-import com.caucho.hmtp.HmtpAgentStream;
+import com.caucho.bam.BamAgentStream;
 import com.caucho.util.*;
 import java.io.Serializable;
 import java.util.logging.*;
@@ -43,7 +43,7 @@ import java.util.logging.*;
 /**
  * Handles packets sent to the connection
  */
-class HempConnectionAgentStream implements HmtpAgentStream
+class HempConnectionAgentStream implements BamAgentStream
 {
   private static final Logger log
     = Logger.getLogger(HempConnectionAgentStream.class.getName());
@@ -53,9 +53,9 @@ class HempConnectionAgentStream implements HmtpAgentStream
   private final HempConnectionImpl _conn;
   private final String _jid;
 
-  private HmtpMessageStream _messageHandler;
-  private HmtpQueryStream _queryHandler;
-  private HmtpPresenceStream _presenceHandler;
+  private BamMessageStream _messageHandler;
+  private BamQueryStream _queryHandler;
+  private BamPresenceStream _presenceHandler;
 
   HempConnectionAgentStream(HempConnectionImpl conn)
   {
@@ -78,7 +78,7 @@ class HempConnectionAgentStream implements HmtpAgentStream
   /**
    * Registers the listener
    */
-  void setMessageHandler(HmtpMessageStream handler)
+  void setMessageHandler(BamMessageStream handler)
   {
     _messageHandler = handler;
   }
@@ -86,7 +86,7 @@ class HempConnectionAgentStream implements HmtpAgentStream
   /**
    * Registers the listener
    */
-  public void setQueryHandler(HmtpQueryStream handler)
+  public void setQueryHandler(BamQueryStream handler)
   {
     _queryHandler = handler;
   }
@@ -94,7 +94,7 @@ class HempConnectionAgentStream implements HmtpAgentStream
   /**
    * Sets the presence listener
    */
-  public void setPresenceHandler(HmtpPresenceStream handler)
+  public void setPresenceHandler(BamPresenceStream handler)
   {
     _presenceHandler = handler;
   }
@@ -108,7 +108,7 @@ class HempConnectionAgentStream implements HmtpAgentStream
    */
   public void sendMessage(String to, String from, Serializable value)
   {
-    HmtpMessageStream handler = _messageHandler;
+    BamMessageStream handler = _messageHandler;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -125,9 +125,9 @@ class HempConnectionAgentStream implements HmtpAgentStream
   public void sendMessageError(String to,
 			       String from,
 			       Serializable value,
-			       HmtpError error)
+			       BamError error)
   {
-    HmtpMessageStream handler = _messageHandler;
+    BamMessageStream handler = _messageHandler;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -151,7 +151,7 @@ class HempConnectionAgentStream implements HmtpAgentStream
 			      String from,
 			      Serializable query)
   {
-    HmtpQueryStream handler = _queryHandler;
+    BamQueryStream handler = _queryHandler;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -162,9 +162,9 @@ class HempConnectionAgentStream implements HmtpAgentStream
     if (handler.sendQueryGet(id, to, from, query))
       return true;
 
-    HmtpError error = 
-      new HmtpError(HmtpError.TYPE_CANCEL,
-	            HmtpError.FEATURE_NOT_IMPLEMENTED,
+    BamError error = 
+      new BamError(BamError.TYPE_CANCEL,
+	            BamError.FEATURE_NOT_IMPLEMENTED,
 		    "unknown query: " + query.getClass().getName());
     
      _conn.getBrokerStream().sendQueryError(id, from, to, query, error);
@@ -180,7 +180,7 @@ class HempConnectionAgentStream implements HmtpAgentStream
 		            String from,
 		            Serializable query)
   {
-    HmtpQueryStream handler = _queryHandler;
+    BamQueryStream handler = _queryHandler;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -191,9 +191,9 @@ class HempConnectionAgentStream implements HmtpAgentStream
     if (handler.sendQuerySet(id, to, from, query))
       return true;
 
-    HmtpError error =
-      new HmtpError(HmtpError.TYPE_CANCEL,
-		    HmtpError.FEATURE_NOT_IMPLEMENTED,
+    BamError error =
+      new BamError(BamError.TYPE_CANCEL,
+		    BamError.FEATURE_NOT_IMPLEMENTED,
 		    "unknown query: " + query.getClass().getName());
     
     _conn.getBrokerStream().sendQueryError(id, from, to, query, error);
@@ -209,7 +209,7 @@ class HempConnectionAgentStream implements HmtpAgentStream
 		            String from,
 		            Serializable value)
   {
-    HmtpQueryStream handler = _queryHandler;
+    BamQueryStream handler = _queryHandler;
 
     if (handler == null) {
       if (_conn.onQueryResult(id, to, from, value))
@@ -230,9 +230,9 @@ class HempConnectionAgentStream implements HmtpAgentStream
 		           String to,
 		           String from,
 		           Serializable query,
-		           HmtpError error)
+		           BamError error)
   {
-    HmtpQueryStream handler = _queryHandler;
+    BamQueryStream handler = _queryHandler;
 
     if (handler == null) {
       if (_conn.onQueryError(id, to, from, query, error))
@@ -255,7 +255,7 @@ class HempConnectionAgentStream implements HmtpAgentStream
    */
   public void sendPresence(String to, String from, Serializable []data)
   {
-    HmtpPresenceStream handler = _presenceHandler;
+    BamPresenceStream handler = _presenceHandler;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -273,7 +273,7 @@ class HempConnectionAgentStream implements HmtpAgentStream
 		              String from,
 			      Serializable []data)
   {
-    HmtpPresenceStream handler = _presenceHandler;
+    BamPresenceStream handler = _presenceHandler;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -291,7 +291,7 @@ class HempConnectionAgentStream implements HmtpAgentStream
 				    String from,
 				    Serializable []data)
   {
-    HmtpPresenceStream handler = _presenceHandler;
+    BamPresenceStream handler = _presenceHandler;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -309,7 +309,7 @@ class HempConnectionAgentStream implements HmtpAgentStream
 				  String from,
 				  Serializable []data)
   {
-    HmtpPresenceStream handler = _presenceHandler;
+    BamPresenceStream handler = _presenceHandler;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -327,7 +327,7 @@ class HempConnectionAgentStream implements HmtpAgentStream
 				   String from,
 				   Serializable []data)
   {
-    HmtpPresenceStream handler = _presenceHandler;
+    BamPresenceStream handler = _presenceHandler;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -345,7 +345,7 @@ class HempConnectionAgentStream implements HmtpAgentStream
 				    String from,
 				    Serializable []data)
   {
-    HmtpPresenceStream handler = _presenceHandler;
+    BamPresenceStream handler = _presenceHandler;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -363,7 +363,7 @@ class HempConnectionAgentStream implements HmtpAgentStream
 				     String from,
 				     Serializable []data)
   {
-    HmtpPresenceStream handler = _presenceHandler;
+    BamPresenceStream handler = _presenceHandler;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -380,9 +380,9 @@ class HempConnectionAgentStream implements HmtpAgentStream
   public void sendPresenceError(String to,
 			      String from,
 			      Serializable []data,
-                              HmtpError error)
+                              BamError error)
   {
-    HmtpPresenceStream handler = _presenceHandler;
+    BamPresenceStream handler = _presenceHandler;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))

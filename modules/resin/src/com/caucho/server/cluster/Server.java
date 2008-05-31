@@ -33,7 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
-import com.caucho.hmtp.HmtpStream;
+import com.caucho.bam.BamStream;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
@@ -1626,7 +1626,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns any HMTP stream
    */
-  public HmtpStream getHmtpStream()
+  public BamStream getHmtpStream()
   {
     return null;
   }

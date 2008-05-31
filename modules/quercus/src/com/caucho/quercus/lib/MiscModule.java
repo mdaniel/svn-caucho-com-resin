@@ -67,9 +67,25 @@ public class MiscModule extends AbstractQuercusModule {
   private static final Logger log
     = Logger.getLogger(MiscModule.class.getName());
 
-  // XXX: connection_aborted
-  // XXX: connection_status
-  // XXX: connection_timeout
+  public static final int CONNECTION_NORMAL = 0;
+  public static final int CONNECTION_ABORTED = 1;
+  public static final int CONNECTION_TIMEOUT = 2;
+
+  /**
+   * Return true on a client disconnect
+   */
+  public static int connection_aborted(Env env)
+  {
+    return env.getConnectionStatus();
+  }
+
+  /**
+   * Returns the status
+   */
+  public static int connection_status(Env env)
+  {
+    return env.getConnectionStatus();
+  }
 
   /**
    * Escapes characters in a string.

@@ -31,13 +31,13 @@ package com.caucho.hmtp.client;
 
 import com.caucho.hmtp.auth.AuthResult;
 import com.caucho.hmtp.auth.AuthQuery;
-import com.caucho.hmtp.HmtpQueryStream;
-import com.caucho.hmtp.HmtpQueryCallback;
-import com.caucho.hmtp.HmtpPresenceStream;
-import com.caucho.hmtp.HmtpMessageStream;
-import com.caucho.hmtp.HmtpStream;
-import com.caucho.hmtp.HmtpError;
-import com.caucho.hmtp.HmtpConnection;
+import com.caucho.bam.BamQueryStream;
+import com.caucho.bam.BamQueryCallback;
+import com.caucho.bam.BamPresenceStream;
+import com.caucho.bam.BamMessageStream;
+import com.caucho.bam.BamStream;
+import com.caucho.bam.BamError;
+import com.caucho.bam.BamConnection;
 import com.caucho.hessian.io.*;
 
 import java.io.*;
@@ -49,7 +49,7 @@ import java.util.logging.*;
 /**
  * HMTP client protocol
  */
-public class HmtpClient implements HmtpConnection {
+public class HmtpClient implements BamConnection {
   private static final Logger log
     = Logger.getLogger(HmtpClient.class.getName());
 
@@ -70,9 +70,9 @@ public class HmtpClient implements HmtpConnection {
   private ClientBrokerStream _clientStream;
   private String _jid;
 
-  private HmtpMessageStream _messageHandler;
-  private HmtpQueryStream _queryHandler;
-  private HmtpPresenceStream _presenceHandler;
+  private BamMessageStream _messageHandler;
+  private BamQueryStream _queryHandler;
+  private BamPresenceStream _presenceHandler;
 
   private HashMap<Long,QueryItem> _queryMap
     = new HashMap<Long,QueryItem>();
@@ -246,7 +246,7 @@ public class HmtpClient implements HmtpConnection {
   /**
    * Sets the message listener
    */
-  public void setMessageHandler(HmtpMessageStream listener)
+  public void setMessageHandler(BamMessageStream listener)
   {
     _messageHandler = listener;
   }
@@ -254,7 +254,7 @@ public class HmtpClient implements HmtpConnection {
   /**
    * Gets the message listener
    */
-  public HmtpMessageStream getMessageHandler()
+  public BamMessageStream getMessageHandler()
   {
     return _messageHandler;
   }
@@ -262,7 +262,7 @@ public class HmtpClient implements HmtpConnection {
   /**
    * Sets the presence handler
    */
-  public void setPresenceHandler(HmtpPresenceStream handler)
+  public void setPresenceHandler(BamPresenceStream handler)
   {
     _presenceHandler = handler;
   }
@@ -270,7 +270,7 @@ public class HmtpClient implements HmtpConnection {
   /**
    * Gets the message listener
    */
-  public HmtpPresenceStream getPresenceHandler()
+  public BamPresenceStream getPresenceHandler()
   {
     return _presenceHandler;
   }
@@ -278,7 +278,7 @@ public class HmtpClient implements HmtpConnection {
   /**
    * Returns the client stream
    */
-  public HmtpStream getBrokerStream()
+  public BamStream getBrokerStream()
   {
     return _clientStream;
   }
@@ -288,7 +288,7 @@ public class HmtpClient implements HmtpConnection {
    */
   public void sendMessage(String to, Serializable value)
   {
-    HmtpStream stream = _clientStream;
+    BamStream stream = _clientStream;
 
     if (stream == null)
       throw new IllegalStateException("connection is closed");
@@ -301,7 +301,7 @@ public class HmtpClient implements HmtpConnection {
    */
   public void presence(Serializable []data)
   {
-    HmtpStream stream = _clientStream;
+    BamStream stream = _clientStream;
 
     if (stream == null)
       throw new IllegalStateException("connection is closed");
@@ -314,7 +314,7 @@ public class HmtpClient implements HmtpConnection {
    */
   public void presence(String to, Serializable []data)
   {
-    HmtpStream stream = _clientStream;
+    BamStream stream = _clientStream;
 
     if (stream == null)
       throw new IllegalStateException("connection is closed");
@@ -327,7 +327,7 @@ public class HmtpClient implements HmtpConnection {
    */
   public void presenceUnavailable(Serializable []data)
   {
-    HmtpStream stream = _clientStream;
+    BamStream stream = _clientStream;
 
     if (stream == null)
       throw new IllegalStateException("connection is closed");
@@ -340,7 +340,7 @@ public class HmtpClient implements HmtpConnection {
    */
   public void presenceUnavailable(String to, Serializable []data)
   {
-    HmtpStream stream = _clientStream;
+    BamStream stream = _clientStream;
 
     if (stream == null)
       throw new IllegalStateException("connection is closed");
@@ -353,7 +353,7 @@ public class HmtpClient implements HmtpConnection {
    */
   public void presenceProbe(String to, Serializable []data)
   {
-    HmtpStream stream = _clientStream;
+    BamStream stream = _clientStream;
 
     if (stream == null)
       throw new IllegalStateException("connection is closed");
@@ -366,7 +366,7 @@ public class HmtpClient implements HmtpConnection {
    */
   public void presenceSubscribe(String to, Serializable []data)
   {
-    HmtpStream stream = _clientStream;
+    BamStream stream = _clientStream;
 
     if (stream == null)
       throw new IllegalStateException("connection is closed");
@@ -379,7 +379,7 @@ public class HmtpClient implements HmtpConnection {
    */
   public void presenceSubscribed(String to, Serializable []data)
   {
-    HmtpStream stream = _clientStream;
+    BamStream stream = _clientStream;
 
     if (stream == null)
       throw new IllegalStateException("connection is closed");
@@ -392,7 +392,7 @@ public class HmtpClient implements HmtpConnection {
    */
   public void presenceUnsubscribe(String to, Serializable []data)
   {
-    HmtpStream stream = _clientStream;
+    BamStream stream = _clientStream;
 
     if (stream == null)
       throw new IllegalStateException("connection is closed");
@@ -405,7 +405,7 @@ public class HmtpClient implements HmtpConnection {
    */
   public void presenceUnsubscribed(String to, Serializable []data)
   {
-    HmtpStream stream = _clientStream;
+    BamStream stream = _clientStream;
 
     if (stream == null)
       throw new IllegalStateException("connection is closed");
@@ -416,9 +416,9 @@ public class HmtpClient implements HmtpConnection {
   /**
    * Sends a presence packet to the server
    */
-  public void presenceError(String to, Serializable []data, HmtpError error)
+  public void presenceError(String to, Serializable []data, BamError error)
   {
-    HmtpStream stream = _clientStream;
+    BamStream stream = _clientStream;
 
     if (stream == null)
       throw new IllegalStateException("connection is closed");
@@ -429,7 +429,7 @@ public class HmtpClient implements HmtpConnection {
   /**
    * Sets the query handler
    */
-  public void setQueryHandler(HmtpQueryStream handler)
+  public void setQueryHandler(BamQueryStream handler)
   {
     _queryHandler = handler;
   }
@@ -437,7 +437,7 @@ public class HmtpClient implements HmtpConnection {
   /**
    * Gets the query handler
    */
-  public HmtpQueryStream getQueryHandler()
+  public BamQueryStream getQueryHandler()
   {
     return _queryHandler;
   }
@@ -463,7 +463,7 @@ public class HmtpClient implements HmtpConnection {
    */
   public void queryGet(String to,
 		       Serializable value,
-		       HmtpQueryCallback callback)
+		       BamQueryCallback callback)
   {
     long id;
       
@@ -473,7 +473,7 @@ public class HmtpClient implements HmtpConnection {
       _queryMap.put(id, new QueryItem(id, callback));
     }
 
-    HmtpStream stream = _clientStream;
+    BamStream stream = _clientStream;
 
     if (stream == null)
       throw new IllegalStateException("connection is closed");
@@ -502,7 +502,7 @@ public class HmtpClient implements HmtpConnection {
    */
   public void querySet(String to,
 		       Serializable value,
-		       HmtpQueryCallback callback)
+		       BamQueryCallback callback)
   {
     long id;
       
@@ -512,7 +512,7 @@ public class HmtpClient implements HmtpConnection {
       _queryMap.put(id, new QueryItem(id, callback));
     }
 
-    HmtpStream stream = _clientStream;
+    BamStream stream = _clientStream;
 
     if (stream == null)
       throw new IllegalStateException("connection is closed");
@@ -542,7 +542,7 @@ public class HmtpClient implements HmtpConnection {
 		    String to,
 		    String from,
 		    Serializable value,
-		    HmtpError error)
+		    BamError error)
   {
     QueryItem item = null;
     
@@ -572,7 +572,7 @@ public class HmtpClient implements HmtpConnection {
   public void queryError(long id,
 			 String to,
 			 Serializable value,
-			 HmtpError error)
+			 BamError error)
   {
     _clientStream.sendQueryError(id, to, null, value, error);
   }
@@ -650,9 +650,9 @@ public class HmtpClient implements HmtpConnection {
 
   static class QueryItem {
     private final long _id;
-    private final HmtpQueryCallback _callback;
+    private final BamQueryCallback _callback;
 
-    QueryItem(long id, HmtpQueryCallback callback)
+    QueryItem(long id, BamQueryCallback callback)
     {
       _id = id;
       _callback = callback;
@@ -667,7 +667,7 @@ public class HmtpClient implements HmtpConnection {
     void onQueryError(String to,
 		      String from,
 		      Serializable value,
-		      HmtpError error)
+		      BamError error)
     {
       if (_callback != null)
 	_callback.onQueryError(to, from, value, error);
@@ -680,9 +680,9 @@ public class HmtpClient implements HmtpConnection {
     }
   }
 
-  static class WaitQueryCallback implements HmtpQueryCallback {
+  static class WaitQueryCallback implements BamQueryCallback {
     private Serializable _result;
-    private HmtpError _error;
+    private BamError _error;
     private boolean _isResult;
 
     public Serializable getResult()
@@ -690,7 +690,7 @@ public class HmtpClient implements HmtpConnection {
       return _result;
     }
     
-    public HmtpError getError()
+    public BamError getError()
     {
       return _error;
     }
@@ -721,7 +721,7 @@ public class HmtpClient implements HmtpConnection {
     }
   
     public void onQueryError(String fromJid, String toJid,
-			     Serializable value, HmtpError error)
+			     Serializable value, BamError error)
     {
       _error = error;
 

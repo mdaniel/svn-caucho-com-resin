@@ -29,16 +29,16 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.hmtp.spi.HmtpBroker;
-import com.caucho.hmtp.disco.DiscoInfoQuery;
-import com.caucho.hmtp.disco.DiscoIdentity;
-import com.caucho.hmtp.disco.DiscoFeature;
-import com.caucho.hmtp.HmtpStream;
-import com.caucho.hmtp.HmtpConnection;
+import com.caucho.bam.BamBroker;
+import com.caucho.bam.disco.DiscoInfoQuery;
+import com.caucho.bam.disco.DiscoIdentity;
+import com.caucho.bam.disco.DiscoFeature;
+import com.caucho.bam.BamStream;
+import com.caucho.bam.BamConnection;
 import com.caucho.config.*;
-import com.caucho.hmtp.AbstractHmtpAgentStream;
-import com.caucho.hmtp.HmtpAgentStream;
-import com.caucho.hmtp.spi.HmtpService;
+import com.caucho.bam.AbstractBamAgentStream;
+import com.caucho.bam.BamAgentStream;
+import com.caucho.bam.BamService;
 import com.caucho.util.*;
 
 import java.io.Serializable;
@@ -50,21 +50,21 @@ import javax.webbeans.*;
 /**
  * GenericService implementation to simplify configuring a service.
  */
-public class GenericService extends AbstractHmtpAgentStream
-  implements HmtpService
+public class GenericService extends AbstractBamAgentStream
+  implements BamService
 {
   private static final L10N L = new L10N(GenericService.class);
   private static final Logger log
     = Logger.getLogger(GenericService.class.getName());
   
-  private @In HmtpBroker _broker;
+  private @In BamBroker _broker;
   
   private String _jid;
   
-  private HmtpConnection _conn;
-  private HmtpStream _brokerStream;
+  private BamConnection _conn;
+  private BamStream _brokerStream;
 
-  private HmtpAgentStream _agentStream;
+  private BamAgentStream _agentStream;
   
   public void setName(String name)
   {
@@ -84,22 +84,22 @@ public class GenericService extends AbstractHmtpAgentStream
     return _jid;
   }
 
-  public void setBroker(HmtpBroker broker)
+  public void setBroker(BamBroker broker)
   {
     _broker = broker;
   }
 
-  protected HmtpBroker getBroker()
+  protected BamBroker getBroker()
   {
     return _broker;
   }
   
-  protected HmtpConnection getConnection()
+  protected BamConnection getConnection()
   {
     return _conn;
   }
 
-  public HmtpStream getBrokerStream()
+  public BamStream getBrokerStream()
   {
     return _brokerStream;
   }
@@ -121,24 +121,24 @@ public class GenericService extends AbstractHmtpAgentStream
     _brokerStream = _broker.getBrokerStream();
   }
 
-  protected HmtpAgentStream createQueue(HmtpAgentStream stream)
+  protected BamAgentStream createQueue(BamAgentStream stream)
   {
     return new HempMemoryQueue(stream, _broker.getBrokerStream());
   }
 
-  public HmtpAgentStream getAgentStream()
+  public BamAgentStream getAgentStream()
   {
     return _agentStream;
   }
   
   //
-  // HmtpService API
+  // BamService API
   //
   
   /**
    * Create a filter for requests sent to the service's agent.
    */
-  public HmtpAgentStream getAgentFilter(HmtpAgentStream agentStream)
+  public BamAgentStream getAgentFilter(BamAgentStream agentStream)
   {
     return agentStream;
   }
@@ -146,7 +146,7 @@ public class GenericService extends AbstractHmtpAgentStream
   /**
    * Create a filter for requests sent by the service to the broker.
    */
-  public HmtpStream getBrokerFilter(HmtpStream brokerStream)
+  public BamStream getBrokerFilter(BamStream brokerStream)
   {
     return brokerStream;
   }
@@ -172,7 +172,7 @@ public class GenericService extends AbstractHmtpAgentStream
   /**
    * Returns a child agent given a jid.
    */
-  public HmtpAgentStream findAgent(String jid)
+  public BamAgentStream findAgent(String jid)
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " findAgent(" + jid + ")");
@@ -262,7 +262,7 @@ public class GenericService extends AbstractHmtpAgentStream
   @PreDestroy
   protected void destroy()
   {
-    HmtpConnection conn = _conn;
+    BamConnection conn = _conn;
     _conn = null;
 
     if (conn != null)

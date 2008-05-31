@@ -30,7 +30,7 @@
 package com.caucho.hmtp.packet;
 
 import com.caucho.hmtp.packet.Packet;
-import com.caucho.hmtp.HmtpStream;
+import com.caucho.bam.BamStream;
 import java.io.Serializable;
 
 /**
@@ -102,7 +102,7 @@ public class QueryResult extends Packet {
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
-  public void dispatch(HmtpStream handler, HmtpStream toSource)
+  public void dispatch(BamStream handler, BamStream toSource)
   {
     handler.sendQueryResult(getId(), getTo(), getFrom(), getValue());
   }

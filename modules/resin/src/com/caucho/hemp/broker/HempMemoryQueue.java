@@ -29,11 +29,10 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.hmtp.HmtpAgentStream;
+import com.caucho.bam.BamAgentStream;
 import com.caucho.hmtp.packet.*;
-import com.caucho.hmtp.spi.*;
-import com.caucho.hmtp.HmtpStream;
-import com.caucho.hmtp.HmtpError;
+import com.caucho.bam.BamStream;
+import com.caucho.bam.BamError;
 import com.caucho.server.resin.*;
 import com.caucho.server.util.*;
 import com.caucho.util.*;
@@ -46,7 +45,7 @@ import java.io.Serializable;
 /**
  * Queue of hmtp packets
  */
-public class HempMemoryQueue implements HmtpAgentStream, Runnable
+public class HempMemoryQueue implements BamAgentStream, Runnable
 {
   private static final Logger log
     = Logger.getLogger(HempMemoryQueue.class.getName());
@@ -55,8 +54,8 @@ public class HempMemoryQueue implements HmtpAgentStream, Runnable
   private final Executor _executor = ScheduledThreadPool.getLocal();
   private final ClassLoader _loader
     = Thread.currentThread().getContextClassLoader();
-  private final HmtpAgentStream _agentStream;
-  private final HmtpStream _brokerStream;
+  private final BamAgentStream _agentStream;
+  private final BamStream _brokerStream;
 
   private int _threadSemaphore;
 
@@ -64,7 +63,7 @@ public class HempMemoryQueue implements HmtpAgentStream, Runnable
   private int _head;
   private int _tail;
 
-  public HempMemoryQueue(HmtpAgentStream agentStream, HmtpStream brokerStream)
+  public HempMemoryQueue(BamAgentStream agentStream, BamStream brokerStream)
   {
     if (agentStream == null)
       throw new NullPointerException();
@@ -99,7 +98,7 @@ public class HempMemoryQueue implements HmtpAgentStream, Runnable
   public void sendMessageError(String to,
 			       String from,
 			       Serializable value,
-			       HmtpError error)
+			       BamError error)
   {
     enqueue(new MessageError(to, from, value, error));
   }
@@ -148,7 +147,7 @@ public class HempMemoryQueue implements HmtpAgentStream, Runnable
 			     String to,
 			     String from,
 			     Serializable query,
-			     HmtpError error)
+			     BamError error)
   {
     enqueue(new QueryError(id, to, from, query, error));
   }
@@ -227,12 +226,12 @@ public class HempMemoryQueue implements HmtpAgentStream, Runnable
   public void sendPresenceError(String to,
 			        String from,
 			        Serializable []data,
-			        HmtpError error)
+			        BamError error)
   {
     enqueue(new PresenceError(to, from, data, error));
   }
 
-  protected HmtpStream getStream()
+  protected BamStream getStream()
   {
     return _agentStream;
   }

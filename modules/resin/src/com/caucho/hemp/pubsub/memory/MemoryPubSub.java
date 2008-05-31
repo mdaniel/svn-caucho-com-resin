@@ -29,8 +29,8 @@
 
 package com.caucho.hemp.pubsub.memory;
 
-import com.caucho.hmtp.pubsub.PubSubPublish;
-import com.caucho.hmtp.HmtpError;
+import com.caucho.bam.pubsub.PubSubPublish;
+import com.caucho.bam.BamError;
 import com.caucho.hemp.broker.GenericService;
 import java.io.Serializable;
 import java.util.*;
@@ -109,7 +109,7 @@ public class MemoryPubSub extends GenericService
 
       if (node == null) {
 	getBrokerStream().sendQueryError(id, from, to, query,
-				     new HmtpError(HmtpError.TYPE_CANCEL,
+				     new BamError(BamError.TYPE_CANCEL,
 						   "no-node"));
 	return true;
       }

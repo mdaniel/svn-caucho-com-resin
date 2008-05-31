@@ -30,7 +30,7 @@
 package com.caucho.server.hmux;
 
 import com.caucho.hessian.io.*;
-import com.caucho.hmtp.HmtpStream;
+import com.caucho.bam.BamStream;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.AbstractHttpRequest;
@@ -1000,7 +1000,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
     Serializable query = (Serializable) readObject();
 
-    HmtpStream hmtpStream = _server.getHmtpStream();
+    BamStream hmtpStream = _server.getHmtpStream();
 
     if (log.isLoggable(Level.FINER))
       log.fine(dbgId() + (char) HMTP_QUERY_GET + " hmtp message"
@@ -1019,7 +1019,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
     Serializable query = (Serializable) readObject();
 
-    HmtpStream hmtpStream = _server.getHmtpStream();
+    BamStream hmtpStream = _server.getHmtpStream();
 
     if (log.isLoggable(Level.FINER))
       log.fine(dbgId() + (char) HMTP_QUERY_GET + " hmtp queryGet id=" + id
@@ -1038,7 +1038,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
     Serializable query = (Serializable) readObject();
 
-    HmtpStream hmtpStream = _server.getHmtpStream();
+    BamStream hmtpStream = _server.getHmtpStream();
 
     if (log.isLoggable(Level.FINER))
       log.fine(dbgId() + (char) HMTP_QUERY_SET + ": hmtp query id=" + id
@@ -1057,7 +1057,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
     Serializable value = (Serializable) readObject();
 
-    HmtpStream hmtpStream = _server.getHmtpStream();
+    BamStream hmtpStream = _server.getHmtpStream();
 
     if (log.isLoggable(Level.FINER))
       log.fine(dbgId() + (char) HMTP_QUERY_RESULT + ": hmtp queryResult id=" + id
