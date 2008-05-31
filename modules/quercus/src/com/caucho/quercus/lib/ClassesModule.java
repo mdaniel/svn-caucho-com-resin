@@ -82,6 +82,9 @@ public class ClassesModule extends AbstractQuercusModule {
                               String className,
                               @Optional("true") boolean useAutoload)
   {
+    if (className == null)
+      return false;
+    
     QuercusClass cl =  env.findClass(className, useAutoload);
 
     // php/[03]9m1

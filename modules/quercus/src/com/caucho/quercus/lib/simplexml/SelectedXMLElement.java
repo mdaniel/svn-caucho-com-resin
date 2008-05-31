@@ -105,14 +105,14 @@ public class SelectedXMLElement extends SimpleXMLElement
     if (children == null)
       return null;
     
-    ArrayList values = new ArrayList();
+    ArrayList<SimpleXMLElement> values = new ArrayList<SimpleXMLElement>();
 
     int size = children.size();
     for (int i = 0; i < size; i++) {
       SimpleXMLElement elt = children.get(i);
 
       if (getName().equals(elt.getName()))
-	values.add(elt);
+        values.add(elt);
     }
 
     return values.iterator();

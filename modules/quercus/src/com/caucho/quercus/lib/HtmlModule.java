@@ -130,6 +130,101 @@ public class HtmlModule extends AbstractQuercusModule {
     return result;
   }
 
+  /*
+   * Converts escaped HTML entities back to characters.
+   * 
+   * @param str escaped string
+   * @param quoteStyle optional quote style used
+   */
+  public static StringValue htmlspecialchars_decode(Env env,
+                                        StringValue str,
+                                        @Optional("ENT_COMPAT") int quoteStyle)
+  {
+    int len = str.length();
+    
+    StringValue sb = str.createStringBuilder(len * 4 / 5);
+
+    for (int i = 0; i < len; i++) {
+      char ch = str.charAt(i);
+
+      if (ch != '&') {
+        sb.append(ch);
+        
+        continue;
+      }
+      
+      switch (str.charAt(i + 1)) {
+        case 'a':
+          sb.append('&');
+          if (i + 4 < len
+              && str.charAt(i + 2) == 'm'
+              && str.charAt(i + 3) == 'p'
+              && str.charAt(i + 4) == ';') {
+            i += 4;
+          }
+          break;
+          
+        case 'q':
+          if ((quoteStyle & ENT_HTML_QUOTE_DOUBLE) != 0
+              && i + 5 < len
+              && str.charAt(i + 2) == 'u'
+              && str.charAt(i + 3) == 'o'
+              && str.charAt(i + 4) == 't'
+              && str.charAt(i + 5) == ';') {
+            i += 5;
+            sb.append('"');
+          }
+          else
+            sb.append('&');
+          break;
+          
+        case '#':
+          if ((quoteStyle & ENT_HTML_QUOTE_SINGLE) != 0
+              && i + 5 < len
+              && str.charAt(i + 2) == '0'
+              && str.charAt(i + 3) == '3'
+              && str.charAt(i + 4) == '9'
+              && str.charAt(i + 5) == ';') {
+            i += 5;
+            sb.append('\'');
+          }
+          else
+            sb.append('&');
+          
+          break;
+
+        case 'l':
+          if (i + 3 < len
+              && str.charAt(i + 2) == 't'
+              && str.charAt(i + 3) == ';') {
+                i += 3;
+                
+                sb.append('<');
+          }
+          else
+            sb.append('&');
+          break;
+
+        case 'g':
+          if (i + 3 < len
+              && str.charAt(i + 2) == 't'
+              && str.charAt(i + 3) == ';') {
+                i += 3;
+                
+                sb.append('>');
+          }
+          else
+            sb.append('&');
+          break;
+
+        default:
+          sb.append('&');
+      }
+    }
+
+    return sb;
+  }
+  
   /**
    * Escapes HTML
    *

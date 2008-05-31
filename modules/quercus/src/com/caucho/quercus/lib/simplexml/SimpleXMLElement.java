@@ -304,7 +304,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
       SimpleXMLElement elt = _children.get(i);
 
       if (elt.getName().equals(name))
-	return elt;
+        return elt;
     }
     
     return null;
@@ -333,7 +333,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
    * Adds an attribute to this node.
    */
   public void addAttribute(Env env,
-			   String name,
+                           String name,
                            StringValue value,
                            @Optional String namespace)
   {
@@ -802,7 +802,8 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
       XPath xpath = XPathFactory.newInstance().newXPath();
 
       InputSource is = new InputSource(asXML(env).toInputStream());
-      NodeList nodes = (NodeList) xpath.evaluate(expression, is, XPathConstants.NODESET);
+      NodeList nodes = (NodeList) xpath.evaluate(expression, is,
+                                                 XPathConstants.NODESET);
 
       int nodeLength = nodes.getLength();
 

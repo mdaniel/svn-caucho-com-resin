@@ -122,7 +122,7 @@ public class ReflectionProperty
     return -1;
   }
   
-  public Value getValue(Env env, ObjectValue obj)
+  public Value getValue(Env env, @Optional ObjectValue obj)
   {
     return _prop.getValue(env, obj);
   }
