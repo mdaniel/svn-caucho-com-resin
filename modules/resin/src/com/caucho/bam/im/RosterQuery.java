@@ -29,7 +29,6 @@
 
 package com.caucho.bam.im;
 
-import com.caucho.hmtp.im.*;
 import com.caucho.bam.im.RosterItem;
 import java.io.Serializable;
 import java.util.*;

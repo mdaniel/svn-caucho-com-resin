@@ -27,62 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.pubsub;
+package com.caucho.server.port;
 
-import com.caucho.bam.pubsub.PubSubItem;
-import java.util.*;
-import java.io.Serializable;
+import com.caucho.server.connection.*;
 
 /**
- * Publish query
+ * Protocol specific information for each request.  ServerRequest
+ * is reused to reduce memory allocations.
+ *
+ * <p>ServerRequests are created by Server.createRequest()
  */
-public class PubSubPublish extends PubSubQuery {
-  private static final PubSubItem []NULL_ITEMS = new PubSubItem[0];
-  
-  private String _node;
-  
-  private PubSubItem []_items = NULL_ITEMS;
-  private String _subid;
-
-  public PubSubPublish()
-  {
-  }
-
-  public PubSubPublish(String node)
-  {
-    _node = node;
-  }
-
-  public PubSubPublish(String node, Serializable value)
-  {
-    _node = node;
-
-    _items = new PubSubItem[] { new PubSubItem(value) };
-  }
-
-  public PubSubPublish(String node, PubSubItem []items)
-  {
-    _node = node;
-    _items = items;
-  }
-
-  public String getNode()
-  {
-    return _node;
-  }
-
-  public String getSubId()
-  {
-    return _subid;
-  }
-
-  public PubSubItem []getItems()
-  {
-    return _items;
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _node + "]";
-  }
+public interface TcpServerRequest extends ServerRequest {
+  public Connection getConnection();
 }

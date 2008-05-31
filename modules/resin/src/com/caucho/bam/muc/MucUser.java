@@ -29,7 +29,6 @@
 
 package com.caucho.bam.muc;
 
-import com.caucho.hmtp.muc.*;
 import com.caucho.bam.muc.MucStatus;
 import com.caucho.bam.muc.MucInvite;
 import com.caucho.bam.muc.MucDestroy;

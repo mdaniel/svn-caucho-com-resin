@@ -29,7 +29,6 @@
 
 package com.caucho.bam.pubsub;
 
-import com.caucho.hmtp.pubsub.*;
 import java.util.*;
 import java.io.Serializable;
 
