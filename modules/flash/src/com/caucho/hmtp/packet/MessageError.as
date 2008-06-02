@@ -75,6 +75,12 @@ package com.caucho.hmtp.packet
     {
       return _error;
     }
+
+    public override function toString():String
+    {
+      return "MessageError[to=" + _to + ",from=" + _from + 
+                         ",value=" + _value + ",error=" + _error + "]";
+    }
   }
 }
 

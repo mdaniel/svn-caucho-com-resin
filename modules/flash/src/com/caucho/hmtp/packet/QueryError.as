@@ -84,6 +84,12 @@ package com.caucho.hmtp.packet
     {
       return _error;
     }
+
+    public override function toString():String
+    {
+      return "QueryError[to=" + _to + ",from=" + _from + ",id=" + _id + 
+                       ",value=" + _value + ",error=" + _error + "]";
+    }
   }
 }
 

@@ -66,6 +66,11 @@ package com.caucho.hmtp.packet
     {
       return _value;
     }
+
+    public override function toString():String
+    {
+      return "Message[to=" + _to + ",from=" + _from + ",value=" + _value + "]";
+    }
   }
 }
 

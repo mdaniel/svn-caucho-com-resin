@@ -55,7 +55,9 @@ package com.caucho.hmtp.packet
     public var _id:Number;
     public var _value:Object;
 
-    public function QueryGet(id:Number, to:String, from:String, value:Object)
+    public function QueryGet(id:Number = 0, 
+                             to:String = null, from:String = null, 
+                             value:Object = null)
     {
       super(QUERY_GET, to, from);
 
@@ -71,6 +73,12 @@ package com.caucho.hmtp.packet
     public function get value():Object
     {
       return _value;
+    }
+
+    public override function toString():String
+    {
+      return "QueryGet[to=" + _to + ",from=" + _from + 
+                     ",id=" + _id + ",value=" + _value + "]";
     }
   }
 }

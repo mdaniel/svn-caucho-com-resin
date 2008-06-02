@@ -73,6 +73,12 @@ package com.caucho.hmtp.packet
     {
       return _value;
     }
+
+    public override function toString():String
+    {
+      return "QueryResult[to=" + _to + ",from=" + _from + 
+                        ",id=" + _id + ",value=" + _value + "]";
+    }
   }
 }
 

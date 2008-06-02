@@ -65,6 +65,7 @@ package com.caucho.hmtp
 
   import com.caucho.hmtp.auth.*;
   import com.caucho.hmtp.packet.*;
+  import com.caucho.hmtp.ping.*;
 
   public class HmtpClient extends EventDispatcher 
                           implements HmtpConnection 
@@ -95,6 +96,8 @@ package com.caucho.hmtp
 
     private var _queryId:int = 0;
     private var _outstandingQueries:Object = new Object();
+
+    private var _messageListeners:Array = new Array();
 
     /**
      * Constructor.
@@ -265,6 +268,27 @@ package com.caucho.hmtp
           trace("Recieved unknown QueryError: " + queryError.id);
         }
       }
+      else if (packet is QueryGet) {
+        trace("packet is QueryGet: " + packet);
+        var queryGet:QueryGet = QueryGet(packet);
+
+        if (queryGet.value is PingQuery) {
+          _stream.sendQueryResult(queryGet.id, 
+                                  queryGet.from, 
+                                  queryGet.to, 
+                                  queryGet.value);
+        }
+      }
+      else if (packet is Message) {
+        var payload:Object = Message(packet).value;
+
+        for (var i:int = 0; i < _messageListeners.length; i++) { 
+          if (_messageListeners[i].invoke(packet.to, packet.from, payload))
+            return;
+        }
+
+        dispatchEvent(packet);
+      }
       else {
         dispatchEvent(packet);
       }
@@ -285,6 +309,14 @@ package com.caucho.hmtp
                                           msg.value, msg.error);
         }
       }*/
+    }
+
+    public function addMessageListener(messageClass:Class, 
+                                       listener:Function):void
+    {
+      var entry:MessageListenerMapEntry = 
+        new MessageListenerMapEntry(messageClass, listener);
+      _messageListeners.push(entry);
     }
 
     /**
@@ -387,6 +419,27 @@ package com.caucho.hmtp
     {
       dispatchEvent(new com.caucho.hmtp.auth.LoginFailureEvent());
     }
+  }
+}
+
+class MessageListenerMapEntry {
+  private var _class:Class;
+  private var _listener:Function;
+
+  public function MessageListenerMapEntry(clazz:Class, listener:Function):void
+  {
+    _class = clazz;
+    _listener = listener;
+  }
+
+  public function invoke(to:String, from:String, payload:Object):Boolean
+  {
+    if (payload is _class) {
+      _listener(to, from, payload);
+      return true;
+    }
+
+    return false;
   }
 }
 
