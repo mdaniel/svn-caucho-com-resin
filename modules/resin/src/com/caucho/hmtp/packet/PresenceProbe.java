@@ -53,7 +53,7 @@ public class PresenceProbe extends Presence {
    * @param from the source
    * @param data a collection of presence data
    */
-  public PresenceProbe(String to, String from, Serializable []data)
+  public PresenceProbe(String to, String from, Serializable data)
   {
     super(to, from, data);
   }

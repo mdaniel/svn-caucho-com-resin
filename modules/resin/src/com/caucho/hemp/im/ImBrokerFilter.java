@@ -53,7 +53,7 @@ public class ImBrokerFilter extends AbstractBamFilter
   @Override
   public void sendPresence(String to,
 			   String from,
-			   Serializable []data)
+			   Serializable data)
   {
     if (to != null)
       getNext().sendPresence(to, _resource.getJid(), data);
@@ -64,7 +64,7 @@ public class ImBrokerFilter extends AbstractBamFilter
   @Override
   public void sendPresenceSubscribe(String to,
 				    String from,
-				    Serializable []data)
+				    Serializable data)
   {
     if (_resource.rosterSubscribeTo(to, from, data)) {
       getNext().sendPresenceSubscribe(to, _resource.getJid(), data);
@@ -74,7 +74,7 @@ public class ImBrokerFilter extends AbstractBamFilter
   @Override
   public void sendPresenceSubscribed(String to,
 				     String from,
-				     Serializable []data)
+				     Serializable data)
   {
     if (_resource.rosterSubscribedTo(to, from, data)) {
       getNext().sendPresenceSubscribed(to, _resource.getJid(), data);

@@ -148,7 +148,8 @@ public class XmppRequest implements TcpServerRequest, Runnable {
 	return handleInit();
       }
 
-      TcpDuplexHandler handler = new XmppBrokerStream(_broker, _in, _os);
+      TcpDuplexHandler handler
+	= new XmppBrokerStream(_protocol, _broker, _in, _os);
       
       TcpDuplexController controller = new TcpDuplexController(this, handler);
 

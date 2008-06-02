@@ -52,7 +52,7 @@ public class PresenceSubscribed extends Presence {
    * @param from the source
    * @param data a collection of presence data
    */
-  public PresenceSubscribed(String to, String from, Serializable []data)
+  public PresenceSubscribed(String to, String from, Serializable data)
   {
     super(to, from, data);
   }

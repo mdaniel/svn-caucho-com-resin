@@ -27,52 +27,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.packet;
+package com.caucho.xmpp;
 
-import com.caucho.bam.BamStream;
-import com.caucho.hmtp.packet.Presence;
-import java.io.Serializable;
+import java.io.*;
+import javax.xml.stream.*;
+import com.caucho.vfs.*;
 
 /**
- * A presence subscription request
+ * Marshals from an xmpp request to and from a serialized class
  */
-public class PresenceSubscribe extends Presence {
+public interface XmppMarshal {
   /**
-   * zero-arg constructor for Hessian
+   * Returns the namespace URI
    */
-  private PresenceSubscribe()
-  {
-  }
+  public String getNamespaceURI();
+  
+  /**
+   * Returns the local name
+   */
+  public String getLocalName();
 
   /**
-   * A directed presence subscription request to another client
-   *
-   * @param to the target client
-   * @param data a collection of presence data
+   * Returns the BAM class name
    */
-  public PresenceSubscribe(String to, Serializable data)
-  {
-    super(to, data);
-  }
-
+  public String getClassName();
+  
   /**
-   * A directed presence subscription request to another client
-   *
-   * @param to the target client
-   * @param from the source
-   * @param data a collection of presence data
+   * Serializes the object to XML
    */
-  public PresenceSubscribe(String to, String from, Serializable data)
-  {
-    super(to, from, data);
-  }
-
+  public void toXml(XMLStreamWriter out, Serializable object)
+    throws IOException, XMLStreamException;
+  
   /**
-   * SPI method to dispatch the packet to the proper handler
+   * Deserializes the object from XML
    */
-  @Override
-  public void dispatch(BamStream handler, BamStream toSource)
-  {
-    handler.sendPresenceSubscribe(getTo(), getFrom(), getData());
-  }
+  public Serializable fromXml(XMLStreamReader in)
+    throws IOException, XMLStreamException;
 }

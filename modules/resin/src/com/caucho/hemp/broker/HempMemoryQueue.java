@@ -155,7 +155,7 @@ public class HempMemoryQueue implements BamAgentStream, Runnable
   /**
    * Presence
    */
-  public void sendPresence(String to, String from, Serializable []data)
+  public void sendPresence(String to, String from, Serializable data)
   {
     enqueue(new Presence(to, from, data));
   }
@@ -165,7 +165,7 @@ public class HempMemoryQueue implements BamAgentStream, Runnable
    */
   public void sendPresenceUnavailable(String to,
 				      String from,
-				      Serializable []data)
+				      Serializable data)
   {
     enqueue(new PresenceUnavailable(to, from, data));
   }
@@ -175,7 +175,7 @@ public class HempMemoryQueue implements BamAgentStream, Runnable
    */
   public void sendPresenceProbe(String to,
 			        String from,
-			        Serializable []data)
+			        Serializable data)
   {
     enqueue(new PresenceProbe(to, from, data));
   }
@@ -185,7 +185,7 @@ public class HempMemoryQueue implements BamAgentStream, Runnable
    */
   public void sendPresenceSubscribe(String to,
 				    String from,
-				    Serializable []data)
+				    Serializable data)
   {
     enqueue(new PresenceSubscribe(to, from, data));
   }
@@ -195,7 +195,7 @@ public class HempMemoryQueue implements BamAgentStream, Runnable
    */
   public void sendPresenceSubscribed(String to,
 				     String from,
-				     Serializable []data)
+				     Serializable data)
   {
     enqueue(new PresenceSubscribed(to, from, data));
   }
@@ -205,7 +205,7 @@ public class HempMemoryQueue implements BamAgentStream, Runnable
    */
   public void sendPresenceUnsubscribe(String to,
 				      String from,
-				      Serializable []data)
+				      Serializable data)
   {
     enqueue(new PresenceUnsubscribe(to, from, data));
   }
@@ -215,7 +215,7 @@ public class HempMemoryQueue implements BamAgentStream, Runnable
    */
   public void sendPresenceUnsubscribed(String to,
 				       String from,
-				       Serializable []data)
+				       Serializable data)
   {
     enqueue(new PresenceUnsubscribed(to, from, data));
   }
@@ -225,7 +225,7 @@ public class HempMemoryQueue implements BamAgentStream, Runnable
    */
   public void sendPresenceError(String to,
 			        String from,
-			        Serializable []data,
+			        Serializable data,
 			        BamError error)
   {
     enqueue(new PresenceError(to, from, data, error));

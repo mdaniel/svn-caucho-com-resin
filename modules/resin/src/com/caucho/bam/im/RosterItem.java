@@ -51,13 +51,14 @@ import java.util.*;
  */
 public class RosterItem implements Serializable {
   private final String _jid;
-  private String []_group;
   // subscribe
   private String _ask;
   // description of the item
   private String _name;
   // none, to, from, both, remove
   private String _subscription;
+  
+  private String []_group;
 
   /**
    * zero-arg for hessian
@@ -77,6 +78,27 @@ public class RosterItem implements Serializable {
 
     if (_jid == null)
       throw new NullPointerException();
+  }
+
+  public RosterItem(String ask, String jid, String name, String subscription,
+		    ArrayList<String> groupList)
+  {
+    _ask = ask;
+    _jid = jid;
+    _name = name;
+    _subscription = subscription;
+
+    if (_jid == null)
+      throw new NullPointerException();
+
+    String []group = null;
+
+    if (groupList != null) {
+      group = new String[groupList.size()];
+      groupList.toArray(group);
+    }
+    
+    _group = group;
   }
 
   public String getJid()

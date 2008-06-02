@@ -229,7 +229,7 @@ public class ClientBrokerStream implements BamStream {
    */
   public void sendPresence(String to,
 			   String from,
-			   Serializable []data)
+			   Serializable data)
   {
     try {
       Hessian2StreamingOutput out = _out;
@@ -248,7 +248,7 @@ public class ClientBrokerStream implements BamStream {
    */
   public void sendPresenceUnavailable(String to,
 				      String from,
-				      Serializable []data)
+				      Serializable data)
   {
     try {
       Hessian2StreamingOutput out = _out;
@@ -267,7 +267,7 @@ public class ClientBrokerStream implements BamStream {
    */
   public void sendPresenceProbe(String to,
 				String from,
-				Serializable []data)
+				Serializable data)
   {
     try {
       Hessian2StreamingOutput out = _out;
@@ -286,7 +286,7 @@ public class ClientBrokerStream implements BamStream {
    */
   public void sendPresenceSubscribe(String to,
 				    String from,
-				    Serializable []data)
+				    Serializable data)
   {
     try {
       Hessian2StreamingOutput out = _out;
@@ -305,7 +305,7 @@ public class ClientBrokerStream implements BamStream {
    */
   public void sendPresenceSubscribed(String to,
 				     String from,
-				     Serializable []data)
+				     Serializable data)
   {
     try {
       Hessian2StreamingOutput out = _out;
@@ -324,7 +324,7 @@ public class ClientBrokerStream implements BamStream {
    */
   public void sendPresenceUnsubscribe(String to,
 				      String from,
-				      Serializable []data)
+				      Serializable data)
   {
     try {
       Hessian2StreamingOutput out = _out;
@@ -343,7 +343,7 @@ public class ClientBrokerStream implements BamStream {
    */
   public void sendPresenceUnsubscribed(String to,
 				       String from,
-				       Serializable []data)
+				       Serializable data)
   {
     try {
       Hessian2StreamingOutput out = _out;
@@ -362,7 +362,7 @@ public class ClientBrokerStream implements BamStream {
    */
   public void sendPresenceError(String to,
 				String from,
-				Serializable []data,
+				Serializable data,
 				BamError error)
   {
     try {

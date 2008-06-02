@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.servlet;
+package com.caucho.xmpp;
 
 import com.caucho.hmtp.packet.QuerySet;
 import com.caucho.hmtp.packet.QueryResult;
@@ -45,27 +45,28 @@ import com.caucho.hmtp.packet.MessageError;
 import com.caucho.hmtp.packet.Message;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
+import com.caucho.vfs.*;
 import java.io.*;
 import java.util.logging.*;
 
 import com.caucho.hessian.io.*;
 
 /**
- * Handles callbacks for a hmpp service
+ * Handles callbacks for a xmpp service
  */
-public class ServerAgentStream implements BamStream
+public class XmppAgentStream implements BamStream
 {
   private static final Logger log
-    = Logger.getLogger(ServerAgentStream.class.getName());
+    = Logger.getLogger(XmppAgentStream.class.getName());
 
-  private ServerBrokerStream _packetHandler;
-  private Hessian2StreamingOutput _out;
+  private XmppBrokerStream _packetHandler;
+  private WriteStream _os;
 
-  ServerAgentStream(ServerBrokerStream packetHandler,
-		     Hessian2StreamingOutput out)
+  XmppAgentStream(XmppBrokerStream packetHandler,
+		  WriteStream os)
   {
     _packetHandler = packetHandler;
-    _out = out;
+    _os = os;
   }
   
   public void sendMessage(String to, String from, Serializable value)
@@ -75,9 +76,21 @@ public class ServerAgentStream implements BamStream
 	log.finer(_packetHandler + " send message to=" + to
 		  + " from=" + from);
       }
+
+      _os.print("<message ");
+      _os.print("to=\"");
+      _os.print(to);
+      _os.print("\" from=\"");
+      _os.print(from);
+      _os.print("\"");
+
+      _os.print(">");
+
+      // IM
+
+      _os.print("</message>");
       
-      _out.writeObject(new Message(to, from, value));
-      _out.flush();
+      _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
       
@@ -95,9 +108,8 @@ public class ServerAgentStream implements BamStream
 	log.finer(_packetHandler + " send error message to=" + to
 		  + " from=" + from + " error=" + error);
       }
-      
-      _out.writeObject(new MessageError(to, from, value, error));
-      _out.flush();
+
+      _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
       
@@ -116,8 +128,7 @@ public class ServerAgentStream implements BamStream
 		  + " from=" + from);
       }
       
-      _out.writeObject(new QueryGet(id, to, from, query));
-      _out.flush();
+      _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
       
@@ -137,9 +148,22 @@ public class ServerAgentStream implements BamStream
 	log.finer(_packetHandler + " querySet to=" + to
 		  + " from=" + from);
       }
+
+      String xmppId = _packetHandler.findId(id);
       
-      _out.writeObject(new QuerySet(id, to, from, query));
-      _out.flush();
+      _os.print("<iq id=\"");
+      _os.print(xmppId);
+      _os.print("\" type=\"set\" to=\"");
+      _os.print(to);
+      _os.print("\" from=\"");
+      _os.print(from);
+      _os.print("\">");
+
+      // XXX: print query
+
+      _os.print("</iq>");
+      
+      _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
       
@@ -157,12 +181,25 @@ public class ServerAgentStream implements BamStream
     try {
       if (log.isLoggable(Level.FINER)) {
 	log.finer(_packetHandler + " queryResult id=" + id + " to=" + to
-		  + " from=" + from);
+		  + " from=" + from + " value=" + value);
       }
+
+      String xmppId = _packetHandler.findId(id);
       
-      _out.writeObject(new QueryResult(id, to, from, value));
-      _out.flush();
-    } catch (IOException e) {
+      _os.print("<iq id=\"");
+      _os.print(xmppId);
+      _os.print("\" type=\"result\" to=\"");
+      _os.print(to);
+      _os.print("\" from=\"");
+      _os.print(from);
+      _os.print("\">");
+
+      _packetHandler.writeValue(value);
+
+      _os.print("</iq>");
+      
+      _os.flush();
+    } catch (Exception e) {
       _packetHandler.close();
       
       log.log(Level.FINE, e.toString(), e);
@@ -177,12 +214,26 @@ public class ServerAgentStream implements BamStream
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send " + error + " to=" + to
-		  + " from=" + from);
+	log.finer(_packetHandler + " queryError id=" + id
+		  + " to=" + to + " from=" + from
+		  + " error=" + error);
       }
+
+      String xmppId = _packetHandler.findId(id);
+
+      _os.print("<iq id=\"");
+      _os.print(xmppId);
+      _os.print("\" type=\"error\" to=\"");
+      _os.print(to);
+      _os.print("\" from=\"");
+      _os.print(from);
+      _os.print("\">");
+
+      // XXX: print query
+
+      _os.print("</iq>");
       
-      _out.writeObject(new QueryError(id, to, from, query, error));
-      _out.flush();
+      _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
       
@@ -202,8 +253,7 @@ public class ServerAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _out.writeObject(new Presence(to, from, data));
-      _out.flush();
+      _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
       
@@ -224,8 +274,7 @@ public class ServerAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _out.writeObject(new PresenceUnavailable(to, from, data));
-      _out.flush();
+      _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
       
@@ -246,8 +295,7 @@ public class ServerAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _out.writeObject(new PresenceProbe(to, from, data));
-      _out.flush();
+      _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
       
@@ -268,8 +316,7 @@ public class ServerAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _out.writeObject(new PresenceSubscribe(to, from, data));
-      _out.flush();
+      _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
       
@@ -290,8 +337,7 @@ public class ServerAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _out.writeObject(new PresenceSubscribed(to, from, data));
-      _out.flush();
+      _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
       
@@ -312,8 +358,7 @@ public class ServerAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _out.writeObject(new PresenceUnsubscribe(to, from, data));
-      _out.flush();
+      _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
       
@@ -334,8 +379,7 @@ public class ServerAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _out.writeObject(new PresenceUnsubscribed(to, from, data));
-      _out.flush();
+      _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
       
@@ -357,8 +401,7 @@ public class ServerAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _out.writeObject(new PresenceError(to, from, data, error));
-      _out.flush();
+      _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
       

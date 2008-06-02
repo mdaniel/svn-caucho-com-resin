@@ -58,7 +58,7 @@ public class PresenceError extends Presence {
    */
   public PresenceError(String to,
 		       String from,
-		       Serializable []data,
+		       Serializable data,
 		       BamError error)
   {
     super(to, from, data);

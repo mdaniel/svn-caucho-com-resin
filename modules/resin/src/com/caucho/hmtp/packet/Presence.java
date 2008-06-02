@@ -37,7 +37,7 @@ import java.io.Serializable;
  * Announces presence information
  */
 public class Presence extends Packet {
-  private final Serializable []_data;
+  private final Serializable _data;
 
   /**
    * zero-arg constructor for Hessian
@@ -52,7 +52,7 @@ public class Presence extends Packet {
    *
    * @param data a collection of presence data
    */
-  public Presence(Serializable []data)
+  public Presence(Serializable data)
   {
     _data = data;
   }
@@ -63,7 +63,7 @@ public class Presence extends Packet {
    * @param to the target client
    * @param data a collection of presence data
    */
-  public Presence(String to, Serializable []data)
+  public Presence(String to, Serializable data)
   {
     super(to);
     
@@ -77,7 +77,7 @@ public class Presence extends Packet {
    * @param from the source
    * @param data a collection of presence data
    */
-  public Presence(String to, String from, Serializable []data)
+  public Presence(String to, String from, Serializable data)
   {
     super(to, from);
     
@@ -87,7 +87,7 @@ public class Presence extends Packet {
   /**
    * Returns the presence data
    */
-  public Serializable []getData()
+  public Serializable getData()
   {
     return _data;
   }
@@ -118,12 +118,8 @@ public class Presence extends Packet {
     }
 
     if (_data != null) {
-      for (Object item : _data) {
-	if (item != null) {
-	  sb.append(",");
-	  sb.append(item.getClass().getSimpleName());
-	}
-      }
+      sb.append(",data=");
+      sb.append(_data);
     }
     
     sb.append("]");

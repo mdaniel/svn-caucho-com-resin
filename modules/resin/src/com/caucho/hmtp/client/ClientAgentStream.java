@@ -229,7 +229,7 @@ class ClientAgentStream implements Runnable, BamStream {
    */
   public void sendPresence(String to,
 			 String from,
-			 Serializable []data)
+			 Serializable data)
   {
     BamPresenceStream handler = _client.getPresenceHandler();
 
@@ -245,7 +245,7 @@ class ClientAgentStream implements Runnable, BamStream {
    */
   public void sendPresenceUnavailable(String to,
 				    String from,
-				    Serializable []data)
+				    Serializable data)
   {
     BamPresenceStream handler = _client.getPresenceHandler();
 
@@ -258,7 +258,7 @@ class ClientAgentStream implements Runnable, BamStream {
    */
   public void sendPresenceProbe(String to,
 			      String from,
-			      Serializable []data)
+			      Serializable data)
   {
     BamPresenceStream handler = _client.getPresenceHandler();
 
@@ -271,7 +271,7 @@ class ClientAgentStream implements Runnable, BamStream {
    */
   public void sendPresenceSubscribe(String to,
 				  String from,
-				  Serializable []data)
+				  Serializable data)
   {
     BamPresenceStream handler = _client.getPresenceHandler();
 
@@ -284,7 +284,7 @@ class ClientAgentStream implements Runnable, BamStream {
    */
   public void sendPresenceSubscribed(String to,
 				   String from,
-				   Serializable []data)
+				   Serializable data)
   {
     BamPresenceStream handler = _client.getPresenceHandler();
 
@@ -297,7 +297,7 @@ class ClientAgentStream implements Runnable, BamStream {
    */
   public void sendPresenceUnsubscribe(String to,
 				    String from,
-				    Serializable []data)
+				    Serializable data)
   {
     BamPresenceStream handler = _client.getPresenceHandler();
 
@@ -310,7 +310,7 @@ class ClientAgentStream implements Runnable, BamStream {
    */
   public void sendPresenceUnsubscribed(String to,
 				     String from,
-				     Serializable []data)
+				     Serializable data)
   {
     BamPresenceStream handler = _client.getPresenceHandler();
 
@@ -323,7 +323,7 @@ class ClientAgentStream implements Runnable, BamStream {
    */
   public void sendPresenceError(String to,
 			      String from,
-			      Serializable []data,
+			      Serializable data,
 			      BamError error)
   {
     BamPresenceStream handler = _client.getPresenceHandler();

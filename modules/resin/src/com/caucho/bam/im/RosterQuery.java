@@ -63,6 +63,18 @@ public class RosterQuery implements Serializable {
     _items = items;
   }
 
+  public RosterQuery(ArrayList<RosterItem> itemList)
+  {
+    RosterItem []items = null;
+    
+    if (itemList != null) {
+      items = new RosterItem[itemList.size()];
+      itemList.toArray(items);
+    }
+    
+    _items = items;
+  }
+
   public RosterItem []getItems()
   {
     return _items;

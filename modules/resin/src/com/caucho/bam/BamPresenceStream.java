@@ -44,55 +44,55 @@ public interface BamPresenceStream
    */
   public void sendPresence(String to,
 			   String from,
-			   Serializable []data);
+			   Serializable data);
 
   /**
    * General presence, for clients announcing unavailability
    */
   public void sendPresenceUnavailable(String to,
 				      String from,
-				      Serializable []data);
+				      Serializable data);
 
   /**
    * Presence probe from the server to a client
    */
   public void sendPresenceProbe(String to,
 			        String from,
-			        Serializable []data);
+			        Serializable data);
 
   /**
    * A subscription request from a client
    */
   public void sendPresenceSubscribe(String to,
 				    String from,
-				    Serializable []data);
+				    Serializable data);
 
   /**
    * A subscription response to a client
    */
   public void sendPresenceSubscribed(String to,
 				     String from,
-				     Serializable []data);
+				     Serializable data);
 
   /**
    * An unsubscription request from a client
    */
   public void sendPresenceUnsubscribe(String to,
 				      String from,
-				      Serializable []data);
+				      Serializable data);
 
   /**
    * A unsubscription response to a client
    */
   public void sendPresenceUnsubscribed(String to,
 				       String from,
-				       Serializable []data);
+				       Serializable data);
 
   /**
    * An error response to a client
    */
   public void sendPresenceError(String to,
 			        String from,
-			        Serializable []data,
+			        Serializable data,
 			        BamError error);
 }

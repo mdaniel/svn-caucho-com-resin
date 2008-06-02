@@ -132,11 +132,11 @@ public class SimpleBamService extends AbstractBamService
    */
   public void sendPresence(String to,
 			 String from,
-			 Serializable []data)
+			 Serializable data)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " sendPresence to=" + to + " from=" + from
-		+ logData(data));
+		+ " value=" + data);
     }
   }
 
@@ -145,7 +145,7 @@ public class SimpleBamService extends AbstractBamService
    */
   public void sendPresenceUnavailable(String to,
 				    String from,
-				    Serializable []data)
+				    Serializable data)
   {
   }
 
@@ -154,7 +154,7 @@ public class SimpleBamService extends AbstractBamService
    */
   public void sendPresenceProbe(String to,
 			      String from,
-			      Serializable []data)
+			      Serializable data)
   {
   }
 
@@ -163,7 +163,7 @@ public class SimpleBamService extends AbstractBamService
    */
   public void sendPresenceSubscribe(String to,
 				  String from,
-				  Serializable []data)
+				  Serializable data)
   {
   }
 
@@ -172,7 +172,7 @@ public class SimpleBamService extends AbstractBamService
    */
   public void sendPresenceSubscribed(String to,
 				   String from,
-				   Serializable []data)
+				   Serializable data)
   {
   }
 
@@ -181,7 +181,7 @@ public class SimpleBamService extends AbstractBamService
    */
   public void sendPresenceUnsubscribe(String to,
 				    String from,
-				    Serializable []data)
+				    Serializable data)
   {
   }
 
@@ -190,7 +190,7 @@ public class SimpleBamService extends AbstractBamService
    */
   public void sendPresenceUnsubscribed(String to,
 				     String from,
-				     Serializable []data)
+				     Serializable data)
   {
   }
 
@@ -199,7 +199,7 @@ public class SimpleBamService extends AbstractBamService
    */
   public void sendPresenceError(String to,
 			      String from,
-			      Serializable []data,
+			      Serializable data,
 			      BamError error)
   {
   }

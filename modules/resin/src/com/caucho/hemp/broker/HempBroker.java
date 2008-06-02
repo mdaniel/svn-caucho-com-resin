@@ -217,7 +217,7 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Presence
    */
-  public void sendPresence(String to, String from, Serializable []data)
+  public void sendPresence(String to, String from, Serializable value)
   {
     /*
     if (to == null) {
@@ -232,11 +232,11 @@ public class HempBroker implements BamBroker, BamStream
     BamStream stream = findAgent(to);
 
     if (stream != null)
-      stream.sendPresence(to, from, data);
+      stream.sendPresence(to, from, value);
     else {
       if (log.isLoggable(Level.FINER)) {
 	log.finer(this + " sendPresence (no resource) to=" + to
-		  + " from=" + from);
+		  + " from=" + from + " value=" + value);
       }
     }
   }
@@ -246,12 +246,18 @@ public class HempBroker implements BamBroker, BamStream
    */
   public void sendPresenceUnavailable(String to,
 				      String from,
-				      Serializable []data)
+				      Serializable data)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendPresenceUnavailable(to, from, data);
+    else {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(this + " sendPresenceUnavailable (no resource) to=" + to
+		  + " from=" + from + " value=" + data);
+      }
+    }
   }
 
   /**
@@ -259,12 +265,18 @@ public class HempBroker implements BamBroker, BamStream
    */
   public void sendPresenceProbe(String to,
 			        String from,
-			        Serializable []data)
+			        Serializable data)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendPresenceProbe(to, from, data);
+    else {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(this + " sendPresenceProbe (no resource) to=" + to
+		  + " from=" + from + " value=" + data);
+      }
+    }
   }
 
   /**
@@ -272,12 +284,18 @@ public class HempBroker implements BamBroker, BamStream
    */
   public void sendPresenceSubscribe(String to,
 				    String from,
-				    Serializable []data)
+				    Serializable data)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendPresenceSubscribe(to, from, data);
+    else {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(this + " sendPresenceSubscribe (no resource) to=" + to
+		  + " from=" + from + " value=" + data);
+      }
+    }
   }
 
   /**
@@ -285,12 +303,18 @@ public class HempBroker implements BamBroker, BamStream
    */
   public void sendPresenceSubscribed(String to,
 				     String from,
-				     Serializable []data)
+				     Serializable data)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendPresenceSubscribed(to, from, data);
+    else {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(this + " sendPresenceSubscribed (no resource) to=" + to
+		  + " from=" + from + " value=" + data);
+      }
+    }
   }
 
   /**
@@ -298,12 +322,18 @@ public class HempBroker implements BamBroker, BamStream
    */
   public void sendPresenceUnsubscribe(String to,
 				      String from,
-				      Serializable []data)
+				      Serializable data)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendPresenceUnsubscribe(to, from, data);
+    else {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(this + " sendPresenceUnsubscribe (no resource) to=" + to
+		  + " from=" + from + " value=" + data);
+      }
+    }
   }
 
   /**
@@ -311,12 +341,18 @@ public class HempBroker implements BamBroker, BamStream
    */
   public void sendPresenceUnsubscribed(String to,
 				       String from,
-				       Serializable []data)
+				       Serializable data)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendPresenceUnsubscribed(to, from, data);
+    else {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(this + " sendPresenceUnsubscribed (no resource) to=" + to
+		  + " from=" + from + " value=" + data);
+      }
+    }
   }
 
   /**
@@ -324,13 +360,19 @@ public class HempBroker implements BamBroker, BamStream
    */
   public void sendPresenceError(String to,
 			        String from,
-			        Serializable []data,
+			        Serializable data,
 			        BamError error)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null)
       stream.sendPresenceError(to, from, data, error);
+    else {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(this + " sendPresenceError (no resource) to=" + to
+		  + " from=" + from + " value=" + data);
+      }
+    }
   }
 
   /**
@@ -369,7 +411,8 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Query an entity
    */
-  public boolean sendQueryGet(long id, String to, String from, Serializable query)
+  public boolean sendQueryGet(long id, String to, String from,
+			      Serializable query)
   {
     BamStream stream = findAgent(to);
 
@@ -377,7 +420,8 @@ public class HempBroker implements BamBroker, BamStream
       if (! stream.sendQueryGet(id, to, from, query)) {
 	if (log.isLoggable(Level.FINE)) {
 	  log.fine(this + " queryGet to unknown feature to='" + to
-		   + "' from=" + from + " query='" + query + "'");
+		   + "' from=" + from + " query='" + query + "'"
+		   + " stream=" + stream);
 	}
 	
 	String msg = L.l("'{0}' is an unknown feature for to='{1}'",

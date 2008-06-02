@@ -55,20 +55,12 @@ import javax.webbeans.*;
 /*
  * XMPP protocol server
  */
-public class XmppProtocol extends Protocol
+public class XmppMarshalFactory
 {
   private static final Logger log
-    = Logger.getLogger(XmppProtocol.class.getName());
-
-  @In private BamBroker _broker;
+    = Logger.getLogger(XmppMarshalFactory.class.getName());
   
   private ClassLoader _loader;
-
-  private HashMap<String,XmppPubSubLeaf> _pubSubMap
-    = new HashMap<String,XmppPubSubLeaf>();
-
-  private ArrayList<XmppRequest> _clients
-    = new ArrayList<XmppRequest>();
 
   private HashMap<QName,XmppMarshal> _unserializeMap
     = new HashMap<QName,XmppMarshal>();
@@ -78,17 +70,11 @@ public class XmppProtocol extends Protocol
 
   private javax.jms.Connection _jmsConn;
   
-  public XmppProtocol()
+  public XmppMarshalFactory()
   {
-    setProtocolName("xmpp");
-
     _loader = Thread.currentThread().getContextClassLoader();
 
-    try {
-      _jmsConn = new JmsConnectionFactory().createConnection();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    init();
   }
 
   ClassLoader getClassLoader()
@@ -96,16 +82,8 @@ public class XmppProtocol extends Protocol
     return _loader;
   }
 
-  BamBroker getBroker()
-  {
-    return _broker;
-  }
-
-  @PostConstruct
   public void init()
   {
-    WebBeansContainer.create().addSingleton(this);
-
     String resource = "META-INF/caucho/com.caucho.xmpp.XmppMarshal";
 
     try {
@@ -127,106 +105,6 @@ public class XmppProtocol extends Protocol
       }
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
-    }
-  }
-
-  /**
-   * Returns an new xmpp connection
-   */
-  @Override
-  public ServerRequest createRequest(Connection connection)
-  {
-    return new XmppRequest(this, (TcpConnection) connection);
-  }
-
-  JmsSession createSession()
-  {
-    try {
-      return (JmsSession) _jmsConn.createSession(false, 1);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  //
-  // pub-sub stuff
-  //
-  
-  public XmppPubSubLeaf createNode(String name)
-  {
-    synchronized (_pubSubMap) {
-      XmppPubSubLeaf leaf = _pubSubMap.get(name);
-
-      if (leaf == null) {
-	if (log.isLoggable(Level.FINE))
-	  log.fine(this + " create pub-sub node " + name);
-	
-	leaf = new XmppPubSubLeaf(this, name);
-	_pubSubMap.put(name, leaf);
-      }
-
-      return leaf;
-    }
-  }
-  
-  public XmppPubSubLeaf getNode(String name)
-  {
-    synchronized (_pubSubMap) {
-      return _pubSubMap.get(name);
-    }
-  }
-  
-  public ArrayList<XmppPubSubLeaf> getNodes()
-  {
-    ArrayList<XmppPubSubLeaf> nodes = new ArrayList<XmppPubSubLeaf>();
-    
-    synchronized (_pubSubMap) {
-      nodes.addAll(_pubSubMap.values());
-
-      return nodes;
-    }
-  }
-
-  void send(XmppPubSubLeaf leaf, MessageImpl msg, long timeout)
-  {
-    MessageStanza stanza = new MessageStanza();
-
-    try {
-      if (msg instanceof TextMessage) {
-	stanza.setBody(((TextMessage) msg).getText());
-      }
-      else if (msg instanceof ObjectMessage) {
-	Object value = ((ObjectMessage) msg).getObject();
-
-	if (value != null)
-	  stanza.setBody(value.toString());
-      }
-    } catch (JMSException e) {
-      throw new RuntimeException(e);
-    }
-
-    System.out.println("STANZA: " + stanza + " " + _clients);
-
-    synchronized (_clients) {
-      for (int i = 0; i < _clients.size(); i++) {
-	XmppRequest client = _clients.get(i);
-	
-	client.offer(client.getRequestId(), stanza);
-      }
-    }
-  }
-  
-  void addClient(XmppRequest request)
-  {
-    synchronized (_clients) {
-      _clients.add(request);
-    }
-  }
-
-  void removeClient(XmppRequest request)
-  {
-    synchronized (_clients) {
-      _clients.remove(request);
     }
   }
 

@@ -132,10 +132,11 @@ public class AbstractBamStream implements BamStream
    */
   public void sendPresence(String to,
 			 String from,
-			 Serializable []data)
+			 Serializable value)
   {
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " sendPresence to=" + to + " from=" + from);
+      log.finer(this + " sendPresence to=" + to + " from=" + from
+		+ " value=" + value);
     }
   }
 
@@ -143,11 +144,12 @@ public class AbstractBamStream implements BamStream
    * General presence, for clients announcing unavailability
    */
   public void sendPresenceUnavailable(String to,
-				    String from,
-				    Serializable []data)
+				      String from,
+				      Serializable value)
   {
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " sendPresenceUnavailable to=" + to + " from=" + from);
+      log.finer(this + " sendPresenceUnavailable to=" + to
+		+ " from=" + from + " value=" + value);
     }
   }
 
@@ -156,10 +158,11 @@ public class AbstractBamStream implements BamStream
    */
   public void sendPresenceProbe(String to,
 				String from,
-				Serializable []data)
+				Serializable value)
   {
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " sendPresenceProbe to=" + to + " from=" + from);
+      log.finer(this + " sendPresenceProbe to=" + to + " from=" + from
+		+ " value=" + value);
     }
   }
 
@@ -168,10 +171,11 @@ public class AbstractBamStream implements BamStream
    */
   public void sendPresenceSubscribe(String to,
 				  String from,
-				  Serializable []data)
+				  Serializable value)
   {
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " sendPresenceSubscribe to=" + to + " from=" + from);
+      log.finer(this + " sendPresenceSubscribe to=" + to + " from=" + from
+		+ " value=" + value);
     }
   }
 
@@ -179,11 +183,12 @@ public class AbstractBamStream implements BamStream
    * A subscription response to a client
    */
   public void sendPresenceSubscribed(String to,
-				   String from,
-				   Serializable []data)
+				     String from,
+				     Serializable value)
   {
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " sendPresenceSubscribed to=" + to + " from=" + from);
+      log.finer(this + " sendPresenceSubscribed to=" + to + " from=" + from
+		+ " value=" + value);
     }
   }
 
@@ -191,11 +196,12 @@ public class AbstractBamStream implements BamStream
    * An unsubscription request from a client
    */
   public void sendPresenceUnsubscribe(String to,
-				    String from,
-				    Serializable []data)
+				      String from,
+				      Serializable value)
   {
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " sendPresenceUnsubscribe to=" + to + " from=" + from);
+      log.finer(this + " sendPresenceUnsubscribe to=" + to + " from=" + from
+		+ " value=" + value);
     }
   }
 
@@ -203,11 +209,12 @@ public class AbstractBamStream implements BamStream
    * A unsubscription response to a client
    */
   public void sendPresenceUnsubscribed(String to,
-				     String from,
-				     Serializable []data)
+				       String from,
+				       Serializable value)
   {
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " sendPresenceUnsubscribed to=" + to + " from=" + from);
+      log.finer(this + " sendPresenceUnsubscribed to=" + to + " from=" + from
+		+ " value=" + value);
     }
   }
 
@@ -215,13 +222,13 @@ public class AbstractBamStream implements BamStream
    * An error response to a client
    */
   public void sendPresenceError(String to,
-			      String from,
-			      Serializable []data,
-			      BamError error)
+				String from,
+				Serializable value,
+				BamError error)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " sendPresenceError to=" + to + " from=" + from
-		+ " error=" + error);
+		+ " value=" + value + " error=" + error);
     }
   }
 }

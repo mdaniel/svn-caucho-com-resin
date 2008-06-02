@@ -115,7 +115,7 @@ public class AbstractBamFilter implements BamStream
    */
   public void sendPresence(String to,
 			   String from,
-			   Serializable []data)
+			   Serializable data)
   {
     _next.sendPresence(to, from, data);
   }
@@ -125,7 +125,7 @@ public class AbstractBamFilter implements BamStream
    */
   public void sendPresenceUnavailable(String to,
 				      String from,
-				      Serializable []data)
+				      Serializable data)
   {
     _next.sendPresenceUnavailable(to, from, data);
   }
@@ -135,7 +135,7 @@ public class AbstractBamFilter implements BamStream
    */
   public void sendPresenceProbe(String to,
 			      String from,
-			      Serializable []data)
+			      Serializable data)
   {
   }
 
@@ -144,7 +144,7 @@ public class AbstractBamFilter implements BamStream
    */
   public void sendPresenceSubscribe(String to,
 				  String from,
-				  Serializable []data)
+				  Serializable data)
   {
     _next.sendPresenceSubscribe(to, from, data);
   }
@@ -154,7 +154,7 @@ public class AbstractBamFilter implements BamStream
    */
   public void sendPresenceSubscribed(String to,
 				   String from,
-				   Serializable []data)
+				   Serializable data)
   {
     _next.sendPresenceSubscribed(to, from, data);
   }
@@ -164,7 +164,7 @@ public class AbstractBamFilter implements BamStream
    */
   public void sendPresenceUnsubscribe(String to,
 				    String from,
-				    Serializable []data)
+				    Serializable data)
   {
     _next.sendPresenceUnsubscribe(to, from, data);
   }
@@ -174,7 +174,7 @@ public class AbstractBamFilter implements BamStream
    */
   public void sendPresenceUnsubscribed(String to,
 				     String from,
-				     Serializable []data)
+				     Serializable data)
   {
     _next.sendPresenceUnsubscribed(to, from, data);
   }
@@ -184,7 +184,7 @@ public class AbstractBamFilter implements BamStream
    */
   public void sendPresenceError(String to,
 			      String from,
-			      Serializable []data,
+			      Serializable data,
 			      BamError error)
   {
     _next.sendPresenceError(to, from, data, error);

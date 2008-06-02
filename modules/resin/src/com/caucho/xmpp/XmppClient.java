@@ -29,13 +29,8 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.xmpp.SuccessStanza;
-import com.caucho.xmpp.StreamStanza;
-import com.caucho.xmpp.Stanza;
-import com.caucho.xmpp.SessionStanza;
-import com.caucho.xmpp.IqErrorStanza;
-import com.caucho.xmpp.EmptyStanza;
-import com.caucho.xmpp.BindStanza;
+import com.caucho.bam.*;
+import com.caucho.xmpp.*;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.util.*;
@@ -86,6 +81,8 @@ public class XmppClient {
   private BlockingQueue<Stanza> _stanzaQueue
     = new LinkedBlockingQueue<Stanza>();
 
+  private XmppClientBrokerStream _toBroker;
+
   public XmppClient(InetAddress address, int port)
   {
     _address = address;
@@ -95,7 +92,7 @@ public class XmppClient {
 
     _isFinest = log.isLoggable(Level.FINEST);
   }
-
+					   
   public XmppClient(String address, int port)
   {
     this(getByName(address), port);
@@ -138,6 +135,8 @@ public class XmppClient {
       _in = factory.createXMLStreamReader(_is);
 
       String tag = readStartTag();
+
+      _toBroker = new XmppClientBrokerStream(this, _os);
 
       if (! tag.equals("stream")
 	  || ! STREAMS_NS.equals(_in.getNamespaceURI())) {
@@ -437,6 +436,11 @@ public class XmppClient {
       log.finest(this + " text='" + in.getText() + "'");
     else
       log.finest(this + " tag=" + in.getEventType());
+  }
+
+  public BamStream getBrokerStream()
+  {
+    return _toBroker;
   }
 
   public String toString()

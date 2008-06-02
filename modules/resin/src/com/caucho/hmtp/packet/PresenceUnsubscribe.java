@@ -50,7 +50,7 @@ public class PresenceUnsubscribe extends Presence {
    * @param to the target client
    * @param data a collection of presence data
    */
-  public PresenceUnsubscribe(String to, Serializable []data)
+  public PresenceUnsubscribe(String to, Serializable data)
   {
     super(to, data);
   }
@@ -62,7 +62,7 @@ public class PresenceUnsubscribe extends Presence {
    * @param from the source
    * @param data a collection of presence data
    */
-  public PresenceUnsubscribe(String to, String from, Serializable []data)
+  public PresenceUnsubscribe(String to, String from, Serializable data)
   {
     super(to, from, data);
   }

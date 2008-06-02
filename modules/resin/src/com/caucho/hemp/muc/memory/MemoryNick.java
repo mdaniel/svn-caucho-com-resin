@@ -100,7 +100,7 @@ public class MemoryNick extends SimpleBamService
   }
 
   @Override
-  public void sendPresence(String to, String from, Serializable []data)
+  public void sendPresence(String to, String from, Serializable data)
   {
     _userJid = from;
     

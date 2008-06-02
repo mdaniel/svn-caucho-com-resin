@@ -115,12 +115,35 @@ public class ImMessage implements Serializable {
     return _type;
   }
 
+  public Text []getSubjects()
+  {
+    return _subject;
+  }
+
+  public String getSubjectString()
+  {
+    if (_subject == null || _subject.length == 0)
+      return null;
+    else
+      return _subject[0].getValue();
+  }
+
+  public Text []getBodys()
+  {
+    return _body;
+  }
+
   public String getBodyString()
   {
     if (_body == null || _body.length == 0)
       return null;
     else
       return _body[0].getValue();
+  }
+
+  public String getThread()
+  {
+    return _thread;
   }
 
   @Override
@@ -131,11 +154,43 @@ public class ImMessage implements Serializable {
     sb.append("[");
     sb.append(_type);
 
-    if (_body != null && _body.length != 0) {
-      sb.append(",body='");
-      sb.append(getBodyString());
-      sb.append("'");
+    if (_to != null)
+      sb.append(",to=").append(_to);
+    
+    if (_from != null)
+      sb.append(",from=").append(_to);
+      
+    if (_subject != null) {
+      for (Text text : _subject) {
+	if (text.getLang() != null) {
+	  sb.append(",subject(").append(text.getLang()).append(")='");
+	}
+	else
+	  sb.append(",subject='");
+	
+	sb.append(text.getValue());
+	sb.append("'");
+      }
     }
+
+    if (_body != null && _body.length != 0) {
+      for (Text text : _body) {
+	if (text.getLang() != null) {
+	  sb.append(",body(").append(text.getLang()).append(")='");
+	}
+	else
+	  sb.append(",body='");
+	
+	sb.append(text.getValue());
+	sb.append("'");
+      }
+    }
+
+    if (_thread != null) {
+      sb.append(",thread=");
+      sb.append(_thread);
+    }
+    
     sb.append("]");
     
     return sb.toString();

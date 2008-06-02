@@ -49,7 +49,7 @@ public class PresenceUnavailable extends Presence {
    *
    * @param data a collection of presence data
    */
-  public PresenceUnavailable(Serializable []data)
+  public PresenceUnavailable(Serializable data)
   {
     super(data);
   }
@@ -60,7 +60,7 @@ public class PresenceUnavailable extends Presence {
    * @param to the target client
    * @param data a collection of presence data
    */
-  public PresenceUnavailable(String to, Serializable []data)
+  public PresenceUnavailable(String to, Serializable data)
   {
     super(to, data);
   }
@@ -72,7 +72,7 @@ public class PresenceUnavailable extends Presence {
    * @param from the source
    * @param data a collection of presence data
    */
-  public PresenceUnavailable(String to, String from, Serializable []data)
+  public PresenceUnavailable(String to, String from, Serializable data)
   {
     super(to, from, data);
   }

@@ -34,9 +34,42 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Presence
+ * Presence - rfc3921
+ *
+ * <pre><code>
+ * element presence {
+ *   attribute from?
+ *   &amp; attribute id?
+ *   &amp; attribute to?
+ *   &amp; attribute type?
+ *
+ *   &amp; show?
+ *   &amp; status*
+ *   &amp; priority?
+ *   &amp; other*
+ *   &amp; error?
+ * }
+ *
+ * element priority {
+ *   integer
+ * }
+ *
+ * element show {
+ *   "away" | "chat" | "dnd" | "xa"
+ * }
+ *
+ * element status {
+ *   attribute xml:lang?,
+ *   string
+ * }
+ * </code></pre>
  */
 public class ImPresence implements Serializable {
+  private String _id;
+  private String _to;
+  private String _from;
+  private String _type;
+  
   // "away", "chat", "dnd", "xa"
   private String _show;
   private Text _status;
@@ -48,9 +81,58 @@ public class ImPresence implements Serializable {
   {
   }
 
+  public ImPresence(String to,
+		    String from,
+		    String show,
+		    Text status,
+		    int priority,
+		    ArrayList<Serializable> extraList)
+  {
+    _to = to;
+    _from = from;
+    
+    _show = show;
+    _status = status;
+    _priority = priority;
+
+    Serializable []extra = null;
+
+    if (extraList != null) {
+      extra = new Serializable[extraList.size()];
+      extraList.toArray(extra);
+    }
+
+    _extra = extra;
+  }
+
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + "]";
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+
+    if (_id != null)
+      sb.append("id=").append(_id);
+
+    if (_show != null)
+      sb.append(",show=").append(_show);
+
+    if (_status != null)
+      sb.append(",status=").append(_status.getValue());
+
+    if (_priority != 0)
+      sb.append(",priority=").append(_priority);
+
+    if (_extra != null) {
+      for (Serializable extra : _extra) {
+	sb.append(",").append(extra);
+      }
+    }
+    
+    sb.append("]");
+    
+    return sb.toString();
   }
 }

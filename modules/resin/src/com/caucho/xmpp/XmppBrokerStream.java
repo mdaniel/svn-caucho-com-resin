@@ -32,15 +32,18 @@ package com.caucho.xmpp;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamConnection;
-import com.caucho.bam.im.ImMessage;
+import com.caucho.bam.im.*;
 import com.caucho.bam.BamBroker;
 import com.caucho.server.connection.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.xml.stream.*;
+import com.caucho.xmpp.im.XmppRosterQueryMarshal;
 import java.io.*;
+import java.util.*;
 import java.util.logging.*;
 import javax.servlet.*;
+import javax.xml.namespace.QName;
 import javax.xml.stream.*;
 
 /**
@@ -51,6 +54,8 @@ public class XmppBrokerStream
 {
   private static final Logger log
     = Logger.getLogger(XmppBrokerStream.class.getName());
+
+  private XmppProtocol _protocol;
   
   private BamBroker _broker;
   private BamConnection _conn;
@@ -63,29 +68,33 @@ public class XmppBrokerStream
   private WriteStream _os;
   
   private XMLStreamReaderImpl _in;
+  private XMLStreamWriter _out;
 
   private String _jid;
   private long _requestId;
 
-  private String _name;
+  private String _uid = "test@localhost";
   private boolean _isFinest;
 
-  XmppBrokerStream(BamBroker broker,
+  // XXX: needs timeout(?)
+  private HashMap<Long,String> _idMap = new HashMap<Long,String>();
+
+  XmppBrokerStream(XmppProtocol protocol, BamBroker broker,
 		   XMLStreamReaderImpl in, WriteStream os)
   {
+    _protocol = protocol;
+    
     _broker = broker;
 
     _in = in;
     _os = os;
 
-    _callbackHandler = null;//new ServerAgentStream(this, _out);
+    _out =  new XMLStreamWriterImpl(os);
+
+    _callbackHandler = new XmppAgentStream(this, _os);
     _authHandler = null;//new AuthBrokerStream(this, _callbackHandler);
 
     _isFinest = log.isLoggable(Level.FINEST);
-
-    System.out.println("START-ME-UP:");
-
-    login("test", "dummy", null);
   }
 
   protected String getJid()
@@ -99,8 +108,6 @@ public class XmppBrokerStream
   {
     XMLStreamReaderImpl in = _in;
     
-    System.out.println("READs for an ex-leper");
-
     if (in == null)
       return false;
 
@@ -168,7 +175,9 @@ public class XmppBrokerStream
   {
     String password = (String) credentials;
     
-    _conn = _broker.getConnection(uid, password);
+    _uid = uid + "@localhost";
+    
+    _conn = _broker.getConnection(_uid, password);
     _conn.setMessageHandler(_callbackHandler);
     _conn.setQueryHandler(_callbackHandler);
     _conn.setPresenceHandler(_callbackHandler);
@@ -225,6 +234,116 @@ public class XmppBrokerStream
     return true;
   }
 
+  /**
+   * Processes a message
+   */
+  private boolean handleMessage()
+    throws IOException, XMLStreamException
+  {
+    String type = _in.getAttributeValue(null, "type");
+    String id = _in.getAttributeValue(null, "id");
+    String from = _in.getAttributeValue(null, "from");
+    String to = _in.getAttributeValue(null, "to");
+
+    int tag;
+
+    from = _jid;
+
+    if (to == null)
+      to = _uid;
+    
+    ArrayList<Text> subjectList = new ArrayList<Text>();
+    ArrayList<Text> bodyList = new ArrayList<Text>();
+    String thread = null;
+    
+    while ((tag = _in.next()) > 0
+	   && ! (tag == XMLStreamReader.END_ELEMENT
+		 && "message".equals(_in.getLocalName()))) {
+      if (_isFinest)
+	debug(_in);
+      
+      if (tag != XMLStreamReader.START_ELEMENT)
+	continue;
+
+      if ("body".equals(_in.getLocalName())
+	  && "jabber:client".equals(_in.getNamespaceURI())) {
+	String lang = null;
+
+	if (_in.getAttributeCount() > 0
+	    && "lang".equals(_in.getAttributeLocalName(0))) {
+	  lang = _in.getAttributeValue(0);
+	}
+	
+	tag = _in.next();
+	if (_isFinest)
+	  debug(_in);
+
+	String body = _in.getText();
+
+	bodyList.add(new Text(body, lang));
+
+	expectEnd("body");
+      }
+      else if ("subject".equals(_in.getLocalName())
+	       && "jabber:client".equals(_in.getNamespaceURI())) {
+	String lang = null;
+	
+	if (_in.getAttributeCount() > 0
+	    && "lang".equals(_in.getAttributeLocalName(0)))
+	  lang = _in.getAttributeValue(0);
+	
+	tag = _in.next();
+	if (_isFinest)
+	  debug(_in);
+
+	String text = _in.getText();
+
+	subjectList.add(new Text(text, lang));
+
+	expectEnd("subject");
+      }
+      else if ("thread".equals(_in.getLocalName())
+	       && "jabber:client".equals(_in.getNamespaceURI())) {
+	tag = _in.next();
+	if (_isFinest)
+	  debug(_in);
+
+	thread = _in.getText();
+
+	expectEnd("thread");
+      }
+    }
+
+    expectEnd("message", tag);
+
+    Text []subjectArray = null;
+
+    if (subjectList.size() > 0) {
+      subjectArray = new Text[subjectList.size()];
+      subjectList.toArray(subjectArray);
+    }
+
+    Text []bodyArray = null;
+
+    if (bodyList.size() > 0) {
+      bodyArray = new Text[bodyList.size()];
+      bodyList.toArray(bodyArray);
+    }
+
+    Serializable []extra = null;
+
+    ImMessage message = new ImMessage(to, from, type,
+				      subjectArray, bodyArray, thread,
+				      extra);
+
+    _toBroker.sendMessage(to, from, message);
+
+    return true;
+  }
+
+  /**
+   * Processes a query
+   */
   private boolean handleIq()
     throws IOException, XMLStreamException
   {
@@ -277,59 +396,73 @@ public class XmppBrokerStream
 
       return true;
     }
-    else if ("jabber:iq:roster".equals(_in.getNamespaceURI())
-	     && "query".equals(_in.getLocalName())) {
-      skipToEnd("iq");
-
-      
-      _os.print("<iq type='result' id='" + id + "' from='" + _jid + "'>");
-      _os.print("<query xmlns='jabber:iq:roster'>");
-
-      _os.print("<item jid='jimmy@localhost' name='Test' subscription='to'>");
-      _os.print("<group>Buddies</group>");
-      _os.print("</item>");
-      
-      _os.print("</query>");
-      _os.print("</iq>");
-      _os.flush();
-
-      return true;
-    }
-    else if ("query".equals(_in.getLocalName())
-	     && "http://jabber.org/protocol/disco#info".equals(uri)) {
-      skipToEnd("iq");
-
-      _os.print("<iq type='result' id='" + id + "'");
-      if (to != null)
-	_os.print(" from='" + to + "'");
-      _os.print(">");
-      _os.print("<query xmlns='http://jabber.org/protocol/disco#info'>");
-      _os.print("<identity category='pubsub' type='leaf' name='test'/>");
-      _os.print("<feature var='http://jabber.org/protocol/disco#info'/>");
-      _os.print("<feature var='jabber:iq:time'/>");
-      _os.print("<feature var='jabber:iq:search'/>");
-      _os.print("<feature var='http://jabber.org/protocol/muc'/>");
-      _os.print("<feature var='http://jabber.org/protocol/pubsub'/>");
-      _os.print("</query>");
-      _os.print("</iq>");
-      _os.flush();
-      System.out.println("QUERY: " + type + " query:" + _in.getLocalName() + " from:" + from + " to:" + to + " id:" + id);
-
-      return true;
-    }
     else {
+      QName name = _in.getName();
+
+      Serializable query = null;
+
+      XmppMarshal marshal = _protocol.getUnserialize(name);
+
+      if (marshal != null)
+	query = marshal.fromXml(_in);
+      else
+	query = readAsXmlString(_in);
+
+      BamError error = null;
+
+      if (to == null)
+	to = _uid;
+      
       skipToEnd("iq");
 
-      _os.print("<iq type='error'>");
-      _os.print("<error/>");
-      _os.print("</iq>");
-
-      if (log.isLoggable(Level.FINE)) {
-	log.fine(this + " <" + _in.getLocalName() + " xmlns="
-		 + _in.getNamespaceURI() + "> unknown iq");
+      if ("get".equals(type)) {
+	long bamId = addId(id);
+	  
+	_toBroker.sendQueryGet(bamId, to, _jid, query);
+      }
+      else if ("set".equals(type)) {
+	long bamId = addId(id);
+	  
+	_toBroker.sendQuerySet(bamId, to, _jid, query);
+      }
+      else if ("result".equals(type)) {
+	long bamId = Long.parseLong(id);
+	  
+	_toBroker.sendQueryResult(bamId, to, _jid, query);
+      }
+      else if ("error".equals(type)) {
+	long bamId = Long.parseLong(id);
+	  
+	_toBroker.sendQueryError(bamId, to, _jid, query, error);
+      }
+      else {
+	if (log.isLoggable(Level.FINE)) {
+	  log.fine(this + " <" + _in.getLocalName() + " xmlns="
+		   + _in.getNamespaceURI() + "> unknown type");
+	}
       }
 
       return true;
+    }
+  }
+
+  private long addId(String id)
+  {
+    long bamId;
+    
+    synchronized (_idMap) {
+      bamId = _requestId++;
+      
+      _idMap.put(bamId, id);
+    }
+
+    return bamId;
+  }
+
+  String findId(long bamId)
+  {
+    synchronized (_idMap) {
+      return _idMap.remove(bamId);
     }
   }
 
@@ -341,7 +474,16 @@ public class XmppBrokerStream
     String from = _in.getAttributeValue(null, "from");
     String to = _in.getAttributeValue(null, "to");
 
+    if (type == null)
+      type = "";
+
     int tag;
+
+    String show = null;
+    Text status = null;
+    int priority = 0;
+    ArrayList<Serializable> extraList = new ArrayList<Serializable>();
+    BamError error = null;
     
     while ((tag = _in.nextTag()) > 0
 	   && ! ("presence".equals(_in.getLocalName())
@@ -358,11 +500,32 @@ public class XmppBrokerStream
 	if (_isFinest)
 	  debug(_in);
 	
-	String status = _in.getText();
+	status = new Text(_in.getText());
 
-	expectEnd("status");
+	skipToEnd("status");
+      }
+      else if ("show".equals(_in.getLocalName())) {
+	tag = _in.next();
+    
+	if (_isFinest)
+	  debug(_in);
 	
-	continue;
+	show = _in.getText();
+
+	skipToEnd("show");
+      }
+      else if ("priority".equals(_in.getLocalName())) {
+	tag = _in.next();
+    
+	if (_isFinest)
+	  debug(_in);
+	
+	priority = Integer.parseInt(_in.getText());
+
+	skipToEnd("show");
+      }
+      else {
+	
       }
     }
     
@@ -371,76 +534,48 @@ public class XmppBrokerStream
 
     expectEnd("presence", tag);
 
-    /*
-    if (! _isPresent) {
-      _isPresent = true;
-      _protocol.addClient(this);
+    from = _jid;
 
-      _os.print("<presence from='jimmy@localhost'>");
-      _os.print("<status>active</status>");
-      _os.print("</presence>");
-    }
-    */
+    if (to == null)
+      to = _uid;
+
+    ImPresence presence = new ImPresence(to, from,
+					 show, status, priority,
+					 extraList);
+
+    if ("".equals(type))
+      _toBroker.sendPresence(to, from, presence);
+    else if ("probe".equals(type))
+      _toBroker.sendPresenceProbe(to, from, presence);
+    else if ("unavailable".equals(type))
+      _toBroker.sendPresenceUnavailable(to, from, presence);
+    else if ("subscribe".equals(type))
+      _toBroker.sendPresenceSubscribe(to, from, presence);
+    else if ("subscribed".equals(type))
+      _toBroker.sendPresenceSubscribed(to, from, presence);
+    else if ("unsubscribe".equals(type))
+      _toBroker.sendPresenceUnsubscribe(to, from, presence);
+    else if ("unsubscribed".equals(type))
+      _toBroker.sendPresenceUnsubscribed(to, from, presence);
+    else if ("error".equals(type))
+      _toBroker.sendPresenceError(to, from, presence, error);
+    else
+      log.warning(this + " " + type + " is an unknown presence type");
 
     return true;
   }
 
-  private boolean handleMessage()
+  void writeValue(Serializable value)
     throws IOException, XMLStreamException
   {
-    String type = _in.getAttributeValue(null, "type");
-    String id = _in.getAttributeValue(null, "id");
-    String from = _in.getAttributeValue(null, "from");
-    String to = _in.getAttributeValue(null, "to");
-
-    int tag;
-    String body = "";
+    if (value == null)
+      return;
     
-    while ((tag = _in.next()) > 0
-	   && ! (tag == XMLStreamReader.END_ELEMENT
-		 && "message".equals(_in.getLocalName()))) {
-      if (_isFinest)
-	debug(_in);
-      
-      if (tag != XMLStreamReader.START_ELEMENT)
-	continue;
+    XmppMarshal marshal = _protocol.getSerialize(value.getClass().getName());
 
-      if ("body".equals(_in.getLocalName())
-	  && "jabber:client".equals(_in.getNamespaceURI())) {
-	tag = _in.next();
-	if (_isFinest)
-	  debug(_in);
-      
-	body = _in.getText();
-
-	expectEnd("body");
-      }
+    if (marshal != null) {
+      marshal.toXml(_out, value);
     }
-
-    expectEnd("message", tag);
-
-    ImMessage message = new ImMessage(type, body);
-
-    System.out.println("SEND-MESSAGE: " + message);
-    _toBroker.sendMessage(to, from, message);
-
-    /*
-    try {
-      ObjectMessageImpl msg = new ObjectMessageImpl();
-      msg.setJMSMessageID("ID:xmpp-test");
-    
-      msg.setObject(body);
-
-      if (log.isLoggable(Level.FINE))
-	log.fine(this + " message to " + leaf);
-
-      leaf.send(null, msg, 0);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    */
-
-    return true;
   }
 
   private void skipToEnd(String tagName)
@@ -529,11 +664,11 @@ public class XmppBrokerStream
     String name = decoded.substring(1, p);
     String password = decoded.substring(p + 1);
 
+    login(name, password, null);
+
     boolean isAuth = true;
 
     if (isAuth) {
-      _name = name;
-
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " auth-plain success for " + name);
       
@@ -544,6 +679,80 @@ public class XmppBrokerStream
     }
 
     return false;
+  }
+
+  private String readAsXmlString(XMLStreamReader in)
+    throws IOException, XMLStreamException
+  {
+    StringBuilder sb = new StringBuilder();
+    int depth = 0;
+
+    while (true) {
+      if (XMLStreamReader.START_ELEMENT == in.getEventType()) {
+	depth++;
+
+	String prefix = in.getPrefix();
+	
+	sb.append("<");
+
+	if (! "".equals(prefix)) {
+	  sb.append(prefix);
+	  sb.append(":");
+	}
+	
+	sb.append(in.getLocalName());
+
+	if (in.getNamespaceURI() != null) {
+	  if ("".equals(prefix))
+	    sb.append(" xmlns");
+	  else
+	    sb.append(" xmlns:").append(prefix);
+	    
+	  sb.append("=\"");
+	  sb.append(in.getNamespaceURI()).append("\"");
+	}
+
+	for (int i = 0; i < in.getAttributeCount(); i++) {
+	  sb.append(" ");
+	  sb.append(in.getAttributeLocalName(i));
+	  sb.append("=\"");
+	  sb.append(in.getAttributeValue(i));
+	  sb.append("\"");
+	}
+	sb.append(">");
+
+	log.finest(this + " " + sb);
+      }
+      else if (XMLStreamReader.END_ELEMENT == in.getEventType()) {
+	depth--;
+
+	sb.append("</");
+
+	String prefix = in.getPrefix();
+	if (! "".equals(prefix))
+	  sb.append(prefix).append(":");
+	
+	sb.append(in.getLocalName());
+	sb.append(">");
+
+	if (depth == 0)
+	  return sb.toString();
+      }
+      else if (XMLStreamReader.CHARACTERS == in.getEventType()) {
+	sb.append(in.getText());
+      }
+      else {
+	log.finer(this + " tag=" + in.getEventType());
+
+	return sb.toString();
+      }
+
+      if (in.next() < 0) {
+	log.finer(this + " unexpected end of file");
+	
+	return sb.toString();
+      }
+    }
   }
 
   private void debug(XMLStreamReader in)
@@ -668,7 +877,7 @@ public class XmppBrokerStream
    */
   public void sendPresence(String to,
 			   String from,
-			   Serializable []data)
+			   Serializable data)
 
   {
     _toBroker.sendPresence(to, _jid, data);
@@ -682,7 +891,7 @@ public class XmppBrokerStream
    */
   public void sendPresenceUnavailable(String to,
 				      String from,
-				      Serializable []data)
+				      Serializable data)
   {
     _toBroker.sendPresenceUnavailable(to, _jid, data);
   }
@@ -692,7 +901,7 @@ public class XmppBrokerStream
    */
   public void sendPresenceProbe(String to,
 			      String from,
-			      Serializable []data)
+			      Serializable data)
   {
     _toBroker.sendPresenceProbe(to, _jid, data);
   }
@@ -702,7 +911,7 @@ public class XmppBrokerStream
    */
   public void sendPresenceSubscribe(String to,
 				    String from,
-				    Serializable []data)
+				    Serializable data)
   {
     _toBroker.sendPresenceSubscribe(to, _jid, data);
   }
@@ -712,7 +921,7 @@ public class XmppBrokerStream
    */
   public void sendPresenceSubscribed(String to,
 				     String from,
-				     Serializable []data)
+				     Serializable data)
   {
     _toBroker.sendPresenceSubscribed(to, _jid, data);
   }
@@ -722,7 +931,7 @@ public class XmppBrokerStream
    */
   public void sendPresenceUnsubscribe(String to,
 				      String from,
-				      Serializable []data)
+				      Serializable data)
   {
     _toBroker.sendPresenceUnsubscribe(to, _jid, data);
   }
@@ -732,7 +941,7 @@ public class XmppBrokerStream
    */
   public void sendPresenceUnsubscribed(String to,
 				       String from,
-				       Serializable []data)
+				       Serializable data)
   {
     _toBroker.sendPresenceUnsubscribed(to, _jid, data);
   }
@@ -742,7 +951,7 @@ public class XmppBrokerStream
    */
   public void sendPresenceError(String to,
 			      String from,
-			      Serializable []data,
+			      Serializable data,
 			      BamError error)
   {
     _toBroker.sendPresenceError(to, _jid, data, error);

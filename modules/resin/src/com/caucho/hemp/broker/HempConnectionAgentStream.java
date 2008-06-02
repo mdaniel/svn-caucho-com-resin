@@ -253,7 +253,7 @@ class HempConnectionAgentStream implements BamAgentStream
   /**
    * Forwards the presence
    */
-  public void sendPresence(String to, String from, Serializable []data)
+  public void sendPresence(String to, String from, Serializable data)
   {
     BamPresenceStream handler = _presenceHandler;
 
@@ -270,8 +270,8 @@ class HempConnectionAgentStream implements BamAgentStream
    * Forwards the presence
    */
   public void sendPresenceProbe(String to,
-		              String from,
-			      Serializable []data)
+				String from,
+				Serializable data)
   {
     BamPresenceStream handler = _presenceHandler;
 
@@ -288,8 +288,8 @@ class HempConnectionAgentStream implements BamAgentStream
    * Forwards the presence
    */
   public void sendPresenceUnavailable(String to,
-				    String from,
-				    Serializable []data)
+				      String from,
+				      Serializable data)
   {
     BamPresenceStream handler = _presenceHandler;
 
@@ -306,8 +306,8 @@ class HempConnectionAgentStream implements BamAgentStream
    * Forwards the presence
    */
   public void sendPresenceSubscribe(String to,
-				  String from,
-				  Serializable []data)
+				    String from,
+				    Serializable data)
   {
     BamPresenceStream handler = _presenceHandler;
 
@@ -324,8 +324,8 @@ class HempConnectionAgentStream implements BamAgentStream
    * Forwards the presence
    */
   public void sendPresenceSubscribed(String to,
-				   String from,
-				   Serializable []data)
+				     String from,
+				     Serializable data)
   {
     BamPresenceStream handler = _presenceHandler;
 
@@ -342,8 +342,8 @@ class HempConnectionAgentStream implements BamAgentStream
    * Forwards the presence
    */
   public void sendPresenceUnsubscribe(String to,
-				    String from,
-				    Serializable []data)
+				      String from,
+				      Serializable data)
   {
     BamPresenceStream handler = _presenceHandler;
 
@@ -360,8 +360,8 @@ class HempConnectionAgentStream implements BamAgentStream
    * Forwards the presence
    */
   public void sendPresenceUnsubscribed(String to,
-				     String from,
-				     Serializable []data)
+				       String from,
+				       Serializable data)
   {
     BamPresenceStream handler = _presenceHandler;
 
@@ -378,9 +378,9 @@ class HempConnectionAgentStream implements BamAgentStream
    * Forwards the presence
    */
   public void sendPresenceError(String to,
-			      String from,
-			      Serializable []data,
-                              BamError error)
+				String from,
+				Serializable data,
+				BamError error)
   {
     BamPresenceStream handler = _presenceHandler;
 

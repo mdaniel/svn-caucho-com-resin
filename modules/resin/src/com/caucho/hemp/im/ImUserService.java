@@ -166,7 +166,7 @@ public class ImUserService extends SimpleBamService
    * forwards presence to logged in resources
    */
   @Override
-  public void sendPresence(String to, String from, Serializable []data)
+  public void sendPresence(String to, String from, Serializable data)
   {
     String []jids = _jids;
 
@@ -179,7 +179,7 @@ public class ImUserService extends SimpleBamService
    * forwards presence to logged in resources
    */
   @Override
-  public void sendPresenceProbe(String to, String from, Serializable []data)
+  public void sendPresenceProbe(String to, String from, Serializable data)
   {
     String []jids = _jids;
 
@@ -193,7 +193,7 @@ public class ImUserService extends SimpleBamService
    */
   @Override
   public void sendPresenceUnavailable(String to, String from,
-				      Serializable []data)
+				      Serializable data)
   {
     String []jids = _jids;
 
@@ -205,7 +205,7 @@ public class ImUserService extends SimpleBamService
   /**
    * Presence from self
    */
-  public void sendPresence(String from, Serializable []data)
+  public void sendPresence(String from, Serializable data)
   {
     for (RosterItem item : getRoster()) {
       String subscription = item.getSubscription();
@@ -231,7 +231,7 @@ public class ImUserService extends SimpleBamService
   @Override
   public void sendPresenceSubscribe(String to,
 				    String from,
-				    Serializable []data)
+				    Serializable data)
   {
     if (! rosterSubscribeFrom(to, from, data)) {
       log.fine(this + " sendPresenceSubscribe denied from=" + from);
@@ -252,7 +252,7 @@ public class ImUserService extends SimpleBamService
   @Override
   public void sendPresenceSubscribed(String to,
 				     String from,
-				     Serializable []data)
+				     Serializable data)
   {
     // complete subscription from the target
     if (rosterSubscribedFrom(to, from, data)) {
@@ -343,7 +343,7 @@ public class ImUserService extends SimpleBamService
    */
   protected boolean rosterSubscribeTo(String to,
 				      String from,
-				      Serializable []data)
+				      Serializable data)
   {
     return true;
   }
@@ -353,7 +353,7 @@ public class ImUserService extends SimpleBamService
    */
   protected boolean rosterSubscribeFrom(String to,
 					String from,
-					Serializable []data)
+					Serializable data)
   {
     return true;
   }
@@ -363,7 +363,7 @@ public class ImUserService extends SimpleBamService
    */
   protected boolean rosterSubscribedTo(String to,
 				     String from,
-				     Serializable []data)
+				     Serializable data)
   {
     return true;
   }
@@ -373,7 +373,7 @@ public class ImUserService extends SimpleBamService
    */
   protected boolean rosterSubscribedFrom(String to,
 					 String from,
-					 Serializable []data)
+					 Serializable data)
   {
     return true;
   }

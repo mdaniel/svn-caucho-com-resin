@@ -231,7 +231,7 @@ public class ServerBrokerStream
    */
   public void sendPresence(String to,
 			   String from,
-			   Serializable []data)
+			   Serializable data)
 
   {
     _toBroker.sendPresence(to, _jid, data);
@@ -245,7 +245,7 @@ public class ServerBrokerStream
    */
   public void sendPresenceUnavailable(String to,
 				      String from,
-				      Serializable []data)
+				      Serializable data)
   {
     _toBroker.sendPresenceUnavailable(to, _jid, data);
   }
@@ -255,7 +255,7 @@ public class ServerBrokerStream
    */
   public void sendPresenceProbe(String to,
 			      String from,
-			      Serializable []data)
+			      Serializable data)
   {
     _toBroker.sendPresenceProbe(to, _jid, data);
   }
@@ -265,7 +265,7 @@ public class ServerBrokerStream
    */
   public void sendPresenceSubscribe(String to,
 				    String from,
-				    Serializable []data)
+				    Serializable data)
   {
     _toBroker.sendPresenceSubscribe(to, _jid, data);
   }
@@ -275,7 +275,7 @@ public class ServerBrokerStream
    */
   public void sendPresenceSubscribed(String to,
 				     String from,
-				     Serializable []data)
+				     Serializable data)
   {
     _toBroker.sendPresenceSubscribed(to, _jid, data);
   }
@@ -285,7 +285,7 @@ public class ServerBrokerStream
    */
   public void sendPresenceUnsubscribe(String to,
 				      String from,
-				      Serializable []data)
+				      Serializable data)
   {
     _toBroker.sendPresenceUnsubscribe(to, _jid, data);
   }
@@ -295,7 +295,7 @@ public class ServerBrokerStream
    */
   public void sendPresenceUnsubscribed(String to,
 				       String from,
-				       Serializable []data)
+				       Serializable data)
   {
     _toBroker.sendPresenceUnsubscribed(to, _jid, data);
   }
@@ -305,7 +305,7 @@ public class ServerBrokerStream
    */
   public void sendPresenceError(String to,
 			      String from,
-			      Serializable []data,
+			      Serializable data,
 			      BamError error)
   {
     _toBroker.sendPresenceError(to, _jid, data, error);

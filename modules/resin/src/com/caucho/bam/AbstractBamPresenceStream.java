@@ -42,8 +42,8 @@ public class AbstractBamPresenceStream implements BamPresenceStream
    * General presence, for clients announcing availability
    */
   public void sendPresence(String to,
-			 String from,
-			 Serializable []data)
+			   String from,
+			   Serializable value)
   {
   }
 
@@ -51,8 +51,8 @@ public class AbstractBamPresenceStream implements BamPresenceStream
    * General presence, for clients announcing unavailability
    */
   public void sendPresenceUnavailable(String to,
-				    String from,
-				    Serializable []data)
+				      String from,
+				      Serializable value)
   {
   }
 
@@ -60,8 +60,8 @@ public class AbstractBamPresenceStream implements BamPresenceStream
    * Presence probe from the server to a client
    */
   public void sendPresenceProbe(String to,
-			      String from,
-			      Serializable []data)
+				String from,
+				Serializable value)
   {
   }
 
@@ -69,8 +69,8 @@ public class AbstractBamPresenceStream implements BamPresenceStream
    * A subscription request from a client
    */
   public void sendPresenceSubscribe(String to,
-				  String from,
-				  Serializable []data)
+				    String from,
+				    Serializable value)
   {
   }
 
@@ -78,8 +78,8 @@ public class AbstractBamPresenceStream implements BamPresenceStream
    * A subscription response to a client
    */
   public void sendPresenceSubscribed(String to,
-				   String from,
-				   Serializable []data)
+				     String from,
+				     Serializable value)
   {
   }
 
@@ -87,8 +87,8 @@ public class AbstractBamPresenceStream implements BamPresenceStream
    * An unsubscription request from a client
    */
   public void sendPresenceUnsubscribe(String to,
-				    String from,
-				    Serializable []data)
+				      String from,
+				      Serializable value)
   {
   }
 
@@ -96,8 +96,8 @@ public class AbstractBamPresenceStream implements BamPresenceStream
    * A unsubscription response to a client
    */
   public void sendPresenceUnsubscribed(String to,
-				     String from,
-				     Serializable []data)
+				       String from,
+				       Serializable value)
   {
   }
 
@@ -105,9 +105,9 @@ public class AbstractBamPresenceStream implements BamPresenceStream
    * An error response to a client
    */
   public void sendPresenceError(String to,
-			      String from,
-			      Serializable []data,
-			      BamError error)
+				String from,
+				Serializable value,
+				BamError error)
   {
   }
 }
