@@ -1366,10 +1366,12 @@
                   hessian/io/Hessian2Constants.as
                   hessian/io/Hessian2Input.as
                   hessian/io/HessianOutput.as
+                  hessian/io/Hessian2StreamingInput.as
+                  hessian/io/Hessian2StreamingOutput.as
                   hessian/io/HessianProtocolError.as
                   hessian/io/HessianServiceError.as
                   hessian/io/ObjectDefinition.as
-                  hessian/events/*.as "/>
+                  hessian/events/*.as"/>
     </compc>
 
     <compc output="${modules}/flash/build/hessian-flex.swc">
@@ -1382,16 +1384,17 @@
                   hessian/mxml/*.as"/>
     </compc>
 
-    <compc output="${modules}/flash/build/hemp-flex.swc">
+    <compc output="${modules}/flash/build/bam-flash.swc">
       <source-path path-element="${modules}/flash/src"/>
       <include-sources 
         dir="${modules}/flash/src" 
-        includes="com/caucho/hmtp/*.as 
+        includes="com/caucho/bam/*.as 
+                  com/caucho/bam/ping/*.as 
                   com/caucho/hmtp/auth/*.as 
-                  com/caucho/hmtp/events/*.as 
+                  com/caucho/hmtp/client/*.as 
                   com/caucho/hmtp/packet/*.as"/>
       <compiler.include-libraries dir="${modules}/flash/build" append="true">
-        <include name="hessian-flex.swc" />
+        <include name="hessian-flash.swc" />
       </compiler.include-libraries>
     </compc>
 
