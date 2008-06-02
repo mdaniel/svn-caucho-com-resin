@@ -47,11 +47,12 @@
  * 
  */
 
-package com.caucho.hmtp
+package com.caucho.bam
 {
-  public interface HmtpStream 
-    extends MessageStream, QueryStream//, PresenceStream 
-  {
+  public interface BamMessageStream {
+    function sendMessage(to:String, from:String, value:Object):void;
+    function sendMessageError(to:String, from:String, value:Object,
+                              error:BamError):void;
   }
 }
 

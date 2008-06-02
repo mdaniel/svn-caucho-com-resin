@@ -47,15 +47,15 @@
  * 
  */
 
-package com.caucho.hmtp
+package com.caucho.bam
 {
-  public interface QueryStream {
+  public interface BamQueryStream {
     function sendQueryGet(id:Number, to:String, from:String, query:Object):void;
 
     function sendQuerySet(id:Number, to:String, from:String, query:Object):void;
 
     function sendQueryError(id:Number, to:String, from:String, 
-                            query:Object, error:HmtpError):void;
+                            query:Object, error:BamError):void;
   }
 }
 

@@ -47,29 +47,33 @@
  * 
  */
 
-package com.caucho.hmtp
+package com.caucho.bam
 {
-  import flash.events.Event;
-  import flash.events.ProgressEvent;
-  import flash.events.TimerEvent;
-  import flash.net.URLRequest;
-  import flash.net.URLStream;
-  import flash.net.Socket;
-  import flash.system.Security;
-  import flash.utils.describeType;
-  import flash.utils.Timer;
+  public interface BamConnection {
+    function get jid():String;
+    function isClosed():Boolean;
+    function close():void;
 
-  import hessian.io.Hessian2StreamingInput;
-  import hessian.util.URL;
+    function sendMessage(to:String, value:Object):void;
+    function queryGet(to:String, value:Object,
+                      onResult:Function, onError:Function):void
+    function querySet(to:String, value:Object,
+                      onResult:Function, onError:Function):void
+    
+    /*
+    function presence(data:Array):void;
+    function presence(to:String, data:Array):void;
+    function presenceUnavailable(data:Array):void;
+    function presenceUnavailable(to:String, data:Array):void;
+    function presenceProbe(to:String, data:Array):void;
+    function presenceSubscribe(to:String, data:Array):void;
+    function presenceSubscribed(to:String, data:Array):void;
+    function presenceUnsubscribe(to:String, data:Array):void;
+    function presenceUnsubscribed(to:String, data:Array):void;
+    function presenceError(to:String, data:Array, error:BamError):void;
+    */
 
-  import com.caucho.hmtp.packet.Packet;
-
-  public interface QueryCallback
-  {
-    function onQueryResult(to:String, from:String, 
-                           value:Object, handback:Object):void;
-
-    function onQueryError(to:String, from:String, 
-                          value:Object, error:HmtpError, handback:Object):void;
+    function get stream():BamStream;
   }
 }
+

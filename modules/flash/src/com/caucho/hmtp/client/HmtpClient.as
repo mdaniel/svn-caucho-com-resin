@@ -47,7 +47,7 @@
  * 
  */
 
-package com.caucho.hmtp
+package com.caucho.hmtp.client
 {
   import flash.events.Event;
   import flash.events.EventDispatcher;
@@ -63,12 +63,13 @@ package com.caucho.hmtp
   import hessian.io.Hessian2StreamingInput;
   import hessian.util.URL;
 
+  import com.caucho.bam.*;
+  import com.caucho.bam.ping.*;
   import com.caucho.hmtp.auth.*;
   import com.caucho.hmtp.packet.*;
-  import com.caucho.hmtp.ping.*;
 
   public class HmtpClient extends EventDispatcher 
-                          implements HmtpConnection 
+                          implements BamConnection 
   {
     public static const MESSAGE:String = "message";
     public static const QUERY:String = "query";
@@ -92,7 +93,7 @@ package com.caucho.hmtp
     private var _headerHistory:Array = new Array(4);
     private var _httpStatus:String = "";
 
-    private var _stream:HmtpClientStream;
+    private var _stream:ClientBrokerStream;
 
     private var _queryId:int = 0;
     private var _outstandingQueries:Object = new Object();
@@ -176,7 +177,7 @@ package com.caucho.hmtp
       _socket = new Socket(_host, _port);
       _socket.addEventListener(Event.CONNECT, handleConnect);
 
-      _stream = new HmtpClientStream(_socket);
+      _stream = new ClientBrokerStream(_socket);
     }
     
     private function handleConnect(event:Event):void
@@ -400,7 +401,7 @@ package com.caucho.hmtp
       _stream.sendQuerySet(queryId, to, null, value);
     }
 
-    public function get stream():HmtpStream
+    public function get stream():BamStream
     {
       return _stream;
     }
@@ -415,7 +416,7 @@ package com.caucho.hmtp
     }
 
     private function onLoginError(to:String, from:String,
-                                  value:Object, error:HmtpError):void
+                                  value:Object, error:BamError):void
     {
       dispatchEvent(new com.caucho.hmtp.auth.LoginFailureEvent());
     }

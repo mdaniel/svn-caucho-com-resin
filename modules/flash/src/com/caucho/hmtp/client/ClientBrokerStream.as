@@ -47,21 +47,22 @@
  * 
  */
 
-package com.caucho.hmtp
+package com.caucho.hmtp.client
 {
   import flash.net.Socket;
 
   import hessian.io.Hessian2StreamingInput;
   import hessian.io.Hessian2StreamingOutput;
 
+  import com.caucho.bam.*;
   import com.caucho.hmtp.packet.*;
 
-  public class HmtpClientStream implements HmtpStream {
+  public class ClientBrokerStream implements BamStream {
     private var _socket:Socket;
     private var _input:Hessian2StreamingInput = new Hessian2StreamingInput();
     private var _output:Hessian2StreamingOutput = new Hessian2StreamingOutput();
 
-    public function HmtpClientStream(socket:Socket):void
+    public function ClientBrokerStream(socket:Socket):void
     {
       _socket = socket;
 
@@ -81,7 +82,7 @@ package com.caucho.hmtp
     }
 
     public function sendMessageError(to:String, from:String, value:Object,
-                                     error:HmtpError):void
+                                     error:BamError):void
     {
       if (_output != null) {
         _output.writeObject(new MessageError(to, from, value, error));
@@ -117,7 +118,7 @@ package com.caucho.hmtp
 
     public function sendQueryError(id:Number, 
                                    to:String, from:String, 
-                                   value:Object, error:HmtpError):void
+                                   value:Object, error:BamError):void
     {
       if (_output != null) {
         _output.writeObject(new QueryError(id, to, from, value, error));

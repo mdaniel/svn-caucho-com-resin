@@ -47,16 +47,12 @@
  * 
  */
 
-package com.caucho.hmtp.auth
+package com.caucho.bam.ping
 {
-  import flash.events.Event;
-  import com.caucho.hmtp.client.HmtpClient;
-
-  public class LoginFailureEvent extends Event
-  {
-    public function LoginFailureEvent()
+  public class PingQuery {
+    public function PingQuery():void
     {
-      super(HmtpClient.LOGIN);
     }
   }
 }
+

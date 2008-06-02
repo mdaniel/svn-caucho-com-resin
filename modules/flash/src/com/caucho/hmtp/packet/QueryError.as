@@ -49,6 +49,7 @@
 
 package com.caucho.hmtp.packet
 {
+  import com.caucho.bam.*;
   import com.caucho.hmtp.*;
 
   public class QueryError extends Packet {
@@ -56,12 +57,12 @@ package com.caucho.hmtp.packet
 
     public var _id:Number;
     public var _value:Object;
-    public var _error:HmtpError;
+    public var _error:BamError;
 
     public function QueryError(id:Number = 0, 
                                to:String = "", from:String = "", 
                                value:Object = null, 
-                               error:HmtpError = null):void
+                               error:BamError = null):void
     {
       super(QUERY_ERROR, to, from);
 
@@ -80,7 +81,7 @@ package com.caucho.hmtp.packet
       return _value;
     }
 
-    public function get error():HmtpError
+    public function get error():BamError
     {
       return _error;
     }

@@ -50,7 +50,7 @@
 package com.caucho.hmtp.auth
 {
   import flash.events.Event;
-  import com.caucho.hmtp.HmtpClient;
+  import com.caucho.hmtp.client.HmtpClient;
 
   public class LoginSuccessEvent extends Event
   {

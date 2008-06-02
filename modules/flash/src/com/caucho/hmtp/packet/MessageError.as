@@ -49,16 +49,17 @@
 
 package com.caucho.hmtp.packet
 {
+  import com.caucho.bam.*;
   import com.caucho.hmtp.*;
 
   public class MessageError extends Packet {
     public const MESSAGE_ERROR:String = "messageError";
 
     private var _value:Object;
-    private var _error:HmtpError;
+    private var _error:BamError;
 
     public function MessageError(to:String, from:String, 
-                                 value:Object, error:HmtpError)
+                                 value:Object, error:BamError)
     {
       super(MESSAGE_ERROR, to, from);
 
@@ -71,7 +72,7 @@ package com.caucho.hmtp.packet
       return _value;
     }
 
-    public function get error():HmtpError
+    public function get error():BamError
     {
       return _error;
     }

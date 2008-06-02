@@ -47,33 +47,14 @@
  * 
  */
 
-package com.caucho.hmtp
+package com.caucho.bam
 {
-  public interface HmtpConnection {
-    function get jid():String;
-    function isClosed():Boolean;
-    function close():void;
+  public interface BamQueryCallback
+  {
+    function onQueryResult(to:String, from:String, 
+                           value:Object, handback:Object):void;
 
-    function sendMessage(to:String, value:Object):void;
-    function queryGet(to:String, value:Object,
-                      onResult:Function, onError:Function):void
-    function querySet(to:String, value:Object,
-                      onResult:Function, onError:Function):void
-    
-    /*
-    function presence(data:Array):void;
-    function presence(to:String, data:Array):void;
-    function presenceUnavailable(data:Array):void;
-    function presenceUnavailable(to:String, data:Array):void;
-    function presenceProbe(to:String, data:Array):void;
-    function presenceSubscribe(to:String, data:Array):void;
-    function presenceSubscribed(to:String, data:Array):void;
-    function presenceUnsubscribe(to:String, data:Array):void;
-    function presenceUnsubscribed(to:String, data:Array):void;
-    function presenceError(to:String, data:Array, error:HmtpError):void;
-    */
-
-    function get stream():HmtpStream;
+    function onQueryError(to:String, from:String, 
+                          value:Object, error:BamError, handback:Object):void;
   }
 }
-

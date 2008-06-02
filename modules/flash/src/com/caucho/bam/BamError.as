@@ -47,9 +47,9 @@
  * 
  */
 
-package com.caucho.hmtp
+package com.caucho.bam
 {
-  public class HmtpError
+  public class BamError
   {
     /**
      * Retry after providing credentials
@@ -234,11 +234,11 @@ package com.caucho.hmtp
 
     public function toString():String
     {
-      return "HmtpError[type=" + _type + 
-                     ", group=" + _group + 
-                     ", text=" + _text + 
-                     ", data=" + _data + 
-                     ", extra=" + _extra + "]";
+      return "BamError[type=" + _type + 
+                    ", group=" + _group + 
+                    ", text=" + _text + 
+                    ", data=" + _data + 
+                    ", extra=" + _extra + "]";
     }
   }
 }
