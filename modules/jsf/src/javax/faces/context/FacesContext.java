@@ -32,7 +32,7 @@ import java.util.*;
 
 import javax.el.*;
 
-import javax.faces.*;
+import javax.faces.event.PhaseId;
 import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.render.*;
@@ -40,6 +40,8 @@ import javax.faces.render.*;
 public abstract class FacesContext {
   private static final ThreadLocal<FacesContext> _currentInstance
     = new ThreadLocal<FacesContext>();
+
+  private PhaseId _currentPhaseId;
   
   public abstract Application getApplication();
 
@@ -87,6 +89,16 @@ public abstract class FacesContext {
   public abstract void renderResponse();
   
   public abstract void responseComplete();
+
+  public PhaseId getCurrentPhaseId()
+  {
+    return _currentPhaseId;
+  }
+
+  public void setCurrentPhaseId(PhaseId currentPhaseId)
+  {
+    _currentPhaseId = currentPhaseId;
+  }
 
   public static FacesContext getCurrentInstance()
   {

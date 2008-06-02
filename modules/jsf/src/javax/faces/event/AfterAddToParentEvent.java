@@ -41,10 +41,8 @@ public class AfterAddToParentEvent
     super(component);
   }
 
-  public boolean isAppropriateListener(FacesListener listener)
-  {
-    if (true) throw new UnsupportedOperationException(getClass().getName());
-
-    return false;
+  @Override
+  public String toString() {
+    return "AfterAddToParentEvent[]";
   }
 }

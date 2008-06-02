@@ -1173,25 +1173,27 @@ public abstract class UIComponentBase extends UIComponent
     }
 
     @Override
-    public boolean add(UIComponent o)
+    public boolean add(UIComponent child)
     {
-      UIComponent child = (UIComponent) o;
-
       setParent(child);
 
       _parent._facetsAndChildren = null;
 
-      return _list.add(o);
+      boolean result = _list.add(child);
+
+      publishAfterAddEvent(child);
+
+      return result;
     }
 
     @Override
-    public void add(int i, UIComponent o)
+    public void add(int i, UIComponent child)
     {
-      UIComponent child = (UIComponent) o;
-
-      _list.add(i, o);
+      _list.add(i, child);
       
       setParent(child);
+
+      publishAfterAddEvent(child);
       
       _parent._facetsAndChildren = null;
     }
@@ -1206,7 +1208,9 @@ public abstract class UIComponentBase extends UIComponent
 
 	_list.add(i++, child);
 
-	isChange = true;
+        publishAfterAddEvent(child);
+
+        isChange = true;
       }
 
       _parent._facetsAndChildren = null;
@@ -1214,11 +1218,26 @@ public abstract class UIComponentBase extends UIComponent
       return isChange;
     }
 
-    @Override
-    public UIComponent set(int i, UIComponent o)
-    {
-      UIComponent child = (UIComponent) o;
+    private void publishAfterAddEvent(UIComponent child) {
+      FacesContext context = FacesContext.getCurrentInstance();
 
+      RenderKitFactory factory
+        = (RenderKitFactory) FactoryFinder.getFactory(FactoryFinder.RENDER_KIT_FACTORY);
+
+      String renderKitId = context.getViewRoot().getRenderKitId();
+
+      RenderKit renderKit = factory.getRenderKit(context, renderKitId);
+
+      if (! renderKit.getResponseStateManager().isPostback(context) &&
+          ! PhaseId.RESTORE_VIEW.equals(context.getCurrentPhaseId())) {
+
+        context.getApplication().publishEvent(AfterAddToParentEvent.class, child);
+      }
+    }
+
+    @Override
+    public UIComponent set(int i, UIComponent child)
+    {
       UIComponent old = _list.remove(i);
 
       if (old != null)
@@ -1227,6 +1246,8 @@ public abstract class UIComponentBase extends UIComponent
       setParent(child);
 
       _list.add(i, child);
+
+      publishAfterAddEvent(child);
 
       _parent._facetsAndChildren = null;
       
