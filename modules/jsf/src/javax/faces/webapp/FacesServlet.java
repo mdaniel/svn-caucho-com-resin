@@ -105,9 +105,7 @@ public final class FacesServlet implements Servlet
     LifecycleFactory lifecycleFactory = (LifecycleFactory)
       FactoryFinder.getFactory(FactoryFinder.LIFECYCLE_FACTORY);
 
-    String name = null;
-
-    name = config.getInitParameter("javax.faces.LIFECYCLE_ID");
+    String name = config.getInitParameter("javax.faces.LIFECYCLE_ID");
 
     if (name == null)
       name = _webApp.getInitParameter("javax.faces.LIFECYCLE_ID");
@@ -124,6 +122,16 @@ public final class FacesServlet implements Servlet
   {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
+
+    String pathInfo = req.getPathInfo();
+
+    if (pathInfo != null &&
+        (pathInfo.startsWith("/WEB-INF") || pathInfo.startsWith("/META-INF"))) {
+
+      res.sendError(HttpServletResponse.SC_NOT_FOUND);
+
+      return;
+    }    
 
     FacesContext oldContext = FacesContext.getCurrentInstance();
 
