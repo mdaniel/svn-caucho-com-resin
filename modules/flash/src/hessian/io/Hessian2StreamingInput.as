@@ -134,6 +134,7 @@ package hessian.io
         if (_length == 0 && _tag == 'P'.charCodeAt()) {
           _buffer.position = 0;
           _input.init(_buffer);
+          _input.resetReferences();
           _queue.push(_input.readObject());
 
           _offset = 0;

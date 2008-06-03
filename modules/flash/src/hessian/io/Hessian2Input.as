@@ -1334,7 +1334,7 @@ package hessian.io
             type = _types[ref] as String;
             length = readInt();
 
-            return readList(length, type, cl);
+            return readLengthList(length, type, cl);
           }
 
         case 'R'.charCodeAt():
@@ -1569,7 +1569,7 @@ package hessian.io
             type = _types[ref] as String;
             length = readInt();
 
-            return readList(length, type);
+            return readLengthList(length, type);
           }
 
         case 'M'.charCodeAt(): 
@@ -1781,7 +1781,6 @@ package hessian.io
       if (code != 'z'.charCodeAt())
         throw error("unknown code:" + String.fromCharCode(code));
     }
-
 
     /**
      * Adds an object reference.
@@ -2244,6 +2243,32 @@ package hessian.io
 
         readListEnd();
       }
+
+      return array;
+    }
+
+    private function readLengthList(length:int, 
+                                    type:String = null, 
+                                    expectedClass:Class = null):Object
+    {
+      var array:Array = new Array();
+      var cl:Class = null;
+
+      try {
+        cl = getDefinitionByName(type) as Class;
+      }
+      catch (e:Error) {}
+
+      if (cl == null)
+        cl = expectedClass;
+
+      if (cl == null)
+        cl = Object;
+
+      addRef(array);
+
+      for (var i:int = 0; i < length; i++)
+        array.push(readObject(cl));
 
       return array;
     }
