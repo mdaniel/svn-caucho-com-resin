@@ -164,14 +164,14 @@ public class SessionStateManager extends StateManager
     if (state == null)
       return null;
     else if (state instanceof byte[])
-      return restoreView(context, (byte []) state);
+      return restoreView(context, (byte []) state, renderKitId);
     if (state instanceof Object [])
-      return restoreView(context, (byte []) ((Object []) state) [0]);
+      return restoreView(context, (byte []) ((Object []) state) [0], renderKitId);
     else if (state instanceof StateManager.SerializedView) {
       StateManager.SerializedView serView
         = (StateManager.SerializedView) state;
 
-      return restoreView(context, (byte[]) serView.getStructure());
+      return restoreView(context, (byte[]) serView.getStructure(), renderKitId);
     }
     else
       throw new IllegalStateException(L.l("unexpected saved state: '{0}'",
@@ -239,9 +239,10 @@ public class SessionStateManager extends StateManager
 
     out.writeObject(comp.saveState(context));
   }
-    
+
   private UIViewRoot restoreView(FacesContext context,
-				 byte []data)
+                                 byte[] data,
+                                 String renderKitId)
   {
     if (data == null)
       return null;
@@ -250,15 +251,16 @@ public class SessionStateManager extends StateManager
       ByteArrayInputStream bis = new ByteArrayInputStream(data);
       Hessian2Input in = new Hessian2Input(bis);
 
-      return (UIViewRoot) deserialize(in, context);
+      return (UIViewRoot) deserialize(in, context, renderKitId);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
   private UIComponent deserialize(AbstractHessianInput in,
-				  FacesContext context)
-    throws IOException,
+                                  FacesContext context,
+                                  String renderKitId)
+  throws IOException,
 	   ClassNotFoundException,
 	   InstantiationException,
 	   IllegalAccessException
@@ -278,11 +280,19 @@ public class SessionStateManager extends StateManager
       type = Class.forName(typeName, false, loader);
     }
 
-    UIComponent comp = (UIComponent) type.newInstance();
+    final UIComponent comp = (UIComponent) type.newInstance();
+
+    if (UIViewRoot.class.equals(type)) {
+      final UIViewRoot viewRoot = (UIViewRoot) comp;
+
+      viewRoot.setRenderKitId(renderKitId);
+
+      context.setViewRoot(viewRoot);
+    }
 
     int childCount = in.readInt();
     for (int i = 0; i < childCount; i++) {
-      comp.getChildren().add(deserialize(in, context));
+      comp.getChildren().add(deserialize(in, context, renderKitId));
     }
 
     int facetCount = in.readInt();
@@ -290,7 +300,7 @@ public class SessionStateManager extends StateManager
     for (int i = 0; i < facetCount; i++) {
       String key = in.readString();
 
-      comp.getFacets().put(key, deserialize(in, context));
+      comp.getFacets().put(key, deserialize(in, context, renderKitId));
     }
 
     comp.restoreState(context, in.readObject());
