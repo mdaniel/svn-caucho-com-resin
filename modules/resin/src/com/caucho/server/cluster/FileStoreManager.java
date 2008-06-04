@@ -140,7 +140,7 @@ public class FileStoreManager extends StoreManager {
   public boolean load(ClusterObject clusterObj, Object obj)
     throws Exception
   {
-    return _backing.loadSelf(clusterObj, obj);
+    return _backing.load(clusterObj, obj);
   }
 
   /**
@@ -162,9 +162,9 @@ public class FileStoreManager extends StoreManager {
     int length = tempStream.getLength();
     InputStream is = tempStream.openInputStreamNoFree();
     try {
-      _backing.storeSelf(obj.getObjectId(), obj.getStoreId(),
-                         is, length, dataHash,
-			 obj.getExpireInterval(), 0, 0, 0);
+      _backing.store(obj.getObjectId(), obj.getStoreId(),
+		     is, length, dataHash,
+		     obj.getExpireInterval(), 0, 0, 0);
 
       if (log.isLoggable(Level.FINE))
         log.fine("file store: " + obj.getObjectId() + " length=" +

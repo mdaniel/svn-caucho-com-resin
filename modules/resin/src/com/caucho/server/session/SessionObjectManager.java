@@ -148,17 +148,16 @@ public final class SessionObjectManager implements ObjectManager
   /**
    * Notification from the cluster.
    */
-  public void notifyUpdate(String objectId)
+  public void notifyUpdate(Object objectId)
   {
   }
       
   /**
    * Notifies an object has been removed.
    */
-  public void notifyRemove(String objectId)
-    throws IOException
+  public void notifyRemove(Object objectId)
   {
-    _sessionManager.notifyRemove(objectId);
+    _sessionManager.notifyRemove((String) objectId);
   }
   
   int getPrimaryIndex(String id)

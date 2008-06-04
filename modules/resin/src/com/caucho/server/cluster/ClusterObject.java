@@ -45,10 +45,11 @@ public class ClusterObject {
 
   private final HashKey _id;
   private final HashKey _storeId;
-  
+
   private final StoreManager _storeManager;
   private final Store _store;
 
+  private Object _objectManagerKey; // key for the object manager
   private ObjectManager _objectManager;
   
   private int _primary;
@@ -175,6 +176,22 @@ public class ClusterObject {
   public HashKey getObjectId()
   {
     return _id;
+  }
+
+  /**
+   * Returns the object manager key
+   */
+  public Object getObjectManagerKey()
+  {
+    return _objectManagerKey;
+  }
+
+  /**
+   * Sets the object manager key
+   */
+  public void setObjectManagerKey(Object key)
+  {
+    _objectManagerKey = key;
   }
 
   /**
@@ -412,7 +429,12 @@ public class ClusterObject {
       _isDead = true;
 
       _storeManager.remove(this);
-    } catch (Throwable e) {
+
+      /*
+      if (_objectManager != null)
+	_objectManager.remove(this);
+      */
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
@@ -539,6 +561,10 @@ public class ClusterObject {
    */
   public void removeImpl()
   {
+    if (_objectManager != null && getObjectManagerKey() != null)
+      _objectManager.notifyRemove(getObjectManagerKey());
+
+    _isDead = true; // XXX: ? 
   }
 
   @Override

@@ -67,12 +67,10 @@ public interface ObjectManager {
   /**
    * Notifies that an object is updated.
    */
-  public void notifyUpdate(String objectId)
-    throws IOException;
+  public void notifyUpdate(Object key);
 
   /**
    * Notifies an object has been removed.
    */
-  public void notifyRemove(String objectId)
-    throws IOException;
+  public void notifyRemove(Object key);
 }

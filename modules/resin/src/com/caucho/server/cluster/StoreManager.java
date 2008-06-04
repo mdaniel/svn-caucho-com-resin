@@ -580,7 +580,12 @@ abstract public class StoreManager
   {
     HashKey key = _hashManager.generateHash(store.getId(), id);
 
-    return createClusterObject(store, key, primary, secondary, tertiary);
+    ClusterObject obj = createClusterObject(store, key,
+					    primary, secondary, tertiary);
+    
+    obj.setObjectManagerKey(id);
+
+    return obj;
   }
  
   /**

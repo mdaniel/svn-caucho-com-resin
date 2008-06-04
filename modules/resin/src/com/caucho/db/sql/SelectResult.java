@@ -277,6 +277,18 @@ public class SelectResult {
     case Column.BLOB:
       return readBlobString();
 
+    case Column.BINARY:
+      {
+	int len = read();
+	
+	byte []bytes = new byte[len];
+
+	read(bytes, 0, len);
+
+	return toHex(bytes);
+      }
+
+
     default:
       throw new RuntimeException("unknown column type:" + type + " column:" + index);
     }
@@ -1135,6 +1147,29 @@ public class SelectResult {
     }
 
     _length = rLength;
+  }
+
+  private String toHex(byte []bytes)
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    int len = bytes.length;
+    for (int i = 0; i < len; i++) {
+      int d1 = (bytes[i] >> 4) & 0xf;
+      int d2 = (bytes[i]) & 0xf;
+
+      if (d1 < 10)
+	sb.append((char) ('0' + d1));
+      else
+	sb.append((char) ('a' + d1 - 10));
+
+      if (d2 < 10)
+	sb.append((char) ('0' + d2));
+      else
+	sb.append((char) ('a' + d2 - 10));
+    }
+
+    return sb.toString();
   }
   
   public void close()
