@@ -1651,8 +1651,8 @@ public class Application extends ServletContextImpl
       }
 
       try {
-	_servletManager.init();
 	_filterManager.init();
+	_servletManager.init();
       } catch (Throwable e) {
 	log.log(Level.WARNING, e.toString(), e);
 	setConfigException(e);
