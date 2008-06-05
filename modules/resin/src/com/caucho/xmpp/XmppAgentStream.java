@@ -62,11 +62,20 @@ public class XmppAgentStream implements BamStream
   private XmppBrokerStream _packetHandler;
   private WriteStream _os;
 
+  private XmppWriter _writer;
+
   XmppAgentStream(XmppBrokerStream packetHandler,
 		  WriteStream os)
   {
     _packetHandler = packetHandler;
     _os = os;
+
+    XmppMarshalFactory marshalFactory = new XmppMarshalFactory();
+      
+    XmppStreamWriterImpl out;
+    out = new XmppStreamWriterImpl(_os, marshalFactory);
+      
+    _writer = new XmppWriter(out);
   }
   
   public void sendMessage(String to, String from, Serializable value)
@@ -77,18 +86,7 @@ public class XmppAgentStream implements BamStream
 		  + " from=" + from);
       }
 
-      _os.print("<message ");
-      _os.print("to=\"");
-      _os.print(to);
-      _os.print("\" from=\"");
-      _os.print(from);
-      _os.print("\"");
-
-      _os.print(">");
-
-      // IM
-
-      _os.print("</message>");
+      _writer.sendMessage(to, from, value);
       
       _os.flush();
     } catch (IOException e) {

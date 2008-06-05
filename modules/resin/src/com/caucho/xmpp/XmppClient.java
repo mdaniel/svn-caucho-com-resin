@@ -30,6 +30,7 @@
 package com.caucho.xmpp;
 
 import com.caucho.bam.*;
+import com.caucho.bam.im.*;
 import com.caucho.xmpp.*;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
@@ -71,6 +72,8 @@ public class XmppClient {
   private String _from;
   
   private XMLStreamReader _in;
+  private XmppReader _reader;
+  
   private boolean _isFinest;
 
   private int _mId;
@@ -82,6 +85,7 @@ public class XmppClient {
     = new LinkedBlockingQueue<Stanza>();
 
   private XmppClientBrokerStream _toBroker;
+  private BamStream _callback;
 
   public XmppClient(InetAddress address, int port)
   {
@@ -133,6 +137,7 @@ public class XmppClient {
       XMLInputFactory factory = XMLInputFactory.newInstance();
     
       _in = factory.createXMLStreamReader(_is);
+      _reader = new XmppReader(_is, _in, _callback);
 
       String tag = readStartTag();
 
@@ -215,25 +220,13 @@ public class XmppClient {
       throw new RuntimeException(e);
     }
   }
-  
-  public void roster()
-    throws IOException
+
+  public void setCallback(BamStream callback)
   {
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " roster");
+    _callback = callback;
 
-    try {
-      _os.print("<iq type='get' id='m_" + _mId++ + "'>");
-      _os.print("<query xmlns='jabber:iq:roster'/>");
-      _os.print("</iq>");
-      _os.flush();
-
-      Stanza stanza = _stanzaQueue.poll(2, TimeUnit.SECONDS);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    if (_reader != null)
+      _reader.setCallback(callback);
   }
   
   public void send(String type, String to, String body)
@@ -485,7 +478,7 @@ public class XmppClient {
 
       if (in == null)
 	return;
-      
+
       while ((tag = in.next()) > 0) {
 	if (_isFinest)
 	  debug(in);
@@ -505,6 +498,9 @@ public class XmppClient {
 	  }
 	  else if ("iq".equals(localName)) {
 	    _stanzaQueue.add(readIq(in));
+	  }
+	  else if ("message".equals(localName)) {
+	    _reader.handleMessage();
 	  }
 	  else {
 	    log.fine(XmppClient.this + " unknown tag <" + _in.getLocalName() + ">");
