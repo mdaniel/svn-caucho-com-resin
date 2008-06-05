@@ -519,7 +519,7 @@ abstract public class StoreManager
    *
    * @param uniqueId the identifier of the storage group
    */
-  public void updateOwner(HashKey objectId)
+  public void updateOwner(ClusterObject objectId)
     throws Exception
   {
     

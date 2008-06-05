@@ -302,12 +302,23 @@ public class ClusterStream {
   }
 
   /**
-   * Writes a hmux yield to the target.
+   * Writes a hmux exit to the target.
+   */
+  public void writeExit()
+    throws IOException
+  {
+    _os.write(HmuxRequest.HMUX_EXIT);
+    _os.flush();
+  }
+
+  /**
+   * Writes a hmux quit to the target.
    */
   public void writeQuit()
     throws IOException
   {
     _os.write(HmuxRequest.HMUX_QUIT);
+    _os.flush();
   }
 
   /**

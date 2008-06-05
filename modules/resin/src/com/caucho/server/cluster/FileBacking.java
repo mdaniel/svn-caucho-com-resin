@@ -226,7 +226,7 @@ public class FileBacking {
       Statement stmt = conn.createStatement();
       
       try {
-	String sql = ("SELECT expire_interval,store_id,is_valid,version"
+	String sql = ("SELECT expire_interval,store_id,is_valid,local_version"
                       + " FROM " + _tableName + " WHERE 1=0");
 
 	ResultSet rs = stmt.executeQuery(sql);
