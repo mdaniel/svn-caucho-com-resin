@@ -53,8 +53,8 @@ public class NamespaceWriterContext extends NamespaceContextImpl
     = new LinkedHashMap<String,NamespaceBinding>();
 
   // xml/310w
-  private ArrayList<NamespaceBinding> _duplicatePrefixes = 
-    new ArrayList<NamespaceBinding>();
+  private ArrayList<NamespaceBinding> _duplicatePrefixes
+    = new ArrayList<NamespaceBinding>();
   private int _uniqueId = 0;
   private NamespaceBinding _nullBinding = new NamespaceBinding(null, null, 0);
 
@@ -105,9 +105,9 @@ public class NamespaceWriterContext extends NamespaceContextImpl
     else {
       binding = _bindings.get(uri);
 
-      if (binding != null && 
-          binding.getPrefix() != null &&
-          binding.getPrefix().equals(prefix)) {
+      if (binding != null
+	  && binding.getPrefix() != null
+	  && binding.getPrefix().equals(prefix)) {
         // for writing, ignore matching prefixes
         if (forceEmit)
           binding.setEmit(true);

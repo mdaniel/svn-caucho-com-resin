@@ -136,7 +136,12 @@ public class XmppClient {
 
       String tag = readStartTag();
 
-      _toBroker = new XmppClientBrokerStream(this, _os);
+      XmppMarshalFactory marshalFactory = new XmppMarshalFactory();
+      
+      XmppStreamWriterImpl out;
+      out = new XmppStreamWriterImpl(_os, marshalFactory);
+      
+      _toBroker = new XmppClientBrokerStream(this, out);
 
       if (! tag.equals("stream")
 	  || ! STREAMS_NS.equals(_in.getNamespaceURI())) {

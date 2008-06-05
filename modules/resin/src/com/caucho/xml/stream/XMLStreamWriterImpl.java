@@ -61,6 +61,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
 
   private int _indent = -1;
   private int _currentIndent;
+  private boolean _flushed = true;
 
   public XMLStreamWriterImpl(WriteStream ws)
   {
@@ -579,8 +580,6 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
 
   /////////////////////////////////////////////////////////////////////////
 
-  private boolean _flushed = true;
-
   private void pushContext(QName elementName)
     throws IOException
   {
@@ -602,7 +601,9 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   private void flushContext()
     throws IOException
   {
-    if (_flushed) return;
+    if (_flushed)
+      return;
+    
     _tracker.emitDeclarations(_out);
     _flushed = true;
   }
@@ -611,12 +612,13 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
     throws XMLStreamException
   {
     try {
-      if (_pendingTagName == null) return;
+      if (_pendingTagName == null)
+	return;
 
       _out.print("<");
       _out.print(printQName(_pendingTagName));
       
-      for(int i=0; i < _pendingAttributeNames.size(); i++) {
+      for(int i = 0; i < _pendingAttributeNames.size(); i++) {
         _out.print(" ");
         _out.print(printQName(_pendingAttributeNames.get(i)));
         _out.print("=\"");

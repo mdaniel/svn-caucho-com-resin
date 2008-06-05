@@ -47,12 +47,11 @@ class XmppClientBrokerStream extends AbstractBamStream
     = Logger.getLogger(XmppClientBrokerStream.class.getName());
 
   private WriteStream _os;
-  private XMLStreamWriter _out;
+  private XmppStreamWriterImpl _out;
 
-  XmppClientBrokerStream(XmppClient client, WriteStream os)
+  XmppClientBrokerStream(XmppClient client, XmppStreamWriterImpl out)
   {
-    _os = os;
-    _out = new XMLStreamWriterImpl(os);
+    _out = out;
   }
 
   /**
@@ -62,7 +61,7 @@ class XmppClientBrokerStream extends AbstractBamStream
   public void sendMessage(String to, String from, Serializable value)
   {
     try {
-      XMLStreamWriter out = _out;
+      XmppStreamWriterImpl out = _out;
 
       synchronized (out) {
 	out.writeStartElement("message");
@@ -123,5 +122,259 @@ class XmppClientBrokerStream extends AbstractBamStream
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Sends a query get message to the stream
+   */
+  @Override
+  public boolean sendQueryGet(long id, String to, String from,
+			      Serializable value)
+  {
+    try {
+      XmppStreamWriterImpl out = _out;
+
+      synchronized (out) {
+	out.writeStartElement("iq");
+
+	out.writeAttribute("id", String.valueOf(id));
+
+	out.writeAttribute("type", "get");
+
+	if (to != null)
+	  out.writeAttribute("to", to);
+
+	if (from != null)
+	  out.writeAttribute("from", to);
+
+	out.writeValue(value);
+
+	out.writeEndElement(); // </iq>
+
+	out.flush();
+      }
+
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(this + " sendQueryGet id=" + id
+		  + " to=" + to + " from=" + from
+		  + " query=" + value);
+      }
+
+      return true;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Sends a query set message to the stream
+   */
+  @Override
+  public boolean sendQuerySet(long id, String to, String from,
+			      Serializable value)
+  {
+    try {
+      XmppStreamWriterImpl out = _out;
+
+      synchronized (out) {
+	out.writeStartElement("iq");
+
+	out.writeAttribute("id", String.valueOf(id));
+
+	out.writeAttribute("type", "set");
+
+	if (to != null)
+	  out.writeAttribute("to", to);
+
+	if (from != null)
+	  out.writeAttribute("from", to);
+
+	out.writeValue(value);
+
+	out.writeEndElement(); // </iq>
+
+	out.flush();
+      }
+
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(this + " sendQueryGet id=" + id
+		  + " to=" + to + " from=" + from
+		  + " query=" + value);
+      }
+
+      return true;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Sends a query result message to the stream
+   */
+  @Override
+  public void sendQueryResult(long id, String to, String from,
+  			      Serializable value)
+  {
+    try {
+      XmppStreamWriterImpl out = _out;
+
+      synchronized (out) {
+	out.writeStartElement("iq");
+
+	out.writeAttribute("id", String.valueOf(id));
+
+	out.writeAttribute("type", "result");
+
+	if (to != null)
+	  out.writeAttribute("to", to);
+
+	if (from != null)
+	  out.writeAttribute("from", to);
+
+	out.writeValue(value);
+
+	out.writeEndElement(); // </iq>
+
+	out.flush();
+      }
+
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(this + " sendQueryResult id=" + id
+		  + " to=" + to + " from=" + from
+		  + " query=" + value);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Sends a presence message to the stream
+   */
+  @Override
+  public void sendPresence(String to, String from, Serializable value)
+  {
+    sendPresence(to, from, value, null);
+  }
+
+  /**
+   * Sends a presence probe to the stream
+   */
+  @Override
+  public void sendPresenceProbe(String to, String from, Serializable value)
+  {
+    sendPresence(to, from, value, "probe");
+  }
+
+  /**
+   * Sends a presence unavailable to the stream
+   */
+  @Override
+  public void sendPresenceUnavailable(String to,
+				      String from,
+				      Serializable value)
+  {
+    sendPresence(to, from, value, "unavailable");
+  }
+
+  /**
+   * Sends a presence subscribe to the stream
+   */
+  @Override
+  public void sendPresenceSubscribe(String to,
+				    String from,
+				    Serializable value)
+  {
+    sendPresence(to, from, value, "subscribe");
+  }
+
+  /**
+   * Sends a presence subscribed to the stream
+   */
+  @Override
+  public void sendPresenceSubscribed(String to,
+				    String from,
+				    Serializable value)
+  {
+    sendPresence(to, from, value, "subscribed");
+  }
+
+  /**
+   * Sends a presence unsubscribe to the stream
+   */
+  @Override
+  public void sendPresenceUnsubscribe(String to,
+				      String from,
+				      Serializable value)
+  {
+    sendPresence(to, from, value, "unsubscribe");
+  }
+
+  /**
+   * Sends a presence unsubscribed to the stream
+   */
+  @Override
+  public void sendPresenceUnsubscribed(String to,
+				      String from,
+				      Serializable value)
+  {
+    sendPresence(to, from, value, "unsubscribed");
+  }
+
+  /**
+   * Sends a presence message to the stream
+   */
+  private void sendPresence(String to, String from,
+			    Serializable value,
+			    String type)
+  {
+    try {
+      XmppStreamWriterImpl out = _out;
+
+      synchronized (out) {
+	out.writeStartElement("presence");
+
+	if (to != null)
+	  out.writeAttribute("to", to);
+
+	if (from != null)
+	  out.writeAttribute("from", from);
+
+	if (type != null)
+	  out.writeAttribute("type", type);
+
+	ImPresence presence = (ImPresence) value;
+
+	Text status = presence.getStatus();
+	if (status != null) {
+	  out.writeStartElement("status");
+
+	  if (status.getLang() != null)
+	    out.writeAttribute("xml", "http://xml.org", "lang",
+			       status.getLang());
+	    
+	  out.writeCharacters(status.getValue());
+	  out.writeEndElement(); // </status>
+	}
+
+	out.writeEndElement(); // </presence>
+
+	out.flush();
+      }
+
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(this + " sendPresence type=" + type
+		  + " to=" + to + " from=" + from
+		  + " value=" + value);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + "]";
   }
 }

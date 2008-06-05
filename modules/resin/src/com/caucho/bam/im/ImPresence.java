@@ -81,6 +81,11 @@ public class ImPresence implements Serializable {
   {
   }
 
+  public ImPresence(String status)
+  {
+    _status = new Text(status);
+  }
+
   public ImPresence(String to,
 		    String from,
 		    String show,
@@ -103,6 +108,11 @@ public class ImPresence implements Serializable {
     }
 
     _extra = extra;
+  }
+
+  public Text getStatus()
+  {
+    return _status;
   }
 
   @Override

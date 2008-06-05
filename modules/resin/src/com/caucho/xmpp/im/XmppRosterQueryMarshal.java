@@ -96,6 +96,7 @@ public class XmppRosterQueryMarshal extends AbstractXmppMarshal {
     RosterQuery roster = (RosterQuery) object;
 
     out.writeStartElement("", "query", "jabber:iq:roster");
+    out.writeNamespace("", "jabber:iq:roster");
 
     RosterItem []items = roster.getItems();
 
