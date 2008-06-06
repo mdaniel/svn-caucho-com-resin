@@ -60,6 +60,8 @@ public class XmppAgentStream implements BamStream
     = Logger.getLogger(XmppAgentStream.class.getName());
 
   private XmppBrokerStream _packetHandler;
+  private XmppContext _xmppContext;
+  
   private WriteStream _os;
 
   private XmppWriter _writer;
@@ -70,12 +72,13 @@ public class XmppAgentStream implements BamStream
     _packetHandler = packetHandler;
     _os = os;
 
-    XmppMarshalFactory marshalFactory = new XmppMarshalFactory();
+    _xmppContext = packetHandler.getXmppContext();
+    XmppMarshalFactory marshalFactory = packetHandler.getMarshalFactory();
       
     XmppStreamWriterImpl out;
     out = new XmppStreamWriterImpl(_os, marshalFactory);
       
-    _writer = new XmppWriter(out);
+    _writer = new XmppWriter(_xmppContext, out);
   }
   
   public void sendMessage(String to, String from, Serializable value)
@@ -171,37 +174,14 @@ public class XmppAgentStream implements BamStream
     return true;
   }
   
-  public void sendQueryResult(long id,
+  public void sendQueryResult(long bamId,
 			      String to,
 			      String from,
 			      Serializable value)
   {
-    try {
-      if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " queryResult id=" + id + " to=" + to
-		  + " from=" + from + " value=" + value);
-      }
+    String id = _xmppContext.findId(bamId);
 
-      String xmppId = _packetHandler.findId(id);
-      
-      _os.print("<iq id=\"");
-      _os.print(xmppId);
-      _os.print("\" type=\"result\" to=\"");
-      _os.print(to);
-      _os.print("\" from=\"");
-      _os.print(from);
-      _os.print("\">");
-
-      _packetHandler.writeValue(value);
-
-      _os.print("</iq>");
-      
-      _os.flush();
-    } catch (Exception e) {
-      _packetHandler.close();
-      
-      log.log(Level.FINE, e.toString(), e);
-    }
+    _writer.sendQuery(id, to, from, value, "result");
   }
   
   public void sendQueryError(long id,

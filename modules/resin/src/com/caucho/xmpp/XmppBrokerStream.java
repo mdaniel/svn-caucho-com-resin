@@ -57,6 +57,7 @@ public class XmppBrokerStream
 
   private XmppRequest _request;
   private XmppProtocol _protocol;
+  private XmppContext _xmppContext;
   
   private BamBroker _broker;
   private BamConnection _conn;
@@ -87,7 +88,7 @@ public class XmppBrokerStream
   {
     _request = request;
     _protocol = request.getProtocol();
-    
+    _xmppContext = new XmppContext(_protocol.getMarshalFactory());
     _broker = broker;
 
     _in = in;
@@ -100,7 +101,7 @@ public class XmppBrokerStream
     _toClient = new XmppAgentStream(this, _os);
     _authHandler = null;//new AuthBrokerStream(this, _callbackHandler);
 
-    _reader = new XmppReader(_protocol.getMarshalFactory(),
+    _reader = new XmppReader(_xmppContext,
 			     is, _in, _toClient,
 			     new XmppBindCallback(this));
 
@@ -118,6 +119,16 @@ public class XmppBrokerStream
   {
     return _toClient;
   }
+
+  XmppMarshalFactory getMarshalFactory()
+  {
+    return _protocol.getMarshalFactory();
+  }
+
+  XmppContext getXmppContext()
+  {
+    return _xmppContext;
+  }
   
   public boolean serviceRead(ReadStream is,
 			     TcpDuplexController controller)
@@ -134,7 +145,6 @@ public class XmppBrokerStream
     try {
       int tag;
 
-      System.out.println("READ:");
       while ((tag = _in.next()) > 0) {
 	if (_isFinest)
 	  debug(_in);

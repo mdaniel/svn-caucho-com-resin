@@ -46,10 +46,12 @@ class XmppWriter
   private static final Logger log
     = Logger.getLogger(XmppWriter.class.getName());
 
+  private XmppContext _xmppContext;
   private XmppStreamWriterImpl _out;
 
-  XmppWriter(XmppStreamWriterImpl out)
+  XmppWriter(XmppContext xmppContext, XmppStreamWriterImpl out)
   {
+    _xmppContext = xmppContext;
     _out = out;
   }
 
@@ -125,7 +127,7 @@ class XmppWriter
   /**
    * Sends a query get message to the stream
    */
-  public void sendQuery(long id, String to, String from,
+  public void sendQuery(String id, String to, String from,
 			Serializable value, String type)
   {
     try {
@@ -134,7 +136,7 @@ class XmppWriter
       synchronized (out) {
 	out.writeStartElement("iq");
 
-	out.writeAttribute("id", String.valueOf(id));
+	out.writeAttribute("id", id);
 
 	out.writeAttribute("type", type);
 

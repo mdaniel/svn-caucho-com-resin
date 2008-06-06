@@ -60,6 +60,7 @@ public class XmppReader
   private ReadStream _is;
   private XMLStreamReaderImpl _in;
 
+  private XmppContext _xmppContext;
   private XmppMarshalFactory _marshalFactory;
 
   private String _uid;
@@ -67,13 +68,14 @@ public class XmppReader
 
   private boolean _isFinest;
 
-  XmppReader(XmppMarshalFactory factory,
+  XmppReader(XmppContext context,
 	     ReadStream is,
 	     XMLStreamReader in,
 	     BamStream toReply,
 	     BamStream handler)
   {
-    _marshalFactory = factory;
+    _xmppContext = context;
+    _marshalFactory = context.getMarshalFactory();
     
     _is = is;
     _in = (XMLStreamReaderImpl) in;
@@ -258,6 +260,12 @@ public class XmppReader
 
     Serializable []extra = null;
 
+    if (_jid == null)
+      from = _jid;
+
+    if (to == null)
+      to = _uid;
+
     ImMessage message = new ImMessage(to, from, type,
 				      subjectArray, bodyArray, thread,
 				      extra);
@@ -309,7 +317,7 @@ public class XmppReader
       to = _uid;
 
       if (query instanceof ImSessionQuery && "set".equals(type)) {
-	long bamId = Long.parseLong(id);
+	long bamId = _xmppContext.addId(id);
 	
 	_toReply.sendQueryResult(bamId, from, to, query);
 
@@ -318,13 +326,13 @@ public class XmppReader
     }
 
     if ("get".equals(type)) {
-      long bamId = Long.parseLong(id);
+      long bamId = _xmppContext.addId(id);
 
       if (_handler != null)
 	_handler.sendQueryGet(bamId, to, from, query);
     }
     else if ("set".equals(type)) {
-      long bamId = Long.parseLong(id);
+      long bamId = _xmppContext.addId(id);
 
       if (_handler != null)
 	_handler.sendQuerySet(bamId, to, from, query);

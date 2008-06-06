@@ -84,6 +84,7 @@ public class XmppClient {
   private BlockingQueue<Stanza> _stanzaQueue
     = new LinkedBlockingQueue<Stanza>();
 
+  private XmppContext _xmppContext = new XmppContext();
   private XmppClientBrokerStream _toBroker;
   private BamStream _callback;
 
@@ -139,12 +140,12 @@ public class XmppClient {
       XmppMarshalFactory marshalFactory = new XmppMarshalFactory();
       
       XmppStreamWriterImpl out;
-      out = new XmppStreamWriterImpl(_os, marshalFactory);
+      out = new XmppStreamWriterImpl(_os, _xmppContext.getMarshalFactory());
       
       _toBroker = new XmppClientBrokerStream(this, out);
     
       _in = factory.createXMLStreamReader(_is);
-      _reader = new XmppReader(marshalFactory, _is, _in, _toBroker, _callback);
+      _reader = new XmppReader(_xmppContext, _is, _in, _toBroker, _callback);
 
       String tag = readStartTag();
 
