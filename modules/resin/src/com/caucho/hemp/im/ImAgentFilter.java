@@ -29,8 +29,8 @@
 
 package com.caucho.hemp.im;
 
-import com.caucho.bam.AbstractBamAgentFilter;
-import com.caucho.bam.BamAgentStream;
+import com.caucho.bam.AbstractBamFilter;
+import com.caucho.bam.BamStream;
 import java.util.*;
 import java.util.logging.*;
 
@@ -38,11 +38,11 @@ import java.util.logging.*;
 /**
  * Filter on outbound requests (needed to support privacy)
  */
-public class ImAgentFilter extends AbstractBamAgentFilter
+public class ImAgentFilter extends AbstractBamFilter
 {
   private ImUserService _resource;
   
-  public ImAgentFilter(BamAgentStream next, ImUserService resource)
+  public ImAgentFilter(BamStream next, ImUserService resource)
   {
     super(next);
 

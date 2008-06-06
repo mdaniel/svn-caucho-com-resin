@@ -42,6 +42,14 @@ public class AbstractBamStream implements BamStream
     = Logger.getLogger(AbstractBamStream.class.getName());
   
   /**
+   * Returns the jid at the end of the stream.
+   */
+  public String getJid()
+  {
+    return null;
+  }
+  
+  /**
    * Callback to handle messages
    * 
    * @param to the target JID
@@ -230,5 +238,11 @@ public class AbstractBamStream implements BamStream
       log.finer(this + " sendPresenceError to=" + to + " from=" + from
 		+ " value=" + value + " error=" + error);
     }
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getJid() + "]";
   }
 }

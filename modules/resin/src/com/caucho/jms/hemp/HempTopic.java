@@ -53,7 +53,6 @@ import com.caucho.webbeans.manager.*;
  * Implements an hemp topic.
  */
 public class HempTopic extends AbstractTopic
-  implements com.caucho.bam.BamMessageStream
 {
   private static final L10N L = new L10N(HempTopic.class);
   
@@ -86,12 +85,14 @@ public class HempTopic extends AbstractTopic
   /**
    * Returns the configuration URL.
    */
+  @Override
   public String getUrl()
   {
     return "xmpp:name=" + getName();
   }
 
   @PostConstruct
+  @Override
   public void init()
   {
     super.init();

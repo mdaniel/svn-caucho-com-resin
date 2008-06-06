@@ -31,7 +31,6 @@ package com.caucho.xmpp;
 
 import com.caucho.bam.*;
 import com.caucho.bam.im.*;
-import com.caucho.xmpp.*;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.util.*;
@@ -140,7 +139,7 @@ public class XmppClient {
       XmppMarshalFactory marshalFactory = new XmppMarshalFactory();
       
       XmppStreamWriterImpl out;
-      out = new XmppStreamWriterImpl(_os, _xmppContext.getMarshalFactory());
+      out = new XmppStreamWriterImpl(_os, marshalFactory);
       
       _toBroker = new XmppClientBrokerStream(this, out);
     
@@ -442,13 +441,17 @@ public class XmppClient {
     return _toBroker;
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _address + "," + _port + "]";
   }
 
-  protected void finalize()
+  @Override
+  protected void finalize() throws Throwable
   {
+    super.finalize();
+    
     close();
   }
 

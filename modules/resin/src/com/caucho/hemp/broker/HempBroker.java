@@ -34,7 +34,6 @@ import com.caucho.bam.BamBroker;
 import com.caucho.bam.BamConnection;
 import com.caucho.bam.BamError;
 import com.caucho.hemp.*;
-import com.caucho.bam.BamAgentStream;
 import com.caucho.bam.BamService;
 import com.caucho.bam.BamStream;
 import com.caucho.server.resin.*;
@@ -55,8 +54,8 @@ public class HempBroker implements BamBroker, BamStream
   private static final L10N L = new L10N(HempBroker.class);
   
   // agents
-  private final HashMap<String,WeakReference<BamAgentStream>> _agentMap
-    = new HashMap<String,WeakReference<BamAgentStream>>();
+  private final HashMap<String,WeakReference<BamStream>> _agentMap
+    = new HashMap<String,WeakReference<BamStream>>();
   
   private final HashMap<String,BamService> _serviceMap
     = new HashMap<String,BamService>();
@@ -117,10 +116,10 @@ public class HempBroker implements BamBroker, BamStream
 
     HempConnectionImpl conn = new HempConnectionImpl(this, jid);
 
-    BamAgentStream agentStream = conn.getAgentStreamHandler();
+    BamStream agentStream = conn.getAgentStreamHandler();
       
     synchronized (_agentMap) {
-      _agentMap.put(jid, new WeakReference<BamAgentStream>(agentStream));
+      _agentMap.put(jid, new WeakReference<BamStream>(agentStream));
     }
 
     if (log.isLoggable(Level.FINE))
@@ -176,14 +175,14 @@ public class HempBroker implements BamBroker, BamStream
     }
     
     synchronized (_agentMap) {
-      WeakReference<BamAgentStream> oldRef = _agentMap.get(jid);
+      WeakReference<BamStream> oldRef = _agentMap.get(jid);
 
       if (oldRef != null && oldRef.get() != null)
 	throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
 					    jid));
 
-      BamAgentStream agentStream = service.getAgentStream();
-      _agentMap.put(jid, new WeakReference<BamAgentStream>(agentStream));
+      BamStream agentStream = service.getAgentStream();
+      _agentMap.put(jid, new WeakReference<BamStream>(agentStream));
     }
 
     if (log.isLoggable(Level.FINE))
@@ -227,6 +226,14 @@ public class HempBroker implements BamBroker, BamStream
   protected String getDomain()
   {
     return _domain;
+  }
+  
+  /**
+   * getJid() returns null for the broker
+   */
+  public String getJid()
+  {
+    return null;
   }
 
   /**
@@ -543,16 +550,16 @@ public class HempBroker implements BamBroker, BamStream
       throw new RuntimeException(L.l("{0} is an unknown entity", to));
   }
 
-  protected BamAgentStream findAgent(String jid)
+  protected BamStream findAgent(String jid)
   {
     synchronized (_agentMap) {
-      WeakReference<BamAgentStream> ref = _agentMap.get(jid);
+      WeakReference<BamStream> ref = _agentMap.get(jid);
 
       if (ref != null)
 	return ref.get();
     }
 
-    BamAgentStream agentStream;
+    BamStream agentStream;
     BamService service = findService(jid);
     
     if (service == null)
@@ -564,12 +571,12 @@ public class HempBroker implements BamBroker, BamStream
 
     if (agentStream != null) {
       synchronized (_agentMap) {
-	WeakReference<BamAgentStream> ref = _agentMap.get(jid);
+	WeakReference<BamStream> ref = _agentMap.get(jid);
 
 	if (ref != null)
 	  return ref.get();
 
-	_agentMap.put(jid, new WeakReference<BamAgentStream>(agentStream));
+	_agentMap.put(jid, new WeakReference<BamStream>(agentStream));
 
 	return agentStream;
       }

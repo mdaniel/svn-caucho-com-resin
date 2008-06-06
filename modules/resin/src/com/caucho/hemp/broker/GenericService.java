@@ -36,8 +36,7 @@ import com.caucho.bam.disco.DiscoFeature;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamConnection;
 import com.caucho.config.*;
-import com.caucho.bam.AbstractBamAgentStream;
-import com.caucho.bam.BamAgentStream;
+import com.caucho.bam.AbstractBamStream;
 import com.caucho.bam.BamService;
 import com.caucho.util.*;
 
@@ -50,7 +49,7 @@ import javax.webbeans.*;
 /**
  * GenericService implementation to simplify configuring a service.
  */
-public class GenericService extends AbstractBamAgentStream
+public class GenericService extends AbstractBamStream
   implements BamService
 {
   private static final L10N L = new L10N(GenericService.class);
@@ -63,8 +62,7 @@ public class GenericService extends AbstractBamAgentStream
   
   private BamConnection _conn;
   private BamStream _brokerStream;
-
-  private BamAgentStream _agentStream;
+  private BamStream _agentStream;
   
   public void setName(String name)
   {
@@ -121,12 +119,12 @@ public class GenericService extends AbstractBamAgentStream
     _brokerStream = _broker.getBrokerStream();
   }
 
-  protected BamAgentStream createQueue(BamAgentStream stream)
+  protected BamStream createQueue(BamStream stream)
   {
     return new HempMemoryQueue(stream, _broker.getBrokerStream());
   }
 
-  public BamAgentStream getAgentStream()
+  public BamStream getAgentStream()
   {
     return _agentStream;
   }
@@ -138,7 +136,7 @@ public class GenericService extends AbstractBamAgentStream
   /**
    * Create a filter for requests sent to the service's agent.
    */
-  public BamAgentStream getAgentFilter(BamAgentStream agentStream)
+  public BamStream getAgentFilter(BamStream agentStream)
   {
     return agentStream;
   }
@@ -172,7 +170,7 @@ public class GenericService extends AbstractBamAgentStream
   /**
    * Returns a child agent given a jid.
    */
-  public BamAgentStream findAgent(String jid)
+  public BamStream findAgent(String jid)
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " findAgent(" + jid + ")");

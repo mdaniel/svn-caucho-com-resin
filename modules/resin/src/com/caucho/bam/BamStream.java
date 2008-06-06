@@ -29,15 +29,175 @@
 
 package com.caucho.bam;
 
-import com.caucho.bam.BamQueryStream;
-import com.caucho.bam.BamPresenceStream;
-import com.caucho.bam.BamMessageStream;
+import java.io.Serializable;
 
 /**
  * Main agent callback to handle packet events.  Each method corresponds to
  * a packet class.
  */
-public interface BamStream 
-  extends BamMessageStream, BamQueryStream, BamPresenceStream
+public interface BamStream
 {
+  /**
+   * Returns the jid of the agent at the end of the stream.  For brokers,
+   * returns null.
+   */
+  public String getJid();
+  
+  //
+  // messages
+  //
+  
+  /**
+   * Sends a message packet
+   * 
+   * @param to the target JID
+   * @param from the source JID
+   * @param value the message payload
+   */
+  public void sendMessage(String to, String from, Serializable value);
+  
+  /**
+   * Sends a message error packet
+   * 
+   * @param to the target JID
+   * @param from the source JID
+   * @param value the message payload
+   * @param error the message error
+   */
+  public void sendMessageError(String to,
+			       String from,
+			       Serializable value,
+			       BamError error);
+
+  //
+  // queries (iq)
+  //
+  /**
+   * Handles a query information request (get), returning true if this
+   * handler understands the query class, and false if it does not.
+   *
+   * If sendQueryGet returns true, the handler MUST send a
+   * <code>queryResult</code> or <code>queryError</code> to the sender,
+   * using the same <code>id</code>.
+   *
+   * @param id the query identifier used to match requests with responses
+   * @param to the target JID
+   * @param from the source JID, used as the target for the response
+   * @param query the query payload
+   *
+   * @return true if this handler understand the query, false otherwise
+   */
+  public boolean sendQueryGet(long id,
+			      String to,
+			      String from,
+			      Serializable query);
+  
+  /**
+   * Handles a query update request (set), returning true if this handler
+   * understands the query class, and false if it does not.
+   *
+   * If sendQuerySet returns true, the handler MUST send a
+   * <code>queryResult</code> or <code>queryError</code> to the sender,
+   * using the same <code>id</code>.
+   *
+   * @param id the query identifier used to match requests with responses
+   * @param to the target JID
+   * @param from the source JID, used as the target for the response
+   * @param query the query payload
+   *
+   * @return true if this handler understand the query, false otherwise
+   */
+  public boolean sendQuerySet(long id,
+			      String to,
+			      String from,
+			      Serializable query);
+
+  /**
+   * Handles the query response from a corresponding queryGet or querySet.
+   *
+   * @param id the query identifier used to match requests with responses
+   * @param to the target JID
+   * @param from the source JID, used as the target for the response
+   * @param value the result payload
+   */
+  public void sendQueryResult(long id,
+			      String to,
+			      String from,
+			      Serializable value);
+  
+  /**
+   * Handles the query error from a corresponding queryGet or querySet.
+   *
+   * @param id the query identifier used to match requests with responses
+   * @param to the target JID
+   * @param from the source JID, used as the target for the response
+   * @param query the query payload
+   * @param error additional error information
+   */
+  public void sendQueryError(long id,
+			     String to,
+			     String from,
+			     Serializable query,
+			     BamError error);
+
+  //
+  // presence
+  //
+
+  /**
+   * General presence, for clients announcing availability
+   */
+  public void sendPresence(String to,
+			   String from,
+			   Serializable data);
+
+  /**
+   * General presence, for clients announcing unavailability
+   */
+  public void sendPresenceUnavailable(String to,
+				      String from,
+				      Serializable data);
+
+  /**
+   * Presence probe from the server to a client
+   */
+  public void sendPresenceProbe(String to,
+			        String from,
+			        Serializable data);
+
+  /**
+   * A subscription request from a client
+   */
+  public void sendPresenceSubscribe(String to,
+				    String from,
+				    Serializable data);
+
+  /**
+   * A subscription response to a client
+   */
+  public void sendPresenceSubscribed(String to,
+				     String from,
+				     Serializable data);
+
+  /**
+   * An unsubscription request from a client
+   */
+  public void sendPresenceUnsubscribe(String to,
+				      String from,
+				      Serializable data);
+
+  /**
+   * A unsubscription response to a client
+   */
+  public void sendPresenceUnsubscribed(String to,
+				       String from,
+				       Serializable data);
+
+  /**
+   * An error response to a client
+   */
+  public void sendPresenceError(String to,
+			        String from,
+			        Serializable data,
+			        BamError error);
 }

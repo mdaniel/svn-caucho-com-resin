@@ -61,21 +61,9 @@ public interface BamConnection {
   //
 
   /**
-   * Registers the message handler
+   * Registers the stream handler
    */
-  public void setMessageHandler(BamMessageStream handler);
-
-  /**
-   * Registers the query handler
-   */
-  public void setQueryHandler(BamQueryStream handler);
-  
-  /**
-   * Sets the presence listener.  The handler will process presence
-   * events sent by the server and other clients
-   */
-  public void setPresenceHandler(BamPresenceStream handler);
-
+  public void setStreamHandler(BamStream handler);
 
   //
   // message handling

@@ -29,13 +29,7 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.jms.xmpp.*;
-import com.caucho.xmpp.MessageStanza;
 import com.caucho.bam.BamBroker;
-import com.caucho.jms.JmsConnectionFactory;
-import com.caucho.jms.message.MessageImpl;
-import com.caucho.jms.connection.JmsSession;
-import com.caucho.jms.hub.*;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.port.*;
 import com.caucho.vfs.*;
@@ -64,33 +58,13 @@ public class XmppProtocol extends Protocol
   
   private ClassLoader _loader;
 
-  private HashMap<String,XmppPubSubLeaf> _pubSubMap
-    = new HashMap<String,XmppPubSubLeaf>();
-
-  private ArrayList<XmppRequest> _clients
-    = new ArrayList<XmppRequest>();
-
   private XmppMarshalFactory _marshalFactory;
-
-  private HashMap<QName,XmppMarshal> _unserializeMap
-    = new HashMap<QName,XmppMarshal>();
-
-  private HashMap<String,XmppMarshal> _serializeMap
-    = new HashMap<String,XmppMarshal>();
-
-  private javax.jms.Connection _jmsConn;
   
   public XmppProtocol()
   {
     setProtocolName("xmpp");
 
     _loader = Thread.currentThread().getContextClassLoader();
-
-    try {
-      _jmsConn = new JmsConnectionFactory().createConnection();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 
   ClassLoader getClassLoader()
@@ -123,146 +97,5 @@ public class XmppProtocol extends Protocol
   public ServerRequest createRequest(Connection connection)
   {
     return new XmppRequest(this, (TcpConnection) connection);
-  }
-
-  JmsSession createSession()
-  {
-    try {
-      return (JmsSession) _jmsConn.createSession(false, 1);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  //
-  // pub-sub stuff
-  //
-  
-  public XmppPubSubLeaf createNode(String name)
-  {
-    synchronized (_pubSubMap) {
-      XmppPubSubLeaf leaf = _pubSubMap.get(name);
-
-      if (leaf == null) {
-	if (log.isLoggable(Level.FINE))
-	  log.fine(this + " create pub-sub node " + name);
-	
-	leaf = new XmppPubSubLeaf(this, name);
-	_pubSubMap.put(name, leaf);
-      }
-
-      return leaf;
-    }
-  }
-  
-  public XmppPubSubLeaf getNode(String name)
-  {
-    synchronized (_pubSubMap) {
-      return _pubSubMap.get(name);
-    }
-  }
-  
-  public ArrayList<XmppPubSubLeaf> getNodes()
-  {
-    ArrayList<XmppPubSubLeaf> nodes = new ArrayList<XmppPubSubLeaf>();
-    
-    synchronized (_pubSubMap) {
-      nodes.addAll(_pubSubMap.values());
-
-      return nodes;
-    }
-  }
-
-  /*
-  void send(XmppPubSubLeaf leaf, MessageImpl msg, long timeout)
-  {
-    MessageStanza stanza = new MessageStanza();
-
-    try {
-      if (msg instanceof TextMessage) {
-	stanza.setBody(((TextMessage) msg).getText());
-      }
-      else if (msg instanceof ObjectMessage) {
-	Object value = ((ObjectMessage) msg).getObject();
-
-	if (value != null)
-	  stanza.setBody(value.toString());
-      }
-    } catch (JMSException e) {
-      throw new RuntimeException(e);
-    }
-
-    System.out.println("STANZA: " + stanza + " " + _clients);
-
-    synchronized (_clients) {
-      for (int i = 0; i < _clients.size(); i++) {
-	XmppRequest client = _clients.get(i);
-	
-	client.offer(client.getRequestId(), stanza);
-      }
-    }
-  }
-  */
-  
-  void addClient(XmppRequest request)
-  {
-    synchronized (_clients) {
-      _clients.add(request);
-    }
-  }
-
-  void removeClient(XmppRequest request)
-  {
-    synchronized (_clients) {
-      _clients.remove(request);
-    }
-  }
-
-  private void loadMarshal(ReadStream is)
-    throws IOException
-  {
-    String line;
-
-    while ((line = is.readLine()) != null) {
-      int p = line.indexOf('#');
-
-      if (p > 0)
-	line = line.substring(0, p);
-      
-      line = line.trim();
-
-      if (line.length() == 0)
-	continue;
-
-      try {
-	String marshalClassName = line;
-	
-	Class cl = Class.forName(marshalClassName, false, _loader);
-	XmppMarshal marshal = (XmppMarshal) cl.newInstance();
-
-	QName qName = new QName(marshal.getNamespaceURI(),
-				marshal.getLocalName(), "");
-
-	String className = marshal.getClassName();
-
-	_serializeMap.put(className, marshal);
-	_unserializeMap.put(qName, marshal);
-
-	if (log.isLoggable(Level.FINEST))
-	  log.finest(this + " marshal: " + marshal + " " + qName + " " + className);
-      } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-  }
-
-  XmppMarshal getUnserialize(QName name)
-  {
-    return _marshalFactory.getUnserialize(name);
-  }
-
-  XmppMarshal getSerialize(String name)
-  {
-    return _marshalFactory.getSerialize(name);
   }
 }

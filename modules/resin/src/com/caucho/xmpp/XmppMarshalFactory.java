@@ -29,14 +29,6 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.jms.xmpp.*;
-import com.caucho.xmpp.MessageStanza;
-import com.caucho.bam.BamBroker;
-import com.caucho.jms.JmsConnectionFactory;
-import com.caucho.jms.message.MessageImpl;
-import com.caucho.jms.connection.JmsSession;
-import com.caucho.jms.hub.*;
-import com.caucho.server.connection.Connection;
 import com.caucho.server.port.*;
 import com.caucho.vfs.*;
 

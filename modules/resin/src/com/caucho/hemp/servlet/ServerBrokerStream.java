@@ -83,7 +83,7 @@ public class ServerBrokerStream
     _authHandler = new AuthBrokerStream(this, _callbackHandler);
   }
 
-  protected String getJid()
+  public String getJid()
   {
     return _jid;
   }
@@ -132,9 +132,7 @@ public class ServerBrokerStream
     String password = (String) credentials;
     
     _conn = _broker.getConnection(uid, password);
-    _conn.setMessageHandler(_callbackHandler);
-    _conn.setQueryHandler(_callbackHandler);
-    _conn.setPresenceHandler(_callbackHandler);
+    _conn.setStreamHandler(_callbackHandler);
 
     _jid = _conn.getJid();
     

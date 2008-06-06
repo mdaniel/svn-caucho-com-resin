@@ -29,7 +29,6 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.bam.BamAgentStream;
 import com.caucho.hmtp.packet.*;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
@@ -45,7 +44,7 @@ import java.io.Serializable;
 /**
  * Queue of hmtp packets
  */
-public class HempMemoryQueue implements BamAgentStream, Runnable
+public class HempMemoryQueue implements BamStream, Runnable
 {
   private static final Logger log
     = Logger.getLogger(HempMemoryQueue.class.getName());
@@ -54,7 +53,7 @@ public class HempMemoryQueue implements BamAgentStream, Runnable
   private final Executor _executor = ScheduledThreadPool.getLocal();
   private final ClassLoader _loader
     = Thread.currentThread().getContextClassLoader();
-  private final BamAgentStream _agentStream;
+  private final BamStream _agentStream;
   private final BamStream _brokerStream;
 
   private int _threadSemaphore;
@@ -63,7 +62,7 @@ public class HempMemoryQueue implements BamAgentStream, Runnable
   private int _head;
   private int _tail;
 
-  public HempMemoryQueue(BamAgentStream agentStream, BamStream brokerStream)
+  public HempMemoryQueue(BamStream agentStream, BamStream brokerStream)
   {
     if (agentStream == null)
       throw new NullPointerException();
@@ -231,7 +230,7 @@ public class HempMemoryQueue implements BamAgentStream, Runnable
     enqueue(new PresenceError(to, from, data, error));
   }
 
-  protected BamStream getStream()
+  protected BamStream getAgentStream()
   {
     return _agentStream;
   }
@@ -280,9 +279,7 @@ public class HempMemoryQueue implements BamAgentStream, Runnable
   }
 
   protected Packet dequeue()
-  {
-    boolean isStartThread = false;
-    
+  {    
     synchronized (this) {
       if (_head == _tail) {
 	_threadSemaphore++;
@@ -311,7 +308,7 @@ public class HempMemoryQueue implements BamAgentStream, Runnable
 	if (log.isLoggable(Level.FINER))
 	  log.finer(this + " dequeue " + packet);
 	
-	packet.dispatch(getStream(), _brokerStream);
+	packet.dispatch(getAgentStream(), _brokerStream);
 	
 	isValid = true;
       } catch (Exception e) {

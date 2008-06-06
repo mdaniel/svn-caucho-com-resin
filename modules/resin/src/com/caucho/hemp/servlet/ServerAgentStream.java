@@ -68,6 +68,14 @@ public class ServerAgentStream implements BamStream
     _out = out;
   }
   
+  /**
+   * Returns the jid of the target stream.
+   */
+  public String getJid()
+  {
+    return _packetHandler.getJid();
+  }
+  
   public void sendMessage(String to, String from, Serializable value)
   {
     try {

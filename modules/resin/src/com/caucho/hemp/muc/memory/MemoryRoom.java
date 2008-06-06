@@ -30,11 +30,9 @@
 package com.caucho.hemp.muc.memory;
 
 import com.caucho.bam.muc.MucUserPresence;
-import com.caucho.bam.BamService;
 import com.caucho.bam.im.ImMessage;
 import com.caucho.bam.BamStream;
 import com.caucho.hemp.broker.GenericService;
-import com.caucho.bam.BamAgentStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.*;
@@ -79,7 +77,7 @@ public class MemoryRoom extends GenericService
   }
 
   @Override
-  public BamAgentStream findAgent(String jid)
+  public BamStream findAgent(String jid)
   {
     synchronized (_nicknameMap) {
       MemoryNick nick = _nicknameMap.get(jid);

@@ -40,7 +40,7 @@ import java.io.Serializable;
  * implementation of this kind of service.
  */
 public class SimpleBamService extends AbstractBamService
-  implements BamAgentStream
+  implements BamStream
 {
   private static final Logger log
     = Logger.getLogger(SimpleBamService.class.getName());
@@ -48,7 +48,7 @@ public class SimpleBamService extends AbstractBamService
   /**
    * Returns the resource's stream
    */
-  public BamAgentStream getAgentStream()
+  public BamStream getAgentStream()
   {
     return this;
   }

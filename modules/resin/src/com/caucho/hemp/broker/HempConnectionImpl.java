@@ -29,10 +29,7 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.bam.BamQueryStream;
 import com.caucho.bam.BamQueryCallback;
-import com.caucho.bam.BamPresenceStream;
-import com.caucho.bam.BamMessageStream;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamConnection;
@@ -119,25 +116,9 @@ public class HempConnectionImpl implements BamConnection
   /**
    * Registers the listener
    */
-  public void setMessageHandler(BamMessageStream handler)
+  public void setStreamHandler(BamStream handler)
   {
-    _handler.setMessageHandler(handler);
-  }
-
-  /**
-   * Registers the listener
-   */
-  public void setQueryHandler(BamQueryStream handler)
-  {
-    _handler.setQueryHandler(handler);
-  }
-
-  /**
-   * Sets the presence listener
-   */
-  public void setPresenceHandler(BamPresenceStream handler)
-  {
-    _handler.setPresenceHandler(handler);
+    _handler.setStreamHandler(handler);
   }
 
   /**

@@ -29,9 +29,6 @@
 
 package com.caucho.bam;
 
-import com.caucho.bam.BamService;
-import com.caucho.bam.BamAgentStream;
-import com.caucho.bam.BamStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.*;
@@ -62,7 +59,7 @@ abstract public class AbstractBamService implements BamService
   /**
    * Looks up a sub-resource
    */
-  public BamAgentStream findAgent(String jid)
+  public BamStream findAgent(String jid)
   {
     return null;
   }
@@ -70,12 +67,12 @@ abstract public class AbstractBamService implements BamService
   /**
    * Returns the stream to the service's agent
    */
-  abstract public BamAgentStream getAgentStream();
+  abstract public BamStream getAgentStream();
 
   /**
    * Creates an outbound filter
    */
-  public BamAgentStream getAgentFilter(BamAgentStream stream)
+  public BamStream getAgentFilter(BamStream stream)
   {
     return stream;
   }

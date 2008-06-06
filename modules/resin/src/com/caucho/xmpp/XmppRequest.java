@@ -29,13 +29,6 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.xmpp.XmppPubSubLeaf;
-import com.caucho.xmpp.XmppProtocol;
-import com.caucho.xmpp.XmppBrokerStream;
-import com.caucho.xmpp.Stanza;
-import com.caucho.jms.memory.*;
-import com.caucho.jms.message.*;
-import com.caucho.jms.connection.*;
 import com.caucho.bam.BamBroker;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
@@ -51,7 +44,7 @@ import javax.xml.stream.*;
 /**
  * XMPP protocol
  */
-public class XmppRequest implements TcpServerRequest, Runnable {
+public class XmppRequest implements TcpServerRequest {
   private static final L10N L = new L10N(XmppRequest.class);
   private static final Logger log
     = Logger.getLogger(XmppRequest.class.getName());
@@ -169,54 +162,6 @@ public class XmppRequest implements TcpServerRequest, Runnable {
       TcpDuplexController controller = new TcpDuplexController(this, handler);
 
       return true;
-      
-      /*
-      int tag;
-      
-      while ((tag = _in.next()) > 0) {
-	if (_isFinest)
-	  debug(_in);
-	
-	if (tag == XMLStreamConstants.END_ELEMENT) {
-	  if ("stream".equals(_in.getLocalName())) {
-	    if (log.isLoggable(Level.FINE))
-	      log.fine(this + " end-stream");
-	  }
-	  else {
-	    log.warning(this + " " + _in.getLocalName());
-	  }
-	}
-
-	if (tag == XMLStreamConstants.START_ELEMENT) {
-	  boolean valid = false;
-	  
-	  if ("auth".equals(_in.getLocalName()))
-	    valid = handleAuth();
-	  else if ("stream".equals(_in.getLocalName()))
-	    valid = handleStream();
-	  else if ("iq".equals(_in.getLocalName()))
-	    valid = handleIq();
-	  else if ("presence".equals(_in.getLocalName()))
-	    valid = handlePresence();
-	  else if ("message".equals(_in.getLocalName()))
-	    valid = handleMessage();
-	  else {
-	    return false;
-	  }
-
-	  if (! valid)
-	    return false;
-
-	  if (_in.available() < 1)
-	    return true;
-	}
-      }
-
-      if (_isFinest)
-	log.finest(this + " end of stream");
-
-      return false;
-      */
     } catch (XMLStreamException e) {
       e.printStackTrace();
       throw new IOExceptionWrapper(e);
@@ -466,231 +411,6 @@ public class XmppRequest implements TcpServerRequest, Runnable {
     return true;
   }
 
-  private boolean handleIq()
-    throws IOException, XMLStreamException
-  {
-    String type = _in.getAttributeValue(null, "type");
-    String id = _in.getAttributeValue(null, "id");
-    String from = _in.getAttributeValue(null, "from");
-    String to = _in.getAttributeValue(null, "to");
-
-    int tag = _in.nextTag();
-
-    if (_isFinest)
-      debug(_in);
-
-    String localName = _in.getLocalName();
-    String uri = _in.getNamespaceURI();
-
-    if ("bind".equals(_in.getLocalName())) {
-      tag = _in.nextTag();
-
-      String resource = null;
-
-      if ("resource".equals(_in.getLocalName())) {
-	_in.next();
-	
-	resource = _in.getText();
-      }
-      
-      skipToEnd("iq");
-
-      _clientBind = "test@" + _streamFrom + "/" + resource;
-
-      if (log.isLoggable(Level.FINE)) {
-	log.fine(this + " bind-result(jid=" + _clientBind
-		 + " id=" + id + " to=" + to + " from=" + from + ")");
-      }
-	
-      _os.print("<iq type='result' id='" + id + "' to='" + _clientTo + "'>");
-      _os.print("<bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>");
-      _os.print("<jid>" + _clientBind + "</jid>");
-      _os.print("</bind></iq>\n");
-      _os.flush();
-
-      return true;
-    }
-    else if ("session".equals(_in.getLocalName())) {
-      skipToEnd("iq");
-      
-      _os.print("<iq type='result' id='" + id + "' from='" + _streamFrom + "'/>");
-      _os.flush();
-
-      return true;
-    }
-    else if ("jabber:iq:roster".equals(_in.getNamespaceURI())
-	     && "query".equals(_in.getLocalName())) {
-      skipToEnd("iq");
-
-      
-      _os.print("<iq type='result' id='" + id + "' from='" + _streamFrom + "'>");
-      _os.print("<query xmlns='jabber:iq:roster'>");
-
-      _os.print("<item jid='jimmy@localhost' name='Test' subscription='to'>");
-      _os.print("<group>Buddies</group>");
-      _os.print("</item>");
-      
-      _os.print("</query>");
-      _os.print("</iq>");
-      _os.flush();
-
-      return true;
-    }
-    else if ("query".equals(_in.getLocalName())
-	     && "http://jabber.org/protocol/disco#info".equals(uri)) {
-      skipToEnd("iq");
-
-      _os.print("<iq type='result' id='" + id + "'");
-      if (to != null)
-	_os.print(" from='" + to + "'");
-      _os.print(">");
-      _os.print("<query xmlns='http://jabber.org/protocol/disco#info'>");
-      _os.print("<identity category='pubsub' type='leaf' name='test'/>");
-      _os.print("<feature var='http://jabber.org/protocol/disco#info'/>");
-      _os.print("<feature var='jabber:iq:time'/>");
-      _os.print("<feature var='jabber:iq:search'/>");
-      _os.print("<feature var='http://jabber.org/protocol/muc'/>");
-      _os.print("<feature var='http://jabber.org/protocol/pubsub'/>");
-      _os.print("</query>");
-      _os.print("</iq>");
-      _os.flush();
-      System.out.println("QUERY: " + type + " query:" + _in.getLocalName() + " from:" + from + " to:" + to + " id:" + id);
-
-      return true;
-    }
-    else {
-      skipToEnd("iq");
-
-      _os.print("<iq type='error'>");
-      _os.print("<error/>");
-      _os.print("</iq>");
-
-      if (log.isLoggable(Level.FINE)) {
-	log.fine(this + " <" + _in.getLocalName() + " xmlns="
-		 + _in.getNamespaceURI() + "> unknown iq");
-      }
-
-      return true;
-    }
-  }
-
-  private boolean handlePresence()
-    throws IOException, XMLStreamException
-  {
-    String type = _in.getAttributeValue(null, "type");
-    String id = _in.getAttributeValue(null, "id");
-    String from = _in.getAttributeValue(null, "from");
-    String to = _in.getAttributeValue(null, "to");
-
-    int tag;
-    
-    while ((tag = _in.nextTag()) > 0
-	   && ! ("presence".equals(_in.getLocalName())
-		 && tag == XMLStreamReader.END_ELEMENT)) {
-      if (_isFinest)
-	debug(_in);
-      
-      if (tag != XMLStreamReader.START_ELEMENT)
-	continue;
-
-      if ("status".equals(_in.getLocalName())) {
-	tag = _in.next();
-    
-	if (_isFinest)
-	  debug(_in);
-	
-	String status = _in.getText();
-
-	expectEnd("status");
-	
-	continue;
-      }
-    }
-    
-    if (_isFinest)
-      debug(_in);
-
-    expectEnd("presence", tag);
-
-    if (! _isPresent) {
-      _isPresent = true;
-      _protocol.addClient(this);
-
-      /*
-      _os.print("<iq from='jimmy@localhost' id='disco' type='get'>");
-      _os.print("<query xmlns='http://jabber.org/protocol/disco#info'/>");
-      _os.print("</iq>");
-      */
-
-      _os.print("<presence from='jimmy@localhost'>");
-      _os.print("<status>active</status>");
-      _os.print("</presence>");
-    }
-
-    return true;
-  }
-
-  private boolean handleMessage()
-    throws IOException, XMLStreamException
-  {
-    String type = _in.getAttributeValue(null, "type");
-    String id = _in.getAttributeValue(null, "id");
-    String from = _in.getAttributeValue(null, "from");
-    String to = _in.getAttributeValue(null, "to");
-
-    XmppPubSubLeaf leaf = _protocol.getNode(to);
-
-    if (leaf == null) {
-      log.fine(this + " message send to '" + to + "' unknown user");
-      
-      skipToEnd("message");
-      
-      return true;
-    }
-
-    int tag;
-    String body = "";
-    
-    while ((tag = _in.next()) > 0
-	   && ! (tag == XMLStreamReader.END_ELEMENT
-		 && "message".equals(_in.getLocalName()))) {
-      if (_isFinest)
-	debug(_in);
-      
-      if (tag != XMLStreamReader.START_ELEMENT)
-	continue;
-
-      if ("body".equals(_in.getLocalName())
-	  && "jabber:client".equals(_in.getNamespaceURI())) {
-	tag = _in.next();
-	if (_isFinest)
-	  debug(_in);
-      
-	body = _in.getText();
-
-	expectEnd("body");
-      }
-    }
-
-    expectEnd("message", tag);
-
-    try {
-      ObjectMessageImpl msg = new ObjectMessageImpl();
-      msg.setJMSMessageID("ID:xmpp-test");
-    
-      msg.setObject(body);
-
-      if (log.isLoggable(Level.FINE))
-	log.fine(this + " message to " + leaf);
-
-      leaf.send(null, msg, 0);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-
-    return true;
-  }
-
   private void skipToEnd(String tagName)
     throws IOException, XMLStreamException
   {
@@ -711,22 +431,6 @@ public class XmppRequest implements TcpServerRequest, Runnable {
 	  return;
       }
     }
-  }
-
-  private void expectEnd(String tagName)
-    throws IOException, XMLStreamException
-  {
-    expectEnd(tagName, _in.nextTag());
-  }
-
-  private void expectEnd(String tagName, int tag)
-    throws IOException, XMLStreamException
-  {
-    if (tag != XMLStreamReader.END_ELEMENT)
-      throw new IllegalStateException("expected </" + tagName + "> at <" + _in.getLocalName() + ">");
-
-    else if (! tagName.equals(_in.getLocalName()))
-      throw new IllegalStateException("expected </" + tagName + "> at </" + _in.getLocalName() + ">");
   }
 
   private boolean handleAuth()
@@ -844,64 +548,13 @@ public class XmppRequest implements TcpServerRequest, Runnable {
    */
   public void protocolCloseEvent()
   {
-    _protocol.removeClient(this);
     _requestId++;
     
     _state = null;
     _isPresent = false;
-
-    synchronized (this) {
-      _outboundQueue.clear();
-    }
   }
 
-  /*
-  public void offer(int requestId, Stanza stanza)
-  {
-    synchronized (this) {
-      if (requestId != _requestId || ! _isPresent)
-	return;
-
-      if (_outboundQueue.offer(stanza)) {
-	if (! _isThread) {
-	  _isThread = true;
-	  _threadPool.schedule(this);
-	}
-      }
-    }
-  }
-  */
-
-  public void run()
-  {
-    int id = _requestId;
-
-    while (id == _requestId) {
-      Stanza stanza = null;
-      
-      synchronized (this) {
-	stanza = _outboundQueue.poll();
-
-	if (stanza == null) {
-	  _isThread = false;
-	  return;
-	}
-      }
-
-      try {
-	if (log.isLoggable(Level.FINER))
-	  log.finest(this + " send from=localhost/test to=" + _clientBind + " " + stanza);
-
-	stanza.print(_os, "localhost/test", _clientBind);
-	_os.flush();
-      } catch (IOException e) {
-	// XXX: should cause close?
-	
-	log.log(Level.FINER, e.toString(), e);
-      }
-    }
-  }
-
+  @Override
   public String toString()
   {
     if (_conn != null)

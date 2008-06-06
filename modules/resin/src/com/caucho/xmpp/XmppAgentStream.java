@@ -29,20 +29,6 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.hmtp.packet.QuerySet;
-import com.caucho.hmtp.packet.QueryResult;
-import com.caucho.hmtp.packet.QueryGet;
-import com.caucho.hmtp.packet.QueryError;
-import com.caucho.hmtp.packet.PresenceUnsubscribed;
-import com.caucho.hmtp.packet.PresenceUnsubscribe;
-import com.caucho.hmtp.packet.PresenceUnavailable;
-import com.caucho.hmtp.packet.PresenceSubscribed;
-import com.caucho.hmtp.packet.PresenceSubscribe;
-import com.caucho.hmtp.packet.PresenceProbe;
-import com.caucho.hmtp.packet.PresenceError;
-import com.caucho.hmtp.packet.Presence;
-import com.caucho.hmtp.packet.MessageError;
-import com.caucho.hmtp.packet.Message;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import com.caucho.vfs.*;
@@ -79,6 +65,14 @@ public class XmppAgentStream implements BamStream
     out = new XmppStreamWriterImpl(_os, marshalFactory);
       
     _writer = new XmppWriter(_xmppContext, out);
+  }
+  
+  /**
+   * Returns the jid of the client
+   */
+  public String getJid()
+  {
+    return _packetHandler.getJid();
   }
   
   public void sendMessage(String to, String from, Serializable value)

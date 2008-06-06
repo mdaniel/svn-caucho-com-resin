@@ -51,6 +51,14 @@ public class AbstractBamFilter implements BamStream
   }
   
   /**
+   * Returns the jid of the final agent
+   */
+  public String getJid()
+  {
+    return _next.getJid();
+  }
+  
+  /**
    * Sends a unidirectional message
    * 
    * @param to the target JID

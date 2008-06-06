@@ -31,10 +31,7 @@ package com.caucho.hmtp.client;
 
 import com.caucho.hmtp.auth.AuthResult;
 import com.caucho.hmtp.auth.AuthQuery;
-import com.caucho.bam.BamQueryStream;
 import com.caucho.bam.BamQueryCallback;
-import com.caucho.bam.BamPresenceStream;
-import com.caucho.bam.BamMessageStream;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamConnection;
@@ -70,9 +67,7 @@ public class HmtpClient implements BamConnection {
   private ClientBrokerStream _clientStream;
   private String _jid;
 
-  private BamMessageStream _messageHandler;
-  private BamQueryStream _queryHandler;
-  private BamPresenceStream _presenceHandler;
+  private BamStream _streamHandler;
 
   private HashMap<Long,QueryItem> _queryMap
     = new HashMap<Long,QueryItem>();
@@ -244,35 +239,19 @@ public class HmtpClient implements BamConnection {
   }
 
   /**
-   * Sets the message listener
+   * Sets the message handler
    */
-  public void setMessageHandler(BamMessageStream listener)
+  public void setStreamHandler(BamStream handler)
   {
-    _messageHandler = listener;
+    _streamHandler = handler;
   }
 
   /**
    * Gets the message listener
    */
-  public BamMessageStream getMessageHandler()
+  public BamStream getStreamHandler()
   {
-    return _messageHandler;
-  }
-
-  /**
-   * Sets the presence handler
-   */
-  public void setPresenceHandler(BamPresenceStream handler)
-  {
-    _presenceHandler = handler;
-  }
-
-  /**
-   * Gets the message listener
-   */
-  public BamPresenceStream getPresenceHandler()
-  {
-    return _presenceHandler;
+    return _streamHandler;
   }
 
   /**
@@ -424,22 +403,6 @@ public class HmtpClient implements BamConnection {
       throw new IllegalStateException("connection is closed");
     
     _clientStream.sendPresenceError(to, null, data, error);
-  }
-
-  /**
-   * Sets the query handler
-   */
-  public void setQueryHandler(BamQueryStream handler)
-  {
-    _queryHandler = handler;
-  }
-
-  /**
-   * Gets the query handler
-   */
-  public BamQueryStream getQueryHandler()
-  {
-    return _queryHandler;
   }
 
   /**

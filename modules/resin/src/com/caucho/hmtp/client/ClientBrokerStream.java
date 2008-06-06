@@ -89,6 +89,14 @@ public class ClientBrokerStream implements BamStream {
   {
     return _in;
   }
+  
+  /**
+   * The jid of the broker is null
+   */
+  public String getJid()
+  {
+    return null;
+  }
 
   //
   // message

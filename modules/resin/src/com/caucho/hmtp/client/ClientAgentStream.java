@@ -29,9 +29,6 @@
 
 package com.caucho.hmtp.client;
 
-import com.caucho.bam.BamQueryStream;
-import com.caucho.bam.BamPresenceStream;
-import com.caucho.bam.BamMessageStream;
 import com.caucho.bam.BamStream;
 import com.caucho.hmtp.packet.Packet;
 import com.caucho.bam.BamError;
@@ -117,13 +114,21 @@ class ClientAgentStream implements Runnable, BamStream {
   }
   
   /**
+   * Returns the jid of the client
+   */
+  public String getJid()
+  {
+    return _client.getJid();
+  }
+  
+  /**
    * Handles a message
    */
   public void sendMessage(String to,
 			String from,
 			Serializable value)
   {
-    BamMessageStream handler = _client.getMessageHandler();
+    BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
       handler.sendMessage(to, from, value);
@@ -137,7 +142,7 @@ class ClientAgentStream implements Runnable, BamStream {
 			       Serializable value,
 			       BamError error)
   {
-    BamMessageStream handler = _client.getMessageHandler();
+    BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
       handler.sendMessageError(to, from, value, error);
@@ -159,7 +164,7 @@ class ClientAgentStream implements Runnable, BamStream {
 			      String from,
 			      Serializable value)
   {
-    BamQueryStream handler = _client.getQueryHandler();
+    BamStream handler = _client.getStreamHandler();
 
     if (handler == null || ! handler.sendQueryGet(id, to, from, value)) {
       String msg = "no sendQueryGet handling " + value.getClass().getName();
@@ -182,7 +187,7 @@ class ClientAgentStream implements Runnable, BamStream {
 			    String from,
 			    Serializable value)
   {
-    BamQueryStream handler = _client.getQueryHandler();
+    BamStream handler = _client.getStreamHandler();
 
     if (handler == null || ! handler.sendQuerySet(id, to, from, value)) {
       String msg = "no sendQuerySet handling " + value.getClass().getName();
@@ -231,7 +236,7 @@ class ClientAgentStream implements Runnable, BamStream {
 			 String from,
 			 Serializable data)
   {
-    BamPresenceStream handler = _client.getPresenceHandler();
+    BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
       handler.sendPresence(to, from, data);
@@ -247,7 +252,7 @@ class ClientAgentStream implements Runnable, BamStream {
 				    String from,
 				    Serializable data)
   {
-    BamPresenceStream handler = _client.getPresenceHandler();
+    BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
       handler.sendPresenceUnavailable(to, from, data);
@@ -260,7 +265,7 @@ class ClientAgentStream implements Runnable, BamStream {
 			      String from,
 			      Serializable data)
   {
-    BamPresenceStream handler = _client.getPresenceHandler();
+    BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
       handler.sendPresenceProbe(to, from, data);
@@ -273,7 +278,7 @@ class ClientAgentStream implements Runnable, BamStream {
 				  String from,
 				  Serializable data)
   {
-    BamPresenceStream handler = _client.getPresenceHandler();
+    BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
       handler.sendPresenceSubscribe(to, from, data);
@@ -286,7 +291,7 @@ class ClientAgentStream implements Runnable, BamStream {
 				   String from,
 				   Serializable data)
   {
-    BamPresenceStream handler = _client.getPresenceHandler();
+    BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
       handler.sendPresenceSubscribed(to, from, data);
@@ -299,7 +304,7 @@ class ClientAgentStream implements Runnable, BamStream {
 				    String from,
 				    Serializable data)
   {
-    BamPresenceStream handler = _client.getPresenceHandler();
+    BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
       handler.sendPresenceUnsubscribe(to, from, data);
@@ -312,7 +317,7 @@ class ClientAgentStream implements Runnable, BamStream {
 				     String from,
 				     Serializable data)
   {
-    BamPresenceStream handler = _client.getPresenceHandler();
+    BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
       handler.sendPresenceUnsubscribed(to, from, data);
@@ -326,7 +331,7 @@ class ClientAgentStream implements Runnable, BamStream {
 			      Serializable data,
 			      BamError error)
   {
-    BamPresenceStream handler = _client.getPresenceHandler();
+    BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
       handler.sendPresenceError(to, from, data, error);

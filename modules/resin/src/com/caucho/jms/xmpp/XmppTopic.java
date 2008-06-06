@@ -29,10 +29,7 @@
 
 package com.caucho.jms.xmpp;
 
-import com.caucho.xmpp.XmppPubSubLeaf;
 import com.caucho.xmpp.XmppProtocol;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.logging.*;
 
 import javax.annotation.*;
@@ -55,8 +52,6 @@ public class XmppTopic extends AbstractTopic
   
   private static final Logger log
     = Logger.getLogger(XmppTopic.class.getName());
-
-  private XmppPubSubLeaf _xmppNode;
 
   private int _id;
 
@@ -89,8 +84,6 @@ public class XmppTopic extends AbstractTopic
     if (xmpp == null)
       throw new java.lang.IllegalStateException(L.l("Need xmpp protocol"));
 
-
-    _xmppNode = xmpp.createNode(getName());
   }
 
   @Override
@@ -98,20 +91,18 @@ public class XmppTopic extends AbstractTopic
                                         String name,
                                         boolean noLocal)
   {
-    return _xmppNode.createSubscriber(session, name, noLocal);
+    return null;//_xmppNode.createSubscriber(session, name, noLocal);
   }
 
   @Override
   public void closeSubscriber(AbstractQueue queue)
   {
-    _xmppNode.closeSubscriber(queue);
   }
 
   @Override
   public void send(JmsSession session, MessageImpl msg, long timeout)
     throws JMSException
   {
-    _xmppNode.send(session, msg, timeout);
   }
 }
 

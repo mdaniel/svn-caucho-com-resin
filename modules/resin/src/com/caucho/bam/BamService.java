@@ -29,9 +29,6 @@
 
 package com.caucho.bam;
 
-import com.caucho.bam.BamAgentStream;
-import com.caucho.bam.BamStream;
-
 /**
  * BamService is a registered service.
  */
@@ -45,13 +42,13 @@ public interface BamService
   /**
    * Returns the service's agent stream
    */
-  public BamAgentStream getAgentStream();
+  public BamStream getAgentStream();
   
   /**
    * Returns an agent, e.g. if the resource is room@domain, then
    * it might return a resource for room@domain/nick
    */
-  public BamAgentStream findAgent(String jid);
+  public BamStream findAgent(String jid);
 
   /**
    * Called when an agent logs in
@@ -66,7 +63,7 @@ public interface BamService
   /**
    * Returns a filter for outbound calls, i.e. filtering messages to the agent.
    */
-  public BamAgentStream getAgentFilter(BamAgentStream stream);
+  public BamStream getAgentFilter(BamStream stream);
 
   /**
    * Returns a filter for inbound calls, i.e. filtering messages to the broker
