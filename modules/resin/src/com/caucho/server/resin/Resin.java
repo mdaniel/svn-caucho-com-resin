@@ -204,7 +204,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     if (loader instanceof EnvironmentClassLoader)
       _classLoader = (EnvironmentClassLoader) loader;
     else
-      _classLoader = new EnvironmentClassLoader();
+      _classLoader = EnvironmentClassLoader.create();
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -820,6 +820,8 @@ public class Resin implements EnvironmentBean, SchemaBean
 
 
       _server = clusterServer.startServer();
+
+      _server.start();
 
       Environment.start(getClassLoader());
 

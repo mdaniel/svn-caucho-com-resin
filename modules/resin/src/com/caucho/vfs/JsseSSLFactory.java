@@ -226,9 +226,9 @@ public class JsseSSLFactory implements SSLFactory {
   {
     SSLServerSocketFactory factory = null;
     
-    SSLContext sslContext = SSLContext.getInstance(_sslContext);
-
     if (_keyStore != null) {
+      SSLContext sslContext = SSLContext.getInstance(_sslContext);
+
       KeyManagerFactory kmf
 	= KeyManagerFactory.getInstance(_keyManagerFactory);
     
@@ -243,12 +243,6 @@ public class JsseSSLFactory implements SSLFactory {
     }
     else {
       factory = createAnonymousFactory();
-
-      ServerSocket ss;
-      ss = factory.createServerSocket(8666, 100);
-
-      Socket s = ss.accept();
-      System.out.println(s);
     }
 
     ServerSocket serverSocket;
@@ -297,9 +291,6 @@ public class JsseSSLFactory implements SSLFactory {
   private SSLServerSocketFactory createAnonymousFactory()
     throws IOException, GeneralSecurityException
   {
-    throw new ConfigException(L.l("jsse-ssl requires a 'key-store-file'"));
-    
-    /*
     KeyManagerFactory kmf
       = KeyManagerFactory.getInstance(_keyManagerFactory);
 
@@ -307,42 +298,26 @@ public class JsseSSLFactory implements SSLFactory {
 
     ks.load(null, "password".toCharArray());
 
-    KeyPairGenerator gen = null;
+    SelfSignedCert cert = SelfSignedCert.create();
 
-    try {
-      gen = KeyPairGenerator.getInstance("DSA");
-    } catch (Exception e) {
-      log.log(Level.FINEST, e.toString(), e);
-    }
-
-    try {
-      if (gen == null)
-	gen = KeyPairGenerator.getInstance("DiffieHellman");
-    } catch (Exception e) {
-      log.log(Level.FINEST, e.toString(), e);
-    }
-
-    if (gen == null)
+    if (cert == null)
       throw new ConfigException(L.l("Cannot generate anonymous certificate"));
-
-    KeyPair pair = gen.generateKeyPair();
-
-    PrivateKey privateKey = pair.getPrivate();
-    PublicKey publicKey = pair.getPublic();
-
-    ks.setKeyEntry("anonymous", privateKey,
-		   "key-password".toCharArray(), null);
+      
+    ks.setKeyEntry("anonymous", cert.getPrivateKey(),
+		   "key-password".toCharArray(), cert.getCertificateChain());
     
     kmf.init(ks, "key-password".toCharArray());
-      
-    // sslContext.init(kmf.getKeyManagers(), null, null);
-
-    SSLServerSocketFactory factory;
     
-    factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+    SSLContext sslContext = SSLContext.getInstance(_sslContext);
+      
+    sslContext.init(kmf.getKeyManagers(), null, null);
+
+    if (_cipherSuites != null)
+      sslContext.createSSLEngine().setEnabledCipherSuites(_cipherSuites);
+
+    SSLServerSocketFactory factory = sslContext.getServerSocketFactory();
 
     return factory;
-    */
   }
   
   /**

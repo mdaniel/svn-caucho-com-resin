@@ -68,6 +68,8 @@ public class TypeFactory implements AddLoaderListener
   private static final EnvironmentLocal<TypeFactory> _localFactory
     = new EnvironmentLocal<TypeFactory>();
 
+  private static final Object _introspectLock = new Object();
+
   private final EnvironmentClassLoader _loader;
   private final TypeFactory _parent;
 
@@ -308,20 +310,22 @@ public class TypeFactory implements AddLoaderListener
 
   private ConfigType getConfigTypeImpl(Class type)
   {
-    ConfigType strategy = _typeMap.get(type.getName());
+    synchronized (_introspectLock) {
+      ConfigType strategy = _typeMap.get(type.getName());
 
-    if (strategy == null) {
-      strategy = _primitiveTypes.get(type);
+      if (strategy == null) {
+	strategy = _primitiveTypes.get(type);
 
-      if (strategy == null)
-	strategy = createType(type);
+	if (strategy == null)
+	  strategy = createType(type);
 
-      _typeMap.put(type.getName(), strategy);
+	_typeMap.put(type.getName(), strategy);
 
-      strategy.introspect();
+	strategy.introspect();
+      }
+
+      return strategy;
     }
-
-    return strategy;
   }
 
   private ConfigType createType(Class type)

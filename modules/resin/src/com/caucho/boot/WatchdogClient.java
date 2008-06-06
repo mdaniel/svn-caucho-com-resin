@@ -148,7 +148,7 @@ class WatchdogClient
   
   public Path getLogDirectory()
   {
-    return _bootManager.getLogDirectory();
+    return _config.getLogDirectory();
   }
   
   public long getShutdownWaitTime()

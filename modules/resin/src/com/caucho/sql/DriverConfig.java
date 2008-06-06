@@ -144,7 +144,7 @@ public class DriverConfig
   /**
    * Sets the driver as data source.
    */
-  public void setDriverType(String type)
+  public void setCauchoDriverType(String type)
     throws ConfigException
   {
     if ("ConnectionPoolDataSource".equals(type)) {

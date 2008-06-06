@@ -96,31 +96,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   /**
    * Creates a new environment class loader.
    */
-  public EnvironmentClassLoader()
-  {
-    this(Thread.currentThread().getContextClassLoader(), null);
-  }
-
-  /**
-   * Creates a new environment class loader.
-   */
-  public EnvironmentClassLoader(String id)
-  {
-    this(Thread.currentThread().getContextClassLoader(), id);
-  }
-
-  /**
-   * Creates a new environment class loader.
-   */
-  public EnvironmentClassLoader(ClassLoader parent)
-  {
-    this(parent, null);
-  }
-
-  /**
-   * Creates a new environment class loader.
-   */
-  public EnvironmentClassLoader(ClassLoader parent, String id)
+  protected EnvironmentClassLoader(ClassLoader parent, String id)
   {
     super(parent);
 
@@ -130,6 +106,45 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     // initializeEnvironment();
 
     initListeners();
+  }
+
+  /**
+   * Creates a new environment class loader.
+   */
+  public static EnvironmentClassLoader create()
+  {
+    ClassLoader parent = Thread.currentThread().getContextClassLoader();
+    String id = null;
+    
+    return create(parent, id);
+  }
+
+  /**
+   * Creates a new environment class loader.
+   */
+  public static EnvironmentClassLoader create(String id)
+  {
+    ClassLoader parent = Thread.currentThread().getContextClassLoader();
+    
+    return create(parent, id);
+  }
+
+  /**
+   * Creates a new environment class loader.
+   */
+  public static EnvironmentClassLoader create(ClassLoader parent)
+  {
+    String id = null;
+    
+    return create(parent, id);
+  }
+
+  /**
+   * Creates a new environment class loader.
+   */
+  public static EnvironmentClassLoader create(ClassLoader parent, String id)
+  {
+    return new EnvironmentClassLoader(parent, id);
   }
 
   /**

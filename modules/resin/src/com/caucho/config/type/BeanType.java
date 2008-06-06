@@ -60,6 +60,8 @@ public class BeanType extends ConfigType
 
   private static final QName TEXT = new QName("#text");
 
+  private static final Object _introspectLock = new Object();
+
   private final Class _beanClass;
   
   private HashMap<QName,Attribute> _nsAttributeMap
@@ -329,29 +331,31 @@ public class BeanType extends ConfigType
   @Override
   public void introspect()
   {
-    if (_isIntrospecting)
-      return;
+    synchronized (_introspectLock) {
+      if (_isIntrospecting)
+	return;
     
-    _isIntrospecting = true;
+      _isIntrospecting = true;
     
-    try {
-      // ioc/20h4 - after to deal with recursion
-      introspectParent();
+      try {
+	// ioc/20h4 - after to deal with recursion
+	introspectParent();
 
-      //Method []methods = _beanClass.getMethods();
-      if (! _isIntrospected) {
-	_isIntrospected = true;
+	//Method []methods = _beanClass.getMethods();
+	if (! _isIntrospected) {
+	  _isIntrospected = true;
 
-	Method []methods = _beanClass.getDeclaredMethods();
+	  Method []methods = _beanClass.getDeclaredMethods();
     
-	introspectMethods(methods);
+	  introspectMethods(methods);
 
-	InjectIntrospector.introspectInject(_injectList, _beanClass);
+	  InjectIntrospector.introspectInject(_injectList, _beanClass);
 
-	InjectIntrospector.introspectInit(_initList, _beanClass);
+	  InjectIntrospector.introspectInit(_initList, _beanClass);
+	}
+      } finally {
+	_isIntrospecting = false;
       }
-    } finally {
-      _isIntrospecting = false;
     }
 
     introspectComplete();

@@ -89,7 +89,7 @@ public class EJBCompiler {
     // wrap so the EJB code will work.
     EnvironmentClassLoader loader;
 
-    loader = new EnvironmentClassLoader(oldLoader);
+    loader = EnvironmentClassLoader.create(oldLoader);
     if (_appDir != null) {
       loader.addLoader(new SimpleLoader(_appDir.lookup("WEB-INF/classes"),
 					null));

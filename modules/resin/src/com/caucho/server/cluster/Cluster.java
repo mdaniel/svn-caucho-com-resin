@@ -119,7 +119,7 @@ public class Cluster
     
   public Cluster()
   {
-    _classLoader = new EnvironmentClassLoader("cluster:??");
+    _classLoader = EnvironmentClassLoader.create("cluster:??");
 
     _clusterLocal.set(this, _classLoader);
   
@@ -755,8 +755,6 @@ public class Cluster
 	server = new Server(clusterServer);
 
       _serverProgram.configure(server);
-
-      server.start();
 
       _server = server;
 

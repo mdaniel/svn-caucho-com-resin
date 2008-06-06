@@ -117,9 +117,9 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
 
     ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
 
-    _loader = new EnvironmentClassLoader(parentLoader);
+    String id = getClass().getSimpleName() + "[" + name + "]";
+    _loader = EnvironmentClassLoader.create(parentLoader, id);
     //_loader.setOwner(this);
-    _loader.setId("EntAppClient[" + name + "]");
 
     _lifecycle = new Lifecycle(log, toString(), Level.INFO);
 

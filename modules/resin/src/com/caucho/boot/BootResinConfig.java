@@ -73,7 +73,7 @@ public class BootResinConfig implements EnvironmentBean
   {
     _args = args;
   
-    _classLoader = new EnvironmentClassLoader();
+    _classLoader = EnvironmentClassLoader.create();
   }
   
   WatchdogArgs getArgs()

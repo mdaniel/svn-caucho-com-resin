@@ -141,7 +141,7 @@ public class EclipseCompiler extends AbstractJavaCompiler {
       ClassLoader oldLoader = thread.getContextClassLoader();
       try {
 	EnvironmentClassLoader env;
-	env = new EnvironmentClassLoader(ClassLoader.getSystemClassLoader());
+	env = EnvironmentClassLoader.create(ClassLoader.getSystemClassLoader());
         thread.setContextClassLoader(env);
 
         try {

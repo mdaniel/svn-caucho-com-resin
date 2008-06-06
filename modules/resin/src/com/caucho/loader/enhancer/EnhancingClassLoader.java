@@ -60,7 +60,7 @@ public class EnhancingClassLoader extends EnvironmentClassLoader {
    */
   public EnhancingClassLoader(ClassLoader parent)
   {
-    super(parent);
+    super(parent, null);
   }
 
   /**

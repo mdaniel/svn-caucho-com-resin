@@ -102,7 +102,7 @@ public class Host extends WebAppContainer
    */
   public Host(HostContainer parent, HostController controller, String hostName)
   {
-    super(new EnvironmentClassLoader("host:" + hostName));
+    super(EnvironmentClassLoader.create("host:" + hostName));
 
     try {
       _controller = controller;

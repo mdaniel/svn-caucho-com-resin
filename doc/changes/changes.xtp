@@ -13,6 +13,17 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>init: servlet init must have access to port mbean (#2683, rep by Vinod Mehra)</li>
+<li>ioc: synchronization on bean introspection (#2672, rep by Matthew Schmidt)</li>
+<li>ssl: synchronization issues with openssl init (#2712, rep by janecek)</li>
+<li>cache: InterruptedIOException needs to be treated like ClientDisconnectException and not stop cache (#2704, rep by Dmitry Zaburyanov)</li>
+<li>dynamicserver: add dynamic server support (#2314)</li>
+<li>boot: add watchdog-log/rollover-period (#2656, rep by Oscar Sumano)</li>
+<li>boot: log directory set by -log-directory and &lt;watchdog-log> (#2685, rep by Jose Quinteiro)</li>
+<li>boot: log and admin need to relative to resin.root (#2682, rep by Maurice Volaski)</li>
+<li>security: authenticator stored in webapp as caucho.authenticator (#2686, rep by Anthony Blandran)</li>
+<li>database: driver-type needs to be an allowed database parameter (#2700, rep by altaman)</li>
+<li>quercus: readlink/realpath fixes for symlinks (#2175, rep by jumakill)</li>
 <li>quercus: grandparent super constructor callable by parent::B() (#2489)</li>
 <li>quercus: oci_fetch_all wasn't checking fetchArray return value properly (#1472, rep by osmedd)</li>
 <li>quercus: Foo:${${a}} support (#2666, rep by falko)</li>

@@ -851,7 +851,7 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value filesize(Env env, Path path)
   {
-    if (! path.exists() || ! path.isFile()) {
+    if (! path.exists()) {
       env.warning(L.l("{0} cannot be read", path.getFullPath()));
       return BooleanValue.FALSE;
     }
@@ -877,14 +877,14 @@ public class FileModule extends AbstractQuercusModule {
       env.warning(L.l("{0} cannot be read", path.getFullPath()));
       return BooleanValue.FALSE;
     }
+    else if (path.isLink())
+      return env.createString("link");
     else if (path.isDirectory())
       return env.createString("dir");
     else if (path.isFile())
       return env.createString("file");
     else if (path.isFIFO())
       return env.createString("fifo");
-    else if (path.isLink())
-      return env.createString("link");
     else if (path.isBlockDevice())
       return env.createString("block");
     else if (path.isCharacterDevice())
@@ -1629,6 +1629,9 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value fstat(Env env, @NotNull BinaryStream stream)
   {
+    if (stream == null)
+      return BooleanValue.FALSE;
+    
     return stream.stat();
   }
 
@@ -2439,26 +2442,32 @@ public class FileModule extends AbstractQuercusModule {
   }
 
   /**
-   * The readlink always fails.
+   * The readlink
    */
-  public static boolean readlink(Env env, String path)
+  public static Value readlink(Env env, Path path)
   {
-    env.stub("readlink(" + path + ")");
+    String link = path.readLink();
 
-    return false;
+    if (link == null)
+      return BooleanValue.FALSE;
+    else
+      return env.createString(link);
   }
 
   /**
    * Returns the actual path name.
    */
-  public static String realpath(Path path)
+  public static Value realpath(Env env, Path path)
   {
-    String fullPath = path.getFullPath();
+    if (path == null)
+      return BooleanValue.FALSE;
 
-    if (fullPath.endsWith("/") && ! fullPath.equals("/"))
-      return fullPath.substring(0, fullPath.length() - 1);
+    String realPath = path.realPath();
+
+    if (realPath != null)
+      return env.createString(realPath);
     else
-      return fullPath;
+      return env.createString(path.getFullPath());
   }
 
   /**

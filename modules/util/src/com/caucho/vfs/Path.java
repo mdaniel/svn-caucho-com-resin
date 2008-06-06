@@ -1194,6 +1194,23 @@ public abstract class Path {
   }
 
   /**
+   * Returns the target path from the link.
+   * Returns null for a non-link.
+   */
+  public String readLink()
+  {
+    return null;
+  }
+
+  /**
+   * Returns the actual path from the link.
+   */
+  public String realPath()
+  {
+    return getFullPath();
+  }
+
+  /**
    * Utility to write the contents of this path to the destination stream.
    *
    * @param os destination stream.

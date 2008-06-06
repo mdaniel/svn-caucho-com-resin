@@ -263,7 +263,6 @@ class WatchdogConfig
 
     if (logDirectory != null)
       return logDirectory;
-    
     if (_watchdogLog != null && _watchdogLog.getDir() != null)
       return _watchdogLog.getDir();
     else

@@ -325,8 +325,8 @@ public class WebApp extends ServletContextImpl
 
     try {
       _classLoader
-	= new EnvironmentClassLoader(controller.getParentClassLoader(),
-				     "web-app:" + getURL());
+	= EnvironmentClassLoader.create(controller.getParentClassLoader(),
+					"web-app:" + getURL());
 
       // the JSP servlet needs to initialize the JspFactory
       JspServlet.initStatic();
@@ -1756,15 +1756,12 @@ public class WebApp extends ServletContextImpl
 
       _classLoader.setId("web-app:" + getURL());
 
-      try {
-        InitialContext ic = new InitialContext();
-        ServletAuthenticator auth;
-        auth = (ServletAuthenticator) ic.lookup("java:comp/env/caucho/auth");
+      WebBeansContainer webBeans = WebBeansContainer.getCurrent();
 
-        setAttribute("caucho.authenticator", auth);
-      } catch (Exception e) {
-        log.finest(e.toString());
-      }
+      ServletAuthenticator auth
+	= webBeans.getByType(ServletAuthenticator.class);;
+
+      setAttribute("caucho.authenticator", auth);
 
       WebAppController parent = null;
       if (_controller != null)

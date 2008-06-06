@@ -127,8 +127,7 @@ public class EnterpriseApplication
     else
       parentLoader = Thread.currentThread().getContextClassLoader();
 
-    _loader = new EnvironmentClassLoader(parentLoader);
-    _loader.setId("eapp:" + name);
+    _loader = EnvironmentClassLoader.create(parentLoader, "eapp:" + name);
 
     _webappsPath = _controller.getRootDirectory().lookup("webapps");
     WorkDir.setLocalWorkDir(_controller.getRootDirectory().lookup("META-INF/work"),

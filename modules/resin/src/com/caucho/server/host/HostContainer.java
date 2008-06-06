@@ -108,7 +108,7 @@ public class HostContainer implements DispatchBuilder {
    */
   public HostContainer()
   {
-    _classLoader = new EnvironmentClassLoader();
+    _classLoader = EnvironmentClassLoader.create();
 
     _rootDir = Vfs.lookup();
   }

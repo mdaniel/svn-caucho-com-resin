@@ -94,7 +94,7 @@ public class JspCompiler implements EnvironmentBean {
 
   public JspCompiler()
   {
-    _loader = new EnvironmentClassLoader();
+    _loader = EnvironmentClassLoader.create();
 
     _tagFileManager = new TagFileManager(this);
   }

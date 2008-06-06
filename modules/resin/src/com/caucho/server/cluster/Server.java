@@ -31,6 +31,7 @@ package com.caucho.server.cluster;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.bam.BamStream;
@@ -364,6 +365,13 @@ public class Server extends ProtocolDispatchServer
    * Arguments on boot
    */
   public void addWatchdogJvmArg(String args)
+  {
+  }
+
+  /**
+   * Arguments on boot
+   */
+  public void addWatchdogLog(ConfigProgram args)
   {
   }
 

@@ -53,7 +53,7 @@ public class ResinEnv extends ResinControl implements EnvironmentBean {
    */
   public ResinEnv()
   {
-    _loader = new EnvironmentClassLoader();
+    _loader = EnvironmentClassLoader.create();
     _loader.setOwner(this);
   }
 

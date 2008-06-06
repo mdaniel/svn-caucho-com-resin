@@ -152,7 +152,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     _ejbContainer = container;
 
-    _loader = new EnvironmentClassLoader(container.getClassLoader());
+    _loader = EnvironmentClassLoader.create(container.getClassLoader());
   }
 
   /**

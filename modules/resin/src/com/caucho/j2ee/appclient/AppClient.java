@@ -105,7 +105,7 @@ public class AppClient implements EnvironmentBean
 
   private AppClient()
   {
-    _loader = new EnvironmentClassLoader();
+    _loader = EnvironmentClassLoader.create();
     _local.set(this, _loader);
 
     _home = CauchoSystem.getResinHome();

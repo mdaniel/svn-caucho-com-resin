@@ -67,9 +67,7 @@ public class SystemClassLoader
    */
   public SystemClassLoader(ClassLoader parent)
   {
-    super(parent);
-
-    setId("system");
+    super(parent, "system");
 
     DynamicClassLoader.setJarCacheEnabled(true);
   }
