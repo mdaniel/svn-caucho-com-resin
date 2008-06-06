@@ -232,12 +232,12 @@ public class ResourceHandlerImpl
 
       Map<String, List<String>> resources = null;
 
-      boolean doJars =  false;
+      boolean doJars = false;
 
       if (_jarEntriesCache == null ||
           (resources = _jarEntriesCache.get()) == null) {
         resources = new HashMap<String, List<String>>();
-        
+
         doJars = true;
       }
 
@@ -249,7 +249,8 @@ public class ResourceHandlerImpl
                                 resourceName,
                                 libraryName,
                                 locale);
-        } else if ("jar".equals(aUrl.getProtocol()) && doJars) {
+        }
+        else if ("jar".equals(aUrl.getProtocol()) && doJars) {
           JarURLConnection jarConnection
             = (JarURLConnection) aUrl.openConnection();
 
@@ -264,7 +265,7 @@ public class ResourceHandlerImpl
 
             String name = entry.getName();
 
-            if (name.startsWith(prefix) && ! entry.isDirectory())
+            if (name.startsWith(prefix) && !entry.isDirectory())
               list.add(name.substring(prefix.length()));
           }
           
@@ -272,9 +273,11 @@ public class ResourceHandlerImpl
         }
       }
 
-      if (doJars &&
-          ! ProjectStage.Development.equals(context.getApplication().getProjectStage()))
-        _jarEntriesCache = new SoftReference(resources);
+      Application app = context.getApplication();
+      
+      if (doJars && ! ProjectStage.Development.equals(app.getProjectStage()))
+        _jarEntriesCache 
+          = new SoftReference<Map<String, List<String>>>(resources);
 
       path = locateResource(path, resources, resourceName, libraryName, locale);
     }
@@ -286,10 +289,11 @@ public class ResourceHandlerImpl
                               final Map<String, List<String>> resources,
                               String resourceName,
                               String libraryName,
-                              String locale) {
+                              String locale)
+  {
     Path result = null;
 
-    String []rnParts = resourceName.split("/");
+    String[] rnParts = resourceName.split("/");
 
     String entryJarEntry = null;
     String entryUrl = null;
@@ -297,11 +301,12 @@ public class ResourceHandlerImpl
     String entryResVer = null;
 
     Set<String> resourceUrlSet = resources.keySet();
-    String []urls;
+    String[] urls;
 
     if (path == null) {
       urls = resourceUrlSet.toArray(new String[resourceUrlSet.size()]);
-    } else {
+    }
+    else {
       urls = new String[resourceUrlSet.size() + 1];
 
       urls[0] = path.getURL();
@@ -321,25 +326,27 @@ public class ResourceHandlerImpl
       if (path != null && i == 0) {
         list = new ArrayList<String>();
 
-        list.add(url.substring(url.indexOf("META-INF/resources/") + "META-INF/resources/".length()));
-      } else {
+        list.add(url.substring(url.indexOf("META-INF/resources/") +
+                               "META-INF/resources/".length()));
+      }
+      else {
         list = resources.get(url);
       }
 
       for (String jarEntry : list) {
 
-        String []parts = jarEntry.split("/");
+        String[] parts = jarEntry.split("/");
 
         int start = 0;
 
         if (parts.length < (start + 1))
           continue;
 
-        if (locale != null && ! locale.equals(parts[start++]))
-            continue;
+        if (locale != null && !locale.equals(parts[start++]))
+          continue;
 
-        if (libraryName != null && ! libraryName.equals(parts[start++]))
-            continue;
+        if (libraryName != null && !libraryName.equals(parts[start++]))
+          continue;
 
 
         int extaPartsCount = parts.length - start - rnParts.length;
@@ -355,28 +362,29 @@ public class ResourceHandlerImpl
             String rnPart = rnParts[k];
 
             if ((parts.length < start + k + 1)
-                || ! rnPart.equals(parts[start + k])) {
+                || !rnPart.equals(parts[start + k])) {
               matchStart = -1;
 
               break;
             }
           }
-        } else {
+        }
+        else {
           if (parts[start].equals(rnParts[0]))
             matchStart = start;
-          else if ((parts.length > start + 2) && (parts[start + 1]).equals(rnParts[0]))
-           matchStart = start + 1;
-          else
-          {
+          else if ((parts.length > start + 2) &&
+                   (parts[start + 1]).equals(rnParts[0]))
+            matchStart = start + 1;
+          else {
             matchStart = -1;
           }
 
           if (matchStart != -1 && rnParts.length > 1) {
             for (int k = 1; k < rnParts.length; k++) {
               if (parts.length < matchStart + k + 1 ||
-                ! rnParts[k].equals(parts[matchStart + k])) {
+                  !rnParts[k].equals(parts[matchStart + k])) {
                 matchStart = -1;
-                
+
                 break;
               }
             }
@@ -437,7 +445,7 @@ public class ResourceHandlerImpl
     }
 
     if (entryJarEntry != null) {
-      if (path != null && entryUrl == urls[0])
+      if (path != null && entryUrl.equals(urls[0]))
         result = Vfs.lookup(entryUrl);
       else
         result = Vfs.lookup(entryUrl + "/" + entryJarEntry);
@@ -594,9 +602,9 @@ public class ResourceHandlerImpl
       = (HttpServletResponse) extContext.getResponse();
 
     String method = request.getMethod();
-    if (! method.equalsIgnoreCase("GET") &&
-        ! method.equalsIgnoreCase("POST") &&
-        ! method.equalsIgnoreCase("HEAD")) {
+    if (!method.equalsIgnoreCase("GET") &&
+        !method.equalsIgnoreCase("POST") &&
+        !method.equalsIgnoreCase("HEAD")) {
       response.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED,
                          "Method not implemented");
 
@@ -648,14 +656,14 @@ public class ResourceHandlerImpl
     String libraryName;
     String locale;
 
-    if (temp != null && ! "".equals(temp))
+    if (temp != null && !"".equals(temp))
       libraryName = temp;
     else
       libraryName = null;
 
     temp = request.getParameter("loc");
 
-    if (temp != null && ! "".equals(temp))
+    if (temp != null && !"".equals(temp))
       locale = temp;
     else
       locale = null;
@@ -679,46 +687,38 @@ public class ResourceHandlerImpl
       }
 
       response.setContentType(resource.getContentType());
+      if (resource.userAgentNeedsUpdate(context)) {
+        if (! method.equalsIgnoreCase("HEAD")) {
+          InputStream is = resource.getInputStream();
+          OutputStream os = response.getOutputStream();
 
-      if (resource instanceof ResourceImpl) {
-        ResourceImpl resourceImpl = (ResourceImpl) resource;
-        response.setContentLength((int) resourceImpl.getLength());
+          TempBuffer tempBuffer = TempBuffer.allocate();
 
-        if (resourceImpl.userAgentNeedsUpdate(context)) {
-          if (! method.equalsIgnoreCase("HEAD"))
-            resourceImpl.writeToStream(response.getOutputStream());
-        }
-        else {
-          response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+          try {
+            byte []buffer = tempBuffer.getBuffer();
+            int length = buffer.length;
+            int len;
+
+            while ((len = is.read(buffer, 0, length)) > 0)
+              os.write(buffer, 0, len);
+          }
+          finally {
+            TempBuffer.free(tempBuffer);
+            tempBuffer = null;
+
+            is.close();
+          }
         }
       }
       else {
-        InputStream is = resource.getInputStream();
-        OutputStream os = response.getOutputStream();
-
-        TempBuffer tempBuffer = TempBuffer.allocate();
-
-        try {
-          byte []buffer = tempBuffer.getBuffer();
-          int length = buffer.length;
-          int len;
-
-          while ((len = is.read(buffer, 0, length)) > 0)
-            os.write(buffer, 0, len);
-        }
-        finally {
-          TempBuffer.free(tempBuffer);
-          tempBuffer = null;
-
-          is.close();
-        }
-
+        response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
       }
     }
     else {
       response.sendError(HttpServletResponse.SC_NOT_FOUND);
     }
   }
+
 
   @Override
   public String getRendererTypeForResourceName(String resourceName)
