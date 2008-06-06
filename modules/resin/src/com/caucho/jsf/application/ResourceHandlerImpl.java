@@ -55,8 +55,7 @@ import java.util.jar.JarEntry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.lang.ref.WeakReference;
+import java.lang.ref.SoftReference;
 
 public class ResourceHandlerImpl
   extends ResourceHandler
@@ -71,8 +70,7 @@ public class ResourceHandlerImpl
   private QDate _calendar = new QDate();
   private LruCache<String, ResourceImpl> _resourceCache;
 
-  private WeakReference<Map<String, List<String>>> _resourceReference
-    = new WeakReference<Map<String, List<String>>>(null);
+  private SoftReference<Map<String, List<String>>> _jarEntriesCache;
 
   public ResourceHandlerImpl()
   {
@@ -235,8 +233,9 @@ public class ResourceHandlerImpl
       Map<String, List<String>> resources = null;
 
       boolean doJars =  false;
-      
-      if (_resourceReference != null) {
+
+      if (_jarEntriesCache == null ||
+          (resources = _jarEntriesCache.get()) == null) {
         resources = new HashMap<String, List<String>>();
         
         doJars = true;
@@ -273,20 +272,11 @@ public class ResourceHandlerImpl
         }
       }
 
-      if (doJars)
-        _resourceReference = new WeakReference<Map<String, List<String>>>(resources);
+      if (doJars &&
+          ! ProjectStage.Development.equals(context.getApplication().getProjectStage()))
+        _jarEntriesCache = new SoftReference(resources);
 
-
-      Path jarPath = locateResource(path, resources, resourceName, libraryName, locale);
-
-      if (jarPath != null) {
-        if (path != null) {
-          path = jarPath;
-        }
-        else {
-          path = jarPath;
-        }
-      }
+      path = locateResource(path, resources, resourceName, libraryName, locale);
     }
 
     return path;
@@ -299,24 +289,24 @@ public class ResourceHandlerImpl
                               String locale) {
     Path result = null;
 
-    String [] rnParts = resourceName.split("/");
+    String []rnParts = resourceName.split("/");
 
     String entryJarEntry = null;
     String entryUrl = null;
     String entryLibVer = null;
     String entryResVer = null;
 
-    Set<String> temp = resources.keySet();
-    String[] urls;
+    Set<String> resourceUrlSet = resources.keySet();
+    String []urls;
 
     if (path == null) {
-      urls = temp.toArray(new String[temp.size()]);
+      urls = resourceUrlSet.toArray(new String[resourceUrlSet.size()]);
     } else {
-      urls = new String[temp.size() + 1];
+      urls = new String[resourceUrlSet.size() + 1];
 
       urls[0] = path.getURL();
 
-      Iterator<String> it = temp.iterator();
+      Iterator<String> it = resourceUrlSet.iterator();
 
       for (int i = 1; i < urls.length; i++) {
         urls[i] = it.next();
@@ -338,23 +328,23 @@ public class ResourceHandlerImpl
 
       for (String jarEntry : list) {
 
-        String[] parts = jarEntry.split("/");
+        String []parts = jarEntry.split("/");
 
         int start = 0;
 
         if (parts.length < (start + 1))
           continue;
 
-        if (locale != null && !locale.equals(parts[start++]))
+        if (locale != null && ! locale.equals(parts[start++]))
             continue;
 
-        if (libraryName != null && !libraryName.equals(parts[start++]))
+        if (libraryName != null && ! libraryName.equals(parts[start++]))
             continue;
 
 
-        int test = parts.length - start - rnParts.length;
+        int extaPartsCount = parts.length - start - rnParts.length;
 
-        if (test > 2) continue;
+        if (extaPartsCount > 2) continue;
 
         int matchStart = -1;
 
@@ -396,7 +386,7 @@ public class ResourceHandlerImpl
         if (matchStart == -1)
           continue;
 
-        if (test == 2) {
+        if (extaPartsCount == 2) {
 
           String lver = parts[matchStart - 1];
           String rver = parts[matchStart + rnParts.length];
@@ -410,7 +400,7 @@ public class ResourceHandlerImpl
             entryUrl = url;
           }
         }
-        else if (test == 1) {
+        else if (extaPartsCount == 1) {
           if ((matchStart + rnParts.length) == parts.length) {
             String lver = parts[matchStart - 1];
 
@@ -435,7 +425,7 @@ public class ResourceHandlerImpl
             }
           }
         }
-        else if (test == 0) {
+        else if (extaPartsCount == 0) {
           if (entryJarEntry == null) {
             entryLibVer = null;
             entryResVer = null;
@@ -470,7 +460,7 @@ public class ResourceHandlerImpl
                                  libraryName);
 
       if (libPath.exists()) {
-        String[] paths = libPath.list();
+        String []paths = libPath.list();
 
         String version = null;
 
@@ -523,7 +513,7 @@ public class ResourceHandlerImpl
                               resourceName);
 
       if (base.isDirectory()) {
-        String[] paths = base.list();
+        String []paths = base.list();
 
         String version = null;
 
@@ -547,9 +537,9 @@ public class ResourceHandlerImpl
 
   private int compareVersions(String ver1, String ver2)
   {
-    String[] ver1Parts = _versionPattern.split(ver1);
+    String []ver1Parts = _versionPattern.split(ver1);
 
-    String[] ver2Parts = _versionPattern.split(ver2);
+    String []ver2Parts = _versionPattern.split(ver2);
 
     int len;
     if (ver1Parts.length > ver2Parts.length)
@@ -559,9 +549,9 @@ public class ResourceHandlerImpl
 
 
     for (int i = 0; i < len; i++) {
-      char[] ver1Part = ver1Parts[i].toCharArray();
+      char []ver1Part = ver1Parts[i].toCharArray();
 
-      char[] ver2Part = ver2Parts[i].toCharArray();
+      char []ver2Part = ver2Parts[i].toCharArray();
 
       if (ver1Part.length == ver2Part.length) {
         for (int j = 0; j < ver2Part.length; j++) {
@@ -604,9 +594,9 @@ public class ResourceHandlerImpl
       = (HttpServletResponse) extContext.getResponse();
 
     String method = request.getMethod();
-    if (!method.equalsIgnoreCase("GET") &&
-        !method.equalsIgnoreCase("POST") &&
-        !method.equalsIgnoreCase("HEAD")) {
+    if (! method.equalsIgnoreCase("GET") &&
+        ! method.equalsIgnoreCase("POST") &&
+        ! method.equalsIgnoreCase("HEAD")) {
       response.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED,
                          "Method not implemented");
 
@@ -658,14 +648,14 @@ public class ResourceHandlerImpl
     String libraryName;
     String locale;
 
-    if (temp != null && !"".equals(temp))
+    if (temp != null && ! "".equals(temp))
       libraryName = temp;
     else
       libraryName = null;
 
     temp = request.getParameter("loc");
 
-    if (temp != null && !"".equals(temp))
+    if (temp != null && ! "".equals(temp))
       locale = temp;
     else
       locale = null;
@@ -695,7 +685,7 @@ public class ResourceHandlerImpl
         response.setContentLength((int) resourceImpl.getLength());
 
         if (resourceImpl.userAgentNeedsUpdate(context)) {
-          if (!method.equalsIgnoreCase("HEAD"))
+          if (! method.equalsIgnoreCase("HEAD"))
             resourceImpl.writeToStream(response.getOutputStream());
         }
         else {
@@ -709,7 +699,7 @@ public class ResourceHandlerImpl
         TempBuffer tempBuffer = TempBuffer.allocate();
 
         try {
-          byte[] buffer = tempBuffer.getBuffer();
+          byte []buffer = tempBuffer.getBuffer();
           int length = buffer.length;
           int len;
 
