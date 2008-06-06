@@ -48,13 +48,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
-import java.util.Locale;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import java.net.JarURLConnection;
+import java.util.*;
+import java.util.jar.JarFile;
+import java.util.jar.JarEntry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.lang.ref.WeakReference;
 
 public class ResourceHandlerImpl
   extends ResourceHandler
@@ -69,6 +71,9 @@ public class ResourceHandlerImpl
   private QDate _calendar = new QDate();
   private LruCache<String, ResourceImpl> _resourceCache;
 
+  private WeakReference<Map<String, List<String>>> _resourceReference
+    = new WeakReference<Map<String, List<String>>>(null);
+
   public ResourceHandlerImpl()
   {
     _resourceCache = new LruCache<String, ResourceImpl>(1024);
@@ -80,8 +85,6 @@ public class ResourceHandlerImpl
       throw new NullPointerException();
 
     return createResource(resourceName, null, null);
-
-
   }
 
   public Resource createResource(String resourceName, String libraryName)
@@ -158,7 +161,7 @@ public class ResourceHandlerImpl
 
       if (resource == null || resource.isStale()) {
 
-        Path path = locateResource(resourceName, libraryName, locale);
+        Path path = locateResource(context, resourceName, libraryName, locale);
 
         if (path == null) {
           log.finer(L.l("Unable to load resource '{0}' from library '{1}'",
@@ -206,29 +209,251 @@ public class ResourceHandlerImpl
     return resource;
   }
 
-  private Path locateResource(String resourceName,
+  private Path locateResource(FacesContext context,
+                              String resourceName,
                               String libraryName,
                               String locale)
     throws IOException
   {
-    Path path = locateResource(Vfs.lookup("resources"),
-                               resourceName,
-                               libraryName,
-                               locale);
+    final URL url = context.getExternalContext().getResource("/resources");
+
+    Path path = null;
+
+    if (url != null)
+      path = locateResource(Vfs.lookup(url.toString()),
+                            resourceName,
+                            libraryName,
+                            locale);
 
     if (path == null) {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-      URL url = loader.getResource("META-INF/resources");
+      Enumeration<URL> resUrls = loader.getResources("META-INF/resources");
 
-      if (url != null)
-        path = locateResource(Vfs.lookup(url.toString()),
-                              resourceName,
-                              libraryName,
-                              locale);
+      final String prefix = "META-INF/resources/";
+
+      Map<String, List<String>> resources = null;
+
+      boolean doJars =  false;
+      
+      if (_resourceReference != null) {
+        resources = new HashMap<String, List<String>>();
+        
+        doJars = true;
+      }
+
+      while (resUrls.hasMoreElements()) {
+        URL aUrl = resUrls.nextElement();
+
+        if ("file".equals(aUrl.getProtocol())) {
+          path = locateResource(Vfs.lookup(aUrl.toString()),
+                                resourceName,
+                                libraryName,
+                                locale);
+        } else if ("jar".equals(aUrl.getProtocol()) && doJars) {
+          JarURLConnection jarConnection
+            = (JarURLConnection) aUrl.openConnection();
+
+          JarFile jar = jarConnection.getJarFile();
+
+          Enumeration<JarEntry> entires = jar.entries();
+
+          List<String> list = new ArrayList<String>(128);
+
+          while (entires.hasMoreElements()) {
+            JarEntry entry = entires.nextElement();
+
+            String name = entry.getName();
+
+            if (name.startsWith(prefix) && ! entry.isDirectory())
+              list.add(name.substring(prefix.length()));
+          }
+          
+          resources.put(aUrl.toString(), list);
+        }
+      }
+
+      if (doJars)
+        _resourceReference = new WeakReference<Map<String, List<String>>>(resources);
+
+
+      Path jarPath = locateResource(path, resources, resourceName, libraryName, locale);
+
+      if (jarPath != null) {
+        if (path != null) {
+          path = jarPath;
+        }
+        else {
+          path = jarPath;
+        }
+      }
     }
 
     return path;
+  }
+
+  private Path locateResource(Path path,
+                              final Map<String, List<String>> resources,
+                              String resourceName,
+                              String libraryName,
+                              String locale) {
+    Path result = null;
+
+    String [] rnParts = resourceName.split("/");
+
+    String entryJarEntry = null;
+    String entryUrl = null;
+    String entryLibVer = null;
+    String entryResVer = null;
+
+    Set<String> temp = resources.keySet();
+    String[] urls;
+
+    if (path == null) {
+      urls = temp.toArray(new String[temp.size()]);
+    } else {
+      urls = new String[temp.size() + 1];
+
+      urls[0] = path.getURL();
+
+      Iterator<String> it = temp.iterator();
+
+      for (int i = 1; i < urls.length; i++) {
+        urls[i] = it.next();
+      }
+    }
+
+    for (int i = 0; i < urls.length; i++) {
+      String url = urls[i];
+
+
+      List<String> list;
+      if (path != null && i == 0) {
+        list = new ArrayList<String>();
+
+        list.add(url.substring(url.indexOf("META-INF/resources/") + "META-INF/resources/".length()));
+      } else {
+        list = resources.get(url);
+      }
+
+      for (String jarEntry : list) {
+
+        String[] parts = jarEntry.split("/");
+
+        int start = 0;
+
+        if (parts.length < (start + 1))
+          continue;
+
+        if (locale != null && !locale.equals(parts[start++]))
+            continue;
+
+        if (libraryName != null && !libraryName.equals(parts[start++]))
+            continue;
+
+
+        int test = parts.length - start - rnParts.length;
+
+        if (test > 2) continue;
+
+        int matchStart = -1;
+
+        if (libraryName == null) {
+          matchStart = start;
+
+          for (int k = 0; k < rnParts.length; k++) {
+            String rnPart = rnParts[k];
+
+            if ((parts.length < start + k + 1)
+                || ! rnPart.equals(parts[start + k])) {
+              matchStart = -1;
+
+              break;
+            }
+          }
+        } else {
+          if (parts[start].equals(rnParts[0]))
+            matchStart = start;
+          else if ((parts.length > start + 2) && (parts[start + 1]).equals(rnParts[0]))
+           matchStart = start + 1;
+          else
+          {
+            matchStart = -1;
+          }
+
+          if (matchStart != -1 && rnParts.length > 1) {
+            for (int k = 1; k < rnParts.length; k++) {
+              if (parts.length < matchStart + k + 1 ||
+                ! rnParts[k].equals(parts[matchStart + k])) {
+                matchStart = -1;
+                
+                break;
+              }
+            }
+          }
+        }
+
+        if (matchStart == -1)
+          continue;
+
+        if (test == 2) {
+
+          String lver = parts[matchStart - 1];
+          String rver = parts[matchStart + rnParts.length];
+
+          if ((entryLibVer == null || (compareVersions(lver, entryLibVer)) > 0) &&
+              (entryResVer == null || (compareVersions(rver, entryResVer)) > 0))
+          {
+            entryLibVer = lver;
+            entryResVer = rver;
+            entryJarEntry = jarEntry;
+            entryUrl = url;
+          }
+        }
+        else if (test == 1) {
+          if ((matchStart + rnParts.length) == parts.length) {
+            String lver = parts[matchStart - 1];
+
+            if (entryLibVer == null ||
+                (compareVersions(lver, entryLibVer) > 0)) {
+              entryLibVer = lver;
+              entryResVer = null;
+              entryJarEntry = jarEntry;
+              entryUrl = url;
+            }
+          }
+          else {
+            String rver = parts[parts.length - 1];
+            if (entryLibVer == null &&
+                (entryResVer == null ||
+                 compareVersions(rver, entryResVer) > 0)
+              ) {
+              entryLibVer = null;
+              entryResVer = rver;
+              entryJarEntry = jarEntry;
+              entryUrl = url;
+            }
+          }
+        }
+        else if (test == 0) {
+          if (entryJarEntry == null) {
+            entryLibVer = null;
+            entryResVer = null;
+            entryJarEntry = jarEntry;
+            entryUrl = url;
+          }
+        }
+      }
+    }
+
+    if (entryJarEntry != null) {
+      if (path != null && entryUrl == urls[0])
+        result = Vfs.lookup(entryUrl);
+      else
+        result = Vfs.lookup(entryUrl + "/" + entryJarEntry);
+    }
+
+    return result;
   }
 
   private Path locateResource(final Path root,
@@ -245,7 +470,7 @@ public class ResourceHandlerImpl
                                  libraryName);
 
       if (libPath.exists()) {
-        String []paths = libPath.list();
+        String[] paths = libPath.list();
 
         String version = null;
 
@@ -298,7 +523,7 @@ public class ResourceHandlerImpl
                               resourceName);
 
       if (base.isDirectory()) {
-        String []paths = base.list();
+        String[] paths = base.list();
 
         String version = null;
 
@@ -320,11 +545,11 @@ public class ResourceHandlerImpl
     return result;
   }
 
-  public int compareVersions(String ver1, String ver2)
+  private int compareVersions(String ver1, String ver2)
   {
-    String []ver1Parts = _versionPattern.split(ver1);
+    String[] ver1Parts = _versionPattern.split(ver1);
 
-    String []ver2Parts = _versionPattern.split(ver2);
+    String[] ver2Parts = _versionPattern.split(ver2);
 
     int len;
     if (ver1Parts.length > ver2Parts.length)
@@ -334,9 +559,9 @@ public class ResourceHandlerImpl
 
 
     for (int i = 0; i < len; i++) {
-      char []ver1Part = ver1Parts[i].toCharArray();
+      char[] ver1Part = ver1Parts[i].toCharArray();
 
-      char []ver2Part = ver2Parts[i].toCharArray();
+      char[] ver2Part = ver2Parts[i].toCharArray();
 
       if (ver1Part.length == ver2Part.length) {
         for (int j = 0; j < ver2Part.length; j++) {
@@ -484,7 +709,7 @@ public class ResourceHandlerImpl
         TempBuffer tempBuffer = TempBuffer.allocate();
 
         try {
-          byte []buffer = tempBuffer.getBuffer();
+          byte[] buffer = tempBuffer.getBuffer();
           int length = buffer.length;
           int len;
 
@@ -505,6 +730,7 @@ public class ResourceHandlerImpl
     }
   }
 
+  @Override
   public String getRendererTypeForResourceName(String resourceName)
   {
     if (resourceName == null)
