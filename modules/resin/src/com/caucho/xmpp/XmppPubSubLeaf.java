@@ -107,7 +107,7 @@ public class XmppPubSubLeaf extends AbstractTopic
       _subscriptionList.get(i).send(session, msg, timeout);
     }
 
-    _protocol.send(this, msg, timeout);
+    //    _protocol.send(this, msg, timeout);
   }
 }
 

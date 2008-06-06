@@ -42,5 +42,13 @@ public interface BamConnectionFactory
   /**
    * Creates a session
    */
-  public BamConnection getConnection(String uid, String password);
+  public BamConnection getConnection(String uid,
+				     String password);
+  
+  /**
+   * Creates a session
+   */
+  public BamConnection getConnection(String uid,
+				     String password,
+				     String resource);
 }

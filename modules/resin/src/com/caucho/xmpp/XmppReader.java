@@ -54,29 +54,112 @@ public class XmppReader
   private static final Logger log
     = Logger.getLogger(XmppReader.class.getName());
 
-  private BamStream _callback;
+  private BamStream _toReply;
+  private BamStream _handler;
 
   private ReadStream _is;
-  private XMLStreamReader _in;
+  private XMLStreamReaderImpl _in;
 
   private XmppMarshalFactory _marshalFactory;
 
+  private String _uid;
+  private String _jid;
+
   private boolean _isFinest;
 
-  XmppReader(ReadStream is,
+  XmppReader(XmppMarshalFactory factory,
+	     ReadStream is,
 	     XMLStreamReader in,
-	     BamStream callback)
+	     BamStream toReply,
+	     BamStream handler)
   {
+    _marshalFactory = factory;
+    
     _is = is;
-    _in = in;
-    _callback = callback;
+    _in = (XMLStreamReaderImpl) in;
+
+    _toReply = toReply;
+    
+    _handler = handler;
 
     _isFinest = log.isLoggable(Level.FINEST);
   }
 
-  void setCallback(BamStream callback)
+  void setHandler(BamStream handler)
   {
-    _callback = callback;
+    _handler = handler;
+  }
+
+  void setUid(String uid)
+  {
+    _uid = uid;
+  }
+
+  void setJid(String jid)
+  {
+    _jid = jid;
+  }
+  
+  boolean readNext()
+    throws IOException
+  {
+    XMLStreamReaderImpl in = _in;
+    
+    if (in == null)
+      return false;
+
+    try {
+      int tag;
+
+      while ((tag = _in.next()) > 0) {
+	if (_isFinest)
+	  debug(_in);
+	
+	if (tag == XMLStreamConstants.END_ELEMENT) {
+	  if ("stream".equals(_in.getLocalName())) {
+	    if (log.isLoggable(Level.FINE))
+	      log.fine(this + " end-stream");
+	  }
+	  else {
+	    log.warning(this + " " + _in.getLocalName());
+	  }
+
+	  return false;
+	}
+
+	if (tag == XMLStreamConstants.START_ELEMENT) {
+	  boolean valid = false;
+
+	  if ("iq".equals(_in.getLocalName()))
+	    valid = handleIq();
+	  else if ("presence".equals(_in.getLocalName()))
+	    valid = handlePresence();
+	  else if ("message".equals(_in.getLocalName()))
+	    valid = handleMessage();
+	  else {
+	    if (log.isLoggable(Level.FINE))
+	      log.fine(this + " " + _in.getLocalName() + " is an unknown tag");
+	    
+	    return false;
+	  }
+
+	  if (! valid)
+	    return false;
+
+	  if (_in.available() < 1)
+	    return true;
+	}
+      }
+
+      if (_isFinest)
+	log.finest(this + " end of stream");
+
+      return false;
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+
+      return false;
+    }
   }
 
   /**
@@ -179,8 +262,8 @@ public class XmppReader
 				      subjectArray, bodyArray, thread,
 				      extra);
 
-    if (_callback != null)
-      _callback.sendMessage(to, from, message);
+    if (_handler != null)
+      _handler.sendMessage(to, from, message);
 
     return true;
   }
@@ -216,37 +299,47 @@ public class XmppReader
       query = readAsXmlString(_in);
 
     BamError error = null;
-
-    /*
-    if (to == null)
-      to = _uid;
-    */
       
     skipToEnd("iq");
+
+    if (_jid != null)
+      from = _jid;
+
+    if (to == null) {
+      to = _uid;
+
+      if (query instanceof ImSessionQuery && "set".equals(type)) {
+	long bamId = Long.parseLong(id);
+	
+	_toReply.sendQueryResult(bamId, from, to, query);
+
+	return true;
+      }
+    }
 
     if ("get".equals(type)) {
       long bamId = Long.parseLong(id);
 
-      if (_callback != null)
-	_callback.sendQueryGet(bamId, to, from, query);
+      if (_handler != null)
+	_handler.sendQueryGet(bamId, to, from, query);
     }
     else if ("set".equals(type)) {
       long bamId = Long.parseLong(id);
 
-      if (_callback != null)
-	_callback.sendQuerySet(bamId, to, from, query);
+      if (_handler != null)
+	_handler.sendQuerySet(bamId, to, from, query);
     }
     else if ("result".equals(type)) {
       long bamId = Long.parseLong(id);
 
-      if (_callback != null)
-	_callback.sendQueryResult(bamId, to, from, query);
+      if (_handler != null)
+	_handler.sendQueryResult(bamId, to, from, query);
     }
     else if ("error".equals(type)) {
       long bamId = Long.parseLong(id);
 
-      if (_callback != null)
-	_callback.sendQueryError(bamId, to, from, query, error);
+      if (_handler != null)
+	_handler.sendQueryError(bamId, to, from, query, error);
     }
     else {
       if (log.isLoggable(Level.FINE)) {
@@ -326,34 +419,33 @@ public class XmppReader
 
     expectEnd("presence", tag);
 
-    /*
-    from = _jid;
+    if (_jid != null)
+      from = _jid;
 
     if (to == null)
       to = _uid;
-    */
 
     ImPresence presence = new ImPresence(to, from,
 					 show, status, priority,
 					 extraList);
 
-    if (_callback != null) {
+    if (_handler != null) {
       if ("".equals(type))
-	_callback.sendPresence(to, from, presence);
+	_handler.sendPresence(to, from, presence);
       else if ("probe".equals(type))
-	_callback.sendPresenceProbe(to, from, presence);
+	_handler.sendPresenceProbe(to, from, presence);
       else if ("unavailable".equals(type))
-	_callback.sendPresenceUnavailable(to, from, presence);
+	_handler.sendPresenceUnavailable(to, from, presence);
       else if ("subscribe".equals(type))
-	_callback.sendPresenceSubscribe(to, from, presence);
+	_handler.sendPresenceSubscribe(to, from, presence);
       else if ("subscribed".equals(type))
-	_callback.sendPresenceSubscribed(to, from, presence);
+	_handler.sendPresenceSubscribed(to, from, presence);
       else if ("unsubscribe".equals(type))
-	_callback.sendPresenceUnsubscribe(to, from, presence);
+	_handler.sendPresenceUnsubscribe(to, from, presence);
       else if ("unsubscribed".equals(type))
-	_callback.sendPresenceUnsubscribed(to, from, presence);
+	_handler.sendPresenceUnsubscribed(to, from, presence);
       else if ("error".equals(type))
-	_callback.sendPresenceError(to, from, presence, error);
+	_handler.sendPresenceError(to, from, presence, error);
       else
 	log.warning(this + " " + type + " is an unknown presence type");
     }

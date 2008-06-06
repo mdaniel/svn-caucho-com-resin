@@ -125,4 +125,10 @@ abstract public class AbstractXmppMarshal implements XmppMarshal
     else
       log.finest(this + " tag=" + in.getEventType());
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }

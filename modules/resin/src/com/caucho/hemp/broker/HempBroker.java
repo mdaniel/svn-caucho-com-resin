@@ -103,7 +103,17 @@ public class HempBroker implements BamBroker, BamStream
    */
   public BamConnection getConnection(String uid, String password)
   {
-    String jid = generateJid(uid);
+    return getConnection(uid, password, null);
+  }
+
+  /**
+   * Creates a session
+   */
+  public BamConnection getConnection(String uid,
+				     String password,
+				     String resourceId)
+  {
+    String jid = generateJid(uid, resourceId);
 
     HempConnectionImpl conn = new HempConnectionImpl(this, jid);
 
@@ -129,15 +139,20 @@ public class HempBroker implements BamBroker, BamStream
     return conn;
   }
 
-  protected String generateJid(String uid)
+  protected String generateJid(String uid, String resource)
   {
     StringBuilder sb = new StringBuilder();
     sb.append(uid);
     sb.append("/");
-    sb.append(_serverId);
-    sb.append(":");
 
-    Base64.encode(sb, RandomUtil.getRandomLong());
+    if (resource != null)
+      sb.append(resource);
+    else {
+      sb.append(_serverId);
+      sb.append(":");
+
+      Base64.encode(sb, RandomUtil.getRandomLong());
+    }
     
     return sb.toString();
   }

@@ -33,10 +33,7 @@ import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.*;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -58,11 +55,27 @@ public class SelfSignedCert {
 
   private X509Certificate _cert;
   private PrivateKey _key;
+  private KeyManagerFactory _kmf;
   
   private SelfSignedCert(X509Certificate cert, PrivateKey key)
+    throws Exception
   {
     _cert = cert;
     _key = key;
+    
+    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+
+    KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+
+    ks.load(null, "password".toCharArray());
+
+      
+    ks.setKeyEntry("anonymous", getPrivateKey(),
+		   "key-password".toCharArray(), getCertificateChain());
+    
+    kmf.init(ks, "key-password".toCharArray());
+
+    _kmf = kmf;
   }
 
   public static SelfSignedCert create()
@@ -103,6 +116,11 @@ public class SelfSignedCert {
   public X509Certificate []getCertificateChain()
   {
     return new X509Certificate[] { _cert };
+  }
+
+  public KeyManager []getKeyManagers()
+  {
+    return _kmf.getKeyManagers();
   }
 
   @Override

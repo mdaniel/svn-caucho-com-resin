@@ -70,6 +70,8 @@ public class XmppProtocol extends Protocol
   private ArrayList<XmppRequest> _clients
     = new ArrayList<XmppRequest>();
 
+  private XmppMarshalFactory _marshalFactory;
+
   private HashMap<QName,XmppMarshal> _unserializeMap
     = new HashMap<QName,XmppMarshal>();
 
@@ -101,33 +103,17 @@ public class XmppProtocol extends Protocol
     return _broker;
   }
 
+  XmppMarshalFactory getMarshalFactory()
+  {
+    return _marshalFactory;
+  }
+
   @PostConstruct
   public void init()
   {
     WebBeansContainer.create().addSingleton(this);
 
-    String resource = "META-INF/caucho/com.caucho.xmpp.XmppMarshal";
-
-    try {
-      Enumeration<URL> iter = _loader.getResources(resource);
-    
-      while (iter.hasMoreElements()) {
-	URL url = iter.nextElement();
-
-	ReadStream is = null;
-	try {
-	  is = Vfs.lookup(url.toString()).openRead();
-	  
-	  loadMarshal(is);
-	} catch (IOException e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	} finally {
-	  is.close();
-	}
-      }
-    } catch (IOException e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
+    _marshalFactory = new XmppMarshalFactory();
   }
 
   /**
@@ -187,6 +173,7 @@ public class XmppProtocol extends Protocol
     }
   }
 
+  /*
   void send(XmppPubSubLeaf leaf, MessageImpl msg, long timeout)
   {
     MessageStanza stanza = new MessageStanza();
@@ -215,6 +202,7 @@ public class XmppProtocol extends Protocol
       }
     }
   }
+  */
   
   void addClient(XmppRequest request)
   {
@@ -270,11 +258,11 @@ public class XmppProtocol extends Protocol
 
   XmppMarshal getUnserialize(QName name)
   {
-    return _unserializeMap.get(name);
+    return _marshalFactory.getUnserialize(name);
   }
 
   XmppMarshal getSerialize(String name)
   {
-    return _serializeMap.get(name);
+    return _marshalFactory.getSerialize(name);
   }
 }

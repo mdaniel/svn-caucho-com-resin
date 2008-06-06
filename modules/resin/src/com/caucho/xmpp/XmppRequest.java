@@ -57,6 +57,8 @@ public class XmppRequest implements TcpServerRequest, Runnable {
     = Logger.getLogger(XmppRequest.class.getName());
 
   private static final String STREAMS_NS = "http://etherx.jabber.org/streams";
+  private static final String STARTTLS_NS = "urn:ietf:params:xml:ns:xmpp-tls";
+  private static final String AUTH_NS = "urn:ietf:params:xml:ns:xmpp-sasl";
 
   private XmppProtocol _protocol;
 
@@ -72,6 +74,7 @@ public class XmppRequest implements TcpServerRequest, Runnable {
   private String _id;
   private String _from;
   private String _clientTo;
+  private String _uid;
   
   private String _streamFrom;
   private String _clientBind;
@@ -79,6 +82,8 @@ public class XmppRequest implements TcpServerRequest, Runnable {
   private String _name;
   
   private XMLStreamReaderImpl _in;
+
+  private boolean _isAllowTls = false;
 
   private boolean _isPresent;
   private boolean _isThread;
@@ -103,12 +108,22 @@ public class XmppRequest implements TcpServerRequest, Runnable {
     return _requestId;
   }
 
+  String getUid()
+  {
+    return _uid;
+  }
+
   /**
    * Returns the tcp connection
    */
   public TcpConnection getConnection()
   {
     return _conn;
+  }
+
+  XmppProtocol getProtocol()
+  {
+    return _protocol;
   }
   
   /**
@@ -149,7 +164,7 @@ public class XmppRequest implements TcpServerRequest, Runnable {
       }
 
       TcpDuplexHandler handler
-	= new XmppBrokerStream(_protocol, _broker, _in, _os);
+	= new XmppBrokerStream(this, _broker, _is, _in, _os);
       
       TcpDuplexController controller = new TcpDuplexController(this, handler);
 
@@ -235,6 +250,19 @@ public class XmppRequest implements TcpServerRequest, Runnable {
       
     _in = new XMLStreamReaderImpl(_is);
 
+    if (! readStreamHeader())
+      return false;
+
+    writeStreamHeader(_streamFrom);
+
+    readStreamInit();
+
+    return true;
+  }
+
+  private boolean readStreamHeader()
+    throws IOException, XMLStreamException
+  {
     int tag;
     while ((tag = _in.next()) > 0
 	   && tag != XMLStreamConstants.START_ELEMENT) {
@@ -307,6 +335,74 @@ public class XmppRequest implements TcpServerRequest, Runnable {
     _streamFrom = from;
     _clientTo = from + "/" + _id;
 
+    return true;
+  }
+
+  private boolean skipToStartElement()
+    throws IOException, XMLStreamException
+  {
+    int tag;
+    
+    while ((tag = _in.next()) > 0
+	   && tag != XMLStreamConstants.START_ELEMENT) {
+      if (_isFinest)
+	debug(_in);
+    }
+    
+    if (tag >= 0 && _isFinest)
+      debug(_in);
+
+    return tag >= 0;
+  }
+  
+  private boolean readStreamInit()
+    throws IOException, XMLStreamException
+  {
+    if (! skipToStartElement())
+      return false;
+
+    if ("starttls".equals(_in.getLocalName())
+	&& STARTTLS_NS.equals(_in.getNamespaceURI())) {
+      if (! startTls())
+	return false;
+    }
+
+    if ("auth".equals(_in.getLocalName())
+	&& AUTH_NS.equals(_in.getNamespaceURI())) {
+      if (! handleAuth())
+	return false;
+
+      if (! skipToStartElement())
+	return false;
+    }
+
+    if ("stream".equals(_in.getLocalName())
+	&& STREAMS_NS.equals(_in.getNamespaceURI())) {
+      if (! handleStream())
+	return false;
+    }
+
+    return true;
+  }
+
+  private boolean startTls()
+    throws IOException, XMLStreamException
+  {
+    skipToEnd("starttls");
+
+    _os.print("<proceed xmlns='" + STARTTLS_NS + "'/>");
+    _os.flush();
+
+    // _conn.upgradeTLS();
+      
+    System.out.println("STARTTLS");
+
+    return true;
+  }
+
+  private void writeStreamHeader(String from)
+    throws IOException
+  {
     _os.print("<stream:stream xmlns='jabber:client'");
     _os.print(" xmlns:stream='http://etherx.jabber.org/streams'");
     _os.print(" id='" + _id + "'");
@@ -315,16 +411,18 @@ public class XmppRequest implements TcpServerRequest, Runnable {
       
     // + "   <mechanism>DIGEST-MD5</mechanism>\n"
     _os.print("<stream:features>");
-	      //		+ "<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'/>"
+    
     _os.print("<mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>");
     _os.print("<mechanism>PLAIN</mechanism>");
     _os.print("</mechanisms>");
+
+    if (_isAllowTls)
+      _os.print("<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'></starttls>");
+    
     _os.print("<auth xmlns='http://jabber.org/features/iq-auth'></auth>");
     //_os.print("<register xmlns='http://jabber.org/features/iq-register'></register>");
     _os.print("</stream:features>\n");
     _os.flush();
-
-    return true;
   }
 
   private boolean handleStream()
@@ -684,6 +782,8 @@ public class XmppRequest implements TcpServerRequest, Runnable {
     if (isAuth) {
       _name = name;
 
+      _uid = _name + "@localhost";
+
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " auth-plain success for " + name);
       
@@ -755,6 +855,7 @@ public class XmppRequest implements TcpServerRequest, Runnable {
     }
   }
 
+  /*
   public void offer(int requestId, Stanza stanza)
   {
     synchronized (this) {
@@ -769,6 +870,7 @@ public class XmppRequest implements TcpServerRequest, Runnable {
       }
     }
   }
+  */
 
   public void run()
   {

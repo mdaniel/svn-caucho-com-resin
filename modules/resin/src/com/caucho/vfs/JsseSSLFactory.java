@@ -291,26 +291,14 @@ public class JsseSSLFactory implements SSLFactory {
   private SSLServerSocketFactory createAnonymousFactory()
     throws IOException, GeneralSecurityException
   {
-    KeyManagerFactory kmf
-      = KeyManagerFactory.getInstance(_keyManagerFactory);
-
-    KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-
-    ks.load(null, "password".toCharArray());
-
     SelfSignedCert cert = SelfSignedCert.create();
 
     if (cert == null)
       throw new ConfigException(L.l("Cannot generate anonymous certificate"));
-      
-    ks.setKeyEntry("anonymous", cert.getPrivateKey(),
-		   "key-password".toCharArray(), cert.getCertificateChain());
-    
-    kmf.init(ks, "key-password".toCharArray());
-    
+
     SSLContext sslContext = SSLContext.getInstance(_sslContext);
       
-    sslContext.init(kmf.getKeyManagers(), null, null);
+    sslContext.init(cert.getKeyManagers(), null, null);
 
     if (_cipherSuites != null)
       sslContext.createSSLEngine().setEnabledCipherSuites(_cipherSuites);

@@ -1,2 +1,4 @@
+com.caucho.xmpp.im.XmppImBindQueryMarshal
+com.caucho.xmpp.im.XmppImSessionQueryMarshal
 com.caucho.xmpp.im.XmppRosterQueryMarshal
 

@@ -135,11 +135,6 @@ public class XmppClient {
       _os.flush();
       
       XMLInputFactory factory = XMLInputFactory.newInstance();
-    
-      _in = factory.createXMLStreamReader(_is);
-      _reader = new XmppReader(_is, _in, _callback);
-
-      String tag = readStartTag();
 
       XmppMarshalFactory marshalFactory = new XmppMarshalFactory();
       
@@ -147,6 +142,11 @@ public class XmppClient {
       out = new XmppStreamWriterImpl(_os, marshalFactory);
       
       _toBroker = new XmppClientBrokerStream(this, out);
+    
+      _in = factory.createXMLStreamReader(_is);
+      _reader = new XmppReader(marshalFactory, _is, _in, _toBroker, _callback);
+
+      String tag = readStartTag();
 
       if (! tag.equals("stream")
 	  || ! STREAMS_NS.equals(_in.getNamespaceURI())) {
@@ -190,7 +190,7 @@ public class XmppClient {
       StringBuilder sb = new StringBuilder();
       Base64.encode(sb, RandomUtil.getRandomLong());
       
-      _os.print("<iq type='set' id='m_" + _mId++ + "'>");
+      _os.print("<iq type='set' id='" + _mId++ + "'>");
       _os.print("<bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>");
       _os.print("<resource>maryJane</resource>");
       _os.print("</bind>");
@@ -199,9 +199,9 @@ public class XmppClient {
       
       stanza = _stanzaQueue.poll(2, TimeUnit.SECONDS);
       if (! (stanza instanceof BindStanza))
-	throw new RuntimeException("expected bind");
+	throw new RuntimeException("expected bind at " + stanza);
       
-      _os.print("<iq type='set' id='m_" + _mId++ + "'>");
+      _os.print("<iq type='set' id='" + _mId++ + "'>");
       _os.print("<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>");
       _os.print("</iq>");
       _os.flush();
@@ -226,7 +226,7 @@ public class XmppClient {
     _callback = callback;
 
     if (_reader != null)
-      _reader.setCallback(callback);
+      _reader.setHandler(callback);
   }
   
   public void send(String type, String to, String body)

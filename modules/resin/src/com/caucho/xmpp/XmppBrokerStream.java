@@ -55,13 +55,14 @@ public class XmppBrokerStream
   private static final Logger log
     = Logger.getLogger(XmppBrokerStream.class.getName());
 
+  private XmppRequest _request;
   private XmppProtocol _protocol;
   
   private BamBroker _broker;
   private BamConnection _conn;
   private BamStream _toBroker;
 
-  private BamStream _callbackHandler;
+  private BamStream _toClient;
   private BamStream _authHandler;
 
   private ReadStream _is;
@@ -69,6 +70,8 @@ public class XmppBrokerStream
   
   private XMLStreamReaderImpl _in;
   private XMLStreamWriter _out;
+
+  private XmppReader _reader;
 
   private String _jid;
   private long _requestId;
@@ -79,20 +82,29 @@ public class XmppBrokerStream
   // XXX: needs timeout(?)
   private HashMap<Long,String> _idMap = new HashMap<Long,String>();
 
-  XmppBrokerStream(XmppProtocol protocol, BamBroker broker,
-		   XMLStreamReaderImpl in, WriteStream os)
+  XmppBrokerStream(XmppRequest request, BamBroker broker,
+		   ReadStream is, XMLStreamReaderImpl in, WriteStream os)
   {
-    _protocol = protocol;
+    _request = request;
+    _protocol = request.getProtocol();
     
     _broker = broker;
 
     _in = in;
     _os = os;
 
+    _uid = request.getUid();
+
     _out =  new XMLStreamWriterImpl(os);
 
-    _callbackHandler = new XmppAgentStream(this, _os);
+    _toClient = new XmppAgentStream(this, _os);
     _authHandler = null;//new AuthBrokerStream(this, _callbackHandler);
+
+    _reader = new XmppReader(_protocol.getMarshalFactory(),
+			     is, _in, _toClient,
+			     new XmppBindCallback(this));
+
+    _reader.setUid(_uid);
 
     _isFinest = log.isLoggable(Level.FINEST);
   }
@@ -101,11 +113,19 @@ public class XmppBrokerStream
   {
     return _jid;
   }
+
+  BamStream getAgentStream()
+  {
+    return _toClient;
+  }
   
   public boolean serviceRead(ReadStream is,
 			     TcpDuplexController controller)
     throws IOException
   {
+    if (true)
+      return _reader.readNext();
+    
     XMLStreamReaderImpl in = _in;
     
     if (in == null)
@@ -113,7 +133,8 @@ public class XmppBrokerStream
 
     try {
       int tag;
-      
+
+      System.out.println("READ:");
       while ((tag = _in.next()) > 0) {
 	if (_isFinest)
 	  debug(_in);
@@ -131,17 +152,16 @@ public class XmppBrokerStream
 	if (tag == XMLStreamConstants.START_ELEMENT) {
 	  boolean valid = false;
 	  
-	  if ("auth".equals(_in.getLocalName()))
-	    valid = handleAuth();
-	  else if ("stream".equals(_in.getLocalName()))
-	    valid = handleStream();
-	  else if ("iq".equals(_in.getLocalName()))
-	    valid = handleIq();
+	  if ("iq".equals(_in.getLocalName()))
+	    valid = _reader.handleIq();
 	  else if ("presence".equals(_in.getLocalName()))
-	    valid = handlePresence();
+	    valid = _reader.handlePresence();
 	  else if ("message".equals(_in.getLocalName()))
-	    valid = handleMessage();
+	    valid = _reader.handleMessage();
 	  else {
+	    if (log.isLoggable(Level.FINE))
+	      log.fine(this + " " + _in.getLocalName() + " is an unknown tag");
+	    
 	    return false;
 	  }
 
@@ -178,9 +198,9 @@ public class XmppBrokerStream
     _uid = uid + "@localhost";
     
     _conn = _broker.getConnection(_uid, password);
-    _conn.setMessageHandler(_callbackHandler);
-    _conn.setQueryHandler(_callbackHandler);
-    _conn.setPresenceHandler(_callbackHandler);
+    _conn.setMessageHandler(_toClient);
+    _conn.setQueryHandler(_toClient);
+    _conn.setPresenceHandler(_toClient);
 
     _jid = _conn.getJid();
     
@@ -339,6 +359,25 @@ public class XmppBrokerStream
     _toBroker.sendMessage(to, from, message);
 
     return true;
+  }
+
+  String bind(String resource, String jid)
+  {
+    String password = null;
+    
+    _conn = _broker.getConnection(_uid, password, resource);
+    _conn.setMessageHandler(_toClient);
+    _conn.setQueryHandler(_toClient);
+    _conn.setPresenceHandler(_toClient);
+
+    _jid = _conn.getJid();
+    
+    _toBroker = _conn.getBrokerStream();
+    
+    _reader.setJid(_jid);
+    _reader.setHandler(_toBroker);
+    
+    return _jid;
   }
 
   /**
