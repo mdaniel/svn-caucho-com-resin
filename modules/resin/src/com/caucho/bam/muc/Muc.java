@@ -32,22 +32,98 @@ package com.caucho.bam.muc;
 import java.util.*;
 
 /**
+ * XEP-0045
+ * http://www.xmpp.org/extensions/xep-0045.html
+ *
  * Muc query
+ *
+ * <code><pre>
+ * namespace = http://jabber.org/protocol/muc
+ *
+ * element x {
+ *   history?,
+ *   password?
+ * }
+ *
+ * element history {
+ *   attribute maxchars?,
+ *   attribute maxstanzas?
+ *   attribute seconds?
+ *   attribute since?
+ * }
+ * </pre></code>
  */
 public class Muc implements java.io.Serializable {
-  private String password;
+  private String _password;
   
-  private int historyMaxChars;
-  private int historyMaxStanzas;
-  private int historySeconds;
-  private Date historySince;
+  private int _historyMaxChars;
+  private int _historyMaxStanzas;
+  private int _historySeconds;
+  private Date _historySince;
   
   public Muc()
   {
   }
+
+  public Muc(String password,
+	     int historyMaxChars,
+	     int historyMaxStanzas,
+	     int historySeconds,
+	     Date historySince)
+  {
+    _password = password;
+    
+    _historyMaxChars = historyMaxChars;
+    _historyMaxStanzas = historyMaxStanzas;
+    _historySeconds = historySeconds;
+    _historySince = historySince;
+  }
+
+  public String getPassword()
+  {
+    return _password;
+  }
+
+  public int getHistoryMaxChars()
+  {
+    return _historyMaxChars;
+  }
+
+  public int getHistoryMaxStanzas()
+  {
+    return _historyMaxStanzas;
+  }
+
+  public int getHistorySeconds()
+  {
+    return _historySeconds;
+  }
+
+  public Date getHistorySince()
+  {
+    return _historySince;
+  }
   
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName()).append("[");
+    
+    if (_historyMaxChars > 0)
+      sb.append(",max-chars=").append(_historyMaxChars);
+    
+    if (_historyStanzas > 0)
+      sb.append(",max-stanzas=").append(_historyMaxStanzas);
+    
+    if (_historySeconds > 0)
+      sb.append(",seconds=").append(_historySeconds);
+    
+    if (_historySince != null)
+      sb.append(",since=").append(_historySince);
+
+    sb.append("]");
+
+    return sb.toString();
   }
 }
