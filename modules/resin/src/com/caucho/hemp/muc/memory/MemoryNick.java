@@ -77,7 +77,7 @@ public class MemoryNick extends SimpleBamService
   }
 
   @Override
-  public void sendMessage(String to, String from, Serializable value)
+  public void message(String to, String from, Serializable value)
   {
     MemoryNick user = _room.getNick(from);
 
@@ -96,11 +96,11 @@ public class MemoryNick extends SimpleBamService
 
     // XXX: check for voice
 
-    _room.getBrokerStream().sendMessage(getUserJid(), user.getJid(), msg);
+    _room.getBrokerStream().message(getUserJid(), user.getJid(), msg);
   }
 
   @Override
-  public void sendPresence(String to, String from, Serializable data)
+  public void presence(String to, String from, Serializable data)
   {
     _userJid = from;
     

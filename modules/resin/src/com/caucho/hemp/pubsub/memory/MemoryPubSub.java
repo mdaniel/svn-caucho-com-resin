@@ -99,7 +99,7 @@ public class MemoryPubSub extends GenericService
    * Implements the queries
    */
   @Override
-  public boolean sendQuerySet(long id, String to, String from,
+  public boolean querySet(long id, String to, String from,
 			      Serializable query)
   {
     if (query instanceof PubSubPublish) {
@@ -108,7 +108,7 @@ public class MemoryPubSub extends GenericService
       MemoryNode node = getNode(publish.getNode());
 
       if (node == null) {
-	getBrokerStream().sendQueryError(id, from, to, query,
+	getBrokerStream().queryError(id, from, to, query,
 				     new BamError(BamError.TYPE_CANCEL,
 						   "no-node"));
 	return true;
@@ -116,11 +116,11 @@ public class MemoryPubSub extends GenericService
 
       node.publish(publish.getItems());
       
-      getBrokerStream().sendQueryResult(id, from, to, null);
+      getBrokerStream().queryResult(id, from, to, null);
 
       return true;
     }
     
-    return super.sendQuerySet(id, to, from, query);
+    return super.querySet(id, to, from, query);
   }
 }

@@ -124,20 +124,20 @@ class ClientAgentStream implements Runnable, BamStream {
   /**
    * Handles a message
    */
-  public void sendMessage(String to,
+  public void message(String to,
 			String from,
 			Serializable value)
   {
     BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
-      handler.sendMessage(to, from, value);
+      handler.message(to, from, value);
   }
   
   /**
    * Handles a message
    */
-  public void sendMessageError(String to,
+  public void messageError(String to,
 			       String from,
 			       Serializable value,
 			       BamError error)
@@ -145,7 +145,7 @@ class ClientAgentStream implements Runnable, BamStream {
     BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
-      handler.sendMessageError(to, from, value, error);
+      handler.messageError(to, from, value, error);
     else {
       if (log.isLoggable(Level.FINER))
 	log.finer(this + " sendMessageError to=" + to + " from=" + from
@@ -159,18 +159,18 @@ class ClientAgentStream implements Runnable, BamStream {
    * The get handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public boolean sendQueryGet(long id,
+  public boolean queryGet(long id,
 			      String to,
 			      String from,
 			      Serializable value)
   {
     BamStream handler = _client.getStreamHandler();
 
-    if (handler == null || ! handler.sendQueryGet(id, to, from, value)) {
+    if (handler == null || ! handler.queryGet(id, to, from, value)) {
       String msg = "no sendQueryGet handling " + value.getClass().getName();
       BamError error = new BamError("unknown", msg);
       
-      _clientStream.sendQueryError(id, from, to, value, error);
+      _clientStream.queryError(id, from, to, value, error);
     }
     
     return true;
@@ -182,18 +182,18 @@ class ClientAgentStream implements Runnable, BamStream {
    * The set handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public boolean sendQuerySet(long id,
+  public boolean querySet(long id,
 			    String to,
 			    String from,
 			    Serializable value)
   {
     BamStream handler = _client.getStreamHandler();
 
-    if (handler == null || ! handler.sendQuerySet(id, to, from, value)) {
+    if (handler == null || ! handler.querySet(id, to, from, value)) {
       String msg = "no sendQuerySet handling " + value.getClass().getName();
       BamError error = new BamError("unknown", msg);
       
-      _clientStream.sendQueryError(id, from, to, value, error);
+      _clientStream.queryError(id, from, to, value, error);
     }
     
     return true;
@@ -204,7 +204,7 @@ class ClientAgentStream implements Runnable, BamStream {
    *
    * The result id will match a pending get or set.
    */
-  public void sendQueryResult(long id,
+  public void queryResult(long id,
 			    String to,
 			    String from,
 			    Serializable value)
@@ -217,7 +217,7 @@ class ClientAgentStream implements Runnable, BamStream {
    *
    * The result id will match a pending get or set.
    */
-  public void sendQueryError(long id,
+  public void queryError(long id,
 			   String to,
 			   String from,
 			   Serializable value,
@@ -232,14 +232,14 @@ class ClientAgentStream implements Runnable, BamStream {
    * If the handler deals with clients, the "from" value should be ignored
    * and replaced by the client's jid.
    */
-  public void sendPresence(String to,
+  public void presence(String to,
 			 String from,
 			 Serializable data)
   {
     BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
-      handler.sendPresence(to, from, data);
+      handler.presence(to, from, data);
   }
   
   /**
@@ -248,85 +248,85 @@ class ClientAgentStream implements Runnable, BamStream {
    * If the handler deals with clients, the "from" value should be ignored
    * and replaced by the client's jid.
    */
-  public void sendPresenceUnavailable(String to,
+  public void presenceUnavailable(String to,
 				    String from,
 				    Serializable data)
   {
     BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
-      handler.sendPresenceUnavailable(to, from, data);
+      handler.presenceUnavailable(to, from, data);
   }
   
   /**
    * Handles a presence probe from another server
    */
-  public void sendPresenceProbe(String to,
+  public void presenceProbe(String to,
 			      String from,
 			      Serializable data)
   {
     BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
-      handler.sendPresenceProbe(to, from, data);
+      handler.presenceProbe(to, from, data);
   }
   
   /**
    * Handles a presence subscribe request from a client
    */
-  public void sendPresenceSubscribe(String to,
+  public void presenceSubscribe(String to,
 				  String from,
 				  Serializable data)
   {
     BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
-      handler.sendPresenceSubscribe(to, from, data);
+      handler.presenceSubscribe(to, from, data);
   }
   
   /**
    * Handles a presence subscribed result to a client
    */
-  public void sendPresenceSubscribed(String to,
+  public void presenceSubscribed(String to,
 				   String from,
 				   Serializable data)
   {
     BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
-      handler.sendPresenceSubscribed(to, from, data);
+      handler.presenceSubscribed(to, from, data);
   }
   
   /**
    * Handles a presence unsubscribe request from a client
    */
-  public void sendPresenceUnsubscribe(String to,
+  public void presenceUnsubscribe(String to,
 				    String from,
 				    Serializable data)
   {
     BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
-      handler.sendPresenceUnsubscribe(to, from, data);
+      handler.presenceUnsubscribe(to, from, data);
   }
   
   /**
    * Handles a presence unsubscribed result to a client
    */
-  public void sendPresenceUnsubscribed(String to,
+  public void presenceUnsubscribed(String to,
 				     String from,
 				     Serializable data)
   {
     BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
-      handler.sendPresenceUnsubscribed(to, from, data);
+      handler.presenceUnsubscribed(to, from, data);
   }
   
   /**
    * Handles a presence unsubscribed result to a client
    */
-  public void sendPresenceError(String to,
+  public void presenceError(String to,
 			      String from,
 			      Serializable data,
 			      BamError error)
@@ -334,7 +334,7 @@ class ClientAgentStream implements Runnable, BamStream {
     BamStream handler = _client.getStreamHandler();
 
     if (handler != null)
-      handler.sendPresenceError(to, from, data, error);
+      handler.presenceError(to, from, data, error);
   }
 
   @Override

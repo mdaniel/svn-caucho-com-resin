@@ -66,12 +66,12 @@ public class AuthBrokerStream extends AbstractBamStream
    * a QueryResult or a QueryError 
    */
   @Override
-  public boolean sendQueryGet(long id,
+  public boolean queryGet(long id,
 			    String to,
 			    String from,
 			    Serializable value)
   {
-    _broker.sendQueryError(id, from, to, value, 
+    _broker.queryError(id, from, to, value, 
 		           new BamError(BamError.TYPE_CANCEL,
 				         BamError.FORBIDDEN));
       
@@ -85,7 +85,7 @@ public class AuthBrokerStream extends AbstractBamStream
    * a QueryResult or a QueryError 
    */
   @Override
-  public boolean sendQuerySet(long id,
+  public boolean querySet(long id,
 			    String to,
 			    String from,
 			    Serializable value)
@@ -98,15 +98,15 @@ public class AuthBrokerStream extends AbstractBamStream
 				  auth.getResource());
 
       if (jid != null)
-	_broker.sendQueryResult(id, from, to, new AuthResult(jid));
+	_broker.queryResult(id, from, to, new AuthResult(jid));
       else
-	_broker.sendQueryError(id, from, to, value,
+	_broker.queryError(id, from, to, value,
 			       new BamError(BamError.TYPE_AUTH,
 					     BamError.FORBIDDEN));
     }
     else {
       // XXX: auth
-      _broker.sendQueryError(id, from, to, value,
+      _broker.queryError(id, from, to, value,
 			     new BamError(BamError.TYPE_CANCEL,
 				           BamError.FORBIDDEN));
     }

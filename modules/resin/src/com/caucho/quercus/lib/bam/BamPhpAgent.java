@@ -96,7 +96,7 @@ public class BamPhpAgent extends GenericService {
   }
 
   @Override
-  public void sendMessage(String to, String from, Serializable value)
+  public void message(String to, String from, Serializable value)
   {
     try {
       ScriptContext context = new SimpleScriptContext();

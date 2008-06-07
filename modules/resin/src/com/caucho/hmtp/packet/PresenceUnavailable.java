@@ -83,6 +83,6 @@ public class PresenceUnavailable extends Presence {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.sendPresenceUnavailable(getTo(), getFrom(), getData());
+    handler.presenceUnavailable(getTo(), getFrom(), getData());
   }
 }

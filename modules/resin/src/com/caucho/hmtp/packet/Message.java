@@ -99,7 +99,7 @@ public class Message extends Packet {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.sendMessage(getTo(), getFrom(), _value);
+    handler.message(getTo(), getFrom(), _value);
   }
 
   @Override

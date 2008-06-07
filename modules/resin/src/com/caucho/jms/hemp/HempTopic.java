@@ -209,7 +209,7 @@ public class HempTopic extends AbstractTopic
       super.setJid(jid);
     }
     
-    public void sendMessage(String to, String from, Serializable msg)
+    public void message(String to, String from, Serializable msg)
     {
       HempTopic.this.sendMessage(to, from, msg);
     }

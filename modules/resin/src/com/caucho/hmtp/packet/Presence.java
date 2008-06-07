@@ -98,7 +98,7 @@ public class Presence extends Packet {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.sendPresence(getTo(), getFrom(), _data);
+    handler.presence(getTo(), getFrom(), _data);
   }
 
   @Override

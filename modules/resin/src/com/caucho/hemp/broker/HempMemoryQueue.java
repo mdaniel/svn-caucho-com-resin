@@ -86,7 +86,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   /**
    * Sends a message
    */
-  public void sendMessage(String to, String from, Serializable value)
+  public void message(String to, String from, Serializable value)
   {
     enqueue(new Message(to, from, value));
   }
@@ -94,7 +94,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   /**
    * Sends a message
    */
-  public void sendMessageError(String to,
+  public void messageError(String to,
 			       String from,
 			       Serializable value,
 			       BamError error)
@@ -105,7 +105,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   /**
    * Query an entity
    */
-  public boolean sendQueryGet(long id,
+  public boolean queryGet(long id,
 			      String to,
 			      String from,
 			      Serializable query)
@@ -118,7 +118,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   /**
    * Query an entity
    */
-  public boolean sendQuerySet(long id,
+  public boolean querySet(long id,
 			      String to,
 			      String from,
 			      Serializable query)
@@ -131,7 +131,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   /**
    * Query an entity
    */
-  public void sendQueryResult(long id,
+  public void queryResult(long id,
 			      String to,
 			      String from,
 			      Serializable value)
@@ -142,7 +142,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   /**
    * Query an entity
    */
-  public void sendQueryError(long id,
+  public void queryError(long id,
 			     String to,
 			     String from,
 			     Serializable query,
@@ -154,7 +154,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   /**
    * Presence
    */
-  public void sendPresence(String to, String from, Serializable data)
+  public void presence(String to, String from, Serializable data)
   {
     enqueue(new Presence(to, from, data));
   }
@@ -162,7 +162,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   /**
    * Presence unavailable
    */
-  public void sendPresenceUnavailable(String to,
+  public void presenceUnavailable(String to,
 				      String from,
 				      Serializable data)
   {
@@ -172,7 +172,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   /**
    * Presence probe
    */
-  public void sendPresenceProbe(String to,
+  public void presenceProbe(String to,
 			        String from,
 			        Serializable data)
   {
@@ -182,7 +182,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   /**
    * Presence subscribe
    */
-  public void sendPresenceSubscribe(String to,
+  public void presenceSubscribe(String to,
 				    String from,
 				    Serializable data)
   {
@@ -192,7 +192,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   /**
    * Presence subscribed
    */
-  public void sendPresenceSubscribed(String to,
+  public void presenceSubscribed(String to,
 				     String from,
 				     Serializable data)
   {
@@ -202,7 +202,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   /**
    * Presence unsubscribe
    */
-  public void sendPresenceUnsubscribe(String to,
+  public void presenceUnsubscribe(String to,
 				      String from,
 				      Serializable data)
   {
@@ -212,7 +212,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   /**
    * Presence unsubscribed
    */
-  public void sendPresenceUnsubscribed(String to,
+  public void presenceUnsubscribed(String to,
 				       String from,
 				       Serializable data)
   {
@@ -222,7 +222,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   /**
    * Presence error
    */
-  public void sendPresenceError(String to,
+  public void presenceError(String to,
 			        String from,
 			        Serializable data,
 			        BamError error)

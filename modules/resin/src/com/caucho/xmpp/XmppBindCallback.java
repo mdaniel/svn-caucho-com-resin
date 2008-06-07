@@ -56,7 +56,7 @@ public class XmppBindCallback extends AbstractBamStream
   }
 
   @Override
-  public boolean sendQuerySet(long id,
+  public boolean querySet(long id,
 			      String to, String from,
 			      Serializable value)
   {
@@ -67,7 +67,7 @@ public class XmppBindCallback extends AbstractBamStream
 
       ImBindQuery result = new ImBindQuery(null, jid);
 
-      _xmppBroker.getAgentStream().sendQueryResult(id, from, to, result);
+      _xmppBroker.getAgentStream().queryResult(id, from, to, result);
 
       return true;
     }

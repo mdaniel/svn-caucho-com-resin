@@ -80,6 +80,6 @@ public class PresenceError extends Presence {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.sendPresenceError(getTo(), getFrom(), getData(), getError());
+    handler.presenceError(getTo(), getFrom(), getData(), getError());
   }
 }

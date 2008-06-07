@@ -271,7 +271,7 @@ public class XmppReader
 				      extra);
 
     if (_handler != null)
-      _handler.sendMessage(to, from, message);
+      _handler.message(to, from, message);
 
     return true;
   }
@@ -319,7 +319,7 @@ public class XmppReader
       if (query instanceof ImSessionQuery && "set".equals(type)) {
 	long bamId = _xmppContext.addId(id);
 	
-	_toReply.sendQueryResult(bamId, from, to, query);
+	_toReply.queryResult(bamId, from, to, query);
 
 	return true;
       }
@@ -329,25 +329,25 @@ public class XmppReader
       long bamId = _xmppContext.addId(id);
 
       if (_handler != null)
-	_handler.sendQueryGet(bamId, to, from, query);
+	_handler.queryGet(bamId, to, from, query);
     }
     else if ("set".equals(type)) {
       long bamId = _xmppContext.addId(id);
 
       if (_handler != null)
-	_handler.sendQuerySet(bamId, to, from, query);
+	_handler.querySet(bamId, to, from, query);
     }
     else if ("result".equals(type)) {
       long bamId = Long.parseLong(id);
 
       if (_handler != null)
-	_handler.sendQueryResult(bamId, to, from, query);
+	_handler.queryResult(bamId, to, from, query);
     }
     else if ("error".equals(type)) {
       long bamId = Long.parseLong(id);
 
       if (_handler != null)
-	_handler.sendQueryError(bamId, to, from, query, error);
+	_handler.queryError(bamId, to, from, query, error);
     }
     else {
       if (log.isLoggable(Level.FINE)) {
@@ -439,21 +439,21 @@ public class XmppReader
 
     if (_handler != null) {
       if ("".equals(type))
-	_handler.sendPresence(to, from, presence);
+	_handler.presence(to, from, presence);
       else if ("probe".equals(type))
-	_handler.sendPresenceProbe(to, from, presence);
+	_handler.presenceProbe(to, from, presence);
       else if ("unavailable".equals(type))
-	_handler.sendPresenceUnavailable(to, from, presence);
+	_handler.presenceUnavailable(to, from, presence);
       else if ("subscribe".equals(type))
-	_handler.sendPresenceSubscribe(to, from, presence);
+	_handler.presenceSubscribe(to, from, presence);
       else if ("subscribed".equals(type))
-	_handler.sendPresenceSubscribed(to, from, presence);
+	_handler.presenceSubscribed(to, from, presence);
       else if ("unsubscribe".equals(type))
-	_handler.sendPresenceUnsubscribe(to, from, presence);
+	_handler.presenceUnsubscribe(to, from, presence);
       else if ("unsubscribed".equals(type))
-	_handler.sendPresenceUnsubscribed(to, from, presence);
+	_handler.presenceUnsubscribed(to, from, presence);
       else if ("error".equals(type))
-	_handler.sendPresenceError(to, from, presence, error);
+	_handler.presenceError(to, from, presence, error);
       else
 	log.warning(this + " " + type + " is an unknown presence type");
     }

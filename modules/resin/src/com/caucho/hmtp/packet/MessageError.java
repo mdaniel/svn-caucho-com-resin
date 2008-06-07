@@ -87,7 +87,7 @@ public class MessageError extends Packet {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.sendMessageError(getTo(), getFrom(), getValue(), _error);
+    handler.messageError(getTo(), getFrom(), getValue(), _error);
   }
 
   @Override

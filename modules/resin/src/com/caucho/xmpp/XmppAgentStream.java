@@ -75,7 +75,7 @@ public class XmppAgentStream implements BamStream
     return _packetHandler.getJid();
   }
   
-  public void sendMessage(String to, String from, Serializable value)
+  public void message(String to, String from, Serializable value)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -93,7 +93,7 @@ public class XmppAgentStream implements BamStream
     }
   }
   
-  public void sendMessageError(String to,
+  public void messageError(String to,
 			       String from,
 			       Serializable value,
 			       BamError error)
@@ -112,7 +112,7 @@ public class XmppAgentStream implements BamStream
     }
   }
   
-  public boolean sendQueryGet(long id,
+  public boolean queryGet(long id,
 		              String to,
 		              String from,
 		              Serializable query)
@@ -133,7 +133,7 @@ public class XmppAgentStream implements BamStream
     return true;
   }
   
-  public boolean sendQuerySet(long id,
+  public boolean querySet(long id,
 		              String to,
 		              String from,
 		              Serializable query)
@@ -168,7 +168,7 @@ public class XmppAgentStream implements BamStream
     return true;
   }
   
-  public void sendQueryResult(long bamId,
+  public void queryResult(long bamId,
 			      String to,
 			      String from,
 			      Serializable value)
@@ -178,7 +178,7 @@ public class XmppAgentStream implements BamStream
     _writer.sendQuery(id, to, from, value, "result");
   }
   
-  public void sendQueryError(long id,
+  public void queryError(long id,
 			     String to,
 			     String from,
 			     Serializable query,
@@ -215,7 +215,7 @@ public class XmppAgentStream implements BamStream
   /**
    * General presence, for clients announcing availability
    */
-  public void sendPresence(String to,
+  public void presence(String to,
 		           String from,
 		           Serializable data)
   {
@@ -236,7 +236,7 @@ public class XmppAgentStream implements BamStream
   /**
    * General presence, for clients announcing unavailability
    */
-  public void sendPresenceUnavailable(String to,
+  public void presenceUnavailable(String to,
 			  	      String from,
 				      Serializable data)
   {
@@ -257,7 +257,7 @@ public class XmppAgentStream implements BamStream
   /**
    * Presence probe from the server to a client
    */
-  public void sendPresenceProbe(String to,
+  public void presenceProbe(String to,
 			        String from,
 			        Serializable data)
   {
@@ -278,7 +278,7 @@ public class XmppAgentStream implements BamStream
   /**
    * A subscription request from a client
    */
-  public void sendPresenceSubscribe(String to,
+  public void presenceSubscribe(String to,
 				    String from,
 				    Serializable data)
   {
@@ -299,7 +299,7 @@ public class XmppAgentStream implements BamStream
   /**
    * A subscription response to a client
    */
-  public void sendPresenceSubscribed(String to,
+  public void presenceSubscribed(String to,
 				     String from,
 				     Serializable data)
   {
@@ -320,7 +320,7 @@ public class XmppAgentStream implements BamStream
   /**
    * An unsubscription request from a client
    */
-  public void sendPresenceUnsubscribe(String to,
+  public void presenceUnsubscribe(String to,
 				      String from,
 				      Serializable data)
   {
@@ -341,7 +341,7 @@ public class XmppAgentStream implements BamStream
   /**
    * A unsubscription response to a client
    */
-  public void sendPresenceUnsubscribed(String to,
+  public void presenceUnsubscribed(String to,
 				       String from,
 				       Serializable data)
   {
@@ -362,7 +362,7 @@ public class XmppAgentStream implements BamStream
   /**
    * An error response to a client
    */
-  public void sendPresenceError(String to,
+  public void presenceError(String to,
 			        String from,
 			        Serializable data,
 			        BamError error)

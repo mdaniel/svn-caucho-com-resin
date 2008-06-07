@@ -129,7 +129,7 @@ public class HempConnectionImpl implements BamConnection
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
 
-    _brokerStream.sendMessage(to, _jid, msg);
+    _brokerStream.message(to, _jid, msg);
   }
 
   //
@@ -173,7 +173,7 @@ public class HempConnectionImpl implements BamConnection
       _queryMap.put(id, new QueryItem(id, callback));
     }
 
-    getBrokerStream().sendQueryGet(id, to, _jid, value);
+    getBrokerStream().queryGet(id, to, _jid, value);
   }
 
   /**
@@ -213,7 +213,7 @@ public class HempConnectionImpl implements BamConnection
       _queryMap.put(id, new QueryItem(id, callback));
     }
 
-    getBrokerStream().sendQuerySet(id, to, _jid, value);
+    getBrokerStream().querySet(id, to, _jid, value);
   }
 
   /**
@@ -270,7 +270,7 @@ public class HempConnectionImpl implements BamConnection
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _brokerStream.sendPresence(null, _jid, data);
+    _brokerStream.presence(null, _jid, data);
   }
 
   /**
@@ -281,7 +281,7 @@ public class HempConnectionImpl implements BamConnection
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
 
-    _brokerStream.sendPresence(to, _jid, data);
+    _brokerStream.presence(to, _jid, data);
   }
 
   /**
@@ -292,7 +292,7 @@ public class HempConnectionImpl implements BamConnection
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
 
-    _brokerStream.sendPresenceUnavailable(null, _jid, data);
+    _brokerStream.presenceUnavailable(null, _jid, data);
  }
   
   /**
@@ -303,7 +303,7 @@ public class HempConnectionImpl implements BamConnection
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _brokerStream.sendPresenceUnavailable(to, _jid, data);
+    _brokerStream.presenceUnavailable(to, _jid, data);
   }
 
   /**
@@ -314,7 +314,7 @@ public class HempConnectionImpl implements BamConnection
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _brokerStream.sendPresenceProbe(to, _jid, data);
+    _brokerStream.presenceProbe(to, _jid, data);
   }
 
 
@@ -326,7 +326,7 @@ public class HempConnectionImpl implements BamConnection
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
 
-    _brokerStream.sendPresenceSubscribe(to, _jid, data);
+    _brokerStream.presenceSubscribe(to, _jid, data);
   }
 
   /**
@@ -337,7 +337,7 @@ public class HempConnectionImpl implements BamConnection
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _brokerStream.sendPresenceSubscribed(to, _jid, data);
+    _brokerStream.presenceSubscribed(to, _jid, data);
   }
 
   /**
@@ -348,7 +348,7 @@ public class HempConnectionImpl implements BamConnection
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _brokerStream.sendPresenceUnsubscribe(to, _jid, data);
+    _brokerStream.presenceUnsubscribe(to, _jid, data);
   }
 
   /**
@@ -359,7 +359,7 @@ public class HempConnectionImpl implements BamConnection
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _brokerStream.sendPresenceUnsubscribed(to, _jid, data);
+    _brokerStream.presenceUnsubscribed(to, _jid, data);
   }
 
   /**
@@ -372,7 +372,7 @@ public class HempConnectionImpl implements BamConnection
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
     
-    _brokerStream.sendPresenceError(to, _jid, data, error);
+    _brokerStream.presenceError(to, _jid, data, error);
   }
  
   /**

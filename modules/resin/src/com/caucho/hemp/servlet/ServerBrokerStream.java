@@ -144,22 +144,22 @@ public class ServerBrokerStream
   /**
    * Handles a message
    */
-  public void sendMessage(String to,
+  public void message(String to,
 			  String from,
 			  Serializable value)
   {
-    _toBroker.sendMessage(to, _jid, value);
+    _toBroker.message(to, _jid, value);
   }
   
   /**
    * Handles a message
    */
-  public void sendMessageError(String to,
+  public void messageError(String to,
 			       String from,
 			       Serializable value,
 			       BamError error)
   {
-    _toBroker.sendMessageError(to, _jid, value, error);
+    _toBroker.messageError(to, _jid, value, error);
   }
   
   /**
@@ -168,12 +168,12 @@ public class ServerBrokerStream
    * The get handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public boolean sendQueryGet(long id,
+  public boolean queryGet(long id,
 			      String to,
 			      String from,
 			      Serializable value)
   {
-    _toBroker.sendQueryGet(id, to, _jid, value);
+    _toBroker.queryGet(id, to, _jid, value);
     
     return true;
   }
@@ -184,12 +184,12 @@ public class ServerBrokerStream
    * The set handler must respond with either
    * a QueryResult or a QueryError 
    */
-  public boolean sendQuerySet(long id,
+  public boolean querySet(long id,
 			      String to,
 			      String from,
 			      Serializable value)
   {
-    _toBroker.sendQuerySet(id, to, _jid, value);
+    _toBroker.querySet(id, to, _jid, value);
     
     return true;
   }
@@ -199,12 +199,12 @@ public class ServerBrokerStream
    *
    * The result id will match a pending get or set.
    */
-  public void sendQueryResult(long id,
+  public void queryResult(long id,
 			      String to,
 			      String from,
 			      Serializable value)
   {
-    _toBroker.sendQueryResult(id, to, _jid, value);
+    _toBroker.queryResult(id, to, _jid, value);
   }
   
   /**
@@ -212,13 +212,13 @@ public class ServerBrokerStream
    *
    * The result id will match a pending get or set.
    */
-  public void sendQueryError(long id,
+  public void queryError(long id,
 			     String to,
 			     String from,
 			     Serializable value,
 			     BamError error)
   {
-    _toBroker.sendQueryError(id, to, _jid, value, error);
+    _toBroker.queryError(id, to, _jid, value, error);
   }
   
   /**
@@ -227,12 +227,12 @@ public class ServerBrokerStream
    * If the handler deals with clients, the "from" value should be ignored
    * and replaced by the client's jid.
    */
-  public void sendPresence(String to,
+  public void presence(String to,
 			   String from,
 			   Serializable data)
 
   {
-    _toBroker.sendPresence(to, _jid, data);
+    _toBroker.presence(to, _jid, data);
   }
   
   /**
@@ -241,72 +241,72 @@ public class ServerBrokerStream
    * If the handler deals with clients, the "from" value should be ignored
    * and replaced by the client's jid.
    */
-  public void sendPresenceUnavailable(String to,
+  public void presenceUnavailable(String to,
 				      String from,
 				      Serializable data)
   {
-    _toBroker.sendPresenceUnavailable(to, _jid, data);
+    _toBroker.presenceUnavailable(to, _jid, data);
   }
   
   /**
    * Handles a presence probe from another server
    */
-  public void sendPresenceProbe(String to,
+  public void presenceProbe(String to,
 			      String from,
 			      Serializable data)
   {
-    _toBroker.sendPresenceProbe(to, _jid, data);
+    _toBroker.presenceProbe(to, _jid, data);
   }
   
   /**
    * Handles a presence subscribe request from a client
    */
-  public void sendPresenceSubscribe(String to,
+  public void presenceSubscribe(String to,
 				    String from,
 				    Serializable data)
   {
-    _toBroker.sendPresenceSubscribe(to, _jid, data);
+    _toBroker.presenceSubscribe(to, _jid, data);
   }
   
   /**
    * Handles a presence subscribed result to a client
    */
-  public void sendPresenceSubscribed(String to,
+  public void presenceSubscribed(String to,
 				     String from,
 				     Serializable data)
   {
-    _toBroker.sendPresenceSubscribed(to, _jid, data);
+    _toBroker.presenceSubscribed(to, _jid, data);
   }
   
   /**
    * Handles a presence unsubscribe request from a client
    */
-  public void sendPresenceUnsubscribe(String to,
+  public void presenceUnsubscribe(String to,
 				      String from,
 				      Serializable data)
   {
-    _toBroker.sendPresenceUnsubscribe(to, _jid, data);
+    _toBroker.presenceUnsubscribe(to, _jid, data);
   }
   
   /**
    * Handles a presence unsubscribed result to a client
    */
-  public void sendPresenceUnsubscribed(String to,
+  public void presenceUnsubscribed(String to,
 				       String from,
 				       Serializable data)
   {
-    _toBroker.sendPresenceUnsubscribed(to, _jid, data);
+    _toBroker.presenceUnsubscribed(to, _jid, data);
   }
   
   /**
    * Handles a presence unsubscribed result to a client
    */
-  public void sendPresenceError(String to,
+  public void presenceError(String to,
 			      String from,
 			      Serializable data,
 			      BamError error)
   {
-    _toBroker.sendPresenceError(to, _jid, data, error);
+    _toBroker.presenceError(to, _jid, data, error);
   }
 
   public void close()

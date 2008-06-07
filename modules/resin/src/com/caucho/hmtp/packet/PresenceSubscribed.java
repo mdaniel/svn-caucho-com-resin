@@ -63,6 +63,6 @@ public class PresenceSubscribed extends Presence {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.sendPresenceSubscribed(getTo(), getFrom(), getData());
+    handler.presenceSubscribed(getTo(), getFrom(), getData());
   }
 }

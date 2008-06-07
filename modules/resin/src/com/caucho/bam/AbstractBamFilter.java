@@ -65,9 +65,9 @@ public class AbstractBamFilter implements BamStream
    * @param from the source JID
    * @param value the message payload
    */
-  public void sendMessage(String to, String from, Serializable value)
+  public void message(String to, String from, Serializable value)
   {
-    _next.sendMessage(to, from, value);
+    _next.message(to, from, value);
   }
   
   /**
@@ -77,71 +77,71 @@ public class AbstractBamFilter implements BamStream
    * @param from the source JID
    * @param value the message payload
    */
-  public void sendMessageError(String to,
+  public void messageError(String to,
 			       String from,
 			       Serializable value,
 			       BamError error)
   {
-    _next.sendMessageError(to, from, value, error);
+    _next.messageError(to, from, value, error);
   }
   
-  public boolean sendQueryGet(long id,
+  public boolean queryGet(long id,
 			      String to,
 			      String from,
 			      Serializable query)
   {
-    return _next.sendQueryGet(id, to, from, query);
+    return _next.queryGet(id, to, from, query);
   }
   
-  public boolean sendQuerySet(long id,
+  public boolean querySet(long id,
 			      String to,
 			      String from,
 			      Serializable query)
   {
-    return _next.sendQuerySet(id, to, from, query);
+    return _next.querySet(id, to, from, query);
   }
   
-  public void sendQueryResult(long id,
+  public void queryResult(long id,
 			      String to,
 			      String from,
 			      Serializable value)
   {
-    _next.sendQueryResult(id, to, from, value);
+    _next.queryResult(id, to, from, value);
   }
   
-  public void sendQueryError(long id,
+  public void queryError(long id,
 			     String to,
 			     String from,
 			     Serializable query,
 			     BamError error)
   {
-    _next.sendQueryError(id, to, from, query, error);
+    _next.queryError(id, to, from, query, error);
   }
   
   /**
    * General presence, for clients announcing availability
    */
-  public void sendPresence(String to,
+  public void presence(String to,
 			   String from,
 			   Serializable data)
   {
-    _next.sendPresence(to, from, data);
+    _next.presence(to, from, data);
   }
 
   /**
    * General presence, for clients announcing unavailability
    */
-  public void sendPresenceUnavailable(String to,
+  public void presenceUnavailable(String to,
 				      String from,
 				      Serializable data)
   {
-    _next.sendPresenceUnavailable(to, from, data);
+    _next.presenceUnavailable(to, from, data);
   }
 
   /**
    * Presence probe from the server to a client
    */
-  public void sendPresenceProbe(String to,
+  public void presenceProbe(String to,
 			      String from,
 			      Serializable data)
   {
@@ -150,51 +150,51 @@ public class AbstractBamFilter implements BamStream
   /**
    * A subscription request from a client
    */
-  public void sendPresenceSubscribe(String to,
+  public void presenceSubscribe(String to,
 				  String from,
 				  Serializable data)
   {
-    _next.sendPresenceSubscribe(to, from, data);
+    _next.presenceSubscribe(to, from, data);
   }
 
   /**
    * A subscription response to a client
    */
-  public void sendPresenceSubscribed(String to,
+  public void presenceSubscribed(String to,
 				   String from,
 				   Serializable data)
   {
-    _next.sendPresenceSubscribed(to, from, data);
+    _next.presenceSubscribed(to, from, data);
   }
 
   /**
    * An unsubscription request from a client
    */
-  public void sendPresenceUnsubscribe(String to,
+  public void presenceUnsubscribe(String to,
 				    String from,
 				    Serializable data)
   {
-    _next.sendPresenceUnsubscribe(to, from, data);
+    _next.presenceUnsubscribe(to, from, data);
   }
 
   /**
    * A unsubscription response to a client
    */
-  public void sendPresenceUnsubscribed(String to,
+  public void presenceUnsubscribed(String to,
 				     String from,
 				     Serializable data)
   {
-    _next.sendPresenceUnsubscribed(to, from, data);
+    _next.presenceUnsubscribed(to, from, data);
   }
 
   /**
    * An error response to a client
    */
-  public void sendPresenceError(String to,
+  public void presenceError(String to,
 			      String from,
 			      Serializable data,
 			      BamError error)
   {
-    _next.sendPresenceError(to, from, data, error);
+    _next.presenceError(to, from, data, error);
   }
 }

@@ -183,11 +183,11 @@ public class GenericService extends AbstractBamStream
   //
 
   @Override
-  public boolean sendQueryGet(long id, String to, String from,
+  public boolean queryGet(long id, String to, String from,
 			      Serializable value)
   {
     if (value instanceof DiscoInfoQuery) {
-      _brokerStream.sendQueryResult(id, from, to,
+      _brokerStream.queryResult(id, from, to,
 				new DiscoInfoQuery(getDiscoIdentity(),
 						   getDiscoFeatures()));
 
@@ -197,7 +197,7 @@ public class GenericService extends AbstractBamStream
     Serializable result = doQueryGet(to, from, value);
 
     if (result != null) {
-      _brokerStream.sendQueryResult(id, from, to, result);
+      _brokerStream.queryResult(id, from, to, result);
       return true;
     }
 

@@ -1007,7 +1007,7 @@ public class HmuxRequest extends AbstractHttpRequest
 	       + " to=" + to + " from=" + from + " " + query);
 
     if (hmtpStream != null) {
-      hmtpStream.sendMessage(to, from, query);
+      hmtpStream.message(to, from, query);
     }
   }
 
@@ -1026,7 +1026,7 @@ public class HmuxRequest extends AbstractHttpRequest
 	       + " to=" + to + " from=" + from + " " + query);
 
     if (hmtpStream != null) {
-      hmtpStream.sendQueryGet(id, to, from, query);
+      hmtpStream.queryGet(id, to, from, query);
     }
   }
 
@@ -1045,7 +1045,7 @@ public class HmuxRequest extends AbstractHttpRequest
 	       + " to=" + to + " from=" + from + " " + query);
 
     if (hmtpStream != null) {
-      hmtpStream.sendQuerySet(id, to, from, query);
+      hmtpStream.querySet(id, to, from, query);
     }
   }
 
@@ -1064,7 +1064,7 @@ public class HmuxRequest extends AbstractHttpRequest
 	       + " to=" + to + " from=" + from + " " + value);
 
     if (hmtpStream != null) {
-      hmtpStream.sendQueryResult(id, to, from, value);
+      hmtpStream.queryResult(id, to, from, value);
     }
   }
 

@@ -85,7 +85,7 @@ class HempConnectionAgentStream implements BamStream
   /**
    * Forwards the message
    */
-  public void sendMessage(String to, String from, Serializable value)
+  public void message(String to, String from, Serializable value)
   {
     BamStream handler = _streamHandler;
 
@@ -95,13 +95,13 @@ class HempConnectionAgentStream implements BamStream
       return;
     }
     
-    handler.sendMessage(to, from, value);
+    handler.message(to, from, value);
   }
 
   /**
    * Forwards the message
    */
-  public void sendMessageError(String to,
+  public void messageError(String to,
 			       String from,
 			       Serializable value,
 			       BamError error)
@@ -115,7 +115,7 @@ class HempConnectionAgentStream implements BamStream
       return;
     }
     
-    handler.sendMessageError(to, from, value, error);
+    handler.messageError(to, from, value, error);
   }
 
   //
@@ -125,7 +125,7 @@ class HempConnectionAgentStream implements BamStream
   /**
    * Forwards the message
    */
-  public boolean sendQueryGet(long id,
+  public boolean queryGet(long id,
 			      String to,
 			      String from,
 			      Serializable query)
@@ -138,7 +138,7 @@ class HempConnectionAgentStream implements BamStream
       return false;
     }
     
-    if (handler.sendQueryGet(id, to, from, query))
+    if (handler.queryGet(id, to, from, query))
       return true;
 
     BamError error = 
@@ -146,7 +146,7 @@ class HempConnectionAgentStream implements BamStream
 	            BamError.FEATURE_NOT_IMPLEMENTED,
 		    "unknown query: " + query.getClass().getName());
     
-     _conn.getBrokerStream().sendQueryError(id, from, to, query, error);
+     _conn.getBrokerStream().queryError(id, from, to, query, error);
    
     return true;
   }
@@ -154,7 +154,7 @@ class HempConnectionAgentStream implements BamStream
   /**
    * Forwards the message
    */
-  public boolean sendQuerySet(long id,
+  public boolean querySet(long id,
 		            String to,
 		            String from,
 		            Serializable query)
@@ -167,7 +167,7 @@ class HempConnectionAgentStream implements BamStream
       return false;
     }
     
-    if (handler.sendQuerySet(id, to, from, query))
+    if (handler.querySet(id, to, from, query))
       return true;
 
     BamError error =
@@ -175,7 +175,7 @@ class HempConnectionAgentStream implements BamStream
 		    BamError.FEATURE_NOT_IMPLEMENTED,
 		    "unknown query: " + query.getClass().getName());
     
-    _conn.getBrokerStream().sendQueryError(id, from, to, query, error);
+    _conn.getBrokerStream().queryError(id, from, to, query, error);
 
     return true;
   }
@@ -183,7 +183,7 @@ class HempConnectionAgentStream implements BamStream
   /**
    * Result from the message
    */
-  public void sendQueryResult(long id,
+  public void queryResult(long id,
 		            String to,
 		            String from,
 		            Serializable value)
@@ -199,13 +199,13 @@ class HempConnectionAgentStream implements BamStream
       return;
     }
 
-    handler.sendQueryResult(id, to, from, value);
+    handler.queryResult(id, to, from, value);
   }
 
   /**
    * Error from the message
    */
-  public void sendQueryError(long id,
+  public void queryError(long id,
 		           String to,
 		           String from,
 		           Serializable query,
@@ -222,7 +222,7 @@ class HempConnectionAgentStream implements BamStream
       return;
     }
 
-    handler.sendQueryError(id, to, from, query, error);
+    handler.queryError(id, to, from, query, error);
   }
 
   //
@@ -232,7 +232,7 @@ class HempConnectionAgentStream implements BamStream
   /**
    * Forwards the presence
    */
-  public void sendPresence(String to, String from, Serializable data)
+  public void presence(String to, String from, Serializable data)
   {
     BamStream handler = _streamHandler;
 
@@ -242,13 +242,13 @@ class HempConnectionAgentStream implements BamStream
       return;
     }
     
-    handler.sendPresence(to, from, data);
+    handler.presence(to, from, data);
   }
 
   /**
    * Forwards the presence
    */
-  public void sendPresenceProbe(String to,
+  public void presenceProbe(String to,
 				String from,
 				Serializable data)
   {
@@ -260,13 +260,13 @@ class HempConnectionAgentStream implements BamStream
       return;
     }
     
-    handler.sendPresenceProbe(to, from, data);
+    handler.presenceProbe(to, from, data);
   }
 
   /**
    * Forwards the presence
    */
-  public void sendPresenceUnavailable(String to,
+  public void presenceUnavailable(String to,
 				      String from,
 				      Serializable data)
   {
@@ -278,13 +278,13 @@ class HempConnectionAgentStream implements BamStream
       return;
     }
     
-    handler.sendPresenceUnavailable(to, from, data);
+    handler.presenceUnavailable(to, from, data);
   }
 
   /**
    * Forwards the presence
    */
-  public void sendPresenceSubscribe(String to,
+  public void presenceSubscribe(String to,
 				    String from,
 				    Serializable data)
   {
@@ -296,13 +296,13 @@ class HempConnectionAgentStream implements BamStream
       return;
     }
     
-    handler.sendPresenceSubscribe(to, from, data);
+    handler.presenceSubscribe(to, from, data);
   }
 
   /**
    * Forwards the presence
    */
-  public void sendPresenceSubscribed(String to,
+  public void presenceSubscribed(String to,
 				     String from,
 				     Serializable data)
   {
@@ -314,13 +314,13 @@ class HempConnectionAgentStream implements BamStream
       return;
     }
     
-    handler.sendPresenceSubscribed(to, from, data);
+    handler.presenceSubscribed(to, from, data);
   }
   
   /**
    * Forwards the presence
    */
-  public void sendPresenceUnsubscribe(String to,
+  public void presenceUnsubscribe(String to,
 				      String from,
 				      Serializable data)
   {
@@ -332,13 +332,13 @@ class HempConnectionAgentStream implements BamStream
       return;
     }
     
-    handler.sendPresenceUnsubscribe(to, from, data);
+    handler.presenceUnsubscribe(to, from, data);
   }
 
   /**
    * Forwards the presence
    */
-  public void sendPresenceUnsubscribed(String to,
+  public void presenceUnsubscribed(String to,
 				       String from,
 				       Serializable data)
   {
@@ -350,13 +350,13 @@ class HempConnectionAgentStream implements BamStream
       return;
     }
     
-    handler.sendPresenceUnsubscribed(to, from, data);
+    handler.presenceUnsubscribed(to, from, data);
   }
 
   /**
    * Forwards the presence
    */
-  public void sendPresenceError(String to,
+  public void presenceError(String to,
 				String from,
 				Serializable data,
 				BamError error)
@@ -369,7 +369,7 @@ class HempConnectionAgentStream implements BamStream
       return;
     }
     
-    handler.sendPresenceError(to, from, data, error);
+    handler.presenceError(to, from, data, error);
   }
   
   @Override

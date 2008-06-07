@@ -105,7 +105,7 @@ public class ClientBrokerStream implements BamStream {
   /**
    * Sends a message to a given jid
    */
-  public void sendMessage(String to, String from, Serializable value)
+  public void message(String to, String from, Serializable value)
   {
     try {
       Hessian2StreamingOutput out = _out;
@@ -122,7 +122,7 @@ public class ClientBrokerStream implements BamStream {
   /**
    * Sends a message error to a given jid
    */
-  public void sendMessageError(String to,
+  public void messageError(String to,
 			       String from,
 			       Serializable value,
 			       BamError error)
@@ -146,7 +146,7 @@ public class ClientBrokerStream implements BamStream {
   /**
    * Low-level query get
    */
-  public boolean sendQueryGet(long id,
+  public boolean queryGet(long id,
 			      String to,
 			      String from,
 			      Serializable value)
@@ -168,7 +168,7 @@ public class ClientBrokerStream implements BamStream {
   /**
    * Low-level query set
    */
-  public boolean sendQuerySet(long id,
+  public boolean querySet(long id,
 			      String to,
 			      String from,
 			      Serializable value)
@@ -190,7 +190,7 @@ public class ClientBrokerStream implements BamStream {
   /**
    * Low-level query response
    */
-  public void sendQueryResult(long id,
+  public void queryResult(long id,
 			      String to,
 			      String from,
 			      Serializable value)
@@ -210,7 +210,7 @@ public class ClientBrokerStream implements BamStream {
   /**
    * Low-level query error
    */
-  public void sendQueryError(long id,
+  public void queryError(long id,
 			     String to,
 			     String from, 
 			     Serializable value,
@@ -235,7 +235,7 @@ public class ClientBrokerStream implements BamStream {
   /**
    * Sends a presence packet to the server
    */
-  public void sendPresence(String to,
+  public void presence(String to,
 			   String from,
 			   Serializable data)
   {
@@ -254,7 +254,7 @@ public class ClientBrokerStream implements BamStream {
   /**
    * Sends a presence packet to the server
    */
-  public void sendPresenceUnavailable(String to,
+  public void presenceUnavailable(String to,
 				      String from,
 				      Serializable data)
   {
@@ -273,7 +273,7 @@ public class ClientBrokerStream implements BamStream {
   /**
    * Sends a presence probe packet to the server
    */
-  public void sendPresenceProbe(String to,
+  public void presenceProbe(String to,
 				String from,
 				Serializable data)
   {
@@ -292,7 +292,7 @@ public class ClientBrokerStream implements BamStream {
   /**
    * Sends a presence subscribe packet to the server
    */
-  public void sendPresenceSubscribe(String to,
+  public void presenceSubscribe(String to,
 				    String from,
 				    Serializable data)
   {
@@ -311,7 +311,7 @@ public class ClientBrokerStream implements BamStream {
   /**
    * Sends a presence subscribed packet to the server
    */
-  public void sendPresenceSubscribed(String to,
+  public void presenceSubscribed(String to,
 				     String from,
 				     Serializable data)
   {
@@ -330,7 +330,7 @@ public class ClientBrokerStream implements BamStream {
   /**
    * Sends a presence subscribe packet to the server
    */
-  public void sendPresenceUnsubscribe(String to,
+  public void presenceUnsubscribe(String to,
 				      String from,
 				      Serializable data)
   {
@@ -349,7 +349,7 @@ public class ClientBrokerStream implements BamStream {
   /**
    * Sends a presence subscribed packet to the server
    */
-  public void sendPresenceUnsubscribed(String to,
+  public void presenceUnsubscribed(String to,
 				       String from,
 				       Serializable data)
   {
@@ -368,7 +368,7 @@ public class ClientBrokerStream implements BamStream {
   /**
    * Sends a presence error packet to the server
    */
-  public void sendPresenceError(String to,
+  public void presenceError(String to,
 				String from,
 				Serializable data,
 				BamError error)

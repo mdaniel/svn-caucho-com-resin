@@ -272,7 +272,7 @@ public class HmtpClient implements BamConnection {
     if (stream == null)
       throw new IllegalStateException("connection is closed");
     
-    stream.sendMessage(to, null, value);
+    stream.message(to, null, value);
   }
 
   /**
@@ -285,7 +285,7 @@ public class HmtpClient implements BamConnection {
     if (stream == null)
       throw new IllegalStateException("connection is closed");
     
-    _clientStream.sendPresence(null, null, data);
+    _clientStream.presence(null, null, data);
   }
 
   /**
@@ -298,7 +298,7 @@ public class HmtpClient implements BamConnection {
     if (stream == null)
       throw new IllegalStateException("connection is closed");
     
-    _clientStream.sendPresence(to, null, data);
+    _clientStream.presence(to, null, data);
   }
 
   /**
@@ -311,7 +311,7 @@ public class HmtpClient implements BamConnection {
     if (stream == null)
       throw new IllegalStateException("connection is closed");
     
-    _clientStream.sendPresenceUnavailable(null, null, data);
+    _clientStream.presenceUnavailable(null, null, data);
   }
 
   /**
@@ -324,7 +324,7 @@ public class HmtpClient implements BamConnection {
     if (stream == null)
       throw new IllegalStateException("connection is closed");
     
-    _clientStream.sendPresenceUnavailable(to, null, data);
+    _clientStream.presenceUnavailable(to, null, data);
   }
 
   /**
@@ -337,7 +337,7 @@ public class HmtpClient implements BamConnection {
     if (stream == null)
       throw new IllegalStateException("connection is closed");
     
-    _clientStream.sendPresenceProbe(to, null, data);
+    _clientStream.presenceProbe(to, null, data);
   }
 
   /**
@@ -350,7 +350,7 @@ public class HmtpClient implements BamConnection {
     if (stream == null)
       throw new IllegalStateException("connection is closed");
     
-    _clientStream.sendPresenceSubscribe(to, null, data);
+    _clientStream.presenceSubscribe(to, null, data);
   }
 
   /**
@@ -363,7 +363,7 @@ public class HmtpClient implements BamConnection {
     if (stream == null)
       throw new IllegalStateException("connection is closed");
     
-    _clientStream.sendPresenceSubscribed(to, null, data);
+    _clientStream.presenceSubscribed(to, null, data);
   }
 
   /**
@@ -376,7 +376,7 @@ public class HmtpClient implements BamConnection {
     if (stream == null)
       throw new IllegalStateException("connection is closed");
     
-    _clientStream.sendPresenceUnsubscribe(to, null, data);
+    _clientStream.presenceUnsubscribe(to, null, data);
   }
 
   /**
@@ -389,7 +389,7 @@ public class HmtpClient implements BamConnection {
     if (stream == null)
       throw new IllegalStateException("connection is closed");
     
-    _clientStream.sendPresenceUnsubscribed(to, null, data);
+    _clientStream.presenceUnsubscribed(to, null, data);
   }
 
   /**
@@ -402,7 +402,7 @@ public class HmtpClient implements BamConnection {
     if (stream == null)
       throw new IllegalStateException("connection is closed");
     
-    _clientStream.sendPresenceError(to, null, data, error);
+    _clientStream.presenceError(to, null, data, error);
   }
 
   /**
@@ -441,7 +441,7 @@ public class HmtpClient implements BamConnection {
     if (stream == null)
       throw new IllegalStateException("connection is closed");
     
-    _clientStream.sendQueryGet(id, to, null, value);
+    _clientStream.queryGet(id, to, null, value);
   }
 
   /**
@@ -480,7 +480,7 @@ public class HmtpClient implements BamConnection {
     if (stream == null)
       throw new IllegalStateException("connection is closed");
     
-    stream.sendQuerySet(id, to, null, value);
+    stream.querySet(id, to, null, value);
   }
 
   /**
@@ -524,7 +524,7 @@ public class HmtpClient implements BamConnection {
   public void queryResult(long id, String to, Serializable value)
     throws IOException
   {
-    _clientStream.sendQueryResult(id, to, null, value);
+    _clientStream.queryResult(id, to, null, value);
   }
   */
 
@@ -537,7 +537,7 @@ public class HmtpClient implements BamConnection {
 			 Serializable value,
 			 BamError error)
   {
-    _clientStream.sendQueryError(id, to, null, value, error);
+    _clientStream.queryError(id, to, null, value, error);
   }
   */
 

@@ -114,18 +114,18 @@ public class ImUserService extends SimpleBamService
   }
 
   @Override
-  public void sendMessage(String to, String from, Serializable value)
+  public void message(String to, String from, Serializable value)
   {
     String []jids = _jids;
 
     for (String jid : jids) {
       // XXX: is the "to" correct?
-      _broker.sendMessage(jid, from, value);
+      _broker.message(jid, from, value);
     }
   }
   
   @Override
-  public boolean sendQueryGet(long id,
+  public boolean queryGet(long id,
 			    String to,
 			    String from,
 			    Serializable query)
@@ -134,12 +134,12 @@ public class ImUserService extends SimpleBamService
       DiscoInfoQuery info = new DiscoInfoQuery(getDiscoIdentity(),
 					       getDiscoFeatures());
       
-      _broker.sendQueryResult(id, from, to, info);
+      _broker.queryResult(id, from, to, info);
       
       return true;
     }
     else if (query instanceof RosterQuery) {
-      _broker.sendQueryResult(id, from, to, new RosterQuery(getRoster()));
+      _broker.queryResult(id, from, to, new RosterQuery(getRoster()));
 
       return true;
     }
@@ -148,7 +148,7 @@ public class ImUserService extends SimpleBamService
   }
   
   @Override
-  public boolean sendQuerySet(long id,
+  public boolean querySet(long id,
 			    String to,
 			    String from,
 			    Serializable query)
@@ -166,12 +166,12 @@ public class ImUserService extends SimpleBamService
    * forwards presence to logged in resources
    */
   @Override
-  public void sendPresence(String to, String from, Serializable data)
+  public void presence(String to, String from, Serializable data)
   {
     String []jids = _jids;
 
     for (String jid : jids) {
-      _broker.sendPresence(jid, from, data);
+      _broker.presence(jid, from, data);
     }
   }
 
@@ -179,12 +179,12 @@ public class ImUserService extends SimpleBamService
    * forwards presence to logged in resources
    */
   @Override
-  public void sendPresenceProbe(String to, String from, Serializable data)
+  public void presenceProbe(String to, String from, Serializable data)
   {
     String []jids = _jids;
 
     for (String jid : jids) {
-      _broker.sendPresenceProbe(jid, from, data);
+      _broker.presenceProbe(jid, from, data);
     }
   }
 
@@ -192,13 +192,13 @@ public class ImUserService extends SimpleBamService
    * forwards presence to logged in resources
    */
   @Override
-  public void sendPresenceUnavailable(String to, String from,
+  public void presenceUnavailable(String to, String from,
 				      Serializable data)
   {
     String []jids = _jids;
 
     for (String jid : jids) {
-      _broker.sendPresenceUnavailable(jid, from, data);
+      _broker.presenceUnavailable(jid, from, data);
     }
   }
 
@@ -212,24 +212,24 @@ public class ImUserService extends SimpleBamService
 
       if ("from".equals(subscription)
 	  || "both".equals(subscription)) {
-	_broker.sendPresence(item.getJid(), getJid(), data);
+	_broker.presence(item.getJid(), getJid(), data);
       }
       
       if ("to".equals(subscription)
 	  || "both".equals(subscription)) {
-	_broker.sendPresenceProbe(item.getJid(), getJid(), data);
+	_broker.presenceProbe(item.getJid(), getJid(), data);
       }
     }
     
     for (String jid : _jids) {
       if (! jid.equals(from)) {
-	_broker.sendPresence(jid, from, data);
+	_broker.presence(jid, from, data);
       }
     }
   }
 
   @Override
-  public void sendPresenceSubscribe(String to,
+  public void presenceSubscribe(String to,
 				    String from,
 				    Serializable data)
   {
@@ -242,7 +242,7 @@ public class ImUserService extends SimpleBamService
     String []jids = _jids;
 
     if (jids.length > 0) {
-      _broker.sendPresenceSubscribe(jids[0], from, data);
+      _broker.presenceSubscribe(jids[0], from, data);
     }
     else {
       log.fine(this + " onPresenceSubscribe to=" + to);
@@ -250,7 +250,7 @@ public class ImUserService extends SimpleBamService
   }
 
   @Override
-  public void sendPresenceSubscribed(String to,
+  public void presenceSubscribed(String to,
 				     String from,
 				     Serializable data)
   {
@@ -259,7 +259,7 @@ public class ImUserService extends SimpleBamService
       String []jids = _jids;
 
       if (jids.length > 0) {
-	_broker.sendPresenceSubscribed(jids[0], from, data);
+	_broker.presenceSubscribed(jids[0], from, data);
       }
     }
   }
@@ -299,7 +299,7 @@ public class ImUserService extends SimpleBamService
     
     querySetResources(roster);
 
-    _broker.sendQueryResult(id, from, to, null);
+    _broker.queryResult(id, from, to, null);
 
     return true;
   }

@@ -64,6 +64,6 @@ public class PresenceProbe extends Presence {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.sendPresenceProbe(getTo(), getFrom(), getData());
+    handler.presenceProbe(getTo(), getFrom(), getData());
   }
 }

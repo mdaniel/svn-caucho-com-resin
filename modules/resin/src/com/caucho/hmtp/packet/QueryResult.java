@@ -104,7 +104,7 @@ public class QueryResult extends Packet {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.sendQueryResult(getId(), getTo(), getFrom(), getValue());
+    handler.queryResult(getId(), getTo(), getFrom(), getValue());
   }
 
   @Override

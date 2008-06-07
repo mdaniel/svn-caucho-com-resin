@@ -73,6 +73,6 @@ public class PresenceUnsubscribe extends Presence {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.sendPresenceUnsubscribe(getTo(), getFrom(), getData());
+    handler.presenceUnsubscribe(getTo(), getFrom(), getData());
   }
 }

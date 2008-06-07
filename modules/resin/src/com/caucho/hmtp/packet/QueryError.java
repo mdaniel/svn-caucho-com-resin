@@ -106,7 +106,7 @@ public class QueryError extends Packet {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.sendQueryError(getId(), getTo(), getFrom(),
+    handler.queryError(getId(), getTo(), getFrom(),
 			   getValue(), getError());
   }
 

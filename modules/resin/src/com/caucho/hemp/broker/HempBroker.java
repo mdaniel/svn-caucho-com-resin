@@ -239,14 +239,14 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Presence
    */
-  public void sendPresence(String to, String from, Serializable value)
+  public void presence(String to, String from, Serializable value)
   {
     /*
     if (to == null) {
       BamServiceManager []resourceManagers = _serviceManagerList;
 
       for (BamServiceManager manager : resourceManagers) {
-        manager.sendPresence(to, from, data);
+        manager.presence(to, from, data);
       }
     }
     else {
@@ -254,7 +254,7 @@ public class HempBroker implements BamBroker, BamStream
     BamStream stream = findAgent(to);
 
     if (stream != null)
-      stream.sendPresence(to, from, value);
+      stream.presence(to, from, value);
     else {
       if (log.isLoggable(Level.FINER)) {
 	log.finer(this + " sendPresence (no resource) to=" + to
@@ -266,14 +266,14 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Presence unavailable
    */
-  public void sendPresenceUnavailable(String to,
+  public void presenceUnavailable(String to,
 				      String from,
 				      Serializable data)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null)
-      stream.sendPresenceUnavailable(to, from, data);
+      stream.presenceUnavailable(to, from, data);
     else {
       if (log.isLoggable(Level.FINER)) {
 	log.finer(this + " sendPresenceUnavailable (no resource) to=" + to
@@ -285,14 +285,14 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Presence probe
    */
-  public void sendPresenceProbe(String to,
+  public void presenceProbe(String to,
 			        String from,
 			        Serializable data)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null)
-      stream.sendPresenceProbe(to, from, data);
+      stream.presenceProbe(to, from, data);
     else {
       if (log.isLoggable(Level.FINER)) {
 	log.finer(this + " sendPresenceProbe (no resource) to=" + to
@@ -304,14 +304,14 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Presence subscribe
    */
-  public void sendPresenceSubscribe(String to,
+  public void presenceSubscribe(String to,
 				    String from,
 				    Serializable data)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null)
-      stream.sendPresenceSubscribe(to, from, data);
+      stream.presenceSubscribe(to, from, data);
     else {
       if (log.isLoggable(Level.FINER)) {
 	log.finer(this + " sendPresenceSubscribe (no resource) to=" + to
@@ -323,14 +323,14 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Presence subscribed
    */
-  public void sendPresenceSubscribed(String to,
+  public void presenceSubscribed(String to,
 				     String from,
 				     Serializable data)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null)
-      stream.sendPresenceSubscribed(to, from, data);
+      stream.presenceSubscribed(to, from, data);
     else {
       if (log.isLoggable(Level.FINER)) {
 	log.finer(this + " sendPresenceSubscribed (no resource) to=" + to
@@ -342,14 +342,14 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Presence unsubscribe
    */
-  public void sendPresenceUnsubscribe(String to,
+  public void presenceUnsubscribe(String to,
 				      String from,
 				      Serializable data)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null)
-      stream.sendPresenceUnsubscribe(to, from, data);
+      stream.presenceUnsubscribe(to, from, data);
     else {
       if (log.isLoggable(Level.FINER)) {
 	log.finer(this + " sendPresenceUnsubscribe (no resource) to=" + to
@@ -361,14 +361,14 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Presence unsubscribed
    */
-  public void sendPresenceUnsubscribed(String to,
+  public void presenceUnsubscribed(String to,
 				       String from,
 				       Serializable data)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null)
-      stream.sendPresenceUnsubscribed(to, from, data);
+      stream.presenceUnsubscribed(to, from, data);
     else {
       if (log.isLoggable(Level.FINER)) {
 	log.finer(this + " sendPresenceUnsubscribed (no resource) to=" + to
@@ -380,7 +380,7 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Presence error
    */
-  public void sendPresenceError(String to,
+  public void presenceError(String to,
 			        String from,
 			        Serializable data,
 			        BamError error)
@@ -388,7 +388,7 @@ public class HempBroker implements BamBroker, BamStream
     BamStream stream = findAgent(to);
 
     if (stream != null)
-      stream.sendPresenceError(to, from, data, error);
+      stream.presenceError(to, from, data, error);
     else {
       if (log.isLoggable(Level.FINER)) {
 	log.finer(this + " sendPresenceError (no resource) to=" + to
@@ -400,12 +400,12 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Sends a message
    */
-  public void sendMessage(String to, String from, Serializable value)
+  public void message(String to, String from, Serializable value)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null)
-      stream.sendMessage(to, from, value);
+      stream.message(to, from, value);
     else {
       log.fine(this + " sendMessage to=" + to + " from=" + from
 	       + " is an unknown stream");
@@ -415,7 +415,7 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Sends a message
    */
-  public void sendMessageError(String to,
+  public void messageError(String to,
 			       String from,
 			       Serializable value,
 			       BamError error)
@@ -423,7 +423,7 @@ public class HempBroker implements BamBroker, BamStream
     BamStream stream = findAgent(to);
 
     if (stream != null)
-      stream.sendMessageError(to, from, value, error);
+      stream.messageError(to, from, value, error);
     else {
       log.fine(this + " sendMessageError to=" + to + " from=" + from
 	       + " error=" + error + " is an unknown stream");
@@ -433,13 +433,13 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Query an entity
    */
-  public boolean sendQueryGet(long id, String to, String from,
+  public boolean queryGet(long id, String to, String from,
 			      Serializable query)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null) {
-      if (! stream.sendQueryGet(id, to, from, query)) {
+      if (! stream.queryGet(id, to, from, query)) {
 	if (log.isLoggable(Level.FINE)) {
 	  log.fine(this + " queryGet to unknown feature to='" + to
 		   + "' from=" + from + " query='" + query + "'"
@@ -453,7 +453,7 @@ public class HempBroker implements BamBroker, BamStream
 					BamError.FEATURE_NOT_IMPLEMENTED,
 					msg);
 	
-	sendQueryError(id, from, to, query, error);
+	queryError(id, from, to, query, error);
       }
 
       return true;
@@ -470,7 +470,7 @@ public class HempBroker implements BamBroker, BamStream
 				    BamError.SERVICE_UNAVAILABLE,
 				    msg);
 				    
-    sendQueryError(id, from, to, query, error);
+    queryError(id, from, to, query, error);
     
     return true;
   }
@@ -478,7 +478,7 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Query an entity
    */
-  public boolean sendQuerySet(long id, String to, String from, Serializable query)
+  public boolean querySet(long id, String to, String from, Serializable query)
   {
     BamStream stream = findAgent(to);
 
@@ -494,12 +494,12 @@ public class HempBroker implements BamBroker, BamStream
 				      BamError.SERVICE_UNAVAILABLE,
 				      msg);
 				    
-      sendQueryError(id, from, to, query, error);
+      queryError(id, from, to, query, error);
 
       return true;
     }
 
-    if (stream.sendQuerySet(id, to, from, query))
+    if (stream.querySet(id, to, from, query))
       return true;
 
     if (log.isLoggable(Level.FINE)) {
@@ -515,7 +515,7 @@ public class HempBroker implements BamBroker, BamStream
 				    BamError.FEATURE_NOT_IMPLEMENTED,
 				    msg);
 				    
-    sendQueryError(id, from, to, query, error);
+    queryError(id, from, to, query, error);
 
     return true;
   }
@@ -523,12 +523,12 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Query an entity
    */
-  public void sendQueryResult(long id, String to, String from, Serializable value)
+  public void queryResult(long id, String to, String from, Serializable value)
   {
     BamStream stream = findAgent(to);
 
     if (stream != null)
-      stream.sendQueryResult(id, to, from, value);
+      stream.queryResult(id, to, from, value);
     else
       throw new RuntimeException(L.l("{0} is an unknown entity", to));
   }
@@ -536,7 +536,7 @@ public class HempBroker implements BamBroker, BamStream
   /**
    * Query an entity
    */
-  public void sendQueryError(long id,
+  public void queryError(long id,
 			 String to,
 			 String from,
 			 Serializable query,
@@ -545,7 +545,7 @@ public class HempBroker implements BamBroker, BamStream
     BamStream stream = findAgent(to);
 
     if (stream != null)
-      stream.sendQueryError(id, to, from, query, error);
+      stream.queryError(id, to, from, query, error);
     else
       throw new RuntimeException(L.l("{0} is an unknown entity", to));
   }

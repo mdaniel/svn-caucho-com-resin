@@ -58,7 +58,7 @@ class XmppClientBrokerStream extends AbstractBamStream
    * Sends a message to the stream
    */
   @Override
-  public void sendMessage(String to, String from, Serializable value)
+  public void message(String to, String from, Serializable value)
   {
     try {
       XmppStreamWriterImpl out = _out;
@@ -128,7 +128,7 @@ class XmppClientBrokerStream extends AbstractBamStream
    * Sends a query get message to the stream
    */
   @Override
-  public boolean sendQueryGet(long id, String to, String from,
+  public boolean queryGet(long id, String to, String from,
 			      Serializable value)
   {
     try {
@@ -170,7 +170,7 @@ class XmppClientBrokerStream extends AbstractBamStream
    * Sends a query set message to the stream
    */
   @Override
-  public boolean sendQuerySet(long id, String to, String from,
+  public boolean querySet(long id, String to, String from,
 			      Serializable value)
   {
     try {
@@ -212,7 +212,7 @@ class XmppClientBrokerStream extends AbstractBamStream
    * Sends a query result message to the stream
    */
   @Override
-  public void sendQueryResult(long id, String to, String from,
+  public void queryResult(long id, String to, String from,
   			      Serializable value)
   {
     try {
@@ -252,7 +252,7 @@ class XmppClientBrokerStream extends AbstractBamStream
    * Sends a presence message to the stream
    */
   @Override
-  public void sendPresence(String to, String from, Serializable value)
+  public void presence(String to, String from, Serializable value)
   {
     sendPresence(to, from, value, null);
   }
@@ -261,7 +261,7 @@ class XmppClientBrokerStream extends AbstractBamStream
    * Sends a presence probe to the stream
    */
   @Override
-  public void sendPresenceProbe(String to, String from, Serializable value)
+  public void presenceProbe(String to, String from, Serializable value)
   {
     sendPresence(to, from, value, "probe");
   }
@@ -270,7 +270,7 @@ class XmppClientBrokerStream extends AbstractBamStream
    * Sends a presence unavailable to the stream
    */
   @Override
-  public void sendPresenceUnavailable(String to,
+  public void presenceUnavailable(String to,
 				      String from,
 				      Serializable value)
   {
@@ -281,7 +281,7 @@ class XmppClientBrokerStream extends AbstractBamStream
    * Sends a presence subscribe to the stream
    */
   @Override
-  public void sendPresenceSubscribe(String to,
+  public void presenceSubscribe(String to,
 				    String from,
 				    Serializable value)
   {
@@ -292,7 +292,7 @@ class XmppClientBrokerStream extends AbstractBamStream
    * Sends a presence subscribed to the stream
    */
   @Override
-  public void sendPresenceSubscribed(String to,
+  public void presenceSubscribed(String to,
 				    String from,
 				    Serializable value)
   {
@@ -303,7 +303,7 @@ class XmppClientBrokerStream extends AbstractBamStream
    * Sends a presence unsubscribe to the stream
    */
   @Override
-  public void sendPresenceUnsubscribe(String to,
+  public void presenceUnsubscribe(String to,
 				      String from,
 				      Serializable value)
   {
@@ -314,7 +314,7 @@ class XmppClientBrokerStream extends AbstractBamStream
    * Sends a presence unsubscribed to the stream
    */
   @Override
-  public void sendPresenceUnsubscribed(String to,
+  public void presenceUnsubscribed(String to,
 				      String from,
 				      Serializable value)
   {

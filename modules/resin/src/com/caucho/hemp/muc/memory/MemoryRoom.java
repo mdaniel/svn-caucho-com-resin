@@ -92,7 +92,7 @@ public class MemoryRoom extends GenericService
   }
 
   @Override
-  public void sendMessage(String to, String from, Serializable value)
+  public void message(String to, String from, Serializable value)
   {
     MemoryNick nick = getNick(from);
 
@@ -119,7 +119,7 @@ public class MemoryRoom extends GenericService
 
     MemoryNick []users = _userArray;
     for (MemoryNick user : users) {
-      getBrokerStream().sendMessage(user.getUserJid(), nick.getJid(), msg);
+      getBrokerStream().message(user.getUserJid(), nick.getJid(), msg);
     }
   }
 
@@ -161,7 +161,7 @@ public class MemoryRoom extends GenericService
 
       MucUserPresence presenceData = user.toPresenceData();
 
-      getBrokerStream().sendPresence(nick.getUserJid(), user.getJid(),
+      getBrokerStream().presence(nick.getUserJid(), user.getJid(),
 				 new Serializable[] { presenceData });
     }
 
@@ -172,7 +172,7 @@ public class MemoryRoom extends GenericService
 
       MucUserPresence presenceData = user.toPresenceData();
 
-      getBrokerStream().sendPresence(user.getUserJid(), nick.getJid(),
+      getBrokerStream().presence(user.getUserJid(), nick.getJid(),
 				 new Serializable[] { presenceData });
     }
 
@@ -180,7 +180,7 @@ public class MemoryRoom extends GenericService
     MucUserPresence presenceData = nick.toPresenceData();
     presenceData.setStatus(new int[] { 110 });
 
-    getBrokerStream().sendPresence(nick.getUserJid(), nick.getJid(),
+    getBrokerStream().presence(nick.getUserJid(), nick.getJid(),
 			       new Serializable[] { presenceData });
   }
 }

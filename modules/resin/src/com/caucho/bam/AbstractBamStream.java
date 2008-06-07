@@ -56,7 +56,7 @@ public class AbstractBamStream implements BamStream
    * @param from the source JID
    * @param value the message payload
    */
-  public void sendMessage(String to, String from, Serializable value)
+  public void message(String to, String from, Serializable value)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " sendMessage to=" + to + " from=" + from
@@ -71,7 +71,7 @@ public class AbstractBamStream implements BamStream
    * @param from the source JID
    * @param value the message payload
    */
-  public void sendMessageError(String to,
+  public void messageError(String to,
 			       String from,
 			       Serializable value,
 			       BamError error)
@@ -82,7 +82,7 @@ public class AbstractBamStream implements BamStream
     }
   }
   
-  public boolean sendQueryGet(long id,
+  public boolean queryGet(long id,
 			    String to,
 			    String from,
 			    Serializable query)
@@ -96,7 +96,7 @@ public class AbstractBamStream implements BamStream
     return false;
   }
   
-  public boolean sendQuerySet(long id,
+  public boolean querySet(long id,
 			    String to,
 			    String from,
 			    Serializable query)
@@ -110,7 +110,7 @@ public class AbstractBamStream implements BamStream
     return false;
   }
   
-  public void sendQueryResult(long id,
+  public void queryResult(long id,
 			    String to,
 			    String from,
 			    Serializable value)
@@ -122,7 +122,7 @@ public class AbstractBamStream implements BamStream
     }
   }
   
-  public void sendQueryError(long id,
+  public void queryError(long id,
 			     String to,
 			     String from,
 			     Serializable query,
@@ -138,7 +138,7 @@ public class AbstractBamStream implements BamStream
   /**
    * General presence, for clients announcing availability
    */
-  public void sendPresence(String to,
+  public void presence(String to,
 			 String from,
 			 Serializable value)
   {
@@ -151,7 +151,7 @@ public class AbstractBamStream implements BamStream
   /**
    * General presence, for clients announcing unavailability
    */
-  public void sendPresenceUnavailable(String to,
+  public void presenceUnavailable(String to,
 				      String from,
 				      Serializable value)
   {
@@ -164,7 +164,7 @@ public class AbstractBamStream implements BamStream
   /**
    * Presence probe from the server to a client
    */
-  public void sendPresenceProbe(String to,
+  public void presenceProbe(String to,
 				String from,
 				Serializable value)
   {
@@ -177,7 +177,7 @@ public class AbstractBamStream implements BamStream
   /**
    * A subscription request from a client
    */
-  public void sendPresenceSubscribe(String to,
+  public void presenceSubscribe(String to,
 				  String from,
 				  Serializable value)
   {
@@ -190,7 +190,7 @@ public class AbstractBamStream implements BamStream
   /**
    * A subscription response to a client
    */
-  public void sendPresenceSubscribed(String to,
+  public void presenceSubscribed(String to,
 				     String from,
 				     Serializable value)
   {
@@ -203,7 +203,7 @@ public class AbstractBamStream implements BamStream
   /**
    * An unsubscription request from a client
    */
-  public void sendPresenceUnsubscribe(String to,
+  public void presenceUnsubscribe(String to,
 				      String from,
 				      Serializable value)
   {
@@ -216,7 +216,7 @@ public class AbstractBamStream implements BamStream
   /**
    * A unsubscription response to a client
    */
-  public void sendPresenceUnsubscribed(String to,
+  public void presenceUnsubscribed(String to,
 				       String from,
 				       Serializable value)
   {
@@ -229,7 +229,7 @@ public class AbstractBamStream implements BamStream
   /**
    * An error response to a client
    */
-  public void sendPresenceError(String to,
+  public void presenceError(String to,
 				String from,
 				Serializable value,
 				BamError error)

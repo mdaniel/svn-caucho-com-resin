@@ -48,55 +48,36 @@ public interface BamStream
   //
   
   /**
-   * Sends a message packet
+   * Sends a message to an agent
    * 
-   * @param to the target JID
-   * @param from the source JID
+   * @param to the target agent's JID
+   * @param from the source agent's JID
    * @param value the message payload
    */
-  public void sendMessage(String to, String from, Serializable value);
+  public void message(String to, String from, Serializable value);
   
   /**
-   * Sends a message error packet
+   * Sends a message error to an agent
    * 
-   * @param to the target JID
-   * @param from the source JID
+   * @param to the target agent's JID
+   * @param from the source agent's JID
    * @param value the message payload
    * @param error the message error
    */
-  public void sendMessageError(String to,
-			       String from,
-			       Serializable value,
-			       BamError error);
+  public void messageError(String to,
+			   String from,
+			   Serializable value,
+			   BamError error);
 
   //
   // queries (iq)
   //
-  /**
-   * Handles a query information request (get), returning true if this
-   * handler understands the query class, and false if it does not.
-   *
-   * If sendQueryGet returns true, the handler MUST send a
-   * <code>queryResult</code> or <code>queryError</code> to the sender,
-   * using the same <code>id</code>.
-   *
-   * @param id the query identifier used to match requests with responses
-   * @param to the target JID
-   * @param from the source JID, used as the target for the response
-   * @param query the query payload
-   *
-   * @return true if this handler understand the query, false otherwise
-   */
-  public boolean sendQueryGet(long id,
-			      String to,
-			      String from,
-			      Serializable query);
   
   /**
-   * Handles a query update request (set), returning true if this handler
-   * understands the query class, and false if it does not.
+   * Sends a query information call (get), returning true if this
+   * handler understands the query class, and false if it does not.
    *
-   * If sendQuerySet returns true, the handler MUST send a
+   * If queryGet returns true, the handler MUST send a
    * <code>queryResult</code> or <code>queryError</code> to the sender,
    * using the same <code>id</code>.
    *
@@ -107,10 +88,30 @@ public interface BamStream
    *
    * @return true if this handler understand the query, false otherwise
    */
-  public boolean sendQuerySet(long id,
-			      String to,
-			      String from,
-			      Serializable query);
+  public boolean queryGet(long id,
+			  String to,
+			  String from,
+			  Serializable query);
+  
+  /**
+   * Sends a query update request (set), returning true if this handler
+   * understands the query class, and false if it does not.
+   *
+   * If querySet returns true, the handler MUST send a
+   * <code>queryResult</code> or <code>queryError</code> to the sender,
+   * using the same <code>id</code>.
+   *
+   * @param id the query identifier used to match requests with responses
+   * @param to the target JID
+   * @param from the source JID, used as the target for the response
+   * @param query the query payload
+   *
+   * @return true if this handler understand the query, false otherwise
+   */
+  public boolean querySet(long id,
+			  String to,
+			  String from,
+			  Serializable query);
 
   /**
    * Handles the query response from a corresponding queryGet or querySet.
@@ -120,10 +121,10 @@ public interface BamStream
    * @param from the source JID, used as the target for the response
    * @param value the result payload
    */
-  public void sendQueryResult(long id,
-			      String to,
-			      String from,
-			      Serializable value);
+  public void queryResult(long id,
+			  String to,
+			  String from,
+			  Serializable value);
   
   /**
    * Handles the query error from a corresponding queryGet or querySet.
@@ -134,70 +135,71 @@ public interface BamStream
    * @param query the query payload
    * @param error additional error information
    */
-  public void sendQueryError(long id,
-			     String to,
-			     String from,
-			     Serializable query,
-			     BamError error);
+  public void queryError(long id,
+			 String to,
+			 String from,
+			 Serializable query,
+			 BamError error);
 
   //
   // presence
   //
 
   /**
-   * General presence, for clients announcing availability
+   * Announces an agent's presence, e.g. for an IM user logging on
+   * or changing their status text.
    */
-  public void sendPresence(String to,
-			   String from,
-			   Serializable data);
+  public void presence(String to,
+		       String from,
+		       Serializable data);
 
   /**
-   * General presence, for clients announcing unavailability
+   * Announces a logout of an agent.
    */
-  public void sendPresenceUnavailable(String to,
-				      String from,
-				      Serializable data);
+  public void presenceUnavailable(String to,
+				  String from,
+				  Serializable data);
 
   /**
-   * Presence probe from the server to a client
+   * Presence forwarding announcement from a server to a client.
    */
-  public void sendPresenceProbe(String to,
-			        String from,
-			        Serializable data);
+  public void presenceProbe(String to,
+			    String from,
+			    Serializable data);
 
   /**
    * A subscription request from a client
    */
-  public void sendPresenceSubscribe(String to,
-				    String from,
-				    Serializable data);
+  public void presenceSubscribe(String to,
+				String from,
+				Serializable data);
 
   /**
    * A subscription response to a client
    */
-  public void sendPresenceSubscribed(String to,
-				     String from,
-				     Serializable data);
+  public void presenceSubscribed(String to,
+				 String from,
+				 Serializable data);
 
   /**
    * An unsubscription request from a client
    */
-  public void sendPresenceUnsubscribe(String to,
-				      String from,
-				      Serializable data);
+  public void presenceUnsubscribe(String to,
+				  String from,
+				  Serializable data);
 
   /**
    * A unsubscription response to a client
    */
-  public void sendPresenceUnsubscribed(String to,
-				       String from,
-				       Serializable data);
+  public void presenceUnsubscribed(String to,
+				   String from,
+				   Serializable data);
 
   /**
    * An error response to a client
    */
-  public void sendPresenceError(String to,
-			        String from,
-			        Serializable data,
-			        BamError error);
+  public void presenceError(String to,
+			    String from,
+			    Serializable data,
+			    BamError error);
 }
