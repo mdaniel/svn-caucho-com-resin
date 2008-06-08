@@ -30,6 +30,7 @@
 package com.caucho.bam.muc;
 
 import java.util.*;
+import com.caucho.bam.data.*;
 
 /**
  * MucOwner query
@@ -52,14 +53,58 @@ import java.util.*;
  * }
  * </pre></code>
  */
-public class MucOwnerQuery implements java.io.Serializable {
-  public MucOwnerQuery()
+public class MucOwnerDestroyQuery extends MucOwnerQuery {
+  private String _jid;
+  private String _password;
+  private String _reason;
+  
+  public MucOwnerDestroyQuery()
   {
+  }
+  
+  public MucOwnerDestroyQuery(String jid)
+  {
+    _jid = jid;
+  }
+  
+  public MucOwnerDestroyQuery(String jid, String password, String reason)
+  {
+    _jid = jid;
+    _password = password;
+    _reason = reason;
+  }
+
+  public String getJid()
+  {
+    return _jid;
+  }
+
+  public String getPassword()
+  {
+    return _password;
+  }
+
+  public String getReason()
+  {
+    return _reason;
   }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName()).append("[");
+
+    if (_jid != null)
+      sb.append("jid=").append(_jid);
+
+    if (_password != null)
+      sb.append(",password=").append(_password);
+
+    if (_reason != null)
+      sb.append(",reason=").append(_reason);
+
+    return sb.toString();
   }
 }

@@ -29,35 +29,60 @@
 
 package com.caucho.bam.muc;
 
-import com.caucho.bam.muc.MucContinue;
 import java.util.*;
 
 /**
- * Muc query
+ * Muc admin query
+ *
+ * XEP-0045: http://www.xmpp.org/extensions/xep-0045.html
+ *
+ * <code><pre>
+ * namespace = http://jabber.org/protocol/muc#admin
+ *
+ * element query {
+ *   item+
+ * }
+ *
+ * element actor {
+ *   attribute jid
+ * }
+ *
+ * element item {
+ *   attribute affiliation?,
+ *   attribute jid?,
+ *   attribute nick?,
+ *   attribute role?,
+ *
+ *   actor?
+ *   &amp; reason?
+ * }
+ *
+ * element reason {
+ *   string
+ * }
+ * </pre></code>
  */
-public class MucUserItem implements java.io.Serializable {
-  // actor jid
+public class MucAdminItem implements java.io.Serializable {
   private String _actor;
   private String _reason;
-  private MucContinue _continue;
 
   // "admin", "member", "none", "outcast", "owner"
-  private String _affiliation = "none";
+  private String _affiliation;
   private String _jid;
   private String _nick;
   // "moderator", "none", "participant", "visitor"
-  private String _role = "none";
+  private String _role;
   
-  public MucUserItem()
+  public MucAdminItem()
   {
   }
-  
-  public MucUserItem(String jid)
+
+  public MucAdminItem(String jid)
   {
     _jid = jid;
   }
-  
-  public MucUserItem(String jid, String nick)
+
+  public MucAdminItem(String jid, String nick)
   {
     _jid = jid;
     _nick = nick;
@@ -83,16 +108,6 @@ public class MucUserItem implements java.io.Serializable {
     _affiliation = affiliation;
   }
 
-  public MucContinue getContinue()
-  {
-    return _continue;
-  }
-
-  public void setContinue(MucContinue mucContinue)
-  {
-    _continue = mucContinue;
-  }  
-
   public String getJid()
   {
     return _jid;
@@ -101,7 +116,7 @@ public class MucUserItem implements java.io.Serializable {
   public void setJid(String jid)
   {
     _jid = jid;
-  }  
+  }
 
   public String getNick()
   {
@@ -111,17 +126,7 @@ public class MucUserItem implements java.io.Serializable {
   public void setNick(String nick)
   {
     _nick = nick;
-  }  
-
-  public String getReason()
-  {
-    return _reason;
   }
-
-  public void setReason(String reason)
-  {
-    _reason = reason;
-  }  
 
   public String getRole()
   {
@@ -131,16 +136,29 @@ public class MucUserItem implements java.io.Serializable {
   public void setRole(String role)
   {
     _role = role;
-  }  
+  }
+
+  public String getReason()
+  {
+    return _reason;
+  }
+
+  public void setReason(String reason)
+  {
+    _reason = reason;
+  }
   
-  @Override
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
 
     sb.append(getClass().getSimpleName()).append("[");
 
-    sb.append("jid=").append(_jid);
+    if (_jid != null)
+      sb.append("jid=").append(_jid);
+
+    if (_nick != null)
+      sb.append(",nick=").append(_nick);
 
     if (_actor != null)
       sb.append(",actor=").append(_actor);
@@ -148,18 +166,12 @@ public class MucUserItem implements java.io.Serializable {
     if (_affiliation != null)
       sb.append(",affiliation=").append(_affiliation);
 
-    if (_continue != null)
-      sb.append(",continue=").append(_continue);
-
-    if (_nick != null)
-      sb.append(",nick=").append(_nick);
+    if (_role != null)
+      sb.append(",role=").append(_role);
 
     if (_reason != null)
       sb.append(",reason=").append(_reason);
 
-    if (_role != null)
-      sb.append(",role=").append(_role);
-    
     sb.append("]");
 
     return sb.toString();

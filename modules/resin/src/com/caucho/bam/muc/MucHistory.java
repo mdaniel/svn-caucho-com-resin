@@ -53,41 +53,65 @@ import java.util.*;
  * }
  * </pre></code>
  */
-public class MucQuery implements java.io.Serializable {
-  private String _password;
+public class MucHistory implements java.io.Serializable {
+  private int _maxChars;
+  private int _maxStanzas;
+  private int _seconds;
+  private Date _since;
   
-  private MucHistory _history;
-  
-  public MucQuery()
+  public MucHistory()
   {
   }
 
-  public MucQuery(String password,
-		  MucHistory history)
+  public MucHistory(int maxChars,
+		    int maxStanzas,
+		    int seconds,
+		    Date since)
   {
-    _password = password;
-    
-    _history = history;
+    _maxChars = maxChars;
+    _maxStanzas = maxStanzas;
+    _seconds = seconds;
+    _since = since;
   }
 
-  public String getPassword()
+  public int getMaxChars()
   {
-    return _password;
+    return _maxChars;
   }
 
-  public void setPassword(String password)
+  public void setMaxChars(int maxChars)
   {
-    _password = password;
+    _maxChars = maxChars;
   }
 
-  public MucHistory getHistory()
+  public int getMaxStanzas()
   {
-    return _history;
+    return _maxStanzas;
   }
 
-  public void setHistory(MucHistory history)
+  public void setMaxStanzas(int maxStanzas)
   {
-    _history = history;
+    _maxStanzas = maxStanzas;
+  }
+
+  public int getSeconds()
+  {
+    return _seconds;
+  }
+
+  public void setSeconds(int seconds)
+  {
+    _seconds = seconds;
+  }
+
+  public Date getSince()
+  {
+    return _since;
+  }
+
+  public void setSince(Date since)
+  {
+    _since = since;
   }
   
   public String toString()
@@ -96,8 +120,17 @@ public class MucQuery implements java.io.Serializable {
 
     sb.append(getClass().getSimpleName()).append("[");
     
-    if (_history != null)
-      sb.append("history=").append(_history);
+    if (_maxChars > 0)
+      sb.append("max-chars=").append(_maxChars);
+    
+    if (_maxStanzas > 0)
+      sb.append(",max-stanzas=").append(_maxStanzas);
+    
+    if (_seconds > 0)
+      sb.append(",seconds=").append(_seconds);
+    
+    if (_since != null)
+      sb.append(",since=").append(_since);
 
     sb.append("]");
 

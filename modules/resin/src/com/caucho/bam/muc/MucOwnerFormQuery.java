@@ -30,6 +30,7 @@
 package com.caucho.bam.muc;
 
 import java.util.*;
+import com.caucho.bam.data.*;
 
 /**
  * MucOwner query
@@ -52,14 +53,26 @@ import java.util.*;
  * }
  * </pre></code>
  */
-public class MucOwnerQuery implements java.io.Serializable {
-  public MucOwnerQuery()
+public class MucOwnerFormQuery extends MucOwnerQuery {
+  private DataForm _form;
+  
+  private MucOwnerFormQuery()
   {
+  }
+  
+  public MucOwnerFormQuery(DataForm form)
+  {
+    _form = form;
+  }
+
+  public DataForm getForm()
+  {
+    return _form;
   }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    return getClass().getSimpleName() + "[" + _form + "]";
   }
 }

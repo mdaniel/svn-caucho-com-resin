@@ -27,87 +27,88 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.muc;
+package com.caucho.bam.pubsub;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
- * Muc admin query
+ * pubsub query
  *
- * XEP-0045: http://www.xmpp.org/extensions/xep-0045.html
+ * XEP-0060: http://www.xmpp.org/extensions/xep-0060.html
  *
  * <code><pre>
- * namespace = http://jabber.org/protocol/muc#admin
+ * namespace = http://jabber.org/protocol/pubsub
  *
- * element query {
- *   item+
+ * element pubsub {
+ *   (create, configure?)
+ *   | (subscribe?, options?)
+ *   | affiliations
+ *   | items
+ *   | publish
+ *   | retract
+ *   | subscription
+ *   | subscriptions
+ *   | unsubscribe
  * }
  *
- * element actor {
- *   attribute jid
- * }
- *
- * element item {
- *   attribute affiliation?,
- *   attribute jid?,
- *   attribute nick?,
- *   attribute role?,
- *
- *   actor?
- *   &amp; reason?
- * }
- *
- * element reason {
- *   string
+ * element unsubscribe {
+ *   attribute jid,
+ *   attribute node?
+ *   attribute subid?
  * }
  * </pre></code>
  */
-public class MucAdminQuery implements java.io.Serializable {
-  private MucUserItem []_items;
-  
-  public MucAdminQuery()
+public class PubSubUnsubscribeQuery extends PubSubQuery {
+  private String _jid;
+  private String _node;
+  private String _subid;
+
+  public PubSubUnsubscribeQuery()
   {
   }
-  
-  public MucAdminQuery(MucUserItem []items)
+
+  public PubSubUnsubscribeQuery(String jid)
   {
-    _items = items;
+    _jid = jid;
   }
-  
-  public MucUserItem []getItems()
+
+  public PubSubUnsubscribeQuery(String jid, String node, String subid)
   {
-    return _items;
+    _jid = jid;
+    _node = node;
+    _subid = subid;
   }
-  
-  public void setItems(MucUserItem []items)
+
+  public String getJid()
   {
-    _items = items;
+    return _jid;
   }
-  
-  public void setItemList(ArrayList<MucUserItem> itemsList)
+
+  public String getNode()
   {
-    if (itemsList != null && itemsList.size() > 0) {
-      _items = new MucUserItem[itemsList.size()];
-      itemsList.toArray(_items);
-    }
-    else
-      _items = null;
+    return _node;
   }
-  
+
+  public String getSubid()
+  {
+    return _subid;
+  }
+
+  @Override
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
 
     sb.append(getClass().getSimpleName()).append("[");
 
-    if (_items != null) {
-      for (int i = 0; i < _items.length; i++) {
-	if (i > 0)
-	  sb.append(",");
+    sb.append("jid=").append(_jid);
 
-	sb.append("item=").append(_items[i]);
-      }
-    }
+    if (_node != null)
+      sb.append(",node=").append(_node);
+
+    if (_subid != null)
+      sb.append(",subid=").append(_subid);
 
     sb.append("]");
 
