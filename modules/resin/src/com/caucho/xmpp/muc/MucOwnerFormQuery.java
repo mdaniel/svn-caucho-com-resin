@@ -27,52 +27,54 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.xmpp;
+package com.caucho.xmpp.muc;
 
-import com.caucho.xmpp.im.ImBindQuery;
-import com.caucho.bam.*;
-import com.caucho.bam.im.*;
-import com.caucho.server.connection.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.stream.*;
-import com.caucho.xmpp.im.XmppRosterQueryMarshal;
-import java.io.*;
+import com.caucho.bam.muc.*;
+import com.caucho.xmpp.data.DataForm;
 import java.util.*;
-import java.util.logging.*;
-import javax.servlet.*;
-import javax.xml.namespace.QName;
-import javax.xml.stream.*;
+import com.caucho.bam.data.*;
 
 /**
- * Protocol handler from the TCP/XMPP stream forwarding to the broker
+ * MucOwner query
+ *
+ * XEP-0045: http://www.xmpp.org/extensions/xep-0045.html
+ *
+ * <code><pre>
+ * namespace = http://jabber.org/protocol/muc#owner
+ *
+ * element query {
+ *   x{jabber:x:data}
+ *   | destroy?
+ * }
+ *
+ * element destroy {
+ *   attribute jid?,
+ *
+ *   password?
+ *   &amp; reason?
+ * }
+ * </pre></code>
  */
-public class XmppBindCallback extends AbstractBamStream
-{
-  private XmppBrokerStream _xmppBroker;
-
-  XmppBindCallback(XmppBrokerStream broker)
+public class MucOwnerFormQuery extends MucOwnerQuery {
+  private DataForm _form;
+  
+  private MucOwnerFormQuery()
   {
-    _xmppBroker = broker;
+  }
+  
+  public MucOwnerFormQuery(DataForm form)
+  {
+    _form = form;
   }
 
-  @Override
-  public boolean querySet(long id,
-			      String to, String from,
-			      Serializable value)
+  public DataForm getForm()
   {
-    if (value instanceof ImBindQuery) {
-      ImBindQuery bind = (ImBindQuery) value;
-
-      String jid = _xmppBroker.bind(bind.getResource(), bind.getJid());
-
-      ImBindQuery result = new ImBindQuery(null, jid);
-
-      _xmppBroker.getAgentStream().queryResult(id, from, to, result);
-
-      return true;
-    }
-    
-    return false;
+    return _form;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _form + "]";
   }
 }

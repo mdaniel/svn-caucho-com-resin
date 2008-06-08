@@ -27,52 +27,57 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.xmpp;
+package com.caucho.xmpp.disco;
 
-import com.caucho.xmpp.im.ImBindQuery;
-import com.caucho.bam.*;
-import com.caucho.bam.im.*;
-import com.caucho.server.connection.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.stream.*;
-import com.caucho.xmpp.im.XmppRosterQueryMarshal;
-import java.io.*;
 import java.util.*;
-import java.util.logging.*;
-import javax.servlet.*;
-import javax.xml.namespace.QName;
-import javax.xml.stream.*;
 
 /**
- * Protocol handler from the TCP/XMPP stream forwarding to the broker
+ * service discovery identity
+ *
+ * http://jabber.org/protocol/disco#info
+ *
+ * <code><pre>
+ * element query {
+ *   attribute node?,
+ *   identity*,
+ *   feature*
+ * }
+ *
+ * element identity {
+ *    attribute category,
+ *    attribute name?,
+ *    attribute type
+ * }
+ *
+ * element feature {
+ *    attribute _var
+ * }
+ * </pre></code>
  */
-public class XmppBindCallback extends AbstractBamStream
-{
-  private XmppBrokerStream _xmppBroker;
-
-  XmppBindCallback(XmppBrokerStream broker)
+public class DiscoFeature implements java.io.Serializable {
+  private String _var;
+  
+  public DiscoFeature()
   {
-    _xmppBroker = broker;
+  }
+  
+  public DiscoFeature(String var)
+  {
+    _var = var;
   }
 
-  @Override
-  public boolean querySet(long id,
-			      String to, String from,
-			      Serializable value)
+  /**
+   * Returns the feature name
+   */
+  public String getVar()
   {
-    if (value instanceof ImBindQuery) {
-      ImBindQuery bind = (ImBindQuery) value;
-
-      String jid = _xmppBroker.bind(bind.getResource(), bind.getJid());
-
-      ImBindQuery result = new ImBindQuery(null, jid);
-
-      _xmppBroker.getAgentStream().queryResult(id, from, to, result);
-
-      return true;
-    }
-    
-    return false;
+    return _var;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return (getClass().getSimpleName()
+	    + "[" + _var + "]");
   }
 }

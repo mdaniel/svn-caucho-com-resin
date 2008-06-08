@@ -27,52 +27,36 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.xmpp;
+package com.caucho.xmpp.muc;
 
-import com.caucho.xmpp.im.ImBindQuery;
-import com.caucho.bam.*;
-import com.caucho.bam.im.*;
-import com.caucho.server.connection.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.stream.*;
-import com.caucho.xmpp.im.XmppRosterQueryMarshal;
-import java.io.*;
 import java.util.*;
-import java.util.logging.*;
-import javax.servlet.*;
-import javax.xml.namespace.QName;
-import javax.xml.stream.*;
 
 /**
- * Protocol handler from the TCP/XMPP stream forwarding to the broker
+ * Muc query
  */
-public class XmppBindCallback extends AbstractBamStream
-{
-  private XmppBrokerStream _xmppBroker;
+public class MucStatus implements java.io.Serializable {
+  private int _code;
 
-  XmppBindCallback(XmppBrokerStream broker)
+  /**
+   * Hessian zero-arg constructor
+   */
+  private MucStatus()
   {
-    _xmppBroker = broker;
+  }
+  
+  public MucStatus(int code)
+  {
+    _code = code;
   }
 
-  @Override
-  public boolean querySet(long id,
-			      String to, String from,
-			      Serializable value)
+  public int getCode()
   {
-    if (value instanceof ImBindQuery) {
-      ImBindQuery bind = (ImBindQuery) value;
-
-      String jid = _xmppBroker.bind(bind.getResource(), bind.getJid());
-
-      ImBindQuery result = new ImBindQuery(null, jid);
-
-      _xmppBroker.getAgentStream().queryResult(id, from, to, result);
-
-      return true;
-    }
-    
-    return false;
+    return _code;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _code + "]";
   }
 }

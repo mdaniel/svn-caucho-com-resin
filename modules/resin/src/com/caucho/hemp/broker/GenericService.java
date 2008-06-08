@@ -30,9 +30,9 @@
 package com.caucho.hemp.broker;
 
 import com.caucho.bam.BamBroker;
-import com.caucho.bam.disco.DiscoInfoQuery;
-import com.caucho.bam.disco.DiscoIdentity;
-import com.caucho.bam.disco.DiscoFeature;
+import com.caucho.xmpp.disco.DiscoInfoQuery;
+import com.caucho.xmpp.disco.DiscoIdentity;
+import com.caucho.xmpp.disco.DiscoFeature;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamConnection;
 import com.caucho.config.*;

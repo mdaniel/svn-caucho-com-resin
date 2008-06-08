@@ -27,52 +27,52 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.xmpp;
+package com.caucho.xmpp.data;
 
-import com.caucho.xmpp.im.ImBindQuery;
-import com.caucho.bam.*;
-import com.caucho.bam.im.*;
-import com.caucho.server.connection.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.stream.*;
-import com.caucho.xmpp.im.XmppRosterQueryMarshal;
-import java.io.*;
 import java.util.*;
-import java.util.logging.*;
-import javax.servlet.*;
-import javax.xml.namespace.QName;
-import javax.xml.stream.*;
 
 /**
- * Protocol handler from the TCP/XMPP stream forwarding to the broker
+ * data forms
+ *
+ * XEP-0004: http://www.xmpp.org/extensions/xep-0004.html
+ *
+ * <code><pre>
+ * namespace = jabber:x:data
+ *
+ * element instructions {
+ *   string
+ * }
+ * </pre></code>
  */
-public class XmppBindCallback extends AbstractBamStream
-{
-  private XmppBrokerStream _xmppBroker;
-
-  XmppBindCallback(XmppBrokerStream broker)
+public class DataInstructions implements java.io.Serializable {
+  private String _value;
+  
+  private DataInstructions()
   {
-    _xmppBroker = broker;
+  }
+  
+  public DataInstructions(String value)
+  {
+    _value = value;
   }
 
-  @Override
-  public boolean querySet(long id,
-			      String to, String from,
-			      Serializable value)
+  public String getValue()
   {
-    if (value instanceof ImBindQuery) {
-      ImBindQuery bind = (ImBindQuery) value;
+    return _value;
+  }
 
-      String jid = _xmppBroker.bind(bind.getResource(), bind.getJid());
-
-      ImBindQuery result = new ImBindQuery(null, jid);
-
-      _xmppBroker.getAgentStream().queryResult(id, from, to, result);
-
-      return true;
-    }
+  public void setValue(String value)
+  {
+    _value = value;
+  }
+  
+  @Override
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getSimpleName());
+    sb.append("[").append(_value).append("]");
     
-    return false;
+    return sb.toString();
   }
 }

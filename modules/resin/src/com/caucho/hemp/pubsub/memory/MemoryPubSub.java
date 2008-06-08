@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.pubsub.memory;
 
-import com.caucho.bam.pubsub.PubSubPublish;
+import com.caucho.xmpp.pubsub.PubSubPublish;
 import com.caucho.bam.BamError;
 import com.caucho.hemp.broker.GenericService;
 import java.io.Serializable;

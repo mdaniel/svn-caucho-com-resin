@@ -29,8 +29,8 @@
 
 package com.caucho.hemp.muc.memory;
 
-import com.caucho.bam.muc.MucUserPresence;
-import com.caucho.bam.im.ImMessage;
+import com.caucho.xmpp.muc.MucUserPresence;
+import com.caucho.xmpp.im.ImMessage;
 import com.caucho.bam.BamStream;
 import com.caucho.hemp.broker.GenericService;
 import java.io.Serializable;

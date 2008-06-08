@@ -29,6 +29,10 @@
 
 package com.caucho.xmpp;
 
+import com.caucho.xmpp.im.Text;
+import com.caucho.xmpp.im.ImSessionQuery;
+import com.caucho.xmpp.im.ImPresence;
+import com.caucho.xmpp.im.ImMessage;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamConnection;

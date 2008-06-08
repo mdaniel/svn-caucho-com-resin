@@ -29,8 +29,8 @@
 
 package com.caucho.hemp.pubsub.memory;
 
-import com.caucho.bam.pubsub.PublishMessage;
-import com.caucho.bam.pubsub.PubSubItem;
+import com.caucho.xmpp.pubsub.PublishMessage;
+import com.caucho.xmpp.pubsub.PubSubItem;
 import com.caucho.util.*;
 import java.util.*;
 import java.util.logging.*;

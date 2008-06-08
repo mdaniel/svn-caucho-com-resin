@@ -29,6 +29,9 @@
 
 package com.caucho.xmpp;
 
+import com.caucho.xmpp.im.Text;
+import com.caucho.xmpp.im.ImPresence;
+import com.caucho.xmpp.im.ImMessage;
 import com.caucho.bam.*;
 import com.caucho.bam.im.*;
 import com.caucho.vfs.*;

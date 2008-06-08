@@ -30,11 +30,11 @@
 package com.caucho.hemp.im;
 
 import com.caucho.bam.SimpleBamService;
-import com.caucho.bam.im.RosterQuery;
-import com.caucho.bam.im.RosterItem;
-import com.caucho.bam.disco.DiscoInfoQuery;
-import com.caucho.bam.disco.DiscoIdentity;
-import com.caucho.bam.disco.DiscoFeature;
+import com.caucho.xmpp.im.RosterQuery;
+import com.caucho.xmpp.im.RosterItem;
+import com.caucho.xmpp.disco.DiscoInfoQuery;
+import com.caucho.xmpp.disco.DiscoIdentity;
+import com.caucho.xmpp.disco.DiscoFeature;
 import com.caucho.bam.BamStream;
 import java.io.Serializable;
 import java.util.*;
