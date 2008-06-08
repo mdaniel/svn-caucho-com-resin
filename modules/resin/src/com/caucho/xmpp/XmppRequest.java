@@ -74,7 +74,7 @@ public class XmppRequest implements TcpServerRequest {
 
   private String _name;
   
-  private XMLStreamReaderImpl _in;
+  private XmppStreamReader _in;
 
   private boolean _isAllowTls = false;
 
@@ -193,7 +193,7 @@ public class XmppRequest implements TcpServerRequest {
     _is = _conn.getReadStream();
     _os = _conn.getWriteStream();
       
-    _in = new XMLStreamReaderImpl(_is);
+    _in = new XmppStreamReaderImpl(_is, _protocol.getMarshalFactory());
 
     if (! readStreamHeader())
       return false;

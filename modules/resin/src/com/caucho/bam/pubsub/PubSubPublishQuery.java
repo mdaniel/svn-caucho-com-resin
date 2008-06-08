@@ -27,70 +27,78 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.disco;
+package com.caucho.bam.pubsub;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
- * service discovery identity
+ * pubsub query
  *
- * http://jabber.org/protocol/disco#info
+ * XEP-0060: http://www.xmpp.org/extensions/xep-0060.html
  *
  * <code><pre>
- * element query {
- *   attribute node?,
- *   identity*,
- *   feature*
+ * namespace = http://jabber.org/protocol/pubsub
+ *
+ * element pubsub {
+ *   (create, configure?)
+ *   | (subscribe?, options?)
+ *   | affiliations
+ *   | items
+ *   | publish
+ *   | retract
+ *   | subscription
+ *   | subscriptions
+ *   | unsubscribe
  * }
  *
- * element identity {
- *    attribute category,
- *    attribute name?,
- *    attribute type
+ * element item {
+ *   attribute id?,
+ *
+ *   other?
  * }
  *
- * element feature {
- *    attribute var
+ * element publish {
+ *   attribute node,
+ *
+ *   item*
  * }
  * </pre></code>
  */
-public class DiscoIdentity implements java.io.Serializable {
-  private String _category;
-  private String _type;
-  private String _name;
-  
-  public DiscoIdentity()
+public class PubSubPublishQuery extends PubSubQuery {
+  private String _node;
+  private PubSubItem _item;
+
+  private PubSubPublishQuery()
   {
-  }
-  
-  public DiscoIdentity(String category, String type)
-  {
-    _category = category;
-    _type = type;
-  }
-  
-  public DiscoIdentity(String category, String type, String name)
-  {
-    _category = category;
-    _type = type;
-    _name = name;
   }
 
-  public String getCategory()
+  public PubSubPublishQuery(String node)
   {
-    return _category;
+    _node = node;
   }
 
-  public String getType()
+  public PubSubPublishQuery(String node, PubSubItem item)
   {
-    return _type;
+    _node = node;
+    _item = item;
   }
 
-  public String getName()
+  public String getNode()
   {
-    return _name;
+    return _node;
   }
-  
+
+  public void setItem(PubSubItem item)
+  {
+    _item = item;
+  }
+
+  public PubSubItem getItem()
+  {
+    return _item;
+  }
+
   @Override
   public String toString()
   {
@@ -98,14 +106,11 @@ public class DiscoIdentity implements java.io.Serializable {
 
     sb.append(getClass().getSimpleName()).append("[");
 
-    sb.append("[category=").append(_category);
-    sb.append(",type=").append(_type);
-
-    if (_name != null)
-      sb.append(",name=").append(_name);
+    sb.append("node=").append(_node);
+    sb.append(",item=").append(_item);
 
     sb.append("]");
-    
+
     return sb.toString();
   }
 }

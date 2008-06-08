@@ -33,7 +33,101 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Publish query
+ * pubsub query
+ *
+ * XEP-0060: http://www.xmpp.org/extensions/xep-0060.html
+ *
+ * <code><pre>
+ * namespace = http://jabber.org/protocol/pubsub
+ *
+ * element pubsub {
+ *   (create, configure?)
+ *   | (subscribe?, options?)
+ *   | affiliations
+ *   | items
+ *   | publish
+ *   | retract
+ *   | subscription
+ *   | subscriptions
+ *   | unsubscribe
+ * }
+ *
+ * element affiliation {
+ *   attribute affiliation,
+ *   attribute node
+ * }
+ *
+ * element affiliations {
+ *   affiliation*
+ * }
+ *
+ * element configure {
+ *   x{jabber:x:data}?
+ * }
+ *
+ * element create {
+ *   attribute node?
+ * }
+ *
+ * element item {
+ *   attribute id?,
+ *
+ *   other?
+ * }
+ *
+ * element items {
+ *   attribute max_items?,
+ *   attribute node,
+ *   attribute subid?,
+ *
+ *   item*
+ * }
+ *
+ * element options {
+ *   attribute jid,
+ *   attribute node?,
+ *   attribute subid?,
+ *
+ *   x{jabber:x:data}*
+ * }
+ *
+ * element publish {
+ *   attribute node,
+ *
+ *   item*
+ * }
+ *
+ * element retract {
+ *   attribute node,
+ *   attribute notify?,
+ *
+ *   item+
+ * }
+ *
+ * element subscribe {
+ *   attribute jid,
+ *   attribute node?
+ * }
+ *
+ * element subscribe-options {
+ *   required?
+ * }
+ *
+ * element subscription {
+ *   attribute jid,
+ *   attribute node?,
+ *   attribute subid?,
+ *   attribute subscription?,
+ *
+ *   subscribe-options?
+ * }
+ *
+ * element unsubscribe {
+ *   attribute jid,
+ *   attribute node?
+ *   attribute subid?
+ * }
+ * </pre></code>
  */
 abstract public class PubSubQuery implements Serializable {
 }

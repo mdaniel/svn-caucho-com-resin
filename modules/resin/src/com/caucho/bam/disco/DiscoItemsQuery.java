@@ -37,9 +37,9 @@ import java.util.*;
  *
  * http://www.xmpp.org/extensions/xep-0030.html
  *
- * xmlns="http://jabber.org/protocol/disco#items"
- *
  * <code><pre>
+ * namespace="http://jabber.org/protocol/disco#items"
+ *
  * element query {
  *   attribute node?,
  *   item*
@@ -61,10 +61,62 @@ public class DiscoItemsQuery implements java.io.Serializable {
   public DiscoItemsQuery()
   {
   }
+
+  public DiscoItemsQuery(String node)
+  {
+    _node = node;
+  }
+
+  public String getNode()
+  {
+    return _node;
+  }
+  
+  public DiscoItem []getItems()
+  {
+    return _items;
+  }
+  
+  public void setItems(DiscoItem []items)
+  {
+    _items = items;
+  }
+  
+  public void setItemList(ArrayList<DiscoItem> itemList)
+  {
+    if (itemList != null && itemList.size() > 0) {
+      _items = new DiscoItem[itemList.size()];
+      itemList.toArray(_items);
+    }
+    else
+      _items = null;
+  }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+
+    if (_node != null) {
+      sb.append("node=");
+      sb.append(_node);
+      sb.append(",");
+    }
+
+    sb.append("items=[");
+    
+    if (_items != null) {
+      for (int i = 0; i < _items.length; i++) {
+	if (i != 0)
+	  sb.append(",");
+	sb.append(_items[i]);
+      }
+    }
+    
+    sb.append("]]");
+    
+    return sb.toString();
   }
 }

@@ -59,6 +59,11 @@ public class PubSubItem implements Serializable {
     return _id;
   }
 
+  public void setValue(Serializable value)
+  {
+    _value = value;
+  }
+
   public Serializable getValue()
   {
     return _value;
@@ -66,6 +71,9 @@ public class PubSubItem implements Serializable {
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _id + "]";
+    if (_id != null)
+      return getClass().getSimpleName() + "[" + _id + "," + _value + "]";
+    else
+      return getClass().getSimpleName() + "[" + _value + "]";
   }
 }

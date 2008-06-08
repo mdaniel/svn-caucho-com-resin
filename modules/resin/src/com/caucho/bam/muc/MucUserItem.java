@@ -37,24 +37,120 @@ import java.util.*;
  */
 public class MucUserItem implements java.io.Serializable {
   // actor jid
-  private String actor;
-  private String reason;
+  private String _actor;
+  private String _reason;
   private MucContinue _continue;
 
   // "admin", "member", "none", "outcast", "owner"
-  private String affiliation;
-  private String jid;
-  private String nick;
+  private String _affiliation = "none";
+  private String _jid;
+  private String _nick;
   // "moderator", "none", "participant", "visitor"
-  private String role;
+  private String _role = "none";
   
   public MucUserItem()
   {
   }
+
+  public String getActor()
+  {
+    return _actor;
+  }
+
+  public void setActor(String actor)
+  {
+    _actor = actor;
+  }
+
+  public String getAffiliation()
+  {
+    return _affiliation;
+  }
+
+  public void setAffiliation(String affiliation)
+  {
+    _affiliation = affiliation;
+  }
+
+  public MucContinue getContinue()
+  {
+    return _continue;
+  }
+
+  public void setContinue(MucContinue mucContinue)
+  {
+    _continue = mucContinue;
+  }  
+
+  public String getJid()
+  {
+    return _jid;
+  }
+
+  public void setJid(String jid)
+  {
+    _jid = jid;
+  }  
+
+  public String getNick()
+  {
+    return _nick;
+  }
+
+  public void setNick(String nick)
+  {
+    _nick = nick;
+  }  
+
+  public String getReason()
+  {
+    return _reason;
+  }
+
+  public void setReason(String reason)
+  {
+    _reason = reason;
+  }  
+
+  public String getRole()
+  {
+    return _role;
+  }
+
+  public void setRole(String role)
+  {
+    _role = role;
+  }  
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName()).append("[");
+
+    sb.append("jid=").append(_jid);
+
+    if (_actor != null)
+      sb.append(",actor=").append(_actor);
+
+    if (_affiliation != null)
+      sb.append(",affiliation=").append(_affiliation);
+
+    if (_continue != null)
+      sb.append(",continue=").append(_continue);
+
+    if (_nick != null)
+      sb.append(",nick=").append(_nick);
+
+    if (_reason != null)
+      sb.append(",reason=").append(_reason);
+
+    if (_role != null)
+      sb.append(",role=").append(_role);
+    
+    sb.append("]");
+
+    return sb.toString();
   }
 }

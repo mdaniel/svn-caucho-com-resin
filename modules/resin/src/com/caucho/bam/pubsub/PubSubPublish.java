@@ -36,7 +36,7 @@ import java.io.Serializable;
 /**
  * Publish query
  */
-public class PubSubPublish extends PubSubQuery {
+public class PubSubPublish implements Serializable {
   private static final PubSubItem []NULL_ITEMS = new PubSubItem[0];
   
   private String _node;

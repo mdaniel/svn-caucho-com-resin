@@ -39,6 +39,7 @@ import com.caucho.xml.stream.*;
  * Marshals from an xmpp request to and from a serialized class
  */
 public class XmppStreamWriterImpl extends XMLStreamWriterImpl
+  implements XmppStreamWriter
 {
   private static final L10N L = new L10N(XmppStreamWriterImpl.class);
   
@@ -59,6 +60,7 @@ public class XmppStreamWriterImpl extends XMLStreamWriterImpl
     if (value == null) {
     }
     else if (value instanceof String) {
+      writeCharacters(""); // flush
       _os.print((String) value);
     }
     else {
@@ -66,7 +68,7 @@ public class XmppStreamWriterImpl extends XMLStreamWriterImpl
 	
       XmppMarshal marshal = _marshalFactory.getSerialize(name);
 
-      if (name == null)
+      if (marshal == null)
 	throw new IllegalArgumentException(L.l("'{0}' is an unknown XMPP marshal class", name));
 
       marshal.toXml(this, value);

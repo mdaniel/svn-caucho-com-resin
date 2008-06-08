@@ -1,4 +1,13 @@
+com.caucho.xmpp.atom.XmppAtomEntryMarshal
+com.caucho.xmpp.caps.XmppCapabilitiesMarshal
+com.caucho.xmpp.data.XmppDataFormMarshal
+com.caucho.xmpp.disco.XmppDiscoInfoQueryMarshal
+com.caucho.xmpp.disco.XmppDiscoItemsQueryMarshal
 com.caucho.xmpp.im.XmppImBindQueryMarshal
 com.caucho.xmpp.im.XmppImSessionQueryMarshal
 com.caucho.xmpp.im.XmppRosterQueryMarshal
+com.caucho.xmpp.muc.XmppMucUserQueryMarshal
+com.caucho.xmpp.pubsub.XmppPubSubQueryMarshal
+com.caucho.xmpp.pubsub.XmppPubSubPublishQueryMarshal
+com.caucho.xmpp.pubsub.XmppPubSubSubscribeQueryMarshal
 

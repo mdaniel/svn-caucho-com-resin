@@ -27,82 +27,98 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.disco;
+package com.caucho.bam.caps;
 
 import java.util.*;
 
 /**
- * service discovery identity
+ * capabilities
  *
- * http://jabber.org/protocol/disco#info
+ * XEP-0115: http://www.xmpp.org/extensions/xep-0115.html
  *
  * <code><pre>
- * element query {
- *   attribute node?,
- *   identity*,
- *   feature*
- * }
+ * namespace = http://jabber.org/protocol/caps
  *
- * element identity {
- *    attribute category,
- *    attribute name?,
- *    attribute type
- * }
- *
- * element feature {
- *    attribute var
+ * element c {
+ *   attribute ext?,
+ *   attribute hash,
+ *   attribute node,
+ *   attribute ver
  * }
  * </pre></code>
  */
-public class DiscoIdentity implements java.io.Serializable {
-  private String _category;
-  private String _type;
-  private String _name;
+public class Capabilities implements java.io.Serializable {
+  private String _ext;
+  private String _hash;
+  private String _node;
+  private String _ver;
   
-  public DiscoIdentity()
+  public Capabilities()
   {
-  }
-  
-  public DiscoIdentity(String category, String type)
-  {
-    _category = category;
-    _type = type;
   }
   
-  public DiscoIdentity(String category, String type, String name)
+  public Capabilities(String hash, String node, String ver)
   {
-    _category = category;
-    _type = type;
-    _name = name;
+    _hash = hash;
+    _node = node;
+    _ver = ver;
   }
 
-  public String getCategory()
+  public String getExt()
   {
-    return _category;
+    return _ext;
+  }
+  
+  public void setExt(String ext)
+  {
+    _ext = ext;
   }
 
-  public String getType()
+  public String getHash()
   {
-    return _type;
+    return _hash;
+  }
+  
+  public void setHash(String hash)
+  {
+    _hash = hash;
   }
 
-  public String getName()
+  public String getNode()
   {
-    return _name;
+    return _node;
+  }
+  
+  public void setNode(String node)
+  {
+    _node = node;
+  }
+
+  public String getVer()
+  {
+    return _ver;
+  }
+  
+  public void setVer(String ver)
+  {
+    _ver = ver;
   }
   
   @Override
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getSimpleName());
+    sb.append("[hash=").append(_hash);
 
-    sb.append(getClass().getSimpleName()).append("[");
+    if (_node != null)
+      sb.append(",node=").append(_node);
 
-    sb.append("[category=").append(_category);
-    sb.append(",type=").append(_type);
+    if (_ver != null)
+      sb.append(",ver=").append(_ver);
 
-    if (_name != null)
-      sb.append(",name=").append(_name);
+    if (_ext != null)
+      sb.append(",ext=").append(_ext);
 
     sb.append("]");
     

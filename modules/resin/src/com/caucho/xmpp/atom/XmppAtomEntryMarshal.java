@@ -27,9 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.xmpp.im;
+package com.caucho.xmpp.atom;
 
-import com.caucho.bam.im.*;
+import com.caucho.bam.atom.*;
 import com.caucho.vfs.*;
 import com.caucho.xmpp.*;
 import java.io.*;
@@ -38,23 +38,28 @@ import java.util.logging.*;
 import javax.xml.stream.*;
 
 /**
- * IM session - RFC 3921
+ * atom
  *
- * <pre>
- * element session{urn:ietf:params:xml:ns:xmpp-session} {
+ * RFC-4287: http://www.ietf.org/html/rfc4287.html
+ *
+ * <code><pre>
+ * namespace = http://www.w3c.org/2005/Atom
+ *
+ * element entry {
  * }
  * </pre></code>
  */
-public class XmppImSessionQueryMarshal extends AbstractXmppMarshal {
+public class XmppAtomEntryMarshal extends AbstractXmppMarshal {
   private static final Logger log
-    = Logger.getLogger(XmppImSessionQueryMarshal.class.getName());
+    = Logger.getLogger(XmppAtomEntryMarshal.class.getName());
+  private static final boolean _isFinest = log.isLoggable(Level.FINEST);
 
   /**
    * Returns the namespace uri for the XMPP stanza value
    */
   public String getNamespaceURI()
   {
-    return "urn:ietf:params:xml:ns:xmpp-session";
+    return "http://www.w3c.org/2005/Atom";
   }
 
   /**
@@ -62,7 +67,7 @@ public class XmppImSessionQueryMarshal extends AbstractXmppMarshal {
    */
   public String getLocalName()
   {
-    return "session";
+    return "entry";
   }
 
   /**
@@ -70,7 +75,7 @@ public class XmppImSessionQueryMarshal extends AbstractXmppMarshal {
    */
   public String getClassName()
   {
-    return ImSessionQuery.class.getName();
+    return AtomEntry.class.getName();
   }
   
   /**
@@ -79,12 +84,12 @@ public class XmppImSessionQueryMarshal extends AbstractXmppMarshal {
   public void toXml(XmppStreamWriter out, Serializable object)
     throws IOException, XMLStreamException
   {
-    ImSessionQuery session = (ImSessionQuery) object;
+    AtomEntry entry = (AtomEntry) object;
 
     out.writeStartElement("", getLocalName(), getNamespaceURI());
     out.writeNamespace("", getNamespaceURI());
     
-    out.writeEndElement(); // </session>
+    out.writeEndElement(); // </entry>
   }
   
   /**
@@ -94,24 +99,11 @@ public class XmppImSessionQueryMarshal extends AbstractXmppMarshal {
     throws IOException, XMLStreamException
   {
     boolean isFinest = log.isLoggable(Level.FINEST);
-    int tag;
 
-    while ((tag = in.nextTag()) > 0) {
-      if (isFinest)
-	debug(in);
+    AtomEntry entry = new AtomEntry();
 
-      if (XMLStreamReader.END_ELEMENT == tag) {
-	return new ImSessionQuery();
-      }
-      else {
-	log.warning(this + " unexpected tag " + in.getLocalName());
+    skipToEnd(in, "entry");
 
-	skipToEnd(in, "session");
-	
-	return null;
-      }
-    }
-
-    return null;
+    return entry;
   }
 }

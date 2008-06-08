@@ -27,83 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.disco;
+package com.caucho.bam.atom;
 
 import java.util.*;
 
 /**
- * service discovery identity
+ * atom
  *
- * http://jabber.org/protocol/disco#info
+ * RFC-4287: http://www.ietf.org/html/rfc4287.html
  *
  * <code><pre>
- * element query {
- *   attribute node?,
- *   identity*,
- *   feature*
- * }
+ * namespace = http://www.w3c.org/2005/Atom
  *
- * element identity {
- *    attribute category,
- *    attribute name?,
- *    attribute type
- * }
- *
- * element feature {
- *    attribute var
+ * element entry {
  * }
  * </pre></code>
  */
-public class DiscoIdentity implements java.io.Serializable {
-  private String _category;
-  private String _type;
-  private String _name;
-  
-  public DiscoIdentity()
-  {
-  }
-  
-  public DiscoIdentity(String category, String type)
-  {
-    _category = category;
-    _type = type;
-  }
-  
-  public DiscoIdentity(String category, String type, String name)
-  {
-    _category = category;
-    _type = type;
-    _name = name;
-  }
-
-  public String getCategory()
-  {
-    return _category;
-  }
-
-  public String getType()
-  {
-    return _type;
-  }
-
-  public String getName()
-  {
-    return _name;
-  }
-  
+public class AtomEntry implements java.io.Serializable {
   @Override
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
-
-    sb.append(getClass().getSimpleName()).append("[");
-
-    sb.append("[category=").append(_category);
-    sb.append(",type=").append(_type);
-
-    if (_name != null)
-      sb.append(",name=").append(_name);
-
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
     sb.append("]");
     
     return sb.toString();

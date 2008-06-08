@@ -19,19 +19,19 @@
 
 <s1 title="Quick Start">
 
-<s2 title="Server sendMessage example">
+<s2 title="Server message example">
 
 <p>Sending a message from one agent to another is a basic HMTP use case.
 Typical applications include chat text, game updates, Atom/RSS updates,
 pub/sub messaging, and event notification for administration consoles.
 In this example, a servlet send a message to an internal logging service.</p>
 
-<p>The sending agent sends a message using <code>sendMessage</code> with
+<p>The sending agent sends a message using <code>message</code> with
 the jid address of the target agent (to), and a message payload.
-The receiving agent implements the <code>sendMessage</code> method to
+The receiving agent implements the <code>message</code> method to
 receive messages.  Since HMTP is a streaming API like
 <code>java.io.OutputStream</code>, the sending method is the same as
-the receiving method, <code>sendMessage</code>.</p>
+the receiving method, <code>message</code>.</p>
 
 <p>HMTP messages use a JID (Jabber ID) for addressing, which looks like
 <code>user@domain</code> or <code>user@domain/resource</code>.  The
@@ -52,38 +52,38 @@ a unique JID for the routing.</p>
 <p>Writing a HMTP client involves the following steps:</p>
 
 <ol>
-<li>Obtaining the <code>HmtpConnectionFactory</code> (usually with @In)</li>
-<li>Creating a <code>HmtpConnection</code> (which automatically registers an agent)</li>
+<li>Obtaining the <code>BamConnectionFactory</code> (usually with @In)</li>
+<li>Creating a <code>BamConnection</code> (which automatically registers an agent)</li>
 <li>Optionally: setting message handlers to receive messages</li>
 <li>Sending messages</li>
 <li>Close the connection</li>
 </ol>
 
-<p>In the example, the servlet creates a <code>HmtpConnection</code> from
-a <code>HmtpConnectionFactory</code> and sends the message.  Opening
+<p>In the example, the servlet creates a <code>BamConnection</code> from
+a <code>BamConnectionFactory</code> and sends the message.  Opening
 a connection registers an agent with the broker.  When the connection
 closes, it will unregister the agent.  The Web Beans
 <code>@javax.webbeans.In</code> injection annotation provides access
-to the <code>HmtpConnectionFactory</code>.</p>
+to the <code>BamConnectionFactory</code>.</p>
 
 <example title="TestServlet.java">
 package example;
 
 import javax.servlet.*;
 import javax.webbeans.In;
-import com.caucho.hmtp.HmtpConnectionFactory;
-import com.caucho.hmtp.HmtpConnection;
+import com.caucho.bam.BamConnectionFactory;
+import com.caucho.bam.BamConnection;
 
 public class TestServlet extends GenericServlet
 {
-  @In HmtpConnectionFactory _factory;
+  @In BamConnectionFactory _factory;
 
   public void service(ServletRequest req, ServletResponse response)
   {
-    HmtpConnection conn = _factory.getConnection("demo@localhost", null);
+    BamConnection conn = _factory.getConnection("demo@localhost", null);
 
     try {
-      conn.sendMessage("test@localhost", "Hello, world!");
+      conn.message("test@localhost", "Hello, world!");
     } finally {
       conn.close();
     }
@@ -94,17 +94,17 @@ public class TestServlet extends GenericServlet
 <p>Writing a HMTP Service involves the following steps:</p>
 
 <ol>
-<li>Implementing <code>HmtpService</code> (usually by extending <code>GenericService</code>)</li>
-<li>Getting the <code>HmtpBroker</code> (either with <code>@In</code> or done by <code>GenericService</code> automatically)</li>
-<li>Registering the <code>HmtpService</code> with <code>HmtpBroker</code> using <code>addService</code> (done by <code>GenericService</code> automatically)</li>
-<li>Receiving messages to the implemented <code>HmtpAgentStream</code> (or overriding <code>HmtpStream</code> methods in <code>GenericService</code>)</li>
+<li>Implementing <code>BamService</code> (usually by extending <code>GenericService</code>)</li>
+<li>Getting the <code>BamBroker</code> (either with <code>@In</code> or done by <code>GenericService</code> automatically)</li>
+<li>Registering the <code>BamService</code> with <code>BamBroker</code> using <code>addService</code> (done by <code>GenericService</code> automatically)</li>
+<li>Receiving messages to the implemented <code>BamStream</code> (or overriding <code>BamStream</code> methods in <code>GenericService</code>)</li>
 <li>Sending messages to other agents using the
 broker's <code>getBrokerStream</code>.</li>
 </ol>
 
 <p>By extending <code>GenericService</code>, the service automatically gains
 a queuing ability.  The broker will queue the message and spawn a new thread
-before calling the service's <code>sendMessage</code>, in order to isolate
+before calling the service's <code>message</code>, in order to isolate
 the receiver from the sender.  Advanced applications can disable the
 queue if appropriate.</p>
 
@@ -121,9 +121,9 @@ public class LogService extends GenericService
     = Logger.getLogger(LogService.class.getName());
 
   @Override
-  public void sendMessage(String to, String from, Serializable value)
+  public void message(String to, String from, Serializable value)
   {
-    log.info(this + " sendMessage from=" + from + " value=" + value);
+    log.info(this + " message from=" + from + " value=" + value);
   }
 }
 </example>
@@ -195,7 +195,7 @@ public class TestService extends GenericService
 </example>
 
 <p>The remote client, <code>HmtpClient</code>, extends
-the <code>HmtpConnection</code> API to provide extra calls for connecting
+the <code>BamConnection</code> API to provide extra calls for connecting
 and logging on to the server.  The message passing calls are identical.</p>
 
 <p>When you create a <code>HmtpClient</code>, you'll send it the URL
@@ -234,8 +234,8 @@ public class TestClient
 <p>The configuration for a remote service now has three components:</p>
 
 <ol>
-<li>The <code>HmtpBroker</code>, implemented by HempBroker</li>
-<li>Any registered <code>HmtpService</code>, e.g. the TestService</li>
+<li>The <code>BamBroker</code>, implemented by HempBroker</li>
+<li>Any registered <code>BamService</code>, e.g. the TestService</li>
 <li>The exposed HMTP service, implemented with <code>HempServlet</code></li>
 </ol>
 
@@ -263,7 +263,7 @@ Messaging pattern, which is basically a hub-and-spoke messaging topology where
 the agents act as dynamic services: joining and detaching from the broker
 as the application progresses.</p>
 
-<p>Services and clients register one or more agents with the HmtpBroker and
+<p>Services and clients register one or more agents with the BamBroker and
 then send messages between the agents.  Each remote client will register
 a local agent with the local HMTP broker.  Services will register one or
 more agents with the broker.   In a tic-tac-toe game, the game
@@ -467,14 +467,14 @@ in IM session.</td>
 
 <s2 title="Client API">
 
-<s3 title="HmtpConnection">
+<s3 title="BamConnection">
 
-<p><code>HmtpConnection</code> is the primary client interface for both
+<p><code>BamConnection</code> is the primary client interface for both
 local and remote clients.  Messages are sent using the
-<code>HmtpConnection</code> methods.  Messages are received by
-setting a handler: HmtpMessageStream, HmtpQueryStream, or HmtpPresenceStream.</p>
+<code>BamConnection</code> methods.  Messages are received by
+setting a BamStream handler.</p>
 
-<p>An active <code>HmtpConnection</code> has an associated agent registered
+<p>An active <code>BamConnection</code> has an associated agent registered
 with the broker.  The agent's jid is available with the <code>getJid()</code>
 call.</p>
 
@@ -482,77 +482,77 @@ call.</p>
 implement an RPC/Query handler, <code>getBrokerStream()</code> returns
 the underlying stream.</p>
 
-<def title="HmtpConnection">
-package com.caucho.hmtp;
+<def title="BamConnection">
+package com.caucho.bam;
 
-public interface HmtpConnection
+public interface BamConnection
 {
   String getJid();
 
   boolean isClosed();
   void close();
   
-  void setMessageHandler(HmtpMessageStream handler);
-  void setQueryHandler(HmtpQueryStream handler);
-  void setPresenceHandler(HmtpPresenceStream handler);
+  void setStreamHandler(BamStream handler);
 
-  void sendMessage(String to, Serializable value);
+  void message(String to, Serializable value);
 
   Serializable queryGet(String to, Serializable query);
   Serializable querySet(String to, Serializable query);
 
-  void queryGet(String to, Serializable query, HmtpQueryCallback callback);
-  void querySet(String to, Serializable query, HmtpQueryCallback callback);
+  void queryGet(String to, Serializable query, BamQueryCallback callback);
+  void querySet(String to, Serializable query, BamQueryCallback callback);
 
-  void presence(Serializable []data);
-  void presence(String to, Serializable []data);
-  void presenceUnavailable(Serializable []data);
-  void presenceUnavailable(String to, Serializable []data);
-  void presenceProbe(String to, Serializable []data);
-  void presenceSubscribe(String to, Serializable []data);
-  void presenceSubscribed(String to, Serializable []data);
-  void presenceUnsubscribe(String to, Serializable []data);
-  void presenceUnsubscribed(String to, Serializable []data);
-  void presenceError(String to, Serializable []data, HmtpError error);
+  void presence(Serializable data);
+  void presence(String to, Serializable data);
+  void presenceUnavailable(Serializable data);
+  void presenceUnavailable(String to, Serializable data);
+  void presenceProbe(String to, Serializable data);
+  void presenceSubscribe(String to, Serializable data);
+  void presenceSubscribed(String to, Serializable data);
+  void presenceUnsubscribe(String to, Serializable data);
+  void presenceUnsubscribed(String to, Serializable data);
+  void presenceError(String to, Serializable data, BamError error);
   
-  HmtpStream getBrokerStream();
+  BamStream getBrokerStream();
 }
 </def>
 
 </s3>
 
-<s3 title="HmtpConnectionFactory">
+<s3 title="BamConnectionFactory">
 
-<p>The <code>HmtpConnectionFactory</code> produces <code>HmtpConnection</code>
+<p>The <code>BamConnectionFactory</code> produces <code>BamConnection</code>
 agents for client code.  Typically, the factory implementation will be
-a <code>HmtpBroker</code>, although that is not required by the clients.</p>
+a <code>BamBroker</code>, although that is not required by the clients.</p>
 
-<def title="HmtpConnectionFactory">
-package com.caucho.hmtp;
+<def title="BamConnectionFactory">
+package com.caucho.bam;
 
-public interface HmtpConnectionFactory
+public interface BamConnectionFactory
 {
-  HmtpConnection getConnection(String uid, String password);
+  BamConnection getConnection(String uid, String password);
+  
+  BamConnection getConnection(String uid, String password, String resourceId);
 }
 </def>
 
 </s3>
 
-<s3 title="HmtpQueryCallback">
+<s3 title="BamQueryCallback">
 
-<p><code>HmtpQueryCallback</code> is used for callback-style RPC.  When
+<p><code>BamQueryCallback</code> is used for callback-style RPC.  When
 the query response completes, the agent will call
-the <code>HmtpQueryCallback</code> with the query's response.</p>
+the <code>BamQueryCallback</code> with the query's response.</p>
 
 <def title="QueryCallback">
-package com.caucho.hmtp;
+package com.caucho.bam;
 
-public interface HmtpQueryCallback
+public interface BamQueryCallback
 {
   void onQueryResult(String to, String from, Serializable value);
   
   void onQueryError(String to, String from, Serializable value,
-                    HmtpError error);
+                    BamError error);
 }
 </def>
 </s3>
@@ -562,18 +562,18 @@ public interface HmtpQueryCallback
 <s2 title="Remote Client API">
 
 <p><code>HmtpClient</code> is the remote client API for Java clients.  Most
-of the methods are extended from <code>HmtpConnection</code>.  The additional
+of the methods are extended from <code>BamConnection</code>.  The additional
 method provide some control for connection and login.  Once the client
 is logged in, applications will typically use
-<code>HmtpConnection</code> methods to send messages and set handlers
+<code>BamConnection</code> methods to send messages and set handlers
 to receive messages.</p>
 
 <s3 title="HmtpClient">
 
 <def title="HmtpClient">
-package com.caucho.hmtp;
+package com.caucho.bam;
 
-public class HmtpClient implements HmtpConnection
+public class HmtpClient implements BamConnection
 {
   public HmtpClient(String url);
 
@@ -581,36 +581,34 @@ public class HmtpClient implements HmtpConnection
 
   public void login(String uid, String password);
 
-  // HmtpConnection methods
+  // BamConnection methods
   String getJid();
 
   boolean isClosed();
   void close();
   
-  void setMessageHandler(HmtpMessageStream handler);
-  void setQueryHandler(HmtpQueryStream handler);
-  void setPresenceHandler(HmtpPresenceStream handler);
+  void setStreamHandler(BamStream handler);
 
-  void sendMessage(String to, Serializable value);
+  void message(String to, Serializable value);
 
   Serializable queryGet(String to, Serializable query);
   Serializable querySet(String to, Serializable query);
 
-  void queryGet(String to, Serializable query, HmtpQueryCallback callback);
-  void querySet(String to, Serializable query, HmtpQueryCallback callback);
+  void queryGet(String to, Serializable query, BamQueryCallback callback);
+  void querySet(String to, Serializable query, BamQueryCallback callback);
 
-  void presence(Serializable []data);
-  void presence(String to, Serializable []data);
-  void presenceUnavailable(Serializable []data);
-  void presenceUnavailable(String to, Serializable []data);
-  void presenceProbe(String to, Serializable []data);
-  void presenceSubscribe(String to, Serializable []data);
-  void presenceSubscribed(String to, Serializable []data);
-  void presenceUnsubscribe(String to, Serializable []data);
-  void presenceUnsubscribed(String to, Serializable []data);
-  void presenceError(String to, Serializable []data, HmtpError error);
+  void presence(Serializable data);
+  void presence(String to, Serializable data);
+  void presenceUnavailable(Serializable data);
+  void presenceUnavailable(String to, Serializable data);
+  void presenceProbe(String to, Serializable data);
+  void presenceSubscribe(String to, Serializable data);
+  void presenceSubscribed(String to, Serializable data);
+  void presenceUnsubscribe(String to, Serializable data);
+  void presenceUnsubscribed(String to, Serializable data);
+  void presenceError(String to, Serializable data, BamError error);
   
-  HmtpStream getBrokerStream();
+  BamStream getBrokerStream();
 }
 </def>
 </s3>
@@ -619,52 +617,17 @@ public class HmtpClient implements HmtpConnection
 
 <s2 title="Protocol(Packet) API">
 
-<s3 title="HmtpMessageStream">
+<s3 title="BamStream">
 
-<p>Applications will implement <code>HmtpMessageStream</code> to receive
-unidirectional messages from the agent.  Typically, applications will extends
-<code>AbstractHmtpMessageStream</code> instead of implementing
-<code>HmtpMessageStream</code> directly.</p>
-
-<def title="HmtpMessageStream">
-package com.caucho.hmtp;
-
-public interface HmtpMessageStream
-{
-  public void sendMessage(String to, String from, Serializable value);
-  
-  public void sendMessageError(String to, String from, Serializable value,
-			       HmtpError error);
-}
-</def>
-
-</s3>
-
-<s3 title="HmtpQueryStream">
+<p><code>BamStream</code> is the core streaming API for the broker and
+its registered agents.  It is simply a combination of all the message,
+query and presence packets.</p>
 
 <p>Applications will implement <code>HmtpQueryStream</code> to receive
 RPC calls and responses from the agent.  If the application implements
 <code>sendQueryGet</code>, it must either send a <code>QueryResponse</code>
 to the sender, or send a <code>QueryError</code> or return false from
 the method.  Queries will always have a response or an error.</p>
-
-<def title="HmtpQueryStream">
-package com.caucho.hmtp;
-
-public interface HmtpQueryStream
-{
-  boolean sendQueryGet(long id, String to, String from, Serializable query);
-  boolean sendQuerySet(long id, String to, String from, Serializable query);
-
-  void sendQueryResult(long id, String to, String from, Serializable value);
-  void sendQueryError(long id, String to, String from, Serializable query,
-                      HmtpError error);
-}
-</def>
-
-</s3>
-
-<s3 title="HmtpPresenceStream">
 
 <p>The presence methods implement the specialized subscription and
 presence messages.  IM applications use presence messages
@@ -673,53 +636,35 @@ to announce availability to people in a buddy list (roster).</p>
 <p>Publish/Subscribe applications can also use subscription packets
 to subscribe and unsubscribe from the publishing service.</p>
 
-<def title="HmtpPresenceStream">
-package com.caucho.hmtp;
+<def title="BamStream">
+package com.caucho.bam;
 
-public interface HmtpPresenceStream
+public interface BamStream {
 {
-  void sendPresence(String to, String from, Serializable []data);
-  void sendPresenceUnavailable(String to, String from, Serializable []data);
-  void sendPresenceProbe(String to, String from, Serializable []data);
-  void sendPresenceSubscribe(String to, String from, Serializable []data);
-  void sendPresenceSubscribed(String to, String from, Serializable []data);
-  void sendPresenceUnsubscribe(String to, String from, Serializable []data);
-  void sendPresenceUnsubscribed(String to, String from, Serializable []data);
-  void sendPresenceError(String to, String from, Serializable []data,
-                         HmtpError error);
-}
-</def>
+  public void message(String to, String from, Serializable value);
+  
+  public void messageError(String to, String from, Serializable value,
+                           BamError error);
+			       
+  boolean queryGet(long id, String to, String from, Serializable query);
+  boolean querySet(long id, String to, String from, Serializable query);
 
-</s3>
-
-<s3 title="HmtpStream">
-
-<p><code>HmtpStream</code> is the core streaming API for the broker and
-its registered agents.  It is simply a combination of all the message,
-query and presence packets.</p>
-
-<def title="HmtpStream">
-package com.caucho.hmtp;
-
-public interface HmtpStream
-  extends HmtpMessageStream, HmtpQueryStream, HmtpPresenceStream
-{
-}
-</def>
-
-</s3>
-
-<s3 title="HmtpAgentStream">
-
-<p><code>HmtpAgentStream</code> marks a stream toward an agent, extending
-<code>HmtpStream</code> and returning the agent's jid.</p>
-
-<def title="HmtpAgentStream">
-package com.caucho.hmtp;
-
-public interface HmtpAgentStream extends HmtpStream
-{
-  Strin getJid();
+  void queryResult(long id, String to, String from, Serializable value);
+  void queryError(long id, String to, String from, Serializable query,
+                  BamError error);
+			       
+  void presence(String to, String from, Serializable data);
+  void presenceUnavailable(String to, String from, Serializable data);
+  
+  void presenceProbe(String to, String from, Serializable data);
+  
+  void presenceSubscribe(String to, String from, Serializable data);
+  void presenceSubscribed(String to, String from, Serializable data);
+  void presenceUnsubscribe(String to, String from, Serializable data);
+  void presenceUnsubscribed(String to, String from, Serializable data);
+  
+  void presenceError(String to, String from, Serializable data,
+                     BamError error);
 }
 </def>
 
@@ -729,29 +674,29 @@ public interface HmtpAgentStream extends HmtpStream
 
 <s2 title="Service APIs">
 
-<s3 title="HmtpBroker">
+<s3 title="BamBroker">
 
-<p><code>HmtpBroker</code> is the central player in the HMTP server.
+<p><code>BamBroker</code> is the central player in the HMTP server.
 It's responsible for routing messages between the agents, for any
 forwarding to remote servers, and managing dynamic agents and services.
 </p>
 
 <p>For all that responsibility, the API is fairly simple.  The
-<code>HmtpBroker</code> extends <code>HmtpConnectionFactory</code>,
-enabling client agents, and allows custom <code>HmtpService</code>
+<code>BamBroker</code> extends <code>BamConnectionFactory</code>,
+enabling client agents, and allows custom <code>BamService</code>
 services to be implemented.  Most importantly, it implements a
-broker stream (<code>HmtpStream</code>) which serves as the destination
+broker stream (<code>BamStream</code>) which serves as the destination
 for all inbound messages.</p>
 
-<def title="HmtpBroker">
-package com.caucho.hmtp;
+<def title="BamBroker">
+package com.caucho.bam;
 
-public interface HmtpBroker extends HmtpConnectionFactory
+public interface BamBroker extends BamConnectionFactory
 {
-  HmtpStream getBrokerStream();
+  BamStream getBrokerStream();
 
-  void addService(HmtpService service);
-  void removeService(HmtpService service);
+  void addService(BamService service);
+  void removeService(BamService service);
 
   void addServiceManager(ServiceManager manager);
 }
@@ -759,17 +704,17 @@ public interface HmtpBroker extends HmtpConnectionFactory
 
 </s3>
 
-<s3 title="HmtpService">
+<s3 title="BamService">
 
-<p><code>HmtpService</code> represents a registered, persistent
+<p><code>BamService</code> represents a registered, persistent
 service with a known jid address.  Typically the services will be
 registered in a configuration file, although they can also be
-created dynamically using the <code>HmtpServiceManager</code>.
+created dynamically using the <code>BamServiceManager</code>.
 Most applications will extend the <code>GenericService</code>
-instead of implementing <code>HmtpService</code> directly.</p>
+instead of implementing <code>BamService</code> directly.</p>
 
 <p>The key methods are <code>getJid</code> and <code>getAgentStream</code>.
-The jid is used for registration with the <code>HmtpBroker</code> and
+The jid is used for registration with the <code>BamBroker</code> and
 <code>getAgentStream</code> is used to receive any messages.</p>
 
 <p>The additional methods are used for specialized applications like
@@ -777,41 +722,41 @@ instant messaging and multiuser-chat, to manage clients logging in.</p>
 
 
 
-<def title="HmtpService">
-package com.caucho.hmtp;
+<def title="BamService">
+package com.caucho.bam;
 
-public interface HmtpService
+public interface BamService
 {
   public String getJid();
   
-  public HmtpAgentStream getAgentStream();
+  public BamStream getAgentStream();
   
-  public HmtpAgentStream findAgent(String jid);
+  public BamStream findAgent(String jid);
 
   public void onAgentStart(String jid);
   public void onAgentStop(String jid);
 
-  public HmtpAgentStream getAgentFilter(HmtpAgentStream stream);
-  public HmtpStream getBrokerFilter(HmtpStream stream);
+  public BamStream getAgentFilter(BamStream stream);
+  public BamStream getBrokerFilter(BamStream stream);
 }
 </def>
 
 </s3>
 
-<s3 title="HmtpServiceManager">
+<s3 title="BamServiceManager">
 
-<p><code>HmtpServiceManager</code> is a specialized manager for finding
+<p><code>BamServiceManager</code> is a specialized manager for finding
 persistent sessions.  In instant messaging, for example, the registered
 users might be stored in a database.  When a message goes to
-harry@host.com, the <code>HmtpServiceManager</code> will lookup the
+harry@host.com, the <code>BamServiceManager</code> will lookup the
 appropriate user.</p>
 
-<def title="HmtpServiceManager">
-package com.caucho.hmtp;
+<def title="BamServiceManager">
+package com.caucho.bam;
 
-public interface HmtpServiceManager
+public interface BamServiceManager
 {
-  public HmtpService findService(String jid);
+  public BamService findService(String jid);
 }
 </def>
 

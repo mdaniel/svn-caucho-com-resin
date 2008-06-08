@@ -27,30 +27,73 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.muc;
+package com.caucho.bam.data;
 
 import java.util.*;
 
 /**
- * Muc query
+ * data forms
+ *
+ * XEP-0004: http://www.xmpp.org/extensions/xep-0004.html
+ *
+ * <code><pre>
+ * namespace = jabber:x:data
+ *
+ * element reported {
+ *   field+
+ * }
+ * </pre></code>
  */
-public class MucAdmin implements java.io.Serializable {
-  private String actor;
-  private String reason;
-
-  // "admin", "member", "none", "outcast", "owner"
-  private String affiliation;
-  private String jid;
-  private String nick;
-  // "moderator", "none", "participant", "visitor"
-  private String role;
+public class DataReported implements java.io.Serializable {
+  private DataField []_field;
   
-  public MucAdmin()
+  public DataReported()
   {
   }
   
+  public DataReported(DataField []fields)
+  {
+    _field = fields;
+  }
+  
+  public DataField []getField()
+  {
+    return _field;
+  }
+  
+  public void setField(DataField []field)
+  {
+    _field = field;
+  }
+  
+  public void setFieldList(ArrayList<DataField> fieldList)
+  {
+    if (fieldList != null && fieldList.size() > 0) {
+      _field = new DataField[fieldList.size()];
+      fieldList.toArray(_field);
+    }
+    else
+      _field = null;
+  }
+  
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+
+    if (_field != null) {
+      for (int i = 0; i < _field.length; i++) {
+	if (i != 0)
+	  sb.append(",");
+	
+	sb.append("field=").append(_field[i]);
+      }
+    }
+
+    sb.append("]");
+    
+    return sb.toString();
   }
 }

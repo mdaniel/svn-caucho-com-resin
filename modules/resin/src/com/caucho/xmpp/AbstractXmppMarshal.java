@@ -45,13 +45,13 @@ abstract public class AbstractXmppMarshal implements XmppMarshal
   /**
    * Serializes the object to XML
    */
-  abstract public void toXml(XMLStreamWriter out, Serializable object)
+  abstract public void toXml(XmppStreamWriter out, Serializable object)
     throws IOException, XMLStreamException;
   
   /**
    * Deserializes the object from XML
    */
-  abstract public Serializable fromXml(XMLStreamReader in)
+  abstract public Serializable fromXml(XmppStreamReader in)
     throws IOException, XMLStreamException;
 
   protected void skipToEnd(XMLStreamReader in, String tagName)

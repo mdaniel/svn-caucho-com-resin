@@ -27,9 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.xmpp.im;
+package com.caucho.xmpp.disco;
 
-import com.caucho.bam.im.*;
+import com.caucho.bam.disco.*;
 import com.caucho.vfs.*;
 import com.caucho.xmpp.*;
 import java.io.*;
@@ -38,37 +38,36 @@ import java.util.logging.*;
 import javax.xml.stream.*;
 
 /**
- * Roster query (jabber:iq:roster defined in rfc3921)
+ * DiscoItems query
+ *
+ * XEP-0030: http://www.xmpp.org/extensions/xep-0030.html
  *
  * <code><pre>
+ * namespace = http://jabber.org/protocol/disco#items
+ *
  * element query {
+ *   attribute node?,
  *   item*
  * }
  *
  * element item {
- *   attribute ask?,
- *   attribute jid,
- *   attribute name?,
- *   attribute subscription?,
- *
- *   group*
- * }
- *
- * element group {
- *   string
+ *    attribute jid,
+ *    attribute name?,
+ *    attribute node?
  * }
  * </pre></code>
  */
-public class XmppRosterQueryMarshal extends AbstractXmppMarshal {
+public class XmppDiscoItemsQueryMarshal extends AbstractXmppMarshal {
   private static final Logger log
-    = Logger.getLogger(XmppRosterQueryMarshal.class.getName());
+    = Logger.getLogger(XmppDiscoItemsQueryMarshal.class.getName());
+  private static final boolean _isFinest = log.isLoggable(Level.FINEST);
 
   /**
    * Returns the namespace uri for the XMPP stanza value
    */
   public String getNamespaceURI()
   {
-    return "jabber:iq:roster";
+    return "http://jabber.org/protocol/disco#items";
   }
 
   /**
@@ -84,7 +83,7 @@ public class XmppRosterQueryMarshal extends AbstractXmppMarshal {
    */
   public String getClassName()
   {
-    return RosterQuery.class.getName();
+    return DiscoItemsQuery.class.getName();
   }
   
   /**
@@ -93,44 +92,33 @@ public class XmppRosterQueryMarshal extends AbstractXmppMarshal {
   public void toXml(XmppStreamWriter out, Serializable object)
     throws IOException, XMLStreamException
   {
-    RosterQuery roster = (RosterQuery) object;
+    DiscoItemsQuery discoItems = (DiscoItemsQuery) object;
 
-    out.writeStartElement("", "query", "jabber:iq:roster");
-    out.writeNamespace("", "jabber:iq:roster");
+    out.writeStartElement("", getLocalName(), getNamespaceURI());
+    out.writeNamespace("", getNamespaceURI());
 
-    RosterItem []items = roster.getItems();
+    if (discoItems.getNode() != null)
+      out.writeAttribute("node", discoItems.getNode());
+    
+    DiscoItem []items = discoItems.getItems();
 
     if (items != null) {
-      for (RosterItem item : items) {
+      for (DiscoItem item : items) {
 	out.writeStartElement("item");
 
-	if (item.getAsk() != null)
-	  out.writeAttribute("ask", item.getAsk());
-
-	if (item.getJid() != null)
-	  out.writeAttribute("jid", item.getJid());
+	out.writeAttribute("jid", item.getJid());
 
 	if (item.getName() != null)
 	  out.writeAttribute("name", item.getName());
 
-	if (item.getSubscription() != null)
-	  out.writeAttribute("subscription", item.getSubscription());
-
-	String []groups = item.getGroup();
-
-	if (groups != null) {
-	  for (String group : groups) {
-	    out.writeStartElement("group");
-	    out.writeCharacters(group);
-	    out.writeEndElement(); // </group>
-	  }
-	}
+	if (item.getNode() != null)
+	  out.writeAttribute("node", item.getNode());
 	
 	out.writeEndElement(); // </item>
       }
     }
     
-    out.writeEndElement(); // </query>
+    out.writeEndElement(); // </item>
   }
   
   /**
@@ -139,64 +127,53 @@ public class XmppRosterQueryMarshal extends AbstractXmppMarshal {
   public Serializable fromXml(XmppStreamReader in)
     throws IOException, XMLStreamException
   {
-    ArrayList<RosterItem> itemList = new ArrayList<RosterItem>();
-
     boolean isFinest = log.isLoggable(Level.FINEST);
     int tag = in.nextTag();
+
+    String node = in.getAttributeValue(null, "node");
+
+    DiscoItemsQuery discoItems = new DiscoItemsQuery(node);
+    
+    ArrayList<DiscoItem> itemList = new ArrayList<DiscoItem>();
     
     while (tag > 0) {
       if (isFinest)
 	debug(in);
 
       if (XMLStreamReader.END_ELEMENT == tag) {
-	return new RosterQuery(itemList);
-      }
-      else if (XMLStreamReader.START_ELEMENT != tag
-	       || ! "item".equals(in.getLocalName())) {
-	log.warning("expected start");
-
-	skipToEnd(in, "query");
+	discoItems.setItemList(itemList);
 	
-	return null;
+	return discoItems;
       }
 
-      String ask = null;
-      String jid = null;
-      String name = null;
-      String subscription = null;
-    
-      for (int i = 0; i < in.getAttributeCount(); i++) {
-	String attr = in.getAttributeLocalName(i);
-
-	if ("ask".equals(attr))
-	  ask = in.getAttributeValue(i);
-	else if ("jid".equals(attr))
-	  jid = in.getAttributeValue(i);
-	else if ("name".equals(attr))
-	  name = in.getAttributeValue(i);
-	else if ("subscription".equals(attr))
-	  subscription = in.getAttributeValue(i);
+      if (XMLStreamReader.START_ELEMENT == tag
+	  && "item".equals(in.getLocalName())) {
+	itemList.add(parseItem(in));
       }
-
-      ArrayList<String> groups = new ArrayList<String>();
-      
-      tag = in.nextTag();
-      while (XMLStreamReader.START_ELEMENT == in.getEventType()
-	     && "group".equals(in.getLocalName())) {
-	groups.add(in.getElementText());
-
-	skipToEnd(in, "group");
+      else if (XMLStreamReader.START_ELEMENT == tag) {
+	log.finer(this + " <" + in.getLocalName() + "> is an unknown tag");
+	
+	skipToEnd(in, in.getLocalName());
       }
-      
-      skipToEnd(in, "item");
-
-      RosterItem item = new RosterItem(ask, jid, name, subscription, groups);
-
-      itemList.add(item);
 
       tag = in.nextTag();
     }
 
     return null;
+  }
+  
+  /**
+   * Deserializes the object from XML
+   */
+  public DiscoItem parseItem(XMLStreamReader in)
+    throws IOException, XMLStreamException
+  {
+    String jid = in.getAttributeValue(null, "jid");
+    String name = in.getAttributeValue(null, "name");
+    String node = in.getAttributeValue(null, "node");
+
+    skipToEnd(in, "item");
+
+    return new DiscoItem(jid, name, node);
   }
 }

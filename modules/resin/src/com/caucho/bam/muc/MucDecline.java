@@ -37,15 +37,49 @@ import java.util.*;
 public class MucDecline implements java.io.Serializable {
   private String _to;
   private String _from;
-  private String reason;
+  private String _reason;
   
   public MucDecline()
   {
   }
   
+  public MucDecline(String to, String from, String reason)
+  {
+    _to = to;
+    _from = from;
+    _reason = reason;
+  }
+
+  public String getTo()
+  {
+    return _to;
+  }
+
+  public String getFrom()
+  {
+    return _from;
+  }
+
+  public String getReason()
+  {
+    return _reason;
+  }
+  
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName()).append("[to=").append(_to);
+
+    if (_from != null)
+      sb.append(",from=").append(_from);
+
+    if (_reason != null)
+      sb.append(",reason=").append(_reason);
+
+    sb.append("]");
+
+    return sb.toString();
   }
 }

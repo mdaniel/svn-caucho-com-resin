@@ -67,8 +67,8 @@ public class XmppBrokerStream
   private ReadStream _is;
   private WriteStream _os;
   
-  private XMLStreamReaderImpl _in;
-  private XMLStreamWriter _out;
+  private XmppStreamReader _in;
+  private XmppStreamWriter _out;
 
   private XmppReader _reader;
 
@@ -82,7 +82,7 @@ public class XmppBrokerStream
   private HashMap<Long,String> _idMap = new HashMap<Long,String>();
 
   XmppBrokerStream(XmppRequest request, BamBroker broker,
-		   ReadStream is, XMLStreamReaderImpl in, WriteStream os)
+		   ReadStream is, XmppStreamReader in, WriteStream os)
   {
     _request = request;
     _protocol = request.getProtocol();
@@ -94,7 +94,7 @@ public class XmppBrokerStream
 
     _uid = request.getUid();
 
-    _out =  new XMLStreamWriterImpl(os);
+    _out =  new XmppStreamWriterImpl(os, _protocol.getMarshalFactory());
 
     _toClient = new XmppAgentStream(this, _os);
     _authHandler = null;//new AuthBrokerStream(this, _callbackHandler);
@@ -366,7 +366,7 @@ public class XmppBrokerStream
 
   public void close()
   {
-    XMLStreamReaderImpl in = _in;
+    XmppStreamReader in = _in;
     _in = null;
 
     if (in != null) {

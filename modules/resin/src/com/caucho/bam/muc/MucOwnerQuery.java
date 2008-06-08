@@ -32,28 +32,18 @@ package com.caucho.bam.muc;
 import java.util.*;
 
 /**
- * Muc query
+ * Muc owner
  */
-public class MucContinue implements java.io.Serializable {
-  private String _thread;
+public class MucOwnerQuery implements java.io.Serializable {
+  private Object jabberXData;
   
-  public MucContinue()
+  public MucOwnerQuery()
   {
-  }
-  
-  public MucContinue(String thread)
-  {
-    _thread = thread;
-  }
-  
-  public String getThread()
-  {
-    return _thread;
   }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _thread + "]";
+    return getClass().getSimpleName() + "[]";
   }
 }

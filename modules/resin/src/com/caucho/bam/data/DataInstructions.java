@@ -27,84 +27,51 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.disco;
+package com.caucho.bam.data;
 
 import java.util.*;
 
 /**
- * service discovery identity
+ * data forms
  *
- * http://jabber.org/protocol/disco#info
+ * XEP-0004: http://www.xmpp.org/extensions/xep-0004.html
  *
  * <code><pre>
- * element query {
- *   attribute node?,
- *   identity*,
- *   feature*
- * }
+ * namespace = jabber:x:data
  *
- * element identity {
- *    attribute category,
- *    attribute name?,
- *    attribute type
- * }
- *
- * element feature {
- *    attribute var
+ * element instructions {
+ *   string
  * }
  * </pre></code>
  */
-public class DiscoIdentity implements java.io.Serializable {
-  private String _category;
-  private String _type;
-  private String _name;
+public class DataInstructions implements java.io.Serializable {
+  private String _value;
   
-  public DiscoIdentity()
+  private DataInstructions()
   {
   }
   
-  public DiscoIdentity(String category, String type)
+  public DataInstructions(String value)
   {
-    _category = category;
-    _type = type;
-  }
-  
-  public DiscoIdentity(String category, String type, String name)
-  {
-    _category = category;
-    _type = type;
-    _name = name;
+    _value = value;
   }
 
-  public String getCategory()
+  public String getValue()
   {
-    return _category;
+    return _value;
   }
 
-  public String getType()
+  public void setValue(String value)
   {
-    return _type;
-  }
-
-  public String getName()
-  {
-    return _name;
+    _value = value;
   }
   
   @Override
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
-
-    sb.append(getClass().getSimpleName()).append("[");
-
-    sb.append("[category=").append(_category);
-    sb.append(",type=").append(_type);
-
-    if (_name != null)
-      sb.append(",name=").append(_name);
-
-    sb.append("]");
+    sb.append(getClass().getSimpleName());
+    sb.append("[").append(_value).append("]");
     
     return sb.toString();
   }

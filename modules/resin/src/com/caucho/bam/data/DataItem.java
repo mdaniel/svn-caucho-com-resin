@@ -27,84 +27,73 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.muc;
+package com.caucho.bam.data;
 
-import com.caucho.bam.muc.MucStatus;
-import com.caucho.bam.muc.MucInvite;
-import com.caucho.bam.muc.MucDestroy;
-import com.caucho.bam.muc.MucDecline;
 import java.util.*;
 
 /**
- * Muc user query
+ * data forms
  *
- * http://jabber.org/protocol/muc#user
+ * XEP-0004: http://www.xmpp.org/extensions/xep-0004.html
  *
  * <code><pre>
- * element x {
- *   decline?
- *   &amp; destroy?
- *   &amp; invite*
- *   &amp; item?
- *   &amp; password?
- *   &amp; status*
- * }
- *
- * element decline {
- *   @from?
- *   &amp; @to?
- *   &amp; reason?
- * }
- *
- * element invite {
- *   @from?
- *   &amp; @to?
- *   &amp; reason?
- * }
- *
- * element destroy {
- *   @jid?
- *   &amp; reason?
- * }
+ * namespace = jabber:x:data
  *
  * element item {
- *   @affiliation?
- *   &amp; @jid?
- *   &amp; @nick?
- *   &amp; @role?
- *   &amp; actor?
- *   &amp; reason?
- *   &amp; continue?
- * }
- *
- * element actor {
- *   @jid
- * }
- *
- * element continue {
- *   @thread?
- * }
- *
- * element status {
- *   @code
+ *   field+
  * }
  * </pre></code>
  */
-public class MucUser implements java.io.Serializable {
-  private MucDecline _decline;
-  private MucDestroy _destroy;
-  private ArrayList<MucInvite> _invite;
-  private MucUserItem _item;
-  private String _password;
-  private ArrayList<MucStatus> _status;
+public class DataItem implements java.io.Serializable {
+  private DataField []_field;
   
-  public MucUser()
+  public DataItem()
   {
+  }
+  
+  public DataItem(DataField []fields)
+  {
+    _field = fields;
+  }
+  
+  public DataField []getField()
+  {
+    return _field;
+  }
+  
+  public void setField(DataField []field)
+  {
+    _field = field;
+  }
+  
+  public void setFieldList(ArrayList<DataField> fieldList)
+  {
+    if (fieldList != null && fieldList.size() > 0) {
+      _field = new DataField[fieldList.size()];
+      fieldList.toArray(_field);
+    }
+    else
+      _field = null;
   }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+
+    if (_field != null) {
+      for (int i = 0; i < _field.length; i++) {
+	if (i != 0)
+	  sb.append(",");
+	
+	sb.append("field=").append(_field[i]);
+      }
+    }
+
+    sb.append("]");
+    
+    return sb.toString();
   }
 }

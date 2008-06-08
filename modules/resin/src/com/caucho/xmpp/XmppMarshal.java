@@ -55,12 +55,12 @@ public interface XmppMarshal {
   /**
    * Serializes the object to XML
    */
-  public void toXml(XMLStreamWriter out, Serializable object)
+  public void toXml(XmppStreamWriter out, Serializable object)
     throws IOException, XMLStreamException;
   
   /**
    * Deserializes the object from XML
    */
-  public Serializable fromXml(XMLStreamReader in)
+  public Serializable fromXml(XmppStreamReader in)
     throws IOException, XMLStreamException;
 }

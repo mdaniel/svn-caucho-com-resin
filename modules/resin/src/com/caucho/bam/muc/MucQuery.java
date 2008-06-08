@@ -53,7 +53,7 @@ import java.util.*;
  * }
  * </pre></code>
  */
-public class Muc implements java.io.Serializable {
+public class MucQuery implements java.io.Serializable {
   private String _password;
   
   private int _historyMaxChars;
@@ -61,15 +61,15 @@ public class Muc implements java.io.Serializable {
   private int _historySeconds;
   private Date _historySince;
   
-  public Muc()
+  public MucQuery()
   {
   }
 
-  public Muc(String password,
-	     int historyMaxChars,
-	     int historyMaxStanzas,
-	     int historySeconds,
-	     Date historySince)
+  public MucQuery(String password,
+		  int historyMaxChars,
+		  int historyMaxStanzas,
+		  int historySeconds,
+		  Date historySince)
   {
     _password = password;
     
@@ -113,7 +113,7 @@ public class Muc implements java.io.Serializable {
     if (_historyMaxChars > 0)
       sb.append(",max-chars=").append(_historyMaxChars);
     
-    if (_historyStanzas > 0)
+    if (_historyMaxStanzas > 0)
       sb.append(",max-stanzas=").append(_historyMaxStanzas);
     
     if (_historySeconds > 0)

@@ -34,26 +34,23 @@ import java.util.*;
 /**
  * Muc query
  */
-public class MucContinue implements java.io.Serializable {
-  private String _thread;
+public class MucAdminQuery implements java.io.Serializable {
+  private String actor;
+  private String reason;
+
+  // "admin", "member", "none", "outcast", "owner"
+  private String affiliation;
+  private String jid;
+  private String nick;
+  // "moderator", "none", "participant", "visitor"
+  private String role;
   
-  public MucContinue()
+  public MucAdminQuery()
   {
   }
   
-  public MucContinue(String thread)
-  {
-    _thread = thread;
-  }
-  
-  public String getThread()
-  {
-    return _thread;
-  }
-  
-  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _thread + "]";
+    return getClass().getSimpleName() + "[]";
   }
 }

@@ -27,9 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.xmpp.im;
+package com.caucho.xmpp.caps;
 
-import com.caucho.bam.im.*;
+import com.caucho.bam.caps.*;
 import com.caucho.vfs.*;
 import com.caucho.xmpp.*;
 import java.io.*;
@@ -38,23 +38,32 @@ import java.util.logging.*;
 import javax.xml.stream.*;
 
 /**
- * IM session - RFC 3921
+ * capabilities
  *
- * <pre>
- * element session{urn:ietf:params:xml:ns:xmpp-session} {
+ * XEP-0115: http://www.xmpp.org/extensions/xep-0115.html
+ *
+ * <code><pre>
+ * namespace = http://jabber.org/protocol/caps
+ *
+ * element c {
+ *   attribute ext?,
+ *   attribute hash,
+ *   attribute node,
+ *   attribute ver
  * }
  * </pre></code>
  */
-public class XmppImSessionQueryMarshal extends AbstractXmppMarshal {
+public class XmppCapabilitiesMarshal extends AbstractXmppMarshal {
   private static final Logger log
-    = Logger.getLogger(XmppImSessionQueryMarshal.class.getName());
+    = Logger.getLogger(XmppCapabilitiesMarshal.class.getName());
+  private static final boolean _isFinest = log.isLoggable(Level.FINEST);
 
   /**
    * Returns the namespace uri for the XMPP stanza value
    */
   public String getNamespaceURI()
   {
-    return "urn:ietf:params:xml:ns:xmpp-session";
+    return "http://jabber.org/protocol/caps";
   }
 
   /**
@@ -62,7 +71,7 @@ public class XmppImSessionQueryMarshal extends AbstractXmppMarshal {
    */
   public String getLocalName()
   {
-    return "session";
+    return "c";
   }
 
   /**
@@ -70,7 +79,7 @@ public class XmppImSessionQueryMarshal extends AbstractXmppMarshal {
    */
   public String getClassName()
   {
-    return ImSessionQuery.class.getName();
+    return Capabilities.class.getName();
   }
   
   /**
@@ -79,12 +88,24 @@ public class XmppImSessionQueryMarshal extends AbstractXmppMarshal {
   public void toXml(XmppStreamWriter out, Serializable object)
     throws IOException, XMLStreamException
   {
-    ImSessionQuery session = (ImSessionQuery) object;
+    Capabilities caps = (Capabilities) object;
 
     out.writeStartElement("", getLocalName(), getNamespaceURI());
     out.writeNamespace("", getNamespaceURI());
+
+    if (caps.getExt() != null)
+      out.writeAttribute("ext", caps.getExt());
+
+    if (caps.getHash() != null)
+      out.writeAttribute("hash", caps.getHash());
+
+    if (caps.getNode() != null)
+      out.writeAttribute("node", caps.getNode());
+
+    if (caps.getVer() != null)
+      out.writeAttribute("ver", caps.getVer());
     
-    out.writeEndElement(); // </session>
+    out.writeEndElement(); // </c>
   }
   
   /**
@@ -94,24 +115,18 @@ public class XmppImSessionQueryMarshal extends AbstractXmppMarshal {
     throws IOException, XMLStreamException
   {
     boolean isFinest = log.isLoggable(Level.FINEST);
-    int tag;
 
-    while ((tag = in.nextTag()) > 0) {
-      if (isFinest)
-	debug(in);
+    String ext = in.getAttributeValue(null, "ext");
+    String hash = in.getAttributeValue(null, "hash");
+    String node = in.getAttributeValue(null, "node");
+    String ver = in.getAttributeValue(null, "ver");
 
-      if (XMLStreamReader.END_ELEMENT == tag) {
-	return new ImSessionQuery();
-      }
-      else {
-	log.warning(this + " unexpected tag " + in.getLocalName());
+    Capabilities caps = new Capabilities(hash, node, ver);
 
-	skipToEnd(in, "session");
-	
-	return null;
-      }
-    }
+    caps.setExt(ext);
 
-    return null;
+    skipToEnd(in, "c");
+
+    return caps;
   }
 }

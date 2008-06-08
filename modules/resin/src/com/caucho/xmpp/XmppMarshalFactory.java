@@ -122,13 +122,18 @@ public class XmppMarshalFactory
 	Class cl = Class.forName(marshalClassName, false, _loader);
 	XmppMarshal marshal = (XmppMarshal) cl.newInstance();
 
-	QName qName = new QName(marshal.getNamespaceURI(),
-				marshal.getLocalName(), "");
+	QName qName = null;
+
+	if (marshal.getNamespaceURI() != null
+	    && marshal.getLocalName() != null) {
+	  qName = new QName(marshal.getNamespaceURI(),
+			    marshal.getLocalName(), "");
+	  _unserializeMap.put(qName, marshal);
+	}
 
 	String className = marshal.getClassName();
-
-	_serializeMap.put(className, marshal);
-	_unserializeMap.put(qName, marshal);
+	if (className != null)
+	  _serializeMap.put(className, marshal);
 
 	if (log.isLoggable(Level.FINEST))
 	  log.finest(this + " marshal: " + marshal + " " + qName + " " + className);

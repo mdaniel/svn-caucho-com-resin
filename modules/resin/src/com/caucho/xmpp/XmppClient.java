@@ -70,7 +70,7 @@ public class XmppClient {
   private String _id;
   private String _from;
   
-  private XMLStreamReader _in;
+  private XmppStreamReader _in;
   private XmppReader _reader;
   
   private boolean _isFinest;
@@ -143,7 +143,7 @@ public class XmppClient {
       
       _toBroker = new XmppClientBrokerStream(this, out);
     
-      _in = factory.createXMLStreamReader(_is);
+      _in = new XmppStreamReaderImpl(_is, marshalFactory);
       _reader = new XmppReader(_xmppContext, _is, _in, _toBroker, _callback);
 
       String tag = readStartTag();
@@ -192,7 +192,7 @@ public class XmppClient {
       
       _os.print("<iq type='set' id='" + _mId++ + "'>");
       _os.print("<bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>");
-      _os.print("<resource>maryJane</resource>");
+      _os.print("<resource>" + getClass().getSimpleName() + "</resource>");
       _os.print("</bind>");
       _os.print("</iq>");
       _os.flush();

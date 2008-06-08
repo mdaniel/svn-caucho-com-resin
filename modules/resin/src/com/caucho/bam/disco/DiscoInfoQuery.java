@@ -36,9 +36,11 @@ import java.util.*;
 /**
  * service discovery query
  *
- * http://jabber.org/protocol/disco#info
+ * XEP-0030: http://www.xmpp.org/extensions/xep-0030.html
  *
  * <code><pre>
+ * namespace = http://jabber.org/protocol/disco#info
+ *
  * element query {
  *   attribute node?,
  *   identity*,
@@ -99,6 +101,51 @@ public class DiscoInfoQuery implements java.io.Serializable {
     
     _identity = identity;
     _features = features;
+  }
+
+  public String getNode()
+  {
+    return _node;
+  }
+  
+  public DiscoFeature []getFeature()
+  {
+    return _features;
+  }
+  
+  public void setFeature(DiscoFeature []feature)
+  {
+    _features = feature;
+  }
+  
+  public void setFeatureList(ArrayList<DiscoFeature> featureList)
+  {
+    if (featureList != null && featureList.size() > 0) {
+      _features = new DiscoFeature[featureList.size()];
+      featureList.toArray(_features);
+    }
+    else
+      _features = null;
+  }
+  
+  public DiscoIdentity []getIdentity()
+  {
+    return _identity;
+  }
+  
+  public void setIdentity(DiscoIdentity []identity)
+  {
+    _identity = identity;
+  }
+  
+  public void setIdentityList(ArrayList<DiscoIdentity> identityList)
+  {
+    if (identityList != null && identityList.size() > 0) {
+      _identity = new DiscoIdentity[identityList.size()];
+      identityList.toArray(_identity);
+    }
+    else
+      _identity = null;
   }
   
   @Override

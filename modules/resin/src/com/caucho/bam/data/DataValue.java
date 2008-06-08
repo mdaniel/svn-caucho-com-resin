@@ -27,23 +27,52 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.muc;
+package com.caucho.bam.data;
 
 import java.util.*;
 
 /**
- * Muc owner
+ * data forms
+ *
+ * XEP-0004: http://www.xmpp.org/extensions/xep-0004.html
+ *
+ * <code><pre>
+ * namespace = jabber:x:data
+ *
+ * element value {
+ *   string
+ * }
+ * </pre></code>
  */
-public class MucOwner implements java.io.Serializable {
-  private Object jabberXData;
+public class DataValue implements java.io.Serializable {
+  private String _value;
   
-  public MucOwner()
+  private DataValue()
   {
+  }
+  
+  public DataValue(String value)
+  {
+    _value = value;
+  }
+
+  public String getValue()
+  {
+    return _value;
+  }
+
+  public void setValue(String value)
+  {
+    _value = value;
   }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getSimpleName());
+    sb.append("[").append(_value).append("]");
+    
+    return sb.toString();
   }
 }

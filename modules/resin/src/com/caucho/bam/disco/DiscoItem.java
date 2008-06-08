@@ -46,9 +46,8 @@ import java.util.*;
  *
  * element item {
  *    attribute jid,
- *    attribute node?,
  *    attribute name?,
- *    attribute action { remove, update}?,
+ *    attribute node?
  * }
  * </pre></code>
  */
@@ -56,9 +55,6 @@ public class DiscoItem implements java.io.Serializable {
   private String _jid;
   private String _node;
   private String _name;
-
-  // remove, update
-  private String _action;
   
   private DiscoItem()
   {
@@ -69,31 +65,47 @@ public class DiscoItem implements java.io.Serializable {
     _jid = jid;
   }
   
-  public DiscoItem(String jid, String node)
+  public DiscoItem(String jid,
+		   String name,
+		   String node)
   {
     _jid = jid;
+    _name = name;
     _node = node;
   }
-  
-  public DiscoItem(String jid,
-		   String node,
-		   String name,
-		   String action)
+
+  public String getName()
   {
-    _jid = jid;
-    _node = node;
-    _name = name;
-    _action = action;
+    return _name;
+  }
+
+  public String getNode()
+  {
+    return _node;
+  }
+
+  public String getJid()
+  {
+    return _jid;
   }
   
   @Override
   public String toString()
   {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName()).append("[");
+
+    sb.append("jid=").append(_jid);
+
+    if (_name != null)
+      sb.append(",name=").append(_name);
+    
     if (_node != null)
-      return (getClass().getSimpleName()
-	      + "[" + _jid + ",node=" + _node + "]");
-    else
-      return (getClass().getSimpleName()
-	      + "[" + _jid + "]");
+      sb.append(",node=").append(_node);
+
+    sb.append("]");
+
+    return sb.toString();
   }
 }

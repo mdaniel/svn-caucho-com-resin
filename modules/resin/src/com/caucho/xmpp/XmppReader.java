@@ -58,7 +58,7 @@ public class XmppReader
   private BamStream _handler;
 
   private ReadStream _is;
-  private XMLStreamReaderImpl _in;
+  private XmppStreamReader _in;
 
   private XmppContext _xmppContext;
   private XmppMarshalFactory _marshalFactory;
@@ -70,7 +70,7 @@ public class XmppReader
 
   XmppReader(XmppContext context,
 	     ReadStream is,
-	     XMLStreamReader in,
+	     XmppStreamReader in,
 	     BamStream toReply,
 	     BamStream handler)
   {
@@ -78,7 +78,7 @@ public class XmppReader
     _marshalFactory = context.getMarshalFactory();
     
     _is = is;
-    _in = (XMLStreamReaderImpl) in;
+    _in = in;
 
     _toReply = toReply;
     
@@ -105,7 +105,7 @@ public class XmppReader
   boolean readNext()
     throws IOException
   {
-    XMLStreamReaderImpl in = _in;
+    XmppStreamReader in = _in;
     
     if (in == null)
       return false;
