@@ -29,7 +29,6 @@
 
 package com.caucho.xmpp.atom;
 
-import com.caucho.bam.atom.*;
 import com.caucho.vfs.*;
 import com.caucho.xmpp.*;
 import java.io.*;

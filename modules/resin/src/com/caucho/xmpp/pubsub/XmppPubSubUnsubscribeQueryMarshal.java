@@ -29,7 +29,6 @@
 
 package com.caucho.xmpp.pubsub;
 
-import com.caucho.bam.pubsub.*;
 import com.caucho.vfs.*;
 import com.caucho.xmpp.*;
 import java.io.*;

@@ -29,8 +29,6 @@
 
 package com.caucho.xmpp.pubsub;
 
-import com.caucho.xmpp.pubsub.PubSubQuery;
-import com.caucho.xmpp.pubsub.PubSubOptions;
 import java.io.Serializable;
 import java.util.*;
 

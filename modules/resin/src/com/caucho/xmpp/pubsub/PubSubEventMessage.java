@@ -29,7 +29,6 @@
 
 package com.caucho.xmpp.pubsub;
 
-import com.caucho.bam.pubsub.*;
 import java.util.*;
 import java.io.Serializable;
 

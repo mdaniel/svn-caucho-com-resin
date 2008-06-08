@@ -29,7 +29,6 @@
 
 package com.caucho.xmpp.muc;
 
-import com.caucho.bam.muc.*;
 import java.util.*;
 
 /**

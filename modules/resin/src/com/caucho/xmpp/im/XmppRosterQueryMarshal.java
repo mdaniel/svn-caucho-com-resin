@@ -29,7 +29,6 @@
 
 package com.caucho.xmpp.im;
 
-import com.caucho.bam.im.*;
 import com.caucho.vfs.*;
 import com.caucho.xmpp.*;
 import java.io.*;

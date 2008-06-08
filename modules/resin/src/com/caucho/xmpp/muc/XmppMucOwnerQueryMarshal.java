@@ -30,8 +30,6 @@
 package com.caucho.xmpp.muc;
 
 import com.caucho.xmpp.data.DataForm;
-import com.caucho.bam.muc.*;
-import com.caucho.bam.data.*;
 import com.caucho.vfs.*;
 import com.caucho.xmpp.*;
 import java.io.*;

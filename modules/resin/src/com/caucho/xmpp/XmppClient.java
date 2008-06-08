@@ -30,7 +30,6 @@
 package com.caucho.xmpp;
 
 import com.caucho.bam.*;
-import com.caucho.bam.im.*;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.util.*;

@@ -29,7 +29,6 @@
 
 package com.caucho.xmpp.im;
 
-import com.caucho.bam.im.*;
 import com.caucho.xmpp.im.Text;
 import java.io.Serializable;
 import java.util.*;

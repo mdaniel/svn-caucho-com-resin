@@ -29,20 +29,19 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.xmpp.im.Text;
-import com.caucho.xmpp.im.ImSessionQuery;
-import com.caucho.xmpp.im.ImPresence;
-import com.caucho.xmpp.im.ImMessage;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamConnection;
-import com.caucho.bam.im.*;
 import com.caucho.bam.BamBroker;
 import com.caucho.server.connection.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.xml.stream.*;
 import com.caucho.xmpp.im.XmppRosterQueryMarshal;
+import com.caucho.xmpp.im.Text;
+import com.caucho.xmpp.im.ImSessionQuery;
+import com.caucho.xmpp.im.ImPresence;
+import com.caucho.xmpp.im.ImMessage;
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;

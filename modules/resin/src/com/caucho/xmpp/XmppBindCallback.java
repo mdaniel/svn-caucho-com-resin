@@ -29,14 +29,13 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.xmpp.im.ImBindQuery;
 import com.caucho.bam.*;
-import com.caucho.bam.im.*;
 import com.caucho.server.connection.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.xml.stream.*;
 import com.caucho.xmpp.im.XmppRosterQueryMarshal;
+import com.caucho.xmpp.im.ImBindQuery;
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;

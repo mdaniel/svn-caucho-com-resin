@@ -29,7 +29,6 @@
 
 package com.caucho.xmpp.disco;
 
-import com.caucho.bam.disco.*;
 import com.caucho.vfs.*;
 import com.caucho.xmpp.*;
 import java.io.*;

@@ -29,7 +29,6 @@
 
 package com.caucho.xmpp.muc;
 
-import com.caucho.bam.muc.*;
 import com.caucho.vfs.*;
 import com.caucho.xmpp.*;
 import java.io.*;
