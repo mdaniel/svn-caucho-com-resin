@@ -216,10 +216,10 @@ class WatchdogManager extends ProtocolDispatchServer {
   boolean authenticate(String password)
   {
     String cookie = getAdminCookie();
-    
+
     if (password == null && cookie == null)
       return true;
-    else if  (password != null && password.equals(getAdminCookie()))
+    else if  (password != null && password.equals(cookie))
       return true;
     else
       return false;
@@ -357,15 +357,19 @@ class WatchdogManager extends ProtocolDispatchServer {
     Vfs.setPwd(args.getRootDirectory());
     BootResinConfig resin = new BootResinConfig(args);
 
-    /*
     config.configure(resin,
 		     args.getResinConf(),
 		     "com/caucho/server/resin/resin.rnc");
-    */
+
+    if (_management == null)
+      _management = resin.getManagement();
+    
+    /*
     // The configuration file has already been validated by ResinBoot, so
     // it doesn't need a second validation
     config.configure(resin,
 		     args.getResinConf());
+    */
 
     if (args.isDynamicServer()) {
       String clusterId = args.getDynamicCluster();

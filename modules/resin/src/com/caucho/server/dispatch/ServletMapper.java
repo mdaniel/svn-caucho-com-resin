@@ -169,7 +169,12 @@ public class ServletMapper {
    */
   public void addWelcomeFile(String fileName)
   {
-    _welcomeFileList.add(fileName);
+    ArrayList<String> welcomeFileList
+      = new ArrayList<String>(_welcomeFileList);
+    
+    welcomeFileList.add(fileName);
+
+    _welcomeFileList = welcomeFileList;
   }
   
   /**
@@ -177,8 +182,7 @@ public class ServletMapper {
    */
   public void setWelcomeFileList(ArrayList<String> list)
   {
-    _welcomeFileList.clear();
-    _welcomeFileList.addAll(list);
+    _welcomeFileList = new ArrayList<String>(list);
   }
 
   public FilterChain mapServlet(ServletInvocation invocation)
@@ -218,8 +222,11 @@ public class ServletMapper {
     }
 
     if (servletName == null) {
-      for (int i = 0; i < _welcomeFileList.size(); i++) {
-        String file = _welcomeFileList.get(i);
+      ArrayList<String> welcomeFileList = _welcomeFileList;
+      int size = welcomeFileList.size();
+      
+      for (int i = 0; i < size; i++) {
+        String file = welcomeFileList.get(i);
 
         try {
 	  String welcomeURI;

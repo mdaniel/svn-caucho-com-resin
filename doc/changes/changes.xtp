@@ -13,6 +13,8 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>cache: avoid caching blank pages (#2610, rep by Shane Cruz)</li>
+<li>hessian: added FooSerializerFactory to handle legacy objects with non-zero constructors (#2584, rep by Matt Johnson)</li>
 <li>init: servlet init must have access to port mbean (#2683, rep by Vinod Mehra)</li>
 <li>ioc: synchronization on bean introspection (#2672, rep by Matthew Schmidt)</li>
 <li>ssl: synchronization issues with openssl init (#2712, rep by janecek)</li>

@@ -124,6 +124,14 @@ public class BootResinConfig implements EnvironmentBean
   {
     _management = management;
   }
+
+  /**
+   * The management configuration
+   */
+  public BootManagementConfig getManagement()
+  {
+    return _management;
+  }
   
   /**
    * Returns the management password.

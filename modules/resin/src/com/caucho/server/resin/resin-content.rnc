@@ -78,8 +78,6 @@ r_cluster-Content =
 
   & r_machine*
 
-  & r_management?
-
   & r_persistent-store?
 
   & r_ping*

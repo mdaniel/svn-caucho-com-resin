@@ -144,7 +144,7 @@ public class DriverConfig
   /**
    * Sets the driver as data source.
    */
-  public void setCauchoDriverType(String type)
+  public void setDriverType(String type)
     throws ConfigException
   {
     if ("ConnectionPoolDataSource".equals(type)) {
@@ -159,8 +159,24 @@ public class DriverConfig
     else if ("Driver".equals(type)) {
       _driverType = TYPE_DRIVER;
     }
-    else
+    else if (! hasDriverTypeMethod(_driverClass)) {
       throw new ConfigException(L.l("'{0}' is an unknown driver type. Valid types are 'ConnectionPoolDataSource', 'XADataSource' and 'Driver'"));
+    }
+  }
+
+  private boolean hasDriverTypeMethod(Class cl)
+  {
+    if (cl == null)
+      return false;
+
+    for (Method method : cl.getMethods()) {
+      if (method.getName().equals("setDriverType")
+	  && method.getParameterTypes().length == 1) {
+	return true;
+      }
+    }
+
+    return false;
   }
 
   /**
