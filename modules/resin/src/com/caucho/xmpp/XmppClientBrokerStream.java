@@ -49,9 +49,9 @@ class XmppClientBrokerStream extends AbstractBamStream
     = Logger.getLogger(XmppClientBrokerStream.class.getName());
 
   private WriteStream _os;
-  private XmppStreamWriterImpl _out;
+  private XmppWriter _out;
 
-  XmppClientBrokerStream(XmppClient client, XmppStreamWriterImpl out)
+  XmppClientBrokerStream(XmppClient client, XmppWriter out)
   {
     _out = out;
   }
@@ -62,68 +62,7 @@ class XmppClientBrokerStream extends AbstractBamStream
   @Override
   public void message(String to, String from, Serializable value)
   {
-    try {
-      XmppStreamWriterImpl out = _out;
-
-      synchronized (out) {
-	out.writeStartElement("message");
-
-	if (to != null)
-	  out.writeAttribute("to", to);
-
-	if (from != null)
-	  out.writeAttribute("from", to);
-
-	ImMessage msg = (ImMessage) value;
-
-	if (msg.getType() != null)
-	  out.writeAttribute("type", msg.getType());
-
-	Text []subjects = msg.getSubjects();
-	if (subjects != null) {
-	  for (Text subject : subjects) {
-	    out.writeStartElement("subject");
-
-	    if (subject.getLang() != null)
-	      out.writeAttribute("xml", "http://xml.org", "lang", subject.getLang());
-	    
-	    out.writeCharacters(subject.getValue());
-	    out.writeEndElement(); // </subject>
-	  }
-	}
-	
-	Text []bodys = msg.getBodys();
-	if (bodys != null) {
-	  for (Text body : bodys) {
-	    out.writeStartElement("body");
-
-	    if (body.getLang() != null)
-	      out.writeAttribute("xml", "http://xml.org", "lang",
-				 body.getLang());
-	    
-	    out.writeCharacters(body.getValue());
-	    out.writeEndElement(); // </body>
-	  }
-	}
-
-	if (msg.getThread() != null) {
-	  out.writeStartElement("thread");
-	  out.writeCharacters(msg.getThread());
-	  out.writeEndElement(); // </thread>
-	}
-
-	out.writeEndElement(); // </message>
-
-	out.flush();
-      }
-
-      if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendMessage to=" + to + " from=" + from
-		  + " msg=" + value);
-      }
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    _out.sendMessage(to, from, value);
   }
 
   /**
@@ -131,41 +70,11 @@ class XmppClientBrokerStream extends AbstractBamStream
    */
   @Override
   public boolean queryGet(long id, String to, String from,
-			      Serializable value)
+			  Serializable value)
   {
-    try {
-      XmppStreamWriterImpl out = _out;
+    _out.sendQuery(String.valueOf(id), to, from, value, "get");
 
-      synchronized (out) {
-	out.writeStartElement("iq");
-
-	out.writeAttribute("id", String.valueOf(id));
-
-	out.writeAttribute("type", "get");
-
-	if (to != null)
-	  out.writeAttribute("to", to);
-
-	if (from != null)
-	  out.writeAttribute("from", to);
-
-	out.writeValue(value);
-
-	out.writeEndElement(); // </iq>
-
-	out.flush();
-      }
-
-      if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendQueryGet id=" + id
-		  + " to=" + to + " from=" + from
-		  + " query=" + value);
-      }
-
-      return true;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return true;
   }
 
   /**
@@ -173,41 +82,11 @@ class XmppClientBrokerStream extends AbstractBamStream
    */
   @Override
   public boolean querySet(long id, String to, String from,
-			      Serializable value)
+			  Serializable value)
   {
-    try {
-      XmppStreamWriterImpl out = _out;
-
-      synchronized (out) {
-	out.writeStartElement("iq");
-
-	out.writeAttribute("id", String.valueOf(id));
-
-	out.writeAttribute("type", "set");
-
-	if (to != null)
-	  out.writeAttribute("to", to);
-
-	if (from != null)
-	  out.writeAttribute("from", to);
-
-	out.writeValue(value);
-
-	out.writeEndElement(); // </iq>
-
-	out.flush();
-      }
-
-      if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendQueryGet id=" + id
-		  + " to=" + to + " from=" + from
-		  + " query=" + value);
-      }
-
-      return true;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    _out.sendQuery(String.valueOf(id), to, from, value, "get");
+    
+    return true;
   }
 
   /**
@@ -215,39 +94,9 @@ class XmppClientBrokerStream extends AbstractBamStream
    */
   @Override
   public void queryResult(long id, String to, String from,
-  			      Serializable value)
+			  Serializable value)
   {
-    try {
-      XmppStreamWriterImpl out = _out;
-
-      synchronized (out) {
-	out.writeStartElement("iq");
-
-	out.writeAttribute("id", String.valueOf(id));
-
-	out.writeAttribute("type", "result");
-
-	if (to != null)
-	  out.writeAttribute("to", to);
-
-	if (from != null)
-	  out.writeAttribute("from", to);
-
-	out.writeValue(value);
-
-	out.writeEndElement(); // </iq>
-
-	out.flush();
-      }
-
-      if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendQueryResult id=" + id
-		  + " to=" + to + " from=" + from
-		  + " query=" + value);
-      }
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    _out.sendQuery(String.valueOf(id), to, from, value, "result");
   }
 
   /**
@@ -256,7 +105,7 @@ class XmppClientBrokerStream extends AbstractBamStream
   @Override
   public void presence(String to, String from, Serializable value)
   {
-    sendPresence(to, from, value, null);
+    _out.sendPresence(to, from, value, null);
   }
 
   /**
@@ -265,7 +114,7 @@ class XmppClientBrokerStream extends AbstractBamStream
   @Override
   public void presenceProbe(String to, String from, Serializable value)
   {
-    sendPresence(to, from, value, "probe");
+    _out.sendPresence(to, from, value, "probe");
   }
 
   /**
@@ -276,7 +125,7 @@ class XmppClientBrokerStream extends AbstractBamStream
 				      String from,
 				      Serializable value)
   {
-    sendPresence(to, from, value, "unavailable");
+    _out.sendPresence(to, from, value, "unavailable");
   }
 
   /**
@@ -287,7 +136,7 @@ class XmppClientBrokerStream extends AbstractBamStream
 				    String from,
 				    Serializable value)
   {
-    sendPresence(to, from, value, "subscribe");
+    _out.sendPresence(to, from, value, "subscribe");
   }
 
   /**
@@ -298,7 +147,7 @@ class XmppClientBrokerStream extends AbstractBamStream
 				    String from,
 				    Serializable value)
   {
-    sendPresence(to, from, value, "subscribed");
+    _out.sendPresence(to, from, value, "subscribed");
   }
 
   /**
@@ -309,7 +158,7 @@ class XmppClientBrokerStream extends AbstractBamStream
 				      String from,
 				      Serializable value)
   {
-    sendPresence(to, from, value, "unsubscribe");
+    _out.sendPresence(to, from, value, "unsubscribe");
   }
 
   /**
@@ -320,58 +169,7 @@ class XmppClientBrokerStream extends AbstractBamStream
 				      String from,
 				      Serializable value)
   {
-    sendPresence(to, from, value, "unsubscribed");
-  }
-
-  /**
-   * Sends a presence message to the stream
-   */
-  private void sendPresence(String to, String from,
-			    Serializable value,
-			    String type)
-  {
-    try {
-      XmppStreamWriterImpl out = _out;
-
-      synchronized (out) {
-	out.writeStartElement("presence");
-
-	if (to != null)
-	  out.writeAttribute("to", to);
-
-	if (from != null)
-	  out.writeAttribute("from", from);
-
-	if (type != null)
-	  out.writeAttribute("type", type);
-
-	ImPresence presence = (ImPresence) value;
-
-	Text status = presence.getStatus();
-	if (status != null) {
-	  out.writeStartElement("status");
-
-	  if (status.getLang() != null)
-	    out.writeAttribute("xml", "http://xml.org", "lang",
-			       status.getLang());
-	    
-	  out.writeCharacters(status.getValue());
-	  out.writeEndElement(); // </status>
-	}
-
-	out.writeEndElement(); // </presence>
-
-	out.flush();
-      }
-
-      if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " sendPresence type=" + type
-		  + " to=" + to + " from=" + from
-		  + " value=" + value);
-      }
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    _out.sendPresence(to, from, value, "unsubscribed");
   }
 
   @Override

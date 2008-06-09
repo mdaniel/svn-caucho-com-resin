@@ -139,8 +139,10 @@ public class XmppClient {
       
       XmppStreamWriterImpl out;
       out = new XmppStreamWriterImpl(_os, marshalFactory);
+
+      XmppWriter writer = new XmppWriter(_xmppContext, out);
       
-      _toBroker = new XmppClientBrokerStream(this, out);
+      _toBroker = new XmppClientBrokerStream(this, writer);
     
       _in = new XmppStreamReaderImpl(_is, marshalFactory);
       _reader = new XmppReader(_xmppContext, _is, _in, _toBroker, _callback);

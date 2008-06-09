@@ -42,6 +42,7 @@ import com.caucho.xmpp.im.Text;
 import com.caucho.xmpp.im.ImSessionQuery;
 import com.caucho.xmpp.im.ImPresence;
 import com.caucho.xmpp.im.ImMessage;
+import com.caucho.xmpp.im.XmlData;
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;
@@ -185,6 +186,7 @@ public class XmppReader
 
     ArrayList<Text> subjectList = new ArrayList<Text>();
     ArrayList<Text> bodyList = new ArrayList<Text>();
+    ArrayList<Serializable> extraList = new ArrayList<Serializable>();
     String thread = null;
     
     while ((tag = _in.next()) > 0
@@ -243,6 +245,13 @@ public class XmppReader
 
 	expectEnd("thread");
       }
+      else {
+	String name = _in.getLocalName();
+	String uri = _in.getNamespaceURI();
+	String data = _in.readAsXmlString();
+
+	extraList.add(new XmlData(name, uri, data));
+      }
     }
 
     expectEnd("message", tag);
@@ -262,6 +271,11 @@ public class XmppReader
     }
 
     Serializable []extra = null;
+    
+    if (extraList.size() > 0) {
+      extra = new Serializable[extraList.size()];
+      extraList.toArray(extra);
+    }
 
     if (_jid == null)
       from = _jid;

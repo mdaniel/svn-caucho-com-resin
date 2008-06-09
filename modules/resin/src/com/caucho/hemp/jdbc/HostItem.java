@@ -27,25 +27,44 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.xmpp;
+package com.caucho.hemp.jdbc;
 
-import java.io.*;
-import javax.xml.stream.*;
+import com.caucho.config.*;
+import com.caucho.bam.*;
 import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.stream.*;
+import java.util.logging.*;
+import java.sql.*;
+import javax.annotation.*;
+import javax.sql.*;
+import javax.webbeans.*;
 
 /**
- * Marshals from an xmpp request to and from a serialized class
+ * host
  */
-public interface XmppStreamReader extends XMLStreamReader
+class HostItem
 {
-  public Serializable readValue()
-    throws IOException, XMLStreamException;
-  
-  public String readAsXmlString()
-    throws IOException, XMLStreamException;
-  
-  public int available()
-    throws IOException;
+  private final int _id;
+  private final String _name;
+
+  HostItem(int id, String name)
+  {
+    _id = id;
+    _name = name;
+  }
+
+  public int getId()
+  {
+    return _id;
+  }
+
+  public String getName()
+  {
+    return _name;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _id + "," + _name + "]";
+  }
 }

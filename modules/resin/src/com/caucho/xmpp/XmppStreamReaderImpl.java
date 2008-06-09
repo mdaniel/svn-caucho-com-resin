@@ -72,7 +72,7 @@ public class XmppStreamReaderImpl extends XMLStreamReaderImpl
       return readAsXmlString();
   }
 
-  private String readAsXmlString()
+  public String readAsXmlString()
     throws IOException, XMLStreamException
   {
     StringBuilder sb = new StringBuilder();

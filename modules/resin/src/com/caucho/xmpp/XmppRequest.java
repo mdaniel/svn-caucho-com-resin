@@ -65,7 +65,8 @@ public class XmppRequest implements TcpServerRequest {
   private volatile int _requestId;
 
   private String _id;
-  private String _from;
+
+  private String _host; // hostname given in stream
   private String _clientTo;
   private String _uid;
   
@@ -198,7 +199,7 @@ public class XmppRequest implements TcpServerRequest {
     if (! readStreamHeader())
       return false;
 
-    writeStreamHeader(_streamFrom);
+    writeStreamHeader(_host);
 
     readStreamInit();
 
@@ -259,20 +260,9 @@ public class XmppRequest implements TcpServerRequest {
       return false;
     }
 
-    String to = null;
-      
-    for (int i = _in.getAttributeCount() - 1; i >= 0; i--) {
-      String localName = _in.getAttributeLocalName(i);
-      String value = _in.getAttributeValue(i);
+    _host = _in.getAttributeValue(null, "to");
 
-      if ("to".equals(localName))
-	to = value;
-    }
-
-    String from = _from;
-
-    if (from == null)
-      from = to;
+    String from = _host;
 
     if (from == null)
       from = _conn.getLocalAddress().getHostAddress();
@@ -345,13 +335,13 @@ public class XmppRequest implements TcpServerRequest {
     return true;
   }
 
-  private void writeStreamHeader(String from)
+  private void writeStreamHeader(String host)
     throws IOException
   {
     _os.print("<stream:stream xmlns='jabber:client'");
     _os.print(" xmlns:stream='http://etherx.jabber.org/streams'");
     _os.print(" id='" + _id + "'");
-    _os.print(" from='" + from + "'");
+    _os.print(" from='" + host + "'");
     _os.print(" version='1.0'>");
       
     // + "   <mechanism>DIGEST-MD5</mechanism>\n"
@@ -385,7 +375,7 @@ public class XmppRequest implements TcpServerRequest {
 	to = value;
     }
 
-    String from = _from;
+    String from = _host;
 
     if (from == null)
       from = to;
@@ -404,7 +394,7 @@ public class XmppRequest implements TcpServerRequest {
       
     _os.print("<stream:features>");
     _os.print("<bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/>");
-    _os.print("<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>");
+    //_os.print("<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>");
     _os.print("</stream:features>");
     _os.flush();
 
@@ -486,7 +476,7 @@ public class XmppRequest implements TcpServerRequest {
     if (isAuth) {
       _name = name;
 
-      _uid = _name + "@localhost";
+      _uid = _name + "@" + _host;
 
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " auth-plain success for " + name);

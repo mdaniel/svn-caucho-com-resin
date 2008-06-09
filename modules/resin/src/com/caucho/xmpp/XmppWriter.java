@@ -112,6 +112,13 @@ class XmppWriter
 	  out.writeEndElement(); // </thread>
 	}
 
+	Serializable []extra = msg.getExtra();
+	if (extra != null) {
+	  for (Serializable extraItem : extra) {
+	    out.writeValue(extraItem);
+	  }
+	}
+
 	out.writeEndElement(); // </message>
 
 	out.flush();

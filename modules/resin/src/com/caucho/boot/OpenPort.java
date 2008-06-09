@@ -27,25 +27,34 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.xmpp;
+package com.caucho.boot;
 
-import java.io.*;
-import javax.xml.stream.*;
+import java.util.logging.*;
+import javax.annotation.*;
+
+import com.caucho.config.*;
+import com.caucho.config.program.*;
+import com.caucho.server.cluster.*;
+import com.caucho.server.port.*;
+import com.caucho.server.http.*;
 import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.stream.*;
+import com.caucho.webbeans.manager.*;
 
 /**
- * Marshals from an xmpp request to and from a serialized class
+ * Represents a protocol connection.
  */
-public interface XmppStreamReader extends XMLStreamReader
+public class OpenPort extends Port
 {
-  public Serializable readValue()
-    throws IOException, XMLStreamException;
-  
-  public String readAsXmlString()
-    throws IOException, XMLStreamException;
-  
-  public int available()
-    throws IOException;
+  public OpenPort()
+  {
+    super.setClass(HttpProtocol.class); // dummy
+  }
+
+  public void setClass(Class cl)
+  {
+  }
+
+  public void setBuilderProgram(ConfigProgram program)
+  {
+  }
 }

@@ -27,25 +27,57 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.xmpp;
+package com.caucho.xmpp.im;
 
-import java.io.*;
-import javax.xml.stream.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.stream.*;
+import java.io.Serializable;
+import java.util.*;
 
 /**
- * Marshals from an xmpp request to and from a serialized class
+ * encapsulated xml as a string
  */
-public interface XmppStreamReader extends XMLStreamReader
-{
-  public Serializable readValue()
-    throws IOException, XMLStreamException;
+public class XmlData implements Serializable {
+  private String _name;
+  private String _uri;
   
-  public String readAsXmlString()
-    throws IOException, XMLStreamException;
-  
-  public int available()
-    throws IOException;
+  private String _data;
+
+  public XmlData()
+  {
+  }
+
+  public XmlData(String name, String uri, String data)
+  {
+    _name = name;
+    _uri = uri;
+    _data = data;
+  }
+
+  public String getName()
+  {
+    return _name;
+  }
+
+  public String getUri()
+  {
+    return _uri;
+  }
+
+  public String getData()
+  {
+    return _data;
+  }
+
+  @Override
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+
+    sb.append(_name).append("{").append(_uri).append("}");
+    
+    sb.append("]");
+
+    return sb.toString();
+  }
 }

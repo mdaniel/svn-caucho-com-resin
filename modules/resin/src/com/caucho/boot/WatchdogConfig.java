@@ -202,7 +202,7 @@ class WatchdogConfig
   public Port createProtocol()
     throws ConfigException
   {
-    ProtocolPort port = new ProtocolPort();
+    OpenPort port = new OpenPort();
 
     _ports.add(port);
 

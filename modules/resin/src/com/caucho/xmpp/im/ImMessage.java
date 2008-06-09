@@ -145,6 +145,26 @@ public class ImMessage implements Serializable {
   {
     return _thread;
   }
+  
+  public Serializable []getExtra()
+  {
+    return _extra;
+  }
+  
+  public void setExtra(Serializable []extra)
+  {
+    _extra = extra;
+  }
+  
+  public void setExtraList(ArrayList<Serializable> extraList)
+  {
+    if (extraList != null && extraList.size() > 0) {
+      _extra = new Serializable[extraList.size()];
+      extraList.toArray(_extra);
+    }
+    else
+      _extra = null;
+  }
 
   @Override
   public String toString()
@@ -189,6 +209,11 @@ public class ImMessage implements Serializable {
     if (_thread != null) {
       sb.append(",thread=");
       sb.append(_thread);
+    }
+
+    if (_extra != null) {
+      for (Serializable extra : _extra)
+	sb.append(",extra=").append(extra);
     }
     
     sb.append("]");
