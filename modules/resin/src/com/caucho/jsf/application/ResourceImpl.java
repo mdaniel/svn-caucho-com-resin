@@ -252,4 +252,9 @@ public class ResourceImpl
     _path = path;
 
   }
+
+  public String toString()
+  {
+    return "ResourceImpl[]";
+  }
 }

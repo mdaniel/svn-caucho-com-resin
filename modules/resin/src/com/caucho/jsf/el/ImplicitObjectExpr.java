@@ -96,6 +96,8 @@ public class ImplicitObjectExpr extends Expr {
       return context.getExternalContext().getRequest();
     case REQUEST_SCOPE:
       return context.getExternalContext().getRequestMap();
+    case RESOURCE:
+      return context.getApplication().getResourceHandler();
     case SESSION:
       return context.getExternalContext().getSession(true);
     case SESSION_SCOPE:
@@ -134,6 +136,7 @@ public class ImplicitObjectExpr extends Expr {
     INIT_PARAM,
     PARAM,
     PARAM_VALUES,
+    RESOURCE,
     REQUEST,
     REQUEST_SCOPE,
     SESSION,
@@ -178,6 +181,9 @@ public class ImplicitObjectExpr extends Expr {
     _exprMap.put("requestScope",
 		 new ImplicitObjectExpr("requestScope",
 					ImplicitEnum.REQUEST_SCOPE));
+    _exprMap.put("resource",
+		 new ImplicitObjectExpr("resource",
+					ImplicitEnum.RESOURCE));
     _exprMap.put("session",
 		 new ImplicitObjectExpr("session",
 					ImplicitEnum.SESSION));

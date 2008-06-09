@@ -36,6 +36,7 @@ import com.caucho.webbeans.el.*;
 import javax.el.*;
 import javax.faces.component.*;
 import javax.faces.context.*;
+import javax.faces.application.ResourceHandler;
 
 import java.beans.FeatureDescriptor;
 import java.util.*;
@@ -71,6 +72,8 @@ public class FacesContextELResolver extends CompositeELResolver {
 
   private final ManagedBeanELResolver _managedBeanResolver
     = new ManagedBeanELResolver();
+
+  private final ResourceELResolver _resourceResolver = new ResourceELResolver(); 
 
   public FacesContextELResolver(ELResolver []customResolvers,
 				JsfResourceBundleELResolver jsfBundleResolver)
@@ -173,6 +176,9 @@ public class FacesContextELResolver extends CompositeELResolver {
 		     _managedBeanResolver.getFeatureDescriptors(env, base));
 
       addDescriptors(descriptors,
+                     _resourceResolver.getFeatureDescriptors(env, base));
+
+      addDescriptors(descriptors,
 		     _jsfBundleResolver.getFeatureDescriptors(env, base));
     }
     
@@ -225,6 +231,8 @@ public class FacesContextELResolver extends CompositeELResolver {
         return _arrayResolver.getType(env, base, property);
       else if (base instanceof ResourceBundle)
         return _bundleResolver.getType(env, base, property);
+      else if (base instanceof ResourceHandler)
+        return _resourceResolver.getType(env, base, property);
       else
         return _beanResolver.getType(env, base, property);
     }
@@ -287,6 +295,8 @@ public class FacesContextELResolver extends CompositeELResolver {
 	return _arrayResolver.getValue(env, base, property);
       else if (base instanceof ResourceBundle)
 	return _bundleResolver.getValue(env, base, property);
+      else if (base instanceof ResourceHandler)
+        return _resourceResolver.getValue(env, base, property);
       else
 	return _beanResolver.getValue(env, base, property);
     }
@@ -365,6 +375,10 @@ public class FacesContextELResolver extends CompositeELResolver {
 	env.setPropertyResolved(true);
 	
 	return _jsfBundleResolver.isReadOnly(env, base, property);
+      } else if (base instanceof ResourceHandler) {
+        env.setPropertyResolved(true);
+
+        return _resourceResolver.isReadOnly(env, base, property);
       }
       else {
 	env.setPropertyResolved(true);
@@ -421,6 +435,8 @@ public class FacesContextELResolver extends CompositeELResolver {
 	_arrayResolver.setValue(env, base, property, value);
       else if (base instanceof ResourceBundle)
 	_jsfBundleResolver.setValue(env, base, property, value);
+      else if (base instanceof ResourceHandler)
+         _resourceResolver.setValue(env, base, property, value);
       else
 	_beanResolver.setValue(env, base, property, value);
     }
@@ -496,6 +512,7 @@ public class FacesContextELResolver extends CompositeELResolver {
     addDescriptor("paramValues", Map.class);
     addDescriptor("request", Object.class);
     addDescriptor("requestScope", Map.class);
+    addDescriptor("resource", Object.class);
     addDescriptor("session", Object.class);
     addDescriptor("sessionScope", Map.class);
     addDescriptor("view", UIViewRoot.class);
