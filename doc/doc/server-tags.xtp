@@ -265,7 +265,7 @@ the command line, typically -X memory parameters and -D defines.</p>
 
 </defun>
 
-<defun title="&lt;jvm-classpath>" version="Resin 3.1">
+<defun title="&lt;jvm-classpath>" version="Resin 3.1.6">
 <parents>server</parents>
 
 <p>&lt;jvm-classpath> adds a classpath entry when starting the JVM.</p>
