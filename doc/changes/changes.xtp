@@ -12,6 +12,7 @@
 
 <s2 title="3.1.7 snapshot">
 <ul>
+<li>(2008-06-09) webapp: versioning wasn't handling ROOT-1.0.war properly (#2668, rep by A Servidio)</li>
 <li>conf: minimal.conf missing </cluster> tag (#2691 rep by Nathan Maves)</li>
 <li>mod_caucho: build issue with Apache 1.3 (#2655, rep by maxpil)</li>
 <li>proxy: ProxyServlet support for x-forwarded-for (#2638, rep by remilon)</li>

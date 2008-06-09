@@ -29,25 +29,11 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.config.types.PathBuilder;
-import com.caucho.log.Log;
-import com.caucho.management.j2ee.J2EEManagedObject;
-import com.caucho.management.j2ee.WebModule;
-import com.caucho.server.deploy.DeployConfig;
-import com.caucho.server.deploy.DeployControllerAdmin;
-import com.caucho.server.deploy.EnvironmentDeployController;
-import com.caucho.server.host.Host;
-import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
-import com.caucho.vfs.Path;
 
-import javax.servlet.jsp.el.ELException;
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * A configuration entry for a versioning web-app.
@@ -72,51 +58,15 @@ public class WebAppVersioningController extends WebAppController {
   private boolean _isModified = true;
 
 
-  public WebAppVersioningController(String contextPath,
+  public WebAppVersioningController(String name,
+				    String contextPath,
 				    WebAppExpandDeployGenerator generator,
 				    WebAppContainer container)
   {
-    super(contextPath, contextPath, null, container);
+    super(name, contextPath, null, container);
 
     _generator = generator;
   }
-
-  /**
-   * Merges two entries.
-   */
-  /*
-  protected WebAppController merge(WebAppController newController)
-  {
-    if (getConfig() != null && getConfig().getURLRegexp() != null)
-      return newController;
-    else if (newController.getConfig() != null &&
-	     newController.getConfig().getURLRegexp() != null)
-      return this;
-    else {
-      Thread thread = Thread.currentThread();
-      ClassLoader oldLoader = thread.getContextClassLoader();
-
-      try {
-	thread.setContextClassLoader(getParentClassLoader());
-
-	//  The contextPath comes from current web-app
-	WebAppController mergedController
-	  = new WebAppController(getContextPath(),
-				 getRootDirectory(),
-				 _container);
-
-	// server/1h1{2,3}
-	// This controller overrides configuration from the new controller
-	mergedController.mergeController(this);
-	mergedController.mergeController(newController);
-
-	return mergedController;
-      } finally {
-	thread.setContextClassLoader(oldLoader);
-      }
-    }
-  }
-  */
 
   void setModified(boolean isModified)
   {
@@ -189,6 +139,7 @@ public class WebAppVersioningController extends WebAppController {
   /**
    * Initialize the controller.
    */
+  @Override
   protected void initBegin()
   {
     /*
@@ -239,9 +190,10 @@ public class WebAppVersioningController extends WebAppController {
   /**
    * Returns a printable view.
    */
+  @Override
   public String toString()
   {
-    return "WebAppVersioningController" +  "[" + getId() + "]";
+    return getClass().getSimpleName() +  "[" + getId() + "]";
   }
 
   static class VersionNameComparator implements Comparator<String>

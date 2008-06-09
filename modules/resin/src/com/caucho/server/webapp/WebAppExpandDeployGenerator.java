@@ -260,20 +260,9 @@ public class WebAppExpandDeployGenerator
 			    _urlPrefix + contextPath,
 			    _urlPrefix + segmentName);
     }
-    
-    /*
-    else if (versionNames.size() == 1) {
-      String versionName = versionNames.get(0);
-
-      if (versionName.equals(segmentName))
-	return makeController(name, segmentName);
-      else
-	return _container.getWebAppGenerator().findController(versionName);
-    }
-    */
 
     WebAppController controller
-      = new WebAppVersioningController(name, this, _container);
+      = new WebAppVersioningController(name, contextPath, this, _container);
 
     return controller;
   }
@@ -315,7 +304,6 @@ public class WebAppExpandDeployGenerator
       // server/003j
       rootDirectory = getExpandDirectory().lookup("./" + expandName);
     }
-    
 
 
     if (! rootDirectory.isDirectory()
