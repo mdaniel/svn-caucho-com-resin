@@ -143,8 +143,8 @@ public class ClusterStream {
     return (_pool.getLoadBalanceIdleTime() < now - _freeTime + 2000L);
   }
 
-  public boolean sendMessage(String to, String from,
-			     Serializable query)
+  public boolean message(String to, String from,
+			 Serializable query)
     throws IOException
   {
     WriteStream out = getWriteStream();
@@ -166,7 +166,7 @@ public class ClusterStream {
     return true;
   }
 
-  public boolean sendQueryGet(long id, String to, String from,
+  public boolean queryGet(long id, String to, String from,
 			      Serializable query)
     throws IOException
   {
@@ -190,7 +190,7 @@ public class ClusterStream {
     return true;
   }
 
-  public boolean sendQuerySet(long id, String to, String from,
+  public boolean querySet(long id, String to, String from,
 			      Serializable query)
     throws IOException
   {
@@ -214,7 +214,7 @@ public class ClusterStream {
     return true;
   }
 
-  public boolean sendQueryResult(long id, String to, String from,
+  public boolean queryResult(long id, String to, String from,
 				 Serializable query)
     throws IOException
   {
