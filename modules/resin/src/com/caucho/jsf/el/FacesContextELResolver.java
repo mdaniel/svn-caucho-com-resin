@@ -135,6 +135,7 @@ public class FacesContextELResolver extends CompositeELResolver {
     common = common(common, _beanResolver.getCommonPropertyType(env, base));
     common = common(common, _jsfBundleResolver.getCommonPropertyType(env, base));
     common = common(common, _bundleResolver.getCommonPropertyType(env, base));
+    common = common(common, _resourceResolver.getCommonPropertyType(env, base));
 
     return common;
   }
