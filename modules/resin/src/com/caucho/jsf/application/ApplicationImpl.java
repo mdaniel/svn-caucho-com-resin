@@ -146,8 +146,14 @@ public class ApplicationImpl
     addComponent(UIColumn.COMPONENT_TYPE,
 		 "javax.faces.component.UIColumn");
 
+    addComponent(UICommand.COMPONENT_TYPE,
+		 "javax.faces.component.UICommand");
+
     addComponent(UIData.COMPONENT_TYPE,
 		 "javax.faces.component.UIData");
+
+    addComponent(UIForm.COMPONENT_TYPE,
+		 "javax.faces.component.UIForm");
 
     addComponent(UIGraphic.COMPONENT_TYPE,
 		 "javax.faces.component.UIGraphic");
@@ -166,6 +172,9 @@ public class ApplicationImpl
 
     addComponent(UIOutput.COMPONENT_TYPE,
 		 "javax.faces.component.UIOutput");
+
+    addComponent(UIPanel.COMPONENT_TYPE,
+                 "javax.faces.component.UIPanel");
 
     addComponent(UIParameter.COMPONENT_TYPE,
 		 "javax.faces.component.UIParameter");
