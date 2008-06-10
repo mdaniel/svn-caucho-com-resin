@@ -40,6 +40,8 @@ import javax.annotation.*;
 import javax.sql.*;
 import javax.webbeans.*;
 
+import java.net.*;
+
 /**
  * service manager
  */
@@ -61,6 +63,8 @@ public class JdbcServiceManager extends AbstractBamServiceManager
 
   private HashMap<String,HostItem> _hostMap
     = new HashMap<String,HostItem>();
+
+  private XmppUserDomainAdmin _admin;
 
   /**
    * Configures the owning server's database
@@ -84,12 +88,17 @@ public class JdbcServiceManager extends AbstractBamServiceManager
     initDatabase();
 
     _broker.addServiceManager(this);
+
+    String host = "localhost";
+    
+    _admin = new XmppUserDomainAdmin(this, host);
+    _admin.register();
   }
 
-  public void createUser(String name,
-			 String host,
-			 String email,
-			 String password)
+  public void addUser(String host,
+		      String name,
+		      String password,
+		      String email)
   {
     HostItem hostItem = createHost(host);
 
@@ -185,7 +194,7 @@ public class JdbcServiceManager extends AbstractBamServiceManager
       stmt.executeUpdate(sql);
       
       sql = ("create table " + _dataTable + "("
-	     + "  key varchar(28) primary key,"
+	     + "  id varchar(28) primary key,"
 	     + "  owner integer,"
 	     + "  value blob"
 	     + ")");
