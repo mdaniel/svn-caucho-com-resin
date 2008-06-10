@@ -122,6 +122,10 @@ public class BamModule extends AbstractQuercusModule
     return BooleanValue.TRUE;
   }
 
+  //
+  // Transmit
+  //
+
   public static void bam_send_message(Env env, String to, Serializable value)
   {
     String jid = getJid(env);
@@ -170,6 +174,66 @@ public class BamModule extends AbstractQuercusModule
     getBrokerStream(env).queryError(id, to, jid, value, error);
   }
 
+  public static void bam_send_presence(Env env, String to, Serializable value)
+  {
+    String jid = getJid(env);
+    getBrokerStream(env).presence(to, jid, value);
+  }
+
+  public static void bam_send_presence_unavailable(Env env, String to, 
+                                                   Serializable value)
+  {
+    String jid = getJid(env);
+    getBrokerStream(env).presenceUnavailable(to, jid, value);
+  }
+
+  public static void bam_send_presence_probe(Env env, String to, 
+                                             Serializable value)
+  {
+    String jid = getJid(env);
+    getBrokerStream(env).presenceProbe(to, jid, value);
+  }
+
+  public static void bam_send_presence_subscribe(Env env, String to, 
+                                                 Serializable value)
+  {
+    String jid = getJid(env);
+    getBrokerStream(env).presenceSubscribe(to, jid, value);
+  }
+
+  public static void bam_send_presence_subscribed(Env env, String to, 
+                                                  Serializable value)
+  {
+    String jid = getJid(env);
+    getBrokerStream(env).presenceSubscribed(to, jid, value);
+  }
+
+  public static void bam_send_presence_unsubscribe(Env env, String to, 
+                                                   Serializable value)
+  {
+    String jid = getJid(env);
+    getBrokerStream(env).presenceUnsubscribe(to, jid, value);
+  }
+
+  public static void bam_send_presence_unsubscribed(Env env, String to, 
+                                                    Serializable value)
+  {
+    String jid = getJid(env);
+    getBrokerStream(env).presenceUnsubscribed(to, jid, value);
+  }
+
+  public static void bam_send_presence_error(Env env, String to, 
+                                             Serializable value,
+                                             BamError error)
+  {
+    String jid = getJid(env);
+    getBrokerStream(env).presenceError(to, jid, value, error);
+  }
+
+  /**
+   * Dispatches messages, queries, and presences to handler functions based
+   * on their prefixes.
+   **/
   public static Value bam_dispatch(Env env)
   {
     Value eventTypeValue = env.getGlobalValue("_quercus_bam_event_type");
@@ -179,135 +243,37 @@ public class BamModule extends AbstractQuercusModule
 
     BamEventType eventType = (BamEventType) eventTypeValue.toJavaObject();
 
-    switch (eventType) {
-      case MESSAGE: 
-        return handleMessage(env);
-
-      case MESSAGE_ERROR:
-        return handleMessageError(env);
-
-      case QUERY_GET:
-        return handleQueryGet(env);
-
-      case QUERY_SET:
-        return handleQuerySet(env);
-
-      case QUERY_RESULT:
-        return handleQueryResult(env);
-
-      case QUERY_ERROR:
-        return handleQueryError(env);
-    }
-
-    return BooleanValue.FALSE;
-  }
-
-  private static Value handleMessage(Env env)
-  {
     Value to = env.getGlobalValue("_quercus_bam_to");
     Value from = env.getGlobalValue("_quercus_bam_from");
     Value value = env.getGlobalValue("_quercus_bam_value");
 
-    AbstractFunction function = findFunction(env, "bam_message", value);
+    AbstractFunction function = findFunction(env, eventType.getPrefix(), value);
 
     if (function == null) {
-      log.fine("bam message handler function not found");
+      log.fine(L.l("bam handler function not found for {0}", eventType));
 
       return BooleanValue.FALSE;
     }
 
-    return function.call(env, to, from, value);
-  }
+    if (eventType.hasId() && eventType.hasError()) {
+      Value id = env.getGlobalValue("_quercus_bam_id");
+      Value error = env.getGlobalValue("_quercus_bam_error");
 
-  private static Value handleMessageError(Env env)
-  {
-    Value to = env.getGlobalValue("_quercus_bam_to");
-    Value from = env.getGlobalValue("_quercus_bam_from");
-    Value value = env.getGlobalValue("_quercus_bam_value");
-    Value error = env.getGlobalValue("_quercus_bam_error");
+      return function.call(env, id, to, from, value, error);
+    } 
+    else if (! eventType.hasId() && eventType.hasError()) {
+      Value error = env.getGlobalValue("_quercus_bam_error");
 
-    AbstractFunction function = findFunction(env, "bam_message_error", value);
-
-    if (function == null) {
-      log.fine("bam message error handler function not found");
-
-      return BooleanValue.FALSE;
+      return function.call(env, to, from, value, error);
     }
+    else if (eventType.hasId() && ! eventType.hasError()) {
+      Value id = env.getGlobalValue("_quercus_bam_id");
 
-    return function.call(env, to, from, value, error);
-  }
-
-  private static Value handleQueryGet(Env env)
-  {
-    Value id = env.getGlobalValue("_quercus_bam_id");
-    Value to = env.getGlobalValue("_quercus_bam_to");
-    Value from = env.getGlobalValue("_quercus_bam_from");
-    Value value = env.getGlobalValue("_quercus_bam_value");
-
-    AbstractFunction function = findFunction(env, "bam_query_get", value);
-
-    if (function == null) {
-      log.fine("bam query get handler function not found");
-
-      return BooleanValue.FALSE;
+      return function.call(env, id, to, from, value);
     }
-
-    return function.call(env, id, to, from, value);
-  }
-
-  private static Value handleQuerySet(Env env)
-  {
-    Value id = env.getGlobalValue("_quercus_bam_id");
-    Value to = env.getGlobalValue("_quercus_bam_to");
-    Value from = env.getGlobalValue("_quercus_bam_from");
-    Value value = env.getGlobalValue("_quercus_bam_value");
-
-    AbstractFunction function = findFunction(env, "bam_query_set", value);
-
-    if (function == null) {
-      log.fine("bam query get handler function not found");
-
-      return BooleanValue.FALSE;
+    else {
+      return function.call(env, to, from, value);
     }
-
-    return function.call(env, id, to, from, value);
-  }
-
-  private static Value handleQueryResult(Env env)
-  {
-    Value id = env.getGlobalValue("_quercus_bam_id");
-    Value to = env.getGlobalValue("_quercus_bam_to");
-    Value from = env.getGlobalValue("_quercus_bam_from");
-    Value value = env.getGlobalValue("_quercus_bam_value");
-
-    AbstractFunction function = findFunction(env, "bam_query_result", value);
-
-    if (function == null) {
-      log.fine("bam query result handler function not found");
-
-      return BooleanValue.FALSE;
-    }
-
-    return function.call(env, id, to, from, value);
-  }
-
-  private static Value handleQueryError(Env env)
-  {
-    Value id = env.getGlobalValue("_quercus_bam_id");
-    Value to = env.getGlobalValue("_quercus_bam_to");
-    Value from = env.getGlobalValue("_quercus_bam_from");
-    Value value = env.getGlobalValue("_quercus_bam_value");
-    Value error = env.getGlobalValue("_quercus_bam_error");
-
-    AbstractFunction function = findFunction(env, "bam_query_error", value);
-
-    if (function == null) {
-      log.fine("bam query error handler function not found");
-
-      return BooleanValue.FALSE;
-    }
-
-    return function.call(env, id, to, from, value, error);
   }
 
   /**
@@ -320,27 +286,21 @@ public class BamModule extends AbstractQuercusModule
                                                String prefix, 
                                                Value value)
   {
-    //System.out.printf("getFunction(%s,%s,%s)\n", env, prefix, value);
-    
     if (value == null)
       return env.findFunction(prefix);
 
     Object obj = value.toJavaObject();
-    //System.out.printf("getFunction(%s,%s,%s): obj=%s\n", env, prefix, value, obj);
 
     if (obj == null)
       return env.findFunction(prefix);
 
     String typeName = obj.getClass().getSimpleName().toLowerCase();
     String functionName = prefix + '_' + typeName;
-    //System.out.printf("getFunction(%s,%s,%s): functionName=%s\n", env, prefix, value, functionName);
 
     AbstractFunction function = env.findFunction(functionName);
 
     if (function == null)
       function = env.findFunction(prefix);
-
-    //System.out.printf("getFunction(%s,%s,%s): function=%s\n", env, prefix, value, function);
 
     return function;
   }

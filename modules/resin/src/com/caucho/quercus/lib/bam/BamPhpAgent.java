@@ -103,7 +103,8 @@ public class BamPhpAgent extends GenericService {
     super.init();
   }
 
-  private Env createEnv()
+  private Env createEnv(BamEventType type, 
+                        String to, String from, Serializable value)
   {
     WriteStream out = new NullWriteStream();
 
@@ -116,53 +117,33 @@ public class BamPhpAgent extends GenericService {
 
     env.start();
 
+    JavaClassDef eventClassDef = env.getJavaClassDefinition(BamEventType.class);
+    Value typeValue = eventClassDef.wrap(env, type);
+
+    env.setGlobalValue("_quercus_bam_event_type", typeValue);
+
+    env.setGlobalValue("_quercus_bam_to", StringValue.create(to));
+    env.setGlobalValue("_quercus_bam_from", StringValue.create(from));
+
+    Value javaValue = NullValue.NULL;
+
+    if (value != null) {
+      JavaClassDef classDef = env.getJavaClassDefinition(value.getClass());
+      javaValue = classDef.wrap(env, value);
+    }
+
+    env.setGlobalValue("_quercus_bam_value", javaValue);
+
     return env;
   }
 
-  @Override
-  public void message(String to, String from, Serializable value)
+  private void setId(Env env, long id)
   {
-    Env env = createEnv();
-
-    JavaClassDef eventClassDef = env.getJavaClassDefinition(BamEventType.class);
-    Value type = eventClassDef.wrap(env, BamEventType.MESSAGE);
-
-    env.setGlobalValue("_quercus_bam_event_type", type);
-    env.setGlobalValue("_quercus_bam_to", StringValue.create(to));
-    env.setGlobalValue("_quercus_bam_from", StringValue.create(from));
-
-    Value javaValue = NullValue.NULL;
-    if (value != null) {
-      JavaClassDef classDef = env.getJavaClassDefinition(value.getClass());
-      javaValue = classDef.wrap(env, value);
-    }
-
-    env.setGlobalValue("_quercus_bam_value", javaValue);
-
-    _program.execute(env);
+    env.setGlobalValue("_quercus_bam_id", LongValue.create(id));
   }
 
-  @Override
-  public void messageError(String to, String from, Serializable value,
-                           BamError error)
+  private void setError(Env env, BamError error)
   {
-    Env env = createEnv();
-
-    JavaClassDef eventClassDef = env.getJavaClassDefinition(BamEventType.class);
-    Value type = eventClassDef.wrap(env, BamEventType.MESSAGE_ERROR);
-
-    env.setGlobalValue("_quercus_bam_event_type", type);
-    env.setGlobalValue("_quercus_bam_to", StringValue.create(to));
-    env.setGlobalValue("_quercus_bam_from", StringValue.create(from));
-
-    Value javaValue = NullValue.NULL;
-    if (value != null) {
-      JavaClassDef classDef = env.getJavaClassDefinition(value.getClass());
-      javaValue = classDef.wrap(env, value);
-    }
-
-    env.setGlobalValue("_quercus_bam_value", javaValue);
-
     Value errorValue = NullValue.NULL;
     if (error != null) {
       JavaClassDef errorClassDef = env.getJavaClassDefinition(BamError.class);
@@ -170,6 +151,20 @@ public class BamPhpAgent extends GenericService {
     }
 
     env.setGlobalValue("_quercus_bam_error", errorValue);
+  }
+
+  @Override
+  public void message(String to, String from, Serializable value)
+  {
+    _program.execute(createEnv(BamEventType.MESSAGE, to, from, value));
+  }
+
+  @Override
+  public void messageError(String to, String from, Serializable value,
+                           BamError error)
+  {
+    Env env = createEnv(BamEventType.MESSAGE_ERROR, to, from, value);
+    setError(env, error);
 
     _program.execute(env);
   }
@@ -177,23 +172,8 @@ public class BamPhpAgent extends GenericService {
   @Override
   public boolean queryGet(long id, String to, String from, Serializable value)
   {
-    Env env = createEnv();
-
-    JavaClassDef eventClassDef = env.getJavaClassDefinition(BamEventType.class);
-    Value type = eventClassDef.wrap(env, BamEventType.QUERY_GET);
-
-    env.setGlobalValue("_quercus_bam_event_type", type);
-    env.setGlobalValue("_quercus_bam_id", LongValue.create(id));
-    env.setGlobalValue("_quercus_bam_to", StringValue.create(to));
-    env.setGlobalValue("_quercus_bam_from", StringValue.create(from));
-
-    Value javaValue = NullValue.NULL;
-    if (value != null) {
-      JavaClassDef classDef = env.getJavaClassDefinition(value.getClass());
-      javaValue = classDef.wrap(env, value);
-    }
-
-    env.setGlobalValue("_quercus_bam_value", javaValue);
+    Env env = createEnv(BamEventType.QUERY_GET, to, from, value);
+    setId(env, id);
 
     return _program.execute(env).toBoolean();
   }
@@ -202,48 +182,17 @@ public class BamPhpAgent extends GenericService {
   @Override
   public boolean querySet(long id, String to, String from, Serializable value)
   {
-    Env env = createEnv();
-
-    JavaClassDef eventClassDef = env.getJavaClassDefinition(BamEventType.class);
-    Value type = eventClassDef.wrap(env, BamEventType.QUERY_SET);
-
-    env.setGlobalValue("_quercus_bam_event_type", type);
-    env.setGlobalValue("_quercus_bam_id", LongValue.create(id));
-    env.setGlobalValue("_quercus_bam_to", StringValue.create(to));
-    env.setGlobalValue("_quercus_bam_from", StringValue.create(from));
-
-    Value javaValue = NullValue.NULL;
-    if (value != null) {
-      JavaClassDef classDef = env.getJavaClassDefinition(value.getClass());
-      javaValue = classDef.wrap(env, value);
-    }
-
-    env.setGlobalValue("_quercus_bam_value", javaValue);
+    Env env = createEnv(BamEventType.QUERY_SET, to, from, value);
+    setId(env, id);
 
     return _program.execute(env).toBoolean();
   }
 
-
   @Override
   public void queryResult(long id, String to, String from, Serializable value)
   {
-    Env env = createEnv();
-
-    JavaClassDef eventClassDef = env.getJavaClassDefinition(BamEventType.class);
-    Value type = eventClassDef.wrap(env, BamEventType.QUERY_RESULT);
-
-    env.setGlobalValue("_quercus_bam_event_type", type);
-    env.setGlobalValue("_quercus_bam_id", LongValue.create(id));
-    env.setGlobalValue("_quercus_bam_to", StringValue.create(to));
-    env.setGlobalValue("_quercus_bam_from", StringValue.create(from));
-
-    Value javaValue = NullValue.NULL;
-    if (value != null) {
-      JavaClassDef classDef = env.getJavaClassDefinition(value.getClass());
-      javaValue = classDef.wrap(env, value);
-    }
-
-    env.setGlobalValue("_quercus_bam_value", javaValue);
+    Env env = createEnv(BamEventType.QUERY_RESULT, to, from, value);
+    setId(env, id);
 
     _program.execute(env);
   }
@@ -252,31 +201,66 @@ public class BamPhpAgent extends GenericService {
   public void queryError(long id, String to, String from, 
                          Serializable value, BamError error)
   {
-    Env env = createEnv();
+    Env env = createEnv(BamEventType.QUERY_ERROR, to, from, value);
+    setId(env, id);
+    setError(env, error);
 
-    JavaClassDef eventClassDef = env.getJavaClassDefinition(BamEventType.class);
-    Value type = eventClassDef.wrap(env, BamEventType.QUERY_ERROR);
+    _program.execute(env);
+  }
 
-    env.setGlobalValue("_quercus_bam_event_type", type);
-    env.setGlobalValue("_quercus_bam_id", LongValue.create(id));
-    env.setGlobalValue("_quercus_bam_to", StringValue.create(to));
-    env.setGlobalValue("_quercus_bam_from", StringValue.create(from));
+  @Override
+  public void presence(String to, String from, Serializable value)
+  {
+    _program.execute(createEnv(BamEventType.PRESENCE, to, from, value));
+  }
 
-    Value javaValue = NullValue.NULL;
-    if (value != null) {
-      JavaClassDef classDef = env.getJavaClassDefinition(value.getClass());
-      javaValue = classDef.wrap(env, value);
-    }
+  @Override
+  public void presenceUnavailable(String to, String from, Serializable value)
+  {
+    _program.execute(createEnv(BamEventType.PRESENCE_UNAVAILABLE, 
+                               to, from, value));
+  }
 
-    env.setGlobalValue("_quercus_bam_value", javaValue);
+  @Override
+  public void presenceProbe(String to, String from, Serializable value)
+  {
+    _program.execute(createEnv(BamEventType.PRESENCE_PROBE, to, from, value));
+  }
 
-    Value errorValue = NullValue.NULL;
-    if (error != null) {
-      JavaClassDef errorClassDef = env.getJavaClassDefinition(BamError.class);
-      errorValue = errorClassDef.wrap(env, error);
-    }
+  @Override
+  public void presenceSubscribe(String to, String from, Serializable value)
+  {
+    _program.execute(createEnv(BamEventType.PRESENCE_SUBSCRIBE, 
+                               to, from, value));
+  }
 
-    env.setGlobalValue("_quercus_bam_error", errorValue);
+  @Override
+  public void presenceSubscribed(String to, String from, Serializable value)
+  {
+    _program.execute(createEnv(BamEventType.PRESENCE_SUBSCRIBED, 
+                               to, from, value));
+  }
+
+  @Override
+  public void presenceUnsubscribe(String to, String from, Serializable value)
+  {
+    _program.execute(createEnv(BamEventType.PRESENCE_UNSUBSCRIBE, 
+                               to, from, value));
+  }
+
+  @Override
+  public void presenceUnsubscribed(String to, String from, Serializable value)
+  {
+    _program.execute(createEnv(BamEventType.PRESENCE_UNSUBSCRIBED, 
+                               to, from, value));
+  }
+
+  @Override
+  public void presenceError(String to, String from, 
+                            Serializable value, BamError error)
+  {
+    Env env = createEnv(BamEventType.PRESENCE_ERROR, to, from, value);
+    setError(env, error);
 
     _program.execute(env);
   }
