@@ -3,9 +3,15 @@
 <product>resin-ee</product>
 <resin-2.0>$ee/ejb-tut/ejb-hello.xtp</resin-2.0>
 <type>tutorial</type>
+<!--
 <tutorial-startpage>index.jsp</tutorial-startpage>
+  -->
 <title>Stateless Session Hello</title>
 <description>
+
+<note>See the <a href="http://caucho.com/resin/examples/ejb-stateless/index.xtp">new tutorial</a> for an up to date description of EJB.  The newer EJB
+specification is much simpler.  This example is for an old version for backward
+compatibility.</note>
 
 <p>This example creates a <var/stateless session/> bean.  A stateless session
 bean is similar to a servlet without sessions.  The server bean itself can have

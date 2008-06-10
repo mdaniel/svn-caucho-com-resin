@@ -2,9 +2,15 @@
 <header>
 <product>resin-ee</product>
 <type>tutorial</type>
+<!--
 <tutorial-startpage>stateless</tutorial-startpage>
+  -->
 <title>Local Stateless Session Hello</title>
 <description>
+
+<note>See the <a href="http://caucho.com/resin/examples/ejb-stateless/index.xtp">new tutorial</a> for an up to date description of EJB.  The newer EJB
+specification is much simpler.  This example is for an old version for backward
+compatibility.</note>
 
 <p>Stateless sessions make database queries and updates robust by
 setting transaction boundaries at each business method.

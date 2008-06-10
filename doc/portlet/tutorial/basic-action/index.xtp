@@ -3,7 +3,9 @@
 <product>resin</product>
 <title>Action Tutorial</title>
 <type>tutorial</type>
+<!--
 <tutorial-startpage>hello</tutorial-startpage>
+-->
 <description>
 <p>
 An action request is a request for the portlet to do something before it is
