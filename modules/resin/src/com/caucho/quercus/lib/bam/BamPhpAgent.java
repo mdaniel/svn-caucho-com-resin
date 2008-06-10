@@ -32,13 +32,25 @@ package com.caucho.quercus.lib.bam;
 import java.io.*;
 import java.util.logging.*;
 
+import com.caucho.bam.BamError;
 import com.caucho.config.*;
-import com.caucho.hemp.broker.*;
+import com.caucho.hemp.broker.GenericService;
+import com.caucho.quercus.Quercus;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JavaValue;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.page.QuercusPage;
+import com.caucho.quercus.page.InterpretedPage;
+import com.caucho.quercus.parser.QuercusParser;
+import com.caucho.quercus.program.JavaClassDef;
+import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
 import javax.annotation.*;
-import javax.script.*;
 
 /**
  * BAM agent that calls into a PHP script to handle messages/queries.
@@ -48,8 +60,10 @@ public class BamPhpAgent extends GenericService {
   private static final Logger log
     = Logger.getLogger(BamPhpAgent.class.getName());
 
-  private CompiledScript _script;
+  private Quercus _quercus = new Quercus();
+  private QuercusProgram _program;
   private Path _scriptPath;
+  private String _encoding = "ISO-8859-1";
 
   public Path getScript()
   {
@@ -61,6 +75,16 @@ public class BamPhpAgent extends GenericService {
     _scriptPath = scriptPath;
   }
 
+  public String getEncoding()
+  {
+    return _encoding;
+  }
+
+  public void setEncoding(String encoding)
+  {
+    _encoding = encoding;
+  }
+
   @PostConstruct
   public void init()
     throws ConfigException
@@ -68,53 +92,192 @@ public class BamPhpAgent extends GenericService {
     if (_scriptPath == null)
       throw new ConfigException(L.l("script path not specified"));
 
-    ReadStream stream = null;
-
     try {
-      stream = _scriptPath.openRead();
-      ScriptEngineManager manager = new ScriptEngineManager();
-      ScriptEngine engine = manager.getEngineByName("quercus");
-      Compilable compiler = (Compilable) engine;
-
-      _script = compiler.compile(stream.getReader());
+      _program = QuercusParser.parse(_quercus, _scriptPath, _encoding);
     }
     catch (IOException e) {
       throw new ConfigException(L.l("unable to open script {0}", _scriptPath), 
                                 e);
     }
-    catch (ScriptException e) {
-      throw new ConfigException(L.l("unable to compile script {0}", 
-                                    _scriptPath), 
-                                e);
-    }
-    finally {
-      if (stream != null)
-        stream.close();
-    }
 
     super.init();
+  }
+
+  private Env createEnv()
+  {
+    WriteStream out = new NullWriteStream();
+
+    QuercusPage page = new InterpretedPage(_program);
+
+    Env env = new Env(_quercus, page, out, null, null);
+
+    JavaClassDef agentClassDef = env.getJavaClassDefinition(BamPhpAgent.class);
+    env.setGlobalValue("_quercus_bam_agent", agentClassDef.wrap(env, this));
+
+    env.start();
+
+    return env;
   }
 
   @Override
   public void message(String to, String from, Serializable value)
   {
-    try {
-      ScriptContext context = new SimpleScriptContext();
+    Env env = createEnv();
 
-      context.setAttribute("_quercus_bam_event_type", BamEventType.MESSAGE,
-                           ScriptContext.ENGINE_SCOPE);
-      context.setAttribute("_quercus_bam_message_to", to, 
-                           ScriptContext.ENGINE_SCOPE);
-      context.setAttribute("_quercus_bam_message_from", from,
-                           ScriptContext.ENGINE_SCOPE);
-      context.setAttribute("_quercus_bam_message_value", value,
-                           ScriptContext.ENGINE_SCOPE);
+    JavaClassDef eventClassDef = env.getJavaClassDefinition(BamEventType.class);
+    Value type = eventClassDef.wrap(env, BamEventType.MESSAGE);
 
-      _script.eval(context);
+    env.setGlobalValue("_quercus_bam_event_type", type);
+    env.setGlobalValue("_quercus_bam_to", StringValue.create(to));
+    env.setGlobalValue("_quercus_bam_from", StringValue.create(from));
+
+    Value javaValue = NullValue.NULL;
+    if (value != null) {
+      JavaClassDef classDef = env.getJavaClassDefinition(value.getClass());
+      javaValue = classDef.wrap(env, value);
     }
-    catch (ScriptException e) {
-      log.fine(L.l("sendMessage({0}, {1}, {2}) failed: {3}", 
-                   to, from, value, e));
+
+    env.setGlobalValue("_quercus_bam_value", javaValue);
+
+    _program.execute(env);
+  }
+
+  @Override
+  public void messageError(String to, String from, Serializable value,
+                           BamError error)
+  {
+    Env env = createEnv();
+
+    JavaClassDef eventClassDef = env.getJavaClassDefinition(BamEventType.class);
+    Value type = eventClassDef.wrap(env, BamEventType.MESSAGE_ERROR);
+
+    env.setGlobalValue("_quercus_bam_event_type", type);
+    env.setGlobalValue("_quercus_bam_to", StringValue.create(to));
+    env.setGlobalValue("_quercus_bam_from", StringValue.create(from));
+
+    Value javaValue = NullValue.NULL;
+    if (value != null) {
+      JavaClassDef classDef = env.getJavaClassDefinition(value.getClass());
+      javaValue = classDef.wrap(env, value);
     }
+
+    env.setGlobalValue("_quercus_bam_value", javaValue);
+
+    Value errorValue = NullValue.NULL;
+    if (error != null) {
+      JavaClassDef errorClassDef = env.getJavaClassDefinition(BamError.class);
+      errorValue = errorClassDef.wrap(env, error);
+    }
+
+    env.setGlobalValue("_quercus_bam_error", errorValue);
+
+    _program.execute(env);
+  }
+
+  @Override
+  public boolean queryGet(long id, String to, String from, Serializable value)
+  {
+    Env env = createEnv();
+
+    JavaClassDef eventClassDef = env.getJavaClassDefinition(BamEventType.class);
+    Value type = eventClassDef.wrap(env, BamEventType.QUERY_GET);
+
+    env.setGlobalValue("_quercus_bam_event_type", type);
+    env.setGlobalValue("_quercus_bam_id", LongValue.create(id));
+    env.setGlobalValue("_quercus_bam_to", StringValue.create(to));
+    env.setGlobalValue("_quercus_bam_from", StringValue.create(from));
+
+    Value javaValue = NullValue.NULL;
+    if (value != null) {
+      JavaClassDef classDef = env.getJavaClassDefinition(value.getClass());
+      javaValue = classDef.wrap(env, value);
+    }
+
+    env.setGlobalValue("_quercus_bam_value", javaValue);
+
+    return _program.execute(env).toBoolean();
+  }
+
+
+  @Override
+  public boolean querySet(long id, String to, String from, Serializable value)
+  {
+    Env env = createEnv();
+
+    JavaClassDef eventClassDef = env.getJavaClassDefinition(BamEventType.class);
+    Value type = eventClassDef.wrap(env, BamEventType.QUERY_SET);
+
+    env.setGlobalValue("_quercus_bam_event_type", type);
+    env.setGlobalValue("_quercus_bam_id", LongValue.create(id));
+    env.setGlobalValue("_quercus_bam_to", StringValue.create(to));
+    env.setGlobalValue("_quercus_bam_from", StringValue.create(from));
+
+    Value javaValue = NullValue.NULL;
+    if (value != null) {
+      JavaClassDef classDef = env.getJavaClassDefinition(value.getClass());
+      javaValue = classDef.wrap(env, value);
+    }
+
+    env.setGlobalValue("_quercus_bam_value", javaValue);
+
+    return _program.execute(env).toBoolean();
+  }
+
+
+  @Override
+  public void queryResult(long id, String to, String from, Serializable value)
+  {
+    Env env = createEnv();
+
+    JavaClassDef eventClassDef = env.getJavaClassDefinition(BamEventType.class);
+    Value type = eventClassDef.wrap(env, BamEventType.QUERY_RESULT);
+
+    env.setGlobalValue("_quercus_bam_event_type", type);
+    env.setGlobalValue("_quercus_bam_id", LongValue.create(id));
+    env.setGlobalValue("_quercus_bam_to", StringValue.create(to));
+    env.setGlobalValue("_quercus_bam_from", StringValue.create(from));
+
+    Value javaValue = NullValue.NULL;
+    if (value != null) {
+      JavaClassDef classDef = env.getJavaClassDefinition(value.getClass());
+      javaValue = classDef.wrap(env, value);
+    }
+
+    env.setGlobalValue("_quercus_bam_value", javaValue);
+
+    _program.execute(env);
+  }
+
+  @Override
+  public void queryError(long id, String to, String from, 
+                         Serializable value, BamError error)
+  {
+    Env env = createEnv();
+
+    JavaClassDef eventClassDef = env.getJavaClassDefinition(BamEventType.class);
+    Value type = eventClassDef.wrap(env, BamEventType.QUERY_ERROR);
+
+    env.setGlobalValue("_quercus_bam_event_type", type);
+    env.setGlobalValue("_quercus_bam_id", LongValue.create(id));
+    env.setGlobalValue("_quercus_bam_to", StringValue.create(to));
+    env.setGlobalValue("_quercus_bam_from", StringValue.create(from));
+
+    Value javaValue = NullValue.NULL;
+    if (value != null) {
+      JavaClassDef classDef = env.getJavaClassDefinition(value.getClass());
+      javaValue = classDef.wrap(env, value);
+    }
+
+    env.setGlobalValue("_quercus_bam_value", javaValue);
+
+    Value errorValue = NullValue.NULL;
+    if (error != null) {
+      JavaClassDef errorClassDef = env.getJavaClassDefinition(BamError.class);
+      errorValue = errorClassDef.wrap(env, error);
+    }
+
+    env.setGlobalValue("_quercus_bam_error", errorValue);
+
+    _program.execute(env);
   }
 }
