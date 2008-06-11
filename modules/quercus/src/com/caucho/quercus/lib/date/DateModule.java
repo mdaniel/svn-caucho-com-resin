@@ -961,23 +961,23 @@ public class DateModule extends AbstractQuercusModule {
    * Parses the time
    */
   public Value strtotime(String timeString,
-			 @Optional("-1") long now)
+                         @Optional("-1") long now)
   {
     try {
       if (now >= 0)
-	now = 1000L * now;
+        now = 1000L * now;
       else
-	now = Alarm.getCurrentTime();
+        now = Alarm.getCurrentTime();
 
       QDate date = new QDate(true);
       date.setGMTTime(now);
 
       if (timeString.equals("")) {
-	date.setHour(0);
-	date.setMinute(0);
-	date.setSecond(0);
+        date.setHour(0);
+        date.setMinute(0);
+        date.setSecond(0);
 
-	return new LongValue(date.getGMTTime() / 1000L);
+        return new LongValue(date.getGMTTime() / 1000L);
       }
 
       DateParser parser = new DateParser(timeString, date);

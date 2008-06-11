@@ -33,6 +33,7 @@ import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReadOnly;
 import com.caucho.quercus.annotation.Reference;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.annotation.UsesSymbolTable;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -177,24 +178,13 @@ public class VariableModule extends AbstractQuercusModule {
     return result;
   }
 
-  // XXX: this doesn't look completed
-  public static Value get_resource_type(Env env, Value v)
+  /*
+   * Returns the type of this resource.
+   */
+  @ReturnNullAsFalse
+  public static String get_resource_type(Env env, Value v)
   {
-    if (! (v instanceof JavaValue))
-      return BooleanValue.FALSE;
-
-    Object obj = v.toJavaObject();
-
-    try {
-      Method m = obj.getClass().getMethod("getResourceType",
-					  new Class[0]);
-
-      if (m != null)
-	return env.createString(String.valueOf(m.invoke(obj)));
-    } catch (Exception e) {
-    }
-    
-    return env.createString("Unknown");
+    return v.getResourceType();
   }
 
   /**
@@ -454,8 +444,7 @@ public class VariableModule extends AbstractQuercusModule {
    */
   public boolean is_resource(@ReadOnly Value value)
   {
-    // XXX:
-    return (value.toValue() instanceof JavaValue);
+    return value.isResource();
   }
 
   /**
@@ -467,15 +456,15 @@ public class VariableModule extends AbstractQuercusModule {
    */
   public static boolean is_scalar(@ReadOnly Value v)
   {
-    if (v==null)
+    if (v == null)
       return false;
 
     Value value = v.toValue();
     
     return (value instanceof DoubleValue
-	    || value instanceof StringValue
-	    || value instanceof LongValue
-	    || value instanceof BooleanValue);
+            || value instanceof StringValue
+            || value instanceof LongValue
+            || value instanceof BooleanValue);
   }
 
   /**
@@ -483,7 +472,7 @@ public class VariableModule extends AbstractQuercusModule {
    */
   public boolean is_string(@ReadOnly Value value)
   {
-    return (value.toValue() instanceof StringValue);
+    return value.isString();
   }
 
   // XXX: is_unicode

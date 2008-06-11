@@ -34,6 +34,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.annotation.EntrySet;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -70,14 +71,20 @@ public class SimpleXMLText extends SimpleXMLElement
     = Logger.getLogger(SimpleXMLText.class.getName());
   private static final L10N L = new L10N(SimpleXMLText.class);
   
-  protected SimpleXMLText()
+  protected SimpleXMLText(Env env,
+                          QuercusClass cls,
+                          JavaClassDef def)
   {
-    _name = "#text";
+    super(env, cls, def, null, "#text");
   }
   
-  protected SimpleXMLText(StringValue text)
+  protected SimpleXMLText(Env env,
+                          QuercusClass cls,
+                          JavaClassDef def,
+                          StringValue text)
   {
-    _name = "#text";
+    super(env, cls, def, null, "#text");
+
     _text = text;
   }
 

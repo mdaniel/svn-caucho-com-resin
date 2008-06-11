@@ -75,8 +75,6 @@ public class MarshalFactory {
                         boolean isNullAsFalse)
   {
     final Marshal marshal;
-
-    System.out.println("M: " + argType);
     // optimized cases, new types should be added to JavaMarshal
 
     if (String.class.equals(argType)) {

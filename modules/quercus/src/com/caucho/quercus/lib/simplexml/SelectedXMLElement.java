@@ -34,6 +34,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.annotation.EntrySet;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -68,11 +69,14 @@ public class SelectedXMLElement extends SimpleXMLElement
 {
   private SimpleXMLElement _owner;
   
-  protected SelectedXMLElement(SimpleXMLElement owner)
+  protected SelectedXMLElement(SimpleXMLElement owner, QuercusClass cls,
+                               JavaClassDef def)
   {
+    super(owner._parent, owner._name, cls, def);
+    
     _owner = owner;
-    _parent = owner._parent;
-    _name = owner._name;
+    //_parent = owner._parent;
+    //_name = owner._name;
 
     _text = owner._text;
     _children = owner._children;

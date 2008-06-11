@@ -31,6 +31,7 @@ package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ResourceType;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
@@ -56,6 +57,7 @@ import java.util.logging.Logger;
 /**
  * mysqli object oriented API facade
  */
+@ResourceType("mysql link")
 public class Mysqli extends JdbcConnectionResource {
   private static final Logger log = Logger.getLogger(Mysqli.class.getName());
   private static final L10N L = new L10N(Mysqli.class);

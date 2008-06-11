@@ -159,6 +159,14 @@ abstract public class Value implements java.io.Serializable
     return false;
   }
   
+  /*
+   * Returns true for a resource.
+   */
+  public boolean isResource()
+  {
+    return false;
+  }
+  
   /**
    * Returns true for a StringValue.
    */
@@ -937,6 +945,14 @@ abstract public class Value implements java.io.Serializable
   public String getType()
   {
     return "value";
+  }
+  
+  /*
+   * Returns the resource type.
+   */
+  public String getResourceType()
+  {
+    return null;
   }
 
   /**

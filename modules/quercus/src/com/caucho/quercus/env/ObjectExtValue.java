@@ -484,7 +484,7 @@ public class ObjectExtValue extends ObjectValue
   public Value get(Value key)
   {
     ArrayDelegate delegate = _quercusClass.getArrayDelegate();
-      
+
     // php/066q vs. php/0906
     //return getField(null, key.toString());
 

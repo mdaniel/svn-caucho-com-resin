@@ -387,12 +387,12 @@ public class StringBuilderValue
   }
 
   /**
-   * Returns the length of the string.
+   * Returns true if the valu is empty.
    */
   @Override
   public final boolean isEmpty()
   {
-    return _length == 0;
+    return _length == 0 || _length == 1 && _buffer[0] == '0';
   }
 
   /**

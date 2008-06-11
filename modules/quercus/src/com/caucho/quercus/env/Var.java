@@ -106,6 +106,15 @@ public class Var extends Value
   {
     return _value.getType();
   }
+  
+  /*
+   * Returns the type of the resource.
+   */
+  @Override
+  public String getResourceType()
+  {
+    return _value.getResourceType();
+  }
 
   /**
    * Returns the ValueType.
@@ -132,6 +141,15 @@ public class Var extends Value
   public boolean isObject()
   {
     return _value.isObject();
+  }
+  
+  /*
+   * Returns true for a resource.
+   */
+  @Override
+  public boolean isResource()
+  {
+    return _value.isResource();
   }
 
   /**

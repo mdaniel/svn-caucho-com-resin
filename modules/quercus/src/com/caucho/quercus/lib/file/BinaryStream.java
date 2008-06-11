@@ -29,11 +29,13 @@
 
 package com.caucho.quercus.lib.file;
 
+import com.caucho.quercus.annotation.ResourceType;
 import com.caucho.quercus.env.Value;
 
 /**
  * Interface for a Quercus stream
  */
+@ResourceType("stream")
 public interface BinaryStream {
   public static final int SEEK_SET = 0;
   public static final int SEEK_CUR = 1;

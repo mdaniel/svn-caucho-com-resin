@@ -34,6 +34,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.annotation.EntrySet;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -66,33 +67,34 @@ import java.util.logging.*;
  */
 public class SimpleXMLChildren extends SimpleXMLElement
 {
-  protected SimpleXMLChildren(SimpleXMLElement parent, String name)
+  protected SimpleXMLChildren(Env env, QuercusClass cls, JavaClassDef def,
+                              SimpleXMLElement parent, String name)
   {
-    _parent = parent;
-    _name = name;
+    super(env, cls, def, parent, name);
   }
   
   /**
    * Implementation for getting the indices of this class.
    * i.e. <code>$a->foo[0]</code>
    */
-  public SimpleXMLElement __get(Env env, Value indexV)
+  @Override
+  public Value __get(Env env, Value indexV)
   {
     if (indexV.isString()) {
       String name = indexV.toString();
       
-      return getAttribute(name);
+      return wrapJava(env, getAttribute(name), _cls, _def);
     }
     else if (indexV.isLongConvertible()) {
       int i = indexV.toInt();
 
       if (_children != null && i < _children.size())
-	return _children.get(i);
+        return wrapJava(env, _children.get(i), _cls, _def);
       else
-	return null;
+        return NullValue.NULL;
     }
     else
-      return null;
+      return NullValue.NULL;
   }
   
   /**

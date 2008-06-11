@@ -1058,7 +1058,7 @@ public class MiscModule extends AbstractQuercusModule {
 	break;
       case 'L':
       case 'N':
-	segments.add(new BigEndianPackSegment(name, count, 4, false));
+	segments.add(new BigEndianPackSegment(name, count, 4, true));
 	break;
       case 'V':
 	segments.add(new LittleEndianPackSegment(name, count, 4));
@@ -1412,8 +1412,8 @@ public class MiscModule extends AbstractQuercusModule {
 
 	for (int k = 0; k < _bytes; k++) {
 	  long d = is.read() & 0xff;
-
-	  v = 256 * v + d;
+	  
+	  v = (v << 8) + d;
 	}
 
 	if (_isSigned) {

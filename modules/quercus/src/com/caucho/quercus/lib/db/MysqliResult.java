@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ResourceType;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
@@ -51,6 +52,7 @@ import java.util.logging.Logger;
 /**
  * mysqli object oriented API facade
  */
+@ResourceType("mysql result")
 public class MysqliResult extends JdbcResultResource {
   private static final Logger log
     = Logger.getLogger(MysqliResult.class.getName());

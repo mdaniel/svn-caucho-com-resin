@@ -34,6 +34,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.annotation.EntrySet;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -66,19 +67,24 @@ import java.util.logging.*;
  */
 public class SimpleXMLAttribute extends SimpleXMLElement
 {
-  protected SimpleXMLAttribute(SimpleXMLElement parent,
-			       String name)
+  protected SimpleXMLAttribute(Env env,
+                               QuercusClass cls,
+                               JavaClassDef def,
+                               SimpleXMLElement parent,
+                               String name)
   {
-    super(parent, name);
+    super(env, cls, def, parent, name);
   }
   
   protected SimpleXMLAttribute(Env env,
-			       SimpleXMLElement parent,
-			       String name,
-			       String namespace,
-			       StringValue text)
+                               QuercusClass cls,
+                               JavaClassDef def,
+                               SimpleXMLElement parent,
+                               String name,
+                               String namespace,
+                               StringValue text)
   {
-    super(env, parent, name, namespace);
+    super(env, cls, def, parent, name, namespace);
     
     _text = text;
   }

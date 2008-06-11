@@ -69,10 +69,13 @@ public class JavaClassDef extends ClassDef {
 
   private final String _name;
   private final Class _type;
+  
   private final boolean _isAbstract;
   private final boolean _isArray;
   private final boolean _isInterface;
   private final boolean _isDelegate;
+  
+  private String _resourceType;
 
   private JavaClassDef _componentDef;
 
@@ -204,6 +207,14 @@ public class JavaClassDef extends ClassDef {
   }
   
   /*
+   * Returns the type of this resource.
+   */
+  public String getResourceType()
+  {
+    return _resourceType;
+  }
+  
+  /*
    * Returns the name of the extension that this class is part of.
    */
   @Override
@@ -280,10 +291,13 @@ public class JavaClassDef extends ClassDef {
 
   public Value wrap(Env env, Object obj)
   {
-    if (!_isInit)
+    if (! _isInit)
       init();
     
-    return new JavaValue(env, obj, this);
+    if (_resourceType != null)
+      return new JavaResourceValue(env, obj, this);
+    else
+      return new JavaValue(env, obj, this);
   }
 
   private int cmpObject(Object lValue, Object rValue)
@@ -871,17 +885,20 @@ public class JavaClassDef extends ClassDef {
 
       // this
       for (Annotation annotation : type.getAnnotations()) {
-	if (annotation.annotationType() == Delegates.class) {
-	  Class[] delegateClasses = ((Delegates) annotation).value();
+        if (annotation.annotationType() == Delegates.class) {
+          Class[] delegateClasses = ((Delegates) annotation).value();
 
-	  for (Class cl : delegateClasses) {
-	    boolean isDelegate = addDelegate(cl);
+          for (Class cl : delegateClasses) {
+            boolean isDelegate = addDelegate(cl);
 	  
-	    if (! isDelegate)
-	      throw new IllegalArgumentException(L.l("unknown @Delegate class '{0}'",
-						     cl));
-	  }
-	}
+            if (! isDelegate)
+              throw new IllegalArgumentException(L.l("unknown @Delegate class '{0}'",
+                                                     cl));
+          }
+        }
+        else if (annotation.annotationType() == ResourceType.class) {
+          _resourceType = ((ResourceType) annotation).value();
+        }
       }
     } catch (RuntimeException e) {
       throw e;

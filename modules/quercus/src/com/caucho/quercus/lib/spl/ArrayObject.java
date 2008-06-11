@@ -71,7 +71,7 @@ public class ArrayObject
 
     QuercusClass iteratorClass = _env.findClass(iteratorClassName);
 
-    if (iteratorClass == null || !iteratorClass.isA("Iterator"))
+    if (iteratorClass == null || ! iteratorClass.isA("Iterator"))
       throw new IllegalArgumentException(L.l("A class that implements Iterator must be specified"));
 
     _iteratorClass = iteratorClass;
@@ -118,7 +118,7 @@ public class ArrayObject
   {
     Value[] args = new Value[] { _value, LongValue.create(_flags) };
 
-    return (ObjectValue) _iteratorClass.callNew(_env,args);
+    return (ObjectValue) _iteratorClass.callNew(_env, args);
   }
 
   public String getIteratorClass()

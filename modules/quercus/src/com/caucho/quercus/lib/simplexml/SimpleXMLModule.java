@@ -32,10 +32,15 @@ import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.ObjectExtJavaValue;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.program.ClassDef;
+import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
 
 import java.util.logging.Level;
@@ -56,42 +61,46 @@ public class SimpleXMLModule
   {
     return new String[] { "SimpleXML" };
   }
-  
-  @ReturnNullAsFalse
-  public SimpleXMLElement simplexml_load_string(Env env,
-                                                Value data,
-                                                @Optional String className,
-                                                @Optional int options,
-                                                @Optional Value namespaceV,
-                                                @Optional boolean isPrefix)
+
+  public Value simplexml_load_string(Env env,
+                                     Value data,
+                                     @Optional String className,
+                                     @Optional int options,
+                                     @Optional Value namespaceV,
+                                     @Optional boolean isPrefix)
   {
     if (data.isNull())
-      return null;
+      return BooleanValue.FALSE;
     else if (data.isBoolean() && data.toBoolean() == false)
-      return null;
+      return BooleanValue.FALSE;
+    
+    QuercusClass cls = null;
+    JavaClassDef def = env.getJavaClassDefinition(SimpleXMLElement.class);
+    
+    if (className != null && className.length() > 0)
+      cls = env.getClass(className);
 
-    return SimpleXMLElement.__construct(env,
-                                        data,
-                                        options,
-                                        false,
-                                        namespaceV,
-                                        isPrefix);
+    return SimpleXMLElement.create(env, data, options, false,
+                                   namespaceV, isPrefix,
+                                   cls, def);
   }
 
-  @ReturnNullAsFalse
-  public SimpleXMLElement simplexml_load_file(Env env,
-                                              @NotNull StringValue file,
-                                              @Optional String className,
-                                              @Optional int options,
-                                              @Optional Value namespaceV,
-                                              @Optional boolean isPrefix)
+  public Value simplexml_load_file(Env env,
+                                   @NotNull StringValue file,
+                                   @Optional String className,
+                                   @Optional int options,
+                                   @Optional Value namespaceV,
+                                   @Optional boolean isPrefix)
   {
-    return SimpleXMLElement.__construct(env,
-                                        file,
-                                        options,
-                                        true,
-                                        namespaceV,
-                                        isPrefix);
+    QuercusClass cls = null;
+    JavaClassDef def = env.getJavaClassDefinition(SimpleXMLElement.class);
+    
+    if (className != null && className.length() > 0)
+      cls = env.getClass(className);
+
+    return SimpleXMLElement.create(env, file, options, true,
+                                   namespaceV, isPrefix,
+                                   cls, def);
   }
   
   public SimpleXMLElement simplexml_import_dom(Env env)

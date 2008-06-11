@@ -41,7 +41,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.*;
-import java.util.IdentityHashMap;
 import java.util.logging.Logger;
 
 /**
@@ -65,6 +64,14 @@ public class JavaValue extends ObjectValue
     _env = env;
     _classDef = def;
     _object = object;
+  }
+  
+  /*
+   * Returns the underlying Java class definition.
+   */
+  protected JavaClassDef getJavaClassDef()
+  {
+    return _classDef;
   }
 
   @Override
@@ -245,6 +252,33 @@ public class JavaValue extends ObjectValue
     return _classDef.cmpObject(_object,
                                rObject,
                                ((JavaValue) rValue)._classDef);
+  }
+  
+  /**
+   * Returns true for an object.
+   */
+  @Override
+  public boolean isObject()
+  {
+    return true;
+  }
+  
+  /*
+   * Returns true for a resource.
+   */
+  @Override
+  public boolean isResource()
+  {
+    return false;
+  }
+
+  /**
+   * Returns the type.
+   */
+  @Override
+  public String getType()
+  {
+    return "object";
   }
 
   /**

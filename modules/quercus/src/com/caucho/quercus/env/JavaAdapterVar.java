@@ -87,6 +87,15 @@ public class JavaAdapterVar extends Var
   {
     return getValue().getType();
   }
+  
+  /**
+   * Returns the type of the resource.
+   */
+  @Override
+  public String getResourceType()
+  {
+    return getValue().getResourceType();
+  }
 
   /**
    * Returns the ValueType.
@@ -113,6 +122,15 @@ public class JavaAdapterVar extends Var
   public boolean isObject()
   {
     return getValue().isObject();
+  }
+  
+  /**
+   * Returns true for an object.
+   */
+  @Override
+  public boolean isResource()
+  {
+    return getValue().isResource();
   }
 
   /**

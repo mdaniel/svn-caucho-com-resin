@@ -664,6 +664,10 @@ public class MathModule extends AbstractQuercusModule {
     return M_PI;
   }
 
+  /*
+   * XXX: may return an integer if it can be represented
+   *      by a system-dependent integer
+   */
   public static double pow(double base, double exp)
   {
     return Math.pow(base, exp);

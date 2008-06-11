@@ -197,7 +197,7 @@ public class QuercusClass {
 
       classDef.initClass(this);
     }
-    
+
     if (_constructor == null && parent != null)
       _constructor = parent.getConstructor();
   }
@@ -679,7 +679,8 @@ public class QuercusClass {
       objectValue = new ObjectExtValue(this);
     }
     else if (_javaClassDef != null && ! _javaClassDef.isDelegate()) {
-      Value javaWrapper = _javaClassDef.callNew(env, new Value[0]);
+      // php/0k3-
+      Value javaWrapper = _javaClassDef.callNew(env, args);
       Object object = javaWrapper.toJavaObject();
       
       objectValue = new ObjectExtJavaValue(this, object, _javaClassDef);
