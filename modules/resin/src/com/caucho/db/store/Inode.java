@@ -355,8 +355,12 @@ public class Inode {
 	
 	long miniFragAddr = store.allocateMiniFragment(xa);
 
-	if (miniFragAddr == 0)
-	  throw new IllegalStateException(L.l("illegal mini fragment"));
+	if (miniFragAddr == 0) {
+	  store.setCorrupted(true);
+	  
+	  throw new IllegalStateException(L.l("{0} illegal mini fragment",
+					      store));
+	}
 
 	writeMiniFragAddr(inode, inodeOffset,
 			  store, xa,
@@ -406,8 +410,11 @@ public class Inode {
 					 store,
 					 currentLength);
 
-	if (fragAddr == 0)
-	  throw new IllegalStateException("inode: illegal fragment at " + currentLength);
+	if (fragAddr == 0) {
+	  store.setCorrupted(true);
+	  
+	  throw new IllegalStateException(store + " inode: illegal fragment at " + currentLength);
+	}
 
 	int fragOffset = (int) (currentLength % INODE_BLOCK_SIZE);
 	int sublen = length;
@@ -430,8 +437,12 @@ public class Inode {
 
 	long fragAddr = store.allocateFragment(xa);
 
-	if (fragAddr == 0)
-	  throw new IllegalStateException(L.l("illegal fragment"));
+	if (fragAddr == 0) {
+	  store.setCorrupted(true);
+	  
+	  throw new IllegalStateException(L.l("{0} illegal fragment",
+					      store));
+	}
 
 	writeFragmentAddr(inode, inodeOffset,
 			  store, xa,
@@ -462,8 +473,11 @@ public class Inode {
 				  store,
 				  currentLength);
 
-	if (addr == 0)
-	  throw new IllegalStateException("inode: illegal block at " + currentLength);
+	if (addr == 0) {
+	  store.setCorrupted(true);
+	  
+	  throw new IllegalStateException(store + " inode: illegal block at " + currentLength);
+	}
 
 	int blockOffset = (int) ((currentLength - FRAGMENT_MAX) % BLOCK_SIZE);
 	int sublen = length;
@@ -486,8 +500,12 @@ public class Inode {
 
 	long blockAddr = store.allocateFragment(xa);
 
-	if (blockAddr == 0)
-	  throw new IllegalStateException(L.l("illegal fragment"));
+	if (blockAddr == 0) {
+	  store.setCorrupted(true);
+	  
+	  throw new IllegalStateException(L.l("{0}: illegal fragment",
+					      store));
+	}
 
 	writeBlockAddr(inode, inodeOffset,
 		       store, xa,
@@ -663,8 +681,11 @@ public class Inode {
 					 store,
 					 currentLength);
 
-	if (fragAddr == 0)
-	  throw new IllegalStateException("inode: illegal fragment at " + currentLength);
+	if (fragAddr == 0) {
+	  store.setCorrupted(true);
+	  
+	  throw new IllegalStateException(store + " inode: illegal fragment at " + currentLength);
+	}
 
 	int fragOffset = (int) (currentLength % INODE_BLOCK_SIZE);
 	int sublen = 2 * length;
@@ -687,8 +708,12 @@ public class Inode {
 
 	long fragAddr = store.allocateFragment(xa);
 
-	if (fragAddr == 0)
-	  throw new IllegalStateException(L.l("illegal fragment"));
+	if (fragAddr == 0) {
+	  store.setCorrupted(true);
+	  
+	  throw new IllegalStateException(L.l("{0}: illegal fragment",
+					      store));
+	}
 
 	writeFragmentAddr(inode, inodeOffset,
 			  store, xa,
@@ -719,8 +744,11 @@ public class Inode {
 				  store,
 				  currentLength);
 
-	if (addr == 0)
-	  throw new IllegalStateException("inode: illegal block at " + currentLength);
+	if (addr == 0) {
+	  store.setCorrupted(true);
+	  
+	  throw new IllegalStateException(store + " inode: illegal block at " + currentLength);
+	}
 
 	int blockOffset = (int) ((currentLength - FRAGMENT_MAX) % BLOCK_SIZE);
 	int sublen = 2 * length;
@@ -743,8 +771,11 @@ public class Inode {
 
 	long blockAddr = store.allocateFragment(xa);
 
-	if (blockAddr == 0)
-	  throw new IllegalStateException(L.l("illegal fragment"));
+	if (blockAddr == 0) {
+	  store.setCorrupted(true);
+	  throw new IllegalStateException(L.l("{0}: illegal fragment",
+					      store));
+	}
 
 	writeBlockAddr(inode, inodeOffset,
 		       store, xa,
@@ -815,12 +846,16 @@ public class Inode {
 
 	    if ((fragAddr & Store.BLOCK_MASK) == 0) {
 	      String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 fragment";
-	      throw stateError(msg);
+	      log.warning(msg);
+	      _store.setCorrupted(true);
+	      continue;
 	    }
 	    else if (fragAddr < 0) {
 	      String msg = _store + ": inode block " + Long.toHexString(length) + " has invalid fragment " + Long.toHexString(fragAddr);
 	    
-	      throw stateError(msg);
+	      log.warning(msg);
+	      _store.setCorrupted(true);
+	      continue;
 	    }
 
 	    _store.deleteMiniFragment(_xa, fragAddr);
@@ -833,12 +868,16 @@ public class Inode {
 
 	    if ((fragAddr & Store.BLOCK_MASK) == 0) {
 	      String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 fragment";
-	      throw stateError(msg);
+	      log.warning(msg);
+	      _store.setCorrupted(true);
+	      continue;
 	    }
 	    else if (fragAddr < 0) {
 	      String msg = _store + ": inode block " + Long.toHexString(length) + " has invalid fragment " + Long.toHexString(fragAddr);
 	    
-	      throw stateError(msg);
+	      log.warning(msg);
+	      _store.setCorrupted(true);
+	      continue;
 	    }
 
 	    _store.deleteFragment(_xa, fragAddr);
@@ -848,8 +887,8 @@ public class Inode {
 	    int dblFragCount = fragCount - DIRECT_BLOCKS - SINGLE_INDIRECT_BLOCKS;
 
 	    // remove the double indirect blocks
-	    if (dblFragCount >= 0 &&
-		dblFragCount % INDIRECT_BLOCKS == 0) {
+	    if (dblFragCount >= 0
+		&& dblFragCount % INDIRECT_BLOCKS == 0) {
 	      fragAddr = readLong(bytes, (DIRECT_BLOCKS + 1) * 8);
 	    
 	      int dblIndex = (int) (fragCount / INDIRECT_BLOCKS);
@@ -968,8 +1007,11 @@ public class Inode {
 
       return store.readFragmentLong(doubleIndirectAddr, offset);
     }
-    else
-      throw new IllegalStateException(L.l("Can't yet support data over 64M"));
+    else {
+      log.warning(this + " fragment address is over 64M, internal error");
+
+      return 0;
+    }
   }
 
   /**

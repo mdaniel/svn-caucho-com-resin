@@ -156,6 +156,8 @@ public class Store {
   private SoftReference<RandomAccessWrapper> _cachedRowFile;
   
   private Lock _rowLock;
+
+  private boolean _isCorrupted;
   
   private final Lifecycle _lifecycle = new Lifecycle();
 
@@ -256,6 +258,16 @@ public class Store {
   public BlockManager getBlockManager()
   {
     return _blockManager;
+  }
+
+  public void setCorrupted(boolean isCorrupted)
+  {
+    _isCorrupted = isCorrupted;
+  }
+
+  public boolean isCorrupted()
+  {
+    return _isCorrupted;
   }
 
   /**
@@ -788,6 +800,11 @@ public class Store {
 			  byte []buffer, int offset, int length)
     throws IOException
   {
+    if (fragmentAddress <= 0) {
+      log.warning(this + " illegal fragment read with fragment-address=0");
+      return 0;
+    }
+    
     if (FRAGMENT_SIZE - fragmentOffset < length) {
       // server/13df
       throw new IllegalArgumentException(L.l("read offset {0} length {1} too long",
