@@ -35,20 +35,35 @@ import java.io.*;
  * Base64 decoding.
  */
 public class Base64 {
-  static int decode[];
+  private static final int _decode[];
+  private static final char _encode[];
 
   static {
-    decode = new int[256];
+    _decode = new int[256];
     for (int i = 'A'; i <= 'Z'; i++)
-      decode[i] = i - 'A';
+      _decode[i] = i - 'A';
     for (int i = 'a'; i <= 'z'; i++)
-      decode[i] = i - 'a' + 26;
+      _decode[i] = i - 'a' + 26;
     for (int i = '0'; i <= '9'; i++)
-      decode[i] = i - '0' + 52;
-    decode['+'] = 62;
-    decode['/'] = 63;
+      _decode[i] = i - '0' + 52;
+    _decode['+'] = 62;
+    _decode['/'] = 63;
     
-    decode['='] = 0;
+    _decode['='] = 0;
+    
+    _encode = new char[64];
+    
+    for (int ch = 'A'; ch <= 'Z'; ch++)
+      _encode[ch - 'A'] = (char) ch;
+    
+    for (int ch = 'a'; ch <= 'z'; ch++)
+      _encode[ch - 'a' + 26] = (char) ch;
+    
+    for (int ch = '0'; ch <= '9'; ch++)
+      _encode[ch - '0' + 52] = (char) ch;
+
+    _encode[62] = '+';
+    _encode[63] = '/';
   }
 
   public static void encode(CharBuffer cb, long data)
@@ -66,19 +81,19 @@ public class Base64 {
     cb.append(Base64.encode(data));
   }
 
-  public static void encode(StringBuilder cb, long data)
+  public static void encode(StringBuilder sb, long data)
   {
-    cb.append(Base64.encode(data >> 60));
-    cb.append(Base64.encode(data >> 54));
-    cb.append(Base64.encode(data >> 48));
-    cb.append(Base64.encode(data >> 42));
-    cb.append(Base64.encode(data >> 36));
-    cb.append(Base64.encode(data >> 30));
-    cb.append(Base64.encode(data >> 24));
-    cb.append(Base64.encode(data >> 18));
-    cb.append(Base64.encode(data >> 12));
-    cb.append(Base64.encode(data >> 6));
-    cb.append(Base64.encode(data));
+    sb.append(encode(data >> 60));
+    sb.append(encode(data >> 54));
+    sb.append(encode(data >> 48));
+    sb.append(encode(data >> 42));
+    sb.append(encode(data >> 36));
+    sb.append(encode(data >> 30));
+    sb.append(encode(data >> 24));
+    sb.append(encode(data >> 18));
+    sb.append(encode(data >> 12));
+    sb.append(encode(data >> 6));
+    sb.append(encode(data));
   }
 
   public static void encode24(CharBuffer cb, int data)
@@ -167,22 +182,12 @@ public class Base64 {
 
   public static char encode(long d)
   {
-    d &= 0x3f;
-    if (d < 26)
-      return (char) (d + 'A');
-    else if (d < 52)
-      return (char) (d + 'a' - 26);
-    else if (d < 62)
-      return (char) (d + '0' - 52);
-    else if (d == 62)
-      return '+';
-    else
-      return '/';
+    return _encode[(int) (d & 0x3f)];
   }
 
   public static int decode(int d)
   {
-    return decode[d];
+    return _decode[d];
   }
 
   public static String encode(String value)
@@ -312,10 +317,10 @@ public class Base64 {
       int ch2 = value.charAt(i + 2) & 0xff;
       int ch3 = value.charAt(i + 3) & 0xff;
 
-      int chunk = ((decode[ch0] << 18) +
-		   (decode[ch1] << 12) +
-		   (decode[ch2] << 6) +
-		   (decode[ch3]));
+      int chunk = ((_decode[ch0] << 18) +
+		   (_decode[ch1] << 12) +
+		   (_decode[ch2] << 6) +
+		   (_decode[ch3]));
 
       cb.append((char) ((chunk >> 16) & 0xff));
 
@@ -356,10 +361,10 @@ public class Base64 {
       if (ch3 < 0)
 	ch3 = '=';
       
-      int chunk = ((decode[ch0] << 18) +
-		   (decode[ch1] << 12) +
-		   (decode[ch2] << 6) +
-		   (decode[ch3]));
+      int chunk = ((_decode[ch0] << 18) +
+		   (_decode[ch1] << 12) +
+		   (_decode[ch2] << 6) +
+		   (_decode[ch3]));
       
       os.write((byte) ((chunk >> 16) & 0xff));
       

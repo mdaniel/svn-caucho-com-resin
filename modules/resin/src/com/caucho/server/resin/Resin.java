@@ -1023,17 +1023,17 @@ public class Resin implements EnvironmentBean, SchemaBean
 		   || argv[i].equals("--dynamic-server"))) {
 	String []values = argv[i + 1].split(":");
 
-	if (values.length != 3) {
+	if (values.length == 3) {
+	  String clusterId = values[0];
+	  String address = values[1];
+	  int port = Integer.parseInt(values[2]);
+
+	  addDynamicServer(clusterId, address, port);
+	} else {
 	  System.out.println("-dynamic-server requires 'cluster:address:port' at '" + argv[i + 1] + "'");
 
 	  System.exit(66);
 	}
-	
-	String clusterId = values[0];
-	String address = values[1];
-	int port = Integer.parseInt(values[2]);
-
-	addDynamicServer(clusterId, address, port);
 
 	i += 2;
       }

@@ -791,8 +791,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    */
   public String getHeader(String name)
   {
-    for (int i = 0; i < _headerKeys.size(); i++) {
-      String oldKey = (String) _headerKeys.get(i);
+    ArrayList<String> keys = _headerKeys;
+    
+    int headerSize = keys.size();
+    for (int i = 0; i < headerSize; i++) {
+      String oldKey = (String) keys.get(i);
  
       if (oldKey.equalsIgnoreCase(name))
  	return (String) _headerValues.get(i);
@@ -826,25 +829,28 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     int i = 0;
     boolean hasHeader = false;
 
-    for (i = _headerKeys.size() - 1; i >= 0; i--) {
-      String oldKey = _headerKeys.get(i);
+    ArrayList<String> keys = _headerKeys;
+    ArrayList<String> values = _headerValues;
+    
+    for (i = keys.size() - 1; i >= 0; i--) {
+      String oldKey = keys.get(i);
 
       if (oldKey.equalsIgnoreCase(key)) {
 	if (hasHeader) {
-	  _headerKeys.remove(i);
-	  _headerValues.remove(i);
+	  keys.remove(i);
+	  values.remove(i);
 	}
 	else {
 	  hasHeader = true;
 
-	  _headerValues.set(i, value);
+	  values.set(i, value);
 	}
       }
     }
 
     if (! hasHeader) {
-      _headerKeys.add(key);
-      _headerValues.add(value);
+      keys.add(key);
+      values.add(value);
     }
   }
 
@@ -917,12 +923,15 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     if (_disableHeaders)
       return;
     
-    for (int i = _headerKeys.size() - 1; i >= 0; i--) {
-      String oldKey = (String) _headerKeys.get(i);
+    ArrayList<String> keys = _headerKeys;
+    ArrayList<String> values = _headerValues;
+    
+    for (int i = keys.size() - 1; i >= 0; i--) {
+      String oldKey = keys.get(i);
 
       if (oldKey.equalsIgnoreCase(key)) {
-        _headerKeys.remove(i);
-        _headerValues.remove(i);
+        keys.remove(i);
+        values.remove(i);
         return;
       }
     }
@@ -1839,7 +1848,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    *
    * @return true if caching has started
    */
-  boolean startCaching(ArrayList<String> keys, ArrayList<String> values,
+  boolean startCaching(ArrayList<String> keys,
+                       ArrayList<String> values,
                        String contentType, String charEncoding,
 		       boolean isByte)
   {
@@ -2246,7 +2256,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	if (cacheWriter != null)
 	  cacheWriter.close();
 	
-	if (_statusCode == 200 && _allowCache) {
+        WebApp webApp = _request.getWebApp();
+	if (_statusCode == 200 && _allowCache
+            && webApp != null && webApp.isActive()) {
 	  AbstractCacheFilterChain cache = _cacheInvocation;
 	  _cacheInvocation = null;
 

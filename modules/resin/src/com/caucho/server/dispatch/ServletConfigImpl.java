@@ -576,7 +576,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
     }
 
     if (zeroArg == null)
-      throw error(L.l("'{0}' must have a zero arg constructor.  Servlets must have public zero-arg constructors.\n{1} is not a valid constructor.", _servletClassName, constructors[0]));
+      throw error(L.l("'{0}' must have a zero arg constructor.  Servlets must have public zero-arg constructors.\n{1} is not a valid constructor.", _servletClassName, constructors != null ? constructors[0] : null));
 
 
     if (! Modifier.isPublic(zeroArg.getModifiers()))

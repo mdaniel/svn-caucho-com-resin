@@ -1296,8 +1296,6 @@ public abstract class Path {
         try {
           long digest = 0;
 
-          int ch;
-
 	  byte []buffer = is.getBuffer();
 	  while (is.fillBuffer() > 0) {
 	    int length = is.getLength();

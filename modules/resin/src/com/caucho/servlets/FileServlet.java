@@ -49,14 +49,17 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Serves static files.  The cache headers are automatically set on these
  * files.
  */
 public class FileServlet extends GenericServlet {
+  private static final Logger log
+    = Logger.getLogger(FileServlet.class.getName());
   private Path _context;
-  private byte []_buffer = new byte[1024];
   private Application _app;
   private RequestDispatcher _dir;
   private LruCache<String,Cache> _pathCache;
@@ -71,21 +74,22 @@ public class FileServlet extends GenericServlet {
   }
 
   /**
-   * Flag to disable the "Range" header.
-   */
-  public void setEnableRange(boolean isEnable)
-  {
-    _isEnableRange = isEnable;
-  }
-
-  /**
    * Sets the character encoding.
    */
   public void setCharacterEncoding(String encoding)
   {
     _characterEncoding = encoding;
   }
+
+  /**
+   * Flag to disable the "Range" header.
+   */
+  public void setEnableRange(boolean isEnable)
+  {
+    _isEnableRange = isEnable;
+  }
   
+  @Override
   public void init(ServletConfig conf)
     throws ServletException
   {
@@ -96,7 +100,8 @@ public class FileServlet extends GenericServlet {
 
     try {
       _dir = _app.getNamedDispatcher("directory");
-    } catch (Throwable e) {
+    } catch (Exception e) {
+      log.finest(e.toString());
     }
       
     _pathCache = new LruCache<String,Cache>(1024);
@@ -108,14 +113,6 @@ public class FileServlet extends GenericServlet {
     String encoding = getInitParameter("character-encoding");
     if (encoding != null && ! "".equals(encoding))
       _characterEncoding = encoding;
-  }
-
-  private RequestDispatcher getDirectoryServlet()
-  {
-    if (_dir == null)
-      _dir = _app.getNamedDispatcher("directory");
-
-    return _dir;
   }
 
   public void service(ServletRequest request, ServletResponse response)
@@ -187,7 +184,6 @@ public class FileServlet extends GenericServlet {
 
       filename = getServletContext().getRealPath(relPath);
       Path path = _context.lookupNative(filename);
-      int lastCh;
 
       // only top-level requests are checked
       if (cauchoReq == null || cauchoReq.getRequestDepth(0) != 0) {
@@ -281,7 +277,9 @@ public class FileServlet extends GenericServlet {
 	synchronized (_calendar) {
 	  try {
 	    ifModifiedTime = _calendar.parseDate(ifModified);
-	  } catch (Throwable e) {
+	  } catch (Exception e) {
+            log.log(Level.FINER, e.toString(), e);
+            
 	    ifModifiedTime = 0;
 	  }
 	}
@@ -340,24 +338,6 @@ public class FileServlet extends GenericServlet {
     }
   }
 
-  private boolean isWindowsSpecial(String lower, String test)
-  {
-    int p = lower.indexOf(test);
-
-    if (p < 0)
-      return false;
-
-    int lowerLen = lower.length();
-    int testLen = test.length();
-    char ch;
-
-    if (lowerLen == p + testLen
-        || (ch = lower.charAt(p + testLen)) == '/' || ch == '.')
-      return true;
-    else
-      return false;
-  }
-
   private boolean handleRange(HttpServletRequest req,
                               HttpServletResponse res,
                               Cache cache,
@@ -387,7 +367,7 @@ public class FileServlet extends GenericServlet {
       long first = 0;
       boolean hasLast = false;
       long last = 0;
-      int ch = -1;;
+      int ch = -1;
 
       // Skip whitespace
       for (; off < length && (ch = range.charAt(off)) == ' '; off++) {
@@ -445,7 +425,7 @@ public class FileServlet extends GenericServlet {
     
       res.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 
-      CharBuffer cb = new CharBuffer();
+      StringBuilder cb = new StringBuilder();
       cb.append("bytes ");
       cb.append(first);
       cb.append('-');
@@ -456,7 +436,7 @@ public class FileServlet extends GenericServlet {
 
       if (hasMore) {
 	if (isFirstChunk) {
-	  CharBuffer cb1 = new CharBuffer();
+	  StringBuilder cb1 = new StringBuilder();
 
 	  cb1.append("--");
 	  Base64.encode(cb1, RandomUtil.getRandomLong());
@@ -624,11 +604,11 @@ public class FileServlet extends GenericServlet {
 	_canRead = _path.canRead();
 	_isDirectory = _path.isDirectory();
 	    
-	CharBuffer cb = new CharBuffer();
-	cb.append('"');
-	Base64.encode(cb, _path.getCrc64());
-	cb.append('"');
-	_etag = cb.close();
+	StringBuilder sb = new StringBuilder();
+	sb.append('"');
+	Base64.encode(sb, _path.getCrc64());
+	sb.append('"');
+	_etag = sb.toString();
 
 	synchronized (_calendar) {
 	  _calendar.setGMTTime(lastModified);
