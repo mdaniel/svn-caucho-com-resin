@@ -106,7 +106,7 @@ public class HmtpHandler extends Handler {
       else
 	value = record.getMessage();
 
-      _conn.sendMessage(_to, value);
+      _conn.message(_to, value);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

@@ -162,7 +162,7 @@ public class MemoryRoom extends GenericService
       MucUserPresence presenceData = user.toPresenceData();
 
       getBrokerStream().presence(nick.getUserJid(), user.getJid(),
-				 new Serializable[] { presenceData });
+                                 presenceData);
     }
 
     // send presence about the new user to the current users
@@ -173,7 +173,7 @@ public class MemoryRoom extends GenericService
       MucUserPresence presenceData = user.toPresenceData();
 
       getBrokerStream().presence(user.getUserJid(), nick.getJid(),
-				 new Serializable[] { presenceData });
+                                 presenceData);
     }
 
     // send presence about the user to itself
@@ -181,6 +181,6 @@ public class MemoryRoom extends GenericService
     presenceData.setStatus(new int[] { 110 });
 
     getBrokerStream().presence(nick.getUserJid(), nick.getJid(),
-			       new Serializable[] { presenceData });
+                               presenceData);
   }
 }

@@ -121,7 +121,7 @@ public class HessianJMSProxy implements InvocationHandler {
         params.length == 1 && params[0].equals(Object.class)) {
       Object value = args[0];
       if (value == null || ! Proxy.isProxyClass(value.getClass()))
-        return new Boolean(false);
+        return Boolean.FALSE;
 
       InvocationHandler handler = Proxy.getInvocationHandler(value);
 
@@ -133,7 +133,7 @@ public class HessianJMSProxy implements InvocationHandler {
       return new Boolean(_outboundName.equals(otherOutboundName));
     }
     else if (methodName.equals("hashCode") && params.length == 0)
-      return new Integer(_outboundName.hashCode());
+      return Integer.valueOf(_outboundName.hashCode());
     else if (methodName.equals("getHessianType"))
       return proxy.getClass().getInterfaces()[0].getName();
     else if (methodName.equals("getHessianURL"))

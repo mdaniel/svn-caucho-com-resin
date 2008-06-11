@@ -72,7 +72,7 @@ public interface BamConnection {
   /**
    * Sends a message
    */
-  public void sendMessage(String to, Serializable value);
+  public void message(String to, Serializable value);
 
   //
   // query handling
@@ -111,53 +111,53 @@ public interface BamConnection {
    * The server will send presence probes to all resources which this
    * client subscribes to.
    */
-  public void presence(Serializable []data);
+  public void presence(Serializable data);
 
   /**
    * Basic presence
    */
-  public void presence(String to, Serializable []data);
+  public void presence(String to, Serializable data);
 
   /**
    * Sends the basic presence unavailable notification to the server.
    */
-  public void presenceUnavailable(Serializable []data);
+  public void presenceUnavailable(Serializable data);
 
   /**
    * Basic presence on logout
    */
-  public void presenceUnavailable(String to, Serializable []data);
+  public void presenceUnavailable(String to, Serializable data);
 
   /**
    * Presence callback on login
    */
-  public void presenceProbe(String to, Serializable []data);
+  public void presenceProbe(String to, Serializable data);
 
   /**
    * Presence subscribe request
    */
-  public void presenceSubscribe(String to, Serializable []data);
+  public void presenceSubscribe(String to, Serializable data);
 
   /**
    * Presence subscribed request
    */
-  public void presenceSubscribed(String to, Serializable []data);
+  public void presenceSubscribed(String to, Serializable data);
 
   /**
    * Presence unsubscribe request
    */
-  public void presenceUnsubscribe(String to, Serializable []data);
+  public void presenceUnsubscribe(String to, Serializable data);
 
   /**
    * Presence unsubscribed request
    */
-  public void presenceUnsubscribed(String to, Serializable []data);
+  public void presenceUnsubscribed(String to, Serializable data);
 
   /**
    * Presence error
    */
   public void presenceError(String to,
-			    Serializable []data,
+			    Serializable data,
 			    BamError error);
   
   /**

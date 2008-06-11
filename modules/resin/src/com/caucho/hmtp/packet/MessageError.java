@@ -61,8 +61,8 @@ public class MessageError extends Packet {
   {
     super(to, from);
 
-    _value = null;
-    _error = null;
+    _value = value;
+    _error = error;
   }
 
   /**

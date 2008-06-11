@@ -124,7 +124,7 @@ public class HempConnectionImpl implements BamConnection
   /**
    * Sends a message
    */
-  public void sendMessage(String to, Serializable msg)
+  public void message(String to, Serializable msg)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -265,7 +265,7 @@ public class HempConnectionImpl implements BamConnection
   /**
    * Basic presence
    */
-  public void presence(Serializable []data)
+  public void presence(Serializable data)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -276,7 +276,7 @@ public class HempConnectionImpl implements BamConnection
   /**
    * directed presence
    */
-  public void presence(String to, Serializable []data)
+  public void presence(String to, Serializable data)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -287,7 +287,7 @@ public class HempConnectionImpl implements BamConnection
   /**
    * Basic presence
    */
-  public void presenceUnavailable(Serializable []data)
+  public void presenceUnavailable(Serializable data)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -298,7 +298,7 @@ public class HempConnectionImpl implements BamConnection
   /**
    * directed presence
    */
-  public void presenceUnavailable(String to, Serializable []data)
+  public void presenceUnavailable(String to, Serializable data)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -309,7 +309,7 @@ public class HempConnectionImpl implements BamConnection
   /**
    * directed presence
    */
-  public void presenceProbe(String to, Serializable []data)
+  public void presenceProbe(String to, Serializable data)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -321,7 +321,7 @@ public class HempConnectionImpl implements BamConnection
   /**
    * directed presence
    */
-  public void presenceSubscribe(String to, Serializable []data)
+  public void presenceSubscribe(String to, Serializable data)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -332,7 +332,7 @@ public class HempConnectionImpl implements BamConnection
   /**
    * directed presence
    */
-  public void presenceSubscribed(String to, Serializable []data)
+  public void presenceSubscribed(String to, Serializable data)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -343,7 +343,7 @@ public class HempConnectionImpl implements BamConnection
   /**
    * directed presence
    */
-  public void presenceUnsubscribe(String to, Serializable []data)
+  public void presenceUnsubscribe(String to, Serializable data)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -354,7 +354,7 @@ public class HempConnectionImpl implements BamConnection
   /**
    * directed presence
    */
-  public void presenceUnsubscribed(String to, Serializable []data)
+  public void presenceUnsubscribed(String to, Serializable data)
   {
     if (_isClosed)
       throw new IllegalStateException(L.l("session is closed"));
@@ -366,7 +366,7 @@ public class HempConnectionImpl implements BamConnection
    * directed presence
    */
   public void presenceError(String to,
-			    Serializable []data,
+			    Serializable data,
 			    BamError error)
   {
     if (_isClosed)

@@ -96,7 +96,7 @@ public class DiscoIdentity implements java.io.Serializable {
   {
     StringBuilder sb = new StringBuilder();
 
-    sb.append(getClass().getSimpleName()).append("[");
+    sb.append(getClass().getSimpleName());
 
     sb.append("[category=").append(_category);
     sb.append(",type=").append(_type);

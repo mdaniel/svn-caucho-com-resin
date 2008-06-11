@@ -265,7 +265,7 @@ public class HmtpClient implements BamConnection {
   /**
    * Sends a message to a given jid
    */
-  public void sendMessage(String to, Serializable value)
+  public void message(String to, Serializable value)
   {
     BamStream stream = _clientStream;
 
@@ -278,7 +278,7 @@ public class HmtpClient implements BamConnection {
   /**
    * Sends a presence packet to the server
    */
-  public void presence(Serializable []data)
+  public void presence(Serializable data)
   {
     BamStream stream = _clientStream;
 
@@ -291,7 +291,7 @@ public class HmtpClient implements BamConnection {
   /**
    * Sends a presence packet to the server
    */
-  public void presence(String to, Serializable []data)
+  public void presence(String to, Serializable data)
   {
     BamStream stream = _clientStream;
 
@@ -304,7 +304,7 @@ public class HmtpClient implements BamConnection {
   /**
    * Sends a presence packet to the server
    */
-  public void presenceUnavailable(Serializable []data)
+  public void presenceUnavailable(Serializable data)
   {
     BamStream stream = _clientStream;
 
@@ -317,7 +317,7 @@ public class HmtpClient implements BamConnection {
   /**
    * Sends a presence packet to the server
    */
-  public void presenceUnavailable(String to, Serializable []data)
+  public void presenceUnavailable(String to, Serializable data)
   {
     BamStream stream = _clientStream;
 
@@ -330,7 +330,7 @@ public class HmtpClient implements BamConnection {
   /**
    * Sends a presence probe packet to the server
    */
-  public void presenceProbe(String to, Serializable []data)
+  public void presenceProbe(String to, Serializable data)
   {
     BamStream stream = _clientStream;
 
@@ -343,7 +343,7 @@ public class HmtpClient implements BamConnection {
   /**
    * Sends a presence subscribe packet to the server
    */
-  public void presenceSubscribe(String to, Serializable []data)
+  public void presenceSubscribe(String to, Serializable data)
   {
     BamStream stream = _clientStream;
 
@@ -356,7 +356,7 @@ public class HmtpClient implements BamConnection {
   /**
    * Sends a presence subscribed packet to the server
    */
-  public void presenceSubscribed(String to, Serializable []data)
+  public void presenceSubscribed(String to, Serializable data)
   {
     BamStream stream = _clientStream;
 
@@ -369,7 +369,7 @@ public class HmtpClient implements BamConnection {
   /**
    * Sends a presence subscribe packet to the server
    */
-  public void presenceUnsubscribe(String to, Serializable []data)
+  public void presenceUnsubscribe(String to, Serializable data)
   {
     BamStream stream = _clientStream;
 
@@ -382,7 +382,7 @@ public class HmtpClient implements BamConnection {
   /**
    * Sends a presence subscribed packet to the server
    */
-  public void presenceUnsubscribed(String to, Serializable []data)
+  public void presenceUnsubscribed(String to, Serializable data)
   {
     BamStream stream = _clientStream;
 
@@ -395,7 +395,7 @@ public class HmtpClient implements BamConnection {
   /**
    * Sends a presence packet to the server
    */
-  public void presenceError(String to, Serializable []data, BamError error)
+  public void presenceError(String to, Serializable data, BamError error)
   {
     BamStream stream = _clientStream;
 

@@ -167,7 +167,7 @@ class ClientAgentStream implements Runnable, BamStream {
     BamStream handler = _client.getStreamHandler();
 
     if (handler == null || ! handler.queryGet(id, to, from, value)) {
-      String msg = "no sendQueryGet handling " + value.getClass().getName();
+      String msg = "no queryGet handling " + value.getClass().getName();
       BamError error = new BamError("unknown", msg);
       
       _clientStream.queryError(id, from, to, value, error);
@@ -190,7 +190,7 @@ class ClientAgentStream implements Runnable, BamStream {
     BamStream handler = _client.getStreamHandler();
 
     if (handler == null || ! handler.querySet(id, to, from, value)) {
-      String msg = "no sendQuerySet handling " + value.getClass().getName();
+      String msg = "no querySet handling " + value.getClass().getName();
       BamError error = new BamError("unknown", msg);
       
       _clientStream.queryError(id, from, to, value, error);
