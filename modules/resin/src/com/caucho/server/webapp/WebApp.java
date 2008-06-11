@@ -1756,15 +1756,12 @@ public class WebApp extends ServletContextImpl
 
       _classLoader.setId("web-app:" + getURL());
 
-      try {
-        InitialContext ic = new InitialContext();
-        ServletAuthenticator auth;
-        auth = (ServletAuthenticator) ic.lookup("java:comp/env/caucho/auth");
+      WebBeansContainer webBeans = WebBeansContainer.getCurrent();
 
-        setAttribute("caucho.authenticator", auth);
-      } catch (Exception e) {
-        log.finest(e.toString());
-      }
+      ServletAuthenticator auth
+	= webBeans.getByType(ServletAuthenticator.class);;
+
+      setAttribute("caucho.authenticator", auth);
 
       WebAppController parent = null;
       if (_controller != null)
