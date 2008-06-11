@@ -27,52 +27,89 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.packet;
+package com.caucho.hmtp;
 
 import com.caucho.bam.BamStream;
-import com.caucho.hmtp.packet.Presence;
-import java.io.Serializable;
 
 /**
- * A presence unsubscription request
+ * Base packet class.  Contains only a 'to' and a 'from' field.
  */
-public class PresenceUnsubscribe extends Presence {
+public class Packet implements java.io.Serializable
+{
+  private final String _to;
+  private final String _from;
+
   /**
-   * zero-arg constructor for Hessian
+   * null constructor for Hessian deserialization
    */
-  private PresenceUnsubscribe()
+  protected Packet()
   {
+    _to = null;
+    _from = null;
   }
 
   /**
-   * A directed presence unsubscription request to another client
+   * Creates a packet with a destination, but no source, e.g. from a
+   * client.  The server will infer the source from the hmpp session
+   * binding.
    *
-   * @param to the target client
-   * @param data a collection of presence data
+   * @param to the destination jid
    */
-  public PresenceUnsubscribe(String to, Serializable data)
+  public Packet(String to)
   {
-    super(to, data);
+    _to = to;
+    _from = null;
   }
 
   /**
-   * A directed presence unsubscription request to another client
+   * Creates a packet with a destination and a source.
    *
-   * @param to the target client
-   * @param from the source
-   * @param data a collection of presence data
+   * @param to the destination jid
+   * @param from the source jid
    */
-  public PresenceUnsubscribe(String to, String from, Serializable data)
+  public Packet(String to, String from)
   {
-    super(to, from, data);
+    _to = to;
+    _from = from;
+  }
+
+  /**
+   * Returns the 'to' field
+   */
+  public String getTo()
+  {
+    return _to;
+  }
+
+  /**
+   * Returns the 'from' field
+   */
+  public String getFrom()
+  {
+    return _from;
   }
 
   /**
    * SPI method to dispatch the packet to the proper handler
    */
-  @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.presenceUnsubscribe(getTo(), getFrom(), getData());
+  }
+
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getSimpleName());
+    sb.append("[to=");
+    sb.append(_to);
+
+    if (_from != null) {
+      sb.append(",from=");
+      sb.append(_from);
+    }
+
+    sb.append("]");
+    
+    return sb.toString();
   }
 }

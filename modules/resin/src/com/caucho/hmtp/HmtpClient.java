@@ -27,10 +27,8 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.client;
+package com.caucho.hmtp;
 
-import com.caucho.hmtp.auth.AuthResult;
-import com.caucho.hmtp.auth.AuthQuery;
 import com.caucho.bam.BamQueryCallback;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;

@@ -27,87 +27,110 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.packet;
+package com.caucho.hmtp;
 
 import com.caucho.bam.BamStream;
+import java.io.Serializable;
 
 /**
- * Base packet class.  Contains only a 'to' and a 'from' field.
+ * RPC result from a get or set.  The "id" field is used
+ * to match the query with the response.
  */
-public class Packet implements java.io.Serializable
-{
-  private final String _to;
-  private final String _from;
+public class QueryResult extends Packet {
+  private final long _id;
+  
+  private final Serializable _value;
 
   /**
-   * null constructor for Hessian deserialization
+   * zero-arg constructor for Hessian
    */
-  protected Packet()
+  private QueryResult()
   {
-    _to = null;
-    _from = null;
+    _id = 0;
+    _value = null;
   }
 
   /**
-   * Creates a packet with a destination, but no source, e.g. from a
-   * client.  The server will infer the source from the hmpp session
-   * binding.
+   * A query to a target
    *
-   * @param to the destination jid
+   * @param id the query id
+   * @param to the target jid
+   * @param value the query content
    */
-  public Packet(String to)
+  public QueryResult(long id, String to, Serializable value)
   {
-    _to = to;
-    _from = null;
+    super(to);
+
+    _id = id;
+    _value = value;
   }
 
   /**
-   * Creates a packet with a destination and a source.
+   * A query to a target from a given source
    *
-   * @param to the destination jid
+   * @param id the query id
+   * @param to the target jid
    * @param from the source jid
+   * @param value the query content
    */
-  public Packet(String to, String from)
+  public QueryResult(long id, String to, String from, Serializable value)
   {
-    _to = to;
-    _from = from;
+    super(to, from);
+
+    _id = id;
+    _value = value;
   }
 
   /**
-   * Returns the 'to' field
+   * Returns the id
    */
-  public String getTo()
+  public long getId()
   {
-    return _to;
+    return _id;
   }
 
   /**
-   * Returns the 'from' field
+   * Returns the query value
    */
-  public String getFrom()
+  public Serializable getValue()
   {
-    return _from;
+    return _value;
   }
 
   /**
    * SPI method to dispatch the packet to the proper handler
    */
+  @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
+    handler.queryResult(getId(), getTo(), getFrom(), getValue());
   }
 
+  @Override
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
-    sb.append(getClass().getSimpleName());
-    sb.append("[to=");
-    sb.append(_to);
 
-    if (_from != null) {
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+
+    sb.append("id=");
+    sb.append(_id);
+    
+    if (getTo() != null) {
+      sb.append(",to=");
+      sb.append(getTo());
+    }
+    
+    if (getFrom() != null) {
       sb.append(",from=");
-      sb.append(_from);
+      sb.append(getFrom());
     }
 
+    if (_value != null) {
+      sb.append("," + _value.getClass().getName());
+    }
+    
     sb.append("]");
     
     return sb.toString();

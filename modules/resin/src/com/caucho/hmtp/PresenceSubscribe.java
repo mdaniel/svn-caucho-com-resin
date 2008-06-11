@@ -27,47 +27,51 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.auth;
+package com.caucho.hmtp;
 
+import com.caucho.bam.BamStream;
 import java.io.Serializable;
 
 /**
- * Authentication result returns the jid on success
+ * A presence subscription request
  */
-public class AuthResult implements Serializable {
-  private final String _jid;
-
+public class PresenceSubscribe extends Presence {
   /**
-   * null constructor for Hessian.
+   * zero-arg constructor for Hessian
    */
-  private AuthResult()
+  private PresenceSubscribe()
   {
-    _jid = null;
   }
 
   /**
-   * login packet
+   * A directed presence subscription request to another client
+   *
+   * @param to the target client
+   * @param data a collection of presence data
    */
-  public AuthResult(String jid)
+  public PresenceSubscribe(String to, Serializable data)
   {
-    _jid = jid;
+    super(to, data);
   }
 
-  public String getJid()
+  /**
+   * A directed presence subscription request to another client
+   *
+   * @param to the target client
+   * @param from the source
+   * @param data a collection of presence data
+   */
+  public PresenceSubscribe(String to, String from, Serializable data)
   {
-    return _jid;
+    super(to, from, data);
   }
 
+  /**
+   * SPI method to dispatch the packet to the proper handler
+   */
   @Override
-  public String toString()
+  public void dispatch(BamStream handler, BamStream toSource)
   {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append(getClass().getSimpleName());
-    sb.append("[");
-    sb.append(_jid);
-    sb.append("]");
-
-    return sb.toString();
+    handler.presenceSubscribe(getTo(), getFrom(), getData());
   }
 }

@@ -27,10 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.client;
+package com.caucho.hmtp;
 
 import com.caucho.bam.BamStream;
-import com.caucho.hmtp.packet.Packet;
 import com.caucho.bam.BamError;
 import com.caucho.hessian.io.*;
 

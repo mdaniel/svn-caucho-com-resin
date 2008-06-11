@@ -29,8 +29,8 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.hmtp.auth.AuthResult;
-import com.caucho.hmtp.auth.AuthQuery;
+import com.caucho.hmtp.AuthResult;
+import com.caucho.hmtp.AuthQuery;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.AbstractBamStream;
 import com.caucho.bam.BamError;

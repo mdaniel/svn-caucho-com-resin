@@ -27,51 +27,68 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.packet;
+package com.caucho.hmtp;
 
 import com.caucho.bam.BamStream;
-import com.caucho.hmtp.packet.Presence;
-import com.caucho.bam.BamError;
 import java.io.Serializable;
 
 /**
- * PresenceError returns an error response to a presence packet
+ * Announces presence information
  */
-public class PresenceError extends Presence {
-  private final BamError _error;
-  
+public class Presence extends Packet {
+  private final Serializable _data;
+
   /**
    * zero-arg constructor for Hessian
    */
-  private PresenceError()
+  protected Presence()
   {
-    _error = null;
+    _data = null;
   }
 
   /**
-   * The subscribed response to the original client
+   * An undirected presence announcement to the server.
+   *
+   * @param data a collection of presence data
+   */
+  public Presence(Serializable data)
+  {
+    _data = data;
+  }
+
+  /**
+   * A directed presence announcement to another client
+   *
+   * @param to the target client
+   * @param data a collection of presence data
+   */
+  public Presence(String to, Serializable data)
+  {
+    super(to);
+    
+    _data = data;
+  }
+
+  /**
+   * A directed presence announcement to another client
    *
    * @param to the target client
    * @param from the source
    * @param data a collection of presence data
-   * @param error the error information
    */
-  public PresenceError(String to,
-		       String from,
-		       Serializable data,
-		       BamError error)
+  public Presence(String to, String from, Serializable data)
   {
-    super(to, from, data);
-
-    _error = error;
+    super(to, from);
+    
+    _data = data;
   }
 
   /**
-   * Returns the error information
+   * Returns the presence data
    */
-  public BamError getError()
+  public Serializable getData()
   {
-    return _error;
+    return _data;
   }
 
   /**
@@ -80,6 +97,32 @@ public class PresenceError extends Presence {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.presenceError(getTo(), getFrom(), getData(), getError());
+    handler.presence(getTo(), getFrom(), _data);
+  }
+
+  @Override
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+    
+    sb.append("to=");
+    sb.append(getTo());
+    
+    if (getFrom() != null) {
+      sb.append(",from=");
+      sb.append(getFrom());
+    }
+
+    if (_data != null) {
+      sb.append(",data=");
+      sb.append(_data);
+    }
+    
+    sb.append("]");
+    
+    return sb.toString();
   }
 }

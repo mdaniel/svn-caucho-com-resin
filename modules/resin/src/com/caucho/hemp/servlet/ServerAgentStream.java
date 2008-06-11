@@ -29,20 +29,20 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.hmtp.packet.QuerySet;
-import com.caucho.hmtp.packet.QueryResult;
-import com.caucho.hmtp.packet.QueryGet;
-import com.caucho.hmtp.packet.QueryError;
-import com.caucho.hmtp.packet.PresenceUnsubscribed;
-import com.caucho.hmtp.packet.PresenceUnsubscribe;
-import com.caucho.hmtp.packet.PresenceUnavailable;
-import com.caucho.hmtp.packet.PresenceSubscribed;
-import com.caucho.hmtp.packet.PresenceSubscribe;
-import com.caucho.hmtp.packet.PresenceProbe;
-import com.caucho.hmtp.packet.PresenceError;
-import com.caucho.hmtp.packet.Presence;
-import com.caucho.hmtp.packet.MessageError;
-import com.caucho.hmtp.packet.Message;
+import com.caucho.hmtp.QuerySet;
+import com.caucho.hmtp.QueryResult;
+import com.caucho.hmtp.QueryGet;
+import com.caucho.hmtp.QueryError;
+import com.caucho.hmtp.PresenceUnsubscribed;
+import com.caucho.hmtp.PresenceUnsubscribe;
+import com.caucho.hmtp.PresenceUnavailable;
+import com.caucho.hmtp.PresenceSubscribed;
+import com.caucho.hmtp.PresenceSubscribe;
+import com.caucho.hmtp.PresenceProbe;
+import com.caucho.hmtp.PresenceError;
+import com.caucho.hmtp.Presence;
+import com.caucho.hmtp.MessageError;
+import com.caucho.hmtp.Message;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import java.io.*;

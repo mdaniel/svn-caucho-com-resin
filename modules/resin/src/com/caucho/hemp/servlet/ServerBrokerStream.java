@@ -31,7 +31,7 @@ package com.caucho.hemp.servlet;
 
 import com.caucho.bam.BamConnection;
 import com.caucho.bam.BamStream;
-import com.caucho.hmtp.packet.Packet;
+import com.caucho.hmtp.Packet;
 import com.caucho.bam.BamError;
 import java.io.*;
 import java.util.logging.*;

@@ -27,35 +27,50 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.packet;
+package com.caucho.hmtp;
 
 import com.caucho.bam.BamStream;
-import com.caucho.hmtp.packet.Presence;
+import com.caucho.bam.BamError;
 import java.io.Serializable;
 
 /**
- * PresenceProbe forwards presence announcements from the server to resources
- * to client has subscriptions from.  i.e. it acts like a listener
- * registration.
+ * PresenceError returns an error response to a presence packet
  */
-public class PresenceProbe extends Presence {
+public class PresenceError extends Presence {
+  private final BamError _error;
+  
   /**
    * zero-arg constructor for Hessian
    */
-  private PresenceProbe()
+  private PresenceError()
   {
+    _error = null;
   }
 
   /**
-   * A directed presence announcement to another client
+   * The subscribed response to the original client
    *
    * @param to the target client
    * @param from the source
    * @param data a collection of presence data
+   * @param error the error information
    */
-  public PresenceProbe(String to, String from, Serializable data)
+  public PresenceError(String to,
+		       String from,
+		       Serializable data,
+		       BamError error)
   {
     super(to, from, data);
+
+    _error = error;
+  }
+
+  /**
+   * Returns the error information
+   */
+  public BamError getError()
+  {
+    return _error;
   }
 
   /**
@@ -64,6 +79,6 @@ public class PresenceProbe extends Presence {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.presenceProbe(getTo(), getFrom(), getData());
+    handler.presenceError(getTo(), getFrom(), getData(), getError());
   }
 }

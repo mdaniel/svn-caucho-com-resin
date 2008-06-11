@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.packet;
+package com.caucho.hmtp;
 
 import com.caucho.bam.BamStream;
 import java.io.Serializable;

@@ -27,17 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.packet;
+package com.caucho.hmtp;
 
-import com.caucho.hmtp.packet.Packet;
 import com.caucho.bam.BamStream;
+import com.caucho.bam.BamError;
 import java.io.Serializable;
 
 /**
- * RPC result from a get or set.  The "id" field is used
- * to match the query with the response.
+ * RPC call changing information/data.  The "id" field is used
+ * to match the query with the response.  The target must either respond
+ * with a QueryResult or QueryError.
  */
-public class QueryResult extends Packet {
+public class QuerySet extends Packet {
   private final long _id;
   
   private final Serializable _value;
@@ -45,7 +46,7 @@ public class QueryResult extends Packet {
   /**
    * zero-arg constructor for Hessian
    */
-  private QueryResult()
+  private QuerySet()
   {
     _id = 0;
     _value = null;
@@ -58,7 +59,7 @@ public class QueryResult extends Packet {
    * @param to the target jid
    * @param value the query content
    */
-  public QueryResult(long id, String to, Serializable value)
+  public QuerySet(long id, String to, Serializable value)
   {
     super(to);
 
@@ -74,7 +75,7 @@ public class QueryResult extends Packet {
    * @param from the source jid
    * @param value the query content
    */
-  public QueryResult(long id, String to, String from, Serializable value)
+  public QuerySet(long id, String to, String from, Serializable value)
   {
     super(to, from);
 
@@ -104,7 +105,11 @@ public class QueryResult extends Packet {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.queryResult(getId(), getTo(), getFrom(), getValue());
+    if (! handler.querySet(getId(), getTo(), getFrom(), getValue())) {
+      toSource.queryError(getId(), getFrom(), getTo(), getValue(),
+			      new BamError(BamError.TYPE_CANCEL,
+					    BamError.ITEM_NOT_FOUND));
+    }
   }
 
   @Override

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.auth;
+package com.caucho.hmtp;
 
 import java.io.Serializable;
 

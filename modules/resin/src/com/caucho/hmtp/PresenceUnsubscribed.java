@@ -27,53 +27,41 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.client;
+package com.caucho.hmtp;
 
-import com.caucho.hmtp.HmtpClient;
-import com.caucho.server.connection.*;
-import com.caucho.server.port.*;
-import com.caucho.hemp.*;
-import com.caucho.hessian.io.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.*;
+import com.caucho.bam.BamStream;
+import java.io.Serializable;
 
 /**
- * HMPP client protocol
+ * PresenceUnsubscribed returns a successful unsubscription response to
+ * the client.
  */
-public class HempClient extends HmtpClient {
-  private static final L10N L = new L10N(HempClient.class);
-  private static final Logger log
-    = Logger.getLogger(HempClient.class.getName());
-
-  public HempClient(String url)
+public class PresenceUnsubscribed extends Presence {
+  /**
+   * zero-arg constructor for Hessian
+   */
+  private PresenceUnsubscribed()
   {
-    super(url);
   }
 
-  @Override
-  protected void executeThread(Runnable task)
+  /**
+   * The unsubscribed response to the original client
+   *
+   * @param to the target client
+   * @param from the source
+   * @param data a collection of presence data
+   */
+  public PresenceUnsubscribed(String to, String from, Serializable data)
   {
-    ThreadPool.getThreadPool().start(task);
+    super(to, from, data);
   }
 
+  /**
+   * SPI method to dispatch the packet to the proper handler
+   */
   @Override
-  protected void openSocket(String host, int port)
-    throws IOException
+  public void dispatch(BamStream handler, BamStream toSource)
   {
-    _s = new Socket(getHost(), getPort());
-
-    SocketStream ss = new SocketStream(_s);
-
-    WriteStream os = new WriteStream(ss);
-    ReadStream is = new ReadStream(ss);
-    
-    _os = os;
-    _is = is;
+    handler.presenceUnsubscribed(getTo(), getFrom(), getData());
   }
 }

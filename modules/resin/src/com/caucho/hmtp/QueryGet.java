@@ -27,18 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.packet;
+package com.caucho.hmtp;
 
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import java.io.Serializable;
 
 /**
- * RPC call changing information/data.  The "id" field is used
+ * RPC call requesting information/data.  The "id" field is used
  * to match the query with the response.  The target must either respond
  * with a QueryResult or QueryError.
  */
-public class QuerySet extends Packet {
+public class QueryGet extends Packet {
   private final long _id;
   
   private final Serializable _value;
@@ -46,7 +46,7 @@ public class QuerySet extends Packet {
   /**
    * zero-arg constructor for Hessian
    */
-  private QuerySet()
+  private QueryGet()
   {
     _id = 0;
     _value = null;
@@ -59,7 +59,7 @@ public class QuerySet extends Packet {
    * @param to the target jid
    * @param value the query content
    */
-  public QuerySet(long id, String to, Serializable value)
+  public QueryGet(long id, String to, Serializable value)
   {
     super(to);
 
@@ -75,7 +75,7 @@ public class QuerySet extends Packet {
    * @param from the source jid
    * @param value the query content
    */
-  public QuerySet(long id, String to, String from, Serializable value)
+  public QueryGet(long id, String to, String from, Serializable value)
   {
     super(to, from);
 
@@ -105,7 +105,7 @@ public class QuerySet extends Packet {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    if (! handler.querySet(getId(), getTo(), getFrom(), getValue())) {
+    if (! handler.queryGet(getId(), getTo(), getFrom(), getValue())) {
       toSource.queryError(getId(), getFrom(), getTo(), getValue(),
 			      new BamError(BamError.TYPE_CANCEL,
 					    BamError.ITEM_NOT_FOUND));

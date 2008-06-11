@@ -27,54 +27,58 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.packet;
+package com.caucho.hmtp;
 
-import com.caucho.hmtp.packet.Presence;
+import com.caucho.bam.BamError;
 import com.caucho.bam.BamStream;
 import java.io.Serializable;
 
 /**
- * Announces presence unavailability
+ * Unidirectional message with an error
  */
-public class PresenceUnavailable extends Presence {
+public class MessageError extends Packet {
+  private final Serializable _value;
+  private final BamError _error;
+
   /**
    * zero-arg constructor for Hessian
    */
-  private PresenceUnavailable()
+  private MessageError()
   {
+    _value = null;
+    _error = null;
   }
 
   /**
-   * An undirected presence unavailable announcement to the server.
+   * An empty message to a destination
    *
-   * @param data a collection of presence data
+   * @param to the target jid
    */
-  public PresenceUnavailable(Serializable data)
+  public MessageError(String to,
+		      String from,
+		      Serializable value,
+		      BamError error)
   {
-    super(data);
+    super(to, from);
+
+    _value = value;
+    _error = error;
   }
 
   /**
-   * A directed presence unavailable announcement to another client
-   *
-   * @param to the target client
-   * @param data a collection of presence data
+   * Returns the message value
    */
-  public PresenceUnavailable(String to, Serializable data)
+  public Serializable getValue()
   {
-    super(to, data);
+    return _value;
   }
 
   /**
-   * A directed presence unavailable announcement to another client
-   *
-   * @param to the target client
-   * @param from the source
-   * @param data a collection of presence data
+   * Returns the message error
    */
-  public PresenceUnavailable(String to, String from, Serializable data)
+  public BamError getError()
   {
-    super(to, from, data);
+    return _error;
   }
 
   /**
@@ -83,6 +87,30 @@ public class PresenceUnavailable extends Presence {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.presenceUnavailable(getTo(), getFrom(), getData());
+    handler.messageError(getTo(), getFrom(), getValue(), _error);
+  }
+
+  @Override
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+    
+    if (getTo() != null) {
+      sb.append("to=");
+      sb.append(getTo());
+    }
+    
+    if (getFrom() != null) {
+      sb.append(",from=");
+      sb.append(getFrom());
+    }
+
+    sb.append("," + _error);
+    sb.append("]");
+    
+    return sb.toString();
   }
 }

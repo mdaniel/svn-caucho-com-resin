@@ -27,69 +27,76 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp.packet;
+package com.caucho.hmtp;
 
-import com.caucho.hmtp.packet.Packet;
 import com.caucho.bam.BamStream;
+import com.caucho.bam.BamError;
 import java.io.Serializable;
 
 /**
- * Announces presence information
+ * RPC error result from a get or set.  The "id" field is used
+ * to match the query with the response.
  */
-public class Presence extends Packet {
-  private final Serializable _data;
+public class QueryError extends Packet {
+  private final long _id;
+  
+  private final Serializable _value;
+  private final BamError _error;
 
   /**
    * zero-arg constructor for Hessian
    */
-  protected Presence()
+  private QueryError()
   {
-    _data = null;
+    _id = 0;
+    _value = null;
+    _error = null;
   }
 
   /**
-   * An undirected presence announcement to the server.
+   * A query to a target
    *
-   * @param data a collection of presence data
+   * @param id the query id
+   * @param to the target jid
+   * @param from the source jid
+   * @param value copy the query request
+   * @param error the query error
    */
-  public Presence(Serializable data)
-  {
-    _data = data;
-  }
-
-  /**
-   * A directed presence announcement to another client
-   *
-   * @param to the target client
-   * @param data a collection of presence data
-   */
-  public Presence(String to, Serializable data)
-  {
-    super(to);
-    
-    _data = data;
-  }
-
-  /**
-   * A directed presence announcement to another client
-   *
-   * @param to the target client
-   * @param from the source
-   * @param data a collection of presence data
-   */
-  public Presence(String to, String from, Serializable data)
+  public QueryError(long id,
+		    String to,
+		    String from,
+		    Serializable value,
+		    BamError error)
   {
     super(to, from);
-    
-    _data = data;
+
+    _id = id;
+    _value = value;
+    _error = error;
   }
 
   /**
-   * Returns the presence data
+   * Returns the id
    */
-  public Serializable getData()
+  public long getId()
   {
-    return _data;
+    return _id;
+  }
+
+  /**
+   * Returns the query value
+   */
+  public Serializable getValue()
+  {
+    return _value;
+  }
+
+  /**
+   * Returns the query error
+   */
+  public BamError getError()
+  {
+    return _error;
   }
 
   /**
@@ -98,7 +105,8 @@ public class Presence extends Packet {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.presence(getTo(), getFrom(), _data);
+    handler.queryError(getId(), getTo(), getFrom(),
+			   getValue(), getError());
   }
 
   @Override
@@ -108,18 +116,26 @@ public class Presence extends Packet {
 
     sb.append(getClass().getSimpleName());
     sb.append("[");
+
+    sb.append("id=");
+    sb.append(_id);
     
-    sb.append("to=");
-    sb.append(getTo());
+    if (getTo() != null) {
+      sb.append(",to=");
+      sb.append(getTo());
+    }
     
     if (getFrom() != null) {
       sb.append(",from=");
       sb.append(getFrom());
     }
 
-    if (_data != null) {
-      sb.append(",data=");
-      sb.append(_data);
+    if (_value != null) {
+      sb.append("," + _value.getClass().getName());
+    }
+
+    if (_error != null) {
+      sb.append(",error=" + _error);
     }
     
     sb.append("]");

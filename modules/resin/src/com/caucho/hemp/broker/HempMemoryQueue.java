@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.hmtp.packet.*;
+import com.caucho.hmtp.*;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import com.caucho.server.resin.*;
