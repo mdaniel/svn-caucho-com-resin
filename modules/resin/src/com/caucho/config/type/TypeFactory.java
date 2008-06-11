@@ -323,9 +323,9 @@ public class TypeFactory implements AddLoaderListener
 
 	strategy.introspect();
       }
-    }
 
-    return strategy;
+      return strategy;
+    }
   }
 
   private ConfigType createType(Class type)
