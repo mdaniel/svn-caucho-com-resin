@@ -845,17 +845,18 @@ public class Inode {
 	    long fragAddr = readMiniFragAddr(bytes, 0, _store, length - 1);
 
 	    if ((fragAddr & Store.BLOCK_MASK) == 0) {
-	      String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 fragment";
-	      log.warning(msg);
 	      _store.setCorrupted(true);
-	      continue;
+	      
+	      String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 fragment";
+
+	      throw stateError(msg);
 	    }
 	    else if (fragAddr < 0) {
 	      String msg = _store + ": inode block " + Long.toHexString(length) + " has invalid fragment " + Long.toHexString(fragAddr);
 	    
-	      log.warning(msg);
 	      _store.setCorrupted(true);
-	      continue;
+	      
+	      throw stateError(msg);
 	    }
 
 	    _store.deleteMiniFragment(_xa, fragAddr);
@@ -957,6 +958,8 @@ public class Inode {
     int fragCount = (int) (fragLength / MINI_FRAG_SIZE);
     
     if ((fragAddr & Store.BLOCK_MASK) == 0) {
+      store.setCorrupted(true);
+      
       throw new IllegalStateException(store + ": inode block " + fragLength + " has zero value " + fragAddr);
     }
     
@@ -979,8 +982,11 @@ public class Inode {
       long indirectAddr;
       indirectAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
-      if (indirectAddr == 0)
-	throw new IllegalStateException(L.l("null block id"));
+      if (indirectAddr == 0) {
+	store.setCorrupted(true);
+	
+	throw new IllegalStateException(L.l("{0} null block id", store));
+      }
 
       int offset = (int) (8 * (fragCount - DIRECT_BLOCKS));
 
@@ -994,8 +1000,11 @@ public class Inode {
       long indirectAddr;
       indirectAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
-      if (indirectAddr == 0)
-	throw new IllegalStateException(L.l("null block id"));
+      if (indirectAddr == 0) {
+	store.setCorrupted(true);
+	
+	throw new IllegalStateException(L.l("{0} null block id", store));
+      }
 
       fragCount -= DIRECT_BLOCKS + SINGLE_INDIRECT_BLOCKS;
 
@@ -1008,9 +1017,11 @@ public class Inode {
       return store.readFragmentLong(doubleIndirectAddr, offset);
     }
     else {
-      log.warning(this + " fragment address is over 64M, internal error");
+      store.setCorrupted(true);
+      
+      throw new IllegalStateException(L.l("{0} fragment address is over 64M ({1}), internal error",
+					  store, fragCount));
 
-      return 0;
     }
   }
 
@@ -1026,6 +1037,8 @@ public class Inode {
     
     // XXX: not sure if correct, needs XA?
     if ((fragAddr & Store.BLOCK_MASK) == 0) {
+      store.setCorrupted(true);
+      
       String msg = store + ": inode block " + fragCount + " writing 0 fragment";
       throw stateError(msg);
     }
@@ -1073,8 +1086,12 @@ public class Inode {
       
       store.writeFragmentLong(xa, dblIndAddr, fragOffset, fragAddr);
     }
-    else
-      throw new IllegalStateException(L.l("Can't yet support data over 64M"));
+    else {
+      store.setCorrupted(true);
+      
+      throw new IllegalStateException(L.l("{0}: can't yet support data over 64M (count={1})",
+					  store, fragCount));
+    }
   }
 
   /**
@@ -1085,15 +1102,20 @@ public class Inode {
 			    long fileOffset)
     throws IOException
   {
-    if (fileOffset <= FRAGMENT_MAX)
-      throw new IllegalStateException("block/fragment mixup");
-    
+    if (fileOffset <= FRAGMENT_MAX) {
+      store.setCorrupted(true);
+      
+      throw new IllegalStateException(store + " block/fragment mixup");
+    }
     else if (fileOffset <= DOUBLE_INDIRECT_MAX) {
       long indirectAddr;
       indirectAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
-      if (indirectAddr == 0)
-	throw new IllegalStateException(L.l("null block id"));
+      if (indirectAddr == 0) {
+	store.setCorrupted(true);
+	
+	throw new IllegalStateException(L.l("{0} null block id"));
+      }
 
       int blockCount = (int) ((fileOffset - FRAGMENT_MAX) / BLOCK_SIZE);
 
@@ -1103,9 +1125,13 @@ public class Inode {
 
       return blockAddr;
     }
-    else
-      throw new IllegalStateException(L.l("size over {0}M not supported",
+    else {
+      store.setCorrupted(true);
+    
+      throw new IllegalStateException(L.l("{0} size over {1}M not supported",
+					  store,
 					  (DOUBLE_INDIRECT_MAX / (1024 * 1024))));
+    }
   }
 
   /**
@@ -1116,15 +1142,20 @@ public class Inode {
 				     long fileOffset, long blockAddr)
     throws IOException
   {
-    if (fileOffset <= FRAGMENT_MAX)
-      throw new IllegalStateException("block/fragment mixup");
-    
+    if (fileOffset <= FRAGMENT_MAX) {
+      store.setCorrupted(true);
+      
+      throw new IllegalStateException(store + " block/fragment mixup");
+    }
     else if (fileOffset <= DOUBLE_INDIRECT_MAX) {
       long indAddr;
       indAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
-      if (indAddr == 0)
-	throw new IllegalStateException(L.l("null block id"));
+      if (indAddr == 0) {
+	store.setCorrupted(true);
+	
+	throw new IllegalStateException(L.l("{0} null block id", store));
+      }
 
       int blockCount = (int) ((fileOffset - FRAGMENT_MAX) / BLOCK_SIZE);
 
@@ -1146,9 +1177,13 @@ public class Inode {
       
       store.writeFragmentLong(xa, dblIndAddr, blockOffset, blockAddr);
     }
-    else
-      throw new IllegalStateException(L.l("size over {0}M not supported",
+    else {
+      store.setCorrupted(true);
+      
+      throw new IllegalStateException(L.l("{0} size over {1}M not supported",
+					  store,
 					  (DOUBLE_INDIRECT_MAX / (1024 * 1024))));
+    }
   }
 
   /**
