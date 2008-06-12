@@ -859,9 +859,11 @@ public class ConfigContext {
 
 	cfg.init();
 
-	Object bean = cfg.replaceObject();
+	Object bean = cfg.createObjectNoInit();
 
 	configureBean(bean, node);
+
+	Config.init(bean);
 	
 	return bean;
       } catch (Exception e) {

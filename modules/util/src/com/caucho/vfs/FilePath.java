@@ -215,7 +215,9 @@ public class FilePath extends FilesystemPath {
     String path = getFullPath();
     int length = path.length();
     CharBuffer cb = new CharBuffer();
-    cb.append("file:/");
+
+    // #2725, server/1495
+    cb.append("file:");
     
     char ch;
     int offset = 0;
@@ -225,12 +227,13 @@ public class FilePath extends FilesystemPath {
 	&& path.charAt(2) == ':'
 	&& ('a' <= (ch = path.charAt(1)) && ch <= 'z'
 	    || 'A' <= ch && ch <= 'Z')) {
-      offset = 1;
+      // offset = 1;
     }
     else if (length >= 3
 	     && path.charAt(0) == '/'
 	     && path.charAt(1) == ':'
 	     && path.charAt(2) == '/') {
+      cb.append('/');
       cb.append('/');
       cb.append('/');
       cb.append('/');

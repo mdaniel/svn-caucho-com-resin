@@ -394,7 +394,7 @@ public class TypeFactory implements AddLoaderListener
 
 	_configSet.add(url);
 
-	InputStream is = url.openStream();
+	InputStream is = Vfs.openRead(url.toString());
 
 	try {
 	  new Config(loader).configure(this, is);

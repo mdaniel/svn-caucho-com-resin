@@ -208,6 +208,18 @@ public class InterfaceConfig extends BeanConfig {
       return null;
   }
 
+  public Object createObjectNoInit()
+  {
+    if (_value != null)
+      return _value;
+    else if (getClassType() != null)
+      return super.createObjectNoInit();
+    else if (getBeanConfigClass().isAssignableFrom(String.class))
+      return _valueName;
+    else
+      return null;
+  }
+
   /**
    * Returns the configured object for configuration
    */

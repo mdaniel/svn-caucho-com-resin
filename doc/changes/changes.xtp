@@ -12,6 +12,8 @@
 
 <s2 title="3.1.7 snapshot">
 <ul>
+<li>security: custom ip-constraint extension IoC configuration issues (#2718, rep by Alex Victoria)</li>
+<li>vfs: windows getURL not properly converting /foo to file:/foo (#2725, rep by Vinod Mehra)</li>
 <li>ioc: synchronization on bean introspection (#2672, rep by Matthew Schmidt)</li>
 <li>cache: InterruptedIOException needs to be treated like ClientDisconnectException and not stop cache (#2704, rep by Dmitry Zaburyanov)</li>
 <li>(2008-06-09) webapp: versioning wasn't handling ROOT-1.0.war properly (#2668, rep by A Servidio)</li>
