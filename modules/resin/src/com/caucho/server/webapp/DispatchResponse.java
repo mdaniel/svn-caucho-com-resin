@@ -160,8 +160,15 @@ class DispatchResponse extends AbstractHttpResponse
   @Override
   public boolean isCommitted()
   {
+    /**
+     * Includes are not committed in the sense of top-level requests because
+     * they don't have headers
+     */
     // jsp/15m2
-    return _next.isCommitted();
+    // return _next.isCommitted();
+    
+    // #2481, server/10y5
+    return false;
   }
 
   /**

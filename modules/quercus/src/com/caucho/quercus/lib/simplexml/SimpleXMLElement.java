@@ -960,7 +960,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     SimpleXMLElement elt = getElement(name);
 
     if (elt != null)
-      return wrapJava(_env, new SelectedXMLElement(elt, _cls, _def), _cls, _def);
+      return wrapJava(_env, new SelectedXMLElement(_env, elt, _cls, _def), _cls, _def);
     else
       return NullValue.NULL;
   }

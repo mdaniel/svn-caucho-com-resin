@@ -164,6 +164,8 @@ abstract public class JarListLoader extends Loader implements Dependency {
 	    while (scan.next()) {
 	      String name = scan.getName();
 
+	      name = name.replace('\\', '/');
+
 	      JarList entryList = pathMap.get(name);
 
 	      entryList = new JarList(jarEntry, entryList);
@@ -193,6 +195,8 @@ abstract public class JarListLoader extends Loader implements Dependency {
 	    ZipEntry entry = e.nextElement();
 	    String name = entry.getName();
 
+	    name = name.replace('\\', '/');
+	    
 	    JarList entryList = pathMap.get(name);
 
 	    entryList = new JarList(jarEntry, entryList);

@@ -472,9 +472,11 @@ public class ClusterObject {
       if (isMatch(dataHash, _dataHash))
 	return;
 
+      byte []oldDataHash = _dataHash;
+      
       _dataHash = dataHash;
 
-      _storeManager.store(this, tempStream, dataHash);
+      _storeManager.store(this, tempStream, dataHash, oldDataHash);
 
       if (isPrimary())
 	_isValid = true;

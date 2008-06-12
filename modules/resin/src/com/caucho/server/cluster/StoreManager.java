@@ -675,10 +675,11 @@ abstract public class StoreManager
    * @param clusterObject the distributed handle
    * @param tempStream the byte stream to the saved data
    * @param dataHash the sha-1 hash of the data
+   * @param oldDataHash the previous hash value for the data
    */
   abstract protected void store(ClusterObject clusterObject,
 				TempOutputStream tempStream,
-				byte []dataHash)
+				byte []dataHash, byte []oldDataHash)
     throws Exception;
   
   /**

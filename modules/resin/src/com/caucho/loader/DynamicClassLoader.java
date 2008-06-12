@@ -924,7 +924,12 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 	  for (URL url : urlLoader.getURLs()) {
 	    if (head.length() > 0)
 	      head.append(CauchoSystem.getPathSeparatorChar());
-	    head.append(url);
+
+	    String urlString = url.toString();
+	    if (urlString.startsWith("file:"))
+	      urlString = urlString.substring("file:".length());
+	    
+	    head.append(urlString);
 	  }
 	}
       }
@@ -1190,6 +1195,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
                                   URL url)
   {
     name = name.replace('/', '.');
+    name = name.replace('\\', '.');
 
     if (name.endsWith("."))
       name = name.substring(0, name.length() - 1);
@@ -1399,7 +1405,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       return super.findClass(name);
     */
 
+    // server/2439
     name = name.replace('/', '.');
+    name = name.replace('\\', '.');
 
     ClassEntry entry = null;
 
@@ -1842,6 +1850,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     if (_priorityPackages != null) {
       String canonName = className.replace('/', '.');
+      canonName = canonName.replace('\\', '.');
 
       for (String priorityPackage : _priorityPackages) {
         if (canonName.startsWith(priorityPackage))
@@ -1853,6 +1862,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       return true;
 
     String canonName = className.replace('/', '.');
+    canonName = canonName.replace('\\', '.');
     String []pkgs = _parentPriorityPackages;
 
     for (int i = 0; pkgs != null && i < pkgs.length; i++) {

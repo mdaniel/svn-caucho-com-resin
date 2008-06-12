@@ -375,6 +375,7 @@ public abstract class Path {
    * Returns the url scheme
    */
   public abstract String getScheme();
+  
   /**
    * Returns the hostname
    */

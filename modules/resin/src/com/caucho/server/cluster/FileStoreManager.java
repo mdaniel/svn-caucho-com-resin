@@ -153,7 +153,7 @@ public class FileStoreManager extends StoreManager {
    */
   public void store(ClusterObject obj,
 		    TempOutputStream tempStream,
-		    byte []dataHash)
+		    byte []dataHash, byte []oldDataHash)
     throws Exception
   {
     if (dataHash == null)
@@ -163,7 +163,7 @@ public class FileStoreManager extends StoreManager {
     InputStream is = tempStream.openInputStreamNoFree();
     try {
       _backing.store(obj.getObjectId(), obj.getStoreId(),
-		     is, length, dataHash,
+		     is, length, dataHash, oldDataHash,
 		     obj.getExpireInterval(), 0, 0, 0);
 
       if (log.isLoggable(Level.FINE))

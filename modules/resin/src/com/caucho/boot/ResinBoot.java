@@ -86,6 +86,7 @@ public class ResinBoot {
       Vfs.initJNI();
 
       resinHome = Vfs.lookup(resinHome.getFullPath());
+      
       _args.setResinHome(resinHome);
     }
     
@@ -96,6 +97,8 @@ public class ResinBoot {
 
     // watchdog/0210
     // Vfs.setPwd(_rootDirectory);
+    
+    System.out.println("HOME: " + resinHome.getFullPath() + " " + resinHome.getURL() + " " + System.getProperty("resin.home"));
 
     if (! _args.getResinConf().canRead()) {
       throw new ConfigException(L().l("Resin/{0} can't open configuration file '{1}'",

@@ -137,6 +137,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       cauchoRes = (CauchoResponse) res;
 
     if (res.isCommitted() && method == null) {
+      System.out.println("RES: " + res);
       IllegalStateException exn;
       exn = new IllegalStateException("forward() not allowed after buffer has committed.");
 

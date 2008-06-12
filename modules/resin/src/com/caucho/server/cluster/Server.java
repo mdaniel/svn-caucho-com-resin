@@ -1666,8 +1666,6 @@ public class Server extends ProtocolDispatchServer
       if (! _lifecycle.toStopping())
         return;
 
-      super.stop();
-
       Alarm alarm = _alarm;
       _alarm = null;
 
@@ -1715,6 +1713,8 @@ public class Server extends ProtocolDispatchServer
       _lifecycle.toStop();
     } finally {
       thread.setContextClassLoader(oldLoader);
+      
+      super.stop();
     }
   }
 

@@ -13,6 +13,10 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>cluster: distributed session writeback in separate threads (#2368, rep by resinossi)</li>
+<li>cluster: distributed objects now check hash for optimistic locking</li>
+<li>servlet: allow forward from include (#2481, rep by Ilya Kasnacheev and Huitang Li)</li>
+<li>vfs: windows getURL not properly converting /foo to file:/foo (#2725, rep by Vinod Mehra)</li>
 <li>cache: setStatus(500) needs to kill caching</li>
 <li>cache: avoid caching blank pages (#2610, rep by Shane Cruz)</li>
 <li>hessian: added FooSerializerFactory to handle legacy objects with non-zero constructors (#2584, rep by Matt Johnson)</li>

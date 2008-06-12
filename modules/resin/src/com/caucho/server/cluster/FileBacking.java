@@ -90,7 +90,9 @@ public class FileBacking {
   
   private String _updateMetadataQuery;
   private String _updateMetadataVersionQuery;
-  private String _updateSaveQuery;
+  
+  private String _updateSaveLockQuery;
+  private String _updateSaveOverrideQuery;
   private String _updateSaveDataQuery;
   
   public FileBacking()
@@ -183,9 +185,15 @@ public class FileBacking {
 	 + " SET update_time=?,local_version=?"
 	 + " WHERE id=? AND data_hash = ?");
     
-    _updateSaveQuery = ("UPDATE " + _tableName
-			+ " SET data_hash=?,data=?,update_time=?,is_valid=1,is_dead=0,local_version=?"
-			+ " WHERE id=?");
+    _updateSaveLockQuery
+      = ("UPDATE " + _tableName
+	 + " SET data_hash=?,data=?,update_time=?,is_valid=1,is_dead=0,local_version=?"
+	 + " WHERE id=? AND data_hash=?");
+    
+    _updateSaveOverrideQuery
+      = ("UPDATE " + _tableName
+	 + " SET data_hash=?,data=?,update_time=?,is_valid=1,is_dead=0,local_version=?"
+	 + " WHERE id=?");
     
     try {
       _path.mkdirs();
@@ -579,37 +587,79 @@ public class FileBacking {
    */
   public void store(HashKey id, HashKey storeId,
 		    InputStream is, int length,
-		    byte []dataHash, long expireInterval,
+		    byte []dataHash, byte []oldDataHash,
+		    long expireInterval,
 		    int primary, int secondary, int tertiary)
   {
     ClusterConnection conn = null;
 
     try {
       conn = getConnection();
-      // Try to updateImpl first, and insert if fail.
+      
       // The binary stream can be reused because it won't actually be
       // read on a failure
 
-      if (storeUpdate(conn, id, is, length, dataHash)) {
-      }
-      else if (storeInsert(conn, id, storeId, is, length, dataHash,
-			   expireInterval, primary, secondary, tertiary)) {
-      }
-      else {
-	// XXX: For now, avoid this case since the self-updateImpl query doesn't
-	// check for any updateImpl count, i.e. it can't tell which updateImpl is
-	// the most recent.  Also, the input stream would need to objectModified
-	// to a tempStream to allow the re-write
+      if (oldDataHash != null) {
+	// If the old hash exists, then we should just be updating to
+	// a matching old-hash.
 	
-	/*
-	if (storeSelfUpdate(conn, uniqueId, is, length)) {
-	  // The second updateImpl is for the rare case where
-	  // two threads try to updateImpl the database simultaneously
+	// Try to update with lock first, then update, and insert if fail.
+
+	if (storeUpdateLock(conn, id, is, length, dataHash, oldDataHash)) {
+	  if (log.isLoggable(Level.FINE))
+	    log.fine(this + " save(update) " + id + " (length=" + length + ")");
+	  return;
+	}
+
+	log.warning(this + " store validation failed, possible lock/data"
+		    + " loss detected (id=" + id + ")");
+
+	if (storeUpdateOverride(conn, id, is, length, dataHash)) {
+	  if (log.isLoggable(Level.FINE)) {
+	    log.fine(this + " save(update-override) "
+		     + id + " (length=" + length + ")");
+	  }
+	  
+	  return;
+	}
+	else if (storeInsert(conn, id, storeId, is, length, dataHash,
+			     expireInterval, primary, secondary, tertiary)) {
+	  if (log.isLoggable(Level.FINE)) {
+	    log.fine(this + " save(insert-override) "
+		     + id + " (length=" + length + ")");
+	  }
+	  
+	  return;
 	}
 	else {
-	  log.fine(L.l("Can't objectStore session {0}", uniqueId));
+	  log.warning(this + " store update failed, probable data loss"
+		      + " for id=" + id);
 	}
-	*/
+      }
+      else {
+	// if the old-hash is null, then we're inserting or
+	// replacing an invalidated session
+	
+	if (storeUpdateOverride(conn, id, is, length, dataHash)) {
+	  if (log.isLoggable(Level.FINE)) {
+	    log.fine(this + " save(update-override) "
+		     + id + " (length=" + length + ")");
+	  }
+	  
+	  return;
+	}
+	else if (storeInsert(conn, id, storeId, is, length, dataHash,
+			expireInterval, primary, secondary, tertiary)) {
+	  if (log.isLoggable(Level.FINE)) {
+	    log.fine(this + " save(insert) "
+		     + id + " (length=" + length + ")");
+	  }
+	  return;
+	}
+	else {
+	  log.warning(this + " store insert failed, probable data loss"
+		      + " for id=" + id);
+	}
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -626,13 +676,53 @@ public class FileBacking {
    * @param id the object's unique id.
    * @param is the input stream to the serialized object
    * @param length the length object the serialized object
+   * @param oldHash the hash of the old contents (for optimistic locking)
+   * @param newHash the hash of the new contents
    */
-  private boolean storeUpdate(ClusterConnection conn, HashKey id,
-			      InputStream is, int length, byte []dataHash)
+  private boolean storeUpdateLock(ClusterConnection conn, HashKey id,
+				  InputStream is, int length,
+				  byte []newHash, byte []oldHash)
   {
     try {
-      PreparedStatement stmt = conn.prepareUpdateSave();
-      stmt.setBytes(1, dataHash);
+      PreparedStatement stmt = conn.prepareUpdateSaveLock();
+      stmt.setBytes(1, newHash);
+      stmt.setBinaryStream(2, is, length);
+
+      long now = Alarm.getCurrentTime();
+      stmt.setLong(3, now);
+      stmt.setInt(4, _version);
+      
+      stmt.setBytes(5, id.getHash());
+      stmt.setBytes(6, oldHash);
+
+      int count = stmt.executeUpdate();
+        
+      if (count > 0)
+	return true;
+    } catch (SQLException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    return false;
+  }
+  
+  /**
+   * Stores the cluster object on the local objectStore using an updateImpl query.
+   *
+   * @param conn the database connection
+   * @param id the object's unique id.
+   * @param is the input stream to the serialized object
+   * @param length the length object the serialized object
+   * @param oldHash the hash of the old contents (for optimistic locking)
+   * @param newHash the hash of the new contents
+   */
+  private boolean storeUpdateOverride(ClusterConnection conn, HashKey id,
+				      InputStream is, int length,
+				      byte []newHash)
+  {
+    try {
+      PreparedStatement stmt = conn.prepareUpdateSaveOverride();
+      stmt.setBytes(1, newHash);
       stmt.setBinaryStream(2, is, length);
 
       long now = Alarm.getCurrentTime();
@@ -643,12 +733,8 @@ public class FileBacking {
 
       int count = stmt.executeUpdate();
         
-      if (count > 0) {
-	if (log.isLoggable(Level.FINE)) 
-	  log.fine(this + " save(update) " + id + " length:" + length);
-	  
+      if (count > 0)
 	return true;
-      }
     } catch (SQLException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -686,14 +772,9 @@ public class FileBacking {
       stmt.setInt(10, _version);
 
       stmt.executeUpdate();
-        
-      if (log.isLoggable(Level.FINE))
-	log.fine(this + " save(insert) " + id + " length:" + length);
 
       return true;
     } catch (SQLException e) {
-      System.out.println(e);
-      
       log.log(Level.FINE, e.toString(), e);
     }
 
@@ -717,7 +798,9 @@ public class FileBacking {
     try {
       conn = getConnection();
 
-      PreparedStatement stmt = conn.prepareUpdateSave();
+      // XXX: locking?
+
+      PreparedStatement stmt = conn.prepareUpdateSaveOverride();
       stmt.setBytes(1, dataHash);
       stmt.setBinaryStream(2, is, length);
 
@@ -937,7 +1020,9 @@ public class FileBacking {
     
     private PreparedStatement _updateMetadataStatement;
     private PreparedStatement _updateMetadataVersionStatement;
-    private PreparedStatement _updateSaveStatement;
+    
+    private PreparedStatement _updateSaveLockStatement;
+    private PreparedStatement _updateSaveOverrideStatement;
 
     ClusterConnection(Connection conn)
     {
@@ -1049,13 +1134,24 @@ public class FileBacking {
       return _updateMetadataVersionStatement;
     }
 
-    PreparedStatement prepareUpdateSave()
+    PreparedStatement prepareUpdateSaveLock()
       throws SQLException
     {
-      if (_updateSaveStatement == null)
-	_updateSaveStatement = _conn.prepareStatement(_updateSaveQuery);
+      if (_updateSaveLockStatement == null)
+	_updateSaveLockStatement = _conn.prepareStatement(_updateSaveLockQuery);
 
-      return _updateSaveStatement;
+      return _updateSaveLockStatement;
+    }
+
+    PreparedStatement prepareUpdateSaveOverride()
+      throws SQLException
+    {
+      if (_updateSaveOverrideStatement == null) {
+	_updateSaveOverrideStatement
+	  = _conn.prepareStatement(_updateSaveOverrideQuery);
+      }
+
+      return _updateSaveOverrideStatement;
     }
 
     void close()

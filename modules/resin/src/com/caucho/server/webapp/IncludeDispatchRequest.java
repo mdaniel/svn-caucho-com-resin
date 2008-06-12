@@ -103,8 +103,8 @@ class IncludeDispatchRequest extends DispatchRequest {
 
     // The included file must ignore caching directives from the
     // original request
-    if (key.equalsIgnoreCase("If-Modified-Since") ||
-        key.equalsIgnoreCase("If-None-Match"))
+    if (key.equalsIgnoreCase("If-Modified-Since")
+	|| key.equalsIgnoreCase("If-None-Match"))
       return null;
     else {
       return super.getHeader(key);

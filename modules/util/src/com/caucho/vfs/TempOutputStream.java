@@ -151,6 +151,15 @@ public class TempOutputStream extends OutputStream
     return _head;
   }
 
+  /**
+   * clear without removing
+   */
+  public void clear()
+  {
+    _head = null;
+    _tail = null;
+  }
+
   public void writeToStream(OutputStream os)
     throws IOException
   {

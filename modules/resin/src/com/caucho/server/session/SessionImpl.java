@@ -999,9 +999,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 	  Object value = in.readObject();
 
 	  if (value != null) {
-	    synchronized (_values) {
-	      _values.put(key, value);
-	    }
+	    _values.put(key, value);
 	      
 	    if (value instanceof HttpSessionActivationListener) {
 	      HttpSessionActivationListener listener

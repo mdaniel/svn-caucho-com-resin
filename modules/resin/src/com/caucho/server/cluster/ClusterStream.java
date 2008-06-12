@@ -413,9 +413,17 @@ public class ClusterStream {
   public void writeBinary(int code, byte []value)
     throws IOException
   {
+    WriteStream os = _os;
+    
+    if (value == null) {
+      os.write(code);
+      os.write(0);
+      os.write(0);
+      return;
+    }
+    
     int len = value.length;
 
-    WriteStream os = _os;
     os.write(code);
     os.write(len >> 8);
     os.write(len);

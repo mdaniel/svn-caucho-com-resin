@@ -163,7 +163,7 @@ class BinaryColumn extends Column {
       int ch1 = block[offset++] & 0xff;
 
       int d1 = ch1 >> 4;
-      int d2 = ch1 >> 4;
+      int d2 = ch1 & 0xf;
 
       if (d1 < 10)
 	sb.append((char) ('0' + d1));
