@@ -800,17 +800,16 @@ indicating that the resource has moved.</p>
 <p>The regular expression in a regexp tag or attribute is a standard
 Java regular expression.</p>
 
-<p>To make the regexp case insensitive, you can use the (?i:...) syntax:</p>
+<p>To make the regexp case insensitive, you can use the <code>(?i:...)</code> syntax:</p>
 
 <example title="case-insensitive match">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
          xmlns:resin="http://caucho.com/ns/resin/core"&gt;
   &lt;rewrite-dispatch&gt;
-    &lt;forbidden regexp='(?:^/foo)'/&gt;
+    &lt;forbidden regexp='(?i:^/foo)'/&gt;
   &lt;/rewrite-dispatch&gt;
 &lt;/web-app&gt;
 </example>
-
 
 </defun>
 
