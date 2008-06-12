@@ -1324,6 +1324,40 @@ successful and unsuccessful matches are logged.
   </example>
 </s2>
 
+<s2 title="Make an alias for a web-app">
+  <p>
+  The desired behaviour is to make it so that a web-app will match more than
+  one url pattern.  For example, a web-app is deployed in
+  <code>webapps/physics</code> and available at
+  <code>http://hostname/physics/</code>, the desired behaviour is to allow a
+  request to <code>http://hostname/classroom/physics</code> to end up at the
+  <code>/physics</code> web-app.
+
+  </p>
+
+  <example title="Desired behaviour">
+    http://hostname/classroom/physics
+      forward => http://hostname/physics 
+
+    http://hostname/classroom/physics/anything
+      forward => http://hostname/physics/anything
+  </example>
+
+  <p>
+  The rewrite-dispatch tag is used at the &lt;host&gt; level.  If it was placed in a 
+  &lt;web-app&gt; then it would be too late to forward to a different web-app
+  because Resin would have already resolved the web-app.
+  </p>
+
+  <example title="Configuration">
+    &lt;host&gt;
+      &lt;rewrite-dispatch&gt;
+        &lt;forward regexp="^/classroom/physics" target="/physics"/&gt;
+      &lt;/rewrite-dispatch&gt;
+       ...
+  </example>
+</s2>
+
 <s2 title="Forward based on host name">
   <p>
   The desired behaviour is to internally forward requests based on the host name.
