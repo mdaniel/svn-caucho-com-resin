@@ -47,15 +47,36 @@
  * 
  */
 
-package com.caucho.hmpp
+package com.caucho.hmtp
 {
-  public interface QueryStream {
-    function sendQueryGet(id:Number, to:String, from:String, query:Object):void;
+  import flash.events.Event;
 
-    function sendQuerySet(id:Number, to:String, from:String, query:Object):void;
+  public class Packet extends Event {
+    public var _to:String;
+    public var _from:String;
 
-    function sendQueryError(id:Number, to:String, from:String, 
-                            query:Object, error:HmppError):void;
+    public function Packet(type:String, to:String, from:String):void
+    {
+      super(type);
+
+      _to = to;
+      _from = from;
+    }
+
+    public function get to():String
+    {
+      return _to;
+    }
+
+    public function get from():String
+    {
+      return _from;
+    }
+
+    public override function toString():String
+    {
+      return "Packet[to=" + _to + ",from=" + _from + "]";
+    }
   }
 }
 

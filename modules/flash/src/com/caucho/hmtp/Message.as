@@ -47,27 +47,19 @@
  * 
  */
 
-package com.caucho.hmtp.packet
+package com.caucho.hmtp
 {
-  public class QuerySet extends Packet {
-    public const QUERY_SET:String = "querySet";
+  public class Message extends Packet {
+    public const MESSAGE:String = "message";
 
-    public var _id:Number;
     public var _value:Object;
 
-    public function QuerySet(id:Number = 0, 
-                             to:String = null, from:String = null, 
-                             value:Object = null)
+    public function Message(to:String = "", from:String = "", 
+                            value:Object = null)
     {
-      super(QUERY_SET, to, from);
+      super(MESSAGE, to, from);
 
-      _id = id;
       _value = value;
-    }
-
-    public function get id():Number
-    {
-      return _id;
     }
 
     public function get value():Object
@@ -77,8 +69,7 @@ package com.caucho.hmtp.packet
 
     public override function toString():String
     {
-      return "QuerySet[to=" + _to + ",from=" + _from + 
-                     ",id=" + _id + ",value=" + _value + "]";
+      return "Message[to=" + _to + ",from=" + _from + ",value=" + _value + "]";
     }
   }
 }

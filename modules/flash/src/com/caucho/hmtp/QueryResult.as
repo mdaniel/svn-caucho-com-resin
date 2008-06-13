@@ -47,7 +47,7 @@
  * 
  */
 
-package com.caucho.hmpp.packet
+package com.caucho.hmtp
 {
   public class QueryResult extends Packet {
     public const QUERY_RESULT:String = "queryResult";
@@ -76,10 +76,8 @@ package com.caucho.hmpp.packet
 
     public override function toString():String
     {
-      return "QueryResult[id=" + _id + 
-                       ", to=" + _to + 
-                       ", from=" + _from + 
-                       " value=" + _value + "]";
+      return "QueryResult[to=" + _to + ",from=" + _from + 
+                        ",id=" + _id + ",value=" + _value + "]";
     }
   }
 }

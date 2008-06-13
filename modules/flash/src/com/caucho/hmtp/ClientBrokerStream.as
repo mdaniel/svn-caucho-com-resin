@@ -47,38 +47,87 @@
  * 
  */
 
-package com.caucho.hmtp.packet
+package com.caucho.hmtp
 {
-  public class QueryResult extends Packet {
-    public const QUERY_RESULT:String = "queryResult";
+  import flash.net.Socket;
 
-    public var _id:Number;
-    public var _value:Object;
+  import hessian.io.Hessian2StreamingInput;
+  import hessian.io.Hessian2StreamingOutput;
 
-    public function QueryResult(id:Number = 0, to:String = "", from:String = "",
-                                value:Object = null):void
+  import com.caucho.bam.*;
+
+  public class ClientBrokerStream implements BamStream {
+    private var _socket:Socket;
+    private var _input:Hessian2StreamingInput = new Hessian2StreamingInput();
+    private var _output:Hessian2StreamingOutput = new Hessian2StreamingOutput();
+
+    public function ClientBrokerStream(socket:Socket):void
     {
-      super(QUERY_RESULT, to, from);
+      _socket = socket;
 
-      _id = id;
-      _value = value;
+      _output.init(_socket);
     }
 
-    public function get id():Number
+    public function get input():Hessian2StreamingInput
     {
-      return _id;
+      return _input;
     }
 
-    public function get value():Object
+    public function sendMessage(to:String, from:String, value:Object):void
     {
-      return _value;
+      if (_output != null) {
+        _output.writeObject(new Message(to, from, value));
+      }
     }
 
-    public override function toString():String
+    public function sendMessageError(to:String, from:String, value:Object,
+                                     error:BamError):void
     {
-      return "QueryResult[to=" + _to + ",from=" + _from + 
-                        ",id=" + _id + ",value=" + _value + "]";
+      if (_output != null) {
+        _output.writeObject(new MessageError(to, from, value, error));
+      }
+    }
+
+    public function sendQueryGet(id:Number, 
+                                 to:String, from:String, 
+                                 query:Object):void
+    {
+      if (_output != null) {
+        _output.writeObject(new QueryGet(id, to, from, query));
+      }
+    }
+
+    public function sendQuerySet(id:Number, 
+                                 to:String, from:String, 
+                                 query:Object):void
+    {
+      if (_output != null) {
+        _output.writeObject(new QuerySet(id, to, from, query));
+      }
+    }
+
+    public function sendQueryResult(id:Number, 
+                                    to:String, from:String, 
+                                    value:Object):void
+    {
+      if (_output != null) {
+        _output.writeObject(new QueryResult(id, to, from, value));
+      }
+    }
+
+    public function sendQueryError(id:Number, 
+                                   to:String, from:String, 
+                                   value:Object, error:BamError):void
+    {
+      if (_output != null) {
+        _output.writeObject(new QueryError(id, to, from, value, error));
+      }
+    }
+
+    public function close():void
+    {
+      _socket.close();
+      _output = null;
     }
   }
 }
-

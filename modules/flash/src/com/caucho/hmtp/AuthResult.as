@@ -47,16 +47,20 @@
  * 
  */
 
-package com.caucho.hmtp.auth
+package com.caucho.hmtp
 {
-  import flash.events.Event;
-  import com.caucho.hmtp.client.HmtpClient;
+  public class AuthResult {
+    public var _jid:String;
 
-  public class LoginFailureEvent extends Event
-  {
-    public function LoginFailureEvent()
+    public function AuthResult(jid:String = ""):void
     {
-      super(HmtpClient.LOGIN);
+      _jid = jid;
+    }
+
+    public function get jid():String
+    {
+      return _jid;
     }
   }
 }
+

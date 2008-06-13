@@ -47,19 +47,40 @@
  * 
  */
 
-package com.caucho.hmpp.auth
+package com.caucho.hmtp
 {
-  public class AuthResult {
-    public var _jid:String;
+  import com.caucho.bam.*;
+  import com.caucho.hmtp.*;
 
-    public function AuthResult(jid:String = ""):void
+  public class MessageError extends Packet {
+    public const MESSAGE_ERROR:String = "messageError";
+
+    private var _value:Object;
+    private var _error:BamError;
+
+    public function MessageError(to:String, from:String, 
+                                 value:Object, error:BamError)
     {
-      _jid = jid;
+      super(MESSAGE_ERROR, to, from);
+
+      _value = value;
+      _error = error;
     }
 
-    public function get jid():String
+    public function get value():Object
     {
-      return _jid;
+      return _value;
+    }
+
+    public function get error():BamError
+    {
+      return _error;
+    }
+
+    public override function toString():String
+    {
+      return "MessageError[to=" + _to + ",from=" + _from + 
+                         ",value=" + _value + ",error=" + _error + "]";
     }
   }
 }

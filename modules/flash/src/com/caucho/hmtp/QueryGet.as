@@ -47,27 +47,22 @@
  * 
  */
 
-package com.caucho.hmpp.packet
+package com.caucho.hmtp
 {
-  import com.caucho.hmpp.*;
-
-  public class QueryError extends Packet {
-    public const QUERY_ERROR:String = "queryError";
+  public class QueryGet extends Packet {
+    public static const QUERY_GET:String = "queryGet";
 
     public var _id:Number;
     public var _value:Object;
-    public var _error:HmppError;
 
-    public function QueryError(id:Number = 0, 
-                               to:String = "", from:String = "", 
-                               value:Object = null, 
-                               error:HmppError = null):void
+    public function QueryGet(id:Number = 0, 
+                             to:String = null, from:String = null, 
+                             value:Object = null)
     {
-      super(QUERY_ERROR, to, from);
+      super(QUERY_GET, to, from);
 
       _id = id;
       _value = value;
-      _error = error;
     }
 
     public function get id():Number
@@ -80,9 +75,10 @@ package com.caucho.hmpp.packet
       return _value;
     }
 
-    public function get error():HmppError
+    public override function toString():String
     {
-      return _error;
+      return "QueryGet[to=" + _to + ",from=" + _from + 
+                     ",id=" + _id + ",value=" + _value + "]";
     }
   }
 }

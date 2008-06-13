@@ -47,34 +47,15 @@
  * 
  */
 
-package com.caucho.hmpp.packet
+package com.caucho.hmtp
 {
-  import com.caucho.hmpp.*;
+  import flash.events.Event;
 
-  public class MessageError extends Packet {
-    public const MESSAGE_ERROR:String = "messageError";
-
-    private var _value:Object;
-    private var _error:HmppError;
-
-    public function MessageError(to:String, from:String, 
-                                 value:Object, error:HmppError)
+  public class LoginSuccessEvent extends Event
+  {
+    public function LoginSuccessEvent()
     {
-      super(MESSAGE_ERROR, to, from);
-
-      _value = value;
-      _error = error;
-    }
-
-    public function get value():Object
-    {
-      return _value;
-    }
-
-    public function get error():HmppError
-    {
-      return _error;
+      super(HmtpClient.LOGIN);
     }
   }
 }
-

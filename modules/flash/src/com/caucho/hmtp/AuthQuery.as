@@ -47,7 +47,7 @@
  * 
  */
 
-package com.caucho.hmpp.auth
+package com.caucho.hmtp
 {
   public class AuthQuery {
     private var _uid:String;

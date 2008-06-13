@@ -47,7 +47,7 @@
  * 
  */
 
-package com.caucho.hmtp.client
+package com.caucho.hmtp
 {
   import flash.events.Event;
   import flash.events.EventDispatcher;
@@ -64,9 +64,7 @@ package com.caucho.hmtp.client
   import hessian.util.URL;
 
   import com.caucho.bam.*;
-  import com.caucho.bam.ping.*;
-  import com.caucho.hmtp.auth.*;
-  import com.caucho.hmtp.packet.*;
+  import com.caucho.xmpp.ping.*;
 
   public class HmtpClient extends EventDispatcher 
                           implements BamConnection 
@@ -408,17 +406,16 @@ package com.caucho.hmtp.client
 
     private function onLoginResult(to:String, from:String, value:Object):void
     {
-      var result:com.caucho.hmtp.auth.AuthResult
-        = com.caucho.hmtp.auth.AuthResult(value);
+      var result:AuthResult = AuthResult(value);
 
       this.jid = result.jid;
-      dispatchEvent(new com.caucho.hmtp.auth.LoginSuccessEvent());
+      dispatchEvent(new LoginSuccessEvent());
     }
 
     private function onLoginError(to:String, from:String,
                                   value:Object, error:BamError):void
     {
-      dispatchEvent(new com.caucho.hmtp.auth.LoginFailureEvent());
+      dispatchEvent(new LoginFailureEvent());
     }
   }
 }

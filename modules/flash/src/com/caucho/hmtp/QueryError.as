@@ -47,22 +47,28 @@
  * 
  */
 
-package com.caucho.hmtp.packet
+package com.caucho.hmtp
 {
-  public class QueryGet extends Packet {
-    public static const QUERY_GET:String = "queryGet";
+  import com.caucho.bam.*;
+  import com.caucho.hmtp.*;
+
+  public class QueryError extends Packet {
+    public const QUERY_ERROR:String = "queryError";
 
     public var _id:Number;
     public var _value:Object;
+    public var _error:BamError;
 
-    public function QueryGet(id:Number = 0, 
-                             to:String = null, from:String = null, 
-                             value:Object = null)
+    public function QueryError(id:Number = 0, 
+                               to:String = "", from:String = "", 
+                               value:Object = null, 
+                               error:BamError = null):void
     {
-      super(QUERY_GET, to, from);
+      super(QUERY_ERROR, to, from);
 
       _id = id;
       _value = value;
+      _error = error;
     }
 
     public function get id():Number
@@ -75,10 +81,15 @@ package com.caucho.hmtp.packet
       return _value;
     }
 
+    public function get error():BamError
+    {
+      return _error;
+    }
+
     public override function toString():String
     {
-      return "QueryGet[to=" + _to + ",from=" + _from + 
-                     ",id=" + _id + ",value=" + _value + "]";
+      return "QueryError[to=" + _to + ",from=" + _from + ",id=" + _id + 
+                       ",value=" + _value + ",error=" + _error + "]";
     }
   }
 }

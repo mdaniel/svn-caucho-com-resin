@@ -47,31 +47,15 @@
  * 
  */
 
-package com.caucho.hmpp.packet
+package com.caucho.hmtp
 {
-  public class Message extends Packet {
-    public const MESSAGE:String = "message";
+  import flash.events.Event;
 
-    public var _value:Object;
-
-    public function Message(to:String = "", 
-                            from:String = "", 
-                            value:Object = null)
+  public class LoginFailureEvent extends Event
+  {
+    public function LoginFailureEvent()
     {
-      super(MESSAGE, to, from);
-
-      _value = value;
-    }
-
-    public function get value():Object
-    {
-      return _value;
-    }
-
-    public override function toString():String
-    {
-      return "Message[to=" + _to + ", from=" + _from + " value=" + _value + "]";
+      super(HmtpClient.LOGIN);
     }
   }
 }
-

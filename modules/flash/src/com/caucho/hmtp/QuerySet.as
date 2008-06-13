@@ -47,16 +47,39 @@
  * 
  */
 
-package com.caucho.hmpp.auth
+package com.caucho.hmtp
 {
-  import flash.events.Event;
-  import com.caucho.hmpp.HmppClient;
+  public class QuerySet extends Packet {
+    public const QUERY_SET:String = "querySet";
 
-  public class LoginFailureEvent extends Event
-  {
-    public function LoginFailureEvent()
+    public var _id:Number;
+    public var _value:Object;
+
+    public function QuerySet(id:Number = 0, 
+                             to:String = null, from:String = null, 
+                             value:Object = null)
     {
-      super(HmppClient.LOGIN);
+      super(QUERY_SET, to, from);
+
+      _id = id;
+      _value = value;
+    }
+
+    public function get id():Number
+    {
+      return _id;
+    }
+
+    public function get value():Object
+    {
+      return _value;
+    }
+
+    public override function toString():String
+    {
+      return "QuerySet[to=" + _to + ",from=" + _from + 
+                     ",id=" + _id + ",value=" + _value + "]";
     }
   }
 }
+

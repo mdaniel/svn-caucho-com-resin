@@ -47,32 +47,12 @@
  * 
  */
 
-package com.caucho.hmpp
+package com.caucho.xmpp.ping
 {
-  import flash.events.Event;
-  import flash.events.ProgressEvent;
-  import flash.events.TimerEvent;
-  import flash.net.URLRequest;
-  import flash.net.URLStream;
-  import flash.net.Socket;
-  import flash.system.Security;
-  import flash.utils.describeType;
-  import flash.utils.Timer;
-
-  import hessian.io.Hessian2StreamingInput;
-  import hessian.util.URL;
-
-  import com.caucho.hmpp.packet.Packet;
-
-  import mx.core.Application;
-  import mx.utils.URLUtil;
-
-  public interface QueryCallback
-  {
-    function onQueryResult(to:String, from:String, 
-                           value:Object, handback:Object):void;
-
-    function onQueryError(to:String, from:String, 
-                          value:Object, error:HmppError, handback:Object):void;
+  public class PingQuery {
+    public function PingQuery():void
+    {
+    }
   }
 }
+
