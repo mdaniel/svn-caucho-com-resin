@@ -13,6 +13,13 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>quercus: "late static binding" implemented (static:: and get_called_class())</li>
+<li>quercus: extending SimpleXMLElement class fix</li>
+<li>quercus: self::$$var, self::$$var() fixes</li>
+<li>quercus: HessianPHP fixes (#2717, rep by M. Schmidt)</li>
+<li>quercus: When extending a built-in class (DOMXPath), parent constructor never gets called (#2362, rep by davidsklar)</li>
+<li>quercus: $HTTP_RAW_POST_DATA and "php://input" stream not implemented (#1770, rep by marlonj)</li>
+<li>quercus: Type casting fails to string fails (#2688, rep by rikus)</li>
 <li>cluster: distributed session writeback in separate threads (#2368, rep by resinossi)</li>
 <li>cluster: distributed objects now check hash for optimistic locking</li>
 <li>servlet: allow forward from include (#2481, rep by Ilya Kasnacheev and Huitang Li)</li>

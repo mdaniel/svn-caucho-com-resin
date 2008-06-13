@@ -36,12 +36,13 @@ init parameter is <var>Hello World</var>.</p>
 
 <example title="WEB-INF/web.xml">
 &lt;web-app&gt;
-  &lt;servlet-mapping url-pattern='/hello'
-                   servlet-name='hello-world'/&gt;
-
   &lt;servlet servlet-name='hello-world'
            servlet-class='test.HelloWorld'&gt;
     &lt;init-param greeting='Hello, World'/&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping url-pattern='/hello'
+                   servlet-name='hello-world'/&gt;
 &lt;/web-app&gt;
 </example>
 
