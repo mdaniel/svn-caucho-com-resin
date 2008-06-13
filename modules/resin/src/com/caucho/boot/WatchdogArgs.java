@@ -48,7 +48,9 @@ class WatchdogArgs
 
     _argv = fillArgv(argv);
 
-    _resinConf = _resinHome.lookup("conf/resin.conf");
+    _resinConf = _resinHome.lookup("conf/resin.xml");
+    if (! _resinConf.canRead())
+      _resinConf = _resinHome.lookup("conf/resin.conf");
 
     parseCommandLine(argv);
   }

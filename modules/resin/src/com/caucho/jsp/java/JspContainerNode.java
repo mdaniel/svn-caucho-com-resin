@@ -484,6 +484,22 @@ public abstract class JspContainerNode extends JspNode {
   }
 
   /**
+   * generates data for tag state children.
+   */
+  public void generateTagStateChildren(JspJavaWriter out)
+    throws Exception
+  {
+    if (_children == null)
+      return;
+
+    for (int i = 0; i < _children.size(); i++) {
+      JspNode child = _children.get(i);
+
+      child.generateTagState(out);
+    }
+  }
+
+  /**
    * Generates the code for the children.
    *
    * @param out the output writer for the generated java.

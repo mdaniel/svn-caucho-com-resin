@@ -394,7 +394,7 @@ public class XmppRequest implements TcpServerRequest {
       
     _os.print("<stream:features>");
     _os.print("<bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/>");
-    //_os.print("<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>");
+    _os.print("<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>");
     _os.print("</stream:features>");
     _os.flush();
 

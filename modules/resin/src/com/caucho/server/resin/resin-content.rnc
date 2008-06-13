@@ -55,6 +55,9 @@ r_cluster-Content =
   & (attribute connection-error-page { string }
      | element connection-error-page { string })?
 
+  & (attribute development-mode-error-page { r_boolean-Type }
+     | element development-mode-error-page { r_boolean-Type })?
+
   & (attribute dynamic-server-enable { r_boolean-Type }
      | element dynamic-server-enable { r_boolean-Type })?
 

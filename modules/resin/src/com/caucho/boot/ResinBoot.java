@@ -49,7 +49,7 @@ import javax.management.*;
 
 /**
  * ResinBoot is the main bootstrap class for Resin.  It parses the
- * resin.conf and looks for the &lt;server> block matching the -server
+ * resin.xml and looks for the &lt;server> block matching the -server
  * argument.
  *
  * <h3>Start Modes:</h3>
@@ -98,8 +98,6 @@ public class ResinBoot {
     // watchdog/0210
     // Vfs.setPwd(_rootDirectory);
     
-    System.out.println("HOME: " + resinHome.getFullPath() + " " + resinHome.getURL() + " " + System.getProperty("resin.home"));
-
     if (! _args.getResinConf().canRead()) {
       throw new ConfigException(L().l("Resin/{0} can't open configuration file '{1}'",
                                       Version.VERSION,
@@ -289,8 +287,8 @@ public class ResinBoot {
    * The main start of the web server.
    *
    * <pre>
-   * -conf resin.conf  : alternate configuration file
-   * -server web-a     : &lt;server> to start
+   * -conf resin.xml  : alternate configuration file
+   * -server web-a    : &lt;server> to start
    * <pre>
    */
 

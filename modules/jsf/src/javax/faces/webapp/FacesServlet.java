@@ -145,7 +145,9 @@ public final class FacesServlet implements Servlet
       ResourceHandler resourceHandler
         = context.getApplication().getResourceHandler();
 
-      if (resourceHandler.isResourceRequest(context)) {
+      // null in case of backwards compat
+      if (resourceHandler != null
+	  && resourceHandler.isResourceRequest(context)) {
         resourceHandler.handleResourceRequest(context);
       }
       else {

@@ -41,6 +41,7 @@ import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.util.CauchoSystem;
+import com.caucho.server.resin.Resin;
 import com.caucho.util.*;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.Encoding;
@@ -147,6 +148,21 @@ public class ErrorPageManager {
   public void setWebAppContainer(WebAppContainer appContainer)
   {
     _appContainer = appContainer;
+  }
+
+  /**
+   * Returns true if we should return a development-friendly error page.
+   */
+  protected boolean isDevelopmentModeErrorPage()
+  {
+    if (_app != null && _app.getServer() != null)
+      return _app.getServer().isDevelopmentModeErrorPage();
+    else if (Resin.getCurrent() != null
+	     && Resin.getCurrent().getServer() != null) {
+      return Resin.getCurrent().getServer().isDevelopmentModeErrorPage();
+    }
+    else
+      return true;
   }
   
   /**
@@ -386,78 +402,99 @@ public class ErrorPageManager {
 
     PrintWriter out = response.getWriter();
 
-    out.println("<html>");
-    if (! response.isCommitted())
-      out.println("<head><title>" + escapeHtml(title) + "</title></head>");
-    out.println("<body>");
-    out.println("<h1>" + escapeHtml(title) + "</h1>");
+    if (isDevelopmentModeErrorPage()) {
+      out.println("<html>");
+      if (! response.isCommitted())
+	out.println("<head><title>" + escapeHtml(title) + "</title></head>");
+      out.println("<body>");
+      out.println("<h1>" + escapeHtml(title) + "</h1>");
 
-    out.println("<code><pre>");
+      out.println("<code><pre>");
     
-    /*
-    if (app != null && app.getServer().isClosed()) {
-      pw.println("Server is temporarily unavailable");
-      doStackTrace = false;
-    }
-    else
-    */
+      /*
+	if (app != null && app.getServer().isClosed()) {
+	pw.println("Server is temporarily unavailable");
+	doStackTrace = false;
+	}
+	else
+      */
     
-    if (log.isLoggable(Level.FINE) || ! Alarm.isTest())
-      doStackTrace = true;
+      if (log.isLoggable(Level.FINE) || ! Alarm.isTest())
+	doStackTrace = true;
 
-    if (doStackTrace) {
-      out.println("<script language='javascript' type='text/javascript'>");
-      out.println("function show() { document.getElementById('trace').style.display = ''; }");
-      out.println("</script>");
-      out.print("<a style=\"text-decoration\" href=\"javascript:show();\">[show]</a> ");
-    }
-    
-    if (compileException instanceof DisplayableException) {
-      DisplayableException dispExn = (DisplayableException) compileException;
-
-      dispExn.print(out);
-    }
-    else if (compileException != null)
-      out.println(escapeHtml(compileException.getMessage()));
-    else
-      out.println(escapeHtml(rootExn.toString()));
-
-    if (doStackTrace) {
-      out.println("<span id=\"trace\" style=\"display:none\">");
-      printStackTrace(out, lineMessage, e, rootExn, lineMap);
-      out.println("</span>");
-    }
-    
-    /*
-     *if (doStackTrace || log.isLoggable(Level.FINE)) {
-        printStackTrace(out, lineMessage, e, rootExn, lineMap);
+      if (doStackTrace) {
+	out.println("<script language='javascript' type='text/javascript'>");
+	out.println("function show() { document.getElementById('trace').style.display = ''; }");
+	out.println("</script>");
+	out.print("<a style=\"text-decoration\" href=\"javascript:show();\">[show]</a> ");
       }
-    */
-
-    out.println("</pre></code>");
-
-    String version = null;
-    if (_app == null) {
-    }
-    else if (_app.getServer() != null
-	     && _app.getServer().getServerHeader() != null) {
-      version = _app.getServer().getServerHeader();
-    }
-    else if (CauchoSystem.isTesting()) {
-    }
-    else
-      version = com.caucho.Version.FULL_VERSION;
     
-    if (version != null) {
-      out.println("<p /><hr />");
-      out.println("<small>");
+      if (compileException instanceof DisplayableException) {
+	DisplayableException dispExn = (DisplayableException) compileException;
+
+	dispExn.print(out);
+      }
+      else if (compileException != null)
+	out.println(escapeHtml(compileException.getMessage()));
+      else
+	out.println(escapeHtml(rootExn.toString()));
+
+      if (doStackTrace) {
+	out.println("<span id=\"trace\" style=\"display:none\">");
+	printStackTrace(out, lineMessage, e, rootExn, lineMap);
+	out.println("</span>");
+      }
+    
+      /*
+       *if (doStackTrace || log.isLoggable(Level.FINE)) {
+       printStackTrace(out, lineMessage, e, rootExn, lineMap);
+       }
+      */
+
+      out.println("</pre></code>");
+
+      String version = null;
+      if (_app == null) {
+      }
+      else if (_app.getServer() != null
+	       && _app.getServer().getServerHeader() != null) {
+	version = _app.getServer().getServerHeader();
+      }
+      else if (CauchoSystem.isTesting()) {
+      }
+      else
+	version = com.caucho.Version.FULL_VERSION;
+    
+      if (version != null) {
+	out.println("<p /><hr />");
+	out.println("<small>");
 	
-      out.println(version);
+	out.println(version);
 	  
-      out.println("</small>");
-    }
+	out.println("</small>");
+      }
       
-    out.println("</body></html>");
+      out.println("</body></html>");
+    }
+    else { // non-development mode
+      out.println("<html>");
+      out.println("<title>Server Error</title>");
+      out.println("<body>");
+      out.println("<h1>Server Error</h1>");
+      out.println("<p>The server is temporarily unavailable due to an");
+      out.println("internal error.  Please notify the system administrator");
+      out.println("of this problem.</p>");
+      
+      out.println("<pre><code>");
+      out.println("Date: " + new QDate().formatISO8601(Alarm.getCurrentTime()));
+      if (Resin.getCurrent() != null)
+	out.println("Server: '" + Resin.getCurrent().getServerId() + "'");
+      
+      out.println("</code></pre>");
+      
+      out.println("</html>");
+      out.println("</body></html>");
+    }
 
     String userAgent = request.getHeader("User-Agent");
       

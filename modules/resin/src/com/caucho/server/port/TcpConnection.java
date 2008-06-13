@@ -609,12 +609,12 @@ public class TcpConnection extends Connection
     if (_port.getSelectManager() != null) {
       if (_port.getSelectManager().keepalive(this)) {
         if (log.isLoggable(Level.FINE))
-          log.fine(dbgId() + "keepalive (select)");
+          log.fine(dbgId() + " keepalive (select)");
 
 	return RequestState.THREAD_DETACHED;
       }
       else {
- 	log.warning(dbgId() + "failed keepalive (select)");
+ 	log.warning(dbgId() + " failed keepalive (select)");
 
 	_state = _state.toActive();
         port.keepaliveEnd(this);
@@ -625,7 +625,7 @@ public class TcpConnection extends Connection
     }
     else {
       if (log.isLoggable(Level.FINE))
-        log.fine(dbgId() + "keepalive (thread)");
+        log.fine(dbgId() + " keepalive (thread)");
       
       if (getReadStream().waitForRead()) {
         port.keepaliveEnd(this);
@@ -912,7 +912,6 @@ public class TcpConnection extends Connection
     {
       return (this == REQUEST_KEEPALIVE
               || this == COMET
-              || this == DUPLEX
               || this == DUPLEX_KEEPALIVE);
     }
     
@@ -1085,8 +1084,11 @@ public class TcpConnection extends Connection
       String oldThreadName = thread.getName();
 		   
       thread.setName(_id);
-    
-      _port.keepaliveEnd(TcpConnection.this);
+
+      if (_state.isKeepalive()) {
+	_port.keepaliveEnd(TcpConnection.this);
+      }
+
       _port.threadBegin(TcpConnection.this);
 
       RequestState result = RequestState.EXIT;
@@ -1128,8 +1130,11 @@ public class TcpConnection extends Connection
       String oldThreadName = thread.getName();
 		   
       thread.setName(_id);
-    
-      _port.keepaliveEnd(TcpConnection.this);
+
+      if (_state.isKeepalive()) {
+	_port.keepaliveEnd(TcpConnection.this);
+      }
+      
       _port.threadBegin(TcpConnection.this);
       
       boolean isValid = false;

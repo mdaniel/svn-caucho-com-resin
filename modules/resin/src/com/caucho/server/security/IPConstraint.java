@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -221,7 +222,7 @@ public class IPConstraint extends AbstractConstraint {
     throws ConfigException
   {
     if (_allowNetworkList == null && _denyNetworkList == null)
-      throw new ConfigException(L.l("either `{0}' or `{1}' or both are expected", "<allow>", "<deny>"));
+      throw new ConfigException(L.l("<ip-constraint> either '<allow>' or '<deny>' or both are expected"));
 
     if (_allowNetworkList != null)
       _allowNetworkList.trimToSize();

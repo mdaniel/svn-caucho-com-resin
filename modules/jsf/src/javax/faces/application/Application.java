@@ -210,21 +210,25 @@ public abstract class Application
   /**
    * @since 2.0
    */
-  public ResourceHandler getResourceHandler(){
+  public ResourceHandler getResourceHandler()
+  {
+    // can't throw exception for backwards compat
+    return null;
+  }
+
+  /**
+   * @since 2.0
+   */
+  public void setResourceHandler(ResourceHandler resourceHandler)
+  {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
    * @since 2.0
    */
-  public void setResourceHandler(ResourceHandler resourceHandler){
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * @since 2.0
-   */
-  public ProjectStage getProjectStage() {
+  public ProjectStage getProjectStage()
+  {
     throw new UnsupportedOperationException(getClass().getName());
   }
 

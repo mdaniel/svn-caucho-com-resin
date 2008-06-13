@@ -75,6 +75,8 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   private String _var;
   
   private String _servletName;
+  private String _servletNameDefault;
+  
   private String _servletClassName;
   private Class _servletClass;
   private String _jspFile;
@@ -141,6 +143,22 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   public String getServletName()
   {
     return _servletName;
+  }
+
+  /**
+   * Sets the servlet name default when not specified
+   */
+  public void setServletNameDefault(String name)
+  {
+    _servletNameDefault = name;
+  }
+
+  /**
+   * Gets the servlet name default.
+   */
+  public String getServletNameDefault()
+  {
+    return _servletNameDefault;
   }
 
   /**

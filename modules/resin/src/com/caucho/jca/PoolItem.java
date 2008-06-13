@@ -540,15 +540,9 @@ class PoolItem implements ConnectionEventListener, XAResource {
   {
     if (_isLocalTransaction || _xid != null)
       throw new IllegalStateException(L.l("attempted to start local transaction while transaction is in progress."));
-    
-    if (_localTransaction != null) {
-      try {
-	_localTransaction.begin();
-	_isLocalTransaction = true;
-      } catch (ResourceException e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-    }
+
+    // server/30c4, #2627
+    _isLocalTransaction = true;
   }
   
   /**
@@ -560,15 +554,9 @@ class PoolItem implements ConnectionEventListener, XAResource {
       throw new IllegalStateException(L.l("attempted to commit() local transaction from an active XA transaction."));
     else if (! _isLocalTransaction)
       throw new IllegalStateException(L.l("attempted to commit() with no active local transaction."));
-    
-    if (_localTransaction != null && _isLocalTransaction) {
-      try {
-	_isLocalTransaction = false;
-	_localTransaction.commit();
-      } catch (ResourceException e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-    }
+
+    // #2627, server/30c4
+    _isLocalTransaction = false;
   }
   
   /**
@@ -580,15 +568,9 @@ class PoolItem implements ConnectionEventListener, XAResource {
       throw new IllegalStateException(L.l("attempted to rollback() local transaction from an active XA transaction."));
     else if (! _isLocalTransaction)
       throw new IllegalStateException(L.l("attempted to rollback() with no active local transaction."));
-    
-    if (_localTransaction != null) {
-      try {
-	_isLocalTransaction = false;
-	_localTransaction.rollback();
-      } catch (ResourceException e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-    }
+
+    // #2627, server/30c4
+    _isLocalTransaction = false;
   }
   
   /**

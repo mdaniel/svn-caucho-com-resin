@@ -93,7 +93,7 @@ import javax.webbeans.Standard;
 
 /**
  * The Resin class represents the top-level container for Resin.
- * It exactly matches the &lt;resin> tag in the resin.conf
+ * It exactly matches the &lt;resin> tag in the resin.xml
  */
 public class Resin implements EnvironmentBean, SchemaBean
 {
@@ -787,7 +787,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	clusterServer = findClusterServer(_serverId);
 
 	if (clusterServer != null)
-	  throw new ConfigException(L().l("dynamic-server '{0}' must not have a static configuration configured in the resin.conf.",
+	  throw new ConfigException(L().l("dynamic-server '{0}' must not have a static configuration configured in the resin.xml.",
 					  _serverId));
 
 	Cluster cluster = findCluster(_dynamicServer.getCluster());
@@ -827,7 +827,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       /*
 	if (! hasListeningPort()) {
-	log().warning(L().l("-server \"{0}\" has no matching http or srun ports.  Check the resin.conf and -server values.",
+	log().warning(L().l("-server \"{0}\" has no matching http or srun ports.  Check the resin.xml and -server values.",
 	_serverId));
 	}
       */
@@ -1221,8 +1221,14 @@ public class Resin implements EnvironmentBean, SchemaBean
       resinConf = pwd.lookup(_configFile);
     }
 
-    if (_configFile == null)
-      _configFile = "conf/resin.conf";
+    if (_configFile == null) {
+      
+      if (pwd.lookup("conf/resin.xml").canRead())
+	_configFile = "conf/resin.xml";
+      else { // backward compat
+	_configFile = "conf/resin.conf";
+      }
+    }
 
     if (resinConf == null || !resinConf.exists()) {
       if (log().isLoggable(Level.FINER))
@@ -1357,21 +1363,6 @@ public class Resin implements EnvironmentBean, SchemaBean
         // second memory check
         memoryTest = new Integer(0);
 
-	long alarmTime = Alarm.getCurrentTime();
-	long systemTime = System.currentTimeMillis();
-
-	long diff = alarmTime - systemTime;
-	if (diff < 0)
-	  diff = -diff;
-
-	// The time difference needs to be fairly large because
-	// GC might take a good deal of time.
-	if (10 * 60000L < diff) {
-	  log().severe(L().l("Restarting due to frozen Resin timer manager thread (Alarm).  This error generally indicates a JVM freeze, not an application deadlock."));
-
-	  return;
-	}
-
 	if (_waitIn != null) {
           int len;
           if ((len = _waitIn.read()) >= 0) {
@@ -1455,8 +1446,8 @@ public class Resin implements EnvironmentBean, SchemaBean
    * The main start of the web server.
    *
    * <pre>
-   * -conf resin.conf   : alternate configuration file
-   * -port port         : set the server's portt
+   * -conf resin.xml   : alternate configuration file
+   * -port port        : set the server's portt
    * <pre>
    */
   public static void main(String []argv)
@@ -1682,7 +1673,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     public Path getConf()
     {
       if (Alarm.isTest())
-	return Vfs.lookup("file:/home/resin/conf/resin.conf");
+	return Vfs.lookup("file:/home/resin/conf/resin.xml");
       else
 	return getResinConf();
     }

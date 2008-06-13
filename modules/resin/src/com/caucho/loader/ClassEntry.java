@@ -32,6 +32,7 @@ package com.caucho.loader;
 import com.caucho.log.Log;
 import com.caucho.make.DependencyContainer;
 import com.caucho.util.ByteBuffer;
+import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Dependency;
@@ -50,7 +51,9 @@ import java.util.logging.Logger;
  * Describes a cached loaded class entry.
  */
 public class ClassEntry implements Dependency {
-  private static final Logger log = Log.open(ClassEntry.class);
+  private static final L10N L = new L10N(ClassEntry.class);
+  private static final Logger log
+    = Logger.getLogger(ClassEntry.class.getName());
   
   private static boolean _hasJNIReload;
   private static boolean _hasAnnotations;
@@ -388,16 +391,33 @@ public class ClassEntry implements Dependency {
       Path classPath = getClassPath();
     
       buffer.clear();
-      long length = classPath.getLength();
-      if (length < 0)
-	throw new IOException("missing class: " + classPath);
-      ReadStream is = classPath.openRead();
-      try {
-	buffer.setLength((int) length);
-	if (is.readAll(buffer.getBuffer(), 0, (int) length) != length)
-	  throw new IOException("class file length mismatch");
-      } finally {
-	is.close();
+
+      int retry = 3;
+      for (int i = 0; i < retry; i++) {
+	long length = classPath.getLength();
+	long lastModified = classPath.getLastModified();
+      
+	if (length < 0)
+	  throw new IOException("missing class: " + classPath);
+      
+	ReadStream is = classPath.openRead();
+      
+	try {
+	  buffer.setLength((int) length);
+
+	  int results = is.readAll(buffer.getBuffer(), 0, (int) length);
+
+	  if (results == length
+	      && length == classPath.getLength()
+	      && lastModified == classPath.getLastModified()) {
+	    return;
+	  }
+	} finally {
+	  is.close();
+	}
+	
+	log.warning(L.l("{0}: class file length mismatch expected={1}",
+			this, length));
       }
     }
   }

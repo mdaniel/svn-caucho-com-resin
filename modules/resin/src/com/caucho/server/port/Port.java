@@ -1333,6 +1333,7 @@ public class Port
         _keepaliveCount = 0;
 
         log.warning(conn + " internal error: negative keepalive count " + count);
+	Thread.dumpStack();
       }
     }
   }

@@ -119,6 +119,8 @@ public class Server extends ProtocolDispatchServer
 
   private long _waitForActiveTime = 10000L;
 
+  private boolean _isDevelopmentModeErrorPage;
+
   // <server> configuration compat
   private int _acceptListenBacklog = 100;
   
@@ -331,6 +333,22 @@ public class Server extends ProtocolDispatchServer
   public int getConnectionMax()
   {
     return _connectionMax;
+  }
+
+  /**
+   * Development mode error pages.
+   */
+  public boolean isDevelopmentModeErrorPage()
+  {
+    return _isDevelopmentModeErrorPage;
+  }
+
+  /**
+   * Development mode error pages.
+   */
+  public void setDevelopmentModeErrorPage(boolean isEnable)
+  {
+    _isDevelopmentModeErrorPage = isEnable;
   }
 
   /**

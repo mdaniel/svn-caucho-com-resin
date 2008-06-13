@@ -385,6 +385,11 @@ public class WbComponentConfig {
     return _comp.get();
   }
 
+  public Object createObjectNoInit()
+  {
+    return _comp.createNoInit();
+  }
+
   private void introspect()
   {
     if (_scope == null) {

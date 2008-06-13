@@ -908,8 +908,8 @@ public class JavaJspGenerator extends JspGenerator {
     if (isSession) {
       out.println("javax.servlet.http.HttpSession session = request.getSession(true);");
     }
+    
     out.println("com.caucho.server.webapp.WebApp _jsp_application = _caucho_getApplication();");
-    out.println("javax.servlet.ServletContext application = _jsp_application;");
 
     out.print("com.caucho.jsp.PageContextImpl pageContext = com.caucho.jsp.QJspFactory.allocatePageContext(");
     out.print("this, _jsp_application, request, response, ");
@@ -930,6 +930,47 @@ public class JavaJspGenerator extends JspGenerator {
     out.print(", ");
     out.print(_parseState.isPrintNullAsBlank());
     out.println(");");
+
+    out.println();
+    out.println("TagState _jsp_state = new TagState();");
+    
+    out.println();
+    out.println("try {");
+    out.pushDepth();
+
+    out.println("_jspService(request, response, pageContext, _jsp_application, session, _jsp_state);");
+
+    out.popDepth();
+    out.println("} catch (java.lang.Throwable _jsp_e) {");
+    out.println("  pageContext.handlePageException(_jsp_e);");
+    out.println("} finally {");
+    out.pushDepth();
+
+    out.println("_jsp_state.release();");
+    
+    out.println("com.caucho.jsp.QJspFactory.freePageContext(pageContext);");
+    
+    // close finally
+    out.popDepth();
+    out.println("}");
+    out.popDepth();
+    out.println("}");
+
+    // impl
+    
+    out.println("");
+    out.println("private void");
+    out.println("_jspService(javax.servlet.http.HttpServletRequest request,");
+    out.println("            javax.servlet.http.HttpServletResponse response,");
+    out.println("            com.caucho.jsp.PageContextImpl pageContext,");
+    out.println("            javax.servlet.ServletContext application,");
+    out.println("            javax.servlet.http.HttpSession session,");
+    out.println("            TagState _jsp_state)");
+    out.println("  throws Throwable");
+
+    out.println("{");
+    out.pushDepth();
+
     out.println("javax.servlet.jsp.JspWriter out = pageContext.getOut();");
     out.println("final javax.el.ELContext _jsp_env = pageContext.getELContext();");
     out.println("javax.servlet.ServletConfig config = getServletConfig();");
@@ -939,22 +980,10 @@ public class JavaJspGenerator extends JspGenerator {
     }
 
     generateContentType(out);
-
-    /*
-    for (int i = 0; i < _fragmentList.size(); i++) {
-      JspNode node = _fragmentList.get(i);
-
-      if (node.isStatic())
-	out.println("com.caucho.jsp.StaticJspFragmentSupport _jsp_frag_" + i + " = null;");
-      else
-	out.println("_CauchoFragment _jsp_frag_" + i + " = null;");
-    }
-    */
     
     _rootNode.generatePrologue(out);
 
-    out.println("try {");
-    out.pushDepth();
+    out.println();
   }
 
   /**
@@ -1158,39 +1187,6 @@ public class JavaJspGenerator extends JspGenerator {
   protected void generatePageFooter(JspJavaWriter out) throws IOException
   {
     out.popDepth();
-    out.println("} catch (java.lang.Throwable _jsp_e) {");
-    out.println("  pageContext.handlePageException(_jsp_e);");
-    out.println("} finally {");
-    out.pushDepth();
-
-    for (int i = 0; i < _topTag.size(); i++) {
-      TagInstance tag = _topTag.get(i);
-
-      if (tag.getTagClass() == null) {
-      }
-      else if (Tag.class.isAssignableFrom(tag.getTagClass())) {
-        out.println("if (" + tag.getId() + " != null)");
-        out.println("  " + tag.getId() + ".release();");
-      }
-    }
-    
-    if (_hasReleaseTag) {
-      out.popDepth();
-      out.println("} finally {");
-      out.pushDepth();
-    }
-    
-    out.println("com.caucho.jsp.QJspFactory.freePageContext(pageContext);");
-
-    if (_hasReleaseTag) {
-      out.popDepth();
-      out.println("}");
-    }
-    
-    // close finally
-    out.popDepth();
-    out.println("}");
-    out.popDepth();
     out.println("}");
   }
 
@@ -1206,6 +1202,8 @@ public class JavaJspGenerator extends JspGenerator {
     generateFragments(out);
     
     generateDepends(out);
+    
+    generateTags(out);
 
     generateExprs(out);
     generateXPath(out);
@@ -1460,6 +1458,40 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("}");
     out.popDepth();
     out.println("}");
+  }
+
+  /**
+   * out.Prints the fragments
+   */
+  private void generateTags(JspJavaWriter out) throws Exception
+  {
+    out.println();
+    out.println("final static class TagState {");
+    out.pushDepth();
+
+    _rootNode.generateTagState(out);
+
+    out.println();
+    out.println("void release()");
+    out.println("{");
+    out.pushDepth();
+
+    for (int i = 0; i < _topTag.size(); i++) {
+      TagInstance tag = _topTag.get(i);
+
+      if (tag.getTagClass() == null) {
+      }
+      else if (Tag.class.isAssignableFrom(tag.getTagClass())) {
+        out.println("if (" + tag.getId() + " != null)");
+        out.println("  " + tag.getId() + ".release();");
+      }
+    }
+
+    out.popDepth();
+    out.println("}"); // release
+
+    out.popDepth();
+    out.println("}"); // TagState
   }
 
   /**

@@ -386,6 +386,16 @@ element connection-error-page {
 
 </defun>
 
+<defun title="&lt;development-mode-error-page>" version="Resin 3.2.0">
+<parents>cluster</parents>
+
+<p>&lt;development-mode-error-page> enables browser error reporting
+with extra information.  Because it can expose internal data, it is not
+generally recommended in production systems.  (The information is generally
+coped to the log.</p>
+
+</defun>
+
 <defun title="&lt;ear-default>" version="Resin 3.1">
 <parents>cluster</parents>
 

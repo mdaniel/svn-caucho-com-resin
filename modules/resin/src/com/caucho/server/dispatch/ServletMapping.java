@@ -73,8 +73,8 @@ public class ServletMapping extends ServletConfigImpl {
     _mappingList.add(new Mapping(pattern, null));
 
     // server/13f4
-    if (getServletName() == null)
-      setServletName(pattern);
+    if (getServletNameDefault() == null)
+      setServletNameDefault(pattern);
   }
 
   /**
@@ -129,8 +129,9 @@ public class ServletMapping extends ServletConfigImpl {
 	  mapper.getServletManager().addServlet(this);
       }
 
-      if (urlPattern != null)
+      if (urlPattern != null) {
 	mapper.addUrlMapping(urlPattern, getServletName(), this);
+      }
       else
 	mapper.addUrlRegexp(urlRegexp, this);
     }

@@ -157,6 +157,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected boolean _forbidForward;
   protected boolean _hasError;
 
+  private boolean _isCacheHit;
+
   private final TempBuffer _tempBuffer = TempBuffer.allocate();
 
   protected AbstractHttpResponse()
@@ -335,6 +337,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     _allowCache = true;
     _isNoCache = false;
     _isTopCache = false;
+    _isCacheHit = false;
 
     _sessionId = null;
 
@@ -362,6 +365,22 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected final boolean isHead()
   {
     return _originalResponseStream.isHead();
+  }
+
+  /**
+   * Set true for a cache hit.
+   */
+  public void setCacheHit(boolean isHit)
+  {
+    _isCacheHit = isHit;
+  }
+
+  /**
+   * Set true for a cache hit.
+   */
+  public boolean isCacheHit()
+  {
+    return _isCacheHit;
   }
 
   /**
@@ -1930,9 +1949,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       _isClosed = false;
 
       /* XXX: complications with filters */
-      if (_cacheInvocation != null &&
-          _cacheInvocation.fillFromCache((CauchoRequest) _originalRequest,
-                                         this, _matchCacheEntry, isTop)) {
+      if (_cacheInvocation != null
+	  && _cacheInvocation.fillFromCache((CauchoRequest) _originalRequest,
+					    this, _matchCacheEntry, isTop)) {
         _matchCacheEntry.updateExpiresDate();
         _cacheInvocation = null;
         _matchCacheEntry = null;

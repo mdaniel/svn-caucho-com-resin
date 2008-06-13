@@ -13,6 +13,17 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>jsp: jsp generation changes to reduce code size (#2347)</li>
+<li>log: added response.isCacheHit() for AbstractHttpResponse (#2733)</li>
+<li>classloader: scan of ext paths must only add directories and jars (#2659, rep by Brian Burke)</li>
+<li>classloader: windows updates to handled custom-modified class files (#2730, rep by axeon)</li>
+<li>jca: localTransactionStarted callback must not call LocalTransaction.begin (#2627, rep by Wesley)</li>
+<li>error: add development-mode-error-page to control error messages exposed to the user (#2714, rep by norlab)</li>
+<li>jsp: better handling of jsp classloading/compiling (#2702, rep by N. Maves)</li>
+<li>jsp: taglib needs to avoid Beans introspector to handle overloaded setters (#2634, rep by J. Reynaert)</li>
+<li>admin: test for alarm freeze failed for win32 dst updates, and was obsolete (#2509, rep by Michael Sengbusch)</li>
+<li>session: call sessionDestroy only on primary server (#2137, rep by Kai Virkki)</li>
+<li>security: custom ip-constraint extension IoC configuration issues (#2718, rep by Alex Victoria)</li>
 <li>quercus: "late static binding" implemented (static:: and get_called_class())</li>
 <li>quercus: extending SimpleXMLElement class fix</li>
 <li>quercus: self::$$var, self::$$var() fixes</li>

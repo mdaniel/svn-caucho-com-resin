@@ -45,6 +45,42 @@ public class CustomTag extends GenericTag
   protected String _bodyContent;
   
   /**
+   * Generates code before the actual JSP.
+   */
+  @Override
+  public void generateTagState(JspJavaWriter out)
+    throws Exception
+  {
+    if (isDeclaringInstance()) {
+      out.print("private ");
+      out.printClass(_tagClass);
+      out.println(" " + _tag.getId() + ";");
+
+      out.println();
+      out.print("final ");
+      out.printClass(_tagClass);
+      out.println(" get" + _tag.getId() + "(PageContext pageContext)");
+      out.println("{");
+      out.pushDepth();
+    
+      out.println("if (" + _tag.getId() + " == null) {");
+      out.pushDepth();
+
+      generateTagInit(out);
+    
+      out.popDepth();
+      out.println("}");
+      out.println();
+      out.println("return " + _tag.getId() + ";");
+    
+      out.popDepth();
+      out.println("}");
+    }
+
+    super.generateTagState(out);
+  }
+  
+  /**
    * Generates the code for a custom tag.
    *
    * @param out the output writer for the generated java.
@@ -79,12 +115,7 @@ public class CustomTag extends GenericTag
       tagHackVar = "out";
 
     if (! isDeclared()) {
-      out.println("if (" + name + " == null) {");
-      out.pushDepth();
-      generateTagInit(out);
-      out.popDepth();
-      out.println("}");
-      out.println();
+      out.println(name + " = _jsp_state.get" + name + "(pageContext);");
     }
 
     if (JspIdConsumer.class.isAssignableFrom(_tag.getTagClass())) {
@@ -115,9 +146,9 @@ public class CustomTag extends GenericTag
     }
 
     boolean hasStartTag = analyzedTag.getDoStart();
-    int startCount = ((analyzedTag.getStartReturnsSkip() ? 1 : 0) +
-		      (analyzedTag.getStartReturnsInclude() ? 1 : 0) + 
-		      (analyzedTag.getStartReturnsBuffered() ? 1 : 0));
+    int startCount = ((analyzedTag.getStartReturnsSkip() ? 1 : 0)
+		      + (analyzedTag.getStartReturnsInclude() ? 1 : 0)
+		      + (analyzedTag.getStartReturnsBuffered() ? 1 : 0));
     
     int thisId = _gen.uniqueId();
     if (! hasStartTag) {
@@ -130,9 +161,9 @@ public class CustomTag extends GenericTag
     }
     printVarAssign(out, VariableInfo.AT_BEGIN);
 
-    if (analyzedTag.getStartReturnsSkip() &&
-	! analyzedTag.getStartReturnsInclude() &&
-	! analyzedTag.getStartReturnsBuffered()) {
+    if (analyzedTag.getStartReturnsSkip()
+	&& ! analyzedTag.getStartReturnsInclude()
+	&& ! analyzedTag.getStartReturnsBuffered()) {
       // jsp/18cp
       generateChildrenEmpty();
     }
@@ -148,19 +179,19 @@ public class CustomTag extends GenericTag
         out.println("if (_jspEval" + thisId + " != javax.servlet.jsp.tagext.Tag.SKIP_BODY) {");
         out.pushDepth();
       }
-      else if ((hasVarDeclaration(VariableInfo.NESTED) ||
-		childHasScriptlet()) &&
-	       ! (analyzedTag.getDoCatch() ||
-		  analyzedTag.getDoFinally() ||
-		  analyzedTag.getDoAfter() &&
-		  analyzedTag.getAfterReturnsAgain())) {
+      else if ((hasVarDeclaration(VariableInfo.NESTED)
+		|| childHasScriptlet())
+	       && ! (analyzedTag.getDoCatch()
+		     || analyzedTag.getDoFinally()
+		     || (analyzedTag.getDoAfter()
+			 && analyzedTag.getAfterReturnsAgain()))) {
 	out.println("{");
 	out.pushDepth();
       }
 
       if (usesTagBody) {
-        if (analyzedTag.getStartReturnsBuffered() &&
-	    analyzedTag.getStartReturnsInclude()) {
+        if (analyzedTag.getStartReturnsBuffered()
+	    && analyzedTag.getStartReturnsInclude()) {
           out.println("if (_jspEval" + thisId + " == javax.servlet.jsp.tagext.BodyTag.EVAL_BODY_BUFFERED) {");
           out.pushDepth();
         }
@@ -177,8 +208,8 @@ public class CustomTag extends GenericTag
         if (analyzedTag.getDoInit())
           out.println(name + ".doInitBody();");
         
-        if (analyzedTag.getStartReturnsBuffered() &&
-	    analyzedTag.getStartReturnsInclude()) {
+        if (analyzedTag.getStartReturnsBuffered()
+	    && analyzedTag.getStartReturnsInclude()) {
           out.popDepth();
           out.println("}");
 
@@ -219,8 +250,8 @@ public class CustomTag extends GenericTag
       }
 
       if (usesTagBody) {
-        if (analyzedTag.getStartReturnsBuffered() &&
-	    analyzedTag.getStartReturnsInclude()) {
+        if (analyzedTag.getStartReturnsBuffered()
+	    && analyzedTag.getStartReturnsInclude()) {
           out.println("if (_jspEval" + thisId + " == javax.servlet.jsp.tagext.BodyTag.EVAL_BODY_BUFFERED)");
 
 	  if (hasEndTag)
@@ -242,12 +273,12 @@ public class CustomTag extends GenericTag
       }
       else if (isEmpty) {
       }
-      else if ((hasVarDeclaration(VariableInfo.NESTED) ||
-		childHasScriptlet()) &&
-	       ! (analyzedTag.getDoCatch() ||
-		  analyzedTag.getDoFinally() ||
-		  analyzedTag.getDoAfter() &&
-		  analyzedTag.getAfterReturnsAgain())) {
+      else if ((hasVarDeclaration(VariableInfo.NESTED)
+		|| childHasScriptlet())
+	       && ! (analyzedTag.getDoCatch()
+		     || analyzedTag.getDoFinally()
+		     || (analyzedTag.getDoAfter()
+			 && analyzedTag.getAfterReturnsAgain()))) {
         out.popDepth();
         out.println("}");
       }

@@ -322,21 +322,29 @@ public class BeanUtil {
    */
   public static Method getSetMethod(BeanInfo info, String propertyName)
   {
+    // jsp/184z, bug #2634
+    
+    /*
     PropertyDescriptor []pds = info.getPropertyDescriptors();
 
     Method method = null;
+    Method bestMethod = null;
+
     for (int i = 0; i < pds.length; i++) {
-      if (pds[i].getName().equals(propertyName) &&
-          pds[i].getWriteMethod() != null) {
+      if (pds[i].getName().equals(propertyName)
+	  && pds[i].getWriteMethod() != null) {
         method = pds[i].getWriteMethod();
 
         if (method.getParameterTypes()[0].equals(String.class))
           return method;
+	else
+	  bestMethod = method;
       }
     }
 
     if (method != null)
       return method;
+    */
 
     return getSetMethod(info.getBeanDescriptor().getBeanClass(), propertyName);
   }
@@ -369,6 +377,7 @@ public class BeanUtil {
       Method method = getSetMethod(ptrCl.getMethods(),
                                    setName,
                                    ignoreCase);
+
 
       if (method != null && method.getParameterTypes()[0].equals(String.class))
         return method;
@@ -407,6 +416,8 @@ public class BeanUtil {
                                      String setName,
                                      boolean ignoreCase)
   {
+    Method bestMethod = null;
+    
     for (int i = 0; i < methods.length; i++) {
       Method method = methods[i];
 
@@ -431,12 +442,20 @@ public class BeanUtil {
         continue;
       
       // It must return void
-      if (method.getReturnType().equals(void.class)) {
-        return method;
-      }
+      if (! method.getReturnType().equals(void.class))
+	continue;
+
+      Class paramType = method.getParameterTypes()[0];
+      
+      if (paramType.equals(String.class))
+	return method;
+      else if (bestMethod == null)
+	bestMethod = method;
+      else if (paramType.getName().compareTo(bestMethod.getParameterTypes()[0].getName()) < 0)
+	bestMethod = method;
     }
 
-    return null;
+    return bestMethod;
   }
   
   /**

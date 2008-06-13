@@ -60,6 +60,8 @@ abstract public class GenericTag extends JspContainerNode
   protected TagInfo _tagInfo;
   protected Class _tagClass;
   protected VariableInfo []_varInfo;
+
+  private boolean _isDeclaringInstance;
   
   public GenericTag()
   {
@@ -278,6 +280,15 @@ abstract public class GenericTag extends JspContainerNode
   }
 
   /**
+   * Returns true if this instance declares the tag.
+   */
+  public boolean isDeclaringInstance()
+  {
+    return _isDeclaringInstance;
+  }
+  
+
+  /**
    * Returns the variable containing the jsf component
    */
   public String getJsfVar()
@@ -350,6 +361,8 @@ abstract public class GenericTag extends JspContainerNode
       if (! JspTagFileSupport.class.isAssignableFrom(_tagClass)) {
 	out.printClass(_tagClass);
 	out.println(" " + _tag.getId() + " = null;");
+
+	_isDeclaringInstance = true;
       }
 
       /*
@@ -629,7 +642,7 @@ abstract public class GenericTag extends JspContainerNode
 
       if (method != null)
 	return method;
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
     }
 
@@ -922,10 +935,10 @@ abstract public class GenericTag extends JspContainerNode
 
     JspNode parent = getParent();
 
-    if (! (parent instanceof JspRoot) &&
-	! (parent instanceof JspTop) &&
-        ! (parent instanceof GenericTag) &&
-        ! (parent instanceof JspAttribute))
+    if (! (parent instanceof JspRoot)
+	&& ! (parent instanceof JspTop)
+	&& ! (parent instanceof GenericTag)
+	&& ! (parent instanceof JspAttribute))
       return false;
 
     boolean isDeclared = false;

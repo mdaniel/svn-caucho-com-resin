@@ -133,7 +133,7 @@ public class ClusterObject {
   }
 
   // XXX: move to objectStore manager?
-  private boolean isPrimary()
+  public boolean isPrimary()
   {
     if (_store != null && _store.isAlwaysLoad())
       return false;

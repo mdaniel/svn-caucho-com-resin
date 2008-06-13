@@ -499,11 +499,8 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     long now = Alarm.getCurrentTime();
 
-    Store store = _manager.getSessionStore();
-
     // server/015k
-    if (_isInvalidating
-	|| store == null || _accessTime + getMaxInactiveInterval() < now)
+    if (_isInvalidating || _accessTime + getMaxInactiveInterval() < now)
       notifyDestroy();
 
     invalidateLocal();
@@ -511,6 +508,10 @@ public class SessionImpl implements HttpSession, CacheListener {
 
   private void notifyDestroy()
   {
+    // server/01ni
+    if (_clusterObject != null && ! _clusterObject.isPrimary())
+      return;
+    
     ArrayList listeners = _manager.getListeners();
 
     if (listeners != null) {

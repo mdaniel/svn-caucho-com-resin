@@ -29,7 +29,7 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.log.Log;
+import com.caucho.config.*;
 import com.caucho.make.DependencyContainer;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
@@ -49,7 +49,7 @@ import java.util.logging.Logger;
  * Manages dispatching: servlets and filters.
  */
 public class ServletMapper {
-  static final Logger log = Log.open(ServletMapper.class);
+  static final Logger log = Logger.getLogger(ServletMapper.class.getName());
   static final L10N L = new L10N(ServletMapper.class);
 
   private ServletContext _servletContext;
@@ -119,24 +119,24 @@ public class ServletMapper {
   {
     try {
       if (servletName == null) {
-	throw new ServletConfigException(L.l("servlet needs a servlet-name."));
+	throw new ConfigException(L.l("servlets need a servlet-name."));
       }
       else if (servletName.equals("invoker")) {
         // special case
       }
-      else if (servletName.equals("plugin_match") ||
-	       servletName.equals("plugin-match")) {
+      else if (servletName.equals("plugin_match")
+	       || servletName.equals("plugin-match")) {
         // special case
       }
-      else if (servletName.equals("plugin_ignore") ||
-	       servletName.equals("plugin-ignore")) {
+      else if (servletName.equals("plugin_ignore")
+	       || servletName.equals("plugin-ignore")) {
 	if (urlPattern != null)
 	  _ignorePatterns.add(urlPattern);
 	
 	return;
       }
       else if (_servletManager.getServlet(servletName) == null)
-        throw new ServletConfigException(L.l("`{0}' is an unknown servlet-name.  servlet-mapping requires that the named servlet be defined in a <servlet> configuration before the <servlet-mapping>.", servletName));
+        throw new ConfigException(L.l("'{0}' is an unknown servlet-name.  servlet-mapping requires that the named servlet be defined in a <servlet> configuration before the <servlet-mapping>.", servletName));
 
       if ("/".equals(urlPattern)) {
         _defaultServlet = servletName;
@@ -150,8 +150,10 @@ public class ServletMapper {
       log.config("servlet-mapping " + urlPattern + " -> " + servletName);
     } catch (ServletException e) {
       throw e;
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
-      throw new ServletException(e);
+      throw ConfigException.create(e);
     }
   }
   
@@ -371,7 +373,7 @@ public class ServletMapper {
       // XXX: this is really an unexpected, internal error that should never
       //      happen
     if (! tail.startsWith("/")) {
-      throw new ServletException("expected '/' starting " +
+      throw new ConfigException("expected '/' starting " +
                                  " sp:" + invocation.getServletPath() +
                                  " pi:" + invocation.getPathInfo() +
                                  " sn:invocation" + invocation);
@@ -387,12 +389,12 @@ public class ServletMapper {
 
     // XXX: This should be generalized, possibly with invoker configuration
     if (servletName.startsWith("com.caucho")) {
-      throw new ServletConfigException(L.l("servlet `{0}' forbidden from invoker. com.caucho.* classes must be defined explicitly in a <servlet> declaration.",
-                                     servletName));
+      throw new ConfigException(L.l("servlet '{0}' forbidden from invoker. com.caucho.* classes must be defined explicitly in a <servlet> declaration.",
+				    servletName));
     }
     else if (servletName.equals("")) {
-      throw new ServletConfigException(L.l("invoker needs a servlet name in URL `{0}'.",
-                                           invocation.getContextURI()));
+      throw new ConfigException(L.l("invoker needs a servlet name in URL '{0}'.",
+				    invocation.getContextURI()));
     }
       
     addServlet(servletName);
@@ -462,6 +464,8 @@ public class ServletMapper {
 
     try {
       config.setServletClass(servletName);
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new ServletException(e);
     }
