@@ -990,6 +990,134 @@ variable can be used to obtain the servlet session if required.
 
 </s2>
 
+<s2 title="Using META-INF/services to package Quercus extensions in jar files">
+
+<p>
+At startup time Quercus discovers and uses files within the META-INF/services
+to discover modules and classes that are made available within the PHP
+environment.
+</p>
+
+<s3 title="META-INF/services/com.caucho.quercus.QuercusModule">
+
+<p>
+<code>META-INF/services/com.caucho.quercus.QuercusModule</code>
+contains a list of classes that are modules.  Each public member of a
+module becomes available as a top-level PHP function.
+</p>
+
+<p>
+For example a line like:
+</p>
+
+<example title="META-INF/services/com.caucho.quercus.QuercusModule">
+...
+com.caucho.quercus.lib.date.DateModule
+...
+</example>
+
+<p>
+references the java class:
+</p>
+
+<example title="com/caucho/quercus/lib/date/DateModule.java">
+package com.caucho.quercus.lib.date.DateModule
+
+public class DateModule
+  extends AbstractQuercusModule
+{
+  ...
+
+  public static final int CAL_GREGORIAN = 0;
+
+  ...
+
+   public static int cal_days_in_month(int cal, int month, int year)
+   {
+     ...
+   }
+
+   ...
+}
+</example>
+
+<p>
+When Quercus starts, the DateModule class is automatically
+introspected, and a PHP script can call the function defined in the
+module:
+</p>
+
+<example title="Calling the cal_days_in_month function">
+&lt;?php
+$var = cal_days_in_month(CAL_GREGORIAN, 2, 2000)
+?>
+</example>
+
+</s3>
+
+<s3 title="META-INF/services/com.caucho.quercus.QuercusClass">
+
+<p>
+<code>META-INF/services/com.caucho.quercus.QuercusClass</code>
+contains a list of classes that should become available to PHP as
+objects.
+</p>
+
+<p>
+For example a line like:
+</p>
+
+<example title="META-INF/services/com.caucho.quercus.QuercuClass">
+...
+com.caucho.quercus.lib.date.DateTime
+...
+</example>
+
+<p>
+references the java class:
+</p>
+
+<example title="com/caucho/quercus/lib/date/DateTime.java">
+package com.caucho.quercus.lib.date;
+
+public class DateTime
+{
+  public static final String ISO8601 = "Y-m-d\\TH:i:sO";
+
+  public DateTime(String timeString)
+  {
+    ...
+  }
+
+  ...
+
+  public String format(String format)
+  {
+    ...
+  }
+ 
+   ...
+}
+</example>
+
+<p>
+When Quercus starts, the DateTime class is automatically
+introspected, and a PHP script can instantiate and use the object:
+</p>
+
+<example title="Using the DateTime class in PHP">
+&lt;?php
+$var = new DateTime("last week");
+
+echo $a->format(DateTime::ISO8601);
+?>
+</example>
+
+</s3>
+
+</s2>
+
+
 </s1> <!-- java integration -->
 
 <s1 name="module_highlights" title="PHP Module highlights">
