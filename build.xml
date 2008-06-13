@@ -1389,10 +1389,9 @@
       <include-sources 
         dir="${modules}/flash/src" 
         includes="com/caucho/bam/*.as 
-                  com/caucho/bam/ping/*.as 
-                  com/caucho/hmtp/auth/*.as 
-                  com/caucho/hmtp/client/*.as 
-                  com/caucho/hmtp/packet/*.as"/>
+                  com/caucho/hmtp/*.as 
+                  com/caucho/xmpp/*.as
+                  com/caucho/xmpp/ping/*.as"/>
       <compiler.include-libraries dir="${modules}/flash/build" append="true">
         <include name="hessian-flash.swc" />
       </compiler.include-libraries>
