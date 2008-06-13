@@ -135,7 +135,7 @@ class HtmlOutputFormatRenderer extends Renderer
       if (value == null)
 	return;
 
-      List<String> paramList = new ArrayList<String>();
+      List paramList = new ArrayList();
 
       List children = component.getChildren();
 
@@ -143,13 +143,12 @@ class HtmlOutputFormatRenderer extends Renderer
         Object child = children.get(i);
         if (child instanceof UIParameter) {
           UIParameter param = (UIParameter) child;
-          Object paramValue = param.getValue();
-          String string = toString(context, param, paramValue);
-          paramList.add(string);
+                    
+          paramList.add(param.getValue());
         }
       }
 
-      String []params = paramList.toArray(new String[paramList.size()]);
+      Object []params = paramList.toArray(new Object[paramList.size()]);
 
       String pattern = toString(context, component, value);
 
