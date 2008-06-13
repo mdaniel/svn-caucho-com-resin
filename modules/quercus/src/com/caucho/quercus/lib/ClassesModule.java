@@ -31,6 +31,7 @@ package com.caucho.quercus.lib;
 
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReadOnly;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -108,6 +109,20 @@ public class ClassesModule extends AbstractQuercusModule {
     }
     else
       return BooleanValue.FALSE;
+  }
+  
+  /*
+   * Returns the calling class name.
+   */
+  @ReturnNullAsFalse
+  public String get_called_class(Env env)
+  {
+    String name = env.getCallingClassName();
+    
+    if (name == null)
+      env.warning("called from outside class scope");
+    
+    return name;
   }
 
   /**

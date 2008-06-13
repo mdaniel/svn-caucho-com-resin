@@ -248,6 +248,8 @@ public class Env {
   private Expr [] _callStack = new Expr[256];
   private Value [] _callThisStack = new Value[256];
   private int _callStackTop;
+  
+  private String _callingClass;
 
   private Value [] _functionArgs;
 
@@ -2277,7 +2279,7 @@ public class Env {
   }
   
   /**
-   * Peeks at the the "this" top call.
+   * Peeks at the "this" top call.
    */
   public Value peekCallThis(int depth)
   {
@@ -2285,6 +2287,37 @@ public class Env {
       return _callThisStack[_callStackTop - depth - 1];
     else
       return null;
+  }
+  
+  /*
+   * Returns the name of calling class.
+   */
+  public String getCallingClassName()
+  {
+    if (_callingClass == null)
+      return getThis().getClassName();
+    else
+      return _callingClass;
+  }
+  
+  /*
+   * Returns the calling class.
+   */
+  public QuercusClass getCallingClass()
+  {
+    return findClass(_callingClass);
+  }
+  
+  /*
+   * Sets the calling class.
+   */
+  public String setCallingClassName(String name)
+  {
+    String oldCallingClass = _callingClass;
+    
+    _callingClass = name;
+    
+    return oldCallingClass;
   }
 
   public ArrayList<String> getStackTrace()

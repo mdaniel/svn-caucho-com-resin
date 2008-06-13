@@ -41,10 +41,10 @@ import java.util.ArrayList;
 /**
  * Represents a PHP static method expression.
  */
-public class StaticMethodExpr extends Expr {
-  private static final L10N L = new L10N(StaticMethodExpr.class);
+public class LateStaticBindingStaticMethodExpr extends Expr {
+  private static final L10N L
+    = new L10N(LateStaticBindingStaticMethodExpr.class);
   
-  protected final String _className;
   protected final String _methodName;
   protected final int _hash;
   protected final char []_name;
@@ -55,12 +55,11 @@ public class StaticMethodExpr extends Expr {
   protected AbstractFunction _fun;
   protected boolean _isMethod;
 
-  public StaticMethodExpr(Location location, String className,
-                          String name,
-                          ArrayList<Expr> args)
+  public LateStaticBindingStaticMethodExpr(Location location,
+                                           String name,
+                                           ArrayList<Expr> args)
   {
     super(location);
-    _className = className.intern();
     
     _methodName = name;
     _name = name.toCharArray();
@@ -70,12 +69,11 @@ public class StaticMethodExpr extends Expr {
     args.toArray(_args);
   }
 
-  public StaticMethodExpr(Location location, String className,
-                          String name,
-                          Expr []args)
+  public LateStaticBindingStaticMethodExpr(Location location,
+                                           String name,
+                                           Expr []args)
   {
     super(location);
-    _className = className.intern();
     
     _methodName = name;
     _name = name.toCharArray();
@@ -85,14 +83,14 @@ public class StaticMethodExpr extends Expr {
   }
 
 
-  public StaticMethodExpr(String className, String name, ArrayList<Expr> args)
+  public LateStaticBindingStaticMethodExpr(String name, ArrayList<Expr> args)
   {
-    this(Location.UNKNOWN, className, name, args);
+    this(Location.UNKNOWN, name, args);
   }
 
-  public StaticMethodExpr(String className, String name, Expr []args)
+  public LateStaticBindingStaticMethodExpr(String name, Expr []args)
   {
-    this(Location.UNKNOWN, className, name, args);
+    this(Location.UNKNOWN, name, args);
   }
 
   /**
@@ -124,10 +122,12 @@ public class StaticMethodExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    QuercusClass cl = env.findClass(_className);
+    String className = env.getCallingClassName();
+    
+    QuercusClass cl = env.findClass(className);
 
     if (cl == null) {
-      env.error(getLocation(), L.l("no matching class {0}", _className));
+      env.error(getLocation(), L.l("no matching class {0}", className));
 
       return NullValue.NULL;
     }
@@ -138,16 +138,12 @@ public class StaticMethodExpr extends Expr {
     //Value thisValue = NullThisValue.NULL;
 
     env.pushCall(this, thisValue);
-
-    String oldClassName = env.setCallingClassName(_className);
     try {
       env.checkTimeout();
 
       return cl.callMethod(env, thisValue, _hash, _name, _name.length, _args);
     } finally {
       env.popCall();
-      
-      env.setCallingClassName(oldClassName);
     }
   }
 
@@ -160,10 +156,12 @@ public class StaticMethodExpr extends Expr {
    */
   public Value evalRef(Env env)
   {
-    QuercusClass cl = env.findClass(_className);
+    String className = env.getCallingClassName();
+    
+    QuercusClass cl = env.findClass(className);
 
     if (cl == null) {
-      env.error(getLocation(), L.l("no matching class {0}", _className));
+      env.error(getLocation(), L.l("no matching class {0}", className));
     }
 
     // qa/0954 - what appears to be a static call may be a call to a super constructor

@@ -72,18 +72,16 @@ public class SimpleXMLText extends SimpleXMLElement
   private static final L10N L = new L10N(SimpleXMLText.class);
   
   protected SimpleXMLText(Env env,
-                          QuercusClass cls,
-                          JavaClassDef def)
+                          QuercusClass cls)
   {
-    super(env, cls, def, null, "#text");
+    super(env, cls, null, "#text");
   }
   
   protected SimpleXMLText(Env env,
                           QuercusClass cls,
-                          JavaClassDef def,
                           StringValue text)
   {
-    super(env, cls, def, null, "#text");
+    super(env, cls, null, "#text");
 
     _text = text;
   }

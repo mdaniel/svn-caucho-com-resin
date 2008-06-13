@@ -211,6 +211,15 @@ public class ExprFactory {
   {
     return new StaticFieldGetExpr(location, className, name);
   }
+  
+  /**
+   * Creates an object get 'static::b' expression.
+   */
+  public Expr createLateStaticBindingFieldGet(Location location,
+                                              String name)
+  {
+    return new LateStaticBindingFieldGetExpr(location, name);
+  }
 
   /**
    * Creates an object get 'a::${b}' expression.
@@ -220,6 +229,15 @@ public class ExprFactory {
                                       Expr name)
   {
     return new StaticFieldVarGetExpr(location, className, name);
+  }
+  
+  /**
+   * Creates an object get 'static::${b}' expression.
+   */
+  public Expr createLateStaticBindingFieldVarGet(Location location,
+                                                 Expr name)
+  {
+    return new LateStaticBindingFieldVarGetExpr(location, name);
   }
   
   /**
@@ -837,9 +855,19 @@ public class ExprFactory {
   {
     return new ClassMethodExpr(loc, className, name, args);
   }
+  
+  /**
+   * Creates a new function call based on the class context.
+   */
+  public Expr createLateStaticBindingClassMethod(Location loc,
+                                                 String name,
+                                                 ArrayList<Expr> args)
+  {
+    return new LateStaticBindingClassMethodExpr(loc, name, args);
+  }
 
   /**
-   * Creates a new function call.
+   * Creates a static function call.
    */
   public Expr createStaticMethod(Location loc,
 				 String className,
@@ -847,6 +875,16 @@ public class ExprFactory {
 				 ArrayList<Expr> args)
   {
     return new StaticMethodExpr(loc, className, name, args);
+  }
+  
+  /**
+   * Creates a static function call based on the calling class.
+   */
+  public Expr createLateStaticBindingStaticMethod(Location loc,
+                                                  String name,
+                                                  ArrayList<Expr> args)
+  {
+    return new LateStaticBindingStaticMethodExpr(loc, name, args);
   }
 
   /**
@@ -858,6 +896,16 @@ public class ExprFactory {
 				    ArrayList<Expr> args)
   {
     return new StaticVarMethodExpr(loc, className, var, args);
+  }
+  
+  /**
+   * Creates a new method static::$f()
+   */
+  public Expr createLateStaticBindingStaticVarMethod(Location loc,
+                                                     Expr var,
+                                                     ArrayList<Expr> args)
+  {
+    return new LateStaticBindingStaticVarMethodExpr(loc, var, args);
   }
 
   /**

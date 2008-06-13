@@ -69,11 +69,10 @@ public class SelectedXMLElement extends SimpleXMLElement
 {
   private SimpleXMLElement _owner;
   
-  protected SelectedXMLElement(Env env,
-			       SimpleXMLElement owner, QuercusClass cls,
-                               JavaClassDef def)
+  protected SelectedXMLElement(Env env, QuercusClass cls,
+			                   SimpleXMLElement owner)
   {
-    super(env, cls, def, owner._parent, owner._name);
+    super(env, cls, owner._parent, owner._name);
     
     _owner = owner;
     //_parent = owner._parent;

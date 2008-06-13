@@ -74,15 +74,15 @@ public class SimpleXMLModule
     else if (data.isBoolean() && data.toBoolean() == false)
       return BooleanValue.FALSE;
     
-    QuercusClass cls = null;
-    JavaClassDef def = env.getJavaClassDefinition(SimpleXMLElement.class);
-    
+    QuercusClass cls;
+
     if (className != null && className.length() > 0)
       cls = env.getClass(className);
+    else
+      cls = env.getClass("SimpleXMLElement");
 
-    return SimpleXMLElement.create(env, data, options, false,
-                                   namespaceV, isPrefix,
-                                   cls, def);
+    return SimpleXMLElement.create(env, cls, data, options, false,
+                                   namespaceV, isPrefix);
   }
 
   public Value simplexml_load_file(Env env,
@@ -92,15 +92,15 @@ public class SimpleXMLModule
                                    @Optional Value namespaceV,
                                    @Optional boolean isPrefix)
   {
-    QuercusClass cls = null;
-    JavaClassDef def = env.getJavaClassDefinition(SimpleXMLElement.class);
+    QuercusClass cls;
     
     if (className != null && className.length() > 0)
       cls = env.getClass(className);
+    else
+      cls = env.getClass("SimpleXMLElement");
 
-    return SimpleXMLElement.create(env, file, options, true,
-                                   namespaceV, isPrefix,
-                                   cls, def);
+    return SimpleXMLElement.create(env, cls, file, options, true,
+                                   namespaceV, isPrefix);
   }
   
   public SimpleXMLElement simplexml_import_dom(Env env)

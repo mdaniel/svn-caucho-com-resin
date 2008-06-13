@@ -69,22 +69,20 @@ public class SimpleXMLAttribute extends SimpleXMLElement
 {
   protected SimpleXMLAttribute(Env env,
                                QuercusClass cls,
-                               JavaClassDef def,
                                SimpleXMLElement parent,
                                String name)
   {
-    super(env, cls, def, parent, name);
+    super(env, cls, parent, name);
   }
   
   protected SimpleXMLAttribute(Env env,
                                QuercusClass cls,
-                               JavaClassDef def,
                                SimpleXMLElement parent,
                                String name,
                                String namespace,
                                StringValue text)
   {
-    super(env, cls, def, parent, name, namespace);
+    super(env, cls, parent, name, namespace);
     
     _text = text;
   }

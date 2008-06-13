@@ -42,21 +42,8 @@ public class NullThisValue extends NullValue
 {
   public static final NullThisValue NULL = new NullThisValue();
 
-  private ClassDef _classDef;
-  
-  protected NullThisValue()
+  private NullThisValue()
   {
-  }
-
-  public NullThisValue(ClassDef classDef)
-  {
-    _classDef = classDef;
-  }
-  
-  public NullThisValue(Env env, String clsName)
-  {
-    if (clsName != null)
-      _classDef = env.findClassDef(clsName);
   }
   
   /**
@@ -65,30 +52,6 @@ public class NullThisValue extends NullValue
   public static NullThisValue create()
   {
     return NULL;
-  }
-
-  /**
-   * Returns true for an implementation of a class
-   */
-  @Override
-  public boolean isA(String name)
-  {
-    if (_classDef != null)
-      return _classDef.isA(name);
-    else
-      return false;
-  }
-  
-  /*
-   * Returns the object name of this value.
-   */
-  @Override
-  public String getClassName()
-  {
-    if (_classDef != null)
-      return _classDef.getName();
-    else
-      return null;
   }
 
   /**

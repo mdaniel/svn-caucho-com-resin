@@ -266,7 +266,7 @@ public class Function extends AbstractFunction {
 
     if (isStatic()) {
       // php/0967
-      oldThis = env.setThis(new NullThisValue(getDeclaringClass()));
+      oldThis = env.setThis(NullThisValue.NULL);
     }
     else
       oldThis = env.getThis();
@@ -343,7 +343,7 @@ public class Function extends AbstractFunction {
 
     if (isStatic()) {
       // php/0967, php/091i
-      oldThis = env.setThis(new NullThisValue(getDeclaringClass()));
+      oldThis = env.setThis(NullThisValue.NULL);
     }
     else
       oldThis = env.getThis();

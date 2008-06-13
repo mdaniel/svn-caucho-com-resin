@@ -604,20 +604,26 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Expr []args)
   {
-    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+    String oldClassName = env.setCallingClassName(_className);
     
-    if (fun != null)
-      return fun.callMethod(env, this, args);
-    else if (_quercusClass.getCall() != null) {
-      Expr []newArgs = new Expr[args.length + 1];
-      newArgs[0] = new StringLiteralExpr(toMethod(name, nameLen));
-      System.arraycopy(args, 0, newArgs, 1, args.length);
+    try {
+      AbstractFunction fun = _methodMap.get(hash, name, nameLen);
       
-      return _quercusClass.getCall().callMethod(env, this, newArgs);
+      if (fun != null)
+        return fun.callMethod(env, this, args);
+      else if (_quercusClass.getCall() != null) {
+        Expr []newArgs = new Expr[args.length + 1];
+        newArgs[0] = new StringLiteralExpr(toMethod(name, nameLen));
+        System.arraycopy(args, 0, newArgs, 1, args.length);
+        
+        return _quercusClass.getCall().callMethod(env, this, newArgs);
+      }
+      else
+        return env.error(L.l("Call to undefined method {0}::{1}",
+                             getName(), toMethod(name, nameLen)));
+    } finally {
+      env.setCallingClassName(oldClassName);
     }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}",
-                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -627,19 +633,25 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value []args)
   {
-    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
-    if (fun != null)
-      return fun.callMethod(env, this, args);
-    else if ((fun = _quercusClass.getCall()) != null) {
-      return fun.callMethod(env,
-			    this,
-			    env.createString(name, nameLen),
-			    new ArrayValueImpl(args));
+      if (fun != null)
+        return fun.callMethod(env, this, args);
+      else if ((fun = _quercusClass.getCall()) != null) {
+        return fun.callMethod(env,
+                  this,
+                  env.createString(name, nameLen),
+                  new ArrayValueImpl(args));
+      }
+      else
+        return env.error(L.l("Call to undefined method {0}::{1}()",
+                             getName(), toMethod(name, nameLen)));
+    } finally {
+      env.setCallingClassName(oldClassName);
     }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -648,19 +660,25 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value callMethod(Env env, int hash, char []name, int nameLen)
   {
-    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
-    if (fun != null)
-      return fun.callMethod(env, this);
-    else if ((fun = _quercusClass.getCall()) != null) {
-      return fun.callMethod(env,
-			    this,
-			    env.createString(name, nameLen),
-			    new ArrayValueImpl());
+      if (fun != null)
+        return fun.callMethod(env, this);
+      else if ((fun = _quercusClass.getCall()) != null) {
+        return fun.callMethod(env,
+                  this,
+                  env.createString(name, nameLen),
+                  new ArrayValueImpl());
+      }
+      else
+        return env.error(L.l("Call to undefined method {0}::{1}()",
+                             getName(), toMethod(name, nameLen)));
+    } finally {
+      env.setCallingClassName(oldClassName);
     }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -670,20 +688,26 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a1)
   {
-    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
-    if (fun != null)
-      return fun.callMethod(env, this, a1);
-    else if ((fun = _quercusClass.getCall()) != null) {
-      return fun.callMethod(env,
-			    this,
-			    env.createString(name, nameLen),
-			    new ArrayValueImpl()
-			    .append(a1));
+      if (fun != null)
+        return fun.callMethod(env, this, a1);
+      else if ((fun = _quercusClass.getCall()) != null) {
+        return fun.callMethod(env,
+                  this,
+                  env.createString(name, nameLen),
+                  new ArrayValueImpl()
+                  .append(a1));
+      }
+      else
+        return env.error(L.l("Call to undefined method {0}::{1}()",
+                             getName(), toMethod(name, nameLen)));
+    } finally {
+      env.setCallingClassName(oldClassName);
     }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -693,21 +717,27 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a1, Value a2)
   {
-    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
-    if (fun != null)
-      return fun.callMethod(env, this, a1, a2);
-    else if ((fun = _quercusClass.getCall()) != null) {
-      return fun.callMethod(env,
-			    this,
-			    env.createString(name, nameLen),
-			    new ArrayValueImpl()
-			    .append(a1)
-			    .append(a2));
+      if (fun != null)
+        return fun.callMethod(env, this, a1, a2);
+      else if ((fun = _quercusClass.getCall()) != null) {
+        return fun.callMethod(env,
+                  this,
+                  env.createString(name, nameLen),
+                  new ArrayValueImpl()
+                  .append(a1)
+                  .append(a2));
+      }
+      else
+        return env.error(L.l("Call to undefined method {0}::{1}()",
+                             getName(), toMethod(name, nameLen)));
+    } finally {
+      env.setCallingClassName(oldClassName);
     }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -718,22 +748,28 @@ public class ObjectExtValue extends ObjectValue
                           int hash, char []name, int nameLen,
 			  Value a1, Value a2, Value a3)
   {
-    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
-    if (fun != null)
-      return fun.callMethod(env, this, a1, a2, a3);
-    else if ((fun = _quercusClass.getCall()) != null) {
-      return fun.callMethod(env,
-			    this,
-			    env.createString(name, nameLen),
-			    new ArrayValueImpl()
-			    .append(a1)
-			    .append(a2)
-			    .append(a3));
+      if (fun != null)
+        return fun.callMethod(env, this, a1, a2, a3);
+      else if ((fun = _quercusClass.getCall()) != null) {
+        return fun.callMethod(env,
+                  this,
+                  env.createString(name, nameLen),
+                  new ArrayValueImpl()
+                  .append(a1)
+                  .append(a2)
+                  .append(a3));
+      }
+      else
+        return env.error(L.l("Call to undefined method {0}::{1}()",
+                             getName(), toMethod(name, nameLen)));
+    } finally {
+      env.setCallingClassName(oldClassName);
     }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           getName(), toMethod(name, nameLen)));
   }  
 
   /**
@@ -744,23 +780,29 @@ public class ObjectExtValue extends ObjectValue
                           int hash, char []name, int nameLen,
 			  Value a1, Value a2, Value a3, Value a4)
   {
-    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
-    if (fun != null)
-      return fun.callMethod(env, this, a1, a2, a3, a4);
-    else if ((fun = _quercusClass.getCall()) != null) {
-      return fun.callMethod(env,
-			    this,
-			    env.createString(name, nameLen),
-			    new ArrayValueImpl()
-			    .append(a1)
-			    .append(a2)
-			    .append(a3)
-			    .append(a4));
+      if (fun != null)
+        return fun.callMethod(env, this, a1, a2, a3, a4);
+      else if ((fun = _quercusClass.getCall()) != null) {
+        return fun.callMethod(env,
+                  this,
+                  env.createString(name, nameLen),
+                  new ArrayValueImpl()
+                  .append(a1)
+                  .append(a2)
+                  .append(a3)
+                  .append(a4));
+      }
+      else
+        return env.error(L.l("Call to undefined method {0}::{1}()",
+                             getName(), toMethod(name, nameLen)));
+    } finally {
+      env.setCallingClassName(oldClassName);
     }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           getName(), toMethod(name, nameLen)));
   }  
 
   /**
@@ -771,24 +813,30 @@ public class ObjectExtValue extends ObjectValue
                           int hash, char []name, int nameLen,
 			  Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
-    if (fun != null)
-      return fun.callMethod(env, this, a1, a2, a3, a4, a5);
-    else if ((fun = _quercusClass.getCall()) != null) {
-      return fun.callMethod(env,
-			    this,
-			    env.createString(name, nameLen),
-			    new ArrayValueImpl()
-			    .append(a1)
-			    .append(a2)
-			    .append(a3)
-			    .append(a4)
-			    .append(a5));
+      if (fun != null)
+        return fun.callMethod(env, this, a1, a2, a3, a4, a5);
+      else if ((fun = _quercusClass.getCall()) != null) {
+        return fun.callMethod(env,
+                  this,
+                  env.createString(name, nameLen),
+                  new ArrayValueImpl()
+                  .append(a1)
+                  .append(a2)
+                  .append(a3)
+                  .append(a4)
+                  .append(a5));
+      }
+      else
+        return env.error(L.l("Call to undefined method {0}::{1}()",
+                             getName(), toMethod(name, nameLen)));
+    } finally {
+      env.setCallingClassName(oldClassName);
     }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           getName(), toMethod(name, nameLen)));
   }  
 
   /**
@@ -798,7 +846,13 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Expr []args)
   {
-    return _quercusClass.callMethodRef(env, this, hash, name, nameLen, args);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      return _quercusClass.callMethodRef(env, this, hash, name, nameLen, args);
+    } finally {
+      env.setCallingClassName(oldClassName);
+    }
   }
 
   /**
@@ -808,19 +862,25 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value []args)
   {
-    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
-    if (fun != null)
-      return fun.callMethodRef(env, this, args);
-    else if ((fun = _quercusClass.getCall()) != null) {
-      return fun.callMethodRef(env,
-			       this,
-			       env.createString(name, nameLen),
-			       new ArrayValueImpl(args));
+      if (fun != null)
+        return fun.callMethodRef(env, this, args);
+      else if ((fun = _quercusClass.getCall()) != null) {
+        return fun.callMethodRef(env,
+                     this,
+                     env.createString(name, nameLen),
+                     new ArrayValueImpl(args));
+      }
+      else
+        return env.error(L.l("Call to undefined method {0}::{1}()",
+                             getName(), toMethod(name, nameLen)));
+    } finally {
+      env.setCallingClassName(oldClassName);
     }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -829,19 +889,25 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value callMethodRef(Env env, int hash, char []name, int nameLen)
   {
-    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
-    if (fun != null)
-      return fun.callMethodRef(env, this);
-    else if ((fun = _quercusClass.getCall()) != null) {
-      return fun.callMethodRef(env,
-			       this,
-			       env.createString(name, nameLen),
-			       new ArrayValueImpl());
+      if (fun != null)
+        return fun.callMethodRef(env, this);
+      else if ((fun = _quercusClass.getCall()) != null) {
+        return fun.callMethodRef(env,
+                     this,
+                     env.createString(name, nameLen),
+                     new ArrayValueImpl());
+      }
+      else
+        return env.error(L.l("Call to undefined method {0}::{1}()",
+                             getName(), toMethod(name, nameLen)));
+    } finally {
+      env.setCallingClassName(oldClassName);
     }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -851,20 +917,26 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a1)
   {
-    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
-    if (fun != null)
-      return fun.callMethodRef(env, this, a1);
-    else if ((fun = _quercusClass.getCall()) != null) {
-      return fun.callMethodRef(env,
-			       this,
-			       env.createString(name, nameLen),
-			       new ArrayValueImpl()
-			       .append(a1));
+      if (fun != null)
+        return fun.callMethodRef(env, this, a1);
+      else if ((fun = _quercusClass.getCall()) != null) {
+        return fun.callMethodRef(env,
+                     this,
+                     env.createString(name, nameLen),
+                     new ArrayValueImpl()
+                     .append(a1));
+      }
+      else
+        return env.error(L.l("Call to undefined method {0}::{1}()",
+                             getName(), toMethod(name, nameLen)));
+    } finally {
+      env.setCallingClassName(oldClassName);
     }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -874,21 +946,27 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a1, Value a2)
   {
-    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
-    if (fun != null)
-      return fun.callMethodRef(env, this, a1, a2);
-    else if ((fun = _quercusClass.getCall()) != null) {
-      return fun.callMethodRef(env,
-			       this,
-			       env.createString(name, nameLen),
-			       new ArrayValueImpl()
-			       .append(a1)
-			       .append(a2));
+      if (fun != null)
+        return fun.callMethodRef(env, this, a1, a2);
+      else if ((fun = _quercusClass.getCall()) != null) {
+        return fun.callMethodRef(env,
+                     this,
+                     env.createString(name, nameLen),
+                     new ArrayValueImpl()
+                     .append(a1)
+                     .append(a2));
+      }
+      else
+        return env.error(L.l("Call to undefined method {0}::{1}()",
+                             getName(), toMethod(name, nameLen)));
+    } finally {
+      env.setCallingClassName(oldClassName);
     }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -898,22 +976,28 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a1, Value a2, Value a3)
   {
-    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
-    if (fun != null)
-      return fun.callMethodRef(env, this, a1, a2, a3);
-    else if ((fun = _quercusClass.getCall()) != null) {
-      return fun.callMethodRef(env,
-			       this,
-			       env.createString(name, nameLen),
-			       new ArrayValueImpl()
-			       .append(a1)
-			       .append(a2)
-			       .append(a3));
+      if (fun != null)
+        return fun.callMethodRef(env, this, a1, a2, a3);
+      else if ((fun = _quercusClass.getCall()) != null) {
+        return fun.callMethodRef(env,
+                     this,
+                     env.createString(name, nameLen),
+                     new ArrayValueImpl()
+                     .append(a1)
+                     .append(a2)
+                     .append(a3));
+      }
+      else
+        return env.error(L.l("Call to undefined method {0}::{1}()",
+                             getName(), toMethod(name, nameLen)));
+    } finally {
+      env.setCallingClassName(oldClassName);
     }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -923,23 +1007,29 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a1, Value a2, Value a3, Value a4)
   {
-    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
-    if (fun != null)
-      return fun.callMethodRef(env, this, a1, a2, a3, a4);
-    else if ((fun = _quercusClass.getCall()) != null) {
-      return fun.callMethodRef(env,
-			       this,
-			       env.createString(name, nameLen),
-			       new ArrayValueImpl()
-			       .append(a1)
-			       .append(a2)
-			       .append(a3)
-			       .append(a4));
+      if (fun != null)
+        return fun.callMethodRef(env, this, a1, a2, a3, a4);
+      else if ((fun = _quercusClass.getCall()) != null) {
+        return fun.callMethodRef(env,
+                     this,
+                     env.createString(name, nameLen),
+                     new ArrayValueImpl()
+                     .append(a1)
+                     .append(a2)
+                     .append(a3)
+                     .append(a4));
+      }
+      else
+        return env.error(L.l("Call to undefined method {0}::{1}()",
+                             getName(), toMethod(name, nameLen)));
+    } finally {
+      env.setCallingClassName(oldClassName);
     }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -949,24 +1039,30 @@ public class ObjectExtValue extends ObjectValue
   public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    AbstractFunction fun = _methodMap.get(hash, name, nameLen);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
-    if (fun != null)
-      return fun.callMethodRef(env, this, a1, a2, a3, a4, a5);
-    else if ((fun = _quercusClass.getCall()) != null) {
-      return fun.callMethodRef(env,
-			       this,
-			       env.createString(name, nameLen),
-			       new ArrayValueImpl()
-			       .append(a1)
-			       .append(a2)
-			       .append(a3)
-			       .append(a4)
-			       .append(a5));
+      if (fun != null)
+        return fun.callMethodRef(env, this, a1, a2, a3, a4, a5);
+      else if ((fun = _quercusClass.getCall()) != null) {
+        return fun.callMethodRef(env,
+                     this,
+                     env.createString(name, nameLen),
+                     new ArrayValueImpl()
+                     .append(a1)
+                     .append(a2)
+                     .append(a3)
+                     .append(a4)
+                     .append(a5));
+      }
+      else
+        return env.error(L.l("Call to undefined method {0}::{1}()",
+                             getName(), toMethod(name, nameLen)));
+    } finally {
+      env.setCallingClassName(oldClassName);
     }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           getName(), toMethod(name, nameLen)));
   }
 
   /**
@@ -975,7 +1071,13 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value callClassMethod(Env env, AbstractFunction fun, Value []args)
   {
-    return fun.callMethod(env, this, args);
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      return fun.callMethod(env, this, args);
+    } finally {
+      env.setCallingClassName(oldClassName);
+    }
   }
 
   /**
@@ -1063,9 +1165,9 @@ public class ObjectExtValue extends ObjectValue
                         SerializeMap serializeMap)
   {
     sb.append("O:");
-    sb.append(_quercusClass.getName().length());
+    sb.append(_className.length());
     sb.append(":\"");
-    sb.append(_quercusClass.getName());
+    sb.append(_className);
     sb.append("\":");
     sb.append(getSize());
     sb.append(":{");
@@ -1096,12 +1198,19 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public StringValue toString(Env env)
   {
-    AbstractFunction fun = _quercusClass.findFunction("__toString");
+    String oldClassName = env.setCallingClassName(_className);
+    
+    try {
+      AbstractFunction fun = _quercusClass.findFunction("__toString");
 
-    if (fun != null)
-      return fun.callMethod(env, this, new Expr[0]).toStringValue();
-    else
-      return env.createString(_quercusClass.getName() + "[]");
+      if (fun != null)
+        return fun.callMethod(env, this, new Expr[0]).toStringValue();
+      else
+        return env.createString(_className + "[]");
+    } finally {
+      env.setCallingClassName(oldClassName);
+    }
+    
   }
 
   /**
@@ -1215,7 +1324,7 @@ public class ObjectExtValue extends ObjectValue
   private void writeObject(ObjectOutputStream out)
     throws IOException
   {
-    out.writeObject(_quercusClass.getName());
+    out.writeObject(_className);
 
     out.writeInt(_size);
     
@@ -1265,7 +1374,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public String toString()
   {
-    return "ObjectExtValue@" + System.identityHashCode(this) +  "[" + _quercusClass.getName() + "]";
+    return "ObjectExtValue@" + System.identityHashCode(this) +  "[" + _className + "]";
   }
   
   public class EntrySet extends AbstractSet<Map.Entry<Value,Value>> {

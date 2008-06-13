@@ -46,14 +46,18 @@ import java.util.TreeSet;
 abstract public class ObjectValue extends Value {
   transient protected QuercusClass _quercusClass;
 
+  protected String _className;
+  
   protected ObjectValue(QuercusClass quercusClass)
   {
     _quercusClass = quercusClass;
+    _className = quercusClass.getName();
   }
 
   protected void setQuercusClass(QuercusClass cl)
   {
     _quercusClass = cl;
+    _className = cl.getName();
   }
 
   public QuercusClass getQuercusClass()
@@ -66,7 +70,7 @@ abstract public class ObjectValue extends Value {
    */
   public String getClassName()
   {
-    return _quercusClass.getName();
+    return _className;
   }
 
   /**
@@ -80,7 +84,7 @@ abstract public class ObjectValue extends Value {
    */
   public String getName()
   {
-    return _quercusClass.getName();
+    return _className;
   }
 
   /**

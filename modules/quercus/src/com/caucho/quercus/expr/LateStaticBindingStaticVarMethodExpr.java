@@ -31,7 +31,11 @@ package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.MethodMap;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
@@ -41,13 +45,11 @@ import java.util.ArrayList;
 /**
  * Represents a PHP static method expression.
  */
-public class StaticMethodExpr extends Expr {
-  private static final L10N L = new L10N(StaticMethodExpr.class);
+public class LateStaticBindingStaticVarMethodExpr extends Expr {
+  private static final L10N L
+    = new L10N(LateStaticBindingStaticMethodExpr.class);
   
-  protected final String _className;
-  protected final String _methodName;
-  protected final int _hash;
-  protected final char []_name;
+  protected final Expr _nameExpr;
   protected final Expr []_args;
 
   protected Expr []_fullArgs;
@@ -55,44 +57,38 @@ public class StaticMethodExpr extends Expr {
   protected AbstractFunction _fun;
   protected boolean _isMethod;
 
-  public StaticMethodExpr(Location location, String className,
-                          String name,
-                          ArrayList<Expr> args)
+  public LateStaticBindingStaticVarMethodExpr(Location location,
+			                                  Expr nameExpr,
+			                                  ArrayList<Expr> args)
   {
     super(location);
-    _className = className.intern();
-    
-    _methodName = name;
-    _name = name.toCharArray();
-    _hash = MethodMap.hash(_name, _name.length);
+
+    _nameExpr = nameExpr;
 
     _args = new Expr[args.size()];
     args.toArray(_args);
   }
 
-  public StaticMethodExpr(Location location, String className,
-                          String name,
-                          Expr []args)
+  public LateStaticBindingStaticVarMethodExpr(Location location,
+			                                  Expr nameExpr,
+			                                  Expr []args)
   {
     super(location);
-    _className = className.intern();
-    
-    _methodName = name;
-    _name = name.toCharArray();
-    _hash = MethodMap.hash(_name, _name.length);
+
+    _nameExpr = nameExpr;
 
     _args = args;
   }
 
-
-  public StaticMethodExpr(String className, String name, ArrayList<Expr> args)
+  public LateStaticBindingStaticVarMethodExpr(Expr nameExpr,
+			                                  ArrayList<Expr> args)
   {
-    this(Location.UNKNOWN, className, name, args);
+    this(Location.UNKNOWN, nameExpr, args);
   }
 
-  public StaticMethodExpr(String className, String name, Expr []args)
+  public LateStaticBindingStaticVarMethodExpr(Expr nameExpr, Expr []args)
   {
-    this(Location.UNKNOWN, className, name, args);
+    this(Location.UNKNOWN, nameExpr, args);
   }
 
   /**
@@ -124,33 +120,20 @@ public class StaticMethodExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    QuercusClass cl = env.findClass(_className);
+    String className = env.getCallingClassName();
+    
+    QuercusClass cl = env.findClass(className);
 
     if (cl == null) {
-      env.error(getLocation(), L.l("no matching class {0}", _className));
-
-      return NullValue.NULL;
+      env.error(getLocation(), L.l("no matching class {0}", className));
     }
 
-    // php/0954 - what appears to be a static call may be a call to a super constructor
-    Value thisValue = env.getThis();    
+    Value thisValue = env.getThis();
+    StringValue methodName = _nameExpr.evalStringValue(env);
 
-    //Value thisValue = NullThisValue.NULL;
-
-    env.pushCall(this, thisValue);
-
-    String oldClassName = env.setCallingClassName(_className);
-    try {
-      env.checkTimeout();
-
-      return cl.callMethod(env, thisValue, _hash, _name, _name.length, _args);
-    } finally {
-      env.popCall();
-      
-      env.setCallingClassName(oldClassName);
-    }
+    return cl.callMethod(env, thisValue, methodName, _args);
   }
-
+  
   /**
    * Evaluates the expression.
    *
@@ -160,21 +143,24 @@ public class StaticMethodExpr extends Expr {
    */
   public Value evalRef(Env env)
   {
-    QuercusClass cl = env.findClass(_className);
+    String className = env.getCallingClassName();
+    
+    QuercusClass cl = env.findClass(className);
 
     if (cl == null) {
-      env.error(getLocation(), L.l("no matching class {0}", _className));
+      env.error(getLocation(), L.l("no matching class {0}", className));
     }
 
     // qa/0954 - what appears to be a static call may be a call to a super constructor
     Value thisValue = env.getThis();
+    StringValue methodName = _nameExpr.evalStringValue(env);
 
-    return cl.callMethodRef(env, thisValue, _hash, _name, _name.length, _args);
+    return cl.callMethodRef(env, thisValue, methodName, _args);
   }
   
   public String toString()
   {
-    return _methodName + "()";
+    return _nameExpr + "()";
   }
 }
 

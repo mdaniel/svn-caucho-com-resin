@@ -387,7 +387,7 @@ public class StringBuilderValue
   }
 
   /**
-   * Returns true if the valu is empty.
+   * Returns true if the value is empty.
    */
   @Override
   public final boolean isEmpty()

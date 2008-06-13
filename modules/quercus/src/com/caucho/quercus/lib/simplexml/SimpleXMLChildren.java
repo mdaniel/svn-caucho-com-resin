@@ -67,10 +67,10 @@ import java.util.logging.*;
  */
 public class SimpleXMLChildren extends SimpleXMLElement
 {
-  protected SimpleXMLChildren(Env env, QuercusClass cls, JavaClassDef def,
+  protected SimpleXMLChildren(Env env, QuercusClass cls,
                               SimpleXMLElement parent, String name)
   {
-    super(env, cls, def, parent, name);
+    super(env, cls, parent, name);
   }
   
   /**
@@ -83,13 +83,13 @@ public class SimpleXMLChildren extends SimpleXMLElement
     if (indexV.isString()) {
       String name = indexV.toString();
       
-      return wrapJava(env, getAttribute(name), _cls, _def);
+      return wrapJava(env, _cls, getAttribute(name));
     }
     else if (indexV.isLongConvertible()) {
       int i = indexV.toInt();
 
       if (_children != null && i < _children.size())
-        return wrapJava(env, _children.get(i), _cls, _def);
+        return wrapJava(env, _cls, _children.get(i));
       else
         return NullValue.NULL;
     }
