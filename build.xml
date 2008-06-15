@@ -165,48 +165,6 @@
     </antcall>
   </target>
 
-  <target name="javaee" 
-          depends="init, jws, ejb, jpa, jca, jms, jsdk, jstl, jcache, jsf, jta, webbeans">
-    <jar jarfile="${lib}/javaee-16.jar">
-      <fileset dir="${modules}/ejb/build">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svnignore"/>
-      </fileset>
-      <fileset dir="${modules}/jca/build">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svnignore"/>
-      </fileset>
-      <fileset dir="${modules}/jms/build">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svnignore"/>
-      </fileset>
-      <fileset dir="${modules}/jpa/build">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svnignore"/>
-      </fileset>
-      <fileset dir="${modules}/jsdk/build">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svnignore"/>
-      </fileset>
-      <fileset dir="${modules}/jsf/build">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svnignore"/>
-      </fileset>
-      <fileset dir="${modules}/jstl/build">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svnignore"/>
-      </fileset>
-      <fileset dir="${modules}/jta/build">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svnignore"/>
-      </fileset>
-      <fileset dir="${modules}/webbeans/build">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svnignore"/>
-      </fileset>
-    </jar>
-  </target>
-
   <target name="j2ee-deploy" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="j2ee-deploy"/>

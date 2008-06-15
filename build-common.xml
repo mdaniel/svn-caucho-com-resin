@@ -509,6 +509,10 @@
         <exclude name="**/.*"/>
       </fileset>
       
+      <fileset dir="${resin.modules}/jws/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
       <fileset dir="${resin.modules}/webbeans/classes">
         <exclude name="**/.*"/>
       </fileset>
