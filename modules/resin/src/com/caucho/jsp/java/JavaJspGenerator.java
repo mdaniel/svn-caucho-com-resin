@@ -938,7 +938,10 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("try {");
     out.pushDepth();
 
-    out.println("_jspService(request, response, pageContext, _jsp_application, session, _jsp_state);");
+    if (isSession)
+      out.println("_jspService(request, response, pageContext, _jsp_application, session, _jsp_state);");
+    else
+      out.println("_jspService(request, response, pageContext, _jsp_application, null, _jsp_state);");
 
     out.popDepth();
     out.println("} catch (java.lang.Throwable _jsp_e) {");

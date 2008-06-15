@@ -49,10 +49,14 @@ import java.util.logging.Logger;
 /**
  * The generator for the host deploy
  */
-public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostController> {
-  private static final Logger log = Log.open(HostExpandDeployGenerator.class);
+public class HostExpandDeployGenerator
+  extends ExpandDeployGenerator<HostController>
+{
+  private static final Logger log
+    = Logger.getLogger(HostExpandDeployGenerator.class.getName());
 
-  private final HostExpandDeployGeneratorAdmin _admin = new HostExpandDeployGeneratorAdmin(this);
+  private final HostExpandDeployGeneratorAdmin _admin
+    = new HostExpandDeployGeneratorAdmin(this);
 
   private HostContainer _container;
 
@@ -64,7 +68,7 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
    * Creates the new host deploy.
    */
   public HostExpandDeployGenerator(DeployContainer<HostController> container,
-			  HostContainer hostContainer)
+				   HostContainer hostContainer)
   {
     super(container, hostContainer.getRootDirectory());
     
@@ -156,34 +160,38 @@ public class HostExpandDeployGenerator extends ExpandDeployGenerator<HostControl
     
     Path rootDirectory = getExpandDirectory().lookup("./" + name);
 
-    HostController controller
-      = new HostController(name, rootDirectory, _container);
+    String hostName = name;
 
+    if ("default".equals(hostName))
+      hostName = "";
+
+    HostController controller
+      = new HostController(hostName, rootDirectory, _container);
 
     Path jarPath = getArchiveDirectory().lookup("./" + name + ".jar");
     controller.setArchivePath(jarPath);
     
-    if (rootDirectory.isDirectory() &&
-	! isValidDirectory(rootDirectory, name))
+    if (rootDirectory.isDirectory()
+	&& ! isValidDirectory(rootDirectory, name))
       return null;
-    else if (! rootDirectory.isDirectory() &&
-	     ! jarPath.isFile())
+    else if (! rootDirectory.isDirectory()
+	     && ! jarPath.isFile())
       return null;
 
     try {
-      String hostName = getHostName();
+      String hostNamePattern = getHostName();
 
-      if (hostName != null) {
+      if (hostNamePattern != null) {
 	ELContext parentEnv = Config.getEnvironment();
 	ELResolver resolver
 	  = new MapVariableResolver(controller.getVariableMap());
 
 	ELContext env = new ConfigELContext(resolver);
 	
-	controller.setHostName(EL.evalString(hostName, env));
+	controller.setHostName(EL.evalString(hostNamePattern, env));
       }
       else
-	controller.setHostName(name);
+	controller.setHostName(hostName);
 
       controller.addDepend(jarPath);
     } catch (Throwable e) {

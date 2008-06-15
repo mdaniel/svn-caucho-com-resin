@@ -32,8 +32,8 @@
   <!--
      - Logging configuration for the JDK logging API.
     -->
-  <log name="" level="info" path="stdout:"
-       timestamp="[%H:%M:%S.%s] {%{thread}} "/>
+  <log-handler name="" level="all" path="stdout:"
+               timestamp="[%H:%M:%S.%s] {%{thread}} "/>
 
   <!--
      - 'info' for production
@@ -67,24 +67,11 @@
     -->
   <javac compiler="internal" args="-source 1.5"/>
 
-  <!-- Security providers.
-     - <security-provider>
-     -    com.sun.net.ssl.internal.ssl.Provider
-     - </security-provider>
-    -->
-
-  <!-- Uncomment to use Resin's XML implementations
-     -
-     - <system-property javax.xml.parsers.DocumentBuilderFactory
-     -                 ="com.caucho.xml.parsers.XmlDocumentBuilderFactory"/>
-     - <system-property javax.xml.parsers.SAXParserFactory
-     -                 ="com.caucho.xml.parsers.XmlSAXParserFactory"/>
-    -->
-
   <cluster id="app-tier">
-    <!-- sets the content root for the cluster, relative to server.root -->
+    <!-- sets the content root for the cluster, relative to resin.root -->
     <root-directory>.</root-directory>
 
+    <!-- enables development error pages -->
     <development-mode-error-page/>
 
     <server-default>
@@ -120,7 +107,6 @@
          - arguments for the watchdog process
         -->
       <watchdog-jvm-arg>-Dcom.sun.management.jmxremote</watchdog-jvm-arg>
-      <watchdog-port>6600</watchdog-port>
 
       <!--
          - Configures the minimum free memory allowed before Resin
@@ -193,16 +179,6 @@
     <web-app-default>
       <prologue>
         <!--
-           - Extension library for common jar files.  The ext is safe
-           - even for non-classloader aware jars.  The loaded classes
-           - will be loaded separately for each web-app, i.e. the class
-           - itself will be distinct.
-          -->
-        <class-loader>
-          <tree-loader path="${resin.root}/ext-webapp-lib"/>
-        </class-loader>
-
-        <!--
            - Enable EL expressions in Servlet and Filter init-param
           -->
         <allow-servlet-el/>
@@ -273,18 +249,6 @@
 
       <!-- creates the webapps directory for .war expansion -->
       <web-app-deploy path="webapps"/>
-
-      <!-- creates the deploy directory for .ear expansion -->
-      <ear-deploy path="deploy">
-        <ear-default>
-          <ejb-server>
-            <config-directory>WEB-INF</config-directory>
-          </ejb-server>
-        </ear-default>
-      </ear-deploy>
-
-      <!-- creates the deploy directory for .rar expansion -->
-      <resource-deploy path="deploy"/>
     </host-default>
 
     <!-- configures a deployment directory for virtual hosts -->

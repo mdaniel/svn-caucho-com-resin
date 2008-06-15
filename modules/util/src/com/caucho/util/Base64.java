@@ -348,7 +348,7 @@ public class Base64 {
   public static void decode(Reader r, OutputStream os)
     throws IOException
   {
-    while(true) {
+    while (true) {
       int ch0 = readNonWhitespace(r);
       int ch1 = r.read();
       int ch2 = r.read();
@@ -361,10 +361,10 @@ public class Base64 {
       if (ch3 < 0)
 	ch3 = '=';
       
-      int chunk = ((_decode[ch0] << 18) +
-		   (_decode[ch1] << 12) +
-		   (_decode[ch2] << 6) +
-		   (_decode[ch3]));
+      int chunk = ((_decode[ch0] << 18)
+		   + (_decode[ch1] << 12)
+		   + (_decode[ch2] << 6)
+		   + (_decode[ch3]));
       
       os.write((byte) ((chunk >> 16) & 0xff));
       
