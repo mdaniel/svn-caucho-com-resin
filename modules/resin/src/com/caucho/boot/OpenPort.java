@@ -54,7 +54,7 @@ public class OpenPort extends Port
   {
   }
 
-  public void setBuilderProgram(ConfigProgram program)
+  public void addBuilderProgram(ConfigProgram program)
   {
   }
 }

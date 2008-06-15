@@ -114,8 +114,9 @@
 
     <temp-dir>com.caucho.java.TempDir</temp-dir>
     <temporary-directory>com.caucho.java.TempDir</temporary-directory>
-
+<!--
     <web-service-client>com.caucho.soa.client.WebServiceClient</web-service-client>
+    -->
     
     <work-dir>com.caucho.java.WorkDir</work-dir>
     <work-directory>com.caucho.java.WorkDir</work-directory>
