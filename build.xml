@@ -1198,8 +1198,8 @@
     
     <copy todir="dist-debian/etc/resin">
       <fileset dir="${install}/conf">
-        <include name="resin.conf"/>
-        <include name="app-default.conf"/>
+        <include name="resin.xml"/>
+        <include name="app-default.xml"/>
       </fileset>
     </copy>
 
@@ -1229,7 +1229,7 @@
         <filter token="resin_home" value="/usr/lib/resin"/>
         <filter token="resin_root" value="-root-directory /var/www/resin"/>
         <filter token="resin_log" value="-log-directory /var/log/resin"/>
-        <filter token="resin_conf" value="-conf /etc/resin/resin.conf"/>
+        <filter token="resin_conf" value="-conf /etc/resin/resin.xml"/>
       </filterset>
     </copy>
     
