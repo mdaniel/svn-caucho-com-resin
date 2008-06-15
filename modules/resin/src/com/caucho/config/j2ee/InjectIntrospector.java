@@ -52,7 +52,7 @@ import javax.naming.*;
 import javax.interceptor.*;
 import javax.persistence.*;
 import javax.webbeans.*;
-import javax.xml.ws.WebServiceRef;
+//import javax.xml.ws.WebServiceRef;
 
 import java.beans.Introspector;
 import java.lang.annotation.Annotation;
@@ -377,12 +377,14 @@ public class InjectIntrospector {
 
       gen = generatePersistenceContext(location, field.getType(), jndiName, pContext);
     }
+    /*
     else if (field.isAnnotationPresent(WebServiceRef.class)) {
       WebServiceRef webService
 	= field.getAnnotation(WebServiceRef.class);
 
       gen = generateWebService(location, field.getType(), jndiName, webService);
     }
+    */
     else if (hasBindingAnnotation(field))
       introspectWebBean(injectList, field);
 
@@ -426,12 +428,14 @@ public class InjectIntrospector {
 
       gen = generatePersistenceContext(location, type, jndiName, pContext);
     }
+    /*
     else if (method.isAnnotationPresent(WebServiceRef.class)) {
       WebServiceRef webService
 	= method.getAnnotation(WebServiceRef.class);
 
       gen = generateWebService(location, type, jndiName, webService);
     }
+    */
     else if (hasBindingAnnotation(method))
       introspectWebBean(injectList, method);
 
@@ -439,6 +443,7 @@ public class InjectIntrospector {
       injectList.add(new MethodGeneratorProgram(method, gen));
   }
 
+  /*
   private static ValueGenerator
     generateWebService(String location,
 		       Class type,
@@ -451,21 +456,9 @@ public class InjectIntrospector {
     if (! "".equals(ref.name()))
       jndiName = ref.name();
 
-    /*
-    if (Service.class.isAssignableFrom(fieldType)) {
-      program = new ServiceInjectProgram(name,
-                                         fieldType,
-                                         inject);
-    }
-    else {
-      program = new ServiceProxyInjectProgram(name,
-                                              fieldType,
-                                              inject);
-    }
-    */
-
     return null;
   }
+  */
 
   private static ValueGenerator
     generatePersistenceContext(String location,
