@@ -13,7 +13,7 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
-<li>jsp: jsp generation changes to reduce code size (#2347)</li>
+<li>(2008-06-15) jsp: jsp generation changes to reduce code size (#2347)</li>
 <li>log: added response.isCacheHit() for AbstractHttpResponse (#2733)</li>
 <li>classloader: scan of ext paths must only add directories and jars (#2659, rep by Brian Burke)</li>
 <li>classloader: windows updates to handled custom-modified class files (#2730, rep by axeon)</li>
