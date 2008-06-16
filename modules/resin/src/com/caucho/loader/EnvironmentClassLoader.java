@@ -32,22 +32,24 @@ package com.caucho.loader;
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.jmx.Jmx;
 import com.caucho.lifecycle.Lifecycle;
-import com.caucho.log.EnvironmentStream;
-import com.caucho.loader.enhancer.ScanManager;
 import com.caucho.loader.enhancer.ScanListener;
+import com.caucho.loader.enhancer.ScanManager;
+import com.caucho.log.EnvironmentStream;
 import com.caucho.naming.Jndi;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.ResinThreadPoolExecutor;
 import com.caucho.vfs.Vfs;
 
-import javax.management.*;
-import java.lang.management.*;
-import javax.naming.*;
+import javax.management.MBeanServerFactory;
+import javax.naming.NamingException;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Properties;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -144,6 +146,21 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    */
   public static EnvironmentClassLoader create(ClassLoader parent, String id)
   {
+    String className = System.getProperty("caucho.environment.class.loader");
+
+    if (className != null) {
+      try {
+        Class cl = Thread.currentThread().getContextClassLoader().loadClass(className);
+        Constructor ctor = cl.getConstructor(new Class[] { ClassLoader.class, String.class});
+        Object instance = ctor.newInstance(parent, id);
+
+        return (EnvironmentClassLoader) instance;
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+
     return new EnvironmentClassLoader(parent, id);
   }
 
