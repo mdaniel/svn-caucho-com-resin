@@ -1,0 +1,402 @@
+<document>
+<properties>
+  <title>Installation</title>
+</properties>
+<body>
+
+<section name="About">
+<p>
+This module provides support for using Terracotta with Resin.
+</p>
+</section>
+
+<section name="Installation">
+
+<subsection name="Download Resin and Terracotta">
+<ol>
+  <li>Download Resin from <a href="http://www.caucho.com/download">http://www.caucho.com/download</a></li>
+<li>Unzip Resin.  From now on, we'll refer to the location of the Resin root directory as $RESIN_HOME</li>
+<li>Download Terracotta from <a href="http://www.terracotta.org">http://www.terracotta.org</a></li>
+<li>Unzip Terracotta. From now on, we'll refer to the location of the Terracotta root directory as $TERRACOTTA_HOME</li>
+</ol>
+</subsection>
+
+<subsection name="Download and install the module">
+<p>
+Download the <a href="http://modules.caucho.com/m2/com/caucho/resin-terracotta">resin-terracotta-X.Y.Z.jar</a> module and save the jar file in $RESIN_HOME/lib/resin-terracotta-X.Y.Z.jar.
+</p>
+</subsection>
+
+<subsection name="Configure Terracotta">
+<ol>
+<li>Create the Terracotta configuration file <code>$RESIN_HOME/tc-config.xml</code>
+<source>
+<b>$RESIN_HOME/tc-config.xml</b>
+
+&lt;?xml version="1.0" encoding="UTF-8"?>
+&lt;tc:tc-config xmlns:tc="http://www.terracotta.org/config">
+  &lt;application>
+    &lt;dso>
+      &lt;roots>
+        &lt;root>
+          &lt;field-name>example.HelloWorldServlet._accessTimes&lt;/field-name>
+        &lt;/root>
+      &lt;/roots>
+      &lt;locks>
+        &lt;autolock>
+          &lt;method-expression>* example.HelloWorldServlet*.*(..)&lt;/method-expression>
+          &lt;lock-level>write&lt;/lock-level>
+        &lt;/autolock>
+      &lt;/locks>
+      &lt;instrumented-classes>
+        &lt;include>&lt;class-expression>example..*&lt;/class-expression>&lt;/include>
+      &lt;/instrumented-classes>
+      &lt;additional-boot-jar-classes>
+        &lt;include>java.util.TimeZone&lt;/include>
+        &lt;include>sun.util.calendar.ZoneInfo&lt;/include>
+       &lt;/additional-boot-jar-classes>
+    &lt;/dso>
+  &lt;/application>
+&lt;/tc:tc-config>
+</source>
+</li>
+<li>Create the Terracotta boot jar:
+<source>
+$TERRACOTTA_HOME/bin/make-boot-jar.sh -f $RESIN_HOME/tc-config.xml
+</source>
+Note the path of the boot jar created by this command.  You will use it in the next step.
+</li>
+</ol>
+</subsection>
+
+<subsection name="Configure Resin">
+
+<p>
+Add jvm arguments to load and configure Resin and Terracotta at startup.  These
+arguments configure Resin to use the specialized classloaders provided by
+the resin-terracotta module, and they configure Terracotta to be loaded into
+the JVM.
+</p>
+
+<source>
+<b>$RESIN_HOME/conf/resin.xml</b>
+
+...
+
+  &lt;jvm-arg>... existing arguments ...&lt;/jvm-arg>
+
+  &lt;jvm-arg>-Djava.system.class.loader=com.caucho.modules.terracotta.SystemClassLoader&lt;/jvm-arg>
+  &lt;jvm-arg>-Dcaucho.environment.class.loader=com.caucho.modules.terracotta.EnvironmentClassLoader&lt;/jvm-arg>
+
+  &lt;jvm-arg>-Xbootclasspath/p:**path-to-boot-jar**&lt;/jvm-arg>
+  &lt;jvm-arg>-Dtc.install-root=**path-to-terracotta**&lt;/jvm-arg>
+  &lt;jvm-arg>-Dtc.config=localhost:9510&lt;/jvm-arg>
+
+...
+
+</source>
+
+<p>
+Make sure to replace the **path-to-boot-jar** and **path-to-terracotta**.
+</p>
+</subsection>
+
+<subsection name="A sample application">
+<ol>
+<li>Create the example webapp directory structure:
+<source>
+mkdir -p $RESIN_HOME/webapps/terracotta/WEB-INF/classes/example/
+</source>
+</li>
+<li>Create the configuration file <code>$RESIN_HOME/webapps/terracotta/WEB-INF/resin-web.xml</code>
+<source>
+<b>$RESIN_HOME/webapps/terracotta/WEB-INF/resin-web.xml</b>
+
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;servlet servlet-name="hello-servlet"
+           servlet-class="example.HelloWorldServlet"/>
+
+  &lt;servlet-mapping url-pattern="/*" servlet-name="hello-servlet"/>
+&lt;/web-app>
+</source>
+</li>
+<li>Create the HelloWorld Servlet
+    <code>$RESIN_HOME/webapps/terracotta/WEB-INF/classes/example/HelloWorldServlet.java</code>
+<source>
+<b>$RESIN_HOME/webapps/terracotta/WEB-INF/classes/example/HelloWorldServlet.java</b>
+
+package example;
+
+import java.io.*;
+import java.text.*;
+import java.util.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class HelloWorldServlet extends HttpServlet {
+  // this is the variable that Terracotta will distribute
+  private ArrayList&lt;Calendar> _accessTimes = new ArrayList&lt;Calendar>();
+
+  @Override
+  public void doGet(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException
+  {
+    Calendar now = Calendar.getInstance();
+
+    synchronized(_accessTimes) {
+      _accessTimes.add((Calendar) now.clone());
+      DateFormat format = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
+
+      resp.setContentType("text/html");
+
+      PrintWriter out = resp.getWriter();
+
+      out.println("&lt;html>");
+      out.println("&lt;body>");
+
+      for (Calendar calendar : _accessTimes) {
+        out.println("&lt;br/>" + format.format(calendar.getTime()));
+      }
+
+      out.println("&lt;/body>");
+      out.println("&lt;/html>");
+    }
+  }
+}
+</source>
+</li>
+
+<li>For testing on a single machine modify the resin.xml as follows:
+<ol>
+<li>
+Remove the line <code>&lt;http address="*" port="8080"/></code> from &lt;server-default&gt; section.
+</li>
+<li>
+Remove the default server line <code>&lt;server id="" address="127.0.0.1" port="6800"/></code>
+</li>
+<li>
+Add two servers:
+<source>
+<b>$RESIN_HOME/conf/resin.conf</b>
+
+  ...
+
+      &lt;server id="a" address="127.0.0.1" port="6800">
+        &lt;http address="*" port="8080"/>
+      &lt;/server>
+
+      &lt;server id="b" address="127.0.0.1" port="6801">
+        &lt;http address="*" port="8081"/>
+      &lt;/server>
+
+  ...
+
+</source>
+</li>
+</ol>
+</li>
+<li>For testing on multiple machines modify the resin.xml as follows:
+<ol>
+<li>
+Remove the default server line <code>&lt;server id="" address="127.0.0.1" port="6800"/></code>
+</li>
+<li>
+Add the servers that correspond to each machine:
+<source>
+<b>$RESIN_HOME/conf/resin.xml</b>
+
+  ...
+
+      &lt;server id="a" address="192.168.0.110" port="6800"/>
+      &lt;server id="b" address="192.168.0.111" port="6800"/>
+
+  ...
+
+</source>
+</li>
+</ol>
+</li>
+
+<li>Start the Terracotta server:
+  <source>
+    $TERRACOTTA_HOME/bin/start-tc-server.sh -f $RESIN_HOME/tc-config.xml
+  </source>
+</li>
+
+<li>Start both Resin servers:
+<source>
+cd $RESIN_HOME
+java -jar lib/resin.jar -server a start
+java -jar lib/resin.jar -server b start
+</source>
+</li>
+
+<li>
+Browse to http://localhost:8080/terracotta (or http://192.168.0.110:8080/terracotta with the multi-machine setup) and hit refresh a few times.  You should see a date added to the page on each refresh.
+</li>
+
+<li>
+Open another browser window to http://localhost:8081/terracotta (or http://192.168.0.111:8080/terracotta with the multi-machine setup).  You should see the same dates from the previous page, but with one now added.
+</li>
+
+</ol>
+</subsection>
+
+<subsection name="Troubleshooting">
+<ul>
+<li>
+You can run <code>$TERRACOTTA_HOME/bin/admin.sh</code> to see the details of
+the shared objects that Terracotta is managing.
+</li>
+</ul>
+</subsection>
+
+<subsection name="Terracotta Sessions and Resin">
+
+<p>
+Terracotta is able to take control of http sessions.  Most Resin users will
+find that the Resin implementation of distributed sessions is more functional
+and has better performance.  Testing should be done to determine if Terracotta
+provides any benefit in the production environment.
+</p>
+
+<p>
+Terracotta sessions are built on their DSOs, so the installation steps above
+provide the basis for configuring Terracotta to handle sessions.  We will use
+Quercus here to show how to use Java sessions from PHP and how Terracotta is
+able to share Java sessions even through PHP and Quercus.
+</p>
+
+<ol>
+
+<li>Copy the Terracotta session jar to Resin's lib directory:
+<source>
+cp $TERRACOTTA_HOME/lib/session/tc-session.jar $RESIN_HOME/lib
+</source>
+</li>
+
+<li>Create the example webapp directory structure:
+<source>
+mkdir -p $RESIN_HOME/webapps/terracotta/WEB-INF/classes/example/
+</source>
+</li>
+
+<li>
+  Configure Terracotta's session filter in WEB-INF/resin-web.xml:
+<source>
+<b>webapps/terracotta/WEB-INF/resin-web.xml</b>
+
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;filter filter-name='terracotta'
+          filter-class='com.terracotta.session.SessionFilter'/>
+  &lt;filter-mapping url-pattern='/*' filter-name='terracotta'/>
+&lt;/web-app>
+</source>
+</li>
+
+<li>Create the example PHP file <code>$RESIN_HOME/webapps/terracotta/index.php</code>
+<source>
+<b>$RESIN_HOME/webapps/terracotta/index.php</b>
+
+&lt;?php
+
+import com.caucho.server.resin.Resin;
+
+$resin = Resin::getLocal();
+
+echo "This server is $resin&lt;br/>";
+
+$session = $request->getSession(true);
+
+$count = $session->getAttribute("count");
+
+
+if (!isset($count)) {
+  $session->setAttribute("count", 0);
+} else {
+  $session->setAttribute("count", $count+1);
+}
+
+echo "Count: " . $session->getAttribute("count");
+?>
+</source>
+</li>
+
+<li>Modify the Terracotta configuration file <code>$RESIN_HOME/tc-config.xml</code>
+<source>
+<b>$RESIN_HOME/tc-config.xml</b>
+
+&lt;?xml version="1.0" encoding="UTF-8"?>
+&lt;tc:tc-config xsi:schemaLocation="http://www.terracotta.org/schema/terracotta-4.xsd" xmlns:tc="http://www.terracotta.org/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  &lt;!--Tell DSO where the Terracotta server can be found; 
+       See the Terracotta DSO Guide for additional information.-->
+  &lt;servers>
+    &lt;server host="%i" name="sample">
+      &lt;data>data/server-data&lt;/data>
+      &lt;logs>logs/server-logs&lt;/logs>
+    &lt;/server>
+    &lt;update-check>
+      &lt;enabled>true&lt;/enabled>
+    &lt;/update-check>
+  &lt;/servers>
+  &lt;!--Tell DSO where to put the generated client logs
+       See the Terracotta DSO Guide for additional information.-->
+  &lt;clients>
+    &lt;logs>logs/client-logs/%(webserver.log.name)&lt;/logs>
+  &lt;/clients>
+  &lt;application>
+    &lt;dso>      
+      &lt;instrumented-classes>
+        &lt;!--Include all classes for DSO instrumentation-->
+        &lt;include>
+          &lt;class-expression>*..*&lt;/class-expression>
+        &lt;/include>
+      &lt;/instrumented-classes>
+
+      &lt;!--Tell DSO which applications in your web container is using DSO-->
+      &lt;web-applications>
+        &lt;web-application>terracotta&lt;/web-application>
+      &lt;/web-applications>
+    &lt;/dso>
+  &lt;/application>
+&lt;/tc:tc-config>
+</source>
+</li>
+
+<li>Recreate the Terracotta boot jar.  It should end up in the same place as in
+    the first example above.
+<source>
+$TERRACOTTA_HOME/bin/make-boot-jar.sh -f $RESIN_HOME/tc-config.xml
+</source>
+Note the path of the boot jar created by this command.  You will use it in the next step.
+</li>
+
+<li>Start the Terracotta server:
+<source>
+$TERRACOTTA_HOME/bin/start-tc-server.sh -f $RESIN_HOME/tc-config.xml</source>
+</li>
+
+<li>Start both Resin servers:
+<source>
+cd $RESIN_HOME
+java -jar lib/resin.jar -server a start
+java -jar lib/resin.jar -server b start
+</source>
+</li>
+
+<li>
+Browse to http://localhost:8080/terracotta (or http://192.168.0.110:8080/terracotta with the multi-machine setup) and hit refresh a few times.  You should see an updated count on each refresh.
+</li>
+
+<li>
+Open another browser window to http://localhost:8081/terracotta (or
+http://192.168.0.111:8080/terracotta with the multi-machine setup).  You should
+see the count from the previous page, incremented by one.
+</li>
+</ol>
+
+</subsection>
+</section>
+
+</body>
+</document>

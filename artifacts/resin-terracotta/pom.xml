@@ -1,0 +1,65 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.caucho.modules</groupId>
+    <artifactId>caucho-module-parent</artifactId>
+    <version>1.0.0</version>
+    <relativePath>../caucho-module-parent</relativePath>
+  </parent>
+
+  <groupId>com.caucho.modules</groupId>
+  <artifactId>resin-terracotta</artifactId>
+  <name>resin-terracotta</name>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <description>Support for using Terracotta within Resin.</description>
+
+  <organization>
+    <name>Caucho Technology, Inc</name>
+    <url>http://caucho.com</url>
+  </organization>
+
+  <issueManagement>
+    <system>Mantis</system>
+    <url>http://bugs.caucho.com</url>
+  </issueManagement>
+
+  <scm>   
+    <connection>svn:svn://svn.caucho.com/resin/trunk/artifacts/${project.artifactId}</connection>
+  </scm>
+
+  <repositories>
+    <repository>
+      <id>com.caucho.modules</id>
+      <name>com.caucho.modules</name>
+      <url>http://modules.caucho.com/m2</url>
+    </repository>
+
+    <repository>
+      <id>terracotta.org</id>
+      <name>terracotta.org</name>
+      <url>http://download.terracotta.org/maven2</url>
+    </repository>
+  </repositories>
+ 
+  <dependencies>
+    <dependency>
+      <groupId>com.caucho</groupId>
+      <artifactId>resin</artifactId>
+      <version>3.1.6</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.terracotta</groupId>
+      <artifactId>terracotta</artifactId>
+      <version>2.5.0</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+</project>
