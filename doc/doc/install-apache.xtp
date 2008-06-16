@@ -67,7 +67,7 @@ There's a more complete discussion of the URL dispatching in the
 </li><li>Compile mod_caucho.so
 </li><li>Configure Apache
 </li><li>Set up environment
-</li><li>Configure resin.conf
+</li><li>Configure resin.xml
 </li><li>Restart Apache and start the backend Resin server
 </li></ol>
 
@@ -216,7 +216,7 @@ ResinConfigServer localhost 6802
 </s1> <!-- windows -->
 
 
-<s1 title="Configuring resin.conf">
+<s1 title="Configuring resin.xml">
 
 <p>
 The communication between <code>mod_caucho</code> and the backend Resin
@@ -224,12 +224,12 @@ server takes place using an <var>srun</var> port.
 </p>
 
 <p>
-The <code>resin.conf</code> for the backend server contains
-an <code>srun</code> to enable the port.  The default <code>resin.conf</code>
+The <code>resin.xml</code> for the backend server contains
+an <code>srun</code> to enable the port.  The default <code>resin.xml</code>
 has an srun listener on port 6802.
 </p>
 
-<example title="resin.conf">
+<example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="http://caucho.com/ns/resin/core"&gt;
 
@@ -250,13 +250,13 @@ has an srun listener on port 6802.
 
 
 <p>
-The resin.conf and the layout of your webapps should match the
+The resin.xml and the layout of your webapps should match the
 layout that Apache expects.  The mapping of urls to filesystem locations
 should be consistent between Apache and the backend Resin server.
 </p>
 
 
-<p>The default resin.conf looks in
+<p>The default resin.xml looks in
 <code>resin-3.1.x/webapps/ROOT</code> 
 for JSP files and
 <code>resin-3.1.x/webapps/ROOT/WEB-INF/classes</code>
@@ -265,7 +265,7 @@ to use Apache's document area, you configure an explicit
 <var>web-app</var> with the appropriate document-directory:
 </p>
 
-<example title="resin.conf">
+<example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="http://caucho.com/ns/resin/core"&gt;
 
@@ -461,7 +461,7 @@ appear in /caucho-status.
 <p>
 The <a href="virtual-host.xtp">virtual host</a> topic describes virtual
 hosts in detail.  If you're using a single JVM, you only need to configure
-the resin.conf.
+the resin.xml.
 </p>
 
 <example title="httpd.conf">
@@ -473,7 +473,7 @@ ResinConfigServer 192.168.0.1 6802
 &lt;/Location&gt;
 </example>
 
-<example title="resin.conf">
+<example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
 &lt;server&gt;
   &lt;cluster&gt;
@@ -559,7 +559,7 @@ $ bin/httpd.sh -pid gryffindor.pid stop
 
 <s1 name="balance" title="Load Balancing">
 
-<p>The <a href="resin-load-balance.xtp">Reliability and Load Balancing</a>
+<p>The <a href="resin-clustering.xtp">Reliability and Load Balancing</a>
 section provides an introduction to the concepts of load balancing.</p>
 
 <p>mod_caucho recognizes cluster configurations for load balancing. 
@@ -569,7 +569,7 @@ Resin will send the request to the next available machine.
 Optional backup machines only receive requests if all of the primaries are
 down.</p>
 
-<example title="resin.conf">
+<example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
 &lt;server&gt;
   &lt;cluster&gt;
@@ -653,11 +653,11 @@ In other words, add a &lt;http port='8080'/&gt; and check port 8080.
 </li><li>Check http://localhost/caucho-status.  That will tell if
 mod_caucho has properly connected to the backend Resin server.
 </li><li>Each srun host should be green and the mappings should
-match your resin.conf.
+match your resin.xml.
 </li><li>If caucho-status fails entirely, the problem is in the mod_caucho
 installation and the Apache httpd.conf.
 </li><li>If caucho-status shows the wrong mappings, there's something wrong
-with the resin.conf or the pointer to the backend server in httpd.conf.
+with the resin.xml or the pointer to the backend server in httpd.conf.
 </li><li>If caucho-status shows a red servlet runner, then Resin hasn't
 properly started.
 </li><li>If you get a "cannot connect to servlet engine", caucho-status
@@ -669,7 +669,7 @@ in resin-3.1.x/log.  You should start <var>httpd.sh -verbose</var> or
 it's not listening for connections from mod_caucho.
  You'll need to add a &lt;srun&gt; line.
 </li><li>If you get Resin's "file not found", the Apache configuration
-is good but the resin.conf probably points to the wrong directories.
+is good but the resin.xml probably points to the wrong directories.
 </li></ol>
 
 </s1>

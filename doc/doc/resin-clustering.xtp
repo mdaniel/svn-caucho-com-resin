@@ -27,7 +27,7 @@ results for the backend servers.</p>
 
 <p>Load balancing divides the Resin servers into two clusters:
 the web-tier and the app-tier. In Resin 3.1, all the cluster 
-and load balance configuration is in a single resin.conf.
+and load balance configuration is in a single resin.xml.
 The actual deployed server is selected with the <var>-server web-a</var>
 <a href="config-cmdline.xtp">command-line argument</a>.</p>
 
@@ -44,7 +44,7 @@ first server (192.168.0.1), which uses web-tier.conf, is the load balancer.  It
 has an &lt;http&gt; listener, it receives requests from browsers, and
 dispatches them to the backend servers (192.168.0.10 and 192.168.0.11).</p>
 
-<example title="resin.conf">
+<example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
 
 &lt;cluster id="web-tier"&gt;
@@ -225,7 +225,7 @@ If the hardware or the JVM crashes, however, the sessions will be lost.
 (If you want to save sessions for hardware or JVM crashes,
 remove the &lt;save-only-on-shutdown/&gt; flag.)</p>
 
-<example title="resin.conf">
+<example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
 &lt;cluster id="app-tier"&gt;
   &lt;server-default>
@@ -609,7 +609,7 @@ tag can be used to enable distributed sessions across an entire site.
 host, including the current host.  Since cluster sessions uses
 Resin's srun protocol, each host must listen for srun requests.</p>
 
-<example title="resin.conf fragment">
+<example title="resin.xml fragment">
 &lt;resin xmlns="http://caucho.com/ns/resin">
   &lt;cluster id="app-tier"&gt;
 
@@ -635,18 +635,18 @@ Resin's srun protocol, each host must listen for srun requests.</p>
 &lt;/resin&gt;
 </example>
 
-<p>Usually, hosts will share the same resin.conf.  Each host will be
+<p>Usually, hosts will share the same resin.xml.  Each host will be
 started with a different <var>-server xx</var> to select the correct
 block.  On Unix, startup will look like:</p>
 
 <example title="Starting Host&#160;C on Unix">
-resin-3.0.x&gt; bin/httpd.sh -conf conf/resin.conf -server c start
+resin-3.0.x&gt; bin/httpd.sh -conf conf/resin.xml -server c start
 </example>
 
 <p>On Windows, Resin will generally be configured as a service:</p>
 
 <example title="Starting Host&#160;C on Windows">
-resin-3.0.x&gt; bin/httpd -conf conf/resin.conf -server c -install-as ResinC
+resin-3.0.x&gt; bin/httpd -conf conf/resin.xml -server c -install-as ResinC
 </example>
 
 <s2 title="always-save-session">

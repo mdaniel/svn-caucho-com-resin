@@ -17,7 +17,7 @@ starting Resin with a Java command line.</p>
 
 <p>The Resin web server starts  listening to HTTP requests on
 port 8080 and listens on port 6800
-for <a href="resin-load-balance.xtp">load balancer</a>
+for <a href="resin-clustering.xtp">load balancer</a>
 or cluster messages.  Resin can then be
 used for development or evaluation.  The steps are:</p>
 
@@ -117,11 +117,11 @@ into a more permanent location:</p>
 </ul>
 </li>
 
-<li>If needed, modify the Resin configuration in <var>resin-3.1.0/conf/resin.conf</var>
+<li>If needed, modify the Resin configuration in <var>resin-3.1.0/conf/resin.xml</var>
 
 <ul>
-<li>You can copy resin.conf to somewhere like <var>/etc/resin/resin.conf</var></li>
-<li>Run <var>java -jar resin-3.1.0/lib/resin.jar --conf /etc/resin/resin.conf</var></li>
+<li>You can copy resin.xml to somewhere like <var>/etc/resin/resin.xml</var></li>
+<li>Run <var>java -jar resin-3.1.0/lib/resin.jar --conf /etc/resin/resin.xml</var></li>
 </ul>
 </li>
 
@@ -225,7 +225,7 @@ configuration tells Apache how to find Resin.</p>
 <ol>
 <li>On Unix only, compile mod_caucho.so using <code>./configure --with-apache; make</code></li>
 <li>Make any needed Apache httpd.conf changes</li>
-<li>Make any needed Resin resin.conf changes</li>
+<li>Make any needed Resin resin.xml changes</li>
 <li>Restart Apache</li>
 <li>Start Resin with <code>resin-3.1.0/bin/httpd.sh</code> on Unix or
 <code>resin-3.1.0/httpd.exe</code> on Windows.</li>
@@ -262,7 +262,7 @@ configuration tells IIS how to find Resin.
 
 <ol>
 <li>Setup the registry and IIS using resin-3.1.0/bin/setup</li>
-<li>Any needed Resin resin.conf changes</li>
+<li>Any needed Resin resin.xml changes</li>
 <li>Restart IIS</li>
 <li>Start Resin with resin-3.1.0/httpd.exe.</li>
 </ol>

@@ -306,7 +306,7 @@ setuid.  It will also open any necessary protected ports, e.g. port 80.</p>
     &lt;user-name>user_1&lt;/user-name>
     &lt;group-name>group_1&lt;/group-name>
 
-    &lt;resin-conf>/home/user_1/conf/resin.xml&lt;/resin-conf>
+    &lt;resin-xml>/home/user_1/conf/resin.xml&lt;/resin-conf>
     &lt;resin-root>/home/user_1/www&lt;/resin-root>
 
     &lt;open-port address="192.168.1.10" port="80"/>

@@ -105,7 +105,7 @@ public class Example extends VerboseFormattedTextWithAnchors {
     out.println("                  framerule=1pt,");
     out.println("                  fontsize=\\footnotesize,");
 
-    if (_title != null) {
+    if (_title != null && ! "".equals(_title)) {
       out.print("                  labelposition=bottomline,label=\\fbox{");
       out.println(LaTeXUtil.escapeForLaTeX(_title) + "},");
     }

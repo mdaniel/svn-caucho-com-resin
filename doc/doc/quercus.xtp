@@ -376,11 +376,11 @@ $db = new PDO("java:comp/env/jdbc/my-database");
 <s3 name="datasource" title="JNDI DataSource">
 
 <p>If a database with JNDI name <code>jdbc/myDatabase</code> is defined in
-resin.conf, (see <a href="config-database.xtp">Database Configuration</a>),
+resin.xml, (see <a href="config-database.xtp">Database Configuration</a>),
 Quercus can do a JNDI lookup for the database when database functions are
 called.  Thus, database connection parameters like user name can be omitted
 within PHP scripts.  This allows easier maintenance and enables Java and PHP
-database settings to be centrally located in resin.conf.</p>
+database settings to be centrally located in resin.xml.</p>
 
 <p>Scripts can use the jndi name directly:</p>
 

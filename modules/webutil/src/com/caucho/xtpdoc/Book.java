@@ -50,7 +50,7 @@ public class Book {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.println("\\documentclass{report}");
+    out.println("\\documentclass[twoside]{book}");
     out.println();
     out.println("\\usepackage{url}");
     out.println("\\usepackage{hyperref}");
@@ -67,6 +67,11 @@ public class Book {
     out.println("\\usepackage{fancyhdr}");
     out.println();
     out.println("\\pagestyle{fancy}");
+    out.println();
+
+    out.println("\\lhead[\\leftmark]{}");
+    out.println("\\rhead[]{\\rightmark}");
+
     out.println();
     out.println("\\definecolor{example-gray}{gray}{0.8}");
     out.println("\\definecolor{results-gray}{gray}{0.6}");

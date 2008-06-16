@@ -112,8 +112,6 @@ public class GitObjectStream {
 	value.append((char) ch);
       }
 
-      System.out.println("KV: " + key + " " + value);
-
       if ("tree".equals(key))
 	commit.setTree(value.toString());
       if ("parent".equals(key))
@@ -134,8 +132,6 @@ public class GitObjectStream {
     while ((ch = _is.read()) >= 0) {
       int mode = 0;
 
-      System.out.print((char) ch);
-
       for (; '0' <= ch && ch <= '7'; ch = _is.read()) {
 	mode = mode * 8 + ch - '0';
       }
@@ -149,9 +145,12 @@ public class GitObjectStream {
       }
       String name = nameBuffer.toString();
 
+      System.out.print(String.format("%o %s ", mode, name));
       byte []sha1 = new byte[20];
-      for (int i = 0; i < sha1.length; i++)
+      for (int i = 0; i < sha1.length; i++) {
 	sha1[i] = (byte) _is.read();
+	System.out.print("," + sha1[i]);
+      }
 
       tree.addEntry(name, mode, Hex.toHex(sha1));
     }

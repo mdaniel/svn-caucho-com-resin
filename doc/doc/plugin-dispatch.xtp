@@ -35,7 +35,7 @@ the ResinConfigServer specified in the httpd.conf or resin.ini.
 The ResinConfigServer can be any Resin server.  When a user requests a URL,
 mod_caucho uses the configuration it has determined from the ResinConfigServer
 to determine whether Resin or Apache should handle the request. That decision
-is based on the configuration in the ResinConfigServer's resin.conf.</p>
+is based on the configuration in the ResinConfigServer's resin.xml.</p>
 
 </s1>
 
@@ -71,7 +71,7 @@ allows path-infos, so <var>/foo/bar.ext/path/info</var> will also match.
 <s2 title="url-regexp">
 
 <note>mod_caucho does not understand regular expressions.  If you
-put regular expressions in your resin.conf, mod_caucho will not send
+put regular expressions in your resin.xml, mod_caucho will not send
 the request to Resin.  Apache will handle the request itself.</note>
 
 <p>If you want to use regular expressions in servlet-mapping, web-app, or
@@ -135,7 +135,7 @@ id.  Because mod_caucho does not understand regexps, it will ignore any
 web-app with a <var>regexp</var> attribute.</note>
 
 <note>web.xml files and war files are treated exactly the same as web-apps
-in the resin.conf.</note>
+in the resin.xml.</note>
 
 </s2>
 
@@ -167,7 +167,7 @@ Resin.</note>
 <s1 title="/caucho-status shows mod_caucho's URLs">
 
 <p>The special URL <var>/caucho-status</var> is invaluable in debugging
-Resin configurations.  <var>/caucho-status</var> displays all the resin.conf
+Resin configurations.  <var>/caucho-status</var> displays all the resin.xml
 patterns, so you can easily scan it to see which URLs mod_caucho is sending
 to Resin and which ones are handled by Apache.</p>
 
@@ -176,7 +176,7 @@ to Resin and which ones are handled by Apache.</p>
 <s1 title="Dispatching using Apache's http.conf">
 
 <p>You can configure Apache directly, instead of letting mod_caucho dispatch
-from the resin.conf file.  If you use this method, you need to make
+from the resin.xml file.  If you use this method, you need to make
 sure you match the Apache configuration with the Resin configuration.</p>
 
 <note>This technique uses Apache-specific features, so it's not

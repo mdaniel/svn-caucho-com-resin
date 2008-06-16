@@ -186,7 +186,6 @@ public class GitRepository {
     tree.toData(treeOut);
     
     int treeLength = treeOut.getLength();
-    System.out.println("LEN: " + treeLength);
     
     InputStream is = treeOut.openRead();
     
@@ -258,8 +257,6 @@ public class GitRepository {
     out.close();
     
     int commitLength = commitOut.getLength();
-    
-    System.out.println("LEN: " + commitLength);
     
     InputStream is = commitOut.openRead();
     

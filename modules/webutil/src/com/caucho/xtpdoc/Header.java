@@ -197,18 +197,22 @@ public class Header {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.println("\\section{" + _title + "}");
-
-    out.println("\\label{" + _document.getName() + "}");
-    out.println("\\hypertarget{" + _document.getName() + "}{}");
+    String label = _document.getDocumentPath().getUserPath();
+    
+    out.println("\\label{" + label + "}");
+    out.println("\\hypertarget{" + label + "}{}");
+    
+    out.println("\\section{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
   }
 
   public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException
   {
-    out.println("\\subsection{" + _title + "}");
+    String label = _document.getDocumentPath().getUserPath();
 
-    out.println("\\label{" + _document.getName() + "}");
-    out.println("\\hypertarget{" + _document.getName() + "}{}");
+    out.println("\\label{" + label + "}");
+    out.println("\\hypertarget{" + label + "}{}");
+    
+    out.println("\\subsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
   }
 }

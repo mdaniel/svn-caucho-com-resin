@@ -42,7 +42,7 @@ Resin and the web server plugin also uses keepalives.  By keeping the
 connection open for following requests, Resin can improve performance.
 </p>
 
-<example title="resin.conf for thread-keepalive">
+<example title="resin.xml for thread-keepalive">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
   &lt;cluster id="app-tier">
 

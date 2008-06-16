@@ -24,7 +24,7 @@
 When you build the project in the IDE, Resin will automatically pick up
 the changes without any need for a deploy step.</p>
 
-<example title="resin.conf for IDE">
+<example title="resin.xml for IDE">
 &lt;resin xmlns="http://caucho.com/ns/resin">
   &lt;cluster id="">
     &lt;server id="">

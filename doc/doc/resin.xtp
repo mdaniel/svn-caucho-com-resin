@@ -1,12 +1,12 @@
 <document>
 <header>
   <product>resin</product>
-  <title>resin.conf: Ports, Virtual Hosts, Clustering and Threads</title>
+  <title>resin.xml: Ports, Virtual Hosts, Clustering and Threads</title>
   <version>Resin 3.0</version>
 
   <description>
 
-  <p>Describes the resin, server, host, and port configuration in the resin.conf.</p>
+  <p>Describes the resin, server, host, and port configuration in the resin.xml.</p>
 
   </description>
 </header>
@@ -72,7 +72,7 @@ detects the low memory before those errors can be thrown.</p>
 <defun title="&lt;resin>" version="Resin 3.0">
       
 <p>&lt;resin> is the top-level configuration tag for
-the resin.conf file.  The &lt;resin&gt;
+the resin.xml file.  The &lt;resin&gt;
 tag needs to specify the Resin namespace, to allow for validation
 of the configuration file.</p>
 

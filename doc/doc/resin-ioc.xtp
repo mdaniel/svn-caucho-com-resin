@@ -226,8 +226,8 @@ WebBeans components or singletons you bring in will also be managed.
 The starting set of managed objects is pretty broad and includes:</p>
 
 <ul>
-<li>&lt;bean> (singletons) defined in the resin.conf or resin-web.xml</li>
-<li>&lt;component> (WebBeans components) defined in the resin.conf,
+<li>&lt;bean> (singletons) defined in the resin.xml or resin-web.xml</li>
+<li>&lt;component> (WebBeans components) defined in the resin.xml,
 resin-web.xml or web-beans.xml</li>
 <li>EJB message-driven beans</li>
 <li>EJB session beans</li>
@@ -281,7 +281,7 @@ to <code>begin()</code>, <code>rollback()</code>, and
 <p><b><code>java.util.concurrent.ScheduledExecutorService</code></b>
 lets applications schedule threads and timed events controlled by
 Resin's thread pool, and restricted by the thread-max configuration
-in the resin.conf.  This <code>ScheduleExecutorService</code> is
+in the resin.xml.  This <code>ScheduleExecutorService</code> is
 classloader-safe, so Resin will automatically close your scheduled
 tasks when restarting a web-app.</p>
 
@@ -634,7 +634,7 @@ public class TimerService {
 <s1 title="XML configuration">
 
 <p>You can register your components and services with Resin using the
-resin.conf or resin-web.xml files.  Since the WebBeans registry is integrated
+resin.xml or resin-web.xml files.  Since the WebBeans registry is integrated
 with Resin, your services be treated as first-class components along with
 the Resin resources.  Although most components will not need XML, there
 are a few advantages for the small number of services which do use XML.</p>
@@ -710,7 +710,7 @@ number of optional attributes:</p>
 <p>Resin's XML configuration uses the standard JavaBeans patterns to
 configure properties.  Resin uses the same mechanism for all of its own
 configuration parsing, including every JavaEE configuration file, the
-resin-web.xml and the resin.conf itself.  So your application will have
+resin-web.xml and the resin.xml itself.  So your application will have
 all the configuration flexibility it needs.</p>
 
 <p>Since the component beans can use WebBeans

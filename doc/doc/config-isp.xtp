@@ -45,7 +45,7 @@ communication is properly configured.</p>
 
 <p>The user can customize the configuration by adding a
 doc/WEB-INF/web.xml file following the servlet deployment descriptor.
-ISPs that want give more flexibility can add a &lt;resin:include&gt; directive
+ISPs that want give more flexibility can add a &lt;resin:import&gt; directive
 to read a user configuration file.</p>
 
 <example title="slytherin.conf">
@@ -91,7 +91,7 @@ Any other servlet-mappings should be defined in WEB-INF/web.xml.
 
 <s1 title="Apache httpd.conf">
 
-<p>Each Apache virtual host use its own resin.conf file.  You can
+<p>Each Apache virtual host use its own resin.xml file.  You can
 look at the configuration using /caucho-status for the virtual host,
 as usual.</p>
 

@@ -5,7 +5,7 @@
     <title>Command-Line Configuration</title>
     <description>
       <p>While most configuration options have been made available in
-        resin.conf, this section describes some common command-line
+        resin.xml, this section describes some common command-line
         options.</p>
     </description>
   </header>
@@ -31,7 +31,7 @@
       <td>Help for all ./configure command line options</td></tr>
     <tr>
       <td>--enable-64bit</td>
-      <td>Compiles the JNI using 64-bits, requires <code>&lt;jvm-arg>-d64&lt;/jvm-arg></code> entry in resin.conf</td>
+      <td>Compiles the JNI using 64-bits, requires <code>&lt;jvm-arg>-d64&lt;/jvm-arg></code> entry in resin.xml</td>
     </tr>
     <tr>
       <td>--enable-ssl</td>
@@ -45,7 +45,7 @@
 
     <p>
       The 64-bit JNI compilation must match the JDK you're using, i.e.
-      you'll need to add a <code>&lt;jvm-arg>-d64&lt;/jvm-arg></code> entry in resin.conf to
+      you'll need to add a <code>&lt;jvm-arg>-d64&lt;/jvm-arg></code> entry in resin.xml to
       indicate that the jvm should start in 64-bit mode.
     </p>
 
@@ -66,11 +66,11 @@
       <tr>
         <td>-conf <var>xxx</var></td>
         <td>Selects the Resin configuration file</td>
-        <td>conf/resin.conf</td>
+        <td>conf/resin.xml</td>
       </tr>
       <tr>
         <td>-server <var>xxx</var></td>
-        <td>Selects the &lt;server> in the resin.conf</td>
+        <td>Selects the &lt;server> in the resin.xml</td>
         <td>""</td>
       </tr>
       <tr>
@@ -134,7 +134,7 @@
         <td>
            Deprecated. Sets the Resin home directory.
            Use environment variable <var>RESIN_HOME</var> or
-           <var>&lt;jvm-arg&gt;-Dresin.home=xxx&lt;/jvm-arg&gt;</var> in resin.conf.
+           <var>&lt;jvm-arg&gt;-Dresin.home=xxx&lt;/jvm-arg&gt;</var> in resin.xml.
         </td>
         <td>The parent directory of resin.jar</td>
       </tr>
@@ -143,14 +143,14 @@
     </s1>
       <s1 title="JDK arguments">
 
-      <p>Resin 3.1 has moved all JDK arguments into the resin.conf
+      <p>Resin 3.1 has moved all JDK arguments into the resin.xml
       file, in the &lt;<a href="server-tags.xtp#jvm-arg">jvm-arg</a>&gt;
       tag. Because the Resin 3.1 watchdog starts each Resin server instance,
       it can pass the arguments defined in the configuration file to the JVM.
       By moving the Java arguments to the configuration file, server configuration
       is easier and more maintainable.</p>
 
-      <example title="resin.conf with Java arguments">
+      <example title="resin.xml with Java arguments">
       &lt;resin xmlns="http://caucho.com/ns/resin">
         &lt;cluster id="app-tier">
 

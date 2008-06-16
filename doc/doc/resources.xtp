@@ -524,7 +524,7 @@ This is true for both clients and servers.
 A security manager is enabled in Resin using the <a config-tag="security-manager"/> configuration:
 </p>
 
-<example title="enabling security-manager in resin.conf">
+<example title="enabling security-manager in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="http://caucho.com/ns/resin/core"&gt;
 

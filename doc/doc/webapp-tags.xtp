@@ -95,7 +95,7 @@ element archive-path {
 }
 </def>
 
-<example title="Example: resin.conf explicit archive location">
+<example title="Example: resin.xml explicit archive location">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 &lt;cluster id="">
 
@@ -359,7 +359,7 @@ element cookie-http-only {
 }
 </def>
 
-<example title="Example: &lt;cookie-http-only> in resin.conf">
+<example title="Example: &lt;cookie-http-only> in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 &lt;cluster id="">
 
@@ -402,7 +402,7 @@ for ear expansion.</p>
 </tr>
 <tr>
   <td>ear-default</td>
-  <td>resin.conf default configuration for all ear files, e.g. configuring
+  <td>resin.xml default configuration for all ear files, e.g. configuring
 database, JMS or EJB defaults.</td>
   <td></td>
 </tr>
@@ -2447,7 +2447,7 @@ element web-app-deploy {
 a matching &lt;web-app&gt; inside the &lt;web-app-deploy&gt;.  The
 &lt;document-directory&gt; is used to match web-apps.</p>
 
-<example title="Example: resin.conf overriding web.xml">
+<example title="Example: resin.xml overriding web.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 &lt;cluster id="">
 &lt;host id="">

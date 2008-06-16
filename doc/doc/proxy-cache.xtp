@@ -519,7 +519,7 @@ for <var>*.jsp</var> even if only some are cacheable.</p>
 
 <p>When designing and testing your cached page, it's important to see
 how Resin is caching the page.  To turn on logging for caching, you'll
-add the following to your resin.conf:</p>
+add the following to your resin.xml:</p>
 
 <example title="Example: adding caching log">
 &lt;resin xmlns="http://caucho.com/ns/resin">

@@ -577,7 +577,7 @@ Enable the use of the security manager for the JVM.
 Add one or more security providers.</d>
     </ix>
     <ix h="resin.xtp#resin" id="resin">
-      <d>Top-level configuration for the resin.conf file.</d>
+      <d>Top-level configuration for the resin.xml file.</d>
     </ix>
     <ix h="resin.xtp#root-directory" id="root-directory">
       <d>Specifies the root directory for the &lt;server&gt; and &lt;host&gt;

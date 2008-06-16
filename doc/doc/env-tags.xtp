@@ -36,7 +36,7 @@ and <code>isUserInRole</code> methods of the
 <p>The authenticators are scoped to their containing environment.
 An authenticator defined in
 WEB-INF/resin-web.xml applies only to the web-app, while an
-authenticator defined in the &lt;cluster> section of the resin.conf
+authenticator defined in the &lt;cluster> section of the resin.xml
 applies to the entire cluster.  The <a href="resin-tags.xtp#management">&lt;management></a> configuration provides an authenticator which is available
 to all applications.</p>
 
@@ -1469,7 +1469,7 @@ to change the compiler to use an external compiler.
 <p>
 The javac compiler is included with the JDK. It executes that same as the
 internal compiler, however it is executed as an external process and is less
-prone to the problems described for the internal compiler.  In resin.conf with
+prone to the problems described for the internal compiler.  In resin.xml with
 the javac configuration option: 
 </p>
 
@@ -2648,7 +2648,7 @@ element set {
 }
 </def>
 
-<example title="Example: resin:set in resin.conf">
+<example title="Example: resin:set in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
           xmlns:resin="http://caucho.com/ns/resin/core">
   &lt;resin:set name="root" value="/var/www"/>

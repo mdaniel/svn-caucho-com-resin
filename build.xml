@@ -717,7 +717,10 @@
       </mapper>
     </apply>
 
-    <generate-pdf name="book"/>
+    <generate-pdf name="book-reference"/>
+
+     <copy tofile="${build}/pdf/resin-3.2-reference.pdf"
+	   file="${build}/pdf/book-reference/book-reference.pdf"/>
   </target>
 
   <target name="relaxng">

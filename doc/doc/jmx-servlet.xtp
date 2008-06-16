@@ -17,7 +17,7 @@
 
 <s1 title="Configure the /resin-status servlet">
 
-<example title="resin.conf /resin-status configuration">
+<example title="resin.xml /resin-status configuration">
 &lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="http://caucho.com/ns/resin/core"&gt;
 

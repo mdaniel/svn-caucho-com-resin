@@ -376,8 +376,9 @@
 
       <java classname="com.caucho.xtpdoc.Printer" fork="true" 
             output="${build}/pdf/@{name}/@{name}.tex" logError="true"
-            dir="${doc}">
-        <arg file="${doc}/pdf/@{name}.xml"/>
+            dir="${doc}/doc">
+        <jvmarg value="-Djava.awt.headless=true"/>
+        <arg file="${doc}/doc/@{name}.xml"/>
         <classpath>
           <pathelement location="${java.home}/../lib/tools.jar"/>
           <dirset dir="${modules}">
@@ -401,7 +402,7 @@
     </sequential>
   </macrodef>
 
-
+<!--
   <target name="pdf" depends="init">
     <delete dir="${build}/pdf" />
     <mkdir dir="${build}/pdf/images"/>
@@ -423,6 +424,7 @@
 
     <generate-pdf name="book"/>
   </target>
+  -->
 
   <target name="relaxng">
     <mkdir dir="xsd"/>

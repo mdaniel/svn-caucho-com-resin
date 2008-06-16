@@ -299,7 +299,7 @@ Following the J2EE spec, the env-entry-name is relative to
 java:comp/env.  If the env-entry is in the &lt;host&gt; context, it will
 be visible to all web-apps in the host.</p>
 
-<example title="Example resin.conf fragment">
+<example title="Example resin.xml fragment">
 &lt;env-entry&gt;
   &lt;env-entry-name&gt;greeting&lt;/env-entry-name&gt;
   &lt;env-entry-type&gt;java.lang.String&lt;/env-entry-type&gt;

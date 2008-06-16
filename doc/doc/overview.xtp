@@ -50,7 +50,7 @@ Clustering is supported with the standalone web server, Apache, and IIS.
 </p>
 
 <ul>
-<li>Resin documentation: <a href="resin-load-balance.xtp">Reliability and Load Balancing</a></li>
+<li>Resin documentation: <a href="resin-clustering.xtp">Reliability and Load Balancing</a></li>
 </ul>
 </s2>
 
@@ -412,13 +412,13 @@ and security holes.</p>
 
 <p>As a side benefit of the watchdog, JVM parameters like heap settings,
 agent configuration, remote JMX and system properties can be configured
-in the resin.conf itself.  The watchdog can read the same resin.conf as
+in the resin.xml itself.  The watchdog can read the same resin.xml as
 the server itself, putting all configuration relevant to the server in
 one location.</p>
 
 <p>For more complicated configurations like an ISP setting, the watchdog
 can use a separate configuration file readable only by root.  The watchdog
-will launch Resin JVMs with assigned resin.conf files, ports, and user
+will launch Resin JVMs with assigned resin.xml files, ports, and user
 assignment, protecting each Resin JVM user from each other.</p>
 
 </s1>

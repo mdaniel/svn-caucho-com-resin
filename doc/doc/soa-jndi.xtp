@@ -134,7 +134,7 @@ stick to the java:comp/env tree.</p>
 
 <p>The vast majority of applications will only need the following simple
 pattern to lookup objects using JNDI.  Since the JNDI objects are
-typically configured in the web.xml or resin.conf, servlets will
+typically configured in the web.xml or resin.xml, servlets will
 typically look up their DataSources or EJB objects once in the init()
 method.  By looking up the object once, the application can avoid any
 JNDI overhead for normal requests.

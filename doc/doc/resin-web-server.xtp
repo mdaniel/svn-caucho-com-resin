@@ -74,7 +74,7 @@ make Resin and website upgrades easier and more maintainable.</p>
 <li>Link <var>/usr/local/share/resin</var> to the current Resin directory. This is <var>$RESIN_HOME</var>.</li>
 <li>Create a deployment root, e.g. <var>/var/www</var>, owned by
 the resin user. This is <var>$RESIN_ROOT</var>.</li>
-<li>Put the modified <var>resin.conf</var> in <var>/etc/resin/resin.conf</var></li>
+<li>Put the modified <var>resin.xml</var> in <var>/etc/resin/resin.conf</var></li>
 <li>Put the site documents in <var>/var/www/webapps/ROOT</var>.</li>
 <li>Put any .war files in <var>/var/www/webapps</var>.</li>
 <li>Put any virtual hosts in <var>/var/www/hosts/www.foo.com</var>.</li>
@@ -116,7 +116,7 @@ export RESIN_ROOT
 
 $java -jar $RESIN_HOME/lib/resin.jar \
       -resin-root $RESIN_ROOT \
-      -conf /etc/conf/resin.conf \
+      -conf /etc/conf/resin.xml \
       -server a \
        $*
 </example>
@@ -127,7 +127,7 @@ and <code>./start.sh stop</code> to stop.</p>
 <p>The <code>-server</code> argument is only
 necessary if you have multiple servers (JVM instances) either
 on different machines or the same machine.
-The <a href="resin-load-balance.xtp">load balancing</a> and
+The <a href="resin-clustering.xtp">load balancing</a> and
 <a href="config-sessions.xtp">distributed sessions</a> pages describe when
 you might use <code>-server</code>.</p>
 
@@ -221,7 +221,7 @@ C:\&gt; net start ResinA
 
 <example>
 unix> java -jar /usr/local/share/resin/lib/resin.jar \
-           -conf /etc/resin/resin.conf \
+           -conf /etc/resin/resin.xml \
            start
 </example>
 
@@ -230,7 +230,7 @@ in resin.jar's manifest. The <var>-conf</var> argument specifies the
 path to your Resin configuration file. Lastly, Resin accepts <var>start</var>,
 <var>stop</var>, and <var>restart</var> arguments which are passed to the <a href="#The Watchdog Process">watchdog
 process</a>. An additional command-line option, <var>-server</var> is used
-in <a href="resin-load-balance.xtp">load-balanced deployments</a>.</p>
+in <a href="resin-clustering.xtp">load-balanced deployments</a>.</p>
 
 <p>JDK 1.5 includes a
 <a href="http://java.sun.com/j2se/1.5.0/docs/tooldocs/share/jps.html">jps</a>
@@ -281,12 +281,12 @@ lock up, the watchdog would still think Resin was okay and would take no action.
 </s2>
 
 <s2 title="Resin Processes">
-<p>If Resin detects a major error (like running out of memory) or if the resin.conf changes,
+<p>If Resin detects a major error (like running out of memory) or if the resin.xml changes,
 it will exit and the watchdog would start a new Resin instance. Reasons a Resin instance
 might exit include:</p>
 
 <ul>
-  <li>resin.conf changes</li>
+  <li>resin.xml changes</li>
   <li>out of memory error</li>
   <li>detected deadlocks</li>
   <li>segv and other severe errors</li>

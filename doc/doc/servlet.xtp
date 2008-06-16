@@ -482,9 +482,9 @@ equally busy, the selection uses a round-robin to distribute the load.
 </td></tr></deftable-parameters>
 
 <p>The usual case balances all requests to backend servers.  The front-end Resin
-instance has a resin.conf similar to the one shown here.  It configures
+instance has a resin.xml similar to the one shown here.  It configures
 the front-end instance to balance the load to the backend
-servers.  The backend Resin instances have a resin.conf file that
+servers.  The backend Resin instances have a resin.xml file that
 configures the web site, similar to a conf file that is used when only one
 instance of Resin used for the server.</p>
 
@@ -668,7 +668,7 @@ Mapping is enabled for all web-apps with the use of
 "*.php" and the pattern "*.phtml" are handled by the backend program: 
 </p>
 
-<example title="resin.conf">
+<example title="resin.xml">
 &lt;web-app-default&gt;
   &lt;servlet&gt;
     &lt;servlet-name&gt;php-fastcgi&lt;/servlet-name&gt;

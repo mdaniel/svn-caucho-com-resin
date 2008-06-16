@@ -42,7 +42,7 @@ RESIN_HOME=C:\resin-3.0
 <p>To configure Resin with IIS, you must follow the following steps:</p>
 <ol>
 <li>Configure IIS/PWS
-</li><li>Configure resin.conf
+</li><li>Configure resin.xml
 </li><li>Start httpd
 </li></ol>
 
@@ -68,9 +68,9 @@ IISPriority high
 
 </s2>
 
-<s2 title="Configuring resin.conf">
+<s2 title="Configuring resin.xml">
 
-<p>resin.conf should mirror the configuration of IIS.  In other words, you 
+<p>resin.xml should mirror the configuration of IIS.  In other words, you 
 need to configure the document root and any directory aliases.</p>
 
 <p>For many users, the only need to change needed in Resin is to change the
@@ -80,7 +80,7 @@ files on the disk must be the same for Resin as they are for IIS. For more
 complicated configurations that use mappings in IIS, you'll need to add <a href="webapp-tags.xtp">path-mapping</a> attributes
 to match.</p>
 
-<example title="resin.conf" language="xml">
+<example title="resin.xml" language="xml">
 &lt;!-- configures the default host, matching any host name --&gt;
 &lt;host id=''&gt;
 
@@ -213,7 +213,7 @@ requests if all primaries are down.</p>
 <p>See the <a href="cluster.xtp">Resin config</a> section for more
 details.</p>
 
-<example title="resin.conf">
+<example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
 &lt;server&gt;
   &lt;cluster&gt;
@@ -261,7 +261,7 @@ may need to stop IIS (control panel/services) to get permission to
 overwrite isapi_srun.dll.</p>
 
 <p>The resin.ini is an optional file in <var>inetpub/scripts</var> to
-override the automatic registry $RESIN_HOME/conf/resin.conf configuration
+override the automatic registry $RESIN_HOME/conf/resin.xml configuration
 file.  If you only have one Resin server, you should not create a resin.ini
 and let isapi_srun.dll use the registry value set by the setup.exe program.</p>
 
@@ -314,7 +314,7 @@ for each virtual site point to <var>d:\inetpub\scripts</var>, so that each virtu
 <p>Resin is configured to recognize virtual hosts with the <var>id</var> attribute
 of <a config-tag="host"/>. </p>
 
-<example title="resin.conf with virtual hosts">
+<example title="resin.xml with virtual hosts">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
   ...
   &lt;server&gt;
@@ -415,7 +415,7 @@ browse http://localhost:8080.
 </li><li>Check <var>http://localhost/caucho-status</var>.  That will tell if
 the ISAPI filter/extension is properly installed. 
 </li><li>Each srun host should be green and the mappings should
-match your resin.conf.
+match your resin.xml.
 </li><li>If caucho-status fails entirely, the problem is in the <var>isapi_srun</var>
 installation.  Try
 <var>http://localhost/scripts/isapi_srun.dll/caucho-status</var> directly
@@ -432,7 +432,7 @@ permissions.
 IIS web site, you need to create a virtual directory <var>/scripts</var> pointing
 to the <var>d:\inetpub\scripts</var> directory.
 </li><li>If caucho-status shows the wrong mappings, there's something wrong
-with the resin.conf.
+with the resin.xml.
 </li><li>If caucho-status shows a red servlet runner, then httpd.exe hasn't
 properly started.
 </li><li>If you get a "cannot connect to servlet engine", caucho-status
@@ -441,7 +441,7 @@ will show red, and httpd.exe hasn't started properly.
 in resin3.0/log.  You should start <var>httpd.exe -verbose</var> to get
 more information.
 </li><li>If you get Resin's file not found, the IIS configuration
-is good but the resin.conf probably points to the wrong directories.
+is good but the resin.xml probably points to the wrong directories.
 </li></ol>
 
 <s2 name="iis6" title="Troubleshooting IIS 6">

@@ -1,10 +1,10 @@
 <document>
   <header>
     <product>resin</product>
-    <title>resin.conf Relax-NG Schema</title>
+    <title>resin.xml Relax-NG Schema</title>
     <version>Resin 3.0</version>
     <description>
-      <p>The formal definition for the resin.conf configuration.</p>
+      <p>The formal definition for the resin.xml configuration.</p>
     </description>
   </header>
 

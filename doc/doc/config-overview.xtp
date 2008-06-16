@@ -14,35 +14,35 @@ documentation.</p>
 
 <s1 title="Introduction">
 
-<p>Many sites will use the default resin.conf with only minimal
+<p>Many sites will use the default resin.xml with only minimal
 configuration changes, e.g. changing the
 <a href="port-tags.xtp#http">&lt;http&gt;</a> port, adding
 <a href="port-tags.xtp#openssl">&lt;openssl&gt;</a> port, 
 new <a href="env-tags.xtp#database">&lt;database&gt;</a> configuration or
 <a href="env-tags.xtp#authenticator">&lt;authenticator&gt;</a> for
-security.  Those sites can use the default resin.conf as an
+security.  Those sites can use the default resin.xml as an
 sample index into the configuration tags to be customized.</p>
 
 <p>This overview provides an overview of some of the other customizations
-available in the resin.conf.  For example some sites have have
+available in the resin.xml.  For example some sites have have
 more sophisticated requirements, either
 adding many <a href="virtual-host.xtp">virtual hosts</a>, 
 <a href="cluster-tags.xtp#cache">proxy caching</a>, 
-<a href="resin-load-balance.xtp">load-balancing</a>, or adding
+<a href="resin-clustering.xtp">load-balancing</a>, or adding
 <a href="sessions.xtp">distributed sessions.</a></p>
 
 
 </s1>
 
-<s1 title="Minimal resin.conf">
+<s1 title="Minimal resin.xml">
 
 <p>As a starting point to the structure of Resin's configuration, it's
-best to look at the minimal usable resin.conf file.  All configuration
-in Resin ultimately derives from the top-level resin.conf file, so
-understanding and debugging a configuration can start from the resin.conf
+best to look at the minimal usable resin.xml file.  All configuration
+in Resin ultimately derives from the top-level resin.xml file, so
+understanding and debugging a configuration can start from the resin.xml
 and work toward any included files such as <g>resin-web.xml</g>.</p>
 
-<p>The minimal usable resin.conf file listens to HTTP at port 8080
+<p>The minimal usable resin.xml file listens to HTTP at port 8080
 and looks for web-apps in webapps.  So the URL
 <var>http://localhost:8080/test.php</var> would look in
 $SERVER_ROOT/webapps/ROOT/test.php.</p>
@@ -51,7 +51,7 @@ $SERVER_ROOT/webapps/ROOT/test.php.</p>
 It can also be assigned with a command-line argument
 <var>--server-root</var></p>
 
-<example title="minimal resin.conf">
+<example title="minimal resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="http://caucho.com/ns/resin/core">
   &lt;cluster id="app-tier">
@@ -68,7 +68,7 @@ It can also be assigned with a command-line argument
 &lt;/resin>
 </example>
 
-<p>To start Resin with this minimal resin.conf use the following:</p>
+<p>To start Resin with this minimal resin.xml use the following:</p>
 
 <example>
 share> java -jar resin-3.1.0/lib/resin.jar
@@ -96,7 +96,7 @@ resource definitions.</p>
 <p>The namespace declaration of <var>http://caucho.com/ns/resin</var>
 enables Resin's validation of the configuration files.  The validator
 will detect syntax errors and provide a summary of the syntax to
-help debug resin.conf files.</p>
+help debug resin.xml files.</p>
 
 </s2>
 
@@ -121,7 +121,7 @@ of virtual hosts, possibly including a default virtual host.  Each
 <a href="server-tags.xtp#server">&lt;server&gt;</a> in
 a &lt;cluster> handles the same requests.</p>
 
-<p>A web-site using Resin's <a href="resin-load-balance.xtp">load
+<p>A web-site using Resin's <a href="resin-clustering.xtp">load
 balancing</a> might have two clusters: a web-tier handling the HTTP requests
 and an app-tier handling servlets, PHP and JSP pages.</p>
 
@@ -240,13 +240,13 @@ let sites choose where to put their virtual hosts.</p>
 <p>The following example shows both the &lt;host> and &lt;host-deploy>
 methods of configuring virtual hosts.  The &lt;host&gt;
 for <var>www.foo.com</var> directly configures the foo.com site in
-the resin.conf.  The &lt;host-deploy&gt; for <var>hosts</var> configures
+the resin.xml.  The &lt;host-deploy&gt; for <var>hosts</var> configures
 a host deployment directory.  Any directory added to <var>hosts</var> will
 automatically create a new virtual host.  Finally, the &lt;host> with
 <var>id=""</var> defines the "default" virtual host. Any request not matching
 any other host will use the virtual host.</p>
 
-<example title="resin.conf">
+<example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin">
   &lt;cluster id="app-tier">
     &lt;root-directory>/var/www&lt;/root-directory>
@@ -290,16 +290,16 @@ can override the defaults.</p>
 a <a href="server-tags.xtp#server">&lt;server></a> tag to
 a <a href="cluster-tags.xtp#cluster">&lt;cluster></a> block.
 Each &lt;server> has an <var>id</var> which is unique in the
-resin.conf file.  The server will also have a
+resin.xml file.  The server will also have a
 unique <var>address</var> and <var>port</var> which allows
 the servers in the cluster to communicate with each other.</p>
 
-<p>Clustering is used for <a href="resin-load-balance.xtp">load-balancing</a>,
+<p>Clustering is used for <a href="resin-clustering.xtp">load-balancing</a>,
 <a href="sessions.xtp">distributed sessions</a> and remote
 administration.  Adding servers to a cluster lets sites handle more traffic
 and improves reliability by providing redundant servers.</p>
 
-<example title="resin.conf for hardware load balancing">
+<example title="resin.xml for hardware load balancing">
 &lt;resin xmlns="http://caucho.com/ns/resin">
   &lt;cluster id="app-tier">
 
@@ -327,12 +327,12 @@ external.)  Because the example is listening to port 80, the
 <a href="server-tags.xtp#user-name">&lt;user-name></a> switches from root to
 a safer runtime uid.</p>
 
-<p>The resin.conf can define multiple &lt;cluster> tags in the same
-resin.conf.  Resin's load-balancing will typically use two clusters,
+<p>The resin.xml can define multiple &lt;cluster> tags in the same
+resin.xml.  Resin's load-balancing will typically use two clusters,
 a web-tier for the HTTP servers and an app-tier for the servlets,
 PHP and JSP files.  A sample load balancing configuration might look like:</p>
 
-<example title="resin.conf for resin load balancing">
+<example title="resin.xml for resin load balancing">
 &lt;resin xmlns="http://caucho.com/ns/resin">
   &lt;cluster id="web-tier">
     &lt;server-default>
@@ -392,7 +392,7 @@ actual urls like <var>/wiki/index.php/Load-balance</var></p>
 
 <s2 title="Redirecting changed hosts">
 
-<example title="resin.conf redirect">
+<example title="resin.xml redirect">
 &lt;resin xmlns="http://caucho.com/ns/resin">
   &lt;cluster id="">
     ...
@@ -409,7 +409,7 @@ actual urls like <var>/wiki/index.php/Load-balance</var></p>
 
 <s2 title="Load balancing">
 
-<example title="resin.conf load balancing">
+<example title="resin.xml load balancing">
 &lt;resin xmlns="http://caucho.com/ns/resin">
   &lt;cluster id="web-tier">
     &lt;server id="web-a">

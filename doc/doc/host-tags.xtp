@@ -210,7 +210,7 @@ for ear expansion.</p>
 </tr>
 <tr>
   <td>ear-default</td>
-  <td>resin.conf default configuration for all ear files, e.g. configuring
+  <td>resin.xml default configuration for all ear files, e.g. configuring
 database, JMS or EJB defaults.</td>
   <td></td>
 </tr>
@@ -325,7 +325,7 @@ configured explicitly.</p>
     <td>automatic</td></tr>
 </deftable>
 
-<example title="Example: explicit host in resin.conf">
+<example title="Example: explicit host in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 &lt;cluster id="">
 
@@ -345,7 +345,7 @@ configured explicitly.</p>
 &lt;/resin>
 </example>
 
-<example title="Example: regexp host in resin.conf">
+<example title="Example: regexp host in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 &lt;cluster id="">
 
@@ -371,7 +371,7 @@ a &lt;host-name&gt; to set the canonical name for the host.</p>
 <p>&lt;host-alias> defines a URL alias for matching HTTP requests.
 Any number of &lt;host-alias> can be used for each alias.</p>
 
-<p>The host-alias can be used either in the resin.conf or in
+<p>The host-alias can be used either in the resin.xml or in
 a host.xml when use host-deploy together with resin:import.</p>
 
 <def title="&lt;host-alias> schema">
@@ -380,7 +380,7 @@ element host-alias {
 }
 </def>
 
-<example title="Example: host-alias in the resin.conf">
+<example title="Example: host-alias in the resin.xml">
 &lt;resin xmlns="http://caucho.com">
 &lt;cluster id="">
 
@@ -422,7 +422,7 @@ element host-alias-regexp {
 }
 </def>
 
-<example title="Example: host-alias-regexp in the resin.conf">
+<example title="Example: host-alias-regexp in the resin.xml">
 &lt;resin xmlns="http://caucho.com">
 &lt;cluster id="">
 
@@ -916,7 +916,7 @@ element web-app-deploy {
 a matching &lt;web-app&gt; inside the &lt;web-app-deploy&gt;.  The
 &lt;document-directory&gt; is used to match web-apps.</p>
 
-<example title="Example: resin.conf overriding web.xml">
+<example title="Example: resin.xml overriding web.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 &lt;cluster id="">
 &lt;host id="">

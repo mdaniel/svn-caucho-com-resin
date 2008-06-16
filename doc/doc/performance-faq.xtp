@@ -53,7 +53,7 @@ accurate picture of web server usage.
 
 <p>
 The primary configuration item in Resin for handling a greater
-load is <a config-tag="thread-max"/>.  The default in <code>resin.conf</code>
+load is <a config-tag="thread-max"/>.  The default in <code>resin.xml</code>
 can be adjusted upwards to handle increased load, the limit is determined by
 the underlying operating system.
 </p>

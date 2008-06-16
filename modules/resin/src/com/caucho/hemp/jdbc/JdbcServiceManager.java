@@ -94,6 +94,24 @@ public class JdbcServiceManager extends AbstractBamServiceManager
     _admin = new XmppUserDomainAdmin(this, host);
     _admin.register();
   }
+  /**
+   * Returns the service with the given name, or null if this is not
+   * a known service
+   */
+  public BamService findService(String jid)
+  {
+    int p = jid.indexOf('@');
+
+    if (p < 0)
+      return null;
+
+    String node = jid.substring(0, p);
+    String domain = jid.substring(p + 1);
+
+    System.out.println("JID: " + jid);
+
+    return null;
+  }
 
   public void addUser(String host,
 		      String name,

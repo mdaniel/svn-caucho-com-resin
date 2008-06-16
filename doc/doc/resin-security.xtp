@@ -58,7 +58,7 @@ The authenticator is automatically shared for all hosts and web-apps, so
 simple sites can even use this authenticator configuration for their
 site-wide authentication.</p>
 
-<example title="resin.conf">
+<example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 
   &lt;management">
@@ -369,12 +369,12 @@ AbstractAuthenticator rather than implementing Authenticator directly.
 stores the authentication in either an xml file or in the configuration
 itself.</p>
 
-<p>When configuring the XmlAuthenticator in the resin.conf
+<p>When configuring the XmlAuthenticator in the resin.xml
 (or web.xml), each <var>user</var> adds a new configured
 user.  The value contains the username, password, and the
 roles the user plays.</p>
 
-<example title="XmlAuthenticator in resin.conf">
+<example title="XmlAuthenticator in resin.xml">
 &lt;authenticator type="com.caucho.server.security.XmlAuthenticator"&gt;
   &lt;init&gt;
     &lt;user&gt;Harry Potter:quidditch:user,gryffindor&lt;/user&gt;
@@ -1727,7 +1727,7 @@ browser and the client is encrypted.</p>
 </s3>
 </s2>
 
-<s2 title="resin.conf - Configuring Resin to use your private key and certificate">
+<s2 title="resin.xml - Configuring Resin to use your private key and certificate">
 
 <p>The OpenSSL configuration has two tags <a config-tag="certificate-file"/> and
 <a config-tag="certificate-key-file"/>.  These correspond exactly to mod_ssl's
@@ -1836,7 +1836,7 @@ certificates, in the correct order.
 $ cat your_domain.crt ComodoSecurityServicesCA.crt GTECyberTrustRoot.crt &gt; chain.txt
 </example>
 
-<example title="resin.conf using a certificate chain file">
+<example title="resin.xml using a certificate chain file">
 &lt;http port="443"&gt;
   &lt;openssl&gt;
     &lt;certificate-key-file&gt;keys/your_domain.key&lt;/certificate-key-file&gt;
@@ -1938,7 +1938,7 @@ Enter key password for &lt;mykey&gt;
 
 </s2>
 
-<s2 title="resin.conf">
+<s2 title="resin.xml">
 
 <p>The Resin SSL configuration extends the http configuration with a few new
 elements.</p>
@@ -2174,7 +2174,7 @@ own certificate, signed by the Thawte Test CA Root, and the other being the Thaw
  
 </s4>
 
-<s4 title="Resin configuration (resin.conf)">
+<s4 title="Resin configuration (resin.xml)">
 
 <p>add the support for the SunJSSE security provider :</p>
 
@@ -2235,9 +2235,9 @@ server down somewhat.</p>
 "sandbox" where Java limits the things that can be done from code
 within th web-app.</p>
 
-<p>The security manager is enabled by adding a <a config-tag="security-manager"/> tag in the resin.conf.</p>
+<p>The security manager is enabled by adding a <a config-tag="security-manager"/> tag in the resin.xml.</p>
 
-<example title="enabling security-manager in resin.conf">
+<example title="enabling security-manager in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="http://caucho.com/ns/resin/core"&gt;
 

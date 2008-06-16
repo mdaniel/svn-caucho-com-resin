@@ -33,14 +33,14 @@ heap dumps.</p>
 enabling it is just adding an appropriate &lt;web-app> tag.</p>
 
 <p>For security, you will also need to add a &lt;user> to
-the &lt;management> section of the resin.conf.  The password will be
+the &lt;management> section of the resin.xml.  The password will be
 a MD5 hash.  By default, the /resin-admin web-app provides a form
 for generating the hash codes.  You will need to copy the generated
-password into the resin.conf.  This guarantees that you have access
-to the resin.conf itself to add any users.  In other words, the configuration
+password into the resin.xml.  This guarantees that you have access
+to the resin.xml itself to add any users.  In other words, the configuration
 is very cautious about security issues to enable the administration.</p>
 
-<example title="resin.conf /resin-admin configuration">
+<example title="resin.xml /resin-admin configuration">
 &lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="http://caucho.com/ns/resin/core"&gt;
 
@@ -117,7 +117,7 @@ any 500 errors, letting you track down errors in the log files.</p>
 <s2 title="/resin-admin config tab">
 
 <p>The config tag summarizes Resin's internal configuration.  This tab
-can be useful to double-check that the values in the resin.conf and
+can be useful to double-check that the values in the resin.xml and
 web.xml match the expected values.</p>
 
 </s2>
@@ -359,7 +359,7 @@ system properties.  For example, <var>-Dcom.sun.management.jmxremote</var>
 will expose JMX to the local machine.</p>
 
 <p>To configure the JVM arguments for Resin, you'll add a &lt;jvm-arg>
-to the resin.conf.  When Resin's <a
+to the resin.xml.  When Resin's <a
 href="http://wiki.caucho.com/Watchdog">Watchdog</a> process starts Resin,
 it will pass along the configured arguments, enabling JMX administration.
 </p>
@@ -518,9 +518,9 @@ network device (e.g. routers) from an SNMP manager application.
 
 <p>
 To enable Resin's SNMP service, you'll need to add an SNMP protocol tag
-to your resin.conf under the &lt;server&gt; tag:
+to your resin.xml under the &lt;server&gt; tag:
 
-<example title="resin.conf">
+<example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
   &lt;cluster id=""&gt;
     &lt;server-default&gt;
@@ -681,7 +681,7 @@ To define your own MIB variables, you'll need to extend the
 <var>com.caucho.server.snmp.SnmpProtocol</var> class and then use that
 class name in the &lt;protocol&gt; tag:
 
-<example title="resin.conf">
+<example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
   &lt;cluster id=""&gt;
     &lt;server-default&gt;

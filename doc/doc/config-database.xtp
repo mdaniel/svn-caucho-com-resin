@@ -669,7 +669,7 @@ Resin provides facilities that allow you to plugin your own custom
 code that returns a password to Resin.  However any solution is vulnerable,
 unless you require a person to type in a password every time Resin starts (or
 restarts).  Typically the security of the machine hosting Resin, and proper
-permissions on the readability of the resin.conf file, are sufficient to
+permissions on the readability of the resin.xml file, are sufficient to
 protect your database password.
 </p>
 

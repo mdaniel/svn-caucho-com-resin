@@ -55,7 +55,7 @@ public class Chapter {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.println("\\chapter{" + _title + "}");
+    out.println("\\chapter{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
 
     for (ChapterSection section : _sections)
       section.writeLaTeX(out);

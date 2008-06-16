@@ -74,7 +74,7 @@ archive files should be placed, beyond the standard webapps directory.</p>
 </tr>
 </deftable>
 
-<example title="Example: resin.conf for custom web-app">
+<example title="Example: resin.xml for custom web-app">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 &lt;cluster id="">
   &lt;host id="">
@@ -107,7 +107,7 @@ A more complicated one might use <var>foo-10.3.14</var> to upgrade from
 <p>The <var>versioning</var> attribute of the &lt;web-app-deploy>
 enables versioning:</p>
 
-<example title="Example: resin.conf for webapps versioning">
+<example title="Example: resin.xml for webapps versioning">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 &lt;cluster id="">
 &lt;host id="">

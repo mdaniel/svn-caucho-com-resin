@@ -68,7 +68,7 @@ computer that the client is running on.</p>
 
 <p>Configuring the standalone server is the easiest and best
 way of testing a virtual host configuration.  The
-resin.conf is identical for Resin standalone and for Resin as a
+resin.xml is identical for Resin standalone and for Resin as a
 servlet runner.  So even when using an external web server like Apache or IIS,
 it's a good idea to test configuring with Resin standalone.</p>
 
@@ -81,7 +81,7 @@ root for logfiles.
 <p>The following sample configuration defines two virtual hosts,
 gryffindor and slytherin, each with its own document directory.</p>
 
-<example title="resin.conf">
+<example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 &lt;cluster id="app-tier">
   &lt;server id="app-a" .../&gt;
@@ -117,10 +117,10 @@ gryffindor and slytherin, each with its own document directory.</p>
 <s1 title="Dynamic virtual hosts">
 
 <p>Resin can be configured to deploy virtual hosts dynamically.  Instead
-of adding a <a config-tag="host"/> tag to <code>resin.conf</code>, a directory
+of adding a <a config-tag="host"/> tag to <code>resin.xml</code>, a directory
 on the file-system is established, and subdirectories become virtual hosts.</p>
 
-<p><a config-tag="host-deploy"/> is used in <code>resin.conf</code>:</p>
+<p><a config-tag="host-deploy"/> is used in <code>resin.xml</code>:</p>
 
 <example title="host-deploy dynamic virtual hosts">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -174,7 +174,7 @@ virtual host.  The isolation of web-apps may not be
 sufficient; each host needs a separate JVM.  In this configuration,
 each JVM needs its own srun-port and possibly its own srun-host.</p>
 
-<p>The setup is similar to <a href="resin-load-balance.xtp">load-balancing</a>.  A
+<p>The setup is similar to <a href="resin-clustering.xtp">load-balancing</a>.  A
 front-end web server receives all requests, and is configured to dispath to back-end Resin
 JVM's that correspond to the host name.</p>
 
@@ -182,7 +182,7 @@ JVM's that correspond to the host name.</p>
 
 <s2 title="Back-end JVM's">
 <p>In the most straightforward configuration, each host specific backend JVM
-gets its own resin.conf.  The resin.conf can use <a href="resin-tags.xtp#resin:include">resin:include</a> to share
+gets its own resin.xml.  The resin.xml can use <a href="resin-tags.xtp#resin:import">resin:import</a> to share
 common configuration.</p>
 
 <p>In this example, the virtual hosts <code>www.gryffindor.com</code> and
@@ -191,7 +191,7 @@ startup of the back-end, host specific instances of Resin.  The second step is
 the by the configuration of the front-end server that dispatches requests to
 the appropriate back-end JVM.</p>
 
-<example title="$RESIN_HOME/conf/resin.conf">
+<example title="$RESIN_HOME/conf/resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
 
   &lt;cluster id="gryffindor&gt;
@@ -243,7 +243,7 @@ servers.</p>
 to the back-end JVM's.  A cluster is defined for each back-end JVM, so that the
 LoadBalanceServlet knows how to find them.</p>
 
-<example title="$RESIN_HOME/conf/resin.conf for front-end web server">
+<example title="$RESIN_HOME/conf/resin.xml for front-end web server">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
   &lt;cluster id="web-tier"&gt;
     &lt;server-default>
@@ -292,9 +292,9 @@ LoadBalanceServlet knows how to find them.</p>
 <p>The front-end server JVM is started similar to the back-end JVM's:</p>
 
 <example>
-unix&gt; bin/httpd.sh -server resin -conf conf/resin.conf start
+unix&gt; bin/httpd.sh -server resin -conf conf/resin.xml start
 ...
-unix&gt; bin/httpd.sh -server resin -conf conf/resin.conf stop
+unix&gt; bin/httpd.sh -server resin -conf conf/resin.xml stop
 </example>
 
 <p>A script that handles the syntax for all three is convenient, and provides the opportunity 
@@ -411,7 +411,7 @@ unix&gt; ./local-server.sh all stop
 <p>With Windows, each JVM is installed as a service.</p>
 
 <example>
-win&gt; bin/httpd -install-as "Resin" -server resin -conf conf/resin.conf -Xrs
+win&gt; bin/httpd -install-as "Resin" -server resin -conf conf/resin.xml -Xrs
 win&gt; bin/httpd -install-as "Resin www.gryffindor.com" -server gryffindor -conf conf/gryffindor.conf -Xrs
 win&gt; bin/httpd -install-as "Resin www.slytherin.com"-server slytherin -conf conf/slytherin.conf -Xrs
 </example>

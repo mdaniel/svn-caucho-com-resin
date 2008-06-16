@@ -74,7 +74,7 @@ public class Def extends VerboseFormattedTextWithAnchors {
     out.println("\\begin{Verbatim}[fontfamily=courier,");
     out.println("                  fontsize=\\footnotesize,");
 
-    if (_title != null) {
+    if (_title != null && ! "".equals(_title)) {
       out.println("                  label=" + _title + ",");
       out.println("                  labelposition=bottomline,");
     }

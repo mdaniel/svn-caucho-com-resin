@@ -38,7 +38,7 @@ the entries for an explanation of why Resin thinks it should restart.
 
 <ul>
 
-<li>In <var>resin.conf</var> specify <code>-g</code> as an option for Resin to pass to the java compiler:
+<li>In <var>resin.xml</var> specify <code>-g</code> as an option for Resin to pass to the java compiler:
 
 <example title="-g compiler option">
 &lt;java compiler='javac' compiler-args='-g'/&gt;
@@ -194,7 +194,7 @@ configured Resin for.</p>
 
 <s3 title="Application reloading">
 
-<p>Whenever a java source file, web.xml, or resin.conf changes then Resin will
+<p>Whenever a java source file, web.xml, or resin.xml changes then Resin will
 restart the application.  If this happens, your current sessions will be lost
 unless you have configured a persistent session store.</p>
 
@@ -404,12 +404,12 @@ useful to put the messages in a a seperate file.</p>
 
 <p>The following configuration creates a debug log for each day, and when a
 problem occurs the debug log is used to help find out what the problem is.
-Since the <a config-tag="log"/> entry is in <var>resin.conf</var>, the log will
+Since the <a config-tag="log"/> entry is in <var>resin.xml</var>, the log will
 capture messages from the server itself and all applications.  The resulting
 log messages are found in the file <var>$RESIN_HOME/log/debug.log</var>.</p>
 
 <example title="Full debug logging of the server to $RESIN_HOME/log/debug.log">
-&lt;!-- resin.conf --&gt;
+&lt;!-- resin.xml --&gt;
 &lt;resin&gt;
   &lt;log name="" path="log/debug.log" timestamp="[%H:%M:%S.%s] {%{thread}} "/>
 
@@ -979,7 +979,7 @@ is being used when Resin is started.</p>
 <s2 name="tcpmon" title="Monitor the HTTP communication">
 
 <p>To monitor just the HTTP headers, the following debug logging can be
-enabled in $RESIN_HOME/resin.conf:</p>
+enabled in $RESIN_HOME/resin.xml:</p>
 
 <example title="debug logging for HTTP headers">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -1016,7 +1016,7 @@ to use tcpmon.  tcpmon will log the request, pass it through to Resin (on port
 <p>Resin's default is to use the `internal' compiler because it is the most
 likely to be available.  Sometimes the internal compiler will start to cause
 errors, causing exceptions or simply hanging and taking up a thread.  The
-solution is to change the compiler to `javac' in resin.conf:</p>
+solution is to change the compiler to `javac' in resin.xml:</p>
 
 <example title="Using the external javac java compiler">
   &lt;javac compiler="javac" args=""/&gt;

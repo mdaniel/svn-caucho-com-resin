@@ -36,7 +36,7 @@
 
       <p>For several of the more important tags, Resin's JSP compiler
         will generate more efficient code than is possible with the straight
-        tag library.  This "fast-jstl" can be disabled in the resin.conf:</p>
+        tag library.  This "fast-jstl" can be disabled in the resin.xml:</p>
       
       <example title="Disabling fast JSTL">
 &lt;caucho.com&gt;

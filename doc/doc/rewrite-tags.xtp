@@ -390,7 +390,7 @@ The <code>update()</code> operations forces an immediate check for modifications
 
 <p>&lt;load-balance> forwards requests from a <g>web-tier</g> server
 to a cluster of <g>app-tier</g> servers for
-<a href="resin-load-balance.xtp">load-balancing</a>.  Load balancing
+<a href="resin-clustering.xtp">load-balancing</a>.  Load balancing
 provides scalability by splitting load among many application servers
 and increases reliability by avoiding servers which are upgrading or
 restarting.</p>
