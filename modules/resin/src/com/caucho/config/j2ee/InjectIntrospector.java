@@ -203,7 +203,9 @@ public class InjectIntrospector {
       if (hasBindingAnnotation(field)) {
         WebBeansContainer webBeans = WebBeansContainer.create();
 
-        webBeans.createProgram(injectList, field);
+	boolean isOptional = isBindingOptional(field);
+	
+        webBeans.createProgram(injectList, field, isOptional);
 
         continue;
       }
@@ -606,7 +608,8 @@ public class InjectIntrospector {
   {
     WebBeansContainer webBeans = WebBeansContainer.create();
 
-    webBeans.createProgram(injectList, field);
+    boolean isOptional = false;
+    webBeans.createProgram(injectList, field, isOptional);
   }
 
   private static void introspectWebBean(ArrayList<ConfigProgram> injectList,
@@ -758,6 +761,24 @@ public class InjectIntrospector {
 
       if (annType.isAnnotationPresent(BindingType.class))
 	return true;
+    }
+
+    return false;
+  }
+
+  private static boolean isBindingOptional(Field field)
+  {
+    for (Annotation ann : field.getAnnotations()) {
+      Class annType = ann.annotationType();
+      
+      if (annType.equals(In.class)) {
+	In in = (In) ann;
+	
+	return in.optional();
+      }
+
+      if (annType.isAnnotationPresent(BindingType.class))
+	return false;
     }
 
     return false;

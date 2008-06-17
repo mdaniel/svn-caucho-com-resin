@@ -41,6 +41,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -56,6 +57,8 @@ public class RewriteDispatch
 
   private final WebApp _webApp;
   private final Server _server;
+
+  private HashSet<String> _dispatcherTypes = new HashSet<String>();
 
   private MatchRule _matchRule;
 
@@ -86,6 +89,54 @@ public class RewriteDispatch
   public WebApp getWebApp()
   {
     return _webApp;
+  }
+
+  /**
+   * Sets the dispatcher type: REQUEST, INCLUDE, FORWARD
+   */
+  public void addDispatcherType(String type)
+  {
+    if ("REQUEST".equals(type)
+	|| "FORWARD".equals(type)
+	|| "INCLUDE".equals(type)) {
+      _dispatcherTypes.add(type);
+    }
+    else
+      throw new ConfigException(L.l("'{0} is an unknown dispatcher-type.  Valid types are 'REQUEST', 'FORWARD', and 'INCLUDE'",
+				    type));
+  }
+
+  /**
+   * Returns true for a request dispatcher
+   */
+  public boolean isRequest()
+  {
+    return (_dispatcherTypes.contains("REQUEST")
+	    || _dispatcherTypes.size() == 0);
+  }
+
+  /**
+   * Returns true for an include dispatcher
+   */
+  public boolean isInclude()
+  {
+    return _dispatcherTypes.contains("INCLUDE");
+  }
+
+  /**
+   * Returns true for a forward dispatcher
+   */
+  public boolean isForward()
+  {
+    return _dispatcherTypes.contains("FORWARD");
+  }
+
+  /**
+   * Returns true for an error dispatcher
+   */
+  public boolean isError()
+  {
+    return _dispatcherTypes.contains("ERROR");
   }
 
   /**

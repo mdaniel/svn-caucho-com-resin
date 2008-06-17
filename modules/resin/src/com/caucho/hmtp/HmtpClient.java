@@ -455,7 +455,8 @@ public class HmtpClient implements BamConnection {
     if (callback.waitFor())
       return callback.getResult();
     else
-      throw new RuntimeException(String.valueOf(callback.getError()));
+      throw new RuntimeException("No valid return for " + query
+				 + "\n" + callback.getError());
   }
 
   /**

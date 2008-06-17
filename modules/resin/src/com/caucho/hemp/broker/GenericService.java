@@ -56,7 +56,7 @@ public class GenericService extends AbstractBamStream
   private static final Logger log
     = Logger.getLogger(GenericService.class.getName());
   
-  private @In BamBroker _broker;
+  private @In(optional=true) BamBroker _broker;
   
   private String _jid;
   

@@ -13,6 +13,10 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>log: add hostname-dns-lookup for apache compatibility (#2732, rep by Michael O'Dea)</li>
+<li>admin: cpu-load for non-unix should not be logged (#2727, rep by Bradley Van Cleave)</li>
+<li>rewrite-dispatch: add absolute-target for forward (#2681, rep by Bill Au)</li>
+<li>rewrite-dispatch: add dispatcher-type for REQUEST, INCLUDE, FORWARD (#2675, rep by Vinod Mehra)</li>
 <li>(2008-06-15) jsp: jsp generation changes to reduce code size (#2347)</li>
 <li>log: added response.isCacheHit() for AbstractHttpResponse (#2733)</li>
 <li>classloader: scan of ext paths must only add directories and jars (#2659, rep by Brian Burke)</li>

@@ -54,6 +54,11 @@ in.</p>
   <td>see below</td>
 </tr>
 <tr>
+  <td>hostname-dns-lookup</td>
+  <td>log the dns name instead of the IP address (has a performance hit).</td>
+  <td>false</td>
+</tr>
+<tr>
   <td>path</td>
   <td>Output path for the log entries,
 see <a href="config-log.xtp#path">"Log Paths"</a>.</td>

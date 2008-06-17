@@ -56,6 +56,8 @@ abstract public class AbstractAccessLog {
 
   private AccessLogAdmin _admin;
 
+  private boolean _isHostnameDnsLookup;
+
   protected AbstractAccessLog()
   {
     _admin = new AccessLogAdmin(this);
@@ -102,6 +104,22 @@ abstract public class AbstractAccessLog {
   public void setId(Path path)
   {
     setPath(path);
+  }
+
+  /**
+   * The hostname-dns-lookup flag for Apache compatibility.
+   */
+  public boolean isHostnameDnsLookup()
+  {
+    return _isHostnameDnsLookup;
+  }
+
+  /**
+   * The hostname-dns-lookup flag for Apache compatibility.
+   */
+  public void setHostnameDnsLookup(boolean enable)
+  {
+    _isHostnameDnsLookup = enable;
   }
 
   public void addInit(ContainerProgram init)

@@ -453,7 +453,8 @@ public class WebBeansContainer
    * Creates an injection program for the given field
    */
   public void createProgram(ArrayList<ConfigProgram> injectList,
-			    Field field)
+			    Field field,
+			    boolean isOptional)
     throws ConfigException
   {
     ComponentImpl component;
@@ -462,11 +463,12 @@ public class WebBeansContainer
 		     field.getGenericType(),
 		     field.getAnnotations());
 
-    if (component == null)
+    if (component != null)
+      component.createProgram(injectList, field);
+    else if (! isOptional)
       throw injectError(field, L.l("Can't find a component for '{0}'",
 				   field.getType().getName()));
 
-    component.createProgram(injectList, field);
   }
 
   /**

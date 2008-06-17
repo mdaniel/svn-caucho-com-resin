@@ -30,6 +30,7 @@
 package com.caucho.server.resin;
 
 import com.caucho.amber.manager.PersistenceEnvironmentListener;
+import com.caucho.bam.*;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
@@ -38,6 +39,7 @@ import com.caucho.config.program.*;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.hemp.broker.HempBroker;
+import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.license.LicenseCheck;
 import com.caucho.lifecycle.Lifecycle;
@@ -156,8 +158,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   private Path _managementPath;
   private Management _management;
 
-  // XXX: might belong in other environment context
-  private HempBroker _broker;
+  private HempBrokerManager _brokerManager;
 
   private ThreadPoolAdmin _threadPoolAdmin;
 
@@ -253,8 +254,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       webBeans.addSingleton(new JavaVar(), "java", Standard.class);
       webBeans.addSingleton(System.getProperties(), "system", Standard.class);
 
-      _broker = new HempBroker();
-      webBeans.addSingleton(_broker, "HmtpBroker", Standard.class);
+      _brokerManager = new HempBrokerManager();
 
       webBeans.addSingleton(new com.caucho.config.functions.FmtFunctions(), "fmt", Standard.class);
 

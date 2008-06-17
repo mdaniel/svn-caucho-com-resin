@@ -35,6 +35,9 @@ r_access-log = element access-log {
   & (attribute format { string }
      | element format { string })?
 
+  & (attribute hostname-dns-lookup { r_boolean-Type }
+     | element hostname-dns-lookup { r_boolean-Type })?
+
   & (attribute shared-buffer { r_boolean-Type }
      | element shared-buffer { r_boolean-Type })?
 
@@ -562,6 +565,10 @@ r_rewrite-dispatch-Contents =
     & r_rewrite-conditions-Type
   }*
 
+  & element dispatcher-type {
+    string
+  }*
+
   & element forbidden {
       r_rewrite-Group
 
@@ -571,7 +578,9 @@ r_rewrite-dispatch-Contents =
   & element forward {
       r_rewrite-Group
 
-      & (attribute target { string }
+      & (attribute absolute-target { string }
+         | element absolute-target { string }
+         | attribute target { string }
          | element target { string })
            
       & (attribute target-host { string }

@@ -36,7 +36,7 @@ import com.caucho.xmpp.disco.DiscoInfoQuery;
 import com.caucho.xmpp.disco.DiscoIdentity;
 import com.caucho.xmpp.disco.DiscoFeature;
 import com.caucho.bam.BamStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 
@@ -48,11 +48,17 @@ public class ImUser extends SimpleBamService
 {
   private static final Logger log
     = Logger.getLogger(ImUser.class.getName());
-  
+
+  private JdbcServiceManager _manager;
   private BamStream _broker;
+
+  private long _dbId;
 
   private ArrayList<String> _jidList
     = new ArrayList<String>();
+
+  private ArrayList<RosterItem> _rosterList
+    = new ArrayList<RosterItem>();
   
   private String []_jids = new String[0];
   
@@ -60,14 +66,18 @@ public class ImUser extends SimpleBamService
   {
   }
   
-  public ImUser(BamStream broker, String jid)
+  public ImUser(JdbcServiceManager manager, long dbId, String jid)
   {
-    if (broker == null)
+    if (manager == null)
       throw new NullPointerException("server may not be null");
+
+    _dbId = dbId;
     
     setJid(jid);
 
-    _broker = broker;
+    _manager = manager;
+
+    _broker = manager.getBroker().getBrokerStream();
   }
 
   public String []getJids()
@@ -293,8 +303,15 @@ public class ImUser extends SimpleBamService
 	  removeRoster(item);
 	else
 	  updateRoster(item);
-
       }
+
+      InputStream is = null;
+
+      synchronized (_rosterList) {
+	is = _manager.serialize(_rosterList);
+      }
+
+      _manager.putData(getJid(), "jabber:im:roster", is);
     }
     
     querySetResources(roster);
@@ -329,6 +346,15 @@ public class ImUser extends SimpleBamService
    */
   protected void updateRoster(RosterItem item)
   {
+    RosterItem oldItem = findRoster(item.getJid());
+
+    if (oldItem == null) {
+      RosterItem newItem = new RosterItem(item.getJid(), item.getGroup());
+
+      synchronized (_rosterList) {
+	_rosterList.add(newItem);
+      }
+    }
   }
 
   /**
@@ -336,6 +362,20 @@ public class ImUser extends SimpleBamService
    */
   protected void removeRoster(RosterItem item)
   {
+  }
+
+  protected RosterItem findRoster(String jid)
+  {
+    synchronized (_rosterList) {
+      for (int i = 0; i < _rosterList.size(); i++) {
+	RosterItem item = _rosterList.get(i);
+
+	if (item.getJid().equals(jid))
+	  return item;
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -383,7 +423,10 @@ public class ImUser extends SimpleBamService
    */
   protected RosterItem []getRoster()
   {
-    return new RosterItem [0];
+    RosterItem []rosterList = new RosterItem[_rosterList.size()];
+    _rosterList.toArray(rosterList);
+    
+    return rosterList;
   }
 
   /**

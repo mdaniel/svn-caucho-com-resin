@@ -29,8 +29,10 @@
 
 package com.caucho.server.host;
 
+import com.caucho.bam.*;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
+import com.caucho.hemp.broker.*;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -48,7 +50,9 @@ import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
+import com.caucho.webbeans.manager.*;
 
+import java.net.*;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -87,6 +91,8 @@ public class Host extends WebAppContainer
 
   // Alises
   private ArrayList<String> _aliasList = new ArrayList<String>();
+
+  private HempBroker _bamBroker;
 
   private Throwable _configException;
   
@@ -254,8 +260,8 @@ public class Host extends WebAppContainer
 
       return "";
     }
-    else if (_hostName.startsWith("http:") ||
-             _hostName.startsWith("https:"))
+    else if (_hostName.startsWith("http:")
+	     || _hostName.startsWith("https:"))
       return _hostName;
     else
       return "http://" + _hostName;
@@ -446,6 +452,8 @@ public class Host extends WebAppContainer
 
     try {
       thread.setContextClassLoader(loader);
+
+      initBam();
       
       super.start();
       
@@ -458,6 +466,35 @@ public class Host extends WebAppContainer
       
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  private void initBam()
+  {
+    String hostName = _hostName;
+    
+    if ("".equals(hostName)) {
+      try {
+	hostName = InetAddress.getLocalHost().getCanonicalHostName();
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+    }
+    
+    _bamBroker = new HempBroker(hostName);
+
+    HempBrokerManager brokerManager = HempBrokerManager.getCurrent();
+
+    brokerManager.addBroker(hostName, _bamBroker);
+
+    for (String alias : _aliasList) {
+      _bamBroker.addAlias(alias);
+      
+      brokerManager.addBroker(hostName, _bamBroker);
+    }
+
+    WebBeansContainer webBeans = WebBeansContainer.getCurrent();
+
+    webBeans.addSingleton(_bamBroker, "bamBroker");
   }
 
   /**
@@ -557,6 +594,8 @@ public class Host extends WebAppContainer
 	return false;
       
       super.stop();
+      
+      _bamBroker.close();
       
       envLoader.stop();
 

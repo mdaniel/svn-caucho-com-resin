@@ -138,6 +138,26 @@ images and *.php files normally, but forward's all other requests to
 </deftable-childtags>
 </defun>
 
+<defun title="dispatch-type">
+<p>
+The dispatch-type lets you configure rewrite-dispatch for REQUEST,
+FORWARD, or INCLUDE.  By default, the rewrite-dispatch is REQUEST.
+</p>
+
+<example title="Example: FORWARD dispatch">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;rewrite-dispatch>
+    &lt;dispatch-type>FORWARD&lt;/dispatch-type>
+
+    &lt;forward regexp="/foo" target="/bar.jsp"/>
+  &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+</defun>
+
 <defun title="enable-at">
 <p>
 Cron syntax for specifying a time or times that that the rule should be enabled,

@@ -29,13 +29,13 @@
 
 package com.caucho.server.admin;
 
-import com.caucho.hessian.io.ExtSerializerFactory;
-import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.hessian.io.Hessian2Output;
-import com.caucho.hessian.io.StringValueDeserializer;
-import com.caucho.hessian.io.StringValueSerializer;
-import com.caucho.jmx.remote.JMXService;
+import com.caucho.bam.*;
+import com.caucho.config.*;
+import com.caucho.git.*;
+import com.caucho.hemp.broker.*;
+import com.caucho.server.resin.*;
 import com.caucho.util.L10N;
+import com.caucho.vfs.*;
 
 import javax.enterprise.deploy.spi.Target;
 import javax.enterprise.deploy.spi.TargetModuleID;
@@ -48,120 +48,47 @@ import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DeployService
-  extends ManagementService
-  implements DeployServiceAPI
+public class DeployService extends GenericService
 {
   private static final Logger log
-    = Logger.getLogger(JMXService.class.getName());
+    = Logger.getLogger(DeployService.class.getName());
 
   private static final L10N L = new L10N(DeployService.class);
 
-  private ExtSerializerFactory _extFactory;
+  private Resin _resin;
+  private Path _gitRoot;
+  private GitRepository _git;
 
-  public DeployService(Management management)
+  DeployService(BamBroker adminBroker)
   {
-    super(management, SERVICE_NAME);
+    _resin = Resin.getCurrent();
+    
+    setBroker(adminBroker);
+    setName("deploy");
   }
 
   @Override
-  public void start()
+  public void init()
   {
-    super.start();
+    getBroker().addService(this);
 
-    _extFactory = new ExtSerializerFactory();
-    _extFactory.addSerializer(ObjectName.class,
-                              new StringValueSerializer());
-    _extFactory.addDeserializer(ObjectName.class,
-                                new StringValueDeserializer(ObjectName.class));
+    Path root = _resin.getRootDirectory();
 
-    log.info(L.l("Deploy management service started"));
-  }
+    // QA
+    if (root instanceof MemoryPath)
+      root = Vfs.lookup("file:/tmp/caucho/qa");
 
-  public void service(ServletRequest request, ServletResponse response)
-    throws IOException, ServletException
-  {
-    Hessian2Input in = new Hessian2Input(request.getInputStream());
-    Hessian2Output out = new Hessian2Output(response.getOutputStream());
-
-    out.findSerializerFactory().addFactory(_extFactory);
-
-    in.startCall();
-
-    String method = in.getMethod();
+    _gitRoot = root.lookup(".git");
+    _git = new GitRepository(_gitRoot);
 
     try {
-      if ("getTargets".equals(method)) {
-        if (! isReadAllowed(request, response))
-          return;
-
-        in.completeCall();
-
-        log.finer("DeployService: getTargets");
-
-        Target[] targets = getTargets();
-
-        out.startReply();
-        out.writeObject(targets);
-        out.completeReply();
-        out.close();
-      }
-      else if ("getAvailableModules".equals(method)) {
-        if (! isReadAllowed(request, response))
-          return;
-
-        String moduleType = in.readString();
-
-        in.completeCall();
-
-        log.finer("DeployService: getAvailableModules " + moduleType);
-
-        TargetModuleID[] modules = getAvailableModules(moduleType);
-
-        out.startReply();
-        out.writeObject(modules);
-        out.completeReply();
-        out.close();
-      }
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+      _git.initDb();
+    } catch (IOException e) {
+      throw ConfigException.create(e);
     }
   }
 
-
-  public TargetModuleID[] getAvailableModules(String moduleType)
+  public void start()
   {
-    if (true) throw new UnsupportedOperationException("unimplemented");
-
-    return new TargetModuleID[0];
-  }
-
-  public Target[] getTargets()
-  {
-    if (true) throw new UnsupportedOperationException("unimplemented");
-
-    return new Target[0];
-  }
-
-  public void distribute(Target[] targets,
-                         InputStream deploymentPlan,
-                         InputStream archiveIs)
-  {
-    if (true) throw new UnsupportedOperationException("unimplemented");
-  }
-
-  public void start(TargetModuleID[] ids)
-  {
-    if (true) throw new UnsupportedOperationException("unimplemented");
-  }
-
-  public void stop(TargetModuleID[] ids)
-  {
-    if (true) throw new UnsupportedOperationException("unimplemented");
-  }
-
-  public void undeploy(TargetModuleID[] ids)
-  {
-    if (true) throw new UnsupportedOperationException("unimplemented");
   }
 }

@@ -225,10 +225,12 @@ public class WebApp extends ServletContextImpl
   private Throwable _configException;
 
   // dispatch mapping
-  private RewriteDispatch _rewriteDispatch;
+  private RewriteDispatch _requestRewriteDispatch;
+  private RewriteDispatch _includeRewriteDispatch;
+  private RewriteDispatch _forwardRewriteDispatch;
 
-  private LruCache<String,String> _realPathCache =
-    new LruCache<String,String>(1024);
+  private LruCache<String,String> _realPathCache
+    = new LruCache<String,String>(1024);
   // real-path mapping
   private RewriteRealPath _rewriteRealPath;
 
@@ -436,6 +438,14 @@ public class WebApp extends ServletContextImpl
    * Returns the local webApp.
    */
   public static WebApp getLocal()
+  {
+    return getCurrent();
+  }
+
+  /**
+   * Returns the local webApp.
+   */
+  public static WebApp getCurrent()
   {
     return _appLocal.get();
   }
@@ -1131,10 +1141,22 @@ public class WebApp extends ServletContextImpl
    */
   public RewriteDispatch createRewriteDispatch()
   {
-    if (_rewriteDispatch == null)
-      _rewriteDispatch = new RewriteDispatch(this);
+    return new RewriteDispatch(this);
+  }
 
-    return _rewriteDispatch;
+  /**
+   * Adds rewrite-dispatch.
+   */
+  public void addRewriteDispatch(RewriteDispatch dispatch)
+  {
+    if (dispatch.isRequest())
+      _requestRewriteDispatch = dispatch;
+    
+    if (dispatch.isInclude())
+      _includeRewriteDispatch = dispatch;
+    
+    if (dispatch.isForward())
+      _forwardRewriteDispatch = dispatch;
   }
 
   /**
@@ -2044,7 +2066,7 @@ public class WebApp extends ServletContextImpl
         boolean isCache = true;
         if (query != null && query.indexOf("jsp_precompile") >= 0)
           isCache = false;
-	else if (_rewriteDispatch != null)
+	else if (_requestRewriteDispatch != null)
 	  isCache = false;
 
         if (isCache)
@@ -2055,10 +2077,10 @@ public class WebApp extends ServletContextImpl
         } else {
           chain = _servletMapper.mapServlet(invocation);
 
-          if (_rewriteDispatch != null) {
-            chain = _rewriteDispatch.map(invocation.getContextURI(),
-                                         invocation.getQueryString(),
-                                         chain);
+          if (_requestRewriteDispatch != null) {
+            chain = _requestRewriteDispatch.map(invocation.getContextURI(),
+						invocation.getQueryString(),
+						chain);
           }
 
           // server/13s[o-r]
@@ -2214,6 +2236,19 @@ public class WebApp extends ServletContextImpl
       }
       else {
         chain = _servletMapper.mapServlet(invocation);
+
+	if (_includeRewriteDispatch != null
+	    && filterMapper == _includeFilterMapper) {
+	  chain = _includeRewriteDispatch.map(invocation.getContextURI(),
+					      invocation.getQueryString(),
+					      chain);
+	}
+	else if (_forwardRewriteDispatch != null
+		 && filterMapper == _forwardFilterMapper) {
+	  chain = _forwardRewriteDispatch.map(invocation.getContextURI(),
+					      invocation.getQueryString(),
+					      chain);
+	}
 
         filterMapper.buildDispatchChain(invocation, chain);
 

@@ -198,7 +198,7 @@ public abstract class AbstractHttpRequest
 
   private final byte []_address = new byte[256];
 
-  private final byte []_logBuffer = new byte[8 * 1024];
+  private final byte []_logBuffer = new byte[1024];
 
   private ServletRequestAttributeListener []_attributeListeners;
   

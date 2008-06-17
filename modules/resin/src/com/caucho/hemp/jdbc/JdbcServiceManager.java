@@ -29,10 +29,14 @@
 
 package com.caucho.hemp.jdbc;
 
-import com.caucho.config.*;
 import com.caucho.bam.*;
+import com.caucho.config.*;
+import com.caucho.hessian.io.*;
 import com.caucho.server.security.*;
 import com.caucho.util.*;
+import com.caucho.vfs.*;
+import java.security.*;
+import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 import java.sql.*;
@@ -87,6 +91,8 @@ public class JdbcServiceManager extends AbstractBamServiceManager
 
     initDatabase();
 
+    setBroker(_broker);
+    
     _broker.addServiceManager(this);
 
     String host = "localhost";
@@ -108,9 +114,12 @@ public class JdbcServiceManager extends AbstractBamServiceManager
     String node = jid.substring(0, p);
     String domain = jid.substring(p + 1);
 
-    System.out.println("JID: " + jid);
+    ImUser user = findUser(jid);
 
-    return null;
+    // XXX: timeout
+    _broker.addService(user);
+
+    return user;
   }
 
   public void addUser(String host,
@@ -154,6 +163,168 @@ public class JdbcServiceManager extends AbstractBamServiceManager
     }
   }
 
+  public ImUser findUser(String jid)
+  {
+    Connection conn = null;
+
+    try {
+      conn = _db.getConnection();
+
+      String sql = ("select id,jid from " + _userTable
+		    + " where jid=?");
+
+      PreparedStatement pstmt = conn.prepareStatement(sql);
+
+      pstmt.setString(1, jid);
+
+      ResultSet rs = pstmt.executeQuery();
+
+      if (rs.next()) {
+	long id = rs.getLong(1);
+	
+	return new ImUser(this, id, jid);
+      }
+
+      return null;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      try {
+	if (conn != null) conn.close();
+      } catch (SQLException e) {
+      }
+    }
+  }
+
+  InputStream serialize(Serializable data)
+  {
+    try {
+      TempOutputStream os = new TempOutputStream();
+      Hessian2Output out = new Hessian2Output(os);
+
+      out.writeObject(data);
+      out.close();
+
+      return os.openInputStream();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  void putData(String jid,
+	       String key,
+	       Serializable data)
+  {
+    putData(jid, key, serialize(data));
+  }
+  
+  
+  void putData(String jid,
+	       String key,
+	       InputStream is)
+  {
+    try {
+      String digest = calculateDigest(jid, key);
+
+      if (! updateData(digest, is))
+	insertData(digest, is);
+    } finally {
+      try {
+	is.close();
+      } catch (IOException e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+  }
+  
+  boolean updateData(String key, InputStream is)
+  {
+    Connection conn = null;
+
+    try {
+      conn = _db.getConnection();
+
+      String sql = ("update " + _dataTable
+		    + " set value=?"
+		    + " where id=?");
+
+      PreparedStatement pstmt = conn.prepareStatement(sql);
+
+      pstmt.setBinaryStream(1, is, -1);
+      pstmt.setString(2, key);
+
+      if (pstmt.executeUpdate() == 1)
+	return true;
+    } catch (SQLException e) {
+      log.log(Level.FINER, e.toString(), e);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      try {
+	if (conn != null) conn.close();
+      } catch (SQLException e) {
+      }
+    }
+
+    return false;
+  }
+  
+  boolean insertData(String key, InputStream is)
+  {
+    Connection conn = null;
+
+    try {
+      conn = _db.getConnection();
+
+      String sql = ("insert into " + _dataTable
+		    + " (id,value) values (?,?)?");
+
+      PreparedStatement pstmt = conn.prepareStatement(sql);
+
+      pstmt.setString(1, key);
+      pstmt.setBinaryStream(2, is, -1);
+
+      if (pstmt.executeUpdate() == 1)
+	return true;
+    } catch (SQLException e) {
+      log.log(Level.FINER, e.toString(), e);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      try {
+	if (conn != null) conn.close();
+      } catch (SQLException e) {
+      }
+    }
+
+    return false;
+  }
+
+  private String calculateDigest(String jid, String id)
+  {
+    try {
+      MessageDigest md = MessageDigest.getInstance("SHA-1");
+
+      md.update((byte) '{');
+      int len = jid.length();
+      for (int i = 0; i < len; i++) {
+	md.update((byte) jid.charAt(i));
+      }
+      md.update((byte) '}');
+      
+      len = id.length();
+      for (int i = 0; i < len; i++) {
+	md.update((byte) id.charAt(i));
+      }
+
+      byte []bytes = md.digest();
+
+      return Base64.encodeFromByteArray(bytes);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   private HostItem createHost(String host)
   {
     return null;
@@ -171,7 +342,7 @@ public class JdbcServiceManager extends AbstractBamServiceManager
       String sql;
 
       try {
-	sql = ("select hash, jid from " + _nodeTable + " where 1=0");
+	sql = ("select jid, node from " + _nodeTable + " where 1=0");
 
 	ResultSet rs = stmt.executeQuery(sql);
 

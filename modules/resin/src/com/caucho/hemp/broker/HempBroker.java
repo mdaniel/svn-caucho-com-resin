@@ -52,7 +52,8 @@ public class HempBroker implements BamBroker, BamStream
   private static final Logger log
     = Logger.getLogger(HempBroker.class.getName());
   private static final L10N L = new L10N(HempBroker.class);
-  
+
+  private HempBrokerManager _manager;
   // agents
   private final HashMap<String,WeakReference<BamStream>> _agentMap
     = new HashMap<String,WeakReference<BamStream>>();
@@ -68,7 +69,30 @@ public class HempBroker implements BamBroker, BamStream
   private String _domain = "localhost";
   private String _managerJid = "localhost";
 
+  private ArrayList<String> _aliasList = new ArrayList<String>();
+
   private BamServiceManager []_serviceManagerList = new BamServiceManager[0];
+
+  public HempBroker()
+  {
+    _manager = HempBrokerManager.getCurrent();
+  }
+
+  public HempBroker(String domain)
+  {
+    _manager = HempBrokerManager.getCurrent();
+    
+    _domain = domain;
+    _managerJid = domain;
+  }
+
+  /**
+   * Adds a domain alias
+   */
+  public void addAlias(String domain)
+  {
+    _aliasList.add(domain);
+  }
   
   /**
    * Returns the stream to the broker
@@ -87,8 +111,11 @@ public class HempBroker implements BamBroker, BamStream
    */
   public void addServiceManager(BamServiceManager serviceManager)
   {
-    BamServiceManager []serviceManagerList = new BamServiceManager[_serviceManagerList.length + 1];
-    System.arraycopy(_serviceManagerList, 0, serviceManagerList, 0, _serviceManagerList.length);
+    BamServiceManager []serviceManagerList
+      = new BamServiceManager[_serviceManagerList.length + 1];
+    
+    System.arraycopy(_serviceManagerList, 0, serviceManagerList, 0,
+		     _serviceManagerList.length);
     serviceManagerList[serviceManagerList.length - 1] = serviceManager;
     _serviceManagerList = serviceManagerList;
   }
@@ -141,15 +168,16 @@ public class HempBroker implements BamBroker, BamStream
   protected String generateJid(String uid, String resource)
   {
     StringBuilder sb = new StringBuilder();
-    sb.append(uid);
+
+    if (uid.indexOf('@') > 0)
+      sb.append(uid);
+    else
+      sb.append(uid).append('@').append(getDomain());
     sb.append("/");
 
     if (resource != null)
       sb.append(resource);
     else {
-      sb.append(_serverId);
-      sb.append(":");
-
       Base64.encode(sb, RandomUtil.getRandomLong());
     }
     
@@ -233,7 +261,7 @@ public class HempBroker implements BamBroker, BamStream
    */
   public String getJid()
   {
-    return null;
+    return _domain;
   }
 
   /**
@@ -666,10 +694,22 @@ public class HempBroker implements BamBroker, BamStream
       _agentMap.remove(jid);
     }
   }
+
+  public void close()
+  {
+    _manager.removeBroker(_domain);
+
+    for (String alias : _aliasList)
+      _manager.removeBroker(alias);
+    
+    _serviceMap.clear();
+    _serviceCache.clear();
+    _agentMap.clear();
+  }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    return getClass().getSimpleName() + "[" + _domain + "]";
   }
 }

@@ -40,4 +40,5 @@ import java.lang.annotation.Target;
 @Target({CONSTRUCTOR, METHOD, FIELD, PARAMETER, TYPE})
 @Retention(RUNTIME)
 public @interface In {
+  boolean optional() default false;
 }

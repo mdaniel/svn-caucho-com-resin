@@ -29,7 +29,8 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.server.dispatch.ForwardFilterChain;
+import com.caucho.server.dispatch.*;
+import com.caucho.server.webapp.*;
 import com.caucho.config.ConfigException;
 
 import javax.servlet.FilterChain;
@@ -39,7 +40,10 @@ public class ForwardRule
   extends AbstractRuleWithConditions
 {
   private String _target;
+  private String _absoluteTarget;
   private String _targetHost;
+
+  private boolean _isAbsolute;
 
   protected ForwardRule(RewriteDispatch rewriteDispatch)
   {
@@ -49,6 +53,13 @@ public class ForwardRule
   public String getTagName()
   {
     return "forward";
+  }
+
+  public void setAbsoluteTarget(String target)
+  {
+    _target = target;
+
+    _isAbsolute = true;
   }
 
   public void setTarget(String target)
@@ -73,13 +84,19 @@ public class ForwardRule
                               FilterChain accept,
                               FilterChainMapper next)
   {
+    String uriArg = null;
+    
     if (queryString == null)
-      return new ForwardFilterChain(uri);
-
-    if (uri.indexOf('?') >= 0)
-      return new ForwardFilterChain(uri + "&" + queryString);
+      uriArg = uri;
+    else if (uri.indexOf('?') >= 0)
+      uriArg = uri + "&" + queryString;
     else
-      return new ForwardFilterChain(uri + "?" + queryString);
+      uriArg = uri + "?" + queryString;
+
+    if (_isAbsolute)
+      return new ForwardAbsoluteFilterChain(uriArg, WebApp.getCurrent());
+    else
+      return new ForwardFilterChain(uriArg);
   }
 
   @Override

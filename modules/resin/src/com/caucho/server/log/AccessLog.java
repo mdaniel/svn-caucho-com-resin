@@ -47,6 +47,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 import java.util.regex.*;
@@ -87,7 +88,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 
   private boolean _isAutoFlush;
   
-  private boolean _isSharedBuffer = true;
+  private boolean _isSharedBuffer = false;
   private Object _sharedBufferLock;
 
   private long _autoFlushTime = 60000;
@@ -430,7 +431,14 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 	break;
 
       case 'h':
-        offset = request.printRemoteAddr(buffer, offset);
+	if (isHostnameDnsLookup()) {
+	  String addrName = request.getRemoteAddr();
+	  InetAddress addr = InetAddress.getByName(addrName);
+
+	  offset = print(buffer, offset, addr.getHostName());
+	}
+	else
+	  offset = request.printRemoteAddr(buffer, offset);
 	break;
 
         // input header

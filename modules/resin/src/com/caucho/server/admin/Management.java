@@ -29,6 +29,8 @@
 
 package com.caucho.server.admin;
 
+import com.caucho.bam.BamBroker;
+import com.caucho.hemp.broker.*;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
 import com.caucho.lifecycle.*;
@@ -62,15 +64,40 @@ public class Management
   private Resin _resin;
   private Server _server;
   private Path _path;
+  
+  private final BamBroker _adminBroker;
 
   private HostConfig _hostConfig;
 
   private ManagementAuthenticator _auth;
 
-  private DeployManagementService _deployService;
+  private DeployService _deployService;
   protected TransactionManager _transactionManager;
 
   private Lifecycle _lifecycle = new Lifecycle();
+
+  public Management()
+  {
+    _resin = Resin.getCurrent();
+
+    HempBrokerManager brokerManager = HempBrokerManager.getCurrent();
+
+    String serverId = _resin.getServerId();
+    
+    String brokerName;
+    
+    if (! "".equals(serverId))
+      brokerName = serverId + ".resin.caucho";
+    else
+      brokerName = "default.resin.caucho";
+    
+    _adminBroker = new HempBroker(brokerName);
+
+    brokerManager.addBroker(brokerName, _adminBroker);
+    brokerManager.addBroker("resin.caucho", _adminBroker);
+    
+    _deployService = new DeployService(_adminBroker);
+  }
 
   public void setCluster(Cluster cluster)
   {
@@ -131,11 +158,8 @@ public class Management
   /**
    * Create and configure the j2ee deploy service.
    */
-  public DeployManagementService createDeployService()
+  public DeployService createDeployService()
   {
-    if (_deployService == null)
-      _deployService = new DeployManagementService(this);
-
     return _deployService;
   }
 
@@ -240,9 +264,6 @@ public class Management
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
-
-    if (_deployService != null)
-      _deployService.start();
   }
 
   public HostConfig getHostConfig()
@@ -298,7 +319,7 @@ public class Management
     TransactionManager transactionManager = _transactionManager;
     _transactionManager = null;
 
-    DeployManagementService deployService = _deployService;
+    DeployService deployService = _deployService;
     _deployService = null;
 
     if (transactionManager != null)
