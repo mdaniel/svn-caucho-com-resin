@@ -50,13 +50,11 @@ public class ValueChangeListenerTag extends TagSupport
   private ValueExpression _binding;
 
   public void setType(ValueExpression type)
-    throws JspException
   {
     _type = type;
   }
 
   public void setBinding(ValueExpression binding)
-    throws JspException
   {
     _binding = binding;
   }

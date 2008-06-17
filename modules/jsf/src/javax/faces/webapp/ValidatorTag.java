@@ -28,20 +28,15 @@
 
 package javax.faces.webapp;
 
-import java.io.*;
-import java.util.*;
-
-import javax.el.*;
-
-import javax.faces.*;
-import javax.faces.application.*;
-import javax.faces.component.*;
-import javax.faces.context.*;
-import javax.faces.validator.*;
-import javax.faces.el.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
+import javax.el.ExpressionFactory;
+import javax.el.ValueExpression;
+import javax.faces.application.Application;
+import javax.faces.component.EditableValueHolder;
+import javax.faces.component.UIComponent;
+import javax.faces.context.FacesContext;
+import javax.faces.validator.Validator;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.TagSupport;
 
 public class ValidatorTag extends TagSupport
 {

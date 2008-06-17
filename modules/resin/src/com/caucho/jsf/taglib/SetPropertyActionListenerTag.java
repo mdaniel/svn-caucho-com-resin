@@ -51,7 +51,6 @@ public class SetPropertyActionListenerTag
   }
 
   public void setTarget(ValueExpression target)
-    throws JspException
   {
     _target = target;
   }
@@ -86,7 +85,6 @@ public class SetPropertyActionListenerTag
   }
 
   protected ActionListener createListener()
-    throws JspException
   {
     SetPropertyActionListener listener = new SetPropertyActionListener();
 

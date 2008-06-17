@@ -90,7 +90,7 @@
 
     <attribute>
       <name>binding</name>
-      <deferred-value><type>javax.faces.convert.NumberConverter</type></deferred-value>
+      <deferred-value><type>javax.el.ValueExpression</type></deferred-value>
     </attribute>
 
     <attribute>

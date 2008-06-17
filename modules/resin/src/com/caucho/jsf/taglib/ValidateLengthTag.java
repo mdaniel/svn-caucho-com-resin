@@ -28,24 +28,15 @@
 
 package com.caucho.jsf.taglib;
 
-import java.io.*;
-import java.util.*;
+import javax.el.ELContext;
+import javax.el.ValueExpression;
+import javax.faces.application.Application;
+import javax.faces.context.FacesContext;
+import javax.faces.validator.LengthValidator;
+import javax.faces.validator.Validator;
+import javax.faces.webapp.ValidatorELTag;
 
-import javax.el.*;
-
-import javax.faces.*;
-import javax.faces.application.*;
-import javax.faces.component.*;
-import javax.faces.context.*;
-import javax.faces.validator.*;
-import javax.faces.webapp.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.util.*;
-
-public class ValidateLengthTag extends ValidatorTag
+public class ValidateLengthTag extends ValidatorELTag
 {
   private ValueExpression _bindingExpr;
   
