@@ -30,6 +30,7 @@
 package com.caucho.xmpp;
 
 import com.caucho.bam.BamBroker;
+import com.caucho.hemp.broker.*;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.port.*;
 import com.caucho.vfs.*;
@@ -54,7 +55,8 @@ public class XmppProtocol extends Protocol
   private static final Logger log
     = Logger.getLogger(XmppProtocol.class.getName());
 
-  @In private BamBroker _broker;
+  private HempBrokerManager _brokerManager;
+  private BamBroker _broker;
   
   private ClassLoader _loader;
 
@@ -65,6 +67,8 @@ public class XmppProtocol extends Protocol
     setProtocolName("xmpp");
 
     _loader = Thread.currentThread().getContextClassLoader();
+
+    _brokerManager = HempBrokerManager.getCurrent();
   }
 
   ClassLoader getClassLoader()

@@ -34,5 +34,18 @@ compatibility.</p>
 
 </s1>
 
+<s1 title="resin-admin">
+
+<p>The admin now lets you start/stop/restart a webapp.  It requires a
+SSL connection to be enabled.</p>
+
+</s1>
+
+<s1 title="cluster store">
+
+<p>Allow save-backup='false' in cases where you don't want to save backups,
+but do want to enable the cluster store so peer servers can obtain the
+current value.</p>
+
 </body>
 </document>

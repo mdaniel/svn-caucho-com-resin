@@ -686,9 +686,19 @@ public class Port
     return 0;
   }
 
+  void addLifetimeRequestCount()
+  {
+    _lifetimeRequestCount++;
+  }
+
   public long getLifetimeRequestCount()
   {
     return _lifetimeRequestCount;
+  }
+
+  void addLifetimeKeepaliveCount()
+  {
+    _lifetimeKeepaliveCount++;
   }
 
   public long getLifetimeKeepaliveCount()
@@ -696,9 +706,19 @@ public class Port
     return _lifetimeKeepaliveCount;
   }
 
+  void addLifetimeClientDisconnectCount()
+  {
+    _lifetimeClientDisconnectCount++;
+  }
+
   public long getLifetimeClientDisconnectCount()
   {
     return _lifetimeClientDisconnectCount;
+  }
+
+  void addLifetimeRequestTime(long time)
+  {
+    _lifetimeRequestTime += time;
   }
 
   public long getLifetimeRequestTime()
@@ -706,9 +726,19 @@ public class Port
     return _lifetimeRequestTime;
   }
 
+  void addLifetimeReadBytes(long time)
+  {
+    _lifetimeReadBytes += time;
+  }
+
   public long getLifetimeReadBytes()
   {
     return _lifetimeReadBytes;
+  }
+
+  void addLifetimeWriteBytes(long time)
+  {
+    _lifetimeWriteBytes += time;
   }
 
   public long getLifetimeWriteBytes()

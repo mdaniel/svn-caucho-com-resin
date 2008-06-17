@@ -13,6 +13,10 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>session: add save-backup='false' to cluster store (#2626, rep by Allen Servedio)</li>
+<li>admin: add PortMX lifetime statistics (#2422, rep by Knut Forkalsrud)</li>
+<li>win32: lpt detection with jni (#2738, rep by T Fukuda)</li>
+<li>admin: resin-admin now allows start/stop/restart for webapps (#1882, rep by S Garrett)</li>
 <li>log: add hostname-dns-lookup for apache compatibility (#2732, rep by Michael O'Dea)</li>
 <li>admin: cpu-load for non-unix should not be logged (#2727, rep by Bradley Van Cleave)</li>
 <li>rewrite-dispatch: add absolute-target for forward (#2681, rep by Bill Au)</li>

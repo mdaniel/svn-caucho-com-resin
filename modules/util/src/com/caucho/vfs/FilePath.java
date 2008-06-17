@@ -49,6 +49,7 @@ public class FilePath extends FilesystemPath {
   private static FilesystemPath PWD;
   
   private File _file;
+  protected boolean _isWindows;
 
   /**
    * @param path canonical path
@@ -58,6 +59,7 @@ public class FilePath extends FilesystemPath {
     super(root, userPath, path);
     
     _separatorChar = getFileSeparatorChar();
+    _isWindows = _separatorChar == '\\';
   }
 
   public FilePath(String path)
@@ -75,6 +77,7 @@ public class FilePath extends FilesystemPath {
     }
 
     _separatorChar = _root._separatorChar;
+    _isWindows = ((FilePath) _root)._isWindows;
   }
 
   protected static String initialPath(String path)
@@ -298,7 +301,7 @@ public class FilePath extends FilesystemPath {
 
   public boolean exists()
   {
-    if (_separatorChar == '\\' && isAux())
+    if (_isWindows && isAux())
       return false;
     else
       return getFile().exists();
@@ -329,7 +332,7 @@ public class FilePath extends FilesystemPath {
 
   public boolean isFile()
   {
-    if (_separatorChar == '\\' && isAux())
+    if (_isWindows && isAux())
       return false;
     else
       return getFile().isFile();
@@ -355,7 +358,7 @@ public class FilePath extends FilesystemPath {
   {
     File file = getFile();
     
-    if (_separatorChar == '\\' && isAux())
+    if (_isWindows && isAux())
       return false;
     else
       return file.canRead();
@@ -365,7 +368,7 @@ public class FilePath extends FilesystemPath {
   {
     File file = getFile();
     
-    if (_separatorChar == '\\' && isAux())
+    if (_isWindows && isAux())
       return false;
     else
       return file.canWrite();
@@ -457,7 +460,7 @@ public class FilePath extends FilesystemPath {
    */
   public StreamImpl openReadImpl() throws IOException
   {
-    if (_separatorChar == '\\' && isAux())
+    if (_isWindows && isAux())
       throw new FileNotFoundException(_file.toString());
 
     /* XXX: only for Solaris (?)
@@ -515,7 +518,7 @@ public class FilePath extends FilesystemPath {
    */
   public RandomAccessStream openRandomAccess() throws IOException
   {
-    if (_separatorChar == '\\' && isAux())
+    if (_isWindows && isAux())
       throw new FileNotFoundException(_file.toString());
 
     return new FileRandomAccessStream(new RandomAccessFile(getFile(), "rw"));
@@ -566,6 +569,9 @@ public class FilePath extends FilesystemPath {
    */
   protected boolean isAux()
   {
+    if (! _isWindows)
+      return false;
+    
     File file = getFile();
 
     String path = getFullPath().toLowerCase();
@@ -579,6 +585,13 @@ public class FilePath extends FilesystemPath {
     p = path.indexOf("/con");
     if (p >= 0 && (len <= p + 4 || path.charAt(p + 4) == '.'))
       return true;
+    
+    p = path.indexOf("/lpt");
+    if (p >= 0
+	&& (len <= p + 5 || path.charAt(p + 5) == '.')
+	&& '0' <= (ch = path.charAt(p + 4)) && ch <= '9') {
+      return true;
+    }
     
     p = path.indexOf("/nul");
     if (p >= 0 && (len <= p + 4 || path.charAt(p + 4) == '.'))

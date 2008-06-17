@@ -299,6 +299,12 @@ if ($script == "thread.php") {
   ?><li><a href="thread.php">Threads</a></li><?
 }
 
+if ($script == "webapp.php") {
+  ?><li class="selected">WebApps</li><?
+} else {
+  ?><li><a href="webapp.php">WebApps</a></li><?
+}
+
 if ($script == "profile.php") {
   ?><li class="selected">Profile</li><?
 } else {

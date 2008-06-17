@@ -1292,6 +1292,14 @@ public class WriteStream extends OutputStreamWithBuffer
   }
 
   /**
+   * Clears the position for statistics cases like a socket stream.
+   */
+  public void clearPosition()
+  {
+    _position = - _writeLength;
+  }
+
+  /**
    * Sets the current write position.
    */
 

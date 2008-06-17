@@ -255,6 +255,14 @@ public final class ReadStream extends InputStream
   }
 
   /**
+   * Clears the position for statistics cases like a socket stream.
+   */
+  public void clearPosition()
+  {
+    _position = (_readLength - _readOffset);
+  }
+
+  /**
    * Returns true if the stream allows reading.
    */
   public boolean canRead()

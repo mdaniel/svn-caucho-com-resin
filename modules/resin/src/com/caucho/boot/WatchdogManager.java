@@ -44,6 +44,7 @@ import com.caucho.server.resin.ResinELContext;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
 import com.caucho.server.port.ProtocolDispatchServer;
+import com.caucho.server.util.*;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.*;
@@ -409,6 +410,7 @@ class WatchdogManager extends ProtocolDispatchServer {
     throws Exception
   {
     DynamicClassLoader.setJarCacheEnabled(false);
+    JniCauchoSystem.create().initJni();
       
     WatchdogManager manager = new WatchdogManager(argv);
     manager.startServer(argv);

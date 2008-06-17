@@ -81,8 +81,8 @@ public class ResinModule
    * Converts a string into its binary representation, according to the
    * given encoding, if given, or the script encoding if not given.
    */
-  public static Value string_to_binary(Env env, String string, 
-                                                @Optional String encoding)
+  public static Value resin_string_to_binary(Env env, String string, 
+					     @Optional String encoding)
   {
     if (encoding == null || encoding.length() == 0)
       encoding = env.getScriptEncoding();

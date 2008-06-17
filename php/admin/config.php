@@ -146,12 +146,12 @@ if ($ports) {
 </table>
 </div>
 <?php
-echo "<h2>ServerConnectors</h2>"
+echo "<h2>ClusterServer</h2>"
 echo "<div class='section'>";
 
 echo "<table class='data'>\n";
 
-$servers = $mbean_server->query("resin:*,type=ServerConnector");
+$servers = $mbean_server->query("resin:*,type=ClusterServer");
 foreach ($servers as $srun) {
 ?>
   <tr>

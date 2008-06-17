@@ -39,6 +39,7 @@ import com.caucho.util.Alarm;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.QSocket;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -492,10 +493,16 @@ public class TcpConnection extends Connection
   /**
    * Begins an active connection.
    */
-  public final void beginActive()
+  public final long beginActive()
   {
     _state = _state.toActive();
     _requestStartTime = Alarm.getCurrentTime();
+    return _requestStartTime;
+  }
+
+  public final long getRequestStartTime()
+  {
+    return _requestStartTime;
   }
 
   /**
@@ -503,7 +510,8 @@ public class TcpConnection extends Connection
    */
   public final void endActive()
   {
-    _requestStartTime = 0;
+    // state change?
+    // _requestStartTime = 0;
   }
 
   public boolean toKeepalive()
@@ -533,7 +541,8 @@ public class TcpConnection extends Connection
    try {
      // clear the interrupted flag
      Thread.interrupted();
-     
+
+     boolean isStatKeepalive = _state.isKeepalive();
      boolean isKeepalive;
      do {
        thread.setContextClassLoader(systemLoader);
@@ -548,7 +557,32 @@ public class TcpConnection extends Connection
        synchronized (_requestLock) {
          isKeepalive = getRequest().handleRequest();
        }
-       
+
+       // statistics
+       if (_requestStartTime > 0) {
+	 long startTime = _requestStartTime;
+	 _requestStartTime = 0;
+	 
+	 if (isStatKeepalive)
+	   _port.addLifetimeKeepaliveCount();
+	 
+	 _port.addLifetimeRequestCount();
+	 
+	 long now = Alarm.getCurrentTime();
+	 _port.addLifetimeRequestTime(now - startTime);
+
+	 ReadStream rs = getReadStream();
+	 long readCount = rs.getPosition();
+	 rs.clearPosition();
+	 _port.addLifetimeReadBytes(readCount);
+
+	 WriteStream ws = getWriteStream();
+	 long writeCount = ws.getPosition();
+	 ws.clearPosition();
+	 _port.addLifetimeWriteBytes(writeCount);
+       }
+
+       // duplex (xmpp/hmtp) handling
        if (_state == ConnectionState.DUPLEX) {
 	 isValid = true;
 	 _readTask.run();
@@ -562,6 +596,8 @@ public class TcpConnection extends Connection
 
      return result;
    } catch (ClientDisconnectException e) {
+     _port.addLifetimeClientDisconnectCount();
+     
       if (log.isLoggable(Level.FINER)) {
         log.finer(dbgId() + e);
       }

@@ -241,7 +241,7 @@ if ($ports) {
 
 <!-- Cluster -->
 
-<h2>Server Connectors</h2>
+<h2>Cluster Servers</h2>
 
 <table class="data">
   <tr>

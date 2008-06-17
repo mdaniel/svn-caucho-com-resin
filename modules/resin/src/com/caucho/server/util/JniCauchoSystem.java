@@ -73,4 +73,11 @@ public class JniCauchoSystem {
   {
     return 0;
   }
+
+  /**
+   * Initialize any JNI code
+   */
+  public void initJni()
+  {
+  }
 }

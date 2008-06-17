@@ -655,9 +655,14 @@ items earlier)</td>
   <td>required</td>
 </tr>
 <tr>
-  <td>triplicate</td>
-  <td>Saves three copies of all distributed objects.</td>
-  <td>false</td>
+  <td>save-backup</td>
+  <td>Saves backup copies of all distributed objects (3.2.0).</td>
+  <td>true</td>
+</tr>
+<tr>
+  <td>save-triplicate</td>
+  <td>Saves three copies of all distributed objects (3.2.0).</td>
+  <td>true</td>
 </tr>
 <tr>
   <td>wait-for-acknowledge</td>

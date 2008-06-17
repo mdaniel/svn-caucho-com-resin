@@ -648,10 +648,25 @@ public class HempBroker implements BamBroker, BamStream
     }
     else if ((p = jid.indexOf('@')) > 0) {
       String domainName = jid.substring(p + 1);
-      return findService(domainName);
+      return findDomain(domainName);
     }
     else
       return null;
+  }
+
+  protected BamService findDomain(String domain)
+  {
+    if (domain == null)
+      return null;
+
+    BamBroker broker = _manager.findBroker(domain);
+
+    if (broker == null || broker == this)
+      return null;
+
+    // construct foreign
+
+    return null;
   }
 
   protected BamService findServiceFromManager(String jid)
