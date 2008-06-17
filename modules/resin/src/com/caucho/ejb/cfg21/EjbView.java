@@ -258,11 +258,13 @@ public class EjbView {
                       getFullMethodName(implMethod)));
     }
 
+    /*
     if (implMethod.isAbstract()) {
       throw error(L.l("{0}: '{1}' must not be abstract.  Business methods must be implemented.",
                       implMethod.getDeclaringClass().getName(),
                       getFullMethodName(implMethod)));
     }
+    */
   }
 
   /**

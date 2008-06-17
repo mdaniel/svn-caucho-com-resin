@@ -148,8 +148,12 @@ public class SystemClassLoader
 	Path root = dir.lookup(fileName);
 
 	try {
-	  if (root.exists())
+	  // #2659
+	  if (root.isDirectory()
+	      || root.isFile() && (root.getPath().endsWith(".jar")
+				   || root.getPath().endsWith(".zip"))) {
 	    addRoot(root);
+	  }
 	} catch (Throwable e) {
 	  _hasBootClassPath = false;
 	  e.printStackTrace();

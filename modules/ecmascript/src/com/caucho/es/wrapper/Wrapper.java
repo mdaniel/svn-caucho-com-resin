@@ -182,8 +182,7 @@ public class Wrapper {
 
     ClassLoader beanLoader;
     beanLoader = SimpleLoader.create(loader,
-                                          CauchoSystem.getWorkPath(),
-                                          name);
+				     CauchoSystem.getWorkPath());
     ESBeanWrapper wrapper;
 
     try {
@@ -217,8 +216,7 @@ public class Wrapper {
     compiler.compile(name.replace('.', '/') + ".java", null);
 
     beanLoader = SimpleLoader.create(loader,
-                                          CauchoSystem.getWorkPath(),
-                                          name);
+				     CauchoSystem.getWorkPath());
     
     try {
       Class cl = CauchoSystem.loadClass(name, false, beanLoader);

@@ -363,6 +363,12 @@ public class JavaClassGenerator {
     throws ClassNotFoundException
   {
     DynamicClassLoader preloadLoader = null;
+
+    String packagePrefix = null;
+
+    int p = fullClassName.lastIndexOf('.');
+    if (p > 0)
+      packagePrefix = fullClassName.substring(0, p);
     
     try {
       ClassLoader loader;
@@ -370,7 +376,7 @@ public class JavaClassGenerator {
       if (preload) {
 	preloadLoader = SimpleLoader.create(getPreloadLoader(),
 					    getWorkDir(),
-					    fullClassName);
+					    packagePrefix);
 
 	// needed for cases like Amber enhancing
 	preloadLoader.setServletHack(true);
@@ -383,7 +389,7 @@ public class JavaClassGenerator {
 	if (loader == null) {
 	  loader = SimpleLoader.create(getParentLoader(),
 				       getWorkDir(),
-				       fullClassName);
+				       packagePrefix);
 	}
       }
 
@@ -403,7 +409,7 @@ public class JavaClassGenerator {
       else {
 	loader = SimpleLoader.create(getParentLoader(),
 				     getWorkDir(),
-				     fullClassName);
+				     packagePrefix);
       }
 
       return Class.forName(fullClassName, false, loader);
