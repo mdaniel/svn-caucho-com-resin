@@ -77,7 +77,7 @@ public class JniCauchoSystem {
   /**
    * Initialize any JNI code
    */
-  public void initJni()
+  public void initJniBackground()
   {
   }
 }

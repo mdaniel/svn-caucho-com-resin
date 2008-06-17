@@ -410,7 +410,7 @@ class WatchdogManager extends ProtocolDispatchServer {
     throws Exception
   {
     DynamicClassLoader.setJarCacheEnabled(false);
-    JniCauchoSystem.create().initJni();
+    JniCauchoSystem.create().initJniBackground();
       
     WatchdogManager manager = new WatchdogManager(argv);
     manager.startServer(argv);
