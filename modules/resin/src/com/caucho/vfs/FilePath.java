@@ -515,6 +515,10 @@ public class FilePath extends FilesystemPath {
     if (p >= 0 && (p + 4 >= len || path.charAt(p + 4) == '.'))
       return true;
     
+    p = path.indexOf("/lpt");
+    if (p >= 0 && (p + 5 >= len || path.charAt(p + 5) == '.'))
+      return true;
+    
     p = path.indexOf("/nul");
     if (p >= 0 && (p + 4 >= len || path.charAt(p + 4) == '.'))
       return true;
