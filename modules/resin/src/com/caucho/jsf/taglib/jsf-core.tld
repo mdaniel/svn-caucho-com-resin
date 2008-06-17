@@ -162,7 +162,7 @@
 
     <attribute>
       <name>converterId</name>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>javax.el.ValueExpression</type></deferred-value>
     </attribute>
   </tag>
 
@@ -170,7 +170,7 @@
   <tag>
     <name>facet</name>
     <tag-class>javax.faces.webapp.FacetTag</tag-class>
-    <body-content>JSP</body-content>
+    <body-content>empty</body-content>
 
     <attribute>
       <name>name</name>
@@ -194,7 +194,7 @@
     <attribute>
       <name>basename</name>
       <required>true</required>
-      <deferred-value><type>String</type></deferred-value>
+      <deferred-value><type>javax.el.ValueExpression</type></deferred-value>
     </attribute>
   </tag>
 

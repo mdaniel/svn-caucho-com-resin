@@ -1208,6 +1208,9 @@ public class JavaJspGenerator extends JspGenerator {
     
     generateTags(out);
 
+    //generateTags may still add to _value(Expr|Method)List
+    generateInit(out);
+
     generateExprs(out);
     generateXPath(out);
     generateConstantStrings(out);
@@ -1722,8 +1725,6 @@ public class JavaJspGenerator extends JspGenerator {
     out.popDepth();
     out.println("}");
     */
-
-    generateInit(out);
 
     if (_parseState.getExtends() == null && ! _parseState.isTag()) {
       out.println();

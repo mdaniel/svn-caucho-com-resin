@@ -45,7 +45,7 @@ import javax.servlet.jsp.tagext.*;
 
 import com.caucho.util.*;
 
-public class ValidateByIdTag extends ValidatorTag
+public class ValidateByIdTag extends ValidatorELTag
 {
   private ValueExpression _bindingExpr;
   
