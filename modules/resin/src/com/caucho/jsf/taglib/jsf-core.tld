@@ -90,7 +90,7 @@
 
     <attribute>
       <name>binding</name>
-      <deferred-value><type>javax.el.ValueExpression</type></deferred-value>
+      <deferred-value><type>javax.faces.convert.NumberConverter</type></deferred-value>
     </attribute>
 
     <attribute>
@@ -162,7 +162,7 @@
 
     <attribute>
       <name>converterId</name>
-      <deferred-value><type>javax.el.ValueExpression</type></deferred-value>
+      <deferred-value><type>String</type></deferred-value>
     </attribute>
   </tag>
 
@@ -194,7 +194,7 @@
     <attribute>
       <name>basename</name>
       <required>true</required>
-      <deferred-value><type>javax.el.ValueExpression</type></deferred-value>
+      <deferred-value><type>String</type></deferred-value>
     </attribute>
   </tag>
 
