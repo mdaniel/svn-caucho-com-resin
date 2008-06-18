@@ -849,6 +849,32 @@ element idle-time {
 
 </defun>
 
+<defun title="&lt;jsf>" type="defun">
+<parents>web-app</parents>
+
+<p>Configures JSF behavior.</p>
+
+<deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>fast-jsf</td>
+  <td>Optimize JSF code generation</td>
+  <td>true</td>
+</tr>
+</deftable-childtags>
+
+<def title="&lt;jsf> schema">
+element jsf {
+  &amp; fast-jsf?
+}
+</def>
+
+</defun>
+
 <defun title="&lt;jsp>" type="defun">
 <parents>web-app</parents>
 
@@ -883,11 +909,6 @@ element idle-time {
 <tr>
   <td>fast-jstl</td>
   <td>Optimize JSTL code generation</td>
-  <td>true</td>
-</tr>
-<tr>
-  <td>fast-jsf</td>
-  <td>Optimize JSF code generation</td>
   <td>true</td>
 </tr>
 <tr>
@@ -980,7 +1001,6 @@ element jsp {
   &amp; deferred-syntax-allowed-as-literal?
   &amp; dependency-check-interval?
   &amp; el-ignored?
-  &amp; fast-jsf?
   &amp; fast-jstl?
   &amp; ide-hack?
   &amp; ignore-el-exception?

@@ -77,6 +77,7 @@ import com.caucho.webbeans.el.WebBeansELResolver;
 import com.caucho.webbeans.manager.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.java.WorkDir;
+import com.caucho.jsf.cfg.JsfPropertyGroup;
 
 import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
@@ -278,6 +279,8 @@ public class WebApp extends ServletContextImpl
   // special
   private int _jspState;
   private JspPropertyGroup _jsp;
+  private JsfPropertyGroup _jsf;
+
   private ArrayList<JspTaglib> _taglibList;
   private JspApplicationContextImpl _jspApplicationContext;
   private HashMap<String,Object> _extensions = new HashMap<String,Object>();
@@ -1385,6 +1388,23 @@ public class WebApp extends ServletContextImpl
   public JspPropertyGroup getJsp()
   {
     return _jsp;
+  }
+
+  /**
+   * jsf configuration
+   */
+  public JsfPropertyGroup createJsf() {
+    if (_jsf == null)
+      _jsf = new JsfPropertyGroup();
+
+    return _jsf;
+  }
+
+  /**
+   * Returns the JSF configuration
+   */
+  public JsfPropertyGroup getJsf() {
+    return _jsf;
   }
 
   /**

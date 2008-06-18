@@ -41,6 +41,7 @@ import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
+import com.caucho.jsf.cfg.JsfPropertyGroup;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,11 +95,13 @@ public class TldManager {
 
     if (app != null) {
       JspPropertyGroup jsp = app.getJsp();
-      if (jsp != null) {
+      if (jsp != null)
 	_tldFileSet = jsp.getTldFileSet();
 
-	_isFastJsf = jsp.isFastJsf();
-      }
+
+      JsfPropertyGroup jsf = app.getJsf();
+      if (jsf != null)
+        _isFastJsf = jsf.isFastJsf();
     }
 
     // JSF has a global listener hidden in one of the *.tld which

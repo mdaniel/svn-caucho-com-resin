@@ -241,9 +241,6 @@ r_jsp = element jsp {
  & (attribute el-ignored { r_boolean-Type }
     | element el-ignored { r_boolean-Type })?
 
- & (attribute fast-jsf { r_boolean-Type }
-    | element fast-jsf { r_boolean-Type })?
-
  & (attribute fast-jstl { r_boolean-Type }
     | element fast-jstl { r_boolean-Type })?
 
@@ -300,6 +297,16 @@ r_jsp = element jsp {
  & (attribute velocity-enabled { r_boolean-Type }
     | element velocity-enabled { r_boolean-Type })?
 }
+
+r_jsf = element jsf {
+  (attribute fast-jsf { r_boolean-Type }
+    | element fast-jsf { r_boolean-Type })?
+    
+ & (attribute state-serialization-method { r_state-serialization-method-Values }
+    | element state-serialization-method { r_state-serialization-method-Values })?
+}
+
+r_state-serialization-method-Values = "hessian" | "java"
 
 r_jsp-config = element jsp-config {
   attribute id { string }?,
@@ -1120,6 +1127,8 @@ r_web-app-Basis =
   & (attribute inherit-session { r_boolean-Type }
      | element inherit-session { r_boolean-Type })?
 
+  & r_jsf?
+  
   & r_jsp?
 
   & r_jsp-config*

@@ -33,6 +33,7 @@ import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.jsp.java.JspNode;
 import com.caucho.vfs.Path;
 import com.caucho.xml.QName;
+import com.caucho.jsf.cfg.JsfPropertyGroup;
 
 /**
  * Generates the nodes for JSP code.
@@ -58,7 +59,10 @@ abstract public class JspBuilder {
   
   // The jsp property
   private JspPropertyGroup _jspPropertyGroup;
-  
+
+  // The jsf property
+  private JsfPropertyGroup _jsfPropertyGroup;
+
   // The tag manager
   protected ParseTagManager _tagManager;
 
@@ -172,18 +176,27 @@ abstract public class JspBuilder {
       return jsp.isFastJstl();
   }
 
+  public JsfPropertyGroup getJsfPropertyGroup()
+  {
+    return _jsfPropertyGroup;
+  }
+
+  public void setJsfPropertyGroup(JsfPropertyGroup jsfPropertyGroup)
+  {
+    _jsfPropertyGroup = jsfPropertyGroup;
+  }
 
   /**
    * Returns true if fast-jsf is enabled.
    */
   public boolean isFastJsf()
   {
-    JspPropertyGroup jsp = getJspPropertyGroup();
+    JsfPropertyGroup jsf = getJsfPropertyGroup();
 
-    if (jsp == null)
+    if (jsf == null)
       return true;
     else
-      return jsp.isFastJsf();
+      return jsf.isFastJsf();
   }
 
   /**
