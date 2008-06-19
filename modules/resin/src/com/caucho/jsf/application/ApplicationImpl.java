@@ -31,6 +31,7 @@ package com.caucho.jsf.application;
 import com.caucho.config.Config;
 import com.caucho.jsf.cfg.ManagedBeanConfig;
 import com.caucho.jsf.cfg.ResourceBundleConfig;
+import com.caucho.jsf.cfg.JsfPropertyGroup;
 import com.caucho.jsf.context.FacesELContext;
 import com.caucho.jsf.el.FacesContextELResolver;
 import com.caucho.jsf.el.FacesJspELResolver;
@@ -163,8 +164,18 @@ public class ApplicationImpl
 
     setViewHandler(new JspViewHandler());
     setResourceHandler(new ResourceHandlerImpl());
-    setStateManager(new SessionStateManager());
 
+    SessionStateManager stateManager = new SessionStateManager();
+    
+    JsfPropertyGroup jsfPropertyGroup = webApp.getJsf();
+
+    if (jsfPropertyGroup != null)
+      stateManager.setStateSerializationMethod(
+        jsfPropertyGroup.getStateSerializationMethod());
+
+    setStateManager(stateManager);
+
+    
     appContext.addELResolver(new FacesJspELResolver(this));
 
     addComponent(UIColumn.COMPONENT_TYPE,
@@ -1272,8 +1283,15 @@ public class ApplicationImpl
     if (_viewHandler == null)
       _viewHandler = new JspViewHandler();
 
-    if (_stateManager == null)
+    if (_stateManager == null) {
       _stateManager = new SessionStateManager();
+
+      JsfPropertyGroup jsfPropertyGroup = WebApp.getLocal().getJsf();
+
+      if (jsfPropertyGroup != null)
+        ((SessionStateManager) _stateManager).setStateSerializationMethod(
+          jsfPropertyGroup.getStateSerializationMethod());
+    }
   }
 
   public String toString()

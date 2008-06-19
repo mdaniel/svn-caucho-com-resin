@@ -865,6 +865,15 @@ element idle-time {
   <td>Optimize JSF code generation</td>
   <td>true</td>
 </tr>
+  <tr>
+    <td>state-serialization-method</td>
+    <td>Configures method of JSF state serialization. Setting value to
+      <code>hessian</code> provides fast, size optimized Hessian
+      serialization. Method <code>java</code> allows fallback
+      to Java Serialization.
+    </td>
+    <td>hessian</td>
+  </tr>
 </deftable-childtags>
 
 <def title="&lt;jsf> schema">

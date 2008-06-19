@@ -52,7 +52,13 @@ public class SessionStateManager extends StateManager
 
   private static final IntMap _typeMap = new IntMap();
   private static final ArrayList<Class> _typeList = new ArrayList();
-  
+  private String _stateSerializationMethod = "hessian";
+
+  public void setStateSerializationMethod(String stateSerializationMethod)
+  {
+    _stateSerializationMethod = stateSerializationMethod;
+  }
+
   @Override
   public Object saveView(FacesContext context)
   {
@@ -63,12 +69,28 @@ public class SessionStateManager extends StateManager
 
     try {
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-      Hessian2Output out = new Hessian2Output(bos);
       
-      serialize(out, context, root, new HashSet<String>());
+      if ("hessian".equalsIgnoreCase(_stateSerializationMethod)) {
 
-      out.close();
+        Hessian2Output out = new Hessian2Output(bos);
+
+        serialize(new HessianStateSerializationWriter(out),
+                  context,
+                  root,
+                  new HashSet<String>());
+
+        out.close();
+      }
+      else {
+        ObjectOutputStream out = new ObjectOutputStream(bos);
+
+        serialize(new JavaStateSerializationWriter(out),
+                  context,
+                  root,
+                  new HashSet<String>());
+
+        out.close();
+      }
 
       byte []state = bos.toByteArray();
 
@@ -178,7 +200,7 @@ public class SessionStateManager extends StateManager
                                           state));
   }
 
-  private void serialize(AbstractHessianOutput out,
+  private void serialize(StateSerializationWriter out,
 			 FacesContext context,
 			 UIComponent comp,
 			 HashSet<String> idMap)
@@ -186,7 +208,7 @@ public class SessionStateManager extends StateManager
   {
     if (comp.isTransient())
       return;
-    
+
     if (idMap.contains(comp.getId()))
       throw new IllegalStateException(L.l("'{0}' is a duplicate component during serialization.",
 					  comp.getId()));
@@ -207,7 +229,7 @@ public class SessionStateManager extends StateManager
       int childCount = 0;
 
       List<UIComponent> children = comp.getChildren();
-      
+
       for (int i = 0; i < fullChildCount; i++) {
 	UIComponent child = children.get(i);
 
@@ -216,7 +238,7 @@ public class SessionStateManager extends StateManager
       }
 
       out.writeInt(childCount);
-    
+
       for (int i = 0; i < fullChildCount; i++) {
 	UIComponent child = children.get(i);
 
@@ -228,7 +250,7 @@ public class SessionStateManager extends StateManager
 
     int facetCount = comp.getFacetCount();
     out.writeInt(facetCount);
-    
+
     if (facetCount > 0) {
       for (Map.Entry<String,UIComponent> entry : comp.getFacets().entrySet()) {
 	out.writeString(entry.getKey());
@@ -249,15 +271,28 @@ public class SessionStateManager extends StateManager
 
     try {
       ByteArrayInputStream bis = new ByteArrayInputStream(data);
-      Hessian2Input in = new Hessian2Input(bis);
 
-      return (UIViewRoot) deserialize(in, context, renderKitId);
+      if ("hessian".equalsIgnoreCase(_stateSerializationMethod)) {
+        Hessian2Input in = new Hessian2Input(bis);
+
+        return (UIViewRoot) deserialize(new HessianStateSerializationReader(in),
+                                        context,
+                                        renderKitId);
+
+      }
+      else {
+        ObjectInputStream in = new ObjectInputStream(bis);
+
+        return (UIViewRoot) deserialize(new JavaStateSerializationReader(in),
+                                        context,
+                                        renderKitId);
+      }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
-  private UIComponent deserialize(AbstractHessianInput in,
+  private UIComponent deserialize(StateSerializationReader in,
                                   FacesContext context,
                                   String renderKitId)
   throws IOException,
@@ -307,7 +342,7 @@ public class SessionStateManager extends StateManager
 
     return comp;
   }
-  
+
   public String toString()
   {
     return "SessionStateManager[]";
@@ -394,5 +429,129 @@ public class SessionStateManager extends StateManager
     addType(HtmlSelectOneListbox.class);
     addType(HtmlSelectOneMenu.class);
     addType(HtmlSelectOneRadio.class);
+  }
+
+  static interface StateSerializationWriter {
+    public void writeInt(int value) throws IOException;
+    public void writeString(String value) throws IOException;
+    public void writeObject(Object object) throws IOException;
+  }
+
+  static interface StateSerializationReader {
+    public int readInt() throws IOException;
+    public String readString() throws IOException;
+    public Object readObject() throws IOException, ClassNotFoundException;
+  }
+
+  static class HessianStateSerializationWriter
+    implements StateSerializationWriter {
+    private Hessian2Output _out;
+
+    HessianStateSerializationWriter(Hessian2Output out)
+    {
+      _out = out;
+    }
+    @Override
+    public void writeString(String value)
+      throws IOException
+    {
+      _out.writeString(value);
+    }
+    @Override
+    public void writeObject(Object object)
+      throws IOException
+    {
+      _out.writeObject(object);
+    }
+    @Override
+    public void writeInt(int value)
+      throws IOException
+    {
+      _out.writeInt(value);
+    }
+  }
+
+  static class JavaStateSerializationWriter
+    implements StateSerializationWriter {
+    private ObjectOutputStream _out;
+
+    JavaStateSerializationWriter(ObjectOutputStream out)
+    {
+      _out = out;
+    }
+    @Override
+    public void writeString(String s)
+      throws IOException
+    {
+      _out.writeUTF(s);
+    }
+    @Override
+    public void writeInt(int i)
+      throws IOException
+    {
+      _out.writeInt(i);
+    }
+    @Override
+    public void writeObject(Object o)
+      throws IOException
+    {
+      _out.writeObject(o);
+    }
+  }
+
+  static class HessianStateSerializationReader
+    implements StateSerializationReader {
+    private Hessian2Input _in;
+
+    HessianStateSerializationReader(Hessian2Input in)
+    {
+      _in = in;
+    }
+    @Override
+    public String readString()
+      throws IOException
+    {
+      return _in.readString();
+    }
+    @Override
+    public int readInt()
+      throws IOException
+    {
+      return _in.readInt();
+    }
+    @Override
+    public Object readObject()
+      throws IOException, ClassNotFoundException
+    {
+      return _in.readObject();
+    }
+  }
+
+  static class JavaStateSerializationReader
+    implements StateSerializationReader {
+    private ObjectInputStream _in;
+
+    JavaStateSerializationReader(ObjectInputStream in)
+    {
+      _in = in;
+    }
+    @Override
+    public String readString()
+      throws IOException
+    {
+      return _in.readUTF();
+    }
+    @Override
+    public int readInt()
+      throws IOException
+    {
+      return _in.readInt();
+    }
+    @Override
+    public Object readObject()
+      throws IOException, ClassNotFoundException
+    {
+      return _in.readObject();
+    }
   }
 }

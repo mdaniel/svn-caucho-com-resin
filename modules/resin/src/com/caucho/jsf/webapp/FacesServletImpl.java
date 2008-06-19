@@ -48,6 +48,7 @@ import com.caucho.config.*;
 import com.caucho.jsf.application.*;
 import com.caucho.jsf.cfg.*;
 import com.caucho.vfs.*;
+import com.caucho.server.webapp.WebApp;
 
 public class FacesServletImpl extends GenericServlet
 {
@@ -120,8 +121,17 @@ public class FacesServletImpl extends GenericServlet
     if (app.getViewHandler() == null)
       app.setViewHandler(new JspViewHandler());
 
-    if (app.getStateManager() == null)
-      app.setStateManager(new SessionStateManager());
+    if (app.getStateManager() == null) {
+      SessionStateManager stateManager = new SessionStateManager();
+
+      JsfPropertyGroup jsfPropertyGroup = WebApp.getLocal().getJsf();
+
+      if (jsfPropertyGroup != null)
+        stateManager.setStateSerializationMethod(
+          jsfPropertyGroup.getStateSerializationMethod());
+
+      app.setStateManager(stateManager);
+    }
 
     LifecycleFactory lifecycleFactory = (LifecycleFactory)
       FactoryFinder.getFactory(FactoryFinder.LIFECYCLE_FACTORY);
