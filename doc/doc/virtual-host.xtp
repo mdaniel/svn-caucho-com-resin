@@ -180,7 +180,7 @@ JVM's that correspond to the host name.</p>
 
 <figure src="config-jvmpervirtualhost.png" width="481" height="145"/>
 
-<s2 title="Back-end JVM's">
+<s2 title="Back-end JVMs">
 <p>In the most straightforward configuration, each host specific backend JVM
 gets its own resin.xml.  The resin.xml can use <a href="resin-tags.xtp#resin:import">resin:import</a> to share
 common configuration.</p>
@@ -192,10 +192,19 @@ the by the configuration of the front-end server that dispatches requests to
 the appropriate back-end JVM.</p>
 
 <example title="$RESIN_HOME/conf/resin.xml">
-&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="http://caucho.com/ns/resin/core">
+
+  &lt;cluster-default>
+    &lt;resin:import path="${resin.home}/conf/app-default.xml"/>
+  &lt;/cluster-default>
 
   &lt;cluster id="gryffindor&gt;
     &lt;server id="gryffindor" host="localhost" port="6802"/&gt;
+    
+    &lt;host-default>
+      &lt;web-app-deploy path="webapps"/>
+    &lt;/host-default>
 
     &lt;host id="www.gryffindor.com"&gt;
   

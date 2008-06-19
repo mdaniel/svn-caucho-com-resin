@@ -29,6 +29,7 @@
 
 package com.caucho.server.cluster;
 
+import com.caucho.bam.BamBroker;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ConfigProgram;
@@ -255,6 +256,14 @@ public class Server extends ProtocolDispatchServer
   protected ClusterServer getClusterServer()
   {
     return _clusterServer;
+  }
+
+  /**
+   * Returns the admin broker.
+   */
+  public BamBroker getBroker()
+  {
+    return _resin.getManagement().getAdminBroker();
   }
 
   //

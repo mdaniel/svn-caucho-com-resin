@@ -30,7 +30,7 @@
 package com.caucho.server.hmux;
 
 import com.caucho.hessian.io.*;
-import com.caucho.bam.BamStream;
+import com.caucho.bam.*;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.AbstractHttpRequest;
@@ -1000,14 +1000,15 @@ public class HmuxRequest extends AbstractHttpRequest
 
     Serializable query = (Serializable) readObject();
 
-    BamStream hmtpStream = _server.getHmtpStream();
+    BamBroker broker = _server.getBroker();
+    BamStream brokerStream = broker.getBrokerStream();
 
     if (log.isLoggable(Level.FINER))
       log.fine(dbgId() + (char) HMTP_QUERY_GET + " hmtp message"
 	       + " to=" + to + " from=" + from + " " + query);
 
-    if (hmtpStream != null) {
-      hmtpStream.message(to, from, query);
+    if (brokerStream != null) {
+      brokerStream.message(to, from, query);
     }
   }
 
@@ -1019,14 +1020,43 @@ public class HmuxRequest extends AbstractHttpRequest
 
     Serializable query = (Serializable) readObject();
 
-    BamStream hmtpStream = _server.getHmtpStream();
+    BamBroker broker = _server.getBroker();
+    BamStream brokerStream = broker.getBrokerStream();
 
     if (log.isLoggable(Level.FINER))
-      log.fine(dbgId() + (char) HMTP_QUERY_GET + " hmtp queryGet id=" + id
+      log.fine(dbgId() + (char) HMTP_QUERY_GET + " queryGet id=" + id
 	       + " to=" + to + " from=" + from + " " + query);
 
-    if (hmtpStream != null) {
-      hmtpStream.queryGet(id, to, from, query);
+    if (from != null && ! "".equals(from)) {
+      brokerStream.queryGet(id, to, from, query);
+    }
+    else {
+      // from=null means the client needs to block and return the data
+      // on the same stream
+      
+      Serializable result = null;
+
+      BamConnection conn = broker.getConnection("hmux", null);
+
+      try {
+	result = conn.queryGet(to, query);
+      } finally {
+	conn.close();
+      }
+
+      WriteStream out = _rawWrite;
+
+      out.write(HMTP_QUERY_RESULT);
+      out.write(0);
+      out.write(8);
+      writeLong(out, id);
+      writeString(HMUX_STRING, from);
+      writeString(HMUX_STRING, to);
+      writeObject(out, result);
+
+      if (log.isLoggable(Level.FINER))
+	log.finer(this + " queryResult to=" + from + " from=" + to +
+		  " result=" + (result != null ? result.getClass() : null));
     }
   }
 
@@ -1458,6 +1488,29 @@ public class HmuxRequest extends AbstractHttpRequest
   {
     writeString(HMUX_HEADER, key); 
     writeString(HMUX_STRING, value); 
+  }
+
+  private void writeObject(WriteStream out, Serializable value)
+    throws IOException
+  {
+    if (_out == null)
+      _out = new Hessian2StreamingOutput(_rawWrite);
+
+    _out.writeObject(value);
+    _out.flush();
+  }
+
+  private void writeLong(WriteStream out, long v)
+    throws IOException
+  {
+    out.write((int) (v << 56));
+    out.write((int) (v << 48));
+    out.write((int) (v << 40));
+    out.write((int) (v << 32));
+    out.write((int) (v << 24));
+    out.write((int) (v << 16));
+    out.write((int) (v << 8));
+    out.write((int) (v << 0));
   }
 
   void writeString(int code, String value)

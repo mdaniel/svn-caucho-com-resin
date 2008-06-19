@@ -31,9 +31,8 @@ package com.caucho.server.cluster;
 
 import com.caucho.hessian.io.*;
 import com.caucho.server.hmux.*;
-import com.caucho.util.Alarm;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 import java.io.*;
 import java.util.logging.*;
@@ -42,7 +41,9 @@ import java.util.logging.*;
  * Defines a connection to the client.
  */
 public class ClusterStream {
-  static protected final Logger log
+  private static final L10N L = new L10N(ClusterStream.class);
+  
+  private static final Logger log
     = Logger.getLogger(ClusterStream.class.getName());
 
   private ServerPool _pool;
@@ -167,7 +168,7 @@ public class ClusterStream {
   }
 
   public boolean queryGet(long id, String to, String from,
-			      Serializable query)
+			  Serializable query)
     throws IOException
   {
     WriteStream out = getWriteStream();
@@ -236,6 +237,42 @@ public class ClusterStream {
     out.flush();
 
     return true;
+  }
+
+  public Serializable readQueryResult(long id)
+    throws IOException
+  {
+    ReadStream in = getReadStream();
+
+    int code = in.read();
+
+    if (code != HmuxRequest.HMTP_QUERY_RESULT)
+      throw new IOException(L.l("expected query result at '" +
+				(char) code + "' " + code));
+
+    int len = (in.read() << 8) + in.read();
+
+    long resultId = readLongValue();
+
+    code = in.read();
+    if (code != HmuxRequest.HMUX_STRING)
+      throw new IOException(L.l("expected string at '"
+				+ (char) code + "' " + code));
+    
+    String to = readStringValue();
+    
+    code = in.read();
+    if (code != HmuxRequest.HMUX_STRING)
+      throw new IOException(L.l("expected string at '"
+				+ (char) code + "' " + code));
+    
+    String from = readStringValue();
+
+    Hessian2StreamingInput hIn = getHessianInputStream();
+
+    Serializable result = (Serializable) hIn.readObject();
+
+    return result;
   }
 
   /**
@@ -441,6 +478,36 @@ public class ClusterStream {
     os.write(len >> 8);
     os.write(len);
     os.write(value, offset, len);
+  }
+
+  public long readLongValue()
+    throws IOException
+  {
+    ReadStream is = _is;
+
+    return (((long) is.read() << 56)
+	    + ((long) is.read() << 48)
+	    + ((long) is.read() << 40)
+	    + ((long) is.read() << 32)
+	    + ((long) is.read() << 24)
+	    + ((long) is.read() << 16)
+	    + ((long) is.read() << 8)
+	    + ((long) is.read() << 0));
+  }
+
+  public String readStringValue()
+    throws IOException
+  {
+    ReadStream is = _is;
+    
+    int len = (is.read() << 8) + is.read();
+
+    char []data = new char[len];
+
+    for (int i = 0; i < len; i++)
+      data[i] = (char) is.read();
+
+    return new String(data);
   }
 
   @Override

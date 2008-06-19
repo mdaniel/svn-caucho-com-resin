@@ -156,6 +156,14 @@ public class Management
   }
 
   /**
+   * Returns the admin broker
+   */
+  public BamBroker getAdminBroker()
+  {
+    return _adminBroker;
+  }
+
+  /**
    * Create and configure the j2ee deploy service.
    */
   public DeployService createDeployService()
