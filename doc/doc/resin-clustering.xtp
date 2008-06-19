@@ -48,9 +48,13 @@ dispatches them to the backend servers (192.168.0.10 and 192.168.0.11).</p>
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
 
 &lt;cluster id="web-tier"&gt;
+  <!-- if not specified, the load-balance cluster would use port 6800 
+  &lt;cluster-port&gt;6800&lt;/cluster-port&gt;
+  -->
+  
   &lt;server-default>
     &lt;http port="80"/&gt;
-  &lt;/serve-default&gt;
+  &lt;/server-default&gt;
 
   &lt;server id="web-a" address="192.168.0.1"/&gt;
   &lt;server id="web-b" address="192.168.0.1"/&gt;
@@ -111,11 +115,11 @@ sessions</a> to make sure the users see the same session values.</p>
 <s2 title="Starting the servers">
 
 <example title="Starting each server">
-192.168.0.1&gt; java lib/resin.jar -server web-a start
-192.168.0.2&gt; java lib/resin.jar -server web-b start
+192.168.0.1&gt; java -jar lib/resin.jar -server web-a start
+192.168.0.2&gt; java -jar lib/resin.jar -server web-b start
 
-192.168.0.10&gt; java lib/resin.jar -server app-a start
-192.168.0.11&gt; java lib/resin.jar -server app-b start
+192.168.0.10&gt; java -jar lib/resin.jar -server app-a start
+192.168.0.11&gt; java -jar lib/resin.jar -server app-b start
 </example>
 
 </s2>

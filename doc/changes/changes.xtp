@@ -13,28 +13,7 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
-<li>database: after connection error in XA, the returned connection must still be the same object (#2708, rep by Takahiro Fukuda)</li>
-<li>win32: for services, avoid java restart on admin exit (#2701, rep by phenzler)</li>
-<li>jsf: fast-jsf is moved from jsp group to jsf group (&lt;jsp fast-jsf='true'&gt; becomes &lt;jsf fast-jsf='true'&gt;)</li>
-<li>session: add save-backup='false' to cluster store (#2626, rep by Allen Servedio)</li>
-<li>admin: add PortMX lifetime statistics (#2422, rep by Knut Forkalsrud)</li>
-<li>win32: lpt detection with jni (#2738, rep by T Fukuda)</li>
-<li>admin: resin-admin now allows start/stop/restart for webapps (#1882, rep by S Garrett)</li>
-<li>log: add hostname-dns-lookup for apache compatibility (#2732, rep by Michael O'Dea)</li>
-<li>admin: cpu-load for non-unix should not be logged (#2727, rep by Bradley Van Cleave)</li>
-<li>rewrite-dispatch: add absolute-target for forward (#2681, rep by Bill Au)</li>
-<li>rewrite-dispatch: add dispatcher-type for REQUEST, INCLUDE, FORWARD (#2675, rep by Vinod Mehra)</li>
-<li>(2008-06-15) jsp: jsp generation changes to reduce code size (#2347)</li>
-<li>log: added response.isCacheHit() for AbstractHttpResponse (#2733)</li>
-<li>classloader: scan of ext paths must only add directories and jars (#2659, rep by Brian Burke)</li>
-<li>classloader: windows updates to handled custom-modified class files (#2730, rep by axeon)</li>
-<li>jca: localTransactionStarted callback must not call LocalTransaction.begin (#2627, rep by Wesley)</li>
-<li>error: add development-mode-error-page to control error messages exposed to the user (#2714, rep by norlab)</li>
-<li>jsp: better handling of jsp classloading/compiling (#2702, rep by N. Maves)</li>
-<li>jsp: taglib needs to avoid Beans introspector to handle overloaded setters (#2634, rep by J. Reynaert)</li>
-<li>admin: test for alarm freeze failed for win32 dst updates, and was obsolete (#2509, rep by Michael Sengbusch)</li>
-<li>session: call sessionDestroy only on primary server (#2137, rep by Kai Virkki)</li>
-<li>security: custom ip-constraint extension IoC configuration issues (#2718, rep by Alex Victoria)</li>
+<li>quercus: include. include_once don't return a Boolean value (#2742, rep by kubazygmunt)</li>
 <li>quercus: "late static binding" implemented (static:: and get_called_class())</li>
 <li>quercus: extending SimpleXMLElement class fix</li>
 <li>quercus: self::$$var, self::$$var() fixes</li>
