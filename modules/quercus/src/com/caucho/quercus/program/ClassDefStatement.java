@@ -50,16 +50,10 @@ public class ClassDefStatement extends Statement {
   @Override
   public Value execute(Env env)
   {
-    // php/0cn2 - make sure interfaces have a QuercusClass
-    for (String iface : _cl.getInterfaces()) {
-      QuercusClass cl = env.findClass(iface);
-    }
-
-    // php/1d1o
-    if (env.findClass(_cl.getName()) == null) {
-      // XXX: parent is null?
-      env.addClass(_cl.getName(), _cl);
-    }
+    // for performance reasons, we are not going to validate classes here
+    // to be consistent with the compiled version
+    // php/0948 vs php/3948
+    //env.addClass(_cl.getName(), _cl);
 
     return null;
   }

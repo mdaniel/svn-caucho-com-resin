@@ -266,16 +266,19 @@ public class QuercusProgram {
    * Execute the program
    *
    * @param env the calling environment
+   * @return null if there is no return value
    *
    */
   public Value execute(Env env)
   {
-    Value value = _statement.execute(env);
+    return _statement.execute(env);
 
+    /*
     if (value != null)
       return value;
     else
       return NullValue.NULL;
+    */
   }
 
   /**

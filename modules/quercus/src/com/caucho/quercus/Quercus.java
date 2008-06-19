@@ -1349,7 +1349,7 @@ public class Quercus
 
       HashSet<URL> urlSet = new HashSet<URL>();
 
-      // get rid of duplicate entries found by multiple classloaders
+      // gets rid of duplicate entries found by different classloaders
       while (urls.hasMoreElements()) {
         URL url = urls.nextElement();
 
@@ -1362,7 +1362,7 @@ public class Quercus
         try {
           is = url.openStream();
 	  
-	  rs = new ReadStream(new VfsStream(is, null));
+          rs = new ReadStream(new VfsStream(is, null));
 
           parseServicesModule(rs);
         } catch (Throwable e) {
@@ -1503,16 +1503,23 @@ public class Quercus
       String quercusModule
         = "META-INF/services/com.caucho.quercus.QuercusClass";
       Enumeration<URL> urls = loader.getResources(quercusModule);
+      
+      HashSet<URL> urlSet = new HashSet<URL>();
 
+      // gets rid of duplicate entries found by different classloaders
       while (urls.hasMoreElements()) {
         URL url = urls.nextElement();
 
+        urlSet.add(url);
+      }
+
+      for (URL url : urlSet) {
         InputStream is = null;
         ReadStream rs = null;
         try {
           is = url.openStream();
 	  
-	  rs = new ReadStream(new VfsStream(is, null));
+          rs = new ReadStream(new VfsStream(is, null));
 	  
           parseClassServicesModule(rs);
         } catch (Throwable e) {

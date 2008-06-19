@@ -153,6 +153,15 @@ public class ExprFactory {
   {
     return new ClassConstExpr(className, name);
   }
+  
+  /**
+   * Creates a class const expression (static::FOO).
+   */
+  public LateStaticBindingClassConstExpr
+    createLateStaticBindingClassConst(String name)
+  {
+    return new LateStaticBindingClassConstExpr(name);
+  }
 
   /**
    * Creates a this expression.

@@ -120,8 +120,7 @@ public class VarExpr
    */
   @Override
   public Expr createAssignRef(QuercusParser parser,
-                              Expr value
-  )
+                              Expr value)
   {
     // _var.setAssigned();
 
@@ -277,10 +276,13 @@ public class VarExpr
    */
   public void evalAssign(Env env, Value value)
   {
+    // php/0232
+    /*
     if (getVarInfo().isGlobal())
       env.setGlobalValue(_name, value);
     else
-      env.setValue(_name, value);
+    */
+    env.setValue(_name, value);
   }
 
   /**

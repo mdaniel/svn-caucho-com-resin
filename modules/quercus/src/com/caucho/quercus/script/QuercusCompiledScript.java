@@ -30,6 +30,7 @@
 package com.caucho.quercus.script;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.page.InterpretedPage;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.program.QuercusProgram;
@@ -88,14 +89,18 @@ public class QuercusCompiledScript extends CompiledScript {
       env.setScriptContext(cxt);
 
       // php/214g
-      //env.start();
+      env.start();
 
-      Object value = _program.execute(env).toJavaObject();
+      Value resultV = _program.execute(env);
+      
+      Object result = null;
+      if (resultV != null)
+        result = resultV.toJavaObject();
 
       out.flushBuffer();
       out.free();
 
-      return value;
+      return result;
       /*
     } catch (ScriptException e) {
       throw e;

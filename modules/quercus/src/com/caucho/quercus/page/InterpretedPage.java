@@ -30,6 +30,7 @@
 package com.caucho.quercus.page;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
@@ -67,7 +68,12 @@ public class InterpretedPage extends QuercusPage
    */
   public Value execute(Env env)
   {
-    return _program.execute(env);
+    Value result = _program.execute(env);
+    
+    if (result == null)
+      result = LongValue.ONE;
+    
+    return result;
   }
 
   /**

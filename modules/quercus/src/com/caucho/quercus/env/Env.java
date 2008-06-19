@@ -2294,10 +2294,7 @@ public class Env {
    */
   public String getCallingClassName()
   {
-    if (_callingClass == null)
-      return getThis().getClassName();
-    else
-      return _callingClass;
+    return _callingClass;
   }
   
   /*
@@ -3470,10 +3467,26 @@ public class Env {
    */
   public void addClass(String name, ClassDef def)
   {
-    QuercusClass qClass = createQuercusClass(def, null);
+    // php/0cn2 - make sure interfaces have a QuercusClass
+    for (String iface : def.getInterfaces()) {
+      QuercusClass cl = findClass(iface);
+    }
 
-    _classMap.put(name, qClass);
-    _lowerClassMap.put(name.toLowerCase(), qClass);
+    // php/1d1o
+    if (findClass(def.getName()) == null) {
+      QuercusClass parentClass = null;
+      
+      String parentName = def.getParentName();
+      
+      if (parentName != null) {
+        parentClass = findAbstractClass(parentName);
+      }
+      
+      QuercusClass qClass = createQuercusClass(def, parentClass);
+
+      _classMap.put(name, qClass);
+      _lowerClassMap.put(name.toLowerCase(), qClass);
+    }
   }
 
   /**
@@ -3849,11 +3862,11 @@ public class Env {
       }
       else if (isRequire) {
         error(L.l("'{0}' is not a valid path", include));
-        return NullValue.NULL;
+        return BooleanValue.FALSE;
       }
       else {
         warning(L.l("'{0}' is not a valid path", include));
-        return NullValue.NULL;
+        return BooleanValue.FALSE;
       }
 
       // php/0b2d
@@ -3863,13 +3876,13 @@ public class Env {
         log.warning(dbgId() + msg);
         error(msg);
 
-        return NullValue.NULL;
+        return BooleanValue.FALSE;
       }
 
       QuercusPage page = _includeMap.get(path);
       
       if (page != null && isOnce)
-        return NullValue.NULL;
+        return BooleanValue.TRUE;
       else if (page == null || page.isModified(this)) {
         page = _quercus.parse(path);
         

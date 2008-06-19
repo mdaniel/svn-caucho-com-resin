@@ -2488,8 +2488,7 @@ public class QuercusParser {
 	try {
 	  if (token == '&') {
 	    // php/03d6
-	    expr = expr.createAssignRef(this,
-                                        parseBitOrExpr());
+	    expr = expr.createAssignRef(this, parseBitOrExpr());
 	  }
 	  else {
 	    _peekToken = token;
@@ -2656,7 +2655,7 @@ public class QuercusParser {
         {
           Expr index = parseExpr();
 
-	  expect('}');
+          expect('}');
 
           term = _factory.createCharAt(term, index);
         }
@@ -3375,8 +3374,12 @@ public class QuercusParser {
    */
   private Expr parseConstant(String className, String name)
   {
-    if (className != null)
-      return _factory.createClassConst(className, name);
+    if (className != null) {
+      if (className.equals("static"))
+        return _factory.createLateStaticBindingClassConst(name);
+      else
+        return _factory.createClassConst(className, name);
+    }
     else if (name.equals("__FILE__"))
       return createString(_parserLocation.getFileName());
     else if (name.equals("__LINE__"))
@@ -3411,19 +3414,19 @@ public class QuercusParser {
     
     Expr varExpr = null;
     String var = null;
+    
     if (token == '{') {
-      varExpr = _factory.createVarVar(parseTermDeref());
+      _peekToken = parseToken();
+      
+      varExpr = parseTerm();
       
       expect('}');
     }
     else if (token == '$') {
-      // php/0958
-      
-      //_peekToken = token;
-      
       varExpr = parseVariable();
     }
     else {
+      // class constant
       _peekToken = token;
       
       var = parseIdentifier();

@@ -38,23 +38,21 @@ import com.caucho.util.L10N;
 /**
  * Represents a PHP parent::FOO constant call expression.
  */
-public class ClassConstExpr extends Expr {
-  private static final L10N L = new L10N(ClassMethodExpr.class);
+public class LateStaticBindingClassConstExpr extends Expr {
+  private static final L10N L
+    = new L10N(LateStaticBindingClassMethodExpr.class);
 
-  protected final String _className;
   protected final String _name;
 
-  public ClassConstExpr(Location location, String className, String name)
+  public LateStaticBindingClassConstExpr(Location location, String name)
   {
     super(location);
-    
-    _className = className.intern();
+
     _name = name.intern();
   }
 
-  public ClassConstExpr(String className, String name)
+  public LateStaticBindingClassConstExpr(String name)
   {
-    _className = className.intern();
     _name = name.intern();
   }
   
@@ -67,12 +65,12 @@ public class ClassConstExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    return env.getClass(_className).getConstant(env, _name);
+    return env.getCallingClass().getConstant(env, _name);
   }
   
   public String toString()
   {
-    return _className + "::" + _name;
+    return "static::" + _name;
   }
 }
 

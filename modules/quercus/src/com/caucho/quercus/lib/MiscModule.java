@@ -171,7 +171,7 @@ public class MiscModule extends AbstractQuercusModule {
   {
     try {
       if (log.isLoggable(Level.FINER))
-	log.finer("quercus eval: [[" + code + "]]");
+        log.finer("quercus eval: [[" + code + "]]");
       
       Quercus quercus = env.getQuercus();
       

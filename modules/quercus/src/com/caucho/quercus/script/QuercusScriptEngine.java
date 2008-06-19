@@ -32,6 +32,7 @@ package com.caucho.quercus.script;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.page.InterpretedPage;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.parser.QuercusParser;
@@ -107,10 +108,13 @@ public class QuercusScriptEngine
       // php/214c
       env.start();
       
-      Object value = null;
+      Object result = null;
       
       try {
-        value = program.execute(env).toJavaObject();
+        Value value = program.execute(env);
+        
+        if (value != null)
+          result = value.toJavaObject();
       }
       catch (QuercusExitException e) {
         //php/2148
@@ -128,7 +132,7 @@ public class QuercusScriptEngine
       // http://bugs.caucho.com/view.php?id=1914
       writer.flush();
       
-      return value;
+      return result;
       
       /*
     } catch (ScriptException e) {

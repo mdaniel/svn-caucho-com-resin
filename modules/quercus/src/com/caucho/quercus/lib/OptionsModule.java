@@ -108,9 +108,7 @@ public class OptionsModule extends AbstractQuercusModule {
       
       Value value = program.execute(env);
 
-      boolean result = value.toBoolean();
-
-      if (! result) {
+      if (value == null || ! value.toBoolean()) {
         env.warning(L.l("Assertion \"{0}\" failed", code));
         return NullValue.NULL;
       }
