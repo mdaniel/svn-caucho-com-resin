@@ -291,7 +291,6 @@ public class ResinBoot {
    * -server web-a    : &lt;server> to start
    * <pre>
    */
-
   public static void main(String []argv)
   {
     try {

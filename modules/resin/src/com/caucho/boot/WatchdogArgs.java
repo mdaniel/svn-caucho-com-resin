@@ -452,7 +452,7 @@ class WatchdogArgs
     if (resinLib.lookup("pro.jar").canRead())
       addClassPath(classPath, resinLib.lookup("pro.jar").getNativePath());
     addClassPath(classPath, resinLib.lookup("resin.jar").getNativePath());
-    addClassPath(classPath, resinLib.lookup("jaxrpc-15.jar").getNativePath());
+    //    addClassPath(classPath, resinLib.lookup("jaxrpc-15.jar").getNativePath());
 		  
     String []list = resinLib.list();
 

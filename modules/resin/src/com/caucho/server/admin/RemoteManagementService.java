@@ -30,8 +30,7 @@
 package com.caucho.server.admin;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.program.PropertyValueProgram;
+import com.caucho.config.program.*;
 import com.caucho.config.types.RawString;
 import com.caucho.server.dispatch.ServletMapping;
 import com.caucho.server.hmux.HmuxRequest;
@@ -54,44 +53,42 @@ import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.logging.Logger;
 
-abstract public class ManagementService
+public class RemoteManagementService
 {
-  private static final L10N L = new L10N(ManagementService.class);
-  protected final Logger log = Logger.getLogger(getClass().getName());
+  private static final L10N L = new L10N(RemoteManagementService.class);
+  protected static final Logger log
+    = Logger.getLogger(RemoteManagementService.class.getName());
 
   private final Management _management;
-  private final String _serviceName;
-
-  private String _password;
 
   private InetNetwork[]_allowedNetworks;
 
-  protected ManagementService(Management management, String serviceName)
+  protected RemoteManagementService(Management management)
   {
     _management = management;
-    _serviceName = serviceName;
   }
 
   public void start()
   {
-    _password = _management.getRemoteCookie();
-    
-    if (_password == null) {
-      log.warning(L.l("jmx-remote disabled.  jmx-remote requires at least one enabled management <user>"));
+    if (_management.getRemoteCookie() == null) {
+      log.warning(L.l("Remote administration disabled.  Remote administration requires at least one enabled management <user>"));
       return;
     }
     
     HostConfig hostConfig = _management.getHostConfig();
 
     WebAppConfig webAppConfig = new WebAppConfig();
-    webAppConfig.setId(_serviceName);
+    webAppConfig.setId("remote-service");
     webAppConfig.setRootDirectory(new RawString("/admin-dummy-root"));
 
-    hostConfig.addBuilderProgram(new PropertyValueProgram("web-app", webAppConfig));
+    ConfigProgram program;
+    
+    program = new PropertyValueProgram("web-app", webAppConfig);
+    hostConfig.addBuilderProgram(program);
 
     ServletMapping servlet = new ServletMapping();
 
-    servlet.setServletName(_serviceName);
+    servlet.setServletName("remote-management");
     servlet.addURLPattern("/*");
     servlet.addURLRegexp(".*");
     servlet.setServletClass(ManagementServlet.class.getName());
@@ -99,14 +96,17 @@ abstract public class ManagementService
     ContainerProgram servletInit = new ContainerProgram();
     servletInit.addProgram(new PropertyValueProgram("service", this));
     servlet.setInit(servletInit);
-
-    webAppConfig.addBuilderProgram(new PropertyValueProgram("servlet-mapping", servlet));
+    
+    program = new PropertyValueProgram("servlet-mapping", servlet);
+    webAppConfig.addBuilderProgram(program);
 
     SecurityConstraint constraint = new SecurityConstraint();
     constraint.setURLPattern("/*");
     constraint.addConstraint(new HmuxConstraint(this));
     constraint.init();
-    webAppConfig.addBuilderProgram(new PropertyValueProgram("security-constraint", constraint));
+
+    program = new PropertyValueProgram("security-constraint", constraint);
+    webAppConfig.addBuilderProgram(program);
 
     try {
       _allowedNetworks = new InetNetwork[] {
@@ -120,7 +120,9 @@ abstract public class ManagementService
     }
   }
 
-  // first stage security - security constraint authorization
+  /**
+   * security constraint authorization
+   */
   public boolean isAuthorized(HttpServletRequest request,
 			      HttpServletResponse response,
                               ServletContext application)
@@ -131,31 +133,32 @@ abstract public class ManagementService
     HttpServletResponse res = (HttpServletResponse) response;
 
     if (! (request instanceof HmuxRequest)) {
-      log.warning(L.l("{0} attempt with non-hmux-request '{1}' from ip {2}",
-                      _serviceName, request, request.getRemoteAddr()));
+      log.warning(L.l("remote management attempt with non-hmux-request '{0}' from ip {1}",
+                      request, request.getRemoteAddr()));
 
       res.sendError(HttpServletResponse.SC_NOT_FOUND);
+      
       return false;
     }
 
     HmuxRequest hmuxRequest = (HmuxRequest) request;
 
-    if (!request.getServletPath().equals("")) {
-      log.warning(L.l("{0} attempt with invalid servlet-path '{1}' from address '{2}'",
-                     _serviceName, request.getServletPath(), request.getRemoteAddr()));
+    if (! request.getServletPath().equals("")) {
+      log.warning(L.l("remote management attempt with invalid servlet-path '{0}' from address '{1}'",
+		      request.getServletPath(), request.getRemoteAddr()));
 
       res.sendError(HttpServletResponse.SC_NOT_FOUND);
+      
       return false;
-
     }
 
     if (request.getPathInfo() != null) {
-      log.warning(L.l("{0} attempt with invalid path-info '{1}' from address '{2}'",
-                      _serviceName, request.getPathInfo(), request.getRemoteAddr()));
+      log.warning(L.l("remote management attempt with invalid path-info '{0}' from address '{1}'",
+                      request.getPathInfo(), request.getRemoteAddr()));
 
       res.sendError(HttpServletResponse.SC_NOT_FOUND);
+      
       return false;
-
     }
 
     // The remote test needs to be last to allow the other QA to work properly
@@ -170,8 +173,8 @@ abstract public class ManagementService
     }
 
     if (! isValidAddr) {
-      log.warning(L.l("{0} attempt from invalid address '{1}'",
-                      _serviceName, remoteAddr));
+      log.warning(L.l("remote management attempt from invalid address '{0}'",
+                      remoteAddr));
 
       res.sendError(HttpServletResponse.SC_NOT_FOUND);
       return false;
@@ -180,9 +183,11 @@ abstract public class ManagementService
     return true;
   }
 
-  // second stage security - read/write permission
-
-  private boolean isRequestAllowed(ServletRequest request, ServletResponse response)
+  /**
+   * read/write permission
+   */
+  private boolean isRequestAllowed(ServletRequest request,
+				   ServletResponse response)
     throws IOException, ServletException
   {
     HttpServletResponse res = (HttpServletResponse) response;
@@ -206,7 +211,8 @@ abstract public class ManagementService
     return true;
   }
 
-  protected boolean isReadAllowed(ServletRequest request, ServletResponse response)
+  protected boolean isReadAllowed(ServletRequest request,
+				  ServletResponse response)
     throws IOException, ServletException
   {
     if (!isRequestAllowed(request, response))
@@ -215,31 +221,35 @@ abstract public class ManagementService
     return true;
   }
 
-  protected boolean isWriteAllowed(ServletRequest request, ServletResponse response)
+  protected boolean isWriteAllowed(ServletRequest request,
+				   ServletResponse response)
     throws IOException, ServletException
   {
-    if (!isRequestAllowed(request, response))
+    if (! isRequestAllowed(request, response))
       return false;
 
     return true;
   }
 
-  abstract public void service(ServletRequest request, ServletResponse response)
-    throws IOException, ServletException;
+  public void service(ServletRequest request,
+		      ServletResponse response)
+    throws IOException, ServletException
+  {
+  }
 
+  @Override
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + _serviceName
-	    + "," + _management.getServerId() + "]");
+	    + "[" + _management.getServerId() + "]");
   }
 
   private static class HmuxConstraint
     extends AbstractConstraint
   {
-    private final ManagementService _service;
+    private final RemoteManagementService _service;
 
-    public HmuxConstraint(ManagementService service)
+    public HmuxConstraint(RemoteManagementService service)
     {
       _service = service;
     }

@@ -13,6 +13,8 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>database: after connection error in XA, the returned connection must still be the same object (#2708, rep by Takahiro Fukuda)</li>
+<li>win32: for services, avoid java restart on admin exit (#2701, rep by phenzler)</li>
 <li>jsf: fast-jsf is moved from jsp group to jsf group (&lt;jsp fast-jsf='true'&gt; becomes &lt;jsf fast-jsf='true'&gt;)</li>
 <li>session: add save-backup='false' to cluster store (#2626, rep by Allen Servedio)</li>
 <li>admin: add PortMX lifetime statistics (#2422, rep by Knut Forkalsrud)</li>

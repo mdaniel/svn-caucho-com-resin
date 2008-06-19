@@ -171,14 +171,16 @@ public class SessionArrayValue extends ArrayValueWrapper
     }
   }
 
-  public synchronized boolean inUse()
+  public boolean inUse()
   {
     return _useCount > 0;
   }
 
-  public synchronized void addUse()
+  public void addUse()
   {
-    _useCount++;
+    synchronized (this) {
+      _useCount++;
+    }
   }
 
   public boolean load()
@@ -285,22 +287,22 @@ public class SessionArrayValue extends ArrayValueWrapper
     clear();
   }
 
-  public synchronized long getAccessTime()
+  public long getAccessTime()
   {
     return _accessTime;
   }
   
-  public synchronized void setAccess(long now)
+  public void setAccess(long now)
   {
     _accessTime = now;
   }
 
-  public synchronized boolean isValid()
+  public boolean isValid()
   {
     return _isValid;
   }
 
-  public synchronized void setValid(boolean isValid)
+  public void setValid(boolean isValid)
   {
     _isValid = isValid;
   }

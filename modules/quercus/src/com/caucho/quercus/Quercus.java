@@ -581,24 +581,27 @@ public class Quercus
    */
   public JavaClassDef getJavaClassDefinition(Class type, String className)
   {
-    JavaClassDef def = _javaClassWrappers.get(className);
+    JavaClassDef def;
+    
+    synchronized (_javaClassWrappers) {
+      def = _javaClassWrappers.get(className);
 
-    if (def != null)
-      return def;
+      if (def == null) {
+	try {
+	  def = getModuleContext().getJavaClassDefinition(type, className);
 
-    try {
-      def = getModuleContext().getJavaClassDefinition(type, className);
-
-      addJavaClassWrapper(className, def);
-
-      // def.introspect(getModuleContext());
-
-      return def;
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new QuercusRuntimeException(e);
+	  _javaClassWrappers.put(className, def);
+	} catch (RuntimeException e) {
+	  throw e;
+	} catch (Exception e) {
+	  throw new QuercusRuntimeException(e);
+	}
+      }
     }
+
+    def.init();
+
+    return def;
   }
   
   /**
@@ -606,29 +609,27 @@ public class Quercus
    */
   public JavaClassDef getJavaClassDefinition(String className)
   {
-    JavaClassDef def = _javaClassWrappers.get(className);
+    JavaClassDef def;
+    
+    synchronized (_javaClassWrappers) {
+      def = _javaClassWrappers.get(className);
 
-    if (def != null)
-      return def;
+      if (def == null) {
+	try {
+	  def = getModuleContext().getJavaClassDefinition(className);
 
-    try {
-      def = getModuleContext().getJavaClassDefinition(className);
-
-      addJavaClassWrapper(className, def);
-
-      // def.introspect(getModuleContext());
-
-      return def;
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new QuercusRuntimeException(e);
+	  _javaClassWrappers.put(className, def);
+	} catch (RuntimeException e) {
+	  throw e;
+	} catch (Exception e) {
+	  throw new QuercusRuntimeException(e);
+	}
+      }
     }
-  }
 
-  protected void addJavaClassWrapper(String className, JavaClassDef def)
-  {
-    _javaClassWrappers.put(className, def);
+    def.init();
+
+    return def;
   }
   
   /**
@@ -636,12 +637,14 @@ public class Quercus
    */
   public ClassDef findJavaClassWrapper(String name)
   {
-    ClassDef def = _javaClassWrappers.get(name);
+    synchronized (_javaClassWrappers) {
+      ClassDef def = _javaClassWrappers.get(name);
 
-    if (def != null)
-      return def;
+      if (def != null)
+	return def;
 
-    return _lowerJavaClassWrappers.get(name.toLowerCase());
+      return _lowerJavaClassWrappers.get(name.toLowerCase());
+    }
   }
 
   /**
@@ -1636,8 +1639,10 @@ public class Quercus
       JavaClassDef def = context.addClass(name, type,
 					  extension, javaClassDefClass);
 
-      _javaClassWrappers.put(name, def);
-      _lowerJavaClassWrappers.put(name.toLowerCase(), def);
+      synchronized (_javaClassWrappers) {
+	_javaClassWrappers.put(name, def);
+	_lowerJavaClassWrappers.put(name.toLowerCase(), def);
+      }
 
       /*
       _staticClasses.put(name, def);

@@ -38,6 +38,7 @@ import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.JavaClassDef;
+import com.caucho.quercus.program.JavaArrayClassDef;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Constructor;
@@ -233,6 +234,10 @@ public class ModuleContext
    */
   public JavaClassDef getJavaClassDefinition(String className)
   {
+    // Note, this method must not trigger an introspection to avoid
+    // any race conditions.  It is only responsible for creating the
+    // wrapper around the class, i.e. it's a leaf node, not a recursive not
+
     synchronized (_javaClassWrappers) {
       JavaClassDef def = _javaClassWrappers.get(className);
 
@@ -246,7 +251,7 @@ public class ModuleContext
 	  type = Class.forName(className, false, _loader);
 	}
 	catch (ClassNotFoundException e) {
-	  throw new ClassNotFoundException(L.l("`{0}' not valid: {1}", className, e.toString()), e);
+	  throw new ClassNotFoundException(L.l("'{0}' is not a known Java class: {1}", className, e.toString()), e);
 	}
 
 	def = JavaClassDef.create(this, className, type);
@@ -281,14 +286,20 @@ public class ModuleContext
   protected JavaClassDef createDefaultJavaClassDef(String className,
                                                    Class type)
   {
-    return new JavaClassDef(this, className, type);
+    if (type.isArray())
+      return new JavaArrayClassDef(this, className, type);
+    else
+      return new JavaClassDef(this, className, type);
   }
   
   protected JavaClassDef createDefaultJavaClassDef(String className,
                                                    Class type,
                                                    String extension)
   {
-    return new JavaClassDef(this, className, type, extension);
+    if (type.isArray())
+      return new JavaArrayClassDef(this, className, type, extension);
+    else
+      return new JavaClassDef(this, className, type, extension);
   }
   
   /**
@@ -301,9 +312,9 @@ public class ModuleContext
 
       if (def != null)
 	return def;
-    }
 
-    return _lowerJavaClassWrappers.get(name.toLowerCase());
+      return _lowerJavaClassWrappers.get(name.toLowerCase());
+    }
   }
 
   public MarshalFactory getMarshalFactory()
@@ -439,13 +450,13 @@ public class ModuleContext
   {
     if (obj == null)
       return NullValue.NULL;
-    else if (Byte.class.equals(obj.getClass()) ||
-             Short.class.equals(obj.getClass()) ||
-             Integer.class.equals(obj.getClass()) ||
-             Long.class.equals(obj.getClass())) {
+    else if (Byte.class.equals(obj.getClass())
+	     || Short.class.equals(obj.getClass())
+	     || Integer.class.equals(obj.getClass())
+	     || Long.class.equals(obj.getClass())) {
       return LongValue.create(((Number) obj).longValue());
-    } else if (Float.class.equals(obj.getClass()) ||
-               Double.class.equals(obj.getClass())) {
+    } else if (Float.class.equals(obj.getClass())
+	       || Double.class.equals(obj.getClass())) {
       return DoubleValue.create(((Number) obj).doubleValue());
     } else if (String.class.equals(obj.getClass())) {
       // XXX: i18n

@@ -53,7 +53,7 @@ public class MethodMap<V>
 
     Entry<V> entry;
     for (entry = _entries[bucket]; entry != null; entry = entry._next) {
-      if (match(entry._key, key, key.length)) {
+      if (match(entry._key, key, length)) {
         entry._value = value;
 
         return;
@@ -145,6 +145,7 @@ public class MethodMap<V>
 
     for (int i = 0; i < _entries.length; i++) {
       Entry<V> entry = _entries[i];
+      
       while (entry != null) {
         Entry<V> next = entry._next;
 

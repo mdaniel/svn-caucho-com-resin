@@ -301,8 +301,11 @@ public class DeployContainer<C extends DeployController>
    */
   private C generateController(String name)
   {
+    // XXX: required for watchdog
+    /*
     if (! _lifecycle.isActive())
       return null;
+    */
     
     C newController = _deployListGenerator.generateController(name);
 

@@ -3256,12 +3256,11 @@ public class Env {
   { 
     JavaClassDef def = _quercus.getJavaClassDefinition(type, type.getName());
 
-    def.init();
-
     return def;
   }
   
-  private JavaClassDef getJavaClassDefinition(String className, boolean useImport)
+  private JavaClassDef getJavaClassDefinition(String className,
+					      boolean useImport)
   { 
     JavaClassDef def = null;
     
@@ -3274,11 +3273,7 @@ public class Env {
       }
       else
         log.log(Level.FINER, e.toString(), e);
-
     }
-
-    if (def != null)
-      def.init();
 
     return def;
   }
@@ -3346,21 +3341,20 @@ public class Env {
 
   /**
    * Returns a PHP value for a Java object
-   */
-  public Value wrapJava(Object obj)
-  {
-    return wrapJava(obj, null, false);
-  }
-
-  /**
-   * Returns a PHP value for a Java object
    *
    * @param isNullAsFalse what to return if <i>obj</i> is null, if true return
    * {@link BooleanValue.FALSE} otherwise return {@link NullValue.NULL)
    */
   public Value wrapJava(Object obj, boolean isNullAsFalse)
   {
-    return wrapJava(obj, null, isNullAsFalse);
+    if (obj == null) {
+      if (isNullAsFalse)
+        return BooleanValue.FALSE;
+      else
+        return NullValue.NULL;
+    }
+
+    return wrapJava(obj);
   }
 
   /**
@@ -3378,36 +3372,48 @@ public class Env {
         return NullValue.NULL;
     }
 
+    return wrapJava(obj, def);
+  }
+
+  /**
+   * Returns a PHP value for a Java object
+   */
+  public Value wrapJava(Object obj)
+  {
+    if (obj == null)
+      return NullValue.NULL;
+
+    if (obj instanceof Value)
+      return (Value) obj;
+    
+    JavaClassDef def = getJavaClassDefinition(obj.getClass());
+
+    return def.wrap(this, obj);
+  }
+
+  /**
+   * Returns a PHP value for a Java object
+   *
+   * @param isNullAsFalse what to return if <i>obj</i> is null, if true return
+   * {@link BooleanValue.FALSE} otherwise return {@link NullValue.NULL)
+   */
+  public Value wrapJava(Object obj, JavaClassDef def)
+  {
+    if (obj == null)
+      return NullValue.NULL;
+
     if (obj instanceof Value)
       return (Value) obj;
 
-    if (def == null)
-      def = getJavaClassDefinition(obj.getClass());
-    else if (def.getType() != obj.getClass()) {
+    // XXX: why is this logic here?  The def should be correct on the call
+    // logic is for JavaMarshal, where can avoid the lookup call
+    if (def.getType() != obj.getClass()) {
       // XXX: what if types are incompatible, does it matter?
       // if it doesn't matter, simplify this to one if with no else
       def = getJavaClassDefinition(obj.getClass());
     }
 
-    if (def.isArray()) {
-      ArrayValueImpl arrayValueImpl = new ArrayValueImpl();
-
-      Class componentClass = def.getType().getComponentType();
-
-      MarshalFactory factory = _quercus.getModuleContext().getMarshalFactory();
-      Marshal componentClassMarshal = factory.create(componentClass);
-
-      int length = Array.getLength(obj);
-      
-      for (int i = 0; i < length; i++) {
-        arrayValueImpl.put(componentClassMarshal.unmarshal(this, Array.get(obj, i)));
-      }
-
-      return arrayValueImpl;
-    }
-    else {
-      return def.wrap(this, obj);
-    }
+    return def.wrap(this, obj);
   }
 
   /**

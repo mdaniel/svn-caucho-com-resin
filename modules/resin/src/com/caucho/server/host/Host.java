@@ -46,6 +46,7 @@ import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.port.Port;
+import com.caucho.server.resin.*;
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
@@ -470,6 +471,9 @@ public class Host extends WebAppContainer
 
   private void initBam()
   {
+    if (Resin.getCurrent() == null)
+      return;
+    
     String hostName = _hostName;
     
     if ("".equals(hostName)) {
@@ -479,17 +483,19 @@ public class Host extends WebAppContainer
 	throw ConfigException.create(e);
       }
     }
-    
+
     _bamBroker = new HempBroker(hostName);
 
     HempBrokerManager brokerManager = HempBrokerManager.getCurrent();
 
-    brokerManager.addBroker(hostName, _bamBroker);
+    if (brokerManager != null)
+      brokerManager.addBroker(hostName, _bamBroker);
 
     for (String alias : _aliasList) {
       _bamBroker.addAlias(alias);
       
-      brokerManager.addBroker(hostName, _bamBroker);
+      if (brokerManager != null)
+	brokerManager.addBroker(hostName, _bamBroker);
     }
 
     WebBeansContainer webBeans = WebBeansContainer.getCurrent();
@@ -594,8 +600,9 @@ public class Host extends WebAppContainer
 	return false;
       
       super.stop();
-      
-      _bamBroker.close();
+
+      if (_bamBroker != null)
+	_bamBroker.close();
       
       envLoader.stop();
 

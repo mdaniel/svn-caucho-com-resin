@@ -980,7 +980,6 @@ public class WebAppContainer
       _uriToAppCache.clear();
     
     WebAppController controller = _uriToAppCache.get(uri);
-
     if (controller != null)
       return controller;
 

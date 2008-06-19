@@ -63,6 +63,8 @@ public class ResinModuleContext extends ModuleContext {
   {
     if (CompositeData.class.isAssignableFrom(type))
       return new CompositeDataClassDef(this, className, type);
+    else if (type.isArray())
+      return new JavaArrayClassDef(this, className, type);
     else
       return new JavaClassDef(this, className, type);
   }

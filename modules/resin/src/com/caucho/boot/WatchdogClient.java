@@ -331,28 +331,22 @@ class WatchdogClient
 
     env.put("CLASSPATH", classPath);
 
-    String ldLibraryPath = env.get("LD_LIBRARY_PATH");
-    String dyldLibraryPath = env.get("DYLD_LIBRARY_PATH");
-
     String libexecPath;
 
-    if (is64bit())
+    if (is64bit()) {
       libexecPath = resinHome.lookup("libexec64").getNativePath();
-    else
+
+      appendEnvPath(env, "LD_LIBRARY_PATH", libexecPath);
+      appendEnvPath(env, "DYLD_LIBRARY_PATH", libexecPath);
+      appendEnvPath(env, "PATH", resinHome.lookup("win64").getNativePath());
+    }
+    else {
       libexecPath = resinHome.lookup("libexec").getNativePath();
 
-    if (ldLibraryPath == null || "".equals(ldLibraryPath))
-      ldLibraryPath += libexecPath;
-    else if (ldLibraryPath.indexOf(libexecPath) < 0)
-      ldLibraryPath += File.pathSeparatorChar + libexecPath;
-
-    if (dyldLibraryPath == null || "".equals(dyldLibraryPath))
-      dyldLibraryPath += libexecPath;
-    else if (ldLibraryPath.indexOf(libexecPath) < 0)
-      dyldLibraryPath += File.pathSeparatorChar + libexecPath;
-  
-    env.put("LD_LIBRARY_PATH", ldLibraryPath);
-    env.put("DYLD_LIBRARY_PATH", dyldLibraryPath);
+      appendEnvPath(env, "LD_LIBRARY_PATH", libexecPath);
+      appendEnvPath(env, "DYLD_LIBRARY_PATH", libexecPath);
+      appendEnvPath(env, "PATH", resinHome.lookup("win32").getNativePath());
+    }
 
     ArrayList<String> list = new ArrayList<String>();
 
@@ -414,6 +408,18 @@ class WatchdogClient
 
     stdIs.close();
     stdOs.close();
+  }
+
+  private void appendEnvPath(Map<String,String> env,
+                             String prop,
+                             String value)
+  {
+    String oldValue = env.get(prop);
+
+    if (oldValue != null && ! "".equals(oldValue))
+      value = value + File.pathSeparator + oldValue;
+
+    env.put(prop, value);
   }
   
   @Override

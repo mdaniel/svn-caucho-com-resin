@@ -269,43 +269,45 @@ class PoolItem implements ConnectionEventListener, XAResource {
    *
    * @return true if the pool item is valid, false if it should be removed.
    */
-  synchronized boolean isValid()
+  boolean isValid()
   {
-    long now = Alarm.getCurrentTime();
+    synchronized (this) {
+      long now = Alarm.getCurrentTime();
 
-    long maxIdleTime = _cm.getMaxIdleTime();
-    long maxPoolTime = _cm.getMaxPoolTime();
-    long maxActiveTime = _cm.getMaxActiveTime();
+      long maxIdleTime = _cm.getMaxIdleTime();
+      long maxPoolTime = _cm.getMaxPoolTime();
+      long maxActiveTime = _cm.getMaxActiveTime();
 
-    boolean isActive = isActive() || _xid != null;
-    boolean isDead = false;
+      boolean isActive = isActive() || _xid != null;
+      boolean isDead = false;
 
-    if (! isActive && _hasConnectionError) {
-      isDead = true;
-      log.fine("closing pool item from connection error:" + this);
-    }
-    else if (! isActive &&
-	     0 < maxIdleTime && _poolEventTime + maxIdleTime < now) {
-      isDead = true;
-      log.fine("closing pool item from idle timeout:" + this);
-    }
-    else if (! isActive &&
-	     0 < maxPoolTime && _poolStartTime + maxPoolTime < now) {
-      isDead = true;
-      log.fine("closing pool item from pool timeout:" + this);
-    }
-    else if (isActive &&
-	     0 < maxActiveTime && _poolEventTime + maxActiveTime < now) {
-      isDead = true;
-      log.warning("closing pool item from active timeout:" + this);
-    }
+      if (! isActive && _hasConnectionError) {
+	isDead = true;
+	log.fine("closing pool item from connection error:" + this);
+      }
+      else if (! isActive &&
+	       0 < maxIdleTime && _poolEventTime + maxIdleTime < now) {
+	isDead = true;
+	log.fine("closing pool item from idle timeout:" + this);
+      }
+      else if (! isActive &&
+	       0 < maxPoolTime && _poolStartTime + maxPoolTime < now) {
+	isDead = true;
+	log.fine("closing pool item from pool timeout:" + this);
+      }
+      else if (isActive &&
+	       0 < maxActiveTime && _poolEventTime + maxActiveTime < now) {
+	isDead = true;
+	log.warning("closing pool item from active timeout:" + this);
+      }
 
-    if (isDead) {
-      _hasConnectionError = true;
-      return false;
+      if (isDead) {
+	_hasConnectionError = true;
+	return false;
+      }
+      else
+	return true;
     }
-    else
-      return true;
   }
   
   /**
@@ -345,8 +347,10 @@ class PoolItem implements ConnectionEventListener, XAResource {
       return null;
     else if (_shareHead != null && ! _cm.isShareable()) // is currently in use
       return null;
+    /* server/14g9, #2708
     else if (_hasConnectionError) // had a fatal error
       return null;
+    */
     
     if (log.isLoggable(Level.FINER))
       log.finer("sharing xa-pool item: " + this);

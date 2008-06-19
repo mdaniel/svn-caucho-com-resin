@@ -71,6 +71,8 @@ public class Management
 
   private ManagementAuthenticator _auth;
 
+  private RemoteManagementService _remoteService;
+
   private DeployService _deployService;
   protected TransactionManager _transactionManager;
 
@@ -168,20 +170,9 @@ public class Management
    */
   public Object createJmxService()
   {
-    throw new ConfigException(L.l("jmx-service requires Resin Professional"));
-  }
+    log.warning(L.l("jmx-service requires Resin Professional"));
 
-  /**
-   * Create and configure the ping monitor.
-   */
-  public ResourceAdapter createPing()
-  {
-    throw new ConfigException(L.l("ping requires Resin Professional"));
-  }
-
-  public void addPing(ResourceAdapter ping)
-  {
-    throw new ConfigException(L.l("ping requires Resin Professional"));
+    return new Object();
   }
 
   /**
@@ -189,7 +180,20 @@ public class Management
    */
   public Object createLogService()
   {
-    throw new ConfigException(L.l("'log-service' management requires Resin Professional"));
+    log.warning(L.l("'log-service' management requires Resin Professional"));
+
+    return new Object();
+  }
+
+  /**
+   * Creates the remote service
+   */
+  public RemoteManagementService createRemoteService()
+  {
+    if (_remoteService == null)
+      _remoteService = new RemoteManagementService(this);
+
+    return _remoteService;
   }
 
   /**
@@ -197,7 +201,9 @@ public class Management
    */
   public Object createStatService()
   {
-    throw new ConfigException(L.l("'stat-service' management requires Resin Professional"));
+    log.warning(L.l("'stat-service' management requires Resin Professional"));
+    
+    return new Object();
   }
 
   /**

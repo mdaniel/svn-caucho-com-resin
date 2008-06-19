@@ -61,6 +61,7 @@ import com.caucho.server.admin.Management;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
+import com.caucho.server.util.*;
 import com.caucho.server.webbeans.ResinWebBeansProducer;
 import com.caucho.util.Alarm;
 import com.caucho.util.CompileException;
@@ -1064,6 +1065,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	i += 2;
       }
       else if (argv[i].equals("-service")) {
+	JniCauchoSystem.create().initJniBackground();
 	// windows service
 	i += 1;
       }
@@ -1126,6 +1128,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       }
       else if ("start".equals(argv[i])
 	       || "restart".equals(argv[i])) {
+	JniCauchoSystem.create().initJniBackground();
 	i++;
       }
       else if (argv[i].equals("-verbose")

@@ -161,6 +161,8 @@ class WatchdogManager extends ProtocolDispatchServer {
 
     WebApp webApp = host.findWebAppByURI("/");
 
+    host.start();
+    
     ServletMapping servlet = webApp.createServletMapping();
 
     servlet.setServletName("watchdog");
@@ -410,6 +412,7 @@ class WatchdogManager extends ProtocolDispatchServer {
     throws Exception
   {
     DynamicClassLoader.setJarCacheEnabled(false);
+    
     JniCauchoSystem.create().initJniBackground();
       
     WatchdogManager manager = new WatchdogManager(argv);

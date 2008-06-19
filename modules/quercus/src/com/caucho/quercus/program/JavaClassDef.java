@@ -71,7 +71,6 @@ public class JavaClassDef extends ClassDef {
   private final Class _type;
   
   private final boolean _isAbstract;
-  private final boolean _isArray;
   private final boolean _isInterface;
   private final boolean _isDelegate;
   
@@ -130,9 +129,12 @@ public class JavaClassDef extends ClassDef {
     _type = type;
 
     _isAbstract = Modifier.isAbstract(type.getModifiers());
-    _isArray = type.isArray();
     _isInterface = type.isInterface();
     _isDelegate = type.isAnnotationPresent(ClassImplementation.class);
+
+    if (type.isArray() && ! isArray())
+      throw new IllegalStateException(L.l("'{0}' needs to be called with JavaArrayClassDef",
+					  type));
   }
   
   public JavaClassDef(ModuleContext moduleContext,
@@ -213,6 +215,11 @@ public class JavaClassDef extends ClassDef {
   {
     return _resourceType;
   }
+
+  protected ModuleContext getModuleContext()
+  {
+    return _moduleContext;
+  }
   
   /*
    * Returns the name of the extension that this class is part of.
@@ -265,7 +272,7 @@ public class JavaClassDef extends ClassDef {
 
   public boolean isArray()
   {
-    return _isArray;
+    return false;
   }
 
   @Override
@@ -578,7 +585,7 @@ public class JavaClassDef extends ClassDef {
     else if (__call != null)
       return __call.callMethod(env, qThis, env.createString(name, nameLen));
     else {
-      env.error(L.l("'{0}::{1}' is an unknown method",
+      env.error(L.l("'{0}::{1}()' is an unknown method",
 		    _name, toMethod(name, nameLen)));
 
       return NullValue.NULL;
@@ -599,7 +606,7 @@ public class JavaClassDef extends ClassDef {
     else if (__call != null)
       return __call.callMethod(env, qThis, env.createString(name, nameLen), a1);
     else {
-      env.error(L.l("'{0}::{1}' is an unknown method",
+      env.error(L.l("'{0}::{1}(a1)' is an unknown method",
 		    _name, toMethod(name, nameLen)));
 
       return NullValue.NULL;
@@ -621,7 +628,7 @@ public class JavaClassDef extends ClassDef {
       return __call.callMethod(env, qThis, env.createString(name, nameLen),
                          a1, a2);
     else {
-      env.error(L.l("'{0}::{1}' is an unknown method",
+      env.error(L.l("'{0}::{1}(a1,a2)' is an unknown method",
 		    _name, toMethod(name, nameLen)));
 
       return NullValue.NULL;
@@ -643,7 +650,7 @@ public class JavaClassDef extends ClassDef {
       return __call.callMethod(env, qThis, env.createString(name, nameLen),
                          a1, a2, a3);
     else {
-      env.error(L.l("'{0}::{1}' is an unknown method",
+      env.error(L.l("'{0}::{1}(a1,a2,a3)' is an unknown method",
 		    _name, toMethod(name, nameLen)));
 
       return NullValue.NULL;
@@ -665,7 +672,7 @@ public class JavaClassDef extends ClassDef {
       return __call.callMethod(env, qThis, env.createString(name, nameLen),
 			       a1, a2, a3, a4);
     else {
-      env.error(L.l("'{0}::{1}' is an unknown method",
+      env.error(L.l("'{0}::{1}(a1,a2,a3,a4)' is an unknown method",
 		    _name, toMethod(name, nameLen)));
 
       return NullValue.NULL;
@@ -688,7 +695,7 @@ public class JavaClassDef extends ClassDef {
 			       new Value[] { env.createString(name, nameLen),
 					     a1, a2, a3, a4, a5 });
     else {
-      env.error(L.l("'{0}::{1}' is an unknown method",
+      env.error(L.l("'{0}::{1}(a1,a2,a3,a4,a5)' is an unknown method",
 		    _name, toMethod(name, nameLen)));
 
       return NullValue.NULL;
@@ -785,17 +792,25 @@ public class JavaClassDef extends ClassDef {
     return null;
   }
 
-  public synchronized void init()
+  @Override
+  public final void init()
   {
     if (_isInit)
       return;
+    
+    synchronized (this) {
+      if (_isInit)
+	return;
 
-    try {
-      initInterfaceList(_type);
-      introspect();
-    }
-    finally {
-      _isInit = true;
+      super.init();
+
+      try {
+	initInterfaceList(_type);
+	introspect();
+      }
+      finally {
+	_isInit = true;
+      }
     }
   }
 
@@ -807,7 +822,6 @@ public class JavaClassDef extends ClassDef {
       return;
 
     for (Class iface : ifaces) {
-
       JavaClassDef javaClassDef = _moduleContext.getJavaClassDefinition(iface);
 
       if (javaClassDef != null)

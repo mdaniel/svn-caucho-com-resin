@@ -404,6 +404,9 @@ class WatchdogProcess
       appendEnvPath(env,
                     "DYLD_LIBRARY_PATH",
                     resinHome.lookup("libexec64").getNativePath());
+      appendEnvPath(env,
+                    "PATH",
+                    resinHome.lookup("win64").getNativePath());
     }
     else {
       appendEnvPath(env,
@@ -412,6 +415,9 @@ class WatchdogProcess
       appendEnvPath(env,
                     "DYLD_LIBRARY_PATH",
                     resinHome.lookup("libexec").getNativePath());
+      appendEnvPath(env,
+                    "PATH",
+                    resinHome.lookup("win32").getNativePath());
     }
 
     ArrayList<String> list = new ArrayList<String>();

@@ -305,7 +305,6 @@ public class WebAppExpandDeployGenerator
       rootDirectory = getExpandDirectory().lookup("./" + expandName);
     }
 
-
     if (! rootDirectory.isDirectory()
         && (jarPath == null || ! jarPath.isFile()))
       return null;
