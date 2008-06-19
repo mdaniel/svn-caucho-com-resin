@@ -31,14 +31,14 @@ package com.caucho.jsf.cfg;
 
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
+import com.caucho.config.ConfigException;
+import static com.caucho.jsf.application.SessionStateManager.StateSerializationMethod;
 
 /**
  * Configuration for the jsf-property-group.
  */
 public class JsfPropertyGroup {
   private static final L10N L = new L10N(JsfPropertyGroup.class);
-
-  private static int _gId;
 
   private static boolean _isDefaultFastJsf;
 
@@ -47,7 +47,9 @@ public class JsfPropertyGroup {
   private String _id;
 
   private boolean _fastJsf = _isDefaultFastJsf;
-  private String _stateSerializationMethod = "hessian";
+
+  private StateSerializationMethod _stateSerializationMethod
+    = StateSerializationMethod.HESSIAN;
 
   public JsfPropertyGroup()
   {
@@ -96,14 +98,22 @@ public class JsfPropertyGroup {
     _fastJsf = fastJsf;
   }
 
-  public String getStateSerializationMethod()
+  public StateSerializationMethod getStateSerializationMethod()
   {
     return _stateSerializationMethod;
   }
 
   public void setStateSerializationMethod(String stateSerializationMethod)
   {
-    _stateSerializationMethod = stateSerializationMethod;
+    if ("hessian".equals(stateSerializationMethod))
+      _stateSerializationMethod
+        = StateSerializationMethod.HESSIAN;
+    else if ("java".equals(stateSerializationMethod))
+      _stateSerializationMethod
+        = StateSerializationMethod.JAVA;
+    else
+      throw new ConfigException(L.l("'{0}' is a valid serialization method",
+                                    stateSerializationMethod));
   }
 
   /**

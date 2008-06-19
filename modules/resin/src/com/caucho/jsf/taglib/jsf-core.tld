@@ -170,7 +170,7 @@
   <tag>
     <name>facet</name>
     <tag-class>javax.faces.webapp.FacetTag</tag-class>
-    <body-content>empty</body-content>
+    <body-content>JSP</body-content>
 
     <attribute>
       <name>name</name>
@@ -183,7 +183,7 @@
   <tag>
     <name>loadBundle</name>
     <tag-class>com.caucho.jsf.taglib.LoadBundleTag</tag-class>
-    <body-content>JSP</body-content>
+    <body-content>empty</body-content>
 
     <attribute>
       <name>var</name>
@@ -202,7 +202,7 @@
   <tag>
     <name>param</name>
     <tag-class>com.caucho.jsf.taglib.ParamTag</tag-class>
-    <body-content>empty</body-content>
+    <body-content>JSP</body-content>
 
     <attribute>
       <name>id</name>
@@ -405,7 +405,7 @@
   <tag>
     <name>validateDoubleRange</name>
     <tag-class>com.caucho.jsf.taglib.ValidateDoubleRangeTag</tag-class>
-    <body-content>empty</body-content>
+    <body-content>JSP</body-content>
 
     <attribute>
       <name>binding</name>
@@ -427,7 +427,7 @@
   <tag>
     <name>validateLength</name>
     <tag-class>com.caucho.jsf.taglib.ValidateLengthTag</tag-class>
-    <body-content>empty</body-content>
+    <body-content>JSP</body-content>
 
     <attribute>
       <name>binding</name>
@@ -449,7 +449,7 @@
   <tag>
     <name>validateLongRange</name>
     <tag-class>com.caucho.jsf.taglib.ValidateLongRangeTag</tag-class>
-    <body-content>empty</body-content>
+    <body-content>JSP</body-content>
 
     <attribute>
       <name>binding</name>

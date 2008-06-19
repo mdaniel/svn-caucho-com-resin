@@ -39,10 +39,9 @@ import javax.faces.component.html.*;
 import javax.faces.context.*;
 import javax.faces.render.*;
 
-import javax.servlet.*;
-
 import com.caucho.util.*;
 import com.caucho.hessian.io.*;
+import static com.caucho.jsf.application.SessionStateManager.StateSerializationMethod.HESSIAN;
 
 public class SessionStateManager extends StateManager
 {
@@ -52,9 +51,11 @@ public class SessionStateManager extends StateManager
 
   private static final IntMap _typeMap = new IntMap();
   private static final ArrayList<Class> _typeList = new ArrayList();
-  private String _stateSerializationMethod = "hessian";
 
-  public void setStateSerializationMethod(String stateSerializationMethod)
+  private StateSerializationMethod _stateSerializationMethod
+    = HESSIAN;
+
+  public void setStateSerializationMethod(StateSerializationMethod stateSerializationMethod)
   {
     _stateSerializationMethod = stateSerializationMethod;
   }
@@ -69,28 +70,13 @@ public class SessionStateManager extends StateManager
 
     try {
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      
-      if ("hessian".equalsIgnoreCase(_stateSerializationMethod)) {
 
-        Hessian2Output out = new Hessian2Output(bos);
+      StateSerializationWriter stateWriter
+        = createStateSerializationWriter(bos);
 
-        serialize(new HessianStateSerializationWriter(out),
-                  context,
-                  root,
-                  new HashSet<String>());
+      serialize(stateWriter, context, root, new HashSet<String>());
 
-        out.close();
-      }
-      else {
-        ObjectOutputStream out = new ObjectOutputStream(bos);
-
-        serialize(new JavaStateSerializationWriter(out),
-                  context,
-                  root,
-                  new HashSet<String>());
-
-        out.close();
-      }
+      stateWriter.close();
 
       byte []state = bos.toByteArray();
 
@@ -119,6 +105,37 @@ public class SessionStateManager extends StateManager
       return state;
     } catch (IOException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  private StateSerializationWriter createStateSerializationWriter(
+    ByteArrayOutputStream out)
+    throws IOException
+  {
+    if (HESSIAN.equals(_stateSerializationMethod))
+      return new HessianStateSerializationWriter(new Hessian2Output(out));
+    else
+      return new JavaStateSerializationWriter(new ObjectOutputStream(out));
+  }
+
+  private StateSerializationReader createStateSerializationReader(
+    ByteArrayInputStream in)
+    throws IOException
+  {
+    if (HESSIAN.equals(_stateSerializationMethod))
+      return new HessianStateSerializationReader(new Hessian2Input(in));
+    else {
+      ObjectInputStream ois = new ObjectInputStream(in) {
+        protected Class<?> resolveClass(ObjectStreamClass objectStreamClass)
+          throws IOException, ClassNotFoundException
+        {
+          ClassLoader cl = Thread.currentThread().getContextClassLoader();
+
+          return cl.loadClass(objectStreamClass.getName());
+        }
+      };
+
+      return new JavaStateSerializationReader(ois);
     }
   }
 
@@ -272,21 +289,10 @@ public class SessionStateManager extends StateManager
     try {
       ByteArrayInputStream bis = new ByteArrayInputStream(data);
 
-      if ("hessian".equalsIgnoreCase(_stateSerializationMethod)) {
-        Hessian2Input in = new Hessian2Input(bis);
+      StateSerializationReader stateReader
+        = createStateSerializationReader(bis);
 
-        return (UIViewRoot) deserialize(new HessianStateSerializationReader(in),
-                                        context,
-                                        renderKitId);
-
-      }
-      else {
-        ObjectInputStream in = new ObjectInputStream(bis);
-
-        return (UIViewRoot) deserialize(new JavaStateSerializationReader(in),
-                                        context,
-                                        renderKitId);
-      }
+      return (UIViewRoot) deserialize(stateReader, context, renderKitId);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -431,10 +437,17 @@ public class SessionStateManager extends StateManager
     addType(HtmlSelectOneRadio.class);
   }
 
+  public static enum StateSerializationMethod {
+    HESSIAN,
+    JAVA
+  }
+
   static interface StateSerializationWriter {
     public void writeInt(int value) throws IOException;
     public void writeString(String value) throws IOException;
     public void writeObject(Object object) throws IOException;
+    public void close()
+      throws IOException;
   }
 
   static interface StateSerializationReader {
@@ -469,6 +482,13 @@ public class SessionStateManager extends StateManager
     {
       _out.writeInt(value);
     }
+    @Override
+    public void close()
+      throws IOException
+    {
+      _out.flush();
+      _out.close();
+    }
   }
 
   static class JavaStateSerializationWriter
@@ -496,6 +516,14 @@ public class SessionStateManager extends StateManager
       throws IOException
     {
       _out.writeObject(o);
+    }
+    @Override
+
+    public void close()
+      throws IOException
+    {
+      _out.flush();
+      _out.close();
     }
   }
 

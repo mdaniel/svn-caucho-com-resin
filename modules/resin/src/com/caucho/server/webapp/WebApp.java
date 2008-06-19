@@ -1393,7 +1393,8 @@ public class WebApp extends ServletContextImpl
   /**
    * jsf configuration
    */
-  public JsfPropertyGroup createJsf() {
+  public JsfPropertyGroup createJsf()
+  {
     if (_jsf == null)
       _jsf = new JsfPropertyGroup();
 
