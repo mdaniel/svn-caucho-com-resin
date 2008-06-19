@@ -71,8 +71,6 @@ public class Management
 
   private ManagementAuthenticator _auth;
 
-  private RemoteManagementService _remoteService;
-
   private DeployService _deployService;
   protected TransactionManager _transactionManager;
 
@@ -188,12 +186,11 @@ public class Management
   /**
    * Creates the remote service
    */
-  public RemoteManagementService createRemoteService()
+  public Object createRemoteService()
   {
-    if (_remoteService == null)
-      _remoteService = new RemoteManagementService(this);
-
-    return _remoteService;
+    log.warning(L.l("'remote-service' management requires Resin Professional"));
+    
+    return new Object();
   }
 
   /**
@@ -204,6 +201,24 @@ public class Management
     log.warning(L.l("'stat-service' management requires Resin Professional"));
     
     return new Object();
+  }
+
+  /**
+   * Create and configure the stat service
+   */
+  public ResourceAdapter createPing()
+  {
+    log.warning(L.l("'ping' requires Resin Professional"));
+    
+    return null;
+  }
+
+  /**
+   * Create and configure the stat service
+   */
+  public void addPing(ResourceAdapter ping)
+  {
+    log.warning(L.l("'ping' requires Resin Professional"));
   }
 
   /**
