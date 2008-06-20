@@ -41,7 +41,6 @@ public class TempOutputStream extends OutputStream
   }
 	   
   public void write(int ch)
-    throws IOException
   {
     if (_tail == null)
       addBuffer(TempBuffer.allocate());
@@ -53,7 +52,6 @@ public class TempOutputStream extends OutputStream
     
   @Override
   public void write(byte []buf, int offset, int length)
-    throws IOException
   {
     int index = 0;
     while (index < length) {

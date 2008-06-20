@@ -71,7 +71,6 @@ public class Management
 
   private ManagementAuthenticator _auth;
 
-  private DeployService _deployService;
   protected TransactionManager _transactionManager;
 
   private Lifecycle _lifecycle = new Lifecycle();
@@ -95,8 +94,6 @@ public class Management
 
     brokerManager.addBroker(brokerName, _adminBroker);
     brokerManager.addBroker("resin.caucho", _adminBroker);
-    
-    _deployService = new DeployService(_adminBroker);
   }
 
   public void setCluster(Cluster cluster)
@@ -166,9 +163,11 @@ public class Management
   /**
    * Create and configure the j2ee deploy service.
    */
-  public DeployService createDeployService()
+  public Object createDeployService()
   {
-    return _deployService;
+    log.warning(L.l("deploy-service requires Resin Professional"));
+
+    return new Object();
   }
 
   /**
@@ -186,7 +185,7 @@ public class Management
    */
   public Object createLogService()
   {
-    log.warning(L.l("'log-service' management requires Resin Professional"));
+    log.warning(L.l("log-service requires Resin Professional"));
 
     return new Object();
   }
@@ -196,7 +195,7 @@ public class Management
    */
   public Object createRemoteService()
   {
-    log.warning(L.l("'remote-service' management requires Resin Professional"));
+    log.warning(L.l("remote-service requires Resin Professional"));
     
     return new Object();
   }
@@ -206,7 +205,7 @@ public class Management
    */
   public Object createStatService()
   {
-    log.warning(L.l("'stat-service' management requires Resin Professional"));
+    log.warning(L.l("stat-service requires Resin Professional"));
     
     return new Object();
   }
@@ -347,9 +346,6 @@ public class Management
   {
     TransactionManager transactionManager = _transactionManager;
     _transactionManager = null;
-
-    DeployService deployService = _deployService;
-    _deployService = null;
 
     if (transactionManager != null)
       transactionManager.destroy();

@@ -73,6 +73,57 @@ public class GitWorkingTree {
     }
   }
 
+  public GitWorkingTree findTreeRec(String path)
+  {
+    while (path.startsWith("/"))
+      path = path.substring(1);
+
+    if ("".equals(path))
+      return this;
+    
+    int p = path.indexOf('/');
+
+    if (p > 0) {
+      String head = path.substring(0, p);
+      String tail = path.substring(p + 1);
+
+      GitWorkingTree tree = getTree(head);
+
+      return tree.findTreeRec(tail);
+    }
+    else {
+      return getTree(path);
+    }
+  }
+
+  public InputStream openFile()
+    throws IOException
+  {
+    TempOutputStream out = new TempOutputStream();
+
+    writeTree(out);
+
+    GitInputStream is = new GitInputStream("tree",
+					   out.getLength(),
+					   out.openRead());
+
+    out = new TempOutputStream();
+    DeflaterOutputStream zipOut = new DeflaterOutputStream(out);
+
+    TempBuffer tBuf = TempBuffer.allocate();
+    byte []buffer = tBuf.getBuffer();
+
+    int len;
+
+    while ((len = is.read(buffer, 0, buffer.length)) > 0) {
+      zipOut.write(buffer, 0, len);
+    }
+
+    zipOut.close();
+
+    return out.openRead();
+  }
+
   String commit(GitCommitTree commit, String path)
   {
     for (Entry entry : _treeMap.values()) {

@@ -85,6 +85,14 @@ public class GitCommitTree {
   }
 
   /**
+   * Finds the directory given the path
+   */
+  public GitWorkingTree findTree(String path)
+  {
+    return _root.findTreeRec(path);
+  }
+
+  /**
    * Commits the tree by calculating the directory hashes
    */
   public String commit()
@@ -94,6 +102,9 @@ public class GitCommitTree {
 
   void addCommitDir(String sha1, String path)
   {
+    if (! path.endsWith("/"))
+      path = path + "/";
+    
     _sha1ToPathMap.put(sha1, path);
   }
 
@@ -139,6 +150,41 @@ public class GitCommitTree {
       return Hex.toHex(md.digest());
     } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
+    } finally {
+      TempBuffer.free(tBuf);
+    }
+  }
+
+  public static InputStream writeBlob(InputStream is, long length)
+    throws IOException
+  {
+    TempOutputStream os = new TempOutputStream();
+    DeflaterOutputStream out = new DeflaterOutputStream(os);
+    TempBuffer tBuf = TempBuffer.allocate();
+
+    try {
+      out.write('b');
+      out.write('l');
+      out.write('o');
+      out.write('b');
+      out.write(' ');
+
+      String lenString = String.valueOf(length);
+      for (int i = 0; i < lenString.length(); i++) {
+	out.write(lenString.charAt(i));
+      }
+      out.write(0);
+
+      int len;
+
+      byte []buffer = tBuf.getBuffer();
+      while ((len = is.read(buffer, 0, buffer.length)) > 0) {
+	out.write(buffer, 0, len);
+      }
+
+      out.close();
+
+      return os.openRead();
     } finally {
       TempBuffer.free(tBuf);
     }

@@ -50,36 +50,32 @@ public class GitRepository {
   private static final int OBJ_TAG = 4;
   
   private Path _root;
-  private Path _git;
 
   public GitRepository(Path root)
   {
     _root = root;
-
-    _git = _root.lookup(".git");
   }
 
   public void initDb()
     throws IOException
   {
-    if (_git.lookup("HEAD").canRead()) {
-      throw new IOException(L.l("git already initialized"));
-    }
-    
-    _git.mkdir();
+    if (_root.lookup("HEAD").canRead())
+      return;
 
-    _git.lookup("refs").mkdir();
-    _git.lookup("refs/heads").mkdir();
-    
-    _git.lookup("objects").mkdir();
-    _git.lookup("objects/info").mkdir();
-    _git.lookup("objects/pack").mkdir();
-    
-    _git.lookup("branches").mkdir();
-    
-    _git.lookup("tmp").mkdir();
+    _root.mkdirs();
 
-    WriteStream out = _git.lookup("HEAD").openWrite();
+    _root.lookup("refs").mkdir();
+    _root.lookup("refs/heads").mkdir();
+    
+    _root.lookup("objects").mkdir();
+    _root.lookup("objects/info").mkdir();
+    _root.lookup("objects/pack").mkdir();
+    
+    _root.lookup("branches").mkdir();
+    
+    _root.lookup("tmp").mkdir();
+
+    WriteStream out = _root.lookup("HEAD").openWrite();
     try {
       out.println("ref: refs/heads/master");
     } finally {
@@ -90,7 +86,7 @@ public class GitRepository {
   public String getMaster()
   {
     try {
-      Path path = _git.lookup("refs/heads/master");
+      Path path = _root.lookup("refs/heads/master");
       ReadStream is = path.openRead();
 
       try {
@@ -144,13 +140,23 @@ public class GitRepository {
     }
   }
 
+  public boolean contains(String sha1)
+  {
+    String prefix = sha1.substring(0, 2);
+    String suffix = sha1.substring(2);
+
+    Path path = _root.lookup("objects").lookup(prefix).lookup(suffix);
+
+    return path.exists();
+  }
+
   private GitObjectStream open(String sha1)
     throws IOException
   {
     String prefix = sha1.substring(0, 2);
     String suffix = sha1.substring(2);
 
-    Path path = _git.lookup("objects").lookup(prefix).lookup(suffix);
+    Path path = _root.lookup("objects").lookup(prefix).lookup(suffix);
 
     return new GitObjectStream(path);
   }
@@ -272,7 +278,7 @@ public class GitRepository {
     }
   }
 
-  private String writeFile(TempOutputStream os, String hex)
+  public String writeFile(TempOutputStream os, String hex)
     throws IOException
   {
     Path objectPath = lookupPath(hex);
@@ -281,8 +287,11 @@ public class GitRepository {
       return hex;
 
     objectPath.getParent().mkdirs();
+    
+    Path tmpDir = _root.lookup("tmp");
+    tmpDir.mkdirs();
 
-    Path tmp = _git.lookup("tmp").lookup("tmp." + hex);
+    Path tmp = _root.lookup("tmp").lookup("tmp." + hex);
 
     WriteStream tmpOs = tmp.openWrite();
     try {
@@ -301,7 +310,7 @@ public class GitRepository {
     String prefix = sha1.substring(0, 2);
     String suffix = sha1.substring(2);
     
-    return _git.lookup("objects").lookup(prefix).lookup(suffix);
+    return _root.lookup("objects").lookup(prefix).lookup(suffix);
   }
 
   private String writeData(OutputStream os, String type,

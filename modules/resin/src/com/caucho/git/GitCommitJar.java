@@ -84,6 +84,34 @@ public class GitCommitJar {
   {
     return _commit.findPath(sha1);
   }
+
+  public InputStream openFile(String sha1)
+    throws IOException
+  {
+    String path = _commit.findPath(sha1);
+
+    if (path.endsWith("/")) {
+      GitWorkingTree tree = _commit.findTree(path);
+
+      return tree.openFile();
+    }
+    else {
+      ZipFile file = new ZipFile(_jar.getNativePath());
+
+      try {
+	ZipEntry entry = file.getEntry(path);
+	InputStream is = file.getInputStream(entry);
+
+	try {
+	  return _commit.writeBlob(is, entry.getSize());
+	} finally {
+	  is.close();
+	}
+      } finally {
+	file.close();
+      }
+    }
+  }
   
   @Override
   public String toString()
