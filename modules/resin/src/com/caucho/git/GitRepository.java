@@ -136,12 +136,32 @@ public class GitRepository {
 	is.close();
     }
   }
-  
+
+  public String []listRefs(String dir)
+  {
+    try {
+      Path path = _root.lookup("refs").lookup(dir);
+
+      if (path.isDirectory())
+	return path.list();
+      else
+	return new String[0];
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return new String[0];
+    }
+  }
+
+  public Path getRefPath(String path)
+  {
+    return _root.lookup("refs").lookup(path);
+  }
+
   public void writeTag(String tag, String hex)
   {
     Path path = _root.lookup("refs").lookup(tag);
 
-    System.out.println("PATH: " + path.getFullPath());
     try {
       path.getParent().mkdirs();
     } catch (IOException e) {
@@ -190,6 +210,28 @@ public class GitRepository {
 				  is.getType()));
       
       return is.parseTree();
+    } finally {
+      is.close();
+    }
+  }
+
+  public void copyToFile(Path path, String sha1)
+    throws IOException
+  {
+    GitObjectStream is = open(sha1);
+    
+    try {
+      if (! "blob".equals(is.getType()))
+	throw new IOException(L.l("'{0}' is an unexpected type, expected 'blot'",
+				  is.getType()));
+
+      WriteStream os = path.openWrite();
+
+      try {
+	os.writeStream(is.getInputStream());
+      } finally {
+	os.close();
+      }
     } finally {
       is.close();
     }

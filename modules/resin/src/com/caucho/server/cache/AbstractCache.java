@@ -37,80 +37,119 @@ import javax.servlet.FilterChain;
 /**
  * Cached response.
  */
-abstract public class AbstractCache {
+public class AbstractCache {
   /**
    * Sets the path to the cache directory.
    */
-  abstract public void setPath(Path path);
+  public void setPath(Path path)
+  {
+  }
   
   /**
    * Returns the path from the cache directory.
    */
-  abstract public Path getPath();
+  public Path getPath()
+  {
+    return null;
+  }
 
   /**
    * Sets the disk size of the cache
    */
-  abstract public void setDiskSize(Bytes size);
+  public void setDiskSize(Bytes size)
+  {
+  }
 
   /**
    * Sets the max entry size of the cache
    */
-  abstract public int getMaxEntrySize();
+  public int getMaxEntrySize()
+  {
+    return 0;
+  }
 
   /**
    * Set true if enabled.
    */
-  abstract public void setEnable(boolean isEnabled);
+  public void setEnable(boolean isEnabled)
+  {
+  }
 
   /**
    * Return true if enabled.
    */
-  abstract public boolean isEnable();
+  public boolean isEnable()
+  {
+    return false;
+  }
 
   /**
    * Sets the max number of entries.
    */
-  abstract public void setEntries(int entries);
+  public void setEntries(int entries)
+  {
+  }
 
   /**
    * Sets the path to the cache directory (backwards compatibility).
    */
-  abstract public void setDir(Path path);
+  public void setDir(Path path)
+  {
+  }
 
   /**
    * Sets the size of the the cache (backwards compatibility).
    */
-  abstract public void setSize(Bytes size);
+  public void setSize(Bytes size)
+  {
+  }
   
   /**
    * Creates the filter.
    */
-  abstract public FilterChain createFilterChain(FilterChain next,
-						WebApp app);
+  public FilterChain createFilterChain(FilterChain next,
+				       WebApp app)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   /**
    * Clears the cache.
    */
-  abstract public void clear();
+  public void clear()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   /**
    * Returns the hit count.
    */
-  abstract public long getHitCount();
+  public long getHitCount()
+  {
+    return 0;
+  }
 
   /**
    * Returns the miss count.
    */
-  abstract public long getMissCount();
+  public long getMissCount()
+  {
+    return 0;
+  }
 
   /**
    * Returns the memory block hit count.
    */
-  abstract public long getMemoryBlockHitCount();
+  public long getMemoryBlockHitCount()
+  {
+    return 0;
+  }
 
   /**
    * Returns the memory block miss count.
    */
-  abstract public long getMemoryBlockMissCount();
+  public long getMemoryBlockMissCount()
+  {
+    return 0;
+  }
 }

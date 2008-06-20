@@ -102,6 +102,10 @@ public class SnmpRequest implements ServerRequest
   {
     return true;
   }
+
+  public void startConnection()
+  {
+  }
   
   /**
    * Handles a new connection.  The controlling TcpServer may call

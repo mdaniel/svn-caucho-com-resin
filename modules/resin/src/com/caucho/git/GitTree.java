@@ -66,6 +66,11 @@ public class GitTree {
     _treeMap.put(name, entry);
   }
 
+  public Collection<Entry> entries()
+  {
+    return _treeMap.values();
+  }
+
   public void toData(OutputStream out)
     throws IOException
   {
@@ -127,6 +132,16 @@ public class GitTree {
     public String getSha1()
     {
       return _sha1;
+    }
+
+    public boolean isDir()
+    {
+      return (_mode & 0777000) == 0040000;
+    }
+
+    public boolean isFile()
+    {
+      return (_mode & 0777000) == 0100000;
     }
 
     public String toString()

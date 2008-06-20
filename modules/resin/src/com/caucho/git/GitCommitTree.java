@@ -116,11 +116,11 @@ public class GitCommitTree {
   /**
    * Returns the commit list
    */
-  public ArrayList<String> getCommitList()
+  public String []getCommitList()
   {
-    ArrayList<String> commitList
-      = new ArrayList<String>(_sha1ToPathMap.keySet());
-    Collections.sort(commitList);
+    String []commitList = new String[_sha1ToPathMap.size()];
+    _sha1ToPathMap.keySet().toArray(commitList);
+    Arrays.sort(commitList);
 
     return commitList;
   }

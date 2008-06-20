@@ -252,6 +252,13 @@ public abstract class AbstractHttpRequest
   }
 
   /**
+   * Called when the connection starts
+   */
+  public void startConnection()
+  {
+  }
+  
+  /**
    * Prepare the Request object for a new request.
    *
    * @param s the raw connection stream

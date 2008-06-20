@@ -1084,6 +1084,8 @@ public class TcpConnection extends Connection
             continue;
           }
 
+	  _request.startConnection();
+
 	  result = handleConnection();
 	  
           if (result == RequestState.THREAD_DETACHED) {

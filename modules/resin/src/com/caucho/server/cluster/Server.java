@@ -30,12 +30,13 @@
 package com.caucho.server.cluster;
 
 import com.caucho.bam.BamBroker;
+import com.caucho.bam.BamStream;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
-import com.caucho.bam.BamStream;
+import com.caucho.git.GitRepository;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
@@ -72,8 +73,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
@@ -110,6 +110,8 @@ public class Server extends ProtocolDispatchServer
   private HostContainer _hostContainer;
 
   private String _serverHeader = "Resin/" + com.caucho.Version.VERSION;
+
+  private GitRepository _git;
 
   private String _url = "";
   private int _urlLengthMax = 8192;
@@ -159,7 +161,7 @@ public class Server extends ProtocolDispatchServer
   private ServerAdmin _admin;
 
   private Alarm _alarm;
-  private AbstractCache _cache;
+  protected AbstractCache _cache;
 
   private boolean _isBindPortsAtEnd = true;
   private volatile boolean _isStartedPorts;
@@ -219,6 +221,19 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
+   * Returns the current server
+   */
+  public static Server getCurrent()
+  {
+    Resin resin = Resin.getCurrent();
+
+    if (resin != null)
+      return resin.getServer();
+    else
+      return null;
+  }
+
+  /**
    * Returns the classLoader
    */
   public ClassLoader getClassLoader()
@@ -248,6 +263,14 @@ public class Server extends ProtocolDispatchServer
   protected Resin getResin()
   {
     return _resin;
+  }
+
+  /**
+   * Returns the repository
+   */
+  public GitRepository getGit()
+  {
+    return _git;
   }
 
   /**
@@ -804,19 +827,9 @@ public class Server extends ProtocolDispatchServer
   public AbstractCache createCache()
     throws ConfigException
   {
-    try {
-      Class cl = Class.forName("com.caucho.server.cache.Cache");
-
-      _cache = (AbstractCache) cl.newInstance();
-    } catch (Throwable e) {
-      e.printStackTrace();
-    }
-
-    if (_cache == null) {
-      throw new ConfigException(L.l("<cache> requires Resin Professional.  Please see http://www.caucho.com for Resin Professional information and licensing."));
-    }
-
-    return _cache;
+    log.warning(L.l("<cache> requires Resin Professional.  Please see http://www.caucho.com for Resin Professional information and licensing."));
+    
+    return new AbstractCache();
   }
 
   /**
@@ -1242,6 +1255,23 @@ public class Server extends ProtocolDispatchServer
     _classLoader.init();
 
     super.init();
+
+    // initialize git repository
+    if (_resin != null) {
+      Path root = _resin.getRootDirectory();
+
+      // QA
+      if (root instanceof MemoryPath)
+	root = Vfs.lookup("file:/tmp/caucho/qa");
+
+      _git = new GitRepository(root.lookup(".git"));
+
+      try {
+	_git.initDb();
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+    }
 
     // backwards compat
     if (_resin != null && _resin.getManagementPath() != null)

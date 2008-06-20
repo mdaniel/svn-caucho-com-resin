@@ -32,10 +32,12 @@ package com.caucho.server.deploy;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.Period;
+import com.caucho.git.GitRepository;
 import com.caucho.loader.Environment;
 import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.Crc64;
 import com.caucho.util.L10N;
 import com.caucho.util.WeakAlarm;
 import com.caucho.server.util.CauchoSystem;
@@ -67,6 +69,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   private Path _containerRootDirectory;
   private Path _archiveDirectory;
   private Path _expandDirectory;
+
+  private GitRepository _git;
+  private String _gitPath;
 
   private String _extension = ".jar";
   
@@ -117,19 +122,32 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   }
 
   /**
-   * Gets the default path.
+   * Sets the war expand dir to check for new archive files.
    */
-  public Path getPath()
+  public void setArchiveDirectory(Path path)
   {
-    return _path;
+    _archiveDirectory = path;
   }
 
   /**
-   * Sets the deploy directory.
+   * Gets the war expand directory.
    */
-  public void setPath(Path path)
+  public Path getArchiveDirectory()
   {
-    _path = path;
+    if (_archiveDirectory != null)
+      return _archiveDirectory;
+    else
+      return _path;
+  }
+
+  /**
+   * Returns the location for deploying an archive with the specified name.
+   *
+   * @param name a name, without an extension
+   */
+  public Path getArchivePath(String name)
+  {
+    return getArchiveDirectory().lookup(name + getExtension());
   }
 
   /**
@@ -196,35 +214,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   protected String getExpandName(String name)
   {
     return getExpandPrefix() + name + getExpandSuffix();
-  }
-
-  /**
-   * Sets the war expand dir to check for new archive files.
-   */
-  public void setArchiveDirectory(Path path)
-  {
-    _archiveDirectory = path;
-  }
-
-  /**
-   * Gets the war expand directory.
-   */
-  public Path getArchiveDirectory()
-  {
-    if (_archiveDirectory != null)
-      return _archiveDirectory;
-    else
-      return _path;
-  }
-
-  /**
-   * Returns the location for deploying an archive with the specified name.
-   *
-   * @param name a name, without an extension
-   */
-  public Path getArchivePath(String name)
-  {
-    return getArchiveDirectory().lookup(name + getExtension());
   }
 
   /**
@@ -312,6 +301,54 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   public String getExpandSuffix()
   {
     return _expandSuffix;
+  }
+
+  /**
+   * The Git repository
+   */
+  public void setGit(GitRepository git)
+  {
+    _git = git;
+  }
+
+  /**
+   * The Git repository
+   */
+  public GitRepository getGit()
+  {
+    return _git;
+  }
+
+  /**
+   * The Git ref directory
+   */
+  public void setGitPath(String gitPath)
+  {
+    _gitPath = gitPath;
+  }
+
+  /**
+   * The Git ref directory
+   */
+  public String getGitPath()
+  {
+    return _gitPath;
+  }
+
+  /**
+   * Gets the default path.
+   */
+  public Path getPath()
+  {
+    return _path;
+  }
+
+  /**
+   * Sets the deploy directory.
+   */
+  public void setPath(Path path)
+  {
+    _path = path;
   }
 
   /**
@@ -451,7 +488,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     if (isModified()) {
       try {
 	deploy();
-      } catch (Throwable e) {
+      } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
     }
@@ -581,19 +618,38 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
    */
   private long getDigest()
   {
+    long digest = 0;
+    
     long archiveDigest = 0;
     
     Path archiveDirectory = getArchiveDirectory();
     if (archiveDirectory != null)
       archiveDigest = archiveDirectory.getCrc64();
+
+    digest = Crc64.generate(digest, archiveDigest);
     
     long expandDigest = 0;
     
     Path expandDirectory = getExpandDirectory();
     if (expandDirectory != null)
       expandDigest = expandDirectory.getCrc64();
+    
+    digest = Crc64.generate(digest, expandDigest);
 
-    return archiveDigest * 65521 + expandDigest;
+    if (_git != null && _gitPath != null) {
+      String []tags = _git.listRefs(_gitPath);
+
+      for (int i = 0; tags != null && i < tags.length; i++) {
+	digest = Crc64.generate(digest, tags[i]);
+      }
+    }
+
+    return digest;
+  }
+
+  public Path getGitRefPath(String name)
+  {
+    return _git.getRefPath(_gitPath + "/" + name);
   }
 
   public ArrayList<String> getVersionNames(String name)
@@ -622,11 +678,23 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   {
     TreeSet<String> entryNames = new TreeSet<String>();
 
-    Path archiveDirectory = getArchiveDirectory();
-    Path expandDirectory = getExpandDirectory();
+    addArchiveEntryNames(entryNames);
+    addExpandEntryNames(entryNames);
+    addRepositoryEntryNames(entryNames);
 
-    if (archiveDirectory == null || expandDirectory == null)
-      return entryNames;
+    return entryNames;
+  }
+  
+  /**
+   * Return the entry names for all deployed objects.
+   */
+  private void addArchiveEntryNames(TreeSet<String> entryNames)
+    throws IOException
+  {
+    Path archiveDirectory = getArchiveDirectory();
+
+    if (archiveDirectory == null)
+      return;
 
     String []entryList = archiveDirectory.list();
 
@@ -659,6 +727,18 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 	}
       }
     }
+  }
+  
+  /**
+   * Return the entry names for all deployed objects.
+   */
+  private void addExpandEntryNames(TreeSet<String> entryNames)
+    throws IOException
+  {
+    Path expandDirectory = getExpandDirectory();
+
+    if (expandDirectory == null)
+      return;
     
     String []entryExpandList = expandDirectory.list();
 
@@ -698,8 +778,23 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 	}
       }
     }
+  }
+  
+  /**
+   * Return the entry names for all repository objects.
+   */
+  private void addRepositoryEntryNames(TreeSet<String> entryNames)
+    throws IOException
+  {
+    if (_git == null || _gitPath == null)
+      return;
+    
+    String []pathList = _git.listRefs(_gitPath);
 
-    return entryNames;
+    // collect all the new repository expand directories
+    for (String pathName : pathList) {
+      entryNames.add(pathName);
+    }
   }
   
   /**

@@ -75,7 +75,7 @@ public class GitCommitJar {
     _commit.commit();
   }
 
-  public ArrayList<String> getCommitList()
+  public String []getCommitList()
   {
     return _commit.getCommitList();
   }

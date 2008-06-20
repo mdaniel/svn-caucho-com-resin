@@ -136,6 +136,13 @@ public class XmppRequest implements TcpServerRequest {
   {
     return true;
   }
+
+  /**
+   * Called when the connection starts.
+   */
+  public void startConnection()
+  {
+  }
   
   /**
    * Handles a new connection.  The controlling TcpServer may call

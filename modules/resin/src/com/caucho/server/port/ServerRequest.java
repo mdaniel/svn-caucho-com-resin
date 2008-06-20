@@ -49,6 +49,11 @@ public interface ServerRequest {
    * handling the request.
    */
   public boolean isWaitForRead();
+
+  /**
+   * Called when the connection starts, i.e. just after the accept
+   */
+  public void startConnection();
   
   /**
    * Handles a new connection.  The controlling TcpServer may call

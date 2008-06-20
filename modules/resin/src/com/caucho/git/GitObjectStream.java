@@ -145,17 +145,20 @@ public class GitObjectStream {
       }
       String name = nameBuffer.toString();
 
-      System.out.print(String.format("%o %s ", mode, name));
       byte []sha1 = new byte[20];
       for (int i = 0; i < sha1.length; i++) {
 	sha1[i] = (byte) _is.read();
-	System.out.print("," + sha1[i]);
       }
 
       tree.addEntry(name, mode, Hex.toHex(sha1));
     }
 
     return tree;
+  }
+  
+  public InputStream getInputStream()
+  {
+    return _is;
   }
 
   public void close()

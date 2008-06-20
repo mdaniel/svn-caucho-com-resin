@@ -30,11 +30,12 @@
 package com.caucho.server.webapp;
 
 import com.caucho.config.ConfigException;
+import com.caucho.git.GitRepository;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
-import com.caucho.log.Log;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.ExpandDeployGenerator;
+import com.caucho.server.cluster.Server;
 import com.caucho.vfs.CaseInsensitive;
 import com.caucho.vfs.Path;
 
@@ -90,6 +91,15 @@ public class WebAppExpandDeployGenerator
       setExtension(".war");
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
+    }
+
+    if (Server.getCurrent() != null) {
+      setGit(Server.getCurrent().getGit());
+      String hostName = webAppContainer.getHostName();
+      if ("".equals(hostName))
+	hostName = "default";
+    
+      setGitPath("wars/" + hostName);
     }
 
     _admin = new WebAppExpandDeployGeneratorAdmin(this);
@@ -305,8 +315,11 @@ public class WebAppExpandDeployGenerator
       rootDirectory = getExpandDirectory().lookup("./" + expandName);
     }
 
+    Path repRefPath = getGitRefPath(segmentName);
+
     if (! rootDirectory.isDirectory()
-        && (jarPath == null || ! jarPath.isFile()))
+        && (jarPath == null || ! jarPath.isFile())
+        && (repRefPath == null || ! repRefPath.isFile()))
       return null;
     else if (rootDirectory.isDirectory()
              && ! isValidDirectory(rootDirectory, versionName.substring(1)))
@@ -330,6 +343,19 @@ public class WebAppExpandDeployGenerator
     controller.setSourceType("expand");
 
     controller.setVersion(version);
+
+    if (Server.getCurrent() != null) {
+      GitRepository git = Server.getCurrent().getGit();
+      controller.setGit(git);
+
+      String hostName = _container.getHostName();
+      if ("".equals(hostName))
+	hostName = "default";
+
+      String ref = "wars/" + hostName + "/" + segmentName;
+      
+      controller.setGitRefPath(git.getRefPath(ref));
+    }
 
     if (! baseName.equals(contextPath)) {
       WebAppController versionController
@@ -368,6 +394,12 @@ public class WebAppExpandDeployGenerator
           controller.setArchivePath(jarPath);
           controller.addDepend(jarPath);
         }
+      }
+
+      if (controller.getGitRefPath() == null && getGit() != null) {
+	String refPath = "wars/default/" + rootDirectory.getTail();
+	
+	controller.setGitRefPath(getGit().getRefPath(refPath));
       }
 
       controller.setStartupMode(getStartupMode());

@@ -279,9 +279,6 @@ abstract public class
       setPrologue(oldController.getPrologue());
     }
 
-    if (oldController.getArchivePath() != null)
-      setArchivePath(oldController.getArchivePath());
-
     mergeStartupMode(oldController.getStartupMode());
 
     mergeRedeployCheckInterval(oldController.getRedeployCheckInterval());

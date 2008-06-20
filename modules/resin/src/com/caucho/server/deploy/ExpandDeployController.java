@@ -30,6 +30,9 @@
 package com.caucho.server.deploy;
 
 import com.caucho.config.types.FileSetType;
+import com.caucho.git.GitCommit;
+import com.caucho.git.GitRepository;
+import com.caucho.git.GitTree;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.util.L10N;
@@ -61,6 +64,9 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
   private Path _rootDirectory;
   private Path _archivePath;
+
+  private GitRepository _git;
+  private Path _gitRefPath;
 
   private FileSetType _expandCleanupFileSet;
 
@@ -115,6 +121,38 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   public void setArchivePath(Path path)
   {
     _archivePath = path;
+  }
+
+  /**
+   * The Git repository
+   */
+  public GitRepository getGit()
+  {
+    return _git;
+  }
+
+  /**
+   * The Git repository
+   */
+  public void setGit(GitRepository git)
+  {
+    _git = git;
+  }
+
+  /**
+   * The Git ref path
+   */
+  public Path getGitRefPath()
+  {
+    return _gitRefPath;
+  }
+
+  /**
+   * The Git ref path
+   */
+  public void setGitRefPath(Path path)
+  {
+    _gitRefPath = path;
   }
 
   /**
@@ -176,6 +214,12 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
     if (oldController._expandCleanupFileSet != null)
       _expandCleanupFileSet = oldController._expandCleanupFileSet;
+
+    if (oldController.getArchivePath() != null)
+      setArchivePath(oldController.getArchivePath());
+
+    if (oldController.getGitRefPath() != null)
+      setGitRefPath(oldController.getGitRefPath());
   }
 
   /**
@@ -186,13 +230,20 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     throws IOException
   {
     synchronized (_archiveExpandLock) {
-      if (! expandArchiveImpl()) {
+      if (expandRepositoryImpl()) {
+      }
+      else if (expandArchiveImpl()) {
+      }
+      else {
         try {
           Thread.sleep(2000);
         } catch (InterruptedException e) {
         }
 
-        expandArchiveImpl();
+	if (expandRepositoryImpl()) {
+	}
+	else
+	  expandArchiveImpl();
       }
 
       Path path = getRootDirectory().lookup("META-INF/MANIFEST.MF");
@@ -247,6 +298,76 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       _manifestLoader.addManifestClassPath(classPath, pwd);
     else
       loader.addManifestClassPath(classPath, pwd);
+  }
+
+  /**
+   * Expand an archive.  The _archiveExpandLock must be obtained before the
+   * expansion.
+   */
+  private boolean expandRepositoryImpl()
+    throws IOException
+  {
+    Path gitRefPath = getGitRefPath();
+
+    if (gitRefPath == null || ! gitRefPath.canRead())
+      return false;
+
+    try {
+      String sha1 = null;
+
+      ReadStream is = null;
+      try {
+	is = gitRefPath.openRead();
+
+	sha1 = is.readLine();
+
+	if (sha1 != null)
+	  sha1 = sha1.trim();
+
+	GitCommit commit = _git.parseCommit(sha1);
+
+	String tree = commit.getTree();
+	
+	Path pwd = getRootDirectory();
+
+	pwd.mkdirs();
+
+	expandRepositoryTree(pwd, tree);
+	
+	return false;
+      } finally {
+	if (is != null)
+	  is.close();
+      }
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    }
+  }
+
+  private void expandRepositoryTree(Path pwd, String treeDigest)
+    throws IOException
+  {
+    GitTree tree = _git.parseTree(treeDigest);
+
+    for (GitTree.Entry entry : tree.entries()) {
+      String name = entry.getName();
+      String sha1 = entry.getSha1();
+      Path subPath = pwd.lookup(name);
+
+      if (entry.isDir()) {
+	subPath.mkdirs();
+
+	expandRepositoryTree(subPath, sha1);
+      }
+      else if (entry.isFile()) {
+	_git.copyToFile(subPath, sha1);
+      }
+      else {
+	log.warning(this + " unknown entry " + entry);
+      }
+    }
   }
 
   /**

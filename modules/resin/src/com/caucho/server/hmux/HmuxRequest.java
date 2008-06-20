@@ -335,6 +335,15 @@ public class HmuxRequest extends AbstractHttpRequest
   }
 
   /**
+   * Called when the connection starts.
+   */
+  public void startConnection()
+  {
+    _in = null;
+    _out = null;
+  }
+
+  /**
    * Handles a new request.  Initializes the protocol handler and
    * the request streams.
    *
@@ -359,10 +368,6 @@ public class HmuxRequest extends AbstractHttpRequest
 
     _serverType = 0;
     _uri.setLength(0);
-
-    // clear the hessian stream to clear the references
-    _in = null;
-    _out = null;
 
     boolean hasRequest = false;
     
@@ -448,6 +453,8 @@ public class HmuxRequest extends AbstractHttpRequest
       } catch (ClientDisconnectException e) {
         throw e;
       } catch (Throwable e) {
+	log.log(Level.FINER, e.toString(), e);
+	
         try {
           _errorManager.sendServletError(e, this, _response);
         } catch (ClientDisconnectException e1) {
@@ -936,7 +943,6 @@ public class HmuxRequest extends AbstractHttpRequest
 	{
 	  len = (is.read() << 8) + is.read();
 	  long id = readLong(is);
-
 	  readHmtpQuerySet(is, id);
 	  hasURI = true;
 	  break;
@@ -998,17 +1004,22 @@ public class HmuxRequest extends AbstractHttpRequest
     String to = readString(is);
     String from = readString(is);
 
-    Serializable query = (Serializable) readObject();
+    try {
+      Serializable query = (Serializable) readObject();
 
-    BamBroker broker = _server.getBroker();
-    BamStream brokerStream = broker.getBrokerStream();
+      BamBroker broker = _server.getBroker();
+      BamStream brokerStream = broker.getBrokerStream();
 
-    if (log.isLoggable(Level.FINER))
-      log.fine(dbgId() + (char) HMTP_QUERY_GET + " hmtp message"
-	       + " to=" + to + " from=" + from + " " + query);
+      if (log.isLoggable(Level.FINER))
+	log.fine(dbgId() + (char) HMTP_QUERY_GET + " hmtp message"
+		 + " to=" + to + " from=" + from + " " + query);
 
-    if (brokerStream != null) {
-      brokerStream.message(to, from, query);
+      if (brokerStream != null) {
+	brokerStream.message(to, from, query);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 
@@ -1068,14 +1079,43 @@ public class HmuxRequest extends AbstractHttpRequest
 
     Serializable query = (Serializable) readObject();
 
-    BamStream hmtpStream = _server.getHmtpStream();
+    BamBroker broker = _server.getBroker();
+    BamStream brokerStream = broker.getBrokerStream();
 
     if (log.isLoggable(Level.FINER))
-      log.fine(dbgId() + (char) HMTP_QUERY_SET + ": hmtp query id=" + id
+      log.fine(dbgId() + (char) HMTP_QUERY_SET + " querySet id=" + id
 	       + " to=" + to + " from=" + from + " " + query);
 
-    if (hmtpStream != null) {
-      hmtpStream.querySet(id, to, from, query);
+    if (from != null && ! "".equals(from)) {
+      brokerStream.querySet(id, to, from, query);
+    }
+    else {
+      // from=null means the client needs to block and return the data
+      // on the same stream
+      
+      Serializable result = null;
+
+      BamConnection conn = broker.getConnection("hmux", null);
+
+      try {
+	result = conn.querySet(to, query);
+      } finally {
+	conn.close();
+      }
+
+      WriteStream out = _rawWrite;
+
+      out.write(HMTP_QUERY_RESULT);
+      out.write(0);
+      out.write(8);
+      writeLong(out, id);
+      writeString(HMUX_STRING, from);
+      writeString(HMUX_STRING, to);
+      writeObject(out, result);
+
+      if (log.isLoggable(Level.FINER))
+	log.finer(this + " queryResult to=" + from + " from=" + to +
+		  " result=" + (result != null ? result.getClass() : null));
     }
   }
 
