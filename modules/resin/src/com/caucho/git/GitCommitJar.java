@@ -80,6 +80,11 @@ public class GitCommitJar {
     return _commit.getCommitList();
   }
 
+  public String getDigest()
+  {
+    return _commit.getDigest();
+  }
+
   public String findPath(String sha1)
   {
     return _commit.findPath(sha1);

@@ -100,6 +100,11 @@ public class GitCommitTree {
     return _root.commit(this, "");
   }
 
+  public String getDigest()
+  {
+    return _root.getDigest();
+  }
+
   void addCommitDir(String sha1, String path)
   {
     if (! path.endsWith("/"))

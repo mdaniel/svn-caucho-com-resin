@@ -35,6 +35,7 @@ import com.caucho.vfs.*;
 import java.io.*;
 import java.security.*;
 import java.util.*;
+import java.util.logging.*;
 import java.util.zip.*;
 
 /**
@@ -42,6 +43,8 @@ import java.util.zip.*;
  */
 public class GitRepository {
   private static final L10N L = new L10N(GitRepository.class);
+  private static final Logger log
+    = Logger.getLogger(GitRepository.class.getName());
   
   private static final int OBJ_NONE = 0;
   private static final int OBJ_COMMIT = 1;
@@ -107,6 +110,58 @@ public class GitRepository {
       return is.getType();
     } finally {
       is.close();
+    }
+  }
+  
+  public String getTag(String tag)
+  {
+    Path path = _root.lookup("refs").lookup(tag);
+
+    if (! path.canRead())
+      return null;
+
+    ReadStream is = null;
+    try {
+      is = path.openRead();
+
+      String hex = is.readLine();
+
+      return hex.trim();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return null;
+    } finally {
+      if (is != null)
+	is.close();
+    }
+  }
+  
+  public void writeTag(String tag, String hex)
+  {
+    Path path = _root.lookup("refs").lookup(tag);
+
+    System.out.println("PATH: " + path.getFullPath());
+    try {
+      path.getParent().mkdirs();
+    } catch (IOException e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    WriteStream out = null;
+    try {
+      out = path.openWrite();
+
+      out.println(hex);
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    } finally {
+      try {
+	if (out != null)
+	  out.close();
+      } catch (Exception e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
     }
   }
 

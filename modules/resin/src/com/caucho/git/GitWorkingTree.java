@@ -50,6 +50,11 @@ public class GitWorkingTree {
     return _treeMap;
   }
 
+  public String getDigest()
+  {
+    return _digest;
+  }
+
   public void addBlobPath(String path, int mode, String sha1)
   {
     while (path.startsWith("/"))
