@@ -48,16 +48,12 @@ dispatches them to the backend servers (192.168.0.10 and 192.168.0.11).</p>
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
 
 &lt;cluster id="web-tier"&gt;
-  <!-- if not specified, the load-balance cluster would use port 6800 
-  &lt;cluster-port&gt;6800&lt;/cluster-port&gt;
-  -->
-  
   &lt;server-default>
     &lt;http port="80"/&gt;
   &lt;/server-default&gt;
 
-  &lt;server id="web-a" address="192.168.0.1"/&gt;
-  &lt;server id="web-b" address="192.168.0.1"/&gt;
+  &lt;server id="web-a" address="192.168.0.1" port="6800"/&gt;
+  &lt;server id="web-b" address="192.168.0.1" port="6801/&gt;
 
   &lt;cache disk-size="1024M" memory-size="256M"/&gt;
 
