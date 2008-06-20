@@ -59,7 +59,7 @@ public class CustomTag extends GenericTag
       out.println();
       out.print("final ");
       out.printClass(_tagClass);
-      out.println(" get" + _tag.getId() + "(PageContext pageContext)");
+      out.println(" get" + _tag.getId() + "(PageContext pageContext) throws Throwable");
       out.println("{");
       out.pushDepth();
     
