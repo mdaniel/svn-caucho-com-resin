@@ -281,11 +281,10 @@ class HtmlCommandLinkRenderer extends BaseRenderer
 	    clickJs.append("']['");
 
 	    String name = param.getName();
-	    String encodedName = URLEncoder.encode(name, enc);
 
-	    HtmlFormRenderer.addCommandLinkParam(context, formClientId, encodedName);
+	    HtmlFormRenderer.addCommandLinkParam(context, formClientId, name);
 
-	    clickJs.append(encodedName);
+	    clickJs.append(name);
 	    clickJs.append("'].value='");
 
 	    String val = toString(context, param, param.getValue());
