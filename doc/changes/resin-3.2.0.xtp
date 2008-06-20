@@ -47,5 +47,18 @@ SSL connection to be enabled.</p>
 but do want to enable the cluster store so peer servers can obtain the
 current value.</p>
 
+</s1>
+
+<s1 title="deployment">
+
+<p>Add command-line deployment</p>
+
+<example title="Example: deploy">
+unix: java -jar $RESIN_HOME/lib/pro.jar -conf conf/resin.xml \
+         deploy test.war
+</example>
+
+</s1>
+
 </body>
 </document>
