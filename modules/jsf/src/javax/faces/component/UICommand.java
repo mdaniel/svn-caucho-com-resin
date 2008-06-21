@@ -32,7 +32,6 @@ import java.util.*;
 
 import javax.el.*;
 
-import javax.faces.*;
 import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.el.*;
@@ -374,14 +373,12 @@ public class UICommand extends UIComponentBase
 
     public Object saveState(FacesContext context)
     {
-      return _binding.getExpressionString();
+      return saveAttachedState(context, _binding);
     }
 
     public void restoreState(FacesContext context, Object state)
     {
-      if (state != null)
-        _binding = context.getApplication()
-          .createMethodBinding((String) state, new Class[]{});
+      _binding = (MethodBinding) restoreAttachedState(context, state);
     }
 
     public int hashCode()
