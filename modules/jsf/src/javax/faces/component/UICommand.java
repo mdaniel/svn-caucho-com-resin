@@ -321,7 +321,8 @@ public class UICommand extends UIComponentBase
 
     private boolean _isTransient;
 
-    public MethodExpressionAdapter() {
+    public MethodExpressionAdapter()
+    {
     }
 
     MethodExpressionAdapter(MethodBinding binding)
@@ -343,20 +344,20 @@ public class UICommand extends UIComponentBase
     {
       return _binding.getExpressionString();
     }
-    
+
     public MethodInfo getMethodInfo(ELContext context)
       throws javax.el.PropertyNotFoundException,
-	     javax.el.MethodNotFoundException,
-	     ELException
+             javax.el.MethodNotFoundException,
+             ELException
     {
       throw new UnsupportedOperationException();
     }
 
     public Object invoke(ELContext context,
-			 Object []params)
+                         Object[] params)
       throws javax.el.PropertyNotFoundException,
-	     javax.el.MethodNotFoundException,
-	     ELException
+             javax.el.MethodNotFoundException,
+             ELException
     {
       return _binding.invoke(FacesContext.getCurrentInstance(), params);
     }
@@ -387,7 +388,7 @@ public class UICommand extends UIComponentBase
     {
       return _binding.hashCode();
     }
-    
+
     public boolean equals(Object o)
     {
       return (this == o);
