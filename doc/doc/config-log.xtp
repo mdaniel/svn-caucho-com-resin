@@ -1188,14 +1188,19 @@ percent codes which are substituted with time and date values.</p>
 </td></tr></deftable>
 
 
-<example title="typical timestamp for the log tag">
-    &lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"/&gt;
+<example title="Example: typical timestamp for the log tag">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+  &lt;log-handler name='' path='stderr:' timestamp="[%H:%M:%S.%s]"/&gt;
+
+  ...
+&lt;/resin>
 </example>
 
 <results>
-[22:50:11.648] Application[/doc] starting
+[22:50:11.648] WebApp[/doc] starting
 [22:50:11.698] http listening to *:8080
-[22:50:11.828] hmux listening to *:6802
+[22:50:11.828] hmux listening to *:6800
 </results>
 
 </s1>

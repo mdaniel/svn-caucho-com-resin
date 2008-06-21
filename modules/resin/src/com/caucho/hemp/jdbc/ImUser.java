@@ -423,6 +423,11 @@ public class ImUser extends SimpleBamService
    */
   protected RosterItem []getRoster()
   {
+    Serializable data = _manager.getData(getJid(), "jabber:im:roster");
+
+    if (data != null)
+      _rosterList = (ArrayList<RosterItem>) data;
+    
     RosterItem []rosterList = new RosterItem[_rosterList.size()];
     _rosterList.toArray(rosterList);
     

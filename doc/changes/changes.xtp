@@ -13,6 +13,7 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>deploy: web-app-deploy shoudl use dependency-check-interval, not redeploy-check-interval (#2745, rep by mzgubin)</li>
 <li>deploy: add command-line war deployment (#1167, rep by Serge Knystautas)</il>
 <li>quercus: include. include_once don't return a Boolean value (#2742, rep by kubazygmunt)</li>
 <li>database: after connection error in XA, the returned connection must still be the same object (#2708, rep by Takahiro Fukuda)</li>

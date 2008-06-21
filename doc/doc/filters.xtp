@@ -105,9 +105,8 @@ can specify a servlet alias defined by <code>filter</code>.
 </td></tr><tr><td>init-param</td><td>Initialization parameters
 </td></tr></deftable>
 
-<example>
-&lt;caucho.com&gt;
-&lt;web-app id='/'&gt;
+<example title="Example: WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
 
 &lt;servlet servlet-name='hello'
          servlet-class='test.HelloWorld'/&gt;

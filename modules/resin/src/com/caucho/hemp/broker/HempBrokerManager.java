@@ -32,6 +32,8 @@ package com.caucho.hemp.broker;
 import com.caucho.bam.*;
 import com.caucho.hemp.*;
 import com.caucho.loader.*;
+import com.caucho.server.cluster.*;
+import com.caucho.server.host.*;
 import com.caucho.server.resin.*;
 import com.caucho.util.*;
 import java.util.*;
@@ -104,8 +106,25 @@ public class HempBrokerManager
 
     if (brokerRef != null)
       return brokerRef.get();
-    else
+
+    Server server = Server.getCurrent();
+
+    System.out.println("SERVER: " + server);
+    if (server == null)
       return null;
+    
+    Host host = server.getHost(name, 5222);
+
+    if (host == null)
+      return null;
+
+    BamBroker broker = host.getBamBroker();
+
+    synchronized (_brokerMap) {
+      _brokerMap.put(name, new WeakReference<BamBroker>(broker));
+    }
+
+    return broker;
   }
   
   @Override

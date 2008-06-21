@@ -219,6 +219,14 @@ public class Host extends WebAppContainer
   }
 
   /**
+   * Returns the bam broker.
+   */
+  public BamBroker getBamBroker()
+  {
+    return _bamBroker;
+  }
+
+  /**
    * Returns the relax schema.
    */
   public String getSchema()

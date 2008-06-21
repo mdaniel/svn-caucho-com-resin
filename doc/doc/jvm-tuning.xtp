@@ -24,16 +24,39 @@ starting Resin (the exact options may depend upon the JVM that you are using,
 the examples here are for the Sun JVM).</p>
 
 <deftable>
-<tr><th>JVM option passed to Resin</th><th>Meaning
-</th></tr><tr><td>-Xms</td><td>initial java heap size
-</td></tr><tr><td>-Xmx</td><td>maximum java heap size
-</td></tr><tr><td>-Xmn</td><td>the size of the heap for the <i>young generation</i>
-</td></tr></deftable>
+<tr>
+  <th>JVM option passed to Resin</th>
+  <th>Meaning</th>
+</tr>
+<tr>
+  <td>-Xms</td>
+  <td>initial java heap size</td>
+</tr>
+<tr>
+  <td>-Xmx</td><td>maximum java heap size</td>
+</tr>
+<tr>
+  <td>-Xmn</td>
+  <td>the size of the heap for the <i>young generation</i></td>
+  </tr>
+  </deftable>
 
-<example title="Resin startup with heap memory options">
-unix&gt; bin/httpd.sh -Xmn100M -Xms500M -Xmx500M
-win&gt; bin/httpd.exe -Xmn100M -Xms500M -Xmx500M
-install win service&gt; bin/httpd.exe -Xmn100M -Xms500M -Xmx500M -install
+<example title="Example: resin.xml startup with heap memory options">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="">
+
+  &lt;server id="" address="127.0.0.1" port="6800">
+    &lt;jvm-arg>-Xmx500M&lt;/jvm-arg>
+    &lt;jvm-arg>-Xms500M&lt;/jvm-arg>
+    &lt;jvm-arg>-Xmn100M&lt;/jvm-arg>
+
+    &lt;http port="80"/>
+  &lt;/server>
+
+  ...
+
+&lt;/cluster>
+&lt;/resin>
 </example>
 
 <p>It is good practice with server-side Java applications like Resin to set the
@@ -104,10 +127,16 @@ the stack size to 2048k, unless it is specified explicity.  2048k is an
 appropriate value for most situations.
  </p>
 
-<deftable>
-<tr><th>JVM option passed to Resin</th><th>Meaning
-</th></tr><tr><td>-Xss</td><td>the stack size for each thread
-</td></tr></deftable>
+<deftable title="Stack configuration">
+<tr>
+  <th>&lt;jvm-arg></th>
+  <th>Meaning</th>
+</tr>
+<tr>
+  <td>-Xss</td>
+  <td>the stack size for each thread</td>
+</tr>
+</deftable>
 
 <p><code>-Xss</code> determines the size of the stack: <code>-Xss1024k</code>.
 If the stack space is too small, eventually you will see an exception <a href="javadoc|java.lang.StackOverflowError|"/>.
@@ -117,7 +146,7 @@ at the OS level for Linux.  A call to <code>ulimit</code> may be necessary, and
 is usually done with a command in /etc/profile:</p>
 
 <example title="Limit thread stack size on Linux">
-ulimit -s 2048
+unix> ulimit -s 2048
 </example>
 </s1>
 
@@ -137,10 +166,22 @@ provided in the <a href="jmx.xtp#console">Administration</a> section of the
 Resin documentation.
 </p>
 
-<example title="jconsole">
-win&gt; ./httpd.exe -Dcom.sun.management.jmxremote
-unix&gt; bin/httpd.sh -Dcom.sun.management.jmxremote
+<example title="Example: jconsole configuration">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="">
 
+  &lt;server-default>
+    &lt;jvm-arg>-Dcom.sun.management.jmxremote&lt;/jvm-arg>
+  &lt;/server-default>
+
+  &lt;server id="" address="127.0.0.1" port="6800"/>
+
+  ...
+&lt;/cluster>  
+&lt;/resin>
+</example>
+
+<example title="Example: jconsole launching">
 <i> ... in another shell window ... </i>
 
 win&gt; jconsole.exe

@@ -181,7 +181,7 @@ JAVA_HOME=/&lt;installdir&gt;/jdk1.4
 export JAVA_HOME
 
 # Resin location (optional).  Usually Resin can figure this out.
-RESIN_HOME=/&lt;installdir&gt;/resin-3.1.2
+RESIN_HOME=/&lt;installdir&gt;/resin-3.2.2
 export RESIN_HOME
 
 # If you're using additional class libraries, you'll need to put them
@@ -205,9 +205,9 @@ The httpd.conf file is also easily modified manually:
 
 <example title="httpd.conf">
 LoadModule caucho_module \
-    &lt;installdir&gt;/resin-3.1.x/win32/apache-2.0/mod_caucho.dll
+    &lt;installdir&gt;/resin-3.2.x/win32/apache-2.0/mod_caucho.dll
 
-ResinConfigServer localhost 6802
+ResinConfigServer localhost 6800
 &lt;Location /caucho-status&gt;
   SetHandler caucho-status
 &lt;/Location&gt;
@@ -220,13 +220,13 @@ ResinConfigServer localhost 6802
 
 <p>
 The communication between <code>mod_caucho</code> and the backend Resin
-server takes place using an <var>srun</var> port.
+server takes place using a <var>server</var> port.
 </p>
 
 <p>
 The <code>resin.xml</code> for the backend server contains
-an <code>srun</code> to enable the port.  The default <code>resin.xml</code>
-has an srun listener on port 6802.
+a <code>server</code> to enable the port.  The default <code>resin.xml</code>
+has an server listener on port 6800.
 </p>
 
 <example title="resin.xml">
@@ -236,13 +236,11 @@ has an srun listener on port 6802.
   ...
 
 
-  &lt;server&gt;
+  &lt;cluster id="app-tier"&gt;
 
     ...
 
-    &lt;cluster&gt;
-      <b>&lt;srun server-id="" host="127.0.0.1" port="6802"/&gt;</b>
-    &lt;/cluster&gt;
+    <b>&lt;server id="" address="127.0.0.1" port="6800"/&gt;</b>
 
     ...
 
@@ -257,9 +255,9 @@ should be consistent between Apache and the backend Resin server.
 
 
 <p>The default resin.xml looks in
-<code>resin-3.1.x/webapps/ROOT</code> 
+<code>resin-3.2.x/webapps/ROOT</code> 
 for JSP files and
-<code>resin-3.1.x/webapps/ROOT/WEB-INF/classes</code>
+<code>resin-3.2.x/webapps/ROOT/WEB-INF/classes</code>
 for servlets and java source files.  To tell Resin
 to use Apache's document area, you configure an explicit 
 <var>web-app</var> with the appropriate document-directory:
@@ -304,14 +302,14 @@ win&gt; httpd.exe
 </example>
 
 <results>
-Resin 3.1.2 (built Mon Aug  4 09:26:44 PDT 2006)
+Resin 3.2.2 (built Mon Aug  4 09:26:44 PDT 2006)
 Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.
  
 Starting Resin on Mon, 04 Aug 2006 09:43:39 -0700 (PDT)
 [09:43:40.664] Loaded Socket JNI library.
 [09:43:40.664] http listening to *:8080
 [09:43:40.664] ServletServer[] starting
-[09:43:40.879] hmux listening to *:6802
+[09:43:40.879] hmux listening to *:6800
 [09:43:41.073] Host[] starting
 [09:43:41.446] Application[http://localhost:8080/resin-doc] starting
 [09:43:41.496] Application[http://localhost:8080] starting
@@ -319,9 +317,9 @@ Starting Resin on Mon, 04 Aug 2006 09:43:39 -0700 (PDT)
 
 <p>
 Resin will print every port it's listening to.  In the above example,
-Resin has an http listener on port 8080 and an srun listener on port 6802
-(using its custom `hmux' protocol).  mod_caucho establishes connections  to
-Resin using port 6802, and a web browser can connect using port 8080.   Usually
+Resin has an http listener on port 8080 and an server listener on port 6800
+(using its custom 'hmux' protocol).  mod_caucho establishes connections  to
+Resin using port 6800, and a web browser can connect using port 8080.   Usually
 the 8080 port will be unused, because web browsers will make requests to Apache,
 these requests get dispatched to Resin as needed by mod_caucho.  A Resin
 configured http listener on port 8080 is a useful debugging tool, it allows you
@@ -340,7 +338,7 @@ configuration for the above example.</p>
       &lt;http address="*" port="8080"/&gt;
     &lt;/server-default&gt;
 
-    &lt;server id="" host="192.168.2.10" port="6800"/&gt;
+    &lt;server id="" address="192.168.2.10" port="6800"/&gt;
 
     ...
   &lt;/cluster&gt;
@@ -376,7 +374,7 @@ default configuration created by the installation process.
 <example title="Unix - httpd.conf">
 LoadModule caucho_module libexec/mod_caucho.so
 
-ResinConfigServer localhost 6802
+ResinConfigServer localhost 6800
 &lt;Location /caucho-status&gt;
   SetHandler caucho-status
 &lt;/Location&gt;
@@ -384,9 +382,9 @@ ResinConfigServer localhost 6802
 
 <example title="Windows - httpd.conf">
 LoadModule caucho_module \
-    &lt;installdir&gt;/resin-3.1.x/libexec/apache-2.0/mod_caucho.dll
+    &lt;installdir&gt;/resin-3.2.x/libexec/apache-2.0/mod_caucho.dll
 
-ResinConfigServer localhost 6802
+ResinConfigServer localhost 6800
 &lt;Location /caucho-status&gt;
   SetHandler caucho-status
 &lt;/Location&gt;
@@ -427,7 +425,7 @@ dispatch.
 </p>
 
 <example>
-CauchoHost 127.0.0.1 6802
+CauchoHost 127.0.0.1 6800
 
 &lt;Location /foo/*&gt;
   SetHandler caucho-request
@@ -435,16 +433,36 @@ CauchoHost 127.0.0.1 6802
 </example>
 
 <deftable>
-<tr><th width="30%">Apache Command</th><th>Meaning
-</th></tr><tr><td>CauchoHost <var>host</var> <var>port</var></td><td>Alternative to <var>ResinConfigServer</var>, adds the Resin JVM with an srun port at host:port as a backend server.
-</td></tr><tr><td>CauchoBackup <var>host</var> <var>port</var></td><td>Alternative to <var>ResinConfigServer</var>, adds the Resin JVM with an srun port at host:port as a backup backend server.
-</td></tr></deftable>
+<tr>
+  <th width="30%">Apache Command</th>
+  <th>Meaning</th>
+</tr>
+<tr>
+  <td>CauchoHost <var>host</var> <var>port</var></td>
+  <td>Alternative to <var>ResinConfigServer</var>, adds the Resin JVM with an server port at host:port as a backend server.</td>
+</tr>
+<tr>
+  <td>CauchoBackup <var>host</var> <var>port</var></td>
+  <td>Alternative to <var>ResinConfigServer</var>, adds the Resin JVM with
+  a server port at host:port as a backup backend server.
+</td>
+</tr>
+</deftable>
 
 <deftable>
-<tr><th width="30%">Apache Handler</th><th>Meaning
-</th></tr><tr><td>caucho-status</td><td>Handler to display /caucho-status
-</td></tr><tr><td>caucho-request</td><td>Dispatch a request to Resin
-</td></tr></deftable>
+<tr>
+  <th width="30%">Apache Handler</th>
+  <th>Meaning</th>
+</tr>
+<tr>
+  <td>caucho-status</td>
+  <td>Handler to display /caucho-status</td>
+</tr>
+<tr>
+  <td>caucho-request</td>
+  <td>Dispatch a request to Resin</td>
+</tr>
+</deftable>
 
 <p>
 Requests dispatched directly from the Apache httpd.conf will not
@@ -467,7 +485,7 @@ the resin.xml.
 <example title="httpd.conf">
 LoadModule caucho_module libexec/mod_caucho.so
 
-ResinConfigServer 192.168.0.1 6802
+ResinConfigServer 192.168.0.1 6800
 &lt;Location /caucho-status&gt;
   SetHandler caucho-status
 &lt;/Location&gt;
@@ -475,10 +493,9 @@ ResinConfigServer 192.168.0.1 6802
 
 <example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;server&gt;
-  &lt;cluster&gt;
-    &lt;srun id="" host="192.168.0.1" port="6802"/&gt;
-  &lt;/cluster&gt;
+&lt;cluster id="app-tier"&gt;
+
+  &lt;server id="" address="192.168.0.1" port="6800"/&gt;
 
   &lt;host id='www.gryffindor.com'&gt;
     &lt;host-alias&gt;gryffindor.com&lt;/host-alias&gt;
@@ -489,7 +506,7 @@ ResinConfigServer 192.168.0.1 6802
     &lt;host-alias&gt;slytherin.com&lt;/host-alias&gt;
      ...
   &lt;/host&gt;
-&lt;/server&gt;
+&lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
 
@@ -497,48 +514,46 @@ ResinConfigServer 192.168.0.1 6802
 
 <p>
 If you want a different JVM for each virtual host, your
-httpd.conf can specify a different srun port for each host.
+httpd.conf can specify a different server port for each host.
 </p>
 
 <example title="httpd.conf">
 &lt;VirtualHost gryffindor.com&gt;
 ServerName gryffindor.com
 ServerAlias www.gryffindor.com
-ResinConfigServer 192.168.0.1 6802
+ResinConfigServer 192.168.0.1 6800
 &lt;/VirtualHost&gt;
 
 &lt;VirtualHost slytherin.com&gt;
 ServerName slytherin.com
 ServerAlias www.slytherin.com
-ResinConfigServer 192.168.0.1 6803
+ResinConfigServer 192.168.0.1 6801
 &lt;/VirtualHost&gt;
 </example>
 
 <example title="gryffindor.conf">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;server&gt;
-  &lt;cluster&gt;
-    &lt;srun id="" host="192.168.0.1" port="6802"/&gt;
-  &lt;/cluster&gt;
+&lt;cluster id=""&gt;
 
-  &lt;host id=''&gt;
+  &lt;server id="" address="192.168.0.1" port="6800"/&gt;
+
+  &lt;host id=""&gt;
      ...
   &lt;/host&gt;
-&lt;/server&gt;
+&lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
 
 <example title="slytherin.conf">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;server&gt;
-  &lt;cluster&gt;
-    &lt;srun id="" host="192.168.0.1" port="6803"/&gt;
-  &lt;/cluster&gt;
+&lt;cluster&gt;
 
-  &lt;host id=''&gt;
+  &lt;server id="" address="192.168.0.1" port="6801"/&gt;
+
+  &lt;host id=""&gt;
      ...
   &lt;/host&gt;
-&lt;/server&gt;
+&lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
 
@@ -571,17 +586,15 @@ down.</p>
 
 <example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;server&gt;
-  &lt;cluster&gt;
-    &lt;srun id="a" host="192.168.0.11" port="6802" index="1"/&gt;
-    &lt;srun id="b" host="192.168.0.11" port="6803" index="2" 
+  &lt;cluster id="app-tier"&gt;
+    &lt;server id="a" address="192.168.0.11" port="6800" index="1"/&gt;
+    &lt;server id="b" address="192.168.0.11" port="6801" index="2" 
              backup="true"/&gt;
-    &lt;srun id="c" host="192.168.0.12" port="6802" index="3"/&gt;
-    &lt;srun id="d" host="192.168.0.12" port="6803" index="4" 
+    &lt;server id="c" address="192.168.0.12" port="6800" index="3"/&gt;
+    &lt;server id="d" address="192.168.0.12" port="6801" index="4" 
              backup="true"/&gt;
+    ...
   &lt;/cluster&gt;
-  ...
-&lt;/server&gt;
 &lt;/resin&gt;
 </example>
 
@@ -591,7 +604,7 @@ that backend server, and learn about all of the other members of the cluster.
 </p>
 
 <example>
-ResinConfigServer 192.168.0.11 6802
+ResinConfigServer 192.168.0.11 6800
 </example>
 
 <p>
@@ -607,8 +620,8 @@ only if none of them are available will it use the local cached copy.
 </p>
 
 <example>
-ResinConfigServer 192.168.0.11 6802
-ResinConfigServer 192.168.0.12 6802
+ResinConfigServer 192.168.0.11 6800
+ResinConfigServer 192.168.0.12 6801
 </example>
 
 <s2 name="manual-dispatch-balance" title="Manual configuration of load balanced dispatching">
@@ -617,10 +630,10 @@ Manual dispatching in httpd.conf can also specify the backend hosts and the back
 </p>
 
 <example>
-CauchoHost 192.168.0.11 6802
-CauchoBackup 192.168.0.11 6803
-CauchoHost 192.168.0.12 6802
-CauchoBackup 192.168.0.12 6803
+CauchoHost 192.168.0.11 6800
+CauchoBackup 192.168.0.11 6801
+CauchoHost 192.168.0.12 6800
+CauchoBackup 192.168.0.12 6801
 
 &lt;Location /foo/*&gt;
   SetHandler caucho-request
@@ -633,11 +646,11 @@ CauchoBackup 192.168.0.12 6803
 
 <example>
 &lt;Location /applicationA/*&gt;
-  ResinConfigServer 192.168.0.11 6802
+  ResinConfigServer 192.168.0.11 6800
 &lt;/Location&gt;
 
 &lt;Location /applicationB/*&gt;
-  ResinConfigServer 192.168.0.12 6802
+  ResinConfigServer 192.168.0.12 6800
 &lt;/Location&gt;
 </example>
 
@@ -649,28 +662,37 @@ CauchoBackup 192.168.0.12 6803
 
 <ol>
 <li>First, check your configuration with Resin standalone.sh.
-In other words, add a &lt;http port='8080'/&gt; and check port 8080.
-</li><li>Check http://localhost/caucho-status.  That will tell if
+In other words, add a &lt;http port='8080'/&gt; and check port 8080.</li>
+<li>Check http://localhost/caucho-status.  That will tell if
 mod_caucho has properly connected to the backend Resin server.
-</li><li>Each srun host should be green and the mappings should
+</li>
+<li>Each server should be green and the mappings should
 match your resin.xml.
-</li><li>If caucho-status fails entirely, the problem is in the mod_caucho
+</li>
+<li>If caucho-status fails entirely, the problem is in the mod_caucho
 installation and the Apache httpd.conf.
-</li><li>If caucho-status shows the wrong mappings, there's something wrong
+</li>
+<li>If caucho-status shows the wrong mappings, there's something wrong
 with the resin.xml or the pointer to the backend server in httpd.conf.
-</li><li>If caucho-status shows a red servlet runner, then Resin hasn't
+</li>
+<li>If caucho-status shows a red servlet runner, then Resin hasn't
 properly started.
-</li><li>If you get a "cannot connect to servlet engine", caucho-status
+</li>
+<li>If you get a "cannot connect to servlet engine", caucho-status
 will show red, and Resin hasn't started properly.
-</li><li>If Resin doesn't start properly, you should look at the logs
-in resin-3.1.x/log.  You should start <var>httpd.sh -verbose</var> or
+</li>
+<li>If Resin doesn't start properly, you should look at the logs
+in resin-3.2.x/log.  You should start <var>httpd.sh -verbose</var> or
 <var>httpd.exe -verbose</var> to get more information.
-</li><li>If Resin never shows a "srun listening to *:6802" line,
+</li>
+<li>If Resin never shows a "hmux listening to *:6800" line,
 it's not listening for connections from mod_caucho.
- You'll need to add a &lt;srun&gt; line.
-</li><li>If you get Resin's "file not found", the Apache configuration
+ You'll need to add a &lt;server&gt; line.
+</li>
+<li>If you get Resin's "file not found", the Apache configuration
 is good but the resin.xml probably points to the wrong directories.
-</li></ol>
+</li>
+</ol>
 
 </s1>
   </body>

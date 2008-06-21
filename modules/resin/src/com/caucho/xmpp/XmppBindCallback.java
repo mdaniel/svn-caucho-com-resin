@@ -57,8 +57,8 @@ public class XmppBindCallback extends AbstractBamStream
 
   @Override
   public boolean querySet(long id,
-			      String to, String from,
-			      Serializable value)
+			  String to, String from,
+			  Serializable value)
   {
     if (value instanceof ImBindQuery) {
       ImBindQuery bind = (ImBindQuery) value;
@@ -71,6 +71,8 @@ public class XmppBindCallback extends AbstractBamStream
 
       return true;
     }
+
+    System.out.println("V: " + value);
     
     return false;
   }

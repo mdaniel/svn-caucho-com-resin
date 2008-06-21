@@ -34,8 +34,8 @@
 <var>test.HelloWorld</var> class and that the value of the <var>greeting</var>
 init parameter is <var>Hello World</var>.</p>
 
-<example title="WEB-INF/web.xml">
-&lt;web-app&gt;
+<example title="Example: WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;servlet servlet-name='hello-world'
            servlet-class='test.HelloWorld'&gt;
     &lt;init-param greeting='Hello, World'/&gt;
@@ -219,11 +219,15 @@ method in a Servlet. JSP EL expressions are allowed.</p>
 all the bean setters are called.</p>
 
 <example title="Bean-style Configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
 &lt;servlet servlet-name='test.HelloWorld'&gt;
   &lt;init&gt;
     &lt;greeting&gt;Hello, ${host.url}&lt;/greeting&gt;
   &lt;/init&gt;
 &lt;/servlet&gt;
+
+&lt;/web-app>
 </example>
 
 <example title="HelloWorld bean">
@@ -232,7 +236,7 @@ public HelloWorld extends GenericServlet {
 
   public void setGreeting(String greeting)
   {
-    _greeting = greetin;
+    _greeting = greeting;
   }
 
   public void service(ServletRequest req,
@@ -956,77 +960,10 @@ getPath method.</p>
 </s1>
 
 <s1 title="run-at">
-      <p>Some web applications need a task to be run at regular intervals, e.g. once
-        an hour or once a day.  For example, a search application might want to
-        spider the web site every day to automatically pick up any new pages.
-        Syndication applications might poll their news sites every hour to check for
-        updates.</p>
-      <p>Resin's <var>run-at</var> servlets make periodic tasks simple.  At the
-          specified interval, Resin will execute a configured servlet.  Because the
-          periodic task is implemented as a servlet, the API is familiar and
-          debugging is simple.</p>
 
-      <p><var>run-at</var> has several advantages over spawning a new thread.
-          First, when you spawn a thread, you need to make sure you close it properly
-          when the servlet is unloaded.  Servlets can be unloaded at any time.
-          Also, <var>run-at</var> automatically handles classloader issues.  A thread
-          implementation needs to ensure that the running thread has the same
-          classloader as the application.</p>
+<p>The "run-at" capability should now be configured using the
+<a href="resources.xtp">&lt;scheduled-task></a> capability.</p>
 
-<s2 title="Sample Service">
-
-<p>The following example doesn't do much.  When the service routine is called,
-is just prints a message to the standard output.</p>
-
-<p>Because there is no request, the <var>request</var> and <var>response</var>
-objects are just stubs.  There's no reason to ever use them in a
-<var>run-at</var> service.  (Yes, that makes the arguments a little silly, but
-it's better than creating a new API.)</p>
-
-<p>The service does have access to the <var>ServletConfig</var>
-and <var>ServletContext</var> objects.</p>
-
-<example title="TestAlarm.java">
-package test;
-
-import javax.servlet.*;
-
-public class TestAlarm extends GenericServlet {
-  public void service(ServletRequest request,
-                      ServletResponse response)
-    throws IOException, ServletException
-  {
-    System.out.println("alarming");
-  }
-}
-</example>
-
-<p>The alarm is configured as any other servlet, with the addition of the
-<var>run-at</var> tag.  The following configuration runs the servlet every
-15 minutes.  If the hour is missing, e.g. <var>:15</var> the service is
-run at the specified minute.</p>
-
-<example title="15 minute configuration">
-...
-&lt;servlet name='alarm' servlet-class='test.TestAlarm'&gt;
-  &lt;run-at&gt;:00, :15, :30, :45&lt;/run-at&gt;
-&lt;/servlet&gt;
-...
-</example>
-
-<p>You can also run an alarm every hour.  Just specify the full
-hour:minute in the run-at.  For example, <var>16:30</var> runs the service once
-a day at 4:30 PM.</p>
-
-<example title="Daily at 4:30 PM Configuration">
-...
-&lt;servlet name='alarm' servlet-class='test.TestAlarm'&gt;
-  &lt;run-at&gt;16:30&lt;/run-at&gt;
-&lt;/servlet&gt;
-...
-</example>
-
-</s2>
 </s1>
 
   </body>

@@ -2384,6 +2384,11 @@ independent war file.</p>
   <td>value of <var>path</var></td>
 </tr>
 <tr>
+  <td>dependency-check-interval</td>
+  <td>How often to check the .war files for a redeploy</td>
+  <td>60s</td>
+</tr>
+<tr>
   <td>expand-cleanup-fileset</td>
   <td>defines the files which should be automatically deleted
 when an updated .war expands</td>
@@ -2408,11 +2413,6 @@ when an updated .war expands</td>
   <td>path</td>
   <td>The path to the webapps directory</td>
   <td>required</td>
-</tr>
-<tr>
-  <td>redeploy-check-interval</td>
-  <td>How often to check the .war files for a redeploy</td>
-  <td>60s</td>
 </tr>
 <tr>
   <td>redeploy-mode</td>

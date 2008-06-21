@@ -34,26 +34,6 @@ the entries for an explanation of why Resin thinks it should restart.
 </li></ul>
 </s2>
 
-<s2 title="No line numbers in exception stack traces">
-
-<ul>
-
-<li>In <var>resin.xml</var> specify <code>-g</code> as an option for Resin to pass to the java compiler:
-
-<example title="-g compiler option">
-&lt;java compiler='javac' compiler-args='-g'/&gt;
-</example>
-
-</li><li>Specify <code>-nojit</code> as a command-line option when starting Resin:
-
-<example title="-nojit command-line options">
-win&gt; bin/httpd.exe -nojit
-unix&gt; bin/httpd.sh -nojit
-</example>
-
-</li></ul>
-</s2>
-
 <s2 name="memory-leaks" title="java.lang.OutOfMemoryError exception, application runs out of memory">
 
 <ul>
@@ -410,8 +390,9 @@ log messages are found in the file <var>$RESIN_HOME/log/debug.log</var>.</p>
 
 <example title="Full debug logging of the server to $RESIN_HOME/log/debug.log">
 &lt;!-- resin.xml --&gt;
-&lt;resin&gt;
-  &lt;log name="" path="log/debug.log" timestamp="[%H:%M:%S.%s] {%{thread}} "/>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;log-handler name="" level="all" path="log/debug.log"
+                  timestamp="[%H:%M:%S.%s] {%{thread}} "/>
 
   &lt;logger name="" level="finer"/>
 
@@ -501,28 +482,8 @@ Thread 12689: (state = BLOCKED)
 
 <p>On Windows, ctrl-break may produce a thread dump.</p>
 
-<p>On Unix, "kill -QUIT" will produce a thread dump.  On the Linux IBM JDKs,
-you'll need to signal one of the child processes.  On the Linux Sun JDK, you'll
-need to kill the grandparent process of most of the threads:</p>
+<p>On Unix, "kill -QUIT" will produce a thread dump.</>
 
-<example>
-unix&gt; ps -ef | grep java
-ferg     14243 10792  0 Jan13 pts/0    00:00:00 sh -c /usr/java/bin/java
-ferg     14244 14243  0 Jan13 pts/0    00:00:00 java -Dres
-ferg     14253 14244  0 Jan13 pts/0    00:00:01 java -Dres
-ferg     14254 14253  0 Jan13 pts/0    00:00:00 java -Dres
-ferg     14255 14253  0 Jan13 pts/0    00:00:00 java -Dres
-ferg     14256 14253  0 Jan13 pts/0    00:00:00 java -Dres
-ferg     14257 14253  0 Jan13 pts/0    00:00:00 java -Dres
-ferg     14258 14253  0 Jan13 pts/0    00:00:00 java -Dres
-unix&gt; kill -QUIT 14244
-</example>
-
-<p>The Solaris 1.3 JDK has a single process, so it's easy.</p>
-
-<p>The Solaris 1.2 JDK has an extra quirk.  You need to run Resin in the
-foreground (i.e. not using "start".)  Then you'll need to answer some
-questions on the console.</p>
 </s3>
 
 <s3 title="Thread dump if signalling doesn't work">
@@ -537,8 +498,19 @@ technique works on all operating systems.</p>
 <ol>
 <li>Start Resin with some extra arguments that allow a debugger to attach:
 
-<example>
-$RESIN_HOME/bin/httpd -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5432
+<example title="resin.xml for debugging">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="">
+
+  &lt;server-default>
+    &lt;jvm-arg>-Xdebug&lt;/jvm-arg>
+    &lt;jvm-arg>-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5432&lt;/jvm-arg>
+  &lt;/server-default>
+
+  &lt;server id="" address="127.0.0.1" port="6800"/>
+    
+&lt;/cluster>
+&lt;/resin>
 </example>
 
 </li><li>Wait until you believe the application is in a state of deadlock
@@ -562,7 +534,7 @@ Initializing jdb ...
 </li><li>Use the "suspend" command and then the "where all" command to get
 a thread dump:
 
-<example>
+<example title="Example: jdbc suspend">
 &gt; suspend
 
 All threads suspended.
@@ -986,8 +958,10 @@ enabled in $RESIN_HOME/resin.xml:</p>
 
   ...
 
-  &lt;log name='com.caucho.server.http' level='finer' path='log/http.log'/&gt;
-  &lt;log name='com.caucho.server.connection' level='finer' path='log/http.log'/&gt;
+  &lt;log-handler name='com.caucho.server.http' level='finer'
+                  path='log/http.log'/&gt;
+  &lt;log-handler name='com.caucho.server.connection' level='finer'
+                  path='log/http.log'/&gt;
 
   ...
 

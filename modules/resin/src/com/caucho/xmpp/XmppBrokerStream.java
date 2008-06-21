@@ -88,6 +88,9 @@ public class XmppBrokerStream
     _xmppContext = new XmppContext(_protocol.getMarshalFactory());
     _broker = broker;
 
+    if (broker == null)
+      throw new NullPointerException();
+
     _in = in;
     _os = os;
 

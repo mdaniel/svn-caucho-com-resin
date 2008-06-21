@@ -76,9 +76,9 @@ public class XmppProtocol extends Protocol
     return _loader;
   }
 
-  BamBroker getBroker()
+  HempBrokerManager getBrokerManager()
   {
-    return _broker;
+    return _brokerManager;
   }
 
   XmppMarshalFactory getMarshalFactory()

@@ -195,21 +195,43 @@ public class JdbcServiceManager extends AbstractBamServiceManager
       }
     }
   }
-
-  InputStream serialize(Serializable data)
+  
+  Serializable getData(String jid, String key)
   {
+    String id = calculateDigest(jid, key);
+      
+    Connection conn = null;
+
     try {
-      TempOutputStream os = new TempOutputStream();
-      Hessian2Output out = new Hessian2Output(os);
+      conn = _db.getConnection();
 
-      out.writeObject(data);
-      out.close();
+      String sql = ("select value from " + _dataTable
+		    + " where id=?");
 
-      return os.openInputStream();
-    } catch (IOException e) {
+      PreparedStatement pstmt = conn.prepareStatement(sql);
+
+      pstmt.setString(1, id);
+
+      ResultSet rs = pstmt.executeQuery();
+      if (rs.next()) {
+	InputStream is = rs.getBinaryStream(1);
+
+	return deserialize(is);
+      }
+    } catch (SQLException e) {
+      log.log(Level.FINER, e.toString(), e);
+    } catch (Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      try {
+	if (conn != null) conn.close();
+      } catch (SQLException e) {
+      }
     }
+
+    return null;
   }
+  
   
   void putData(String jid,
 	       String key,
@@ -217,7 +239,6 @@ public class JdbcServiceManager extends AbstractBamServiceManager
   {
     putData(jid, key, serialize(data));
   }
-  
   
   void putData(String jid,
 	       String key,
@@ -298,6 +319,32 @@ public class JdbcServiceManager extends AbstractBamServiceManager
     }
 
     return false;
+  }
+
+  InputStream serialize(Serializable data)
+  {
+    try {
+      TempOutputStream os = new TempOutputStream();
+      Hessian2Output out = new Hessian2Output(os);
+
+      out.writeObject(data);
+      out.close();
+
+      return os.openInputStream();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  Serializable deserialize(InputStream is)
+  {
+    try {
+      Hessian2Input in = new Hessian2Input(is);
+
+      return (Serializable) in.readObject();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private String calculateDigest(String jid, String id)

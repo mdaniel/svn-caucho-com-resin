@@ -68,6 +68,7 @@ public class HempBroker implements BamBroker, BamStream
 
   private String _domain = "localhost";
   private String _managerJid = "localhost";
+  private HempDomainService _domainService;
 
   private ArrayList<String> _aliasList = new ArrayList<String>();
 
@@ -76,6 +77,7 @@ public class HempBroker implements BamBroker, BamStream
   public HempBroker()
   {
     _manager = HempBrokerManager.getCurrent();
+    _domainService = new HempDomainService(this, "");
   }
 
   public HempBroker(String domain)
@@ -84,6 +86,8 @@ public class HempBroker implements BamBroker, BamStream
     
     _domain = domain;
     _managerJid = domain;
+
+    _domainService = new HempDomainService(this, domain);
   }
 
   /**
@@ -100,6 +104,14 @@ public class HempBroker implements BamBroker, BamStream
   public BamStream getBrokerStream()
   {
     return this;
+  }
+  
+  /**
+   * Returns the domain service
+   */
+  public BamService getDomainService()
+  {
+    return _domainService;
   }
 
   //
@@ -626,6 +638,12 @@ public class HempBroker implements BamBroker, BamStream
     }
 
     BamService service = findServiceFromManager(jid);
+
+    if (service == null
+	&& jid.indexOf('/') < 0
+	&& jid.indexOf('@') < 0) {
+      service = findDomain(jid);
+    }
     
     if (service != null) {
       synchronized (_serviceCache) {
@@ -644,11 +662,16 @@ public class HempBroker implements BamBroker, BamStream
 
     if ((p = jid.indexOf('/')) > 0) {
       String uid = jid.substring(0, p);
-      return findService(uid);
+      service = findService(uid);
+
+      return service;
     }
     else if ((p = jid.indexOf('@')) > 0) {
       String domainName = jid.substring(p + 1);
-      return findDomain(domainName);
+      
+      service = findService(domainName);
+
+      return service;
     }
     else
       return null;
@@ -661,6 +684,15 @@ public class HempBroker implements BamBroker, BamStream
 
     BamBroker broker = _manager.findBroker(domain);
 
+    System.out.println("FIND: " + broker + " " + this + " " + domain);
+    if (broker instanceof HempBroker) {
+      HempBroker hempBroker = (HempBroker) broker;
+
+      System.out.println("DS: " + hempBroker.getDomainService());
+      
+      return hempBroker.getDomainService();
+    }
+    
     if (broker == null || broker == this)
       return null;
 

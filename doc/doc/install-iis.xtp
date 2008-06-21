@@ -33,7 +33,7 @@ and load-balancing with failover.
 <p>The Control Panel is used to configure two environment variables:</p>
 <example>
 JAVA_HOME=C:\jdk1.5.0
-RESIN_HOME=C:\resin-3.0
+RESIN_HOME=C:\resin-3.2
 </example>
 </s1>
 
@@ -80,19 +80,25 @@ files on the disk must be the same for Resin as they are for IIS. For more
 complicated configurations that use mappings in IIS, you'll need to add <a href="webapp-tags.xtp">path-mapping</a> attributes
 to match.</p>
 
-<example title="resin.xml" language="xml">
-&lt;!-- configures the default host, matching any host name --&gt;
-&lt;host id=''&gt;
+<example title="Example: resin.xml" language="xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="">
+
+  &lt;!-- configures the default host, matching any host name --&gt;
+  &lt;host id=""&gt;
 
   &lt;!-- configures the root web-app --&gt;
   &lt;web-app id='/'&gt;
-    &lt;document-directory&gt;C:/inetpub/wwwroot&lt;/document-directory&gt;
+    &lt;root-directory&gt;C:/inetpub/wwwroot&lt;/root-directory&gt;
     &lt;!-- adds xsl to the search path --&gt;
     &lt;class-loader&gt;
       &lt;simple-loader path="$host-root/xsl"/&gt;
     &lt;/class-loader&gt;
   &lt;/web-app&gt;
 &lt;/host&gt;
+
+&lt;/cluster&gt;
+&lt;/cluster&gt;
 </example>
 
 </s2>
@@ -104,8 +110,8 @@ servlet runner.</p>
 
 <example title="Run httpd.exe">
 C:\&gt; cd %RESIN_HOME%
-C:\resin-3.0&gt; cd bin
-C:\resin-3.0&gt; httpd.exe
+C:\resin-3.2&gt; cd bin
+C:\resin-3.2&gt; httpd.exe
 </example>
 
 <p>Now browse http://localhost/test.jsp.  You should get a 'file not
@@ -177,13 +183,13 @@ unexpectedly exits.</p>
 <p>To install the service, use</p>
 
 <example>
-win&gt; resin-3.0.x/httpd -install
+win&gt; resin-3.2.x/httpd -install
 </example>
 
 <p>To remove the service, use</p>
 
 <example>
-win&gt; resin-3.0.x/httpd -remove
+win&gt; resin-3.2.x/httpd -remove
 </example>
 
 <p>You will either need to reboot the machine or start the service
@@ -195,7 +201,7 @@ administrator logs out.  JDK 1.4 and later can avoid that bug if the
 JDK is started with -Xrs. </note>
 
 <example>
-win&gt; resin-3.0.x/httpd -install -Xrs
+win&gt; resin-3.2.x/httpd -install -Xrs
 </example>
 
 </s1>
@@ -215,19 +221,20 @@ details.</p>
 
 <example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;server&gt;
-  &lt;cluster&gt;
-    &lt;srun id="a" host="host1" port="6802" index="1"/&gt;
-    &lt;srun id="b" host="host2" port="6802" index="2"/&gt;
-    &lt;srun id="c" host="backup" port="6802" index="3" backup="true"/&gt;
+&lt;cluster id="app-tier"&gt;
+
+    &lt;server id="a" address="host1" port="6802" index="1"/&gt;
+    &lt;server id="b" address="host2" port="6802" index="2"/&gt;
+    &lt;server id="c" address="backup" port="6802" index="3" backup="true"/&gt;
   ...
-&lt;/server&gt;
+&lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
+
 <example title="installing multiple servlet runners as services">
-win&gt; resin-3.0.x/httpd -install-as "Resin-A" -server a -Xrs
-win&gt; resin-3.0.x/httpd -install-as "Resin-B" -server b -Xrs
-win&gt; resin-3.0.x/httpd -install-as "Resin-C" -server c -Xrs
+win&gt; resin-3.2.x/httpd -install-as "Resin-A" -server a -Xrs
+win&gt; resin-3.2.x/httpd -install-as "Resin-B" -server b -Xrs
+win&gt; resin-3.2.x/httpd -install-as "Resin-C" -server c -Xrs
 </example>
 </s1>
 
@@ -352,37 +359,38 @@ in the <code>scripts</code> directory.</p>
 <example title="resin-foo.conf">
 <!-- for foo.com jvm -->
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;server&gt;
-  &lt;cluster&gt;
-    &lt;srun port="6802"/&gt;
-  &lt;/cluster&gt;
+&lt;cluster id=""&gt;
+
+  &lt;server port="6800"/&gt;
+
   ...
   &lt;host id="*"&gt;
     ...
   &lt;/host&gt;
-&lt;/server&gt;
+  
+&lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
 
 <example title="resin-bar.conf">
 <!-- for bar.com jvm -->
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-&lt;server&gt;
-  &lt;cluster&gt;
-    &lt;srun port="6803"/&gt;
-  &lt;/cluster&gt;
+&lt;cluster id=""&gt;
+
+  &lt;server port="6801"/&gt;
+
   ...
   &lt;host id="*"&gt;
     ...
   &lt;/host&gt;
-&lt;/server&gt;
+&lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
 
 <example title="installing a servlet runner for each virtual site">
-win&gt; resin-3.0.x/httpd -install-as "Resin-foo" \
+win&gt; resin-3.2.x/httpd -install-as "Resin-foo" \
     -conf resin-foo.conf -Xrs
-win&gt; resin-3.0.x/httpd -install-as "Resin-bar" \
+win&gt; resin-3.2.x/httpd -install-as "Resin-bar" \
     -conf resin-bar.conf -Xrs
 </example>
 
@@ -414,7 +422,7 @@ In other words, add a &lt;http port='8080'/&gt; block and
 browse http://localhost:8080.
 </li><li>Check <var>http://localhost/caucho-status</var>.  That will tell if
 the ISAPI filter/extension is properly installed. 
-</li><li>Each srun host should be green and the mappings should
+</li><li>Each server should be green and the mappings should
 match your resin.xml.
 </li><li>If caucho-status fails entirely, the problem is in the <var>isapi_srun</var>
 installation.  Try
@@ -438,7 +446,7 @@ properly started.
 </li><li>If you get a "cannot connect to servlet engine", caucho-status
 will show red, and httpd.exe hasn't started properly.
 </li><li>If httpd.exe doesn't start properly, you should look at the logs
-in resin3.0/log.  You should start <var>httpd.exe -verbose</var> to get
+in resin3.2/log.  You should start <var>httpd.exe -verbose</var> to get
 more information.
 </li><li>If you get Resin's file not found, the IIS configuration
 is good but the resin.xml probably points to the wrong directories.

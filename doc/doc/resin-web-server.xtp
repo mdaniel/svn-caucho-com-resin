@@ -1,7 +1,7 @@
 <document>
   <header>
     <product>resin</product>
-    <version>Resin 3.1</version>
+    <version>Resin 3.2</version>
     <title>Resin Web Server</title>
     <description>
       <p>This document describes how to install and run Resin
@@ -27,8 +27,8 @@
 <ol>
 <li>Install JDK 1.5 or later and link <var>/usr/java</var> to your Java home or
 set environment variable <var>JAVA_HOME</var>.</li>
-<li><code>tar -vzxf resin-3.1.0.tar.gz</code> in <var>/usr/local/share</var></li>
-<li>(Optional) Link <var>/usr/local/share/resin</var> to the <var>resin-3.1.0</var> directory.</li>
+<li><code>tar -vzxf resin-3.2.0.tar.gz</code> in <var>/usr/local/share</var></li>
+<li>(Optional) Link <var>/usr/local/share/resin</var> to the <var>resin-3.2.0</var> directory.</li>
 <li>./configure; make; make install
   <ul><li>some <a href="config-cmdline.xtp">./configure options</a> are available</li></ul>
   </li>
@@ -40,7 +40,7 @@ set environment variable <var>JAVA_HOME</var>.</li>
 
 <example title="Successful Foreground Startup Output">
 unix&gt; java -jar resin/lib/resin.jar
-Resin Professional 3.1.0 (built Fri, 08 Sep 2006 12:49:30 PDT)
+Resin Professional 3.2.0 (built Fri, 08 Sep 2006 12:49:30 PDT)
 Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.
 
   001111.license - 1 Resin server Hogwarts School
@@ -75,8 +75,8 @@ make Resin and website upgrades easier and more maintainable.</p>
 <li>Create a deployment root, e.g. <var>/var/www</var>, owned by
 the resin user. This is <var>$RESIN_ROOT</var>.</li>
 <li>Put the modified <var>resin.xml</var> in <var>/etc/resin/resin.conf</var></li>
-<li>Put the site documents in <var>/var/www/webapps/ROOT</var>.</li>
-<li>Put any .war files in <var>/var/www/webapps</var>.</li>
+<li>Put the site documents in <var>/var/www/hosts/default/webapps/ROOT</var>.</li>
+<li>Put any .war files in <var>/var/www/hosts/default/webapps</var>.</li>
 <li>Put any virtual hosts in <var>/var/www/hosts/www.foo.com</var>.</li>
 <li>Output logs will appear in <var>/var/www/log</var>.</li>
 <li>Create a startup script and configure the server to start it
@@ -116,7 +116,7 @@ export RESIN_ROOT
 
 $java -jar $RESIN_HOME/lib/resin.jar \
       -resin-root $RESIN_ROOT \
-      -conf /etc/conf/resin.xml \
+      -conf /etc/resin/resin.xml \
       -server a \
        $*
 </example>
@@ -145,15 +145,15 @@ you might use <code>-server</code>.</p>
 <ol>
 <li>Install JDK 1.5 or later.</li>
 <li>Make sure the JDK installation set the environment variable <var>JAVA_HOME</var> correctly</li>
-<li>Unzip resin-3.1.0.zip</li>
-<li>Run <code>java -jar resin-3.1.0/lib/resin.jar</code></li>
-<li>Or execute <var>resin-3.1.0/httpd.exe</var></li>
+<li>Unzip resin-3.2.0.zip</li>
+<li>Run <code>java -jar resin-3.2.0/lib/resin.jar</code></li>
+<li>Or execute <var>resin-3.2.0/httpd.exe</var></li>
 <li>Browse <var>http://localhost:8080</var></li>
 </ol>
 
 <example title="Starting on Win32">
-C:\win32&gt; resin-3.1.0\bin\httpd
-Resin 3.1.0-beta (built Thu Feb 13 18:21:13 PST 2003)
+C:\win32&gt; resin-3.2.0\bin\httpd
+Resin 3.2.0-beta (built Thu Feb 13 18:21:13 PST 2003)
 Copyright(c) 1998-2002 Caucho Technology.  All rights reserved.
 
 Starting Resin on Sat, 01 Mar 2003 19:11:52 -0500 (EST)
@@ -177,13 +177,14 @@ Starting Resin on Sat, 01 Mar 2003 19:11:52 -0500 (EST)
 <p>To install the service, use</p>
 
 <example>
-C:\&gt; resin-3.1.x\httpd -install -conf conf/myconf.conf
+C:\&gt; resin-3.2.x\httpd -install -conf conf/myconf.xml \
+                          -user MyResinUser -password mypassword
 </example>
 
 <p>To remove the service, use</p>
 
 <example>
-C:\&gt; resin-3.1.x\httpd -remove
+C:\&gt; resin-3.2.x\httpd -remove
 </example>
 
 <p>You will either need to reboot the machine or start the service
@@ -206,7 +207,7 @@ the executable string.</p>
 the service name.</p>
 
 <example>
-C:\&gt; resin-3.1.x\httpd -install-as ResinA \
+C:\&gt; resin-3.2.x\httpd -install-as ResinA \
                        -conf conf/myconf.conf \
                        -server a
 C:\&gt; net start ResinA

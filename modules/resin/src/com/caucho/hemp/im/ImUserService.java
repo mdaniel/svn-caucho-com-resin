@@ -29,13 +29,14 @@
 
 package com.caucho.hemp.im;
 
+import com.caucho.bam.BamStream;
 import com.caucho.bam.SimpleBamService;
+import com.caucho.hemp.broker.GenericService;
 import com.caucho.xmpp.im.RosterQuery;
 import com.caucho.xmpp.im.RosterItem;
 import com.caucho.xmpp.disco.DiscoInfoQuery;
 import com.caucho.xmpp.disco.DiscoIdentity;
 import com.caucho.xmpp.disco.DiscoFeature;
-import com.caucho.bam.BamStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.*;
@@ -44,13 +45,11 @@ import java.util.logging.*;
 /**
  * Resource representing an IM user
  */
-public class ImUserService extends SimpleBamService
+public class ImUserService extends GenericService
 {
   private static final Logger log
     = Logger.getLogger(ImUserService.class.getName());
   
-  private BamStream _broker;
-
   private ArrayList<String> _jidList
     = new ArrayList<String>();
   
@@ -60,14 +59,9 @@ public class ImUserService extends SimpleBamService
   {
   }
   
-  public ImUserService(BamStream broker, String jid)
+  public ImUserService(String jid)
   {
-    if (broker == null)
-      throw new NullPointerException("server may not be null");
-    
     setJid(jid);
-
-    _broker = broker;
   }
 
   public String []getJids()
@@ -120,7 +114,7 @@ public class ImUserService extends SimpleBamService
 
     for (String jid : jids) {
       // XXX: is the "to" correct?
-      _broker.message(jid, from, value);
+      getBrokerStream().message(jid, from, value);
     }
   }
   
@@ -134,12 +128,12 @@ public class ImUserService extends SimpleBamService
       DiscoInfoQuery info = new DiscoInfoQuery(getDiscoIdentity(),
 					       getDiscoFeatures());
       
-      _broker.queryResult(id, from, to, info);
+      getBrokerStream().queryResult(id, from, to, info);
       
       return true;
     }
     else if (query instanceof RosterQuery) {
-      _broker.queryResult(id, from, to, new RosterQuery(getRoster()));
+      getBrokerStream().queryResult(id, from, to, new RosterQuery(getRoster()));
 
       return true;
     }
@@ -171,7 +165,7 @@ public class ImUserService extends SimpleBamService
     String []jids = _jids;
 
     for (String jid : jids) {
-      _broker.presence(jid, from, data);
+      getBrokerStream().presence(jid, from, data);
     }
   }
 
@@ -184,7 +178,7 @@ public class ImUserService extends SimpleBamService
     String []jids = _jids;
 
     for (String jid : jids) {
-      _broker.presenceProbe(jid, from, data);
+      getBrokerStream().presenceProbe(jid, from, data);
     }
   }
 
@@ -198,7 +192,7 @@ public class ImUserService extends SimpleBamService
     String []jids = _jids;
 
     for (String jid : jids) {
-      _broker.presenceUnavailable(jid, from, data);
+      getBrokerStream().presenceUnavailable(jid, from, data);
     }
   }
 
@@ -212,18 +206,18 @@ public class ImUserService extends SimpleBamService
 
       if ("from".equals(subscription)
 	  || "both".equals(subscription)) {
-	_broker.presence(item.getJid(), getJid(), data);
+	getBrokerStream().presence(item.getJid(), getJid(), data);
       }
       
       if ("to".equals(subscription)
 	  || "both".equals(subscription)) {
-	_broker.presenceProbe(item.getJid(), getJid(), data);
+	getBrokerStream().presenceProbe(item.getJid(), getJid(), data);
       }
     }
     
     for (String jid : _jids) {
       if (! jid.equals(from)) {
-	_broker.presence(jid, from, data);
+	getBrokerStream().presence(jid, from, data);
       }
     }
   }
@@ -242,7 +236,7 @@ public class ImUserService extends SimpleBamService
     String []jids = _jids;
 
     if (jids.length > 0) {
-      _broker.presenceSubscribe(jids[0], from, data);
+      getBrokerStream().presenceSubscribe(jids[0], from, data);
     }
     else {
       log.fine(this + " onPresenceSubscribe to=" + to);
@@ -259,7 +253,7 @@ public class ImUserService extends SimpleBamService
       String []jids = _jids;
 
       if (jids.length > 0) {
-	_broker.presenceSubscribed(jids[0], from, data);
+	getBrokerStream().presenceSubscribed(jids[0], from, data);
       }
     }
   }
@@ -299,7 +293,7 @@ public class ImUserService extends SimpleBamService
     
     querySetResources(roster);
 
-    _broker.queryResult(id, from, to, null);
+    getBrokerStream().queryResult(id, from, to, null);
 
     return true;
   }

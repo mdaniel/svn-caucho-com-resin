@@ -394,10 +394,13 @@ public class XmppReader
     int priority = 0;
     ArrayList<Serializable> extraList = new ArrayList<Serializable>();
     BamError error = null;
+
+    System.out.println("HANDLE_PRESENCE:");
     
     while ((tag = _in.nextTag()) > 0
 	   && ! ("presence".equals(_in.getLocalName())
 		 && tag == XMLStreamReader.END_ELEMENT)) {
+      System.out.println("NEXT:");
       if (_isFinest)
 	debug(_in);
       
@@ -432,15 +435,24 @@ public class XmppReader
 	
 	priority = Integer.parseInt(_in.getText());
 
-	skipToEnd("show");
+	skipToEnd("priority");
       }
       else {
-	
+	String name = _in.getLocalName();
+	String uri = _in.getNamespaceURI();
+	String data = _in.readAsXmlString();
+
+	extraList.add(new XmlData(name, uri, data));
+
+	System.out.println("DATA: " + data);
       }
     }
+
+    System.out.println("X-TRA: " + extraList);
     
     if (_isFinest)
       debug(_in);
+    System.out.println("END-P:");
 
     expectEnd("presence", tag);
 
@@ -453,6 +465,8 @@ public class XmppReader
     ImPresence presence = new ImPresence(to, from,
 					 show, status, priority,
 					 extraList);
+
+    System.out.println("H: " + _handler + " " + presence);
 
     if (_handler != null) {
       if ("".equals(type))

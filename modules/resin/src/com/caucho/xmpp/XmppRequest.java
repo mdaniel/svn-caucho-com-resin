@@ -30,6 +30,7 @@
 package com.caucho.xmpp;
 
 import com.caucho.bam.BamBroker;
+import com.caucho.hemp.broker.*;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.util.*;
@@ -55,6 +56,7 @@ public class XmppRequest implements TcpServerRequest {
 
   private XmppProtocol _protocol;
 
+  private HempBrokerManager _brokerManager;
   private BamBroker _broker;
   
   private TcpConnection _conn;
@@ -78,6 +80,7 @@ public class XmppRequest implements TcpServerRequest {
   private XmppStreamReader _in;
 
   private boolean _isAllowTls = false;
+  private boolean _isRequireSession = true;
 
   private boolean _isPresent;
   private boolean _isThread;
@@ -92,7 +95,7 @@ public class XmppRequest implements TcpServerRequest {
   XmppRequest(XmppProtocol protocol, TcpConnection conn)
   {
     _protocol = protocol;
-    _broker = protocol.getBroker();
+    _brokerManager = protocol.getBrokerManager();
     _conn = conn;
     _threadPool = ThreadPool.getThreadPool();
   }
@@ -142,6 +145,8 @@ public class XmppRequest implements TcpServerRequest {
    */
   public void startConnection()
   {
+    _host = null;
+    _broker = null;
   }
   
   /**
@@ -273,6 +278,18 @@ public class XmppRequest implements TcpServerRequest {
 
     if (from == null)
       from = _conn.getLocalAddress().getHostAddress();
+
+    _broker = _brokerManager.findBroker(_host);
+
+    if (_broker == null) {
+      if (log.isLoggable(Level.FINE))
+	log.fine(L.l("{0}: host='{1}' is an unknown host",
+		     this, _host));
+
+      _os.print("<error><unknown-host/></error>");
+      
+      return false;
+    }
       
     _streamFrom = from;
     _clientTo = from + "/" + _id;
@@ -401,7 +418,10 @@ public class XmppRequest implements TcpServerRequest {
       
     _os.print("<stream:features>");
     _os.print("<bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/>");
-    _os.print("<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>");
+
+    if (_isRequireSession)
+      _os.print("<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>");
+    
     _os.print("</stream:features>");
     _os.flush();
 

@@ -136,8 +136,6 @@ will automatically register itself with the broker.</p>
 <example title="WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
-    &lt;bean class="com.caucho.hemp.broker.HempBroker"/>
-
     &lt;bean name="test@localhost" class="example.LogService"/>
 
 &lt;/web-app>
@@ -241,8 +239,6 @@ public class TestClient
 
 <example title="WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
-
-    &lt;bean class="com.caucho.hemp.broker.HempBroker"/>
 
     &lt;bean name="test@localhost" class="example.TestService"/>
 
