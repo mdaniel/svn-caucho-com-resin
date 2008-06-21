@@ -288,7 +288,7 @@ class HtmlCommandLinkRenderer extends BaseRenderer
 
 	    String val = toString(context, param, param.getValue());
 
-            char[] paramValue = val.toCharArray();
+            char []paramValue = val.toCharArray();
 
             clickJs.ensureCapacity(clickJs.length() + paramValue.length);
 
