@@ -313,8 +313,16 @@ public class UICommand extends UIComponentBase
     VALUE,
   }
 
-  static class MethodExpressionAdapter extends MethodExpression {
+  static class MethodExpressionAdapter
+    extends MethodExpression
+    implements StateHolder
+  {
     private MethodBinding _binding;
+
+    private boolean _isTransient;
+
+    public MethodExpressionAdapter() {
+    }
 
     MethodExpressionAdapter(MethodBinding binding)
     {
@@ -351,6 +359,28 @@ public class UICommand extends UIComponentBase
 	     ELException
     {
       return _binding.invoke(FacesContext.getCurrentInstance(), params);
+    }
+
+    public boolean isTransient()
+    {
+      return _isTransient;
+    }
+
+    public void setTransient(boolean aTransient)
+    {
+      _isTransient = aTransient;
+    }
+
+    public Object saveState(FacesContext context)
+    {
+      return _binding.getExpressionString();
+    }
+
+    public void restoreState(FacesContext context, Object state)
+    {
+      if (state != null)
+        _binding = context.getApplication()
+          .createMethodBinding((String) state, new Class[]{});
     }
 
     public int hashCode()
