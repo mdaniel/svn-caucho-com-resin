@@ -274,14 +274,12 @@ class HtmlCommandLinkRenderer extends BaseRenderer
 
 	  if (child instanceof UIParameter) {
 	    UIParameter param = (UIParameter) child;
-	    String enc = out.getCharacterEncoding();
 
 	    clickJs.append("document.forms['");
 	    clickJs.append(formClientId);
 	    clickJs.append("']['");
 
 	    String name = param.getName();
-	    String encodedName = URLEncoder.encode(name, enc);
 
 	    HtmlFormRenderer.addCommandLinkParam(context, formClientId, name);
 
@@ -289,10 +287,24 @@ class HtmlCommandLinkRenderer extends BaseRenderer
 	    clickJs.append("'].value='");
 
 	    String val = toString(context, param, param.getValue());
-	    String encodedVal = URLEncoder.encode(val, enc);
 
-	    clickJs.append(encodedVal);
-	    clickJs.append("';");
+            char []paramValue = val.toCharArray();
+
+            clickJs.ensureCapacity(clickJs.length() + paramValue.length);
+
+            for (int j = 0; j < paramValue.length; j++) {
+              char c = paramValue[j];
+
+              switch (c) {
+                case '\'': {
+                  clickJs.append("\\'");
+                  break;
+                }
+                default: clickJs.append(c);
+              }
+            }
+
+            clickJs.append("';");
 	  }
 	}
       }
