@@ -34,8 +34,10 @@ import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.xmpp.im.*;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -84,6 +86,10 @@ public class XmppClient {
 
   private XmppContext _xmppContext = new XmppContext();
   private XmppClientBrokerStream _toBroker;
+  private BindCallback _bindCallback;
+
+  private String _jid;
+  
   private BamStream _callback;
 
   public XmppClient(InetAddress address, int port)
@@ -145,7 +151,10 @@ public class XmppClient {
       _toBroker = new XmppClientBrokerStream(this, writer);
     
       _in = new XmppStreamReaderImpl(_is, marshalFactory);
-      _reader = new XmppReader(_xmppContext, _is, _in, _toBroker, _callback);
+
+      _bindCallback = new BindCallback();
+      _reader = new XmppReader(_xmppContext, _is, _in, _toBroker,
+			       _bindCallback);
 
       String tag = readStartTag();
 
@@ -156,8 +165,6 @@ public class XmppClient {
       }
 
       readStreamFeatures();
-
-      ThreadPool.getThreadPool().start(new Listener());
     } catch (XMLStreamException e) {
       throw new IOExceptionWrapper(e);
     }
@@ -179,13 +186,10 @@ public class XmppClient {
     _os.flush();
 
     try {
-      Stanza stanza = _stanzaQueue.poll(2, TimeUnit.SECONDS);
-
-      if (! (stanza instanceof SuccessStanza))
-	throw new RuntimeException("login failure");
-
-      stanza = _stanzaQueue.poll(2, TimeUnit.SECONDS);
-      if (! (stanza instanceof StreamStanza))
+      if (! readSuccess())
+	throw new RuntimeException("expected success");
+      
+      if (! readStream())
 	throw new RuntimeException("expected stream");
 
       StringBuilder sb = new StringBuilder();
@@ -197,24 +201,33 @@ public class XmppClient {
       _os.print("</bind>");
       _os.print("</iq>");
       _os.flush();
-      
-      stanza = _stanzaQueue.poll(2, TimeUnit.SECONDS);
-      if (! (stanza instanceof BindStanza))
-	throw new RuntimeException("expected bind at " + stanza);
+
+      _reader.readNext();
+
+      if (_jid == null)
+	throw new RuntimeException("expected bind");
       
       _os.print("<iq type='set' id='" + _mId++ + "'>");
       _os.print("<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>");
       _os.print("</iq>");
       _os.flush();
-      
-      stanza = _stanzaQueue.poll(2, TimeUnit.SECONDS);
+
+      _reader.readNext();
+
+      /*
+      Stanza stanza = _stanzaQueue.poll(2, TimeUnit.SECONDS);
 
       if (! (stanza instanceof SessionStanza)
 	  && ! (stanza instanceof EmptyStanza))
 	throw new RuntimeException("expected session");
+      */
 
       if (log.isLoggable(Level.FINER))
 	log.finer(this + " authentication successful for " + name);
+
+      _reader.setHandler(_callback);
+
+      ThreadPool.getThreadPool().start(new Listener());
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -226,7 +239,7 @@ public class XmppClient {
   {
     _callback = callback;
 
-    if (_reader != null)
+    if (_reader != null && _jid != null)
       _reader.setHandler(callback);
   }
   
@@ -437,6 +450,90 @@ public class XmppClient {
       log.finest(this + " tag=" + in.getEventType());
   }
 
+  private boolean readStream()
+    throws IOException, XMLStreamException
+  {
+    int tag;
+
+    XMLStreamReader in = _in;
+
+    if (in == null)
+      return false;
+
+    while ((tag = in.next()) > 0) {
+      if (_isFinest)
+	debug(in);
+	
+      if (tag == XMLStreamReader.START_ELEMENT) {
+	String localName = in.getLocalName();
+
+	if ("stream".equals(localName)) {
+	  readStreamFeatures();
+	    
+	  return true;
+	}
+	else {
+	  log.fine(XmppClient.this + " expected stream at tag <" + _in.getLocalName() + ">");
+	  close();
+	  return false;
+	}
+      }
+      else if (tag == XMLStreamReader.END_ELEMENT) {
+	log.fine(XmppClient.this + " unexpected end </" + _in.getLocalName() + ">");
+	close();
+	return false;
+      }
+    }
+
+    if (tag < 0) {
+      close();
+    }
+
+    return false;
+  }
+
+  private boolean readSuccess()
+    throws IOException, XMLStreamException
+  {
+    int tag;
+
+    XMLStreamReader in = _in;
+
+    if (in == null)
+      return false;
+
+    while ((tag = in.next()) > 0) {
+      if (_isFinest)
+	debug(in);
+	
+      if (tag == XMLStreamReader.START_ELEMENT) {
+	String localName = in.getLocalName();
+
+	if ("success".equals(localName)) {
+	  _reader.skipToEnd("success");
+	    
+	  return true;
+	}
+	else {
+	  log.fine(XmppClient.this + " expected success at tag <" + _in.getLocalName() + ">");
+	  close();
+	  return false;
+	}
+      }
+      else if (tag == XMLStreamReader.END_ELEMENT) {
+	log.fine(XmppClient.this + " unexpected end </" + _in.getLocalName() + ">");
+	close();
+	return false;
+      }
+    }
+
+    if (tag < 0) {
+      close();
+    }
+
+    return false;
+  }
+
   public BamStream getBrokerStream()
   {
     return _toBroker;
@@ -456,13 +553,26 @@ public class XmppClient {
     close();
   }
 
+  class BindCallback extends AbstractBamStream {
+    @Override
+    public void queryResult(long id, String to, String from,
+			    Serializable value)
+    {
+      if (value instanceof ImBindQuery) {
+	ImBindQuery bind = (ImBindQuery) value;
+
+	_jid = bind.getJid();
+      }
+    }
+  }
+
   class Listener implements Runnable {
     private boolean _isFinest;
     
     public void run()
     {
       _isFinest = log.isLoggable(Level.FINEST);
-      
+
       try {
 	while (! isClosed()) {
 	  readPacket();
@@ -502,10 +612,13 @@ public class XmppClient {
 	    _stanzaQueue.add(new StreamStanza(in));
 	  }
 	  else if ("iq".equals(localName)) {
-	    _stanzaQueue.add(readIq(in));
+	    _reader.handleIq();
 	  }
 	  else if ("message".equals(localName)) {
 	    _reader.handleMessage();
+	  }
+	  else if ("presence".equals(localName)) {
+	    _reader.handlePresence();
 	  }
 	  else {
 	    log.fine(XmppClient.this + " unknown tag <" + _in.getLocalName() + ">");

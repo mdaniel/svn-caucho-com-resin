@@ -157,7 +157,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     = new ArrayList<BoundPort>();
 
   private Path _managementPath;
-  private Management _management;
+  protected Management _management;
 
   private HempBrokerManager _brokerManager;
 
@@ -256,6 +256,8 @@ public class Resin implements EnvironmentBean, SchemaBean
       webBeans.addSingleton(System.getProperties(), "system", Standard.class);
 
       _brokerManager = new HempBrokerManager();
+
+      _management = createManagement();
 
       webBeans.addSingleton(new com.caucho.config.functions.FmtFunctions(), "fmt", Standard.class);
 
@@ -652,16 +654,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   public Management createManagement()
   {
     if (_management == null) {
-      try {
-        Class cl = Class.forName("com.caucho.server.admin.ProManagement");
-
-        _management = (Management) cl.newInstance();
-      } catch (Exception e) {
-        log().log(Level.FINEST, e.toString(), e);
-      }
-
-      if (_management == null)
-        _management = new Management();
+      _management = new Management();
 
       _management.setResin(this);
     }

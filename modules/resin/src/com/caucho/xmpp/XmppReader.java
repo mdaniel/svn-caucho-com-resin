@@ -277,7 +277,7 @@ public class XmppReader
       extraList.toArray(extra);
     }
 
-    if (_jid == null)
+    if (_jid != null)
       from = _jid;
 
     if (to == null)
@@ -443,16 +443,11 @@ public class XmppReader
 	String data = _in.readAsXmlString();
 
 	extraList.add(new XmlData(name, uri, data));
-
-	System.out.println("DATA: " + data);
       }
     }
 
-    System.out.println("X-TRA: " + extraList);
-    
     if (_isFinest)
       debug(_in);
-    System.out.println("END-P:");
 
     expectEnd("presence", tag);
 
@@ -465,8 +460,6 @@ public class XmppReader
     ImPresence presence = new ImPresence(to, from,
 					 show, status, priority,
 					 extraList);
-
-    System.out.println("H: " + _handler + " " + presence);
 
     if (_handler != null) {
       if ("".equals(type))
@@ -492,7 +485,7 @@ public class XmppReader
     return true;
   }
 
-  private void skipToEnd(String tagName)
+  protected void skipToEnd(String tagName)
     throws IOException, XMLStreamException
   {
     XMLStreamReader in = _in;

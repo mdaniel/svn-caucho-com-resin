@@ -216,8 +216,8 @@ public class XmppAgentStream implements BamStream
    * General presence, for clients announcing availability
    */
   public void presence(String to,
-		           String from,
-		           Serializable data)
+		       String from,
+		       Serializable data)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
@@ -225,6 +225,8 @@ public class XmppAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
+      _writer.sendPresence(to, from, data, "");
+
       _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
@@ -246,6 +248,8 @@ public class XmppAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
+      _writer.sendPresence(to, from, data, "unavailable");
+
       _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
@@ -267,6 +271,8 @@ public class XmppAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
+      _writer.sendPresence(to, from, data, "probe");
+
       _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
@@ -288,6 +294,8 @@ public class XmppAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
+      _writer.sendPresence(to, from, data, "subscribe");
+
       _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
@@ -309,6 +317,8 @@ public class XmppAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
+      _writer.sendPresence(to, from, data, "subscribed");
+
       _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
@@ -330,6 +340,8 @@ public class XmppAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
+      _writer.sendPresence(to, from, data, "unsubscribe");
+
       _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
@@ -351,6 +363,8 @@ public class XmppAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
+      _writer.sendPresence(to, from, data, "unsubscribed");
+
       _os.flush();
     } catch (IOException e) {
       _packetHandler.close();
