@@ -482,7 +482,7 @@ Thread 12689: (state = BLOCKED)
 
 <p>On Windows, ctrl-break may produce a thread dump.</p>
 
-<p>On Unix, "kill -QUIT" will produce a thread dump.</>
+<p>On Unix, "kill -QUIT" will produce a thread dump.</p>
 
 </s3>
 
