@@ -73,6 +73,13 @@
     </item>
 
     <!-- line/rule goes here? -->
+
+    <!--
+       - Guides
+      -->
+    <item link="guide-admin.xtp" title="Guide: Admin"/>
+    
+    <!-- line/rule goes here? -->
     
     <!--
        - Admin/JMX

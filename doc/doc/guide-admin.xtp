@@ -1,0 +1,250 @@
+<document>
+<header>
+<title>User Guide: Administration</title>
+
+<description>
+
+<p>Overview and introduction to Resin from an administration perspective.
+</p>
+
+</description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Terminology">
+
+<ul>
+<li><b>cluster</b> - A set of <em>servers</em> configured to serve
+identical content.  Even a solo server will belong to its own
+cluster.</li>
+<li><b>default host</b> - A virtual host configured to handle any
+requests not maching a specified host.</li>
+<li><b>host</b> - An internet domain like www.slytherin.com whose content
+is handled by a cluster.  Also called virtual host.</li>
+<li><b>keepalive</b> - A HTTP connection kept open after a request finishes
+so the next request to the server will be more efficient.</li>
+<li><b>load-balancer</b> - A Resin <em>server</em> which forwards requests
+to an application cluster for increased scalability and reliability.</li>
+<li><b>machine</b> - A physical computer.  Multiple <em>servers</em> can run on the same machine.</li>
+<li><b>port</b> - A server's internet connection handling a specific protocol,
+e.g. a HTTP port 80 or HTTPS port 443 or XMPP (Jabber) port 5222.</li>
+<li><b>proxy cache</b> - A content cache in front of a web application,
+storing the content and returning it quickly without running the application.
+Speedups for some applications can be 10x or 100x.</li>
+<li><b>server</b> - A Resin instance running on a single JVM.  One or
+more servers can run on the same <em>machine</em>.</li>
+<li><b>servlet</b> - A Java program responsible for serving web content.  All
+content is handle by a servlet, including static files,
+JSPs and PHP content.</li>
+<li><b>thread</b> - An active execution of a Java program.  Because Java
+is multithreaded, multiple Java programs are running simultaneously.
+For example, each HTTP user/request is handled by its own Java thread.</li>
+<li><b>watchdog</b> - A Resin Java process responsible for starting and
+restarting Resin <em>servers</em> for reliability.</li>
+<li><b>webapp</b> - A web application is a content collection, like a
+Drupal or Mediawiki site.  All content belongs to a webapp.</li>
+</ul>
+
+</s1>
+
+<s1 title="Dispatching Content">
+
+<p>All HTTP content in Resin is ultimately handled by a servlet.  If
+Resin can't find a servlet for a URL, it will return
+a <code>404 Not Found</code> to the browser.  So, if you see an
+unexpected <code>404 Not Found</code>, you not only need to check that
+the file exists, but make sure that the servlet and its URL mapping is
+properly configured.  If you turn on logging to "finer", you can
+trace the request to figure out why the servlet is not getting
+called.</p>
+
+<p>To match up the URL to its final servlet and the content, you need
+all of the following properly configured:</p>
+
+<ol>
+<li><b>Server</b>.  The Resin server must be active to do anything.
+Because servers belong to a cluster, you'll automatically have a
+cluster even if it only has a single server.</li>
+<li><b>HTTP port</b>.  The server must be listening to the internet
+for HTTP requests just to get started.  If the HTTP port is missing or
+misconfigured, you will get connection failure messages because the
+browser cannot connect to your server at all.</li>
+<li><b>Host</b>.  Resin must first match the
+<a href="host-tags.xtp">&lt;host></a> specified by the
+HTTP request, e.g. www.slytherin.com.  If no hosts match, Resin will
+use the default host.  If no default host exists, Resin will
+return a <code>404 Not Found</code> to the browser.</li>
+<li><b>WebApp</b>.  Inside the host, Resin finds a
+web-application to handle the request by looking for the
+<a href="webapp-tags.xtp#webapp">&lt;web-app></a> with the longest URL
+prefix. So, <code>http://www.slytherin.com/drupal/index.php</code>
+might match the <code>/drupal/</code>.  The ROOT web-app matches all
+URLs.  If Resin can't find a web-app, it will return
+<code>404 Not Found</code> to the browser.</li>
+<li><b>servlet-mapping</b>.  Inside the web-app, Resin searches for a
+<a href="webapp-tags.xtp#servlet-mapping">&lt;servlet-mapping></a> matching
+the URL.  For example, <code>test.php</code> would match the
+<code>QuercusServlet</code> and <code>test.jsp</code> would match
+the JSP servlet.   If none match, Resin will try the default mapping,
+which is normally the <code>FileServlet</code> to handle static pages.
+If the default servlet isn't configured, Resin will return a <code>404
+Not Found</code> to the browser.</li>
+<li><b>Servlet</b>.  Finally, the selected servlet processes the
+request and returns the content.  The servlet itself might not find
+the requested content, e.g. if <code>/foo.php</code> does not exist in
+the expected location.  The servlet itself is responsible for error
+handling, but most servlets will return a <code>404 Not Found</code>
+if any expected files are missing.</li>
+</ol>
+
+<p>Based on Resin's dispatching flow, here's a minimal
+resin.xml to serve some content out of <code>/var/www/htdocs</code>.
+Resin's philosophy of configuration files is that 1) for maintainability,
+all configuration should be traceable to the resin.xml, i.e. no magic
+defaults or hidden state are allowed and 2) for security, if something
+is not configured, it doesn't exist.  In Resin, you need to enable
+things explicitly, not disable hidden defaults.  The slight extra
+verbosity is outweighed by the improved security and
+maintainability.</p>
+
+<p>This resin.xml specifies an Apache-style structure where
+all content is served from the <code>/var/www/htdocs</code> directory,
+and is useful when upgrading from an old PHP site to use Quercus
+for security and performance.  When organizing a site from scratch,
+you'll typically use a more structured dynamic
+hosting directory structure.</p>
+
+<example title="Example: minimal /etc/resin/resin.xml for HTTP">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="http://caucho.com/ns/resin/core">
+	
+  &lt;cluster id="app-tier">
+    &lt;development-mode-error-page/>
+
+    &lt;server id="" address="127.0.0.1" port="6800">
+      &lt;http port="8080"/>
+    &lt;/server>
+
+    &lt;resin:import path="/etc/resin/app-default.xml"/>
+
+    &lt;host id="">
+      &lt;web-app id="">
+        &lt;root-directory>/var/www/htdocs&lt;/root-directory>
+      &lt;/web-app>
+    &lt;/host>
+  &lt;/cluster>
+
+&lt;/resin>
+</example>
+
+<ul>
+<li><a href="resin-tags.xtp#resin">&lt;resin></a> starts a Resin
+configuration file and introduces the XML namespaces allowing
+for validation.</li>
+<li><a href="cluster-tags.xtp#cluster">&lt;cluster></a> encloses the
+single-server cluster containing our content.</li>
+<li><a
+href="cluster-tags.xtp#development-mode-error-page">&lt;development-mode-error-page></a>
+reports configuration and runtime errors to the browser, which is
+very helpful during development.  On a production server, you may
+want to remove this tag so errors don't expose information to the
+internet.</li>
+<li><a href="server-tags.xtp#server">&lt;server></a> configures the
+Resin server, including its ports.  The <var>id</var> matches the
+command-line <var>-server</var> argument at startup.  The
+<var>address</var> and <var>port</var> open Resin's cluster port,
+which is used for deployment, management, clustering, and
+distributed caching.</li>
+<li><a href="server-tags.xtp#http">&lt;http></a> listens for HTTP
+requests.  Production servers will change the port to 80.</li>
+<li><a href="env-tags.xtp#import">&lt;resin:import></a> defines the
+standard servlet like JSP, PHP and the static file servlet.  If you
+omit this &lt;resin:import>, Resin will return <code>404 Not
+Found</code> because the <a
+href="webapp-tags.xtp#servlet-mapping">&lt;servlet-mapping></a> and
+servlets would not be defined.</li>
+<li><a href="host-tags.xtp#host">&lt;host></a> defines a default
+virtual host.  The default host will handle any host domain given by
+a HTTP request.</li>
+<li><a href="webapp-tags.xtp#web-app">&lt;web-app></a> defines a ROOT
+web-app, serving all URLs for the host.  The servlets in the web-app
+are defined by the <code>app-default.xml</code> specified by the &lt;resin:import>.</li>
+<li><a href="webapp-tags.xtp#root-directory">&lt;root-directory></a>
+specifies the content directory, here matching a standard Apache
+directory.
+</li>
+</ul>
+
+</s1>
+
+<s1 title="Resin Processes">
+
+<ul>
+<li><b>command-line</b> - the command-line process
+(<code>ResinBoot</code>) only exists long
+enough to send a message to the <em>watchdog</em> or the Resin
+process, like a "start", "deploy", or "stop".  If necessary, the
+command-line process will start the watchdog.</li>
+
+<li><b>watchdog</b> - the <a href="resin-watchdog.xtp">watchdog
+process</a> manages and monitors <em>Resin server</em> processes.
+If the Resin server exits, the watchdog will automatically restart
+Resin, providing extra reliability in case of server failure.</li>
+
+<li><b>Resin server</b> - the Resin server handles the HTTP requests
+and serves the content.</li>
+
+</ul>
+
+<figure src="startup-watchdog.png"/>
+
+<p>Because the Resin server is started as a child of the watchdog
+process, its own JVM arguments come from the resin.xml,
+not from the command-line of <code>ResinBoot</code>.  The JVM
+configuration arguments are supplied as <a
+href="server-tags#jvm-arg">&lt;jvm-arg></a> in the &lt;server>
+configuration.</p>
+
+</s1>
+
+<s1 title="Files and Directories">
+
+<example title="Example: Unix directory structure">
+/etc/resin/
+  resin.xml                 - main Resin configuration file
+  app-default.xml           - default servlet configuration
+
+/etc/init.d/resin           - startup script
+
+/usr/local/share/resin/     - ${resin.home}
+   lib/*.jar                - Resin's Java classes
+   libexec/*.so             - native JNI libraries
+   libexec64/*.so           - JNI for 64-bit systems
+   licenses/*               - Resin Pro licenses
+   php/admin/*              - /resin-admin source
+   win32/*.dll              - Win32 JNI
+   win64/*.dll              - Win64 JNI
+   
+/var/www/                   - ${resin.root}
+   log/                     - watchdog and Resin debug logging
+   logs/                    - HTTP access logging
+   admin/                   - Resin database and cache storage
+   hosts/foo.com/           - dynamic host contents
+     logs/                  - access logging per virtual host
+     host.xml               - optional host-specific configuration
+     webapps/ROOT/          - web-app content
+       index.php            - web-app content
+       WEB-INF/             - web-app classes and configuration
+         web.xml            - servlet-standard configuration
+	 resin-web.xml      - Resin-specific configuration
+	 lib/*.jar          - application jars
+	 classes/**/*.class - application classes
+	 work/              - work directory for JSP, PHP, etc.
+</example>
+</s1>
+
+  </body>
+</document>

@@ -23,6 +23,10 @@
     <linked-section link="config-cmdline.xtp" />
   </chapter>
   
+  <chapter title="Admin Guide">
+    <linked-section link="guide-admin.xtp" />
+  </chapter>
+  
   <chapter title="Watchdog">
     <linked-section link="resin-watchdog.xtp" />
   </chapter>

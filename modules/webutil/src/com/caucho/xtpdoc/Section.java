@@ -298,16 +298,36 @@ public abstract class Section extends ContainerNode {
     writeLaTeX(out);
   }
 
-  public void writeLaTeX(PrintWriter out)
-    throws IOException
+  protected void writeLaTeXLabel(PrintWriter out)
   {
-    String label = getDocument().getDocumentPath().getUserPath() + ":" + _title;
+    String fileName = getDocument().getDocumentPath().getUserPath();
+    String label = fileName + ":" + _title;
 
-    label = label.replace(" ", "-");
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < label.length(); i++) {
+      char ch = label.charAt(i);
+
+      if (ch == ' ')
+	sb.append('-');
+      else if (ch == '<' || ch == '>') {
+      }
+      else
+	sb.append(ch);
+    }
+    
+    label = sb.toString();
 
     out.println("\\label{" + label + "}");
     out.println("\\hypertarget{" + label + "}{}");
 
+  }
+
+  public void writeLaTeX(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeXLabel(out);
+    
     super.writeLaTeX(out);
 
     if (_type != null && _type.equals("defun"))

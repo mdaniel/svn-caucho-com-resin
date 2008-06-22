@@ -82,6 +82,16 @@ public class S1 extends Section {
     super.writeLaTeX(out);
   }
 
+  @Override
+  public void writeLaTeX(PrintWriter out)
+    throws IOException
+  {
+    if (_title != null)
+      out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+    
+    super.writeLaTeX(out);
+  }
+
   public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException
   {

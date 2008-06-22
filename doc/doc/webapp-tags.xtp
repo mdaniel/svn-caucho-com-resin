@@ -1621,6 +1621,18 @@ element rewrite-real-path {
 
 </defun>
 
+<defun title="&lt;root-directory>" version="Resin 3.1">
+
+<p>&lt;root-directory> configures the web-app's filesystem root.</p>
+
+<def title="&lt;root-directory> schema">
+element root-directory {
+  string
+}
+</def>
+
+</defun>
+
 <defun title="&lt;secure>">
 <parents>web-app</parents>
 
