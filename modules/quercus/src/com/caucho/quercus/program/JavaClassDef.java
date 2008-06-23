@@ -771,17 +771,19 @@ public class JavaClassDef extends ClassDef {
     return null;
   }
 
-  public synchronized void init()
+  public void init()
   {
-    if (_isInit)
-      return;
+    synchronized (this) {
+      if (_isInit)
+	return;
 
-    try {
-      initInterfaceList(_type);
-      introspect();
-    }
-    finally {
-      _isInit = true;
+      try {
+	initInterfaceList(_type);
+	introspect();
+      }
+      finally {
+	_isInit = true;
+      }
     }
   }
 

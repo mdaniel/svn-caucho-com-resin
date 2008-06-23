@@ -12,6 +12,11 @@
 
 <s2 title="3.1.7 snapshot">
 <ul>
+<li>plugin: win32 apache/iis timeout default needs to be greater than socket-timeout to avoid 503 (#2715, rep by bmeyns)</li>
+<li>deploy: web-app-deploy shoudl use dependency-check-interval, not redeploy-check-interval (#2745, rep by mzgubin)</li>
+<li>admin: add start/restart in /resin-admin</li>
+<li>database: after connection error in XA, the returned connection must still be the same object (#2708, rep by Takahiro Fukuda)</li>
+<li>win32: lpt detection with jni (#2738, rep by T Fukuda)</li>
 <li>classloader: scan of ext paths must only add directories and jars (#2659, rep by Brian Burke)</li>
 <li>security: custom ip-constraint extension IoC configuration issues (#2718, rep by Alex Victoria)</li>
 <li>vfs: windows getURL not properly converting /foo to file:/foo (#2725, rep by Vinod Mehra)</li>

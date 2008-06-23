@@ -714,8 +714,10 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       } catch (Throwable e) {
       }
 
+      /*
       if (System.getProperty("org.xml.sax.driver") == null)
         System.setProperty("org.xml.sax.driver", "com.caucho.xml.Xml");
+      */
 
       Properties props = System.getProperties();
 

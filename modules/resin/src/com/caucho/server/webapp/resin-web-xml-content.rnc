@@ -1029,6 +1029,8 @@ r_web-app-deploy = element web-app-deploy {
   & (attribute archive-directory { r_path-Type }
      | element archive-directory { r_path-Type })?
 
+  & r_dependency-check-interval?
+
   & (attribute expand-path { r_path-Type }
      | element expand-path { r_path-Type })?
 
@@ -1047,8 +1049,6 @@ r_web-app-deploy = element web-app-deploy {
 
   & (attribute startup-mode { string }
      | element startup-mode { string })?
-
-  & r_redeploy-check-interval?
 
   & r_redeploy-mode?
 

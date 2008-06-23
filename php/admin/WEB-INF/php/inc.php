@@ -311,6 +311,12 @@ if ($script == "heap.php") {
   ?><li><a href="heap.php">Heap</a></li><?
 }
 
+if ($script == "webapp.php") {
+  ?><li class="selected">WebApp</li><?
+} else {
+  ?><li><a href="webapp.php">WebApp</a></li><?
+}
+
 if ($script == "cache.php") {
   ?><li class="selected">Cache</li><?
 } else {

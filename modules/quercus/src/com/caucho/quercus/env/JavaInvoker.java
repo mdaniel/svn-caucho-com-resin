@@ -97,115 +97,117 @@ abstract public class JavaInvoker
     // init();
   }
 
-  public synchronized void init()
+  public void init()
   {
-    if (_isInit)
-      return;
+    synchronized (this) {
+      if (_isInit)
+	return;
 
-    MarshalFactory marshalFactory = _moduleContext.getMarshalFactory();
-    ExprFactory exprFactory = _moduleContext.getExprFactory();
+      MarshalFactory marshalFactory = _moduleContext.getMarshalFactory();
+      ExprFactory exprFactory = _moduleContext.getExprFactory();
 
-    try {
-      boolean callUsesVariableArgs = false;
-      boolean callUsesSymbolTable = false;
-      boolean returnNullAsFalse = false;
+      try {
+	boolean callUsesVariableArgs = false;
+	boolean callUsesSymbolTable = false;
+	boolean returnNullAsFalse = false;
 
-      for (Annotation ann : _methodAnn) {
-        if (VariableArguments.class.isAssignableFrom(ann.annotationType()))
-          callUsesVariableArgs = true;
+	for (Annotation ann : _methodAnn) {
+	  if (VariableArguments.class.isAssignableFrom(ann.annotationType()))
+	    callUsesVariableArgs = true;
 
-        if (UsesSymbolTable.class.isAssignableFrom(ann.annotationType()))
-          callUsesSymbolTable = true;
+	  if (UsesSymbolTable.class.isAssignableFrom(ann.annotationType()))
+	    callUsesSymbolTable = true;
 
-        if (ReturnNullAsFalse.class.isAssignableFrom(ann.annotationType()))
-          returnNullAsFalse = true;
+	  if (ReturnNullAsFalse.class.isAssignableFrom(ann.annotationType()))
+	    returnNullAsFalse = true;
+	}
+
+	_isCallUsesVariableArgs = callUsesVariableArgs;
+	_isCallUsesSymbolTable = callUsesSymbolTable;
+
+	_hasEnv = _param.length > 0 && _param[0].equals(Env.class);
+	int envOffset = _hasEnv ? 1 : 0;
+
+	if (envOffset < _param.length)
+	  _hasThis = hasThis(_param[envOffset], _paramAnn[envOffset]);
+	else
+	  _hasThis = false;
+
+	if (_hasThis)
+	  envOffset++;
+
+	boolean hasRestArgs = false;
+	boolean isRestReference = false;
+
+	if (_param.length > 0
+	    && (_param[_param.length - 1].equals(Value[].class)
+		|| _param[_param.length - 1].equals(Object[].class))) {
+	  hasRestArgs = true;
+
+	  for (Annotation ann : _paramAnn[_param.length - 1]) {
+	    if (Reference.class.isAssignableFrom(ann.annotationType()))
+	      isRestReference = true;
+	  }
+	}
+
+	_hasRestArgs = hasRestArgs;
+	_isRestReference = isRestReference;
+
+	int argLength = _param.length;
+
+	if (_hasRestArgs)
+	  argLength -= 1;
+
+	_defaultExprs = new Expr[argLength - envOffset];
+	_marshalArgs = new Marshal[argLength - envOffset];
+
+	_maxArgumentLength = argLength - envOffset;
+	_minArgumentLength = _maxArgumentLength;
+
+	for (int i = 0; i < argLength - envOffset; i++) {
+	  boolean isReference = false;
+	  boolean isNotNull = false;
+
+	  for (Annotation ann : _paramAnn[i + envOffset]) {
+	    if (Optional.class.isAssignableFrom(ann.annotationType())) {
+	      _minArgumentLength--;
+
+	      Optional opt = (Optional) ann;
+
+	      if (! opt.value().equals("")) {
+		Expr expr = QuercusParser.parseDefault(opt.value());
+
+		_defaultExprs[i] = expr;
+	      } else
+		_defaultExprs[i] = exprFactory.createDefault();
+	    } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
+	      isReference = true;
+	    } else if (NotNull.class.isAssignableFrom(ann.annotationType())) {
+	      isNotNull = true;
+	    }
+	  }
+
+	  Class argType = _param[i + envOffset];
+
+	  if (isReference) {
+	    _marshalArgs[i] = marshalFactory.createReference();
+
+	    if (! Value.class.equals(argType)
+		&& ! Var.class.equals(argType)) {
+	      throw new QuercusException(L.l("reference must be Value or Var for {0}",
+					     _name));
+	    }
+	  }
+	  else
+	    _marshalArgs[i] = marshalFactory.create(argType, isNotNull);
+	}
+
+	_unmarshalReturn = marshalFactory.create(_retType,
+						 false,
+						 returnNullAsFalse);
+      } finally {
+	_isInit = true;
       }
-
-      _isCallUsesVariableArgs = callUsesVariableArgs;
-      _isCallUsesSymbolTable = callUsesSymbolTable;
-
-      _hasEnv = _param.length > 0 && _param[0].equals(Env.class);
-      int envOffset = _hasEnv ? 1 : 0;
-
-      if (envOffset < _param.length)
-        _hasThis = hasThis(_param[envOffset], _paramAnn[envOffset]);
-      else
-        _hasThis = false;
-
-      if (_hasThis)
-        envOffset++;
-
-      boolean hasRestArgs = false;
-      boolean isRestReference = false;
-
-      if (_param.length > 0
-	  && (_param[_param.length - 1].equals(Value[].class)
-	      || _param[_param.length - 1].equals(Object[].class))) {
-        hasRestArgs = true;
-
-        for (Annotation ann : _paramAnn[_param.length - 1]) {
-          if (Reference.class.isAssignableFrom(ann.annotationType()))
-            isRestReference = true;
-        }
-      }
-
-      _hasRestArgs = hasRestArgs;
-      _isRestReference = isRestReference;
-
-      int argLength = _param.length;
-
-      if (_hasRestArgs)
-        argLength -= 1;
-
-      _defaultExprs = new Expr[argLength - envOffset];
-      _marshalArgs = new Marshal[argLength - envOffset];
-
-      _maxArgumentLength = argLength - envOffset;
-      _minArgumentLength = _maxArgumentLength;
-
-      for (int i = 0; i < argLength - envOffset; i++) {
-        boolean isReference = false;
-        boolean isNotNull = false;
-
-        for (Annotation ann : _paramAnn[i + envOffset]) {
-          if (Optional.class.isAssignableFrom(ann.annotationType())) {
-            _minArgumentLength--;
-
-            Optional opt = (Optional) ann;
-
-            if (! opt.value().equals("")) {
-              Expr expr = QuercusParser.parseDefault(opt.value());
-
-              _defaultExprs[i] = expr;
-            } else
-              _defaultExprs[i] = exprFactory.createDefault();
-          } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
-            isReference = true;
-          } else if (NotNull.class.isAssignableFrom(ann.annotationType())) {
-            isNotNull = true;
-          }
-        }
-
-        Class argType = _param[i + envOffset];
-
-        if (isReference) {
-          _marshalArgs[i] = marshalFactory.createReference();
-
-          if (! Value.class.equals(argType)
-              && ! Var.class.equals(argType)) {
-            throw new QuercusException(L.l("reference must be Value or Var for {0}",
-                                           _name));
-          }
-        }
-        else
-          _marshalArgs[i] = marshalFactory.create(argType, isNotNull);
-      }
-
-      _unmarshalReturn = marshalFactory.create(_retType,
-                                               false,
-                                               returnNullAsFalse);
-    } finally {
-      _isInit = true;
     }
   }
 

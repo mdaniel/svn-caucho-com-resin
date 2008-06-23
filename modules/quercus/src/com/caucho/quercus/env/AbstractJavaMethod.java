@@ -67,17 +67,61 @@ abstract public class AbstractJavaMethod extends AbstractFunction
   abstract public boolean getHasRestArgs();
   
   abstract public int getMarshalingCost(Value []args);
+
+  public Class getJavaDeclaringClass()
+  {
+    return null;
+  }
+  
+  public Class []getJavaParameterTypes()
+  {
+    return null;
+  }
   
   /**
    * Returns an overloaded java method.
    */
   public AbstractJavaMethod overload(AbstractJavaMethod fun)
   {
+    // same method can occur for interfaces and overrides
+    if (isSameMethod(this, fun)) {
+      if (getJavaDeclaringClass().isAssignableFrom(fun.getJavaDeclaringClass()))
+	return this;
+      else if (fun.getJavaDeclaringClass().isAssignableFrom(getJavaDeclaringClass()))
+	return fun;
+      else
+	return this;
+    }
+      
     AbstractJavaMethod method = new JavaOverloadMethod(this);
     
     method = method.overload(fun);
     
     return method;
+  }
+
+  /**
+   * Checks for the same method, e.g. for multiple interfaces declaring
+   * the same method.
+   */
+  private boolean isSameMethod(AbstractJavaMethod funA,
+			       AbstractJavaMethod funB)
+  {
+    Class []paramTypesA = funA.getJavaParameterTypes();
+    Class []paramTypesB = funB.getJavaParameterTypes();
+
+    if (paramTypesA == null || paramTypesB == null)
+      return false;
+
+    if (paramTypesA.length != paramTypesB.length)
+      return false;
+
+    for (int i = 0; i < paramTypesA.length; i++) {
+      if (! paramTypesA[i].equals(paramTypesB[i]))
+	return false;
+    }
+
+    return true;
   }
 
   abstract public Value callMethod(Env env, Value qThis, Value []args);

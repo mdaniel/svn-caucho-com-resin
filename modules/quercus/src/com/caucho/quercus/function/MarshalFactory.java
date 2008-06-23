@@ -230,18 +230,18 @@ public class MarshalFactory {
       marshal = new JavaMarshal(javaDef, isNotNull, isNullAsFalse);
     }
 
-    if (!isNullAsFalse)
+    if (! isNullAsFalse)
       return marshal;
     else {
-      if (Value.class.equals(argType) ||
-          Boolean.class.equals(argType) ||
-          Byte.class.equals(argType) ||
-          Short.class.equals(argType) ||
-          Integer.class.equals(argType) ||
-          Long.class.equals(argType) ||
-          Float.class.equals(argType) ||
-          Double.class.equals(argType) ||
-          Character.class.equals(argType)) {
+      if (Value.class.equals(argType)
+	  || Boolean.class.equals(argType)
+	  || Byte.class.equals(argType)
+	  || Short.class.equals(argType)
+	  || Integer.class.equals(argType)
+	  || Long.class.equals(argType)
+	  || Float.class.equals(argType)
+	  || Double.class.equals(argType)
+	  || Character.class.equals(argType)) {
 
         String shortName = argType.getSimpleName();
         throw new UnsupportedOperationException("@ReturnNullAsFalse cannot be used with return type `"+shortName+"'");

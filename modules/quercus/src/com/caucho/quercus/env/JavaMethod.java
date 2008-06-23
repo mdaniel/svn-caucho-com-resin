@@ -91,6 +91,18 @@ public class JavaMethod extends JavaInvoker {
   }
 
   @Override
+  public Class []getJavaParameterTypes()
+  {
+    return _method.getParameterTypes();
+  }
+
+  @Override
+  public Class getJavaDeclaringClass()
+  {
+    return _method.getDeclaringClass();
+  }
+
+  @Override
   public Object invoke(Object obj, Object []args)
   {
     try {

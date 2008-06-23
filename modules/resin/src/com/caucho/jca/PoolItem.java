@@ -345,8 +345,10 @@ class PoolItem implements ConnectionEventListener, XAResource {
       return null;
     else if (_shareHead != null && ! _cm.isShareable()) // is currently in use
       return null;
+    /* server/14g9, #2708
     else if (_hasConnectionError) // had a fatal error
       return null;
+    */
     
     if (log.isLoggable(Level.FINER))
       log.finer("sharing xa-pool item: " + this);
