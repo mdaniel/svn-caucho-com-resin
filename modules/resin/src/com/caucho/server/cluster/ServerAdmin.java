@@ -31,6 +31,7 @@ package com.caucho.server.cluster;
 
 import com.caucho.management.server.AbstractEmitterObject;
 import com.caucho.management.server.ClusterMXBean;
+import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.ServerMXBean;
 import com.caucho.management.server.ThreadPoolMXBean;
@@ -78,6 +79,11 @@ public class ServerAdmin extends AbstractEmitterObject
   public ClusterMXBean getCluster()
   {
     return _server.getCluster().getAdmin();
+  }
+
+  public EnvironmentMXBean getEnvironment()
+  {
+    return _server.getCluster().getEnvironmentAdmin();
   }
 
   /**

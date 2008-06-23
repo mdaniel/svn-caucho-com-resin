@@ -1072,7 +1072,7 @@ public class PageContextImpl extends PageContext
                                      relativeUrl));
     rd.forward(req, res);
 
-    _out.close();
+    //_out.close();
     _responseStream.close();
   }
 

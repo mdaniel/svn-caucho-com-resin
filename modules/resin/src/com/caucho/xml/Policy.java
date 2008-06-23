@@ -167,9 +167,10 @@ class Policy {
     String fullName = source.toString();
     String prefix = null;
     String localName = null;
-    String ns = null;;
+    String ns = null;
 
     if (! _isNamespaceAware) {
+      localName = fullName;
     }
     else if (i < 0) {
       localName = fullName;

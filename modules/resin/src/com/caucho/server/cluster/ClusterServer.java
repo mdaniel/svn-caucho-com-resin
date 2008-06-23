@@ -242,7 +242,7 @@ public class ClusterServer {
     if (_loadBalanceSocketTimeout != DEFAULT)
       return _loadBalanceSocketTimeout;
     else
-      return _socketTimeout;
+      return _socketTimeout + 600000L;
   }
 
   /**

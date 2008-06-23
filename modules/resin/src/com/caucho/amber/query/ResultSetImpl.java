@@ -240,11 +240,15 @@ public class ResultSetImpl implements ResultSet {
   public void init()
     throws SQLException
   {
-    _row = 0;
     _numberOfLoadingColumns = 1;
 
     while (_row < _firstResult && next()) {
     }
+  }
+
+  public void setRow(int row)
+  {
+    _row = row;
   }
 
   /**
@@ -253,7 +257,7 @@ public class ResultSetImpl implements ResultSet {
   public int getRow()
     throws SQLException
   {
-    return _rs.getRow();
+    return _row;
   }
 
   /**
@@ -307,20 +311,13 @@ public class ResultSetImpl implements ResultSet {
   public java.sql.ResultSetMetaData getMetaData()
     throws SQLException
   {
-    try {
+    if (_rs == null)
+      return _cacheMetaData;
+    else {
+      _cacheMetaData = _rs.getMetaData();
 
-      if (_rs == null)
-        return _cacheMetaData;
-      else {
-        _cacheMetaData = _rs.getMetaData();
-
-        return _cacheMetaData;
-      }
-
-    } catch (NullPointerException ex) {
+      return _cacheMetaData;
     }
-
-    return null;
   }
 
   /**

@@ -744,8 +744,9 @@ public class XmlParser extends AbstractParser {
           _contentHandler.startPrefixMapping(prefix, uri);
 	}
 
-	// needed for xml/032e
-	if (isElement && _isXmlnsAttribute) {
+	// needed for xml/032e vs xml/00ke
+	if (isElement && _isXmlnsAttribute
+	    && _contentHandler instanceof DOMBuilder) {
           _attributes.add(name, uri);
 	}
 

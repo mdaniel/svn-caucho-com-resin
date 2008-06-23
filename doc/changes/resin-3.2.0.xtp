@@ -60,5 +60,11 @@ unix: java -jar $RESIN_HOME/lib/pro.jar -conf conf/resin.xml \
 
 </s1>
 
+<s1 title="log rotation">
+
+<p>Logs can now use rollover-cron for more precise rollover times.</p>
+
+</s1>
+
 </body>
 </document>

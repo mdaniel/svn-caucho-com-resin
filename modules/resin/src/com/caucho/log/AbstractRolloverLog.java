@@ -31,6 +31,7 @@ package com.caucho.log;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Bytes;
+import com.caucho.config.types.CronType;
 import com.caucho.config.types.Period;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -78,7 +79,9 @@ public class AbstractRolloverLog {
   private String _archiveFormat;
   // .gz or .zip
   private String _archiveSuffix = "";
-  
+
+  // Cron description of the rollover
+  private CronType _rolloverCron;
   // How often the logs are rolled over.
   private long _rolloverPeriod = Period.INFINITE;
 
@@ -193,6 +196,14 @@ public class AbstractRolloverLog {
   }
 
   /**
+   * Sets the log rollover cron specification
+   */
+  public void setRolloverCron(CronType cron)
+  {
+    _rolloverCron = cron;
+  }
+
+  /**
    * Sets the log rollover period, rounded up to the nearest hour.
    *
    * @param period the new rollover period in milliseconds.
@@ -303,16 +314,25 @@ public class AbstractRolloverLog {
     
       _calendar.setGMTTime(lastModified);
 
-      _nextPeriodEnd = Period.periodEnd(lastModified, getRolloverPeriod());
+      if (_rolloverCron != null)
+	_nextPeriodEnd = _rolloverCron.nextTime(lastModified);
+      else
+	_nextPeriodEnd = Period.periodEnd(lastModified, getRolloverPeriod());
     }
-    else
-      _nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
+    else {
+      if (_rolloverCron != null)
+	_nextPeriodEnd = _rolloverCron.nextTime(now);
+      else
+	_nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
+    }
 
     if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
       _nextRolloverCheckTime = _nextPeriodEnd;
 
     if (_archiveFormat != null || getRolloverPeriod() <= 0) {
     }
+    else if (_rolloverCron != null)
+      _archiveFormat = _rolloverPrefix + ".%Y%m%d.%H";
     else if (getRolloverPeriod() % DAY == 0)
       _archiveFormat = _rolloverPrefix + ".%Y%m%d";
     else if (getRolloverPeriod() % HOUR == 0)
@@ -421,7 +441,11 @@ public class AbstractRolloverLog {
 	_nextRolloverCheckTime = now + _rolloverCheckPeriod;
 
 	long lastPeriodEnd = _nextPeriodEnd;
-	_nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
+
+	if (_rolloverCron != null)
+	  _nextPeriodEnd = _rolloverCron.nextTime(now);
+	else
+	  _nextPeriodEnd = Period.periodEnd(now, getRolloverPeriod());
 
 	Path path = getPath();
 
@@ -731,6 +755,8 @@ public class AbstractRolloverLog {
     
     if (format != null)
       return _calendar.formatLocal(time, format);
+    else if (_rolloverCron != null)
+      return _rolloverPrefix + "." + _calendar.formatLocal(time, "%Y%m%d.%H");
     else if (getRolloverPeriod() % (24 * 3600 * 1000L) == 0)
       return _rolloverPrefix + "." + _calendar.formatLocal(time, "%Y%m%d");
     else

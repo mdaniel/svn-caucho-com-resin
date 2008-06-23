@@ -33,6 +33,7 @@ package com.caucho.server.cluster;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ClusterServerMXBean;
+import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.management.server.PersistentStoreMXBean;
 import com.caucho.management.server.PortMXBean;
@@ -53,7 +54,12 @@ public class ClusterAdmin extends AbstractManagedObject
   {
     return _cluster.getId();
   }
-
+  
+  public HostMXBean []getHosts()
+  {
+    return new HostMXBean[0];
+  }
+  
   public PortMXBean getPort()
   {
     ClusterServer clusterServer = _cluster.getSelfServer();
@@ -72,11 +78,6 @@ public class ClusterAdmin extends AbstractManagedObject
   public PersistentStoreMXBean getPersistentStore()
   {
     return null;
-  }
-
-  public HostMXBean []getHosts()
-  {
-    return new HostMXBean[0];
   }
 
   public ClusterServerMXBean []getServers()

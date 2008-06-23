@@ -318,6 +318,7 @@ public class UserQuery implements AmberQuery {
     _rs.setSession(_aConn);
     _rs.setFirstResult(_firstResult);
     _rs.setMaxResults(_maxResults);
+    _rs.setRow(0);
 
     int chunkSize = _aConn.getCacheChunkSize();
     boolean isCacheable;
@@ -347,7 +348,10 @@ public class UserQuery implements AmberQuery {
     if (cacheChunk == null) {
       ResultSet rs;
 
-      rs = executeQuery(0, _maxResults);
+      if (isCacheable)
+	rs = executeQuery(0, chunkSize);
+      else
+	rs = executeQuery(_firstResult, _maxResults);
 
       metaData = rs.getMetaData();
 
@@ -374,7 +378,7 @@ public class UserQuery implements AmberQuery {
   /**
    * Executes the query.
    */
-  ResultSet executeQuery(int row, int maxResults)
+  ResultSet executeQuery(int firstResults, int maxResults)
     throws SQLException
   {
     String sql = _query.getSQL();
@@ -383,7 +387,13 @@ public class UserQuery implements AmberQuery {
       JdbcMetaData metaData = _aConn.getAmberManager().getMetaData();
 
       // XXX: should limit meta-data as well?
-      sql = metaData.limit(sql, maxResults);
+      // jps/1431
+      if (metaData.isLimitOffset()) {
+	sql = metaData.limit(sql, firstResults, maxResults);
+	_rs.setRow(firstResults);
+      }
+      else
+	sql = metaData.limit(sql, 0, firstResults + maxResults);
     }
 
     PreparedStatement pstmt = _aConn.prepareStatement(sql);
@@ -398,8 +408,11 @@ public class UserQuery implements AmberQuery {
 
     ResultSet rs = pstmt.executeQuery();
 
-    for (int i = 0; i < row && rs.next(); i++) {
+    // jpa/1431
+    /*
+    for (int i = 0; i < firstResults && rs.next(); i++) {
     }
+    */
 
     return rs;
   }

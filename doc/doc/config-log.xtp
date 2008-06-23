@@ -278,6 +278,11 @@ The handler will be registered with the Logger with the matching name.</td>
   <td>none</td>
 </tr>
 <tr>
+  <td>rollover-cron</td>
+  <td>cron-style specification on rollover times.</td>
+  <td>none</td>
+</tr>
+<tr>
   <td>rollover-period</td>
   <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
         months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 

@@ -121,6 +121,30 @@ public class LdapAuthenticator extends AbstractPasswordAuthenticator {
   }
 
   /**
+   * Sets the Context.SECURITY_AUTHENTICATION
+   */
+  public void setSecurityAuthentication(String type)
+  {
+    _jndiEnv.put(Context.SECURITY_AUTHENTICATION, type);
+  }
+
+  /**
+   * Sets the Context.SECURITY_PRINCIPAL
+   */
+  public void setSecurityPrincipal(String user)
+  {
+    _jndiEnv.put(Context.SECURITY_PRINCIPAL, user);
+  }
+
+  /**
+   * Sets the Context.SECURITY_CREDENTIALS
+   */
+  public void setSecurityCredentials(String password)
+  {
+    _jndiEnv.put(Context.SECURITY_CREDENTIALS, password);
+  }
+
+  /**
    * Initialize the authenticator.
    */
   @PostConstruct

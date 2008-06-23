@@ -986,47 +986,61 @@ public class SessionImpl implements HttpSession, CacheListener {
     throws IOException
   {
     HttpSessionEvent event = null;
-    
-    synchronized (_values) {
-      unbind();
+    ArrayList<HttpSessionActivationListener> listeners = null;
 
-      try {
-	int size = in.readInt();
+    synchronized (this) {
+      synchronized (_values) {
+	unbind();
 
-	//System.out.println("LOAD: " + size + " " + this + " " + _clusterObject + System.identityHashCode(this));
+	try {
+	  int size = in.readInt();
 
-	for (int i = 0; i < size; i++) {
-	  String key = in.readString();
-	  Object value = in.readObject();
+	  //System.out.println("LOAD: " + size + " " + this + " " + _clusterObject + System.identityHashCode(this));
 
-	  if (value != null) {
-	    _values.put(key, value);
+	  for (int i = 0; i < size; i++) {
+	    String key = in.readString();
+	    Object value = in.readObject();
+
+	    if (value != null) {
+	      _values.put(key, value);
 	      
-	    if (value instanceof HttpSessionActivationListener) {
-	      HttpSessionActivationListener listener
-		= (HttpSessionActivationListener) value;
+	      if (value instanceof HttpSessionActivationListener) {
+		HttpSessionActivationListener listener
+		  = (HttpSessionActivationListener) value;
 
-	      if (event == null)
-		event = new HttpSessionEvent(this);
+		if (event == null)
+		  event = new HttpSessionEvent(this);
 
-	      listener.sessionDidActivate(event);
+		if (listeners == null)
+		  listeners = new ArrayList<HttpSessionActivationListener>();
+
+		listeners.add(listener);
+	      }
 	    }
 	  }
+	} catch (Exception e) {
+	  throw IOExceptionWrapper.create(e);
 	}
-      } catch (Exception e) {
-	throw IOExceptionWrapper.create(e);
       }
+    }
 
-      ArrayList<HttpSessionActivationListener> listeners;
-      listeners = _manager.getActivationListeners();
-      for (int i = 0; listeners != null && i < listeners.size(); i++) {
-	HttpSessionActivationListener listener = listeners.get(i);
+    for (int i = 0; listeners != null && i < listeners.size(); i++) {
+      HttpSessionActivationListener listener = listeners.get(i);
 
-	if (event == null)
-	  event = new HttpSessionEvent(this);
+      if (event == null)
+	event = new HttpSessionEvent(this);
 	
-	listener.sessionDidActivate(event);
-      }
+      listener.sessionDidActivate(event);
+    }
+
+    listeners = _manager.getActivationListeners();
+    for (int i = 0; listeners != null && i < listeners.size(); i++) {
+      HttpSessionActivationListener listener = listeners.get(i);
+
+      if (event == null)
+	event = new HttpSessionEvent(this);
+	
+      listener.sessionDidActivate(event);
     }
   }
 
@@ -1036,52 +1050,28 @@ public class SessionImpl implements HttpSession, CacheListener {
   public void store(Hessian2Output out)
     throws IOException
   {
+    Set<Map.Entry<String,Object>> set = null;
+    
     HttpSessionEvent event = null;
+    ArrayList<HttpSessionActivationListener> listeners;
     
     synchronized (_values) {
-      Set set = getEntrySet();
+      set = getEntrySet();
 
       int size = set == null ? 0 : set.size();
 
-      out.writeInt(size);
-
-      if (size == 0)
+      if (size == 0) {
+	out.writeInt(0);
 	return;
-
-      ArrayList<HttpSessionActivationListener> listeners;
-      listeners = _manager.getActivationListeners();
-      for (int i = 0; listeners != null && i < listeners.size(); i++) {
-	HttpSessionActivationListener listener = listeners.get(i);
-
-	if (event == null)
-	  event = new HttpSessionEvent(this);
-	
-	listener.sessionWillPassivate(event);
       }
 
-      boolean ignoreNonSerializable =
-	getManager().getIgnoreSerializationErrors();
+      listeners = new ArrayList<HttpSessionActivationListener>();
 
-      Map.Entry []entries = new Map.Entry[set.size()];
-      
-      Iterator iter = set.iterator();
-      int i = 0;
-      while (iter.hasNext()) {
-	entries[i++] = (Map.Entry) iter.next();
-      }
+      if (_manager.getActivationListeners() != null)
+	listeners.addAll(_manager.getActivationListeners());
 
-      Arrays.sort(entries, KEY_COMPARATOR);
-
-      for (i = 0; i < entries.length; i++) {
-	Map.Entry entry = entries[i];
+      for (Map.Entry entry : set) {
 	Object value = entry.getValue();
-
-	out.writeString((String) entry.getKey());
-
-	if (ignoreNonSerializable && ! (value instanceof Serializable)) {
-	  out.writeObject(null);
-	  continue;
-	}
 	      
 	if (value instanceof HttpSessionActivationListener) {
 	  HttpSessionActivationListener listener
@@ -1090,15 +1080,62 @@ public class SessionImpl implements HttpSession, CacheListener {
 	  if (event == null)
 	    event = new HttpSessionEvent(this);
 
-	  listener.sessionWillPassivate(event);
+	  listeners.add(listener);
+	}
+      }
+    }
+
+    if (listeners != null && listeners.size() > 0) {
+      if (event == null)
+	event = new HttpSessionEvent(this);
+
+      for (HttpSessionActivationListener listener : listeners) {
+	listener.sessionWillPassivate(event);
+      }
+    }
+
+    synchronized (this) {
+      synchronized (_values) {
+	set = getEntrySet();
+
+	int size = set == null ? 0 : set.size();
+
+	out.writeInt(size);
+
+	if (size == 0)
+	  return;
+
+	boolean ignoreNonSerializable =
+	  getManager().getIgnoreSerializationErrors();
+
+	Map.Entry []entries = new Map.Entry[set.size()];
+      
+	Iterator iter = set.iterator();
+	int i = 0;
+	while (iter.hasNext()) {
+	  entries[i++] = (Map.Entry) iter.next();
 	}
 
-	try {
-	  out.writeObject(value);
-	} catch (NotSerializableException e) {
-	  log.warning(L.l("{0}: failed storing persistent session attribute '{1}'.  Persistent session values must extend java.io.Serializable.\n{2}", 
-                          this, entry.getKey(), String.valueOf(e)));
-	  throw e;
+	Arrays.sort(entries, KEY_COMPARATOR);
+
+	for (i = 0; i < entries.length; i++) {
+	  Map.Entry entry = entries[i];
+	  Object value = entry.getValue();
+
+	  out.writeString((String) entry.getKey());
+
+	  if (ignoreNonSerializable && ! (value instanceof Serializable)) {
+	    out.writeObject(null);
+	    continue;
+	  }
+
+	  try {
+	    out.writeObject(value);
+	  } catch (NotSerializableException e) {
+	    log.warning(L.l("{0}: failed storing persistent session attribute '{1}'.  Persistent session values must extend java.io.Serializable.\n{2}", 
+			    this, entry.getKey(), String.valueOf(e)));
+	    throw e;
+	  }
 	}
       }
     }
@@ -1111,50 +1148,59 @@ public class SessionImpl implements HttpSession, CacheListener {
     throws IOException
   {
     HttpSessionEvent event = null;
-    
-    synchronized (_values) {
-      // server/017u, #1820 - loadImpl does not trigger callbacks
-      _values.clear();
+    ArrayList<HttpSessionActivationListener> listeners = null;
 
-      try {
-	int size = in.readInt();
+    synchronized (this) {
+      synchronized (_values) {
+	// server/017u, #1820 - loadImpl does not trigger callbacks
+	_values.clear();
 
-	//System.out.println("LOAD: " + size + " " + this + " " + _clusterObject + System.identityHashCode(this));
+	try {
+	  int size = in.readInt();
 
-	for (int i = 0; i < size; i++) {
-	  String key = in.readUTF();
-	  Object value = in.readObject();
+	  //System.out.println("LOAD: " + size + " " + this + " " + _clusterObject + System.identityHashCode(this));
 
-	  if (value != null) {
-	    synchronized (_values) {
+	  for (int i = 0; i < size; i++) {
+	    String key = in.readUTF();
+	    Object value = in.readObject();
+
+	    if (value != null) {
 	      _values.put(key, value);
-	    }
 	      
-	    if (value instanceof HttpSessionActivationListener) {
-	      HttpSessionActivationListener listener
-		= (HttpSessionActivationListener) value;
+	      if (value instanceof HttpSessionActivationListener) {
+		if (listeners == null)
+		  listeners = new ArrayList<HttpSessionActivationListener>();
 
-	      if (event == null)
-		event = new HttpSessionEvent(this);
-
-	      listener.sessionDidActivate(event);
+		HttpSessionActivationListener listener
+		  = (HttpSessionActivationListener) value;
+		
+		listeners.add(listener);
+	      }
 	    }
 	  }
+	} catch (Exception e) {
+	  throw IOExceptionWrapper.create(e);
 	}
-      } catch (Exception e) {
-	throw IOExceptionWrapper.create(e);
       }
+    }
 
-      ArrayList<HttpSessionActivationListener> listeners;
-      listeners = _manager.getActivationListeners();
-      for (int i = 0; listeners != null && i < listeners.size(); i++) {
-	HttpSessionActivationListener listener = listeners.get(i);
+    for (int i = 0; listeners != null && i < listeners.size(); i++) {
+      HttpSessionActivationListener listener = listeners.get(i);
 
-	if (event == null)
-	  event = new HttpSessionEvent(this);
+      if (event == null)
+	event = new HttpSessionEvent(this);
 	
-	listener.sessionDidActivate(event);
-      }
+      listener.sessionDidActivate(event);
+    }
+
+    listeners = _manager.getActivationListeners();
+    for (int i = 0; listeners != null && i < listeners.size(); i++) {
+      HttpSessionActivationListener listener = listeners.get(i);
+
+      if (event == null)
+	event = new HttpSessionEvent(this);
+	
+      listener.sessionDidActivate(event);
     }
   }
 
@@ -1164,52 +1210,28 @@ public class SessionImpl implements HttpSession, CacheListener {
   public void store(ObjectOutput out)
     throws IOException
   {
+    Set<Map.Entry<String,Object>> set = null;
+    
     HttpSessionEvent event = null;
+    ArrayList<HttpSessionActivationListener> listeners;
     
     synchronized (_values) {
-      Set set = getEntrySet();
+      set = getEntrySet();
 
       int size = set == null ? 0 : set.size();
 
-      out.writeInt(size);
-
-      if (size == 0)
+      if (size == 0) {
+	out.writeInt(0);
 	return;
-
-      ArrayList<HttpSessionActivationListener> listeners;
-      listeners = _manager.getActivationListeners();
-      for (int i = 0; listeners != null && i < listeners.size(); i++) {
-	HttpSessionActivationListener listener = listeners.get(i);
-
-	if (event == null)
-	  event = new HttpSessionEvent(this);
-	
-	listener.sessionWillPassivate(event);
       }
 
-      boolean ignoreNonSerializable =
-	getManager().getIgnoreSerializationErrors();
+      listeners = new ArrayList<HttpSessionActivationListener>();
 
-      Map.Entry []entries = new Map.Entry[set.size()];
-      
-      Iterator iter = set.iterator();
-      int i = 0;
-      while (iter.hasNext()) {
-	entries[i++] = (Map.Entry) iter.next();
-      }
+      if (_manager.getActivationListeners() != null)
+	listeners.addAll(_manager.getActivationListeners());
 
-      Arrays.sort(entries, KEY_COMPARATOR);
-
-      for (i = 0; i < entries.length; i++) {
-	Map.Entry entry = entries[i];
+      for (Map.Entry entry : set) {
 	Object value = entry.getValue();
-
-	out.writeUTF((String) entry.getKey());
-
-	if (ignoreNonSerializable && ! (value instanceof Serializable)) {
-	  out.writeObject(null);
-	  continue;
-	}
 	      
 	if (value instanceof HttpSessionActivationListener) {
 	  HttpSessionActivationListener listener
@@ -1218,15 +1240,62 @@ public class SessionImpl implements HttpSession, CacheListener {
 	  if (event == null)
 	    event = new HttpSessionEvent(this);
 
-	  listener.sessionWillPassivate(event);
+	  listeners.add(listener);
+	}
+      }
+    }
+
+    if (listeners != null && listeners.size() > 0) {
+      if (event == null)
+	event = new HttpSessionEvent(this);
+
+      for (HttpSessionActivationListener listener : listeners) {
+	listener.sessionWillPassivate(event);
+      }
+    }
+
+    synchronized (this) {
+      synchronized (_values) {
+	set = getEntrySet();
+
+	int size = set == null ? 0 : set.size();
+
+	out.writeInt(size);
+
+	if (size == 0)
+	  return;
+
+	boolean ignoreNonSerializable =
+	  getManager().getIgnoreSerializationErrors();
+
+	Map.Entry []entries = new Map.Entry[set.size()];
+      
+	Iterator iter = set.iterator();
+	int i = 0;
+	while (iter.hasNext()) {
+	  entries[i++] = (Map.Entry) iter.next();
 	}
 
-	try {
-	  out.writeObject(value);
-	} catch (NotSerializableException e) {
-	  log.warning(L.l("{0}: failed storing persistent session attribute '{1}'.  Persistent session values must extend java.io.Serializable.\n{2}", 
-                          this, entry.getKey(), String.valueOf(e)));
-	  throw e;
+	Arrays.sort(entries, KEY_COMPARATOR);
+
+	for (i = 0; i < entries.length; i++) {
+	  Map.Entry entry = entries[i];
+	  Object value = entry.getValue();
+
+	  out.writeUTF((String) entry.getKey());
+
+	  if (ignoreNonSerializable && ! (value instanceof Serializable)) {
+	    out.writeObject(null);
+	    continue;
+	  }
+
+	  try {
+	    out.writeObject(value);
+	  } catch (NotSerializableException e) {
+	    log.warning(L.l("{0}: failed storing persistent session attribute '{1}'.  Persistent session values must extend java.io.Serializable.\n{2}", 
+			    this, entry.getKey(), String.valueOf(e)));
+	    throw e;
+	  }
 	}
       }
     }
@@ -1235,7 +1304,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   /**
    * Returns the set of values in the session
    */
-  Set getEntrySet()
+  Set<Map.Entry<String,Object>> getEntrySet()
   {
     synchronized (_values) {
       if (! _isValid)

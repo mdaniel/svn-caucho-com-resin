@@ -13,6 +13,14 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>log: add rollover-cron to access-log (#2744, rep by Keith Fetterman)</li>
+<li>admin: add classpath to /resin-admin/config.php (#2750, rep by Martin Morawetz)</li>
+<li>jpa: limit improperly calculated (#2746, rep by Riccardo Cohen)</li>
+<li>jsp: content after forward should be ignored (#2748, rep by Vinod Mehra)</li>
+<li>session: update synchronization for ajax applications (#2333)</li>
+<li>plugin: win32 apache/iis timeout default needs to be greater than socket-timeout to avoid 503 (#2715, rep by bmeyns)</li>
+<li>xml: sax issue with Tapestry (#2723, rep by wirah)</li>
+<li>security: for ldap authentication, add security-authentication, security-principal and security-credentials (#2325, rep by Vinny)</li>
 <li>deploy: web-app-deploy shoudl use dependency-check-interval, not redeploy-check-interval (#2745, rep by mzgubin)</li>
 <li>deploy: add command-line war deployment (#1167, rep by Serge Knystautas)</li>
 <li>quercus: include. include_once don't return a Boolean value (#2742, rep by kubazygmunt)</li>

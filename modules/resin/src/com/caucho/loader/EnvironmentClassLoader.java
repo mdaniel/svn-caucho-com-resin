@@ -35,6 +35,7 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.loader.enhancer.ScanManager;
 import com.caucho.log.EnvironmentStream;
+import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.naming.Jndi;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.ResinThreadPoolExecutor;
@@ -92,6 +93,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   // The state of the environment
   private volatile Lifecycle _lifecycle = new Lifecycle();
   private boolean _isConfigComplete;
+
+  private EnvironmentAdmin _admin;
 
   private Throwable _configException;
 
@@ -203,6 +206,19 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   public boolean isActive()
   {
     return _lifecycle.isActive();
+  }
+
+  /**
+   * Returns the admin
+   */
+  public EnvironmentMXBean getAdmin()
+  {
+    if (_admin == null) {
+      _admin = new EnvironmentAdmin(this);
+      _admin.register();
+    }
+
+    return _admin;
   }
 
   /**
@@ -652,6 +668,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader
           }
         }
       }
+
+      if (_admin != null)
+	_admin.unregister();
     } finally {
       thread.setContextClassLoader(oldLoader);
 
@@ -753,8 +772,10 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       } catch (Throwable e) {
       }
 
+      /*
       if (System.getProperty("org.xml.sax.driver") == null)
         System.setProperty("org.xml.sax.driver", "com.caucho.xml.Xml");
+      */
 
       Properties props = System.getProperties();
 

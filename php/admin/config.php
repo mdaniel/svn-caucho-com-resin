@@ -60,11 +60,30 @@ if (! $server) {
     <td><?= $resin->RootDirectory ?></td>
   </tr>
   </table>
+<?php
 
+   echo "<h3>Environment</h3>\n";
+
+   $env = $server->Environment;
+
+   echo "<table class='data'>\n"
+   echo "<tr><td class='item' valign='top'>classpath ";
+   echo "<a id='s_classpath' href=\"javascript:show('classpath');show('h_classpath');hide('s_classpath')\">[show]</a> ";
+   echo "<a id='h_classpath' href=\"javascript:hide('classpath');show('s_classpath');hide('h_classpath');\" style='display:none'>[hide]</a>";
+   echo "</td>";
+   echo "<td>";
+   echo "<pre id='classpath' style='display:none'>";
+   foreach ($env->ClassPath as $item) {
+     echo $item . "\n";
+   }
+   echo "</pre>";
+   echo "</td></tr></table>";
+?>
 <?php
 $thread_pool = $server->ThreadPool;
 ?>
   <p/>
+<h3>Threads</h3>  
   <table class="data">
   <tr>
     <td class='item'>thread-idle-min</td>

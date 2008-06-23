@@ -42,6 +42,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.management.server.ClusterMXBean;
+import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.server.port.Port;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
@@ -84,6 +85,7 @@ public class Cluster
   private Path _rootDirectory;
 
   private ClusterAdmin _admin;
+
   private ObjectName _objectName;
 
   private ArrayList<ContainerProgram> _serverDefaultList
@@ -609,6 +611,9 @@ public class Cluster
       // if it's the empty cluster, add it
       _clusterLocal.set(this);
     }
+
+    // initialize the environment admin
+    getEnvironmentAdmin();
  
     try {
       String name = _id;
@@ -729,6 +734,11 @@ public class Cluster
     return ports;
   }
 
+  EnvironmentMXBean getEnvironmentAdmin()
+  {
+    return _classLoader.getAdmin();
+  }
+  
   /**
    * Starts the server.
    */

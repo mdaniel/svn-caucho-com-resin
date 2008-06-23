@@ -86,6 +86,12 @@ public interface ServerMXBean extends ManagedObjectMXBean {
   @Description("The cluster port handles management and cluster messages")
   public PortMXBean getClusterPort();
 
+  /**
+   * Returns the classloader EnvironmentMXBean
+   */
+  @Description("The environment is a classloader and its resources")
+  public EnvironmentMXBean getEnvironment();
+
   //
   // Configuration attributes
   //

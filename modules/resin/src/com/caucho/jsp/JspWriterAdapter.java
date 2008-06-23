@@ -34,12 +34,14 @@ import com.caucho.util.L10N;
 
 import javax.servlet.jsp.JspWriter;
 import java.io.IOException;
-import java.util.logging.Level;
+import java.util.logging.*;
 
 /**
  * A buffered JSP writer encapsulating a Writer.
  */
 public class JspWriterAdapter extends AbstractBodyContent {
+  private static final Logger log
+    = Logger.getLogger(JspWriterAdapter.class.getName());
   private static final L10N L = new L10N(JspWriterAdapter.class);
   
   // the parent writer
@@ -94,8 +96,13 @@ public class JspWriterAdapter extends AbstractBodyContent {
   final public void write(char []buf, int offset, int length)
     throws IOException
   {
-    if (_isClosed)
-      throw new IOException(L.l("write() forbidden after writer is closed"));
+    if (_isClosed) {
+      // jsp/15m7
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " write() forbidden after writer is closed");
+
+      return;
+    }
 
     _out.print(buf, offset, length);
   }
@@ -111,7 +118,11 @@ public class JspWriterAdapter extends AbstractBodyContent {
       if (Character.isWhitespace(ch))
 	return;
       
-      throw new IOException(L.l("write() forbidden after writer is closed"));
+      // jsp/15m7
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " write() forbidden after writer is closed");
+
+      return;
     }
 
     _out.print(ch);
@@ -123,7 +134,11 @@ public class JspWriterAdapter extends AbstractBodyContent {
   final public void println() throws IOException
   {
     if (_isClosed) {
-      throw new IOException(L.l("write() forbidden after writer is closed"));
+      // jsp/15m7
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " write() forbidden after writer is closed");
+
+      return;
     }
 
     _out.print('\n');
@@ -135,8 +150,13 @@ public class JspWriterAdapter extends AbstractBodyContent {
   final public void write(String s, int off, int len)
     throws IOException
   {
-    if (_isClosed)
-      throw new IOException(L.l("write() forbidden after writer is closed"));
+    if (_isClosed) {
+      // jsp/15m7
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " write() forbidden after writer is closed");
+
+      return;
+    }
 
     char []writeBuffer = _out.getCharBuffer();
     int size = writeBuffer.length;
@@ -186,8 +206,14 @@ public class JspWriterAdapter extends AbstractBodyContent {
 
   public void clear() throws IOException
   {
-    if (_isClosed)
-      throw new IOException(L.l("clear() forbidden after writer is closed"));
+    if (_isClosed) {
+      // jsp/15m7
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " write() forbidden after writer is closed");
+
+      return;
+    }
+
     /*
     else if (_out.isCommitted()) {
       // jsp/0502
@@ -210,8 +236,13 @@ public class JspWriterAdapter extends AbstractBodyContent {
   public void flushBuffer()
     throws IOException
   {
-    if (_isClosed)
-      throw new IOException(L.l("flushBuffer() forbidden after writer is closed"));
+    if (_isClosed) {
+      // jsp/15m7
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " write() forbidden after writer is closed");
+
+      return;
+    }
 
     _out.flushBuffer();
   }
@@ -221,8 +252,13 @@ public class JspWriterAdapter extends AbstractBodyContent {
    */
   public void flush() throws IOException
   {
-    if (_isClosed)
-      throw new IOException(L.l("flush() forbidden after writer is closed"));
+    if (_isClosed) {
+      // jsp/15m7
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " write() forbidden after writer is closed");
+
+      return;
+    }
 
     _out.flushChar();
   }

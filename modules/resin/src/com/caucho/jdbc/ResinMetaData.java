@@ -92,14 +92,27 @@ public class ResinMetaData extends GenericMetaData {
     return sqlType + " auto_increment";
   }
 
+  @Override
+  public boolean isLimit()
+  {
+    return true;
+  }
+
+  @Override
+  public boolean isLimitOffset()
+  {
+    return true;
+  }
+
   /**
    * Returns a limit.
    */
-  public String limit(String sql, int limit)
+  @Override
+  public String limit(String sql, int offset, int limit)
   {
     if (limit < 0)
       return sql;
     else
-      return sql + " LIMIT " + limit;
+      return sql + " OFFSET " + offset + " LIMIT " + limit;
   }
 }

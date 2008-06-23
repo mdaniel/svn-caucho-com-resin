@@ -31,6 +31,7 @@ package com.caucho.server.log;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Bytes;
+import com.caucho.config.types.CronType;
 import com.caucho.config.types.Period;
 import com.caucho.loader.CloseListener;
 import com.caucho.loader.Environment;
@@ -152,6 +153,16 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   public void setRolloverCount(int count)
   {
     _logWriter.setRolloverCount(count);
+  }
+
+  /**
+   * Sets the log rollover cron
+   *
+   * @param cron the cron string for rollover times
+   */
+  public void setRolloverCron(CronType cron)
+  {
+    _logWriter.setRolloverCron(cron);
   }
 
   /**

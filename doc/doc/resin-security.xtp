@@ -493,6 +493,21 @@ uses jndi to contact an LDAP (or Active Directory) server for authentication pur
 <tr><td>logout-on-session-timeout</td>
     <td>If true, the user will be logged out when the session times out</td>
     <td>true</td></tr>
+<tr>
+  <td>security-authentication</td>
+  <td>Sets the Context.SECURITY_AUTHENTICATION for the ldap environment</td>
+  <td></td>
+</tr>
+<tr>
+  <td>security-principal</td>
+  <td>Sets the Context.SECURITY_PRINCIPAL for the ldap environment</td>
+  <td></td>
+</tr>
+<tr>
+  <td>security-credentials</td>
+  <td>Sets the Context.SECURITY_CREDENTIALS for the ldap environment</td>
+  <td></td>
+</tr>
 <tr><td><a href="#password-digest">password-digest</a></td>
      <td>selects the signature method to protect the password</td>
      <td>md5-base64</td></tr>

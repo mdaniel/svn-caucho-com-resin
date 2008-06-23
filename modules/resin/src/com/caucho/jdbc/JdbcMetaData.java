@@ -232,9 +232,25 @@ abstract public class JdbcMetaData {
   }
 
   /**
+   * Returns true if the metadata can handle limit
+   */
+  public boolean isLimit()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the metadata can handle limit and offset
+   */
+  public boolean isLimitOffset()
+  {
+    return false;
+  }
+    
+  /**
    * Returns a limit.
    */
-  public String limit(String sql, int max)
+  public String limit(String sql, int firstResults, int maxResults)
   {
     return sql;
   }
