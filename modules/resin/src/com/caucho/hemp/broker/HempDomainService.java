@@ -70,8 +70,6 @@ public class HempDomainService extends GenericService
   @Override
   public BamStream findAgent(String jid)
   {
-    System.out.println("AGENT: " + jid + " "+this);
-    
     if (jid.indexOf('/') < 0 && jid.indexOf('@') < 0)
       return this;
     else

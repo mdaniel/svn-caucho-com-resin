@@ -109,7 +109,6 @@ public class HempBrokerManager
 
     Server server = Server.getCurrent();
 
-    System.out.println("SERVER: " + server);
     if (server == null)
       return null;
     

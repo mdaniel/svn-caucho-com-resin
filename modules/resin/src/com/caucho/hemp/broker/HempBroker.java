@@ -684,12 +684,9 @@ public class HempBroker implements BamBroker, BamStream
 
     BamBroker broker = _manager.findBroker(domain);
 
-    System.out.println("FIND: " + broker + " " + this + " " + domain);
     if (broker instanceof HempBroker) {
       HempBroker hempBroker = (HempBroker) broker;
 
-      System.out.println("DS: " + hempBroker.getDomainService());
-      
       return hempBroker.getDomainService();
     }
     

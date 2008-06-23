@@ -36,7 +36,7 @@ import com.caucho.util.L10N;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.servlet.jsp.tagext.*;
-import javax.xml.ws.WebServiceRef;
+//import javax.xml.ws.WebServiceRef;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -277,16 +277,16 @@ public class TagAnalyzer
     for (Method method : tagClass.getDeclaredMethods()) {
       if (method.getName().startsWith("set")
 	  && (method.isAnnotationPresent(Resource.class)
-	      || method.isAnnotationPresent(EJB.class)
-	      || method.isAnnotationPresent(WebServiceRef.class))) {
+	      || method.isAnnotationPresent(EJB.class))) {
+	//	      || method.isAnnotationPresent(WebServiceRef.class))) {
 	tag.setHasInjection(true);
       }
     }
     
     for (Field field : tagClass.getDeclaredFields()) {
       if (field.isAnnotationPresent(Resource.class)
-	  || field.isAnnotationPresent(EJB.class)
-	  || field.isAnnotationPresent(WebServiceRef.class)) {
+	  || field.isAnnotationPresent(EJB.class)) {
+	//	  || field.isAnnotationPresent(WebServiceRef.class)) {
 	tag.setHasInjection(true);
       }
     }
