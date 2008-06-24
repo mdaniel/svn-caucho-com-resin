@@ -1,38 +1,6 @@
 <project name="resin" default="compile" basedir="."
          xmlns:ivy="antlib:org.apache.ivy.ant">
   <import file="build-common.xml"/>
-
-  <!-- in import
-  <property environment="env"/>
-
-  <property file="local.properties"/>
-
-  <property name="install" location="${basedir}/"/>
-
-  <property name="modules" location="${basedir}/modules"/>
-  <property name="artifacts" location="${basedir}/artifacts"/>
-  <property name="src" location="${basedir}/src"/>
-  <property name="ext" location="${basedir}/modules/ext"/>
-  <property name="ivy.lib" location="${basedir}/ivy-lib"/>
-  <property name="doc" location="${basedir}/doc"/>
-
-  <property name="build" location="${install}/build"/>
-  <property name="lib" location="${install}/lib"/>
-  <property name="clientlib" location="${install}/clientlib"/>
-  <property name="dist" location="${install}/dist"/>
-
-  <property name="javac.verbose" value="off"/>
-  <property name="javac.debug" value="on"/>
-  <property name="javac.optimize" value="off"/>
-  <property name="javac.deprecation" value="off"/>
-  <property name="javac.nowarn" value="on"/>
-  <property name="javac.memoryMaximumSize" value="512m"/>
-
-  <property name="javac.source" value="1.5"/>
-  <property name="javac.target" value="1.5"/>
-
-  <property name="jar.compress" value="false"/>
-  -->
   <property name="jar.update" value="true"/>
 
   <property name="promodules" location="${basedir}/../pro/modules"/>
@@ -40,69 +8,25 @@
 
   <property name="shell" value="bash"/>
 
-  <!--
-  <target name="update">
-    <mkdir dir="${ivy.lib}"/>
-    <ivy:retrieve pattern="${ivy.lib}/[artifact]-[revision].[ext]"/>
-  </target>
-
-  <target name="tstamp">
-    <tstamp/>
-    <tstamp>
-      <format property="date" pattern="EEE, dd MMM yyyy hh:mm:ss zzz"/>
-    </tstamp>
-    <tstamp>
-      <format property="vdate" pattern="yyyyMMdd'T'hhmmss"/>
-    </tstamp>
-    <tstamp>
-      <format property="snapshotdate" pattern="yyyyMMdd"/>
-    </tstamp>
-  </target>
-
-  <target name="init" depends="tstamp">
-    <property name="product" value="Resin"/>
-    <property name="shortproduct" value="resin"/>
-    
-    <condition property="maven.version" value="${version}">
-      <isset property="version"/>
-    </condition>
-    <property name="maven.version" value="3.2-SNAPSHOT"/>
-    
-    <condition property="maven.metadata.template" value="release">
-      <isset property="version"/>
-    </condition>
-    <property name="maven.metadata.template" value="snapshot"/>
-    
-    <condition property="maven.m2" value="m2">
-      <isset property="version"/>
-    </condition>
-    <property name="maven.m2" value="m2-snapshot"/>
-    <property name="maven.root" value="${dist}/${maven.m2}"/>
-    
-    <property name="version" value="3.2.s${snapshotdate}"/>
-    <property name="dist.name" value="${shortproduct}-${version}"/>
-
-    <mkdir dir="${build}"/>
-    <mkdir dir="${build}/webapps"/>
-    <mkdir dir="${build}/ext-webapp-lib"/>
-    <mkdir dir="${build}/plugins"/>
-    <mkdir dir="${ivy.lib}"/>
-
-    <condition property="unix">
-      <os family="unix"/>
-    </condition>
-  </target>
-  -->
-
   <target name="compile" 
-          depends="init, hessian, jws, ejb, jpa, jca, jms, jsdk, jstl, jcache, jsf, jta, portlet, script, resin-util, resin-deploy, quercus, resin, ecmascript, webbeans, webutil, deploy, conf, ext">
+          depends="init, hessian, javaee, jcache, jsf, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, conf, ext">
   </target>
 
+  <!--
+     - artifacts
+    -->
+     
   <target name="ant" depends="init">
-    <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="ant"/>
-      <param name="module.jar" value="resin-ant.jar"/>
-      <param name="javac.source" value="1.5"/>
+    <antcall target="artifact" inheritRefs="true">
+      <param name="artifact.name" value="ant"/>
+      <param name="artifact.jar" value="resin-ant.jar"/>
+    </antcall>
+  </target>
+
+  <target name="eclipse" depends="init">
+    <antcall target="artifact" inheritRefs="true">
+      <param name="artifact.name" value="eclipse"/>
+      <param name="artifact.jar" value="resin-eclipse.jar"/>
     </antcall>
   </target>
   
@@ -161,7 +85,7 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="hessian"/>
       <param name="module.jar" value="hessian.jar"/>
-      <param name="javac.source" value="1.5"/>
+      <param name="module.dist" value="${lib}"/>
     </antcall>
   </target>
 
@@ -226,6 +150,7 @@
   <target name="jsf" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jsf"/>
+      <param name="module.dist" value="${lib}"/>
       <param name="module.jar" value="jsf-12.jar"/>
     </antcall>
   </target>
@@ -318,16 +243,10 @@
     </antcall>
   </target>
   
-  <target name="resin-deploy" depends="init">
-    <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="deploy"/>
-      <param name="module.jar" value="resin-deploy.jar"/>
-    </antcall>
-  </target>
-  
   <target name="resin-util" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="util"/>
+      <param name="module.dist" value="${lib}"/>
       <param name="module.jar" value="resin-util.jar"/>
     </antcall>
   </target>
@@ -359,6 +278,7 @@
   <target name="jcache" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jcache"/>
+      <param name="module.dist" value="${lib}"/>
       <param name="module.jar" value="jcache-16.jar"/>
     </antcall>
   </target>
@@ -394,13 +314,13 @@
     </copy>
   </target>
 
-  <target name="resin-dev" depends="init, compat, ejb, hessian, jcache, jca, jms, jsdk, jstl, jsf, jta, portlet, script, resin-deploy, resin-util, webbeans, version">
+  <target name="resin-dev" depends="init, hessian, jcache, javaee, jsf, portlet, script, resin-util, webbeans, version">
 
     <!-- build module -->
 
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="resin"/>
-      <param name="javac.source" value="1.5"/>
+      <param name="module.dist" value="${lib}"/>
     </antcall>
   </target>
   
@@ -432,7 +352,7 @@
   <target name="quercus-dev" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="quercus"/>
-      <param name="javac.source" value="1.5"/>
+      <param name="module.dist" value="${lib}"/>
     </antcall>
   </target>
 
@@ -441,151 +361,10 @@
   <target name="ecmascript" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="ecmascript"/>
+      <param name="module.dist" value="${lib}"/>
       <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
-
-  <!--
-  <target name="module">
-    <property name="module.src" value="${modules}/${module.name}/src"/>
-    <property name="module.build" value="${modules}/${module.name}/classes"/>
-    <property name="module.dist" value="${lib}"/>
-    <property name="module.jar" value="${module.name}.jar"/>
-
-    <property file="${module.src}/module.properties"/>
-
-    <mkdir dir="${module.build}" />
-
-    <copy todir="${module.build}">
-      <fileset dir="${module.src}">
-        <include name="**/*.xml"/>
-        <include name="**/*.xsll"/>
-        <include name="**/*.rnc"/>
-        <include name="**/*.tld"/>
-        <include name="**/*.ftld"/>
-        <include name="**/*.afm"/>
-        <include name="**/*.properties"/>
-        <include name="**/jaxb.index"/>
-        <include name="META-INF/**"/>
-      </fileset>
-    </copy>
-
-    <javac srcdir="${module.src}" destdir="${module.build}"
-           fork="true" 
-           verbose="${javac.verbose}" 
-           debug="${javac.debug}" optimize="${javac.optimize}"
-           deprecation="${javac.deprecation}" nowarn="${javac.nowarn}"
-           source="${javac.source}"
-           target="${javac.target}"
-           excludes="**/.svn/**"
-           memoryMaximumSize="${javac.memoryMaximumSize}">
-      <classpath>
-        <dirset dir="${modules}">
-          <include name="*/classes"/>
-       </dirset>
-        <fileset dir="${ext}">
-          <include name="**/*.jar"/>
-        </fileset>
-        <fileset dir="${ivy.lib}">
-          <include name="**/*.jar"/>
-        </fileset>
-      </classpath>
-    </javac>
-
-    <mkdir dir="${module.dist}" />
-
-    <jar jarfile="${module.dist}/${module.jar}"
-         compress="${jar.compress}" index="${jar.index}" update="${jar.update}"
-         manifest="${module.src}/manifest">
-      <fileset dir="${module.build}">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svnignore"/>
-      </fileset>
-    </jar>
-  </target>
-   -->
-  <!--
-     - artifact compile
-    -->
-  <!--
-  <target name="artifact">
-    <property name="artifact.src" value="${artifacts}/${artifact.name}/src"/>
-    <property name="artifact.build" value="${artifacts}/${artifact.name}/classes"/>
-    <property name="artifact.dist" value="${artifacts}/${artifact.name}/build"/>
-    <property name="artifact.jar" value="${artifact.name}.jar"/>
-
-    <property file="${artifact.src}/module.properties"/>
-
-    <mkdir dir="${artifact.build}" />
-
-    <copy todir="${artifact.build}">
-      <fileset dir="${artifact.src}">
-        <include name="**/*.xml"/>
-        <include name="**/*.xsll"/>
-        <include name="**/*.rnc"/>
-        <include name="**/*.tld"/>
-        <include name="**/*.ftld"/>
-        <include name="**/*.afm"/>
-        <include name="**/*.properties"/>
-        <include name="**/jaxb.index"/>
-        <include name="META-INF/**"/>
-      </fileset>
-    </copy>
-
-    <javac srcdir="${artifact.src}" destdir="${artifact.build}"
-           fork="true" 
-           verbose="${javac.verbose}" 
-           debug="${javac.debug}" optimize="${javac.optimize}"
-           deprecation="${javac.deprecation}" nowarn="${javac.nowarn}"
-           source="${javac.source}"
-           target="${javac.target}"
-           excludes="**/.svn/**"
-           memoryMaximumSize="${javac.memoryMaximumSize}">
-      <classpath>
-        <dirset dir="${modules}">
-          <include name="*/classes"/>
-       </dirset>
-        <fileset dir="${ext}">
-          <include name="**/*.jar"/>
-        </fileset>
-        <fileset dir="${ivy.lib}">
-          <include name="**/*.jar"/>
-        </fileset>
-      </classpath>
-    </javac>
-
-    <mkdir dir="${artifact.dist}" />
-
-    <jar jarfile="${artifact.dist}/${artifact.jar}"
-         compress="${jar.compress}" index="${jar.index}" update="${jar.update}"
-         manifest="${artifact.src}/manifest">
-      <fileset dir="${artifact.build}">
-        <exclude name=".cvsignore"/>
-        <exclude name=".svnignore"/>
-      </fileset>
-    </jar>
-  </target>
-  -->
-  
-  <!--
-     - artifact dist
-    -->
-  <!--
-  <target name="artifact.dist.macro">
-    <property name="artifact.src" value="${artifacts}/${artifact.name}/src"/>
-    <property name="artifact.build" value="${artifacts}/${artifact.name}/classes"/>
-    <property name="artifact.dist" value="${artifacts}/${artifact.name}/build"/>
-    <property name="artifact.jar" value="${artifact.name}.jar"/>
-
-    <property file="${artifact.src}/module.properties"/>
-
-    <mkdir dir="${dist}/${dist.name}/ivy2/caucho/${artifact.name}/jars"/>
-    
-    <copy tofile="${dist}/${dist.name}/ivy2/caucho/${artifact.name}/jars/${artifact.name}-${version}.jar"
-          file="${artifact.dist}/${artifact.name}.jar"/>
-  </target>
-  -->
-
 
   <target name="csharp" depends="init">
     <property name="module.name" value="csharp"/>
@@ -1021,34 +800,30 @@
       <param name="maven.name" value="resin-ant"/>
     </antcall>
 
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="ejb"/>
-      <param name="jar.name" value="ejb-15.jar"/>
-      <param name="maven.name" value="resin-ejb"/>
+    <antcall target="maven2-artifact" inheritRefs="true">
+      <param name="module.name" value="eclipse"/>
+      <param name="jar.name" value="resin-eclipse.jar"/>
+      <param name="maven.name" value="resin-eclipse"/>
     </antcall>
 
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="module.name" value="javaee"/>
+      <param name="jar.name" value="javaee-16.jar"/>
+      <param name="maven.name" value="resin-javaee"/>
+    </antcall>
+
+    <!--
     <antcall target="maven2-module" inheritRefs="true">
       <param name="module.name" value="deploy"/>
       <param name="jar.name" value="resin-deploy.jar"/>
       <param name="maven.name" value="resin-deploy"/>
     </antcall>
+    -->
 
     <antcall target="maven2-module" inheritRefs="true">
       <param name="module.name" value="hessian"/>
       <param name="jar.name" value="hessian.jar"/>
       <param name="maven.name" value="resin-hessian"/>
-    </antcall>
-
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="j2ee-management"/>
-      <param name="jar.name" value="j2ee-management-10.jar"/>
-      <param name="maven.name" value="resin-j2ee-management"/>
-    </antcall>
-
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="jca"/>
-      <param name="jar.name" value="jca-15.jar"/>
-      <param name="maven.name" value="resin-jca"/>
     </antcall>
 
     <antcall target="maven2-module" inheritRefs="true">
@@ -1058,45 +833,9 @@
     </antcall>
 
     <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="jms"/>
-      <param name="jar.name" value="jms-11.jar"/>
-      <param name="maven.name" value="resin-jms"/>
-    </antcall>
-
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="jpa"/>
-      <param name="jar.name" value="jpa-15.jar"/>
-      <param name="maven.name" value="resin-jpa"/>
-    </antcall>
-
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="jsdk"/>
-      <param name="jar.name" value="jsdk-16.jar"/>
-      <param name="maven.name" value="resin-jsdk"/>
-    </antcall>
-
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="jstl"/>
-      <param name="jar.name" value="jstl-11.jar"/>
-      <param name="maven.name" value="resin-jstl"/>
-    </antcall>
-
-    <antcall target="maven2-module" inheritRefs="true">
       <param name="module.name" value="jsf"/>
       <param name="jar.name" value="jsf-12.jar"/>
       <param name="maven.name" value="resin-jsf"/>
-    </antcall>
-
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="jta"/>
-      <param name="jar.name" value="jta-101.jar"/>
-      <param name="maven.name" value="resin-jta"/>
-    </antcall>
-
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="jws"/>
-      <param name="jar.name" value="jws-15.jar"/>
-      <param name="maven.name" value="resin-jws"/>
     </antcall>
 
     <antcall target="maven2-module" inheritRefs="true">
@@ -1121,12 +860,6 @@
       <param name="module.name" value="util"/>
       <param name="jar.name" value="resin-util.jar"/>
       <param name="maven.name" value="resin-util"/>
-    </antcall>
-
-    <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="webbeans"/>
-      <param name="jar.name" value="webbeans-16.jar"/>
-      <param name="maven.name" value="resin-webbeans"/>
     </antcall>
   </target>
 

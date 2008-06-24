@@ -130,7 +130,7 @@
   <target name="module">
     <property name="module.src" value="${modules}/${module.name}/src"/>
     <property name="module.build" value="${modules}/${module.name}/classes"/>
-    <property name="module.dist" value="${lib}"/>
+    <property name="module.dist" value="${modules}/${module.name}/dist"/>
     <property name="module.jar" value="${module.name}.jar"/>
 
     <property file="${module.src}/module.properties"/>
@@ -247,6 +247,8 @@
         <exclude name=".svnignore"/>
       </fileset>
     </jar>
+
+    
   </target>
 
 
@@ -467,6 +469,55 @@
           file="${artifact.dist}/${artifact.name}.jar"/>
   </target>
 
+  <target name="javaee" depends="ejb, jca, jms, jpa, jsdk, jstl, jta, jws, webbeans">
+    <!--
+       - javaee-16.jar
+      -->
+    <jar destfile="${resin.lib}/javaee-16.jar">
+      <fileset dir="${resin.modules}/ejb/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/jca/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/jms/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/jpa/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/jsdk/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+
+      <!--
+      <fileset dir="${resin.modules}/jsf/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      -->
+      
+      <fileset dir="${resin.modules}/jstl/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/jta/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/jws/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
+      <fileset dir="${resin.modules}/webbeans/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+    </jar>
+  </target>
+	  
   <target name="resin.dist.jar"
           depends="compile">
     <property name="dist.name" value="${shortproduct}-${version}"/>
@@ -1010,6 +1061,12 @@
     </exec>
   </target>
 
+  <target name="maven2-artifact">
+    <antcall target="maven2-module" inheritRefs="true">
+      <param name="modules" value="${artifacts}"/>
+    </antcall>
+  </target>
+    
   <target name="maven2-module">
     <property name="module.src" value="${modules}/${module.name}/src"/>
     <property name="jar.name" value="${module.name}.jar"/>

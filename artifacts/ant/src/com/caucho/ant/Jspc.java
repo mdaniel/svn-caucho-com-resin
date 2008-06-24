@@ -90,7 +90,7 @@ public class Jspc {
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      EnvironmentClassLoader env = new EnvironmentClassLoader();
+      EnvironmentClassLoader env = EnvironmentClassLoader.create();
 
       for (String cp : classPath.split("[" + File.pathSeparatorChar + "]")) {
 	com.caucho.vfs.Path path = Vfs.lookup(cp);
