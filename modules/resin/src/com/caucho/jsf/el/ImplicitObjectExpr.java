@@ -37,6 +37,7 @@ import javax.faces.context.*;
 import javax.faces.component.UIComponent;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
 
 public class ImplicitObjectExpr extends Expr {
   private static final HashMap<String,ImplicitObjectExpr> _exprMap
@@ -76,8 +77,17 @@ public class ImplicitObjectExpr extends Expr {
       return context.getExternalContext().getContext();
     case APPLICATION_SCOPE:
       return context.getExternalContext().getApplicationMap();
-    case COMPONENT:
-      return UIComponent.getCurrentComponent();
+//    case COMPONENT: {
+//      try {
+//        return context.getAttributes().get("component");
+//      }
+//      catch (UnsupportedOperationException e) {
+//        if (log.isLoggable(Level.FINEST))
+//          log.log(Level.FINEST, e.getMessage(), e);
+//      }
+//
+//      return null;
+//    }
     case COOKIE:
       return context.getExternalContext().getRequestCookieMap();
     case FACES_CONTEXT:
@@ -128,7 +138,7 @@ public class ImplicitObjectExpr extends Expr {
   enum ImplicitEnum {
     APPLICATION,
     APPLICATION_SCOPE,
-    COMPONENT,
+//    COMPONENT,
     COOKIE,
     FACES_CONTEXT,
     HEADER,
@@ -151,9 +161,9 @@ public class ImplicitObjectExpr extends Expr {
     _exprMap.put("applicationScope",
 		 new ImplicitObjectExpr("applicationScope",
 					ImplicitEnum.APPLICATION_SCOPE));
-    _exprMap.put("component",
-		 new ImplicitObjectExpr("component",
-					ImplicitEnum.COMPONENT));
+//    _exprMap.put("component",
+//		 new ImplicitObjectExpr("component",
+//					ImplicitEnum.COMPONENT));
     _exprMap.put("cookie",
 		 new ImplicitObjectExpr("cookie",
 					ImplicitEnum.COOKIE));
