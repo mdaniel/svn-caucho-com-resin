@@ -34,7 +34,6 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.TimedCache;
-import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 
@@ -45,6 +44,8 @@ import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import java.util.logging.Level;
+import java.lang.reflect.Method;
 
 /**
  * Manages i18n bundles
@@ -61,11 +62,25 @@ public class BundleManager {
 
   private TimedCache<String,LocalizationContext> _bundleCache;
 
+  private Method bundleSetParentMethod;
+
   private BundleManager()
   {
     long updateInterval = Environment.getDependencyCheckInterval();
     
     _bundleCache = new TimedCache(256, updateInterval);
+
+    try {
+      bundleSetParentMethod
+        = ResourceBundle.class.getDeclaredMethod("setParent",
+                                         new Class[]{
+                                           ResourceBundle.class});
+      
+      bundleSetParentMethod.setAccessible(true);
+    }
+    catch (Exception e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+    }
   }
 
   /**
@@ -118,40 +133,68 @@ public class BundleManager {
   public LocalizationContext getBundle(String name, Locale locale)
   {
     String cacheName = (name + '_' +
-                       locale.getLanguage() + '_' +
-                       locale.getCountry() + '_' +
-                       locale.getVariant());
-    
+                        locale.getLanguage() + '_' +
+                        locale.getCountry() + '_' +
+                        locale.getVariant());
+
     LocalizationContext bundle;
 
     bundle = _bundleCache.get(cacheName);
-    
+
     if (bundle != null)
       return bundle != NULL_BUNDLE ? bundle : null;
 
-    String fullName = cacheName;
+    ResourceBundle base;
 
-    ResourceBundle resourceBundle;
-    resourceBundle = getBaseBundle(fullName);
+    base = getBaseBundle(name);
+
+    ResourceBundle resourceBundle = getBaseBundle(name +
+                                                  '_' +
+                                                  locale.getLanguage());
     if (resourceBundle != null) {
-      bundle = new LocalizationContext(resourceBundle, locale);
-      _bundleCache.put(cacheName, bundle);
-      return bundle;
+      if (base != null)
+        try {
+          bundleSetParentMethod.invoke(resourceBundle, base);
+        }
+        catch (Exception e) {
+          log.log(Level.WARNING, e.getMessage(), e);
+        }
+      base = resourceBundle;
     }
-      
-    fullName = name + '_' + locale.getLanguage() + '_' + locale.getCountry();
-    resourceBundle = getBaseBundle(fullName);
+
+    resourceBundle = getBaseBundle(name + '_' +
+                                   locale.getLanguage() + '_' +
+                                   locale.getCountry());
     if (resourceBundle != null) {
-      bundle = new LocalizationContext(resourceBundle, locale);
-      _bundleCache.put(cacheName, bundle);
-      return bundle;
+      if (base != null)
+        try {
+          bundleSetParentMethod.invoke(resourceBundle, base);
+        }
+        catch (Exception e) {
+          log.log(Level.WARNING, e.getMessage(), e);
+        }
+      base = resourceBundle;
     }
-    
-    fullName = name + '_' + locale.getLanguage();
-    resourceBundle = getBaseBundle(fullName);
+
+    resourceBundle = getBaseBundle(name + '_' +
+                                   locale.getLanguage() + '_' +
+                                   locale.getCountry() + '_' +
+                                   locale.getVariant());
     if (resourceBundle != null) {
-      bundle = new LocalizationContext(resourceBundle, locale);
+      if (base != null)
+        try {
+          bundleSetParentMethod.invoke(resourceBundle, base);
+        }
+        catch (Exception e) {
+          log.log(Level.WARNING, e.getMessage(), e);
+        }
+      base = resourceBundle;
+    }
+
+    if (base != null) {
+      bundle = new LocalizationContext(base, locale);
       _bundleCache.put(cacheName, bundle);
+
       return bundle;
     }
 
@@ -159,7 +202,7 @@ public class BundleManager {
 
     return null;
   }
-  
+
 
   /**
    * Returns the named ResourceBundle.
