@@ -31,6 +31,7 @@ package javax.faces.component;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.el.*;
 
@@ -344,25 +345,35 @@ public abstract class UIComponent
    */
   protected void pushComponentToEL(FacesContext context)
   {
-    Map requestMap = context.getExternalContext().getRequestMap();
 
-    UIComponent[] components
-      = (UIComponent[]) requestMap.get("caucho.jsf.component.stack");
+    try {
+      Map<Object, Object> attributes = context.getAttributes();
 
-    if (components == null) {
-      components = new UIComponent[]{this};
+      UIComponent []components
+        = (UIComponent[]) attributes.get("caucho.jsf.component.stack");
+
+      if (components == null) {
+        components = new UIComponent[]{this};
+      }
+      else {
+        UIComponent []temp = new UIComponent[components.length + 1];
+
+        System.arraycopy(components, 0, temp, 0, components.length);
+
+        temp[temp.length - 1] = this;
+
+        components = temp;
+      }
+
+      attributes.put("caucho.jsf.component.stack", components);
+
+      attributes.put("component", this);
+
     }
-    else {
-      UIComponent[] temp = new UIComponent[components.length + 1];
-
-      System.arraycopy(components, 0, temp, 0, components.length);
-
-      temp[temp.length - 1] = this;
-
-      components = temp;
+    catch (UnsupportedOperationException e) {
+      if (log.isLoggable(Level.FINEST))
+        log.log(Level.FINEST, e.getMessage(), e);
     }
-
-    requestMap.put("caucho.jsf.component.stack", components);
   }
 
   /**
@@ -370,39 +381,56 @@ public abstract class UIComponent
    */
   protected void popComponentFromEL(FacesContext context)
   {
-    Map requestMap = context.getExternalContext().getRequestMap();
+    try {
+      Map<Object, Object> attributes = context.getAttributes();
+      UIComponent[] components
+        = (UIComponent[]) attributes.get("caucho.jsf.component.stack");
 
-    UIComponent [] components
-      = (UIComponent []) requestMap.get("caucho.jsf.component.stack");
+      if (components == null ||
+          components.length == 0 ||
+          components[components.length - 1] != this) {
+        log.fine("UIComponent.popComponent expected to find self '" +
+                 this +
+                 "' on stack");
+      }
+      else {
+        UIComponent[] temp = new UIComponent[components.length - 1];
 
-    if (components == null ||
-        components.length == 0 ||
-        components [components.length - 1] != this) {
-      log.fine("UIComponent.popComponent expected to find self '" + this + "' on stack");
+        System.arraycopy(components, 0, temp, 0, temp.length);
+
+        attributes.put("caucho.jsf.component.stack", temp);
+
+        if (temp.length > 0)
+          attributes.put("component", temp.length - 1);
+        else
+          attributes.remove("component");
+      }
+
     }
-    else {
-      UIComponent []temp = new UIComponent [components.length - 1];
-
-      System.arraycopy(components, 0, temp, 0, temp.length);
-
-      requestMap.put("caucho.jsf.component.stack", temp);
+    catch (UnsupportedOperationException e) {
+      if (log.isLoggable(Level.FINEST))
+        log.log(Level.FINEST, e.getMessage(), e);
     }
   }
 
   /**
    * @since 2.0
    */
-  public static UIComponent getCurrentComponent() {
+  public static UIComponent getCurrentComponent()
+  {
     FacesContext context = FacesContext.getCurrentInstance();
 
-    UIComponent [] stack = (UIComponent []) context.getExternalContext()
-      .getRequestMap()
-      .get("caucho.jsf.component.stack");
+    try {
+      Map<Object, Object> attributes = context.getAttributes();
 
-    if (stack == null || stack.length == 0)
-      return null;
+       return (UIComponent) attributes.get("component");
+    }
+    catch (UnsupportedOperationException e) {
+      if (log.isLoggable(Level.FINEST))
+        log.log(Level.FINEST, e.getMessage(), e);
+    }
 
-    return stack [stack.length - 1];
+    return null;
   }
 
 }

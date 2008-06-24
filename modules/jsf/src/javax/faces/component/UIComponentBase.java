@@ -1184,8 +1184,8 @@ public abstract class UIComponentBase extends UIComponent
 
       FacesContext context = FacesContext.getCurrentInstance();
 
-      if (! isPostback(context) &&
-          ! PhaseId.RESTORE_VIEW.equals(context.getCurrentPhaseId())) {
+      if (! PhaseId.RESTORE_VIEW.equals(context.getCurrentPhaseId()) &&
+          ! isPostback(context)) {
 
         context.getApplication()
           .publishEvent(AfterAddToParentEvent.class, child);
@@ -1205,8 +1205,8 @@ public abstract class UIComponentBase extends UIComponent
 
       FacesContext context = FacesContext.getCurrentInstance();
 
-      if (! isPostback(context) &&
-          ! PhaseId.RESTORE_VIEW.equals(context.getCurrentPhaseId())) {
+      if (! PhaseId.RESTORE_VIEW.equals(context.getCurrentPhaseId()) &&
+          ! isPostback(context)) {
 
         context.getApplication()
           .publishEvent(AfterAddToParentEvent.class, child);
@@ -1229,8 +1229,8 @@ public abstract class UIComponentBase extends UIComponent
 
         FacesContext context = FacesContext.getCurrentInstance();
 
-        if (! isPostback(context) &&
-            ! PhaseId.RESTORE_VIEW.equals(context.getCurrentPhaseId())) {
+        if (! PhaseId.RESTORE_VIEW.equals(context.getCurrentPhaseId()) &&
+            ! isPostback(context)) {
 
           context.getApplication()
             .publishEvent(AfterAddToParentEvent.class, child);

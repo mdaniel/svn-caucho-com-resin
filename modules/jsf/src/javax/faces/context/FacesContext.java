@@ -100,6 +100,15 @@ public abstract class FacesContext {
     _currentPhaseId = currentPhaseId;
   }
 
+  /**
+   * Since 2.0
+   */
+  public Map<Object, Object> getAttributes()
+    throws UnsupportedOperationException
+  {
+    throw new UnsupportedOperationException();
+  }
+
   public static FacesContext getCurrentInstance()
   {
     FacesContext context = _currentInstance.get();

@@ -68,7 +68,9 @@ public class ServletFacesContextImpl extends FacesContext
   private ResponseStream _responseStream;
 
   private boolean _isClosed;
-  
+
+  private HashMap<Object, Object> _attributes;
+
   protected ServletFacesContextImpl(FacesContextFactoryImpl factory,
 				    ServletContext webApp,
 				    HttpServletRequest request,
@@ -355,7 +357,24 @@ public class ServletFacesContextImpl extends FacesContext
   public void release()
   {
     _isClosed = true;
+    
+    if (_attributes != null) {
+      _attributes.clear();
+      _attributes = null;
+    }
+
     FacesContext.setCurrentInstance(null);
+  }
+
+  public Map<Object, Object> getAttributes()
+  {
+    if (_isClosed)
+      throw new IllegalStateException();
+
+    if (_attributes == null)
+      _attributes = new HashMap<Object, Object>();
+
+    return _attributes;
   }
 
   public String toString()
