@@ -68,13 +68,19 @@ class XmppWriter
       synchronized (out) {
 	out.writeStartElement("message");
 
+        ImMessage msg = (ImMessage) value;
+
+        if (msg.getTo() != null)
+          to = msg.getTo();
+
+        if (msg.getFrom() != null)
+          from = msg.getFrom();
+
 	if (to != null)
 	  out.writeAttribute("to", to);
 
 	if (from != null)
-	  out.writeAttribute("from", to);
-
-	ImMessage msg = (ImMessage) value;
+	  out.writeAttribute("from", from);
 
 	if (msg.getType() != null)
 	  out.writeAttribute("type", msg.getType());

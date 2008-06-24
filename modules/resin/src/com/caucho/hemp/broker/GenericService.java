@@ -32,6 +32,8 @@ package com.caucho.hemp.broker;
 import com.caucho.bam.BamBroker;
 import com.caucho.xmpp.disco.DiscoInfoQuery;
 import com.caucho.xmpp.disco.DiscoIdentity;
+import com.caucho.xmpp.disco.DiscoItem;
+import com.caucho.xmpp.disco.DiscoItemsQuery;
 import com.caucho.xmpp.disco.DiscoFeature;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamConnection;
@@ -186,13 +188,11 @@ public class GenericService extends AbstractBamStream
   public boolean queryGet(long id, String to, String from,
 			      Serializable value)
   {
-    if (value instanceof DiscoInfoQuery) {
-      _brokerStream.queryResult(id, from, to,
-				new DiscoInfoQuery(getDiscoIdentity(),
-						   getDiscoFeatures()));
+    if (value instanceof DiscoInfoQuery)
+      return handleDiscoInfoQuery(id, to, from, (DiscoInfoQuery) value);
 
-      return true;
-    }
+    if (value instanceof DiscoItemsQuery)
+      return handleDiscoItemsQuery(id, to, from, (DiscoItemsQuery) value);
 
     Serializable result = doQueryGet(to, from, value);
 
@@ -212,6 +212,32 @@ public class GenericService extends AbstractBamStream
   protected Serializable doQuerySet(String to, String from, Serializable value)
   {
     return null;
+  }
+
+  protected boolean handleDiscoInfoQuery(long id, String to, String from,
+                                         DiscoInfoQuery query)
+  {
+    _brokerStream.queryResult(id, from, to,
+                              new DiscoInfoQuery(getDiscoIdentity(),
+                                                 getDiscoFeatures()));
+
+    return true;
+  }
+
+  protected boolean handleDiscoItemsQuery(long id, String to, String from,
+                                          DiscoItemsQuery query)
+  {
+    DiscoItemsQuery result = new DiscoItemsQuery();
+    result.setItems(getDiscoItems());
+
+    _brokerStream.queryResult(id, from, to, result);
+
+    return true;
+  }
+
+  protected DiscoItem[] getDiscoItems()
+  {
+    return new DiscoItem[] {};
   }
 
   /**
@@ -235,9 +261,8 @@ public class GenericService extends AbstractBamStream
 
     DiscoFeature []features = new DiscoFeature[featureNames.size()];
 
-    for (int i = 0; i < featureNames.size(); i++) {
+    for (int i = 0; i < featureNames.size(); i++)
       features[i] = new DiscoFeature(featureNames.get(i));
-    }
 
     return features;
   }

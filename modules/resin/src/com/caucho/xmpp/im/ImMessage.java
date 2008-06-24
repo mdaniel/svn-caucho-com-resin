@@ -93,6 +93,14 @@ public class ImMessage implements Serializable {
     _body = new Text[] { new Text(body) };
   }
 
+  public ImMessage(String to, String from, String body)
+  {
+    _type = "chat";
+    _to = to;
+    _from = from;
+    _body = new Text[] { new Text(body) };
+  }
+
   public ImMessage(String to, String from, String type,
 		   Text []subject,
 		   Text []body,
@@ -108,6 +116,16 @@ public class ImMessage implements Serializable {
     _thread = thread;
 
     _extra = extra;
+  }
+
+  public String getTo()
+  {
+    return _to;
+  }
+
+  public String getFrom()
+  {
+    return _from;
   }
 
   public String getType()
@@ -178,7 +196,7 @@ public class ImMessage implements Serializable {
       sb.append(",to=").append(_to);
     
     if (_from != null)
-      sb.append(",from=").append(_to);
+      sb.append(",from=").append(_from);
       
     if (_subject != null) {
       for (Text text : _subject) {

@@ -52,7 +52,9 @@ public enum BamEventType
   PRESENCE_SUBSCRIBED   ("bam_presence_subscribed",   false, false),
   PRESENCE_UNSUBSCRIBE  ("bam_presence_unsubscribe",  false, false),
   PRESENCE_UNSUBSCRIBED ("bam_presence_unsubscribed", false, false),
-  PRESENCE_ERROR        ("bam_presence_error",        false, true);
+  PRESENCE_ERROR        ("bam_presence_error",        false, true),
+
+  GET_DISCO_FEATURES    ("bam_get_disco_features",    false, false);
 
   private final String _prefix;
   private final boolean _hasId;

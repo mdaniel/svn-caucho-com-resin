@@ -31,6 +31,10 @@ package com.caucho.quercus.lib.bam;
 
 import com.caucho.hemp.client.HempClient;
 import com.caucho.quercus.env.EnvCleanup;
+import com.caucho.util.L10N;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * BAM client resource.
@@ -38,6 +42,11 @@ import com.caucho.quercus.env.EnvCleanup;
 public class BamClientResource 
   implements EnvCleanup
 {
+  private static final Logger log
+    = Logger.getLogger(BamClientResource.class.getName());
+
+  private static final L10N L = new L10N(BamClientResource.class);
+
   private HempClient _client;
 
   public BamClientResource(String url)
@@ -53,6 +62,9 @@ public class BamClientResource
   public void cleanup()
   {
     if (_client != null) {
+      if (log.isLoggable(Level.FINEST))
+        log.finest(L.l("BamClientResource.cleanup(): closing {0}", _client));
+
       _client.close();
       _client = null;
     }

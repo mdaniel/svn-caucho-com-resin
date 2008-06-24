@@ -32,9 +32,14 @@ package com.caucho.quercus.lib.bam;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import com.caucho.hemp.client.HempClient;
+import com.caucho.xmpp.im.ImMessage;
+import com.caucho.xmpp.im.ImPresence;
+import com.caucho.xmpp.im.RosterItem;
+import com.caucho.xmpp.im.RosterQuery;
 
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.ClassImplementation;
+import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.env.BooleanValue;
@@ -47,9 +52,12 @@ import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.vfs.Path;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
@@ -63,44 +71,47 @@ public class BamModule extends AbstractQuercusModule
 
   private static final L10N L = new L10N(BamModule.class);
 
-  private static BamStream getBrokerStream(Env env)
-  {
-    Value agentValue = env.getGlobalValue("_quercus_bam_agent");
-
-    if (agentValue != null && ! agentValue.isNull()) {
-      BamPhpAgent agent = (BamPhpAgent) agentValue.toJavaObject();
-
-      return agent.getBrokerStream();
-    }
-    else {
-      HempClient client = env.getSpecialValue("_quercus_bam_client");
-
-      return client.getBrokerStream();
-    }
-  }
-
-  private static String getJid(Env env)
-  {
-    Value agentValue = env.getGlobalValue("_quercus_bam_agent");
-
-    if (agentValue != null && ! agentValue.isNull()) {
-      BamPhpAgent agent = (BamPhpAgent) agentValue.toJavaObject();
-
-      return agent.getJid();
-    }
-    else {
-      HempClient client = env.getSpecialValue("_quercus_bam_client");
-
-      return client.getJid();
-    }
-  }
-
-  public static Value bam_login(Env env, 
-                                String url, String username, String password)
+  private static BamPhpAgent getAgent(Env env)
   {
     Value agentValue = env.getGlobalValue("_quercus_bam_agent");
 
     if (agentValue != null && ! agentValue.isNull())
+      return (BamPhpAgent) agentValue.toJavaObject();
+
+    return null;
+  }
+
+  private static BamStream getBrokerStream(Env env)
+  {
+    BamPhpAgent agent = getAgent(env);
+
+    if (agent != null)
+      return agent.getBrokerStream();
+
+    HempClient client = env.getSpecialValue("_quercus_bam_client");
+
+    return client.getBrokerStream();
+  }
+
+  private static String getJid(Env env)
+  {
+    BamPhpAgent agent = getAgent(env);
+
+    if (agent != null)
+      return agent.getJid();
+    
+    HempClient client = env.getSpecialValue("_quercus_bam_client");
+
+    return client.getJid();
+  }
+
+  // XXX does bam_login make sense?  should this really be a persistent bean?
+  public static Value bam_login(Env env, 
+                                String url, String username, String password)
+  {
+    BamPhpAgent agent = getAgent(env);
+
+    if (agent != null)
       return env.error("bam_login not available from agent script");
 
     BamClientResource resource = new BamClientResource(url);
@@ -122,29 +133,93 @@ public class BamModule extends AbstractQuercusModule
     return BooleanValue.TRUE;
   }
 
+  /**
+   * Registers a "child" agent that is represented by the given script.
+   **/
+  public static Value bam_register_agent(Env env, String jid, String script)
+  {
+    BamPhpAgent agent = getAgent(env);
+
+    if (agent == null)
+      return env.error("bam_register_agent must be called from agent script");
+
+    BamPhpAgent child = new BamPhpAgent();
+    child.setName(jid);
+
+    Path path = env.getSelfDirectory().lookup(script);
+
+    if (! path.exists())
+      return env.error("script not found: " + script);
+
+    child.setScript(path);
+
+    WebBeansContainer container = WebBeansContainer.getCurrent();
+    container.injectObject(child);
+
+    agent.addChild(jid, child);
+
+    return BooleanValue.TRUE;
+  }
+
+  public static Value bam_agent_exists(Env env, String jid)
+  {
+    BamPhpAgent agent = getAgent(env);
+
+    if (agent == null)
+      return env.error("bam_agent_exists must be called from agent script");
+
+    return BooleanValue.create(agent.findAgent(jid) != null);
+  }
+
+  public static String bam_my_jid(Env env)
+  {
+    return getJid(env);
+  }
+
+  //
+  // Utilities
+  //
+
+  public static String bam_get_bare_jid(Env env, String uri)
+  {
+    int slash = uri.indexOf('/');
+
+    if (slash < 0)
+      return uri;
+
+    return uri.substring(0, slash);
+  }
+
+  public static String bam_get_jid_resource(Env env, String uri)
+  {
+    int slash = uri.indexOf('/');
+
+    if (slash < 0 || slash == uri.length() - 1)
+      return "";
+
+    return uri.substring(slash + 1);
+  }
+
   //
   // Transmit
   //
 
   public static void bam_send_message(Env env, String to, Serializable value)
   {
-    String jid = getJid(env);
-    getBrokerStream(env).message(to, jid, value);
+    getBrokerStream(env).message(to, null, value);
   }
 
   public static void bam_send_message_error(Env env, 
                                             String to, 
                                             Serializable value, BamError error)
   {
-    String jid = getJid(env);
-    getBrokerStream(env).messageError(to, jid, value, error);
+    getBrokerStream(env).messageError(to, null, value, error);
   }
 
   public static Value bam_send_query_get(Env env, 
                                          long id, String to, Serializable value)
   {
-    String jid = getJid(env);
-    boolean understood = getBrokerStream(env).queryGet(id, to, jid, value);
+    boolean understood = getBrokerStream(env).queryGet(id, to, null, value);
 
     return BooleanValue.create(understood);
   }
@@ -152,8 +227,7 @@ public class BamModule extends AbstractQuercusModule
   public static Value bam_send_query_set(Env env, 
                                          long id, String to, Serializable value)
   {
-    String jid = getJid(env);
-    boolean understood = getBrokerStream(env).querySet(id, to, jid, value);
+    boolean understood = getBrokerStream(env).querySet(id, to, null, value);
 
     return BooleanValue.create(understood);
   }
@@ -162,16 +236,14 @@ public class BamModule extends AbstractQuercusModule
                                            long id, String to,
                                            Serializable value)
   {
-    String jid = getJid(env);
-    getBrokerStream(env).queryResult(id, to, jid, value);
+    getBrokerStream(env).queryResult(id, to, null, value);
   }
 
   public static void bam_send_query_error(Env env, 
                                           long id, String to,
                                           Serializable value, BamError error)
   {
-    String jid = getJid(env);
-    getBrokerStream(env).queryError(id, to, jid, value, error);
+    getBrokerStream(env).queryError(id, to, null, value, error);
   }
 
   public static void bam_send_presence(Env env, String to, Serializable value)
@@ -183,51 +255,44 @@ public class BamModule extends AbstractQuercusModule
   public static void bam_send_presence_unavailable(Env env, String to, 
                                                    Serializable value)
   {
-    String jid = getJid(env);
-    getBrokerStream(env).presenceUnavailable(to, jid, value);
+    getBrokerStream(env).presenceUnavailable(to, null, value);
   }
 
   public static void bam_send_presence_probe(Env env, String to, 
                                              Serializable value)
   {
-    String jid = getJid(env);
-    getBrokerStream(env).presenceProbe(to, jid, value);
+    getBrokerStream(env).presenceProbe(to, null, value);
   }
 
   public static void bam_send_presence_subscribe(Env env, String to, 
                                                  Serializable value)
   {
-    String jid = getJid(env);
-    getBrokerStream(env).presenceSubscribe(to, jid, value);
+    getBrokerStream(env).presenceSubscribe(to, null, value);
   }
 
   public static void bam_send_presence_subscribed(Env env, String to, 
                                                   Serializable value)
   {
-    String jid = getJid(env);
-    getBrokerStream(env).presenceSubscribed(to, jid, value);
+    getBrokerStream(env).presenceSubscribed(to, null, value);
   }
 
   public static void bam_send_presence_unsubscribe(Env env, String to, 
                                                    Serializable value)
   {
-    String jid = getJid(env);
-    getBrokerStream(env).presenceUnsubscribe(to, jid, value);
+    getBrokerStream(env).presenceUnsubscribe(to, null, value);
   }
 
   public static void bam_send_presence_unsubscribed(Env env, String to, 
                                                     Serializable value)
   {
-    String jid = getJid(env);
-    getBrokerStream(env).presenceUnsubscribed(to, jid, value);
+    getBrokerStream(env).presenceUnsubscribed(to, null, value);
   }
 
   public static void bam_send_presence_error(Env env, String to, 
                                              Serializable value,
                                              BamError error)
   {
-    String jid = getJid(env);
-    getBrokerStream(env).presenceError(to, jid, value, error);
+    getBrokerStream(env).presenceError(to, null, value, error);
   }
 
   /**
@@ -255,25 +320,31 @@ public class BamModule extends AbstractQuercusModule
       return BooleanValue.FALSE;
     }
 
+    Value functionReturn = BooleanValue.FALSE;
+
     if (eventType.hasId() && eventType.hasError()) {
       Value id = env.getGlobalValue("_quercus_bam_id");
       Value error = env.getGlobalValue("_quercus_bam_error");
 
-      return function.call(env, id, to, from, value, error);
+      functionReturn = function.call(env, id, to, from, value, error);
     } 
     else if (! eventType.hasId() && eventType.hasError()) {
       Value error = env.getGlobalValue("_quercus_bam_error");
 
-      return function.call(env, to, from, value, error);
+      functionReturn = function.call(env, to, from, value, error);
     }
     else if (eventType.hasId() && ! eventType.hasError()) {
       Value id = env.getGlobalValue("_quercus_bam_id");
 
-      return function.call(env, id, to, from, value);
+      functionReturn = function.call(env, id, to, from, value);
     }
     else {
-      return function.call(env, to, from, value);
+      functionReturn = function.call(env, to, from, value);
     }
+
+    env.setGlobalValue("_quercus_bam_function_return", functionReturn);
+
+    return functionReturn;
   }
 
   /**
@@ -303,6 +374,41 @@ public class BamModule extends AbstractQuercusModule
       function = env.findFunction(prefix);
 
     return function;
+  }
+
+  public static void im_send_message(Env env, 
+                                     String to, 
+                                     String from, 
+                                     String body)
+  {
+    bam_send_message(env, to, new ImMessage(to, from, body));
+  }
+
+  public static RosterItem im_create_roster_item(Env env, 
+                                                 String jid,
+                                                 @Optional String name,
+                                                 @Optional String subscription,
+                                                 @Optional 
+                                                 ArrayList<String> groupList)
+  {
+    if ("".equals(subscription))
+      subscription = "both";
+
+    return new RosterItem(null, jid, name, subscription, groupList);
+  }
+
+  public static void im_send_roster(Env env, 
+                                    long id, String to, 
+                                    ArrayList<RosterItem> roster)
+  {
+    bam_send_query_result(env, id, to, new RosterQuery(roster));
+  }
+
+  public static void im_send_presence(Env env, 
+                                      String to, 
+                                      String status)
+  {
+    bam_send_presence(env, to, new ImPresence(status));
   }
 }
 
