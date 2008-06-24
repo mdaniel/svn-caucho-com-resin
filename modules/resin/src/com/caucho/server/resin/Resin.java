@@ -361,6 +361,14 @@ public class Resin implements EnvironmentBean, SchemaBean
     return _resinAdmin;
   }
 
+  /**
+   * Returns the admin broker
+   */
+  public BamBroker getAdminBroker()
+  {
+    return _management.getAdminBroker();
+  }
+
   public ThreadPoolMXBean getThreadPoolAdmin()
   {
     return _threadPoolAdmin;

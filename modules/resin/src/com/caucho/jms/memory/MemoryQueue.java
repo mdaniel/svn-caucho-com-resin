@@ -30,6 +30,8 @@
 package com.caucho.jms.memory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 import java.util.logging.*;
 
 import javax.jms.*;
@@ -46,7 +48,9 @@ public class MemoryQueue extends AbstractQueue
   private static final Logger log
     = Logger.getLogger(MemoryQueue.class.getName());
 
-  private ArrayList<MessageImpl> _queueList = new ArrayList<MessageImpl>();
+  private PriorityQueue<MessageImpl> _queueList
+    = new PriorityQueue<MessageImpl>(64, new JmsPriorityComparator());
+  
   // messages waiting for an ack
   private ArrayList<MessageImpl> _readList = new ArrayList<MessageImpl>();
 
@@ -83,7 +87,10 @@ public class MemoryQueue extends AbstractQueue
    * active listeners.
    */
   @Override
-  public void send(JmsSession session, MessageImpl msg, long expires)
+  public void send(JmsSession session,
+		   MessageImpl msg,
+		   int priority,
+		   long expires)
   {
     synchronized (_queueList) {
       _queueList.add(msg);
@@ -108,11 +115,11 @@ public class MemoryQueue extends AbstractQueue
   public MessageImpl receive(boolean isAutoAck)
   {
     synchronized (_queueList) {
-      if (_queueList.size() == 0)
+      MessageImpl msg = _queueList.poll();
+
+      if (msg == null)
 	return null;
       
-      MessageImpl msg = _queueList.remove(0);
-
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " receive " + msg + (isAutoAck ? " (auto-ack)" : ""));
       
@@ -172,6 +179,20 @@ public class MemoryQueue extends AbstractQueue
           _queueList.add(msg);
 	  notifyMessageAvailable();
         }
+      }
+    }
+  }
+
+  static class JmsPriorityComparator implements Comparator<MessageImpl> {
+    /**
+     * Compares the priority.
+     */
+    public int compare(MessageImpl msg1, MessageImpl msg2)
+    {
+      try {
+	return msg2.getJMSPriority() - msg1.getJMSPriority();
+      } catch (Exception e) {
+	throw new RuntimeException(e);
       }
     }
   }

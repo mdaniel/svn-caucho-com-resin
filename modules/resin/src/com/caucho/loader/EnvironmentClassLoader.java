@@ -668,9 +668,6 @@ public class EnvironmentClassLoader extends DynamicClassLoader
           }
         }
       }
-
-      if (_admin != null)
-	_admin.unregister();
     } finally {
       thread.setContextClassLoader(oldLoader);
 

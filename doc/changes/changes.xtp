@@ -13,6 +13,8 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>jms: add backup to cluster queue (#2415)</li>
+<li>jms: add priority support to memory, file (#2433, rep by Malcolm)</li>
 <li>log: add rollover-cron to access-log (#2744, rep by Keith Fetterman)</li>
 <li>admin: add classpath to /resin-admin/config.php (#2750, rep by Martin Morawetz)</li>
 <li>jpa: limit improperly calculated (#2746, rep by Riccardo Cohen)</li>

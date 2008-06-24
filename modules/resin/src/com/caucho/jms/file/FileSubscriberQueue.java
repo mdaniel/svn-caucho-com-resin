@@ -56,12 +56,15 @@ public class FileSubscriberQueue extends MemoryQueue
 
 
   @Override
-  public void send(JmsSession session, MessageImpl msg, long timeout)
+  public void send(JmsSession session,
+		   MessageImpl msg,
+		   int priority,
+		   long timeout)
   {
     if (_isNoLocal && _session == session)
       return;
     else
-      super.send(session, msg, timeout);
+      super.send(session, msg, priority, timeout);
   }
 
   public String toString()

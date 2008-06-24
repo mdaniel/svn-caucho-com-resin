@@ -885,7 +885,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       if (log.isLoggable(Level.FINE))
 	log.fine(queue + " sending " + message);
       
-      queue.send(this, message, expiration);
+      queue.send(this, message, priority, expiration);
     }
   }
 
@@ -1154,7 +1154,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     void commit()
       throws JMSException
     {
-      _queue.send(JmsSession.this, _message, 0);
+      _queue.send(JmsSession.this, _message, _message.getJMSPriority(), 0);
     }
 
     void rollback()

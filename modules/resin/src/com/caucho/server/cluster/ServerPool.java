@@ -29,6 +29,7 @@
 
 package com.caucho.server.cluster;
 
+import com.caucho.config.ConfigException;
 import com.caucho.management.server.ServerConnectorMXBean;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
@@ -37,6 +38,7 @@ import com.caucho.server.resin.*;
 
 import javax.management.ObjectName;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1136,6 +1138,119 @@ public class ServerPool
       log.log(Level.FINER, e.toString(), e);
 
       return false;
+    }
+  }
+
+  //
+  // BAM API
+  //
+
+  /**
+   * Non-blocking message
+   */
+  public void message(String to, Serializable message)
+  {
+    ClusterStream stream = null;
+
+    boolean isQuit = false;
+
+    try {
+      stream = open();
+
+      stream.message(to, "", message);
+
+      isQuit = true;
+    } catch (Exception e) {
+      isQuit = false;
+      
+      throw ConfigException.create(e);
+    } finally {
+      if (stream == null) {
+      }
+      else if (isQuit)
+	stream.free();
+      else
+	stream.close();
+    }
+  }
+
+  /**
+   * Blocking 'GET' query
+   */
+  public Object queryGet(String to, Serializable query)
+  {
+    ClusterStream stream = null;
+
+    boolean isQuit = false;
+    try {
+      stream = open();
+
+      long id = 0;
+
+      stream.queryGet(id, to, "", query);
+
+      Object result = stream.readQueryResult(id);
+
+      int code = stream.getReadStream().read();
+
+      if (code == 'Q')
+	isQuit = true;
+      else if (code != 'X')
+	throw new IllegalStateException("unexpected code " + (char) code);
+
+      return result;
+    } catch (Exception e) {
+      isQuit = false;
+      
+      throw ConfigException.create(e);
+    } finally {
+      if (stream == null) {
+      }
+      else if (isQuit)
+	stream.free();
+      else
+	stream.close();
+    }
+  }
+
+  public Object querySet(String to, Serializable query)
+    throws IOException
+  {
+    ClusterStream stream = null;
+    boolean isQuit = false;
+    
+    try {
+      stream = open();
+
+      long id = 0;
+
+      stream.querySet(id, to, "", query);
+
+      Object result = stream.readQueryResult(id);
+
+      int code = stream.getReadStream().read();
+
+      if (code == 'Q')
+	isQuit = true;
+      else if (code != 'X')
+	throw new IllegalStateException("unexpected code " + (char) code);
+
+      return result;
+    } catch (IOException e) {
+      isQuit = false;
+
+      throw e;
+    } catch (Exception e) {
+      isQuit = false;
+      
+      throw new IOException(e);
+    } finally {
+      if (stream == null) {
+      }
+      else if (isQuit)
+	stream.free();
+      else
+	stream.close();
     }
   }
 

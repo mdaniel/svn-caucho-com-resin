@@ -34,6 +34,7 @@ import java.lang.ref.*;
 import javax.jms.*;
 
 import com.caucho.jms.message.*;
+import com.caucho.util.Alarm;
 
 /**
  * Entry in a file queue
@@ -41,9 +42,14 @@ import com.caucho.jms.message.*;
 public class FileQueueEntry
 {
   private final long _id;
+  private final int _priority;
+
+  private final long _leaseExpire;
 
   FileQueueEntry _prev;
   FileQueueEntry _next;
+  
+  FileQueueEntry _nextPriority;
 
   private long _expiresTime;
 
@@ -54,22 +60,39 @@ public class FileQueueEntry
   // True if the message has been read, but not yet committed
   private boolean _isRead;
 
-  public FileQueueEntry(long id, long expiresTime)
+  public FileQueueEntry(long id,
+			long leaseTimeout,
+			int priority,
+			long expiresTime)
   {
     _id = id;
+    _leaseExpire = leaseTimeout + Alarm.getCurrentTime();
     _expiresTime = expiresTime;
+    _priority = priority;
   }
 
-  public FileQueueEntry(long id, long expiresTime, MessageType type)
+  public FileQueueEntry(long id,
+			long leaseTimeout,
+			int priority,
+			long expiresTime,
+			MessageType type)
   {
     _id = id;
+    _leaseExpire = leaseTimeout + Alarm.getCurrentTime();
+    _priority = priority;
     _expiresTime = expiresTime;
     _type = type;
   }
 
-  public FileQueueEntry(long id, long expiresTime, MessageImpl msg)
+  public FileQueueEntry(long id,
+			long leaseTimeout,
+			int priority,
+			long expiresTime,
+			MessageImpl msg)
   {
     _id = id;
+    _leaseExpire = leaseTimeout + Alarm.getCurrentTime();
+    _priority = priority;
     _expiresTime = expiresTime;
     _msg = new SoftReference<MessageImpl>(msg);
   }
@@ -104,6 +127,14 @@ public class FileQueueEntry
     _msg = new SoftReference<MessageImpl>(msg);
   }
 
+  /**
+   * Returns true if we can get a lease to this entry
+   */
+  public boolean isLease()
+  {
+    return _leaseExpire < Alarm.getCurrentTime();
+  }
+
   public boolean isRead()
   {
     return _isRead;
@@ -112,6 +143,11 @@ public class FileQueueEntry
   public void setRead(boolean isRead)
   {
     _isRead = isRead;
+  }
+  
+  public int getPriority()
+  {
+    return _priority;
   }
 }
 

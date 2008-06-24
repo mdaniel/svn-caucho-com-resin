@@ -80,6 +80,7 @@ public class FileQueueStore
   private PreparedStatement _receiveStartStmt;
   private PreparedStatement _readStmt;
   private PreparedStatement _receiveStmt;
+  private PreparedStatement _removeStmt;
   private PreparedStatement _deleteStmt;
 
   public FileQueueStore(MessageFactory messageFactory)
@@ -176,18 +177,22 @@ public class FileQueueStore
   /**
    * Adds a new message to the persistent store.
    */
-  public long send(MessageImpl msg, long expireTime)
+  public long send(MessageImpl msg, int priority, long expireTime)
   {
     synchronized (this) {
       try {
 	_sendStmt.setLong(1, _queueId);
-	_sendStmt.setLong(2, expireTime);
-	_sendStmt.setString(3, msg.getJMSMessageID());
-	_sendStmt.setBinaryStream(4, msg.propertiesToInputStream(), 0);
-	_sendStmt.setInt(5, msg.getType().ordinal());
-	_sendStmt.setBinaryStream(6, msg.bodyToInputStream(), 0);
+	_sendStmt.setInt(2, priority);
+	_sendStmt.setLong(3, expireTime);
+	_sendStmt.setString(4, msg.getJMSMessageID());
+	_sendStmt.setBinaryStream(5, msg.propertiesToInputStream(), 0);
+	_sendStmt.setInt(6, msg.getType().ordinal());
+	_sendStmt.setBinaryStream(7, msg.bodyToInputStream(), 0);
 
 	_sendStmt.executeUpdate();
+
+	if (log.isLoggable(Level.FINE))
+	  log.fine(this + " send " + msg);
 
 	ResultSet rs = _sendStmt.getGeneratedKeys();
 
@@ -218,10 +223,12 @@ public class FileQueueStore
 
 	while (rs.next()) {
 	  long id = rs.getLong(1);
-	  long expire = rs.getLong(2);
-	  MessageType type = MESSAGE_TYPE[rs.getInt(3)];
+	  int priority = rs.getInt(2);
+	  long expire = rs.getLong(3);
+	  MessageType type = MESSAGE_TYPE[rs.getInt(4)];
 	  
-	  FileQueueEntry entry = fileQueue.addEntry(id, expire, type);
+	  FileQueueEntry entry
+	    = fileQueue.addEntry(id, -1, priority, expire, type);
 	}
 
 	rs.close();
@@ -339,6 +346,22 @@ public class FileQueueStore
   /**
    * Retrieves a message from the persistent store.
    */
+  public void remove(String id)
+  {
+    synchronized (this) {
+      try {
+	_removeStmt.setString(1, id);
+
+	_removeStmt.executeUpdate();
+      } catch (Exception e) {
+	throw new RuntimeException(e);
+      }
+    }
+  }
+
+  /**
+   * Retrieves a message from the persistent store.
+   */
   void delete(long id)
   {
     synchronized (this) {
@@ -379,6 +402,7 @@ public class FileQueueStore
 	   + "  id bigint auto_increment,"
 	   + "  queue bigint,"
 	   + "  state integer,"
+	   + "  priority integer,"
 	   + "  expire datetime,"
 	   + "  owner_1 bigint,"
 	   + "  owner_2 bigint,"
@@ -432,7 +456,8 @@ public class FileQueueStore
     throws SQLException
   {
     String sql = ("insert into " + _messageTable
-		  + " (queue,expire,msg_id,header,type,body) VALUES(?,?,?,?,?,?)");
+		  + " (queue,priority,expire,msg_id,header,type,body)"
+		  + " VALUES(?,?,?,?,?,?,?)");
     
     _sendStmt = _conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
     
@@ -446,10 +471,18 @@ public class FileQueueStore
     
     _readStmt = _conn.prepareStatement(sql);
     
-    sql = ("select id,expire,type from " + _messageTable
-	   + " WHERE queue=? ORDER BY id");
+    sql = ("select id,priority,expire,type from " + _messageTable
+	   + " WHERE queue=? AND body is not null ORDER BY id");
     
     _receiveStartStmt = _conn.prepareStatement(sql);
+    
+    _removeStmt = _conn.prepareStatement(sql);
+    
+    sql = ("update " + _messageTable
+	   + " set body=null, expire=now() + 120000"
+	   + " WHERE id=?");
+    
+    _removeStmt = _conn.prepareStatement(sql);
     
     sql = ("delete from " + _messageTable
 	   + " WHERE id=?");

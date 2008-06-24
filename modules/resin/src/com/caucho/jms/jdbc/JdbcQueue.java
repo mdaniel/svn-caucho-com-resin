@@ -191,12 +191,15 @@ public class JdbcQueue extends PollingQueue {
    * Sends the message to the queue.
    */
   @Override
-  public void send(JmsSession session, MessageImpl message, long expireTime)
+  public void send(JmsSession session,
+		   MessageImpl message,
+		   int priority,
+		   long expireTime)
     throws JMSException
   {
     try {
       JdbcMessage jdbcMessage = _jdbcManager.getJdbcMessage();
-      jdbcMessage.send(message, _id, expireTime);
+      jdbcMessage.send(message, _id, priority, expireTime);
     } catch (Exception e) {
       throw new JMSExceptionWrapper(e);
     }

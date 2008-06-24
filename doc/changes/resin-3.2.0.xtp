@@ -66,5 +66,12 @@ unix: java -jar $RESIN_HOME/lib/pro.jar -conf conf/resin.xml \
 
 </s1>
 
+<s1 title="jms cluster">
+
+<p>The cluster store now has a backup attribute, to save backup values
+across the cluster.</p>
+
+</s1>
+
 </body>
 </document>

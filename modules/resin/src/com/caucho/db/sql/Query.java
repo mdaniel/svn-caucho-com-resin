@@ -577,6 +577,11 @@ abstract public class Query {
    */
   public void setBoolean(int index, boolean value)
   {
+    if (index < 1 || _params.length < index) {
+      throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
+					     this, index, _sql));
+    }
+    
     _params[index - 1].setBoolean(value);
   }
 
@@ -585,6 +590,11 @@ abstract public class Query {
    */
   public void setString(int index, String value)
   {
+    if (index < 1 || _params.length < index) {
+      throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
+					     this, index, _sql));
+    }
+    
     _params[index - 1].setString(value);
   }
 
@@ -593,6 +603,11 @@ abstract public class Query {
    */
   public void setLong(int index, long value)
   {
+    if (index < 1 || _params.length < index) {
+      throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
+					     this, index, _sql));
+    }
+    
     _params[index - 1].setLong(value);
   }
 
@@ -601,6 +616,11 @@ abstract public class Query {
    */
   public void setDouble(int index, double value)
   {
+    if (index < 1 || _params.length < index) {
+      throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
+					     this, index, _sql));
+    }
+    
     _params[index - 1].setDouble(value);
   }
 
@@ -609,6 +629,11 @@ abstract public class Query {
    */
   public void setDate(int index, long value)
   {
+    if (index < 1 || _params.length < index) {
+      throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
+					     this, index, _sql));
+    }
+    
     _params[index - 1].setDate(value);
   }
 
@@ -617,6 +642,11 @@ abstract public class Query {
    */
   public void setBinaryStream(int index, InputStream is, int length)
   {
+    if (index < 1 || _params.length < index) {
+      throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
+					     this, index, _sql));
+    }
+    
     _params[index - 1].setBinaryStream(is, length);
   }
 
@@ -625,6 +655,11 @@ abstract public class Query {
    */
   public void setBytes(int index, byte []bytes)
   {
+    if (index < 1 || _params.length < index) {
+      throw new IllegalArgumentException(L.l("{0}: column '{1}' out of bounds for {2}",
+					     this, index, _sql));
+    }
+    
     _params[index - 1].setBytes(bytes);
   }
 

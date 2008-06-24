@@ -110,11 +110,14 @@ public class MemoryTopic extends AbstractTopic
   }
 
   @Override
-  public void send(JmsSession session, MessageImpl msg, long timeout)
+  public void send(JmsSession session,
+		   MessageImpl msg,
+		   int priority,
+		   long timeout)
     throws JMSException
   {
     for (int i = 0; i < _subscriptionList.size(); i++) {
-      _subscriptionList.get(i).send(session, msg, timeout);
+      _subscriptionList.get(i).send(session, msg, priority, timeout);
     }
   }
 }

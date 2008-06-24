@@ -54,7 +54,10 @@ public class MemorySubscriberQueue extends MemoryQueue
   }
 
   @Override
-  public void send(JmsSession sendingSession, MessageImpl msg, long timeout)
+  public void send(JmsSession sendingSession,
+		   MessageImpl msg,
+		   int priority,
+		   long timeout)
   {
     if (_isNoLocal && _session == sendingSession)
       return;
@@ -62,7 +65,7 @@ public class MemorySubscriberQueue extends MemoryQueue
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " send message " + msg);
       
-      super.send(sendingSession, msg, timeout);
+      super.send(sendingSession, msg, priority, timeout);
     }
   }
 }

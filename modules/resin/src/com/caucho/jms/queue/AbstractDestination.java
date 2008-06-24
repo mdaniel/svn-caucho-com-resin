@@ -158,7 +158,13 @@ abstract public class AbstractDestination
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  abstract public void send(JmsSession session, MessageImpl msg, long timeout)
+  /**
+   * Sends a message to the queue
+   */
+  abstract public void send(JmsSession session,
+			    MessageImpl msg,
+			    int priority,
+			    long timeout)
     throws JMSException;
   
   /**

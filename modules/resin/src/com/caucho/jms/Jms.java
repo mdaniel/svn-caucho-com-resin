@@ -79,6 +79,26 @@ public class Jms
     }
   }
 
+  public void send(Destination dest,
+		   Message msg,
+		   int deliveryMode,
+		   int priority,
+		   long ttl)
+  {
+    Session session = null;
+    
+    try {
+      session = getSession();
+
+      MessageProducer producer = session.createProducer(null);
+
+      producer.send(dest, msg, deliveryMode, priority, ttl);
+    } catch (JMSException e) {
+    } finally {
+      freeSession(session);
+    }
+  }
+
   public Message receive(Destination dest)
   {
     Session session = null;

@@ -44,7 +44,7 @@ import java.util.logging.Logger;
 /**
  * A basic message.
  */
-public class MessageImpl implements Message
+public class MessageImpl implements Message, java.io.Serializable
 {
   protected static final Logger log
     = Logger.getLogger(MessageImpl.class.getName());
@@ -71,8 +71,8 @@ public class MessageImpl implements Message
 
   private HashMap<String,Object> _properties;
   
-  private boolean _isHeaderWriteable = true;
-  private boolean _isBodyWriteable = true;
+  private transient boolean _isHeaderWriteable = true;
+  private transient boolean _isBodyWriteable = true;
 
   public MessageImpl()
   {
@@ -365,7 +365,6 @@ public class MessageImpl implements Message
    * Returns the message priority.
    */
   public int getJMSPriority()
-    throws JMSException
   {
     return _priority;
   }
@@ -376,7 +375,6 @@ public class MessageImpl implements Message
    * @param priority the priority
    */
   public void setJMSPriority(int priority)
-    throws JMSException
   {
     _priority = priority;
   }

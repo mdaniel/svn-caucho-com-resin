@@ -138,6 +138,7 @@ public class JdbcMessage
 	     "  delivered INTEGER NOT NULL," +
 	     "  msg_type INTEGER NOT NULL," +
 	     "  msg_id VARCHAR(64) NOT NULL," +
+	     "  priority INTEGER NOT NULL," +
 	     "  expire " + longType + " NOT NULL," +
 	     "  header " + blob + "," +
 	     "  body " + blob +
@@ -170,7 +171,7 @@ public class JdbcMessage
   /**
    * Sends the message to the queue.
    */
-  public long send(Message message, int queue, long expireTime)
+  public long send(Message message, int queue, int priority, long expireTime)
     throws SQLException, IOException, JMSException
   {
     if (log.isLoggable(Level.FINE))
@@ -251,8 +252,8 @@ public class JdbcMessage
 	  throw new RuntimeException("can't create message");
 	
 	sql = ("INSERT INTO " + _messageTable +
-	       "(m_id, queue, msg_type, msg_id, expire, delivered, header, body) " +
-	       "VALUES (?,?,?,?,?,0,?,?)");
+	       "(m_id, queue, msg_type, msg_id, priority, expire, delivered, header, body) " +
+	       "VALUES (?,?,?,?,?,?,0,?,?)");
 
 	pstmt = conn.prepareStatement(sql);
 
@@ -261,6 +262,7 @@ public class JdbcMessage
 	pstmt.setInt(i++, queue);
 	pstmt.setInt(i++, type);
 	pstmt.setString(i++, msgId);
+	pstmt.setInt(i++, priority);
 	pstmt.setLong(i++, expireTime);
 
 	if (header.getLength() > 0)
@@ -277,8 +279,8 @@ public class JdbcMessage
       }
       else {
 	sql = ("INSERT INTO " + _messageTable +
-	       "(queue, msg_type, msg_id, expire, delivered, header, body) " +
-	       "VALUES (?,?,?,?,0,?,?)");
+	       "(queue, msg_type, msg_id, priority, expire, delivered, header, body) " +
+	       "VALUES (?,?,?,?,?,0,?,?)");
 	PreparedStatement pstmt;
 
 	pstmt = conn.prepareStatement(sql);
@@ -287,6 +289,7 @@ public class JdbcMessage
 	pstmt.setInt(i++, queue);
 	pstmt.setInt(i++, type);
 	pstmt.setString(i++, msgId);
+	pstmt.setInt(i++, priority);
 	pstmt.setLong(i++, expireTime);
 	pstmt.setBinaryStream(i++, header.openRead(), header.getLength());
 	
@@ -317,7 +320,7 @@ public class JdbcMessage
       String sql = ("SELECT m_id, msg_type, msg_id, delivered, body, header" +
 		    " FROM " + _messageTable +
 		    " WHERE ?<id AND queue=? AND consumer IS NULL" +
-		    " ORDER BY id");
+		    " ORDER BY priority DESC, id");
 
       PreparedStatement selectStmt = conn.prepareStatement(sql);
 
