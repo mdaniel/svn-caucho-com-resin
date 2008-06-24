@@ -195,6 +195,7 @@
     <property name="artifact.src" value="${artifacts}/${artifact.name}/src"/>
     <property name="artifact.build" value="${artifacts}/${artifact.name}/classes"/>
     <property name="artifact.dist" value="${artifacts}/${artifact.name}/dist"/>
+    <property name="artifact.lib" value="${artifacts}/${artifact.name}/lib"/>
     <property name="artifact.jar" value="${artifact.name}.jar"/>
 
     <property file="${artifact.src}/module.properties"/>
@@ -228,6 +229,9 @@
         <dirset dir="${modules}">
           <include name="*/classes"/>
        </dirset>
+        <fileset dir="${artifacts}/${artifact.name}">
+          <include name="lib/**/*.jar"/>
+       </fileset>
         <fileset dir="${ext}">
           <include name="**/*.jar"/>
         </fileset>
@@ -1062,20 +1066,25 @@
   </target>
 
   <target name="maven2-artifact">
+    <property name="jar.name" value="${module.name}.jar"/>
+    
     <antcall target="maven2-module" inheritRefs="true">
-      <param name="modules" value="${artifacts}"/>
+      <param name="module.dir" value="${artifacts}"/>
+      <param name="jar" value="${artifacts}/${module.name}/dist/${jar.name}"/>
     </antcall>
   </target>
     
   <target name="maven2-module">
-    <property name="module.src" value="${modules}/${module.name}/src"/>
+    <property name="module.dir" value="${modules}"/>
+    <property name="module.src" value="${module.dir}/${module.name}/src"/>
     <property name="jar.name" value="${module.name}.jar"/>
     <property name="maven.name" value="resin-${module.name}"/>
     <property name="maven.dist" value="${maven}/${maven.name}/${maven.version}"/>
+    <property name="jar" value="${lib}/${jar.name}"/>
 
     <mkdir dir="${maven.dist}"/>
 
-    <copy file="${modules}/${module.name}/maven2/pom.xml"
+    <copy file="${module.dir}/${module.name}/maven2/pom.xml"
           tofile="${maven.dist}/${maven.name}-${maven.version}.pom"
           preservelastmodified="true"
           overwrite="true">
@@ -1091,7 +1100,7 @@
     <checksum file="${maven.dist}/${maven.name}-${maven.version}.pom"
               algorithm="md5"/>
 
-    <copy file="${lib}/${jar.name}"
+    <copy file="${jar}"
           tofile="${maven.dist}/${maven.name}-${maven.version}.jar"
           preservelastmodified="true"
           overwrite="true"/>
@@ -1101,7 +1110,7 @@
     <checksum file="${maven.dist}/${maven.name}-${maven.version}.jar"
               algorithm="md5"/>
 
-    <copy file="${modules}/${module.name}/maven2/ivy.xml"
+    <copy file="${module.dir}/${module.name}/maven2/ivy.xml"
           tofile="${maven.dist}/ivy-${maven.version}.xml"
           preservelastmodified="true"
           overwrite="true">

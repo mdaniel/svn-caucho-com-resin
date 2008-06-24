@@ -29,6 +29,40 @@
       <param name="artifact.jar" value="resin-eclipse.jar"/>
     </antcall>
   </target>
+
+  <target name="netbeans" depends="init">
+    <antcall target="artifact" inheritRefs="true">
+      <param name="artifact.name" value="netbeans"/>
+      <param name="artifact.jar" value="resin-netbeans.jar"/>
+    </antcall>
+
+    <property name="nbm.build" location="${artifacts}/netbeans/dist"/>
+    
+    <mkdir dir="${nbm.build}/Info" />
+    <mkdir dir="${nbm.build}/netbeans/modules" />
+    
+    <copy file="${artifacts}/netbeans/dist/resin-netbeans.jar"
+          tofile="${nbm.build}/netbeans/modules/resin-netbeans.jar"/>
+    
+    <copy file="${artifacts}/netbeans/Info/info.xml"
+          tofile="${nbm.build}/Info/info.xml"/>
+    
+    <copy todir="${nbm.build}/netbeans">
+      <fileset dir="${artifacts}/netbeans/netbeans">
+        <include name="**/*.xml"/>
+      </fileset>
+    </copy>
+	  
+    <jar jarfile="${artifacts}/netbeans/dist/resin-netbeans.nbm">
+      <fileset dir="${nbm.build}">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+        <exclude name="*.nbm"/>
+        <exclude name="*.jar"/>
+      </fileset>
+    </jar>
+	  
+  </target>
   
   <target name="artifacts" depends="init, compat">
     <mkdir dir="artifacts"/>
@@ -786,7 +820,7 @@
   </target>
   -->
 
-  <target name="maven-dist" depends="init">
+  <target name="maven-dist" depends="init, compile, ant, eclipse">
     <property name="maven" value="${maven.root}/com/caucho/"/>
     
     <antcall target="maven2-module" inheritRefs="true">
@@ -794,7 +828,7 @@
       <param name="maven.name" value="resin"/>
     </antcall>
 
-    <antcall target="maven2-module" inheritRefs="true">
+    <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="ant"/>
       <param name="jar.name" value="resin-ant.jar"/>
       <param name="maven.name" value="resin-ant"/>
@@ -952,69 +986,6 @@
       <arg value="${maven.root}"/>
       <arg value="caucho@weasley.caucho.com:/var/www/hosts/www.caucho.com/webapps/"/>
     </exec>
-  </target>
-
-  <target name="maven2-module">
-    <property name="module.src" value="${modules}/${module.name}/src"/>
-    <property name="jar.name" value="${module.name}.jar"/>
-    <property name="maven.name" value="resin-${module.name}"/>
-    <property name="maven.dist" value="${maven}/${maven.name}/${maven.version}"/>
-
-    <mkdir dir="${maven.dist}"/>
-
-    <copy file="${modules}/${module.name}/maven2/pom.xml"
-          tofile="${maven.dist}/${maven.name}-${maven.version}.pom"
-          preservelastmodified="true"
-          overwrite="true">
-      <filterset>
-        <filter token="VERSION" value="${maven.version}"/>
-        <filter token="DATE" value="${date}"/>
-        <filter token="VERSION_DATE" value="${vdate}"/>
-      </filterset>
-    </copy>
-
-    <checksum file="${maven.dist}/${maven.name}-${maven.version}.pom"
-              algorithm="sha1"/>
-    <checksum file="${maven.dist}/${maven.name}-${maven.version}.pom"
-              algorithm="md5"/>
-
-    <copy file="${lib}/${jar.name}"
-          tofile="${maven.dist}/${maven.name}-${maven.version}.jar"
-          preservelastmodified="true"
-          overwrite="true"/>
-
-    <checksum file="${maven.dist}/${maven.name}-${maven.version}.jar"
-              algorithm="sha1"/>
-    <checksum file="${maven.dist}/${maven.name}-${maven.version}.jar"
-              algorithm="md5"/>
-
-    <copy file="${modules}/${module.name}/maven2/ivy.xml"
-          tofile="${maven.dist}/ivy-${maven.version}.xml"
-          preservelastmodified="true"
-          overwrite="true">
-      <filterset>
-        <filter token="VERSION" value="${maven.version}"/>
-        <filter token="DATE" value="${date}"/>
-        <filter token="VERSION_DATE" value="${vdate}"/>
-      </filterset>
-    </copy>
-
-    <copy file="maven2/${maven.metadata.template}-metadata.xml"
-          tofile="${maven}/${maven.name}/maven-metadata.xml"
-          preservelastmodified="true"
-          overwrite="true">
-      <filterset>
-        <filter token="VERSION" value="${maven.version}"/>
-        <filter token="DATE" value="${date}"/>
-        <filter token="VERSION_DATE" value="${vdate}"/>
-        <filter token="ARTIFACT" value="${maven.name}"/>
-      </filterset>
-    </copy>
-    
-    <checksum file="${maven}/${maven.name}/maven-metadata.xml"
-              algorithm="sha1"/>
-    <checksum file="${maven}/${maven.name}/maven-metadata.xml"
-              algorithm="md5"/>
   </target>
   
   <target name="rest-jar" depends="init, compile">
