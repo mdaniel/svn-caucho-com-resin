@@ -472,55 +472,6 @@
     <copy tofile="${dist}/${dist.name}/ivy2/caucho/${artifact.name}/jars/${artifact.name}-${version}.jar"
           file="${artifact.dist}/${artifact.name}.jar"/>
   </target>
-
-  <target name="javaee" depends="ejb, jca, jms, jpa, jsdk, jstl, jta, jws, webbeans">
-    <!--
-       - javaee-16.jar
-      -->
-    <jar destfile="${resin.lib}/javaee-16.jar">
-      <fileset dir="${resin.modules}/ejb/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/jca/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/jms/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/jpa/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/jsdk/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-
-      <!--
-      <fileset dir="${resin.modules}/jsf/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      -->
-      
-      <fileset dir="${resin.modules}/jstl/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/jta/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/jws/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/webbeans/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-    </jar>
-  </target>
 	  
   <target name="resin.dist.jar"
           depends="compile">
