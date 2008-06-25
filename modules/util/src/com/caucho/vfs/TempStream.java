@@ -30,7 +30,7 @@ package com.caucho.vfs;
 
 import java.io.*;
 
-public class TempStream extends StreamImpl
+public class TempStream extends StreamImpl implements java.io.Serializable
 {
   private String _encoding;
   private TempBuffer _head;

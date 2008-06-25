@@ -39,7 +39,8 @@ import java.lang.annotation.Target;
 /**
  * The @JoinColumn annotation.
  */
-@Target({TYPE, METHOD, FIELD}) @Retention(RUNTIME)
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
 public @interface JoinColumn {
   String name() default "";
   String referencedColumnName() default "";

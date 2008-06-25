@@ -38,7 +38,8 @@ import java.lang.annotation.Target;
 /**
  * The @Column annotation.
  */
-@Target({METHOD, FIELD}) @Retention(RUNTIME)
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
 public @interface Column {
   String name() default "";
   boolean unique() default false;

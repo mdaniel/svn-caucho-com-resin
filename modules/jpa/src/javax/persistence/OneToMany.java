@@ -44,4 +44,8 @@ public @interface OneToMany {
   CascadeType []cascade() default {};
   FetchType fetch() default FetchType.LAZY;
   String mappedBy() default "";
+  /**
+   * @since JPA 2.0
+   */
+  boolean orphanRemoval() default false;
 }

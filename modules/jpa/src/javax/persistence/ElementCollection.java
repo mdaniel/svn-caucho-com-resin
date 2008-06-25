@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,14 +29,18 @@
 
 package javax.persistence;
 
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.FIELD;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
+
 /**
- * The CascadeType enumeration
+ * The @ElementCollection defines a collection of instances of a basic type.
  */
-public enum CascadeType {
-  ALL,
-  PERSIST,
-  MERGE,
-  REMOVE,
-  REFRESH,
-  CLEAR
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
+public @interface ElementCollection {
+  Class targetClass() default void.class;
+  FetchType fetch() default FetchType.LAZY;
 }

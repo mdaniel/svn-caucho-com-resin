@@ -556,7 +556,7 @@ public class ClusterServer {
     _clusterPort.init();
 
     if (_cluster != null) {
-      _serverPool = new ServerPool(Resin.getCurrent().getServerId(), this);
+      _serverPool = new ServerPool(_cluster.getServerId(), this);
       _serverPool.init();
 
       _admin.register();

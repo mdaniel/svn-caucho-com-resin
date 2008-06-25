@@ -29,6 +29,9 @@
 
 package javax.persistence;
 
+import java.util.Map;
+import java.util.Set;
+
 /**
  * The main application interface to the persistence context.
  */
@@ -52,6 +55,25 @@ public interface EntityManager {
    * Find based on the primary key.
    */
   public <T> T find(Class<T> entityCLass, Object primaryKey);
+
+  /**
+   * Find based on the primary key.
+   *
+   * @since JPA 2.0
+   */
+  public <T> T find(Class<T> entityCLass,
+		    Object primaryKey,
+		    LockModeType lockMode);
+
+  /**
+   * Find based on the primary key.
+   *
+   * @since JPA 2.0
+   */
+  public <T> T find(Class<T> entityCLass,
+		    Object primaryKey,
+		    LockModeType lockMode,
+		    Map properties);
 
   /**
    * Gets an instance whose state may be lazily fetched.
@@ -79,9 +101,34 @@ public interface EntityManager {
   public void lock(Object entity, LockModeType lockMode);
 
   /**
+   * Sets the lock mode for an entity.
+   *
+   * @since JPA 2.0
+   */
+  public void lock(Object entity,
+		   LockModeType lockMode,
+		   Map properties);
+
+  /**
    * Update the state of the instance from the database.
    */
   public void refresh(Object entity);
+
+  /**
+   * Update the state of the instance from the database.
+   *
+   * @since JPA 2.0
+   */
+  public void refresh(Object entity, LockModeType lockMode);
+
+  /**
+   * Update the state of the instance from the database.
+   *
+   * @since JPA 2.0
+   */
+  public void refresh(Object entity,
+		      LockModeType lockMode,
+		      Map properties);
 
   /**
    * Clears the context, causing all entities to become detached.
@@ -89,9 +136,37 @@ public interface EntityManager {
   public void clear();
 
   /**
+   * Clears the entity
+   *
+   * @since JPA 2.0
+   */
+  public void clear(Object entity);
+
+  /**
    * Check if the instance belongs to the current context.
    */
   public boolean contains(Object entity);
+
+  /**
+   * Returns the lock mode for the entity
+   *
+   * @since JPA 2.0
+   */
+  public LockModeType getLockMode(Object entity);
+
+  /**
+   * Returns the properties for the entity manager
+   *
+   * @since JPA 2.0
+   */
+  public Map getProperties();
+
+  /**
+   * Returns the supported properties for the entity manager
+   *
+   * @since JPA 2.0
+   */
+  public Set<String> getSupportedProperties();
 
   /**
    * Creates a new query.
@@ -116,7 +191,7 @@ public interface EntityManager {
   /**
    * Creates a query for SQL.
    */
-  public Query createNativeQuery(String sql, String resultSEtMapping);
+  public Query createNativeQuery(String sql, String resultSetMapping);
 
   /**
    * Joins the transaction.
@@ -142,4 +217,11 @@ public interface EntityManager {
    * Returns the transaction manager object.
    */
   public EntityTransaction getTransaction();
+
+  /**
+   * Returns the owning factory
+   *
+   * @since JPA 2.0
+   */
+  public EntityManagerFactory getEntityManagerFactory();
 }

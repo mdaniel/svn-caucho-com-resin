@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -29,13 +30,49 @@
 package javax.persistence;
 
 /**
- * The CascadeType enumeration
+ * Thrown by the persistence provider when an
+ * pessimistic locking conflict occurs.
  */
-public enum CascadeType {
-  ALL,
-  PERSIST,
-  MERGE,
-  REMOVE,
-  REFRESH,
-  CLEAR
+public class PessimisticLockException extends PersistenceException
+{
+  Object _entity;
+
+  public PessimisticLockException()
+  {
+  }
+
+  public PessimisticLockException(Object entity)
+  {
+    _entity = entity;
+  }
+
+  public PessimisticLockException(String message)
+  {
+    super(message);
+  }
+
+  public PessimisticLockException(String message,
+                                 Throwable cause)
+  {
+    super(message, cause);
+  }
+
+  public PessimisticLockException(String message,
+                                 Throwable cause,
+                                 Object entity)
+  {
+    super(message, cause);
+
+    _entity = entity;
+  }
+
+  public PessimisticLockException(Throwable cause)
+  {
+    super(cause);
+  }
+
+  public Object getEntity()
+  {
+    return _entity;
+  }
 }

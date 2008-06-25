@@ -33,10 +33,13 @@ import com.caucho.util.L10N;
 import com.caucho.webbeans.component.HandleAware;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -253,6 +256,115 @@ public class EntityManagerProxy
   public boolean isOpen()
   {
     return true;
+  }
+
+  /**
+   * Find based on the primary key.
+   *
+   * @since JPA 2.0
+   */
+  public <T> T find(Class<T> entityCLass,
+		    Object primaryKey,
+		    LockModeType lockMode)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Find based on the primary key.
+   *
+   * @since JPA 2.0
+   */
+  public <T> T find(Class<T> entityCLass,
+		    Object primaryKey,
+		    LockModeType lockMode,
+		    Map properties)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Sets the lock mode for an entity.
+   *
+   * @since JPA 2.0
+   */
+  public void lock(Object entity,
+		   LockModeType lockMode,
+		   Map properties)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Update the state of the instance from the database.
+   *
+   * @since JPA 2.0
+   */
+  public void refresh(Object entity, LockModeType lockMode)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Update the state of the instance from the database.
+   *
+   * @since JPA 2.0
+   */
+  public void refresh(Object entity,
+		      LockModeType lockMode,
+		      Map properties)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Clears the entity
+   *
+   * @since JPA 2.0
+   */
+  public void clear(Object entity)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the lock mode for the entity
+   *
+   * @since JPA 2.0
+   */
+  public LockModeType getLockMode(Object entity)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the properties for the entity manager
+   *
+   * @since JPA 2.0
+   */
+  public Map getProperties()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the supported properties for the entity manager
+   *
+   * @since JPA 2.0
+   */
+  public Set<String> getSupportedProperties()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the owning factory
+   *
+   * @since JPA 2.0
+   */
+  public EntityManagerFactory getEntityManagerFactory()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**

@@ -37,7 +37,8 @@ import java.lang.annotation.Target;
 /**
  * The @DiscriminatorValue annotation.
  */
-@Target({TYPE}) @Retention(RUNTIME)
+@Target({TYPE})
+@Retention(RUNTIME)
 public @interface DiscriminatorValue {
   String value() default "";
 }

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,14 +29,28 @@
 
 package javax.persistence;
 
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
+
 /**
- * The CascadeType enumeration
+ * The @MapKey annotation.
+ *
+ * @since JPA 2.0
  */
-public enum CascadeType {
-  ALL,
-  PERSIST,
-  MERGE,
-  REMOVE,
-  REFRESH,
-  CLEAR
+@Target({METHOD,FIELD})
+@Retention(RUNTIME)
+public @interface MapKeyColumn {
+  String name() default "";
+  boolean unique() default false;
+  boolean nullable() default false;
+  boolean insertable() default true;
+  boolean updatable() default true;
+  String columnDefinition() default "";
+  String table() default "";
+  int length() default 255;
+  int precision() default 0;
+  int scale() default 0;
 }

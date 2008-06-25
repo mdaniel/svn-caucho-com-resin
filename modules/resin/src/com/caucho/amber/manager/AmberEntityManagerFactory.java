@@ -29,9 +29,11 @@
 
 package com.caucho.amber.manager;
 
+import javax.persistence.Cache;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import com.caucho.webbeans.component.*;
 
@@ -86,6 +88,36 @@ public class AmberEntityManagerFactory
   public boolean isOpen()
   {
     return _isOpen;
+  }
+
+  /**
+   * Returns the properties and values for the factory
+   *
+   * @since JPA 2.0
+   */
+  public Map getProperties()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the supported properties
+   *
+   * @since JPA 2.0
+   */
+  public Set<String> getSupportedProperties()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the entity manager cache
+   *
+   * @since JPA 2.0
+   */
+  public Cache getCache()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**

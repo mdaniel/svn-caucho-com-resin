@@ -35,6 +35,7 @@ import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.util.L10N;
 
 import javax.persistence.FlushModeType;
+import javax.persistence.LockModeType;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import java.sql.ResultSet;
@@ -43,6 +44,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The EJB query
@@ -225,5 +228,95 @@ public class QueryImpl implements Query {
     _userQuery.setDouble(index, value);
     
     return this;
+  }
+
+  /**
+   * The maximum number of results to retrieve.
+   *
+   * @Since JPA 2.0
+   */
+  public int getMaxResults()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * The first to retrieve.
+   *
+   * @Since JPA 2.0
+   */
+  public int getFirstResult()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the implementation-specific hints
+   *
+   * @Since JPA 2.0
+   */
+  public Map getHints()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the supported hints
+   *
+   * @Since JPA 2.0
+   */
+  public Set<String> getSupportedHints()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the named parameters as a map
+   *
+   * @since JPA 2.0
+   */
+  public Map getNamedParameters()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the positional parameters as a list
+   *
+   * @since JPA 2.0
+   */
+  public List getPositionalParameters()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Gets the flush type.
+   *
+   * @since JPA 2.0
+   */
+  public FlushModeType getFlushMode()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Sets the lock type.
+   *
+   * @since JPA 2.0
+   */
+  public Query setLockMode(LockModeType lockMode)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Gets the lock type.
+   *
+   * @since JPA 2.0
+   */
+  public LockModeType getLockMode()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }

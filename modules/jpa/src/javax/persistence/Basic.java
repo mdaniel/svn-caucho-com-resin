@@ -41,5 +41,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Basic {
   FetchType fetch() default FetchType.EAGER;
+  
   boolean optional() default true;
 }

@@ -32,6 +32,8 @@ package javax.persistence;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The main application interface to the persistence context.
@@ -53,9 +55,16 @@ public interface Query {
   public int executeUpdate();
 
   /**
-   * Sets the maximum number of results to retrieve.
+   * The maximum number of results to retrieve.
    */
   public Query setMaxResults(int maxResult);
+
+  /**
+   * The maximum number of results to retrieve.
+   *
+   * @Since JPA 2.0
+   */
+  public int getMaxResults();
 
   /**
    * Sets the first result.
@@ -63,9 +72,30 @@ public interface Query {
   public Query setFirstResult(int startPosition);
 
   /**
-   * Sets an implementation-specific hint.
+   * The first to retrieve.
+   *
+   * @Since JPA 2.0
+   */
+  public int getFirstResult();
+
+  /**
+   * An implementation-specific hint.
    */
   public Query setHint(String hintName, Object value);
+
+  /**
+   * Returns the implementation-specific hints
+   *
+   * @Since JPA 2.0
+   */
+  public Map getHints();
+
+  /**
+   * Returns the supported hints
+   *
+   * @Since JPA 2.0
+   */
+  public Set<String> getSupportedHints();
 
   /**
    * Binds a named parameter.
@@ -98,8 +128,42 @@ public interface Query {
   public Query setParameter(int pos, Calendar date, TemporalType type);
 
   /**
+   * Returns the named parameters as a map
+   *
+   * @since JPA 2.0
+   */
+  public Map getNamedParameters();
+
+  /**
+   * Returns the positional parameters as a list
+   *
+   * @since JPA 2.0
+   */
+  public List getPositionalParameters();
+
+  /**
    * Sets the flush type.
    */
   public Query setFlushMode(FlushModeType flushMode);
-  
+
+  /**
+   * Gets the flush type.
+   *
+   * @since JPA 2.0
+   */
+  public FlushModeType getFlushMode();
+
+  /**
+   * Sets the lock type.
+   *
+   * @since JPA 2.0
+   */
+  public Query setLockMode(LockModeType lockMode);
+
+  /**
+   * Gets the lock type.
+   *
+   * @since JPA 2.0
+   */
+  public LockModeType getLockMode();
 }

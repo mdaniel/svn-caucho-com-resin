@@ -30,6 +30,7 @@
 package javax.persistence;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Factory for getting an entity manager.
@@ -54,4 +55,25 @@ public interface EntityManagerFactory {
    * Returns true if the factory is open.
    */
   public boolean isOpen();
+
+  /**
+   * Returns the properties and values for the factory
+   *
+   * @since JPA 2.0
+   */
+  public Map getProperties();
+
+  /**
+   * Returns the supported properties
+   *
+   * @since JPA 2.0
+   */
+  public Set<String> getSupportedProperties();
+
+  /**
+   * Returns the entity manager cache
+   *
+   * @since JPA 2.0
+   */
+  public Cache getCache();
 }

@@ -37,7 +37,7 @@ import java.util.logging.*;
 /**
  * Pooled temporary byte buffer.
  */
-public class TempBuffer {
+public class TempBuffer implements java.io.Serializable {
   private static Logger _log;
   
   private static FreeList<TempBuffer> _freeList = new FreeList<TempBuffer>(32);

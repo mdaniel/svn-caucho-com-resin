@@ -1222,6 +1222,13 @@ public class ServerPool
     try {
       stream = open();
 
+      if (stream == null) {
+	if (log.isLoggable(Level.FINE))
+	  log.fine(this + " can't open for querySet");
+	
+	return null;
+      }
+
       long id = 0;
 
       stream.querySet(id, to, "", query);

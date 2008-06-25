@@ -41,5 +41,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AssociationOverride {
   String name();
+  
   JoinColumn[] joinColumns();
+  
+  /**
+   * @since JPA 2.0
+   */
+  JoinTable joinTable() default @JoinTable;
 }

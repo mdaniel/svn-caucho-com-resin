@@ -29,16 +29,17 @@
 
 package javax.persistence;
 
-import java.lang.annotation.ElementType;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
  * The @Enumerated annotation marks a property as an enumerated type.
  */
-@Target({ElementType.METHOD,ElementType.FIELD})
-@Retention(RetentionPolicy.RUNTIME)
+@Target({METHOD,FIELD})
+@Retention(RUNTIME)
 public @interface Enumerated {
   EnumType value() default EnumType.ORDINAL;
 }

@@ -43,6 +43,14 @@ import java.lang.annotation.Target;
 public @interface SequenceGenerator {
   String name();
   String sequenceName() default "";
+  /**
+   * @since JPA 2.0
+   */
+  String catalog() default "";
+  /**
+   * @since JPA 2.0
+   */
+  String schema() default "";
   int initialValue() default 0;
   int allocationSize() default 50;
 }

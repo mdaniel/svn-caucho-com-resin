@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,14 +29,39 @@
 
 package javax.persistence;
 
+import java.util.Map;
+
 /**
- * The CascadeType enumeration
+ * Cache for objects
+ *
+ * @since JPA 2.0
  */
-public enum CascadeType {
-  ALL,
-  PERSIST,
-  MERGE,
-  REMOVE,
-  REFRESH,
-  CLEAR
+public interface Cache {
+  /**
+   * Returns true if the cache contains data for the entity
+   *
+   * @since JPA 2.0
+   */
+  public boolean contains(Class cl, Object key);
+  
+  /**
+   * Evict the data
+   *
+   * @since JPA 2.0
+   */
+  public void evict(Class cl, Object key);
+  
+  /**
+   * Evict call members of the given class
+   *
+   * @since JPA 2.0
+   */
+  public void evict(Class cl);
+  
+  /**
+   * Clears the cache
+   *
+   * @since JPA 2.0
+   */
+  public void evictAll();
 }

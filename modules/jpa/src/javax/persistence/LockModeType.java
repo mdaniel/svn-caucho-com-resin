@@ -34,6 +34,10 @@ package javax.persistence;
  */
 public enum LockModeType {
   READ,
-
-  WRITE
+  WRITE,
+  OPTIMISTIC,
+  OPTIMISTIC_FORCE_INCREMENT,
+  PESSIMISTIC,
+  PESSIMISTIC_FORCE_INCREMENT,
+   NONE
 }

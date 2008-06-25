@@ -38,6 +38,7 @@ import java.lang.annotation.Target;
 /**
  * The @EmbeddedId annotation.
  */
-@Target({METHOD, FIELD}) @Retention(RUNTIME)
+@Target({METHOD, FIELD})
+@Retention(RUNTIME)
 public @interface EmbeddedId {
 }
