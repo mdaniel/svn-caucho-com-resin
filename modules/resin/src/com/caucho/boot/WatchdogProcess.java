@@ -496,8 +496,27 @@ class WatchdogProcess
 	  out.println();
       }
 
-      for (Map.Entry<String, String> envEntry : env.entrySet())
-        out.println("" + envEntry.getKey() + ": " + envEntry.getValue());
+      for (Map.Entry<String, String> envEntry : env.entrySet()) {
+	String key = envEntry.getKey();
+	String value = envEntry.getValue();
+
+	if ("CLASSPATH".equals(key)
+	    || "LD_LIBRARY_PATH".equals(key)
+	    || "DYLD_LIBRARY_PATH".equals(key)) {
+	  out.println(key + ": ");
+	  
+	  int len = (key + ": ").length();
+
+	  for (String v : value.split("[" + File.pathSeparatorChar + "]")) {
+	    for (int i = 0; i < len; i++)
+	      out.print(" ");
+
+	    out.println(v);
+	  }
+	}
+	else
+	  out.println("" + key + ": " + value);
+      }
     }
 
     Boot boot = getJniBoot();

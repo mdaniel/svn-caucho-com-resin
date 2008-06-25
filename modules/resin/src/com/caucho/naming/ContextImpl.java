@@ -59,7 +59,8 @@ import java.util.logging.Logger;
  * take care of the JNDI API for the model.
  */
 public class ContextImpl implements Context {
-  protected static final Logger dbg = Log.open(ContextImpl.class);
+  protected static final Logger log
+    = Logger.getLogger(ContextImpl.class.getName());
   protected static final L10N L = new L10N(ContextImpl.class);
 
   protected Hashtable _env;
@@ -214,8 +215,8 @@ public class ContextImpl implements Context {
   public Object lookup(Name name)
     throws NamingException
   {
-    if (dbg.isLoggable(Level.FINEST))
-      dbg.finest(L.l("JNDI lookup `{0}'", name));
+    if (log.isLoggable(Level.FINEST))
+      log.finest(L.l("JNDI lookup `{0}'", name));
     
     if (name == null)
       return create(_model, _env);
@@ -382,8 +383,8 @@ public class ContextImpl implements Context {
   public void bind(Name name, Object obj)
     throws NamingException
   {
-    if (dbg.isLoggable(Level.FINEST))
-      dbg.finest(L.l("JNDI bind `{0}'", name));
+    if (log.isLoggable(Level.FINEST))
+      log.finest(L.l("JNDI bind `{0}'", name));
     
     if (name.size() == 0)
       throw new NamingException(L.l("can't bind root"));
@@ -433,8 +434,8 @@ public class ContextImpl implements Context {
   public void rebind(String name, Object obj)
     throws NamingException
   {
-    if (dbg.isLoggable(Level.FINEST))
-      dbg.finest(L.l("JNDI rebind `{0}' value: {1}", name, obj));
+    if (log.isLoggable(Level.FINEST))
+      log.finest(L.l("JNDI rebind `{0}' value: {1}", name, obj));
     
     String tail = name;
     AbstractModel model = _model;
