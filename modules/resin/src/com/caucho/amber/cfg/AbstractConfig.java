@@ -24,75 +24,16 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Rodrigo Westrupp
+ * @author Scott Ferguson
  */
 
 package com.caucho.amber.cfg;
 
 import javax.persistence.FetchType;
 
-
 /**
- * The base class for <one-to-one>, <one-to-many> and so on.
+ * The base class for properties
  */
-abstract class AbstractRelationConfig extends AbstractConfig
+abstract class AbstractConfig
 {
-  // attributes
-  private String _name;
-  private String _targetEntity;
-  private FetchType _fetch;
-
-  // elements
-  private JoinTableConfig _joinTable;
-  private CascadeConfig _cascade;
-
-  public String getName()
-  {
-    return _name;
-  }
-
-  public void setName(String name)
-  {
-    _name = name;
-  }
-
-  public String getTargetEntity()
-  {
-    return _targetEntity;
-  }
-
-  public void setTargetEntity(String targetEntity)
-  {
-    _targetEntity = targetEntity;
-  }
-
-  public FetchType getFetch()
-  {
-    return _fetch;
-  }
-
-  public void setFetch(String fetch)
-  {
-    _fetch = FetchType.valueOf(fetch);
-  }
-
-  public CascadeConfig getCascade()
-  {
-    return _cascade;
-  }
-
-  public void setCascade(CascadeConfig cascade)
-  {
-    _cascade = cascade;
-  }
-
-  public JoinTableConfig getJoinTable()
-  {
-    return _joinTable;
-  }
-
-  public void setJoinTable(JoinTableConfig joinTable)
-  {
-    _joinTable = joinTable;
-  }
 }

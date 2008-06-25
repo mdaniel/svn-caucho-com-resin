@@ -29,70 +29,46 @@
 
 package com.caucho.amber.cfg;
 
-import javax.persistence.FetchType;
+
+import com.caucho.amber.field.*;
+import com.caucho.amber.type.*;
+import com.caucho.bytecode.*;
+import com.caucho.config.ConfigException;
+
+import javax.persistence.*;
 
 
 /**
- * The base class for <one-to-one>, <one-to-many> and so on.
+ * completes for dependent
  */
-abstract class AbstractRelationConfig extends AbstractConfig
-{
-  // attributes
-  private String _name;
-  private String _targetEntity;
-  private FetchType _fetch;
+class CompletionImpl implements Completion {
+  protected final BaseConfigIntrospector _base;
+  
+  protected EntityType _entityType;
 
-  // elements
-  private JoinTableConfig _joinTable;
-  private CascadeConfig _cascade;
-
-  public String getName()
+  protected CompletionImpl(BaseConfigIntrospector base,
+		       EntityType entityType,
+		       String fieldName)
   {
-    return _name;
+    _base = base;
+    _entityType = entityType;
+    _entityType.addCompletionField(fieldName);
   }
 
-  public void setName(String name)
+  protected CompletionImpl(BaseConfigIntrospector base,
+		       EntityType entityType)
   {
-    _name = name;
+    _base = base;
+    _entityType = entityType;
   }
 
-  public String getTargetEntity()
+  public EntityType getRelatedType()
   {
-    return _targetEntity;
+    return _entityType;
   }
 
-  public void setTargetEntity(String targetEntity)
+  public void complete()
+    throws ConfigException
   {
-    _targetEntity = targetEntity;
-  }
-
-  public FetchType getFetch()
-  {
-    return _fetch;
-  }
-
-  public void setFetch(String fetch)
-  {
-    _fetch = FetchType.valueOf(fetch);
-  }
-
-  public CascadeConfig getCascade()
-  {
-    return _cascade;
-  }
-
-  public void setCascade(CascadeConfig cascade)
-  {
-    _cascade = cascade;
-  }
-
-  public JoinTableConfig getJoinTable()
-  {
-    return _joinTable;
-  }
-
-  public void setJoinTable(JoinTableConfig joinTable)
-  {
-    _joinTable = joinTable;
   }
 }

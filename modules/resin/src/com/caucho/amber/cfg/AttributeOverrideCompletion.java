@@ -45,7 +45,8 @@ import java.util.HashMap;
 /**
  * Completion for overrides based on a parent map
  */
-public class AttributeOverrideCompletion extends Completion {
+public class AttributeOverrideCompletion extends CompletionImpl
+{
   private static final L10N L = new L10N(AttributeOverrideCompletion.class);
   private JClass _type;
   private HashMap<String,ColumnConfig> _overrideMap;
@@ -62,7 +63,7 @@ public class AttributeOverrideCompletion extends Completion {
   }
 
   @Override
-  void complete()
+  public void complete()
     throws ConfigException
   {
 

@@ -91,6 +91,12 @@ abstract public class AbstractConfigIntrospector {
   // annotations allowed with a @OneToOne annotation
   static HashSet<String> _oneToOneAnnotations = new HashSet<String>();
 
+  // annotations allowed with a @ElementCollection annotation
+  static HashSet<String> _elementCollectionAnnotations = new HashSet<String>();
+
+  // types allowed with a @ElementCollection annotation
+  static HashSet<String> _elementCollectionTypes = new HashSet<String>();
+
   // annotations allowed with a @Embedded annotation
   static HashSet<String> _embeddedAnnotations = new HashSet<String>();
 
@@ -732,6 +738,15 @@ abstract public class AbstractConfigIntrospector {
     _oneToOneAnnotations.add("javax.persistence.OneToOne");
     _oneToOneAnnotations.add("javax.persistence.JoinColumn");
     _oneToOneAnnotations.add("javax.persistence.JoinColumns");
+
+    // annotations allowed with a @ElementCollection annotation
+    _elementCollectionAnnotations.add("javax.persistence.ElementCollection");
+    
+    // types allowed with an @ElementCollection annotation
+    _elementCollectionTypes.add("java.util.Collection");
+    _elementCollectionTypes.add("java.util.List");
+    _elementCollectionTypes.add("java.util.Set");
+    _elementCollectionTypes.add("java.util.Map");
 
     // annotations allowed with a @Embedded annotation
     _embeddedAnnotations.add("javax.persistence.Embedded");

@@ -63,7 +63,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
   private static final Class []_annTypes = new Class[] {
     Basic.class, javax.persistence.Column.class, javax.persistence.Id.class,
-    EmbeddedId.class,
+    javax.persistence.ElementCollection.class, EmbeddedId.class,
     ManyToOne.class, OneToMany.class, OneToOne.class, ManyToMany.class,
     Version.class, Transient.class
   };
@@ -1185,9 +1185,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       else if (methodName.startsWith("get")) {
         propName = methodName.substring(3);
       }
-      else if (methodName.startsWith("is") &&
-               (method.getReturnType().getName().equals("boolean") ||
-                method.getReturnType().getName().equals("java.lang.Boolean"))) {
+      else if (methodName.startsWith("is")
+	       && (method.getReturnType().equals(boolean.class)
+		   || method.getReturnType().equals(Boolean.class))) {
         propName = methodName.substring(2);
       }
       else {
@@ -1206,9 +1206,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
         JMethod setter = type.getMethod("set" + propName,
                                         new JClass[] { method.getReturnType() });
-        if (method.isPrivate() ||
-            (setter == null) || setter.isPrivate()) {
-
+        if (method.isPrivate() || setter == null || setter.isPrivate()) {
           JAnnotation ann = isAnnotatedMethod(method);
 
           if (ann == null) {
@@ -1322,6 +1320,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     ManyToOneConfig manyToOneConfig = null;
     ManyToManyConfig manyToManyConfig = null;
     VersionConfig versionConfig = null;
+    ElementCollectionConfig elementCollectionConfig = null;
 
     if (mappedSuperOrEntityConfig != null) {
       attributesConfig = mappedSuperOrEntityConfig.getAttributes();
@@ -1334,6 +1333,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         oneToOneConfig = attributesConfig.getOneToOne(fieldName);
 
         oneToManyConfig = attributesConfig.getOneToMany(fieldName);
+	
+        elementCollectionConfig = null; // attributesConfig.getOneToMany(fieldName);
 
         manyToOneConfig = attributesConfig.getManyToOne(fieldName);
 
@@ -1343,7 +1344,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       }
     }
 
-    if ((idConfig != null)
+    if (idConfig != null
 	|| field.isAnnotationPresent(javax.persistence.Id.class)) {
       validateAnnotations(field, "@Id", _idAnnotations);
 
@@ -1352,7 +1353,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                fieldType.getName(), field.getName()));
       }
     }
-    else if ((basicConfig != null)
+    else if (basicConfig != null
 	     || field.isAnnotationPresent(javax.persistence.Basic.class)) {
       validateAnnotations(field, "@Basic", _basicAnnotations);
 
@@ -1365,7 +1366,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       addVersion((EntityType) sourceType, field,
                  fieldName, fieldType, versionConfig);
     }
-    else if ((manyToOneConfig != null)
+    else if (manyToOneConfig != null
 	     || field.isAnnotationPresent(javax.persistence.ManyToOne.class)) {
       validateAnnotations(field, "@ManyToOne", _manyToOneAnnotations);
 
@@ -1413,7 +1414,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                                    fieldName,
                                                    fieldType));
     }
-    else if ((oneToManyConfig != null)
+    else if (oneToManyConfig != null
 	     || field.isAnnotationPresent(javax.persistence.OneToMany.class)) {
       validateAnnotations(field, "@OneToMany", _oneToManyAnnotations);
 
@@ -1510,6 +1511,28 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         _linkCompletions.add(completion);
       else
         _depCompletions.add(completion);
+    }
+    else if (elementCollectionConfig != null
+	     || field.isAnnotationPresent(javax.persistence.ElementCollection.class)) {
+      validateAnnotations(field, "@ElementCollection", _elementCollectionAnnotations);
+      if (! _elementCollectionTypes.contains(fieldType.getName())) {
+        throw error(field, L.l("'{0}' is an illegal @ElementCollection type for {1}.  @ElementCollection must be a java.util.Collection, java.util.List or java.util.Map",
+                               fieldType.getName(),
+                               field.getName()));
+      }
+
+      EntityType entityType = (EntityType) sourceType;
+
+      /*
+      ElementCollectionCompletion comp
+	= new ElementCollectionCompletion(entityType,
+					  field,
+					  fieldName,
+					  fieldType,
+					  elementCollectionConfig);
+
+      _depCompletions.add(comp);
+      */
     }
     else if (field.isAnnotationPresent(javax.persistence.Embedded.class)) {
       validateAnnotations(field, "@Embedded", _embeddedAnnotations);
@@ -2288,7 +2311,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   /**
    * completes for dependent
    */
-  class OneToManyCompletion extends Completion {
+  class OneToManyCompletion extends CompletionImpl {
     private JAccessibleObject _field;
     private String _fieldName;
     private JClass _fieldType;
@@ -2310,7 +2333,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
 
     @Override
-    void complete()
+    public void complete()
       throws ConfigException
     {
       getInternalOneToManyConfig(_entityType.getBeanClass(),
@@ -2671,7 +2694,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   /**
    * completes for dependent
    */
-  class OneToOneCompletion extends Completion {
+  class OneToOneCompletion extends CompletionImpl {
     private JAccessibleObject _field;
     private String _fieldName;
     private JClass _fieldType;
@@ -2694,7 +2717,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
 
     @Override
-    void complete()
+    public void complete()
       throws ConfigException
     {
       getInternalOneToOneConfig(_entityType.getBeanClass(),
@@ -2897,7 +2920,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   /**
    * completes for dependent
    */
-  class ManyToManyCompletion extends Completion {
+  class ManyToManyCompletion extends CompletionImpl {
     private JAccessibleObject _field;
     private String _fieldName;
     private JClass _fieldType;
@@ -2915,7 +2938,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
 
     @Override
-    void complete()
+    public void complete()
       throws ConfigException
     {
       addManyToMany(_entityType, _field, _fieldName, _fieldType);
@@ -2925,7 +2948,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   /**
    * completes for link
    */
-  class ManyToOneCompletion extends Completion {
+  class ManyToOneCompletion extends CompletionImpl {
     private JAccessibleObject _field;
     private String _fieldName;
     private JClass _fieldType;
@@ -2943,7 +2966,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
 
     @Override
-    void complete()
+    public void complete()
       throws ConfigException
     {
       addManyToOne(_entityType, _field, _fieldName, _fieldType);
@@ -2953,7 +2976,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   /**
    * completes for dependent
    */
-  class EmbeddedCompletion extends Completion {
+  class EmbeddedCompletion extends CompletionImpl {
     private JAccessibleObject _field;
     private String _fieldName;
     private JClass _fieldType;
@@ -2976,7 +2999,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
 
     @Override
-    void complete()
+    public void complete()
       throws ConfigException
     {
       getInternalAttributeOverrideConfig(_entityType.getBeanClass(),
@@ -3082,7 +3105,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   /**
    * completes for dependent
    */
-  class SqlResultSetMappingCompletion extends Completion {
+  class SqlResultSetMappingCompletion extends CompletionImpl {
     private String _name;
     private Object _entities[];
     private Object _columns[];
@@ -3100,7 +3123,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
 
     @Override
-    void complete()
+    public void complete()
       throws ConfigException
     {
       addSqlResultSetMapping(_name,

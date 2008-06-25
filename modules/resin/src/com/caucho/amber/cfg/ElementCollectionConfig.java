@@ -24,27 +24,16 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Rodrigo Westrupp
+ * @author Scott Ferguson
  */
 
 package com.caucho.amber.cfg;
 
-
-import com.caucho.amber.field.*;
-import com.caucho.amber.type.*;
-import com.caucho.bytecode.*;
-import com.caucho.config.ConfigException;
-
-import javax.persistence.*;
-
+import java.util.HashMap;
 
 /**
- * completes for dependent
+ * <element-collection> tag in orm.xml
  */
-interface Completion
+public class ElementCollectionConfig extends AbstractRelationConfig
 {
-  EntityType getRelatedType();
-
-  void complete()
-    throws ConfigException;
 }
