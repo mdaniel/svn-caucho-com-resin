@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -26,14 +26,14 @@
  * @author Sam
  */
 
-package com.caucho.eclipse;
+package com.caucho.resin.eclipse;
 
 import org.eclipse.jst.server.generic.core.internal.GenericServerBehaviour;
 
 public class ResinServerBehaviour
   extends GenericServerBehaviour
 {
-
+  @Override
   public void stop(boolean force)
   {
     // change the default behaviour and always force the stop,

@@ -24,21 +24,39 @@
   </target>
 
   <target name="eclipse" depends="init">
+    <property name="eclipse.basedir" location="${artifacts}/eclipse"/>
+    <property name="eclipse.build" location="${eclipse.basedir}/build"/>
+  
+    <mkdir dir="${eclipse.build}"/>
+  
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="eclipse"/>
       <param name="artifact.jar" value="resin-eclipse.jar"/>
+      <param name="artifact.dist" value="${eclipse.build}"/>
     </antcall>
-
-    <jar jarfile="${artifacts}/eclipse/dist/resin-eclipse.jar"
-         manifest="${artifacts}/eclipse/META-INF/MANIFEST.MF"
-         update="true">
-      <fileset dir="${artifacts}/eclipse">
+    
+    <copy todir="${eclipse.build}">
+      <fileset dir="${eclipse.basedir}">
         <include name="META-INF/*"/>
         <include name="plugin.properties"/>
         <include name="plugin.xml"/>
         <include name="buildfiles/*.xml"/>
-        <include name="icons/**/*.gif"/>
+        <include name="icons/**/*.png"/>
         <include name="**/*.serverdef"/>
+        <include name="src/**"/>
+        <exclude name="src/manifest"/>
+      </fileset>
+    </copy>
+
+    <property name="eclipse.dist" location="${eclipse.basedir}/dist"/>
+
+    <mkdir dir="${eclipse.dist}"/>
+
+    <jar jarfile="${eclipse.dist}/com.caucho.resin.eclipse_3.1.0.jar"
+         manifest="${eclipse.basedir}/META-INF/MANIFEST.MF">
+      <fileset dir="${eclipse.build}">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
       </fileset>
     </jar>
   </target>

@@ -31,20 +31,19 @@
   </extension>
 
   <extension point="org.eclipse.wst.server.core.serverTypes">
-
     <serverType
-      runtime="true"
+      behaviourClass="com.caucho.resin.eclipse.ResinServerBehaviour"
       class="org.eclipse.jst.server.generic.core.internal.GenericServer"
+      description="%resin31serverTypeDescription"
+      hasConfiguration="false"
       id="org.eclipse.jst.server.generic.resin31"
       initialState="stopped"
-      supportsRemoteHosts="false"
-      runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin31"
-      description="%resin31serverTypeDescription"
       launchConfigId="org.eclipse.jst.server.generic.core.launchConfigurationType"
-      behaviourClass="com.caucho.eclipse.ResinServerBehaviour"
+      launchModes="run"
       name="%resin31serverTypeName"
-      hasConfiguration="false"
-      launchModes="run">        
+      runtime="true"
+      runtimeTypeId="org.eclipse.jst.server.generic.runtime.resin31"
+      supportsRemoteHosts="false">
     </serverType>
   </extension>
   
@@ -62,11 +61,11 @@
   <extension point="org.eclipse.wst.server.ui.serverImages">
     <image
       id="org.eclipse.jst.server.generic.image"
-      icon="icons/obj16/resin.gif"
+      icon="icons/obj16/resin.png"
       typeIds="org.eclipse.jst.server.generic.runtime.resin31"/>
     <image
       id="org.eclipse.jst.server.generic.image"
-      icon="icons/obj16/resin.gif"
+      icon="icons/obj16/resin.png"
       typeIds="org.eclipse.jst.server.generic.resin31"/>
   </extension>
 
@@ -127,7 +126,7 @@
 
   <extension point="org.eclipse.wst.common.project.facet.ui.images">
     <image runtime-component-type="org.eclipse.jst.server.generic.runtime.resin"
-      path="icons/obj16/resin.gif"/>  
+      path="icons/obj16/resin.png"/>  
   </extension>
 
   <extension point="org.eclipse.wst.common.project.facet.core.runtimes">  
