@@ -77,13 +77,6 @@ public class AmberEntityHome implements Comparable {
   {
     _manager = manager;
     _entityType = type;
-
-    try {
-      Class cl = Class.forName("com.caucho.ejb.entity.EntityObject");
-      _cauchoGetBeanMethod = cl.getMethod("_caucho_getBean", new Class[0]);
-    } catch (Exception e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
   }
 
   /**

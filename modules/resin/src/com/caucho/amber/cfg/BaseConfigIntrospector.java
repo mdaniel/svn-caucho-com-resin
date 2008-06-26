@@ -246,7 +246,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 */
     String entityTypeName = entityType.getBeanClass().getName();
 
-    for (int i = 0; i < listeners.length; i++) {
+    for (int i = 0; listeners != null && i < listeners.length; i++) {
 
       Class cl = null;
 

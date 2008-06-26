@@ -69,7 +69,6 @@ abstract public class AbstractField implements AmberField {
   private String _name;
 
   private JType _type;
-  private Class _javaClass;
 
   private Method _getterMethod;
   private Method _setterMethod;
@@ -171,17 +170,6 @@ abstract public class AbstractField implements AmberField {
   protected void setJavaType(JType type)
   {
     _type = type;
-    
-    if (_javaClass == null)
-      _javaClass = type.getRawType().getJavaClass();
-  }
-
-  /**
-   * Sets the java type.
-   */
-  protected void setJavaType(Class type)
-  {
-    _javaClass = type;
   }
 
   /**
@@ -349,7 +337,7 @@ abstract public class AbstractField implements AmberField {
    */
   public Class getJavaClass()
   {
-    return _javaClass;
+    return getJavaType().getRawType().getJavaClass();
   }
 
   /**
