@@ -41,7 +41,7 @@ import java.sql.Types;
 /**
  * Represents a java.util.Integer type
  */
-public class IntegerType extends Type {
+public class IntegerType extends AmberType {
   private static final L10N L = new L10N(IntegerType.class);
 
   private static final IntegerType INTEGER_TYPE = new IntegerType();

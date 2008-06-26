@@ -29,7 +29,7 @@
 package com.caucho.amber.expr;
 
 import com.caucho.amber.field.IdField;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 
 /**
  * Bound identifier expression.
@@ -48,5 +48,5 @@ public interface IdFieldExpr extends AmberExpr {
   /**
    * Returns the column.
    */
-  public Column getColumn();
+  public AmberColumn getColumn();
 }

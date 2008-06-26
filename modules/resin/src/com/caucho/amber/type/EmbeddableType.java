@@ -32,7 +32,7 @@ package com.caucho.amber.type;
 import com.caucho.amber.AmberRuntimeException;
 import com.caucho.amber.entity.Embeddable;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.field.*;
 import com.caucho.amber.gen.*;
 import com.caucho.java.*;
@@ -86,7 +86,7 @@ public class EmbeddableType extends BeanType {
   /**
    * Generates the select clause for a load.
    */
-  public String generateLoadSelect(Table table, String id)
+  public String generateLoadSelect(AmberTable table, String id)
   {
     return generateLoadSelect(table, id, -1);
   }

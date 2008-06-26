@@ -34,15 +34,12 @@ import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Table;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberTable;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.BeanType;
 import com.caucho.amber.type.EntityType;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassWrapper;
-import com.caucho.bytecode.JField;
-import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JType;
+import com.caucho.bytecode.JTypeWrapper;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.CharBuffer;
@@ -50,6 +47,9 @@ import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -61,17 +61,18 @@ import java.util.logging.Logger;
  */
 abstract public class AbstractField implements AmberField {
   private static final L10N L = new L10N(AbstractField.class);
-  protected static final Logger log
+  private static final Logger log
     = Logger.getLogger(AbstractField.class.getName());
 
   final BeanType _sourceType;
 
   private String _name;
 
-  private JType _javaType;
+  private JType _type;
+  private Class _javaClass;
 
-  private JMethod _getterMethod;
-  private JMethod _setterMethod;
+  private Method _getterMethod;
+  private Method _setterMethod;
 
   private boolean _isLazy = true;
   private boolean _isOverride;
@@ -125,28 +126,28 @@ abstract public class AbstractField implements AmberField {
       */
 
       if (_getterMethod == null) {
-        JField field = BeanType.getField(getBeanClass(), _name);
+        Field field = BeanType.getField(getBeanClass(), _name);
 
         if (field == null)
           throw new ConfigException(L.l("{0}: {1} has no matching field.",
                                         getBeanClass().getName(), _name));
 
-        _javaType = field.getGenericType();
+        _type = JTypeWrapper.create(field.getGenericType());
       }
       else {
-        _javaType = _getterMethod.getGenericReturnType();
+        _type = JTypeWrapper.create(_getterMethod.getGenericReturnType());
 
         _setterMethod = BeanType.getSetter(getBeanClass(), setter);
       }
     }
     else {
-      JField field = BeanType.getField(getBeanClass(), name);
+      Field field = BeanType.getField(getBeanClass(), name);
 
       if (field == null)
         throw new ConfigException(L.l("{0}: {1} has no matching field.",
                                       getBeanClass().getName(), name));
 
-      _javaType = field.getGenericType();
+      _type = JTypeWrapper.create(field.getGenericType());
     }
 
     /*
@@ -169,7 +170,10 @@ abstract public class AbstractField implements AmberField {
    */
   protected void setJavaType(JType type)
   {
-    _javaType = type;
+    _type = type;
+    
+    if (_javaClass == null)
+      _javaClass = type.getRawType().getJavaClass();
   }
 
   /**
@@ -177,7 +181,7 @@ abstract public class AbstractField implements AmberField {
    */
   protected void setJavaType(Class type)
   {
-    setJavaType(new JClassWrapper(type, getPersistenceUnit().getJClassLoader()));
+    _javaClass = type;
   }
 
   /**
@@ -199,7 +203,7 @@ abstract public class AbstractField implements AmberField {
   /**
    * Returns the bean class.
    */
-  public JClass getBeanClass()
+  public Class getBeanClass()
   {
     return getSourceType().getBeanClass();
   }
@@ -216,7 +220,7 @@ abstract public class AbstractField implements AmberField {
   /**
    * Returns the table containing the field's columns.
    */
-  public Table getTable()
+  public AmberTable getTable()
   {
     return getEntitySourceType().getTable();
   }
@@ -224,7 +228,7 @@ abstract public class AbstractField implements AmberField {
   /**
    * Returns the column for the field
    */
-  public Column getColumn()
+  public AmberColumn getColumn()
   {
     return null;
   }
@@ -232,7 +236,7 @@ abstract public class AbstractField implements AmberField {
   /**
    * Returns the column for the field
    */
-  public void setColumn(Column column)
+  public void setColumn(AmberColumn column)
   {
   }
 
@@ -318,7 +322,7 @@ abstract public class AbstractField implements AmberField {
    */
   public String getJavaTypeName()
   {
-    return getJavaType().getPrintName();
+    return getJavaTypeName(getJavaClass());
   }
 
   /**
@@ -337,7 +341,15 @@ abstract public class AbstractField implements AmberField {
    */
   public JType getJavaType()
   {
-    return _javaType;
+    return _type;
+  }
+  
+  /**
+   * Returns the field's class
+   */
+  public Class getJavaClass()
+  {
+    return _javaClass;
   }
 
   /**
@@ -354,7 +366,8 @@ abstract public class AbstractField implements AmberField {
   public boolean isAbstract()
   {
     // jpa/0u21
-    return _getterMethod != null && _getterMethod.isAbstract();
+    return (_getterMethod != null
+            && Modifier.isAbstract(_getterMethod.getModifiers()));
   }
 
   /**
@@ -413,7 +426,7 @@ abstract public class AbstractField implements AmberField {
     if (isAbstract()) {
       out.println();
       out.print("public ");
-      out.print(getJavaType().getPrintName());
+      out.print(getJavaTypeName());
       out.print(" " + getFieldName() + ";");
     }
   }
@@ -425,7 +438,7 @@ abstract public class AbstractField implements AmberField {
   /**
    * Returns the getter method.
    */
-  public JMethod getGetterMethod()
+  public Method getGetterMethod()
   {
     return _getterMethod;
   }
@@ -433,7 +446,7 @@ abstract public class AbstractField implements AmberField {
   /**
    * Returns the setter method.
    */
-  public JMethod getSetterMethod()
+  public Method getSetterMethod()
   {
     return _setterMethod;
   }
@@ -626,7 +639,7 @@ abstract public class AbstractField implements AmberField {
   /**
    * Generates the select clause for an entity load.
    */
-  public String generateLoadSelect(Table table, String id)
+  public String generateLoadSelect(AmberTable table, String id)
   {
     return null;
   }

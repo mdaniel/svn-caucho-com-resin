@@ -30,7 +30,7 @@ package com.caucho.amber.expr;
 
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.EntityType;
 import com.caucho.util.CharBuffer;
 
@@ -70,7 +70,7 @@ public class IdExpr extends AbstractPathExpr {
   /**
    * Returns the table
    */
-  Table getTable()
+  AmberTable getTable()
   {
     return _fromItem.getTable();
   }

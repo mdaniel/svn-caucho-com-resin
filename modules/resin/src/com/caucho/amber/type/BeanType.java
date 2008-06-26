@@ -31,20 +31,18 @@ package com.caucho.amber.type;
 
 import com.caucho.amber.field.*;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.table.Column;
-import com.caucho.amber.table.Table;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassDependency;
-import com.caucho.bytecode.JField;
-import com.caucho.bytecode.JMethod;
+import com.caucho.amber.table.AmberColumn;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.make.ClassDependency;
-import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.PersistentDependency;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -71,7 +69,7 @@ abstract public class BeanType extends AbstractEnhancedType {
   private HashMap<String,String> _completionFields
     = new HashMap<String,String>();
 
-  private Column _discriminator;
+  private AmberColumn _discriminator;
 
   public BeanType(AmberPersistenceUnit amberPersistenceUnit)
   {
@@ -110,7 +108,7 @@ abstract public class BeanType extends AbstractEnhancedType {
   /**
    * Returns the discriminator.
    */
-  public Column getDiscriminator()
+  public AmberColumn getDiscriminator()
   {
     return _discriminator;
   }
@@ -118,7 +116,7 @@ abstract public class BeanType extends AbstractEnhancedType {
   /**
    * Sets the discriminator.
    */
-  public void setDiscriminator(Column discriminator)
+  public void setDiscriminator(AmberColumn discriminator)
   {
     _discriminator = discriminator;
   }
@@ -174,11 +172,11 @@ abstract public class BeanType extends AbstractEnhancedType {
    * Sets the bean class.
    */
   @Override
-  public void setBeanClass(JClass beanClass)
+  public void setBeanClass(Class beanClass)
   {
     super.setBeanClass(beanClass);
 
-    addDependency(_beanClass);
+    addDependency(_tBeanClass);
   }
 
   /**
@@ -187,14 +185,6 @@ abstract public class BeanType extends AbstractEnhancedType {
   public void addDependency(Class cl)
   {
     addDependency(new ClassDependency(cl));
-  }
-
-  /**
-   * Adds a dependency.
-   */
-  public void addDependency(JClass cl)
-  {
-    addDependency(new JClassDependency(cl));
   }
 
   /**
@@ -264,8 +254,8 @@ abstract public class BeanType extends AbstractEnhancedType {
     for (AmberField field : _selfFields) {
       // ejb/0602
       if (getPersistenceUnit().isJPA()) {
-	if (field instanceof EntityManyToOneField)
-	  ((EntityManyToOneField) field).init((EntityType) this);
+	if (field instanceof ManyToOneField)
+	  ((ManyToOneField) field).init((EntityType) this);
       }
     }
   }
@@ -283,7 +273,7 @@ abstract public class BeanType extends AbstractEnhancedType {
    * Generates the select clause for a load.
    */
   public void generateLoadSelect(StringBuilder sb,
-				 Table table,
+				 AmberTable table,
 				 String id,
 				 int loadGroup)
   {
@@ -320,7 +310,8 @@ abstract public class BeanType extends AbstractEnhancedType {
         parent = ((EntityType) this).getParentType();
 
       boolean isAbstractParent = getPersistenceUnit().isJPA()
-        && (parent == null || parent.getBeanClass().isAbstract());
+        && (parent == null 
+            || Modifier.isAbstract(parent.getBeanClass().getModifiers()));
 
       if (loadGroupIndex == 0 || isAbstractParent)
         index++;
@@ -338,12 +329,12 @@ abstract public class BeanType extends AbstractEnhancedType {
   /**
    * Generates the select clause for a load.
    */
-  abstract public String generateLoadSelect(Table table, String id);
+  abstract public String generateLoadSelect(AmberTable table, String id);
 
   /**
    * Generates the select clause for a load.
    */
-  public String generateLoadSelect(Table table,
+  public String generateLoadSelect(AmberTable table,
                                    String id,
                                    int loadGroup)
   {
@@ -393,27 +384,27 @@ abstract public class BeanType extends AbstractEnhancedType {
   /**
    * Gets a matching getter.
    */
-  public JMethod getGetter(String name)
+  public Method getGetter(String name)
   {
-    return getGetter(_beanClass, name);
+    return getGetter(_tBeanClass, name);
   }
 
   /**
    * Gets a matching getter.
    */
-  public static JMethod getGetter(JClass cl, String name)
+  public static Method getGetter(Class cl, String name)
   {
-    JMethod []methods = cl.getMethods();
+    Method []methods = cl.getMethods();
 
     for (int i = 0; i < methods.length; i++) {
-      JClass []param = methods[i].getParameterTypes();
+      Class []param = methods[i].getParameterTypes();
       String methodName = methods[i].getName();
 
       if (name.equals(methodName) && param.length == 0)
         return methods[i];
     }
 
-    cl = cl.getSuperClass();
+    cl = cl.getSuperclass();
 
     if (cl != null)
       return getGetter(cl, name);
@@ -424,16 +415,16 @@ abstract public class BeanType extends AbstractEnhancedType {
   /**
    * Gets a matching getter.
    */
-  public static JField getField(JClass cl, String name)
+  public static Field getField(Class cl, String name)
   {
-    JField []fields = cl.getDeclaredFields();
+    Field []fields = cl.getDeclaredFields();
 
     for (int i = 0; i < fields.length; i++) {
       if (name.equals(fields[i].getName()))
         return fields[i];
     }
 
-    cl = cl.getSuperClass();
+    cl = cl.getSuperclass();
 
     if (cl != null)
       return getField(cl, name);
@@ -444,19 +435,19 @@ abstract public class BeanType extends AbstractEnhancedType {
   /**
    * Gets a matching getter.
    */
-  public static JMethod getSetter(JClass cl, String name)
+  public static Method getSetter(Class cl, String name)
   {
-    JMethod []methods = cl.getMethods();
+    Method []methods = cl.getMethods();
 
     for (int i = 0; i < methods.length; i++) {
-      JClass []param = methods[i].getParameterTypes();
+      Class []param = methods[i].getParameterTypes();
       String methodName = methods[i].getName();
 
       if (name.equals(methodName) && param.length == 1)
         return methods[i];
     }
 
-    cl = cl.getSuperClass();
+    cl = cl.getSuperclass();
 
     if (cl != null)
       return getSetter(cl, name);
@@ -476,14 +467,5 @@ abstract public class BeanType extends AbstractEnhancedType {
     }
 
     return mask;
-  }
-
-  /**
-   * Printable version of the entity.
-   */
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _beanClass.getName() + "]";
   }
 }

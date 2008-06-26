@@ -29,12 +29,12 @@
 
 package com.caucho.amber.cfg;
 
-import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.type.EmbeddableType;
-import com.caucho.bytecode.*;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -61,10 +61,10 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
   /**
    * Returns true for embeddable type.
    */
-  public boolean isEmbeddable(JClass type)
+  public boolean isEmbeddable(Class type)
   {
     getInternalEmbeddableConfig(type, _annotationCfg);
-    JAnnotation embeddableAnn = _annotationCfg.getAnnotation();
+    Annotation embeddableAnn = _annotationCfg.getAnnotation();
     EmbeddableConfig embeddableConfig = _annotationCfg.getEmbeddableConfig();
 
     return (! _annotationCfg.isNull());
@@ -73,11 +73,11 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
   /**
    * Introspects.
    */
-  public EmbeddableType introspect(JClass type)
+  public EmbeddableType introspect(Class type)
     throws ConfigException, SQLException
   {
     getInternalEmbeddableConfig(type, _annotationCfg);
-    JAnnotation embeddableAnn = _annotationCfg.getAnnotation();
+    Annotation embeddableAnn = _annotationCfg.getAnnotation();
     EmbeddableConfig embeddableConfig = _annotationCfg.getEmbeddableConfig();
 
     String typeName = type.getName();
@@ -97,7 +97,7 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
         embeddableType.setFieldAccess(true);
 
       // XXX: jpa/0u21
-      JAnnotation ann = type.getAnnotation(javax.persistence.Embeddable.class);
+      Annotation ann = type.getAnnotation(javax.persistence.Embeddable.class);
 
       if (ann == null) {
         isField = true;
@@ -132,15 +132,15 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
     return embeddableType;
   }
 
-  boolean isField(JClass type,
+  boolean isField(Class type,
                   AbstractEnhancedConfig typeConfig)
     throws ConfigException
   {
-    for (JMethod method : type.getDeclaredMethods()) {
-      JAnnotation ann[] = method.getDeclaredAnnotations();
+    for (Method method : type.getDeclaredMethods()) {
+      Annotation ann[] = method.getDeclaredAnnotations();
 
       for (int i = 0; ann != null && i < ann.length; i++) {
-	if (isPropertyAnnotation(ann[i].getType()))
+	if (isPropertyAnnotation(ann[i].getClass().getName()))
 	  return false;
       }
     }

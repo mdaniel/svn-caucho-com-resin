@@ -33,7 +33,7 @@ import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParseException;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.util.CharBuffer;
 
 import java.sql.ResultSet;
@@ -54,7 +54,7 @@ public interface AmberExpr {
   /**
    * Returns the expr type.
    */
-  Type getType();
+  AmberType getType();
 
   /**
    * Binds the expression as a select item.

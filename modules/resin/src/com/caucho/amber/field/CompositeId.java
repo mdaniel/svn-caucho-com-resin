@@ -30,20 +30,17 @@
 package com.caucho.amber.field;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.BeanType;
 import com.caucho.amber.type.EmbeddableType;
-import com.caucho.amber.type.PrimitiveType;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
+import com.caucho.amber.type.AmberType;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.logging.Logger;
@@ -54,9 +51,10 @@ import java.util.logging.Logger;
  */
 public class CompositeId extends Id {
   private static final L10N L = new L10N(CompositeId.class);
-  protected static final Logger log = Log.open(CompositeId.class);
+  private static final Logger log
+    = Logger.getLogger(CompositeId.class.getName());
 
-  private JClass _keyClass;
+  private Class _tKeyClass;
 
   public CompositeId(EntityType ownerType,
                      ArrayList<IdField> keys)
@@ -72,9 +70,9 @@ public class CompositeId extends Id {
   /**
    * Sets the foreign key type.
    */
-  public void setKeyClass(JClass keyClass)
+  public void setKeyClass(Class keyClass)
   {
-    _keyClass = keyClass;
+    _tKeyClass = keyClass;
 
     getOwnerType().addDependency(keyClass);
   }
@@ -82,10 +80,11 @@ public class CompositeId extends Id {
   /**
    * Returns the foreign type.
    */
+  @Override
   public String getForeignTypeName()
   {
-    if (_keyClass != null)
-      return _keyClass.getName();
+    if (_tKeyClass != null)
+      return _tKeyClass.getName();
     else if (isEmbeddedId())
       return getEmbeddedIdField().getJavaTypeName();
     else
@@ -115,6 +114,7 @@ public class CompositeId extends Id {
   /**
    * Generates any prologue.
    */
+  @Override
   public void generatePrologue(JavaWriter out,
                                HashSet<Object> completedSet,
                                String name)
@@ -195,7 +195,7 @@ public class CompositeId extends Id {
         else
           name = "get" + ch + key.getName().substring(1);
 
-        JMethod method = BeanType.getGetter(_keyClass, name);
+        Method method = BeanType.getGetter(_tKeyClass, name);
 
         if (key.isKeyField() || (method != null)) {
           out.println(key.generateSetKeyProperty("key", "a" + i) + ";");
@@ -315,7 +315,7 @@ public class CompositeId extends Id {
         else
           name = "get" + ch + key.getName().substring(1);
 
-        JMethod method = BeanType.getGetter(_keyClass, name);
+        Method method = BeanType.getGetter(_tKeyClass, name);
 
         if (key.isKeyField() || (method != null)) {
           if (i == 0)
@@ -345,6 +345,7 @@ public class CompositeId extends Id {
   /**
    * Returns the foreign type.
    */
+  @Override
   public int generateLoadForeign(JavaWriter out, String rs,
                                  String indexVar, int index)
     throws IOException
@@ -356,6 +357,7 @@ public class CompositeId extends Id {
   /**
    * Returns the foreign type.
    */
+  @Override
   public int generateLoadForeign(JavaWriter out, String rs,
                                  String indexVar, int index,
                                  String name)
@@ -374,6 +376,7 @@ public class CompositeId extends Id {
   /**
    * Generates the select clause.
    */
+  @Override
   public String generateSelect(String id)
   {
     ArrayList<IdField> keys = getKeys();
@@ -393,6 +396,7 @@ public class CompositeId extends Id {
   /**
    * Generates the JPA QL select clause.
    */
+  @Override
   public String generateJavaSelect(String id)
   {
     ArrayList<IdField> keys = getKeys();
@@ -412,6 +416,7 @@ public class CompositeId extends Id {
   /**
    * Generates the select clause.
    */
+  @Override
   public String generateLoadSelect(String id)
   {
     return null;
@@ -445,6 +450,7 @@ public class CompositeId extends Id {
   /**
    * Generates loading cache
    */
+  @Override
   public void generateSet(JavaWriter out, String objThis, String value)
     throws IOException
   {
@@ -460,7 +466,7 @@ public class CompositeId extends Id {
       // jpa/0u21
 
       EmbeddableType embeddable
-        = persistenceUnit.getEmbeddable(_keyClass.getName());
+        = persistenceUnit.getEmbeddable(_tKeyClass.getName());
 
       // jpa/0u21 ArrayList<IdField> keys = getKeys();
       ArrayList<AmberField> keys = embeddable.getFields();
@@ -480,7 +486,7 @@ public class CompositeId extends Id {
 
         KeyPropertyField prop = null;
 
-        Column column = key.getColumn();
+        AmberColumn column = key.getColumn();
 
 	// jpa/0j55
         if (true || column == null) {
@@ -496,7 +502,7 @@ public class CompositeId extends Id {
         if (prop != null)
           key = prop;
 
-        Type columnType = key.getColumn().getType();
+        AmberType columnType = key.getColumn().getType();
 
         value = columnType.generateCastFromObject("field" + i);
 
@@ -563,6 +569,7 @@ public class CompositeId extends Id {
   /**
    * Generates loading cache
    */
+  @Override
   public void generateLoadFromObject(JavaWriter out, String obj)
     throws IOException
   {
@@ -576,6 +583,7 @@ public class CompositeId extends Id {
   /**
    * Generates loading cache
    */
+  @Override
   public void generateUpdateFromObject(JavaWriter out, String obj)
     throws IOException
   {
@@ -608,6 +616,7 @@ public class CompositeId extends Id {
   /**
    * Generates the where clause.
    */
+  @Override
   public String generateCreateTableSQL(AmberPersistenceUnit manager)
   {
     return null;
@@ -616,6 +625,7 @@ public class CompositeId extends Id {
   /**
    * Generates the set clause.
    */
+  @Override
   public void generateSetKey(JavaWriter out, String pstmt,
                              String obj, String index)
     throws IOException
@@ -626,6 +636,7 @@ public class CompositeId extends Id {
   /**
    * Generates code to convert to the type from the object.
    */
+  @Override
   public String generateCastFromObject(String value)
   {
     return value;
@@ -634,6 +645,7 @@ public class CompositeId extends Id {
   /**
    * Generates code for a match.
    */
+  @Override
   public void generateMatch(JavaWriter out, String key)
     throws IOException
   {
@@ -643,6 +655,7 @@ public class CompositeId extends Id {
   /**
    * Generates code to test the equals.
    */
+  @Override
   public String generateEquals(String leftBase, String value)
   {
     return leftBase + ".equals(" + value + ")";
@@ -650,6 +663,7 @@ public class CompositeId extends Id {
   /**
    * Generates the set clause.
    */
+  @Override
   public void generateCheckCreateKey(JavaWriter out)
     throws IOException
   {
@@ -668,6 +682,7 @@ public class CompositeId extends Id {
   /**
    * Generates code to convert to the object.
    */
+  @Override
   public String toObject(String value)
   {
     return value;

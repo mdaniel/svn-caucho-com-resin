@@ -31,7 +31,7 @@ package com.caucho.amber.type;
 /**
  * Represents a primitive numeric type.
  */
-abstract public class Primitive extends Type {
+abstract public class Primitive extends AmberType {
   /**
    * Returns a boolean equality.
    */

@@ -33,7 +33,7 @@ import com.caucho.amber.expr.CollectionIdExpr;
 import com.caucho.amber.expr.IdExpr;
 import com.caucho.amber.expr.JoinExpr;
 import com.caucho.amber.expr.PathExpr;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.EntityType;
 
 public class FromItem {
@@ -41,7 +41,7 @@ public class FromItem {
 
   private EntityType _entityType;
 
-  private Table _table;
+  private AmberTable _table;
 
   private AbstractQuery _query;
 
@@ -61,7 +61,7 @@ public class FromItem {
     = JoinSemantics.UNKNOWN;
 
   FromItem(EntityType entityType,
-           Table table,
+           AmberTable table,
            String name,
            int index)
   {
@@ -159,7 +159,7 @@ public class FromItem {
   /**
    * Returns the table.
    */
-  public Table getTable()
+  public AmberTable getTable()
   {
     return _table;
   }
@@ -175,7 +175,7 @@ public class FromItem {
   /**
    * Sets the table.
    */
-  public void setTable(Table table)
+  public void setTable(AmberTable table)
   {
     _table = table;
   }

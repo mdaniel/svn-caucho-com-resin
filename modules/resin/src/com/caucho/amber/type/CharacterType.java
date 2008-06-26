@@ -41,7 +41,7 @@ import java.sql.Types;
 /**
  * The character type.
  */
-public class CharacterType extends Type {
+public class CharacterType extends AmberType {
   private static final L10N L = new L10N(CharacterType.class);
 
   private static final CharacterType CHAR_TYPE = new CharacterType();

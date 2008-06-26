@@ -34,8 +34,6 @@ import com.caucho.amber.cfg.*;
 import com.caucho.amber.gen.AmberEnhancer;
 import com.caucho.amber.gen.AmberGenerator;
 import com.caucho.amber.type.*;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassLoader;
 import com.caucho.config.*;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.EnhancerManager;
@@ -68,8 +66,6 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   private ClassLoader _tempLoader;
   // private EnhancingClassLoader _enhancedLoader;
   private AmberContainer _parentAmberContainer;
-
-  private JClassLoader _jClassLoader;
 
   private AmberEnhancer _enhancer;
 
@@ -143,13 +139,6 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
 
     // --- ok
     
-    // XXX: change after the 3.1.4 release
-    _jClassLoader = EnhancerManager.create(_parentLoader).getJavaClassLoader();
-    /*
-    _jClassLoader
-      = JClassLoaderWrapper.create(_parentLoader.getNewTempClassLoader());
-    */
-
     _enhancer = new AmberEnhancer(this);
 
     EnhancerManager.create(_parentLoader).addClassEnhancer(_enhancer);
@@ -323,9 +312,15 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   /**
    * Returns the JClassLoader.
    */
-  public JClassLoader getJClassLoader()
+  public ClassLoader getTempClassLoader()
   {
-    return _jClassLoader;
+    return _tempLoader;
+  }
+  
+  public Class loadTempClass(String name)
+    throws ClassNotFoundException
+  {
+    return Class.forName(name, false, getTempClassLoader());
   }
 
   private void copyContainerDefaults(AmberContainer parent)
@@ -726,7 +721,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
       if (unitList == null)
 	return;
 
-      HashMap<String, JClass> classMap = new HashMap<String, JClass>();
+      HashMap<String,Class> classMap = new HashMap<String,Class>();
 
       for (PersistenceUnitConfig unitConfig : unitList) {
 	Class provider = unitConfig.getProvider();
@@ -954,11 +949,11 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   }
 
   private void lookupClass(String className,
-                           HashMap<String, JClass> classMap,
+                           HashMap<String,Class> classMap,
                            EntityMappingsConfig entityMappings)
     throws Exception
   {
-    JClass type = _jClassLoader.forName(className);
+    Class type = loadTempClass(className);
 
     if (type != null) {
       boolean isEntity

@@ -48,7 +48,7 @@ public class ArgExpr extends AbstractAmberExpr {
 
   private String _name;
 
-  private Type _type;
+  private AmberType _type;
 
   /**
    * Creates a new argument expression.
@@ -91,7 +91,7 @@ public class ArgExpr extends AbstractAmberExpr {
   /**
    * Returns the expr type.
    */
-  public Type getType()
+  public AmberType getType()
   {
     return _type;
   }
@@ -99,7 +99,7 @@ public class ArgExpr extends AbstractAmberExpr {
   /**
    * Sets the expr type.
    */
-  public void setType(Type type)
+  public void setType(AmberType type)
   {
     _type = type;
   }
@@ -161,7 +161,7 @@ public class ArgExpr extends AbstractAmberExpr {
    * Sets the parameter.
    */
   public void setParameter(PreparedStatement pstmt, int i,
-                           Type []argTypes, Object []argValues)
+                           AmberType []argTypes, Object []argValues)
     throws SQLException
   {
     try {

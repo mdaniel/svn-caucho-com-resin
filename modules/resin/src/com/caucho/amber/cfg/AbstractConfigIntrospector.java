@@ -33,11 +33,6 @@ import com.caucho.amber.field.IdField;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.type.BeanType;
 import com.caucho.amber.type.EntityType;
-import com.caucho.bytecode.JAccessibleObject;
-import com.caucho.bytecode.JAnnotation;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JField;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
@@ -46,7 +41,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.logging.Logger;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import javax.persistence.JoinColumn;
+import javax.persistence.Version;
 
 
 /**
@@ -116,31 +114,31 @@ abstract public class AbstractConfigIntrospector {
    * Validates a callback method
    */
   void validateCallback(String callbackName,
-                        JMethod method,
+                        Method method,
                         boolean isListener)
     throws ConfigException
   {
-    if (method.isFinal())
+    if (Modifier.isFinal(method.getModifiers()))
       throw error(method, L.l("'{0}' must not be final.  @{1} methods may not be final.",
-                                    method.getFullName(),
+                                    getFullName(method),
                                     callbackName));
 
-    if (method.isStatic())
+    if (Modifier.isStatic(method.getModifiers()))
       throw error(method, L.l("'{0}' must not be static.  @{1} methods may not be static.",
-                                    method.getFullName(),
+                                    getFullName(method),
                                     callbackName));
 
-    JClass params[] = method.getParameterTypes();
+    Class params[] = method.getParameterTypes();
 
     if (isListener) {
       if (params.length != 1) {
         throw error(method, L.l("'{0}' must have the <METHOD>(Object) signature for entity listeners.",
-                                      method.getFullName()));
+                                      getFullName(method)));
       }
     }
     else if (params.length != 0) {
       throw error(method, L.l("'{0}' must not have any arguments.  @{1} methods have zero arguments for entities or mapped superclasses.",
-                                    method.getFullName(),
+                                    getFullName(method),
                                     callbackName));
     }
   }
@@ -148,10 +146,10 @@ abstract public class AbstractConfigIntrospector {
   /**
    * Validates the bean
    */
-  public void validateType(JClass type, boolean isEntity)
+  public void validateType(Class type, boolean isEntity)
     throws ConfigException
   {
-    if (type.isFinal())
+    if (Modifier.isFinal(type.getModifiers()))
       throw new ConfigException(L.l("'{0}' must not be final.  Entity beans may not be final.",
                                     type.getName()));
 
@@ -161,25 +159,27 @@ abstract public class AbstractConfigIntrospector {
     if (isEntity)
       validateConstructor(type);
 
-    for (JMethod method : type.getMethods()) {
+    for (Method method : type.getMethods()) {
       if (method.getDeclaringClass().getName().equals("java.lang.Object")) {
       }
-      else if (method.isFinal())
+      else if (Modifier.isFinal(method.getModifiers()))
         throw error(method, L.l("'{0}' must not be final.  Entity beans methods may not be final.",
-                                method.getFullName()));
+                                getFullName(method)));
     }
   }
 
   /**
    * Checks for a valid constructor.
    */
-  public void validateConstructor(JClass type)
+  public void validateConstructor(Class type)
     throws ConfigException
   {
-    for (JMethod ctor : type.getConstructors()) {
-      JClass []param = ctor.getParameterTypes();
+    for (Constructor ctor : type.getConstructors()) {
+      Class []param = ctor.getParameterTypes();
 
-      if (param.length == 0 && (ctor.isPublic() || ctor.isProtected()))
+      if (param.length == 0
+          && (Modifier.isPublic(ctor.getModifiers())
+              || Modifier.isProtected(ctor.getModifiers())))
         return;
     }
 
@@ -191,26 +191,26 @@ abstract public class AbstractConfigIntrospector {
   /**
    * Validates a non-getter method.
    */
-  public void validateNonGetter(JMethod method)
+  public void validateNonGetter(Method method)
     throws ConfigException
   {
-    JAnnotation ann = isAnnotatedMethod(method);
+    Annotation ann = isAnnotatedMethod(method);
 
-    if ((ann != null) && (! ann.getType().equals("javax.persistence.Version")))  {
+    if (ann != null && ! (ann instanceof Version))  {
       throw error(method,
                   L.l("'{0}' is not a valid annotation for {1}.  Only public getters and fields may have property annotations.",
-                      ann.getType(), method.getFullName()));
+                      ann, getFullName(method)));
     }
   }
 
   /**
    * Validates a non-getter method.
    */
-  JAnnotation isAnnotatedMethod(JMethod method)
+  Annotation isAnnotatedMethod(Method method)
     throws ConfigException
   {
-    for (JAnnotation ann : method.getDeclaredAnnotations()) {
-      if (_propertyAnnotations.contains(ann.getType())) {
+    for (Annotation ann : method.getDeclaredAnnotations()) {
+      if (_propertyAnnotations.contains(ann.getClass().getName())) {
         return ann;
       }
     }
@@ -238,20 +238,21 @@ abstract public class AbstractConfigIntrospector {
     return false;
   }
 
-  static void validateAnnotations(JAccessibleObject field,
+  static void validateAnnotations(AccessibleObject field,
+                                  String fieldName,
 				  String fieldType,
                                   HashSet<String> validAnnotations)
     throws ConfigException
   {
-    for (JAnnotation ann : field.getDeclaredAnnotations()) {
-      String name = ann.getType();
+    for (Annotation ann : field.getDeclaredAnnotations()) {
+      String name = ann.getClass().getName();
 
       if (! name.startsWith("javax.persistence"))
         continue;
 
       if (! validAnnotations.contains(name)) {
         throw error(field, L.l("{0} may not have a @{1} annotation.  {2} does not allow @{3}.",
-                               field.getName(),
+                               fieldName,
                                name,
 			       fieldType,
 			       name));
@@ -259,19 +260,9 @@ abstract public class AbstractConfigIntrospector {
     }
   }
 
-  static ConfigException error(JAccessibleObject field,
-                               String msg)
+  static String getFullName(Method method)
   {
-    // XXX: the field is for line numbers in the source, theoretically
-
-    String className = field.getDeclaringClass().getName();
-
-    int line = field.getLine();
-
-    if (line > 0)
-      return new ConfigException(className + ":" + line + ": " + msg);
-    else
-      return new ConfigException(className + "." + field.getName() + ": " + msg);
+    return method.getName();
   }
 
   static String toFieldName(String name)
@@ -285,21 +276,21 @@ abstract public class AbstractConfigIntrospector {
       return name;
   }
 
-  static ArrayList<ForeignColumn> calculateColumns(com.caucho.amber.table.Table mapTable,
+  static ArrayList<ForeignColumn> calculateColumns(com.caucho.amber.table.AmberTable mapTable,
                                                    EntityType type,
-                                                   Object []joinColumnsAnn)
+                                                   JoinColumn []joinColumns)
   {
-    if (joinColumnsAnn == null || joinColumnsAnn.length == 0)
+    if (joinColumns == null || joinColumns.length == 0)
       return calculateColumns(mapTable, type);
 
     ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
 
-    for (int i = 0; i < joinColumnsAnn.length; i++) {
+    for (int i = 0; i < joinColumns.length; i++) {
       ForeignColumn foreignColumn;
-      JAnnotation joinColumnAnn = (JAnnotation) joinColumnsAnn[i];
+      JoinColumn joinColumn = joinColumns[i];
 
       foreignColumn =
-        mapTable.createForeignColumn(joinColumnAnn.getString("name"),
+        mapTable.createForeignColumn(joinColumn.name(),
                                      type.getId().getKey().getColumns().get(0));
 
       columns.add(foreignColumn);
@@ -309,11 +300,12 @@ abstract public class AbstractConfigIntrospector {
   }
 
   static ArrayList<ForeignColumn>
-    calculateColumns(JAccessibleObject field,
-                     com.caucho.amber.table.Table mapTable,
+    calculateColumns(AccessibleObject field,
+                     String fieldName,
+                     com.caucho.amber.table.AmberTable mapTable,
                      String prefix,
                      EntityType type,
-                     Object []joinColumnsAnn,
+                     JoinColumn []joinColumnsAnn,
                      HashMap<String, JoinColumnConfig> joinColumnsConfig)
     throws ConfigException
   {
@@ -339,7 +331,7 @@ abstract public class AbstractConfigIntrospector {
 
     if (len != idFields.size()) {
       throw error(field, L.l("@JoinColumns for {0} do not match number of the primary key columns in {1}.  The foreign key columns must match the primary key columns.",
-                             field.getName(),
+                             fieldName,
                              type.getName()));
     }
 
@@ -354,8 +346,7 @@ abstract public class AbstractConfigIntrospector {
       String name;
 
       if (joinColumnsAnn != null) {
-        JAnnotation joinColumnAnn = (JAnnotation) joinColumnsAnn[i];
-        name = joinColumnAnn.getString("name");
+        name = joinColumnsAnn[i].name();
       }
       else {
         JoinColumnConfig joinColumnConfig = (JoinColumnConfig) it.next();
@@ -372,14 +363,50 @@ abstract public class AbstractConfigIntrospector {
     return columns;
   }
 
-  static ArrayList<ForeignColumn> calculateColumns(com.caucho.amber.table.Table mapTable,
+  static ConfigException error(AccessibleObject field, String msg)
+  {
+    if (field instanceof Field)
+      return error((Field) field, msg);
+    else
+      return error((Method) field, msg);
+  }
+  
+  static ConfigException error(Field field, String msg)
+  {
+    // XXX: the field is for line numbers in the source, theoretically
+
+    String className = field.getDeclaringClass().getName();
+
+    int line = 0; //field.getLine();
+
+    if (line > 0)
+      return new ConfigException(className + ":" + line + ": " + msg);
+    else
+      return new ConfigException(className + "." + field.getName() + ": " + msg);
+  }
+ 
+  static ConfigException error(Method field, String msg)
+  {
+    // XXX: the field is for line numbers in the source, theoretically
+
+    String className = field.getDeclaringClass().getName();
+
+    int line = 0; //field.getLine();
+
+    if (line > 0)
+      return new ConfigException(className + ":" + line + ": " + msg);
+    else
+      return new ConfigException(className + "." + field.getName() + ": " + msg);
+  }
+
+  static ArrayList<ForeignColumn> calculateColumns(com.caucho.amber.table.AmberTable mapTable,
                                                    EntityType type)
   {
     ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
 
     EntityType parentType = type;
 
-    ArrayList<com.caucho.amber.table.Column> targetIdColumns;
+    ArrayList<com.caucho.amber.table.AmberColumn> targetIdColumns;
 
     targetIdColumns = type.getId().getColumns();
 
@@ -393,14 +420,14 @@ abstract public class AbstractConfigIntrospector {
       targetIdColumns = parentType.getId().getColumns();
     }
 
-    for (com.caucho.amber.table.Column key : targetIdColumns) {
+    for (com.caucho.amber.table.AmberColumn key : targetIdColumns) {
       columns.add(mapTable.createForeignColumn(key.getName(), key));
     }
 
     return columns;
   }
 
-  static ArrayList<ForeignColumn> calculateColumns(com.caucho.amber.table.Table mapTable,
+  static ArrayList<ForeignColumn> calculateColumns(com.caucho.amber.table.AmberTable mapTable,
                                                    String prefix,
                                                    EntityType type)
   {
@@ -408,7 +435,7 @@ abstract public class AbstractConfigIntrospector {
 
     EntityType parentType = type;
 
-    ArrayList<com.caucho.amber.table.Column> targetIdColumns;
+    ArrayList<com.caucho.amber.table.AmberColumn> targetIdColumns;
 
     targetIdColumns = type.getId().getColumns();
 
@@ -422,26 +449,16 @@ abstract public class AbstractConfigIntrospector {
       targetIdColumns = parentType.getId().getColumns();
     }
 
-    for (com.caucho.amber.table.Column key : targetIdColumns) {
+    for (com.caucho.amber.table.AmberColumn key : targetIdColumns) {
       columns.add(mapTable.createForeignColumn(prefix + key.getName(), key));
     }
 
     return columns;
   }
 
-  protected static String loc(JMethod method)
-  {
-    return method.getDeclaringClass().getName() + "." + method.getName() + ": ";
-  }
-
   protected static String loc(Method method)
   {
     return method.getDeclaringClass().getSimpleName() + "." + method.getName() + ": ";
-  }
-
-  protected static String loc(JField field)
-  {
-    return field.getDeclaringClass().getName() + "." + field.getName() + ": ";
   }
 
   protected static String loc(Field field)
@@ -455,10 +472,10 @@ abstract public class AbstractConfigIntrospector {
   }
 
   class AnnotationConfig {
-    private JAnnotation _annotation;
+    private Annotation _annotation;
     private Object _config;
 
-    public JAnnotation getAnnotation()
+    public Annotation getAnnotation()
     {
       return _annotation;
     }
@@ -468,7 +485,7 @@ abstract public class AbstractConfigIntrospector {
       return _config;
     }
 
-    public void setAnnotation(JAnnotation annotation)
+    public void setAnnotation(Annotation annotation)
     {
       _annotation = annotation;
     }
@@ -488,14 +505,14 @@ abstract public class AbstractConfigIntrospector {
       _annotation = null;
       _config = null;
     }
-
-    public void reset(JClass type, Class cl)
+    
+    public void reset(Class type, Class cl)
     {
       _annotation = type.getAnnotation(cl);
       _config = null;
     }
 
-    public void reset(JAccessibleObject field, Class cl)
+    public void reset(AccessibleObject field, Class cl)
     {
       _annotation = field.getAnnotation(cl);
       _config = null;

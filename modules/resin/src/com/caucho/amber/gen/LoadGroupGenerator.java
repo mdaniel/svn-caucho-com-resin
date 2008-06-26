@@ -30,14 +30,14 @@
 package com.caucho.amber.gen;
 
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.*;
-import com.caucho.bytecode.JMethod;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.ClassComponent;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /**
@@ -62,6 +62,7 @@ public class LoadGroupGenerator extends ClassComponent {
   /**
    * Generates the load group.
    */
+  @Override
   public void generate(JavaWriter out)
     throws IOException
   {
@@ -284,14 +285,14 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
     out.println("  return;");
 
-    Table table = _entityType.getTable();
+    AmberTable table = _entityType.getTable();
 
     String from = null;
     String select = null;
     String where = null;
 
     String subSelect = null;
-    Table mainTable = null;
+    AmberTable mainTable = null;
     String tableName = null;
 
     select = _entityType.generateLoadSelect(table, "o", _index);
@@ -303,10 +304,10 @@ public class LoadGroupGenerator extends ClassComponent {
       tableName = "o";
     }
 
-    ArrayList<Table> subTables = _entityType.getSecondaryTables();
+    ArrayList<AmberTable> subTables = _entityType.getSecondaryTables();
 
     for (int i = 0; i < subTables.size(); i++) {
-      Table subTable = subTables.get(i);
+      AmberTable subTable = subTables.get(i);
 
       subSelect = _entityType.generateLoadSelect(subTable, "o" + i, _index);
 
@@ -415,14 +416,14 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("}");
   }
 
-  private void generateCallbacks(JavaWriter out, ArrayList<JMethod> callbacks)
+  private void generateCallbacks(JavaWriter out, ArrayList<Method> callbacks)
     throws IOException
   {
     if (callbacks.size() == 0)
       return;
 
     out.println();
-    for (JMethod method : callbacks) {
+    for (Method method : callbacks) {
       out.println(method.getName() + "();");
     }
   }

@@ -36,10 +36,10 @@ import com.caucho.amber.expr.fun.*;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
@@ -505,7 +505,7 @@ public class QueryParser {
 
             FromItem rootItem = null;
 
-            Type targetType = pathExpr.getTargetType();
+            AmberType targetType = pathExpr.getTargetType();
 
             // jpa/0w24
             if (targetType instanceof EntityType) {
@@ -523,7 +523,7 @@ public class QueryParser {
               if (parentType != relatedType) {
                 FromItem child = pathExpr.getChildFromItem();
 
-                Table table = relatedType.getTable(); // parentType.getTable();
+                AmberTable table = relatedType.getTable(); // parentType.getTable();
                 ArrayList<LinkColumns> outgoingLinks = table.getOutgoingLinks();
 
                 for (LinkColumns link : outgoingLinks) {
@@ -1013,7 +1013,7 @@ public class QueryParser {
   /**
    * Adds a new FromItem.
    */
-  public FromItem addFromItem(Table table)
+  public FromItem addFromItem(AmberTable table)
   {
     return addFromItem(null, table, createTableName());
   }
@@ -1022,7 +1022,7 @@ public class QueryParser {
    * Adds a new FromItem.
    */
   public FromItem addFromItem(EntityType entityType,
-                              Table table)
+                              AmberTable table)
   {
     return addFromItem(entityType, table, createTableName());
   }
@@ -1038,7 +1038,7 @@ public class QueryParser {
   /**
    * Adds a new FromItem.
    */
-  public FromItem addFromItem(Table table, String id)
+  public FromItem addFromItem(AmberTable table, String id)
   {
     return addFromItem(null, table, id);
   }
@@ -1047,7 +1047,7 @@ public class QueryParser {
    * Adds a new FromItem.
    */
   public FromItem addFromItem(EntityType entityType,
-                              Table table,
+                              AmberTable table,
                               String id)
   {
     if (id == null)

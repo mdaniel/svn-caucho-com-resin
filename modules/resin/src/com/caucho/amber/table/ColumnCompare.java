@@ -33,11 +33,11 @@ import java.util.Comparator;
 /**
  * Sorts columns fields.
  */
-public class ColumnCompare implements Comparator<Column> {
+public class ColumnCompare implements Comparator<AmberColumn> {
   /**
    * Compares the fields.
    */
-  public int compare(Column a, Column b)
+  public int compare(AmberColumn a, AmberColumn b)
   {
     if (a.isPrimaryKey() && ! b.isPrimaryKey())
       return -1;

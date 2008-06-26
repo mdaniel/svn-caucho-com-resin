@@ -31,7 +31,6 @@ package com.caucho.amber.field;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.persistence.CascadeType;
@@ -43,7 +42,8 @@ import java.util.logging.Logger;
  */
 public class AssociationField extends CollectionField {
   private static final L10N L = new L10N(AssociationField.class);
-  protected static final Logger log = Log.open(AssociationField.class);
+  private static final Logger log
+    = Logger.getLogger(AssociationField.class.getName());
 
   private LinkColumns _linkColumns;
 
@@ -102,6 +102,7 @@ public class AssociationField extends CollectionField {
   /**
    * Sets the result columns.
    */
+  @Override
   public void setLinkColumns(LinkColumns columns)
   {
     _linkColumns = columns;
@@ -110,6 +111,7 @@ public class AssociationField extends CollectionField {
   /**
    * Gets the result.
    */
+  @Override
   public LinkColumns getLinkColumns()
   {
     return _linkColumns;
@@ -118,6 +120,7 @@ public class AssociationField extends CollectionField {
   /**
    * Generates the target select.
    */
+  @Override
   public String generateTargetSelect(String id)
   {
     return getLinkColumns().generateSelectSQL(id);

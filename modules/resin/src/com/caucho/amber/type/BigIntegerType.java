@@ -43,7 +43,7 @@ import java.sql.Types;
 /**
  * The type of a property.
  */
-public class BigIntegerType extends Type {
+public class BigIntegerType extends AmberType {
   private static final L10N L = new L10N(BigIntegerType.class);
 
   private BigIntegerType()

@@ -30,8 +30,8 @@
 package com.caucho.amber.gen;
 
 import com.caucho.amber.field.*;
-import com.caucho.amber.table.Column;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberColumn;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.MappedSuperclassType;
 import com.caucho.amber.type.EntityType;
@@ -44,6 +44,9 @@ import com.caucho.vfs.PersistentDependency;
 
 import javax.persistence.CascadeType;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -143,6 +146,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
   /**
    * Starts generation of the Java code
    */
+  @Override
   public final void generate(JavaWriter out)
     throws IOException
   {
@@ -281,7 +285,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     ArrayList<AmberField> fields = _entityType.getFields();
 
-    for (JMethod ctor : _entityType.getBeanClass().getConstructors()) {
+    for (Constructor ctor : _entityType.getBeanClass().getConstructors()) {
       out.println();
       // XXX: s/b actual access type?
       out.print("public ");
@@ -289,12 +293,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.print(className);
       out.print("(");
 
-      JClass []args = ctor.getParameterTypes();
+      Class []args = ctor.getParameterTypes();
       for (int i = 0; i < args.length; i++) {
         if (i != 0)
           out.print(", ");
 
-        out.print(args[i].getPrintName());
+        out.printClass(args[i]);
         out.print(" a" + i);
       }
       out.println(")");
@@ -336,8 +340,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
         throw new IllegalStateException(L.l("'{0}' is missing a key.",
                                             _entityType.getName()));
 
-    boolean isAbstract = (_entityType.getBeanClass().isAbstract()
-			  && _entityType.getPersistenceUnit().isJPA());
+    boolean isAbstract
+      = Modifier.isAbstract(_entityType.getBeanClass().getModifiers());
 
     out.println();
     out.println("public void __caucho_setPrimaryKey(Object key)");
@@ -482,7 +486,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     Id id = _entityType.getId();
 
     // jpa/0gg0
-    if (id == null || _entityType.getBeanClass().isAbstract()) {
+    if (id == null || Modifier.isAbstract(_entityType.getBeanClass().getModifiers())) {
       // jpa/0ge6: MappedSuperclass
 
       out.println("return true;");
@@ -518,7 +522,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     throws IOException
   {
     if (_entityType.getColumns() != null) {
-      for (Column column : _entityType.getColumns())
+      for (AmberColumn column : _entityType.getColumns())
         column.generatePrologue(out);
     }
 
@@ -1105,9 +1109,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
   void generateCreate(JavaWriter out)
     throws IOException
   {
-    boolean isAbstract = (_entityType.getBeanClass().isAbstract()
-                          && _entityType.getPersistenceUnit().isJPA());
-
+    boolean isAbstract
+      = Modifier.isAbstract(_entityType.getBeanClass().getModifiers());
+    
     boolean isGeneratedValue = false;
 
     // jpa/0gg0
@@ -1198,7 +1202,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println();
       
       // jpa/0r20
-      for (JMethod method : _entityType.getPrePersistCallbacks()) {
+      for (Method method : _entityType.getPrePersistCallbacks()) {
         out.println(method.getName() + "();");
       }
 
@@ -1216,7 +1220,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
       out.println("__caucho_home.postPersist(this);");
 
-      for (JMethod method : _entityType.getPostPersistCallbacks()) {
+      for (Method method : _entityType.getPostPersistCallbacks()) {
         out.println(method.getName() + "();");
       }
 
@@ -1257,7 +1261,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("__caucho_dirtyMask_" + i + " = 0L;");
     }
 
-    Table table = _entityType.getTable();
+    AmberTable table = _entityType.getTable();
 
     String sql = null;
 
@@ -1315,7 +1319,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     EntityType parentType = _entityType;
 
     do {
-      for (Table subTable : parentType.getSecondaryTables()) {
+      for (AmberTable subTable : parentType.getSecondaryTables()) {
         sql = parentType.generateCreateSQL(subTable);
 
         out.println();
@@ -1685,8 +1689,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    boolean isAbstract = (_entityType.getBeanClass().isAbstract()
-                          && _entityType.getPersistenceUnit().isJPA());
+    boolean isAbstract
+      = Modifier.isAbstract(_entityType.getBeanClass().getModifiers());
 
     // jpa/0gg0
     if (_entityType.getId() == null || isAbstract) {
@@ -1722,8 +1726,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    boolean isAbstract = (_entityType.getBeanClass().isAbstract()
-                          && _entityType.getPersistenceUnit().isJPA());
+    boolean isAbstract
+      = Modifier.isAbstract(_entityType.getBeanClass().getModifiers());
 
     if (_entityType.getId() == null || isAbstract) {
       // jpa/0ge6: MappedSuperclass
@@ -1804,7 +1808,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    Column discriminator = _entityType.getDiscriminator();
+    AmberColumn discriminator = _entityType.getDiscriminator();
 
     if (_entityType.isAbstractClass()
         || _entityType.getId() == null
@@ -1912,14 +1916,14 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
   void generateCallbacks(JavaWriter out,
                          String object,
-                         ArrayList<JMethod> callbacks)
+                         ArrayList<Method> callbacks)
     throws IOException
   {
     if (callbacks.size() > 0) {
 
       out.println();
 
-      for (JMethod method : callbacks) {
+      for (Method method : callbacks) {
         out.println(object + "." + method.getName() + "();");
       }
     }

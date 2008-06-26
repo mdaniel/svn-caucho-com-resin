@@ -30,7 +30,7 @@
 package com.caucho.amber.field;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.*;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
@@ -49,13 +49,13 @@ import java.util.logging.Logger;
  */
 public class Id {
   private static final L10N L = new L10N(Id.class);
-  protected static final Logger log
+  private static final Logger log
     = Logger.getLogger(Id.class.getName());
 
   private EntityType _ownerType;
 
   private ArrayList<IdField> _keys = new ArrayList<IdField>();
-  private ArrayList<Column> _columns = new ArrayList<Column>();
+  private ArrayList<AmberColumn> _columns = new ArrayList<AmberColumn>();
 
   public Id(EntityType ownerType, ArrayList<IdField> keys)
   {
@@ -102,7 +102,7 @@ public class Id {
     _columns.addAll(key.getColumns());
     // Collections.sort(_columns, new ColumnCompare());
 
-    for (Column column : key.getColumns()) {
+    for (AmberColumn column : key.getColumns()) {
       _ownerType.getTable().addIdColumn(column);
     }
   }
@@ -125,7 +125,7 @@ public class Id {
   /**
    * Returns all the column.
    */
-  public ArrayList<Column> getColumns()
+  public ArrayList<AmberColumn> getColumns()
   {
     return _columns;
   }
@@ -348,7 +348,7 @@ public class Id {
     boolean isFirst = true;
 
     for (IdField field : getKeys()) {
-      for (Column column : field.getColumns()) {
+      for (AmberColumn column : field.getColumns()) {
 	if (! isFirst)
 	  cb.append(" and ");
 	isFirst = false;

@@ -28,7 +28,7 @@
 
 package com.caucho.amber.field;
 
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.EntityType;
 import com.caucho.java.JavaWriter;
 import com.caucho.log.Log;
@@ -46,7 +46,7 @@ public class MapElementField extends AssociationField
   private static final L10N L = new L10N(MapElementField.class);
   protected static final Logger log = Log.open(MapElementField.class);
 
-  private ArrayList<Column> _indexColumns;
+  private ArrayList<AmberColumn> _indexColumns;
   
   public MapElementField(EntityType entityType)
   {
@@ -56,7 +56,7 @@ public class MapElementField extends AssociationField
   /**
    * Sets the index columns.
    */
-  public void setIndexColumns(ArrayList<Column> columns)
+  public void setIndexColumns(ArrayList<AmberColumn> columns)
   {
     _indexColumns = columns;
   }
@@ -64,7 +64,7 @@ public class MapElementField extends AssociationField
   /**
    * Sets the index columns.
    */
-  public ArrayList<Column> getIndexColumns()
+  public ArrayList<AmberColumn> getIndexColumns()
   {
     return _indexColumns;
   }

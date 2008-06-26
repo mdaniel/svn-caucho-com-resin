@@ -31,7 +31,7 @@ package com.caucho.amber.type;
 /**
  * The type of a property.
  */
-abstract public class ArrayType extends Type {
+abstract public class ArrayType extends AmberType {
 
   /**
    * Returns the corresponding primitive array

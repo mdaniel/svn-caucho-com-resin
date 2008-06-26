@@ -30,7 +30,7 @@ package com.caucho.amber.type;
 
 import com.caucho.amber.field.Id;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.util.L10N;
 
 /**
@@ -103,7 +103,7 @@ public class SubEntityType extends EntityType {
    * Returns the discriminator.
    */
   @Override
-  public Column getDiscriminator()
+  public AmberColumn getDiscriminator()
   {
     if (getRootType() == this) // jpa/0ge2
       return super.getDiscriminator();

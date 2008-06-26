@@ -29,11 +29,65 @@
 
 package com.caucho.amber.cfg;
 
-import javax.persistence.FetchType;
+import com.caucho.amber.table.AmberColumn;
+import com.caucho.bytecode.JAccessibleObject;
+import com.caucho.config.ConfigException;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 /**
  * The base class for properties
  */
 abstract class AbstractConfig
 {
+  static AmberColumn findColumn(ArrayList<AmberColumn> columns, String ref)
+  {
+    if (((ref == null) || ref.equals("")) && columns.size() == 1)
+      return columns.get(0);
+
+    for (AmberColumn column : columns) {
+      if (column.getName().equals(ref))
+        return column;
+    }
+
+    return null;
+  }
+
+  static ConfigException error(AccessibleObject field, String msg)
+  {
+    if (field instanceof Field)
+      return error((Field) field, msg);
+    else
+      return error((Method) field, msg);
+  }
+  
+  static ConfigException error(Field field, String msg)
+  {
+    // XXX: the field is for line numbers in the source, theoretically
+
+    String className = field.getDeclaringClass().getName();
+
+    int line = 0; //field.getLine();
+
+    if (line > 0)
+      return new ConfigException(className + ":" + line + ": " + msg);
+    else
+      return new ConfigException(className + "." + field.getName() + ": " + msg);
+  }
+ 
+  static ConfigException error(Method field, String msg)
+  {
+    // XXX: the field is for line numbers in the source, theoretically
+
+    String className = field.getDeclaringClass().getName();
+
+    int line = 0; //field.getLine();
+
+    if (line > 0)
+      return new ConfigException(className + ":" + line + ": " + msg);
+    else
+      return new ConfigException(className + "." + field.getName() + ": " + msg);
+  }
 }

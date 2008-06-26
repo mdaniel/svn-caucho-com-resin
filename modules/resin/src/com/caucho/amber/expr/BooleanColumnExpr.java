@@ -32,25 +32,25 @@ package com.caucho.amber.expr;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.util.CharBuffer;
 
 /**
- * Column expression returning a boolean
+ * AmberColumn expression returning a boolean
  */
 public class BooleanColumnExpr extends AbstractAmberExpr {
   protected PathExpr _parent;
   // identifier name value
-  private Column _column;
+  private AmberColumn _column;
 
   protected FromItem _fromItem;
 
   /**
    * Creates a new unbound id expression.
    */
-  public BooleanColumnExpr(PathExpr parent, Column column)
+  public BooleanColumnExpr(PathExpr parent, AmberColumn column)
   {
     _parent = parent;
     _column = column;
@@ -67,7 +67,7 @@ public class BooleanColumnExpr extends AbstractAmberExpr {
   /**
    * Returns the name.
    */
-  Column getColumn()
+  AmberColumn getColumn()
   {
     return _column;
   }

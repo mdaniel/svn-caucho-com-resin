@@ -41,7 +41,7 @@ import java.sql.Types;
 /**
  * Represents a java.util.Long type
  */
-public class LongType extends Type {
+public class LongType extends AmberType {
   private static final L10N L = new L10N(LongType.class);
 
   private static final LongType LONG_TYPE = new LongType();

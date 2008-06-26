@@ -38,7 +38,7 @@ import java.sql.SQLException;
 /**
  * The type of a property.
  */
-public class TrueFalseType extends Type {
+public class TrueFalseType extends AmberType {
   private static final L10N L = new L10N(TrueFalseType.class);
 
   private static final TrueFalseType TRUE_FALSE_TYPE = new TrueFalseType();

@@ -32,18 +32,18 @@ package com.caucho.amber.field;
 import com.caucho.amber.expr.*;
 import com.caucho.amber.manager.*;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberColumn;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.*;
-import com.caucho.bytecode.*;
+import com.caucho.bytecode.JType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Logger;
@@ -62,7 +62,7 @@ public class EmbeddedSubField implements AmberField {
   // The corresponding field of the embeddable type
   private AmberField _embeddableField;
 
-  private Column _column;
+  private AmberColumn _column;
   private boolean _isInsert;
   private boolean _isUpdate;
 
@@ -77,7 +77,7 @@ public class EmbeddedSubField implements AmberField {
     _embeddableField = embeddableField;
     _index = index;
 
-    Column embeddableColumn;
+    AmberColumn embeddableColumn;
 
     if (embeddableField instanceof PropertyField) {
       embeddableColumn = ((PropertyField) embeddableField).getColumn();
@@ -90,7 +90,7 @@ public class EmbeddedSubField implements AmberField {
     if (embeddableColumn == null)
       throw new IllegalStateException(embeddableField + " column is null");
 
-    _column = new Column(_embeddedField.getTable(),
+    _column = new AmberColumn(_embeddedField.getTable(),
 			 embeddableColumn.getName(),
 			 embeddableColumn.getType());
   }
@@ -122,12 +122,12 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Returns the table containing the value (or null)
    */
-  public Table getTable()
+  public AmberTable getTable()
   {
     return getColumn().getTable();
   }
 
-  public Column getColumn()
+  public AmberColumn getColumn()
   {
     return _column;
   }
@@ -162,6 +162,14 @@ public class EmbeddedSubField implements AmberField {
   public JType getJavaType()
   {
     return _embeddableField.getJavaType();
+  }
+
+  /**
+   * Returns the type of the field
+   */
+  public Class getJavaClass()
+  {
+    return getJavaType().getRawType().getJavaClass();
   }
 
   /**
@@ -210,7 +218,7 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Returns the getter method.
    */
-  public JMethod getGetterMethod()
+  public Method getGetterMethod()
   {
     return _embeddedField.getGetterMethod();
   }
@@ -226,7 +234,7 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Returns the setter method.
    */
-  public JMethod getSetterMethod()
+  public Method getSetterMethod()
   {
     return _embeddedField.getSetterMethod();
   }
@@ -623,7 +631,7 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Generates the select clause for an entity load.
    */
-  public String generateLoadSelect(Table table, String id)
+  public String generateLoadSelect(AmberTable table, String id)
   {
     if (getColumn().getTable() == table)
       return generateSelect(id);

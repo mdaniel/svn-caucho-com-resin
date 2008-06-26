@@ -35,8 +35,8 @@ import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * Generates the Java code for the wrapped object.
@@ -68,6 +68,7 @@ public class EntityComponent extends AmberMappedComponent {
   /**
    * Generates the delete
    */
+  @Override
   void generateDelete(JavaWriter out)
     throws IOException
   {
@@ -178,6 +179,7 @@ public class EntityComponent extends AmberMappedComponent {
   /**
    * Generates the flush
    */
+  @Override
   void generateFlush(JavaWriter out)
     throws IOException
   {
@@ -193,8 +195,8 @@ public class EntityComponent extends AmberMappedComponent {
     out.println("{");
     out.pushDepth();
 
-    boolean isAbstract = (_entityType.getBeanClass().isAbstract()
-                          && _entityType.getPersistenceUnit().isJPA());
+    boolean isAbstract
+      = Modifier.isAbstract(_entityType.getBeanClass().getModifiers());
 
     if (_entityType.getId() == null || isAbstract) {
       // jpa/0ge6: MappedSuperclass
@@ -328,7 +330,7 @@ public class EntityComponent extends AmberMappedComponent {
       out.println("} else {");
       out.pushDepth();
       String value = version.generateGet("super");
-      Type type = version.getColumn().getType();
+      AmberType type = version.getColumn().getType();
       out.println(version.generateSuperSetter("this", type.generateIncrementVersion(value)) + ";");
       out.popDepth();
       out.println("}");

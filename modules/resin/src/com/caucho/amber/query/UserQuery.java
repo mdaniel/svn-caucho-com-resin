@@ -55,7 +55,7 @@ public class UserQuery implements AmberQuery {
 
   private QueryCacheKey _cacheKey;
 
-  private Type []_argTypes;
+  private AmberType []_argTypes;
   private Object []_argValues;
   private int _argLength = 0;
 
@@ -73,7 +73,7 @@ public class UserQuery implements AmberQuery {
 
     ArgExpr []argList = query.getArgList();
 
-    _argTypes = new Type[argList.length];
+    _argTypes = new AmberType[argList.length];
     _argValues = new Object[argList.length];
 
     _argLength = argList.length;
@@ -136,7 +136,7 @@ public class UserQuery implements AmberQuery {
   /**
    * Returns the arg type array.
    */
-  Type []getArgTypes()
+  AmberType []getArgTypes()
   {
     return _argTypes;
   }
@@ -260,7 +260,7 @@ public class UserQuery implements AmberQuery {
   /**
    * Sets the argument with an object and its Amber type.
    */
-  public void setObject(int index, Object v, Type type)
+  public void setObject(int index, Object v, AmberType type)
   {
     _argTypes[index - 1] = type;
     _argValues[index - 1] = v;

@@ -32,9 +32,9 @@ package com.caucho.amber.expr;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParseException;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.util.CharBuffer;
 
 
@@ -44,14 +44,14 @@ import com.caucho.util.CharBuffer;
 public class ColumnExpr extends AbstractAmberExpr {
   protected PathExpr _parent;
   // identifier name value
-  private Column _column;
+  private AmberColumn _column;
 
   protected FromItem _fromItem;
 
   /**
    * Creates a new unbound id expression.
    */
-  public ColumnExpr(PathExpr parent, Column column)
+  public ColumnExpr(PathExpr parent, AmberColumn column)
   {
     _parent = parent;
     _column = column;
@@ -68,7 +68,7 @@ public class ColumnExpr extends AbstractAmberExpr {
   /**
    * Returns the name.
    */
-  public Column getColumn()
+  public AmberColumn getColumn()
   {
     return _column;
   }
@@ -76,7 +76,7 @@ public class ColumnExpr extends AbstractAmberExpr {
   /**
    * Returns the expr type.
    */
-  public Type getType()
+  public AmberType getType()
   {
     return getColumn().getType();
   }

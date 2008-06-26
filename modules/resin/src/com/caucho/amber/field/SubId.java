@@ -30,7 +30,7 @@
 package com.caucho.amber.field;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.type.EntityType;
 import com.caucho.java.JavaWriter;
@@ -208,10 +208,10 @@ public class SubId extends Id {
   {
     LinkColumns link = getOwnerType().getTable().getDependentIdLink();
 
-    ArrayList<Column> columns = parentId.getColumns();
+    ArrayList<AmberColumn> columns = parentId.getColumns();
 
     for (int i = 0; i < columns.size(); i++) {
-      Column column = columns.get(i);
+      AmberColumn column = columns.get(i);
 
       if (i != 0)
         cb.append(" and ");

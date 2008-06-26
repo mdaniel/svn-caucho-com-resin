@@ -39,7 +39,7 @@ import java.sql.SQLException;
 /**
  * A property containing a class
  */
-public class ClassType extends Type {
+public class ClassType extends AmberType {
   private static final L10N L = new L10N(ClassType.class);
 
   private static final ClassType CLASS_TYPE = new ClassType();

@@ -29,7 +29,6 @@
 package com.caucho.amber.type;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.bytecode.JClass;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
@@ -43,7 +42,7 @@ import java.sql.Types;
 /**
  * The type of a property.
  */
-public class UtilDateType extends Type {
+public class UtilDateType extends AmberType {
   private static final L10N L = new L10N(UtilDateType.class);
 
   public static final UtilDateType
@@ -80,7 +79,7 @@ public class UtilDateType extends Type {
    * Returns true if the value is assignable to the Java type.
    */
   @Override
-  public boolean isAssignableTo(JClass javaType)
+  public boolean isAssignableTo(Class javaType)
   {
     return javaType.isAssignableFrom(java.util.Date.class);
   }
@@ -88,6 +87,7 @@ public class UtilDateType extends Type {
   /**
    * Generates the type for the table.
    */
+  @Override
   public String generateCreateColumnSQL(AmberPersistenceUnit manager,
                                         int length,
                                         int precision,
@@ -99,6 +99,7 @@ public class UtilDateType extends Type {
   /**
    * Generates a string to load the property.
    */
+  @Override
   public int generateLoad(JavaWriter out,
                           String rs,
                           String indexVar,
@@ -113,6 +114,7 @@ public class UtilDateType extends Type {
   /**
    * Generates a string to load the property.
    */
+  @Override
   public int generateLoadNative(JavaWriter out, int index)
     throws IOException
   {
@@ -124,6 +126,7 @@ public class UtilDateType extends Type {
   /**
    * Generates a string to set the property.
    */
+  @Override
   public void generateSet(JavaWriter out,
                           String pstmt,
                           String index,
@@ -148,6 +151,7 @@ public class UtilDateType extends Type {
   /**
    * Gets the value.
    */
+  @Override
   public Object getObject(ResultSet rs, int index)
     throws SQLException
   {
@@ -162,6 +166,7 @@ public class UtilDateType extends Type {
   /**
    * Sets the value.
    */
+  @Override
   public void setParameter(PreparedStatement pstmt,
                            int index,
                            Object value)

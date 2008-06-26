@@ -37,7 +37,7 @@ public class NamedNativeQueryConfig {
 
   // attributes
   private String _name;
-  private String _resultClass;
+  private Class _resultClass;
   private String _resultSetMapping;
 
   // elements
@@ -49,7 +49,7 @@ public class NamedNativeQueryConfig {
     return _name;
   }
 
-  public String getResultClass()
+  public Class getResultClass()
   {
     return _resultClass;
   }
@@ -84,7 +84,7 @@ public class NamedNativeQueryConfig {
     _hint = hint;
   }
 
-  public void setResultClass(String resultClass)
+  public void setResultClass(Class resultClass)
   {
     _resultClass = resultClass;
   }

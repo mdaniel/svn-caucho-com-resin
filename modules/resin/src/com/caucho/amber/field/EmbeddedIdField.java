@@ -31,8 +31,8 @@ package com.caucho.amber.field;
 import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberColumn;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.EmbeddableType;
 import com.caucho.config.ConfigException;
@@ -78,7 +78,7 @@ public class EmbeddedIdField extends EntityEmbeddedField implements IdField
   /**
    * Returns the columns
    */
-  public ArrayList<Column> getColumns()
+  public ArrayList<AmberColumn> getColumns()
   {
     return null;
   }
@@ -236,7 +236,7 @@ public class EmbeddedIdField extends EntityEmbeddedField implements IdField
    * Generates the select clause.
    */
   @Override
-  public String generateLoadSelect(Table table, String id)
+  public String generateLoadSelect(AmberTable table, String id)
   {
     return null;
   }

@@ -35,12 +35,11 @@ import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.ManyToOneExpr;
 import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.*;
-import com.caucho.bytecode.JAnnotation;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.CharBuffer;
@@ -52,14 +51,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Logger;
+import javax.persistence.JoinColumn;
 
 /**
  * Represents a many-to-one link pointing to an entity.
  */
-public class EntityManyToOneField extends CascadableField {
-  private static final L10N L = new L10N(EntityManyToOneField.class);
+public class ManyToOneField extends CascadableField {
+  private static final L10N L = new L10N(ManyToOneField.class);
   private static final Logger log
-    = Logger.getLogger(EntityManyToOneField.class.getName());
+    = Logger.getLogger(ManyToOneField.class.getName());
 
   private LinkColumns _linkColumns;
 
@@ -78,10 +78,10 @@ public class EntityManyToOneField extends CascadableField {
 
   private boolean _isManyToOne;
 
-  private Object _joinColumnsAnn[];
+  private JoinColumn _joinColumnsAnn[];
   private HashMap<String, JoinColumnConfig> _joinColumnMap = null;
 
-  public EntityManyToOneField(EntityType relatedType,
+  public ManyToOneField(EntityType relatedType,
                               String name,
                               CascadeType[] cascadeType,
                               boolean isManyToOne)
@@ -92,7 +92,7 @@ public class EntityManyToOneField extends CascadableField {
     _isManyToOne = isManyToOne;
   }
 
-  public EntityManyToOneField(EntityType relatedType,
+  public ManyToOneField(EntityType relatedType,
                               String name,
                               CascadeType[] cascadeType)
     throws ConfigException
@@ -100,14 +100,14 @@ public class EntityManyToOneField extends CascadableField {
     super(relatedType, name, cascadeType);
   }
 
-  public EntityManyToOneField(EntityType relatedType,
+  public ManyToOneField(EntityType relatedType,
                               String name)
     throws ConfigException
   {
     this(relatedType, name, null);
   }
 
-  public EntityManyToOneField(EntityType relatedType)
+  public ManyToOneField(EntityType relatedType)
   {
     super(relatedType);
   }
@@ -115,7 +115,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Sets the target type.
    */
-  public void setType(Type targetType)
+  public void setType(AmberType targetType)
   {
     if (! (targetType instanceof EntityType))
       throw new AmberRuntimeException(L.l("many-to-one requires an entity target at '{0}'",
@@ -194,7 +194,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Sets the join column annotations.
    */
-  public void setJoinColumns(Object joinColumnsAnn[])
+  public void setJoinColumns(JoinColumn joinColumnsAnn[])
   {
     _joinColumnsAnn = joinColumnsAnn;
   }
@@ -258,10 +258,11 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Creates a copy of the field for a parent
    */
+  @Override
   public AmberField override(BeanType type)
   {
-    EntityManyToOneField field
-      = new EntityManyToOneField((EntityType) getSourceType(), getName(),
+    ManyToOneField field
+      = new ManyToOneField((EntityType) getSourceType(), getName(),
 				 getCascadeType(), _isManyToOne);
 
     field.setOverride(true);
@@ -301,7 +302,7 @@ public class EntityManyToOneField extends CascadableField {
     else
       _targetLoadIndex = relatedType.nextLoadGroupIndex();
 
-    Table sourceTable = relatedType.getTable();
+    AmberTable sourceTable = relatedType.getTable();
 
     if (sourceTable == null || ! isJPA) {
       // jpa/0ge3, ejb/0602
@@ -321,7 +322,7 @@ public class EntityManyToOneField extends CascadableField {
 
     EntityType parentType = _targetType;
 
-    ArrayList<Column> targetIdColumns = _targetType.getId().getColumns();
+    ArrayList<AmberColumn> targetIdColumns = _targetType.getId().getColumns();
 
     while (targetIdColumns.size() == 0) {
 
@@ -333,7 +334,7 @@ public class EntityManyToOneField extends CascadableField {
       targetIdColumns = parentType.getId().getColumns();
     }
 
-    for (Column keyColumn : targetIdColumns) {
+    for (AmberColumn keyColumn : targetIdColumns) {
 
       String columnName;
 
@@ -363,15 +364,15 @@ public class EntityManyToOneField extends CascadableField {
         }
       }
       else {
-        JAnnotation joinAnn
+        JoinColumn joinAnn
           = BaseConfigIntrospector.getJoinColumn(_joinColumnsAnn,
                                                  keyColumn.getName());
 
         if (joinAnn != null) {
-          columnName = joinAnn.getString("name");
+          columnName = joinAnn.name();
 
-          nullable = joinAnn.getBoolean("nullable");
-          unique = joinAnn.getBoolean("unique");
+          nullable = joinAnn.nullable();
+          unique = joinAnn.unique();
         }
       }
 
@@ -394,13 +395,13 @@ public class EntityManyToOneField extends CascadableField {
     super.init();
 
     Id id = getEntityTargetType().getId();
-    ArrayList<Column> keys = id.getColumns();
+    ArrayList<AmberColumn> keys = id.getColumns();
 
     if (_linkColumns == null) {
       ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
 
       for (int i = 0; i < keys.size(); i++) {
-        Column key = keys.get(i);
+        AmberColumn key = keys.get(i);
 
         String name;
 
@@ -459,7 +460,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Gets the column corresponding to the target field.
    */
-  public ForeignColumn getColumn(Column targetColumn)
+  public ForeignColumn getColumn(AmberColumn targetColumn)
   {
     return _linkColumns.getSourceColumn(targetColumn);
   }
@@ -478,7 +479,7 @@ public class EntityManyToOneField extends CascadableField {
    * Generates the select clause.
    */
   @Override
-  public String generateLoadSelect(Table table, String id)
+  public String generateLoadSelect(AmberTable table, String id)
   {
     if (_aliasField != null)
       return null;
@@ -808,6 +809,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates the set property.
    */
+  @Override
   public void generateSetterMethod(JavaWriter out)
     throws IOException
   {
@@ -1218,6 +1220,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates the set clause.
    */
+  @Override
   public void generateStatementSet(JavaWriter out, String pstmt,
                           String index, String source)
     throws IOException
@@ -1290,6 +1293,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates loading cache
    */
+  @Override
   public void generateUpdateFromObject(JavaWriter out, String obj)
     throws IOException
   {
@@ -1350,6 +1354,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates code for foreign entity create/delete
    */
+  @Override
   public void generateInvalidateForeign(JavaWriter out)
     throws IOException
   {
@@ -1366,6 +1371,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates any pre-delete code
    */
+  @Override
   public void generatePreDelete(JavaWriter out)
     throws IOException
   {
@@ -1380,6 +1386,7 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates any pre-delete code
    */
+  @Override
   public void generatePostDelete(JavaWriter out)
     throws IOException
   {

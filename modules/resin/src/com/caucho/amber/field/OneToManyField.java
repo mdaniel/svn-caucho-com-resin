@@ -34,11 +34,11 @@ import com.caucho.amber.expr.OneToManyExpr;
 import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
-import com.caucho.bytecode.JField;
+import com.caucho.amber.type.AmberType;
 import com.caucho.bytecode.JType;
+import com.caucho.bytecode.JTypeWrapper;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.CharBuffer;
@@ -46,6 +46,7 @@ import com.caucho.util.L10N;
 
 import javax.persistence.CascadeType;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
@@ -55,19 +56,19 @@ import java.util.logging.Logger;
  * Represents a field to a collection of objects where the target
  * hold a back-link to the source entity.
  */
-public class EntityOneToManyField extends CollectionField {
-  private static final L10N L = new L10N(EntityOneToManyField.class);
+public class OneToManyField extends CollectionField {
+  private static final L10N L = new L10N(OneToManyField.class);
   private static final Logger log 
-    = Logger.getLogger(EntityOneToManyField.class.getName());
+    = Logger.getLogger(OneToManyField.class.getName());
 
   private String _mapKey;
 
   private ArrayList<String> _orderByFields;
   private ArrayList<Boolean> _orderByAscending;
 
-  private EntityManyToOneField _sourceField;
+  private ManyToOneField _sourceField;
 
-  public EntityOneToManyField(EntityType entityType,
+  public OneToManyField(EntityType entityType,
                               String name,
                               CascadeType[] cascadeTypes)
     throws ConfigException
@@ -75,14 +76,14 @@ public class EntityOneToManyField extends CollectionField {
     super(entityType, name, cascadeTypes);
   }
 
-  public EntityOneToManyField(EntityType entityType,
+  public OneToManyField(EntityType entityType,
                               String name)
     throws ConfigException
   {
     this(entityType, name, null);
   }
 
-  public EntityOneToManyField(EntityType entityType)
+  public OneToManyField(EntityType entityType)
   {
     super(entityType);
   }
@@ -120,7 +121,7 @@ public class EntityOneToManyField extends CollectionField {
    * Returns the target type as entity.
    */
   @Override
-  public Type getTargetType()
+  public AmberType getTargetType()
   {
     return _sourceField.getSourceType();
   }
@@ -128,7 +129,7 @@ public class EntityOneToManyField extends CollectionField {
   /**
    * Gets the source field.
    */
-  public EntityManyToOneField getSourceField()
+  public ManyToOneField getSourceField()
   {
     return _sourceField;
   }
@@ -136,7 +137,7 @@ public class EntityOneToManyField extends CollectionField {
   /**
    * Sets the source field.
    */
-  public void setSourceField(EntityManyToOneField sourceField)
+  public void setSourceField(ManyToOneField sourceField)
   {
     _sourceField = sourceField;
   }
@@ -243,7 +244,7 @@ public class EntityOneToManyField extends CollectionField {
       out.print("for (Object o : " + getter);
 
       // jpa/0v04
-      if (getJavaType().isAssignableTo(Map.class))
+      if (Map.class.isAssignableFrom(getJavaClass()))
         out.print(".values()");
 
       out.println(") {");
@@ -366,10 +367,10 @@ public class EntityOneToManyField extends CollectionField {
   {
     String var = "_caucho_field_" + getGetterName();
 
-    boolean isSet = getJavaType().isAssignableTo(Set.class);
+    boolean isSet = Set.class.isAssignableFrom(getJavaClass());
     boolean isMap = false;
     if (!isSet) {
-      isMap = getJavaType().isAssignableTo(Map.class);
+      isMap = Map.class.isAssignableFrom(getJavaClass());
     }
 
     JType type = getJavaType();
@@ -640,11 +641,11 @@ public class EntityOneToManyField extends CollectionField {
     JType type;
 
     if (! getEntitySourceType().isFieldAccess()) {
-      type = getGetterMethod().getGenericReturnType();
+      type = JTypeWrapper.create(getGetterMethod().getGenericReturnType());
     }
     else {
-      JField field = EntityType.getField(getBeanClass(), getName());
-      type = field.getGenericType();
+      Field field = EntityType.getField(getBeanClass(), getName());
+      type = JTypeWrapper.create(field.getGenericType());
     }
 
     out.println();
@@ -772,7 +773,7 @@ public class EntityOneToManyField extends CollectionField {
     if (getEntitySourceType().getPersistenceUnit().isJPA())
       return;
 
-    Table table = getLinkColumns().getSourceTable();
+    AmberTable table = getLinkColumns().getSourceTable();
 
     out.println("if (\"" + table.getName() + "\".equals(table)) {");
     out.pushDepth();

@@ -42,7 +42,7 @@ import java.sql.Types;
 /**
  * Represents a java.util.Double type
  */
-public class DoubleType extends Type {
+public class DoubleType extends AmberType {
   private static final L10N L = new L10N(DoubleType.class);
 
   private static final DoubleType DOUBLE_TYPE = new DoubleType();

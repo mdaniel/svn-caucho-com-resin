@@ -31,7 +31,6 @@ package com.caucho.amber.cfg;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.type.*;
-import com.caucho.bytecode.JClass;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
@@ -72,7 +71,7 @@ public class AmberConfigManager {
   /**
    * Introspects the type
    */
-  public BeanType introspect(JClass type)
+  public BeanType introspect(Class type)
   {
     TypeConfig typeConfig = _typeMap.get(type.getName());
 
@@ -105,7 +104,7 @@ public class AmberConfigManager {
     }
   }
 
-  void addType(JClass type, TypeConfig typeConfig)
+  void addType(Class type, TypeConfig typeConfig)
   {
     _typeMap.put(type.getName(), typeConfig);
 

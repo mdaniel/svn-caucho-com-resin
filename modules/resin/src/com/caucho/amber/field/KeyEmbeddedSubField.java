@@ -29,8 +29,8 @@
 
 package com.caucho.amber.field;
 
-import com.caucho.amber.table.Column;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.table.AmberColumn;
+import com.caucho.amber.type.AmberType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 
@@ -52,9 +52,9 @@ public class KeyEmbeddedSubField extends EmbeddedSubField implements IdField
   /**
    * Returns the columns
    */
-  public ArrayList<Column> getColumns()
+  public ArrayList<AmberColumn> getColumns()
   {
-    ArrayList<Column> columns = new ArrayList<Column>();
+    ArrayList<AmberColumn> columns = new ArrayList<AmberColumn>();
 
     columns.add(getColumn());
 
@@ -64,7 +64,7 @@ public class KeyEmbeddedSubField extends EmbeddedSubField implements IdField
   /**
    * Returns the column type
    */
-  public Type getType()
+  public AmberType getType()
   {
     return getColumn().getType();
   }

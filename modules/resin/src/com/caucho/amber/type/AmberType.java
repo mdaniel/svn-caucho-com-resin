@@ -32,7 +32,6 @@ package com.caucho.amber.type;
 import com.caucho.amber.entity.EntityItem;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.bytecode.JClass;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -46,8 +45,8 @@ import java.sql.Types;
 /**
  * The type of a property.
  */
-abstract public class Type {
-  private static final L10N L = new L10N(Type.class);
+abstract public class AmberType {
+  private static final L10N L = new L10N(AmberType.class);
 
   /**
    * Returns the type name.
@@ -97,7 +96,7 @@ abstract public class Type {
   /**
    * Returns the type as a foreign key.
    */
-  public Type getForeignType()
+  public AmberType getForeignType()
   {
     return this;
   }
@@ -113,7 +112,7 @@ abstract public class Type {
   /**
    * Returns true if the value is assignable to the Java type.
    */
-  public boolean isAssignableTo(JClass javaType)
+  public boolean isAssignableTo(Class javaType)
   {
     return true;
   }
@@ -153,7 +152,7 @@ abstract public class Type {
    */
   public int generateLoad(JavaWriter out, String rs,
                           String indexVar, int index,
-                          JClass targetType)
+                          Class targetType)
     throws IOException
   {
     String i = indexVar + " + " + index;

@@ -68,7 +68,7 @@ public class PrimitiveBooleanType extends PrimitiveType {
   /**
    * Returns the foreign key type.
    */
-  public Type getForeignType()
+  public AmberType getForeignType()
   {
     return BooleanType.create();
   }

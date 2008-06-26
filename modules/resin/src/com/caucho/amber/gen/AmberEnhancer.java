@@ -32,7 +32,14 @@ package com.caucho.amber.gen;
 import com.caucho.amber.field.AmberField;
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.type.*;
-import com.caucho.bytecode.*;
+import com.caucho.bytecode.Analyzer;
+import com.caucho.bytecode.CodeVisitor;
+import com.caucho.bytecode.ConstantPool;
+import com.caucho.bytecode.FieldRefConstant;
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JavaClass;
+import com.caucho.bytecode.JavaMethod;
+import com.caucho.bytecode.MethodRefConstant;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaCompiler;
 import com.caucho.java.WorkDir;
@@ -43,7 +50,6 @@ import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.ClassEnhancer;
 import com.caucho.loader.enhancer.EnhancerPrepare;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -59,7 +65,8 @@ import java.util.logging.Logger;
  */
 public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   private static final L10N L = new L10N(AmberEnhancer.class);
-  private static final Logger log = Log.open(AmberEnhancer.class);
+  private static final Logger log 
+    = Logger.getLogger(AmberEnhancer.class.getName());
 
   private Path _configDirectory;
   private boolean _useHibernateFiles;
@@ -546,13 +553,13 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     ArrayList<FieldMap> fieldMaps = new ArrayList<FieldMap>();
 
-    JClass thisClass = _amberContainer.getJClassLoader().forName(className.replace('/', '.'));
+    Class thisClass = _amberContainer.loadTempClass(className.replace('/', '.'));
 
     if (thisClass == null)
       return;
 
     // Cache entity JClass for next fixup.
-    JClass entityClass = thisClass;
+    Class entityClass = thisClass;
 
     // Field-based fixup.
     do {
@@ -585,7 +592,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       for (AmberField field : type.getFields()) {
         fieldMaps.add(new FieldMap(baseClass, field.getName()));
       }
-    } while ((thisClass = thisClass.getSuperClass()) != null);
+    } while ((thisClass = thisClass.getSuperclass()) != null);
 
     if (fieldMaps.size() > 0) {
       FieldFixupAnalyzer analyzer = new FieldFixupAnalyzer(fieldMaps);
@@ -720,6 +727,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     }
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _configDirectory + "]";

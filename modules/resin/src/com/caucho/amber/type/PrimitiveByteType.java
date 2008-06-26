@@ -77,7 +77,7 @@ public class PrimitiveByteType extends PrimitiveType {
   /**
    * Returns the foreign key type.
    */
-  public Type getForeignType()
+  public AmberType getForeignType()
   {
     return ByteType.create();
   }

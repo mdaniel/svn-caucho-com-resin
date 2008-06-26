@@ -49,6 +49,24 @@ public class JTypeWrapper implements JType {
     _type = type;
   }
 
+  public JTypeWrapper(ParameterizedType type)
+  {
+    ClassLoader loader = ((Class) type.getRawType()).getClassLoader();
+    _loader = JClassLoaderWrapper.create(loader);
+    
+    _type = type;
+  }
+  
+  public static JType create(Type type)
+  {
+    if (type instanceof ParameterizedType) {
+      return new JTypeWrapper((ParameterizedType) type);
+    }
+    else {
+      return new JClassWrapper((Class) type);
+    }
+  }
+
   /**
    * Returns the class name.
    */

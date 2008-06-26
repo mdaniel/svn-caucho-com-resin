@@ -41,7 +41,7 @@ import java.sql.Types;
 /**
  * The type of a property.
  */
-public class BooleanType extends Type {
+public class BooleanType extends AmberType {
   private static final L10N L = new L10N(BooleanType.class);
 
   private static final BooleanType BOOLEAN_TYPE = new BooleanType();

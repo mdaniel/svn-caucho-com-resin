@@ -38,7 +38,7 @@ import com.caucho.amber.expr.JoinExpr;
 import com.caucho.amber.expr.ManyToOneJoinExpr;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.EntityType;
 import com.caucho.jdbc.JdbcMetaData;
 
@@ -113,7 +113,7 @@ abstract public class AbstractQuery {
   /**
    * Sets the from list.
    */
-  public FromItem createFromItem(Table table,
+  public FromItem createFromItem(AmberTable table,
                                  String name)
   {
     return createFromItem(null, table, name);
@@ -123,7 +123,7 @@ abstract public class AbstractQuery {
    * Sets the from list.
    */
   public FromItem createFromItem(EntityType entityType,
-                                 Table table,
+                                 AmberTable table,
                                  String name)
   {
     FromItem item = new FromItem(entityType, table,

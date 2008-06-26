@@ -50,11 +50,8 @@ import com.caucho.amber.idgen.SequenceIdGenerator;
 import com.caucho.amber.query.AbstractQuery;
 import com.caucho.amber.query.QueryCacheKey;
 import com.caucho.amber.query.ResultSetCacheChunk;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.*;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassLoader;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jdbc.JdbcMetaData;
@@ -67,6 +64,7 @@ import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
+import java.lang.reflect.Method;
 import java.sql.ResultSetMetaData;
 import java.util.*;
 import java.util.logging.Level;
@@ -123,8 +121,8 @@ public class AmberPersistenceUnit {
   // loader override for ejb
   private ClassLoader _enhancedLoader;
 
-  private HashMap<String,Table> _tableMap
-    = new HashMap<String,Table>();
+  private HashMap<String,AmberTable> _tableMap
+    = new HashMap<String,AmberTable>();
 
   private HashMap<String,AmberEntityHome> _entityHomeMap
     = new HashMap<String,AmberEntityHome>();
@@ -154,7 +152,7 @@ public class AmberPersistenceUnit {
   private ArrayList<EntityType> _lazyGenerate = new ArrayList<EntityType>();
   private ArrayList<AmberEntityHome> _lazyHomeInit
     = new ArrayList<AmberEntityHome>();
-  private ArrayList<Table> _lazyTable = new ArrayList<Table>();
+  private ArrayList<AmberTable> _lazyTable = new ArrayList<AmberTable>();
 
   private HashMap<String,String> _namedQueryMap
     = new HashMap<String,String>();
@@ -247,6 +245,11 @@ public class AmberPersistenceUnit {
   public AmberContainer getAmberContainer()
   {
     return _amberContainer;
+  }
+  
+  public ClassLoader getTempClassLoader()
+  {
+    return _amberContainer.getTempClassLoader();
   }
 
   public ClassLoader getEnhancedLoader()
@@ -447,27 +450,28 @@ public class AmberPersistenceUnit {
       return _xid++;
     }
   }
-
-  /**
-   * Returns the enhanced loader.
-   */
-  public JClassLoader getJClassLoader()
+  
+  public Class loadTempClass(String className)
   {
-    return _amberContainer.getJClassLoader();
+    try {
+      return Class.forName(className, false, getTempClassLoader());
+    } catch (ClassNotFoundException e) {
+      throw ConfigException.create(e);
+    }
   }
 
   /**
    * Creates a table.
    */
-  public Table createTable(String tableName)
+  public AmberTable createTable(String tableName)
   {
     if (log.isLoggable(Level.FINER))
       log.log(Level.FINER, "AmberPersistenceUnit.createTable: " + tableName);
 
-    Table table = _tableMap.get(tableName);
+    AmberTable table = _tableMap.get(tableName);
 
     if (table == null) {
-      table = new Table(this, tableName);
+      table = new AmberTable(this, tableName);
       table.setCacheTimeout(getTableCacheTimeout());
 
       _tableMap.put(tableName, table);
@@ -491,11 +495,11 @@ public class AmberPersistenceUnit {
    *             Entity | Embeddable | MappedSuperclass
    */
   public void addEntityClass(String className,
-                             JClass type)
+                             Class type)
     throws ConfigException
   {
     if (type == null) {
-      type = getJClassLoader().forName(className);
+      type = loadTempClass(className);
 
       if (type == null) {
         throw new ConfigException(L.l("'{0}' is an unknown type",
@@ -581,7 +585,7 @@ public class AmberPersistenceUnit {
   /**
    * Adds an entity.
    */
-  public EntityType createEntity(JClass beanClass)
+  public EntityType createEntity(Class beanClass)
   {
     return createEntity(beanClass.getName(), beanClass);
   }
@@ -590,7 +594,7 @@ public class AmberPersistenceUnit {
    * Adds an entity.
    */
   public EntityType createEntity(String name,
-                                 JClass beanClass)
+                                 Class beanClass)
   {
     EntityType entityType = (EntityType) _typeManager.get(name);
 
@@ -604,9 +608,9 @@ public class AmberPersistenceUnit {
       // The parent type can be a @MappedSuperclass or an @EntityType.
       EntityType parentType = null;
 
-      for (JClass parentClass = beanClass.getSuperClass();
+      for (Class parentClass = beanClass.getSuperclass();
            parentType == null && parentClass != null;
-           parentClass = parentClass.getSuperClass()) {
+           parentClass = parentClass.getSuperclass()) {
         parentType = (EntityType) _typeManager.get(parentClass.getName());
       }
 
@@ -648,7 +652,7 @@ public class AmberPersistenceUnit {
    * Adds an entity.
    */
   public MappedSuperclassType createMappedSuperclass(String name,
-                                                     JClass beanClass)
+                                                     Class beanClass)
   {
     MappedSuperclassType mappedSuperType
       = (MappedSuperclassType) _typeManager.get(name);
@@ -674,7 +678,7 @@ public class AmberPersistenceUnit {
   /**
    * Adds an embeddable type.
    */
-  public EmbeddableType createEmbeddable(JClass beanClass)
+  public EmbeddableType createEmbeddable(Class beanClass)
   {
     return createEmbeddable(beanClass.getName(), beanClass);
   }
@@ -683,9 +687,9 @@ public class AmberPersistenceUnit {
    * Adds an embeddable type.
    */
   public EmbeddableType createEmbeddable(String name,
-                                         JClass beanClass)
+                                         Class beanClass)
   {
-    Type type = _typeManager.get(name);
+    AmberType type = _typeManager.get(name);
 
     if (type != null && ! (type instanceof EmbeddableType))
       throw new ConfigException(L.l("'{0}' is not a valid embeddable type",
@@ -720,7 +724,7 @@ public class AmberPersistenceUnit {
    * Adds an enumerated type.
    */
   public EnumType createEnum(String name,
-                             JClass beanClass)
+                             Class beanClass)
   {
     EnumType enumType = (EnumType) _typeManager.get(name);
 
@@ -752,7 +756,7 @@ public class AmberPersistenceUnit {
   /**
    * Adds a default listener.
    */
-  public ListenerType addDefaultListener(JClass beanClass)
+  public ListenerType addDefaultListener(Class beanClass)
   {
     ListenerType listenerType = getListener(beanClass);
 
@@ -778,7 +782,7 @@ public class AmberPersistenceUnit {
    * Adds an entity listener.
    */
   public ListenerType addEntityListener(String entityName,
-                                        JClass listenerClass)
+                                        Class listenerClass)
   {
     ListenerType listenerType = getListener(listenerClass);
 
@@ -788,7 +792,7 @@ public class AmberPersistenceUnit {
     return listenerType;
   }
 
-  private ListenerType getListener(JClass beanClass)
+  private ListenerType getListener(Class beanClass)
   {
     String name = beanClass.getName();
 
@@ -801,9 +805,9 @@ public class AmberPersistenceUnit {
 
     ListenerType parentType = null;
 
-    for (JClass parentClass = beanClass.getSuperClass();
+    for (Class parentClass = beanClass.getSuperclass();
          parentType == null && parentClass != null;
-         parentClass = parentClass.getSuperClass()) {
+         parentClass = parentClass.getSuperclass()) {
       parentType = (ListenerType) _typeManager.get(parentClass.getName());
     }
 
@@ -860,7 +864,7 @@ public class AmberPersistenceUnit {
    */
   public GeneratorTableType createGeneratorTable(String name)
   {
-    Type type = _typeManager.get(name);
+    AmberType type = _typeManager.get(name);
 
     if (type instanceof GeneratorTableType)
       return (GeneratorTableType) type;
@@ -1151,7 +1155,7 @@ public class AmberPersistenceUnit {
    */
   public EmbeddableType getEmbeddable(String className)
   {
-    Type type = _typeManager.get(className);
+    AmberType type = _typeManager.get(className);
 
     if (type instanceof EmbeddableType)
       return (EmbeddableType) type;
@@ -1164,7 +1168,7 @@ public class AmberPersistenceUnit {
    */
   public EntityType getEntityType(String className)
   {
-    Type type = _typeManager.get(className);
+    AmberType type = _typeManager.get(className);
 
     if (type instanceof EntityType)
       return (EntityType) type;
@@ -1177,7 +1181,7 @@ public class AmberPersistenceUnit {
    */
   public MappedSuperclassType getMappedSuperclass(String className)
   {
-    Type type = _typeManager.get(className);
+    AmberType type = _typeManager.get(className);
 
     if (type instanceof MappedSuperclassType)
       return (MappedSuperclassType) type;
@@ -1202,14 +1206,14 @@ public class AmberPersistenceUnit {
       = new ArrayList<EntityType>();
 
     try {
-      HashMap<String,Type> typeMap = _typeManager.getTypeMap();
+      HashMap<String,AmberType> typeMap = _typeManager.getTypeMap();
 
-      Collection<Type> types = typeMap.values();
+      Collection<AmberType> types = typeMap.values();
 
       Iterator it = types.iterator();
 
       while (it.hasNext()) {
-        Type type = (Type) it.next();
+        AmberType type = (AmberType) it.next();
 
         if (type instanceof EntityType) {
           EntityType entityType = (EntityType) type;
@@ -1230,15 +1234,15 @@ public class AmberPersistenceUnit {
   /**
    * Creates a type.
    */
-  public Type createType(String typeName)
+  public AmberType createType(String typeName)
     throws ConfigException
   {
-    Type type = _typeManager.get(typeName);
+    AmberType type = _typeManager.get(typeName);
 
     if (type != null)
       return type;
 
-    JClass cl = _amberContainer.getJClassLoader().forName(typeName);
+    Class cl = loadTempClass(typeName);
 
     if (cl == null)
       throw new ConfigException(L.l("'{0}' is an unknown type", typeName));
@@ -1249,10 +1253,10 @@ public class AmberPersistenceUnit {
   /**
    * Creates a type.
    */
-  public Type createType(JClass javaType)
+  public AmberType createType(Class javaType)
     throws ConfigException
   {
-    Type type = _typeManager.create(javaType);
+    AmberType type = _typeManager.create(javaType);
 
     if (type != null)
       return type;
@@ -1399,7 +1403,7 @@ public class AmberPersistenceUnit {
     throws ConfigException
   {
     while (_lazyTable.size() > 0) {
-      Table table = _lazyTable.remove(0);
+      AmberTable table = _lazyTable.remove(0);
 
       if (getDataSource() == null)
         throw new ConfigException(L.l("{0}: No configured data-source found.",
@@ -1534,7 +1538,7 @@ public class AmberPersistenceUnit {
 
     if (! entityType.getExcludeDefaultListeners()) {
       for (ListenerType listenerType : _defaultListeners) {
-        for (JMethod m : listenerType.getCallbacks(callbackIndex)) {
+        for (Method m : listenerType.getCallbacks(callbackIndex)) {
           Listener listener = (Listener) listenerType.getInstance();
           listener.__caucho_callback(callbackIndex, entity);
         }
@@ -1554,7 +1558,7 @@ public class AmberPersistenceUnit {
           _defaultListeners.contains(listenerType))
         continue;
 
-      for (JMethod m : listenerType.getCallbacks(callbackIndex)) {
+      for (Method m : listenerType.getCallbacks(callbackIndex)) {
         Listener listener = (Listener) listenerType.getInstance();
         listener.__caucho_callback(callbackIndex, entity);
       }
@@ -1781,8 +1785,9 @@ public class AmberPersistenceUnit {
     return getMetaData().getCreateColumnSQL(sqlType, length, precision, scale);
   }
 
+  @Override
   public String toString()
   {
-    return "AmberPersistenceUnit[" + _name + "]";
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 }

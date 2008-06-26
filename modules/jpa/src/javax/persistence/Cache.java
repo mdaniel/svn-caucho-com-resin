@@ -29,8 +29,6 @@
 
 package javax.persistence;
 
-import java.util.Map;
-
 /**
  * Cache for objects
  *

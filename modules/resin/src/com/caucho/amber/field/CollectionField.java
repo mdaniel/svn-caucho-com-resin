@@ -32,11 +32,11 @@ package com.caucho.amber.field;
 import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -53,7 +53,7 @@ public class CollectionField extends CascadableField {
   private static final Logger log
     = Logger.getLogger(CollectionField.class.getName());
 
-  private Type _targetType;
+  private AmberType _targetType;
 
   private LinkColumns _linkColumns;
 
@@ -91,7 +91,7 @@ public class CollectionField extends CascadableField {
   /**
    * Sets the target type.
    */
-  public void setType(Type targetType)
+  public void setType(AmberType targetType)
   {
     _targetType = targetType;
   }
@@ -99,7 +99,7 @@ public class CollectionField extends CascadableField {
   /**
    * Returns the target type.
    */
-  public Type getTargetType()
+  public AmberType getTargetType()
   {
     return _targetType;
   }
@@ -273,7 +273,7 @@ public class CollectionField extends CascadableField {
   /**
    * Returns the source column for a given target key.
    */
-  public ForeignColumn getSourceColumn(Column key)
+  public ForeignColumn getSourceColumn(AmberColumn key)
   {
     return _linkColumns.getSourceColumn(key);
   }

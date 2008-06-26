@@ -34,9 +34,9 @@ import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.EmbeddableType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.util.CharBuffer;
 
 import java.lang.reflect.Method;

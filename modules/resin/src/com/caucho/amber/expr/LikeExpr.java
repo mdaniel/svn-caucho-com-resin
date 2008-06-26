@@ -31,7 +31,7 @@ package com.caucho.amber.expr;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.type.BooleanType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.util.CharBuffer;
 
 /**
@@ -69,7 +69,7 @@ public class LikeExpr extends AbstractAmberExpr {
   /**
    * Returns the expr type.
    */
-  public Type getType()
+  public AmberType getType()
   {
     return BooleanType.create();
   }

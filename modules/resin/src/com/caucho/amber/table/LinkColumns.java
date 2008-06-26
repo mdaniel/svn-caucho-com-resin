@@ -55,8 +55,8 @@ public class LinkColumns {
   private static final int SOURCE_CASCADE_DELETE = 1;
   private static final int TARGET_CASCADE_DELETE = 2;
 
-  private Table _sourceTable;
-  private Table _targetTable;
+  private AmberTable _sourceTable;
+  private AmberTable _targetTable;
 
   private ArrayList<ForeignColumn> _columns;
 
@@ -68,7 +68,7 @@ public class LinkColumns {
   /**
    * Creates the table link.
    */
-  public LinkColumns(Table sourceTable, Table targetTable,
+  public LinkColumns(AmberTable sourceTable, AmberTable targetTable,
                      ArrayList<ForeignColumn> columns)
   {
     _sourceTable = sourceTable;
@@ -131,7 +131,7 @@ public class LinkColumns {
   /**
    * Returns the source table.
    */
-  public Table getSourceTable()
+  public AmberTable getSourceTable()
   {
     return _sourceTable;
   }
@@ -139,7 +139,7 @@ public class LinkColumns {
   /**
    * Returns the target table.
    */
-  public Table getTargetTable()
+  public AmberTable getTargetTable()
   {
     return _targetTable;
   }
@@ -159,7 +159,7 @@ public class LinkColumns {
   /**
    * Generates the linking for a link
    */
-  public ForeignColumn getSourceColumn(Column targetKey)
+  public ForeignColumn getSourceColumn(AmberColumn targetKey)
   {
     for (int i = _columns.size() - 1; i >= 0; i--) {
       ForeignColumn column = _columns.get(i);

@@ -29,7 +29,6 @@
 
 package com.caucho.amber.type;
 
-import com.caucho.bytecode.JClass;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
@@ -41,14 +40,14 @@ import java.util.HashMap;
 public class TypeManager {
   private static final L10N L = new L10N(TypeManager.class);
 
-  private static HashMap<String,Type> _builtinTypes;
-  private static HashMap<String,Type> _primitiveTypes;
+  private static HashMap<String,AmberType> _builtinTypes;
+  private static HashMap<String,AmberType> _primitiveTypes;
 
-  private HashMap<String,Type> _typeMap;
+  private HashMap<String,AmberType> _typeMap;
 
   public TypeManager()
   {
-    _typeMap = new HashMap<String,Type>();
+    _typeMap = new HashMap<String,AmberType>();
 
     _typeMap.putAll(_builtinTypes);
   }
@@ -56,10 +55,10 @@ public class TypeManager {
   /**
    * Returns the type.
    */
-  public Type create(String name)
+  public AmberType create(String name)
     throws ConfigException
   {
-    Type type = _typeMap.get(name);
+    AmberType type = _typeMap.get(name);
 
     if (type != null)
       return type;
@@ -70,10 +69,10 @@ public class TypeManager {
   /**
    * Returns the type.
    */
-  public Type create(JClass cl)
+  public AmberType create(Class cl)
     throws ConfigException
   {
-    Type type = _primitiveTypes.get(cl.getName());
+    AmberType type = _primitiveTypes.get(cl.getName());
 
     if (type != null)
       return type;
@@ -86,7 +85,7 @@ public class TypeManager {
   /**
    * Returns the type.
    */
-  public Type get(String name)
+  public AmberType get(String name)
   {
     return _typeMap.get(name);
   }
@@ -96,7 +95,7 @@ public class TypeManager {
    */
   public EntityType getEntityByInstanceClass(String name)
   {
-    for (Type type : _typeMap.values()) {
+    for (AmberType type : _typeMap.values()) {
       if (type instanceof EntityType) {
         EntityType entityType = (EntityType) type;
 
@@ -111,7 +110,7 @@ public class TypeManager {
   /**
    * Returns the type map.
    */
-  public HashMap<String,Type> getTypeMap()
+  public HashMap<String,AmberType> getTypeMap()
   {
     return _typeMap;
   }
@@ -119,9 +118,9 @@ public class TypeManager {
   /**
    * Adds a type.
    */
-  public void put(String name, Type type)
+  public void put(String name, AmberType type)
   {
-    Type oldType = _typeMap.get(name);
+    AmberType oldType = _typeMap.get(name);
 
     if (oldType != null && oldType != type)
       throw new IllegalStateException(L.l("'{0}' is a duplicate type",
@@ -131,7 +130,7 @@ public class TypeManager {
   }
 
   static {
-    _builtinTypes = new HashMap<String,Type>();
+    _builtinTypes = new HashMap<String,AmberType>();
 
     _builtinTypes.put("boolean", BooleanType.create());
     _builtinTypes.put("java.lang.Boolean", BooleanType.create());
@@ -194,7 +193,7 @@ public class TypeManager {
     _builtinTypes.put("class", ClassType.create());
     _builtinTypes.put("java.lang.Class", ClassType.create());
 
-    _primitiveTypes = new HashMap<String,Type>();
+    _primitiveTypes = new HashMap<String,AmberType>();
 
     _primitiveTypes.put("boolean", PrimitiveBooleanType.create());
     _primitiveTypes.put("char", PrimitiveCharType.create());

@@ -35,7 +35,7 @@ import com.caucho.amber.expr.KeyColumnExpr;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -97,7 +97,7 @@ public class FunExpr extends AbstractAmberExpr {
   /**
    * Returns the expr type.
    */
-  public Type getType()
+  public AmberType getType()
   {
     if (getArgs().size() == 0)
       return super.getType();

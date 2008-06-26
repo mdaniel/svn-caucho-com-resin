@@ -43,9 +43,8 @@ import com.caucho.amber.idgen.IdGenerator;
 import com.caucho.amber.idgen.SequenceIdGenerator;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.table.Column;
-import com.caucho.amber.table.Table;
-import com.caucho.bytecode.*;
+import com.caucho.amber.table.AmberColumn;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.config.ConfigException;
 import com.caucho.jdbc.*;
 import com.caucho.java.JavaWriter;
@@ -73,12 +72,12 @@ public class EntityType extends BeanType {
 
   private EntityType _parentType;
   
-  Table _table;
+  AmberTable _table;
 
   private String _rootTableName;
 
-  private ArrayList<Table> _secondaryTables
-    = new ArrayList<Table>();
+  private ArrayList<AmberTable> _secondaryTables
+    = new ArrayList<AmberTable>();
 
   private ArrayList<ListenerType> _listeners
     = new ArrayList<ListenerType>();
@@ -120,7 +119,7 @@ public class EntityType extends BeanType {
 
   private boolean _hasDependent;
 
-  private JClass _proxyClass;
+  private Class _proxyClass;
 
   private AmberEntityHome _home;
 
@@ -159,13 +158,13 @@ public class EntityType extends BeanType {
   @Override
   public boolean isEntity()
   {
-    return ! getBeanClass().isAbstract();
+    return ! Modifier.isAbstract(getBeanClass().getModifiers());
   }
   
   /**
    * Sets the table.
    */
-  public void setTable(Table table)
+  public void setTable(AmberTable table)
   {
     _table = table;
 
@@ -182,7 +181,7 @@ public class EntityType extends BeanType {
   /**
    * Returns the table.
    */
-  public Table getTable()
+  public AmberTable getTable()
   {
     // jpa/0gg0
     if (_table == null && ! isAbstractClass()) {
@@ -311,7 +310,7 @@ public class EntityType extends BeanType {
   /**
    * Adds a secondary table.
    */
-  public void addSecondaryTable(Table table)
+  public void addSecondaryTable(AmberTable table)
   {
     if (! _secondaryTables.contains(table)) {
       _secondaryTables.add(table);
@@ -323,7 +322,7 @@ public class EntityType extends BeanType {
   /**
    * Gets the secondary tables.
    */
-  public ArrayList<Table> getSecondaryTables()
+  public ArrayList<AmberTable> getSecondaryTables()
   {
     return _secondaryTables;
   }
@@ -350,9 +349,9 @@ public class EntityType extends BeanType {
   /**
    * Gets a secondary table.
    */
-  public Table getSecondaryTable(String name)
+  public AmberTable getSecondaryTable(String name)
   {
-    for (Table table : _secondaryTables) {
+    for (AmberTable table : _secondaryTables) {
       if (table.getName().equals(name))
         return table;
     }
@@ -390,18 +389,18 @@ public class EntityType extends BeanType {
   /**
    * Gets the proxy class.
    */
-  public JClass getProxyClass()
+  public Class getProxyClass()
   {
     if (_proxyClass != null)
       return _proxyClass;
     else
-      return _beanClass;
+      return _tBeanClass;
   }
 
   /**
    * Gets the proxy class.
    */
-  public void setProxyClass(JClass proxyClass)
+  public void setProxyClass(Class proxyClass)
   {
     _proxyClass = proxyClass;
   }
@@ -412,7 +411,8 @@ public class EntityType extends BeanType {
   public boolean isAbstractClass()
   {
     // ejb/0600 - EJB 2.1 are not abstract in this sense
-    return getBeanClass().isAbstract() && _proxyClass == null;
+    return (Modifier.isAbstract(getBeanClass().getModifiers())
+            && _proxyClass == null);
   }
 
   /**
@@ -549,7 +549,7 @@ public class EntityType extends BeanType {
   /**
    * Returns the columns.
    */
-  public ArrayList<Column> getColumns()
+  public ArrayList<AmberColumn> getColumns()
   {
     // jpa/0gg0
     if (getTable() == null)
@@ -941,21 +941,21 @@ public class EntityType extends BeanType {
                                         cl));
         }
 
-        for (JMethod jMethod : listenerType.getCallbacks(Listener.PRE_PERSIST)) {
+        for (Method jMethod : listenerType.getCallbacks(Listener.PRE_PERSIST)) {
           Method method = getListenerMethod(cl, jMethod.getName());
 
           if (method != null)
             _prePersistCallbacks.add(new ListenerCallback(listener, method));
         }
 
-        for (JMethod jMethod : listenerType.getCallbacks(Listener.POST_PERSIST)) {
+        for (Method jMethod : listenerType.getCallbacks(Listener.POST_PERSIST)) {
           Method method = getListenerMethod(cl, jMethod.getName());
 
           if (method != null)
             _postPersistCallbacks.add(new ListenerCallback(listener, method));
         }
 
-        for (JMethod jMethod : listenerType.getCallbacks(Listener.POST_LOAD)) {
+        for (Method jMethod : listenerType.getCallbacks(Listener.POST_LOAD)) {
           Method method = getListenerMethod(cl, jMethod.getName());
 
           if (method != null)
@@ -981,7 +981,7 @@ public class EntityType extends BeanType {
       
       if (methods[i].getName().equals(methodName)
           && paramTypes.length == 1
-          && getBeanClass().isAssignableTo(paramTypes[0])) {
+          && paramTypes[0].isAssignableFrom(getBeanClass())) {
         return methods[i];
       }
     }
@@ -1313,7 +1313,7 @@ public class EntityType extends BeanType {
   /**
    * Generates the select clause for a load.
    */
-  public String generateLoadSelect(Table table, String id)
+  public String generateLoadSelect(AmberTable table, String id)
   {
     StringBuilder sb = new StringBuilder();
 
@@ -1343,7 +1343,7 @@ public class EntityType extends BeanType {
    * Generates the select clause for a load.
    */
   @Override
-  public void generateLoadSelect(StringBuilder sb, Table table,
+  public void generateLoadSelect(StringBuilder sb, AmberTable table,
 				 String id, int loadGroup)
   {
     if (_parentType != null)
@@ -1355,7 +1355,7 @@ public class EntityType extends BeanType {
   /**
    * Generates the auto insert sql.
    */
-  public String generateAutoCreateSQL(Table table)
+  public String generateAutoCreateSQL(AmberTable table)
   {
     return generateCreateSQL(table, true);
   }
@@ -1363,7 +1363,7 @@ public class EntityType extends BeanType {
   /**
    * Generates the insert sql.
    */
-  public String generateCreateSQL(Table table)
+  public String generateCreateSQL(AmberTable table)
   {
     return generateCreateSQL(table, false);
   }
@@ -1371,7 +1371,7 @@ public class EntityType extends BeanType {
   /**
    * Generates the insert sql.
    */
-  private String generateCreateSQL(Table table, boolean isAuto)
+  private String generateCreateSQL(AmberTable table, boolean isAuto)
   {
     CharBuffer sql = new CharBuffer();
 
@@ -1386,7 +1386,7 @@ public class EntityType extends BeanType {
       if (isAuto && field.getGenerator() != null)
 	continue;
       
-      for (Column key : field.getColumns()) {
+      for (AmberColumn key : field.getColumns()) {
         String name;
 
         if (table == key.getTable())
@@ -1455,7 +1455,7 @@ public class EntityType extends BeanType {
     return sql.toString();
   }
 
-  protected void generateInsertColumns(Table table, ArrayList<String> columns)
+  protected void generateInsertColumns(AmberTable table, ArrayList<String> columns)
   {
     if (getParentType() != null)
       getParentType().generateInsertColumns(table, columns);
@@ -1470,7 +1470,7 @@ public class EntityType extends BeanType {
    * Generates the update sql.
    */
   public void generateInsertSet(JavaWriter out,
-                                Table table,
+                                AmberTable table,
                                 String pstmt,
                                 String query,
                                 String obj)
@@ -1698,8 +1698,8 @@ public class EntityType extends BeanType {
     for (int i = 0; i < fields.size(); i++) {
       AmberField field = fields.get(i);
 
-      if (field instanceof EntityManyToOneField) {
-        EntityManyToOneField manyToOne = (EntityManyToOneField) field;
+      if (field instanceof ManyToOneField) {
+        ManyToOneField manyToOne = (ManyToOneField) field;
 
         EntityType targetRelatedType = manyToOne.getEntityTargetType();
 
@@ -1719,8 +1719,8 @@ public class EntityType extends BeanType {
             // jpa/0j67
             if (! manyToOne.isAnnotatedManyToOne()) {
               for (AmberField targetField : targetType.getFields()) {
-                if (targetField instanceof EntityManyToOneField) {
-                  EntityManyToOneField targetManyToOne = (EntityManyToOneField) targetField;
+                if (targetField instanceof ManyToOneField) {
+                  ManyToOneField targetManyToOne = (ManyToOneField) targetField;
 
                   type = targetManyToOne.getEntityTargetType();
 
@@ -1766,8 +1766,8 @@ public class EntityType extends BeanType {
       field = parentType.getField(name);
     }
 
-    if (field instanceof EntityManyToOneField) {
-      EntityManyToOneField manyToOne = (EntityManyToOneField) field;
+    if (field instanceof ManyToOneField) {
+      ManyToOneField manyToOne = (ManyToOneField) field;
 
       return getTable().getInvalidateCompletion();
     }
@@ -1849,14 +1849,5 @@ public class EntityType extends BeanType {
   {
     for (int i = 0; i < _postLoadCallbacks.size(); i++)
       _postLoadCallbacks.get(i).invoke(entity);
-  }
-
-  /**
-   * Printable version of the entity.
-   */
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _beanClass.getName() + "]";
   }
 }

@@ -43,7 +43,7 @@ import java.util.Calendar;
 /**
  * The type of a property.
  */
-public class CalendarType extends Type {
+public class CalendarType extends AmberType {
   private static final L10N L = new L10N(CalendarType.class);
 
   public static final CalendarType

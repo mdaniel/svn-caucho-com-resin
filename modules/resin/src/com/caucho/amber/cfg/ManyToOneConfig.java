@@ -29,21 +29,58 @@
 
 package com.caucho.amber.cfg;
 
+import com.caucho.amber.field.ManyToOneField;
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.MappedSuperclassType;
+import com.caucho.bytecode.JClass;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+import java.lang.reflect.AccessibleObject;
 import java.util.HashMap;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
+import javax.persistence.ManyToOne;
 
 
 /**
  * <many-to-one> tag in orm.xml
  */
-public class ManyToOneConfig extends AbstractRelationConfig {
+class ManyToOneConfig extends AbstractRelationConfig
+{
+  private static final L10N L = new L10N(ManyToOneConfig.class);
+  
+  private BaseConfigIntrospector _introspector;
 
+  private EntityType _sourceType;
+  private AccessibleObject _field;
+  private String _fieldName;
+  private Class _fieldType;
+  
   // attributes
-  private boolean _isOptional;
+  private boolean _isOptional = true;
 
   // elements
-  private HashMap<String, JoinColumnConfig> _joinColumnMap
-    = new HashMap<String, JoinColumnConfig>();
+  private HashMap<String,JoinColumnConfig> _joinColumnMap
+    = new HashMap<String,JoinColumnConfig>();
 
+
+  ManyToOneConfig(BaseConfigIntrospector introspector,
+                  EntityType sourceType,
+                  AccessibleObject field,
+                  String fieldName,
+                  Class fieldType)
+  {
+    _introspector = introspector;
+    
+    _sourceType = sourceType;
+    
+    _field = field;
+    _fieldName = fieldName;
+    _fieldType = fieldType;
+    
+    introspect();
+  }
 
   public boolean getOptional()
   {
@@ -69,5 +106,84 @@ public class ManyToOneConfig extends AbstractRelationConfig {
   public HashMap<String, JoinColumnConfig> getJoinColumnMap()
   {
     return _joinColumnMap;
+  }
+
+    public void complete()
+      throws ConfigException
+    {
+//      addManyToOne(_entityType, _field, _fieldName, _fieldType);
+    }
+    
+  private void introspect()
+  {
+    ManyToOne manyToOne = _field.getAnnotation(ManyToOne.class);
+    
+    if (manyToOne != null)
+      introspectManyToOne(manyToOne);
+    
+    JoinColumn joinColumnAnn = _field.getAnnotation(JoinColumn.class);
+    JoinColumns joinColumnsAnn = _field.getAnnotation(JoinColumns.class);
+
+    if (joinColumnsAnn != null && joinColumnAnn != null) {
+      throw error(_field, L.l("{0} may not have both @JoinColumn and @JoinColumns",
+                             _fieldName));
+    }
+
+    if (joinColumnsAnn != null)
+      introspectJoinColumns(joinColumnsAnn.value());
+    else if (joinColumnAnn != null)
+      introspectJoinColumns(new JoinColumn[] { joinColumnAnn });
+  }
+  
+  private void introspectManyToOne(ManyToOne manyToOne)
+  {
+    setTargetEntity(manyToOne.targetEntity());
+    setCascadeTypes(manyToOne.cascade());
+    setFetch(manyToOne.fetch());
+    
+    _isOptional = manyToOne.optional();
+  }
+  
+  private void introspectJoinColumns(JoinColumn []joinColumns)
+  {
+    for (JoinColumn joinColumn : joinColumns) {
+      addJoinColumn(new JoinColumnConfig(joinColumn));
+    }
+  }
+
+  void addManyToOne()
+    throws ConfigException
+  {
+    AmberPersistenceUnit persistenceUnit = _sourceType.getPersistenceUnit();
+
+    JClass targetClass = null;
+
+    String targetName = "";
+    if (targetClass != null)
+      targetName = targetClass.getName();
+
+    if (targetName.equals("") || targetName.equals("void"))
+      targetName = _fieldType.getName();
+
+    ManyToOneField manyToOneField;
+    manyToOneField = new ManyToOneField(_sourceType, _fieldName, getCascade(), true);
+
+    EntityType targetType = persistenceUnit.createEntity(getTargetEntity());
+
+    manyToOneField.setType(targetType);
+
+    manyToOneField.setLazy(isFetchLazy());
+
+    manyToOneField.setJoinColumnMap(_joinColumnMap);
+
+    _sourceType.addField(manyToOneField);
+
+    // jpa/0ge3
+    if (_sourceType instanceof MappedSuperclassType)
+      return;
+
+    validateJoinColumns(_field, _fieldName, _joinColumnMap, targetType);
+
+    manyToOneField.init();
   }
 }

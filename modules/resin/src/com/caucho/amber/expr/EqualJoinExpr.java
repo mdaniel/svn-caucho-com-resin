@@ -30,7 +30,7 @@ package com.caucho.amber.expr;
 
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.util.CharBuffer;
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ import java.util.ArrayList;
  * Links two tables by their key fields.
  */
 public class EqualJoinExpr extends JoinExpr {
-  private ArrayList<Column> _keyColumns;
+  private ArrayList<AmberColumn> _keyColumns;
 
   private FromItem _fromItemA;
   private FromItem _fromItemB;
@@ -47,7 +47,7 @@ public class EqualJoinExpr extends JoinExpr {
   /**
    * Creates the expr.
    */
-  EqualJoinExpr(ArrayList<Column> keyColumns,
+  EqualJoinExpr(ArrayList<AmberColumn> keyColumns,
                 FromItem fromItemA,
                 FromItem fromItemB)
   {
@@ -181,7 +181,7 @@ public class EqualJoinExpr extends JoinExpr {
     cb.append('(');
 
     for (int i = 0; i < _keyColumns.size(); i++) {
-      Column column = _keyColumns.get(i);
+      AmberColumn column = _keyColumns.get(i);
 
       if (i != 0)
         cb.append(" AND ");

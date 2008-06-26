@@ -43,7 +43,7 @@ import com.caucho.amber.query.QueryCacheKey;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.query.ResultSetCacheChunk;
 import com.caucho.amber.query.UserQuery;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.EJBExceptionWrapper;
@@ -535,10 +535,10 @@ public class AmberConnection
     if (! ((resultSetMapping == null) || "".equals(resultSetMapping)))
       return createNativeQuery(sql, resultSetMapping);
 
-    String resultClass = nativeQuery.getResultClass();
+    Class resultClass = nativeQuery.getResultClass();
 
     AmberEntityHome entityHome
-      = _persistenceUnit.getEntityHome(resultClass);
+      = _persistenceUnit.getEntityHome(resultClass.getName());
 
     EntityType entityType = entityHome.getEntityType();
 
@@ -2189,7 +2189,7 @@ public class AmberConnection
     if (! isActiveTransaction())
       return;
 
-    Table table = entity.__caucho_getEntityType().getTable();
+    AmberTable table = entity.__caucho_getEntityType().getTable();
 
     Object key = entity.__caucho_getPrimaryKey();
 
@@ -2763,7 +2763,7 @@ public class AmberConnection
     // setTransactionalState(entity);
 
     // jpa/0g0i
-    Table table = home.getEntityType().getTable();
+    AmberTable table = home.getEntityType().getTable();
     addCompletion(new RowInsertCompletion(table.getName()));
   }
 

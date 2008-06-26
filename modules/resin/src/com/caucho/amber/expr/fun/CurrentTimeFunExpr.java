@@ -30,7 +30,7 @@ package com.caucho.amber.expr.fun;
 
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.type.SqlTimeType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -73,7 +73,7 @@ public class CurrentTimeFunExpr extends DateTimeFunExpr {
   /**
    * Returns the expr type.
    */
-  public Type getType()
+  public AmberType getType()
   {
     return SqlTimeType.create();
   }

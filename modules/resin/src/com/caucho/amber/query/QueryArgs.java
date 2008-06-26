@@ -34,19 +34,19 @@ import com.caucho.amber.type.*;
  * Represents the arguments to a query.
  */
 public class QueryArgs {
-  private Type []_argTypes;
+  private AmberType []_argTypes;
   private Object []_argValues;
 
   public QueryArgs(int length)
   {
-    _argTypes = new Type[length];
+    _argTypes = new AmberType[length];
     _argValues = new Object[length];
   }
 
   /**
    * Returns the arg type array.
    */
-  Type []getArgTypes()
+  AmberType []getArgTypes()
   {
     return _argTypes;
   }

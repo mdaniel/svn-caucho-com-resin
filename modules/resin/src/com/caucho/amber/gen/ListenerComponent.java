@@ -31,13 +31,12 @@ package com.caucho.amber.gen;
 
 import com.caucho.amber.entity.Listener;
 import com.caucho.amber.type.ListenerType;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.ClassComponent;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /**
@@ -106,6 +105,7 @@ public class ListenerComponent extends ClassComponent {
   /**
    * Starts generation of the Java code
    */
+  @Override
   public void generate(JavaWriter out)
     throws IOException
   {
@@ -190,7 +190,7 @@ public class ListenerComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    ArrayList<JMethod> callbacks = null;
+    ArrayList<Method> callbacks = null;
     ListenerType parentType;
 
     parentType = listenerType;
@@ -228,8 +228,8 @@ public class ListenerComponent extends ClassComponent {
     while (parentType != null);
 
     if (callbacks.size() > 0) {
-      for (JMethod method : callbacks) {
-        JClass params[] = method.getParameterTypes();
+      for (Method method : callbacks) {
+        Class params[] = method.getParameterTypes();
 
         out.print("this.");
 

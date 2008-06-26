@@ -31,12 +31,12 @@ package com.caucho.amber.table;
 import com.caucho.util.L10N;
 
 /**
- * Column linking to another table
+ * AmberColumn linking to another table
  */
-public class ForeignColumn extends Column {
+public class ForeignColumn extends AmberColumn {
   private static final L10N L = new L10N(ForeignColumn.class);
 
-  private Column _targetColumn;
+  private AmberColumn _targetColumn;
   
   /**
    * Creates a foreign column.
@@ -45,7 +45,7 @@ public class ForeignColumn extends Column {
    * @param name the column name
    * @param targetColumn the key column of the target table
    */
-  ForeignColumn(Table table, String name, Column targetColumn)
+  ForeignColumn(AmberTable table, String name, AmberColumn targetColumn)
   {
     super(table, name, targetColumn.getType());
 
@@ -60,7 +60,7 @@ public class ForeignColumn extends Column {
   /**
    * Returns the target column.
    */
-  public Column getTargetColumn()
+  public AmberColumn getTargetColumn()
   {
     return _targetColumn;
   }

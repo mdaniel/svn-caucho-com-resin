@@ -30,8 +30,8 @@ package com.caucho.amber.type;
 
 import com.caucho.amber.idgen.AmberTableGenerator;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.table.Column;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberColumn;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
@@ -41,12 +41,12 @@ import java.util.HashMap;
 /**
  * A type which represents a table or a portion.
  */
-public class GeneratorTableType extends Type {
+public class GeneratorTableType extends AmberType {
   private static final L10N L = new L10N(GeneratorTableType.class);
 
   private AmberPersistenceUnit _amberPersistenceUnit;
 
-  private Table _table;
+  private AmberTable _table;
 
   private String _keyColumn = "GEN_KEY";
   private String _valueColumn = "GEN_VALUE";
@@ -80,7 +80,7 @@ public class GeneratorTableType extends Type {
   /**
    * Returns the table.
    */
-  public Table getTable()
+  public AmberTable getTable()
   {
     return _table;
   }
@@ -124,12 +124,12 @@ public class GeneratorTableType extends Type {
   public void init()
     throws ConfigException
   {
-    Column keyColumn = getTable().createColumn(_keyColumn,
+    AmberColumn keyColumn = getTable().createColumn(_keyColumn,
                                                StringType.create());
     keyColumn.setPrimaryKey(true);
     keyColumn.setLength(254);
 
-    Column valueColumn = getTable().createColumn(_valueColumn,
+    AmberColumn valueColumn = getTable().createColumn(_valueColumn,
                                                  LongType.create());
 
     if (getAmberManager().getCreateDatabaseTables())

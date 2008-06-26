@@ -28,7 +28,7 @@
 
 package com.caucho.amber.field;
 
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.EntityType;
 import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
@@ -48,7 +48,7 @@ public class EntityMapField extends AbstractField {
   private static final L10N L = new L10N(EntityMapField.class);
   protected static final Logger log = Log.open(EntityMapField.class);
 
-  private ArrayList<Column> _indexColumns;
+  private ArrayList<AmberColumn> _indexColumns;
   private JMethod _mapMethod;
 
   private EntityType _targetType;
@@ -119,7 +119,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Sets the index columns.
    */
-  public void setIndexColumns(ArrayList<Column> columns)
+  public void setIndexColumns(ArrayList<AmberColumn> columns)
   {
     _indexColumns = columns;
   }
@@ -127,7 +127,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Sets the index columns.
    */
-  public ArrayList<Column> getIndexColumns()
+  public ArrayList<AmberColumn> getIndexColumns()
   {
     return _indexColumns;
   }

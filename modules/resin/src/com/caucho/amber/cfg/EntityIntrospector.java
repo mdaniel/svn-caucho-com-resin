@@ -31,16 +31,16 @@ package com.caucho.amber.cfg;
 
 import com.caucho.amber.AmberTableCache;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.*;
 import com.caucho.amber.field.SubId;
-import com.caucho.bytecode.JAnnotation;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.util.L10N;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import javax.persistence.InheritanceType;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.DiscriminatorType;
@@ -49,6 +49,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
+import javax.persistence.AttributeOverride;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.IdClass;
+import javax.persistence.Inheritance;
+import javax.persistence.JoinColumn;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.SecondaryTable;
+import javax.persistence.Table;
 
 /**
  * Configuration for an entity bean
@@ -69,7 +82,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
   /**
    * Returns true for entity type.
    */
-  public boolean isEntity(JClass type)
+  public boolean isEntity(Class type)
   {
     getInternalEntityConfig(type, _annotationCfg);
  
@@ -79,7 +92,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
   /**
    * Introspects.
    */
-  public BeanType introspect(JClass type)
+  public BeanType introspect(Class type)
     throws ConfigException, SQLException
   {
     BeanType beanType = null;
@@ -87,7 +100,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     try {
       EntityType entityType = null;
 
-      EntityType parentType = introspectParent(type.getSuperClass());
+      EntityType parentType = introspectParent(type.getSuperclass());
 
       entityType = introspectEntityType(type, parentType);
 
@@ -116,16 +129,16 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       introspectTableCache(entityType, type);
 
       getInternalIdClassConfig(type, _annotationCfg);
-      JAnnotation idClassAnn = _annotationCfg.getAnnotation();
+      IdClass idClassAnn = (IdClass) _annotationCfg.getAnnotation();
       IdClassConfig idClassConfig = _annotationCfg.getIdClassConfig();
 
-      JClass idClass = null;
+      Class idClass = null;
       if (! _annotationCfg.isNull()) {
         if (idClassAnn != null)
-          idClass = idClassAnn.getClass("value");
+          idClass = idClassAnn.value();
         else {
           String s = idClassConfig.getClassName();
-          idClass = _persistenceUnit.getJClassLoader().forName(s);
+          idClass = _persistenceUnit.loadTempClass(s);
         }
 
         // XXX: temp. introspects idClass as an embeddable type.
@@ -208,13 +221,13 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     return beanType;
   }
 
-  private EntityType introspectEntityType(JClass type,
+  private EntityType introspectEntityType(Class type,
 					  EntityType parentType)
     throws SQLException
   {
     getInternalEntityConfig(type, _annotationCfg);
       
-    JAnnotation entityAnn = _annotationCfg.getAnnotation();
+    Entity entityAnn = (Entity) _annotationCfg.getAnnotation();
     EntityConfig entityConfig = _annotationCfg.getEntityConfig();
 
     boolean isEntity = ! _annotationCfg.isNull();
@@ -228,14 +241,14 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     if (entityConfig != null)
       typeName = entityConfig.getClassName();
     else
-      typeName = entityAnn.getString("name");
+      typeName = entityAnn.name();
 
     // Validates the type
     String entityName;
-    JAnnotation inheritanceAnn = null;
+    Inheritance inheritanceAnn = null;
     InheritanceConfig inheritanceConfig = null;
-    JClass rootClass = type;
-    JAnnotation rootEntityAnn = null;
+    Class rootClass = type;
+    Entity rootEntityAnn = null;
     EntityConfig rootEntityConfig = null;
 
     validateType(type, true);
@@ -244,7 +257,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       // if (hasInheritance) {
 
     if (entityConfig == null)
-      entityName = entityAnn.getString("name");
+      entityName = entityAnn.name();
     else {
       entityName = entityConfig.getClassName();
 
@@ -270,13 +283,13 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     return entityType;
   }
 
-  private EntityType introspectMappedType(JClass type, EntityType parentType)
+  private EntityType introspectMappedType(Class type, EntityType parentType)
     throws SQLException
   {
     EntityType entityType;
 
     boolean isMappedSuperclass = false;
-    JAnnotation mappedSuperAnn = null;
+    MappedSuperclass mappedSuperAnn = null;
     MappedSuperclassConfig mappedSuperConfig = null;
 
     String typeName;
@@ -284,7 +297,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     MappedSuperclassConfig mappedSuperOrEntityConfig = null;
 
     getInternalMappedSuperclassConfig(type, _annotationCfg);
-    mappedSuperAnn = _annotationCfg.getAnnotation();
+    mappedSuperAnn = (MappedSuperclass) _annotationCfg.getAnnotation();
     mappedSuperConfig = _annotationCfg.getMappedSuperclassConfig();
 
     isMappedSuperclass = ! _annotationCfg.isNull();
@@ -296,15 +309,15 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
     if (mappedSuperConfig != null)
       typeName = mappedSuperConfig.getClassName();
-    else
-      typeName = mappedSuperAnn.getString("name");
-
+/*    else
+      typeName = mappedSuperAnn.name();
+*/
     // Validates the type
     String entityName;
-    JAnnotation inheritanceAnn = null;
+    Inheritance inheritanceAnn = null;
     InheritanceConfig inheritanceConfig = null;
-    JClass rootClass = type;
-    JAnnotation rootEntityAnn = null;
+    Class rootClass = type;
+    Entity rootEntityAnn = null;
     EntityConfig rootEntityConfig = null;
 
     validateType(type, false);
@@ -313,7 +326,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     // if (hasInheritance) {
 
     if (mappedSuperConfig == null)
-      entityName = mappedSuperAnn.getString("name");
+      entityName = null;//mappedSuperAnn.name();
     else {
       entityName = mappedSuperConfig.getSimpleClassName();
     }
@@ -341,11 +354,11 @@ public class EntityIntrospector extends BaseConfigIntrospector {
   /**
    * Introspects.
    */
-  private EmbeddableType introspectEmbeddableType(JClass type)
+  private EmbeddableType introspectEmbeddableType(Class type)
     throws ConfigException, SQLException
   {
     getInternalEmbeddableConfig(type, _annotationCfg);
-    JAnnotation embeddableAnn = _annotationCfg.getAnnotation();
+    Embeddable embeddableAnn = (Embeddable) _annotationCfg.getAnnotation();
     EmbeddableConfig embeddableConfig = _annotationCfg.getEmbeddableConfig();
 
     /*
@@ -367,7 +380,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         embeddableType.setFieldAccess(true);
 
       // XXX: jpa/0u21
-      JAnnotation ann = type.getAnnotation(javax.persistence.Embeddable.class);
+      Embeddable ann = (Embeddable) type.getAnnotation(javax.persistence.Embeddable.class);
 
       if (ann == null) {
         isField = true;
@@ -403,7 +416,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     return embeddableType;
   }
 
-  private MappedSuperclassConfig introspectEntityConfig(JClass type)
+  private MappedSuperclassConfig introspectEntityConfig(Class type)
     throws SQLException
   {
     getInternalEntityConfig(type, _annotationCfg);
@@ -416,7 +429,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     return _annotationCfg.getMappedSuperclassConfig();
   }
 
-  private EntityType introspectParent(JClass parentClass)
+  private EntityType introspectParent(Class parentClass)
     throws SQLException
   {
     if (parentClass == null)
@@ -436,7 +449,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
 
 
-  private void introspectInheritance(JClass type,
+  private void introspectInheritance(Class type,
 				     EntityType entityType,
 				     EntityType parentType)
     throws SQLException
@@ -445,10 +458,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     // on the entity class that is the root of the entity
     // class hierarachy.
     InheritanceConfig inheritanceConfig;
-    JAnnotation inheritanceAnn;
+    Inheritance inheritanceAnn;
 
     getInternalInheritanceConfig(type, _annotationCfg);
-    inheritanceAnn = _annotationCfg.getAnnotation();
+    inheritanceAnn = (Inheritance) _annotationCfg.getAnnotation();
     inheritanceConfig = _annotationCfg.getInheritanceConfig();
 
     boolean hasInheritance = ! _annotationCfg.isNull();
@@ -468,7 +481,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       rootType.addSubClass(entityType);
 
       getInternalPrimaryKeyJoinColumnConfig(type, _annotationCfg);
-      JAnnotation joinAnn = _annotationCfg.getAnnotation();
+      JoinColumn joinAnn = (JoinColumn) _annotationCfg.getAnnotation();
       PrimaryKeyJoinColumnConfig primaryKeyJoinColumnConfig
 	= _annotationCfg.getPrimaryKeyJoinColumnConfig();
 
@@ -492,14 +505,14 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 			    inheritanceAnn, inheritanceConfig);
   }
 
-  private void introspectDiscriminatorValue(JClass type, EntityType entityType)
+  private void introspectDiscriminatorValue(Class type, EntityType entityType)
   {
-    JAnnotation discValueAnn = type.getAnnotation(DiscriminatorValue.class);
+    DiscriminatorValue discValueAnn = (DiscriminatorValue) type.getAnnotation(DiscriminatorValue.class);
 
     String discriminatorValue = null;
 
     if (discValueAnn != null)
-      discriminatorValue = discValueAnn.getString("value");
+      discriminatorValue = discValueAnn.value();
 
     if (discriminatorValue == null || discriminatorValue.equals("")) {
       String name = entityType.getBeanClass().getSimpleName();
@@ -515,15 +528,15 @@ public class EntityIntrospector extends BaseConfigIntrospector {
    */
   void introspectInheritance(AmberPersistenceUnit persistenceUnit,
                              EntityType entityType,
-                             JClass type,
-                             JAnnotation inheritanceAnn,
+                             Class type,
+                             Inheritance inheritanceAnn,
                              InheritanceConfig inheritanceConfig)
     throws ConfigException, SQLException
   {
     InheritanceType strategy;
 
     if (inheritanceAnn != null)
-      strategy = (InheritanceType) inheritanceAnn.get("strategy");
+      strategy = inheritanceAnn.strategy();
     else
       strategy = inheritanceConfig.getStrategy();
 
@@ -534,22 +547,22 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     }
 
     getInternalDiscriminatorColumnConfig(type, _annotationCfg);
-    JAnnotation discriminatorAnn = _annotationCfg.getAnnotation();
+    DiscriminatorColumn discriminatorAnn = (DiscriminatorColumn) _annotationCfg.getAnnotation();
     DiscriminatorColumnConfig discriminatorConfig = _annotationCfg.getDiscriminatorColumnConfig();
 
     String columnName = null;
 
     if (discriminatorAnn != null)
-      columnName = discriminatorAnn.getString("name");
+      columnName = discriminatorAnn.name();
 
     if (columnName == null || columnName.equals(""))
       columnName = "DTYPE";
 
-    Type columnType = null;
+    AmberType columnType = null;
     DiscriminatorType discType = DiscriminatorType.STRING;
 
     if (discriminatorAnn != null)
-      discType = (DiscriminatorType) discriminatorAnn.get("discriminatorType");
+      discType = discriminatorAnn.discriminatorType();
 
     switch (discType) {
     case STRING:
@@ -565,22 +578,22 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       throw new IllegalStateException();
     }
 
-    Table table = entityType.getTable();
+    AmberTable table = entityType.getTable();
 
     // jpa/0gg0
     if (table == null)
       return;
 
-    com.caucho.amber.table.Column column
+    com.caucho.amber.table.AmberColumn column
       = table.createColumn(columnName, columnType);
 
     if (discriminatorAnn != null) {
-      column.setNotNull(! discriminatorAnn.getBoolean("nullable"));
+//      column.setNotNull(! discriminatorAnn.nullable());
 
-      column.setLength(discriminatorAnn.getInt("length"));
+      column.setLength(discriminatorAnn.length());
 
-      if (! "".equals(discriminatorAnn.get("columnDefinition")))
-        column.setSQLType(discriminatorAnn.getString("columnDefinition"));
+      if (! "".equals(discriminatorAnn.columnDefinition()))
+        column.setSQLType(discriminatorAnn.columnDefinition());
     }
     else {
       column.setNotNull(true);
@@ -590,23 +603,23 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     entityType.setDiscriminator(column);
   }
 
-  private void introspectTable(JClass type,
+  private void introspectTable(Class type,
                                EntityType entityType,
 			       EntityType parentType)
   {
     // XXX: need better test
     boolean isEntity = ! (entityType instanceof MappedSuperclassType);
     
-    Table table = null;
+    AmberTable table = null;
 
     getInternalTableConfig(type, _annotationCfg);
-    JAnnotation tableAnn = _annotationCfg.getAnnotation();
+    Table tableAnn = (Table) _annotationCfg.getAnnotation();
     TableConfig tableConfig = _annotationCfg.getTableConfig();
 
     String tableName = null;
 
     if (tableAnn != null)
-      tableName = (String) tableAnn.get("name");
+      tableName = tableAnn.name();
     else if (tableConfig != null)
       tableName = tableConfig.getName();
 
@@ -650,15 +663,15 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
 	EntityType rootType = parentType.getRootType();
 
-	JClass rootClass = rootType.getBeanClass();
+	Class rootClass = rootType.getBeanClass();
 	getInternalTableConfig(rootClass, _annotationCfg);
-	JAnnotation rootTableAnn = _annotationCfg.getAnnotation();
+	Table rootTableAnn = (Table) _annotationCfg.getAnnotation();
 	TableConfig rootTableConfig = _annotationCfg.getTableConfig();
 
 	String rootTableName = null;
 
 	if (rootTableAnn != null)
-	  rootTableName = (String) rootTableAnn.get("name");
+	  rootTableName = rootTableAnn.name();
 	else if (rootTableConfig != null)
 	  rootTableName = rootTableConfig.getName();
 
@@ -675,19 +688,19 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     }
   }
 
-  private void introspectSecondaryTable(EntityType entityType, JClass type)
+  private void introspectSecondaryTable(EntityType entityType, Class type)
   {
     getInternalSecondaryTableConfig(type, _annotationCfg);
-    JAnnotation secondaryTableAnn = _annotationCfg.getAnnotation();
+    SecondaryTable secondaryTableAnn = (SecondaryTable) _annotationCfg.getAnnotation();
     SecondaryTableConfig secondaryTableConfig = _annotationCfg.getSecondaryTableConfig();
 
-    Table secondaryTable = null;
+    AmberTable secondaryTable = null;
 
     if ((secondaryTableAnn != null) || (secondaryTableConfig != null)) {
       String secondaryName;
 
       if (secondaryTableAnn != null)
-	secondaryName = secondaryTableAnn.getString("name");
+	secondaryName = secondaryTableAnn.name();
       else
 	secondaryName = secondaryTableConfig.getName();
 
@@ -699,42 +712,31 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     }
 
     if (secondaryTableAnn != null) {
-      Object []join = (Object []) secondaryTableAnn.get("pkJoinColumns");
-
-      JAnnotation []joinAnn = null;
-
-      if (join != null) {
-	joinAnn = new JAnnotation[join.length];
-	System.arraycopy(join, 0, joinAnn, 0, join.length);
-      }
-
-      linkSecondaryTable(entityType.getTable(),
-			 secondaryTable,
-			 joinAnn);
+      PrimaryKeyJoinColumn[] joinAnn = secondaryTableAnn.pkJoinColumns();
     }
   }
 
-  private void introspectTableCache(EntityType entityType, JClass type)
+  private void introspectTableCache(EntityType entityType, Class type)
   {
-    JAnnotation tableCache = type.getAnnotation(AmberTableCache.class);
+    AmberTableCache tableCache = (AmberTableCache) type.getAnnotation(AmberTableCache.class);
 
     if (tableCache != null) {
-      entityType.getTable().setReadOnly(tableCache.getBoolean("readOnly"));
+      entityType.getTable().setReadOnly(tableCache.readOnly());
 
-      long cacheTimeout = Period.toPeriod(tableCache.getString("timeout"));
+      long cacheTimeout = Period.toPeriod(tableCache.timeout());
       entityType.getTable().setCacheTimeout(cacheTimeout);
     }
   }
 
   private void introspectAttributeOverrides(EntityType entityType,
-                                            JClass type)
+                                            Class type)
   {
     EntityType parent = entityType.getParentType();
 
     if (parent == null)
       return;
 
-    boolean isAbstract = parent.getBeanClass().isAbstract();
+    boolean isAbstract = Modifier.isAbstract(parent.getBeanClass().getModifiers());
 
     if (parent.isEntity() && ! isAbstract)
       return;
@@ -743,12 +745,12 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       = new HashMap<String,ColumnConfig>();
     
     getInternalAttributeOverrideConfig(type, _annotationCfg);
-    JAnnotation attributeOverrideAnn = _annotationCfg.getAnnotation();
+    AttributeOverride attributeOverrideAnn = (AttributeOverride) _annotationCfg.getAnnotation();
 
     boolean hasAttributeOverride = (attributeOverrideAnn != null);
 
-    JAnnotation attributeOverridesAnn
-      = type.getAnnotation(AttributeOverrides.class);
+    AttributeOverrides attributeOverridesAnn
+      = (AttributeOverrides) type.getAnnotation(AttributeOverrides.class);
 
     ArrayList<AttributeOverrideConfig> attributeOverrideList = null;
 
@@ -788,17 +790,19 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       else {
 	// Convert annotations to configurations.
 
-	Object attOverridesAnn[]
-	  = (Object []) attributeOverridesAnn.get("value");
+	AttributeOverride attOverridesAnn[]
+	  = attributeOverridesAnn.value();
 
 	AttributeOverrideConfig attOverrideConfig;
 
+        /* XXX:
 	for (int i = 0; i < attOverridesAnn.length; i++) {
 	  attOverrideConfig
 	    = convertAttributeOverrideAnnotationToConfig((JAnnotation) attOverridesAnn[i]);
 
 	  attributeOverrideList.add(attOverrideConfig);
 	}
+         * */
       }
     }
 
@@ -810,15 +814,15 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 							overrideMap));
   }
 
-  boolean isField(JClass type,
+  boolean isField(Class type,
                   AbstractEnhancedConfig typeConfig)
     throws ConfigException
   {
-    for (JMethod method : type.getDeclaredMethods()) {
-      JAnnotation ann[] = method.getDeclaredAnnotations();
+    for (Method method : type.getDeclaredMethods()) {
+      Annotation ann[] = method.getDeclaredAnnotations();
 
       for (int i = 0; ann != null && i < ann.length; i++) {
-	if (isPropertyAnnotation(ann[i].getType()))
+	if (isPropertyAnnotation(ann[i].getClass()))
 	  return false;
       }
     }
@@ -826,9 +830,9 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     return true;
   }
 
-  private boolean isPropertyAnnotation(String name)
+  private boolean isPropertyAnnotation(Class cl)
   {
-    return ("javax.persistence.Basic".equals(name)
-	    || "javax.persistence.Column".equals(name));
+    return (Basic.class.equals(cl)
+	    || Column.class.equals(cl));
   }
 }

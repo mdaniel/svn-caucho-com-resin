@@ -29,13 +29,12 @@
 
 package com.caucho.amber.cfg;
 
-import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.type.AbstractEnhancedType;
-import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
+import java.lang.annotation.Annotation;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
@@ -61,10 +60,10 @@ public class MappedSuperIntrospector extends BaseConfigIntrospector {
   /**
    * Returns true for mapped superclass type.
    */
-  public boolean isMappedSuper(JClass type)
+  public boolean isMappedSuper(Class type)
   {
     getInternalMappedSuperclassConfig(type, _annotationCfg);
-    JAnnotation mappedSuperAnn = _annotationCfg.getAnnotation();
+    Annotation mappedSuperAnn = _annotationCfg.getAnnotation();
     MappedSuperclassConfig mappedSuperConfig
       = _annotationCfg.getMappedSuperclassConfig();
 

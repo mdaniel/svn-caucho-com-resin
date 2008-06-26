@@ -31,9 +31,9 @@ package com.caucho.amber.expr;
 import com.caucho.amber.field.KeyPropertyField;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 
 /**
  * Bound identifier expression.
@@ -84,7 +84,7 @@ public class KeyPropertyExpr extends AbstractAmberExpr implements IdFieldExpr {
   /**
    * Returns the expr type
    */
-  public Type getType()
+  public AmberType getType()
   {
     return getField().getType();
   }
@@ -92,7 +92,7 @@ public class KeyPropertyExpr extends AbstractAmberExpr implements IdFieldExpr {
   /**
    * Returns the parent expression.
    */
-  public Column getColumn()
+  public AmberColumn getColumn()
   {
     return getField().getColumn();
   }
@@ -103,7 +103,7 @@ public class KeyPropertyExpr extends AbstractAmberExpr implements IdFieldExpr {
   /*
   public PathExpr createField(QueryParser parser, String name)
   {
-    Type type = getType();
+    AmberType type = getType();
 
     if (! (type instanceof EntityType))
       return null;

@@ -76,7 +76,7 @@ public class PrimitiveFloatType extends PrimitiveType {
   /**
    * Returns the type as a foreign key.
    */
-  public Type getForeignType()
+  public AmberType getForeignType()
   {
     return FloatType.create();
   }

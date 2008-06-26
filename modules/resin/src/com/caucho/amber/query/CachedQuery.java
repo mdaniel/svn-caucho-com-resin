@@ -31,8 +31,7 @@ package com.caucho.amber.query;
 
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
-import com.caucho.bytecode.JClass;
+import com.caucho.amber.type.AmberType;
 import com.caucho.util.Alarm;
 
 import java.sql.PreparedStatement;
@@ -49,7 +48,7 @@ public class CachedQuery {
   private CachedQueryKey _key;
   private ResultSetImpl _rs;
 
-  private Type []_argTypes;
+  private AmberType []_argTypes;
   private Object []_argValues;
   private int _argLength = 0;
 
@@ -64,13 +63,13 @@ public class CachedQuery {
   {
     _query = (SelectQuery) query.getQuery();
 
-    Type []argTypes = query.getArgTypes();
+    AmberType []argTypes = query.getArgTypes();
     Object []argValues = query.getArgValues();
     
     _argLength = query.getArgLength();
 
     if (_argLength > 0) {
-      _argTypes = new Type[_argLength];
+      _argTypes = new AmberType[_argLength];
       _argValues = new Object[_argLength];
 
       for (int i = _argLength - 1; i >= 0; i--) {
@@ -110,9 +109,9 @@ public class CachedQuery {
   public void list(List<Object> list, AmberConnection aConn, long maxAge)
     throws SQLException
   {
-    Type type = _query.getResultType(0);
+    AmberType type = _query.getResultType(0);
     EntityType entityType = (EntityType) type;
-    JClass cl = entityType.getBeanClass();
+    Class cl = entityType.getBeanClass();
     
     synchronized (this) {
       long now = Alarm.getCurrentTime();
@@ -186,8 +185,9 @@ public class CachedQuery {
     return _rs;
   }
 
+  @Override
   public String toString()
   {
-    return "UserQuery[" + _query.getQueryString() + "]";
+    return getClass().getSimpleName() + "[" + _query.getQueryString() + "]";
   }
 }

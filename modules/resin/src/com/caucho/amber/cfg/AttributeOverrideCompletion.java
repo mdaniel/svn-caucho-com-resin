@@ -31,10 +31,9 @@ package com.caucho.amber.cfg;
 
 
 import com.caucho.amber.field.*;
-import com.caucho.amber.table.Column;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberColumn;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.*;
-import com.caucho.bytecode.*;
 import com.caucho.config.ConfigException;
 
 import com.caucho.util.L10N;
@@ -45,15 +44,15 @@ import java.util.HashMap;
 /**
  * Completion for overrides based on a parent map
  */
-public class AttributeOverrideCompletion extends CompletionImpl
+class AttributeOverrideCompletion extends CompletionImpl
 {
   private static final L10N L = new L10N(AttributeOverrideCompletion.class);
-  private JClass _type;
+  private Class _type;
   private HashMap<String,ColumnConfig> _overrideMap;
 
   AttributeOverrideCompletion(BaseConfigIntrospector base,
                               EntityType entityType,
-			      JClass type,
+			      Class type,
 			      HashMap<String,ColumnConfig> overrideMap)
   {
     super(base, entityType);
@@ -105,13 +104,13 @@ public class AttributeOverrideCompletion extends CompletionImpl
 
     ColumnConfig column = _overrideMap.get(fieldName);
 
-    Column oldColumn = field.getColumn();
+    AmberColumn oldColumn = field.getColumn();
     // XXX: deal with types
     AbstractField newField = (AbstractField) field.override(_entityType);
 
     if (column != null) {
-      Table table = _entityType.getTable();
-      Column newColumn = table.createColumn(column.getName(),
+      AmberTable table = _entityType.getTable();
+      AmberColumn newColumn = table.createColumn(column.getName(),
 					    oldColumn.getType());
 
       newField.setColumn(newColumn);
@@ -121,8 +120,8 @@ public class AttributeOverrideCompletion extends CompletionImpl
       return newField;
     }
     else {
-      Table table = _entityType.getTable();
-      Column newColumn = table.createColumn(oldColumn.getName(),
+      AmberTable table = _entityType.getTable();
+      AmberColumn newColumn = table.createColumn(oldColumn.getName(),
 					    oldColumn.getType());
 
       newField.setColumn(newColumn);

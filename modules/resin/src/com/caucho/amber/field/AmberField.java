@@ -34,10 +34,9 @@ import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Table;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberTable;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.BeanType;
-import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
@@ -45,6 +44,8 @@ import com.caucho.util.CharBuffer;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -71,12 +72,12 @@ public interface AmberField {
   /**
    * Returns the table containing the value (or null)
    */
-  public Table getTable();
+  public AmberTable getTable();
 
   /**
    * Returns the column for the field.
    */
-  public Column getColumn();
+  public AmberColumn getColumn();
 
   /**
    * Returns the property index.
@@ -93,6 +94,11 @@ public interface AmberField {
    */
   public long getCreateLoadMask(int group);
 
+  /**
+   * Returns the class of the field
+   */
+  public Class getJavaClass();
+  
   /**
    * Returns the type of the field
    */
@@ -147,12 +153,12 @@ public interface AmberField {
   /**
    * Returns the getter method.
    */
-  public JMethod getGetterMethod();
+  public Method getGetterMethod();
 
   /**
    * Returns the setter method.
    */
-  public JMethod getSetterMethod();
+  public Method getSetterMethod();
 
   /**
    * Returns the getter name.
@@ -239,7 +245,7 @@ public interface AmberField {
   /**
    * Generates the select clause for an entity load.
    */
-  public String generateLoadSelect(Table table, String id);
+  public String generateLoadSelect(AmberTable table, String id);
 
   /**
    * Generates the select clause.

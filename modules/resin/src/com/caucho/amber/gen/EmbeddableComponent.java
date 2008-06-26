@@ -30,19 +30,15 @@
 package com.caucho.amber.gen;
 
 import com.caucho.amber.field.*;
-import com.caucho.amber.table.Column;
-import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EmbeddableType;
-import com.caucho.amber.type.Type;
 import com.caucho.bytecode.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.ClassComponent;
-import com.caucho.loader.Environment;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * Generates the Java code for the wrapped object.
@@ -110,6 +106,7 @@ public class EmbeddableComponent extends ClassComponent {
   /**
    * Starts generation of the Java code
    */
+  @Override
   public void generate(JavaWriter out)
     throws IOException
   {
@@ -160,7 +157,7 @@ public class EmbeddableComponent extends ClassComponent {
 
     ArrayList<AmberField> fields = _embeddableType.getFields();
 
-    for (JMethod ctor : _embeddableType.getBeanClass().getConstructors()) {
+    for (Constructor ctor : _embeddableType.getBeanClass().getConstructors()) {
       out.println();
       // XXX: s/b actual access type?
       out.print("public ");
@@ -168,12 +165,12 @@ public class EmbeddableComponent extends ClassComponent {
       out.print(className);
       out.print("(");
 
-      JClass []args = ctor.getParameterTypes();
+      Class []args = ctor.getParameterTypes();
       for (int i = 0; i < args.length; i++) {
         if (i != 0)
           out.print(", ");
 
-        out.print(args[i].getPrintName());
+        out.printClass(args[i]);
         out.print(" a" + i);
       }
       out.println(")");

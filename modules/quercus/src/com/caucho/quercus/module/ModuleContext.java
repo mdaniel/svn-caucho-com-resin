@@ -341,8 +341,10 @@ public class ModuleContext
   {
     ArrayValue internal = new ArrayValueImpl();
 
-    for (String name : _staticFunctions.keySet()) {
-      internal.put(name);
+    synchronized (_staticFunctions) {
+      for (String name : _staticFunctions.keySet()) {
+	internal.put(name);
+      }
     }
 
     return internal;
@@ -361,12 +363,14 @@ public class ModuleContext
    */
   public ClassDef findClass(String name)
   {
-    ClassDef def = _staticClasses.get(name);
+    synchronized (_staticClasses) {
+      ClassDef def = _staticClasses.get(name);
 
-    if (def == null)
-      def = _lowerStaticClasses.get(name.toLowerCase());
+      if (def == null)
+	def = _lowerStaticClasses.get(name.toLowerCase());
 
-    return def;
+      return def;
+    }
   }
 
   /**
@@ -374,7 +378,9 @@ public class ModuleContext
    */
   public HashMap<String, ClassDef> getClassMap()
   {
-    return _staticClasses;
+    synchronized (_staticClasses) {
+      return new HashMap<String,ClassDef>(_staticClasses);
+    }
   }
 
   /**

@@ -87,7 +87,7 @@ public class MappedSuperclassType extends EntityType {
   }
 
   @Override
-  public Table getTable()
+  public AmberTable getTable()
   {
     return null;
   }

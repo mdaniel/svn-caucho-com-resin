@@ -31,7 +31,7 @@ package com.caucho.amber.expr;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.util.CharBuffer;
 
 /**
@@ -130,7 +130,7 @@ public class EmptyExpr extends AbstractAmberExpr {
 
     LinkColumns join = oneToMany.getLinkColumns();
 
-    Table table = join.getSourceTable();
+    AmberTable table = join.getSourceTable();
     cb.append("EXISTS(SELECT ");
 
     if (table.getIdColumns().size() > 0)

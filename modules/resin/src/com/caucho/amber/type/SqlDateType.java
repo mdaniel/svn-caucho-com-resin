@@ -29,7 +29,6 @@
 package com.caucho.amber.type;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.bytecode.JClass;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
@@ -43,7 +42,7 @@ import java.sql.Types;
 /**
  * The type of a property.
  */
-public class SqlDateType extends Type {
+public class SqlDateType extends AmberType {
   private static final L10N L = new L10N(SqlDateType.class);
 
   private static final SqlDateType SQL_DATE_TYPE = new SqlDateType();
@@ -72,7 +71,7 @@ public class SqlDateType extends Type {
    * Returns true if the value is assignable to the Java type.
    */
   @Override
-  public boolean isAssignableTo(JClass javaType)
+  public boolean isAssignableTo(Class javaType)
   {
     return javaType.isAssignableFrom(java.sql.Date.class);
   }
@@ -80,6 +79,7 @@ public class SqlDateType extends Type {
   /**
    * Generates the type for the table.
    */
+  @Override
   public String generateCreateColumnSQL(AmberPersistenceUnit manager, int length, int precision, int scale)
   {
     return manager.getCreateColumnSQL(Types.DATE, length, precision, scale);
@@ -88,6 +88,7 @@ public class SqlDateType extends Type {
   /**
    * Generates a string to load the property.
    */
+  @Override
   public int generateLoad(JavaWriter out, String rs,
 			  String indexVar, int index)
     throws IOException
@@ -100,6 +101,7 @@ public class SqlDateType extends Type {
   /**
    * Generates a string to load the property.
    */
+  @Override
   public int generateLoadNative(JavaWriter out, int index)
     throws IOException
   {
@@ -111,6 +113,7 @@ public class SqlDateType extends Type {
   /**
    * Generates a string to set the property.
    */
+  @Override
   public void generateSet(JavaWriter out, String pstmt,
 			  String index, String value)
     throws IOException
@@ -124,6 +127,7 @@ public class SqlDateType extends Type {
   /**
    * Sets the value.
    */
+  @Override
   public void setParameter(PreparedStatement pstmt, int index, Object value)
     throws SQLException
   {
@@ -133,6 +137,7 @@ public class SqlDateType extends Type {
   /**
    * Gets the value.
    */
+  @Override
   public Object getObject(ResultSet rs, int index)
     throws SQLException
   {

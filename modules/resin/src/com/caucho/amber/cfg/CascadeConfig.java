@@ -42,7 +42,8 @@ public class CascadeConfig {
   private HashSet<CascadeType> _cascadeSet
     = new HashSet<CascadeType>();
 
-  protected CascadeType[] getCascadeTypes() {
+  protected CascadeType[] getCascadeTypes() 
+  {
     CascadeType cascade[] = new CascadeType[_cascadeSet.size()];
     return _cascadeSet.toArray(cascade);
   }

@@ -40,7 +40,7 @@ import java.sql.Types;
 /**
  * Represents a java.util.Byte type
  */
-public class ByteType extends Type {
+public class ByteType extends AmberType {
   private static final L10N L = new L10N(ByteType.class);
 
   private static final ByteType BYTE_TYPE = new ByteType();

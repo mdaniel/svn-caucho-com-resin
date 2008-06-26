@@ -31,7 +31,7 @@ package com.caucho.amber.expr;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.type.EnumType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -233,8 +233,8 @@ public class BinaryExpr extends AbstractAmberExpr {
   {
     // jpa/141d
 
-    Type leftType = left.getType();
-    Type rightType = right.getType();
+    AmberType leftType = left.getType();
+    AmberType rightType = right.getType();
 
     if (left instanceof EnumExpr) {
       EnumExpr enumExpr = (EnumExpr) left;

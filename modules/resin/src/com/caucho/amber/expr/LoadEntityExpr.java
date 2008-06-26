@@ -35,9 +35,9 @@ import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -86,7 +86,7 @@ public class LoadEntityExpr extends LoadExpr {
 
     if (type.getSecondaryTables().size() > 0) {
       for (AmberField field : type.getFields()) {
-        Table subTable = field.getTable();
+        AmberTable subTable = field.getTable();
 
         if (subTable != null && subTable != type.getTable()) {
           LinkColumns link = subTable.getDependentIdLink();

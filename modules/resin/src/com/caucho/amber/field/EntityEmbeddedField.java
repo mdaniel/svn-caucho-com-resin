@@ -33,10 +33,10 @@ import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.EmbeddedExpr;
 import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.EmbeddableType;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.CharBuffer;
@@ -108,7 +108,7 @@ public class EntityEmbeddedField extends AbstractField
   /**
    * Sets the result type.
    */
-  public Type getType()
+  public AmberType getType()
   {
     return _embeddableType;
   }
@@ -263,7 +263,7 @@ public class EntityEmbeddedField extends AbstractField
   /**
    * Generates the select clause.
    */
-  public String generateLoadSelect(Table table, String id)
+  public String generateLoadSelect(AmberTable table, String id)
   {
     if (getTable() != table)
       return null;

@@ -32,12 +32,12 @@ import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.KeyManyToOneExpr;
 import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.log.Log;
@@ -52,7 +52,7 @@ import java.util.logging.Logger;
 /**
  * Configuration for a bean's field
  */
-public class KeyManyToOneField extends EntityManyToOneField implements IdField {
+public class KeyManyToOneField extends ManyToOneField implements IdField {
   private static final L10N L = new L10N(KeyManyToOneField.class);
   protected static final Logger log = Log.open(KeyManyToOneField.class);
 
@@ -98,12 +98,12 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
     return (EntityType) getEntityTargetType();
   }
 
-  public Type getType()
+  public AmberType getType()
   {
     return getEntityTargetType();
   }
 
-  public Column getColumn()
+  public AmberColumn getColumn()
   {
     throw new UnsupportedOperationException();
   }
@@ -182,9 +182,9 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   /**
    * Returns columns
    */
-  public ArrayList<Column> getColumns()
+  public ArrayList<AmberColumn> getColumns()
   {
-    ArrayList<Column> columns = new ArrayList<Column>();
+    ArrayList<AmberColumn> columns = new ArrayList<AmberColumn>();
 
     columns.addAll(getLinkColumns().getColumns());
 
@@ -272,7 +272,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   /**
    * Gets the column corresponding to the target field.
    */
-  public ForeignColumn getColumn(Column key)
+  public ForeignColumn getColumn(AmberColumn key)
   {
     return getLinkColumns().getSourceColumn(key);
   }

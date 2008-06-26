@@ -30,7 +30,7 @@
 package com.caucho.amber.field;
 
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.log.Log;
@@ -68,7 +68,7 @@ public class VersionField extends PropertyField {
   public String generateIsNull()
   {
     String getter = generateSuperGetter("this");
-    Type type = getColumn().getType();
+    AmberType type = getColumn().getType();
 
     return type.generateIsNull(getter);
   }
@@ -85,7 +85,7 @@ public class VersionField extends PropertyField {
     long dirtyMask = 1L << (getIndex() % 64);
 
     String getter = generateSuperGetter("this");
-    Type type = getColumn().getType();
+    AmberType type = getColumn().getType();
 
     // jpa/0x02
     out.println();
@@ -135,7 +135,7 @@ public class VersionField extends PropertyField {
     throws IOException
   {
     String value = generateGet("super");
-    Type type = getColumn().getType();
+    AmberType type = getColumn().getType();
     // jpa/0x02
     getColumn().generateSetVersion(out, pstmt, index, value); // type.generateIncrementVersion(value));
   }

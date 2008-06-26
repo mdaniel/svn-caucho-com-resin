@@ -35,19 +35,19 @@ import com.caucho.amber.expr.OneToManyExpr;
 import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
-import com.caucho.bytecode.JField;
+import com.caucho.amber.type.AmberType;
 import com.caucho.bytecode.JType;
+import com.caucho.bytecode.JTypeWrapper;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
 import javax.persistence.CascadeType;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
@@ -56,15 +56,16 @@ import java.util.logging.Logger;
 /**
  * Configuration for a bean's field
  */
-public class EntityManyToManyField extends AssociationField {
-  private static final L10N L = new L10N(EntityManyToManyField.class);
-  protected static final Logger log = Log.open(EntityManyToManyField.class);
+public class ManyToManyField extends AssociationField {
+  private static final L10N L = new L10N(ManyToManyField.class);
+  private static final Logger log
+    = Logger.getLogger(ManyToManyField.class.getName());
 
   private String _mapKey;
 
   private EntityType _targetType;
 
-  private Table _associationTable;
+  private AmberTable _associationTable;
 
   private LinkColumns _sourceLink;
   private LinkColumns _targetLink;
@@ -72,7 +73,7 @@ public class EntityManyToManyField extends AssociationField {
   private ArrayList<String> _orderByFields;
   private ArrayList<Boolean> _orderByAscending;
 
-  public EntityManyToManyField(EntityType relatedType,
+  public ManyToManyField(EntityType relatedType,
                                String name,
                                CascadeType[] cascadeTypes)
     throws ConfigException
@@ -80,21 +81,21 @@ public class EntityManyToManyField extends AssociationField {
     super(relatedType, name, cascadeTypes);
   }
 
-  public EntityManyToManyField(EntityType relatedType,
+  public ManyToManyField(EntityType relatedType,
                                String name)
     throws ConfigException
   {
     this(relatedType, name, null);
   }
 
-  public EntityManyToManyField(EntityType relatedType)
+  public ManyToManyField(EntityType relatedType)
   {
     super(relatedType);
   }
 
-  public EntityManyToManyField(EntityType relatedType,
+  public ManyToManyField(EntityType relatedType,
                                String name,
-                               EntityManyToManyField source,
+                               ManyToManyField source,
                                CascadeType[] cascadeTypes)
     throws ConfigException
   {
@@ -125,7 +126,8 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Sets the target type.
    */
-  public void setType(Type targetType)
+  @Override
+  public void setType(AmberType targetType)
   {
     _targetType = (EntityType) targetType;
 
@@ -144,6 +146,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Returns the target type.
    */
+  @Override
   public EntityType getTargetType()
   {
     return _targetType;
@@ -152,7 +155,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Returns the association table
    */
-  public Table getAssociationTable()
+  public AmberTable getAssociationTable()
   {
     return _associationTable;
   }
@@ -160,7 +163,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Sets the association table
    */
-  public void setAssociationTable(Table table)
+  public void setAssociationTable(AmberTable table)
   {
     _associationTable = table;
   }
@@ -210,6 +213,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Initializes the field.
    */
+  @Override
   public void init()
     throws ConfigException
   {
@@ -222,6 +226,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Generates the set clause.
    */
+  @Override
   public void generateStatementSet(JavaWriter out, String pstmt,
                           String obj, String index)
     throws IOException
@@ -231,6 +236,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Generates the select clause.
    */
+  @Override
   public String generateLoadSelect(String id)
   {
     return null;
@@ -253,6 +259,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Creates the expression for the field.
    */
+  @Override
   public AmberExpr createExpr(QueryParser parser, PathExpr parent)
   {
     return new ManyToOneExpr(new OneToManyExpr(parser, parent, _sourceLink),
@@ -262,6 +269,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Updates from the cached copy.
    */
+  @Override
   public void generateCopyLoadObject(JavaWriter out,
                                      String dst, String src,
                                      int loadIndex)
@@ -288,6 +296,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Updates the cached copy.
    */
+  @Override
   public void generateMergeFrom(JavaWriter out,
                                       String dst, String src)
     throws IOException
@@ -305,6 +314,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Generates the target select.
    */
+  @Override
   public String generateTargetSelect(String id)
   {
     return getTargetType().getId().generateSelect(id);
@@ -332,6 +342,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Generates the set property.
    */
+  @Override
   public void generateGetterMethod(JavaWriter out)
     throws IOException
   {
@@ -746,6 +757,7 @@ public class EntityManyToManyField extends AssociationField {
    * be cascaded first if the operation can be
    * performed with no risk to break FK constraints.
    */
+  @Override
   public void generatePostCascade(JavaWriter out,
                                   String aConn,
                                   CascadeType cascadeType)
@@ -1015,6 +1027,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Generates the set property.
    */
+  @Override
   public void generateSetterMethod(JavaWriter out)
     throws IOException
   {
@@ -1029,11 +1042,11 @@ public class EntityManyToManyField extends AssociationField {
     JType type;
 
     if (! getSourceType().isFieldAccess()) {
-      type = getGetterMethod().getGenericReturnType();
+      type = JTypeWrapper.create(getGetterMethod().getGenericReturnType());
     }
     else {
-      JField field = EntityType.getField(getBeanClass(), getName());
-      type = field.getGenericType();
+      Field field = EntityType.getField(getBeanClass(), getName());
+      type = JTypeWrapper.create(field.getGenericType());
     }
 
     out.println();
@@ -1133,6 +1146,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Generates code for foreign entity create/delete
    */
+  @Override
   public void generateInvalidateForeign(JavaWriter out)
     throws IOException
   {
@@ -1148,6 +1162,7 @@ public class EntityManyToManyField extends AssociationField {
   /**
    * Generates code for the object expire
    */
+  @Override
   public void generateExpire(JavaWriter out)
     throws IOException
   {

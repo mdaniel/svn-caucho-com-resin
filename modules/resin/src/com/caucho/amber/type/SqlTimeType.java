@@ -29,7 +29,6 @@
 package com.caucho.amber.type;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.bytecode.JClass;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
@@ -41,7 +40,7 @@ import java.sql.Types;
 /**
  * The type of a property.
  */
-public class SqlTimeType extends Type {
+public class SqlTimeType extends AmberType {
   private static final L10N L = new L10N(SqlTimeType.class);
 
   private static final SqlTimeType SQL_TIME_TYPE = new SqlTimeType();
@@ -70,7 +69,7 @@ public class SqlTimeType extends Type {
    * Returns true if the value is assignable to the Java type.
    */
   @Override
-  public boolean isAssignableTo(JClass javaType)
+  public boolean isAssignableTo(Class javaType)
   {
     return javaType.isAssignableFrom(java.sql.Time.class);
   }
@@ -78,6 +77,7 @@ public class SqlTimeType extends Type {
   /**
    * Generates the type for the table.
    */
+  @Override
   public String generateCreateColumnSQL(AmberPersistenceUnit manager, int length, int precision, int scale)
   {
     return manager.getCreateColumnSQL(Types.TIME, length, precision, scale);
@@ -86,6 +86,7 @@ public class SqlTimeType extends Type {
   /**
    * Generates a string to load the property.
    */
+  @Override
   public int generateLoad(JavaWriter out, String rs,
 			  String indexVar, int index)
     throws IOException
@@ -98,6 +99,7 @@ public class SqlTimeType extends Type {
   /**
    * Generates a string to load the property.
    */
+  @Override
   public int generateLoadNative(JavaWriter out, int index)
     throws IOException
   {
@@ -109,6 +111,7 @@ public class SqlTimeType extends Type {
   /**
    * Generates a string to set the property.
    */
+  @Override
   public void generateSet(JavaWriter out, String pstmt,
 			  String index, String value)
     throws IOException
@@ -122,6 +125,7 @@ public class SqlTimeType extends Type {
   /**
    * Gets the value.
    */
+  @Override
   public Object getObject(ResultSet rs, int index)
     throws SQLException
   {

@@ -36,10 +36,10 @@ import com.caucho.amber.expr.JoinExpr;
 import com.caucho.amber.expr.KeyColumnExpr;
 import com.caucho.amber.expr.LoadEntityExpr;
 import com.caucho.amber.expr.ManyToOneJoinExpr;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.SubEntityType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.util.CharBuffer;
 
@@ -175,7 +175,7 @@ public class SelectQuery extends AbstractQuery {
   /**
    * Returns the result type.
    */
-  Type getResultType(int index)
+  AmberType getResultType(int index)
   {
     AmberExpr expr = _resultList.get(index);
 
@@ -537,7 +537,7 @@ public class SelectQuery extends AbstractQuery {
       // jpa/0l44, jpa/0l12
       /* XXX: jpa/0l47 move this to LoadExpr.generateSelect
       if (entityType != null) {
-        Column discriminator = entityType.getDiscriminator();
+        AmberColumn discriminator = entityType.getDiscriminator();
 
         if (entityType instanceof SubEntityType &&
             discriminator != null) {
@@ -587,7 +587,7 @@ public class SelectQuery extends AbstractQuery {
 
       // jpa/0l44
       if (entityType != null) {
-        Column discriminator = entityType.getDiscriminator();
+        AmberColumn discriminator = entityType.getDiscriminator();
 
         // jpa/0l43
         if (entityType instanceof SubEntityType &&

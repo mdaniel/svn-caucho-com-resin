@@ -29,7 +29,7 @@
 package com.caucho.amber.table;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
 import com.caucho.java.JavaWriter;
@@ -45,18 +45,18 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * Column configuration.
+ * AmberColumn configuration.
  */
-public class Column {
-  private static final L10N L = new L10N(Column.class);
+public class AmberColumn {
+  private static final L10N L = new L10N(AmberColumn.class);
 
-  private Table _table;
+  private AmberTable _table;
 
   private String _name;
 
   private String _configLocation;
 
-  private Type _type;
+  private AmberType _type;
 
   private boolean _isPrimaryKey;
 
@@ -75,7 +75,7 @@ public class Column {
   private String _fieldName;
 
 
-  Column(Table table, String name)
+  AmberColumn(AmberTable table, String name)
   {
     _table = table;
     _name = name;
@@ -88,7 +88,7 @@ public class Column {
    * @param name the column sql name
    * @param type the column's type
    */
-  public Column(Table table, String name, Type type)
+  public AmberColumn(AmberTable table, String name, AmberType type)
   {
     _table = table;
     _name = name;
@@ -98,7 +98,7 @@ public class Column {
   /**
    * Returns the owning table.
    */
-  public Table getTable()
+  public AmberTable getTable()
   {
     return _table;
   }
@@ -130,7 +130,7 @@ public class Column {
   /**
    * Returns the type.
    */
-  public Type getType()
+  public AmberType getType()
   {
     return _type;
   }
@@ -462,8 +462,9 @@ public class Column {
   /**
    * Returns the name.
    */
+  @Override
   public String toString()
   {
-    return "Column[" + getName() + "]";
+    return getClass().getSimpleName() + "[" + getName() + "]";
   }
 }

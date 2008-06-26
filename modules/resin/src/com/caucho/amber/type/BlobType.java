@@ -38,7 +38,7 @@ import java.sql.SQLException;
 /**
  * The type of a property.
  */
-public class BlobType extends Type {
+public class BlobType extends AmberType {
   private static final L10N L = new L10N(BlobType.class);
 
   private static final BlobType BLOB_TYPE = new BlobType();

@@ -32,12 +32,10 @@ package com.caucho.amber.field;
 import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.persistence.CascadeType;
 import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -203,7 +201,7 @@ abstract public class CascadableField extends AbstractField {
 
       // XXX: jpa/0h27, jpa/0o33
       if (cascadeType == CascadeType.PERSIST
-          && this instanceof EntityManyToOneField) {
+          && this instanceof ManyToOneField) {
         out.println("((com.caucho.amber.entity.Entity) " + getter + ").__caucho_flush();");
       }
 

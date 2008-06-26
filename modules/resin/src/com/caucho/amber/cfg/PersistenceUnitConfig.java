@@ -31,7 +31,6 @@ package com.caucho.amber.cfg;
 
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.bytecode.JClass;
 import com.caucho.naming.*;
 import com.caucho.config.*;
 import com.caucho.loader.*;
@@ -71,8 +70,8 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   private Properties _properties = new Properties();
 
   // className -> type
-  private HashMap<String, JClass> _classMap
-    = new HashMap<String, JClass>();
+  private HashMap<String,Class> _classMap
+    = new HashMap<String,Class>();
 
   private ArrayList<String> _mappingFiles
     = new ArrayList<String>();
@@ -263,11 +262,11 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Adds a map of configured classes.
    */
-  public void addAllClasses(Map<String, JClass> classMap)
+  public void addAllClasses(Map<String,Class> classMap)
   {
-    for (Map.Entry<String, JClass> entry : classMap.entrySet()) {
+    for (Map.Entry<String,Class> entry : classMap.entrySet()) {
       String k = entry.getKey();
-      JClass v = entry.getValue();
+      Class v = entry.getValue();
 
       if (! _classMap.containsKey(k))
         _classMap.put(k, v);
@@ -317,9 +316,9 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
 
     unit.init();
 
-    for (Map.Entry<String, JClass> entry : _classMap.entrySet()) {
+    for (Map.Entry<String,Class> entry : _classMap.entrySet()) {
       String className = entry.getKey();
-      JClass type = entry.getValue();
+      Class type = entry.getValue();
 
       unit.addEntityClass(className, type);
     }
@@ -426,9 +425,10 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
     return _loader.getNewTempClassLoader();
   }
 
+  @Override
   public String toString()
   {
-    return "PersistenceUnitConfig[" + _name + "]";
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 
   protected DataSource loadDataSource(String name)

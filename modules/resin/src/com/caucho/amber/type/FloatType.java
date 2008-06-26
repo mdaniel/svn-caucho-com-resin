@@ -42,7 +42,7 @@ import java.sql.Types;
 /**
  * Represents a java.util.Float type
  */
-public class FloatType extends Type {
+public class FloatType extends AmberType {
   private static final L10N L = new L10N(FloatType.class);
 
   private static final FloatType FLOAT_TYPE = new FloatType();

@@ -30,7 +30,6 @@
 package com.caucho.amber.type;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.bytecode.JClass;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
@@ -44,7 +43,7 @@ import java.sql.Types;
 /**
  * The type of a property.
  */
-public class SqlTimestampType extends Type {
+public class SqlTimestampType extends AmberType {
   private static final L10N L = new L10N(SqlTimestampType.class);
 
   private static final SqlTimestampType SQL_TIMESTAMP_TYPE = new SqlTimestampType();
@@ -73,7 +72,7 @@ public class SqlTimestampType extends Type {
    * Returns true if the value is assignable to the Java type.
    */
   @Override
-  public boolean isAssignableTo(JClass javaType)
+  public boolean isAssignableTo(Class javaType)
   {
     return javaType.isAssignableFrom(java.sql.Timestamp.class);
   }
@@ -81,6 +80,7 @@ public class SqlTimestampType extends Type {
   /**
    * Generates the type for the table.
    */
+  @Override
   public String generateCreateColumnSQL(AmberPersistenceUnit manager, int length, int precision, int scale)
   {
     return manager.getCreateColumnSQL(Types.TIMESTAMP, length, precision, scale);
@@ -89,6 +89,7 @@ public class SqlTimestampType extends Type {
   /**
    * Generates a string to load the property.
    */
+  @Override
   public int generateLoad(JavaWriter out, String rs,
                           String indexVar, int index)
     throws IOException
@@ -101,6 +102,7 @@ public class SqlTimestampType extends Type {
   /**
    * Generates a string to load the property.
    */
+  @Override
   public int generateLoadNative(JavaWriter out, int index)
     throws IOException
   {
@@ -112,6 +114,7 @@ public class SqlTimestampType extends Type {
   /**
    * Generates a string to set the property.
    */
+  @Override
   public void generateSet(JavaWriter out, String pstmt,
                           String index, String value)
     throws IOException
@@ -125,6 +128,7 @@ public class SqlTimestampType extends Type {
   /**
    * Generates a string to set the property.
    */
+  @Override
   public void generateSetVersion(JavaWriter out,
                                  String pstmt,
                                  String index,
@@ -138,6 +142,7 @@ public class SqlTimestampType extends Type {
   /**
    * Generates the increment version.
    */
+  @Override
   public String generateIncrementVersion(String value)
     throws IOException
   {
@@ -147,6 +152,7 @@ public class SqlTimestampType extends Type {
   /**
    * Sets the value.
    */
+  @Override
   public void setParameter(PreparedStatement pstmt, int index, Object value)
     throws SQLException
   {
@@ -156,6 +162,7 @@ public class SqlTimestampType extends Type {
   /**
    * Gets the value.
    */
+  @Override
   public Object getObject(ResultSet rs, int index)
     throws SQLException
   {

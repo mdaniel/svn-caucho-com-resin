@@ -34,7 +34,7 @@ import com.caucho.amber.field.KeyManyToOneField;
 import com.caucho.amber.field.KeyPropertyField;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.EntityType;
 import com.caucho.util.CharBuffer;
 
@@ -86,7 +86,7 @@ public class KeyManyToOneExpr extends AbstractPathExpr
   /**
    * Returns the column.
    */
-  public Column getColumn()
+  public AmberColumn getColumn()
   {
     throw new UnsupportedOperationException();
   }

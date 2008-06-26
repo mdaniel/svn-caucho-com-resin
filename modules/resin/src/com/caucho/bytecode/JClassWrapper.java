@@ -75,6 +75,7 @@ public class JClassWrapper extends JClass {
   /**
    * Returns the Java class.
    */
+  @Override
   public Class getJavaClass()
   {
     return _class;

@@ -30,7 +30,7 @@
 package com.caucho.amber.field;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.*;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;

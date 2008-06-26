@@ -34,7 +34,7 @@ import com.caucho.amber.entity.TableInvalidateCompletion;
 import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.JoinExpr;
 import com.caucho.amber.manager.AmberConnection;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.SubEntityType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.jdbc.JdbcMetaData;
@@ -258,7 +258,7 @@ public class UpdateQuery extends AbstractQuery {
 
           // jpa/0l44
           if (entityType != null) {
-            Column discriminator = entityType.getDiscriminator();
+            AmberColumn discriminator = entityType.getDiscriminator();
 
             // jpa/0l43
             if (entityType instanceof SubEntityType &&

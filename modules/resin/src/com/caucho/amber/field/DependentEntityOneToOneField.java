@@ -38,7 +38,6 @@ import com.caucho.amber.table.*;
 import com.caucho.amber.type.*;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -57,7 +56,7 @@ public class DependentEntityOneToOneField extends CascadableField {
   private static final Logger log
     = Logger.getLogger(DependentEntityOneToOneField.class.getName());
 
-  private EntityManyToOneField _targetField;
+  private ManyToOneField _targetField;
   private long _targetLoadIndex;
   private boolean _isCascadeDelete;
 
@@ -79,7 +78,7 @@ public class DependentEntityOneToOneField extends CascadableField {
   /**
    * Sets the target field.
    */
-  public void setTargetField(EntityManyToOneField targetField)
+  public void setTargetField(ManyToOneField targetField)
   {
     _targetField = targetField;
   }
@@ -87,7 +86,7 @@ public class DependentEntityOneToOneField extends CascadableField {
   /**
    * Sets the target field.
    */
-  public EntityManyToOneField getTargetField()
+  public ManyToOneField getTargetField()
   {
     return _targetField;
   }
@@ -121,7 +120,7 @@ public class DependentEntityOneToOneField extends CascadableField {
   /**
    * Returns the target type.
    */
-  public Type getType()
+  public AmberType getType()
   {
     return getEntityTargetType();
   }
@@ -138,7 +137,7 @@ public class DependentEntityOneToOneField extends CascadableField {
   /**
    * Sets the column.
    */
-  public void setColumn(Column column)
+  public void setColumn(AmberColumn column)
   {
     throw new IllegalStateException();
   }
@@ -514,11 +513,11 @@ public class DependentEntityOneToOneField extends CascadableField {
   public void generateInvalidateForeign(JavaWriter out)
     throws IOException
   {
-    // Table table = getEntityTargetType().getTable();
+    // AmberTable table = getEntityTargetType().getTable();
 
     AmberPersistenceUnit persistenceUnit = getSourceType().getPersistenceUnit();
 
-    Table table;
+    AmberTable table;
 
     if (persistenceUnit.isJPA()) {
       String className = getJavaType().getName();

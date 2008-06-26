@@ -28,8 +28,8 @@
 
 package com.caucho.amber.field;
 
-import com.caucho.amber.table.Column;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.table.AmberColumn;
+import com.caucho.amber.type.AmberType;
 import com.caucho.java.JavaWriter;
 
 import java.io.IOException;
@@ -42,12 +42,12 @@ public interface IdField extends AmberField {
   /**
    * Returns the columns
    */
-  public ArrayList<Column> getColumns();
+  public ArrayList<AmberColumn> getColumns();
 
   /**
    * Returns type
    */
-  public Type getType();
+  public AmberType getType();
 
   /**
    * Returns true for a generator.

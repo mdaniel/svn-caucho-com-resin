@@ -35,7 +35,7 @@ import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParseException;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.type.StringType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -59,7 +59,7 @@ abstract public class AbstractAmberExpr implements AmberExpr {
   /**
    * Returns the expr type.
    */
-  public Type getType()
+  public AmberType getType()
   {
     return StringType.create();
   }

@@ -42,7 +42,7 @@ import java.sql.Types;
 /**
  * The type of a property.
  */
-public class BigDecimalType extends Type {
+public class BigDecimalType extends AmberType {
   private static final L10N L = new L10N(BigDecimalType.class);
 
   private int _scale = -1;

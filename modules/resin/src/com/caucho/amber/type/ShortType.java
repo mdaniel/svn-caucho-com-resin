@@ -41,7 +41,7 @@ import java.sql.Types;
 /**
  * Represents a java.util.Short type
  */
-public class ShortType extends Type {
+public class ShortType extends AmberType {
   private static final L10N L = new L10N(ShortType.class);
 
   private static final ShortType SHORT_TYPE = new ShortType();

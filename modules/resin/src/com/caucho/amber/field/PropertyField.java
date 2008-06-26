@@ -35,9 +35,9 @@ import com.caucho.amber.expr.ColumnExpr;
 import com.caucho.amber.expr.EmbeddedExpr;
 import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.table.ForeignColumn;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.*;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
@@ -56,8 +56,8 @@ public class PropertyField extends AbstractField {
   private static final Logger log
     = Logger.getLogger(PropertyField.class.getName());
 
-  private Column _column;
-  private Type _type;
+  private AmberColumn _column;
+  private AmberType _type;
 
   private KeyManyToOneField _aliasKey;
 
@@ -79,7 +79,7 @@ public class PropertyField extends AbstractField {
   /**
    * Sets the result type.
    */
-  public void setType(Type type)
+  public void setType(AmberType type)
   {
     _type = type;
   }
@@ -87,7 +87,7 @@ public class PropertyField extends AbstractField {
   /**
    * Sets the result type.
    */
-  public Type getType()
+  public AmberType getType()
   {
     return _type;
   }
@@ -105,7 +105,7 @@ public class PropertyField extends AbstractField {
    * Returns the table containing the field's columns.
    */
   @Override
-  public Table getTable()
+  public AmberTable getTable()
   {
     return getColumn().getTable();
   }
@@ -114,7 +114,7 @@ public class PropertyField extends AbstractField {
    * Sets the column.
    */
   @Override
-  public void setColumn(Column column)
+  public void setColumn(AmberColumn column)
   {
     _column = column;
   }
@@ -123,7 +123,7 @@ public class PropertyField extends AbstractField {
    * Gets the column.
    */
   @Override
-  public Column getColumn()
+  public AmberColumn getColumn()
   {
     return _column;
   }
@@ -355,7 +355,7 @@ public class PropertyField extends AbstractField {
    * Generates the select clause.
    */
   @Override
-  public String generateLoadSelect(Table table, String id)
+  public String generateLoadSelect(AmberTable table, String id)
   {
     if (getColumn().getTable() != table) {
       // jpa/0l14 as a negative test
@@ -472,7 +472,7 @@ public class PropertyField extends AbstractField {
 
     String var = "amber_ld" + index;
 
-    Type columnType;
+    AmberType columnType;
 
     // jpa/0w24
     if (getColumn() == null)
@@ -540,7 +540,7 @@ public class PropertyField extends AbstractField {
 
     String var = "amber_ld" + index;
 
-    Type columnType;
+    AmberType columnType;
 
     columnType = getColumn().getType();
 
@@ -575,7 +575,7 @@ public class PropertyField extends AbstractField {
   @Override
   public AmberExpr createExpr(QueryParser parser, PathExpr parent)
   {
-    Column column;
+    AmberColumn column;
 
     if (parent instanceof EmbeddedExpr) {
       column = ((EmbeddedExpr) parent).getColumnByFieldName(getName());

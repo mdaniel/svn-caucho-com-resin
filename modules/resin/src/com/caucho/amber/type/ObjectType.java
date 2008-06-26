@@ -39,7 +39,7 @@ import java.sql.SQLException;
 /**
  * The type of a property.
  */
-public class ObjectType extends Type {
+public class ObjectType extends AmberType {
   private static final L10N L = new L10N(ObjectType.class);
 
   private static final ObjectType OBJECT_TYPE = new ObjectType();

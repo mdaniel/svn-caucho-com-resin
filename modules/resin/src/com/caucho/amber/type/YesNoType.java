@@ -38,7 +38,7 @@ import java.sql.SQLException;
 /**
  * The type of a property.
  */
-public class YesNoType extends Type {
+public class YesNoType extends AmberType {
   private static final L10N L = new L10N(YesNoType.class);
 
   private static final YesNoType YES_NO_TYPE = new YesNoType();

@@ -31,9 +31,9 @@ package com.caucho.amber.expr;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.util.CharBuffer;
 
 /**
@@ -74,7 +74,7 @@ public class OneToManyExpr extends AbstractPathExpr {
   /**
    * Returns the expr type.
    */
-  public Type getType()
+  public AmberType getType()
   {
     return _linkColumns.getSourceTable().getType();
   }
@@ -122,7 +122,7 @@ public class OneToManyExpr extends AbstractPathExpr {
 
     _fromItem = _parent.bindSubPath(parser);
 
-    Table sourceTable = _linkColumns.getSourceTable();
+    AmberTable sourceTable = _linkColumns.getSourceTable();
     _childFromItem = parser.addFromItem(sourceTable, id);
 
     JoinExpr joinExpr;
@@ -158,7 +158,7 @@ public class OneToManyExpr extends AbstractPathExpr {
   /**
    * Returns the table.
    */
-  public Table getTable()
+  public AmberTable getTable()
   {
     // return _field.getTable();
     return _fromItem.getTable();

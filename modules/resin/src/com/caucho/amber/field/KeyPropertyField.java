@@ -32,21 +32,17 @@ import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.KeyColumnExpr;
 import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.BeanType;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
-import com.caucho.bytecode.JClassWrapper;
+import com.caucho.amber.type.AmberType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -54,9 +50,10 @@ import java.util.logging.Logger;
  */
 public class KeyPropertyField extends PropertyField implements IdField {
   private static final L10N L = new L10N(KeyPropertyField.class);
-  private static final Logger log = Log.open(KeyPropertyField.class);
+  private static final Logger log
+    = Logger.getLogger(KeyPropertyField.class.getName());
 
-  private Column _column;
+  private AmberColumn _column;
   private boolean _isKeyField;
   private String _generator;
 
@@ -74,7 +71,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
 
   public KeyPropertyField(EntityType entityType,
                           String name,
-                          Column column)
+                          AmberColumn column)
     throws ConfigException
   {
     super(entityType, name);
@@ -129,7 +126,8 @@ public class KeyPropertyField extends PropertyField implements IdField {
   /**
    * Sets the column
    */
-  public void setColumn(Column column)
+  @Override
+  public void setColumn(AmberColumn column)
   {
     _column = column;
     _column.setPrimaryKey(true);
@@ -138,7 +136,8 @@ public class KeyPropertyField extends PropertyField implements IdField {
   /**
    * Returns column
    */
-  public Column getColumn()
+  @Override
+  public AmberColumn getColumn()
   {
     return _column;
   }
@@ -146,9 +145,9 @@ public class KeyPropertyField extends PropertyField implements IdField {
   /**
    * Returns columns
    */
-  public ArrayList<Column> getColumns()
+  public ArrayList<AmberColumn> getColumns()
   {
-    ArrayList<Column> columns = new ArrayList<Column>();
+    ArrayList<AmberColumn> columns = new ArrayList<AmberColumn>();
 
     columns.add(_column);
 
@@ -166,7 +165,8 @@ public class KeyPropertyField extends PropertyField implements IdField {
   /**
    * Returns type
    */
-  public Type getType()
+  @Override
+  public AmberType getType()
   {
     return _column.getType();
   }
@@ -186,6 +186,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
   /**
    * Generates any prologue.
    */
+  @Override
   public void generatePrologue(JavaWriter out, HashSet<Object> completedSet)
     throws IOException
   {
@@ -219,6 +220,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
    *
    * @param value the non-null value
    */
+  @Override
   public String generateGet(String objThis)
   {
     if (objThis == null)
@@ -235,6 +237,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
    *
    * @param value the non-null value
    */
+  @Override
   public String generateSet(String objThis, String value)
   {
     if ("super".equals(objThis))
@@ -276,6 +279,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
   /**
    * Creates a copy of the field for a parent
    */
+  @Override
   public AmberField override(BeanType type)
   {
     KeyPropertyField field
@@ -292,6 +296,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
   /**
    * Returns the select code
    */
+  @Override
   public String generateSelect(String id)
   {
     return _column.generateSelect(id);
@@ -300,6 +305,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
   /**
    * Returns the JPA QL select code
    */
+  @Override
   public String generateJavaSelect(String id)
   {
     String select = getName();
@@ -379,6 +385,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
   /**
    * Generates the set clause.
    */
+  @Override
   public void generateStatementSet(JavaWriter out, String pstmt,
                           String index, String value)
     throws IOException
@@ -402,6 +409,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
   /**
    * Generates code to test the equals.
    */
+  @Override
   public String generateEquals(String left, String right)
   {
     return _column.getType().generateEquals(left, right);
@@ -562,26 +570,13 @@ public class KeyPropertyField extends PropertyField implements IdField {
    */
   public String generateGetProxyProperty(String value)
   {
-    // XXX: better solution
-    Class proxyClass = ((JClassWrapper) getEntitySourceType().getProxyClass()).getWrappedClass();
-
-    try {
-      Method method = proxyClass.getMethod(getGetterName(), new Class[0]);
-
-      if (method != null)
-        return generateGet(value);
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-
-    Id id = getEntitySourceType().getId();
-
-    return generateGetKeyProperty("((" + id.getForeignTypeName() + ") " + value + ".getPrimaryKey())");
+    throw new UnsupportedOperationException();
   }
 
   /**
    * Creates the expression for the field.
    */
+  @Override
   public AmberExpr createExpr(QueryParser parser, PathExpr parent)
   {
     return new KeyColumnExpr(parent, getColumn());
@@ -590,6 +585,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
   /**
    * Converts to an object.
    */
+  @Override
   public String toObject(String value)
   {
     return getColumn().getType().toObject(value);

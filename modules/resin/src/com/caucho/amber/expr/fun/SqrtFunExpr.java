@@ -31,7 +31,7 @@ package com.caucho.amber.expr.fun;
 import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.type.DoubleType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -78,7 +78,7 @@ public class SqrtFunExpr extends FunExpr {
   /**
    * Returns the expr type.
    */
-  public Type getType()
+  public AmberType getType()
   {
     // jpa/1197
     return DoubleType.create();

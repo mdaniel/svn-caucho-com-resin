@@ -32,9 +32,9 @@ import com.caucho.amber.field.EntityEmbeddedField;
 import com.caucho.amber.field.EmbeddedSubField;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.EmbeddableType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.util.CharBuffer;
 
 import java.util.ArrayList;
@@ -76,7 +76,7 @@ public class EmbeddedExpr extends AbstractPathExpr {
   /**
    * Returns the target type.
    */
-  public Type getType()
+  public AmberType getType()
   {
     return _embeddableType;
   }
@@ -84,7 +84,7 @@ public class EmbeddedExpr extends AbstractPathExpr {
   /**
    * Returns column by name.
    */
-  public Column getColumnByFieldName(String fieldName)
+  public AmberColumn getColumnByFieldName(String fieldName)
   {
     for (int i = 0; i < _subFields.size(); i++) {
       EmbeddedSubField subField = _subFields.get(i);

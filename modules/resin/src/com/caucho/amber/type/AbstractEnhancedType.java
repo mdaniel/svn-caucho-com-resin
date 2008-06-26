@@ -32,13 +32,11 @@ package com.caucho.amber.type;
 import com.caucho.amber.AmberRuntimeException;
 import com.caucho.amber.entity.Listener;
 import com.caucho.amber.field.StubMethod;
-import com.caucho.amber.gen.AmberMappedComponent;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
 import com.caucho.java.gen.ClassComponent;
 import com.caucho.util.L10N;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -46,13 +44,13 @@ import java.util.logging.Logger;
  * Represents an abstract enhanced type.
  * Known subclasses: EntityType and ListenerType.
  */
-public abstract class AbstractEnhancedType extends Type {
+public abstract class AbstractEnhancedType extends AmberType {
   private static final Logger log = Logger.getLogger(AbstractEnhancedType.class.getName());
   private static final L10N L = new L10N(AbstractEnhancedType.class);
 
   AmberPersistenceUnit _amberPersistenceUnit;
 
-  JClass _beanClass;
+  Class _tBeanClass;
   private String _className;
   private Class _javaBeanClass;
 
@@ -76,26 +74,26 @@ public abstract class AbstractEnhancedType extends Type {
 
   private ArrayList<StubMethod> _methods = new ArrayList<StubMethod>();
 
-  private ArrayList<JMethod> _postLoadCallbacks
-    = new ArrayList<JMethod>();
+  private ArrayList<Method> _postLoadCallbacks
+    = new ArrayList<Method>();
 
-  private ArrayList<JMethod> _prePersistCallbacks
-    = new ArrayList<JMethod>();
+  private ArrayList<Method> _prePersistCallbacks
+    = new ArrayList<Method>();
 
-  private ArrayList<JMethod> _postPersistCallbacks
-    = new ArrayList<JMethod>();
+  private ArrayList<Method> _postPersistCallbacks
+    = new ArrayList<Method>();
 
-  private ArrayList<JMethod> _preUpdateCallbacks
-    = new ArrayList<JMethod>();
+  private ArrayList<Method> _preUpdateCallbacks
+    = new ArrayList<Method>();
 
-  private ArrayList<JMethod> _postUpdateCallbacks
-    = new ArrayList<JMethod>();
+  private ArrayList<Method> _postUpdateCallbacks
+    = new ArrayList<Method>();
 
-  private ArrayList<JMethod> _preRemoveCallbacks
-    = new ArrayList<JMethod>();
+  private ArrayList<Method> _preRemoveCallbacks
+    = new ArrayList<Method>();
 
-  private ArrayList<JMethod> _postRemoveCallbacks
-    = new ArrayList<JMethod>();
+  private ArrayList<Method> _postRemoveCallbacks
+    = new ArrayList<Method>();
 
 
   public AbstractEnhancedType(AmberPersistenceUnit amberPersistenceUnit)
@@ -125,28 +123,21 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Sets the bean class.
    */
-  public void setBeanClass(JClass beanClass)
+  public void setBeanClass(Class beanClass)
   {
-    _beanClass = beanClass;
+    _tBeanClass = beanClass;
     _className = beanClass.getName();
 
-    if (getName() == null) {
-      String name = beanClass.getName();
-      int p = name.lastIndexOf('.');
-
-      if (p > 0)
-        name = name.substring(p + 1);
-
-      setName(name);
-    }
+    if (getName() == null)
+      setName(beanClass.getSimpleName());
   }
 
   /**
    * Gets the bean class.
    */
-  public JClass getBeanClass()
+  public Class getBeanClass()
   {
-    return _beanClass;
+    return _tBeanClass;
   }
 
   /**
@@ -381,7 +372,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Adds a @PostLoad callback.
    */
-  public void addPostLoadCallback(JMethod callback)
+  public void addPostLoadCallback(Method callback)
   {
     _postLoadCallbacks.add(callback);
   }
@@ -389,7 +380,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Gets the post-load callback.
    */
-  public ArrayList<JMethod> getPostLoadCallbacks()
+  public ArrayList<Method> getPostLoadCallbacks()
   {
     return _postLoadCallbacks;
   }
@@ -397,7 +388,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Adds a pre-persist callback.
    */
-  public void addPrePersistCallback(JMethod callback)
+  public void addPrePersistCallback(Method callback)
   {
     _prePersistCallbacks.add(callback);
   }
@@ -405,7 +396,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Gets the pre-persist callback.
    */
-  public ArrayList<JMethod> getPrePersistCallbacks()
+  public ArrayList<Method> getPrePersistCallbacks()
   {
     return _prePersistCallbacks;
   }
@@ -413,7 +404,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Adds a post-persist callback.
    */
-  public void addPostPersistCallback(JMethod callback)
+  public void addPostPersistCallback(Method callback)
   {
     _postPersistCallbacks.add(callback);
   }
@@ -421,7 +412,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Gets the post-persist callback.
    */
-  public ArrayList<JMethod> getPostPersistCallbacks()
+  public ArrayList<Method> getPostPersistCallbacks()
   {
     return _postPersistCallbacks;
   }
@@ -429,7 +420,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Adds a pre-update callback.
    */
-  public void addPreUpdateCallback(JMethod callback)
+  public void addPreUpdateCallback(Method callback)
   {
     _preUpdateCallbacks.add(callback);
   }
@@ -437,7 +428,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Gets the pre-update callback.
    */
-  public ArrayList<JMethod> getPreUpdateCallbacks()
+  public ArrayList<Method> getPreUpdateCallbacks()
   {
     return _preUpdateCallbacks;
   }
@@ -445,7 +436,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Adds a post-update callback.
    */
-  public void addPostUpdateCallback(JMethod callback)
+  public void addPostUpdateCallback(Method callback)
   {
     _postUpdateCallbacks.add(callback);
   }
@@ -453,7 +444,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Gets the post-update callback.
    */
-  public ArrayList<JMethod> getPostUpdateCallbacks()
+  public ArrayList<Method> getPostUpdateCallbacks()
   {
     return _postUpdateCallbacks;
   }
@@ -461,7 +452,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Adds a pre-remove callback.
    */
-  public void addPreRemoveCallback(JMethod callback)
+  public void addPreRemoveCallback(Method callback)
   {
     _preRemoveCallbacks.add(callback);
   }
@@ -469,7 +460,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Gets the pre-remove callback.
    */
-  public ArrayList<JMethod> getPreRemoveCallbacks()
+  public ArrayList<Method> getPreRemoveCallbacks()
   {
     return _preRemoveCallbacks;
   }
@@ -477,7 +468,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Adds a post-remove callback.
    */
-  public void addPostRemoveCallback(JMethod callback)
+  public void addPostRemoveCallback(Method callback)
   {
     _postRemoveCallbacks.add(callback);
   }
@@ -485,7 +476,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Gets the post-remove callback.
    */
-  public ArrayList<JMethod> getPostRemoveCallbacks()
+  public ArrayList<Method> getPostRemoveCallbacks()
   {
     return _postRemoveCallbacks;
   }
@@ -493,7 +484,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Gets the callbacks.
    */
-  public ArrayList<JMethod> getCallbacks(int callbackIndex)
+  public ArrayList<Method> getCallbacks(int callbackIndex)
   {
     switch (callbackIndex) {
     case Listener.PRE_PERSIST:
@@ -519,7 +510,7 @@ public abstract class AbstractEnhancedType extends Type {
    * Adds a callback.
    */
   public void addCallback(int callbackIndex,
-                          JMethod callback)
+                          Method callback)
   {
     switch (callbackIndex) {
     case Listener.PRE_PERSIST:
@@ -549,8 +540,9 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Printable version of the listener.
    */
+  @Override
   public String toString()
   {
-    return "AbstractEnhancedType[" + _beanClass.getName() + "]";
+    return getClass().getSimpleName() + "[" + _tBeanClass.getName() + "]";
   }
 }

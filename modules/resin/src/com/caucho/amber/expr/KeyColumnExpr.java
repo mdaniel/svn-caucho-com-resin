@@ -29,7 +29,7 @@
 package com.caucho.amber.expr;
 
 import com.caucho.amber.query.FromItem;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 
 /**
  * Bound identifier expression.
@@ -38,7 +38,7 @@ public class KeyColumnExpr extends ColumnExpr {
   /**
    * Creates a new unbound id expression.
    */
-  public KeyColumnExpr(PathExpr parent, Column column)
+  public KeyColumnExpr(PathExpr parent, AmberColumn column)
   {
     super(parent, column);
   }

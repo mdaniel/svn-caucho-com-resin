@@ -28,7 +28,7 @@
 
 package com.caucho.amber.field;
 
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 
 import java.util.ArrayList;
 
@@ -36,5 +36,5 @@ import java.util.ArrayList;
  * Configuration for a bean's field
  */
 public interface MapField {
-  public void setIndexColumns(ArrayList<Column> columns);
+  public void setIndexColumns(ArrayList<AmberColumn> columns);
 }

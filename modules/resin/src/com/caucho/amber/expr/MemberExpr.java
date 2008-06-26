@@ -30,10 +30,10 @@ package com.caucho.amber.expr;
 
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
+import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.AmberTable;
 import com.caucho.util.CharBuffer;
 
 import java.util.ArrayList;
@@ -194,7 +194,7 @@ public class MemberExpr extends AbstractAmberExpr {
     // changed to IN for jpa/10ca cb.append("EXISTS (SELECT *");
     cb.append(" IN (SELECT "); // SELECT *");
     cb.append(fk.getName());
-    Table table = join.getSourceTable();
+    AmberTable table = join.getSourceTable();
     cb.append(" FROM " + table.getName() + " caucho");
     cb.append(" WHERE ");
 
@@ -215,7 +215,7 @@ public class MemberExpr extends AbstractAmberExpr {
       }
       else {
         // XXX: needs to handle compound PK.
-        ArrayList<Column> idColumns =
+        ArrayList<AmberColumn> idColumns =
           join.getSourceTable().getIdColumns();
 
         cb.append(idColumns.get(0).getName());
@@ -265,7 +265,7 @@ public class MemberExpr extends AbstractAmberExpr {
       }
       else {
         // XXX: needs to handle compound PK.
-        ArrayList<Column> idColumns =
+        ArrayList<AmberColumn> idColumns =
           join.getSourceTable().getIdColumns();
 
         String id = idColumns.get(0).getName();

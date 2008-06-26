@@ -69,10 +69,10 @@ public class SumFunExpr extends FunExpr {
   /**
    * Returns the expr type.
    */
-  public Type getType()
+  public AmberType getType()
   {
     // int/Integer -> Long and float/Float -> Double
-    Type argType = _arg.getType();
+    AmberType argType = _arg.getType();
 
     if ((argType instanceof IntegerType) ||
         (argType instanceof PrimitiveIntType))

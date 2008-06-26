@@ -37,7 +37,7 @@ import com.caucho.amber.entity.TableInvalidateCompletion;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.AmberType;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
 import com.caucho.util.CharBuffer;
@@ -54,8 +54,8 @@ import java.util.Collections;
 /**
  * Representation of a database table.
  */
-public class Table {
-  private static final L10N L = new L10N(Table.class);
+public class AmberTable {
+  private static final L10N L = new L10N(AmberTable.class);
 
   private String _name;
 
@@ -66,12 +66,12 @@ public class Table {
   // The entity type is used to generate primary keys for cascade deletes
   private EntityType _type;
 
-  private ArrayList<Column> _columns = new ArrayList<Column>();
+  private ArrayList<AmberColumn> _columns = new ArrayList<AmberColumn>();
 
   private ArrayList<LinkColumns> _incomingLinks = new ArrayList<LinkColumns>();
   private ArrayList<LinkColumns> _outgoingLinks = new ArrayList<LinkColumns>();
 
-  private ArrayList<Column> _idColumns = new ArrayList<Column>();
+  private ArrayList<AmberColumn> _idColumns = new ArrayList<AmberColumn>();
   private LinkColumns _dependentIdLink;
 
   private boolean _isReadOnly;
@@ -82,7 +82,7 @@ public class Table {
 
   private TableInvalidateCompletion _invalidateCompletion;
 
-  public Table(AmberPersistenceUnit manager, String name)
+  public AmberTable(AmberPersistenceUnit manager, String name)
   {
     _manager = manager;
     _name = name;
@@ -182,16 +182,16 @@ public class Table {
   /**
    * Creates a column.
    */
-  public Column createColumn(String name, Type type)
+  public AmberColumn createColumn(String name, AmberType type)
   {
     for (int i = 0; i < _columns.size(); i++) {
-      Column oldColumn = _columns.get(i);
+      AmberColumn oldColumn = _columns.get(i);
 
       if (oldColumn.getName().equals(name))
         return oldColumn;
     }
 
-    Column column = new Column(this, name, type);
+    AmberColumn column = new AmberColumn(this, name, type);
 
     _columns.add(column);
     Collections.sort(_columns, new ColumnCompare());
@@ -202,10 +202,10 @@ public class Table {
   /**
    * Creates a foreign column.
    */
-  public ForeignColumn createForeignColumn(String name, Column key)
+  public ForeignColumn createForeignColumn(String name, AmberColumn key)
   {
     for (int i = 0; i < _columns.size(); i++) {
-      Column oldColumn = _columns.get(i);
+      AmberColumn oldColumn = _columns.get(i);
 
       if (! oldColumn.getName().equals(name)) {
       }
@@ -233,10 +233,10 @@ public class Table {
   /**
    * Adds a column.
    */
-  public Column addColumn(Column column)
+  public AmberColumn addColumn(AmberColumn column)
   {
     for (int i = 0; i < _columns.size(); i++) {
-      Column oldColumn = _columns.get(i);
+      AmberColumn oldColumn = _columns.get(i);
 
       if (! oldColumn.getName().equals(column.getName())) {
       }
@@ -259,7 +259,7 @@ public class Table {
   /**
    * Returns the columns.
    */
-  public ArrayList<Column> getColumns()
+  public ArrayList<AmberColumn> getColumns()
   {
     return _columns;
   }
@@ -267,7 +267,7 @@ public class Table {
   /**
    * Remove a given column.
    */
-  public boolean removeColumn(Column column)
+  public boolean removeColumn(AmberColumn column)
   {
     return _columns.remove(column);
   }
@@ -305,7 +305,7 @@ public class Table {
   /**
    * Adds an id column.
    */
-  public void addIdColumn(Column column)
+  public void addIdColumn(AmberColumn column)
   {
     _idColumns.add(column);
   }
@@ -313,7 +313,7 @@ public class Table {
   /**
    * Returns the id columns.
    */
-  public ArrayList<Column> getIdColumns()
+  public ArrayList<AmberColumn> getIdColumns()
   {
     return _idColumns;
   }
@@ -380,7 +380,7 @@ public class Table {
     cb.append("create table " + getName() + " (");
 
     boolean hasColumn = false;
-    for (Column column : _columns) {
+    for (AmberColumn column : _columns) {
       String columnSQL = column.generateCreateTableSQL(amberPersistenceUnit);
 
       if (columnSQL == null) {
@@ -426,7 +426,7 @@ public class Table {
         conn.close();
       }
 
-      for (Column column : _columns) {
+      for (AmberColumn column : _columns) {
         column.validateDatabase(amberPersistenceUnit);
       }
     } catch (ConfigException e) {

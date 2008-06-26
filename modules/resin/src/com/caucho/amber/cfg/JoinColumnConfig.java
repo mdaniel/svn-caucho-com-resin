@@ -29,6 +29,8 @@
 
 package com.caucho.amber.cfg;
 
+import javax.persistence.JoinColumn;
+
 
 /**
  * <join-column> tag in the orm.xml
@@ -37,6 +39,22 @@ public class JoinColumnConfig extends AbstractColumnConfig {
 
   // attributes
   private String _referencedColumnName;
+  
+  public JoinColumnConfig()
+  {
+  }
+  
+  public JoinColumnConfig(JoinColumn joinColumn)
+  {
+    setName(joinColumn.name());
+    setReferencedColumnName(joinColumn.referencedColumnName());
+    setUnique(joinColumn.unique());
+    setNullable(joinColumn.nullable());
+    setInsertable(joinColumn.insertable());
+    setUpdatable(joinColumn.updatable());
+    setColumnDefinition(joinColumn.columnDefinition());
+    setTable(joinColumn.table());
+  }
 
   /**
    * Returns the referenced column name.

@@ -29,7 +29,6 @@
 package com.caucho.amber.type;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.bytecode.JClass;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
@@ -46,11 +45,11 @@ import java.util.logging.Logger;
 /**
  * The enum type.
  */
-public class EnumType extends Type {
+public class EnumType extends AmberType {
   private static final Logger log = Log.open(EnumType.class);
   private static final L10N L = new L10N(EnumType.class);
 
-  private JClass _beanClass;
+  private Class _beanClass;
 
   private String _name;
 
@@ -64,7 +63,7 @@ public class EnumType extends Type {
   /**
    * Gets the bean class.
    */
-  public JClass getBeanClass()
+  public Class getBeanClass()
   {
     return _beanClass;
   }
@@ -72,7 +71,7 @@ public class EnumType extends Type {
   /**
    * Sets the bean class.
    */
-  public void setBeanClass(JClass beanClass)
+  public void setBeanClass(Class beanClass)
   {
     _beanClass = beanClass;
   }
@@ -96,6 +95,7 @@ public class EnumType extends Type {
   /**
    * Returns true for a numeric type.
    */
+  @Override
   public boolean isNumeric()
   {
     return isOrdinal();
@@ -120,7 +120,8 @@ public class EnumType extends Type {
   /**
    * Returns the type as a foreign key.
    */
-  public Type getForeignType()
+  @Override
+  public AmberType getForeignType()
   {
     return IntegerType.create();
   }
@@ -128,6 +129,7 @@ public class EnumType extends Type {
   /**
    * Generates the type for the table.
    */
+  @Override
   public String generateCreateColumnSQL(AmberPersistenceUnit manager, int length, int precision, int scale)
   {
     if (_isOrdinal)
@@ -143,6 +145,7 @@ public class EnumType extends Type {
   /**
    * Generates a string to load the property.
    */
+  @Override
   public int generateLoad(JavaWriter out, String rs,
                           String indexVar, int index)
     throws IOException
@@ -166,6 +169,7 @@ public class EnumType extends Type {
   /**
    * Generates a string to load the property.
    */
+  @Override
   public int generateLoadNative(JavaWriter out, int index)
     throws IOException
   {
@@ -188,6 +192,7 @@ public class EnumType extends Type {
   /**
    * Generates a string to load the property.
    */
+  @Override
   public int generateLoadForeign(JavaWriter out, String rs,
                                  String indexVar, int index)
     throws IOException
@@ -211,6 +216,7 @@ public class EnumType extends Type {
   /**
    * Generates a string to set the property.
    */
+  @Override
   public void generateSet(JavaWriter out, String pstmt,
                           String index, String value)
     throws IOException
@@ -232,6 +238,7 @@ public class EnumType extends Type {
   /**
    * Sets the value.
    */
+  @Override
   public void setParameter(PreparedStatement pstmt, int index, Object value)
     throws SQLException
   {
@@ -252,6 +259,7 @@ public class EnumType extends Type {
   /**
    * Converts to an object.
    */
+  @Override
   public String toObject(String value)
   {
     return value;
@@ -260,6 +268,7 @@ public class EnumType extends Type {
   /**
    * Converts the value.
    */
+  @Override
   public String generateCastFromObject(String value)
   {
     return value + ".ordinal()";
@@ -294,6 +303,7 @@ public class EnumType extends Type {
   /**
    * Gets the value.
    */
+  @Override
   public Object getObject(ResultSet rs, int index)
     throws SQLException
   {
@@ -308,7 +318,7 @@ public class EnumType extends Type {
       return rs.wasNull() ? null : values[v];
     }
     else {
-      Class cl = getBeanClass().getJavaClass();
+      Class cl = getBeanClass();
 
       String name = rs.getString(index);
 
@@ -319,6 +329,7 @@ public class EnumType extends Type {
   /**
    * Converts to an object.
    */
+  @Override
   public Object toObject(long value)
   {
     if (_isOrdinal) {
@@ -336,11 +347,11 @@ public class EnumType extends Type {
   private Object[] getValues()
   {
     try {
-      Class cl = getBeanClass().getJavaClass();
+      Class cl = getBeanClass();
 
-      Method method = cl.getDeclaredMethod("values", null);
+      Method method = cl.getDeclaredMethod("values");
 
-      Object object = method.invoke(cl, null);
+      Object object = method.invoke(cl);
 
       return (Object []) object;
     } catch (Exception e) {
