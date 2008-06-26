@@ -81,9 +81,6 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   ArrayList<Completion> _linkCompletions = new ArrayList<Completion>();
   ArrayList<Completion> _depCompletions = new ArrayList<Completion>();
 
-  HashMap<EntityType, ArrayList<OneToOneCompletion>> _oneToOneCompletions
-    = new HashMap<EntityType, ArrayList<OneToOneCompletion>>();
-
   HashMap<String, EmbeddableConfig> _embeddableConfigMap
     = new HashMap<String, EmbeddableConfig>();
 
@@ -695,7 +692,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       String methodName = method.getName();
       Class []paramTypes = method.getParameterTypes();
 
-      if (method.getDeclaringClass().getName().equals("java.lang.Object"))
+      if (method.getDeclaringClass().equals(Object.class))
         continue;
 
       if (! methodName.startsWith("get") || paramTypes.length != 0) {
@@ -783,7 +780,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     if (config != null)
       attributesConfig = config.getAttributes();
 
-    for (Field field : type.getFields()) {
+    for (Field field : type.getDeclaredFields()) {
       String fieldName = field.getName();
 
       if (containsFieldOrCompletion(parentType, fieldName))
@@ -1174,7 +1171,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       String methodName = method.getName();
       Class []paramTypes = method.getParameterTypes();
 
-      if (method.getDeclaringClass().getName().equals("java.lang.Object"))
+      if (method.getDeclaringClass().equals(Object.class))
         continue;
 
       // jpa/0r38
@@ -1376,7 +1373,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 	     || field.isAnnotationPresent(javax.persistence.Basic.class)) {
       validateAnnotations(field, fieldName, "@Basic", _basicAnnotations);
 
-      addBasic(sourceType, field, fieldName, fieldType, basicConfig);
+      BasicConfig basic
+        = new BasicConfig(this, (EntityType) sourceType, field, fieldName, fieldType);
+      
+      basic.complete();
     }
     else if ((versionConfig != null)
 	     || field.isAnnotationPresent(javax.persistence.Version.class)) {
@@ -1460,41 +1460,15 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       EntityType entityType = (EntityType) sourceType;
 
-      OneToOneCompletion oneToOne = new OneToOneCompletion(entityType,
-                                                           field,
-                                                           fieldName,
-                                                           fieldType);
-
-      // jpa/0o03 and jpa/0o06 (check also jpa/0o07 with no mappedBy at all)
-      // @OneToOne with mappedBy should be completed first
-      String mappedBy = null;
-
-      if (oneToOneConfig != null)
-        mappedBy = oneToOneConfig.getMappedBy();
-      else {
-        OneToOne oneToOneAnn = field.getAnnotation(OneToOne.class);
-        // XXX: mappedBy = oneToOneAnn.mappedBy();
-	
-      }
-
-      boolean isOwner = (mappedBy == null || mappedBy.equals(""));
-
-      if (isOwner)
+      OneToOneConfig oneToOne
+        = new OneToOneConfig(this, entityType, field, fieldName, fieldType);
+      
+      if (oneToOne.isOwningSide())
         _linkCompletions.add(oneToOne);
       else {
         _depCompletions.add(0, oneToOne);
         entityType.setHasDependent(true);
       }
-
-      ArrayList<OneToOneCompletion> oneToOneList
-        = _oneToOneCompletions.get(entityType);
-
-      if (oneToOneList == null) {
-        oneToOneList = new ArrayList<OneToOneCompletion>();
-        _oneToOneCompletions.put(entityType, oneToOneList);
-      }
-
-      oneToOneList.add(oneToOne);
     }
     else if ((manyToManyConfig != null)
 	     || field.isAnnotationPresent(javax.persistence.ManyToMany.class)) {
@@ -1575,76 +1549,11 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     else if (field.isAnnotationPresent(javax.persistence.Transient.class)) {
     }
     else {
-      addBasic(sourceType, field, fieldName, fieldType, basicConfig);
+      BasicConfig basic
+        = new BasicConfig(this, (EntityType) sourceType, field, fieldName, fieldType);
+      
+      basic.complete();
     }
-  }
-
-  void addBasic(BeanType sourceType,
-                AccessibleObject field,
-                String fieldName,
-                Class fieldType,
-                BasicConfig basicConfig)
-    throws ConfigException
-  {
-    AmberPersistenceUnit persistenceUnit = sourceType.getPersistenceUnit();
-
-    Basic basicAnn = field.getAnnotation(Basic.class);
-    Column columnAnn = field.getAnnotation(Column.class);
-    Enumerated enumeratedAnn = field.getAnnotation(Enumerated.class);
-
-    ColumnConfig columnConfig = null;
-
-    if (basicConfig != null)
-      columnConfig = basicConfig.getColumn();
-
-    if (_basicTypes.contains(fieldType.getName())) {
-    }
-    else if (Serializable.class.isAssignableFrom(fieldType)) {
-    }
-    else
-      throw error(field, L.l("{0} is an invalid @Basic type for {1}.",
-                             fieldType, fieldName));
-
-    AmberType amberType;
-
-    if (enumeratedAnn == null)
-      amberType = persistenceUnit.createType(fieldType);
-    else {
-      com.caucho.amber.type.EnumType enumType;
-
-      enumType = persistenceUnit.createEnum(fieldType.getName(),
-                                            fieldType);
-
-      enumType.setOrdinal(enumeratedAnn.value() ==
-                          javax.persistence.EnumType.ORDINAL);
-
-      amberType = enumType;
-    }
-
-    AmberColumn fieldColumn = null;
-
-    fieldColumn = createColumn(sourceType, field, fieldName,
-			       columnAnn, amberType, columnConfig);
-
-    PropertyField property = new PropertyField(sourceType, fieldName);
-    property.setColumn(fieldColumn);
-
-    // jpa/0w24
-    property.setType(amberType);
-
-    if (basicAnn != null)
-      property.setLazy(basicAnn.fetch() == FetchType.LAZY);
-    else if (basicConfig != null)
-      property.setLazy(basicConfig.getFetch() == FetchType.LAZY);
-    else
-      property.setLazy(false);
-
-    /*
-      field.setInsertable(insertable);
-      field.setUpdateable(updateable);
-    */
-
-    sourceType.addField(property);
   }
 
   void addVersion(EntityType sourceType,
@@ -1761,134 +1670,6 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
 
     return column;
-  }
-
-  void addManyToOne(EntityType sourceType,
-                    AccessibleObject field,
-                    String fieldName,
-                    Class fieldType)
-    throws ConfigException
-  {
-    AmberPersistenceUnit persistenceUnit = sourceType.getPersistenceUnit();
-
-    getInternalManyToOneConfig(sourceType.getBeanClass(), field, fieldName,
-			       _annotationCfg);
-    ManyToOne manyToOneAnn = (ManyToOne) _annotationCfg.getAnnotation();
-    Object manyToOneConfig = _annotationCfg.getManyToOneConfig();
-    HashMap<String, JoinColumnConfig> joinColumnMap = null;
-    CascadeType cascadeTypes[] = null;
-
-    Class parentClass = sourceType.getBeanClass();
-
-    do {
-      getInternalEntityConfig(parentClass, _annotationCfg);
-      Annotation parentEntity = _annotationCfg.getAnnotation();
-      EntityConfig superEntityConfig = _annotationCfg.getEntityConfig();
-
-      if (superEntityConfig != null) {
-        AttributesConfig attributesConfig = superEntityConfig.getAttributes();
-
-        if (attributesConfig != null) {
-          if (manyToOneConfig == null)
-            manyToOneConfig = attributesConfig.getManyToOne(fieldName);
-        }
-      }
-
-      parentClass = parentClass.getSuperclass();
-    }
-    while ((parentClass != null) && (manyToOneConfig == null));
-
-    FetchType fetchType = FetchType.EAGER;
-    Class targetClass = null;
-
-    boolean isManyToOne = true;
-
-    if ((manyToOneAnn == null) && (manyToOneConfig == null)) {
-      // jpa/0j67
-      isManyToOne = false;
-
-      // jpa/0o03
-      getInternalOneToOneConfig(sourceType.getBeanClass(), field, fieldName,
-				_annotationCfg);
-      manyToOneAnn = (ManyToOne) _annotationCfg.getAnnotation();
-      manyToOneConfig = _annotationCfg.getOneToOneConfig();
-
-      if (manyToOneConfig != null) {
-        fetchType = ((OneToOneConfig) manyToOneConfig).getFetch();
-        joinColumnMap = ((OneToOneConfig) manyToOneConfig).getJoinColumnMap();
-        // XXX: targetClass = manyToOneConfig.getTargetEntity();
-      }
-    }
-    else {
-      if (manyToOneConfig != null) {
-        fetchType = ((ManyToOneConfig) manyToOneConfig).getFetch();
-        joinColumnMap = ((ManyToOneConfig) manyToOneConfig).getJoinColumnMap();
-        // XXX: cascadeTypes = manyToOneConfig.getCascade();
-        // XXX: targetClass = manyToOneConfig.getTargetEntity();
-      }
-    }
-
-    if (manyToOneAnn != null) {
-      fetchType = manyToOneAnn.fetch();
-
-      targetClass = manyToOneAnn.targetEntity();
-
-      cascadeTypes = manyToOneAnn.cascade();
-    }
-
-    if (fetchType == FetchType.EAGER) {
-      if (sourceType.getBeanClass().getName().equals(fieldType.getName())) {
-        throw error(field, L.l("'{0}': '{1}' is an illegal recursive type for @OneToOne/@ManyToOne with EAGER fetching. You should specify FetchType.LAZY for this relationship.",
-                               fieldName,
-                               fieldType.getName()));
-      }
-    }
-
-    JoinColumns joinColumns = field.getAnnotation(JoinColumns.class);
-
-    JoinColumn []joinColumnsAnn = null;
-
-    if (joinColumns != null)
-      joinColumnsAnn = joinColumns.value();
-
-    JoinColumn joinColumnAnn = field.getAnnotation(JoinColumn.class);
-
-    if (joinColumnsAnn != null && joinColumnAnn != null) {
-      throw error(field, L.l("{0} may not have both @JoinColumn and @JoinColumns",
-                             fieldName));
-    }
-
-    if (joinColumnAnn != null)
-      joinColumnsAnn = new JoinColumn[] { joinColumnAnn };
-
-    String targetName = "";
-    if (targetClass != null)
-      targetName = targetClass.getName();
-
-    if (targetName.equals("") || targetName.equals("void"))
-      targetName = fieldType.getName();
-
-    ManyToOneField manyToOneField;
-    manyToOneField = new ManyToOneField(sourceType, fieldName, cascadeTypes, isManyToOne);
-
-    EntityType targetType = persistenceUnit.createEntity(targetName, fieldType);
-
-    manyToOneField.setType(targetType);
-
-    manyToOneField.setLazy(fetchType == FetchType.LAZY);
-
-    manyToOneField.setJoinColumns(joinColumnsAnn);
-    manyToOneField.setJoinColumnMap(joinColumnMap);
-
-    sourceType.addField(manyToOneField);
-
-    // jpa/0ge3
-    if (sourceType instanceof MappedSuperclassType)
-      return;
-
-    validateJoinColumns(field, fieldName, joinColumnsAnn, joinColumnMap, targetType);
-
-    manyToOneField.init();
   }
 
   public static JoinColumn getJoinColumn(JoinColumns joinColumns,
@@ -2259,33 +2040,6 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         }
         else if (field.getName().equals(mappedBy))
           return (ManyToOneField) field;
-      }
-
-      // jpa/0ge4
-      targetType = targetType.getParentType();
-    }
-    while (targetType != null);
-
-    return null;
-  }
-
-  OneToOneCompletion getSourceCompletion(EntityType targetType,
-                                         String mappedBy)
-  {
-    do {
-      ArrayList<OneToOneCompletion> sourceCompletions
-        = _oneToOneCompletions.get(targetType);
-
-      if (sourceCompletions == null) {
-      } // jpa/0o07
-      else if (sourceCompletions.size() == 1)
-        return sourceCompletions.get(0);
-      else {
-        for (OneToOneCompletion oneToOne : sourceCompletions) {
-          if (oneToOne.getFieldName().equals(mappedBy)) {
-            return oneToOne;
-          }
-        }
       }
 
       // jpa/0ge4
@@ -2670,222 +2424,6 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   /**
    * completes for dependent
    */
-  class OneToOneCompletion extends CompletionImpl {
-    private AccessibleObject _field;
-    private String _fieldName;
-    private Class _fieldType;
-
-    OneToOneCompletion(EntityType type,
-                       AccessibleObject field,
-                       String fieldName,
-                       Class fieldType)
-    {
-      super(BaseConfigIntrospector.this, type, fieldName);
-
-      _field = field;
-      _fieldName = fieldName;
-      _fieldType = fieldType;
-    }
-
-    String getFieldName()
-    {
-      return _fieldName;
-    }
-
-    @Override
-    public void complete()
-      throws ConfigException
-    {
-      getInternalOneToOneConfig(_entityType.getBeanClass(),
-				_field, _fieldName,
-				_annotationCfg);
-      OneToOne oneToOneAnn = (OneToOne) _annotationCfg.getAnnotation();
-      OneToOneConfig oneToOneConfig = _annotationCfg.getOneToOneConfig();
-
-      boolean isLazy;
-
-      if (oneToOneAnn != null)
-        isLazy = oneToOneAnn.fetch() == FetchType.LAZY;
-      else
-        isLazy = oneToOneConfig.getFetch() == FetchType.LAZY;
-
-      if (! isLazy) {
-        if (_entityType.getBeanClass().getName().equals(_fieldType.getName())) {
-          throw error(_field, L.l("'{0}': '{1}' is an illegal recursive type for @OneToOne with EAGER fetching. You should specify FetchType.LAZY for this relationship.",
-                                  _fieldName,
-                                  _fieldType.getName()));
-        }
-      }
-
-      AmberPersistenceUnit persistenceUnit = _entityType.getPersistenceUnit();
-
-      Class targetEntity = null;
-      String targetName = "";
-
-      if (oneToOneAnn != null) {
-        targetEntity = oneToOneAnn.targetEntity();
-
-        if (targetEntity != null)
-          targetName = targetEntity.getName();
-      }
-      else {
-        targetEntity = oneToOneConfig.getTargetEntity();
-      }
-
-      if (targetEntity == null || targetEntity.getName().equals("void"))
-        targetEntity = _fieldType;
-
-      getInternalEntityConfig(targetEntity, _annotationCfg);
-      Annotation targetEntityAnn = _annotationCfg.getAnnotation();
-      EntityConfig targetEntityConfig = _annotationCfg.getEntityConfig();
-
-      if (_annotationCfg.isNull()) {
-        throw error(_field, L.l("'{0}' is an illegal targetEntity for {1}.  @OneToOne relations must target a valid @Entity.",
-                                targetEntity.getName(), _fieldName));
-      }
-
-      if (! _fieldType.isAssignableFrom(targetEntity)) {
-        throw error(_field, L.l("'{0}' is an illegal targetEntity for {1}.  @OneToOne targetEntity must be assignable to the field type '{2}'.",
-                                targetEntity.getName(),
-                                _fieldName,
-                                _fieldType.getName()));
-      }
-
-      String mappedBy = null;
-
-      if (oneToOneAnn != null) {
-        // XXX: mappedBy = oneToOneAnn.mappedBy();
-      }
-      else
-        mappedBy = oneToOneConfig.getMappedBy();
-
-      EntityType targetType = null;
-
-      if (targetName != null && ! targetName.equals("")) {
-        targetType = persistenceUnit.getEntityType(targetName);
-
-        if (targetType == null)
-          throw error(_field, L.l("'{0}' is an unknown entity for '{1}'.",
-                                        targetName,
-                                        _fieldName));
-      }
-      else {
-        targetType = persistenceUnit.getEntityType(((Field) _field).getType().getName());
-
-        if (targetType == null)
-          throw error(_field, L.l("can't determine target name for '{0}'",
-                                        _fieldName));
-      }
-
-      // jpa/0o00, jpa/0o03, jpa/0o06, jpa/0o07, jpa/10ca, jpa/0s2d
-
-      // jpa/0o06
-      boolean isManyToOne = (mappedBy == null) || "".equals(mappedBy);
-
-      // jpa/0o07
-      if (isManyToOne) {
-        getInternalJoinColumnConfig(_entityType.getBeanClass(),
-				    _field, _fieldName,
-				    _annotationCfg);
-        Annotation joinColumnAnn = _annotationCfg.getAnnotation();
-        JoinColumnConfig joinColumnConfig = _annotationCfg.getJoinColumnConfig();
-
-        if (! _annotationCfg.isNull()) {
-          // jpa/0o07: DstBean.getParent()
-          // OK: isManyToOne = true;
-        }
-        else {
-          // jpa/10ca
-          OneToOneCompletion otherSide
-            = getSourceCompletion(targetType, mappedBy);
-
-          if (otherSide != null) {
-            getInternalJoinColumnConfig(targetType.getBeanClass(),
-                                        otherSide._field,
-                                        otherSide._fieldName,
-					_annotationCfg);
-
-            // jpa/0o07, jpa/0s2d
-            if (! _annotationCfg.isNull())
-              isManyToOne = false;
-          }
-        }
-      }
-
-      // XXX: jpa/0ge4
-      if (targetType.getParentType() != null) {
-        if (targetType.getParentType() instanceof MappedSuperclassType) {
-          isManyToOne = false;
-
-          OneToOneCompletion otherSide
-            = getSourceCompletion(targetType.getParentType(), mappedBy);
-
-          if (otherSide != null) {
-            // jpa/0ge4
-            if (_depCompletions.remove(otherSide)) {
-              otherSide.complete();
-            }
-          }
-        }
-      }
-
-      if (isManyToOne) {
-
-        addManyToOne(_entityType, _field, _fieldName, ((Field) _field).getType());
-
-        // XXX: set unique
-      }
-      else {
-
-        if (! (mappedBy == null || "".equals(mappedBy))) {
-
-          // jpa/0o06
-
-          OneToOneCompletion otherSide
-            = getSourceCompletion(targetType, mappedBy);
-
-          if (otherSide != null) {
-            // jpa/0o00
-            if (_depCompletions.remove(otherSide)) {
-              otherSide.complete();
-            }
-          }
-        }
-
-        // Owner
-        ManyToOneField sourceField
-          = getSourceField(targetType, mappedBy, _entityType);
-
-        if (sourceField == null) {
-          throw error(_field, L.l("OneToOne target '{0}' does not have a matching ManyToOne relation.",
-                                        targetType.getName()));
-        }
-
-        DependentEntityOneToOneField oneToOne;
-
-        CascadeType cascadeTypes[] = null;
-
-        if (oneToOneAnn != null) {
-          // jpa/0o33
-
-          // XXX: runtime does not cast this
-          // cascadeType = (CascadeType []) manyToOneAnn.get("cascade");
-          cascadeTypes = oneToOneAnn.cascade();
-        }
-
-        oneToOne = new DependentEntityOneToOneField(_entityType, _fieldName, cascadeTypes);
-        oneToOne.setTargetField(sourceField);
-        sourceField.setTargetField(oneToOne);
-        oneToOne.setLazy(isLazy);
-
-        _entityType.addField(oneToOne);
-      }
-    }
-  }
-
-  /**
-   * completes for dependent
-   */
   class ManyToManyCompletion extends CompletionImpl {
     private AccessibleObject _field;
     private String _fieldName;
@@ -2910,36 +2448,6 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       addManyToMany(_entityType, _field, _fieldName, _fieldType);
     }
   }
-
-  /**
-   * completes for link
-   */
-  /*
-  class ManyToOneCompletion extends CompletionImpl {
-    private AccessibleObject _field;
-    private String _fieldName;
-    private Class _fieldType;
-
-    ManyToOneCompletion(EntityType type,
-                        AccessibleObject field,
-                        String fieldName,
-                        Class fieldType)
-    {
-      super(BaseConfigIntrospector.this, type, fieldName);
-
-      _field = field;
-      _fieldName = fieldName;
-      _fieldType = fieldType;
-    }
-
-    @Override
-    public void complete()
-      throws ConfigException
-    {
-      addManyToOne(_entityType, _field, _fieldName, _fieldType);
-    }
-  }
-  */
 
   /**
    * completes for dependent

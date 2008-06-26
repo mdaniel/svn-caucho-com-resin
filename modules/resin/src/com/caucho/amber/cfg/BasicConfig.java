@@ -29,7 +29,21 @@
 
 package com.caucho.amber.cfg;
 
+import com.caucho.amber.field.PropertyField;
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.table.AmberColumn;
+import com.caucho.amber.table.AmberTable;
+import com.caucho.amber.type.AmberType;
+import com.caucho.amber.type.EntityType;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+import java.io.Serializable;
+import java.lang.reflect.AccessibleObject;
+import java.util.HashSet;
+import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.TemporalType;
 
@@ -37,19 +51,49 @@ import javax.persistence.TemporalType;
 /**
  * <basic> tag in the orm.xml
  */
-public class BasicConfig {
+class BasicConfig extends AbstractConfig
+{
+  private static final L10N L = new L10N(BasicConfig.class);
+
+  // types allowed with a @Basic annotation
+  private static HashSet<String> _basicTypes = new HashSet<String>();
+  
+  private BaseConfigIntrospector _introspector;
+
+  private EntityType _sourceType;
+  private AccessibleObject _field;
+  private String _fieldName;
+  private Class _fieldType;
 
   // attributes
   private String _name;
-  private FetchType _fetch;
-  private boolean _optional;
+  private FetchType _fetch = FetchType.EAGER;
+  private boolean _isOptional = true;
 
   // elements
   private ColumnConfig _column;
+  
   // XXX: lob type?
   private String _lob;
   private TemporalType _temporal;
   private EnumType _enumerated;
+
+  BasicConfig(BaseConfigIntrospector introspector,
+	      EntityType sourceType,
+	      AccessibleObject field,
+	      String fieldName,
+	      Class fieldType)
+  {
+    _introspector = introspector;
+    
+    _sourceType = sourceType;
+    
+    _field = field;
+    _fieldName = fieldName;
+    _fieldType = fieldType;
+    
+    introspect();
+  }
 
   /**
    * Returns the name.
@@ -82,13 +126,18 @@ public class BasicConfig {
   {
     _fetch = FetchType.valueOf(fetch);
   }
+  
+  public boolean isFetchLazy()
+  {
+    return _fetch == FetchType.LAZY;
+  }
 
   /**
    * Returns the optional.
    */
   public boolean getOptional()
   {
-    return _optional;
+    return _isOptional;
   }
 
   /**
@@ -96,7 +145,7 @@ public class BasicConfig {
    */
   public void setOptional(boolean optional)
   {
-    _optional = optional;
+    _isOptional = optional;
   }
 
   /**
@@ -161,5 +210,166 @@ public class BasicConfig {
   public void setEnumerated(String enumerated)
   {
     _enumerated = EnumType.valueOf(enumerated);
+  }
+
+  private void introspect()
+    throws ConfigException
+  {
+    if (_basicTypes.contains(_fieldType.getName())) {
+    }
+    else if (Serializable.class.isAssignableFrom(_fieldType)) {
+    }
+    else
+      throw error(_field, L.l("{0} is an invalid @Basic type for {1}.",
+			      _fieldType, _fieldName));
+
+    Basic basicAnn = _field.getAnnotation(Basic.class);
+ 
+    if (basicAnn != null) {
+      _fetch = basicAnn.fetch();
+      _isOptional = basicAnn.optional();
+    }
+   
+    Column columnAnn = _field.getAnnotation(Column.class);
+    
+    if (columnAnn != null)
+      _column = new ColumnConfig(columnAnn);
+    else
+      _column = new ColumnConfig();
+
+    if (_column.getName().equals(""))
+      _column.setName(toSqlName(_fieldName));
+ 
+    Enumerated enumeratedAnn = _field.getAnnotation(Enumerated.class);
+
+    if (enumeratedAnn != null)
+      _enumerated = enumeratedAnn.value();
+  }
+
+  @Override
+  public void complete()
+  {
+    PropertyField property = new PropertyField(_sourceType, _fieldName);
+ 
+    AmberPersistenceUnit persistenceUnit = _sourceType.getPersistenceUnit();
+    
+    AmberType amberType;
+
+    if (_enumerated == null)
+      amberType = persistenceUnit.createType(_fieldType);
+    else {
+      com.caucho.amber.type.EnumType enumType;
+
+      enumType = persistenceUnit.createEnum(_fieldType.getName(),
+                                            _fieldType);
+
+      enumType.setOrdinal(_enumerated == javax.persistence.EnumType.ORDINAL);
+
+      amberType = enumType;
+    }
+
+    // jpa/0w24
+    property.setType(amberType);
+
+    property.setLazy(isFetchLazy());
+
+    AmberColumn fieldColumn = createColumn(amberType);
+    property.setColumn(fieldColumn);
+ 
+
+    /*
+      field.setInsertable(insertable);
+      field.setUpdateable(updateable);
+    */
+
+    _sourceType.addField(property);
+  }
+
+  private AmberColumn createColumn(AmberType amberType)
+    throws ConfigException
+  {
+    EntityType entityType = _sourceType;
+    
+    String name = _column.getName();
+
+    AmberColumn column = null;
+
+    if (entityType == null) { // embeddable
+      column = new AmberColumn(null, name, amberType);
+    }
+    else {
+      String tableName = _column.getTable();
+      AmberTable table;
+
+      if (tableName.equals(""))
+        table = entityType.getTable();
+      else {
+        table = entityType.getSecondaryTable(tableName);
+
+        if (table == null)
+          throw error(_field, L.l("{0} @Column(table='{1}') is an unknown secondary table.",
+                                  _fieldName,
+                                  tableName));
+      }
+
+      column = table.createColumn(name, amberType);
+    }
+
+    // primaryKey = column.primaryKey();
+    column.setUnique(_column.isUnique());
+    column.setNotNull(! _column.isNullable());
+    //insertable = column.insertable();
+    //updateable = column.updatable();
+    if (! "".equals(_column.getColumnDefinition()))
+      column.setSQLType(_column.getColumnDefinition());
+      
+    column.setLength(_column.getLength());
+    int precision = _column.getPrecision();
+    if (precision < 0) {
+      throw error(_field, L.l("{0} @Column precision cannot be less than 0.",
+			     _fieldName));
+    }
+
+    int scale = _column.getScale();
+    if (scale < 0) {
+      throw error(_field, L.l("{0} @Column scale cannot be less than 0.",
+			     _fieldName));
+    }
+
+    // this test implicitly works for case where
+    // precision is not set explicitly (ie: set to 0 by default)
+    // and scale is set
+    if (precision < scale) {
+      throw error(_field, L.l("{0} @Column scale cannot be greater than precision. Must set precision to a non-zero value before setting scale.",
+			     _fieldName));
+    }
+
+    if (precision > 0) {
+      column.setPrecision(precision);
+      column.setScale(scale);
+    }
+
+    return column;
+  }
+
+  public static String toSqlName(String name)
+  {
+    return name; // name.toUpperCase();
+  }
+
+  static {
+    // non-serializable types allowed with a @Basic annotation
+    _basicTypes.add("boolean");
+    _basicTypes.add("byte");
+    _basicTypes.add("char");
+    _basicTypes.add("short");
+    _basicTypes.add("int");
+    _basicTypes.add("long");
+    _basicTypes.add("float");
+    _basicTypes.add("double");
+    _basicTypes.add("[byte");
+    _basicTypes.add("[char");
+    _basicTypes.add("[java.lang.Byte");
+    _basicTypes.add("[java.lang.Character");
   }
 }

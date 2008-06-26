@@ -338,12 +338,7 @@ public class ManyToOneField extends CascadableField {
 
       String columnName;
 
-      if (isJPA)
-        columnName = getName().toUpperCase() + '_' + keyColumn.getName();
-      else {
-        // ejb/0602
-        columnName = keyColumn.getName();
-      }
+      columnName = getName() + '_' + keyColumn.getName();
 
       boolean nullable = true;
       boolean unique = false;
@@ -359,8 +354,8 @@ public class ManyToOneField extends CascadableField {
         if (joinColumn != null) {
           columnName = joinColumn.getName();
 
-          nullable = joinColumn.getNullable();
-          unique = joinColumn.getUnique();
+          nullable = joinColumn.isNullable();
+          unique = joinColumn.isUnique();
         }
       }
       else {

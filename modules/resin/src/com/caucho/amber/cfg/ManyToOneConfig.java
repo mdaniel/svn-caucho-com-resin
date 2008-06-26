@@ -65,7 +65,6 @@ class ManyToOneConfig extends AbstractRelationConfig
   private HashMap<String,JoinColumnConfig> _joinColumnMap
     = new HashMap<String,JoinColumnConfig>();
 
-
   ManyToOneConfig(BaseConfigIntrospector introspector,
                   EntityType sourceType,
                   AccessibleObject field,
@@ -168,14 +167,7 @@ class ManyToOneConfig extends AbstractRelationConfig
   {
     AmberPersistenceUnit persistenceUnit = _sourceType.getPersistenceUnit();
 
-    JClass targetClass = null;
-
-    String targetName = "";
-    if (targetClass != null)
-      targetName = targetClass.getName();
-
-    if (targetName.equals("") || targetName.equals("void"))
-      targetName = _fieldType.getName();
+    String targetName = _fieldType.getName();
 
     ManyToOneField manyToOneField;
     manyToOneField = new ManyToOneField(_sourceType, _fieldName, getCascade(), true);
@@ -186,7 +178,8 @@ class ManyToOneConfig extends AbstractRelationConfig
 
     manyToOneField.setLazy(isFetchLazy());
 
-    manyToOneField.setJoinColumnMap(_joinColumnMap);
+    if (_joinColumnMap.size() > 0)
+      manyToOneField.setJoinColumnMap(_joinColumnMap);
 
     _sourceType.addField(manyToOneField);
 
@@ -194,7 +187,8 @@ class ManyToOneConfig extends AbstractRelationConfig
     if (_sourceType instanceof MappedSuperclassType)
       return;
 
-    validateJoinColumns(_field, _fieldName, _joinColumnMap, targetType);
+    if (_joinColumnMap.size() > 0)
+      validateJoinColumns(_field, _fieldName, _joinColumnMap, targetType);
 
     manyToOneField.init();
   }

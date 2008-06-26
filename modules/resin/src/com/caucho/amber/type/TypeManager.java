@@ -183,7 +183,7 @@ public class TypeManager {
     _builtinTypes.put("clob", BlobType.create());
     _builtinTypes.put("java.sql.Clob", ClobType.create());
 
-    _builtinTypes.put("[B", ByteArrayType.create());
+    _builtinTypes.put("[B", PrimitiveByteArrayType.create());
     _builtinTypes.put("[byte", PrimitiveByteArrayType.create());
     _builtinTypes.put("[java.lang.Byte", ByteArrayType.create());
 

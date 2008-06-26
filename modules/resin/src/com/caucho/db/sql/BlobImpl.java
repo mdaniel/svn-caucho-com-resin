@@ -34,6 +34,8 @@ import com.caucho.util.L10N;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.sql.Blob;
 import java.sql.SQLException;
 
@@ -75,7 +77,30 @@ public class BlobImpl implements java.sql.Blob {
   public byte []getBytes(long pos, int length)
     throws SQLException
   {
-    throw new UnsupportedOperationException();
+    try {
+      // XXX: performance
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+      InputStream is = getBinaryStream();
+
+      if (pos > 1)
+	is.skip(pos - 1);
+
+      for (int i = 0; i < length; i++) {
+	int ch = is.read();
+
+	if (ch < 0)
+	  break;
+	
+	bos.write(ch);
+      }
+
+      is.close();
+
+      return bos.toByteArray();
+    } catch (IOException e) {
+      throw new SQLException(e);
+    }
   }
 
   /**

@@ -37,9 +37,27 @@ import javax.persistence.Column;
 public class ColumnConfig extends AbstractColumnConfig {
 
   // attributes
-  private int _length;
+  private int _length = 255;
   private int _precision;
   private int _scale;
+  
+  public ColumnConfig()
+  {
+  }
+  
+  public ColumnConfig(Column column)
+  {
+    setName(column.name());
+    setUnique(column.unique());
+    setNullable(column.nullable());
+    setInsertable(column.insertable());
+    setUpdatable(column.updatable());
+    setColumnDefinition(column.columnDefinition());
+    setTable(column.table());
+    setLength(column.length());
+    setPrecision(column.precision());
+    setScale(column.scale());
+  }
 
   /**
    * Returns the length.

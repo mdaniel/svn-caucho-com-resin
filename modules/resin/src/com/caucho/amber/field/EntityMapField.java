@@ -31,6 +31,7 @@ package com.caucho.amber.field;
 import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.EntityType;
 import com.caucho.bytecode.JMethod;
+import com.caucho.bytecode.JTypeWrapper;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.log.Log;
@@ -64,6 +65,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Sets the field name.
    */
+  @Override
   public void setName(String name)
   {
     // hack for EJB maps
@@ -73,7 +75,7 @@ public class EntityMapField extends AbstractField {
       log.log(Level.FINEST, e.toString(), e);
     }
 
-    setJavaType(java.util.Map.class);
+    setJavaType(JTypeWrapper.create(java.util.Map.class));
   }
 
   /**
@@ -87,6 +89,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Returns true if the methods are abstract.
    */
+  @Override
   public boolean isUpdateable()
   {
     return false;
@@ -135,6 +138,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Generates loading cache
    */
+  @Override
   public void generateUpdate(JavaWriter out, String mask, String pstmt,
                              String index)
     throws IOException
@@ -144,6 +148,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Generates loading cache
    */
+  @Override
   public void generateLoadFromObject(JavaWriter out, String obj)
     throws IOException
   {
@@ -152,6 +157,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Generates loading cache
    */
+  @Override
   public void generateUpdateFromObject(JavaWriter out, String obj)
     throws IOException
   {
@@ -168,6 +174,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Updates the cached copy.
    */
+  @Override
   public void generateCopyUpdateObject(JavaWriter out,
                                        String dst, String src,
                                        int updateIndex)
@@ -178,6 +185,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Updates the cached copy.
    */
+  @Override
   public void generateCopyLoadObject(JavaWriter out,
                                      String dst, String src,
                                      int loadIndex)
@@ -188,6 +196,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Generates the get property.
    */
+  @Override
   public void generateSuperGetterMethod(JavaWriter out)
     throws IOException
   {
@@ -196,6 +205,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Generates the get property.
    */
+  @Override
   public void generateSuperSetterMethod(JavaWriter out)
     throws IOException
   {
@@ -204,6 +214,7 @@ public class EntityMapField extends AbstractField {
   /**
    * Generates the set property.
    */
+  @Override
   public void generateGetterMethod(JavaWriter out)
     throws IOException
   {

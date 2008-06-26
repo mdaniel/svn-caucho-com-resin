@@ -41,6 +41,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.vfs.TempBuffer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -321,6 +322,9 @@ public class SelectResult {
 
 	return bytes;
       }
+
+    case Column.BLOB:
+      return readBlobBytes();
 
     default:
       throw new RuntimeException("unknown column type:" + type + " column:" + index);
@@ -747,6 +751,31 @@ public class SelectResult {
     }
 
     return cb.toString();
+  }
+
+  /**
+   * Returns the string value for the result set.
+   */
+  private byte []readBlobBytes()
+    throws SQLException
+  {
+    read(_blob, 0, 128);
+
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+    BlobInputStream is = null;
+    try {
+      is = new BlobInputStream(_stores[_column], _blob, 0);
+
+      int ch;
+      while ((ch = is.read()) >= 0) {
+	bos.write(ch);
+      }
+    } catch (IOException e) {
+      throw new SQLExceptionWrapper(e);
+    }
+
+    return bos.toByteArray();
   }
 
   /**

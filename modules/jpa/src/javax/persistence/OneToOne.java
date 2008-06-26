@@ -44,6 +44,7 @@ public @interface OneToOne {
   CascadeType []cascade() default {};
   FetchType fetch() default FetchType.EAGER;
   boolean optional() default true;
+  String mappedBy() default "";
   
   /**
    * @since JPA 2.0

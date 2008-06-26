@@ -267,13 +267,18 @@ abstract public class AbstractConfigIntrospector {
 
   static String toFieldName(String name)
   {
+    // jpa/0g0d
+    return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+    
+    /*
     if (Character.isLowerCase(name.charAt(0)))
       return name;
     else if (name.length() == 1
-	     || Character.isLowerCase(name.charAt(1)))
+	     || ! Character.isUpperCase(name.charAt(1)))
       return Character.toLowerCase(name.charAt(0)) + name.substring(1);
     else
       return name;
+    */
   }
 
   static ArrayList<ForeignColumn> calculateColumns(com.caucho.amber.table.AmberTable mapTable,

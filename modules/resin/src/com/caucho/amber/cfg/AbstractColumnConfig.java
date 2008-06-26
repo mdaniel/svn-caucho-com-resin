@@ -34,13 +34,13 @@ package com.caucho.amber.cfg;
  */
 abstract public class AbstractColumnConfig {
   // attributes
-  private String _name;
+  private String _name = "";
   private boolean _isUnique;
   private boolean _isNullable;
   private boolean _isInsertable;
   private boolean _isUpdatable;
-  private String _columnDefinition;
-  private String _table;
+  private String _columnDefinition = "";
+  private String _table = "";
 
   /**
    * Returns the name.
@@ -58,22 +58,22 @@ abstract public class AbstractColumnConfig {
     _name = name;
   }
 
-  public boolean getUnique()
+  public boolean isUnique()
   {
     return _isUnique;
   }
 
-  public boolean getNullable()
+  public boolean isNullable()
   {
     return _isNullable;
   }
 
-  public boolean getInsertable()
+  public boolean isInsertable()
   {
     return _isInsertable;
   }
 
-  public boolean getUpdatable()
+  public boolean isUpdatable()
   {
     return _isUpdatable;
   }
