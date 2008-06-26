@@ -552,7 +552,8 @@ public class ConfigContext {
 	  
 	  attrStrategy.setValue(bean, qName, value);
 	}
-	else if (textValue.length() > 0) {
+	else {
+	  // needed for boolean
 	  attrStrategy.setText(bean, qName, textValue);
 	}
       }

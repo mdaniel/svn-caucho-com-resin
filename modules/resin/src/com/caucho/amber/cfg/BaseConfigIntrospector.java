@@ -1385,8 +1385,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       addVersion((EntityType) sourceType, field,
                  fieldName, fieldType, versionConfig);
     }
-    else if (manyToOneConfig != null
-	     || field.isAnnotationPresent(javax.persistence.ManyToOne.class)) {
+    else if (field.isAnnotationPresent(javax.persistence.ManyToOne.class)) {
       validateAnnotations(field, fieldName, "@ManyToOne", _manyToOneAnnotations);
 
       ManyToOne ann = field.getAnnotation(ManyToOne.class);
@@ -1424,10 +1423,11 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       entityType.setHasDependent(true);
 
-      _linkCompletions.add(new ManyToOneCompletion(entityType,
-                                                   field,
-                                                   fieldName,
-                                                   fieldType));
+      _linkCompletions.add(new ManyToOneConfig(this,
+					       entityType,
+					       field,
+					       fieldName,
+					       fieldType));
     }
     else if (oneToManyConfig != null
 	     || field.isAnnotationPresent(javax.persistence.OneToMany.class)) {
@@ -2914,6 +2914,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   /**
    * completes for link
    */
+  /*
   class ManyToOneCompletion extends CompletionImpl {
     private AccessibleObject _field;
     private String _fieldName;
@@ -2938,6 +2939,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       addManyToOne(_entityType, _field, _fieldName, _fieldType);
     }
   }
+  */
 
   /**
    * completes for dependent

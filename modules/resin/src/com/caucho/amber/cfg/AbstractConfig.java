@@ -30,6 +30,7 @@
 package com.caucho.amber.cfg;
 
 import com.caucho.amber.table.AmberColumn;
+import com.caucho.amber.type.EntityType;
 import com.caucho.bytecode.JAccessibleObject;
 import com.caucho.config.ConfigException;
 import java.lang.reflect.AccessibleObject;
@@ -40,8 +41,19 @@ import java.util.ArrayList;
 /**
  * The base class for properties
  */
-abstract class AbstractConfig
+abstract class AbstractConfig implements Completion
 {
+  public EntityType getRelatedType()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void complete()
+    throws ConfigException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
   static AmberColumn findColumn(ArrayList<AmberColumn> columns, String ref)
   {
     if (((ref == null) || ref.equals("")) && columns.size() == 1)

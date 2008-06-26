@@ -53,6 +53,7 @@ class ManyToOneConfig extends AbstractRelationConfig
   private BaseConfigIntrospector _introspector;
 
   private EntityType _sourceType;
+  private EntityType _targetType;
   private AccessibleObject _field;
   private String _fieldName;
   private Class _fieldType;
@@ -107,12 +108,17 @@ class ManyToOneConfig extends AbstractRelationConfig
   {
     return _joinColumnMap;
   }
+  
+  public EntityType getRelatedType()
+  {
+    return _sourceType;
+  }
 
-    public void complete()
-      throws ConfigException
-    {
-//      addManyToOne(_entityType, _field, _fieldName, _fieldType);
-    }
+  public void complete()
+    throws ConfigException
+  {
+    addManyToOne();
+  }
     
   private void introspect()
   {
@@ -137,7 +143,13 @@ class ManyToOneConfig extends AbstractRelationConfig
   
   private void introspectManyToOne(ManyToOne manyToOne)
   {
-    setTargetEntity(manyToOne.targetEntity());
+    Class targetClass = manyToOne.targetEntity();
+
+    if (void.class.equals(targetClass))
+      targetClass = _fieldType;
+    
+    setTargetEntity(targetClass);
+    
     setCascadeTypes(manyToOne.cascade());
     setFetch(manyToOne.fetch());
     
