@@ -683,6 +683,7 @@
     <copy todir="${dist}/${dist.name}/plugins" preservelastmodified="true">
       <fileset dir="${resin.install}/lib">
         <include name="resin-ant.jar"/>
+        <include name="resin-richfaces.jar"/>
         <include name="netbeans-plugin.nbm"/>
       </fileset>
     </copy >

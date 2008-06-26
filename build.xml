@@ -23,6 +23,13 @@
     </antcall>
   </target>
 
+  <target name="richfaces" depends="init">
+    <antcall target="artifact" inheritRefs="true">
+      <param name="artifact.name" value="richfaces"/>
+      <param name="artifact.jar" value="resin-richfaces.jar"/>
+    </antcall>
+  </target>
+
   <target name="eclipse" depends="init">
     <property name="eclipse.basedir" location="${artifacts}/eclipse"/>
     <property name="eclipse.build" location="${eclipse.basedir}/build"/>
