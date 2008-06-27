@@ -393,11 +393,12 @@ public class IniDefinition {
                     int scope,
                     Value value)
     {
+      Env env = Env.getInstance();
       
       // php/1a17
       // XXX: Env may not be around yet, so need another way to notify user
       //      of unsupported options
-      if (true)
+      if (env == null)
         return;
       
       // php/1a0u
@@ -407,7 +408,7 @@ public class IniDefinition {
         return;
         //Env.getInstance().notice(L.l("ini value `{0}' is not supported", getName()));
       else
-        Env.getInstance().warning(L.l("ini value `{0}' is not supported", getName()));
+        env.warning(L.l("ini value `{0}' is not supported", getName()));
     }
   }
 

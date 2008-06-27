@@ -364,9 +364,9 @@ public class Xml {
       InputSource is;
 
       if (_xmlString.isUnicode())
-	is = new InputSource(_xmlString.toReader("utf-8"));
+        is = new InputSource(_xmlString.toReader("utf-8"));
       else
-	is = new InputSource(_xmlString.toInputStream());
+        is = new InputSource(_xmlString.toInputStream());
       
       if (_xmlOptionTargetEncoding == null)
         _xmlOptionTargetEncoding = is.getEncoding();
@@ -375,16 +375,22 @@ public class Xml {
         _errorCode = XmlModule.XML_ERROR_NONE;
         _errorString = null;
 
-	_xmlHandler = new XmlHandler();
+        _xmlHandler = new XmlHandler();
 	
         SAXParser saxParser = _factory.newSAXParser();
         saxParser.parse(is, _xmlHandler);
-      } catch (Exception e) {
+      } catch (SAXException e) {
+        _errorCode = XmlModule.XML_ERROR_SYNTAX;
+
+        log.log(Level.FINE, e.getMessage(), e);
+        return 0;
+      } catch (IOException e) {
         _errorCode = XmlModule.XML_ERROR_SYNTAX;
 
         log.log(Level.FINE, e.getMessage(), e);
         return 0;
       }
+      
     }
 
     return 1;
@@ -399,7 +405,7 @@ public class Xml {
    * @return 0 for failure, 1 for success
    */
   public int xml_parse_into_struct(Env env,
-                                   String data,
+                                   StringValue data,
                                    @Reference Value valsV,
                                    @Optional @Reference Value indexV)
     throws Exception
@@ -413,18 +419,31 @@ public class Xml {
     if (data == null || data.length() == 0)
       return 0;
     
+    if (_xmlString == null)
+      _xmlString = data.toStringBuilder();
+    
     _xmlString.append(data);
 
-    InputSource is = new InputSource(new StringReader(_xmlString.toString()));
+    InputSource is;
+    
+    if (_xmlString.isUnicode())
+      is = new InputSource(_xmlString.toReader("utf-8"));
+    else
+      is = new InputSource(_xmlString.toInputStream());
 
     try {
       SAXParser saxParser = _factory.newSAXParser();
       saxParser.parse(is, new StructHandler(valueArray, indexArray));
-    } catch (Exception e) {
+    } catch (SAXException e) {
       log.log(Level.FINE, e.toString(), e);
-
+      
+      return 0;
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+      
       return 0;
     }
+    
 
     return 1;
   }
@@ -746,11 +765,11 @@ public class Xml {
 
       try {
         if (_startElementHandler != null)
-          _startElementHandler.call(_env,args);
+          _startElementHandler.call(_env, args);
         else {
-	  if (log.isLoggable(Level.FINER))
-	    log.finer(this + " startElement " + qName);
-	}
+          if (log.isLoggable(Level.FINER))
+            log.finer(this + " startElement " + qName);
+        }
       } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));

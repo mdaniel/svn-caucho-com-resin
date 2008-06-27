@@ -34,8 +34,8 @@ import java.util.IdentityHashMap;
  * Holds reference indexes for serialization.
  */
 public final class SerializeMap {
-  private IdentityHashMap<Var, Integer> _varMap
-    = new IdentityHashMap<Var, Integer>();
+  private IdentityHashMap<Value, Integer> _varMap
+    = new IdentityHashMap<Value, Integer>();
   
   // serialization index for references
   private int _index = 1;
@@ -55,17 +55,22 @@ public final class SerializeMap {
   /*
    * Stores reference at the current index in the serialization process.
    */
-  public void put(Var var)
+  public void put(Value var)
   {
-    _varMap.put(var, new Integer(_index));
+    _varMap.put(var, Integer.valueOf(_index));
   }
   
   /*
    * Retrieves the index of this reference in the serialization, if exists.
    */
-  public Integer get(Var var)
+  public Integer get(Value value)
   {
-    return _varMap.get(var);
+    Integer index = _varMap.get(value);
+    
+    if (index == null && value instanceof Var)
+      return _varMap.get(value.toValue());
+    
+    return index;
   }
   
 }

@@ -66,10 +66,6 @@ public class ZlibModule extends AbstractQuercusModule {
   public static final int FORCE_GZIP = 0x1;
   public static final int FORCE_DEFLATE = 0x2;
 
-  public static final int SEEK_SET = FileModule.SEEK_SET;
-  public static final int SEEK_CUR = FileModule.SEEK_CUR;
-  public static final int SEEK_END = FileModule.SEEK_END;
-
   public String []getLoadedExtensions()
   {
     return new String[] { "zlib" };
@@ -340,7 +336,7 @@ public class ZlibModule extends AbstractQuercusModule {
    */
   public int gzseek(@NotNull BinaryStream binaryStream,
                     long offset,
-                    @Optional("SEEK_SET") int whence)
+                    @Optional("FileModule.SEEK_SET") int whence)
   {
     if (binaryStream == null)
       return -1;

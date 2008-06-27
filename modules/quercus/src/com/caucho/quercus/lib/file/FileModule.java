@@ -851,7 +851,7 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value filesize(Env env, Path path)
   {
-    if (! path.exists()) {
+    if (! path.exists() || ! path.isFile()) {
       env.warning(L.l("{0} cannot be read", path.getFullPath()));
       return BooleanValue.FALSE;
     }
@@ -2462,12 +2462,18 @@ public class FileModule extends AbstractQuercusModule {
     if (path == null)
       return BooleanValue.FALSE;
 
-    String realPath = path.realPath();
+    String pathStr = path.realPath();
 
-    if (realPath != null)
-      return env.createString(realPath);
+    if (pathStr == null)
+      pathStr = path.getFullPath();
+
+    StringValue sb = env.createStringBuilder();
+    
+    // php/164c
+    if (pathStr.endsWith("/"))
+      return sb.append(pathStr, 0, pathStr.length()- 1);
     else
-      return env.createString(path.getFullPath());
+      return sb.append(pathStr, 0, pathStr.length());
   }
 
   /**

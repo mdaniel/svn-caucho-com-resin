@@ -598,6 +598,25 @@ public class RefVar extends Value
   }
 
   /**
+   * Serializes the value.
+   */
+  public void serialize(StringBuilder sb)
+  {
+    _var.serialize(sb);
+  }
+  
+  /*
+   * Serializes the value.
+   * 
+   * @param sb holds result of serialization
+   * @param serializeMap holds reference indexes
+   */
+  public void serialize(StringBuilder sb, SerializeMap serializeMap)
+  {
+    _var.serialize(sb, serializeMap);
+  }
+  
+  /**
    * Prints the value.
    * @param env
    */

@@ -1172,6 +1172,7 @@ public class ObjectExtValue extends ObjectValue
     sb.append(getSize());
     sb.append(":{");
     
+    serializeMap.put(this);
     serializeMap.incrementIndex();
 
     for (Map.Entry<Value,Value> entry : entrySet()) {

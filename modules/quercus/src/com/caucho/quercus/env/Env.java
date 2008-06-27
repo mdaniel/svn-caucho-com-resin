@@ -3122,6 +3122,17 @@ public class Env {
     else
       return StringBuilderValue.EMPTY;
   }
+
+  /*
+   * Creates an empty string builder.
+   */
+  public StringValue createStringBuilder()
+  {
+    if (_isUnicodeSemantics)
+      return new UnicodeBuilderValue();
+    else
+      return new StringBuilderValue();
+  }
   
   /**
    * Creates a PHP string from a byte buffer.

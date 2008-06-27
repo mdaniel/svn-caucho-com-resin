@@ -227,9 +227,9 @@ public class XmlModule extends AbstractQuercusModule {
    * @throws Exception
    */
   public int xml_parse(Env env,
-		       @NotNull Xml parser,
-		       StringValue data,
-		       @Optional("true") boolean isFinal)
+                       @NotNull Xml parser,
+                       StringValue data,
+                       @Optional("true") boolean isFinal)
   {
     if (parser == null)
       return 0;
@@ -249,7 +249,7 @@ public class XmlModule extends AbstractQuercusModule {
   public Xml xml_parser_create(Env env,
                                     @Optional String outputEncoding)
   {
-    return new Xml(env,outputEncoding,null);
+    return new Xml(env, outputEncoding, null);
   }
 
   /**
@@ -265,7 +265,7 @@ public class XmlModule extends AbstractQuercusModule {
                                        @Optional String outputEncoding,
                                        @Optional("':'") String separator)
   {
-    return new Xml(env,outputEncoding,separator);
+    return new Xml(env, outputEncoding, separator);
   }
 
   /**
@@ -441,7 +441,7 @@ public class XmlModule extends AbstractQuercusModule {
    */
   public int xml_parse_into_struct(Env env,
                                    @NotNull Xml parser,
-                                   @NotNull String data,
+                                   StringValue data,
                                    @Reference Value valueArray,
                                    @Optional @Reference Value indexArray)
   {

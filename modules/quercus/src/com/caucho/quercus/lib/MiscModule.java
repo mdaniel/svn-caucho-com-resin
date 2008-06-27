@@ -179,6 +179,9 @@ public class MiscModule extends AbstractQuercusModule {
       
       Value value = program.execute(env);
       
+      if (value == null)
+        value = NullValue.NULL;
+      
       return value;
     } catch (IOException e) {
       throw new QuercusException(e);
