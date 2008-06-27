@@ -381,11 +381,13 @@ public class Xml {
         saxParser.parse(is, _xmlHandler);
       } catch (SAXException e) {
         _errorCode = XmlModule.XML_ERROR_SYNTAX;
+        _errorString = e.toString();
 
         log.log(Level.FINE, e.getMessage(), e);
         return 0;
       } catch (IOException e) {
         _errorCode = XmlModule.XML_ERROR_SYNTAX;
+        _errorString = e.toString();
 
         log.log(Level.FINE, e.getMessage(), e);
         return 0;
@@ -418,11 +420,9 @@ public class Xml {
     
     if (data == null || data.length() == 0)
       return 0;
-    
+
     if (_xmlString == null)
       _xmlString = data.toStringBuilder();
-    
-    _xmlString.append(data);
 
     InputSource is;
     
@@ -435,15 +435,20 @@ public class Xml {
       SAXParser saxParser = _factory.newSAXParser();
       saxParser.parse(is, new StructHandler(valueArray, indexArray));
     } catch (SAXException e) {
+      _errorCode = XmlModule.XML_ERROR_SYNTAX;
+      _errorString = e.toString();
+      
       log.log(Level.FINE, e.toString(), e);
       
       return 0;
     } catch (IOException e) {
+      _errorCode = XmlModule.XML_ERROR_SYNTAX;
+      _errorString = e.toString();
+      
       log.log(Level.FINE, e.toString(), e);
       
       return 0;
     }
-    
 
     return 1;
   }

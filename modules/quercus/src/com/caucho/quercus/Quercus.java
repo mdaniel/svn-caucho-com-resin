@@ -239,7 +239,7 @@ public class Quercus
 
   public String getVersion()
   {
-    return "Open Source 3.1.6";
+    return "Open Source 3.2.0";
   }
 
   public String getVersionDate()
@@ -367,6 +367,9 @@ public class Quercus
     _pageManager.setLazyCompile(isCompile);
   }
 
+  /*
+   * Returns the expected encoding of php scripts.
+   */
   public String getScriptEncoding()
   {
     if (_scriptEncoding != null)
@@ -377,6 +380,9 @@ public class Quercus
       return "iso-8859-1";
   }
 
+  /*
+   * Sets the expected encoding of php scripts.
+   */
   public void setScriptEncoding(String encoding)
   {
     _scriptEncoding = encoding;
@@ -392,6 +398,11 @@ public class Quercus
     return _mySqlVersion;
   }
 
+  /*
+   * Sets the mysql version to report to applications.  This cloaks
+   * the underlying JDBC driver version, so that when an application
+   * asks for the mysql version, this version string is returned instead.
+   */
   public void setMysqlVersion(String version)
   {
     _mySqlVersion = version;
