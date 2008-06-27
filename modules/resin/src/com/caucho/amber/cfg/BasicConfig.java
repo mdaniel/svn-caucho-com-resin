@@ -352,11 +352,6 @@ class BasicConfig extends AbstractConfig
     return column;
   }
 
-  public static String toSqlName(String name)
-  {
-    return name; // name.toUpperCase();
-  }
-
   static {
     // non-serializable types allowed with a @Basic annotation
     _basicTypes.add("boolean");

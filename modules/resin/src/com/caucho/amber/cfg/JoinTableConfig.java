@@ -30,6 +30,8 @@
 package com.caucho.amber.cfg;
 
 import java.util.HashMap;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 
 
 /**
@@ -43,6 +45,29 @@ public class JoinTableConfig extends AbstractTableConfig {
 
   private HashMap<String, JoinColumnConfig> _inverseJoinColumnMap
     = new HashMap<String, JoinColumnConfig>();
+
+  public JoinTableConfig()
+  {
+  }
+
+  public JoinTableConfig(JoinTable joinTable)
+  {
+    setName(joinTable.name());
+    setCatalog(joinTable.catalog());
+    setSchema(joinTable.schema());
+
+    for (JoinColumn joinColumn : joinTable.joinColumns()) {
+      JoinColumnConfig joinColumnConfig = new JoinColumnConfig(joinColumn);
+      
+      addJoinColumn(joinColumnConfig);
+    }
+
+    for (JoinColumn joinColumn : joinTable.inverseJoinColumns()) {
+      JoinColumnConfig joinColumnConfig = new JoinColumnConfig(joinColumn);
+      
+      addInverseJoinColumn(joinColumnConfig);
+    }
+  }
 
   public JoinColumnConfig getJoinColumn(String name)
   {

@@ -29,11 +29,15 @@
 
 package com.caucho.amber.cfg;
 
+import com.caucho.amber.field.IdField;
 import com.caucho.amber.table.AmberColumn;
+import com.caucho.amber.table.AmberTable;
+import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 import java.lang.reflect.AccessibleObject;
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
@@ -167,5 +171,104 @@ abstract class AbstractRelationConfig extends AbstractConfig
         throw error(field, L.l("referencedColumnName '{0}' does not match any key column in '{1}'.",
                                ref, targetType.getName()));
     }
+  }
+
+  ArrayList<ForeignColumn>
+    calculateColumns(AccessibleObject field,
+                     String fieldName,
+                     AmberTable mapTable,
+                     String prefix,
+                     EntityType type,
+                     HashMap<String, JoinColumnConfig> joinColumnsConfig)
+    throws ConfigException
+  {
+    if (joinColumnsConfig == null || joinColumnsConfig.size() == 0)
+      return calculateColumns(mapTable, prefix, type);
+
+    ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
+
+    // #1448 not reproduced.
+    if (type.getId() == null)
+      throw error(field, L.l("Entity {0} has no primary key defined.",
+                             type.getName()));
+
+    ArrayList<IdField> idFields = type.getId().getKeys();
+
+    int len = joinColumnsConfig.size();
+
+    if (len != idFields.size()) {
+      throw error(field, L.l("@JoinColumns for {0} do not match number of the primary key columns in {1}.  The foreign key columns must match the primary key columns.",
+                             fieldName,
+                             type.getName()));
+    }
+
+    for (JoinColumnConfig joinColumn : joinColumnsConfig.values()) {
+      ForeignColumn foreignColumn;
+
+      String name = joinColumn.getName();
+
+      AmberColumn column = idFields.get(columns.size()).getColumns().get(0);
+
+      foreignColumn = mapTable.createForeignColumn(name, column);
+
+      columns.add(foreignColumn);
+    }
+
+    return columns;
+  }
+
+  static ArrayList<ForeignColumn> calculateColumns(com.caucho.amber.table.AmberTable mapTable,
+                                                   String prefix,
+                                                   EntityType type)
+  {
+    ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
+
+    EntityType parentType = type;
+
+    ArrayList<com.caucho.amber.table.AmberColumn> targetIdColumns;
+
+    targetIdColumns = type.getId().getColumns();
+
+    while (targetIdColumns.size() == 0) {
+      parentType = parentType.getParentType();
+
+      if (parentType == null)
+        break;
+
+      targetIdColumns = parentType.getId().getColumns();
+    }
+
+    for (AmberColumn key : targetIdColumns) {
+      columns.add(mapTable.createForeignColumn(prefix + key.getName(), key));
+    }
+
+    return columns;
+  }
+
+  ArrayList<ForeignColumn> calculateColumns(AmberTable mapTable,
+					    EntityType type)
+  {
+    ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
+
+    EntityType parentType = type;
+
+    ArrayList<AmberColumn> targetIdColumns;
+
+    targetIdColumns = type.getId().getColumns();
+
+    while (targetIdColumns.size() == 0) {
+      parentType = parentType.getParentType();
+
+      if (parentType == null)
+        break;
+
+      targetIdColumns = parentType.getId().getColumns();
+    }
+
+    for (AmberColumn key : targetIdColumns) {
+      columns.add(mapTable.createForeignColumn(key.getName(), key));
+    }
+
+    return columns;
   }
 }

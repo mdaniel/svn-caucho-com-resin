@@ -1163,6 +1163,11 @@ public class AmberPersistenceUnit {
       return null;
   }
 
+  public EntityType getEntityType(Class cl)
+  {
+    return getEntityType(cl.getName());
+  }
+  
   /**
    * Returns a matching entity.
    */
