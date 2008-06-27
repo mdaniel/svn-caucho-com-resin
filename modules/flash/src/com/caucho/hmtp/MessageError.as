@@ -55,8 +55,8 @@ package com.caucho.hmtp
   public class MessageError extends Packet {
     public const MESSAGE_ERROR:String = "messageError";
 
-    private var _value:Object;
-    private var _error:BamError;
+    public var _value:Object;
+    public var _error:BamError;
 
     public function MessageError(to:String, from:String, 
                                  value:Object, error:BamError)

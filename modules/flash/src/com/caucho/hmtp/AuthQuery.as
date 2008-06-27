@@ -50,9 +50,9 @@
 package com.caucho.hmtp
 {
   public class AuthQuery {
-    private var _uid:String;
-    private var _credentials:Object;
-    private var _resource:String;
+    public var _uid:String;
+    public var _credentials:Object;
+    public var _resource:String;
 
     public function AuthQuery(uid:String, 
                               credentials:Object, 
