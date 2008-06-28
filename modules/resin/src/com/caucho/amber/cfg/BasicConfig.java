@@ -34,6 +34,7 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.AmberType;
+import com.caucho.amber.type.BeanType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
@@ -60,7 +61,7 @@ class BasicConfig extends AbstractConfig
   
   private BaseConfigIntrospector _introspector;
 
-  private EntityType _sourceType;
+  private BeanType _sourceType;
   private AccessibleObject _field;
   private String _fieldName;
   private Class _fieldType;
@@ -79,7 +80,7 @@ class BasicConfig extends AbstractConfig
   private EnumType _enumerated;
 
   BasicConfig(BaseConfigIntrospector introspector,
-	      EntityType sourceType,
+	      BeanType sourceType,
 	      AccessibleObject field,
 	      String fieldName,
 	      Class fieldType)
@@ -288,16 +289,13 @@ class BasicConfig extends AbstractConfig
   private AmberColumn createColumn(AmberType amberType)
     throws ConfigException
   {
-    EntityType entityType = _sourceType;
-    
     String name = _column.getName();
 
     AmberColumn column = null;
 
-    if (entityType == null) { // embeddable
-      column = new AmberColumn(null, name, amberType);
-    }
-    else {
+    if (_sourceType instanceof EntityType) {
+      EntityType entityType = (EntityType) _sourceType;
+      
       String tableName = _column.getTable();
       AmberTable table;
 
@@ -313,6 +311,9 @@ class BasicConfig extends AbstractConfig
       }
 
       column = table.createColumn(name, amberType);
+    }
+    else { // embeddable
+      column = new AmberColumn(null, name, amberType);
     }
 
     // primaryKey = column.primaryKey();

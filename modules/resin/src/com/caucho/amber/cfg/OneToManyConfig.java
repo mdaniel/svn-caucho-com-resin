@@ -176,7 +176,9 @@ class OneToManyConfig extends AbstractRelationConfig
     else
       retType = ((Method) _field).getGenericReturnType();
 
-    JType type = JTypeWrapper.create(retType);
+    ClassLoader loader = _sourceType.getPersistenceUnit().getTempClassLoader();
+    
+    JType type = JTypeWrapper.create(retType, loader);
 
     JType []typeArgs = type.getActualTypeArguments();
 
@@ -271,6 +273,12 @@ class OneToManyConfig extends AbstractRelationConfig
     return _joinColumnMap;
   }
 
+  @Override
+  public EntityType getRelatedType()
+  {
+    return _sourceType;
+  }
+  
   @Override
     public void complete()
   {
@@ -383,14 +391,12 @@ class OneToManyConfig extends AbstractRelationConfig
       mapTable = persistenceUnit.createTable(sqlTable);
 
       sourceColumns
-	= calculateColumns(_field, _fieldName,
-			   mapTable,
+	= calculateColumns(_field, _fieldName, mapTable,
 			   _sourceType.getTable().getName() + "_",
 			   _sourceType,
 			   joinColumnsConfig);
 
-      targetColumns = calculateColumns(_field,
-				       _fieldName, mapTable,
+      targetColumns = calculateColumns(_field, _fieldName, mapTable,
 				       _sourceType.getTable().getName() + "_",
 				       _sourceType,
 				       inverseJoinColumnsConfig);

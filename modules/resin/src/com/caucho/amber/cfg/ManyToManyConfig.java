@@ -149,12 +149,15 @@ class ManyToManyConfig extends AbstractRelationConfig
     else
       retType = ((Method) _field).getGenericReturnType();
 
-    JType type = JTypeWrapper.create(retType);
+    ClassLoader loader = _sourceType.getPersistenceUnit().getTempClassLoader();
+    
+    JType type = JTypeWrapper.create(retType, loader);
 
     JType []typeArgs = type.getActualTypeArguments();
 
-    if (typeArgs.length > 0)
+    if (typeArgs.length > 0) {
       setTargetEntity(typeArgs[0].getRawType().getJavaClass());
+    }
   }
   
   private void introspectManyToMany(ManyToMany manyToMany)
@@ -238,24 +241,26 @@ class ManyToManyConfig extends AbstractRelationConfig
     ArrayList<ForeignColumn> sourceColumns = null;
     ArrayList<ForeignColumn> targetColumns = null;
 
-    String joinTableName = joinTableConfig.getName();
+    HashMap<String,JoinColumnConfig> joinColumnsConfig = null;
+    HashMap<String,JoinColumnConfig> inverseJoinColumnsConfig = null;
 
-    HashMap<String,JoinColumnConfig> joinColumnsConfig
-      = joinTableConfig.getJoinColumnMap();
-    
-    HashMap<String,JoinColumnConfig> inverseJoinColumnsConfig
-      = joinTableConfig.getInverseJoinColumnMap();
+    if (joinTableConfig != null) {
+      String joinTableName = joinTableConfig.getName();
 
-    if (joinColumnsConfig != null 
-        && joinColumnsConfig.size() > 0)
-      manyToManyField.setJoinColumns(true);
+      joinColumnsConfig = joinTableConfig.getJoinColumnMap();
+      inverseJoinColumnsConfig = joinTableConfig.getInverseJoinColumnMap();
 
-    if (inverseJoinColumnsConfig != null
-        && inverseJoinColumnsConfig.size() > 0)
-      manyToManyField.setInverseJoinColumns(true);
+      if (joinColumnsConfig != null 
+	  && joinColumnsConfig.size() > 0)
+	manyToManyField.setJoinColumns(true);
+
+      if (inverseJoinColumnsConfig != null
+	  && inverseJoinColumnsConfig.size() > 0)
+	manyToManyField.setInverseJoinColumns(true);
  
-    if (! joinTableName.equals(""))
-      sqlTable = joinTableName;
+      if (! joinTableName.equals(""))
+	sqlTable = joinTableName;
+    }
 
     mapTable = persistenceUnit.createTable(sqlTable);
 

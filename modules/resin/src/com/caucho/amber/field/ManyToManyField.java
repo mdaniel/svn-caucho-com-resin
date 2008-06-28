@@ -1041,12 +1041,18 @@ public class ManyToManyField extends AssociationField {
 
     JType type;
 
+    ClassLoader loader
+      = getSourceType().getPersistenceUnit().getTempClassLoader();
+    
     if (! getSourceType().isFieldAccess()) {
-      type = JTypeWrapper.create(getGetterMethod().getGenericReturnType());
+      type = JTypeWrapper.create(getGetterMethod().getGenericReturnType(),
+				 loader);
     }
     else {
       Field field = EntityType.getField(getBeanClass(), getName());
-      type = JTypeWrapper.create(field.getGenericType());
+      
+      type = JTypeWrapper.create(field.getGenericType(),
+				 loader);
     }
 
     out.println();

@@ -75,7 +75,9 @@ public class EntityMapField extends AbstractField {
       log.log(Level.FINEST, e.toString(), e);
     }
 
-    setJavaType(JTypeWrapper.create(java.util.Map.class));
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    setJavaType(JTypeWrapper.create(java.util.Map.class, loader));
   }
 
   /**

@@ -36,9 +36,9 @@ abstract public class AbstractColumnConfig {
   // attributes
   private String _name = "";
   private boolean _isUnique;
-  private boolean _isNullable;
-  private boolean _isInsertable;
-  private boolean _isUpdatable;
+  private boolean _isNullable = true;
+  private boolean _isInsertable = true;
+  private boolean _isUpdatable = true;
   private String _columnDefinition = "";
   private String _table = "";
 

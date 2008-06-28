@@ -103,6 +103,9 @@ abstract public class AbstractField implements AmberField {
   {
     _name = name;
 
+    ClassLoader loader
+      = getSourceType().getPersistenceUnit().getTempClassLoader();
+      
     if (! isFieldAccess()) {
       char ch = name.charAt(0);
       if (Character.isLowerCase(ch))
@@ -123,7 +126,7 @@ abstract public class AbstractField implements AmberField {
         throw new ConfigException(L.l("{0}: {1} has no matching getter.",
                                       getBeanClass().getName(), name));
       */
-
+    
       if (_getterMethod == null) {
         Field field = BeanType.getField(getBeanClass(), _name);
 
@@ -131,10 +134,11 @@ abstract public class AbstractField implements AmberField {
           throw new ConfigException(L.l("{0}: {1} has no matching field.",
                                         getBeanClass().getName(), _name));
 
-        _type = JTypeWrapper.create(field.getGenericType());
+        _type = JTypeWrapper.create(field.getGenericType(), loader);
       }
       else {
-        _type = JTypeWrapper.create(_getterMethod.getGenericReturnType());
+        _type = JTypeWrapper.create(_getterMethod.getGenericReturnType(),
+				    loader);
 
         _setterMethod = BeanType.getSetter(getBeanClass(), setter);
       }
@@ -146,7 +150,7 @@ abstract public class AbstractField implements AmberField {
         throw new ConfigException(L.l("{0}: {1} has no matching field.",
                                       getBeanClass().getName(), name));
 
-      _type = JTypeWrapper.create(field.getGenericType());
+      _type = JTypeWrapper.create(field.getGenericType(), loader);
     }
 
     /*

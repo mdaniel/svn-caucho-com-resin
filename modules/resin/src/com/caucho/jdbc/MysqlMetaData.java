@@ -105,7 +105,9 @@ public class MysqlMetaData extends GenericMetaData {
   {
     if (limit < 0)
       return sql;
+    else if (offset <= 0)
+      return sql + " LIMIT " + limit;
     else
-      return sql + " LIMIT " + offset + "," + limit;
+      return sql + " OFFSET " + offset + " LIMIT " + limit;
   }
 }

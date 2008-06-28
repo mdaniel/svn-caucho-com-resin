@@ -1536,7 +1536,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
     else {
       BasicConfig basic
-        = new BasicConfig(this, (EntityType) sourceType, field, fieldName, fieldType);
+        = new BasicConfig(this, sourceType, field, fieldName, fieldType);
       
       basic.complete();
     }

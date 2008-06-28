@@ -112,6 +112,8 @@ public class ResinMetaData extends GenericMetaData {
   {
     if (limit < 0)
       return sql;
+    else if (offset <= 0)
+      return sql + " LIMIT " + limit;
     else
       return sql + " OFFSET " + offset + " LIMIT " + limit;
   }

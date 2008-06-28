@@ -556,7 +556,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       columnName = discriminatorAnn.name();
 
     if (columnName == null || columnName.equals(""))
-      columnName = "DTYPE";
+      columnName = "dtype";
 
     AmberType columnType = null;
     DiscriminatorType discType = DiscriminatorType.STRING;

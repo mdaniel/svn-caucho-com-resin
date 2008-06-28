@@ -49,18 +49,17 @@ public class JTypeWrapper implements JType {
     _type = type;
   }
 
-  public JTypeWrapper(ParameterizedType type)
+  public JTypeWrapper(ParameterizedType type, ClassLoader loader)
   {
-    ClassLoader loader = ((Class) type.getRawType()).getClassLoader();
     _loader = JClassLoaderWrapper.create(loader);
     
     _type = type;
   }
   
-  public static JType create(Type type)
+  public static JType create(Type type, ClassLoader loader)
   {
     if (type instanceof ParameterizedType) {
-      return new JTypeWrapper((ParameterizedType) type);
+      return new JTypeWrapper((ParameterizedType) type, loader);
     }
     else {
       return new JClassWrapper((Class) type);
@@ -111,8 +110,9 @@ public class JTypeWrapper implements JType {
     for (int i = 0; i < args.length; i++) {
       Type type = rawArgs[i];
 
-      if (type instanceof Class)
+      if (type instanceof Class) {
 	args[i] = _loader.forName(((Class) type).getName());
+      }
       else if (type instanceof ParameterizedType)
 	args[i] = new JTypeWrapper(_loader, (ParameterizedType) type);
       else {
