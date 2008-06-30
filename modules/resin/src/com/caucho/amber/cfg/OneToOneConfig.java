@@ -190,6 +190,12 @@ class OneToOneConfig extends AbstractRelationConfig
   }
 
   @Override
+  public EntityType getRelatedType()
+  {
+    return _sourceType;
+  }
+
+  @Override
   public void complete()
   {
     AmberPersistenceUnit persistenceUnit = _sourceType.getPersistenceUnit();
