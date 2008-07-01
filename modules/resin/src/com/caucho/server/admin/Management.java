@@ -43,7 +43,7 @@ import com.caucho.security.*;
 import com.caucho.server.security.*;
 import com.caucho.webbeans.manager.*;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
+import com.caucho.vfs.*;
 
 import javax.annotation.*;
 import javax.resource.spi.ResourceAdapter;
@@ -136,10 +136,16 @@ public class Management
   
   public Path getPath()
   {
-    if (_path != null)
-      return _path;
-    else
-      return _resin.getRootDirectory().lookup("admin");
+    Path path = _path;
+    
+    if (path == null)
+      path = _resin.getRootDirectory().lookup("admin");
+
+    if (path instanceof MemoryPath) { // QA
+      path = Vfs.lookup("file:/tmp/caucho/qa/admin");
+    }
+
+    return path;
   }
 
   /**
