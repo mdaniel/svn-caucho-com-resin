@@ -226,28 +226,33 @@ public class HashModule extends AbstractQuercusModule {
   {
     try {
       if (options == HASH_HMAC) {
-	algorithm = "Hmac" + algorithm;
-	
-	KeyGenerator gen = KeyGenerator.getInstance(algorithm);
+        algorithm = "Hmac" + algorithm;
 
-	Mac mac = Mac.getInstance(algorithm);
+        KeyGenerator gen = KeyGenerator.getInstance(algorithm);
 
-	int keySize = 64;
-	byte []keyBytes = new byte[keySize];
+        Mac mac = Mac.getInstance(algorithm);
 
-	for (int i = 0; i < keyString.length(); i++) {
-	  keyBytes[i] = (byte) keyString.charAt(i);
-	}
+        int keySize = 64;
 
-	Key key = new SecretKeySpec(keyBytes, "dsa");
-	mac.init(key);
+        // php/530c
+        if (keyString != null)
+          keySize = keyString.length();
 
-	return new HashMacContext(mac);
+        byte []keyBytes = new byte[keySize];
+
+        for (int i = 0; i < keyString.length(); i++) {
+          keyBytes[i] = (byte) keyString.charAt(i);
+        }
+
+        Key key = new SecretKeySpec(keyBytes, "dsa");
+        mac.init(key);
+
+        return new HashMacContext(mac);
       }
       else {
-	MessageDigest md = MessageDigest.getInstance(algorithm);
+        MessageDigest md = MessageDigest.getInstance(algorithm);
 
-	return new HashDigestContext(md);
+        return new HashDigestContext(md);
       }
     } catch (Exception e) {
       env.error(L.l("hash_init: '{0}' is an unknown algorithm",
