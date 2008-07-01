@@ -168,7 +168,7 @@ public class BamModule extends AbstractQuercusModule
     if (agent == null)
       return env.error("bam_agent_exists must be called from agent script");
 
-    return BooleanValue.create(agent.findAgent(jid) != null);
+    return BooleanValue.create(agent.hasChild(jid));
   }
 
   public static String bam_my_jid(Env env)

@@ -32,6 +32,7 @@ package com.caucho.hemp.muc.memory;
 import com.caucho.xmpp.muc.MucUserPresence;
 import com.caucho.xmpp.im.ImMessage;
 import com.caucho.bam.BamStream;
+import com.caucho.hemp.annotation.*;
 import com.caucho.hemp.broker.GenericService;
 import java.io.Serializable;
 import java.util.*;
@@ -77,22 +78,23 @@ public class MemoryRoom extends GenericService
   }
 
   @Override
-  public BamStream findAgent(String jid)
+  public boolean startAgent(String jid)
   {
     synchronized (_nicknameMap) {
       MemoryNick nick = _nicknameMap.get(jid);
 
       if (nick == null) {
-	nick = new MemoryNick(this, jid);
-	_nicknameMap.put(jid, nick);
+        nick = new MemoryNick(this, jid);
+        getBroker().addService(nick);
+
+        _nicknameMap.put(jid, nick);
       }
 
-      return nick.getAgentStream();
+      return true;
     }
   }
 
-  @Override
-  public void message(String to, String from, Serializable value)
+  public void handleImMessage(String to, String from, @Message ImMessage msg)
   {
     MemoryNick nick = getNick(from);
 
@@ -100,14 +102,6 @@ public class MemoryRoom extends GenericService
       log.warning(this + " sendMessage unknown user from=" + from);
       return;
     }
-
-    if (! (value instanceof ImMessage)) {
-      log.fine(this + " sendMessage with unknown value from=" + from
-	       + " value=" + value);
-      return;
-    }
-
-    ImMessage msg = (ImMessage) value;
 
     if (! "groupchat".equals(msg.getType())) {
       log.fine(this + " sendMessage expects 'groupchat' at type='"

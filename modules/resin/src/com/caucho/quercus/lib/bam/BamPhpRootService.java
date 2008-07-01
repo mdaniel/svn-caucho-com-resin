@@ -88,10 +88,10 @@ public class BamPhpRootService extends GenericService {
   }
 
   @Override
-  public BamStream findAgent(String jid)
+  public boolean startAgent(String jid)
   {
     if (log.isLoggable(Level.FINE)) 
-      log.fine(L.l("{0}.findAgent({1})", toString(), jid));
+      log.fine(L.l("{0}.startAgent({1})", toString(), jid));
 
     BamPhpAgent agent = _agents.get(jid);
 
@@ -105,7 +105,7 @@ public class BamPhpRootService extends GenericService {
       _agents.put(jid, agent);
     }
 
-    return agent;
+    return true;
   }
 
   public String toString()

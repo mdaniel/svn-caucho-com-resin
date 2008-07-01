@@ -37,8 +37,12 @@ import com.caucho.bam.BamService;
 public interface BamServiceManager
 {
   /**
-   * Returns the service with the given name, or null if this is not
-   * a known service
+   * Requests that a service with the given jid be started. 
    */
-  public BamService findService(String jid);
+  public boolean startService(String jid);
+
+  /**
+   * Requests that a service with the given jid be stopped. 
+   */
+  public boolean stopService(String jid);
 }

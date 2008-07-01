@@ -57,11 +57,19 @@ abstract public class AbstractBamService implements BamService
   }
 
   /**
-   * Looks up a sub-resource
+   * Requests that an agent with the given jid be started. 
    */
-  public BamStream findAgent(String jid)
+  public boolean startAgent(String jid)
   {
-    return null;
+    return false;
+  }
+
+  /**
+   * Requests that an agent with the given jid be stopped. 
+   */
+  public boolean stopAgent(String jid)
+  {
+    return false;
   }
 
   /**

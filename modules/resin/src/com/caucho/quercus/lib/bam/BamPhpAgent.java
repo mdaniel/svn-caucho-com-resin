@@ -128,12 +128,17 @@ public class BamPhpAgent extends GenericService {
   }
 
   @Override
-  public BamStream findAgent(String jid)
+  public boolean startAgent(String jid)
   {
     if (log.isLoggable(Level.FINE)) 
-      log.fine(L.l("{0}.findAgent({1})", toString(), jid));
+      log.fine(L.l("{0}.startAgent({1})", toString(), jid));
 
-    return _children.get(jid);
+    return hasChild(jid);
+  }
+
+  boolean hasChild(String jid)
+  {
+    return _children.containsKey(jid);
   }
 
   void addChild(String jid, BamPhpAgent child)

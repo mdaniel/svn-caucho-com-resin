@@ -56,11 +56,18 @@ public class AbstractBamServiceManager implements BamServiceManager
   }
   
   /**
-   * Returns the resource with the given name, or null if this is not
-   * a known resource
+   * Requests that a service with the given jid be started. 
    */
-  public BamService findService(String jid)
+  public boolean startService(String jid)
   {
-    return null;
+    return false;
+  }
+
+  /**
+   * Requests that a service with the given jid be stopped. 
+   */
+  public boolean stopService(String jid)
+  {
+    return false;
   }
 }

@@ -24,54 +24,20 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
-package com.caucho.bam;
+package com.caucho.hemp.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * BamService is a registered service.
+ * The @PresenceUnsubscribed annotation.
  */
-public interface BamService
-{
-  /**
-   * Returns the service's jid.
-   */
-  public String getJid();
-
-  /**
-   * Returns the service's agent stream
-   */
-  public BamStream getAgentStream();
-  
-  /**
-   * Requests that an agent with the given jid be started. 
-   */
-  public boolean startAgent(String jid);
-
-  /**
-   * Requests that an agent with the given jid be stopped. 
-   */
-  public boolean stopAgent(String jid);
-
-  /**
-   * Called when an agent logs in
-   */
-  public void onAgentStart(String jid);
-
-  /**
-   * Called when an agent logs out
-   */
-  public void onAgentStop(String jid);
-  
-  /**
-   * Returns a filter for outbound calls, i.e. filtering messages to the agent.
-   */
-  public BamStream getAgentFilter(BamStream stream);
-
-  /**
-   * Returns a filter for inbound calls, i.e. filtering messages to the broker
-   * from the agent.
-   */
-  public BamStream getBrokerFilter(BamStream stream);
+@Target({ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface PresenceUnsubscribed {
 }

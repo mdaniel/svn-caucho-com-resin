@@ -104,12 +104,12 @@ public class JdbcServiceManager extends AbstractBamServiceManager
    * Returns the service with the given name, or null if this is not
    * a known service
    */
-  public BamService findService(String jid)
+  public boolean startService(String jid)
   {
     int p = jid.indexOf('@');
 
     if (p < 0)
-      return null;
+      return false;
 
     String node = jid.substring(0, p);
     String domain = jid.substring(p + 1);
@@ -119,7 +119,7 @@ public class JdbcServiceManager extends AbstractBamServiceManager
     // XXX: timeout
     _broker.addService(user);
 
-    return user;
+    return true;
   }
 
   public void addUser(String host,

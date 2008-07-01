@@ -596,33 +596,44 @@ public class HempBroker implements BamBroker, BamStream
       WeakReference<BamStream> ref = _agentMap.get(jid);
 
       if (ref != null)
-	return ref.get();
+        return ref.get();
     }
 
     BamStream agentStream;
     BamService service = findService(jid);
-    
-    if (service == null)
+
+    if (service == null) {
       return null;
-    else if (jid.equals(service.getJid()))
-      agentStream = service.getAgentStream();
-    else
-      agentStream = service.findAgent(jid);
+    }
+    else if (jid.equals(service.getJid())) {
+      agentStream = service.getAgentStream(); 
 
-    if (agentStream != null) {
-      synchronized (_agentMap) {
-	WeakReference<BamStream> ref = _agentMap.get(jid);
+      if (agentStream != null) {
+        synchronized (_agentMap) {
+          WeakReference<BamStream> ref = _agentMap.get(jid);
 
-	if (ref != null)
-	  return ref.get();
+          if (ref != null)
+            return ref.get();
 
-	_agentMap.put(jid, new WeakReference<BamStream>(agentStream));
+          _agentMap.put(jid, new WeakReference<BamStream>(agentStream));
 
-	return agentStream;
+          return agentStream;
+        }
       }
     }
-    else
-      return null;
+    else {
+      if (! service.startAgent(jid))
+        return null;
+
+      synchronized (_agentMap) {
+        WeakReference<BamStream> ref = _agentMap.get(jid);
+
+        if (ref != null)
+          return ref.get();
+      }
+    }
+
+    return null;
   }
 
   protected BamService findService(String jid)
@@ -637,24 +648,29 @@ public class HempBroker implements BamBroker, BamStream
 	return ref.get();
     }
 
-    BamService service = findServiceFromManager(jid);
-
-    if (service == null
-	&& jid.indexOf('/') < 0
-	&& jid.indexOf('@') < 0) {
-      service = findDomain(jid);
-    }
-    
-    if (service != null) {
+    if (startServiceFromManager(jid)) {
       synchronized (_serviceCache) {
-	WeakReference<BamService> ref = _serviceCache.get(jid);
+        WeakReference<BamService> ref = _serviceCache.get(jid);
 
-	if (ref != null)
-	  return ref.get();
+        if (ref != null)
+          return ref.get();
+      }
+    }
 
-	_serviceCache.put(jid, new WeakReference<BamService>(service));
+    if (jid.indexOf('/') < 0 && jid.indexOf('@') < 0) {
+      BamService service = findDomain(jid);
 
-	return service;
+      if (service != null) {
+        synchronized (_serviceCache) {
+          WeakReference<BamService> ref = _serviceCache.get(jid);
+
+          if (ref != null)
+            return ref.get();
+
+          _serviceCache.put(jid, new WeakReference<BamService>(service));
+
+          return service;
+        }
       }
     }
     
@@ -662,16 +678,13 @@ public class HempBroker implements BamBroker, BamStream
 
     if ((p = jid.indexOf('/')) > 0) {
       String uid = jid.substring(0, p);
-      service = findService(uid);
 
-      return service;
+      return findService(uid);
     }
     else if ((p = jid.indexOf('@')) > 0) {
       String domainName = jid.substring(p + 1);
       
-      service = findService(domainName);
-
-      return service;
+      return findService(domainName);
     }
     else
       return null;
@@ -698,16 +711,14 @@ public class HempBroker implements BamBroker, BamStream
     return null;
   }
 
-  protected BamService findServiceFromManager(String jid)
+  protected boolean startServiceFromManager(String jid)
   {
     for (BamServiceManager manager : _serviceManagerList) {
-      BamService service = manager.findService(jid);
-
-      if (service != null)
-	return service;
+      if (manager.startService(jid))
+        return true;
     }
 
-    return null;
+    return false;
   }
   
   /**
