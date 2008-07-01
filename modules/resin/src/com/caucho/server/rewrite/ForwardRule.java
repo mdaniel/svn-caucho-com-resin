@@ -32,13 +32,19 @@ package com.caucho.server.rewrite;
 import com.caucho.server.dispatch.*;
 import com.caucho.server.webapp.*;
 import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
 import javax.servlet.FilterChain;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ForwardRule
   extends AbstractRuleWithConditions
 {
+  private static final L10N L = new L10N(ForwardRule.class);
+
+  private static final Pattern ALL_PATTERN = Pattern.compile("^.*$");
+
   private String _target;
   private String _absoluteTarget;
   private String _targetHost;
@@ -106,5 +112,8 @@ public class ForwardRule
     super.init();
 
     required(_target, "target");
+
+    if (getRegexp() == null && getFullUrlRegexp() == null)
+      setRegexp(ALL_PATTERN);
   }
 }
