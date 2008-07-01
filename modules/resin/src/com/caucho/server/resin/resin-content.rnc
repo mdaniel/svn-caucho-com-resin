@@ -114,6 +114,8 @@ r_cluster-Content =
 
   & element rcore:if { rcore_if-Args, r_cluster-Content }*
 
+  & rcore_import*
+
   & element rcore:choose {
       element rcore:when { rcore_when-Args, r_cluster-Content }+,
       element rcore:otherwise { r_cluster-Content }?
@@ -198,6 +200,8 @@ r_host-Flow =
   & element rcore:env { rcore_env-Args, r_host-Flow }*
 
   & element rcore:if { rcore_if-Args, r_host-Flow }*
+
+  & rcore_import*
 
   & element rcore:choose {
       element rcore:when { rcore_when-Args, r_host-Flow }+,
@@ -332,6 +336,8 @@ r_management-Content =
   & r_xa-log-service?
 
   & element rcore:if { rcore_if-Args, r_management-Content }*
+
+  & rcore_import*
 
   & element rcore:choose {
       element rcore:when { rcore_when-Args, r_management-Content }+,
@@ -518,6 +524,8 @@ r_resin-Content =
 
   & element rcore:if { rcore_if-Args, r_resin-Content }*
 
+  & rcore_import*
+
   & element rcore:choose {
       element rcore:when { rcore_when-Args, r_resin-Content }+,
       element rcore:otherwise { r_resin-Content }?
@@ -643,6 +651,8 @@ r_server-Content =
      | element watchdog-port { r_int-Type })?
 
   & element rcore:if { rcore_if-Args, r_server-Content }*
+
+  & rcore_import*
 
   & element rcore:choose {
       element rcore:when { rcore_when-Args, r_server-Content }+,

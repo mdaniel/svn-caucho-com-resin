@@ -96,7 +96,7 @@ public class Database
     if (dir != null)
       setPath(dir);
 
-    long minSize = 8 * 1024 * 1024;
+    long minSize = 1 * 1024 * 1024;
 
     long memorySize = Runtime.getRuntime().maxMemory() / 16;
 
@@ -147,47 +147,6 @@ public class Database
       return;
 
     Path dir = _dir;
-
-    if (dir != null) {
-      String []list = null;
-
-      try {
-	list = dir.list();
-      } catch (IOException e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-
-      for (int i = 0; i < list.length; i++) {
-	String name = list[i];
-
-	if (! name.endsWith(".db"))
-	  continue;
-
-	name = name.substring(0, name.length() - 3);
-
-	try {
-	  Table table = Table.loadFromFile(this, name);
-
-	  table.init();
-
-	  _tables.put(name, table);
-	} catch (Throwable e) {
-	  if (_removeOnError) {
-	    if (log.isLoggable(Level.FINER))
-	      log.log(Level.FINER, e.toString(), e);
-	    else
-	      log.warning(e.toString());
-
-	    try {
-	      dir.lookup(name + ".db").remove();
-	    } catch (IOException e1) {
-	    }
-	  }
-	  else
-	    throw new SQLExceptionWrapper(e);
-	}
-      }
-    }
   }
 
   /**
@@ -240,7 +199,42 @@ public class Database
    */
   public Table getTable(String name)
   {
-    return _tables.get(name);
+    synchronized (_tables) {
+      Table table = _tables.get(name);
+
+      if (table != null)
+	return table;
+      
+      Path dir = _dir;
+    
+      if (dir == null)
+	return null;
+
+      try {
+	table = Table.loadFromFile(this, name);
+
+	table.init();
+
+	_tables.put(name, table);
+
+	return table;
+      } catch (Exception e) {
+	if (_removeOnError) {
+	  if (log.isLoggable(Level.FINER))
+	    log.log(Level.FINER, e.toString(), e);
+	  else
+	    log.warning(e.toString());
+
+	  try {
+	    dir.lookup(name + ".db").remove();
+	  } catch (IOException e1) {
+	    log.log(Level.FINEST, e.toString(), e);
+	  }
+	}
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -252,7 +246,7 @@ public class Database
     Table table = null;
 
     synchronized (this) {
-      table = _tables.get(name);
+      table = getTable(name);
       
       if (table == null)
 	throw new SQLException(L.l("Table {0} does not exist.  DROP TABLE can only drop an existing table.",
@@ -355,6 +349,6 @@ public class Database
 
   public String toString()
   {
-    return "Database[" + _dir + "]";
+    return getClass().getSimpleName() + "[" + _dir + "]";
   }
 }

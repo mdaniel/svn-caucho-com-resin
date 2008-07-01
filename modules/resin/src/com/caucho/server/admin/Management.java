@@ -96,6 +96,15 @@ public class Management
     brokerManager.addBroker("resin.caucho", _adminBroker);
   }
 
+  public static Path getCurrentPath()
+  {
+    Resin resin = Resin.getCurrent();
+
+    Management management = resin.getManagement();
+
+    return management.getPath();
+  }
+
   public void setCluster(Cluster cluster)
   {
     _cluster = cluster;
@@ -127,7 +136,10 @@ public class Management
   
   public Path getPath()
   {
-    return _path;
+    if (_path != null)
+      return _path;
+    else
+      return _resin.getRootDirectory().lookup("admin");
   }
 
   /**
@@ -205,6 +217,9 @@ public class Management
    */
   public Object createStatService()
   {
+    System.out.println("MGMR: " + this);
+    Thread.dumpStack();
+    
     log.warning(L.l("stat-service requires Resin Professional"));
     
     return new Object();

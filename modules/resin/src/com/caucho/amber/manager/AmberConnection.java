@@ -3035,6 +3035,9 @@ public class AmberConnection
   {
     EntityState state = entity.__caucho_getEntityState();
 
+    if (state == null)
+      state = EntityState.TRANSIENT;
+
     switch (state) {
     case TRANSIENT:
       {

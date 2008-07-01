@@ -88,6 +88,9 @@ public abstract class Attribute {
   public void setText(Object bean, QName name, String value)
     throws ConfigException
   {
+    if (value.trim().equals(""))
+      return;
+    
     throw new ConfigException(L.l("'{0}' does not allow text for attribute {1}.",
 				  getConfigType().getTypeName(),
 				  name));

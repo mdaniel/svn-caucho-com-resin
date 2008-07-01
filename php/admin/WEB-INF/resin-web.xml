@@ -2,7 +2,9 @@
          xmlns:resin="http://caucho.com/ns/resin/core">
 
   <servlet-mapping url-pattern="*.php"
-                   servlet-class="com.caucho.quercus.servlet.QuercusServlet"/>
+                   servlet-class="com.caucho.quercus.servlet.QuercusServlet">
+     <init compile="false"/>
+  </servlet-mapping>
 
   <!--
      - Security configuration

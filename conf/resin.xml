@@ -21,12 +21,12 @@
   <management path="${resin.root}/admin">
     <user name="admin" password="password" disable="true"/>
 
-    <resin:if test="${resin.professional}">
-      <deploy-service/>
-      <jmx-service/>
-      <log-service/>
-      <xa-log-service/>
-    </resin:if>
+    <resin:import path="${__DIR__}/admin-user.xml" optional="true"/>
+    
+    <deploy-service/>
+    <jmx-service/>
+    <log-service/>
+    <xa-log-service/>
   </management>
 
   <!--

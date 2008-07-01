@@ -38,7 +38,7 @@ import javax.persistence.DiscriminatorType;
 public class DiscriminatorColumnConfig {
 
   // attributes
-  private String _name = "dtype";
+  private String _name = "DTYPE";
   private DiscriminatorType _discriminatorType = DiscriminatorType.STRING;
   private String _columnDefinition;
   private int _length = 31;

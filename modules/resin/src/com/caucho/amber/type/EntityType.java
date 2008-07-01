@@ -997,14 +997,9 @@ public class EntityType extends BeanType {
                           String indexVar, int index)
     throws IOException
   {
-    // ejb/0ag3
-    // out.print("(" + getInstanceClassName() + ") ");
-
-    out.print("aConn.loadProxy(\"" + getName() + "\", ");
+     out.print("(" + getInstanceClassName() + ") ");
 
     index = getId().generateLoadForeign(out, rs, indexVar, index);
-
-    out.println(");");
 
     return index;
   }

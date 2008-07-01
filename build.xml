@@ -466,7 +466,7 @@
   <target name="webutil" depends="init, resin">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="webutil"/>
-      <param name="javac.source" value="1.5"/>
+      <param name="module.dist" value="${lib}"/>
     </antcall>
   </target>
 

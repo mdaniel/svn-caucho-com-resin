@@ -556,7 +556,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       columnName = discriminatorAnn.name();
 
     if (columnName == null || columnName.equals(""))
-      columnName = "dtype";
+      columnName = "DTYPE";
 
     AmberType columnType = null;
     DiscriminatorType discType = DiscriminatorType.STRING;
@@ -713,6 +713,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
     if (secondaryTableAnn != null) {
       PrimaryKeyJoinColumn[] joinAnn = secondaryTableAnn.pkJoinColumns();
+
+      linkSecondaryTable(entityType.getTable(),
+			 secondaryTable,
+			 joinAnn);
     }
   }
 

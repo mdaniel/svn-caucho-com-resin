@@ -173,14 +173,6 @@ public class Resin implements EnvironmentBean, SchemaBean
   /**
    * Creates a new resin server.
    */
-  protected Resin()
-  {
-    this(Thread.currentThread().getContextClassLoader(), null);
-  }
-
-  /**
-   * Creates a new resin server.
-   */
   protected Resin(ClassLoader loader)
   {
     this(loader, null);
@@ -298,10 +290,11 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public static Resin create(ClassLoader loader)
   {
+    
     String licenseErrorMessage = null;
 
     Resin resin = null;
-    
+
     try {
       Class cl = Class.forName("com.caucho.server.resin.ProResin");
       Constructor ctor = cl.getConstructor(new Class[] { ClassLoader.class });
@@ -320,7 +313,8 @@ public class Resin implements EnvironmentBean, SchemaBean
 			 "  including caching, clustering, JNI acceleration, and OpenSSL integration.\n");
     }
 
-    resin = new Resin(loader, licenseErrorMessage);
+    if (resin == null)
+      resin = new Resin(loader, licenseErrorMessage);
 
     _resinLocal.set(resin, loader);
 
@@ -417,6 +411,16 @@ public class Resin implements EnvironmentBean, SchemaBean
   public String getServerId()
   {
     return _serverId;
+  }
+  
+  public static String getCurrentServerId()
+  {
+    Resin resin = getCurrent();
+
+    if (resin != null)
+      return resin.getServerId();
+    else
+      return "";
   }
 
   /**
@@ -1226,7 +1230,6 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
 
     if (_configFile == null) {
-      
       if (pwd.lookup("conf/resin.xml").canRead())
 	_configFile = "conf/resin.xml";
       else { // backward compat
@@ -1418,7 +1421,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   public String toString()
   {
-    return "Resin[" + _serverId + "]";
+    return getClass().getSimpleName() + "[" + _serverId + "]";
   }
 
   private static long getFreeMemory(Runtime runtime)

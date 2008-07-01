@@ -178,6 +178,40 @@ directory.
 </li>
 </ul>
 
+<s2 title="rewrite-dispatch replaces mod_rewrite">
+
+<p>For many applications like Drupal and Mediawiki, it's important to
+rewrite a user-friendly URL to an internal servlet or PHP URL.
+Resin's <a href="rewrite-tags.xtp">&lt;rewrite-dispatch></a> replaces
+the capabilities of mod_rewrite for Apache.</p>
+
+<example title="Example: WEB-INF/resin-web.xml Drupal rewriting ">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;rewrite-dispatch>
+    &lt;dispatch regexp="\.(php|gif|css|jpg|png|ico|js|htm|html)"/>
+    &lt;forward regexp="^/" target="/index.php?q="/>
+  &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<ul>
+<li><a href="webapp-tags.xtp#web-app">&lt;web-app></a> configures the
+<code>/drupal</code> web-application.</li>
+<li><a
+href="rewrite-tags.xtp#rewrite-dispatch">&lt;rewrite-dispatch></a>
+starts the URL rewriting configuration.</li>
+<li><a
+href="rewrite-tags.xtp#dispatch">&lt;dispatch></a>
+passes the URL untouched for content handling, e.g. static files or php.</li>
+<li><a
+href="rewrite-tags.xtp#forward">&lt;forward></a>
+rewrites the URL and forwards.</li>
+</ul>
+
+</s2>
+
 </s1>
 
 <s1 title="Resin Processes">
@@ -212,7 +246,57 @@ configuration.</p>
 
 <s1 title="Files and Directories">
 
-<example title="Example: Unix directory structure">
+<p>Resin's configuration allows for great flexibility in choosing a
+directory structure for your site, or adapting Resin to your existing
+site configuration if you're upgrading from Apache/PHP for a Drupal or
+MediaWiki site.  There are three main directory styles:</p>
+
+<ul>
+<li><b>Resin dynamic virtual host</b> - the most general solution,
+letting you easily add virtual hosts without modifying the
+configuration files.</li>
+<li><b>Apache upgrade</b> - all content is placed in
+a <code>/var/www/htdocs</code> directory.</li>
+<li><b>Servlet war style</b> - all content is deployed with .war files
+in a webapps directory.  The .war file is automatically expanded and
+deployed from the webapps.</li>
+</ul>
+
+<s2 title="Dynamic Virtual Host">
+
+<p>In the dynamic virtual host configuration, your content is placed
+in <code>/var/www/hosts/foo.com/webapps/ROOT</code>.
+<code>/var/www</code> is the standard location for HTTP documents.
+<code>hosts/foo.com</code> contains your virtual host root directory.
+<code>webapps/ROOT</code> contains the root web-app for the virtual
+host.</p>
+
+<p>Adding a new virtual host is easy just by adding a new
+<code>hosts/bar.com</code> directory.  The special directory
+<code>hosts/default</code> creates a default virtual host, which will
+serve pages for anything not matching a specific host.  If you
+need to configure the host, or add <a
+href="host-tags.xtp#host-alias">&lt;host-alias></a> tags, you can add
+them to a <code>hosts/bar.com/host.xml</code> file.</p>
+
+<p>Deploying a web-application is also straightforward by adding
+a .war file to <code>webapps/foo.war</code> or
+<code>webapps/ROOT.war</code>.  <code>webapps/ROOT</code> is a special
+web-app which handles the root URL, "/".</p>
+
+<p>In a standard Unix deployment, your configuration files go in
+<code>/etc/resin</code> and typically includes the
+<code>resin.xml</code> and the <code>app-default.xml</code>.
+<code>app-default.xml</code> contains standard configuration like the
+static file servlet, JSP, PHP servlets, as well as the standard
+mime-type mappings.</p>
+
+<p>The Resin jars, JNI libraries and licenses go in
+<code>/usr/local/share/resin</code>, typically owned
+by root.  The <code>resin</code> directory itself will normally be a
+symbolic link to the Resin version, so you can upgrade easily.</p>
+
+<example title="Example: Unix dynamic virtual host">
 /etc/resin/
   resin.xml                 - main Resin configuration file
   app-default.xml           - default servlet configuration
@@ -229,9 +313,11 @@ configuration.</p>
    win64/*.dll              - Win64 JNI
    
 /var/www/                   - ${resin.root}
+   admin/                   - Resin database and cache storage
+   ivy2/                    - ivy2 jar repository
+   lib/                     - Shared application jars
    log/                     - watchdog and Resin debug logging
    logs/                    - HTTP access logging
-   admin/                   - Resin database and cache storage
    hosts/foo.com/           - dynamic host contents
      logs/                  - access logging per virtual host
      host.xml               - optional host-specific configuration
@@ -244,6 +330,213 @@ configuration.</p>
 	 classes/**/*.class - application classes
 	 work/              - work directory for JSP, PHP, etc.
 </example>
+
+<example title="Example: /etc/resin/resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="http://caucho.com/ns/resin/core">
+  &lt;root-directory>/var/www&lt;/root-directory>
+  
+  &lt;cluster id="">
+    &lt;server id="" address="127.0.0.1" port="6800">
+      &lt;http port="8080"/>
+    &lt;/server>
+
+    &lt;resin:import path="/etc/resin/app-default.xml"/>
+
+    &lt;host-default>
+      &lt;resin:import path="host.xml" optional="true"/>
+    
+      &lt;web-app-deploy path="webapps"/>
+    &lt;/host-default>
+
+    &lt;host-deploy path="hosts"/>
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</s2>
+
+<s2 title="Apache Upgrade">
+
+<p>In an Apache upgrade, you have an existing site that you're
+upgrading to use Quercus or just evaluating the performance
+improvement for an existing side.  The content is placed
+in <code>/var/www/htdocs</code> directory, and there's only a single
+virtual host and single root web-app.</p>
+
+<p>For Apache-style sites with multiple virtual hosts, you can add new
+<a href="host-tags.xtp#host">&lt;host></a> tags for each host, and add
+a <a href="host-tags.xtp#root-directory">&lt;root-directory></a> to
+set the host's root.</p>
+
+<example title="Example: Unix Apache upgrade">
+/etc/resin/
+  resin.xml                 - main Resin configuration file
+  app-default.xml           - default servlet configuration
+
+/etc/init.d/resin           - startup script
+
+/usr/local/share/resin/     - ${resin.home}
+   lib/*.jar                - Resin's Java classes
+   ...
+   
+/var/www/                   - ${resin.root}
+   admin/                   - Resin database and cache storage
+   log/                     - watchdog and Resin debug logging
+   logs/                    - HTTP access logging
+   htdocs/
+     index.php              - web-app content
+     WEB-INF/               - web-app classes and configuration
+       resin-web.xml        - Resin-specific configuration
+       lib/*.jar            - application jars
+       classes/**/*.class   - application classes
+       work/                - work directory for JSP, PHP, etc.
+</example>
+
+<example title="Example: /etc/resin/resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="http://caucho.com/ns/resin/core">
+  &lt;root-directory>/var/www&lt;/root-directory>
+  
+  &lt;cluster id="">
+    &lt;server id="" address="127.0.0.1" port="6800">
+      &lt;http port="8080"/>
+    &lt;/server>
+
+    &lt;resin:import path="/etc/resin/app-default.xml"/>
+
+    &lt;host id="">
+    
+      &lt;web-app id="" root-directory="htdocs"/>
+      
+    &lt;/host>
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</s2>
+
+<s2 title="Java App-Server directory structure">
+
+<p>A common Java app-server deployment structure looks like a
+mixture of the full dynamic host configuration and the Apache-style
+static configuration.  The virtual hosts are configured statically
+like Apache, but webapps are created dynamically by dropping .war
+files in a <code>webapps</code> directory.</p>
+
+<example title="Example: Java app-server structure">
+/etc/resin/
+  resin.xml                 - main Resin configuration file
+  app-default.xml           - default servlet configuration
+
+/etc/init.d/resin           - startup script
+
+/usr/local/share/resin/     - ${resin.home}
+   lib/*.jar                - Resin's Java classes
+   ...
+   
+/var/www/                   - ${resin.root}
+   admin/                   - Resin database and cache storage
+   log/                     - watchdog and Resin debug logging
+   logs/                    - HTTP access logging
+   webapps/
+     ROOT/                  - web-app for "/"
+       index.php            - web-app content
+       WEB-INF/             - web-app classes and configuration
+         resin-web.xml      - Resin-specific configuration
+         lib/*.jar          - application jars
+         classes/**/*.class - application classes
+         work/              - work directory for JSP, PHP, etc.
+     wiki/                  - web-app for "/wiki"
+       ...
+     drupal/                - web-app for "/wiki"
+       index.php
+</example>
+
+<example title="Example: /etc/resin/resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="http://caucho.com/ns/resin/core">
+  &lt;root-directory>/var/www&lt;/root-directory>
+  
+  &lt;cluster id="">
+    &lt;server id="" address="127.0.0.1" port="6800">
+      &lt;http port="8080"/>
+    &lt;/server>
+
+    &lt;resin:import path="/etc/resin/app-default.xml"/>
+
+    &lt;host id="">
+    
+      &lt;web-app-deploy path="webapps"/>
+      
+    &lt;/host>
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</s2>
+</s1>
+
+<s1 title="Threads, Memory and Sockets">
+
+<p>A Resin server needs to have enough memory, threads, and sockets to
+handle the user load.  For the most part, the defaults provide a good
+starting point, but it's a good idea to become familiar with the
+primary resources.</p>
+
+<ul>
+<li><b>memory</b> - divided into heap, thread stack, PermGen space,
+and some specialized JVM/JNI space.  With a 32-bit machine, you are
+likely to run into virtual memory limits.  Even with a 64-bit machine,
+you need enough swap to handle your virtual memory size.</li>
+<li><b>sockets</b> - a TCP connection to the browser.  Each user uses
+one or sockets as long as the browser is connected.  Sockets use up
+<b>file descriptors</b> on Unix, which are also used by database
+connections, and open files.  The <em>netstat</em> command is
+important for threading.</li>
+<li><b>threads</b> - an program execution, taking up CPU and virtual
+memory (for the thread stack).  Active requests use CPU, while even
+blocked threads take up memory.</li>
+</ul>
+
+<s2 title="Memory">
+
+<p>Memory is the most important configuration item for the machine.
+You need enough virtual memory to handle heap, stack, and permanent
+memory, and enough physical memory to avoid swapping.  If the JVM
+runs out of memory, it may throw <code>OutOfMemoryError</code> and
+force a restart of the server.</p>
+
+<ul>
+<li><b>heap</b> - Java memory used for all application objects.  Heap
+memory is garbage collected periodically, causing the JVM to stop or
+slow while finding unused memory.  The maximum heap is set by the
+<code>-Xmx512m</code> command-line argument in <a
+href="server-tags.xtp#jvm-arg">&lt;jvm-arg></a>.</li>
+
+<li><b>PermGen (permanent generation)</b> is JVM memory for permanent
+data like Java class code, JNI code, shared libraries, mmapped memory
+(jars), and the JVM itself.  Configured by
+<code>-XX:PermGen=128M</code>.  The JVM default usually needs
+to be increased.</li>
+
+<li><b>thread stack</b> - Each thread takes up virtual memory for its
+execution stack.  Since the default is 1M and having 1000 threads is
+fairly common, you can use 1G of virtual memory just for the thread
+stack.  The thread stack is configured by <code>-Xss1m</code></li>
+
+<li><b>virtual memory</b> is total memory allocated to the JVM by the
+operating system.  VM = heap + stack + PermGen.  For a 32-bit system,
+you might have as little as 2G
+for all the heap, stack, and PermGen.  You also need to have
+enough <b>swap</b> memory to handle your virtual memory, especially if
+you have a large heap, lots of threads, or even lots of large
+jars.</li>
+
+</ul>
+
+</s2>
+
 </s1>
 
   </body>

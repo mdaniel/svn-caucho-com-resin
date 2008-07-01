@@ -326,7 +326,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     listenerType.setInstanceClassName(listenerType.getName() + "__ResinExt");
 
-    for (Method method : type.getMethods()) {
+    for (Method method : type.getDeclaredMethods()) {
       introspectCallbacks(listenerType, method);
     }
   }
@@ -348,7 +348,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     if (! _annotationCfg.isNull())
       entityType.setExcludeSuperclassListeners(true);
 
-    for (Method method : type.getMethods()) {
+    for (Method method : type.getDeclaredMethods()) {
       introspectCallbacks(entityType, method);
     }
   }
@@ -687,7 +687,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     if (config != null)
       attributesConfig = config.getAttributes();
 
-    for (Method method : type.getMethods()) {
+    for (Method method : type.getDeclaredMethods()) {
       String methodName = method.getName();
       Class []paramTypes = method.getParameterTypes();
 
@@ -1045,14 +1045,15 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    */
   void linkSecondaryTable(AmberTable primaryTable,
                           AmberTable secondaryTable,
-                          JoinColumn []joinColumnsAnn)
+                          PrimaryKeyJoinColumn []joinColumnsAnn)
     throws ConfigException
   {
     ArrayList<ForeignColumn> linkColumns = new ArrayList<ForeignColumn>();
     for (AmberColumn column : primaryTable.getIdColumns()) {
       ForeignColumn linkColumn;
 
-      JoinColumn joinAnn = getJoinColumn(joinColumnsAnn, column.getName());
+      PrimaryKeyJoinColumn joinAnn
+	= getJoinColumn(joinColumnsAnn, column.getName());
       String name;
 
       if (joinAnn == null)
@@ -1166,7 +1167,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                          AbstractEnhancedConfig typeConfig)
     throws ConfigException
   {
-    for (Method method : type.getMethods()) {
+    for (Method method : type.getDeclaredMethods()) {
       String methodName = method.getName();
       Class []paramTypes = method.getParameterTypes();
 
@@ -1682,6 +1683,22 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
   public static JoinColumn getJoinColumn(JoinColumn []columnsAnn,
                                           String keyName)
+  {
+    if (columnsAnn == null || columnsAnn.length == 0)
+      return null;
+
+    for (int i = 0; i < columnsAnn.length; i++) {
+      String ref = columnsAnn[i].referencedColumnName();
+
+      if (ref.equals("") || ref.equals(keyName))
+        return columnsAnn[i];
+    }
+
+    return null;
+  }
+
+  public static PrimaryKeyJoinColumn getJoinColumn(PrimaryKeyJoinColumn []columnsAnn,
+						   String keyName)
   {
     if (columnsAnn == null || columnsAnn.length == 0)
       return null;
