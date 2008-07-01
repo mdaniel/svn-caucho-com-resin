@@ -252,10 +252,10 @@ public class HempSkeleton<C>
       messageHandler.invoke(target, to, from, value);
     }
     catch (IllegalAccessException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
     catch (InvocationTargetException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -271,10 +271,10 @@ public class HempSkeleton<C>
       messageErrorHandler.invoke(target, to, from, value, error);
     }
     catch (IllegalAccessException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
     catch (InvocationTargetException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -290,11 +290,11 @@ public class HempSkeleton<C>
       return (Boolean) queryHandler.invoke(target, id, to, from, value);
     }
     catch (IllegalAccessException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
       return false;
     }
     catch (InvocationTargetException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
       return false;
     }
   }
@@ -311,11 +311,11 @@ public class HempSkeleton<C>
       return (Boolean) queryHandler.invoke(target, id, to, from, value);
     }
     catch (IllegalAccessException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
       return false;
     }
     catch (InvocationTargetException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
       return false;
     }
   }
@@ -332,10 +332,10 @@ public class HempSkeleton<C>
       queryHandler.invoke(target, id, to, from, value);
     }
     catch (IllegalAccessException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
     catch (InvocationTargetException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -351,10 +351,10 @@ public class HempSkeleton<C>
       queryErrorHandler.invoke(target, id, to, from, value, error);
     }
     catch (IllegalAccessException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
     catch (InvocationTargetException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -370,10 +370,10 @@ public class HempSkeleton<C>
       presenceHandler.invoke(target, to, from, value);
     }
     catch (IllegalAccessException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
     catch (InvocationTargetException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -389,10 +389,10 @@ public class HempSkeleton<C>
       presenceProbeHandler.invoke(target, to, from, value);
     }
     catch (IllegalAccessException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
     catch (InvocationTargetException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -409,10 +409,10 @@ public class HempSkeleton<C>
       presenceSubscribeHandler.invoke(target, to, from, value);
     }
     catch (IllegalAccessException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
     catch (InvocationTargetException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -429,10 +429,10 @@ public class HempSkeleton<C>
       presenceSubscribedHandler.invoke(target, to, from, value);
     }
     catch (IllegalAccessException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
     catch (InvocationTargetException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -449,10 +449,10 @@ public class HempSkeleton<C>
       presenceUnsubscribeHandler.invoke(target, to, from, value);
     }
     catch (IllegalAccessException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
     catch (InvocationTargetException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -469,10 +469,10 @@ public class HempSkeleton<C>
       presenceUnsubscribedHandler.invoke(target, to, from, value);
     }
     catch (IllegalAccessException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
     catch (InvocationTargetException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -489,10 +489,10 @@ public class HempSkeleton<C>
       presenceUnavailableHandler.invoke(target, to, from, value);
     }
     catch (IllegalAccessException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
     catch (InvocationTargetException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
@@ -508,10 +508,10 @@ public class HempSkeleton<C>
       presenceErrorHandler.invoke(target, to, from, value, error);
     }
     catch (IllegalAccessException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
     catch (InvocationTargetException e) {
-      log.fine(e.toString());
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 
