@@ -207,7 +207,11 @@ abstract class AbstractRelationConfig extends AbstractConfig
 
       String name = joinColumn.getName();
 
-      AmberColumn column = idFields.get(columns.size()).getColumns().get(0);
+      String refName = joinColumn.getReferencedColumnName();
+
+      IdField id = getField(idFields, refName);
+
+      AmberColumn column = id.getColumns().get(0);
 
       foreignColumn = mapTable.createForeignColumn(name, column);
 
@@ -216,6 +220,25 @@ abstract class AbstractRelationConfig extends AbstractConfig
 
     return columns;
   }
+
+  IdField getField(ArrayList<IdField> fields, String name)
+  {
+    if (fields.size() == 1)
+      return fields.get(0);
+
+    for (IdField field : fields) {
+      if (field.getName().equals(name))
+	return field;
+    }
+
+    if (name == null || name.equals(""))
+      throw new ConfigException(L.l("{0}: '{1}' requires a referencedColumnName value because it has multiple target keys.",
+				    getTargetEntity(), getName()));
+
+    throw new ConfigException(L.l("{0}: '{1}' is an unknown field for {2}",
+				  getTargetEntity(), name, getName()));
+  }
+  
 
   static ArrayList<ForeignColumn> calculateColumns(com.caucho.amber.table.AmberTable mapTable,
                                                    String prefix,

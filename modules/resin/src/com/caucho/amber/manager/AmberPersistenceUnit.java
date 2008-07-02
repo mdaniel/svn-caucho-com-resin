@@ -1407,6 +1407,9 @@ public class AmberPersistenceUnit {
   public void initTables()
     throws ConfigException
   {
+    for (IdGenerator gen : _tableGenMap.values())
+      gen.start();
+    
     while (_lazyTable.size() > 0) {
       AmberTable table = _lazyTable.remove(0);
 

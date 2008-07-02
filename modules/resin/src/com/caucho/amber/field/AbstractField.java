@@ -310,6 +310,14 @@ abstract public class AbstractField implements AmberField {
   }
 
   /**
+   * Returns true for a key
+   */
+  public boolean isKey()
+  {
+    return false;
+  }
+
+  /**
    * Returns the getter name.
    */
   public String getJavaTypeName()

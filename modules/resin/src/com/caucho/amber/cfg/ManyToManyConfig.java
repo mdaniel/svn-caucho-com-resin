@@ -85,6 +85,8 @@ class ManyToManyConfig extends AbstractRelationConfig
     _field = field;
     _fieldName = fieldName;
     _fieldType = fieldType;
+
+    setName(_fieldName);
     
     introspect();
   }

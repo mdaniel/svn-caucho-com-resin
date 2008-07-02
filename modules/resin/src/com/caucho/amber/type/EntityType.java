@@ -1145,7 +1145,6 @@ public class EntityType extends BeanType {
    */
   public void setGenerator(String name, IdGenerator gen)
   {
-    Thread.dumpStack();
     _idGenMap.put(name, gen);
   }
 

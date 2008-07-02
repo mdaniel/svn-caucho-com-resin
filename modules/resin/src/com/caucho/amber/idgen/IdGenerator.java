@@ -88,4 +88,11 @@ abstract public class IdGenerator {
    */
   abstract public long allocateGroup(AmberConnection aConn)
     throws SQLException;
+
+  /**
+   * Starts the generator
+   */
+  public void start()
+  {
+  }
 }

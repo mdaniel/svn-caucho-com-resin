@@ -1004,9 +1004,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     if (name == null || "".equals(name))
       name = idField.getEntitySourceType().getTable().getName() + "_cseq";
 
-    //IdGenerator gen = persistenceUnit.createSequenceGenerator(name, 1);
+    IdGenerator gen = persistenceUnit.createSequenceGenerator(name, 1);
 
-    //idField.getEntitySourceType().setGenerator(idField.getName(), gen);
+    idField.getEntitySourceType().setGenerator(idField.getName(), gen);
   }
 
   void addTableIdGenerator(AmberPersistenceUnit persistenceUnit,
@@ -1208,8 +1208,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         Method setter = null;
         
         try {
-          setter = type.getMethod("set" + propName,
-                                  new Class[] { method.getReturnType() });
+          setter = getMethod(type,
+			     "set" + propName,
+			     new Class[] { method.getReturnType() });
         } catch (Exception e) {
           log.log(Level.FINEST, e.toString(), e);
         }
@@ -1251,6 +1252,32 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       introspectField(persistenceUnit, entityType, method,
                       fieldName, fieldType, typeConfig);
     }
+  }
+
+  private Method getMethod(Class cl, String name, Class []param)
+  {
+    if (cl == null)
+      return null;
+
+    loop:
+    for (Method method : cl.getDeclaredMethods()) {
+      if (! method.getName().equals(name))
+	continue;
+
+      Class []types = method.getParameterTypes();
+
+      if (types.length != param.length)
+	continue;
+      
+      for (int i = 0; i < types.length; i++) {
+	if (! param[i].equals(types[i]))
+	  continue loop;
+      }
+
+      return method;
+    }
+
+    return getMethod(cl.getSuperclass(), name, param);
   }
 
   /**

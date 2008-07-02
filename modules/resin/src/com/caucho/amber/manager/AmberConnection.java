@@ -1597,8 +1597,9 @@ public class AmberConnection
     Entity entity = (Entity) obj;
 
     // jpa/11a8
-    if (entity.__caucho_getConnection() != this)
+    if (entity.__caucho_getConnection() != this) {
       return false;
+    }
 
     EntityState state = entity.__caucho_getEntityState();
     if (isInTransaction() && ! state.isTransactional()) {
@@ -1607,8 +1608,9 @@ public class AmberConnection
     }
 
     // jpa/0j5f
-    if (EntityState.P_DELETING.ordinal() <= state.ordinal())
+    if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
       return false;
+    }
 
     return true;
   }

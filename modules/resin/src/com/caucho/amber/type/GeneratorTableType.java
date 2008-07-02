@@ -131,7 +131,10 @@ public class GeneratorTableType extends AmberType {
 
     AmberColumn valueColumn = getTable().createColumn(_valueColumn,
                                                  LongType.create());
+  }
 
+  public void start()
+  {
     if (getAmberManager().getCreateDatabaseTables())
       getTable().createDatabaseTable(getAmberManager());
 

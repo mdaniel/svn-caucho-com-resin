@@ -868,10 +868,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
 
     out.println();
+    /* jpa/0g43 - XA doesn't have a cache item
     out.println("if (__caucho_cacheItem == null) {");
     // the cache item does not have its state changed
     out.println("}");
-    out.println("else if (__caucho_state.isTransactional()) {");
+    out.println("else ");
+    */
+    out.println("if (__caucho_state.isTransactional()) {");
     out.println("}");
     out.println("else if (__caucho_session == null");
     out.println("         || ! __caucho_session.isActiveTransaction()) {");

@@ -397,4 +397,10 @@ public class Data {
       return false;
     }
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getString() + "]";
+  }
 }

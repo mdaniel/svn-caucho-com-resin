@@ -94,6 +94,8 @@ class OneToManyConfig extends AbstractRelationConfig
     _field = field;
     _fieldName = fieldName;
     _fieldType = fieldType;
+
+    setName(fieldName);
     
     introspect();
   }
@@ -280,7 +282,7 @@ class OneToManyConfig extends AbstractRelationConfig
   }
   
   @Override
-    public void complete()
+  public void complete()
   {
     AmberPersistenceUnit persistenceUnit = _sourceType.getPersistenceUnit();
 
@@ -298,6 +300,9 @@ class OneToManyConfig extends AbstractRelationConfig
 		      targetEntity.getName(),
 		      _fieldName));
     }
+
+    if (_orderBy != null)
+      calculateOrderBy(_orderBy);
  
     if (! isOwningSide()) {
       oneToManyBidirectional(targetType);
@@ -397,8 +402,8 @@ class OneToManyConfig extends AbstractRelationConfig
 			   joinColumnsConfig);
 
       targetColumns = calculateColumns(_field, _fieldName, mapTable,
-				       _sourceType.getTable().getName() + "_",
-				       _sourceType,
+				       targetType.getTable().getName() + "_",
+				       targetType,
 				       inverseJoinColumnsConfig);
     }
     else {

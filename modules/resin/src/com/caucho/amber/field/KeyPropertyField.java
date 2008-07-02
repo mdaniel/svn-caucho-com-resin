@@ -81,6 +81,15 @@ public class KeyPropertyField extends PropertyField implements IdField {
   }
 
   /**
+   * Returns true for a key
+   */
+  @Override
+  public boolean isKey()
+  {
+    return true;
+  }
+
+  /**
    * Returns true if key fields are accessed through fields.
    */
   public boolean isKeyField()

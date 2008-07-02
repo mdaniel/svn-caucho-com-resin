@@ -732,78 +732,72 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
 	  continue;
 	}
 	
-        try {
-	  if (log.isLoggable(Level.CONFIG))
-	    log.config("Amber PersistenceUnit[" + unitConfig.getName() + "] configuring " + rootContext.getRoot().getURL());
+	if (log.isLoggable(Level.CONFIG))
+	  log.config("Amber PersistenceUnit[" + unitConfig.getName() + "] configuring " + rootContext.getRoot().getURL());
 	  
-          if (! unitConfig.isExcludeUnlistedClasses()) {
+	if (! unitConfig.isExcludeUnlistedClasses()) {
+	  classMap.clear();
+	    
+	  for (String className : rootContext.getClassNameList())
+	    lookupClass(className, classMap, entityMappings);
+	    
+	  unitConfig.addAllClasses(classMap);
+	}
+
+	ArrayList<EntityMappingsConfig> entityMappingsList
+	  = new ArrayList<EntityMappingsConfig>();
+
+	if (entityMappings != null)
+	  entityMappingsList.add(entityMappings);
+
+	// jpa/0s2n: <jar-file>
+	for (String fileName : unitConfig.getJarFiles()) {
+	  JarPath jarFile;
+
+	  Path parent = root;
+
+	  if (root instanceof JarPath) {
+	    parent = ((JarPath) root).getContainer().getParent();
+	  }
+
+	  jarFile = JarPath.create(parent.lookup(fileName));
+
+	  classMap.clear();
+
+	  // lookupJarClasses(jarFile, classMap, entityMappings);
+
+	  unitConfig.addAllClasses(classMap);
+	}
+
+	// jpa/0s2l: custom mapping-file.
+	for (String fileName : unitConfig.getMappingFiles()) {
+	  Path mappingFile = root.lookup(fileName);
+
+	  EntityMappingsConfig mappingFileConfig
+	    = configureMappingFile(root, mappingFile);
+
+	  if (mappingFileConfig != null) {
+	    entityMappingsList.add(mappingFileConfig);
+
 	    classMap.clear();
-	    
-	    for (String className : rootContext.getClassNameList())
-	      lookupClass(className, classMap, entityMappings);
-	    
-	    unitConfig.addAllClasses(classMap);
-          }
-
-          ArrayList<EntityMappingsConfig> entityMappingsList
-            = new ArrayList<EntityMappingsConfig>();
-
-          if (entityMappings != null)
-            entityMappingsList.add(entityMappings);
-
-          // jpa/0s2n: <jar-file>
-          for (String fileName : unitConfig.getJarFiles()) {
-            JarPath jarFile;
-
-            Path parent = root;
-
-            if (root instanceof JarPath) {
-              parent = ((JarPath) root).getContainer().getParent();
-            }
-
-            jarFile = JarPath.create(parent.lookup(fileName));
-
-            classMap.clear();
-
-            // lookupJarClasses(jarFile, classMap, entityMappings);
-
-            unitConfig.addAllClasses(classMap);
-          }
-
-          // jpa/0s2l: custom mapping-file.
-          for (String fileName : unitConfig.getMappingFiles()) {
-            Path mappingFile = root.lookup(fileName);
-
-            EntityMappingsConfig mappingFileConfig
-              = configureMappingFile(root, mappingFile);
-
-            if (mappingFileConfig != null) {
-              entityMappingsList.add(mappingFileConfig);
-
-              classMap.clear();
-	      /*
+	    /*
 	      lookupClasses(root.getPath().length(), root, classMap,
-                            mappingFileConfig);
-	      */
-              unitConfig.addAllClasses(classMap);
-            }
-          }
+	      mappingFileConfig);
+	    */
+	    unitConfig.addAllClasses(classMap);
+	  }
+	}
 
-          AmberPersistenceUnit unit
-	    = unitConfig.init(this, entityMappingsList);
+	AmberPersistenceUnit unit
+	  = unitConfig.init(this, entityMappingsList);
 
-	  _pendingUnitList.add(unit);
+	_pendingUnitList.add(unit);
 
-          _unitMap.put(unit.getName(), unit);
-        } catch (Exception e) {
-          addException(e);
-
-          log.log(Level.WARNING, e.toString(), e);
-        }
+	_unitMap.put(unit.getName(), unit);
       }
-    } catch (RuntimeException e) {
-      throw e;
     } catch (Exception e) {
+      addException(e);
+
       throw ConfigException.create(e);
     }
   }
