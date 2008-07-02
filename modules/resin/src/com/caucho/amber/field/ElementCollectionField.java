@@ -207,7 +207,8 @@ public class ElementCollectionField extends AssociationField {
     throws IOException
   {
     if (! isLazy()) {
-      out.println(getGetterName() + "();");
+      // jpa/1a02: the size is to force the actual load
+      out.println(getGetterName() + "().size();");
     }
 
     return ++index;
@@ -326,6 +327,7 @@ public class ElementCollectionField extends AssociationField {
     out.pushDepth();
 
     out.println(var + ".setSession(__caucho_session);");
+
     out.println("return " + var + ";");
 
     out.popDepth();
@@ -1095,6 +1097,19 @@ public class ElementCollectionField extends AssociationField {
 
     out.println("if (" + var + " != null)");
     out.println("  " + var + ".update();");
+  }
+
+  /**
+   * Generates the detach property.
+   */
+  @Override
+  public void generateDetach(JavaWriter out)
+    throws IOException
+  {
+    String var = "_caucho_field_" + getGetterName();
+
+    out.println("if (" + var + " != null)");
+    out.println("  " + var + ".detach();");
   }
 
   private String generateAccessor(String src, String var)

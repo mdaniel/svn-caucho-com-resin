@@ -689,6 +689,14 @@ public class EmbeddedSubField implements AmberField {
   {
   }
 
+  /**
+   * Generates any code needed for detachment
+   */
+  public void generateDetach(JavaWriter out)
+    throws IOException
+  {
+  }
+
   //
   // Query methods
 

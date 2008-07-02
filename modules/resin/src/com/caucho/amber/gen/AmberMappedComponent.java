@@ -817,6 +817,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println();
     out.println("__caucho_session = null;");
 
+    for (AmberField field : _entityType.getFields())
+      field.generateDetach(out);
+
     // jpa/0x00
     // out.println("__caucho_home = null;");
 

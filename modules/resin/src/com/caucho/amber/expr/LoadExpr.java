@@ -91,7 +91,6 @@ abstract public class LoadExpr extends AbstractAmberExpr {
    */
   public AmberType getType()
   {
-    System.out.println("TT: " + _expr.getTargetType());
     return _expr.getTargetType();
   }
 

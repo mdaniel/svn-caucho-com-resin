@@ -77,7 +77,6 @@ public class LoadBasicExpr extends LoadExpr {
   public void generateSelect(CharBuffer cb,
                              boolean fullSelect)
   {
-    System.out.println("GENERATE: " + _expr + " " + _expr.getClass());
     _expr.generateSelect(cb);
   }
 }

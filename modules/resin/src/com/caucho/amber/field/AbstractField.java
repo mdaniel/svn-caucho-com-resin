@@ -632,6 +632,14 @@ abstract public class AbstractField implements AmberField {
   {
   }
 
+  /**
+   * Generates the detachment code
+   */
+  public void generateDetach(JavaWriter out)
+    throws IOException
+  {
+  }
+
   //
   // SQL generation
   //

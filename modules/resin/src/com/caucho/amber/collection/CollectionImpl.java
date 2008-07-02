@@ -180,6 +180,15 @@ public class CollectionImpl<E> extends AbstractList<E>
     return Alarm.getCurrentTime() <= _expireTime;
   }
 
+  /**
+   * Detaches the collection.
+   */
+  public void detach()
+  {
+    _aConn = null;
+    _query = null;
+  }
+
   private void fill()
   {
     // jpa/0s2i

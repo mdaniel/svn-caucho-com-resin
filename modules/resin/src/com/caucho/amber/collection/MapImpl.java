@@ -168,6 +168,15 @@ public class MapImpl<K, V> extends AbstractMap<K, V>
   }
 
   /**
+   * Detaches the collection.
+   */
+  public void detach()
+  {
+    _aConn = null;
+    _query = null;
+  }
+
+  /**
    * Adds an item to the collection.
    */
   public void putAll(Map<? extends K, ? extends V> map)

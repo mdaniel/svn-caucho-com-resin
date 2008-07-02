@@ -168,6 +168,15 @@ public class SetImpl<E> extends AbstractSet<E>
     _expireTime = 0;
   }
 
+  /**
+   * Detaches the collection.
+   */
+  public void detach()
+  {
+    _aConn = null;
+    _query = null;
+  }
+
   protected boolean isValid()
   {
     return Alarm.getCurrentTime() <= _expireTime;

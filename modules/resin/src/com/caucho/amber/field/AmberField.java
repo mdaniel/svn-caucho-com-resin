@@ -231,6 +231,12 @@ public interface AmberField {
    */
   public void generateSetterMethod(JavaWriter out)
     throws IOException;
+
+  /**
+   * Generates detachment code
+   */
+  public void generateDetach(JavaWriter out)
+    throws IOException;
   
   //
   // constructor code

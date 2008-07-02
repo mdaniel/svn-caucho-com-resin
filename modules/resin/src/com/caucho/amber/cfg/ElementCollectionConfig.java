@@ -206,6 +206,7 @@ class ElementCollectionConfig extends AbstractConfig
     eltCollectionField
       = new ElementCollectionField(_sourceType, _fieldName);
     eltCollectionField.setType(targetType);
+    eltCollectionField.setLazy(isFetchLazy());
 
     CollectionTableConfig collectionTableConfig = _collectionTable;
  
