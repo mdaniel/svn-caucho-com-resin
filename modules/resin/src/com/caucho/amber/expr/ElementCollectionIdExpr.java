@@ -29,50 +29,50 @@
 package com.caucho.amber.expr;
 
 import com.caucho.amber.query.FromItem;
-import com.caucho.amber.query.QueryParser;
+import com.caucho.amber.type.AmberType;
 import com.caucho.amber.type.BeanType;
+import com.caucho.util.CharBuffer;
+
 
 /**
- * Represents an amber mapping query expression
+ * Bound identifier expression.
  */
-public interface PathExpr extends AmberExpr {
+public class ElementCollectionIdExpr extends CollectionIdExpr {
+  private ElementCollectionExpr _path;
+  
   /**
-   * Returns the target type.
+   * Creates a new unbound id expression.
    */
-  public BeanType getTargetType();
+  public ElementCollectionIdExpr(FromItem fromItem, ElementCollectionExpr path)
+  {
+    super(fromItem, path);
+
+    _path = path;
+  }
 
   /**
-   * Creates the expr from the path.
+   * Returns the entity class.
    */
-  public AmberExpr createField(QueryParser parser, String field);
-
-  /**
-   * Creates an array reference.
-   */
-  public AmberExpr createArray(AmberExpr field);
-
-  /**
-   * Creates an id expression.
-   */
-  public IdExpr createId(FromItem from);
+  public BeanType getTargetType()
+  {
+    return _path.getTargetType();
+  }
 
   /**
    * Creates a load expression.
    */
-  public LoadExpr createLoad();
+  @Override
+  public LoadExpr createLoad()
+  {
+    return new LoadBasicExpr(this);
+  }
 
   /**
-   * Binds the expression as a select item.
+   * Generates the select expression.
    */
-  public PathExpr bindSelect(QueryParser parser, String tableName);
-
-  /**
-   * Binds the expression as a select item.
-   */
-  public FromItem bindSubPath(QueryParser parser);
-
-  /**
-   * Returns the from item
-   */
-  public FromItem getChildFromItem();
+  @Override
+  public void generateSelect(CharBuffer cb)
+  {
+    _path.generateSelect(cb);
+  }
 }

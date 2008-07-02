@@ -62,6 +62,7 @@ public class LoadEntityExpr extends LoadExpr {
   LoadEntityExpr(PathExpr expr)
   {
     super(expr);
+    Thread.dumpStack();
   }
 
   /**

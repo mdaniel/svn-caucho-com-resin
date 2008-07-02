@@ -32,6 +32,7 @@ import com.caucho.amber.field.AmberField;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParseException;
 import com.caucho.amber.query.QueryParser;
+import com.caucho.amber.type.BeanType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.util.L10N;
 
@@ -65,7 +66,7 @@ public class FromIdSchemaExpr extends SchemaExpr {
   public SchemaExpr createField(QueryParser parser, String name)
     throws QueryParseException
   {
-    EntityType type = _id.getTargetType();
+    BeanType type = _id.getTargetType();
 
     AmberField field = type.getField(name);
 
@@ -87,6 +88,9 @@ public class FromIdSchemaExpr extends SchemaExpr {
     if (fieldExpr instanceof OneToManyExpr)
       return new OneToManySchemaExpr((OneToManyExpr) fieldExpr);
 
+    if (fieldExpr instanceof ElementCollectionExpr)
+      return new ElementCollectionSchemaExpr((ElementCollectionExpr) fieldExpr);
+
     if (fieldExpr instanceof DependentEntityOneToOneExpr)
       return new OneToOneSchemaExpr((DependentEntityOneToOneExpr) fieldExpr, name);
 
@@ -104,6 +108,8 @@ public class FromIdSchemaExpr extends SchemaExpr {
   public FromItem addFromItem(QueryParser parser, String id)
     throws QueryParseException
   {
-    return parser.addFromItem(_id.getTargetType().getTable(), id);
+    EntityType entityType = (EntityType) _id.getTargetType();
+    
+    return parser.addFromItem(entityType.getTable(), id);
   }
 }

@@ -19,60 +19,65 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
 package com.caucho.amber.expr;
 
+import com.caucho.amber.entity.Embeddable;
+import com.caucho.amber.field.AmberField;
+import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.type.BeanType;
+import com.caucho.amber.table.LinkColumns;
+import com.caucho.amber.table.AmberTable;
+import com.caucho.amber.type.EmbeddableType;
+import com.caucho.amber.type.AmberType;
+import com.caucho.util.CharBuffer;
+
+import java.lang.reflect.Method;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
- * Represents an amber mapping query expression
+ * An embedded expression which should be loaded.
  */
-public interface PathExpr extends AmberExpr {
-  /**
-   * Returns the target type.
-   */
-  public BeanType getTargetType();
-
-  /**
-   * Creates the expr from the path.
-   */
-  public AmberExpr createField(QueryParser parser, String field);
-
-  /**
-   * Creates an array reference.
-   */
-  public AmberExpr createArray(AmberExpr field);
-
-  /**
-   * Creates an id expression.
-   */
-  public IdExpr createId(FromItem from);
-
-  /**
-   * Creates a load expression.
-   */
-  public LoadExpr createLoad();
+public class LoadBasicExpr extends LoadExpr {
+  LoadBasicExpr(PathExpr expr)
+  {
+    super(expr);
+  }
 
   /**
    * Binds the expression as a select item.
    */
-  public PathExpr bindSelect(QueryParser parser, String tableName);
+  public AmberExpr bindSelect(QueryParser parser)
+  {
+    _fromItem = _expr.bindSubPath(parser);
+
+    if (_fromItem == null)
+      throw new NullPointerException(_expr.getClass().getName() + " " + _expr);
+
+    return this;
+  }
 
   /**
-   * Binds the expression as a select item.
+   * Generates the select expression.
    */
-  public FromItem bindSubPath(QueryParser parser);
-
-  /**
-   * Returns the from item
-   */
-  public FromItem getChildFromItem();
+  @Override
+  public void generateSelect(CharBuffer cb,
+                             boolean fullSelect)
+  {
+    System.out.println("GENERATE: " + _expr + " " + _expr.getClass());
+    _expr.generateSelect(cb);
+  }
 }

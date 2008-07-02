@@ -239,7 +239,10 @@ public abstract class AbstractEnhancedType extends AmberType {
   /**
    * Gets the instance class.
    */
-  abstract public Class getInstanceClass();
+  public Class getInstanceClass()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   /**
    * Gets the instance class.
@@ -543,6 +546,6 @@ public abstract class AbstractEnhancedType extends AmberType {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _tBeanClass.getName() + "]";
+    return getClass().getSimpleName() + "[" + getName() + "]";
   }
 }

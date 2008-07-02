@@ -1083,14 +1083,14 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    */
   void linkInheritanceTable(AmberTable primaryTable,
                             AmberTable secondaryTable,
-                            JoinColumn joinAnn,
+                            PrimaryKeyJoinColumn joinAnn,
                             PrimaryKeyJoinColumnConfig pkJoinColumnCfg)
     throws ConfigException
   {
-    JoinColumn joinAnns[] = null;
+    PrimaryKeyJoinColumn joinAnns[] = null;
 
     if (joinAnn != null)
-      joinAnns = new JoinColumn[] { joinAnn };
+      joinAnns = new PrimaryKeyJoinColumn[] { joinAnn };
 
     linkInheritanceTable(primaryTable,
                          secondaryTable,
@@ -1103,7 +1103,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    */
   void linkInheritanceTable(AmberTable primaryTable,
                             AmberTable secondaryTable,
-                            JoinColumn []joinColumnsAnn,
+                            PrimaryKeyJoinColumn []joinColumnsAnn,
                             PrimaryKeyJoinColumnConfig pkJoinColumnCfg)
     throws ConfigException
   {
@@ -1121,7 +1121,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
           name = pkJoinColumnCfg.getName();
       }
       else {
-        JoinColumn join;
+        PrimaryKeyJoinColumn join;
 
         join = getJoinColumn(joinColumnsAnn, column.getName());
 
@@ -1527,16 +1527,13 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       EntityType entityType = (EntityType) sourceType;
 
-      /*
-      ElementCollectionCompletion comp
-	= new ElementCollectionCompletion(entityType,
-					  field,
-					  fieldName,
-					  fieldType,
-					  elementCollectionConfig);
+      ElementCollectionConfig comp
+	= new ElementCollectionConfig(entityType,
+				      field,
+				      fieldName,
+				      fieldType);
 
       _depCompletions.add(comp);
-      */
     }
     else if (field.isAnnotationPresent(javax.persistence.Embedded.class)) {
       validateAnnotations(field, fieldName, "@Embedded", _embeddedAnnotations);

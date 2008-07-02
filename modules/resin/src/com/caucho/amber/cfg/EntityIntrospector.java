@@ -481,7 +481,8 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       rootType.addSubClass(entityType);
 
       getInternalPrimaryKeyJoinColumnConfig(type, _annotationCfg);
-      JoinColumn joinAnn = (JoinColumn) _annotationCfg.getAnnotation();
+      PrimaryKeyJoinColumn joinAnn
+	= (PrimaryKeyJoinColumn) _annotationCfg.getAnnotation();
       PrimaryKeyJoinColumnConfig primaryKeyJoinColumnConfig
 	= _annotationCfg.getPrimaryKeyJoinColumnConfig();
 

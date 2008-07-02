@@ -60,7 +60,7 @@ public class CollectionIdExpr extends IdExpr {
    */
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
-    return ((getFromItem() == from) ||
-            (getFromItem().getJoinExpr().getJoinTarget() == from));
+    return (getFromItem() == from
+	    || getFromItem().getJoinExpr().getJoinTarget() == from);
   }
 }

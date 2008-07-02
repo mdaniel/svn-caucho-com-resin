@@ -941,7 +941,7 @@ public class JavaJspGenerator extends JspGenerator {
     if (isSession)
       out.println("_jspService(request, response, pageContext, _jsp_application, session, _jsp_state);");
     else
-      out.println("_jspService(request, response, pageContext, _jsp_application, null, _jsp_state);");
+      out.println("_jspService(request, response, pageContext, _jsp_application, _jsp_state);");
 
     out.popDepth();
     out.println("} catch (java.lang.Throwable _jsp_e) {");
@@ -967,7 +967,11 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("            javax.servlet.http.HttpServletResponse response,");
     out.println("            com.caucho.jsp.PageContextImpl pageContext,");
     out.println("            javax.servlet.ServletContext application,");
-    out.println("            javax.servlet.http.HttpSession session,");
+
+    if (isSession) {
+      out.println("            javax.servlet.http.HttpSession session,");
+    }
+    
     out.println("            TagState _jsp_state)");
     out.println("  throws Throwable");
 

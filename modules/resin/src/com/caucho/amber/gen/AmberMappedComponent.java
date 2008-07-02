@@ -285,7 +285,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     ArrayList<AmberField> fields = _entityType.getFields();
 
-    for (Constructor ctor : _entityType.getBeanClass().getConstructors()) {
+    Class beanClass = _entityType.getBeanClass();
+    for (Constructor ctor : beanClass.getDeclaredConstructors()) {
       out.println();
       // XXX: s/b actual access type?
       out.print("public ");
@@ -866,7 +867,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       // ejb/0645
       // out.println("__caucho_updateMask_" + i + " = 0;");
     }
-
+    
     out.println();
     /* jpa/0g43 - XA doesn't have a cache item
     out.println("if (__caucho_cacheItem == null) {");

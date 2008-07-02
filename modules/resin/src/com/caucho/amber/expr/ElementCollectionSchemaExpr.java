@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -29,50 +30,54 @@
 package com.caucho.amber.expr;
 
 import com.caucho.amber.query.FromItem;
+import com.caucho.amber.query.QueryParseException;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.type.BeanType;
+import com.caucho.util.L10N;
 
 /**
- * Represents an amber mapping query expression
+ * Represents a collection from a from-item table.
  */
-public interface PathExpr extends AmberExpr {
-  /**
-   * Returns the target type.
-   */
-  public BeanType getTargetType();
+public class ElementCollectionSchemaExpr extends SchemaExpr {
+  private static final L10N L = new L10N(ElementCollectionSchemaExpr.class);
+
+  private ElementCollectionExpr _expr;
 
   /**
-   * Creates the expr from the path.
+   * Creates the collection schema.
    */
-  public AmberExpr createField(QueryParser parser, String field);
+  public ElementCollectionSchemaExpr(ElementCollectionExpr expr)
+  {
+    _expr = expr;
+  }
 
   /**
-   * Creates an array reference.
+   * Returns the tail name.
    */
-  public AmberExpr createArray(AmberExpr field);
+  public String getTailName()
+  {
+    //return _expr.getField().getName();
+    throw new UnsupportedOperationException();
+  }
 
   /**
-   * Creates an id expression.
+   * Creates a field-based schema.
    */
-  public IdExpr createId(FromItem from);
+  public SchemaExpr createField(QueryParser parser, String name)
+    throws QueryParseException
+  {
+    throw parser.error(L.l("collections in FROM may not be sub-collected."));
+  }
 
   /**
-   * Creates a load expression.
+   * Adds the from item.
    */
-  public LoadExpr createLoad();
+  public FromItem addFromItem(QueryParser parser, String id)
+    throws QueryParseException
+  {
+    _expr.bindSelect(parser, id);
 
-  /**
-   * Binds the expression as a select item.
-   */
-  public PathExpr bindSelect(QueryParser parser, String tableName);
+    FromItem fromItem = _expr.getChildFromItem();
 
-  /**
-   * Binds the expression as a select item.
-   */
-  public FromItem bindSubPath(QueryParser parser);
-
-  /**
-   * Returns the from item
-   */
-  public FromItem getChildFromItem();
+    return fromItem;
+  }
 }

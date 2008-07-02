@@ -52,7 +52,8 @@ import java.util.logging.Logger;
  * Represents a stateful type:
  * embeddable, entity or mapped-superclass.
  */
-abstract public class BeanType extends AbstractEnhancedType {
+abstract public class BeanType extends AbstractEnhancedType
+{
   private static final Logger log = Logger.getLogger(BeanType.class.getName());
   private static final L10N L = new L10N(BeanType.class);
 

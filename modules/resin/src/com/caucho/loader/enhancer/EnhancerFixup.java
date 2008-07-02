@@ -386,8 +386,8 @@ public class EnhancerFixup {
 
         String type = method.getDescriptor();
 
-        if (! method.getName().equals(baseName) ||
-            ! method.getDescriptor().equals(extMethod.getDescriptor()))
+        if (! method.getName().equals(baseName)
+	    || ! method.getDescriptor().equals(extMethod.getDescriptor()))
           continue;
 
         if (baseName.equals("<init>")) {

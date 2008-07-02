@@ -31,6 +31,8 @@ package com.caucho.amber.expr;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.AmberTable;
+import com.caucho.amber.type.AmberType;
+import com.caucho.amber.type.BeanType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.util.CharBuffer;
 
@@ -86,7 +88,7 @@ public class IdExpr extends AbstractPathExpr {
   /**
    * Returns the entity class.
    */
-  public EntityType getTargetType()
+  public BeanType getTargetType()
   {
     return _fromItem.getEntityType();
   }
@@ -105,6 +107,15 @@ public class IdExpr extends AbstractPathExpr {
   public FromItem bindSubPath(QueryParser parser)
   {
     return _fromItem;
+  }
+
+  /**
+   * Creates a load expression.
+   */
+  @Override
+  public LoadExpr createLoad()
+  {
+    return new LoadEntityExpr(this);
   }
 
   /**
@@ -178,6 +189,8 @@ public class IdExpr extends AbstractPathExpr {
       cb.append('.');
     }
 
-    cb.append(getTargetType().getId().getColumns().get(0).getName());
+    EntityType entityType = (EntityType) getTargetType();
+
+    cb.append(entityType.getId().getColumns().get(0).getName());
   }
 }

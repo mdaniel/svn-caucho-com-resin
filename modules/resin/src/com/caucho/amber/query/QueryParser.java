@@ -507,6 +507,9 @@ public class QueryParser {
 
             AmberType targetType = pathExpr.getTargetType();
 
+	    System.out.println("TARGET: " + targetType
+			       + " " + pathExpr + " " + pathExpr.getClass());
+
             // jpa/0w24
             if (targetType instanceof EntityType) {
               EntityType relatedType = (EntityType) targetType;

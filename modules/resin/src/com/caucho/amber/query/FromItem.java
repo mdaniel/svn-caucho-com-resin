@@ -87,7 +87,7 @@ public class FromItem {
     if (_idExpr != null) {
     }
     else if (_collectionExpr != null) {
-      _idExpr = new CollectionIdExpr(this, _collectionExpr);
+      _idExpr = _collectionExpr.createId(this);
     }
     else
       _idExpr = new IdExpr(this);

@@ -79,6 +79,22 @@ abstract public class AbstractPathExpr extends AbstractAmberExpr
   }
 
   /**
+   * Creates an id expression.
+   */
+  public IdExpr createId(FromItem fromItem)
+  {
+    return new CollectionIdExpr(fromItem, this);
+  }
+
+  /**
+   * Creates a load expression.
+   */
+  public LoadExpr createLoad()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
    * Binds the expression as a select item.
    */
   public PathExpr bindSelect(QueryParser parser, String tableName)
