@@ -162,6 +162,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   private HempBrokerManager _brokerManager;
 
   private ThreadPoolAdmin _threadPoolAdmin;
+  private MemoryAdmin _memoryAdmin;
 
   private ObjectName _objectName;
   private ResinAdmin _resinAdmin;
@@ -272,6 +273,8 @@ public class Resin implements EnvironmentBean, SchemaBean
       _resinAdmin = new ResinAdmin(this);
 
       _threadPoolAdmin.register();
+      
+      _memoryAdmin = MemoryAdmin.create();
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

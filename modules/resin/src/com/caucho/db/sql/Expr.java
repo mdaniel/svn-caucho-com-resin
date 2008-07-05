@@ -80,8 +80,8 @@ abstract public class Expr {
   {
     Class type = getType();
 
-    return (int.class.equals(type) || long.class.equals(type) ||
-	    java.sql.Date.class.equals(type));
+    return (int.class.equals(type) || long.class.equals(type)
+	    || java.sql.Date.class.equals(type));
   }
 
   /**

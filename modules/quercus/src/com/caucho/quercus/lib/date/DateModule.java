@@ -1209,7 +1209,10 @@ public class DateModule extends AbstractQuercusModule {
   public static long timezone_offset_get(DateTimeZone dateTimeZone,
                                          DateTime dateTime)
   {
-    return dateTimeZone.getOffset(dateTime);
+    if (dateTimeZone == null)
+      return 0;
+    else
+      return dateTimeZone.getOffset(dateTime);
   }
   
   public static DateTimeZone timezone_open(String timeZone)

@@ -262,6 +262,31 @@ public class ImageModule extends AbstractQuercusModule {
   // XXX: image2wbmp
 
   /**
+   * Returns a copy of the current transform
+   */
+  public static AffineTransform image_get_transform(QuercusImage image)
+  {
+    if (image == null)
+      return null;
+    
+    return image.getGraphics().getTransform();
+  }
+
+  /**
+   * Returns a copy of the current transform
+   */
+  public static boolean image_set_transform(QuercusImage image,
+					    AffineTransform transform)
+  {
+    if (image == null)
+      return false;
+    
+    image.getGraphics().setTransform(transform);
+
+    return true;
+  }
+
+  /**
    * Set the blending mode for an image
    */
   public static boolean imagealphablending(QuercusImage image,
@@ -1476,6 +1501,67 @@ public class ImageModule extends AbstractQuercusModule {
       return 0;
     
     return image.getHeight();
+  }
+
+  /**
+   * general affine transformation
+   */
+  public static boolean image_transform(QuercusImage image,
+					double m00, double m10,
+					double m01, double m11,
+					double m02, double m12)
+  {
+    if (image == null)
+      return false;
+
+    AffineTransform transform
+      = new AffineTransform(m00, m10, m01, m11, m02, m12);
+
+    image.getGraphics().transform(transform);
+    
+    return true;
+  }
+
+  /**
+   * scaling transformation
+   */
+  public static boolean image_transform_scale(QuercusImage image,
+					      double sx, double sy)
+  {
+    if (image == null)
+      return false;
+
+    image.getGraphics().scale(sx, sy);
+    
+    return true;
+  }
+
+  /**
+   * shearing transformation
+   */
+  public static boolean image_transform_shear(QuercusImage image,
+					      double shx, double shy)
+  {
+    if (image == null)
+      return false;
+
+    image.getGraphics().shear(shx, shy);
+    
+    return true;
+  }
+
+  /**
+   * translation transformation
+   */
+  public static boolean image_transform_translate(QuercusImage image,
+						  double x, double y)
+  {
+    if (image == null)
+      return false;
+
+    image.getGraphics().translate(x, y);
+    
+    return true;
   }
 
   /**

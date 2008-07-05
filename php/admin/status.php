@@ -153,6 +153,125 @@ if ($mbean_server) {
 
 </table>
 <?php
+/* graphs */
+
+$stat_service = $mbean_server->lookup("resin:type=StatService");
+
+if ($stat_service) {
+  echo "<h2>Graphs</h2>\n";
+  
+  echo "<p>";
+  echo "<img src='graph.php?";
+  echo "g[0][0]=resin:type=Server&g[0][1]=RuntimeMemory"
+  echo "&g[1][0]=resin:type=Server&g[1][1]=RuntimeMemoryFree"
+  echo "&g[2][0]=resin:type=Memory&g[2][1]=TenuredUsed"
+  echo "&g[3][0]=resin:type=Memory&g[3][1]=PermGenUsed"
+  echo "&width=300&height=240' width='300' height='240'>\n"
+  
+  echo "<img src='graph.php?";
+  echo "g[0][0]=resin:type=Server&g[0][1]=CpuLoadAvg"
+  echo "&width=300&height=240' width='300' height='240'>\n"
+  
+  echo "<img src='graph.php?";
+  echo "g[0][0]=java.lang:type=Threading&g[0][1]=ThreadCount"
+  echo "&g[1][0]=resin:type=ThreadPool&g[1][1]=ThreadCount"
+  echo "&width=300&height=240' width='300' height='240'>\n"
+}
+?>
+
+<?php
+
+if ($mbean_server) {
+  $mbean = $mbean_server->lookup("resin:type=LogService");
+}
+
+//
+// recent messages
+//
+
+if ($mbean) {
+  $now = time();
+
+  $messages = $mbean->findMessages(($now - 24 * 3600) * 1000, $now * 1000);
+
+  if (! empty($messages)) {
+    echo "<h2>Recent Messages</h2>\n";
+
+    echo "<table class='data'>\n";
+/*
+    //echo "<thead class='scroll'>\n";
+    echo "<tr><th class='date'>Date</th>"
+    echo "    <th class='level'>Level</th>"
+    echo "    <th class='message'>Message</th></tr>\n";
+    //echo "</thead>\n";
+*/
+
+    $messages = array_reverse($messages);
+
+    echo "<tbody class='scroll'>\n";
+    foreach ($messages as $message) {
+      echo "<tr class='{$message->level}'>";
+      echo "  <td class='date'>";
+      echo strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
+      echo "</td>";
+      echo "  <td class='level'>{$message->level}</td>";
+      echo "  <td class='message'>" . htmlspecialchars(wordwrap($message->message, 90));
+      echo "  </td>";
+      echo "</tr>";
+    }
+
+    echo "</tbody>\n";
+    echo "</table>\n";
+  }
+
+  //
+  // startup
+  //
+  $start_time = $server->StartTime->time / 1000;
+
+  $messages = $mbean->findMessages(($start_time - 15 * 60) * 1000, ($start_time - 2) * 1000);
+
+  if (! empty($messages)) {
+    echo "<h2>Shutdown Messages</h2>\n";
+
+    echo "<table class='data'>\n";
+/*
+    //echo "<thead class='scroll'>\n";
+    echo "<tr><th class='date'>Date</th>"
+    echo "    <th class='level'>Level</th>"
+    echo "    <th class='message'>Message</th></tr>\n";
+    //echo "</thead>\n";
+*/
+
+    $messages = array_reverse($messages);
+
+    echo "<tbody class='scroll'>\n";
+
+    // mark the start time
+    echo "<tr class='warning'>";
+    echo "  <td class='date'>";
+    echo strftime("%Y-%m-%d %H:%M:%S", $start_time);
+    echo "</td>";
+    echo "  <td class='level'></td>";
+    echo "  <td class='message'>Start Time</td>";
+    echo "</tr>";
+
+    foreach ($messages as $message) {
+      echo "<tr class='{$message->level}'>";
+      echo "  <td class='date'>";
+      echo strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
+      echo "</td>";
+      echo "  <td class='level'>{$message->level}</td>";
+      echo "  <td class='message'>" . htmlspecialchars(wordwrap($message->message, 90)) . "</td>";
+      echo "</tr>";
+    }
+
+    echo "</tbody>\n";
+    echo "</table>\n";
+  }
+}
+?>
+<?php
 $thread_pool = $server->ThreadPool;
 ?>
 
@@ -344,99 +463,6 @@ if ($db_pools) {
 ?>
 </table>
 <?php
-}
-?>
-
-<?php
-
-if ($mbean_server) {
-  $mbean = $mbean_server->lookup("resin:type=LoggingManager");
-}
-
-//
-// recent messages
-//
-
-if ($mbean) {
-  $now = time();
-
-  $messages = $mbean->findMessages(($now - 24 * 3600) * 1000, $now * 1000);
-
-  if (! empty($messages)) {
-    echo "<h2>Recent Messages</h2>\n";
-
-    echo "<table class='data'>\n";
-/*
-    //echo "<thead class='scroll'>\n";
-    echo "<tr><th class='date'>Date</th>"
-    echo "    <th class='level'>Level</th>"
-    echo "    <th class='message'>Message</th></tr>\n";
-    //echo "</thead>\n";
-*/
-
-    $messages = array_reverse($messages);
-
-    echo "<tbody class='scroll'>\n";
-    foreach ($messages as $message) {
-      echo "<tr class='{$message->level}'>";
-      echo "  <td class='date'>";
-      echo strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
-      echo "</td>";
-      echo "  <td class='level'>{$message->level}</td>";
-      echo "  <td class='message'>" . htmlspecialchars(wordwrap($message->message, 90));
-      echo "  </td>";
-      echo "</tr>";
-    }
-
-    echo "</tbody>\n";
-    echo "</table>\n";
-  }
-
-  //
-  // startup
-  //
-  $start_time = $server->StartTime->time / 1000;
-
-  $messages = $mbean->findMessages(($start_time - 15 * 60) * 1000, ($start_time - 2) * 1000);
-
-  if (! empty($messages)) {
-    echo "<h2>Shutdown Messages</h2>\n";
-
-    echo "<table class='data'>\n";
-/*
-    //echo "<thead class='scroll'>\n";
-    echo "<tr><th class='date'>Date</th>"
-    echo "    <th class='level'>Level</th>"
-    echo "    <th class='message'>Message</th></tr>\n";
-    //echo "</thead>\n";
-*/
-
-    $messages = array_reverse($messages);
-
-    echo "<tbody class='scroll'>\n";
-
-    // mark the start time
-    echo "<tr class='warning'>";
-    echo "  <td class='date'>";
-    echo strftime("%Y-%m-%d %H:%M:%S", $start_time);
-    echo "</td>";
-    echo "  <td class='level'></td>";
-    echo "  <td class='message'>Start Time</td>";
-    echo "</tr>";
-
-    foreach ($messages as $message) {
-      echo "<tr class='{$message->level}'>";
-      echo "  <td class='date'>";
-      echo strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
-      echo "</td>";
-      echo "  <td class='level'>{$message->level}</td>";
-      echo "  <td class='message'>" . htmlspecialchars(wordwrap($message->message, 90)) . "</td>";
-      echo "</tr>";
-    }
-
-    echo "</tbody>\n";
-    echo "</table>\n";
-  }
 }
 ?>
 <!-- Persistent store -->

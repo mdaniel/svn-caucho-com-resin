@@ -13,6 +13,8 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>classloader: getResource/getResources issues with directories (#2763, rep by bregnvig)</li>
+<li>amber: basic @ElementCollection implementation (#2749, rep by Martin Aschoff)</li>
 <li>jsf: new JSF 'java' state serialization method introduced. Now supports methods 'hessian'-(defalut) and 'java'</li>
 <li>jsf: AjaxAnywhere fixes(#2644, rep by vladdy)</li>
 <li>quercus: missing synchronization in ModuleContext</li>

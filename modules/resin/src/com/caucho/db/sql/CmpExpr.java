@@ -55,6 +55,11 @@ class CmpExpr extends Expr {
     _left = _left.bind(query);
     _right = _right.bind(query);
 
+    /*
+    if (_left.isLong() && _right.isLong())
+      return new LongCmpExpr(_op, _left, _right);
+    */
+
     switch (_op) {
     case Parser.LT:
     case Parser.LE:

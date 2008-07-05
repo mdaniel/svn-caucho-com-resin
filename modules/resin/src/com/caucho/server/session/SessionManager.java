@@ -1026,8 +1026,10 @@ public final class SessionManager implements AlarmListener
     String id = oldId;
 
     if (id == null || id.length() < 4
-	|| ! _objectManager.isInSessionGroup(id)
         || ! reuseSessionId(fromCookie)) {
+      // server/0175
+      // || ! _objectManager.isInSessionGroup(id)
+      
       id = createSessionId(request, true);
     }
 

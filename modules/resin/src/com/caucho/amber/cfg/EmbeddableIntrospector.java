@@ -38,6 +38,8 @@ import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.logging.Logger;
+import javax.persistence.Basic;
+import javax.persistence.Column;
 
 /**
  * Configuration for an embeddable type
@@ -140,7 +142,7 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
       Annotation ann[] = method.getDeclaredAnnotations();
 
       for (int i = 0; ann != null && i < ann.length; i++) {
-	if (isPropertyAnnotation(ann[i].getClass().getName()))
+	if (isPropertyAnnotation(ann[i]))
 	  return false;
       }
     }
@@ -148,9 +150,8 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
     return true;
   }
 
-  private boolean isPropertyAnnotation(String name)
+  private boolean isPropertyAnnotation(Annotation ann)
   {
-    return ("javax.persistence.Basic".equals(name)
-	    || "javax.persistence.Column".equals(name));
+    return (ann instanceof Basic || ann instanceof Column);
   }
 }

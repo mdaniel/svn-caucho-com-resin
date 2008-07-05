@@ -373,7 +373,6 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     _configManager.addType(type, new EmbeddableConfig(type.getName(), this, embeddableType));
 
     try {
-
       boolean isField = isField(type, embeddableConfig);
 
       if (isField)
@@ -827,7 +826,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       Annotation ann[] = method.getDeclaredAnnotations();
 
       for (int i = 0; ann != null && i < ann.length; i++) {
-	if (isPropertyAnnotation(ann[i].getClass()))
+	if (ann[i] instanceof Basic || ann[i] instanceof Column)
 	  return false;
       }
     }

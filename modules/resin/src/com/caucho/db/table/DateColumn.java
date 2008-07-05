@@ -201,6 +201,17 @@ class DateColumn extends Column {
   }
   
   /**
+   * Gets a double value in the column.
+   *
+   * @param block the block's buffer
+   * @param rowOffset the offset of the row in the block
+   */
+  public double getDouble(byte []block, int rowOffset)
+  {
+    return (double) getDate(block, rowOffset);
+  }
+  
+  /**
    * Sets a long value in the column.
    *
    * @param block the block's buffer
