@@ -1212,9 +1212,10 @@ public class Port
       TcpConnection conn = connections[i];
 
       long requestTime = -1;
+      long startTime = conn.getRequestStartTime();
 
-      if (conn.isRequestActive())
-	requestTime = now - conn.getRequestStartTime();
+      if (conn.isRequestActive() && startTime > 0)
+	requestTime = now - startTime;
       
       TcpConnectionInfo info
 	= new TcpConnectionInfo(conn.getId(),

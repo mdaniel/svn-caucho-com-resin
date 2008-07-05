@@ -337,10 +337,12 @@ if ($ports) {
   </tr>
 <?php
   $count = 0;
+  $row = 0;
   foreach ($ports as $port) {
+    $count++;
 ?>
 
-  <tr class='<?= $count++ % 2 == 0 ? "ra" : "rb" ?>'>
+  <tr class='<?= $row++ % 2 == 0 ? "ra" : "rb" ?>'>
     <td class='item'><?= $port->ProtocolName ?>://<?= $port->Address ? $port->Address : "*" ?>:<?= $port->Port ?></td>
     <td class="<?= $port->State ?>"><?= $port->State ?></td>
     <td><?= $port->ThreadActiveCount ?></td>
@@ -351,6 +353,54 @@ if ($ports) {
     <td><?= $port->KeepaliveThreadCount ?></td>
     <td><?= $port->KeepaliveSelectCount ?></td>
     <td><?= $port->CometIdleCount ?>
+  </tr>
+<?php
+
+$conn = null;
+
+$jvm_thread = $mbean_server->lookup("java.lang:type=Threading");
+
+$connInfoList = $port->connectionInfo();
+usort($connInfoList, "conn_time_cmp");
+foreach ($connInfoList as $connInfo) {
+  if ($connInfo->requestTime >= 0 && $connInfo->threadId >= 0) {
+    echo "<tr class='" . ($row++ % 2 == 0 ? "ra" : "rb") . "'>\n";
+    echo "<tr>\n";
+    echo "<td></td>\n";
+    echo "<td colspan='8'>\n";
+//    echo "</td>\n";
+//    echo "<td colspan='7'>\n";
+
+    $pname = "port_" . $count;
+    
+    $threadId = $connInfo->threadId;
+    
+    $show = "hide('s_$pname');show('h_$pname');show('h1_$pname')";
+    $hide = "show('s_$pname');hide('h_$pname');hide('h1_$pname')";
+    echo "<a id='s_$pname' href=\"javascript:$show\">[show]</a> ";
+    echo "<a id='h_$pname' href=\"javascript:$hide\" style='display:none'>[hide]</a>";
+    
+    echo sprintf("%.3fms", $connInfo->requestTime * 0.001);
+    // echo " thread=" . $threadId;
+    echo " " . $connInfo->state;
+    echo " conn=" . $connInfo->id;
+    echo "\n";
+    
+    echo "<pre id='h1_$pname' style='display:none'>";
+
+    $thread = $jvm_thread->getThreadInfo($threadId, 50);
+    foreach ($thread->stackTrace as $trace) {
+      echo "     at " . $trace->className . "." . $trace->methodName . "\n";
+    }
+
+    echo "</pre>";
+    echo "</td>";
+    echo "</tr>";
+  }
+}
+
+?>
+    </td>
   </tr>
 <?php 
   }
@@ -595,6 +645,11 @@ foreach ($slow_conn as $slow) {
 
 }
 */
+
+function conn_time_cmp($conn_a, $conn_b)
+{
+  return $conn_b->requestTime - $conn_a->requestTime;
+}
 
 ?>
 

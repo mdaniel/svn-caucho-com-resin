@@ -281,7 +281,7 @@ function draw_graph($im, $val,
     else
       imageline($im, $last_x, $last_y, $x, $y, $color);
 
-    imagearc($im, $x, $y, 3, 3, 0, 360, $color);
+//    imagearc($im, $x, $y, 3, 3, 0, 360, $color);
 
     $last_x = $x;
     $last_y = $y;
