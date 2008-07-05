@@ -80,7 +80,6 @@ public class TcpConnection extends Connection
 
   private ConnectionState _state = ConnectionState.IDLE;
   
-  private boolean _isActive;
   private boolean _isClosed;
 
   private boolean _isKeepalive;
@@ -172,21 +171,21 @@ public class TcpConnection extends Connection
   {
     return _accessTime;
   }
-  
-  /**
-   * Set true for active.
-   */
-  public void setActive(boolean isActive)
-  {
-    _isActive = isActive;
-  }
 
   /**
    * Returns true for active.
    */
   public boolean isActive()
   {
-    return _isActive;
+    return _state.isActive();
+  }
+
+  /**
+   * Returns true for active.
+   */
+  public boolean isRequestActive()
+  {
+    return _state.isRequestActive();
   }
 
   /**
@@ -814,7 +813,6 @@ public class TcpConnection extends Connection
     if (controller != null)
       controller.close();
     
-    _isActive = false;
     _isKeepalive = false;
 
     Port port = getPort();
@@ -956,6 +954,18 @@ public class TcpConnection extends Connection
       switch (this) {
       case IDLE:
       case ACCEPT:
+      case REQUEST:
+      case REQUEST_ACTIVE:
+	return true;
+
+      default:
+	return false;
+      }
+    }
+    
+    boolean isRequestActive()
+    {
+      switch (this) {
       case REQUEST:
       case REQUEST_ACTIVE:
 	return true;

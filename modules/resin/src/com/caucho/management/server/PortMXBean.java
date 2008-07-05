@@ -266,4 +266,9 @@ public interface PortMXBean extends ManagedObjectMXBean {
    * Disables the port, stopping it from listening to connections.
    */
   public void stop();
+  
+  /**
+   * Returns the connection info
+   */
+  public TcpConnectionInfo []connectionInfo();
 }

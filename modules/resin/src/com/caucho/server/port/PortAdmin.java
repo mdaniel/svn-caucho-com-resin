@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -31,6 +32,7 @@ package com.caucho.server.port;
 
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.PortMXBean;
+import com.caucho.management.server.TcpConnectionInfo;
 
 public class PortAdmin extends AbstractManagedObject
   implements PortMXBean
@@ -216,6 +218,14 @@ public class PortAdmin extends AbstractManagedObject
     _port.disable();
   }
 
+  /**
+   * returns information for all the port's connections
+   */
+  public TcpConnectionInfo []connectionInfo()
+  {
+    return _port.connectionInfo();
+  }
+
   void register()
   {
     registerSelf();
@@ -223,7 +233,6 @@ public class PortAdmin extends AbstractManagedObject
 
   public String toString()
   {
-    return "PortAdmin[" + getObjectName() + "]";
+    return getClass().getSimpleName() + "[" + getObjectName() + "]";
   }
-
 }

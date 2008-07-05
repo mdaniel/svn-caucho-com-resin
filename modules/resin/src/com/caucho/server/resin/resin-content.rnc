@@ -677,6 +677,17 @@ r_ssl-session-cookie =
   attribute ssl-session-cookie { string }
   | element ssl-session-cookie { string }
 
+r_stat-item = element stat-item {
+  (attribute attr { string }
+   | element attr { string })
+     
+  & (attribute name { string }
+     | element name { string })
+   
+  & (attribute description { string }
+     | element description { string })?
+}
+
 r_stat-service = element stat-service {
   (attribute cpu-load-exit-threshold { r_double-Type }
    | element cpu-load-exit-threshold { r_double-Type })?
@@ -695,6 +706,8 @@ r_stat-service = element stat-service {
 
   & (attribute thread-dump-interval { r_period-Type }
      | element thread-dump-interval { r_period-Type })?
+
+  & r_stat-item*
 }
 
 r_thread-max =

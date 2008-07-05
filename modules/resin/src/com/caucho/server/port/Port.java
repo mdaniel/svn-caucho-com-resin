@@ -38,6 +38,7 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.management.server.PortMXBean;
+import com.caucho.management.server.TcpConnectionInfo;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.*;
@@ -135,6 +136,10 @@ public class Port
 
   // the selection manager
   private AbstractSelectManager _selectManager;
+
+  // active list of all connections
+  private ArrayList<TcpConnection> _activeList
+    = new ArrayList<TcpConnection>();
 
   // server push (comet) suspend list
   private ArrayList<TcpConnection> _suspendList
@@ -1189,6 +1194,42 @@ public class Port
   }
 
   /**
+   * returns the connection info for jmx
+   */
+  TcpConnectionInfo []connectionInfo()
+  {
+    TcpConnection []connections;
+
+    synchronized (this) {
+      connections = new TcpConnection[_activeList.size()];
+      _activeList.toArray(connections);
+    }
+
+    long now = Alarm.getExactTime();
+    TcpConnectionInfo []infoList = new TcpConnectionInfo[connections.length];
+
+    for (int i = 0 ; i < connections.length; i++) {
+      TcpConnection conn = connections[i];
+
+      long requestTime = -1;
+
+      if (conn.isRequestActive())
+	requestTime = now - conn.getRequestStartTime();
+      
+      TcpConnectionInfo info
+	= new TcpConnectionInfo(conn.getId(),
+				conn.getThreadId(),
+				getAddress() + ":" + getPort(),
+				conn.getState().toString(),
+				requestTime);
+
+      infoList[i] = info;
+    }
+
+    return infoList;
+  }
+
+  /**
    * returns the select manager.
    */
   public AbstractSelectManager getSelectManager()
@@ -1497,6 +1538,10 @@ public class Port
 	    conn._isFree = false;
 	  }
 
+	  synchronized (this) {
+	    _activeList.add(conn);
+	  }
+
           ThreadPool.getThreadPool().schedule(conn.getReadTask());
         }
       } catch (Throwable e) {
@@ -1564,6 +1609,8 @@ public class Port
   private void closeConnection(TcpConnection conn)
   {
     synchronized (this) {
+      _activeList.remove(conn);
+      
       if (_connectionCount-- == _connectionMax) {
         try {
           notify();
