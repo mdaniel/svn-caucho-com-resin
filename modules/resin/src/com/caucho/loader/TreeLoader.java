@@ -63,9 +63,6 @@ public class TreeLoader extends JarListLoader implements Dependency
 
   private String []_fileNames;
 
-  private HashSet<Path> _files = new HashSet<Path>();
-  private HashSet<Path> _tempFiles = new HashSet<Path>();
-
   /**
    * Creates a new directory loader.
    */

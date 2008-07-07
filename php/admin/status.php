@@ -371,27 +371,30 @@ foreach ($connInfoList as $connInfo) {
 //    echo "</td>\n";
 //    echo "<td colspan='7'>\n";
 
-    $pname = "port_" . $count;
+    $pname = "port_" . $row;
     
     $threadId = $connInfo->threadId;
     
     $show = "hide('s_$pname');show('h_$pname');show('h1_$pname')";
     $hide = "show('s_$pname');hide('h_$pname');hide('h1_$pname')";
     echo "<a id='s_$pname' href=\"javascript:$show\">[show]</a> ";
-    echo "<a id='h_$pname' href=\"javascript:$hide\" style='display:none'>[hide]</a>";
+    echo "<a id='h_$pname' href=\"javascript:$hide\" style='display:none'>[hide]</a> ";
     
-    echo sprintf("%.3fms", $connInfo->requestTime * 0.001);
+    echo sprintf("%.3fs", $connInfo->requestTime * 0.001);
     // echo " thread=" . $threadId;
+    echo " conn-" . $connInfo->id;
     echo " " . $connInfo->state;
-    echo " conn=" . $connInfo->id;
     echo "\n";
     
     echo "<pre id='h1_$pname' style='display:none'>";
 
     $thread = $jvm_thread->getThreadInfo($threadId, 50);
+    /*
     foreach ($thread->stackTrace as $trace) {
       echo "     at " . $trace->className . "." . $trace->methodName . "\n";
     }
+    */
+    echo $thread;
 
     echo "</pre>";
     echo "</td>";

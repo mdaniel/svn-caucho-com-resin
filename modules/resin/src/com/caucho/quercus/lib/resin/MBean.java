@@ -39,6 +39,7 @@ import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.openmbean.*;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -243,6 +244,25 @@ public class MBean {
     }
     else if (value instanceof CompositeData) {
       CompositeData compositeValue = (CompositeData) value;
+
+      CompositeType type = compositeValue.getCompositeType();
+
+      if (type != null) {
+	String typeName = type.getTypeName();
+
+	try {
+	  ClassLoader loader = Thread.currentThread().getContextClassLoader();
+	  
+	  Class typeClass = Class.forName(typeName, false, loader);
+
+	  Method from = typeClass.getMethod("from", new Class[] { CompositeData.class });
+
+	  if (from != null)
+	    return from.invoke(null, compositeValue);
+	} catch (Exception e) {
+	  log.log(Level.FINER, e.toString(), e);
+	}
+      }
 
       return new CompositeDataBean(compositeValue);
     }

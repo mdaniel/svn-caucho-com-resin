@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -35,6 +36,7 @@ import com.caucho.log.Log;
 import com.caucho.make.AlwaysModified;
 import com.caucho.make.Make;
 import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Depend;
@@ -78,6 +80,8 @@ public class CompilingLoader extends Loader implements Make {
   private boolean _requireSource;
 
   private HashSet<String> _excludedDirectories = new HashSet<String>();
+
+  private long _lastMakeTime;
 
   private boolean _isBatch = true;
 
@@ -338,23 +342,44 @@ public class CompilingLoader extends Loader implements Make {
   public void make()
     throws IOException, ClassNotFoundException
   {
+    synchronized (this) {
+      if (Alarm.getCurrentTime() < _lastMakeTime + 2000)
+	return;
+      
+      makeImpl();
+
+      _lastMakeTime = Alarm.getCurrentTime();
+    }
+  }
+
+  private void makeImpl()
+    throws IOException, ClassNotFoundException
+  {
     if (_sourceDir.isDirectory() && ! _classDir.isDirectory())
       _classDir.mkdirs();
 
     String sourcePath = prefixClassPath(getClassPath());
+    
+    ArrayList<String> files = new ArrayList<String>();
+    findAllModifiedClasses("", _sourceDir, _classDir, sourcePath, files);
+
+    if (files.size() == 0)
+      return;
 
     if (_isBatch) {
-      ArrayList<String> files = new ArrayList<String>();
-      findAllModifiedClasses("", _sourceDir, _classDir, sourcePath, files);
+      String []paths = files.toArray(new String[files.size()]);
 
-      if (files.size() > 0) {
-	String []paths = files.toArray(new String[files.size()]);
-
+      compileBatch(paths, true);
+    }
+    else {
+      while (files.size() > 0) {
+	String path = files.remove(0);
+	
+	String []paths = new String[] { path };
+	
 	compileBatch(paths, true);
       }
     }
-    else
-      makeAllSequential("", _sourceDir, _classDir, sourcePath);
   }
 
   private void makeAllSequential(String name, Path sourceDir, Path classDir,
@@ -515,7 +540,7 @@ public class CompilingLoader extends Loader implements Make {
 	  }
 
 	  if (doRemove) {
-	    log.finer(L.l("removing obsolete class `{0}'.", subClass.getPath()));
+	    log.finer(L.l("removing obsolete class '{0}'.", subClass.getPath()));
 
 	    subClass.remove();
 	  }

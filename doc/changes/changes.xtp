@@ -13,6 +13,13 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>jsp: reduce makeAll lock in MakeContainer/CompilingLoader for multithread (#2751, rep by Sri Satish)</li>
+<li>jsp: make JspPrecompileListener multithreaded (#2767, rep by stbu)</li>
+<li>admin: add check for PermGen free memory (#2760, rep by Andy Qu)</li>
+<li>admin: moved deadlock detection to ProManagement and enhanced logging (#2288, rep by Allen Servedio)</li>
+<li>admin: added TcpConnectionInfo for connection state and added to /resin-admin</li>
+<li>admin: restored logs to /resin-admin</li>
+<li>admin: added basic graphs to /resin-admin</li>
 <li>classloader: getResource/getResources issues with directories (#2763, rep by bregnvig)</li>
 <li>amber: basic @ElementCollection implementation (#2749, rep by Martin Aschoff)</li>
 <li>jsf: new JSF 'java' state serialization method introduced. Now supports methods 'hessian'-(defalut) and 'java'</li>

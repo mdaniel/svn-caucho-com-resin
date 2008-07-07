@@ -142,13 +142,22 @@ foreach ($groups as $name) {
     echo "<td>" . $info->threadName . "</td>";
 
     if ($info->stackTrace[0]) {
-      echo "<td>" . $info->stackTrace[0]->className . "."
+      $name = $info->stackTrace[0]->className;
+      $tail = strrchr($name, '.');
+      if ($tail)
+        $name = substr($tail, 1);
+      echo "<td>" . $name . "."
 	. $info->stackTrace[0]->methodName . "()</td>";
     }
     else
       echo "<td></td>";
     
-    echo "<td>" . $info->threadState . "</td>";
+    echo "<td>" . $info->threadState;
+    if ($info->getBlockedTime() > 0)
+      echo sprintf(" (%dms)", $info->getBlockedTime())
+    else if ($info->getWaitedTime() > 0)
+      echo sprintf(" (%dms)", $info->getWaitedTime())
+    echo "</td>";
 
     echo "</tr>\n";
 
@@ -156,9 +165,19 @@ foreach ($groups as $name) {
     echo "<td style='border-width:0'></td>";
     echo "<td colspan='4'>";
     echo "<pre>\n";
+    
+    // echo $info;
+
+    // XXX: need to look at the JDK 1.6 for locks
+    /*
+    var_dump($info->getLockedMonitors());
+    var_dump($info->getLockedSynchronizers());
+    */
+    
     foreach ($info->stackTrace as $elt) {
       echo " at {$elt->className}.{$elt->methodName} ({$elt->fileName}:{$elt->lineNumber})\n";
     }
+
     echo "</pre>\n";
     echo "</td>";
     echo "</tr>\n";

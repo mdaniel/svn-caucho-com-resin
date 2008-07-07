@@ -146,6 +146,7 @@ public class Server extends ProtocolDispatchServer
   private long _suspendTimeMax = 600000;
 
   private long _memoryFreeMin = 1024 * 1024;
+  private long _permGenFreeMin = 1024 * 1024;
   
   private long _shutdownWaitMax = 60 * 1000;
   
@@ -460,6 +461,22 @@ public class Server extends ProtocolDispatchServer
   public long getMemoryFreeMin()
   {
     return _memoryFreeMin;
+  }
+
+  /**
+   * Sets the minimum free memory after a GC
+   */
+  public void setPermGenFreeMin(Bytes min)
+  {
+    _permGenFreeMin = min.getBytes();
+  }
+
+  /**
+   * Sets the minimum free memory after a GC
+   */
+  public long getPermGenFreeMin()
+  {
+    return _permGenFreeMin;
   }
 
   /**

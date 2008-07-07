@@ -134,17 +134,22 @@ abstract public class JarListLoader extends Loader implements Dependency {
     
     JarPath jarPath = JarPath.create(jar);
     JarEntry jarEntry = new JarEntry(jarPath);
+
+    if (getLoader() != null) {
+      if (! getLoader().addURL(jarPath))
+	return;
+    }
+
+    // skip duplicates
+    if (_jarList.contains(jarEntry))
+      return;
+    
     _jarList.add(jarEntry);
 
     _dependencyList.add(new Depend(jarPath));
 
     if (_pathMap == null && DynamicClassLoader.isJarCacheEnabled())
       _pathMap = new HashMap<String,JarList>(8);
-
-    if (getLoader() != null) {
-      if (! getLoader().addURL(jarPath))
-	return;
-    }
 
     if (_pathMap != null) {
       ZipScanner scan = null;

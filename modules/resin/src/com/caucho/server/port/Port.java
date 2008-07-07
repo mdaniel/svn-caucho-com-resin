@@ -813,7 +813,10 @@ public class Port
 
   public int getKeepaliveSelectMax()
   {
-    return getSelectManager().getSelectMax();
+    if (getSelectManager() != null)
+      return getSelectManager().getSelectMax();
+    else
+      return -1;
   }
 
   //

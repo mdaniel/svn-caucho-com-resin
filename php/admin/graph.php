@@ -41,12 +41,12 @@ foreach ($items as $item) {
   $stat_data->name = $item[0];
   $stat_data->attr = $item[1];
   
-  resin_var_dump($stat_data);
+//  resin_var_dump($stat_data);
 
   $stat = find_stat($stat_service, $stat_data->name, $stat_data->attr);
 
   if (! $stat) {
-  resin_var_dump($stat_data);
+//  resin_var_dump($stat_data);
     echo "$item->name with attr=$item->attr is an unknown statistic\n";
     return;
   }

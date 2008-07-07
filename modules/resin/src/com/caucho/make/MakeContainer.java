@@ -61,7 +61,7 @@ public class MakeContainer implements Make {
   /**
    * Returns true if the underlying dependencies have changed.
    */
-  public synchronized void make()
+  public void make()
     throws Exception
   {
     for (int i = 0; i < _makeList.size(); i++) {

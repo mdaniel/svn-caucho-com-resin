@@ -37,7 +37,9 @@ import com.caucho.java.LineMap;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.log.Log;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.util.Alarm;
 import com.caucho.util.CompileException;
+import com.caucho.util.ThreadPool;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -52,7 +54,8 @@ import java.util.logging.Logger;
  * Resource for precompiling all the *.jsp files on startup.
  */
 public class JspPrecompileResource {
-  private static final Logger log = Log.open(JspPrecompileResource.class);
+  private static final Logger log
+    = Logger.getLogger(JspPrecompileResource.class.getName());
   private static final L10N L = new L10N(JspPrecompileResource.class);
 
   private FileSetType _fileSet;
@@ -60,6 +63,10 @@ public class JspPrecompileResource {
   private WebApp _webApp;
 
   private final Lifecycle _lifecycle = new Lifecycle();
+
+  private int _threadCount = 2;
+
+  private int _completeCount;
 
   /**
    * Sets the webApp.
@@ -88,6 +95,17 @@ public class JspPrecompileResource {
   public FileSetType createFileSet()
   {
     return createFileset();
+  }
+
+  /**
+   * Sets the number of threads to spawn.
+   */
+  public void setThreadCount(int count)
+  {
+    if (count < 1)
+      count = 1;
+    
+    _threadCount = count;
   }
 
   /**
@@ -125,37 +143,104 @@ public class JspPrecompileResource {
 
     if (JspFactory.getDefaultFactory() == null)
       JspFactory.setDefaultFactory(new QJspFactory());
-    
-    JspCompiler compiler = new JspCompiler();
-    compiler.setWebApp(_webApp);
 
     ArrayList<Path> paths = _fileSet.getPaths();
     ArrayList<String> classes = new ArrayList<String>();
 
-    String contextPath = _webApp.getContextPath();
-    if (! contextPath.endsWith("/"))
-      contextPath = contextPath + "/";
-    
-    Path pwd = Vfs.lookup();
+    for (int i = 0; i < _threadCount; i++) {
+      CompileTask task = new CompileTask(paths, classes);
+      
+      ThreadPool.getThreadPool().schedule(task);
+    }
 
-    for (int i = 0; i < paths.size(); i++) {
-      Path path = paths.get(i);
+    long expire = Alarm.getCurrentTime() + 60000;
+    synchronized (this) {
+      while (_completeCount < _threadCount) {
+	System.out.println("CC: " + _completeCount + " " + _threadCount);
+	try {
+	  long timeout = expire - Alarm.getCurrentTime();
+
+	  if (timeout < 0)
+	    return;
+	  
+	  wait(timeout);
+	} catch (Exception e) {
+	}
+      }
+    }
+  }
+
+  class CompileTask implements Runnable {
+    private int _chunkCount;
+    private ArrayList<Path> _paths;
+    private ArrayList<String> _classes;
+    private JspCompiler _compiler;
+
+    CompileTask(ArrayList<Path> paths,
+		ArrayList<String> classes)
+    {
+      _paths = paths;
+      _classes = classes;
+
+      synchronized (_paths) {
+	_chunkCount = (_paths.size() + _threadCount) / _threadCount;
+      }
+      
+      _compiler = new JspCompiler();
+      _compiler.setWebApp(_webApp);
+    }
+
+    public void run()
+    {
+      try {
+	while (compilePath()) {
+	}
+      
+	while (compileClasses()) {
+	}
+      } finally {
+	synchronized (JspPrecompileResource.this) {
+	  _completeCount++;
+
+	  System.out.println("COMPLETE: " + _completeCount);
+
+	  JspPrecompileResource.this.notifyAll();
+	}
+      }
+    }
+
+    private boolean compilePath()
+    {
+      String contextPath = _webApp.getContextPath();
+      if (! contextPath.endsWith("/"))
+	contextPath = contextPath + "/";
+    
+      Path pwd = Vfs.lookup();
+      Path path = null;
+
+      synchronized (_paths) {
+	System.out.println("PATH: " + _paths);
+	if (_paths.size() == 0)
+	  return false;
+
+	path = _paths.remove(0);
+      }
 
       String uri = path.getPath().substring(pwd.getPath().length());
 
       if (_webApp.getContext(contextPath + uri) != _webApp)
-	continue;
+	return true;
 
       String className = JspCompiler.urlToClassName(uri);
 
       try {
-	CauchoPage page = (CauchoPage) compiler.loadClass(className, true);
+	CauchoPage page = (CauchoPage) _compiler.loadClass(className, true);
 
 	page.init(pwd);
 
 	if (! page._caucho_isModified()) {
 	  log.fine("pre-loaded " + uri);
-	  continue;
+	  return true;
 	}
       } catch (ClassNotFoundException e) {
       } catch (Throwable e) {
@@ -166,42 +251,56 @@ public class JspPrecompileResource {
       
       try {
 	JspCompilerInstance compilerInst;
-	compilerInst = compiler.getCompilerInstance(path, uri, className);
+	compilerInst = _compiler.getCompilerInstance(path, uri, className);
 
 	JspGenerator generator = compilerInst.generate();
 	
 	if (generator.isStatic())
-	  continue;
+	  return true;
 	
 	LineMap lineMap = generator.getLineMap();
 
-	classes.add(className.replace('.', '/') + ".java");
+	synchronized (_classes) {
+	  _classes.add(className.replace('.', '/') + ".java");
+	}
       } catch (Exception e) {
 	if (e instanceof CompileException)
 	  log.warning(e.getMessage());
 	else
 	  log.log(Level.WARNING, e.toString(), e);
-
-	continue;
       }
+
+      return true;
     }
 
-    if (classes.size() == 0)
-      return;
+    private boolean compileClasses()
+    {
+      String []files;
+      
+      synchronized (_classes) {
+	System.out.println("COMPILE: " + _classes);
+	
+	if (_classes.size() == 0)
+	  return false;
+	
+	files = new String[_classes.size()];
+	_classes.toArray(files);
+	_classes.clear();
+      }
 
-    try {
-      JavaCompiler javaCompiler = JavaCompiler.create(null);
-      javaCompiler.setClassDir(compiler.getClassDir());
+      try {
+	JavaCompiler javaCompiler = JavaCompiler.create(null);
+	javaCompiler.setClassDir(_compiler.getClassDir());
 
-      String files[] = new String[classes.size()];
-      classes.toArray(files);
+	javaCompiler.compileBatch(files);
+      } catch (Exception e) {
+	if (e instanceof CompileException)
+	  log.warning(e.getMessage());
+	else
+	  log.log(Level.WARNING, e.toString(), e);
+      }
 
-      javaCompiler.compileBatch(files);
-    } catch (Exception e) {
-      if (e instanceof CompileException)
-	log.warning(e.getMessage());
-      else
-	log.log(Level.WARNING, e.toString(), e);
+      return true;
     }
   }
 }

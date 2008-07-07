@@ -490,6 +490,19 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     }
   }
 
+  /**
+   * Adds the URL to the URLClassLoader.
+   */
+  public boolean containsURL(Path path)
+  {
+    URL url = pathToURL(path);
+
+    if (url == null)
+      return false;
+    else
+      return containsURL(url);
+  }
+
   private URL pathToURL(Path path)
   {
     try {
