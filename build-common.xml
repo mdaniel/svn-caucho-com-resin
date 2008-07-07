@@ -284,7 +284,8 @@
      - distribution rules
     -->
 
-  <target name="webapps" depends="init, doc, quercus">
+  <!--
+  <target name="webapps" depends="init, quercus">
   </target>
 
   <target name="doc" depends="init">
@@ -304,74 +305,7 @@
       </fileset>
     </jar>
   </target>
-
-  <target name="javadoc" depends="init">
-    <delete quiet="true" file="${dist}/resin-javadoc-${version}.war"/>
-
-    <delete quiet="true" dir="${build}/javadoc"/>
-
-    <mkdir dir="${build}/javadoc/web-app"/>
-
-    <javadoc destdir="${build}/javadoc/web-app/" 
-      maxmemory="256m"
-      use="true" 
-      author="true"
-      version="true"
-      windowtitle="Resin ${version}"
-      source="1.5"
-      splitindex="yes">
-
-      <packageset dir="${modules}/ejb/src"/>
-      <packageset dir="${modules}/jsdk/src"/>
-      <packageset dir="${modules}/jcache/src"/>
-      <packageset dir="${modules}/jpa/src"/>
-      <!--
-      <packageset dir="${modules}/j2ee-deploy/src"/>
-      <packageset dir="${modules}/j2ee-management/src"/>
-      <packageset dir="${modules}/jaf/src"/>
-      -->
-      <packageset dir="${modules}/jaxrpc/src"/>
-      <packageset dir="${modules}/jca/src"/>
-      <packageset dir="${modules}/jms/src"/>
-      <packageset dir="${modules}/jstl/src"/>
-      <packageset dir="${modules}/jta/src"/>
-      <packageset dir="${modules}/portlet/src"/>
-      <packageset dir="${modules}/quercus/src"/>
-      <packageset dir="${modules}/resin/src"/>
-      <!--
-      <packageset dir="${modules}/saaj/src"/>
-      -->
-      <packageset dir="${modules}/script/src"/>
-      <packageset dir="${modules}/unix/src"/>
-      <packageset dir="${modules}/util/src"/>
-      <packageset dir="${modules}/webbeans/src"/>
-      <packageset dir="${modules}/webutil/src"/>
-      <packageset dir="${promodules}/pro/src"/>
-
-    <!-- For any linked documents here, the href="xxx" must be matched
-       - by an <api id="xxx"/> in web.xml
-    <link href="${jdkapi.href}"/>
-      -->
-    </javadoc>
-
-    <mkdir dir="${dist}"/>
-
-    <jar 
-      jarfile="${dist}/resin-javadoc-${version}.war"
-      basedir="${build}/javadoc/web-app"
-      compress="true"
-      index="false">
-      <exclude name="**/timestamp"/>
-      <exclude name="**/WEB-INF/lib"/>
-
-      <exclude name="**/work"/>
-      <exclude name="**/tmp"/>
-      <exclude name="**/.*"/>
-      <exclude name="**/.svn"/>
-      <exclude name="**/debug.log"/>
-    </jar>
-
-  </target>
+  -->
 
   <macrodef name="generate-pdf">
     <attribute name="name"/>
@@ -582,7 +516,7 @@
   </target>
   
   <target name="resin.dist.build" 
-          depends="compile, configure, resin.dist.jar, doc">
+          depends="compile, configure, resin.dist.jar">
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <mkdir dir="${dist}/${dist.name}"/>

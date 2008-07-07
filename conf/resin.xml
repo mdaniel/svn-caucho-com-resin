@@ -204,15 +204,15 @@
          - <cookie-http-only/>
         -->
 
-        <jsf fast-jsf='false'/>
       <!--
          - Some JSP packages have incorrect .tld files.  It's possible to
          - set validate-taglib-schema to false to work around these packages.
         -->
-        <jsp>
-          <validate-taglib-schema>true</validate-taglib-schema>
-          <fast-jstl>true</fast-jstl>
-        </jsp>
+      <jsp>
+        <validate-taglib-schema>true</validate-taglib-schema>
+        <fast-jstl>true</fast-jstl>
+      </jsp>
+      <jsf fast-jsf='false'/>
     </web-app-default>
 
     <!-- includes the app-default for default web-app behavior -->
