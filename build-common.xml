@@ -582,7 +582,7 @@
   </target>
   
   <target name="resin.dist.build" 
-          depends="compile, configure, resin.dist.jar">
+          depends="compile, configure, resin.dist.jar, doc">
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <mkdir dir="${dist}/${dist.name}"/>
@@ -634,34 +634,6 @@
         <include name="lib/jaxrpc-15.jar"/>
         <include name="lib/jsf-12.jar"/>
         <include name="lib/webutil.jar"/>
-
-	<!--
-        <include name="lib/aopalliance.jar"/>
-        <include name="lib/portlet-10.jar"/>
-        <include name="lib/script-10.jar"/>
-        <include name="lib/jaxws-api.jar"/>
-        <include name="lib/jws-15.jar"/>
-        <include name="lib/saaj.jar"/>
-	-->
-	
-        <!--
-        <include name="lib/ejb-15.jar"/>
-        <include name="lib/hessian.jar"/>
-        <include name="lib/jpa-15.jar"/>
-        <include name="lib/jca-15.jar"/>
-        <include name="lib/jms-11.jar"/>
-        <include name="lib/jsdk-16.jar"/>
-        <include name="lib/jsf-12.jar"/>
-        <include name="lib/jstl-11.jar"/>
-        <include name="lib/jta-101.jar"/>
-        <include name="lib/jws-15.jar"/>
-        <include name="lib/quercus.jar"/>
-        <include name="lib/resin-deploy.jar"/>
-        <include name="lib/resin-util.jar"/>
-        <include name="lib/resin.jar"/>
-        <include name="lib/resinboot.jar"/>
-        <include name="lib/webbeans-16.jar"/>
-	-->
 
         <include name="webapps/resin-doc.war"/>
         <include name="webapps/ROOT/index.jsp"/>
