@@ -223,9 +223,6 @@ public class Management
    */
   public Object createStatService()
   {
-    System.out.println("MGMR: " + this);
-    Thread.dumpStack();
-    
     log.warning(L.l("stat-service requires Resin Professional"));
     
     return new Object();
@@ -252,9 +249,11 @@ public class Management
   /**
    * Create and configure the transaction log.
    */
-  public TransactionLog createXaLogService()
+  public Object createXaLogService()
   {
-    return createTransactionManager().createTransactionLog();
+    log.warning(L.l("xa-log-service requires Resin Professional"));
+    
+    return new Object();
   }
 
   /**

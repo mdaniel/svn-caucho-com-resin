@@ -881,14 +881,18 @@
           file="${resin.lib}/quercus.jar"/>
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/resin-util.jar"
           file="${resin.lib}/resin-util.jar"/>
+    <!--
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/script-10.jar"
           file="${resin.lib}/script-10.jar"/>
+    -->
 
     <jar destfile="${dist}/quercus-${version}.war">
       <fileset dir="${install}/php/quercus-war">
         <include name="WEB-INF/lib/quercus.jar"/>
         <include name="WEB-INF/lib/resin-util.jar"/>
+	<!--
         <include name="WEB-INF/lib/script-10.jar"/>
+	-->
         <include name="WEB-INF/web.xml"/>
         <include name="images/caucho-white.jpg"/>
         <include name="images/dragonfly-tiny.png"/>
