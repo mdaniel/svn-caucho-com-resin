@@ -1141,7 +1141,7 @@ public class MysqlModule extends AbstractQuercusModule {
 
   private static Mysqli getConnection(Env env)
   {
-    return getConnection(env, env.createEmptyString());
+    return getConnection(env, env.getEmptyString());
   }
 
   private static Mysqli getConnection(Env env, StringValue db)
@@ -1153,10 +1153,10 @@ public class MysqlModule extends AbstractQuercusModule {
       return conn;
 
     conn = new Mysqli(env,
-                      env.createEmptyString(),
-                      env.createEmptyString(), env.createEmptyString(),
+                      env.getEmptyString(),
+                      env.getEmptyString(), env.getEmptyString(),
                       db, 3306,
-                      env.createEmptyString());
+                      env.getEmptyString());
 
     env.setSpecialValue("caucho.mysql", conn);
 

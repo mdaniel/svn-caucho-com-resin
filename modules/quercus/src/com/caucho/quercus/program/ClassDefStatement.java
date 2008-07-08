@@ -50,10 +50,7 @@ public class ClassDefStatement extends Statement {
   @Override
   public Value execute(Env env)
   {
-    // for performance reasons, we are not going to validate classes here
-    // to be consistent with the compiled version
-    // php/0948 vs php/3948
-    //env.addClass(_cl.getName(), _cl);
+    env.addClass(_cl.getName(), _cl);
 
     return null;
   }

@@ -192,7 +192,7 @@ public class UrlModule extends AbstractQuercusModule {
             if (colon < line.length())
               value = env.createString(line.substring(colon + 1).trim());
             else
-              value = env.createEmptyString();
+              value = env.getEmptyString();
 
 
             if (result.get(key) != UnsetValue.UNSET)
@@ -312,7 +312,7 @@ public class UrlModule extends AbstractQuercusModule {
     httpBuildQueryImpl(env,
                        result,
                        formdata,
-                       env.createEmptyString(),
+                       env.getEmptyString(),
                        numeric_prefix,
                        separator);
 
@@ -475,7 +475,7 @@ public class UrlModule extends AbstractQuercusModule {
   public static Value parse_url(Env env, StringValue str)
   {
     if (str == null)
-      str = env.createEmptyString();
+      str = env.getEmptyString();
 
     int i = 0;
     int length = str.length();

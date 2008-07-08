@@ -62,7 +62,7 @@ public class ToBinaryExpr extends ToStringExpr {
     if (value instanceof BytesValue)
       return value;
     else
-      return value.toBinaryValue(env);
+      return value.toString(env).toBinaryValue(env);
   }
 
   public String toString()

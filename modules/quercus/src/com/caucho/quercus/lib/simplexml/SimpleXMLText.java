@@ -100,4 +100,9 @@ public class SimpleXMLText extends SimpleXMLElement
   {
     sb.append(_text);
   }
+  
+  public StringValue __toString()
+  {
+    return _text;
+  }
 }

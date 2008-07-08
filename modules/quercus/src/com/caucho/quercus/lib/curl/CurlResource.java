@@ -104,10 +104,10 @@ public class CurlResource
   private BinaryInput _uploadFile;
   private int _uploadFileSize;
 
-  private Callback _headerFunction;
-  private Callback _passwordFunction;
-  private Callback _readFunction;
-  private Callback _writeFunction;
+  private Callback _headerCallback;
+  private Callback _passwordCallback;
+  private Callback _readCallback;
+  private Callback _writeCallback;
 
   public CurlResource()
   {
@@ -248,13 +248,21 @@ public class CurlResource
   {
     _header = header;
   }
+  
+  /*
+   * Returns the header callback.
+   */
+  public Callback getHeaderCallback()
+  {
+    return _headerCallback;
+  }
 
   /**
-   *
+   * Sets the callback to read the header.
    */
-  public void setHeaderFunction(Callback callback)
+  public void setHeaderCallback(Callback callback)
   {
-    _headerFunction = callback;
+    _headerCallback = callback;
   }
 
   /**
@@ -411,9 +419,9 @@ public class CurlResource
   /**
    *
    */
-  public void setPasswordFunction(Callback callback)
+  public void setPasswordCallback(Callback callback)
   {
-    _passwordFunction = callback;
+    _passwordCallback = callback;
   }
 
   /**
@@ -528,12 +536,20 @@ public class CurlResource
     _proxyUsername = user;
   }
 
-  /**
-   * 
+  /*
+   * Returns the callback to read the body.
    */
-  public void setReadFunction(Callback callback)
+  public Callback getReadCallback()
   {
-    _readFunction = callback;
+    return _readCallback;
+  }
+  
+  /**
+   * Sets the callback to read the body.
+   */
+  public void setReadCallback(Callback callback)
+  {
+    _readCallback = callback;
   }
 
   /**
@@ -686,9 +702,9 @@ public class CurlResource
   /**
    *
    */
-  public void setWriteFunction(Callback callback)
+  public void setWriteCallback(Callback callback)
   {
-    _writeFunction = callback;
+    _writeCallback = callback;
   }
 
   /**
@@ -736,10 +752,11 @@ public class CurlResource
 
     env.addCleanup(httpRequest);
 
-    httpRequest.execute(env);
-
-    if (hasError())
+    if (! httpRequest.execute(env))
       return BooleanValue.FALSE;
+
+    //if (hasError())
+      //return BooleanValue.FALSE;
 
     if (_cookie != null && _cookieFilename != null)
       saveCookie(env);
@@ -859,7 +876,7 @@ public class CurlResource
     curl.setError(_error);
     curl.setErrorCode(_errorCode);
     curl.setFailOnError(_failOnError);
-    curl.setHeaderFunction(_headerFunction);
+    curl.setHeaderCallback(_headerCallback);
     curl.setHeader(_header);
     curl.setIsFollowingRedirects(_isFollowingRedirects);
     curl.setIfModifiedSince(_ifModifiedSince);
@@ -872,7 +889,7 @@ public class CurlResource
     curl.setOutputFile(_outputFile);
     curl.setOutputHeaderFile(_outputHeaderFile);
     curl.setPassword(_password);
-    curl.setPasswordFunction(_passwordFunction);
+    curl.setPasswordCallback(_passwordCallback);
     curl.setPort(_port);
     curl.setPostBody(_postBody);
     curl.setProxyPassword(_proxyPassword);
@@ -880,7 +897,7 @@ public class CurlResource
     curl.setProxyType(_proxyType);
     curl.setProxyURL(_proxyURL);
     curl.setProxyUsername(_proxyUsername);
-    curl.setReadFunction(_readFunction);
+    curl.setReadCallback(_readCallback);
     curl.setReadTimeout(_readTimeout);
     curl.setRequestMethod(_requestMethod);
 
@@ -893,7 +910,7 @@ public class CurlResource
     curl.setUploadFileSize(_uploadFileSize);
     curl.setURL(_URL);
     curl.setUsername(_username);
-    curl.setWriteFunction(_writeFunction);
+    curl.setWriteCallback(_writeCallback);
 
     return curl;
   }

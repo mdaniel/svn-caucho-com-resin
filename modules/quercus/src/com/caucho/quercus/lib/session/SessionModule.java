@@ -244,16 +244,20 @@ public class SessionModule extends AbstractQuercusModule
   public static boolean session_regenerate_id(Env env,
                                               @Optional boolean deleteOld)
   {
+    // php/1k82, php/1k83
+    if (env.getSession() == null)
+      return ! deleteOld;
+    
     String sessionId = env.generateSessionId();
     
     if (deleteOld) {
       session_destroy(env);
 
       SessionArrayValue session = env.createSession(sessionId, true);
-      env.setSession(session);
     }
     else {
       SessionArrayValue session = env.getSession();
+      
       session.setId(sessionId);
     }
 
@@ -424,7 +428,7 @@ public class SessionModule extends AbstractQuercusModule
       }
 
       if (! generateCookie)
-        env.addConstant("SID", env.createEmptyString(), false);
+        env.addConstant("SID", env.getEmptyString(), false);
     }
 
     //

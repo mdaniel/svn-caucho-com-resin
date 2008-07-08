@@ -258,7 +258,7 @@ public class JavaRegexpModule
           for (int j = regs.getSize(); j < i; j++) {
             ArrayValue part = new ArrayValueImpl();
 
-            part.append(env.createEmptyString());
+            part.append(env.getEmptyString());
             part.append(LongValue.MINUS_ONE);
 
             regs.put(new LongValue(j), part);
@@ -278,7 +278,7 @@ public class JavaRegexpModule
           // php/151u
           // add unmatched groups first
           for (int j = regs.getSize(); j < i; j++) {
-            regs.put(new LongValue(j), env.createEmptyString());
+            regs.put(new LongValue(j), env.getEmptyString());
           }
 
           StringValue match = env.createString(group);
@@ -486,7 +486,7 @@ public class JavaRegexpModule
             for (int j = matchResult.getSize(); j < i; j++) {
               ArrayValue part = new ArrayValueImpl();
 
-              part.append(env.createEmptyString());
+              part.append(env.getEmptyString());
               part.append(LongValue.MINUS_ONE);
 
               matchResult.put(LongValue.create(j), part);
@@ -502,7 +502,7 @@ public class JavaRegexpModule
             // php/
             // add unmatched groups that was skipped
             for (int j = matchResult.getSize(); j < i; j++) {
-              matchResult.put(LongValue.create(j), env.createEmptyString());
+              matchResult.put(LongValue.create(j), env.getEmptyString());
             }
 
             result = groupValue;
@@ -592,7 +592,7 @@ public class JavaRegexpModule
       return pregReplace(env, pattern, replacement, subject.toStringValue(),
               limit, count);
     } else
-      return env.createEmptyString();
+      return env.getEmptyString();
 
   }
 
@@ -624,7 +624,7 @@ public class JavaRegexpModule
         if (replacementIter.hasNext())
           replacementStr = replacementIter.next().toStringValue();
         else
-          replacementStr = env.createEmptyString();
+          replacementStr = env.getEmptyString();
 
         string = pregReplaceString(env,
                 patternIter.next().toStringValue(),
@@ -704,7 +704,7 @@ public class JavaRegexpModule
         if (group != null)
           regs.put(env.createString(group));
         else
-          regs.put(env.createEmptyString());
+          regs.put(env.getEmptyString());
       }
 
       Value replacement = fun.call(env, regs);
@@ -806,7 +806,7 @@ public class JavaRegexpModule
     }
 
     if (replacement instanceof NullValue) {
-      replacementStr = env.createEmptyString();
+      replacementStr = env.getEmptyString();
     } else if (replacement instanceof StringValue) {
       replacementStr = replacement.toStringValue();
     } else {
@@ -953,7 +953,7 @@ public class JavaRegexpModule
               limit,
               count);
     } else {
-      return env.createEmptyString();
+      return env.getEmptyString();
     }
   }
 
@@ -992,7 +992,7 @@ public class JavaRegexpModule
               limit,
               countV);
     } else {
-      return env.createEmptyString();
+      return env.getEmptyString();
     }
   }
 
@@ -1086,13 +1086,13 @@ public class JavaRegexpModule
               if (isCaptureOffset) {
                 ArrayValue part = new ArrayValueImpl();
 
-                part.put(env.createEmptyString());
+                part.put(env.getEmptyString());
                 part.put(LongValue.create(startPosition));
 
                 result.put(part);
               }
               else {
-                result.put(env.createEmptyString());
+                result.put(env.getEmptyString());
               }
             }
           }

@@ -87,7 +87,7 @@ public class Post {
           
           bb.appendReadAll(is, Integer.MAX_VALUE);
           
-          env.setPostData(bb);
+          env.setInputData(bb);
           
           if (contentType != null
               && contentType.startsWith("application/x-www-form-urlencoded"))

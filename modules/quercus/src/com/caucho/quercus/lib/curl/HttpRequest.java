@@ -30,9 +30,11 @@
 package com.caucho.quercus.lib.curl;
 
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -163,25 +165,38 @@ public class HttpRequest
   /**
    * Closes the connection and sends data and connection info to curl.
    */
-  protected void finish(Env env)
+  protected boolean finish(Env env)
     throws IOException
   {
     _curl.setResponseCode(_conn.getResponseCode());
 
-    _curl.setHeader(getHeader(env.createBinaryBuilder()));
-    _curl.setBody(getBody(env.createBinaryBuilder()));
+    Value header = getHeader(env, env.createBinaryBuilder());
+    
+    if (header == BooleanValue.FALSE)
+      return false;
+    
+    _curl.setHeader(header.toStringValue());
+    
+    Value body = getBody(env, env.createBinaryBuilder());
+    
+    if (body == BooleanValue.FALSE)
+      return false;
+    
+    _curl.setBody(body.toStringValue());
 
     _curl.setContentLength(_conn.getContentLength());
 
     _curl.setCookie(_conn.getHeaderField("Set-Cookie"));
 
     _conn.close();
+    
+    return true;
   }
 
   /**
    * Perform this request.
    */
-  public final void execute(Env env)
+  public final boolean execute(Env env)
   {
     try {
       create(env);
@@ -192,16 +207,22 @@ public class HttpRequest
 
       transfer(env);
 
-      finish(env);
+      return finish(env);
     }
     catch (MalformedURLException e) {
       error(env, CurlModule.CURLE_URL_MALFORMAT, e.getMessage(), e);
+      
+      return false;
     }
     catch (SocketTimeoutException e) {
       error(env, CurlModule.CURLE_OPERATION_TIMEOUTED, "connection timed out", e);
+      
+      return false;
     }
     catch (ConnectException e) {
       error(env, CurlModule.CURLE_COULDNT_CONNECT, e.getMessage(), e);
+      
+      return false;
     }
     catch (ProtocolException e) {
       throw new QuercusModuleException(e.getMessage());
@@ -209,9 +230,13 @@ public class HttpRequest
     }
     catch (UnknownHostException e) {
       error(env, CurlModule.CURLE_COULDNT_RESOLVE_HOST, "unknown host: " + e.getMessage(), e);
+      
+      return false;
     }
     catch (IOException e) {
       error(env, CurlModule.CURLE_RECV_ERROR, e.getMessage(), e);
+      
+      return false;
     }
   }
 
@@ -269,11 +294,26 @@ public class HttpRequest
   /**
    * Returns the server response header.
    */
-  private final StringValue getHeader(StringValue bb)
+  private final Value getHeader(Env env, StringValue bb)
   {
     // Append server response to the very top
     bb.append(_conn.getHeaderField(0));
+    
     bb.append("\r\n");
+    
+    if (_curl.getHeaderCallback() != null) {
+      StringValue sb = env.createUnicodeBuilder();
+      
+      sb.append(_conn.getHeaderField(0));
+      sb.append("\r\n");
+      
+      Value len = _curl.getHeaderCallback().call(env, env.wrapJava(_curl), sb);
+      
+      if (len.toInt() != sb.length()) {
+        _curl.setErrorCode(CurlModule.CURLE_WRITE_ERROR);
+        return BooleanValue.FALSE;
+      }
+    }
 
     String key;
     int i = 1;
@@ -283,10 +323,44 @@ public class HttpRequest
       bb.append(": ");
       bb.append(_conn.getHeaderField(i));
       bb.append("\r\n");
+      
+      if (_curl.getHeaderCallback() != null) {
+        StringValue sb = env.createUnicodeBuilder();
+        
+        sb.append(key);
+        sb.append(": ");
+        sb.append(_conn.getHeaderField(i));
+        sb.append("\r\n");
+        
+        Value len = _curl.getHeaderCallback().call(env,
+                                                   env.wrapJava(_curl),
+                                                   sb);
+        
+        if (len.toInt() != sb.length()) {
+          _curl.setErrorCode(CurlModule.CURLE_WRITE_ERROR);
+          return BooleanValue.FALSE;
+        }
+      }
+      
       i++;
     }
 
     bb.append("\r\n");
+    
+    if (_curl.getHeaderCallback() != null) {
+      StringValue sb = env.createUnicodeBuilder();
+      
+      sb.append("\r\n");
+      
+      Value len = _curl.getHeaderCallback().call(env,
+                                                 env.wrapJava(_curl),
+                                                 sb);
+      
+      if (len.toInt() != sb.length()) {
+        _curl.setErrorCode(CurlModule.CURLE_WRITE_ERROR);
+        return BooleanValue.FALSE;
+      }
+    }
 
     return bb;
   }
@@ -294,7 +368,7 @@ public class HttpRequest
   /**
    * Returns the server response body.
    */
-  private final StringValue getBody(StringValue bb)
+  private final Value getBody(Env env, StringValue bb)
     throws SocketTimeoutException, IOException
   {
     InputStream in;
@@ -331,6 +405,16 @@ public class HttpRequest
       }
     }
     catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+    
+    if (_curl.getReadCallback() != null) {
+      Value len = _curl.getReadCallback().call(env, env.wrapJava(_curl), bb);
+      
+      if (len.toInt() != bb.length()) {
+        _curl.setErrorCode(CurlModule.CURLE_WRITE_ERROR);
+        return BooleanValue.FALSE;
+      }
     }
 
     return bb;

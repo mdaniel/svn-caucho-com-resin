@@ -31,6 +31,7 @@ package com.caucho.quercus.lib.json;
 
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.simplexml.SimpleXMLElement;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 
@@ -108,7 +109,7 @@ public class JsonModule
       Value key = keyIter.next();
       
       if ((! key.isLongConvertible()) || key.toLong() != length) {
-        encodeArrayToObject(env, sb, val);
+        encodeAssociativeArray(env, sb, val);
         return;
       }
       length++;
@@ -130,12 +131,17 @@ public class JsonModule
   /**
    * Encodes an associative array into a JSON object.
    */
-  private void encodeArrayToObject(Env env, StringValue sb, ArrayValue val)
+  private void encodeAssociativeArray(Env env, StringValue sb, ArrayValue val)
   {
       sb.append('{');
 
       int length = 0;
-      for (Map.Entry<Value,Value> entry : val.entrySet()) {
+      
+      Iterator<Map.Entry<Value,Value>> iter = val.getIterator(env);
+      
+      while (iter.hasNext()) {
+        Map.Entry<Value,Value> entry = iter.next();
+
         if (length > 0)
           sb.append(',');
 

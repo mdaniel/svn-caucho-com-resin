@@ -1375,7 +1375,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public String toString()
   {
-    return "ObjectExtValue@" + System.identityHashCode(this) +  "[" + _className + "]";
+    return getClass().getSimpleName() + "@" + System.identityHashCode(this) +  "[" + _className + "]";
   }
   
   public class EntrySet extends AbstractSet<Map.Entry<Value,Value>> {

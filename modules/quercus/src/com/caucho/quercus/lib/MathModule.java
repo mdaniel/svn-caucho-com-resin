@@ -207,7 +207,7 @@ public class MathModule extends AbstractQuercusModule {
     } else if (value instanceof LongValue) {
       return valueToBase(env, (LongValue) value, base);
     } else {
-      return env.createEmptyString();
+      return env.getEmptyString();
     }
   }
 

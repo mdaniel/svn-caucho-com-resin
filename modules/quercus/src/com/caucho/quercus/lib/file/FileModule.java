@@ -48,8 +48,10 @@ import com.caucho.vfs.LockableStream;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1734,7 +1736,7 @@ public class FileModule extends AbstractQuercusModule {
       compiledGlobRegex = Pattern.compile(globRegex);
     } catch (PatternSyntaxException e) {
       log.log(Level.FINE, e.toString(), e);
-
+      
       return null;
     }
 
@@ -1744,20 +1746,22 @@ public class FileModule extends AbstractQuercusModule {
       list = path.list();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       return null;
     }
-
+    
     for (String entry : list) {
       Matcher matcher = compiledGlobRegex.matcher(entry);
 
       if (matcher.matches()) {
         StringValue sb = env.createUnicodeBuilder();
 
-        sb.append(prefix);
-
-        if (prefix.length() > 0)
-          sb.append("/");
+        if (prefix.length() > 0) {
+          sb.append(prefix);
+          
+          if (! prefix.equals("/"))
+            sb.append("/");
+        }
 
         sb.append(entry);
 
@@ -1785,8 +1789,9 @@ public class FileModule extends AbstractQuercusModule {
         if ((firstSlash < 0 || subPattern.length() == 0) && 
             (((flags & GLOB_ONLYDIR) == 0) ||
              (((flags & GLOB_ONLYDIR) != 0) && 
-              (entryPath != null && entryPath.isDirectory()))))
-          result.put(sb);
+              (entryPath != null && entryPath.isDirectory())))) {
+            result.put(sb);
+        }
       }
     }
 
@@ -1796,29 +1801,74 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Matches all files with the given pattern.
    */
-  public static Value glob(Env env, StringValue pattern, @Optional int flags)
+  public static Value glob(Env env, String pattern, @Optional int flags)
   {
     Path path = env.getPwd();
 
-    String trimmedPattern = pattern.toString();
-
-    if (pattern.length() > 0 && pattern.charAt(0) == '/') {
+    int patternLength = pattern.length();
+    String prefix = "";
+    
+    int braceIndex;
+    if ((flags & GLOB_BRACE) != 0 && (braceIndex = pattern.indexOf('{')) >= 0) {
+      if ((flags & GLOB_NOESCAPE) != 0)
+        return globBrace(env, pattern, flags, braceIndex);
+      
+      int i = 0;
+      
+      boolean isEscaped = false;
+      
+      // find open bracket '{'
+      while (i < patternLength) {
+        char ch = pattern.charAt(i);
+        
+        if (ch == '\\')
+          isEscaped = ! isEscaped;
+        else if (ch == '{') {
+          if (isEscaped)
+            isEscaped = false;
+          else
+            break;
+        }
+        else
+          isEscaped = false;
+        
+        i++;
+      }
+      
+      if (i < patternLength)
+        return globBrace(env, pattern, flags, i);
+    }
+    
+    if (patternLength > 0 && pattern.charAt(0) == '/') {
+      prefix = "/";
+      
       int i;
 
       // strip off any leading slashes
-      for (i = 0; i < pattern.length(); i++) {
+      for (i = 0; i < patternLength; i++) {
         if (pattern.charAt(i) != '/')
           break;
       }
 
       path = path.lookup("/");
 
-      trimmedPattern = pattern.substring(i).toString();
+      pattern = pattern.substring(i);
+    }
+    else if (Path.isWindows()
+             && patternLength > 2 && pattern.charAt(1) == ':') {
+      prefix = pattern.substring(0, 2);
+      
+      String driveLetter = pattern.substring(0, 2);
+      
+      // X:/ - slash is required when looking up root
+      path = path.lookup(driveLetter + '/');
+      
+      pattern = pattern.substring(3);
     }
 
     ArrayValue result = new ArrayValueImpl();
     
-    result = globImpl(env, trimmedPattern, flags, path, "", result);
+    result = globImpl(env, pattern, flags, path, prefix, result);
 
     if (result == null)
       return BooleanValue.FALSE;
@@ -1828,6 +1878,105 @@ public class FileModule extends AbstractQuercusModule {
     if ((flags & GLOB_NOSORT) == 0)
       result.sort(ArrayValue.ValueComparator.CMP, true, true);
 
+    return result;
+  }
+  
+  /*
+   * Breaks a glob with braces into multiple globs.
+   */
+  private static Value globBrace(Env env, String pattern, int flags,
+                                 int braceIndex)
+  {
+    int patternLength = pattern.length();
+    
+    boolean isEscaped = false;
+    
+    String prefix = pattern.substring(0, braceIndex);
+
+    ArrayList<StringBuilder> basePathList
+      = new ArrayList<StringBuilder>();
+    
+    StringBuilder sb = new StringBuilder();
+    sb.append(prefix);
+    
+    isEscaped = false;
+    
+    int i = braceIndex + 1;
+    
+    // parse bracket contents
+    while (i < patternLength) {
+      char ch = pattern.charAt(i++);
+      
+      if (ch == ',') {
+        if (isEscaped) {
+          isEscaped = false;
+          sb.append(',');
+        }
+        else {
+          basePathList.add(sb);
+          sb = new StringBuilder();
+          sb.append(prefix);
+        }
+      }
+      else if (ch == '}') {
+        if (isEscaped) {
+          isEscaped = false;
+          sb.append('}');
+        }
+        else {
+          basePathList.add(sb);
+          break;
+        }
+      }
+      else if (ch == '\\') {
+        if ((flags & GLOB_NOESCAPE) != 0)
+          sb.append('\\');
+        else if (isEscaped) {
+          isEscaped = false;
+          sb.append('\\');
+          sb.append('\\');
+        }
+        else
+          isEscaped = true;
+      }
+      else {
+        if (isEscaped) {
+          isEscaped = false;
+          sb.append('\\');
+        }
+
+        sb.append(ch);
+      }
+    }
+    
+    String suffix = "";
+    
+    if (i < patternLength)
+      suffix = pattern.substring(i);
+    
+    Value result = null;
+
+    for (StringBuilder path : basePathList) {
+      path.append(suffix);
+      Value subresult = glob(env, path.toString(), flags);
+      
+      if (subresult.isArray() && subresult.getSize() > 0) {
+        if (prefix.length() == 0 && suffix.length() == 0)
+          return subresult;
+        else {
+          if (result == null)
+            result = subresult;
+          else {
+            Iterator<Map.Entry<Value,Value>> iter
+              = subresult.getIterator(env);
+          
+            while (iter.hasNext())
+              result.put(iter.next().getValue());
+          }
+        }
+      }
+    }
+    
     return result;
   }
 
@@ -2239,13 +2388,13 @@ public class FileModule extends AbstractQuercusModule {
       String value = sb.toString().trim();
 
       if (value.equalsIgnoreCase("null"))
-	return env.createEmptyString();
+	return env.getEmptyString();
       else if (value.equalsIgnoreCase("true")
 	       || value.equalsIgnoreCase("yes"))
 	return env.createString("1");
       else if (value.equalsIgnoreCase("false")
 	       || value.equalsIgnoreCase("no"))
-	return env.createEmptyString();
+	return env.getEmptyString();
 
       if (env.isDefined(value))
 	return env.createString(env.getConstant(value).toString());
@@ -2288,11 +2437,11 @@ public class FileModule extends AbstractQuercusModule {
   public static Value pathinfo(Env env, String path, @Optional Value optionsV)
   {
     if (optionsV == null)
-      return env.createEmptyString();
+      return env.getEmptyString();
     
     if (path == null) {
       if (! (optionsV instanceof DefaultValue)) {
-        return env.createEmptyString();
+        return env.getEmptyString();
       }
 
       ArrayValueImpl value = new ArrayValueImpl();
@@ -2335,7 +2484,7 @@ public class FileModule extends AbstractQuercusModule {
       else if ((options & PATHINFO_FILENAME) == PATHINFO_FILENAME)
         return env.createString(filename);
       else
-        return env.createEmptyString();
+        return env.getEmptyString();
     }
     else {
       ArrayValueImpl value = new ArrayValueImpl();

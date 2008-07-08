@@ -123,7 +123,7 @@ public class StreamReadWrite extends StreamResource
     if (_is != null)
       return _env.createString(_is.readLineNoChop());
     else
-      return _env.createEmptyString();
+      return _env.getEmptyString();
   }
 
   /**

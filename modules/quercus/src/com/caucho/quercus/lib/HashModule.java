@@ -146,19 +146,19 @@ public class HashModule extends AbstractQuercusModule {
       ReadStream is = path.openRead();
       
       try {
-	int len;
+        int len;
 
-	while ((len = is.read(buffer, 0, buffer.length)) > 0) {
-	  digest.update(buffer, 0, buffer.length);
-	}
+        while ((len = is.read(buffer, 0, buffer.length)) > 0) {
+          digest.update(buffer, 0, len);
+        }
 
-	byte []bytes = digest.digest();
+        byte []bytes = digest.digest();
 
-	return hashToValue(env, bytes, isBinary);
+        return hashToValue(env, bytes, isBinary);
       } finally {
-	TempBuffer.free(tempBuffer);
-	
-	is.close();
+        TempBuffer.free(tempBuffer);
+        
+        is.close();
       }
     } catch (NoSuchAlgorithmException e) {
       env.error(L.l("'{0}' is an unknown algorithm", algorithm), e);

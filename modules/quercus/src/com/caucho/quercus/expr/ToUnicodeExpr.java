@@ -30,6 +30,7 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.env.BytesValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.env.Value;
@@ -58,11 +59,11 @@ public class ToUnicodeExpr extends ToStringExpr {
   public Value eval(Env env)
   {
     Value value = _expr.eval(env).toValue();
-
-    if (value instanceof UnicodeValue)
+    
+    if (value.isUnicode())
       return value;
     else
-      return value.toUnicodeValue(env);
+      return value.toString(env).toUnicodeValue(env);
   }
 
   public String toString()

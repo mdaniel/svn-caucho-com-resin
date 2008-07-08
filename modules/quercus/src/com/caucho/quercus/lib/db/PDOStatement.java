@@ -1428,7 +1428,7 @@ public class PDOStatement
 
       if (!_isValid) {
         // this matches php behaviour
-        _var.set(_env.createEmptyString());
+        _var.set(_env.getEmptyString());
       }
       else {
         Value value = getColumnValue(_column, _jdbcType, _type);

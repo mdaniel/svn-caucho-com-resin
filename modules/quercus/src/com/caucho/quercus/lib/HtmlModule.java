@@ -309,7 +309,7 @@ public class HtmlModule extends AbstractQuercusModule {
 					       @Optional String charset)
   {
     if (string.length() == 0)
-      return env.createEmptyString();
+      return env.getEmptyString();
 
     Iterator<Map.Entry<Value,Value>> iter;
 

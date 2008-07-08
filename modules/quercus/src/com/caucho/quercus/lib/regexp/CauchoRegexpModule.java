@@ -613,7 +613,7 @@ public class CauchoRegexpModule
         return pregReplace(env, pattern, replacement, subject.toStringValue(),
                            limit, count);
       } else
-        return env.createEmptyString();
+        return env.getEmptyString();
     }
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -653,7 +653,7 @@ public class CauchoRegexpModule
         if (replacementIter.hasNext())
           replacementStr = replacementIter.next().toStringValue();
         else
-          replacementStr = env.createEmptyString();
+          replacementStr = env.getEmptyString();
 
         string = pregReplaceString(env,
 				   patternIter.next().toStringValue(),
@@ -843,7 +843,7 @@ public class CauchoRegexpModule
     }
 
     if (replacement instanceof NullValue) {
-      replacementStr = env.createEmptyString();
+      replacementStr = env.getEmptyString();
     } else if (replacement instanceof StringValue) {
       replacementStr = replacement.toStringValue();
     } else {
@@ -1004,7 +1004,7 @@ public class CauchoRegexpModule
             limit,
             count);
       } else {
-        return env.createEmptyString();
+        return env.getEmptyString();
       }
     }
     catch (IllegalRegexpException e) { 
@@ -1051,7 +1051,7 @@ public class CauchoRegexpModule
               limit,
               countV);
     } else {
-      return env.createEmptyString();
+      return env.getEmptyString();
     }
   }
 

@@ -138,6 +138,12 @@ public class JavaValue extends ObjectValue
   }
   
   @Override
+  public StringValue toString(Env env)
+  {
+    return _classDef.toString(env, this);
+  }
+  
+  @Override
   protected void printRImpl(Env env,
                             WriteStream out,
                             int depth,
@@ -494,8 +500,10 @@ public class JavaValue extends ObjectValue
   @Override
   public String toString()
   {
+    return toString(Env.getInstance()).toString();
+    
     // php/1x0b
-    return String.valueOf(_object);
+    //return String.valueOf(_object);
   }
 
 

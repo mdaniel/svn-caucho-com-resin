@@ -951,27 +951,18 @@ public class CurlModule
 
       //
       // callback functions
-      //   - nobody really knows how to use them
       //
       case CURLOPT_HEADERFUNCTION:
-        curl.setHeaderFunction(env.createCallback(value));
-        if (true)
-          throw new UnimplementedException("cURL callback support");
+        curl.setHeaderCallback(env.createCallback(value));
         break;
       case CURLOPT_PASSWDFUNCTION:
-        curl.setPasswordFunction(env.createCallback(value));
-        if (true)
-          throw new UnimplementedException("cURL callback support");
+        curl.setPasswordCallback(env.createCallback(value));
         break;
       case CURLOPT_READFUNCTION:
-        curl.setReadFunction(env.createCallback(value));
-        if (true)
-          throw new UnimplementedException("cURL callback support");
+        curl.setReadCallback(env.createCallback(value));
         break;
       case CURLOPT_WRITEFUNCTION:
-        curl.setWriteFunction(env.createCallback(value));
-        if (true)
-          throw new UnimplementedException("cURL callback support");
+        curl.setWriteCallback(env.createCallback(value));
         break;
 
       default:

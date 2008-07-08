@@ -280,7 +280,7 @@ public class MysqliModule extends AbstractQuercusModule {
     if (error != null)
       return env.createString(error.toString());
     else
-      return env.createEmptyString();
+      return env.getEmptyString();
   }
 
   /**
@@ -521,7 +521,7 @@ public class MysqliModule extends AbstractQuercusModule {
                                               @NotNull MysqliStatement stmt)
   {
     if (stmt == null)
-      return env.createEmptyString();
+      return env.getEmptyString();
 
     return stmt.error(env);
   }
@@ -985,7 +985,7 @@ public class MysqliModule extends AbstractQuercusModule {
       return NullValue.NULL;
 
     if (unescapedString.length() == 0)
-      return env.createEmptyString();
+      return env.getEmptyString();
 
     StringBuilder buf = new StringBuilder();
 

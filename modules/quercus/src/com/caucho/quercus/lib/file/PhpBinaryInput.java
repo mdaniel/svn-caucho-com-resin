@@ -51,12 +51,12 @@ public class PhpBinaryInput extends AbstractBinaryInput
   {
     super(env);
     
-    StringValue postV = env.getPostData();
+    StringValue inputData = env.getInputData();
     
-    if (postV == null)
-      postV = env.createEmptyString();
+    if (inputData == null)
+      inputData = env.getEmptyString();
     
-    init(new ReadStream(new VfsStream(postV.toInputStream(), null)));
+    init(new ReadStream(new VfsStream(inputData.toInputStream(), null)));
   }
   
   public String toString()

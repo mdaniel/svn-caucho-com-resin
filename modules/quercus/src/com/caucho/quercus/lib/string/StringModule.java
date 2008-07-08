@@ -725,7 +725,7 @@ public class StringModule extends AbstractQuercusModule {
     array.put(env.createString("mon_thousands_sep"),
 	      env.createString(decimal.getGroupingSeparator()));
     //array.put("mon_grouping", "");
-    array.put(env.createString("positive_sign"), env.createEmptyString());
+    array.put(env.createString("positive_sign"), env.getEmptyString());
     array.put(env.createString("negative_sign"),
 	      env.createString(decimal.getMinusSign()));
     array.put(env.createString("int_frac_digits"),
@@ -774,7 +774,7 @@ public class StringModule extends AbstractQuercusModule {
       }
     }
 
-    return env.createEmptyString();
+    return env.getEmptyString();
   }
 
   /**
@@ -1530,7 +1530,7 @@ public class StringModule extends AbstractQuercusModule {
       }
     }
 
-    return env.createEmptyString();
+    return env.getEmptyString();
   }
 
   /**
@@ -2489,7 +2489,7 @@ public class StringModule extends AbstractQuercusModule {
     count.set(LongValue.ZERO);
 
     if (subject.isNull())
-      return env.createEmptyString();
+      return env.getEmptyString();
 
     if (search.isNull())
       return subject;
@@ -2515,7 +2515,7 @@ public class StringModule extends AbstractQuercusModule {
       StringValue subjectString = subject.toStringValue();
 
       if (subjectString.length() == 0)
-        return env.createEmptyString();
+        return env.getEmptyString();
 
       return strReplaceImpl(env,
 			    search,
@@ -3632,7 +3632,7 @@ public class StringModule extends AbstractQuercusModule {
                              Value needleV)
   {
     if (haystackV == null)
-      haystackV = env.createEmptyString();
+      haystackV = env.getEmptyString();
     
     String needle;
 
@@ -3708,7 +3708,7 @@ public class StringModule extends AbstractQuercusModule {
       StringValue savedString = (StringValue) env.getSpecialValue("caucho.strtok_string");
       Integer savedOffset = (Integer) env.getSpecialValue("caucho.strtok_offset");
 
-      string = savedString == null ? env.createEmptyString() : savedString;
+      string = savedString == null ? env.getEmptyString() : savedString;
       offset = savedOffset == null ? 0 : savedOffset;
       characters = string1;
     }
@@ -4148,7 +4148,7 @@ public class StringModule extends AbstractQuercusModule {
     }
 
     if (tail < head)
-      return env.createEmptyString();
+      return env.getEmptyString();
     else {
       return (StringValue) string.subSequence(head, tail + 1);
     }

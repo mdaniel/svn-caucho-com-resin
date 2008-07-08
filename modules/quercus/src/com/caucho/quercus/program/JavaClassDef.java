@@ -106,6 +106,7 @@ public class JavaClassDef extends ClassDef {
   private ArrayDelegate _arrayDelegate;
   
   private JavaMethod __call;
+  private JavaMethod __toString;
 
   private Method _printRImpl;
   private Method _varDumpImpl;
@@ -1191,6 +1192,8 @@ public class JavaClassDef extends ClassDef {
         _entrySet = method;
       } else if ("__call".equals(method.getName())) {
         __call = new JavaMethod(moduleContext, method);
+      } else if ("__toString".equals(method.getName())) {
+        __toString = new JavaMethod(moduleContext, method);
       } else {
         if (method.getName().startsWith("quercus_"))
           throw new UnsupportedOperationException(L.l("{0}: use @Name instead", method.getName()));
@@ -1216,6 +1219,16 @@ public class JavaClassDef extends ClassDef {
     }
   }
 
+  public StringValue toString(Env env,
+                              JavaValue value)
+  {
+    if (__toString == null) {
+      return env.getEmptyString();
+    }
+    
+    return __toString.callMethod(env, value, new Expr[0]).toStringValue();
+  }
+  
   /**
    *
    * @return false if printRImpl not implemented
@@ -1250,9 +1263,8 @@ public class JavaClassDef extends ClassDef {
     throws IOException
   {
     try {
-      if (_varDumpImpl == null) {
+      if (_varDumpImpl == null)
         return false;
-      }
 
       _varDumpImpl.invoke(obj, env, out, depth, valueSet);
       return true;
@@ -1303,7 +1315,7 @@ public class JavaClassDef extends ClassDef {
       try {
         Iterator iterator =
           (Iterator) _iteratorMethod.invoke(qThis.toJavaObject());
-        
+
         return new JavaValueIterator(env, iterator);
       }
       catch (Exception e) {

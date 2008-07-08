@@ -3060,27 +3060,6 @@ public class QuercusParser {
       
     case DIE:
       return parseDie();
-
-      /*
-    case STATIC:
-    {
-      token = parseToken();
-      
-      if (token != SCOPE) {
-        throw error(L.l("{0} is an unexpected token, expected an expression.",
-                tokenName(token)));
-      }
-      
-      token = parseToken();
-      
-      Thread.dumpStack();
-      
-      if (token == '$')
-        return parseStaticClassField(null, true);
-      
-
-    }
-    */
       
     case IDENTIFIER:
       {

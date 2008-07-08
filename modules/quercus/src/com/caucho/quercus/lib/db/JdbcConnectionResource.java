@@ -102,7 +102,7 @@ public abstract class JdbcConnectionResource
     if (isConnected())
       return env.createString(getErrorMessage());
     else
-      return env.createEmptyString();
+      return env.getEmptyString();
   }
 
   public boolean isConnected()

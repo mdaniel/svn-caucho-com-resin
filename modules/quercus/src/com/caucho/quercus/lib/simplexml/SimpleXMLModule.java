@@ -74,14 +74,13 @@ public class SimpleXMLModule
     else if (data.isBoolean() && data.toBoolean() == false)
       return BooleanValue.FALSE;
     
-    QuercusClass cls;
+    if (className == null || className.length() == 0)
+      className = "SimpleXMLElement";
+    
+    QuercusClass cls = env.getClass(className);
 
-    if (className != null && className.length() > 0)
-      cls = env.getClass(className);
-    else
-      cls = env.getClass("SimpleXMLElement");
-
-    return SimpleXMLElement.create(env, cls, data, options, false,
+    return SimpleXMLElement.create(env, cls,
+                                   data, options, false,
                                    namespaceV, isPrefix);
   }
 
@@ -92,14 +91,13 @@ public class SimpleXMLModule
                                    @Optional Value namespaceV,
                                    @Optional boolean isPrefix)
   {
-    QuercusClass cls;
-    
-    if (className != null && className.length() > 0)
-      cls = env.getClass(className);
-    else
-      cls = env.getClass("SimpleXMLElement");
+    if (className == null || className.length() == 0)
+      className = "SimpleXMLElement";
 
-    return SimpleXMLElement.create(env, cls, file, options, true,
+    QuercusClass cls = env.getClass(className);
+
+    return SimpleXMLElement.create(env, cls,
+                                   file, options, true,
                                    namespaceV, isPrefix);
   }
   

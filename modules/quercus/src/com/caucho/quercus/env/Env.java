@@ -67,6 +67,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
@@ -266,7 +267,7 @@ public class Env {
   private HttpServletResponse _response;
 
   private ArrayValue _postArray;
-  private StringValue _postData;
+  private StringValue _inputData;
   
   private ArrayValue _files;
   private SessionArrayValue _session;
@@ -367,9 +368,20 @@ public class Env {
                     _files,
                     _request,
                     getIniBoolean("magic_quotes_gpc"));
+    } else if (_request != null && ! _request.getMethod().equals("GET")) {
+      InputStream is = null;
+      
+      try {
+        is = _request.getInputStream();
+      } catch (IOException e) {
+        warning(e);
+      }
+      
+      StringValue bb = createBinaryBuilder();
+      bb.appendReadAll(is, Integer.MAX_VALUE);
+      
+      setInputData(bb);
     }
-    
-
     /*
     Cluster cluster = Cluster.getLocal();
 
@@ -623,19 +635,19 @@ public class Env {
   }
   
   /*
-   * Returns the post data.
+   * Returns the input (POST, PUT) data.
    */
-  public StringValue getPostData()
+  public StringValue getInputData()
   {
-    return _postData;
+    return _inputData;
   }
   
   /*
    * Sets the post data.
    */
-  public void setPostData(StringValue data)
+  public void setInputData(StringValue data)
   {
-    _postData = data;
+    _inputData = data;
   }
 
   /**
@@ -1334,7 +1346,7 @@ public class Env {
     _javaSession = _request.getSession(true);
 
     if (create && _javaSession.getId().length() >= 3
-	&& sessionId.length() >= 3)
+               && sessionId.length() >= 3)
       sessionId = _javaSession.getId().substring(0, 3) + sessionId.substring(3);
 
     SessionArrayValue session = _quercus.loadSession(this, sessionId);
@@ -1942,14 +1954,14 @@ public class Env {
       if (! Quercus.INI_ALWAYS_POPULATE_RAW_POST_DATA.getAsBoolean(this))
         return null;
       
-      if (_postData == null)
+      if (_inputData == null)
         return null;
       
       var = new Var();
       
       _globalMap.put(name, var);
       
-      var.set(_postData);
+      var.set(_inputData);
       
       return var;
     }
@@ -3115,7 +3127,7 @@ public class Env {
   /*
    * Creates an empty string.
    */
-  public StringValue createEmptyString()
+  public StringValue getEmptyString()
   {
     if (_isUnicodeSemantics)
       return UnicodeBuilderValue.EMPTY;

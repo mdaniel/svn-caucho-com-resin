@@ -83,7 +83,7 @@ public class SimpleXMLAttribute extends SimpleXMLElement
                                StringValue text)
   {
     super(env, cls, parent, name, namespace);
-    
+
     _text = text;
   }
 
@@ -129,11 +129,22 @@ public class SimpleXMLAttribute extends SimpleXMLElement
    * 
    * @return xml string
    */
-  @ReturnNullAsFalse
   @Override  
   public StringValue asXML(Env env)
   {
-    return null;
+    StringValue sb = env.createStringBuilder();
+    
+    if (_attributes != null) {
+      // this is an attribute list
+      for (SimpleXMLElement attr : _attributes) {
+        attr.toXMLImpl(sb);
+      }
+    }
+    else {
+      toXMLImpl(sb);
+    }
+    
+    return sb;
   }
 
   @Override
@@ -151,5 +162,33 @@ public class SimpleXMLAttribute extends SimpleXMLElement
     if (_text != null)
       sb.append(_text);
     sb.append("\"");
+  }
+  
+  /**
+   * Implementation for getting the indices of this class.
+   * i.e. <code>$a->foo[0]</code>
+   */
+  public Value __get(Env env, Value indexV)
+  {
+    if (indexV.isString()) {
+      String name = indexV.toString();
+      
+      SimpleXMLElement attr = getAttribute(name);
+      
+      if (attr != null)
+        return wrapJava(env, _cls, attr);
+      else
+        return NullValue.NULL;
+    }
+    else if (indexV.isLongConvertible()) {
+      int i = indexV.toInt();
+
+      if (i < _attributes.size())
+        return wrapJava(env, _cls, _attributes.get(i));
+
+      return NullValue.NULL;
+    }
+    else
+      return NullValue.NULL;
   }
 }

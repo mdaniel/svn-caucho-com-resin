@@ -582,7 +582,7 @@ public class Mysqli extends JdbcConnectionResource {
     try {
       return env.createString(validateConnection().getServerInfo());
     } catch (SQLException e) {
-      return env.createEmptyString();
+      return env.getEmptyString();
     }
   }
 

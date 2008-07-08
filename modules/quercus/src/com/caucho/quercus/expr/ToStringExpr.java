@@ -66,7 +66,7 @@ public class ToStringExpr extends UnaryExpr {
    */
   public Value eval(Env env)
   {
-    return _expr.eval(env).toStringValue();
+    return _expr.eval(env).toString(env);
   }
 
   public String toString()
