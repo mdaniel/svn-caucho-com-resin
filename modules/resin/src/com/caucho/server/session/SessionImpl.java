@@ -500,7 +500,10 @@ public class SessionImpl implements HttpSession, CacheListener {
     long now = Alarm.getCurrentTime();
 
     // server/015k
-    if (_isInvalidating || _accessTime + getMaxInactiveInterval() < now)
+    if (_isInvalidating
+	|| _accessTime + getMaxInactiveInterval() < now
+	|| _manager.isClosed()
+	|| _clusterObject == null)
       notifyDestroy();
 
     invalidateLocal();
@@ -572,6 +575,20 @@ public class SessionImpl implements HttpSession, CacheListener {
       log.fine(this + " lru");
     
     invalidateImpl(Logout.LRU);
+  }
+
+  /**
+   * Invalidates the session, called by user code.
+   * 
+   * This should never be called by Resin code (for logging purposes)
+   */
+  public void invalidateRemote()
+  {
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " invalidate remote");
+
+    _isInvalidating = true;
+    invalidate(Logout.INVALIDATE);
   }
 
   /**
@@ -685,7 +702,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   /**
    * Creates a new session.
    */
-  void create(long now)
+  void create(long now, boolean isCreate)
   {
     if (log.isLoggable(Level.FINE)) {
       log.fine(this + " create session");
@@ -700,7 +717,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     _accessTime = now;
     _creationTime = now;
 
-    if (_clusterObject != null)
+    if (_clusterObject != null && isCreate)
       _clusterObject.objectCreate();
   }
 

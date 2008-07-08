@@ -196,7 +196,8 @@
     <property name="artifact.build" value="${artifacts}/${artifact.name}/classes"/>
     <property name="artifact.dist" value="${artifacts}/${artifact.name}/dist"/>
     <property name="artifact.lib" value="${artifacts}/${artifact.name}/lib"/>
-    <property name="artifact.jar" value="${artifact.name}.jar"/>
+    <property name="artifact.ext" value="jar"/>
+    <property name="artifact.jar" value="${artifact.name}.${artifact.ext}"/>
 
     <property file="${artifact.src}/module.properties"/>
 
@@ -251,8 +252,6 @@
         <exclude name=".svnignore"/>
       </fileset>
     </jar>
-
-    
   </target>
 
 
@@ -939,7 +938,8 @@
   <target name="maven2-module">
     <property name="module.dir" value="${modules}"/>
     <property name="module.src" value="${module.dir}/${module.name}/src"/>
-    <property name="jar.name" value="${module.name}.jar"/>
+    <property name="module.ext" value="jar"/>
+    <property name="jar.name" value="${module.name}.${module.ext}"/>
     <property name="maven.name" value="resin-${module.name}"/>
     <property name="maven.dist" value="${maven}/${maven.name}/${maven.version}"/>
     <property name="jar" value="${lib}/${jar.name}"/>
@@ -963,13 +963,13 @@
               algorithm="md5"/>
 
     <copy file="${jar}"
-          tofile="${maven.dist}/${maven.name}-${maven.version}.jar"
+          tofile="${maven.dist}/${maven.name}-${maven.version}.${module.ext}"
           preservelastmodified="true"
           overwrite="true"/>
 
-    <checksum file="${maven.dist}/${maven.name}-${maven.version}.jar"
+    <checksum file="${maven.dist}/${maven.name}-${maven.version}.${module.ext}"
               algorithm="sha1"/>
-    <checksum file="${maven.dist}/${maven.name}-${maven.version}.jar"
+    <checksum file="${maven.dist}/${maven.name}-${maven.version}.${module.ext}"
               algorithm="md5"/>
 
     <copy file="${module.dir}/${module.name}/maven2/ivy.xml"

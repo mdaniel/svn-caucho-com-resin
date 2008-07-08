@@ -213,6 +213,9 @@ public class Database
       try {
 	table = Table.loadFromFile(this, name);
 
+	if (table == null)
+	  return null;
+
 	table.init();
 
 	_tables.put(name, table);

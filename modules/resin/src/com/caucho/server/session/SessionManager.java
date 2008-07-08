@@ -1046,9 +1046,9 @@ public final class SessionManager implements AlarmListener
 
     synchronized (session) {
       if (_sessionStore != null && id.equals(oldId))
-        load(session, now);
+        load(session, now, true);
       else
-	session.create(now);
+	session.create(now, true);
     }
 
     // after load so a reset doesn't clear any setting
@@ -1182,7 +1182,7 @@ public final class SessionManager implements AlarmListener
     if (session != null && ! session.addUse()) {
       session = null;
     }
-    
+
     if (session == null && _sessionStore != null) {
       if (! _objectManager.isInSessionGroup(key))
 	return null;
@@ -1198,7 +1198,7 @@ public final class SessionManager implements AlarmListener
       return null;
     
     if (isNew) {
-      killSession = ! load(session, now);
+      killSession = ! load(session, now, create);
       isNew = killSession;
     }
     else if (! session.load()) {
@@ -1255,10 +1255,10 @@ public final class SessionManager implements AlarmListener
    */
   public void notifyRemove(String id)
   {
-    SessionImpl session = _sessions.remove(id);
+    SessionImpl session = _sessions.get(id);
 
     if (session != null)
-      session.invalidateLru();
+      session.invalidateRemote();
   }
 
   private void handleCreateListeners(SessionImpl session)
@@ -1281,7 +1281,7 @@ public final class SessionManager implements AlarmListener
    * @param session the session to load.
    * @param now current time in milliseconds.
    */
-  private boolean load(SessionImpl session, long now)
+  private boolean load(SessionImpl session, long now, boolean isCreate)
   {
     try {
       // XXX: session.setNeedsLoad(false);
@@ -1299,7 +1299,7 @@ public final class SessionManager implements AlarmListener
         return true;
       }
       else {
-        session.create(now);
+        session.create(now, isCreate);
       }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);

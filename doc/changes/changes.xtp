@@ -13,7 +13,9 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
-<li>jsp: reduce makeAll lock in MakeContainer/CompilingLoader for multithread (#2751, rep by Sri Satish)</li>
+<li>netbeans plugin now distributed in maven repository (#2716, rep by N. Phadte)</li>
+<li>eclipse plugin now distributed in maven repository (#2710, rep by Vinod Mehra)</li>
+<li>(2008-07-07) jsp: reduce makeAll lock in MakeContainer/CompilingLoader for multithread (#2751, rep by Sri Satish)</li>
 <li>jsp: make JspPrecompileListener multithreaded (#2767, rep by stbu)</li>
 <li>admin: add check for PermGen free memory (#2760, rep by Andy Qu)</li>
 <li>admin: moved deadlock detection to ProManagement and enhanced logging (#2288, rep by Allen Servedio)</li>

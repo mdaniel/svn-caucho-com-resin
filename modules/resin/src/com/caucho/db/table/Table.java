@@ -230,7 +230,7 @@ public class Table extends Store {
     Path path = db.getPath().lookup(name + ".db");
 
     if (! path.exists())
-      throw new IOException(L.l("table {0} does not exist", name));
+      return null; //throw new SQLException(L.l("table {0} does not exist", name));
 
     String version = null;
 

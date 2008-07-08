@@ -23,13 +23,6 @@
     </antcall>
   </target>
 
-  <target name="richfaces" depends="init">
-    <antcall target="artifact" inheritRefs="true">
-      <param name="artifact.name" value="richfaces"/>
-      <param name="artifact.jar" value="resin-richfaces.jar"/>
-    </antcall>
-  </target>
-
   <target name="eclipse" depends="init">
     <property name="eclipse.basedir" location="${artifacts}/eclipse"/>
     <property name="eclipse.build" location="${eclipse.basedir}/build"/>
@@ -101,6 +94,20 @@
     </jar>
 	  
   </target>
+
+  <target name="richfaces" depends="init">
+    <antcall target="artifact" inheritRefs="true">
+      <param name="artifact.name" value="richfaces"/>
+      <param name="artifact.jar" value="resin-richfaces.jar"/>
+    </antcall>
+  </target>
+
+  <target name="spring" depends="init">
+    <antcall target="artifact" inheritRefs="true">
+      <param name="artifact.name" value="spring"/>
+      <param name="artifact.jar" value="resin-spring.jar"/>
+    </antcall>
+  </target>
   
   <target name="artifacts" depends="init, compat">
     <mkdir dir="artifacts"/>
@@ -111,22 +118,27 @@
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="mule"/>
+      <param name="artifact.jar" value="resin-mule.jar"/>
     </antcall>
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="spring"/>
+      <param name="artifact.jar" value="resin-spring.jar"/>
     </antcall>
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="wicket"/>
+      <param name="artifact.jar" value="resin-wicket.jar"/>
     </antcall>
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="xfire"/>
+      <param name="artifact.jar" value="resin-xfire.jar"/>
     </antcall>
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="xwork2"/>
+      <param name="artifact.jar" value="resin-xwork2.jar"/>
     </antcall>
   </target>
   
@@ -253,13 +265,13 @@
   -->
 
   <target name="maven-plugin" depends="init">
-    <property name="module.src" value="${modules}/maven/src"/>
-    <property name="module.build" value="${modules}/maven/classes"/>
+    <property name="module.src" value="${artifacts}/maven/src"/>
+    <property name="module.build" value="${artifacts}/maven/classes"/>
     
     <mkdir dir="${module.build}" />
 
     <copy tofile="${module.build}/META-INF/maven/com.caucho/resin-maven-plugin/pom.xml"
-          file="${modules}/maven/maven2/pom.xml"
+          file="${artifacts}/maven/maven2/pom.xml"
           preservelastmodified="true"
           overwrite="true">
       <filterset>
@@ -267,42 +279,44 @@
       </filterset>
     </copy>
    
-    <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="maven"/>
-      <param name="module.jar" value="resin-maven-plugin.jar"/>
+    <antcall target="artifact" inheritRefs="true">
+      <param name="artifact.name" value="maven"/>
+      <param name="artifact.jar" value="resin-maven-plugin.jar"/>
     </antcall>
   </target>
   
   <target name="netbeans-plugin" depends="init">
-    <property name="module.name" value="netbeans-plugin"/>
+    <property name="artifact.name" value="netbeans"/>
     <property name="jar.name" value="resin-netbeans-plugin"/>
     
-    <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="${module.name}"/>
-      <param name="module.jar" value="${jar.name}.jar"/>
+    <antcall target="artifact" inheritRefs="true">
+      <param name="artifact.name" value="${artifact.name}"/>
+      <param name="artifact.ext" value="nbm"/>
+      <param name="artifact.jar" value="${jar.name}.jar"/>
     </antcall>
 
-    <property name="nbm.build" location="${modules}/${module.name}/dist"/>
+    <property name="nbm.build" location="${artifacts}/${artifact.name}/dist"/>
     
     <mkdir dir="${nbm.build}/Info" />
     <mkdir dir="${nbm.build}/netbeans/modules" />
     
-    <copy file="${lib}/${jar.name}.jar"
+    <copy file="${nbm.build}/${jar.name}.jar"
           tofile="${nbm.build}/netbeans/modules/${jar.name}.jar"/>
     
-    <copy file="${modules}/${module.name}/Info/info.xml"
+    <copy file="${artifacts}/${artifact.name}/Info/info.xml"
           tofile="${nbm.build}/Info/info.xml"/>
     
     <copy todir="${nbm.build}/netbeans">
-      <fileset dir="${modules}/${module.name}/netbeans">
+      <fileset dir="${artifacts}/${artifact.name}/netbeans">
         <include name="**/*.xml"/>
       </fileset>
     </copy>
 	  
-    <jar jarfile="${lib}/${jar.name}.nbm">
+    <jar jarfile="${nbm.build}/${jar.name}.nbm">
       <fileset dir="${nbm.build}">
         <exclude name=".cvsignore"/>
         <exclude name=".svnignore"/>
+        <exclude name="*.nbm"/>
       </fileset>
     </jar>
 	  
@@ -975,7 +989,7 @@
   </target>
   -->
 
-  <target name="maven-dist" depends="init, compile, ant, eclipse">
+  <target name="maven-dist" depends="init, compile, ant, eclipse, artifacts">
     <property name="maven" value="${maven.root}/com/caucho/"/>
     
     <antcall target="maven2-module" inheritRefs="true">
@@ -1027,10 +1041,17 @@
       <param name="maven.name" value="resin-jsf"/>
     </antcall>
 
-    <antcall target="maven2-module" inheritRefs="true">
+    <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="maven"/>
       <param name="jar.name" value="resin-maven-plugin.jar"/>
       <param name="maven.name" value="resin-maven-plugin"/>
+    </antcall>
+
+    <antcall target="maven2-artifact" inheritRefs="true">
+      <param name="module.name" value="netbeans"/>
+      <param name="module.ext" value="nbm"/>
+      <param name="jar.name" value="resin-netbeans-plugin.nbm"/>
+      <param name="maven.name" value="resin-netbeans-plugin"/>
     </antcall>
 
     <antcall target="maven2-module" inheritRefs="true">
@@ -1039,11 +1060,19 @@
       <param name="maven.name" value="resin-quercus"/>
     </antcall>
 
+    <antcall target="maven2-artifact" inheritRefs="true">
+      <param name="module.name" value="spring"/>
+      <param name="jar.name" value="resin-spring.jar"/>
+      <param name="maven.name" value="resin-spring"/>
+    </antcall>
+
+    <!--
     <antcall target="maven2-module" inheritRefs="true">
       <param name="module.name" value="support"/>
       <param name="jar.name" value="resin-support.jar"/>
       <param name="maven.name" value="resin-support"/>
     </antcall>
+    -->
 
     <antcall target="maven2-module" inheritRefs="true">
       <param name="module.name" value="util"/>
