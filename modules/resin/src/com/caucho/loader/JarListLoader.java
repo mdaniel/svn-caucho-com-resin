@@ -147,18 +147,18 @@ abstract public class JarListLoader extends Loader implements Dependency {
 	  if (scan != null && scan.open()) {
 	    while (scan.next()) {
 	      String name = scan.getName();
-
+	      
 	      ArrayList<JarEntry> entryList = pathMap.get(name);
 	      if (entryList == null) {
 		entryList = new ArrayList<JarEntry>();
 
-		// server/249b
-		/*
-		if (name.endsWith("/"))
-		  name = name.substring(0, name.length() - 1);
-		*/
-		
 		pathMap.put(name, entryList);
+		
+		// server/249b, server/249k
+		if (name.endsWith("/")) {
+		  String subName = name.substring(0, name.length() - 1);
+		  pathMap.put(subName, entryList);
+		}
 	      }
 
 	      entryList.add(jarEntry);
@@ -342,6 +342,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
     if (_pathMap != null) {
       ArrayList<JarEntry> jarEntryList = _pathMap.get(pathName);
 
+      System.out.println("PM: " + pathName + " " + jarEntryList);
       if (jarEntryList != null) {
 	return jarEntryList.get(0).getJarPath().lookup(pathName);
       }
@@ -352,6 +353,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
 	Path path = jarEntry.getJarPath();
 
 	Path filePath = path.lookup(pathName);
+	System.out.println("FP: " + filePath);
 
 	if (filePath.exists())
 	  return filePath;

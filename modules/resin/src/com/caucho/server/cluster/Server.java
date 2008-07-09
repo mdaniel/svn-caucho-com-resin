@@ -29,6 +29,7 @@
 
 package com.caucho.server.cluster;
 
+import com.caucho.amber.manager.PersistenceEnvironmentListener;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.Bytes;
@@ -197,6 +198,9 @@ public class Server extends ProtocolDispatchServer
         _hostContainer.setDispatchServer(this);
 
 	_admin = new ServerAdmin(this);
+
+	// Add JPA listener
+	// Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
 	
 	_alarm = new Alarm(this);
 

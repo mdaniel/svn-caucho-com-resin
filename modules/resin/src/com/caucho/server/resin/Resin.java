@@ -255,7 +255,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       webBeans.addSingleton(new ResinWebBeansProducer());
       webBeans.update();
       
-      Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
+      // Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
 
       _threadPoolAdmin = ThreadPoolAdmin.create();
       _resinAdmin = new ResinAdmin(this);
