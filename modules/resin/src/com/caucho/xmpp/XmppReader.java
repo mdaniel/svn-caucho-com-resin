@@ -383,6 +383,7 @@ public class XmppReader
     String id = _in.getAttributeValue(null, "id");
     String from = _in.getAttributeValue(null, "from");
     String to = _in.getAttributeValue(null, "to");
+    String target = to;
 
     if (type == null)
       type = "";
@@ -454,8 +455,8 @@ public class XmppReader
     if (_jid != null)
       from = _jid;
 
-    if (to == null)
-      to = _uid;
+    if (target == null)
+      target = _uid;
 
     ImPresence presence = new ImPresence(to, from,
 					 show, status, priority,
@@ -463,21 +464,21 @@ public class XmppReader
 
     if (_handler != null) {
       if ("".equals(type))
-	_handler.presence(to, from, presence);
+	_handler.presence(target, from, presence);
       else if ("probe".equals(type))
-	_handler.presenceProbe(to, from, presence);
+	_handler.presenceProbe(target, from, presence);
       else if ("unavailable".equals(type))
-	_handler.presenceUnavailable(to, from, presence);
+	_handler.presenceUnavailable(target, from, presence);
       else if ("subscribe".equals(type))
-	_handler.presenceSubscribe(to, from, presence);
+	_handler.presenceSubscribe(target, from, presence);
       else if ("subscribed".equals(type))
-	_handler.presenceSubscribed(to, from, presence);
+	_handler.presenceSubscribed(target, from, presence);
       else if ("unsubscribe".equals(type))
-	_handler.presenceUnsubscribe(to, from, presence);
+	_handler.presenceUnsubscribe(target, from, presence);
       else if ("unsubscribed".equals(type))
-	_handler.presenceUnsubscribed(to, from, presence);
+	_handler.presenceUnsubscribed(target, from, presence);
       else if ("error".equals(type))
-	_handler.presenceError(to, from, presence, error);
+	_handler.presenceError(target, from, presence, error);
       else
 	log.warning(this + " " + type + " is an unknown presence type");
     }

@@ -36,6 +36,7 @@ import com.caucho.xmpp.im.ImMessage;
 import com.caucho.xmpp.im.ImPresence;
 import com.caucho.xmpp.im.RosterItem;
 import com.caucho.xmpp.im.RosterQuery;
+import com.caucho.xmpp.im.Text;
 
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.ClassImplementation;
@@ -58,6 +59,7 @@ import com.caucho.vfs.Path;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 /**
@@ -77,6 +79,16 @@ public class BamModule extends AbstractQuercusModule
 
     if (agentValue != null && ! agentValue.isNull())
       return (BamPhpAgent) agentValue.toJavaObject();
+
+    return null;
+  }
+
+  private static BamPhpServiceManager getServiceManager(Env env)
+  {
+    Value managerValue = env.getGlobalValue("_quercus_bam_service_manager");
+
+    if (managerValue != null && ! managerValue.isNull())
+      return (BamPhpServiceManager) managerValue.toJavaObject();
 
     return null;
   }
@@ -133,6 +145,77 @@ public class BamModule extends AbstractQuercusModule
     return BooleanValue.TRUE;
   }
 
+  public static Value bam_service_exists(Env env, String jid)
+  {
+    BamPhpServiceManager manager = getServiceManager(env);
+
+    if (manager == null)
+      return env.error("bam_service_exists must be called from " + 
+                       "service manager script");
+
+    return BooleanValue.create(manager.hasChild(jid));
+  }
+
+  /**
+   * Registers a "child" service that is represented by the given script.
+   **/
+  public static Value bam_register_service(Env env, String jid, String script)
+  {
+    BamPhpServiceManager manager = getServiceManager(env);
+
+    if (manager == null)
+      return env.error("bam_register_service must be called from " + 
+                       "service manager script");
+
+    Path path = env.getSelfDirectory().lookup(script);
+
+    if (! path.exists())
+      return env.error("script not found: " + script);
+
+    BamPhpAgent child = new BamPhpAgent();
+    child.setName(jid);
+    child.setScript(path);
+    child.setBroker(manager.getBroker());
+
+    WebBeansContainer container = WebBeansContainer.getCurrent();
+    container.injectObject(child);
+
+    manager.addChild(jid, child);
+
+    return BooleanValue.TRUE;
+  }
+
+  /**
+   * Registers a "child" service that is represented by the given script.
+   **/
+  public static Value bam_unregister_service(Env env, String jid)
+  {
+    BamPhpServiceManager manager = getServiceManager(env);
+
+    if (manager == null)
+      return env.error("bam_unregister_service must be called from " + 
+                       "service manager script");
+
+    BamPhpAgent service = manager.removeChild(jid);
+
+    if (service == null)
+      return BooleanValue.FALSE;
+
+    manager.getBroker().removeService(service);
+
+    return BooleanValue.TRUE;
+  }
+
+  public static Value bam_agent_exists(Env env, String jid)
+  {
+    BamPhpAgent agent = getAgent(env);
+
+    if (agent == null)
+      return env.error("bam_agent_exists must be called from agent script");
+
+    return BooleanValue.create(agent.hasChild(jid));
+  }
+
   /**
    * Registers a "child" agent that is represented by the given script.
    **/
@@ -161,16 +244,6 @@ public class BamModule extends AbstractQuercusModule
     return BooleanValue.TRUE;
   }
 
-  public static Value bam_agent_exists(Env env, String jid)
-  {
-    BamPhpAgent agent = getAgent(env);
-
-    if (agent == null)
-      return env.error("bam_agent_exists must be called from agent script");
-
-    return BooleanValue.create(agent.hasChild(jid));
-  }
-
   public static String bam_my_jid(Env env)
   {
     return getJid(env);
@@ -180,7 +253,7 @@ public class BamModule extends AbstractQuercusModule
   // Utilities
   //
 
-  public static String bam_get_bare_jid(Env env, String uri)
+  public static String bam_bare_jid(Env env, String uri)
   {
     int slash = uri.indexOf('/');
 
@@ -190,7 +263,7 @@ public class BamModule extends AbstractQuercusModule
     return uri.substring(0, slash);
   }
 
-  public static String bam_get_jid_resource(Env env, String uri)
+  public static String bam_jid_resource(Env env, String uri)
   {
     int slash = uri.indexOf('/');
 
@@ -295,12 +368,272 @@ public class BamModule extends AbstractQuercusModule
     getBrokerStream(env).presenceError(to, null, value, error);
   }
 
+  public static Value im_send_message(Env env, 
+                                     String to, 
+                                     String from, 
+                                     Value body,
+                                     @Optional("chat") String type,
+                                     @Optional Value subject,
+                                     @Optional String thread,
+                                     @Optional Serializable[] extras)
+  {
+    Text[] subjects = null;
+
+    // extract subject text
+    if (subject != null) {
+      if (subject.isArray()) {
+        subjects = new Text[subject.getSize()];
+
+        int i = 0;
+        Iterator<Value> iterator = subject.getValueIterator(env);
+
+        while (iterator.hasNext()) {
+          Value subjectValue = iterator.next();
+
+          if (! subjectValue.isString())
+            return env.error("subject values must be strings");
+
+          subjects[i++] = new Text(subjectValue.toString());
+        }
+      }
+      else if (subject.isString()) {
+        if (! subject.isString())
+          return env.error("subject values must be strings");
+
+        subjects = new Text[] { new Text(subject.toString()) };
+      }
+    }
+
+    // extract body text
+    Text[] bodies = null;
+
+    if (body.isArray()) {
+      bodies = new Text[body.getSize()];
+
+      int i = 0;
+      Iterator<Value> iterator = body.getValueIterator(env);
+
+      while (iterator.hasNext()) {
+        Value bodyValue = iterator.next();
+
+        if (! bodyValue.isString())
+          return env.error("body values must be strings");
+
+        bodies[i++] = new Text(bodyValue.toString());
+      }
+    }
+    else if (body.isString()) {
+      if (! body.isString())
+        return env.error("body values must be strings");
+
+      bodies = new Text[] { new Text(body.toString()) };
+    }
+
+    ImMessage message = new ImMessage(to, from, type, 
+                                      subjects, bodies, thread, extras);
+    
+    bam_send_message(env, to, message);
+
+    return BooleanValue.TRUE;
+  }
+
+  public static RosterItem im_create_roster_item(Env env, 
+                                                 String jid,
+                                                 @Optional String name,
+                                                 @Optional String subscription,
+                                                 @Optional 
+                                                 ArrayList<String> groupList)
+  {
+    if ("".equals(subscription))
+      subscription = "to";
+
+    return new RosterItem(null, jid, name, subscription, groupList);
+  }
+
+  public static void im_send_roster(Env env, 
+                                    long id, String to, 
+                                    ArrayList<RosterItem> roster)
+  {
+    bam_send_query_result(env, id, to, new RosterQuery(roster));
+  }
+  
+  private static ImPresence createPresence(Env env, 
+                                           String to, 
+                                           String from,
+                                           String show,
+                                           String status,
+                                           int priority,
+                                           ArrayList<Serializable> extras)
+  {
+    if ("".equals(from))
+      from = getJid(env);
+
+    if ("".equals(show))
+      show = null;
+
+    Text statusText = null;
+
+    if (! "".equals(status))
+      statusText = new Text(status);
+
+    return new ImPresence(to, from, show, statusText, priority, extras);
+  }
+
+
+  public static void im_send_presence(Env env, 
+                                      String to, 
+                                      @Optional String from,
+                                      @Optional String show,
+                                      @Optional String status,
+                                      @Optional int priority,
+                                      @Optional ArrayList<Serializable> extras)
+  {
+    ImPresence presence = 
+      createPresence(env, to, from, show, status, priority, extras);
+
+    bam_send_presence(env, to, presence);
+  }
+
+  public static void im_send_presence_unavailable(Env env, 
+                                                  String to, 
+                                                  @Optional String from,
+                                                  @Optional String show,
+                                                  @Optional String status,
+                                                  @Optional int priority,
+                                                  @Optional 
+                                                  ArrayList<Serializable> 
+                                                  extras)
+  {
+    ImPresence presence = 
+      createPresence(env, to, from, show, status, priority, extras);
+
+    bam_send_presence_unavailable(env, to, presence);
+  }
+
+  /**
+   * Makes a subscription request.
+   **/
+  public static void im_send_presence_subscribe(Env env, 
+                                                String to, 
+                                                @Optional String from,
+                                                @Optional String show,
+                                                @Optional String status,
+                                                @Optional int priority,
+                                                @Optional 
+                                                ArrayList<Serializable> extras)
+  {
+    ImPresence presence = 
+      createPresence(env, to, from, show, status, priority, extras);
+
+    bam_send_presence_subscribe(env, to, presence);
+  }
+
+  /**
+   * Approves a subscription request.
+   **/
+  public static void im_send_presence_subscribed(Env env, 
+                                                 String to, 
+                                                 @Optional String from,
+                                                 @Optional String show,
+                                                 @Optional String status,
+                                                 @Optional int priority,
+                                                 @Optional 
+                                                 ArrayList<Serializable> extras)
+  {
+    ImPresence presence = 
+      createPresence(env, to, from, show, status, priority, extras);
+
+    bam_send_presence_subscribed(env, to, presence);
+  }
+
+  /**
+   * Makes an unsubscription request.
+   **/
+  public static void im_send_presence_unsubscribe(Env env, 
+                                                  String to, 
+                                                  @Optional String from,
+                                                  @Optional String show,
+                                                  @Optional String status,
+                                                  @Optional int priority,
+                                                  @Optional 
+                                                  ArrayList<Serializable> 
+                                                  extras)
+  {
+    ImPresence presence = 
+      createPresence(env, to, from, show, status, priority, extras);
+
+    bam_send_presence_unsubscribe(env, to, presence);
+  }
+
+  /**
+   * Rejects a subscription request.
+   **/
+  public static void im_send_presence_unsubscribed(Env env, 
+                                                   String to, 
+                                                   @Optional String from,
+                                                   @Optional String show,
+                                                   @Optional String status,
+                                                   @Optional int priority,
+                                                   @Optional 
+                                                   ArrayList<Serializable> 
+                                                   extras)
+  {
+    ImPresence presence = 
+      createPresence(env, to, from, show, status, priority, extras);
+
+    bam_send_presence_unsubscribed(env, to, presence);
+  }
+
+  public static void im_send_presence_probe(Env env, 
+                                            String to, 
+                                            @Optional String from,
+                                            @Optional String show,
+                                            @Optional String status,
+                                            @Optional int priority,
+                                            @Optional 
+                                            ArrayList<Serializable> extras)
+  {
+    ImPresence presence = 
+      createPresence(env, to, from, show, status, priority, extras);
+
+    bam_send_presence_probe(env, to, presence);
+  }
+
   /**
    * Dispatches messages, queries, and presences to handler functions based
    * on their prefixes.
    **/
   public static Value bam_dispatch(Env env)
   {
+    // manager script dispatch
+    BamPhpServiceManager manager = getServiceManager(env);
+
+    if (manager != null) {
+      AbstractFunction function = null;
+
+      if (env.getGlobalValue("_quercus_bam_start_service") != null) {
+        function = env.findFunction("bam_start_service");
+      } 
+      else if (env.getGlobalValue("_quercus_bam_stop_service") != null) {
+        function = env.findFunction("bam_stop_service");
+      }
+
+      if (function == null) {
+        env.setGlobalValue("_quercus_bam_function_return", BooleanValue.FALSE);
+
+        return BooleanValue.FALSE;
+      }
+
+      Value jid = env.getGlobalValue("_quercus_bam_service_jid");
+      Value ret = function.call(env, jid);
+
+      env.setGlobalValue("_quercus_bam_function_return", ret);
+
+      return BooleanValue.TRUE;
+    }
+
+    // agent script dispatch
+
     Value eventTypeValue = env.getGlobalValue("_quercus_bam_event_type");
 
     if (eventTypeValue == null)
@@ -376,39 +709,5 @@ public class BamModule extends AbstractQuercusModule
     return function;
   }
 
-  public static void im_send_message(Env env, 
-                                     String to, 
-                                     String from, 
-                                     String body)
-  {
-    bam_send_message(env, to, new ImMessage(to, from, body));
-  }
-
-  public static RosterItem im_create_roster_item(Env env, 
-                                                 String jid,
-                                                 @Optional String name,
-                                                 @Optional String subscription,
-                                                 @Optional 
-                                                 ArrayList<String> groupList)
-  {
-    if ("".equals(subscription))
-      subscription = "both";
-
-    return new RosterItem(null, jid, name, subscription, groupList);
-  }
-
-  public static void im_send_roster(Env env, 
-                                    long id, String to, 
-                                    ArrayList<RosterItem> roster)
-  {
-    bam_send_query_result(env, id, to, new RosterQuery(roster));
-  }
-
-  public static void im_send_presence(Env env, 
-                                      String to, 
-                                      String status)
-  {
-    bam_send_presence(env, to, new ImPresence(status));
-  }
 }
 

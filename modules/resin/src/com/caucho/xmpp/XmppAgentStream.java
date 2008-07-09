@@ -225,7 +225,7 @@ public class XmppAgentStream implements BamStream
 		  + " from=" + from + " value=" + data);
       }
       
-      _writer.sendPresence(to, from, data, "");
+      _writer.sendPresence(to, from, data, null);
 
       _os.flush();
     } catch (IOException e) {

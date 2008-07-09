@@ -230,14 +230,16 @@ public class HempSkeleton<C>
  
   public static HempSkeleton getHempSkeleton(Class cl)
   {
-    HempSkeleton skeleton = _skeletons.get(cl);
+    synchronized(_skeletons) {
+      HempSkeleton skeleton = _skeletons.get(cl);
 
-    if (skeleton == null) {
-      skeleton = new HempSkeleton(cl);
-      _skeletons.put(cl, skeleton);
+      if (skeleton == null) {
+        skeleton = new HempSkeleton(cl);
+        _skeletons.put(cl, skeleton);
+      }
+
+      return skeleton;
     }
-
-    return skeleton;
   }
 
   public void dispatchMessage(C target, String to, String from,

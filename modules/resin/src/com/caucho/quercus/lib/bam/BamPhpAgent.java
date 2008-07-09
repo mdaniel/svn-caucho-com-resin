@@ -59,6 +59,7 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.xmpp.disco.DiscoInfoQuery;
 
 import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 
 /**
  * BAM agent that calls into a PHP script to handle messages/queries.
@@ -68,14 +69,13 @@ public class BamPhpAgent extends GenericService {
   private static final Logger log
     = Logger.getLogger(BamPhpAgent.class.getName());
 
+  private static final Quercus _quercus = new Quercus();
+
   private final HashMap<String,BamPhpAgent> _children = 
     new HashMap<String,BamPhpAgent>();
 
-  private final Quercus _quercus = new Quercus();
-
   private ArrayList<String> _featureNames = new ArrayList<String>();
 
-  private QuercusProgram _program;
   private Path _script;
   private String _encoding = "ISO-8859-1";
 
@@ -116,14 +116,6 @@ public class BamPhpAgent extends GenericService {
     if (_script == null)
       throw new ConfigException(L.l("script path not specified"));
 
-    try {
-      _program = QuercusParser.parse(_quercus, _script, _encoding);
-    }
-    catch (IOException e) {
-      throw new ConfigException(L.l("unable to open script {0}", _script), 
-                                e);
-    }
-
     super.init();
   }
 
@@ -138,20 +130,22 @@ public class BamPhpAgent extends GenericService {
 
   boolean hasChild(String jid)
   {
-    return _children.containsKey(jid);
+    synchronized(_children) {
+      return _children.containsKey(jid);
+    }
   }
 
   void addChild(String jid, BamPhpAgent child)
   {
-    _children.put(jid, child);
+    synchronized(_children) {
+      _children.put(jid, child);
+    }
   }
 
-  private Env createEnv(BamEventType type, 
+  private Env createEnv(QuercusPage page, BamEventType type, 
                         String to, String from, Serializable value)
   {
     WriteStream out = new NullWriteStream();
-
-    QuercusPage page = new InterpretedPage(_program);
 
     Env env = new Env(_quercus, page, out, null, null);
 
@@ -202,8 +196,12 @@ public class BamPhpAgent extends GenericService {
     Env env = null;
 
     try {
-      env = createEnv(BamEventType.MESSAGE, to, from, value);
-      _program.execute(env);
+      QuercusPage page = _quercus.parse(_script);
+      env = createEnv(page, BamEventType.MESSAGE, to, from, value);
+      page.executeTop(env);
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
     finally {
       if (env != null)
@@ -218,10 +216,14 @@ public class BamPhpAgent extends GenericService {
     Env env = null;
 
     try {
-      env = createEnv(BamEventType.MESSAGE_ERROR, to, from, value);
+      QuercusPage page = _quercus.parse(_script);
+      env = createEnv(page, BamEventType.MESSAGE_ERROR, to, from, value);
       setError(env, error);
 
-      _program.execute(env);
+      page.executeTop(env);
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
     finally {
       if (env != null)
@@ -234,6 +236,7 @@ public class BamPhpAgent extends GenericService {
   {
     BamEventType eventType = BamEventType.QUERY_GET;
 
+    // XXX move to override of introspected method
     if (value instanceof DiscoInfoQuery)
       eventType = BamEventType.GET_DISCO_FEATURES;
 
@@ -241,10 +244,11 @@ public class BamPhpAgent extends GenericService {
     boolean understood = false;
 
     try {
-      env = createEnv(eventType, to, from, value);
+      QuercusPage page = _quercus.parse(_script);
+      env = createEnv(page, eventType, to, from, value);
       setId(env, id);
 
-      _program.execute(env);
+      page.executeTop(env);
 
       if (eventType == BamEventType.GET_DISCO_FEATURES) {
         _featureNames.clear();
@@ -263,8 +267,8 @@ public class BamPhpAgent extends GenericService {
           env.getGlobalValue("_quercus_bam_function_return").toBoolean();
       }
     }
-    catch (Exception e) {
-      e.printStackTrace(System.out);
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
     finally {
       if (env != null)
@@ -287,13 +291,17 @@ public class BamPhpAgent extends GenericService {
     boolean understood = false;
 
     try {
-      env = createEnv(BamEventType.QUERY_SET, to, from, value);
+      QuercusPage page = _quercus.parse(_script);
+      env = createEnv(page, BamEventType.QUERY_SET, to, from, value);
       setId(env, id);
 
-      _program.execute(env);
+      page.executeTop(env);
 
       understood = 
         env.getGlobalValue("_quercus_bam_function_return").toBoolean();
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
     finally {
       if (env != null)
@@ -309,10 +317,14 @@ public class BamPhpAgent extends GenericService {
     Env env = null;
 
     try {
-      env = createEnv(BamEventType.QUERY_RESULT, to, from, value);
+      QuercusPage page = _quercus.parse(_script);
+      env = createEnv(page, BamEventType.QUERY_RESULT, to, from, value);
       setId(env, id);
 
-      _program.execute(env);
+      page.executeTop(env);
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
     finally {
       if (env != null)
@@ -327,11 +339,15 @@ public class BamPhpAgent extends GenericService {
     Env env = null;
 
     try {
-      env = createEnv(BamEventType.QUERY_ERROR, to, from, value);
+      QuercusPage page = _quercus.parse(_script);
+      env = createEnv(page, BamEventType.QUERY_ERROR, to, from, value);
       setId(env, id);
       setError(env, error);
 
-      _program.execute(env);
+      page.executeTop(env);
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
     finally {
       if (env != null)
@@ -345,9 +361,13 @@ public class BamPhpAgent extends GenericService {
     Env env = null;
 
     try {
-      env = createEnv(BamEventType.PRESENCE, to, from, value);
+      QuercusPage page = _quercus.parse(_script);
+      env = createEnv(page, BamEventType.PRESENCE, to, from, value);
 
-      _program.execute(env);
+      page.executeTop(env);
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
     finally {
       if (env != null)
@@ -361,9 +381,13 @@ public class BamPhpAgent extends GenericService {
     Env env = null;
 
     try {
-      env = createEnv(BamEventType.PRESENCE_UNAVAILABLE, to, from, value);
+      QuercusPage page = _quercus.parse(_script);
+      env = createEnv(page, BamEventType.PRESENCE_UNAVAILABLE, to, from, value);
 
-      _program.execute(env);
+      page.executeTop(env);
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
     finally {
       if (env != null)
@@ -377,9 +401,13 @@ public class BamPhpAgent extends GenericService {
     Env env = null;
 
     try {
-      env = createEnv(BamEventType.PRESENCE_PROBE, to, from, value);
+      QuercusPage page = _quercus.parse(_script);
+      env = createEnv(page, BamEventType.PRESENCE_PROBE, to, from, value);
 
-      _program.execute(env);
+      page.executeTop(env);
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
     finally {
       if (env != null)
@@ -393,9 +421,13 @@ public class BamPhpAgent extends GenericService {
     Env env = null;
 
     try {
-      env = createEnv(BamEventType.PRESENCE_SUBSCRIBE, to, from, value);
+      QuercusPage page = _quercus.parse(_script);
+      env = createEnv(page, BamEventType.PRESENCE_SUBSCRIBE, to, from, value);
 
-      _program.execute(env);
+      page.executeTop(env);
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
     finally {
       if (env != null)
@@ -409,9 +441,13 @@ public class BamPhpAgent extends GenericService {
     Env env = null;
 
     try {
-      env = createEnv(BamEventType.PRESENCE_SUBSCRIBED, to, from, value);
+      QuercusPage page = _quercus.parse(_script);
+      env = createEnv(page, BamEventType.PRESENCE_SUBSCRIBED, to, from, value);
 
-      _program.execute(env);
+      page.executeTop(env);
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
     finally {
       if (env != null)
@@ -425,9 +461,13 @@ public class BamPhpAgent extends GenericService {
     Env env = null;
 
     try {
-      env = createEnv(BamEventType.PRESENCE_UNSUBSCRIBE, to, from, value);
+      QuercusPage page = _quercus.parse(_script);
+      env = createEnv(page, BamEventType.PRESENCE_UNSUBSCRIBE, to, from, value);
 
-      _program.execute(env);
+      page.executeTop(env);
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
     finally {
       if (env != null)
@@ -441,9 +481,14 @@ public class BamPhpAgent extends GenericService {
     Env env = null;
 
     try {
-      env = createEnv(BamEventType.PRESENCE_UNSUBSCRIBED, to, from, value);
+      QuercusPage page = _quercus.parse(_script);
+      env = createEnv(page, BamEventType.PRESENCE_UNSUBSCRIBED, 
+                      to, from, value);
 
-      _program.execute(env);
+      page.executeTop(env);
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
     finally {
       if (env != null)
@@ -458,10 +503,14 @@ public class BamPhpAgent extends GenericService {
     Env env = null;
 
     try {
-      env = createEnv(BamEventType.PRESENCE_ERROR, to, from, value);
+      QuercusPage page = _quercus.parse(_script);
+      env = createEnv(page, BamEventType.PRESENCE_ERROR, to, from, value);
       setError(env, error);
 
-      _program.execute(env);
+      page.executeTop(env);
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
     finally {
       if (env != null)

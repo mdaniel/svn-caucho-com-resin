@@ -191,16 +191,20 @@ class XmppWriter
       synchronized (out) {
 	out.writeStartElement("presence");
 
+	ImPresence presence = (ImPresence) value;
+
 	if (to != null)
 	  out.writeAttribute("to", to);
+  else if (presence.getTo() != null)
+	  out.writeAttribute("to", presence.getTo());
 
 	if (from != null)
 	  out.writeAttribute("from", from);
+  else if (presence.getFrom() != null)
+	  out.writeAttribute("from", presence.getFrom());
 
 	if (type != null)
 	  out.writeAttribute("type", type);
-
-	ImPresence presence = (ImPresence) value;
 
 	Text status = presence.getStatus();
 	if (status != null) {

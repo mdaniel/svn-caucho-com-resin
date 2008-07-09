@@ -154,10 +154,27 @@ public class RosterItem implements Serializable {
 
     sb.append("[");
     sb.append(_jid);
+    sb.append(",name=");
+    sb.append(_name);
     sb.append(",sub=");
     sb.append(_subscription);
+
     if (_ask != null)
       sb.append(",ask=" + _ask);
+
+    if (_group != null) {
+      sb.append(",group=[");
+
+      for (int i = 0; i < _group.length; i++) {
+        sb.append(_group[i]);
+        
+        if (i != _group.length - 1)
+          sb.append(',');
+      }
+
+      sb.append(']');
+    }
+
     sb.append("]");
 
     return sb.toString();

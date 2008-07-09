@@ -159,6 +159,11 @@ public class ImMessage implements Serializable {
       return _body[0].getValue();
   }
 
+  public void setThread(String thread)
+  {
+    _thread = thread;
+  }
+ 
   public String getThread()
   {
     return _thread;

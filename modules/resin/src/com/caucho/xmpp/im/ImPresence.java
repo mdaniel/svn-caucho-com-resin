@@ -68,7 +68,6 @@ public class ImPresence implements Serializable {
   private String _id;
   private String _to;
   private String _from;
-  private String _type;
   
   // "away", "chat", "dnd", "xa"
   private String _show;
@@ -115,6 +114,16 @@ public class ImPresence implements Serializable {
     return _status;
   }
 
+  public String getTo()
+  {
+    return _to;
+  }
+
+  public String getFrom()
+  {
+    return _from;
+  }
+
   @Override
   public String toString()
   {
@@ -122,6 +131,12 @@ public class ImPresence implements Serializable {
 
     sb.append(getClass().getSimpleName());
     sb.append("[");
+
+    if (_to != null)
+      sb.append("to=").append(_to);
+
+    if (_from != null)
+      sb.append(",from=").append(_from);
 
     if (_id != null)
       sb.append("id=").append(_id);
