@@ -299,11 +299,14 @@ r_jsp = element jsp {
 }
 
 r_jsf = element jsf {
-  (attribute fast-jsf { r_boolean-Type }
+   (attribute fast-jsf { r_boolean-Type }
     | element fast-jsf { r_boolean-Type })?
     
  & (attribute state-serialization-method { r_state-serialization-method-Values }
     | element state-serialization-method { r_state-serialization-method-Values })?
+
+ & (attribute enable-developer-aid { r_boolean-Type }
+    | element enable-developer-aid { r_boolean-Type })?
 }
 
 r_state-serialization-method-Values = "hessian" | "java"

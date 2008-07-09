@@ -51,6 +51,8 @@ public class JsfPropertyGroup {
   private StateSerializationMethod _stateSerializationMethod
     = StateSerializationMethod.HESSIAN;
 
+  private boolean _enableDeveloperAid;
+
   public JsfPropertyGroup()
   {
   }
@@ -98,6 +100,14 @@ public class JsfPropertyGroup {
     _fastJsf = fastJsf;
   }
 
+  /**
+   * Return true if fast jsf is allowed.
+   */
+  public boolean isFastJsf()
+  {
+    return _fastJsf;
+  }
+
   public StateSerializationMethod getStateSerializationMethod()
   {
     return _stateSerializationMethod;
@@ -116,12 +126,13 @@ public class JsfPropertyGroup {
                                     stateSerializationMethod));
   }
 
-  /**
-   * Return true if fast jsf is allowed.
-   */
-  public boolean isFastJsf()
+  public void setEnableDeveloperAid(boolean enableDeveloperAid) {
+    _enableDeveloperAid = enableDeveloperAid;
+  }
+
+  public boolean isEnableDeveloperAid()
   {
-    return _fastJsf;
+    return _enableDeveloperAid;
   }
 
   static {

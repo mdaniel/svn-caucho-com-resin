@@ -29,26 +29,24 @@
 package com.caucho.jsf.webapp;
 
 import java.io.*;
-import java.lang.reflect.*;
 import java.net.*;
 import java.util.*;
 import java.util.logging.*;
 
 import javax.faces.*;
 import javax.faces.application.*;
-import javax.faces.context.*;
 import javax.faces.event.*;
 import javax.faces.lifecycle.*;
 import javax.faces.webapp.*;
 
 import javax.servlet.*;
-import javax.servlet.http.*;
 
 import com.caucho.config.*;
 import com.caucho.jsf.application.*;
 import com.caucho.jsf.cfg.*;
 import com.caucho.vfs.*;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.server.dispatch.ServletMapping;
 
 public class FacesServletImpl extends GenericServlet
 {
@@ -70,9 +68,6 @@ public class FacesServletImpl extends GenericServlet
   public void init(ServletConfig config)
     throws ServletException
   {
-    Object factoryObj;
-    String factory;
-
     initFactory(FactoryFinder.APPLICATION_FACTORY,
 		"com.caucho.jsf.application.ApplicationFactoryImpl");
 
@@ -121,10 +116,10 @@ public class FacesServletImpl extends GenericServlet
     if (app.getViewHandler() == null)
       app.setViewHandler(new JspViewHandler());
 
+    JsfPropertyGroup jsfPropertyGroup = WebApp.getLocal().getJsf();
+
     if (app.getStateManager() == null) {
       SessionStateManager stateManager = new SessionStateManager();
-
-      JsfPropertyGroup jsfPropertyGroup = WebApp.getLocal().getJsf();
 
       if (jsfPropertyGroup != null)
         stateManager.setStateSerializationMethod(
@@ -136,15 +131,33 @@ public class FacesServletImpl extends GenericServlet
     LifecycleFactory lifecycleFactory = (LifecycleFactory)
       FactoryFinder.getFactory(FactoryFinder.LIFECYCLE_FACTORY);
 
+    PhaseListener developerAidListener = null;
+
+    if (jsfPropertyGroup.isEnableDeveloperAid()) {
+      developerAidListener = new JsfDeveloperAid();
+
+      //will use Servlet 3.0
+      ServletMapping servletMapping = WebApp.getCurrent().createServletMapping();
+      
+      servletMapping.addURLPattern("caucho.jsf.developer.aid");
+      servletMapping.setServletClass(JsfDeveloperAidServlet.class.getName());
+
+      WebApp.getCurrent().addServletMapping(servletMapping);
+    }
+
     Iterator iter = lifecycleFactory.getLifecycleIds();
     while (iter.hasNext()) {
       Lifecycle lifecycle
 	= lifecycleFactory.getLifecycle((String) iter.next());
 
+      if (developerAidListener != null)
+        lifecycle.addPhaseListener(developerAidListener);
+      
       for (PhaseListener listener : _phaseListenerList) {
 	lifecycle.addPhaseListener(listener);
       }
     }
+
   }
 
   private static void initFactory(String factoryName, String defaultName)
