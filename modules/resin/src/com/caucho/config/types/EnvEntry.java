@@ -57,7 +57,6 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
 
   public EnvEntry()
   {
-    Thread.dumpStack();
   }
 
   public void setId(String id)

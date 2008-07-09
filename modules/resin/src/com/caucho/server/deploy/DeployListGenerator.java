@@ -144,9 +144,6 @@ public class DeployListGenerator<E extends DeployController>
       
       // merge with the rest of the entries
       for (int j = 0; j < _generatorList.size(); j++) {
-	if (i == j)
-	  continue;
-	
         DeployGenerator<E> generator = _generatorList.get(j);
 
         // XXX: issue with server/10tl

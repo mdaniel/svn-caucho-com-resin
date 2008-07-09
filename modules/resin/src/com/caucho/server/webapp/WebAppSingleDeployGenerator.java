@@ -47,8 +47,10 @@ import java.util.logging.Logger;
  */
 public class WebAppSingleDeployGenerator
   extends DeployGenerator<WebAppController>
-  implements EnvironmentListener {
-  private static final Logger log = Log.open(WebAppSingleDeployGenerator.class);
+  implements EnvironmentListener
+{
+  private static final Logger log
+    = Logger.getLogger(WebAppSingleDeployGenerator.class.getName());
 
   private WebAppContainer _container;
   
@@ -240,7 +242,7 @@ public class WebAppSingleDeployGenerator
   }
   
   /**
-   * Returns the current array of webApp entries.
+   * Creates a controller given the name
    */
   public WebAppController generateController(String name)
   {
