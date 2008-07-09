@@ -1,5 +1,5 @@
 event=com.caucho.log.handler.EventHandler
 jms=com.caucho.log.handler.JmsHandler
-hmtp=com.caucho.log.handler.HmtpHandler
+bam=com.caucho.log.handler.HmtpHandler
 syslog=com.caucho.log.SyslogHandler
 

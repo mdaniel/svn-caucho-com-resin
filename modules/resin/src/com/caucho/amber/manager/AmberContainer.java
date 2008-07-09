@@ -35,6 +35,7 @@ import com.caucho.amber.gen.AmberEnhancer;
 import com.caucho.amber.gen.AmberGenerator;
 import com.caucho.amber.type.*;
 import com.caucho.config.*;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.EnhancerManager;
 import com.caucho.loader.enhancer.ScanListener;
@@ -75,6 +76,12 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
 
   private boolean _createDatabaseTables;
 
+  private ArrayList<ConfigProgram> _unitDefaultList
+    = new ArrayList<ConfigProgram>();
+
+  private HashMap<String,ArrayList<ConfigProgram>> _unitDefaultMap
+    = new HashMap<String,ArrayList<ConfigProgram>>();
+  
   private ArrayList<PersistenceUnitConfig> _unitConfigList
     = new ArrayList<PersistenceUnitConfig>();
 
@@ -298,6 +305,43 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   public static String getPersistenceUnitJndiPrefix()
   {
     return "java:comp/env/persistence/_amber_PersistenceUnit/";
+  }
+
+  /**
+   * Adds a persistence-unit default
+   */
+  public void addPersistenceUnitDefault(ConfigProgram program)
+  {
+    _unitDefaultList.add(program);
+  }
+
+  /**
+   * Returns the persistence-unit default list.
+   */
+  public ArrayList<ConfigProgram> getPersistenceUnitDefaultList()
+  {
+    return _unitDefaultList;
+  }
+
+  /**
+   * Adds a persistence-unit default
+   */
+  public void addPersistenceUnitProxy(String name,
+				      ArrayList<ConfigProgram> program)
+  {
+    ArrayList<ConfigProgram> oldProgram = _unitDefaultMap.get(name);
+
+    if (oldProgram == null)
+      oldProgram = new ArrayList<ConfigProgram>();
+
+    oldProgram.addAll(program);
+    
+    _unitDefaultMap.put(name, oldProgram);
+  }
+
+  public ArrayList<ConfigProgram> getProxyProgram(String name)
+  {
+    return _unitDefaultMap.get(name);
   }
 
   /**
@@ -892,7 +936,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     try {
       is = persistenceXml.openRead();
 
-      PersistenceConfig persistence = new PersistenceConfig();
+      PersistenceConfig persistence = new PersistenceConfig(this);
       persistence.setRoot(root);
 
       new Config().configure(persistence, is,

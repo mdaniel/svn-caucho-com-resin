@@ -1641,6 +1641,9 @@ public abstract class AbstractHttpRequest
 
     WebApp app = getWebApp();
     if (app == null) {
+      if (log.isLoggable(Level.FINE))
+	log.finer("authentication failed, no web-app found");
+      
       _response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return false;
     }
@@ -1657,11 +1660,14 @@ public abstract class AbstractHttpRequest
         getSession(true);
         
       _session.setUser(user);
-    }
 
-    if (user != null)
       return true;
+    }
     else {
+      if (log.isLoggable(Level.FINE))
+	log.finer("authentication failed, no login module found for "
+		  + app);
+      
       _response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return false;
     }

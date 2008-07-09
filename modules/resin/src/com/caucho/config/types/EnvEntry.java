@@ -49,7 +49,6 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
   private static final L10N L = new L10N(EnvEntry.class);
   private static final Logger log = Logger.getLogger(EnvEntry.class.getName());
 
-
   private String _name;
   private Class _type;
   private String _value;
@@ -58,6 +57,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
 
   public EnvEntry()
   {
+    Thread.dumpStack();
   }
 
   public void setId(String id)
@@ -189,7 +189,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
 
   public String toString()
   {
-    return "EnvEntry[" + _name + "]";
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 }
 

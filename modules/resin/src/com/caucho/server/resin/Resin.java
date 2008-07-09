@@ -267,8 +267,6 @@ public class Resin implements EnvironmentBean, SchemaBean
       webBeans.addSingleton(new ResinWebBeansProducer());
       webBeans.update();
       
-      Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
-
       _threadPoolAdmin = ThreadPoolAdmin.create();
       _resinAdmin = new ResinAdmin(this);
 
@@ -1495,8 +1493,10 @@ public class Resin implements EnvironmentBean, SchemaBean
 	}
       }
 
-      if (! resin.isClosed())
+      if (! resin.isClosed()) {
+	EnvironmentStream.getOriginalSystemErr().println("Resin halting due to stalled shutdown");
 	Runtime.getRuntime().halt(1);
+      }
 
       System.exit(0);
     } catch (Throwable e) {

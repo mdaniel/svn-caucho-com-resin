@@ -29,7 +29,9 @@
 
 package com.caucho.amber.cfg;
 
+import com.caucho.amber.manager.AmberContainer;
 import com.caucho.config.*;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.vfs.*;
 
 import java.net.*;
@@ -39,10 +41,17 @@ import java.util.ArrayList;
  * Top <persistence> tag for the persistence.xml
  */
 public class PersistenceConfig {
+  private AmberContainer _manager;
+  
   private Path _root;
   
   private ArrayList<PersistenceUnitConfig> _unitList
     = new ArrayList<PersistenceUnitConfig>();
+
+  public PersistenceConfig(AmberContainer manager)
+  {
+    _manager = manager;
+  }
 
   public void setRoot(Path root)
   {
@@ -76,7 +85,12 @@ public class PersistenceConfig {
       else
 	rootUrl = new URL(_root.getURL());
       
-      PersistenceUnitConfig unit = new PersistenceUnitConfig(rootUrl);
+      PersistenceUnitConfig unit
+	= new PersistenceUnitConfig(_manager, rootUrl);
+
+      for (ConfigProgram program : _manager.getPersistenceUnitDefaultList()) {
+	program.configure(unit);
+      }
     
       _unitList.add(unit);
 

@@ -344,6 +344,8 @@ public class WebAppContainer
       return;
     }
 
+    // server/10f6
+    /*
     WebAppController oldEntry
       = _appDeploy.findController(config.getContextPath());
 
@@ -351,9 +353,11 @@ public class WebAppContainer
       throw new ConfigException(L.l("duplicate web-app '{0}' forbidden.",
 				    config.getId()));
     }
+    */
 
     WebAppSingleDeployGenerator deploy
       = new WebAppSingleDeployGenerator(_appDeploy, this, config);
+    
     deploy.deploy();
 
     _appDeploy.add(deploy);
@@ -737,8 +741,12 @@ public class WebAppContainer
 
       if (rewriteChain != chain) {
 	Server server = (Server) _dispatchServer;
-        // server/13sf
-	invocation.setWebApp(getErrorWebApp());
+        // server/13sf, server/1kq1
+	WebApp webApp = findWebAppByURI("/");
+	if (webApp != null)
+	  invocation.setWebApp(webApp);
+	else
+	  invocation.setWebApp(getErrorWebApp());
 	invocation.setFilterChain(rewriteChain);
         isAlwaysModified = false;
       }
@@ -765,6 +773,7 @@ public class WebAppContainer
     Invocation includeInvocation = new Invocation();
     Invocation forwardInvocation = new Invocation();
     Invocation errorInvocation = new Invocation();
+    Invocation dispatchInvocation = new Invocation();
     InvocationDecoder decoder = new InvocationDecoder();
 
     String rawURI = url;
@@ -777,11 +786,13 @@ public class WebAppContainer
       buildIncludeInvocation(includeInvocation);
       buildForwardInvocation(forwardInvocation);
       buildErrorInvocation(errorInvocation);
+      buildDispatchInvocation(dispatchInvocation);
 
       RequestDispatcher disp
 	= new RequestDispatcherImpl(includeInvocation,
 				    forwardInvocation,
 				    errorInvocation,
+				    dispatchInvocation,
 				    getWebApp(includeInvocation, false));
 
       return disp;
@@ -838,6 +849,18 @@ public class WebAppContainer
 
     if (app != null)
       app.buildErrorInvocation(invocation);
+  }
+
+  /**
+   * Creates the invocation for a rewrite-dispatch/dispatch.
+   */
+  public void buildDispatchInvocation(Invocation invocation)
+    throws ServletException
+  {
+   WebApp app = buildSubInvocation(invocation);
+
+    if (app != null)
+      app.buildDispatchInvocation(invocation);
   }
 
   /**

@@ -76,6 +76,11 @@ class WatchdogClient
     _id = config.getId();
   }
 
+  public WatchdogConfig getConfig()
+  {
+    return _config;
+  }
+
   public String getId()
   {
     return _id;

@@ -79,16 +79,19 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   private Invocation _includeInvocation;
   private Invocation _forwardInvocation;
   private Invocation _errorInvocation;
+  private Invocation _dispatchInvocation;
   private boolean _isLogin;
 
   RequestDispatcherImpl(Invocation includeInvocation,
                         Invocation forwardInvocation,
                         Invocation errorInvocation,
+                        Invocation dispatchInvocation,
                         WebApp webApp)
   {
     _includeInvocation = includeInvocation;
     _forwardInvocation = forwardInvocation;
     _errorInvocation = errorInvocation;
+    _dispatchInvocation = dispatchInvocation;
     _webApp = webApp;
   }
 
@@ -114,6 +117,13 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   {
     forward((HttpServletRequest) request, (HttpServletResponse) response,
 	    "error", _errorInvocation);
+  }
+
+  public void dispatch(ServletRequest request, ServletResponse response)
+    throws ServletException, IOException
+  {
+    forward((HttpServletRequest) request, (HttpServletResponse) response,
+	    "error", _dispatchInvocation);
   }
 
   /**

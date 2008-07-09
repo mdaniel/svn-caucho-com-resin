@@ -105,4 +105,10 @@ public class DispatchFilterChain implements FilterChain {
       thread.setContextClassLoader(oldLoader);
     }
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _next + "]";
+  }
 }

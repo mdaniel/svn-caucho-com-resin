@@ -2187,14 +2187,40 @@ More details on JPA are available on the <a href="amber.xtp">Amber</a> page.</p>
 
 <def title="&lt;persistence-manager> schema">
 element persistence-manager {
-  create-database-schema
-  &amp; cache-size
-  &amp; cache-timeout
-  &amp; data-source
-  &amp; jdbc-isolation
-  &amp; read-data-source
-  &amp; validate-database-schema
-  &amp; xa-data-source
+  create-database-schema?
+  &amp; cache-size?
+  &amp; cache-timeout?
+  &amp; data-source?
+  &amp; jdbc-isolation?
+  &amp; persistence-unit*
+  &amp; persistence-unit-default*
+  &amp; read-data-source?
+  &amp; validate-database-schema?
+  &amp; xa-data-source?
+}
+
+element persistence-unit {
+  name
+  &amp; jta-data-source?
+  &amp; non-jta-data-source?
+  &amp; provider?
+  &amp; transaction-type?
+  &amp; properties?
+}
+
+element persistence-unit-default {
+  &amp; jta-data-source?
+  &amp; non-jta-data-source?
+  &amp; provider?
+  &amp; transaction-type?
+  &amp; properties?
+}
+
+element properties {
+  element property {
+     name
+     &amp; value
+  }*
 }
 </def>
 

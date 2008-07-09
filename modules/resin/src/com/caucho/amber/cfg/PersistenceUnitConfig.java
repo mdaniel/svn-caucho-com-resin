@@ -33,10 +33,12 @@ import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.naming.*;
 import com.caucho.config.*;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.loader.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import javax.naming.*;
 import javax.persistence.spi.*;
@@ -53,6 +55,9 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   private static final L10N L = new L10N(PersistenceUnitConfig.class);
   private static final Logger log
     = Logger.getLogger(PersistenceUnitConfig.class.getName());
+
+  private AmberContainer _manager;
+  
   private String _name;
   private Class _provider;
   private String _jtaDataSourceName;
@@ -82,8 +87,10 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   private ArrayList<URL> _jarFileUrls
     = new ArrayList<URL>();
 
-  public PersistenceUnitConfig(URL rootUrl)
+  public PersistenceUnitConfig(AmberContainer manager, URL rootUrl)
   {
+    _manager = manager;
+    
     Thread thread = Thread.currentThread();
 
     _loader = (DynamicClassLoader) thread.getContextClassLoader();
@@ -297,6 +304,18 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
     return new PropertiesConfig();
   }
 
+  @PostConstruct
+  public void init()
+  {
+    ArrayList<ConfigProgram> defaultList = _manager.getProxyProgram(_name);
+
+    if (defaultList != null) {
+      for (ConfigProgram program : defaultList) {
+	program.configure(this);
+      }
+    }
+  }
+    
   public AmberPersistenceUnit init(AmberContainer container,
                                    ArrayList<EntityMappingsConfig> entityMappings)
     throws Exception

@@ -139,16 +139,21 @@ public class DeployListGenerator<E extends DeployController>
     for (int i = 0; i < _generatorList.size(); i++) {
       E controller = _generatorList.get(i).generateController(key);
 
+      if (controller == null)
+	continue;
+      
       // merge with the rest of the entries
-      for (int j = 0; controller != null && j < _generatorList.size(); j++) {
+      for (int j = 0; j < _generatorList.size(); j++) {
+	if (i == j)
+	  continue;
+	
         DeployGenerator<E> generator = _generatorList.get(j);
 
         // XXX: issue with server/10tl
         controller = _generatorList.get(j).mergeController(controller, key);
       }
 
-      if (controller != null)
-        return controller;
+      return controller;
     }
 
     return null;

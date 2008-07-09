@@ -17,13 +17,34 @@ new features, it may be more unstable than the production branch.</p>
 
 </s1>
 
+<s1 title="amber">
+
+<p>Added persistence-unit-default and persistence-unit to
+persistence-manager</p>
+</s1>
+
 <s1 title="rewrite-dispatch">
+
+<s2 title="dispatcher-type">
 
 <p>rewrite-dispatch now allows a dispatcher-type element, letting you
 use rewrite-dispatch for forwards as well as requests.</p>
 
-<p>rewrite-dispatch forward now allows an absolute-target so child
+</s2>
+
+<s2 title="forward and absolute-target">
+
+<p>rewrite-dispatch &lt;forward> now allows an absolute-target so child
 web-apps can redirect to a peer.</p>
+
+</s2>
+
+<s2 title="dispatch target">
+
+<p>rewrite-dispatch &lt;dispatch> now allows a target, so rewriting
+can act exactly like a normal request, not a servlet forward.</p>
+
+</s2>
 
 </s1>
 
@@ -38,6 +59,11 @@ compatibility.</p>
 
 <p>The admin now lets you start/stop/restart a webapp.  It requires a
 SSL connection to be enabled.</p>
+
+<p>The Resin-Pro admin now includes graphs for memory, cpu, and threads.</p>
+
+<p>The Resin admin now includes request info and thread dumps, so you
+can see the status of the slowest requests.</p>
 
 </s1>
 

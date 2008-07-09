@@ -111,12 +111,12 @@ public class MatchRule
   /**
    * Adds a dispatch.
    */
-  public AcceptRule createDispatch()
+  public DispatchRule createDispatch()
   {
-    return new AcceptRule(getRewriteDispatch());
+    return new DispatchRule(getRewriteDispatch());
   }
 
-  public void addDispatch(AcceptRule dispatch)
+  public void addDispatch(DispatchRule dispatch)
   {
     add(dispatch);
   }

@@ -38,7 +38,7 @@ import java.util.regex.Matcher;
 public class RewriteRule
   extends AbstractRuleWithConditions
 {
-  private String _replacement;
+  private String _target;
 
   protected RewriteRule(RewriteDispatch rewriteDispatch)
   {
@@ -55,7 +55,15 @@ public class RewriteRule
    */
   public void setReplacement(String replacement)
   {
-    _replacement = replacement;
+    setTarget(replacement);
+  }
+
+  /**
+   * Sets the target.
+   */
+  public void setTarget(String target)
+  {
+    _target = target;
   }
 
   /**
@@ -67,13 +75,13 @@ public class RewriteRule
   {
     super.init();
 
-    required(_replacement, "replacement");
+    required(_target, "target");
   }
 
   @Override
   public String rewrite(String uri, Matcher matcher)
   {
-    return matcher == null ? _replacement : matcher.replaceAll(_replacement);
+    return matcher == null ? _target : matcher.replaceAll(_target);
   }
 
   public FilterChain dispatch(String uri,

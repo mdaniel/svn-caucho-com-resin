@@ -100,6 +100,8 @@ class WatchdogManager extends ProtocolDispatchServer {
     EnvironmentStream.setStdout(out);
     EnvironmentStream.setStderr(out);
 
+    Logger.getLogger("").setLevel(Level.FINEST);
+
     LogConfig log = new LogConfig();
     log.setName("");
     log.setPath(logPath);
@@ -393,14 +395,17 @@ class WatchdogManager extends ProtocolDispatchServer {
       cluster.addServer(server);
     }
 
-    WatchdogConfig server = resin.findServer(args.getServerId());
+    WatchdogClient client = resin.findClient(args.getServerId());
       
-    Watchdog watchdog = _watchdogMap.get(server.getId());
+    if (client == null) {
+      WatchdogConfig server = resin.findServer(args.getServerId());
       
-    if (watchdog == null)
       _watchdogMap.put(server.getId(), new Watchdog(server));
+    }
     else {
-      watchdog.setConfig(server);
+      WatchdogConfig server = client.getConfig();
+      
+      _watchdogMap.put(server.getId(), new Watchdog(server));
     }
   }
 

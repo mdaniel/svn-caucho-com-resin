@@ -31,6 +31,8 @@ package com.caucho.amber.cfg;
 
 import com.caucho.amber.manager.*;
 import com.caucho.config.*;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.loader.*;
 import com.caucho.util.*;
 
@@ -61,6 +63,17 @@ public class PersistenceManager
   public void setDataSource(DataSource dataSource)
   {
     _amberManager.setDataSource(dataSource);
+  }
+
+  public void addPersistenceUnitDefault(ContainerProgram program)
+  {
+    _amberManager.addPersistenceUnitDefault(program);
+  }
+
+  public void addPersistenceUnit(PersistenceUnitProxy proxy)
+  {
+    _amberManager.addPersistenceUnitProxy(proxy.getName(),
+					  proxy.getProgramList());
   }
 
   @PostConstruct
