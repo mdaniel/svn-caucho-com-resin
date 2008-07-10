@@ -154,29 +154,16 @@ class BinaryColumn extends Column {
     int startOffset = rowOffset + _columnOffset;
     int len = _length;
 
-    StringBuffer sb = new StringBuffer();
+    char []buffer = new char[len];
 
     int offset = startOffset;
     int endOffset = offset + len;
     int i = 0;
     while (offset < endOffset) {
-      int ch1 = block[offset++] & 0xff;
-
-      int d1 = ch1 >> 4;
-      int d2 = ch1 & 0xf;
-
-      if (d1 < 10)
-	sb.append((char) ('0' + d1));
-      else
-	sb.append((char) ('a' + d1 - 10));
-
-      if (d2 < 10)
-	sb.append((char) ('0' + d2));
-      else
-	sb.append((char) ('a' + d2 - 10));
+      buffer[i++] = (char) (block[offset++] & 0xff);
     }
 
-    return sb.toString();
+    return new String(buffer, 0, len);
   }
   
   /**

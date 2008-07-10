@@ -588,6 +588,15 @@ public class TcpConnection extends Connection
 
 	 return RequestState.THREAD_DETACHED;
        }
+       else if (_state == ConnectionState.COMET) {
+	 if (_port.suspend(this)) {
+	   isValid = true;
+
+	   return RequestState.THREAD_DETACHED;
+	 }
+	 else
+	   return RequestState.EXIT;
+       }
      } while (isKeepalive
 	      && (result = keepaliveRead()) == RequestState.REQUEST);
 
@@ -756,11 +765,11 @@ public class TcpConnection extends Connection
 
     // comet
     if (getPort().resume(this)) {
-      log.fine(dbgId() + "wake");
+      log.fine(dbgId() + " wake");
       return true;
     }
 
-    log.fine(dbgId() + "wake failed");
+    log.fine(dbgId() + " wake failed");
     return false;
   }
 
@@ -944,8 +953,8 @@ public class TcpConnection extends Connection
      */
     boolean isKeepalive()
     {
+      // || this == COMET
       return (this == REQUEST_KEEPALIVE
-              || this == COMET
               || this == DUPLEX_KEEPALIVE);
     }
     
@@ -957,7 +966,7 @@ public class TcpConnection extends Connection
       case REQUEST:
       case REQUEST_ACTIVE:
 	return true;
-
+	
       default:
 	return false;
       }
@@ -1009,6 +1018,9 @@ public class TcpConnection extends Connection
       case DUPLEX_KEEPALIVE:
       case DUPLEX:
         return DUPLEX;
+
+      case COMET:
+	return COMET;
 	
       default:
 	throw new IllegalStateException(this + " is an illegal active state");

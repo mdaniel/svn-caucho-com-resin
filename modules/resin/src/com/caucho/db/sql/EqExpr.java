@@ -63,15 +63,15 @@ class EqExpr extends Expr {
     Expr newLeft = _left.bind(query);
     Expr newRight = _right.bind(query);
 
-    if (newLeft instanceof ColumnExpr &&
-	newLeft.getType().equals(String.class)) {
+    if (newLeft instanceof ColumnExpr
+	&& newLeft.getType().equals(String.class)) {
       return new StringEqExpr((ColumnExpr) newLeft, newRight);
     }
-    else if (newRight instanceof ColumnExpr &&
-	     newRight.getType().equals(String.class)) {
+    else if (newRight instanceof ColumnExpr
+	     && newRight.getType().equals(String.class)) {
       return new StringEqExpr((ColumnExpr) newRight, newLeft);
     }
-    
+
     if (_left == newLeft && _right == newRight)
       return this;
     else

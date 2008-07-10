@@ -105,8 +105,8 @@ class CmpExpr extends Expr {
 	String leftValue = _left.evalString(context);
 	String rightValue = _right.evalString(context);
 
-	if (! (leftValue == rightValue ||
-	       leftValue != null && leftValue.equals(rightValue)))
+	if (! (leftValue == rightValue
+	       || leftValue != null && leftValue.equals(rightValue)))
 	  return TRUE;
 	else
 	  return FALSE;
@@ -116,9 +116,8 @@ class CmpExpr extends Expr {
       {
 	String leftValue = _left.evalString(context);
 	String rightValue = _right.evalString(context);
-
-	if (leftValue == rightValue ||
-	    leftValue != null && leftValue.equals(rightValue))
+	if (leftValue == rightValue
+	    || leftValue != null && leftValue.equals(rightValue))
 	  return TRUE;
 	else
 	  return FALSE;

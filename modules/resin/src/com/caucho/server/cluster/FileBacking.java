@@ -616,7 +616,8 @@ public class FileBacking {
 	}
 
 	log.warning(this + " store validation failed, possible lock/data"
-		    + " loss detected (id=" + id + ")");
+		    + " loss detected (id=" + id
+		    + ",hash=" + new HashKey(oldDataHash) + ")");
 
 	if (storeUpdateOverride(conn, id, is, length, dataHash)) {
 	  if (log.isLoggable(Level.FINE)) {
@@ -653,10 +654,11 @@ public class FileBacking {
 	  return;
 	}
 	else if (storeInsert(conn, id, storeId, is, length, dataHash,
-			expireInterval, primary, secondary, tertiary)) {
+			     expireInterval, primary, secondary, tertiary)) {
 	  if (log.isLoggable(Level.FINE)) {
 	    log.fine(this + " save(insert) "
-		     + id + " (length=" + length + ")");
+		     + id + " (length=" + length
+		     + ",hash=" + new HashKey(dataHash) + ")");
 	  }
 	  return;
 	}

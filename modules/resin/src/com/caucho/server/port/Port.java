@@ -1477,8 +1477,9 @@ public class Port
   boolean resume(TcpConnection conn)
   {
     synchronized (_suspendList) {
-      if (! _suspendList.remove(conn))
+      if (! _suspendList.remove(conn)) {
 	return false;
+      }
       
       conn.setResume();
     }

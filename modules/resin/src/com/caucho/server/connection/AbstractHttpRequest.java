@@ -2612,7 +2612,7 @@ public abstract class AbstractHttpRequest
 
       // server/0219
       // _invocation = null;
-      
+
       if (session != null)
         session.finish();
 
@@ -2628,7 +2628,7 @@ public abstract class AbstractHttpRequest
         }
       }
       _closeOnExit.clear();
-      
+
       if (_tcpConn != null)
 	_tcpConn.endActive();
     }
@@ -2640,6 +2640,7 @@ public abstract class AbstractHttpRequest
 
     if (comet == null) {
       _session = null;
+
       
       if (_attributes.size() > 0) {
 	for (Map.Entry<String,Object> entry : _attributes.entrySet()) {

@@ -2209,7 +2209,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return;
 
     ConnectionController controller = null;
-    
+
     try {
       if (_originalRequest instanceof AbstractHttpRequest) {
 	AbstractHttpRequest request = (AbstractHttpRequest) _originalRequest;
