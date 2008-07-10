@@ -352,7 +352,6 @@ abstract public class JarListLoader extends Loader implements Dependency {
 	Path path = jarEntry.getJarPath();
 
 	Path filePath = path.lookup(pathName);
-	System.out.println("FP: " + filePath);
 
 	if (filePath.exists())
 	  return filePath;
