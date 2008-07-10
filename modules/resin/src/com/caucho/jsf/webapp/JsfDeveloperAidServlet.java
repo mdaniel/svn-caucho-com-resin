@@ -259,8 +259,7 @@ public class JsfDeveloperAidServlet
 
 
         if (valueExpression != null) {
-          JsfDeveloperAid.ViewRoot root
-            = (JsfDeveloperAid.ViewRoot) viewRoots[1];
+          JsfDeveloperAid.ViewRoot root =  viewRoots[1];
 
           UIViewRoot uiViewRoot = new UIViewRoot();
           uiViewRoot.setLocale(root.getLocale());
@@ -290,30 +289,30 @@ public class JsfDeveloperAidServlet
         else if (phaseId == null) {
           out.println("<table border=\"1\">");
           out.println("<thead>");
-          out.print("<tr><td colspan=\"2\" align=\"center\"><strong>Snoop</strong></td></tr>");
-          out.print("<tr><td><strong>Name</strong></td><td><strong>Value</strong></td></tr>");
+          out.println("<tr><td colspan=\"2\" align=\"center\"><strong>Snoop</strong></td></tr>");
+          out.println("<tr><td><strong>Name</strong></td><td><strong>Value</strong></td></tr>");
           out.println("</thead>");
 
           out.println("<tbody>");
 
-          out.print("<tr><td colspan=\"2\" align=\"center\"><em>Headers</em></td></tr>");
+          out.println("<tr><td colspan=\"2\" align=\"center\"><em>Headers</em></td></tr>");
 
           Map<String, String> headers = snapshot.getHeaderMap();
           for (String header : headers.keySet()) {
             String value = headers.get(header);
-            out.print("<tr><td><em>" +
+            out.println("<tr><td><em>" +
                       header +
                       "</em></td><td><em>" +
                       value +
                       "</em></td></tr>");
           }
 
-          out.print("<tr><td colspan=\"2\" align=\"center\"><em>Parameters</em></td></tr>");
+          out.println("<tr><td colspan=\"2\" align=\"center\"><em>Parameters</em></td></tr>");
 
           Map<String, String> parameters = snapshot.getParameterMap();
           for (String parameter : parameters.keySet()) {
             String value = headers.get(parameter);
-            out.print("<tr><td><em>" +
+            out.println("<tr><td><em>" +
                       parameter +
                       "</em></td><td><em>" +
                       value +
