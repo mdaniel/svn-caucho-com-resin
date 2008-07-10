@@ -133,12 +133,13 @@ public class FacesServletImpl extends GenericServlet
 
     PhaseListener developerAidListener = null;
 
-    if (jsfPropertyGroup.isEnableDeveloperAid()) {
+    if (jsfPropertyGroup != null && jsfPropertyGroup.isEnableDeveloperAid()) {
       developerAidListener = new JsfDeveloperAid();
 
       //will use Servlet 3.0
-      ServletMapping servletMapping = WebApp.getCurrent().createServletMapping();
-      
+      ServletMapping servletMapping = WebApp.getCurrent()
+        .createServletMapping();
+
       servletMapping.addURLPattern("caucho.jsf.developer.aid");
       servletMapping.setServletClass(JsfDeveloperAidServlet.class.getName());
 
