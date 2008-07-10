@@ -524,8 +524,9 @@ public abstract class JspNode {
 
     if (parent != null)
       return parent.getTag();
-    else
+    else {
       return _gen.getRootTag();
+    }
   }
 
   /**
@@ -1010,7 +1011,8 @@ public abstract class JspNode {
     }
     else
       cb.append(", null");
-      
+
+    cb.append(", _jsp_state");
     cb.append(")");
 
     return cb.toString();

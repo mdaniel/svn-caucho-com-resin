@@ -1223,7 +1223,7 @@ public class JavaClassDef extends ClassDef {
                               JavaValue value)
   {
     if (__toString == null) {
-      return env.getEmptyString();
+      return env.createString(String.valueOf(value.toJavaObject()));
     }
     
     return __toString.callMethod(env, value, new Expr[0]).toStringValue();

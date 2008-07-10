@@ -83,6 +83,8 @@ abstract public class JspGenerator {
   abstract protected void setParseState(ParseState parseState);
   
   abstract protected ParseState getParseState();
+
+  abstract public int uniqueId();
   
   public void setJspParser(JspParser parser)
   {

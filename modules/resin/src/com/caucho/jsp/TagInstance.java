@@ -65,6 +65,7 @@ public class TagInstance {
   private ArrayList<TagInstance> _children = new ArrayList<TagInstance>();
   private ArrayList<TagInstance> _tags = new ArrayList<TagInstance>();
 
+  private JspGenerator _gen;
   private String _tagId = null;
   private QName _qname;
   private Class _cl;
@@ -87,15 +88,21 @@ public class TagInstance {
     _tagId = null;
   }
   
-  public TagInstance(ParseTagManager manager, String id)
+  public TagInstance(ParseTagManager manager,
+		     String id)
   {
     _manager = manager;
     _top = this;
     _tagId = id;
   }
   
-  TagInstance(TagInstance parent, TagInfo tagInfo, QName qname, Class cl)
+  TagInstance(JspGenerator gen,
+	      TagInstance parent,
+	      TagInfo tagInfo,
+	      QName qname,
+	      Class cl)
   {
+    _gen = gen;
     _qname = qname;
     _parent = parent;
     _manager = parent._manager;
@@ -111,8 +118,7 @@ public class TagInstance {
       int p = className.lastIndexOf('.');
       if (p >= 0)
 	className = className.substring(p + 1);
-      _tagId = "_jsp_" + className + "_" + _top._maxId++;
-
+      _tagId = "_jsp_" + className + "_" + _gen.uniqueId();
     }
     
     _analyzedTag = _manager.analyzeTag(cl);
@@ -294,7 +300,9 @@ public class TagInstance {
    * @param names the array of attribute names
    * @param values the array of attribute values
    */
-  public TagInstance addTag(QName tagName, TagInfo tagInfo,
+  public TagInstance addTag(JspGenerator gen,
+			    QName tagName,
+			    TagInfo tagInfo,
                             Class cl,
                             ArrayList<QName> names,
                             ArrayList<Object> values,
@@ -302,7 +310,7 @@ public class TagInstance {
   {
     TagInstance child = null;//findTag(tagName, names);
     if (child == null)
-      child = new TagInstance(this, tagInfo, tagName, cl);
+      child = new TagInstance(gen, this, tagInfo, tagName, cl);
 
     child.setBodyContent(hasBodyContent);
 
@@ -335,7 +343,9 @@ public class TagInstance {
   /**
    * Adds a new tag.  Always create a new tag.
    */
-  public TagInstance addNewTag(QName tagName, TagInfo tagInfo,
+  public TagInstance addNewTag(JspGenerator gen,
+			       QName tagName,
+			       TagInfo tagInfo,
                                Class cl,
 			       ArrayList<QName> names,
                                ArrayList<String> values,
@@ -343,7 +353,7 @@ public class TagInstance {
   {
     TagInstance child = null;
     if (child == null)
-      child = new TagInstance(this, tagInfo, tagName, cl);
+      child = new TagInstance(gen, this, tagInfo, tagName, cl);
 
     child.setBodyContent(hasBodyContent);
 

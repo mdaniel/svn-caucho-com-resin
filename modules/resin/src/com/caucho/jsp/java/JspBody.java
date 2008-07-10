@@ -111,13 +111,13 @@ public class JspBody extends JspFragmentNode {
     
     JspNode parent = getParent();
 
-    if (parent == null ||
+    if (parent == null
 	//	parent instanceof JspRoot ||
-	parent instanceof JspTop) {
+	|| parent instanceof JspTop) {
       throw error(L.l("jsp:body must be contained in a valid tag."));
     }
-    else if (parent instanceof JspBody ||
-	     parent instanceof JspAttribute) {
+    else if (parent instanceof JspBody
+	     || parent instanceof JspAttribute) {
       throw error(L.l("jsp:body is not allowed in <{0}>",
 		      parent.getTagName()));
     }

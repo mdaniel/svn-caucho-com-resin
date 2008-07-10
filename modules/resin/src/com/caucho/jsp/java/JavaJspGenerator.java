@@ -985,6 +985,7 @@ public class JavaJspGenerator extends JspGenerator {
     if (_parseState.isErrorPage()) {
       out.println("java.lang.Throwable exception = ((com.caucho.jsp.PageContextImpl) pageContext).getThrowable();");
     }
+    out.println("javax.servlet.jsp.tagext.JspTag _jsp_parent_tag = null;");
 
     generateContentType(out);
     
@@ -1481,6 +1482,10 @@ public class JavaJspGenerator extends JspGenerator {
 
     _rootNode.generateTagState(out);
 
+    for (JspFragmentNode frag : _fragmentList) {
+      frag.generateTagState(out);
+    }
+
     out.println();
     out.println("void release()");
     out.println("{");
@@ -1531,12 +1536,14 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("public static class _CauchoFragment extends com.caucho.jsp.JspFragmentSupport {");
     out.pushDepth();
     out.println("private int _frag_code;");
+    out.println("private TagState _jsp_state;");
 
     out.println();
     out.println("static _CauchoFragment create(_CauchoFragment frag, int code,");
     out.println("                              com.caucho.jsp.PageContextImpl pageContext,");
     out.println("                              javax.servlet.jsp.tagext.JspTag parent,");
-    out.println("                              javax.servlet.jsp.tagext.JspFragment jspBody)");
+    out.println("                              javax.servlet.jsp.tagext.JspFragment jspBody,");
+    out.println("                              TagState _jsp_state)");
     out.println("{");
     out.pushDepth();
     out.println("if (frag == null)");
@@ -1547,6 +1554,7 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("frag._jsp_env = pageContext.getELContext();");
     out.println("frag._jsp_parent_tag = parent;");
     out.println("frag._jspBody = jspBody;");
+    out.println("frag._jsp_state = _jsp_state;");
     out.println();
     out.println("return frag;");
     out.popDepth();
@@ -2226,7 +2234,8 @@ public class JavaJspGenerator extends JspGenerator {
 
     return javaPath;
   }
-  
+
+  @Override
   public int uniqueId()
   {
     return _uniqueId++;

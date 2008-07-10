@@ -69,6 +69,7 @@ public class JstlCoreForEach extends JstlNode {
   private String _tagVar;
 
   private TagInstance _tag;
+  private boolean _isDeclaration;
   
   /**
    * Adds an attribute.
@@ -234,9 +235,11 @@ public class JstlCoreForEach extends JstlNode {
       _tagVar = _tag.getId();
     }
     else {
+      _isDeclaration = true;
+      
       String id = "_jsp_loop_" + _gen.uniqueId();
       
-      _tag = parent.addTag(getQName(), null, null,
+      _tag = parent.addTag(_gen, getQName(), null, null,
 			   _attributeNames, _attributeValues, false);
 
       _tag.setId(id);
@@ -300,9 +303,9 @@ public class JstlCoreForEach extends JstlNode {
     else if (node instanceof JstlCoreForEach) {
       JstlCoreForEach forEach = (JstlCoreForEach) node;
 
-      if (forEach.isInteger() == isInteger() &&
-	  forEach.getDepth() == depth &&
-	  forEach.hasDeclaration())
+      if (forEach.isInteger() == isInteger()
+	  && forEach.getDepth() == depth
+	  && forEach.hasDeclaration())
 	return 0;
     }
     
@@ -358,19 +361,8 @@ public class JstlCoreForEach extends JstlNode {
     String oldStatusVar = "_jsp_status_" + uniqueId;
     
     if (_tagVar != null) {
-      out.println("if (" + _tagVar + " == null)");
-      out.println("  " + _tagVar + " = new com.caucho.jsp.IntegerLoopSupportTag();");
-
-      if (hasTag()) {
-	JspNode parentTagNode = getParent().getParentTagNode();
-
-	if (parentTagNode == null) {
-	  out.println(_tagVar + ".setParent((javax.servlet.jsp.tagext.Tag) null);");
-	}
-	else {
-	  out.println(_tagVar + ".setParent(" + parentTagNode.getCustomTagName() + ");");
-	}
-      }
+      out.println(_tagVar + " = _jsp_state.get" + _tagVar
+		  + "(pageContext, _jsp_parent_tag);");
     }
 
     String beginVar = "_jsp_begin_" + uniqueId;
@@ -466,6 +458,7 @@ public class JstlCoreForEach extends JstlNode {
       */
     }
   }
+
   
   /**
    * Generates the code for the c:forEach tag.
@@ -479,19 +472,8 @@ public class JstlCoreForEach extends JstlNode {
     String oldStatusVar = "_jsp_status_" + uniqueId;
     
     if (_tagVar != null) {
-      out.println("if (" + _tagVar + " == null)");
-      out.println("  " + _tagVar + " = new com.caucho.jsp.IteratorLoopSupportTag();");
-
-      if (hasTag()) {
-	JspNode parentTagNode = getParent().getParentTagNode();
-
-	if (parentTagNode == null) {
-	  out.println(_tagVar + ".setParent((javax.servlet.jsp.tagext.Tag) null);");
-	}
-	else {
-	  out.println(_tagVar + ".setParent(" + parentTagNode.getCustomTagName() + ");");
-	}
-      }
+      out.println(_tagVar + " = _jsp_state.get" + _tagVar
+		  + "(pageContext, _jsp_parent_tag);");
     }
 
     String itemsVar = "_jsp_items_" + uniqueId;
@@ -667,5 +649,59 @@ public class JstlCoreForEach extends JstlNode {
       out.print(escapeJavaString(_varStatus));
       out.println("\");");
     }
+  }
+  
+  /**
+   * Generates code before the actual JSP.
+   */
+  @Override
+  public void generateTagState(JspJavaWriter out)
+    throws Exception
+  {
+    if (! _isDeclaration) {
+      super.generateTagState(out);
+      return;
+    }
+    
+    JspNode parentTagNode = getParent().getParentTagNode();
+    String tagClass;
+      
+    if (_items == null && _itemsAttr == null)
+      tagClass = "com.caucho.jsp.IntegerLoopSupportTag";
+    else
+      tagClass = "com.caucho.jsp.IteratorLoopSupportTag";
+
+    out.print("private ");
+    out.print(tagClass);
+    out.println(" " + _tagVar + ";");
+
+    out.println();
+    out.print("final ");
+    out.print(tagClass);
+    out.println(" get" + _tagVar + "(PageContext pageContext, javax.servlet.jsp.tagext.JspTag _jsp_parent_tag) throws Throwable");
+    out.println("{");
+    out.pushDepth();
+    
+    out.println("if (" + _tagVar + " == null) {");
+    out.pushDepth();
+
+    out.println(_tagVar + " = new " + tagClass + "();");
+      
+    if (parentTagNode == null) {
+      out.println(_tagVar + ".setParent((javax.servlet.jsp.tagext.Tag) null);");
+    }
+    else {
+      out.println(_tagVar + ".setParent(" + parentTagNode.getCustomTagName() + ");");
+    }
+    
+    out.popDepth();
+    out.println("}");
+    out.println();
+    out.println("return " + _tagVar + ";");
+    
+    out.popDepth();
+    out.println("}");
+
+    super.generateTagState(out);
   }
 }

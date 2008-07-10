@@ -50,6 +50,8 @@ public abstract class JspContainerNode extends JspNode {
   
   protected ArrayList<JspNode> _children = new ArrayList<JspNode>();
 
+  private ArrayList<JspAttribute> _attrChildren;
+
   protected boolean _hasJspAttribute;
   
   /**
@@ -181,6 +183,14 @@ public abstract class JspContainerNode extends JspNode {
 
       _children.add(node);
     }
+  }
+
+  protected void addAttributeChild(JspAttribute attr)
+  {
+    if (_attrChildren == null)
+      _attrChildren = new ArrayList<JspAttribute>();
+
+    _attrChildren.add(attr);
   }
 
   private boolean hasJspBody()
@@ -489,13 +499,18 @@ public abstract class JspContainerNode extends JspNode {
   public void generateTagStateChildren(JspJavaWriter out)
     throws Exception
   {
-    if (_children == null)
-      return;
+    if (_children != null) {
+      for (int i = 0; i < _children.size(); i++) {
+	JspNode child = _children.get(i);
 
-    for (int i = 0; i < _children.size(); i++) {
-      JspNode child = _children.get(i);
-
-      child.generateTagState(out);
+	child.generateTagState(out);
+      }
+    }
+    
+    if (_attrChildren != null) {
+      for (JspNode child : _attrChildren) {
+	child.generateTagState(out);
+      }
     }
   }
 

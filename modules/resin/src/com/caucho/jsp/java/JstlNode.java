@@ -103,6 +103,6 @@ abstract public class JstlNode extends JspContainerNode {
       out.println("pageContext.applicationSetOrRemove(\"" + var + "\", " + value + ");");
     }
     else
-      throw error(L.l("invalid scope `{0}'", scope));
+      throw error(L.l("invalid scope '{0}'", scope));
   }
 }

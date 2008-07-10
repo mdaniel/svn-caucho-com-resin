@@ -349,12 +349,12 @@ abstract public class GenericTag extends JspContainerNode
     boolean isBodyTag = BodyTag.class.isAssignableFrom(_tagClass);
     boolean isEmpty = isEmpty();
     boolean hasBodyContent = isBodyTag && ! isEmpty;
-    
+
     _tag = parent.findTag(getQName(), _attributeNames,
 			  hasBodyContent);
 
     if (_tag == null || ! _parseState.isRecycleTags()) {
-      _tag = parent.addTag(getQName(), _tagInfo, _tagClass,
+      _tag = parent.addTag(_gen, getQName(), _tagInfo, _tagClass,
 			   _attributeNames, _attributeValues,
 			   hasBodyContent);
 

@@ -156,7 +156,6 @@ public class JspPrecompileResource {
     long expire = Alarm.getCurrentTime() + 60000;
     synchronized (this) {
       while (_completeCount < _threadCount) {
-	System.out.println("CC: " + _completeCount + " " + _threadCount);
 	try {
 	  long timeout = expire - Alarm.getCurrentTime();
 
@@ -202,8 +201,6 @@ public class JspPrecompileResource {
 	synchronized (JspPrecompileResource.this) {
 	  _completeCount++;
 
-	  System.out.println("COMPLETE: " + _completeCount);
-
 	  JspPrecompileResource.this.notifyAll();
 	}
       }
@@ -219,7 +216,6 @@ public class JspPrecompileResource {
       Path path = null;
 
       synchronized (_paths) {
-	System.out.println("PATH: " + _paths);
 	if (_paths.size() == 0)
 	  return false;
 
@@ -278,8 +274,6 @@ public class JspPrecompileResource {
       String []files;
       
       synchronized (_classes) {
-	System.out.println("COMPILE: " + _classes);
-	
 	if (_classes.size() == 0)
 	  return false;
 	

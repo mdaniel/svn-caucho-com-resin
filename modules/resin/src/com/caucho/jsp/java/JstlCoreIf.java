@@ -72,10 +72,13 @@ public class JstlCoreIf extends JstlNode {
   public void addAttribute(QName name, JspAttribute value)
     throws JspParseException
   {
-    if (TEST.equals(name))
+    if (TEST.equals(name)) {
       _testAttr = value;
+
+      addAttributeChild(value);
+    }
     else
-      throw error(L.l("`{0}' is an unknown jsp:attribute for <{1}>.",
+      throw error(L.l("'{0}' is an unknown jsp:attribute for <{1}>.",
                       name.getName(), getTagName()));
   }
 

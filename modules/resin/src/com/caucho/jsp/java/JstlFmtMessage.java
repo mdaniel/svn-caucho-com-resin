@@ -134,11 +134,24 @@ public class JstlFmtMessage extends JstlNode {
   /**
    * Generates the code for the fmt:message tag.
    */
+  @Override
   public void generatePrologue(JspJavaWriter out)
     throws Exception
   {
     for (int i = 0; i < _params.size(); i++) {
       _params.get(i).generatePrologue(out);
+    }
+  }
+
+  /**
+   * Generates the code for the fmt:message tag.
+   */
+  @Override
+  public void generateTagState(JspJavaWriter out)
+    throws Exception
+  {
+    for (int i = 0; i < _params.size(); i++) {
+      _params.get(i).generateTagState(out);
     }
   }
 

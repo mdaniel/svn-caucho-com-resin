@@ -220,6 +220,8 @@ abstract public class JspFragmentNode extends JspContainerNode
       cb.append(", _jspBody");
     else
       cb.append(", null");
+
+    cb.append(", _jsp_state");
       
     cb.append(")");
 
@@ -245,7 +247,8 @@ abstract public class JspFragmentNode extends JspContainerNode
     out.println("static String " + _fragmentName + "(");
     out.println("  com.caucho.jsp.PageContextImpl pageContext,");
     out.println("  javax.servlet.jsp.tagext.JspTag _jsp_parent_tag,");
-    out.println("  javax.servlet.jsp.tagext.JspFragment _jspBody)");
+    out.println("  javax.servlet.jsp.tagext.JspFragment _jspBody,");
+    out.println("  TagState _jsp_state)");
     out.println("  throws Throwable");
     out.println("{");
     out.pushDepth();

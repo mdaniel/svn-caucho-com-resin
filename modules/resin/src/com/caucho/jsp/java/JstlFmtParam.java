@@ -46,8 +46,9 @@ public class JstlFmtParam extends JstlNode {
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
-    if (VALUE.equals(name))
+    if (VALUE.equals(name)) {
       _value = value;
+    }
     else
       throw error(L.l("`{0}' is an unknown attribute for <{1}>.",
                       name.getName(), getTagName()));
@@ -58,8 +59,8 @@ public class JstlFmtParam extends JstlNode {
    */
   public boolean hasScripting()
   {
-    return (super.hasScripting() ||
-	    hasScripting(_value) || hasScripting(_valueAttr));
+    return (super.hasScripting()
+	    || hasScripting(_value) || hasScripting(_valueAttr));
   }
 
   /**
