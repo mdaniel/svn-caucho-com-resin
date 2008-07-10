@@ -13,6 +13,7 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>config: xml errors now show context (#2781)</li>
 <li>quercus: sprintf locale printing (#2771, rep by fredo)</li>
 <li>quercus: web.xml sample init-param is incorrect (#2776, rep by mingfai)</li>
 <li>quercus: StringModule/sha1+md5 does not support raw output (#2769, rep by fredo)</li>

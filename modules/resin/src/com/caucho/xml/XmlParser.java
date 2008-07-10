@@ -2961,6 +2961,37 @@ public class XmlParser extends AbstractParser {
    */
   XmlParseException error(String text)
   {
+
+    StringBuilder lines = new StringBuilder();
+
+    try {
+      Path path = Vfs.lookup(_systemId);
+      System.out.println("PATH: " + _systemId);
+      if (path.canRead()) {
+	ReadStream is = path.openRead();
+
+	lines.append("\n");
+
+	try {
+	  for (int i = 1; i < _line + 3; i++) {
+	    String line = is.readLine();
+
+	    if (line == null)
+	      break;
+	  
+	    if (_line - 3 < i && i < _line + 3) {
+	      lines.append(i).append(": ").append(line).append("\n");
+	    }
+	  }
+	} finally {
+	  is.close();
+	}
+      }
+    } catch (IOException e) {
+    }
+
+    text = text + lines;
+    
     if (_errorHandler != null) {
       SAXParseException e = new SAXParseException(text, _locator);
 
