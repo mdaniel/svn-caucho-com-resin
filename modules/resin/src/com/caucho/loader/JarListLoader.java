@@ -342,7 +342,6 @@ abstract public class JarListLoader extends Loader implements Dependency {
     if (_pathMap != null) {
       ArrayList<JarEntry> jarEntryList = _pathMap.get(pathName);
 
-      System.out.println("PM: " + pathName + " " + jarEntryList);
       if (jarEntryList != null) {
 	return jarEntryList.get(0).getJarPath().lookup(pathName);
       }
