@@ -37,6 +37,7 @@ import javax.faces.component.UIComponentBase;
 import javax.faces.component.UIViewRoot;
 import javax.faces.component.ValueHolder;
 import javax.faces.context.FacesContext;
+import javax.faces.context.ExternalContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
@@ -68,44 +69,48 @@ public class JsfDeveloperAid
 
     Map sessionMap = context.getExternalContext().getSessionMap();
 
-    Map<String, Object[]> aidMap
-      = (Map<String, Object[]>) sessionMap.get(
+    Map<String, JsfRequestSnapshot> aidMap
+      = (Map<String, JsfRequestSnapshot>) sessionMap.get(
       "caucho.jsf.developer.aid");
 
     if (aidMap == null) {
-      aidMap = new HashMap<String, Object[]>();
+      aidMap = new HashMap<String, JsfRequestSnapshot>();
 
       sessionMap.put("caucho.jsf.developer.aid", aidMap);
     }
 
     try {
-      UIViewRoot viewRoot = context.getViewRoot();
+      UIViewRoot uiViewRoot = context.getViewRoot();
 
-      if (viewRoot != null) {
-        final String viewId = viewRoot.getViewId();
+      if (uiViewRoot != null) {
+        final String viewId = uiViewRoot.getViewId();
         final String phaseId = event.getPhaseId().toString();
 
-        final Component component = reflect(context, viewRoot);
+        final ViewRoot viewRoot = (ViewRoot) reflect(context, uiViewRoot);
+        viewRoot.setPhase(phaseId);
 
-        Object []phases;
+        JsfRequestSnapshot snapshot;
 
         if (PhaseId.RESTORE_VIEW.equals(event.getPhaseId())) {
-          phases = new Object[]{phaseId, component};
+          snapshot = new JsfRequestSnapshot();
+
+          snapshot.addViewRoot(viewRoot);
+
+          final ExternalContext exContext = context.getExternalContext();
+
+          Map<String, String> map = exContext.getRequestHeaderMap();
+          snapshot.setHeaderMap(new HashMap<String, String>(map));
+
+          map = exContext.getRequestParameterMap();
+          snapshot.setParameterMap(new HashMap<String, String>(map));
+
+          aidMap.put(viewId, snapshot);
         }
         else {
-          phases = aidMap.get(viewId);
+          snapshot = aidMap.get(viewId);
 
-          Object []newPhases = new Object[phases.length + 2];
-
-          System.arraycopy(phases, 0, newPhases, 0, phases.length);
-
-          newPhases[newPhases.length - 2] = phaseId;
-          newPhases[newPhases.length - 1] = component;
-
-          phases = newPhases;
+          snapshot.addViewRoot(viewRoot);
         }
-
-        aidMap.put(viewId, phases);
       }
     }
     catch (IllegalStateException e) {
@@ -127,8 +132,13 @@ public class JsfDeveloperAid
     final Component result;
 
     if (uiComponent instanceof UIViewRoot) {
-      UIViewRoot viewRoot = (UIViewRoot) uiComponent;
-      result = new ViewRoot(viewRoot.getLocale(), viewRoot.getRenderKitId());
+      UIViewRoot uiViewRoot = (UIViewRoot) uiComponent;
+      result = new ViewRoot();
+
+      ViewRoot viewRoot = (ViewRoot) result;
+
+      viewRoot.setLocale(uiViewRoot.getLocale());
+      viewRoot.setRenderKitId(uiViewRoot.getRenderKitId());
     }
     else
       result = new Component();
@@ -180,7 +190,7 @@ public class JsfDeveloperAid
 
         StringBuilder sb = new StringBuilder('[');
 
-        Object []values = (Object[]) submittedValue;
+        Object[] values = (Object[]) submittedValue;
 
         for (int i = 0; i < values.length; i++) {
           Object value = values[i];
@@ -250,26 +260,88 @@ public class JsfDeveloperAid
     return result;
   }
 
+  public static class JsfRequestSnapshot {
+    private ViewRoot []_phases;
+    private Map<String, String> _parameterMap;
+    private Map<String, String> _headerMap;
+
+    public void addViewRoot(ViewRoot viewRoot)
+    {
+      if (_phases == null) {
+        _phases = new ViewRoot[]{viewRoot};
+      }
+      else {
+        ViewRoot []newPhases = new ViewRoot[_phases.length + 1];
+
+        System.arraycopy(_phases, 0, newPhases, 0, _phases.length);
+
+        newPhases[newPhases.length - 1] = viewRoot;
+
+        _phases = newPhases;
+      }
+    }
+
+    public ViewRoot[] getPhases()
+    {
+      return _phases;
+    }
+
+    public Map<String, String> getParameterMap()
+    {
+      return _parameterMap;
+    }
+
+    public void setParameterMap(Map<String, String> parameterMap)
+    {
+      _parameterMap = parameterMap;
+    }
+
+    public Map<String, String> getHeaderMap()
+    {
+      return _headerMap;
+    }
+
+    public void setHeaderMap(Map<String, String> headerMap)
+    {
+      _headerMap = headerMap;
+    }
+  }
+
   public static class ViewRoot
     extends Component
   {
     private Locale _locale;
     private String _renderKitId;
-
-    public ViewRoot(Locale locale, String renderKitId)
-    {
-      _locale = locale;
-      _renderKitId = renderKitId;
-    }
+    private String _phase;
 
     public Locale getLocale()
     {
       return _locale;
     }
 
+    public void setLocale(Locale locale)
+    {
+      _locale = locale;
+    }
+
     public String getRenderKitId()
     {
       return _renderKitId;
+    }
+
+    public void setRenderKitId(String renderKitId)
+    {
+      _renderKitId = renderKitId;
+    }
+
+    public String getPhase()
+    {
+      return _phase;
+    }
+
+    public void setPhase(String phase)
+    {
+      _phase = phase;
     }
   }
 

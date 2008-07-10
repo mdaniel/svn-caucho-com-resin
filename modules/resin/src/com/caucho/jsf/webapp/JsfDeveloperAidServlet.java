@@ -108,6 +108,7 @@ public class JsfDeveloperAidServlet
                                                      _lifecycle);
 
       res.setCharacterEncoding("UTF-8");
+      res.setContentType("text/html");
 
       PrintWriter out = res.getWriter();
 
@@ -126,8 +127,8 @@ public class JsfDeveloperAidServlet
         return;
       }
 
-      Map<String, Object[]> aidMap
-        = (Map<String, Object[]>)
+      Map<String, JsfDeveloperAid.JsfRequestSnapshot> aidMap
+        = (Map<String, JsfDeveloperAid.JsfRequestSnapshot>)
         session.getAttribute("caucho.jsf.developer.aid");
 
       if (aidMap == null) {
@@ -187,27 +188,38 @@ public class JsfDeveloperAidServlet
         out.println(" <div id=\"header\"");
         out.println("  <ul>");
 
-        final String phaseId = request.getParameter("phaseId");
+        final String phaseId = req.getParameter("phaseId");
         String valueExpression = req.getParameter("valueExpression");
 
         if (valueExpression != null)
           valueExpression = URLDecoder.decode(valueExpression, "UTF-8");
 
-        Object []phases = aidMap.get(viewId);
+        JsfDeveloperAid.JsfRequestSnapshot snapshot = aidMap.get(viewId);
 
-        boolean selectedMarked = false;
+        out.print("   <li" + (phaseId == null ? " id=\"selected\"" : "") + ">");
+        out.print("<a href=\"" +
+                  request.getContextPath() +
+                  "/caucho.jsf.developer.aid;jsessionid=" +
+                  session.getId() +
+                  "?viewId=" +
+                  viewId +
+                  "\">" +
+                  "Request Info" +
+                  "</a>");
+        out.println("</li>");
 
-        JsfDeveloperAid.Component component = null;
+        JsfDeveloperAid.ViewRoot viewRoot = null;
 
-        for (int i = 0; i < phases.length / 2; i++) {
-          String phase = (String) phases[i * 2];
+        JsfDeveloperAid.ViewRoot []viewRoots = snapshot.getPhases();
+
+        for (JsfDeveloperAid.ViewRoot root : viewRoots) {
+          String phase = root.getPhase();
 
           boolean selected = false;
 
-          if (!selectedMarked && valueExpression == null) {
-            selected = phaseId == null || phase.equals(phaseId);
-            selectedMarked = selected;
-            component = (JsfDeveloperAid.Component) phases[i * 2 + 1];
+          if (phase.equals(phaseId) && valueExpression == null) {
+            selected = true;
+            viewRoot = root;
           }
 
           out.print("   <li" + (selected ? " id=\"selected\"" : "") + ">");
@@ -247,7 +259,8 @@ public class JsfDeveloperAidServlet
 
 
         if (valueExpression != null) {
-          JsfDeveloperAid.ViewRoot root = (JsfDeveloperAid.ViewRoot) phases[1];
+          JsfDeveloperAid.ViewRoot root
+            = (JsfDeveloperAid.ViewRoot) viewRoots[1];
 
           UIViewRoot uiViewRoot = new UIViewRoot();
           uiViewRoot.setLocale(root.getLocale());
@@ -274,8 +287,44 @@ public class JsfDeveloperAidServlet
                       "</a></em>");
 
         }
+        else if (phaseId == null) {
+          out.println("<table border=\"1\">");
+          out.println("<thead>");
+          out.print("<tr><td colspan=\"2\" align=\"center\"><strong>Snoop</strong></td></tr>");
+          out.print("<tr><td><strong>Name</strong></td><td><strong>Value</strong></td></tr>");
+          out.println("</thead>");
+
+          out.println("<tbody>");
+
+          out.print("<tr><td colspan=\"2\" align=\"center\"><em>Headers</em></td></tr>");
+
+          Map<String, String> headers = snapshot.getHeaderMap();
+          for (String header : headers.keySet()) {
+            String value = headers.get(header);
+            out.print("<tr><td><em>" +
+                      header +
+                      "</em></td><td><em>" +
+                      value +
+                      "</em></td></tr>");
+          }
+
+          out.print("<tr><td colspan=\"2\" align=\"center\"><em>Parameters</em></td></tr>");
+
+          Map<String, String> parameters = snapshot.getParameterMap();
+          for (String parameter : parameters.keySet()) {
+            String value = headers.get(parameter);
+            out.print("<tr><td><em>" +
+                      parameter +
+                      "</em></td><td><em>" +
+                      value +
+                      "</em></td></tr>");
+          }
+
+          out.println("</tbody>");
+          out.println("</table>");
+        }
         else
-          printComponentTree(request, out, component, null, viewId, phaseId, 0);
+          printComponentTree(request, out, viewRoot, null, viewId, phaseId, 0);
 
         out.println(" </div>");
         out.println(" </body>");
@@ -312,8 +361,8 @@ public class JsfDeveloperAidServlet
     Object obj = valueExpression.getValue(elContext);
 
     out.print("<strong>");
-    out.print(expression + "=");
-    out.print("</strong>");
+    out.print(expression);
+    out.print("</strong>=");
 
     if (obj == null) {
       out.println("null");
