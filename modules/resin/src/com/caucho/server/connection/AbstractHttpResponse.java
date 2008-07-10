@@ -458,6 +458,10 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
         message = L.l("Internal Server Error");
     }
 
+    // server/2h0g
+    if (code != SC_OK && code != SC_NOT_MODIFIED)
+      killCache();
+
     _statusCode = code;
     _statusMessage = message;
   }
