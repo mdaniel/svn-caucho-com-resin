@@ -502,7 +502,6 @@ public class SessionImpl implements HttpSession, CacheListener {
     // server/015k
     if (_isInvalidating
 	|| _accessTime + getMaxInactiveInterval() < now
-	|| _manager.isClosed()
 	|| _clusterObject == null)
       notifyDestroy();
 
@@ -1007,7 +1006,9 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     synchronized (this) {
       synchronized (_values) {
-	unbind();
+	// server/017u
+	_values.clear();
+	// unbind();
 
 	try {
 	  int size = in.readInt();

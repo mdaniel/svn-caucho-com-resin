@@ -300,7 +300,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       Class cl = Class.forName("com.caucho.server.resin.ProResin");
       Constructor ctor = cl.getConstructor(new Class[] { ClassLoader.class });
 
-      resin = (Resin) ctor.newInstance(loader); 
+      resin = (Resin) ctor.newInstance(loader);
     } catch (ConfigException e) {
       log().log(Level.FINER, e.toString(), e);
 

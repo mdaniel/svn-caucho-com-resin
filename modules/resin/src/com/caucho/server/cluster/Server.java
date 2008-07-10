@@ -1431,6 +1431,8 @@ public class Server extends ProtocolDispatchServer
 	startPorts();
       }
 
+      getCluster().startRemote();
+
       _alarm.queue(ALARM_INTERVAL);
       
       _lifecycle.toActive();

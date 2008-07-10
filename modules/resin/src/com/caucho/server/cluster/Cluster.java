@@ -1044,6 +1044,14 @@ public class Cluster
   {
   }
 
+  /**
+   * Start any work in notifying other members in the cluster
+   * that the server is active.
+   */
+  public void startRemote()
+  {
+  }
+  
   public void startPersistentStore()
   {
     try {

@@ -32,6 +32,7 @@ package com.caucho.server.admin;
 import com.caucho.bam.BamBroker;
 import com.caucho.hemp.broker.*;
 import com.caucho.config.ConfigException;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.RawString;
 import com.caucho.lifecycle.*;
 import com.caucho.server.cluster.Cluster;
@@ -184,8 +185,9 @@ public class Management
   public Object createDeployService()
   {
     log.warning(L.l("deploy-service requires Resin Professional"));
+    Thread.dumpStack();
 
-    return new Object();
+    return new ContainerProgram();
   }
 
   /**

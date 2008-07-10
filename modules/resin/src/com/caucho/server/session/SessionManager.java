@@ -658,9 +658,9 @@ public final class SessionManager implements AlarmListener
   {
     if (reuse == null)
       _reuseSessionId = COOKIE;
-    else if (reuse.equalsIgnoreCase("true") ||
-	     reuse.equalsIgnoreCase("yes") ||
-	     reuse.equalsIgnoreCase("cookie"))
+    else if (reuse.equalsIgnoreCase("true")
+	     || reuse.equalsIgnoreCase("yes")
+	     || reuse.equalsIgnoreCase("cookie"))
       _reuseSessionId = COOKIE;
     else if (reuse.equalsIgnoreCase("false") || reuse.equalsIgnoreCase("no"))
       _reuseSessionId = FALSE;
