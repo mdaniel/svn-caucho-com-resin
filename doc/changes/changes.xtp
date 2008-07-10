@@ -13,6 +13,12 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>quercus: sprintf locale printing (#2771, rep by fredo)</li>
+<li>quercus: web.xml sample init-param is incorrect (#2776, rep by mingfai)</li>
+<li>quercus: StringModule/sha1+md5 does not support raw output (#2769, rep by fredo)</li>
+<li>quercus: glob() doesn't work as in mod_php (#2761, znagy_k2004)</li>
+<li>quercus: session_regenerate_id() auto starts session (#2758, rep by stephaneeybert)</li>
+<li>quercus: curl callback support (#2762)</li>
 <li>jpa: add persistence-unit to persistence-manager (#2775, rep by Uwe Schaefer)</li>
 <li>jpa: add persistence-unit-default to persistence-manager (#2775, rep by Uwe Schaefer)</li>
 <li>jpa: amber should not be enabled by default (#2775, rep by Uwe Schaefer)</li>
