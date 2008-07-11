@@ -2966,7 +2966,7 @@ public class XmlParser extends AbstractParser {
 
     try {
       Path path = Vfs.lookup(_systemId);
-      System.out.println("PATH: " + _systemId);
+
       if (path.canRead()) {
 	ReadStream is = path.openRead();
 

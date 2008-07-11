@@ -99,6 +99,8 @@ public class RemoteClient extends BeanConfig
 
     comp.init();
 
+    _comp = comp;
+
     webBeans.addComponent(comp);
   }
 }
