@@ -1051,30 +1051,7 @@ package hessian.io
       if (tag != 'd'.charCodeAt())
         throw error("expected date");
 
-      var b64:Number = read();
-      var b56:Number = read();
-      var b48:Number = read();
-      var b40:Number = read();
-      var b32:Number = read();
-      var b24:Number = read();
-      var b16:Number = read();
-      var b8:Number = read();
-
-      // the << operator in actionscript returns a 32-bit int so we can only
-      // use it for the lowest 32 bits of the long.  Note that we also have 
-      // to be careful about the sign bit of the lower 32 bits: if the MSB of
-      // byte b32 is 1, then it can make the bottom 32 bits actually 
-      // represent a negative number, so we really can only use << for the
-      // lowest 24 bits.
-
-      return ((b64 * 0x100000000000000) +
-              (b56 * 0x1000000000000) +
-              (b48 * 0x10000000000) +
-              (b40 * 0x100000000) +
-              (b32 * 0x1000000) +
-              (b24 << 16) +
-              (b16 << 8) +
-              b8);
+      return parseLong();
     }
 
     /**
@@ -1944,20 +1921,37 @@ package hessian.io
       var b8:Number = read();
 
       // The << operator in actionscript returns a 32-bit int so we can only
-      // use it for the lowest 32 bits of the long.  Note that we also have 
-      // to be careful about the sign bit of the lower 32 bits: if the MSB of
-      // byte b32 is 1, then it can make the bottom 32 bits actually 
+      // use it for the lowest 32 bits of any computation.  Note that we also 
+      // have to be careful about the sign bit of the lower 32 bits: if the 
+      // MSB of byte b32 is 1, then it can make the bottom 32 bits actually 
       // represent a negative number, so we really can only use << for the
       // lowest 24 bits.
 
-      return ((b64 * 0x100000000000000) +
-              (b56 * 0x1000000000000) +
-              (b48 * 0x10000000000) +
-              (b40 * 0x100000000) +
-              (b32 * 0x1000000) +
-              (b24 << 16) +
-              (b16 << 8) +
-              b8);
+      // Notice that we've also split the long into the most and least 
+      // significant 32-bits.  This is because the arithmetic to deal with
+      // 64-bit negative numbers doesn't always work because AS Numbers are
+      // 64-bit floats underneath.  Thus we split and do 32-bit arithmetic
+      // to avoid overflows.
+
+      var msi:Number = (b64 * 0x1000000) +
+                       (b56 << 16) +
+                       (b48 << 8) +
+                        b40;
+      var lsi:Number = (b32 * 0x1000000) +
+                       (b24 << 16) +
+                       (b16 << 8) +
+                        b8;
+
+      var sign:Number = 1;
+
+      if ((b64 & 0x80) != 0) {
+        msi = 0xFFFFFFFF - msi;
+        lsi = 0x100000000 - lsi;
+
+        sign = -1;
+      }
+
+      return sign * (msi * 0x100000000 + lsi);
     }
   
     /**

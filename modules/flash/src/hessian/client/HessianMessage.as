@@ -49,95 +49,19 @@
 
 package hessian.client
 {
-  import mx.messaging.messages.IMessage;
+  import mx.messaging.messages.HTTPRequestMessage;
 
-  internal class HessianMessage implements IMessage
+  internal class HessianMessage extends HTTPRequestMessage
   {
-    private var _body:Object;
-    private var _clientId:String;
-    private var _destination:String;
-    private var _headers:Object;
-    private var _messageId:String;
-    private var _timestamp:Number;
-    private var _timeToLive:Number;
-
-    public function HessianMessage(body:Object, destination:String)
+    public function HessianMessage(destination:String)
     {
-      _body = body;
-      _destination = destination;
+      super();
+      method = POST_METHOD;
+      contentType = "binary/octet-stream";
+      url = destination;
     }
 
-    public function get body():Object
-    {
-      return _body;
-    }
-
-    public function set body(value:Object):void 
-    {
-      _body = value;
-    }
-
-    public function get clientId():String
-    {
-      return _clientId;
-    }
-
-    public function set clientId(value:String):void
-    {
-      _clientId = value;
-    }
-
-    public function get destination():String
-    {
-      return _destination;
-    }
-
-    public function set destination(value:String):void 
-    {
-      _destination = value;
-    }
-
-    public function get headers():Object
-    {
-      return _headers;
-    }
-
-    public function set headers(value:Object):void 
-    {
-      _headers = value;
-    }
-
-    public function get messageId():String
-    {
-      return _messageId;
-    }
-
-    public function set messageId(value:String):void 
-    {
-      _messageId = value;
-    }
-
-    public function get timestamp():Number
-    {
-      return _timestamp;
-    }
-
-    public function set timestamp(value:Number):void 
-    {
-      _timestamp = value;
-    }
-
-    public function get timeToLive():Number
-    {
-      return _timeToLive;
-    }
-
-    public function set timeToLive(value:Number):void
-    {
-      _timeToLive = value;
-    }
-
-    public function toString():String
+    public override function toString():String
     {
       return "HessianMessage[body=" + body + "," +
                             "clientId=" + clientId + "," +

@@ -124,10 +124,16 @@ package hessian.client
      */
     public override function getOperation(name:String):AbstractOperation
     {
-      if (operations[name] == null)
-        operations[name] = new HessianOperation(this, name);
+      var operation:AbstractOperation = super.getOperation(name);
 
-      return operations[name];
+      if (operation == null) {
+        operation = new HessianOperation(this, name);
+        operations[name] = operation;
+      }
+
+      trace("returning operation: " + operation);
+
+      return operation;
     }
 
     /**
@@ -147,6 +153,11 @@ package hessian.client
 
       if (api != null)
         introspect();
+    }
+
+    public function toString():String
+    {
+      return "HessianService[destination=" + destination + ",api=" + _api + "]";
     }
   }
 }

@@ -123,13 +123,14 @@ package hessian.client
       request.method = "POST";
       request.contentType = "binary/octet-stream";
 
-      var msg:HessianMessage = new HessianMessage(args, service.destination);
+      var msg:HessianMessage = new HessianMessage(service.destination);
       
       // XXX This seems to be necessary to avoid a Fault
       msg.headers = new Object();
       msg.headers.DSMessageStore = new Object();
 
-      var token:AsyncToken = mx_internal::invoke(msg);
+      mx_internal::asyncRequest.destination = service.destination;
+      var token:AsyncToken = new AsyncToken(msg);
       var stream:URLStream = new URLStream();
 
       _tokens[stream] = token;
@@ -217,6 +218,11 @@ package hessian.client
     public function set returnType(returnType:Class):void
     {
       _returnType = returnType;
+    }
+
+    public override function toString():String
+    {
+      return "HessianOperation[" + name + "]";
     }
   }
 }
