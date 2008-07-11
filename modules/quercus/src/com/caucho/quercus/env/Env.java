@@ -358,7 +358,6 @@ public class Env {
       // php/0b32
       _includeMap.put(_selfPath, _page);
     }
-
     
     if (_request != null && _request.getMethod().equals("POST")) {
       _postArray = new ArrayValueImpl();
@@ -3230,7 +3229,7 @@ public class Env {
   /**
    * Creates a PHP Exception.
    */
-  public Value createException(Exception e)
+  public Value createException(Throwable e)
   {
     QuercusClass cls = findClass("Exception");
     

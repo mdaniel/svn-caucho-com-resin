@@ -85,9 +85,9 @@ public class MathModule extends AbstractQuercusModule {
     return Math.acos(value);
   }
 
-  public static Value acosh(Env env, Value value)
+  public static double acosh(Env env, double value)
   {
-    throw new UnsupportedOperationException();
+    return Math.log(value + Math.sqrt(value * value - 1));
   }
 
   public static Value asin(Value value)
@@ -95,9 +95,9 @@ public class MathModule extends AbstractQuercusModule {
     return new DoubleValue(Math.asin(value.toDouble()));
   }
 
-  public static Value asinh(Value value)
+  public static double asinh(double value)
   {
-    throw new UnsupportedOperationException();
+    return Math.log(value + Math.sqrt(value * value + 1));
   }
 
   public static double atan2(double yV, double xV)
@@ -110,9 +110,9 @@ public class MathModule extends AbstractQuercusModule {
     return Math.atan(value);
   }
 
-  public static Value atanh(Value value)
+  public static double atanh(double value)
   {
-    throw new UnsupportedOperationException();
+    return 0.5 * Math.log((1 + value) / (1 - value));
   }
 
   /**

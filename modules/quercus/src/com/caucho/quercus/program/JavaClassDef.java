@@ -83,7 +83,7 @@ public class JavaClassDef extends ClassDef {
   private final HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
 
-  private final MethodMap<AbstractJavaMethod> _functionMap
+  public final MethodMap<AbstractJavaMethod> _functionMap
     = new MethodMap<AbstractJavaMethod>();
 
   private final HashMap<StringValue, AbstractJavaMethod> _getMap
@@ -746,6 +746,10 @@ public class JavaClassDef extends ClassDef {
 
     if (__call != null)
       cl.setCall(__call);
+    
+    if (__toString != null) {
+      cl.addMethod("__toString", __toString);
+    }
 
     if (_arrayDelegate != null)
       cl.setArrayDelegate(_arrayDelegate);
@@ -1218,13 +1222,17 @@ public class JavaClassDef extends ClassDef {
       introspectMethods(moduleContext, ifc);
     }
   }
+  
+  public JavaMethod getToString()
+  {
+    return __toString;
+  }
 
   public StringValue toString(Env env,
                               JavaValue value)
   {
-    if (__toString == null) {
-      return env.createString(String.valueOf(value.toJavaObject()));
-    }
+    if (__toString == null)
+      return null;
     
     return __toString.callMethod(env, value, new Expr[0]).toStringValue();
   }

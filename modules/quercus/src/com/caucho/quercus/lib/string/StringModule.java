@@ -620,7 +620,7 @@ public class StringModule extends AbstractQuercusModule {
                               StringValue format,
                               Value []args)
   {
-    Value value = sprintf(format, args);
+    Value value = sprintf(env, format, args);
 
     return FileModule.fwrite(env, os, value.toInputStream(),
 			     Integer.MAX_VALUE);
@@ -785,9 +785,9 @@ public class StringModule extends AbstractQuercusModule {
    *
    * @return a string of imploded values
    */
-  public static StringValue md5(Env env,
-				InputStream is,
-				@Optional boolean rawOutput)
+  public static Value md5(Env env,
+                          InputStream is,
+				          @Optional boolean rawOutput)
   {
     try {
       MessageDigest md = MessageDigest.getInstance("MD5");
@@ -801,16 +801,8 @@ public class StringModule extends AbstractQuercusModule {
       
       byte []digest = md.digest();
       
-      StringValue sb = env.createUnicodeBuilder();
-      for (int i = 0; i < digest.length; i++) {
-        int d1 = (digest[i] >> 4) & 0xf;
-        int d2 = (digest[i] & 0xf);
-	
-        sb.append(toHexChar(d1));
-        sb.append(toHexChar(d2));
-      }
-      
-      return sb;
+      return hashToValue(env, digest, rawOutput);
+
     } catch (Exception e) {
       throw new QuercusModuleException(e);
     }
@@ -825,7 +817,7 @@ public class StringModule extends AbstractQuercusModule {
    * @return a string of imploded values
    */
   public static Value md5_file(Env env,
-			       Path source,
+                               Path source,
                                @Optional boolean rawOutput)
   {
     try {
@@ -840,7 +832,10 @@ public class StringModule extends AbstractQuercusModule {
           md.update((byte) d);
         }
     
-        return digestToString(env, md.digest());
+        byte []digest = md.digest();
+        
+        return hashToValue(env, digest, rawOutput);
+        
       } catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
     
@@ -1405,7 +1400,7 @@ public class StringModule extends AbstractQuercusModule {
    */
   public static int printf(Env env, StringValue format, Value []args)
   {
-    Value str = sprintf(format, args);
+    Value str = sprintf(env, format, args);
 
     str.print(env);
 
@@ -1575,6 +1570,40 @@ public class StringModule extends AbstractQuercusModule {
                                   int category,
                                   String localeName)
   { 
+    Locale locale = findLocale(localeName);
+
+    if (! isValidLocale(locale))
+      return null;
+
+    switch (category) {
+    case LC_ALL:
+      localeInfo.setAll(locale);
+      return localeInfo.getMessages();
+    case LC_COLLATE:
+      localeInfo.setCollate(locale);
+      return localeInfo.getCollate();
+    case LC_CTYPE:
+      localeInfo.setCtype(locale);
+      return localeInfo.getCtype();
+    case LC_MONETARY:
+      localeInfo.setMonetary(locale);
+      return localeInfo.getMonetary();
+    case LC_NUMERIC:
+      localeInfo.setNumeric(locale);
+      return localeInfo.getNumeric();
+    case LC_TIME:
+      localeInfo.setTime(locale);
+      return localeInfo.getTime();
+    case LC_MESSAGES:
+      localeInfo.setMessages(locale);
+      return localeInfo.getMessages();
+    default:
+      return null;
+    }
+  }
+
+  private static Locale findLocale(String localeName)
+  {
     String language;
     String country;
     String variant;
@@ -1622,37 +1651,10 @@ public class StringModule extends AbstractQuercusModule {
     }
     else
       locale = new Locale(localeName);
-
-    if (! isValidLocale(locale))
-      return null;
-
-    switch (category) {
-    case LC_ALL:
-      localeInfo.setAll(locale);
-      return localeInfo.getMessages();
-    case LC_COLLATE:
-      localeInfo.setCollate(locale);
-      return localeInfo.getCollate();
-    case LC_CTYPE:
-      localeInfo.setCtype(locale);
-      return localeInfo.getCtype();
-    case LC_MONETARY:
-      localeInfo.setMonetary(locale);
-      return localeInfo.getMonetary();
-    case LC_NUMERIC:
-      localeInfo.setNumeric(locale);
-      return localeInfo.getNumeric();
-    case LC_TIME:
-      localeInfo.setTime(locale);
-      return localeInfo.getTime();
-    case LC_MESSAGES:
-      localeInfo.setMessages(locale);
-      return localeInfo.getMessages();
-    default:
-      return null;
-    }
+    
+    return locale;
   }
-
+  
   /**
    * Returns true if the locale is supported.
    */
@@ -1677,8 +1679,9 @@ public class StringModule extends AbstractQuercusModule {
    *
    * @return a string of imploded values
    */
-  public static String sha1(String source,
-                            @Optional boolean rawOutput)
+  public static Value sha1(Env env,
+                           String source,
+                           @Optional boolean rawOutput)
   {
     if (source == null)
       source = "";
@@ -1689,23 +1692,14 @@ public class StringModule extends AbstractQuercusModule {
       // XXX: iso-8859-1
       
       for (int i = 0; i < source.length(); i++) {
-	char ch = source.charAt(i);
-	
-	md.update((byte) ch);
+        char ch = source.charAt(i);
+        
+        md.update((byte) ch);
       }
       
       byte []digest = md.digest();
       
-      StringBuilder sb = new StringBuilder();
-      for (int i = 0; i < digest.length; i++) {
-	int d1 = (digest[i] >> 4) & 0xf;
-	int d2 = (digest[i] & 0xf);
-	
-	sb.append(toHexChar(d1));
-	sb.append(toHexChar(d2));
-      }
-      
-      return sb.toString();
+      return hashToValue(env, digest, rawOutput);
     } catch (Exception e) {
       throw new QuercusException(e);
     }
@@ -1720,7 +1714,7 @@ public class StringModule extends AbstractQuercusModule {
    * @return a string of imploded values
    */
   public static Value sha1_file(Env env,
-				Path source,
+                                Path source,
                                 @Optional boolean rawOutput)
   {
     try {
@@ -1728,27 +1722,59 @@ public class StringModule extends AbstractQuercusModule {
       InputStream is = null;
       
       try {
-	is = source.openRead();
-	int d;
-	
-	while ((d = is.read()) >= 0) {
-	  md.update((byte) d);
-	}
-	
-	return digestToString(env, md.digest());
+        is = source.openRead();
+        int d;
+        
+        while ((d = is.read()) >= 0) {
+          md.update((byte) d);
+        }
+        
+        byte []digest = md.digest();
+        
+        return hashToValue(env, digest, rawOutput);
       } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
-	
-	return BooleanValue.FALSE;
+        log.log(Level.FINE, e.toString(), e);
+        
+        return BooleanValue.FALSE;
       } finally {
-	try {
-	  if (is != null)
-	    is.close();
-	} catch (IOException e) {
-	}
+        try {
+          if (is != null)
+            is.close();
+        } catch (IOException e) {
+        }
       }
     } catch (Exception e) {
       throw new QuercusException(e);
+    }
+  }
+  
+  private static Value hashToValue(Env env, byte []bytes, boolean isBinary)
+  {
+    if (isBinary) {
+      StringValue v = env.createBinaryBuilder();
+      v.append(bytes, 0, bytes.length);
+      return v;
+    }
+    else {
+      StringValue v = env.createUnicodeBuilder();
+
+      for (int i = 0; i < bytes.length; i++) {
+    int ch = bytes[i];
+    int d1 = (ch >> 4) & 0xf;
+    int d2 = (ch) & 0xf;
+
+    if (d1 < 10)
+      v.append((char) ('0' + d1));
+    else
+      v.append((char) ('a' + d1 - 10));
+
+    if (d2 < 10)
+      v.append((char) ('0' + d2));
+    else
+      v.append((char) ('a' + d2 - 10));
+      }
+
+      return v;
     }
   }
 
@@ -1803,9 +1829,9 @@ public class StringModule extends AbstractQuercusModule {
    *
    * @return the formatted string
    */
-  public static Value sprintf(StringValue format, Value []args)
+  public static Value sprintf(Env env, StringValue format, Value []args)
   {
-    ArrayList<PrintfSegment> segments = parsePrintfFormat(format);
+    ArrayList<PrintfSegment> segments = parsePrintfFormat(env, format);
 
     StringValue sb = format.createStringBuilder();
 
@@ -1815,7 +1841,8 @@ public class StringModule extends AbstractQuercusModule {
     return sb;
   }
 
-  private static ArrayList<PrintfSegment> parsePrintfFormat(StringValue format)
+  private static ArrayList<PrintfSegment> parsePrintfFormat(Env env,
+                                                            StringValue format)
   { 
     ArrayList<PrintfSegment> segments = new ArrayList<PrintfSegment>();
 
@@ -1916,12 +1943,12 @@ public class StringModule extends AbstractQuercusModule {
             i = j;
             break loop;
 
-	  case 'i': case 'u':
-	    ch = 'd';
+          case 'i': case 'u':
+            ch = 'd';
           case 'd': case 'x': case 'o': case 'X':
             sb.setLength(sb.length() - 1);
-	    if (sb.length() > 0)
-	      segments.add(new TextPrintfSegment(sb));
+            if (sb.length() > 0)
+              segments.add(new TextPrintfSegment(sb));
             sb.setLength(0);
 	    
             if (isLeft)
@@ -1932,15 +1959,23 @@ public class StringModule extends AbstractQuercusModule {
             sb.append(format, head, j);
             sb.append(ch);
 
-            segments.add(LongPrintfSegment.create(sb.toString(), index++));
+            segments.add(LongPrintfSegment.create(env, sb.toString(), index++));
             sb.setLength(0);
             i = j;
             break loop;
 
           case 'e': case 'E': case 'f': case 'g': case 'G':
+          case 'F':
+            Locale locale = null;
+            
+            if (ch == 'F')
+              ch = 'f';
+            else
+              locale = env.getLocaleInfo().getNumeric();
+            
             sb.setLength(sb.length() - 1);
-	    if (sb.length() > 0)
-	      segments.add(new TextPrintfSegment(sb));
+            if (sb.length() > 0)
+              segments.add(new TextPrintfSegment(sb));
             sb.setLength(0);
 
             if (isLeft)
@@ -1951,7 +1986,9 @@ public class StringModule extends AbstractQuercusModule {
             sb.append(format, head, j);
             sb.append(ch);
 
-            segments.add(new DoublePrintfSegment(sb.toString(), index++));
+            segments.add(new DoublePrintfSegment(sb.toString(),
+                                                 index++,
+                                                 locale));
             sb.setLength(0);
             i = j;
             break loop;
@@ -4236,8 +4273,9 @@ public class StringModule extends AbstractQuercusModule {
    * @param format the format string
    * @param array the arguments to apply to the format string
    */
-  public static Value vsprintf(StringValue format,
-			       @NotNull ArrayValue array)
+  public static Value vsprintf(Env env,
+                               StringValue format,
+                               @NotNull ArrayValue array)
   {
     Value []args;
 
@@ -4250,7 +4288,7 @@ public class StringModule extends AbstractQuercusModule {
     else
       args = new Value[0];
 
-    return sprintf(format, args);
+    return sprintf(env, format, args);
   }
 
   /**
@@ -4442,22 +4480,24 @@ public class StringModule extends AbstractQuercusModule {
   static class LongPrintfSegment extends PrintfSegment {
     private final String _format;
     private final int _index;
+    private final Locale _locale;
 
-    private LongPrintfSegment(String format, int index)
+    private LongPrintfSegment(String format, int index, Locale locale)
     {
       _format = format;
       _index = index;
+      _locale = locale;
     }
     
-    static PrintfSegment create(String format, int index)
+    static PrintfSegment create(Env env, String format, int index)
     {
       if (hasIndex(format)) {
         index = getIndex(format);
-	format = getIndexFormat(format);
+        format = getIndexFormat(format);
       }
       else {
         format = '%' + format;
-        index = index;
+        //index = index;
       }
       
       // php/115b
@@ -4483,7 +4523,8 @@ public class StringModule extends AbstractQuercusModule {
 	  return hex;
       }
 
-      return new LongPrintfSegment(format, index);
+      return new LongPrintfSegment(format, index,
+                                   env.getLocaleInfo().getNumeric());
     }
 
     public void apply(StringValue sb, Value []args)
@@ -4495,7 +4536,7 @@ public class StringModule extends AbstractQuercusModule {
       else
         value = 0;
 
-      sb.append(String.format(_format, value));
+      sb.append(String.format(_locale, _format, value));
     }
   }
 
@@ -4581,17 +4622,20 @@ public class StringModule extends AbstractQuercusModule {
   static class DoublePrintfSegment extends PrintfSegment {
     private final String _format;
     private final int _index;
-
-    DoublePrintfSegment(String format, int index)
+    private final Locale _locale;
+    
+    DoublePrintfSegment(String format, int index, Locale locale)
     {
       if (hasIndex(format)) {
-	_index = getIndex(format);
-	_format = getIndexFormat(format);
+        _index = getIndex(format);
+        _format = getIndexFormat(format);
       }
       else {
-	_format = '%' + format;
-	_index = index;
+        _format = '%' + format;
+        _index = index;
       }
+      
+      _locale = locale;
     }
 
     public void apply(StringValue sb, Value []args)
@@ -4603,7 +4647,7 @@ public class StringModule extends AbstractQuercusModule {
       else
         value = 0;
 
-      sb.append(String.format(_format, value));
+      sb.append(String.format(_locale, _format, value));
     }
   }
 

@@ -140,7 +140,12 @@ public class JavaValue extends ObjectValue
   @Override
   public StringValue toString(Env env)
   {
-    return _classDef.toString(env, this);
+    StringValue value = _classDef.toString(env, this);
+    
+    if (value == null)
+      value = env.createString(_object.toString());
+    
+    return value;
   }
   
   @Override
