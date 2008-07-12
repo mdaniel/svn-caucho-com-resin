@@ -36,8 +36,8 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
 import javax.faces.component.UIViewRoot;
 import javax.faces.component.ValueHolder;
-import javax.faces.context.FacesContext;
 import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
@@ -190,7 +190,7 @@ public class JsfDeveloperAid
 
         StringBuilder sb = new StringBuilder('[');
 
-        Object[] values = (Object[]) submittedValue;
+        Object []values = (Object[]) submittedValue;
 
         for (int i = 0; i < values.length; i++) {
           Object value = values[i];
@@ -260,7 +260,9 @@ public class JsfDeveloperAid
     return result;
   }
 
-  public static class JsfRequestSnapshot {
+  public static class JsfRequestSnapshot
+    implements Serializable
+  {
     private ViewRoot []_phases;
     private Map<String, String> _parameterMap;
     private Map<String, String> _headerMap;
@@ -281,7 +283,12 @@ public class JsfDeveloperAid
       }
     }
 
-    public ViewRoot[] getPhases()
+    public void setPhases(ViewRoot []phases)
+    {
+      _phases = phases;
+    }
+
+    public ViewRoot []getPhases()
     {
       return _phases;
     }
@@ -367,9 +374,19 @@ public class JsfDeveloperAid
       return _children;
     }
 
+    public void setChildren(List<Component> children)
+    {
+      _children = children;
+    }
+
     public Map<String, Component> getFacets()
     {
       return _facets;
+    }
+
+    public void setFacets(Map<String, Component> facets)
+    {
+      _facets = facets;
     }
 
     public String getUiComponentClass()
@@ -377,9 +394,19 @@ public class JsfDeveloperAid
       return _uiComponentClass;
     }
 
+    public void setUiComponentClass(String uiComponentClass)
+    {
+      _uiComponentClass = uiComponentClass;
+    }
+
     public String getClientId()
     {
       return _clientId;
+    }
+
+    public void setClientId(String clientId)
+    {
+      _clientId = clientId;
     }
 
     public String getFamily()
@@ -387,9 +414,19 @@ public class JsfDeveloperAid
       return _family;
     }
 
+    public void setFamily(String family)
+    {
+      _family = family;
+    }
+
     public String getValue()
     {
       return _value;
+    }
+
+    public void setValue(String value)
+    {
+      _value = value;
     }
 
     public String getLocalValue()
@@ -397,9 +434,19 @@ public class JsfDeveloperAid
       return _localValue;
     }
 
+    public void setLocalValue(String localValue)
+    {
+      _localValue = localValue;
+    }
+
     public String getSubmittedValue()
     {
       return _submittedValue;
+    }
+
+    public void setSubmittedValue(String submittedValue)
+    {
+      _submittedValue = submittedValue;
     }
 
     public boolean isValueHolder()
@@ -407,9 +454,19 @@ public class JsfDeveloperAid
       return _isValueHolder;
     }
 
+    public void setValueHolder(boolean valueHolder)
+    {
+      _isValueHolder = valueHolder;
+    }
+
     public boolean isEditableValueHolder()
     {
       return _isEditableValueHolder;
+    }
+
+    public void setEditableValueHolder(boolean editableValueHolder)
+    {
+      _isEditableValueHolder = editableValueHolder;
     }
 
     public void setAttribute(String name, String value)
@@ -423,6 +480,11 @@ public class JsfDeveloperAid
     public Map<String, String> getAttributes()
     {
       return _attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes)
+    {
+      _attributes = attributes;
     }
   }
 }

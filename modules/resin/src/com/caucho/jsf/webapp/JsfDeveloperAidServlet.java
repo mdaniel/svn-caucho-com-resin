@@ -28,6 +28,8 @@
 
 package com.caucho.jsf.webapp;
 
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.util.L10N;
 
 import javax.el.ELContext;
@@ -38,15 +40,11 @@ import javax.faces.context.FacesContext;
 import javax.faces.context.FacesContextFactory;
 import javax.faces.lifecycle.Lifecycle;
 import javax.faces.lifecycle.LifecycleFactory;
-import javax.servlet.GenericServlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -94,13 +92,171 @@ public class JsfDeveloperAidServlet
     _lifecycle = lifecycleFactory.getLifecycle(name);
   }
 
+  private void printControls(PrintWriter out,
+                             HttpServletRequest request,
+                             HttpSession session)
+  {
+    if (request.getParameter("viewId") != null)
+      out.println(" <br/><br/><a href=\"" +
+                  request.getContextPath() +
+                  "/caucho.jsf.developer.aid" +
+                  (session == null ? "" : ";jsessionid=" + session.getId()) +
+                  "\"><em>" +
+                  "Show Available Views" +
+                  "</em></a>");
+
+    out.println(" <br/><br/><a href=\"" +
+                request.getContextPath() +
+                "/caucho.jsf.developer.aid" +
+                (session == null ? "" : ";jsessionid=" + session.getId()) +
+                "?save=\"><em>" +
+                "Save to file" +
+                "</em></a>");
+
+    out.println(
+      " <br/><br/><form enctype=\"multipart/form-data\" method=\"POST\"><em>Load from file</em><input name=\"file\" type=\"file\"/><input type=\"submit\" value=\"Upload\"/></form>");
+
+  }
+
+  public void doPost(HttpServletRequest request, HttpServletResponse response)
+    throws IOException, ServletException
+  {
+    ServletInputStream in = request.getInputStream();
+
+    byte []data = null;
+    int position = 0;
+
+    Scan scan = new Scan();
+
+    int count;
+
+    boolean found = false;
+    byte []buffer = new byte[0xFFF];
+    while ((count = in.read(buffer, position, buffer.length - position)) >
+           0) {
+      if (found)
+        continue;
+
+      if (count + position == buffer.length) {
+        final byte []newData = new byte[buffer.length * 2];
+        System.arraycopy(buffer, 0, newData, 0, buffer.length);
+        buffer = newData;
+      }
+
+      if (scan.boundaryEnd == -1) {
+        for (int i = 0; i < position + count; i++) {
+          if (buffer[i] == 0x0A) {
+            scan.boundaryEnd = i - 1;
+            scan.pointer = i;
+            break;
+          }
+        }
+      }
+
+      position = position + count;
+
+      found = find(buffer, scan, position);
+
+      if (found) {
+        data = buffer;
+        buffer = new byte[0xFF];
+        position = 0;
+      }
+    }
+
+    if (found) {
+      int start = -1;
+
+      for (int i = scan.boundaryEnd; i < data.length; i++) {
+        if (data[i] == 0x0A && data[i - 2] == 0x0A) {
+          start = i;
+
+          break;
+        }
+      }
+
+      Hessian2Input input = new Hessian2Input(new ByteArrayInputStream(data,
+                                                                       start +
+                                                                       1,
+                                                                       scan
+                                                                         .pointer -
+                                                                                  start -
+                                                                                  3));
+
+      Object obj = input.readObject();
+
+      HttpSession session = request.getSession(true);
+
+      session.setAttribute("caucho.jsf.developer.aid", obj);
+    }
+    else {
+      response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  private class Scan {
+    private int pointer = 0;
+    private int boundaryIdx = 0;
+    private int boundaryEnd = -1;
+  }
+
+  public boolean find(byte []data, Scan scan, int limit)
+  {
+    for (; scan.pointer < limit; scan.pointer++) {
+      for (; scan.boundaryIdx < scan.boundaryEnd; scan.boundaryIdx++) {
+        if (limit >= (scan.pointer + scan.boundaryIdx)) {
+          if (data[scan.pointer + scan.boundaryIdx] !=
+              data[scan.boundaryIdx]) {
+            scan.boundaryIdx = 0;
+
+            break;
+          }
+        }
+        else
+          break;
+      }
+      if (scan.boundaryIdx == scan.boundaryEnd)
+        return true;
+    }
+
+    return false;
+  }
+
   public void service(ServletRequest req, ServletResponse res)
     throws IOException, ServletException
   {
-    FacesContext oldContext = FacesContext.getCurrentInstance();
+    final HttpServletRequest request = (HttpServletRequest) req;
+    final HttpServletResponse response = (HttpServletResponse) res;
 
+    final PrintWriter out = res.getWriter();
+
+    if ("POST".equalsIgnoreCase(request.getMethod())) {
+      doPost(request, response);
+    }
+
+    final HttpSession session = request.getSession();
+
+    final Map<String, JsfDeveloperAid.JsfRequestSnapshot> aidMap;
+
+    if (session != null)
+      aidMap
+        = (Map<String, JsfDeveloperAid.JsfRequestSnapshot>) session.getAttribute(
+        "caucho.jsf.developer.aid");
+    else
+      aidMap = null;
+
+    if (req.getParameter("save") != null) {
+
+      if (aidMap != null)
+        serveAidMap(aidMap, res);
+      else
+        response.sendError(HttpServletResponse.SC_NO_CONTENT);
+
+      return;
+    }
+
+    final FacesContext oldContext = FacesContext.getCurrentInstance();
     FacesContext context = null;
-
     try {
       context = _facesContextFactory.getFacesContext(_webApp,
                                                      req,
@@ -110,29 +266,20 @@ public class JsfDeveloperAidServlet
       res.setCharacterEncoding("UTF-8");
       res.setContentType("text/html");
 
-      PrintWriter out = res.getWriter();
-
       out.println(
         "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
 
       out.println(
         "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">");
 
-      HttpServletRequest request = (HttpServletRequest) req;
+      if (session == null || aidMap == null) {
+        out.println("<body>");
 
-      HttpSession session = request.getSession();
+        printControls(out, request, null);
 
-      if (session == null) {
+        out.println("</body>");
         out.println("</html>");
-        return;
-      }
 
-      Map<String, JsfDeveloperAid.JsfRequestSnapshot> aidMap
-        = (Map<String, JsfDeveloperAid.JsfRequestSnapshot>)
-        session.getAttribute("caucho.jsf.developer.aid");
-
-      if (aidMap == null) {
-        out.println("</html>");
         return;
       }
 
@@ -162,6 +309,7 @@ public class JsfDeveloperAidServlet
           out.println("   </li>");
         }
         out.println(" </ul>");
+        printControls(out, request, session);
         out.println(" </body>");
         out.println("</html>");
 
@@ -259,7 +407,7 @@ public class JsfDeveloperAidServlet
 
 
         if (valueExpression != null) {
-          JsfDeveloperAid.ViewRoot root =  viewRoots[1];
+          JsfDeveloperAid.ViewRoot root = viewRoots[1];
 
           UIViewRoot uiViewRoot = new UIViewRoot();
           uiViewRoot.setLocale(root.getLocale());
@@ -289,36 +437,39 @@ public class JsfDeveloperAidServlet
         else if (phaseId == null) {
           out.println("<table border=\"1\">");
           out.println("<thead>");
-          out.println("<tr><td colspan=\"2\" align=\"center\"><strong>Snoop</strong></td></tr>");
-          out.println("<tr><td><strong>Name</strong></td><td><strong>Value</strong></td></tr>");
+          out.println(
+            "<tr><td colspan=\"2\" align=\"center\"><strong>Snoop</strong></td></tr>");
+          out.println(
+            "<tr><td><strong>Name</strong></td><td><strong>Value</strong></td></tr>");
           out.println("</thead>");
 
           out.println("<tbody>");
 
-          out.println("<tr><td colspan=\"2\" align=\"center\"><em>Headers</em></td></tr>");
+          out.println(
+            "<tr><td colspan=\"2\" align=\"center\"><em>Headers</em></td></tr>");
 
           Map<String, String> headers = snapshot.getHeaderMap();
           for (String header : headers.keySet()) {
             String value = headers.get(header);
             out.println("<tr><td><em>" +
-                      header +
-                      "</em></td><td><em>" +
-                      value +
-                      "</em></td></tr>");
+                        header +
+                        "</em></td><td><em>" +
+                        value +
+                        "</em></td></tr>");
           }
 
-          out.println("<tr><td colspan=\"2\" align=\"center\"><em>Parameters</em></td></tr>");
+          out.println(
+            "<tr><td colspan=\"2\" align=\"center\"><em>Parameters</em></td></tr>");
 
           Map<String, String> parameters = snapshot.getParameterMap();
           for (String parameter : parameters.keySet()) {
-            String value = headers.get(parameter);
+            String value = parameters.get(parameter);
             out.println("<tr><td><em>" +
-                      parameter +
-                      "</em></td><td><em>" +
-                      value +
-                      "</em></td></tr>");
+                        parameter +
+                        "</em></td><td><em>" +
+                        value +
+                        "</em></td></tr>");
           }
-
           out.println("</tbody>");
           out.println("</table>");
         }
@@ -326,6 +477,7 @@ public class JsfDeveloperAidServlet
           printComponentTree(request, out, viewRoot, null, viewId, phaseId, 0);
 
         out.println(" </div>");
+        printControls(out, request, session);
         out.println(" </body>");
         out.println("</html>");
       }
@@ -336,11 +488,26 @@ public class JsfDeveloperAidServlet
       throw e;
     }
     finally {
-      context.release();
+      if (context != null)
+        context.release();
 
       FacesContext.setCurrentInstance(oldContext);
     }
   }
+
+  private void serveAidMap(Map<String, JsfDeveloperAid.JsfRequestSnapshot> aidMap,
+                           ServletResponse res)
+    throws IOException
+  {
+    res.setContentType("application/x-caucho-jsf-developer-aid");
+
+    Hessian2Output out = new Hessian2Output(res.getOutputStream());
+
+    out.writeObject(aidMap);
+
+    out.flush();
+  }
+
 
   private void printEvaluated(FacesContext context,
                               HttpServletRequest request,

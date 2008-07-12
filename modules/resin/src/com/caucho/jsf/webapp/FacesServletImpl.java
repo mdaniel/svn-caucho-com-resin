@@ -140,7 +140,7 @@ public class FacesServletImpl extends GenericServlet
       ServletMapping servletMapping = WebApp.getCurrent()
         .createServletMapping();
 
-      servletMapping.addURLPattern("caucho.jsf.developer.aid");
+      servletMapping.addURLPattern("/caucho.jsf.developer.aid");
       servletMapping.setServletClass(JsfDeveloperAidServlet.class.getName());
 
       WebApp.getCurrent().addServletMapping(servletMapping);
