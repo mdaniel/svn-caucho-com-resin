@@ -263,6 +263,16 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
   public void destroy()
     throws IOException
   {
+    long expire = Alarm.getCurrentTime() + 5000;
+    
+    synchronized (_writeQueue) {
+      while (_writeQueue.size() > 0 && Alarm.getCurrentTime() < expire) {
+	try {
+	  _writeQueue.wait(expire - Alarm.getCurrentTime());
+	} catch (Exception e) {
+	}
+      }
+    }
   }
 
   public void run()

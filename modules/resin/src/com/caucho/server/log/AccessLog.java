@@ -699,6 +699,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     if (alarm != null)
       alarm.dequeue();
 
+    flush();
     _logWriter.close();
   }
 

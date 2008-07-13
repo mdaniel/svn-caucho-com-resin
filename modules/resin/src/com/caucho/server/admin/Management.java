@@ -185,7 +185,6 @@ public class Management
   public Object createDeployService()
   {
     log.warning(L.l("deploy-service requires Resin Professional"));
-    Thread.dumpStack();
 
     return new ContainerProgram();
   }

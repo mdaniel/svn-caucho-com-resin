@@ -5,51 +5,14 @@
  * @author Sam
  */
 
-
 require_once "WEB-INF/php/inc.php";
 
-$server_id = $_GET["server-id"];
-
-if ($server_id) {
-  $mbean_server = new MBeanServer($server_id);
-
-  if (! $mbean_server) {
-    $title = "Resin: WebApp for server $server_id";
-
-    display_header("webapp.php", $title, $server);
-
-    echo "<h3 class='fail'>Can't contact $server_id</h3>";
-    return;
-  }
-}
-else
-  $mbean_server = new MBeanServer();
-
-if ($mbean_server) {
-  $resin = $mbean_server->lookup("resin:type=Resin");
-  $server = $mbean_server->lookup("resin:type=Server");
-}
-
-$title = "Resin: WebApp";
-
-if (! empty($server->Id))
-  $title = $title . " for server " . $server->Id;
-?>
-
-<?php
-
-display_header("webapp.php", $title, $server, true);
 function sort_host($a, $b)
 {
   return strcmp($a->URL, $b->URL);
 }
 
-if (! $server) {
-  echo "<h2 class='fail'>Can't contact '$server_id'</h2>";
-  return;
-}
-
-$webapp = $mbean_server->lookup($_GET['id']);
+$webapp = $g_mbean_server->lookup($_GET['id']);
 
 $request = quercus_get_request();
 $is_secure = $request->isSecure();
@@ -79,16 +42,16 @@ else if ($request->isSecure()
 }
 
 if ($webapp) {
-  display_webapp($mbean_server, $webapp);
+  display_webapp($g_mbean_server, $webapp);
 }
 else {
-  display_webapp_summary($mbean_server);
+  display_webapp_summary($g_mbean_server);
 }
 
 /**
  * single-page webapp
  */
-function display_webapp($mbean_server, $webapp)
+function display_webapp($g_mbean_server, $webapp)
 {
   $session = $webapp->SessionManager;
   
@@ -164,7 +127,7 @@ echo "</form>";
 /**
  * summary of all the webapps
  */
-function display_webapp_summary($mbean_server)
+function display_webapp_summary($g_mbean_server)
 {
 ?>
 
@@ -182,8 +145,8 @@ function display_webapp_summary($mbean_server)
   </tr>
 <?php
 
-if ($mbean_server) {
-  $hosts = $mbean_server->query("resin:*,type=Host");
+if ($g_mbean_server) {
+  $hosts = $g_mbean_server->query("resin:*,type=Host");
 }
 
 usort($hosts, "sort_host");
@@ -214,7 +177,7 @@ foreach ($webapps as $webapp) {
 $context_path = empty($webapp->ContextPath) ? "/" : $webapp->ContextPath;
 $object_name = $webapp->mbean_name;
 
-echo "<a href='webapp.php?id=" . $object_name . "'>" . $context_path . "</a>";
+echo "<a href='index.php?q=webapp&id=" . $object_name . "'>" . $context_path . "</a>";
 ?>       
     </td>
     <td class='<?= format_state_class($webapp->State) ?>'>
@@ -239,5 +202,3 @@ echo "<a href='webapp.php?id=" . $object_name . "'>" . $context_path . "</a>";
 <?php
 } // summary
 ?>
-
-<?php display_footer("webapp.php"); ?>

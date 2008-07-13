@@ -1,0 +1,527 @@
+<?php
+/**
+ * Provides the most important status information about the Resin server.
+ *
+ * @author Sam
+ */
+
+require_once "WEB-INF/php/inc.php";
+
+if (! admin_init()) {
+  return;
+}
+
+$mbean_server = $g_mbean_server;
+$resin = $g_resin;
+$server = $g_server;
+
+$runtime = $g_mbean_server->lookup("java.lang:type=Runtime");
+$os = $g_mbean_server->lookup("java.lang:type=OperatingSystem");
+
+?>
+
+<h2>Server: <?= $server->Id ? $server->Id : "default" ?></h2>
+<?php
+$row = 0;
+?>
+
+<table class="data">
+  <tr class='<?= row_style($row++) ?>'>
+    <td class='item'
+        title="The server id used when starting this instance of Resin, the value of '-server'.">
+    Server id:</td>
+    <td><?= $server->Id ? $server->Id : '""' ?></td>
+    
+    <td class='item'
+        title="The ip address of the machine that is running this instance of Resin.">
+      Machine:
+    </td>
+    <td><?= $runtime->Name ?></td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <td class='item'
+        title="The Resin version.">
+      Resin:
+    </td>
+    <td colspan='3'><?= $resin->Version ?></td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <td class='item'
+        title="The JDK version.">
+      JDK:
+    </td>
+    <td colspan='3'><?= $runtime->VmName ?> <?= $runtime->VmVersion ?></td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <td class='item'
+        title="The OS version.">
+    OS:</th>
+    <td colspan='3'>
+      <?= $os->AvailableProcessors ?> cpu,
+      <?= $os->Name ?>
+      <?= $os->Arch ?>
+      <?= $os->Version ?>
+    </td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <td class='item'
+        title="The current lifecycle state">
+      State:
+    </td>
+    <td class="<?= $server->State ?>"><?= $server->State ?></td>
+
+    <td class='item'
+        title="The time that this instance was last started or restarted.">
+      Uptime:
+    </td>
+    <?php
+      $start_time = $server->StartTime->time / 1000;
+      $now = $server->CurrentTime->time / 1000;
+      $uptime = $now - $start_time;
+
+      if ($uptime < 12 * 3600)
+        echo "<td class='warmup'>";
+      else
+        echo "<td>";
+
+      echo sprintf("%d days %02d:%02d:%02d",
+                   $uptime / (24 * 3600),
+                   $uptime / 3600 % 24,
+                   $uptime / 60 % 60,
+                   $uptime % 60);
+      echo " -- " . format_datetime($server->StartTime);
+     ?>
+   </td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <td class='item'
+        title="The current free amount of heap memory available for the JVM, in bytes.">
+	Free heap:
+    </td>
+    <td><?= format_memory($server->RuntimeMemoryFree) ?></td>
+    
+    <td class='item'
+        title="The current total amount of heap memory available for the JVM, in bytes.">
+      Total heap:
+    </td>
+    <td><?= format_memory($server->RuntimeMemory) ?></td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <td class='item'
+        title="The current file descriptors used.">
+	File des:
+    </td>
+    <td><?= $os->OpenFileDescriptorCount ?></td>
+    
+    <td class='item'
+        title="The maximum file descriptors available.">
+	File des max:
+    </td>
+    <td><?= $os->MaxFileDescriptorCount ?></td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <td class='item'
+        title="The free amount of operating-system swap space.">
+	Free Swap:
+    </td>
+    <td><?= format_memory($os->FreeSwapSpaceSize) ?></td>
+    
+    <td class='item'
+        title="The total amount of operating-system swap space.">Total Swap:</th>
+    <td><?= format_memory($os->TotalSwapSpaceSize) ?></td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <td class='item'
+        title="The free amount of operating-system physical memory.">Free Physical:</td>
+    <td><?= format_memory($os->FreePhysicalMemorySize) ?></td>
+    
+    <td class='item'
+        title="The total amount of operating-system physical memory.">Total Physical:</td>
+    <td><?= format_memory($os->TotalPhysicalMemorySize) ?></td>
+  </tr>
+
+
+<?php
+
+if ($mbean_server) {
+  $block_cache = $mbean_server->lookup("resin:type=BlockManager");
+  $proxy_cache = $mbean_server->lookup("resin:type=ProxyCache");
+}
+
+?>
+
+</table>
+<?php
+/* graphs */
+
+$stat_service = $mbean_server->lookup("resin:type=StatService");
+
+if ($stat_service) {
+  echo "<h2>Graphs</h2>\n";
+  
+  echo "<p>";
+  echo "<img src='graph.php?";
+  echo "g[0][0]=resin:type=Server&g[0][1]=RuntimeMemory"
+  echo "&g[1][0]=resin:type=Server&g[1][1]=RuntimeMemoryFree"
+  echo "&g[2][0]=resin:type=Memory&g[2][1]=TenuredUsed"
+  echo "&g[3][0]=resin:type=Memory&g[3][1]=PermGenUsed"
+  echo "&width=300&height=240' width='300' height='240'>\n"
+  
+  echo "<img src='graph.php?";
+  echo "g[0][0]=resin:type=Server&g[0][1]=CpuLoadAvg"
+  echo "&width=300&height=240' width='300' height='240'>\n"
+  
+  echo "<img src='graph.php?";
+  echo "g[0][0]=java.lang:type=Threading&g[0][1]=ThreadCount"
+  echo "&g[1][0]=resin:type=ThreadPool&g[1][1]=ThreadCount"
+  echo "&width=300&height=240' width='300' height='240'>\n"
+}
+?>
+
+<?php
+
+if ($mbean_server) {
+  $mbean = $mbean_server->lookup("resin:type=LogService");
+}
+
+//
+// recent messages
+//
+
+if ($mbean) {
+  $now = time();
+
+  $messages = $mbean->findMessages(($now - 24 * 3600) * 1000, $now * 1000);
+
+  if (! empty($messages)) {
+    echo "<h2>Recent Messages</h2>\n";
+
+    echo "<table class='data'>\n";
+/*
+    //echo "<thead class='scroll'>\n";
+    echo "<tr><th class='date'>Date</th>"
+    echo "    <th class='level'>Level</th>"
+    echo "    <th class='message'>Message</th></tr>\n";
+    //echo "</thead>\n";
+*/
+
+    $messages = array_reverse($messages);
+
+    echo "<tbody class='scroll'>\n";
+    foreach ($messages as $message) {
+      echo "<tr class='{$message->level}'>";
+      echo "  <td class='date'>";
+      echo strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
+      echo "</td>";
+      echo "  <td class='level'>{$message->level}</td>";
+      echo "  <td class='message'>" . htmlspecialchars(wordwrap($message->message, 90));
+      echo "  </td>";
+      echo "</tr>";
+    }
+
+    echo "</tbody>\n";
+    echo "</table>\n";
+  }
+
+  //
+  // startup
+  //
+  $start_time = $server->StartTime->time / 1000;
+
+  $messages = $mbean->findMessages(($start_time - 15 * 60) * 1000, ($start_time - 2) * 1000);
+
+  if (! empty($messages)) {
+    echo "<h2>Shutdown Messages</h2>\n";
+
+    echo "<table class='data'>\n";
+/*
+    //echo "<thead class='scroll'>\n";
+    echo "<tr><th class='date'>Date</th>"
+    echo "    <th class='level'>Level</th>"
+    echo "    <th class='message'>Message</th></tr>\n";
+    //echo "</thead>\n";
+*/
+
+    $messages = array_reverse($messages);
+
+    echo "<tbody class='scroll'>\n";
+
+    // mark the start time
+    echo "<tr class='warning'>";
+    echo "  <td class='date'>";
+    echo strftime("%Y-%m-%d %H:%M:%S", $start_time);
+    echo "</td>";
+    echo "  <td class='level'></td>";
+    echo "  <td class='message'>Start Time</td>";
+    echo "</tr>";
+
+    foreach ($messages as $message) {
+      echo "<tr class='{$message->level}'>";
+      echo "  <td class='date'>";
+      echo strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
+      echo "</td>";
+      echo "  <td class='level'>{$message->level}</td>";
+      echo "  <td class='message'>" . htmlspecialchars(wordwrap($message->message, 90)) . "</td>";
+      echo "</tr>";
+    }
+
+    echo "</tbody>\n";
+    echo "</table>\n";
+  }
+}
+?>
+<?php
+$thread_pool = $server->ThreadPool;
+?>
+
+<!--
+"Restart" - "Exit this instance cleanly and allow the wrapper script to start a new JVM."
+-->
+
+<!-- TCP ports -->
+
+<?php
+$ports = $server->Ports;
+
+if ($ports) {
+?>
+<h2>TCP ports</h2>
+
+<table class="data">
+  <tr>
+    <th colspan='2'>&nbsp;</th>
+  <th colspan='3'>Threads</th>
+  <th colspan='4'>Keepalive</th>
+
+  <tr>
+    <th>&nbsp;</th>
+    <th>Status</th>
+
+    <th>Active</th>
+    <th>Idle</th>
+    <th>Total</th>
+
+    <th>Total</th>
+    <th>Thread</th>
+    <th>Select</th>
+    <th>Comet</th>
+  </tr>
+<?php
+  $count = 0;
+  $row = 0;
+  foreach ($ports as $port) {
+    $count++;
+?>
+
+  <tr class='<?= $row++ % 2 == 0 ? "ra" : "rb" ?>'>
+    <td class='item'><?= $port->ProtocolName ?>://<?= $port->Address ? $port->Address : "*" ?>:<?= $port->Port ?></td>
+    <td class="<?= $port->State ?>"><?= $port->State ?></td>
+    <td><?= $port->ThreadActiveCount ?></td>
+    <td><?= $port->ThreadIdleCount ?></td>
+    <td><?= $port->ThreadCount ?></td>
+
+    <td><?= $port->KeepaliveCount ?></td>
+    <td><?= $port->KeepaliveThreadCount ?></td>
+    <td><?= $port->KeepaliveSelectCount ?></td>
+    <td><?= $port->CometIdleCount ?>
+  </tr>
+<?php
+
+$conn = null;
+
+$jvm_thread = $mbean_server->lookup("java.lang:type=Threading");
+
+$connInfoList = $port->connectionInfo();
+usort($connInfoList, "conn_time_cmp");
+foreach ($connInfoList as $connInfo) {
+  if ($connInfo->requestTime >= 0 && $connInfo->threadId >= 0) {
+    echo "<tr class='" . ($row++ % 2 == 0 ? "ra" : "rb") . "'>\n";
+    echo "<tr>\n";
+    echo "<td></td>\n";
+    echo "<td colspan='8'>\n";
+//    echo "</td>\n";
+//    echo "<td colspan='7'>\n";
+
+    $pname = "port_" . $row;
+    
+    $threadId = $connInfo->threadId;
+    
+    $show = "hide('s_$pname');show('h_$pname');show('h1_$pname')";
+    $hide = "show('s_$pname');hide('h_$pname');hide('h1_$pname')";
+    echo "<a id='s_$pname' href=\"javascript:$show\">[show]</a> ";
+    echo "<a id='h_$pname' href=\"javascript:$hide\" style='display:none'>[hide]</a> ";
+    
+    echo sprintf("%.3fs", $connInfo->requestTime * 0.001);
+    // echo " thread=" . $threadId;
+    echo " conn-" . $connInfo->id;
+    echo " " . $connInfo->state;
+    echo "\n";
+    
+    echo "<pre id='h1_$pname' style='display:none'>";
+
+    $thread = $jvm_thread->getThreadInfo($threadId, 50);
+    /*
+    foreach ($thread->stackTrace as $trace) {
+      echo "     at " . $trace->className . "." . $trace->methodName . "\n";
+    }
+    */
+    echo $thread;
+
+    echo "</pre>";
+    echo "</td>";
+    echo "</tr>";
+  }
+}
+
+?>
+    </td>
+  </tr>
+<?php 
+  }
+}
+?>
+</table>
+
+<!-- Cluster -->
+
+<h2>Servers</h2>
+
+<table class="data">
+  <tr>
+    <th>Server</th>
+    <th>Address</th>
+    <th>Status</th>
+    <th>Active</th>
+    <th>Idle</th>
+    <th>Connection Miss</th>
+    <th>Load</th>
+    <th>Latency</th>
+    <th colspan='2'>Failures</th>
+    <th colspan='2'>Busy</th>
+  </tr>
+<?php
+
+  foreach ($resin->Clusters as $cluster) {
+    if (empty($cluster->Servers))
+      continue;
+
+    echo "<tr><td class='group' colspan='12'>$cluster->Name</td></tr>\n";
+
+  $count = 0;
+  foreach ($cluster->Servers as $client) {
+?>
+
+  <tr class='<?= $count++ % 2 == 0 ? "ra" : "rb" ?>'>
+    <td class='item'><?= $client->Name ?></td>
+    <td><?= $client->Address ?>:<?= $client->Port ?></td>
+    <td class="<?= $client->State ?>"><?= $client->State ?></td>
+    <td><?= $client->ConnectionActiveCount ?></td>
+    <td><?= $client->ConnectionIdleCount ?></td>
+    <td><?= format_miss_ratio($client->ConnectionKeepaliveCountTotal,
+                              $client->ConnectionNewCountTotal) ?></td>
+    <td><?= sprintf("%.2f", $client->ServerCpuLoadAvg) ?></td>
+    <td><?= sprintf("%.2f", $client->LatencyFactor) ?></td>
+    <?php
+      format_ago_td_pair($client->ConnectionFailCountTotal,
+                         $client->LastFailTime);
+
+      format_ago_td_pair($client->ConnectionBusyCountTotal,
+                         $client->LastBusyTime);
+
+    ?>
+  </tr>
+<?php 
+  }
+}
+?>
+
+</table>
+
+<!-- Database pools -->
+
+<?php
+if ($mbean_server) {
+  $db_pools = $mbean_server->query("resin:*,type=ConnectionPool");
+}
+
+if ($db_pools) {
+?>
+
+<h2>Database pools</h2>
+
+<table class="data">
+  <tr>
+    <th>&nbsp;</th>
+    <th colspan='5'>Connections</th>
+    <th colspan='2'>Config</th>
+  </tr>
+  <tr>
+    <th>Name</th>
+    <th>Active</th>
+    <th>Idle</th>
+    <th>Created</th>
+    <th colspan='2'>Failed</th>
+    <th>max-connections</th>
+    <th>idle-time</th>
+  </tr>
+
+<?php
+  $row = 0;
+  foreach ($db_pools as $pool) {
+?>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <td><?= $pool->Name ?></td>
+    <td><?= $pool->ConnectionActiveCount ?></td>
+    <td><?= $pool->ConnectionIdleCount ?></td>
+    <td><?= format_miss_ratio($pool->ConnectionCountTotal,
+                              $pool->ConnectionCreateCountTotal) ?></td>
+    <td><?= $pool->ConnectionFailCountTotal ?></td>
+    <td class='<?= format_ago_class($pool->LastFailTime) ?>'>
+        <?= format_ago($pool->LastFailTime) ?></td>
+    <td><?= $pool->MaxConnections ?></td>
+    <td><?= $pool->MaxIdleTime ?></td>
+  </tr>
+<?php
+  }
+?>
+</table>
+<?php
+}
+?>
+<!-- Persistent store -->
+<?php
+/*
+if ($mbean_server) {
+  $store = $mbean_server->lookup("resin:type=PersistentStore");
+}
+
+if ($store) {
+  echo "<h2>Persistent Store: $store->StoreType</h2>\n";
+  echo "<table class='data'>";
+
+  echo "<tr><th>Object Count</th><td>$store->ObjectCount</td>\n";
+  echo "<tr><th>Load Count</th><td>$store->LoadCountTotal</td>\n";
+  echo "<tr><th>Load Fail Count</th><td>$store->LoadFailCountTotal</td>\n";
+  echo "<tr><th>Save Count</th><td>$store->SaveCountTotal</td>\n";
+  echo "<tr><th>Save Fail Count</th><td>$store->SaveFailCountTotal</td>\n";
+  echo "</table>";
+}
+*/
+
+function conn_time_cmp($conn_a, $conn_b)
+{
+  return $conn_b->requestTime - $conn_a->requestTime;
+}
+
+?>
+
+<?php display_footer("status.php"); ?>

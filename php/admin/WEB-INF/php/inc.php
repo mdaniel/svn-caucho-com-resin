@@ -5,11 +5,80 @@
  * @author Sam
  */
 
+global $g_server_id;
+global $g_mbean_server;
+global $g_resin;
+global $g_server;
+
 // kill the cache, all pages are uncached and private
 header("Expires: 01 Dec 1994 16:00:00 GMT"); 
 header("Cache-Control: max-age=0,private"); 
-header("Pragma: No-Cache"); 
+header("Pragma: No-Cache");
 
+function admin_init()
+{
+  global $g_server_id;
+  global $g_mbean_server;
+  global $g_resin;
+  global $g_server;
+  global $g_page;
+  
+  $g_server_id = $_GET["server-id"];
+
+  if ($g_server_id) {
+    $g_mbean_server = new MBeanServer($g_server_id);
+
+    if (! $g_mbean_server) {
+      if ($g_server_id)
+        $title = "Resin: $g_page for server $g_server_id";
+      else
+        $title = "Resin: $g_page for server default";
+
+      display_header("thread.php", $title, $g_server);
+
+      echo "<h3 class='fail'>Can't contact $g_server_id</h3>";
+    
+      return false;
+    }
+  }
+  else
+    $g_mbean_server = new MBeanServer();
+
+  if ($g_mbean_server) {
+    $g_resin = $g_mbean_server->lookup("resin:type=Resin");
+    $g_server = $g_mbean_server->lookup("resin:type=Server");
+  }
+
+  if ($g_server_id)
+    $title = "Resin: $g_page for server $g_server_id";
+  else
+    $title = "Resin: $g_page for server default";
+
+  display_header("thread.php", $title, $g_server, true);
+
+  return true;
+}  
+
+function load_pages()
+{
+  $dir = opendir("WEB-INF/php");
+
+  $pages = null;
+
+  while (($file = readdir($dir))) {
+    $values = null;
+    if (preg_match("/(.*)\.page$/", $file, $values)) {
+      // include_once("WEB-INF/php/" . $file);
+
+      $name = $values[1];
+      $pages[$name] = "WEB-INF/php/" . $file;
+    }
+  }
+
+  closedir($dir);
+  
+  return $pages;
+}
 
 function format_datetime($date)
 {
@@ -208,6 +277,9 @@ $is_display_footer = false;
  */
 function display_header($script, $title, $server, $allow_remote = false)
 {
+  if (! empty($server->Id))
+    $title = $title . " for server " . $server->Id;
+  
   $server_id = $server->Id;
 
   global $display_header_script, $display_header_title;
@@ -246,7 +318,7 @@ function display_header($script, $title, $server, $allow_remote = false)
   <td valign="top">
    <ul class="status">
 <? if (! empty($server)) { ?>
-   <li class="server">Server: <?= $server->Id ?></li>
+   <li class="server">Server: <?= $server->Id ? $server->Id : "default" ?></li>
 <? }  ?>
    <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
    <li><a href="<?= $script ?>">refresh</a></li>
@@ -281,57 +353,29 @@ function display_header($script, $title, $server, $allow_remote = false)
 
 <ul class="tabs">
 <?
-if ($script == "status.php") {
-  ?><li class="selected">Summary</li><?
-} else {
-  ?><li><a href="status.php">Summary</a></li><?
+global $g_pages;
+global $g_page;
+
+$names = array_keys($g_pages);
+sort($names);
+
+foreach ($names as $name) {
+  if ($g_page == $name) {
+    ?><li class="selected"><?= $name ?></li><?
+  } else {
+    ?><li><a href="?q=<?= $name ?>"><?= $name ?></a></li><?
+  }
 }
 
-if ($script == "config.php") {
-  ?><li class="selected">Config</li><?
-} else {
-  ?><li><a href="config.php">Config</a></li><?
-}
-
-if ($script == "thread.php") {
-  ?><li class="selected">Threads</li><?
-} else {
-  ?><li><a href="thread.php">Threads</a></li><?
-}
-
-if ($script == "webapp.php") {
-  ?><li class="selected">WebApps</li><?
-} else {
-  ?><li><a href="webapp.php">WebApps</a></li><?
-}
-
-if ($script == "profile.php") {
-  ?><li class="selected">Profile</li><?
-} else {
-  ?><li><a href="profile.php">Profile</a></li><?
-}
-
-if ($script == "heap.php") {
-  ?><li class="selected">Heap</li><?
-} else {
-  ?><li><a href="heap.php">Heap</a></li><?
-}
-
-if ($script == "cache.php") {
-  ?><li class="selected">Cache</li><?
-} else {
-  ?><li><a href="cache.php">Cache</a></li><?
-}
-
-if ($script == "cluster.php") {
-  ?><li class="selected">Cluster</li><?
-} else {
-  ?><li><a href="cluster.php">Cluster</a></li><?
-}
 ?>
 </ul>
 
 <?php
+  if (! $server) {
+    echo "<h3 class='fail'>Can't contact $g_server_id</h3>";
+    return false;
+  }
+  
   return true;
 }
 

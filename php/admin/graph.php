@@ -68,6 +68,9 @@ $max_y = $graph->max_y;
 if ($min_y > 0)
   $min_y = 0;
 
+$base_y = pow(10, floor(log10($max_y)));
+$max_y = ceil($max_y / $base_y) * $base_y;
+
 $data_width = $max_x - $min_x;
 if ($data_width == 0)
   $data_width = 1;
@@ -233,6 +236,7 @@ function draw_grid($im,
                    $min_x, $min_y, $max_x, $max_y,
                    $x0, $y0, $width, $height, $low_color, $high_color)
 {
+  // x-grid
   $x = $min_x;
 
   for ($x = $min_x; $x < $max_x; $x += 3600000) {
@@ -243,15 +247,50 @@ function draw_grid($im,
     $hour_time += date_create($hour_x)->offset;
     $day_hour = $hour_time / 3600 % 24;
 
-    if ($day_hour % 6 == 0)
-      $color = $high_color;
-    else
-      $color = $low_color;
-
     if ($hour_x < $max_x) {
       $xp = $x0 + ($hour_x - $min_x) * $width / ($max_x - $min_x);
+
+      if ($day_hour % 6 == 0) {
+        $color = $high_color;
+      }
+      else
+        $color = $low_color;
+
+      if ($min_x < $x && $x + 3600000 < $max_x) {
+        $s = date("H", $hour_x / 1000);
+        imagestring($im, 1, $xp - 2, $y0 + $height + 2, $s, $color);
+      }
+
       imageline($im, $xp, $y0, $xp, $y0 + $height, $color);
     }
+  }
+  
+  // y-grid
+  $y = $min_y;
+
+  $digit = (int) ($max_y / pow(10, floor(log10($max_y - $min_y))) + 0.5);
+  $high_mod = 2;
+  
+  if ($digit == 1)
+    $digit = 10;
+  else if ($digit == 2) {
+    $high_mod = 5;
+    $digit = 10;
+  }
+  else if ($digit == 3)
+    $digit = 6;
+
+  $delta = ($max_y - $min_y) / $digit;
+
+  $i = 1;
+  for ($y = $min_y + $delta; $y < $max_y; $y += $delta) {
+    $yp = $y0 + ($y - $min_y) * $height / ($max_y - $min_y);
+
+    $color = $i % $high_mod == 0 ? $high_color : $low_color;
+
+    imageline($im, $x0, $yp, $x0 + $width, $yp, $color);
+
+    $i++;
   }
 }
 
