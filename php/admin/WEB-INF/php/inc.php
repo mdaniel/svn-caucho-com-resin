@@ -454,15 +454,19 @@ function display_left_navigation($current_server)
     foreach ($client_names as $client) {
       $client_server = $mbean_server->lookup("resin:type=ServerConnector,name=$client");
 
+      $name = $client;
+      if ($name == "")
+        $name = "default";
+
       if ($client == $current_server->Id) {
-        echo "<div class='nav-this'>$client</div>\n";
+        echo "<div class='nav-this'>$name</div>\n";
       }
       else if ($client_server && ! $client_server->ping()) {
-        echo "<div class='nav-dead'>$client</div>\n";
+        echo "<div class='nav-dead'>$name</div>\n";
       }
       else {
         echo "<div class='nav-server'><a href='?server-id=$client'>";
-        echo "$client</a></div>\n";
+        echo "$name</a></div>\n";
       }
     }
   }

@@ -73,6 +73,14 @@ abstract public class Loader {
     throws ConfigException
   {
   }
+
+  /**
+   * Loads the class directly, e.g. from OSGi
+   */
+  protected Class loadClass(String name)
+  {
+    return null;
+  }
   
   /**
    * Returns the class entry.

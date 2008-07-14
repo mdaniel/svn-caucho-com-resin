@@ -1299,7 +1299,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    *
    * @return the loaded classes
    */
-  protected Class loadClassImpl(String name, boolean resolve)
+  public Class loadClassImpl(String name, boolean resolve)
     throws ClassNotFoundException
   {
     if (_entryCache != null) {
@@ -1426,8 +1426,19 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     entry = _entryCache == null ? null : _entryCache.get(name);
 
-    if (entry == null)
+    if (entry == null) {
+      int len = _loaders.size();
+
+      // special case for osgi
+      for (int i = 0; i < len; i++) {
+	Class cl = _loaders.get(i).loadClass(name);
+
+	if (cl != null)
+	  return cl;
+      }
+      
       entry = getClassEntry(name);
+    }
 
     if (entry == null)
       return null;

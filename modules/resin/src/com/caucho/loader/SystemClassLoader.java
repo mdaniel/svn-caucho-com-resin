@@ -191,8 +191,7 @@ public class SystemClassLoader
    *
    * @return the loaded classes
    */
-
-  protected Class loadClassImpl(String name, boolean resolve)
+  public Class loadClassImpl(String name, boolean resolve)
     throws ClassNotFoundException
   {
     // The JVM has already cached the classes, so we don't need to

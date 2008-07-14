@@ -10,7 +10,7 @@ $g_pages = load_pages();
 $g_page = $_GET['q'];
 
 if (! $g_pages[$g_page]) {
-  $g_page = "status";
+  $g_page = "summary";
 }
 
 if (! admin_init()) {
