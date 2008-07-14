@@ -26,11 +26,12 @@
  * @author Alex Rojkov
  */
 
-package com.caucho.jsf.webapp;
+package com.caucho.jsf.dev;
 
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.util.L10N;
+import com.caucho.jsf.webapp.*;
 
 import javax.el.ELContext;
 import javax.el.ValueExpression;
@@ -63,7 +64,7 @@ public class JsfDeveloperAidServlet
   private static final Logger log
     = Logger.getLogger(FacesServletImpl.class.getName());
 
-  private static final L10N L = new L10N(JsfDeveloperAid.class);
+  private static final L10N L = new L10N(com.caucho.jsf.dev.JsfDeveloperAid.class);
 
   private ServletContext _webApp;
 
@@ -131,7 +132,7 @@ public class JsfDeveloperAidServlet
     int count;
 
     boolean found = false;
-    byte []buffer = new byte[0xFFF];
+    byte []buffer = new byte[4096];
     while ((count = in.read(buffer, position, buffer.length - position)) >
            0) {
       if (found)
@@ -145,7 +146,7 @@ public class JsfDeveloperAidServlet
 
       if (scan.boundaryEnd == -1) {
         for (int i = 0; i < position + count; i++) {
-          if (buffer[i] == 0x0A) {
+          if (buffer[i] == '\n') {
             scan.boundaryEnd = i - 1;
             scan.pointer = i;
             break;
@@ -159,7 +160,7 @@ public class JsfDeveloperAidServlet
 
       if (found) {
         data = buffer;
-        buffer = new byte[0xFF];
+        buffer = new byte[256];
         position = 0;
       }
     }
@@ -168,7 +169,7 @@ public class JsfDeveloperAidServlet
       int start = -1;
 
       for (int i = scan.boundaryEnd; i < data.length; i++) {
-        if (data[i] == 0x0A && data[i - 2] == 0x0A) {
+        if (data[i] == '\n' && data[i - 2] == '\n') {
           start = i;
 
           break;
@@ -236,11 +237,11 @@ public class JsfDeveloperAidServlet
 
     final HttpSession session = request.getSession();
 
-    final Map<String, JsfDeveloperAid.JsfRequestSnapshot> aidMap;
+    final Map<String, com.caucho.jsf.dev.JsfDeveloperAid.JsfRequestSnapshot> aidMap;
 
     if (session != null)
       aidMap
-        = (Map<String, JsfDeveloperAid.JsfRequestSnapshot>) session.getAttribute(
+        = (Map<String, com.caucho.jsf.dev.JsfDeveloperAid.JsfRequestSnapshot>) session.getAttribute(
         "caucho.jsf.developer.aid");
     else
       aidMap = null;
@@ -342,7 +343,7 @@ public class JsfDeveloperAidServlet
         if (valueExpression != null)
           valueExpression = URLDecoder.decode(valueExpression, "UTF-8");
 
-        JsfDeveloperAid.JsfRequestSnapshot snapshot = aidMap.get(viewId);
+        com.caucho.jsf.dev.JsfDeveloperAid.JsfRequestSnapshot snapshot = aidMap.get(viewId);
 
         out.print("   <li" + (phaseId == null ? " id=\"selected\"" : "") + ">");
         out.print("<a href=\"" +
@@ -356,11 +357,11 @@ public class JsfDeveloperAidServlet
                   "</a>");
         out.println("</li>");
 
-        JsfDeveloperAid.ViewRoot viewRoot = null;
+        com.caucho.jsf.dev.JsfDeveloperAid.ViewRoot viewRoot = null;
 
-        JsfDeveloperAid.ViewRoot []viewRoots = snapshot.getPhases();
+        com.caucho.jsf.dev.JsfDeveloperAid.ViewRoot []viewRoots = snapshot.getPhases();
 
-        for (JsfDeveloperAid.ViewRoot root : viewRoots) {
+        for (com.caucho.jsf.dev.JsfDeveloperAid.ViewRoot root : viewRoots) {
           String phase = root.getPhase();
 
           boolean selected = false;
@@ -407,7 +408,7 @@ public class JsfDeveloperAidServlet
 
 
         if (valueExpression != null) {
-          JsfDeveloperAid.ViewRoot root = viewRoots[1];
+          com.caucho.jsf.dev.JsfDeveloperAid.ViewRoot root = viewRoots[1];
 
           UIViewRoot uiViewRoot = new UIViewRoot();
           uiViewRoot.setLocale(root.getLocale());
@@ -495,7 +496,7 @@ public class JsfDeveloperAidServlet
     }
   }
 
-  private void serveAidMap(Map<String, JsfDeveloperAid.JsfRequestSnapshot> aidMap,
+  private void serveAidMap(Map<String, com.caucho.jsf.dev.JsfDeveloperAid.JsfRequestSnapshot> aidMap,
                            ServletResponse res)
     throws IOException
   {
@@ -578,7 +579,7 @@ public class JsfDeveloperAidServlet
 
   private void printComponentTree(HttpServletRequest request,
                                   PrintWriter out,
-                                  JsfDeveloperAid.Component component,
+                                  com.caucho.jsf.dev.JsfDeveloperAid.Component component,
                                   String facetName,
                                   String viewId,
                                   String phaseId,
@@ -634,11 +635,11 @@ public class JsfDeveloperAidServlet
 
     out.println("><br/>");
 
-    List<JsfDeveloperAid.Component> children = component.getChildren();
-    Map<String, JsfDeveloperAid.Component> facets = component.getFacets();
+    List<com.caucho.jsf.dev.JsfDeveloperAid.Component> children = component.getChildren();
+    Map<String, com.caucho.jsf.dev.JsfDeveloperAid.Component> facets = component.getFacets();
 
     if (children != null)
-      for (JsfDeveloperAid.Component child : children)
+      for (com.caucho.jsf.dev.JsfDeveloperAid.Component child : children)
         printComponentTree(request,
                            out,
                            child,
@@ -704,7 +705,7 @@ public class JsfDeveloperAidServlet
             out.print(' ');
 
           wasSpace = false;
-          out.print("0x0A;");
+          out.print('\n');
 
           break;
         case '\r':
@@ -712,7 +713,7 @@ public class JsfDeveloperAidServlet
             out.print(' ');
 
           wasSpace = false;
-          out.print("0x0D;");
+          out.print('\r');
 
           break;
         case '<':

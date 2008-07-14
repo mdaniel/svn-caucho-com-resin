@@ -44,6 +44,7 @@ import javax.servlet.*;
 import com.caucho.config.*;
 import com.caucho.jsf.application.*;
 import com.caucho.jsf.cfg.*;
+import com.caucho.jsf.dev.*;
 import com.caucho.vfs.*;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.dispatch.ServletMapping;
