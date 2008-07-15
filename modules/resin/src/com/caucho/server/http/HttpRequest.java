@@ -110,7 +110,7 @@ public class HttpRequest extends AbstractHttpRequest
   private ChunkedInputStream _chunkedInputStream = new ChunkedInputStream();
   private ContentLengthStream _contentLengthStream = new ContentLengthStream();
 
-  private ErrorPageManager _errorManager = new ErrorPageManager();
+  private ErrorPageManager _errorManager = new ErrorPageManager(null);
 
   private boolean _initAttributes;
 

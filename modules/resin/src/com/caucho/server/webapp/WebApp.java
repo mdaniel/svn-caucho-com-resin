@@ -386,8 +386,8 @@ public class WebApp extends ServletContextImpl
       _errorFilterMapper.setFilterManager(_filterManager);
 
       _constraintManager = new ConstraintManager();
-      _errorPageManager = new ErrorPageManager();
-      _errorPageManager.setWebApp(this);
+      _errorPageManager = new ErrorPageManager(this);
+
       if (getParent() != null)
         _errorPageManager.setParent(getParent().getErrorPageManager());
 

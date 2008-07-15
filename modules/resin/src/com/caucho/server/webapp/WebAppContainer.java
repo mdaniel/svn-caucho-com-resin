@@ -143,8 +143,6 @@ public class WebAppContainer
     _docDir = Vfs.lookup();
 
     _classLoader = loader;
-    _errorPageManager = new ErrorPageManager();
-    _errorPageManager.setWebAppContainer(this);
 
     /*
     Environment.addEnvironmentListener(this, loader);
@@ -155,6 +153,9 @@ public class WebAppContainer
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       thread.setContextClassLoader(loader);
+      
+      _errorPageManager = new ErrorPageManager(getErrorWebApp());
+      _errorPageManager.setWebAppContainer(this);
 
       // These need to be in the proper class loader so they can
       // register themselves with the environment
@@ -743,10 +744,12 @@ public class WebAppContainer
 	Server server = (Server) _dispatchServer;
         // server/13sf, server/1kq1
 	WebApp webApp = findWebAppByURI("/");
+	
 	if (webApp != null)
 	  invocation.setWebApp(webApp);
 	else
 	  invocation.setWebApp(getErrorWebApp());
+	
 	invocation.setFilterChain(rewriteChain);
         isAlwaysModified = false;
       }

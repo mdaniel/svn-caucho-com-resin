@@ -880,7 +880,7 @@ public class Cluster
 
     int index = 0;
 
-    if (srunLength < 64) {
+    if (srunLength <= 64) {
       index = decode(id.charAt(offset + 0));
     }
     else {
@@ -906,7 +906,7 @@ public class Cluster
 
     int index = 0;
 
-    if (srunLength < 64) {
+    if (srunLength <= 64) {
       index = decode(id.charAt(offset + 1));
     }
     else {
@@ -932,7 +932,7 @@ public class Cluster
 
     int index = 0;
 
-    if (srunLength < 64) {
+    if (srunLength <= 64) {
       index = decode(id.charAt(offset + 2));
     }
     else {
@@ -958,7 +958,7 @@ public class Cluster
 
     int index = 0;
 
-    if (srunLength < 64) {
+    if (srunLength <= 64) {
       index = decode(id.charAt(offset + 0));
     }
     else {
@@ -981,7 +981,7 @@ public class Cluster
 
     int index = 0;
 
-    if (srunLength < 64) {
+    if (srunLength <= 64) {
       index = decode(id.charAt(offset + 1));
     }
     else {
@@ -1004,7 +1004,7 @@ public class Cluster
 
     int index = 0;
 
-    if (srunLength < 64) {
+    if (srunLength <= 64) {
       index = decode(id.charAt(offset + 2));
     }
     else {
@@ -1022,7 +1022,7 @@ public class Cluster
     ClusterServer []srunList = getServerList();
     int srunLength = srunList.length;
     
-    if (srunLength < 64)
+    if (srunLength <= 64)
       cb.append(convert(digit));
     else {
       cb.append(convert(digit / 64));

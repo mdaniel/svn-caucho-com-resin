@@ -229,8 +229,12 @@ public class Table extends Store {
   {
     Path path = db.getPath().lookup(name + ".db");
 
-    if (! path.exists())
+    if (! path.exists()) {
+      if (log.isLoggable(Level.FINE))
+	log.fine(db + " '" + path.getNativePath() + "' is an unknown table");
+      
       return null; //throw new SQLException(L.l("table {0} does not exist", name));
+    }
 
     String version = null;
 

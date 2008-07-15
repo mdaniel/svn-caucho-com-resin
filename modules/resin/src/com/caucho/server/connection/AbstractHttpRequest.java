@@ -137,6 +137,7 @@ public abstract class AbstractHttpRequest
   private String _runAs;
 
   private boolean _keepalive;
+  private long _startTime;
 
   protected CharSegment _hostHeader;
   protected boolean _expect100Continue;
@@ -316,10 +317,11 @@ public abstract class AbstractHttpRequest
     throws IOException
   {
     _oldProvider = SecurityContext.setProvider(this);
-    // _startTime = Alarm.getCurrentTime();
     
     if (_tcpConn != null)
       _tcpConn.beginActive();
+    else
+      _startTime = Alarm.getCurrentTime();
   }
 
   /**
@@ -2447,6 +2449,8 @@ public abstract class AbstractHttpRequest
   {
     if (_tcpConn != null)
       _tcpConn.beginActive();
+    else
+      _startTime = Alarm.getCurrentTime();
   }
   
   /**
@@ -2457,7 +2461,7 @@ public abstract class AbstractHttpRequest
     if (_tcpConn != null)
       return _tcpConn.getRequestStartTime();
     else
-      return 0;
+      return _startTime;
   }
 
   /**

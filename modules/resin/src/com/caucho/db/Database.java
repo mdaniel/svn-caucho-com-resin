@@ -222,6 +222,9 @@ public class Database
 
 	return table;
       } catch (Exception e) {
+	if (log.isLoggable(Level.FINER))
+	  log.log(Level.FINER, e.toString(), e);
+	
 	if (_removeOnError) {
 	  if (log.isLoggable(Level.FINER))
 	    log.log(Level.FINER, e.toString(), e);

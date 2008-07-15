@@ -31,6 +31,7 @@ package com.caucho.sql;
 
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.PropertyValueProgram;
@@ -159,7 +160,10 @@ public class DriverConfig
     else if ("Driver".equals(type)) {
       _driverType = TYPE_DRIVER;
     }
-    else if (! hasDriverTypeMethod(_driverClass)) {
+    else if (hasDriverTypeMethod(_driverClass)) {
+      _init.addProgram(new PropertyStringProgram("driverType", type));
+    }
+    else {
       throw new ConfigException(L.l("'{0}' is an unknown driver type. Valid types are 'ConnectionPoolDataSource', 'XADataSource' and 'Driver'"));
     }
   }

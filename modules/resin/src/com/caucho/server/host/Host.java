@@ -649,6 +649,6 @@ public class Host extends WebAppContainer
 
   public String toString()
   {
-    return "Host[" + getHostName() + "]";
+    return getClass().getSimpleName() + "[" + getHostName() + "]";
   }
 }

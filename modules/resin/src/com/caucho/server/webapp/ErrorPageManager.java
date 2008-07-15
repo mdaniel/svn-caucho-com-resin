@@ -66,7 +66,8 @@ import java.util.logging.Logger;
  */
 public class ErrorPageManager {
   private final static L10N L = new L10N(ErrorPageManager.class);
-  private final static Logger log = Log.open(ErrorPageManager.class);
+  private final static Logger log
+    = Logger.getLogger(ErrorPageManager.class.getName());
   
   public static final char []MSIE_PADDING;
   
@@ -87,7 +88,7 @@ public class ErrorPageManager {
   
   public static String SHUTDOWN = "com.caucho.shutdown";
   
-  private WebApp _app;
+  private final WebApp _app;
   private WebAppContainer _appContainer;
   private HashMap<Object,String> _errorPageMap = new HashMap<Object,String>();
   private String _defaultLocation;
@@ -97,8 +98,9 @@ public class ErrorPageManager {
   /**
    * Create error page manager.
    */
-  public ErrorPageManager()
+  public ErrorPageManager(WebApp app)
   {
+    _app = app;
   }
 
   /**
@@ -132,14 +134,6 @@ public class ErrorPageManager {
     else
       _errorPageMap.put(new Integer(errorPage.getErrorCode()),
                         errorPage.getLocation());
-  }
-
-  /**
-   * Sets the webApp.
-   */
-  public void setWebApp(WebApp app)
-  {
-    _app = app;
   }
 
   /**
@@ -783,6 +777,11 @@ public class ErrorPageManager {
     }
 
     return cb.toString();
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _app + "]";
   }
 
   static {

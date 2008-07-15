@@ -76,6 +76,7 @@ public class ConnectionPoolDataSourceImpl implements ConnectionPoolDataSource {
   {
     if (url.startsWith("jdbc:"))
       url = url.substring(5);
+    
     if (url.startsWith("resin:"))
       url = url.substring(6);
 

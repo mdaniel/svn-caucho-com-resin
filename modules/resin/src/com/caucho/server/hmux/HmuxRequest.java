@@ -261,7 +261,7 @@ public class HmuxRequest extends AbstractHttpRequest
   private Cluster _cluster;
 
   private HmuxProtocol _hmuxProtocol;
-  private ErrorPageManager _errorManager = new ErrorPageManager();
+  private ErrorPageManager _errorManager = new ErrorPageManager(null);
 
   private int _srunIndex;
 
