@@ -2,7 +2,7 @@
   <header>
     <product>resin</product>
     <title>JSF - Java Server Faces</title>
-    <version>Resin 3.1</version>
+    <version>Resin 3.2</version>
     <description>
 
       <p>As of Resin version 3.1.6 Resin supports JSF 1.2.
@@ -191,7 +191,8 @@ public class FooBean {
 &lt;/managed-bean&gt;
       </example>
       <p>
-       Don't forget to place an emtpy web-beans.xml file into your classpath under <code>META-INF</code> directory to enable Web Beans for the context.
+       Don't forget to place an emtpy web-beans.xml file into your classpath under
+        <code>META-INF</code> directory to enable Web Beans for the context.
        <example title="e.g. WEB-INF/classes/META-INF/web-beans.xml">
 &lt;web-beans xmlns="http://caucho.com/ns/resin"/&gt;
        </example>
@@ -204,5 +205,78 @@ public class FooBean {
       </p>
     </s1>
 
+    <s1 title="JSF Developer Aid">
+      <p>
+        Since version 3.2.0 resin offers JSF Developer Aid that allows to quickly
+        introspect state of the comonent tree captured at the end of all
+        of the JSF phases and displayed in a tabbed view. The EL Experessions
+        displayed in the view are navigable allowing to diplays of the backing data.
+      </p>
+      <p>
+        Alone with the state the Aid displays information for all request headers and
+        parameters.
+      </p>
+    </s1>
+    <s1>
+    <s2 title="Enabling the JSF Developer Aid">
+      <p>
+      To enable the Aid place a line <code>&lt;jsf enable-developer-aid='true'/></code>
+      into <code>resin-web.xml</code> file.
+      </p>
+      <example title="WEB-INF/resin-web.xml">
+&lt;web-app xmlns='http://caucho.com/ns/resin'>
+  &lt;jsf enable-developer-aid='true'/>
+&lt;/web-app>
+      </example>
+      <p>
+      Once the Aid is enabled a <em>JSF Dev Aid</em> link will appear in the right
+      bottom corner of the page as on the picture below.
+      </p>
+      <figure src="jsf-dev-aid-link.png"/>
+      <p>
+        If desired, the position of the link can be changed via a <code>developer-aid-link-style</code>
+        parameter in resin-web.xml file.
+
+        <example title="Link position">
+&lt;web-app xmlns='http://caucho.com/ns/resin'>
+  &lt;jsf enable-developer-aid='true' developer-aid-link-style='position:absolute; bottom:1; right:1'/>
+&lt;/web-app>
+        </example>
+      </p>
+    </s2>
+
+    <s2 title="Aid's main page">
+      <p>
+      The main page lists available views and controls that allow to save the information
+      into a binary file or load from a file saved earlier.
+      Persisted to file, the info may be shared with other developers, attached to QA bug reports, etc.
+      </p>
+      <figure src="jsf-dev-aid.png"/>
+    </s2>
+
+    <s2 title="Aid's Request Info page">
+       <p>
+         Request Info page will show headers and parameters contained in HTTP request.
+       </p>
+      <figure src="jsf-dev-aid-request-info.png"/>
+    </s2>
+
+    <s2 title="Aid's View States">
+     <p>
+       The aid captures state of the <code>UIViewRoot</code> at the end of each
+       phase and offers it in a tabbed view.
+     </p>
+     <figure src="jsf-dev-aid-view.png"/>
+    </s2>
+
+    <s2 title="Aid's EL Expression Display">
+      <p>
+       Expression which are encoutered during introspection of a Component Tree
+        become links and navigate to a dynamically created tab that display result
+        of evaluation of that expression.
+      </p>
+      <figure src="jsf-dev-aid-el-obj.png"/>
+    </s2>
+    </s1>
   </body>
 </document>
