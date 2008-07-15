@@ -208,12 +208,12 @@ public class FooBean {
     <s1 title="JSF Developer Aid">
       <p>
         Since version 3.2.0 resin offers JSF Developer Aid that allows to quickly
-        introspect state of the comonent tree captured at the end of all
-        of the JSF phases and displayed in a tabbed view. The EL Experessions
-        displayed in the view are navigable allowing to diplays of the backing data.
+        introspect state of a Component Tree captured at the end of each
+        phase and displayed in a tabbed view. The EL Experessions
+        displayed in the view are navigable to screens that display backing data.
       </p>
       <p>
-        Alone with the state the Aid displays information for all request headers and
+        Alone with the state, the Aid displays information for all request headers and
         parameters.
       </p>
     </s1>
@@ -230,7 +230,7 @@ public class FooBean {
       </example>
       <p>
       Once the Aid is enabled a <em>JSF Dev Aid</em> link will appear in the right
-      bottom corner of the page as on the picture below.
+      bottom corner of a page as on the picture below.
       </p>
       <figure src="jsf-dev-aid-link.png"/>
       <p>
@@ -247,9 +247,9 @@ public class FooBean {
 
     <s2 title="Aid's main page">
       <p>
-      The main page lists available views and controls that allow to save the information
-      into a binary file or load from a file saved earlier.
-      Persisted to file, the info may be shared with other developers, attached to QA bug reports, etc.
+      The main page lists available views and controls that allow saving the information
+      into a binary file or loading from a file saved earlier.
+      Persisted to a file, captured state may be shared with other developers, attached to QA bug reports and so on.
       </p>
       <figure src="jsf-dev-aid.png"/>
     </s2>
@@ -271,8 +271,8 @@ public class FooBean {
 
     <s2 title="Aid's EL Expression Display">
       <p>
-       Expression which are encoutered during introspection of a Component Tree
-        become links and navigate to a dynamically created tab that display result
+       Expression, encoutered during introspection of a Component Tree
+        become links and navigate to a page that display result
         of evaluation of that expression.
       </p>
       <figure src="jsf-dev-aid-el-obj.png"/>
