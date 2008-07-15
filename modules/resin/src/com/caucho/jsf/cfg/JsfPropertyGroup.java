@@ -52,6 +52,7 @@ public class JsfPropertyGroup {
     = StateSerializationMethod.HESSIAN;
 
   private boolean _enableDeveloperAid;
+  private String _developerAidLinkStyle;
 
   public JsfPropertyGroup()
   {
@@ -133,6 +134,16 @@ public class JsfPropertyGroup {
   public boolean isEnableDeveloperAid()
   {
     return _enableDeveloperAid;
+  }
+
+  public String getDeveloperAidLinkStyle()
+  {
+    return _developerAidLinkStyle;
+  }
+
+  public void setDeveloperAidLinkStyle(String developerAidLinkStyle)
+  {
+    _developerAidLinkStyle = developerAidLinkStyle;
   }
 
   static {

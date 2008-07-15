@@ -307,6 +307,9 @@ r_jsf = element jsf {
 
  & (attribute enable-developer-aid { r_boolean-Type }
     | element enable-developer-aid { r_boolean-Type })?
+
+ & (attribute developer-aid-link-style { string }
+    | element developer-aid-link-style { string })?
 }
 
 r_state-serialization-method-Values = "hessian" | "java"

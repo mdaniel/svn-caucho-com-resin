@@ -30,6 +30,7 @@ package com.caucho.jsf.dev;
 
 import com.caucho.util.L10N;
 import com.caucho.jsf.webapp.FacesServletImpl;
+import com.caucho.server.webapp.WebApp;
 
 import javax.el.ValueExpression;
 import javax.faces.component.EditableValueHolder;
@@ -63,6 +64,15 @@ public class JsfDeveloperAid
     = Logger.getLogger(FacesServletImpl.class.getName());
 
   private static final L10N L = new L10N(JsfDeveloperAid.class);
+
+  private String _developerAidLinkStyle;
+
+  public JsfDeveloperAid()
+  {
+    WebApp webApp = WebApp.getCurrent();
+
+    _developerAidLinkStyle = webApp.getJsf().getDeveloperAidLinkStyle();
+  }
 
   public void afterPhase(PhaseEvent event)
   {
@@ -120,7 +130,17 @@ public class JsfDeveloperAid
   }
 
   public void beforePhase(PhaseEvent event)
-  {//
+  {
+    if (! PhaseId.RENDER_RESPONSE.equals(event.getPhaseId()))
+      return;
+
+    UIViewRoot viewRoot = FacesContext.getCurrentInstance().getViewRoot();
+
+    DeveloperAidLink link = new DeveloperAidLink();
+
+    link.setStyle(_developerAidLinkStyle);
+
+    viewRoot.getChildren().add(link);
   }
 
   public PhaseId getPhaseId()
