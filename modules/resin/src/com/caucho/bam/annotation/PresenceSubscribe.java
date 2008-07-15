@@ -27,7 +27,7 @@
  * @author Emil Ong
  */
 
-package com.caucho.hemp.annotation;
+package com.caucho.bam.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -35,9 +35,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The @QueryResult annotation.
+ * The @PresenceSubscribe annotation.
  */
 @Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface QueryResult {
+public @interface PresenceSubscribe {
 }

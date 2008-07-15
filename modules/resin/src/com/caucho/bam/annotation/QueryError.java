@@ -27,7 +27,7 @@
  * @author Emil Ong
  */
 
-package com.caucho.hemp.annotation;
+package com.caucho.bam.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

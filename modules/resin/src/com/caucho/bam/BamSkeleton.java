@@ -27,10 +27,10 @@
  * @author Emil Ong
  */
 
-package com.caucho.hemp.broker;
+package com.caucho.bam;
 
 import com.caucho.config.*;
-import com.caucho.hemp.annotation.*;
+import com.caucho.bam.annotation.*;
 import com.caucho.bam.BamError;
 import com.caucho.util.*;
 
@@ -44,14 +44,14 @@ import javax.webbeans.*;
 
 /**
  */
-public class HempSkeleton<C>
+public class BamSkeleton<C>
 {
-  private static final L10N L = new L10N(HempSkeleton.class);
+  private static final L10N L = new L10N(BamSkeleton.class);
   private static final Logger log
-    = Logger.getLogger(HempSkeleton.class.getName());
+    = Logger.getLogger(BamSkeleton.class.getName());
 
-  private final static HashMap<Class, HempSkeleton> _skeletons = 
-    new HashMap<Class, HempSkeleton>();
+  private final static HashMap<Class, BamSkeleton> _skeletons = 
+    new HashMap<Class, BamSkeleton>();
   
   private final HashMap<Class, Method> _messageHandlers = 
     new HashMap<Class, Method>();
@@ -82,7 +82,7 @@ public class HempSkeleton<C>
   private final HashMap<Class, Method> _presenceErrorHandlers = 
     new HashMap<Class, Method>();
 
-  private HempSkeleton(Class<C> cl)
+  private BamSkeleton(Class<C> cl)
   {
     log.log(Level.FINEST, L.l("Introspecting class {0}", cl.getName()));
 
@@ -228,13 +228,13 @@ public class HempSkeleton<C>
     }
   }
  
-  public static HempSkeleton getHempSkeleton(Class cl)
+  public static BamSkeleton getBamSkeleton(Class cl)
   {
     synchronized(_skeletons) {
-      HempSkeleton skeleton = _skeletons.get(cl);
+      BamSkeleton skeleton = _skeletons.get(cl);
 
       if (skeleton == null) {
-        skeleton = new HempSkeleton(cl);
+        skeleton = new BamSkeleton(cl);
         _skeletons.put(cl, skeleton);
       }
 

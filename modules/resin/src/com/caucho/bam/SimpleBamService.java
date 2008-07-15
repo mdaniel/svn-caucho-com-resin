@@ -44,6 +44,18 @@ public class SimpleBamService extends AbstractBamService
 {
   private static final Logger log
     = Logger.getLogger(SimpleBamService.class.getName());
+
+  private final BamSkeleton _skeleton;
+
+  protected SimpleBamService()
+  {
+    _skeleton = BamSkeleton.getBamSkeleton(this.getClass());
+  }
+
+  protected BamSkeleton getBamSkeleton()
+  {
+    return _skeleton;
+  }
   
   /**
    * Returns the resource's stream
@@ -63,9 +75,11 @@ public class SimpleBamService extends AbstractBamService
   public void message(String to, String from, Serializable value)
   {
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " sendMessage to=" + to + " from=" + from
+      log.finer(this + " message to=" + to + " from=" + from
 		+ logValue(value));
     }
+
+    _skeleton.dispatchMessage(this, to, from, value);
   }
   
   /**
@@ -81,35 +95,37 @@ public class SimpleBamService extends AbstractBamService
 			       BamError error)
   {
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " sendMessageError to=" + to + " from=" + from
+      log.finer(this + " messageError to=" + to + " from=" + from
 		+ " error=" + error);
     }
+
+    _skeleton.dispatchMessageError(this, to, from, value, error);
   }
   
   public boolean queryGet(long id,
 			    String to,
 			    String from,
-			    Serializable query)
+			    Serializable value)
   {
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " sendQuerySet id=" + id + " to=" + to
-		+ " from=" + from + logValue(query));
+      log.finer(this + " querySet id=" + id + " to=" + to
+		+ " from=" + from + " value=" + logValue(value));
     }
     
-    return false;
+    return _skeleton.dispatchQueryGet(this, id, to, from, value);
   }
   
   public boolean querySet(long id,
 			    String to,
 			    String from,
-			    Serializable query)
+			    Serializable value)
   {
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " sendQuerySet id=" + id + " to=" + to
-		+ " from=" + from + logValue(query));
+      log.finer(this + " querySet id=" + id + " to=" + to
+		+ " from=" + from + " value=" + logValue(value));
     }
     
-    return false;
+    return _skeleton.dispatchQuerySet(this, id, to, from, value);
   }
   
   public void queryResult(long id,
@@ -117,14 +133,27 @@ public class SimpleBamService extends AbstractBamService
 			    String from,
 			    Serializable value)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " queryResult id=" + id + " to=" + to
+		+ " from=" + from + " value=" + logValue(value));
+    }
+
+     _skeleton.dispatchQueryResult(this, id, to, from, value);
   }
   
   public void queryError(long id,
 			   String to,
 			   String from,
-			   Serializable query,
+			   Serializable value,
 			   BamError error)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " queryResult id=" + id + " to=" + to
+                + " from=" + from + " value=" + logValue(value) 
+                + " error=" + logValue(error));
+    }
+
+    _skeleton.dispatchQueryError(this, id, to, from, value, error);
   }
   
   /**
@@ -132,12 +161,14 @@ public class SimpleBamService extends AbstractBamService
    */
   public void presence(String to,
 			 String from,
-			 Serializable data)
+			 Serializable value)
   {
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " sendPresence to=" + to + " from=" + from
-		+ " value=" + data);
+      log.finer(this + " presence to=" + to + " from=" + from
+		+ " value=" + value);
     }
+
+    _skeleton.dispatchPresence(this, to, from, value);
   }
 
   /**
@@ -145,8 +176,14 @@ public class SimpleBamService extends AbstractBamService
    */
   public void presenceUnavailable(String to,
 				    String from,
-				    Serializable data)
+				    Serializable value)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " presenceUnavailable to=" + to + " from=" + from
+		+ " value=" + value);
+    }
+
+    _skeleton.dispatchPresenceUnavailable(this, to, from, value);
   }
 
   /**
@@ -154,8 +191,14 @@ public class SimpleBamService extends AbstractBamService
    */
   public void presenceProbe(String to,
 			      String from,
-			      Serializable data)
+			      Serializable value)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " presenceProbe to=" + to + " from=" + from
+		+ " value=" + value);
+    }
+
+    _skeleton.dispatchPresenceProbe(this, to, from, value);
   }
 
   /**
@@ -163,8 +206,14 @@ public class SimpleBamService extends AbstractBamService
    */
   public void presenceSubscribe(String to,
 				  String from,
-				  Serializable data)
+				  Serializable value)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " presenceSubscribe to=" + to + " from=" + from
+		+ " value=" + value);
+    }
+
+    _skeleton.dispatchPresenceSubscribe(this, to, from, value);
   }
 
   /**
@@ -172,8 +221,14 @@ public class SimpleBamService extends AbstractBamService
    */
   public void presenceSubscribed(String to,
 				   String from,
-				   Serializable data)
+				   Serializable value)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " presenceSubscribed to=" + to + " from=" + from
+		+ " value=" + value);
+    }
+
+    _skeleton.dispatchPresenceSubscribed(this, to, from, value);
   }
 
   /**
@@ -181,8 +236,14 @@ public class SimpleBamService extends AbstractBamService
    */
   public void presenceUnsubscribe(String to,
 				    String from,
-				    Serializable data)
+				    Serializable value)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " presenceUnsubscribe to=" + to + " from=" + from
+		+ " value=" + value);
+    }
+
+    _skeleton.dispatchPresenceUnsubscribe(this, to, from, value);
   }
 
   /**
@@ -190,8 +251,14 @@ public class SimpleBamService extends AbstractBamService
    */
   public void presenceUnsubscribed(String to,
 				     String from,
-				     Serializable data)
+				     Serializable value)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " presenceUnsubscribed to=" + to + " from=" + from
+		+ " value=" + value);
+    }
+
+    _skeleton.dispatchPresenceUnsubscribed(this, to, from, value);
   }
 
   /**
@@ -199,8 +266,14 @@ public class SimpleBamService extends AbstractBamService
    */
   public void presenceError(String to,
 			      String from,
-			      Serializable data,
+			      Serializable value,
 			      BamError error)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " presenceError to=" + to + " from=" + from
+		+ " error=" + error);
+    }
+
+    _skeleton.dispatchPresenceError(this, to, from, value, error);
   }
 }

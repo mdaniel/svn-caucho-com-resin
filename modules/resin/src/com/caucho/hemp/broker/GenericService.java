@@ -29,14 +29,15 @@
 
 package com.caucho.hemp.broker;
 
+import com.caucho.bam.annotation.QueryGet;
 import com.caucho.bam.AbstractBamStream;
 import com.caucho.bam.BamBroker;
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamService;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamConnection;
+import com.caucho.bam.SimpleBamService;
 import com.caucho.config.*;
-import com.caucho.hemp.annotation.QueryGet;
 import com.caucho.util.*;
 import com.caucho.xmpp.disco.DiscoInfoQuery;
 import com.caucho.xmpp.disco.DiscoIdentity;
@@ -53,8 +54,7 @@ import javax.webbeans.*;
 /**
  * GenericService implementation to simplify configuring a service.
  */
-public class GenericService extends AbstractBamStream
-  implements BamService
+public class GenericService extends SimpleBamService
 {
   private static final L10N L = new L10N(GenericService.class);
   private static final Logger log
@@ -68,13 +68,6 @@ public class GenericService extends AbstractBamStream
   private BamStream _brokerStream;
   private BamStream _agentStream;
 
-  private final HempSkeleton _skeleton;
-
-  public GenericService()
-  {
-    _skeleton = HempSkeleton.getHempSkeleton(this.getClass());
-  }
-  
   public void setName(String name)
   {
     setJid(name);
@@ -200,105 +193,6 @@ public class GenericService extends AbstractBamStream
     return false;
   }
   
-  //
-  // message
-  //
-
-  @Override
-  public void message(String to, String from, Serializable value)
-  {
-    _skeleton.dispatchMessage(this, to, from, value);
-  }
-
-  @Override
-  public void messageError(String to, String from, 
-                           Serializable value, BamError error)
-  {
-    _skeleton.dispatchMessageError(this, to, from, value, error);
-  }
-
-  //
-  // queries
-  //
-
-  @Override
-  public boolean querySet(long id, String to, String from, Serializable value)
-  {
-    return _skeleton.dispatchQuerySet(this, id, to, from, value);
-  }
-
-  @Override
-  public boolean queryGet(long id, String to, String from, Serializable value)
-  {
-    return _skeleton.dispatchQueryGet(this, id, to, from, value);
-  }
-
-  @Override
-  public void queryResult(long id, String to, String from, Serializable value)
-  {
-    _skeleton.dispatchQueryResult(this, id, to, from, value);
-  }
-
-  @Override
-  public void queryError(long id, String to, String from, 
-                         Serializable value, BamError error)
-  {
-    _skeleton.dispatchQueryError(this, id, to, from, value, error);
-  }
-
-  //
-  // Presence
-  //
-
-  @Override
-  public void presence(String to, String from, Serializable value)
-  {
-    _skeleton.dispatchPresence(this, to, from, value);
-  }
-
-  @Override
-  public void presenceProbe(String to, String from, Serializable value)
-  {
-    _skeleton.dispatchPresenceProbe(this, to, from, value);
-  }
-
-  @Override
-  public void presenceUnavailable(String to, String from, Serializable value)
-  {
-    _skeleton.dispatchPresenceUnavailable(this, to, from, value);
-  }
-
-  @Override
-  public void presenceSubscribe(String to, String from, Serializable value)
-  {
-    _skeleton.dispatchPresenceSubscribe(this, to, from, value);
-  }
-
-  @Override
-  public void presenceSubscribed(String to, String from, Serializable value)
-  {
-    _skeleton.dispatchPresenceSubscribed(this, to, from, value);
-  }
-
-  @Override
-  public void presenceUnsubscribe(String to, String from, Serializable value)
-  {
-    _skeleton.dispatchPresenceUnsubscribe(this, to, from, value);
-  }
-
-  @Override
-  public void presenceUnsubscribed(String to, String from, Serializable value)
-  {
-    _skeleton.dispatchPresenceUnsubscribed(this, to, from, value);
-  }
-
-  @Override
-  public void presenceError(String to, String from, 
-                            Serializable value, BamError error)
-  {
-    _skeleton.dispatchPresenceError(this, to, from, value, error);
-  }
-
   public boolean handleDiscoInfoQuery(long id, String to, String from,
                                       @QueryGet DiscoInfoQuery query)
   {
