@@ -30,18 +30,19 @@
 package org.osgi.framework;
 
 import java.util.EventListener;
+import java.util.EventObject;
 
 /**
  * A framework events
  */
 public class FrameworkEvent extends EventObject
 {
-  public static final int STARTED = 00000001;
-  public static final int ERROR = 00000002;
-  public static final int PACKAGES_REFRESHED = 00000004;
-  public static final int STARTLEVEL_CHANGED = 00000008;
-  public static final int WARNING = 00000010;
-  public static final int INFO = 00000020;
+  public static final int STARTED = 0x00000001;
+  public static final int ERROR = 0x00000002;
+  public static final int PACKAGES_REFRESHED = 0x00000004;
+  public static final int STARTLEVEL_CHANGED = 0x00000008;
+  public static final int WARNING = 0x00000010;
+  public static final int INFO = 0x00000020;
 
   private final int _type;
   private final Throwable _exn;
@@ -54,6 +55,7 @@ public class FrameworkEvent extends EventObject
     super(source);
 
     _type = type;
+    _exn = null;
   }
 
   public FrameworkEvent(int type, Bundle bundle, Throwable exn)

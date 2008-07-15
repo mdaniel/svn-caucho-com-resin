@@ -27,43 +27,38 @@
  * @author Scott Ferguson
  */
 
-package org.osgi.framework;
+package com.caucho.webbeans.context;
 
-import java.util.EventListener;
-import java.util.EventObject;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.webbeans.component.ComponentImpl;
+
+import java.io.Closeable;
+import java.util.*;
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+
 
 /**
- * A bundle event
+ * The application scope value
  */
-public class BundleEvent extends EventObject
-{
-  public static final int INSTALLED = 0x00000001;
-  public static final int STARTED = 0x00000002;
-  public static final int STOPPED = 0x00000004;
-  public static final int UPDATED = 0x00000008;
-  public static final int UNINSTALLED = 0x00000010;
-  public static final int RESOLVED = 0x00000020;
-  public static final int UNRESOLVED = 0x00000040;
-  public static final int STARTING = 0x00000080;
-  public static final int STOPPING = 0x00000100;
-  public static final int LAZY_ACTIVATION = 0x00000200;
-  
-  private final int _type;
+public class ComponentDestructor implements Closeable {
+  private ComponentImpl _owner;
+  private Object _value;
 
-  public BundleEvent(int type, Bundle bundle)
+  public ComponentDestructor(ComponentImpl owner, Object value)
   {
-    super(bundle);
-
-    _type = type;
+    _owner = owner;
+    _value = value;
   }
 
-  public Bundle getBundle()
+  public void close()
   {
-    return (Bundle) getSource();
+    _owner.destroy(_value, null);
   }
 
-  public int getType()
+  public String toString()
   {
-    return _type;
+    return getClass().getSimpleName() + "[" + _owner + "," + _value + "]";
   }
 }

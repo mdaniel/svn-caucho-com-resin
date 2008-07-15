@@ -117,6 +117,8 @@ class WatchdogManager extends ProtocolDispatchServer {
     webBeans.addSingletonByName(elContext.getJavaVar(), "java");
     webBeans.addSingletonByName(elContext.getResinVar(), "resin");
     webBeans.addSingletonByName(elContext.getServerVar(), "server");
+    webBeans.addSingletonByName(System.getProperties(), "system");
+    webBeans.addSingletonByName(System.getenv(), "getenv");
 
     _watchdogPort = _args.getWatchdogPort();
     readConfig(_args);

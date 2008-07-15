@@ -52,7 +52,7 @@ public interface Bundle
   public static final int STOP_TRANSIENT = 1;
 
   /**
-   * Returns the bundle's current start
+   * Returns the bundle's current state
    */
   public int getState();
 
@@ -152,7 +152,7 @@ public interface Bundle
   /**
    * Returns the resources for the bundle
    */
-  public Enumeration getResource(String name)
+  public Enumeration getResources(String name)
     throws IOException;
 
   /**

@@ -232,19 +232,18 @@ public class Management
   /**
    * Create and configure the stat service
    */
-  public ResourceAdapter createPing()
+  public Object createPing()
   {
     log.warning(L.l("'ping' requires Resin Professional"));
     
-    return null;
+    return new ContainerProgram();
   }
 
   /**
    * Create and configure the stat service
    */
-  public void addPing(ResourceAdapter ping)
+  public void addPing(Object ping)
   {
-    log.warning(L.l("'ping' requires Resin Professional"));
   }
 
   /**

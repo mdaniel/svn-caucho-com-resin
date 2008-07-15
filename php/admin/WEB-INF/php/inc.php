@@ -321,7 +321,7 @@ function display_header($script, $title, $server, $allow_remote = false)
    <li class="server">Server: <?= $server->Id ? $server->Id : "default" ?></li>
 <? }  ?>
    <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
-   <li><a href="<?= $script ?>">refresh</a></li>
+   <li><a href="?q=<?= $g_page ?>">refresh</a></li>
    </ul>
   </td>
 </tr>

@@ -13,6 +13,8 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>amber: query/cache issues around chunk-size limit (#2777, rep by Riccardo Cohen)</li>
+<li>config: ${getenv['foo']} now returns environment variables (#2783, rep by Robert Heerdink)</li>
 <li>jsf: JSF Developer Aid. Displays Component Tree with values and request info.</li>
 <li>remote: remote-client was storing wrong object in jndi (#2780, rep by Sashidhar Guduri)</li>
 <li>config: xml errors now show context (#2781)</li>

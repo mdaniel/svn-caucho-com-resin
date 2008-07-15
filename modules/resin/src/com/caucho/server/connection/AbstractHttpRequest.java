@@ -1513,7 +1513,8 @@ public abstract class AbstractHttpRequest
     SessionImpl session;
 
     if (id != null && id.length() > 6) {
-      session = manager.getSession(id, now, create, _isSessionIdFromCookie);
+      // server/01t0
+      session = manager.getSession(id, now, false, _isSessionIdFromCookie);
 
       if (session == null) {
       }

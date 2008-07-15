@@ -30,6 +30,7 @@
 package org.osgi.framework;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Dictionary;
 
 /**

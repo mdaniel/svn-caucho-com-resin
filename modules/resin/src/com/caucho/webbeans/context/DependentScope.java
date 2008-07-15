@@ -29,6 +29,7 @@
 
 package com.caucho.webbeans.context;
 
+import com.caucho.loader.Environment;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.webbeans.component.ComponentImpl;
 
@@ -141,6 +142,7 @@ public class DependentScope {
       _scope.addDestructor(comp, value);
     else {
       // add to env?
+      Environment.addCloseListener(new ComponentDestructor(comp, value));
     }
   }
 

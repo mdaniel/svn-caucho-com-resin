@@ -118,6 +118,8 @@ public class ResinBoot {
     webBeans.addSingletonByName(elContext.getJavaVar(), "java");
     webBeans.addSingletonByName(elContext.getResinVar(), "resin");
     webBeans.addSingletonByName(elContext.getServerVar(), "server");
+    webBeans.addSingletonByName(System.getProperties(), "system");
+    webBeans.addSingletonByName(System.getenv(), "getenv");
 
     config.configure(bootManager, _args.getResinConf(),
                      "com/caucho/server/resin/resin.rnc");

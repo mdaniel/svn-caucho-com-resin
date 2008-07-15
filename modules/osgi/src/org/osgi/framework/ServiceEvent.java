@@ -30,6 +30,7 @@
 package org.osgi.framework;
 
 import java.util.EventListener;
+import java.util.EventObject;
 
 /**
  * A service event

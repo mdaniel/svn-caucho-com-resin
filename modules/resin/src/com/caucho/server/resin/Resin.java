@@ -247,6 +247,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       webBeans.addSingleton(new Var(), "server", Standard.class);
       webBeans.addSingleton(new JavaVar(), "java", Standard.class);
       webBeans.addSingleton(System.getProperties(), "system", Standard.class);
+      webBeans.addSingleton(System.getenv(), "getenv", Standard.class);
 
       _brokerManager = new HempBrokerManager();
 

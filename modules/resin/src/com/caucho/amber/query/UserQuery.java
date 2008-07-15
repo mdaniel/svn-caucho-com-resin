@@ -335,44 +335,65 @@ public class UserQuery implements AmberQuery {
     ResultSetCacheChunk cacheChunk = null;
     ResultSetMetaData metaData = null;
 
+    int firstResult = _firstResult;
+    int maxResults = _maxResults;
+
     if (isCacheable) {
       int row = 0;
 
       cacheChunk = _aConn.getQueryCacheChunk(query.getSQL(), _argValues, row);
       metaData = _aConn.getQueryMetaData();
 
+      if (cacheChunk == null) {
+	cacheChunk = fillCache(query);
+      }
+
+      // all data returned in chunk
+      firstResult = cacheChunk.getRowCount();
+      if (cacheChunk.getRowCount() < chunkSize)
+	maxResults = 0;
+      else
+	maxResults -= firstResult - _firstResult;
+
       _rs.setCacheChunk(cacheChunk, metaData);
       _rs.setUserQuery(this);
     }
 
-    if (cacheChunk == null) {
+    if (maxResults > 0) {
       ResultSet rs;
 
-      if (isCacheable)
-	rs = executeQuery(0, chunkSize);
-      else
-	rs = executeQuery(_firstResult, _maxResults);
+      rs = executeQuery(firstResult, maxResults);
 
       metaData = rs.getMetaData();
 
       _rs.setResultSet(rs, metaData);
-
-      if (isCacheable) {
-        cacheChunk = new ResultSetCacheChunk();
-        cacheChunk.setQuery(query);
-
-        _rs.fillCacheChunk(cacheChunk);
-
-        _rs.setCacheChunk(cacheChunk, metaData);
-
-        _aConn.putQueryCacheChunk(query.getSQL(), _argValues, 0,
-                                  cacheChunk, metaData);
-      }
     }
 
     _rs.init();
 
     return _rs;
+  }
+
+  private ResultSetCacheChunk fillCache(SelectQuery query)
+    throws SQLException
+  {
+    int chunkSize = _aConn.getCacheChunkSize();
+    
+    ResultSet rs = executeQuery(0, chunkSize);
+      
+    ResultSetMetaData metaData = rs.getMetaData();
+
+    _rs.setResultSet(rs, metaData);
+
+    ResultSetCacheChunk cacheChunk = new ResultSetCacheChunk();
+    cacheChunk.setQuery(query);
+
+    _rs.fillCacheChunk(cacheChunk);
+
+    _aConn.putQueryCacheChunk(query.getSQL(), _argValues, 0,
+			      cacheChunk, metaData);
+
+    return cacheChunk;
   }
 
   /**
@@ -383,6 +404,8 @@ public class UserQuery implements AmberQuery {
   {
     String sql = _query.getSQL();
 
+    int row = 0;
+
     if (maxResults > 0) {
       JdbcMetaData metaData = _aConn.getAmberManager().getMetaData();
 
@@ -390,7 +413,7 @@ public class UserQuery implements AmberQuery {
       // jps/1431
       if (metaData.isLimitOffset()) {
 	sql = metaData.limit(sql, firstResults, maxResults);
-	_rs.setRow(firstResults);
+	row = firstResults;
       }
       else
 	sql = metaData.limit(sql, 0, firstResults + maxResults);
@@ -409,10 +432,8 @@ public class UserQuery implements AmberQuery {
     ResultSet rs = pstmt.executeQuery();
 
     // jpa/1431
-    /*
-    for (int i = 0; i < firstResults && rs.next(); i++) {
+    for (int i = row; i < firstResults && rs.next(); i++) {
     }
-    */
 
     return rs;
   }

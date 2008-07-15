@@ -75,6 +75,12 @@ current value.</p>
 
 </s1>
 
+<s1 title="config">
+
+<p>The configure can now use ${getenv['foo']} to get environment variables.</p>
+
+</s1>
+
 <s1 title="deployment">
 
 <p>Add command-line deployment</p>

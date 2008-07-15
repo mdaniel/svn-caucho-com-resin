@@ -77,6 +77,8 @@ public class MBean {
       if (_info == null)
         _info = _server.getMBeanInfo(_name);
 
+      System.out.println("SERVER: " + _server);
+
       return _info;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);

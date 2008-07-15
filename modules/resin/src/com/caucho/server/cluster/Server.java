@@ -945,8 +945,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Creates the ping.
    */
-  @Deprecated
-  public ResourceAdapter createPing()
+  public Object createPing()
     throws ConfigException
   {
     return createManagement().createPing();
@@ -955,8 +954,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Adds the ping.
    */
-  @Deprecated
-  public void addPing(ResourceAdapter ping)
+  public void addPing(Object ping)
     throws ConfigException
   {
     createManagement().addPing(ping);

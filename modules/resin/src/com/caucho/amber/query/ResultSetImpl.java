@@ -249,6 +249,7 @@ public class ResultSetImpl implements ResultSet {
   public void setRow(int row)
   {
     _row = row;
+    System.out.println("SET: " + row);
   }
 
   /**
@@ -402,39 +403,46 @@ public class ResultSetImpl implements ResultSet {
       return false;
 
     int row = _row++;
+    System.out.println("ROW: " + row + " " + _cacheChunk);
     ResultSetCacheChunk cacheChunk = _cacheChunk;
 
     if (cacheChunk == null)
       return _rs.next();
     else if (row < cacheChunk.getRowCount()) {
+      System.out.println("ROWC: " + row);
       return true;
     }
     else {
       ResultSetCacheChunk next = cacheChunk.getNext();
-
+      System.out.println("NEXT: " + next);
       if (next != null) {
-        _cacheChunk = next;
-        return true;
+	_cacheChunk = next;
+	return true;
       }
 
       _isCache = false;
       _cacheChunk = null;
 
+      // jpa/1433
+      /*
       if (cacheChunk.isLast()) {
-        _maxResults = 0;
-        return false;
+	_maxResults = 0;
+	return false;
       }
-      else if (_rs != null)
-        return true;
+      else
+      */
+      if (_rs != null) {
+	return _rs.next();
+      }
       else if (_userQuery != null) {
-        _rs = _userQuery.executeQuery(row, -1);
+	_rs = _userQuery.executeQuery(row, -1);
 
-        _cacheMetaData = _rs.getMetaData();
+	_cacheMetaData = _rs.getMetaData();
 
-        return _rs.next();
+	return _rs.next();
       }
       else {
-        return false;
+	return false;
       }
     }
   }

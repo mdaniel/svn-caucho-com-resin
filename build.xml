@@ -369,6 +369,14 @@
     </antcall>
   </target>
 
+  <target name="osgi" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="osgi"/>
+      <param name="module.dist" value="${lib}"/>
+      <param name="module.jar" value="osgi-14.jar"/>
+    </antcall>
+  </target>
+
   <target name="webbeans" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="webbeans"/>
