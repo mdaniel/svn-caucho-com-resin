@@ -63,8 +63,14 @@ public class GitCommitJar {
 	if (entry.isDirectory())
 	  continue;
 	
-	if (length < 0)
-	  throw new RuntimeException("can't handle dynamic length");
+	if (length < 0) {
+	  length = 0;
+	  int ch;
+
+	  while ((ch = zin.read()) >= 0) {
+	    length++;
+	  }
+	}
 
 	_commit.addFile(path, 0664, zin, length);
       }
