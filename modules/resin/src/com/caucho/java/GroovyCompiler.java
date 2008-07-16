@@ -75,7 +75,7 @@ public class GroovyCompiler extends AbstractJavaCompiler {
 
     if (_groovyCompilerClass == null) {
       try {
-	_groovyCompilerClass = Class.forName(GROOVY_COMPILER, false, loader);
+	_groovyCompilerClass = Class.forName(GROOVY_COMPILER);
 	_setClasspath =
 	  _groovyCompilerClass.getMethod("setClasspath",
 					 new Class[] { String.class });
@@ -192,21 +192,5 @@ public class GroovyCompiler extends AbstractJavaCompiler {
       return ".";
     else
       return nativePath;
-  }
-
-  public static class CompilerThread implements Runnable {
-    private volatile boolean _isDone;
-    
-    public void run()
-    {
-      try {
-      } finally {
-	_isDone = true;
-
-	synchronized (this) {
-	  notifyAll();
-	}
-      }
-    }
   }
 }
