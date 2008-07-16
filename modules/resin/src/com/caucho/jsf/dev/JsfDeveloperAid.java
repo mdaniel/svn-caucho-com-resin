@@ -54,7 +54,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class JsfDeveloperAid
+public class
+  JsfDeveloperAid
   implements PhaseListener
 {
 
@@ -131,12 +132,12 @@ public class JsfDeveloperAid
 
   public void beforePhase(PhaseEvent event)
   {
-    if (! PhaseId.RENDER_RESPONSE.equals(event.getPhaseId()))
+    if (!PhaseId.RENDER_RESPONSE.equals(event.getPhaseId()))
       return;
 
     UIViewRoot viewRoot = FacesContext.getCurrentInstance().getViewRoot();
 
-    DeveloperAidLink link = new DeveloperAidLink();
+    JsfDeveloperAidLink link = new JsfDeveloperAidLink();
 
     link.setStyle(_developerAidLinkStyle);
 
@@ -175,8 +176,12 @@ public class JsfDeveloperAid
 
       result._children = new ArrayList<Component>(children.size());
 
-      for (int i = 0; i < childCount; i++)
-        result._children.add(reflect(facesContext, children.get(i)));
+      for (int i = 0; i < childCount; i++) {
+        UIComponent child = children.get(i);
+
+        if (!(child instanceof JsfDeveloperAidLink))
+          result._children.add(reflect(facesContext, children.get(i)));
+      }
     }
 
     final int facetCount = uiComponent.getFacetCount();
@@ -188,8 +193,11 @@ public class JsfDeveloperAid
 
       Set<String> names = facets.keySet();
 
-      for (String name : names)
-        result._facets.put(name, reflect(facesContext, uiComponent));
+      for (String name : names) {
+        UIComponent child = facets.get(name);
+
+        result._facets.put(name, reflect(facesContext, child));
+      }
     }
 
     if (uiComponent instanceof ValueHolder) {
@@ -211,7 +219,7 @@ public class JsfDeveloperAid
 
         StringBuilder sb = new StringBuilder('[');
 
-        Object []values = (Object[]) submittedValue;
+        Object[] values = (Object[]) submittedValue;
 
         for (int i = 0; i < values.length; i++) {
           Object value = values[i];
@@ -284,7 +292,7 @@ public class JsfDeveloperAid
   public static class JsfRequestSnapshot
     implements Serializable
   {
-    private ViewRoot []_phases;
+    private ViewRoot[] _phases;
     private Map<String, String> _parameterMap;
     private Map<String, String> _headerMap;
 
@@ -294,7 +302,7 @@ public class JsfDeveloperAid
         _phases = new ViewRoot[]{viewRoot};
       }
       else {
-        ViewRoot []newPhases = new ViewRoot[_phases.length + 1];
+        ViewRoot[] newPhases = new ViewRoot[_phases.length + 1];
 
         System.arraycopy(_phases, 0, newPhases, 0, _phases.length);
 
@@ -304,12 +312,12 @@ public class JsfDeveloperAid
       }
     }
 
-    public void setPhases(ViewRoot []phases)
+    public void setPhases(ViewRoot[] phases)
     {
       _phases = phases;
     }
 
-    public ViewRoot []getPhases()
+    public ViewRoot[] getPhases()
     {
       return _phases;
     }
