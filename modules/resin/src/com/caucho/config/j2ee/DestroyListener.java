@@ -59,6 +59,13 @@ public class DestroyListener implements EnvironmentListener
   /**
    * Handles the case where the environment is starting (after init).
    */
+  public void environmentConfigure(EnvironmentClassLoader loader)
+  {
+  }
+  
+  /**
+   * Handles the case where the environment is starting (after init).
+   */
   public void environmentBind(EnvironmentClassLoader loader)
   {
   }

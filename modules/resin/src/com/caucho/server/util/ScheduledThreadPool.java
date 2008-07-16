@@ -414,6 +414,13 @@ public class ScheduledThreadPool
   /**
    * Called when the environment config phase
    */
+  public void environmentConfigure(EnvironmentClassLoader loader)
+  {
+  }
+
+  /**
+   * Called when the environment bind phase
+   */
   public void environmentBind(EnvironmentClassLoader loader)
   {
   }

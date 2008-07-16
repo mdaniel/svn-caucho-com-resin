@@ -442,6 +442,13 @@ abstract public class
   /**
    * Handles config phase.
    */
+  public void environmentConfigure(EnvironmentClassLoader loader)
+  {
+  }
+
+  /**
+   * Handles bind phase.
+   */
   public void environmentBind(EnvironmentClassLoader loader)
   {
   }

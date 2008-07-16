@@ -607,6 +607,25 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     for (int i = 0; listeners != null && i < size; i++) {
       EnvironmentListener listener = listeners.get(i);
 
+      listener.environmentConfigure(this);
+    }
+    
+    // _isConfigComplete = true;
+  }
+
+  /**
+   * Starts the config phase of the environment.
+   */
+  private void bind()
+  {
+    config();
+      
+    ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
+
+    int size = listeners.size();
+    for (int i = 0; listeners != null && i < size; i++) {
+      EnvironmentListener listener = listeners.get(i);
+
       listener.environmentBind(this);
     }
     
@@ -624,7 +643,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
     sendAddLoaderEvent();
     
-    config();
+    bind();
       
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
 

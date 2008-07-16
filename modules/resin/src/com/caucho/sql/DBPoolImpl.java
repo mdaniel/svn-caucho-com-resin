@@ -1046,9 +1046,17 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   /**
    * Callback when the environment configures.
    */
+  public void environmentConfigure(EnvironmentClassLoader loader)
+  {
+  }
+
+  /**
+   * Callback when the environment binds.
+   */
   public void environmentBind(EnvironmentClassLoader loader)
   {
   }
+  
   /**
    * Callback when the environment starts.
    */

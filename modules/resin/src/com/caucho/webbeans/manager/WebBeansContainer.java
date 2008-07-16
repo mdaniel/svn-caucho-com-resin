@@ -1044,6 +1044,14 @@ public class WebBeansContainer
   /**
    * Handles the case the environment config phase
    */
+  public void environmentConfigure(EnvironmentClassLoader loader)
+  {
+    update();
+  }
+
+  /**
+   * Handles the case the environment config phase
+   */
   public void environmentBind(EnvironmentClassLoader loader)
   {
     update();

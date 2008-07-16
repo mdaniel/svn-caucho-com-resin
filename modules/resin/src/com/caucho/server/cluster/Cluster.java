@@ -1073,6 +1073,13 @@ public class Cluster
   }
 
   /**
+   * Handles the case where the environment is configured (after init).
+   */
+  public void environmentConfigure(EnvironmentClassLoader loader)
+  {
+  }
+
+  /**
    * Handles the case where the environment is starting (after init).
    */
   public void environmentBind(EnvironmentClassLoader loader)

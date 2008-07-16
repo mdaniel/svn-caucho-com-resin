@@ -443,6 +443,13 @@ public class ConnectorConfig implements EnvironmentListener {
   /**
    * Handles the configure phase.
    */
+  public void environmentConfigure(EnvironmentClassLoader loader)
+  {
+  }
+  
+  /**
+   * Handles the bind phase.
+   */
   public void environmentBind(EnvironmentClassLoader loader)
   {
   }

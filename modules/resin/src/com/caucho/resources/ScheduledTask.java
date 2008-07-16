@@ -251,6 +251,11 @@ public class ScheduledTask extends BeanConfig
     }
   }
 
+  public void environmentConfigure(EnvironmentClassLoader loader)
+    throws ConfigException
+  {
+  }
+
   public void environmentBind(EnvironmentClassLoader loader)
     throws ConfigException
   {

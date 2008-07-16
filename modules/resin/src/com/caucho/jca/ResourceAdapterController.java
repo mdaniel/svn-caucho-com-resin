@@ -41,7 +41,8 @@ import javax.webbeans.*;
 /**
  * Controller for a resource-adapter
  */
-public class ResourceAdapterController implements EnvironmentListener {
+public class ResourceAdapterController implements EnvironmentListener
+{
   private static final L10N L = new L10N(ResourceAdapterController.class);
   private static final Logger log
     = Logger.getLogger(ResourceAdapterController.class.getName());
@@ -109,6 +110,14 @@ public class ResourceAdapterController implements EnvironmentListener {
   
   /**
    * Handles the environment config phase.
+   */
+  public void environmentConfigure(EnvironmentClassLoader loader)
+    throws StartLifecycleException
+  {
+  }
+  
+  /**
+   * Handles the environment bind phase.
    */
   public void environmentBind(EnvironmentClassLoader loader)
     throws StartLifecycleException

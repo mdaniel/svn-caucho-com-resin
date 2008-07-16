@@ -1175,6 +1175,13 @@ public class WebAppContainer
   /**
    * Handles the environment config phase
    */
+  public void environmentConfigure(EnvironmentClassLoader loader)
+  {
+  }
+
+  /**
+   * Handles the environment bind phase
+   */
   public void environmentBind(EnvironmentClassLoader loader)
   {
   }

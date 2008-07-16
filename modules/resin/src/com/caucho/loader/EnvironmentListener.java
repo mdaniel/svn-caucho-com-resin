@@ -37,6 +37,13 @@ import com.caucho.lifecycle.StartLifecycleException;
  */
 public interface EnvironmentListener {
   /**
+   * Handles the case where the environment is configuring and
+   * registering beans
+   */
+  public void environmentConfigure(EnvironmentClassLoader loader)
+    throws ConfigException;
+  
+  /**
    * Handles the case where the environment is binding injection targets
    */
   public void environmentBind(EnvironmentClassLoader loader)

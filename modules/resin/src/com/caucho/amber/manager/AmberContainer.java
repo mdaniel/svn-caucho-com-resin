@@ -1094,9 +1094,17 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   /**
    * Handles the environment config phase
    */
-  public void environmentBind(EnvironmentClassLoader loader)
+  public void environmentConfigure(EnvironmentClassLoader loader)
   {
     configurePersistenceRoots();
+  }
+  
+  /**
+   * Handles the environment config phase
+   */
+  public void environmentBind(EnvironmentClassLoader loader)
+  {
+    // configurePersistenceRoots();
   }
   
  /**
