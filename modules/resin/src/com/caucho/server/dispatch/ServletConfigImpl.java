@@ -482,6 +482,10 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
 
     if (_servletName != null) {
     }
+    else if (getServletNameDefault() != null) {
+      // server/13f4
+      _servletName = getServletNameDefault();
+    }
     else if (_protocolConfig != null) {
       String protocolName = _protocolConfig.getUri();
       

@@ -142,12 +142,8 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
 
   void writeThrough(byte []buffer, int offset, int length)
   {
-    try {
-      write(buffer, offset, length);
-      flush();
-    } catch (IOException e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
+    writeBuffer(buffer, offset, length);
+    flush();
   }
 
   private AccessLogBuffer write(AccessLogBuffer logBuffer)

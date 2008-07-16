@@ -2103,13 +2103,14 @@ public class WebApp extends ServletContextImpl
           chain = _servletMapper.mapServlet(invocation);
 
           if (_requestRewriteDispatch != null) {
-            chain = _requestRewriteDispatch.map(invocation.getContextURI(),
-						invocation.getQueryString(),
-						chain);
+	    FilterChain newChain
+	      = _requestRewriteDispatch.map(invocation.getContextURI(),
+					    invocation.getQueryString(),
+					    chain);
           }
 
-          // server/13s[o-r]
-          _filterMapper.buildDispatchChain(invocation, chain);
+	  // server/13s[o-r]
+	  _filterMapper.buildDispatchChain(invocation, chain);
 
           chain = invocation.getFilterChain();
 

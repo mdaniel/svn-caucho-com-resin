@@ -490,6 +490,17 @@ abstract public class StoreManager
     throws Exception;
   
   /**
+   * Updates the object's objectAccess time in the persistent objectStore.
+   *
+   * @param uniqueId the identifier of the object.
+   */
+  public void accessImpl(ClusterObject obj)
+    throws Exception
+  {
+    accessImpl(obj.getObjectId());
+  }
+  
+  /**
    * Sets the timef for the expires interval.
    *
    * @param uniqueId the identifier of the object.

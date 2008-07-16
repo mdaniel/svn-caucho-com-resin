@@ -343,7 +343,7 @@ public class ClusterObject {
 
     if (getAccessWindow() <= now - _accessTime) {
       try {
-	_storeManager.accessImpl(getObjectId());
+	_storeManager.accessImpl(this);
       } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
@@ -549,7 +549,7 @@ public class ClusterObject {
 
     if (getAccessWindow() <= now - _accessTime) {
       try {
-	_storeManager.accessImpl(getObjectId());
+	_storeManager.accessImpl(this);
       } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
