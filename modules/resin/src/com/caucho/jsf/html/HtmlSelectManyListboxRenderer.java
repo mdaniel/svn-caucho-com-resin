@@ -159,10 +159,12 @@ class HtmlSelectManyListboxRenderer extends SelectRenderer
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
-    
+
+      Integer iValue;
+
       accesskey = (String) attrMap.get("accesskey");
       dir = (String) attrMap.get("dir");
-      disabled = (Boolean) attrMap.get("disabled");
+      disabled = Boolean.TRUE.equals(attrMap.get("disabled"));
       disabledClass = (String) attrMap.get("disabledClass");
       enabledClass = (String) attrMap.get("enabledClass");
       lang = (String) attrMap.get("lang");
@@ -185,8 +187,11 @@ class HtmlSelectManyListboxRenderer extends SelectRenderer
       
       onselect = (String) attrMap.get("onselect");
 
-      readonly = (Boolean) attrMap.get("readonly");
-      size = (Integer) attrMap.get("size");
+      readonly = Boolean.TRUE.equals(attrMap.get("readonly"));
+
+      iValue = (Integer) attrMap.get("size");
+      size = iValue != null ? iValue.intValue() : 0;
+
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
       tabindex = (String) attrMap.get("tabindex");

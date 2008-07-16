@@ -157,14 +157,17 @@ class HtmlInputSecretRenderer extends Renderer
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
-    
+      Integer iValue;
+
       accesskey = (String) attrMap.get("accesskey");
       alt = (String) attrMap.get("alt");
       autocomplete = (String) attrMap.get("autocomplete");
       dir = (String) attrMap.get("dir");
-      disabled = (Boolean) attrMap.get("disabled");
+      disabled = Boolean.TRUE.equals(attrMap.get("disabled"));
       lang = (String) attrMap.get("lang");
-      maxlength = (Integer) attrMap.get("maxlength");
+
+      iValue = (Integer) attrMap.get("maxlength");
+      maxlength = iValue != null ? iValue.intValue() : 0; 
       
       onblur = (String) attrMap.get("onblur");
       onchange = (String) attrMap.get("onchange");
@@ -184,9 +187,12 @@ class HtmlInputSecretRenderer extends Renderer
       
       onselect = (String) attrMap.get("onselect");
       
-      readonly = (Boolean) attrMap.get("readonly");
-      redisplay = (Boolean) attrMap.get("redisplay");
-      size = (Integer) attrMap.get("size");
+      readonly = Boolean.TRUE.equals(attrMap.get("readonly"));
+      redisplay = Boolean.TRUE.equals(attrMap.get("redisplay"));
+
+      iValue = (Integer) attrMap.get("size");
+      size = iValue != null ? iValue.intValue() : 0; 
+
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
       tabindex = (String) attrMap.get("tabindex");

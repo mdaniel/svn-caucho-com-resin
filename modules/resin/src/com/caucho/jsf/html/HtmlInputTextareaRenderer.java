@@ -153,11 +153,16 @@ class HtmlInputTextareaRenderer extends Renderer
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
+
+      Integer iValue;
     
       accesskey = (String) attrMap.get("accesskey");
-      cols = (Integer) attrMap.get("cols");
+
+      iValue = (Integer) attrMap.get("cols");
+      cols = iValue != null ? iValue.intValue() : 0;
+
       dir = (String) attrMap.get("dir");
-      disabled = (Boolean) attrMap.get("disabled");
+      disabled = Boolean.TRUE.equals(attrMap.get("disabled"));
       lang = (String) attrMap.get("lang");
       
       onblur = (String) attrMap.get("onblur");
@@ -178,8 +183,11 @@ class HtmlInputTextareaRenderer extends Renderer
       
       onselect = (String) attrMap.get("onselect");
       
-      readonly = (Boolean) attrMap.get("readonly");
-      rows = (Integer) attrMap.get("rows");
+      readonly = Boolean.TRUE.equals(attrMap.get("readonly"));
+
+      iValue = (Integer) attrMap.get("rows");
+      rows = iValue != null ? iValue.intValue() : 0;
+
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
       tabindex = (String) attrMap.get("tabindex");

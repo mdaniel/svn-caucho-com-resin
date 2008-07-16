@@ -174,7 +174,7 @@ class HtmlCommandLinkRenderer extends BaseRenderer
       charset = (String) attrMap.get("charset");
       coords = (String) attrMap.get("coords");
       dir = (String) attrMap.get("dir");
-      disabled = (Boolean) attrMap.get("disabled");
+      disabled = Boolean.TRUE.equals(attrMap.get("disabled"));
       hreflang = (String) attrMap.get("hreflang");
       lang = (String) attrMap.get("lang");
 

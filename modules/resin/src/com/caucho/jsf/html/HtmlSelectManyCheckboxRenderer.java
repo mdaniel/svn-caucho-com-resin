@@ -108,8 +108,11 @@ class HtmlSelectManyCheckboxRenderer
     else {
       Map<String, Object> attrMap = component.getAttributes();
 
-      border = (Integer) attrMap.get("border");
-      disabled = (Boolean) attrMap.get("disabled");
+      Integer iValue = (Integer) attrMap.get("border");
+
+      border = iValue != null ? iValue : 0;
+
+      disabled = Boolean.TRUE.equals(attrMap.get("disabled"));
       layout = (String) attrMap.get("layout");
 
       style = (String) attrMap.get("style");
@@ -226,10 +229,15 @@ class HtmlSelectManyCheckboxRenderer
     else {
       Map<String, Object> attrMap = component.getAttributes();
 
+      Integer iValue;
+
       accesskey = (String) attrMap.get("accesskey");
-      border = (Integer) attrMap.get("border");
+
+      iValue = (Integer) attrMap.get("border");
+      border = iValue != null ? iValue.intValue() : 0;
+
       dir = (String) attrMap.get("dir");
-      disabled = (Boolean) attrMap.get("disabled");
+      disabled = Boolean.TRUE.equals(attrMap.get("disabled"));
       disabledClass = (String) attrMap.get("disabledClass");
       enabledClass = (String) attrMap.get("enabledClass");
       lang = (String) attrMap.get("lang");
@@ -253,7 +261,7 @@ class HtmlSelectManyCheckboxRenderer
 
       onselect = (String) attrMap.get("onselect");
 
-      readonly = (Boolean) attrMap.get("readonly");
+      readonly = Boolean.TRUE.equals(attrMap.get("readonly"));
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
       tabindex = (String) attrMap.get("tabindex");

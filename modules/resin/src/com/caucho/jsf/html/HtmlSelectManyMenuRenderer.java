@@ -161,7 +161,7 @@ class HtmlSelectManyMenuRenderer extends SelectRenderer
     
       accesskey = (String) attrMap.get("accesskey");
       dir = (String) attrMap.get("dir");
-      disabled = (Boolean) attrMap.get("disabled");
+      disabled = Boolean.TRUE.equals(attrMap.get("disabled"));
       disabledClass = (String) attrMap.get("disabledClass");
       enabledClass = (String) attrMap.get("enabledClass");
       lang = (String) attrMap.get("lang");
@@ -184,7 +184,7 @@ class HtmlSelectManyMenuRenderer extends SelectRenderer
       
       onselect = (String) attrMap.get("onselect");
 
-      readonly = (Boolean) attrMap.get("readonly");
+      readonly = Boolean.TRUE.equals(attrMap.get("readonly"));
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
       tabindex = (String) attrMap.get("tabindex");

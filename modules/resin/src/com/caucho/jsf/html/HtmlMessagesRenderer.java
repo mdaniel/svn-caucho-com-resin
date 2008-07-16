@@ -61,13 +61,9 @@ class HtmlMessagesRenderer extends Renderer
   public void encodeBegin(FacesContext context, UIComponent component)
     throws IOException
   {
-    UIMessages uiMessage = (UIMessages) component;
-
     Iterator<FacesMessage> iter = context.getMessages();
 
     ResponseWriter out = context.getResponseWriter();
-
-    String id = component.getId();
 
     String dir;
     String lang;
@@ -118,8 +114,8 @@ class HtmlMessagesRenderer extends Renderer
     else {
       Map<String,Object> attrMap = component.getAttributes();
 
-      isShowSummary = (Boolean) attrMap.get("showSummary");
-      isShowDetail = (Boolean) attrMap.get("showDetail");
+      isShowSummary = Boolean.TRUE.equals(attrMap.get("showSummary"));
+      isShowDetail = Boolean.TRUE.equals(attrMap.get("showDetail"));
 
       dir = (String) attrMap.get("dir");
       
@@ -137,7 +133,7 @@ class HtmlMessagesRenderer extends Renderer
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
       title = (String) attrMap.get("title");
-      tooltip = (Boolean) attrMap.get("tooltip");
+      tooltip = Boolean.TRUE.equals(attrMap.get("tooltip"));
     }
 
     boolean isFirst = true;
