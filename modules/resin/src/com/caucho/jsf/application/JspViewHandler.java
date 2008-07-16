@@ -182,8 +182,9 @@ public class JspViewHandler extends ViewHandler
 
       return null;
     }
-    
-    UIViewRoot viewRoot = new UIViewRoot();
+
+    UIViewRoot viewRoot = (UIViewRoot) context.getApplication()
+      .createComponent(UIViewRoot.COMPONENT_TYPE);
 
     viewRoot.setViewId(viewId);
 
