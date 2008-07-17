@@ -1959,7 +1959,7 @@ public class PageContextImpl extends PageContext
     public Object getContext(Class key)
     {
       if (key == JspContext.class)
-	return PageContextImpl.class;
+	return PageContextImpl.this;
       else
 	return super.getContext(key);
     }
