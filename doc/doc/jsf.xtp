@@ -214,7 +214,7 @@ public class FooBean {
       </p>
       <p>
         Alone with the state, the Aid displays information for all request headers and
-        parameters.
+        parameters, and, attributes set on request, session and application.
       </p>
     </s1>
     <s1>
@@ -264,7 +264,8 @@ public class FooBean {
     <s2 title="Aid's View States">
      <p>
        The aid captures state of the <code>UIViewRoot</code> at the end of each
-       phase and offers it in a tabbed view.
+       phase and offers it in a tabbed view. Alone with it, the aid captures attributes 
+       set on request, session and application.
      </p>
      <figure src="jsf-dev-aid-view.png"/>
     </s2>

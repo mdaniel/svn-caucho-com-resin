@@ -45,12 +45,9 @@ import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.Field;
+import java.lang.reflect.Array;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -77,9 +74,11 @@ public class
 
   public void afterPhase(PhaseEvent event)
   {
-    FacesContext context = event.getFacesContext();
+    final FacesContext context = event.getFacesContext();
 
-    Map sessionMap = context.getExternalContext().getSessionMap();
+    final ExternalContext exContext = context.getExternalContext();
+
+    final Map<String, Object> sessionMap = exContext.getSessionMap();
 
     Map<String, JsfRequestSnapshot> aidMap
       = (Map<String, JsfRequestSnapshot>) sessionMap.get(
@@ -92,7 +91,7 @@ public class
     }
 
     try {
-      UIViewRoot uiViewRoot = context.getViewRoot();
+      final UIViewRoot uiViewRoot = context.getViewRoot();
 
       if (uiViewRoot != null) {
         final String viewId = uiViewRoot.getViewId();
@@ -101,18 +100,67 @@ public class
         final ViewRoot viewRoot = (ViewRoot) reflect(context, uiViewRoot);
         viewRoot.setPhase(phaseId);
 
+        //request attributes
+        Map<String, Object> requestMap = exContext.getRequestMap();
+        Map<String, Bean> requestSnapshot = new HashMap<String, Bean>();
+
+        for (String key : requestMap.keySet()) {
+          if (key.startsWith("caucho.") ||
+              key.startsWith("com.caucho.") ||
+              key.startsWith("javax."))
+            continue;
+
+          Bean bean = reflect(requestMap.get(key));
+
+          requestSnapshot.put(key, bean);
+        }
+
+        viewRoot.setRequestMap(requestSnapshot);
+        
+
+        //session attributes
+        Map<String, Bean> sessionSnapshot = new HashMap<String, Bean>();
+
+        for (String key : sessionMap.keySet()) {
+          if (key.startsWith("caucho.") ||
+              key.startsWith("com.caucho.") ||
+              key.startsWith("javax."))
+            continue;
+
+          Bean bean = reflect(sessionMap.get(key));
+
+          sessionSnapshot.put(key, bean);
+        }
+
+        viewRoot.setSessionMap(sessionSnapshot);
+
+        //application attributes
+        Map<String, Object> applicationMap = exContext.getApplicationMap();
+        Map<String, Bean> applicationSnapshot = new HashMap<String, Bean>();
+
+        for (String key : applicationMap.keySet()) {
+          if (key.startsWith("caucho.") ||
+              key.startsWith("com.caucho.") ||
+              key.startsWith("javax."))
+            continue;
+
+          Bean bean = reflect(applicationMap.get(key));
+
+          applicationSnapshot.put(key, bean);
+        }
+
+        viewRoot.setApplicationMap(applicationSnapshot);
+
         JsfRequestSnapshot snapshot;
 
         if (PhaseId.RESTORE_VIEW.equals(event.getPhaseId())) {
           snapshot = new JsfRequestSnapshot();
 
-          snapshot.addViewRoot(viewRoot);
-
-          final ExternalContext exContext = context.getExternalContext();
-
+         //headers
           Map<String, String> map = exContext.getRequestHeaderMap();
           snapshot.setHeaderMap(new HashMap<String, String>(map));
 
+          //parameters
           map = exContext.getRequestParameterMap();
           snapshot.setParameterMap(new HashMap<String, String>(map));
 
@@ -120,13 +168,16 @@ public class
         }
         else {
           snapshot = aidMap.get(viewId);
-
-          snapshot.addViewRoot(viewRoot);
         }
+
+        snapshot.addViewRoot(viewRoot);
       }
     }
     catch (IllegalStateException e) {
       log.log(Level.FINER, e.getMessage(), e);
+    }
+    catch (Throwable t) {
+      log.log(Level.FINER, t.getMessage(), t);
     }
   }
 
@@ -136,6 +187,9 @@ public class
       return;
 
     UIViewRoot viewRoot = FacesContext.getCurrentInstance().getViewRoot();
+
+    if (viewRoot == null)
+      return;
 
     JsfDeveloperAidLink link = new JsfDeveloperAidLink();
 
@@ -203,23 +257,47 @@ public class
     if (uiComponent instanceof ValueHolder) {
       result._isValueHolder = true;
 
-      Object value = ((ValueHolder) uiComponent).getValue();
-      result._value = (value == null ? null : value.toString());
+      Object value;
 
-      Object localValue = ((ValueHolder) uiComponent).getLocalValue();
-      result._localValue = (localValue == null ? null : localValue.toString());
+      try {
+        value = ((ValueHolder) uiComponent).getValue();
+      }
+      catch (Throwable t) {
+        value = "Failed due to: " + t.getMessage();
+      }
+
+      result._value = String.valueOf(value);
+
+      Object localValue;
+
+      try {
+        localValue = ((ValueHolder) uiComponent).getLocalValue();
+      }
+      catch (Throwable t) {
+        localValue = "Failed due to: " + t.getMessage();
+      }
+
+      result._localValue = String.valueOf(localValue);
     }
 
     if (uiComponent instanceof EditableValueHolder) {
       result._isEditableValueHolder = true;
 
-      Object submittedValue = ((EditableValueHolder) uiComponent).getValue();
+      Object submittedValue;
+
+      try {
+        submittedValue
+          = ((EditableValueHolder) uiComponent).getSubmittedValue();
+      }
+      catch (Throwable t) {
+        submittedValue = "Failed due to: " + t.getMessage();
+      }
 
       if (submittedValue instanceof Object[]) {
 
         StringBuilder sb = new StringBuilder('[');
 
-        Object[] values = (Object[]) submittedValue;
+        Object []values = (Object[]) submittedValue;
 
         for (int i = 0; i < values.length; i++) {
           Object value = values[i];
@@ -235,9 +313,7 @@ public class
         result._submittedValue = sb.toString();
       }
       else {
-        result._submittedValue = (submittedValue == null
-                                  ? null
-                                  : submittedValue.toString());
+        result._submittedValue = String.valueOf(submittedValue);
       }
     }
 
@@ -289,10 +365,64 @@ public class
     return result;
   }
 
+  public Bean reflect(Object obj)
+  {
+    if (obj == null)
+      return null;
+
+    final Bean result;
+
+    if (obj instanceof String
+        || obj instanceof Boolean
+        || obj instanceof Character
+        || obj instanceof Number
+        || obj instanceof Date
+      ) {
+      result = new Bean();
+
+      result.setClassName(obj.getClass().getSimpleName());
+      result.setToString(obj.toString());
+      result.setSimple(true);
+    } else if (obj instanceof Object[]) {
+      result = new Bean();
+
+      result.setArray(true);
+      result.setClassName(obj.getClass().getComponentType().getName());
+      result.setLength(Array.getLength(obj));
+    }
+    else {
+      result = new Bean();
+
+      result.setClassName(obj.getClass().getName());
+      result.setToString(obj.toString());
+
+      Field []fields = obj.getClass().getDeclaredFields();
+
+      Map<String, String> attributes = new HashMap<String, String>();
+
+      for (Field field : fields) {
+        try {
+          field.setAccessible(true);
+
+          Object value = field.get(obj);
+
+          attributes.put(field.getName(), String.valueOf(value));
+        }
+        catch (IllegalAccessException e) {
+        }
+      }
+
+      result.setAttributes(attributes);
+    }
+
+    return result;
+  }
+
+
   public static class JsfRequestSnapshot
     implements Serializable
   {
-    private ViewRoot[] _phases;
+    private ViewRoot []_phases;
     private Map<String, String> _parameterMap;
     private Map<String, String> _headerMap;
 
@@ -302,7 +432,7 @@ public class
         _phases = new ViewRoot[]{viewRoot};
       }
       else {
-        ViewRoot[] newPhases = new ViewRoot[_phases.length + 1];
+        ViewRoot []newPhases = new ViewRoot[_phases.length + 1];
 
         System.arraycopy(_phases, 0, newPhases, 0, _phases.length);
 
@@ -312,7 +442,7 @@ public class
       }
     }
 
-    public void setPhases(ViewRoot[] phases)
+    public void setPhases(ViewRoot []phases)
     {
       _phases = phases;
     }
@@ -341,6 +471,78 @@ public class
     {
       _headerMap = headerMap;
     }
+
+  }
+
+  public static class Bean
+    implements Serializable
+  {
+    private Map<String, String> _attributes;
+    private String _className;
+    private String _toString;
+    private boolean _isArray;
+    private int _length;
+    private boolean _simple;
+
+    public String getToString()
+    {
+      return _toString;
+    }
+
+    public void setToString(String toString)
+    {
+      _toString = toString;
+    }
+
+    public String getClassName()
+    {
+      return _className;
+    }
+
+    public void setClassName(String className)
+    {
+      _className = className;
+    }
+
+    public Map<String, String> getAttributes()
+    {
+      return _attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes)
+    {
+      _attributes = attributes;
+    }
+
+    public boolean isArray()
+    {
+      return _isArray;
+    }
+
+    public void setArray(boolean array)
+    {
+      _isArray = array;
+    }
+
+    public int getLength()
+    {
+      return _length;
+    }
+
+    public void setLength(int length)
+    {
+      _length = length;
+    }
+
+    public boolean isSimple()
+    {
+      return _simple;
+    }
+
+    public void setSimple(boolean simple)
+    {
+      _simple = simple;
+    }
   }
 
   public static class ViewRoot
@@ -349,6 +551,10 @@ public class
     private Locale _locale;
     private String _renderKitId;
     private String _phase;
+    private Map<String, Bean> _requestMap;
+    private Map<String, Bean> _sessionMap;
+    private Map<String, Bean> _applicationMap;
+
 
     public Locale getLocale()
     {
@@ -379,6 +585,37 @@ public class
     {
       _phase = phase;
     }
+
+    public Map<String, Bean> getRequestMap()
+    {
+      return _requestMap;
+    }
+
+    public void setRequestMap(Map<String, Bean> requestMap)
+    {
+      _requestMap = requestMap;
+    }
+
+    public Map<String, Bean> getSessionMap()
+    {
+      return _sessionMap;
+    }
+
+    public void setSessionMap(Map<String, Bean> sessionMap)
+    {
+      _sessionMap = sessionMap;
+    }
+
+    public Map<String, Bean> getApplicationMap()
+    {
+      return _applicationMap;
+    }
+
+    public void setApplicationMap(Map<String, Bean> applicationMap)
+    {
+      _applicationMap = applicationMap;
+    }
+
   }
 
   public static class Component

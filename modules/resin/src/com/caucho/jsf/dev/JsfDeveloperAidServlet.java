@@ -64,7 +64,8 @@ public class JsfDeveloperAidServlet
   private static final Logger log
     = Logger.getLogger(FacesServletImpl.class.getName());
 
-  private static final L10N L = new L10N(com.caucho.jsf.dev.JsfDeveloperAid.class);
+  private static final L10N L
+    = new L10N(com.caucho.jsf.dev.JsfDeveloperAid.class);
 
   private ServletContext _webApp;
 
@@ -240,9 +241,8 @@ public class JsfDeveloperAidServlet
     final Map<String, com.caucho.jsf.dev.JsfDeveloperAid.JsfRequestSnapshot> aidMap;
 
     if (session != null)
-      aidMap
-        = (Map<String, com.caucho.jsf.dev.JsfDeveloperAid.JsfRequestSnapshot>) session.getAttribute(
-        "caucho.jsf.developer.aid");
+      aidMap = (Map<String, JsfDeveloperAid.JsfRequestSnapshot>)
+        session.getAttribute("caucho.jsf.developer.aid");
     else
       aidMap = null;
 
@@ -324,17 +324,21 @@ public class JsfDeveloperAidServlet
         out.println("<style type=\"text/css\" media=\"all\">");
         out.println("#header ul {list-style: none;padding: 0;margin: 0;}");
         out.println(
-          "#header li {float: left;border: 1px solid;border-bottom-width: 0;margin: 0 0.5em 0 0;\t}");
+          "#header li {float: left;border: 1px solid;border-bottom-width: 0;margin: 0 0.5em 0 0; font-weight: bold}");
         out.println("#header a {display: block;padding: 0 1em;}");
         out.println(
-          "#header #selected {position: relative;top: 1px;background: white;}");
+          "#header #selected {position: relative;top: 1px;background: white; font-weight: normal}");
         out.println("#content {border: 1px solid;clear: both;}");
+        out.println("#view {padding: 10px, 10px, 10px, 10px}");
+        out.println("table {width: 100%}");
+        out.println("td {border: 1px dotted}");
+
         out.println("h1 {margin: 0;padding: 0 0 1em 0;}");
         out.println("</style>");
         out.println("</head>");
         //
         out.println("<body>");
-        out.println(" <div id=\"header\"");
+        out.println(" <div id=\"header\">");
         out.println("  <ul>");
 
         final String phaseId = req.getParameter("phaseId");
@@ -343,7 +347,8 @@ public class JsfDeveloperAidServlet
         if (valueExpression != null)
           valueExpression = URLDecoder.decode(valueExpression, "UTF-8");
 
-        com.caucho.jsf.dev.JsfDeveloperAid.JsfRequestSnapshot snapshot = aidMap.get(viewId);
+        com.caucho.jsf.dev.JsfDeveloperAid.JsfRequestSnapshot snapshot
+          = aidMap.get(viewId);
 
         out.print("   <li" + (phaseId == null ? " id=\"selected\"" : "") + ">");
         out.print("<a href=\"" +
@@ -359,7 +364,8 @@ public class JsfDeveloperAidServlet
 
         com.caucho.jsf.dev.JsfDeveloperAid.ViewRoot viewRoot = null;
 
-        com.caucho.jsf.dev.JsfDeveloperAid.ViewRoot []viewRoots = snapshot.getPhases();
+        com.caucho.jsf.dev.JsfDeveloperAid.ViewRoot []viewRoots
+          = snapshot.getPhases();
 
         for (com.caucho.jsf.dev.JsfDeveloperAid.ViewRoot root : viewRoots) {
           String phase = root.getPhase();
@@ -436,7 +442,7 @@ public class JsfDeveloperAidServlet
 
         }
         else if (phaseId == null) {
-          out.println("<table border=\"1\">");
+          out.println("<table>");
           out.println("<thead>");
           out.println(
             "<tr><td colspan=\"2\" align=\"center\"><strong>Snoop</strong></td></tr>");
@@ -446,6 +452,7 @@ public class JsfDeveloperAidServlet
 
           out.println("<tbody>");
 
+          //headers
           out.println(
             "<tr><td colspan=\"2\" align=\"center\"><em>Headers</em></td></tr>");
 
@@ -459,6 +466,7 @@ public class JsfDeveloperAidServlet
                         "</em></td></tr>");
           }
 
+          //parameters
           out.println(
             "<tr><td colspan=\"2\" align=\"center\"><em>Parameters</em></td></tr>");
 
@@ -471,13 +479,45 @@ public class JsfDeveloperAidServlet
                         value +
                         "</em></td></tr>");
           }
+
+
           out.println("</tbody>");
           out.println("</table>");
         }
-        else
+        else {
+          out.println(" <div id=\"view\">");
           printComponentTree(request, out, viewRoot, null, viewId, phaseId, 0);
+          out.println(" </div>");
+          //snoop
+          out.println(" <table>");
+          out.println(" <thead>");
+          out.println(
+            " <tr><td colspan=\"2\" align=\"center\"><strong>Snoop</strong></td></tr>");
+          out.println(
+            " <tr><td><strong>Name</strong></td><td><strong>Value</strong></td></tr>");
+          out.println(" </thead>");
+          out.println(" <tbody>");
 
+          //request
+          out.println(
+            " <tr><td colspan=\"2\" align=\"center\"><em>Request</em></td></tr>");
+          printBeanMap(out, viewRoot.getRequestMap());
+
+          //session
+          out.println(
+            " <tr><td colspan=\"2\" align=\"center\"><em>Session</em></td></tr>");
+          printBeanMap(out, viewRoot.getSessionMap());
+
+          //application
+          out.println(
+            " <tr><td colspan=\"2\" align=\"center\"><em>Application</em></td></tr>");
+          printBeanMap(out, viewRoot.getApplicationMap());
+
+          out.println(" </tbody>");
+          out.println(" </table>");
+        }
         out.println(" </div>");
+
         printControls(out, request, session);
         out.println(" </body>");
         out.println("</html>");
@@ -493,6 +533,63 @@ public class JsfDeveloperAidServlet
         context.release();
 
       FacesContext.setCurrentInstance(oldContext);
+    }
+  }
+
+  private void printBeanMap(PrintWriter out, Map<String, JsfDeveloperAid.Bean> map)
+  {
+    for (String key : map.keySet()) {
+      JsfDeveloperAid.Bean bean = map.get(key);
+
+      if (bean == null) {
+        out.println(" <tr><td><em>" +
+                    key +
+                    "</em></td><td><em>null</em></td></tr>");
+      }
+      else if (bean.isSimple()) {
+        out.println(" <tr><td><em>" +
+                    key +
+                    "</em></td><td><em>" +
+                    bean.getClassName() + '(' + bean.getToString() + ')' +
+                    "</em></td></tr>");
+      }
+      else if (bean.isArray()) {
+        out.println(" <tr><td><em>" +
+                    key +
+                    "</em></td><td><em>" +
+                    bean.getClassName() + '[' + bean.getLength() + ']' +
+                    "</em></td></tr>");
+
+      }
+      else {
+        out.print(" <tr><td><em>" +
+                  key +
+                  "</em></td><td><em>" +
+                  bean.getClassName() + '(' + bean.getToString() + ')');
+        out.print(": </em>");
+
+        Map<String, String> beanAttributes = bean.getAttributes();
+
+        if (beanAttributes != null) {
+          for (String attribute : beanAttributes.keySet()) {
+            out.print("<br/>&nbsp;&nbsp;&nbsp;<em>" +
+                      attribute +
+                      "</em>=");
+
+            String value = beanAttributes.get(attribute);
+
+            if (value == null) {
+              out.print("<em>null</em>");
+            }
+            else {
+              out.print("<em>");
+              printEscaped(out, value);
+              out.print("</em>");
+            }
+          }
+        }
+        out.println("</td></tr>");
+      }
     }
   }
 
@@ -574,6 +671,7 @@ public class JsfDeveloperAidServlet
           }
         }
       }
+
     }
   }
 
@@ -635,8 +733,10 @@ public class JsfDeveloperAidServlet
 
     out.println("><br/>");
 
-    List<com.caucho.jsf.dev.JsfDeveloperAid.Component> children = component.getChildren();
-    Map<String, com.caucho.jsf.dev.JsfDeveloperAid.Component> facets = component.getFacets();
+    List<com.caucho.jsf.dev.JsfDeveloperAid.Component> children
+      = component.getChildren();
+    Map<String, com.caucho.jsf.dev.JsfDeveloperAid.Component> facets = component
+      .getFacets();
 
     if (children != null)
       for (com.caucho.jsf.dev.JsfDeveloperAid.Component child : children)
@@ -688,50 +788,54 @@ public class JsfDeveloperAidServlet
                 value +
                 "</a>");
     }
-    else {
+    else
+      printEscaped(out, value);
 
-      char []valueChars = value.toCharArray();
+    out.print("\"");
+  }
 
-      boolean wasSpace = false;
+  public void printEscaped(PrintWriter out, String value)
+  {
+    char []valueChars = value.toCharArray();
 
-      for (char valueChar : valueChars) {
-        switch (valueChar) {
-        case ' ':
-          wasSpace = true;
+    boolean wasSpace = false;
 
-          break;
-        case '\n':
-          if (wasSpace)
-            out.print(' ');
+    for (char valueChar : valueChars) {
+      switch (valueChar) {
+      case ' ':
+        wasSpace = true;
 
-          wasSpace = false;
-          out.print('\n');
+        break;
+      case '\n':
+        if (wasSpace)
+          out.print(' ');
 
-          break;
-        case '\r':
-          if (wasSpace)
-            out.print(' ');
+        wasSpace = false;
+        out.print('\n');
 
-          wasSpace = false;
-          out.print('\r');
+        break;
+      case '\r':
+        if (wasSpace)
+          out.print(' ');
 
-          break;
-        case '<':
-          if (wasSpace)
-            out.print(' ');
-          wasSpace = false;
+        wasSpace = false;
+        out.print('\r');
 
-          out.print("&lt;");
-          break;
-        default:
-          if (wasSpace)
-            out.print(' ');
+        break;
+      case '<':
+        if (wasSpace)
+          out.print(' ');
+        wasSpace = false;
 
-          wasSpace = false;
-          out.write(valueChar);
-        }
+        out.print("&lt;");
+        break;
+      default:
+        if (wasSpace)
+          out.print(' ');
+
+        wasSpace = false;
+        out.write(valueChar);
       }
     }
-    out.print("\"");
   }
 }
