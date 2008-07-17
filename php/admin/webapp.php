@@ -38,7 +38,8 @@ if (! empty($server->Id))
 
 <?php
 
-display_header("status.php", $title, $server, true);
+display_header("webapp.php", $title, $server, true);
+
 function sort_host($a, $b)
 {
   return strcmp($a->URL, $b->URL);
@@ -234,7 +235,6 @@ echo "<a href='webapp.php?id=" . $object_name . "'>" . $context_path . "</a>";
   } // webapps
 } // hosts
 ?>
-}
 
 </table>
 <?php
