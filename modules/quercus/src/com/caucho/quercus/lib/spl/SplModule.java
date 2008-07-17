@@ -51,14 +51,54 @@ public class SplModule extends AbstractQuercusModule
     return new String[] { "SPL" };
   }
   
+  public static Value class_implements(Env env,
+                                        Value obj,
+                                        @Optional boolean autoload)
+  {
+    QuercusClass cls;
+    
+    if (obj.isObject())
+      cls = ((ObjectValue) obj.toObject(env)).getQuercusClass();
+    else
+      cls = env.findClass(obj.toString(), autoload);
+
+    if (cls != null)
+      return cls.getInterfaces(env, autoload);
+    else
+      return BooleanValue.FALSE;
+  }
+  
+  public static Value class_parents(Env env,
+                                    Value obj,
+                                    @Optional boolean autoload)
+  {
+    QuercusClass cls;
+
+    if (obj.isObject())
+      cls = ((ObjectValue) obj.toObject(env)).getQuercusClass();
+    else
+      cls = env.findClass(obj.toString(), autoload);
+
+    if (cls != null) {
+      ArrayValue array = new ArrayValueImpl();
+
+      QuercusClass parent = cls;
+
+      while ((parent = parent.getParent()) != null) {
+        String name = parent.getName();
+        
+        array.put(name, name);
+      }
+
+      return array;
+    }
+    else
+      return BooleanValue.FALSE;
+  }
+  
   public static boolean spl_autoload_register(Env env,
                                               @Optional Callback fun)
   {
-    /*
-    if (fun == null || fun.length() == 0)
-      fun = "spl_autoload";
-    */
-
     if (fun == null)
       fun = new CallbackFunction(env, "spl_autoload");
     
@@ -124,9 +164,8 @@ public class SplModule extends AbstractQuercusModule
     
     String []extensionList;
     
-    if (extensions == null || "".equals(extensions)) {
+    if (extensions == null || "".equals(extensions))
       extensionList = new String[] { ".php", ".inc" };
-    }
     else
       extensionList = extensions.split("[,\\s]+");
     

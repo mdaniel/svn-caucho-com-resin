@@ -70,12 +70,7 @@ public class ReflectionProperty
     
     return new ReflectionProperty(env, cls, propName);
   }
-  
-  public String __toString()
-  {
-    return null;
-  }
-  
+
   public static String export(Env env,
                               Value cls,
                               String name,

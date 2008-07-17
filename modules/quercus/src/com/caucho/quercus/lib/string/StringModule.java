@@ -39,6 +39,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.file.BinaryOutput;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 import com.caucho.vfs.ByteToChar;
@@ -46,6 +47,7 @@ import com.caucho.vfs.Path;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -701,15 +703,18 @@ public class StringModule extends AbstractQuercusModule {
 
   /**
    * Gets locale-specific symbols.
+   * XXX: locale charset
    */
   public static ArrayValue localeconv(Env env)
   {
     ArrayValueImpl array = new ArrayValueImpl();
 
-    Locale money = env.getLocaleInfo().getMonetary();
+    QuercusLocale money = env.getLocaleInfo().getMonetary();
     
-    DecimalFormatSymbols decimal = new DecimalFormatSymbols(money);
-    Currency currency = NumberFormat.getInstance(money).getCurrency();
+    Locale locale = money.getLocale();
+    
+    DecimalFormatSymbols decimal = new DecimalFormatSymbols(locale);
+    Currency currency = NumberFormat.getInstance(locale).getCurrency();
     
     array.put(env.createString("decimal_point"),
 	      env.createString(decimal.getDecimalSeparator()));
@@ -1227,6 +1232,7 @@ public class StringModule extends AbstractQuercusModule {
 
   /**
    * Returns a formatted money value.
+   * XXX: locale charset
    *
    * @param format the format
    * @param value the value
@@ -1235,9 +1241,11 @@ public class StringModule extends AbstractQuercusModule {
    */
   public static String money_format(Env env, String format, double value)
   {
-    Locale monetaryLocale = env.getLocaleInfo().getMonetary();
+    QuercusLocale monetary = env.getLocaleInfo().getMonetary();
+    
+    Locale locale = monetary.getLocale();
 
-    return NumberFormat.getCurrencyInstance(monetaryLocale).format(value);
+    return NumberFormat.getCurrencyInstance(locale).format(value);
   }
 
   // XXX: nl_langinfo
@@ -1540,21 +1548,27 @@ public class StringModule extends AbstractQuercusModule {
 
     if (localeArg instanceof ArrayValue) {
       for (Value value : ((ArrayValue) localeArg).values()) {
-        Locale locale = setLocale(localeInfo, category, value.toString());
+        QuercusLocale locale = setLocale(localeInfo,
+                                         category,
+                                         value.toString());
 
         if (locale != null)
           return env.createString(locale.toString());
       }
     }
     else {
-      Locale locale = setLocale(localeInfo, category, localeArg.toString());
+      QuercusLocale locale = setLocale(localeInfo,
+                                       category,
+                                       localeArg.toString());
 
       if (locale != null)
         return env.createString(locale.toString());
     }
 
     for (int i = 0; i < fallback.length; i++) {
-      Locale locale = setLocale(localeInfo, category, fallback[i].toString());
+      QuercusLocale locale = setLocale(localeInfo,
+                                       category,
+                                       fallback[i].toString());
 
       if (locale != null)
         return env.createString(locale.toString());
@@ -1566,13 +1580,13 @@ public class StringModule extends AbstractQuercusModule {
   /**
    * Sets locale configuration.
    */
-  private static Locale setLocale(LocaleInfo localeInfo,
-                                  int category,
-                                  String localeName)
+  private static QuercusLocale setLocale(LocaleInfo localeInfo,
+                                         int category,
+                                         String localeName)
   { 
-    Locale locale = findLocale(localeName);
-
-    if (! isValidLocale(locale))
+    QuercusLocale locale = findLocale(localeName);
+    
+    if (locale == null)
       return null;
 
     switch (category) {
@@ -1602,57 +1616,68 @@ public class StringModule extends AbstractQuercusModule {
     }
   }
 
-  private static Locale findLocale(String localeName)
+  /*
+   * Example locale: fr_FR.UTF-8@euro, french (on Windows)
+   * (French, France, UTF-8, with euro currency support)
+   */
+  private static QuercusLocale findLocale(String localeName)
   {
     String language;
     String country;
-    String variant;
+    String charset = null;
+    String variant = null;
 
-    int p = localeName.indexOf('_');
-    int p1 = localeName.indexOf('-');
-
-    if (p1 > 0 && (p1 < p || p < 0))
-      p = p1;
+    CharBuffer sb = CharBuffer.allocate();
+    
+    int len = localeName.length();
+    int i = 0;
+    
+    char ch = 0;
+    while (i < len && (ch = localeName.charAt(i++)) != '-' && ch != '_') {
+      sb.append(ch);
+    }
+    
+    language = sb.toString();
+    sb.clear();
+    
+    while (i < len && (ch = localeName.charAt(i)) != '.' && ch != '@') {
+      sb.append(ch);
+      
+      i++;
+    }
+    
+    if (ch == '.')
+      i++;
+    
+    country = sb.toString();
+    sb.clear();
+    
+    while (i < len && (ch = localeName.charAt(i)) != '@') {
+      sb.append(ch);
+      
+      i++;
+    }
+    
+    if (sb.length() > 0)
+      charset = sb.toString();
+    
+    if (i + 1 < len)
+      variant = localeName.substring(i + 1);
 
     Locale locale;
-
-    if (p > 0) {
-      language = localeName.substring(0, p);
-
-      int q = localeName.indexOf('-', p + 1);
-      int q1 = localeName.indexOf('.', p + 1);
-      // XXX: '.' should be charset?
-
-      if (q1 > 0 && (q1 < q || q < 0))
-        q = q1;
-
-      q1 = localeName.indexOf('@', p + 1);
-      // XXX: '@' is ??
-
-      if (q1 > 0 && (q1 < q || q < 0))
-        q = q1;
-
-      q1 = localeName.indexOf('_', p + 1);
-
-      if (q1 > 0 && (q1 < q || q < 0))
-        q = q1;
-
-      if (q > 0) {
-        country = localeName.substring(p + 1, q);
-        variant = localeName.substring(q + 1);
-
-        locale = new Locale(language, country, variant);
-      }
-      else {
-        country = localeName.substring(p + 1);
-
-        locale = new Locale(language, country);
-      }
-    }
-    else
-      locale = new Locale(localeName);
     
-    return locale;
+    // java versions >= 1.5 should automatically use the euro sign
+    if (variant != null && ! variant.equalsIgnoreCase("euro"))
+      locale = new Locale(language, country, variant);
+    else if (country != null)
+      locale = new Locale(language, country);
+    else
+      locale = new Locale(language);
+
+    if (isValidLocale(locale))
+      return new QuercusLocale(locale, charset);
+    else
+      return null;
   }
   
   /**
@@ -1966,7 +1991,7 @@ public class StringModule extends AbstractQuercusModule {
 
           case 'e': case 'E': case 'f': case 'g': case 'G':
           case 'F':
-            Locale locale = null;
+            QuercusLocale locale = null;
             
             if (ch == 'F')
               ch = 'f';
@@ -4480,9 +4505,9 @@ public class StringModule extends AbstractQuercusModule {
   static class LongPrintfSegment extends PrintfSegment {
     private final String _format;
     private final int _index;
-    private final Locale _locale;
+    private final QuercusLocale _locale;
 
-    private LongPrintfSegment(String format, int index, Locale locale)
+    private LongPrintfSegment(String format, int index, QuercusLocale locale)
     {
       _format = format;
       _index = index;
@@ -4536,7 +4561,7 @@ public class StringModule extends AbstractQuercusModule {
       else
         value = 0;
 
-      sb.append(String.format(_locale, _format, value));
+      sb.append(String.format(_locale.getLocale(), _format, value));
     }
   }
 
@@ -4622,9 +4647,9 @@ public class StringModule extends AbstractQuercusModule {
   static class DoublePrintfSegment extends PrintfSegment {
     private final String _format;
     private final int _index;
-    private final Locale _locale;
+    private final QuercusLocale _locale;
     
-    DoublePrintfSegment(String format, int index, Locale locale)
+    DoublePrintfSegment(String format, int index, QuercusLocale locale)
     {
       if (hasIndex(format)) {
         _index = getIndex(format);
@@ -4647,7 +4672,7 @@ public class StringModule extends AbstractQuercusModule {
       else
         value = 0;
 
-      sb.append(String.format(_locale, _format, value));
+      sb.append(String.format(_locale.getLocale(), _format, value));
     }
   }
 

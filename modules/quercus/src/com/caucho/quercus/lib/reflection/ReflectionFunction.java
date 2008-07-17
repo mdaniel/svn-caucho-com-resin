@@ -60,11 +60,6 @@ public class ReflectionFunction extends ReflectionFunctionAbstract
       return null;
   }
   
-  public String __toString()
-  {
-    return null;
-  }
-  
   public Value export(Env env,
                       String name,
                       @Optional boolean isReturn)

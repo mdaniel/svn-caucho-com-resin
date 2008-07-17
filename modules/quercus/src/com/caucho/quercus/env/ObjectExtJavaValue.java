@@ -57,7 +57,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
   private final JavaClassDef _javaClassDef;
   
   public ObjectExtJavaValue(QuercusClass cl, Object object,
-			    JavaClassDef javaClassDef)
+                            JavaClassDef javaClassDef)
   {
     super(cl);
 
@@ -100,9 +100,9 @@ public class ObjectExtJavaValue extends ObjectExtValue
   }
   
   public void varDumpImpl(Env env,
-          WriteStream out,
-          int depth,
-          IdentityHashMap<Value, String> valueSet)
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
     if (! _javaClassDef.varDumpImpl(env, _object, out, depth, valueSet))
@@ -111,9 +111,9 @@ public class ObjectExtJavaValue extends ObjectExtValue
 
   @Override
   protected void printRImpl(Env env,
-            WriteStream out,
-            int depth,
-            IdentityHashMap<Value, String> valueSet)
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
     _javaClassDef.printRImpl(env, _object, out, depth, valueSet);

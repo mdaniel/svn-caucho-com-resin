@@ -1795,19 +1795,29 @@ public class QuercusParser {
 
     String parentName = null;
 
+    ArrayList<String> ifaceList = new ArrayList<String>();
+    
     int token = parseToken();
     if (token == EXTENDS) {
-      parentName = parseIdentifier();
-      token = parseToken();
+      if ((modifiers & M_INTERFACE)!= 0) {
+        do {
+          ifaceList.add(parseIdentifier());
+
+          token = parseToken();
+        } while (token == ',');
+      }
+      else {
+        parentName = parseIdentifier();
+        
+        token = parseToken();
+      }
     }
 
-    ArrayList<String> ifaceList = new ArrayList<String>();
-
-    if (token == IMPLEMENTS) {
+    if ((modifiers & M_INTERFACE) == 0 && token == IMPLEMENTS) {
       do {
-	ifaceList.add(parseIdentifier());
+        ifaceList.add(parseIdentifier());
 
-	token = parseToken();
+        token = parseToken();
       } while (token == ',');
     }
 
@@ -1817,7 +1827,6 @@ public class QuercusParser {
     Scope oldScope = _scope;
 
     try {
-
       _classDef = oldScope.addClass(getLocation(), name, parentName, ifaceList);
 
       if ((modifiers & M_ABSTRACT) != 0)

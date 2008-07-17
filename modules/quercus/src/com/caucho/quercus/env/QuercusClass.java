@@ -742,35 +742,76 @@ public class QuercusClass {
   }
   
   /*
-   * Returns true if implements interface.
+   * Returns an array of the interfaces that this class and its parents
+   * implements.
    */
-  public boolean implementsInterface(Env env, String name)
+  public ArrayValue getInterfaces(Env env, boolean autoload)
   {
-    if (isInterface())
-      return false;
+    ArrayValue array = new ArrayValueImpl();
     
+    getInterfaces(env, array, autoload, true);
+    
+    return array;
+  }
+  
+  /*
+   * Puts the interfaces that this class and its parents implements
+   * into the array.
+   */
+  private void getInterfaces(Env env, ArrayValue array,
+                             boolean autoload, boolean isTop)
+  {
     ClassDef [] defList = _classDefList;
     
     for (int i = 0; i < defList.length; i++) {
       ClassDef def = defList[i];
       
-      if (def.isInterface()) {
-        if (def.getName().equals(name))
-          return true;
-      }
-      else {
-        String []defNames = def.getInterfaces();
+      if (! isTop && def.isInterface()) {
+        String name = def.getName();
         
-        for (int j = 0; j < defNames.length; j++) {
-          QuercusClass cls = env.findClass(defNames[j]);
-          
-          if (cls.getName().equals(name))
-            return true;
-        }
+        array.put(name, name);
+      }
+
+      String []defNames = def.getInterfaces();
+      
+      for (int j = 0; j < defNames.length; j++) {
+        QuercusClass cls = env.findClass(defNames[j]);
+        
+        cls.getInterfaces(env, array, autoload, false);
+      }
+    }
+
+    if (_parent != null)
+      _parent.getInterfaces(env, array, autoload, false);
+  }
+  
+  /*
+   * Returns true if this class or its parents implements specified interface.
+   */
+  public boolean implementsInterface(Env env, String name)
+  {
+    ClassDef [] defList = _classDefList;
+    
+    for (int i = 0; i < defList.length; i++) {
+      ClassDef def = defList[i];
+      
+      if (def.isInterface() && def.getName().equals(name))
+        return true;
+
+      String []defNames = def.getInterfaces();
+      
+      for (int j = 0; j < defNames.length; j++) {
+        QuercusClass cls = env.findClass(defNames[j]);
+
+        if (cls.implementsInterface(env, name))
+          return true;
       }
     }
     
-    return false;
+    if (_parent != null)
+      return _parent.implementsInterface(env, name);
+    else
+      return false;
   }
 
   /**

@@ -85,7 +85,7 @@ public class JavaValue extends ObjectValue
    */
   public long toLong()
   {
-    return StringValue.parseLong(toString());
+    return StringValue.parseLong(toString(Env.getInstance()));
   }
 
   /**
@@ -93,7 +93,7 @@ public class JavaValue extends ObjectValue
    */
   public double toDouble()
   {
-    return toDouble(toString());
+    return toDouble(toString(Env.getInstance()).toString());
   }
 
   /**
@@ -143,7 +143,7 @@ public class JavaValue extends ObjectValue
     StringValue value = _classDef.toString(env, this);
     
     if (value == null)
-      value = env.createString(_object.toString());
+      value = env.createString(toString());
     
     return value;
   }
@@ -502,13 +502,11 @@ public class JavaValue extends ObjectValue
   /**
    * Converts to a string.
    */
-  @Override
   public String toString()
   {
-    return toString(Env.getInstance()).toString();
-    
-    // php/1x0b
-    //return String.valueOf(_object);
+    //return toString(Env.getInstance()).toString();
+
+    return String.valueOf(_object);
   }
 
 

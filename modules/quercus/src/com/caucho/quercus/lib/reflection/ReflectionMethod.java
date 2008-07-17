@@ -71,11 +71,6 @@ public class ReflectionMethod extends ReflectionFunctionAbstract
     return new ReflectionMethod(cls, env.findFunction(cls, name));
   }
   
-  public String __toString()
-  {
-    return null;
-  }
-  
   public static String export(Env env,
                               Value cls,
                               String name,

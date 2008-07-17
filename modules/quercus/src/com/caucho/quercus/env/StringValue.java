@@ -412,7 +412,7 @@ abstract public class StringValue extends Value implements CharSequence {
     return result;
   }
 
-  static long parseLong(String string)
+  static long parseLong(CharSequence string)
   {
     final int len = string.length();
 

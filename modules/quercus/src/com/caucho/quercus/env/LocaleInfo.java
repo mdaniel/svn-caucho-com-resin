@@ -32,19 +32,21 @@ package com.caucho.quercus.env;
 import java.util.Locale;
 
 public class LocaleInfo {
-  private Locale _collate;
-  private Locale _ctype;
-  private Locale _monetary;
-  private Locale _numeric;
-  private Locale _time;
-  private Locale _messages;
+  private QuercusLocale _collate;
+  private QuercusLocale _ctype;
+  private QuercusLocale _monetary;
+  private QuercusLocale _numeric;
+  private QuercusLocale _time;
+  private QuercusLocale _messages;
 
   LocaleInfo()
   {
-    setAll(Locale.getDefault());
+    Locale locale = Locale.getDefault();
+    
+    setAll(new QuercusLocale(locale, null));
   }
 
-  public void setAll(Locale locale)
+  public void setAll(QuercusLocale locale)
   {
     setCollate(locale);
     setCtype(locale);
@@ -54,62 +56,62 @@ public class LocaleInfo {
     setMessages(locale);
   }
 
-  public Locale getCollate()
+  public QuercusLocale getCollate()
   {
     return _collate;
   }
 
-  public void setCollate(Locale locale)
+  public void setCollate(QuercusLocale locale)
   {
     _collate = locale;
   }
 
-  public Locale getCtype()
+  public QuercusLocale getCtype()
   {
     return _ctype;
   }
 
-  public void setCtype(Locale locale)
+  public void setCtype(QuercusLocale locale)
   {
     _ctype = locale;
   }
 
-  public Locale getMonetary()
+  public QuercusLocale getMonetary()
   {
-    return _ctype;
+    return _monetary;
   }
 
-  public void setMonetary(Locale locale)
+  public void setMonetary(QuercusLocale locale)
   {
     _monetary = locale;
   }
 
-  public Locale getTime()
+  public QuercusLocale getTime()
   {
     return _time;
   }
 
-  public void setTime(Locale locale)
+  public void setTime(QuercusLocale locale)
   {
     _time = locale;
   }
 
-  public Locale getNumeric()
+  public QuercusLocale getNumeric()
   {
     return _numeric;
   }
 
-  public void setNumeric(Locale locale)
+  public void setNumeric(QuercusLocale locale)
   {
     _numeric = locale;
   }
 
-  public Locale getMessages()
+  public QuercusLocale getMessages()
   {
     return _messages;
   }
 
-  public void setMessages(Locale locale)
+  public void setMessages(QuercusLocale locale)
   {
     _messages = locale;
   }

@@ -97,11 +97,6 @@ public class ReflectionClass
     return new ReflectionClass(cls);
   }
   
-  public String __toString()
-  {
-    return null;
-  }
-  
   public static String export(Env env,
                               Value cls,
                               @Optional boolean isReturn)

@@ -143,7 +143,7 @@ abstract public class ClassDef {
   }
   
   /*
-   * 
+   * Returns true if the class has private/protected methods.
    */
   public boolean hasNonPublicMethods()
   {

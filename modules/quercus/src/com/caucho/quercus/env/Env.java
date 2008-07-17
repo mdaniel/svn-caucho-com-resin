@@ -3554,20 +3554,20 @@ public class Env {
         try {
           _autoloadClasses.add(name);
 
-	  int size = _autoloadList != null ? _autoloadList.size() : 0;
+          int size = _autoloadList != null ? _autoloadList.size() : 0;
 
-	  for (int i = 0; i < size; i++) {
-	    Callback cb = _autoloadList.get(i);
+          for (int i = 0; i < size; i++) {
+            Callback cb = _autoloadList.get(i);
 
-	    cb.call(this, nameString);
-	    
-	    QuercusClass cls = createClassImpl(name, false, useImport);
-              
-	    if (cls != null)
-	      return cls;
-	  }
+            cb.call(this, nameString);
+            
+            QuercusClass cls = createClassImpl(name, false, useImport);
+                  
+            if (cls != null)
+              return cls;
+          }
 
-	  if (size == 0) {
+	      if (size == 0) {
             if (_autoload == null)
               _autoload = findFunction("__autoload");
             

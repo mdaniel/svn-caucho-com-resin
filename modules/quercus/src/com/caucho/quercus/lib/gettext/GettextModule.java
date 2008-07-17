@@ -284,7 +284,7 @@ public class GettextModule
                                 StringValue message,
                                 Value []args)
   {
-    Locale locale = env.getLocaleInfo().getMessages();
+    Locale locale = env.getLocaleInfo().getMessages().getLocale();
 
     GettextResource resource = getResource(env,
                                            domain.getPath(),
@@ -322,7 +322,7 @@ public class GettextModule
                                 int quantity,
                                 Value []args)
   {
-    Locale locale = env.getLocaleInfo().getMessages();
+    Locale locale = env.getLocaleInfo().getMessages().getLocale();
 
     GettextResource resource = getResource(env,
                                            domain.getPath(),

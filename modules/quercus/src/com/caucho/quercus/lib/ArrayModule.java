@@ -1321,7 +1321,7 @@ public class ArrayModule
       array.sort(CN_VALUE_REVERSE, NO_KEY_RESET, NOT_STRICT);
       break;
     case SORT_LOCALE_STRING:
-      Locale locale = env.getLocaleInfo().getCollate();
+      Locale locale = env.getLocaleInfo().getCollate().getLocale();
       array.sort(new CompareLocale(ArrayValue.GET_VALUE, SORT_REVERSE,
                                    Collator.getInstance(locale)),
                  NO_KEY_RESET, NOT_STRICT);
@@ -1356,7 +1356,7 @@ case SORT_NUMERIC:
       array.sort(CN_VALUE_NORMAL, NO_KEY_RESET, NOT_STRICT);
       break;
     case SORT_LOCALE_STRING:
-      Locale locale = env.getLocaleInfo().getCollate();
+      Locale locale = env.getLocaleInfo().getCollate().getLocale();
       array.sort(new CompareLocale(ArrayValue.GET_VALUE, SORT_NORMAL,
                                    Collator.getInstance(locale)),
                  NO_KEY_RESET, NOT_STRICT);
@@ -1391,7 +1391,7 @@ case SORT_NUMERIC:
       array.sort(CN_KEY_NORMAL, NO_KEY_RESET, NOT_STRICT);
       break;
     case SORT_LOCALE_STRING:
-      Locale locale = env.getLocaleInfo().getCollate();
+      Locale locale = env.getLocaleInfo().getCollate().getLocale();
       array.sort(new CompareLocale(ArrayValue.GET_KEY, SORT_NORMAL,
                                    Collator.getInstance(locale)),
                  NO_KEY_RESET, NOT_STRICT);
@@ -1426,7 +1426,7 @@ case SORT_NUMERIC:
       array.sort(CN_KEY_REVERSE, NO_KEY_RESET, NOT_STRICT);
       break;
     case SORT_LOCALE_STRING:
-      Locale locale = env.getLocaleInfo().getCollate();
+      Locale locale = env.getLocaleInfo().getCollate().getLocale();
       array.sort(new CompareLocale(ArrayValue.GET_KEY, SORT_REVERSE,
                                    Collator.getInstance(locale)),
                  NO_KEY_RESET, NOT_STRICT);
@@ -1542,7 +1542,7 @@ case SORT_NUMERIC:
       array.sort(CN_VALUE_NORMAL, KEY_RESET, STRICT);
       break;
     case SORT_LOCALE_STRING:
-      Locale locale = env.getLocaleInfo().getCollate();
+      Locale locale = env.getLocaleInfo().getCollate().getLocale();
       array.sort(new CompareLocale(ArrayValue.GET_VALUE, SORT_NORMAL,
                                    Collator.getInstance(locale)),
                  KEY_RESET, STRICT);
@@ -1576,7 +1576,7 @@ case SORT_NUMERIC:
       array.sort(CN_VALUE_REVERSE, KEY_RESET, STRICT);
       break;
     case SORT_LOCALE_STRING:
-      Locale locale = env.getLocaleInfo().getCollate();
+      Locale locale = env.getLocaleInfo().getCollate().getLocale();
       array.sort(new CompareLocale(ArrayValue.GET_VALUE, SORT_REVERSE,
                                    Collator.getInstance(locale)),
                  KEY_RESET, STRICT);

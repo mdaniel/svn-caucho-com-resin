@@ -81,11 +81,6 @@ public class ReflectionParameter
     throw new ReflectionException(L.l("cannot find parameter '{0}'", paramName));
   }
   
-  public String __toString()
-  {
-    return null;
-  }
-  
   public static String export(Env env,
                               Value function,
                               Value parameter,

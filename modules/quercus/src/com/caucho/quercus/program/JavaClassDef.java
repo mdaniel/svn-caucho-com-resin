@@ -83,7 +83,7 @@ public class JavaClassDef extends ClassDef {
   private final HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
 
-  public final MethodMap<AbstractJavaMethod> _functionMap
+  private final MethodMap<AbstractJavaMethod> _functionMap
     = new MethodMap<AbstractJavaMethod>();
 
   private final HashMap<StringValue, AbstractJavaMethod> _getMap
@@ -1233,7 +1233,7 @@ public class JavaClassDef extends ClassDef {
   {
     if (__toString == null)
       return null;
-    
+
     return __toString.callMethod(env, value, new Expr[0]).toStringValue();
   }
   

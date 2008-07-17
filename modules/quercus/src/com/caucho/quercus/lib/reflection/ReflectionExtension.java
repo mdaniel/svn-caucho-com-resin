@@ -67,11 +67,6 @@ public class ReflectionExtension
     return new ReflectionExtension(env, name);
   }
   
-  public String __toString()
-  {
-    return null;
-  }
-  
   public static String export(Env env,
                               String name,
                               @Optional boolean isReturn)
