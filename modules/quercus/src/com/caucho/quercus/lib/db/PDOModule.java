@@ -28,10 +28,12 @@
 
 package com.caucho.quercus.lib.db;
 
+import com.caucho.quercus.module.AbstractQuercusModule;
+
 /*
  * Prior to PHP 5.1, PDO constants were global constants.
  */
-public class PDOModule
+public class PDOModule extends AbstractQuercusModule
 {
   /**
    * Returns true for the pdo extension.

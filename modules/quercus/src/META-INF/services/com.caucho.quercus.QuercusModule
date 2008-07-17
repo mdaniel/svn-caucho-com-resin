@@ -29,7 +29,7 @@ com.caucho.quercus.lib.NetworkModule
 com.caucho.quercus.lib.db.OracleModule
 com.caucho.quercus.lib.OptionsModule
 com.caucho.quercus.lib.OutputModule
-com.caucho.quercus.lib.PDOModule
+com.caucho.quercus.lib.db.PDOModule
 com.caucho.quercus.lib.db.PostgresModule
 com.caucho.quercus.lib.QuercusModule
 com.caucho.quercus.lib.reflection.ReflectionModule

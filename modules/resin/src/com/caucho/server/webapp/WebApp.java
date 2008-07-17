@@ -2107,6 +2107,8 @@ public class WebApp extends ServletContextImpl
 	      = _requestRewriteDispatch.map(invocation.getContextURI(),
 					    invocation.getQueryString(),
 					    chain);
+
+	    chain = newChain;
           }
 
 	  // server/13s[o-r]
