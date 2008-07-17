@@ -54,9 +54,9 @@ public class MysqlModule extends AbstractQuercusModule {
   private static final Logger log = Log.open(MysqlModule.class);
   private static final L10N L = new L10N(MysqlModule.class);
 
-  public static final int MYSQL_ASSOC = 0x1;
-  public static final int MYSQL_NUM = 0x2;
-  public static final int MYSQL_BOTH = 0x3;
+  public static final int MYSQL_ASSOC = JdbcResultResource.FETCH_ASSOC;
+  public static final int MYSQL_NUM = JdbcResultResource.FETCH_NUM;
+  public static final int MYSQL_BOTH = JdbcResultResource.FETCH_BOTH;
 
   public static final int MYSQL_USE_RESULT = 0x0;
   public static final int MYSQL_STORE_RESULT = 0x1;
@@ -555,7 +555,7 @@ public class MysqlModule extends AbstractQuercusModule {
 
     // php/142t
     // must return FALSE for mediawiki
-    if (value == NullValue.NULL)
+    if (value.isNull())
       value = BooleanValue.FALSE;
 
     return value;

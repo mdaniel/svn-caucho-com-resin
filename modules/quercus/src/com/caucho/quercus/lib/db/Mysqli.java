@@ -83,7 +83,7 @@ public class Mysqli extends JdbcConnectionResource {
   private int _nextResultValue = 0;
   private boolean _hasBeenUsed = true;
 
-  private static String _checkedDriverVersion = null;
+  private static volatile String _checkedDriverVersion = null;
   private static Object _checkDriverLock = new Object();
 
   private LastSqlType _lastSql;
@@ -886,12 +886,11 @@ public class Mysqli extends JdbcConnectionResource {
   {
     try {
       if (isConnected()) {
-	String catalog = dbname.toString();
-	
-	getEnv().getQuercus().setSpecial("mysql.catalog", catalog);
+        String catalog = dbname.toString();
+        getEnv().getQuercus().setSpecial("mysql.catalog", catalog);
 	
         validateConnection().setCatalog(catalog);
-
+        
         return true;
       }
       else
@@ -1432,7 +1431,7 @@ public class Mysqli extends JdbcConnectionResource {
       return;
     
     synchronized(_checkDriverLock) {
-      // required if statement to prevent multiple checks
+      // to prevent multiple checks
       if (_checkedDriverVersion == null) {
         _checkedDriverVersion = checkDriverVersionImpl(env, conn);
 
@@ -1440,7 +1439,8 @@ public class Mysqli extends JdbcConnectionResource {
           return;
         
         String message = "Unable to detect MySQL Connector/J JDBC driver " +
-                         "version.  The recommended JDBC version is 3.1.14.";
+                         "version.  The recommended JDBC version is " +
+                         "3.1.14+/5+.";
 
         log.log(Level.WARNING, message);
         env.warning(message);
@@ -1512,29 +1512,17 @@ public class Mysqli extends JdbcConnectionResource {
 
         checkedDriverVersion = major + "." + minor + "." + release;
 
-	// This doesn't make sense.  We can't recommend avoiding the
-	// current version of the driver.
-	/*
-        if (major == 3 && (minor > 1 || minor == 1 && release >= 14)) {
-        }
-        else if (major > 3) {
-          String message = L.l("Your MySQL Connector/J JDBC {0} driver may " +
-                               "have issues with column/table aliases and " +
-                               "DESCRIBE statements.  The recommended " +
-                               "JDBC version is 3.1.14.", version);
-          
-          log.log(Level.WARNING, message);
-          env.warning(message);
+        if (major >= 5
+            || major == 3 && (minor > 1 || minor == 1 && release >= 14)) {
         }
         else {
           String message = L.l("Your MySQL Connector/J JDBC {0} driver may " +
                                "have issues with character encoding.  The " +
-                               "recommended JDBC version is 3.1.14.", version);
+                               "recommended JDBC version is 3.1.14/5+.", version);
 
           log.log(Level.WARNING, message);
           env.warning(message);
         }
-	*/
       }
     }
     

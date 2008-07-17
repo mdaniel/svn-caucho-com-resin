@@ -1002,7 +1002,7 @@ public class PostgresModule extends AbstractQuercusModule {
       // calls return the next row as usual.
       // We set a flag for this. See PostgresResult and php/4342
 
-      if (row == NullValue.NULL) {
+      if (row.isNull()) {
         if (result.getPassedNullRow()) {
           result.setPassedNullRow();
         } else {
@@ -1205,14 +1205,13 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Value field = pg_fetch_result(env,
                                     result,
-                                    LongValue.create(-1),
+                                    LongValue.MINUS_ONE,
                                     LongValue.create(fieldNumber));
 
-      if ((field == null) || (field == NullValue.NULL)) {
-        return LongValue.create(1);
-      }
-
-      return LongValue.create(0);
+      if (field == null || field.isNull())
+        return LongValue.ONE;
+      else
+        return LongValue.ZERO;
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -1490,8 +1489,8 @@ public class PostgresModule extends AbstractQuercusModule {
 
       Value value = pg_fetch_result(env,
                                     result,
-                                    LongValue.create(-1),
-                                    LongValue.create(0));
+                                    LongValue.MINUS_ONE,
+                                    LongValue.ZERO);
 
       if (value.isLongConvertible()) {
         return LongValue.create(value.toLong());
@@ -2502,7 +2501,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       PostgresResult result = pg_query(env, conn, "SHOW "+paramName);
 
-      Value value = pg_fetch_result(env, result, LongValue.create(0), LongValue.create(0));
+      Value value = pg_fetch_result(env, result, LongValue.ZERO, LongValue.ZERO);
 
       if ((value == null) || value.isNull())
         return BooleanValue.FALSE;
@@ -3097,9 +3096,9 @@ public class PostgresModule extends AbstractQuercusModule {
 
       PostgresResult result = pg_query(env, conn, "SHOW log_error_verbosity");
 
-      ArrayValue arr = pg_fetch_row(env, result, LongValue.create(0));
+      ArrayValue arr = pg_fetch_row(env, result, LongValue.ZERO);
 
-      String prevVerbosity = arr.get(LongValue.create(0)).toString();
+      String prevVerbosity = arr.get(LongValue.ZERO).toString();
 
       switch (intVerbosity) {
       case PGSQL_ERRORS_TERSE:

@@ -957,7 +957,7 @@ public class ArrayModule
 
     long endIndex = size;
 
-    if (elements != NullValue.NULL) {
+    if (! elements.isNull()) {
       endIndex = elements.toLong();
 
       if (endIndex < 0)
@@ -1025,7 +1025,7 @@ public class ArrayModule
 
     int endIndex = size;
 
-    if (length != NullValue.NULL) {
+    if (! length.isNull()) {
       endIndex = length.toInt();
 
       if (endIndex < 0)
@@ -1515,10 +1515,14 @@ case SORT_NUMERIC:
     if (stack == null)
       return false;
 
+    Value result;
+    
     if (strict)
-      return stack.containsStrict(needle) != NullValue.NULL;
+      result = stack.containsStrict(needle);
     else
-      return stack.contains(needle) != NullValue.NULL;
+      result = stack.contains(needle);
+    
+    return ! result.isNull();
   }
 
   /**
@@ -1824,12 +1828,12 @@ case SORT_NUMERIC:
 
       switch ((int) extractType) {
       case EXTR_SKIP:
-        if (tableValue != NullValue.NULL)
+        if (! tableValue.isNull())
           symbolName = "";
 
         break;
       case EXTR_PREFIX_SAME:
-        if (tableValue != NullValue.NULL)
+        if (! tableValue.isNull())
           symbolName = prefix + symbolName;
 
         break;
@@ -1843,12 +1847,12 @@ case SORT_NUMERIC:
 
         break;
       case EXTR_IF_EXISTS:
-        if (tableValue == NullValue.NULL)
+        if (tableValue.isNull())
           symbolName = "";//entryValue = tableValue;
 
         break;
       case EXTR_PREFIX_IF_EXISTS:
-        if (tableValue != NullValue.NULL)
+        if (! tableValue.isNull())
           symbolName = prefix + symbolName;
         else
           symbolName = "";
@@ -1933,7 +1937,7 @@ case SORT_NUMERIC:
         }
 
         valueFound =
-          ((ArrayValue) arrays[k]).contains(entryValue) != NullValue.NULL;
+          ! ((ArrayValue) arrays[k]).contains(entryValue).isNull();
       }
 
       if (! valueFound)
@@ -2107,7 +2111,7 @@ case SORT_NUMERIC:
 
         Value searchKey = ((ArrayValue) arrays[k]).contains(entryValue);
 
-        if (searchKey != NullValue.NULL)
+        if (! searchKey.isNull())
           ValueFound = ((int) func.call(env, searchKey, entryKey).toLong()) ==
                        0;
       }
@@ -2220,7 +2224,7 @@ case SORT_NUMERIC:
           break;
 
         valueFound =
-          ((ArrayValue) arrays[k]).contains(entryValue) != NullValue.NULL;
+          ! ((ArrayValue) arrays[k]).contains(entryValue).isNull();
       }
 
       if (valueFound)

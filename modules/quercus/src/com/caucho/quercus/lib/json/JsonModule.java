@@ -71,9 +71,9 @@ public class JsonModule
 
   private void jsonEncodeImpl(Env env, StringValue sb, Value val)
   {
-    if (val instanceof StringValue) {
+    if (val.isString()) {
       sb.append('"');
-      encodeString(sb, (StringValue)val);
+      encodeString(sb, (StringValue) val);
       sb.append('"');
     }
 
@@ -85,13 +85,13 @@ public class JsonModule
     else if (val instanceof NumberValue)
       sb.append(val.toStringValue());
 
-    else if (val instanceof ArrayValue)
+    else if (val.isArray())
       encodeArray(env, sb, (ArrayValue)val);
 
-    else if (val instanceof ObjectValue)
+    else if (val.isObject())
       encodeObject(env, sb, (ObjectValue)val);
 
-    else if (val == NullValue.NULL || val == null)
+    else if (val == null || val.isNull())
       sb.append("null");
 
     else {

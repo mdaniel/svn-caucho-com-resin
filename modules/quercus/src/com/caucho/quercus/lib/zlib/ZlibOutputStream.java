@@ -230,7 +230,7 @@ public class ZlibOutputStream extends AbstractBinaryOutput {
   }
 
   /**
-   * Returns false always for an write stream.
+   * Returns false always for a write stream.
    */
   public boolean isEOF()
   {

@@ -44,13 +44,17 @@ import java.io.IOException;
  */
 public class ZlibInputStream extends ReadStreamInput
 {
+  private Env _env;
+  
   private BinaryInput _in;
   private GZInputStream _gzIn;
   
-  public ZlibInputStream(BinaryInput in) throws IOException
+  public ZlibInputStream(Env env, BinaryInput in) throws IOException
   {
-    super(Env.getInstance());
+    super(env);
 
+    _env = env;
+    
     init(in);
   }
 
@@ -71,7 +75,7 @@ public class ZlibInputStream extends ReadStreamInput
   public BinaryInput openCopy()
     throws IOException
   {
-    return new ZlibInputStream(_in.openCopy());
+    return new ZlibInputStream(_env, _in.openCopy());
   }
 
   /**
@@ -82,15 +86,22 @@ public class ZlibInputStream extends ReadStreamInput
     try {
       BinaryInput newIn = _in.openCopy();
       
+      /*
       _gzIn.close();
       getInputStream().close();
-
+      
+      _in.close();
+      _in = null;
+      _gzIn = null;
+      */
+      
+      close();
+      _in.close();
+      
       init(newIn);
 
-      if (offset > 0)
-        skip(offset);
+      return skip(offset) == offset;
 
-      return true;
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }

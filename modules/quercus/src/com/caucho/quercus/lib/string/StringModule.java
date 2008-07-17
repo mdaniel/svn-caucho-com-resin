@@ -4672,7 +4672,13 @@ public class StringModule extends AbstractQuercusModule {
       else
         value = 0;
 
-      sb.append(String.format(_locale.getLocale(), _format, value));
+      String s;
+      if (_locale == null)
+        s = String.format(_format, value);
+      else
+        s = String.format(_locale.getLocale(), _format, value);
+      
+      sb.append(s);
     }
   }
 

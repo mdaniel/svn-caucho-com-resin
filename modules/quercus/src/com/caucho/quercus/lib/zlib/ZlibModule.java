@@ -99,7 +99,7 @@ public class ZlibModule extends AbstractQuercusModule {
 
       if (ch == 'r') {
         BinaryInput is = (BinaryInput) val;
-        return new ZlibInputStream(is);
+        return new ZlibInputStream(env, is);
       }
       else if (ch == 'w') {
         return new ZlibOutputStream(((BinaryOutput) val).getOutputStream(),

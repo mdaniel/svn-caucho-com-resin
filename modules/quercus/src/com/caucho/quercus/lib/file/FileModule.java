@@ -853,6 +853,12 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value filesize(Env env, Path path)
   {
+    if (path == null) {
+      env.warning(L.l("path cannot be read"));
+      
+      return BooleanValue.FALSE;
+    }
+    
     if (! path.exists() || ! path.isFile()) {
       env.warning(L.l("{0} cannot be read", path.getFullPath()));
       return BooleanValue.FALSE;

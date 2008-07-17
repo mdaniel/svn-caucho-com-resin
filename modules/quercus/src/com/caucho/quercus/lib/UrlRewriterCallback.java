@@ -125,7 +125,7 @@ public class UrlRewriterCallback extends CallbackFunction {
       Parser parser = rewriter.new Parser(buffer.toString(), env);
       result = parser.parse();
 
-      if (result == NullValue.NULL)
+      if (result.isNull())
         result = buffer;
     }
 

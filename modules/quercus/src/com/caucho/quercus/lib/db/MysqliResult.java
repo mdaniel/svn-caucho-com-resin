@@ -132,9 +132,9 @@ public class MysqliResult extends JdbcResultResource {
   public ArrayValue fetch_array(Env env,
                                 @Optional("MYSQLI_BOTH") int type)
   {
-    if (type != MysqlModule.MYSQL_ASSOC
-	&& type != MysqlModule.MYSQL_BOTH
-	&& type != MysqlModule.MYSQL_NUM) {
+    if (type != MysqliModule.MYSQLI_ASSOC
+	    && type != MysqliModule.MYSQLI_BOTH
+	    && type != MysqliModule.MYSQLI_NUM) {
       env.warning(L.l("invalid result_type"));
       return null;
     }
@@ -290,7 +290,7 @@ public class MysqliResult extends JdbcResultResource {
       int fieldScale = md.getScale(offset);
 
       if (fieldTable == null || "".equals(fieldTable)) {
-	return fetchFieldImproved(env, md, offset);
+        return fetchFieldImproved(env, md, offset);
       }
 
       String sql = "SHOW FULL COLUMNS FROM " + fieldTable + " LIKE \'" + fieldName + "\'";
@@ -302,7 +302,7 @@ public class MysqliResult extends JdbcResultResource {
 							catalogName);
 
       if (metaResult == null) {
-	return fetchFieldImproved(env, md, offset);
+        return fetchFieldImproved(env, md, offset);
       }
 
       return metaResult.fetchFieldImproved(env,

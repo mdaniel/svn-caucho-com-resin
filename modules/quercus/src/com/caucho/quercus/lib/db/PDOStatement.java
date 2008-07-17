@@ -63,10 +63,17 @@ public class PDOStatement
 
   private static final Value[] NULL_VALUES = new Value[0];
 
-  private static final Value FETCH_FAILURE = new NullValue() {};
-  private static final Value FETCH_EXHAUSTED = new NullValue() {};
-  private static final Value FETCH_CONTINUE = new NullValue() {};
-  private static final Value FETCH_SUCCESS = new NullValue() {};
+  //private static final Value FETCH_FAILURE = new NullValue() {};
+  //private static final Value FETCH_EXHAUSTED = new NullValue() {};
+  //private static final Value FETCH_CONTINUE = new NullValue() {};
+  //private static final Value FETCH_SUCCESS = new NullValue() {};
+  
+  private static final int FETCH_FAILURE = 0;
+  private static final int FETCH_EXHAUSTED = 1;
+  private static final int FETCH_CONTINUE = 2;
+  private static final int FETCH_SUCCESS = 3;
+  
+  private int _fetchErrorCode;
 
   private final Env _env;
   private final PDOError _error;
@@ -87,9 +94,10 @@ public class PDOStatement
   private ArrayList<BindParam> _bindParams;
   private IntMap _parameterNameMap;
 
-  PDOStatement(Env env, Connection conn, String query, boolean isPrepared, ArrayValue options)
+  PDOStatement(Env env, Connection conn,
+               String query, boolean isPrepared,
+               ArrayValue options)
     throws SQLException
-
   {
     _env = env;
     _error = new PDOError(_env);
@@ -546,15 +554,15 @@ public class PDOStatement
     while (true) {
       Value value = fetchImpl(effectiveFetchMode, columnIndex);
 
-      if (value == FETCH_FAILURE) {
+      if (_fetchErrorCode == FETCH_FAILURE) {
         rows.clear();
         return rows;
       }
 
-      if (value == FETCH_EXHAUSTED)
+      if (_fetchErrorCode == FETCH_EXHAUSTED)
         break;
 
-      if (value == FETCH_CONTINUE)
+      if (_fetchErrorCode == FETCH_CONTINUE)
         continue;
 
       rows.put(value);
@@ -566,12 +574,18 @@ public class PDOStatement
   private Value fetchAssoc()
   {
     try {
-      if (!advanceResultSet())
-        return FETCH_EXHAUSTED;
+      if (!advanceResultSet()) {
+        _fetchErrorCode = FETCH_EXHAUSTED;
+        
+        return BooleanValue.FALSE;
+      }
 
       if (_fetchModeArgs.length != 0) {
         _error.notice(L.l("unexpected arguments"));
-        return FETCH_FAILURE;
+        
+        _fetchErrorCode = FETCH_FAILURE;
+        
+        return BooleanValue.FALSE;
       }
 
       ArrayValueImpl array = new ArrayValueImpl();
@@ -589,21 +603,29 @@ public class PDOStatement
     }
     catch (SQLException ex) {
       _error.error(ex);
-      return FETCH_FAILURE;
+      
+      _fetchErrorCode = FETCH_FAILURE;
+      
+      return BooleanValue.FALSE;
     }
   }
 
   private Value fetchBoth()
   {
     try {
-      if (!advanceResultSet())
-        return FETCH_EXHAUSTED;
+      if (! advanceResultSet()) {
+        _fetchErrorCode = FETCH_EXHAUSTED;
+        
+        return BooleanValue.FALSE;
+      }
 
       if (_fetchModeArgs.length != 0) {
         _error.notice(L.l("unexpected arguments"));
-        return FETCH_FAILURE;
+        
+        _fetchErrorCode = FETCH_FAILURE;
+        
+        return BooleanValue.FALSE;
       }
-
 
       ArrayValueImpl array = new ArrayValueImpl();
 
@@ -621,16 +643,24 @@ public class PDOStatement
     }
     catch (SQLException ex) {
       _error.error(ex);
-      return FETCH_FAILURE;
+      
+      _fetchErrorCode = FETCH_FAILURE;
+      
+      return BooleanValue.FALSE;
     }
   }
 
   private Value fetchBound()
   {
-    if (!advanceResultSet())
-      return FETCH_EXHAUSTED;
+    if (!advanceResultSet()) {
+      _fetchErrorCode = FETCH_EXHAUSTED;
+      
+      return BooleanValue.FALSE;
+    }
 
-    return FETCH_SUCCESS;
+    _fetchErrorCode = FETCH_SUCCESS;
+    
+    return BooleanValue.FALSE;
   }
 
   private Value fetchClass()
@@ -669,21 +699,30 @@ public class PDOStatement
    */
   public Value fetchColumn(@Optional int column)
   {
-    if (!advanceResultSet())
-      return FETCH_EXHAUSTED;
+    if (!advanceResultSet()) {
+      _fetchErrorCode = FETCH_EXHAUSTED;
+      
+      return BooleanValue.FALSE;
+    }
 
     if (column < 0 && _fetchModeArgs.length > 0)
       column = _fetchModeArgs[0].toInt();
 
     try {
-      if (column < 0 || column >= getResultSetMetaData().getColumnCount())
-        return FETCH_CONTINUE;
+      if (column < 0 || column >= getResultSetMetaData().getColumnCount()) {
+        _fetchErrorCode = FETCH_CONTINUE;
+        
+        return BooleanValue.FALSE;
+      }
 
       return getColumnValue(column + 1);
     }
     catch (SQLException ex) {
       _error.error(ex);
-      return FETCH_FAILURE;
+      
+      _fetchErrorCode = FETCH_FAILURE;
+      
+      return BooleanValue.FALSE;
     }
   }
 
@@ -721,6 +760,8 @@ public class PDOStatement
 
     fetchMode = fetchMode & (~(PDO.FETCH_CLASSTYPE | PDO.FETCH_SERIALIZE));
 
+    _fetchErrorCode = FETCH_SUCCESS;
+    
     switch (fetchMode) {
       case PDO.FETCH_ASSOC:
         return fetchAssoc();
@@ -769,8 +810,11 @@ public class PDOStatement
 
     Value var = _fetchModeArgs[0];
 
-    if (!advanceResultSet())
-      return FETCH_EXHAUSTED;
+    if (!advanceResultSet()) {
+      _fetchErrorCode = FETCH_EXHAUSTED;
+      
+      return BooleanValue.FALSE;
+    }
 
     try {
       int columnCount = getResultSetMetaData().getColumnCount();
@@ -784,7 +828,10 @@ public class PDOStatement
     }
     catch (SQLException ex) {
       _error.error(ex);
-      return FETCH_FAILURE;
+      
+      _fetchErrorCode = FETCH_FAILURE;
+      
+      return BooleanValue.FALSE;
     }
 
     return var;
@@ -799,8 +846,11 @@ public class PDOStatement
   private Value fetchNamed()
   {
     try {
-      if (!advanceResultSet())
-        return FETCH_EXHAUSTED;
+      if (!advanceResultSet()) {
+        _fetchErrorCode = FETCH_EXHAUSTED;
+        
+        return BooleanValue.FALSE;
+      }
 
       ArrayValue array = new ArrayValueImpl();
 
@@ -831,19 +881,27 @@ public class PDOStatement
     }
     catch (SQLException ex) {
       _error.error(ex);
-      return FETCH_FAILURE;
+      _fetchErrorCode = FETCH_FAILURE;
+      
+      return BooleanValue.FALSE;
     }
   }
 
   private Value fetchNum()
   {
     try {
-      if (!advanceResultSet())
-        return FETCH_EXHAUSTED;
+      if (!advanceResultSet()) {
+        _fetchErrorCode = FETCH_EXHAUSTED;
+        
+        return BooleanValue.FALSE;
+      }
 
       if (_fetchModeArgs.length != 0) {
         _error.notice(L.l("unexpected arguments"));
-        return FETCH_FAILURE;
+        
+        _fetchErrorCode = FETCH_FAILURE;
+        
+        return BooleanValue.FALSE;
       }
 
       ArrayValueImpl array = new ArrayValueImpl();
@@ -860,7 +918,9 @@ public class PDOStatement
     }
     catch (SQLException ex) {
       _error.error(ex);
-      return FETCH_FAILURE;
+      _fetchErrorCode = FETCH_FAILURE;
+      
+      return BooleanValue.FALSE;
     }
   }
 
@@ -889,8 +949,11 @@ public class PDOStatement
       }
     }
 
-    if (!advanceResultSet())
-      return FETCH_EXHAUSTED;
+    if (!advanceResultSet()) {
+      _fetchErrorCode = FETCH_EXHAUSTED;
+      
+      return BooleanValue.FALSE;
+    }
 
     try {
       Value object;
@@ -913,7 +976,9 @@ public class PDOStatement
     }
     catch (Throwable ex) {
       _error.error(ex);
-      return FETCH_FAILURE;
+      _fetchErrorCode = FETCH_FAILURE;
+      
+      return BooleanValue.FALSE;
     }
 
   }

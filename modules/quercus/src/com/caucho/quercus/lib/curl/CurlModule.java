@@ -805,10 +805,12 @@ public class CurlModule
         curl.setReadTimeout(value.toInt() * 1000);
         break;
       case CURLOPT_TIMEVALUE:
-        long time = value.toInt() * 1000L;
+        long time = value.toLong() * 1000L;
         String format = "%a, %d %b %Y %H:%M:%S %Z";
+        
+        String date = QDate.formatGMT(time, format);
 
-        curl.setModifiedTime(QDate.formatGMT(time, format));
+        curl.setModifiedTime(date);
         break;
 
       //

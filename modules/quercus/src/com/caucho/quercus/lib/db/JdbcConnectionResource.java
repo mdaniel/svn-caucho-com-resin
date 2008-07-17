@@ -855,7 +855,7 @@ public abstract class JdbcConnectionResource
   public void setCatalog(String name)
     throws SQLException
   {
-    if (_catalog.equals(name))
+    if (_catalog != null && _catalog.equals(name))
       return;
 
     clearErrors();
