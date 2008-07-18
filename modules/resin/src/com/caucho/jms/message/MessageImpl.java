@@ -69,6 +69,8 @@ public class MessageImpl implements Message, java.io.Serializable
   private String _messageType;
   private int _priority = 4;
 
+  private long _sequence;
+
   private HashMap<String,Object> _properties;
   
   private transient boolean _isHeaderWriteable = true;
@@ -680,6 +682,16 @@ public class MessageImpl implements Message, java.io.Serializable
   public HashMap<String,Object> getProperties()
   {
     return _properties;
+  }
+
+  public long getSequence()
+  {
+    return _sequence;
+  }
+
+  public void setSequence(long seq)
+  {
+    _sequence = seq;
   }
   
   public MessageImpl copy()

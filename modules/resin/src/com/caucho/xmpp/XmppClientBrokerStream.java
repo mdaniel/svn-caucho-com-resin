@@ -84,7 +84,7 @@ class XmppClientBrokerStream extends AbstractBamStream
   public boolean querySet(long id, String to, String from,
 			  Serializable value)
   {
-    _out.sendQuery(String.valueOf(id), to, from, value, "get");
+    _out.sendQuery(String.valueOf(id), to, from, value, "set");
     
     return true;
   }

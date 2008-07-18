@@ -396,12 +396,9 @@ public class XmppReader
     ArrayList<Serializable> extraList = new ArrayList<Serializable>();
     BamError error = null;
 
-    System.out.println("HANDLE_PRESENCE:");
-    
     while ((tag = _in.nextTag()) > 0
 	   && ! ("presence".equals(_in.getLocalName())
 		 && tag == XMLStreamReader.END_ELEMENT)) {
-      System.out.println("NEXT:");
       if (_isFinest)
 	debug(_in);
       

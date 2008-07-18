@@ -54,6 +54,8 @@ public class MemoryQueue extends AbstractQueue
   // messages waiting for an ack
   private ArrayList<MessageImpl> _readList = new ArrayList<MessageImpl>();
 
+  private long _sequence;
+
   //
   // JMX configuration
   //
@@ -93,6 +95,8 @@ public class MemoryQueue extends AbstractQueue
 		   long expires)
   {
     synchronized (_queueList) {
+      msg.setSequence(_sequence++);
+      
       _queueList.add(msg);
     }
 
@@ -190,7 +194,19 @@ public class MemoryQueue extends AbstractQueue
     public int compare(MessageImpl msg1, MessageImpl msg2)
     {
       try {
-	return msg2.getJMSPriority() - msg1.getJMSPriority();
+	int cmp = msg2.getJMSPriority() - msg1.getJMSPriority();
+
+	if (cmp != 0)
+	  return cmp;
+
+	long seqCmp = (msg1.getSequence() - msg2.getSequence());
+
+	if (seqCmp < 0)
+	  return -1;
+	else if (seqCmp > 0)
+	  return 1;
+	else
+	  return 0;
       } catch (Exception e) {
 	throw new RuntimeException(e);
       }
