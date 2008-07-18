@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp;
+package com.caucho.hemp.broker;
 
 import com.caucho.bam.*;
 import com.caucho.util.*;

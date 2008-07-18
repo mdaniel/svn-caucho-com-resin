@@ -122,6 +122,14 @@ public class HempConnectionImpl implements BamConnection
   }
 
   /**
+   * Registers the listener
+   */
+  public BamStream getStreamHandler()
+  {
+    return _handler.getStreamHandler();
+  }
+
+  /**
    * Sends a message
    */
   public void message(String to, Serializable msg)

@@ -78,6 +78,14 @@ class HempConnectionAgentStream implements BamStream
     _streamHandler = handler;
   }
 
+  /**
+   * Registers the handler
+   */
+  BamStream getStreamHandler()
+  {
+    return _streamHandler;
+  }
+
   //
   // message handling
   //

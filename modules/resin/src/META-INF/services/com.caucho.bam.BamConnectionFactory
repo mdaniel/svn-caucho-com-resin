@@ -1,1 +1,1 @@
-com.caucho.hemp.BamConnectionFactoryImpl
+com.caucho.hemp.broker.BamConnectionFactoryImpl
