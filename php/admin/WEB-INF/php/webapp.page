@@ -51,7 +51,7 @@ else {
 /**
  * single-page webapp
  */
-function display_webapp($g_mbean_server, $webapp)
+function display_webapp($mbean_server, $webapp)
 {
   $session = $webapp->SessionManager;
   
@@ -69,59 +69,66 @@ function display_webapp($g_mbean_server, $webapp)
   </tr>
 END;
 
-echo "<tr class='" . row_style($count++) . "'>\n";
-echo " <td class='item'>\n";
+  echo "<tr class='" . row_style($count++) . "'>\n";
+  echo " <td class='item'>\n";
 
-$context_path = empty($webapp->ContextPath) ? "/" : $webapp->ContextPath;
+  $context_path = empty($webapp->ContextPath) ? "/" : $webapp->ContextPath;
 
-echo $context_path;
+  echo $context_path;
 
-echo " </td>";
+  echo " </td>";
 
-echo "  <td class='" . format_state_class($webapp->State) . "'>\n";
-echo  $webapp->State;
-echo "  </td>\n";
-echo "  <td>" . $webapp->RequestCount . "</td>\n";
-echo "  <td>" . $session->SessionActiveCount . "</td>\n";
-echo "  <td class='" . format_ago_class($webapp->StartTime) . "'>\n";
-echo "    " . format_ago($webapp->StartTime) . "\n";
-echo "   </td>\n";
+  echo "  <td class='" . format_state_class($webapp->State) . "'>\n";
+  echo  $webapp->State;
+  echo "  </td>\n";
+  echo "  <td>" . $webapp->RequestCount . "</td>\n";
+  echo "  <td>" . $session->SessionActiveCount . "</td>\n";
+  echo "  <td class='" . format_ago_class($webapp->StartTime) . "'>\n";
+  echo "    " . format_ago($webapp->StartTime) . "\n";
+  echo "   </td>\n";
 
         format_ago_td_pair($webapp->Status500CountTotal,
                            $webapp->Status500LastTime);
 
-echo "</tr>\n";
-echo "</table>";
+  echo "</tr>\n";
+  echo "</table>";
 
-echo "<h3>Actions</h3>\n";
+  echo "<h3>Actions</h3>\n";
 
-if (quercus_get_request()->isSecure()) {
-  $disabled = "";
-}
-else {
-  $disabled = "disabled='true'";
-}
+  if (quercus_get_request()->isSecure()) {
+    $disabled = "";
+  }
+  else {
+    $disabled = "disabled='true'";
+  }
 
-$name = $webapp->mbean_name;
+  $name = $webapp->mbean_name;
 
-echo "<form method='POST' style='display:inline'>\n";
-echo "<input type='hidden' name='action' value='start'>\n";
-echo "<input type='hidden' name='name' value='$name'>\n";
-echo "<input type='submit' name='submit' value='start' $disabled>\n";
-echo "</form>";
+  echo "<form method='POST' style='display:inline'>\n";
+  echo "<input type='hidden' name='action' value='start'>\n";
+  echo "<input type='hidden' name='name' value='$name'>\n";
+  echo "<input type='submit' name='submit' value='start' $disabled>\n";
+  echo "</form>";
 
-echo "<form method='POST' style='display:inline'>\n";
-echo "<input type='hidden' name='action' value='stop'>\n";
-echo "<input type='hidden' name='name' value='$name'>\n";
-echo "<input type='submit' name='submit' value='stop' $disabled>\n";
-echo "</form>";
+  echo "<form method='POST' style='display:inline'>\n";
+  echo "<input type='hidden' name='action' value='stop'>\n";
+  echo "<input type='hidden' name='name' value='$name'>\n";
+  echo "<input type='submit' name='submit' value='stop' $disabled>\n";
+  echo "</form>";
 
-echo "<form method='POST' style='display:inline'>";
-echo "<input type='hidden' name='action' value='restart'>";
-echo "<input type='hidden' name='name' value='$name'>\n";
-echo "<input type='submit' name='submit' value='restart' $disabled>";
-echo "</form>";
-  
+  echo "<form method='POST' style='display:inline'>";
+  echo "<input type='hidden' name='action' value='restart'>";
+  echo "<input type='hidden' name='name' value='$name'>\n";
+  echo "<input type='submit' name='submit' value='restart' $disabled>";
+  echo "</form>";
+
+  echo "<h2>MBeans</h2>\n";
+
+  $exp = mbean_explode($name);
+  $beans = $mbean_server->query("resin:*,Host=" . $exp['Host']
+                                 . ",WebApp=" . $exp['name']);
+
+  display_jmx($mbean_server, $beans);
 }
 
 /**

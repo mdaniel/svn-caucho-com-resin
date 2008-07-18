@@ -88,39 +88,6 @@ foreach ($mbean_group as $group_name => $group_mbeans) {
 
 //var_dump($a);
 
-function jmx_short_name($name, $exclude_array)
-{
-  $exp = mbean_explode($name);
-
-  foreach ($exclude_array as $key) {
-    unset($exp[$key]);
-  }
-
-  if (count($exp) > 0) {
-    ksort($exp);
-    
-    $name = "";
-    
-    foreach ($exp as $key => $value) {
-      if ($key == ':domain:')
-        continue;
-	
-      if (strlen($name) > 0)
-        $name .= ",";
-
-      $name .= $key . '=' . $value;
-    }
-    
-    if ($exp[':domain:']) {
-      $name = $exp[':domain:'] . ":" . $name;
-    }
-    
-    return $name;
-  }
-  else
-    return $name;
-}
-
 function jmx_order($a, $b)
 {
   $name_a = $a->mbean_name;
@@ -136,46 +103,6 @@ function jmx_order($a, $b)
   }
   
   return strcmp($name_a, $name_b);
-}
-
-function jmx_partition($mbean_list, $keys)
-{
-  $env = null;
-
-  foreach ($mbean_list as $mbean) {
-    $exp = mbean_explode($mbean->mbean_name);
-
-    $domain = $exp[':domain:'];
-
-    if ($domain == "JMImplementation")
-      continue;
-
-    $name = "";
-
-    foreach ($keys as $key) {
-      if ($key == ":domain:")
-        continue;
-      
-      $value = $exp[$key];
-
-      if ($value) {
-        if (strlen($name) > 0)
-	  $name .= ",";
-
-	$name .= $value;
-      }
-    }
-
-    if (in_array(":domain:", $keys)) {
-      $name = "${domain}:" . $name;
-    }
-      
-    $env[$name][] = $mbean;
-  }
-  
-  ksort($env);
-
-  return $env;
 }
 
 function jmx_partition_type($mbean_list)

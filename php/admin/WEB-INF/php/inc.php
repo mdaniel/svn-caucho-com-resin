@@ -265,6 +265,148 @@ $display_header_script = NULL;
 $display_header_title = NULL;
 $is_display_footer = false;
 
+function display_jmx($mbean_server, $group_mbeans)
+{
+  $type_partition = jmx_partition($group_mbeans, array("type"));
+  ksort($type_partition);
+
+  echo "<table class='data'>";
+  
+  foreach ($type_partition as $type_name => $type_mbeans) {
+    echo "<tr><td class='group' colspan='2'>$type_name</td></tr>\n";
+
+    foreach ($type_mbeans as $mbean) {
+      $attr_list = $mbean->mbean_info->attributes;
+      sort($attr_list);
+      
+      $attr_names = null;
+      
+      foreach ($attr_list as $attr) {
+        $attr_names[] = $attr->name;
+      }
+      sort($attr_names);
+
+      $start_id = ++$data_id;
+
+      $s = "show('h$start_id');hide('s$start_id');";
+      $h = "hide('h$start_id');show('s$start_id');";
+
+      for ($i = 0; $i < count($attr_names); $i++) {
+        $s .= "show('jmx" . ($i + $start_id) . "');";
+        $h .= "hide('jmx" . ($i + $start_id) . "');";
+      }
+      
+      echo "<tr><td class='item' colspan='2'>";
+      echo "<a id='s$start_id' href=\"javascript:$s\">[show]</a>\n";
+      echo "<a id='h$start_id' href=\"javascript:$h\" style='display:none'>[hide]</a>\n";
+      echo jmx_short_name($mbean->mbean_name, $group_array);
+      echo "</td></tr>\n";
+
+      $row = 0;
+
+      foreach ($attr_names as $attr_name) {
+        $id = "jmx" . $data_id++;
+      
+        echo "<tr id='$id' style='display:none'>";
+	echo "<td>" . $attr_name . "</td>";
+
+	$v = $mbean->$attr_name;
+
+	if ($v === false)
+	  $v = "false";
+	else if ($v === true)
+	  $v = "true";
+	else if ($v === null)
+	  $v = "null";
+	else
+	  $v = (string) $v;
+
+        $v = substr($v, 0, 60);
+	if (strlen($v) >= 60)
+	  $v .= "...";
+	  
+	echo "<td>" . $v . "</td>\n";
+        echo "</tr>";
+      }
+    }
+  }
+  
+  echo "</table>";
+}
+
+function jmx_partition($mbean_list, $keys)
+{
+  $env = null;
+
+  foreach ($mbean_list as $mbean) {
+    $exp = mbean_explode($mbean->mbean_name);
+
+    $domain = $exp[':domain:'];
+
+    if ($domain == "JMImplementation")
+      continue;
+
+    $name = "";
+
+    foreach ($keys as $key) {
+      if ($key == ":domain:")
+        continue;
+      
+      $value = $exp[$key];
+
+      if ($value) {
+        if (strlen($name) > 0)
+	  $name .= ",";
+
+	$name .= $value;
+      }
+    }
+
+    if (in_array(":domain:", $keys)) {
+      $name = "${domain}:" . $name;
+    }
+      
+    $env[$name][] = $mbean;
+  }
+  
+  ksort($env);
+
+  return $env;
+}
+
+function jmx_short_name($name, $exclude_array)
+{
+  $exp = mbean_explode($name);
+
+  foreach ($exclude_array as $key) {
+    unset($exp[$key]);
+  }
+
+  if (count($exp) > 0) {
+    ksort($exp);
+    
+    $name = "";
+    
+    foreach ($exp as $key => $value) {
+      if ($key == ':domain:')
+        continue;
+	
+      if (strlen($name) > 0)
+        $name .= ",";
+
+      $name .= $key . '=' . $value;
+    }
+    
+    if ($exp[':domain:']) {
+      $name = $exp[':domain:'] . ":" . $name;
+    }
+    
+    return $name;
+  }
+  else
+    return $name;
+}
+
 /**
  * Outputs an html header.
  * A header is only output if this is the first call to display_header().
@@ -359,6 +501,9 @@ global $g_page;
 $names = array_keys($g_pages);
 sort($names);
 
+$names = array_diff($names, array('summary'));
+array_unshift($names, 'summary');
+
 foreach ($names as $name) {
   if ($g_page == $name) {
     ?><li class="selected"><?= $name ?></li><?
@@ -371,7 +516,7 @@ foreach ($names as $name) {
 </ul>
 
 <?php
-  if (! $server) {
+  if (! $server && $g_server_id) {
     echo "<h3 class='fail'>Can't contact $g_server_id</h3>";
     return false;
   }

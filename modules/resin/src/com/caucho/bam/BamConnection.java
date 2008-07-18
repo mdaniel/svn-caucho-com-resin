@@ -65,6 +65,11 @@ public interface BamConnection {
    */
   public void setStreamHandler(BamStream handler);
 
+  /**
+   * Registers the stream handler
+   */
+  public BamStream getStreamHandler();
+
   //
   // message handling
   //
