@@ -54,7 +54,7 @@ public class BundleManager {
   private static final L10N L = new L10N(BundleManager.class);
   private static final Logger log = Log.open(BundleManager.class);
 
-  private static final LocalizationContext NULL_BUNDLE
+  public static final LocalizationContext NULL_BUNDLE
     = new LocalizationContext();
 
   private static EnvironmentLocal<BundleManager> _envBundle
