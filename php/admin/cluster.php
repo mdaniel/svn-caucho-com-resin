@@ -3,9 +3,6 @@
  * Provides the clustering information.
  */
 
-
-require_once "WEB-INF/php/inc.php";
-
 $mbeanServer = new MBeanServer();
 
 $resin = $mbeanServer->lookup("resin:type=Resin");
@@ -300,6 +297,4 @@ if ($live_count < 2) {
   echo "&lt;/resin>\n";
   echo "</pre>\n";
 }
-
-display_footer("cluster.php");
 

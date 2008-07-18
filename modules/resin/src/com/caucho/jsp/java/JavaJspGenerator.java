@@ -1491,6 +1491,13 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("{");
     out.pushDepth();
 
+    _rootNode.generateTagRelease(out);
+
+    for (JspFragmentNode frag : _fragmentList) {
+      frag.generateTagRelease(out);
+    }
+
+    /*
     for (int i = 0; i < _topTag.size(); i++) {
       TagInstance tag = _topTag.get(i);
 
@@ -1501,6 +1508,7 @@ public class JavaJspGenerator extends JspGenerator {
         out.println("  " + tag.getId() + ".release();");
       }
     }
+    */
 
     out.popDepth();
     out.println("}"); // release

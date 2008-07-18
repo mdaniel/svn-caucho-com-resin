@@ -54,15 +54,15 @@ public class BundleManager {
   private static final L10N L = new L10N(BundleManager.class);
   private static final Logger log = Log.open(BundleManager.class);
 
-  static LocalizationContext NULL_BUNDLE =
-    new LocalizationContext();
+  private static final LocalizationContext NULL_BUNDLE
+    = new LocalizationContext();
 
   private static EnvironmentLocal<BundleManager> _envBundle
     = new EnvironmentLocal<BundleManager>();
 
   private TimedCache<String,LocalizationContext> _bundleCache;
 
-  private Method bundleSetParentMethod;
+  private Method _bundleSetParentMethod;
 
   private BundleManager()
   {
@@ -71,12 +71,12 @@ public class BundleManager {
     _bundleCache = new TimedCache(256, updateInterval);
 
     try {
-      bundleSetParentMethod
+      _bundleSetParentMethod
         = ResourceBundle.class.getDeclaredMethod("setParent",
                                          new Class[]{
-                                           ResourceBundle.class});
+						   ResourceBundle.class});
       
-      bundleSetParentMethod.setAccessible(true);
+      _bundleSetParentMethod.setAccessible(true);
     }
     catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
@@ -132,70 +132,83 @@ public class BundleManager {
    */
   public LocalizationContext getBundle(String name, Locale locale)
   {
-    String cacheName = (name + '_' +
-                        locale.getLanguage() + '_' +
-                        locale.getCountry() + '_' +
-                        locale.getVariant());
+    String cacheName = (name
+			+ '_' + locale.getLanguage()
+			+ '_' + locale.getCountry()
+			+ '_' + locale.getVariant());
 
-    LocalizationContext bundle;
+    LocalizationContext context;
 
-    bundle = _bundleCache.get(cacheName);
+    context = _bundleCache.get(cacheName);
 
-    if (bundle != null)
-      return bundle != NULL_BUNDLE ? bundle : null;
+    if (context != null)
+      return context != NULL_BUNDLE ? context : null;
 
-    ResourceBundle base;
+    ResourceBundle parent = getBaseBundle(name);
 
-    base = getBaseBundle(name);
+    ResourceBundle bundle = getBaseBundle(name
+					  + '_' + locale.getLanguage());
 
-    ResourceBundle resourceBundle = getBaseBundle(name +
-                                                  '_' +
-                                                  locale.getLanguage());
-    if (resourceBundle != null) {
-      if (base != null)
+    ResourceBundle matchBundle = null;
+
+    
+    if (bundle != null) {
+      if (parent != null) {
         try {
-          bundleSetParentMethod.invoke(resourceBundle, base);
+          _bundleSetParentMethod.invoke(bundle, parent);
         }
         catch (Exception e) {
           log.log(Level.WARNING, e.getMessage(), e);
         }
-      base = resourceBundle;
+      }
+      
+      parent = bundle;
+      matchBundle = bundle;
     }
 
-    resourceBundle = getBaseBundle(name + '_' +
-                                   locale.getLanguage() + '_' +
-                                   locale.getCountry());
-    if (resourceBundle != null) {
-      if (base != null)
+    bundle = getBaseBundle(name
+			   + '_' + locale.getLanguage()
+			   + '_' + locale.getCountry());
+    
+    if (bundle != null) {
+      if (parent != null) {
         try {
-          bundleSetParentMethod.invoke(resourceBundle, base);
+          _bundleSetParentMethod.invoke(bundle, parent);
         }
         catch (Exception e) {
           log.log(Level.WARNING, e.getMessage(), e);
         }
-      base = resourceBundle;
+      }
+      
+      parent = bundle;
+      matchBundle = bundle;
     }
 
-    resourceBundle = getBaseBundle(name + '_' +
-                                   locale.getLanguage() + '_' +
-                                   locale.getCountry() + '_' +
-                                   locale.getVariant());
-    if (resourceBundle != null) {
-      if (base != null)
+    bundle = getBaseBundle(name
+			   + '_' + locale.getLanguage()
+			   + '_' + locale.getCountry()
+			   + '_' + locale.getVariant());
+    
+    if (bundle != null) {
+      if (parent != null) {
         try {
-          bundleSetParentMethod.invoke(resourceBundle, base);
+          _bundleSetParentMethod.invoke(bundle, parent);
         }
         catch (Exception e) {
           log.log(Level.WARNING, e.getMessage(), e);
         }
-      base = resourceBundle;
+      }
+      
+      parent = bundle;
+      matchBundle = bundle;
     }
 
-    if (base != null) {
-      bundle = new LocalizationContext(base, locale);
-      _bundleCache.put(cacheName, bundle);
+    if (matchBundle != null) {
+      context = new LocalizationContext(matchBundle, locale);
+      
+      _bundleCache.put(cacheName, context);
 
-      return bundle;
+      return context;
     }
 
     _bundleCache.put(cacheName, NULL_BUNDLE);
@@ -219,7 +232,9 @@ public class BundleManager {
     ResourceBundle resourceBundle = getBaseBundle(name);
     if (resourceBundle != null) {
       bundle = new LocalizationContext(resourceBundle);
+      
       _bundleCache.put(name, bundle);
+      
       return bundle;
     }
 
@@ -245,11 +260,12 @@ public class BundleManager {
           return rb;
       }
     } catch (Throwable e) {
+      log.log(Level.FINEST, e.toString(), e);
     }
     
     try {
       InputStream is = loader.getResourceAsStream(name.replace('.', '/') + ".properties");
-
+      
       if (is instanceof ReadStream) {
         Path path = ((ReadStream) is).getPath();
         Environment.addDependency(path.createDepend());
@@ -261,6 +277,7 @@ public class BundleManager {
 
       return bundle;
     } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
     }
 
     return null;

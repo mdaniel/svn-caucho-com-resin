@@ -739,6 +739,23 @@ public abstract class JspNode {
   }
 
   /**
+   * generates tag state release
+   */
+  public void generateTagRelease(JspJavaWriter out)
+    throws Exception
+  {
+    generateTagReleaseChildren(out);
+  }
+
+  /**
+   * generates tag state
+   */
+  public void generateTagReleaseChildren(JspJavaWriter out)
+    throws Exception
+  {
+  }
+
+  /**
    * Generates the code for the tag
    *
    * @param out the output writer for the generated java.

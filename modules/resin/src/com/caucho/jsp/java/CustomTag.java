@@ -81,6 +81,21 @@ public class CustomTag extends GenericTag
   }
   
   /**
+   * Generates code before the actual JSP.
+   */
+  @Override
+  public void generateTagRelease(JspJavaWriter out)
+    throws Exception
+  {
+    if (isDeclaringInstance()) {
+      out.println("if (" + _tag.getId() + " != null)");
+      out.println("  " + _tag.getId() + ".release();");
+    }
+    
+    super.generateTagRelease(out);
+  }
+  
+  /**
    * Generates the code for a custom tag.
    *
    * @param out the output writer for the generated java.

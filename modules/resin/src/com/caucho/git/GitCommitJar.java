@@ -50,6 +50,10 @@ public class GitCommitJar {
   {
     _jar = jar;
 
+    HashMap<String,Long> lengthMap = new HashMap<String,Long>();
+
+    fillLengthMap(lengthMap, jar);
+
     ReadStream is = jar.openRead();
     try {
       ZipInputStream zin = new ZipInputStream(is);
@@ -62,15 +66,11 @@ public class GitCommitJar {
 
 	if (entry.isDirectory())
 	  continue;
-	
-	if (length < 0) {
-	  length = 0;
-	  int ch;
 
-	  while ((ch = zin.read()) >= 0) {
-	    length++;
-	  }
-	}
+	Long lengthValue = lengthMap.get(path);
+
+	if (lengthValue != null)
+	  length = lengthValue;
 
 	_commit.addFile(path, 0664, zin, length);
       }
@@ -94,6 +94,38 @@ public class GitCommitJar {
   public String findPath(String sha1)
   {
     return _commit.findPath(sha1);
+  }
+
+  private void fillLengthMap(HashMap<String,Long> lengthMap, Path jar)
+    throws IOException
+  {
+    ReadStream is = jar.openRead();
+    try {
+      ZipInputStream zin = new ZipInputStream(is);
+
+      ZipEntry entry;
+      
+      while ((entry = zin.getNextEntry()) != null) {
+	String path = entry.getName();
+	long length = entry.getSize();
+
+	if (entry.isDirectory())
+	  continue;
+	
+	if (length < 0) {
+	  length = 0;
+	  int ch;
+
+	  while ((ch = zin.read()) >= 0) {
+	    length++;
+	  }
+	}
+
+	lengthMap.put(path, length);
+      }
+    } finally {
+      is.close();
+    }
   }
 
   public InputStream openFile(String sha1)
