@@ -691,5 +691,7 @@ public class JavaJspBuilder extends JspBuilder {
 	   JsfFacetNode.class);
     addMap(_jsfTagMap, "faces", "view", JSF_CORE_URI,
 	   JsfViewRoot.class);
+    addMap(_jsfTagMap, "faces", "phaseListener", JSF_CORE_URI,
+           JsfPhaseListener.class);
   }
 }
