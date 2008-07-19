@@ -207,7 +207,7 @@ public class HempTopic extends AbstractTopic
   }
 
   class TopicResource extends SimpleBamService {
-    protected void setJid(String jid)
+    public void setJid(String jid)
     {
       super.setJid(jid);
     }

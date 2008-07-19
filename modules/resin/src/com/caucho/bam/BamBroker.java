@@ -35,6 +35,11 @@ package com.caucho.bam;
 public interface BamBroker extends BamConnectionFactory
 {
   /**
+   * Returns the broker's jid, i.e. the virtual host domain name.
+   */
+  public String getJid();
+  
+  /**
    * Returns the stream to the broker
    */
   public BamStream getBrokerStream();

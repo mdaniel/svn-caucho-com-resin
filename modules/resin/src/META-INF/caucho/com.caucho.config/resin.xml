@@ -3,6 +3,9 @@
   <bean name="authenticator"
         class="com.caucho.server.security.ServletAuthenticator"/>
 
+  <bean name="bam-service"
+        class="com.caucho.hemp.broker.BamServiceConfig"/>
+
   <bean name="bean"
         class="com.caucho.config.types.BeanConfig"/>
 

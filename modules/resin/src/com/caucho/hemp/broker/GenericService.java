@@ -193,8 +193,9 @@ public class GenericService extends SimpleBamService
     return false;
   }
   
+  @QueryGet
   public boolean handleDiscoInfoQuery(long id, String to, String from,
-                                      @QueryGet DiscoInfoQuery query)
+				      DiscoInfoQuery query)
   {
     _brokerStream.queryResult(id, from, to,
                               new DiscoInfoQuery(getDiscoIdentity(),
@@ -203,8 +204,9 @@ public class GenericService extends SimpleBamService
     return true;
   }
 
+  @QueryGet
   public boolean handleDiscoItemsQuery(long id, String to, String from,
-                                       @QueryGet DiscoItemsQuery query)
+				       DiscoItemsQuery query)
   {
     DiscoItemsQuery result = new DiscoItemsQuery();
     result.setItems(getDiscoItems());

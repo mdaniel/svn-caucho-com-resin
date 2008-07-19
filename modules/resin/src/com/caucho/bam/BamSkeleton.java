@@ -50,182 +50,206 @@ public class BamSkeleton<C>
   private static final Logger log
     = Logger.getLogger(BamSkeleton.class.getName());
 
-  private final static HashMap<Class, BamSkeleton> _skeletons = 
-    new HashMap<Class, BamSkeleton>();
+  private final static WeakHashMap<Class, BamSkeleton> _skeletons
+    = new WeakHashMap<Class, BamSkeleton>();
+
+  private Class _cl;
   
-  private final HashMap<Class, Method> _messageHandlers = 
-    new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _messageErrorHandlers = 
-    new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _queryGetHandlers = 
-    new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _querySetHandlers = 
-    new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _queryResultHandlers = 
-    new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _queryErrorHandlers = 
-    new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceHandlers = 
-    new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceProbeHandlers = 
-    new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceSubscribeHandlers = 
-    new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceSubscribedHandlers = 
-    new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceUnsubscribeHandlers = 
-    new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceUnsubscribedHandlers = 
-    new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceUnavailableHandlers = 
-    new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceErrorHandlers = 
-    new HashMap<Class, Method>();
+  private final HashMap<Class, Method> _messageHandlers
+    = new HashMap<Class, Method>();
+  private final HashMap<Class, Method> _messageErrorHandlers
+    = new HashMap<Class, Method>();
+  private final HashMap<Class, Method> _queryGetHandlers
+    = new HashMap<Class, Method>();
+  private final HashMap<Class, Method> _querySetHandlers
+    = new HashMap<Class, Method>();
+  private final HashMap<Class, Method> _queryResultHandlers
+    = new HashMap<Class, Method>();
+  private final HashMap<Class, Method> _queryErrorHandlers
+    = new HashMap<Class, Method>();
+  private final HashMap<Class, Method> _presenceHandlers
+    = new HashMap<Class, Method>();
+  private final HashMap<Class, Method> _presenceProbeHandlers
+    = new HashMap<Class, Method>();
+  private final HashMap<Class, Method> _presenceSubscribeHandlers
+    = new HashMap<Class, Method>();
+  private final HashMap<Class, Method> _presenceSubscribedHandlers
+    = new HashMap<Class, Method>();
+  private final HashMap<Class, Method> _presenceUnsubscribeHandlers
+    = new HashMap<Class, Method>();
+  private final HashMap<Class, Method> _presenceUnsubscribedHandlers
+    = new HashMap<Class, Method>();
+  private final HashMap<Class, Method> _presenceUnavailableHandlers
+    = new HashMap<Class, Method>();
+  private final HashMap<Class, Method> _presenceErrorHandlers
+    = new HashMap<Class, Method>();
 
   private BamSkeleton(Class<C> cl)
   {
-    log.log(Level.FINEST, L.l("Introspecting class {0}", cl.getName()));
+    _cl = cl;
+    
+    log.finest(L.l("{0} introspecting class {1}", this, cl.getName()));
 
     Method[] methods = cl.getMethods();
 
     for (int i = 0; i < methods.length; i++) {
-      Class observed = null;
+      Method method = methods[i];
+      
+      Class messageType = getMessageType(Message.class, method);
 
-      observed = getMessageObserved(methods[i]);
-
-      if (observed != null) {
-        log.log(Level.FINEST, L.l("Found message handler: {0}", methods[i]));
-        _messageHandlers.put(observed, methods[i]);
+      if (messageType != null) {
+        log.finest(L.l("{0} found @Message handler type={1} method={2}",
+		       this, messageType.getName(), method));
+	
+        _messageHandlers.put(messageType, method);
         continue;
       }
 
+      messageType = getMessageType(MessageError.class, method);
 
-      observed = getMessageErrorObserved(methods[i]);
-
-      if (observed != null) {
-        log.log(Level.FINEST, L.l("Found message error handler: {0}", 
-                                  methods[i]));
-        _messageErrorHandlers.put(observed, methods[i]);
+      if (messageType != null) {
+        log.finest(L.l("{0} found @MessageError handler type={1} method={2}",
+		       this, messageType.getName(), method));
+	
+        _messageErrorHandlers.put(messageType, method);
         continue;
       }
 
+      messageType = getMessageType(QueryGet.class, method);
 
-      observed = getQueryGetObserved(methods[i]);
+      if (messageType != null) {
+        log.finest(L.l("{0} found @QueryGet handler type={1} method={2}",
+		       this, messageType.getName(), method));
+	
+        _queryGetHandlers.put(messageType, method);
+        continue;
+      }
 
-      if (observed != null) {
-        log.log(Level.FINEST, L.l("Found queryGet handler: {0}", methods[i]));
-        _queryGetHandlers.put(observed, methods[i]);
+      messageType = getMessageType(QuerySet.class, method);
+
+      if (messageType != null) {
+        log.finest(L.l("{0} found @QuerySet handler type={1} method={2}",
+		       this, messageType.getName(), method));
+
+        _querySetHandlers.put(messageType, method);
+        continue;
+      }
+
+      messageType = getMessageType(QueryResult.class, method);
+
+      if (messageType != null) {
+        log.finest(L.l("{0} found @QueryResult handler type={1} method={2}",
+		       this, messageType.getName(), method));
+
+        _queryResultHandlers.put(messageType, method);
         continue;
       }
       
+      messageType = getMessageType(QueryError.class, method);
 
-      observed = getQuerySetObserved(methods[i]);
-
-      if (observed != null) {
-        log.log(Level.FINEST, L.l("Found querySet handler: {0}", methods[i]));
-        _querySetHandlers.put(observed, methods[i]);
+      if (messageType != null) {
+        log.finest(L.l("{0} found @QueryError handler type={1} method={2}",
+		       this, messageType.getName(), method));
+	
+        _queryErrorHandlers.put(messageType, method);
         continue;
       }
 
-      
-      observed = getQueryResultObserved(methods[i]);
+      messageType = getMessageType(Presence.class, method);
 
-      if (observed != null) {
-        log.log(Level.FINEST, L.l("Found queryResult handler: {0}", 
-                                  methods[i]));
-        _queryResultHandlers.put(observed, methods[i]);
-        continue;
-      }
-      
-
-      observed = getQueryErrorObserved(methods[i]);
-
-      if (observed != null) {
-        log.log(Level.FINEST, L.l("Found query error handler: {0}", 
-                                  methods[i]));
-        _queryErrorHandlers.put(observed, methods[i]);
+      if (messageType != null) {
+        log.finest(L.l("{0} found @Presence handler type={1} method={2}",
+		       this, messageType.getName(), method));
+	
+        _presenceHandlers.put(messageType, method);
+	
         continue;
       }
 
+      messageType = getMessageType(PresenceProbe.class, method);
 
-      observed = getPresenceObserved(methods[i]);
+      if (messageType != null) {
+        log.finest(L.l("{0} found @PresenceProbe handler type={1} method={2}",
+		       this, messageType.getName(), method));
 
-      if (observed != null) {
-        log.log(Level.FINEST, L.l("Found presence handler: {0}", methods[i]));
-        _presenceHandlers.put(observed, methods[i]);
+        _presenceProbeHandlers.put(messageType, methods[i]);
+	
         continue;
       }
 
+      messageType = getMessageType(PresenceSubscribe.class, method);
 
-      observed = getPresenceProbeObserved(methods[i]);
-
-      if (observed != null) {
-        log.log(Level.FINEST, L.l("Found presence probe handler: {0}", 
-                                  methods[i]));
-        _presenceProbeHandlers.put(observed, methods[i]);
+      if (messageType != null) {
+        log.finest(L.l("{0} found @PresenceSubscribe handler type={1} method={2}",
+		       this, messageType.getName(), method));
+	
+        _presenceSubscribeHandlers.put(messageType, methods[i]);
         continue;
       }
 
+      messageType = getMessageType(PresenceSubscribed.class, method);
 
-      observed = getPresenceSubscribeObserved(methods[i]);
+      if (messageType != null) {
+        log.finest(L.l("{0} found @PresenceSubscribe handler type={1} method={2}",
+		       this, messageType.getName(), method));
 
-      if (observed != null) {
-        log.log(Level.FINEST, L.l("Found presence subscribe handler: {0}", 
-                                  methods[i]));
-        _presenceSubscribeHandlers.put(observed, methods[i]);
+        _presenceSubscribedHandlers.put(messageType, methods[i]);
         continue;
       }
 
+      messageType = getMessageType(PresenceUnsubscribe.class, method);
 
-      observed = getPresenceSubscribedObserved(methods[i]);
+      if (messageType != null) {
+        log.finest(L.l("{0} found @PresenceUnsubscribe handler type={1} method={2}",
+		       this, messageType.getName(), method));
 
-      if (observed != null) {
-        log.log(Level.FINEST, L.l("Found presence subscribed handler: {0}", 
-                                  methods[i]));
-        _presenceSubscribedHandlers.put(observed, methods[i]);
+        _presenceUnsubscribeHandlers.put(messageType, methods[i]);
         continue;
       }
 
+      messageType = getMessageType(PresenceUnsubscribed.class, method);
 
-      observed = getPresenceUnsubscribeObserved(methods[i]);
+      if (messageType != null) {
+        log.finest(L.l("{0} found @PresenceUnsubscribed handler type={1} method={2}",
+		       this, messageType.getName(), method));
 
-      if (observed != null) {
-        log.log(Level.FINEST, L.l("Found presence unsubscribe handler: {0}", 
-                                  methods[i]));
-        _presenceUnsubscribeHandlers.put(observed, methods[i]);
+        _presenceUnsubscribedHandlers.put(messageType, methods[i]);
         continue;
       }
 
+      messageType = getMessageType(PresenceUnavailable.class, method);
 
-      observed = getPresenceUnsubscribedObserved(methods[i]);
-
-      if (observed != null) {
-        log.log(Level.FINEST, L.l("Found presence unsubscribed handler: {0}", 
-                                  methods[i]));
-        _presenceUnsubscribedHandlers.put(observed, methods[i]);
+      if (messageType != null) {
+        log.finest(L.l("{0} found @PresenceUnavailable handler type={1} method={2}",
+		       this, messageType.getName(), method));
+	
+        _presenceUnavailableHandlers.put(messageType, methods[i]);
         continue;
       }
 
+      messageType = getMessageType(PresenceError.class, method);
 
-      observed = getPresenceUnavailableObserved(methods[i]);
+      if (messageType != null) {
+        log.finest(L.l("{0} found @PresenceError handler type={1} method={2}",
+		       this, messageType.getName(), method));
 
-      if (observed != null) {
-        log.log(Level.FINEST, L.l("Found presence unavailable handler: {0}", 
-                                  methods[i]));
-        _presenceUnavailableHandlers.put(observed, methods[i]);
-        continue;
-      }
-
-
-      observed = getPresenceErrorObserved(methods[i]);
-
-      if (observed != null) {
-        log.log(Level.FINEST, L.l("Found presence error handler: {0}", 
-                                  methods[i]));
-        _presenceErrorHandlers.put(observed, methods[i]);
+        _presenceErrorHandlers.put(messageType, methods[i]);
         continue;
       }
     }
+  }
+
+  private Class getMessageType(Class annotationType, Method method)
+  {
+    Class []paramTypes = method.getParameterTypes();
+
+    if (paramTypes.length < 3)
+      return null;
+
+    if (method.isAnnotationPresent(annotationType))
+      return paramTypes[2];
+    else
+      return null;
   }
  
   public static BamSkeleton getBamSkeleton(Class cl)
@@ -517,511 +541,8 @@ public class BamSkeleton<C>
     }
   }
 
-  /**
-   * Returns the class of the message that a method observes, if it is
-   * a message-observing method.  A message-observing method looks like
-   *
-   *   void foo(String to, String from, @Message Bar bar)
-   *
-   * where Bar implements Serializable.
-   **/
-  private Class getMessageObserved(Method method)
+  public String toString()
   {
-    if (! void.class.equals(method.getReturnType()))
-      return null;
-
-    Class[] parameterTypes = method.getParameterTypes();
-
-    if (parameterTypes.length != 3)
-      return null;
-
-    // check for to and from parameters
-    if (! String.class.equals(parameterTypes[0]) ||
-        ! String.class.equals(parameterTypes[1]))
-      return null;
-
-    if (! Serializable.class.isAssignableFrom(parameterTypes[2]))
-      return null;
-
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-    if (! contains(Message.class, parameterAnnotations[2]))
-      return null;
-
-    return parameterTypes[2];
-  }
-
-  /**
-   * Returns the class of the message that a method observes, if it is
-   * a message error-observing method.  A message error-observing method 
-   * looks like
-   *
-   *   void foo(String to, String from, @MessageError Bar bar, BamError error)
-   *
-   * where Bar implements Serializable.
-   **/
-  private Class getMessageErrorObserved(Method method)
-  {
-    if (! void.class.equals(method.getReturnType()))
-      return null;
-
-    Class[] parameterTypes = method.getParameterTypes();
-
-    if (parameterTypes.length != 4)
-      return null;
-
-    // check for to and from and error parameters
-    if (! String.class.equals(parameterTypes[0]) ||
-        ! String.class.equals(parameterTypes[1]) ||
-        ! BamError.class.equals(parameterTypes[3]))
-      return null;
-
-    if (! Serializable.class.isAssignableFrom(parameterTypes[2]))
-      return null;
-
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-    if (! contains(MessageError.class, parameterAnnotations[2]))
-      return null;
-
-    return parameterTypes[2];
-  }
-
-  /**
-   * Returns the class of the query that a method observes, if it is
-   * a query-observing method.  A query-observing method looks like
-   *
-   *   boolean foo(long id, String to, String from, @QueryGet Bar bar)
-   *
-   * where Bar implements Serializable.
-   **/
-  private Class getQueryGetObserved(Method method)
-  {
-    if (! boolean.class.equals(method.getReturnType()))
-      return null;
-
-    Class[] parameterTypes = method.getParameterTypes();
-
-    if (parameterTypes.length != 4)
-      return null;
-
-    // check for id, to, and from parameters
-    if (! long.class.equals(parameterTypes[0]) ||
-        ! String.class.equals(parameterTypes[1]) ||
-        ! String.class.equals(parameterTypes[2]))
-      return null;
-
-    if (! Serializable.class.isAssignableFrom(parameterTypes[3]))
-      return null;
-
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-    if (! contains(QueryGet.class, parameterAnnotations[3]))
-      return null;
-
-    return parameterTypes[3];
-  }
-
-  /**
-   * Returns the class of the query that a method observes, if it is
-   * a query-observing method.  A query-observing method looks like
-   *
-   *   boolean foo(long id, String to, String from, @QuerySet Bar bar)
-   *
-   * where Bar implements Serializable.
-   **/
-  private Class getQuerySetObserved(Method method)
-  {
-    if (! boolean.class.equals(method.getReturnType()))
-      return null;
-
-    Class[] parameterTypes = method.getParameterTypes();
-
-    if (parameterTypes.length != 4)
-      return null;
-
-    // check for id, to, and from parameters
-    if (! long.class.equals(parameterTypes[0]) ||
-        ! String.class.equals(parameterTypes[1]) ||
-        ! String.class.equals(parameterTypes[2]))
-      return null;
-
-    if (! Serializable.class.isAssignableFrom(parameterTypes[3]))
-      return null;
-
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-    if (! contains(QuerySet.class, parameterAnnotations[3]))
-      return null;
-
-    return parameterTypes[3];
-  }
-
-  /**
-   * Returns the class of the query that a method observes, if it is
-   * a query-observing method.  A query-observing method looks like
-   *
-   *   boolean foo(long id, String to, String from, @QueryResult Bar bar)
-   *
-   * or
-   *
-   *   void foo(long id, String to, String from, @QueryResult Bar bar)
-   *
-   * where Bar implements Serializable.
-   **/
-  private Class getQueryResultObserved(Method method)
-  {
-    if (! void.class.equals(method.getReturnType()) &&
-        ! boolean.class.equals(method.getReturnType()))
-      return null;
-
-    Class[] parameterTypes = method.getParameterTypes();
-
-    if (parameterTypes.length != 4)
-      return null;
-
-    // check for id, to, and from parameters
-    if (! long.class.equals(parameterTypes[0]) ||
-        ! String.class.equals(parameterTypes[1]) ||
-        ! String.class.equals(parameterTypes[2]))
-      return null;
-
-    if (! Serializable.class.isAssignableFrom(parameterTypes[3]))
-      return null;
-
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-    if (! contains(QueryResult.class, parameterAnnotations[3]))
-      return null;
-
-    return parameterTypes[3];
-  }
-
-  /**
-   * Returns the class of the query that a method observes, if it is
-   * a query error-observing method.  A query error-observing method 
-   * looks like
-   *
-   *   void foo(long id, String to, String from, @QueryError Bar bar, 
-   *            BamError error)
-   *
-   * where Bar implements Serializable.
-   **/
-  private Class getQueryErrorObserved(Method method)
-  {
-    if (! void.class.equals(method.getReturnType()))
-      return null;
-
-    Class[] parameterTypes = method.getParameterTypes();
-
-    if (parameterTypes.length != 5)
-      return null;
-
-    // check for id, to, from, and error parameters
-    if (! long.class.equals(parameterTypes[0]) ||
-        ! String.class.equals(parameterTypes[1]) ||
-        ! String.class.equals(parameterTypes[2]) ||
-        ! BamError.class.equals(parameterTypes[4]))
-      return null;
-
-    if (! Serializable.class.isAssignableFrom(parameterTypes[3]))
-      return null;
-
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-    if (! contains(QueryError.class, parameterAnnotations[3]))
-      return null;
-
-    return parameterTypes[3];
-  }
-
-  /**
-   * Returns the class of the presence that a method observes, if it is
-   * a presence-observing method.  A presence-observing method looks like
-   *
-   *   void foo(String to, String from, @Presence Bar bar)
-   *
-   * where Bar implements Serializable.
-   **/
-  private Class getPresenceObserved(Method method)
-  {
-    if (! void.class.equals(method.getReturnType()))
-      return null;
-
-    Class[] parameterTypes = method.getParameterTypes();
-
-    if (parameterTypes.length != 3)
-      return null;
-
-    // check for to and from parameters
-    if (! String.class.equals(parameterTypes[0]) ||
-        ! String.class.equals(parameterTypes[1]))
-      return null;
-
-    if (! Serializable.class.isAssignableFrom(parameterTypes[2]))
-      return null;
-
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-    if (! contains(Presence.class, parameterAnnotations[2]))
-      return null;
-
-    return parameterTypes[2];
-  }
-
-  /**
-   * Returns the class of the presence probe that a method observes, if it is
-   * a presence probe-observing method.  A presence probe-observing method 
-   * looks like
-   *
-   *   void foo(String to, String from, @PresenceProbe Bar bar)
-   *
-   * where Bar implements Serializable.
-   **/
-  private Class getPresenceProbeObserved(Method method)
-  {
-    if (! void.class.equals(method.getReturnType()))
-      return null;
-
-    Class[] parameterTypes = method.getParameterTypes();
-
-    if (parameterTypes.length != 3)
-      return null;
-
-    // check for to and from parameters
-    if (! String.class.equals(parameterTypes[0]) ||
-        ! String.class.equals(parameterTypes[1]))
-      return null;
-
-    if (! Serializable.class.isAssignableFrom(parameterTypes[2]))
-      return null;
-
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-    if (! contains(PresenceProbe.class, parameterAnnotations[2]))
-      return null;
-
-    return parameterTypes[2];
-  }
-
-  /**
-   * Returns the class of the presence subscribe that a method observes, 
-   * if it is a presence subscribe-observing method.  A presence 
-   * subscribe-observing method looks like
-   *
-   *   void foo(String to, String from, @PresenceSubscribe Bar bar)
-   *
-   * where Bar implements Serializable.
-   **/
-  private Class getPresenceSubscribeObserved(Method method)
-  {
-    if (! void.class.equals(method.getReturnType()))
-      return null;
-
-    Class[] parameterTypes = method.getParameterTypes();
-
-    if (parameterTypes.length != 3)
-      return null;
-
-    // check for to and from parameters
-    if (! String.class.equals(parameterTypes[0]) ||
-        ! String.class.equals(parameterTypes[1]))
-      return null;
-
-    if (! Serializable.class.isAssignableFrom(parameterTypes[2]))
-      return null;
-
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-    if (! contains(PresenceSubscribe.class, parameterAnnotations[2]))
-      return null;
-
-    return parameterTypes[2];
-  }
-
-  /**
-   * Returns the class of the presence subscribed that a method observes, 
-   * if it is a presence subscribed-observing method.  A presence 
-   * subscribed-observing method looks like
-   *
-   *   void foo(String to, String from, @PresenceSubscribed Bar bar)
-   *
-   * where Bar implements Serializable.
-   **/
-  private Class getPresenceSubscribedObserved(Method method)
-  {
-    if (! void.class.equals(method.getReturnType()))
-      return null;
-
-    Class[] parameterTypes = method.getParameterTypes();
-
-    if (parameterTypes.length != 3)
-      return null;
-
-    // check for to and from parameters
-    if (! String.class.equals(parameterTypes[0]) ||
-        ! String.class.equals(parameterTypes[1]))
-      return null;
-
-    if (! Serializable.class.isAssignableFrom(parameterTypes[2]))
-      return null;
-
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-    if (! contains(PresenceSubscribed.class, parameterAnnotations[2]))
-      return null;
-
-    return parameterTypes[2];
-  }
-
-  /**
-   * Returns the class of the presence unsubscribe that a method observes, 
-   * if it is a presence unsubscribe-observing method.  A presence 
-   * unsubscribe-observing method looks like
-   *
-   *   void foo(String to, String from, @PresenceUnsubscribe Bar bar)
-   *
-   * where Bar implements Serializable.
-   **/
-  private Class getPresenceUnsubscribeObserved(Method method)
-  {
-    if (! void.class.equals(method.getReturnType()))
-      return null;
-
-    Class[] parameterTypes = method.getParameterTypes();
-
-    if (parameterTypes.length != 3)
-      return null;
-
-    // check for to and from parameters
-    if (! String.class.equals(parameterTypes[0]) ||
-        ! String.class.equals(parameterTypes[1]))
-      return null;
-
-    if (! Serializable.class.isAssignableFrom(parameterTypes[2]))
-      return null;
-
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-    if (! contains(PresenceUnsubscribe.class, parameterAnnotations[2]))
-      return null;
-
-    return parameterTypes[2];
-  }
-
-  /**
-   * Returns the class of the presence unsubscribed that a method observes, 
-   * if it is a presence unsubscribed-observing method.  A presence 
-   * unsubscribed-observing method looks like
-   *
-   *   void foo(String to, String from, @PresenceUnsubscribed Bar bar)
-   *
-   * where Bar implements Serializable.
-   **/
-  private Class getPresenceUnsubscribedObserved(Method method)
-  {
-    if (! void.class.equals(method.getReturnType()))
-      return null;
-
-    Class[] parameterTypes = method.getParameterTypes();
-
-    if (parameterTypes.length != 3)
-      return null;
-
-    // check for to and from parameters
-    if (! String.class.equals(parameterTypes[0]) ||
-        ! String.class.equals(parameterTypes[1]))
-      return null;
-
-    if (! Serializable.class.isAssignableFrom(parameterTypes[2]))
-      return null;
-
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-    if (! contains(PresenceUnsubscribed.class, parameterAnnotations[2]))
-      return null;
-
-    return parameterTypes[2];
-  }
-
-  /**
-   * Returns the class of the presence unavailabled that a method observes, 
-   * if it is a presence unavailable-observing method.  A presence 
-   * unavailable-observing method looks like
-   *
-   *   void foo(String to, String from, @PresenceUnavailable Bar bar)
-   *
-   * where Bar implements Serializable.
-   **/
-  private Class getPresenceUnavailableObserved(Method method)
-  {
-    if (! void.class.equals(method.getReturnType()))
-      return null;
-
-    Class[] parameterTypes = method.getParameterTypes();
-
-    if (parameterTypes.length != 3)
-      return null;
-
-    // check for to and from parameters
-    if (! String.class.equals(parameterTypes[0]) ||
-        ! String.class.equals(parameterTypes[1]))
-      return null;
-
-    if (! Serializable.class.isAssignableFrom(parameterTypes[2]))
-      return null;
-
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-    if (! contains(PresenceUnavailable.class, parameterAnnotations[2]))
-      return null;
-
-    return parameterTypes[2];
-  }
-
-  /**
-   * Returns the class of the presence that a method observes, if it is
-   * a presence error-observing method.  A presence error-observing method 
-   * looks like
-   *
-   *   void foo(String to, String from, @PresenceError Bar bar, BamError error)
-   *
-   * where Bar implements Serializable.
-   **/
-  private Class getPresenceErrorObserved(Method method)
-  {
-    if (! void.class.equals(method.getReturnType()))
-      return null;
-
-    Class[] parameterTypes = method.getParameterTypes();
-
-    if (parameterTypes.length != 4)
-      return null;
-
-    // check for to and from and error parameters
-    if (! String.class.equals(parameterTypes[0]) ||
-        ! String.class.equals(parameterTypes[1]) ||
-        ! BamError.class.equals(parameterTypes[3]))
-      return null;
-
-    if (! Serializable.class.isAssignableFrom(parameterTypes[2]))
-      return null;
-
-    Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-    if (! contains(PresenceError.class, parameterAnnotations[2]))
-      return null;
-
-    return parameterTypes[2];
-  }
-
-  private boolean contains(Class annotation, Annotation[] annotations)
-  {
-    for (int i = 0; i < annotations.length; i++) {
-      if (annotation.isInstance(annotations[i]))
-        return true;
-    }
-
-    return false;
+    return getClass().getSimpleName() + "[" + _cl.getName() + "]";
   }
 }

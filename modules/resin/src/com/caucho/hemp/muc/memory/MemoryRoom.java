@@ -94,7 +94,8 @@ public class MemoryRoom extends GenericService
     }
   }
 
-  public void handleImMessage(String to, String from, @Message ImMessage msg)
+  @Message
+  public void handleImMessage(String to, String from, ImMessage msg)
   {
     MemoryNick nick = getNick(from);
 

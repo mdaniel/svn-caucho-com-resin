@@ -43,7 +43,7 @@ abstract public class AbstractBamService implements BamService
   
   private String _jid;
 
-  protected void setJid(String jid)
+  public void setJid(String jid)
   {
     _jid = jid;
   }

@@ -40,6 +40,11 @@ public interface BamService
   public String getJid();
 
   /**
+   * Sets the service's jid.
+   */
+  public void setJid(String jid);
+
+  /**
    * Returns the service's agent stream
    */
   public BamStream getAgentStream();

@@ -24,10 +24,10 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Emil Ong
+ * @author Scott Ferguson
  */
 
-package com.caucho.bam.annotation;
+package com.caucho.config.annotation;
 
 import static java.lang.annotation.ElementType.METHOD;
 import java.lang.annotation.Retention;
@@ -35,9 +35,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
- * The @Message annotation.
+ * The @Start annotation.
  */
 @Target({METHOD})
 @Retention(RUNTIME)
-public @interface Message {
+public @interface Start {
 }
