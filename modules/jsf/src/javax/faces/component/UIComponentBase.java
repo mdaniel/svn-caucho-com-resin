@@ -1254,6 +1254,9 @@ public abstract class UIComponentBase extends UIComponent
 
       RenderKit renderKit = factory.getRenderKit(context, renderKitId);
 
+      if (renderKit == null)
+        renderKit = factory.getRenderKit(context, RenderKitFactory.HTML_BASIC_RENDER_KIT);
+      
       return renderKit.getResponseStateManager().isPostback(context);
     }
 
