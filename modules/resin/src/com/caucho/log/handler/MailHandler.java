@@ -27,53 +27,50 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.services;
+package com.caucho.log.handler;
 
-import com.caucho.bam.BamStream;
-import com.caucho.bam.SimpleBamService;
-import com.caucho.bam.annotation.*;
-import com.caucho.config.types.Period;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-
-import java.io.Serializable;
-
-import java.util.*;
-import java.util.logging.*;
-
-import javax.jms.TextMessage;
-import javax.jms.ObjectMessage;
-
-import javax.mail.Address;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.AddressException;
+import com.caucho.hemp.services.MailService;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.*;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.webbeans.In;
+import javax.mail.*;
+import javax.mail.internet.*;
+import javax.management.*;
+
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.logging.Logger;
+import java.util.logging.LogRecord;
+import java.util.logging.Level;
+import java.util.logging.Filter;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
 
 /**
- * mail service
+ * Sends formatted messages to mail
  */
-public class BamMailService
-  extends SimpleBamService
-  implements AlarmListener
+public class MailHandler extends Handler implements AlarmListener
 {
   private static final Logger log
-    = Logger.getLogger(BamMailService.class.getName());
-
-  @In(optional=true)
-  private Session _session;
+    = Logger.getLogger(MailHandler.class.getName());
+  private static final L10N L = new L10N(MailHandler.class);
 
   private long _delayTime = 60000L;
+  private long _timeIntervalMin = 60 * 60000L;
+
+  private long _lastMailTime;
 
   private StringBuilder _text;
   private Alarm _alarm;
 
   private MailService _mailService = new MailService();
 
-  public BamMailService()
+  public MailHandler()
   {
     _alarm = new Alarm(this);
   }
@@ -85,6 +82,15 @@ public class BamMailService
   public void setDelayTime(Period period)
   {
     _delayTime = period.getPeriod();
+  }
+
+  /**
+   * Sets the delay time, i.e. how long the service should accumulate
+   * messages before sending them.
+   */
+  public void setTimeIntervalMin(Period period)
+  {
+    _timeIntervalMin = period.getPeriod();
   }
 
   /**
@@ -112,14 +118,6 @@ public class BamMailService
   }
 
   /**
-   * Sets subject
-   */
-  public void setSubject(String subject)
-  {
-    _mailService.setSubject(subject);
-  }
-
-  /**
    * Adds a 'to'
    */
   public void addTo(String to)
@@ -128,65 +126,67 @@ public class BamMailService
     _mailService.addTo(new InternetAddress(to));
   }
 
+  /**
+   * Initialize the handler
+   */
   @PostConstruct
   public void init()
+    throws ConfigException
   {
     _mailService.init();
   }
 
   /**
-   * Sends to a mailbox
+   * Publishes the record.
    */
-  @Override
-  public void message(String to, String from, Serializable value)
+  public void publish(LogRecord record)
   {
-    String text = messageToText(value);
-
-    if (_delayTime <= 0) {
-      _mailService.send(text);
+    if (record.getLevel().intValue() < getLevel().intValue())
       return;
-    }
 
-    boolean isStartAlarm = false;
-    synchronized (this) {
-      if (_text == null) {
-	isStartAlarm = true;
-	_text = new StringBuilder();
-      }
+    Filter filter = getFilter();
+    if (filter != null && ! filter.isLoggable(record))
+      return;
+
+    try {
+      String value;
+
+      Formatter formatter = getFormatter();
+      if (formatter != null)
+	value = formatter.format(record);
+      else
+	value = record.getMessage();
+
+      boolean isStartAlarm = false;
+      synchronized (this) {
+	if (_text == null) {
+	  isStartAlarm = true;
+	  _text = new StringBuilder();
+	}
     
-      _text.append(text).append("\n");
-    }
+	_text.append(value).append("\n");
+      }
 
-    if (isStartAlarm)
-      _alarm.queue(_delayTime);
+      if (isStartAlarm) {
+	long delta = _lastMailTime + _timeIntervalMin - Alarm.getCurrentTime();
+
+	if (delta < _delayTime)
+	  delta = _delayTime;
+	
+	_alarm.queue(delta);
+      }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  protected String messageToText(Serializable value)
+  /**
+   * Flushes the buffer.
+   */
+  public void flush()
   {
-    String text = null;
-    
-    if (value instanceof String) {
-      text = value.toString();
-    }
-    else if (value instanceof TextMessage) {
-      try {
-	text = ((TextMessage) value).getText();
-      } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
-      }
-    }
-    else if (value instanceof ObjectMessage) {
-      try {
-	text = String.valueOf(((ObjectMessage) value).getObject());
-      } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
-      }
-    }
-    
-    if (text == null)
-      text = String.valueOf(value);
-
-    return text;
   }
 
   public void handleAlarm(Alarm alarm)
@@ -198,6 +198,8 @@ public class BamMailService
 	text = _text.toString();
       _text = null;
     }
+
+    _lastMailTime = Alarm.getCurrentTime();
 
     if (text != null)
       _mailService.send(text);
@@ -216,5 +218,10 @@ public class BamMailService
 
     if (text != null)
       _mailService.send(text);
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }

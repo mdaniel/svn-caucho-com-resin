@@ -481,6 +481,117 @@ logging, and mail messages.  The services are all configured with
   <td>sends an email with a summary of recent messages</td>
 </tr>
 </deftable>
+
+<s2 title="JMS">
+
+<p>The JMS service forwards BAM messages to a JMS queue, wrapping each
+message in a JMS ObjectMessage.  Applications can use this BAM to JMS bridge
+to queue messages from a Java client.</p>
+
+<example title="Example: JMS configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;jms-connection-factory name="jms_cf" uri="resin:"/>
+  &lt;jms-queue name="queue" uri="memory:"/>
+
+  &lt;bam-service name="jms@localhost" uri="caucho.jms:">
+    &lt;init>
+      &lt;connection-factory>${jms_cf}&lt;/connection-factory>
+      &lt;queue>${queue}&lt;/queue>
+    &lt;/init>
+  &lt;/bam-service>
+  
+&lt;/web-app>
+</example>
+
+</s2>
+
+<s2 title="Logging">
+
+<p>The logging service adds BAM messages to a java.util.logging Logger.
+An application could use the logging service as a chat-room recording
+or debugging service.</p>
+
+<deftable title="caucho.log attributes">
+<tr>
+  <th>attribute</th>
+  <th>description</th>
+</tr>
+<tr>
+  <td>name</td>
+  <td>logger name</td>
+</tr>
+<tr>
+  <td>level</td>
+  <td>logger level</td>
+</tr>
+</deftable>
+
+<example title="Example: Log configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;bam-service name="log@localhost" uri="caucho.log:">
+    &lt;init>
+      &lt;name>com.foo.chat&lt;/name>
+      &lt;level>info&lt;/level>
+    &lt;/init>
+  &lt;/bam-service>
+  
+&lt;/web-app>
+</example>
+
+</s2>
+
+<s2 title="Mail">
+
+<p>The mail service sends BAM messages to an email address.  This
+can be used to notify any issues with an application that may need
+administration.</p>
+
+<deftable title="caucho.mail attributes">
+<tr>
+  <th>attribute</th>
+  <th>description</th>
+</tr>
+<tr>
+  <td>delay-time</td>
+  <td>a pause interval to gather groups of messages before sending</td>
+</tr>
+<tr>
+  <td>mail-session</td>
+  <td>a javax.mail.Session object</td>
+</tr>
+<tr>
+  <td>properties</td>
+  <td>javamail properties</td>
+</tr>
+<tr>
+  <td>subject</td>
+  <td>the mail subject</td>
+</tr>
+<tr>
+  <td>to</td>
+  <td>a mail destination address</td>
+</tr>
+</deftable>
+
+<example title="Example: Mail configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;bam-service name="mail@localhost" uri="caucho.mail:">
+    &lt;init>
+      &lt;to>bam@foo.com&lt;/name>
+      &lt;subject>BAM Notification&lt;/subject>
+      &lt;properties>
+        mail.from=bamservice@foo.com
+      &lt;/properties>
+    &lt;/init>
+  &lt;/bam-service>
+  
+&lt;/web-app>
+</example>
+
+</s2>
   
 </s1>
 

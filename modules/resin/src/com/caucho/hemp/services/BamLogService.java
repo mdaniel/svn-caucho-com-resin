@@ -32,9 +32,12 @@ package com.caucho.hemp.services;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.SimpleBamService;
 import com.caucho.bam.annotation.*;
+import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
+import com.caucho.hmtp.*;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.L10N;
 
 import java.io.Serializable;
 
@@ -54,6 +57,7 @@ import javax.webbeans.In;
 public class BamLogService
   extends SimpleBamService
 {
+  private static final L10N L = new L10N(BamLogService.class);
   private static final Logger log
     = Logger.getLogger(BamMailService.class.getName());
 
@@ -77,6 +81,23 @@ public class BamLogService
       _level = Level.OFF;
     else if ("all".equals(level))
       _level = Level.ALL;
+    else if ("finest".equals(level))
+      _level = Level.FINEST;
+    else if ("finer".equals(level))
+      _level = Level.FINER;
+    else if ("fine".equals(level))
+      _level = Level.FINE;
+    else if ("config".equals(level))
+      _level = Level.CONFIG;
+    else if ("info".equals(level))
+      _level = Level.INFO;
+    else if ("warning".equals(level))
+      _level = Level.WARNING;
+    else if ("severe".equals(level))
+      _level = Level.SEVERE;
+    else
+      throw new ConfigException(L.l("'{0}' is an unknown logging level",
+				    level));
   }
 
   /**

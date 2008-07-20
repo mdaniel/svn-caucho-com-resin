@@ -95,6 +95,11 @@
        - BAM
       -->
     <item link="hmtp.xtp" title="BAM"/>
+    
+    <!--
+       - Caching
+      -->
+    <item link="proxy-cache.xtp" title="Caching"/>
       
     <item link="resin-clustering.xtp" title="Clustering"/>
     <!--
@@ -103,11 +108,6 @@
       <item link="resin-load-balance.xtp" title="Load Balancing"/>
     </item>
     -->
-    
-    <!--
-       - Caching
-      -->
-    <item link="proxy-cache.xtp" title="Caching"/>
       
     <!--
        - Database

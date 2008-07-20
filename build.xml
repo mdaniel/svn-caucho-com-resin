@@ -1133,9 +1133,7 @@
         <include name="lib/activation.jar"/>
         <include name="lib/javamail-14.jar"/>
         <include name="lib/jcache.jar"/>
-	<!--
         <include name="lib/jaxrpc-15.jar"/>
-	-->
         <include name="lib/jsf-12.jar"/>
         <include name="lib/webutil.jar"/>
       </fileset>

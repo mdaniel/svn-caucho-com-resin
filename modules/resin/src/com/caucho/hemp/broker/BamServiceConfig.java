@@ -80,6 +80,7 @@ public class BamServiceConfig extends BeanConfig
   public void init()
   {
     super.init();
+    
     start();
   }
 
@@ -98,6 +99,13 @@ public class BamServiceConfig extends BeanConfig
     
 
     service.setJid(jid);
+
+    // queue
+    if (_threadMax > 0) {
+      service = new MemoryQueueServiceFilter(service,
+					     _broker.getBrokerStream(),
+					     _threadMax);
+    }
     
     _broker.addService(service);
   }
