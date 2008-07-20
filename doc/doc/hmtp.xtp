@@ -1,12 +1,12 @@
 <document>
   <header>
     <product>resin</product>
-    <title>HMTP</title>
+    <title>BAM</title>
     <type>contents</type>
 
     <description>
       <p>
-      HMTP (Hessian Message Transport Protocol) is an asynchronous,
+      BAM (Brokered Agent Messaging) is an asynchronous,
       object-oriented messaging framework, designed around small, interactive
       message packets, a brokered-agent topology and based on the <a href="http://hessian.caucho.com/">Hessian</a> protocol and <a href="http://xmpp.org">XMPP</a> (Jabber).
       </p>
@@ -21,19 +21,20 @@
 
 <s2 title="Server message example">
 
-<p>Sending a message from one agent to another is a basic HMTP use case.
-Typical applications include chat text, game updates, Atom/RSS updates,
-pub/sub messaging, and event notification for administration consoles.
-In this example, a servlet send a message to an internal logging service.</p>
+<p>Sending a message from one agent to another is a basic BAM use case.
+Typical applications include message queuing, chat text, game updates,
+Atom/RSS updates, pub/sub messaging, and event notification
+for administration consoles. In this example, a servlet sends a message
+to an internal logging service.</p>
 
 <p>The sending agent sends a message using <code>message</code> with
 the jid address of the target agent (to), and a message payload.
 The receiving agent implements the <code>message</code> method to
-receive messages.  Since HMTP is a streaming API like
+receive messages.  Since BAM is a streaming API like
 <code>java.io.OutputStream</code>, the sending method is the same as
 the receiving method, <code>message</code>.</p>
 
-<p>HMTP messages use a JID (Jabber ID) for addressing, which looks like
+<p>BAM messages use a JID (Jabber ID) for addressing, which looks like
 <code>user@domain</code> or <code>user@domain/resource</code>.  The
 second <code>user@domain/resource</code> is used for dynamic
 agent, e.g. a user logged into messaging with a cellphone.</p>
@@ -42,7 +43,7 @@ agent, e.g. a user logged into messaging with a cellphone.</p>
 is available for many languages, the message can easily interoperate with
 RIA platforms like Flash.</p>
 
-<p>Since HMTP uses a broker/agent or hub-and-spoke messaging model, all
+<p>Since BAM uses a broker/agent or hub-and-spoke messaging model, all
 messages go through the broker to be routed to the target agent.  Each
 service and client will register an agent with the broker and receive
 a unique JID for the routing.</p>
@@ -52,41 +53,30 @@ a unique JID for the routing.</p>
 <p>Writing a HMTP client involves the following steps:</p>
 
 <ol>
-<li>Obtaining the <code>BamConnectionFactory</code> (usually with @In)</li>
-<li>Creating a <code>BamConnection</code> (which automatically registers an agent)</li>
+<li>Create a <code>BamClient</code></li>
 <li>Optionally: setting message handlers to receive messages</li>
 <li>Sending messages</li>
 <li>Close the connection</li>
 </ol>
 
-<p>In the example, the servlet creates a <code>BamConnection</code> from
-a <code>BamConnectionFactory</code> and sends the message.  Opening
-a connection registers an agent with the broker.  When the connection
-closes, it will unregister the agent.  The Web Beans
-<code>@javax.webbeans.In</code> injection annotation provides access
-to the <code>BamConnectionFactory</code>.</p>
+<p>In the example, the servlet creates a <code>BamClient</code> 
+and sends the message.  Opening
+a client registers an agent with the broker.  When the connection
+closes, it will unregister the agent.</p>
 
 <example title="TestServlet.java">
 package example;
 
 import javax.servlet.*;
-import javax.webbeans.In;
-import com.caucho.bam.BamConnectionFactory;
-import com.caucho.bam.BamConnection;
+import com.caucho.bam.BamClient;
 
 public class TestServlet extends GenericServlet
 {
-  @In BamConnectionFactory _factory;
+  private BamClient _client = new BamClient();
 
   public void service(ServletRequest req, ServletResponse response)
   {
-    BamConnection conn = _factory.getConnection("demo@localhost", null);
-
-    try {
-      conn.message("test@localhost", "Hello, world!");
-    } finally {
-      conn.close();
-    }
+    _client.message("test@localhost", "Hello, world!");
   }
 }
 </example>
@@ -94,28 +84,28 @@ public class TestServlet extends GenericServlet
 <p>Writing a HMTP Service involves the following steps:</p>
 
 <ol>
-<li>Implementing <code>BamService</code> (usually by extending <code>GenericService</code>)</li>
-<li>Getting the <code>BamBroker</code> (either with <code>@In</code> or done by <code>GenericService</code> automatically)</li>
-<li>Registering the <code>BamService</code> with <code>BamBroker</code> using <code>addService</code> (done by <code>GenericService</code> automatically)</li>
-<li>Receiving messages to the implemented <code>BamStream</code> (or overriding <code>BamStream</code> methods in <code>GenericService</code>)</li>
+<li>Implementing <code>BamService</code> (usually by extending <code>SimpleBamService</code>)</li>
+<li>Registering the <code>BamService</code> with <code>BamBroker</code> and
+a jid using <code>&lt;bam-service></code></li>
+<li>Receiving messages to the implemented <code>BamStream</code> (or overriding <code>BamStream</code> methods in <code>SimpleBamService</code>)</li>
 <li>Sending messages to other agents using the
 broker's <code>getBrokerStream</code>.</li>
 </ol>
 
-<p>By extending <code>GenericService</code>, the service automatically gains
-a queuing ability.  The broker will queue the message and spawn a new thread
-before calling the service's <code>message</code>, in order to isolate
-the receiver from the sender.  Advanced applications can disable the
-queue if appropriate.</p>
+<p>By configuring <code>&lt;bam-service></code>, the service automatically
+gains a queuing ability.  The broker will queue the message and spawn a
+new thread before calling the service's <code>message</code>, in order
+to isolate the receiver from the sender.  Advanced applications can
+disable the queue if appropriate.</p>
 
 <example title="LogService.java">
 package example;
 
-import com.caucho.hemp.broker.GenericService;
+import com.caucho.bam.SimpleBamService;
 import java.io.Serializable;
 import java.util.logging.*;
 
-public class LogService extends GenericService
+public class LogService extends SimpleBamService
 {
   private static final Logger log
     = Logger.getLogger(LogService.class.getName());
@@ -129,14 +119,12 @@ public class LogService extends GenericService
 </example>
 
 <p>The HMTP configuration consists of the broker and the service
-configured with <a href="resin-ioc.xtp">Resin IoC</a>.  Because
-the <code>LogService</code> extends <code>GenericService</code>, it
-will automatically register itself with the broker.</p>
+configured with <a href="resin-ioc.xtp">Resin IoC</a>.</p>
 
 <example title="WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
-    &lt;bean name="test@localhost" class="example.LogService"/>
+    &lt;bam-service name="test@localhost" class="example.LogService"/>
 
 &lt;/web-app>
 </example>
@@ -145,18 +133,18 @@ will automatically register itself with the broker.</p>
 
 <s2 title="Client queryGet (RPC) example">
 
-<p>Remote calls are another primary use for HMTP.  In this example, we
-just query a service for some basic information.  In HMTP, queries
+<p>Remote calls are another primary use for BAM.  In this example, we
+just query a service for some basic information.  In BAM, queries
 are bidirectional: the server can also query the client.  And the application
 can also use the messaging in the previous example.</p>
 
 <figure src="hmtp-client.png"/>
 
 <p>To implement the server side of an RPC call, the service implements
-<code>sendQueryGet</code> or <code>sendQuerySet</code>, and examines the
+<code>queryGet</code> or <code>querySet</code>, and examines the
 query to see if it understands the query class.  If the service does not
 understand the query, it will return false (or call the super
-method for <code>GenericService</code>).  If a query returns true, it
+method for <code>SimpleBamService</code>).  If a query returns true, it
 must either send a query response or query error with
 the same <code>id</code>, so the waiting client will always receive a
 response.</p>
@@ -167,34 +155,27 @@ Services can be mash-ups of capabilities just by adding new query types.</p>
 <example title="TestService.java">
 package example;
 
-import com.caucho.hemp.broker.GenericService;
-import java.io.Serializable;
-import java.util.logging.*;
+import com.caucho.bam.SimpleBamService;
+import com.caucho.bam.annotation.QueryGet;
 
-public class TestService extends GenericService
+public class TestService extends SimpleBamService
 {
-  private static final Logger log
-    = Logger.getLogger(LogService.class.getName());
-
-  @Override
-  public boolean sendQueryGet(long id, String to, String from,
-                              Serializable query)
+  @QueryGet
+  public boolean queryGet(long id, String to, String from,
+                          TestQuery query)
   {
-    if (query instanceof TestQuery) {
-      getBrokerStream().sendQueryResult(id, to, from, "hello response");
+    getBrokerStream().sendQueryResult(id, to, from, "hello response");
 
-      return true;
-    }
-    else {
-      return super.sendQueryGet(id, to, from, query);
-    }
+    return true;
   }
 }
 </example>
 
-<p>The remote client, <code>HmtpClient</code>, extends
-the <code>BamConnection</code> API to provide extra calls for connecting
-and logging on to the server.  The message passing calls are identical.</p>
+<p>In this example, we'll use a remote client, <code>HmtpClient</code>,
+which extends the <code>BamConnection</code> API to provide extra calls
+for connecting and logging on to the server.  For local messages, we could
+use <code>BamClient</code> instead.  The message passing calls
+are identical.</p>
 
 <p>When you create a <code>HmtpClient</code>, you'll send it the URL
 of the HMTP service, then call <code>connect()</code> and <code>login</code>
@@ -232,15 +213,15 @@ public class TestClient
 <p>The configuration for a remote service now has three components:</p>
 
 <ol>
-<li>The <code>BamBroker</code>, implemented by HempBroker</li>
 <li>Any registered <code>BamService</code>, e.g. the TestService</li>
-<li>The exposed HMTP service, implemented with <code>HempServlet</code></li>
+<li>The exposed HMTP service protocol, implemented
+with <code>HempServlet</code></li>
 </ol>
 
 <example title="WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
-    &lt;bean name="test@localhost" class="example.TestService"/>
+    &lt;bam-service name="test@localhost" class="example.TestService"/>
 
     &lt;servlet-mapping url-pattern="/hmtp"
                      servlet-class="com.caucho.hemp.servlet.HempServlet"/>
@@ -254,14 +235,14 @@ public class TestClient
 
 <s1 title="Brokered Agent Messaging (BAM)">
 
-<p>Applications using HMTP will generally follow a Brokered Agent
+<p>Applications using BAM will generally follow a Brokered Agent
 Messaging pattern, which is basically a hub-and-spoke messaging topology where
 the agents act as dynamic services: joining and detaching from the broker
 as the application progresses.</p>
 
 <p>Services and clients register one or more agents with the BamBroker and
 then send messages between the agents.  Each remote client will register
-a local agent with the local HMTP broker.  Services will register one or
+a local agent with the local broker.  Services will register one or
 more agents with the broker.   In a tic-tac-toe game, the game
 instance might register two agents: one for each player in a particular
 game.</p>
@@ -296,12 +277,12 @@ player agent, <var>tictactoe@host.com/1</var>.</p>
 
 <s1 title="XMPP (Jabber)">
 
-<p>HMTP is an adaptation of the <a href="http://xmpp.org">XMPP</a> (Jabber)
+<p>BAM is an adaptation of the <a href="http://xmpp.org">XMPP</a> (Jabber)
 instant messaging protocol.  Where XMPP (Xml Messaging and Presence Protocol)
 is based on XML, HMTP (Hessian Message Transport Protocol) is
-based on Hessian.  Because HMTP is designed to follow XMPP, its
+based on Hessian.  Because BAM is designed to follow XMPP, its
 architecture and protocols are essentially identical until the very
-lowest layer, where HMTP substitutes Hessian for XML.</p>
+lowest layer.</p>
 
 <p>Because of the close relationship to XMPP, you may want to browse the
 XMPP specifications for a deeper understanding of how HMTP works.  Since
@@ -320,11 +301,12 @@ XML data, but also must create their own XML parsers and formatters.</p>
 
 <s1 title="Packet types">
 
-<p>HMTP provides three categories of packets: messages, queries (rpc), and
+<p>BAM provides three categories of packets: messages, queries (rpc), and
 presence announcements.  Messages and queries are typically the bulk of the
 packets, while presence announcements are used rarely.</p>
 
-<p>Messages are unidirectional fire-and-forget packets.</p>
+<p>Messages are unidirectional fire-and-forget packets.  They can be
+used for queuing systems as a replacement JMS queues.</p>
 
 <p>Queries are request-response pairs.  Each request must have a corresponding
 response or error.</p>
@@ -337,10 +319,10 @@ his presence.</p>
 <s2 title="Message Packets">
 
 <p>The main Message packet contains a target ("to"), a sender ("from"),
-and a payload ("value").  In HMTP, the payload can be any serializable
-value.  Example messages could be IM text messages, administration console
-graph, game updates, or updated stock quotes.  Since HMTP is bidirectional,
-messages can flow to and from any client.</p>
+and a payload ("value").  In BAM, the payload can be any serializable
+value.  Example messages could be IM text messages, queued tasks,
+administration console graph, game updates, or updated stock quotes.
+Since BAM is bidirectional, messages can flow to and from any client.</p>
 
 <ul>
 <li>Message - sends a message to a resource</li>
@@ -396,8 +378,12 @@ packets at all.</p>
 
 <s1 title="Addressing (JIDs)">
 
-<p>HMTP resources all have unique identifiers called JIDs (Jabber IDs).
-The id looks like:</p>
+<p>BAM resources all have unique identifiers called JIDs (Jabber IDs), which
+look and act like extended email addresses.  Because IM applications can
+have multiple connections for the same user, each address has an
+optional resource providing a unique name for the connection.</p>
+
+<p>The id looks like:</p>
 
 <def title="JID format">
 <var>user</var>@<var>domain</var>/<var>resource</var>
@@ -416,8 +402,16 @@ The id looks like:</p>
 </tr>
 <tr>
   <td>ferg@foo.com/xB8</td>
-  <td>User login agent, i.e. the HMTP address corresponding to a logged
+  <td>User login agent, i.e. the BAM address corresponding to a logged
 in IM session.</td>
+</tr>
+<tr>
+  <td>batch@foo.com</td>
+  <td>Application queuing service (like an EJB message driven bean)</td>
+</tr>
+<tr>
+  <td>mail@foo.com</td>
+  <td>Mail notification service</td>
 </tr>
 <tr>
   <td>tictactoe@foo.com</td>
@@ -459,9 +453,67 @@ in IM session.</td>
 
 </s1>
 
+<s1 title="Services">
+
+<p>Resin includes a number of predefined BAM services for JMS compatibility,
+logging, and mail messages.  The services are all configured with
+<code>&lt;bam-service></code>.</p>
+
+<deftable title="Predefined Services">
+<tr>
+  <th>uri</th>
+  <th>class</th>
+  <th>description</th>
+</tr>
+<tr>
+  <td>caucho.jms</td>
+  <td>com.caucho.hemp.services.BamJmsService</td>
+  <td>forwards messages to a JMS queue</td>
+</tr>
+<tr>
+  <td>caucho.log</td>
+  <td>com.caucho.hemp.services.BamLogService</td>
+  <td>logs messages to java.util.logging</td>
+</tr>
+<tr>
+  <td>caucho.mail</td>
+  <td>com.caucho.hemp.services.BamMailService</td>
+  <td>sends an email with a summary of recent messages</td>
+</tr>
+</deftable>
+  
+</s1>
+
 <s1 title="API">
 
 <s2 title="Client API">
+
+<s3 title="BamClient">
+
+<p><code>BamClient</code> is the primary client class for
+local clients.  The <code>BamClient</code> will automatically create
+a connection with the local broker.  Messages are sent using the
+<code>BamConnection</code> methods.  Messages are received by
+setting a BamStream handler.</p>
+
+<def title="BamClient">
+package com.caucho.bam;
+
+public class BamClient implements BamConnection
+{
+  public BamClient();
+  public BamClient(String uid, String password);
+  public BamClient(String uid, String password, String resource);
+
+  // BamConnection methods
+  String getJid();
+  ...
+  void message(String to, Serializable value);
+  ...
+}
+</def>
+
+</s3>
 
 <s3 title="BamConnection">
 
@@ -706,7 +758,7 @@ public interface BamBroker extends BamConnectionFactory
 service with a known jid address.  Typically the services will be
 registered in a configuration file, although they can also be
 created dynamically using the <code>BamServiceManager</code>.
-Most applications will extend the <code>GenericService</code>
+Most applications will extend the <code>SimpleBamService</code>
 instead of implementing <code>BamService</code> directly.</p>
 
 <p>The key methods are <code>getJid</code> and <code>getAgentStream</code>.
@@ -727,7 +779,8 @@ public interface BamService
   
   public BamStream getAgentStream();
   
-  public BamStream findAgent(String jid);
+  public boolean startAgent(String jid);
+  public boolean stopAgent(String jid);
 
   public void onAgentStart(String jid);
   public void onAgentStop(String jid);

@@ -90,6 +90,11 @@
        - Amber
       -->
     <item link="amber.xtp" title="Amber"/>
+
+    <!--
+       - BAM
+      -->
+    <item link="hmtp.xtp" title="BAM"/>
       
     <item link="resin-clustering.xtp" title="Clustering"/>
     <!--
@@ -143,11 +148,6 @@
       <item link="burlap-notes.xtp" title="Burlap Design Notes"/>
       <item link="hessian-messaging.xtp" title="Hessian Messaging"/>
     </item>
-
-    <!--
-       - HMTP
-      -->
-    <item link="hmtp.xtp" title="HMTP"/>
 
     <!--
        - IoC
