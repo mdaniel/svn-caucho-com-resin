@@ -145,6 +145,10 @@ public class MailService
       smtp = _session.getTransport("smtp");
 
       smtp.connect();
+
+      smtp.send(message, _to);
+
+      log.fine(this + " sent mail to " + _to[0]);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -177,5 +181,10 @@ public class MailService
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + _toList;
   }
 }

@@ -34,6 +34,7 @@ import com.caucho.config.types.*;
 import com.caucho.jmx.Jmx;
 import com.caucho.loader.CloseListener;
 import com.caucho.loader.Environment;
+import com.caucho.log.formatter.TimestampFormatter;
 import com.caucho.log.handler.PathHandler;
 import com.caucho.management.server.*;
 import com.caucho.util.L10N;
@@ -66,7 +67,8 @@ public class LogHandlerConfig extends BeanConfig {
 
   private boolean _useParentHandlers;
   private Handler _handler;
-
+  
+  private String _timestamp = "[%Y/%m/%d %H:%M:%S.%s] {%{level} %{thread}} ";
   private PathHandler _pathHandler;
 
   public LogHandlerConfig()
@@ -188,10 +190,7 @@ public class LogHandlerConfig extends BeanConfig {
    */
   public void setTimestamp(String timestamp)
   {
-    if (_pathHandler == null)
-      _pathHandler = new PathHandler();
-    
-    _pathHandler.setTimestamp(timestamp);
+    _timestamp = timestamp;
   }
 
   /**
@@ -261,6 +260,17 @@ public class LogHandlerConfig extends BeanConfig {
       ((ELFormatter)_formatter).init();
     }
 
+    if (_timestamp != null) {
+      if (_pathHandler != null) {
+	_pathHandler.setTimestamp(_timestamp);
+      }
+      else if (_formatter == null) {
+	TimestampFormatter formatter = new TimestampFormatter();
+	_formatter = formatter;
+	formatter.setTimestamp(_timestamp);
+      }
+    }
+    
     if (_pathHandler != null) {
       _pathHandler.init();
 
