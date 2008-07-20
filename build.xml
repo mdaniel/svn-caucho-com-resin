@@ -191,6 +191,7 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jaxrpc"/>
       <param name="module.jar" value="jaxrpc-15.jar"/>
+      <param name="module.dist" value="${lib}"/>
       <param name="javac.source" value="1.5"/>
     </antcall>
   </target>
