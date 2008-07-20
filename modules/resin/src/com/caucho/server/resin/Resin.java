@@ -840,7 +840,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	}
       */
 
-      log().info("Resin started in " + (Alarm.getExactTime() - _startTime) + "ms");
+      log().severe(this + " started in " + (Alarm.getExactTime() - _startTime) + "ms");
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -1423,7 +1423,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _serverId + "]";
+    return getClass().getSimpleName() + "[id=" + _serverId + "]";
   }
 
   private static long getFreeMemory(Runtime runtime)
