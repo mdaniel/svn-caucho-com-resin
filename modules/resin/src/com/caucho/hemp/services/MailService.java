@@ -64,7 +64,7 @@ public class MailService
   private Properties _properties = new Properties();
   
   private Session _session;
-  private Transport _transport;
+  private Transport _smtp;
 
   /**
    * Sets the mail session
@@ -139,12 +139,23 @@ public class MailService
    */
   public void send(Message message)
   {
+    Transport smtp = null;
+    
     try {
-      _transport.sendMessage(message, _to);
+      smtp = _session.getTransport("smtp");
+
+      smtp.connect();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      try {
+	if (smtp != null)
+	  smtp.close();
+      } catch (Exception e) {
+	log.log(Level.FINER, e.toString(), e);
+      }
     }
   }
 
@@ -161,7 +172,8 @@ public class MailService
 	_session = Session.getInstance(_properties);
       }
 
-      _transport = _session.getTransport("smtp");
+      Transport smtp = _session.getTransport("smtp");
+      smtp.close();
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

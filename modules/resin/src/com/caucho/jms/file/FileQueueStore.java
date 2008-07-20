@@ -378,7 +378,7 @@ public class FileQueueStore
   private void initDatabase()
     throws SQLException
   {
-    String sql = "select id from " + _queueTable + " where 1=0";
+    String sql = "select id, priority from " + _messageTable + " where 1=0";
     Statement stmt = _conn.createStatement();
 
     try {
@@ -387,6 +387,18 @@ public class FileQueueStore
       rs.close();
       
       return;
+    } catch (SQLException e) {
+      log.finer(e.toString());
+    }
+
+    try {
+      stmt.executeUpdate("drop table " + _queueTable);
+    } catch (SQLException e) {
+      log.finer(e.toString());
+    }
+
+    try {
+      stmt.executeUpdate("drop table " + _messageTable);
     } catch (SQLException e) {
       log.finer(e.toString());
     }
