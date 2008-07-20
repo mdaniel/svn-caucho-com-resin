@@ -2,16 +2,19 @@
   <!--
      - Configures the JDBC-backed Queue.
     -->
+  <!--
   <resource var="queue" type="com.caucho.jms.jdbc.JdbcQueue">
     <init>
       <queue-name>resin</queue-name>
       <data-source>jdbc/resin</data-source>
     </init>
   </resource>
+  -->
 
   <!--
      - Configures the JMS connectionAbstract factory
     -->
+  <!--
   <resource var="jmsFactory" type="com.caucho.jms.ConnectionFactoryImpl">
   </resource>
 
@@ -33,12 +36,14 @@
       <destination>${queue}</destination>
     </init>
   </resource>
+  -->
 
   <!--
      - The test servlet uses bean-style init to simplify the code.
      - Applications may want to use a standard init-param and
      - JNDI lookup in the init() method.
     -->
+  <!--
   <servlet servlet-name="send" servlet-class="example.MessageServlet">
     <init>
       <sender>${jndi:lookup("jms/sender")}</sender>
@@ -46,4 +51,5 @@
   </servlet>
 
   <servlet-mapping url-pattern="/send" servlet-name="send"/>
+  -->
 </web-app>
