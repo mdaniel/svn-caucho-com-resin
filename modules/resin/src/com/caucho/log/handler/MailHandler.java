@@ -154,8 +154,19 @@ public class MailHandler extends Handler implements AlarmListener
       Formatter formatter = getFormatter();
       if (formatter != null)
 	value = formatter.format(record);
-      else
+      else {
 	value = record.getMessage();
+
+	Throwable thrown = record.getThrown();
+	if (thrown != null) {
+	  java.io.StringWriter writer = new java.io.StringWriter();
+	  PrintWriter out = new PrintWriter(writer);
+	  thrown.printStackTrace(out);
+	  out.close();
+
+	  value += "\n" + out;
+	}
+      }
 
       boolean isStartAlarm = false;
       synchronized (this) {

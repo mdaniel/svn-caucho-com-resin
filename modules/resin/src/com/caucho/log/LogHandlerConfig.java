@@ -68,7 +68,7 @@ public class LogHandlerConfig extends BeanConfig {
   private boolean _useParentHandlers;
   private Handler _handler;
   
-  private String _timestamp = "[%Y/%m/%d %H:%M:%S.%s] {%{level} %{thread}} ";
+  private String _timestamp = "[%Y/%m/%d %H:%M:%S.%s] {%{thread}} ";
   private PathHandler _pathHandler;
 
   public LogHandlerConfig()
