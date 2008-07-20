@@ -249,7 +249,6 @@ public class ResultSetImpl implements ResultSet {
   public void setRow(int row)
   {
     _row = row;
-    System.out.println("SET: " + row);
   }
 
   /**
@@ -403,18 +402,15 @@ public class ResultSetImpl implements ResultSet {
       return false;
 
     int row = _row++;
-    System.out.println("ROW: " + row + " " + _cacheChunk);
     ResultSetCacheChunk cacheChunk = _cacheChunk;
 
     if (cacheChunk == null)
       return _rs.next();
     else if (row < cacheChunk.getRowCount()) {
-      System.out.println("ROWC: " + row);
       return true;
     }
     else {
       ResultSetCacheChunk next = cacheChunk.getNext();
-      System.out.println("NEXT: " + next);
       if (next != null) {
 	_cacheChunk = next;
 	return true;
