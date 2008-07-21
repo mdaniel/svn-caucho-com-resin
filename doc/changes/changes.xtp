@@ -13,6 +13,10 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>(2008-07-20) log: added mail: as a logging handler</li>
+<li>messaging: added caucho.log:, caucho.jms:, caucho.mail: as bam services</li>
+<li>messaging: added &lt;bam-service> as a parallel to &lt;ejb-message-bean></li>
+<li>messaging: added BamClient for local bam messages</li>
 <li>(2008-07-18) amber: query/cache issues around chunk-size limit (#2777, rep by Riccardo Cohen)</li>
 <li>config: ${getenv['foo']} now returns environment variables (#2783, rep by Robert Heerdink)</li>
 <li>jsf: JSF Developer Aid. Displays Component Tree with values and request info.</li>

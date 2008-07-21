@@ -131,6 +131,80 @@ ron=cannons,user,prefect
 
 </defun>
 
+<defun title="&lt;bam-service>" occur="*" version="Resin 3.0">
+<parents>resin, cluster, host, web-app</parents>
+
+<p>&lt;bam-service> configures a <a href="hmtp.xtp">BamService</a> to
+listen for messages.  The service is always a single instance.</p>
+
+<p>&lt;bam-service> can be used as a simple queueing service, replacing
+JMS queues and ejb-message-bean.  By default the queue is consumed 
+with a single thread.  Unlike EJB message driven beans, &lt;bam-service>
+uses a single instance like a servlet, not a pool of instances.
+</p>
+
+<p>The bean has full access to Resin-IoC capabilities, including
+dependency injection, transaction attributes, and aspect interception.
+</p>
+
+<deftable title="&lt;bam-service> attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>class</td>
+  <td>Classname of the BamService bean</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>init</td>
+  <td>IoC configuration for the listener bean</td>
+  <td></td>
+</tr>
+<tr>
+  <td>name</td>
+  <td>The JID of the service, used by clients to send messages to</td>
+  <td></td>
+</tr>
+<tr>
+  <td>thread-max</td>
+  <td>The number of threads to handle the queue.  If 0, the service
+  is not queued, but handles messages directly.</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>uri</td>
+  <td>A shortcut name for the service, defined in META-INF/caucho/com.caucho.uri/com.caucho.bam.BamService.</td>
+  <td></td>
+</tr>
+</deftable>
+
+<def title="&lt;bam-service> schema">
+element ejb-message-bean {
+  class
+  &amp; init?
+  &amp; name?
+  &amp; uri?
+}
+</def>
+
+<example title="Example: Log service in WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;bam-service uri="caucho.log:">
+    &lt;name>log&lt;/name>
+    &lt;init>
+      &lt;name>test.Log&lt;name>
+    &lt;/init>
+  &lt;/bam-service>
+
+&lt;/web-app>
+</example>
+
+</defun>
+
 <defun title="&lt;bean>" occur="*" version="Resin 3.0">
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.config.types.Resource -->

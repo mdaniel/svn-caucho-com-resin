@@ -88,7 +88,7 @@ public class MailHandler extends Handler implements AlarmListener
    * Sets the delay time, i.e. how long the service should accumulate
    * messages before sending them.
    */
-  public void setTimeIntervalMin(Period period)
+  public void setMailIntervalMin(Period period)
   {
     _timeIntervalMin = period.getPeriod();
   }

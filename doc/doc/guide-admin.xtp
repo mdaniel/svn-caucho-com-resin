@@ -539,5 +539,33 @@ jars.</li>
 
 </s1>
 
+<s1 title="Notifications">
+
+<p>Resin can notify you by email when it detects something wrong with the
+server.  The main mechanism is adding a new logging handler sending mail
+for warning and severe messages.  When a log entry is added at the WARNING
+or SEVERE level, Resin will send a mail containing the log information.  You
+can then look at the administration console to debug any problems.</p>
+
+<p>The configuration is described in the <a href="config-log.xtp#mail">logging configuration</a> section.</p>
+
+<example title="Example: resin.xml with mail logging">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+  &lt;log-handler name="" level="warning" uri="mail:">
+    &lt;init>
+      &lt;to>admin@foo.com&lt;/to>
+      &lt;properties>
+        mail.smtp.host=127.0.0.1
+        mail.smtp.port=25
+      &lt;/properties>
+    &lt;/init>
+  &lt;/log-handler>
+  
+&lt;/resin>
+</example>
+
+</s1>
+
   </body>
 </document>
