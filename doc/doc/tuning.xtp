@@ -209,7 +209,7 @@ reused.</p>
       &lt;keepalive-max&gt;250&lt;/keepalive-max&gt;
       &lt;keepalive-timeout&gt;120s&lt;/keepalive-timeout&gt;
 
-      &lt;load-balance-idle-time&gt;120s&lt;/load-balance-idle-time&gt;
+      &lt;load-balance-idle-time&gt;100s&lt;/load-balance-idle-time&gt;
     &lt;/server-default>
 
     &lt;server id="app-a" address="192.168.2.1"/&gt;

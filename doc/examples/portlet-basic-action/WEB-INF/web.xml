@@ -4,7 +4,7 @@
   <!-- potentially useful logging:
   <log name="com.caucho.portal" level="finer" path="stdout:"/>
   -->
-
+<!--
   <servlet servlet-name="hello" 
            servlet-class="com.caucho.portal.generic.PortletServlet">
     <init>
@@ -13,5 +13,6 @@
   </servlet>
 
   <servlet-mapping url-pattern="/hello" servlet-name="hello"/>
+  -->
 </web-app>
 
