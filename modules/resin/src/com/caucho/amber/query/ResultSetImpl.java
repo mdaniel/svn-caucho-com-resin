@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -405,7 +406,7 @@ public class ResultSetImpl implements ResultSet {
     ResultSetCacheChunk cacheChunk = _cacheChunk;
 
     if (cacheChunk == null)
-      return _rs.next();
+      return _rs != null ? _rs.next() : false;
     else if (row < cacheChunk.getRowCount()) {
       return true;
     }
@@ -430,6 +431,7 @@ public class ResultSetImpl implements ResultSet {
       if (_rs != null) {
 	return _rs.next();
       }
+      /*
       else if (_userQuery != null) {
 	_rs = _userQuery.executeQuery(row, -1);
 
@@ -437,6 +439,7 @@ public class ResultSetImpl implements ResultSet {
 
 	return _rs.next();
       }
+      */
       else {
 	return false;
       }

@@ -313,11 +313,14 @@ public class UserQuery implements AmberQuery {
       _rs = new ResultSetImpl();
 
     SelectQuery query = (SelectQuery) _query;
+    
+    int firstResult = _firstResult;
+    int maxResults = _maxResults;
 
     _rs.setQuery(query);
     _rs.setSession(_aConn);
-    _rs.setFirstResult(_firstResult);
-    _rs.setMaxResults(_maxResults);
+    _rs.setFirstResult(firstResult);
+    _rs.setMaxResults(maxResults);
     _rs.setRow(0);
 
     int chunkSize = _aConn.getCacheChunkSize();
@@ -335,9 +338,6 @@ public class UserQuery implements AmberQuery {
     ResultSetCacheChunk cacheChunk = null;
     ResultSetMetaData metaData = null;
 
-    int firstResult = _firstResult;
-    int maxResults = _maxResults;
-
     if (isCacheable) {
       int row = 0;
 
@@ -346,6 +346,7 @@ public class UserQuery implements AmberQuery {
 
       if (cacheChunk == null) {
 	cacheChunk = fillCache(query);
+	System.out.println("FILL: " + cacheChunk);
       }
 
       // all data returned in chunk
@@ -359,7 +360,7 @@ public class UserQuery implements AmberQuery {
       _rs.setUserQuery(this);
     }
 
-    if (maxResults > 0) {
+    if (maxResults != 0) {
       ResultSet rs;
 
       rs = executeQuery(firstResult, maxResults);
