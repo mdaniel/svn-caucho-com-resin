@@ -110,8 +110,8 @@ public class CustomTag extends GenericTag
 
     AnalyzedTag analyzedTag = _tag.getAnalyzedTag();
 
-    boolean isIterator = (IterationTag.class.isAssignableFrom(cl) ||
-                          BodyTag.class.isAssignableFrom(cl));
+    boolean isIterator = (IterationTag.class.isAssignableFrom(cl)
+			  || BodyTag.class.isAssignableFrom(cl));
     boolean isBodyTag = BodyTag.class.isAssignableFrom(cl);
     boolean isCatch = TryCatchFinally.class.isAssignableFrom(cl);
 
@@ -387,8 +387,8 @@ public class CustomTag extends GenericTag
 
     Class declaringClass = method.getDeclaringClass();
 
-    return (! declaringClass.equals(TagSupport.class) &&
-            ! declaringClass.equals(BodyTagSupport.class));
+    return (! declaringClass.equals(TagSupport.class)
+	    && ! declaringClass.equals(BodyTagSupport.class));
   }
 
   /**

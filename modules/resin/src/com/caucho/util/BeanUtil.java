@@ -322,12 +322,18 @@ public class BeanUtil {
    */
   public static Method getSetMethod(BeanInfo info, String propertyName)
   {
-    // jsp/184z, bug #2634
+    // jsp, 184c, jsp/184z, bug #2634
+
+    Method method;
     
-    /*
+    method = getSetMethod(info.getBeanDescriptor().getBeanClass(),
+			  propertyName);
+
+    if (method != null)
+      return method;
+    
     PropertyDescriptor []pds = info.getPropertyDescriptors();
 
-    Method method = null;
     Method bestMethod = null;
 
     for (int i = 0; i < pds.length; i++) {
@@ -344,9 +350,8 @@ public class BeanUtil {
 
     if (method != null)
       return method;
-    */
 
-    return getSetMethod(info.getBeanDescriptor().getBeanClass(), propertyName);
+    return null;
   }
   
   /**

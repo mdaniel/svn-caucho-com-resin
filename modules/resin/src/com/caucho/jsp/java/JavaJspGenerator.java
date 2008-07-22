@@ -915,6 +915,7 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("com.caucho.server.webapp.WebApp _jsp_application = _caucho_getApplication();");
 
     out.print("com.caucho.jsp.PageContextImpl pageContext = _jsp_pageManager.allocatePageContext(");
+    
     out.print("this, _jsp_application, request, response, ");
     if (_parseState.getErrorPage() == null) 
       out.print("null");
@@ -1812,95 +1813,102 @@ public class JavaJspGenerator extends JspGenerator {
     if (isTag())
       out.println("static boolean _jsp_isTagInit;");
 
-    if (_parseState.getExtends() == null) {
-      out.println();
-      out.println("public void init(ServletConfig config)");
-      out.println("  throws ServletException");
-      out.println("{");
-      out.pushDepth();
+    out.println();
+    out.println("public void init(ServletConfig config)");
+    out.println("{");
+    out.pushDepth();
 
-      if (isTag()) {
-        out.println("if (_jsp_isTagInit)");
-        out.println("  return;");
-        out.println("_jsp_isTagInit = true;");
-      }
+    if (isTag()) {
+      out.println("if (_jsp_isTagInit)");
+      out.println("  return;");
+      out.println("_jsp_isTagInit = true;");
+    }
 
-      out.println("com.caucho.server.webapp.WebApp webApp");
-      out.println("  = (com.caucho.server.webapp.WebApp) config.getServletContext();");
+    out.println("try {");
+    out.pushDepth();
       
-      if (! isTag())
-        out.println("super.init(config);");
+    out.println("com.caucho.server.webapp.WebApp webApp");
+    out.println("  = (com.caucho.server.webapp.WebApp) config.getServletContext();");
       
+    if (! isTag()) {
+      out.println("super.init(config);");
+
       out.println("_jsp_pageManager = webApp.getJspApplicationContext().getPageManager();");
-      out.println("com.caucho.jsp.TaglibManager manager = webApp.getJspApplicationContext().getTaglibManager();");
-
-      for (Taglib taglib : _tagLibraryList) {
-	out.print("manager.addTaglibFunctions(_jsp_functionMap, \"");
-	out.printJavaString(taglib.getPrefixString());
-	out.print("\", \"");
-	out.printJavaString(taglib.getURI());
-	out.println("\");");
-      }
-
-      if (! isTag())
-        out.println("com.caucho.jsp.PageContextImpl pageContext = new com.caucho.jsp.PageContextImpl(webApp, this);");
-      else
-        out.println("com.caucho.jsp.PageContextImpl pageContext = new com.caucho.jsp.PageContextImpl(webApp, _caucho_getFunctionMap());");
+    }
       
-      for (int i = 0; i < _exprList.size(); i++) {
-	String expr = _exprList.get(i);
-      
-	out.print("_caucho_expr_" + i + " = com.caucho.jsp.JspUtil.createExpr(pageContext.getELContext(), \"");
-	out.printJavaString(expr);
-	out.println("\");");
-      }
-      
-      for (int i = 0; i < _valueExprList.size(); i++) {
-	ValueExpr expr = _valueExprList.get(i);
+    out.println("com.caucho.jsp.TaglibManager manager = webApp.getJspApplicationContext().getTaglibManager();");
 
-	out.print("_caucho_value_expr_" + i + " = com.caucho.jsp.JspUtil.createValueExpression(pageContext.getELContext(), ");
-	out.printClass(expr.getReturnType());
-	out.print(".class, \"");
-	out.printJavaString(expr.getExpressionString());
-	out.println("\");");
-      }
+    for (Taglib taglib : _tagLibraryList) {
+      out.print("manager.addTaglibFunctions(_jsp_functionMap, \"");
+      out.printJavaString(taglib.getPrefixString());
+      out.print("\", \"");
+      out.printJavaString(taglib.getURI());
+      out.println("\");");
+    }
+
+    if (! isTag())
+      out.println("com.caucho.jsp.PageContextImpl pageContext = new com.caucho.jsp.PageContextImpl(webApp, this);");
+    else
+      out.println("com.caucho.jsp.PageContextImpl pageContext = new com.caucho.jsp.PageContextImpl(webApp, _caucho_getFunctionMap());");
+      
+    for (int i = 0; i < _exprList.size(); i++) {
+      String expr = _exprList.get(i);
+      
+      out.print("_caucho_expr_" + i + " = com.caucho.jsp.JspUtil.createExpr(pageContext.getELContext(), \"");
+      out.printJavaString(expr);
+      out.println("\");");
+    }
+      
+    for (int i = 0; i < _valueExprList.size(); i++) {
+      ValueExpr expr = _valueExprList.get(i);
+
+      out.print("_caucho_value_expr_" + i + " = com.caucho.jsp.JspUtil.createValueExpression(pageContext.getELContext(), ");
+      out.printClass(expr.getReturnType());
+      out.print(".class, \"");
+      out.printJavaString(expr.getExpressionString());
+      out.println("\");");
+    }
     
-      for (int i = 0; i < _methodExprList.size(); i++) {
-	MethodExpr expr = _methodExprList.get(i);
+    for (int i = 0; i < _methodExprList.size(); i++) {
+      MethodExpr expr = _methodExprList.get(i);
 	
-	out.print("_caucho_method_expr_" + i + " = com.caucho.jsp.JspUtil.createMethodExpression(pageContext.getELContext(), \"");
-	out.printJavaString(expr.getExprString());
-	out.print("\", ");
-	if (expr.getReturnType() != null) {
-	  out.printClass(expr.getReturnType());
+      out.print("_caucho_method_expr_" + i + " = com.caucho.jsp.JspUtil.createMethodExpression(pageContext.getELContext(), \"");
+      out.printJavaString(expr.getExprString());
+      out.print("\", ");
+      if (expr.getReturnType() != null) {
+	out.printClass(expr.getReturnType());
+	out.print(".class");
+      }
+      else
+	out.print("String.class");
+      
+      out.print(", new Class[] {");
+
+      Class []args = expr.getArgs();
+      if (args != null) {
+	for (int j = 0; j < args.length; j++) {
+	  if (j != 0)
+	    out.print(", ");
+
+	  out.printClass(args[j]);
 	  out.print(".class");
 	}
-	else
-	  out.print("String.class");
-      
-	out.print(", new Class[] {");
-
-	Class []args = expr.getArgs();
-	if (args != null) {
-	  for (int j = 0; j < args.length; j++) {
-	    if (j != 0)
-	      out.print(", ");
-
-	    out.printClass(args[j]);
-	    out.print(".class");
-	  }
-	}
-      
-	out.println("});");
       }
-
-      for (String tagClass : _tagFileClassList) {
-        out.println("new " + tagClass + "().init(config);");
-      }
-
-      out.popDepth();
-      out.println("}");
+      
+      out.println("});");
     }
+
+    for (String tagClass : _tagFileClassList) {
+      out.println("new " + tagClass + "().init(config);");
+    }
+
+    out.popDepth();
+    out.println("} catch (Exception e) {");
+    out.println("  throw com.caucho.config.ConfigException.create(e);");
+    out.println("}");
+    
+    out.popDepth();
+    out.println("}");
   }
 
   /**
