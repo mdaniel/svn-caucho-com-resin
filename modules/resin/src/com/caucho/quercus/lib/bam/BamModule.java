@@ -29,8 +29,10 @@
 
 package com.caucho.quercus.lib.bam;
 
+import com.caucho.bam.BamConnection;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
+import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hemp.client.HempClient;
 import com.caucho.xmpp.im.ImMessage;
 import com.caucho.xmpp.im.ImPresence;
@@ -47,6 +49,7 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.IniDefinition;
@@ -62,6 +65,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
+import javax.webbeans.In;
+
 /**
  * BAM functions
  */
@@ -70,8 +75,13 @@ public class BamModule extends AbstractQuercusModule
 {
   private static final Logger log
     = Logger.getLogger(BamModule.class.getName());
-
   private static final L10N L = new L10N(BamModule.class);
+
+  private static final StringValue PHP_SELF 
+    = new StringBuilderValue("PHP_SELF");
+
+  private static final StringValue SERVER_NAME 
+    = new StringBuilderValue("SERVER_NAME");
 
   private static BamPhpAgent getAgent(Env env)
   {
@@ -81,6 +91,29 @@ public class BamModule extends AbstractQuercusModule
       return (BamPhpAgent) agentValue.toJavaObject();
 
     return null;
+  }
+
+  private static BamConnection getBamConnection(Env env)
+  {
+    BamConnection connection = env.getSpecialValue("_quercus_bam_connection");
+
+    // create a connection lazily
+    if (connection == null) {
+      HempBroker broker = 
+        WebBeansContainer.getCurrent().getByType(HempBroker.class);
+
+      String jid = "php@" + env.getGlobalVar("_SERVER").get(SERVER_NAME);
+      String resource = env.getGlobalVar("_SERVER").get(PHP_SELF).toString();
+
+      if (resource.indexOf('/') == 0)
+        resource = resource.substring(1);
+
+      connection = broker.getConnection(jid, "pass", resource);
+      env.addCleanup(new BamConnectionResource(connection));
+      env.setSpecialValue("_quercus_bam_connection", connection);
+    }
+
+    return connection;
   }
 
   private static BamPhpServiceManager getServiceManager(Env env)
@@ -100,9 +133,9 @@ public class BamModule extends AbstractQuercusModule
     if (agent != null)
       return agent.getBrokerStream();
 
-    HempClient client = env.getSpecialValue("_quercus_bam_client");
+    BamConnection connection = getBamConnection(env);
 
-    return client.getBrokerStream();
+    return connection.getBrokerStream();
   }
 
   private static String getJid(Env env)
@@ -111,25 +144,26 @@ public class BamModule extends AbstractQuercusModule
 
     if (agent != null)
       return agent.getJid();
-    
-    HempClient client = env.getSpecialValue("_quercus_bam_client");
 
-    return client.getJid();
+    BamConnection connection = getBamConnection(env);
+
+    return connection.getJid();
   }
 
-  // XXX does bam_login make sense?  should this really be a persistent bean?
   public static Value bam_login(Env env, 
-                                String url, String username, String password)
+                                String url, 
+                                String username, 
+                                String password)
   {
     BamPhpAgent agent = getAgent(env);
 
     if (agent != null)
       return env.error("bam_login not available from agent script");
 
-    BamClientResource resource = new BamClientResource(url);
-    env.addCleanup(resource);
+    HempClient client = new HempClient(url);
 
-    HempClient client = resource.getClient();
+    BamConnectionResource resource = new BamConnectionResource(client);
+    env.addCleanup(resource);
 
     try {
       client.connect();
@@ -140,7 +174,7 @@ public class BamModule extends AbstractQuercusModule
 
     client.login(username, password);
 
-    env.setSpecialValue("_quercus_bam_client", client);
+    env.setSpecialValue("_quercus_bam_connection", client);
 
     return BooleanValue.TRUE;
   }
@@ -279,103 +313,117 @@ public class BamModule extends AbstractQuercusModule
 
   public static void bam_send_message(Env env, String to, Serializable value)
   {
-    getBrokerStream(env).message(to, null, value);
+    getBrokerStream(env).message(to, getJid(env), value);
   }
 
   public static void bam_send_message_error(Env env, 
                                             String to, 
-                                            Serializable value, BamError error)
+                                            Serializable value, 
+                                            BamError error)
   {
-    getBrokerStream(env).messageError(to, null, value, error);
+    getBrokerStream(env).messageError(to, getJid(env), value, error);
   }
 
   public static Value bam_send_query_get(Env env, 
-                                         long id, String to, Serializable value)
+                                         long id, 
+                                         String to, 
+                                         Serializable value)
   {
-    boolean understood = getBrokerStream(env).queryGet(id, to, null, value);
+    String from = getJid(env);
+    boolean understood = getBrokerStream(env).queryGet(id, to, from, value);
 
     return BooleanValue.create(understood);
   }
 
   public static Value bam_send_query_set(Env env, 
-                                         long id, String to, Serializable value)
+                                         long id, 
+                                         String to, 
+                                         Serializable value)
   {
-    boolean understood = getBrokerStream(env).querySet(id, to, null, value);
+    String from = getJid(env);
+    boolean understood = getBrokerStream(env).querySet(id, to, from, value);
 
     return BooleanValue.create(understood);
   }
 
   public static void bam_send_query_result(Env env, 
-                                           long id, String to,
+                                           long id, 
+                                           String to,
                                            Serializable value)
   {
-    getBrokerStream(env).queryResult(id, to, null, value);
+    getBrokerStream(env).queryResult(id, to, getJid(env), value);
   }
 
   public static void bam_send_query_error(Env env, 
                                           long id, String to,
                                           Serializable value, BamError error)
   {
-    getBrokerStream(env).queryError(id, to, null, value, error);
+    getBrokerStream(env).queryError(id, to, getJid(env), value, error);
   }
 
   public static void bam_send_presence(Env env, String to, Serializable value)
   {
-    String jid = getJid(env);
-    getBrokerStream(env).presence(to, jid, value);
+    getBrokerStream(env).presence(to, getJid(env), value);
   }
 
-  public static void bam_send_presence_unavailable(Env env, String to, 
+  public static void bam_send_presence_unavailable(Env env, 
+                                                   String to, 
                                                    Serializable value)
   {
-    getBrokerStream(env).presenceUnavailable(to, null, value);
+    getBrokerStream(env).presenceUnavailable(to, getJid(env), value);
   }
 
-  public static void bam_send_presence_probe(Env env, String to, 
+  public static void bam_send_presence_probe(Env env, 
+                                             String to, 
                                              Serializable value)
   {
-    getBrokerStream(env).presenceProbe(to, null, value);
+    getBrokerStream(env).presenceProbe(to, getJid(env), value);
   }
 
-  public static void bam_send_presence_subscribe(Env env, String to, 
+  public static void bam_send_presence_subscribe(Env env, 
+                                                 String to, 
                                                  Serializable value)
   {
-    getBrokerStream(env).presenceSubscribe(to, null, value);
+    getBrokerStream(env).presenceSubscribe(to, getJid(env), value);
   }
 
-  public static void bam_send_presence_subscribed(Env env, String to, 
+  public static void bam_send_presence_subscribed(Env env, 
+                                                  String to, 
                                                   Serializable value)
   {
-    getBrokerStream(env).presenceSubscribed(to, null, value);
+    getBrokerStream(env).presenceSubscribed(to, getJid(env), value);
   }
 
-  public static void bam_send_presence_unsubscribe(Env env, String to, 
+  public static void bam_send_presence_unsubscribe(Env env, 
+                                                   String to, 
                                                    Serializable value)
   {
-    getBrokerStream(env).presenceUnsubscribe(to, null, value);
+    getBrokerStream(env).presenceUnsubscribe(to, getJid(env), value);
   }
 
-  public static void bam_send_presence_unsubscribed(Env env, String to, 
+  public static void bam_send_presence_unsubscribed(Env env, 
+                                                    String to, 
                                                     Serializable value)
   {
-    getBrokerStream(env).presenceUnsubscribed(to, null, value);
+    getBrokerStream(env).presenceUnsubscribed(to, getJid(env), value);
   }
 
-  public static void bam_send_presence_error(Env env, String to, 
+  public static void bam_send_presence_error(Env env, 
+                                             String to, 
                                              Serializable value,
                                              BamError error)
   {
-    getBrokerStream(env).presenceError(to, null, value, error);
+    getBrokerStream(env).presenceError(to, getJid(env), value, error);
   }
 
   public static Value im_send_message(Env env, 
-                                     String to, 
-                                     String from, 
-                                     Value body,
-                                     @Optional("chat") String type,
-                                     @Optional Value subject,
-                                     @Optional String thread,
-                                     @Optional Serializable[] extras)
+                                      String to, 
+                                      String from, 
+                                      Value body,
+                                      @Optional("chat") String type,
+                                      @Optional Value subject,
+                                      @Optional String thread,
+                                      @Optional Serializable[] extras)
   {
     Text[] subjects = null;
 

@@ -64,7 +64,6 @@ public class GenericService extends SimpleBamService
   
   private String _jid;
   
-  private BamConnection _conn;
   private BamStream _brokerStream;
   private BamStream _agentStream;
 
@@ -96,11 +95,6 @@ public class GenericService extends SimpleBamService
     return _broker;
   }
   
-  protected BamConnection getConnection()
-  {
-    return _conn;
-  }
-
   public BamStream getBrokerStream()
   {
     return _brokerStream;
@@ -266,12 +260,6 @@ public class GenericService extends SimpleBamService
   @PreDestroy
   protected void destroy()
   {
-    BamConnection conn = _conn;
-    _conn = null;
-
-    if (conn != null)
-      conn.close();
-
     if (log.isLoggable(Level.FINE))
       log.fine(this + " destroy");
   }
