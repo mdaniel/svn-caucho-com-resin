@@ -121,7 +121,6 @@ public class Resin implements EnvironmentBean, SchemaBean
   private Path _rootDirectory;
 
   private boolean _isGlobalSystemProperties;
-  private boolean _isResinProfessional;
 
   private long _minFreeMemory = 2 * 1024L * 1024L;
   private long _shutdownWaitMax = 60000L;
@@ -1783,7 +1782,7 @@ public class Resin implements EnvironmentBean, SchemaBean
      */
     public boolean isProfessional()
     {
-      return _isResinProfessional;
+      return Resin.this.isProfessional();
     }
 
     /**

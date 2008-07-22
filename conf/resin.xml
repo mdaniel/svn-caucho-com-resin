@@ -26,6 +26,7 @@
     <deploy-service/>
     <jmx-service/>
     <log-service/>
+    <stat-service/>
     <xa-log-service/>
   </management>
 
@@ -121,7 +122,6 @@
       <socket-timeout>65s</socket-timeout>
 
       <!-- Configures the keepalive -->
-      <keepalive-max>128</keepalive-max>
       <keepalive-timeout>15s</keepalive-timeout>
 
       <!--

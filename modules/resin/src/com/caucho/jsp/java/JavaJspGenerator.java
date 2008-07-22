@@ -77,8 +77,9 @@ import java.util.logging.Logger;
  * generates code from that tree.
  */
 public class JavaJspGenerator extends JspGenerator {
-  static final L10N L = new L10N(JavaJspGenerator.class);
-  static final Logger log = Log.open(JavaJspGenerator.class);
+  private static final L10N L = new L10N(JavaJspGenerator.class);
+  private static final Logger log
+    = Logger.getLogger(JavaJspGenerator.class.getName());
   
   static final String IE_CLSID = "clsid:8AD9C840-044E-11D1-B3E9-00805F499D93";
   static final String IE_URL = "http://java.sun.com/products/plugin/1.2.2/jinstall-1_2_2-win.cab#Version=1,2,2,0";
@@ -833,6 +834,8 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("private static final java.util.HashMap<String,java.lang.reflect.Method> _jsp_functionMap = new java.util.HashMap<String,java.lang.reflect.Method>();");
 
     out.println("private boolean _caucho_isDead;");
+    out.println("private com.caucho.jsp.PageManager _jsp_pageManager;");
+    //out.println("private com.caucho.util.FreeList<TagState> _jsp_freeState = new com.caucho.util.FreeList<TagState>(8);");
 
     String info = _parseState.getInfo();
     if (info != null) {
@@ -911,7 +914,7 @@ public class JavaJspGenerator extends JspGenerator {
     
     out.println("com.caucho.server.webapp.WebApp _jsp_application = _caucho_getApplication();");
 
-    out.print("com.caucho.jsp.PageContextImpl pageContext = com.caucho.jsp.QJspFactory.allocatePageContext(");
+    out.print("com.caucho.jsp.PageContextImpl pageContext = _jsp_pageManager.allocatePageContext(");
     out.print("this, _jsp_application, request, response, ");
     if (_parseState.getErrorPage() == null) 
       out.print("null");
@@ -933,6 +936,9 @@ public class JavaJspGenerator extends JspGenerator {
 
     out.println();
     out.println("TagState _jsp_state = new TagState();");
+    // out.println("TagState _jsp_state = _jsp_freeState.allocate();");
+    //out.println("if (_jsp_state == null)");
+    //out.println("  _jsp_state = new TagState();");
     
     out.println();
     out.println("try {");
@@ -949,9 +955,10 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("} finally {");
     out.pushDepth();
 
+    //out.println("if (! _jsp_freeState.free(_jsp_state))");
     out.println("_jsp_state.release();");
     
-    out.println("com.caucho.jsp.QJspFactory.freePageContext(pageContext);");
+    out.println("_jsp_pageManager.freePageContext(pageContext);");
     
     // close finally
     out.popDepth();
@@ -1753,6 +1760,10 @@ public class JavaJspGenerator extends JspGenerator {
       out.pushDepth();
       out.println("  _caucho_isDead = true;");
       out.println("  super.destroy();");
+
+      out.println("TagState tagState;");
+      //out.println("while ((tagState = _jsp_freeState.allocate()) != null)");
+      //out.println("  tagState.release();");
       out.popDepth();
       out.println("}");
     }
@@ -1820,6 +1831,7 @@ public class JavaJspGenerator extends JspGenerator {
       if (! isTag())
         out.println("super.init(config);");
       
+      out.println("_jsp_pageManager = webApp.getJspApplicationContext().getPageManager();");
       out.println("com.caucho.jsp.TaglibManager manager = webApp.getJspApplicationContext().getTaglibManager();");
 
       for (Taglib taglib : _tagLibraryList) {

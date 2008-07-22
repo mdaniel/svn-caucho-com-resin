@@ -29,6 +29,7 @@
 
 package com.caucho.jsp.el;
 
+import com.caucho.jsp.PageManager;
 import com.caucho.jsp.TaglibManager;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
@@ -47,6 +48,7 @@ public class JspApplicationContextImpl implements JspApplicationContext
   private final ExpressionFactory _expressionFactory;
 
   private TaglibManager _taglibManager;
+  private PageManager _pageManager;
 
   private ELResolver []_resolverArray = new ELResolver[0];
   private ELContextListener []_listenerArray = new ELContextListener[0];
@@ -77,6 +79,19 @@ public class JspApplicationContextImpl implements JspApplicationContext
   public void setTaglibManager(TaglibManager taglibManager)
   {
     _taglibManager = taglibManager;
+  }
+
+  public PageManager getPageManager()
+  {
+    if (_pageManager == null)
+      throw new NullPointerException();
+    
+    return _pageManager;
+  }
+
+  public void setPageManager(PageManager pageManager)
+  {
+    _pageManager = pageManager;
   }
 
   //

@@ -69,7 +69,10 @@ public class SystemClassLoader
   {
     super(parent, "system");
 
-    DynamicClassLoader.setJarCacheEnabled(true);
+    String preScan = System.getProperty("caucho.jar.prescan");
+    
+    if (preScan == null || ! "false".equals(preScan))
+      DynamicClassLoader.setJarCacheEnabled(true);
   }
 
   public ClassLoader getClassLoader()

@@ -32,7 +32,6 @@ package com.caucho.jsp;
 import com.caucho.java.LineMap;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.SimpleLoader;
-import com.caucho.log.Log;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.util.CauchoSystem;
@@ -99,10 +98,12 @@ public class JspManager extends PageManager {
    */
   public void init()
   {
+    WebApp app = getWebApp();
+	
+    app.getJspApplicationContext().setPageManager(this);
+    
     if (_isLoadTldOnInit) {
       try {
-	WebApp app = getWebApp();
-	
 	TldManager tld = TldManager.create(new AppResourceManager(app), app);
 
 	// must be initialized at startup for <listeners>, e.g. JSF

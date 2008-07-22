@@ -1086,7 +1086,7 @@ public class TcpConnection extends Connection
 	_state = _state.toAccept();
 
         // while (! _state.isClosed()) {
-        while (! _port.isClosed()) {
+        while (! _port.isClosed() && _state != ConnectionState.DESTROYED) {
           _state = _state.toAccept();
           
           if (! _port.accept(TcpConnection.this, isStart)) {
@@ -1171,8 +1171,10 @@ public class TcpConnection extends Connection
 	  close();
       }
 
-      if (isValid && result != RequestState.THREAD_DETACHED)
+      if (isValid && result != RequestState.THREAD_DETACHED) {
+	// acceptTask significantly faster than finishing
 	_acceptTask.doAccept(false);
+      }
     }
   }
 

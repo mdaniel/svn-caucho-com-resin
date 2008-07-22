@@ -79,7 +79,7 @@ $heap = @new Java("com.caucho.profile.Heap");
 $is_heap_available_heap = false;
 
 if ($heap) {
-  echo "<form action='?q=heap' method='post'>";
+  echo "<form action='?q=memory' method='post'>";
   echo "<input type='submit' name='action' value='dump heap'>";
   echo "</form>";
 

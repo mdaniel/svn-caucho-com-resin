@@ -265,21 +265,8 @@ public class PageContextImpl extends PageContext
     _webApp = app;
     _locale = null;
 
-    //_topOut.init(this, bufferSize, autoFlush);
-
-    // jsp/17ee
-    //_jspPrintWriter.init(_topOut);
-    //_response.setPrintWriter(_jspPrintWriter);
-
-    // not quite correct
-    //  _writerStreamImpl.setWriter(_topOut);
-    // _response.setPrintWriter(body.getWriter());
-
-    // jsp/3145
-    _elContext = null;
-    /*
-    _elResolver = null;
-    */
+    // major performance issue if null
+    //_elContext = null;
 
     _hasException = false;
     //if (_attributes.size() > 0)

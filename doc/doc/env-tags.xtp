@@ -2153,6 +2153,11 @@ properties can be configured directly on the &lt;mail> tag.</p>
   <td></td>
 </tr>
 <tr>
+  <td>properties</td>
+  <td>general mail properties in property file format</td>
+  <td></td>
+</tr>
+<tr>
   <td>smtp-host</td>
   <td>sets the mail.smtp.host property</td>
   <td></td>
@@ -2207,6 +2212,21 @@ element mail {
   &amp; user?
 }
 </def>
+
+<example title="Example: mail">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;mail jndi-name="java:comp/env/mail">
+    &lt;from>noreply@foo.com&lt;/from>
+    &lt;smtp-host>localhost&lt;/smtp-host>
+    &lt;smtp-port>25&lt;/smtp-port>
+
+    &lt;properties>
+      mail.smtp.starttls.enable=true
+    &lt;/properties>
+  &lt;/mail>
+&lt;/web-app>
+</example>
 
 </defun>
 

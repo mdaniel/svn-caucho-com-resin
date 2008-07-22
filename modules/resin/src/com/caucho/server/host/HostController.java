@@ -412,8 +412,8 @@ public class HostController
   {
     if (getConfig() != null && getConfig().getRegexp() != null)
       return newController;
-    else if (newController.getConfig() != null &&
-	     newController.getConfig().getRegexp() != null)
+    else if (newController.getConfig() != null
+	     && newController.getConfig().getRegexp() != null)
       return this;
     else {
       Thread thread = Thread.currentThread();

@@ -35,19 +35,20 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.java.JavaCompiler;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.Environment;
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CacheListener;
+import com.caucho.util.FreeList;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 import com.caucho.webbeans.context.DependentScope;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.servlet.jsp.PageContext;
 import javax.servlet.ServletConfig;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -60,9 +61,13 @@ import java.util.logging.Logger;
  * is responsible for caching pages until the underlying files change.
  */
 abstract public class PageManager {
-  private final static Logger log = Log.open(PageManager.class);
+  private final static Logger log
+    = Logger.getLogger(PageManager.class.getName());
   
   static final long ACCESS_INTERVAL = 60000L;
+
+  private FreeList<PageContextImpl> _freePages
+    = new FreeList<PageContextImpl>(256);
 
   protected WebApp _webApp;
   private Path _classDir;
@@ -145,16 +150,70 @@ abstract public class PageManager {
   {
     return _webApp;
   }
+
+  public PageContextImpl allocatePageContext(Servlet servlet,
+					     ServletRequest request,
+					     ServletResponse response,
+					     String errorPageURL,
+					     boolean needsSession,
+					     int buffer,
+					     boolean autoFlush)
+  {
+    PageContextImpl pc = _freePages.allocate();
+    if (pc == null)
+      pc = new PageContextImpl();
+
+    try {
+      pc.initialize(servlet, request, response, errorPageURL,
+                    needsSession, buffer, autoFlush);
+    } catch (Exception e) {
+    }
+
+    return pc;
+  }
+
+  /**
+   * The jsp page context initialization.
+   */
+  public PageContextImpl allocatePageContext(Servlet servlet,
+					     WebApp app,
+					     ServletRequest request,
+					     ServletResponse response,
+					     String errorPageURL,
+					     HttpSession session,
+					     int buffer,
+					     boolean autoFlush,
+					     boolean isPrintNullAsBlank)
+  {
+    PageContextImpl pc = _freePages.allocate();
+    if (pc == null)
+      pc = new PageContextImpl();
+
+    pc.initialize(servlet, app, request, response, errorPageURL,
+		  session, buffer, autoFlush, isPrintNullAsBlank);
+
+    return pc;
+  }
+
+  public void freePageContext(PageContext pc)
+  {
+    if (pc != null) {
+      pc.release();
+
+      if (pc instanceof PageContextImpl)
+	_freePages.free((PageContextImpl) pc);
+    }
+  }
   
-   /**
-    * Compiles and returns the page at the given path and uri.  The uri
-    * is needed for jsp:include, etc. in the JSP pages.
-    *
-    * @param path Path to the page.
-    * @param uri uri of the page.
-    *
-    * @return the compiled JSP (or XTP) page.
-    */
+  /**
+   * Compiles and returns the page at the given path and uri.  The uri
+   * is needed for jsp:include, etc. in the JSP pages.
+   *
+   * @param path Path to the page.
+   * @param uri uri of the page.
+   *
+   * @return the compiled JSP (or XTP) page.
+   */
   public Page getPage(String uri, Path path)
     throws Exception
   {
