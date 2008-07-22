@@ -13,6 +13,9 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>quercus: Pages sidebar not found in a standard Wordpress installation (#2800, rep by PeterUnold)</li>
+<li>quercus: class_implements() is missing (#2788, rep by drhalogen)</li>
+<li>quercus: setlocale not working properly (#2752, rep s. eybert)</li>
 <li>mail: add properties attribute as &lt;init> synonym (rep by Daniel Lopez)</li>
 <li>(2008-07-20) log: added mail: as a logging handler</li>
 <li>messaging: added caucho.log:, caucho.jms:, caucho.mail: as bam services</li>
