@@ -579,7 +579,7 @@
         <include name="configure"/>
         <include name="configure.ac"/>
         <include name="aclocal.m4"/>
-        <include name="httpd.exe"/>
+        <include name="resin.exe"/>
         <include name="setup.exe"/>
         <include name="description-pak"/>
       </fileset>
@@ -602,7 +602,7 @@
     <chmod perm="ugo+rx">
       <fileset dir="${dist}/${dist.name}">
         <include name="configure"/>
-        <include name="bin/httpd.sh"/>
+        <include name="bin/resin.sh"/>
         <include name="bin/wrapper.pl"/>
         <include name="automake/missing"/>
         <include name="automake/install-sh"/>

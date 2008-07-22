@@ -573,7 +573,7 @@
     <copy todir="${install}/win64"
           file="${win32}/resin/modules/c/src/resin_os_64/Release/resin_os.dll"/>
     <copy todir="${install}"
-          file="${win32}/resin/modules/c/src/httpd/Release/httpd.exe"/>
+          file="${win32}/resin/modules/c/src/httpd/Release/resin.exe"/>
     <copy todir="${install}"
           file="${win32}/resin/modules/c/src/setup/Release/setup.exe"/>
 

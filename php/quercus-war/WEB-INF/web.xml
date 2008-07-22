@@ -11,12 +11,11 @@
     <servlet-class>com.caucho.quercus.servlet.QuercusServlet</servlet-class>
 
     <!-- Specifies the encoding Quercus should use to read in PHP scripts.
-         Uncomment this if you're having "invalid utf-8" errors.
     -->
     <!--
     <init-param>
       <param-name>script-encoding</param-name>
-      <param-value>ISO-8859-1</param-value>
+      <param-value>UTF-8</param-value>
     </init-param>
     -->
 
@@ -32,7 +31,7 @@
 
     <!--
     <init-param>
-      <param-name>php-ini-file</param-name>
+      <param-name>ini-file</param-name>
       <param-value>WEB-INF/php.ini</param-value>
     </init-param>
     -->

@@ -270,7 +270,7 @@ public class ResinModule
       Hashtable<String, String> entries = objectName.getKeyPropertyList();
 
       for (Map.Entry<String, String> entry : entries.entrySet()) {
-	exploded.put(entry.getKey(), entry.getValue());
+        exploded.put(entry.getKey(), entry.getValue());
       }
 
       return exploded;
