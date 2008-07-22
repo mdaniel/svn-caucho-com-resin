@@ -78,6 +78,15 @@ public class DependentEntityOneToOneExpr extends AbstractPathExpr {
   }
 
   /**
+   * Creates a load expression.
+   */
+  @Override
+  public LoadExpr createLoad()
+  {
+    return new LoadEntityExpr(this);
+  }
+
+  /**
    * Return the child from item.
    */
   public FromItem getChildFromItem()

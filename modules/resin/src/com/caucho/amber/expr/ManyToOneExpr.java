@@ -237,6 +237,15 @@ public class ManyToOneExpr extends AbstractPathExpr {
   }
 
   /**
+   * Creates a load expression.
+   */
+  @Override
+  public LoadExpr createLoad()
+  {
+    return new LoadEntityExpr(this);
+  }
+
+  /**
    * Returns the parent.
    */
   public PathExpr getParent()

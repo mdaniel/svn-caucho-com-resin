@@ -1874,6 +1874,96 @@ element jndi-link {
 
 </defun>
 
+<defun title="&lt;jpa-persistence>" occur="*" version="Resin 3.1">
+<parents>resin, cluster, host, web-app</parents>
+
+<p>&lt;jpa-persistence> configures JPA persistence defaults.
+More details on JPA are available on the <a href="amber.xtp">Amber</a> page.</p>
+
+<deftable title="&lt;jpa-persistence> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>create-database-schema</td>
+  <td>If true, Amber will automatically create the database schema</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>cache-size</td>
+  <td>Size of the entity cache</td>
+  <td>32k</td>
+</tr>
+<tr>
+  <td>data-source</td>
+  <td>database used for JTA</td>
+  <td></td>
+</tr>
+<tr>
+  <td>jdbc-isolation</td>
+  <td>JDBC isolation level used for connections</td>
+  <td></td>
+</tr>
+<tr>
+  <td>read-data-source</td>
+  <td>Data source to be used for read-only queries</td>
+  <td>data-source</td>
+</tr>
+<tr>
+  <td>validate-database-schema</td>
+  <td>enables validation of the database tables on startup</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>xa-data-source</td>
+  <td>database to use in transactions</td>
+  <td>data-source</td>
+</tr>
+</deftable>
+
+<def title="&lt;jpa-persistence> schema">
+element jpa-persistence {
+  create-database-schema?
+  &amp; cache-size?
+  &amp; cache-timeout?
+  &amp; data-source?
+  &amp; jdbc-isolation?
+  &amp; persistence-unit*
+  &amp; persistence-unit-default*
+  &amp; read-data-source?
+  &amp; validate-database-schema?
+  &amp; xa-data-source?
+}
+
+element persistence-unit {
+  name
+  &amp; jta-data-source?
+  &amp; non-jta-data-source?
+  &amp; provider?
+  &amp; transaction-type?
+  &amp; properties?
+}
+
+element persistence-unit-default {
+  &amp; jta-data-source?
+  &amp; non-jta-data-source?
+  &amp; provider?
+  &amp; transaction-type?
+  &amp; properties?
+}
+
+element properties {
+  element property {
+     name
+     &amp; value
+  }*
+}
+</def>
+
+</defun>
+
 <defun title="&lt;library-loader>" occur="*" version="Resin 3.0">
   <parents>class-loader</parents>
 
@@ -2227,96 +2317,6 @@ element mail {
   &lt;/mail>
 &lt;/web-app>
 </example>
-
-</defun>
-
-<defun title="&lt;persistence-manager>" occur="*" version="Resin 3.1">
-<parents>resin, cluster, host, web-app</parents>
-
-<p>&lt;persistence-manager> configures JPA persistence defaults.
-More details on JPA are available on the <a href="amber.xtp">Amber</a> page.</p>
-
-<deftable title="&lt;persistence-manager> Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>create-database-schema</td>
-  <td>If true, Amber will automatically create the database schema</td>
-  <td>false</td>
-</tr>
-<tr>
-  <td>cache-size</td>
-  <td>Size of the entity cache</td>
-  <td>32k</td>
-</tr>
-<tr>
-  <td>data-source</td>
-  <td>database used for JTA</td>
-  <td></td>
-</tr>
-<tr>
-  <td>jdbc-isolation</td>
-  <td>JDBC isolation level used for connections</td>
-  <td></td>
-</tr>
-<tr>
-  <td>read-data-source</td>
-  <td>Data source to be used for read-only queries</td>
-  <td>data-source</td>
-</tr>
-<tr>
-  <td>validate-database-schema</td>
-  <td>enables validation of the database tables on startup</td>
-  <td>false</td>
-</tr>
-<tr>
-  <td>xa-data-source</td>
-  <td>database to use in transactions</td>
-  <td>data-source</td>
-</tr>
-</deftable>
-
-<def title="&lt;persistence-manager> schema">
-element persistence-manager {
-  create-database-schema?
-  &amp; cache-size?
-  &amp; cache-timeout?
-  &amp; data-source?
-  &amp; jdbc-isolation?
-  &amp; persistence-unit*
-  &amp; persistence-unit-default*
-  &amp; read-data-source?
-  &amp; validate-database-schema?
-  &amp; xa-data-source?
-}
-
-element persistence-unit {
-  name
-  &amp; jta-data-source?
-  &amp; non-jta-data-source?
-  &amp; provider?
-  &amp; transaction-type?
-  &amp; properties?
-}
-
-element persistence-unit-default {
-  &amp; jta-data-source?
-  &amp; non-jta-data-source?
-  &amp; provider?
-  &amp; transaction-type?
-  &amp; properties?
-}
-
-element properties {
-  element property {
-     name
-     &amp; value
-  }*
-}
-</def>
 
 </defun>
 

@@ -30,9 +30,11 @@
 package com.caucho.config;
 
 import com.caucho.util.*;
+import com.caucho.vfs.*;
 
-import java.io.PrintWriter;
+import java.io.*;
 import java.lang.reflect.*;
+import java.util.logging.*;
 
 /**
  * Thrown by the various Builders
@@ -41,6 +43,9 @@ public class ConfigException
   extends ConfigRuntimeException
   implements CompileException, DisplayableException
 {
+  private static final Logger log
+    = Logger.getLogger(ConfigException.class.getName());
+  
   /**
    * Create a null exception
    */
@@ -117,6 +122,29 @@ public class ConfigException
       return new LineConfigException(line + e, e);
   }
 
+  public static RuntimeException createLine(String systemId, int line,
+					    Throwable e)
+  {
+    while (e.getCause() != null
+	   && (e instanceof InstantiationException
+	       || e instanceof InvocationTargetException
+	       || e.getClass().equals(ConfigRuntimeException.class))) {
+      e = e.getCause();
+    }
+    
+    if (e instanceof LineConfigException)
+      throw (LineConfigException) e;
+
+    String lines = getSourceLines(systemId, line);
+    String loc = systemId + ":" + line + ": ";
+    
+    if (e instanceof DisplayableException) {
+      return new LineConfigException(loc + e.getMessage() + "\n" + lines, e);
+    }
+    else
+      return new LineConfigException(loc + e + "\n" + lines, e);
+  }
+
   public static RuntimeException create(Field field, Throwable e)
   {
     return create(loc(field), e);
@@ -170,5 +198,38 @@ public class ConfigException
   public static String loc(Method method)
   {
     return method.getDeclaringClass().getName() + "." + method.getName() + "(): ";
+  }
+
+  private static String getSourceLines(String systemId, int errorLine)
+  {
+    if (systemId == null)
+      return "";
+    
+    ReadStream is = null;
+    try {
+      is = Vfs.lookup().lookup(systemId).openRead();
+      int line = 0;
+      StringBuilder sb = new StringBuilder("\n\n");
+      String text;
+      while ((text = is.readLine()) != null) {
+	line++;
+
+	if (errorLine - 2 <= line && line <= errorLine + 2) {
+	  sb.append(line);
+	  sb.append(": ");
+	  sb.append(text);
+	  sb.append("\n");
+	}
+      }
+
+      return sb.toString();
+    } catch (IOException e) {
+      log.log(Level.FINEST, e.toString(), e);
+
+      return "";
+    } finally {
+      if (is != null)
+	is.close();
+    }
   }
 }

@@ -61,7 +61,7 @@ public class MailHandler extends Handler implements AlarmListener
   private static final L10N L = new L10N(MailHandler.class);
 
   private long _delayTime = 60000L;
-  private long _timeIntervalMin = 60 * 60000L;
+  private long _timeIntervalMin = 3 * 60 * 60000L;
 
   private long _lastMailTime;
 

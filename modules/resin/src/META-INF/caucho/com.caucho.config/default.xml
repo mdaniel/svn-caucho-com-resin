@@ -83,6 +83,9 @@
     
     <bean name="jms-topic"
           class="com.caucho.jms.cfg.JmsTopicConfig"/>
+
+  <bean name="jpa-persistence"
+        class="com.caucho.amber.cfg.PersistenceManager"/>
     
     <bean name="list"
           class="com.caucho.config.type.ListType"/>

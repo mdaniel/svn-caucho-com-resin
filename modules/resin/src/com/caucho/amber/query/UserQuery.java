@@ -346,7 +346,6 @@ public class UserQuery implements AmberQuery {
 
       if (cacheChunk == null) {
 	cacheChunk = fillCache(query);
-	System.out.println("FILL: " + cacheChunk);
       }
 
       // all data returned in chunk

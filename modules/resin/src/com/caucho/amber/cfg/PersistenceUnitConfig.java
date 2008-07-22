@@ -320,31 +320,38 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
                                    ArrayList<EntityMappingsConfig> entityMappings)
     throws Exception
   {
-    AmberPersistenceUnit unit
-      = new AmberPersistenceUnit(container, _name);
+    try {
+      AmberPersistenceUnit unit
+	= new AmberPersistenceUnit(container, _name);
 
-    unit.setJPA(true);
+      unit.setJPA(true);
 
-    if (_jtaDataSourceName != null)
-      unit.setJtaDataSourceName(_jtaDataSourceName);
+      if (_jtaDataSourceName != null)
+	unit.setJtaDataSourceName(_jtaDataSourceName);
     
-    if (_nonJtaDataSourceName != null)
-      unit.setNonJtaDataSourceName(_nonJtaDataSourceName);
+      if (_nonJtaDataSourceName != null)
+	unit.setNonJtaDataSourceName(_nonJtaDataSourceName);
 
-    unit.setEntityMappingsList(entityMappings);
+      unit.setEntityMappingsList(entityMappings);
 
-    unit.init();
+      unit.init();
 
-    for (Map.Entry<String,Class> entry : _classMap.entrySet()) {
-      String className = entry.getKey();
-      Class type = entry.getValue();
+      for (Map.Entry<String,Class> entry : _classMap.entrySet()) {
+	String className = entry.getKey();
+	Class type = entry.getValue();
 
-      unit.addEntityClass(className, type);
+	unit.addEntityClass(className, type);
+      }
+
+      unit.generate();
+
+      return unit;
+    } catch (Exception e) {
+      if (_rootUrl != null)
+	throw ConfigException.createLine(_rootUrl.toString() + ":\n", e);
+      else
+	throw e;
     }
-
-    unit.generate();
-
-    return unit;
   }
 
   //
