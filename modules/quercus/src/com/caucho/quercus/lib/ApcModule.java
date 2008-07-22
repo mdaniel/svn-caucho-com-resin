@@ -235,7 +235,6 @@ public class ApcModule extends AbstractQuercusModule {
     if (_cache == null) {
       long size = env.getIniLong("apc.user_entries_hint");
 
-      System.out.println("SIZE: " + size);
       if (size <= 0)
         size = _defaultSize;
 

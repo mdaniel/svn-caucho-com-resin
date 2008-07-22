@@ -38,6 +38,7 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -132,27 +133,34 @@ public class ClassesModule extends AbstractQuercusModule {
    *
    * @return an array of method names
    */
-  public static Set<String> get_class_methods(Env env, Value clss)
+  public static Value get_class_methods(Env env, Value cls)
   {
     // php/1j11
 
     QuercusClass cl;
 
-    if (clss instanceof ObjectValue)
-      cl = ((ObjectValue) clss).getQuercusClass();
+    if (cls.isObject())
+      cl = ((ObjectValue) cls).getQuercusClass();
     else
-      cl = env.findClass(clss.toString());
+      cl = env.findClass(cls.toString());
 
     if (cl == null)
-      return null;
+      return NullValue.NULL;
 
-    TreeSet<String> names = new TreeSet<String>();
+    ArrayValue array = new ArrayValueImpl();
 
+    HashSet<String> set = new HashSet<String>();
+    
+    // to combine __construct and class name constructors
     for (AbstractFunction fun : cl.getClassMethods()) {
-      names.add(fun.getName());
+      set.add(fun.getName());
+    }
+    
+    for (String name : set) {
+      array.put(name);
     }
 
-    return names;
+    return array;
   }
 
   /**
@@ -231,7 +239,7 @@ public class ClassesModule extends AbstractQuercusModule {
       if (parent != null)
         return env.createString(parent);
     }
-    else if (value instanceof StringValue) {
+    else if (value.isString()) {
       String className = value.toString();
 
       QuercusClass cl = env.findClass(className);

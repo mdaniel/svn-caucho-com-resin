@@ -89,6 +89,14 @@ public class SelectedXMLElement extends SimpleXMLElement
     return _owner;
   }
   
+  public String toString()
+  {
+    if (_text != null)
+      return _text.toString();
+    else
+      return "";
+  }
+  
   /**
    * Required for 'foreach'. When only values are specified in
    * the loop <code>foreach($a as $b)</code>, this method

@@ -210,7 +210,6 @@ public class XmlModule extends AbstractQuercusModule {
       return StringValue.create("No error");
       
     case XML_ERROR_SYNTAX:
-      System.err.println("XmlModule->xml_error_string(): " + code);
       return StringValue.create("syntax error");
 
     default:

@@ -222,7 +222,6 @@ public class MarshalFactory {
       marshal = new JavaCollectionMarshal(javaDef, isNotNull, isNullAsFalse);
     }
     else if (Enum.class.isAssignableFrom(argType)) {
-      System.out.println("ENUM: " + argType);
       marshal = new EnumMarshal(argType);
     }
     else {

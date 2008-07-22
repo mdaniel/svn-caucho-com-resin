@@ -1003,7 +1003,7 @@ public class ArrayModule
    * @return the part of the arrayV removed from input
    */
   public Value array_splice(Env env,
-			    @Reference Value arrayVar, //array gets spliced at offset
+                            @Reference Value arrayVar, //array gets spliced at offset
                             int offset,
                             @Optional("NULL") Value length,
                             @Optional Value replace)
@@ -1034,15 +1034,16 @@ public class ArrayModule
         endIndex += startIndex;
     }
 
-    return spliceImpl(arrayVar, array, startIndex, endIndex,
-		      (ArrayValue) replace.toArray());
+    return spliceImpl(env, arrayVar, array, startIndex, endIndex,
+                      (ArrayValue) replace.toArray());
   }
 
-  public Value spliceImpl(Value var,
-			  ArrayValue array,
-			  int start,
-			  int end,
-			  ArrayValue replace)
+  public Value spliceImpl(Env env,
+                          Value var,
+                          ArrayValue array,
+                          int start,
+                          int end,
+                          ArrayValue replace)
   {
     int index = 0;
 
@@ -1051,39 +1052,37 @@ public class ArrayModule
 
     var.set(newArray);
 
-    ArrayValue.Entry ptr = array.getHead();
-    for (; ptr != null; ptr = ptr.getNext()) {
-      Value key = ptr.getKey();
+    for (Map.Entry<Value,Value> entry : array.entrySet()) {
+      Value key = entry.getKey();
+      Value value = entry.getValue();
       
       if (start == index && replace != null) {
-	for (ArrayValue.Entry replaceEntry = replace.getHead();
-	     replaceEntry != null;
-	     replaceEntry = replaceEntry.getNext()) {
-	  newArray.put(replaceEntry.getValue());
-	}
+        Iterator<Value> replaceIter = replace.getValueIterator(env);
+        while (replaceIter.hasNext()) {
+          newArray.put(replaceIter.next());
+        }
       }
       
       if (start <= index && index < end) {
-	if (ptr.getKey() instanceof StringValue)
-	  result.put(ptr.getKey(), ptr.getValue());
-	else
-	  result.put(ptr.getValue());
+        if (key.isString())
+          result.put(key, value);
+        else
+          result.put(value);
       }
       else {
-	if (ptr.getKey() instanceof StringValue)
-	  newArray.put(ptr.getKey(), ptr.getValue());
-	else
-	  newArray.put(ptr.getValue());
+        if (key.isString())
+          newArray.put(key, value);
+        else
+          newArray.put(value);
       }
 
       index++;
     }
 
     if (index <= start && replace != null) {
-      for (ArrayValue.Entry replaceEntry = replace.getHead();
-	   replaceEntry != null;
-	   replaceEntry = replaceEntry.getNext()) {
-	newArray.put(replaceEntry.getValue());
+      Iterator<Value> replaceIter = replace.getValueIterator(env);
+      while (replaceIter.hasNext()) {
+        newArray.put(replaceIter.next());
       }
     }
 
@@ -2526,13 +2525,13 @@ case SORT_NUMERIC:
    */
   public Value array_merge(Value []args)
   {
-    // quercus/1731
+    // php/1731
 
     ArrayValue result = new ArrayValueImpl();
 
     for (Value arg : args) {
       if (arg.isNull())
-	return NullValue.NULL;
+        return NullValue.NULL;
       
       if (! (arg.toValue() instanceof ArrayValue))
         continue;
@@ -2541,7 +2540,9 @@ case SORT_NUMERIC:
 
       for (Map.Entry<Value, Value> entry : array.entrySet()) {
         Value key = entry.getKey();
-        Value value = entry.getValue();
+        
+        // php/173z
+        Value value = ((ArrayValue.Entry) entry).getRawValue();
 
         if (key.isNumberConvertible())
           result.put(value);

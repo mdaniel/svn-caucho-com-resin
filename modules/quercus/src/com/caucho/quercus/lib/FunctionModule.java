@@ -38,6 +38,8 @@ import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -69,8 +71,8 @@ public class FunctionModule extends AbstractQuercusModule {
   {
     ArrayValue argArray;
 
-    if (arg instanceof ArrayValue)
-      argArray = (ArrayValue) arg;
+    if (arg.isArray())
+      argArray = (ArrayValue) arg.toArray();
     else
       argArray = new ArrayValueImpl().append(arg);
 
@@ -80,10 +82,11 @@ public class FunctionModule extends AbstractQuercusModule {
       args = new Value[argArray.getSize()];
 
       int i = 0;
-      for (ArrayValue.Entry head = argArray.getHead();
-	   head != null;
-	   head = head.getNext()) {
-	args[i++] = head.getRawValue(); // php/1c09
+      
+      for (Map.Entry<Value,Value> entry : argArray.entrySet()) {
+        ArrayValue.Entry arrayEntry = (ArrayValue.Entry) entry;
+        
+        args[i++] = arrayEntry.getRawValue();
       }
     }
     else

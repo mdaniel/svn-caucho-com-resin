@@ -1158,7 +1158,7 @@ abstract public class ArrayValue extends Value {
     entry.printRImpl(env, out, depth, valueSet);
   }
 
-  public final static class Entry
+  public static class Entry
     implements Map.Entry<Value,Value>, Serializable  
   {
     final Value _key;

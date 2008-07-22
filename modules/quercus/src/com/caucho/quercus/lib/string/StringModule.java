@@ -669,15 +669,15 @@ public class StringModule extends AbstractQuercusModule {
     StringValue sb = glue.createStringBuilder();
     boolean isFirst = true;
 
-    for (ArrayValue.Entry entry = pieces.getHead();
-	 entry != null;
-	 entry = entry.getNext()) {
+    Iterator<Value> iter = pieces.getValueIterator(env);
+    
+    while (iter.hasNext()) {
       if (! isFirst)
         sb = sb.append(glue);
 
       isFirst = false;
 
-      sb = sb.append(entry.getValue());
+      sb = sb.append(iter.next());
     }
 
     return sb;

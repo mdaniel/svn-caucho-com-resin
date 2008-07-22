@@ -61,6 +61,9 @@ import java.util.logging.Logger;
 public class Mysqli extends JdbcConnectionResource {
   private static final Logger log = Logger.getLogger(Mysqli.class.getName());
   private static final L10N L = new L10N(Mysqli.class);
+  
+  protected static final String DRIVER
+    = "com.mysql.jdbc.Driver";
 
   /**
    * mysqli_multi_query populates _resultValues
@@ -186,7 +189,7 @@ public class Mysqli extends JdbcConnectionResource {
       }
 
       if (driver == null || driver.equals("")) {
-        driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
+        driver = DRIVER;
       }
 
       if (url == null || url.equals("")) {

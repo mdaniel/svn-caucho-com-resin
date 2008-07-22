@@ -523,24 +523,26 @@ public class ImageModule extends AbstractQuercusModule {
    * Apply a 3x3 convolution matrix, using coefficient div and offset
    */
   public static boolean imageconvolution(QuercusImage image, ArrayValue matrix,
-					 double div, double offset)
+                                         double div, double offset)
   {
     // XXX: implement div and offset
     float[] kernelValues = new float[9];
-    ArrayValue.Entry entry = matrix.getHead();
-    for(int y=0; y<3; y++)
-      for(int x=0; x<3; x++)
-	{
-	  kernelValues[x+y*3] =
-	    (float)matrix
-	    .get(LongValue.create(y))
-	    .get(LongValue.create(x)).toDouble();
-	}
-    ConvolveOp convolveOp =
-      new ConvolveOp(new Kernel(3, 3, kernelValues),
-		     ConvolveOp.EDGE_NO_OP, null);
+
+    for(int y = 0; y < 3; y++) {
+      for(int x = 0; x < 3; x++) {
+	    kernelValues[x + y * 3] =
+	      (float) matrix.get(LongValue.create(y))
+	                    .get(LongValue.create(x)).toDouble();
+	  }
+    }
+    
+    ConvolveOp convolveOp = new ConvolveOp(new Kernel(3, 3, kernelValues),
+                                           ConvolveOp.EDGE_NO_OP,
+                                           null);
+    
     BufferedImage bufferedImage =
       convolveOp.filter(image._bufferedImage, null);
+    
     image._bufferedImage.getGraphics().drawImage(bufferedImage, 1, 0, null);
     return true;
   }
@@ -844,11 +846,12 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Draw a filled polygon
    */
-  public static boolean imagefilledpolygon(QuercusImage image,
-					   ArrayValue points,
-					   int numPoints, int color)
+  public static boolean imagefilledpolygon(Env env,
+                                           QuercusImage image,
+                                           ArrayValue points,
+                                           int numPoints, int color)
   {
-    image.fill(arrayToPolygon(points, numPoints), color);
+    image.fill(arrayToPolygon(env, points, numPoints), color);
     return true;
   }
 
@@ -1286,10 +1289,12 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Draw a polygon
    */
-  public static boolean imagepolygon(QuercusImage image, ArrayValue points,
-				     int numPoints, int color)
+  public static boolean imagepolygon(Env env,
+                                     QuercusImage image,
+                                     ArrayValue points,
+                                     int numPoints, int color)
   {
-    image.stroke(arrayToPolygon(points, numPoints), color);
+    image.stroke(arrayToPolygon(env, points, numPoints), color);
     return true;
   }
 
@@ -1424,9 +1429,11 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Set the style for line drawing
    */
-  public static boolean imagesetstyle(QuercusImage image, ArrayValue style)
+  public static boolean imagesetstyle(Env env,
+                                      QuercusImage image,
+                                      ArrayValue style)
   {
-    image.setStyle(style);
+    image.setStyle(env, style);
     return true;
   }
 
@@ -1648,15 +1655,17 @@ public class ImageModule extends AbstractQuercusModule {
 
   // Private Helpers ////////////////////////////////////////////////////////
   
-  private static Polygon arrayToPolygon(ArrayValue points, int numPoints)
+  private static Polygon arrayToPolygon(Env env,
+                                        ArrayValue points,
+                                        int numPoints)
   {
     Polygon polygon = new Polygon();
-    ArrayValue.Entry entry = points.getHead();
-    for(int i=0; i<numPoints; i++) {
-      int x = entry.getValue().toInt();
-      entry = entry.getNext();
-      int y = entry.getValue().toInt();
-      entry = entry.getNext();
+    
+    Iterator<Value> iter = points.getValueIterator(env);
+    
+    for(int i = 0; i < numPoints; i++) {
+      int x = iter.next().toInt();
+      int y = iter.next().toInt();
       polygon.addPoint(x, y);
     }
     return polygon;
@@ -2116,15 +2125,15 @@ public class ImageModule extends AbstractQuercusModule {
       _thickness = thickness;
     }
 
-    public void setStyle(ArrayValue colors)
+    public void setStyle(Env env, ArrayValue colors)
     {
       _style = new int[colors.getSize()];
-      ArrayValue.Entry e = colors.getHead();
-      for(int i=0; i<_style.length; i++)
-	{
-	  _style[i] = e.getValue().toInt();
-	  e = e.getNext();
-	}
+      
+      Iterator<Value> iter = colors.getValueIterator(env);
+
+      for(int i = 0; i < _style.length; i++) {
+	    _style[i] = iter.next().toInt();
+	  }
     }
 
     public void setBrush(QuercusImage image)

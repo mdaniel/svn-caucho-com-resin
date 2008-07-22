@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.env.ArrayValue.Entry;
 import com.caucho.quercus.env.JavaCollectionAdapter.KeyIterator;
 import com.caucho.quercus.env.JavaCollectionAdapter.ValueIterator;
 import com.caucho.quercus.program.JavaClassDef;
@@ -339,34 +340,17 @@ public class JavaMapAdapter
   }
 
   public static class MapEntry
-    implements Map.Entry<Value,Value>
+    extends ArrayValue.Entry
   {
-    private final Value _key;
-    private Value _value;
-
     public MapEntry(Value key, Value value)
     {
-      _key = key;
-      _value = value;
+      super(key, value);
     }
-
-    public Value getKey()
+    
+    @Override
+    public Entry getNext()
     {
-      return _key;
-    }
-
-    public Value getValue()
-    {
-      return _value;
-    }
-
-    public Value setValue(Value value)
-    {
-      Value oldValue = _value;
-
-      _value = value;
-
-      return oldValue;
+      throw new UnsupportedOperationException();
     }
   }
 

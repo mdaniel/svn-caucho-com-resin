@@ -726,9 +726,7 @@ public class VariableModule extends AbstractQuercusModule {
       printDepth(out, 2 * depth);
       out.println("(");
 
-      for (Map.Entry<Value,Value> mapEntry : array.entrySet()) {
-	ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
-
+      for (Map.Entry<Value,Value> entry : array.entrySet()) {
         printDepth(out, 2 * depth);
         out.print("    [");
         out.print(entry.getKey());

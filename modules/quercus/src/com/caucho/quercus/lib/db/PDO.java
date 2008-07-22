@@ -828,7 +828,7 @@ public class PDO implements EnvCleanup {
     if (password != null)
       _password = password;
 
-    String driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
+    String driver = Mysqli.DRIVER;
 
     String url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
 
