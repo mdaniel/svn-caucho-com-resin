@@ -48,6 +48,7 @@ import com.caucho.util.CharSegment;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.QSocket;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempBuffer;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -100,7 +101,7 @@ public class HttpRequest extends AbstractHttpRequest
 
   private final InvocationKey _invocationKey = new InvocationKey();
 
-  private final char []_headerBuffer = new char[16 * 1024];
+  private final char []_headerBuffer;
 
   private CharSegment []_headerKeys;
   private CharSegment []_headerValues;
@@ -137,7 +138,15 @@ public class HttpRequest extends AbstractHttpRequest
     _uriHost = new CharBuffer();
     _protocol = new CharBuffer();
 
-    _headerCapacity = 256;
+    if (TempBuffer.isSmallmem()) {
+      _headerBuffer = new char[4 * 1024];
+      _headerCapacity = 64;
+    }
+    else {
+      _headerBuffer = new char[16 * 1024];
+      _headerCapacity = 256;
+    }
+    
     _headerSize = 0;
     _headerKeys = new CharSegment[_headerCapacity];
     _headerValues = new CharSegment[_headerCapacity];

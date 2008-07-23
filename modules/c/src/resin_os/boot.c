@@ -190,7 +190,7 @@ Java_com_caucho_bootjni_JniProcess_exec(JNIEnv *env,
     return 0;
   }
 
-  c_jni_process = (*env)->FindClass(env, "com/caucho/boot/JniProcess");
+  c_jni_process = (*env)->FindClass(env, "com/caucho/bootjni/JniProcess");
 
   if (! c_jni_process) {
     resin_printf_exception(env, "java/lang/NullPointerException", "can't load JniProcess");

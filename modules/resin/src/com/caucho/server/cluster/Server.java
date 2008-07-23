@@ -144,7 +144,7 @@ public class Server extends ProtocolDispatchServer
 
   private Management _management;
   
-  private long _suspendTimeMax = 600000;
+  private long _suspendTimeMax = 600000L;
 
   private long _memoryFreeMin = 1024 * 1024;
   private long _permGenFreeMin = 1024 * 1024;

@@ -513,6 +513,12 @@ public class TcpConnection extends Connection
     // _requestStartTime = 0;
   }
 
+  void toSuspend()
+  {
+    _suspendTime = Alarm.getCurrentTime();
+    _keepaliveExpireTime = _suspendTime + _idleTimeMax;
+  }
+
   public boolean toKeepalive()
   {
     if (! _isKeepalive) {
@@ -740,12 +746,18 @@ public class TcpConnection extends Connection
     super.setController(controller);
 
     if (controller.isDuplex()) {
+      if (log.isLoggable(Level.FINER))
+	log.finer(this + " starting duplex");
+      
       TcpDuplexController duplex = (TcpDuplexController) controller;
       
       _state = ConnectionState.DUPLEX;
       _readTask = new DuplexReadTask(duplex);
     }
     else {
+      if (log.isLoggable(Level.FINER))
+	log.finer(this + " starting comet");
+      
       _state = ConnectionState.COMET;
     }
   }
@@ -1234,18 +1246,16 @@ public class TcpConnection extends Connection
       boolean isValid = false;
       
       try {
-        if (! getRequest().handleResume()) {
-          close();
-        }
-        
-        isValid = true;
+        if (getRequest().handleResume()
+	    && _port.suspend(TcpConnection.this)) {
+	  isValid = true;
+	}
       } catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
       } finally {
-        if (! isValid)
-          close();
-        
-        finish();
+        if (! isValid) {
+	  finish();
+	}
       }
     }
   }

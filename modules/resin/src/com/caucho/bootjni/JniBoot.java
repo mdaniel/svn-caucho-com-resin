@@ -4,11 +4,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.boot;
+package com.caucho.bootjni;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.caucho.boot.*;
 import com.caucho.vfs.*;
 
 /**

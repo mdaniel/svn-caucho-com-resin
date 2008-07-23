@@ -14,6 +14,7 @@ import com.caucho.vfs.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,9 +79,22 @@ public class JniProcess extends Process
 
     int stdoutFd = _stdoutFd;
     _stdoutFd = -1;
-    
-    JniFileStream stream = new JniFileStream(stdoutFd, true, false);
-    _is = new ReadStream(stream);
+
+    try {
+      StreamImpl stream;
+
+      System.out.println("LOADER: " + getClass().getClassLoader());
+      Class cl = Class.forName("com.caucho.vfs.JniFileStream",
+			       false, getClass().getClassLoader());
+
+      Constructor ctor = cl.getConstructor(new Class[] { int.class, boolean.class, boolean.class });
+      
+      stream = (StreamImpl) ctor.newInstance(stdoutFd, true, false);
+      
+      _is = new ReadStream(stream);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
 
   public JniProcess create(ArrayList<String> args,

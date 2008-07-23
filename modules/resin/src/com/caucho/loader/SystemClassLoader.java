@@ -73,6 +73,11 @@ public class SystemClassLoader
     
     if (preScan == null || ! "false".equals(preScan))
       DynamicClassLoader.setJarCacheEnabled(true);
+
+    String smallmem = System.getProperty("caucho.smallmem");
+    
+    if (smallmem != null && ! "false".equals(smallmem))
+      DynamicClassLoader.setJarCacheEnabled(false);
   }
 
   public ClassLoader getClassLoader()

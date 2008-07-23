@@ -247,6 +247,8 @@ public class JniFileStream extends StreamImpl
       System.loadLibrary("resin_os");
     } catch (Throwable e) {
       System.err.println("Can't open Resin JNI library: " + e);
+      System.out.println("CP: " + JniFileStream.class.getClassLoader());
+      Thread.dumpStack();
     }
   }
 }

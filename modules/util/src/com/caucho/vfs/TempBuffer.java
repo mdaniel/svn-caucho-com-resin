@@ -40,8 +40,11 @@ import java.util.logging.*;
 public class TempBuffer implements java.io.Serializable {
   private static Logger _log;
   
-  private static FreeList<TempBuffer> _freeList = new FreeList<TempBuffer>(32);
-  public static final int SIZE = 16 * 1024;
+  private static final FreeList<TempBuffer> _freeList
+    = new FreeList<TempBuffer>(32);
+
+  private static final boolean _isSmallmem;
+  public static final int SIZE;
 
   TempBuffer _next;
   final byte []_buf;
@@ -57,6 +60,14 @@ public class TempBuffer implements java.io.Serializable {
   public TempBuffer(int size)
   {
     _buf = new byte[size];
+  }
+
+  /**
+   * Returns true for a smallmem configuration
+   */
+  public static boolean isSmallmem()
+  {
+    return _isSmallmem;
   }
 
   /**
@@ -234,5 +245,20 @@ public class TempBuffer implements java.io.Serializable {
       _log = Logger.getLogger(TempBuffer.class.getName());
 
     return _log;
+  }
+
+  static {
+    int size = 16 * 1024;
+    boolean isSmallmem = false;
+
+    String smallmem = System.getProperty("caucho.smallmem");
+    
+    if (smallmem != null && ! "false".equals(smallmem)) {
+      isSmallmem = true;
+      size = 1024;
+    }
+
+    _isSmallmem = isSmallmem;
+    SIZE = size;
   }
 }

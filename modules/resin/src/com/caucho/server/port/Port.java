@@ -1446,6 +1446,7 @@ public class Port
 	conn.setResume();
       }
       else if (conn.isComet()) {
+	conn.toSuspend();
 	_suspendList.add(conn);
 	return true;
       }
@@ -1510,7 +1511,8 @@ public class Port
         // need delay to avoid spawing too many threads over a short time,
         // when the load doesn't justify it
         Thread.yield();
-        Thread.sleep(10);
+	
+        // XXX: Thread.sleep(10);
 
         synchronized (this) {
           isStart = _startThreadCount + _idleThreadCount < _acceptThreadMin;

@@ -476,8 +476,9 @@ public class Table extends Store {
     os.print(DB_VERSION);
     os.write(0);
 
-    while (os.getBufferOffset() < INDEX_ROOT_OFFSET)
+    while (os.getPosition() < INDEX_ROOT_OFFSET) {
       os.write(0);
+    }
 
     Column []columns = _row.getColumns();
     for (int i = 0; i < columns.length; i++) {
@@ -494,8 +495,9 @@ public class Table extends Store {
       }
     }
 
-    while (os.getBufferOffset() < ROOT_DATA_END)
+    while (os.getPosition() < ROOT_DATA_END) {
       os.write(0);
+    }
 
     os.print("CREATE TABLE " + getName() + "(");
     for (int i = 0; i < _row.getColumns().length; i++) {

@@ -620,7 +620,7 @@ class WatchdogProcess
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       
-      Class cl = Class.forName("com.caucho.boot.JniBoot", false, loader);
+      Class cl = Class.forName("com.caucho.bootjni.JniBoot", false, loader);
 
       _jniBoot = (Boot) cl.newInstance();
     } catch (ClassNotFoundException e) {
