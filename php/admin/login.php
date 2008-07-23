@@ -10,7 +10,7 @@ if ($error) {
   echo "<h3 class='fail'>Error: $error</h3>";
 }
 
-?><form method="POST" action="j_security_check?j_uri=status.php">
+?><form method="POST" action="j_security_check?j_uri=index.php">
 <table border='0'>
 <tr>
   <th>Username: </th>
@@ -66,21 +66,16 @@ to enable administration functionality.
 ?>
 
 <p>
-The following can now be set in the resin.conf file
+The following can now be set in the ${resin.home}/conf/admin-user.xml file
 to enable administration functionality. 
 </p>
 
 <pre>
-&lt;resin xmlns="http://caucho.com">
+&lt;management xmlns="http://caucho.com">
 
-  &lt;management path="admin">
-     &lt;user name="<?= $digest_username ?>" password="<?= $digest ?>"/>
-     ...
-  &lt;/management>
+  &lt;user name="<?= $digest_username ?>" password="<?= $digest ?>"/>
 
-  ...
-
-&lt;/resin>
+&lt;/management>
 </pre>
 
 <p>

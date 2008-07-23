@@ -19,8 +19,6 @@
      - Remote management requires at least one enabled admin user.
     -->
   <management path="${resin.root}/admin">
-    <user name="admin" password="password" disable="true"/>
-
     <resin:import path="${__DIR__}/admin-user.xml" optional="true"/>
     
     <deploy-service/>
@@ -79,17 +77,10 @@
       <!-- The http port -->
       <http address="*" port="8080"/>
 
-      <!--
-         - SSL port configuration:
-         -
-         - <http address="*" port="8443">
-         -   <openssl>
-         -     <certificate-file>keys/gryffindor.crt</certificate-file>
-         -     <certificate-key-file>keys/gryffindor.key</certificate-key-file>
-         -     <password>test123</password>
-         -   </openssl>
-         - </http>
-        -->
+      <!-- SSL port configuration: -->
+      <http address="*" port="8443">
+        <jsse-ssl self-signed-certificate-name="localhost"/>
+      </http>
 
       <!--
          - The JVM arguments

@@ -273,4 +273,4 @@ function is_keepalive_thread($info)
 
 ?>
 
-<?php display_footer("status.php"); ?>
+<?php display_footer("summary.php"); ?>

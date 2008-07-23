@@ -276,6 +276,9 @@ r_jsse-ssl = element jsse-ssl {
   & (attribute key-manager-factory { string }
      | element key-manager-factory { r_string-Group })?
 
+  & (attribute self-signed-certificate-name { string }
+     | element self-signed-certificate-name { r_string-Group })?
+
   & (attribute ssl-context { string }
      | element ssl-context { r_string-Group })?
 

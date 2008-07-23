@@ -104,4 +104,11 @@ public interface ResinMXBean extends ManagedObjectMXBean {
   @Description("The ip address or host name of the machine that is running"
                + " this instance of Resin")
   public String getLocalHost();
+
+  /**
+   * Returns the user name of the process that is running this ResinServer.
+   */
+  @Description("The user name of the process that is running"
+               + " this instance of Resin")
+  public String getUserName();
 }

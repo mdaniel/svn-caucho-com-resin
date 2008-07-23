@@ -65,6 +65,8 @@ public class JsseSSLFactory implements SSLFactory {
   private String _sslContext = "TLS";
   private String []_cipherSuites;
 
+  private String _selfSignedName;
+
   private KeyStore _keyStore;
   
   /**
@@ -156,6 +158,14 @@ public class JsseSSLFactory implements SSLFactory {
   }
 
   /**
+   * Sets the self-signed certificate name
+   */
+  public void setSelfSignedCertificateName(String name)
+  {
+    _selfSignedName = name;
+  }
+
+  /**
    * Sets the ssl-context
    */
   public void setSSLContext(String sslContext)
@@ -185,6 +195,9 @@ public class JsseSSLFactory implements SSLFactory {
 
     if (_alias != null && _keyStoreFile == null)
       throw new ConfigException(L.l("'alias' requires a key store for JSSE."));
+
+    if (_keyStoreFile == null && _selfSignedName == null)
+      throw new ConfigException(L.l("JSSE requires a key-store-file or a self-signed-certificate-name."));
 
     if (_keyStoreFile == null)
       return;
@@ -291,7 +304,7 @@ public class JsseSSLFactory implements SSLFactory {
   private SSLServerSocketFactory createAnonymousFactory()
     throws IOException, GeneralSecurityException
   {
-    SelfSignedCert cert = SelfSignedCert.create();
+    SelfSignedCert cert = SelfSignedCert.create(_selfSignedName);
 
     if (cert == null)
       throw new ConfigException(L.l("Cannot generate anonymous certificate"));

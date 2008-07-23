@@ -39,7 +39,9 @@ class WatchdogArgs
 
   WatchdogArgs(String[] argv)
   {
-    super();
+    String logLevel = System.getProperty("caucho.logger.level");
+
+    setLogLevel(logLevel);
     
     _resinHome = calculateResinHome();
     _rootDirectory = calculateResinRoot(_resinHome);
@@ -168,6 +170,32 @@ class WatchdogArgs
   public ResinELContext getELContext()
   {
     return new ResinBootELContext();
+  }
+
+  private void setLogLevel(String levelName)
+  {
+    Level level = Level.WARNING;
+
+    if ("off".equals(levelName))
+      level = Level.OFF;
+    else if ("all".equals(levelName))
+      level = Level.ALL;
+    else if ("severe".equals(levelName))
+      level = Level.SEVERE;
+    else if ("warning".equals(levelName))
+      level = Level.WARNING;
+    else if ("info".equals(levelName))
+      level = Level.INFO;
+    else if ("config".equals(levelName))
+      level = Level.CONFIG;
+    else if ("fine".equals(levelName))
+      level = Level.FINE;
+    else if ("finer".equals(levelName))
+      level = Level.FINER;
+    else if ("finest".equals(levelName))
+      level = Level.FINEST;
+
+    Logger.getLogger("").setLevel(level);
   }
 
   private void parseCommandLine(String[] argv)

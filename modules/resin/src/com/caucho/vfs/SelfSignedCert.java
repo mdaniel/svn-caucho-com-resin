@@ -78,7 +78,7 @@ public class SelfSignedCert {
     _kmf = kmf;
   }
 
-  public static SelfSignedCert create()
+  public static SelfSignedCert create(String name)
   {
     try {
       String keyAlgName = "DSA";
@@ -93,10 +93,10 @@ public class SelfSignedCert {
       keypair.generate(keysize);
 
       PrivateKey privKey = keypair.getPrivateKey();
-      X500Name name = new X500Name("CN=Resin Self-Signed Cert");
+      X500Name x500name = new X500Name("CN=" + name);
       
       X509Certificate cert
-	= keypair.getSelfCertificate(name, days * 24 * 3600);
+	= keypair.getSelfCertificate(x500name, days * 24 * 3600);
 
       return new SelfSignedCert(cert, privKey);
     } catch (Exception e) {

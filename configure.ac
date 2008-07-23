@@ -711,12 +711,12 @@ fi
 # OS which can handle the Resin launcher
 #
 resin_pro_plugin=
-if test -r "modules/c/src/resin/Makefile.in"; then
+if test -r "modules/c/src/resin/std.c"; then
    resin_pro_plugin="resin"
 fi
 	
 resin_ssl_plugin=
-if test -r "modules/c/src/resinssl/Makefile.in"; then
+if test -r "modules/c/src/resinssl/ssl.c"; then
    resin_ssl_plugin="resinssl"
 fi
 

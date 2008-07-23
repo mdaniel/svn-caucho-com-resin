@@ -1,6 +1,6 @@
 <?php
 /**
- * Redirect to the status.php page
+ * Redirect to the summary page
  */
 
 require "WEB-INF/php/inc.php";

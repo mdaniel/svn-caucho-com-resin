@@ -52,6 +52,17 @@
 #include <netdb.h>
 #endif
 
+#ifndef WIN32
+#ifdef EPOLL
+#include <sys/epoll.h>
+#endif
+#ifdef POLL
+#include <sys/poll.h>
+#else
+#include <sys/select.h>
+#endif
+#endif
+
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -62,6 +73,8 @@
 #include <errno.h>
 /* probably system-dependent */
 #include <jni.h>
+
+#define STACK_BUFFER_SIZE (16 * 1024)
 
 jboolean jvmdi_can_reload_native(JNIEnv *env, jobject obj);
 jboolean jvmti_can_reload_native(JNIEnv *env, jobject obj);
@@ -82,44 +95,28 @@ jvmdi_reload_native(JNIEnv *env,
 		    jint offset,
 		    jint length);
 
-int
+static int
 resin_set_byte_array_region(JNIEnv *env,
-			    jbyteArray buf, jint offset, jint sublen,
-			    char *buffer)
+			    jbyteArray j_buf,
+			    jint offset,
+			    jint sublen,
+			    char *c_buf)
 {
-  jbyte *cBuf;
+  (*env)->SetByteArrayRegion(env, j_buf, offset, sublen, (void*) c_buf);
   
-  /* (*env)->SetByteArrayRegion(env, buf, offset, sublen, buffer); */
-  
-  cBuf = (*env)->GetPrimitiveArrayCritical(env, buf, 0);
-
-  if (cBuf) {
-    memcpy(cBuf + offset, buffer, sublen);
-
-    (*env)->ReleasePrimitiveArrayCritical(env, buf, cBuf, 0);
-
-    return 1;
-  }
-  
-  return 0;
+  return 1;
 }
 
-int
+static int
 resin_get_byte_array_region(JNIEnv *env,
-			    jbyteArray buf, jint offset, jint sublen,
+			    jbyteArray buf,
+			    jint offset,
+			    jint sublen,
 			    char *buffer)
 {
-  jbyte *cBuf = (*env)->GetPrimitiveArrayCritical(env, buf, 0);
-
-  if (cBuf) {
-    memcpy(buffer, cBuf + offset, sublen);
-
-    (*env)->ReleasePrimitiveArrayCritical(env, buf, cBuf, 0);
-
-    return 1;
-  }
+  (*env)->GetByteArrayRegion(env, buf, offset, sublen, (void*) buffer);
   
-  return 0;
+  return 1;
 }
 
 void
@@ -273,4 +270,209 @@ Java_com_caucho_server_boot_ResinBoot_execDaemon(JNIEnv *env,
   exit(1);
 #endif  
   return -1;
+}
+
+#ifdef POLL
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniFileStream_nativeAvailable(JNIEnv *env,
+						  jobject obj,
+						  jint fd)
+{
+  struct pollfd poll_item[1];
+
+  if (fd < 0)
+    return 0;
+
+  poll_item[0].fd = fd;
+  poll_item[0].events = POLLIN|POLLPRI;
+  poll_item[0].revents = 0;
+
+  return (poll(poll_item, 1, 0) > 0);
+}
+#else /* select */
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniFileStream_nativeAvailable(JNIEnv *env,
+						  jobject obj,
+						  jint fd)
+{
+  fd_set read_set;
+  struct timeval timeval;
+  int result;
+  
+  if (fd < 0)
+    return 0;
+
+  FD_ZERO(&read_set);
+
+  FD_SET(fd, &read_set);
+
+  memset(&timeval, 0, sizeof(timeval));
+
+  result = select(fd + 1, &read_set, 0, 0, &timeval);
+
+  return result > 0;
+}
+#endif /* select */
+
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniFileStream_nativeRead(JNIEnv *env,
+					     jobject obj,
+					     jint fd,
+					     jbyteArray buf,
+					     jint offset,
+					     jint length)
+{
+  int sublen;
+  char buffer[STACK_BUFFER_SIZE];
+  int read_length = 0;
+
+  if (fd < 0)
+    return -1;
+
+  while (length > 0) {
+    int result;
+    
+    if (length < sizeof(buffer))
+      sublen = length;
+    else
+      sublen = sizeof(buffer);
+
+#ifdef RESIN_DIRECT_JNI_BUFFER
+   {
+     jbyte *cBuf = (*env)->GetPrimitiveArrayCritical(env, buf, 0);
+
+     if (! cBuf)
+       return -1;
+     
+     result = read(fd, cBuf + offset, sublen);
+
+     (*env)->ReleasePrimitiveArrayCritical(env, buf, cBuf, 0);
+     
+     if (result <= 0)
+       return read_length == 0 ? -1 : read_length;
+   }
+#else
+   {
+     result = read(fd, buffer, sublen);
+
+     if (result <= 0)
+       return read_length == 0 ? -1 : read_length;
+
+     resin_set_byte_array_region(env, buf, offset, result, buffer);
+   }
+#endif    
+
+    read_length += result;
+    
+    if (result < sublen)
+      return read_length;
+    
+    offset += result;
+    length -= result;
+  }
+
+  return read_length;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniFileStream_nativeWrite(JNIEnv *env,
+					      jobject obj,
+					      jint fd,
+					      jbyteArray buf,
+					      jint offset,
+					      jint length)
+{
+  int sublen;
+  char buffer[STACK_BUFFER_SIZE];
+  int read_length = 0;
+
+  if (fd < 0)
+    return -1;
+
+  while (length > 0) {
+    int result;
+    
+    if (length < sizeof(buffer))
+      sublen = length;
+    else
+      sublen = sizeof(buffer);
+
+    resin_get_byte_array_region(env, buf, offset, sublen, buffer);
+
+    result = write(fd, buffer, sublen);
+
+    if (result <= 0)
+      return -1;
+    
+    offset += result;
+    length -= result;
+  }
+
+  return 1;
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_caucho_vfs_JniFileStream_nativeSkip(JNIEnv *env,
+					     jobject obj,
+					     jint fd,
+					     jlong offset)
+{
+  if (fd < 0)
+    return 0;
+
+  return lseek(fd, (off_t) offset, SEEK_CUR);
+}
+
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniFileStream_nativeClose(JNIEnv *env,
+					      jobject obj,
+					      jint fd)
+{
+  if (fd >= 0) {
+    return close(fd);
+  }
+  else
+    return -1;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniFileStream_nativeFlushToDisk(JNIEnv *env,
+						    jobject obj,
+						    jint fd)
+{
+  if (fd >= 0) {
+#ifndef WIN32
+    return fsync(fd);
+#else
+	  return -1;
+#endif
+  }
+  else
+    return -1;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniFileStream_nativeSeekStart(JNIEnv *env,
+						  jobject obj,
+						  jint fd,
+						  jlong offset)
+{
+  if (fd >= 0) {
+    return lseek(fd, (off_t) offset, SEEK_SET);
+  }
+  else
+    return -1;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniFileStream_nativeSeekEnd(JNIEnv *env,
+						jobject obj,
+						jint fd,
+						jlong offset)
+{
+  if (fd >= 0) {
+    return lseek(fd, (off_t) offset, SEEK_END);
+  }
+  else
+    return -1;
 }

@@ -1,0 +1,10 @@
+<!--
+   - admin-user.xml contains the administrator names and passwords
+   -
+   - The /resin-admin page contains a digest creator for generating
+   - the password digests.  The 'password' attribute is a digest, not
+   - a plaintext password.
+  -->
+<management xmlns="http://caucho.com/ns/resin">
+  <user name="admin" password="password" disable="true"/>
+</management>

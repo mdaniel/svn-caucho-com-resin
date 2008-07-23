@@ -33,6 +33,12 @@ $row = 0;
     <td><?= $server->Id ? $server->Id : '""' ?></td>
     
     <td class='item'
+        title="The operating system user that is running this instance of Resin.">
+      User:
+    </td>
+    <td><?= $resin->UserName ?></td>
+    
+    <td class='item'
         title="The ip address of the machine that is running this instance of Resin.">
       Machine:
     </td>
@@ -44,7 +50,7 @@ $row = 0;
         title="The Resin version.">
       Resin:
     </td>
-    <td colspan='3'><?= $resin->Version ?></td>
+    <td colspan='5'><?= $resin->Version ?></td>
   </tr>
 
   <tr class='<?= row_style($row++) ?>'>
@@ -52,14 +58,14 @@ $row = 0;
         title="The JDK version.">
       JDK:
     </td>
-    <td colspan='3'><?= $runtime->VmName ?> <?= $runtime->VmVersion ?></td>
+    <td colspan='5'><?= $runtime->VmName ?> <?= $runtime->VmVersion ?></td>
   </tr>
 
   <tr class='<?= row_style($row++) ?>'>
     <td class='item'
         title="The OS version.">
     OS:</th>
-    <td colspan='3'>
+    <td colspan='5'>
       <?= $os->AvailableProcessors ?> cpu,
       <?= $os->Name ?>
       <?= $os->Arch ?>
@@ -84,9 +90,9 @@ $row = 0;
       $uptime = $now - $start_time;
 
       if ($uptime < 12 * 3600)
-        echo "<td class='warmup'>";
+        echo "<td class='warmup' colspan='3'>";
       else
-        echo "<td>";
+        echo "<td colspan='3'>";
 
       echo sprintf("%d days %02d:%02d:%02d",
                    $uptime / (24 * 3600),
@@ -109,7 +115,7 @@ $row = 0;
         title="The current total amount of heap memory available for the JVM, in bytes.">
       Total heap:
     </td>
-    <td><?= format_memory($server->RuntimeMemory) ?></td>
+    <td colspan='3'><?= format_memory($server->RuntimeMemory) ?></td>
   </tr>
 
   <tr class='<?= row_style($row++) ?>'>
@@ -123,7 +129,7 @@ $row = 0;
         title="The maximum file descriptors available.">
 	File des max:
     </td>
-    <td><?= $os->MaxFileDescriptorCount ?></td>
+    <td colspan='3'><?= $os->MaxFileDescriptorCount ?></td>
   </tr>
 
   <tr class='<?= row_style($row++) ?>'>
@@ -135,7 +141,7 @@ $row = 0;
     
     <td class='item'
         title="The total amount of operating-system swap space.">Total Swap:</th>
-    <td><?= format_memory($os->TotalSwapSpaceSize) ?></td>
+    <td colspan='3'><?= format_memory($os->TotalSwapSpaceSize) ?></td>
   </tr>
 
   <tr class='<?= row_style($row++) ?>'>
@@ -145,7 +151,7 @@ $row = 0;
     
     <td class='item'
         title="The total amount of operating-system physical memory.">Total Physical:</td>
-    <td><?= format_memory($os->TotalPhysicalMemorySize) ?></td>
+    <td colspan='3'><?= format_memory($os->TotalPhysicalMemorySize) ?></td>
   </tr>
 
 
@@ -524,4 +530,4 @@ function conn_time_cmp($conn_a, $conn_b)
 
 ?>
 
-<?php display_footer("status.php"); ?>
+<?php display_footer("summary.php"); ?>

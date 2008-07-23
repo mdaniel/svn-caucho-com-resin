@@ -188,11 +188,11 @@ class WatchdogClient
     throws ConfigException, IOException
   {
     if (getUserName() != null && ! hasBoot()) {
-	throw new ConfigException(L.l("<user-name> requires Resin Professional and compiled JNI.  Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin.so and check for a valid license in $RESIN_HOME/licenses."));
+	throw new ConfigException(L.l("<user-name> requires compiled JNI.  Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin_os.so."));
     }
 
     if (getGroupName() != null && ! hasBoot()) {
-      throw new ConfigException(L.l("<group-name> requires Resin Professional and compiled JNI.  Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin.so and check for a valid license in $RESIN_HOME/licenses."));
+      throw new ConfigException(L.l("<group-name> requires compiled JNI.  Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin_os.so."));
     }
     
     WatchdogAPI watchdog = getProxy();

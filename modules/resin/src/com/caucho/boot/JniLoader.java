@@ -29,12 +29,35 @@
 
 package com.caucho.boot;
 
+import com.caucho.config.ConfigException;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.enhancer.ByteCodeEnhancer;
+import com.caucho.loader.enhancer.EnhancerRuntimeException;
+import com.caucho.make.AlwaysModified;
+import com.caucho.make.DependencyContainer;
+import com.caucho.make.Make;
+import com.caucho.make.MakeContainer;
 import com.caucho.management.server.*;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.ByteBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.TimedCache;
 import com.caucho.vfs.*;
 
+import javax.annotation.PostConstruct;
 import java.io.*;
+import java.net.URL;
 import java.security.*;
 import java.lang.instrument.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -44,44 +67,24 @@ import java.lang.instrument.*;
  * From the perspective of the JDK, it's all one classloader.  Internally,
  * the class loader chain searches like a classpath.
  */
-class ProLoader extends SecureClassLoader
+public class JniLoader extends SecureClassLoader
 {
   private Path _resinHome;
-  private Path _libexec;
   private JarPath _proJar;
-  private JarPath _licenseJar;
+  private boolean _is64bit;
   
   /**
    * Create a new class loader.
    *
    * @param parent parent class loader
    */
-  private ProLoader(Path resinHome)
+  public JniLoader(Path resinHome)
   {
-    super(ClassLoader.getSystemClassLoader());
+    super(JniLoader.class.getClassLoader());
 
     _resinHome = resinHome;
-
-    boolean is64bit = "64".equals(System.getProperty("sun.arch.data.model"));
-                                  
-    if (is64bit)
-      _libexec = _resinHome.lookup("libexec64");
-    else
-      _libexec = _resinHome.lookup("libexec");
     
-    //_proJar = JarPath.create(_resinHome.lookup("lib/pro.jar"));
-    //_licenseJar = JarPath.create(_resinHome.lookup("lib/license.jar"));
-  }
-
-  static ProLoader create(Path resinHome)
-  {
-    /*
-    if (resinHome.lookup("lib/pro.jar").canRead())
-      return new ProLoader(resinHome);
-    else
-      return null;
-    */
-    return new ProLoader(resinHome);
+    _proJar = JarPath.create(_resinHome.lookup("lib/pro.jar"));
   }
   
   /**
@@ -96,13 +99,9 @@ class ProLoader extends SecureClassLoader
   protected synchronized Class loadClass(String name, boolean resolve)
     throws ClassNotFoundException
   {
-    /*
     String className = name.replace('.', '/') + ".class";
 
     Path path = _proJar.lookup(className);
-
-    if (path.getLength() < 0)
-      path = _licenseJar.lookup(className);
 
     int length = (int) path.getLength();
 
@@ -127,7 +126,6 @@ class ProLoader extends SecureClassLoader
         throw new RuntimeException(e);
       }
     }
-    */
     
     return super.loadClass(name, resolve);
   }
@@ -150,17 +148,10 @@ class ProLoader extends SecureClassLoader
    */
   public String findLibrary(String name)
   {
-    Path path = _libexec.lookup("lib" + name + ".so");
-
-    if (path.canRead()) {
-      return path.getNativePath();
+    if (name.equals("resin")) {
+      return _resinHome.lookup("libexec").lookup("libresin.jnilib").getNativePath();
     }
-    
-    path = _libexec.lookup("lib" + name + ".jnilib");
 
-    if (path.canRead()) {
-      return path.getNativePath();
-    }
 
     return super.findLibrary(name);
   }

@@ -112,6 +112,11 @@ public class ResinAdmin extends AbstractManagedObject
     return CauchoSystem.getLocalHost();
   }
 
+  public String getUserName()
+  {
+    return System.getProperty("user.name");
+  }
+
   public String toString()
   {
     return "ResinAdmin[" + getObjectName() + "]";

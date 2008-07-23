@@ -570,16 +570,16 @@ class WatchdogProcess
 
     if (_watchdog.getUserName() != null) {
       if (_watchdog.isSingle())
-	throw new ConfigException(L.l("<user-name> requires Resin Professional and compiled JNI started with 'start'.  Resin cannot use <user-name> when started as a foreground process."));
+	throw new ConfigException(L.l("<user-name> requires compiled JNI started with 'start'.  Resin cannot use <user-name> when started as a foreground process."));
       else
-	throw new ConfigException(L.l("<user-name> requires Resin Professional and compiled JNI."));
+	throw new ConfigException(L.l("<user-name> requires compiled JNI."));
     }
       
     if (_watchdog.getGroupName() != null) {
       if (_watchdog.isSingle())
-	throw new ConfigException(L.l("<group-name> requires Resin Professional and compiled JNI started with 'start'.  Resin cannot use <group-name> when started as a foreground process."));
+	throw new ConfigException(L.l("<group-name> compiled JNI started with 'start'.  Resin cannot use <group-name> when started as a foreground process."));
       else
-	throw new ConfigException(L.l("<group-name> requires Resin Professional and compiled JNI."));
+	throw new ConfigException(L.l("<group-name> compiled JNI."));
     }
 
     ProcessBuilder builder = new ProcessBuilder();
