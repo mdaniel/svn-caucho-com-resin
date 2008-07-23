@@ -35,7 +35,7 @@ import com.caucho.config.types.*;
 import com.caucho.el.EL;
 import com.caucho.el.EnvironmentContext;
 import com.caucho.relaxng.*;
-import com.caucho.util.L10N;
+import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.xml.DOMBuilder;
@@ -55,7 +55,7 @@ import java.lang.ref.SoftReference;
 import java.lang.reflect.*;
 import java.net.*;
 import java.util.HashMap;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * Facade for Resin's configuration builder.
@@ -722,6 +722,29 @@ public class Config {
     return new ConfigException(location(method) + msg);
   }
 
+  public static RuntimeException createLine(String systemId, int line,
+					    Throwable e)
+  {
+    while (e.getCause() != null
+	   && (e instanceof InstantiationException
+	       || e instanceof InvocationTargetException
+	       || e.getClass().equals(ConfigRuntimeException.class))) {
+      e = e.getCause();
+    }
+    
+    if (e instanceof LineConfigException)
+      throw (LineConfigException) e;
+
+    String lines = getSourceLines(systemId, line);
+    String loc = systemId + ":" + line + ": ";
+    
+    if (e instanceof DisplayableException) {
+      return new LineConfigException(loc + e.getMessage() + "\n" + lines, e);
+    }
+    else
+      return new LineConfigException(loc + e + "\n" + lines, e);
+  }
+
   public static String location(Field field)
   {
     String className = field.getDeclaringClass().getName();
@@ -734,6 +757,39 @@ public class Config {
     String className = method.getDeclaringClass().getName();
 
     return className + "." + method.getName() + ": ";
+  }
+
+  private static String getSourceLines(String systemId, int errorLine)
+  {
+    if (systemId == null)
+      return "";
+    
+    ReadStream is = null;
+    try {
+      is = Vfs.lookup().lookup(systemId).openRead();
+      int line = 0;
+      StringBuilder sb = new StringBuilder("\n\n");
+      String text;
+      while ((text = is.readLine()) != null) {
+	line++;
+
+	if (errorLine - 2 <= line && line <= errorLine + 2) {
+	  sb.append(line);
+	  sb.append(": ");
+	  sb.append(text);
+	  sb.append("\n");
+	}
+      }
+
+      return sb.toString();
+    } catch (IOException e) {
+      log.log(Level.FINEST, e.toString(), e);
+
+      return "";
+    } finally {
+      if (is != null)
+	is.close();
+    }
   }
 }
 

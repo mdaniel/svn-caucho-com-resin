@@ -1825,7 +1825,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     /**
      * Returns the JDK home
      */
-    public String getHome()
+    public Path getHome()
     {
       return Vfs.lookup(System.getProperty("java.home"));
     }
