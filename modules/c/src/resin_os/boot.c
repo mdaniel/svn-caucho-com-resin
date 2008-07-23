@@ -49,7 +49,7 @@ get_utf8(JNIEnv *env, jstring jaddr, char *buf, int buflen)
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_caucho_boot_JniProcess_isNativeBootAvailable(JNIEnv *env, jobject obj)
+Java_com_caucho_bootjni_JniProcess_isNativeBootAvailable(JNIEnv *env, jobject obj)
 {
 #ifdef WIN32
   return 0;
@@ -59,7 +59,7 @@ Java_com_caucho_boot_JniProcess_isNativeBootAvailable(JNIEnv *env, jobject obj)
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_caucho_boot_JniProcess_clearSaveOnExec(JNIEnv *env, jobject obj)
+Java_com_caucho_bootjni_JniProcess_clearSaveOnExec(JNIEnv *env, jobject obj)
 {
 #ifdef WIN32
   return 0;
@@ -79,7 +79,7 @@ Java_com_caucho_boot_JniProcess_clearSaveOnExec(JNIEnv *env, jobject obj)
 }
 
 JNIEXPORT jint JNICALL
-Java_com_caucho_boot_JniProcess_getFdMax(JNIEnv *env, jobject obj)
+Java_com_caucho_bootjni_JniProcess_getFdMax(JNIEnv *env, jobject obj)
 {
 #ifdef WIN32
   return -1;
@@ -94,7 +94,7 @@ Java_com_caucho_boot_JniProcess_getFdMax(JNIEnv *env, jobject obj)
 }
 
 JNIEXPORT jint JNICALL
-Java_com_caucho_boot_JniProcess_setFdMax(JNIEnv *env, jobject obj)
+Java_com_caucho_bootjni_JniProcess_setFdMax(JNIEnv *env, jobject obj)
 {
 #ifdef WIN32
   return -1;
@@ -142,7 +142,7 @@ Java_com_caucho_boot_JniProcess_setFdMax(JNIEnv *env, jobject obj)
 }
 
 jboolean
-Java_com_caucho_boot_JniProcess_exec(JNIEnv *env,
+Java_com_caucho_bootjni_JniProcess_exec(JNIEnv *env,
 				     jobject obj,
 				     jobjectArray j_argv,
 				     jobjectArray j_envp,
@@ -363,10 +363,10 @@ Java_com_caucho_boot_JniProcess_exec(JNIEnv *env,
 }
 
 jint
-Java_com_caucho_boot_JniProcess_waitpid(JNIEnv *env,
-					jobject obj,
-					jint pid,
-					jboolean is_block)
+Java_com_caucho_bootjni_JniProcess_waitpid(JNIEnv *env,
+					   jobject obj,
+					   jint pid,
+					   jboolean is_block)
 {
   int status = 0;
   int result;

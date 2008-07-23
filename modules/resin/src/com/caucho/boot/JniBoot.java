@@ -19,20 +19,12 @@ public class JniBoot implements Boot {
   
   public JniBoot()
   {
-    _jniProcess = new JniProcess();
-    
-    /*
-    
-    JniLoader loader = new JniLoader(resinHome);
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
     try {
-      Class cl = Class.forName("com.caucho.boot.JniProcess", false, loader);
-      
-      System.out.println("CL: " + cl);
+      Class cl = Class.forName("com.caucho.bootjni.JniProcess", false, loader);
       
       _jniProcess = (JniProcessAPI) cl.newInstance();
-
-      System.out.println("JP: " + _jniProcess);
     } catch (RuntimeException e) {
       e.printStackTrace();
       throw e;
@@ -44,7 +36,6 @@ public class JniBoot implements Boot {
       
       throw new RuntimeException(e);
     }
-    */
   }
 
   public boolean isValid()

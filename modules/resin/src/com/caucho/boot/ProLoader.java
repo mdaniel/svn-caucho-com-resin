@@ -48,8 +48,7 @@ class ProLoader extends SecureClassLoader
 {
   private Path _resinHome;
   private Path _libexec;
-  private JarPath _proJar;
-  private JarPath _licenseJar;
+  private JarPath _resinJar;
   
   /**
    * Create a new class loader.
@@ -69,19 +68,15 @@ class ProLoader extends SecureClassLoader
     else
       _libexec = _resinHome.lookup("libexec");
     
-    //_proJar = JarPath.create(_resinHome.lookup("lib/pro.jar"));
-    //_licenseJar = JarPath.create(_resinHome.lookup("lib/license.jar"));
+    _resinJar = JarPath.create(_resinHome.lookup("lib/resin.jar"));
   }
 
   static ProLoader create(Path resinHome)
   {
-    /*
-    if (resinHome.lookup("lib/pro.jar").canRead())
+    if (resinHome.lookup("lib/resin.jar").canRead())
       return new ProLoader(resinHome);
     else
       return null;
-    */
-    return new ProLoader(resinHome);
   }
   
   /**
@@ -96,17 +91,13 @@ class ProLoader extends SecureClassLoader
   protected synchronized Class loadClass(String name, boolean resolve)
     throws ClassNotFoundException
   {
-    /*
     String className = name.replace('.', '/') + ".class";
 
-    Path path = _proJar.lookup(className);
-
-    if (path.getLength() < 0)
-      path = _licenseJar.lookup(className);
+    Path path = _resinJar.lookup(className);
 
     int length = (int) path.getLength();
 
-    if (length > 0) {
+    if (className.startsWith("com/caucho/bootjni") && length > 0) {
       byte []buffer = new byte[length];
 
       try {
@@ -127,7 +118,6 @@ class ProLoader extends SecureClassLoader
         throw new RuntimeException(e);
       }
     }
-    */
     
     return super.loadClass(name, resolve);
   }

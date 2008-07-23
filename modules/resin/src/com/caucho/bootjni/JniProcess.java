@@ -4,10 +4,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.boot;
+package com.caucho.bootjni;
 
+import com.caucho.boot.*;
 import com.caucho.config.ConfigException;
-import com.caucho.license.LicenseCheck;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -183,7 +183,6 @@ public class JniProcess extends Process
     try {
       System.loadLibrary("resin_os");
     } catch (Throwable e) {
-      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
       
       _jniLoadException = e;
