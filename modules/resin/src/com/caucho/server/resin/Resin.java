@@ -1821,6 +1821,14 @@ public class Resin implements EnvironmentBean, SchemaBean
     {
       return System.getProperty("java.version");
     }
+    
+    /**
+     * Returns the JDK home
+     */
+    public String getHome()
+    {
+      return Vfs.lookup(System.getProperty("java.home"));
+    }
   }
 
   class SecurityManagerConfig {
