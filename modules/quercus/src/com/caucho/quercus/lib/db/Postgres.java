@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ResourceType;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
@@ -48,6 +49,7 @@ import java.util.logging.Logger;
 /**
  * postgres connection class (postgres has NO object oriented API)
  */
+@ResourceType("pgsql link")
 public class Postgres extends JdbcConnectionResource {
   private static final Logger log = Logger.getLogger(Postgres.class.getName());
   private static final L10N L = new L10N(Postgres.class);

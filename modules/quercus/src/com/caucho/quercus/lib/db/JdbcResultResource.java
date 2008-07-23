@@ -89,7 +89,7 @@ public class JdbcResultResource {
    * @param conn the corresponding connection
    */
   public JdbcResultResource(Env env,
-			    Statement stmt,
+                            Statement stmt,
                             ResultSet rs,
                             JdbcConnectionResource conn)
   {
@@ -106,7 +106,7 @@ public class JdbcResultResource {
    * @param conn the corresponding connection
    */
   public JdbcResultResource(Env env,
-			    ResultSetMetaData metaData,
+                            ResultSetMetaData metaData,
                             JdbcConnectionResource conn)
   {
     _env = env;
@@ -475,7 +475,7 @@ public class JdbcResultResource {
           else
             return _env.createString(String.valueOf(value));
         }
-
+      case Types.REAL:
       case Types.DOUBLE:
         {
           double value = rs.getDouble(column);
@@ -627,9 +627,17 @@ public class JdbcResultResource {
       Timestamp timestamp = rs.getTimestamp(column);
 
       if (timestamp == null)
-	return NullValue.NULL;
-      else
-	return env.createString(String.valueOf(timestamp));
+        return NullValue.NULL;
+      else {
+        String time = String.valueOf(timestamp);
+        
+        // the .0 nanoseconds at the end may not matter, but strip it out
+        // anyways to match php (postgresql)
+        if (time.endsWith(".0"))
+          time = time.substring(0, time.length() - 2);
+        
+        return env.createString(time);
+      }
     } catch (SQLException e) {
       if (log.isLoggable(Level.FINE))
 	log.log(Level.FINE, e.toString(), e);

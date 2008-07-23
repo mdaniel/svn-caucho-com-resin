@@ -50,6 +50,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.HashMap;
@@ -1051,8 +1052,7 @@ public class PostgresModule extends AbstractQuercusModule {
                                           @Optional("-1") Value row)
   {
     try {
-
-      if ((row != null) && (!row.equals(NullValue.NULL)) && (row.toInt() >= 0)) {
+      if (! row.isNull() && row.toInt() >= 0) {
         result.seek(env, row.toInt());
       }
 
@@ -1483,7 +1483,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       String columnTypeName = metaData.getColumnTypeName(fieldNumber + 1);
 
-      String metaQuery = ("SELECT oid FROM pg_type WHERE typname='"+columnTypeName+"'");
+      String metaQuery = ("SELECT oid FROM pg_type WHERE typname='" + columnTypeName + "'");
 
       result = pg_query(env, (Postgres) result.getConnection(), metaQuery);
 
@@ -1847,8 +1847,12 @@ public class PostgresModule extends AbstractQuercusModule {
                                       @NotNull Postgres conn)
   {
     try {
-
-      return conn.getWarnings().toString();
+      SQLWarning warning = conn.getWarnings();
+      
+      if (warning != null)
+        return warning.toString();
+      else
+        return null;
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -3325,7 +3329,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       int size = params.getSize(); // pstmt.getPreparedMappingSize();
 
-      for (int i=0; i<size; i++)
+      for (int i = 0; i < size; i++)
         stringBuilder.append('s');
 
       String types = stringBuilder.toString();

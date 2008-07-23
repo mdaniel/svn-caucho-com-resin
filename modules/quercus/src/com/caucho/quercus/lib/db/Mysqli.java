@@ -1113,11 +1113,14 @@ public class Mysqli extends JdbcConnectionResource {
         env.getQuercus().markForPoolRemoval(conn);
 
         ResultSet rs = stmt.executeQuery("KILL CONNECTION " + threadId);
-      } catch (SQLException e) {
-        // Invoking the KILL command above will terminate the connection
-        // and raise a SQLException in executeQuery().
-
+        
         result = true;
+        
+        // close the underlying java.sql connection, not Mysqli itself
+        conn.close();
+        
+      } catch (SQLException e) {
+        // exception thrown if cannot find specified thread id
       } finally {
         if (stmt != null)
           stmt.close();

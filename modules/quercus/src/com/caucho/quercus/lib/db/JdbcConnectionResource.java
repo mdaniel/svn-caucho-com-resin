@@ -587,6 +587,8 @@ public abstract class JdbcConnectionResource
                                     ResultSet.CONCUR_READ_ONLY);
       else
         stmt = conn.createStatement();
+      
+      _stmt = stmt;
 
       stmt.setEscapeProcessing(false); // php/1406
 
@@ -630,7 +632,7 @@ public abstract class JdbcConnectionResource
     } catch (DataTruncation truncationError) {
       try {
         _affectedRows = stmt.getUpdateCount();
-        _warnings = stmt.getWarnings();
+        //_warnings = stmt.getWarnings();
       } catch (SQLException e) {
         saveErrors(e);
         log.log(Level.FINEST, e.toString(), e);
@@ -937,7 +939,17 @@ public abstract class JdbcConnectionResource
    */
   protected SQLWarning getWarnings()
   {
-    return _warnings;
+    try {
+      if (_stmt != null)
+        return _stmt.getWarnings();
+      else
+        return null;
+      
+    } catch (SQLException e) {
+      log.log(Level.FINEST, e.toString(), e);
+      
+      return null;
+    }
   }
 
   /**

@@ -56,7 +56,7 @@ public class PostgresResult extends JdbcResultResource {
    * @param conn the corresponding connection
    */
   public PostgresResult(Env env,
-			Statement stmt,
+                        Statement stmt,
                         ResultSet rs,
                         Postgres conn)
   {

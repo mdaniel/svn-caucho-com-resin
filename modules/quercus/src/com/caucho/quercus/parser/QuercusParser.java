@@ -373,8 +373,6 @@ public class QuercusParser {
     
       return new QuercusParser(null, path, path.openRead()).parseExpr();
     } catch (IOException e) {
-      e.printStackTrace();
-      
       throw new QuercusRuntimeException(e);
     }
   }

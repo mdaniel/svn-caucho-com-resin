@@ -1973,15 +1973,18 @@ public class FileModule extends AbstractQuercusModule {
           if (result == null)
             result = subresult;
           else {
-            Iterator<Map.Entry<Value,Value>> iter
-              = subresult.getIterator(env);
+            Iterator<Value> iter
+              = subresult.getValueIterator(env);
           
             while (iter.hasNext())
-              result.put(iter.next().getValue());
+              result.put(iter.next());
           }
         }
       }
     }
+    
+    if (result == null)
+      result = new ArrayValueImpl();
     
     return result;
   }

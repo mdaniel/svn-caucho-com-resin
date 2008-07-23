@@ -660,7 +660,7 @@ public class PDOStatement
 
     _fetchErrorCode = FETCH_SUCCESS;
     
-    return BooleanValue.FALSE;
+    return BooleanValue.TRUE;
   }
 
   private Value fetchClass()
