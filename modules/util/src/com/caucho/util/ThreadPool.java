@@ -309,7 +309,14 @@ public class ThreadPool {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
-    schedule(task, loader, 0, MAX_EXPIRE, true);
+    if (! schedule(task, loader, 0, 5000L, true)) {
+      log.warning(this + " unable to schedule priority thread " + task);
+      
+      Thread thread = new Thread(task);
+      thread.setDaemon(true);
+      thread.setName(task.getClass().getSimpleName() + "-overflow");
+      thread.start();
+    }
   }
 
   /**
