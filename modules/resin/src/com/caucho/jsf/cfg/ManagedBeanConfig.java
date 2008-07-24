@@ -42,8 +42,6 @@ import javax.faces.el.*;
 import javax.faces.event.*;
 import javax.faces.validator.*;
 
-import javax.xml.bind.annotation.*;
-
 import com.caucho.config.*;
 import com.caucho.jsf.el.*;
 import com.caucho.util.*;
@@ -89,7 +87,6 @@ public class ManagedBeanConfig
     _configLocation = location;
   }
   
-  @XmlElement(name="managed-bean-class")
   public void setManagedBeanClass(String cl)
   {
     _typeName = cl;
@@ -115,7 +112,6 @@ public class ManagedBeanConfig
     return _type;
   }
   
-  @XmlElement(name="managed-bean-scope")
   public void setManagedBeanScope(String scope)
   {
     if ("request".equals(scope))
@@ -136,7 +132,6 @@ public class ManagedBeanConfig
     return _scope.toString();
   }
   
-  @XmlElement(name="managed-property")
   public void setManagedProperty(ManagedProperty property)
   {
     property.addProgram(_program, getType());

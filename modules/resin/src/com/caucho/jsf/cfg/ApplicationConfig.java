@@ -45,8 +45,6 @@ import javax.faces.el.*;
 import javax.faces.event.*;
 import javax.faces.validator.*;
 
-import javax.xml.bind.annotation.*;
-
 import com.caucho.config.*;
 import com.caucho.util.*;
 import com.caucho.jsf.application.ApplicationImpl;
@@ -63,7 +61,6 @@ public class ApplicationConfig
 
   private String _defaultRenderKitId;
 
-  @XmlElement(name="message-bundle")
   private String _messageBundle;
 
   private Class _navigationHandler;

@@ -116,7 +116,7 @@
       <keepalive-timeout>15s</keepalive-timeout>
 
       <!--
-         - If starting bin/resin as root on Unix, specify the user name
+         - If starting Resin as root on Unix, specify the user name
          - and group name for the web server user.
          -
          - <user-name>resin</user-name>

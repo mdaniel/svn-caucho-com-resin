@@ -47,8 +47,6 @@ import javax.faces.lifecycle.*;
 import javax.faces.render.*;
 import javax.faces.validator.*;
 
-import javax.xml.bind.annotation.*;
-
 import com.caucho.config.*;
 import com.caucho.util.*;
 

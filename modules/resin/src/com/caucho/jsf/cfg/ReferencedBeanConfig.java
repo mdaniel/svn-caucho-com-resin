@@ -43,8 +43,6 @@ import javax.faces.el.*;
 import javax.faces.event.*;
 import javax.faces.validator.*;
 
-import javax.xml.bind.annotation.*;
-
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.jsf.el.*;

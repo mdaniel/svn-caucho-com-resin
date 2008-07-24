@@ -36,8 +36,6 @@ import javax.annotation.*;
 import javax.faces.application.*;
 import javax.faces.event.*;
 
-import javax.xml.bind.annotation.*;
-
 public class FacesConfig
 {
   private String _id;
@@ -76,7 +74,6 @@ public class FacesConfig
   {
   }
 
-  @XmlAttribute(name="schemaLocation")
   public void setSchemaLocation(String location)
   {
   }
@@ -90,7 +87,6 @@ public class FacesConfig
   {
   }
 
-  @XmlElement(name="faces-config-extension")
   public void setFacesConfigExtension(ConfigProgram program)
   {
   }

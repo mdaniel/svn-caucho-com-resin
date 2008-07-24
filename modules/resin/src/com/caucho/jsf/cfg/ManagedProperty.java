@@ -44,8 +44,6 @@ import javax.faces.el.*;
 import javax.faces.event.*;
 import javax.faces.validator.*;
 
-import javax.xml.bind.annotation.*;
-
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.types.*;
@@ -96,7 +94,6 @@ public class ManagedProperty extends DescriptionGroupConfig
     _value = entries;
   }
 
-  @XmlElement(name="property-class")
   public void setPropertyClass(Class type)
   {
   }
