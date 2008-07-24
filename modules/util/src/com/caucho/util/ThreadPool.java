@@ -211,6 +211,11 @@ public class ThreadPool {
     _threadPrioritySet = true;
   }
 
+  public int getThreadPriority()
+  {
+    return _threadPriority;
+  }
+
   private int getDefaultPriority()
   {
     return _threadPriority;

@@ -71,27 +71,13 @@ public class Alarm implements ThreadTask {
   private AlarmListener _listener;
   private ClassLoader _contextLoader;
   private String _name;
+
+  private boolean _isPriority = true;
   
   private int _heapIndex = 0;
 
   private volatile boolean _isRunning;
-
-  static {
-    _currentTime = System.currentTimeMillis();
-
-    Method nanoTimeMethod;
-
-    try
-    {
-      nanoTimeMethod = System.class.getMethod("nanoTime", null);
-    }
-    catch (NoSuchMethodException e)
-    {
-      nanoTimeMethod = null;
-    }
-
-    _nanoTimeMethod = nanoTimeMethod;
-  }
+  
     
   /**
    * Create a new wakeup alarm with a designated listener as a callback.
@@ -316,6 +302,22 @@ public class Alarm implements ThreadTask {
   boolean isRunning()
   {
     return _isRunning;
+  }
+
+  /**
+   * True for a priority alarm (default)
+   */
+  public void setPriority(boolean isPriority)
+  {
+    _isPriority = isPriority;
+  }
+
+  /**
+   * True for a priority alarm (default)
+   */
+  public boolean isPriority()
+  {
+    return _isPriority;
   }
 
   /**
@@ -693,7 +695,10 @@ public class Alarm implements ThreadTask {
 	      }
 	    }
 
-	    ThreadPool.getThreadPool().startPriority(alarm);
+	    if (alarm.isPriority())
+	      ThreadPool.getThreadPool().startPriority(alarm);
+	    else
+	      ThreadPool.getThreadPool().start(alarm);
 	  }
 
 	  synchronized (this) {
@@ -710,5 +715,22 @@ public class Alarm implements ThreadTask {
 	}
       }
     }
+  }
+
+  static {
+    _currentTime = System.currentTimeMillis();
+
+    Method nanoTimeMethod;
+
+    try
+    {
+      nanoTimeMethod = System.class.getMethod("nanoTime", null);
+    }
+    catch (NoSuchMethodException e)
+    {
+      nanoTimeMethod = null;
+    }
+
+    _nanoTimeMethod = nanoTimeMethod;
   }
 }

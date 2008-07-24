@@ -349,16 +349,6 @@ public class WebApp extends ServletContextImpl
 
       // map.put("app", _appVar);
 
-      if (CauchoSystem.isTesting()) {
-      }
-      else if (_appDir.equals(CauchoSystem.getResinHome())) {
-        throw new ConfigException(L.l("web-app root-directory can not be the same as resin.home\n{0}", _appDir));
-      }
-      else if (_parent != null
-               && _appDir.equals(_parent.getRootDirectory())) {
-        throw new ConfigException(L.l("web-app root-directory can not be the same as the host root-directory\n{0}", _appDir));
-      }
-
       _servletManager = new ServletManager();
       _servletMapper = new ServletMapper();
       _servletMapper.setServletContext(this);
@@ -395,6 +385,17 @@ public class WebApp extends ServletContextImpl
       _invocationDependency.add(this);
 
       _jspApplicationContext = new JspApplicationContextImpl(this);
+
+      // validation
+      if (CauchoSystem.isTesting()) {
+      }
+      else if (_appDir.equals(CauchoSystem.getResinHome())) {
+        throw new ConfigException(L.l("web-app root-directory can not be the same as resin.home\n{0}", _appDir));
+      }
+      else if (_parent != null
+               && _appDir.equals(_parent.getRootDirectory())) {
+        throw new ConfigException(L.l("web-app root-directory can not be the same as the host root-directory\n{0}", _appDir));
+      }
     } catch (Throwable e) {
       setConfigException(e);
     } finally {

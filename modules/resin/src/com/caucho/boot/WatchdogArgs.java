@@ -2,6 +2,7 @@ package com.caucho.boot;
 
 import com.caucho.Version;
 import com.caucho.config.ConfigException;
+import com.caucho.license.*;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -20,6 +21,8 @@ import java.util.logging.Logger;
 class WatchdogArgs
 {
   private static L10N _L;
+  private static final Logger log
+    = Logger.getLogger(WatchdogArgs.class.getName());
 
   private Path _javaHome;
   private Path _resinHome;
@@ -517,6 +520,9 @@ class WatchdogArgs
   public class ResinBootELContext
     extends ResinELContext
   {
+    private boolean _isLicenseCheck;
+    private boolean _isResinProfessional;
+    
     public Path getResinHome()
     {
       return WatchdogArgs.this.getResinHome();
@@ -539,7 +545,42 @@ class WatchdogArgs
 
     public boolean isResinProfessional()
     {
-      return false;
+      loadLicenses();
+      
+      return _isResinProfessional;
+    }
+
+    private void loadLicenses()
+    {
+      if (_isLicenseCheck)
+	return;
+      
+      _isLicenseCheck = true;
+      
+      LicenseCheck license;
+
+      try {
+	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+	Class cl = Class.forName("com.caucho.license.LicenseCheckImpl",
+				 false, loader);
+				 
+	license = (LicenseCheck) cl.newInstance();
+	
+	license.validate(0);
+
+	//_licenseMessage = license.doLogging(1);
+
+	license.validate(1);
+
+	Vfs.initJNI();
+
+	_isResinProfessional = true;
+
+	// license.doLogging(1);
+      } catch (Exception e) {
+	log.log(Level.FINER, e.toString(), e);
+      }
     }
   }
 

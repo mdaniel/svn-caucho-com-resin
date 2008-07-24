@@ -179,6 +179,15 @@ abstract public class ConfigType
   }
 
   /**
+   * Returns the flow program attribute, i.e. attributes that also
+   * save if/choose without interpreting.
+   */
+  public Attribute getContentProgramAttribute()
+  {
+    return null;
+  }
+
+  /**
    * Called before the children are configured.
    */
   public void beforeConfigureBean(ConfigContext builder, Object bean, Node node)
@@ -198,5 +207,11 @@ abstract public class ConfigType
    */
   public void afterConfigure(ConfigContext builder, Object bean)
   {
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getTypeName() + "]";
   }
 }

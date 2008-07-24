@@ -84,6 +84,7 @@ public class BeanType extends ConfigType
   
   private Attribute _addText;
   private Attribute _addProgram;
+  private Attribute _addContentProgram;
   private Attribute _setProperty;
   
   private ComponentImpl _component;
@@ -218,6 +219,15 @@ public class BeanType extends ConfigType
   }
 
   /**
+   * Returns the content program attribute (program excluding if, choose).
+   */
+  @Override
+  public Attribute getContentProgramAttribute()
+  {
+    return _addContentProgram;
+  }
+
+  /**
    * Initialize the type
    */
   @Override
@@ -282,14 +292,18 @@ public class BeanType extends ConfigType
       
       return bean;
     }
-    else if (_addProgram != null) {
+    else if (_addProgram != null || _addContentProgram != null) {
       Object bean = create(null);
 
       inject(bean);
       
       try {
 	ConfigProgram program = new PropertyStringProgram("value", text);
-	_addProgram.setValue(bean, TEXT, program);
+
+	if (_addProgram != null)
+	  _addProgram.setValue(bean, TEXT, program);
+	else
+	  _addContentProgram.setValue(bean, TEXT, program);
       } catch (Exception e) {
 	throw ConfigException.create(e);
       }
@@ -426,6 +440,9 @@ public class BeanType extends ConfigType
 
 	if (_addProgram == null)
 	  _addProgram = parentBean._addProgram;
+	
+	if (_addContentProgram == null)
+	  _addContentProgram = parentBean._addContentProgram;
 
 	if (_setProperty == null)
 	  _setProperty = parentBean._setProperty;
@@ -490,6 +507,13 @@ public class BeanType extends ConfigType
 	ConfigType type = TypeFactory.getType(paramTypes[0]);
 	
 	_addProgram = new ProgramAttribute(method, type);
+      }
+      else if (name.equals("addContentProgram")
+	       && paramTypes.length == 1
+	       && paramTypes[0].equals(ConfigProgram.class)) {
+	ConfigType type = TypeFactory.getType(paramTypes[0]);
+	
+	_addContentProgram = new ProgramAttribute(method, type);
       }
       else if ((name.equals("setConfigLocation")
 		&& paramTypes.length == 2

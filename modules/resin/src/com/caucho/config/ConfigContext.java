@@ -440,6 +440,18 @@ public class ConfigContext {
       if (attrStrategy == null)
 	attrStrategy = type.getProgramAttribute();
 
+      if (attrStrategy == null) {
+	// ioc/2252 - flow attributes are not captured by ContentProgram
+	
+	attrStrategy = type.getContentProgramAttribute();
+
+	Attribute envStrategy
+	  = TypeFactory.getFactory().getEnvironmentAttribute(qName);
+
+	if (envStrategy instanceof FlowAttribute)
+	  attrStrategy = null;
+      }
+
       if (attrStrategy == null)
 	attrStrategy = TypeFactory.getFactory().getEnvironmentAttribute(qName);
 

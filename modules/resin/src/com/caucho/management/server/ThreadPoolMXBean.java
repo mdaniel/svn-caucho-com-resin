@@ -47,6 +47,18 @@ public interface ThreadPoolMXBean extends ManagedObjectMXBean {
   public int getThreadMax();
   
   /**
+   * Returns the maximum number of executor threads.
+   */
+  @Description("The configured maximum number of executor threads")
+  public int getThreadExecutorMax();
+  
+  /**
+   * Returns the priority thread gap
+   */
+  @Description("The priority thread gap")
+  public int getThreadPriorityMin();
+  
+  /**
    * Returns the minimum number of idle threads.
    */
   @Description("The configured minimum number of idle threads")

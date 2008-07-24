@@ -76,6 +76,14 @@ public class ThreadPoolAdmin extends AbstractManagedObject
   }
 
   /**
+   * Returns the maximum number of executor threads.
+   */
+  public int getThreadExecutorMax()
+  {
+    return _threadPool.getExecutorTaskMax();
+  }
+
+  /**
    * Returns the minimum number of idle threads.
    */
   public int getThreadIdleMin()
@@ -89,6 +97,14 @@ public class ThreadPoolAdmin extends AbstractManagedObject
   public int getThreadIdleMax()
   {
     return _threadPool.getThreadIdleMax();
+  }
+
+  /**
+   * Returns the minimum number of saved priority threads.
+   */
+  public int getThreadPriorityMin()
+  {
+    return _threadPool.getThreadPriority();
   }
 
   /**

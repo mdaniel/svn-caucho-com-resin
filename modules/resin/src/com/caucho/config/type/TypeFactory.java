@@ -300,7 +300,10 @@ public class TypeFactory implements AddLoaderListener
       if (type == null)
 	return null;
 
-      attr = new EnvironmentAttribute(type);
+      if (type instanceof FlowBeanType)
+	attr = new FlowAttribute(type);
+      else
+	attr = new EnvironmentAttribute(type);
 
       _envAttrMap.put(name, attr);
 
@@ -354,6 +357,8 @@ public class TypeFactory implements AddLoaderListener
       return new MapType(type);
     else if (EnvironmentBean.class.isAssignableFrom(type))
       return new EnvironmentBeanType(type);
+    else if (FlowBean.class.isAssignableFrom(type))
+      return new FlowBeanType(type);
     else if (type.isArray()) {
       Class compType = type.getComponentType();
       
@@ -732,6 +737,16 @@ public class TypeFactory implements AddLoaderListener
     {
       _beanMap.put(bean.getName(), bean);
     }
+
+    public FlowConfig createFlow()
+    {
+      return new FlowConfig(_ns, _isDefault);
+    }
+
+    public void addFlow(FlowConfig flow)
+    {
+      _beanMap.put(flow.getName(), flow);
+    }
   }
 
   public class BeanConfig {
@@ -795,6 +810,13 @@ public class TypeFactory implements AddLoaderListener
       
       if (_className == null)
 	throw new ConfigException(L.l("bean requires a 'class' attribute"));
+    }
+  }
+
+  public class FlowConfig extends BeanConfig {
+    FlowConfig(String ns, boolean isDefault)
+    {
+      super(ns, isDefault);
     }
   }
 

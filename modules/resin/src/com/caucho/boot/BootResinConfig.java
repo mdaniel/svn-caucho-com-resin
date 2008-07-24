@@ -268,7 +268,7 @@ public class BootResinConfig implements EnvironmentBean
   /**
    * Ignore items we can't understand.
    */
-  public void addBuilderProgram(ConfigProgram program)
+  public void addContentProgram(ConfigProgram program)
   {
   }
 }

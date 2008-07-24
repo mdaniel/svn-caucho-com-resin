@@ -20,47 +20,37 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.config.program;
+package com.caucho.config.type;
+
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.logging.*;
 
 import com.caucho.config.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.util.L10N;
-import com.caucho.xml.QElement;
+import com.caucho.config.attribute.*;
+import com.caucho.loader.*;
+import com.caucho.make.*;
+import com.caucho.el.*;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 import org.w3c.dom.Node;
 
 /**
- * Stored configuration program for an attribute.
+ * Represents an introspected bean type for configuration which implements
+ * control flow like if/choose.
  */
-public class NodeBuilderProgram extends FlowProgram {
-  static final L10N L = new L10N(NodeBuilderProgram.class);
-
-  public static final NodeBuilderProgram NULL
-    = new NodeBuilderProgram(new QElement());
-
-  private final Node _node;
-
-  public NodeBuilderProgram( Node node)
+public class FlowBeanType extends BeanType
+{
+  public FlowBeanType(Class beanClass)
   {
-    _node = node;
-  }
-
-  @Override
-  public void inject(Object bean, ConfigContext env)
-    throws ConfigException
-  {
-    env.configureBean(bean, _node);
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _node + "]";
+    super(beanClass);
   }
 }

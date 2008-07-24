@@ -40,7 +40,7 @@ import org.w3c.dom.Node;
 /**
  * Stored configuration program for an attribute.
  */
-public class NodeBuilderChildProgram extends ConfigProgram {
+public class NodeBuilderChildProgram extends FlowProgram {
   static final L10N L = new L10N(NodeBuilderChildProgram.class);
 
   private final Node _node;

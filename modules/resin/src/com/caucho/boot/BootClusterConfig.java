@@ -112,7 +112,7 @@ public class BootClusterConfig {
   /**
    * Ignore items we can't understand.
    */
-  public void addBuilderProgram(ConfigProgram program)
+  public void addContentProgram(ConfigProgram program)
   {
   }
 }

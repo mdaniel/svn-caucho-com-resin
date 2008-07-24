@@ -273,7 +273,7 @@
      - Configuration for the web-tier/load-balancer
     -->
   <resin:if test="${resin.professional}">
-    <cluster id="web-tier">
+    <cluster id="web-tier" root-directory="web-tier">
       <server-default>
         <!-- The http port -->
         <http address="*" port="9080"/>
