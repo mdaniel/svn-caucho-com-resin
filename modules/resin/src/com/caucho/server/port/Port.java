@@ -1101,6 +1101,13 @@ public class Port
     throws java.io.IOException
   {
     QServerSocket ss;
+
+    if (_port >= 1024)
+      return null;
+    else if (_sslFactory instanceof JsseSSLFactory) {
+      log.warning(this + " cannot bind jsse in watchdog");
+      return null;
+    }
     
     if (_socketAddress != null) {
       ss = QJniServerSocket.createJNI(_socketAddress, _port);

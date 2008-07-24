@@ -621,7 +621,6 @@ class WatchdogProcess
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       
       Class cl = Class.forName("com.caucho.bootjni.JniBoot", false, loader);
-
       _jniBoot = (Boot) cl.newInstance();
     } catch (ClassNotFoundException e) {
       log.fine(e.toString());

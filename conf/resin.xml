@@ -79,7 +79,7 @@
 
       <!-- SSL port configuration: -->
       <http address="*" port="8443">
-        <jsse-ssl self-signed-certificate-name="localhost"/>
+        <jsse-ssl self-signed-certificate-name="resin@localhost"/>
       </http>
 
       <!--

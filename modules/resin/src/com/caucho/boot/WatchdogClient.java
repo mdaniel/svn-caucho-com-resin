@@ -462,7 +462,6 @@ class WatchdogClient
 
       return boot != null && boot.isValid();
     } catch (Throwable e) {
-      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     }
 

@@ -46,10 +46,8 @@ public class JniProcess extends Process
 
   public JniProcess()
   {
-    if (_jniLoadException != null)
-      throw ConfigException.create(_jniLoadException);
-
-    _hasJni = isNativeBootAvailable();
+    if (_jniLoadException == null)
+      _hasJni = isNativeBootAvailable();
   }
 
   private JniProcess(ArrayList<String> args,
@@ -83,7 +81,6 @@ public class JniProcess extends Process
     try {
       StreamImpl stream;
 
-      System.out.println("LOADER: " + getClass().getClassLoader());
       Class cl = Class.forName("com.caucho.vfs.JniFileStream",
 			       false, getClass().getClassLoader());
 
