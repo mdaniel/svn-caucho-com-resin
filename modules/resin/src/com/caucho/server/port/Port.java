@@ -980,7 +980,7 @@ public class Port
     }
 
     if (_protocol == null)
-      throw new IllegalStateException(L.l("`{0}' must have a configured protocol before starting.", this));
+      throw new IllegalStateException(L.l("'{0}' must have a configured protocol before starting.", this));
 
     if (_port == 0)
       return;
@@ -1149,14 +1149,13 @@ public class Port
     try {
       bind();
       postBind();
+      
+      enable();
 
       String name = "resin-port-" + _serverSocket.getLocalPort();
       Thread thread = new Thread(this, name);
       thread.setDaemon(true);
-
       thread.start();
-      
-      enable();
 
       _suspendAlarm = new Alarm(new SuspendReaper());
       _suspendAlarm.queue(60000);
@@ -1516,6 +1515,7 @@ public class Port
 
         synchronized (this) {
           isStart = _startThreadCount + _idleThreadCount < _acceptThreadMin;
+	  
           if (_connectionMax <= _connectionCount)
             isStart = false;
 

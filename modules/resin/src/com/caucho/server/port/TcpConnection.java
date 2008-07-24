@@ -870,7 +870,6 @@ public class TcpConnection extends Connection
       } catch (Throwable e) {
 	log.log(Level.FINE, e.toString(), e);
       }
-
     }
   }
 
@@ -1100,7 +1099,7 @@ public class TcpConnection extends Connection
         // while (! _state.isClosed()) {
         while (! _port.isClosed() && _state != ConnectionState.DESTROYED) {
           _state = _state.toAccept();
-          
+
           if (! _port.accept(TcpConnection.this, isStart)) {
             close();
             break;
@@ -1147,6 +1146,12 @@ public class TcpConnection extends Connection
 	  finish();
       }
     }
+
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + TcpConnection.this + "]";
+    }
   }
  
   class KeepaliveTask implements Runnable {
@@ -1187,6 +1192,12 @@ public class TcpConnection extends Connection
 	// acceptTask significantly faster than finishing
 	_acceptTask.doAccept(false);
       }
+    }
+
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + TcpConnection.this + "]";
     }
   }
 

@@ -211,7 +211,7 @@ public class SocketStream extends StreamImpl {
     if (s == null)
       return -1;
 
-    int oldTimeout = s.getSoTimeout();;
+    int oldTimeout = s.getSoTimeout();
 
     try {
       s.setSoTimeout((int) timeout);

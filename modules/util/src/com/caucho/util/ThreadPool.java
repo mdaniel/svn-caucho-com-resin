@@ -146,6 +146,8 @@ public class ThreadPool {
       throw new ConfigException(L.l("lt;thread-idle-min> ({0}) must be less than &lt;thread-idle-max> ({1})", min, _threadIdleMax));
     
     _threadIdleMin = min;
+
+    calculateThreadPriority();
   }
 
   /**
@@ -651,7 +653,6 @@ public class ThreadPool {
 	_threads.add(this);
 
 	if (_startCount < 0) {
-	  System.out.println("ThreadPool start count is negative: " + _startCount);
 	  _startCount = 0;
 	}
       }

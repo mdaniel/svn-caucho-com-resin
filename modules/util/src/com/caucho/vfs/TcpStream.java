@@ -35,12 +35,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of a TCP stream.  Mostly this just forwards the
  * request to the underlying socket streams.
  */
 class TcpStream extends StreamImpl {
+  private static final Logger log
+    = Logger.getLogger(TcpStream.class.getName());
+  
   private Socket _s;
   private InputStream _is;
   private OutputStream _os;
@@ -110,6 +115,7 @@ class TcpStream extends StreamImpl {
 	else
 	  _s.setSoTimeout(Integer.parseInt(String.valueOf(value)));
       } catch (SocketException e) {
+	log.log(Level.FINER, e.toString(), e);
       }
     }
   }
