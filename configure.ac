@@ -711,7 +711,7 @@ fi
 # OS which can handle the Resin launcher
 #
 resin_pro_plugin=
-if test -r "modules/c/src/resin/std.c"; then
+if test -r "modules/c/src/resin/jni_vfs.c"; then
    resin_pro_plugin="resin"
 fi
 	

@@ -188,7 +188,7 @@ class WatchdogClient
     throws ConfigException, IOException
   {
     if (getUserName() != null && ! hasBoot()) {
-	throw new ConfigException(L.l("<user-name> requires compiled JNI.  Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin_os.so."));
+      throw new ConfigException(L.l("<user-name> requires compiled JNI.  Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin_os.so."));
     }
 
     if (getGroupName() != null && ! hasBoot()) {
@@ -441,7 +441,7 @@ class WatchdogClient
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       
-      Class cl = Class.forName("com.caucho.boot.JniBoot", false, loader);
+      Class cl = Class.forName("com.caucho.bootjni.JniBoot", false, loader);
 
       _jniBoot = (Boot) cl.newInstance();
     } catch (ClassNotFoundException e) {
@@ -460,8 +460,9 @@ class WatchdogClient
     try {
       Boot boot = getJniBoot();
 
-      return boot.isValid();
+      return boot != null && boot.isValid();
     } catch (Throwable e) {
+      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     }
 

@@ -7,8 +7,6 @@
 package com.caucho.vfs;
 
 import com.caucho.config.ConfigException;
-import com.caucho.license.LicenseCheck;
-import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
@@ -26,7 +24,6 @@ public class JniServerSocketImpl extends QServerSocket {
     = Logger.getLogger(JniServerSocketImpl.class.getName());
   
   private static boolean _hasInitJni;
-  private static boolean _licenseValid;
   private long _fd;
 
   /**
@@ -91,68 +88,26 @@ public class JniServerSocketImpl extends QServerSocket {
     throws IOException
   {
     if (! _hasInitJni) {
-      if (! _licenseValid)
-        throw new IOException(L.l("Can't use JNI to listen to port '{0}:{1}" +
-                                  "' because a valid license was not found.",
-				  host, port));
-
       throw new IOException(L.l("Can't use JNI to listen to port '{0}:{1}" +
 				"' because JNI support has not been compiled.\n" +
 				"  On Unix, run ./configure; make; make install.  On Windows, check for resin.dll.",
 				host, port));
     }
-      
-    try {
-      Class cl = Class.forName("com.caucho.license.LicenseCheckImpl");
-      
-      LicenseCheck license = (LicenseCheck) cl.newInstance();
-      license.validate(1);
-    
-      return new JniServerSocketImpl(host, port);
-    } catch (ConfigException e) {
-      log.finer(e.toString());
-    } catch (IOException e) {
-      throw e;
-    } catch (Throwable e) {
-    }
 
-    log.fine(L.l("JNI Socket support requires Resin Professional.\nSee http://www.caucho.com for more information."));
-
-    return null;
+    return new JniServerSocketImpl(host, port);
   }
 
   public static QServerSocket open(int fd, int port)
     throws IOException
   {
     if (! _hasInitJni) {
-      if (! _licenseValid)
-        throw new IOException(L.l("Can't open JNI port '{0}' fd '{1}'" +
-                                  "because a valid license could not be found.",
-                                  port, fd));
-
       throw new IOException(L.l("Can't open JNI port '{0}' fd '{1}'" +
 				" because JNI support has not been compiled.\n" +
 				"  On Unix, run ./configure; make; make install.",
 				port, fd));
     }
-      
-    try {
-      Class cl = Class.forName("com.caucho.license.LicenseCheckImpl");
-      
-      LicenseCheck license = (LicenseCheck) cl.newInstance();
-      license.validate(1);
-    
-      return new JniServerSocketImpl(fd, port, true);
-    } catch (ConfigException e) {
-      log.finer(e.toString());
-    } catch (IOException e) {
-      throw e;
-    } catch (Throwable e) {
-    }
 
-    log.fine(L.l("JNI Socket support requires Resin Professional.\nSee http://www.caucho.com for more information."));
-
-    return null;
+    return new JniServerSocketImpl(fd, port, true);
   }
 
   /**
@@ -310,6 +265,7 @@ public class JniServerSocketImpl extends QServerSocket {
   static {
     try {
       System.loadLibrary("resin_os");
+      _hasInitJni = true;
     } catch (Throwable e) {
       log.info("Socket JNI library is not available.\nResin will still run but performance will be slower.\nTo compile the Socket JNI library on Unix, use ./configure; make; make install.");
       log.log(Level.FINER, e.toString(), e);

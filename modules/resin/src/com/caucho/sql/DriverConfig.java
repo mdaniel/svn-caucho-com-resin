@@ -732,7 +732,7 @@ public class DriverConfig
         program = new PropertyValueProgram("user", _user);
         program.configure(driverObject);
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
 
       if (! (driverObject instanceof Driver))
@@ -745,7 +745,7 @@ public class DriverConfig
         program = new PropertyValueProgram("password", _password);
         program.configure(driverObject);
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
 
       if (! (driverObject instanceof Driver))

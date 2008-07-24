@@ -144,7 +144,6 @@ public class ConfigException
 
   public static RuntimeException create(Throwable e)
   {
-    e.printStackTrace();
     while (e.getCause() != null
 	   && (e instanceof InstantiationException
 	       || e instanceof InvocationTargetException

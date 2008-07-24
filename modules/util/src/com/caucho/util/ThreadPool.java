@@ -170,13 +170,6 @@ public class ThreadPool {
 				    max, _threadMax));
     
     _threadIdleMax = max;
-
-    if (! _threadPrioritySet) {
-      if (_threadIdleMin <= 2)
-	_threadPriority = _threadIdleMin;
-      else
-	_threadPriority = (_threadIdleMin + 1) / 2;
-    }
   }
 
   /**
@@ -311,11 +304,9 @@ public class ThreadPool {
     
     if (! schedule(task, loader, 0, 5000L, true)) {
       log.warning(this + " unable to schedule priority thread " + task);
-      
-      Thread thread = new Thread(task);
-      thread.setDaemon(true);
-      thread.setName(task.getClass().getSimpleName() + "-overflow");
-      thread.start();
+
+      OverflowItem item = new OverflowItem(task);
+      item.start();
     }
   }
 
@@ -409,7 +400,12 @@ public class ThreadPool {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
-    schedule(task, loader, 0, MAX_EXPIRE, false);
+    if (! schedule(task, loader, 0, 5000L, false)) {
+      log.warning(this + " unable to schedule priority thread " + task);
+
+      OverflowItem item = new OverflowItem(task);
+      item.start();
+    }
   }
 
   /**
@@ -555,6 +551,20 @@ public class ThreadPool {
       if (_threadIdleMax < _threadIdleMin)
 	_threadIdleMin = 1;
     }
+
+    calculateThreadPriority();
+  }
+
+  private void calculateThreadPriority()
+  {
+    if (_threadPrioritySet) {
+    }
+    else if (_threadIdleMin <= 0)
+      _threadPriority = 0;
+    else if (_threadIdleMin <= 2)
+      _threadPriority = _threadIdleMin;
+    else
+      _threadPriority = (_threadIdleMin + 1) / 2;
   }
 
   class Item implements Runnable {
@@ -776,6 +786,35 @@ public class ThreadPool {
 	} catch (Throwable e) {
 	}
       }
+    }
+  }
+
+  class OverflowItem implements Runnable {
+    private Runnable _task;
+    private ClassLoader _loader;
+
+    OverflowItem(Runnable task)
+    {
+      _task = task;
+      _loader = Thread.currentThread().getContextClassLoader();
+    }
+
+    void start()
+    {
+      Thread thread = new Thread(this, _task.getClass().getSimpleName() + "-Overflow");
+      thread.setDaemon(true);
+      thread.start();
+    }
+
+    /**
+     * The main thread execution method.
+     */
+    public void run()
+    {
+      Thread thread = Thread.currentThread();
+      thread.setContextClassLoader(_loader);
+
+      _task.run();
     }
   }
 
