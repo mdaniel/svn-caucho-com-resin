@@ -892,7 +892,7 @@ elif test -r "$JAVA_HOME/../Headers/jvmdi.h"; then
 fi
 	
 if test -n "$JNI"; then
-  plugins="$plugins $resin_plugin resin_os"
+  plugins="$plugins resin_os $resin_plugin"
 else  
   echo "Can't JNI include files in JAVA_HOME: $JAVA_HOME"
 fi
