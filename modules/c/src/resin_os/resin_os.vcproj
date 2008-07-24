@@ -216,6 +216,14 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath=".\boot.c"
+				>
+			</File>
+			<File
+				RelativePath=".\java.c"
+				>
+			</File>
+			<File
 				RelativePath=".\jni_jvmdi.c"
 				>
 			</File>
@@ -228,7 +236,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\jni_socket.c"
+				>
+			</File>
+			<File
+				RelativePath=".\memory.c"
+				>
+			</File>
+			<File
 				RelativePath=".\resin_os.def"
+				>
+			</File>
+			<File
+				RelativePath=".\std.c"
 				>
 			</File>
 		</Filter>
@@ -236,6 +256,10 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
+			<File
+				RelativePath=".\resin.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

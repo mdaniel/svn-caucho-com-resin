@@ -871,6 +871,7 @@ jvm_status(cluster_t *cluster, EXTENSION_CONTROL_BLOCK *r)
   cse_printf(r, "    <th>Connect<br>Timeout</th>\n");
   cse_printf(r, "    <th>Live<br>Time</th>\n");
   cse_printf(r, "    <th>Dead<br>Time</th>\n");
+  cse_printf(r, "    <th>Read<br>Timeout</th>\n");
   cse_printf(r, "</tr>\n");
 
   for (; cluster; cluster = cluster->next) {
@@ -910,6 +911,7 @@ jvm_status(cluster_t *cluster, EXTENSION_CONTROL_BLOCK *r)
 		 srun->active_sockets, pool_count);
       cse_printf(r, "<td align=right>%d</td><td align=right>%d</td><td align=right>%d</td>",
 		 srun->connect_timeout, srun->live_time, srun->dead_time);
+	  cse_printf(r, "<td align=right>%d</td>", srun->read_timeout);
       cse_printf(r, "</tr>\n");
     }
   }
