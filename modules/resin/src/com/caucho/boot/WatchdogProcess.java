@@ -530,6 +530,9 @@ class WatchdogProcess
 	  for (Port port : _watchdog.getPorts()) {
 	    QServerSocket ss = port.bindForWatchdog();
 
+	    if (ss == null)
+	      continue;
+
 	    boundSockets.add(ss);
 	    
 	    if (ss.setSaveOnExec()) {

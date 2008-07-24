@@ -1479,6 +1479,8 @@ public class Server extends ProtocolDispatchServer
     try {
       thread.setContextClassLoader(_classLoader);
 
+      log.info("");
+      
       ArrayList<Port> ports = _clusterServer.getPorts();
       for (int i = 0; i < ports.size(); i++) {
 	Port port = ports.get(i);
@@ -1487,6 +1489,8 @@ public class Server extends ProtocolDispatchServer
 
 	port.bind();
       }
+      
+      log.info("");
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

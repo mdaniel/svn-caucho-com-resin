@@ -312,6 +312,8 @@ public class Resin implements EnvironmentBean, SchemaBean
 			 "\n" +
 			 "  See http://www.caucho.com for information on Resin Professional,\n" +
 			 "  including caching, clustering, JNI acceleration, and OpenSSL integration.\n");
+
+      licenseErrorMessage = msg;
     }
 
     if (resin == null)

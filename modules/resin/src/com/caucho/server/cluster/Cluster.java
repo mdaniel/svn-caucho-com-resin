@@ -749,20 +749,7 @@ public class Cluster
       if (_server != null)
 	return _server;
 
-      Server server = null;
-
-      try {
-	Class proServer = Class.forName("com.caucho.server.cluster.ProServer");
-
-	Constructor ctor = proServer.getConstructor(new Class[] { ClusterServer.class });
-
-	server = (Server) ctor.newInstance(clusterServer);
-      } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
-      }
-
-      if (server == null)
-	server = new Server(clusterServer);
+      Server server = createResinServer(clusterServer);
 
       _serverProgram.configure(server);
 
@@ -770,6 +757,11 @@ public class Cluster
 
       return server;
     }
+  }
+
+  protected Server createResinServer(ClusterServer clusterServer)
+  {
+    return new Server(clusterServer);
   }
   
   //

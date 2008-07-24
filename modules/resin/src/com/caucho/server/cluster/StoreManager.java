@@ -390,6 +390,8 @@ abstract public class StoreManager
 
     handleAlarm(_alarm);
 
+    log.info(this + " active");
+
     return true;
   }
 

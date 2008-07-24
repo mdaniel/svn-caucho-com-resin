@@ -35,7 +35,9 @@
       <param name="artifact.dist" value="${eclipse.build}"/>
     </antcall>
     
-    <copy todir="${eclipse.build}">
+    <copy todir="${eclipse.build}"
+          preservelastmodified="true"
+          overwrite="true">
       <fileset dir="${eclipse.basedir}">
         <include name="META-INF/*"/>
         <include name="plugin.properties"/>
@@ -746,10 +748,14 @@
 
   <target name="configure">
      <copy tofile="modules/c/src/resin/Makefile.in"
-	   file="${prodir}/modules/c/src/resin/Makefile.in"/>
+	   file="${prodir}/modules/c/src/resin/Makefile.in"
+           preservelastmodified="true"
+           overwrite="true"/>
      
      <copy tofile="modules/c/src/resinssl/Makefile.in"
-	   file="${prodir}/modules/c/src/resinssl/Makefile.in"/>
+	   file="${prodir}/modules/c/src/resinssl/Makefile.in"
+           preservelastmodified="true"
+           overwrite="true"/>
      
      <mkdir dir="automake"/>
      <exec executable="aclocal"/>
@@ -1117,14 +1123,18 @@
     
     <mkdir dir="dist-debian/var/www/resin"/>
     
-    <copy todir="dist-debian/etc/resin">
+    <copy todir="dist-debian/etc/resin"
+          preservelastmodified="true"
+          overwrite="true">
       <fileset dir="${install}/conf">
         <include name="resin.xml"/>
         <include name="app-default.xml"/>
       </fileset>
     </copy>
 
-    <copy todir="dist-debian/usr/lib/resin" preservelastmodified="true">
+    <copy todir="dist-debian/usr/lib/resin"
+          preservelastmodified="true"
+          overwrite="true">
       <fileset dir="${dist}/${dist.name}">
         <include name="lib/resin.jar"/>
         <include name="lib/javaee-16.jar"/>
@@ -1142,7 +1152,8 @@
     
     <copy tofile="dist-debian/etc/init.d/resin"
           file="${install}/contrib/init.resin.in"
-          preservelastmodified="true">
+          preservelastmodified="true"
+          overwrite="true">
       <filterset>
         <filter token="JAVA_HOME" value="/usr/java"/>
         <filter token="resin_home" value="/usr/lib/resin"/>

@@ -137,7 +137,9 @@
 
     <mkdir dir="${module.build}" />
 
-    <copy todir="${module.build}">
+    <copy todir="${module.build}"
+          preservelastmodified="true"
+          overwrite="true">
       <fileset dir="${module.src}">
         <include name="**/*.xml"/>
         <include name="**/*.xsll"/>
@@ -203,7 +205,9 @@
 
     <mkdir dir="${artifact.build}" />
 
-    <copy todir="${artifact.build}">
+    <copy todir="${artifact.build}"
+          preservelastmodified="true"
+          overwrite="true">
       <fileset dir="${artifact.src}">
         <include name="**/*.xml"/>
         <include name="**/*.xsll"/>
@@ -523,7 +527,9 @@
     <copy tofile="${install}/conf/resin.xml.orig"
           file="${resin.install}/conf/resin.xml"/>
 
-    <copy todir="${dist}/${dist.name}" preservelastmodified="true">
+    <copy todir="${dist}/${dist.name}"
+          preservelastmodified="true"
+          overwrite="true">
       <fileset dir="${resin.install}">
         <exclude name="**/*~"/>
         <exclude name="**/.cvsignore"/>
@@ -559,7 +565,6 @@
         <include name="win64/**"/>
         <include name="bin/**"/>
         <include name="xsd/**"/>
-        <include name="automake/**"/>
 	
         <include name="lib/activation.jar"/>
         <include name="lib/javamail-14.jar"/>
@@ -574,18 +579,20 @@
         <include name="LICENSE"/>
         <include name="README"/>
         <include name="build.xml"/>
+        <include name="configure.ac"/>
+        <include name="configure"/>
+        <include name="aclocal.m4"/>
         <include name="Makefile.am"/>
         <include name="Makefile.in"/>
-        <include name="configure"/>
-        <include name="configure.ac"/>
-        <include name="aclocal.m4"/>
         <include name="resin.exe"/>
         <include name="setup.exe"/>
         <include name="description-pak"/>
       </fileset>
     </copy>
     
-    <copy todir="${dist}/${dist.name}/plugins" preservelastmodified="true">
+    <copy todir="${dist}/${dist.name}/plugins"
+          preservelastmodified="true"
+          overwrite="true">
       <fileset dir="${resin.install}/lib">
         <include name="resin-ant.jar"/>
         <include name="resin-richfaces.jar"/>
@@ -593,7 +600,9 @@
       </fileset>
     </copy >
     
-    <copy todir="${dist}/${dist.name}/ext-webapp-lib" preservelastmodified="true">
+    <copy todir="${dist}/${dist.name}/ext-webapp-lib"
+          preservelastmodified="true"
+          overwrite="true">
       <fileset dir="${resin.install}/lib">
         <include name="resin-support.jar"/>
       </fileset>
@@ -873,14 +882,18 @@
     
     <mkdir dir="dist-debian/var/www/resin"/>
     
-    <copy todir="dist-debian/etc/resin">
+    <copy todir="dist-debian/etc/resin"
+          preservelastmodified="true"
+          overwrite="true">
       <fileset dir="${install}/conf">
         <include name="resin.xml"/>
         <include name="app-default.xml"/>
       </fileset>
     </copy>
 
-    <copy todir="dist-debian/usr/lib/resin" preservelastmodified="true">
+    <copy todir="dist-debian/usr/lib/resin"
+          preservelastmodified="true"
+          overwrite="true">
       <fileset dir="${dist}/${dist.name}">
         <include name="lib/resin.jar"/>
         <include name="lib/javaee-16.jar"/>
@@ -898,7 +911,8 @@
     
     <copy tofile="dist-debian/etc/init.d/resin"
           file="${install}/contrib/init.resin.in"
-          preservelastmodified="true">
+          preservelastmodified="true"
+          overwrite="true">
       <filterset>
         <filter token="JAVA_HOME" value="/usr/java"/>
         <filter token="resin_home" value="/usr/lib/resin"/>
@@ -915,7 +929,9 @@
     </chmod>
 
     <copy file="${install}/debian/control"
-          tofile="dist-debian/DEBIAN/control"/>
+          tofile="dist-debian/DEBIAN/control"
+          preservelastmodified="true"
+          overwrite="true"/>
     
     <exec executable="debian-perm"/>
         
