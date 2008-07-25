@@ -309,8 +309,11 @@ public class ThreadPool {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
-    if (! schedule(task, loader, 0, 5000L, true)) {
-      log.warning(this + " unable to schedule priority thread " + task);
+    if (! schedule(task, loader, 0, 10000L, true)) {
+      log.warning(this + " unable to schedule priority thread " + task
+		  + " pri=" + _threadPriority
+		  + " active=" + _threadCount
+		  + " max=" + _threadMax);
 
       OverflowItem item = new OverflowItem(task);
       item.start();
@@ -407,8 +410,11 @@ public class ThreadPool {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
-    if (! schedule(task, loader, 0, 5000L, false)) {
-      log.warning(this + " unable to schedule priority thread " + task);
+    if (! schedule(task, loader, 0, 10000L, false)) {
+      log.warning(this + " unable to start priority thread " + task
+		  + " pri=" + _threadPriority
+		  + " active=" + _threadCount
+		  + " max=" + _threadMax);
 
       OverflowItem item = new OverflowItem(task);
       item.start();
@@ -572,6 +578,11 @@ public class ThreadPool {
       _threadPriority = _threadIdleMin;
     else
       _threadPriority = (_threadIdleMin + 1) / 2;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 
   class Item implements Runnable {
