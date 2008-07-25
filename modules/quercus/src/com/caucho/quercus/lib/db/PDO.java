@@ -146,6 +146,8 @@ public class PDO implements EnvCleanup {
   private String _lastInsertId;
 
   private boolean _inTransaction;
+  
+  private static String ENCODING = "ISO8859_1";
 
   public PDO(Env env,
              String dsn,
@@ -499,7 +501,7 @@ public class PDO implements EnvCleanup {
       closeStatements();
 
       PDOStatement pdoStatement
-	= new PDOStatement(_env, _conn, statement, true, driverOptions);
+        = new PDOStatement(_env, _conn, statement, true, driverOptions);
       
       _lastPDOStatement = pdoStatement;
 
@@ -799,7 +801,7 @@ public class PDO implements EnvCleanup {
     // XXX: more robust to get attribute values as is done in getPgsqlDataSource
 
     String host = attr.get("host");
-    String port = attr.get("port");
+    String portStr = attr.get("port");
     String dbname = attr.get("dbname");
     String unixSocket = attr.get("unix_socket");
 
@@ -811,8 +813,15 @@ public class PDO implements EnvCleanup {
     if (host == null)
       host = "localhost";
 
-    if (port == null)
-      port = "3306";
+    int port = 3306;
+    
+    if (portStr != null) {
+      try {
+        port = Integer.parseInt(portStr);
+      } catch (NumberFormatException e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
 
     if (dbname == null)
       dbname = "test";
@@ -829,9 +838,11 @@ public class PDO implements EnvCleanup {
       _password = password;
 
     String driver = Mysqli.DRIVER;
-
-    String url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
-
+    
+    // XXX: mysql options?
+    String url = Mysqli.getUrl(host, port, dbname, ENCODING,
+                               false, false, false);
+    
     return env.getDataSource(driver, url);
   }
 

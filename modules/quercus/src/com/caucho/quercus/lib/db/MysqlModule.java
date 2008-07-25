@@ -313,25 +313,48 @@ public class MysqlModule extends AbstractQuercusModule {
    * @return the escaped string
    */
 
-  public static StringValue mysql_escape_string(Env env, StringValue unescapedString)
+  public static StringValue mysql_escape_string(Env env, Value val)
   {
+    if (! val.isString())
+      return env.getEmptyString();
+    
+    StringValue unescapedString = val.toStringValue();
+    
     StringValue sb = unescapedString.createStringBuilder();
     
     int len = unescapedString.length();
 
     for (int i = 0; i < len; i++) {
       char ch = unescapedString.charAt(i);
-      
+
       switch(ch) {
         case 0:
+          sb.append('\\');
+          sb.append(0);
+          break;
         case '\n':
+          sb.append('\\');
+          sb.append('n');
+          break;
         case '\r':
+          sb.append('\\');
+          sb.append('r');
+          break;
         case '\\':
+          sb.append('\\');
+          sb.append('\\');
+          break;
         case '\'':
+          sb.append('\\');
+          sb.append('\'');
+          break;
         case '"':
+          sb.append('\\');
+          sb.append('"');
+          break;
         case 0x1A:
           sb.append('\\');
-          sb.append(ch);
+          sb.append('Z');
           break;
         default:
           sb.append(ch);
@@ -350,9 +373,14 @@ public class MysqlModule extends AbstractQuercusModule {
    */
 
   public static StringValue mysql_real_escape_string(Env env,
-                                              StringValue unescapedString,
-                                              @Optional Mysqli conn)
+                                                     Value val,
+                                                     @Optional Mysqli conn)
   {
+    if (! val.isString())
+      return env.getEmptyString();
+    
+    StringValue unescapedString = val.toStringValue();
+    
     if (conn == null)
       conn = getConnection(env);
 

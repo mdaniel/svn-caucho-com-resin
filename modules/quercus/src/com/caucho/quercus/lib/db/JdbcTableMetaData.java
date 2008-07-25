@@ -105,7 +105,7 @@ public class JdbcTableMetaData {
 	column.setIndex(true);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      log.log(Level.FINE, e.toString(), e);
     } finally {
       rs.close();
     }

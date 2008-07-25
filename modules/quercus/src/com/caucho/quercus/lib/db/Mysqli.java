@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.db;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ResourceType;
@@ -41,6 +42,7 @@ import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.DatabaseMetaData;
@@ -90,6 +92,8 @@ public class Mysqli extends JdbcConnectionResource {
   private static Object _checkDriverLock = new Object();
 
   private LastSqlType _lastSql;
+  
+  private static final String ENCODING = "ISO8859_1";
 
   /**
     * This is the constructor for the mysqli class.
@@ -193,58 +197,10 @@ public class Mysqli extends JdbcConnectionResource {
       }
 
       if (url == null || url.equals("")) {
-        StringBuilder urlBuilder = new StringBuilder();
-  
-        urlBuilder.append("jdbc:mysql://");
-        urlBuilder.append(host);
-        urlBuilder.append(":");
-        urlBuilder.append(port);
-        urlBuilder.append("/");
-        urlBuilder.append(dbname);
-
-        // Ignore MYSQL_CLIENT_LOCAL_FILES and MYSQL_CLIENT_IGNORE_SPACE flags.
-
-        if ((flags & MysqliModule.MYSQL_CLIENT_INTERACTIVE) != 0) {
-          char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
-
-          urlBuilder.append(sep);
-          urlBuilder.append("interactiveClient=true");
-        }
-
-        if ((flags & MysqliModule.MYSQL_CLIENT_COMPRESS) != 0) {
-          char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
-
-          urlBuilder.append(sep);
-          urlBuilder.append("useCompression=true");
-        }
-
-        if ((flags & MysqliModule.MYSQL_CLIENT_SSL) != 0) {
-          char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
-
-          urlBuilder.append(sep);
-          urlBuilder.append("useSSL=true");
-        }
-
-        // Explicitly indicate that iso-8859-1 encoding should
-        // be used as the default driver encoding. We don't want the
-        // driver to use its version of Cp1252 because that encoding
-        // does not support byte values in the range 0x80 to 0x9f.
-        //
-        // php/144b
-        char sep = urlBuilder.indexOf("?") < 0 ? '?' : '&';
-        urlBuilder.append(sep + "characterEncoding=UTF8");
-	/*
-        //urlBuilder.append("&useInformationSchema=true");
-        
-        // required to get the result table name alias,
-        // doesn't work in mysql JDBC 5.1.6, but set it anyways in case
-        // the mysql guys fix it
-        //
-        // php/141p
-        urlBuilder.append("&useOldAliasMetadataBehavior=true");
-	*/
-	
-        url = urlBuilder.toString();
+        url = getUrl(host, port, dbname, ENCODING,
+                     (flags & MysqliModule.MYSQL_CLIENT_INTERACTIVE) != 0,
+                     (flags & MysqliModule.MYSQL_CLIENT_COMPRESS) != 0,
+                     (flags & MysqliModule.MYSQL_CLIENT_SSL) != 0);
       }
       
       Connection jConn = env.getConnection(driver, url, userName, password);
@@ -265,6 +221,71 @@ public class Mysqli extends JdbcConnectionResource {
 
       return null;
     }
+  }
+  
+  protected static String getUrl(String host,
+                                 int port,
+                                 String dbname,
+                                 String encoding,
+                                 boolean useInteractive,
+                                 boolean useCompression,
+                                 boolean useSsl)
+  {
+    StringBuilder urlBuilder = new StringBuilder();
+    
+    urlBuilder.append("jdbc:mysql://");
+    urlBuilder.append(host);
+    urlBuilder.append(":");
+    urlBuilder.append(port);
+    urlBuilder.append("/");
+    urlBuilder.append(dbname);
+
+    // Ignore MYSQL_CLIENT_LOCAL_FILES and MYSQL_CLIENT_IGNORE_SPACE flags.
+
+    if (useInteractive) {
+      char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
+
+      urlBuilder.append(sep);
+      urlBuilder.append("interactiveClient=true");
+    }
+
+    if (useCompression) {
+      char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
+
+      urlBuilder.append(sep);
+      urlBuilder.append("useCompression=true");
+    }
+
+    if (useSsl) {
+      char sep = (urlBuilder.indexOf("?") < 0) ? '?' : '&';
+
+      urlBuilder.append(sep);
+      urlBuilder.append("useSSL=true");
+    }
+
+    // Explicitly indicate that we want iso-8859-1 encoding so
+    // we would know what encoding to use to convert StringValues
+    // to Strings
+    // php/144b, php/140b
+    if (encoding != null) {
+      char sep = urlBuilder.indexOf("?") < 0 ? '?' : '&';
+      urlBuilder.append(sep);
+      urlBuilder.append("characterEncoding=");
+      urlBuilder.append(encoding);
+    }
+
+/*
+    //urlBuilder.append("&useInformationSchema=true");
+    
+    // required to get the result table name alias,
+    // doesn't work in mysql JDBC 5.1.6, but set it anyways in case
+    // the mysql guys fix it
+    //
+    // php/141p
+    urlBuilder.append("&useOldAliasMetadataBehavior=true");
+*/
+
+    return urlBuilder.toString();
   }
 
   /**
@@ -721,10 +742,23 @@ public class Mysqli extends JdbcConnectionResource {
    * @return a {@link JdbcResultResource}, or null for failure
    */
   public Value query(Env env,
-                     StringValue sql,
+                     StringValue sqlV,
                      @Optional("MYSQLI_STORE_RESULT") int resultMode)
   {
-    return realQuery(env, sql.toString());
+    String sql = sqlToString(env, sqlV);
+    
+    return realQuery(env, sql);
+  }
+  
+  private static String sqlToString(Env env, StringValue sql)
+  {
+    byte []bytes = sql.toBytes();
+    
+    try {
+      return new String(bytes, ENCODING);
+    } catch (UnsupportedEncodingException e) {
+      throw new QuercusException(e);
+    }
   }
 
   /**
@@ -736,7 +770,7 @@ public class Mysqli extends JdbcConnectionResource {
   protected Value realQuery(Env env, String sql)
   {
     clearErrors();
-
+    
     _lastSql = null;
 
     setResultResource(null);
