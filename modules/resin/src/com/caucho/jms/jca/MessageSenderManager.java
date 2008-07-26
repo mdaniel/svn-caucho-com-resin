@@ -33,12 +33,14 @@ import com.caucho.config.ConfigException;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
+import javax.annotation.PostConstruct;
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.ResourceAdapter;
+import javax.resource.spi.ResourceAdapterAssociation;
 import javax.security.auth.Subject;
 import java.io.PrintWriter;
 import java.util.Iterator;
@@ -48,8 +50,10 @@ import java.util.logging.Logger;
 /**
  * The managed factory implementation.
  */
-public class MessageSenderManager implements ManagedConnectionFactory {
-  protected static final Logger log = Log.open(MessageSenderManager.class);
+public class MessageSenderManager
+  implements ManagedConnectionFactory, ResourceAdapterAssociation {
+  protected static final Logger log
+    = Logger.getLogger(MessageSenderManager.class.getName());
   private static final L10N L = new L10N(MessageSenderManager.class);
 
   private ResourceAdapterImpl _ra;
@@ -73,6 +77,7 @@ public class MessageSenderManager implements ManagedConnectionFactory {
     _ra = (ResourceAdapterImpl) adapter;
   }
 
+  @PostConstruct
   public void init()
     throws ConfigException
   {

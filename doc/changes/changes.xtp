@@ -13,7 +13,7 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
-<li>config: jpa-persistence replaces persistence-manager to avoid confusion with persistent-store</li>
+<li>(2008-07-24) config: jpa-persistence replaces persistence-manager to avoid confusion with persistent-store</li>
 <li>quercus: Pages sidebar not found in a standard Wordpress installation (#2800, rep by PeterUnold)</li>
 <li>quercus: class_implements() is missing (#2788, rep by drhalogen)</li>
 <li>quercus: setlocale not working properly (#2752, rep s. eybert)</li>
