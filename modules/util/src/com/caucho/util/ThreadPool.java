@@ -49,6 +49,8 @@ public class ThreadPool {
   private static final int DEFAULT_THREAD_IDLE_MIN = 10;
   private static final int DEFAULT_THREAD_IDLE_GAP = 5;
 
+  private static final long PRIORITY_TIMEOUT = 1000L;
+
   private static ThreadPool _globalThreadPool;
 
   private int _g_id;
@@ -308,8 +310,9 @@ public class ThreadPool {
   public void schedulePriority(Runnable task)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
-    if (! schedule(task, loader, 0, 10000L, true)) {
+
+    long expire = Alarm.getCurrentTime() + PRIORITY_TIMEOUT;
+    if (! schedule(task, loader, 0, expire, true)) {
       log.warning(this + " unable to schedule priority thread " + task
 		  + " pri=" + _threadPriority
 		  + " active=" + _threadCount
@@ -410,7 +413,8 @@ public class ThreadPool {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
-    if (! schedule(task, loader, 0, 10000L, false)) {
+    long expire = Alarm.getCurrentTime() + PRIORITY_TIMEOUT;
+    if (! schedule(task, loader, 0, expire, false)) {
       log.warning(this + " unable to start priority thread " + task
 		  + " pri=" + _threadPriority
 		  + " active=" + _threadCount
@@ -523,7 +527,7 @@ public class ThreadPool {
 		// clear interrupted flag
 		Thread.interrupted();
 		
-		_idleLock.wait(5000);
+		_idleLock.wait(1000);
 	      } finally {
 		_scheduleWaitCount--;
 	      }

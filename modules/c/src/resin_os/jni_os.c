@@ -281,6 +281,108 @@ Java_com_caucho_vfs_JniFileStream_nativeAvailable(JNIEnv *env,
 #endif /* select */
 
 JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniFileStream_nativeOpenRead(JNIEnv *env,
+						 jobject obj,
+						 jbyteArray name,
+						 jint length)
+{
+  char buffer[8192];
+  int fd;
+
+  if (! name || length <= 0 || sizeof(buffer) <= length)
+    return -1;
+
+  resin_get_byte_array_region(env, name, 0, length, buffer);
+
+  buffer[length] = 0;
+
+#ifdef S_ISDIR
+ /* On Linux, check if the file is a directory first. */
+ {
+   struct stat st;
+
+   if (stat(buffer, &st) || S_ISDIR(st.st_mode)) {
+     return -1;
+   }
+ }
+#endif
+
+#ifdef O_BINARY
+  fd = open(buffer, O_RDONLY|O_BINARY);
+#else  
+  fd = open(buffer, O_RDONLY);
+#endif
+
+  return fd;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniFileStream_nativeOpenWrite(JNIEnv *env,
+						  jobject obj,
+						  jbyteArray name,
+						  jint length,
+						  jboolean is_append)
+{
+  char buffer[8192];
+  int fd;
+  int flags;
+
+  if (! name || length <= 0 || sizeof(buffer) <= length)
+    return -1;
+
+  resin_get_byte_array_region(env, name, 0, length, buffer);
+
+  buffer[length] = 0;
+
+  flags = 0;
+  
+#ifdef O_BINARY
+  flags |= O_BINARY;
+#endif
+  
+#ifdef O_LARGEFILE
+  flags |= O_LARGEFILE;
+#endif
+
+  if (is_append)
+    fd = open(buffer, O_WRONLY|O_CREAT|O_APPEND|flags, 0666);
+  else
+    fd = open(buffer, O_WRONLY|O_CREAT|O_TRUNC|flags, 0666);
+
+  if (fd < 0) {
+    switch (errno) {
+    case EISDIR:
+      resin_printf_exception(env, "java/io/IOException",
+			     "'%s' is a directory", buffer);
+      break;
+    case EACCES:
+      resin_printf_exception(env, "java/io/IOException",
+			     "'%s' permission denied", buffer);
+      break;
+    case ENOTDIR:
+      resin_printf_exception(env, "java/io/IOException",
+			     "'%s' parent directory does not exist", buffer);
+      break;
+    case EMFILE:
+    case ENFILE:
+      resin_printf_exception(env, "java/io/IOException",
+			     "too many files open", buffer);
+      break;
+    case ENOENT:
+      resin_printf_exception(env, "java/io/FileNotFoundException",
+			     "'%s' unable to open", buffer);
+      break;
+    default:
+      resin_printf_exception(env, "java/io/IOException",
+			     "'%s' unknown error (errno=%d).", buffer, errno);
+      break;
+    }
+  }
+
+  return fd;
+}
+
+JNIEXPORT jint JNICALL
 Java_com_caucho_vfs_JniFileStream_nativeRead(JNIEnv *env,
 					     jobject obj,
 					     jint fd,

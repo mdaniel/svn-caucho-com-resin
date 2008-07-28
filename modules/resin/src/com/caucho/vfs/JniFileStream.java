@@ -7,6 +7,7 @@
 package com.caucho.vfs;
 
 import java.io.IOException;
+import java.util.logging.*;
 
 /**
  * Stream using with JNI.
@@ -14,6 +15,11 @@ import java.io.IOException;
 public class JniFileStream extends StreamImpl
     implements LockableStream
 {
+  private static final Logger log
+    = Logger.getLogger(JniFileStream.class.getName());
+
+  private static boolean _isJni;
+  
   private int _fd;
   private long _pos;
 
@@ -35,6 +41,33 @@ public class JniFileStream extends StreamImpl
 
     _canRead = canRead;
     _canWrite = canWrite;
+  }
+
+  public static boolean isJni()
+  {
+    return _isJni;
+  }
+
+  public static JniFileStream openRead(byte []name, int length)
+  {
+    int fd = nativeOpenRead(name, length);
+    
+    if (fd >= 0)
+      return new JniFileStream(fd, true, false);
+    else
+      return null;
+  }
+
+  public static JniFileStream openWrite(byte []name,
+					int length,
+					boolean isAppend)
+  {
+    int fd = nativeOpenWrite(name, length, isAppend);
+    
+    if (fd >= 0)
+      return new JniFileStream(fd, false, true);
+    else
+      return null;
   }
 
   public boolean canRead()
@@ -171,6 +204,17 @@ public class JniFileStream extends StreamImpl
     throws IOException;
 
   /**
+   * Native to open a file for reading
+   */
+  private static native int nativeOpenRead(byte []name, int length);
+  
+  /**
+   * Native to open a file for writing
+   */
+  private static native int nativeOpenWrite(byte []name, int length,
+					    boolean isAppend);
+
+  /**
    * Native interface to write bytes to the file
    */
   native int nativeWrite(int fd, byte []buf, int offset, int length)
@@ -245,10 +289,10 @@ public class JniFileStream extends StreamImpl
   static {
     try {
       System.loadLibrary("resin_os");
+      _isJni = true;
     } catch (Throwable e) {
-      System.err.println("Can't open Resin JNI library: " + e);
-      System.out.println("CP: " + JniFileStream.class.getClassLoader());
-      Thread.dumpStack();
+      e.printStackTrace();
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 }

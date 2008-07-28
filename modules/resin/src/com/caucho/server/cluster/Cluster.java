@@ -612,9 +612,6 @@ public class Cluster
       _clusterLocal.set(this);
     }
 
-    // initialize the environment admin
-    getEnvironmentAdmin();
- 
     try {
       String name = _id;
 

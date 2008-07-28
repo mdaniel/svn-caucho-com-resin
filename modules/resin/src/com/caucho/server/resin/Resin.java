@@ -291,7 +291,6 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public static Resin create(ClassLoader loader)
   {
-    
     String licenseErrorMessage = null;
 
     Resin resin = null;
@@ -1247,7 +1246,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       resinConf = _rootDirectory.lookup(_configFile);
     }
 
-    if (!resinConf.exists() && ! _resinHome.equals(_rootDirectory)) {
+    if (! resinConf.exists() && ! _resinHome.equals(_rootDirectory)) {
       if (log().isLoggable(Level.FINER))
         log().finer(this + " looking for conf in " +  _resinHome.lookup(_configFile));
 

@@ -1420,6 +1420,9 @@ public class Server extends ProtocolDispatchServer
       _classLoader.start();
 
       _hostContainer.start();
+      
+      // initialize the environment admin
+      _classLoader.getAdmin();
 
       getCluster().startPersistentStore();
 
