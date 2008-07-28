@@ -37,6 +37,7 @@
 #include <errno.h>
 /* probably system-dependent */
 #include <jni.h>
+#include "resin.h"
 
 #define STACK_BUFFER_SIZE (16 * 1024)
 
@@ -393,7 +394,6 @@ Java_com_caucho_vfs_JniFileStream_nativeRead(JNIEnv *env,
   int sublen;
   char buffer[STACK_BUFFER_SIZE];
   int read_length = 0;
-
   if (fd < 0)
     return -1;
 
@@ -427,7 +427,7 @@ Java_com_caucho_vfs_JniFileStream_nativeRead(JNIEnv *env,
        return read_length == 0 ? -1 : read_length;
 
      resin_set_byte_array_region(env, buf, offset, result, buffer);
-   }
+  }
 #endif    
 
     read_length += result;

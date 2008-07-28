@@ -48,7 +48,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="c:\program files\java\jdk1.5.0\include,c:\program files\java\jdk1.5.0\include\win32,c:\local\ssl\include"
+				AdditionalIncludeDirectories="e:\program files\java\jdk1.5.0_10\include,e:\program files\java\jdk1.5.0_10\include\win32"
 				PreprocessorDefinitions="WIN32;HAS_JVMTI;_DEBUG;_WINDOWS;_USRDLL"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -58,6 +58,7 @@
 				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
 				CompileAs="0"
 			/>
@@ -74,7 +75,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="c:\local\openssl-engine-0.9.6d\out32dll\libeay32.lib"
+				AdditionalDependencies="ws2_32.lib"
 				OutputFile=".\Debug/resin_os.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
