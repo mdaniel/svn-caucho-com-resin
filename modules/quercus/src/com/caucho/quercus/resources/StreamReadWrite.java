@@ -117,13 +117,14 @@ public class StreamReadWrite extends StreamResource
   /**
    * Reads a line from the buffer.
    */
-  public StringValue readLine()
+  @Override
+  public StringValue readLine(Env env)
     throws IOException
   {
     if (_is != null)
-      return _env.createString(_is.readLineNoChop());
+      return env.createString(_is.readLineNoChop());
     else
-      return _env.getEmptyString();
+      return env.getEmptyString();
   }
 
   /**

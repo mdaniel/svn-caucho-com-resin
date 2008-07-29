@@ -92,8 +92,6 @@ public class Mysqli extends JdbcConnectionResource {
   private static Object _checkDriverLock = new Object();
 
   private LastSqlType _lastSql;
-  
-  private static final String ENCODING = "ISO8859_1";
 
   /**
     * This is the constructor for the mysqli class.
@@ -209,15 +207,19 @@ public class Mysqli extends JdbcConnectionResource {
 
       return jConn;
     } catch (SQLException e) {
+      e.printStackTrace();
+      
       env.warning(L.l("A link to the server could not be established.\n  url={0}\n  driver={1}\n  {2}", url, driver, e.toString()), e);
 
-      env.setSpecialValue("mysqli.connectErrno",new LongValue(e.getErrorCode()));
-      env.setSpecialValue("mysqli.connectError", new UnicodeValueImpl(e.getMessage()));
+      env.setSpecialValue("mysqli.connectErrno", new LongValue(e.getErrorCode()));
+      env.setSpecialValue("mysqli.connectError", env.createString(e.getMessage()));
 
       return null;
     } catch (Exception e) {
+      e.printStackTrace();
+      
       env.warning(L.l("A link to the server could not be established.\n  url={0}\n  driver={1}\n  {2}", url, driver, e.toString()), e);
-      env.setSpecialValue("mysqli.connectError", new UnicodeValueImpl(e.toString()));
+      env.setSpecialValue("mysqli.connectError", env.createString(e.toString()));
 
       return null;
     }
@@ -266,7 +268,7 @@ public class Mysqli extends JdbcConnectionResource {
     // Explicitly indicate that we want iso-8859-1 encoding so
     // we would know what encoding to use to convert StringValues
     // to Strings
-    // php/144b, php/140b
+    // php/140b
     if (encoding != null) {
       char sep = urlBuilder.indexOf("?") < 0 ? '?' : '&';
       urlBuilder.append(sep);

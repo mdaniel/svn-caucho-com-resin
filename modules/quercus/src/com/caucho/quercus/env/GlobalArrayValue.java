@@ -51,15 +51,6 @@ public class GlobalArrayValue extends ArrayValueImpl {
   }
   
   /**
-   * Converts to a string.
-   * @param env
-   */
-  public StringValue toString(Env env)
-  {
-    return new UnicodeValueImpl("Array");
-  }
-  
-  /**
    * Converts to an object.
    */
   public Object toObject()

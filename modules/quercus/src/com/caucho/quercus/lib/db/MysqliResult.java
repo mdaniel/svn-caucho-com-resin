@@ -81,7 +81,7 @@ public class MysqliResult extends JdbcResultResource {
    * @param conn the corresponding connection
    */
   public MysqliResult(Env env,
-		      ResultSetMetaData metaData,
+                      ResultSetMetaData metaData,
                       Mysqli conn)
   {
     super(env, metaData, conn);

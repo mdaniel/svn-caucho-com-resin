@@ -87,6 +87,9 @@ public abstract class JdbcConnectionResource
   private boolean _isUsed;
 
   protected SqlParseToken _sqlParseToken = new SqlParseToken();
+  
+  // php/144b, php/1464, php/1465
+  protected static final String ENCODING = "ISO8859_1";
 
   public JdbcConnectionResource(Env env)
   {
@@ -626,6 +629,7 @@ public abstract class JdbcConnectionResource
 
         // for php/430a
         if (! keepStatementOpen()) {
+          _warnings = stmt.getWarnings();
           stmt.close();
         }
       }
@@ -939,17 +943,7 @@ public abstract class JdbcConnectionResource
    */
   protected SQLWarning getWarnings()
   {
-    try {
-      if (_stmt != null)
-        return _stmt.getWarnings();
-      else
-        return null;
-      
-    } catch (SQLException e) {
-      log.log(Level.FINEST, e.toString(), e);
-      
-      return null;
-    }
+    return _warnings;
   }
 
   /**

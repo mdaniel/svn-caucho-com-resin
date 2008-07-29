@@ -161,7 +161,7 @@ public class JMSQueue
 
       return env.wrapJava(object);
     } else if (message instanceof TextMessage) {
-      return new UnicodeValueImpl(((TextMessage) message).getText());
+      return env.createString(((TextMessage) message).getText());
     } else if (message instanceof StreamMessage) {
       Object object = ((StreamMessage) message).readObject();
 
@@ -199,7 +199,7 @@ public class JMSQueue
 
         Object object = mapMessage.getObject(name);
 
-        array.put(new UnicodeValueImpl(name), env.wrapJava(object));
+        array.put(env.createString(name), env.wrapJava(object));
       }
 
       return array;

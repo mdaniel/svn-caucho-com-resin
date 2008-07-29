@@ -3536,8 +3536,8 @@ public class Env {
       if (parentName != null)
         parent = findClass(parentName);
 
-      if (parentName == null || parent instanceof QuercusClass)
-        return createQuercusClass(classDef, (QuercusClass) parent);
+      if (parentName == null || parent != null)
+        return createQuercusClass(classDef, parent);
       else
         return null; // php/
     }

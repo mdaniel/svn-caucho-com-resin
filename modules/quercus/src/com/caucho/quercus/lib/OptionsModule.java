@@ -749,18 +749,13 @@ public class OptionsModule extends AbstractQuercusModule {
   /**
    * Compares versions
    */
-  public static Value version_compare(String version1,
-                                      String version2,
+  public static Value version_compare(Env env,
+                                      StringValue version1,
+                                      StringValue version2,
                                       @Optional("cmp") String op)
   {
-    if (version1 == null)
-      version1 = "";
-    
-    if (version2 == null)
-      version2 = "";
-    
-    ArrayList<Value> expanded1 = expandVersion(version1);
-    ArrayList<Value> expanded2 = expandVersion(version2);
+    ArrayList<Value> expanded1 = expandVersion(env, version1);
+    ArrayList<Value> expanded2 = expandVersion(env, version2);
 
     int cmp = compareTo(expanded1, expanded2);
 
@@ -794,7 +789,7 @@ public class OptionsModule extends AbstractQuercusModule {
     return "2.0.4";
   }
 
-  private static ArrayList<Value> expandVersion(String version)
+  private static ArrayList<Value> expandVersion(Env env, StringValue version)
   {
     ArrayList<Value> expand = new ArrayList<Value>();
 
@@ -835,7 +830,7 @@ public class OptionsModule extends AbstractQuercusModule {
         else
           s = "z" + s;
 
-        expand.add(new UnicodeValueImpl(s));
+        expand.add(env.createString(s));
       }
       else
         i++;

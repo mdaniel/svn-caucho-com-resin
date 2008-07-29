@@ -36,6 +36,8 @@ import com.caucho.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -537,6 +539,7 @@ public class JdbcResultResource {
           return bb;
         }
 
+      case Types.VARCHAR:
       case Types.LONGVARCHAR:
       {
         StringValue bb = env.createUnicodeBuilder();
@@ -551,14 +554,33 @@ public class JdbcResultResource {
             bb.append(reader);
           }
           else {
-            InputStream is = rs.getBinaryStream(column);
+            byte []bytes = null;
             
-            if (is == null) // || rs.wasNull())
-              return NullValue.NULL;
+            if (metaData.getClass().getName().equals("com.mysql.jdbc.ResultSetMetaData")) {
+              // calling getString() will decode using the database encoding
+              String s = rs.getString(column);
+              
+              if (s == null)
+                return NullValue.NULL;
+              
+              // php/1464, php/144f, php/144g
+              // attempt to convert to latin1 bytes,
+              // conversion may fail if there was a mismatch between database
+              // encoding and latin1
+              bytes = MysqlLatin1Utility.encode(s);
+            }
             
-            bb.appendReadAll(is, Long.MAX_VALUE);
+            // php/144b
+            if (bytes == null)
+              bytes = rs.getBytes(column);
+            
+            bb.append(bytes);
+            
+            return bb;
           }
         } catch (RuntimeException e) {
+          e.printStackTrace();
+          
           log.log(Level.WARNING, e.toString(), e);
 
           return NullValue.NULL;

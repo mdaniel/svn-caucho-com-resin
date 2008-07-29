@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.file;
 
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.resources.StreamResource;
@@ -68,10 +69,11 @@ public class FileValue extends StreamResource {
   /**
    * Reads a line from a file, returning null.
    */
-  public StringValue readLine()
+  @Override
+  public StringValue readLine(Env env)
     throws IOException
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
+    StringValue sb = env.createStringBuilder();
 
     int ch;
 

@@ -297,9 +297,16 @@ public class StringModule extends AbstractQuercusModule {
    *
    * @return the string equivalent
    */
-  public static String chr(long value)
+  public static StringValue chr(Env env, long value)
   {
-    return String.valueOf((char) value);
+    if (! env.isUnicodeSemantics())
+      value = value & 0xFF;
+    
+    StringValue sb = env.createUnicodeBuilder();
+    
+    sb.append((char) value);
+    
+    return sb;
   }
 
   /**

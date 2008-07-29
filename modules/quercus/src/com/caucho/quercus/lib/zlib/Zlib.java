@@ -209,13 +209,13 @@ public class Zlib {
    *
    * @return the next character or BooleanValue.FALSE
    */
-  public Value gzgetc()
+  public Value gzgetc(Env env)
   {
     try {
       int ch = _in.read();
 
       if (ch >= 0)
-	return new UnicodeValueImpl(Character.toString((char) ch));
+        return env.createString(Character.toString((char) ch));
       else
 	return BooleanValue.FALSE;
     } catch (IOException e) {

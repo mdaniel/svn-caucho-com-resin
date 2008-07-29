@@ -32,6 +32,7 @@ package com.caucho.quercus;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.annotation.ClassImplementation;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.db.JavaSqlDriverWrapper;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.session.QuercusSessionManager;
 import com.caucho.quercus.module.*;
@@ -463,7 +464,12 @@ public class Quercus
       try {
         Class cls = loader.loadClass(driver);
         
-        return (DataSource)cls.newInstance();
+        Object ds = cls.newInstance();
+        
+        if (ds instanceof DataSource)
+          return (DataSource) ds;
+        else
+          return new JavaSqlDriverWrapper((java.sql.Driver) ds, url);
       } catch (ClassNotFoundException e) {
         throw new QuercusModuleException(e);
       } catch (InstantiationException e) {

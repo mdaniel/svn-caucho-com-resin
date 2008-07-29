@@ -163,14 +163,14 @@ public class VariableModule extends AbstractQuercusModule {
     HashMap<String,Var> map = env.getEnv();
 
     for (Map.Entry<String,Var> entry : map.entrySet()) {
-      result.append(new UnicodeValueImpl(entry.getKey()),
+      result.append(env.createString(entry.getKey()),
 		    entry.getValue().toValue());
     }
 
     HashMap<String,Var> globalMap = env.getGlobalEnv();
     if (map != globalMap) {
       for (Map.Entry<String,Var> entry : globalMap.entrySet()) {
-	result.append(new UnicodeValueImpl(entry.getKey()),
+	result.append(env.createString(entry.getKey()),
 		      entry.getValue().toValue());
       }
     }
@@ -604,7 +604,7 @@ public class VariableModule extends AbstractQuercusModule {
     if (v instanceof StringValue)
       return (StringValue) v;
     else
-      return new UnicodeValueImpl(v.toString());
+      return v.toString(env);
   }
 
   /**

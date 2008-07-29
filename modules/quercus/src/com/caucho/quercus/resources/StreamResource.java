@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.resources;
 
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ResourceValue;
 import com.caucho.quercus.env.StringValue;
 
@@ -68,7 +69,7 @@ public class StreamResource extends ResourceValue {
   /**
    * Reads a line from the buffer.
    */
-  public StringValue readLine()
+  public StringValue readLine(Env env)
     throws IOException
   {
     return null;
