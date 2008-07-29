@@ -558,8 +558,10 @@
         <include name="automake/**"/>
         <include name="conf/**"/>
         <include name="contrib/**"/>
+	<!--
         <include name="doc/**"/>
         <include name="php/**"/>
+	-->
         <include name="modules/**/src/**"/>
         <include name="win32/**"/>
         <include name="win64/**"/>
@@ -569,11 +571,13 @@
         <include name="lib/activation.jar"/>
         <include name="lib/javamail-14.jar"/>
         <include name="lib/jcache.jar"/>
-        <include name="lib/jaxrpc-15.jar"/>
+        <include name="lib/jaxstream-15.jar"/>
         <include name="lib/jsf-12.jar"/>
         <include name="lib/webutil.jar"/>
 
+	<!--
         <include name="webapps/resin-doc.war"/>
+	-->
         <include name="webapps/ROOT/index.jsp"/>
 
         <include name="LICENSE"/>
@@ -590,6 +594,32 @@
       </fileset>
     </copy>
     
+    <copy todir="${dist}/${dist.name}/doc/resin-doc">
+      <fileset dir="${resin.install}/doc">
+        <exclude name="**/*~"/>
+        <exclude name="**/.cvsignore"/>
+        <exclude name="**/.svnignore"/>
+        <exclude name="**/WEB-INF/pre_work/**"/>
+        <exclude name="**/WEB-INF/tmp/**"/>
+        <exclude name="**/WEB-INF/db/**"/>
+      </fileset>
+    </copy>
+    
+    <copy todir="${dist}/${dist.name}/doc">
+      <fileset dir="${resin.install}/php">
+        <exclude name="**/*~"/>
+        <exclude name="**/.cvsignore"/>
+        <exclude name="**/.svnignore"/>
+        <exclude name="**/WEB-INF/pre_work/**"/>
+        <exclude name="**/WEB-INF/tmp/**"/>
+        <exclude name="**/WEB-INF/db/**"/>
+	
+        <include name="admin/**"/>
+        <include name="config/**"/>
+      </fileset>
+    </copy>
+
+    <!--
     <copy todir="${dist}/${dist.name}/plugins"
           preservelastmodified="true"
           overwrite="true">
@@ -598,8 +628,10 @@
         <include name="resin-richfaces.jar"/>
         <include name="netbeans-plugin.nbm"/>
       </fileset>
-    </copy >
-    
+    </copy>
+    -->
+
+    <!--
     <copy todir="${dist}/${dist.name}/ext-webapp-lib"
           preservelastmodified="true"
           overwrite="true">
@@ -607,12 +639,12 @@
         <include name="resin-support.jar"/>
       </fileset>
     </copy>
+    -->
 
     <chmod perm="ugo+rx">
       <fileset dir="${dist}/${dist.name}">
         <include name="configure"/>
         <include name="bin/resin.sh"/>
-        <include name="bin/wrapper.pl"/>
         <include name="automake/missing"/>
         <include name="automake/install-sh"/>
         <include name="automake/config.sub"/>
@@ -627,9 +659,11 @@
     <mkdir dir="${dist}/${dist.name}/keys"/>
     <mkdir dir="${dist}/${dist.name}/ext-lib"/>
     <mkdir dir="${dist}/${dist.name}/ext-webapp-lib"/>
+    <mkdir dir="${dist}/${dist.name}/ivy2"/>
+    <!--
     <mkdir dir="${dist}/${dist.name}/plugins"/>
+      -->
     <mkdir dir="${dist}/${dist.name}/log"/>
-    <mkdir dir="${dist}/${dist.name}/logs"/>
   </target>
   
   <target name="dist.package" depends="init">
@@ -653,8 +687,7 @@
       <include name="${dist.name}/webapps/**"/>
       <include name="${dist.name}/contrib/**"/>
       <include name="${dist.name}/conf/**"/>
-      <include name="${dist.name}/php/**"/>
-      <include name="${dist.name}/plugins/**"/>
+      <include name="${dist.name}/doc/**"/>
       <include name="${dist.name}/ext-webapp-lib/**"/>
       <include name="${dist.name}/automake/**"/>
 
@@ -862,86 +895,6 @@
     <copy tofile="${dist}/${shortproduct}-3_2-snap-src.tar.gz"
           file="${dist}/${shortproduct}-${version}-src.tar.gz"/>
   </target>
-  
-  <!--
-     - debian
-    -->
-  <target name="debian" depends="compile,resin.dist.jar">
-    <exec executable="debian-perm">
-      <arg value="-r"/>
-    </exec>
-      
-    <delete dir="dist-debian"/>
-    
-    <mkdir dir="dist-debian/etc/resin"/>
-    
-    <mkdir dir="dist-debian/usr/lib/resin/lib"/>
-    <mkdir dir="dist-debian/usr/lib/resin/libexec"/>
-    
-    <mkdir dir="dist-debian/var/log/resin"/>
-    
-    <mkdir dir="dist-debian/var/www/resin"/>
-    
-    <copy todir="dist-debian/etc/resin"
-          preservelastmodified="true"
-          overwrite="true">
-      <fileset dir="${install}/conf">
-        <include name="resin.xml"/>
-        <include name="admin-users.xml"/>
-        <include name="app-default.xml"/>
-      </fileset>
-    </copy>
-
-    <copy todir="dist-debian/usr/lib/resin"
-          preservelastmodified="true"
-          overwrite="true">
-      <fileset dir="${dist}/${dist.name}">
-        <include name="lib/resin.jar"/>
-        <include name="lib/javaee-16.jar"/>
-      </fileset>
-      
-      <fileset dir="${install}">
-        <include name="lib/activation.jar"/>
-        <include name="lib/javamail-14.jar"/>
-        <include name="lib/jcache.jar"/>
-        <include name="lib/jaxrpc-15.jar"/>
-        <include name="lib/jsf-12.jar"/>
-        <include name="lib/webutil.jar"/>
-      </fileset>
-    </copy>
-    
-    <copy tofile="dist-debian/etc/init.d/resin"
-          file="${install}/contrib/init.resin.in"
-          preservelastmodified="true"
-          overwrite="true">
-      <filterset>
-        <filter token="JAVA_HOME" value="/usr/java"/>
-        <filter token="resin_home" value="/usr/lib/resin"/>
-        <filter token="resin_root" value="-root-directory /var/www/resin"/>
-        <filter token="resin_log" value="-log-directory /var/log/resin"/>
-        <filter token="resin_conf" value="-conf /etc/resin/resin.xml"/>
-      </filterset>
-    </copy>
-    
-    <chmod perm="ugo+rx">
-      <fileset dir="dist-debian">
-        <include name="etc/init.d/resin"/>
-      </fileset>
-    </chmod>
-
-    <copy file="${install}/debian/control"
-          tofile="dist-debian/DEBIAN/control"
-          preservelastmodified="true"
-          overwrite="true"/>
-    
-    <exec executable="debian-perm"/>
-        
-    <exec executable="dpkg">
-      <arg value="-b"/>
-      <arg value="dist-debian"/>
-      <arg value="${dist}/resin_${version}-i386.deb"/>
-    </exec>
-  </target>
 
   <target name="maven2-artifact">
     <property name="jar.name" value="${module.name}.jar"/>
@@ -1091,7 +1044,7 @@
     <delete dir="${clientlib}"/>
     <delete dir="${install}/unix"/>
 
-    <delete dir="${install}/logs"/>
+    <delete dir="${install}/log"/>
     <delete dir="${install}/bin"/>
     <delete dir="${install}/doc/WEB-INF"/>
     <delete dir="${install}/cache"/>

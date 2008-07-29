@@ -66,6 +66,8 @@ public class ClusterStream {
     _os = os;
 
     _debugId = "[" + pool.getDebugId() + ":" + count + "]";
+
+    Thread.dumpStack();
   }
 
   /**

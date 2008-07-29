@@ -1426,7 +1426,8 @@ public class Wrapper {
     com.caucho.make.ClassDependency dep = new com.caucho.make.ClassDependency(cl);
     println("try {");
     println("  Class cl = Class.forName(\"" + cl.getName() + "\", false, Thread.currentThread().getContextClassLoader());");
-    println("  return new com.caucho.make.ClassDependency(cl, " + dep.getDigest() + "L).isModified();");
+    println("  return new com.caucho.make.ClassDependency(\""
+	    + cl.getName() + "\", " + dep.getDigest() + "L).isModified();");
     println("} catch (Throwable e) {");
     println("  return true;");
     println("}");

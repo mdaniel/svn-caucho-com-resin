@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.management.server.ServerConnectorMXBean;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
+import com.caucho.util.QDate;
 import com.caucho.vfs.*;
 import com.caucho.server.resin.*;
 
@@ -163,6 +164,8 @@ public class ServerPool
     _loadBalanceRecoverTime = server.getLoadBalanceRecoverTime();
     _loadBalanceWarmupTime = server.getLoadBalanceWarmupTime();
     _loadBalanceWeight = server.getLoadBalanceWeight();
+
+    System.out.println("IDLE: " + _loadBalanceIdleTime);
   }
 
   /**
@@ -855,8 +858,13 @@ public class ServerPool
       }
     }
 
-    if (stream != null)
+    if (stream != null) {
+      if (log.isLoggable(Level.FINER))
+	log.finer(this + " close idle " + stream
+		  + " expire=" + QDate.formatISO8601(stream.getFreeTime() + _loadBalanceIdleTime));
+      
       stream.closeImpl();
+    }
 
     return null;
   }

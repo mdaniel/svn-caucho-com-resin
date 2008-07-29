@@ -9,7 +9,7 @@
   <property name="shell" value="bash"/>
 
   <target name="compile" 
-          depends="init, hessian, javaee, jaxrpc, jcache, jsf, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, conf, ext">
+          depends="init, hessian, javaee, jaxstream, jcache, jsf, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, conf, ext">
   </target>
 
   <!--
@@ -193,6 +193,15 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jaxrpc"/>
       <param name="module.jar" value="jaxrpc-15.jar"/>
+      <param name="module.dist" value="${lib}"/>
+      <param name="javac.source" value="1.5"/>
+    </antcall>
+  </target>
+
+  <target name="jaxstream" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jaxstream"/>
+      <param name="module.jar" value="jaxstream-15.jar"/>
       <param name="module.dist" value="${lib}"/>
       <param name="javac.source" value="1.5"/>
     </antcall>
@@ -608,6 +617,7 @@
   <target name="doc" depends="init">
     <mkdir dir="${install}/webapps"/>
 
+    <!--
     <jar jarfile="${install}/webapps/resin-doc.war"
          compress="true" index="${jar.index}" update="${jar.update}">
 
@@ -621,6 +631,7 @@
         <exclude name="**/.svnignore"/>
       </fileset>
     </jar>
+    -->
   </target>
 
   <target name="javadoc" depends="init">
@@ -648,12 +659,14 @@
       <packageset dir="${modules}/j2ee-management/src"/>
       <packageset dir="${modules}/jaf/src"/>
       -->
-      <packageset dir="${modules}/jaxrpc/src"/>
+      <packageset dir="${modules}/jaxstream/src"/>
       <packageset dir="${modules}/jca/src"/>
       <packageset dir="${modules}/jms/src"/>
       <packageset dir="${modules}/jstl/src"/>
       <packageset dir="${modules}/jta/src"/>
+      <!--
       <packageset dir="${modules}/portlet/src"/>
+      -->
       <packageset dir="${modules}/quercus/src"/>
       <packageset dir="${modules}/resin/src"/>
       <!--
@@ -1094,92 +1107,6 @@
       <param name="jar.name" value="resin-util.jar"/>
       <param name="maven.name" value="resin-util"/>
     </antcall>
-  </target>
-
-  <target name="debian-perm">
-    <exec executable="cc">
-      <arg value="-o"/>
-      <arg value="debian-perm"/>
-      <arg value="c/debian-perm.c"/>
-    </exec>
-  </target>
-  
-  <!--
-     - debian
-    -->
-  <target name="debian" depends="compile,resin.dist.jar">
-    <exec executable="debian-perm">
-      <arg value="-r"/>
-    </exec>
-      
-    <delete dir="dist-debian"/>
-    
-    <mkdir dir="dist-debian/etc/resin"/>
-    
-    <mkdir dir="dist-debian/usr/lib/resin/lib"/>
-    <mkdir dir="dist-debian/usr/lib/resin/libexec"/>
-    
-    <mkdir dir="dist-debian/var/log/resin"/>
-    
-    <mkdir dir="dist-debian/var/www/resin"/>
-    
-    <copy todir="dist-debian/etc/resin"
-          preservelastmodified="true"
-          overwrite="true">
-      <fileset dir="${install}/conf">
-        <include name="resin.xml"/>
-        <include name="admin-users.xml"/>
-        <include name="app-default.xml"/>
-      </fileset>
-    </copy>
-
-    <copy todir="dist-debian/usr/lib/resin"
-          preservelastmodified="true"
-          overwrite="true">
-      <fileset dir="${dist}/${dist.name}">
-        <include name="lib/resin.jar"/>
-        <include name="lib/javaee-16.jar"/>
-      </fileset>
-      
-      <fileset dir="${install}">
-        <include name="lib/activation.jar"/>
-        <include name="lib/javamail-14.jar"/>
-        <include name="lib/jcache.jar"/>
-        <include name="lib/jaxrpc-15.jar"/>
-        <include name="lib/jsf-12.jar"/>
-        <include name="lib/webutil.jar"/>
-      </fileset>
-    </copy>
-    
-    <copy tofile="dist-debian/etc/init.d/resin"
-          file="${install}/contrib/init.resin.in"
-          preservelastmodified="true"
-          overwrite="true">
-      <filterset>
-        <filter token="JAVA_HOME" value="/usr/java"/>
-        <filter token="resin_home" value="/usr/lib/resin"/>
-        <filter token="resin_root" value="-root-directory /var/www/resin"/>
-        <filter token="resin_log" value="-log-directory /var/log/resin"/>
-        <filter token="resin_conf" value="-conf /etc/resin/resin.xml"/>
-      </filterset>
-    </copy>
-    
-    <chmod perm="ugo+rx">
-      <fileset dir="dist-debian">
-        <include name="etc/init.d/resin"/>
-      </fileset>
-    </chmod>
-
-    <copy file="${install}/debian/control"
-          tofile="dist-debian/DEBIAN/control"/>
-    
-    <exec executable="debian-perm"/>
-        
-    <exec executable="dpkg">
-      <arg value="-b"/>
-      <arg value="dist-debian"/>
-      <arg value="${dist}/resin_${version}-i386.deb"/>
-    </exec>
   </target>
 
   <target name="maven-rsync" depends="init,maven-dist">

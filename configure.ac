@@ -1,11 +1,11 @@
-AC_INIT(modules/c/src/apache2/mod_caucho.c)
+AC_INIT(modules/c/src/resin_os/boot.c)
 AC_PREFIX_DEFAULT(`pwd`)
 AC_CONFIG_AUX_DIR(automake)	
 
 dnl Get os info
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE(resin, 3.1.1)
+AM_INIT_AUTOMAKE(resin, 3.2.0)
 
 FULL_VERSION="Resin $VERSION -- `date`"
 AC_SUBST(FULL_VERSION)
@@ -1167,7 +1167,6 @@ modules/c/src/common/Makefile
 modules/c/src/apache1/Makefile
 modules/c/src/apache2/Makefile
 modules/c/src/resin_os/Makefile
-contrib/init.resin
 ], [])
 
 if test -n "${resin_pro_plugin}"; then
