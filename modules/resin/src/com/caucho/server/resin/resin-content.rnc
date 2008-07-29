@@ -267,14 +267,17 @@ r_jsse-ssl = element jsse-ssl {
   & (attribute key-store-file { string }
      | element key-store-file { r_string-Group })?
 
-  & (attribute password { string }
-     | element password { r_string-Group })?
-
   & (attribute key-store-type { string }
      | element key-store-type { r_string-Group })?
 
   & (attribute key-manager-factory { string }
      | element key-manager-factory { r_string-Group })?
+
+  & (attribute password { string }
+     | element password { r_string-Group })?
+
+  & (attribute protocol { string }
+     | element protocol { r_string-Group })?
 
   & (attribute self-signed-certificate-name { string }
      | element self-signed-certificate-name { r_string-Group })?

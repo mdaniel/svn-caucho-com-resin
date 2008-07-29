@@ -291,7 +291,7 @@ public class Management
       
 	WebBeansContainer webBeans = WebBeansContainer.create();
 
-	webBeans.addSingleton(_auth, "resin-admin", Standard.class);
+	webBeans.addSingleton(_auth, "resin_admin", Standard.class);
       }
 
       if (_transactionManager != null)
@@ -416,7 +416,7 @@ public class Management
       return new PasswordUser(new BasicPrincipal(_name),
 			      _password.toCharArray(),
 			      _isDisabled, isAnonymous,
-			      new String[] { "resin-admin" });
+			      new String[] { "resin_admin" });
     }
   }
 }

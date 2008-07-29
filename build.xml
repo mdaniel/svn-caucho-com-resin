@@ -1128,6 +1128,7 @@
           overwrite="true">
       <fileset dir="${install}/conf">
         <include name="resin.xml"/>
+        <include name="admin-users.xml"/>
         <include name="app-default.xml"/>
       </fileset>
     </copy>

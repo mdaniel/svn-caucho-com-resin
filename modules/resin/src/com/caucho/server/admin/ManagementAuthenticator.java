@@ -41,8 +41,8 @@ import java.util.logging.*;
  * Special authenticator for management
  */
 public class ManagementAuthenticator extends AbstractPasswordAuthenticator {
-  private static final Logger log =
-    Logger.getLogger(ManagementAuthenticator.class.getName());
+  private static final Logger log
+    = Logger.getLogger(ManagementAuthenticator.class.getName());
   
   private TreeMap<String,PasswordUser> _userMap
     = new TreeMap<String,PasswordUser>();

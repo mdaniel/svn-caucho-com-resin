@@ -474,6 +474,9 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
   private boolean isModified(String className)
   {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    
     try {
       ClassLoader loader = _amberContainer.getParentClassLoader();
       ClassLoader tempLoader
@@ -485,6 +488,8 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       Class cl = Class.forName(className.replace('/', '.'),
 			       false,
 			       workLoader);
+
+      thread.setContextClassLoader(tempLoader);
 	  
       Method init = cl.getMethod("_caucho_init", new Class[] { Path.class });
       Method modified = cl.getMethod("_caucho_is_modified", new Class[0]);
@@ -496,6 +501,8 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       log.log(Level.FINEST, e.toString(), e);
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
 
     return true;

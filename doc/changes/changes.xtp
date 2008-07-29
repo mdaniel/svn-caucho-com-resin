@@ -13,6 +13,9 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>jsse: add 'protocols' attribute (#2794, rep by Maithili Deshpande)</li>
+<li>server: IllegalStateException: DESTROYED in TcpConnection (#2799, rep by Steffen Busch)</li>
+<li>install: MacOS-X configure update for 64-bit Java (#2448, 2771 rep by mmetcalfe)</li>
 <li>(2008-07-24) config: jpa-persistence replaces persistence-manager to avoid confusion with persistent-store</li>
 <li>quercus: Pages sidebar not found in a standard Wordpress installation (#2800, rep by PeterUnold)</li>
 <li>quercus: class_implements() is missing (#2788, rep by drhalogen)</li>

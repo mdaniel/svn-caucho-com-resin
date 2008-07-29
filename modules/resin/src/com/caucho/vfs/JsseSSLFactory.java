@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -64,6 +65,7 @@ public class JsseSSLFactory implements SSLFactory {
   private String _keyManagerFactory = "SunX509";
   private String _sslContext = "TLS";
   private String []_cipherSuites;
+  private String []_protocols;
 
   private String _selfSignedName;
 
@@ -182,6 +184,14 @@ public class JsseSSLFactory implements SSLFactory {
   }
 
   /**
+   * Sets the protocol
+   */
+  public void setProtocol(String protocol)
+  {
+    _protocols = protocol.split("[\\s,]+");
+  }
+
+  /**
    * Initialize
    */
   @PostConstruct
@@ -251,6 +261,9 @@ public class JsseSSLFactory implements SSLFactory {
 
       if (_cipherSuites != null)
 	sslContext.createSSLEngine().setEnabledCipherSuites(_cipherSuites);
+
+      if (_protocols != null)
+	sslContext.createSSLEngine().setEnabledProtocols(_protocols);
 
       factory = sslContext.getServerSocketFactory();
     }

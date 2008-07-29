@@ -438,7 +438,12 @@ public class JavaClassGenerator {
     if (searchPath == null)
       searchPath = getDefaultSearchPath();
 
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
     try {
+      if (_parentLoader != null)
+	thread.setContextClassLoader(_parentLoader);
+	
       Method method = cl.getMethod(_initMethod, new Class[] { Path.class });
       method.invoke(null, new Object[] { searchPath });
 
@@ -452,6 +457,8 @@ public class JavaClassGenerator {
       log.warning(e.toString());
       
       return true;
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
   }
 }

@@ -19,7 +19,7 @@
      - Remote management requires at least one enabled admin user.
     -->
   <management path="${resin.root}/admin">
-    <resin:import path="${__DIR__}/admin-user.xml" optional="true"/>
+    <resin:import path="${__DIR__}/admin-users.xml" optional="true"/>
     
     <deploy-service/>
     <jmx-service/>

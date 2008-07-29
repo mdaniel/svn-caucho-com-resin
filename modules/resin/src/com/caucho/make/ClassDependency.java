@@ -71,9 +71,15 @@ public class ClassDependency implements PersistentDependency {
    * @param cl the source class
    * @param digest the MD5 digest
    */
-  public ClassDependency(Class cl, long digest)
+  public ClassDependency(String className, long digest)
   {
-    _cl = cl;
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+      _cl = Class.forName(className, false, loader);
+    } catch (ClassNotFoundException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
 
     long newDigest = getDigest();
 
@@ -214,8 +220,9 @@ public class ClassDependency implements PersistentDependency {
    */
   public String getJavaCreateString()
   {
-    return ("new com.caucho.make.ClassDependency(" +
-            _cl.getName().replace('$', '.') + ".class, " + getDigest() + "L)");
+    return ("new com.caucho.make.ClassDependency("
+	    + "\"" + _cl.getName().replace('$', '.') + "\""
+	    + ", " + getDigest() + "L)");
   }
   
   /**
