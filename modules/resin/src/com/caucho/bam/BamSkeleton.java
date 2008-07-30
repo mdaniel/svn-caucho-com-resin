@@ -115,7 +115,7 @@ public class BamSkeleton<C>
         continue;
       }
 
-      messageType = getMessageType(QueryGet.class, method);
+      messageType = getQueryMessageType(QueryGet.class, method);
 
       if (messageType != null) {
         log.finest(L.l("{0} found @QueryGet handler type={1} method={2}",
@@ -125,7 +125,7 @@ public class BamSkeleton<C>
         continue;
       }
 
-      messageType = getMessageType(QuerySet.class, method);
+      messageType = getQueryMessageType(QuerySet.class, method);
 
       if (messageType != null) {
         log.finest(L.l("{0} found @QuerySet handler type={1} method={2}",
@@ -135,7 +135,7 @@ public class BamSkeleton<C>
         continue;
       }
 
-      messageType = getMessageType(QueryResult.class, method);
+      messageType = getQueryMessageType(QueryResult.class, method);
 
       if (messageType != null) {
         log.finest(L.l("{0} found @QueryResult handler type={1} method={2}",
@@ -145,7 +145,7 @@ public class BamSkeleton<C>
         continue;
       }
       
-      messageType = getMessageType(QueryError.class, method);
+      messageType = getQueryMessageType(QueryError.class, method);
 
       if (messageType != null) {
         log.finest(L.l("{0} found @QueryError handler type={1} method={2}",
@@ -248,6 +248,19 @@ public class BamSkeleton<C>
 
     if (method.isAnnotationPresent(annotationType))
       return paramTypes[2];
+    else
+      return null;
+  }
+
+  private Class getQueryMessageType(Class annotationType, Method method)
+  {
+    Class []paramTypes = method.getParameterTypes();
+
+    if (paramTypes.length < 4)
+      return null;
+
+    if (method.isAnnotationPresent(annotationType))
+      return paramTypes[3];
     else
       return null;
   }

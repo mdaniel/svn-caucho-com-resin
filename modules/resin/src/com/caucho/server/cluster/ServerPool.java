@@ -1157,7 +1157,7 @@ public class ServerPool
   /**
    * Non-blocking message
    */
-  public void message(String to, Serializable message)
+  public boolean message(String to, Serializable message)
   {
     ClusterStream stream = null;
 
@@ -1166,9 +1166,11 @@ public class ServerPool
     try {
       stream = open();
 
-      stream.message(to, "", message);
+      if (stream != null) {
+	stream.message(to, "", message);
 
-      isQuit = true;
+	isQuit = true;
+      }
     } catch (Exception e) {
       isQuit = false;
       
@@ -1181,6 +1183,8 @@ public class ServerPool
       else
 	stream.close();
     }
+
+    return isQuit;
   }
 
   /**
