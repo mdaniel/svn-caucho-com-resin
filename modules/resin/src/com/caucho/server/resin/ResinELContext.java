@@ -180,6 +180,14 @@ abstract public class ResinELContext
     }
 
     /**
+     * Returns the user
+     */
+    public String getUserName()
+    {
+      return System.getProperty("user.name");
+    }
+
+    /**
      * Returns the version
      *
      * @return version

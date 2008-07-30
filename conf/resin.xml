@@ -118,10 +118,11 @@
       <!--
          - If starting Resin as root on Unix, specify the user name
          - and group name for the web server user.
-         -
-         - <user-name>resin</user-name>
-         - <group-name>resin</group-name>
         -->
+      <resin:if test="${resin.userName == 'root'}">
+        <user-name>resin</user-name>
+        <group-name>resin</group-name>
+      </resin:if>
     </server-default>
 
     <!-- define the servers in the cluster -->

@@ -416,7 +416,7 @@ public class Management
       return new PasswordUser(new BasicPrincipal(_name),
 			      _password.toCharArray(),
 			      _isDisabled, isAnonymous,
-			      new String[] { "resin_admin" });
+			      new String[] { "resin-admin" });
     }
   }
 }

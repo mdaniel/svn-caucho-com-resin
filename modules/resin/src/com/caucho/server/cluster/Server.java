@@ -1482,18 +1482,20 @@ public class Server extends ProtocolDispatchServer
     try {
       thread.setContextClassLoader(_classLoader);
 
-      log.info("");
-      
       ArrayList<Port> ports = _clusterServer.getPorts();
-      for (int i = 0; i < ports.size(); i++) {
-	Port port = ports.get(i);
-
-	port.setServer(this);
-
-	port.bind();
-      }
+      if (ports.size() > 0) {
+	log.info("");
       
-      log.info("");
+	for (int i = 0; i < ports.size(); i++) {
+	  Port port = ports.get(i);
+
+	  port.setServer(this);
+
+	  port.bind();
+	}
+      
+	log.info("");
+      }
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

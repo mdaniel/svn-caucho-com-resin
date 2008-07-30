@@ -1816,6 +1816,14 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
     
     /**
+     * Returns the user name
+     */
+    public String getUserName()
+    {
+      return System.getProperty("user.name");
+    }
+    
+    /**
      * Returns the JDK version
      */
     public String getVersion()

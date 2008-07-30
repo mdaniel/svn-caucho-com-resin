@@ -81,7 +81,7 @@ abstract public class StoreManager
   protected HashMap<HashKey,Store> _storeMap;
   protected LruCache<HashKey,ClusterObject> _clusterObjects;
 
-  private final Lifecycle _lifecycle = new Lifecycle(log, toString());
+  private final Lifecycle _lifecycle = new Lifecycle();
 
   //
   // statistics
