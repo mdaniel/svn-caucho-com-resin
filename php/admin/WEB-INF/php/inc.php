@@ -26,7 +26,10 @@ function admin_init()
   $g_server_id = $_GET["server-id"];
 
   if ($g_server_id) {
-    $g_mbean_server = new MBeanServer($g_server_id);
+    if ($g_server_id == "default")
+      $g_mbean_server = new MBeanServer("");
+    else
+      $g_mbean_server = new MBeanServer($g_server_id);
 
     if (! $g_mbean_server) {
       if ($g_server_id)
@@ -459,11 +462,15 @@ function display_header($script, $title, $server, $allow_remote = false)
 
   <td valign="top">
    <ul class="status">
-<? if (! empty($server)) { ?>
-   <li class="server">Server: <?= $server->Id ? $server->Id : "default" ?></li>
+<?
+if (! empty($server)) {
+  $server_name = $server->Id ? $server->Id : "default";
+  
+?>
+   <li class="server">Server: <?= $server_name ?></li>
 <? }  ?>
    <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
-   <li><a href="?q=<?= $g_page ?>">refresh</a></li>
+   <li><a href="?q=<?= $g_page ?>&server_id=<?= $server_named ?>">refresh</a></li>
    </ul>
   </td>
 </tr>
@@ -508,7 +515,7 @@ foreach ($names as $name) {
   if ($g_page == $name) {
     ?><li class="selected"><?= $name ?></li><?
   } else {
-    ?><li><a href="?q=<?= $name ?>"><?= $name ?></a></li><?
+    echo "<li><a href='?q=$name&server_id=$g_server_id'>$name</a></li>\n";
   }
 }
 
