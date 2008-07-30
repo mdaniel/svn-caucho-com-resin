@@ -87,7 +87,7 @@ public class ClassesModule extends AbstractQuercusModule {
     if (className == null)
       return false;
     
-    QuercusClass cl =  env.findClass(className, useAutoload);
+    QuercusClass cl =  env.findClass(className, useAutoload, true);
 
     // php/[03]9m1
     return cl != null && ! cl.isInterface();
@@ -262,7 +262,7 @@ public class ClassesModule extends AbstractQuercusModule {
                                   String interfaceName,
                                   @Optional("true") boolean useAutoload)
   {
-    QuercusClass cl =  env.findClass(interfaceName, useAutoload);
+    QuercusClass cl =  env.findClass(interfaceName, useAutoload, true);
 
     // php/[03]9m0
     return cl != null && cl.isInterface();

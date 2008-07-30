@@ -34,16 +34,13 @@ import com.caucho.util.IntMap;
 
 public class MysqlLatin1Utility
 {
-  // Most of the characters in the 0x80-0x9F latin1 range
-  // (so-called CO/C1 range) do NOT have corresponding Unicode values.
-  // So converting latin1 to Unicode will be very lossy.   Mysql's
-  // "latin1" is not strict ISO-8859-1 as it is more like ISO-8859-1
-  // with Windows-1252 replacing some of the 0x80-0x9F range that do
-  // not have Unicode equivalents.
+  // Mysql's "latin1" is not strict ISO-8859-1 as it is more like
+  // ISO-8859-1 supplemented with some of Windows-1252 0x80-0x9F
+  // characters.
   //
   // from /usr/share/mysql/charsets/latin1.xml 
   //
-  private static char []C0_C1_MAP
+  private static char []C1_MAP
     = { '\u20AC', '\u0081', '\u201A', '\u0192',
         '\u201E', '\u2026', '\u2020', '\u2021',
         '\u02C6', '\u2030', '\u0160', '\u2039',
@@ -56,8 +53,8 @@ public class MysqlLatin1Utility
   private static IntMap UNICODE_MAP = new IntMap();
   
   static {
-    for (int i = 0; i < C0_C1_MAP.length; i++) {
-      UNICODE_MAP.put(new Integer(C0_C1_MAP[i]), i + 0x80);
+    for (int i = 0; i < C1_MAP.length; i++) {
+      UNICODE_MAP.put(new Integer(C1_MAP[i]), i + 0x80);
     }
   }
   
@@ -69,7 +66,7 @@ public class MysqlLatin1Utility
       byte b = bytes[i];
       
       if (0x80 <= b && b <= 0x9F)
-        sb.append(C0_C1_MAP[b - 0x80]);
+        sb.append(C1_MAP[b - 0x80]);
       else
         sb.append((char) b);
     }
@@ -86,7 +83,7 @@ public class MysqlLatin1Utility
     for (int i = 0; i < len; i++) {
       int ch = s.charAt(i);
       
-      // there was an error in converting to a Java String
+      // there was a previous error in converting to a Java String
       if (ch == 0xfffd)
         return null;
       

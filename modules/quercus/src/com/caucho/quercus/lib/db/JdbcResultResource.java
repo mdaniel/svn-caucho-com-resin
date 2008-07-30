@@ -566,7 +566,8 @@ public class JdbcResultResource {
               // php/1464, php/144f, php/144g
               // attempt to convert to latin1 bytes,
               // conversion may fail if there was a mismatch between database
-              // encoding and latin1
+              // encoding and latin1 (implying that the database didn't encode
+              // the data that went into it)
               bytes = MysqlLatin1Utility.encode(s);
             }
             

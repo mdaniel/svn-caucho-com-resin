@@ -60,7 +60,7 @@ public class SplModule extends AbstractQuercusModule
     if (obj.isObject())
       cls = ((ObjectValue) obj.toObject(env)).getQuercusClass();
     else
-      cls = env.findClass(obj.toString(), autoload);
+      cls = env.findClass(obj.toString(), autoload,  true);
 
     if (cls != null)
       return cls.getInterfaces(env, autoload);
@@ -77,7 +77,7 @@ public class SplModule extends AbstractQuercusModule
     if (obj.isObject())
       cls = ((ObjectValue) obj.toObject(env)).getQuercusClass();
     else
-      cls = env.findClass(obj.toString(), autoload);
+      cls = env.findClass(obj.toString(), autoload, true);
 
     if (cls != null) {
       ArrayValue array = new ArrayValueImpl();
@@ -159,7 +159,7 @@ public class SplModule extends AbstractQuercusModule
                                   String className,
                                   @Optional String extensions)
   {
-    if (env.findClass(className, false) != null)
+    if (env.findClass(className, false, true) != null)
       return;
     
     String []extensionList;
@@ -176,7 +176,7 @@ public class SplModule extends AbstractQuercusModule
 
       env.include(filename);
       
-      QuercusClass cls = env.findClass(className, false);
+      QuercusClass cls = env.findClass(className, false, true);
       
       if (cls != null)
         return;

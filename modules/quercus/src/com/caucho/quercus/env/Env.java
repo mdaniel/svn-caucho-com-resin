@@ -3443,7 +3443,7 @@ public class Env {
    */
   public QuercusClass findClass(String name)
   {
-    return findClass(name, true);
+    return findClass(name, true, true);
   }
 
   /**
@@ -3453,7 +3453,9 @@ public class Env {
    * @param useAutoload use autoload to locate the class if necessary
    * @return the found class or null if no class found.
    */
-  public QuercusClass findClass(String name, boolean useAutoload)
+  public QuercusClass findClass(String name,
+                                boolean useAutoload,
+                                boolean useImport)
   {
     QuercusClass cl = _classMap.get(name);
 
@@ -3465,7 +3467,7 @@ public class Env {
     if (cl != null)
       return cl;
 
-    cl = createClassImpl(name, useAutoload, true);
+    cl = createClassImpl(name, useAutoload, useImport);
 
     if (cl != null) {
       _classMap.put(cl.getName(), cl);
@@ -3548,7 +3550,7 @@ public class Env {
       return createQuercusClass(staticClass, null); // XXX: cache
 
     if (useAutoload) {
-      StringBuilderValue nameString = new StringBuilderValue(name);
+      StringValue nameString = createString(name);
       
       if (! _autoloadClasses.contains(name)) {
         try {
@@ -3572,9 +3574,12 @@ public class Env {
               _autoload = findFunction("__autoload");
             
             if (_autoload != null) {
-              _autoload.call(this, new StringBuilderValue(name));
+              _autoload.call(this, nameString);
 
-              return createClassImpl(name, false, useImport);
+              // php/0976
+              return findClass(name, false, useImport);
+              
+              //return createClassImpl(name, false, useImport);
             }
           }
         } finally {
@@ -3697,7 +3702,7 @@ public class Env {
    */
   public QuercusClass findAbstractClass(String name)
   {
-    QuercusClass cl = findClass(name, true);
+    QuercusClass cl = findClass(name, true, true);
 
     if (cl != null)
       return cl;
