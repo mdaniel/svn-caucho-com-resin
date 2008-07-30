@@ -590,20 +590,20 @@ public class ThreadPool {
   }
 
   class Item implements Runnable {
-    private final int _id;
-    private final String _name;
+    final int _id;
+    final String _name;
 
-    private Thread _thread;
-    private Thread _queueThread;
+    Thread _thread;
+    Thread _queueThread;
 
-    private Item _prev;
-    private Item _next;
-    private boolean _isIdle;
+    Item _prev;
+    Item _next;
+    boolean _isIdle;
 
-    private long _threadResetCount;
+    long _threadResetCount;
   
-    private Runnable _task;
-    private ClassLoader _classLoader;
+    Runnable _task;
+    ClassLoader _classLoader;
 
     private Item()
     {
@@ -811,8 +811,8 @@ public class ThreadPool {
   }
 
   class OverflowItem implements Runnable {
-    private Runnable _task;
-    private ClassLoader _loader;
+    Runnable _task;
+    ClassLoader _loader;
 
     OverflowItem(Runnable task)
     {
@@ -980,8 +980,8 @@ public class ThreadPool {
   }
 
   static class ExecutorQueueItem {
-    private Runnable _runnable;
-    private ClassLoader _loader;
+    Runnable _runnable;
+    ClassLoader _loader;
 
     ExecutorQueueItem _next;
 
