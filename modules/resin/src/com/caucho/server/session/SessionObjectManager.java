@@ -39,6 +39,8 @@ import java.io.*;
 public final class SessionObjectManager implements ObjectManager
 {
   private final SessionManager _sessionManager;
+  private SerializerFactory _hessianFactory
+    = new SerializerFactory();
 
   private Cluster _cluster;
   private Store _store;
@@ -97,6 +99,7 @@ public final class SessionObjectManager implements ObjectManager
 
     if (_sessionManager.isHessianSerialization()) {
       Hessian2Input in = new Hessian2Input(is);
+      in.setSerializerFactory(_hessianFactory);
 
       session.load(in);
 
@@ -131,6 +134,7 @@ public final class SessionObjectManager implements ObjectManager
 
     if (_sessionManager.isHessianSerialization()) {
       Hessian2Output out = new Hessian2Output(os);
+      out.setSerializerFactory(_hessianFactory);
 
       session.store(out);
 

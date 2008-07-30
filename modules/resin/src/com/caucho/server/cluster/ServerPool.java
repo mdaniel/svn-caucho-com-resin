@@ -164,8 +164,6 @@ public class ServerPool
     _loadBalanceRecoverTime = server.getLoadBalanceRecoverTime();
     _loadBalanceWarmupTime = server.getLoadBalanceWarmupTime();
     _loadBalanceWeight = server.getLoadBalanceWeight();
-
-    System.out.println("IDLE: " + _loadBalanceIdleTime);
   }
 
   /**
@@ -772,7 +770,10 @@ public class ServerPool
 
     long now = Alarm.getCurrentTime();
 
-    if (now < _failTime + _failRecoverTime) {
+    if (now < _failTime + _failRecoverTime)
+      return null;
+    else if (_state == ST_FAIL && _startingCount > 0) {
+      // if in fail state, only one thread should try to connect
       return null;
     }
 
@@ -882,7 +883,7 @@ public class ServerPool
       
       _startingCount++;
     }
-	  
+    
     try {
       ReadWritePair pair = openTCPPair();
       ReadStream rs = pair.getReadStream();
