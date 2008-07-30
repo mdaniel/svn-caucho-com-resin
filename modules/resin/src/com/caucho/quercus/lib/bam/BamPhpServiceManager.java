@@ -72,7 +72,7 @@ public class BamPhpServiceManager implements BamServiceManager {
   private static final Logger log
     = Logger.getLogger(BamPhpServiceManager.class.getName());
 
-  private static final Quercus _quercus = new Quercus();
+  private final Quercus _quercus = new Quercus();
 
   private final HashMap<String,BamPhpAgent> _children = 
     new HashMap<String,BamPhpAgent>();

@@ -69,10 +69,10 @@ public class BamPhpAgent extends GenericService {
   private static final Logger log
     = Logger.getLogger(BamPhpAgent.class.getName());
 
-  private static final Quercus _quercus = new Quercus();
+  private final Quercus _quercus = new Quercus();
 
-  private final HashMap<String,BamPhpAgent> _children = 
-    new HashMap<String,BamPhpAgent>();
+  private final HashMap<String,BamPhpAgent> _children
+    = new HashMap<String,BamPhpAgent>();
 
   private ArrayList<String> _featureNames = new ArrayList<String>();
 

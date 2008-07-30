@@ -48,6 +48,7 @@ public class ClassDependency implements PersistentDependency {
     = Logger.getLogger(ClassDependency.class.getName());
   
   private Class _cl;
+  private String _className;
 
   private boolean _checkFields = true;
   private boolean _checkStatic = true;
@@ -63,6 +64,7 @@ public class ClassDependency implements PersistentDependency {
   public ClassDependency(Class cl)
   {
     _cl = cl;
+    _className = cl.getName();
   }
 
   /**
@@ -73,6 +75,8 @@ public class ClassDependency implements PersistentDependency {
    */
   public ClassDependency(String className, long digest)
   {
+    _className = className;
+    
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
@@ -85,7 +89,7 @@ public class ClassDependency implements PersistentDependency {
 
     if (newDigest != digest) {
       if (log.isLoggable(Level.FINE))
-        log.fine(_cl.getName() + " digest is modified (old=" + digest + ",new=" + newDigest + ")");
+        log.fine(className + " digest is modified (old=" + digest + ",new=" + newDigest + ")");
 
       _isDigestModified = true;
     }
@@ -105,7 +109,7 @@ public class ClassDependency implements PersistentDependency {
   public boolean logModified(Logger log)
   {
     if (isModified()) {
-      log.info(_cl.getName() + " digest is modified");
+      log.info(_className + " digest is modified");
       return true;
     }
     else
@@ -221,7 +225,7 @@ public class ClassDependency implements PersistentDependency {
   public String getJavaCreateString()
   {
     return ("new com.caucho.make.ClassDependency("
-	    + "\"" + _cl.getName().replace('$', '.') + "\""
+	    + "\"" + _className.replace('$', '.') + "\""
 	    + ", " + getDigest() + "L)");
   }
   
@@ -261,7 +265,7 @@ public class ClassDependency implements PersistentDependency {
 
     ClassDependency depend = (ClassDependency) o;
 
-    return _cl.equals(depend._cl);
+    return _className.equals(depend._className);
   }
 
   static class ClassComparator implements Comparator<Class> {
