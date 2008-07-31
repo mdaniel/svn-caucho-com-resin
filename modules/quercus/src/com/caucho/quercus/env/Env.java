@@ -3199,12 +3199,10 @@ public class Env {
    */
   public StringValue createString(char ch)
   {
-    // XXX: create static cache for this
-    
     if (_isUnicodeSemantics)
-      return new UnicodeValueImpl(String.valueOf(ch));
+      return UnicodeValueImpl.create(ch);
     else
-      return new StringBuilderValue(String.valueOf(ch));
+      return StringBuilderValue.create(ch);
   }
 
   /**

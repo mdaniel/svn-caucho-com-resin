@@ -578,7 +578,7 @@ abstract public class ArrayValue extends Value {
   {
     return new ValueCollection();
   }
-
+  
   /**
    * Convenience for lib.
    */

@@ -356,13 +356,13 @@ public class Xml {
     throws Exception
   {
     if (_xmlString == null)
-      _xmlString = data.toStringBuilder();
+      _xmlString = data.createStringBuilder();
     
     _xmlString.append(data);
 
     if (isFinal) {
       InputSource is;
-
+      
       if (_xmlString.isUnicode())
         is = new InputSource(_xmlString.toReader("utf-8"));
       else
@@ -391,7 +391,13 @@ public class Xml {
 
         log.log(Level.FINE, e.getMessage(), e);
         return 0;
-      }
+      } catch (Exception e) {
+        _errorCode = XmlModule.XML_ERROR_SYNTAX;
+        _errorString = e.toString();
+        
+        log.log(Level.FINE, e.toString(), e);
+        return 0;
+      } 
       
     }
 
@@ -442,6 +448,13 @@ public class Xml {
       
       return 0;
     } catch (IOException e) {
+      _errorCode = XmlModule.XML_ERROR_SYNTAX;
+      _errorString = e.toString();
+      
+      log.log(Level.FINE, e.toString(), e);
+      
+      return 0;
+    } catch (Exception e) {
       _errorCode = XmlModule.XML_ERROR_SYNTAX;
       _errorString = e.toString();
       

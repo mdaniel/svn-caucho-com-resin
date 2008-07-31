@@ -29,12 +29,18 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.regexp.RegexpModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -95,7 +101,7 @@ public class HtmlModule extends AbstractQuercusModule {
    * Returns HTML translation tables.
    */
   public Value get_html_translation_table(Env env,
-					  @Optional("HTML_SPECIALCHARS") int table,
+                                          @Optional("HTML_SPECIALCHARS") int table,
                                           @Optional("ENT_COMPAT") int quoteStyle)
   {
     Value result;
@@ -122,10 +128,10 @@ public class HtmlModule extends AbstractQuercusModule {
     }
 
     if ((quoteStyle & ENT_HTML_QUOTE_SINGLE) != 0)
-      result.put(env.createString("'"), env.createString("&apos;"));
+      result.put(env.createString('\''), env.createString("&apos;"));
 
     if ((quoteStyle & ENT_HTML_QUOTE_DOUBLE) != 0)
-      result.put(env.createString("\""), env.createString("&quot;"));
+      result.put(env.createString('"'), env.createString("&quot;"));
 
     return result;
   }
@@ -291,8 +297,65 @@ public class HtmlModule extends AbstractQuercusModule {
                                    @Optional("ENT_COMPAT") int quoteStyle,
                                    @Optional String charset)
   {
-    //XXX: other entities
-    return htmlspecialchars(env, string, quoteStyle, charset);
+    if (charset == null || charset.length() == 0)
+      charset = "ISO-8859-1";
+    
+    Reader reader;
+    
+    try {
+      reader = string.toReader(charset);
+    } catch (UnsupportedEncodingException e) {
+      env.warning(e);
+      
+      reader = new StringReader(string.toString());
+    }
+    
+    StringValue sb = string.createStringBuilder(string.length() * 5 / 4);
+
+    ArrayValue entitiesArray;
+    
+    if (env.isUnicodeSemantics()) {
+      if (HTML_ENTITIES_ARRAY_UNICODE == null)
+        HTML_ENTITIES_ARRAY_UNICODE = toUnicodeArray(env, HTML_ENTITIES_ARRAY);
+      
+      entitiesArray = HTML_ENTITIES_ARRAY_UNICODE;
+    }
+    else {
+      entitiesArray = HTML_ENTITIES_ARRAY;
+    }
+    
+    int ch;
+    try {
+      while ((ch = reader.read()) >= 0) {
+        StringValue chV = env.createString((char) ch);
+        
+        Value entity = entitiesArray.get(chV);
+        
+        if (entity.isNull())
+          entity = chV;
+        
+        if (ch == '"') {
+          if ((quoteStyle & ENT_HTML_QUOTE_DOUBLE) != 0) {
+            entity = env.createString("&quot;");
+          }
+          else
+            entity = chV;
+        }
+        else if (ch == '\'') {
+          if ((quoteStyle & ENT_HTML_QUOTE_SINGLE) != 0) {
+            entity = env.createString("&#039;");
+          }
+          else
+            entity = chV;
+        }
+        
+        sb.append(entity);
+      }
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+
+    return sb;
   }
 
   /**
@@ -314,9 +377,9 @@ public class HtmlModule extends AbstractQuercusModule {
     Iterator<Map.Entry<Value,Value>> iter;
 
     if (env.isUnicodeSemantics())
-      iter = HTML_SPECIALCHARS_ARRAY_UNICODE.getIterator(env);
+      iter = HTML_ENTITIES_ARRAY_UNICODE.getIterator(env);
     else
-      iter = HTML_SPECIALCHARS_ARRAY.getIterator(env);
+      iter = HTML_ENTITIES_ARRAY.getIterator(env);
 
     while (iter.hasNext()) {
       Map.Entry<Value,Value> entry = iter.next();
@@ -368,7 +431,8 @@ public class HtmlModule extends AbstractQuercusModule {
 
   private static void entity(int ch, String entity)
   {
-    HTML_ENTITIES_ARRAY.put("&" + (char) ch + ";", entity);
+    // XXX: i18n and optimize static variables usuage
+    HTML_ENTITIES_ARRAY.put("" + (char) ch, entity);
   }
 
   static {
@@ -376,106 +440,106 @@ public class HtmlModule extends AbstractQuercusModule {
     HTML_SPECIALCHARS_ARRAY.put(">", "&gt;");
     HTML_SPECIALCHARS_ARRAY.put("&", "&amp;");
 
-    entity('<', "lt");
-    entity('>', "gt");
-    entity('&', "amp");
+    entity('<', "&lt;");
+    entity('>', "&gt;");
+    entity('&', "&amp;");
 
-    entity(160, "nbsp");
-    entity(161, "iexcl");
-    entity(162, "cent");
-    entity(163, "pound");
-    entity(164, "curren");
-    entity(165, "yen");
-    entity(166, "brvbar");
-    entity(167, "sect");
-    entity(168, "uml");
-    entity(169, "copy");
-    entity(170, "ordf");
-    entity(171, "laquo");
-    entity(172, "not");
-    entity(173, "shy");
-    entity(174, "reg");
-    entity(175, "macr");
-    entity(176, "deg");
-    entity(177, "plusmn");
-    entity(178, "sup2");
-    entity(179, "sup3");
-    entity(180, "acute");
-    entity(181, "micro");
-    entity(182, "para");
-    entity(183, "middot");
-    entity(184, "cedil");
-    entity(185, "sup1");
-    entity(186, "ordm");
-    entity(187, "raquo");
-    entity(188, "frac14");
-    entity(189, "frac12");
-    entity(190, "frac34");
-    entity(191, "iquest");
-    entity(192, "Agrave");
-    entity(193, "Aacute");
-    entity(194, "Acirc");
-    entity(195, "Atilde");
-    entity(196, "Auml");
-    entity(197, "Aring");
-    entity(198, "AElig");
-    entity(199, "Ccedil");
-    entity(200, "Egrave");
-    entity(201, "Eacute");
-    entity(202, "Ecirc");
-    entity(203, "Euml");
-    entity(204, "Igrave");
-    entity(205, "Iacute");
-    entity(206, "Icirc");
-    entity(207, "Iuml");
-    entity(208, "ETH");
-    entity(209, "Ntilde");
-    entity(210, "Ograve");
-    entity(211, "Oacute");
-    entity(212, "Ocirc");
-    entity(213, "Otilde");
-    entity(214, "Ouml");
-    entity(215, "times");
-    entity(216, "Oslash");
-    entity(217, "Ugrave");
-    entity(218, "Uacute");
-    entity(219, "Ucirc");
-    entity(220, "Uuml");
-    entity(221, "Yacute");
-    entity(222, "THORN");
-    entity(223, "szlig");
-    entity(224, "agrave");
-    entity(225, "aacute");
-    entity(226, "acirc");
-    entity(227, "atilde");
-    entity(228, "auml");
-    entity(229, "aring");
-    entity(230, "aelig");
-    entity(231, "ccedil");
-    entity(232, "egrave");
-    entity(233, "eacute");
-    entity(234, "ecirc");
-    entity(235, "euml");
-    entity(236, "igrave");
-    entity(237, "iacute");
-    entity(238, "icirc");
-    entity(239, "iuml");
-    entity(240, "eth");
-    entity(241, "ntilde");
-    entity(242, "ograve");
-    entity(243, "oacute");
-    entity(244, "ocirc");
-    entity(245, "otilde");
-    entity(246, "ouml");
-    entity(247, "divide");
-    entity(248, "oslash");
-    entity(249, "ugrave");
-    entity(250, "uacute");
-    entity(251, "ucirc");
-    entity(252, "uuml");
-    entity(253, "yacute");
-    entity(254, "thorn");
-    entity(255, "yuml");
+    entity(160, "&nbsp;");
+    entity(161, "&iexcl;");
+    entity(162, "&cent;");
+    entity(163, "&pound;");
+    entity(164, "&curren;");
+    entity(165, "&yen;");
+    entity(166, "&brvbar;");
+    entity(167, "&sect;");
+    entity(168, "&uml;");
+    entity(169, "&copy;");
+    entity(170, "&ordf;");
+    entity(171, "&laquo;");
+    entity(172, "&not;");
+    entity(173, "&shy;");
+    entity(174, "&reg;");
+    entity(175, "&macr;");
+    entity(176, "&deg;");
+    entity(177, "&plusmn;");
+    entity(178, "&sup2;");
+    entity(179, "&sup3;");
+    entity(180, "&acute;");
+    entity(181, "&micro;");
+    entity(182, "&para;");
+    entity(183, "&middot;");
+    entity(184, "&cedil;");
+    entity(185, "&sup1;");
+    entity(186, "&ordm;");
+    entity(187, "&raquo;");
+    entity(188, "&frac14;");
+    entity(189, "&frac12;");
+    entity(190, "&frac34;");
+    entity(191, "&iquest;");
+    entity(192, "&Agrave;");
+    entity(193, "&Aacute;");
+    entity(194, "&Acirc;");
+    entity(195, "&Atilde;");
+    entity(196, "&Auml;");
+    entity(197, "&Aring;");
+    entity(198, "&AElig;");
+    entity(199, "&Ccedil;");
+    entity(200, "&Egrave;");
+    entity(201, "&Eacute;");
+    entity(202, "&Ecirc;");
+    entity(203, "&Euml;");
+    entity(204, "&Igrave;");
+    entity(205, "&Iacute;");
+    entity(206, "&Icirc;");
+    entity(207, "&Iuml;");
+    entity(208, "&ETH;");
+    entity(209, "&Ntilde;");
+    entity(210, "&Ograve;");
+    entity(211, "&Oacute;");
+    entity(212, "&Ocirc;");
+    entity(213, "&Otilde;");
+    entity(214, "&Ouml;");
+    entity(215, "&times;");
+    entity(216, "&Oslash;");
+    entity(217, "&Ugrave;");
+    entity(218, "&Uacute;");
+    entity(219, "&Ucirc;");
+    entity(220, "&Uuml;");
+    entity(221, "&Yacute;");
+    entity(222, "&THORN;");
+    entity(223, "&szlig;");
+    entity(224, "&agrave;");
+    entity(225, "&aacute;");
+    entity(226, "&acirc;");
+    entity(227, "&atilde;");
+    entity(228, "&auml;");
+    entity(229, "&aring;");
+    entity(230, "&aelig;");
+    entity(231, "&ccedil;");
+    entity(232, "&egrave;");
+    entity(233, "&eacute;");
+    entity(234, "&ecirc;");
+    entity(235, "&euml;");
+    entity(236, "&igrave;");
+    entity(237, "&iacute;");
+    entity(238, "&icirc;");
+    entity(239, "&iuml;");
+    entity(240, "&eth;");
+    entity(241, "&ntilde;");
+    entity(242, "&ograve;");
+    entity(243, "&oacute;");
+    entity(244, "&ocirc;");
+    entity(245, "&otilde;");
+    entity(246, "&ouml;");
+    entity(247, "&divide;");
+    entity(248, "&oslash;");
+    entity(249, "&ugrave;");
+    entity(250, "&uacute;");
+    entity(251, "&ucirc;");
+    entity(252, "&uuml;");
+    entity(253, "&yacute;");
+    entity(254, "&thorn;");
+    entity(255, "&yuml;");
   }
 }
 

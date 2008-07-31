@@ -48,7 +48,6 @@ import com.caucho.util.L10N;
 public class XmlModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(XmlModule.class);
 
-
   public static final int XML_OPTION_CASE_FOLDING = 0x0;
   public static final int XML_OPTION_SKIP_TAGSTART = 0x1;
   public static final int XML_OPTION_SKIP_WHITE = 0x2;
@@ -247,8 +246,11 @@ public class XmlModule extends AbstractQuercusModule {
    * returns a new Xml Parser
    */
   public Xml xml_parser_create(Env env,
-                                    @Optional String outputEncoding)
+                               @Optional String outputEncoding)
   {
+    if (outputEncoding == null || outputEncoding.length() == 0)
+      outputEncoding = "UTF-8";
+    
     return new Xml(env, outputEncoding, null);
   }
 
