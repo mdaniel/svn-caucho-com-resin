@@ -36,11 +36,35 @@ $graph = new StatGraph();
 
 //$value[0].attr = "resin:type=CpuLoadAvg";
 
+$test_server_id = null;
+$g_server_unique = true;
+
 foreach ($items as $item) {
   $stat_data = new StatData();
   $stat_data->name = $item[0];
   $stat_data->attr = $item[1];
+
+  $server_id = $item[2];
+  if (! $server_id)
+    $mbean_server = new MBeanServer();
+  else if ($server_id == "default") {
+    $mbean_server = new MBeanServer("");
+    $stat_data->server = $server_id;
+  }
+  else {
+    $mbean_server = new MBeanServer($server_id);
+    $stat_data->server = $server_id;
+  }
   
+  if (isset($test_server) && $test_server != $server_id)
+    $g_server_unique = false;
+  $test_server = $server_id;
+
+  $stat_service = $mbean_server->lookup("resin:type=StatService");
+
+  if (! $stat_service)
+    continue;
+    
 //  resin_var_dump($stat_data);
 
   $stat = find_stat($stat_service, $stat_data->name, $stat_data->attr);
@@ -139,6 +163,9 @@ foreach ($graph->stat_list as $data) {
   $color = imagecolorallocate($im, $rgb[0], $rgb[1], $rgb[2]);
 
   $desc = $data->desc;
+
+  if (! $g_server_unique && $data->server)
+    $desc .= " [" . $data->server . "]";
 
   $y = 13 * $row;
 

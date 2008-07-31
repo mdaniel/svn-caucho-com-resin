@@ -16,8 +16,8 @@ $stat_service = $g_mbean_server->lookup("resin:type=StatService");
 
 if ($stat_service) {
   echo "<img src='graph.php?";
-  echo "g[0][0]=java.lang:type=Threading&g[0][1]=ThreadCount"
-  echo "&g[1][0]=resin:type=ThreadPool&g[1][1]=ThreadCount"
+  echo "g[0][0]=java.lang:type=Threading&g[0][1]=ThreadCount&g[0][2]=$g_server_id"
+  echo "&g[1][0]=resin:type=ThreadPool&g[1][1]=ThreadCount&g[0][2]=$g_server_id"
   echo "&width=600&height=300' width='600' height='300'>\n"
 }
 

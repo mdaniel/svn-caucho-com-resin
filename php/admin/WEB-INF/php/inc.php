@@ -25,7 +25,15 @@ function admin_init()
   
   $g_server_id = $_GET["server-id"];
 
-  if ($g_server_id) {
+  if (! $g_server_id) {
+    $g_mbean_server = new MBeanServer();
+    $server = $g_mbean_server->lookup("resin:type=Server");
+    $g_server_id = $server->Id;
+
+    if (! $g_server_id)
+      $g_server_id = "default";
+  }
+  else {
     if ($g_server_id == "default")
       $g_mbean_server = new MBeanServer("");
     else
@@ -44,8 +52,6 @@ function admin_init()
       return false;
     }
   }
-  else
-    $g_mbean_server = new MBeanServer();
 
   if ($g_mbean_server) {
     $g_resin = $g_mbean_server->lookup("resin:type=Resin");
@@ -53,9 +59,9 @@ function admin_init()
   }
 
   if ($g_server_id)
-    $title = "Resin: $g_page for server $g_server_id";
+    $title = "Resin: $g_page";
   else
-    $title = "Resin: $g_page for server default";
+    $title = "Resin: $g_page";
 
   display_header("thread.php", $title, $g_server, true);
 
@@ -422,8 +428,10 @@ function jmx_short_name($name, $exclude_array)
  */
 function display_header($script, $title, $server, $allow_remote = false)
 {
-  if (! empty($server->Id))
-    $title = $title . " for server " . $server->Id;
+  global $g_server_id;
+  global $g_page;
+  
+  $title = $title . " for server " . $g_server_id;
   
   $server_id = $server->Id;
 
@@ -467,10 +475,10 @@ if (! empty($server)) {
   $server_name = $server->Id ? $server->Id : "default";
   
 ?>
-   <li class="server">Server: <?= $server_name ?></li>
+   <li class="server">Server: <?= $g_server_id ?></li>
 <? }  ?>
    <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
-   <li><a href="?q=<?= $g_page ?>&server_id=<?= $server_named ?>">refresh</a></li>
+   <li><a href="?q=<?= $g_page ?>&server-id=<?= $g_server_id ?>">refresh</a></li>
    </ul>
   </td>
 </tr>
@@ -515,7 +523,7 @@ foreach ($names as $name) {
   if ($g_page == $name) {
     ?><li class="selected"><?= $name ?></li><?
   } else {
-    echo "<li><a href='?q=$name&server_id=$g_server_id'>$name</a></li>\n";
+    echo "<li><a href='?q=$name&server-id=$g_server_id'>$name</a></li>\n";
   }
 }
 
@@ -575,6 +583,9 @@ function display_footer($script)
 
 function display_left_navigation($current_server)
 {
+  global $g_page;
+  global $g_server_id;
+  
   $mbean_server = new MBeanServer();
 
   if (! $mbean_server)
@@ -617,7 +628,7 @@ function display_left_navigation($current_server)
         echo "<div class='nav-dead'>$name</div>\n";
       }
       else {
-        echo "<div class='nav-server'><a href='?server-id=$client'>";
+        echo "<div class='nav-server'><a href='?q=$g_page&server-id=$client'>";
         echo "$name</a></div>\n";
       }
     }

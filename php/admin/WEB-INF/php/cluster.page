@@ -119,6 +119,41 @@ foreach ($g_resin->Clusters as $cluster) {
 
 echo "</table>";
 
+$servers = null;
+foreach ($g_resin->Clusters as $cluster) {
+  if (empty($cluster->Servers))
+    continue;
+    
+  foreach (server_names($g_server, $cluster) as $name) {
+    $servers[] = $name;
+  }
+}
+sort($servers);
+
+$stat_service = $g_mbean_server->lookup("resin:type=StatService");
+
+if ($stat_service) {
+  create_graph("resin:type=Server", "CpuLoadAvg", $servers);
+  create_graph("resin:type=Memory", "TenuredUsed", $servers);
+  create_graph("java.lang:type=Threading", "ThreadCount", $servers);
+}
+
+function create_graph($mbean, $attr, $servers)
+{
+  echo "<p>\n";
+  echo "<img src='graph.php?width=600&height=300";
+
+  $i = 0;
+  foreach ($servers as $name) {
+    if (! $name)
+      $name = "default";
+      
+    echo "&g[$i][0]=$mbean&g[$i][1]=$attr&g[$i][2]=$name"
+    $i++;
+  }
+  echo "' width='600' height='300'>\n"
+}
+
 echo "<h2>Database Pools</h2>";
 
 echo "<table class='data'>";
