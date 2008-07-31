@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.xml;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.env.*;
@@ -42,6 +43,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -365,6 +367,8 @@ public class Xml {
       
       if (_xmlString.isUnicode())
         is = new InputSource(_xmlString.toReader("utf-8"));
+      else if (_xmlOptionTargetEncoding != null)
+        is = new InputSource(_xmlString.toReader(_xmlOptionTargetEncoding));
       else
         is = new InputSource(_xmlString.toInputStream());
       
@@ -837,19 +841,36 @@ public class Xml {
                            int length)
       throws SAXException
     {
-      String s = new String(buf, start, length);
+      StringValue value;
+      
+      if (_env.isUnicodeSemantics()) {
+        value = _env.createString(buf, start, length);
+      }
+      else {
+        String s = new String(buf, start, length);
+        
+        byte[] bytes;
+        
+        try {
+          bytes = s.getBytes(_xmlOptionTargetEncoding);
+        } catch (UnsupportedEncodingException e) {
+          throw new QuercusException(e);
+        }
+
+        value = _env.createStringBuilder();
+        
+        value.append(bytes);
+      }
 
       try {
         if (_characterDataHandler != null)
-          _characterDataHandler.call(_env, _parser,
-				     _env.createString(buf, start, length));
+          _characterDataHandler.call(_env, _parser, value);
         else if (_defaultHandler != null)
-          _defaultHandler.call(_env, _parser, _env.createString(s));
+          _defaultHandler.call(_env, _parser, value);
         else {
-	  if (log.isLoggable(Level.FINER))
-	    log.finer(this + " characters '"
-		      + new String(buf, start, length) + "'");
-	}
+          if (log.isLoggable(Level.FINER))
+            log.finer(this + " characters '" + value + "'");
+        }
       } catch (Exception t) {
         log.log(Level.FINE, t.toString(), t);
         throw new SAXException(L.l(t.getMessage()));
