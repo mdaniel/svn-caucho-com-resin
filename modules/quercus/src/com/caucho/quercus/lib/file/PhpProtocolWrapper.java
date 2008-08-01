@@ -54,14 +54,12 @@ public class PhpProtocolWrapper extends ProtocolWrapper {
       return new PhpBinaryOutput(env);
     else if (path.equals("php://input"))
       return new PhpBinaryInput(env);
-    else if (env.getRequest() == null) {
-      if (path.equals("php://stdout"))
-        return new PhpStdout();
-      else if (path.equals("php://stderr"))
-        return new PhpStderr();
-      else if (path.equals("php://stdin"))
-        return new PhpStdin(env);
-    }
+    else if (path.equals("php://stdout"))
+      return new PhpStdout();
+    else if (path.equals("php://stderr"))
+      return new PhpStderr();
+    else if (path.equals("php://stdin"))
+      return new PhpStdin(env);
     
     env.warning(L.l("{0} is an unsupported or unknown path for this protocol",
                     path));
