@@ -12,6 +12,7 @@
 
 <s2 title="3.1.7 snapshot">
 <ul>
+<li>admin: getKeepaliveSelectMax nullpointer (rep by Raymond Morin)</li>
 <li>admin: webapp page cleanup (#2793, rep by stbu)</li>
 <li>classloader: getResource/getResources issues with directories (#2763, rep by bregnvig)</li>
 <li>jsp: content after forward should be ignored (#2748, rep by Vinod Mehra)</li>

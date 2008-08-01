@@ -1,4 +1,5 @@
 <web-app xmlns="http://caucho.com/ns/resin">
+  <!--
   <servlet-mapping url-pattern="/user/*"
                    jndi-name="service/UserService"
                    servlet-class="example.UserServiceImpl">
@@ -9,4 +10,5 @@
     <url>soap:${webApp.url}/user/</url>
     <interface>example.UserService</interface>
   </web-service-client>
+  -->
 </web-app>
