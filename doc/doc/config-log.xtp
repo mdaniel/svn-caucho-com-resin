@@ -603,7 +603,7 @@ logging patterns, including sending messages to JMS, <a href="hmtp">HMTP</a>,
 and the syslog service.  Creating your own custom handler is also
 straightforward.</p>
 
-<s3 name="bam" title="BamHandler, uri='bam:'">
+<s3 name="bam" title="BamHandler, uri='bam:' (3.2.0)">
 
 <p>The BAM handler publishes the log message to a <a href="hmtp.xtp">BAM</a>
 agent.  The agent can be a custom HMTP service to process log messages.
@@ -663,7 +663,7 @@ shortcut is uri="event:".</p>
 
 </s3>
 
-<s3 name="mail" title="MailHandler, uri='mail:'">
+<s3 name="mail" title="MailHandler, uri='mail:' (3.2.0)">
 
 <p>The Mail handler sends log messages to an email address.  To keep the
 number of mails down, the handler will concatenate messages and only send

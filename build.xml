@@ -348,6 +348,19 @@
       <param name="module.jar" value="resin-util.jar"/>
     </antcall>
   </target>
+
+  <target name="resin-xml" depends="init">
+    <copy tofile="conf/resin.xml"
+          file="conf/resin.xml.in"
+          preservelastmodified="true"
+          overwrite="true">
+      <!--
+      <filterset>
+        <filter token="VERSION" value="${maven.version}"/>
+      </filterset>
+       -->
+    </copy>
+  </target>
   
   <target name="script" depends="init">
     <antcall target="module" inheritRefs="true">
@@ -469,7 +482,7 @@
     </jar>
   </target>
 
-  <target name="resin-dev" depends="init, hessian, jcache, javaee, jsf, portlet, script, resin-util, webbeans, version">
+  <target name="resin-dev" depends="init, resin-xml, hessian, jcache, javaee, jsf, portlet, script, resin-util, webbeans, version">
 
     <!-- build module -->
 

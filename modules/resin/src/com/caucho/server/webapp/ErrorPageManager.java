@@ -287,13 +287,6 @@ public class ErrorPageManager {
       return;
     }
 
-    if (isCompileException)
-      log.warning(compileException.getMessage());
-    else if (! doStackTrace)
-      log.warning(rootExn.toString());
-    else
-      log.log(Level.WARNING, e.toString(), e);
-
     if (badRequest) {
       title = rootExn.getMessage();
       doStackTrace = false;
@@ -305,7 +298,6 @@ public class ErrorPageManager {
       response.resetBuffer();
       
       response.setStatus(response.SC_BAD_REQUEST, rootExn.getMessage());
-
     }
     else if (rootExn instanceof UnavailableException) {
       UnavailableException unAvail = (UnavailableException) rootExn;
@@ -340,6 +332,7 @@ public class ErrorPageManager {
     
     if (location == null)
       location = _defaultLocation;
+	
     
     if (location != null) {
       if (errorPageExn == null)
