@@ -235,6 +235,14 @@ abstract public class AbstractFunction {
   }
 
   /**
+   * Returns the actual function
+   */
+  public AbstractFunction getActualFunction(int actualArgs)
+  {
+    return this;
+  }
+
+  /**
    * Binds the user's arguments to the actual arguments.
    *
    * @param args the user's arguments

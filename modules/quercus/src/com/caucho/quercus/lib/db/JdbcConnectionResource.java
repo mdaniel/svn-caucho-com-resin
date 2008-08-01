@@ -581,7 +581,8 @@ public abstract class JdbcConnectionResource
       if (conn == null)
         return BooleanValue.FALSE;
 
-      checkSql(conn, sql);
+      if (checkSql(conn, sql))
+	return BooleanValue.TRUE;
       
       // XXX: test for performance
       boolean canSeek = true;
@@ -665,12 +666,12 @@ public abstract class JdbcConnectionResource
     return env.wrapJava(_rs);
   }
 
-  private void checkSql(Connection conn, String sql)
+  private boolean checkSql(Connection conn, String sql)
   {
     SqlParseToken tok = parseSqlToken(sql, null);
 
     if (tok == null)
-      return;
+      return false;
 
     switch (tok.getFirstChar()) {
       case 'a': case 'A': {
@@ -713,32 +714,39 @@ public abstract class JdbcConnectionResource
           // don't pool connections that create tables
           _env.getQuercus().markForPoolRemoval(conn);
         }
+	/*
+        else if (tok.matchesToken("COMMIT")) {
+          commit();
+          setAutoCommit(true);
+	  return true;
+        }
+	*/
         break;
       }
-/*
+
+	// reason for comment out?  no real perf gain?
+	/*
       case 'b': case 'B': {
         if (tok.matchesToken("BEGIN")) {
           // Test for mediawiki performance
           setAutoCommit(false);
+	  return true;
         }
         break;
       }
-      case 'c': case 'C': {
-        if (tok.matchesToken("COMMIT")) {
-          commit();
-          setAutoCommit(true);
-        }
-        break;
-      }
+
       case 'r': case 'R': {
         if (tok.matchesToken("ROLLBACK")) {
           rollback();
           setAutoCommit(true);
+	  return true;
         }
         break;
       }
-*/
+	*/
     }
+
+    return false;
   }
 
   /**

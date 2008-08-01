@@ -44,32 +44,26 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
+import com.caucho.util.LruCache;
+import com.caucho.xpath.Expr;
 
 public class DOMXPath
 {
-  private XPath _xpath;
-  private XPathExpression _compiledXPath;
-  private String _expression;
   private DOMNamespaceContext _context;
-  
   private DOMDocument _document;
   
   public static DOMXPath __construct(Env env, DOMDocument document)
   {
-    return new DOMXPath(document);
+    return new DOMXPath(env, document);
   }
   
-  private DOMXPath(DOMDocument document)
+  private DOMXPath(Env env, DOMDocument document)
   {
     _document = document;
-    
-    _context = new DOMNamespaceContext();
-    
-    _xpath = XPathFactory.newInstance().newXPath();
-    _xpath.setNamespaceContext(_context);
   }
   
   public Object evaluate(Env env,
@@ -102,38 +96,75 @@ public class DOMXPath
 
     return _document.wrap(nodeList);
   }
-  
-  private NodeList query(Env env, String expression, Node node)
-  {
-    try {
-      compile(expression);
-      
-      NodeList nodeList =
-        (NodeList) _compiledXPath.evaluate(node,
-                                           XPathConstants.NODESET);
 
-      return nodeList;
-    }
-    catch (XPathExpressionException e) {
+  private NodeList query(Env env, String pattern, Node node)
+  {
+    // the JDKs xpath is extremely inefficient, causing benchmark
+    // problems with mediawiki
+    
+    try {
+      Expr expr = com.caucho.xpath.XPath.parseExpr(pattern);
+
+      return (NodeList) expr.evalObject(node);
+    } catch (Exception e) {
       throw new QuercusModuleException(e);
     }
   }
-  
-  private void compile(String expression)
+	
+  /*
+  private NodeList query(Env env, String pattern, Node node)
   {
     try {
-      if (_compiledXPath == null || ! expression.equals(_expression)) {
-        _compiledXPath = _xpath.compile(expression);
-        _expression = expression;
+      if (_context == null) {
+	Quercus quercus = env.getQuercus();
+	
+	ExpressionCache cache
+	  = (ExpressionCache) quercus.getSpecial("caucho.domxpath.cache");
+
+	if (cache == null) {
+	  cache = new ExpressionCache();
+	  quercus.setSpecial("caucho.domxpath.cache", cache);
+	}
+
+	XPathExpression expr = cache.compile(pattern);
+	
+	NodeList nodeList
+	  = (NodeList) expr.evaluate(node, XPathConstants.NODESET);
+
+	cache.free(pattern, expr);
+
+	return nodeList;
+      }
+      else {
+	XPath xpath = (XPath) env.getSpecialValue("caucho.domxpath.xpath");
+	
+	if (xpath == null) {
+	  XPathFactory factory = XPathFactory.newInstance();
+	  xpath = factory.newXPath();
+	  env.setSpecialValue("caucho.domxpath.xpath", xpath);
+	}
+
+	xpath.setNamespaceContext(_context);
+
+	XPathExpression expr = xpath.compile(pattern);
+	  
+	NodeList nodeList
+	  = (NodeList) expr.evaluate(node, XPathConstants.NODESET);
+
+	return nodeList;
       }
     }
     catch (XPathExpressionException e) {
       throw new QuercusModuleException(e);
     }
   }
+  */
   
   public boolean registerNamespace(String prefix, String namespaceURI)
   {
+    if (_context == null)
+      _context = new DOMNamespaceContext();
+    
     _context.addNamespace(prefix, namespaceURI);
 
     return true;
@@ -187,6 +218,63 @@ public class DOMXPath
         return prefixList.iterator();
       else
         return null;
+    }
+  }
+
+  static class ExpressionCache {
+    private final XPathFactory _factory = XPathFactory.newInstance();
+    
+    private final LruCache<String,ExpressionEntry> _xpathCache
+      = new LruCache<String,ExpressionEntry>(1024);
+
+    XPathExpression compile(String pattern)
+      throws XPathExpressionException
+    {
+      ExpressionEntry entry = _xpathCache.get(pattern);
+      XPathExpression expr = null;
+
+      if (entry != null)
+	expr = entry.allocate();
+
+      if (expr == null) {
+	XPath xpath = _factory.newXPath();
+        expr = xpath.compile(pattern);
+      }
+
+      return expr;
+    }
+
+    void free(String pattern, XPathExpression expr)
+    {
+      ExpressionEntry entry = _xpathCache.get(pattern);
+
+      if (entry == null) {
+	entry = new ExpressionEntry();
+	_xpathCache.put(pattern, entry);
+      }
+
+      entry.free(expr);
+    }
+  }
+
+  static class ExpressionEntry {
+    private XPathExpression _expr;
+
+    XPathExpression allocate()
+    {
+      synchronized (this) {
+	XPathExpression expr = _expr;
+	_expr = null;
+
+	return expr;
+      }
+    }
+
+    void free(XPathExpression expr)
+    {
+      synchronized (this) {
+	_expr = expr;
+      }
     }
   }
 }

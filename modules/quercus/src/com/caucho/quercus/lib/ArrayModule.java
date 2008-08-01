@@ -1773,6 +1773,39 @@ case SORT_NUMERIC:
    * Inputs new variables into the symbol table from the passed array
    *
    * @param array the array contained the new variables
+   * @return the number of new variables added from the array to the symbol
+   *         table
+   */
+  @UsesSymbolTable(replace=false)
+  public static Value extract(Env env,
+                              ArrayValue array)
+  {
+    if (array == null)
+      return NullValue.NULL;
+
+    int completedSymbols = 0;
+
+    for (Value entryKey : array.keySet()) {
+      Value entryValue;
+
+      entryValue = array.get(entryKey);
+
+      String symbolName = entryKey.toString();
+
+      if (validVariableName(symbolName)) {
+        env.setValue(symbolName, entryValue);
+
+        completedSymbols++;
+      }
+    }
+
+    return LongValue.create(completedSymbols);
+  }
+
+  /**
+   * Inputs new variables into the symbol table from the passed array
+   *
+   * @param array the array contained the new variables
    * @param rawType flag to determine how to handle collisions
    * @param valuePrefix used along with the flag
    * @return the number of new variables added from the array to the symbol
@@ -1781,7 +1814,7 @@ case SORT_NUMERIC:
   @UsesSymbolTable
   public static Value extract(Env env,
                               ArrayValue array,
-                              @Optional("EXTR_OVERWRITE") long rawType,
+                              long rawType,
                               @Optional("NULL") Value valuePrefix)
   {
     if (array == null)
@@ -1791,16 +1824,16 @@ case SORT_NUMERIC:
 
     boolean extrRefs = (rawType & EXTR_REFS) != 0;
 
-    if (extractType < EXTR_OVERWRITE || extractType > EXTR_IF_EXISTS &&
-                                        extractType != EXTR_REFS) {
+    if (extractType < EXTR_OVERWRITE
+	|| extractType > EXTR_IF_EXISTS && extractType != EXTR_REFS) {
       env.warning("Unknown extract type");
 
       return NullValue.NULL;
     }
 
-    if (extractType >= EXTR_PREFIX_SAME &&
-        extractType <= EXTR_PREFIX_IF_EXISTS &&
-        (valuePrefix == null || (! (valuePrefix instanceof StringValue)))) {
+    if (extractType >= EXTR_PREFIX_SAME
+	&& extractType <= EXTR_PREFIX_IF_EXISTS
+	&& (valuePrefix == null || ! (valuePrefix instanceof StringValue))) {
       env.warning("Prefix expected to be specified");
 
       return NullValue.NULL;

@@ -68,16 +68,17 @@ import java.util.logging.Logger;
  * object.  Most applications will not need to use it. 
  */
 public class XPath {
-  private static final Logger log = Log.open(XPath.class);
+  private static final Logger log
+    = Logger.getLogger(XPath.class.getName());
 
-  private static EnvironmentLocal<LruCache<String,Pattern>> _matchCache =
-    new EnvironmentLocal<LruCache<String,Pattern>>();
+  private static EnvironmentLocal<LruCache<String,Pattern>> _matchCache
+    = new EnvironmentLocal<LruCache<String,Pattern>>();
   
-  private static EnvironmentLocal<LruCache<String,Pattern>> _selectCache =
-    new EnvironmentLocal<LruCache<String,Pattern>>();
+  private static EnvironmentLocal<LruCache<String,Pattern>> _selectCache
+    = new EnvironmentLocal<LruCache<String,Pattern>>();
   
-  private static EnvironmentLocal<LruCache<String,Expr>> _exprCache =
-    new EnvironmentLocal<LruCache<String,Expr>>();
+  private static EnvironmentLocal<LruCache<String,Expr>> _exprCache
+    = new EnvironmentLocal<LruCache<String,Expr>>();
 
   private XPath()
   {
@@ -295,8 +296,10 @@ public class XPath {
     throws XPathParseException
   {
     LruCache<String,Expr> cache = _exprCache.get();
-    if (cache == null)
+    if (cache == null) {
       cache = new LruCache<String,Expr>(128);
+      _exprCache.set(cache);
+    }
     
     Expr expr = cache.get(query);
 

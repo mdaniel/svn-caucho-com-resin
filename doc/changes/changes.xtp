@@ -13,6 +13,7 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>quercus: add replace() to UsesSymbolTable and split the array extract</li>
 <li>jsse: add 'protocols' attribute (#2794, rep by Maithili Deshpande)</li>
 <li>server: IllegalStateException: DESTROYED in TcpConnection (#2799, rep by Steffen Busch)</li>
 <li>install: MacOS-X configure update for 64-bit Java (#2448, 2771 rep by mmetcalfe)</li>

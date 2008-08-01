@@ -1535,9 +1535,9 @@ public class Env {
    * Gets a special value, a special value is used to store and retrieve module
    * specific values in the env using a unique name.
    */
-  public <T> T getSpecialValue(String name)
+  public Object getSpecialValue(String name)
   {
-    return (T) _specialMap.get(name);
+    return _specialMap.get(name);
   }
 
   /**

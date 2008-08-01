@@ -69,6 +69,8 @@ public class JavaClassDef extends ClassDef {
 
   private final String _name;
   private final Class _type;
+
+  private final HashSet<String> _instanceOfSet = new HashSet<String>();
   
   private final boolean _isAbstract;
   private final boolean _isInterface;
@@ -128,7 +130,7 @@ public class JavaClassDef extends ClassDef {
     _moduleContext = moduleContext;
     _name = name;
     _type = type;
-
+    
     _isAbstract = Modifier.isAbstract(type.getModifiers());
     _isInterface = type.isInterface();
     _isDelegate = type.isAnnotationPresent(ClassImplementation.class);
@@ -136,6 +138,8 @@ public class JavaClassDef extends ClassDef {
     if (type.isArray() && ! isArray())
       throw new IllegalStateException(L.l("'{0}' needs to be called with JavaArrayClassDef",
 					  type));
+
+    fillInstanceOfSet(_type);
   }
   
   public JavaClassDef(ModuleContext moduleContext,
@@ -148,6 +152,22 @@ public class JavaClassDef extends ClassDef {
     _extension = extension;
     
     moduleContext.addExtensionClass(extension, name);
+  }
+
+  private void fillInstanceOfSet(Class type)
+  {
+    if (type == null)
+      return;
+    
+    _instanceOfSet.add(type.getSimpleName());
+
+    fillInstanceOfSet(type.getSuperclass());
+
+    Class []ifaceList = type.getInterfaces();
+    if (ifaceList != null) {
+      for (Class iface : ifaceList)
+	fillInstanceOfSet(iface);
+    }
   }
 
   public static JavaClassDef create(ModuleContext moduleContext,
@@ -201,7 +221,7 @@ public class JavaClassDef extends ClassDef {
    */
   public String getSimpleName()
   {
-    return getType().getSimpleName();
+    return _type.getSimpleName();
   }
 
   public Class getType()
@@ -234,18 +254,7 @@ public class JavaClassDef extends ClassDef {
   @Override
   public boolean isA(String name)
   {
-    if (_name.equalsIgnoreCase(name))
-      return true;
-
-    for (Class type = _type; type != null; type = type.getSuperclass()) {
-      if (type.getSimpleName().equalsIgnoreCase(name))
-        return true;
-
-      if (hasInterface(name, type))
-        return true;
-    }
-
-    return false;
+    return _instanceOfSet.contains(name);
   }
 
   private boolean hasInterface(String name, Class type)

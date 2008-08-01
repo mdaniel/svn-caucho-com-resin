@@ -166,6 +166,6 @@ public class StaticFunction extends JavaInvoker {
 
   public String toString()
   {
-    return "StaticFunction[" + _method + "]";
+    return getClass().getSimpleName() + "[" + _method + "]";
   }
 }

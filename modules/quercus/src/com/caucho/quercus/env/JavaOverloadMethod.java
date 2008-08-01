@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 
 /**
@@ -136,18 +137,35 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
   }
 
   /**
+   * Returns the actual function
+   */
+  @Override
+  public AbstractFunction getActualFunction(int argLength)
+  {
+    for (int i = argLength; i < _methodTable.length; i++) {
+      if (_methodTable[i] == null)
+	continue;
+
+      if (_methodTable[i] != null && _methodTable[i].length == 1) {
+	return _methodTable[i][0];
+      }
+    }
+
+    return this;
+  }
+
+  /**
    * Evaluates the function.
    */
   @Override
   public Value callMethod(Env env, Value qThis, Value []args)
   {
     if (_methodTable.length <= args.length) {
-
       if (_restMethodTable.length == 0)
         return env.error(L.l("'{0}' overloaded method call with {1} arguments has too many arguments", getName(), args.length));
       else {
-        AbstractJavaMethod method =
-          getBestFitJavaMethod(null, _restMethodTable, args);
+        AbstractJavaMethod method
+	  = getBestFitJavaMethod(null, _restMethodTable, args);
 
         return method.callMethod(env, qThis, args);
       }
