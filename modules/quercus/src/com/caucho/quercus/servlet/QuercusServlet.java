@@ -72,6 +72,10 @@ public class QuercusServlet
       try {
 	Class cl = Class.forName("com.caucho.quercus.servlet.ProQuercusServlet");
 	_impl = (QuercusServletImpl) cl.newInstance();
+      } catch (ConfigException e) {
+	log.log(Level.FINEST, e.toString(), e);
+	log.info("Quercus compiled mode requires Resin personal or professional licenses");
+	log.info(e.getMessage());
       } catch (Exception e) {
 	log.log(Level.FINEST, e.toString(), e);
       }

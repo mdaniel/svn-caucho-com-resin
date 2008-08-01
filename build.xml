@@ -354,11 +354,10 @@
           file="conf/resin.xml.in"
           preservelastmodified="true"
           overwrite="true">
-      <!--
       <filterset>
-        <filter token="VERSION" value="${maven.version}"/>
+        <filter token="HTTP_PORT" value="${resin.http}"/>
+        <filter token="HTTPS_PORT" value="${resin.https}"/>
       </filterset>
-       -->
     </copy>
   </target>
   

@@ -1713,6 +1713,11 @@ public class Resin implements EnvironmentBean, SchemaBean
 	return Resin.this.getRootDirectory();
     }
 
+    public String getUserName()
+    {
+      return System.getProperty("user.name");
+    }
+
     /**
      * Returns the version
      *

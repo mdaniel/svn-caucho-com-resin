@@ -567,11 +567,7 @@ class WatchdogArgs
 				 
 	license = (LicenseCheck) cl.newInstance();
 	
-	license.validate(0);
-
-	//_licenseMessage = license.doLogging(1);
-
-	license.validate(1);
+	license.requireProfessional(1);
 
 	Vfs.initJNI();
 

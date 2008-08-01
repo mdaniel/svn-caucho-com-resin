@@ -312,11 +312,14 @@ public class ConfigContext {
     else if (attrName.startsWith("xmlns"))
       return;
 
+    String oldFile = _baseUri;
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     ConfigContext oldBuilder = getCurrentBuilder();
     try {
       setCurrentBuilder(this);
+
+      _baseUri = attribute.getBaseURI();
       
       ConfigType type = TypeFactory.getType(bean.getClass());
 
@@ -334,6 +337,7 @@ public class ConfigContext {
     catch (Exception e) {
       throw error(e, attribute);
     } finally {
+      _baseUri = oldFile;
       setCurrentBuilder(oldBuilder);
       thread.setContextClassLoader(oldLoader);
     }

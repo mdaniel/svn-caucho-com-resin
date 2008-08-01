@@ -290,6 +290,13 @@ public class Config {
 
       ConfigContext builder = createBuilder();
 
+      WebBeansContainer webBeans = WebBeansContainer.create();
+      
+      if (webBeans != null && webBeans.findByName("__FILE__") == null)
+	webBeans.addSingleton(FileVar.__FILE__, "__FILE__");
+      if (webBeans != null && webBeans.findByName("__DIR__") == null)
+	webBeans.addSingleton(DirVar.__DIR__, "__DIR__");
+
       builder.configureBean(obj, topNode);
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -438,11 +445,11 @@ public class Config {
     if (beanClass == null)
       throw new ConfigException(L.l("null classes can't be instantiated."));
     else if (beanClass.isInterface())
-      throw new ConfigException(L.l("`{0}' must be a concrete class.  Interfaces cannot be instantiated.", beanClass.getName()));
+      throw new ConfigException(L.l("'{0}' must be a concrete class.  Interfaces cannot be instantiated.", beanClass.getName()));
     else if (! Modifier.isPublic(beanClass.getModifiers()))
-      throw new ConfigException(L.l("Custom bean class `{0}' is not public.  Bean classes must be public, concrete, and have a zero-argument constructor.", beanClass.getName()));
+      throw new ConfigException(L.l("Custom bean class '{0}' is not public.  Bean classes must be public, concrete, and have a zero-argument constructor.", beanClass.getName()));
     else if (Modifier.isAbstract(beanClass.getModifiers()))
-      throw new ConfigException(L.l("Custom bean class `{0}' is abstract.  Bean classes must be public, concrete, and have a zero-argument constructor.", beanClass.getName()));
+      throw new ConfigException(L.l("Custom bean class '{0}' is abstract.  Bean classes must be public, concrete, and have a zero-argument constructor.", beanClass.getName()));
 
     Constructor []constructors = beanClass.getDeclaredConstructors();
 
@@ -456,10 +463,10 @@ public class Config {
     }
 
     if (constructor == null)
-      throw new ConfigException(L.l("Custom bean class `{0}' doesn't have a zero-arg constructor.  Bean classes must be have a zero-argument constructor.", beanClass.getName()));
+      throw new ConfigException(L.l("Custom bean class '{0}' doesn't have a zero-arg constructor.  Bean classes must be have a zero-argument constructor.", beanClass.getName()));
 
     if (! Modifier.isPublic(constructor.getModifiers())) {
-      throw new ConfigException(L.l("The zero-argument constructor for `{0}' isn't public.  Bean classes must have a public zero-argument constructor.", beanClass.getName()));
+      throw new ConfigException(L.l("The zero-argument constructor for '{0}' isn't public.  Bean classes must have a public zero-argument constructor.", beanClass.getName()));
     }
   }
   
@@ -489,15 +496,15 @@ public class Config {
       throw new ConfigException(L.l("null classes can't be instantiated."));
     else if (beanClass.isInterface())
       throw new ConfigException(L.l(
-	"`{0}' must be a concrete class.  Interfaces cannot be instantiated.",
+	"'{0}' must be a concrete class.  Interfaces cannot be instantiated.",
 	beanClass.getName()));
     else if (! Modifier.isPublic(beanClass.getModifiers()))
       throw new ConfigException(L.l(
-	"Custom bean class `{0}' is not public.  Bean classes must be public, concrete, and have a zero-argument constructor.",
+	"Custom bean class '{0}' is not public.  Bean classes must be public, concrete, and have a zero-argument constructor.",
 	beanClass.getName()));
     else if (Modifier.isAbstract(beanClass.getModifiers()))
       throw new ConfigException(L.l(
-	"Custom bean class `{0}' is abstract.  Bean classes must be public, concrete, and have a zero-argument constructor.",
+	"Custom bean class '{0}' is abstract.  Bean classes must be public, concrete, and have a zero-argument constructor.",
 	beanClass.getName()));
 
     Constructor [] constructors = beanClass.getDeclaredConstructors();
@@ -527,12 +534,12 @@ public class Config {
 	     singleArgConstructor == null)
 	   if (type != null)
 	     throw new ConfigException(L.l(
-	       "Custom bean class `{0}' doesn't have a zero-arg constructor, or a constructor accepting parameter of type `{1}'.  Bean class `{0}' must have a zero-argument constructor, or a constructor accepting parameter of type `{1}'",
+	       "Custom bean class '{0}' doesn't have a zero-arg constructor, or a constructor accepting parameter of type '{1}'.  Bean class '{0}' must have a zero-argument constructor, or a constructor accepting parameter of type '{1}'",
 	       beanClass.getName(),
 	       type.getName()));
 	   else
 	     throw new ConfigException(L.l(
-	       "Custom bean class `{0}' doesn't have a zero-arg constructor.  Bean classes must have a zero-argument constructor.",
+	       "Custom bean class '{0}' doesn't have a zero-arg constructor.  Bean classes must have a zero-argument constructor.",
 	       beanClass.getName()));
 
 
@@ -541,7 +548,7 @@ public class Config {
 	  (zeroArgsConstructor == null ||
 	   ! Modifier.isPublic(zeroArgsConstructor.getModifiers()))) {
 	throw new ConfigException(L.l(
-	  "The constructor for bean `{0}' accepting parameter of type `{1}' is not public.  Constructor accepting parameter of type `{1}' must be public.",
+	  "The constructor for bean '{0}' accepting parameter of type '{1}' is not public.  Constructor accepting parameter of type '{1}' must be public.",
 	  beanClass.getName(),
 	  type.getName()));
       }
@@ -549,7 +556,7 @@ public class Config {
     else if (zeroArgsConstructor != null) {
       if (! Modifier.isPublic(zeroArgsConstructor.getModifiers()))
 	throw new ConfigException(L.l(
-	  "The zero-argument constructor for `{0}' isn't public.  Bean classes must have a public zero-argument constructor.",
+	  "The zero-argument constructor for '{0}' isn't public.  Bean classes must have a public zero-argument constructor.",
 	  beanClass.getName()));
     }
   }

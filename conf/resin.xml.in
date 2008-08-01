@@ -75,10 +75,10 @@
 
     <server-default>
       <!-- The http port -->
-      <http address="*" port="8080"/>
+      <http address="*" port="@HTTP_PORT@"/>
 
       <!-- SSL port configuration: -->
-      <http address="*" port="8443">
+      <http address="*" port="@HTTPS_PORT@">
         <jsse-ssl self-signed-certificate-name="resin@localhost"/>
       </http>
 
@@ -208,7 +208,7 @@
     </web-app-default>
 
     <!-- includes the app-default for default web-app behavior -->
-    <resin:import path="${__DIR__}/conf/app-default.xml"/>
+    <resin:import path="${__DIR__}/app-default.xml"/>
 
     <!--
        - Sample database pool configuration

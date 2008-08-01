@@ -32,27 +32,16 @@ import com.caucho.config.ConfigException;
 
 import java.io.IOException;
 
-/**
- * This interface hides an implementation class that loads all of the licenses
- * for the current installation and determines whether or not they are valid.
- */
-public interface LicenseCheck {
-  /**
-   * Validates the number of servers.
-   */
-  public void validate(int serverCount)
+public interface LicenseCheck
+{
+  public void requirePersonal(int personalCount)
     throws ConfigException, IOException;
+  
+  public void requireProfessional(int professionalCount)
+    throws ConfigException, IOException;
+  
+  public String doLogging();
 
-  /**
-   * Write log messages based on the licenses and the number of servers that
-   * the user is attempting to use.
-   */
-  public String doLogging(int serverCount);
-
-  /**
-   * Return a summary description of the licenses, suitable for presentation to
-   * the user. 
-   */
   public String getDescription();
 }
 

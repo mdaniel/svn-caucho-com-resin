@@ -24,6 +24,9 @@
   
   <property name="lib" location="${install}/lib"/>
   <property name="resin.lib" location="${resin.install}/lib"/>
+
+  <property name="resin.http" value="8080"/>
+  <property name="resin.https" value="8443"/>
   
   <property name="clientlib" location="${install}/clientlib"/>
   
