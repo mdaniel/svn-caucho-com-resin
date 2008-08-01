@@ -54,7 +54,8 @@ public class DOMImplementation
 
   static DOMImplementation get(Env env)
   {
-    DOMImplementation impl = env.getSpecialValue("caucho.dom");
+    DOMImplementation impl
+      = (DOMImplementation) env.getSpecialValue("caucho.dom");
 
     if (impl == null) {
       impl = new DOMImplementation();

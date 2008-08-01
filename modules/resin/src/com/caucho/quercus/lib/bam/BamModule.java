@@ -95,7 +95,8 @@ public class BamModule extends AbstractQuercusModule
 
   private static BamConnection getBamConnection(Env env)
   {
-    BamConnection connection = env.getSpecialValue("_quercus_bam_connection");
+    BamConnection connection
+      = (BamConnection) env.getSpecialValue("_quercus_bam_connection");
 
     // create a connection lazily
     if (connection == null) {
