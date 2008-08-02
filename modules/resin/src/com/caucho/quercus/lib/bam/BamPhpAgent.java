@@ -38,8 +38,8 @@ import java.util.logging.Logger;
 
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamStream;
+import com.caucho.bam.SimpleBamService;
 import com.caucho.config.ConfigException;
-import com.caucho.hemp.broker.GenericService;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.JavaValue;
@@ -64,7 +64,7 @@ import javax.sql.DataSource;
 /**
  * BAM agent that calls into a PHP script to handle messages/queries.
  **/
-public class BamPhpAgent extends GenericService {
+public class BamPhpAgent extends SimpleBamService {
   private static final L10N L = new L10N(BamPhpAgent.class);
   private static final Logger log
     = Logger.getLogger(BamPhpAgent.class.getName());
@@ -77,6 +77,8 @@ public class BamPhpAgent extends GenericService {
   private ArrayList<String> _featureNames = new ArrayList<String>();
 
   private Path _script;
+  private QuercusPage _page;
+  
   private String _encoding = "ISO-8859-1";
 
   public BamPhpAgent()
@@ -116,7 +118,11 @@ public class BamPhpAgent extends GenericService {
     if (_script == null)
       throw new ConfigException(L.l("script path not specified"));
 
-    super.init();
+    try {
+      _page = _quercus.parse(_script);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
 
   @Override
@@ -139,6 +145,267 @@ public class BamPhpAgent extends GenericService {
   {
     synchronized(_children) {
       _children.put(jid, child);
+    }
+  }
+
+  private void setId(Env env, long id)
+  {
+    env.setGlobalValue("_quercus_bam_id", LongValue.create(id));
+  }
+
+  private void setError(Env env, BamError error)
+  {
+    Value errorValue = NullValue.NULL;
+    if (error != null) {
+      JavaClassDef errorClassDef = env.getJavaClassDefinition(BamError.class);
+      errorValue = errorClassDef.wrap(env, error);
+    }
+
+    env.setGlobalValue("_quercus_bam_error", errorValue);
+  }
+
+  @Override
+  public void message(String to, String from, Serializable value)
+  {
+    Env env = createEnv(_page, BamEventType.MESSAGE, to, from, value);
+
+    try {
+      _page.executeTop(env);
+    }
+    finally {
+      env.close();
+    }
+  }
+
+  @Override
+  public void messageError(String to, String from, Serializable value,
+                           BamError error)
+  {
+    Env env = createEnv(_page, BamEventType.MESSAGE_ERROR, to, from, value);
+
+    try {
+      setError(env, error);
+
+      _page.executeTop(env);
+    }
+    finally {
+      env.close();
+    }
+  }
+
+  @Override
+  public boolean queryGet(long id, String to, String from, Serializable value)
+  {
+    BamEventType eventType = BamEventType.QUERY_GET;
+
+    // XXX move to override of introspected method
+    if (value instanceof DiscoInfoQuery)
+      eventType = BamEventType.GET_DISCO_FEATURES;
+
+    Env env = createEnv(_page, eventType, to, from, value);
+    boolean understood = false;
+
+    try {
+      setId(env, id);
+
+      _page.executeTop(env);
+
+      if (eventType == BamEventType.GET_DISCO_FEATURES) {
+        _featureNames.clear();
+
+        Value returnValue = env.getGlobalValue("_quercus_bam_function_return");
+
+        if (returnValue.isArray()) {
+          _featureNames = 
+            (ArrayList) returnValue.toJavaList(env, ArrayList.class);
+        }
+
+	/*
+        understood = handleDiscoInfoQuery(id, to, from, (DiscoInfoQuery) value);
+	*/
+      }
+      else {
+        understood = 
+          env.getGlobalValue("_quercus_bam_function_return").toBoolean();
+      }
+    }
+    finally {
+      env.close();
+    }
+
+    return understood;
+  }
+
+  /*
+  @Override
+  protected void getDiscoFeatureNames(ArrayList<String> featureNames)
+  {
+    featureNames.addAll(_featureNames);
+  }
+  */
+
+  @Override
+  public boolean querySet(long id, String to, String from, Serializable value)
+  {
+    Env env = createEnv(_page, BamEventType.QUERY_SET, to, from, value);
+    boolean understood = false;
+
+    try {
+      setId(env, id);
+
+      _page.executeTop(env);
+
+      understood = 
+        env.getGlobalValue("_quercus_bam_function_return").toBoolean();
+    }
+    finally {
+      env.close();
+    }
+
+    return understood;
+  }
+
+  @Override
+  public void queryResult(long id, String to, String from, Serializable value)
+  {
+    Env env = createEnv(_page, BamEventType.QUERY_RESULT, to, from, value);
+
+    try {
+      setId(env, id);
+
+      _page.executeTop(env);
+    }
+    finally {
+      env.close();
+    }
+  }
+
+  @Override
+  public void queryError(long id, String to, String from, 
+                         Serializable value, BamError error)
+  {
+    Env env = createEnv(_page, BamEventType.QUERY_ERROR, to, from, value);
+
+    try {
+      setId(env, id);
+      setError(env, error);
+
+      _page.executeTop(env);
+    }
+    finally {
+      env.close();
+    }
+  }
+
+  @Override
+  public void presence(String to, String from, Serializable value)
+  {
+    Env env = createEnv(_page, BamEventType.PRESENCE, to, from, value);
+
+    try {
+      _page.executeTop(env);
+    }
+    finally {
+      env.close();
+    }
+  }
+
+  @Override
+  public void presenceUnavailable(String to, String from, Serializable value)
+  {
+    Env env = createEnv(_page, BamEventType.PRESENCE_UNAVAILABLE,
+			to, from, value);
+
+    try {
+      _page.executeTop(env);
+    }
+    finally {
+      env.close();
+    }
+  }
+
+  @Override
+  public void presenceProbe(String to, String from, Serializable value)
+  {
+    Env env = createEnv(_page, BamEventType.PRESENCE_PROBE, to, from, value);
+
+    try {
+      _page.executeTop(env);
+    }
+    finally {
+      env.close();
+    }
+  }
+
+  @Override
+  public void presenceSubscribe(String to, String from, Serializable value)
+  {
+    Env env = createEnv(_page, BamEventType.PRESENCE_SUBSCRIBE,
+			to, from, value);
+
+    try {
+      _page.executeTop(env);
+    }
+    finally {
+      env.close();
+    }
+  }
+
+  @Override
+  public void presenceSubscribed(String to, String from, Serializable value)
+  {
+    Env env = createEnv(_page, BamEventType.PRESENCE_SUBSCRIBED,
+			to, from, value);
+
+    try {
+      _page.executeTop(env);
+    }
+    finally {
+      env.close();
+    }
+  }
+
+  @Override
+  public void presenceUnsubscribe(String to, String from, Serializable value)
+  {
+    Env env = createEnv(_page, BamEventType.PRESENCE_UNSUBSCRIBE,
+			to, from, value);
+
+    try {
+      _page.executeTop(env);
+    }
+    finally {
+      env.close();
+    }
+  }
+
+  @Override
+  public void presenceUnsubscribed(String to, String from, Serializable value)
+  {
+    Env env = createEnv(_page, BamEventType.PRESENCE_UNSUBSCRIBED, 
+			to, from, value);
+
+    try {
+      _page.executeTop(env);
+    }
+    finally {
+      env.close();
+    }
+  }
+
+  @Override
+  public void presenceError(String to, String from, 
+                            Serializable value, BamError error)
+  {
+    Env env = createEnv(_page, BamEventType.PRESENCE_ERROR, to, from, value);
+
+    try {
+      setError(env, error);
+
+      _page.executeTop(env);
+    }
+    finally {
+      env.close();
     }
   }
 
@@ -174,352 +441,10 @@ public class BamPhpAgent extends GenericService {
     return env;
   }
 
-  private void setId(Env env, long id)
-  {
-    env.setGlobalValue("_quercus_bam_id", LongValue.create(id));
-  }
-
-  private void setError(Env env, BamError error)
-  {
-    Value errorValue = NullValue.NULL;
-    if (error != null) {
-      JavaClassDef errorClassDef = env.getJavaClassDefinition(BamError.class);
-      errorValue = errorClassDef.wrap(env, error);
-    }
-
-    env.setGlobalValue("_quercus_bam_error", errorValue);
-  }
-
-  @Override
-  public void message(String to, String from, Serializable value)
-  {
-    Env env = null;
-
-    try {
-      QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, BamEventType.MESSAGE, to, from, value);
-      page.executeTop(env);
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    finally {
-      if (env != null)
-        env.close();
-    }
-  }
-
-  @Override
-  public void messageError(String to, String from, Serializable value,
-                           BamError error)
-  {
-    Env env = null;
-
-    try {
-      QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, BamEventType.MESSAGE_ERROR, to, from, value);
-      setError(env, error);
-
-      page.executeTop(env);
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    finally {
-      if (env != null)
-        env.close();
-    }
-  }
-
-  @Override
-  public boolean queryGet(long id, String to, String from, Serializable value)
-  {
-    BamEventType eventType = BamEventType.QUERY_GET;
-
-    // XXX move to override of introspected method
-    if (value instanceof DiscoInfoQuery)
-      eventType = BamEventType.GET_DISCO_FEATURES;
-
-    Env env = null;
-    boolean understood = false;
-
-    try {
-      QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, eventType, to, from, value);
-      setId(env, id);
-
-      page.executeTop(env);
-
-      if (eventType == BamEventType.GET_DISCO_FEATURES) {
-        _featureNames.clear();
-
-        Value returnValue = env.getGlobalValue("_quercus_bam_function_return");
-
-        if (returnValue.isArray()) {
-          _featureNames = 
-            (ArrayList) returnValue.toJavaList(env, ArrayList.class);
-        }
-
-        understood = handleDiscoInfoQuery(id, to, from, (DiscoInfoQuery) value);
-      }
-      else {
-        understood = 
-          env.getGlobalValue("_quercus_bam_function_return").toBoolean();
-      }
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    finally {
-      if (env != null)
-        env.close();
-
-      return understood;
-    }
-  }
-
-  @Override
-  protected void getDiscoFeatureNames(ArrayList<String> featureNames)
-  {
-    featureNames.addAll(_featureNames);
-  }
-
-  @Override
-  public boolean querySet(long id, String to, String from, Serializable value)
-  {
-    Env env = null;
-    boolean understood = false;
-
-    try {
-      QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, BamEventType.QUERY_SET, to, from, value);
-      setId(env, id);
-
-      page.executeTop(env);
-
-      understood = 
-        env.getGlobalValue("_quercus_bam_function_return").toBoolean();
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    finally {
-      if (env != null)
-        env.close();
-
-      return understood;
-    }
-  }
-
-  @Override
-  public void queryResult(long id, String to, String from, Serializable value)
-  {
-    Env env = null;
-
-    try {
-      QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, BamEventType.QUERY_RESULT, to, from, value);
-      setId(env, id);
-
-      page.executeTop(env);
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    finally {
-      if (env != null)
-        env.close();
-    }
-  }
-
-  @Override
-  public void queryError(long id, String to, String from, 
-                         Serializable value, BamError error)
-  {
-    Env env = null;
-
-    try {
-      QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, BamEventType.QUERY_ERROR, to, from, value);
-      setId(env, id);
-      setError(env, error);
-
-      page.executeTop(env);
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    finally {
-      if (env != null)
-        env.close();
-    }
-  }
-
-  @Override
-  public void presence(String to, String from, Serializable value)
-  {
-    Env env = null;
-
-    try {
-      QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, BamEventType.PRESENCE, to, from, value);
-
-      page.executeTop(env);
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    finally {
-      if (env != null)
-        env.close();
-    }
-  }
-
-  @Override
-  public void presenceUnavailable(String to, String from, Serializable value)
-  {
-    Env env = null;
-
-    try {
-      QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, BamEventType.PRESENCE_UNAVAILABLE, to, from, value);
-
-      page.executeTop(env);
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    finally {
-      if (env != null)
-        env.close();
-    }
-  }
-
-  @Override
-  public void presenceProbe(String to, String from, Serializable value)
-  {
-    Env env = null;
-
-    try {
-      QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, BamEventType.PRESENCE_PROBE, to, from, value);
-
-      page.executeTop(env);
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    finally {
-      if (env != null)
-        env.close();
-    }
-  }
-
-  @Override
-  public void presenceSubscribe(String to, String from, Serializable value)
-  {
-    Env env = null;
-
-    try {
-      QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, BamEventType.PRESENCE_SUBSCRIBE, to, from, value);
-
-      page.executeTop(env);
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    finally {
-      if (env != null)
-        env.close();
-    }
-  }
-
-  @Override
-  public void presenceSubscribed(String to, String from, Serializable value)
-  {
-    Env env = null;
-
-    try {
-      QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, BamEventType.PRESENCE_SUBSCRIBED, to, from, value);
-
-      page.executeTop(env);
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    finally {
-      if (env != null)
-        env.close();
-    }
-  }
-
-  @Override
-  public void presenceUnsubscribe(String to, String from, Serializable value)
-  {
-    Env env = null;
-
-    try {
-      QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, BamEventType.PRESENCE_UNSUBSCRIBE, to, from, value);
-
-      page.executeTop(env);
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    finally {
-      if (env != null)
-        env.close();
-    }
-  }
-
-  @Override
-  public void presenceUnsubscribed(String to, String from, Serializable value)
-  {
-    Env env = null;
-
-    try {
-      QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, BamEventType.PRESENCE_UNSUBSCRIBED, 
-                      to, from, value);
-
-      page.executeTop(env);
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    finally {
-      if (env != null)
-        env.close();
-    }
-  }
-
-  @Override
-  public void presenceError(String to, String from, 
-                            Serializable value, BamError error)
-  {
-    Env env = null;
-
-    try {
-      QuercusPage page = _quercus.parse(_script);
-      env = createEnv(page, BamEventType.PRESENCE_ERROR, to, from, value);
-      setError(env, error);
-
-      page.executeTop(env);
-    }
-    catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    finally {
-      if (env != null)
-        env.close();
-    }
-  }
-
   public String toString()
   {
-    return "BamPhpAgent[jid=" + getJid() + ",script=" + _script + "]";
+    return (getClass().getSimpleName()
+	    + "[jid=" + getJid()
+	    + ",script=" + _script + "]");
   }
 }

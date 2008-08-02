@@ -599,6 +599,11 @@ public class HempBroker implements BamBroker, BamStream
         return ref.get();
     }
 
+    if (jid.endsWith("@")) {
+      // jms/3d00
+      jid = jid + getDomain();
+    }
+
     BamStream agentStream;
     BamService service = findService(jid);
 
@@ -640,7 +645,7 @@ public class HempBroker implements BamBroker, BamStream
   {
     if (jid == null)
       return null;
-    
+
     synchronized (_serviceCache) {
       WeakReference<BamService> ref = _serviceCache.get(jid);
 

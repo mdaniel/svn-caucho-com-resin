@@ -1,6 +1,6 @@
 <%@ page import="com.caucho.bam.BamClient, java.util.*, example.*"
 %><%!
-@javax.webbeans.Named("bam-queue-example@localhost")
+@javax.webbeans.Named("bam-java-queue")
 ExampleService _service;
 
 BamClient _client = new BamClient();
@@ -26,7 +26,7 @@ if (color1 != null && noun1 != null && adj1 != null) {
 
   ExampleMessage exMsg = new ExampleMessage(msg);
 
-  _client.message("bam-queue-example@localhost", exMsg);
+  _client.message("bam-php-queue@", exMsg);
 }
 
 %>

@@ -91,8 +91,6 @@ public class BamServiceConfig extends BeanConfig
   @PreDestroy
   public void destroy()
   {
-    System.out.println("KILL:" + _service);
-    
     _broker.removeService(_service);
   }
 

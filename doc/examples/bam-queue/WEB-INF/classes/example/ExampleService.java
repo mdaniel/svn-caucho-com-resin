@@ -33,6 +33,11 @@ public class ExampleService extends SimpleBamService
     _messages.add(text);
   }
 
+  public void addMessage(String text)
+  {
+    _messages.add(text);
+  }
+
   public ArrayList<String> getMessages()
   {
     return _messages;

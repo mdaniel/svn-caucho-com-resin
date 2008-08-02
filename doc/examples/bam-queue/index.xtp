@@ -23,11 +23,15 @@
 </tr>
 <tr>
   <td><viewfile-link file="WEB-INF/classes/example/ExampleService.java"/></td>
-  <td>The message listener.</td>
+  <td>The Java message listener.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/php/bam_queue.php"/></td>
+  <td>The PHP message listener.</td>
 </tr>
 <tr>
   <td><viewfile-link file="WEB-INF/classes/example/ExampleMessage.java"/></td>
-  <td>The custom message class.</td>
+  <td>The custom message model.</td>
 </tr>
 <tr>
   <td><viewfile-link file="demo.jsp"/></td>
@@ -83,7 +87,7 @@ public void send()
 
   ExampleMessage message = new ExampleMessage("sample message");
 
-  client.message("consumer@localhost", message);
+  client.message("consumer@", message);
 
   client.close();
 }
@@ -94,7 +98,7 @@ public void send()
 
 $msg = java("example.ExampleMessage", "sample message");
 
-bam_send_message("consumer@localhost", $msg);
+bam_send_message("consumer@", $msg);
 
 ?>
 </example>
@@ -126,17 +130,40 @@ public class ExampleService extends SimpleBamService
 }
 </example>
 
+<p>The PHP version of the service implements a <code>bam_message</code>
+method to handle the message and calls <code>bam_dispatch()</code> to
+dispatch the message.  The PHP service will call the bam_queue.php when
+it receives a message.</p>
+
+<example title="Example: bam_queue.php">
+&lt;?php
+
+function bam_message($to, $from, $value)
+{
+  resin_debug($value);
+}
+
+bam_dispatch();
+
+?>
+</example>
+
 </s1>
 
 <s1 title="Configuration">
 
 <example title="Example: resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin">
 
-  &lt;bam-service name="consumer@localhost"
+  &lt;bam-service name="java-consumer"
                class="example.ExampleService"/>
 
-&lt;/web-app&gt;
+  &lt;bam-service name="php-consumer"
+               uri="caucho.php:">
+    &lt;init script="WEB-INF/php/bam_queue.php"/>
+  &lt;/bam-service>
+
+&lt;/web-app>
 </example>
 
 </s1>

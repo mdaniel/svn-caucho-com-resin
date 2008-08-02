@@ -94,7 +94,7 @@
     <!--
        - BAM
       -->
-    <item link="hmtp.xtp" title="BAM"/>
+    <item link="bam.xtp" title="BAM"/>
     
     <!--
        - Caching

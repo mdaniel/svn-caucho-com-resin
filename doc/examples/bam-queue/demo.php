@@ -2,7 +2,7 @@
 
 <?php
 
-$service = java_bean("bam-queue-example@localhost");
+$service = java_bean("bam-java-queue");
 
 echo "<ol>\n";
 
@@ -19,7 +19,7 @@ $adj1 = $_REQUEST['adj1'];
 if ($color1 && $noun1 && $adj1) {
   $msg = "The " . $color1 . " " . $noun1 . " is " . $adj1 . ".";
 
-  bam_send_message("bam-queue-example@localhost", $msg);
+  bam_send_message("bam-java-queue@", $msg);
 }
 
 ?>
