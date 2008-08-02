@@ -1,0 +1,8 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+  
+  <bam-service name="bam-queue-example@localhost"
+	       class="example.ExampleService"/>
+		     
+</web-app>
+
+  

@@ -59,6 +59,7 @@ public class BamServiceConfig extends BeanConfig
   @In private BamBroker _broker;
 
   private int _threadMax = 1;
+  private BamService _service;
   
   public BamServiceConfig()
   {
@@ -80,13 +81,27 @@ public class BamServiceConfig extends BeanConfig
   public void init()
   {
     super.init();
+
+    // XXX: 3.2.0 temp 
+    com.caucho.loader.Environment.addCloseListener(this);
     
     start();
+  }
+
+  @PreDestroy
+  public void destroy()
+  {
+    System.out.println("KILL:" + _service);
+    
+    _broker.removeService(_service);
   }
 
   @Start
   public void start()
   {
+    if (_service != null)
+      return;
+    
     BamService service = (BamService) getObject();
 
     String name = getName();
@@ -106,6 +121,8 @@ public class BamServiceConfig extends BeanConfig
 					     _broker.getBrokerStream(),
 					     _threadMax);
     }
+
+    _service = service;
     
     _broker.addService(service);
   }

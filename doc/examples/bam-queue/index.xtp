@@ -1,0 +1,145 @@
+<document>
+  <header>
+    <title>BAM Queue</title>
+        <description>
+          <p>Using BAM to implement a queuing service.</p>
+        </description>
+    <type>tutorial</type>
+    <tutorial-startpage>demo.jsp</tutorial-startpage>
+  </header>
+
+<body>
+<summary/>
+
+<s1 title="Files in this tutorial">
+<deftable>
+<tr>
+  <th>file</th>
+  <th>description</th>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+  <td>Configures the BamService.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/ExampleService.java"/></td>
+  <td>The message listener.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/ExampleMessage.java"/></td>
+  <td>The custom message class.</td>
+</tr>
+<tr>
+  <td><viewfile-link file="demo.jsp"/></td>
+  <td>The JSP demo</td>
+</tr>
+<tr>
+  <td><viewfile-link file="demo.php"/></td>
+  <td>The PHP demo</td>
+</tr>
+</deftable>
+</s1>
+
+<s1 title="Overview">
+
+<p>Messaging lets a servlet delegate processing to a batch process either
+on the same machine or on a separate machine.  The servlet creates a message
+and sends it to a queue.  The servlet immediately completes and when the
+batch process is ready, it processes the message.</p>
+
+<p>Messaging is therefore comprised of three main components:
+</p>
+
+<ul>
+<li>A <var>Producer</var> creates messages and sends them to
+a <var>Consumer</var>, continuing processing.  The Producer could
+be a Servlet or PHP page that sends a request to a backend consumer
+and continues the web response without waiting for the task to complete.
+</li>
+<li>A <var>Consumer</var> processes messages as they become
+available.  In BAM, the <var>Consumer</var> extends
+<var>SimpleBamService</var> to receive the messages.
+</li>
+<li>The <var>Queue</var> buffers messages from the Produces and provides
+them to a Consumer when the Consumer is ready.  The Queue is part of the BAM
+messaging system.
+</li>
+</ul>
+
+</s1>
+
+<s1 title="Producer">
+
+<p>In this example, the Producer is a Servlet which sends a simple message.
+The Producer creates a <code>BamClient</code> 
+to send the message.</p>
+
+<example title="Example: MessageServlet using BamClient">
+import com.caucho.bam.BamClient;
+
+public void send()
+{
+  BamClient client = new BamClient();
+
+  ExampleMessage message = new ExampleMessage("sample message");
+
+  client.message("consumer@localhost", message);
+
+  client.close();
+}
+</example>
+
+<example title="Example: PHP using bam_send_message">
+&lt;?php
+
+$msg = java("example.ExampleMessage", "sample message");
+
+bam_send_message("consumer@localhost", $msg);
+
+?>
+</example>
+
+</s1>
+
+<s1 title="Consumer">
+
+<p>The Queue delivers message to the Consumer one by one.  When the
+Consumer finishes processing a message the Queue will deliver the next
+available message.  The Consumer
+implements <code>com.caucho.bam.BamService</code>.</p>
+
+<p>In this example, the Consumer just logs the message.</p>
+
+<example title="Example: ExampleService">
+package example;
+
+import com.caucho.bam.SimpleBamService;
+import com.caucho.bam.annotation.Message;
+
+public class ExampleService extends SimpleBamService
+{
+  @Message
+  public void onMessage(String to, String from, ExampleMessage message)
+  {
+    System.out.println("Message: " + message + " from=" + from);
+  }
+}
+</example>
+
+</s1>
+
+<s1 title="Configuration">
+
+<example title="Example: resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+
+  &lt;bam-service name="consumer@localhost"
+               class="example.ExampleService"/>
+
+&lt;/web-app&gt;
+</example>
+
+</s1>
+
+</body>
+</document>

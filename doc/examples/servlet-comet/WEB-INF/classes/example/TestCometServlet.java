@@ -37,15 +37,9 @@ public class TestCometServlet extends GenericCometServlet
 
     // Padding needed because Safari needs at least 1k data before
     // it will start progressive rendering.
-    out.print("<!--");
-    for (int i = 0; i < 1024; i++) {
-      if (i % 64 == 0)
-	out.println();
-      
-      out.print("*");
+    for (int i = 0; i < 100; i++) {
+      out.println("<span></span>");
     }
-    out.println();
-    out.println("-->");
 
     out.println("<script type='text/javascript'>");
     out.println("var comet_update = window.parent.comet_update;");
