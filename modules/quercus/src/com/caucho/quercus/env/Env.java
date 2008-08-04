@@ -4622,6 +4622,8 @@ public class Env {
    */
   public Value error(int code, Location location, String loc, String msg)
   {
+    Thread.dumpStack();
+    
     int mask = 1 << code;
 
     if (code >= 0 && code < _errorHandlers.length

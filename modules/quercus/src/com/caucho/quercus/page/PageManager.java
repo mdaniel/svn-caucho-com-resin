@@ -177,10 +177,14 @@ public class PageManager
 
       program = _programCache.get(path);
 
+      boolean isModified = false;
+      
       if (program != null) {
+        isModified = program.isModified();
+        
         if (program.isCompilable()) {
         }
-        else if (program.isModified())
+        else if (isModified)
           program.setCompilable(true);
         else {
           if (log.isLoggable(Level.FINE))
@@ -190,7 +194,7 @@ public class PageManager
         }
       }
 
-      if (program == null || program.isModified()) {
+      if (program == null || isModified) {
         clearProgram(path, program);
 
         program = QuercusParser.parse(_quercus,

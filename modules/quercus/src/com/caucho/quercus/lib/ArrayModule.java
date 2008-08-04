@@ -1825,15 +1825,15 @@ case SORT_NUMERIC:
     boolean extrRefs = (rawType & EXTR_REFS) != 0;
 
     if (extractType < EXTR_OVERWRITE
-	|| extractType > EXTR_IF_EXISTS && extractType != EXTR_REFS) {
+        || extractType > EXTR_IF_EXISTS && extractType != EXTR_REFS) {
       env.warning("Unknown extract type");
 
       return NullValue.NULL;
     }
 
     if (extractType >= EXTR_PREFIX_SAME
-	&& extractType <= EXTR_PREFIX_IF_EXISTS
-	&& (valuePrefix == null || ! (valuePrefix instanceof StringValue))) {
+        && extractType <= EXTR_PREFIX_IF_EXISTS
+        && (valuePrefix == null || ! (valuePrefix.isString()))) {
       env.warning("Prefix expected to be specified");
 
       return NullValue.NULL;
@@ -3401,11 +3401,11 @@ case SORT_NUMERIC:
     ArrayValue compactArray = new ArrayValueImpl();
 
     for (Value variableName : variables) {
-      if (variableName instanceof StringValue) {
-        Value tableValue = env.getValue(variableName.toString());
+      if (variableName.isString()) {
+        Var var = env.getRef(variableName.toString());
 
-        if (tableValue.isset())
-          compactArray.put(variableName, tableValue);
+        if (var != null)
+          compactArray.put(variableName, var.toValue());
       }
       else if (variableName instanceof ArrayValue) {
         ArrayValue array = (ArrayValue) variableName;
