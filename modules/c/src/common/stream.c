@@ -62,6 +62,10 @@
 #define LIVE_TIME 10
 #define CONNECT_TIMEOUT 2
 
+#ifndef ECONNRESET
+#define ECONNRESET EPIPE
+#endif
+
 /**
  * Opening method for non-ssl.
  */
