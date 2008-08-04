@@ -734,6 +734,13 @@
         <globmapper from="*.png" to="*.pdf"/>
       </mapper>
     </apply>
+    
+    <copy todir="${build}/pdf/images"
+	  overwrite='true'>
+      <fileset dir="${doc}/images">
+        <include name="**/*.pdf"/>
+      </fileset>
+    </copy>
 
     <generate-pdf name="book-reference"/>
 

@@ -102,6 +102,13 @@ public class BamServiceConfig extends BeanConfig
     
     BamService service = (BamService) getObject();
 
+    // XXX: jms/3a14 - needs to be cleaned up
+    if (service instanceof SimpleBamService) {
+      SimpleBamService simpleService = (SimpleBamService) service;
+
+      simpleService.setBrokerStream(_broker.getBrokerStream());
+    }
+
     String name = getName();
     if (name == null)
       name = service.getClass().getSimpleName();

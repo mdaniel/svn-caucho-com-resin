@@ -208,9 +208,9 @@ public class BamModule extends AbstractQuercusModule
       return env.error("script not found: " + script);
 
     BamPhpAgent child = new BamPhpAgent();
-    child.setName(jid);
+    child.setJid(jid);
     child.setScript(path);
-    child.setBroker(manager.getBroker());
+    // child.setBroker(manager.getBroker());
 
     WebBeansContainer container = WebBeansContainer.getCurrent();
     container.injectObject(child);
@@ -262,7 +262,7 @@ public class BamModule extends AbstractQuercusModule
       return env.error("bam_register_agent must be called from agent script");
 
     BamPhpAgent child = new BamPhpAgent();
-    child.setName(jid);
+    child.setJid(jid);
 
     Path path = env.getSelfDirectory().lookup(script);
 

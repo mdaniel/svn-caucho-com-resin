@@ -84,6 +84,10 @@
     <linked-section link="filters.xtp" />
   </chapter>
   
+  <chapter title="BAM">
+    <linked-section link="bam.xtp" />
+  </chapter>
+  
   <chapter title="Comet">
     <linked-section link="resin-comet.xtp" />
   </chapter>

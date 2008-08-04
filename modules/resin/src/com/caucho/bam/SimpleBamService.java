@@ -45,6 +45,7 @@ public class SimpleBamService extends AbstractBamService
   private static final Logger log
     = Logger.getLogger(SimpleBamService.class.getName());
 
+  private BamStream _brokerStream;
   private final BamSkeleton _skeleton;
 
   protected SimpleBamService()
@@ -55,6 +56,22 @@ public class SimpleBamService extends AbstractBamService
   protected BamSkeleton getBamSkeleton()
   {
     return _skeleton;
+  }
+
+  /**
+   * Returns the stream to the broker
+   */
+  public BamStream getBrokerStream()
+  {
+    return _brokerStream;
+  }
+
+  /**
+   * Sets the stream to the broker
+   */
+  public void setBrokerStream(BamStream brokerStream)
+  {
+    _brokerStream = brokerStream;
   }
   
   /**

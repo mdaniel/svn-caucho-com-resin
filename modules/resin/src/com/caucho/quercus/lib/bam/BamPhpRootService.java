@@ -97,7 +97,7 @@ public class BamPhpRootService extends GenericService {
 
     if (agent == null) {
       agent = new BamPhpAgent(_script, _encoding);
-      agent.setName(jid);
+      agent.setJid(jid);
 
       WebBeansContainer container = WebBeansContainer.getCurrent();
       container.injectObject(agent);
