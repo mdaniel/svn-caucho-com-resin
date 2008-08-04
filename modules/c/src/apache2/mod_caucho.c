@@ -74,7 +74,7 @@ cse_log(char *fmt, ...)
   int pid;
   FILE *file;
 
-  file = fopen("/tmp/mod_caucho.log", "w+");
+  file = fopen("/tmp/mod_caucho.log", "a");
 
   pid = (int) getpid();
 
@@ -750,8 +750,9 @@ send_data(stream_t *s, request_rec *r)
   int i;
   int channel;
     
-  if (cse_fill_buffer(s) < 0)
+  if (cse_fill_buffer(s) < 0) {
     return -1;
+  }
     
   while (1) {
     int len;
@@ -821,8 +822,9 @@ send_data(stream_t *s, request_rec *r)
       return code;
 
     default:
-      if (code < 0)
+      if (code < 0) {
 	return code;
+      }
       
       len = hmux_read_len(s);
       cse_skip(s, len);
@@ -922,6 +924,7 @@ caucho_request(request_rec *r, config_t *config, resin_host_t *host,
 				 now, r->pool)) {
     ERR(("%s:%d:caucho_request(): no connection: cluster(%p)\n",
 	 __FILE__, __LINE__, &host->cluster));
+    
     return HTTP_SERVICE_UNAVAILABLE;
   }
 
@@ -949,8 +952,9 @@ caucho_request(request_rec *r, config_t *config, resin_host_t *host,
 
     return HTTP_SERVICE_UNAVAILABLE;
   }
-  else if (r->status == HTTP_SERVICE_UNAVAILABLE)
+  else if (r->status == HTTP_SERVICE_UNAVAILABLE) {
     return HTTP_SERVICE_UNAVAILABLE;
+  }
   else {
     /*
      * See pages like jms/index.xtp

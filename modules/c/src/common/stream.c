@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -56,7 +57,7 @@
 #include "cse.h"
 
 #define WINDOWS_READ_TIMEOUT 3600
-#define DEFAULT_PORT 6802
+#define DEFAULT_PORT 6800
 #define DEAD_TIME 20
 #define LIVE_TIME 10
 #define CONNECT_TIMEOUT 2
@@ -516,6 +517,7 @@ int
 cse_fill_buffer(stream_t *s)
 {
   int len = 0;
+  int retry;
   
   if (s->socket < 0)
     return -1;
@@ -539,11 +541,19 @@ cse_fill_buffer(stream_t *s)
   }
 
   s->read_offset = 0;
-  /* config read/save has no cluster_srun */
-  if (s->cluster_srun)
-    s->read_length = s->cluster_srun->srun->read(s, s->read_buf, BUF_LENGTH);
-  else
-    s->read_length = read(s->socket, s->read_buf, BUF_LENGTH);
+
+  retry = 3;
+
+  do {
+    /* config read/save has no cluster_srun */
+    if (s->cluster_srun)
+      s->read_length = s->cluster_srun->srun->read(s, s->read_buf, BUF_LENGTH);
+    else
+      s->read_length = read(s->socket, s->read_buf, BUF_LENGTH);
+    // repeat for EINTR, EAGAIN
+  } while (s->read_length < 0
+	   && errno != EPIPE && errno != ECONNRESET
+	   && retry-- > 0);
   
   if (s->read_length <= 0) {
     cse_close(s, "fill_buffer");
