@@ -84,6 +84,14 @@ Resin with 25,000 simultaneous clients</a>.</p>
 
 </s1>
 
+<s1 title="-Dcaucho.smallmem">
+
+<p>The -Dcaucho.smallmem command-line argument tells Resin to shrink its
+buffer sizes for a small-memory footprint.  For example, the main internal
+buffer size shrinks from 16k to 1k.</p>
+
+</s1>
+
 <s1 title="debian">
 
 <p>Resin Professional can now be installed as a Debian package.  The package

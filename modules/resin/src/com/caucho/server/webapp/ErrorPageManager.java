@@ -198,6 +198,7 @@ public class ErrorPageManager {
     String lineMessage = null;
 
     boolean lookupErrorPage = true;
+    
     while (true) {
       if (rootExn instanceof LineMapException)
         lineMap = ((LineMapException) rootExn).getLineMap();
@@ -332,7 +333,15 @@ public class ErrorPageManager {
     
     if (location == null)
       location = _defaultLocation;
-	
+
+    Level level = location == null ? Level.WARNING : Level.FINE;
+
+    if (isCompileException)
+      log.log(level, compileException.getMessage());
+    else if (! doStackTrace)
+      log.log(level, rootExn.toString());
+    else
+      log.log(level, e.toString(), e);
     
     if (location != null) {
       if (errorPageExn == null)

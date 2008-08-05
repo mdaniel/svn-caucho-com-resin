@@ -367,6 +367,7 @@ public class UserQuery implements AmberQuery {
       metaData = rs.getMetaData();
 
       _rs.setResultSet(rs, metaData);
+      _rs.setRow(_firstResult);
     }
 
     _rs.init();
