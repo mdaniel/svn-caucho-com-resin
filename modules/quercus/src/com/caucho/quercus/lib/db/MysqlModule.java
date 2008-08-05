@@ -315,9 +315,6 @@ public class MysqlModule extends AbstractQuercusModule {
 
   public static StringValue mysql_escape_string(Env env, Value val)
   {
-    if (! val.isString())
-      return env.getEmptyString();
-    
     StringValue unescapedString = val.toStringValue();
     
     StringValue sb = unescapedString.createStringBuilder();
@@ -376,9 +373,6 @@ public class MysqlModule extends AbstractQuercusModule {
                                                      Value val,
                                                      @Optional Mysqli conn)
   {
-    if (! val.isString())
-      return env.getEmptyString();
-    
     StringValue unescapedString = val.toStringValue();
     
     if (conn == null)

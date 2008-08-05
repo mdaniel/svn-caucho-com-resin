@@ -238,7 +238,7 @@ public abstract class JdbcConnectionResource
       switch (c) {
       case '\u0000':
         buf.append('\\');
-        buf.append('\u0000');
+        buf.append(0);
         break;
       case '\n':
         buf.append('\\');
