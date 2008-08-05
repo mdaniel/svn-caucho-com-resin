@@ -56,13 +56,17 @@ public class BamServiceConfig extends BeanConfig
   private static final Logger log
     = Logger.getLogger(BamServiceConfig.class.getName());
 
-  @In private BamBroker _broker;
+  private BamBroker _broker;
 
   private int _threadMax = 1;
   private BamService _service;
   
   public BamServiceConfig()
   {
+    WebBeansContainer webBeans = WebBeansContainer.getCurrent();
+
+    _broker = webBeans.getByType(BamBroker.class);
+
     setScope("singleton");
   }
 
@@ -84,7 +88,7 @@ public class BamServiceConfig extends BeanConfig
 
     // XXX: 3.2.0 temp 
     com.caucho.loader.Environment.addCloseListener(this);
-    
+
     start();
   }
 
@@ -114,9 +118,8 @@ public class BamServiceConfig extends BeanConfig
       name = service.getClass().getSimpleName();
 
     String jid = name;
-    if (jid.indexOf('@') < 0)
+    if (jid.indexOf('@') < 0 && jid.indexOf('/') < 0)
       jid = name + "@" + _broker.getJid();
-    
 
     service.setJid(jid);
 
@@ -128,7 +131,7 @@ public class BamServiceConfig extends BeanConfig
     }
 
     _service = service;
-    
+
     _broker.addService(service);
   }
 }

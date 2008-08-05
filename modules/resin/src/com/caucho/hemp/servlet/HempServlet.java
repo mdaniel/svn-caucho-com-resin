@@ -32,17 +32,23 @@ package com.caucho.hemp.servlet;
 import java.io.*;
 import javax.servlet.*;
 
+import com.caucho.config.ConfigException;
 import com.caucho.hemp.*;
 import com.caucho.bam.BamBroker;
 import com.caucho.server.connection.*;
+import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 import com.caucho.webbeans.manager.*;
 import javax.servlet.http.HttpServletResponse;
+import javax.webbeans.In;
 
 /**
  * Main protocol handler for the HTTP version of HeMPP.
  */
 public class HempServlet extends GenericServlet {
+  private static final L10N L = new L10N(HempServlet.class);
+  
+  @In(optional=true)
   private BamBroker _broker;
 
   public void setBroker(BamBroker broker)
@@ -54,9 +60,7 @@ public class HempServlet extends GenericServlet {
   public void init()
   {
     if (_broker == null) {
-      WebBeansContainer webBeans = WebBeansContainer.create();
-      
-      _broker = webBeans.getByType(BamBroker.class);
+      throw new ConfigException(L.l("broker is required"));
     }
   }
   

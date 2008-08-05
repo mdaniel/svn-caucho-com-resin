@@ -148,7 +148,7 @@ public class XmppBrokerStream
   {
     String password = (String) credentials;
     
-    _uid = uid + "@localhost";
+    _uid = uid + _broker.getJid();
     
     _conn = _broker.getConnection(_uid, password);
     _conn.setStreamHandler(_toClient);
@@ -202,8 +202,8 @@ public class XmppBrokerStream
    * Handles a message
    */
   public void message(String to,
-			  String from,
-			  Serializable value)
+		      String from,
+		      Serializable value)
   {
     _toBroker.message(to, _jid, value);
   }
@@ -212,9 +212,9 @@ public class XmppBrokerStream
    * Handles a message
    */
   public void messageError(String to,
-			       String from,
-			       Serializable value,
-			       BamError error)
+			   String from,
+			   Serializable value,
+			   BamError error)
   {
     _toBroker.messageError(to, _jid, value, error);
   }

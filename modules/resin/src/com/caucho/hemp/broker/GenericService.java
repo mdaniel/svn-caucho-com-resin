@@ -109,7 +109,7 @@ public class GenericService extends SimpleBamService
 
     _agentStream = createQueue(this);
 
-    _broker.addService(this);
+    // _broker.addService(this);
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " init");
