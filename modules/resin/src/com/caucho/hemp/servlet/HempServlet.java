@@ -53,14 +53,16 @@ public class HempServlet extends GenericServlet {
 
   public void setBroker(BamBroker broker)
   {
-    _broker = broker;
+    if (broker != null)
+      _broker = broker;
   }
 
   @Override
   public void init()
   {
     if (_broker == null) {
-      throw new ConfigException(L.l("broker is required"));
+      throw new ConfigException(L.l("{0}: broker is required",
+				    this));
     }
   }
   
