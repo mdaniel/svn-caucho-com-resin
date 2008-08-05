@@ -165,16 +165,23 @@ public class HostSingleDeployGenerator
   public HostController mergeController(HostController controller,
 					String name)
   {
-    /*
-    // if directory matches, merge them
-    if (controller.getRootDirectory().equals(_controller.getRootDirectory()))
+    // if directory matches, merge the two controllers.  The
+    // last controller has priority.
+    if (controller.getRootDirectory().equals(_controller.getRootDirectory())) {
+      // controller.setDynamicDeploy(false);
+      
       return controller.merge(_controller);
-    */
-    // If the names match, merge the controller
-    if (_controller.isNameMatch(name))
-      return controller.merge(_controller);
-    else
+    }
+    else if (! _controller.isNameMatch(name)) {
+      // else if the names don't match, return the new controller
+      
       return controller;
+    }
+    else {
+      // otherwise, the single deploy overrides
+      // server/10v9
+      return _controller;
+    }
   }
 
   public Throwable getConfigException()

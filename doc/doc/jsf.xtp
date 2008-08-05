@@ -56,7 +56,8 @@
       </p>
 
       <example title="Fast-JSF JSP Generated Code">
-HtmlOutputText _jsp_comp_1 = Utils.add(jsf_context, request, response, javax.faces.component.html.HtmlOutputTest.class);
+HtmlOutputText _jsp_comp_1
+  = Utils.add(jsf_context, request, response, HtmlOutputTest.class);
 _jsp_comp_1.setValueExpression("value", _value_expr_0);
       </example>
 
@@ -67,7 +68,8 @@ _jsp_HtmlOutputTextTag_1 = new HtmlOutputTextTag();
 _jsp_HtmlOutputTextTag_1.setPageContext(pageContext);
 _jsp_HtmlOutputTextTag_1.setParent((javax.servlet.jsp.tagext.Tag) _jsp_FacesViewTag_0);
 _jsp_HtmlOutputTextTag_1.setJspId("jsp2");
-_jsp_HtmlOutputTextTag_1.setValue(pageContext.createExpr(_value_expr_0, "#{msgs.title}", java.lang.Object.class));
+_jsp_HtmlOutputTextTag_1.setValue(pageContext.createExpr(_value_expr_0,
+                                    "#{msgs.title}", java.lang.Object.class));
 _jsp_HtmlOutputTextTag_1.doStartTag();
 _jsp_HtmlOutputTextTag_1.doEndTag();
       </example>
@@ -272,7 +274,7 @@ public class FooBean {
 
     <s2 title="Aid's EL Expression Display">
       <p>
-       Expression, encoutered during introspection of a Component Tree
+       Expressions encoutered during introspection of a Component Tree
         become links and navigate to a page that display result
         of evaluation of that expression.
       </p>

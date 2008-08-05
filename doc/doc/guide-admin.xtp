@@ -37,7 +37,7 @@ Speedups for some applications can be 10x or 100x.</li>
 <li><b>server</b> - A Resin instance running on a single JVM.  One or
 more servers can run on the same <em>machine</em>.</li>
 <li><b>servlet</b> - A Java program responsible for serving web content.  All
-content is handle by a servlet, including static files,
+content is handled by a servlet, including static files,
 JSPs and PHP content.</li>
 <li><b>thread</b> - An active execution of a Java program.  Because Java
 is multithreaded, multiple Java programs are running simultaneously.
@@ -110,7 +110,7 @@ things explicitly, not disable hidden defaults.  The slight extra
 verbosity is outweighed by the improved security and
 maintainability.</p>
 
-<p>This resin.xml specifies an Apache-style structure where
+<p>The following resin.xml specifies an Apache-style structure where
 all content is served from the <code>/var/www/htdocs</code> directory,
 and is useful when upgrading from an old PHP site to use Quercus
 for security and performance.  When organizing a site from scratch,
@@ -142,8 +142,8 @@ hosting directory structure.</p>
 
 <ul>
 <li><a href="resin-tags.xtp#resin">&lt;resin></a> starts a Resin
-configuration file and introduces the XML namespaces allowing
-for validation.</li>
+configuration file and declares the validation namespaces.
+</li>
 <li><a href="cluster-tags.xtp#cluster">&lt;cluster></a> encloses the
 single-server cluster containing our content.</li>
 <li><a
@@ -292,7 +292,7 @@ static file servlet, JSP, PHP servlets, as well as the standard
 mime-type mappings.</p>
 
 <p>The Resin jars, JNI libraries and licenses go in
-<code>/usr/local/share/resin</code>, typically owned
+<code>/usr/lib/resin</code>, typically owned
 by root.  The <code>resin</code> directory itself will normally be a
 symbolic link to the Resin version, so you can upgrade easily.</p>
 
@@ -300,26 +300,26 @@ symbolic link to the Resin version, so you can upgrade easily.</p>
 /etc/resin/
   resin.xml                 - main Resin configuration file
   app-default.xml           - default servlet configuration
+  admin-users.xml           - /resin-admin users
 
 /etc/init.d/resin           - startup script
 
-/usr/local/share/resin/     - ${resin.home}
+/usr/lib/resin/             - ${resin.home}
    lib/*.jar                - Resin's Java classes
    libexec/*.so             - native JNI libraries
    libexec64/*.so           - JNI for 64-bit systems
    licenses/*               - Resin Pro licenses
-   php/admin/*              - /resin-admin source
    win32/*.dll              - Win32 JNI
    win64/*.dll              - Win64 JNI
    
 /var/www/                   - ${resin.root}
    admin/                   - Resin database and cache storage
+   doc/admin/               - /resin-admin source
    ivy2/                    - ivy2 jar repository
    lib/                     - Shared application jars
    log/                     - watchdog and Resin debug logging
-   logs/                    - HTTP access logging
    hosts/foo.com/           - dynamic host contents
-     logs/                  - access logging per virtual host
+     log/                   - access logging per virtual host
      host.xml               - optional host-specific configuration
      webapps/ROOT/          - web-app content
        index.php            - web-app content

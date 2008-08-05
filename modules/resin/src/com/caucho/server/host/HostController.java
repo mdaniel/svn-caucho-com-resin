@@ -332,6 +332,9 @@ public class HostController
    */
   public boolean isNameMatch(String name)
   {
+    if (name.equals("default"))
+      name = "";
+    
     if (_hostName.equalsIgnoreCase(name))
       return true;
 
@@ -430,7 +433,8 @@ public class HostController
 	mergedController.mergeController(this);
 	mergedController.mergeController(newController);
 
-	if (! getHostName().equals(newController.getHostName())) {
+	if (! isNameMatch(newController.getHostName())
+	    && ! newController.isNameMatch(getHostName())) {
 	  ConfigException e;
 
 	  e = new ConfigException(L.l("Illegal merge of {0} and {1}.  Both hosts have the same root-directory '{2}'.",

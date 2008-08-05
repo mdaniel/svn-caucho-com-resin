@@ -211,6 +211,14 @@ public class HostExpandDeployGenerator
 					   String key)
   {
     try {
+      Path expandDirectory = getExpandDirectory();
+      Path rootDirectory = controller.getRootDirectory();
+
+      if (! expandDirectory.equals(rootDirectory.getParent()))
+        return controller;
+
+      controller = super.mergeController(controller, key);
+      
       controller.setStartupMode(getStartupMode());
     
       for (int i = 0; i < _hostDefaults.size(); i++)

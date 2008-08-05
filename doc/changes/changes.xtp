@@ -51,7 +51,7 @@
 <li>admin: added basic graphs to /resin-admin</li>
 <li>classloader: getResource/getResources issues with directories (#2763, rep by bregnvig)</li>
 <li>amber: basic @ElementCollection implementation (#2749, rep by Martin Aschoff)</li>
-<li>jsf: new JSF 'java' state serialization method introduced. Now supports methods 'hessian'-(defalut) and 'java'</li>
+<li>jsf: new JSF 'java' state serialization method introduced. Now supports methods 'hessian'-(default) and 'java'</li>
 <li>jsf: AjaxAnywhere fixes(#2644, rep by vladdy)</li>
 <li>quercus: missing synchronization in ModuleContext</li>
 <li>jms: add jndi/remote cluster client (#2476)</li>
@@ -66,7 +66,7 @@
 <li>plugin: win32 apache/iis timeout default needs to be greater than socket-timeout to avoid 503 (#2715, rep by bmeyns)</li>
 <li>xml: sax issue with Tapestry (#2723, rep by wirah)</li>
 <li>security: for ldap authentication, add security-authentication, security-principal and security-credentials (#2325, rep by Vinny)</li>
-<li>deploy: web-app-deploy shoudl use dependency-check-interval, not redeploy-check-interval (#2745, rep by mzgubin)</li>
+<li>deploy: web-app-deploy should use dependency-check-interval, not redeploy-check-interval (#2745, rep by mzgubin)</li>
 <li>deploy: add command-line war deployment (#1167, rep by Serge Knystautas)</li>
 <li>quercus: include. include_once don't return a Boolean value (#2742, rep by kubazygmunt)</li>
 <li>database: after connection error in XA, the returned connection must still be the same object (#2708, rep by Takahiro Fukuda)</li>
