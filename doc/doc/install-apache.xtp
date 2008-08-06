@@ -296,9 +296,9 @@ for a detailed description.</p>
 <example>
 unix&gt; java -jar $RESIN_HOME/lib/resin.jar
 
-unix&gt; bin/httpd.sh
+unix&gt; bin/resin.sh
 
-win&gt; httpd.exe
+win&gt; resin.exe
 </example>
 
 <results>
@@ -558,12 +558,12 @@ ResinConfigServer 192.168.0.1 6801
 </example>
 
 <example>
-$ bin/httpd.sh -pid gryffindor.pid -conf conf/gryffindor.conf start
-$ bin/httpd.sh -pid slytherin.pid -conf conf/slytherin.conf start
+$ bin/resin.sh -pid gryffindor.pid -conf conf/gryffindor.conf start
+$ bin/resin.sh -pid slytherin.pid -conf conf/slytherin.conf start
 
 ...
 
-$ bin/httpd.sh -pid gryffindor.pid stop
+$ bin/resin.sh -pid gryffindor.pid stop
 
 </example>
 
@@ -682,8 +682,8 @@ properly started.
 will show red, and Resin hasn't started properly.
 </li>
 <li>If Resin doesn't start properly, you should look at the logs
-in resin-3.2.x/log.  You should start <var>httpd.sh -verbose</var> or
-<var>httpd.exe -verbose</var> to get more information.
+in resin-3.2.x/log.  You should start <var>resin.sh -verbose</var> or
+<var>resin.exe -verbose</var> to get more information.
 </li>
 <li>If Resin never shows a "hmux listening to *:6800" line,
 it's not listening for connections from mod_caucho.

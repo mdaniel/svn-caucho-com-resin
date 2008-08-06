@@ -42,7 +42,7 @@ implementation will work just as well in UNIX.</p>
 The non-pro version is open-source.</li>
 <li>Save the file to your desktop.</li>
 <li>Double click the binary and unzip the file.</li>
-<li>For purposes of this demo, I have unzipped the contents to C:\resin-3.0.14</li>
+<li>For purposes of this demo, I have unzipped the contents to C:\resin-3.2.0</li>
 </ol>
 
 </s2>
@@ -50,8 +50,8 @@ The non-pro version is open-source.</li>
 <s2 title="Running Resin for the first time">
 
 <ol>
-<li>Browse to the directory into which you unzipped the resin download (ie: C:\resin-3.0.14)</li>
-<li>Double-click httpd.exe.  At this point the resin web server should start.</li>
+<li>Browse to the directory into which you unzipped the resin download (ie: C:\resin-3.2.0)</li>
+<li>Double-click resin.exe.  At this point the resin web server should start.</li>
 <li>Open your favorite browser and type in the following URL: http://localhost:8080</li>
 <li>You will now see Resin's Default Home Page</li>
 </ol>
@@ -63,11 +63,11 @@ The non-pro version is open-source.</li>
 
 <ol>
 <li>Cut and paste the "resin-web.xml" into your favorite text editor.</li>
-<li>Save the file into C:\resin-3.0.14\webapps\ROOT\WEB-INF (NB: if you use
+<li>Save the file into C:\resin-3.2.0\webapps\ROOT\WEB-INF (NB: if you use
 Notepad, then be careful to either save as "all files" or just put the
 file name in double quotes.  IE: "resin-web.xml").</li>
 <li>Cut and paste the "hello-world.php" into your text editor.</li>
-<li>Save the file into C:\resin-3.0.14\webapps\ROOT</li>
+<li>Save the file into C:\resin-3.2.0\webapps\ROOT</li>
 <li>Open your favorite browser and type in the
 following URL: http://localhost:8080/hello-world.php.</li>
 </ol>

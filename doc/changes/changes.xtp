@@ -13,6 +13,8 @@
 
 <s2 title="3.2.0 snapshot">
 <ul>
+<li>resin: renamed httpd.sh and httpd.exe to resin.sh and resin.exe respectively</li>
+<li>quercus: fixed compact() for variables with NULL values</li>
 <li>quercus: add replace() to UsesSymbolTable and split the array extract</li>
 <li>jsse: add 'protocols' attribute (#2794, rep by Maithili Deshpande)</li>
 <li>server: IllegalStateException: DESTROYED in TcpConnection (#2799, rep by Steffen Busch)</li>

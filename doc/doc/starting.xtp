@@ -226,8 +226,8 @@ configuration tells Apache how to find Resin.</p>
 <li>Make any needed Apache httpd.conf changes</li>
 <li>Make any needed Resin resin.xml changes</li>
 <li>Restart Apache</li>
-<li>Start Resin with <code>resin-3.2.0/bin/httpd.sh</code> on Unix or
-<code>resin-3.2.0/httpd.exe</code> on Windows.</li>
+<li>Start Resin with <code>resin-3.2.0/bin/resin.sh</code> on Unix or
+<code>resin-3.2.0/resin.exe</code> on Windows.</li>
 </ol>
 
 <p>On Unix, you'll run configure using <code>--with-apache</code> and then <code>make</code>:
@@ -255,15 +255,15 @@ Resin, and <var>srun</var>, Resin's Java support.</p>
 <figure src="iis_srun.gif"/>
 
 <p>For this setup you must configure both IIS and Resin.  The Resin
-configuration is identical to Resin's httpd configuration.  The IIS
-configuration tells IIS how to find Resin.
+configuration to run with IIS is identical to Resin's standalone
+configuration.  The IIS configuration tells IIS how to find Resin.
 </p>
 
 <ol>
-<li>Setup the registry and IIS using resin-3.2.0/bin/setup</li>
+<li>Setup the registry and IIS using resin-3.2.0/setup.exe</li>
 <li>Any needed Resin resin.xml changes</li>
 <li>Restart IIS</li>
-<li>Start Resin with resin-3.2.0/httpd.exe.</li>
+<li>Start Resin with resin-3.2.0/resin.exe.</li>
 </ol>
 
 <p>For more details and troubleshooting steps, see the

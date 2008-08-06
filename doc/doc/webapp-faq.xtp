@@ -226,7 +226,7 @@ it is specified at startup:
 </p>
 
 <example>
-$ bin/httpd -Dfile.encoding=ISO-8859-1
+$ bin/resin -Dfile.encoding=ISO-8859-1
 </example>
 
 <p>

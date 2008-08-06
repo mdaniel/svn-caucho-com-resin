@@ -2281,8 +2281,8 @@ system property at the command line:
 </p>
 
 <example>
-unix$ bin/httpd.sh -Djava.security.policy=<i>file:/path/to/java.policy</i>
-win$ bin/httpd.exe -Djava.security.policy=<i>file:/path/to/java.policy</i>
+unix$ bin/resin.sh -Djava.security.policy=<i>file:/path/to/java.policy</i>
+win$ bin/resin.exe -Djava.security.policy=<i>file:/path/to/java.policy</i>
 </example>
 
 <p>

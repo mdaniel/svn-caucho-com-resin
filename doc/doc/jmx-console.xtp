@@ -22,8 +22,8 @@ local and remote administration of a Resin server.
 </p>
 
 <example title="Start Resin and allow local JMX administration">
-win&gt; ./httpd.exe -Dcom.sun.management.jmxremote
-unix&gt; bin/httpd.sh -Dcom.sun.management.jmxremote
+win&gt; ./resin.exe -Dcom.sun.management.jmxremote
+unix&gt; bin/resin.sh -Dcom.sun.management.jmxremote
 </example>
 
 <example title="Start jconsole">
@@ -34,8 +34,8 @@ unix&gt; jconsole
 </example>
 
 <example title="Start Resin and allow remote JMX administration">
-win&gt; ./httpd.exe -Dcom.sun.management.jmxremote.port=9999
-unix&gt; bin/httpd.sh -Dcom.sun.management.jmxremote.port=9999
+win&gt; ./resin.exe -Dcom.sun.management.jmxremote.port=9999
+unix&gt; bin/resin.sh -Dcom.sun.management.jmxremote.port=9999
 </example>
 
 <p>
@@ -53,13 +53,13 @@ is accessible by anyone who can guess the port number.
 
 <example title="Start Resin and remote JMX - disable password checking and SSL">
 
-win&gt; ./httpd.exe -Dcom.sun.management.jmxremote.port=9999
-                 -Dcom.sun.management.jmxremote.ssl=false
-                 -Dcom.sun.management.jmxremote.authenticate=false
+win&gt; ./resin.exe -Dcom.sun.management.jmxremote.port=9999
+                    -Dcom.sun.management.jmxremote.ssl=false
+                    -Dcom.sun.management.jmxremote.authenticate=false
 
-unix&gt; bin/httpd.sh -Dcom.sun.management.jmxremote.port=9999 \
-                   -Dcom.sun.management.jmxremote.ssl=false \
-                   -Dcom.sun.management.jmxremote.authenticate=false
+unix&gt; bin/resin.sh -Dcom.sun.management.jmxremote.port=9999 \
+                      -Dcom.sun.management.jmxremote.ssl=false \
+                      -Dcom.sun.management.jmxremote.authenticate=false
 </example>
 
 <example title="Start jconsole">
@@ -83,11 +83,11 @@ controlRole 55control
 
 <example title="Start Resin and remote JMX - disable SSL">
 
-win&gt; ./httpd.exe -Dcom.sun.management.jmxremote.port=9999
-                 -Dcom.sun.management.jmxremote.ssl=false
+win&gt; ./resin.exe -Dcom.sun.management.jmxremote.port=9999
+                    -Dcom.sun.management.jmxremote.ssl=false
 
-unix&gt; bin/httpd.sh -Dcom.sun.management.jmxremote.port=9999 \
-                   -Dcom.sun.management.jmxremote.ssl=false
+unix&gt; bin/resin.sh -Dcom.sun.management.jmxremote.port=9999 \
+                      -Dcom.sun.management.jmxremote.ssl=false
 
 </example>
 

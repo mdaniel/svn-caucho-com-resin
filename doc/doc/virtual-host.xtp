@@ -457,9 +457,9 @@ unix&gt; java -jar lib/resin.jar -server web -conf conf/resin.xml stop
 <p>With Windows, each JVM is installed as a service.</p>
 
 <example title="Example: installing as win32 service">
-win&gt; httpd -install-as "Resin" -server resin -conf conf/resin.xml
-win&gt; httpd -install-as "Resin www.gryffindor.com" -server gryffindor -conf conf/gryffindor.conf
-win&gt; httpd -install-as "Resin www.slytherin.com"-server slytherin -conf conf/slytherin.conf
+win&gt; resin.exe -install-as "Resin" -server resin -conf conf/resin.xml
+win&gt; resin.exe -install-as "Resin www.gryffindor.com" -server gryffindor -conf conf/gryffindor.xml
+win&gt; resin.exe -install-as "Resin www.slytherin.com"-server slytherin -conf conf/slytherin.xml
 </example>
 
 <p>You will either need to reboot the machine or start the service from the

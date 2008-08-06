@@ -682,7 +682,7 @@ a large number of threads (&gt; 256).</p>
 <p>The steps to track down a memory problem are:</p>
 
 <ol>
-<li>Enable -J-verbosegc with the httpd.sh start or httpd -install.
+<li>Enable -J-verbosegc with the resin.sh start or resin.exe -install.
 The -verbosegc flag logs the garbage collection of the heap, which will
 let you know if you're running out of heap memory (the most common case).
 </li><li>Get a heap profiler or use the heap dump in the JVM.  JProfiler is an
@@ -760,7 +760,7 @@ the <a href="http://developer.sun.com/dev/coolstuff/jvmstat">jvmstat tools</a>.<
 start Resin (unix or windows) as</p>
 
 <example>
-&gt; httpd.sh -J-Xrunhprof:heap=sites,cpu=samples
+&gt; resin.sh -J-Xrunhprof:heap=sites,cpu=samples
 </example>
 
 <p>(On Unix, Resin's startup script has a -cpuprof-ascii argument that sets it for you automatically.)</p>
@@ -927,10 +927,10 @@ step to eliminating these classes.</p>
 
 <example title="Starting Resin with an empty CLASSPATH">
 win&gt; set CLASSPATH=
-win&gt; bin/httpd.exe
+win&gt; bin/resin.exe
 
 unix.sh&gt; export CLASSPATH=""
-unix.sh&gt; bin/httpd.sh
+unix.sh&gt; bin/resin.sh
 </example>
 
 <p>If you have manually placed any jars in $RESIN_HOME/lib or you
@@ -943,8 +943,8 @@ might be left.  It is best to give each version it's own directory.</p>
 <p>If the RESIN_HOME environment variable is not set, Resin may be
 picking up an older version.</p>
 
-<p>You can start httpd with the -verbose option to see the CLASSPATH that
-is being used when Resin is started.</p>
+<p>You can start resin.sh/resin.exe with the -verbose option to see the
+CLASSPATH that is being used when Resin is started.</p>
 
 </s2> <!-- classpath  -->
 

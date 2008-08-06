@@ -44,7 +44,7 @@ to create a module in Java callable from a PHP page.
 -->
 
 <p>For purposes of this article, I assume that you are working with
-Resin 3.0.17 and that the directory housing httpd.exe is
+Resin 3.2.0 and that the directory housing resin.exe is
 /var/www/webapps/ROOT. I will call this directory $webApp.
 </p>
 

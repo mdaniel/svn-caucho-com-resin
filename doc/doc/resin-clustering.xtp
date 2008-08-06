@@ -640,13 +640,13 @@ started with a different <var>-server xx</var> to select the correct
 block.  On Unix, startup will look like:</p>
 
 <example title="Starting Host&#160;C on Unix">
-resin-3.0.x&gt; bin/httpd.sh -conf conf/resin.xml -server c start
+resin-3.2.x&gt; bin/resin.sh -conf conf/resin.xml -server c start
 </example>
 
 <p>On Windows, Resin will generally be configured as a service:</p>
 
 <example title="Starting Host&#160;C on Windows">
-resin-3.0.x&gt; bin/httpd -conf conf/resin.xml -server c -install-as ResinC
+resin-3.2.x&gt; bin/resin -conf conf/resin.xml -server c -install-as ResinC
 </example>
 
 <s2 title="always-save-session">

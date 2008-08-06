@@ -33,19 +33,19 @@ set environment variable <var>JAVA_HOME</var>.</li>
   <ul><li>some <a href="config-cmdline.xtp">./configure options</a> are available</li></ul>
   </li>
 <li>Run <code>java -jar resin/lib/resin.jar</code>
-<ul><li>Or run <code>resin/bin/httpd.sh</code></li></ul>
+<ul><li>Or run <code>resin/bin/resin.sh</code></li></ul>
 </li>
 <li>Browse <var>http://localhost:8080</var></li>
 </ol>
 
 <example title="Successful Foreground Startup Output">
 unix&gt; java -jar resin/lib/resin.jar
-Resin Professional 3.2.0 (built Fri, 08 Sep 2006 12:49:30 PDT)
-Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.
+Resin Professional 3.2.0 (built Wed, 06 Aug 2008 12:49:30 PDT)
+Copyright(c) 1998-2008 Caucho Technology.  All rights reserved.
 
   001111.license - 1 Resin server Hogwarts School
 
-Starting Resin on Tue, 12 Sep 2006 19:11:52 -0700 (PDT)
+Starting Resin on Thu, 07 Aug 2008 19:11:52 -0700 (PDT)
 
 [21:22:21.282] Proxy Cache disk-size=1024M memory-size=8M
 [21:22:21.477] Server[id=,cluster=app-tier] starting
@@ -147,16 +147,16 @@ you might use <code>-server</code>.</p>
 <li>Make sure the JDK installation set the environment variable <var>JAVA_HOME</var> correctly</li>
 <li>Unzip resin-3.2.0.zip</li>
 <li>Run <code>java -jar resin-3.2.0/lib/resin.jar</code></li>
-<li>Or execute <var>resin-3.2.0/httpd.exe</var></li>
+<li>Or execute <var>resin-3.2.0/resin.exe</var></li>
 <li>Browse <var>http://localhost:8080</var></li>
 </ol>
 
 <example title="Starting on Win32">
-C:\win32&gt; resin-3.2.0\bin\httpd
-Resin 3.2.0-beta (built Thu Feb 13 18:21:13 PST 2003)
-Copyright(c) 1998-2002 Caucho Technology.  All rights reserved.
+C:\win32&gt; resin-3.2.0\bin\resin.exe
+Resin 3.2.0 (built Wed Aug 06 18:21:13 PST 2008)
+Copyright(c) 1998-2008 Caucho Technology.  All rights reserved.
 
-Starting Resin on Sat, 01 Mar 2003 19:11:52 -0500 (EST)
+Starting Resin on Thu, 07 Aug 2008 19:11:52 -0500 (EST)
 [19:11:56.479] ServletServer[] starting
 [19:11:57.000] Host[] starting
 [19:11:58.312] Application[http://localhost:8380/doc] starting
@@ -177,14 +177,14 @@ Starting Resin on Sat, 01 Mar 2003 19:11:52 -0500 (EST)
 <p>To install the service, use</p>
 
 <example>
-C:\&gt; resin-3.2.x\httpd -install -conf conf/myconf.xml \
-                          -user MyResinUser -password mypassword
+C:\&gt; resin-3.2.x\resin.exe -install -conf conf/myconf.xml \
+                              -user MyResinUser -password mypassword
 </example>
 
 <p>To remove the service, use</p>
 
 <example>
-C:\&gt; resin-3.2.x\httpd -remove
+C:\&gt; resin-3.2.x\resin.exe -remove
 </example>
 
 <p>You will either need to reboot the machine or start the service
@@ -207,9 +207,9 @@ the executable string.</p>
 the service name.</p>
 
 <example>
-C:\&gt; resin-3.2.x\httpd -install-as ResinA \
-                       -conf conf/myconf.conf \
-                       -server a
+C:\&gt; resin-3.2.x\resin.exe -install-as ResinA \
+                              -conf conf/myconf.conf \
+                              -server a
 C:\&gt; net start ResinA
 </example>
 
@@ -244,7 +244,7 @@ unix&gt; jps
 2097 Resin
 </example>
 
-<p>When running as a daemon (eg, <code>httpd.sh start</code>)
+<p>When running as a daemon (eg, <code>resin.sh start</code>)
 <var>ResinWatchdogManager</var> is the watchdog and <var>Resin</var>
 is the actual Resin instance. When running Resin as a foreground process,
 the process list displays <var>resin.jar</var>, which acts as the watchdog.</p>

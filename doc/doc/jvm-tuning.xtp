@@ -122,7 +122,7 @@ threads that you can have, too big of a stack size and you will run out of
 memory as each thread is allocated more memory than it needs.</p>
 
 <p>
-The Resin startup scripts (httpd.exe on Windows, wrapper.pl on Unix) will set
+The Resin startup scripts (resin.exe on Windows, resin.sh on Unix) will set
 the stack size to 2048k, unless it is specified explicity.  2048k is an
 appropriate value for most situations.
  </p>
