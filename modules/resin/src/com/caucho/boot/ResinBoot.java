@@ -31,6 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.loader.*;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
@@ -120,6 +121,8 @@ public class ResinBoot {
     webBeans.addSingletonByName(elContext.getServerVar(), "server");
     webBeans.addSingletonByName(System.getProperties(), "system");
     webBeans.addSingletonByName(System.getenv(), "getenv");
+
+    ResinConfigLibrary.configure(webBeans);
 
     config.configure(bootManager, _args.getResinConf(),
                      "com/caucho/server/resin/resin.rnc");

@@ -31,6 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.config.types.RawString;
 import com.caucho.loader.*;
 import com.caucho.log.EnvironmentStream;
@@ -119,6 +120,8 @@ class WatchdogManager extends ProtocolDispatchServer {
     webBeans.addSingletonByName(elContext.getServerVar(), "server");
     webBeans.addSingletonByName(System.getProperties(), "system");
     webBeans.addSingletonByName(System.getenv(), "getenv");
+
+    ResinConfigLibrary.configure(webBeans);
 
     _watchdogPort = _args.getWatchdogPort();
     readConfig(_args);
