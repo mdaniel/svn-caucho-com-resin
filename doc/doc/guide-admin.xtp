@@ -48,6 +48,24 @@ restarting Resin <em>servers</em> for reliability.</li>
 Drupal or Mediawiki site.  All content belongs to a webapp.</li>
 </ul>
 
+<figure src="cluster-load-balance.png"/>
+
+<p>In the previous figure:</p>
+<ul>
+<li>The <em>servers</em> are "web-a", "app-a" and "app-b".</li>
+<li>The <em>clusters</em> are "web-tier" and "app-tier".</li>
+<li>The <em>virtual hosts</em> are "foo.com" and "bar.com".</li>
+<li>The <em>webapps</em> are "/", "/wiki" and "/drupal".</li>
+<li>Both <em>servers</em> "app-a" and "app-b" in the <em>cluster</em>
+"app-tier" serve identical content, i.e. the same <em>virtual
+hosts</em> and <em>webapps</em>.</li>
+<li>web-a has a <em>proxy-cache</em> and <em>load balancer</em>.</li>
+<li>web-a listens to HTTP <em>port</em> 80.</li>
+<li>app-a and app-b listen to cluster <em>port</em> 6800 and 6801.</li>
+<li>All three <em>servers</em> could be on the same <em>machine</em> or
+on separate <em>machines</em>.</li>
+</ul>
+
 </s1>
 
 <s1 title="Dispatching Content">
