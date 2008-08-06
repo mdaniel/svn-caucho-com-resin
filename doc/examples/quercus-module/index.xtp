@@ -44,8 +44,8 @@ to create a module in Java callable from a PHP page.
 -->
 
 <p>For purposes of this article, I assume that you are working with
-Resin 3.2.0 and that the directory housing resin.exe is
-/var/www/webapps/ROOT. I will call this directory $webApp.
+Resin 3.2.0 with the home directory at C:\resin-3.2.0. I will call this
+directory <code>$webApp</code>.
 </p>
 
 </s1>
@@ -118,7 +118,10 @@ You should see:
 
 <s1 title="Advanced Users">
 
-<p>The first argument of a Java function may be the <code>Env</code>.  The <code>Env</code> provides access to Quercus resources like printing to the browser and retrieving a PHP ini value.  For the API of <code>Env</code>, refer to the Quercus javadoc.</p>
+<p>The first argument of a Java function may be the <code>Env</code>.
+The <code>Env</code> provides access to Quercus resources like printing
+to the browser and retrieving a PHP ini value.  For the API of
+<code>Env</code>, refer to the Quercus javadoc.</p>
 
 <example>
 
@@ -146,17 +149,26 @@ public class HelloModule extends AbstractQuercusModule {
 
 </example>
 
-<p>Now <code>hello_test</code> will print "inside HelloModule hello_test()" to the browser before returning.</p>
+<p>Now <code>hello_test</code> will print "inside HelloModule hello_test()"
+to the browser before returning.</p>
 
 </s1>
 
 <s1 title="Java Function Arguments/Return Marshaling">
 
-<p>Quercus does marshaling to and from Quercus Values and Java objects.  If a Java function requires a String, Quercus will automatically convert the internal Quercus StringValue to a String.  If a Java function returns an <code>int</code>, Quercus will create a Quercus LongValue for it.</p>
+<p>Quercus does marshaling to and from Quercus Values and Java objects.
+If a Java function requires a String, Quercus will automatically convert
+the internal Quercus StringValue to a String.  If a Java function returns
+an <code>int</code>, Quercus will create a Quercus LongValue for it.</p>
 
-<p>For other Java Objects like <code>java.util.Date</code> that are returned to PHP, Quercus puts them into wrappers to expose their public methods and members to the PHP script.  Java Collection, List, and Map instances have the additional ability to be used within a PHP script like any other PHP array.</p>
+<p>For other Java Objects like <code>java.util.Date</code> that are returned
+to PHP, Quercus puts them into wrappers to expose their public methods and
+members to the PHP script.  Java Collection, List, and Map instances have
+the additional ability to be used within a PHP script like any other PHP
+array.</p>
 
-<p>For more information, see <a href="../../doc/quercus-java-integration.xtp">Java Interface</a>.</p>
+<p>For more information, see
+<a href="../../doc/quercus-java-integration.xtp">Java Interface</a>.</p>
 
 </s1>
 
