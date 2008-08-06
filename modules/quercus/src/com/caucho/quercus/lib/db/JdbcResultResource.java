@@ -574,14 +574,13 @@ public class JdbcResultResource {
             // php/144b
             if (bytes == null)
               bytes = rs.getBytes(column);
-            
-            bb.append(bytes);
+
+	    if (bytes != null)
+	      bb.append(bytes);
             
             return bb;
           }
         } catch (RuntimeException e) {
-          e.printStackTrace();
-          
           log.log(Level.WARNING, e.toString(), e);
 
           return NullValue.NULL;
