@@ -54,7 +54,7 @@
 
     <mkdir dir="${eclipse.dist}"/>
 
-    <jar jarfile="${eclipse.dist}/com.caucho.resin.eclipse_3.1.0.jar"
+    <jar jarfile="${eclipse.dist}/com.caucho.resin.eclipse_${version}.jar"
          manifest="${eclipse.basedir}/META-INF/MANIFEST.MF">
       <fileset dir="${eclipse.build}">
         <exclude name=".cvsignore"/>
@@ -1052,7 +1052,8 @@
 
     <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="eclipse"/>
-      <param name="jar.name" value="resin-eclipse.jar"/>
+      <param name="jar.name"
+	     value="com.caucho.resin.eclipse_${version}.jar"/>
       <param name="maven.name" value="resin-eclipse"/>
     </antcall>
 
