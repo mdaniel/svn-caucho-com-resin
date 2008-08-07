@@ -76,10 +76,11 @@ poll_read(int fd, int s)
 	if (s <= 0)
 		return 1;
 
-	while (s >= 0) {
+	while (s > 0) {
 		fd_set read_set;
 		struct timeval timeout;
 		int sec = s;
+		int result;
 
 		FD_ZERO(&read_set);
 		FD_SET(fd, &read_set);
@@ -90,13 +91,16 @@ poll_read(int fd, int s)
 		timeout.tv_sec = sec;
 		timeout.tv_usec = 0;
 
-		if (select(fd + 1, &read_set, 0, 0, &timeout) > 0)
-			return 1;
+		result = select(fd + 1, &read_set, 0, 0, &timeout);
+		if (0)
+			return result;
+		if (result != 0)
+			return result;		
 
 		s -= sec;
 	}
 
-	return -1;
+	return 0;
 }
 
 /**
@@ -111,8 +115,10 @@ std_read(stream_t *s, void *buf, int length)
   if (s->cluster_srun && s->cluster_srun->srun->read_timeout > 0)
 	  timeout = s->cluster_srun->srun->read_timeout;
 
-  if (poll_read(s->socket, timeout) <= 0)
+  if (poll_read(s->socket, timeout) <= 0) {
+	  cse_close(s, "timeout");
     return -1;
+  }
 #endif
 
   return recv(s->socket, buf, length, 0);
@@ -705,7 +711,12 @@ int
 hmux_read_len(stream_t *s)
 {
   int l1 = cse_read_byte(s) & 0xff;
-  int l2 = cse_read_byte(s) & 0xff;
+  int l2 = cse_read_byte(s);
+  
+  if (l2 < 0)
+	  return -1;
+  else
+	  l2 = l2 & 0xff;
 
   return (l1 << 8) + l2;
 }
@@ -804,9 +815,15 @@ hmux_read_string(stream_t *s, char *buf, int length)
   length--;
 
   l1 = cse_read_byte(s) & 0xff;
-  l2 = cse_read_byte(s) & 0xff;
-  read_length = (l1 << 8) + l2;
+  l2 = cse_read_byte(s);
 
+  if (l2 < 0) {
+	  read_length = -1;
+  }
+  else {
+	l2 = l2 & 0xff;
+	read_length = (l1 << 8) + l2;
+  }
   if (s->socket < 0) {
     *buf = 0;
     return -1;
