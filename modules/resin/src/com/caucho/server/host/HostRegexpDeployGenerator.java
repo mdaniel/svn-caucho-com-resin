@@ -164,7 +164,7 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
 	controller.destroy();
 	return null;
       }
-    
+
       synchronized (_entries) {
 	for (int i = 0; i < _entries.size(); i++) {
 	  HostController oldController = _entries.get(i);
@@ -184,7 +184,7 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
 	log.log(Level.WARNING, e.toString(), e);
       }
       */
-
+      
       return controller;
     } finally {
       thread.setContextClassLoader(oldLoader);

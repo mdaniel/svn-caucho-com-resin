@@ -481,8 +481,7 @@
     </jar>
   </target>
 
-  <target name="resin-dev" depends="init, resin-xml, hessian, jcache, javaee, jsf, portlet, script, resin-util, webbeans, version">
-
+  <target name="resin-compile">
     <!-- build module -->
 
     <antcall target="module" inheritRefs="true">
@@ -491,7 +490,7 @@
     </antcall>
   </target>
   
-  <target name="resin" depends="resin-dev"/>
+  <target name="resin" depends="init, resin-xml, hessian, jcache, javaee, jsf, portlet, script, resin-util, osgi, version, resin-compile"/>
 
   <!--
   <target name="jaf" depends="init">
@@ -1098,10 +1097,10 @@
     <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="netbeans"/>
       <param name="module.ext" value="nbm"/>
-      <param name="jar.name" value="resin-netbeans-plugin.nbm"/>
-      <param name="maven.name" value="resin-netbeans-plugin"/>
+      <param name="jar.name" value="resin-netbeans.nbm"/>
+      <param name="maven.name" value="resin-netbeans"/>
     </antcall>
-
+    
     <antcall target="maven2-module" inheritRefs="true">
       <param name="module.name" value="quercus"/>
       <param name="jar.name" value="quercus.jar"/>

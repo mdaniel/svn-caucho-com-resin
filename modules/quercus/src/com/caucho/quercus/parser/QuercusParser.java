@@ -1675,10 +1675,10 @@ public class QuercusParser {
       // php/076b, php/1c02
       // XXX: save arg type for type checking upon function call
       String expectedClass = null;
-      if (token != ')' &&
-          token != '&' &&
-          token != '$' &&
-          token != -1) {
+      if (token != ')'
+	  && token != '&'
+	  && token != '$'
+	  && token != -1) {
         _peekToken = token;
         expectedClass = parseIdentifier();
         token = parseToken();
@@ -2672,6 +2672,7 @@ public class QuercusParser {
    *      ::= term '[' index ']'
    *      ::= term '{' index '}'
    *      ::= term '(' index ')'
+   *      ::= term '->' name
    * </pre>
    */
   private Expr parseTerm()
@@ -2796,9 +2797,13 @@ public class QuercusParser {
 	term = _factory.createPostIncrement(term, -1);
 	break;
 
+	
+	/*
       case DEREF:
+      // php/0d6g
 	term = parseDeref(term);
         break;
+	*/
 
       default:
         _peekToken = token;

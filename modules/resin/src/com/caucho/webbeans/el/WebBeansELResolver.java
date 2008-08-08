@@ -87,10 +87,13 @@ public class WebBeansELResolver extends ELResolver {
 
     ComponentImpl value = _webBeans.findByName(name);
 
-    if (value != null) {
-      context.setPropertyResolved(true);
+    Object result = null;
+    
+    if (value != null)
+      result = value.get();
 
-      Object result = value.get();
+    if (result != null) {
+      context.setPropertyResolved(true);
 
       return result;
     }

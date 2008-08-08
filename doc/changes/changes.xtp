@@ -11,7 +11,22 @@
 <li><a href="http://caucho.com/resin-3.1/doc/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="3.2.0 snapshot">
+<s2 title="3.2.1 snapshot">
+<ul>
+<li>host: regexp vs static host priority (#2813, rep by Shane Cruz)</li>
+<li>jsp: virtual host should not add 'name' as webbean value (#2807, rep by hpri)</li>
+<li>jsp: validation of tag dynamic-attributes generated improper XML (#2808, rep by hpri)</li>
+<li>quercus: added php.ini for session.cookie_version="0" (#2649, rep by sgraf)</li>
+<li>quercus: precedence for $$foo->bar() (#2812)</li>
+<li>install: modified conf/minimal.xml for true minimal configuration (#2630, rep by wirah)</li>
+<li>quercus: all errors get logged at FINE level (#2608, rep by B. Youngblood)</li>
+<li>server: add port-default as a configuration item (#2798, rep by Eric Masson)</li>
+<li>configure: make install needs to work even if the libexec fails (#2815, rep by stephaneeybert)</li>
+<li>quercus: intval was ignoring base param (#2817, rep by stephaneeybert)</li>
+</ul>
+</s2>
+
+<s2 title="3.2.0">
 <ul>
 <li>resin: renamed httpd.sh and httpd.exe to resin.sh and resin.exe respectively</li>
 <li>quercus: fixed compact() for variables with NULL values</li>

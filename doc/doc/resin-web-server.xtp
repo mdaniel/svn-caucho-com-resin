@@ -115,7 +115,7 @@ export RESIN_HOME
 export RESIN_ROOT
 
 $java -jar $RESIN_HOME/lib/resin.jar \
-      -resin-root $RESIN_ROOT \
+      -root-directory $RESIN_ROOT \
       -conf /etc/resin/resin.xml \
       -server a \
        $*

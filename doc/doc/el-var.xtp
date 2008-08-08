@@ -568,7 +568,7 @@ jndi:lookup can be used to lookup a JNDI value for the configuration.</p>
 </tr>
 <tr>
   <td>root</td>
-  <td>The location of the content, specified at startup with --resin-root</td>
+  <td>The location of the content, specified at startup with --root-directory</td>
 </tr>
 <tr>
   <td>serverId</td>

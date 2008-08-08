@@ -68,6 +68,8 @@ public class ClusterServer {
   private boolean _isDynamic;
 
   private ClusterPort _clusterPort;
+  private boolean _isClusterPortConfig;
+  
   private ServerPool _serverPool;
 
   private long _socketTimeout = 65000L;
@@ -85,6 +87,8 @@ public class ClusterServer {
   private ContainerProgram _serverProgram
     = new ContainerProgram();
 
+  private ArrayList<ConfigProgram> _portDefaults
+    = new ArrayList<ConfigProgram>();
   private ArrayList<Port> _ports = new ArrayList<Port>();
 
   private boolean _isSelf;
@@ -404,19 +408,29 @@ public class ClusterServer {
   }
 
   /**
+   * Adds a port default
+   */
+  public void addPortDefault(ContainerProgram program)
+  {
+    _portDefaults.add(program);
+  }
+
+  /**
    * Adds a http.
    */
   public Port createHttp()
     throws ConfigException
   {
     Port port = new Port(this);
-    
+
     HttpProtocol protocol = new HttpProtocol();
     protocol.setParent(port);
     port.setProtocol(protocol);
 
     addProtocolPort(port);
 
+    applyPortDefaults(port);
+    
     return port;
   }
 
@@ -430,12 +444,21 @@ public class ClusterServer {
 
     _ports.add(port);
 
+    applyPortDefaults(port);
+    
     return port;
   }
 
   void addProtocolPort(Port port)
   {
     _ports.add(port);
+  }
+
+  private void applyPortDefaults(Port port)
+  {
+    for (ConfigProgram program : _portDefaults) {
+      program.configure(port);
+    }
   }
 
   /**
@@ -493,6 +516,10 @@ public class ClusterServer {
    */
   public ClusterPort createClusterPort()
   {
+    applyPortDefaults(_clusterPort);
+
+    _isClusterPortConfig = true;
+    
     return _clusterPort;
   }
 
@@ -553,6 +580,9 @@ public class ClusterServer {
   public void init()
     throws Exception
   {
+    if (! _isClusterPortConfig)
+      applyPortDefaults(_clusterPort);
+    
     _clusterPort.init();
 
     if (_cluster != null) {

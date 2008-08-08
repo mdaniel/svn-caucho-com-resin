@@ -66,4 +66,12 @@ public class BundleEvent extends EventObject
   {
     return _type;
   }
+
+  @Override
+  public String toString()
+  {
+    return (getClass().getSimpleName()
+	    + "[type=" + getType()
+	    + ",source=" + getSource());
+  }
 }

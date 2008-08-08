@@ -51,6 +51,8 @@ import java.io.*;
 import java.util.jar.*;
 import java.util.zip.*;
 
+import org.osgi.framework.Bundle;
+
 /**
  * Class loader which checks for changes in class files and automatically
  * picks up new jars.
@@ -65,6 +67,8 @@ public class OsgiManager
 
   private ClassLoader _parentLoader;
 
+  private long _nextBundleId = 1;
+  
   private ArrayList<OsgiBundle> _bundleList
     = new ArrayList<OsgiBundle>();
 
@@ -107,11 +111,50 @@ public class OsgiManager
   {
     JarPath jar = JarPath.create(path);
 
-    OsgiBundle bundle = new OsgiBundle(this, jar);
+    OsgiBundle bundle = new OsgiBundle(nextBundleId(), this, jar);
 
-    _bundleList.add(bundle);
+    synchronized (_bundleList) {
+      _bundleList.add(bundle);
+    }
 
     return bundle;
+  }
+
+  /**
+   * Returns all bundles.
+   */
+  public Bundle []getBundles()
+  {
+    synchronized (_bundleList) {
+      Bundle []bundles = new Bundle[_bundleList.size()];
+      _bundleList.toArray(bundles);
+
+      return bundles;
+    }
+  }
+
+  /**
+   * Returns all bundles.
+   */
+  public Bundle getBundle(long id)
+  {
+    synchronized (_bundleList) {
+      for (int i = _bundleList.size() - 1; i >= 0; i--) {
+	Bundle bundle = _bundleList.get(i);
+
+	if (id == bundle.getBundleId())
+	  return bundle;
+      }
+    }
+
+    return null;
+  }
+
+  private long nextBundleId()
+  {
+    synchronized (this) {
+      return _nextBundleId++;
+    }
   }
 
   public ExportBundleClassLoader getExportLoader(String name)
@@ -123,6 +166,14 @@ public class OsgiManager
 			      ExportBundleClassLoader loader)
   {
     _exportMap.put(name, loader);
+  }
+
+  /**
+   * Adds the bundle for installation
+   */
+  public void install(OsgiBundle bundle)
+  {
+    bundle.activate();
   }
 
   @Override

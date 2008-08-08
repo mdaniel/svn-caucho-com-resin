@@ -4624,6 +4624,14 @@ public class Env {
   {
     int mask = 1 << code;
 
+    if (log.isLoggable(Level.FINEST)) {
+      QuercusException e = new QuercusException(loc + msg);
+
+      log.log(Level.FINEST, e.toString(), e);
+    }
+    else if (log.isLoggable(Level.FINE))
+      log.fine(this + " " + loc + msg);
+
     if (code >= 0 && code < _errorHandlers.length
 	&& _errorHandlers[code] != null) {
       Callback handler = _errorHandlers[code];

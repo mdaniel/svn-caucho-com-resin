@@ -62,7 +62,8 @@ public class HostSingleDeployGenerator
    * Creates the new host deploy.
    */
   public HostSingleDeployGenerator(DeployContainer<HostController> container,
-			  HostContainer hostContainer, HostConfig config)
+				   HostContainer hostContainer,
+				   HostConfig config)
     throws Exception
   {
     super(container);

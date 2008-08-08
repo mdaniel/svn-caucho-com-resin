@@ -446,14 +446,26 @@ r_port = element port {
   & r_protocol
 }
 
+r_port-default = element port-default {
+  r_port-Parameters
+} 
+
 r_port-Content =
   ((attribute address { string }
     | element address { string }
     | attribute host { string }
     | element host { string })?
 
-   & (attribute accept-listen-backlog { r_int-Type }
-      | element accept-listen-backlog { r_int-Type })?
+    & (attribute port { string } | element port { string })
+
+    & r_port-Parameters
+
+    & (r_openssl | r_jsse-ssl)?
+  )
+    
+r_port-Parameters =
+   (attribute accept-listen-backlog { r_int-Type }
+    | element accept-listen-backlog { r_int-Type })?
 
    & (attribute accept-thread-min { r_int-Type }
       | element accept-thread-min { r_int-Type })?
@@ -473,8 +485,6 @@ r_port-Content =
    & (attribute keepalive-timeout { r_period-Type }
       | element keepalive-timeout { r_period-Type })?
 
-   & (attribute port { string } | element port { string })
-
    & (attribute secure { r_boolean-Type }
       | element secure { r_boolean-Type })?
 
@@ -487,11 +497,8 @@ r_port-Content =
    & (attribute tcp-no-delay { string }
       | element tcp-no-delay { string })?
 
-  & (attribute throttle-concurrent-max { r_int-Type }
-     | element throttle-concurrent-max { r_int-Type })?
-
-   & (r_openssl | r_jsse-ssl)?
-   )
+   & (attribute throttle-concurrent-max { r_int-Type }
+      | element throttle-concurrent-max { r_int-Type })?
 
 r_protocol =
   element protocol {
@@ -620,6 +627,8 @@ r_server-Content =
   & r_memory-free-min?
 
   & r_ping*
+
+  & r_port-default*
 
   & r_protocol*
 

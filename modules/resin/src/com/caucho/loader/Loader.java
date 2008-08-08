@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -46,7 +47,8 @@ import java.util.logging.Logger;
  * Loads resources.
  */
 abstract public class Loader {
-  protected static final Logger log = Log.open(Loader.class);
+  protected static final Logger log
+    = Logger.getLogger(Loader.class.getName());
   
   private DynamicClassLoader _loader;
 

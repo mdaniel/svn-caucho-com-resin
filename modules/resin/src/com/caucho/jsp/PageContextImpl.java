@@ -340,7 +340,7 @@ public class PageContextImpl extends PageContext
   {
     if (name == null)
       throw new NullPointerException(L.l("setAttribute must have a non-null name"));
-    
+
     if (attribute != null)
       _attributes.put(name, attribute);
     else

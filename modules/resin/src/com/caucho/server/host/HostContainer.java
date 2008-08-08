@@ -440,7 +440,9 @@ public class HostContainer implements DispatchBuilder {
   private HostController findHostController(String hostName)
     throws Exception
   {
-    return _hostDeploy.findController(hostName);
+    HostController controller = _hostDeploy.findController(hostName);
+    
+    return controller;
   }
 
   /**

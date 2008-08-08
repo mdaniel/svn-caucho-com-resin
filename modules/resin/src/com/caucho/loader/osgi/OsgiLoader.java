@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -29,8 +30,10 @@
 package com.caucho.loader.osgi;
 
 import com.caucho.config.ConfigException;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.Loader;
-import com.caucho.log.Log;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.JarPath;
 import com.caucho.server.util.*;
@@ -43,11 +46,10 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 /**
  * Loads resources.
  */
-public class OsgiLoader extends Loader
+public class OsgiLoader extends Loader implements EnvironmentListener
 {
   private static final Logger log
     = Logger.getLogger(OsgiLoader.class.getName());
@@ -56,9 +58,23 @@ public class OsgiLoader extends Loader
 
   private ArrayList<OsgiBundle> _bundleList = new ArrayList<OsgiBundle>();
 
+  private ArrayList<OsgiBundle> _pendingInstallList
+     = new ArrayList<OsgiBundle>();
+
   public OsgiLoader()
   {
     _manager = OsgiManager.create();
+
+    Environment.addEnvironmentListener(this);
+  }
+
+  public void addInstall(Path path)
+  {
+    OsgiBundle bundle = _manager.addPath(path);
+
+    _bundleList.add(bundle);
+
+    _pendingInstallList.add(bundle);
   }
 
   public void addPath(Path path)
@@ -87,12 +103,53 @@ public class OsgiLoader extends Loader
   protected Class loadClass(String name)
   {
     for (OsgiBundle bundle : _bundleList) {
-      Class cl = bundle.loadClass(name);
+      Class cl = bundle.loadClassImpl(name);
 
       if (cl != null)
 	return cl;
     }
     
     return null;
+  }
+  
+  /**
+   * Handles the case where the environment is configuring and
+   * registering beans
+   */
+  public void environmentConfigure(EnvironmentClassLoader loader)
+    throws ConfigException
+  {
+  }
+  
+  /**
+   * Handles the case where the environment is binding injection targets
+   */
+  public void environmentBind(EnvironmentClassLoader loader)
+    throws ConfigException
+  {
+  }
+  
+  /**
+   * Handles the case where the environment is starting (after init).
+   */
+  public void environmentStart(EnvironmentClassLoader loader)
+  {
+    ArrayList<OsgiBundle> installList = new ArrayList<OsgiBundle>();
+
+    synchronized (_pendingInstallList) {
+      installList.addAll(_pendingInstallList);
+      _pendingInstallList.clear();
+    }
+
+    for (OsgiBundle bundle : installList) {
+      bundle.activate();
+    }
+  }
+  
+  /**
+   * Handles the case where the environment is stopping (after init).
+   */
+  public void environmentStop(EnvironmentClassLoader loader)
+  {
   }
 }

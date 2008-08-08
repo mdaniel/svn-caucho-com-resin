@@ -516,12 +516,14 @@ public class SessionModule extends AbstractQuercusModule
     String cookieName = env.getIni("session.name").toString();
     
     env.addConstant("SID", 
-            env.createString(cookieName + '=' + sessionId),
-            false);
+		    env.createString(cookieName + '=' + sessionId),
+		    false);
 
     Cookie cookie = new Cookie(cookieName, sessionId);
     // #2649
-    cookie.setVersion(1);
+    String cookieVersion = env.getIniString("session.cookie_version");
+    if (! "0".equals(cookieVersion))
+      cookie.setVersion(1);
 
     if (response.isCommitted()) {
       env.warning(L.l("cannot send session cookie because response is committed"));

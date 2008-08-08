@@ -627,6 +627,14 @@ servers may use multiple ports like 6800 and 6801.</p>
 
 </defun>
 
+<defun title="&lt;port-default>" version="Resin 3.2.1">
+<parents>server</parents>
+
+<p>Defines default port parameters for all &lt;http>, &lt;protocol>, and
+&lt;cluster-port>.</p>
+
+</defun>
+
 <defun title="&lt;protocol>" version="Resin 3.1">
 <parents>server</parents>
 

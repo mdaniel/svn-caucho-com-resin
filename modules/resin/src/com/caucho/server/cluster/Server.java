@@ -91,7 +91,8 @@ import java.util.regex.Pattern;
 
 public class Server extends ProtocolDispatchServer
   implements EnvironmentBean, SchemaBean, AlarmListener,
-             ClassLoaderListener {
+             ClassLoaderListener
+{
   private static final L10N L = new L10N(Server.class);
   private static final Logger log
     = Logger.getLogger(Server.class.getName());

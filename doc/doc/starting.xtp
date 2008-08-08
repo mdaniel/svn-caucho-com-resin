@@ -111,7 +111,7 @@ into a more permanent location:</p>
 
 <ul>
 <li>Virtual hosts go in <var>/var/www/hosts/www.foo.com/webapps/ROOT</var></li>
-<li>Run <var>java -jar resin-3.2.0/lib/resin.jar --resin-root /var/www</var></li>
+<li>Run <var>java -jar resin-3.2.0/lib/resin.jar --root-directory /var/www</var></li>
 <li>You can also set &lt;root-directory> in the &lt;<a href="cluster-tags.xtp#root-directory">cluster</a>> to configure the resin root.</li>
 </ul>
 </li>

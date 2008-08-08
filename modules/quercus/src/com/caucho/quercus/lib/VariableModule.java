@@ -248,6 +248,42 @@ public class VariableModule extends AbstractQuercusModule {
   }
 
   /**
+   * Converts to a long
+   *
+   * @param v the variable to convert
+   * @return the double value
+   */
+  public static long intval(@ReadOnly Value v, int base)
+  {
+    if (! v.isString())
+      return v.toLong();
+
+    StringValue s = v.toStringValue();
+
+    int len = s.length();
+    long value = 0;
+
+    for (int i = 0; i < len; i++) {
+      char ch = s.charAt(i);
+
+      int digit;
+
+      if ('0' <= ch && ch <= '9')
+	digit = ch - '0';
+      else if ('a' <= ch && ch <= 'z')
+	digit = ch - 'a' + 10;
+      else if ('A' <= ch && ch <= 'Z')
+	digit = ch - 'A' + 10;
+      else
+	digit = 0;
+
+      value = value * base + digit;
+    }
+
+    return value;
+  }
+
+  /**
    * Returns true for an array.
    *
    * @param v the value to test

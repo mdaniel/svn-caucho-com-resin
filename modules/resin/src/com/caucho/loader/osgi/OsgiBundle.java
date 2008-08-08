@@ -37,6 +37,7 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.DependencyContainer;
 import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
@@ -52,15 +53,19 @@ import java.io.*;
 import java.util.jar.*;
 import java.util.zip.*;
 
+import org.osgi.framework.*;
+
 /**
  * An osgi-bundle
  */
-public class OsgiBundle
+public class OsgiBundle implements Bundle
 {
   private static final L10N L = new L10N(OsgiBundle.class);
   private static final Logger log
     = Logger.getLogger(OsgiBundle.class.getName());
 
+  private final long _id;
+  
   private OsgiManager _manager;
   
   private JarPath _jar;
@@ -71,10 +76,21 @@ public class OsgiBundle
   private ArrayList<ExportBundleClassLoader> _exportList
     = new ArrayList<ExportBundleClassLoader>();
 
-  OsgiBundle(OsgiManager manager, JarPath jar)
+  private String _activatorClassName;
+  private OsgiBundleContext _bundleContext;
+
+  private ArrayList<BundleListener> _listenerList
+    = new ArrayList<BundleListener>();
+
+  private int _state;
+  private long _lastModified;
+
+  OsgiBundle(long id, OsgiManager manager, JarPath jar)
   {
+    _id = id;
     _manager = manager;
     _jar = jar;
+    _lastModified = Alarm.getCurrentTime();
 
     try {
       Manifest manifest = jar.getManifest();
@@ -94,8 +110,54 @@ public class OsgiBundle
 	exportList = parseItems(exportAttr);
 
       addExports(exportList);
+
+      _activatorClassName = attr.getValue("Bundle-Activator");
     } catch (Exception e) {
       throw ConfigException.create(e);
+    }
+
+    _state = INSTALLED;
+  }
+
+  /**
+   * Activates the bundle
+   */
+  public void activate()
+  {
+    sendEvent(BundleEvent.STARTING);
+
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+
+    try {
+      if (_activatorClassName == null) {
+	log.finer(this + " active with no Bundle-Activator");
+
+	_state = ACTIVE;
+      
+	return;
+      }
+    
+      Class cl = Class.forName(_activatorClassName, false, loader);
+
+      if (! BundleActivator.class.isAssignableFrom(cl)) {
+	throw new ConfigException(L.l("'{0}' does not implement BundleActivator",
+				      cl.getName()));
+      }
+
+      BundleActivator activator = (BundleActivator) cl.newInstance();
+
+      _bundleContext = new OsgiBundleContext(_manager, this);
+      
+      _state = STARTING;
+
+      activator.start(_bundleContext);
+      
+      _state = ACTIVE;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    } finally  {
+      sendEvent(BundleEvent.STARTED);
     }
   }
 
@@ -211,7 +273,7 @@ public class OsgiBundle
     return _jar;
   }
 
-  Class loadClass(String name)
+  Class loadClassImpl(String name)
   {
     for (ExportBundleClassLoader loader : _exportList) {
       try {
@@ -226,12 +288,263 @@ public class OsgiBundle
     return null;
   }
 
+  //
+  // Bundle API
+  //
+
+  /**
+   * Returns the bundle's unique id
+   */
+  public long getBundleId()
+  {
+    return _id;
+  }
+
+  /**
+   * Returns the bundle's symbolic name
+   */
+  public String getSymbolicName()
+  {
+    return _symbolicName;
+  }
+
+  /**
+   * Returns the location
+   */
+  public String getLocation()
+  {
+    return _jar.getURL();
+  }
+
+  /**
+   * Returns the bundle's current state
+   */
+  public int getState()
+  {
+    return _state;
+  }
+
+  /**
+   * Start the bundle
+   */
+  public void start(int options)
+    throws BundleException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Start the bundle
+   */
+  public void start()
+    throws BundleException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Stop the bundle
+   */
+  public void stop(int options)
+    throws BundleException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Start the bundle
+   */
+  public void stop()
+    throws BundleException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Updates the bundle
+   */
+  public void update()
+    throws BundleException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Updates the bundle from an input stream
+   */
+  public void update(InputStream is)
+    throws BundleException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Uninstall the bundle
+   */
+  public void uninstall()
+    throws BundleException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the Manifest headers
+   */
+  public Dictionary getHeaders()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the bundle's registered services
+   */
+  public ServiceReference []getRegisteredServices()
+  {
+    return new ServiceReference[0];
+  }
+
+  /**
+   * Returns the services the bundle is using
+   */
+  public ServiceReference []getServicesInUse()
+  {
+    return new ServiceReference[0];
+  }
+
+  /**
+   * Returns true if the bundle has the specified permission
+   */
+  public boolean hasPermission(Object permission)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the specified resource from the bundle
+   */
+  public URL getResource(String name)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the localized view of the manifest
+   */
+  public Dictionary getHeaders(String locale)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Loads a class using the bundle's classloader
+   */
+  public Class loadClass(String name)
+    throws ClassNotFoundException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the resources for the bundle
+   */
+  public Enumeration getResources(String name)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the paths to entries in the bundle
+   */
+  public Enumeration getEntryPaths(String path)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns a URL to the named entry
+   */
+  public URL getEntry(String path)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the last modified time of the bundle.
+   */
+  public long getLastModified()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns entries matching a pattern.
+   */
+  public Enumeration findEntries(String path,
+				 String filePattern,
+				 boolean recurse)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the bundle's context
+   */
+  public BundleContext getBundleContext()
+  {
+    return _bundleContext;
+  }
+
+  /**
+   * Sends a bundle event
+   */
+  void sendEvent(int type)
+  {
+    ArrayList<BundleListener> listeners;
+    
+    synchronized (_listenerList) {
+      if (_listenerList.size() == 0)
+	return;
+
+      listeners = new ArrayList<BundleListener>(_listenerList);
+    }
+
+    BundleEvent event = new BundleEvent(type, this);
+    
+    for (BundleListener listener : listeners) {
+      listener.bundleChanged(event);
+    }
+  }
+    
+  /**
+   * Adds a listener for bundle events
+   */
+  void addBundleListener(BundleListener listener)
+  {
+    synchronized (_listenerList) {
+      if (! _listenerList.contains(listener))
+	_listenerList.add(listener);
+    }
+  }
+
+  /**
+   * Removes a listener for bundle events
+   */
+  void removeBundleListener(BundleListener listener)
+  {
+    synchronized (_listenerList) {
+      _listenerList.remove(listener);
+    }
+  }
+
+
   @Override
   public String toString()
   {
     return (getClass().getSimpleName()
-	    + "[" + _symbolicName
-	    + "," + _jar + "]");
+	    + "[" + getBundleId()
+	    + "," + getSymbolicName()
+	    + "," + getLocation() + "]");
   }
 
   static class PackageItem {

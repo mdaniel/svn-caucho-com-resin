@@ -158,8 +158,9 @@ public class PageContextELResolver extends AbstractVariableResolver {
     for (int i = 0; i < _customResolvers.length; i++) {
       Object value = _customResolvers[i].getValue(env, base, property);
 
-      if (env.isPropertyResolved())
+      if (env.isPropertyResolved()) {
 	return value;
+      }
     }
     
     if (base != null) {
@@ -176,7 +177,7 @@ public class PageContextELResolver extends AbstractVariableResolver {
     }
     else if (property instanceof String) {
       env.setPropertyResolved(true);
-	
+
       return _pageContext.findAttribute(property.toString());
     }
     else
