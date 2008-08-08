@@ -60,6 +60,8 @@ public class QuercusProgram {
     = new HashMap<String,Function>();
 
   private HashMap<String,InterpretedClassDef> _classMap;
+  
+  private HashMap<String,InterpretedClassDef> _conditionalClassMap;
 
   private FunctionInfo _functionInfo;
   private Statement _statement;
@@ -80,6 +82,7 @@ public class QuercusProgram {
   public QuercusProgram(Quercus quercus, Path sourceFile,
 			HashMap<String, Function> functionMap,
 			HashMap<String, InterpretedClassDef> classMap,
+            HashMap<String, InterpretedClassDef> conditionalClassMap,
 			FunctionInfo functionInfo,
 			Statement statement)
   {
@@ -98,6 +101,7 @@ public class QuercusProgram {
     }
 
     _classMap = classMap;
+    _conditionalClassMap = conditionalClassMap;
 
     _functionInfo = functionInfo;
     _statement = statement;
@@ -231,6 +235,14 @@ public class QuercusProgram {
   public Collection<InterpretedClassDef> getClasses()
   {
     return _classMap.values();
+  }
+  
+  /**
+   * Returns the functions.
+   */
+  public Collection<InterpretedClassDef> getConditionalClasses()
+  {
+    return _conditionalClassMap.values();
   }
 
   /**

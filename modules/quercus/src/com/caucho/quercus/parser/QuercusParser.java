@@ -209,6 +209,8 @@ public class QuercusParser {
 
   private boolean _isNewExpr;
   private boolean _isIfTest;
+  
+  private int _classesParsed;
 
   QuercusParser(Quercus quercus)
   {
@@ -421,6 +423,7 @@ public class QuercusParser {
     QuercusProgram program = new QuercusProgram(_quercus, _sourceFile,
 						_globalScope.getFunctionMap(),
 						_globalScope.getClassMap(),
+                        _globalScope.getConditionalClassMap(),
 						_function,
 						stmt);
     return program;
@@ -446,6 +449,7 @@ public class QuercusParser {
     return new QuercusProgram(_quercus, _sourceFile,
 			      _globalScope.getFunctionMap(),
 			      _globalScope.getClassMap(),
+                  _globalScope.getConditionalClassMap(),
 			      _function,
 			      _factory.createBlock(location, stmtList));
   }
@@ -1052,7 +1056,7 @@ public class QuercusParser {
   {
     boolean oldTop = _isTop;
     _isTop = false;
-
+    
     try {
       Location location = getLocation();
 
@@ -1067,23 +1071,39 @@ public class QuercusParser {
       int token = parseToken();
 
       if (token == ':')
-	return parseAlternateIf(test, location);
+        return parseAlternateIf(test, location);
       else
-	_peekToken = token;
+        _peekToken = token;
 
-      Statement trueBlock = parseStatement();
+      Statement trueBlock = null;
+      Scope oldScope = _scope;
+      
+      try {
+        _scope = new IfScope(_factory, oldScope);
+        trueBlock = parseStatement();
+      } finally {
+        _scope = oldScope;
+      }
+      
       Statement falseBlock = null;
 
       token = parseToken();
 
       if (token == ELSEIF) {
-	falseBlock = parseIf();
+        falseBlock = parseIf();
       }
       else if (token == ELSE) {
-	falseBlock = parseStatement();
+        oldScope = _scope;
+        
+        try {
+          _scope = new IfScope(_factory, oldScope);
+          falseBlock = parseStatement();
+        } finally {
+          _scope = oldScope;
+        }
       }
       else
-	_peekToken = token;
+        _peekToken = token;
 
       return _factory.createIf(location, test, trueBlock, falseBlock);
 
@@ -1098,8 +1118,16 @@ public class QuercusParser {
   private Statement parseAlternateIf(Expr test, Location location)
     throws IOException
   {
-    Statement trueBlock = _factory.createBlock(location,
-						   parseStatementList());
+    Statement trueBlock = null;
+    
+    Scope oldScope = _scope;
+    
+    try {
+      _scope = new IfScope(_factory, oldScope);
+      trueBlock = _factory.createBlock(location, parseStatementList());
+    } finally {
+      _scope = oldScope;
+    }
 
     Statement falseBlock = null;
 
@@ -1116,8 +1144,14 @@ public class QuercusParser {
     else if (token == ELSE) {
       expect(':');
       
-      falseBlock = _factory.createBlock(getLocation(),
-					    parseStatementList());
+      oldScope = _scope;
+      
+      try {
+        _scope = new IfScope(_factory, oldScope);
+        falseBlock = _factory.createBlock(getLocation(), parseStatementList());
+      } finally {
+        _scope = oldScope;
+      }
 
       expect(ENDIF);
     }
@@ -1578,21 +1612,30 @@ public class QuercusParser {
 	                                                _function, args);
       }
       else {
-	expect('{');
-      
-	Statement []statements = parseStatements();
-    
-	expect('}');
+        expect('{');
 
-	if (_classDef != null)
-      function = _factory.createObjectMethod(location,
-                                             _classDef,
-                                             name, _function,
-                                             args, statements);
-	else
-	  function = _factory.createFunction(location, name,
-					     _function, args,
-					     statements);
+        Statement []statements = null;
+        
+        Scope oldScope = _scope;
+        
+        try {
+          _scope = new FunctionScope(_factory, oldScope);
+          statements = parseStatements();
+        } finally {
+          _scope = oldScope;
+        }
+    
+        expect('}');
+
+        if (_classDef != null)
+          function = _factory.createObjectMethod(location,
+                                                 _classDef,
+                                                 name, _function,
+                                                 args, statements);
+        else
+          function = _factory.createFunction(location, name,
+                                             _function, args,
+                                             statements);
       }
 
       function.setGlobal(oldTop);
@@ -1825,7 +1868,9 @@ public class QuercusParser {
     Scope oldScope = _scope;
 
     try {
-      _classDef = oldScope.addClass(getLocation(), name, parentName, ifaceList);
+      _classDef = oldScope.addClass(getLocation(),
+                                    name, parentName, ifaceList,
+                                    _classesParsed++);
 
       if ((modifiers & M_ABSTRACT) != 0)
         _classDef.setAbstract(true);
@@ -1950,9 +1995,9 @@ public class QuercusParser {
       }
 
       if ((modifiers & M_STATIC) != 0)
-	((ClassScope) _scope).addStaticVar(name, expr);
+        ((ClassScope) _scope).addStaticVar(name, expr);
       else
-	((ClassScope) _scope).addVar(name, expr);
+        ((ClassScope) _scope).addVar(name, expr);
 
       token = parseToken();
     } while (token == ',');

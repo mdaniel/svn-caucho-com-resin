@@ -51,12 +51,23 @@ public class GlobalScope extends Scope {
 
   private HashMap<String,InterpretedClassDef> _classMap
     = new HashMap<String,InterpretedClassDef>();
+  
+  private HashMap<String,InterpretedClassDef> _conditionalClassMap
+    = new HashMap<String,InterpretedClassDef>();
 
   GlobalScope(ExprFactory exprFactory)
   {
     _exprFactory = exprFactory;
   }
 
+  /*
+   * Returns true if scope is global.
+   */
+  public boolean isGlobal()
+  {
+    return true;
+  }
+  
   /**
    * Adds a function.
    */
@@ -71,7 +82,8 @@ public class GlobalScope extends Scope {
   public InterpretedClassDef addClass(Location location,
                                       String name,
                                       String parentName,
-                                      ArrayList<String> ifaceList)
+                                      ArrayList<String> ifaceList,
+                                      int index)
   {
     InterpretedClassDef cl = _classMap.get(name);
 
@@ -79,12 +91,22 @@ public class GlobalScope extends Scope {
       String []ifaceArray = new String[ifaceList.size()];
       ifaceList.toArray(ifaceArray);
 
-      cl = _exprFactory.createClassDef(location, name, parentName, ifaceArray);
+      cl = _exprFactory.createClassDef(location,
+                                       name, parentName, ifaceArray,
+                                       index);
       
       _classMap.put(name, cl);
     }
 
     return cl;
+  }
+  
+  /*
+   *  Adds a class
+   */
+  protected void addConditionalClass(InterpretedClassDef def)
+  {
+    _conditionalClassMap.put(def.getJavaName(), def);
   }
 
   /**
@@ -101,6 +123,14 @@ public class GlobalScope extends Scope {
   public HashMap<String,InterpretedClassDef> getClassMap()
   {
     return _classMap;
+  }
+  
+  /**
+   * Returns the conditional class map.
+   */
+  public HashMap<String,InterpretedClassDef> getConditionalClassMap()
+  {
+    return _conditionalClassMap;
   }
 }
 

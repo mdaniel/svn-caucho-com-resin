@@ -67,20 +67,26 @@ public class InterpretedClassDef extends ClassDef
   protected AbstractFunction _getField;
   protected AbstractFunction _setField;
   protected AbstractFunction _call;
-
+  
+  // the order that this class was parsed
+  protected int _index;
+  
   public InterpretedClassDef(Location location,
                              String name,
                              String parentName,
-                             String []ifaceList)
+                             String []ifaceList,
+                             int index)
   {
     super(location, name, parentName, ifaceList);
+    
+    _index = index;
   }
 
   public InterpretedClassDef(String name,
                              String parentName,
                              String []ifaceList)
   {
-    super(null, name, parentName, ifaceList);
+    this(null, name, parentName, ifaceList, 0);
   }
 
   /**
@@ -137,6 +143,14 @@ public class InterpretedClassDef extends ClassDef
   public boolean getHasNonPublicMethods()
   {
     return _hasNonPublicMethods;
+  }
+  
+  /*
+   * Unique name to use for compilation.
+   */
+  public String getJavaName()
+  {
+    return getName() + "_" + _index;
   }
 
   /**

@@ -29,43 +29,46 @@
 
 package com.caucho.quercus.parser;
 
-import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.quercus.program.Function;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.Location;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
- * Class parse scope.
+ * Parse scope.
  */
-public class ClassScope extends Scope {
-  private final static L10N L = new L10N(ClassScope.class);
-  
-  private final InterpretedClassDef _cl;
+public class IfScope extends Scope {
+  private final static L10N L = new L10N(IfScope.class);
 
-  public ClassScope(InterpretedClassDef cl)
-  {
-    _cl = cl;
-  }
+  private ExprFactory _exprFactory;
+  private Scope _parentScope;
+
+  private HashMap<String,Function> _functionMap
+    = new HashMap<String,Function>();
+
+  private HashMap<String,InterpretedClassDef> _classMap
+    = new HashMap<String,InterpretedClassDef>();
   
+  private HashMap<String,InterpretedClassDef> _conditionalClassMap
+    = new HashMap<String,InterpretedClassDef>();
+
+  IfScope(ExprFactory exprFactory, Scope scope)
+  {
+    _exprFactory = exprFactory;
+    
+    _parentScope = scope;
+  }
+
   /*
-   * Returns true if scope is within a class.
+   * Returns true if scope is local to a function.
    */
-  public boolean isClass()
+  public boolean isIf()
   {
-    return true;
-  }
-  
-  /**
-   * Returns true for an abstract scope, e.g. an abstract class or an
-   * interface.
-   */
-  public boolean isAbstract()
-  {
-    return _cl.isAbstract() || _cl.isInterface();
+    return false;
   }
   
   /**
@@ -73,53 +76,44 @@ public class ClassScope extends Scope {
    */
   public void addFunction(String name, Function function)
   {
-    _cl.addFunction(name, function);
-  }
-  
-  /**
-   * Adds a value
-   */
-  public void addVar(String name, Expr value)
-  {
-    // XXX: i18n
-    _cl.addValue(new StringBuilderValue(name), value);
-  }
-  
-  /**
-   * Adds a static value
-   */
-  public void addStaticVar(String name, Expr value)
-  {
-    // XXX: i18n
-    _cl.addStaticValue(new StringBuilderValue(name), value);
-  }
-  
-  /**
-   * Adds a constant value
-   */
-  public void addConstant(String name, Expr value)
-  {
-    _cl.addConstant(name, value);
+    _functionMap.put(name.toLowerCase(), function);
   }
 
   /**
    * Adds a class
    */
-  public InterpretedClassDef addClass(Location location, String name,
+  public InterpretedClassDef addClass(Location location,
+                                      String name,
                                       String parentName,
                                       ArrayList<String> ifaceList,
                                       int index)
   {
-    throw new UnsupportedOperationException();
+    InterpretedClassDef cl = _classMap.get(name);
+
+    if (cl == null) {
+      String []ifaceArray = new String[ifaceList.size()];
+      ifaceList.toArray(ifaceArray);
+
+      cl = _exprFactory.createClassDef(location,
+                                       name, parentName, ifaceArray,
+                                       index);
+      
+      _classMap.put(name, cl);
+    }
+    
+    _parentScope.addConditionalClass(cl);
+
+    return cl;
   }
   
   /*
-   *  Adds a class
+   *  Adds a conditional class.
    */
-  protected void addClass(String name,
-                          InterpretedClassDef def)
+  protected void addConditionalClass(InterpretedClassDef def)
   {
-    throw new UnsupportedOperationException();
+    _conditionalClassMap.put(def.getJavaName(), def);
+    
+    _parentScope.addConditionalClass(def);
   }
 }
 

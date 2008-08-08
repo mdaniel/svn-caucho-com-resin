@@ -48,17 +48,55 @@ abstract public class Scope {
     return false;
   }
   
+  /*
+   * Returns true if scope is global.
+   */
+  public boolean isGlobal()
+  {
+    return false;
+  }
+  
+  /*
+   * Returns true if scope is within a class.
+   */
+  public boolean isClass()
+  {
+    return false;
+  }
+  
+  /*
+   * Returns true if scope is local to a function.
+   */
+  public boolean isFunction()
+  {
+    return false;
+  }
+  
+  /*
+   * Returns true if scope is local to a function.
+   */
+  public boolean isIf()
+  {
+    return false;
+  }
+  
   /**
    * Adds a function.
    */
   abstract public void addFunction(String name, Function function);
 
   /**
-   * Adds a class
+   * Adds a class.
    */
   abstract public InterpretedClassDef addClass(Location location,
                                                String name,
                                                String parent,
-                                               ArrayList<String> ifaceList);
+                                               ArrayList<String> ifaceList,
+                                               int index);
+  
+  /*
+   *  Adds a conditional class.
+   */
+  abstract protected void addConditionalClass(InterpretedClassDef def);
 }
 

@@ -1248,7 +1248,7 @@ public class ExprFactory {
    * Creates a new function def statement
    */
   public Statement createClassDef(Location loc,
-				  InterpretedClassDef cl)
+                                  InterpretedClassDef cl)
   {
     return new ClassDefStatement(loc, cl);
   }
@@ -1305,9 +1305,12 @@ public class ExprFactory {
   public InterpretedClassDef createClassDef(Location location,
                                             String name,
                                             String parentName,
-                                            String[] ifaceList)
+                                            String[] ifaceList,
+                                            int index)
   {
-    return new InterpretedClassDef(location, name, parentName, ifaceList);
+    return new InterpretedClassDef(location,
+                                   name, parentName, ifaceList,
+                                   index);
   }
 }
 
