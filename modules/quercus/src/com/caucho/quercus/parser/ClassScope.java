@@ -114,10 +114,9 @@ public class ClassScope extends Scope {
   }
   
   /*
-   *  Adds a class
+   *  Adds a conditional class.
    */
-  protected void addClass(String name,
-                          InterpretedClassDef def)
+  protected void addConditionalClass(InterpretedClassDef def)
   {
     throw new UnsupportedOperationException();
   }

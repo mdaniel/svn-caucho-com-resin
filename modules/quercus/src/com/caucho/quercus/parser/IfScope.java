@@ -111,7 +111,7 @@ public class IfScope extends Scope {
    */
   protected void addConditionalClass(InterpretedClassDef def)
   {
-    _conditionalClassMap.put(def.getJavaName(), def);
+    _conditionalClassMap.put(def.getCompilationName(), def);
     
     _parentScope.addConditionalClass(def);
   }

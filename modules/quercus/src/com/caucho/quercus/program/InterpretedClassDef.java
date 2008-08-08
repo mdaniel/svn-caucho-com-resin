@@ -148,7 +148,7 @@ public class InterpretedClassDef extends ClassDef
   /*
    * Unique name to use for compilation.
    */
-  public String getJavaName()
+  public String getCompilationName()
   {
     return getName() + "_" + _index;
   }
