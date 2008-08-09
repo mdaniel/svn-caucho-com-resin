@@ -13,6 +13,7 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>quercus: mail with to in the extraHeaders argument (#2754, rep by atijms)</il>
 <li>host: regexp vs static host priority (#2813, rep by Shane Cruz)</li>
 <li>jsp: virtual host should not add 'name' as webbean value (#2807, rep by hpri)</li>
 <li>jsp: validation of tag dynamic-attributes generated improper XML (#2808, rep by hpri)</li>

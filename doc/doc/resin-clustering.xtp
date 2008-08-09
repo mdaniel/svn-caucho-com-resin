@@ -2,8 +2,11 @@
 <header>
 <title>Resin Clustering</title>
 <description>
-<p>Resin's HTTP Web Server includes load balancing for scalability
-and reliability.
+
+<p>As traffic increases beyond a single server, Resin's clustering
+lets you add new machines to handle the load and simultaneously improves
+uptime and reliability by failing over requests from a downed or maintenance
+server to a backup transparently.
 </p>
 
 </description>
@@ -15,40 +18,64 @@ and reliability.
 
 <s1 name="resin" title="Load Balancing">
 
-<p>Resin Professional includes
-a <a href="rewrite-tags.xtp#load-balance">&lt;load-balance></a> rewrite tag
-that can balance requests to an application-tier cluster of backend servers.
-Because it is implemented as a servlet, this configuration is the most
-flexible. A site might use 192.168.0.1 as 
-the frontend load balancer, and send all requests for /foo to the backend host
-192.168.0.10 and all requests to /bar to the backend host 192.168.0.11. Since
-Resin has an integrated HTTP proxy cache, the web-tier machine can cache
-results for the backend servers.</p>
+<p>When your traffic requires multiple servers, your site will
+naturally split into two clusters: an app-tier of identical servers to handle
+the content and a web-tier of HTTP servers talking to the browsers, caching
+the content, and distributing the load to the app-tier servers.</p>
 
-<p>Load balancing divides the Resin servers into two clusters:
-the web-tier and the app-tier. In Resin 3.2, all the cluster 
-and load balance configuration is in a single resin.xml.
-The actual deployed server is selected with the "-server web-a"
-<a href="config-cmdline.xtp">command-line argument</a>.</p>
-
-<p>Using Resin as the load balancing web server requires a minimum
-of two clusters: one for the load balancing server, and one
-for the backend servers.  The front cluster will dispatch
-to the backend servers, while the backend will actually serve the
-requests.  Both clusters can be defined in the same resin.xml file.</p>
+<p>Since each app-tier servers produces the same content, Resin configures
+them identically: the app-tier servers have the same virtual hosts,
+web-applications and servlets, and use the same resin.xml.  Adding a new
+machine just requires adding a new &lt;server> tag to the cluster.</p>
 
 <figure src="cluster-load-balance.png"/>
 
-<s2 title="The web-tier caches and load balances">
+<p>The new server has a unique name like "app-b" and a TCP cluster-port
+consisting of an &lt;IP,port>, so the other servers can communicate with
+it.  Although you can start multiple Resin servers on the same machine,
+TCP requires the &lt;IP,port> must be unique, so you might need to assign
+unique ports like 6801, 6802 for servers on the same machine.  On different
+machines, you'll use unique IP addresses.  Because the cluster-port is for
+Resin servers to communicate with each other, they'll typically be private
+IP addresses like 192.168.1.10 and not public IP addresses.  In particular,
+the load balancer on the web-tier uses the cluster-port of the app-tier
+to forward HTTP requests.</p>
 
-<p>In the following example, there are three servers and two clusters.  The
-first server "web-a" (192.168.0.1), which is in cluster "web-tier",
-is the load balancer.  It has an &lt;http&gt; listener, 
-receives requests from browsers, and dispatches them to the backend
-servers "app-a" and "app-b" (192.168.0.10 and 192.168.0.11).</p>
+<p>The load balancer on the web-tier forwards requests to the app-tier,
+distributing the load evenly and skipping any app-tier server that's
+down for maintenance or restarting due to a crash.  This failover capability
+increases reliability and improves the customer's experiency by making
+your site look like every server is always up.  The load balancer also
+steers traffic from a user session to the same app-tier server, improving
+caching and session performance, i.e. it supports sticky sessions.</p>
+
+<s2 title="Two Server Configuration">
+
+<p>For example, a site running Drupal on Resin might now need two
+app-tier servers to handle additional load as it grows traffic.  In the
+following configuration, the two app-tier servers "app-a" and "app-b" both
+serve the Drupal content, while the web-tier server "web-a" handles the
+HTTP, caches content, and balances the load to the app-tier cluster.</p>
+
+<p>The web-tier is configured with a &lt;cache> tag for the caching, and
+uses <a href="rewrite-tags.xtp#load-balance">&lt;rewrite-dispatch></a> with
+a &lt;load-balance> tag for the dispatching.  In this case, we send
+all content to the app-tier.  &lt;rewrite-dispatch> is
+Resin's equivalent of the Apache mod_rewrite module, providing a powerful
+and detailed URL matching and decoding, so more complicated sites might
+load-balance based on the virtual host or URL.</p>
 
 <example title="Example: resin.xml for load balancing">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+
+&lt;cluster id="app-tier"&gt;
+  &lt;server id="app-a" address="192.168.0.10" port="6800"/&gt;
+  &lt;server id="app-b" address="192.168.0.11" port="6800"/&gt;
+
+  &lt;host id=""&gt;
+    &lt;web-app id="" root-directory="/var/www/htdocs"/>
+  &lt;/host&gt;
+&lt;/cluster&gt;
 
 &lt;cluster id="web-tier"&gt;
   &lt;server-default>
@@ -61,7 +88,6 @@ servers "app-a" and "app-b" (192.168.0.10 and 192.168.0.11).</p>
 
   &lt;host id=""&gt;
     &lt;web-app id="/"&gt;
-      &lt;!-- balance all requests to cluster app-tier --&gt;
       &lt;rewrite-dispatch>
         &lt;load-balance regexp="" cluster="app-tier"/>
       &lt;/rewrite-dispatch>
@@ -69,61 +95,49 @@ servers "app-a" and "app-b" (192.168.0.10 and 192.168.0.11).</p>
   &lt;/host&gt;
 &lt;/cluster&gt;
 
-&lt;cluster id="app-tier"&gt;
-  &lt;server id="app-a" address="192.168.0.10" port="6800"/&gt;
-  &lt;server id="app-b" address="192.168.0.11" port="6800"/&gt;
-
-  &lt;persistent-store type="cluster"&gt;
-    &lt;init path="cluster"/&gt;
-  &lt;/persistent-store&gt;
-
-  &lt;web-app-default&gt;
-    &lt;session-config&gt;
-      &lt;use-persistent-store/&gt;
-    &lt;/session-config&gt;
-  &lt;/web-app-default&gt;
-
-  &lt;host id="www.foo.com"&gt;
-    ...
-  &lt;/host&gt;
-&lt;/cluster&gt;
-
 &lt;/resin&gt;
 </example>
 
-<p>The
-LoadBalanceServlet selects a backend server using a round-robin policy.
-Although the round-robin policy is simple, in practice it is as effective as
-complicated balancing policies.  In addition, because it's simple, round-robin
-is more robust and faster than adaptive policies.  </p>
+<p>All three servers will use the same resin.xml, which makes managing
+multiple servers easier.  The servers are name by the
+server <var>id</var> attribute, which must be unique.  When you start
+Resin, you'll use the server-id as part of the command line</p>
+
+<example title="Example: starting servers">
+192.168.0.10> java -jar lib/resin.jar -server app-a start
+
+192.168.0.11> java -jar lib/resin.jar -server app-b start
+
+192.168.0.1> java -jar lib/resin.jar -server web-a start
+</example>
+
+<p>Since Resin lets you start multiple servers on the same machine, a
+small site might start the web-tier server and one of the app-tier servers
+on one machine, and start the second server on a second machine.  You can
+even start all three servers on the same machine, increasing reliability
+and easing maintenance, without addressing the additional load.  If you
+do put multiple servers on the same machine, remember to change the
+<var>port</var> to something like 6801, so the TCP bind doesn't
+conflict.</p>
+
+<p>In the <a href="resin-admin.xtp">/resin-admin</a> management page, you
+can manage all three servers at once, gathering statistics and load and
+watching for any errors.  When setting up /resin-admin on a web-tier
+server, you'll want to remember to add a separate &lt;web-app> for resin-admin
+to make sure the &lt;rewrite-dispatch> doesn't inadvertantly send the
+management request to the app-tier.</p>
+
 </s2>
 
-<s2 title="The app-tier processes requests">
+<s2 title="Socket Pooling, Timeouts, and Failover">
 
-<p>The backend servers belong to the "app-tier" cluster.
-In this case, there are two backend servers, "app-a" and "app-b".  The
-server names must be unique and also the &lt;address,port> pair must
-be unique because TCP will not allow two processes to listen to
-exactly the same port and address combination.  If you have two
-backend servers on the same machine, they must have different ports,
-like 6801 and 6800.  In other words, you can have &lt;192.168.0.10,6800>
-and &lt;192.168.0.11,6800> on separate machines
-or you can have &lt;192.168.0.10,6800> and &lt;192.168.0.10,6801>
-on the same machine.</p>
-
-<p>Because the backend cluster all serves the same content, the &lt;host> and
-&lt;web-app> configuration is identical.  Only JVM-specific configuration
-like ports, addresses, and memory configuration belongs to the server.
-</p>
-
-<p>Sites using sessions will
-often configure <a href="config-sessions.xtp">distributed
-sessions</a> to make that the load balancer's failover will ensure a smooth
-switch of sessions from one backend to another.</p>
-
-</s2>
-
-<s2 title="Timeouts">
+<p>For efficiency, Resin's load balancer manages a pool of sockets
+connecting to the app-tier servers.  If Resin forwards a new request to
+an app-tier server and it has an idle socket available, it will reuse that
+socket, improving performance an minimizing network load.  Resin uses a
+set of timeout values to manage those idle sockets and to handle any
+failures or freezes of the backend servers.  The following diagram
+illustrates the main timeout values:</p>
 
 <figure src="load-balance-idle-time.png"/>
 
@@ -132,7 +146,7 @@ switch of sessions from one backend to another.</p>
 for the <code>connect()</code> system call to complete to
 the app-tier (5s).</li>
 <li><b>load-balance-idle-time</b>: load balancer timeout
-for an idle socket before reusing it (5s).</li>
+for an idle socket before closing it automatically (5s).</li>
 <li><b>load-balance-recover-time</b>: the load balancer connection failure wait
 time before trying a new connection (15s).</li>
 <li><b>load-balance-socket-timeout</b>: the load balancer
@@ -143,17 +157,16 @@ connection (15s)</li>
 write (65s)</li>
 </ul>
 
+<p>When an app-tier server is down due to maintenance or a crash, Resin
+will use the <b>load-balance-recover-time</b> as a delay before retrying
+the downed server.  With the failover and recover timeout, the load balancer
+reduces the cost of a failed server to almost no time at all.  Every
+recover-time, Resin will try a new connection and wait for
+<b>load-balance-connect-timeout</b> for the server to respond.  At most, one
+request every 15 seconds might wait an extra 5 seconds to connect to the
+backend server.  All other requests will automatically go
+to the other servers.</p>
 
-</s2>
-
-<s2 title="Starting the servers">
-
-<example title="Starting each server">
-192.168.0.1&gt; java -jar lib/resin.jar -server web-a start
-
-192.168.0.10&gt; java -jar lib/resin.jar -server app-a start
-192.168.0.11&gt; java -jar lib/resin.jar -server app-b start
-</example>
 
 </s2>
 

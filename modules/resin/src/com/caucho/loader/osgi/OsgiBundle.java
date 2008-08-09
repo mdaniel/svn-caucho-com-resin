@@ -73,6 +73,8 @@ public class OsgiBundle implements Bundle
   private String _symbolicName;
   private String _version = "0.0.0";
 
+  private ClassLoader _loader;
+
   private ArrayList<ExportBundleClassLoader> _exportList
     = new ArrayList<ExportBundleClassLoader>();
 
@@ -91,6 +93,9 @@ public class OsgiBundle implements Bundle
     _manager = manager;
     _jar = jar;
     _lastModified = Alarm.getCurrentTime();
+
+    // XXX:
+    _loader = Thread.currentThread().getContextClassLoader();
 
     try {
       Manifest manifest = jar.getManifest();
@@ -119,6 +124,11 @@ public class OsgiBundle implements Bundle
     _state = INSTALLED;
   }
 
+  ClassLoader getClassLoader()
+  {
+    return _loader;
+  }
+
   /**
    * Activates the bundle
    */
@@ -127,9 +137,11 @@ public class OsgiBundle implements Bundle
     sendEvent(BundleEvent.STARTING);
 
     Thread thread = Thread.currentThread();
-    ClassLoader loader = thread.getContextClassLoader();
+    ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
+      thread.setContextClassLoader(_loader);
+      
       if (_activatorClassName == null) {
 	log.finer(this + " active with no Bundle-Activator");
 
@@ -138,7 +150,7 @@ public class OsgiBundle implements Bundle
 	return;
       }
     
-      Class cl = Class.forName(_activatorClassName, false, loader);
+      Class cl = loadClass(_activatorClassName);
 
       if (! BundleActivator.class.isAssignableFrom(cl)) {
 	throw new ConfigException(L.l("'{0}' does not implement BundleActivator",
@@ -157,6 +169,8 @@ public class OsgiBundle implements Bundle
     } catch (Exception e) {
       throw ConfigException.create(e);
     } finally  {
+      thread.setContextClassLoader(oldLoader);
+      
       sendEvent(BundleEvent.STARTED);
     }
   }
@@ -441,7 +455,7 @@ public class OsgiBundle implements Bundle
   public Class loadClass(String name)
     throws ClassNotFoundException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return Class.forName(name, false, _loader);
   }
 
   /**
@@ -450,7 +464,7 @@ public class OsgiBundle implements Bundle
   public Enumeration getResources(String name)
     throws IOException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _loader.getResources(name);
   }
 
   /**

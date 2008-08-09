@@ -183,7 +183,7 @@ public class OsgiBundleContext implements BundleContext
 				 String filter)
     throws InvalidSyntaxException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _manager.addServiceListener(_bundle, listener, createFilter(filter));
   }
 
   /**
@@ -191,7 +191,7 @@ public class OsgiBundleContext implements BundleContext
    */
   public void addServiceListener(ServiceListener listener)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _manager.addServiceListener(_bundle, listener, null);
   }
 
   /**
@@ -199,7 +199,7 @@ public class OsgiBundleContext implements BundleContext
    */
   public void removeServiceListener(ServiceListener listener)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _manager.removeServiceListener(_bundle, listener);
   }
 
   /**
@@ -209,7 +209,14 @@ public class OsgiBundleContext implements BundleContext
 					     Object service,
 					     Dictionary properties)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    ServiceRegistration reg = _manager.registerService(_bundle,
+						       classNames,
+						       service,
+						       properties);
+
+    //sendServiceEvent(ServiceEvent.REGISTERED, reg.getReference());
+
+    return reg;
   }
 
   /**
@@ -219,7 +226,9 @@ public class OsgiBundleContext implements BundleContext
 					     Object service,
 					     Dictionary properties)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return registerService(new String[] { className },
+			   service,
+			   properties);
   }
 
   /**
@@ -247,7 +256,7 @@ public class OsgiBundleContext implements BundleContext
    */
   public ServiceReference getServiceReference(String className)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _manager.getServiceReference(className);
   }
 
   /**
@@ -255,7 +264,9 @@ public class OsgiBundleContext implements BundleContext
    */
   public Object getService(ServiceReference reference)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    OsgiServiceReference ref = (OsgiServiceReference) reference;
+
+    return ref.getService(_bundle);
   }
 
   /**
@@ -263,7 +274,9 @@ public class OsgiBundleContext implements BundleContext
    */
   public boolean ungetService(ServiceReference reference)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    OsgiServiceReference ref = (OsgiServiceReference) reference;
+
+    return ref.ungetService(_bundle);
   }
 
   /**

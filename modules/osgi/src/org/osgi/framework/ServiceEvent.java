@@ -59,4 +59,22 @@ public class ServiceEvent extends EventObject
   {
     return _type;
   }
+
+  @Override
+  public String toString()
+  {
+    switch (_type) {
+    case REGISTERED:
+      return getClass().getName() + "[" + getSource() + ",registered]";
+      
+    case MODIFIED:
+      return getClass().getName() + "[" + getSource() + ",modified]";
+      
+    case UNREGISTERING:
+      return getClass().getName() + "[" + getSource() + ",unregistering]";
+      
+    default:
+      return getClass().getName() + "[" + getSource() + "," + getType() + "]";
+    }
+  }
 }

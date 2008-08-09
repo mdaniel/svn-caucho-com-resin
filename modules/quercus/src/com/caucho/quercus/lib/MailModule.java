@@ -46,6 +46,8 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,6 +74,11 @@ public class MailModule extends AbstractQuercusModule {
     Transport smtp = null;
 
     try {
+      HashMap<String,String> headers = splitHeaders(additionalHeaders);
+
+      if (to == null || to.equals(""))
+	to = headers.get("to");
+      
       Properties props = new Properties();
       
       StringValue host = env.getIni("SMTP");
@@ -86,7 +93,16 @@ public class MailModule extends AbstractQuercusModule {
       else if (System.getProperty("mail.smtp.port") != null)
         props.put("mail.smtp.port", System.getProperty("mail.smtp.port"));
 
-      StringValue user = env.getIni("sendmail_from");
+      if (System.getProperty("mail.smtp.class") != null)
+        props.put("mail.smtp.class", System.getProperty("mail.smtp.class"));
+
+      StringValue user = null;
+
+      if (headers.get("from") != null)
+	user = env.createString(headers.get("from"));
+
+      if (user == null)
+	user = env.getIni("sendmail_from");
       if (user != null && ! user.toString().equals(""))
         props.put("mail.from", user.toString());
       else if (System.getProperty("mail.from") != null)
@@ -97,7 +113,7 @@ public class MailModule extends AbstractQuercusModule {
 
       if (password != null && ! "".equals(password))
         props.put("mail.smtp.auth", "true");
- 
+
       Session mailSession = Session.getInstance(props, null);
       smtp = mailSession.getTransport("smtp");
 
@@ -108,8 +124,8 @@ public class MailModule extends AbstractQuercusModule {
       ArrayList<Address> addrList;
       addrList = addRecipients(msg, Message.RecipientType.TO, to);
 
-      if (additionalHeaders != null)
-        addHeaders(msg, additionalHeaders);
+      if (headers != null)
+        addHeaders(msg, headers);
 
       Address []from = msg.getFrom();
       if (from == null || from.length == 0) {
@@ -149,7 +165,7 @@ public class MailModule extends AbstractQuercusModule {
 
       log.log(Level.FINE, e.toString(), e);
 
-      env.warning(e.getMessage());
+      env.warning(e.toString());
 
       return false;
     } catch (MessagingException e) {
@@ -191,12 +207,12 @@ public class MailModule extends AbstractQuercusModule {
                                                   String to)
     throws MessagingException
   {
-    String []split = to.split("[ \t,<>]");
+    String []split = to.split("[ \t,]|<.*>");
 
     ArrayList<Address> addresses = new ArrayList<Address>();
 
     for (int i = 0; i < split.length; i++) {
-      if (split[i].indexOf('@') > 0) {
+      if (split[i].length() > 0) {
         Address addr = new InternetAddress(split[i]);
 
         addresses.add(addr);
@@ -207,9 +223,31 @@ public class MailModule extends AbstractQuercusModule {
     return addresses;
   }
 
-  private static void addHeaders(MimeMessage msg, String headers)
+  private static void addHeaders(MimeMessage msg,
+				 HashMap<String,String> headerMap)
     throws MessagingException
   {
+    for (Map.Entry<String,String> entry : headerMap.entrySet()) {
+      String name = entry.getKey();
+      String value = entry.getValue();
+
+      if ("".equals(value)) {
+      }
+      else if (name.equalsIgnoreCase("From")) {
+	msg.setFrom(new InternetAddress(value));
+      }
+      else
+        msg.addHeader(name, value);
+    }
+  }
+
+  private static HashMap<String,String> splitHeaders(String headers)
+  {
+    HashMap<String,String> headerMap = new HashMap<String,String>();
+
+    if (headers == null)
+      return headerMap;
+    
     int i = 0;
     int len = headers.length();
 
@@ -224,7 +262,7 @@ public class MailModule extends AbstractQuercusModule {
       }
 
       if (len <= i)
-        return;
+        return headerMap;
 
       buffer.clear();
 
@@ -255,14 +293,12 @@ public class MailModule extends AbstractQuercusModule {
 
       String value = buffer.toString();
 
-      if ("".equals(value)) {
+      if (! "".equals(value)) {
+        headerMap.put(name.toLowerCase(), value);
       }
-      else if (name.equalsIgnoreCase("From")) {
-	msg.setFrom(new InternetAddress(value));
-      }
-      else
-        msg.addHeader(name, value);
     }
+
+    return headerMap;
   }
 }
 

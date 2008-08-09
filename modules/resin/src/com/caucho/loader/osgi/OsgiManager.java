@@ -52,6 +52,11 @@ import java.util.jar.*;
 import java.util.zip.*;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -74,6 +79,12 @@ public class OsgiManager
 
   private HashMap<String,ExportBundleClassLoader> _exportMap
     = new HashMap<String,ExportBundleClassLoader>();
+
+  private HashMap<String,ServiceReference> _serviceReferenceMap
+    = new HashMap<String,ServiceReference>();
+  
+  private ArrayList<ServiceListenerEntry> _serviceListenerList
+    = new ArrayList<ServiceListenerEntry>();
 
   private OsgiManager()
   {
@@ -176,9 +187,174 @@ public class OsgiManager
     bundle.activate();
   }
 
+  //
+  // services
+  //
+
+  /**
+   * Registers a service
+   */
+  ServiceRegistration registerService(OsgiBundle bundle,
+				      String []classNames,
+				      Object service,
+				      Dictionary properties)
+  {
+    OsgiServiceRegistration registration;
+    
+    registration = new OsgiServiceRegistration(this,
+					       bundle,
+					       classNames,
+					       service,
+					       properties);
+
+    synchronized (_serviceReferenceMap) {
+      for (String name : classNames) {
+	_serviceReferenceMap.put(name, registration.getReference());
+      }
+    }
+
+    sendServiceEvent(ServiceEvent.REGISTERED, registration.getReference());
+
+    return registration;
+  }
+  
+  /**
+   * Returns the service reference for the given service
+   */
+  public ServiceReference getServiceReference(String className)
+  {
+    synchronized (_serviceReferenceMap) {
+      return _serviceReferenceMap.get(className);
+    }
+  }
+
+  /**
+   * Registers a service
+   */
+  void unregisterService(ServiceReference ref)
+  {
+    sendServiceEvent(ServiceEvent.UNREGISTERING, ref);
+    
+    synchronized (_serviceReferenceMap) {
+      Iterator<Map.Entry<String,ServiceReference>> iter;
+      iter = _serviceReferenceMap.entrySet().iterator();
+
+      while (iter.hasNext()) {
+	Map.Entry<String,ServiceReference> entry = iter.next();
+
+	if (entry.getValue() == ref) {
+	  iter.remove();
+	}
+      }
+    }
+  }
+
+  /**
+   * Adds a listener for service events
+   */
+  void addServiceListener(OsgiBundle bundle,
+			  ServiceListener listener,
+			  Filter filter)
+  {
+    synchronized (_serviceListenerList) {
+      ServiceListenerEntry entry;
+      
+      entry = new ServiceListenerEntry(bundle, listener, filter);
+
+      for (int i = _serviceListenerList.size() - 1; i >= 0; i--) {
+	ServiceListenerEntry oldEntry = _serviceListenerList.get(i);
+
+	if (oldEntry.getListener() == listener
+	    && oldEntry.getBundle() == bundle) {
+	  _serviceListenerList.set(i, entry);
+	  return;
+	}
+      }
+	
+      _serviceListenerList.add(entry);
+    }
+  }
+
+  /**
+   * Removes a listener for service events
+   */
+  void removeServiceListener(OsgiBundle bundle, ServiceListener listener)
+  {
+    synchronized (_serviceListenerList) {
+      for (int i = _serviceListenerList.size() - 1; i >= 0; i--) {
+	ServiceListenerEntry entry = _serviceListenerList.get(i);
+
+	if (entry.getListener() == listener
+	    && entry.getBundle() == bundle) {
+	  _serviceListenerList.remove(i);
+
+	  return;
+	}
+      }
+    }
+  }
+
+  private void sendServiceEvent(int type, ServiceReference ref)
+  {
+    ArrayList<ServiceListenerEntry> listenerList = null;
+
+    synchronized (_serviceListenerList) {
+      if (_serviceListenerList.size() > 0) {
+	listenerList = new ArrayList<ServiceListenerEntry>();
+	listenerList.addAll(_serviceListenerList);
+      }
+    }
+
+    if (listenerList != null) {
+      ServiceEvent event = new ServiceEvent(type, ref);
+
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+      
+      for (ServiceListenerEntry entry : listenerList) {
+	ServiceListener listener = entry.getListener();
+
+	// XXX: filter
+
+	try {
+	  thread.setContextClassLoader(entry.getBundle().getClassLoader());
+	  
+	  listener.serviceChanged(event);
+	} finally {
+	  thread.setContextClassLoader(oldLoader);
+	}
+      }
+    }
+  }
+
   @Override
   public String toString()
   {
-    return (getClass().getSimpleName() + "[]");
+    return getClass().getSimpleName() + "[]";
+  }
+
+  static class ServiceListenerEntry {
+    private final OsgiBundle _bundle;
+    private final ServiceListener _listener;
+    private final Filter _filter;
+
+    ServiceListenerEntry(OsgiBundle bundle,
+			 ServiceListener listener,
+			 Filter filter)
+    {
+      _bundle = bundle;
+      _listener = listener;
+      _filter = filter;
+    }
+
+    OsgiBundle getBundle()
+    {
+      return _bundle;
+    }
+
+    ServiceListener getListener()
+    {
+      return _listener;
+    }
   }
 }
