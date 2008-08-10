@@ -47,7 +47,7 @@ public interface ServiceFactory
 			   ServiceRegistration registration);
   
   /**
-   * Releases a new service
+   * Releases a service
    */
   public void ungetService(Bundle bundle,
 			   ServiceRegistration registration,

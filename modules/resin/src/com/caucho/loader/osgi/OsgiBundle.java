@@ -94,40 +94,47 @@ public class OsgiBundle implements Bundle
     _jar = jar;
     _lastModified = Alarm.getCurrentTime();
 
-    try {
-      Manifest manifest = jar.getManifest();
+    if (jar != null) {
+      try {
+	Manifest manifest = jar.getManifest();
 
-      Attributes attr = manifest.getMainAttributes();
-      _symbolicName = attr.getValue("Bundle-SymbolicName");
+	Attributes attr = manifest.getMainAttributes();
+	_symbolicName = attr.getValue("Bundle-SymbolicName");
 
-      if (_symbolicName == null)
-	throw new ConfigException(L.l("'{0}' needs a Bundle-SymbolicName in its manifest.  OSGi bundles require a Bundle-SymbolicName",
-				      jar.getNativePath()));
+	if (_symbolicName == null)
+	  throw new ConfigException(L.l("'{0}' needs a Bundle-SymbolicName in its manifest.  OSGi bundles require a Bundle-SymbolicName",
+					jar.getNativePath()));
 
-      String exportAttr = attr.getValue("Export-Package");
+	String exportAttr = attr.getValue("Export-Package");
 
-      ArrayList<PackageItem> exportList = null;
+	ArrayList<PackageItem> exportList = null;
       
-      if (exportAttr != null)
-	exportList = parseItems(exportAttr);
+	if (exportAttr != null)
+	  exportList = parseItems(exportAttr);
 
-      addExports(exportList);
+	addExports(exportList);
 
-      if (exportList != null)
-	_importList.addAll(exportList);
+	if (exportList != null)
+	  _importList.addAll(exportList);
 
-      _activatorClassName = attr.getValue("Bundle-Activator");
-    } catch (Exception e) {
-      throw ConfigException.create(e);
+	_activatorClassName = attr.getValue("Bundle-Activator");
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+
+      _loader = new BundleClassLoader(_manager.getParentLoader(),
+				      _symbolicName + "-" + id,
+				      jar.getContainer());
     }
-
-    _loader = new BundleClassLoader(_manager.getParentLoader(),
-				    _symbolicName + "-" + id,
-				    jar.getContainer());
 
     _state = INSTALLED;
   }
 
+  OsgiManager getManager()
+  {
+    return _manager;
+  }
+  
   ClassLoader getClassLoader()
   {
     return _loader;

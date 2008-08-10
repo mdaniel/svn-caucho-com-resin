@@ -55,8 +55,11 @@ import java.util.zip.*;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
@@ -77,6 +80,8 @@ public class OsgiManager
   private ClassLoader _parentLoader;
 
   private long _nextBundleId = 1;
+
+  private OsgiBundle _systemBundle;
   
   private ArrayList<OsgiBundle> _bundleList
     = new ArrayList<OsgiBundle>();
@@ -86,6 +91,9 @@ public class OsgiManager
 
   private HashMap<String,ServiceReference> _serviceReferenceMap
     = new HashMap<String,ServiceReference>();
+  
+  private ArrayList<FrameworkListenerEntry> _frameworkListenerList
+    = new ArrayList<FrameworkListenerEntry>();
   
   private ArrayList<BundleListenerEntry> _bundleListenerList
     = new ArrayList<BundleListenerEntry>();
@@ -102,6 +110,9 @@ public class OsgiManager
   public OsgiManager(ClassLoader parentLoader)
   {
     _parentLoader = Thread.currentThread().getContextClassLoader().getParent();
+
+    _systemBundle = new OsgiSystemBundle(this);
+    _bundleList.add(_systemBundle);
   }
 
   public static OsgiManager getCurrent()
@@ -252,8 +263,14 @@ public class OsgiManager
 	bundle.start();
       } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
+	
+	BundleException exn = new BundleException(bundle + " " + e, e);
+
+	sendFrameworkEvent(FrameworkEvent.ERROR, bundle, exn);
       }
     }
+
+    sendFrameworkEvent(FrameworkEvent.STARTED, _systemBundle, null);
   }
 
   /**
@@ -337,6 +354,84 @@ public class OsgiManager
   //
   // listener management
   //
+
+  /**
+   * Adds a listener for framework events
+   */
+  void addFrameworkListener(OsgiBundle bundle,
+			    FrameworkListener listener)
+  {
+    synchronized (_frameworkListenerList) {
+      FrameworkListenerEntry entry;
+      
+      entry = new FrameworkListenerEntry(bundle, listener);
+
+      for (int i = _frameworkListenerList.size() - 1; i >= 0; i--) {
+	FrameworkListenerEntry oldEntry = _frameworkListenerList.get(i);
+
+	if (oldEntry.getListener() == listener
+	    && oldEntry.getBundle() == bundle) {
+	  _frameworkListenerList.set(i, entry);
+	  return;
+	}
+      }
+	
+      _frameworkListenerList.add(entry);
+    }
+  }
+
+  /**
+   * Removes a listener for framework events
+   */
+  void removeFrameworkListener(OsgiBundle bundle,
+			       FrameworkListener listener)
+  {
+    synchronized (_frameworkListenerList) {
+      for (int i = _frameworkListenerList.size() - 1; i >= 0; i--) {
+	FrameworkListenerEntry entry = _frameworkListenerList.get(i);
+
+	if (entry.getListener() == listener
+	    && entry.getBundle() == bundle) {
+	  _frameworkListenerList.remove(i);
+
+	  return;
+	}
+      }
+    }
+  }
+
+  private void sendFrameworkEvent(int type, Bundle bundle, Throwable exn)
+  {
+    ArrayList<FrameworkListenerEntry> listenerList = null;
+
+    synchronized (_frameworkListenerList) {
+      if (_frameworkListenerList.size() > 0) {
+	listenerList = new ArrayList<FrameworkListenerEntry>();
+	listenerList.addAll(_frameworkListenerList);
+      }
+    }
+
+    if (listenerList != null) {
+      FrameworkEvent event;
+
+      event = new FrameworkEvent(type, bundle, exn);
+
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+
+      for (FrameworkListenerEntry entry : listenerList) {
+	FrameworkListener listener = entry.getListener();
+
+	try {
+	  thread.setContextClassLoader(entry.getBundle().getClassLoader());
+	  
+	  listener.frameworkEvent(event);
+	} finally {
+	  thread.setContextClassLoader(oldLoader);
+	}
+      }
+    }
+  }
 
   /**
    * Adds a listener for bundle events
@@ -495,6 +590,28 @@ public class OsgiManager
   public String toString()
   {
     return getClass().getSimpleName() + "[]";
+  }
+
+  static class FrameworkListenerEntry {
+    private final OsgiBundle _bundle;
+    private final FrameworkListener _listener;
+
+    FrameworkListenerEntry(OsgiBundle bundle,
+			   FrameworkListener listener)
+    {
+      _bundle = bundle;
+      _listener = listener;
+    }
+
+    OsgiBundle getBundle()
+    {
+      return _bundle;
+    }
+
+    FrameworkListener getListener()
+    {
+      return _listener;
+    }
   }
 
   static class BundleListenerEntry {

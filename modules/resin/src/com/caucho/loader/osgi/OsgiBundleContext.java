@@ -81,7 +81,7 @@ public class OsgiBundleContext implements BundleContext
    */
   public void addFrameworkListener(FrameworkListener listener)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _manager.addFrameworkListener(_bundle, listener);
   }
 
   /**
@@ -89,7 +89,7 @@ public class OsgiBundleContext implements BundleContext
    */
   public void removeFrameworkListener(FrameworkListener listener)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _manager.removeFrameworkListener(_bundle, listener);
   }
 
   //
@@ -213,8 +213,6 @@ public class OsgiBundleContext implements BundleContext
 						       classNames,
 						       service,
 						       properties);
-
-    //sendServiceEvent(ServiceEvent.REGISTERED, reg.getReference());
 
     return reg;
   }
