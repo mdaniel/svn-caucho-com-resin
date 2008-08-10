@@ -948,6 +948,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       }
     }
 
+    buildImportClassPath(head);
+
     ArrayList<Loader> loaders = getLoaders();
     if (loaders != null) {
       for (int i = 0; i < loaders.size(); i++) {
@@ -956,6 +958,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 	loader.buildClassPath(head);
       }
     }
+  }
+
+  protected void buildImportClassPath(StringBuilder sb)
+  {
   }
 
   /**
@@ -1352,6 +1358,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       }
 
       if (cl == null) {
+	// osgi imports
+	cl = findImportClass(name);
+      }
+
+      if (cl == null) {
         cl = findClassImpl(name);
       }
     }
@@ -1371,6 +1382,14 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       resolveClass(cl);
 
     return cl;
+  }
+
+  /**
+   * Returns any import class, e.g. from an osgi bundle
+   */
+  protected Class findImportClass(String name)
+  {
+    return null;
   }
 
   /**
@@ -1399,7 +1418,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    *
    * @return the loaded class
    */
-  protected Class findClassImpl(String name)
+  public Class findClassImpl(String name)
     throws ClassNotFoundException
   {
     if (_isVerbose)

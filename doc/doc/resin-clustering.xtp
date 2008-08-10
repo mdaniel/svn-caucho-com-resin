@@ -167,6 +167,25 @@ request every 15 seconds might wait an extra 5 seconds to connect to the
 backend server.  All other requests will automatically go
 to the other servers.</p>
 
+<p>The socket-timeout values tell Resin when a socket connection is
+dead and should be dropped.  The web-tier timeout
+<b>load-balance-socket-timeout</b> is much larger than the app-tier
+timeout <b>socket-timeout</b> because the web-tier needs to wait for
+the application to generate the response.  If your application has some
+very slow pages, like a complicated nightly report, you may need to
+increase the <b>load-balance-socket-timeout</b> to avoid the web-tier
+disconnecting it.</p>
+
+<p>Likewise, the <b>load-balance-idle-time</b> and <b>keepalive-timeout</b>
+are a matching pair for the socket idle pool.  The idle-time tells the
+web-tier how long it can keep an idle socket before closing it.  The
+keepalive-timeout tells the app-tier how long it should listen for
+new requests on the socket.  The <b>keepalive-timeout</b> must be
+significantly larger than the <b>load-balance-idle-time</b> so the app-tier
+doesn't close its sockets too soon.  The keepalive timeout can be large
+since the app-tier can use the
+<a href="server-tags.xtp#keepalive-select-enable">keepalive-select</a>
+manager to efficiently wait for many connections at once.</p>
 
 </s2>
 

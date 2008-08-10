@@ -63,18 +63,29 @@ public class ServiceEvent extends EventObject
   @Override
   public String toString()
   {
+    StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getName()).append("[");
+    
     switch (_type) {
     case REGISTERED:
-      return getClass().getName() + "[" + getSource() + ",registered]";
+      sb.append("registered");
+      break;
       
     case MODIFIED:
-      return getClass().getName() + "[" + getSource() + ",modified]";
+      sb.append("modified");
+      break;
       
     case UNREGISTERING:
-      return getClass().getName() + "[" + getSource() + ",unregistering]";
+      sb.append("unregistering");
+      break;
       
     default:
-      return getClass().getName() + "[" + getSource() + "," + getType() + "]";
+      sb.append("type=").append(getType());
+      break;
     }
+
+    sb.append(",").append(getSource()).append("]");
+
+    return sb.toString();
   }
 }

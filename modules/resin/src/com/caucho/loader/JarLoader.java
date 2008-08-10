@@ -74,9 +74,4 @@ public class JarLoader extends JarListLoader implements Dependency {
   {
     return null;
   }
-
-  public String toString()
-  {
-    return "JarLoader[]";
-  }
 }

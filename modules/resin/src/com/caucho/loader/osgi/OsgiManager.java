@@ -34,6 +34,8 @@ import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.PathPatternType;
 import com.caucho.loader.Loader;
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.DependencyContainer;
 import com.caucho.server.util.CauchoSystem;
@@ -52,6 +54,8 @@ import java.util.jar.*;
 import java.util.zip.*;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -83,36 +87,49 @@ public class OsgiManager
   private HashMap<String,ServiceReference> _serviceReferenceMap
     = new HashMap<String,ServiceReference>();
   
+  private ArrayList<BundleListenerEntry> _bundleListenerList
+    = new ArrayList<BundleListenerEntry>();
+  
   private ArrayList<ServiceListenerEntry> _serviceListenerList
     = new ArrayList<ServiceListenerEntry>();
 
-  private OsgiManager()
+  private ArrayList<OsgiBundle> _pendingStartupList
+    = new ArrayList<OsgiBundle>();
+
+  /**
+   * Constructor should be called only from EnvironmentClassLoader
+   */
+  public OsgiManager(ClassLoader parentLoader)
   {
     _parentLoader = Thread.currentThread().getContextClassLoader().getParent();
   }
 
   public static OsgiManager getCurrent()
   {
-    return _localOsgi.getLevel();
+    EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
+
+    return loader.getOsgiManager();
   }
 
   public static OsgiManager create()
   {
-    synchronized (_localOsgi) {
-      OsgiManager manager = _localOsgi.getLevel();
+    EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
 
-      if (manager == null) {
-	manager = new OsgiManager();
-	_localOsgi.set(manager);
-      }
-
-      return manager;
-    }
+    return loader.getOsgiManager();
   }
 
   public ClassLoader getParentLoader()
   {
     return _parentLoader;
+  }
+
+  void addStartupBundle(Path path)
+  {
+    OsgiBundle bundle = addPath(path);
+
+    synchronized (_pendingStartupList) {
+      _pendingStartupList.add(bundle);
+    }
   }
 
   /**
@@ -127,6 +144,8 @@ public class OsgiManager
     synchronized (_bundleList) {
       _bundleList.add(bundle);
     }
+
+    sendBundleEvent(BundleEvent.INSTALLED, bundle);
 
     return bundle;
   }
@@ -180,11 +199,77 @@ public class OsgiManager
   }
 
   /**
+   * Returns any import class, e.g. from an osgi bundle
+   */
+  public Class findImportClass(String name)
+  {
+    int p = name.lastIndexOf('.');
+
+    if (p < 0)
+      return null;
+
+    String packageName = name.substring(0, p);
+
+    ExportBundleClassLoader loader;
+
+    synchronized (_exportMap) {
+      loader = _exportMap.get(packageName);
+
+      try {
+	return loader.findClassImpl(name);
+      } catch (Exception e) {
+      }
+    }
+    
+    return null;
+  }
+
+  public void buildImportClassPath(StringBuilder head)
+  {
+    synchronized (_exportMap) {
+      for (ExportBundleClassLoader exportLoader : _exportMap.values()) {
+	for (Loader loader : exportLoader.getLoaders()) {
+	  loader.buildClassPath(head);
+	}
+      }
+    }
+  }
+
+  /**
+   * Starts the manager
+   */
+  public void start()
+  {
+    ArrayList<OsgiBundle> startList = new ArrayList<OsgiBundle>();
+
+    synchronized (_pendingStartupList) {
+      startList.addAll(_pendingStartupList);
+      _pendingStartupList.clear();
+    }
+
+    for (OsgiBundle bundle : startList) {
+      try {
+	bundle.start();
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+  }
+
+  /**
    * Adds the bundle for installation
    */
-  public void install(OsgiBundle bundle)
+  public void start(OsgiBundle bundle)
   {
-    bundle.activate();
+    bundle.resolve();
+    
+    sendBundleEvent(BundleEvent.STARTING, bundle);
+
+    try {
+      bundle.startImpl();
+    } finally {
+      sendBundleEvent(BundleEvent.STARTED, bundle);
+    }
   }
 
   //
@@ -244,6 +329,85 @@ public class OsgiManager
 
 	if (entry.getValue() == ref) {
 	  iter.remove();
+	}
+      }
+    }
+  }
+
+  //
+  // listener management
+  //
+
+  /**
+   * Adds a listener for bundle events
+   */
+  void addBundleListener(OsgiBundle bundle,
+			 BundleListener listener)
+  {
+    synchronized (_bundleListenerList) {
+      BundleListenerEntry entry;
+      
+      entry = new BundleListenerEntry(bundle, listener);
+
+      for (int i = _bundleListenerList.size() - 1; i >= 0; i--) {
+	BundleListenerEntry oldEntry = _bundleListenerList.get(i);
+
+	if (oldEntry.getListener() == listener
+	    && oldEntry.getBundle() == bundle) {
+	  _bundleListenerList.set(i, entry);
+	  return;
+	}
+      }
+	
+      _bundleListenerList.add(entry);
+    }
+  }
+
+  /**
+   * Removes a listener for bundle events
+   */
+  void removeBundleListener(OsgiBundle bundle, BundleListener listener)
+  {
+    synchronized (_bundleListenerList) {
+      for (int i = _bundleListenerList.size() - 1; i >= 0; i--) {
+	BundleListenerEntry entry = _bundleListenerList.get(i);
+
+	if (entry.getListener() == listener
+	    && entry.getBundle() == bundle) {
+	  _bundleListenerList.remove(i);
+
+	  return;
+	}
+      }
+    }
+  }
+
+  private void sendBundleEvent(int type, Bundle bundle)
+  {
+    ArrayList<BundleListenerEntry> listenerList = null;
+
+    synchronized (_bundleListenerList) {
+      if (_bundleListenerList.size() > 0) {
+	listenerList = new ArrayList<BundleListenerEntry>();
+	listenerList.addAll(_bundleListenerList);
+      }
+    }
+
+    if (listenerList != null) {
+      BundleEvent event = new BundleEvent(type, bundle);
+
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+      
+      for (BundleListenerEntry entry : listenerList) {
+	BundleListener listener = entry.getListener();
+
+	try {
+	  thread.setContextClassLoader(entry.getBundle().getClassLoader());
+	  
+	  listener.bundleChanged(event);
+	} finally {
+	  thread.setContextClassLoader(oldLoader);
 	}
       }
     }
@@ -331,6 +495,28 @@ public class OsgiManager
   public String toString()
   {
     return getClass().getSimpleName() + "[]";
+  }
+
+  static class BundleListenerEntry {
+    private final OsgiBundle _bundle;
+    private final BundleListener _listener;
+
+    BundleListenerEntry(OsgiBundle bundle,
+			BundleListener listener)
+    {
+      _bundle = bundle;
+      _listener = listener;
+    }
+
+    OsgiBundle getBundle()
+    {
+      return _bundle;
+    }
+
+    BundleListener getListener()
+    {
+      return _listener;
+    }
   }
 
   static class ServiceListenerEntry {

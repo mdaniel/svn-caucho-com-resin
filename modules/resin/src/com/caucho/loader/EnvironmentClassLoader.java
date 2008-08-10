@@ -34,6 +34,7 @@ import com.caucho.jmx.Jmx;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.loader.enhancer.ScanManager;
+import com.caucho.loader.osgi.OsgiManager;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.naming.Jndi;
@@ -83,6 +84,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
   private ArrayList<ScanListener> _scanListeners;
   private ArrayList<URL> _pendingScanUrls = new ArrayList<URL>();
+
+  private OsgiManager _osgiManager;
 
   // Array of listeners
   // XXX: this used to be a weak reference list, but that caused problems
@@ -551,6 +554,36 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   }
 
   /**
+   * Returns the osgi manager
+   */
+  public OsgiManager getOsgiManager()
+  {
+    synchronized (this) {
+      if (_osgiManager == null)
+	_osgiManager = new OsgiManager(getParent());
+      
+      return _osgiManager;
+    }
+  }
+
+  /**
+   * Returns any import class, e.g. from an osgi bundle
+   */
+  protected Class findImportClass(String name)
+  {
+    if (_osgiManager != null)
+      return _osgiManager.findImportClass(name);
+    else
+      return null;
+  }
+
+  protected void buildImportClassPath(StringBuilder sb)
+  {
+    if (_osgiManager != null)
+      _osgiManager.buildImportClassPath(sb);
+  }
+
+  /**
    * Called when the <class-loader> completes.
    */
   @Override
@@ -644,6 +677,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     sendAddLoaderEvent();
     
     bind();
+
+    if (_osgiManager != null)
+      _osgiManager.start();
       
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
 

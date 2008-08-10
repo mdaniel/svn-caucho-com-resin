@@ -73,16 +73,16 @@ public class OsgiBundle implements Bundle
   private String _symbolicName;
   private String _version = "0.0.0";
 
-  private ClassLoader _loader;
+  private BundleClassLoader _loader;
 
   private ArrayList<ExportBundleClassLoader> _exportList
     = new ArrayList<ExportBundleClassLoader>();
+  
+  private ArrayList<PackageItem> _importList
+    = new ArrayList<PackageItem>();
 
   private String _activatorClassName;
   private OsgiBundleContext _bundleContext;
-
-  private ArrayList<BundleListener> _listenerList
-    = new ArrayList<BundleListener>();
 
   private int _state;
   private long _lastModified;
@@ -93,9 +93,6 @@ public class OsgiBundle implements Bundle
     _manager = manager;
     _jar = jar;
     _lastModified = Alarm.getCurrentTime();
-
-    // XXX:
-    _loader = Thread.currentThread().getContextClassLoader();
 
     try {
       Manifest manifest = jar.getManifest();
@@ -116,10 +113,17 @@ public class OsgiBundle implements Bundle
 
       addExports(exportList);
 
+      if (exportList != null)
+	_importList.addAll(exportList);
+
       _activatorClassName = attr.getValue("Bundle-Activator");
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+
+    _loader = new BundleClassLoader(_manager.getParentLoader(),
+				    _symbolicName + "-" + id,
+				    jar.getContainer());
 
     _state = INSTALLED;
   }
@@ -132,10 +136,8 @@ public class OsgiBundle implements Bundle
   /**
    * Activates the bundle
    */
-  public void activate()
+  void startImpl()
   {
-    sendEvent(BundleEvent.STARTING);
-
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -170,8 +172,22 @@ public class OsgiBundle implements Bundle
       throw ConfigException.create(e);
     } finally  {
       thread.setContextClassLoader(oldLoader);
-      
-      sendEvent(BundleEvent.STARTED);
+    }
+  }
+
+  void resolve()
+  {
+    _loader.init();
+
+    for (PackageItem item : _importList) {
+      String packageName = item.getPrimaryPackage();
+
+      ExportBundleClassLoader loader = _manager.getExportLoader(packageName);
+
+      if (loader == null)
+	throw new NullPointerException();
+
+      _loader.addImport(packageName, loader);
     }
   }
 
@@ -344,7 +360,7 @@ public class OsgiBundle implements Bundle
   public void start(int options)
     throws BundleException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    start();
   }
 
   /**
@@ -353,7 +369,7 @@ public class OsgiBundle implements Bundle
   public void start()
     throws BundleException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _manager.start(this);
   }
 
   /**
@@ -508,49 +524,6 @@ public class OsgiBundle implements Bundle
   {
     return _bundleContext;
   }
-
-  /**
-   * Sends a bundle event
-   */
-  void sendEvent(int type)
-  {
-    ArrayList<BundleListener> listeners;
-    
-    synchronized (_listenerList) {
-      if (_listenerList.size() == 0)
-	return;
-
-      listeners = new ArrayList<BundleListener>(_listenerList);
-    }
-
-    BundleEvent event = new BundleEvent(type, this);
-    
-    for (BundleListener listener : listeners) {
-      listener.bundleChanged(event);
-    }
-  }
-    
-  /**
-   * Adds a listener for bundle events
-   */
-  void addBundleListener(BundleListener listener)
-  {
-    synchronized (_listenerList) {
-      if (! _listenerList.contains(listener))
-	_listenerList.add(listener);
-    }
-  }
-
-  /**
-   * Removes a listener for bundle events
-   */
-  void removeBundleListener(BundleListener listener)
-  {
-    synchronized (_listenerList) {
-      _listenerList.remove(listener);
-    }
-  }
-
 
   @Override
   public String toString()

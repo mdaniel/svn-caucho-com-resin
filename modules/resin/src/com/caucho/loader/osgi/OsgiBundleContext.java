@@ -153,7 +153,7 @@ public class OsgiBundleContext implements BundleContext
    */
   public void addBundleListener(BundleListener listener)
   {
-    _bundle.addBundleListener(listener);
+    _manager.addBundleListener(_bundle, listener);
   }
 
   /**
@@ -161,7 +161,7 @@ public class OsgiBundleContext implements BundleContext
    */
   public void removeBundleListener(BundleListener listener)
   {
-    _bundle.removeBundleListener(listener);
+    _manager.removeBundleListener(_bundle, listener);
   }
 
   /**

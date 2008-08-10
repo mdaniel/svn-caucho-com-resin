@@ -190,7 +190,7 @@ abstract public class Loader {
   /**
    * Adds the classpath of this loader.
    */
-  protected final void buildClassPath(StringBuilder head)
+  public final void buildClassPath(StringBuilder head)
   {
     ArrayList<String> pathList = new ArrayList<String>();
     buildClassPath(pathList);

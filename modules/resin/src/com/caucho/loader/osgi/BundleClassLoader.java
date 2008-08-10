@@ -31,40 +31,73 @@ package com.caucho.loader.osgi;
 
 import com.caucho.loader.*;
 import com.caucho.util.*;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+
+import java.util.HashMap;
 
 /**
  * OSGi bundle class loader
  */
-public class BundleClassLoader extends EnvironmentClassLoader
+public class BundleClassLoader extends DynamicClassLoader
 {
   private static final L10N L = new L10N(BundleClassLoader.class);
-  
+
+  private String _id;
+
+  private Path _jar;
+
+  private HashMap<String,ExportBundleClassLoader> _importMap
+    = new HashMap<String,ExportBundleClassLoader>();
+
   /**
    * Creates a new environment class loader.
    */
-  protected BundleClassLoader(ClassLoader parent, String id)
+  BundleClassLoader(ClassLoader parent, String id, Path jarPath)
   {
-    super(parent, id);
+    super(parent);
+
+    _id = id;
 
     if (id == null)
       throw new IllegalArgumentException(L.l("BundleClassLoader requires a bundle id."));
-  }
 
-  /**
-   * Creates a new environment class loader.
-   */
-  public static BundleClassLoader create(String id)
-  {
-    ClassLoader parent = Thread.currentThread().getContextClassLoader();
+    _jar = jarPath;
     
-    return create(parent, id);
+    addJar(jarPath);
   }
 
-  /**
-   * Creates a new environment class loader.
-   */
-  public static BundleClassLoader create(ClassLoader parent, String id)
+  public void addImport(String name, ExportBundleClassLoader loader)
   {
-    return new BundleClassLoader(parent, id);
+    _importMap.put(name, loader);
+  }
+
+  @Override
+  protected Class findImportClass(String name)
+  {
+    int p = name.lastIndexOf('.');
+
+    if (p < 0)
+      return null;
+
+    String packageName = name.substring(0, p);
+
+    ExportBundleClassLoader loader = _importMap.get(packageName);
+
+    if (loader != null) {
+      try {
+	return loader.findClassImpl(name);
+      } catch (ClassNotFoundException e) {
+	// log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+
+    return null;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _id + "," + _jar + "]";
   }
 }

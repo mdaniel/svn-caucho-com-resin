@@ -142,7 +142,7 @@ public class OsgiLoader extends Loader implements EnvironmentListener
     }
 
     for (OsgiBundle bundle : installList) {
-      bundle.activate();
+      bundle.startImpl();
     }
   }
   

@@ -70,8 +70,53 @@ public class BundleEvent extends EventObject
   @Override
   public String toString()
   {
-    return (getClass().getSimpleName()
-	    + "[type=" + getType()
-	    + ",source=" + getSource());
+    StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getName()).append("[");
+    
+    switch (_type) {
+    case INSTALLED:
+      sb.append("installed");
+      break;
+      
+    case STARTED:
+      sb.append("started");
+      break;
+      
+    case STOPPED:
+      sb.append("stopped");
+      break;
+      
+    case UPDATED:
+      sb.append("updated");
+      break;
+      
+    case UNINSTALLED:
+      sb.append("uninstalled");
+      break;
+      
+    case RESOLVED:
+      sb.append("resolved");
+      break;
+      
+    case UNRESOLVED:
+      sb.append("unresolved");
+      break;
+      
+    case STARTING:
+      sb.append("starting");
+      break;
+      
+    case STOPPING:
+      sb.append("stopping");
+      break;
+      
+    default:
+      sb.append("type=").append(getType());
+      break;
+    }
+
+    sb.append(",").append(getSource()).append("]");
+
+    return sb.toString();
   }
 }
