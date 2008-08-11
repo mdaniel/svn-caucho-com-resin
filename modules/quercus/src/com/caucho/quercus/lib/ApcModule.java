@@ -75,7 +75,9 @@ public class ApcModule extends AbstractQuercusModule {
   /**
    * Returns cache information.
    */
-  public Value apc_cache_info(Env env, @Optional String type)
+  public Value apc_cache_info(Env env,
+			      @Optional String type,
+			      @Optional boolean limited)
   {
     ArrayValue value = new ArrayValueImpl();
 
@@ -97,7 +99,7 @@ public class ApcModule extends AbstractQuercusModule {
     ArrayValueImpl cacheList = new ArrayValueImpl();
     value.put(env.createString("cache_list"), cacheList);
 
-    if ("user".equals(type) && _cache != null) {
+    if ("user".equals(type) && _cache != null && ! limited) {
       ArrayList<String> keys = new ArrayList<String>();
       ArrayList<Entry> values = new ArrayList<Entry>();
 

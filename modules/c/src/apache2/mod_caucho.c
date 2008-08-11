@@ -1218,7 +1218,12 @@ cse_strip(request_rec *r)
 	char *url_rewrite = strstr(r->filename, config->session_url_prefix);
     
 	if (url_rewrite) {
-	  *url_rewrite = 0;
+	  char *query = strstr(url_rewrite, "?");
+
+	  if (query)
+	    strcpy(url_rewrite, query);
+	  else
+	    *url_rewrite = 0;
 
 	  /*
 	    if (stat(r->filename, &r->finfo) < 0)

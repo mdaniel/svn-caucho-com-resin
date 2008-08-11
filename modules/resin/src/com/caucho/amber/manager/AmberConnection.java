@@ -798,7 +798,7 @@ public class AmberConnection
    */
   public int getCacheChunkSize()
   {
-    return 25;
+    return 32;
   }
 
   public Object load(Class cl,

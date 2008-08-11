@@ -98,6 +98,10 @@ public class OsgiBundle implements Bundle
       try {
 	Manifest manifest = jar.getManifest();
 
+	if (manifest == null)
+	  throw new ConfigException(L.l("OSGi bundle '{0}' does not have a manifest, which is required by the OSGi specification",
+					jar.getContainer().getNativePath()));
+
 	Attributes attr = manifest.getMainAttributes();
 	_symbolicName = attr.getValue("Bundle-SymbolicName");
 

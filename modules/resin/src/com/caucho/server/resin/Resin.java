@@ -61,6 +61,7 @@ import com.caucho.server.admin.Management;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
+import com.caucho.server.repository.ModuleRepository;
 import com.caucho.server.util.*;
 import com.caucho.server.webbeans.ResinWebBeansProducer;
 import com.caucho.util.Alarm;
@@ -157,6 +158,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private Path _managementPath;
   protected Management _management;
+  private ModuleRepository _repository = new ModuleRepository();
 
   private HempBrokerManager _brokerManager;
 
@@ -676,6 +678,11 @@ public class Resin implements EnvironmentBean, SchemaBean
     return _management;
   }
 
+  public ModuleRepository createModuleRepository()
+  {
+    return _repository;
+  }
+
   @Deprecated
   public Path getManagementPath()
   {
@@ -783,11 +790,13 @@ public class Resin implements EnvironmentBean, SchemaBean
     
     try {
       thread.setContextClassLoader(getClassLoader());
-      
-      startManagement();
 
       // force a GC on start
       System.gc();
+      
+      startManagement();
+
+      Path repositoryPath = getManagement().getPath().lookup("ivy");
 
       ClusterServer clusterServer = null;
 

@@ -509,6 +509,16 @@ r_protocol =
     & r_init?
   }
 
+r_module-repository = element module-repository {
+  element resolver {
+    (attribute uri { string }
+     | element uri { string })
+     
+    & (attribute artifact-pattern { string }
+       | element artifact-pattern { string })*
+  }*
+}
+
 r_resin = element resin {
   r_resin-Content
 }
@@ -525,6 +535,8 @@ r_resin-Content =
      | element environment-system-properties { r_boolean-Type })?
 
   & r_management?
+
+  & r_module-repository?
 
   & r_root-directory?
 

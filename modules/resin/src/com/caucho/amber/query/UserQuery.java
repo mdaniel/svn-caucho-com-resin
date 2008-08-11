@@ -359,7 +359,7 @@ public class UserQuery implements AmberQuery {
       _rs.setUserQuery(this);
     }
 
-    if (maxResults != 0) {
+    if (maxResults > 0) {
       ResultSet rs;
 
       rs = executeQuery(firstResult, maxResults);

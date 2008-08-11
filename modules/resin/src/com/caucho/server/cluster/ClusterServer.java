@@ -561,7 +561,7 @@ public class ClusterServer {
   /**
    * Adds a program.
    */
-  public void addBuilderProgram(ConfigProgram program)
+  public void addContentProgram(ConfigProgram program)
   {
     _serverProgram.addProgram(program);
   }

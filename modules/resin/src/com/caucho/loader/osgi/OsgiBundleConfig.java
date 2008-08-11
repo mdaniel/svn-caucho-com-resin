@@ -31,6 +31,7 @@ package com.caucho.loader.osgi;
 
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
+import com.caucho.server.repository.ModuleRepository;
 import com.caucho.vfs.Path;
 
 import java.util.logging.*;
@@ -48,8 +49,8 @@ public class OsgiBundleConfig
   private Path _path;
 
   private String _org;
-  private String _name;
-  private String _version;
+  private String _module;
+  private String _rev;
 
   /**
    * Sets a specific path to a jar file
@@ -72,29 +73,45 @@ public class OsgiBundleConfig
   }
 
   /**
-   * Sets the archive name
+   * Sets the module name
    */
-  public void setName(String name)
+  public void setModule(String module)
   {
-    _name = name;
+    _module = module;
   }
 
   /**
-   * Sets the archive version
+   * Sets the module version
    */
-  public void setVersion(String version)
+  public void setRev(String rev)
   {
-    _version = version;
+    _rev = rev;
   }
 
   @PostConstruct
   public void init()
   {
-    if (_path == null && _name == null)
-      throw new ConfigException(L.l("osgi-bundle requires either a 'path' or a 'name' attribute"));
+    if (_path == null && _module == null)
+      throw new ConfigException(L.l("osgi-bundle requires either a 'path' or a 'module' attribute"));
 
-    Path path = _path;
+    Path path = null;
     
+    if (_path != null) {
+      path = _path;
+    }
+    else {
+      ModuleRepository repository = ModuleRepository.getCurrent();
+
+      if (repository == null)
+	throw new IllegalStateException(L.l("ModuleRepository is not properly initialized"));
+
+      path = repository.findArtifact(_org, _module, _rev, "jar");
+    }
+
+    if (path == null)
+      throw new ConfigException(L.l("Can't find module '{0}'",
+				    _module));
+
     OsgiManager manager = OsgiManager.create();
 
     manager.addStartupBundle(path);

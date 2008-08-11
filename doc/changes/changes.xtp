@@ -13,6 +13,9 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>config: allow resin:if in &lt;server> to define &lt;http> (#2802, rep by Dana P'Simer)</li>
+<li>quercus: apc_cache_info needs @Optional 'limited' param (#2833, rep by koreth)</li>
+<li>amber: update cache size to 32 (#2821, rep by Riccardo Cohen)</li>
 <li>quercus: mail with to in the extraHeaders argument (#2754, rep by atijms)</li>
 <li>host: regexp vs static host priority (#2813, rep by Shane Cruz)</li>
 <li>jsp: virtual host should not add 'name' as webbean value (#2807, rep by hpri)</li>
