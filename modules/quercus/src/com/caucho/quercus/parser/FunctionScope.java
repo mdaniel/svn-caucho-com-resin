@@ -47,14 +47,10 @@ public class FunctionScope extends Scope {
   private ExprFactory _exprFactory;
   private Scope _parentScope;
 
-  private HashMap<String,Function> _functionMap
-    = new HashMap<String,Function>();
-
   private HashMap<String,InterpretedClassDef> _classMap
     = new HashMap<String,InterpretedClassDef>();
   
-  private HashMap<String,InterpretedClassDef> _conditionalClassMap
-    = new HashMap<String,InterpretedClassDef>();
+  private HashMap<String,InterpretedClassDef> _conditionalClassMap;
 
   FunctionScope(ExprFactory exprFactory, Scope scope)
   {
@@ -78,6 +74,14 @@ public class FunctionScope extends Scope {
     throw new UnsupportedOperationException();
     //_functionMap.put(name.toLowerCase(), function);
   }
+  
+  /*
+   *  Adds a function defined in a conditional block.
+   */
+  protected void addConditionalFunction(Function function)
+  {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Adds a class
@@ -99,9 +103,18 @@ public class FunctionScope extends Scope {
                                        index);
       
       _classMap.put(name, cl);
+      
+      _parentScope.addConditionalClass(cl);
     }
-    
-    _parentScope.addConditionalClass(cl);
+    else {
+      // class statically redeclared
+      // XXX: should throw a runtime error?
+      
+      // dummy classdef for parsing only
+      cl = _exprFactory.createClassDef(location,
+                                       name, parentName, new String[0],
+                                       index);
+    }
 
     return cl;
   }
@@ -111,6 +124,9 @@ public class FunctionScope extends Scope {
    */
   protected void addConditionalClass(InterpretedClassDef def)
   {
+    if (_conditionalClassMap == null)
+      _conditionalClassMap = new HashMap<String,InterpretedClassDef>(1);
+    
     _conditionalClassMap.put(def.getCompilationName(), def);
     
     _parentScope.addConditionalClass(def);

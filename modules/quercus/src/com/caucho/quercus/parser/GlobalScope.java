@@ -49,6 +49,9 @@ public class GlobalScope extends Scope {
   private HashMap<String,Function> _functionMap
     = new HashMap<String,Function>();
 
+  private HashMap<String,Function> _conditionalFunctionMap
+    = new HashMap<String,Function>();
+  
   private HashMap<String,InterpretedClassDef> _classMap
     = new HashMap<String,InterpretedClassDef>();
   
@@ -75,6 +78,14 @@ public class GlobalScope extends Scope {
   {
     _functionMap.put(name.toLowerCase(), function);
   }
+  
+  /*
+   *  Adds a function defined in a conditional block.
+   */
+  protected void addConditionalFunction(Function function)
+  {
+    _conditionalFunctionMap.put(function.getCompilationName(), function);
+  }
 
   /**
    * Adds a class
@@ -97,6 +108,15 @@ public class GlobalScope extends Scope {
       
       _classMap.put(name, cl);
     }
+    else {
+      // class statically redeclared
+      // XXX: should throw a runtime error?
+      
+      // dummy classdef for parsing only
+      cl = _exprFactory.createClassDef(location,
+                                       name, parentName, new String[0],
+                                       index);
+    }
 
     return cl;
   }
@@ -115,6 +135,14 @@ public class GlobalScope extends Scope {
   public HashMap<String,Function> getFunctionMap()
   {
     return _functionMap;
+  }
+  
+  /**
+   * Returns the conditional function map.
+   */
+  public HashMap<String,Function> getConditionalFunctionMap()
+  {
+    return _conditionalFunctionMap;
   }
 
   /**

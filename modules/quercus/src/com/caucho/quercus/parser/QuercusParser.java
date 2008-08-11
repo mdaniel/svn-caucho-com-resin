@@ -211,6 +211,7 @@ public class QuercusParser {
   private boolean _isIfTest;
   
   private int _classesParsed;
+  private int _functionsParsed;
 
   QuercusParser(Quercus quercus)
   {
@@ -420,12 +421,14 @@ public class QuercusParser {
     
     Statement stmt = parseTop();
 
-    QuercusProgram program = new QuercusProgram(_quercus, _sourceFile,
-						_globalScope.getFunctionMap(),
-						_globalScope.getClassMap(),
-                        _globalScope.getConditionalClassMap(),
-						_function,
-						stmt);
+    QuercusProgram program
+      = new QuercusProgram(_quercus, _sourceFile,
+                           _globalScope.getFunctionMap(),
+                           _globalScope.getConditionalFunctionMap(),
+                           _globalScope.getClassMap(),
+                           _globalScope.getConditionalClassMap(),
+                           _function,
+                           stmt);
     return program;
 
     /*
@@ -447,11 +450,12 @@ public class QuercusParser {
     ArrayList<Statement> stmtList = parseStatementList();
 
     return new QuercusProgram(_quercus, _sourceFile,
-			      _globalScope.getFunctionMap(),
-			      _globalScope.getClassMap(),
-                  _globalScope.getConditionalClassMap(),
-			      _function,
-			      _factory.createBlock(location, stmtList));
+                              _globalScope.getFunctionMap(),
+                              _globalScope.getConditionalFunctionMap(),
+                              _globalScope.getClassMap(),
+                              _globalScope.getConditionalClassMap(),
+                              _function,
+                              _factory.createBlock(location, stmtList));
   }
 
   Function parseFunction(String name, Path argPath, Path codePath)
@@ -1641,6 +1645,8 @@ public class QuercusParser {
       function.setGlobal(oldTop);
       function.setStatic((modifiers & M_STATIC) != 0);
       function.setFinal((modifiers & M_FINAL) != 0);
+      
+      function.setParseIndex(_functionsParsed++);
       
       if ((modifiers & M_PROTECTED) != 0)
         function.setVisibility(Visibility.PROTECTED);

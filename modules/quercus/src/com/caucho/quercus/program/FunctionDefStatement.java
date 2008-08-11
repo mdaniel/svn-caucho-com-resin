@@ -32,11 +32,14 @@ package com.caucho.quercus.program;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.util.L10N;
 
 /**
  * Represents a function definition
  */
 public class FunctionDefStatement extends Statement {
+  private final static L10N L = new L10N(FunctionDefStatement.class);
+  
   protected Function _fun;
 
   public FunctionDefStatement(Location location, Function fun)
@@ -53,6 +56,9 @@ public class FunctionDefStatement extends Statement {
 
       if (env.findFunction(name) == null)
         env.addFunction(name, _fun);
+      else
+        env.error(getLocation(),
+                  L.l("function {0}() is already defined.", name));
     }
     catch (RuntimeException e) {
       rethrow(e, RuntimeException.class);

@@ -3096,8 +3096,9 @@ public class Env {
       System.arraycopy(_classDef, 0, def, 0, _classDef.length);
       _classDef = def;
     }
-
-    _classDef[id] = cl;
+    
+    if (_classDef[id] == null)
+      _classDef[id] = cl;
   }
 
   public ClassDef findClassDef(String name)
@@ -3494,10 +3495,10 @@ public class Env {
       QuercusClass cl = findClass(iface);
     }
 
+    QuercusClass parentClass = null;
+    
     // php/1d1o
-    if (findClass(def.getName()) == null) {
-      QuercusClass parentClass = null;
-      
+    if (findClass(name, false, false) == null) {
       String parentName = def.getParentName();
       
       if (parentName != null) {

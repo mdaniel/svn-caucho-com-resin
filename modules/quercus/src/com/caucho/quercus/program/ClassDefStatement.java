@@ -33,11 +33,14 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
+import com.caucho.util.L10N;
 
 /**
  * Represents a class definition
  */
 public class ClassDefStatement extends Statement {
+  private final static L10N L = new L10N(ClassDefStatement.class);
+  
   protected final InterpretedClassDef _cl;
 
   public ClassDefStatement(Location location, InterpretedClassDef cl)

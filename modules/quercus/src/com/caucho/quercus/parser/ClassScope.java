@@ -76,6 +76,14 @@ public class ClassScope extends Scope {
     _cl.addFunction(name, function);
   }
   
+  /*
+   *  Adds a function defined in a conditional block.
+   */
+  public void addConditionalFunction(Function function)
+  {
+    throw new UnsupportedOperationException();
+  }
+  
   /**
    * Adds a value
    */

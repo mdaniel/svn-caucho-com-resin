@@ -58,6 +58,10 @@ public class QuercusProgram {
   private HashMap<String,Function> _functionMap;
   private HashMap<String,Function> _functionMapLowerCase
     = new HashMap<String,Function>();
+  
+  private HashMap<String,Function> _conditionalFunctionMap;
+  private HashMap<String,Function> _conditionalFunctionMapLowerCase
+    = new HashMap<String,Function>();
 
   private HashMap<String,InterpretedClassDef> _classMap;
   
@@ -80,11 +84,12 @@ public class QuercusProgram {
    * @param statement the top-level statement
    */
   public QuercusProgram(Quercus quercus, Path sourceFile,
-			HashMap<String, Function> functionMap,
-			HashMap<String, InterpretedClassDef> classMap,
-            HashMap<String, InterpretedClassDef> conditionalClassMap,
-			FunctionInfo functionInfo,
-			Statement statement)
+                        HashMap<String, Function> functionMap,
+                        HashMap<String, Function> conditionalFunctionMap,
+                        HashMap<String, InterpretedClassDef> classMap,
+                        HashMap<String, InterpretedClassDef> conditionalClassMap,
+                        FunctionInfo functionInfo,
+                        Statement statement)
   {
     _quercus = quercus;
     _depend.setCheckInterval(quercus.getDependencyCheckInterval());
@@ -94,10 +99,14 @@ public class QuercusProgram {
       addDepend(sourceFile);
 
     _functionMap = functionMap;
+    _conditionalFunctionMap = conditionalFunctionMap;
 
     for (Map.Entry<String,Function> entry : functionMap.entrySet()) {
       _functionMapLowerCase.put(entry.getKey().toLowerCase(),
-				entry.getValue());
+                                entry.getValue());
+      
+      _conditionalFunctionMapLowerCase.put(entry.getKey().toLowerCase(),
+                                           entry.getValue());
     }
 
     _classMap = classMap;
@@ -228,6 +237,14 @@ public class QuercusProgram {
   {
     return _functionMap.values();
   }
+  
+  /**
+   * Returns the functions.
+   */
+  public Collection<Function> getConditionalFunctions()
+  {
+    return _conditionalFunctionMap.values();
+  }
 
   /**
    * Returns the functions.
@@ -314,7 +331,7 @@ public class QuercusProgram {
       Function fun = entry.getValue();
 
       if (fun.isGlobal())
-	env.addFunction(entry.getKey(), fun);
+        env.addFunction(entry.getKey(), fun);
     }
     
     for (Map.Entry<String,InterpretedClassDef> entry : _classMap.entrySet()) {

@@ -54,6 +54,8 @@ abstract public class AbstractFunction {
   protected Visibility _visibility = Visibility.PUBLIC;
   protected String _declaringClassName;
   
+  protected int _parseIndex;
+  
   public AbstractFunction()
   {
     // XXX:
@@ -68,6 +70,11 @@ abstract public class AbstractFunction {
   public String getName()
   {
     return "unknown";
+  }
+  
+  public final String getCompilationName()
+  {
+    return getName() + "_" + _parseIndex;
   }
   
   /*
@@ -155,6 +162,11 @@ abstract public class AbstractFunction {
   public final void setVisibility(Visibility v)
   {
     _visibility = v;
+  }
+  
+  public final void setParseIndex(int index)
+  {
+    _parseIndex = index;
   }
   
   public final Location getLocation()

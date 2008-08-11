@@ -49,12 +49,13 @@ public class IfScope extends Scope {
 
   private HashMap<String,Function> _functionMap
     = new HashMap<String,Function>();
+  
+  private HashMap<String,Function> _conditionalFunctionMap;
 
   private HashMap<String,InterpretedClassDef> _classMap
     = new HashMap<String,InterpretedClassDef>();
   
-  private HashMap<String,InterpretedClassDef> _conditionalClassMap
-    = new HashMap<String,InterpretedClassDef>();
+  private HashMap<String,InterpretedClassDef> _conditionalClassMap;
 
   IfScope(ExprFactory exprFactory, Scope scope)
   {
@@ -77,6 +78,21 @@ public class IfScope extends Scope {
   public void addFunction(String name, Function function)
   {
     _functionMap.put(name.toLowerCase(), function);
+    
+    _parentScope.addConditionalFunction(function);
+  }
+  
+  /*
+   *  Adds a function defined in a conditional block.
+   */
+  protected void addConditionalFunction(Function function)
+  {
+    if (_conditionalFunctionMap == null)
+      _conditionalFunctionMap = new HashMap<String,Function>(4);
+
+    _conditionalFunctionMap.put(function.getCompilationName(), function);
+    
+    _parentScope.addConditionalFunction(function);
   }
 
   /**
@@ -99,9 +115,18 @@ public class IfScope extends Scope {
                                        index);
       
       _classMap.put(name, cl);
+      
+      _parentScope.addConditionalClass(cl);
     }
-    
-    _parentScope.addConditionalClass(cl);
+    else {
+      // class statically redeclared
+      // XXX: should throw a runtime error?
+      
+      // dummy classdef for parsing only
+      cl = _exprFactory.createClassDef(location,
+                                       name, parentName, new String[0],
+                                       index);
+    }
 
     return cl;
   }
@@ -111,6 +136,9 @@ public class IfScope extends Scope {
    */
   protected void addConditionalClass(InterpretedClassDef def)
   {
+    if (_conditionalClassMap == null)
+      _conditionalClassMap = new HashMap<String,InterpretedClassDef>(1);
+
     _conditionalClassMap.put(def.getCompilationName(), def);
     
     _parentScope.addConditionalClass(def);
