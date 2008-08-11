@@ -1206,6 +1206,7 @@ cse_strip(request_rec *r)
     return DECLINED;
 
   if (config->session_url_prefix) {
+    char buffer[8192];
     char *new_uri;
     
     new_uri = strstr(uri, config->session_url_prefix);
@@ -1218,12 +1219,7 @@ cse_strip(request_rec *r)
 	char *url_rewrite = strstr(r->filename, config->session_url_prefix);
     
 	if (url_rewrite) {
-	  char *query = strstr(url_rewrite, "?");
-
-	  if (query)
-	    strcpy(url_rewrite, query);
-	  else
-	    *url_rewrite = 0;
+	  *url_rewrite = 0;
 
 	  /*
 	    if (stat(r->filename, &r->finfo) < 0)
@@ -1231,9 +1227,17 @@ cse_strip(request_rec *r)
 	  */
 	}
       }
-      
-      apr_table_setn(r->headers_out, "Location",
-		     ap_construct_url(r->pool, r->uri, r));
+
+      if (r->args) {
+	sprintf(buffer, "%s?%s", r->uri, r->args);
+	
+	apr_table_setn(r->headers_out, "Location",
+		       ap_construct_url(r->pool, buffer, r));
+      }
+      else {
+	apr_table_setn(r->headers_out, "Location",
+		       ap_construct_url(r->pool, r->uri, r));
+      }
       
       return HTTP_MOVED_PERMANENTLY;
     }
