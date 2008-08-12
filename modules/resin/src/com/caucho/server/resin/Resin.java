@@ -58,6 +58,7 @@ import com.caucho.management.server.ThreadPoolMXBean;
 import com.caucho.naming.Jndi;
 import com.caucho.server.admin.TransactionManager;
 import com.caucho.server.admin.Management;
+import com.caucho.server.cache.TempFileManager;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
@@ -159,6 +160,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   private Path _managementPath;
   protected Management _management;
   private ModuleRepository _repository = new ModuleRepository();
+  private TempFileManager _tempFileManager;
 
   private HempBrokerManager _brokerManager;
 
@@ -681,6 +683,17 @@ public class Resin implements EnvironmentBean, SchemaBean
   public ModuleRepository createModuleRepository()
   {
     return _repository;
+  }
+
+  public TempFileManager getTempFileManager()
+  {
+    if (_tempFileManager == null) {
+      Path path = createManagement().getPath().lookup("temp_" + _serverId + ".tmp");
+      
+      _tempFileManager = new TempFileManager(path);
+    }
+    
+    return _tempFileManager;
   }
 
   @Deprecated
