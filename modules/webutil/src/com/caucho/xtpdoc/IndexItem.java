@@ -64,9 +64,10 @@ public class IndexItem implements ContentItem {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    out.writeCharacters("\n");
     out.writeStartElement("dt");
     out.writeStartElement("a");
-    out.writeAttribute("name", _link);
+    out.writeAttribute("href", _link);
     out.writeCharacters(_id);
     out.writeEndElement(); // a
     out.writeEndElement(); // dt

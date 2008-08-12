@@ -68,15 +68,21 @@ response varies based on the submitted value of cookies.
 </p>
 
 <deftable-childtags>
-<tr><td>cookie</td>
-    <td>Name of the cookie</td>
-    <td>required</td></tr>
-<tr><td>regexp</td>
-    <td>The regular expression to match</td>
-    <td>optional</td></tr>
-<tr><td>send-vary</td>
-    <td>Send a <code>Vary</code> header containing "<code>Cookie</code>" as part of the response</td>
-    <td>true</td></tr>
+<tr>
+  <td>cookie</td>
+  <td>Name of the cookie</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>regexp</td>
+  <td>The regular expression to match</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td>send-vary</td>
+  <td>Send a <code>Vary</code> header containing "<code>Cookie</code>" as part of the response</td>
+  <td>true</td>
+</tr>
 </deftable-childtags>
 
 </defun>
@@ -114,27 +120,41 @@ images and *.php files normally, but forward's all other requests to
 </example>
 
 <deftable-childtags>
-<tr><td><a href="#disable-at">disable-at</a></td>
-    <td>A cron syntax time specification for triggering disablement of the rule</td>
-    <td>none</td></tr>
-<tr><td><a href="#enable-at">enable-at</a></td>
-    <td>A cron syntax time specification for triggering enablement of the rule</td>
-    <td>none</td></tr>
-<tr><td>enabled</td>
-    <td>False to start with the rule initially disabled</td>
-    <td>true</td></tr>
-<tr><td><a href="#name">name</a></td>
-    <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
-    <td>do not register an mbean</td></tr>
-<tr><td>regexp</td>
-    <td>A regexp that must match the <a href="#URL">URL</a></td>
-    <td>optional</td></tr>
-<tr><td><a href="#when">when</a></td>
-    <td>A condition which must evaluate to true</td>
-    <td>optional</td></tr>
-<tr><td><a href="#unless">unless</a></td>
-    <td>A condition which must not evaluate to true</td>
-    <td>optional</td></tr>
+<tr>
+  <td><a href="#disable-at">disable-at</a></td>
+  <td>A cron syntax time specification for triggering disablement of the rule</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td><a href="#enable-at">enable-at</a></td>
+  <td>A cron syntax time specification for triggering enablement of the rule</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>enabled</td>
+  <td>False to start with the rule initially disabled</td>
+  <td>true</td>
+</tr>
+<tr>
+  <td><a href="#name">name</a></td>
+  <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
+  <td>do not register an mbean</td>
+</tr>
+<tr>
+  <td>regexp</td>
+  <td>A regexp that must match the <a href="#URL">URL</a></td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td><a href="#when">when</a></td>
+  <td>A condition which must evaluate to true</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td><a href="#unless">unless</a></td>
+  <td>A condition which must not evaluate to true</td>
+  <td>optional</td>
+</tr>
 </deftable-childtags>
 </defun>
 
@@ -688,17 +708,6 @@ evaluate to true.
 
 </defun>
 
-<defun title="&lt;or&gt;">
-<parents>when, unless</parents>
-
-<p>
-Contains one or more conditions and evaluates to true if any of the contained
-conditions evaluate to true, false only if all of the contained conditions
-evaluate to false.
-</p>
-
-</defun>
-
 <defun title="&lt;not-found>">
 <parents>rewrite-dispatch, match</parents>
 
@@ -738,6 +747,44 @@ for a matching URL.</p>
     <td>A condition which must not evaluate to true</td>
     <td>optional</td></tr>
 </deftable-childtags>
+</defun>
+
+<defun title="&lt;or&gt;">
+<parents>when, unless</parents>
+
+<p>
+Contains one or more conditions and evaluates to true if any of the contained
+conditions evaluate to true, false only if all of the contained conditions
+evaluate to false.
+</p>
+
+</defun>
+
+<defun title="&lt;proxy>">
+
+<p>The &lt;proxy> tag proxies HTTP requests to a backend service like
+&lt;load-balance> proxies requests to a backend Resin service.
+Frameworks like Ruby can sit behind a Resin instance and deliver
+requests through the proxy tag.</p>
+
+<deftable title="proxy attribute">
+<tr>
+  <th>attribute</th>
+  <th>description</th>
+  <th>default</th>
+</tr>
+<tr>
+  <td>address</td>
+  <td>target IP and port like 192.168.1.10:8080</td>
+  <td></td>
+</tr>
+<tr>
+  <td>target</td>
+  <td>replaced URL if the URL should be rewritten</td>
+  <td></td>
+</tr>  
+</deftable>
+
 </defun>
 
 <defun title="query-param">

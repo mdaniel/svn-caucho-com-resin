@@ -54,6 +54,7 @@ public class Index implements ContentItem {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    out.writeCharacters("\n");
     out.writeStartElement("dl");
     out.writeAttribute("class", "index");
     out.writeAttribute("compact", "COMPACT");

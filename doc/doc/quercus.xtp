@@ -187,6 +187,94 @@ apps have priority over other Quercus bugs.</p>
 
 <s1 name="configuring" title="Configuring Quercus">
 
+<s2 title="QuercusServlet">
+
+<p><code>QuercusServlet</code> is the servlet responsible for handling
+PHP requests.  It acts like the PHP servlet, taking *.php requests,
+parsing and interpreting them.  <code>QuercusServlet</code> has three
+modes: interpreted, compiled and automatic.</p>
+
+<ul>
+<li>Interpreted mode evaluates PHP based on Quercus's
+internal parse tree.  It's a bit slower at runtime, but faster to
+startup.</li>
+<li>Compiled mode translates PHP into Java and if the fastest PHP mode
+available.  Because it calls the Java compiler, it's slower to
+startup.</li>
+<li>Automatic mode is a mixture.  It will start in interpreted mode
+and compile PHP pages in the background.  When the compilation
+finishes, Quercus will switch to the compiled class.</li>
+</ul>
+
+<deftable title="QuercusServlet init values">
+<tr>
+  <th>parameter</th>
+  <th>description</th>
+  <th>default</th>
+</tr>
+<tr>
+  <td>compile</td>
+  <td>true, false or lazy</td>
+  <td>lazy</td>
+</tr>
+<tr>
+  <td>database</td>
+  <td>A JNDI name of a preconfigured database to use for all PHP methods.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>strict</td>
+  <td>set strict syntax checking</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>php-ini</td>
+  <td>A resin-xml configuration of php.ini values.  Each php.ini is
+  an attribute to the &lt;php-ini&lt; element.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>ini-file</td>
+  <td>A path to a traditional php.ini file</td>
+  <td></td>
+</tr>  
+</deftable>
+
+<p>Quercus can also be configured using traditional init-param servlet
+values.</p>
+
+<deftable title="QuercusServlet init-param">
+<tr>
+  <th>parameter</th>
+  <th>description</th>
+  <th>default</th>
+</tr>
+<tr>
+  <td>compile</td>
+  <td>sets the compile mode: true, false, lazy</td>
+  <td>lazy</td>
+</tr>
+<tr>
+  <td>database</td>
+  <td>sets a JNDI database to be used for all PHP database
+  access.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>ini-file</td>
+  <td>set a path to a php.ini file</td>
+  <td></td>
+</tr>  
+<tr>
+  <td>strict</td>
+  <td>sets strict-mode compile checking</td>
+  <td>false</td>
+</tr>  
+</deftable>
+
+
+</s2>
+
 <s2 name="php.ini" title="php.ini">
 
 <p>Individial PHP initialization values can be set in resin-web.xml.  For example, to set the settings for sending mail:</p>
@@ -420,6 +508,34 @@ ignoring the parameters to the <code>mysql_connect</code> call.
       <b>&lt;database>java:comp/env/jdbc/myDatabaseName&lt;/database></b>
     &lt;/init>
   &lt;/servlet-mapping>
+&lt;/web-app>
+</example>
+
+</s3>
+
+<s3 title="database-default and spy">
+
+<p>Resin has a handy <a
+href="env-tags.xtp#database-default">&lt;database-default></a>
+configuration tag that lets you set connection pooling an database
+defaults for all database connections.  Since Quercus can create
+pools automatically, &lt;database-default> gives you control over
+those pools.</p>
+
+<p>In particular, the &lt;spy> tag shows the queries that your PHP
+script is sending to the database at log level "fine" for
+"com.caucho.sql.spy".</p>
+
+<example title="Example: database-default for spy">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;log-handler name="com.caucho.sql.spy" path="WEB-INF/spy.log"/>
+  &lt;logger name="com.caucho.sql.spy" level="fine"/>
+  
+  &lt;database-default>
+    &lt;spy/>
+  &lt;/database-default>
+
 &lt;/web-app>
 </example>
 
@@ -1457,6 +1573,68 @@ Returns TRUE for success, FALSE for failure.
 </s2>
 
 </s1> <!-- resin module -->
+
+<s1 title="Quercus Internals">
+
+<p>If you want to develop Quercus modules, the first step is to
+download the source and look at the existing modules as an example.
+All the PHP functions and classes are written as modules in the
+Quercus system, so adding another one is straightforward.</p>
+
+<s2 title="Strings and i18n">
+
+<p>Since Java has 16-bit characters, PHP 5 has 8-bit characters, and
+PHP 6 has 16-bit characters only in unicode.semantics='true' mode, the
+Quercus classes for strings are a little complicated.  Here's the
+list:</p>
+
+<s3 title="StringValue">
+
+<p><b>StringValue</b> is an abstract string class as the parent of all
+strings in Quercus.  This class does not have any underlying
+data.</p>
+
+</s3>
+
+<s3 title="StringBuilderValue">
+
+<p>The main string class for PHP-5 mode for both string and binary data.
+Strings are conceptually 8-bits like PHP5, but are stored as
+16-bit Java characters for efficiency, i.e. because Java wants its
+strings to be 16-bits.  The top byte will always be zero
+for StringBuilderValue.  If the application is running in PHP5 mode,
+your module will always use StringBuilderValue for both binary and
+string values.</p>
+
+</s3>
+
+<s3 title="UnicodeBuilderValue (PHP6 unicode.semantics)">
+
+<p>In PHP6 unicode mode, unicode strings are represented as
+<b>UnicodeBuilderValue</b>, which are just like Java's 16-bit strings.
+In PHP6 mode, you must always use <code>UnicodeBuilderValue</code> and never
+<code>StringBuilderValue</code> because
+<code>StringBuilderValue</code> is only for PHP5 mode.</p>
+
+</s3>
+
+<s3 title="BinaryBuilderValue (PHP6 unicode.semantics)">
+
+<p>In PHP6 unicode mode, binary strings are represented as
+<b>BinaryBuilderValue</b>, which are just like Java's byte arrays.
+In PHP6 mode, you must always use <code>BinaryBuilderValue</code> and never
+<code>StringBuilderValue</code> because
+<code>StringBuilderValue</code> is only for PHP5 mode.</p>
+
+<p>Note, that <code>UnicodeBuilderValue</code> and
+<code>BinaryCodeValue</code>  are not equivalent, which can be
+surprising when using them as keys to arrays.</p>
+
+</s3>
+
+</s2>
+
+</s1>
 
 <s1 name="resources" title="See Also">
 

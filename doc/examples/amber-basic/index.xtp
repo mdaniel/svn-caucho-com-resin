@@ -18,7 +18,7 @@
   </header>
 
   <body>
-    <summary/>
+    <localtoc/>
 
 <s1>
 <p>Amber's persistence manages tables in a relational database using a Java
@@ -33,15 +33,24 @@ beans instead of changing lots of SQL statements in the program.</p>
 
 <s1 title="Files in this tutorial">
 <deftable>
-<tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
-    </td><td>resin-web.xml configuration
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>
-    </td><td>persistence.xml configuration
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/CourseBean.java"/>
-    </td><td>The course bean
-</td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/CourseServlet.java"/>
-    </td><td>The course servlet
-</td></tr></deftable>
+<tr>
+  <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
+  <td>resin-web.xml configuration</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/></td>
+  <td>persistence.xml configuration</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/CourseBean.java"/></td>
+  <td>The course bean</td>
+</tr>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/CourseServlet.java"/></td>
+  <td>The course servlet</td>
+  </tr>
+</deftable>
+
 </s1>
 
 <s1 title="Database Schema">
@@ -54,8 +63,8 @@ CREATE TABLE basic_courses (
   teacher VARCHAR(250)
 );
 
-INSERT INTO basic_courses VALUES('Potions', 'Severus Snape');
-INSERT INTO basic_courses VALUES('Transfiguration', 'Minerva McGonagall');
+INSERT INTO basic_courses VALUES(1, 'Potions', 'Severus Snape');
+INSERT INTO basic_courses VALUES(1, 'Transfiguration', 'Minerva McGonagall');
 </example>
 
 </s1>
@@ -92,7 +101,7 @@ package example;
 import javax.persistence.*;
 
 <a href="doc|amber-table.xtp#@Entity">@Entity</a>
-<a href="doc|amber-table.xtp#@Table">@Table</a>(name="amber_basic_course")
+<a href="doc|amber-table.xtp#@Table">@Table</a>(name="basic_courses")
 public class CourseBean {
   private int _id;
   private String _course;
@@ -148,12 +157,11 @@ attach it to Resin.  The entity bean is deployed using
 the <code>ejb-server</code> resource.</p>
 
 <example title="WEB-INF/resin-web.xml">
-&lt;web-app&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;!-- server configuration --&gt;
   &lt;ejb-server data-source="jdbc/resin"/&gt;
 
   &lt;servlet servlet-name="basic" servlet-class="example.CourseServlet"/&gt;
-
   &lt;servlet-mapping url-pattern="/basic" servlet-name="basic"/&gt;
 &lt;/web-app&gt;
 </example>
@@ -181,10 +189,12 @@ WEB-INF/classes/persistence.xml.</p>
 <s1 title="Client Servlet">
 
 <example title="CourseServlet.java">
+package example;
+
 import javax.persistence.*;
 
 public class CourseServlet extends HttpServlet {
-  @PersistenceUnit(name="example")
+  @PersistenceContext(name="example")
   private EntityManager _manager;
 
   public void service(HttpServletRequest req, HttpServletResponse res)
