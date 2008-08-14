@@ -223,9 +223,9 @@ public class DeploymentManagerImpl implements DeploymentManager {
 
       ProgressObjectImpl result = new ProgressObjectImpl(targetModules);
 
-      result.completed(L.l("application ${0} deployed to ${1}", name, archive));
+      result.completed(L.l("application {0} deployed from {1}", name, archive));
 
-      return new ProgressObjectImpl(targetModules);
+      return result;
     }
     catch (Exception e) {
       IllegalStateException ex;
