@@ -1143,7 +1143,10 @@ public class JdbcResultResource {
   }
 
   /**
-   * Returns number of rows returned in query
+   * Returns number of rows returned in query.
+   * last() call is efficient for Mysql because the driver just adjusts
+   * the result index.  It is very inefficient for Postgres because that
+   * driver iterates over the result set.
    *
    * @param rs a result set
    * @return the number of rows in the specified result set

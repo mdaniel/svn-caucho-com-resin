@@ -58,6 +58,8 @@ public class MysqliResult extends JdbcResultResource {
     = Logger.getLogger(MysqliResult.class.getName());
   private static final L10N L
     = new L10N(MysqliResult.class);
+  
+  private int _resultSetSize;
 
   /**
    * Constructor for MysqliResult
@@ -67,11 +69,14 @@ public class MysqliResult extends JdbcResultResource {
    * @param conn the corresponding connection
    */
   public MysqliResult(Env env,
-		      Statement stmt,
+                      Statement stmt,
                       ResultSet rs,
                       Mysqli conn)
   {
     super(env, stmt, rs, conn);
+
+    // getNumRows() is efficient for MySQL
+    _resultSetSize = getNumRows();
   }
 
   /**
@@ -922,14 +927,8 @@ public class MysqliResult extends JdbcResultResource {
    *
    * @return the number of rows in the result set
    */
-  public Value num_rows()
+  public int num_rows()
   {
-    int numRows = getNumRows();
-
-    if (numRows < 0) {
-      return BooleanValue.FALSE;
-    }
-
-    return LongValue.create(numRows);
+    return _resultSetSize;
   }
 }

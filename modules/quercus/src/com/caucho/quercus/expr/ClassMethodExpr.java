@@ -34,6 +34,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.Arg;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -99,8 +100,15 @@ public class ClassMethodExpr extends Expr {
     
     Value []values = new Value[_args.length];
 
-    for (int i = 0; i < values.length; i++)
-      values[i] = _args[i].eval(env);
+    Arg []args = fun.getArgs();
+    
+    for (int i = 0; i < values.length; i++) {
+      // php/09e1
+      if (args[i].isReference())
+        values[i] = _args[i].evalArg(env);
+      else
+        values[i] = _args[i].eval(env);
+    }
 
     Value obj = env.getThis();
     env.pushCall(this, obj);

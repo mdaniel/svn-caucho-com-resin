@@ -77,7 +77,7 @@ public class MailModule extends AbstractQuercusModule {
       HashMap<String,String> headers = splitHeaders(additionalHeaders);
 
       if (to == null || to.equals(""))
-	to = headers.get("to");
+        to = headers.get("to");
       
       Properties props = new Properties();
       
@@ -118,6 +118,10 @@ public class MailModule extends AbstractQuercusModule {
       smtp = mailSession.getTransport("smtp");
 
       MimeMessage msg = new MimeMessage(mailSession);
+      
+      if (subject == null)
+        subject = "";
+      
       msg.setSubject(subject);
       msg.setContent(message.toString(), "text/plain");
 

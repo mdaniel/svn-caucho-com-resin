@@ -47,10 +47,15 @@ public class FunctionScope extends Scope {
   private ExprFactory _exprFactory;
   private Scope _parentScope;
 
+  private HashMap<String,Function> _functionMap
+  = new HashMap<String,Function>();
+  
   private HashMap<String,InterpretedClassDef> _classMap
     = new HashMap<String,InterpretedClassDef>();
   
   private HashMap<String,InterpretedClassDef> _conditionalClassMap;
+  
+  private HashMap<String,Function> _conditionalFunctionMap;
 
   FunctionScope(ExprFactory exprFactory, Scope scope)
   {
@@ -71,8 +76,9 @@ public class FunctionScope extends Scope {
    */
   public void addFunction(String name, Function function)
   {
-    throw new UnsupportedOperationException();
-    //_functionMap.put(name.toLowerCase(), function);
+    _functionMap.put(name.toLowerCase(), function);
+    
+    _parentScope.addConditionalFunction(function);
   }
   
   /*
@@ -80,7 +86,12 @@ public class FunctionScope extends Scope {
    */
   protected void addConditionalFunction(Function function)
   {
-    throw new UnsupportedOperationException();
+    if (_conditionalFunctionMap == null)
+      _conditionalFunctionMap = new HashMap<String,Function>(4);
+
+    _conditionalFunctionMap.put(function.getCompilationName(), function);
+    
+    _parentScope.addConditionalFunction(function);
   }
 
   /**

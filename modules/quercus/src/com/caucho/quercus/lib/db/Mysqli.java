@@ -784,8 +784,8 @@ public class Mysqli extends JdbcConnectionResource {
       SqlParseToken tok = parseSqlToken(sql, null);
 
       if (tok != null
-	  && tok.matchesFirstChar('U', 'u')
-	  && tok.matchesToken("USE")) {
+          && tok.matchesFirstChar('U', 'u')
+          && tok.matchesToken("USE")) {
         // Mysql "USE DBNAME" statement.
         //
         // The Mysql JDBC driver does not properly implement getCatalog()

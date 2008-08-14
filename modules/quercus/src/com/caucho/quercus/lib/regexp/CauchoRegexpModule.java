@@ -853,11 +853,12 @@ public class CauchoRegexpModule
 
     try {
       patternStr = cleanEregRegexp(env, patternStr, false);
+      
       if (isCaseInsensitive)
         patternStr = addDelimiters(env, patternStr, "/", "/i");
       else
         patternStr = addDelimiters(env, patternStr, "/", "/");
-
+      
       Regexp regexp = getRegexp(env, patternStr);
       RegexpState regexpState = new RegexpState(env, regexp, subject);
 
@@ -1506,17 +1507,8 @@ public class CauchoRegexpModule
     StringValue sb = regexp.createStringBuilder();
     char quote = 0;
 
-    boolean sawVerticalBar = false;
-
     for (int i = 0; i < len; i++) {
       char ch = regexp.charAt(i);
-
-      if (sawVerticalBar) {
-        if ((! Character.isWhitespace(ch)) &&
-                ch != '#' &&
-                ch != '|')
-          sawVerticalBar = false;
-      }
 
       switch (ch) {
       case '\\':
@@ -1699,14 +1691,7 @@ public class CauchoRegexpModule
         break;
 
       case '|':
-        // php/152o
-        // php ignores subsequent vertical bars
-        //
-        // to accomodate drupal bug http://drupal.org/node/123750
-        if (! sawVerticalBar) {
-          sb = sb.appendByte('|');
-          sawVerticalBar = true; 
-        }
+        sb = sb.appendByte('|');
         break;
 
       default:

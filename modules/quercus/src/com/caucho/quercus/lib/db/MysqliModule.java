@@ -692,7 +692,7 @@ public class MysqliModule extends AbstractQuercusModule {
     if (result == null)
       return NullValue.NULL;
 
-    return result.num_rows();
+    return LongValue.create(result.num_rows());
   }
 
   /**

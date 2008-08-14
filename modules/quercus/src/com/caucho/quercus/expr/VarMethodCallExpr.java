@@ -49,8 +49,6 @@ public class VarMethodCallExpr extends Expr {
 
   protected Expr []_fullArgs;
 
-  private AbstractFunction _fun;
-
   public VarMethodCallExpr(Location location, Expr objExpr, Expr name, ArrayList<Expr> args)
   {
     super(location);

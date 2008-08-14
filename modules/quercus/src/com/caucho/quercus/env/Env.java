@@ -3562,10 +3562,16 @@ public class Env {
 
             cb.call(this, nameString);
             
-            QuercusClass cls = createClassImpl(name, false, useImport);
-                  
+            // php/0977
+            QuercusClass cls = findClass(name, false, useImport);
+            
             if (cls != null)
               return cls;
+            
+            //QuercusClass cls = createClassImpl(name, false, useImport);
+                  
+            //if (cls != null)
+              //return cls;
           }
 
 	      if (size == 0) {

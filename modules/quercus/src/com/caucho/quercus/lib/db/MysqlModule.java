@@ -971,7 +971,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (result == null)
       return BooleanValue.FALSE;
 
-    return result.num_rows();
+    return LongValue.create(result.num_rows());
   }
 
   /**
