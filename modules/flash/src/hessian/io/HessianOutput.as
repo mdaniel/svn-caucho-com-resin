@@ -50,6 +50,7 @@ package hessian.io
 {
 	import flash.errors.IllegalOperationError;
 	import flash.utils.ByteArray;
+	import flash.utils.Dictionary;
 	import flash.utils.IDataOutput;
   import flash.utils.describeType;
   import flash.utils.getQualifiedClassName;
@@ -63,7 +64,7 @@ package hessian.io
   {
     private var _out:IDataOutput;
     private var _version:int = 1;
-    private var _refs:Object;
+    private var _refs:Dictionary;
     private var _numRefs:int = 0;
 
     /**
@@ -304,6 +305,9 @@ package hessian.io
         return;
       }
       else if (object is Array || className == "Array") {
+        if (addRef(object))
+          return;
+
         var array:Array = object as Array;
 
         var hasEnd:Boolean = writeListBegin(array.length, className);
@@ -575,14 +579,36 @@ package hessian.io
     public override function writeUTCDate(time:Number):void
     {
       _out.writeByte('d'.charCodeAt());
-      _out.writeByte(0xFF & (time / 0x100000000000000));
-      _out.writeByte(0xFF & (time / 0x1000000000000));
-      _out.writeByte(0xFF & (time / 0x10000000000));
-      _out.writeByte(0xFF & (time / 0x100000000));
-      _out.writeByte(0xFF & (time >> 24));
-      _out.writeByte(0xFF & (time >> 16));
-      _out.writeByte(0xFF & (time >> 8));
-      _out.writeByte(0xFF & (time));
+
+      if (time >= 0) {
+        _out.writeByte(0xFF & (time / 0x100000000000000));
+        _out.writeByte(0xFF & (time / 0x1000000000000));
+        _out.writeByte(0xFF & (time / 0x10000000000));
+        _out.writeByte(0xFF & (time / 0x100000000));
+        _out.writeByte(0xFF & (time >> 24));
+        _out.writeByte(0xFF & (time >> 16));
+        _out.writeByte(0xFF & (time >> 8));
+        _out.writeByte(0xFF & (time));
+      }
+      else {
+        var abs:Number = Math.abs(time);
+
+        var msi:Number = 0x100000000 - (abs / 0x100000000);
+        var lsi:Number = 0x100000000 - (abs & 0xFFFFFFFF);
+
+        if (msi == 0x100000000)
+          msi = 0xFFFFFFFF;
+
+        _out.writeByte(0xFF & (msi >> 24));
+        _out.writeByte(0xFF & (msi >> 16));
+        _out.writeByte(0xFF & (msi >> 8));
+        _out.writeByte(0xFF & (msi));
+
+        _out.writeByte(0xFF & (lsi >> 24));
+        _out.writeByte(0xFF & (lsi >> 16));
+        _out.writeByte(0xFF & (lsi >> 8));
+        _out.writeByte(0xFF & (lsi));
+      }
     }
 
     /**
@@ -865,7 +891,7 @@ package hessian.io
     public override function addRef(object:Object):Boolean
     {
       if (_refs == null)
-        _refs = new Object();
+        _refs = new Dictionary();
 
       var ref:Object = _refs[object];
 
@@ -888,7 +914,7 @@ package hessian.io
     public override function resetReferences():void
     {
       if (_refs != null) {
-        _refs = new Object();
+        _refs = new Dictionary();
         _numRefs = 0;
       }
     }

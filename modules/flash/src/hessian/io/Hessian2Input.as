@@ -1643,7 +1643,7 @@ package hessian.io
       else {
         value = new Object();
 
-        if (type != null)
+        if (type != null && type != "")
           value.hessianTypeName = type;
       }
 
@@ -2189,7 +2189,7 @@ package hessian.io
       else {
         obj = new Object();
 
-        if (type != null)
+        if (type != null && type != "")
           obj.hessianTypeName = type;
       }
 
