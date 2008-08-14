@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2007 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2008 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -130,8 +130,6 @@ package hessian.client
         operation = new HessianOperation(this, name);
         operations[name] = operation;
       }
-
-      trace("returning operation: " + operation);
 
       return operation;
     }

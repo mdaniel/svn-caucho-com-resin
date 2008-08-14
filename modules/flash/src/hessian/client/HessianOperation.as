@@ -173,11 +173,16 @@ package hessian.client
         _input.init(stream);
         ret = _input.readReply(_returnType);
 
+        // this event is to trigger changes to those bound to lastResult
         event = new ResultEvent(BINDING_RESULT, 
                                 /*bubbles=*/false, /*cancelable=*/false, 
                                 ret, token, token.message);
 
         token.applyResult(ResultEvent(event));
+        dispatchEvent(event);
+
+        // this is for those explicitly waiting for a result event
+        dispatchEvent(ResultEvent.createEvent(ret, token, token.message));
       }
       catch (e:HessianServiceError) {
         fault = new Fault(e.code, e.message, String(e.detail));
@@ -188,6 +193,9 @@ package hessian.client
                                fault, token, token.message);
 
         token.applyFault(FaultEvent(event));
+
+        // this is for those explicitly waiting for a fault event
+        dispatchEvent(FaultEvent.createEvent(fault, token, token.message));
       }
       catch (e:Error) {
         fault = new Fault("", e.message, "");
@@ -198,13 +206,15 @@ package hessian.client
                                fault, token, token.message);
 
         token.applyFault(FaultEvent(event));
+
+        // this is for those explicitly waiting for a fault event
+        dispatchEvent(FaultEvent.createEvent(fault, token, token.message));
       }
       finally {
         stream.close();
       }
 
       mx_internal::_result = ret;
-      dispatchEvent(event);
     }
 
     /**
