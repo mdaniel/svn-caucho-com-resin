@@ -831,6 +831,8 @@
           file="${resin.lib}/quercus.jar"/>
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/resin-util.jar"
           file="${resin.lib}/resin-util.jar"/>
+    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/javamail-14.jar"
+          file="${resin.lib}/javamail-14.jar"/>
     <!--
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/script-10.jar"
           file="${resin.lib}/script-10.jar"/>
@@ -840,6 +842,7 @@
       <fileset dir="${install}/php/quercus-war">
         <include name="WEB-INF/lib/quercus.jar"/>
         <include name="WEB-INF/lib/resin-util.jar"/>
+        <include name="WEB-INF/lib/javamail-14.jar"/>
 	<!--
         <include name="WEB-INF/lib/script-10.jar"/>
 	-->
