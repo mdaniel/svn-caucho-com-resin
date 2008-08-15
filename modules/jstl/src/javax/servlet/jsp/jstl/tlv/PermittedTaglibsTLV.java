@@ -49,7 +49,14 @@ public class PermittedTaglibsTLV extends TagLibraryValidator {
 
     _permitted = new HashSet<String>();
 
+    //spec required
     _permitted.add("http://java.sun.com/JSP/Page");
+
+    //used implicitly for el expressions
+    _permitted.add("http://java.sun.com/jsp/jstl/core");
+    
+    //self
+    _permitted.add(uri);
 
     String []values = permitted.split("[ \t\n\r]+");
 
