@@ -51,9 +51,6 @@ public class PermittedTaglibsTLV extends TagLibraryValidator {
 
     //spec required
     _permitted.add("http://java.sun.com/JSP/Page");
-
-    //used implicitly for el expressions
-    _permitted.add("http://java.sun.com/jsp/jstl/core");
     
     //self
     _permitted.add(uri);
