@@ -384,8 +384,8 @@ public class MBeanContext
       
       MBeanContext parentContext = _mbeanServer.createContext(parentLoader);
 
-      if (parentContext == null ||
-	  parentContext == context)
+      if (parentContext == null
+	  || parentContext == context)
 	break;
 
       if (parentContext._globalView == null) {
@@ -502,7 +502,8 @@ public class MBeanContext
    */
   void sendRegisterNotification(ObjectName name)
   {
-    serverNotification(name, MBeanServerNotification.REGISTRATION_NOTIFICATION);
+    serverNotification(name,
+		       MBeanServerNotification.REGISTRATION_NOTIFICATION);
   }
 
   /**
@@ -510,7 +511,8 @@ public class MBeanContext
    */
   void sendUnregisterNotification(ObjectName name)
   {
-    serverNotification(name, MBeanServerNotification.UNREGISTRATION_NOTIFICATION);
+    serverNotification(name,
+		       MBeanServerNotification.UNREGISTRATION_NOTIFICATION);
   }
 
   /**

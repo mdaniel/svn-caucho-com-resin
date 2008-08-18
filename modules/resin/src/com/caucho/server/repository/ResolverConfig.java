@@ -30,12 +30,16 @@
 package com.caucho.server.repository;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.type.TypeFactory;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.ivy.IvyPattern;
 import com.caucho.util.L10N;
 import com.caucho.server.resin.Resin;
 import com.caucho.vfs.Path;
 
 import java.util.ArrayList;
+import javax.annotation.PostConstruct;
 
 /**
  * The configuration for a resolver
@@ -44,26 +48,56 @@ public class ResolverConfig
 {
   private static final L10N L = new L10N(ResolverConfig.class);
 
-  private String _artifactPattern;
-  private String _ivyPattern;
+  private Resolver _resolver;
+  
+  private IvyPattern _artifactPattern;
+  private IvyPattern _ivyPattern;
 
   public void setUri(String uri)
   {
+    TypeFactory factory = TypeFactory.create();
     
+    Class cl = factory.getDriverClassByUrl(Resolver.class, uri);
+
+    try {
+      _resolver = (Resolver) cl.newInstance();
+
+      ContainerProgram program = factory.getUrlProgram(uri);
+
+      if (program != null)
+	program.configure(_resolver);
+    } catch (Exception e) {
+      throw new ConfigException(L.l("<resolver> can't instantiate '{0}'",
+				    cl.getName()),
+				e);
+    }
   }
 
   public void setArtifactPattern(String pattern)
   {
-    _artifactPattern = pattern;
+    _artifactPattern = new IvyPattern(pattern);
   }
 
   public void setIvyPattern(String pattern)
   {
-    _ivyPattern = pattern;
+    _ivyPattern = new IvyPattern(pattern);
+  }
+  
+  @PostConstruct
+  public void init()
+  {
+    if (_resolver == null)
+      throw new ConfigException(L.l("<resolver> requires a 'uri' attribute"));
+
+    if (_artifactPattern != null)
+      _resolver.setArtifactPattern(_artifactPattern);
+
+    if (_ivyPattern != null)
+      _resolver.setIvyPattern(_ivyPattern);
   }
 
   Resolver getResolver()
   {
-    return null;
+    return _resolver;
   }
 }

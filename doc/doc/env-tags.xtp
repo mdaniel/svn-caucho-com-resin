@@ -2179,7 +2179,8 @@ properties can be configured directly on the &lt;mail> tag.</p>
 </tr>
 <tr>
   <td>authenticator</td>
-  <td>sets the javamail authenticator</td>
+  <td>sets a custom javamail authenticator, either with EL or a
+  custom resin:type bean</td>
   <td></td>
 </tr>
 <tr>
@@ -2225,6 +2226,11 @@ properties can be configured directly on the &lt;mail> tag.</p>
 <tr>
   <td>name</td>
   <td>Resin-IoC/WebBeans @Named value</td>
+  <td></td>
+</tr>
+<tr>
+  <td>password</td>
+  <td>sets the password for authentication</td>
   <td></td>
 </tr>
 <tr>

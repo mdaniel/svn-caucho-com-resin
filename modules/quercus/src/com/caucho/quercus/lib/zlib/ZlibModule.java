@@ -592,9 +592,10 @@ public class ZlibModule extends AbstractQuercusModule {
     
     TempBuffer tempBuf = TempBuffer.allocate();
     byte []buffer = tempBuf.getBuffer();
+    Inflater inflater = null;
 
     try {
-      Inflater inflater = new Inflater(true);
+      inflater = new Inflater(true);
       StringValue sb = env.createBinaryBuilder();
 
       while (true) {
@@ -615,14 +616,15 @@ public class ZlibModule extends AbstractQuercusModule {
           break;
       }
 
-      inflater.end();
-
       return sb;
     } catch (Exception e) {
       env.warning(e);
       return BooleanValue.FALSE;
     } finally {
       TempBuffer.free(tempBuf);
+
+      if (inflater != null)
+	inflater.end();
     }
   }
 

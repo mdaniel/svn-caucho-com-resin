@@ -105,6 +105,12 @@ public class IvyPattern {
     }
   }
 
+  @Override
+    public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _pattern + "]";
+  }
+
   abstract static class Segment {
     abstract public void resolve(StringBuilder sb, Map<String,String> props);
   }

@@ -447,6 +447,13 @@ class WatchdogProcess
 	list.add(arg);
     }
 
+    for (String arg : _watchdog.getArgv()) {
+      if (arg.startsWith("-D") || arg.startsWith("-X"))
+	list.add(arg);
+      else if (arg.startsWith("-J"))
+	list.add(arg.substring(2));
+    }
+
     ArrayList<String> resinArgs = new ArrayList<String>();
     String []argv = _watchdog.getArgv();
     for (int i = 0; i < argv.length; i++) {

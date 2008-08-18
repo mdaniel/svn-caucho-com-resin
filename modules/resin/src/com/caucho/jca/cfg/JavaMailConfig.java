@@ -50,6 +50,9 @@ public class JavaMailConfig extends AbstractBeanConfig {
 
   private Properties _props = new Properties();
   private Authenticator _auth;
+
+  private String _user;
+  private String _password;
   private Session _session;
   
   public JavaMailConfig()
@@ -117,6 +120,14 @@ public class JavaMailConfig extends AbstractBeanConfig {
   }
 
   /**
+   * mail.smtp.auth
+   */
+  public void setSmtpAuth(boolean isEnable)
+  {
+    setProperty("mail.smtp.auth", isEnable ? "true" : "false");
+  }
+
+  /**
    * mail.smtp.host
    */
   public void setSmtpHost(String host)
@@ -169,7 +180,17 @@ public class JavaMailConfig extends AbstractBeanConfig {
    */
   public void setUser(String user)
   {
+    _user = user;
+    
     setProperty("mail.user", user);
+  }
+
+  /**
+   * password
+   */
+  public void setPassword(String password)
+  {
+    _password = password;
   }
 
   /**
@@ -197,9 +218,14 @@ public class JavaMailConfig extends AbstractBeanConfig {
     try {
       if (getInit() != null)
 	getInit().configure(this);
+
+      Authenticator auth = _auth;
+
+      if (auth == null && _user != null && _password != null)
+	auth = new StandardAuthenticator(_user, _password);
       
-      if (_auth != null)
-	_session = Session.getInstance(_props, _auth);
+      if (auth != null)
+	_session = Session.getInstance(_props, auth);
       else
 	_session = Session.getInstance(_props);
 
@@ -212,5 +238,28 @@ public class JavaMailConfig extends AbstractBeanConfig {
   public Object replaceObject()
   {
     return _session;
+  }
+
+  static class StandardAuthenticator extends Authenticator {
+    private final String _userName;
+    private final PasswordAuthentication _passwordAuth;
+
+    StandardAuthenticator(String userName, String password)
+    {
+      _userName = userName;
+      _passwordAuth = new PasswordAuthentication(userName, password);
+    }
+
+    @Override
+    protected PasswordAuthentication getPasswordAuthentication()
+    {
+      return _passwordAuth;
+    }
+
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _userName + "]";
+    }
   }
 }

@@ -688,7 +688,9 @@ public class Resin implements EnvironmentBean, SchemaBean
   public TempFileManager getTempFileManager()
   {
     if (_tempFileManager == null) {
-      Path path = createManagement().getPath().lookup("temp_" + _serverId + ".tmp");
+      String fileName = "temp_" + _serverId + ".cache";
+      
+      Path path = createManagement().getPath().lookup(fileName);
       
       _tempFileManager = new TempFileManager(path);
     }
@@ -1170,6 +1172,11 @@ public class Resin implements EnvironmentBean, SchemaBean
       }
       else if (argv[i].equals("-finer")
 	       || argv[i].equals("--finer")) {
+	i += 1;
+      }
+      else if (argv[i].startsWith("-D")
+	       || argv[i].startsWith("-J")
+	       || argv[i].startsWith("-X")) {
 	i += 1;
       }
       else {

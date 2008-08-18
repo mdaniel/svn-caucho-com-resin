@@ -13,6 +13,15 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>hessian2: ref production changed to ref ::= R &lt;int></li>
+<li>hessian2: added compact date encoding (0x65) (rep by Fredrik Olsson)</li>
+<li>hessian2: 'v' and 'V' changed to be fixed and variable length, w/o Hessian 1.0 compat (#2823, rep by Niclas Olofsson)</li>
+<li>jni: when socket read fails due to ClientDisconnect, close the socket (#2843, rep by Malte Muenke)</li>
+<li>mail: added password authenticator support (#2822, rep by Daniel Lopez)</li>
+<li>watchdog: -D as Resin argument should be passed to child (#2841, rep by Rob Lockstone)</li>
+<li>admin: when JMX does not contain "Tenured Gen" or "Perm Gen", issue warning and continue (#2839, rep by George Buschbeck)</li>
+<li>quercus: callbacks with "A::foo" were not properly interpreted (#2836, rep by wikipo)</li>
+<li>watchdog: watchdog start needs synchronization to handle sites with multiple servers (#2840, rep by Philippe Collard)</li>
 <li>mod_caucho: static file handling for ;jsessionid= and query (#2825, rep by ckiehl)</li>
 <li>config: allow resin:if in &lt;server> to define &lt;http> (#2802, rep by Dana P'Simer)</li>
 <li>quercus: apc_cache_info needs @Optional 'limited' param (#2833, rep by koreth)</li>

@@ -27,55 +27,47 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.cache;
+package com.caucho.server.repository;
 
 import com.caucho.config.ConfigException;
-import com.caucho.db.Database;
-import com.caucho.db.store.RawTransaction;
-import com.caucho.db.store.Store;
-import com.caucho.db.store.StoreTransaction;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.ivy.IvyPattern;
 import com.caucho.util.L10N;
-import com.caucho.vfs.OutputStreamWithBuffer;
+import com.caucho.server.cache.TempFileInode;
+import com.caucho.server.resin.Resin;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.TempCharBuffer;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
- * Represents an inode to a temporary file.
+ * The module repository holds the module jars for osgi and ivy.
  */
-public class TempFileManager
+public class InodeDataSource implements DataSource
 {
-  private static final L10N L = new L10N(TempFileManager.class);
-  private static final Logger log
-    = Logger.getLogger(TempFileManager.class.getName());
+  private TempFileInode _inode;
 
-  private final Store _store;
-
-  public TempFileManager(Path path)
+  InodeDataSource(TempFileInode inode)
   {
-    try {
-      path.getParent().mkdirs();
-      
-      Database database = new Database();
-      database.ensureMemoryCapacity(1024 * 1024);
-      database.init();
-    
-      _store = new Store(database, "temp-file", null, path);
-      _store.setFlushDirtyBlocksOnCommit(false);
-      _store.create();
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
+    _inode = inode;
   }
 
-  public TempFileInode createInode()
+  public InputStream openInputStream()
   {
-    return new TempFileInode(_store);
+    return _inode.openInputStream();
+  }
+
+  public void close()
+  {
+    TempFileInode inode = _inode;
+    _inode = null;
+
+    if (inode != null)
+      inode.free();
+  }
+
+  protected void finalize()
+  {
+    close();
   }
 }

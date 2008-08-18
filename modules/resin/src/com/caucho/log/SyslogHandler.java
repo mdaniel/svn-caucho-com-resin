@@ -39,7 +39,7 @@ import java.util.logging.LogRecord;
  * Logs to the syslog stream
  */
 public class SyslogHandler extends Handler {
-  private static L10N L = new L10N(SyslogHandler.class);
+  private static final L10N L = new L10N(SyslogHandler.class);
   
   private int _facility = Syslog.LOG_DAEMON;
   private int _severity = Syslog.LOG_INFO;

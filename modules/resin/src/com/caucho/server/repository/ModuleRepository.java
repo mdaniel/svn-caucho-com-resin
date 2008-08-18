@@ -34,14 +34,21 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.L10N;
 import com.caucho.server.resin.Resin;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.WriteStream;
 
+import java.io.InputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The module repository holds the module jars for osgi and ivy.
  */
 public class ModuleRepository
 {
+  private static final Logger log
+    = Logger.getLogger(ModuleRepository.class.getName());
   private static final L10N L = new L10N(ModuleRepository.class);
   
   private static final EnvironmentLocal<ModuleRepository> _currentRepository
@@ -102,7 +109,55 @@ public class ModuleRepository
 			   String rev,
 			   String ext)
   {
-    return findArtifactInCache(org, module, rev, ext);
+    Path path = findArtifactInCache(org, module, rev, ext);
+
+    if (path != null)
+      return path;
+
+    for (Resolver resolver : _resolverList) {
+      DataSource source = resolver.resolveArtifact(org, module, rev, ext);
+
+      if (source != null) {
+	return fillCache(org, module, rev, ext, source);
+      }
+    }
+
+    return null;
+  }
+
+  private Path fillCache(String org,
+			 String module,
+			 String rev,
+			 String ext,
+			 DataSource dataSource)
+  {
+    try {
+      Path path = getRoot().lookup(org);
+      path = path.lookup(module);
+      path = path.lookup(ext + "s");
+      path.mkdirs();
+
+      path = path.lookup(module + "_" + rev + "." + ext);
+
+      WriteStream os = path.openWrite();
+      try {
+	InputStream is = dataSource.openInputStream();
+
+	os.writeStream(is);
+
+	is.close();
+      } finally {
+	os.close();
+      }
+
+      return path;
+    } catch (IOException e) {
+      log.log(Level.WARNING, e.toString(), e);
+
+      return null;
+    } finally {
+      dataSource.close();
+    }
   }
 
   private Path findArtifactInCache(String org,

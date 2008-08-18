@@ -3812,7 +3812,24 @@ public class Env {
       if (value.isEmpty())
         return null;
 
-      return new CallbackFunction(this, value.toString());
+      String s = value.toString();
+
+      int p = s.indexOf("::");
+
+      if (p < 0)
+	return new CallbackFunction(this, s);
+      else {
+	String className = s.substring(0, p);
+	String methodName = s.substring(p + 2);
+	
+        QuercusClass cl = findClass(className);
+
+        if (cl == null)
+          throw new IllegalStateException(L.l("can't find class {0}",
+                                              className));
+
+        return new CallbackFunction(cl.getFunction(methodName));
+      }
     }
     else if (value instanceof ArrayValue) {
       Value obj = value.get(LongValue.ZERO);

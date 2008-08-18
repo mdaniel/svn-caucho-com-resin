@@ -36,66 +36,15 @@ import com.caucho.util.L10N;
 import com.caucho.server.resin.Resin;
 import com.caucho.vfs.Path;
 
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * The module repository holds the module jars for osgi and ivy.
  */
-abstract public class Resolver
+public interface DataSource
 {
-  private static final L10N L = new L10N(Resolver.class);
-
-  private IvyPattern _artifactPattern;
-  private IvyPattern _ivyPattern;
-
-  public void setArtifactPattern(IvyPattern pattern)
-  {
-    _artifactPattern = pattern;
-  }
-
-  public void setIvyPattern(IvyPattern pattern)
-  {
-    _ivyPattern = pattern;
-  }
-
-  public final DataSource resolveArtifact(String org,
-					  String module,
-					  String rev,
-					  String ext)
-  {
-    return resolveArtifact(org, module, module, rev, ext);
-  }
+  public InputStream openInputStream();
   
-  abstract public DataSource resolveArtifact(String org,
-					     String module,
-					     String artifact,
-					     String rev,
-					     String ext);
-
-  protected String resolveArtifactString(String org,
-					 String module,
-					 String artifact,
-					 String rev,
-					 String ext)
-  {
-    if (_artifactPattern == null)
-      return null;
-
-    HashMap<String,String> map = new HashMap<String,String>();
-
-    map.put("organisation", org);
-    map.put("module", module);
-    map.put("artifact", artifact);
-    map.put("revision", rev);
-    map.put("ext", ext);
-
-    return _artifactPattern.resolve(map);
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _artifactPattern + "]";
-  }
+  public void close();
 }
