@@ -436,7 +436,7 @@ get_resin_home(char *resin_home, char *path)
 	 * These files must come first so starting Resin from its
 	 * directory will take precedence.
 	 */
-	if (! stat(rsprintf(buf, "%s\\conf\\resin.conf", path), &info))
+	if (! stat(rsprintf(buf, "%s\\lib\\resin.jar", path), &info))
 		return canonicalize(path);
 
 	path = get_parent(path);
@@ -445,7 +445,7 @@ get_resin_home(char *resin_home, char *path)
 	 * These files must come first so starting Resin from its
 	 * directory will take precedence.
 	 */
-	if (! stat(rsprintf(buf, "%s\\conf\\resin.conf", path), &info))
+	if (! stat(rsprintf(buf, "%s\\lib\\resin.jar", path), &info))
 		return canonicalize(path);
 
 
@@ -468,7 +468,7 @@ get_resin_home(char *resin_home, char *path)
 	hSearch = FindFirstFile(rsprintf(buf, "%s\\resin*", root), &dir);
 	if (hSearch != INVALID_HANDLE_VALUE) {
 		do {
-			if (! stat(rsprintf(buf, "%s\\%s\\conf\\resin.conf", root, dir.cFileName), &info)) {
+			if (! stat(rsprintf(buf, "%s\\%s\\lib\\resin.jar", root, dir.cFileName), &info)) {
 				found_path = canonicalize(rsprintf(buf, "%s\\%s", root, dir.cFileName));
 			}
 		} while (FindNextFile(hSearch, &dir));

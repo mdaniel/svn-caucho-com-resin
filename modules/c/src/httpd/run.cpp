@@ -176,37 +176,7 @@ spawn_java(char *exe, char **args)
 		while (! g_is_started) {
 			Sleep(1000);
 		}
-		/*
-		int sock = socket(AF_INET, SOCK_STREAM, 0);
-		if (sock < 0) {
-			fprintf(err, "can't create socket\n");
-			return 1;
-		}
-
-		// make not inheritable
-		DuplicateHandle(GetCurrentProcess(), 
-						(HANDLE) _get_osfhandle(sock), 
-						GetCurrentProcess(), 
-						NULL, 
-						0,
-						FALSE,
-						DUPLICATE_SAME_ACCESS);
-		sockaddr_in sin;
-		memset(&sin, 0, sizeof(sin));
-		sin.sin_family = AF_INET;
-		sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-
-		if (bind(sock, (sockaddr *) &sin, sizeof(sin)) < 0) {
-			fprintf(err, "can't bind socket\n");
-			return 1;
-		}
-
-		int len = sizeof(sockaddr_in);
-		getsockname(sock, (sockaddr *) &sin, &len);
-		int port = ntohs(sin.sin_port);
-
-		listen(sock, 5);
-		*/
+		
 		STARTUPINFO startInfo;
 		memset(&startInfo, 0, sizeof(startInfo));
 		memset(&g_procInfo_buf, 0, sizeof(g_procInfo_buf));	
@@ -216,13 +186,7 @@ spawn_java(char *exe, char **args)
 		char portname[32];
 
 		strcpy(childarg, arg);
-		/*
-		if (! g_is_standalone) {
-		  strcat(childarg, " -socketwait");
-		  sprintf(portname, " %d", port);
-		  strcat(childarg, portname);
-		}
-		*/
+
 		int flag = 0;
 		if (g_is_service) {
 			flag = 0; // DETACHED_PROCESS;
