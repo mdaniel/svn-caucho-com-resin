@@ -104,7 +104,7 @@ public class Cluster
   private long _clientFailRecoverTime = 15000L;
   private long _clientWarmupTime = 60000L;
 
-  private long _clientReadTimeout = 60000L;
+  private long _clientReadTimeout = 600000L;
   private long _clientConnectTimeout = 5000L;
 
   private ContainerProgram _serverProgram

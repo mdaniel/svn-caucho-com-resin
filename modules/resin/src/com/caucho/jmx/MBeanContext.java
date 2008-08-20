@@ -51,6 +51,8 @@ public class MBeanContext
     = Logger.getLogger(MBeanContext.class.getName());
   private static final L10N L = new L10N(MBeanContext.class);
 
+  private MBeanContext _parent;
+  
   // The owning MBeanServer
   private AbstractMBeanServer _mbeanServer;
 
@@ -63,11 +65,11 @@ public class MBeanContext
   private ClassLoader _loader;
 
   private String _domain = "resin";
-  private LinkedHashMap<String,String> _properties =
-    new LinkedHashMap<String,String>();
+  private LinkedHashMap<String,String> _properties
+    = new LinkedHashMap<String,String>();
 
-  private ClassLoaderRepositoryImpl _classLoaderRepository =
-    new ClassLoaderRepositoryImpl();
+  private ClassLoaderRepositoryImpl _classLoaderRepository
+    = new ClassLoaderRepositoryImpl();
   
   // map of all mbeans
   private Hashtable<ObjectName,MBeanWrapper> _mbeans
@@ -85,11 +87,7 @@ public class MBeanContext
 	       MBeanServerDelegate delegate,
 	       MBeanContext globalContext)
   {
-    for (; loader != null
-	   && loader != ClassLoader.getSystemClassLoader()
-	   && ! (loader instanceof EnvironmentClassLoader);
-	 loader = loader.getParent()) {
-    }
+    loader = Environment.getEnvironmentClassLoader(loader);
 
     if (loader == null)
       loader = ClassLoader.getSystemClassLoader();
@@ -99,6 +97,8 @@ public class MBeanContext
     _delegate = delegate;
     _globalContext = globalContext;
 
+    _mbeanServer.setCurrentContext(this, loader);
+
     Environment.addClassLoaderListener(new CloseListener(this), _loader);
     //Environment.addClassLoaderListener(new WeakCloseListener(this), _loader);
     
@@ -106,6 +106,15 @@ public class MBeanContext
 
     _view = new MBeanView(mbeanServer, _loader, "resin");
     _globalView = new MBeanView(mbeanServer, _loader, "resin");
+
+    if (_loader != null
+	&& _loader != ClassLoader.getSystemClassLoader()) {
+      _parent = _mbeanServer.createContext(_loader.getParent());
+
+      if (_parent == this) {
+	_parent = null;
+      }
+    }
   }
 
   /**
@@ -378,23 +387,14 @@ public class MBeanContext
 
     sendRegisterNotification(name);
 
-    MBeanContext context = this;
-    while (context._loader != null) {
-      ClassLoader parentLoader = context._loader.getParent();
-      
-      MBeanContext parentContext = _mbeanServer.createContext(parentLoader);
-
-      if (parentContext == null ||
-	  parentContext == context)
-	break;
-
+    for (MBeanContext parentContext = _parent;
+	 parentContext != null;
+	 parentContext = parentContext._parent) {
       if (parentContext._globalView == null) {
 	log.finer("global view is empty");
       }
       else if (parentContext._globalView.add(name, mbean, false))
 	parentContext.sendRegisterNotification(name);
-      
-      context = parentContext;
     }
   }
 
@@ -422,17 +422,8 @@ public class MBeanContext
       }
     }
 
-    ClassLoader loader = _loader.getParent();
-    for (; loader != null; loader = loader.getParent()) {
-      MBeanContext parentContext = _mbeanServer.getContext(loader);
-
-      if (this == parentContext)
-	return mbean;
-      else if (parentContext != null) {
-	parentContext.removeMBean(name);
-	break;
-      }
-    }
+    if (_parent != null)
+      _parent.removeMBean(name);
 
     return mbean;
   }
@@ -502,7 +493,8 @@ public class MBeanContext
    */
   void sendRegisterNotification(ObjectName name)
   {
-    serverNotification(name, MBeanServerNotification.REGISTRATION_NOTIFICATION);
+    serverNotification(name,
+		       MBeanServerNotification.REGISTRATION_NOTIFICATION);
   }
 
   /**
@@ -510,7 +502,8 @@ public class MBeanContext
    */
   void sendUnregisterNotification(ObjectName name)
   {
-    serverNotification(name, MBeanServerNotification.UNREGISTRATION_NOTIFICATION);
+    serverNotification(name,
+		       MBeanServerNotification.UNREGISTRATION_NOTIFICATION);
   }
 
   /**

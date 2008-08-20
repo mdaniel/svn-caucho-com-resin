@@ -298,7 +298,7 @@ public class JspDirectiveTag extends JspNode {
     */
     String dynAttr = gen.getDynamicAttributes();
     if (dynAttr != null)
-      os.print("dynamic-attributes='" + dynAttr + "'");
+      os.print(" dynamic-attributes='" + dynAttr + "'");
 
     os.print("/>");
   }

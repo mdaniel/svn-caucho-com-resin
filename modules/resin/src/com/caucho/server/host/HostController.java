@@ -117,7 +117,8 @@ public class HostController
     addHostAlias(id);
     setHostName(id);
 
-    getVariableMap().put("name", id);
+    // jsp/101r
+    // getVariableMap().put("name", id);
     getVariableMap().put("host", _hostVar);
     
     setContainer(container);

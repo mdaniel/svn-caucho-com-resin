@@ -29,6 +29,7 @@
 package com.caucho.jmx;
 
 import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.WeakCloseListener;
 import com.caucho.util.L10N;
 
@@ -51,6 +52,9 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     = Logger.getLogger(AbstractMBeanServer.class.getName());
 
   static ObjectName SERVER_DELEGATE_NAME;
+
+  private EnvironmentLocal<MBeanContext> _currentContext
+    = new EnvironmentLocal<MBeanContext>();
 
   // default domain
   private String _defaultDomain;
@@ -76,15 +80,15 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   /**
    * Returns the context implementation.
    */
-  protected MBeanContext getExistingContext()
+  protected final MBeanContext getCurrentContext()
   {
-    return getExistingContext(Thread.currentThread().getContextClassLoader());
+    return getCurrentContext(Thread.currentThread().getContextClassLoader());
   }
 
   /**
    * Returns the context implementation.
    */
-  protected MBeanContext getGlobalContext()
+  protected final MBeanContext getGlobalContext()
   {
     return createContext(ClassLoader.getSystemClassLoader());
   }
@@ -97,7 +101,13 @@ abstract public class AbstractMBeanServer implements MBeanServer {
   /**
    * Returns the context implementation.
    */
-  abstract protected MBeanContext getExistingContext(ClassLoader loader);
+  abstract protected MBeanContext getCurrentContext(ClassLoader loader);
+
+  /**
+   * Sets the context implementation.
+   */
+  abstract protected void setCurrentContext(MBeanContext context,
+					    ClassLoader loader);
 
   /**
    * Returns the context implementation.
@@ -471,7 +481,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     throws InstanceNotFoundException,
            MBeanRegistrationException
   {
-    MBeanContext context = getExistingContext();
+    MBeanContext context = getCurrentContext();
 
     if (context != null) {
       context.unregisterMBean(name);

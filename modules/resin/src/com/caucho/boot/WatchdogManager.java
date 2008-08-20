@@ -239,30 +239,32 @@ public class WatchdogManager extends ProtocolDispatchServer {
   String status()
   {
     StringBuilder sb = new StringBuilder();
-    
-    ArrayList<String> keys = new ArrayList<String>(_watchdogMap.keySet());
-    Collections.sort(keys);
-    
-    for (String key : keys) {
-      Watchdog watchdog = _watchdogMap.get(key);
 
-      sb.append("\n");
-      sb.append("server '" + key + "' : " + watchdog.getState() + "\n");
+    synchronized (_watchdogMap) {
+      ArrayList<String> keys = new ArrayList<String>(_watchdogMap.keySet());
+      Collections.sort(keys);
+    
+      for (String key : keys) {
+	Watchdog watchdog = _watchdogMap.get(key);
 
-      if (getAdminCookie() == null)
-	sb.append("  password: missing\n");
-      else
-	sb.append("  password: ok\n");
+	sb.append("\n");
+	sb.append("server '" + key + "' : " + watchdog.getState() + "\n");
+
+	if (getAdminCookie() == null)
+	  sb.append("  password: missing\n");
+	else
+	  sb.append("  password: ok\n");
       
-      sb.append("  user: " + System.getProperty("user.name"));
+	sb.append("  user: " + System.getProperty("user.name"));
         
-      if (watchdog.getGroupName() != null)
-	sb.append("(" + watchdog.getGroupName() + ")");
+	if (watchdog.getGroupName() != null)
+	  sb.append("(" + watchdog.getGroupName() + ")");
         
-      sb.append("\n");
+	sb.append("\n");
       
-      sb.append("  root: " + watchdog.getResinRoot() + "\n");
-      sb.append("  conf: " + watchdog.getResinConf() + "\n");
+	sb.append("  root: " + watchdog.getResinRoot() + "\n");
+	sb.append("  conf: " + watchdog.getResinConf() + "\n");
+      }
     }
     
     return sb.toString();
@@ -271,40 +273,45 @@ public class WatchdogManager extends ProtocolDispatchServer {
   void startServer(String []argv)
     throws ConfigException
   {
-    WatchdogArgs args = new WatchdogArgs(argv);
+    synchronized (_watchdogMap) {
+      WatchdogArgs args = new WatchdogArgs(argv);
 
-    String serverId = args.getServerId();
+      String serverId = args.getServerId();
 
-    Vfs.setPwd(_args.getRootDirectory());
+      Vfs.setPwd(_args.getRootDirectory());
 
-    try {
-      readConfig(args);
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
+      try {
+	readConfig(args);
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
     
-    Watchdog watchdog = _watchdogMap.get(serverId);
+      Watchdog watchdog = _watchdogMap.get(serverId);
 
-    if (watchdog == null)
-      throw new ConfigException(L().l("No matching <server> found for -server '{0}' in '{1}'",
-				      serverId, _args.getResinConf()));
+      if (watchdog == null)
+	throw new ConfigException(L().l("No matching <server> found for -server '{0}' in '{1}'",
+					serverId, _args.getResinConf()));
 
-    watchdog.start();
+      watchdog.start();
+    }
   }
 
   void stopServer(String serverId)
   {
-    Watchdog watchdog = _watchdogMap.get(serverId);
+    synchronized (_watchdogMap) {
+      Watchdog watchdog = _watchdogMap.get(serverId);
     
-    if (watchdog == null)
-      throw new ConfigException(L().l("No matching <server> found for -server '{0}' in {1}",
-				      serverId, _args.getResinConf()));
+      if (watchdog == null)
+	throw new ConfigException(L().l("No matching <server> found for -server '{0}' in {1}",
+					serverId, _args.getResinConf()));
     
-    watchdog.stop();
+      watchdog.stop();
+    }
   }
 
   void killServer(String serverId)
   {
+    // no synchronization because kill shouldn't block
     Watchdog watchdog = _watchdogMap.get(serverId);
     
     if (watchdog == null)
@@ -316,13 +323,15 @@ public class WatchdogManager extends ProtocolDispatchServer {
 
   void restartServer(String serverId, String []argv)
   {
-    Watchdog server = _watchdogMap.get(serverId);
+    synchronized (_watchdogMap) {
+      Watchdog server = _watchdogMap.get(serverId);
     
-    if (server != null)
-      server.stop();
+      if (server != null)
+	server.stop();
     
-    startServer(argv);
-   }
+      startServer(argv);
+    }
+  }
 
   private void readConfig(WatchdogArgs args)
     throws Exception

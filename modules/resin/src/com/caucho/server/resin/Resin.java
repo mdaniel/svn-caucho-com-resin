@@ -986,6 +986,11 @@ public class Resin implements EnvironmentBean, SchemaBean
 	       || argv[i].equals("--finer")) {
 	i += 1;
       }
+      else if (argv[i].startsWith("-D")
+	       || argv[i].startsWith("-J")
+	       || argv[i].startsWith("-X")) {
+	i += 1;
+      }
       else {
         System.out.println(L().l("unknown argument '{0}'", argv[i]));
         System.out.println();

@@ -263,13 +263,17 @@ public class JdbcMessage
 	pstmt.setString(i++, msgId);
 	pstmt.setLong(i++, expireTime);
 
-	if (header.getLength() > 0)
-	  pstmt.setBinaryStream(i++, header.openRead(), header.getLength());
+	int headerLength = header.getLength();
+	if (headerLength > 0)
+	  pstmt.setBinaryStream(i++, header.openRead(), headerLength);
 	else
 	  pstmt.setNull(i++, Types.BINARY);
 	
-	if (body != null) 
-	  pstmt.setBinaryStream(i++, body.openRead(), body.getLength());
+	if (body != null) {
+	  int bodyLength = body.getLength();
+	  
+	  pstmt.setBinaryStream(i++, body.openRead(), bodyLength);
+	}
 	else
 	  pstmt.setString(i++, "");
 
@@ -288,10 +292,13 @@ public class JdbcMessage
 	pstmt.setInt(i++, type);
 	pstmt.setString(i++, msgId);
 	pstmt.setLong(i++, expireTime);
-	pstmt.setBinaryStream(i++, header.openRead(), header.getLength());
+	int headerLength = header.getLength();
+	pstmt.setBinaryStream(i++, header.openRead(), headerLength);
 	
-	if (body != null) 
-	  pstmt.setBinaryStream(i++, body.openRead(), body.getLength());
+	if (body != null) {
+	  int bodyLength = body.getLength();
+	  pstmt.setBinaryStream(i++, body.openRead(), bodyLength);
+	}
 	else
 	  pstmt.setString(i++, "");
 
