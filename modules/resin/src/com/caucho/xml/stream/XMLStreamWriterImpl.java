@@ -188,6 +188,9 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
                              String localName, String value)
     throws XMLStreamException
   {
+    if (prefix == null || "".equals(prefix))
+      throw new XMLStreamException(L.l("Attribute namespace prefixes cannot be null or empty"));
+
     if (_repair && _tracker.getPrefix(namespaceURI) == null)
       _tracker.declare(prefix, namespaceURI, true);
     else
