@@ -114,7 +114,9 @@ public class HessianHmuxProxy implements InvocationHandler {
       if (! "200".equals(code)) {
 	CharBuffer sb = new CharBuffer();
 
-	while (is.readLine(sb)) {
+	int count = 1024;
+
+	while (is.readLine(sb, false) && count-- >= 0) {
 	}
 
 	throw new HessianProtocolException(code + ": " + sb);

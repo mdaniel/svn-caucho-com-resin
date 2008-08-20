@@ -57,7 +57,12 @@ class MBeanServerImpl extends AbstractMBeanServer {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
     MBeanContext globalContext = null;
-    _context = new MBeanContext(this, loader, delegate, globalContext);
+    MBeanContext context
+      = new MBeanContext(this, loader, delegate, globalContext);
+
+    // MBeanContext should set _context automatically
+    if (context != _context)
+      throw new IllegalStateException();
 
     try {
       IntrospectionMBean mbean;
@@ -80,9 +85,22 @@ class MBeanServerImpl extends AbstractMBeanServer {
   /**
    * Returns the context.
    */
-  protected MBeanContext getExistingContext(ClassLoader loader)
+  @Override
+  protected MBeanContext getCurrentContext(ClassLoader loader)
   {
     return _context;
+  }
+
+  /**
+   * Returns the context.
+   */
+  @Override
+  protected void setCurrentContext(MBeanContext context, ClassLoader loader)
+  {
+    if (_context != null)
+      throw new IllegalStateException(L.l("MBeanServerImpl cannot reassign the server"));
+    
+    _context = context;
   }
 
   /**

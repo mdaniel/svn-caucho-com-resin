@@ -73,11 +73,19 @@ public class LocalMBeanServer extends AbstractMBeanServer {
   /**
    * Returns the local context.
    */
-  protected MBeanContext getExistingContext(ClassLoader loader)
+  protected MBeanContext getCurrentContext(ClassLoader loader)
   {
     AbstractMBeanServer envServer = Jmx.getMBeanServer();
 
-    return envServer.getExistingContext(_loader);
+    return envServer.getCurrentContext(_loader);
+  }
+
+  /**
+   * Returns the local context.
+   */
+  protected void setCurrentContext(MBeanContext context, ClassLoader loader)
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
   }
 
   /**

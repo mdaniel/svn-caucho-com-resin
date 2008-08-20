@@ -682,10 +682,6 @@ class name directly like <var>test.HelloWorld</var>
       <d><i>As a child of <a config-tag="session-config"/></i>.
         Enable URL rewriting for sessions. (resin 1.1)</d>
     </ix>
-    <ix id="file-store" h="webapp-tags.xtp#session-config">
-      <d><i>As a child of <a config-tag="session-config"/></i>.
-        Persistent sessions using a file store. (resin 1.2)</d>
-    </ix>
     <ix id="jdbc-store" h="webapp-tags.xtp#session-config">
       <d><i>As a child of <a config-tag="session-config"/></i>.
         Persistent sessions using a JDBC store. (resin 1.2)</d>

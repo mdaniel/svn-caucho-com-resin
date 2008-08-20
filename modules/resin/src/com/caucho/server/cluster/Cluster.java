@@ -45,6 +45,7 @@ import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.server.port.Port;
 import com.caucho.server.resin.Resin;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 import com.caucho.vfs.Path;
@@ -490,7 +491,7 @@ public class Cluster
   /**
    * Sets the cluster store.
    */
-  void setStore(StoreManager store)
+  protected void setStore(StoreManager store)
   {
     _clusterStore = store;
   }
@@ -517,68 +518,6 @@ public class Cluster
 
     if (store == null)
       throw new ConfigException(L.l("'jdbc' persistent sessions are available in Resin Professional.  See http://www.caucho.com for information and licensing."));
-
-    return store;
-  }
-
-  public StoreManager createPrivateFileStore()
-    throws ConfigException
-  {
-    StoreManager store = createFileStore();
-
-    setStore(null);
-
-    return store;
-  }
-
-  public StoreManager createFileStore()
-    throws ConfigException
-  {
-    if (getStore() != null)
-      throw new ConfigException(L.l("multiple file stores are not allowed in a cluster."));
-
-    StoreManager store = null;
-
-    try {
-      Class cl = Class.forName("com.caucho.server.cluster.FileStoreManager");
-
-      store = (StoreManager) cl.newInstance();
-
-      store.setCluster(this);
-
-      setStore(store);
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-
-    if (store == null)
-      throw new ConfigException(L.l("'file' persistent sessions are available in Resin Professional.  See http://www.caucho.com for information and licensing."));
-
-    return store;
-  }
-
-  public StoreManager createClusterStore()
-    throws ConfigException
-  {
-    if (getStore() != null)
-      throw new ConfigException(L.l("multiple cluster stores are not allowed in a cluster."));
-
-    StoreManager store = null;
-
-    try {
-      Class cl = Class.forName("com.caucho.server.cluster.ClusterStoreManager");
-
-      store = (StoreManager) cl.newInstance();
-
-      store.setCluster(this);
-
-      setStore(store);
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-
-    if (store == null)
-      throw new ConfigException(L.l("'cluster' persistent sessions are available in Resin Professional.  See http://www.caucho.com for information and licensing."));
 
     return store;
   }
@@ -1039,6 +978,28 @@ public class Cluster
    */
   public void startRemote()
   {
+  }
+
+  /**
+   * Creates a persistent store instance.
+   */
+  protected StoreManager createPersistentStore(String type)
+  {
+    if (type.equals("file")) {
+      if (! Alarm.isTest())
+	throw new ConfigException(L.l("'file' store is no longer allowed.  Use 'cluster' store instead with a single server"));
+      
+      setStore(new FileStoreManager());
+    }
+    else if (type.equals("cluster")) {
+      setStore(new FileStoreManager());
+    }
+
+    if (getStore() == null)
+      throw new ConfigException(L.l("{0} is an unknown persistent-store type.  Only 'cluster' with a single server is allowed for Resin OpenSource.",
+				    type));
+
+    return getStore();
   }
   
   public void startPersistentStore()

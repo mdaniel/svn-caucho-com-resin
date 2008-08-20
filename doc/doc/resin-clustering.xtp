@@ -351,33 +351,26 @@ the <a href="resin-tags.xtp#persistent-store">persistent-store</a> tag.</p>
 
 <s2 title="File Based">
 
-<ul>
-<li>For single-server configurations
-</li><li>Useful in development when classes change often
-</li></ul>
-
-<p>Persistent sessions are configured in the <var>web-app</var>.
-File-based sessions use <var>file-store</var>.</p>
+<p>For single-server configurations, the "cluster" store saves session
+data on disk, allowing for recovery after system restart or during
+development.</p>
 
 <example>
-&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;session-config&gt;
-    &lt;file-store&gt;WEB-INF/sessions&lt;/file-store&gt;
-  &lt;/session-config&gt;
-&lt;/web-app&gt;
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;cluster id="">
+    &lt;persistent-store type="cluster"/&gt;
+
+    &lt;host id="">
+      &lt;/web-app id=""/>
+    &lt;/host>
+  &lt;/cluster>
+&lt;/resin&gt;
 </example>
 
-<p>Sessions are stored as files in the <var>file-store</var>
+<p>Sessions are stored as files in the <var>path</var>
 directory.  When the session changes, the updates will be written to
 the file.  After Resin loads an Application, it will load the stored
 sessions.</p>
-
-<p>File-based persistence is not useful in multi-server
-environments.  Although a network filesystem such as NFS will allow all
-the servers to access the same filesystem, it's not designed for the
-fine-grained access.  For example, NFS will cache pages.  So if one
-server modifies the page, e.g. a session value, the other servers may not see
-the change for several seconds.</p>
 
 </s2>
 

@@ -31,7 +31,7 @@ package com.caucho.jmx;
 
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.log.Log;
+import com.caucho.loader.Environment;
 import com.caucho.util.L10N;
 
 import javax.management.MBeanServerDelegate;
@@ -44,7 +44,8 @@ import java.util.logging.Logger;
  */
 public class EnvironmentMBeanServer extends AbstractMBeanServer {
   private static final L10N L = new L10N(EnvironmentMBeanServer.class);
-  private static final Logger log = Log.open(EnvironmentMBeanServer.class);
+  private static final Logger log
+    = Logger.getLogger(EnvironmentMBeanServer.class.getName());
 
   private EnvironmentLocal<MBeanContext> _localContext =
     new EnvironmentLocal<MBeanContext>();
@@ -136,13 +137,32 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer {
   /**
    * Returns the local context.
    */
-  protected MBeanContext getExistingContext(ClassLoader loader)
+  @Override
+  protected MBeanContext getCurrentContext(ClassLoader loader)
   {
     if (loader == null)
-      return _localContext.get(ClassLoader.getSystemClassLoader());
+      loader = Environment.getEnvironmentClassLoader(loader);
     
     synchronized (_localContext) {
       return _localContext.getLevel(loader);
+    }
+  }
+
+  /**
+   * Sets the local context.
+   */
+  @Override
+  protected void setCurrentContext(MBeanContext context, ClassLoader loader)
+  {
+    if (loader == null)
+      loader = Environment.getEnvironmentClassLoader(loader);
+    
+    synchronized (_localContext) {
+      if (_localContext.getLevel(loader) != null
+	  && _localContext.getLevel(loader) != context)
+	throw new IllegalStateException(L.l("replacing context is forbidden"));
+      
+      _localContext.set(context, loader);
     }
   }
   

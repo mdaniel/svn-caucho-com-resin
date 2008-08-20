@@ -41,9 +41,11 @@ import java.util.logging.Logger;
 /**
  * Configuration distributed stores.
  */
-public class PersistentStoreConfig {
-  static protected final Logger log = Log.open(PersistentStoreConfig.class);
-  static final L10N L = new L10N(PersistentStoreConfig.class);
+public class PersistentStoreConfig
+{
+  private static final Logger log
+    = Logger.getLogger(PersistentStoreConfig.class.getName());
+  private static final L10N L = new L10N(PersistentStoreConfig.class);
 
   private String _name = "caucho/persistent-store";
 
@@ -64,48 +66,8 @@ public class PersistentStoreConfig {
     throws ConfigException
   {
     Cluster cluster = Cluster.getLocal();
-    
-    if (type.equals("jdbc")) {
-      try {
-	Class cl = Class.forName("com.caucho.server.cluster.JdbcStoreManager");
-	
-	_store = (StoreManager) cl.newInstance();
 
-	if (cluster != null)
-	  cluster.setStore(_store);
-      } catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
-      }
-
-      if (_store == null)
-	throw new ConfigException(L.l("'{0}' persistent sessions are available in Resin Professional.  See http://www.caucho.com for information and licensing.",
-				      type));
-    }
-    else if (type.equals("file"))
-      _store = new FileStoreManager();
-    else if (type.equals("cluster") || type.equals("tcp")) {
-      if (cluster == null)
-	throw new ConfigException(L.l("Cluster store needs a defined <cluster>.  Use 'file' for single-machine persistence."));
-      
-      try {
-	Class cl = Class.forName("com.caucho.server.cluster.ClusterStoreManager");
-
-	_store = (StoreManager) cl.newInstance();
-
-	if (cluster != null)
-	  cluster.setStore(_store);
-      } catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
-      }
-
-      if (_store == null)
-	throw new ConfigException(L.l("'{0}' persistent sessions are available in Resin Professional.  See http://www.caucho.com for information and licensing.",
-				      type));
-    }
-
-    if (_store == null)
-      throw new ConfigException(L.l("{0} is an unknown persistent-store type.  Only 'jdbc', 'file', and 'tcp' are allowed.",
-				    type));
+    _store = cluster.createPersistentStore(type);
   }
 
   public StoreManager createInit()

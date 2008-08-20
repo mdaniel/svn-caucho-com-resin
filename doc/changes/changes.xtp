@@ -13,6 +13,8 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>jmx: update _parent handling for environment JMX to avoid loop (#2848, rep by Rajasekar Elango)</li>
+<li>jms: jdbc wasn't properly setting binary length (#2856, rep by Richard Grantham)</li>
 <li>hessian2: ref production changed to ref ::= R &lt;int></li>
 <li>hessian2: added compact date encoding (0x65) (rep by Fredrik Olsson)</li>
 <li>hessian2: 'v' and 'V' changed to be fixed and variable length, w/o Hessian 1.0 compat (#2823, rep by Niclas Olofsson)</li>

@@ -505,12 +505,6 @@ r_session-config = element session-config {
 
   &amp; (attribute use-persistent-store { r_boolean-Type }
      | element use-persistent-store { r_boolean-Type })?
-
-  &amp; (attribute cluster-store { r_boolean-Type }
-     | element cluster-store { empty })?
-
-  &amp; (attribute file-store { string }
-     | element file-store { string })?
 }
 
 r_shutdown-wait-max =

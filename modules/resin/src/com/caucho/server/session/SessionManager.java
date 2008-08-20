@@ -162,7 +162,6 @@ public final class SessionManager implements AlarmListener
   // Compatibility fields
   //
   
-  private boolean _isWebAppStore; // i.e. for old-style compatibility
   private Store _sessionStore;
   private int _alwaysLoadSession;
   private int _alwaysSaveSession;
@@ -680,24 +679,6 @@ public final class SessionManager implements AlarmListener
   }
 
   /**
-   * Sets the file store.
-   */
-  public StoreManager createFileStore()
-    throws ConfigException
-  {
-    if (_cluster.getStore() != null)
-      throw new ConfigException(L.l("<file-store> may not be used with a defined <persistent-store>.  Use <use-persistent-store> instead."));
-
-    StoreManager fileStore = _cluster.createPrivateFileStore();
-    
-    _storeManager = fileStore;
-
-    _isWebAppStore = true;
-
-    return fileStore;
-  }
-
-  /**
    * Sets the cluster store.
    */
   public void setUsePersistentStore(boolean enable)
@@ -715,9 +696,6 @@ public final class SessionManager implements AlarmListener
     }
     else
       throw new ConfigException(L.l("use-persistent-store in <session-config> requires a configured <persistent-store> in the <server>"));
-    
-    if (_isWebAppStore)
-      throw new ConfigException(L.l("use-persistent-store may not be used with <jdbc-store> or <file-store>."));
     
     _storeManager = store;
   }
@@ -952,24 +930,6 @@ public final class SessionManager implements AlarmListener
       throw new ConfigException(L.l("save-mode='on-shutdown' cannot be used with <always-save-session/> or <always-load-session/>"));
     _sessions = new LruCache<String,SessionImpl>(_sessionMax);
     _sessionIter = _sessions.values();
-
-    if (_isWebAppStore) {
-      // for backward compatibility
-      
-      if (_alwaysLoadSession == SET_TRUE)
-	_storeManager.setAlwaysLoad(true);
-      else if (_alwaysLoadSession == SET_FALSE)
-	_storeManager.setAlwaysLoad(false);
-      
-      if (_alwaysSaveSession == SET_TRUE)
-	_storeManager.setAlwaysSave(true);
-      else if (_alwaysSaveSession == SET_FALSE)
-	_storeManager.setAlwaysSave(false);
-
-      _storeManager.init();
-
-      _storeManager.updateIdleCheckInterval(_sessionTimeout);
-    }
 
     if (_storeManager != null) {
       _sessionStore = _storeManager.createStore(_distributionId,

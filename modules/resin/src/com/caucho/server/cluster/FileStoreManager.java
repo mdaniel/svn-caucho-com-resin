@@ -30,6 +30,7 @@
 package com.caucho.server.cluster;
 
 import com.caucho.config.*;
+import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
 import java.io.InputStream;
@@ -40,6 +41,7 @@ import java.util.logging.*;
  * Class storing distributed objects based on the filesystem.
  */
 public class FileStoreManager extends StoreManager {
+  private static final L10N L = new L10N(FileStoreManager.class);
   private final static Logger log
     = Logger.getLogger(FileStoreManager.class.getName());
   
@@ -79,6 +81,11 @@ public class FileStoreManager extends StoreManager {
   {
     if (! super.init())
       return false;
+
+    Cluster cluster = Cluster.getCurrent();
+
+    if (cluster.getServerList().length != 1)
+      throw new ConfigException(L.l("file-store can only be used in single-server configurations."));
 
     try {
       String serverId = Cluster.getServerId();
