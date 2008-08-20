@@ -622,6 +622,9 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
 			break;
 
 		case HMUX_HEADER:
+		  {
+		    char *ptr = header_ptr;
+		    
 			read_len = hmux_read_len(s);
 			header_ptr += cse_read_limit(s, header_ptr,
                                                      header_end - header_ptr,
@@ -638,7 +641,13 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
                                                      read_len);
                         *header_ptr++ = '\r';
                         *header_ptr++ = '\n';
+
+			/* content-length must be ignored for chunking */
+			if (http11 && ! strncmp(ptr, "Content-Length")) {
+			  header_ptr = ptr;
+			}
 			break;
+		}
 
 		case CSE_SEND_HEADER:
 			read_len = hmux_read_len(s);
