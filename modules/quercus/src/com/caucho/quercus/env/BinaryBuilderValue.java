@@ -957,7 +957,7 @@ public class BinaryBuilderValue
   /**
    * Serializes the value.
    */
-  public void serialize(StringBuilder sb)
+  public void serialize(Env env, StringBuilder sb)
   {
     sb.append("s:");
     sb.append(_length);

@@ -293,7 +293,7 @@ public class DoubleValue extends NumberValue
   /**
    * Serializes the value.
    */
-  public void serialize(StringBuilder sb)
+  public void serialize(Env env, StringBuilder sb)
   {
     sb.append("d:");
     sb.append(_value);

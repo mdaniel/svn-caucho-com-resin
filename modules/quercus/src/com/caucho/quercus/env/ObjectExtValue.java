@@ -1161,8 +1161,8 @@ public class ObjectExtValue extends ObjectValue
    * @param serializeMap holds reference indexes
    */
   @Override
-  public void serialize(StringBuilder sb,
-                        SerializeMap serializeMap)
+  public void serialize(Env env,
+                        StringBuilder sb, SerializeMap serializeMap)
   {
     sb.append("O:");
     sb.append(_className.length());
@@ -1186,7 +1186,7 @@ public class ObjectExtValue extends ObjectValue
 
       Value value = ((Entry) entry).getRawValue();
       
-      value.serialize(sb, serializeMap);
+      value.serialize(env, sb, serializeMap);
     }
 
     sb.append("}");

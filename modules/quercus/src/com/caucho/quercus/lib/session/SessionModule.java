@@ -146,7 +146,7 @@ public class SessionModule extends AbstractQuercusModule
       return null;
     }
 
-    return ((SessionArrayValue)session).encode();
+    return ((SessionArrayValue)session).encode(env);
   }
 
   /**

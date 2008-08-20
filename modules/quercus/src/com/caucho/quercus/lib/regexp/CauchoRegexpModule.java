@@ -891,14 +891,14 @@ public class CauchoRegexpModule
    * Replaces values using regexps
    */
   private static StringValue
-    pregReplaceStringImpl(Env env,
-			  Regexp regexp,
-			  RegexpState regexpState,
-			  ArrayList<Replacement> replacementProgram,
-			  StringValue subject,
-			  long limit,
-			  Value countV,
-			  boolean isEval)
+      pregReplaceStringImpl(Env env,
+                            Regexp regexp,
+                            RegexpState regexpState,
+                            ArrayList<Replacement> replacementProgram,
+                            StringValue subject,
+                            long limit,
+                            Value countV,
+                            boolean isEval)
   {
     if (limit < 0)
       limit = LONG_MAX;
@@ -932,7 +932,7 @@ public class CauchoRegexpModule
 
         for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementProgram.get(i);
-
+          
           evalString = replacement.eval(env, evalString, regexpState);
         }
 
@@ -1413,7 +1413,7 @@ public class CauchoRegexpModule
   }
 
   private static ArrayList<Replacement>
-  compileReplacement(Env env, StringValue replacement, boolean isEval)
+    compileReplacement(Env env, StringValue replacement, boolean isEval)
   {
     ArrayList<Replacement> program = new ArrayList<Replacement>();
     StringBuilder text = new StringBuilder();
@@ -1801,16 +1801,26 @@ public class CauchoRegexpModule
         for (int i = 0; i < len; i++) {
           char ch = group.charAt(i);
 
-          if (ch == '\'') {
-            sb = sb.appendByte('\\');
-            sb = sb.appendByte('\'');
+          switch (ch) {
+            case '\'':
+              sb = sb.appendByte('\\');
+              sb = sb.appendByte('\'');
+              break;
+            case '"':
+              sb = sb.appendByte('\\');
+              sb = sb.appendByte('"');
+              break;
+            case '\\':
+              sb = sb.appendByte('\\');
+              sb = sb.appendByte('\\');
+              break;
+            case 0:
+              sb = sb.appendByte('\\');
+              sb = sb.appendByte('0');
+              break;
+            default:
+              sb = sb.appendByte(ch);
           }
-          else if (ch == '\"') {
-            sb = sb.appendByte('\\');
-            sb = sb.appendByte('\"');
-          }
-          else
-            sb = sb.appendByte(ch);
         }
       }
       

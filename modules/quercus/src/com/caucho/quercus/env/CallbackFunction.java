@@ -82,7 +82,7 @@ public class CallbackFunction extends Callback {
   /**
    * Serializes the value.
    */
-  public void serialize(StringBuilder sb)
+  public void serialize(Env env, StringBuilder sb)
   {
     String name;
     

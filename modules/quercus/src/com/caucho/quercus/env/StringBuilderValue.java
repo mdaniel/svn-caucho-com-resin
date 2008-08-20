@@ -206,14 +206,6 @@ public class StringBuilderValue
   }
 
   /*
-   * Creates an empty string builder of the same type.
-   */
-  public StringValue createEmptyStringBuilder()
-  {
-    return new StringBuilderValue();
-  }
-  
-  /*
    * Returns the empty string of same type.
    */
   public StringValue getEmptyString()
@@ -1268,7 +1260,7 @@ public class StringBuilderValue
   /**
    * Serializes the value.
    */
-  public void serialize(StringBuilder sb)
+  public void serialize(Env env, StringBuilder sb)
   {
     sb.append("s:");
     sb.append(_length);
@@ -1518,9 +1510,26 @@ public class StringBuilderValue
   public void generate(PrintWriter out)
     throws IOException
   {
-    out.print("new StringBuilderValue(\"");
-    printJavaString(out, this);
-    out.print("\")");
+    int max = 0xFFFF - 1;
+    
+    if (_length < max) {
+      out.print("new StringBuilderValue(\"");
+      printJavaString(out, this);
+      out.print("\")");
+    }
+    else {
+      out.print("((StringBuilderValue) (new StringBuilderValue(\"");
+      
+      // php/
+      for (int i = 0; i < _length; i += max) {
+        if (i != 0)
+          out.print("\").append(\"");
+        
+        printJavaString(out, substring(i, Math.min(i + max, _length)));
+      }
+      
+      out.print("\")))");
+    }
   }
   
   //

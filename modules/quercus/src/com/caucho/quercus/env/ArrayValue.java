@@ -954,7 +954,7 @@ abstract public class ArrayValue extends Value {
    * @param serializeMap holds reference indexes
    */
   @Override
-  public void serialize(StringBuilder sb, SerializeMap serializeMap)
+  public void serialize(Env env, StringBuilder sb, SerializeMap serializeMap)
   {
     sb.append("a:");
     sb.append(getSize());
@@ -963,8 +963,8 @@ abstract public class ArrayValue extends Value {
     serializeMap.incrementIndex();
 
     for (Entry entry = getHead(); entry != null; entry = entry._next) {
-      entry.getKey().serialize(sb);
-      entry.getRawValue().serialize(sb, serializeMap);
+      entry.getKey().serialize(env, sb);
+      entry.getRawValue().serialize(env, sb, serializeMap);
     }
 
     sb.append("}");

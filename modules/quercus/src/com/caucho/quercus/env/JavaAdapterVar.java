@@ -1336,9 +1336,9 @@ public class JavaAdapterVar extends Var
    * Serializes the value.
    */
   @Override
-  public void serialize(StringBuilder sb, SerializeMap map)
+  public void serialize(Env env, StringBuilder sb, SerializeMap map)
   {
-    getValue().serialize(sb, map);
+    getValue().serialize(env, sb, map);
   }
 
   @Override

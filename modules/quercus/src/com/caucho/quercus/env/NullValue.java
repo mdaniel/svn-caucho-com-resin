@@ -511,7 +511,7 @@ public class NullValue extends Value
    * Serializes the value.
    */
   @Override
-  public void serialize(StringBuilder sb)
+  public void serialize(Env env, StringBuilder sb)
   {
     sb.append("N;");
   }

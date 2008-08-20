@@ -569,11 +569,12 @@ public class VariableModule extends AbstractQuercusModule {
   /**
    * Serializes the value to a string.
    */
-  public static String serialize(@ReadOnly Value v)
+  public static String serialize(Env env,
+                                 @ReadOnly Value v)
   {
     StringBuilder sb = new StringBuilder();
 
-    v.serialize(sb, new SerializeMap());
+    v.serialize(env, sb, new SerializeMap());
 
     return sb.toString();
   }

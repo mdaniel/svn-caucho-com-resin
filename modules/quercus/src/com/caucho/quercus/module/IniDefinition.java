@@ -102,7 +102,7 @@ public class IniDefinition {
     return false;
   }
 
-  private BooleanValue toBooleanValue(Value value)
+  private static BooleanValue toBooleanValue(Value value)
   {
     if (value instanceof BooleanValue)
       return (BooleanValue) value;
@@ -400,11 +400,11 @@ public class IniDefinition {
       //      of unsupported options
       if (env == null)
         return;
-      
+
       // php/1a0u
       // don't send a warning if it's being turned off (for Drupal)
       // XXX: send notice instead?
-      if (value.eq(getDefault()))
+      if (toBooleanValue(value).equals(toBooleanValue(getDefault())))
         return;
         //Env.getInstance().notice(L.l("ini value `{0}' is not supported", getName()));
       else

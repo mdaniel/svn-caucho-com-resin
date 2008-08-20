@@ -2751,6 +2751,69 @@ public class QuercusParser {
    * term ::= termBase
    *      ::= term '[' index ']'
    *      ::= term '{' index '}'
+   * </pre>
+   */
+  private Expr parseTermArrayDeref()
+    throws IOException
+  {
+    Expr term = parseTermBase();
+
+    while (true) {
+      int token = parseToken();
+
+      switch (token) {
+      case '[':
+      {
+        token = parseToken();
+      
+        if (token == ']') {
+          term = _factory.createArrayTail(getLocation(), term);
+        }
+        else {
+          _peekToken = token;
+          Expr index = parseExpr();
+          token = parseToken();
+
+          term = _factory.createArrayGet(getLocation(), term, index);
+        }
+
+          if (token != ']')
+            throw expect("']'", token);
+        }
+        break;
+    
+      case '{':
+        {
+          Expr index = parseExpr();
+
+          expect('}');
+
+          term = _factory.createCharAt(term, index);
+        }
+        break;
+
+      case INCR:
+        term = _factory.createPostIncrement(term, 1);
+        break;
+
+      case DECR:
+        term = _factory.createPostIncrement(term, -1);
+        break;
+
+      default:
+        _peekToken = token;
+        return term;
+      }
+    }
+  }
+  
+  /**
+   * Parses a basic term.
+   *
+   * <pre>
+   * term ::= termBase
+   *      ::= term '[' index ']'
+   *      ::= term '{' index '}'
    *      ::= term '->' field;
    * </pre>
    *
@@ -2802,14 +2865,11 @@ public class QuercusParser {
       case DECR:
 	term = _factory.createPostIncrement(term, -1);
 	break;
-
 	
-	/*
       case DEREF:
       // php/0d6g
 	term = parseDeref(term);
         break;
-	*/
 
       default:
         _peekToken = token;
@@ -3327,7 +3387,7 @@ public class QuercusParser {
       }
     }
   }
-
+  
   /**
    * Parses the next variable
    */
@@ -3343,7 +3403,7 @@ public class QuercusParser {
       _peekToken = token;
 
       // php/0d6c, php/0d6f
-      return _factory.createVarVar(parseTermDeref());
+      return _factory.createVarVar(parseTermArrayDeref());
     }
     else if (token == '{') {
       AbstractVarExpr expr = _factory.createVarVar(parseExpr());

@@ -1502,9 +1502,9 @@ public class Var extends Value
    * Serializes the value.
    */
   @Override
-  public void serialize(StringBuilder sb)
+  public void serialize(Env env, StringBuilder sb)
   {
-    _value.serialize(sb);
+    _value.serialize(env, sb);
   }
   
   /*
@@ -1514,8 +1514,8 @@ public class Var extends Value
    * @param serializeMap holds reference indexes
    */
   @Override
-  public void serialize(StringBuilder sb,
-                        SerializeMap serializeMap)
+  public void serialize(Env env,
+                        StringBuilder sb, SerializeMap serializeMap)
   {
     Integer index = serializeMap.get(this);
 
@@ -1527,7 +1527,7 @@ public class Var extends Value
     else {
       serializeMap.put(this);
       
-      _value.serialize(sb, serializeMap);
+      _value.serialize(env, sb, serializeMap);
     }
   }
 

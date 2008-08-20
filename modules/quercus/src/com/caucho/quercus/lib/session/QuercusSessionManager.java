@@ -37,6 +37,7 @@ import com.caucho.util.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -606,11 +607,11 @@ public class QuercusSessionManager implements AlarmListener {
   /**
    * Saves the session.
    */
-  public void store(ObjectOutputStream out, Object obj)
+  public void store(OutputStream out, Object obj)
     throws IOException
   {
     SessionArrayValue session = (SessionArrayValue) obj;
 
-    session.store(out);
+    session.store(Env.getInstance(), out);
   }
 }

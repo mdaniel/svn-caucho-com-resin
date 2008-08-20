@@ -2209,26 +2209,29 @@ abstract public class Value implements java.io.Serializable
       throw new QuercusRuntimeException(e);
     }
   }
-
-  /**
-   * Serializes the value.
-   */
-  public void serialize(StringBuilder sb)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
   
   /*
    * Serializes the value.
    * 
+   * @param env
    * @param sb holds result of serialization
    * @param serializeMap holds reference indexes
    */
-  public void serialize(StringBuilder sb, SerializeMap serializeMap)
+  public void serialize(Env env,
+                        StringBuilder sb,
+                        SerializeMap serializeMap)
   {
     serializeMap.incrementIndex();
     
-    serialize(sb);
+    serialize(env, sb);
+  }
+  
+  /**
+   * Serializes the value.
+   */
+  public void serialize(Env env, StringBuilder sb)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
@@ -2253,7 +2256,7 @@ abstract public class Value implements java.io.Serializable
   {
   }
 
-  protected void printJavaString(PrintWriter out, StringValue s)
+  protected static void printJavaString(PrintWriter out, StringValue s)
   {
     if (s == null) {
       out.print("");

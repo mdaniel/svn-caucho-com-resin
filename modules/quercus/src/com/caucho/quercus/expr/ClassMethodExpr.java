@@ -99,15 +99,10 @@ public class ClassMethodExpr extends Expr {
     AbstractFunction fun = cl.getFunction(_name);
     
     Value []values = new Value[_args.length];
-
-    Arg []args = fun.getArgs();
     
     for (int i = 0; i < values.length; i++) {
       // php/09e1
-      if (args[i].isReference())
-        values[i] = _args[i].evalArg(env);
-      else
-        values[i] = _args[i].eval(env);
+      values[i] = _args[i].evalArg(env);
     }
 
     Value obj = env.getThis();

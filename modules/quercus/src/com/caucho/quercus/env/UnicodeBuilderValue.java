@@ -150,14 +150,6 @@ public class UnicodeBuilderValue extends StringBuilderValue
   }
   
   /*
-   * Creates an empty string builder of the same type.
-   */
-  public StringValue createEmptyStringBuilder()
-  {
-    return new UnicodeBuilderValue();
-  }
-  
-  /*
    * Returns the empty string of same type.
    */
   public StringValue getEmptyString()
@@ -513,7 +505,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
   /**
    * Serializes the value.
    */
-  public void serialize(StringBuilder sb)
+  public void serialize(Env env, StringBuilder sb)
   {
     sb.append("U:");
     sb.append(_length);
@@ -693,6 +685,10 @@ public class UnicodeBuilderValue extends StringBuilderValue
     int ch = 0;
     boolean hasPoint = false;
 
+    while (i < len && Character.isWhitespace(buffer[i])) {
+      i++;
+    }
+    
     if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {
       i++;
     }
@@ -714,6 +710,10 @@ public class UnicodeBuilderValue extends StringBuilderValue
 
     for (; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
     }
+    
+    while (i < len && Character.isWhitespace(buffer[i])) {
+      i++;
+    }
 
     if (len <= i)
       return ValueType.LONG_EQ;
@@ -722,6 +722,10 @@ public class UnicodeBuilderValue extends StringBuilderValue
            i < len && ('0' <= (ch = buffer[i]) && ch <= '9' ||
                        ch == '+' || ch == '-' || ch == 'e' || ch == 'E');
            i++) {
+      }
+      
+      while (i < len && Character.isWhitespace(buffer[i])) {
+        i++;
       }
 
       if (i < len)
@@ -743,8 +747,14 @@ public class UnicodeBuilderValue extends StringBuilderValue
 
   public static double toDouble(char []buffer, int offset, int len)
   {
+    int start = offset;
     int i = offset;
     int ch = 0;
+    
+    while (i < len && Character.isWhitespace(buffer[i])) {
+      start++;
+      i++;
+    }
 
     if (i < len && ((ch = buffer[i]) == '+' || ch == '-')) {
       i++;
@@ -779,7 +789,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
       return 0;
 
     try {
-      return Double.parseDouble(new String(buffer, 0, i));
+      return Double.parseDouble(new String(buffer, start, i - start));
     } catch (NumberFormatException e) {
       return 0;
     }

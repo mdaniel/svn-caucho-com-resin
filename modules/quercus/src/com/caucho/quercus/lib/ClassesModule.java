@@ -54,7 +54,7 @@ public class ClassesModule extends AbstractQuercusModule {
     = Logger.getLogger(ClassesModule.class.getName());
 
   /**
-   * Calls a user function
+   * Calls an object method.
    */
   public static Value call_user_method(Env env,
                                        String name,
@@ -75,7 +75,18 @@ public class ClassesModule extends AbstractQuercusModule {
     }
   }
 
-  // XXX: call_user_method_array
+  /*
+   * Calls a object method with arguments in an array.
+   */
+  public static Value call_user_method_array(Env env,
+                                             String methodName,
+                                             Value obj,
+                                             ArrayValue params)
+  {
+    Value []args = params.valuesToArray();
+    
+    return call_user_method(env, methodName, obj, args);
+  }
   
   /**
    * returns true if the class exists.

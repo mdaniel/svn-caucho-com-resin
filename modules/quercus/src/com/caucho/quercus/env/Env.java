@@ -2847,8 +2847,11 @@ public class Env {
     QuercusProgram program = quercus.parseEvalExpr(code);
 
     Value value = program.execute(this);
-
-    return value;
+    
+    if (value == null)
+      return NullValue.NULL;
+    else
+      return value;
   }
 
   /**
@@ -5120,7 +5123,7 @@ public class Env {
         
         // php/1k6e
         if (session.getSize() > 0)
-          value = VariableModule.serialize(session.getArray());
+          value = VariableModule.serialize(this, session.getArray());
         else
           value = "";
 
@@ -5131,7 +5134,7 @@ public class Env {
       else {
         _quercus.saveSession(this, session);
 
-	Value sessionCopy = session.copy(this);
+        Value sessionCopy = session.copy(this);
 	
         setGlobalValue("_SESSION", sessionCopy);
         setGlobalValue("HTTP_SESSION_VARS", sessionCopy);

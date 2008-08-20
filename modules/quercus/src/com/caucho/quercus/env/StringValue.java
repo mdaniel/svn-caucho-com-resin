@@ -329,6 +329,10 @@ abstract public class StringValue extends Value implements CharSequence {
     long result = 0;
 
     int end = offset + len;
+    
+    while (offset < end && Character.isWhitespace(buffer[offset])) {
+      offset++;
+    }
 
     if (buffer[offset] == '-') {
       sign = -1;
@@ -359,7 +363,7 @@ abstract public class StringValue extends Value implements CharSequence {
       }
     }
 
-    if (!isResultSet)
+    if (! isResultSet)
       result = sign * value;
 
     return result;
@@ -477,9 +481,17 @@ abstract public class StringValue extends Value implements CharSequence {
   public static double toDouble(String s)
   {
     int len = s.length();
+    
+    int start = 0;
+    
     int i = 0;
     int ch = 0;
 
+    while (i < len && Character.isWhitespace(s.charAt(i))) {
+      start++;
+      i++;
+    }
+    
     if (i < len && ((ch = s.charAt(i)) == '+' || ch == '-')) {
       i++;
     }
@@ -508,10 +520,10 @@ abstract public class StringValue extends Value implements CharSequence {
 
     if (i == 0)
       return 0;
-    else if (i == len)
+    else if (i == len && start == 0)
       return Double.parseDouble(s);
     else
-      return Double.parseDouble(s.substring(0, i));
+      return Double.parseDouble(s.substring(start, i));
   }
 
   /**
@@ -868,7 +880,7 @@ abstract public class StringValue extends Value implements CharSequence {
    * Serializes the value.
    */
   @Override
-  public void serialize(StringBuilder sb)
+  public void serialize(Env env, StringBuilder sb)
   {
     sb.append("s:");
     sb.append(length());

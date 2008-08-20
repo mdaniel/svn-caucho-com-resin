@@ -280,7 +280,7 @@ public class BooleanValue extends Value
   /**
    * Serializes the value.
    */
-  public void serialize(StringBuilder sb)
+  public void serialize(Env env, StringBuilder sb)
   {
     sb.append("b:");
     sb.append(_value ? 1 : 0);

@@ -117,7 +117,7 @@ public class SessionArrayValue extends ArrayValueWrapper
   /**
    * Encoding for serialization.
    */
-  public String encode()
+  public String encode(Env env)
   {
     StringBuilder sb = new StringBuilder();
     ArrayValue array = getArray();
@@ -129,7 +129,7 @@ public class SessionArrayValue extends ArrayValueWrapper
         sb.append(entry.getKey().toString());
         sb.append("|");
 
-        entry.getValue().serialize(sb, serializeMap);
+        entry.getValue().serialize(env, sb, serializeMap);
       }
     }
 
@@ -191,10 +191,10 @@ public class SessionArrayValue extends ArrayValueWrapper
   /**
    * Saves the object to the output stream.
    */
-  public void store(OutputStream out)
+  public void store(Env env, OutputStream out)
     throws IOException
   {
-    String encode = encode();
+    String encode = encode(env);
 
     int len = encode.length();
 

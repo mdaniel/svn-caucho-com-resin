@@ -636,7 +636,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Serializes the value.
    */
-  public void serialize(StringBuilder sb)
+  public void serialize(Env env, StringBuilder sb)
   {
     throw new UnsupportedOperationException();
   }
