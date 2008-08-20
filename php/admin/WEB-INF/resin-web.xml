@@ -10,7 +10,7 @@
      - Security configuration
     -->
   <login uri="form:">
-     <init authenticator="resin_admin"
+     <init authenticator="${resin_admin}"
 	   login-page="/login.php"
 	   error-page="/error.php"/>
   </login>

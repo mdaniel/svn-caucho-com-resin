@@ -512,6 +512,7 @@ echo -n "checking if Java is 64-bit... "
 tmpname="/tmp/java$$.out"
 	       	
 $JAVA_HOME/bin/java -version 2> $tmpname
+
 grep "64-Bit" $tmpname 1> /dev/null
 if test "$?" = "0"; then
    b64_jni=true
