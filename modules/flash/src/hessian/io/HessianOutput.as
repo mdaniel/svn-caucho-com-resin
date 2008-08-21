@@ -593,11 +593,11 @@ package hessian.io
       else {
         var abs:Number = Math.abs(time);
 
-        var msi:Number = 0x100000000 - (abs / 0x100000000);
-        var lsi:Number = 0x100000000 - (abs & 0xFFFFFFFF);
-
+        var msi:Number = 0x100000000 - Math.abs(abs / 0x100000000);
         if (msi == 0x100000000)
           msi = 0xFFFFFFFF;
+
+        var lsi:Number = 0x100000000 - (abs % 0x100000000);
 
         _out.writeByte(0xFF & (msi >> 24));
         _out.writeByte(0xFF & (msi >> 16));
