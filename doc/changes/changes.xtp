@@ -13,6 +13,20 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>quercus: Can't compile class with magic set/get/call methods (#2857, rep by koreth)</li>
+<li>quercus: curl_version() not implemented (Wordpress OpenID plugin) (#2852)</li>
+<li>quercus: Joomla 1.5 not working (#2302, rep by rfisk)</li>
+<li>quercus: call_user_method_array() not implemented (Wordpress) (#2854)</li>
+<li>quercus: Can't compile class with abstract method (#2851, rep by koreth)</li>
+<li>quercus: Can't compile function that calls func_get_args() (#2850, rep by koreth)</li>
+<li>quercus: SugarCRM 5.0 working (#1011, rep by Vic)</li>
+<li>quercus: Using Quercus with symfony under Glassfish/Tomcat (#2795, rep by Timo)</li>
+<li>quercus: WordPress 2.0.11 and 2.5.1 installers get stuck in step 2 (#2664, rep by falko)</li>
+<li>quercus: argument by reference and self:: (#2837, rep by wikipo)</li>
+<li>quercus: ereg_replace() vertical brace bug (#2835, rep by stephaneeybert)</li>
+<li>quercus: DotClear 2 doesn't work (#2828, rep by ebourg)</li>
+<li>quercus: db operation not allowed after ResultSet closed (FormTools) (#2811, rep by B. Youngblood)</li>
+<li>quercus: Conditional function definition fails to compile (#2830, rep by koreth)</li>
 <li>isapi: chunked encoding needs to filter out content-length (#2849, rep by Trieu Truong)</li>
 <li>jmx: update _parent handling for environment JMX to avoid loop (#2848, rep by Rajasekar Elango)</li>
 <li>jms: jdbc wasn't properly setting binary length (#2856, rep by Richard Grantham)</li>
