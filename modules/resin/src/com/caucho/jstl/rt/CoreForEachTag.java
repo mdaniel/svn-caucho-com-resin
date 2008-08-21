@@ -222,6 +222,10 @@ public class CoreForEachTag extends LoopTagSupport {
     {
       _value = value;
       _length = value.length();
+
+      for (_i = 0; _i < _value.length(); _i++)
+        if (_value.charAt(_i) != ',')
+          break;
     }
     
     public boolean hasNext()
@@ -231,14 +235,26 @@ public class CoreForEachTag extends LoopTagSupport {
     
     public Object next()
     {
-      char ch = 0;
+      char ch;
       int begin = _i;
-      for (; _i < _length && (ch = _value.charAt(_i)) != ','; _i++) {
+      int tail = -1;
+
+      for (; _i < _length; _i++) {
+        ch =_value.charAt(_i);
+
+        if (ch == ',') {
+          if (tail == -1)
+            tail = _i;
+        } else {
+          if (tail != -1)
+            break;
+        }
       }
 
-      String value = _value.substring(begin, _i);
+      if (tail == -1)
+        tail = _length;
 
-      _i++;
+      String value = _value.substring(begin, tail);
 
       return value;
     }

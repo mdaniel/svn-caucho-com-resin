@@ -379,12 +379,15 @@ public class ForEachTag extends TagSupport
     private String _value;
     private int _length;
     private int _i;
-    private CharBuffer _cb = new CharBuffer();
 
     StringIterator(String value)
     {
       _value = value;
       _length = value.length();
+
+      for (; _i < _length; _i++)
+        if (_value.charAt(_i) != ',')
+          break;
     }
     
     public boolean hasNext()
@@ -394,15 +397,28 @@ public class ForEachTag extends TagSupport
     
     public Object next()
     {
-      _cb.clear();
+      char ch;
+      int begin = _i;
+      int tail = -1;
 
-      char ch = 0;
-      for (; _i < _length && (ch = _value.charAt(_i)) != ','; _i++)
-        _cb.append(ch);
+      for (; _i < _length; _i++) {
+        ch =_value.charAt(_i);
 
-      _i++;
+        if (ch == ',') {
+          if (tail == -1)
+            tail = _i;
+        } else {
+          if (tail != -1)
+            break;
+        }
+      }
 
-      return _cb.toString();
+      if (tail == -1)
+        tail = _length;
+
+      String value = _value.substring(begin, tail);
+
+      return value;
     }
     
     public void remove()
