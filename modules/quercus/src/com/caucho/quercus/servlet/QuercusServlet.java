@@ -156,6 +156,24 @@ public class QuercusServlet
         "'{0}' is an unknown compile value.  Values are 'true', 'false', or 'lazy'.",
         isCompile));
   }
+  
+  /**
+   * Set true interpreted pages should be used for pages that fail to compile.
+   */
+  public void setCompileFailover(String isCompileFailover)
+    throws ConfigException
+  {
+    Quercus quercus = getQuercus();
+
+    if ("true".equals(isCompileFailover) || "".equals(isCompileFailover)) {
+      quercus.setCompileFailover(true);
+    } else if ("false".equals(isCompileFailover)) {
+      quercus.setCompileFailover(false);
+    } else
+      throw new ConfigException(L.l(
+        "'{0}' is an unknown compile-failover value.  Values are 'true', 'false', or 'lazy'.",
+        isCompileFailover));
+  }
 
   /**
    * Set the default data source.

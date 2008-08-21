@@ -1498,41 +1498,6 @@ public class StringBuilderValue
   }
 
   //
-  // Java generator code
-  //
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  @Override
-  public void generate(PrintWriter out)
-    throws IOException
-  {
-    int max = 0xFFFF - 1;
-    
-    if (_length < max) {
-      out.print("new StringBuilderValue(\"");
-      printJavaString(out, this);
-      out.print("\")");
-    }
-    else {
-      out.print("((StringBuilderValue) (new StringBuilderValue(\"");
-      
-      // php/
-      for (int i = 0; i < _length; i += max) {
-        if (i != 0)
-          out.print("\").append(\"");
-        
-        printJavaString(out, substring(i, Math.min(i + max, _length)));
-      }
-      
-      out.print("\")))");
-    }
-  }
-  
-  //
   // Java serialization code
   //
   

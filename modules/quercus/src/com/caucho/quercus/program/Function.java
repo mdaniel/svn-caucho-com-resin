@@ -315,8 +315,9 @@ public class Function extends AbstractFunction {
 
       if (arg == null) {
       }
-      else if (arg.isReference())
+      else if (arg.isReference()) {
         map.put(arg.getName(), args[i].toRefVar());
+      }
       else {
         // quercus/0d04
         map.put(arg.getName(), args[i].copy().toVar());

@@ -1182,24 +1182,6 @@ public class BinaryBuilderValue
   }
 
   //
-  // Java generator code
-  //
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  @Override
-  public void generate(PrintWriter out)
-    throws IOException
-  {
-    out.print("new BinaryBuilderValue(\"");
-    printJavaString(out, this);
-    out.print("\")");
-  }
-  
-  //
   // Java serialization code
   //
   

@@ -2753,7 +2753,7 @@ public class QuercusParser {
    *      ::= term '{' index '}'
    * </pre>
    */
-  private Expr parseTermArrayDeref()
+  private Expr parseTermArray()
     throws IOException
   {
     Expr term = parseTermBase();
@@ -3403,7 +3403,7 @@ public class QuercusParser {
       _peekToken = token;
 
       // php/0d6c, php/0d6f
-      return _factory.createVarVar(parseTermArrayDeref());
+      return _factory.createVarVar(parseTermArray());
     }
     else if (token == '{') {
       AbstractVarExpr expr = _factory.createVarVar(parseExpr());

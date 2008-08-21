@@ -983,9 +983,28 @@ public class CurlModule
    * @param version
    */
   public static ArrayValue curl_version(Env env,
-                              @Optional Value version)
+                                        @Optional Value age)
   {
-    throw new UnimplementedException("curl_version");
+    ArrayValue array = new ArrayValueImpl();
+    
+    // dummy values
+    array.put(env, "version_number", 462848);
+    array.put(env, "age", 2);
+    array.put(env, "features", 540);
+    array.put(env, "ssl_version_number", 0);
+    array.put(env, "version", "7.16.0");
+    array.put(env, "host", "i386-pc-java");
+    array.put(env, "ssl_version", " OpenSSL/0.9.8g");
+    array.put(env, "libz_version", "1.2.3");
+    
+    // supported protocols
+    ArrayValue protocols = new ArrayValueImpl();
+    protocols.put(env.createString("http"));
+    protocols.put(env.createString("https"));
+    
+    array.put(env.createString("protocols"), protocols);
+    
+    return array;
   }
 
 }

@@ -32,6 +32,7 @@ package com.caucho.quercus.page;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.QuercusProgram;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.IOExceptionWrapper;
@@ -55,6 +56,7 @@ public class PageManager
   //private Path _pwd;
   private boolean _isLazyCompile;
   private boolean _isCompile;
+  private boolean _isCompileFailover = ! Alarm.isTest();
 
   protected LruCache<Path,QuercusProgram> _programCache
     = new LruCache<Path,QuercusProgram>(1024);
@@ -112,6 +114,22 @@ public class PageManager
   public void setLazyCompile(boolean isCompile)
   {
     _isLazyCompile = isCompile;
+  }
+  
+  /*
+   * true if interpreted pages should be used if pages fail to compile.
+   */
+  public boolean isCompileFailover()
+  {
+    return _isCompileFailover;
+  }
+  
+  /*
+   * true if interpreted pages should be used if pages fail to compile.
+   */
+  public void setCompileFailover(boolean isCompileFailover)
+  {
+    _isCompileFailover = isCompileFailover;
   }
 
   /**

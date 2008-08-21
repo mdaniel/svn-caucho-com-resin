@@ -1964,6 +1964,46 @@ abstract public class StringValue extends Value implements CharSequence {
 
     return true;
   }
+  
+  //
+  // Java generator code
+  //
+
+  /**
+   * Generates code to recreate the expression.
+   *
+   * @param out the writer to the Java source code.
+   */
+  @Override
+  final public void generate(PrintWriter out)
+    throws IOException
+  {
+    // max JVM constant string length
+    int maxSublen = 0xFFFE;
+    
+    int len = length();
+    
+    String className = getClass().getSimpleName();
+    
+    if (len < maxSublen) {
+      out.print("new " + className + "(\"");
+      printJavaString(out, this);
+      out.print("\")");
+    }
+    else {
+      out.print("((" + className + ") (new " + className + "(\"");
+      
+      // php/313u
+      for (int i = 0; i < len; i += maxSublen) {
+        if (i != 0)
+          out.print("\").append(\"");
+        
+        printJavaString(out, substring(i, Math.min(i + maxSublen, len)));
+      }
+      
+      out.print("\")))");
+    }
+  }
 
   @Override
   abstract public String toDebugString();

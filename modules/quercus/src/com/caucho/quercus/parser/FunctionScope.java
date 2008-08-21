@@ -76,7 +76,10 @@ public class FunctionScope extends Scope {
    */
   public void addFunction(String name, Function function)
   {
-    _functionMap.put(name.toLowerCase(), function);
+    name = name.toLowerCase();
+    
+    if (_functionMap.get(name) == null)
+      _functionMap.put(name, function);
     
     _parentScope.addConditionalFunction(function);
   }
@@ -103,29 +106,20 @@ public class FunctionScope extends Scope {
                                       ArrayList<String> ifaceList,
                                       int index)
   {
-    InterpretedClassDef cl = _classMap.get(name);
+    InterpretedClassDef existingClass = _classMap.get(name);
 
-    if (cl == null) {
-      String []ifaceArray = new String[ifaceList.size()];
-      ifaceList.toArray(ifaceArray);
+    String []ifaceArray = new String[ifaceList.size()];
+    ifaceList.toArray(ifaceArray);
 
-      cl = _exprFactory.createClassDef(location,
-                                       name, parentName, ifaceArray,
-                                       index);
-      
+    InterpretedClassDef cl
+      = _exprFactory.createClassDef(location,
+                                    name, parentName, ifaceArray,
+                                    index);
+    
+    if (existingClass == null)
       _classMap.put(name, cl);
       
-      _parentScope.addConditionalClass(cl);
-    }
-    else {
-      // class statically redeclared
-      // XXX: should throw a runtime error?
-      
-      // dummy classdef for parsing only
-      cl = _exprFactory.createClassDef(location,
-                                       name, parentName, new String[0],
-                                       index);
-    }
+    _parentScope.addConditionalClass(cl);
 
     return cl;
   }

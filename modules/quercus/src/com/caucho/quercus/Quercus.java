@@ -367,6 +367,14 @@ public class Quercus
   {
     _pageManager.setLazyCompile(isCompile);
   }
+  
+  /*
+   * true if interpreted pages should be used if pages fail to compile.
+   */
+  public void setCompileFailover(boolean isCompileFailover)
+  {
+    _pageManager.setCompileFailover(isCompileFailover);
+  }
 
   /*
    * Returns the expected encoding of php scripts.

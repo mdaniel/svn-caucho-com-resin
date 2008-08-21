@@ -594,23 +594,6 @@ public class UnicodeBuilderValue extends StringBuilderValue
   // java.lang.Object methods
   //
 
-  //
-  // Java generator code
-  //
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PrintWriter out)
-    throws IOException
-  {
-    out.print("new UnicodeBuilderValue(\"");
-    printJavaString(out, this);
-    out.print("\")");
-  }
-
   private void copyOnWrite()
   {
     if (_isCopy) {
