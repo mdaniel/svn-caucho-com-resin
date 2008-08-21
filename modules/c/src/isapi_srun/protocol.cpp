@@ -643,7 +643,7 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
                         *header_ptr++ = '\n';
 
 			/* content-length must be ignored for chunking */
-						if (http11 && ! strncmp(ptr, "Content-Length", sizeof("Content-Length:") - 1)) {
+						if (http11 && ! strncmp(ptr, "Content-Length:", sizeof("Content-Length:") - 1)) {
 						  header_ptr = ptr;	
 			}
 			break;

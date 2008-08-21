@@ -572,6 +572,8 @@ if test -n "${b64_jni}"; then
    LIBEXEC=libexec64
 fi
 
+CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64"
+
 #
 # fill in based on known configurations
 #
