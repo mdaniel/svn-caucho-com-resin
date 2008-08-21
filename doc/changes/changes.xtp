@@ -12,6 +12,7 @@
 
 <s2 title="3.1.7 snapshot">
 <ul>
+<li>jstl: restoring request attributes named after <i>var</i> in c:forEach (#2804, rep by bregnvig)</li>
 <li>jmx: update _parent handling for environment JMX to avoid loop (#2848, rep by Rajasekar Elango)</li>
 <li>jms: jdbc wasn't properly setting binary length (#2856, rep by Richard Grantham)</li>
 <li>watchdog: -D as Resin argument should be passed to child (#2841, rep by Rob Lockstone)</li>

@@ -415,13 +415,11 @@ public class JstlCoreForEach extends JstlNode {
       out.println("\", " + _tagVar + ");");
     }
 
-    /* 
     if (_var != null) {
       out.print("Object " + oldVar + " = pageContext.getAttribute(\"");
       out.print(escapeJavaString(_var));
       out.println("\");");
     }
-    */
 
     out.print("for (int " + iVar + " = " + beginVar + "; ");
     out.print(iVar + " <= " + endVar + "; ");
@@ -443,15 +441,9 @@ public class JstlCoreForEach extends JstlNode {
     out.println("}");
 
     if (_var != null) {
-      out.print("pageContext.removeAttribute(\"");
-      out.print(escapeJavaString(_var));
-      out.println("\");");
-      
-      /*
       out.print("pageContext.pageSetOrRemove(\"");
       out.print(escapeJavaString(_var));
       out.println("\", " + oldVar + ");");
-      */
     }
 
     if (_varStatus != null) {
@@ -589,13 +581,11 @@ public class JstlCoreForEach extends JstlNode {
       out.println("\", " + _tagVar + ");");
     }
 
-    /*
     if (_var != null) {
       out.print("Object " + oldVar + " = pageContext.getAttribute(\"");
       out.print(escapeJavaString(_var));
       out.println("\");");
     }
-    */
 
     if (endVar != null) {
       String begin = beginVar == null ? "0" : beginVar;
@@ -648,10 +638,10 @@ public class JstlCoreForEach extends JstlNode {
     out.println("}");
 
     if (_var != null) {
-      // jsp/1cmg
-      out.print("pageContext.removeAttribute(\"");
+      // jsp/1cmg jsp/1cmh
+      out.print("pageContext.pageSetOrRemove(\"");
       out.print(escapeJavaString(_var));
-      out.println("\");");
+      out.println("\", " + oldVar + ");");
 
       // restore EL variable
       if (deferredValue != null && _var != null) {
