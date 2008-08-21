@@ -104,7 +104,8 @@ public class CoreForTokensTag extends LoopTagSupport {
   public void prepare()
     throws JspTagException
   {
-    if (_items.contains("#{")) {
+        // jsp/1ce6
+    if (_items != null && _items.contains("#{")) {
       ELContext elContext = pageContext.getELContext();
 
       deferredExpression
