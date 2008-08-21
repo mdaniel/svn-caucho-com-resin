@@ -41,7 +41,7 @@ public class CoreForEachTag extends LoopTagSupport {
 
   protected int _begin;
   protected int _end;
-  
+
   protected Object _items;
   protected boolean _hasItems;
 
@@ -92,6 +92,12 @@ public class CoreForEachTag extends LoopTagSupport {
   public void prepare()
     throws JspTagException
   {
+    if (_items instanceof ValueExpression) {
+      deferredExpression = (ValueExpression) _items;
+
+      _items = deferredExpression.getValue(pageContext.getELContext());
+    }
+
     if (_hasItems) {
       _iterator = com.caucho.jstl.el.ForEachTag.getIterator(_items);
     }
@@ -142,8 +148,18 @@ public class CoreForEachTag extends LoopTagSupport {
       throw new JspTagException(L.l("unknown items value `{0}'", items));
   }
 
+  @Override
+  protected ValueExpression createIndexedExpression(int index)
+    throws JspTagException
+  {
+    return CoreForEachTag.getExpr(deferredExpression,
+                                  index,
+                                  _items,
+                                  null);
+  }
+
   public static ValueExpression getExpr(ValueExpression expr, Integer i,
-                                        Object items)
+                                        Object items, String delims)
     throws JspTagException
   {
     if (items == null)
@@ -158,8 +174,10 @@ public class CoreForEachTag extends LoopTagSupport {
       return new IteratedValueExpression(new IteratedExpression(expr), i);
     else if (items instanceof Enumeration)
       return new IteratedValueExpression(new IteratedExpression(expr), i);
-    else if (items instanceof String)
+    else if (items instanceof String && delims == null)
       return new StringTokenValueExpression(expr, i);
+    else if (items instanceof String && delims != null)
+      return new CoreStringTokenValueExpression(expr, i, delims);
     else
       throw new JspTagException(L.l("unknown items value '{0}'", items));
   }

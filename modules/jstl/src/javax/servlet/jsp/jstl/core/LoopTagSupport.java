@@ -29,7 +29,7 @@
 package javax.servlet.jsp.jstl.core;
 
 import javax.el.ValueExpression;
-
+import javax.el.VariableMapper;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.tagext.IterationTag;
@@ -58,6 +58,7 @@ abstract public class LoopTagSupport extends TagSupport
   private LoopTagStatus _status;
   private int _index;
   private int _count;
+  private ValueExpression _mapped;
 
   /**
    * Sets the var attribute.
@@ -139,6 +140,12 @@ abstract public class LoopTagSupport extends TagSupport
     return _status;
   }
 
+  protected ValueExpression createIndexedExpression(int index)
+    throws JspTagException
+  {
+    return null;
+  }
+
   /**
    * Starts the iteration.
    */
@@ -166,8 +173,17 @@ abstract public class LoopTagSupport extends TagSupport
 
       _current = next();
 
-      if (itemId != null)
-        pageContext.setAttribute(itemId, _current);
+      if (itemId != null) {
+        if (deferredExpression != null) {
+
+          VariableMapper mapper = pageContext.getELContext()
+            .getVariableMapper();
+
+          _mapped = mapper.setVariable(itemId, createIndexedExpression(_index));
+        }
+        else
+          pageContext.setAttribute(itemId, _current);
+      }
 
       if (statusId != null)
         pageContext.setAttribute(statusId, getLoopStatus());
@@ -191,7 +207,7 @@ abstract public class LoopTagSupport extends TagSupport
       if (! hasNext()) {
 	if (this.itemId != null)
 	  pageContext.setAttribute(itemId, _initialVar);
-	
+
 	return SKIP_BODY;
       }
         
@@ -202,8 +218,15 @@ abstract public class LoopTagSupport extends TagSupport
     _count++;
 
     if (! endSpecified || _index <= end) {
-      if (itemId != null)
-        pageContext.setAttribute(itemId, _current);
+      if (itemId != null) {
+        if (deferredExpression != null) {
+          VariableMapper mapper = pageContext.getELContext().getVariableMapper();
+
+          mapper.setVariable(itemId,createIndexedExpression(_index));
+        }
+        else
+          pageContext.setAttribute(itemId, _current);
+      }
 
       if (statusId != null)
         pageContext.setAttribute(statusId, getLoopStatus());
@@ -222,11 +245,22 @@ abstract public class LoopTagSupport extends TagSupport
   
   public void doFinally()
   {
-    if (itemId != null)
-      pageContext.setAttribute(itemId, _initialVar);
+    if (itemId != null) {
+      if (deferredExpression != null) {
+        VariableMapper mapper = pageContext.getELContext().getVariableMapper();
+
+        mapper.setVariable(itemId, _mapped);
+      }
+      else
+        pageContext.setAttribute(itemId, _initialVar);
+    }
     
     if (statusId != null)
       pageContext.setAttribute(statusId, null);
+
+    _mapped = null;
+
+    deferredExpression = null;
   }
 
   public class Status implements LoopTagStatus {

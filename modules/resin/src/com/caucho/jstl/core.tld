@@ -1,5 +1,5 @@
-<taglib xmlns="http://java.sun.com/xml/ns/j2ee" version="2.0">
-  <tlib-version>1.0</tlib-version>
+<taglib xmlns="http://java.sun.com/xml/ns/javaee" version="2.1">
+  <tlib-version>1.2</tlib-version>
   <short-name>c</short-name>
 
   <uri>http://java.sun.com/jsp/jstl/core</uri>
@@ -37,6 +37,9 @@
       <name>value</name>
       <required>false</required>
       <rtexprvalue>true</rtexprvalue>
+      <deferred-value>
+        <type>java.lang.Object</type>
+      </deferred-value>
     </attribute>
 
     <attribute>
@@ -151,6 +154,10 @@
       <name>items</name>
       <required>false</required>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Object</type>
+      <deferred-value>
+        <type>java.lang.Object</type>
+      </deferred-value>
     </attribute>
 
     <attribute>

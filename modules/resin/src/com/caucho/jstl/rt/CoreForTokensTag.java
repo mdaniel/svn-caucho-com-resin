@@ -30,9 +30,12 @@ package com.caucho.jstl.rt;
 
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
+import com.caucho.jsp.JspUtil;
 
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.jstl.core.LoopTagSupport;
+import javax.el.ELContext;
+import javax.el.ValueExpression;
 import java.util.Iterator;
 
 public class CoreForTokensTag extends LoopTagSupport {
@@ -56,6 +59,16 @@ public class CoreForTokensTag extends LoopTagSupport {
   public void setDelims(String delims)
   {
     _delims = delims;
+  }
+
+  @Override
+  protected ValueExpression createIndexedExpression(int index)
+    throws JspTagException
+  {
+    return CoreForEachTag.getExpr(deferredExpression,
+                                  index,
+                                  _items,
+                                  _delims);
   }
 
   /**
@@ -91,6 +104,15 @@ public class CoreForTokensTag extends LoopTagSupport {
   public void prepare()
     throws JspTagException
   {
+    if (_items.contains("#{")) {
+      ELContext elContext = pageContext.getELContext();
+
+      deferredExpression
+        = JspUtil.createValueExpression(elContext, String.class, _items);
+
+      _items = (String) deferredExpression.getValue(elContext);
+    }
+
     _iterator = new TokenIterator(_items, _delims);
   }
 
@@ -127,7 +149,27 @@ public class CoreForTokensTag extends LoopTagSupport {
         _delims = delims.toCharArray();
       else
         _delims = new char[0];
+
       _length = value.length();
+
+      char ch;
+      final int startDelims = _delims.length - 1;
+
+      for (_i = 0; _i < _length; _i++) {
+        ch = _value.charAt(_i);
+
+        boolean isDelim = false;
+        for (int j = startDelims; j >= 0; j--) {
+          if (_delims[j] == ch) {
+            isDelim = true;
+
+            break;
+          }
+        }
+
+        if (! isDelim)
+          break;
+      }
     }
     
     public boolean hasNext()
@@ -139,8 +181,8 @@ public class CoreForTokensTag extends LoopTagSupport {
     {
       _cb.clear();
 
-      char ch = 0;
-      int startDelims = _delims.length - 1;
+      char ch;
+      final int startDelims = _delims.length - 1;
       loop:
       for (; _i < _length; _i++) {
         ch = _value.charAt(_i);

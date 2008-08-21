@@ -144,7 +144,16 @@ public class JstlCoreSet extends JstlNode {
   public void generate(JspJavaWriter out)
     throws Exception
   {
-    if (_value != null) {
+    if (_value != null && _value.contains("#{") && _var != null) {
+      String exprVar = "_caucho_value_expr_" + _gen.addValueExpr(_value, null);
+
+      out.print("_jsp_env.getVariableMapper().setVariable(\"");
+      out.print(escapeJavaString(_var));
+      out.print("\", ");
+      out.print(exprVar);
+      out.println(");");
+    }
+    else if (_value != null) {
       String value = generateValue(Object.class, _value);
       
       generateSet(out, value);

@@ -1247,7 +1247,11 @@ public abstract class JspNode {
       }
       else if (rtexpr && hasDeferredAttribute(value, false)) {
         // jsp/1c2m, jsp/1ce8
-        return generateELValue(type, value);
+        if (type.equals(String.class))
+          return '"' + value + '"';
+        else
+          return generateELValue(type, value);
+
       }
       else if (! rtexpr
 	       && hasDeferredAttribute(value, isELIgnored)
@@ -1334,6 +1338,15 @@ public abstract class JspNode {
 
       exprIndex = _gen.addValueExpr(value, "");
       
+      return ("_caucho_value_expr_" + exprIndex);
+    }
+    else if (type.equals(Object.class) &&
+             value.contains("#{") &&
+             CustomTag.class.equals(getClass())) {
+      int exprIndex;
+
+      exprIndex = _gen.addValueExpr(value, "");
+
       return ("_caucho_value_expr_" + exprIndex);
     }
     else if (type.equals(com.caucho.xpath.Expr.class)) {

@@ -611,7 +611,7 @@ public class JstlCoreForEach extends JstlNode {
       out.print("\", ");
       out.print("com.caucho.jstl.rt.CoreForEachTag.getExpr(");
       out.print(deferredValue + ", " + _tagVar + ".getIndex(), " + itemsVar);
-      out.println("));");
+      out.println(", null));");
     }
 
     generateChildren(out);

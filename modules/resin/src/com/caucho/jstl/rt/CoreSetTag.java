@@ -35,6 +35,8 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTagSupport;
+import javax.el.ValueExpression;
+import javax.el.VariableMapper;
 
 public class CoreSetTag extends BodyTagSupport {
   private static L10N L = new L10N(CoreSetTag.class);
@@ -97,7 +99,9 @@ public class CoreSetTag extends BodyTagSupport {
     if (! _hasValue)
       return EVAL_BODY_BUFFERED;
 
-    if (_var != null)
+    if (_value instanceof ValueExpression && _var != null)
+      doMapVariable((ValueExpression) _value);
+    else if (_var != null)
       doSetValue(_value);
     else
       doSetProperty(_value);
@@ -119,6 +123,12 @@ public class CoreSetTag extends BodyTagSupport {
     }
 
     return EVAL_PAGE;
+  }
+
+  private void doMapVariable(ValueExpression valueExpr) {
+    VariableMapper mapper = pageContext.getELContext().getVariableMapper();
+
+    mapper.setVariable(_var, valueExpr);
   }
 
   private void doSetValue(Object value)
