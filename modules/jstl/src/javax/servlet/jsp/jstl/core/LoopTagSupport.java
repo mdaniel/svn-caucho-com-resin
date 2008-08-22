@@ -168,7 +168,7 @@ abstract public class LoopTagSupport extends TagSupport
       next();
     }
 
-    if (hasNext() && (! endSpecified || _index <= end)) {
+    if (hasNext() && (end == -1 || _index <= end)) {
       _count++;
 
       _current = next();
@@ -217,12 +217,12 @@ abstract public class LoopTagSupport extends TagSupport
 
     _count++;
 
-    if (! endSpecified || _index <= end) {
+    if (end == -1 || _index <= end) {
       if (itemId != null) {
         if (deferredExpression != null) {
           VariableMapper mapper = pageContext.getELContext().getVariableMapper();
 
-          mapper.setVariable(itemId,createIndexedExpression(_index));
+          mapper.setVariable(itemId, createIndexedExpression(_index));
         }
         else
           pageContext.setAttribute(itemId, _current);

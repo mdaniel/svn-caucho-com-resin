@@ -399,7 +399,20 @@ public class JstlCoreForEach extends JstlNode {
       stepVar = "1";
 
     if (_tagVar != null)
-      out.println(_tagVar + ".init(" + beginVar + ", " + endVar + ", " + stepVar + ");");
+      out.println(_tagVar +
+                  ".init(" +
+                  beginVar +
+                  ", " +
+                  endVar +
+                  ", " +
+                  stepVar +
+                  ", " +
+                  (_begin != null) +
+                  ", " +
+                  (_end != null) +
+                  ", " +
+                  (_step != null) +
+                  ");");
 
     if (_varStatus != null) {
       out.print("Object " + oldStatusVar + " = pageContext.putAttribute(\"");
@@ -440,15 +453,9 @@ public class JstlCoreForEach extends JstlNode {
     }
 
     if (_varStatus != null) {
-      out.print("pageContext.removeAttribute(\"");
-      out.print(escapeJavaString(_varStatus));
-      out.println("\");");
-      
-      /*
       out.print("pageContext.pageSetOrRemove(\"");
       out.print(escapeJavaString(_varStatus));
       out.println("\", " + oldStatusVar + ");");
-      */
     }
   }
 
@@ -555,7 +562,10 @@ public class JstlCoreForEach extends JstlNode {
       else
 	out.print("Integer.MAX_VALUE, ");
 
-      out.println(stepVar + ");");
+      out.print(stepVar + ", ");
+      out.print((_begin != null) + ", ");
+      out.print((_end != null) + ", ");
+      out.println((_step != null) + ");");
     }
 
     if (_varStatus != null) {
@@ -636,9 +646,9 @@ public class JstlCoreForEach extends JstlNode {
 
     if (_varStatus != null) {
       // jsp/1cme
-      out.print("pageContext.removeAttribute(\"");
+      out.print("pageContext.pageSetOrRemove(\"");
       out.print(escapeJavaString(_varStatus));
-      out.println("\");");
+      out.print("\", " + oldStatusVar + ");");
     }
   }
   

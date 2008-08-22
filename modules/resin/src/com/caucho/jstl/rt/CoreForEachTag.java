@@ -102,15 +102,10 @@ public class CoreForEachTag extends LoopTagSupport {
       _iterator = com.caucho.jstl.el.ForEachTag.getIterator(_items);
     }
     else {
-      this.beginSpecified = false;
-      this.begin = 0;
-      this.endSpecified = false;
-      this.end = -1;
-
-      _iterator = new RangeIterator(_begin, _end);
+      _iterator = new RangeIterator(0, _end);
     }
   }
-
+                     
   /**
    * Returns true if there are more items.
    */

@@ -43,7 +43,11 @@ public class IteratorLoopSupportTag extends TagSupport
   private int _begin;
   private int _end;
   private int _step;
-  
+
+  private boolean _beginSpecified = false;
+  private boolean _endSpecified = false;
+  private boolean _stepSpecified = false;
+
   private int _index;
   private int _count;
 
@@ -80,11 +84,21 @@ public class IteratorLoopSupportTag extends TagSupport
   /**
    * Sets the initial values.
    */
-  public void init(int begin, int end, int step)
+  public void init(int begin,
+                   int end,
+                   int step,
+                   boolean beginSpecified,
+                   boolean endSpecified,
+                   boolean stepSpecified)
   {
     _begin = begin;
     _end = end;
     _step = step;
+
+    _beginSpecified = beginSpecified;
+    _endSpecified = endSpecified;
+    _stepSpecified = stepSpecified;
+
     _count = 0;
     _index = _begin - _step;
   }
@@ -140,16 +154,25 @@ public class IteratorLoopSupportTag extends TagSupport
   
   public Integer getBegin()
   {
+    if (! _beginSpecified)
+      return null;
+
     return new Integer(_begin);
   }
   
   public Integer getEnd()
   {
+    if (! _endSpecified)
+      return null;
+
     return new Integer(_end);
   }
   
   public Integer getStep()
   {
+    if (! _stepSpecified)
+      return null;
+
     return new Integer(_step);
   }
 }
