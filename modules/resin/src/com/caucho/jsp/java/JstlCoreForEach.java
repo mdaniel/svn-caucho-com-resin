@@ -357,9 +357,8 @@ public class JstlCoreForEach extends JstlNode {
 
     int uniqueId = _gen.uniqueId();
 
-    String oldVar = "_jsp_oldVar_" + uniqueId;
     String oldStatusVar = "_jsp_status_" + uniqueId;
-    
+
     if (_tagVar != null) {
       out.println(_tagVar + " = _jsp_state.get" + _tagVar
 		  + "(pageContext, _jsp_parent_tag);");
@@ -420,12 +419,6 @@ public class JstlCoreForEach extends JstlNode {
       out.println("\", " + _tagVar + ");");
     }
 
-    if (_var != null) {
-      out.print("Object " + oldVar + " = pageContext.getAttribute(\"");
-      out.print(escapeJavaString(_var));
-      out.println("\");");
-    }
-
     out.print("for (int " + iVar + " = " + beginVar + "; ");
     out.print(iVar + " <= " + endVar + "; ");
     out.println(iVar + " += " + stepVar + ") {");
@@ -433,7 +426,7 @@ public class JstlCoreForEach extends JstlNode {
 
     if (_var != null) {
       out.print("pageContext.setAttribute(\"" + escapeJavaString(_var) + "\"");
-      out.println(", new Integer(" +  iVar + "));");
+      out.println(", new Integer(" + iVar + "));");
     }
 
     if (_tagVar != null) {
@@ -446,16 +439,24 @@ public class JstlCoreForEach extends JstlNode {
     out.println("}");
 
     if (_var != null) {
-      // jsp/1ddv jsp/1ddw
       out.print("pageContext.pageSetOrRemove(\"");
       out.print(escapeJavaString(_var));
-      out.println("\", " + oldVar + ");");
+      out.println("\", null);");
     }
 
     if (_varStatus != null) {
+      out.print("if (" + oldStatusVar + " instanceof javax.servlet.jsp.jstl.core.LoopTagStatus)");
+      out.pushDepth();
       out.print("pageContext.pageSetOrRemove(\"");
       out.print(escapeJavaString(_varStatus));
-      out.println("\", " + oldStatusVar + ");");
+      out.println("\", "+oldStatusVar+");");
+      out.popDepth();
+      out.println("else");
+      out.pushDepth();
+      out.print("pageContext.pageSetOrRemove(\"");
+      out.print(escapeJavaString(_varStatus));
+      out.println("\", null);");
+      out.popDepth();
     }
   }
 
@@ -468,9 +469,8 @@ public class JstlCoreForEach extends JstlNode {
   {
     int uniqueId = _gen.uniqueId();
 
-    String oldVar = "_jsp_oldVar_" + uniqueId;
     String oldStatusVar = "_jsp_status_" + uniqueId;
-    
+
     if (_tagVar != null) {
       out.println(_tagVar + " = _jsp_state.get" + _tagVar
 		  + "(pageContext, _jsp_parent_tag);");
@@ -574,12 +574,6 @@ public class JstlCoreForEach extends JstlNode {
       out.println("\", " + _tagVar + ");");
     }
 
-    if (_var != null) {
-      out.print("Object " + oldVar + " = pageContext.getAttribute(\"");
-      out.print(escapeJavaString(_var));
-      out.println("\");");
-    }
-
     if (endVar != null) {
       String begin = beginVar == null ? "0" : beginVar;
       
@@ -597,22 +591,22 @@ public class JstlCoreForEach extends JstlNode {
 
     out.println("Object " + iVar + " = " + iterVar + ".next();");
 
-    if (_var != null) {
-      out.print("pageContext.setAttribute(\"" + escapeJavaString(_var) + "\"");
-      out.println(", " + iVar + ");");
-    }
-
     if (_tagVar != null) {
       out.println(_tagVar + ".setCurrent(" + iVar + ", " + iterVar + ".hasNext());");
     }
 
-    if (deferredValue != null && _var != null) {
-      out.print("_jsp_env.getVariableMapper().setVariable(\"");
-      out.print(escapeJavaString(_var));
-      out.print("\", ");
-      out.print("com.caucho.jstl.rt.CoreForEachTag.getExpr(");
-      out.print(deferredValue + ", " + _tagVar + ".getIndex(), " + itemsVar);
-      out.println(", null));");
+    if (_var != null) {
+      if (deferredValue != null) {
+        out.print("_jsp_env.getVariableMapper().setVariable(\"");
+        out.print(escapeJavaString(_var));
+        out.print("\", ");
+        out.print("com.caucho.jstl.rt.CoreForEachTag.getExpr(");
+        out.print(deferredValue + ", " + _tagVar + ".getIndex(), " + itemsVar);
+        out.println(", null));");
+      } else {
+        out.print("pageContext.setAttribute(\"" + escapeJavaString(_var) + "\"");
+        out.println(", " + iVar + ");");
+      }
     }
 
     generateChildren(out);
@@ -631,24 +625,31 @@ public class JstlCoreForEach extends JstlNode {
     out.println("}");
 
     if (_var != null) {
-      // jsp/1cmg jsp/1cmh
-      out.print("pageContext.pageSetOrRemove(\"");
-      out.print(escapeJavaString(_var));
-      out.println("\", " + oldVar + ");");
-
       // restore EL variable
-      if (deferredValue != null && _var != null) {
+      if (deferredValue != null) {
         out.print("_jsp_env.getVariableMapper().setVariable(\"");
         out.print(escapeJavaString(_var));
         out.println("\", " + mapperVar + ");");
+      } else {
+        out.print("pageContext.pageSetOrRemove(\"");
+        out.print(escapeJavaString(_var));
+        out.println("\", null);");
       }
     }
 
     if (_varStatus != null) {
-      // jsp/1cme
+      out.print("if (" + oldStatusVar + " instanceof javax.servlet.jsp.jstl.core.LoopTagStatus)");
+      out.pushDepth();
       out.print("pageContext.pageSetOrRemove(\"");
       out.print(escapeJavaString(_varStatus));
-      out.print("\", " + oldStatusVar + ");");
+      out.println("\", "+oldStatusVar+");");
+      out.popDepth();
+      out.println("else");
+      out.pushDepth();
+      out.print("pageContext.pageSetOrRemove(\"");
+      out.print(escapeJavaString(_varStatus));
+      out.println("\", null);");
+      out.popDepth();
     }
   }
   
@@ -706,3 +707,4 @@ public class JstlCoreForEach extends JstlNode {
     super.generateTagState(out);
   }
 }
+

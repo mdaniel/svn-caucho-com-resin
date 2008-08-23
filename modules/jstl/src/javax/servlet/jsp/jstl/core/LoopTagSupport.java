@@ -32,6 +32,7 @@ import javax.el.ValueExpression;
 import javax.el.VariableMapper;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
+import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.IterationTag;
 import javax.servlet.jsp.tagext.TagSupport;
 import javax.servlet.jsp.tagext.TryCatchFinally;
@@ -56,6 +57,7 @@ abstract public class LoopTagSupport extends TagSupport
   private Object _initialVar;
   private Object _current;
   private LoopTagStatus _status;
+  private Object _oldStatus;
   private int _index;
   private int _count;
   private ValueExpression _mapped;
@@ -185,8 +187,14 @@ abstract public class LoopTagSupport extends TagSupport
           pageContext.setAttribute(itemId, _current);
       }
 
-      if (statusId != null)
+      if (statusId != null) {
+        _oldStatus = pageContext.getAttribute(statusId, PageContext.PAGE_SCOPE);
+
+        if (! (_oldStatus instanceof LoopTagStatus))
+          _oldStatus = null;
+
         pageContext.setAttribute(statusId, getLoopStatus());
+      }
 
       return EVAL_BODY_INCLUDE;
     }
@@ -228,9 +236,6 @@ abstract public class LoopTagSupport extends TagSupport
           pageContext.setAttribute(itemId, _current);
       }
 
-      if (statusId != null)
-        pageContext.setAttribute(statusId, getLoopStatus());
-      
       return EVAL_BODY_AGAIN;
     }
     else {
@@ -252,11 +257,11 @@ abstract public class LoopTagSupport extends TagSupport
         mapper.setVariable(itemId, _mapped);
       }
       else
-        pageContext.setAttribute(itemId, _initialVar);
+        pageContext.setAttribute(itemId, null);
     }
     
     if (statusId != null)
-      pageContext.setAttribute(statusId, null);
+      pageContext.setAttribute(statusId, _oldStatus);
 
     _mapped = null;
 
