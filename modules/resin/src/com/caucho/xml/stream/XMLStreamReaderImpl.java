@@ -320,7 +320,9 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     if ("".equals(uri))
       return null;
     else
-      return uri;
+      // .intern() for WSS4J compatibility
+      // xml/3028
+      return uri.intern();
   }
 
   public QName getName()
