@@ -69,12 +69,12 @@ cse_log(char *fmt, ...)
 #ifdef DEBUG
   va_list args;
   char timestamp[32];
-  char buffer[8192];
+  char buffer[65536];
   time_t t;
   int pid;
   FILE *file;
 
-  file = fopen("/tmp/mod_caucho.log", "w+");
+  file = fopen("/tmp/mod_caucho.log", "a");
 
   pid = (int) getpid();
 
@@ -705,9 +705,10 @@ cse_write_response(stream_t *s, int len, request_rec *r)
     int sublen;
     int writelen;
     int sentlen;
-
-    if (s->read_length <= s->read_offset && cse_fill_buffer(s) < 0)
+    
+    if (s->read_length <= s->read_offset && cse_fill_buffer(s) < 0) {
       return -1;
+    }
 
     sublen = s->read_length - s->read_offset;
     if (len < sublen)
@@ -716,6 +717,7 @@ cse_write_response(stream_t *s, int len, request_rec *r)
     writelen = sublen;
     while (writelen > 0) {
       sentlen = ap_rwrite(s->read_buf + s->read_offset, writelen, r);
+
       /*
        * RSN-420.  If the client fails, should still read data from the
        * server and complete that side of the socket.
@@ -727,10 +729,18 @@ cse_write_response(stream_t *s, int len, request_rec *r)
       }
       */
 
-      writelen -= sublen;
+      if (sentlen > 0) {
+	writelen -= sentlen;
+	s->read_offset += sentlen;
+      }
+      else {
+	s->read_offset += writelen;
+	writelen = 0;
+	break;
+      }
     }
     
-    s->read_offset += sublen;
+    /* s->read_offset += sublen; */
     len -= sublen;
   }
   

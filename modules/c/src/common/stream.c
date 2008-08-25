@@ -559,6 +559,8 @@ cse_fill_buffer(stream_t *s)
     }
   }
 
+  s->read_offset = 0;
+  
   retry = 3;
 
   do {
@@ -567,7 +569,7 @@ cse_fill_buffer(stream_t *s)
       s->read_length = s->cluster_srun->srun->read(s, s->read_buf, BUF_LENGTH);
     else
       s->read_length = read(s->socket, s->read_buf, BUF_LENGTH);
-    // repeat for EINTR, EAGAIN
+    /* repeat for EINTR, EAGAIN */
   } while (s->read_length < 0
 	   && errno != EPIPE && errno != ECONNRESET
 	   && retry-- > 0);
