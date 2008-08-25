@@ -289,6 +289,7 @@ Java_com_caucho_vfs_JniFileStream_nativeOpenRead(JNIEnv *env,
 {
   char buffer[8192];
   int fd;
+  int flags;
 
   if (! name || length <= 0 || sizeof(buffer) <= length)
     return -1;
@@ -308,11 +309,17 @@ Java_com_caucho_vfs_JniFileStream_nativeOpenRead(JNIEnv *env,
  }
 #endif
 
+ flags = O_RDONLY;
+  
 #ifdef O_BINARY
-  fd = open(buffer, O_RDONLY|O_BINARY);
-#else  
-  fd = open(buffer, O_RDONLY);
+  flags |= O_BINARY;
 #endif
+  
+#ifdef O_LARGEFILE
+  flags |= O_LARGEFILE;
+#endif
+ 
+  fd = open(buffer, flags);
 
   return fd;
 }

@@ -572,7 +572,7 @@
         <include name="xsd/**"/>
 	
         <include name="lib/activation.jar"/>
-        <include name="lib/javamail-14.jar"/>
+        <include name="lib/javamail-141.jar"/>
         <include name="lib/jcache.jar"/>
         <include name="lib/jaxstream-15.jar"/>
         <include name="lib/jsf-12.jar"/>

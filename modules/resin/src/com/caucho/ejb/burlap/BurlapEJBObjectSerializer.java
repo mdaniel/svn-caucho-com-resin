@@ -52,15 +52,17 @@ public class BurlapEJBObjectSerializer extends AbstractSerializer {
       AbstractEJBObject ejbObject = (AbstractEJBObject) obj;
       AbstractServer server = ejbObject.__caucho_getServer();
 
-      out.writeRemote(server.getRemoteObjectClass().getName(),
-                      server.getHandleEncoder("burlap").getURL(ejbObject.__caucho_getId()));
+      // XXX: need proxy
+      // out.writeRemote(server.getRemoteObjectClass().getName(),
+      //                 server.getHandleEncoder("burlap").getURL(ejbObject.__caucho_getId()));
     }
     // XXXX:
     else if (obj instanceof HessianRemoteObject) {
       HessianRemoteObject ejbObject = (HessianRemoteObject) obj;
 
-      out.writeRemote(ejbObject.getHessianType(),
-                      ejbObject.getHessianURL());
+      // XXX: need proxy
+      // out.writeRemote(ejbObject.getHessianType(),
+      //                 ejbObject.getHessianURL());
     }
     else
       throw new IllegalArgumentException(String.valueOf(obj));

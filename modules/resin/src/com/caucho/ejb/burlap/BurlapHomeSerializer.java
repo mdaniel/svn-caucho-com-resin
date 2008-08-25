@@ -52,16 +52,18 @@ public class BurlapHomeSerializer extends AbstractSerializer {
     if (obj instanceof AbstractEJBHome) {
       AbstractEJBHome ejbHome = (AbstractEJBHome) obj;
       AbstractServer server = ejbHome.__caucho_getServer();
-      
-      out.writeRemote(server.getRemoteHomeClass().getName(),
-                      server.getHandleEncoder("burlap").getURL());
+
+      // XXX: need proxy
+      // out.writeRemote(server.getRemoteHomeClass().getName(),
+      //                 server.getHandleEncoder("burlap").getURL());
     }
     else if (obj instanceof AbstractEJBObject) {
       AbstractEJBObject ejbObject = (AbstractEJBObject) obj;
       AbstractServer server = ejbObject.__caucho_getServer();
-      
-      out.writeRemote(server.getRemoteHomeClass().getName(),
-                      server.getHandleEncoder("burlap").getURL());
+
+      // XXX: need proxy
+      // out.writeRemote(server.getRemoteHomeClass().getName(),
+      //                 server.getHandleEncoder("burlap").getURL());
     }
     else {
       EJBHome ejbHome = (EJBHome) obj;
@@ -69,7 +71,8 @@ public class BurlapHomeSerializer extends AbstractSerializer {
       
       Class api = ejbHome.getEJBMetaData().getHomeInterfaceClass();
 
-      out.writeRemote(api.getName(), handle.toString());
+      // XXX: need proxy
+      // out.writeRemote(api.getName(), handle.toString());
     }
   }
 }

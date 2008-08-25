@@ -61,7 +61,6 @@ public class CoreForTokensTag extends LoopTagSupport {
     _delims = delims;
   }
 
-  @Override
   protected ValueExpression createIndexedExpression(int index)
     throws JspTagException
   {

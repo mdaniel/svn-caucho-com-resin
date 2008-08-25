@@ -3,7 +3,7 @@
    - document tree in /var/www/htdocs.
    -
    - unix> java -jar lib/resin.jar -root-directory /var/www \
-   -            -conf conf/minimal.conf
+   -            -conf conf/minimal.xml
    -
    - resin.root is /var/www, documents are in /var/www/htdocs.
   -->

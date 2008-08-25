@@ -143,7 +143,6 @@ public class CoreForEachTag extends LoopTagSupport {
       throw new JspTagException(L.l("unknown items value `{0}'", items));
   }
 
-  @Override
   protected ValueExpression createIndexedExpression(int index)
     throws JspTagException
   {
