@@ -292,7 +292,27 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
 	CauchoResponse response = (CauchoResponse) pageContext.getResponse();
 	response.getResponseStream().setEncoding(_charEncoding);
 
-        disp.include(pageContext.getRequest(), response);
+        final ServletRequest request = pageContext.getRequest();
+
+        disp.include(request, response);
+
+        final Integer statusCode
+          = (Integer) request.getAttribute("com.caucho.dispatch.response.statusCode");
+
+
+        if (statusCode != null) {
+          final int status = statusCode.intValue();
+
+          if (status < 200 || status > 299) {
+            String message = L.l(
+              "c:import status code {0} recieved while serving {1}",
+              statusCode,
+              context + url);
+
+            throw new JspException(message);
+          }
+        }
+
       }
       else
         handleExternalBody(context + url);
@@ -310,6 +330,23 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
       RequestDispatcher disp = request.getRequestDispatcher(url);
 
       disp.include(request, response);
+
+      final Integer statusCode
+        = (Integer) request.getAttribute("com.caucho.dispatch.response.statusCode");
+
+
+      if (statusCode != null) {
+        final int status = statusCode.intValue();
+
+        if (status < 200 || status > 299) {
+          String message = L.l(
+            "c:import status code {0} recieved while serving {1}",
+            statusCode,
+            url);
+
+          throw new JspException(message);
+        }
+      }
     }
     else
       handleExternalBody(url);

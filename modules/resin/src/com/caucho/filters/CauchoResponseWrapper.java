@@ -292,6 +292,21 @@ public class CauchoResponseWrapper extends ResponseWrapper
     return false;
   }
 
+  public int getStatusCode()
+  {
+    if (_response instanceof CauchoResponse)
+      return ((CauchoResponse) _response).getStatusCode();
+
+    throw new UnsupportedOperationException();
+  }
+
+  public String getStatusMessage()
+  {
+    if (_response instanceof CauchoResponse)
+      return ((CauchoResponse) _response).getStatusMessage();
+
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Set to true while processing an error.

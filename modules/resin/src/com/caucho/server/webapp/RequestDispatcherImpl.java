@@ -502,6 +502,12 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     boolean isOkay = false;
     try {
       invocation.service(topRequest, topResponse);
+
+      int status = subResponse.getStatusCode();
+
+      request.setAttribute("com.caucho.dispatch.response.statusCode",
+                           new Integer(status));
+
       isOkay = true;
     } finally {
       thread.setContextClassLoader(oldLoader);

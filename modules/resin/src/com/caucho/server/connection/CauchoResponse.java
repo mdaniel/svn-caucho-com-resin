@@ -59,6 +59,9 @@ public interface CauchoResponse extends HttpServletResponse {
   public boolean getForbidForward();
   public void setForbidForward(boolean forbid);
 
+  public int getStatusCode();
+  public String getStatusMessage();
+
   public boolean hasError();
   public void setHasError(boolean error);
 

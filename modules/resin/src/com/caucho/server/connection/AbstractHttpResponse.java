@@ -489,6 +489,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     return _statusCode;
   }
 
+  public String getStatusMessage()
+  {
+    return _statusMessage;
+  }
+
   public void sendError(int code)
     throws IOException
   {

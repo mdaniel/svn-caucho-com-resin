@@ -163,7 +163,7 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
 
       if (params == null && paramCount != 0
           || params != null && paramCount != params.size()) {
-        throw new JspException(L.l("sql:param does not match expected parameters\nin '{0}'",
+        throw new SQLException(L.l("sql:param does not match expected parameters\nin '{0}'",
                                    sql));
       }
 
