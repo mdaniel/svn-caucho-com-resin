@@ -221,7 +221,7 @@ public abstract class Application
    */
   public void setResourceHandler(ResourceHandler resourceHandler)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    //emtpy for backward compatibility
   }
 
   /**
@@ -229,7 +229,7 @@ public abstract class Application
    */
   public ProjectStage getProjectStage()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return ProjectStage.Production;
   }
 
   /**
@@ -239,7 +239,7 @@ public abstract class Application
                                Class sourceClass,
                                SystemEventListener listener)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    //emtpy for backward compatibility
   }
                                                       
   /**
@@ -248,7 +248,7 @@ public abstract class Application
   public void subscribeToEvent(Class<? extends SystemEvent> systemEventClass,
                                SystemEventListener listener)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    //emtpy for backward compatibility
   }
 
   /**
@@ -258,7 +258,7 @@ public abstract class Application
                                    Class sourceClass,
                                    SystemEventListener listener)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    //emtpy for backward compatibility
   }
 
   /**
@@ -267,7 +267,7 @@ public abstract class Application
   public void unsubscribeFromEvent(Class<? extends SystemEvent> systemEventClass,
                                    SystemEventListener listener)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    //emtpy for backward compatibility
   }
 
   /**
@@ -276,6 +276,6 @@ public abstract class Application
   public void publishEvent(Class<? extends SystemEvent> systemEventClass,
                            SystemEventListenerHolder source)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    //emtpy for backward compatibility
   }
 }
