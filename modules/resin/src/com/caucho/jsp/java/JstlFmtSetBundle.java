@@ -125,8 +125,25 @@ public class JstlFmtSetBundle extends JstlNode {
     else
       basenameExpr = generateValue(String.class, _basename);
 
-    String value = "pageContext.getBundle(" + basenameExpr + ")";
+    String locCtxVar = "_caucho_loc_ctx_" + _gen.uniqueId();
 
-    generateSetNotNull(out, _var, _scope, value);
+    out.println("javax.servlet.jsp.jstl.fmt.LocalizationContext " +
+                locCtxVar +
+                " = pageContext.getBundle(" +
+                basenameExpr +
+                ");");
+
+    String localeVar = "_caucho_locale_" + _gen.uniqueId();
+
+    out.println("java.util.Locale " + localeVar + ";");
+    out.println("if ((" + localeVar + " = " + locCtxVar + ".getLocale()) != null)");
+    out.pushDepth();
+    out.println("response.setLocale(" + localeVar + ");");
+    out.popDepth();
+
+
+//    String value = "pageContext.getBundle(" + basenameExpr + ")";
+
+    generateSetNotNull(out, _var, _scope, locCtxVar);
   }
 }

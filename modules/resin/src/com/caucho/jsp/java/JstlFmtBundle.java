@@ -34,10 +34,9 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.xml.QName;
 
 import java.io.IOException;
-import javax.servlet.jsp.jstl.core.*;
 
 /**
- * Generates code for the fmt:setBundle bundle.
+ * Generates code for the fmt:bundle bundle.
  *
  * <p>Set bundle looks up the correct localization context based on
  * a <code>basename</code> and the current <code>pageContext</code>.
@@ -143,15 +142,32 @@ public class JstlFmtBundle extends JstlNode {
       basenameExpr = generateValue(String.class, _basename);
 
     String oldVar = "_caucho_bundle_" + _gen.uniqueId();
-    
-    out.print("Object " + oldVar + " = pageContext.putAttribute(\"caucho.bundle\", ");
-    out.println("pageContext.getBundle(" + basenameExpr + "));");
 
+    String locCtxVar = "_caucho_loc_ctx_" + _gen.uniqueId();
+
+    out.println("javax.servlet.jsp.jstl.fmt.LocalizationContext " +
+                locCtxVar +
+                " = pageContext.getBundle(" +
+                basenameExpr +
+                ");");
+
+    String localeVar = "_caucho_locale_" + _gen.uniqueId();
+
+    out.println("java.util.Locale " + localeVar + ";");
+    out.println("if ((" + localeVar + " = " + locCtxVar + ".getLocale()) != null)");
+    out.pushDepth();
+    out.println("response.setLocale(" + localeVar + ");");
+    out.popDepth();
+
+    out.print("Object " + oldVar + " = pageContext.putAttribute(\"caucho.bundle\", ");
+    out.println(locCtxVar + ");");
+
+    /*
     String var = _var;
     if (var == null)
       var = Config.FMT_LOCALIZATION_CONTEXT;
 
-    /*
+
     if (var != null) {
       out.print("pageContext.putAttribute(\"");
       out.printJavaString(var);

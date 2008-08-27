@@ -35,6 +35,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 import javax.servlet.jsp.jstl.core.*;
 import javax.servlet.jsp.tagext.TagSupport;
+import java.util.Locale;
 
 /**
  * Sets the i18n localization bundle for the current page.
@@ -91,6 +92,11 @@ public class SetBundleTag extends TagSupport {
     else
       throw new JspException(L.l("unknown scope `{0}' in fmt:setBundle",
                                  _scope));
+
+    Locale locale = bundle.getLocale();
+
+    if (locale != null)
+      pageContext.getResponse().setLocale(locale);
 
     return SKIP_BODY;
   }

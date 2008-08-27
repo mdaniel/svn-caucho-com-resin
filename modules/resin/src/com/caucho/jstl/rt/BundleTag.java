@@ -35,6 +35,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 import javax.servlet.jsp.tagext.TagSupport;
 import javax.servlet.jsp.tagext.TryCatchFinally;
+import java.util.Locale;
 
 /**
  * Sets the i18n localization bundle for a context.
@@ -76,6 +77,11 @@ public class BundleTag extends TagSupport implements TryCatchFinally {
     _oldPrefix = pc.getAttribute("caucho.bundle.prefix");
     
     LocalizationContext bundle = pc.getBundle(_basename);
+
+    Locale locale = bundle.getLocale();
+
+    if (locale != null)
+      pageContext.getResponse().setLocale(locale);
 
     pc.setAttribute("caucho.bundle", bundle);
 
