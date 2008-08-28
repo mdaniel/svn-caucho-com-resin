@@ -34,6 +34,7 @@ import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ResinMXBean;
 import com.caucho.management.server.ServerMXBean;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 
@@ -94,7 +95,12 @@ public class ResinAdmin extends AbstractManagedObject
 
   public ServerMXBean getServer()
   {
-    return _resin.getServer().getAdmin();
+    Server server = _resin.getServer();
+
+    if (server != null)
+      return server.getAdmin();
+    else
+      return null;
   }
 
   public String getVersion()

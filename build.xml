@@ -789,7 +789,7 @@
 	
         <include name="lib/aopalliance.jar"/>
         <include name="lib/activation.jar"/>
-        <include name="lib/javamail-14.jar"/>
+        <include name="lib/javamail-141.jar"/>
         <include name="lib/ejb-15.jar"/>
         <include name="lib/hessian.jar"/>
         <!--
@@ -931,7 +931,7 @@
       <include name="${dist.name}/**"/>
       
       <include name="${dist.name}/lib/activation.jar"/>
-      <include name="${dist.name}/lib/javamail-14.jar"/>
+      <include name="${dist.name}/lib/javamail-141.jar"/>
 
       <exclude name="${dist.name}/webapps/*.war"/>
       <exclude name="${dist.name}/lib/**"/>
