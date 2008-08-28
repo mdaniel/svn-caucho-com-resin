@@ -241,7 +241,7 @@ public class JstlFmtMessage extends JstlNode {
     } else if (_bundle != null) {
       out.println(locObjVar + " = " + generateValue(Object.class, _bundle) + ";");
     } else {
-      out.println(locObjVar + " = " + "(javax.servlet.jsp.jstl.fmt.LocalizationContext) pageContext.getAttribute(\"caucho.bundle\")");
+      out.println(locObjVar + " = " + "(javax.servlet.jsp.jstl.fmt.LocalizationContext) pageContext.getAttribute(\"caucho.bundle\");");
     }
 
     String locCtxVar = "_caucho_loc_ctx_" + _gen.uniqueId();
