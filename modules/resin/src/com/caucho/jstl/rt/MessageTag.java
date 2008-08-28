@@ -37,6 +37,7 @@ import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Looks up an i18n message from a bundle and prints it.
@@ -127,18 +128,31 @@ public class MessageTag extends BodyTagSupport implements ParamContainerTag {
         key = getBodyContent().getString().trim();
 
       String msg;
-      
-      if (_bundle != null) {
-        msg = pc.getLocalizedMessage(_bundle, key, args, null);
+
+      LocalizationContext locCtx;
+
+      if (_bundle instanceof String) {
+        locCtx = pc.getBundle((String) _bundle);
+      }
+      else if (_bundle instanceof LocalizationContext) {
+        locCtx = (LocalizationContext) _bundle;
+      }
+      else if (_bundle == null) {
+        locCtx
+          = (LocalizationContext) pageContext.getAttribute("caucho.bundle");
+      } else {
+        locCtx = null;
+      }
+
+      if (locCtx == null) {
+        msg = pc.getLocalizedMessage(key, args, null);
       }
       else {
-        LocalizationContext lc;
-        lc = (LocalizationContext) pageContext.getAttribute("caucho.bundle");
+        msg = pc.getLocalizedMessage(locCtx, key, args, null);
 
-        if (lc == null)
-          msg = pc.getLocalizedMessage(key, args, null);
-        else
-          msg = pc.getLocalizedMessage(lc, key, args, null);
+        Locale locale = locCtx.getLocale();
+        if (locale != null)
+          pageContext.getResponse().setLocale(locale);
       }
 
       if (_var != null)

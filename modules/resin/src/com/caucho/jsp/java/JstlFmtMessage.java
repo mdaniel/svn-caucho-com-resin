@@ -232,6 +232,71 @@ public class JstlFmtMessage extends JstlNode {
       }
     }
 
+
+    String locObjVar = "_caucho_loc_object_" + _gen.uniqueId();
+    out.println("Object " + locObjVar + ";");
+
+    if (_bundleAttr != null) {
+      out.println(locObjVar + " = " + _bundleAttr.generateValue() + ";");
+    } else if (_bundle != null) {
+      out.println(locObjVar + " = " + generateValue(Object.class, _bundle) + ";");
+    } else {
+      out.println(locObjVar + " = " + "(javax.servlet.jsp.jstl.fmt.LocalizationContext) pageContext.getAttribute(\"caucho.bundle\")");
+    }
+
+    String locCtxVar = "_caucho_loc_ctx_" + _gen.uniqueId();
+    out.println("javax.servlet.jsp.jstl.fmt.LocalizationContext " + locCtxVar + ";");
+
+    out.println("if (" + locObjVar + " instanceof javax.servlet.jsp.jstl.fmt.LocalizationContext)");
+    out.pushDepth();
+    out.println(locCtxVar + " = (javax.servlet.jsp.jstl.fmt.LocalizationContext)" + locObjVar + ";");
+    out.popDepth();
+
+    out.println(" else if (" + locObjVar + " instanceof String)");
+    out.pushDepth();
+    out.println(locCtxVar + " = pageContext.getBundle((String)" + locObjVar + ");");
+    out.popDepth();
+
+    out.println("else");
+    out.pushDepth();
+    out.println(locCtxVar + " = null;");
+    out.popDepth();
+
+    out.println();
+
+    String messageVar = "_caucho_message_" + _gen.uniqueId();
+    out.println("String " + messageVar + ";");
+
+    out.println("if (" + locCtxVar + " != null) {");
+    out.pushDepth();
+
+
+    String localeVar = "_caucho_locale_" + _gen.uniqueId();
+    out.println("java.util.Locale " + localeVar + "= " + locCtxVar + ".getLocale();");
+    out.println("if (" + localeVar + " != null)");
+    out.pushDepth();
+    out.println("response.setLocale(" + localeVar + ");");
+    out.popDepth();
+    out.println(messageVar + " = " + "pageContext.getLocalizedMessage(" +
+                locCtxVar + ", " + prefix + keyExpr + ", " + paramVar + ", null);");
+
+    out.popDepth();
+    out.println("}");
+    out.println("else {");
+    out.pushDepth();
+    out.println(messageVar + " = " + "pageContext.getLocalizedMessage(null, "
+                + prefix + keyExpr + ", " + paramVar + ", null);");
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    if (_var != null) {
+      generateSetOrRemove(out, _var, _scope, messageVar);
+    } else {
+      out.println("out.print(" + messageVar + ");");
+    }
+
+/*
     if (_var != null) {
       String value;
 
@@ -242,31 +307,32 @@ public class JstlFmtMessage extends JstlNode {
       }
       else if (_bundle != null) {
         String bundleExpr = generateValue(Object.class, _bundle);
-      
+
         value = ("pageContext.getLocalizedMessage(" + bundleExpr + ", " +
                  prefix + keyExpr + ", " + paramVar + ", null)");
       }
       else
         value = ("pageContext.getLocalizedMessage(null, " + prefix + keyExpr + ", " +
                  paramVar + ", null)");
-  
+
       generateSetOrRemove(out, _var, _scope, value);
     }
     else {
       if (_bundleAttr != null) {
         String bundleExpr = _bundleAttr.generateValue();
-      
+
         out.println("out.print(pageContext.getLocalizedMessage(" + bundleExpr + ", " + prefix + keyExpr + ", " + paramVar + ", null));");
 
       }
       else if (_bundle != null) {
         String bundleExpr = generateValue(Object.class, _bundle);
-      
+
         out.println("out.print(pageContext.getLocalizedMessage(" + bundleExpr + ", " + prefix + keyExpr + ", " + paramVar + ", null));");
 
       }
       else
         out.println("out.print(pageContext.getLocalizedMessage(null, " + prefix + keyExpr + ", " + paramVar + ", null));");
     }
+*/
   }
 }
