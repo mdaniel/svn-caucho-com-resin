@@ -140,8 +140,14 @@ public class ObjectExtValue extends ObjectValue
     for (Entry entry = _entries[hash];
 	 entry != null;
 	 entry = entry._next) {
-      if (name.equals(entry._key))
+      if (name.equals(entry._key)) {
+	if (entry._visibility == FieldVisibility.PRIVATE) {
+	  env.error(L.l("Can't access private field '{0}::{1}'",
+			_quercusClass.getName(), name));
+	}
+	
         return entry._value.toValue();
+      }
     }
 
     Value value = getFieldExt(env, name);
@@ -189,7 +195,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Var getFieldRef(Env env, StringValue name)
   {
-    Entry entry = createEntry(name);
+    Entry entry = createEntry(name, FieldVisibility.PUBLIC);
 
     Value value = entry._value;
 
@@ -209,7 +215,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Var getThisFieldRef(Env env, StringValue name)
   {
-    Entry entry = createEntry(name);
+    Entry entry = createEntry(name, FieldVisibility.PUBLIC);
 
     Value value = entry._value;
 
@@ -306,7 +312,7 @@ public class ObjectExtValue extends ObjectValue
       }
     }
     
-    entry = createEntry(name);
+    entry = createEntry(name, FieldVisibility.PROTECTED);
 
     Value oldValue = entry._value;
 
@@ -357,7 +363,7 @@ public class ObjectExtValue extends ObjectValue
       }
     }
     
-    entry = createEntry(name);
+    entry = createEntry(name, FieldVisibility.PROTECTED);
 
     Value oldValue = entry._value;
 
@@ -388,9 +394,11 @@ public class ObjectExtValue extends ObjectValue
    * Adds a new value to the object.
    */
   @Override
-  public void initField(StringValue key, Value value)
+  public void initField(StringValue key,
+			Value value,
+			FieldVisibility visibility)
   {
-    Entry entry = createEntry(key);
+    Entry entry = createEntry(key, visibility);
 
     entry._value = value;
   }
@@ -445,7 +453,7 @@ public class ObjectExtValue extends ObjectValue
   /**
    * Creates the entry for a key.
    */
-  private Entry createEntry(StringValue name)
+  private Entry createEntry(StringValue name, FieldVisibility visibility)
   {
     int hash = name.hashCode() & _hashMask;
 
@@ -458,7 +466,7 @@ public class ObjectExtValue extends ObjectValue
     
     _size++;
 
-    Entry newEntry = new Entry(name);
+    Entry newEntry = new Entry(name, visibility);
     Entry next = _entries[hash];
     
     if (next != null) {
@@ -1551,6 +1559,7 @@ public class ObjectExtValue extends ObjectValue
                Comparable<Map.Entry<Value, Value>>
   {
     private final StringValue _key;
+    private final FieldVisibility _visibility;
     private Value _value;
 
     Entry _prev;
@@ -1559,12 +1568,21 @@ public class ObjectExtValue extends ObjectValue
     public Entry(StringValue key)
     {
       _key = key;
+      _visibility = FieldVisibility.PUBLIC;
+      _value = NullValue.NULL;
+    }
+
+    public Entry(StringValue key, FieldVisibility visibility)
+    {
+      _key = key;
+      _visibility = visibility;
       _value = NullValue.NULL;
     }
 
     public Entry(StringValue key, Value value)
     {
       _key = key;
+      _visibility = FieldVisibility.PUBLIC;
       _value = value;
     }
 
@@ -1581,6 +1599,11 @@ public class ObjectExtValue extends ObjectValue
     public Value getKey()
     {
       return _key;
+    }
+
+    public final boolean isPrivate()
+    {
+      return _visibility == FieldVisibility.PRIVATE;
     }
 
     public Value toValue()

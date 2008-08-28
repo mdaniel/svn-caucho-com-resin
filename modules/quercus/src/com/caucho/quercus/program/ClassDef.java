@@ -227,7 +227,7 @@ abstract public class ClassDef {
            + "[" + _name + "]";
   }
 
-  public Set<Map.Entry<StringValue, Expr>> fieldSet()
+  public Set<Map.Entry<StringValue, FieldEntry>> fieldSet()
   {
     return null;
   }
@@ -237,5 +237,26 @@ abstract public class ClassDef {
     return null;
   }
 
+
+  public static class FieldEntry {
+    private final Expr _value;
+    private final FieldVisibility _visibility;
+
+    public FieldEntry(Expr value, FieldVisibility visibility)
+    {
+      _value = value;
+      _visibility = visibility;
+    }
+
+    public Expr getValue()
+    {
+      return _value;
+    }
+
+    public FieldVisibility getVisibility()
+    {
+      return _visibility;
+    }
+  }
 }
 

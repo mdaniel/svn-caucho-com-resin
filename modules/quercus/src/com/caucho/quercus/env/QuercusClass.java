@@ -436,7 +436,10 @@ public class QuercusClass {
   /**
    * Adds a field.
    */
-  public void addField(StringValue name, int index, Expr initExpr)
+  public void addField(StringValue name,
+		       int index,
+		       Expr initExpr,
+		       FieldVisibility visibility)
   {
     _fieldNames.add(name);
     _fieldMap.put(name, index);

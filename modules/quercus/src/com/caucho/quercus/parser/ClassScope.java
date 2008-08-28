@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.parser;
 
+import com.caucho.quercus.env.FieldVisibility;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.Function;
@@ -87,10 +88,10 @@ public class ClassScope extends Scope {
   /**
    * Adds a value
    */
-  public void addVar(String name, Expr value)
+  public void addVar(String name, Expr value, FieldVisibility visibility)
   {
     // XXX: i18n
-    _cl.addValue(new StringBuilderValue(name), value);
+    _cl.addValue(new StringBuilderValue(name), value, visibility);
   }
   
   /**

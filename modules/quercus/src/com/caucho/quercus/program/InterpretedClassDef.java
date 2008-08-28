@@ -53,8 +53,8 @@ public class InterpretedClassDef extends ClassDef
   protected final HashMap<String,AbstractFunction> _functionMap
     = new HashMap<String,AbstractFunction>();
 
-  protected final HashMap<StringValue,Expr> _fieldMap
-    = new LinkedHashMap<StringValue,Expr>();
+  protected final HashMap<StringValue,FieldEntry> _fieldMap
+    = new LinkedHashMap<StringValue,FieldEntry>();
 
   protected final HashMap<String,Expr> _staticFieldMap
     = new LinkedHashMap<String,Expr>();
@@ -178,8 +178,11 @@ public class InterpretedClassDef extends ClassDef
       cl.addMethod(entry.getKey(), entry.getValue());
     }
     
-    for (Map.Entry<StringValue,Expr> entry : _fieldMap.entrySet()) {
-      cl.addField(entry.getKey(), 0, entry.getValue());
+    for (Map.Entry<StringValue,FieldEntry> entry : _fieldMap.entrySet()) {
+      FieldEntry fieldEntry = entry.getValue();
+      
+      cl.addField(entry.getKey(), 0, fieldEntry.getValue(),
+		  fieldEntry.getVisibility());
     }
 
     String className = getName();
@@ -252,9 +255,9 @@ public class InterpretedClassDef extends ClassDef
   /**
    * Adds a value.
    */
-  public void addValue(Value name, Expr value)
+  public void addValue(Value name, Expr value, FieldVisibility visibility)
   {
-    _fieldMap.put(name.toStringValue(), value);
+    _fieldMap.put(name.toStringValue(), new FieldEntry(value, visibility));
   }
 
   /**
@@ -262,7 +265,12 @@ public class InterpretedClassDef extends ClassDef
    */
   public Expr get(Value name)
   {
-    return _fieldMap.get(name.toStringValue());
+    FieldEntry entry = _fieldMap.get(name.toStringValue());
+
+    if (entry != null)
+      return entry.getValue();
+    else
+      return null;
   }
 
   /**
@@ -292,8 +300,12 @@ public class InterpretedClassDef extends ClassDef
   {
     ObjectValue object = (ObjectValue) value;
     
-    for (Map.Entry<StringValue,Expr> entry : _fieldMap.entrySet()) {
-      object.initField(entry.getKey(), entry.getValue().eval(env).copy());
+    for (Map.Entry<StringValue,FieldEntry> entry : _fieldMap.entrySet()) {
+      FieldEntry fieldEntry = entry.getValue();
+      
+      object.initField(entry.getKey(),
+		       fieldEntry.getValue().eval(env).copy(),
+		       fieldEntry.getVisibility());
     }
   }
 
@@ -305,7 +317,7 @@ public class InterpretedClassDef extends ClassDef
     return _constructor;
   }
 
-  public Set<Map.Entry<StringValue, Expr>> fieldSet()
+  public Set<Map.Entry<StringValue, FieldEntry>> fieldSet()
   {
     return _fieldMap.entrySet();
   }

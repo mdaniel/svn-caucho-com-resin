@@ -352,7 +352,9 @@ abstract public class ObjectValue extends Value {
   /**
    * Initializes a new field, does not call __set if it is defined.
    */
-  public void initField(StringValue key, Value value)
+  public void initField(StringValue key,
+			Value value,
+			FieldVisibility visibility)
   {
     putThisField(null, key, value);
   }

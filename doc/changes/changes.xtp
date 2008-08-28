@@ -13,9 +13,10 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
-<<<<<<< .mine
+<li>admin: ResinAdmin.getServer() should return null if server isn't ready (rep by Vinod Mehra)</li>
+<li>quercus: issues with compiled continue statement with following content (#2156, rep by koreth)</li>
+<li>quercus: private field checking (#585)</li>
 <li>ext: upgrade to javamail 1.4.1 (#2863, rep by Matt Pangaro)</li>
-=======
 <li>quercus: Can't compile class with magic set/get/call methods (#2857, rep by koreth)</li>
 <li>quercus: curl_version() not implemented (Wordpress OpenID plugin) (#2852)</li>
 <li>quercus: Joomla 1.5 not working (#2302, rep by rfisk)</li>
@@ -30,7 +31,6 @@
 <li>quercus: DotClear 2 doesn't work (#2828, rep by ebourg)</li>
 <li>quercus: db operation not allowed after ResultSet closed (FormTools) (#2811, rep by B. Youngblood)</li>
 <li>quercus: Conditional function definition fails to compile (#2830, rep by koreth)</li>
->>>>>>> .r4586
 <li>isapi: chunked encoding needs to filter out content-length (#2849, rep by Trieu Truong)</li>
 <li>jmx: update _parent handling for environment JMX to avoid loop (#2848, rep by Rajasekar Elango)</li>
 <li>jms: jdbc wasn't properly setting binary length (#2856, rep by Richard Grantham)</li>

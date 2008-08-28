@@ -2002,8 +2002,12 @@ public class QuercusParser {
 
       if ((modifiers & M_STATIC) != 0)
         ((ClassScope) _scope).addStaticVar(name, expr);
+      else if ((modifiers & M_PRIVATE) != 0)
+        ((ClassScope) _scope).addVar(name, expr, FieldVisibility.PRIVATE);
+      else if ((modifiers & M_PROTECTED) != 0)
+        ((ClassScope) _scope).addVar(name, expr, FieldVisibility.PROTECTED);
       else
-        ((ClassScope) _scope).addVar(name, expr);
+        ((ClassScope) _scope).addVar(name, expr, FieldVisibility.PUBLIC);
 
       token = parseToken();
     } while (token == ',');
