@@ -66,6 +66,8 @@ public class ZlibModule extends AbstractQuercusModule {
   public static final int FORCE_GZIP = 0x1;
   public static final int FORCE_DEFLATE = 0x2;
 
+  private int _dbg;
+
   public String []getLoadedExtensions()
   {
     return new String[] { "zlib" };
@@ -436,8 +438,10 @@ public class ZlibModule extends AbstractQuercusModule {
     TempBuffer tempBuf = TempBuffer.allocate();
     byte []buffer = tempBuf.getBuffer();
 
+    Deflater deflater = null;
+    
     try {
-      Deflater deflater = new Deflater(level, true);
+      deflater = new Deflater(level, true);
       Adler32 crc = new Adler32();
 
       boolean isFinished = false;
@@ -491,6 +495,9 @@ public class ZlibModule extends AbstractQuercusModule {
       throw QuercusModuleException.create(e);
     } finally {
       TempBuffer.free(tempBuf);
+
+      if (deflater != null)
+	deflater.end();
     }
   }
 
@@ -507,11 +514,12 @@ public class ZlibModule extends AbstractQuercusModule {
     TempBuffer tempBuf = TempBuffer.allocate();
     byte []buffer = tempBuf.getBuffer();
 
+    InflaterInputStream in = null;
     try {
       if (length == 0)
         length = Long.MAX_VALUE;
 
-      InflaterInputStream in = new InflaterInputStream(is);
+      in = new InflaterInputStream(is);
 
       StringValue sb = env.createLargeBinaryBuilder();
 
@@ -520,17 +528,19 @@ public class ZlibModule extends AbstractQuercusModule {
         sb.append(buffer, 0, len);
       }
 
-      in.close();
-
       return sb;
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
     } finally {
       TempBuffer.free(tempBuf);
+
+      try {
+	if (in != null)
+	  in.close();
+      } catch (Exception e) {
+      }
     }
   }
-
-  private int _dbg;
   
   /**
    *
@@ -542,9 +552,10 @@ public class ZlibModule extends AbstractQuercusModule {
   {
     TempBuffer tempBuf = TempBuffer.allocate();
     byte []buffer = tempBuf.getBuffer();
-
+    Deflater deflater = null;
+    
     try {
-      Deflater deflater = new Deflater(level, true);
+      deflater = new Deflater(level, true);
 
       boolean isFinished = false;
       TempStream out = new TempStream();
@@ -574,6 +585,9 @@ public class ZlibModule extends AbstractQuercusModule {
       throw QuercusModuleException.create(e);
     } finally {
       TempBuffer.free(tempBuf);
+
+      if (deflater != null)
+	deflater.end();
     }
   }
 
@@ -649,9 +663,9 @@ public class ZlibModule extends AbstractQuercusModule {
     TempStream ts = new TempStream();
     StreamImplOutputStream out = new StreamImplOutputStream(ts);
 
-    try {
-      ZlibOutputStream gzOut;
+    ZlibOutputStream gzOut = null;
 
+    try {
       gzOut = new ZlibOutputStream(out, level,
 				   Deflater.DEFAULT_STRATEGY,
 				   encodingMode);
@@ -673,6 +687,9 @@ public class ZlibModule extends AbstractQuercusModule {
       TempBuffer.free(tempBuf);
 
       ts.destroy();
+
+      if (gzOut != null)
+	gzOut.close();
     }
   }
 

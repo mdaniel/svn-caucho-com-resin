@@ -121,6 +121,7 @@ public class GZInputStream extends InputStream
     int n = read(b);
     if (n < 0)
       return -1;
+    
     return b[0];
   }
 

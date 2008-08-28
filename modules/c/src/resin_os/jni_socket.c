@@ -143,8 +143,6 @@ Java_com_caucho_vfs_JniSocketImpl_readNative(JNIEnv *env,
 
   /* Should probably have a different response for EINTR */
   if (sublen < 0) {
-    conn->ops->close(conn);
-    
     return sublen;
   }
 
