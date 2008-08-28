@@ -151,8 +151,9 @@ public class MessageTag extends BodyTagSupport implements ParamContainerTag {
         msg = pc.getLocalizedMessage(locCtx, key, args, null);
 
         Locale locale = locCtx.getLocale();
+        
         if (locale != null)
-          pageContext.getResponse().setLocale(locale);
+          I18NSupport.setResponseLocale(pageContext, locale);
       }
 
       if (_var != null)

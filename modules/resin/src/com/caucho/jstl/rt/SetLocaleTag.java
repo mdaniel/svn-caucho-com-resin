@@ -33,13 +33,12 @@ import com.caucho.util.L10N;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.jstl.core.Config;
-import javax.servlet.jsp.tagext.TagSupport;
 import java.util.Locale;
 
 /**
  * Sets the i18n locale bundle for the current page.
  */
-public class SetLocaleTag extends TagSupport {
+public class SetLocaleTag extends I18NSupport {
   private static final L10N L = new L10N(SetBundleTag.class);
   
   private Object _value;
@@ -92,9 +91,9 @@ public class SetLocaleTag extends TagSupport {
     if (locale == null)
       locale = Locale.getDefault();
 
-    pageContext.getResponse().setLocale(locale);
-    
-    CoreSetTag.setValue(pc, Config.FMT_LOCALE, _scope, locale);
+    CoreSetTag.setValue(pageContext, Config.FMT_LOCALE, _scope, locale);
+
+    setResponseLocale(pc, locale);
 
     return SKIP_BODY;
   }

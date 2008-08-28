@@ -40,7 +40,7 @@ import java.util.Locale;
 /**
  * Sets the i18n localization bundle for the current page.
  */
-public class SetBundleTag extends TagSupport {
+public class SetBundleTag extends I18NSupport {
   private static L10N L = new L10N(SetBundleTag.class);
   
   private String _basename;
@@ -96,7 +96,7 @@ public class SetBundleTag extends TagSupport {
     Locale locale = bundle.getLocale();
 
     if (locale != null)
-      pageContext.getResponse().setLocale(locale);
+      setResponseLocale(pageContext, locale);
 
     return SKIP_BODY;
   }

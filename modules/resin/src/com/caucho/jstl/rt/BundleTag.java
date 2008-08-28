@@ -40,7 +40,7 @@ import java.util.Locale;
 /**
  * Sets the i18n localization bundle for a context.
  */
-public class BundleTag extends TagSupport implements TryCatchFinally {
+public class BundleTag extends I18NSupport implements TryCatchFinally {
   private static L10N L = new L10N(BundleTag.class);
   
   private String _basename;
@@ -81,7 +81,7 @@ public class BundleTag extends TagSupport implements TryCatchFinally {
     Locale locale = bundle.getLocale();
 
     if (locale != null)
-      pageContext.getResponse().setLocale(locale);
+      setResponseLocale(pageContext, locale);
 
     pc.setAttribute("caucho.bundle", bundle);
 

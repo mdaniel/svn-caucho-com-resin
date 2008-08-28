@@ -33,10 +33,14 @@ import com.caucho.util.L10N;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.jstl.core.Config;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTagSupport;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.el.ValueExpression;
 import javax.el.VariableMapper;
+import java.util.Locale;
 
 public class CoreSetTag extends BodyTagSupport {
   private static L10N L = new L10N(CoreSetTag.class);
