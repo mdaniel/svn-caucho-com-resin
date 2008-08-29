@@ -37,9 +37,15 @@ import com.caucho.xml.Xml;
 import com.caucho.xml.XmlParser;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.xml.sax.*;
 
 import javax.xml.parsers.*;
+import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.dom.DOMResult;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import java.io.Reader;
@@ -174,16 +180,36 @@ public class XmlParseTag extends BodyTagSupport {
 
       XMLFilter filter = (XMLFilter) _filter;
 
-      if (_filter != null && _var == null && _varDom == null) {
+      if (_filter != null) {
 	SAXParserFactory factory = SAXParserFactory.newInstance();
 	SAXParser saxParser = factory.newSAXParser();
 	XMLReader parser = saxParser.getXMLReader();
 
 	filter.setParent(parser);
-	
-	filter.parse(is);
-	
-	reader.close();
+
+        if (_var != null || _varDom != null) {
+
+          TransformerFactory saxTrFactory = SAXTransformerFactory.newInstance();
+          Transformer transformer = saxTrFactory.newTransformer();
+
+          DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+          doc = dbFactory.newDocumentBuilder().newDocument();
+
+          DOMResult result = new DOMResult(doc);
+          transformer.transform(new SAXSource(filter, is), result);
+
+          if (_var != null)
+            CoreSetTag.setValue(pageContext, _var, _scope, doc);
+
+          if (_varDom != null)
+            CoreSetTag.setValue(pageContext, _varDom, _scope, doc);
+          
+        }
+        else {
+          filter.parse(is);
+        }
+
+        reader.close();
       }
       else {
 	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
