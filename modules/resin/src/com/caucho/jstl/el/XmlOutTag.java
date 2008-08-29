@@ -72,15 +72,22 @@ public class XmlOutTag extends TagSupport {
   {
     try {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
-      
+
       JspWriter out = pageContext.getOut();
 
       boolean doEscape = (_escapeXml == null ||
                           _escapeXml.evalBoolean(pageContext.getELContext()));
 
       toStream(out, pageContext, _select, doEscape);
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
+    }
+    catch (RuntimeException e) {
+      throw e;
+    }
+    catch (JspException e) {
+      throw e;
+    }
+    catch (Exception e) {
+      throw new JspException(e);
     }
 
     return SKIP_BODY;

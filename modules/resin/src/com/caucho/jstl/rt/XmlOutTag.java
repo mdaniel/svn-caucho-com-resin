@@ -33,14 +33,17 @@ import com.caucho.log.Log;
 import com.caucho.xpath.Env;
 import com.caucho.xpath.Expr;
 import com.caucho.xpath.XPath;
+import com.caucho.xpath.XPathException;
 
 import org.w3c.dom.Node;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.TagSupport;
+import javax.el.ELException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.io.IOException;
 
 public class XmlOutTag extends TagSupport {
   private static final Logger log = Log.open(XmlOutTag.class);
@@ -71,7 +74,7 @@ public class XmlOutTag extends TagSupport {
   {
     try {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
-      
+
       JspWriter out = pageContext.getOut();
 
       Env env = XPath.createEnv();
@@ -86,9 +89,10 @@ public class XmlOutTag extends TagSupport {
       if (_escapeXml)
         com.caucho.el.Expr.toStreamEscaped(out, value);
       else
-        out.print(value);      
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
+        out.print(value);
+    }
+    catch (Exception e) {
+      throw new JspException(e);
     }
 
     return SKIP_BODY;

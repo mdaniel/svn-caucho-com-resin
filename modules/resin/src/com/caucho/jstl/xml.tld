@@ -66,7 +66,7 @@
 
   <tag>
     <name>out</name>
-    <tag-class>com.caucho.jstl.el.XmlOutTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.XmlOutTag</tag-class>
     <body-content>empty</body-content>
 
     <attribute>
@@ -78,7 +78,7 @@
     <attribute>
       <name>escapeXml</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
   </tag>
 
