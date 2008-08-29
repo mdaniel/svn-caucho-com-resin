@@ -90,7 +90,7 @@ public class ReflectionClass
     QuercusClass cls;
     
     if (obj.isObject())
-      cls = ((ObjectValue) obj).getQuercusClass();
+      cls = ((ObjectValue) obj.toValue()).getQuercusClass();
     else
       cls = env.findClass(obj.toString());
 

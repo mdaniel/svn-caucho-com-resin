@@ -52,12 +52,12 @@ import java.util.logging.Logger;
 public class MbstringModule
   extends AbstractQuercusModule
 {
-  private static final IniDefinitions _iniDefinitions = new IniDefinitions();
-
-
-  private static final Logger log =
-                       Logger.getLogger(MbstringModule.class.getName());
+  private static final Logger log
+    = Logger.getLogger(MbstringModule.class.getName());
+  
   private static final L10N L = new L10N(MbstringModule.class);
+  
+  private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
   public static final int MB_CASE_UPPER = 0;
   public static final int MB_CASE_LOWER = 1;

@@ -38,7 +38,7 @@ public class MysqlLatin1Utility
   // ISO-8859-1 supplemented with some of Windows-1252 0x80-0x9F
   // characters.
   //
-  // from /usr/share/mysql/charsets/latin1.xml 
+  // XXX: dependent on server version
   //
   private static char []C1_MAP
     = { '\u20AC', '\u0081', '\u201A', '\u0192',

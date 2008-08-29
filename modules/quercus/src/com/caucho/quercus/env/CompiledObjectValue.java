@@ -645,12 +645,10 @@ public class CompiledObjectValue extends ObjectValue
     }
     else {
       cl = env.getQuercus().getStdClass();
-
+      
       setQuercusClass(cl);
-
-      putField(env,
-               "__Quercus_Class_Definition_Not_Found",
-               new StringBuilderValue(name));
+      
+      setIncompleteObjectName(name);
     }
   }
 }

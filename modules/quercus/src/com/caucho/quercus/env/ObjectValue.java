@@ -45,8 +45,10 @@ import java.util.TreeSet;
  */
 abstract public class ObjectValue extends Value {
   transient protected QuercusClass _quercusClass;
-
+  
   protected String _className;
+  
+  protected String _incompleteObjectName;
   
   protected ObjectValue(QuercusClass quercusClass)
   {
@@ -63,6 +65,37 @@ abstract public class ObjectValue extends Value {
   public QuercusClass getQuercusClass()
   {
     return _quercusClass;
+  }
+  
+  public boolean isIncompleteObject()
+  {
+    return _incompleteObjectName != null;
+  }
+  
+  /*
+   * Returns the name of the uninitialized object.
+   */
+  public String getIncompleteObjectName()
+  {
+    return _incompleteObjectName;
+  }
+  
+  /*
+   * Sets the name of uninitialized object.
+   */
+  public void setIncompleteObjectName(String name)
+  {
+    _incompleteObjectName = name;
+  }
+  
+  /*
+   * Initializes the incomplete class.
+   */
+  public void initObject(Env env, QuercusClass cls)
+  {
+    setQuercusClass(cls);
+    
+    _incompleteObjectName = null;
   }
 
   /**
@@ -444,8 +477,26 @@ abstract public class ObjectValue extends Value {
                             IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
-    out.println("object(" + getName() + ") (" + getSize() + ") {");
+    int size = getSize();
+    
+    if (isIncompleteObject())
+      size++;
+    
+    out.println("object(" + getName() + ") (" + size + ") {");
 
+    if (isIncompleteObject()) {
+      printDepth(out, 2 * (depth + 1));
+      out.println("[\"__Quercus_Incomplete_Class_name\"]=>");
+
+      printDepth(out, 2 * (depth + 1));
+      
+      Value value = env.createString(getIncompleteObjectName());
+      
+      value.varDump(env, out, depth + 1, valueSet);
+
+      out.println();
+    }
+    
     ArrayValue sortedEntries = new ArrayValueImpl();
 
     Iterator<Map.Entry<Value,Value>> iter = getIterator(env);

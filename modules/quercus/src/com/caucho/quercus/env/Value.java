@@ -1826,7 +1826,7 @@ abstract public class Value implements java.io.Serializable
       public void remove()     { iter.remove(); }
     };
   }
-
+  
   //
   // Object field references
   //

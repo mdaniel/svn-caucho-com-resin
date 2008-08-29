@@ -226,7 +226,8 @@ public class ArrayIterator
     else {
       Value arrayValue = _value;
 
-      out.println("object (" + arrayValue.getCount(env) + ") {");
+      // XXX: ArrayIterator may be extended
+      out.println("object(ArrayIterator) (" + arrayValue.getCount(env) + ") {");
 
       depth++;
 

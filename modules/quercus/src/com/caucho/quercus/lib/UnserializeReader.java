@@ -222,15 +222,12 @@ public final class UnserializeReader {
         Value obj;
 
         if (qClass != null)
-          obj = qClass.callNew(env, Env.EMPTY_VALUE);
+          obj = qClass.createObject(env);
         else {
           log.fine(L.l("{0} is an undefined class in unserialize",
                    className));
           
-          obj = env.createObject();
-          obj.putField(env,
-		       "__Quercus_Incomplete_Class_name",
-		       env.createString(className));
+          obj = env.createIncompleteObject(className);
         }
         
         if (_useReference)

@@ -105,12 +105,13 @@ public class ArrayFunExpr extends Expr {
 
     for (int i = 0; i < _values.length; i++) {
       Expr keyExpr = _keys[i];
-      Value value = _values[i].evalArg(env);
 
-      value = value.toArgValue();
+      Value value = _values[i].evalCopy(env);
+      //value = value.toArgValue();
 
       if (keyExpr != null) {
-        Value key = keyExpr.evalArg(env).toArgValue();
+        Value key = keyExpr.evalCopy(env);
+        //Value key = keyExpr.evalArg(env).toArgValue();
 
         array.put(key, value);
       }

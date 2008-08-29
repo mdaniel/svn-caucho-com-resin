@@ -184,12 +184,46 @@ public class ApcModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
 
     Value value = entry.getValue(env);
+    
+    if (value != null)
+      initObject(env, value);
 
     if (value != null) {
       return value;
     }
     else
       return BooleanValue.FALSE;
+  }
+  
+  /*
+   * Updates the value's class with a currently available one.
+   */
+  private static void initObject(Env env, Value value)
+  {
+    if (value.isObject()) {
+      ObjectValue obj = (ObjectValue) value.toValue().toObject(env);
+
+      String className;
+      
+      if (obj.isIncompleteObject())
+        className = obj.getIncompleteObjectName();
+      else
+        className = obj.getName();
+      
+      QuercusClass cls = env.findClass(className);
+        
+      if (cls != null) {
+        obj.setIncompleteObjectName(null);
+        obj.initObject(env, cls);
+      }
+    }
+    else if (value.isArray()) {
+      Iterator<Value> iter = value.getValueIterator(env);
+      
+      while (iter.hasNext()) {
+        initObject(env, iter.next());
+      }
+    }
   }
 
   /**

@@ -666,6 +666,56 @@ public class QuercusClass {
     return object;
   }
   */
+  
+  /*
+   * Creates a new object without calling the constructor.  This is used
+   * for unserializing classes.
+   */
+  public Value createObject(Env env)
+  {
+    if (_classDef.isAbstract()) {
+      throw env.createErrorException(L.l("abstract class '{0}' cannot be instantiated.",
+                                     _className));
+    }
+    else if (_classDef.isInterface()) {
+      throw env.createErrorException(L.l("interface '{0}' cannot be instantiated.",
+                                     _className));
+    }
+
+    ObjectValue objectValue = null;
+
+    if (_isJavaWrapper) {
+      // Java objects always need to call the constructor?
+      return _javaClassDef.callNew(env, Value.NULL_ARGS);
+    }
+    else if (_javaClassDef != null && _javaClassDef.isDelegate()) {
+      objectValue = new ObjectExtValue(this);
+    }
+    else if (_javaClassDef != null && ! _javaClassDef.isDelegate()) {
+      // Java objects always need to call the constructor?
+      Value javaWrapper = _javaClassDef.callNew(env, Value.NULL_ARGS);
+      Object object = javaWrapper.toJavaObject();
+      
+      objectValue = new ObjectExtJavaValue(this, object, _javaClassDef);
+    }
+    else {
+      objectValue = _classDef.createObject(env, this);
+    }
+
+    initObject(env, objectValue);
+
+    return objectValue;
+  }
+  
+  /*
+   * Initializes the object's methods and fields.
+   */
+  public void initObject(Env env, ObjectValue obj)
+  {
+    for (int i = 0; i < _initializers.size(); i++) {
+      _initializers.get(i).initInstance(env, obj);
+    }
+  }
 
   /**
    * Creates a new instance.
@@ -703,9 +753,7 @@ public class QuercusClass {
         objectValue = _classDef.newInstance(env, this);
       }
 
-      for (int i = 0; i < _initializers.size(); i++) {
-        _initializers.get(i).initInstance(env, objectValue);
-      }
+      initObject(env, objectValue);
       
       AbstractFunction fun = findConstructor();
 

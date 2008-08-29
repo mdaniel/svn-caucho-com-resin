@@ -66,7 +66,7 @@ public class ArrayObject
       value = new ArrayValueImpl();
 
     _env = env;
-    _value = value;
+    _value = value.toValue();
     _flags = flags;
 
     QuercusClass iteratorClass = _env.findClass(iteratorClassName);

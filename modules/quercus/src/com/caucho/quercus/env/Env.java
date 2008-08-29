@@ -3120,7 +3120,26 @@ public class Env {
   public ObjectValue createObject()
   {
     try {
-      return (ObjectValue) _quercus.getStdClass().callNew(this, EMPTY_VALUE);
+      return (ObjectValue) _quercus.getStdClass().createObject(this);
+    }
+    catch (Exception e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+  
+  /**
+   * Creates a stdClass object.
+   */
+  public ObjectValue createIncompleteObject(String name)
+  {
+    try {
+      ObjectValue obj
+        = (ObjectValue) _quercus.getStdClass().createObject(this);
+      
+      obj.setIncompleteObjectName(name);
+      
+      return obj;
+      
     }
     catch (Exception e) {
       throw new QuercusModuleException(e);

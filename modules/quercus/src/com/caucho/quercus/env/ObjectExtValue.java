@@ -104,12 +104,15 @@ public class ObjectExtValue extends ObjectValue
 	_entries[i] = entryCopy;
       }
     }
+    
+    _incompleteObjectName = copy._incompleteObjectName;
   }
 
   private void init()
   {
     _entries = new Entry[DEFAULT_SIZE];
     _hashMask = _entries.length - 1;
+    _size = 0;
   }
   
   @Override
@@ -118,6 +121,31 @@ public class ObjectExtValue extends ObjectValue
     super.setQuercusClass(cl);
     
     _methodMap = cl.getMethodMap();
+  }
+  
+  /*
+   * Initializes the incomplete class.
+   */
+  @Override
+  public void initObject(Env env, QuercusClass cls)
+  {
+    setQuercusClass(cls);
+    
+    Entry []entries = _entries;
+    
+    _entries = new Entry[DEFAULT_SIZE];
+    _hashMask = _entries.length - 1;
+    _size = 0;
+    
+    cls.initObject(env, this);
+    
+    EntryIterator iter = new EntryIterator(entries);
+    
+    while (iter.hasNext()) {
+      Map.Entry<Value,Value> entry = iter.next();
+      
+      initField(entry.getKey().toStringValue(), entry.getValue());
+    }
   }
 
   /**
@@ -166,9 +194,7 @@ public class ObjectExtValue extends ObjectValue
   {
     int hash = name.hashCode() & _hashMask;
 
-    for (Entry entry = _entries[hash];
-	 entry != null;
-	 entry = entry._next) {
+    for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
       if (name.equals(entry._key))
         return entry._value.toValue();
     }
@@ -178,7 +204,7 @@ public class ObjectExtValue extends ObjectValue
     if (value != null)
       return value;
     else
-      return UnsetValue.UNSET;
+      return _quercusClass.getField(env, this, name);
   }
 
   /**
@@ -1283,15 +1309,33 @@ public class ObjectExtValue extends ObjectValue
   // debugging
   //
 
+  //XXX: push up to super, and use varDumpObject
   public void varDumpImpl(Env env,
                           WriteStream out,
                           int depth,
                           IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
-    // XXX: push up to super, and use varDumpObject
-    out.println("object(" + getName() + ") (" + getSize() + ") {");
+    int size = getSize();
+    
+    if (isIncompleteObject())
+      size++;
+    
+    out.println("object(" + getName() + ") (" + size + ") {");
 
+    if (isIncompleteObject()) {
+      printDepth(out, 2 * (depth + 1));
+      out.println("[\"__Quercus_Incomplete_Class_name\"]=>");
+
+      printDepth(out, 2 * (depth + 1));
+      
+      Value value = env.createString(getIncompleteObjectName());
+      
+      value.varDump(env, out, depth + 1, valueSet);
+
+      out.println();
+    }
+    
     for (Map.Entry<Value,Value> mapEntry : sortedEntrySet()) {
       ObjectExtValue.Entry entry = (ObjectExtValue.Entry) mapEntry;
 
@@ -1360,10 +1404,8 @@ public class ObjectExtValue extends ObjectValue
       cl = env.getQuercus().getStdClass();
 
       setQuercusClass(cl);
-
-      putThisField(env,
-		   env.createString("__Quercus_Class_Definition_Not_Found"),
-		   env.createString(name));
+      
+      setIncompleteObjectName(name);
     }
 
     int size = in.readInt();

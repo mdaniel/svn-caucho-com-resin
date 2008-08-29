@@ -900,6 +900,22 @@ public class Var extends Value
   {
     return _value.getSize();
   }
+  
+  /**
+   * Returns the count, as returned by the global php count() function
+   */
+  public int getCount(Env env)
+  {
+    return _value.getCount(env);
+  }
+
+  /**
+   * Returns the count, as returned by the global php count() function
+   */
+  public int getCountRecursive(Env env)
+  {
+    return _value.getCountRecursive(env);
+  }
 
   @Override
   public Iterator<Map.Entry<Value, Value>> getIterator(Env env)
