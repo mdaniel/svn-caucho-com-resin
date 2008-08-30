@@ -75,6 +75,9 @@ public class OsgiBundle implements Bundle
 
   private BundleClassLoader _loader;
 
+  private TreeMap<String,String> _headerMap
+    = new TreeMap<String,String>();
+
   private ArrayList<ExportBundleClassLoader> _exportList
     = new ArrayList<ExportBundleClassLoader>();
   
@@ -103,6 +106,12 @@ public class OsgiBundle implements Bundle
 					jar.getContainer().getNativePath()));
 
 	Attributes attr = manifest.getMainAttributes();
+
+	for (Map.Entry entry : attr.entrySet()) {
+	  _headerMap.put(String.valueOf(entry.getKey()),
+			 String.valueOf(entry.getValue()));
+	}
+	
 	_symbolicName = attr.getValue("Bundle-SymbolicName");
 
 	if (_symbolicName == null)
@@ -142,6 +151,11 @@ public class OsgiBundle implements Bundle
   ClassLoader getClassLoader()
   {
     return _loader;
+  }
+
+  ArrayList<ExportBundleClassLoader> getExports()
+  {
+    return _exportList;
   }
 
   /**
@@ -222,7 +236,7 @@ public class OsgiBundle implements Bundle
 	for (String name : item.getPackageNames()) {
 	  ExportLoader exportLoader = new ExportLoader(_jar, name, version);
 	  loader.addLoader(exportLoader);
-	  
+
 	  _manager.putExportLoader(name, loader);
 	}
       }
@@ -250,7 +264,9 @@ public class OsgiBundle implements Bundle
       }
       else if (ch == ';')
 	continue;
-      else if (! Character.isJavaIdentifierPart(ch)) {
+      else if (Character.isJavaIdentifierPart(ch)) {
+      }
+      else {
 	throw new ConfigException(L.l("'{0}' is an illegal OSGi package/version string",
 				      attr));
       }
@@ -266,7 +282,8 @@ public class OsgiBundle implements Bundle
 
       for (;
 	   i < len
-	     && Character.isJavaIdentifierPart((ch = attr.charAt(i)));
+	     && (Character.isJavaIdentifierPart((ch = attr.charAt(i)))
+		 || ch == '.');
 	   i++) {
 	name.append(ch);
       }
@@ -389,7 +406,7 @@ public class OsgiBundle implements Bundle
   public void stop(int options)
     throws BundleException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    stop();
   }
 
   /**
@@ -398,7 +415,8 @@ public class OsgiBundle implements Bundle
   public void stop()
     throws BundleException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    throw new IllegalStateException(L.l("Bundle '{0}' can't be stopped because it is a fixed bundle",
+					_symbolicName));
   }
 
   /**
@@ -407,7 +425,8 @@ public class OsgiBundle implements Bundle
   public void update()
     throws BundleException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    throw new IllegalStateException(L.l("Bundle '{0}' can't be updated because it is a fixed bundle",
+					_symbolicName));
   }
 
   /**
@@ -416,7 +435,8 @@ public class OsgiBundle implements Bundle
   public void update(InputStream is)
     throws BundleException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    throw new IllegalStateException(L.l("Bundle '{0}' can't be updated because it is a fixed bundle",
+					_symbolicName));
   }
 
   /**
@@ -425,7 +445,8 @@ public class OsgiBundle implements Bundle
   public void uninstall()
     throws BundleException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    throw new IllegalStateException(L.l("Bundle '{0}' can't be uninstalled because it is a fixed bundle",
+					_symbolicName));
   }
 
   /**
@@ -433,7 +454,7 @@ public class OsgiBundle implements Bundle
    */
   public Dictionary getHeaders()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return new Hashtable(_headerMap);
   }
 
   /**
@@ -457,15 +478,7 @@ public class OsgiBundle implements Bundle
    */
   public boolean hasPermission(Object permission)
   {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Returns the specified resource from the bundle
-   */
-  public URL getResource(String name)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+    return true;
   }
 
   /**
@@ -473,7 +486,7 @@ public class OsgiBundle implements Bundle
    */
   public Dictionary getHeaders(String locale)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return getHeaders();
   }
 
   /**
@@ -483,6 +496,25 @@ public class OsgiBundle implements Bundle
     throws ClassNotFoundException
   {
     return Class.forName(name, false, _loader);
+  }
+
+  /**
+   * Returns the specified resource from the bundle
+   */
+  public URL getResource(String name)
+  {
+    int len = _exportList.size();
+    
+    for (int i = 0; i < len; i++) {
+      ExportBundleClassLoader loader = _exportList.get(i);
+
+      URL url = loader.getResource(name);
+
+      if (url != null)
+	return url;
+    }
+    
+    return null;
   }
 
   /**
@@ -499,15 +531,33 @@ public class OsgiBundle implements Bundle
    */
   public Enumeration getEntryPaths(String path)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    URL entry = getEntry(path);
+
+    if (entry != null) {
+      Vector vector = new Vector();
+      vector.add(entry);
+      
+      return vector.elements();
+    }
+
+    return null;
   }
 
   /**
    * Returns a URL to the named entry
    */
-  public URL getEntry(String path)
+  public URL getEntry(String pathName)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    Path path = _jar.lookup(pathName);
+
+    try {
+      if (path.exists())
+	return new URL(path.getURL());
+      else
+	return null;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -515,17 +565,31 @@ public class OsgiBundle implements Bundle
    */
   public long getLastModified()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _jar.getLastModified();
   }
 
   /**
    * Returns entries matching a pattern.
    */
-  public Enumeration findEntries(String path,
+  public Enumeration findEntries(String pathName,
 				 String filePattern,
 				 boolean recurse)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    Path path = _jar.lookup(pathName);
+
+    Vector list = new Vector();
+    
+    try {
+      if (path.exists())
+	list.add(new URL(path.getURL()));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+
+    if (list.size() > 0)
+      return list.elements();
+    else
+      return null;
   }
 
   /**

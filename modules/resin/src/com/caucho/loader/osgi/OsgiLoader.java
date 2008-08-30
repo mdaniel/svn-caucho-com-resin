@@ -61,9 +61,17 @@ public class OsgiLoader extends Loader implements EnvironmentListener
   private ArrayList<OsgiBundle> _pendingInstallList
      = new ArrayList<OsgiBundle>();
 
+  private ArrayList<ExportBundleClassLoader> _exportList
+    = new ArrayList<ExportBundleClassLoader>();
+
   public OsgiLoader()
   {
-    _manager = OsgiManager.create();
+    this(OsgiManager.create());
+  }
+
+  public OsgiLoader(OsgiManager manager)
+  {
+    _manager = manager;
 
     Environment.addEnvironmentListener(this);
   }
@@ -72,7 +80,7 @@ public class OsgiLoader extends Loader implements EnvironmentListener
   {
     OsgiBundle bundle = _manager.addPath(path);
 
-    _bundleList.add(bundle);
+    addBundle(bundle);
 
     _pendingInstallList.add(bundle);
   }
@@ -81,7 +89,14 @@ public class OsgiLoader extends Loader implements EnvironmentListener
   {
     OsgiBundle bundle = _manager.addPath(path);
 
+    addBundle(bundle);
+  }
+
+  public void addBundle(OsgiBundle bundle)
+  {
     _bundleList.add(bundle);
+
+    _exportList.addAll(bundle.getExports());
   }
   
   /**
@@ -102,11 +117,14 @@ public class OsgiLoader extends Loader implements EnvironmentListener
   @Override
   protected Class loadClass(String name)
   {
-    for (OsgiBundle bundle : _bundleList) {
-      Class cl = bundle.loadClassImpl(name);
+    for (ExportBundleClassLoader loader : _exportList) {
+      try {
+	Class cl = loader.findClassImpl(name);
 
-      if (cl != null)
-	return cl;
+	if (cl != null)
+	  return cl;
+      } catch (Exception e) {
+      }
     }
     
     return null;

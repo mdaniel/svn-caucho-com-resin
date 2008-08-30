@@ -631,6 +631,9 @@ public class ZlibModule extends AbstractQuercusModule {
       }
 
       return sb;
+    } catch (OutOfMemoryError e) {
+      env.warning(e);
+      return BooleanValue.FALSE;
     } catch (Exception e) {
       env.warning(e);
       return BooleanValue.FALSE;

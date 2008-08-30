@@ -577,6 +577,17 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       return null;
   }
 
+  /**
+   * Get resource from OSGi
+   */
+  protected URL getImportResource(String name)
+  {
+    if (_osgiManager != null)
+      return _osgiManager.getImportResource(name);
+    else
+      return null;
+  }
+
   protected void buildImportClassPath(StringBuilder sb)
   {
     if (_osgiManager != null)

@@ -662,6 +662,7 @@
       splitindex="yes">
 
       <packageset dir="${modules}/ejb/src"/>
+      <packageset dir="${modules}/hessian/src"/>
       <packageset dir="${modules}/jsdk/src"/>
       <packageset dir="${modules}/jcache/src"/>
       <packageset dir="${modules}/jpa/src"/>

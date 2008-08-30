@@ -41,6 +41,8 @@ public class ExportBundleClassLoader extends DynamicClassLoader
 
   private String _symbolicName;
   private String _version;
+
+  private String _packageName;
   
   /**
    * Creates a new export class loader.
@@ -65,7 +67,9 @@ public class ExportBundleClassLoader extends DynamicClassLoader
 					       String symbolicName,
 					       String version)
   {
-    return new ExportBundleClassLoader(parent, symbolicName, version);
+    return new ExportBundleClassLoader(parent,
+				       symbolicName,
+				       version);
   }
 
   @Override

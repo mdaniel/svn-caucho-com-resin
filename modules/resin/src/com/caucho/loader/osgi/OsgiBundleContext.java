@@ -169,7 +169,16 @@ public class OsgiBundleContext implements BundleContext
    */
   public File getDataFile(String fileName)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    try {
+      Path dataRoot = _manager.getWorkRoot().lookup("data");
+      Path bundleRoot = dataRoot.lookup(_bundle.getSymbolicName());
+
+      bundleRoot.mkdirs();
+
+      return new File(bundleRoot.lookup(fileName).getNativePath());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   //
@@ -236,7 +245,7 @@ public class OsgiBundleContext implements BundleContext
 						 String filter)
     throws InvalidSyntaxException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _manager.getServiceReferences(className, filter);
   }
 
   /**
@@ -246,7 +255,7 @@ public class OsgiBundleContext implements BundleContext
 						    String filter)
     throws InvalidSyntaxException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _manager.getAllServiceReferences(className, filter);
   }
 
   /**

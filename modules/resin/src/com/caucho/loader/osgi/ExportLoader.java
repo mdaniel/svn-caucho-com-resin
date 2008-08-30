@@ -142,7 +142,7 @@ public class ExportLoader extends Loader implements Dependency
    */
   public Path getPath(String pathName)
   {
-    if (! pathName.startsWith(_packageName))
+    if (! pathName.startsWith(_packagePath))
       return null;
 
     Path path = _jar.lookup(pathName);

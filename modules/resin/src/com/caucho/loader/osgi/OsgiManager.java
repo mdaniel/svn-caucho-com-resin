@@ -32,6 +32,7 @@ package com.caucho.loader.osgi;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.PathPatternType;
+import com.caucho.java.WorkDir;
 import com.caucho.loader.Loader;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
@@ -60,6 +61,7 @@ import org.osgi.framework.BundleListener;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
@@ -77,11 +79,16 @@ public class OsgiManager
   private static final EnvironmentLocal<OsgiManager> _localOsgi
     = new EnvironmentLocal<OsgiManager>();
 
+  private ClassLoader _classLoader;
   private ClassLoader _parentLoader;
 
   private long _nextBundleId = 1;
 
   private OsgiBundle _systemBundle;
+
+  private OsgiLoader _exportLoader;
+
+  private Path _workRoot;
   
   private ArrayList<OsgiBundle> _bundleList
     = new ArrayList<OsgiBundle>();
@@ -109,7 +116,14 @@ public class OsgiManager
    */
   public OsgiManager(ClassLoader parentLoader)
   {
-    _parentLoader = Thread.currentThread().getContextClassLoader().getParent();
+    _classLoader = Thread.currentThread().getContextClassLoader();
+    
+    _parentLoader = _classLoader.getParent();
+
+    _exportLoader = new OsgiLoader(this);
+
+    if (_parentLoader instanceof DynamicClassLoader)
+      ((DynamicClassLoader) _parentLoader).addLoader(_exportLoader);
 
     _systemBundle = new OsgiSystemBundle(this);
     _bundleList.add(_systemBundle);
@@ -132,6 +146,14 @@ public class OsgiManager
   public ClassLoader getParentLoader()
   {
     return _parentLoader;
+  }
+
+  Path getWorkRoot()
+  {
+    if (_workRoot == null)
+      _workRoot = WorkDir.getLocalWorkDir(_parentLoader).lookup("_osgi");
+
+    return _workRoot;
   }
 
   void addStartupBundle(Path path)
@@ -207,6 +229,7 @@ public class OsgiManager
 			      ExportBundleClassLoader loader)
   {
     _exportMap.put(name, loader);
+    _exportMap.put(name.replace('.', '/'), loader);
   }
 
   /**
@@ -228,6 +251,32 @@ public class OsgiManager
 
       try {
 	return loader.findClassImpl(name);
+      } catch (Exception e) {
+      }
+    }
+    
+    return null;
+  }
+
+  /**
+   * Returns any import class, e.g. from an osgi bundle
+   */
+  public URL getImportResource(String name)
+  {
+    int p = name.lastIndexOf('/');
+
+    if (p < 0)
+      return null;
+
+    String packageName = name.substring(0, p);
+
+    ExportBundleClassLoader loader;
+
+    synchronized (_exportMap) {
+      loader = _exportMap.get(packageName);
+
+      try {
+	return loader.getResource(name);
       } catch (Exception e) {
       }
     }
@@ -259,6 +308,8 @@ public class OsgiManager
     }
 
     for (OsgiBundle bundle : startList) {
+      _exportLoader.addBundle(bundle);
+
       try {
 	bundle.start();
       } catch (Exception e) {
@@ -328,6 +379,38 @@ public class OsgiManager
     synchronized (_serviceReferenceMap) {
       return _serviceReferenceMap.get(className);
     }
+  }
+  
+  /**
+   * Returns the service reference for the given service
+   */
+  public ServiceReference []getServiceReferences(String className,
+						 String filter)
+    throws InvalidSyntaxException
+  {
+    ArrayList<ServiceReference> serviceList
+      = new ArrayList<ServiceReference>();
+
+    ServiceReference ref = getServiceReference(className);
+
+    if (ref != null)
+      serviceList.add(ref);
+
+    ServiceReference []refArray = new ServiceReference[serviceList.size()];
+
+    serviceList.toArray(refArray);
+
+    return refArray;
+  }
+  
+  /**
+   * Returns the service reference for the given service
+   */
+  public ServiceReference []getAllServiceReferences(String className,
+						    String filter)
+    throws InvalidSyntaxException
+  {
+    return getServiceReferences(className, filter);
   }
 
   /**

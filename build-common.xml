@@ -734,6 +734,7 @@
 
     <delete file="${dist}/hessian-${version}.jar"/>
     <delete file="${dist}/hessian-${version}-src.jar"/>
+    <delete file="${dist}/hessian-test.jar"/>
 
     <zip destfile="${dist}/${shortproduct}-${version}.zip">
       <zipfileset dir="${dist}">
@@ -775,6 +776,7 @@
         <exclude name="com/caucho/hessian/HessianContextFactory.class"/>
         <exclude name="com/caucho/burlap/EJBServlet.class"/>
         <exclude name="com/caucho/burlap/BurlapContextFactory.class"/>
+        <exclude name="com/caucho/hessian/test/**"/>
         <include name="com/caucho/util/CharBuffer.class"/>
         <include name="com/caucho/util/CharBuffer$CBInputStream.class"/>
         <include name="com/caucho/util/CharSegment.class"/>
@@ -824,6 +826,25 @@
       </fileset>
       <fileset dir="${basedir}">
         <include name="apache.license"/>
+      </fileset>
+    </jar>
+
+    <jar destfile="${dist}/hessian-test.jar">
+      <fileset dir="${resin.modules}/hessian/classes">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/.svn/**"/>
+        <include name="com/caucho/hessian/test/**"/>
+      </fileset>
+      <fileset dir="${resin.modules}/hessian/src">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/.svn/**"/>
+        <include name="com/caucho/hessian/test/**"/>
       </fileset>
     </jar>
 

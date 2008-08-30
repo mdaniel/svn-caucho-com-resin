@@ -1682,6 +1682,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         return url;
     }
 
+    url = getImportResource(name);
+
+    if (url != null)
+      return url;
+
     ArrayList<Loader> loaders = getLoaders();
 
     for (int i = 0; loaders != null && i < loaders.size(); i++) {
@@ -1705,6 +1710,14 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     _resourceCache.put(name, NULL_URL);
 
+    return null;
+  }
+
+  /**
+   * Get resource from OSGi
+   */
+  protected URL getImportResource(String name)
+  {
     return null;
   }
 
