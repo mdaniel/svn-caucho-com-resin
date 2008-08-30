@@ -87,7 +87,7 @@ public class JspExpression extends JspNode {
     os.print("<jsp:expression");
     printJspId(os);
     os.print(">");
-    
+
     printXmlText(os, _text);
     os.print("</jsp:expression>");
   }

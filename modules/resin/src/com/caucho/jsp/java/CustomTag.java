@@ -55,7 +55,7 @@ public class CustomTag extends GenericTag
       out.print("private ");
       out.printClass(_tagClass);
       out.println(" " + _tag.getId() + ";");
-
+                                           
       out.println();
       out.print("final ");
       out.printClass(_tagClass);

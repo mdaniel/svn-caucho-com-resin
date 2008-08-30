@@ -122,10 +122,19 @@ public class MessageTag extends BodyTagSupport implements ParamContainerTag {
 
       String key = _key;
 
-      if (_key != null)
+      if (_key != null) {
         key = _key;
-      else
-        key = getBodyContent().getString().trim();
+      }
+      else if (bodyContent != null) {
+
+        String bodyString = bodyContent.getString();
+
+        if (bodyString != null)
+          key = bodyString.trim();
+      }
+
+      if (key == null)
+        key = "";
 
       String msg;
 

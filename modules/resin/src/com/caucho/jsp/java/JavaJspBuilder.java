@@ -30,7 +30,6 @@ package com.caucho.jsp.java;
 
 import com.caucho.jsp.*;
 import com.caucho.jsp.cfg.*;
-import com.caucho.log.Log;
 import com.caucho.util.CompileException;
 import com.caucho.util.L10N;
 import com.caucho.util.LineCompileException;
@@ -101,7 +100,8 @@ public class JavaJspBuilder extends JspBuilder {
   static HashMap<QName,Class> _tagMap;
   static HashMap<QName,Class> _fastTagMap;
   static HashMap<QName,Class> _jsfTagMap;
-  
+  static HashMap<QName, Class> _jstlTlvTagMap;
+
   private JavaJspGenerator _gen;
   private JspNode _rootNode;
   private JspNode _currentNode;
@@ -315,7 +315,22 @@ public class JavaJspBuilder extends JspBuilder {
       _openNode.setStartLocation(_sourcePath, _filename, _line);
     }
     else if (Tag.class.isAssignableFrom(tagClass)) {
-      CustomTag customTag = new CustomTag();
+
+      CustomTag customTag = null;
+
+      Class c = _jstlTlvTagMap.get(qname);
+
+      if (c != null) {
+        try {
+          customTag = (CustomTag) c.newInstance();
+        }
+        catch (Throwable e) {
+        }
+      }
+
+      if (customTag == null)
+        customTag = new CustomTag();
+
       customTag.setGenerator(_gen);
       customTag.setParseState(_parseState);
       customTag.setQName(qname);
@@ -693,5 +708,49 @@ public class JavaJspBuilder extends JspBuilder {
 	   JsfViewRoot.class);
     addMap(_jsfTagMap, "faces", "phaseListener", JSF_CORE_URI,
            JsfPhaseListener.class);
+
+    _jstlTlvTagMap = new HashMap<QName, Class>();
+
+    addMap(_jstlTlvTagMap, "resin-c", "choose", JSTL_CORE_URI,
+	   JstlTlvCoreChoose.class);
+    addMap(_jstlTlvTagMap, "resin-c", "choose", JSTL_EL_CORE_URI,
+	   JstlTlvCoreChoose.class);
+    addMap(_jstlTlvTagMap, "resin-c", "choose", JSTL_RT_CORE_URI,
+	   JstlTlvCoreChoose.class);
+
+    addMap(_jstlTlvTagMap, "resin-c", "when", JSTL_CORE_URI,
+	   JstlTlvCoreWhen.class);
+    addMap(_jstlTlvTagMap, "resin-c", "when", JSTL_EL_CORE_URI,
+	   JstlTlvCoreWhen.class);
+    addMap(_jstlTlvTagMap, "resin-c", "when", JSTL_RT_CORE_URI,
+	   JstlTlvCoreWhen.class);
+
+    addMap(_jstlTlvTagMap, "resin-c", "otherwise", JSTL_CORE_URI,
+	   JstlTlvCoreOtherwise.class);
+    addMap(_jstlTlvTagMap, "resin-c", "otherwise", JSTL_EL_CORE_URI,
+	   JstlTlvCoreOtherwise.class);
+    addMap(_jstlTlvTagMap, "resin-c", "otherwise", JSTL_RT_CORE_URI,
+	   JstlTlvCoreOtherwise.class);
+
+    addMap(_jstlTlvTagMap, "resin-xml", "choose", JSTL_XML_URI,
+	   JstlTlvXmlChoose.class);
+    addMap(_jstlTlvTagMap, "resin-xml", "choose", JSTL_RT_XML_URI,
+	   JstlTlvXmlChoose.class);
+    addMap(_jstlTlvTagMap, "resin-xml", "choose", JSTL_EL_XML_URI,
+	   JstlTlvXmlChoose.class);
+
+    addMap(_jstlTlvTagMap, "resin-xml", "when", JSTL_XML_URI,
+	   JstlTlvXmlWhen.class);
+    addMap(_jstlTlvTagMap, "resin-xml", "when", JSTL_RT_XML_URI,
+	   JstlTlvXmlWhen.class);
+    addMap(_jstlTlvTagMap, "resin-xml", "when", JSTL_EL_XML_URI,
+	   JstlTlvXmlWhen.class);
+
+    addMap(_jstlTlvTagMap, "resin-xml", "otherwise", JSTL_XML_URI,
+	   JstlTlvXmlOtherwise.class);
+    addMap(_jstlTlvTagMap, "resin-xml", "otherwise", JSTL_RT_XML_URI,
+	   JstlTlvXmlOtherwise.class);
+    addMap(_jstlTlvTagMap, "resin-xml", "otherwise", JSTL_EL_XML_URI,
+	   JstlTlvXmlOtherwise.class);
   }
 }
