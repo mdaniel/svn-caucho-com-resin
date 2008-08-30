@@ -64,7 +64,7 @@ public class ScriptFreeTLV extends TagLibraryValidator {
         new ValidationMessage("", e.getMessage())
       };
     }
-    
+                                         
     return null;
   }
 
@@ -90,8 +90,8 @@ public class ScriptFreeTLV extends TagLibraryValidator {
         for (int i = 0; i < attributes.getLength(); i++) {
           String value = attributes.getValue(i);
 
-          if (value != null && value.indexOf("<%=") >= 0)
-            throw new SAXException("Runtime expression " + value + " is not allowed in a script-free JSP page");
+          if (value != null && value.indexOf("%=") >= 0)
+            throw new SAXException("Runtime expression <" + value + "> is not allowed in a script-free JSP page");
             
         }
       }
