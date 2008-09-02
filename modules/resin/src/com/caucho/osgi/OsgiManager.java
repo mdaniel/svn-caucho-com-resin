@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.loader.osgi;
+package com.caucho.osgi;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
@@ -41,6 +41,7 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.DependencyContainer;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
 import javax.annotation.PostConstruct;
@@ -63,6 +64,7 @@ import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -73,6 +75,7 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class OsgiManager
 {
+  private static final L10N L = new L10N(OsgiManager.class);
   private static final Logger log
     = Logger.getLogger(OsgiManager.class.getName());
 
@@ -96,8 +99,11 @@ public class OsgiManager
   private HashMap<String,ExportBundleClassLoader> _exportMap
     = new HashMap<String,ExportBundleClassLoader>();
 
-  private HashMap<String,ServiceReference> _serviceReferenceMap
-    = new HashMap<String,ServiceReference>();
+  private HashMap<String,ArrayList<ServiceReference>> _serviceReferenceMap
+    = new HashMap<String,ArrayList<ServiceReference>>();
+
+  private HashMap<String,ServiceRegistration> _pidMap
+    = new HashMap<String,ServiceRegistration>();
   
   private ArrayList<FrameworkListenerEntry> _frameworkListenerList
     = new ArrayList<FrameworkListenerEntry>();
@@ -352,6 +358,27 @@ public class OsgiManager
 				      Object service,
 				      Dictionary properties)
   {
+    if (! (service instanceof ServiceFactory)) {
+      for (String name : classNames) {
+        try {
+	  Class api = bundle.loadClass(name);
+
+	  if (api == null)
+	    throw new IllegalStateException(L.l("'{0}' is an unknown class in bundle '{1}'",
+						name, bundle));
+
+	  if (! api.isAssignableFrom(service.getClass())) {
+	    throw new IllegalStateException(L.l("'{0}' is not an interface of '{1}' in bundle '{2}'",
+						name, service.getClass().getName(), bundle));
+	  }
+	} catch (RuntimeException e) {
+	  throw e;
+	} catch (Exception e) {
+	  throw new RuntimeException(e);
+	}
+      }
+    }
+    
     OsgiServiceRegistration registration;
     
     registration = new OsgiServiceRegistration(this,
@@ -360,11 +387,35 @@ public class OsgiManager
 					       service,
 					       properties);
 
-    synchronized (_serviceReferenceMap) {
-      for (String name : classNames) {
-	_serviceReferenceMap.put(name, registration.getReference());
+    String pid = null;
+
+    if (properties != null)
+      pid = (String) properties.get("service.pid");
+
+    synchronized (_pidMap) {
+      if (pid != null) {
+	if (_pidMap.get(pid) != null)
+	  throw new IllegalStateException(L.l("service.pid '{0}' is not unique for service '{1}' in bundle '{2}'",
+					      pid, service, bundle));
+
+	_pidMap.put(pid, registration);
       }
     }
+
+    synchronized (_serviceReferenceMap) {
+      for (String name : classNames) {
+	ArrayList<ServiceReference> list = _serviceReferenceMap.get(name);
+
+	if (list == null) {
+	  list = new ArrayList<ServiceReference>();
+	  _serviceReferenceMap.put(name, list);
+	}
+
+	list.add(registration.getReference());
+      }
+    }
+
+    bundle.addService(registration);
 
     sendServiceEvent(ServiceEvent.REGISTERED, registration.getReference());
 
@@ -374,43 +425,57 @@ public class OsgiManager
   /**
    * Returns the service reference for the given service
    */
-  public ServiceReference getServiceReference(String className)
+  ServiceReference getServiceReference(Bundle bundle,
+				       String className)
   {
     synchronized (_serviceReferenceMap) {
-      return _serviceReferenceMap.get(className);
+      ArrayList<ServiceReference> list = _serviceReferenceMap.get(className);
+
+      if (list == null || list.size() == 0)
+	return null;
+      else
+	return list.get(0);
     }
   }
   
   /**
    * Returns the service reference for the given service
    */
-  public ServiceReference []getServiceReferences(String className,
-						 String filter)
+  ServiceReference []getServiceReferences(Bundle bundle,
+					  String className,
+					  String filter)
     throws InvalidSyntaxException
   {
-    ArrayList<ServiceReference> serviceList
-      = new ArrayList<ServiceReference>();
+    synchronized (_serviceReferenceMap) {
+      ArrayList<ServiceReference> list = _serviceReferenceMap.get(className);
 
-    ServiceReference ref = getServiceReference(className);
+      if (list == null || list.size() == 0)
+	return null;
+      
+      ArrayList<ServiceReference> matchList
+	= new ArrayList<ServiceReference>();
 
-    if (ref != null)
-      serviceList.add(ref);
+      matchList.addAll(list);
 
-    ServiceReference []refArray = new ServiceReference[serviceList.size()];
+      if (matchList.size() == 0)
+	return null;
 
-    serviceList.toArray(refArray);
+      ServiceReference []refs = new ServiceReference[matchList.size()];
+      matchList.toArray(refs);
 
-    return refArray;
+      return refs;
+    }
   }
   
   /**
    * Returns the service reference for the given service
    */
-  public ServiceReference []getAllServiceReferences(String className,
+  public ServiceReference []getAllServiceReferences(Bundle bundle,
+						    String className,
 						    String filter)
     throws InvalidSyntaxException
   {
-    return getServiceReferences(className, filter);
+    return getServiceReferences(bundle, className, filter);
   }
 
   /**
@@ -419,17 +484,29 @@ public class OsgiManager
   void unregisterService(ServiceReference ref)
   {
     sendServiceEvent(ServiceEvent.UNREGISTERING, ref);
+
+    OsgiServiceReference osgiRef = (OsgiServiceReference) ref;
+    OsgiBundle bundle = (OsgiBundle) osgiRef.getBundle();
+    
+    bundle.removeService(osgiRef.getRegistration());
+    
+    synchronized (_pidMap) {
+      String pid = (String) ref.getProperty("service.pid");
+
+      if (pid != null)
+	_pidMap.remove(pid);
+    }
     
     synchronized (_serviceReferenceMap) {
-      Iterator<Map.Entry<String,ServiceReference>> iter;
+      Iterator<Map.Entry<String,ArrayList<ServiceReference>>> iter;
       iter = _serviceReferenceMap.entrySet().iterator();
 
       while (iter.hasNext()) {
-	Map.Entry<String,ServiceReference> entry = iter.next();
+	Map.Entry<String,ArrayList<ServiceReference>> entry = iter.next();
 
-	if (entry.getValue() == ref) {
-	  iter.remove();
-	}
+	ArrayList<ServiceReference> list = entry.getValue();
+
+	list.remove(ref);
       }
     }
   }

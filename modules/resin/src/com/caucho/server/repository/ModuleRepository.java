@@ -106,27 +106,47 @@ public class ModuleRepository
    */
   public Path findArtifact(String org,
 			   String module,
+			   String artifact,
 			   String rev,
 			   String ext)
   {
-    Path path = findArtifactInCache(org, module, rev, ext);
+    if (module == null)
+      throw new NullPointerException(L.l("'module' is required in findArtifact"));
+    
+    if (artifact == null)
+      artifact = module;
+    
+    Path path = findArtifactInCache(org, module, artifact, rev, ext);
 
     if (path != null)
       return path;
 
+    ModuleNotFoundException exn = null;
+
     for (Resolver resolver : _resolverList) {
-      DataSource source = resolver.resolveArtifact(org, module, rev, ext);
+      DataSource source = null;
+      try {
+	source = resolver.resolveArtifact(org, module, artifact, rev, ext);
+      } catch (ModuleNotFoundException e) {
+	log.log(Level.FINEST, e.toString(), e);
+	
+	exn = e;
+      }
 
       if (source != null) {
-	return fillCache(org, module, rev, ext, source);
+	return fillCache(org, module, artifact, rev, ext, source);
       }
     }
+
+    if (exn != null)
+      throw exn;
 
     return null;
   }
 
   private Path fillCache(String org,
 			 String module,
+			 String artifact,
 			 String rev,
 			 String ext,
 			 DataSource dataSource)
@@ -137,7 +157,7 @@ public class ModuleRepository
       path = path.lookup(ext + "s");
       path.mkdirs();
 
-      path = path.lookup(module + "_" + rev + "." + ext);
+      path = path.lookup(artifact + "_" + rev + "." + ext);
 
       WriteStream os = path.openWrite();
       try {
@@ -162,6 +182,7 @@ public class ModuleRepository
 
   private Path findArtifactInCache(String org,
 				   String module,
+				   String artifact,
 				   String rev,
 				   String ext)
   {
@@ -181,7 +202,7 @@ public class ModuleRepository
       return null;
 
     if (rev == null) {
-      ArrayList<String> revList = findRevList(path, module + "_", "." + ext);
+      ArrayList<String> revList = findRevList(path, artifact + "_", "." + ext);
 
       if (revList == null || revList.size() == 0)
 	return null;
@@ -189,7 +210,7 @@ public class ModuleRepository
       rev = revList.get(0);
     }
 
-    String name = module + "_" + rev + "." + ext;
+    String name = artifact + "_" + rev + "." + ext;
 
     path = path.lookup(name);
 
@@ -200,8 +221,9 @@ public class ModuleRepository
   }
 
   private Path findArtifactInCacheValidate(String org,
-				   String module,
-				   String rev,
+					   String module,
+					   String artifact,
+					   String rev,
 				   String ext)
   {
     Path path = getRoot().lookup(org);
@@ -223,7 +245,7 @@ public class ModuleRepository
 				    org, module, ext));
 
     if (rev == null) {
-      ArrayList<String> revList = findRevList(path, module + "_", "." + ext);
+      ArrayList<String> revList = findRevList(path, artifact + "_", "." + ext);
 
       if (revList == null || revList.size() == 0) {
 	throw new ConfigException(L.l("org={0}, module={1} has no valid {2}s version.",
@@ -233,7 +255,7 @@ public class ModuleRepository
       rev = revList.get(0);
     }
 
-    String name = module + "_" + rev + "." + ext;
+    String name = artifact + "_" + rev + "." + ext;
 
     path = path.lookup(name);
 

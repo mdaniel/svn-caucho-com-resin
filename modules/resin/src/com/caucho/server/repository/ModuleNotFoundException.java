@@ -34,47 +34,46 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.ivy.IvyPattern;
 import com.caucho.util.L10N;
 import com.caucho.server.cache.TempFileInode;
+import com.caucho.server.cache.TempFileManager;
 import com.caucho.server.resin.Resin;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.TempBuffer;
 
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
 
 /**
- * The module repository holds the module jars for osgi and ivy.
+ * Exception for the module not found.
  */
-public class InodeDataSource implements DataSource
+public class ModuleNotFoundException extends RuntimeException
 {
-  private String _name;
-  private TempFileInode _inode;
-
-  InodeDataSource(String name, TempFileInode inode)
+  public ModuleNotFoundException()
   {
-    _name = name;
-    _inode = inode;
   }
 
-  public String getName()
+  public ModuleNotFoundException(String msg)
   {
-    return _name;
+    super(msg);
   }
 
-  public InputStream openInputStream()
+  public ModuleNotFoundException(String msg, Throwable e)
   {
-    return _inode.openInputStream();
+    super(msg, e);
   }
 
-  public void close()
+  public ModuleNotFoundException(Throwable e)
   {
-    TempFileInode inode = _inode;
-    _inode = null;
-
-    if (inode != null)
-      inode.free();
-  }
-
-  protected void finalize()
-  {
-    close();
+    super(e);
   }
 }

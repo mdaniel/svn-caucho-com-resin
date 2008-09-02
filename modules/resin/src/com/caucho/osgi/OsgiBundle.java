@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.loader.osgi;
+package com.caucho.osgi;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
@@ -83,6 +83,12 @@ public class OsgiBundle implements Bundle
   
   private ArrayList<PackageItem> _importList
     = new ArrayList<PackageItem>();
+
+  private ArrayList<OsgiServiceRegistration> _serviceList
+    = new ArrayList<OsgiServiceRegistration>();
+
+  private ArrayList<ServiceUse> _serviceUseList
+    = new ArrayList<ServiceUse>();
 
   private String _activatorClassName;
   private OsgiBundleContext _bundleContext;
@@ -457,12 +463,94 @@ public class OsgiBundle implements Bundle
     return new Hashtable(_headerMap);
   }
 
+  void addService(OsgiServiceRegistration reg)
+  {
+    synchronized (_serviceList) {
+      _serviceList.add(reg);
+    }
+  }
+
+  void removeService(OsgiServiceRegistration reg)
+  {
+    synchronized (_serviceList) {
+      _serviceList.remove(reg);
+    }
+  }
+
+  Object getService(ServiceReference ref)
+  {
+    synchronized (_serviceUseList) {
+      for (int i = 0; i < _serviceUseList.size(); i++) {
+	ServiceUse use = _serviceUseList.get(i);
+
+	if (use.getRef() == ref) {
+	  use.addUse();
+	  return use.getService();
+	}
+      }
+      
+      OsgiServiceReference osgiRef = (OsgiServiceReference) ref;
+
+      Object service = osgiRef.getService(this);
+
+      if (service == null)
+	return null;
+
+      ServiceFactory factory = null;
+      
+      if (service instanceof ServiceFactory) {
+	factory = (ServiceFactory) service;
+
+	service = factory.getService(this, osgiRef.getRegistration());
+      }
+
+      ServiceUse use = new ServiceUse(osgiRef, factory, service);
+
+      _serviceUseList.add(use);
+
+      return service;
+    }
+  }
+  
+  boolean ungetService(ServiceReference ref)
+  {
+    synchronized (_serviceUseList) {
+      for (int i = _serviceUseList.size() - 1; i >= 0; i--) {
+	ServiceUse use = _serviceUseList.get(i);
+
+	if (use.getRef() == ref) {
+	  _serviceUseList.remove(i);
+
+	  if (use.getFactory() != null)
+	    use.getFactory().ungetService(this,
+					  use.getRef().getRegistration(),
+					  use.getService());
+	  
+	  return true;
+	}
+      }
+    }
+      
+    return false;
+  }
+
   /**
    * Returns the bundle's registered services
    */
   public ServiceReference []getRegisteredServices()
   {
-    return new ServiceReference[0];
+    synchronized (_serviceList) {
+      if (_serviceList.size() == 0)
+	return null;
+      
+      ServiceReference []refs = new ServiceReference[_serviceList.size()];
+
+      for (int i = 0; i < refs.length; i++) {
+	refs[i] = _serviceList.get(i).getReference();
+      }
+
+      return refs;
+    }
   }
 
   /**
@@ -470,7 +558,16 @@ public class OsgiBundle implements Bundle
    */
   public ServiceReference []getServicesInUse()
   {
-    return new ServiceReference[0];
+    synchronized (_serviceUseList) {
+      ServiceReference []refList
+	= new ServiceReference[_serviceUseList.size()];
+      
+      for (int i = 0; i < refList.length; i++) {
+	refList[i] = _serviceUseList.get(i).getRef();
+      }
+
+      return refList;
+    }
   }
 
   /**
@@ -639,6 +736,48 @@ public class OsgiBundle implements Bundle
     public String toString()
     {
       return "PackageItem[" + _packages + "," + _attr + "]";
+    }
+  }
+
+  static class ServiceUse {
+    private final OsgiServiceReference _ref;
+    private final ServiceFactory _factory;
+    private final Object _service;
+    private int _count;
+
+    ServiceUse(OsgiServiceReference ref,
+	       ServiceFactory factory,
+	       Object service)
+    {
+      _ref = ref;
+      _service = service;
+      _factory = factory;
+      _count = 1;
+    }
+
+    OsgiServiceReference getRef()
+    {
+      return _ref;
+    }
+
+    ServiceFactory getFactory()
+    {
+      return _factory;
+    }
+
+    Object getService()
+    {
+      return _service;
+    }
+
+    void addUse()
+    {
+      _count++;
+    }
+
+    boolean removeUse()
+    {
+      return --_count > 0;
     }
   }
 }

@@ -109,7 +109,7 @@
           class="com.caucho.config.type.NullType"/>
     
     <bean name="osgi-bundle"
-          class="com.caucho.loader.osgi.OsgiBundleConfig"/>
+          class="com.caucho.osgi.OsgiBundleConfig"/>
 
     <bean name="persistent-store"
           class="com.caucho.server.cluster.PersistentStoreConfig"/>

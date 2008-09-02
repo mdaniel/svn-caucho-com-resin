@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.loader.osgi;
+package com.caucho.osgi;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
@@ -71,7 +71,7 @@ public class OsgiServiceRegistration implements ServiceRegistration
   
   private final HashMap<String,Object> _properties
     = new HashMap<String,Object>();
-  
+
   private Object _service;
 
   private OsgiServiceReference _reference;
@@ -126,7 +126,10 @@ public class OsgiServiceRegistration implements ServiceRegistration
   public void unregister()
   {
     try {
+      _reference.unregister();
+      
       _manager.unregisterService(getReference());
+
     } finally {
       _service = null;
     }
@@ -143,7 +146,17 @@ public class OsgiServiceRegistration implements ServiceRegistration
 
   Object getProperty(String key)
   {
-    return _properties.get(key);
+    Object value = _properties.get(key);
+
+    if (value != null)
+      return value;
+
+    for (Map.Entry<String,Object> entry : _properties.entrySet()) {
+      if (entry.getKey().equalsIgnoreCase(key))
+	return entry.getValue();
+    }
+
+    return null;
   }
 
   String []getPropertyKeys()

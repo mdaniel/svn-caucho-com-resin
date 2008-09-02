@@ -271,6 +271,17 @@ public class WbComponentConfig {
   /**
    * Adds an init property
    */
+  public void addProperty(String name, Object value)
+  {
+    if (_init == null)
+      _init = new ContainerProgram();
+
+    _init.addProgram(new PropertyValueProgram(name, value));
+  }
+
+  /**
+   * Adds an init property
+   */
   public void addOptionalStringProperty(String name, String value)
   {
     if (_init == null)

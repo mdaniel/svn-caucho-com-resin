@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.loader.osgi;
+package com.caucho.loader;
 
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
@@ -40,11 +40,11 @@ import javax.annotation.PostConstruct;
 /**
  * Adds a new bundle to the current environment
  */
-public class OsgiBundleConfig
+public class ModuleConfig
 {
-  private static final L10N L = new L10N(OsgiBundleConfig.class);
+  private static final L10N L = new L10N(ModuleConfig.class);
   private static final Logger log
-    = Logger.getLogger(OsgiBundleConfig.class.getName());
+    = Logger.getLogger(ModuleConfig.class.getName());
 
   private Path _path;
 
@@ -52,13 +52,15 @@ public class OsgiBundleConfig
   private String _module;
   private String _rev;
 
+  private String _artifact;
+
   /**
    * Sets a specific path to a jar file
    */
   public void setPath(Path path)
   {
     if (! path.getTail().endsWith(".jar"))
-      throw new ConfigException(L.l("osgi-bundle path='{0}' must be a jar file.",
+      throw new ConfigException(L.l("module path='{0}' must be a jar file.",
 				    path));
 
     _path = path;
@@ -81,6 +83,14 @@ public class OsgiBundleConfig
   }
 
   /**
+   * Sets the artifact name (defaults to module)
+   */
+  public void setArtifact(String artifact)
+  {
+    _artifact = artifact;
+  }
+
+  /**
    * Sets the module version
    */
   public void setRev(String rev)
@@ -88,11 +98,18 @@ public class OsgiBundleConfig
     _rev = rev;
   }
 
+  /**
+   * Sets true if the bundle should be started automatically.
+   */
+  public void setStart(boolean isStart)
+  {
+  }
+
   @PostConstruct
   public void init()
   {
     if (_path == null && _module == null)
-      throw new ConfigException(L.l("osgi-bundle requires either a 'path' or a 'module' attribute"));
+      throw new ConfigException(L.l("module requires either a 'path' or a 'module' attribute"));
 
     Path path = null;
     
@@ -105,15 +122,15 @@ public class OsgiBundleConfig
       if (repository == null)
 	throw new IllegalStateException(L.l("ModuleRepository is not properly initialized"));
 
-      path = repository.findArtifact(_org, _module, _rev, "jar");
+      path = repository.findArtifact(_org, _module, _artifact, _rev, "jar");
     }
 
     if (path == null)
       throw new ConfigException(L.l("Can't find module '{0}'",
 				    _module));
 
-    OsgiManager manager = OsgiManager.create();
+    EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
 
-    manager.addStartupBundle(path);
+    loader.addJar(path);
   }
 }

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.loader.osgi;
+package com.caucho.osgi;
 
 import com.caucho.loader.*;
 import com.caucho.util.*;

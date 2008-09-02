@@ -193,7 +193,8 @@ public class BeanType extends ConfigType
       Attribute attr = _nsAttributeMap.get(name);
 
       if (attr == null) {
-	attr = _attributeMap.get(name.getLocalName());
+	// serer/2r10
+	attr = _attributeMap.get(name.getLocalName().toLowerCase());
 
 	if (attr != null)
 	  _nsAttributeMap.put(name, attr);

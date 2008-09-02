@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.loader.osgi;
+package com.caucho.osgi;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
@@ -245,7 +245,7 @@ public class OsgiBundleContext implements BundleContext
 						 String filter)
     throws InvalidSyntaxException
   {
-    return _manager.getServiceReferences(className, filter);
+    return _manager.getServiceReferences(_bundle, className, filter);
   }
 
   /**
@@ -255,7 +255,7 @@ public class OsgiBundleContext implements BundleContext
 						    String filter)
     throws InvalidSyntaxException
   {
-    return _manager.getAllServiceReferences(className, filter);
+    return _manager.getAllServiceReferences(_bundle, className, filter);
   }
 
   /**
@@ -263,7 +263,7 @@ public class OsgiBundleContext implements BundleContext
    */
   public ServiceReference getServiceReference(String className)
   {
-    return _manager.getServiceReference(className);
+    return _manager.getServiceReference(_bundle, className);
   }
 
   /**
@@ -271,9 +271,7 @@ public class OsgiBundleContext implements BundleContext
    */
   public Object getService(ServiceReference reference)
   {
-    OsgiServiceReference ref = (OsgiServiceReference) reference;
-
-    return ref.getService(_bundle);
+    return _bundle.getService(reference);
   }
 
   /**

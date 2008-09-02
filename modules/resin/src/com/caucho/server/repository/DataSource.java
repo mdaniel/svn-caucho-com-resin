@@ -44,6 +44,8 @@ import java.util.ArrayList;
  */
 public interface DataSource
 {
+  public String getName();
+  
   public InputStream openInputStream();
   
   public void close();

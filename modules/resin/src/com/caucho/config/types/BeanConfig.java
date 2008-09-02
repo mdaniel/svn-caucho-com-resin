@@ -209,7 +209,6 @@ public class BeanConfig extends WbComponentConfig {
     return _uri;
   }
   
-
   public void init()
   {
     super.init();

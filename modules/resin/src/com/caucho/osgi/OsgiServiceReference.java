@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.loader.osgi;
+package com.caucho.osgi;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
@@ -70,6 +70,8 @@ public class OsgiServiceReference implements ServiceReference
   private final String []_classNames;
 
   private final OsgiServiceRegistration _registration;
+
+  private ArrayList<OsgiBundle> _useList = new ArrayList<OsgiBundle>();
 
   OsgiServiceReference(OsgiManager manager,
 		       OsgiBundle bundle,
@@ -141,10 +143,21 @@ public class OsgiServiceReference implements ServiceReference
   }
 
   /**
+   * Returns the service registration
+   */
+  OsgiServiceRegistration getRegistration()
+  {
+    return _registration;
+  }
+  
+  /**
    * Returns the service object for the service
    */
   Object getService(OsgiBundle bundle)
   {
+    if (! _useList.contains(bundle))
+      _useList.add(bundle);
+    
     return _registration.getService();
   }
 
@@ -153,7 +166,27 @@ public class OsgiServiceReference implements ServiceReference
    */
   boolean ungetService(OsgiBundle bundle)
   {
+    if (_useList.remove(bundle)) {
+      bundle.ungetService(this);
+      
+      return true;
+    }
+    
     return false;
+  }
+
+  void unregister()
+  {
+    ArrayList<OsgiBundle> useList;
+
+    synchronized (_useList) {
+      useList = new ArrayList<OsgiBundle>(_useList);
+      _useList.clear();
+    }
+      
+    for (OsgiBundle bundle : useList) {
+      bundle.ungetService(this);
+    }
   }
 
   @Override

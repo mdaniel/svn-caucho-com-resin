@@ -34,7 +34,7 @@ import com.caucho.jmx.Jmx;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.loader.enhancer.ScanManager;
-import com.caucho.loader.osgi.OsgiManager;
+import com.caucho.osgi.OsgiManager;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.naming.Jndi;

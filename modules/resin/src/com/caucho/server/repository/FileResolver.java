@@ -37,6 +37,7 @@ import com.caucho.server.cache.TempFileInode;
 import com.caucho.server.cache.TempFileManager;
 import com.caucho.server.resin.Resin;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 import com.caucho.vfs.TempBuffer;
 
 import java.io.InputStream;
@@ -58,7 +59,7 @@ import javax.annotation.PostConstruct;
  * Default is [organization]/[module]/[artifact]-[rev].[ext]
  * Default is [organization]/[module]/ivy-[rev].xml
  */
-public class UrlResolver extends Resolver
+public class FileResolver extends Resolver
 {
   private static final L10N L = new L10N(UrlResolver.class);
   private static final Logger log
@@ -67,7 +68,7 @@ public class UrlResolver extends Resolver
   private TempFileManager _tempFileManager;
   private Path _path;
 
-  public UrlResolver()
+  public FileResolver()
   {
     _tempFileManager = Resin.getCurrent().getTempFileManager();
   }
@@ -104,6 +105,13 @@ public class UrlResolver extends Resolver
   {
     String urlString = resolveArtifactString(org, module, artifact, rev, ext);
 
+    Path path;
+
+    if (_path != null)
+      path = _path.lookup(urlString);
+    else
+      path = Vfs.lookup(urlString);
+
     TempFileInode inode = _tempFileManager.createInode();
 
     try {
@@ -113,25 +121,11 @@ public class UrlResolver extends Resolver
       if (sha1 == null)
 	md5 = loadChecksum(urlString, "md5");
 
-      URL url = null;
-
-      try {
-	url = new URL(urlString);
-      } catch (MalformedURLException e) {
-	throw new ConfigException(L.l("'{0}' is an invalid URL", urlString));
-      }
-
-      URLConnection conn = url.openConnection();
-
-      if (conn == null)
-	return null;
-
       InputStream is = null;
       try {
-	conn.connect();
-	int length = conn.getContentLength();
+	long length = path.getLength();
 	
-	is = conn.getInputStream();
+	is = path.openRead();
 
 	OutputStream out = inode.openOutputStream();
 
@@ -153,8 +147,8 @@ public class UrlResolver extends Resolver
 	TempBuffer.free(tempBuffer);
 
 	InodeDataSource dataSource
-	  = new InodeDataSource(urlString, inode);
-
+	  = new InodeDataSource(path.getURL(), inode);
+	
 	if (md5 != null)
 	  validateSignature(dataSource, md5, "MD5");
 
@@ -170,12 +164,12 @@ public class UrlResolver extends Resolver
       }
     } catch (SecurityException e) {
       throw new ModuleNotFoundException(L.l("{0} failed signature validation",
-					    urlString, e));
+					    path.getURL(), e));
     } catch (MalformedURLException e) {
       throw new ModuleNotFoundException(e);
     } catch (IOException e) {
       throw new ModuleNotFoundException(L.l("{0} is an unknown module",
-					    urlString),
+					    path.getURL()),
 					e);
     } catch (RuntimeException e) {
       throw e;
@@ -194,9 +188,14 @@ public class UrlResolver extends Resolver
     try {
       log.finer(urlString + " looking for checksum " + ext);
 
-      URL url = new URL(urlString + "." + ext);
+      Path path;
 
-      is = url.openStream();
+      if (_path != null)
+	path = _path.lookup(urlString + "." + ext);
+      else
+	path = Vfs.lookup(urlString + "." + ext);
+
+      is = path.openRead();
       StringBuilder sb = new StringBuilder();
       int ch;
 
