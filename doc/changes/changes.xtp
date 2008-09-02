@@ -13,6 +13,9 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>quercus: Page cache NPE (rep by Steven Grimm)</li>
+<li>quercus: getSpecialRef loop (rep by Paul Fisher)</li>
+<li>example: possible xss in example (rep by Antonio Varni)</li>
 <li>admin: ResinAdmin.getServer() should return null if server isn't ready (rep by Vinod Mehra)</li>
 <li>quercus: issues with compiled continue statement with following content (#2156, rep by koreth)</li>
 <li>quercus: private field checking (#585)</li>

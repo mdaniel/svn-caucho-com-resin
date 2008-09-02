@@ -28,7 +28,7 @@ public class MovieServlet extends HttpServlet {
 
     String director = request.getParameter("director");
 
-    if (director == null) {
+    if (director == null || director.indexOf('<') >= 0) {
       out.println("No director specified");
       return;
     }
