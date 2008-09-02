@@ -206,13 +206,14 @@ public class ServerArrayValue extends ArrayValueImpl {
 
     _isFilled = true;
 
-    for (Map.Entry<String,String> entry: System.getenv().entrySet()) {
+    for (Map.Entry<String,String> entry
+	   : System.getenv().entrySet()) {
       super.put(_env.createString(entry.getKey()),
 		_env.createString(entry.getValue()));
     }
 
-    for (Map.Entry<Value,Value> entry:
-        _env.getQuercus().getServerEnvMap().entrySet()) {
+    for (Map.Entry<Value,Value> entry
+	   : _env.getQuercus().getServerEnvMap().entrySet()) {
       super.put(entry.getKey(), entry.getValue());
     }
     
@@ -269,8 +270,7 @@ public class ServerArrayValue extends ArrayValueImpl {
                 _env.createString(root));
 
       super.put(SCRIPT_NAME_V,
-                _env.createString(contextPath +
-                                    servletPath));
+                _env.createString(contextPath + servletPath));
 
       if (queryString != null)
         requestURI = requestURI + '?' + queryString;

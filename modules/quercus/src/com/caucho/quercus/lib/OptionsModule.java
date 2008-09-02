@@ -608,12 +608,12 @@ public class OptionsModule extends AbstractQuercusModule {
     }
     
     if (hasRequest(env)) {
-      phpinfoVariable(env, "_REQUEST", env.getSpecialRef("_REQUEST"));
-      phpinfoVariable(env, "_GET", env.getSpecialRef("_GET"));
-      phpinfoVariable(env, "_POST", env.getSpecialRef("_POST"));
+      phpinfoVariable(env, "_REQUEST", env.getGlobalVar("_REQUEST"));
+      phpinfoVariable(env, "_GET", env.getGlobalVar("_GET"));
+      phpinfoVariable(env, "_POST", env.getGlobalVar("_POST"));
     }
 
-    phpinfoVariable(env, "_SERVER", env.getSpecialRef("_SERVER"));
+    phpinfoVariable(env, "_SERVER", env.getGlobalVar("_SERVER"));
     
     if (hasRequest(env))
       env.print("</table>");

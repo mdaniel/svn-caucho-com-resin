@@ -1599,7 +1599,10 @@ public class Env {
     if (var != null)
       return var;
 
-    var = getSpecialRef(name);
+    var = getGlobalSpecialRef(name);
+
+    if (var == null)
+      var = getGlobalScriptContextRef(name);
 
     if (var == null) {
       var = new Var();
@@ -1748,6 +1751,9 @@ public class Env {
   {
     Var var = _map.get(name);
 
+    // getRef should not be looking for the superglobals.  The
+    // parse-time code should convert those into direct global calls
+    /* (XXX: this should be deleted unless the regressions freak)
     if (var == null) {
       var = getSpecialRef(name);
 
@@ -1758,6 +1764,7 @@ public class Env {
         var = _map.get(name);
       }
     }
+    */
 
     return var;
   }
@@ -1778,7 +1785,11 @@ public class Env {
     Var var = _globalMap.get(name);
 
     if (var == null) {
-      var = getSpecialRef(name);
+      var = getGlobalSpecialRef(name);
+
+      if (var == null)
+	var = getGlobalScriptContextRef(name);
+      
       if (var == null)
 	var = new Var();
       
@@ -1791,9 +1802,16 @@ public class Env {
   /**
    * Gets a value.
    */
-  public Var getSpecialRef(String name)
+  protected Var getGlobalSpecialRef(String name)
   {
     Var var = null;
+
+    if (_map != _globalMap) {
+      var = _globalMap.get(name);
+      
+      if (var != null)
+	return var;
+    }
 
     switch (SPECIAL_VARS.get(name)) {
     case _ENV: {
@@ -1968,6 +1986,7 @@ public class Env {
     case HTTP_SERVER_VARS:
       if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
 	return null;
+      
     case _SERVER: {
       var = new Var();
 
@@ -1991,6 +2010,7 @@ public class Env {
     case HTTP_COOKIE_VARS:
       if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
 	return null;
+      
     case _COOKIE: {
       var = new Var();
       _globalMap.put(name, var);
@@ -2029,38 +2049,41 @@ public class Env {
 
       return var;
     }
-
-    default: {
-      if (_scriptContext != null) {
-        Object value = _scriptContext.getAttribute(name);
-
-        if (value == null) {
-          Bindings bindings
-          = _scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
-
-          if (bindings != null)
-            value = bindings.get(name);
-        }
-
-        if (value == null) {
-          Bindings bindings
-          = _scriptContext.getBindings(ScriptContext.GLOBAL_SCOPE);
-
-          if (bindings != null)
-            value = bindings.get(name);
-        }
-
-        if (value != null) {
-          var = new Var();
-          _globalMap.put(name, var);
-
-          var.set(wrapJava(value));
-
-          return var;
-        }
-      }
     }
-    } // end switch
+
+    return var;
+  }
+
+  protected Var getGlobalScriptContextRef(String name)
+  {
+    if (_scriptContext == null)
+      return null;
+
+    Var var = null;
+    Object value = _scriptContext.getAttribute(name);
+
+    if (value == null) {
+      Bindings bindings
+	= _scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
+
+      if (bindings != null)
+	value = bindings.get(name);
+    }
+
+    if (value == null) {
+      Bindings bindings
+	= _scriptContext.getBindings(ScriptContext.GLOBAL_SCOPE);
+
+      if (bindings != null)
+	value = bindings.get(name);
+    }
+
+    if (value != null) {
+      var = new Var();
+      _globalMap.put(name, var);
+
+      var.set(wrapJava(value));
+    }
 
     return var;
   }

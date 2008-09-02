@@ -144,7 +144,9 @@ public class ObjectExtValue extends ObjectValue
     while (iter.hasNext()) {
       Map.Entry<Value,Value> entry = iter.next();
       
-      initField(entry.getKey().toStringValue(), entry.getValue());
+      initField(entry.getKey().toStringValue(),
+		entry.getValue(),
+		FieldVisibility.PUBLIC);
     }
   }
 

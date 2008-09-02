@@ -225,7 +225,8 @@ public class Post {
     int error;
 
     // php/1667
-    long uploadMaxFilesize = env.getIniBytes("upload_max_filesize", 2 * 1024 * 1024);
+    long uploadMaxFilesize
+      = env.getIniBytes("upload_max_filesize", 2 * 1024 * 1024);
 
     if (fileName.length() == 0)
       // php/0864
@@ -389,7 +390,10 @@ public class Post {
     }
   }
 
-  private static void put(ArrayValue array, Value key, Value value, boolean addSlashes)
+  private static void put(ArrayValue array,
+			  Value key,
+			  Value value,
+			  boolean addSlashes)
   {
     if (addSlashes && (value instanceof StringValue)) {
       value = StringModule.addslashes(value.toStringValue());
