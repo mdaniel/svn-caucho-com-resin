@@ -812,8 +812,12 @@ public class Env {
 
     database = findDatabase(driver, url);
     
-    if (! _quercus.isConnectionPool())
-      return database.getConnection();
+    if (! _quercus.isConnectionPool()) {
+      if (userName == null || userName.equals(""))
+        return database.getConnection();
+      else
+        return database.getConnection(userName, password);
+    }
     
     ConnectionEntry entry = new ConnectionEntry();
     entry.init(database, userName, password);
