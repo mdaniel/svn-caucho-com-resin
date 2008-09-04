@@ -675,6 +675,7 @@ public final class ReadStream extends InputStream {
     char []buf = cb.getBuffer();
 
     byte []readBuffer = _readBuffer;
+    int startOffset = offset;
 
     while (true) {
       int readOffset = _readOffset;
@@ -715,7 +716,7 @@ public final class ReadStream extends InputStream {
       if (_readLength <= readOffset) {
 	if (! readBuffer()) {
 	  cb.setLength(offset);
-	  return offset > 0;
+	  return startOffset < offset;
 	}
       }
 

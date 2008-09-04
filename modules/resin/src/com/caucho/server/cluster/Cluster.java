@@ -80,7 +80,7 @@ public class Cluster implements EnvironmentListener {
   private long _clientWarmupTime = 60000L;
   private long _clientBusyTime = 15000L;
   
-  private long _clientReadTimeout = 60000L;
+  private long _clientReadTimeout = 600000L;
   private long _clientWriteTimeout = 60000L;
   private long _clientConnectTimeout = 5000L;
 
