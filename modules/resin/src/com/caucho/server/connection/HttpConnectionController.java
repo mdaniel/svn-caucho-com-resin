@@ -44,8 +44,9 @@ import com.caucho.util.*;
 public class HttpConnectionController extends ConnectionController
   implements CometController
 {
-  private AbstractHttpRequest _request;
-  private HashMap<String,Object> _map = new HashMap<String,Object>(8);
+  private HttpServletRequestImpl _request;
+  private HashMap<String,Object> _map
+    = new HashMap<String,Object>(8);
   
   private long _maxIdleTime;
 
@@ -54,17 +55,17 @@ public class HttpConnectionController extends ConnectionController
     this(getAbstractHttpRequest(request));
   }
 
-  public HttpConnectionController(AbstractHttpRequest request)
+  public HttpConnectionController(HttpServletRequestImpl request)
   {
     super(request.getConnection());
 
     _request = request;
   }
 
-  private static AbstractHttpRequest
+  private static HttpServletRequestImpl
     getAbstractHttpRequest(ServletRequest request)
   {
-    return (AbstractHttpRequest) request;
+    return (HttpServletRequestImpl) request;
   }
   
   /**
@@ -135,7 +136,7 @@ public class HttpConnectionController extends ConnectionController
 
   public String toString()
   {
-    AbstractHttpRequest request = _request;
+    HttpServletRequestImpl request = _request;
 
     if (request == null || request.getConnection() == null)
       return "HttpConnectionController[closed]";

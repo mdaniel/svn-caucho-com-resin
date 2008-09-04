@@ -2223,7 +2223,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	controller = conn.getController();
 
 	try {
-	  request.skip();
+	  if (controller == null || ! controller.isSuspended())
+	    request.skip();
 	} catch (BadRequestException e) {
 	  log.warning(e.toString());
 	  log.log(Level.FINE, e.toString(), e);
@@ -2236,7 +2237,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	handleNotModified(_isTopCache);
       }
 
-      if (controller != null && ! controller.isClosed())
+      if (controller != null && controller.isSuspended())
 	isClose = false;
 
       // include() files finish too, but shouldn't force a flush, hence
@@ -2246,7 +2247,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	_responseStream.close();
       else if (_responseStream != _originalResponseStream)
 	_responseStream.finish();
-      else if (controller == null)
+      else if (controller == null || ! controller.isSuspended())
 	_responseStream.finish();
       else
 	_responseStream.flush();

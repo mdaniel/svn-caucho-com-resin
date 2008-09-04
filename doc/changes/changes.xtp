@@ -13,6 +13,7 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>comet: avoid skip() at end of request for a comet call so input can be buffered (rep by David Peterson)</li>
 <li>(2008-09-02) quercus: Page cache NPE (rep by Steven Grimm)</li>
 <li>quercus: getSpecialRef loop (rep by Paul Fisher)</li>
 <li>example: possible xss in example (rep by Antonio Varni)</li>

@@ -33,8 +33,10 @@ import com.caucho.jca.UserTransactionProxy;
 import com.caucho.jca.UserTransactionImpl;
 import com.caucho.log.Log;
 import com.caucho.servlet.comet.CometFilterChain;
+import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
+import com.caucho.server.connection.HttpServletResponseImpl;
 import com.caucho.server.dispatch.AbstractFilterChain;
 import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.transaction.TransactionManagerImpl;
@@ -201,7 +203,7 @@ public class WebAppFilterChain extends AbstractFilterChain {
       }
 
       if (_isTop) {
-	((AbstractHttpResponse) response).close();
+	((CauchoResponse) response).close();
 	
 	try {
 	  if (ut != null)
@@ -270,7 +272,7 @@ public class WebAppFilterChain extends AbstractFilterChain {
       app.exitWebApp();
 
       if (_isTop) {
-	((AbstractHttpResponse) response).close();
+	((HttpServletResponseImpl) response).close();
 	
 	try {
 	  _utm.abortTransaction();

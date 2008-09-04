@@ -42,7 +42,12 @@ public class ConnectionController
     = Logger.getLogger(ConnectionController.class.getName());
 
   private Connection _conn;
+  
   private boolean _isTimeout;
+
+  private boolean _isInitial = true;
+  private boolean _isSuspended;
+  private boolean _isComplete;
 
   /**
    * Creates a new TcpConnectionController.
@@ -59,6 +64,58 @@ public class ConnectionController
   public Connection getConnection()
   {
     return _conn;
+  }
+
+  /**
+   * Returns true if the connection is the initial request
+   */
+  public final boolean isInitial()
+  {
+    return _isInitial;
+  }
+
+  /**
+   * Returns true if the connection should be suspended
+   */
+  public final boolean isSuspended()
+  {
+    return _isSuspended;
+  }
+
+  /**
+   * Suspend the connection on the next request
+   */
+  public final void suspend()
+  {
+    if (! _isComplete)
+      _isSuspended = true;
+  }
+
+  /**
+   * Returns true if the connection is complete.
+   */
+  public final boolean isComplete()
+  {
+    return _isComplete;
+  }
+
+  /**
+   * Complete the connection
+   */
+  public final void complete()
+  {
+    _isComplete = true;
+    _isSuspended = false;
+    wake();
+  }
+
+  /**
+   * Suspend the connection on the next request
+   */
+  public final void startResume()
+  {
+    _isSuspended = false;
+    _isInitial = false;
   }
   
   /**
@@ -119,6 +176,8 @@ public class ConnectionController
    */
   public void close()
   {
+    complete();
+    
     Connection conn = _conn;
     _conn = null;
 

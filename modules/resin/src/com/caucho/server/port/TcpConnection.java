@@ -587,8 +587,8 @@ public class TcpConnection extends Connection
 	 _port.addLifetimeWriteBytes(writeCount);
        }
 
-       // duplex (xmpp/hmtp) handling
        if (_state == ConnectionState.DUPLEX) {
+	 // duplex (xmpp/hmtp) handling
 	 isValid = true;
 	 _readTask.run();
 
@@ -600,8 +600,9 @@ public class TcpConnection extends Connection
 
 	   return RequestState.THREAD_DETACHED;
 	 }
-	 else
+	 else {
 	   return RequestState.EXIT;
+	 }
        }
      } while (isKeepalive
 	      && (result = keepaliveRead()) == RequestState.REQUEST);
@@ -780,9 +781,10 @@ public class TcpConnection extends Connection
       log.fine(dbgId() + " wake");
       return true;
     }
-
-    log.fine(dbgId() + " wake failed");
-    return false;
+    else {
+      log.fine(dbgId() + " wake failed");
+      return false;
+    }
   }
 
   /**

@@ -2645,7 +2645,6 @@ public abstract class AbstractHttpRequest
 
     if (comet == null) {
       _session = null;
-
       
       if (_attributes.size() > 0) {
 	for (Map.Entry<String,Object> entry : _attributes.entrySet()) {

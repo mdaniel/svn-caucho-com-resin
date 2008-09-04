@@ -34,6 +34,8 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.connection.ConnectionController;
+import com.caucho.server.connection.HttpServletRequestImpl;
+import com.caucho.server.connection.HttpServletResponseImpl;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.Invocation;
@@ -112,6 +114,9 @@ public class HttpRequest extends AbstractHttpRequest
   private ContentLengthStream _contentLengthStream = new ContentLengthStream();
 
   private ErrorPageManager _errorManager = new ErrorPageManager(null);
+
+  private HttpServletRequestImpl _requestFacade;
+  private HttpServletResponseImpl _responseFacade;
 
   private boolean _initAttributes;
 
@@ -277,7 +282,10 @@ public class HttpRequest extends AbstractHttpRequest
 
 	setInvocation(invocation);
 
-	invocation.service(this, _response);
+	_requestFacade = new HttpServletRequestImpl(this);
+	_responseFacade = new HttpServletResponseImpl(_response);
+
+	invocation.service(_requestFacade, _responseFacade);
       } finally {
 	finish();
       }
@@ -342,8 +350,12 @@ public class HttpRequest extends AbstractHttpRequest
 
 	if (controller == null) {
 	  killKeepalive();
+	  return false;
 	}
-	else if (_invocation.doResume(this, _response)) {
+
+	controller.startResume();
+
+	if (_invocation.doResume(_requestFacade, _responseFacade)) {
 	  controller = null;
 	  isResume = true;
 	}
@@ -1476,7 +1488,12 @@ public class HttpRequest extends AbstractHttpRequest
   {
     super.finish();
 
-    skip();
+    ConnectionController comet = getConnection().getController();
+
+    // on a comet request, don't skip the content
+    if (comet == null) {
+      skip();
+    }
   }
 
   protected String dbgId()

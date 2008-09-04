@@ -35,6 +35,8 @@ import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.Connection;
+import com.caucho.server.connection.HttpServletRequestImpl;
+import com.caucho.server.connection.HttpServletResponseImpl;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationDecoder;
@@ -265,6 +267,9 @@ public class HmuxRequest extends AbstractHttpRequest
 
   private int _srunIndex;
 
+  private HttpServletRequestImpl _requestFacade;
+  private HttpServletResponseImpl _responseFacade;
+
   public HmuxRequest(DispatchServer server,
 		     Connection conn,
 		     HmuxProtocol protocol)
@@ -448,8 +453,11 @@ public class HmuxRequest extends AbstractHttpRequest
 	invocation = invocation.getRequestInvocation(this);
 
 	setInvocation(invocation);
-      
-        invocation.service(this, _response);
+
+	_requestFacade = new HttpServletRequestImpl(this);
+	_responseFacade = new HttpServletResponseImpl(_response);
+
+        invocation.service(_requestFacade, _responseFacade);
       } catch (ClientDisconnectException e) {
         throw e;
       } catch (Throwable e) {

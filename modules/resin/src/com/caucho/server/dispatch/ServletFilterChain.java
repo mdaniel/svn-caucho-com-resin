@@ -132,6 +132,8 @@ public class ServletFilterChain extends AbstractFilterChain {
 			  ServletResponse response)
     throws ServletException, IOException
   {
+    doFilter(request, response);
+    
     return false;
   }
 
