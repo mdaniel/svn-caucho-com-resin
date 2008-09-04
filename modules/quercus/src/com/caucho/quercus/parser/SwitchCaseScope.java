@@ -41,22 +41,22 @@ import java.util.HashMap;
 /**
  * Parse scope.
  */
-public class FunctionScope extends Scope {
-  private final static L10N L = new L10N(FunctionScope.class);
+public class SwitchCaseScope extends Scope {
+  private final static L10N L = new L10N(SwitchCaseScope.class);
 
   private ExprFactory _exprFactory;
 
   private HashMap<String,Function> _functionMap
-  = new HashMap<String,Function>();
+    = new HashMap<String,Function>();
   
+  private HashMap<String,Function> _conditionalFunctionMap;
+
   private HashMap<String,InterpretedClassDef> _classMap
     = new HashMap<String,InterpretedClassDef>();
   
   private HashMap<String,InterpretedClassDef> _conditionalClassMap;
-  
-  private HashMap<String,Function> _conditionalFunctionMap;
 
-  FunctionScope(ExprFactory exprFactory, Scope parent)
+  SwitchCaseScope(ExprFactory exprFactory, Scope parent)
   {
     super(parent);
     
@@ -64,9 +64,9 @@ public class FunctionScope extends Scope {
   }
 
   /*
-   * Returns true if scope is local to a function.
+   * Returns true if scope is local to a switch case statement.
    */
-  public boolean isFunction()
+  public boolean isSwitchCase()
   {
     return true;
   }
@@ -118,7 +118,7 @@ public class FunctionScope extends Scope {
     
     if (existingClass == null)
       _classMap.put(name, cl);
-      
+    
     _parent.addConditionalClass(cl);
 
     return cl;
@@ -131,7 +131,7 @@ public class FunctionScope extends Scope {
   {
     if (_conditionalClassMap == null)
       _conditionalClassMap = new HashMap<String,InterpretedClassDef>(1);
-    
+
     _conditionalClassMap.put(def.getCompilationName(), def);
     
     _parent.addConditionalClass(def);

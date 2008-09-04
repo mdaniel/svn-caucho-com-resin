@@ -209,6 +209,30 @@ public class NetworkModule extends AbstractQuercusModule {
 
     return new LongValue(v);
   }
+  
+  /*
+   * Converts internet address in integer format to dotted format.
+   */
+  public static StringValue long2ip(Env env, long address)
+  {
+    if (address < 0L || address >= 0xFFFFFFFFL)
+      return env.createString("255.255.255.255");
+    
+    StringValue sb = env.createStringBuilder();
+    
+    sb.append((address & 0xFF000000L) >> 24);
+    sb.append('.');
+    
+    sb.append((address & 0xFF0000L) >> 16);
+    sb.append('.');
+    
+    sb.append((address & 0xFF00L) >> 8);
+    sb.append('.');
+    
+    sb.append(address & 0xFFL);
+    
+    return sb;
+  }
 
   /**
    * Returns the IP address of the given host name.  If the IP address cannot

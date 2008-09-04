@@ -788,6 +788,9 @@ public class Env {
     DataSource database = _quercus.getDatabase();
 
     if (database != null) {
+      if (! _quercus.isConnectionPool())
+        return database.getConnection();
+      
       ConnectionEntry entry = new ConnectionEntry();
       entry.init(database, null, null);
 
@@ -809,6 +812,9 @@ public class Env {
 
     database = findDatabase(driver, url);
     
+    if (! _quercus.isConnectionPool())
+      return database.getConnection();
+    
     ConnectionEntry entry = new ConnectionEntry();
     entry.init(database, userName, password);
 
@@ -828,7 +834,7 @@ public class Env {
 
       _connMap.put(entry, entry);
     }
-      
+
     return conn;
   }
 

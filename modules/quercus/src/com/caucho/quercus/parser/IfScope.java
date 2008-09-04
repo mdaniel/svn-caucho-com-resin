@@ -45,7 +45,6 @@ public class IfScope extends Scope {
   private final static L10N L = new L10N(IfScope.class);
 
   private ExprFactory _exprFactory;
-  private Scope _parentScope;
 
   private HashMap<String,Function> _functionMap
     = new HashMap<String,Function>();
@@ -57,19 +56,19 @@ public class IfScope extends Scope {
   
   private HashMap<String,InterpretedClassDef> _conditionalClassMap;
 
-  IfScope(ExprFactory exprFactory, Scope scope)
+  IfScope(ExprFactory exprFactory, Scope parent)
   {
-    _exprFactory = exprFactory;
+    super(parent);
     
-    _parentScope = scope;
+    _exprFactory = exprFactory;
   }
 
   /*
-   * Returns true if scope is local to a function.
+   * Returns true if scope is local to an IF statement.
    */
   public boolean isIf()
   {
-    return false;
+    return true;
   }
   
   /**
@@ -82,7 +81,7 @@ public class IfScope extends Scope {
     if (_functionMap.get(name) == null)
       _functionMap.put(name, function);
     
-    _parentScope.addConditionalFunction(function);
+    _parent.addConditionalFunction(function);
   }
   
   /*
@@ -95,7 +94,7 @@ public class IfScope extends Scope {
 
     _conditionalFunctionMap.put(function.getCompilationName(), function);
     
-    _parentScope.addConditionalFunction(function);
+    _parent.addConditionalFunction(function);
   }
 
   /**
@@ -120,7 +119,7 @@ public class IfScope extends Scope {
     if (existingClass == null)
       _classMap.put(name, cl);
     
-    _parentScope.addConditionalClass(cl);
+    _parent.addConditionalClass(cl);
 
     return cl;
   }
@@ -135,7 +134,7 @@ public class IfScope extends Scope {
 
     _conditionalClassMap.put(def.getCompilationName(), def);
     
-    _parentScope.addConditionalClass(def);
+    _parent.addConditionalClass(def);
   }
 }
 

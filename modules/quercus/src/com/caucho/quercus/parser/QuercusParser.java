@@ -1207,71 +1207,78 @@ public class QuercusParser {
 
       while ((token = parseToken()) == CASE || token == DEFAULT) {
         Location caseLocation = getLocation();
+        
+        Scope oldScope = _scope;
+        _scope = new SwitchCaseScope(_factory, oldScope);
+        
+        try {
 
-	ArrayList<Expr> valueList = new ArrayList<Expr>();
-	boolean isDefault = false;
-      
-	while (token == CASE || token == DEFAULT) {
-          if (token == CASE) {
-	    Expr value = parseExpr();
+          ArrayList<Expr> valueList = new ArrayList<Expr>();
+          boolean isDefault = false;
+            
+          while (token == CASE || token == DEFAULT) {
+            if (token == CASE) {
+              Expr value = parseExpr();
 
-	    valueList.add(value);
-	  }
-	  else
-	    isDefault = true;
+              valueList.add(value);
+            }
+            else
+              isDefault = true;
 
-	  token = parseToken();
-	  if (token == ':') {
-	  }
-	  else if (token == ';') {
-	    // XXX: warning?
-	  }
-	  else
-	    throw error("expected ':' at " + tokenName(token));
+            token = parseToken();
+            if (token == ':') {
+            }
+            else if (token == ';') {
+              // XXX: warning?
+            }
+            else
+              throw error("expected ':' at " + tokenName(token));
 
-	  token = parseToken();
-	}
+            token = parseToken();
+          }
 
-	_peekToken = token;
+          _peekToken = token;
 
-	Expr []values = new Expr[valueList.size()];
-	valueList.toArray(values);
+          Expr []values = new Expr[valueList.size()];
+          valueList.toArray(values);
 
-	ArrayList<Statement> newBlockList = parseStatementList();
+          ArrayList<Statement> newBlockList = parseStatementList();
 
-	for (int fallThrough : fallThroughList) {
-	  BlockStatement block = blockList.get(fallThrough);
+          for (int fallThrough : fallThroughList) {
+            BlockStatement block = blockList.get(fallThrough);
 
-	  boolean isDefaultBlock = block == defaultBlock;
+            boolean isDefaultBlock = block == defaultBlock;
 
-	  block = block.append(newBlockList);
+            block = block.append(newBlockList);
 
-	  blockList.set(fallThrough, block);
+            blockList.set(fallThrough, block);
 
-	  if (isDefaultBlock)
-	    defaultBlock = block;
-	}
-      
-	BlockStatement block
-	  = _factory.createBlockImpl(caseLocation, newBlockList);
+            if (isDefaultBlock)
+              defaultBlock = block;
+          }
+            
+          BlockStatement block
+            = _factory.createBlockImpl(caseLocation, newBlockList);
 
-	if (values.length > 0) {
-	  caseList.add(values);
+          if (values.length > 0) {
+            caseList.add(values);
 
-	  blockList.add(block);
-	}
+            blockList.add(block);
+          }
 
-	if (isDefault)
-	  defaultBlock = block;
+          if (isDefault)
+            defaultBlock = block;
 
-	if (blockList.size() > 0 &&
-	    ! fallThroughList.contains(blockList.size() - 1)) {
-	  fallThroughList.add(blockList.size() - 1);
-	}
+          if (blockList.size() > 0 &&
+              ! fallThroughList.contains(blockList.size() - 1)) {
+            fallThroughList.add(blockList.size() - 1);
+          }
 
-	  
-	if (block.fallThrough() != Statement.FALL_THROUGH)
-	  fallThroughList.clear();
+          if (block.fallThrough() != Statement.FALL_THROUGH)
+            fallThroughList.clear();
+        } finally {
+         _scope = oldScope;
+        }
       }
 
       _peekToken = token;
@@ -1740,8 +1747,18 @@ public class QuercusParser {
   private Statement parseBreak()
     throws IOException
   {
+    Scope scope = _scope;
+    
+    while (scope.isIf()) {
+      scope = scope.getParent();
+    }
+    
+    if (scope.isFunction()) {
+      throw error(L.l("cannot 'break' a function"));
+    }
+    
     Location location = getLocation();
-
+    
     int token = parseToken();
 
     switch (token) {
@@ -1765,6 +1782,15 @@ public class QuercusParser {
   private Statement parseContinue()
     throws IOException
   {
+    Scope scope = _scope;
+    
+    while (scope.isIf()) {
+      scope = scope.getParent();
+    }
+    
+    if (scope.isFunction())
+      throw error(L.l("cannot 'continue' a function"));
+    
     Location location = getLocation();
 
     int token = parseToken();
@@ -5126,8 +5152,9 @@ public class QuercusParser {
         _parserLocation.incrementLineNumber();
         _hasCr = true;
       }
-      else if (ch == '\n' && ! _hasCr)
+      else if (ch == '\n' && ! _hasCr) {
         _parserLocation.incrementLineNumber();
+      }
       else
         _hasCr = false;
 

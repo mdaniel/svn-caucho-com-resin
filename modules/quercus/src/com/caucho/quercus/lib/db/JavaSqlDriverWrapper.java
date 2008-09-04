@@ -35,11 +35,13 @@ import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.Properties;
 
+/*
+ * javax.sql.DataSource adapter for java.sql.Driver
+ */
 public class JavaSqlDriverWrapper implements javax.sql.DataSource
 {
   private Driver _driver;
   private String _url;
-  
   
   public JavaSqlDriverWrapper(Driver driver, String url)
   {

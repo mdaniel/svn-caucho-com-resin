@@ -133,7 +133,7 @@ public class ObjectExtValue extends ObjectValue
     
     Entry []entries = _entries;
     
-    _entries = new Entry[DEFAULT_SIZE];
+    _entries = new Entry[_entries.length];
     _hashMask = _entries.length - 1;
     _size = 0;
     
@@ -142,11 +142,17 @@ public class ObjectExtValue extends ObjectValue
     EntryIterator iter = new EntryIterator(entries);
     
     while (iter.hasNext()) {
-      Map.Entry<Value,Value> entry = iter.next();
+      Map.Entry<Value,Value> field = iter.next();
       
-      initField(entry.getKey().toStringValue(),
-		entry.getValue(),
-		FieldVisibility.PUBLIC);
+      StringValue key = field.getKey().toStringValue();
+      Value value = field.getValue();
+      
+      Entry entry = getEntry(key);
+      
+      if (entry != null)
+        entry._value = value;
+      else
+        initField(key, field.getValue(), FieldVisibility.PUBLIC);
     }
   }
 

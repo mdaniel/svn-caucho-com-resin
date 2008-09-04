@@ -194,6 +194,22 @@ public class QuercusServlet
   {
     getQuercus().setStrict(isStrict);
   }
+  
+  /*
+   * Sets the max size of the page cache.
+   */
+  public void setPageCacheEntries(int entries)
+  {
+    getQuercus().setPageCacheEntries(entries);
+  }
+  
+  /*
+   * Turns connection pooling on or off.
+   */
+  public void setConnectionPool(boolean isEnable)
+  {
+    getQuercus().setConnectionPool(isEnable);
+  }
 
   /**
    * Adds a quercus module.
@@ -350,6 +366,12 @@ public class QuercusServlet
     }
     else if ("strict".equals(paramName)) {
       setStrict("true".equals(paramValue));
+    }
+    else if ("page-cache-entries".equals(paramName)) {
+      setPageCacheEntries(Integer.parseInt(paramValue));
+    }
+    else if ("connection-pool".equals(paramName)) {
+      setConnectionPool("true".equals(paramValue));
     }
     else
       throw new ServletException(L.l("'{0}' is not a recognized init-param", paramName));

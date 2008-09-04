@@ -39,6 +39,18 @@ import java.util.ArrayList;
  * Parse scope.
  */
 abstract public class Scope {
+  
+  protected Scope _parent;
+  
+  public Scope()
+  {
+  }
+  
+  public Scope(Scope parent)
+  {
+    _parent = parent;
+  }
+  
   /**
    * Returns true for an abstract scope, e.g. an abstract class or an
    * interface.
@@ -73,11 +85,27 @@ abstract public class Scope {
   }
   
   /*
-   * Returns true if scope is local to a function.
+   * Returns true if scope is local to an IF statement.
    */
   public boolean isIf()
   {
     return false;
+  }
+  
+  /*
+   * Returns true if scope is local to a switch case statement.
+   */
+  public boolean isSwitchCase()
+  {
+    return false;
+  }
+  
+  /*
+   * Returns the parent scope.
+   */
+  public Scope getParent()
+  {
+    return _parent;
   }
   
   /**

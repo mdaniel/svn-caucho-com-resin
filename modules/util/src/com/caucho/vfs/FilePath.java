@@ -149,6 +149,28 @@ public class FilePath extends FilesystemPath {
     else
       return path;
   }
+  
+  @Override
+  public long getDiskSpaceFree()
+  {
+    try {
+      // JDK 1.6+ only
+      return _file.getFreeSpace();
+    } catch (Exception e) {
+      return 0;
+    }
+  }
+
+  @Override
+  public long getDiskSpaceTotal()
+  {
+    try {
+      // JDK 1.6+ only
+      return _file.getTotalSpace();
+    } catch (Exception e) {
+      return 0;
+    }
+  }
 
   /**
    * Lookup the path, handling windows weirdness

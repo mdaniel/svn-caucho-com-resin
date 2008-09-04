@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.Quercus;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.annotation.Name;
@@ -42,6 +43,24 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class QuercusModule extends AbstractQuercusModule
 {
+  /*
+   * Returns the Quercus object.
+   */
+  @Name("quercus_get_quercus")
+  public static Quercus get_quercus(Env env)
+  {
+    return env.getQuercus();
+  }
+  
+  /*
+   * Returns the Env object.
+   */
+  @Name("quercus_get_env")
+  public static Env get_env(Env env)
+  {
+    return env;
+  }
+  
   /**
    * Returns the version of Quercus.
    */

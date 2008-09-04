@@ -131,6 +131,23 @@ public class PageManager
   {
     _isCompileFailover = isCompileFailover;
   }
+  
+  /*
+   * Gets the max size of the page cache.
+   */
+  public int getPageCacheEntries()
+  {
+    return _programCache.getCapacity();
+  }
+  
+  /*
+   * Sets the max size of the page cache.
+   */
+  public void setPageCacheEntries(int entries)
+  {
+    if (_programCache.getCapacity() != entries)
+      _programCache = new LruCache<Path,QuercusProgram>(entries);
+  }
 
   /**
    * true if the manager is active.

@@ -1977,7 +1977,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value getThisFieldArray(Env env, StringValue name)
   {
-    Value v = getField(env, name);
+    Value v = getThisField(env, name);
 
     Value array = v.toAutoArray();
 

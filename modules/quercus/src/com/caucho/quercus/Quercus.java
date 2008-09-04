@@ -156,6 +156,8 @@ public class Quercus
 
   private boolean _isStrict;
   private boolean _isRequireSource;
+  
+  private boolean _isConnectionPool = true;
 
   private DataSource _database;
 
@@ -528,6 +530,25 @@ public class Quercus
     return _isStrict;
   }
   
+  /*
+   * Gets the max size of the page cache.
+   */
+  public int getPageCacheEntries()
+  {
+    return _pageManager.getPageCacheEntries();
+  }
+  
+  /*
+   * Sets the capacity of the page cache.
+   */
+  public void setPageCacheEntries(int entries)
+  {
+    _pageManager.setPageCacheEntries(entries);
+  }
+  
+  /*
+   * Set to true if compiled pages need to be backed by php source files.
+   */
   public void setRequireSource(boolean isRequireSource)
   {
     _isRequireSource = isRequireSource;
@@ -539,6 +560,22 @@ public class Quercus
   public boolean isRequireSource()
   {
     return _isRequireSource;
+  }
+  
+  /*
+   * Turns connection pooling on or off.
+   */
+  public void setConnectionPool(boolean isEnable)
+  {
+    _isConnectionPool = isEnable;
+  }
+  
+  /*
+   * Returns true if connections should be pooled.
+   */
+  public boolean isConnectionPool()
+  {
+    return _isConnectionPool;
   }
 
   /**
