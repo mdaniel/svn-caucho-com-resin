@@ -1466,7 +1466,12 @@ public class HttpRequest extends AbstractHttpRequest
   {
     super.finish();
 
-    skip();
+    ConnectionController comet = getConnection().getController();
+
+    // on a comet request, don't skip the content
+    if (comet == null) {
+      skip();
+    }
   }
 
   protected String dbgId()

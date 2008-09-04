@@ -1705,6 +1705,13 @@ public class Env {
   {
     Var var = null;
 
+    if (_map != _globalMap) {
+      var = _globalMap.get(name);
+      
+      if (var != null)
+	return var;
+    }
+
     switch (SPECIAL_VARS.get(name)) {
     case _ENV: {
       var = new Var();

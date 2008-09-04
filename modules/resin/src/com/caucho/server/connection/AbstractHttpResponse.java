@@ -2158,7 +2158,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	controller = conn.getController();
 
 	try {
-	  request.skip();
+	  if (controller == null)
+	    request.skip();
 	} catch (BadRequestException e) {
 	  log.warning(e.toString());
 	  log.log(Level.FINE, e.toString(), e);

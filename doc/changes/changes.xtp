@@ -12,11 +12,14 @@
 
 <s2 title="3.1.8 snapshot">
 <ul>
+<li>comet: avoid skip() at end of request for a comet call so input can be buffered (rep by David Peterson)</li>
 </ul>
 </s2>
 
 <s2 title="3.1.7 release">
 <ul>
+<li>jsp: virtual host should not add 'name' as webbean value (#2807, rep by hpri)</li>
+<li>jsp: validation of tag dynamic-attributes generated improper XML (#2808, rep by hpri)</li>
 <li>isapi: chunked encoding needs to filter out content-length (#2849, rep by Trieu Truong)</li>
 <li>jstl: restoring request attributes named after <i>var</i> in c:forEach (#2804, rep by bregnvig)</li>
 <li>jmx: update _parent handling for environment JMX to avoid loop (#2848, rep by Rajasekar Elango)</li>
