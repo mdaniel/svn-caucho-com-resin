@@ -1350,15 +1350,13 @@ public class QuercusParser {
     boolean oldTop = _isTop;
     _isTop = false;
 
-    Scope oldScope = null;
+    Scope oldScope = _scope;
+    _scope = new WhileScope(_factory, oldScope);
     
     try {
       Location location = getLocation();
 
       Statement block = parseStatement();
-
-      oldScope = _scope;
-      _scope = new WhileScope(_factory, oldScope);
       
       expect(WHILE);
       expect('(');
@@ -1373,8 +1371,7 @@ public class QuercusParser {
     } finally {
       _isTop = oldTop;
       
-      if (oldScope != null)
-        _scope = oldScope;
+      _scope = oldScope;
     }
   }
 
