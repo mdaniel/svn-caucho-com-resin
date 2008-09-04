@@ -1782,7 +1782,7 @@ public class QuercusParser {
   {
     Scope scope = _scope;
     
-    while (scope.isIf()) {
+    while (scope.isIf() || scope.isTry()) {
       scope = scope.getParent();
     }
     
@@ -1817,7 +1817,7 @@ public class QuercusParser {
   {
     Scope scope = _scope;
     
-    while (scope.isIf()) {
+    while (scope.isIf() || scope.isTry()) {
       scope = scope.getParent();
     }
     
