@@ -208,7 +208,7 @@ spawn_java(char *exe, char **args)
 		int ok = CreateProcess(0, childarg, 0, 0, FALSE, flag, 
 					           0, 0, 
 							   &startInfo,
-							   &procInfo);
+							   &g_procInfo_buf);
 
 		if (! ok) {
 			closesocket(sock);
@@ -219,15 +219,15 @@ spawn_java(char *exe, char **args)
 		g_procInfo = &g_procInfo_buf;
 		g_keepalive_handle = sock;
 
-		WaitForSingleObject(procInfo.hProcess, INFINITE);
+		WaitForSingleObject(g_procInfo_buf.hProcess, INFINITE);
 		DWORD status;
-		GetExitCodeProcess(procInfo.hProcess, &status);
+		GetExitCodeProcess(g_procInfo_buf.hProcess, &status);
 		if (g_keepalive_handle >= 0)
 			closesocket(g_keepalive_handle);
 		g_keepalive_handle = -1;
 		CloseHandle(g_procInfo_buf.hThread);
 		CloseHandle(g_procInfo_buf.hProcess);
-		g_profInfo = 0;
+		g_procInfo = 0;
 
 		if (status == 66 || g_is_standalone)
 			return status;
