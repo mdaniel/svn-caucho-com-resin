@@ -1305,6 +1305,9 @@ public class QuercusParser {
     boolean oldTop = _isTop;
     _isTop = false;
 
+    Scope oldScope = _scope;
+    _scope = new WhileScope(_factory, oldScope);
+    
     try {
       Location location = getLocation();
 
@@ -1334,6 +1337,7 @@ public class QuercusParser {
       return _factory.createWhile(location, test, block);
     } finally {
       _isTop = oldTop;
+      _scope = oldScope;
     }
   }
 
@@ -1346,11 +1350,16 @@ public class QuercusParser {
     boolean oldTop = _isTop;
     _isTop = false;
 
+    Scope oldScope = null;
+    
     try {
       Location location = getLocation();
 
       Statement block = parseStatement();
 
+      oldScope = _scope;
+      _scope = new WhileScope(_factory, oldScope);
+      
       expect(WHILE);
       expect('(');
 
@@ -1363,6 +1372,9 @@ public class QuercusParser {
       return _factory.createDo(location, test, block);
     } finally {
       _isTop = oldTop;
+      
+      if (oldScope != null)
+        _scope = oldScope;
     }
   }
 
@@ -1375,6 +1387,9 @@ public class QuercusParser {
     boolean oldTop = _isTop;
     _isTop = false;
 
+    Scope oldScope = _scope;
+    _scope = new WhileScope(_factory, oldScope);
+    
     try {
       Location location = getLocation();
 
@@ -1429,6 +1444,7 @@ public class QuercusParser {
       return _factory.createFor(location, init, test, incr, block);
     } finally {
       _isTop = oldTop;
+      _scope = oldScope;
     }
   }
 
@@ -1441,6 +1457,9 @@ public class QuercusParser {
     boolean oldTop = _isTop;
     _isTop = false;
 
+    Scope oldScope = _scope;
+    _scope = new WhileScope(_factory, oldScope);
+    
     try {
       Location location = getLocation();
 
@@ -1508,6 +1527,7 @@ public class QuercusParser {
 				    valueVar, isRef, block);
     } finally {
       _isTop = oldTop;
+      _scope = oldScope;
     }
   }
 
@@ -1519,30 +1539,46 @@ public class QuercusParser {
   {
     boolean oldTop = _isTop;
     _isTop = false;
-
+    
     try {
       Location location = getLocation();
 
-      Statement block = parseStatement();
+      Scope oldScope = _scope;
+      _scope = new TryScope(_factory, oldScope);
+      
+      Statement block = null;
+      
+      try {
+        block = parseStatement();
+      } finally {
+        _scope = oldScope;
+      }
 
       TryStatement stmt = _factory.createTry(location, block);
       
       int token = parseToken();
 
       while (token == CATCH) {
-        expect('(');
+        oldScope = _scope;
+        _scope = new TryScope(_factory, oldScope);
         
-        String id = parseIdentifier();
+        try {
+          expect('(');
+          
+          String id = parseIdentifier();
 
-        AbstractVarExpr lhs = parseLeftHandSide();
-        
-        expect(')');
+          AbstractVarExpr lhs = parseLeftHandSide();
+          
+          expect(')');
 
-        block = parseStatement();
+          block = parseStatement();
 
-        stmt.addCatch(id, lhs, block);
+          stmt.addCatch(id, lhs, block);
 
-        token = parseToken();
+          token = parseToken();
+        } finally {
+          _scope = oldScope;
+        }
       }
 
       _peekToken = token;

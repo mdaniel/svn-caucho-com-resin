@@ -101,6 +101,22 @@ abstract public class Scope {
   }
   
   /*
+   * Returns true if scope is local to a while statement.
+   */
+  public boolean isWhile()
+  {
+    return false;
+  }
+  
+  /*
+   * Returns true if scope is local to a try statement.
+   */
+  public boolean isTry()
+  {
+    return false;
+  }
+  
+  /*
    * Returns the parent scope.
    */
   public Scope getParent()
