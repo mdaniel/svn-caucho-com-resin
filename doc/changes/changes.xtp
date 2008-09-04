@@ -13,7 +13,11 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
-<li>comet: avoid skip() at end of request for a comet call so input can be buffered (rep by David Peterson)</li>
+<li>quercus: json utf-8 fixes (#2092, rep by hendler)</li>
+<li>quercus: add PEAR path automatically to include path (#844)</li>
+<li>deploy: .git repository should only be created when used (#2885, rep by iRideSnow)</li>
+<li>server: add server to default error page (#2903, rep by Alex Sharaz)</li>
+<li>comet: avoid skip() at end of request for a comet call so input can be buffered (#2870, rep by David Peterson)</li>
 <li>(2008-09-02) quercus: Page cache NPE (rep by Steven Grimm)</li>
 <li>quercus: getSpecialRef loop (rep by Paul Fisher)</li>
 <li>example: possible xss in example (rep by Antonio Varni)</li>
@@ -62,6 +66,12 @@
 <li>server: add port-default as a configuration item (#2798, rep by Eric Masson)</li>
 <li>configure: make install needs to work even if the libexec fails (#2815, rep by stephaneeybert)</li>
 <li>quercus: intval was ignoring base param (#2817, rep by stephaneeybert)</li>
+</ul>
+</s2>
+
+<s2 title="3.2.0a">
+<ul>
+<li>build error missing final JNI updates</li>
 </ul>
 </s2>
 

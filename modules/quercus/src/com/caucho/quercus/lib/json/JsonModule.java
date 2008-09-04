@@ -190,65 +190,101 @@ public class JsonModule
       char c = val.charAt(i);
 
       switch (c) {
-        case '\b':
-          sb.append('\\');
-          sb.append('b');
-          break;
-        case '\f':
-          sb.append('\\');
-          sb.append('f');
-          break;
-        case '\n':
-          sb.append('\\');
-          sb.append('n');
-          break;
-        case '\r':
-          sb.append('\\');
-          sb.append('r');
-          break;
-        case '\t':
-          sb.append('\\');
-          sb.append('t');
-          break;
-        case '\\':
-          sb.append('\\');
-          sb.append('\\');
-          break;
-        case '"':
-          sb.append('\\');
-          sb.append('"');
-          break;
-        case '/':
-          sb.append('\\');
-          sb.append('/');
-          break;
-        default:
-          if (c > 0x1F) {
-            sb.append(c);
-            break;
-          }
+      case '\b':
+	sb.append('\\');
+	sb.append('b');
+	break;
+      case '\f':
+	sb.append('\\');
+	sb.append('f');
+	break;
+      case '\n':
+	sb.append('\\');
+	sb.append('n');
+	break;
+      case '\r':
+	sb.append('\\');
+	sb.append('r');
+	break;
+      case '\t':
+	sb.append('\\');
+	sb.append('t');
+	break;
+      case '\\':
+	sb.append('\\');
+	sb.append('\\');
+	break;
+      case '"':
+	sb.append('\\');
+	sb.append('"');
+	break;
+      case '/':
+	sb.append('\\');
+	sb.append('/');
+	break;
+      default:
+	if (c <= 0x1f) {
+	  addUnicode(sb, c);
+	}
+	else if (c < 0x80) {
+	  sb.append(c);
+	}
+	else if ((c & 0xe0) == 0xc0 && i + 1 < len) {
+	  int c1 = val.charAt(i + 1);
+	  i++;
 
-          // Need to escape control chars in range 0-0x1F
-          sb.append('\\');
-          sb.append('u');
-          sb.append('0');
-          sb.append('0');
+	  int ch = ((c & 0x1f) << 6) + (c1 & 0x3f);
 
-          if (c <= 0x0F)
-            sb.append('0');
-          else {
-            sb.append('1');
-            c &= 0x0F;
-          }
+	  addUnicode(sb, ch);
+	}
+	else if ((c & 0xf0) == 0xe0 && i + 2 < len) {
+	  int c1 = val.charAt(i + 1);
+	  int c2 = val.charAt(i + 2);
+	  
+	  i += 2;
 
-          if (c <= 0x09)
-            c += '0';
-          else
-            c += 'a' - 10;
+	  int ch = ((c & 0x0f) << 12) + ((c1 & 0x3f) << 6) + (c2 & 0x3f);
 
-          sb.append(c);
+	  addUnicode(sb, ch);
+	}
+	else {
+	  // technically illegal
+	  addUnicode(sb, c);
+	}
+
+	break;
       }
     }
+  }
+
+  private void addUnicode(StringValue sb, int c)
+  {
+    sb.append('\\');
+    sb.append('u');
+
+    int d = (c >> 12) & 0xf;
+    if (d < 10)
+      sb.append((char) ('0' + d));
+    else
+      sb.append((char) ('a' + d - 10));
+    
+    d = (c >> 8) & 0xf;
+    if (d < 10)
+      sb.append((char) ('0' + d));
+    else
+      sb.append((char) ('a' + d - 10));
+    
+    d = (c >> 4) & 0xf;
+    if (d < 10)
+      sb.append((char) ('0' + d));
+    else
+      sb.append((char) ('a' + d - 10));
+    
+    d = (c) & 0xf;
+    if (d < 10)
+      sb.append((char) ('0' + d));
+    else
+      sb.append((char) ('a' + d - 10));
   }
 
   /**

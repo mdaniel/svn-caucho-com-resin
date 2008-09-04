@@ -51,7 +51,7 @@ import com.caucho.vfs.*;
  *
  * The URL looks like
  * <pre>
- * file:name=my-name;path=file:/var/www/webapps/test/WEB-INFjms
+ * file:name=my-name;path=file:/var/www/webapps/test/WEB-INF/jms
  * </pre>
  *
  * It is configured as:

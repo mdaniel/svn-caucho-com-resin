@@ -273,7 +273,26 @@ public class Server extends ProtocolDispatchServer
    */
   public GitRepository getGit()
   {
-    return _git;
+    synchronized (this) {
+      if (_git == null && _resin != null) {
+	// initialize git repository
+	Path root = _resin.getRootDirectory();
+
+	// QA
+	if (root instanceof MemoryPath)
+	  root = Vfs.lookup("file:/tmp/caucho/qa");
+
+	_git = new GitRepository(root.lookup(".git"));
+
+	try {
+	  _git.initDb();
+	} catch (Exception e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
+      }
+      
+      return _git;
+    }
   }
 
   /**
@@ -1272,23 +1291,6 @@ public class Server extends ProtocolDispatchServer
     _classLoader.init();
 
     super.init();
-
-    // initialize git repository
-    if (_resin != null) {
-      Path root = _resin.getRootDirectory();
-
-      // QA
-      if (root instanceof MemoryPath)
-	root = Vfs.lookup("file:/tmp/caucho/qa");
-
-      _git = new GitRepository(root.lookup(".git"));
-
-      try {
-	_git.initDb();
-      } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
-      }
-    }
 
     // backwards compat
     if (_resin != null && _resin.getManagementPath() != null)

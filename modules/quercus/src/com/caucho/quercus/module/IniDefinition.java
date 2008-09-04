@@ -162,9 +162,7 @@ public class IniDefinition {
    */
   public void set(Quercus quercus, String value)
   {
-    set(quercus.getIniMap(true),
-        PHP_INI_SYSTEM,
-        new StringBuilderValue(value));
+    set(quercus, new StringBuilderValue(value));
   }
 
   /**

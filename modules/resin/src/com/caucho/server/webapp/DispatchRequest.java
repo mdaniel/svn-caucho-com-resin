@@ -65,8 +65,8 @@ class DispatchRequest extends RequestAdapter {
   protected static final Logger log
     = Logger.getLogger(DispatchRequest.class.getName());
 
-  private static final FreeList<DispatchRequest> _freeList =
-    new FreeList<DispatchRequest>(32);
+  private static final FreeList<DispatchRequest> _freeList
+    = new FreeList<DispatchRequest>(32);
 
   private WebApp _webApp;
   private WebApp _oldWebApp;

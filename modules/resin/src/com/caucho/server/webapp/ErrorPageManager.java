@@ -466,6 +466,9 @@ public class ErrorPageManager {
 	out.println("<small>");
 	
 	out.println(version);
+	
+	if (Resin.getCurrent() != null)
+	  out.println("Server: '" + Resin.getCurrent().getServerId() + "'");
 	  
 	out.println("</small>");
       }

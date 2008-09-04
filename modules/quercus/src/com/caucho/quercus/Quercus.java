@@ -188,6 +188,8 @@ public class Quercus
     _workDir = getWorkDir();
 
     _iniDefinitions.addAll(_ini);
+
+    initLocal();
   }
 
   public Env createEnv(QuercusPage page,
@@ -1788,6 +1790,29 @@ public class Quercus
     _staticClasses.put(exn.getName(), exn);
     _lowerStaticClasses.put(exn.getName().toLowerCase(), exn);
     */
+  }
+
+  /**
+   * Initialize local configuration, e.g. finding the PHP and PEAR libraries
+   */
+  protected void initLocal()
+  {
+    StringBuilder sb = new StringBuilder(".");
+
+    Path pwd = getPwd();
+
+    String []paths = new String[] {
+      "/usr/share/php", "/usr/lib/php", "/usr/local/lib/php",
+      "/usr/share/pear", "/usr/lib/pear", "/usr/local/lib/pear"
+    };
+
+    for (String path : paths) {
+      if (pwd.lookup(path).isDirectory()) {
+	sb.append(":").append(pwd.lookup(path).getPath());
+      }
+    }
+
+    setIni("include_path", sb.toString());
   }
 
   public void start()

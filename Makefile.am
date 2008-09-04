@@ -25,10 +25,9 @@ install	:
 	  mkdir -p $(PREFIX)/ext-webapp-lib; \
 	  cp -r php/* $(PREFIX)/ext-webapp-lib; \
 	  mkdir -p $(PREFIX)/conf; \
-	  cp conf/resin.conf $(PREFIX)/conf/resin.conf.orig; \
 	  cp conf/app-default.xml $(PREFIX)/conf/app-default.xml.orig; \
-	  if test ! -r $(PREFIX)/conf/resin.conf; then \
-	    cp conf/resin.conf $(PREFIX)/conf/resin.conf; \
+	  if test ! -r $(PREFIX)/conf/resin.xml; then \
+	    cp conf/resin.xml $(PREFIX)/conf/resin.xml; \
 	    cp conf/app-default.xml $(PREFIX)/conf/app-default.xml; \
 	  fi; \
 	fi

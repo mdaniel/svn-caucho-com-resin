@@ -74,26 +74,26 @@ class JsonDecoder {
           return decodeString(env);
 
         case 't':
-          if (read() == 'r' &&
-              read() == 'u' &&
-              read() == 'e')
+          if (read() == 'r'
+	      && read() == 'u'
+	      && read() == 'e')
             return BooleanValue.TRUE;
           else
             return errorReturn(env, "expected 'true'");
 
         case 'f':
-          if (read() == 'a' &&
-              read() == 'l' &&
-              read() == 's' &&
-              read() == 'e')
+          if (read() == 'a'
+	      && read() == 'l'
+	      && read() == 's'
+	      && read() == 'e')
             return BooleanValue.FALSE;
           else
             return errorReturn(env, "expected 'false'");
 
         case 'n':
-          if (read() == 'u' &&
-              read() == 'l' &&
-              read() == 'l')
+          if (read() == 'u'
+	      && read() == 'l'
+	      && read() == 'l')
             return NullValue.NULL;
           else
             return errorReturn(env, "expected 'null'");
@@ -314,64 +314,74 @@ class JsonDecoder {
 
       switch (ch) {
         // Escaped Characters
-        case '\\':
-          ch = read();
-          if (ch < 0)
-            return errorReturn(env, "invalid escape character");
+      case '\\':
+	ch = read();
+	if (ch < 0)
+	  return errorReturn(env, "invalid escape character");
 
-          switch (ch) {
-            case '"':
-              sbv.append('"');
-              break;
-            case '\\':
-              sbv.append('\\');
-              break;
-            case '/':
-              sbv.append('/');
-              break;
-            case 'b':
-              sbv.append('\b');
-              break;
-            case 'f':
-              sbv.append('\f');
-              break;
-            case 'n':
-              sbv.append('\n');
-              break;
-            case 'r':
-              sbv.append('\r');
-              break;
-            case 't':
-              sbv.append('\t');
-              break;
-            case 'u':
-            case 'U':
-              int hex = 0;
+	switch (ch) {
+	case '"':
+	  sbv.append('"');
+	  break;
+	case '\\':
+	  sbv.append('\\');
+	  break;
+	case '/':
+	  sbv.append('/');
+	  break;
+	case 'b':
+	  sbv.append('\b');
+	  break;
+	case 'f':
+	  sbv.append('\f');
+	  break;
+	case 'n':
+	  sbv.append('\n');
+	  break;
+	case 'r':
+	  sbv.append('\r');
+	  break;
+	case 't':
+	  sbv.append('\t');
+	  break;
+	case 'u':
+	case 'U':
+	  int hex = 0;
 
-              for (int i = 0; i < 4; i++) {
-                hex = hex << 4;
-                ch = read();
+	  for (int i = 0; i < 4; i++) {
+	    hex = hex << 4;
+	    ch = read();
 
-                if ('0' <= ch && ch <= '9')
-                  hex += ch - '0';
-                else if (ch >= 'a' && ch <= 'f')
-                  hex += ch - 'a' + 10;
-                else if (ch >= 'A' && ch <= 'F')
-                  hex += ch - 'A' + 10;
-                else
-                  return errorReturn(env, "invalid escaped hex character");
-              }
+	    if ('0' <= ch && ch <= '9')
+	      hex += ch - '0';
+	    else if (ch >= 'a' && ch <= 'f')
+	      hex += ch - 'a' + 10;
+	    else if (ch >= 'A' && ch <= 'F')
+	      hex += ch - 'A' + 10;
+	    else
+	      return errorReturn(env, "invalid escaped hex character");
+	  }
 
-              sbv.append((char)hex);
+	  System.out.println("HEX: " + hex);
+	  if (hex < 0x80)
+	    sbv.append((char)hex);
+	  else if (hex < 0x800) {
+	    sbv.append((char) (0xc0 + (hex >> 6)));
+	    sbv.append((char) (0x80 + (hex & 0x3f)));
+	  }
+	  else {
+	    sbv.append((char) (0xe0 + (hex >> 12)));
+	    sbv.append((char) (0x80 + ((hex >> 6) & 0x3f)));
+	    sbv.append((char) (0x80 + (hex & 0x3f)));
+	  }
+	}
+	break;
 
-          }
-          break;
+      case '"':
+	return sbv;
 
-        case '"':
-          return sbv;
-
-        default:
-          sbv.append((char)ch);
+      default:
+	sbv.append((char)ch);
       }
     }
 

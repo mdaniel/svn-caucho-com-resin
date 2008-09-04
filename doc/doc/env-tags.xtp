@@ -2754,7 +2754,7 @@ element resin:message {
   <th>Default</th>
 </tr>
 <tr>
-  <td>name</td>
+  <td>var</td>
   <td>name of the variable to set</td>
   <td>required</td>
 </tr>
