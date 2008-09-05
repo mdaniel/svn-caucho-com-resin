@@ -158,29 +158,29 @@ public class JspViewHandler extends ViewHandler
   {
     if (context == null)
       throw new NullPointerException();
-    
-    if (viewId != null)
+
+    if (viewId != null) {
+
       viewId = convertViewId(context, viewId);
-    else
-      viewId = createViewId(context);
 
-    ExternalContext extContext = context.getExternalContext();
-    String servletPath = extContext.getRequestServletPath();
+      ExternalContext extContext = context.getExternalContext();
+      String servletPath = extContext.getRequestServletPath();
 
-    if (viewId == null
-	|| viewId.equals(servletPath)
-	|| (servletPath == null
-	    && viewId.equals(extContext.getRequestPathInfo()))) {
-      try {
-	extContext.redirect(extContext.getRequestContextPath());
-      } catch (IOException e) {
-	throw new FacesException(e);
+      if (viewId.equals(servletPath)
+          || (servletPath == null
+              && viewId.equals(extContext.getRequestPathInfo()))) {
+        try {
+          extContext.redirect(extContext.getRequestContextPath());
+        }
+        catch (IOException e) {
+          throw new FacesException(e);
+        }
+
+        context.renderResponse();
+        context.responseComplete();
+
+        return null;
       }
-
-      context.renderResponse();
-      context.responseComplete();
-
-      return null;
     }
 
     UIViewRoot viewRoot = (UIViewRoot) context.getApplication()

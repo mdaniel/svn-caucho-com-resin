@@ -196,6 +196,9 @@ public class BeanType extends ConfigType
 	// serer/2r10
 	attr = _attributeMap.get(name.getLocalName().toLowerCase());
 
+        if (attr == null)
+          attr = _attributeMap.get(name.getLocalName());
+
 	if (attr != null)
 	  _nsAttributeMap.put(name, attr);
       }
