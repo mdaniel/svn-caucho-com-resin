@@ -73,6 +73,8 @@ public class QuercusScriptEngine
   public Object eval(Reader script, ScriptContext cxt)
     throws ScriptException
   {
+    Env env = null;
+
     try {
       ReadStream reader = ReaderStream.open(script);
       
@@ -101,7 +103,7 @@ public class QuercusScriptEngine
 
       QuercusPage page = new InterpretedPage(program);
 
-      Env env = new Env(_quercus, page, out, null, null);
+      env = new Env(_quercus, page, out, null, null);
 
       env.setScriptContext(cxt);
 
@@ -144,6 +146,9 @@ public class QuercusScriptEngine
       throw new ScriptException(e);
     } catch (Throwable e) {
       throw new RuntimeException(e);
+    } finally {
+      if (env != null)
+        env.close();
     }
   }
 

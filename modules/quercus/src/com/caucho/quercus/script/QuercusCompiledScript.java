@@ -61,6 +61,8 @@ public class QuercusCompiledScript extends CompiledScript {
   public Object eval(ScriptContext cxt)
     throws ScriptException
   {
+    Env env = null;
+
     try {
       Writer writer = cxt.getWriter();
 
@@ -84,7 +86,7 @@ public class QuercusCompiledScript extends CompiledScript {
 
       QuercusPage page = new InterpretedPage(_program);
 
-      Env env = new Env(_engine.getQuercus(), page, out, null, null);
+      env = new Env(_engine.getQuercus(), page, out, null, null);
 
       env.setScriptContext(cxt);
 
@@ -111,6 +113,9 @@ public class QuercusCompiledScript extends CompiledScript {
       throw new ScriptException(e);
     } catch (Throwable e) {
       throw new RuntimeException(e);
+    } finally {
+      if (env != null)
+        env.close();
     }
   }
 
