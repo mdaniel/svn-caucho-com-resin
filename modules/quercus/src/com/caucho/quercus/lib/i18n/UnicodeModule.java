@@ -178,7 +178,7 @@ public class UnicodeModule extends AbstractQuercusModule {
       tail = offset + length;
 
     if (offset < 0 || tail < offset)
-      return str.getEmptyString();
+      return str.EMPTY;
 
     unicodeStr = unicodeStr.substring(offset, tail);
     

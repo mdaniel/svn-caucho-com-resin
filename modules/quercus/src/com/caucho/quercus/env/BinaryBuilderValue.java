@@ -147,22 +147,6 @@ public class BinaryBuilderValue
     else
       return new BinaryBuilderValue(value);
   }
-  
-  /*
-   * Creates an empty string builder of the same type.
-   */
-  public StringValue createEmptyStringBuilder()
-  {
-    return new BinaryBuilderValue();
-  }
-  
-  /*
-   * Returns the empty string of same type.
-   */
-  public StringValue getEmptyString()
-  {
-    return EMPTY;
-  }
 
   /**
    * Returns the value.
@@ -470,7 +454,7 @@ public class BinaryBuilderValue
   public CharSequence subSequence(int start, int end)
   {
     if (end <= start)
-      return StringValue.EMPTY;
+      return EMPTY;
 
     return new BinaryBuilderValue(_buffer, start, end - start);
   }
@@ -747,6 +731,41 @@ public class BinaryBuilderValue
     return this;
   }
 
+  /**
+   * Append a bytes to the value.
+   */
+  @Override
+  public StringValue append(String s, int start, int end)
+  {
+    int sublen = end - start;
+
+    if (_buffer.length < _length + sublen)
+      ensureCapacity(_length + sublen);
+
+    for (int i = start; i < end; i++) {
+      _buffer[_length++] = (byte) s.charAt(i);
+    }
+
+    return this;
+  }
+  
+  /**
+   * Append a Java buffer to the value.
+   */
+  public StringValue append(char []buf, int offset, int length)
+  {
+    if (_buffer.length < _length + length)
+      ensureCapacity(_length + length);
+
+    int end = offset + length;
+    
+    for (int i = offset; i < end; i++) {
+      _buffer[_length++] = (byte) buf[i];
+    }
+
+    return this;
+  }
+  
   /**
    * Append a Java string to the value.
    */

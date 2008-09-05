@@ -57,6 +57,16 @@ abstract public class StringValue extends Value implements CharSequence {
   protected static final int IS_DOUBLE = 2;
 
   /**
+   * Creates a string builder of the same type.
+   */
+  abstract public StringValue createStringBuilder();
+
+  /**
+   * Creates a string builder of the same type.
+   */
+  abstract public StringValue createStringBuilder(int length);
+  
+  /**
    * Creates the string.
    */
   public static Value create(String value)
@@ -121,21 +131,6 @@ abstract public class StringValue extends Value implements CharSequence {
       return unicodeStr;
     }
   }
-
-  /**
-   * Creates a string builder of the same type.
-   */
-  abstract public StringValue createStringBuilder();
-
-  /**
-   * Creates a string builder of the same type.
-   */
-  abstract public StringValue createStringBuilder(int length);
-  
-  /*
-   * Returns the immutable empty string of same type.
-   */
-  abstract public StringValue getEmptyString();
   
   //
   // Predicates and relations

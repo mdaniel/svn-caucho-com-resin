@@ -43,6 +43,8 @@ import com.caucho.util.*;
 public class LargeStringBuilderValue
   extends StringValue
 {
+  public static final StringValue EMPTY = StringBuilderValue.EMPTY;
+  
   public static final int SIZE = 4 * 1024;
   
   protected byte [][]_bufferList;
@@ -69,14 +71,6 @@ public class LargeStringBuilderValue
   public StringValue createEmptyStringBuilder()
   {
     return new StringBuilderValue();
-  }
-  
-  /*
-   * Returns the empty string of same type.
-   */
-  public StringValue getEmptyString()
-  {
-    return StringBuilderValue.EMPTY;
   }
 
   /**

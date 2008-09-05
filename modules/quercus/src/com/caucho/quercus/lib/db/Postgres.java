@@ -76,22 +76,25 @@ public class Postgres extends JdbcConnectionResource {
   {
     super(env);
 
-    connectInternal(env, host, user, password, db, port, "", 0, driver, url);
+    connectInternal(env, host, user, password, db, port, "", 0,
+                    driver, url, false);
   }
 
   /**
    * Connects to the underlying database.
    */
+  @Override
   protected Connection connectImpl(Env env,
-				   @Optional("localhost") String host,
-				   @Optional String userName,
-				   @Optional String password,
-				   @Optional String dbname,
-				   @Optional("5432") int port,
-				   @Optional String socket,
-				   @Optional int flags,
-				   @Optional String driver,
-				   @Optional String url)
+				                   String host,
+				                   String userName,
+				                   String password,
+				                   String dbname,
+				                   int port,
+				                   String socket,
+				                   int flags,
+				                   String driver,
+				                   String url,
+                                   boolean isNewLink)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));
@@ -112,7 +115,12 @@ public class Postgres extends JdbcConnectionResource {
         url = "jdbc:postgresql://" + host + ":" + port + "/" + dbname;
       }
 
-      Connection jConn = env.getConnection(driver, url, userName, password);
+      Connection jConn;
+      
+      if (isNewLink)
+        jConn = env.createConnection(driver, url, userName, password);
+      else
+        jConn = env.getConnection(driver, url, userName, password);
 
       return jConn;
 

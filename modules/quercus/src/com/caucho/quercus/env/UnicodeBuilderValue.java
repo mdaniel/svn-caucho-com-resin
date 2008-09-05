@@ -149,14 +149,6 @@ public class UnicodeBuilderValue extends StringBuilderValue
     return str;
   }
   
-  /*
-   * Returns the empty string of same type.
-   */
-  public StringValue getEmptyString()
-  {
-    return EMPTY;
-  }
-  
   /**
    * Decodes from charset and returns UnicodeValue.
    *

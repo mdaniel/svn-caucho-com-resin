@@ -64,7 +64,7 @@ public class OutputModule extends AbstractQuercusModule
   private enum Encoding {NONE, GZIP, DEFLATE};
 
   private static class GZOutputPair {
-    public StringOutputStream _tempStream;
+    public StringBuilderOutputStream _tempStream;
     public OutputStream _outputStream;
   }
 
@@ -514,8 +514,8 @@ public class OutputModule extends AbstractQuercusModule
       int encodingFlag = 0;
 
       pair = new GZOutputPair();
-      pair._tempStream = new StringOutputStream();
-      pair._tempStream.setResult(result);
+      pair._tempStream = new StringBuilderOutputStream(result);
+      pair._tempStream.setStringBuilder(result);
 
       try {
         if (encoding == Encoding.GZIP) {
@@ -538,7 +538,7 @@ public class OutputModule extends AbstractQuercusModule
       if (pair == null)
         return BooleanValue.FALSE;
       
-      pair._tempStream.setResult(result);
+      pair._tempStream.setStringBuilder(result);
     }
     
     try {
@@ -552,30 +552,9 @@ public class OutputModule extends AbstractQuercusModule
       return BooleanValue.FALSE;
     }
 
-    pair._tempStream.setResult(null);
+    pair._tempStream.setStringBuilder(null);
 
     return result;
-  }
-
-  static class StringOutputStream extends OutputStream {
-    private StringValue _result;
-
-    void setResult(StringValue result)
-    {
-      _result = result;
-    }
-
-    public void write(byte []buffer, int offset, int length)
-      throws IOException
-    {
-      _result.append(buffer, offset, length);
-    }
-
-    public void write(int ch)
-      throws IOException
-    {
-      _result.append(ch);
-    }
   }
 
   static final IniDefinition INI_OUTPUT_BUFFERING

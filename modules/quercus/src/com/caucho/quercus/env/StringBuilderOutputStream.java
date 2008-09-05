@@ -24,49 +24,38 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Nam Nguyen
  */
 
 package com.caucho.quercus.env;
 
-/**
- * Represents an 8-bit binary php-6 value.
- */
-abstract public class BinaryValue extends StringValue
-{
-  public static final StringValue EMPTY = BinaryBuilderValue.EMPTY;
+import java.io.IOException;
+import java.io.OutputStream;
+
+public class StringBuilderOutputStream
+  extends OutputStream {
   
-  @Override
-  public boolean isBinary()
+  private StringValue _sb;
+
+  public StringBuilderOutputStream(StringValue sb)
   {
-    return true;
+    _sb = sb;
   }
 
-  /**
-   * Returns the buffer offset
-   */
-  public byte []getBuffer()
+  public void write(byte []buffer, int offset, int length)
+    throws IOException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _sb.append(buffer, offset, length);
   }
 
-  /**
-   * Returns the buffer offset
-   */
-  public int getOffset()
+  public void write(int ch)
+    throws IOException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _sb.append(ch);
   }
-
-  /**
-   * Returns the buffer offset
-   */
-  public void setOffset(int offset)
+  
+  public void setStringBuilder(StringValue sb)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _sb = sb;
   }
-
-  @Override
-  abstract public byte[] toBytes();
 }
-

@@ -205,14 +205,6 @@ public class StringBuilderValue
       return new StringBuilderValue(value);
   }
 
-  /*
-   * Returns the empty string of same type.
-   */
-  public StringValue getEmptyString()
-  {
-    return EMPTY;
-  }
-
   /**
    * Returns the value.
    */

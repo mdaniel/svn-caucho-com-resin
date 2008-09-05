@@ -236,7 +236,7 @@ public class MysqliModule extends AbstractQuercusModule {
               @Optional("localhost") StringValue host,
               @Optional StringValue userName,
               @Optional StringValue password,
-              @Optional StringValue dbname,
+              @Optional String dbname,
               @Optional("3306") int port,
               @Optional StringValue socket)
     throws IllegalStateException
@@ -1091,7 +1091,7 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Select the database for a connection.
    */
-  public static boolean mysqli_select_db(Mysqli conn, StringValue dbName)
+  public static boolean mysqli_select_db(Mysqli conn, String dbName)
   {
     if (conn == null)
       return false;
@@ -1273,9 +1273,9 @@ public class MysqliModule extends AbstractQuercusModule {
    * Changes the user and database.
    */
   public static boolean mysqli_change_user(@NotNull Mysqli mysqli,
-             StringValue user,
-             StringValue password,
-             StringValue db)
+                                           String user,
+                                           String password,
+                                           String db)
   {
     if (mysqli == null)
       return false;

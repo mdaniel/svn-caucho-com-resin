@@ -313,7 +313,7 @@ public class MiscModule extends AbstractQuercusModule {
                        String user_agent,
                        boolean return_array)
   {
-    StringValue patternMatched = StringValue.EMPTY;
+    StringValue patternMatched = env.getEmptyString();
     String regExpMatched = null;
 
     for (Map.Entry<Value,Value> entry : browsers.entrySet()) {

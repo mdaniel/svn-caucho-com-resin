@@ -221,7 +221,7 @@ public class CauchoRegexpModule
         return LongValue.ZERO;
       }
 
-      StringValue empty = subject.getEmptyString();
+      StringValue empty = subject.EMPTY;
       
       Regexp regexp = getRegexp(env, regexpValue);
       RegexpState regexpState = new RegexpState(env, regexp, subject);
@@ -397,7 +397,7 @@ public class CauchoRegexpModule
 
     ArrayValue []matchList = new ArrayValue[groupCount + 1];
 
-    StringValue emptyStr = subject.getEmptyString();
+    StringValue emptyStr = subject.EMPTY;
     
     for (int j = 0; j < groupCount; j++) {
       ArrayValue values = new ArrayValueImpl();
@@ -478,7 +478,7 @@ public class CauchoRegexpModule
       return LongValue.ZERO;
     }
 
-    StringValue empty = subject.getEmptyString();
+    StringValue empty = subject.EMPTY;
     
     int count = 0;
 
@@ -703,7 +703,7 @@ public class CauchoRegexpModule
 						     Value countV)
     throws IllegalRegexpException
   {
-    StringValue empty = subject.getEmptyString();
+    StringValue empty = subject.EMPTY;
     
     long numberOfMatches = 0;
 
@@ -1074,7 +1074,7 @@ public class CauchoRegexpModule
       if (limit <= 0)
 	limit = LONG_MAX;
 
-      StringValue empty = patternString.getEmptyString();
+      StringValue empty = patternString.EMPTY;
     
       Regexp regexp = getRegexp(env, patternString);
       RegexpState regexpState = new RegexpState(env, regexp, string);

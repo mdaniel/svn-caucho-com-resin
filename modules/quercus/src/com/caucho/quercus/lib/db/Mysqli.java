@@ -43,6 +43,8 @@ import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.DatabaseMetaData;
@@ -102,7 +104,7 @@ public class Mysqli extends JdbcConnectionResource {
                 @Optional("localhost") StringValue host,
                 @Optional StringValue user,
                 @Optional StringValue password,
-                @Optional StringValue db,
+                @Optional String db,
                 @Optional("3306") int port,
                 @Optional StringValue socket)
   {
@@ -116,8 +118,8 @@ public class Mysqli extends JdbcConnectionResource {
       hostStr = host.toString();
 
     connectInternal(env, hostStr, user.toString(), password.toString(),
-                    db.toString(), port, socket.toString(),
-                    0, null, null);
+                    db, port, socket.toString(),
+                    0, null, null, true);
   }
 
   /**
@@ -136,7 +138,8 @@ public class Mysqli extends JdbcConnectionResource {
          String socket,
          int flags,
          String driver,
-         String url)
+         String url,
+         boolean isNewLink)
   {
     super(env);
 
@@ -144,7 +147,7 @@ public class Mysqli extends JdbcConnectionResource {
       host = "localhost";
 
     connectInternal(env, host, user, password, db, port, socket,
-		    flags, driver, url);
+                    flags, driver, url, isNewLink);
   }
 
   protected Mysqli(Env env)
@@ -165,6 +168,7 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Connects to the underlying database.
    */
+  @Override
   protected Connection connectImpl(Env env,
                                    String host,
                                    String userName,
@@ -174,7 +178,8 @@ public class Mysqli extends JdbcConnectionResource {
                                    String socket,
                                    int flags,
                                    String driver,
-                                   String url)
+                                   String url,
+                                   boolean isNewLink)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));
@@ -201,7 +206,12 @@ public class Mysqli extends JdbcConnectionResource {
                      (flags & MysqliModule.MYSQL_CLIENT_SSL) != 0);
       }
       
-      Connection jConn = env.getConnection(driver, url, userName, password);
+      Connection jConn;
+      
+      if (isNewLink)
+        jConn = env.createConnection(driver, url, userName, password);
+      else
+        jConn = env.getConnection(driver, url, userName, password);
 
       checkDriverVersion(env, jConn);
 
@@ -318,35 +328,45 @@ public class Mysqli extends JdbcConnectionResource {
    * @param password the new password
    * @param db the new database
    */
-  public boolean change_user(StringValue user, StringValue password, StringValue db)
+  public boolean change_user(String user,
+                             String password,
+                             String db)
   {
-    // XXX: Docs for mysqli_change_user indicate that if new user authorization fails,
-    // then the existing user perms are retained.
-
-    close(getEnv());
-    
-    String userStr;
-    String passwordStr;
-    String dbStr;
-
-    if (user.length() == 0) {
-      userStr = getUserName();
-    } else {
-      userStr = user.toString();
+    try {
+      if (isConnected()) {
+        Connection conn = getJavaConnection();
+        
+        Class cls = conn.getClass();
+        
+        Method method = cls.getMethod("changeUser", String.class, String.class);
+        
+        if (method != null) {
+          method.invoke(conn, user, password);
+          
+          select_db(db);
+          
+          return true;
+        }
+      }
+    } catch (NoSuchMethodException e) {
+      throw new QuercusException(e);
+    } catch (InvocationTargetException e) {
+      throw new QuercusException(e);
+    } catch (IllegalAccessException e) {
+      throw new QuercusException(e);
+    } catch (SQLException e) {
+      getEnv().warning(L.l("unable to change user to '{0}'", user));
+      
+      return false;
     }
 
-    if (password.length() == 0)
-      passwordStr = getPassword();
-    else
-      passwordStr = password.toString();
+    // XXX: Docs for mysqli_change_user indicate that if new user authorization fails,
+    // then the existing user perms are retained.
+    
+    close(getEnv());
 
-    if (db.length() == 0)
-      dbStr = getCatalog().toString();
-    else
-      dbStr = db.toString();
-
-    return connectInternal(getEnv(), _host, userStr, passwordStr,
-                           dbStr, _port, _socket, _flags, _driver, _url);
+    return connectInternal(getEnv(), _host, user, password,
+                           db, _port, _socket, _flags, _driver, _url, false);
   }
 
   /**
@@ -893,7 +913,8 @@ public class Mysqli extends JdbcConnectionResource {
                            socket.toString(),
                            flags,
                            null,
-                           null);
+                           null,
+                           false);
   }
 
   /**
@@ -917,14 +938,11 @@ public class Mysqli extends JdbcConnectionResource {
    *
    * @param dbname the name of the database to select.
    */
-  public boolean select_db(StringValue dbname)
+  public boolean select_db(String db)
   {
     try {
       if (isConnected()) {
-        String catalog = dbname.toString();
-        getEnv().getQuercus().setSpecial("mysql.catalog", catalog);
-	
-        validateConnection().setCatalog(catalog);
+        validateConnection().setCatalog(db);
         
         return true;
       }

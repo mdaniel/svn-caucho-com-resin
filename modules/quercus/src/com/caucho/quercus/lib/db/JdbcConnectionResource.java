@@ -171,7 +171,8 @@ public abstract class JdbcConnectionResource
 					  String socket,
 					  int flags,
 					  String driver,
-					  String url)
+					  String url,
+                      boolean isNewLink)
   {
     _host = host;
     _userName = userName;
@@ -188,7 +189,8 @@ public abstract class JdbcConnectionResource
     _catalog = dbname;
 
     Connection conn = connectImpl(env, host, userName, password,
-				  dbname, port, socket, flags, driver, url);
+                                  dbname, port, socket, flags, driver, url,
+                                  isNewLink);
 
     if (conn != null) {
       _conn = conn;
@@ -218,7 +220,8 @@ public abstract class JdbcConnectionResource
 					    String socket,
 					    int flags,
 					    String driver,
-					    String url);
+					    String url,
+                        boolean isNewLink);
 
   /**
    * Escape the given string for SQL statements.
@@ -892,7 +895,7 @@ public abstract class JdbcConnectionResource
         conn.close();
 
       connectInternal(_env, _host, _userName, _password, name,
-		      _port, _socket, _flags, _driver, _url);
+		      _port, _socket, _flags, _driver, _url, false);
     }
     else {
       _conn.setCatalog(name);

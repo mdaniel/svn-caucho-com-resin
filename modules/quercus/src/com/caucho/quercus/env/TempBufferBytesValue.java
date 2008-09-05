@@ -71,14 +71,6 @@ public class TempBufferBytesValue
   {
     return new BinaryBuilderValue(length);
   }
-  
-  /*
-   * Returns the empty string of same type.
-   */
-  public StringValue getEmptyString()
-  {
-    return BinaryBuilderValue.EMPTY;
-  }
 
   /**
    * 

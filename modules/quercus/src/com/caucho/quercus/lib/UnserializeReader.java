@@ -67,7 +67,8 @@ public final class UnserializeReader {
     _buffer = s.toCharArray();
     _length = _buffer.length;
     
-    if (s.indexOf("R:") >= 0)
+    if (s.indexOf("R:") >= 0
+        || s.indexOf("r:") >= 0)
       initReferenceList();
   }
 
@@ -77,7 +78,8 @@ public final class UnserializeReader {
     _buffer = s.toCharArray();
     _length = _buffer.length;
     
-    if (s.indexOf("R:") >= 0)
+    if (s.indexOf("R:") >= 0
+        || s.indexOf("r:") >= 0)
       initReferenceList();
   }
 
@@ -199,7 +201,7 @@ public final class UnserializeReader {
         }
 
         expect('}');
-
+          
         return array;
       }
 
@@ -266,7 +268,27 @@ public final class UnserializeReader {
 
         expect(';');
         
+        if (value - 1 >= _valueList.size())
+          return BooleanValue.FALSE;
+        
         Value ref = _valueList.get(value - 1);
+        
+        return ref;
+      }
+    case 'r':
+      {
+        _useReference = true;
+        
+        expect(':');
+
+        int value = (int) readInt();
+
+        expect(';');
+        
+        if (value - 1 >= _valueList.size())
+          return BooleanValue.FALSE;
+        
+        Value ref = _valueList.get(value - 1).copy();
         
         return ref;
       }
@@ -501,6 +523,21 @@ public final class UnserializeReader {
         
         return;
       }
+      
+      case 'r':
+      {
+        _useReference = true;
+        
+        _referenceList.add(Boolean.FALSE);
+        
+        expect(':');
+
+        int value = (int) readInt();
+
+        expect(';');
+        
+        return;
+      }
     }
   }
 
@@ -603,11 +640,12 @@ public final class UnserializeReader {
       if (_index < _buffer.length)
         context += _buffer[_index];
       
-      throw new IOException(L.l("expected '{0}' at '{1}' (0x{2}) (context '{3}')",
+      throw new IOException(L.l("expected '{0}' at '{1}' (0x{2}) (context '{3}', index {4})",
                                 String.valueOf((char) expectCh),
                                 String.valueOf((char) ch),
                                 Integer.toHexString(ch),
-                                context));
+                                context,
+                                _index));
     }
   }
 

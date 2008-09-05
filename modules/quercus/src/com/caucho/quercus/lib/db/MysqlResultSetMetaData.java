@@ -38,7 +38,6 @@ import java.util.logging.Logger;
 import com.caucho.quercus.QuercusException;
 import com.caucho.util.L10N;
 
-
 /**
  * Extra Mysql metadata.
  * XXX: implement more methods

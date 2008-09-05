@@ -870,18 +870,18 @@ public class MysqlModule extends AbstractQuercusModule {
    * A Result on success, FALSE on failure.
    */
   public static Value mysql_list_fields(Env env,
-                                 StringValue databaseName,
+                                 String database,
                                  StringValue tableName,
                                  @Optional Mysqli conn)
   {
-    if (databaseName.length() == 0)
+    if (database == null || database.length() == 0)
       return BooleanValue.FALSE;
 
     if (tableName.length() == 0)
       return BooleanValue.FALSE;
 
     return mysql_db_query(env,
-                          databaseName,
+                          database,
                           env.createString("SELECT * FROM " + tableName + " WHERE NULL"),
                           conn);
   }
@@ -891,9 +891,9 @@ public class MysqlModule extends AbstractQuercusModule {
    */
 
   public static Value mysql_listfields(Env env,
-                                 StringValue databaseName,
-                                 StringValue tableName,
-                                 @Optional Mysqli conn)
+                                        String databaseName,
+                                        StringValue tableName,
+                                        @Optional Mysqli conn)
   {
     return mysql_list_fields(env, databaseName, tableName, conn);
   }
@@ -902,9 +902,9 @@ public class MysqlModule extends AbstractQuercusModule {
    * Returns result set or false on error
    */
   public static Value mysql_db_query(Env env,
-                              StringValue databaseName,
-                              StringValue query,
-                              @Optional Mysqli conn)
+                                     String databaseName,
+                                     StringValue query,
+                                     @Optional Mysqli conn)
   {
     if (conn == null)
       conn = getConnection(env);
@@ -919,10 +919,10 @@ public class MysqlModule extends AbstractQuercusModule {
    * Selects the database
    */
   public static boolean mysql_select_db(Env env,
-                                 StringValue dbName,
-                                 @Optional Mysqli conn)
+                                         String dbName,
+                                         @Optional Mysqli conn)
   {
-    if (dbName.length() == 0)
+    if (dbName == null || dbName.length() == 0)
       return false;
 
     if (conn == null)
@@ -1009,7 +1009,7 @@ public class MysqlModule extends AbstractQuercusModule {
 				    @Optional StringValue host,
 				    @Optional StringValue userName,
 				    @Optional StringValue password,
-				    @Optional boolean newLink,
+				    @Optional boolean isNewLink,
 				    @Optional int flags)
   {
     int port = 3306;
@@ -1070,14 +1070,17 @@ public class MysqlModule extends AbstractQuercusModule {
       }
     }
 
+    /*
     String catalog = (String) env.getQuercus().getSpecial("mysql.catalog");
 
     if (catalog == null)
       catalog = "";
+    */
 
     Mysqli mysqli = new Mysqli(env, hostStr, userName.toString(),
-                               password.toString(), catalog,
-                               port, socketStr, flags, null, null);
+                               password.toString(), "",
+                               port, socketStr, flags,
+                               null, null, isNewLink);
 
     if (! mysqli.isConnected())
       return BooleanValue.FALSE;
@@ -1163,10 +1166,10 @@ public class MysqlModule extends AbstractQuercusModule {
 
   private static Mysqli getConnection(Env env)
   {
-    return getConnection(env, env.getEmptyString());
+    return getConnection(env, "");
   }
 
-  private static Mysqli getConnection(Env env, StringValue db)
+  private static Mysqli getConnection(Env env, String db)
   {
     Mysqli conn = (Mysqli) env.getSpecialValue("caucho.mysql");
 

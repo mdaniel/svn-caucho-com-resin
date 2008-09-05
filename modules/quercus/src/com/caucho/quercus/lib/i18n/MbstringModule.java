@@ -770,38 +770,38 @@ public class MbstringModule
    * boundaries.
    */
   public static StringValue mb_strcut(Env env,
-                              StringValue str,
+                              final StringValue str,
                               int start,
                               @Optional("7fffffff") int length,
                               @Optional String encoding)
   {
     encoding = getEncoding(env, encoding);
 
-    str = str.convertToUnicode(env, encoding);
+    StringValue unicodeStr = str.convertToUnicode(env, encoding);
 
-    int len = str.length();
+    int len = unicodeStr.length();
     int end = start + length;
 
     if (end > len)
       end = len;
 
     if (start < 0 || start > end)
-      return StringValue.EMPTY;
+      return str.EMPTY;
 
     // XXX: not quite exactly the same behavior as PHP
-    if (Character.isHighSurrogate(str.charAt(start)))
+    if (Character.isHighSurrogate(unicodeStr.charAt(start)))
       start--;
 
-    str = str.substring(start, end);
+    unicodeStr = unicodeStr.substring(start, end);
 
-    return str.toBinaryValue(env, encoding);
+    return unicodeStr.toBinaryValue(env, encoding);
   }
 
   /**
    * Truncates the string.
    */
   public static StringValue mb_strimwidth(Env env,
-                              StringValue str,
+                              final StringValue str,
                               int start,
                               int width,
                               @Optional() StringValue trimmarker,
@@ -818,7 +818,7 @@ public class MbstringModule
       end = len;
 
     if (start < 0 || start > end)
-      return str.getEmptyString();
+      return str.EMPTY;
 
     unicodeStr = unicodeStr.substring(start, end);
 
@@ -862,7 +862,7 @@ public class MbstringModule
     haystack = haystack.convertToUnicode(env, encoding);
     needle = needle.convertToUnicode(env, encoding);
 
-   return StringModule.strpos(haystack, needle, offset);
+    return StringModule.strpos(haystack, needle, offset);
   }
 
   /**
@@ -996,7 +996,7 @@ public class MbstringModule
     Value val = StringModule.substr(env, unicodeStr, start, lengthV);
 
     if (val == BooleanValue.FALSE)
-      return str.getEmptyString();
+      return str.EMPTY;
     
     return str.create(env, val.toStringValue(), encoding);
   }
@@ -1208,7 +1208,7 @@ public class MbstringModule
       else if (_position < _length)
         return _string.substring(_position);
       else
-        return StringValue.EMPTY;
+        return _string.EMPTY;
     }
 
     Value search(Env env, boolean isArrayReturn)
