@@ -775,6 +775,44 @@ public class Env {
     return _quercus.findDatabase(driver, url);
   }
 
+  /*
+   * Returns a connection to the given database.
+   */
+  public Connection createConnection(String driver, String url,
+                                     String userName, String password)
+    throws Exception
+  {
+    DataSource database = _quercus.getDatabase();
+
+    if (database != null) {
+      ConnectionEntry entry = new ConnectionEntry();
+      entry.init(database, null, null);
+
+      entry.setConnection(database.getConnection());
+      _connMap.put(entry, entry);
+      
+      return entry.getConnection();
+    }
+
+    database = findDatabase(driver, url);
+    
+    ConnectionEntry entry = new ConnectionEntry();
+    entry.init(database, userName, password);
+
+    Connection conn;
+    
+    if (userName == null || userName.equals(""))
+      conn = database.getConnection();
+    else
+      conn = database.getConnection(userName, password);
+
+    entry.setConnection(conn);
+
+    _connMap.put(entry, entry);
+
+    return conn;
+  }
+  
   /**
    * Returns a connection to the given database. If there is
    * already a connection to this specific database, then
@@ -788,9 +826,6 @@ public class Env {
     DataSource database = _quercus.getDatabase();
 
     if (database != null) {
-      if (! _quercus.isConnectionPool())
-        return database.getConnection();
-      
       ConnectionEntry entry = new ConnectionEntry();
       entry.init(database, null, null);
 
@@ -811,13 +846,6 @@ public class Env {
     }
 
     database = findDatabase(driver, url);
-    
-    if (! _quercus.isConnectionPool()) {
-      if (userName == null || userName.equals(""))
-        return database.getConnection();
-      else
-        return database.getConnection(userName, password);
-    }
     
     ConnectionEntry entry = new ConnectionEntry();
     entry.init(database, userName, password);
