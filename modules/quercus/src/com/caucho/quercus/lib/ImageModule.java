@@ -44,17 +44,8 @@ import com.caucho.vfs.WriteStream;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.color.ColorSpace;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.FlatteningPathIterator;
-import java.awt.geom.Line2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ColorConvertOp;
-import java.awt.image.ConvolveOp;
-import java.awt.image.Kernel;
-import java.awt.image.RescaleOp;
+import java.awt.geom.*;
+import java.awt.image.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
@@ -767,6 +758,9 @@ public class ImageModule extends AbstractQuercusModule {
    */
   public static QuercusImage imagecreatefromstring(Env env, InputStream data)
   {
+    if (data == null)
+      return null;
+
     return new QuercusImage(data);
   }
 
@@ -1018,6 +1012,30 @@ public class ImageModule extends AbstractQuercusModule {
     int height = image.getGraphics().getFontMetrics(awtfont).getAscent();
     g.setFont(awtfont);
     g.drawString(c.substring(0, 1), -1 * y, x+height);
+    return true;
+  }
+
+  /**
+   * Draw a string vertically
+   */
+  public static boolean imagestringup(QuercusImage image, int font,
+				      int x, int y, String s, int color)
+  {
+    Graphics2D g = image.getGraphics();
+
+    AffineTransform oldTransform = g.getTransform();
+    
+    g.translate(x, y);
+    //    g.rotate(-1 * Math.PI / 2);
+    g.rotate(-1 * Math.PI / 2);
+    g.setColor(intToColor(color));
+    Font awtfont = image.getFont(font);
+    int height = image.getGraphics().getFontMetrics(awtfont).getAscent();
+    g.setFont(awtfont);
+    g.drawString(s, 0, 0+height);
+
+    g.setTransform(oldTransform);
+    
     return true;
   }
 
