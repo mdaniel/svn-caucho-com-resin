@@ -302,7 +302,7 @@ public class InterpretedClassDef extends ClassDef
     
     for (Map.Entry<StringValue,FieldEntry> entry : _fieldMap.entrySet()) {
       FieldEntry fieldEntry = entry.getValue();
-      
+
       object.initField(entry.getKey(),
 		       fieldEntry.getValue().eval(env).copy(),
 		       fieldEntry.getVisibility());

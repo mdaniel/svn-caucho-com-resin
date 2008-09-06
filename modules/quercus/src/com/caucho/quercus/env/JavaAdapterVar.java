@@ -1062,6 +1062,20 @@ public class JavaAdapterVar extends Var
   }
 
   /**
+   * Initializes a new field, does not call __set if it is defined.
+   */
+  public void initField(StringValue key,
+                        Value value,
+                        FieldVisibility visibility)
+  {
+    setRaw(getValue());
+    
+    super.initField(key, value, visibility);
+    
+    setValue(getRawValue());
+  }
+  
+  /**
    * Sets the field.
    */
   @Override

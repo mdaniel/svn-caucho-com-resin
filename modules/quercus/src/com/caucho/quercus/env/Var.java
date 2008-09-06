@@ -1215,6 +1215,16 @@ public class Var extends Value
   {
     return _value.getThisFieldObject(env, name);
   }
+  
+  /**
+   * Initializes a new field, does not call __set if it is defined.
+   */
+  public void initField(StringValue key,
+                        Value value,
+                        FieldVisibility visibility)
+  {
+    _value.initField(key, value, visibility);
+  }
 
   /**
    * Sets the field.

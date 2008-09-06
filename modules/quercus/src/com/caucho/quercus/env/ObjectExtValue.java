@@ -142,17 +142,14 @@ public class ObjectExtValue extends ObjectValue
     EntryIterator iter = new EntryIterator(entries);
     
     while (iter.hasNext()) {
-      Map.Entry<Value,Value> field = iter.next();
+      Entry newField = iter.next();
       
-      StringValue key = field.getKey().toStringValue();
-      Value value = field.getValue();
-      
-      Entry entry = getEntry(key);
+      Entry entry = getEntry(newField._key);
       
       if (entry != null)
-        entry._value = value;
+        entry._value = newField._value;
       else
-        initField(key, field.getValue(), FieldVisibility.PUBLIC);
+        initField(newField._key, newField._value, newField._visibility);
     }
   }
 
@@ -429,8 +426,8 @@ public class ObjectExtValue extends ObjectValue
    */
   @Override
   public void initField(StringValue key,
-			Value value,
-			FieldVisibility visibility)
+                        Value value,
+                        FieldVisibility visibility)
   {
     Entry entry = createEntry(key, visibility);
 
@@ -595,7 +592,7 @@ public class ObjectExtValue extends ObjectValue
     if (delegate != null)
       return delegate.getIterator(env, this);
 
-    return new EntryIterator(_entries);
+    return new KeyValueIterator(_entries);
   }
 
   /**
@@ -1206,6 +1203,19 @@ public class ObjectExtValue extends ObjectValue
   public void serialize(Env env,
                         StringBuilder sb, SerializeMap serializeMap)
   {
+    Integer index = serializeMap.get(this);
+    
+    if (index != null) {
+      sb.append("r:");
+      sb.append(index);
+      sb.append(";");
+      
+      return;
+    }
+    
+    serializeMap.put(this);
+    serializeMap.incrementIndex();
+    
     sb.append("O:");
     sb.append(_className.length());
     sb.append(":\"");
@@ -1213,16 +1223,35 @@ public class ObjectExtValue extends ObjectValue
     sb.append("\":");
     sb.append(getSize());
     sb.append(":{");
+
+    Iterator<Entry> iter = new EntryIterator(_entries);
     
-    serializeMap.put(this);
-    serializeMap.incrementIndex();
-
-    for (Map.Entry<Value,Value> entry : entrySet()) {
-      Value key = entry.getKey();
-
+    while (iter.hasNext()) {
+      Entry entry = iter.next();
+      
       sb.append("s:");
-      sb.append(key.length());
-      sb.append(":\"");
+      
+      Value key = entry.getKey();
+      int len = key.length();
+      
+      if (entry._visibility == FieldVisibility.PROTECTED) {
+        sb.append(len + 3);
+        
+        sb.append(":\"");
+        sb.append("\u0000*\u0000");
+      }
+      else if (entry._visibility == FieldVisibility.PRIVATE) {
+        sb.append(len + 3);
+        
+        sb.append(":\"");
+        sb.append("\u0000A\u0000");
+      }
+      else {
+        sb.append(len);
+        
+        sb.append(":\"");
+      }
+      
       sb.append(key);
       sb.append("\";");
 
@@ -1450,18 +1479,68 @@ public class ObjectExtValue extends ObjectValue
     @Override
     public Iterator<Map.Entry<Value,Value>> iterator()
     {
-      return new EntryIterator(ObjectExtValue.this._entries);
+      return new KeyValueIterator(ObjectExtValue.this._entries);
     }
   }
-
+  
   public static class EntryIterator
-    implements Iterator<Map.Entry<Value,Value>>
+    implements Iterator<Entry>
   {
     private final Entry []_list;
     private int _index;
     private Entry _entry;
 
     EntryIterator(Entry []list)
+    {
+      _list = list;
+    }
+
+    public boolean hasNext()
+    {
+      if (_entry != null)
+        return true;
+      
+      for (; _index < _list.length && _list[_index] == null; _index++) {
+      }
+
+      return _index < _list.length;
+    }
+
+    public Entry next()
+    {
+      if (_entry != null) {
+        Entry entry = _entry;
+        _entry = entry._next;
+
+        return entry;
+      }
+
+      for (; _index < _list.length && _list[_index] == null; _index++) {
+      }
+
+      if (_list.length <= _index)
+        return null;
+
+      Entry entry = _list[_index++];
+      _entry = entry._next;
+
+      return entry;
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  public static class KeyValueIterator
+    implements Iterator<Map.Entry<Value,Value>>
+  {
+    private final Entry []_list;
+    private int _index;
+    private Entry _entry;
+
+    KeyValueIterator(Entry []list)
     {
       _list = list;
     }
@@ -1628,11 +1707,18 @@ public class ObjectExtValue extends ObjectValue
       _visibility = visibility;
       _value = NullValue.NULL;
     }
-
+    
     public Entry(StringValue key, Value value)
     {
       _key = key;
       _visibility = FieldVisibility.PUBLIC;
+      _value = value;
+    }
+
+    public Entry(StringValue key, Value value, FieldVisibility visibility)
+    {
+      _key = key;
+      _visibility = visibility;
       _value = value;
     }
 
@@ -1745,7 +1831,7 @@ public class ObjectExtValue extends ObjectValue
 
     Entry copyTree(Env env, CopyRoot root)
     {
-      return new Entry(_key, _value.copyTree(env, root));
+      return new Entry(_key, _value.copyTree(env, root), _visibility);
     }
 
     public int compareTo(Map.Entry<Value, Value> other)
@@ -1771,8 +1857,15 @@ public class ObjectExtValue extends ObjectValue
                             IdentityHashMap<Value, String> valueSet)
       throws IOException
     {
+      String suffix = "";
+      
+      if (_visibility == FieldVisibility.PROTECTED)
+        suffix = ":protected";
+      else if (_visibility == FieldVisibility.PRIVATE)
+        suffix = ":private";
+      
       printDepth(out, 2 * depth);
-      out.println("[\"" + getKey() + "\"]=>");
+      out.println("[\"" + getKey() + suffix + "\"]=>");
 
       printDepth(out, 2 * depth);
       
@@ -1787,8 +1880,15 @@ public class ObjectExtValue extends ObjectValue
                               IdentityHashMap<Value, String> valueSet)
       throws IOException
     {
+      String suffix = "";
+      
+      if (_visibility == FieldVisibility.PROTECTED)
+        suffix = ":protected";
+      else if (_visibility == FieldVisibility.PRIVATE)
+        suffix = ":private";
+      
       printDepth(out, 4 * depth);
-      out.print("[" + getKey() + "] => ");
+      out.print("[" + getKey() + suffix + "] => ");
       
       _value.printR(env, out, depth + 1, valueSet);
 

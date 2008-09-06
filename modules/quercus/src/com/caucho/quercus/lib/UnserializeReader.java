@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.program.Visibility;
 import com.caucho.util.IntMap;
 import com.caucho.util.IntSet;
 import com.caucho.util.L10N;
@@ -232,19 +233,48 @@ public final class UnserializeReader {
           obj = env.createIncompleteObject(className);
         }
         
+        Value ref = null;
+        
         if (_useReference)
-          obj = createReference(obj);
+          ref = createReference(obj);
 
         for (int i = 0; i < count; i++) {
-          String key = unserializeString();
+          StringValue key = unserializeKey(env).toStringValue();
+          
+          FieldVisibility visibility = FieldVisibility.PUBLIC;
+
+          if (key.length() > 3 && key.charAt(0) == 0) {
+            switch (key.charAt(1)) {
+              case 'A': // 0x41
+                visibility = FieldVisibility.PRIVATE;
+                break;
+              case '*': // 0x2A
+                visibility = FieldVisibility.PROTECTED;
+                break;
+              default:
+                throw new IOException(L.l("field visibility modifier is not valid: 0x{0}",
+                                          Integer.toHexString(key.charAt(2))));
+            }
+            
+            if (key.charAt(2) != 0) {
+              throw new IOException(L.l("end of field visibility modifier is not valid: 0x{0}",
+                                        Integer.toHexString(key.charAt(2))));
+            }
+            
+            key = key.substring(3);
+          }
+          
           Value value = unserialize(env);
 
-          obj.putField(env, key, value);
+          obj.initField(key, value, visibility);
         }
 
         expect('}');
-
-        return obj;
+        
+        if (ref != null)
+          return ref;
+        else
+          return obj;
       }
 
     case 'N':
@@ -268,8 +298,11 @@ public final class UnserializeReader {
 
         expect(';');
         
-        if (value - 1 >= _valueList.size())
-          return BooleanValue.FALSE;
+        if (value - 1 >= _valueList.size()) {
+          throw new IOException(L.l("reference out of range: {0}, size {1}",
+                                    value - 1, _valueList.size()));
+          //return BooleanValue.FALSE;
+        }
         
         Value ref = _valueList.get(value - 1);
         
@@ -285,8 +318,11 @@ public final class UnserializeReader {
 
         expect(';');
         
-        if (value - 1 >= _valueList.size())
-          return BooleanValue.FALSE;
+        if (value - 1 >= _valueList.size()) {
+          throw new IOException(L.l("reference out of range: {0}, size {1}",
+                                    value - 1, _valueList.size()));
+          //return BooleanValue.FALSE;
+        }
         
         Value ref = _valueList.get(value - 1).copy();
         

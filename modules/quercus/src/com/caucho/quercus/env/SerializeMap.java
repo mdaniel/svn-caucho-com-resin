@@ -37,7 +37,6 @@ public final class SerializeMap {
   private IdentityHashMap<Value, Integer> _varMap
     = new IdentityHashMap<Value, Integer>();
   
-  // serialization index for references
   private int _index = 1;
   
   public SerializeMap()
@@ -45,7 +44,7 @@ public final class SerializeMap {
   }
   
   /*
-   * Increments the serialization index for the next reference
+   * Increments the index of values.
    */
   public void incrementIndex()
   {
@@ -53,15 +52,15 @@ public final class SerializeMap {
   }
   
   /*
-   * Stores reference at the current index in the serialization process.
+   * Stores the position of this value in the serialization process.
    */
-  public void put(Value var)
+  public void put(Value value)
   {
-    _varMap.put(var, Integer.valueOf(_index));
+    _varMap.put(value, Integer.valueOf(_index));
   }
   
   /*
-   * Retrieves the index of this reference in the serialization, if exists.
+   * Retrieves the position of this value in the serialization.
    */
   public Integer get(Value value)
   {

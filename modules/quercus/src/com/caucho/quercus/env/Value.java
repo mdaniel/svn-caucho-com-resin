@@ -1991,6 +1991,16 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Initializes a new field, does not call __set if it is defined.
+   */
+  public void initField(StringValue key,
+                        Value value,
+                        FieldVisibility visibility)
+  {
+    putThisField(Env.getInstance(), key, value);
+  }
+  
+  /**
    * Returns the field ref.
    */
   public Value putThisField(Env env, StringValue name, Value object)
@@ -2017,6 +2027,7 @@ abstract public class Value implements java.io.Serializable
   //
   // field convenience
   //
+  
   public Value putField(Env env, String name, Value value)
   {
     return putThisField(env, env.createString(name), value);

@@ -163,16 +163,16 @@ public abstract class JdbcConnectionResource
    * @param dbname database name
    */
   final protected boolean connectInternal(Env env,
-					  String host,
-					  String userName,
-					  String password,
-					  String dbname,
-					  int port,
-					  String socket,
-					  int flags,
-					  String driver,
-					  String url,
-                      boolean isNewLink)
+                                          String host,
+                                          String userName,
+                                          String password,
+                                          String dbname,
+                                          int port,
+                                          String socket,
+                                          int flags,
+                                          String driver,
+                                          String url,
+                                          boolean isNewLink)
   {
     _host = host;
     _userName = userName;
