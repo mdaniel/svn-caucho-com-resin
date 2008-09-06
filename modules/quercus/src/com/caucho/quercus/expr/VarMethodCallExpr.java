@@ -99,7 +99,7 @@ public class VarMethodCallExpr extends Expr {
 
     Value obj = _objExpr.eval(env);
 
-    env.pushCall(this, obj);
+    env.pushCall(this, obj, values);
 
     try {
       env.checkTimeout();

@@ -248,6 +248,7 @@ public class Env {
 
   private Expr [] _callStack = new Expr[256];
   private Value [] _callThisStack = new Value[256];
+  private Value [][] _callArgStack = new Value[256][];
   private int _callStackTop;
   
   private String _callingClass;
@@ -2303,7 +2304,7 @@ public class Env {
   /**
    * Sets the calling function expression.
    */
-  public void pushCall(Expr call, Value obj)
+  public void pushCall(Expr call, Value obj, Value []args)
   {
     if (_callStack.length <= _callStackTop) {
       Expr []newStack = new Expr[2 * _callStack.length];
@@ -2314,11 +2315,18 @@ public class Env {
       System.arraycopy(_callThisStack,
 		       0, newThisStack,
 		       0, _callThisStack.length);
+      
+      Value []newArgStack = new Value[2 * _callArgStack.length];
+      System.arraycopy(_callArgStack,
+		       0, newArgStack,
+		       0, _callArgStack.length);
+      
       _callThisStack = newThisStack;
     }
 
     _callStack[_callStackTop] = call;
     _callThisStack[_callStackTop] = obj;
+    _callArgStack[_callStackTop] = args;
 
     _callStackTop++;
   }
@@ -2357,6 +2365,17 @@ public class Env {
   {
     if (_callStackTop - depth > 0)
       return _callThisStack[_callStackTop - depth - 1];
+    else
+      return null;
+  }
+  
+  /**
+   * Peeks at the the top call.
+   */
+  public Value []peekArgs(int depth)
+  {
+    if (_callStackTop - depth > 0)
+      return _callArgStack[_callStackTop - depth - 1];
     else
       return null;
   }

@@ -13,6 +13,13 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>quercus: in_array with Java adapter wasn't implemented (#2889, rep by Heimo Laukkanen)</li>
+<li>quercus: tempnam wasn't removing file at end of execution (#2097, rep by A Sharaz)</li>
+<li>quercus: debug_backtrace line numbers in compiled mode (#2158, rep by koreth)</li>
+<li>quercus: debug_backtrace arguments (interpreted only) (#1154, rep by koreth)</li>
+<li>quercus: add public QuercusScriptEngine method to allow for security overriding (#2072)</li>
+<li>quercus: NPE in curl_exec (#2902)</li>
+<li>quercus: Exception trace was not catching top location (#1774, rep by U Wohlfeil)</li>
 <li>quercus: json utf-8 fixes (#2092, rep by hendler)</li>
 <li>quercus: add PEAR path automatically to include path (#844)</li>
 <li>deploy: .git repository should only be created when used (#2885, rep by iRideSnow)</li>

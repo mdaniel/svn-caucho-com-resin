@@ -55,8 +55,14 @@ public class QuercusScriptEngine
 
   QuercusScriptEngine(QuercusScriptEngineFactory factory)
   {
+    this(factory, new Quercus());
+  }
+
+  public QuercusScriptEngine(QuercusScriptEngineFactory factory,
+			     Quercus quercus)
+  {
     _factory = factory;
-    _quercus = new Quercus();
+    _quercus = quercus;
   }
 
   /**

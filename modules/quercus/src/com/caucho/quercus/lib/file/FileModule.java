@@ -2888,6 +2888,8 @@ public class FileModule extends AbstractQuercusModule {
     try {
       Path path = dir.createTempFile(prefix, ".tmp");
       
+      env.addCleanup(new RemoveFile(path));
+      
       return env.createString(path.getTail());
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -2909,6 +2911,8 @@ public class FileModule extends AbstractQuercusModule {
 
       Path file = tmp.createTempFile("resin", "tmp");
 
+      env.addCleanup(new RemoveFile(file));
+      
       return new FileInputOutput(env, file, false, false, true);
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -2979,6 +2983,21 @@ public class FileModule extends AbstractQuercusModule {
       log.log(Level.FINE, e.toString(), e);
 
       return false;
+    }
+  }
+
+  static class RemoveFile implements EnvCleanup {
+    private Path _path;
+
+    RemoveFile(Path path)
+    {
+      _path = path;
+    }
+
+    public void cleanup()
+      throws IOException
+    {
+      _path.remove();
     }
   }
 

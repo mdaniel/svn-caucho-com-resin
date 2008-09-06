@@ -569,7 +569,12 @@ abstract public class JavaAdapter extends ArrayValue
    */
   public Value containsStrict(Value value)
   {
-    throw new UnsupportedOperationException();
+    for (Map.Entry<Value,Value> entry : entrySet()) {
+      if (entry.getValue().eql(value))
+        return entry.getKey();
+    }
+
+    return NullValue.NULL;
   }
 
   /**

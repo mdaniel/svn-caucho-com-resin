@@ -137,7 +137,7 @@ public class StaticMethodExpr extends Expr {
 
     //Value thisValue = NullThisValue.NULL;
 
-    env.pushCall(this, thisValue);
+    env.pushCall(this, thisValue, new Value[0]);
 
     String oldClassName = env.setCallingClassName(_className);
     try {

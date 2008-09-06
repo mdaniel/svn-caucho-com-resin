@@ -137,7 +137,7 @@ public class LateStaticBindingStaticMethodExpr extends Expr {
 
     //Value thisValue = NullThisValue.NULL;
 
-    env.pushCall(this, thisValue);
+    env.pushCall(this, thisValue, new Value[0]);
     try {
       env.checkTimeout();
 

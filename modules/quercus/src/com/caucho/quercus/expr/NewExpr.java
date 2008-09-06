@@ -81,16 +81,16 @@ public class NewExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    env.pushCall(this, NullValue.NULL);
+    Value []args = new Value[_args.length];
+
+    for (int i = 0; i < args.length; i++) {
+      args[i] = _args[i].evalArg(env);
+    }
+    
+    env.pushCall(this, NullValue.NULL, args);
     
     try {
       QuercusClass cl = env.findAbstractClass(_name);
-
-      Value []args = new Value[_args.length];
-
-      for (int i = 0; i < args.length; i++) {
-        args[i] = _args[i].evalArg(env);
-      }
 
       env.checkTimeout();
 

@@ -169,7 +169,7 @@ public class FunctionExpr extends Expr {
 
     Value []args = fun.evalArguments(env, this, _args);
 
-    env.pushCall(this, NullValue.NULL);
+    env.pushCall(this, NullValue.NULL, args);
     // XXX: qa/1d14 Value oldThis = env.setThis(UnsetValue.NULL);
     try {
       env.checkTimeout();

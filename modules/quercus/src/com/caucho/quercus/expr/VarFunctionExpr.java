@@ -105,7 +105,7 @@ public class VarFunctionExpr extends Expr {
     Value name = _name.eval(env);
     AbstractFunction fun = env.getFunction(name);
 
-    env.pushCall(this, NullValue.NULL);
+    env.pushCall(this, NullValue.NULL, null);
 
     try {
       env.checkTimeout();

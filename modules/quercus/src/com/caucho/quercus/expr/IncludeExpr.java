@@ -81,7 +81,7 @@ public class IncludeExpr extends UnaryExpr {
   {
     String name = _expr.evalString(env);
       
-    env.pushCall(this, NullValue.NULL);
+    env.pushCall(this, NullValue.NULL, new Value[] { env.createString(name) });
     try {
       return env.include(_dir, name, _isRequire, false);
     } finally {

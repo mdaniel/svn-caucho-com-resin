@@ -96,7 +96,7 @@ public class MethodCallExpr extends Expr {
     for (int i = 0; i < _args.length; i++)
       args[i] = _args[i].evalArg(env);
 
-    env.pushCall(this, obj);
+    env.pushCall(this, obj, args);
 
     try {
       env.checkTimeout();
@@ -125,7 +125,7 @@ public class MethodCallExpr extends Expr {
     for (int i = 0; i < _args.length; i++)
       args[i] = _args[i].evalArg(env);
 
-    env.pushCall(this, obj);
+    env.pushCall(this, obj, args);
     
     try {
       env.checkTimeout();

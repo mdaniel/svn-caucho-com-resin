@@ -107,7 +107,7 @@ public class LateStaticBindingClassMethodExpr extends Expr {
       values[i] = _args[i].eval(env);
 
     Value obj = env.getThis();
-    env.pushCall(this, obj);
+    env.pushCall(this, obj, values);
 
     try {
       env.checkTimeout();

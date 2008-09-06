@@ -110,7 +110,7 @@ public class ErrorModule extends AbstractQuercusModule {
       String name = elt.getMethodName();
       String className = elt.getClassName();
 
-      // System.out.println("NAME: " + name + " " + elt.getClassName());
+      // System.out.println("N: " + name + " " + className);
     
       if (name.equals("executeTop")) {
 	return result;
@@ -120,13 +120,18 @@ public class ErrorModule extends AbstractQuercusModule {
 	String path = unmangleFile(className);
 	String fileName = env.getPwd().lookup("./" + path).getNativePath();
 	
+	String fun = findFunction(stack, i);
+
+	if (fun.equals("debug_backtrace"))
+	  continue;
+
 	ArrayValue call = new ArrayValueImpl();
 	result.put(call);
 
 	call.put("file", fileName);
 	call.put("line", env.getSourceLine(className, elt.getLineNumber()));
-	
-	call.put("function", unmangleFunction(className));
+
+	call.put("function", fun);
 
 	call.put(env.createString("args"), new ArrayValueImpl());
       }
@@ -150,29 +155,28 @@ public class ErrorModule extends AbstractQuercusModule {
       else if (className.startsWith("_quercus._")
 	       && name.equals("execute")) {
 	String methodName = stack[i - 1].getMethodName();
-	if (stack[i - 1].getClassName().equals("com.caucho.quercus.env.Env") &&
-            (methodName.equals("include") || methodName.equals("includeOnce"))) {
-	  String path = unmangleFile(className);
-	  String fileName = env.getPwd().lookup("./" + path).getNativePath();
 
-	  ArrayValue call = new ArrayValueImpl();
-	  result.put(call);
+	String path = unmangleFile(className);
+	String fileName = env.getPwd().lookup("./" + path).getNativePath();
 
-	  call.put("file", fileName);
-	  call.put("line", env.getSourceLine(className, elt.getLineNumber()));
+	ArrayValue call = new ArrayValueImpl();
+	result.put(call);
 
-	  if (methodName.equals("includeOnce"))
-	    call.put("function", "include_once");
-	  else
-	    call.put("function", "include");
+	call.put("file", fileName);
+	call.put("line", env.getSourceLine(className, elt.getLineNumber()));
+
+	if (methodName.equals("includeOnce"))
+	  call.put("function", "include_once");
+	else if (methodName.equals("include"))
+	  call.put("function", "include");
+	else {
+	  call.put("function", findFunction(stack, i));
 	}
       }
       else if (className.equals("com.caucho.quercus.expr.FunctionExpr")
 	       && name.equals("evalImpl")) {
 	if (stack[i - 1].getMethodName().equals("evalArguments")) {
 	}
-	else if (result.getSize() == 0 && depth == 0)
-	  depth++;
 	else
 	  addInterpreted(env, result, depth++);
       }
@@ -180,8 +184,13 @@ public class ErrorModule extends AbstractQuercusModule {
 	       && name.equals("eval")) {
 	if (stack[i - 1].getMethodName().equals("evalArguments")) {
 	}
-	else if (result.getSize() == 0 && depth == 0)
-	  depth++;
+	else
+	  addInterpreted(env, result, depth++);
+      }
+      else if (className.equals("com.caucho.quercus.expr.NewExpr")
+	       && name.equals("eval")) {
+	if (stack[i - 1].getMethodName().equals("evalArguments")) {
+	}
 	else
 	  addInterpreted(env, result, depth++);
       }
@@ -214,6 +223,23 @@ public class ErrorModule extends AbstractQuercusModule {
     return result;
   }
 
+  private static String findFunction(StackTraceElement []stack, int i)
+  {
+    String className = stack[i].getClassName();
+    
+    if (i == 0)
+      return unmangleFunction(className);
+    
+    String prevClassName = stack[i - 1].getClassName();
+    String prevMethodName = stack[i - 1].getMethodName();
+
+    if (prevClassName.startsWith("_quercus._")
+	&& prevMethodName.startsWith("call"))
+      return unmangleFunction(prevClassName);
+    else
+      return prevMethodName;
+  }
+  
   private static void addInterpreted(Env env, ArrayValue result, int i)
   {
     Expr expr = env.peekCall(i);
@@ -221,6 +247,10 @@ public class ErrorModule extends AbstractQuercusModule {
     if (expr instanceof FunctionExpr) {
       FunctionExpr callExpr = (FunctionExpr) expr;
 
+      String functionName = callExpr.getName();
+      if ("debug_backtrace".equals(functionName))
+	return;
+	
       ArrayValue call = new ArrayValueImpl();
       result.put(call);
       
@@ -229,7 +259,7 @@ public class ErrorModule extends AbstractQuercusModule {
 		 env.createString(callExpr.getFileName()));
 	call.put(env.createString("line"), new LongValue(callExpr.getLine()));
       }
-	
+
       call.put(env.createString("function"),
 	       env.createString(callExpr.getName()));
 
@@ -239,7 +269,7 @@ public class ErrorModule extends AbstractQuercusModule {
       // php/180q
       //ArrayValueImpl args = evalArgsArray(env, callExpr);
 
-      ArrayValueImpl args = new ArrayValueImpl();
+      ArrayValueImpl args = new ArrayValueImpl(env.peekArgs(i));
       
       call.put(env.createString("args"), args);
     }
@@ -359,8 +389,15 @@ public class ErrorModule extends AbstractQuercusModule {
   {
     int p = className.lastIndexOf("$fun_");
 
-    if (p > 0)
-      return className.substring(p + "$fun_".length());
+    if (p > 0) {
+      className = className.substring(p + "$fun_".length());
+
+      p = className.lastIndexOf('_');
+      if (p > 0)
+	return className.substring(0, p);
+      else
+	return className;
+    }
     else
       return className;
   }

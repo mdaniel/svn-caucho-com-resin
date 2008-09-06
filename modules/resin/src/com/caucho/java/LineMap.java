@@ -116,12 +116,20 @@ public class LineMap implements Serializable {
    */
   public boolean add(String srcFilename, int srcLine, int dstLine)
   {
+    return add(srcFilename, srcLine, dstLine, false);
+  }
+  
+  public boolean add(String srcFilename,
+		     int srcLine,
+		     int dstLine,
+		     boolean isPreferLast)
+  {
     _lastSrcFilename = srcFilename;
 
     if (_lines.size() > 0) {
       Line line = _lines.get(_lines.size() - 1);
 
-      if (line.add(srcFilename, srcLine, dstLine)) {
+      if (line.add(srcFilename, srcLine, dstLine, isPreferLast)) {
 	if (_lines.size() > 1) {
 	  Line prevLine = _lines.get(_lines.size() - 2);
 
@@ -441,15 +449,31 @@ public class LineMap implements Serializable {
     /**
      * Tries to add a new location.
      */
-    boolean add(String srcFilename, int srcLine, int dstLine)
+    boolean add(String srcFilename, int srcLine, int dstLine,
+		boolean isPreferLast)
     {
-      if (_srcFilename != null &&
-	  (! _srcFilename.equals(srcFilename) || srcFilename == null))
+      if (_srcFilename != null
+	  && (! _srcFilename.equals(srcFilename) || srcFilename == null))
 	return false;
 
-      // XXX:
       if (dstLine <= _dstLine) {
-	return true;
+	// php/180u
+	if (! isPreferLast)
+	  return true;
+	else if (_dstIncrement == 1 && _repeat == 1) {
+	  _srcLine = srcLine;
+	  return true;
+	}
+	else if (_repeat > 1) {
+	  _repeat--;
+	  return false;
+	}
+	else if (_dstIncrement > 1) {
+	  _dstIncrement--;
+	  return false;
+	}
+	else
+	  return true;
       }
 
       if (srcLine == _srcLine) {

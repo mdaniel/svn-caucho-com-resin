@@ -124,6 +124,9 @@ public class HttpRequest
   protected void init(Env env)
     throws ProtocolException
   {
+    if (_conn == null || _curl == null)
+      return;
+    
     _conn.setRequestMethod(_curl.getRequestMethod());
 
     HashMap<String,String> _properties = _curl.getRequestPropertiesMap();
@@ -150,7 +153,8 @@ public class HttpRequest
     throws ConnectException, SocketTimeoutException,
            UnknownHostException, IOException
   {
-    _conn.connect(_curl);
+    if (_conn != null)
+      _conn.connect(_curl);
   }
 
   /**
@@ -168,6 +172,9 @@ public class HttpRequest
   protected boolean finish(Env env)
     throws IOException
   {
+    if (_curl == null || _conn == null)
+      return false;
+    
     _curl.setResponseCode(_conn.getResponseCode());
 
     Value header = getHeader(env, env.createBinaryBuilder());
@@ -278,6 +285,9 @@ public class HttpRequest
   protected final URL getURL(Env env, String urlString, int port)
     throws MalformedURLException
   {
+    if (urlString == null)
+      return null;
+    
     URL url;
 
     if (urlString.indexOf("://") < 0)

@@ -106,7 +106,7 @@ public class ClassMethodExpr extends Expr {
     }
 
     Value obj = env.getThis();
-    env.pushCall(this, obj);
+    env.pushCall(this, obj, values);
 
     try {
       env.checkTimeout();

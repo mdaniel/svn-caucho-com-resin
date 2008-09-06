@@ -81,7 +81,8 @@ public class IncludeOnceExpr extends UnaryExpr {
 
     // return env.include(_dir, name);
     
-    env.pushCall(this, NullValue.NULL);
+    env.pushCall(this, NullValue.NULL,
+		 new Value[] { env.createString(name) });
     
     try {
       if (_dir != null)

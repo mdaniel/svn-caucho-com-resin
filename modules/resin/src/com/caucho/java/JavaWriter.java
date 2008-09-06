@@ -51,6 +51,7 @@ public class JavaWriter extends Writer {
 
   // The line mapping
   private LineMap _lineMap;
+  private boolean _isPreferLast = false;
 
   // The current output line
   private int _destLine = 1;
@@ -106,8 +107,16 @@ public class JavaWriter extends Writer {
     throws IOException
   {
     if (_lineMap != null && filename != null && line >= 0) {
-      _lineMap.add(filename, line, _destLine);
+      _lineMap.add(filename, line, _destLine, _isPreferLast);
     }
+  }
+
+  /**
+   * True if later source line numbers should override earlier ones
+   */
+  public void setPreferLast(boolean isPreferLast)
+  {
+    _isPreferLast = isPreferLast;
   }
 
   /**
