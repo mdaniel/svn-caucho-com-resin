@@ -547,15 +547,15 @@ public abstract class JdbcConnectionResource
     try {
       Connection conn = _conn;
       _conn = null;
-      
-      if (! _env.getQuercus().isConnectionPool()) {
-        if (log.isLoggable(Level.FINER))
-          log.finer(this +  " cleanup(): pool removal");
-        
-        _env.getQuercus().markForPoolRemoval(conn);
-      }
 
       if (conn != null) {
+        if (! _env.getQuercus().isConnectionPool()) {
+          if (log.isLoggable(Level.FINER))
+            log.finer(this +  " cleanup(): pool removal");
+
+          _env.getQuercus().markForPoolRemoval(conn);
+        }
+        
         conn.close();
       }
       
