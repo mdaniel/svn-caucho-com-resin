@@ -125,9 +125,13 @@ public class MysqlModule extends AbstractQuercusModule {
    */
   public static boolean mysql_close(Env env, @Optional Mysqli conn)
   {
+    boolean isEnvConn = false;
+    
     if (conn == null) {
       conn = (Mysqli) env.getSpecialValue("caucho.mysql");
       env.removeSpecialValue("caucho.mysql");
+      
+      isEnvConn = true;
     }
 
     if (conn == null) {
@@ -136,6 +140,9 @@ public class MysqlModule extends AbstractQuercusModule {
       env.warning(L.l("no MySQL-Link resource supplied"));
       return false;
     }
+    
+    if (isEnvConn || env.getSpecialValue("caucho.mysql") != null)
+      env.removeSpecialValue("caucho.mysql");
 
     if (conn.isConnected()) {
       conn.close(env);
