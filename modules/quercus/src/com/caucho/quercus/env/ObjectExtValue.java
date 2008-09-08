@@ -343,7 +343,7 @@ public class ObjectExtValue extends ObjectValue
       }
     }
     
-    entry = createEntry(name, FieldVisibility.PROTECTED);
+    entry = createEntry(name, FieldVisibility.PUBLIC);
 
     Value oldValue = entry._value;
 
@@ -394,7 +394,7 @@ public class ObjectExtValue extends ObjectValue
       }
     }
     
-    entry = createEntry(name, FieldVisibility.PROTECTED);
+    entry = createEntry(name, FieldVisibility.PUBLIC);
 
     Value oldValue = entry._value;
 
