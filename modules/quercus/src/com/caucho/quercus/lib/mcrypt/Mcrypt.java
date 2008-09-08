@@ -197,6 +197,14 @@ public class Mcrypt {
       return get_block_size();
   }
 
+  private boolean isPadKey()
+  {
+    if (McryptModule.MCRYPT_BLOWFISH.equals(_algorithm))
+      return false;
+    else
+      return true;
+  }
+
   /**
    * Returns the initialization vector size.
    */
@@ -210,15 +218,23 @@ public class Mcrypt {
    */
   public int init(byte []keyBytesArg, byte []iv)
   {
-    byte []keyBytes = new byte[get_key_size()];
+    byte []keyBytes;
+
+    if (isPadKey()) {
+      keyBytes = new byte[get_key_size()];
     
-    int length = Math.min(keyBytesArg.length, keyBytes.length);
+      int length = Math.min(keyBytesArg.length, keyBytes.length);
     
-    System.arraycopy(keyBytesArg, 0, keyBytes, 0, length);
+      System.arraycopy(keyBytesArg, 0, keyBytes, 0, length);
+    }
+    else
+      keyBytes = keyBytesArg;
 
     _key = new SecretKeySpec(keyBytes, getAlgorithm(_algorithm));
 
-    if (_mode.equals("CBC") || _mode.equals("CFB") || _mode.equals("OFB"))
+    if (iv == null)
+      _iv = null;
+    else if (_mode.equals("CBC") || _mode.equals("CFB") || _mode.equals("OFB"))
       _iv = new IvParameterSpec(iv);
     else
       _iv = null;
@@ -271,7 +287,6 @@ public class Mcrypt {
     }
   }
 
-
   private boolean isPadded()
   {
     return (McryptModule.MCRYPT_DES.equals(_algorithm)
@@ -299,10 +314,12 @@ public class Mcrypt {
       return "DES/" + mode + "/NoPadding";
     else if (McryptModule.MCRYPT_3DES.equals(algorithm))
       return "DESede/" + mode + "/NoPadding";
-    else if (McryptModule.MCRYPT_BLOWFISH.equals(algorithm))
-      return "Blowfish/" + mode + "/NoPadding";
-    else if (McryptModule.MCRYPT_ARCFOUR.equals(algorithm) ||
-	     McryptModule.MCRYPT_RC4.equals(algorithm))
+    else if (McryptModule.MCRYPT_BLOWFISH.equals(algorithm)) {
+      // php/1q0t, #2561
+      return "Blowfish/" + mode + "/PKCS5Padding";
+    }
+    else if (McryptModule.MCRYPT_ARCFOUR.equals(algorithm)
+	     || McryptModule.MCRYPT_RC4.equals(algorithm))
       return "ARCFOUR/" + mode + "/NoPadding";
     else
       return algorithm + '/' + mode + "/NoPadding";

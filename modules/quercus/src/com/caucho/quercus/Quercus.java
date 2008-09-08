@@ -161,6 +161,9 @@ public class Quercus
 
   private DataSource _database;
 
+  private HashMap<String,DataSource> _databaseMap
+    = new HashMap<String,DataSource>();
+
   private long _staticId;
 
   private Path _pwd;
@@ -471,17 +474,30 @@ public class Quercus
     if (_database != null)
       return _database;
     else {
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
       try {
-        Class cls = loader.loadClass(driver);
+	synchronized (_databaseMap) {
+	  String key = driver + ";" + url;
+	
+	  DataSource database = _databaseMap.get(key);
+
+	  if (database != null)
+	    return database;
+	
+	  ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+	  Class cls = loader.loadClass(driver);
         
-        Object ds = cls.newInstance();
+	  Object ds = cls.newInstance();
         
-        if (ds instanceof DataSource)
-          return (DataSource) ds;
-        else
-          return new JavaSqlDriverWrapper((java.sql.Driver) ds, url);
+	  if (ds instanceof DataSource)
+	    database = (DataSource) ds;
+	  else
+	    database = new JavaSqlDriverWrapper((java.sql.Driver) ds, url);
+
+	  _databaseMap.put(key, database);
+
+	  return database;
+	}
       } catch (ClassNotFoundException e) {
         throw new QuercusModuleException(e);
       } catch (InstantiationException e) {
@@ -491,6 +507,13 @@ public class Quercus
       }
     }
   }
+  
+  /*
+   * Marks the connection for removal from the connection pool.
+   */
+  public void markForPoolRemoval(Connection conn)
+  {
+  }
 
   /**
    * Unwrap connection if necessary.
@@ -498,14 +521,6 @@ public class Quercus
   public Connection getConnection(Connection conn)
   {
     return conn;
-  }
-  
-  /*
-   * Marks the connection for removal from the connection pool.
-   */
-  public void markForPoolRemoval(Connection conn)
-  {
-    return;
   }
   
   /**

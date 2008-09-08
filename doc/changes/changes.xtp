@@ -13,6 +13,9 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>quercus: refactor database to avoid JdbcConnection close issues (#2721, rep by paulberto)</li>
+<li>quercus: pg_free_result needs to return true (#2546, rep by gjvc)</li>
+<li>quercus: mcrypt padding issues with blowfixh (#2561, rep by gjvc)</li>
 <li>quercus: in_array with Java adapter wasn't implemented (#2889, rep by Heimo Laukkanen)</li>
 <li>quercus: tempnam wasn't removing file at end of execution (#2097, rep by A Sharaz)</li>
 <li>quercus: debug_backtrace line numbers in compiled mode (#2158, rep by koreth)</li>

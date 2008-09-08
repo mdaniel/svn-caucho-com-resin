@@ -31,6 +31,7 @@ package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.ConnectionEntry;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.env.StringValue;
@@ -55,7 +56,7 @@ public abstract class JdbcConnectionResource
   private static LruCache<TableKey,JdbcTableMetaData> _tableMetadataMap
     = new LruCache<TableKey,JdbcTableMetaData>(256);
 
-  private Connection _conn;
+  protected ConnectionEntry _conn;
 
   // cached statement
   private Statement _stmt;
@@ -163,17 +164,20 @@ public abstract class JdbcConnectionResource
    * @param dbname database name
    */
   final protected boolean connectInternal(Env env,
-                                          String host,
-                                          String userName,
-                                          String password,
-                                          String dbname,
-                                          int port,
-                                          String socket,
-                                          int flags,
-                                          String driver,
-                                          String url,
-                                          boolean isNewLink)
+					  String host,
+					  String userName,
+					  String password,
+					  String dbname,
+					  int port,
+					  String socket,
+					  int flags,
+					  String driver,
+					  String url,
+					  boolean isNewLink)
   {
+    if (_conn != null)
+      throw new IllegalStateException(getClass().getSimpleName() + " attempt to open multiple connections");
+    
     _host = host;
     _userName = userName;
     _password = password;
@@ -188,40 +192,36 @@ public abstract class JdbcConnectionResource
     
     _catalog = dbname;
 
-    Connection conn = connectImpl(env, host, userName, password,
-                                  dbname, port, socket, flags, driver, url,
-                                  isNewLink);
+    _conn = connectImpl(env, host, userName, password,
+			dbname, port, socket, flags, driver, url,
+			isNewLink);
 
-    if (conn != null) {
-      _conn = conn;
-
-      _env.addCleanup(this);
-
+    if (_conn != null) {
       try {
 	if ("".equals(_catalog)) 
-	  _catalog = conn.getCatalog();
+	  _catalog = _conn.getConnection().getCatalog();
       } catch (SQLException e) {
 	log.log(Level.FINE, e.toString(), e);
       }
     }
 
-    return conn != null;
+    return _conn != null && _conn.getConnection() != null;
   }
 
   /**
    * Connects to the underlying database.
    */
-  protected abstract Connection connectImpl(Env env,
-					    String host,
-					    String userName,
-					    String password,
-					    String dbname,
-					    int port,
-					    String socket,
-					    int flags,
-					    String driver,
-					    String url,
-                        boolean isNewLink);
+  protected abstract ConnectionEntry connectImpl(Env env,
+						 String host,
+						 String userName,
+						 String password,
+						 String dbname,
+						 int port,
+						 String socket,
+						 int flags,
+						 String driver,
+						 String url,
+						 boolean isNewLink);
 
   /**
    * Escape the given string for SQL statements.
@@ -310,7 +310,7 @@ public abstract class JdbcConnectionResource
 
     try {
       if (_dmd == null)
-        _dmd = _conn.getMetaData();
+        _dmd = _conn.getConnection().getMetaData();
 
       ResultSet rs = _dmd.getCatalogs();
 
@@ -370,7 +370,7 @@ public abstract class JdbcConnectionResource
   {
     try {
       if (_dmd == null)
-        _dmd = _conn.getMetaData();
+        _dmd = _conn.getConnection().getMetaData();
 
       return _dmd.getDatabaseProductVersion();
     } catch (SQLException e) {
@@ -385,9 +385,14 @@ public abstract class JdbcConnectionResource
   public final Connection getConnection(Env env)
   {
     _isUsed = true;
+
+    Connection conn = null;
     
     if (_conn != null)
-      return _conn;
+      conn = _conn.getConnection();
+
+    if (conn != null)
+      return conn;
     else if (_errorMessage != null) {
       env.warning(_errorMessage);
       return null;
@@ -399,13 +404,14 @@ public abstract class JdbcConnectionResource
   }
 
   /**
-   * Returns the underlying SQL connection
+   * Returns the unwrapped SQL connection
    * associated to this statement.
    */
   protected Connection getJavaConnection()
     throws SQLException
   {
-    return _env.getQuercus().getConnection(_conn);
+    // XXX: jdbc for jdk 1.6 updates
+    return _env.getQuercus().getConnection(_conn.getConnection());
   }
 
   /**
@@ -443,7 +449,7 @@ public abstract class JdbcConnectionResource
     throws SQLException
   {
     if (_dmd == null)
-      _dmd = _conn.getMetaData();
+      _dmd = _conn.getConnection().getMetaData();
 
     return _dmd.getURL();
   }
@@ -493,7 +499,7 @@ public abstract class JdbcConnectionResource
     throws SQLException
   {
     if (_dmd == null)
-      _dmd = _conn.getMetaData();
+      _dmd = _conn.getConnection().getMetaData();
 
     return _dmd;
   }
@@ -505,9 +511,9 @@ public abstract class JdbcConnectionResource
     if (result.length < 3)
       return 0;
 
-    return (Integer.parseInt(result[0]) * 10000 +
-            Integer.parseInt(result[1]) * 100 +
-            Integer.parseInt(result[2]));
+    return (Integer.parseInt(result[0]) * 10000
+	    + Integer.parseInt(result[1]) * 100
+	    + Integer.parseInt(result[2]));
   }
 
   /**
@@ -516,7 +522,13 @@ public abstract class JdbcConnectionResource
   public boolean close(Env env)
   {
     // php/1418
-    cleanup();
+    // cleanup();
+
+    ConnectionEntry conn = _conn;
+    _conn = null;
+
+    if (conn != null)
+      conn.phpClose();
 
     return true;
   }
@@ -540,27 +552,17 @@ public abstract class JdbcConnectionResource
 
       if (stmt != null)
         stmt.close();
-    } catch (SQLException e) {
+    } catch (Throwable e) {
+      // must catch throwable to force the conn close to work
+      
       log.log(Level.FINER, e.toString(), e);
     }
 
-    try {
-      Connection conn = _conn;
-      _conn = null;
+    ConnectionEntry conn = _conn;
+    _conn = null;
 
-      if (conn != null) {
-        if (! _env.getQuercus().isConnectionPool()) {
-          if (log.isLoggable(Level.FINER))
-            log.finer(this +  " cleanup(): pool removal");
-
-          _env.getQuercus().markForPoolRemoval(conn);
-        }
-        
-        conn.close();
-      }
-      
-    } catch (SQLException e) {
-      log.log(Level.FINER, e.toString(), e);
+    if (conn != null) {
+      conn.phpClose();
     }
   }
 
@@ -591,7 +593,7 @@ public abstract class JdbcConnectionResource
       if (conn == null)
         return BooleanValue.FALSE;
 
-      if (checkSql(conn, sql))
+      if (checkSql(_conn, sql))
 	return BooleanValue.TRUE;
       
       // XXX: test for performance
@@ -676,7 +678,7 @@ public abstract class JdbcConnectionResource
     return env.wrapJava(_rs);
   }
 
-  private boolean checkSql(Connection conn, String sql)
+  private boolean checkSql(ConnectionEntry connEntry, String sql)
   {
     SqlParseToken tok = parseSqlToken(sql, null);
 
@@ -721,8 +723,9 @@ public abstract class JdbcConnectionResource
       }
       case 'c': case 'C': {
         if (tok.matchesToken("CREATE")) {
-          // don't pool connections that create tables
-          _env.getQuercus().markForPoolRemoval(conn);
+          // don't pool connections that create tables, because of mysql
+	  // temporary tables
+          connEntry.markForPoolRemoval();
         }
 	/*
         else if (tok.matchesToken("COMMIT")) {
@@ -825,7 +828,7 @@ public abstract class JdbcConnectionResource
     clearErrors();
 
     try {
-      _conn.setAutoCommit(mode);
+      _conn.getConnection().setAutoCommit(mode);
     } catch (SQLException e) {
       saveErrors(e);
       log.log(Level.FINEST, e.toString(), e);
@@ -843,7 +846,7 @@ public abstract class JdbcConnectionResource
     clearErrors();
 
     try {
-      _conn.commit();
+      _conn.getConnection().commit();
     } catch (SQLException e) {
       saveErrors(e);
       log.log(Level.FINEST, e.toString(), e);
@@ -864,7 +867,7 @@ public abstract class JdbcConnectionResource
     clearErrors();
 
     try {
-      _conn.rollback();
+      _conn.getConnection().rollback();
     } catch (SQLException e) {
       saveErrors(e);
       log.log(Level.FINEST, e.toString(), e);
@@ -888,11 +891,11 @@ public abstract class JdbcConnectionResource
       // The database is only connected, but not used, reopen with
       // a real catalog
 
-      Connection conn = _conn;
+      ConnectionEntry conn = _conn;
       _conn = null;
 
       if (conn != null)
-        conn.close();
+        conn.phpClose();
 
       connectInternal(_env, _host, _userName, _password, name,
 		      _port, _socket, _flags, _driver, _url, false);
@@ -917,7 +920,10 @@ public abstract class JdbcConnectionResource
    */
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _conn + "]";
+    if (_conn != null)
+      return getClass().getSimpleName() + "[" + _conn.getConnection() + "]";
+    else
+      return getClass().getSimpleName() + "[" + null + "]";
   }
 
   /**

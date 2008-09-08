@@ -35,6 +35,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ResourceType;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.ConnectionEntry;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
@@ -169,17 +170,17 @@ public class Mysqli extends JdbcConnectionResource {
    * Connects to the underlying database.
    */
   @Override
-  protected Connection connectImpl(Env env,
-                                   String host,
-                                   String userName,
-                                   String password,
-                                   String dbname,
-                                   int port,
-                                   String socket,
-                                   int flags,
-                                   String driver,
-                                   String url,
-                                   boolean isNewLink)
+    protected ConnectionEntry connectImpl(Env env,
+					  String host,
+					  String userName,
+					  String password,
+					  String dbname,
+					  int port,
+					  String socket,
+					  int flags,
+					  String driver,
+					  String url,
+					  boolean isNewLink)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));
@@ -206,12 +207,8 @@ public class Mysqli extends JdbcConnectionResource {
                      (flags & MysqliModule.MYSQL_CLIENT_SSL) != 0);
       }
       
-      Connection jConn;
-      
-      if (isNewLink)
-        jConn = env.createConnection(driver, url, userName, password);
-      else
-        jConn = env.getConnection(driver, url, userName, password);
+      ConnectionEntry jConn
+	= env.getConnection(driver, url, userName, password, ! isNewLink);
 
       checkDriverVersion(env, jConn);
 
@@ -1160,7 +1157,7 @@ public class Mysqli extends JdbcConnectionResource {
       try {
         stmt = conn.createStatement();
 
-        env.getQuercus().markForPoolRemoval(conn);
+	_conn.markForPoolRemoval();
 
         ResultSet rs = stmt.executeQuery("KILL CONNECTION " + threadId);
         
@@ -1480,11 +1477,14 @@ public class Mysqli extends JdbcConnectionResource {
    * Older versions of this driver return incorrect type information
    * and suffer from encoding related bugs.
    */
-  protected static void checkDriverVersion(Env env, Connection conn)
+  protected static void checkDriverVersion(Env env,
+					   ConnectionEntry connEntry)
     throws SQLException
   {
     if (_checkedDriverVersion != null)
       return;
+
+    Connection conn = connEntry.getConnection();
     
     synchronized(_checkDriverLock) {
       // to prevent multiple checks

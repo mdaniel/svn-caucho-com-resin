@@ -775,44 +775,6 @@ public class Env {
   {
     return _quercus.findDatabase(driver, url);
   }
-
-  /*
-   * Returns a connection to the given database.
-   */
-  public Connection createConnection(String driver, String url,
-                                     String userName, String password)
-    throws Exception
-  {
-    DataSource database = _quercus.getDatabase();
-
-    if (database != null) {
-      ConnectionEntry entry = new ConnectionEntry();
-      entry.init(database, null, null);
-
-      entry.setConnection(database.getConnection());
-      _connMap.put(entry, entry);
-      
-      return entry.getConnection();
-    }
-
-    database = findDatabase(driver, url);
-    
-    ConnectionEntry entry = new ConnectionEntry();
-    entry.init(database, userName, password);
-
-    Connection conn;
-    
-    if (userName == null || userName.equals(""))
-      conn = database.getConnection();
-    else
-      conn = database.getConnection(userName, password);
-
-    entry.setConnection(conn);
-
-    _connMap.put(entry, entry);
-
-    return conn;
-  }
   
   /**
    * Returns a connection to the given database. If there is
@@ -820,55 +782,41 @@ public class Env {
    * return the connection from the pool. Otherwise, create
    * a new connection and add it to the pool.
    */
-  public Connection getConnection(String driver, String url,
-                                  String userName, String password)
+  public ConnectionEntry getConnection(String driver, String url,
+				       String userName, String password,
+				       boolean isReuse)
     throws Exception
   {
     DataSource database = _quercus.getDatabase();
 
     if (database != null) {
-      ConnectionEntry entry = new ConnectionEntry();
-      entry.init(database, null, null);
-
-      ConnectionEntry oldEntry = _connMap.get(entry);
-
-      Connection conn;
-      if (oldEntry != null
-          && (conn = oldEntry.getConnection()) != null
-          && ! conn.isClosed())
-        return conn;
-
-      entry.setConnection(database.getConnection());
-      _connMap.put(entry, entry);
-      
-      conn = entry.getConnection();
-
-      return conn;
+      userName = null;
+      password = null;
     }
+    else {
+      database = findDatabase(driver, url);
 
-    database = findDatabase(driver, url);
+      if (database == null)
+	return null;
+    }
     
-    ConnectionEntry entry = new ConnectionEntry();
+    ConnectionEntry entry = new ConnectionEntry(this);
     entry.init(database, userName, password);
 
-    ConnectionEntry oldEntry = _connMap.get(entry);
+    ConnectionEntry oldEntry = null;
 
-    Connection conn;
-    
-    if (oldEntry == null
-        || (conn = oldEntry.getConnection()) == null
-        || conn.isClosed()) {
-      if (userName == null || userName.equals(""))
-        conn = database.getConnection();
-      else
-        conn = database.getConnection(userName, password);
+    if (isReuse)
+      oldEntry = _connMap.get(entry);
 
-      entry.setConnection(conn);
+    if (oldEntry != null && oldEntry.isReusable())
+      return oldEntry;
 
+    entry.connect(isReuse);
+
+    if (isReuse)
       _connMap.put(entry, entry);
-    }
 
-    return conn;
+    return entry;
   }
 
   /**
@@ -5175,8 +5123,8 @@ public class Env {
         log.log(Level.FINE, e.toString(), e);
       }
 
-      ArrayList<EnvCleanup> cleanupList = _cleanupList;
-      _cleanupList = new ArrayList<EnvCleanup>(_cleanupList);
+      ArrayList<EnvCleanup> cleanupList
+	= new ArrayList<EnvCleanup>(_cleanupList);
 
       for (EnvCleanup envCleanup : cleanupList) {
         try {
@@ -5298,60 +5246,6 @@ public class Env {
 
       else
 	return false;
-    }
-  }
-
-  static class ConnectionEntry {
-    private DataSource _ds;
-    private String _user;
-    private String _password;
-    private Connection _conn;
-
-    public void init(DataSource ds, String user, String password)
-    {
-      _ds = ds;
-      _user = user;
-      _password = password;
-    }
-
-    public void setConnection(Connection conn)
-    {
-      _conn = conn;
-    }
-
-    public Connection getConnection()
-    {
-      return _conn;
-    }
-
-    public int hashCode()
-    {
-      int hash = _ds.hashCode();
-      
-      if (_user == null)
-	return hash;
-      else
-	return 65521 * hash + _user.hashCode();
-    }
-
-    public boolean equals(Object o)
-    {
-      if (! (o instanceof ConnectionEntry))
-	return false;
-
-      ConnectionEntry entry = (ConnectionEntry) o;
-
-      if (_ds != entry._ds)
-	return false;
-      else if (_user == null)
-	return entry._user == null;
-      else
-	return _user.equals(entry._user);
-    }
-
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[ds=" + _ds + ", user=" + _user + "]";
     }
   }
 

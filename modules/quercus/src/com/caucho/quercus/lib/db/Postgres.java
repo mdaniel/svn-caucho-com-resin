@@ -31,6 +31,7 @@ package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ResourceType;
+import com.caucho.quercus.env.ConnectionEntry;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
@@ -84,17 +85,17 @@ public class Postgres extends JdbcConnectionResource {
    * Connects to the underlying database.
    */
   @Override
-  protected Connection connectImpl(Env env,
-				                   String host,
-				                   String userName,
-				                   String password,
-				                   String dbname,
-				                   int port,
-				                   String socket,
-				                   int flags,
-				                   String driver,
-				                   String url,
-                                   boolean isNewLink)
+    protected ConnectionEntry connectImpl(Env env,
+					  String host,
+					  String userName,
+					  String password,
+					  String dbname,
+					  int port,
+					  String socket,
+					  int flags,
+					  String driver,
+					  String url,
+					  boolean isNewLink)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));
@@ -115,15 +116,11 @@ public class Postgres extends JdbcConnectionResource {
         url = "jdbc:postgresql://" + host + ":" + port + "/" + dbname;
       }
 
-      Connection jConn;
+      ConnectionEntry jConn;
       
-      if (isNewLink)
-        jConn = env.createConnection(driver, url, userName, password);
-      else
-        jConn = env.getConnection(driver, url, userName, password);
+      jConn = env.getConnection(driver, url, userName, password, ! isNewLink);
 
       return jConn;
-
     } catch (SQLException e) {
       env.warning("A link to the server could not be established. " + e.toString());
       env.setSpecialValue("postgres.connectErrno",new LongValue(e.getErrorCode()));

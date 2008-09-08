@@ -132,6 +132,7 @@ public class JdbcResultResource {
 
       _stmt = null;
       _env = null;
+
       _conn = null;
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
