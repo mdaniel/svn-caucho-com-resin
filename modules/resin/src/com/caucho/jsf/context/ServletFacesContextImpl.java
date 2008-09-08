@@ -34,6 +34,7 @@ import java.util.logging.*;
 import javax.el.*;
 
 import javax.faces.*;
+import javax.faces.event.PhaseId;
 import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.component.*;
@@ -46,7 +47,13 @@ public class ServletFacesContextImpl extends FacesContext
 {
   private static final Logger log
     = Logger.getLogger(ServletFacesContextImpl.class.getName());
-  
+
+  private static final Iterator<FacesMessage> NO_MESSAGES
+    = new NoMessagesIterator();
+
+  private static final Iterator<String> NO_IDS
+    = new NoIdsIterator();
+
   private FacesContextFactoryImpl _factory;
 
   private ServletContext _webApp;
@@ -61,8 +68,9 @@ public class ServletFacesContextImpl extends FacesContext
   
   private UIViewRoot _uiViewRoot;
 
-  private HashMap<String,ArrayList<FacesMessage>> _messageMap
-    = new HashMap<String,ArrayList<FacesMessage>>();
+  private Object []_messages;
+  private final Object _messagesLock = new Object();
+  private int _messageModCount = 0;
 
   private ResponseWriter _responseWriter;
   private ResponseStream _responseStream;
@@ -260,15 +268,22 @@ public class ServletFacesContextImpl extends FacesContext
     if (log.isLoggable(Level.FINE))
       log.fine("FacesContext.addMessage " + clientId + " " + message);
 
-    synchronized (_messageMap) {
-      ArrayList<FacesMessage> messages = _messageMap.get(clientId);
+    synchronized (_messagesLock) {
+      if (_messages == null) {
+        _messages = new Object[]{clientId, message};
+      }
+      else {
+        Object []newMessages = new Object[_messages.length + 2];
 
-      if (messages == null) {
-	messages = new ArrayList<FacesMessage>();
-	_messageMap.put(clientId, messages);
+        System.arraycopy(_messages, 0, newMessages, 0, _messages.length);
+
+        newMessages[newMessages.length - 2] = clientId;
+        newMessages[newMessages.length - 1] = message;
+
+        _messages = newMessages;
       }
 
-      messages.add(message);
+      _messageModCount++;
     }
   }
 
@@ -276,11 +291,20 @@ public class ServletFacesContextImpl extends FacesContext
   {
     if (_isClosed)
       throw new IllegalStateException(getClass().getName() + " is closed");
-    
-    synchronized (_messageMap) {
-      ArrayList<String> list = new ArrayList<String>(_messageMap.keySet());
 
-      return list.iterator();
+    synchronized (_messagesLock) {
+      if (_messages == null)
+        return NO_IDS;
+
+      LinkedHashSet<String> ids = new LinkedHashSet<String>();
+
+      for (int i = 0; i < _messages.length / 2; i++) {
+        Object id = _messages[i * 2];
+
+        ids.add((String) id);
+      }
+
+      return ids.iterator();
     }
   }
 
@@ -288,21 +312,22 @@ public class ServletFacesContextImpl extends FacesContext
   {
     if (_isClosed)
       throw new IllegalStateException(getClass().getName() + " is closed");
-    
-    synchronized (_messageMap) {
-      FacesMessage.Severity severity = null;
-      
-      for (Map.Entry<String,ArrayList<FacesMessage>> entry
-	     : _messageMap.entrySet()) {
-	for (FacesMessage msg : entry.getValue()) {
-	  if (severity == null)
-	    severity = msg.getSeverity();
-	  else if (severity.compareTo(msg.getSeverity()) < 0)
-	    severity = msg.getSeverity();
-	}
+
+
+    synchronized (_messagesLock) {
+      if (_messages == null)
+        return null;
+
+      FacesMessage.Severity result = null;
+
+      for (int i = 0; i < _messages.length / 2; i++) {
+        FacesMessage msg = (FacesMessage) _messages[i * 2 + 1];
+
+        if (result == null || msg.getSeverity().compareTo(result) > 0)
+          result = msg.getSeverity();
       }
 
-      return severity;
+      return result;
     }
   }
 
@@ -310,30 +335,141 @@ public class ServletFacesContextImpl extends FacesContext
   {
     if (_isClosed)
       throw new IllegalStateException(getClass().getName() + " is closed");
-    
-    synchronized (_messageMap) {
-      ArrayList<FacesMessage> messages = new ArrayList<FacesMessage>();
-      
-      for (ArrayList<FacesMessage> value : _messageMap.values()) {
-	messages.addAll(value);
-      }
-      
-      return messages.iterator();
+
+    synchronized (_messagesLock) {
+      if (_messages == null)
+        return NO_MESSAGES;
+
+      return new Iterator<FacesMessage>() {
+        private int _cursor = 1;
+        private int _expectedModCount = _messageModCount;
+
+        public boolean hasNext()
+        {
+          synchronized (_messagesLock) {
+            return (_cursor < _messages.length);
+          }
+        }
+
+        public FacesMessage next()
+        {
+          synchronized (_messagesLock) {
+            if (_expectedModCount != _messageModCount)
+              throw new ConcurrentModificationException();
+
+            int idx = _cursor;
+            _cursor = _cursor + 2;
+
+            try {
+              return (FacesMessage) _messages[idx];
+            }
+            catch (ArrayIndexOutOfBoundsException e) {
+              throw new NoSuchElementException();
+            }
+          }
+        }
+
+        public void remove()
+        {
+          synchronized (_messagesLock) {
+            if (_expectedModCount != _messageModCount)
+              throw new ConcurrentModificationException();
+
+            Object []newMessages = new Object[_messages.length - 2];
+            System.arraycopy(_messages, 0, newMessages, 0, _cursor - 3);
+
+            System.arraycopy(_messages,
+                             _cursor - 1,
+                             newMessages,
+                             _cursor - 3,
+                             _messages.length - _cursor + 1);
+
+            _messages = newMessages;
+
+            _cursor = _cursor - 2;
+            
+            _expectedModCount++;
+            _messageModCount = _expectedModCount;
+          }
+        }
+      };
     }
   }
 
-  public Iterator<FacesMessage> getMessages(String clientId)
+  public Iterator<FacesMessage> getMessages(final String clientId)
   {
     if (_isClosed)
       throw new IllegalStateException(getClass().getName() + " is closed");
-    
-    synchronized (_messageMap) {
-      ArrayList<FacesMessage> messages = _messageMap.get(clientId);
 
-      if (messages == null)
-	messages = new ArrayList<FacesMessage>();
+    synchronized (_messagesLock) {
+      if (_messages == null)
+        return NO_MESSAGES;
 
-      return messages.iterator();
+      return new Iterator<FacesMessage>() {
+        private int _expectedModCount = _messageModCount;
+        private int _cursor = 0;
+
+        public boolean hasNext()
+        {
+          for (int i = _cursor; i < _messages.length / 2; i++) {
+            int idx = i * 2;
+
+            if ((clientId == null && _messages[idx] == null) ||
+                (clientId != null && clientId.equals(_messages[idx])))
+              return true;
+
+          }
+
+          return false;
+        }
+
+        public FacesMessage next()
+        {
+          synchronized (_messagesLock) {
+            if (_expectedModCount != _messageModCount)
+              throw new ConcurrentModificationException();
+
+            for (int i = _cursor; i < _messages.length / 2; i++) {
+              int idx = i * 2;
+
+              if ((clientId == null && _messages[idx] == null) ||
+                  (clientId != null && clientId.equals(_messages[idx]))) {
+                _cursor = i + 1;
+
+                FacesMessage result = (FacesMessage) _messages[idx + 1];
+
+                return result;
+              }
+            }
+
+            throw new NoSuchElementException();
+          }
+        }
+
+        public void remove()
+        {
+          synchronized (_messagesLock) {
+            if (_expectedModCount != _messageModCount)
+              throw new ConcurrentModificationException();
+
+            Object []newMessages = new Object[_messages.length - 2];
+            System.arraycopy(_messages, 0, newMessages, 0, (_cursor - 1) * 2);
+
+            System.arraycopy(_messages,
+                             _cursor * 2,
+                             newMessages,
+                             (_cursor - 1) * 2,
+                             _messages.length - _cursor * 2);
+
+            _messages = newMessages;
+
+            _cursor = _cursor - 1;
+
+            _expectedModCount++;
+            _messageModCount = _expectedModCount;
+          }
+        }
+      };
     }
   }
 
@@ -363,6 +499,8 @@ public class ServletFacesContextImpl extends FacesContext
       _attributes = null;
     }
 
+    _messages = null;
+
     FacesContext.setCurrentInstance(null);
   }
 
@@ -377,8 +515,60 @@ public class ServletFacesContextImpl extends FacesContext
     return _attributes;
   }
 
+  public PhaseId getCurrentPhaseId()
+  {
+    if (_isClosed)
+      throw new IllegalStateException();
+
+    return super.getCurrentPhaseId();
+  }
+
+  public void setCurrentPhaseId(PhaseId currentPhaseId)
+  {
+    if (_isClosed)
+      throw new IllegalStateException();
+
+    super.setCurrentPhaseId(currentPhaseId);
+  }
+
   public String toString()
   {
     return "ServletFacesContextImpl[]";
+  }
+
+  private static class NoIdsIterator
+    implements Iterator<String> {
+    public boolean hasNext()
+    {
+      return false;
+    }
+
+    public String next()
+    {
+      throw new NoSuchElementException();
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException("unimplemented");
+    }
+  }
+
+  private static class NoMessagesIterator
+    implements Iterator<FacesMessage> {
+    public boolean hasNext()
+    {
+      return false;
+    }
+
+    public FacesMessage next()
+    {
+      throw new NoSuchElementException();
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException("unimplemented");
+    }
   }
 }

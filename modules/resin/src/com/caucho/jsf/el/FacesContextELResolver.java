@@ -337,11 +337,10 @@ public class FacesContextELResolver extends CompositeELResolver {
 
       if (env.isPropertyResolved())
 	return value;
-
-      return null;
     }
-    else
-      return null;
+
+    throw new javax.el.PropertyNotFoundException(
+      L.l("Property '{0}' not found.", property));
   }
   
   @Override

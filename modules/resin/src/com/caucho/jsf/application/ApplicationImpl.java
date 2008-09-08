@@ -611,6 +611,9 @@ public class ApplicationImpl
     if (componentType == null)
       throw new NullPointerException();
 
+    if (componentClass == null)
+      throw new NullPointerException();
+
     synchronized (_componentClassNameMap) {
       _componentClassNameMap.put(componentType, componentClass);
     }
