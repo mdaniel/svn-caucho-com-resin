@@ -337,12 +337,13 @@ public class FacesContextELResolver extends CompositeELResolver {
 
       if (env.isPropertyResolved())
 	return value;
-    }
 
-    throw new javax.el.PropertyNotFoundException(
-      L.l("Property '{0}' not found.", property));
+      return null;
+    }
+    else
+      return null;
   }
-  
+
   @Override
   public boolean isReadOnly(ELContext env, Object base, Object property)
   {
