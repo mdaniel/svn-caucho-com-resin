@@ -309,12 +309,13 @@ public class JspViewHandler extends ViewHandler
 
     if (pathInfo == null) /*suffix mapping*/ {
       final int lastDot = viewId.lastIndexOf('.');
+      final int suffixDot = servletPath.lastIndexOf('.');
 
       return contextPath +
-	     (lastDot == -1
+	     (lastDot == -1 || suffixDot == -1
 	      ? viewId
 	      : viewId.substring(0, lastDot) +
-		servletPath.substring(servletPath.lastIndexOf('.')));
+		servletPath.substring(suffixDot));
     }
     else /*prefix mapping*/ {
 
