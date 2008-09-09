@@ -2955,11 +2955,9 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * umask call
    */
-  public static int umask(Env env, @Optional Value maskV)
+  public static int umask(Env env, @Optional("0") int maskV)
   {
-    env.stub("umask(" + maskV + ")");
-
-    return maskV.toInt();
+    return 0002;
   }
 
   /**
