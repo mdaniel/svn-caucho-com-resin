@@ -561,11 +561,13 @@ public class ArrayModule
     for (Map.Entry<Value, Value> entry : array.entrySet()) {
       Value entryValue = entry.getValue();
 
-      if ((entryValue.isLongConvertible()) ||
-          (entryValue instanceof StringValue))
+      if (entryValue.isLongConvertible()
+	  || entryValue instanceof StringValue)
         newArray.put(entryValue, entry.getKey());
-      else
-        env.warning("Can only flip STRING and INTEGER values!");
+      else {
+        env.warning(L.l("Can only flip string and integer values at '{0}'",
+			entryValue));
+      }
     }
 
     return newArray;

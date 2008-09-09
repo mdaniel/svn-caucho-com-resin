@@ -42,7 +42,8 @@ import java.util.ArrayList;
 /**
  * Class parse scope.
  */
-public class ClassScope extends Scope {
+public class ClassScope extends Scope
+{
   private final static L10N L = new L10N(ClassScope.class);
   
   private final InterpretedClassDef _cl;
@@ -72,6 +73,7 @@ public class ClassScope extends Scope {
   /**
    * Adds a function.
    */
+  @Override
   public void addFunction(String name, Function function)
   {
     _cl.addFunction(name, function);
@@ -80,9 +82,10 @@ public class ClassScope extends Scope {
   /*
    *  Adds a function defined in a conditional block.
    */
-  public void addConditionalFunction(Function function)
+  @Override
+  public void addConditionalFunction(String name, Function function)
   {
-    throw new UnsupportedOperationException();
+    addFunction(name, function);
   }
   
   /**

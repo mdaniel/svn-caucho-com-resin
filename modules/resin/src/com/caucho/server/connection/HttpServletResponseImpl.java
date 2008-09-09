@@ -537,4 +537,13 @@ public class HttpServletResponseImpl implements CauchoResponse
   {
     _response.setPrivateCache(isPrivate);
   }
+
+  //
+  // HttpServletRequestImpl methods
+  //
+
+  public AbstractHttpResponse getAbstractHttpResponse()
+  {
+    return _response;
+  }
 }

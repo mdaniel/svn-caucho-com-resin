@@ -37,6 +37,8 @@ import com.caucho.loader.CloseListener;
 import com.caucho.loader.Environment;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
+import com.caucho.server.connection.HttpServletRequestImpl;
+import com.caucho.server.connection.HttpServletResponseImpl;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.*;
 import com.caucho.vfs.Path;
@@ -335,8 +337,11 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 		  ServletContext application)
     throws IOException
   {
-    AbstractHttpRequest request = (AbstractHttpRequest) req;
-    AbstractHttpResponse response = (AbstractHttpResponse) res;
+    HttpServletRequestImpl requestImpl = (HttpServletRequestImpl) req;
+    HttpServletResponseImpl responseImpl = (HttpServletResponseImpl) res;
+
+    AbstractHttpRequest request = requestImpl.getAbstractHttpRequest();
+    AbstractHttpResponse response = responseImpl.getAbstractHttpResponse();
 
     // skip excluded urls
     if (_excludes.length > 0) {

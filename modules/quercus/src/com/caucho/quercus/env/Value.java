@@ -1625,10 +1625,10 @@ abstract public class Value implements java.io.Serializable
    */
   public Value mul(long r)
   {
-    if (isDoubleConvertible())
-      return new DoubleValue(toDouble() * r);
-    else
+    if (isLongConvertible())
       return LongValue.create(toLong() * r);
+    else
+      return new DoubleValue(toDouble() * r);
   }
 
   /**
@@ -1640,7 +1640,7 @@ abstract public class Value implements java.io.Serializable
       long l = toLong();
       long r = rValue.toLong();
       
-      if (l % r == 0)
+      if (r != 0 && l % r == 0)
         return LongValue.create(l / r);
       else
         return new DoubleValue(toDouble() / rValue.toDouble());
@@ -1656,7 +1656,7 @@ abstract public class Value implements java.io.Serializable
   {
     long l = toLong();
     
-    if (l % r == 0)
+    if (r != 0 && l % r == 0)
       return LongValue.create(l / r);
     else
       return new DoubleValue(toDouble() / r);

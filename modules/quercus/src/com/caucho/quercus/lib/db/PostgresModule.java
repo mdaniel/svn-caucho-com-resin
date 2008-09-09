@@ -203,18 +203,14 @@ public class PostgresModule extends AbstractQuercusModule {
   {
     try {
       if (conn == null)
-        conn = getConnection(env);
+	return false;
 
-      if (conn != null) {
+      if (conn == env.getSpecialValue("caucho.postgres"))
+	env.removeSpecialValue("caucho.postgres");
 
-        if (conn == getConnection(env))
-          env.removeSpecialValue("caucho.postgres");
+      conn.close(env);
 
-        conn.close(env);
-
-        return true;
-      }
-
+      return true;
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
     }
@@ -893,7 +889,6 @@ public class PostgresModule extends AbstractQuercusModule {
                                              StringValue data)
   {
     try {
-
       Postgres conn = getConnection(env);
 
       if (conn == null)
@@ -3365,8 +3360,8 @@ public class PostgresModule extends AbstractQuercusModule {
    * Returns an array with client, protocol and server version (when available)
    */
   @ReturnNullAsFalse
-  public static String pg_version(Env env,
-                                  @Optional Postgres conn)
+  public static ArrayValue pg_version(Env env,
+				      @Optional Postgres conn)
   {
     try {
 
@@ -3375,8 +3370,14 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         conn = (Postgres) env.getSpecialValue("caucho.postgres");
 
-      return conn.getServerInfo();
+      ArrayValue result = new ArrayValueImpl();
 
+      result.append(env.createString("client"),
+		    env.createString(conn.getClientInfo()));
+      result.append(env.createString("server_version"),
+		    env.createString(conn.getServerInfo()));
+      
+      return result;
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
       return null;

@@ -81,20 +81,21 @@ public class FunctionScope extends Scope {
     if (_functionMap.get(name) == null)
       _functionMap.put(name, function);
     
-    _parent.addConditionalFunction(function);
+    _parent.addConditionalFunction(name, function);
   }
   
   /*
    *  Adds a function defined in a conditional block.
    */
-  protected void addConditionalFunction(Function function)
+  @Override
+  protected void addConditionalFunction(String name, Function function)
   {
     if (_conditionalFunctionMap == null)
       _conditionalFunctionMap = new HashMap<String,Function>(4);
 
     _conditionalFunctionMap.put(function.getCompilationName(), function);
     
-    _parent.addConditionalFunction(function);
+    _parent.addConditionalFunction(name, function);
   }
 
   /**

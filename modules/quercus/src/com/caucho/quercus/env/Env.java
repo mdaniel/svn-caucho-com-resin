@@ -787,6 +787,11 @@ public class Env {
 				       boolean isReuse)
     throws Exception
   {
+    // XXX: connections might not be reusable (see gallery2), because
+    // of case with two reuses and one closes because of CREATE or
+    // catalog
+    isReuse = false;
+    
     DataSource database = _quercus.getDatabase();
 
     if (database != null) {
@@ -5126,7 +5131,9 @@ public class Env {
       ArrayList<EnvCleanup> cleanupList
 	= new ArrayList<EnvCleanup>(_cleanupList);
 
-      for (EnvCleanup envCleanup : cleanupList) {
+      // cleanup is in reverse order of creation
+      for (int i = cleanupList.size() - 1; i >= 0; i--) {
+	EnvCleanup envCleanup = cleanupList.get(i);
         try {
           if (envCleanup != null)
             envCleanup.cleanup();

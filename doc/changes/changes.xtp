@@ -13,6 +13,8 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>quercus: $a * 1000000 not properly convert for non-long values (#2552, rep by lee)</li>
+<li>quercus: pg_fetch_assoc for bit(32) field was not calling correct jdbc method (#2506, rep by damjan)</li>
 <li>quercus: refactor database to avoid JdbcConnection close issues (#2721, rep by paulberto)</li>
 <li>quercus: pg_free_result needs to return true (#2546, rep by gjvc)</li>
 <li>quercus: mcrypt padding issues with blowfixh (#2561, rep by gjvc)</li>

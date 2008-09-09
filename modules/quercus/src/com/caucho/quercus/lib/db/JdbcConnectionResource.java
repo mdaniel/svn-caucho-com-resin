@@ -398,7 +398,8 @@ public abstract class JdbcConnectionResource
       return null;
     }
     else {
-      env.warning(L.l("Connection is not available"));
+      env.warning(L.l("Connection is not available: {0}", _conn));
+      
       return null;
     }
   }

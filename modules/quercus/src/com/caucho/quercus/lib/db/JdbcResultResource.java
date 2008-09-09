@@ -446,13 +446,13 @@ public class JdbcResultResource {
         {
           String typeName = metaData.getColumnTypeName(column);
           // Postgres matches BIT for BOOL columns
-          if (!typeName.equals("bool")) {
-            long value = rs.getLong(column);
+          if (! typeName.equals("bool")) {
+            String value = rs.getString(column);
 
             if (rs.wasNull())
               return NullValue.NULL;
             else
-              return _env.createString(String.valueOf(value));
+              return _env.createString(value);
           }
           // else fall to boolean
         }
@@ -709,7 +709,10 @@ public class JdbcResultResource {
   public int getFieldCount()
   {
     try {
-      return getMetaData().getColumnCount();
+      if (getMetaData() != null)
+	return getMetaData().getColumnCount();
+      else
+	return -1;
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }

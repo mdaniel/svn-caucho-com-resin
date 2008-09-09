@@ -132,7 +132,8 @@ abstract public class Scope {
   /*
    *  Adds a function defined in a conditional block.
    */
-  abstract protected void addConditionalFunction(Function function);
+  abstract protected void addConditionalFunction(String name,
+						 Function function);
   
   /**
    * Adds a class.

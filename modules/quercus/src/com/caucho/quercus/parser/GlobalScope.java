@@ -82,9 +82,9 @@ public class GlobalScope extends Scope {
   /*
    *  Adds a function defined in a conditional block.
    */
-  protected void addConditionalFunction(Function function)
+  protected void addConditionalFunction(String name, Function function)
   {
-    _conditionalFunctionMap.put(function.getCompilationName(), function);
+    _conditionalFunctionMap.put(name, function);
   }
 
   /**

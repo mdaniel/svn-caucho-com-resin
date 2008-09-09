@@ -916,6 +916,15 @@ public class HttpServletRequestImpl implements CauchoRequest
     return _request.getConnection();
   }
 
+  //
+  // HttpServletRequestImpl methods
+  //
+
+  public AbstractHttpRequest getAbstractHttpRequest()
+  {
+    return _request;
+  }
+
   @Override
   public String toString()
   {

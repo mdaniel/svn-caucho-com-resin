@@ -837,25 +837,25 @@ public class DateModule extends AbstractQuercusModule {
    */
   public static Value microtime(Env env, @Optional boolean getAsFloat)
   {
-    long now;
+    double now;
 
     // windows System.nanoTime() does not return the system time,
     // so just return milliseconds multiplied by 1000
     if (Path.isWindows()) {
-      now = System.currentTimeMillis() * 1000L;
+      now = System.currentTimeMillis() * 0.001;
     }
     else {
-      now = System.nanoTime() / 1000L;
+      now = Alarm.getExactTimeNanoseconds() * 1e-9;
     }
 
     if (getAsFloat) {
-      return new DoubleValue(((double) now) / 1e6);
+      return new DoubleValue(now);
     }
     else {
       return (env.createUnicodeBuilder()
-	      .append(now % 1000000L / 1e6)
+	      .append(String.format("%.6f", now - Math.floor(now)))
 	      .append(' ')
-	      .append(now / 1000000L));
+	      .append((int) Math.floor(now)));
     }
   }
 
