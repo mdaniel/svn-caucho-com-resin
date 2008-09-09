@@ -122,7 +122,7 @@ class Regcomp {
 
     RegexpNode begin = null;
     if ((_flags & ANCHORED) != 0)
-      begin = RegexpNode.ANCHOR_BEGIN;
+      begin = RegexpNode.ANCHOR_BEGIN_RELATIVE;
     
     RegexpNode value = parseRec(pattern, begin);
 

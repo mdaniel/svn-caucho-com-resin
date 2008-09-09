@@ -33,6 +33,7 @@ import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.EnvCleanup;
@@ -389,6 +390,18 @@ public class PDO implements EnvCleanup {
     }
   }
 
+  public static ArrayValue getAvailableDrivers()
+  {
+    ArrayValue array = new ArrayValueImpl();
+    
+    array.put("mysql");
+    array.put("pgsql");
+    array.put("java");
+    array.put("jdbc");
+    
+    return array;
+  }
+  
   /**
    * Returns the auto commit value for the connection.
    */
@@ -404,11 +417,6 @@ public class PDO implements EnvCleanup {
       _error.error(e);
       return true;
     }
-  }
-
-  public ArrayValue getAvailableDrivers()
-  {
-    throw new UnimplementedException();
   }
 
   public int getCase()

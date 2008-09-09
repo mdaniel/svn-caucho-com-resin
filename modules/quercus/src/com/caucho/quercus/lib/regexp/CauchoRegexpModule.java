@@ -74,13 +74,13 @@ public class CauchoRegexpModule
   public static final boolean [] PREG_QUOTE = new boolean[256];
 
   private static final LruCache<StringValue, Regexp> _regexpCache
-  = new LruCache<StringValue, Regexp>(1024);
+    = new LruCache<StringValue, Regexp>(1024);
 
   private static final LruCache<StringValue, ArrayList<Replacement>> _replacementCache
-  = new LruCache<StringValue, ArrayList<Replacement>>(1024);
+    = new LruCache<StringValue, ArrayList<Replacement>>(1024);
 
   private static final HashMap<String, Value> _constMap
-  = new HashMap<String, Value>();
+    = new HashMap<String, Value>();
 
   @Override
   public String []getLoadedExtensions()
@@ -94,9 +94,9 @@ public class CauchoRegexpModule
    * @param env the calling environment
    */
   public static Value ereg(Env env,
-          Value pattern,
-          StringValue string,
-          @Optional @Reference Value regsV)
+                           Value pattern,
+                           StringValue string,
+                           @Optional @Reference Value regsV)
   {
     return eregImpl(env, pattern, string, regsV, false);
   }
@@ -107,9 +107,9 @@ public class CauchoRegexpModule
    * @param env the calling environment
    */
   public static Value eregi(Env env,
-          Value pattern,
-          StringValue string,
-          @Optional @Reference Value regsV)
+                            Value pattern,
+                            StringValue string,
+                            @Optional @Reference Value regsV)
   {
     return eregImpl(env, pattern, string, regsV, true);
   }
@@ -209,11 +209,11 @@ public class CauchoRegexpModule
    * @param env the calling environment
    */
   public static Value preg_match(Env env,
-				 StringValue regexpValue,
-				 StringValue subject,
-				 @Optional @Reference Value matchRef,
-				 @Optional int flags,
-				 @Optional int offset)
+                                 StringValue regexpValue,
+                                 StringValue subject,
+                                 @Optional @Reference Value matchRef,
+                                 @Optional int flags,
+                                 @Optional int offset)
   {
     try {
       if (regexpValue.length() < 2) {
@@ -228,7 +228,7 @@ public class CauchoRegexpModule
 
       ArrayValue regs;
 
-      if (matchRef instanceof DefaultValue)
+      if (matchRef.isDefault())
         regs = null;
       else
         regs = new ArrayValueImpl();
@@ -322,21 +322,21 @@ public class CauchoRegexpModule
   {
     try {
       if (rawRegexp.length() < 2) {
-	env.warning(L.l("Pattern must have at least opening and closing delimiters"));
-	return BooleanValue.FALSE;
+        env.warning(L.l("Pattern must have at least opening and closing delimiters"));
+        return BooleanValue.FALSE;
       }
 
       if ((flags & PREG_PATTERN_ORDER) == 0) {
-	// php/152m
-	if ((flags & PREG_SET_ORDER) == 0) {
-	  flags = flags | PREG_PATTERN_ORDER;
-	}
+        // php/152m
+        if ((flags & PREG_SET_ORDER) == 0) {
+          flags = flags | PREG_PATTERN_ORDER;
+        }
       }
       else {
-	if ((flags & PREG_SET_ORDER) != 0) {
-	  env.warning((L.l("Cannot combine PREG_PATTER_ORDER and PREG_SET_ORDER")));
-	  return BooleanValue.FALSE;
-	}
+        if ((flags & PREG_SET_ORDER) != 0) {
+          env.warning((L.l("Cannot combine PREG_PATTER_ORDER and PREG_SET_ORDER")));
+          return BooleanValue.FALSE;
+        }
       }
 
       Regexp regexp = getRegexp(env, rawRegexp);
@@ -345,33 +345,33 @@ public class CauchoRegexpModule
       ArrayValue matches;
 
       if (matchRef instanceof ArrayValue)
-	matches = (ArrayValue) matchRef;
+        matches = (ArrayValue) matchRef;
       else
-	matches = new ArrayValueImpl();
+        matches = new ArrayValueImpl();
 
       matches.clear();
 
       matchRef.set(matches);
 
       if ((flags & PREG_PATTERN_ORDER) != 0) {
-	return pregMatchAllPatternOrder(env,
-					regexpState,
-					subject,
-					matches,
-					flags,
-					offset);
+        return pregMatchAllPatternOrder(env,
+                                        regexpState,
+                                        subject,
+                                        matches,
+                                        flags,
+                                        offset);
       }
       else if ((flags & PREG_SET_ORDER) != 0) {
-	return pregMatchAllSetOrder(env,
-				    regexp,
-				    regexpState,
-				    subject,
-				    matches,
-				    flags,
-				    offset);
+        return pregMatchAllSetOrder(env,
+                                    regexp,
+                                    regexpState,
+                                    subject,
+                                    matches,
+                                    flags,
+                                    offset);
       }
       else
-	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -520,7 +520,7 @@ public class CauchoRegexpModule
             result.put(LongValue.create(start));
           } else {
             // php/
-            // add unmatched groups that was skipped
+            // add any unmatched groups that was skipped
             for (int j = matchResult.getSize(); j < i; j++) {
               matchResult.put(LongValue.create(j), empty);
             }
@@ -719,7 +719,7 @@ public class CauchoRegexpModule
     while (regexpState.find() && numberOfMatches < limit) {
       // Increment countV (note: if countV != null, then it should be a Var)
       if (countV != null && countV instanceof Var) {
-        long count = ((Var) countV).getRawValue().toLong();
+        long count = countV.toValue().toLong();
         countV.set(LongValue.create(count + 1));
       }
 

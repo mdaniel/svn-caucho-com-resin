@@ -72,6 +72,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
   /**
    * Returns fields not specified by the value.
    */
+  @Override
   protected Value getFieldExt(Env env, StringValue name)
   {
     Value value = _javaClassDef.getField(env, this, name);
@@ -79,7 +80,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
     if (value != null)
       return value;
     else
-      return _quercusClass.getField(env, this, name);
+      return super.getFieldExt(env, name);
   }
 
   /**

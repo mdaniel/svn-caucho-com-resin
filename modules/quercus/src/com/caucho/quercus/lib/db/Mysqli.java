@@ -90,6 +90,8 @@ public class Mysqli extends JdbcConnectionResource {
     = new ArrayList<JdbcResultResource>();
   private int _nextResultValue = 0;
   private boolean _hasBeenUsed = true;
+  
+  private boolean _isPersistent;
 
   private static volatile String _checkedDriverVersion = null;
   private static Object _checkDriverLock = new Object();
@@ -1470,6 +1472,7 @@ public class Mysqli extends JdbcConnectionResource {
 
   public void setPersistent()
   {
+    _isPersistent = true;
   }
   
   /**

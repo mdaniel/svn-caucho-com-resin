@@ -111,12 +111,10 @@ public class JavaMethod extends JavaInvoker {
       Throwable e1 = e.getCause();
 
       String methodName = (_method.getDeclaringClass().getName() + "."
-			   + _method.getName());
+                           + _method.getName());
       
       throw new QuercusException(methodName + ": " + e1.getMessage(), e1);
     } catch (Exception e) {
-
-      
       String methodName = (_method.getDeclaringClass().getName() + "."
 			   + _method.getName());
       

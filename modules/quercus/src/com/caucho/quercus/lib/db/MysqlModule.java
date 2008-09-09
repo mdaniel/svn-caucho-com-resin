@@ -129,7 +129,6 @@ public class MysqlModule extends AbstractQuercusModule {
     
     if (conn == null) {
       conn = (Mysqli) env.getSpecialValue("caucho.mysql");
-      env.removeSpecialValue("caucho.mysql");
       
       isEnvConn = true;
     }
@@ -989,14 +988,15 @@ public class MysqlModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns a new mysql connection.
+   * Returns a new persistent mysql connection.  JDBC has its own pooling
+   * so don't need to do anything different from regular mysql_connect().
    */
   public static Value mysql_pconnect(Env env,
-				     @Optional StringValue server,
-				     @Optional StringValue user,
-				     @Optional StringValue password,
-				     @Optional boolean newLink,
-				     @Optional int flags)
+                                     @Optional StringValue server,
+                                     @Optional StringValue user,
+                                     @Optional StringValue password,
+                                     @Optional boolean newLink,
+                                     @Optional int flags)
   {
     Value value = mysql_connect(env, server, user, password, newLink, flags);
 
@@ -1012,11 +1012,11 @@ public class MysqlModule extends AbstractQuercusModule {
    * Returns a new mysql connection.
    */
   public static Value mysql_connect(Env env,
-				    @Optional StringValue host,
-				    @Optional StringValue userName,
-				    @Optional StringValue password,
-				    @Optional boolean isNewLink,
-				    @Optional int flags)
+                                    @Optional StringValue host,
+				                    @Optional StringValue userName,
+				                    @Optional StringValue password,
+				                    @Optional boolean isNewLink,
+				                    @Optional int flags)
   {
     int port = 3306;
     String socketStr = "";

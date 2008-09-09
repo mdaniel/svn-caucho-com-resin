@@ -183,12 +183,7 @@ public class ObjectExtValue extends ObjectValue
       }
     }
 
-    Value value = getFieldExt(env, name);
-
-    if (value != null)
-      return value;
-    else
-      return _quercusClass.getField(env, this, name);
+    return getFieldExt(env, name);
   }
 
   /**
@@ -204,20 +199,15 @@ public class ObjectExtValue extends ObjectValue
         return entry._value.toValue();
     }
 
-    Value value = getFieldExt(env, name);
-
-    if (value != null)
-      return value;
-    else
-      return _quercusClass.getField(env, this, name);
+    return getFieldExt(env, name);
   }
-
+  
   /**
-   * Returns fields not specified by the value.
+   * Returns fields not explicitly specified by this value.
    */
   protected Value getFieldExt(Env env, StringValue name)
   {
-    return null;
+    return _quercusClass.getField(env, this, name);
   }
 
   /**

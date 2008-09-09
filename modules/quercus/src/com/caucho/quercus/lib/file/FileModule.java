@@ -2888,7 +2888,7 @@ public class FileModule extends AbstractQuercusModule {
     try {
       Path path = dir.createTempFile(prefix, ".tmp");
 
-      path.remove();
+      //path.remove();
       
       env.addCleanup(new RemoveFile(path));
       

@@ -320,6 +320,10 @@ class RegexpNode {
   static final AnchorBegin ANCHOR_BEGIN = new AnchorBegin();
   static final AnchorBeginOrNewline ANCHOR_BEGIN_OR_NEWLINE
     = new AnchorBeginOrNewline();
+  
+  static final AnchorBeginRelative ANCHOR_BEGIN_RELATIVE
+   =  new AnchorBeginRelative();
+  
   static final AnchorEnd ANCHOR_END = new AnchorEnd();
   static final AnchorEndOnly ANCHOR_END_ONLY = new AnchorEndOnly();
   static final AnchorEndOrNewline ANCHOR_END_OR_NEWLINE
@@ -330,9 +334,9 @@ class RegexpNode {
     int match(StringValue string, int length, int offset, RegexpState state)
     {
       if (offset == 0)
-	return offset;
+        return offset;
       else
-	return -1;
+        return -1;
     }
   }
   
@@ -344,6 +348,17 @@ class RegexpNode {
 	return offset;
       else
 	return -1;
+    }
+  }
+  
+  private static class AnchorBeginRelative extends NullableNode {
+    @Override
+    int match(StringValue string, int strlen, int offset, RegexpState state)
+    {
+      if (offset == state._start)
+        return offset;
+      else
+        return -1;
     }
   }
   

@@ -114,7 +114,7 @@ public class ArgGetFieldValue extends Value {
    */
   public Var toVar()
   {
-    return new Var();
+    return new Var(toValue());
   }
 
   /**
