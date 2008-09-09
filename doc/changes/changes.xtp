@@ -13,6 +13,24 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>quercus: Regex option 'A' ignored (#2907, rep by wikipo)</li>
+<li>quercus: PDO::getAvailableDrivers() not implemented (#2914, rep by A. Bonat)</li>
+<li>quercus: Dynamic members do not work properly (#2887, rep by PeterJanRoes)</li>
+<li>quercus: unserialize does not work properly with lot of dereferencing (#2697, rep by perololo)</li>
+<li>quercus: Calling mysql_close() twice results in NPE (#2911, rep by koreth)</li>
+<li>quercus: unserialize error for object references (#2895, rep by koreth)</li>
+<li>quercus: Quercus serialize/unserialize doesn't recognize protected and private field markers (#2910, rep by koreth)</li>
+<li>quercus: MySQL code assumes only one database name is ever used (#2880, rep by koreth)</li>
+<li>quercus: Add option to disable database connection pooling (#2877, rep by koreth)</li>
+<li>quercus: Username and password not used when connection pooling turned off (#2905, rep by koreth)</li>
+<li>quercus: Can't use "continue" any more in loop statements (#2901, rep by koreth)</li>
+<li>quercus: Class method can't access private array field (#2882, rep by koreth)</li>
+<li>quercus: long2ip() not implemented (#2881, rep by koreth)</li>
+<li>quercus: Quercus program cache is too small for large code bases (#2884, rep by koreth)</li>
+<li>quercus: Bogus "break" causes compilation failure (#2879, rep by koreth)</li>
+<li>quercus: diskfreespace(.) always return 0 (#2861, rep by mingfai)</li>
+<li>quercus: $object->x->x does not trigger __get in array define (#2874, rep by nbzx)</li>
+<li>quercus: $this->x does not trigger __get and trigger __set twice (#2873, rep by nbzx)</li>
 <li>quercus: $a * 1000000 not properly convert for non-long values (#2552, rep by lee)</li>
 <li>quercus: pg_fetch_assoc for bit(32) field was not calling correct jdbc method (#2506, rep by damjan)</li>
 <li>quercus: refactor database to avoid JdbcConnection close issues (#2721, rep by paulberto)</li>
