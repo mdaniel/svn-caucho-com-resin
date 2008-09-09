@@ -32,7 +32,6 @@ package javax.el;
 import java.beans.FeatureDescriptor;
 import java.lang.reflect.Array;
 import java.util.Iterator;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -133,6 +132,10 @@ public class ArrayELResolver extends ELResolver {
     else if (base.getClass().isArray()) {
       context.setPropertyResolved(true);
 
+      int index = getIndex(property);
+
+      if (index < 0 || index >= Array.getLength(base))
+        throw new PropertyNotFoundException("array index '" + index + "' is invalid");
       return _isReadOnly;
     }
     else

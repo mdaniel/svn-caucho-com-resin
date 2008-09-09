@@ -89,6 +89,12 @@ public class ListELResolver extends ELResolver {
 
     if (base instanceof List) {
       context.setPropertyResolved(true);
+      List list = (List) base;
+      
+      int index = getIndex(property);
+
+      if (index < 0 || list.size() <= index)
+	throw new PropertyNotFoundException("'" + index + "' is an invalid index for list of length '" + list.size() + "'");
 
       return Object.class;
     }
@@ -106,25 +112,12 @@ public class ListELResolver extends ELResolver {
       
       context.setPropertyResolved(true);
 
-      int index = 0;
-
-      if (property instanceof Number)
-	index = ((Number) property).intValue();
-      else if (property instanceof String) {
-	try {
-	  index = Integer.parseInt((String) property);
-	} catch (Exception e) {
-	  throw new ELException("can't convert '" + property + "' to long.");
-	}
-      }
-      else {
-	throw new ELException("can't convert '" + property + "' to long.");
-      }
+      int index = getIndex(property);
 
       if (0 <= index && index < list.size())
 	return list.get(index);
       else
-	throw new PropertyNotFoundException("List.getIndex '" + index + "' is an invalid index for list of length '" + list.size() + "'");
+	throw new PropertyNotFoundException("'" + index + "' is an invalid index for list of length '" + list.size() + "'");
     }
     else {
       return null;
@@ -138,6 +131,13 @@ public class ListELResolver extends ELResolver {
   {
     if (base instanceof List) {
       context.setPropertyResolved(true);
+
+      List list = (List) base;
+
+      int index = getIndex(property);
+
+      if (index < 0 || list.size() <= index)
+	throw new PropertyNotFoundException("'" + index + "' is an invalid index for list of length '" + list.size() + "'");
 
       return _isReadOnly;
     }
@@ -156,22 +156,27 @@ public class ListELResolver extends ELResolver {
       
       context.setPropertyResolved(true);
 
-      int index = 0;
+      int index = getIndex(property);
 
-      if (property instanceof Number)
-	index = ((Number) property).intValue();
-      else if (property instanceof String) {
-	try {
-	  index = Integer.parseInt((String) property);
-	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
-      }
+      if (index < 0 || list.size() <= index)
+	throw new PropertyNotFoundException("'" + index + "' is an invalid index for list of length '" + list.size() + "'");
 
-      if (index < 0 || list.size() < index)
-	throw new PropertyNotFoundException("List.setValue '" + index + "' is an invalid index for list of length '" + list.size() + "'");
       list.set(index, value);
-      
     }
+  }
+
+  private int getIndex(Object property)
+  {
+    if (property instanceof Number)
+      return ((Number) property).intValue();
+    else if (property instanceof String) {
+      try {
+	return Integer.parseInt((String) property);
+      } catch (Exception e) {
+	throw new ELException("can't convert '" + property + "' to long.");
+      }
+    }
+    else
+      throw new ELException("can't convert '" + property + "' to long.");
   }
 }
