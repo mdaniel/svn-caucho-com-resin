@@ -127,7 +127,9 @@ abstract public class Scope {
   /**
    * Adds a function.
    */
-  abstract public void addFunction(String name, Function function);
+  abstract public void addFunction(String name,
+				   Function function,
+				   boolean isTop);
 
   /*
    *  Adds a function defined in a conditional block.
@@ -143,7 +145,6 @@ abstract public class Scope {
    */
   protected void addConditionalFunction(Function function)
   {
-    throw new UnsupportedOperationException(getClass().getName());
   }
   
   /**
@@ -153,7 +154,8 @@ abstract public class Scope {
                                                String name,
                                                String parent,
                                                ArrayList<String> ifaceList,
-                                               int index);
+                                               int index,
+					       boolean isTop);
   
   /*
    *  Adds a conditional class.

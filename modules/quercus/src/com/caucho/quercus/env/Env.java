@@ -4118,7 +4118,7 @@ public class Env {
       // php/0b21
       path = scriptPwd.lookup(include);
 
-      if (! path.canRead() || path.isDirectory())
+      if (! includeExists(path))
 	path = null;
     }
 
@@ -4143,6 +4143,15 @@ public class Env {
     return null;
   }
 
+  private boolean includeExists(Path path)
+  {
+    if (path.canRead() && ! path.isDirectory())
+      return true;
+    else if (! getQuercus().isRequireSource())
+      return getQuercus().includeExists(path);
+    else
+      return false;
+  }
   /**
    * Returns the include path.
    */

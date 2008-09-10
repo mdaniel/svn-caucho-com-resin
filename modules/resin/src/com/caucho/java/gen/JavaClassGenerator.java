@@ -356,6 +356,20 @@ public class JavaClassGenerator {
   }
 
   /**
+   * Checks if the preload exists
+   */
+  public boolean preloadExists(String fullClassName)
+  {
+    DynamicClassLoader preloadLoader = null;
+    
+    Path workDir = getWorkDir();
+
+    String classFile = fullClassName.replace('.', '/') + ".class";
+
+    return workDir.lookup(classFile).exists();
+  }
+
+  /**
    * Loads the generated class.  If any class dependencies have
    * changed, return null.
    */
@@ -395,8 +409,10 @@ public class JavaClassGenerator {
       if (! preload)
 	return cl;
 
-      if (isModified(cl))
+      if (isModified(cl)) {
+	System.out.println("MODIFIED:" + cl);
 	return null;
+      }
 
       if (_loader != null)
 	loader = _loader;
@@ -406,7 +422,9 @@ public class JavaClassGenerator {
 				     fullClassName);
       }
 
-      return Class.forName(fullClassName, false, loader);
+      cl = Class.forName(fullClassName, false, loader);
+
+      return cl;
     } catch (RuntimeException e) {
       if (! preload)
 	throw e;

@@ -59,13 +59,10 @@ public class QuercusProgram {
   private HashMap<String,Function> _functionMapLowerCase
     = new HashMap<String,Function>();
   
-  private HashMap<String,Function> _conditionalFunctionMap;
-  private HashMap<String,Function> _conditionalFunctionMapLowerCase
-    = new HashMap<String,Function>();
+  private ArrayList<Function> _functionList;
 
   private HashMap<String,InterpretedClassDef> _classMap;
-  
-  private HashMap<String,InterpretedClassDef> _conditionalClassMap;
+  private ArrayList<InterpretedClassDef> _classList;
 
   private FunctionInfo _functionInfo;
   private Statement _statement;
@@ -84,10 +81,10 @@ public class QuercusProgram {
    * @param statement the top-level statement
    */
   public QuercusProgram(Quercus quercus, Path sourceFile,
-                        HashMap<String, Function> functionMap,
-                        HashMap<String, Function> conditionalFunctionMap,
-                        HashMap<String, InterpretedClassDef> classMap,
-                        HashMap<String, InterpretedClassDef> conditionalClassMap,
+                        HashMap<String,Function> functionMap,
+                        ArrayList<Function> functionList,
+                        HashMap<String,InterpretedClassDef> classMap,
+                        ArrayList<InterpretedClassDef> classList,
                         FunctionInfo functionInfo,
                         Statement statement)
   {
@@ -99,21 +96,34 @@ public class QuercusProgram {
       addDepend(sourceFile);
 
     _functionMap = functionMap;
-    _conditionalFunctionMap = conditionalFunctionMap;
+    _functionList = functionList;
 
     for (Map.Entry<String,Function> entry : functionMap.entrySet()) {
       _functionMapLowerCase.put(entry.getKey().toLowerCase(),
                                 entry.getValue());
-      
-      _conditionalFunctionMapLowerCase.put(entry.getKey().toLowerCase(),
-                                           entry.getValue());
     }
 
     _classMap = classMap;
-    _conditionalClassMap = conditionalClassMap;
+    _classList = classList;
 
     _functionInfo = functionInfo;
     _statement = statement;
+  }
+
+  /**
+   * Creates a new quercus program
+   *
+   * @param quercus the owning quercus engine
+   * @param sourceFile the path to the source file
+   * @param statement the top-level statement
+   */
+  public QuercusProgram(Quercus quercus,
+			Path sourceFile,
+			QuercusPage page)
+  {
+    _quercus = quercus;
+    _sourceFile = sourceFile;
+    _compiledPage = page;
   }
 
   /**
@@ -180,6 +190,8 @@ public class QuercusProgram {
   public void addDepend(Path path)
   {
     Depend depend = new Depend(path);
+
+    depend.setRequireSource(_quercus.isRequireSource());
     
     _dependList.add(depend);
     _depend.add(depend);
@@ -241,13 +253,13 @@ public class QuercusProgram {
   /**
    * Returns the functions.
    */
-  public Collection<Function> getConditionalFunctions()
+  public ArrayList<Function> getFunctionList()
   {
-    return _conditionalFunctionMap.values();
+    return _functionList;
   }
 
   /**
-   * Returns the functions.
+   * Returns the classes.
    */
   public Collection<InterpretedClassDef> getClasses()
   {
@@ -257,9 +269,9 @@ public class QuercusProgram {
   /**
    * Returns the functions.
    */
-  public Collection<InterpretedClassDef> getConditionalClasses()
+  public ArrayList<InterpretedClassDef> getClassList()
   {
-    return _conditionalClassMap.values();
+    return _classList;
   }
 
   /**

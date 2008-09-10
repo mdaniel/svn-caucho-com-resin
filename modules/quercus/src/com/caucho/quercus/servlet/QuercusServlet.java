@@ -176,6 +176,14 @@ public class QuercusServlet
   }
 
   /**
+   * Set true if the source php is required
+   */
+  public void setRequireSource(boolean isRequireSource)
+  {
+    getQuercus().setRequireSource(isRequireSource);
+  }
+
+  /**
    * Set the default data source.
    */
   public void setDatabase(DataSource database)

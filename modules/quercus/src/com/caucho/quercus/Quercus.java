@@ -931,6 +931,14 @@ public class Quercus
   }
 
   /**
+   * Returns true if a precompiled page exists
+   */
+  public boolean includeExists(Path path)
+  {
+    return _pageManager.precompileExists(path);
+  }
+
+  /**
    * Parses a quercus program.
    *
    * @param path the source file path

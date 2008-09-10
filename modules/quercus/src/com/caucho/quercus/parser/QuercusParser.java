@@ -424,9 +424,9 @@ public class QuercusParser {
     QuercusProgram program
       = new QuercusProgram(_quercus, _sourceFile,
                            _globalScope.getFunctionMap(),
-                           _globalScope.getConditionalFunctionMap(),
+                           _globalScope.getFunctionList(),
                            _globalScope.getClassMap(),
-                           _globalScope.getConditionalClassMap(),
+                           _globalScope.getClassList(),
                            _function,
                            stmt);
     return program;
@@ -451,9 +451,9 @@ public class QuercusParser {
 
     return new QuercusProgram(_quercus, _sourceFile,
                               _globalScope.getFunctionMap(),
-                              _globalScope.getConditionalFunctionMap(),
+                              _globalScope.getFunctionList(),
                               _globalScope.getClassMap(),
-                              _globalScope.getConditionalClassMap(),
+                              _globalScope.getClassList(),
                               _function,
                               _factory.createBlock(location, stmtList));
   }
@@ -1080,15 +1080,9 @@ public class QuercusParser {
         _peekToken = token;
 
       Statement trueBlock = null;
-      Scope oldScope = _scope;
       
-      try {
-        _scope = new IfScope(_factory, oldScope);
-        trueBlock = parseStatement();
-      } finally {
-        _scope = oldScope;
-      }
-      
+      trueBlock = parseStatement();
+
       Statement falseBlock = null;
 
       token = parseToken();
@@ -1097,14 +1091,7 @@ public class QuercusParser {
         falseBlock = parseIf();
       }
       else if (token == ELSE) {
-        oldScope = _scope;
-        
-        try {
-          _scope = new IfScope(_factory, oldScope);
-          falseBlock = parseStatement();
-        } finally {
-          _scope = oldScope;
-        }
+	falseBlock = parseStatement();
       }
       else
         _peekToken = token;
@@ -1124,14 +1111,7 @@ public class QuercusParser {
   {
     Statement trueBlock = null;
     
-    Scope oldScope = _scope;
-    
-    try {
-      _scope = new IfScope(_factory, oldScope);
-      trueBlock = _factory.createBlock(location, parseStatementList());
-    } finally {
-      _scope = oldScope;
-    }
+    trueBlock = _factory.createBlock(location, parseStatementList());
 
     Statement falseBlock = null;
 
@@ -1148,14 +1128,7 @@ public class QuercusParser {
     else if (token == ELSE) {
       expect(':');
       
-      oldScope = _scope;
-      
-      try {
-        _scope = new IfScope(_factory, oldScope);
-        falseBlock = _factory.createBlock(getLocation(), parseStatementList());
-      } finally {
-        _scope = oldScope;
-      }
+      falseBlock = _factory.createBlock(getLocation(), parseStatementList());
 
       expect(ENDIF);
     }
@@ -1207,78 +1180,70 @@ public class QuercusParser {
 
       while ((token = parseToken()) == CASE || token == DEFAULT) {
         Location caseLocation = getLocation();
-        
-        Scope oldScope = _scope;
-        _scope = new SwitchCaseScope(_factory, oldScope);
-        
-        try {
 
-          ArrayList<Expr> valueList = new ArrayList<Expr>();
-          boolean isDefault = false;
+	ArrayList<Expr> valueList = new ArrayList<Expr>();
+	boolean isDefault = false;
             
-          while (token == CASE || token == DEFAULT) {
-            if (token == CASE) {
-              Expr value = parseExpr();
+	while (token == CASE || token == DEFAULT) {
+	  if (token == CASE) {
+	    Expr value = parseExpr();
 
-              valueList.add(value);
-            }
-            else
-              isDefault = true;
+	    valueList.add(value);
+	  }
+	  else
+	    isDefault = true;
 
-            token = parseToken();
-            if (token == ':') {
-            }
-            else if (token == ';') {
-              // XXX: warning?
-            }
-            else
-              throw error("expected ':' at " + tokenName(token));
+	  token = parseToken();
+	  if (token == ':') {
+	  }
+	  else if (token == ';') {
+	    // XXX: warning?
+	  }
+	  else
+	    throw error("expected ':' at " + tokenName(token));
 
-            token = parseToken();
-          }
+	  token = parseToken();
+	}
 
-          _peekToken = token;
+	_peekToken = token;
 
-          Expr []values = new Expr[valueList.size()];
-          valueList.toArray(values);
+	Expr []values = new Expr[valueList.size()];
+	valueList.toArray(values);
 
-          ArrayList<Statement> newBlockList = parseStatementList();
+	ArrayList<Statement> newBlockList = parseStatementList();
 
-          for (int fallThrough : fallThroughList) {
-            BlockStatement block = blockList.get(fallThrough);
+	for (int fallThrough : fallThroughList) {
+	  BlockStatement block = blockList.get(fallThrough);
 
-            boolean isDefaultBlock = block == defaultBlock;
+	  boolean isDefaultBlock = block == defaultBlock;
 
-            block = block.append(newBlockList);
+	  block = block.append(newBlockList);
 
-            blockList.set(fallThrough, block);
+	  blockList.set(fallThrough, block);
 
-            if (isDefaultBlock)
-              defaultBlock = block;
-          }
+	  if (isDefaultBlock)
+	    defaultBlock = block;
+	}
             
-          BlockStatement block
-            = _factory.createBlockImpl(caseLocation, newBlockList);
+	BlockStatement block
+	  = _factory.createBlockImpl(caseLocation, newBlockList);
 
-          if (values.length > 0) {
-            caseList.add(values);
+	if (values.length > 0) {
+	  caseList.add(values);
 
-            blockList.add(block);
-          }
+	  blockList.add(block);
+	}
 
-          if (isDefault)
-            defaultBlock = block;
+	if (isDefault)
+	  defaultBlock = block;
 
-          if (blockList.size() > 0 &&
-              ! fallThroughList.contains(blockList.size() - 1)) {
-            fallThroughList.add(blockList.size() - 1);
-          }
+	if (blockList.size() > 0 &&
+	    ! fallThroughList.contains(blockList.size() - 1)) {
+	  fallThroughList.add(blockList.size() - 1);
+	}
 
-          if (block.fallThrough() != Statement.FALL_THROUGH)
-            fallThroughList.clear();
-        } finally {
-         _scope = oldScope;
-        }
+	if (block.fallThrough() != Statement.FALL_THROUGH)
+	  fallThroughList.clear();
       }
 
       _peekToken = token;
@@ -1305,9 +1270,6 @@ public class QuercusParser {
     boolean oldTop = _isTop;
     _isTop = false;
 
-    Scope oldScope = _scope;
-    _scope = new WhileScope(_factory, oldScope);
-    
     try {
       Location location = getLocation();
 
@@ -1337,7 +1299,6 @@ public class QuercusParser {
       return _factory.createWhile(location, test, block);
     } finally {
       _isTop = oldTop;
-      _scope = oldScope;
     }
   }
 
@@ -1350,9 +1311,6 @@ public class QuercusParser {
     boolean oldTop = _isTop;
     _isTop = false;
 
-    Scope oldScope = _scope;
-    _scope = new WhileScope(_factory, oldScope);
-    
     try {
       Location location = getLocation();
 
@@ -1370,8 +1328,6 @@ public class QuercusParser {
       return _factory.createDo(location, test, block);
     } finally {
       _isTop = oldTop;
-      
-      _scope = oldScope;
     }
   }
 
@@ -1383,9 +1339,6 @@ public class QuercusParser {
   {
     boolean oldTop = _isTop;
     _isTop = false;
-
-    Scope oldScope = _scope;
-    _scope = new WhileScope(_factory, oldScope);
     
     try {
       Location location = getLocation();
@@ -1441,7 +1394,6 @@ public class QuercusParser {
       return _factory.createFor(location, init, test, incr, block);
     } finally {
       _isTop = oldTop;
-      _scope = oldScope;
     }
   }
 
@@ -1453,9 +1405,6 @@ public class QuercusParser {
   {
     boolean oldTop = _isTop;
     _isTop = false;
-
-    Scope oldScope = _scope;
-    _scope = new WhileScope(_factory, oldScope);
     
     try {
       Location location = getLocation();
@@ -1524,7 +1473,6 @@ public class QuercusParser {
 				    valueVar, isRef, block);
     } finally {
       _isTop = oldTop;
-      _scope = oldScope;
     }
   }
 
@@ -1539,16 +1487,13 @@ public class QuercusParser {
     
     try {
       Location location = getLocation();
-
-      Scope oldScope = _scope;
-      _scope = new TryScope(_factory, oldScope);
       
       Statement block = null;
       
       try {
         block = parseStatement();
       } finally {
-        _scope = oldScope;
+	//  _scope = oldScope;
       }
 
       TryStatement stmt = _factory.createTry(location, block);
@@ -1556,26 +1501,19 @@ public class QuercusParser {
       int token = parseToken();
 
       while (token == CATCH) {
-        oldScope = _scope;
-        _scope = new TryScope(_factory, oldScope);
-        
-        try {
-          expect('(');
+	expect('(');
           
-          String id = parseIdentifier();
+	String id = parseIdentifier();
 
-          AbstractVarExpr lhs = parseLeftHandSide();
+	AbstractVarExpr lhs = parseLeftHandSide();
           
-          expect(')');
+	expect(')');
 
-          block = parseStatement();
+	block = parseStatement();
 
-          stmt.addCatch(id, lhs, block);
+	stmt.addCatch(id, lhs, block);
 
-          token = parseToken();
-        } finally {
-          _scope = oldScope;
-        }
+	token = parseToken();
       }
 
       _peekToken = token;
@@ -1661,7 +1599,6 @@ public class QuercusParser {
         Statement []statements = null;
         
         Scope oldScope = _scope;
-        
         try {
           _scope = new FunctionScope(_factory, oldScope);
           statements = parseStatements();
@@ -1693,7 +1630,7 @@ public class QuercusParser {
       else if ((modifiers & M_PRIVATE) != 0)
         function.setVisibility(Visibility.PRIVATE);
 
-      _scope.addFunction(name, function);
+      _scope.addFunction(name, function, oldTop);
 
       /*
     com.caucho.vfs.WriteStream out = com.caucho.vfs.Vfs.lookup("stdout:").openWrite();
@@ -1781,14 +1718,12 @@ public class QuercusParser {
     throws IOException
   {
     Scope scope = _scope;
-    
-    while (scope.isIf() || scope.isTry()) {
-      scope = scope.getParent();
-    }
-    
+
+    /* XXX: check for is loop/break
     if (scope.isFunction()) {
-      throw error(L.l("cannot 'break' a function"));
+      throw error(L.l("cannot 'break' inside a function"));
     }
+    */
     
     Location location = getLocation();
     
@@ -1815,14 +1750,12 @@ public class QuercusParser {
   private Statement parseContinue()
     throws IOException
   {
-    Scope scope = _scope;
-    
-    while (scope.isIf() || scope.isTry()) {
-      scope = scope.getParent();
-    }
-    
+    // Scope scope = _scope;
+
+    /* XXX: add isLoop/Switch check, e.g. as a flag like top
     if (scope.isFunction())
       throw error(L.l("cannot 'continue' a function"));
+    */
     
     Location location = getLocation();
 
@@ -1935,7 +1868,8 @@ public class QuercusParser {
     try {
       _classDef = oldScope.addClass(getLocation(),
                                     name, parentName, ifaceList,
-                                    _classesParsed++);
+                                    _classesParsed++,
+				    _isTop);
 
       if ((modifiers & M_ABSTRACT) != 0)
         _classDef.setAbstract(true);

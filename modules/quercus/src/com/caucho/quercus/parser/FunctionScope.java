@@ -74,14 +74,17 @@ public class FunctionScope extends Scope {
   /**
    * Adds a function.
    */
-  public void addFunction(String name, Function function)
+  public void addFunction(String name,
+			  Function function,
+			  boolean isTop)
   {
     name = name.toLowerCase();
     
     if (_functionMap.get(name) == null)
       _functionMap.put(name, function);
     
-    _parent.addConditionalFunction(name, function);
+    //_parent.addConditionalFunction(name, function);
+    _parent.addFunction(name, function, false);
   }
   
   /*
@@ -105,7 +108,8 @@ public class FunctionScope extends Scope {
                                       String name,
                                       String parentName,
                                       ArrayList<String> ifaceList,
-                                      int index)
+                                      int index,
+				      boolean isTop)
   {
     InterpretedClassDef existingClass = _classMap.get(name);
 

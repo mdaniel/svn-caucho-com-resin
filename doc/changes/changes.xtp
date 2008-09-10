@@ -13,6 +13,8 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>quercus: add require-source='false' and allow php to be deleted with compilation (#2217)</li>
+<li>quercus: class cache issues for performance (#2915, rep by koreth)</li>
 <li>quercus: Regex option 'A' ignored (#2907, rep by wikipo)</li>
 <li>quercus: PDO::getAvailableDrivers() not implemented (#2914, rep by A. Bonat)</li>
 <li>quercus: Dynamic members do not work properly (#2887, rep by PeterJanRoes)</li>

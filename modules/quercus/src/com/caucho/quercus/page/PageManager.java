@@ -58,6 +58,8 @@ public class PageManager
   private boolean _isCompile;
   private boolean _isCompileFailover = ! Alarm.isTest();
 
+  private boolean _isRequireSource;
+
   protected LruCache<Path,QuercusProgram> _programCache
     = new LruCache<Path,QuercusProgram>(1024);
 
@@ -116,7 +118,7 @@ public class PageManager
     _isLazyCompile = isCompile;
   }
   
-  /*
+  /**
    * true if interpreted pages should be used if pages fail to compile.
    */
   public boolean isCompileFailover()
@@ -124,7 +126,7 @@ public class PageManager
     return _isCompileFailover;
   }
   
-  /*
+  /**
    * true if interpreted pages should be used if pages fail to compile.
    */
   public void setCompileFailover(boolean isCompileFailover)
@@ -132,7 +134,23 @@ public class PageManager
     _isCompileFailover = isCompileFailover;
   }
   
-  /*
+  /**
+   * true if compiled pages require their source
+   */
+  public void setRequireSource(boolean isRequireSource)
+  {
+    _isRequireSource = isRequireSource;
+  }
+  
+  /**
+   * true if compiled pages require their source
+   */
+  public boolean isRequireSource()
+  {
+    return _isRequireSource;
+  }
+  
+  /**
    * Gets the max size of the page cache.
    */
   public int getPageCacheEntries()
@@ -140,7 +158,7 @@ public class PageManager
     return _programCache.getCapacity();
   }
   
-  /*
+  /**
    * Sets the max size of the page cache.
    */
   public void setPageCacheEntries(int entries)
@@ -232,11 +250,15 @@ public class PageManager
       if (program == null || isModified) {
         clearProgram(path, program);
 
-        program = QuercusParser.parse(_quercus,
-                                      path,
-                                      _quercus.getScriptEncoding(),
-                                      fileName,
-                                      line);
+	program = preloadProgram(path, fileName);
+
+	if (program == null) {
+	  program = QuercusParser.parse(_quercus,
+					path,
+					_quercus.getScriptEncoding(),
+					fileName,
+					line);
+	}
         
         _programCache.put(path, program);
       }
@@ -252,6 +274,16 @@ public class PageManager
     } catch (Throwable e) {
       throw new IOExceptionWrapper(e);
     }
+  }
+
+  public boolean precompileExists(Path path)
+  {
+    return false;
+  }
+
+  protected QuercusProgram preloadProgram(Path path, String fileName)
+  {
+    return null;
   }
 
   protected void clearProgram(Path path, QuercusProgram program)

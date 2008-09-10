@@ -74,7 +74,9 @@ public class ClassScope extends Scope
    * Adds a function.
    */
   @Override
-  public void addFunction(String name, Function function)
+  public void addFunction(String name,
+			  Function function,
+			  boolean isTop)
   {
     _cl.addFunction(name, function);
   }
@@ -85,7 +87,7 @@ public class ClassScope extends Scope
   @Override
   public void addConditionalFunction(String name, Function function)
   {
-    addFunction(name, function);
+    //addFunction(name, function);
   }
   
   /**
@@ -117,10 +119,12 @@ public class ClassScope extends Scope
   /**
    * Adds a class
    */
+  @Override
   public InterpretedClassDef addClass(Location location, String name,
                                       String parentName,
                                       ArrayList<String> ifaceList,
-                                      int index)
+                                      int index,
+				      boolean isTop)
   {
     throw new UnsupportedOperationException();
   }

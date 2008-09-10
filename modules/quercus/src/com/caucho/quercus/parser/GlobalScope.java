@@ -49,11 +49,17 @@ public class GlobalScope extends Scope {
   private HashMap<String,Function> _functionMap
     = new HashMap<String,Function>();
 
+  private ArrayList<Function> _functionList
+    = new ArrayList<Function>();
+  
   private HashMap<String,Function> _conditionalFunctionMap
     = new HashMap<String,Function>();
   
   private HashMap<String,InterpretedClassDef> _classMap
     = new HashMap<String,InterpretedClassDef>();
+  
+  private ArrayList<InterpretedClassDef> _classList
+    = new ArrayList<InterpretedClassDef>();
   
   private HashMap<String,InterpretedClassDef> _conditionalClassMap
     = new HashMap<String,InterpretedClassDef>();
@@ -74,9 +80,14 @@ public class GlobalScope extends Scope {
   /**
    * Adds a function.
    */
-  public void addFunction(String name, Function function)
+  public void addFunction(String name,
+			  Function function,
+			  boolean isTop)
   {
-    _functionMap.put(name.toLowerCase(), function);
+    if (isTop)
+      _functionMap.put(name.toLowerCase(), function);
+    
+    _functionList.add(function);
   }
   
   /*
@@ -94,9 +105,13 @@ public class GlobalScope extends Scope {
                                       String name,
                                       String parentName,
                                       ArrayList<String> ifaceList,
-                                      int index)
+                                      int index,
+				      boolean isTop)
   {
-    InterpretedClassDef cl = _classMap.get(name);
+    InterpretedClassDef cl = null;
+
+    if (isTop)
+      cl = _classMap.get(name);
 
     if (cl == null) {
       String []ifaceArray = new String[ifaceList.size()];
@@ -105,8 +120,9 @@ public class GlobalScope extends Scope {
       cl = _exprFactory.createClassDef(location,
                                        name, parentName, ifaceArray,
                                        index);
-      
-      _classMap.put(name, cl);
+
+      if (isTop)
+	_classMap.put(name, cl);
     }
     else {
       // class statically redeclared
@@ -117,6 +133,8 @@ public class GlobalScope extends Scope {
                                        name, parentName, new String[0],
                                        index);
     }
+    
+    _classList.add(cl);
 
     return cl;
   }
@@ -136,6 +154,15 @@ public class GlobalScope extends Scope {
   {
     return _functionMap;
   }
+
+  /**
+   * Returns the function list.  The function list may include multiple
+   * functions with the same name, e.g. from inside conditionals.
+   */
+  public ArrayList<Function> getFunctionList()
+  {
+    return _functionList;
+  }
   
   /**
    * Returns the conditional function map.
@@ -151,6 +178,15 @@ public class GlobalScope extends Scope {
   public HashMap<String,InterpretedClassDef> getClassMap()
   {
     return _classMap;
+  }
+
+  /**
+   * Returns the list of defined classes.  The class list may include
+   * conditional classes.
+   */
+  public ArrayList<InterpretedClassDef> getClassList()
+  {
+    return _classList;
   }
   
   /**
