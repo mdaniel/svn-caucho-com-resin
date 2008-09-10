@@ -5248,11 +5248,21 @@ public class Env {
       if (_parentRef == key._parentRef)
 	return true;
       
-      else if (_parentRef != null && key._parentRef != null)
-	return _parentRef.get() == key._parentRef.get();
-
-      else
+      else if (_parentRef == null || key._parentRef == null)
 	return false;
+
+      QuercusClass aParent = _parentRef.get();
+      QuercusClass bParent = key._parentRef.get();
+
+      return (aParent != null && aParent.equals(bParent));
+    }
+
+    @Override
+    public String toString()
+    {
+      return (getClass().getSimpleName()
+	      + "[" + _defRef.get() + ","
+	      + (_parentRef != null ? _parentRef.get() : null) + "]");
     }
   }
 

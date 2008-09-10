@@ -61,11 +61,11 @@ public class QuercusClass {
   private final ClassDef _classDef;
   private final String _className;
 
+  private QuercusClass _parent;
+
   private boolean _isJavaWrapper;
   
   private ClassDef []_classDefList;
-
-  private QuercusClass _parent;
 
   private AbstractFunction _constructor;
 
@@ -1597,6 +1597,33 @@ public class QuercusClass {
   public final HashMap<String, Expr> getConstantMap()
   {
     return _constMap;
+  }
+
+  public int hashCode()
+  {
+    return _className.hashCode();
+  }
+
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (! (o instanceof QuercusClass))
+      return false;
+
+    QuercusClass qClass = (QuercusClass) o;
+
+    if (_classDef != qClass._classDef)
+      return false;
+    
+    if (_javaClassDef != qClass._javaClassDef)
+      return false;
+
+    if (_parent == qClass._parent)
+      return true;
+
+    else
+      return (_parent != null && _parent.equals(qClass._parent));
   }
 
   public String toString()
