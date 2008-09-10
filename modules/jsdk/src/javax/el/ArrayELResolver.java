@@ -136,6 +136,7 @@ public class ArrayELResolver extends ELResolver {
 
       if (index < 0 || index >= Array.getLength(base))
         throw new PropertyNotFoundException("array index '" + index + "' is invalid");
+
       return _isReadOnly;
     }
     else
@@ -153,16 +154,19 @@ public class ArrayELResolver extends ELResolver {
     else if (base.getClass().isArray()) {
       context.setPropertyResolved(true);
 
+      if (_isReadOnly)
+        throw new PropertyNotWritableException("resolver is read-only");
+
       int index = getIndex(property);
 
       if (0 <= index && index < Array.getLength(base))
 	Array.set(base, index, value);
       else
-	throw new PropertyNotWritableException("array index '" + index + "' is invalid");
+	throw new PropertyNotFoundException("array index '" + index + "' is invalid");
     }
   }
 
-  private int getIndex(Object property)
+  static int getIndex(Object property)
   {
     if (property instanceof Number)
       return ((Number) property).intValue();
@@ -170,10 +174,10 @@ public class ArrayELResolver extends ELResolver {
       try {
 	return Integer.parseInt((String) property);
       } catch (Exception e) {
-	throw new ELException("can't convert '" + property + "' to long.");
+	throw new IllegalArgumentException("can't convert '" + property + "' to long.");
       }
     }
     else
-      throw new ELException("can't convert '" + property + "' to long.");
+      throw new IllegalArgumentException("can't convert '" + property + "' to long.");
   }
 }

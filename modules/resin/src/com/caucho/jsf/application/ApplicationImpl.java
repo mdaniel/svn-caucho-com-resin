@@ -29,9 +29,9 @@
 package com.caucho.jsf.application;
 
 import com.caucho.config.Config;
+import com.caucho.jsf.cfg.JsfPropertyGroup;
 import com.caucho.jsf.cfg.ManagedBeanConfig;
 import com.caucho.jsf.cfg.ResourceBundleConfig;
-import com.caucho.jsf.cfg.JsfPropertyGroup;
 import com.caucho.jsf.context.FacesELContext;
 import com.caucho.jsf.el.FacesContextELResolver;
 import com.caucho.jsf.el.FacesJspELResolver;
@@ -48,33 +48,34 @@ import javax.el.PropertyNotFoundException;
 import javax.faces.FacesException;
 import javax.faces.application.Application;
 import javax.faces.application.NavigationHandler;
+import javax.faces.application.ProjectStage;
+import javax.faces.application.ResourceHandler;
 import javax.faces.application.StateManager;
 import javax.faces.application.ViewHandler;
-import javax.faces.application.ResourceHandler;
-import javax.faces.application.ProjectStage;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.*;
 import javax.faces.el.*;
+import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionListener;
 import javax.faces.event.SystemEvent;
 import javax.faces.event.SystemEventListener;
 import javax.faces.event.SystemEventListenerHolder;
-import javax.faces.event.AbortProcessingException;
 import javax.faces.validator.DoubleRangeValidator;
 import javax.faces.validator.LengthValidator;
 import javax.faces.validator.LongRangeValidator;
 import javax.faces.validator.Validator;
-import javax.servlet.jsp.JspApplicationContext;
-import javax.servlet.jsp.JspFactory;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.lang.reflect.Constructor;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import javax.servlet.jsp.JspApplicationContext;
+import javax.servlet.jsp.JspFactory;
 import java.beans.FeatureDescriptor;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ApplicationImpl
   extends Application
@@ -1315,17 +1316,47 @@ public class ApplicationImpl
     public Class getType(Object base, int index)
       throws javax.faces.el.PropertyNotFoundException
     {
-      if (base == null)
-	throw new javax.faces.el.PropertyNotFoundException(
-	  "getType() has null base object");
-
-      try {
-	FacesContext context = FacesContext.getCurrentInstance();
-
-	return _elResolver.getType(context.getELContext(), base, index);
+      if (base == null) {
+        throw new javax.faces.el.PropertyNotFoundException(
+          "base can not be null");
       }
-      catch (javax.el.PropertyNotFoundException e) {
-	throw new javax.faces.el.PropertyNotFoundException(e);
+      else if (base.getClass().isArray()) {
+        try {
+          Object value = Array.get(base, index);
+
+          if (value == null)
+            return null;
+          else
+            return value.getClass();
+        }
+        catch (ArrayIndexOutOfBoundsException e) {
+          throw new javax.faces.el.PropertyNotFoundException("index '" +
+                                                             index +
+                                                             "' is out of bounds");
+        }
+      }
+      else if (base instanceof List) {
+        List list = (List) base;
+
+        try {
+          Object value = list.get(index);
+
+          if (value == null)
+            return null;
+          else
+            return value.getClass();
+        }
+        catch (IndexOutOfBoundsException e) {
+          throw new javax.faces.el.PropertyNotFoundException("index '" +
+                                                             index +
+                                                             "' is out of bounds");
+        }
+      }
+      else {
+        throw new javax.faces.el.PropertyNotFoundException(
+          "wrong type of the base '" +
+          base.getClass().getName() +
+          "', only java.util.List and arrays are accepted");
       }
     }
 
@@ -1348,16 +1379,38 @@ public class ApplicationImpl
     public Object getValue(Object base, int index)
       throws javax.faces.el.PropertyNotFoundException
     {
-      if (base == null)
-	throw new javax.faces.el.PropertyNotFoundException(
-	  "getValue() has null base object");
-      try {
-	FacesContext context = FacesContext.getCurrentInstance();
+      if (base == null) {
+        throw new javax.faces.el.PropertyNotFoundException(
+          "base can not be null");
 
-	return _elResolver.getValue(context.getELContext(), base, index);
       }
-      catch (javax.el.PropertyNotFoundException e) {
-	throw new javax.faces.el.PropertyNotFoundException(e);
+      else if (base.getClass().isArray()) {
+        try {
+          return Array.get(base, index);
+        }
+        catch (ArrayIndexOutOfBoundsException e) {
+          throw new javax.faces.el.PropertyNotFoundException("index '" +
+                                                             index +
+                                                             "' is out of bounds");
+        }
+      }
+      else if (base instanceof List) {
+        List list = (List) base;
+
+        try {
+          return list.get(index);
+        }
+        catch (IndexOutOfBoundsException e) {
+          throw new javax.faces.el.PropertyNotFoundException("index '" +
+                                                             index +
+                                                             "' is out of bounds");
+        }
+      }
+      else {
+        throw new javax.faces.el.PropertyNotFoundException(
+          "wrong type of the base '" +
+          base.getClass().getName() +
+          "', only java.util.List and arrays are accepted");
       }
     }
 
@@ -1377,13 +1430,32 @@ public class ApplicationImpl
     public boolean isReadOnly(Object base, int index)
       throws javax.faces.el.PropertyNotFoundException
     {
-      try {
-	FacesContext context = FacesContext.getCurrentInstance();
-
-	return _elResolver.isReadOnly(context.getELContext(), base, index);
+      if (base == null) {
+        throw new javax.faces.el.PropertyNotFoundException(
+          "base can not be null");
       }
-      catch (javax.el.PropertyNotFoundException e) {
-	throw new javax.faces.el.PropertyNotFoundException(e);
+      else if (base.getClass().isArray()) {
+        if (index >= 0 && index < Array.getLength(base))
+          return false;
+        else
+          throw new javax.faces.el.PropertyNotFoundException("index '" +
+                                                             index +
+                                                             "' is out of bounds");
+      }
+      else if (base instanceof List) {
+        List list = (List) base;
+        if (index >= 0 && index < list.size())
+          return false;
+        else
+          throw new javax.faces.el.PropertyNotFoundException("index '" +
+                                                             index +
+                                                             "' is out of bounds");
+      }
+      else {
+        throw new javax.faces.el.PropertyNotFoundException(
+          "wrong type of the base '" +
+          base.getClass().getName() +
+          "', only java.util.List and arrays are accepted");
       }
     }
 
@@ -1403,19 +1475,37 @@ public class ApplicationImpl
     public void setValue(Object base, int index, Object value)
       throws javax.faces.el.PropertyNotFoundException
     {
-      if (base == null)
-	throw new javax.faces.el.PropertyNotFoundException();
-
-      try {
-	FacesContext context = FacesContext.getCurrentInstance();
-
-	_elResolver.setValue(context.getELContext(), base, index, value);
+      if (base == null) {
+        throw new javax.faces.el.PropertyNotFoundException(
+          "base can not be null");
       }
-      catch (javax.el.PropertyNotFoundException e) {
-	throw new javax.faces.el.PropertyNotFoundException(e);
+      else if (base.getClass().isArray()) {
+        try {
+          Array.set(base, index, value);
+        }
+        catch (ArrayIndexOutOfBoundsException e) {
+          throw new javax.faces.el.PropertyNotFoundException("index '" +
+                                                             index +
+                                                             "' is out of bounds");
+        }
       }
-      catch (javax.el.PropertyNotWritableException e) {
-	throw new javax.faces.el.PropertyNotFoundException(e);
+      else if (base instanceof List) {
+        List list = (List) base;
+
+        try {
+          list.set(index, value);
+        }
+        catch (IndexOutOfBoundsException e) {
+          throw new javax.faces.el.PropertyNotFoundException("index '" +
+                                                             index +
+                                                             "' is out of bounds");
+        }
+      }
+      else {
+        throw new javax.faces.el.PropertyNotFoundException(
+          "wrong type of the base '" +
+          base.getClass().getName() +
+          "', only java.util.List and arrays are accepted");
       }
     }
 

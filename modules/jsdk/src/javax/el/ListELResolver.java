@@ -89,12 +89,13 @@ public class ListELResolver extends ELResolver {
 
     if (base instanceof List) {
       context.setPropertyResolved(true);
-      List list = (List) base;
-      
-      int index = getIndex(property);
 
-      if (index < 0 || list.size() <= index)
-	throw new PropertyNotFoundException("'" + index + "' is an invalid index for list of length '" + list.size() + "'");
+      int index = ArrayELResolver.getIndex(property);
+
+      if (index < 0 || ((List) base).size() <= index)
+        throw new PropertyNotFoundException("list index '" +
+                                            index +
+                                            "' is invalid");
 
       return Object.class;
     }
@@ -112,12 +113,14 @@ public class ListELResolver extends ELResolver {
       
       context.setPropertyResolved(true);
 
-      int index = getIndex(property);
+      int index = ArrayELResolver.getIndex(property);
 
       if (0 <= index && index < list.size())
 	return list.get(index);
       else
-	throw new PropertyNotFoundException("'" + index + "' is an invalid index for list of length '" + list.size() + "'");
+        throw new PropertyNotFoundException("list index '" +
+                                            index +
+                                            "' is invalid");
     }
     else {
       return null;
@@ -132,13 +135,12 @@ public class ListELResolver extends ELResolver {
     if (base instanceof List) {
       context.setPropertyResolved(true);
 
-      List list = (List) base;
+      int index = ArrayELResolver.getIndex(property);
 
-      int index = getIndex(property);
-
-      if (index < 0 || list.size() <= index)
-	throw new PropertyNotFoundException("'" + index + "' is an invalid index for list of length '" + list.size() + "'");
-
+      if (index < 0 || index >= ((List) base).size())
+        throw new PropertyNotFoundException("list index '" +
+                                            index +
+                                            "' is invalid");
       return _isReadOnly;
     }
     else
@@ -147,36 +149,25 @@ public class ListELResolver extends ELResolver {
 
   @Override
   public void setValue(ELContext context,
-		       Object base,
-		       Object property,
-		       Object value)
+                       Object base,
+                       Object property,
+                       Object value)
   {
     if (base instanceof List) {
       List list = (List) base;
-      
+
       context.setPropertyResolved(true);
 
-      int index = getIndex(property);
+      int index = ArrayELResolver.getIndex(property);
 
-      if (index < 0 || list.size() <= index)
-	throw new PropertyNotFoundException("'" + index + "' is an invalid index for list of length '" + list.size() + "'");
+      if (_isReadOnly)
+        throw new PropertyNotWritableException("resolver is read-only");
 
+      if (index < 0 || list.size() < index)
+        throw new PropertyNotFoundException("list index '" +
+                                            index +
+                                            "' is invalid");
       list.set(index, value);
     }
-  }
-
-  private int getIndex(Object property)
-  {
-    if (property instanceof Number)
-      return ((Number) property).intValue();
-    else if (property instanceof String) {
-      try {
-	return Integer.parseInt((String) property);
-      } catch (Exception e) {
-	throw new ELException("can't convert '" + property + "' to long.");
-      }
-    }
-    else
-      throw new ELException("can't convert '" + property + "' to long.");
   }
 }
