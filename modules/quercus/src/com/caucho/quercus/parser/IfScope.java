@@ -81,7 +81,7 @@ public class IfScope extends Scope {
     if (_functionMap.get(name) == null)
       _functionMap.put(name, function);
     
-    _parent.addConditionalFunction(function);
+    _parent.addConditionalFunction(name, function);
   }
   
   /*
@@ -94,7 +94,7 @@ public class IfScope extends Scope {
 
     _conditionalFunctionMap.put(function.getCompilationName(), function);
     
-    _parent.addConditionalFunction(function);
+    _parent.addConditionalFunction(function.getCompilationName(), function);
   }
 
   /**

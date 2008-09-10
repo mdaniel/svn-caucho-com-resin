@@ -207,8 +207,13 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
     result = recv(fd, buf, len, 0);
   } while (result < 0 && (errno == EINTR || errno == EAGAIN) && retry-- >= 0);
     
-  if (result >= 0)
+  if (result > 0)
     return result;
+  else if (result == 0) {
+    conn->ops->close(conn);
+
+    return result;
+  }
   else {
     return read_exception_status(conn, errno);
   }

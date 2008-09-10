@@ -727,7 +727,10 @@ cse_write_response(stream_t *s, int len, request_rec *r)
       }
       */
 
-      writelen -= sublen;
+      if (sentlen > 0)
+	writelen -= sentlen;
+      else
+	writelen = 0;
     }
     
     s->read_offset += sublen;
