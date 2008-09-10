@@ -131,6 +131,15 @@ public class HtmlBasicRenderKit extends RenderKit
 			  String rendererType,
 			  Renderer renderer)
   {
+    if (family == null)
+      throw new NullPointerException();
+
+    if (rendererType == null)
+      throw new NullPointerException();
+
+    if (renderer == null)
+      throw new NullPointerException();
+    
     _rendererMap.put(new Key(family, rendererType), renderer);
   }
   
