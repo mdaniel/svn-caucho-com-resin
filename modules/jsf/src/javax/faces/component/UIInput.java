@@ -500,7 +500,7 @@ public class UIInput extends UIOutput
 
       setValue(null);
       setLocalValueSet(false);
-    } catch (RuntimeException e) {
+    } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       
       setValid(false);
@@ -517,7 +517,9 @@ public class UIInput extends UIOutput
 
       // jsf/5011
       // if the spec lets us throw this, it's useful for development
-      throw new FacesException("id=" + getClientId(context)
+      Application app = context.getApplication();
+      if (app.getProjectStage().equals(ProjectStage.Development))
+         throw new FacesException("id=" + getClientId(context)
 			       + " " + e.toString(), e);
     }
   }

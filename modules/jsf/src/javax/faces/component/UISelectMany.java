@@ -112,15 +112,6 @@ public class UISelectMany extends UIInput
       return;
 
     boolean hasValue = false;
-
-    ValueExpression ve = getValueExpression("value");
-
-    Class type = null;
-    if (ve != null) {
-      type = ve.getType(context.getELContext());
-      if (type != null)
-        type = type.getComponentType();
-    }
     
     ExpressionFactory exprFactory
       = context.getApplication().getExpressionFactory();
@@ -129,10 +120,7 @@ public class UISelectMany extends UIInput
       Object[] values = (Object[]) value;
 
       for (int i = 0; i < values.length; i++) {
-        hasValue = UISelectOne.matchChildren(exprFactory,
-                                             this,
-                                             values[i],
-                                             type);
+        hasValue = UISelectOne.matchChildren(exprFactory, this, values[i]);
 
         if (!hasValue)
           break;
@@ -145,11 +133,11 @@ public class UISelectMany extends UIInput
       String summary = Util.l10n(context, INVALID_MESSAGE_ID,
 				 "{0}: Validation Error: UISelectMany value {1} is not valid.",
 				 Util.getLabel(context, this),
-				 value);
+				 value == null? null: Arrays.asList((Object[])value));
 
       String detail = summary;
 
-      FacesMessage msg = new FacesMessage(summary, detail);
+      FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, detail);
 	
       context.addMessage(getClientId(context), msg);
     }

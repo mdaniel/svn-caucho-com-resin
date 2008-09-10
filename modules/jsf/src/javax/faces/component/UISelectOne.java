@@ -62,14 +62,7 @@ public class UISelectOne extends UIInput
     if (! isValid() || value == null)
       return;
 
-    ValueExpression ve = getValueExpression("value");
-
-    Class type = null;
-    if (ve != null) {
-      type = ve.getType(context.getELContext());
-    }
-
-    boolean hasValue = matchChildren(context.getApplication().getExpressionFactory(), this, value, type);
+    boolean hasValue = matchChildren(context.getApplication().getExpressionFactory(), this, value);
 
     if (! hasValue) {
       String summary = Util.l10n(context, INVALID_MESSAGE_ID,
@@ -79,7 +72,7 @@ public class UISelectOne extends UIInput
 
       String detail = summary;
 
-      FacesMessage msg = new FacesMessage(summary, detail);
+      FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, detail);
 	
       context.addMessage(getClientId(context), msg);
       
@@ -87,7 +80,7 @@ public class UISelectOne extends UIInput
     }
   }
 
-  static boolean matchChildren(ExpressionFactory expressionFactory, UIComponent comp, Object value, Class type)
+  static boolean matchChildren(ExpressionFactory expressionFactory, UIComponent comp, Object value)
   {
     int count = comp.getChildCount();
 
@@ -95,7 +88,9 @@ public class UISelectOne extends UIInput
       return false;
 
     List<UIComponent> children = comp.getChildren();
-    
+
+    Class type = value.getClass();
+
     for (int i = 0; i < count; i++) {
       UIComponent child = children.get(i);
       

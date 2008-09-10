@@ -306,6 +306,6 @@ class HtmlSelectOneMenuRenderer extends SelectRenderer
 
   public String toString()
   {
-    return "HtmlInputTextRenderer[]";
+    return "HtmlSelectOneMenuRenderer[]";
   }
 }

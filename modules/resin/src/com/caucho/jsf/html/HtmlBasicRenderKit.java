@@ -132,13 +132,13 @@ public class HtmlBasicRenderKit extends RenderKit
 			  Renderer renderer)
   {
     if (family == null)
-      throw new NullPointerException();
+      throw new NullPointerException("family argument is null");
 
     if (rendererType == null)
-      throw new NullPointerException();
+      throw new NullPointerException("rendererType argument is null");
 
     if (renderer == null)
-      throw new NullPointerException();
+      throw new NullPointerException("renderer argument is null");
     
     _rendererMap.put(new Key(family, rendererType), renderer);
   }
@@ -146,8 +146,11 @@ public class HtmlBasicRenderKit extends RenderKit
   public Renderer getRenderer(String family,
 			      String rendererType)
   {
-    if (family == null || rendererType == null)
-      return null;
+    if (family == null)
+      throw new NullPointerException("family argument is null");
+
+    if (rendererType == null)
+      throw new NullPointerException("rendererType argument is null");
 
     _key.init(family, rendererType);
     
