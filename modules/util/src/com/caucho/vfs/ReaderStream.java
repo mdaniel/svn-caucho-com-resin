@@ -31,8 +31,13 @@ package com.caucho.vfs;
 import java.io.IOException;
 import java.io.Reader;
 
+import com.caucho.util.L10N;
+
 public class ReaderStream extends StreamImpl {
+  private static final L10N L = new L10N(ReaderStream.class);
+  
   private Reader _reader;
+  private int _peek = -1;
 
   ReaderStream(Reader reader)
   {
@@ -50,7 +55,10 @@ public class ReaderStream extends StreamImpl {
     throw new UnsupportedOperationException();
   }
 
-  public boolean canRead() { return true; }
+  public boolean canRead()
+  {
+    return true;
+  }
 
   // XXX: encoding issues
   public int read(byte []buf, int offset, int length) throws IOException
@@ -59,7 +67,14 @@ public class ReaderStream extends StreamImpl {
     int end = i + length;
 
     while (i < end) {
-      int ch = _reader.read();
+      int ch;
+
+      if (_peek >= 0) {
+	ch = _peek;
+	_peek = -1;
+      }
+      else
+	ch = _reader.read();
       
       if (ch < 0)
         break;
@@ -73,7 +88,7 @@ public class ReaderStream extends StreamImpl {
 	  throw new IllegalStateException(L.l("buffer is not large enough to accept UTF-8 encoding.  length={0}, 2-character utf-8",
 					      length));
 	else {
-	  _reader.unread(ch);
+	  _peek = ch;
 	  return end - offset;
 	}
 	  
@@ -87,7 +102,7 @@ public class ReaderStream extends StreamImpl {
 	  throw new IllegalStateException(L.l("buffer is not large enough to accept UTF-8 encoding.  length={0}, 3-character utf-8",
 					      length));
 	else {
-	  _reader.unread(ch);
+	  _peek = ch;
 	  return i - offset;
 	}
 	
