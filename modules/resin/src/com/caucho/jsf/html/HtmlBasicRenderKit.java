@@ -168,17 +168,26 @@ public class HtmlBasicRenderKit extends RenderKit
 					     String contentTypeList,
 					     String characterEncoding)
   {
-    // jsf/2003
-    /*
-    if (contentTypeList != null
-	&& contentTypeList.indexOf("text/html") < 0
-	&& contentTypeList.indexOf("application/xhtml+xml") < 0
-	&& contentTypeList.indexOf("application/xml") < 0
-	&& contentTypeList.indexOf("text/xml") < 0) {
-      throw new IllegalArgumentException(L.l("'{0}' does not have a matching ResponseWriter.",
-					     contentTypeList));
+    String contentType = null;
+
+    if (contentTypeList != null) {
+      if (contentTypeList.indexOf("text/html") > -1) {
+        contentType = "text/html";
+      }
+      else if (contentTypeList.indexOf("application/xhtml+xml") > -1 ||
+               contentTypeList.indexOf("application/xml") > -1 ||
+               contentTypeList.indexOf("text/xml") > -1) {
+        contentType = "application/xhtml+xml";
+      }
+      else if (contentTypeList.indexOf("*/*") > -1) {
+        contentType = "text/html";
+      }
+      else {
+        throw new IllegalArgumentException(L.l(
+          "'{0}' does not have a matching ResponseWriter.",
+          contentTypeList));
+      }
     }
-    */
 
     if (characterEncoding != null) {
 
@@ -187,7 +196,7 @@ public class HtmlBasicRenderKit extends RenderKit
 						 characterEncoding));
     }
     
-    return new HtmlResponseWriter(writer, contentTypeList, characterEncoding);
+    return new HtmlResponseWriter(writer, contentType, characterEncoding);
   }
 
   public ResponseStream createResponseStream(OutputStream out)
