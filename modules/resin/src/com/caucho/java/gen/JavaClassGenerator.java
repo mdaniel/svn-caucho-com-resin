@@ -410,7 +410,6 @@ public class JavaClassGenerator {
 	return cl;
 
       if (isModified(cl)) {
-	System.out.println("MODIFIED:" + cl);
 	return null;
       }
 

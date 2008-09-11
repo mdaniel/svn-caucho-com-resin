@@ -72,17 +72,18 @@ public class HttpsConnection
     throws IOException
   {
     Proxy proxy = getProxy();
-    
-    HttpsURLConnection conn
-      = (HttpsURLConnection)getURL().openConnection(proxy);
-    
+
+    HttpsURLConnection conn;
+
+    conn = (HttpsURLConnection) getURL().openConnection(proxy);
+
     HostnameVerifier hostnameVerifier
       = CurlHostnameVerifier.create(curl.getIsVerifySSLPeer(),
                                     curl.getIsVerifySSLCommonName(),
                                     curl.getIsVerifySSLHostname());
     
     conn.setHostnameVerifier(hostnameVerifier);
-    
+
     setConnection(conn);
   }
   

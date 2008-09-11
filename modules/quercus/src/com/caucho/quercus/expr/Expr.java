@@ -323,9 +323,8 @@ abstract public class Expr {
    * @return the expression value.
    */
   public Value evalConstant()
-    throws IOException
   {
-    throw new IOException(L.l("{0} is not a constant expression", this));
+    throw new IllegalStateException(L.l("{0} is not a constant expression", this));
   }
 
   /**

@@ -173,6 +173,9 @@ public class Env {
 
   private ArrayList<EnvCleanup> _cleanupList
     = new ArrayList<EnvCleanup>();
+
+  private ArrayList<ObjectExtValue> _objCleanupList
+    = new ArrayList<ObjectExtValue>();
   
   private ArrayList<Shutdown> _shutdownList
     = new ArrayList<Shutdown>();
@@ -729,7 +732,16 @@ public class Env {
   }
 
   /**
-   * remove resource from the list of refrences that are
+   * add an object with a destructor to the list of references that are
+   * cleaned up when finished with this environment.
+   */
+  public void addObjectCleanup(ObjectExtValue objCleanup)
+  {
+    _objCleanupList.add(objCleanup);
+  }
+
+  /**
+   * remove resource from the list of references that are
    * cleaned up when finished with this environment.
    *
    * @param resource
@@ -5123,53 +5135,70 @@ public class Env {
       //throw new RuntimeException(e);
     //}
     finally {
+      cleanup();
+    }
+  }
+
+  private void cleanup()
+  {
+    // cleanup is in reverse order of creation
+    for (int i = _objCleanupList.size() - 1; i >= 0; i--) {
+      ObjectExtValue objCleanup = _objCleanupList.get(i);
       try {
-        for (int i = 0; i < _shutdownList.size(); i++)
-          _shutdownList.get(i).call(this);
+	if (objCleanup != null)
+	  objCleanup.cleanup(this);
       }
       catch (Throwable e) {
-        log.log(Level.FINE, e.toString(), e);
+	log.log(Level.FINER, e.toString(), e);
       }
+    }
+      
+    try {
+      for (int i = 0; i < _shutdownList.size(); i++)
+	_shutdownList.get(i).call(this);
+    }
+    catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    try {
+      sessionWriteClose();
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    ArrayList<EnvCleanup> cleanupList
+      = new ArrayList<EnvCleanup>(_cleanupList);
+
+    // cleanup is in reverse order of creation
+    for (int i = cleanupList.size() - 1; i >= 0; i--) {
+      EnvCleanup envCleanup = cleanupList.get(i);
+      try {
+	if (envCleanup != null)
+	  envCleanup.cleanup();
+      }
+      catch (Throwable e) {
+	log.log(Level.FINER, e.toString(), e);
+      }
+    }
+
+    _threadEnv.set(_oldThreadEnv);
+
+    for (int i = 0; _removePaths != null && i < _removePaths.size(); i++) {
+      Path path = _removePaths.get(i);
 
       try {
-        sessionWriteClose();
-      } catch (Throwable e) {
-        log.log(Level.FINE, e.toString(), e);
+	path.remove();
       }
-
-      ArrayList<EnvCleanup> cleanupList
-	= new ArrayList<EnvCleanup>(_cleanupList);
-
-      // cleanup is in reverse order of creation
-      for (int i = cleanupList.size() - 1; i >= 0; i--) {
-	EnvCleanup envCleanup = cleanupList.get(i);
-        try {
-          if (envCleanup != null)
-            envCleanup.cleanup();
-        }
-        catch (Throwable e) {
-          log.log(Level.FINER, e.toString(), e);
-        }
+      catch (IOException e) {
+	log.log(Level.FINER, e.toString(), e);
       }
-
-      _threadEnv.set(_oldThreadEnv);
-
-      for (int i = 0; _removePaths != null && i < _removePaths.size(); i++) {
-        Path path = _removePaths.get(i);
-
-        try {
-          path.remove();
-        }
-        catch (IOException e) {
-          log.log(Level.FINER, e.toString(), e);
-        }
-      }
-
-      AbstractFunction []fun = _fun;
-      _fun = null;
-      if (fun != null)
-	_freeFunList.free(fun);
     }
+
+    AbstractFunction []fun = _fun;
+    _fun = null;
+    if (fun != null)
+      _freeFunList.free(fun);
   }
 
   public void sessionWriteClose()

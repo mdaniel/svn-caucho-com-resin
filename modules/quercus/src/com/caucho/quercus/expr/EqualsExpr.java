@@ -48,6 +48,11 @@ public class EqualsExpr extends BinaryExpr {
     super(left, right);
   }
 
+  public boolean isBoolean()
+  {
+    return true;
+  }
+
   /**
    * Evaluates the equality as a boolean.
    */

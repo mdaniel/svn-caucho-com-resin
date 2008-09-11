@@ -92,7 +92,6 @@ public class ConnectionEntry implements EnvCleanup
     _isReuse = false;
 
     _conn.setCatalog(catalog);
-    System.out.println("CATALOG: " + catalog);
   }
 
   public int hashCode()
@@ -127,8 +126,6 @@ public class ConnectionEntry implements EnvCleanup
   public void markForPoolRemoval()
   {
     _isReuse = false;
-
-    System.out.println("REMOVE:");
 
     if (_conn != null)
       _env.getQuercus().markForPoolRemoval(_conn);

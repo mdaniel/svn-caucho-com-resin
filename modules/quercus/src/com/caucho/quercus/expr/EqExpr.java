@@ -37,7 +37,8 @@ import com.caucho.quercus.env.Value;
 /**
  * Represents a PHP equality testing expression.
  */
-public class EqExpr extends BinaryExpr {
+public class EqExpr extends BinaryExpr
+{
   public EqExpr(Location location, Expr left, Expr right)
   {
     super(location, left, right);
@@ -46,6 +47,11 @@ public class EqExpr extends BinaryExpr {
   public EqExpr(Expr left, Expr right)
   {
     super(left, right);
+  }
+
+  public boolean isBoolean()
+  {
+    return true;
   }
 
   /**

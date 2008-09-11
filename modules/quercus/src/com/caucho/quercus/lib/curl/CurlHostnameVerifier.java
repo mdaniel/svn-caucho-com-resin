@@ -65,9 +65,10 @@ public final class CurlHostnameVerifier
   
   public boolean verify(String hostname, SSLSession session)
   {
-    if (_isVerifySSLPeer == false &&
-        _isVerifySSLCommonName == false &&
-        _isVerifySSLHostname == false) {
+    System.out.println("VERIFY: " + hostname);
+    if (_isVerifySSLPeer == false
+	&& _isVerifySSLCommonName == false
+	&& _isVerifySSLHostname == false) {
       return true;
     }
     

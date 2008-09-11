@@ -13,6 +13,9 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>quercus: parsing php from Java string could run into encoding issues (#2920, rep by rgnitz)</li>
+<li>quercus: __destructor support (#2417, rep by Carl Lobo)</li>
+<li>quercus: conditional function refactor (#2918, rep by koreth)</li>
 <li>quercus: add require-source='false' and allow php to be deleted with compilation (#2217)</li>
 <li>quercus: class cache issues for performance (#2915, rep by koreth)</li>
 <li>quercus: Regex option 'A' ignored (#2907, rep by wikipo)</li>

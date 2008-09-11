@@ -1778,7 +1778,7 @@ case SORT_NUMERIC:
    * @return the number of new variables added from the array to the symbol
    *         table
    */
-  @UsesSymbolTable(replace=false)
+  @UsesSymbolTable(replace=true)
   public static Value extract(Env env,
                               ArrayValue array)
   {
@@ -2558,7 +2558,7 @@ case SORT_NUMERIC:
    * @param args the vector of array arguments
    * @return an array with all of the mapped values
    */
-  public Value array_merge(Value []args)
+  public static Value array_merge(Value []args)
   {
     // php/1731
 

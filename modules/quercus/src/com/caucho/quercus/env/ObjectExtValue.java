@@ -1444,6 +1444,14 @@ public class ObjectExtValue extends ObjectValue
     }
   }
 
+  public void cleanup(Env env)
+  {
+    AbstractFunction fun = getQuercusClass().getDestructor();
+    
+    if (fun != null)
+      fun.callMethod(env, this);
+  }
+
   private static String toMethod(char []key, int keyLength)
   {
     return new String(key, 0, keyLength);

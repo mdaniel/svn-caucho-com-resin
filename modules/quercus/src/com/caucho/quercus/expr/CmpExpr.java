@@ -54,6 +54,11 @@ public final class CmpExpr extends Expr {
     _right = right;
   }
 
+  public boolean isBoolean()
+  {
+    return true;
+  }
+
   /**
    * Evaluates the equality as a boolean.
    */

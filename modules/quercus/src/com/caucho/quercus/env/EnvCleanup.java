@@ -30,7 +30,6 @@
 package com.caucho.quercus.env;
 
 public interface EnvCleanup {
-
   /*
    * This method is invoked after a Quercus request has been
    * processed and the environment is being cleaned up.
@@ -41,9 +40,7 @@ public interface EnvCleanup {
    * are explicitly cleaned up, the Env.removeCleanup()
    * method should be invoked.
    */
-
   public void cleanup()
     throws Exception;
-
 }
 

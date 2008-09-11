@@ -163,6 +163,11 @@ public class InterpretedClassDef extends ClassDef
       cl.addMethod("__construct", _constructor);
     }
     
+    if (_destructor != null) {
+      cl.setDestructor(_destructor);
+      cl.addMethod("__destruct", _destructor);
+    }
+    
     if (_getField != null)
       cl.setFieldGet(_getField);
     
@@ -307,6 +312,9 @@ public class InterpretedClassDef extends ClassDef
 		       fieldEntry.getValue().eval(env).copy(),
 		       fieldEntry.getVisibility());
     }
+
+    if (_destructor != null && value instanceof ObjectExtValue)
+      env.addObjectCleanup((ObjectExtValue) object);
   }
 
   /**

@@ -68,6 +68,7 @@ public class QuercusClass {
   private ClassDef []_classDefList;
 
   private AbstractFunction _constructor;
+  private AbstractFunction _destructor;
 
   private AbstractFunction _fieldGet;
   private AbstractFunction _fieldSet;
@@ -202,6 +203,9 @@ public class QuercusClass {
 
     if (_constructor == null && parent != null)
       _constructor = parent.getConstructor();
+
+    if (_destructor == null && parent != null)
+      _destructor = parent.getDestructor();
   }
 
   /**
@@ -219,6 +223,7 @@ public class QuercusClass {
     _parent = parent;
 
     _constructor = cacheClass._constructor;
+    _destructor = cacheClass._destructor;
     
     _fieldGet = cacheClass._fieldGet;
     _fieldSet = cacheClass._fieldSet;
@@ -315,6 +320,22 @@ public class QuercusClass {
   public AbstractFunction getConstructor()
   {
     return _constructor;
+  }
+
+  /**
+   * Sets the destructor.
+   */
+  public void setDestructor(AbstractFunction fun)
+  {
+    _destructor = fun;
+  }
+
+  /**
+   * Gets the destructor.
+   */
+  public AbstractFunction getDestructor()
+  {
+    return _destructor;
   }
   
   /**
