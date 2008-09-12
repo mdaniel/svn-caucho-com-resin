@@ -1594,9 +1594,14 @@ OpenSSL libraries (it was in resin.dll in versions before 3.0).  All
 you need to do is to obtain an OpenSSL binary distribution and install
 it. </p>
   
-<p>Resin on Windows is compiled against the GnuWin32 binary, you can obtain an
+<p>Resin on Windows 32 is compiled against the Win32 binary, you can obtain an
 installation package 
-<a href="http://gnuwin32.sourceforge.net/packages/openssl.htm">here</a>.
+<a href="http://www.slproweb.com">http://www.slproweb.com (Shining Light Productions)</a>.
+</p>
+  
+<p>Resin on Windows 64 is compiled against a Win64 binary, you can obtain an
+installation package 
+<a href="http://www.deanlee.cn?p=60&cp=1">Dean Lee: /dev/blog</a>.
 </p>
 
 <p>Once you have run the installation package, you can copy the necessary

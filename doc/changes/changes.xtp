@@ -13,6 +13,10 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>quercus: dynamic method with more than five arguments causing errors (#2927, rep by koreth)</li>
+<li>install: ./configure --prefix; make install wasn't copying doc/admin correctly (#2898, rep by moffermann)</li>
+<li>hessian: proxy equals should return false if the compared object is a non-matching proxy (#2878, rep by Christian Campo)</li>
+<li>hessian: missing case for long[] deserialization (#2909, rep by aloksingh)</li>
 <li>quercus: parsing php from Java string could run into encoding issues (#2920, rep by rgnitz)</li>
 <li>quercus: __destructor support (#2417, rep by Carl Lobo)</li>
 <li>quercus: conditional function refactor (#2918, rep by koreth)</li>

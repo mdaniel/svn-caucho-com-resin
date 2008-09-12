@@ -1267,7 +1267,7 @@ abstract public class Value implements java.io.Serializable
                         args[0], args[1], args[2], args[3], args[4]);
 
     default:
-      return errorNoMethod(env, name, nameLen);
+      return callMethod(env, hash, name, nameLen, args);
     }
   }
 
