@@ -1998,7 +1998,7 @@ case SORT_NUMERIC:
     Iterator<Value> iter = keyArray.getValueIterator(env);
     
     while (iter.hasNext()) {
-      array.put(iter.next(), value);
+      array.put(iter.next(), value.copy());
     }
     
     return array;
