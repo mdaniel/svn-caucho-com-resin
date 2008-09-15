@@ -731,9 +731,9 @@ public class ThreadPool {
 
 	    // check to see if we're over the idle thread limit
 	    synchronized (_idleLock) {
-	      if (_isIdle &&
-		  (_threadIdleMax < _idleCount ||
-		   _resetCount != _threadResetCount)) {
+	      if (_isIdle
+		  && (_threadIdleMax < _idleCount
+		      || _resetCount != _threadResetCount)) {
 		isDead = true;
 
 		isReset = _resetCount != _threadResetCount;

@@ -12,6 +12,7 @@
 
 <s2 title="3.1.8 snapshot">
 <ul>
+<li>comet: remove Thread.sleep(10) in Port for long polling</li>
 <li>comet: avoid skip() at end of request for a comet call so input can be buffered (#2870, rep by David Peterson)</li>
 </ul>
 </s2>

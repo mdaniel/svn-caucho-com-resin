@@ -431,12 +431,12 @@ public class TcpConnection extends PortConnection implements ThreadTask
       else if (port.suspend(this)) {
 	isSuspended = true;
 	if (log.isLoggable(Level.FINE))
-	  log.fine(dbgId() + " suspend");
+	  log.fine(dbgId() + "suspend");
       }
 
       if (! isSuspended) {
 	if (log.isLoggable(Level.FINE))
-	  log.fine(dbgId() + " suspend fail");
+	  log.fine(dbgId() + "suspend fail");
 	
 	free();
       }
@@ -561,8 +561,9 @@ public class TcpConnection extends PortConnection implements ThreadTask
       }
     }
 
-    log.fine(dbgId() + "wake failed");
-    return false;
+    log.fine(dbgId() + "wake for non-suspended comet");
+    
+    return true;
   }
 
   public boolean suspendWrite()
@@ -601,7 +602,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
     Thread thread = Thread.currentThread();
     String oldThreadName = thread.getName();
 		   
-    thread.setName(_id);
+    thread.setName(_id + "$" + System.identityHashCode(thread));
     
     if (isKeepalive)
       port.keepaliveEnd(this);
@@ -620,6 +621,9 @@ public class TcpConnection extends PortConnection implements ThreadTask
       _thread = thread;
 
       if (isResume) {
+        if (log.isLoggable(Level.FINE))
+          log.fine(dbgId() + "resume");
+	
 	ConnectionController controller = getController();
 
 	if (controller != null && controller.isDuplex()) {

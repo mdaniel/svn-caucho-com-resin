@@ -1183,7 +1183,7 @@ public class EntityManyToOneField extends CascadableField {
     String dirtyVar = "__caucho_dirtyMask_" + (getIndex() / 64);
     long dirtyMask = (1L << (getIndex() % 64));
 
-    out.println("if ((" + getter + " != null) && (__caucho_state.isPersist() || (" + dirtyVar + " & " + dirtyMask + ") != 0L)) {");
+    out.println("if ((" + getter + " != null) && (__caucho_state.isPersist() || (" + dirtyVar + " & " + dirtyMask + "L) != 0L)) {");
     out.pushDepth();
 
     String relatedEntity = "((com.caucho.amber.entity.Entity) " + getter + ")";

@@ -1357,6 +1357,9 @@ public class Port
     }
 
     if (isResume) {
+      if (log.isLoggable(Level.FINER))
+	log.finer(conn.dbgId() + "schedule resume");
+      
       ThreadPool.getThreadPool().schedule(conn);
       return true;
     }
@@ -1504,7 +1507,8 @@ public class Port
         // need delay to avoid spawing too many threads over a short time,
         // when the load doesn't justify it
         Thread.yield();
-        Thread.sleep(10);
+	
+        // Thread.sleep(10);
 
         synchronized (this) {
           isStart = _startThreadCount + _idleThreadCount < _acceptThreadMin;
