@@ -62,6 +62,10 @@ public class MethodSignature {
   {
   }
 
+  public void setDescription(String description)
+  {
+  }
+
   public void setEJBName(String ejbName)
   {
     _ejbName = ejbName;
