@@ -891,6 +891,24 @@ public class BinaryBuilderValue
   }
   
   /**
+   * Append Java bytes to the value without conversions.
+   */
+  @Override
+  public final StringValue appendBytes(byte []bytes, int offset, int end)
+  {
+    int length = _length + end - offset;
+
+    if (_buffer.length < length)
+      ensureCapacity(length);
+
+    for (int i = offset; i < end; i++) {
+      _buffer[_length++] = (byte) bytes[i];
+    }
+
+    return this;
+  }
+  
+  /**
    * Append to a string builder.
    */
   public StringValue appendTo(UnicodeBuilderValue sb)

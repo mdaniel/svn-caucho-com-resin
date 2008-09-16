@@ -1162,6 +1162,24 @@ public class StringBuilderValue
 
     return this;
   }
+  
+  /**
+   * Append Java bytes to the value without conversions.
+   */
+  @Override
+  public final StringValue appendBytes(byte []bytes, int offset, int end)
+  {
+    int length = _length + end - offset;
+
+    if (_buffer.length < length)
+      ensureCapacity(length);
+
+    for (int i = offset; i < end; i++) {
+      _buffer[_length++] = (char) bytes[i];
+    }
+
+    return this;
+  }
 
   @Override
   public StringValue append(Reader reader, long length)

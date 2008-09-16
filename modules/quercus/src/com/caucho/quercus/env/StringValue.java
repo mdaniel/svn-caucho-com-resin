@@ -47,7 +47,10 @@ import java.util.IdentityHashMap;
 /**
  * Represents a Quercus string value.
  */
-abstract public class StringValue extends Value implements CharSequence {
+abstract public class StringValue
+  extends Value
+  implements CharSequence
+{
   public static final StringValue EMPTY = new StringBuilderValue("");
 
   private final static StringValue []CHAR_STRINGS;
@@ -1192,6 +1195,20 @@ abstract public class StringValue extends Value implements CharSequence {
     
     while (offset < end) {
       sb = sb.appendByte(buf[offset++]);
+    }
+    
+    return sb;
+  }
+  
+  /**
+   * Append Java bytes to the value without conversions.
+   */
+  public StringValue appendBytes(byte []bytes, int offset, int end)
+  {
+    StringValue sb = this;
+    
+    while (offset < end) {
+      sb = sb.appendByte(bytes[offset++]);
     }
     
     return sb;

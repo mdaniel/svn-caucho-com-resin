@@ -121,8 +121,7 @@ public class ArgGetValue extends Value
    */
   public Var toVar()
   {
-    // quercus/3d56
-    return new Var();
+    return new Var(toValue());
   }
 
   /**

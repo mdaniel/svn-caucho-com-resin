@@ -254,7 +254,7 @@ public class Env {
   private Value [][] _callArgStack = new Value[256][];
   private int _callStackTop;
   
-  private String _callingClass;
+  private QuercusClass _callingClass;
 
   private Value [] _functionArgs;
 
@@ -2346,29 +2346,21 @@ public class Env {
   }
   
   /*
-   * Returns the name of calling class.
+   * Returns the calling class.
    */
-  public String getCallingClassName()
+  public QuercusClass getCallingClass()
   {
     return _callingClass;
   }
   
   /*
-   * Returns the calling class.
-   */
-  public QuercusClass getCallingClass()
-  {
-    return findClass(_callingClass);
-  }
-  
-  /*
    * Sets the calling class.
    */
-  public String setCallingClassName(String name)
+  public QuercusClass setCallingClass(QuercusClass cls)
   {
-    String oldCallingClass = _callingClass;
+    QuercusClass oldCallingClass = _callingClass;
     
-    _callingClass = name;
+    _callingClass = cls;
     
     return oldCallingClass;
   }

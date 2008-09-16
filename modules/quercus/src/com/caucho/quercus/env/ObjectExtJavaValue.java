@@ -70,7 +70,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
   //
 
   /**
-   * Returns fields not specified by the value.
+   * Returns fields not explicitly specified by this value.
    */
   @Override
   protected Value getFieldExt(Env env, StringValue name)
