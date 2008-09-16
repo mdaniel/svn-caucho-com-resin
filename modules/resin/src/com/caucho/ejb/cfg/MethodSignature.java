@@ -104,6 +104,10 @@ public class MethodSignature {
     }
   }
 
+  public void setDescription(String value)
+  {
+  }
+
   public void addText(String text)
     throws ConfigException
   {

@@ -648,7 +648,7 @@ public class ThreadPool {
     /**
      * Starts the thread.
      */
-    private boolean start(Runnable task, ClassLoader loader)
+    boolean start(Runnable task, ClassLoader loader)
     {
       synchronized (this) {
 	_task = task;

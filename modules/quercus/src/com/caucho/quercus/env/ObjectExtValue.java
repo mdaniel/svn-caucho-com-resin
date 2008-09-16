@@ -174,10 +174,13 @@ public class ObjectExtValue extends ObjectValue
 	 entry != null;
 	 entry = entry._next) {
       if (name.equals(entry._key)) {
+	// php/091m
+	/*
 	if (entry._visibility == FieldVisibility.PRIVATE) {
 	  env.error(L.l("Can't access private field '{0}::{1}'",
 			_quercusClass.getName(), name));
 	}
+	*/
 	
         return entry._value.toValue();
       }

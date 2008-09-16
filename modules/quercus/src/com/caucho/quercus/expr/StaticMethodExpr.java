@@ -137,13 +137,19 @@ public class StaticMethodExpr extends Expr {
 
     //Value thisValue = NullThisValue.NULL;
 
-    env.pushCall(this, thisValue, new Value[0]);
+    Value []args = new Value[_args.length];
+
+    for (int i = 0; i < args.length; i++) {
+      args[i] = _args[i].eval(env);
+    }
+
+    env.pushCall(this, thisValue, args);
 
     String oldClassName = env.setCallingClassName(_className);
     try {
       env.checkTimeout();
 
-      return cl.callMethod(env, thisValue, _hash, _name, _name.length, _args);
+      return cl.callMethod(env, thisValue, _hash, _name, _name.length, args);
     } finally {
       env.popCall();
       

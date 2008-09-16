@@ -49,8 +49,8 @@ abstract public class JavaInvoker
 {
   private static final L10N L = new L10N(JavaInvoker.class);
 
-  private static final Object [] NULL_ARGS = new Object[0];
-  private static final Value [] NULL_VALUES = new Value[0];
+  private static final Object []NULL_ARGS = new Object[0];
+  private static final Value []NULL_VALUES = new Value[0];
 
   private final ModuleContext _moduleContext;
   private final String _name;
@@ -67,7 +67,7 @@ abstract public class JavaInvoker
   private boolean _hasEnv;
   private boolean _hasThis;
   private Expr [] _defaultExprs;
-  private Marshal [] _marshalArgs;
+  private Marshal []_marshalArgs;
   private boolean _hasRestArgs;
   private Marshal _unmarshalReturn;
 

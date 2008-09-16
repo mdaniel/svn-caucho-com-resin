@@ -207,7 +207,10 @@ public class QuercusProgram {
    */
   public boolean isModified()
   {
-    return _depend.isModified();
+    if (_compiledPage != null)
+      return _compiledPage.isModified();
+    else
+      return _depend.isModified();
   }
 
   /**

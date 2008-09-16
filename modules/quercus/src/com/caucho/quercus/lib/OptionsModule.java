@@ -44,15 +44,19 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.logging.*;
 
 /**
  * PHP options
  */
 public class OptionsModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(OptionsModule.class);
+  private static final Logger log
+    = Logger.getLogger(OptionsModule.class.getName());
 
   // php/1a0q (phpMyAdmin)
   public static final String PHP_OS
@@ -530,7 +534,15 @@ public class OptionsModule extends AbstractQuercusModule {
       return PHP_OS;
 
     case 'n':
-      return "localhost";
+      try {
+	InetAddress addr = InetAddress.getLocalHost();
+	
+	return addr.getHostName();
+      } catch (Exception e) {
+	log.log(Level.FINER, e.toString(), e);
+
+	return "localhost";
+      }
 
     case 'r':
       return "2.4.0";
@@ -543,11 +555,11 @@ public class OptionsModule extends AbstractQuercusModule {
 
     case 'a':
     default:
-      return (php_uname("s") + " " +
-              php_uname("n") + " " +
-              php_uname("r") + " " +
-              php_uname("v") + " " +
-              php_uname("m"));
+      return (php_uname("s") + " "
+	      + php_uname("n") + " "
+	      + php_uname("r") + " "
+	      + php_uname("v") + " "
+	      + php_uname("m"));
     }
   }
 

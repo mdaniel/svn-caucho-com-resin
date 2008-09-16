@@ -58,7 +58,7 @@ public class PageManager
   private boolean _isCompile;
   private boolean _isCompileFailover = ! Alarm.isTest();
 
-  private boolean _isRequireSource;
+  private boolean _isRequireSource = true;
 
   protected LruCache<Path,QuercusProgram> _programCache
     = new LruCache<Path,QuercusProgram>(1024);

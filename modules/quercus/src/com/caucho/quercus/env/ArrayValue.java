@@ -146,10 +146,8 @@ abstract public class ArrayValue extends Value {
     for (Entry entry = getHead(); entry != null; entry = entry._next) {
       Value key = entry.getKey();
 
-      if (key instanceof StringValue) {
-        // XXX: intern?
-        obj.putField(env, key.toString(), entry.getValue());
-      }
+      // php/03oe
+      obj.putField(env, key.toString(), entry.getValue());
     }
 
     return obj;

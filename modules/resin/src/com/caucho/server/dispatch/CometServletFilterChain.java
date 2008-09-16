@@ -41,7 +41,7 @@ import java.util.HashMap;
 import com.caucho.servlet.comet.CometServlet;
 import com.caucho.servlet.comet.CometController;
 
-import com.caucho.server.connection.AbstractHttpRequest;
+import com.caucho.server.connection.HttpServletRequestImpl;
 import com.caucho.server.connection.HttpConnectionController;
 
 /**
@@ -159,7 +159,7 @@ public class CometServletFilterChain extends AbstractFilterChain {
     
     CometController controller = null;
     try {
-      AbstractHttpRequest req = (AbstractHttpRequest) request;
+      HttpServletRequestImpl req = (HttpServletRequestImpl) request;
 
       controller = (CometController) req.getConnection().getController();
 

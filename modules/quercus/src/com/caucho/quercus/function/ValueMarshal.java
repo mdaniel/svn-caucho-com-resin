@@ -59,7 +59,8 @@ public class ValueMarshal extends Marshal
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    return value;
+    // php/3c81
+    return value.toValue();
   }
 
   public Value unmarshal(Env env, Object value)

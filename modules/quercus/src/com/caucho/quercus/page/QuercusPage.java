@@ -62,7 +62,7 @@ abstract public class QuercusPage
   /**
    * Returns true if the page is modified.
    */
-  public boolean isModified(Env env)
+  public boolean isModified()
   {
     return false;
   }
