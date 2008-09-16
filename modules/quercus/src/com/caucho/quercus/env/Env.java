@@ -3999,7 +3999,7 @@ public class Env {
       
       if (page != null && isOnce)
         return BooleanValue.TRUE;
-      else if (page == null || page.isModified(this)) {
+      else if (page == null || page.isModified()) {
         page = _quercus.parse(path);
         
         page.init(this);
