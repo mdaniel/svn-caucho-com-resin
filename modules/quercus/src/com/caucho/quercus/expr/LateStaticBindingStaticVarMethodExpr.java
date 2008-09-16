@@ -32,6 +32,7 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
@@ -120,12 +121,12 @@ public class LateStaticBindingStaticVarMethodExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    String className = env.getCallingClassName();
-    
-    QuercusClass cl = env.findClass(className);
+    QuercusClass cl = env.getCallingClass();
 
     if (cl == null) {
-      env.error(getLocation(), L.l("no matching class {0}", className));
+      env.error(getLocation(), L.l("no calling class found"));
+
+      return NullValue.NULL;
     }
 
     Value thisValue = env.getThis();
@@ -143,12 +144,12 @@ public class LateStaticBindingStaticVarMethodExpr extends Expr {
    */
   public Value evalRef(Env env)
   {
-    String className = env.getCallingClassName();
-    
-    QuercusClass cl = env.findClass(className);
+    QuercusClass cl = env.getCallingClass();
 
     if (cl == null) {
-      env.error(getLocation(), L.l("no matching class {0}", className));
+      env.error(getLocation(), L.l("no calling class found"));
+
+      return NullValue.NULL;
     }
 
     // qa/0954 - what appears to be a static call may be a call to a super constructor

@@ -138,14 +138,14 @@ public class StaticMethodExpr extends Expr {
     //Value thisValue = NullThisValue.NULL;
 
     Value []args = new Value[_args.length];
-
+    
     for (int i = 0; i < args.length; i++) {
       args[i] = _args[i].eval(env);
     }
-
+    
+    QuercusClass oldClass = env.setCallingClass(cl);
     env.pushCall(this, thisValue, args);
-
-    String oldClassName = env.setCallingClassName(_className);
+    
     try {
       env.checkTimeout();
 
@@ -153,7 +153,7 @@ public class StaticMethodExpr extends Expr {
     } finally {
       env.popCall();
       
-      env.setCallingClassName(oldClassName);
+      env.setCallingClass(oldClass);
     }
   }
 

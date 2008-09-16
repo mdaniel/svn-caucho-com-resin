@@ -31,6 +31,8 @@ package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
@@ -64,8 +66,15 @@ public class LateStaticBindingFieldVarGetExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    return env.getStaticClassFieldValue(env.getCallingClassName(),
-                                        _varName.evalString(env));
+    QuercusClass cl = env.getCallingClass();
+
+    if (cl == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return NullValue.NULL;
+    }
+    
+    return cl.getStaticField(env, _varName.evalString(env)).toValue();
   }
 
   /**
@@ -77,8 +86,15 @@ public class LateStaticBindingFieldVarGetExpr extends AbstractVarExpr {
    */
   public Value evalCopy(Env env)
   {
-    return env.getStaticClassFieldVar(env.getCallingClassName(),
-                                      _varName.evalString(env)).copy();
+    QuercusClass cl = env.getCallingClass();
+
+    if (cl == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return NullValue.NULL;
+    }
+    
+    return cl.getStaticField(env, _varName.evalString(env)).copy();
   }
 
   /**
@@ -90,8 +106,15 @@ public class LateStaticBindingFieldVarGetExpr extends AbstractVarExpr {
    */
   public Value evalArg(Env env)
   {
-    return env.getStaticClassFieldVar(env.getCallingClassName(),
-                                      _varName.evalString(env));
+    QuercusClass cl = env.getCallingClass();
+
+    if (cl == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return NullValue.NULL;
+    }
+    
+    return cl.getStaticField(env, _varName.evalString(env));
   }
 
   /**
@@ -103,8 +126,15 @@ public class LateStaticBindingFieldVarGetExpr extends AbstractVarExpr {
    */
   public Value evalArray(Env env)
   {
-    return env.getStaticClassFieldVar(env.getCallingClassName(),
-                                      _varName.evalString(env)).getArray();
+    QuercusClass cl = env.getCallingClass();
+
+    if (cl == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return NullValue.NULL;
+    }
+    
+    return cl.getStaticField(env, _varName.evalString(env)).getArray();
   }
   
   /**
@@ -116,8 +146,15 @@ public class LateStaticBindingFieldVarGetExpr extends AbstractVarExpr {
    */
   public Value evalObject(Env env)
   {
-    return env.getStaticClassFieldVar(env.getCallingClassName(),
-                                      _varName.evalString(env)).getObject(env);
+    QuercusClass cl = env.getCallingClass();
+
+    if (cl == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return NullValue.NULL;
+    }
+    
+    return cl.getStaticField(env, _varName.evalString(env)).getObject(env);
   }
   
   /**
@@ -129,8 +166,15 @@ public class LateStaticBindingFieldVarGetExpr extends AbstractVarExpr {
    */
   public Value evalRef(Env env)
   {
-    return env.getStaticClassFieldVar(env.getCallingClassName(),
-                                      _varName.evalString(env));
+    QuercusClass cl = env.getCallingClass();
+
+    if (cl == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return NullValue.NULL;
+    }
+    
+    return cl.getStaticField(env, _varName.evalString(env));
   }
   
   /**
@@ -142,8 +186,15 @@ public class LateStaticBindingFieldVarGetExpr extends AbstractVarExpr {
    */
   public void evalAssign(Env env, Value value)
   {
-    env.getStaticClassFieldVar(env.getCallingClassName(),
-                               _varName.evalString(env)).set(value);
+    QuercusClass cl = env.getCallingClass();
+
+    if (cl == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return;
+    }
+    
+    cl.getStaticField(env, _varName.evalString(env)).set(value);
   }
   
   /**
@@ -157,7 +208,7 @@ public class LateStaticBindingFieldVarGetExpr extends AbstractVarExpr {
   {
     env.error(getLocation(),
               L.l("{0}::${1}: Cannot unset static variables.",
-                  env.getCallingClassName(), _varName));
+                  env.getCallingClass().getName(), _varName));
   }
   
   public String toString()

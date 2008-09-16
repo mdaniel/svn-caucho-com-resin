@@ -31,6 +31,7 @@ package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.program.AbstractFunction;
@@ -92,14 +93,15 @@ public class LateStaticBindingClassMethodExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    String className = env.getCallingClassName();
+    QuercusClass cls = env.getCallingClass();
     
-    QuercusClass cl = env.findClass(className);
-
-    if (cl == null)
-      throw env.createErrorException(L.l("{0} is an unknown class", className));
-
-    AbstractFunction fun = cl.getFunction(_name);
+    if (cls == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return NullValue.NULL;
+    }
+    
+    AbstractFunction fun = cls.getFunction(_name);
     
     Value []values = new Value[_args.length];
 

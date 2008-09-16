@@ -31,6 +31,8 @@ package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
@@ -63,7 +65,15 @@ public class LateStaticBindingFieldGetExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    return env.getStaticClassFieldValue(env.getCallingClassName(), _varName);
+    QuercusClass cls = env.getCallingClass();
+    
+    if (cls == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return NullValue.NULL;
+    }
+    
+    return cls.getStaticField(env, _varName).toValue();
   }
 
   /**
@@ -75,8 +85,15 @@ public class LateStaticBindingFieldGetExpr extends AbstractVarExpr {
    */
   public Value evalCopy(Env env)
   {
-    return env.getStaticClassFieldVar(env.getCallingClassName(),
-                                      _varName).copy();
+    QuercusClass cls = env.getCallingClass();
+    
+    if (cls == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return NullValue.NULL;
+    }
+    
+    return cls.getStaticField(env, _varName).copy();
   }
 
   /**
@@ -88,7 +105,15 @@ public class LateStaticBindingFieldGetExpr extends AbstractVarExpr {
    */
   public Value evalArg(Env env)
   {
-    return env.getStaticClassFieldVar(env.getCallingClassName(), _varName);
+    QuercusClass cls = env.getCallingClass();
+    
+    if (cls == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return NullValue.NULL;
+    }
+    
+    return cls.getStaticField(env, _varName);
   }
 
   /**
@@ -100,8 +125,15 @@ public class LateStaticBindingFieldGetExpr extends AbstractVarExpr {
    */
   public Value evalArray(Env env)
   {
-    return env.getStaticClassFieldVar(env.getCallingClassName(),
-                                      _varName).getArray();
+    QuercusClass cls = env.getCallingClass();
+    
+    if (cls == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return NullValue.NULL;
+    }
+    
+    return cls.getStaticField(env, _varName).getArray();
   }
   
   /**
@@ -113,8 +145,15 @@ public class LateStaticBindingFieldGetExpr extends AbstractVarExpr {
    */
   public Value evalObject(Env env)
   {
-    return env.getStaticClassFieldVar(env.getCallingClassName(),
-                                      _varName).getObject(env);
+    QuercusClass cls = env.getCallingClass();
+    
+    if (cls == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return NullValue.NULL;
+    }
+    
+    return cls.getStaticField(env, _varName).getObject(env);
   }
   
   /**
@@ -126,7 +165,15 @@ public class LateStaticBindingFieldGetExpr extends AbstractVarExpr {
    */
   public Value evalRef(Env env)
   {
-    return env.getStaticClassFieldVar(env.getCallingClassName(), _varName);
+    QuercusClass cls = env.getCallingClass();
+    
+    if (cls == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return NullValue.NULL;
+    }
+    
+    return cls.getStaticField(env, _varName);
   }
   
   /**
@@ -138,7 +185,15 @@ public class LateStaticBindingFieldGetExpr extends AbstractVarExpr {
    */
   public void evalAssign(Env env, Value value)
   {
-    env.getStaticClassFieldVar(env.getCallingClassName(), _varName).set(value);
+    QuercusClass cls = env.getCallingClass();
+    
+    if (cls == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return;
+    }
+    
+    cls.getStaticField(env, _varName).set(value);
   }
   
   /**
@@ -152,7 +207,7 @@ public class LateStaticBindingFieldGetExpr extends AbstractVarExpr {
   {
     env.error(getLocation(),
               L.l("{0}::${1}: Cannot unset static variables.",
-                      env.getCallingClassName(), _varName));
+                      env.getCallingClass().getName(), _varName));
   }
   
   public String toString()

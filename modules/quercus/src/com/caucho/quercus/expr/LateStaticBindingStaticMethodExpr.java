@@ -122,13 +122,11 @@ public class LateStaticBindingStaticMethodExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    String className = env.getCallingClassName();
-    
-    QuercusClass cl = env.findClass(className);
+    QuercusClass cl = env.getCallingClass();
 
     if (cl == null) {
-      env.error(getLocation(), L.l("no matching class {0}", className));
-
+      env.error(getLocation(), L.l("no calling class found"));
+      
       return NullValue.NULL;
     }
 
@@ -156,12 +154,12 @@ public class LateStaticBindingStaticMethodExpr extends Expr {
    */
   public Value evalRef(Env env)
   {
-    String className = env.getCallingClassName();
-    
-    QuercusClass cl = env.findClass(className);
+    QuercusClass cl = env.getCallingClass();
 
     if (cl == null) {
-      env.error(getLocation(), L.l("no matching class {0}", className));
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return NullValue.NULL;
     }
 
     // qa/0954 - what appears to be a static call may be a call to a super constructor
