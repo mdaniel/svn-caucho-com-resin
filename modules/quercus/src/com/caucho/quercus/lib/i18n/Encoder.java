@@ -39,7 +39,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
 
-abstract public class QuercusCharsetEncoder
+abstract public class Encoder
 {
   protected static final int ERROR_CHARACTER = 0xFFFE;
   
@@ -48,12 +48,12 @@ abstract public class QuercusCharsetEncoder
   protected boolean _isIgnore;
   protected boolean _isReplaceUnicode = false;
   
-  protected QuercusCharsetEncoder(String charset)
+  protected Encoder(String charset)
   {
     _charset = charset;
   }
   
-  public static QuercusCharsetEncoder create(String charset)
+  public static Encoder create(String charset)
   {
     if (charset.equalsIgnoreCase("utf8")
         || charset.equalsIgnoreCase("utf-8"))

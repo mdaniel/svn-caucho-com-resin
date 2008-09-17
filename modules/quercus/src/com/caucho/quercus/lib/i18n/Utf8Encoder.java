@@ -41,7 +41,7 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
 
 public class Utf8Encoder
-  extends QuercusCharsetEncoder
+  extends Encoder
 {
   private static final Logger log
     = Logger.getLogger(Utf8Encoder.class.getName());

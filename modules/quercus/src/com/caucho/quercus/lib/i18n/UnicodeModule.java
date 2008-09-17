@@ -108,7 +108,7 @@ public class UnicodeModule extends AbstractQuercusModule {
                                      @Optional int errorMode)
   {
     try {
-      QuercusCharsetEncoder encoder = QuercusCharsetEncoder.create(encoding);
+      Encoder encoder = Encoder.create(encoding);
       
       return encoder.encode(env, str);
     } catch (UnsupportedCharsetException e) {
@@ -250,7 +250,7 @@ public class UnicodeModule extends AbstractQuercusModule {
 
       unicodeStr = unicodeStr.subSequence(newOffset, tail);
       
-      QuercusCharsetEncoder encoder = QuercusCharsetEncoder.create(charset);
+      Encoder encoder = Encoder.create(charset);
       StringValue encodedStr = encoder.encode(env, unicodeStr);
       
       return encodedStr;
@@ -329,12 +329,12 @@ public class UnicodeModule extends AbstractQuercusModule {
     }
     
     try {
-      QuercusCharsetEncoder encoder;
+      Encoder encoder;
       
       if (isEndUtf8)
         encoder = new Utf8Encoder(outCharset);
       else
-        encoder = QuercusCharsetEncoder.create(outCharset);
+        encoder = Encoder.create(outCharset);
       
       encoder.setIgnoreErrors(isIgnoreErrors);
       

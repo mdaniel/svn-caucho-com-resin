@@ -825,7 +825,7 @@ public class MbstringModule
     Decoder decoder = getDecoder(env, fromEncoding);
     CharSequence contentsUnicode = decoder.decode(env, contents);
 
-    QuercusCharsetEncoder encoder = getEncoder(env, toEncoding);
+    Encoder encoder = getEncoder(env, toEncoding);
     return encoder.encode(env, contentsUnicode);
   }
 
@@ -1252,14 +1252,14 @@ public class MbstringModule
                                     CharSequence str,
                                     String encoding)
   {
-    QuercusCharsetEncoder encoder = getEncoder(env, encoding);
+    Encoder encoder = getEncoder(env, encoding);
 
     return encoder.encode(env, str);
   }
   
-  private static QuercusCharsetEncoder getEncoder(Env env, String encoding)
+  private static Encoder getEncoder(Env env, String encoding)
   {
-    QuercusCharsetEncoder encoder = QuercusCharsetEncoder.create(encoding);
+    Encoder encoder = Encoder.create(encoding);
     
     String ini = env.getIniString("mbstring.substitute_character");
     
@@ -1427,7 +1427,7 @@ public class MbstringModule
                                  Value val,
                                  String encoding)
   {
-    QuercusCharsetEncoder encoder = getEncoder(env, encoding);
+    Encoder encoder = getEncoder(env, encoding);
     
     return encodeAll(env, val, encoder);
   }
@@ -1437,7 +1437,7 @@ public class MbstringModule
    */
   private static Value encodeAll(Env env,
                                  Value val,
-                                 QuercusCharsetEncoder encoder)
+                                 Encoder encoder)
   {
     val = val.toValue();
 

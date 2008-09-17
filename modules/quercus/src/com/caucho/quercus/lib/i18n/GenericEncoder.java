@@ -49,7 +49,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.TempBuffer;
 
 public class GenericEncoder
-  extends QuercusCharsetEncoder
+  extends Encoder
 {
   private static final Logger log
     = Logger.getLogger(GenericEncoder.class.getName());

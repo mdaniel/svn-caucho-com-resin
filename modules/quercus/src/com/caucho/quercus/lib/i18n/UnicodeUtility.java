@@ -147,7 +147,7 @@ public class UnicodeUtility
                                    String replacement,
                                    boolean isIgnoreErrors)
   {
-    QuercusCharsetEncoder encoder = QuercusCharsetEncoder.create(charset);
+    Encoder encoder = Encoder.create(charset);
     
     encoder.setReplacement(replacement);
     encoder.setIgnoreErrors(isIgnoreErrors);
@@ -192,11 +192,11 @@ public class UnicodeUtility
     
     // encode phase
     
-    QuercusCharsetEncoder encoder;
+    Encoder encoder;
     if (isEndUtf8)
       encoder = new Utf8Encoder(outCharset);
     else
-      encoder = QuercusCharsetEncoder.create(outCharset);
+      encoder = Encoder.create(outCharset);
     
     encoder.setIgnoreErrors(isIgnoreErrors);
     
