@@ -13,6 +13,7 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>quercus: $a[3] = 'n' was modifying constants when $a is string (#2940, rep by koreth)</li>
 <li>quercus: php_uname('n') needs to return host name (#2931, rep by koreth)</li>
 <li>quercus: back out private handling (#2933, rep by koreth)</li>
 <li>quercus: try-catch not analyzed properly for variables (#2934, rep by koreth)</li>

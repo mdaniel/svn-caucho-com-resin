@@ -72,8 +72,8 @@ public class HempServlet extends GenericServlet {
   public void service(ServletRequest request, ServletResponse response)
     throws IOException, ServletException
   {
-    AbstractHttpRequest req = (AbstractHttpRequest) request;
-    AbstractHttpResponse res = (AbstractHttpResponse) response;
+    HttpServletRequestImpl req = (HttpServletRequestImpl) request;
+    HttpServletResponseImpl res = (HttpServletResponseImpl) response;
 
     String upgrade = req.getHeader("Upgrade");
 

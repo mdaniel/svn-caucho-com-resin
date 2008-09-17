@@ -2126,6 +2126,15 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Sets the array value, returning the new array, e.g. to handle
+   * string update ($a[0] = 'A').
+   */
+  public Value append(Value index, Value value)
+  {
+    return this;
+  }
+
+  /**
    * Sets the array ref.
    */
   public Value putRef()

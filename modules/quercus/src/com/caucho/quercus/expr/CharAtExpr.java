@@ -81,7 +81,8 @@ public class CharAtExpr extends AbstractVarExpr {
   {
     Value obj = _objExpr.eval(env);
 
-    Value result = obj.setCharValueAt(_indexExpr.evalLong(env), value.toString());
+    Value result = obj.setCharValueAt(_indexExpr.evalLong(env),
+				      value.toString());
 
     _objExpr.evalAssign(env, result);
   }

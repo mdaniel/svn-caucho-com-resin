@@ -466,8 +466,10 @@ public class Var extends Value
   public Value toAutoArray()
   {
     _value = _value.toAutoArray();
-    
-    return _value;
+
+    // php/03mg
+
+    return this;
   }
 
   /**
@@ -1034,9 +1036,10 @@ public class Var extends Value
   @Override
   public Value put(Value index, Value value)
   {
-    _value = _value.toAutoArray();
-    
-    return _value.put(index, value);
+    // php/33m{g,h}
+    _value = _value.append(index, value);
+
+    return value;
   }
 
   /**
@@ -1282,7 +1285,11 @@ public class Var extends Value
   @Override
   public Value setCharValueAt(long index, String value)
   {
-    return _value.setCharValueAt(index, value);
+    // php/03mg
+    
+    _value = _value.setCharValueAt(index, value);
+
+    return _value;
   }
 
   /**

@@ -546,4 +546,10 @@ public class HttpServletResponseImpl implements CauchoResponse
   {
     return _response;
   }
+
+
+  public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
+  {
+    return _response.upgradeProtocol(handler);
+  }
 }

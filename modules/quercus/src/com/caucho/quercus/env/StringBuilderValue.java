@@ -515,6 +515,17 @@ public class StringBuilderValue
   @Override
   public Value put(Value index, Value value)
   {
+    setCharValueAt(index.toLong(), value.toString());
+
+    return value;
+  }
+  
+  /**
+   * Sets the array ref.
+   */
+  @Override
+  public Value append(Value index, Value value)
+  {
     return setCharValueAt(index.toLong(), value.toString());
   }
 
@@ -591,28 +602,27 @@ public class StringBuilderValue
     if (indexL < 0)
       return this;
     else {
+      // php/03mg, #2940
+      
       int index = (int) indexL;
+
+      StringBuilderValue sb = new StringBuilderValue(this);
       
       int padLen = index - len;
 
       if (padLen > 0) {
-        ensureCapacity(index + 1);
-        
-        for (int i = 0; i < padLen; i++) {
-          _buffer[i + len] = ' ';
+        for (int i = 0; i <= padLen; i++) {
+	  sb.append(' ');
         }
-        
-        _length = index + 1;
       }
       
       if (value.length() == 0)
-        _buffer[index] = 0;
+        sb._buffer[index] = 0;
       else
-        _buffer[index] = value.charAt(0);
-      
+        sb._buffer[index] = value.charAt(0);
+
+      return sb;
     }
-    
-    return this;
   }
     
   /**
