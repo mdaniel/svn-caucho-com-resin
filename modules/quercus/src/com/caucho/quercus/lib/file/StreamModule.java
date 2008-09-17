@@ -331,7 +331,7 @@ public class StreamModule extends AbstractQuercusModule {
    * XXX: TODO
    */
   public static Value stream_get_meta_data(Env env,
-                                           BinaryStream stream )
+                                           BinaryStream stream)
   {
     if (stream == null)
       return BooleanValue.FALSE;

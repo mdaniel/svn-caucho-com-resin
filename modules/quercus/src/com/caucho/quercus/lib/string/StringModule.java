@@ -56,6 +56,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Currency;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -3052,31 +3054,101 @@ public class StringModule extends AbstractQuercusModule {
    * @param allowTags the allowable tags
    */
   public static StringValue strip_tags(StringValue string,
-				       @Optional String allowTags)
+                                       @Optional Value allowTags)
   {
-    // XXX: allowTags is stubbed
-
     StringValue result = string.createStringBuilder(string.length());
 
+    HashSet<StringValue> allowedTagMap = null;
+
+    if (! allowTags.isDefault())
+      allowedTagMap = getAllowedTags(allowTags.toStringValue());
+    
     int len = string.length();
 
     for (int i = 0; i < len; i++) {
       char ch = string.charAt(i);
 
-      if (ch != '<') {
+      if (i + 1 >= len || ch != '<') {
         result.append(ch);
         continue;
       }
 
-      for (i++; i < len; i++) {
-        ch = string.charAt(i);
+      ch = string.charAt(i + 1);
+      
+      if (Character.isWhitespace(ch)) {
+        i++;
 
-        if (ch == '>')
-          break;
+        result.append('<');
+        result.append(ch);
+        continue;
       }
+
+      int tagNameStart = i + 1;
+      
+      if (ch == '/')
+        tagNameStart++;
+      
+      int j = tagNameStart;
+      
+      while (j < len
+             && (ch = string.charAt(j)) != '>'
+             // && ch != '/'
+             && ! Character.isWhitespace(ch)) {
+        j++;
+      }
+      
+      StringValue tagName = string.substring(tagNameStart, j);
+      
+      if (allowedTagMap != null && allowedTagMap.contains(tagName)) {
+        result.append(string, i, Math.min(j + 1, len));
+      }
+      else {
+        while (j < len && (ch = string.charAt(j)) != '>') {
+          j++;
+        }
+      }
+      
+      i = j;
     }
 
     return result;
+  }
+  
+  private static HashSet<StringValue> getAllowedTags(StringValue str)
+  {
+    int len = str.length();
+    
+    HashSet<StringValue> set = new HashSet<StringValue>();
+    
+    for (int i = 0; i < len; i++) {
+      char ch = str.charAt(i);
+      
+      switch (ch) {
+        case '<':
+          
+          int j = i + 1;
+          
+          while (j < len
+                 && (ch = str.charAt(j)) != '>'
+                 //&& ch != '/'
+                 && ! Character.isWhitespace(ch)) {
+            j++;
+          }
+          
+          if (ch == '>'
+              && i + 1 < j
+              && j < len)
+            set.add(str.substring(i + 1, j));
+          else
+            i = j;
+        
+        default:
+          continue;
+      }
+      
+    }
+    
+    return set;
   }
 
   /**
