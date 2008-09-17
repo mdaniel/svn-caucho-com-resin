@@ -76,6 +76,9 @@ class Regcomp {
   HashMap<StringValue,Integer> _groupNameReverseMap
     = new HashMap<StringValue,Integer>();
 
+  ArrayList<RegexpNode.Recursive> _recursiveList
+    = new ArrayList<RegexpNode.Recursive>();
+
   RegexpNode _groupTail;
   
   boolean _isLookbehind;
@@ -121,6 +124,7 @@ class Regcomp {
     _nGroup = 1;
 
     RegexpNode begin = null;
+
     if ((_flags & ANCHORED) != 0)
       begin = RegexpNode.ANCHOR_BEGIN_RELATIVE;
     
@@ -135,6 +139,21 @@ class Regcomp {
 
     if (_maxGroup < _nGroup)
       _maxGroup = _nGroup;
+
+    for (RegexpNode.Recursive rec : _recursiveList) {
+      RegexpNode top = value;
+
+      if (top instanceof RegexpNode.Concat) {
+	RegexpNode.Concat topConcat = (RegexpNode.Concat) top;
+
+	if (topConcat.getConcatHead() instanceof RegexpNode.AnchorBegin
+	    || topConcat.getConcatHead() instanceof RegexpNode.AnchorBeginRelative) {
+	  top = topConcat.getConcatNext();
+	}
+      }
+      
+      rec.setTop(top);
+    }
 
     if (log.isLoggable(Level.FINEST))
       log.finest("regexp[] " + value);
@@ -326,6 +345,17 @@ class Regcomp {
 	  case 'P':
 	    pattern.read();
 	    return parseNamedGroup(pattern, tail);
+
+	  case 'R':
+	    pattern.read();
+	    RegexpNode.Recursive rec = new RegexpNode.Recursive();
+	    _recursiveList.add(rec);
+	    ch = pattern.read();
+	    if (ch != ')')
+	      throw error(L.l("expected ')' at '{0}'",
+			      String.valueOf((char) ch)));
+	    
+	    return concat(tail, parseRec(pattern, rec));
 
 	  case 'm': case 's': case 'i': case 'x': case 'g':
 	  case 'U': case 'X':

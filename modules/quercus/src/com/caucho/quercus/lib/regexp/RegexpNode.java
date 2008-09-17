@@ -249,13 +249,46 @@ class RegexpNode {
   @Override
   public String toString()
   {
+    Map<RegexpNode,Integer> map = new IdentityHashMap<RegexpNode,Integer>();
+
+    StringBuilder sb = new StringBuilder();
+
+    toString(sb, map);
+
+    return sb.toString();
+  }
+
+  protected void toString(StringBuilder sb, Map<RegexpNode,Integer> map)
+  {
+    if (toStringAdd(sb, map))
+      return;
+    
+    sb.append(toStringName()).append("[]");
+  }
+
+  protected boolean toStringAdd(StringBuilder sb, Map<RegexpNode,Integer> map)
+  {
+    Integer v = map.get(this);
+
+    if (v != null) {
+      sb.append("#").append(v);
+      return true;
+    }
+
+    map.put(this, map.size());
+
+    return false;
+  }
+
+  protected String toStringName()
+  {
     String name = getClass().getName();
     int p = name.lastIndexOf('$');
 
     if (p < 0)
       p = name.lastIndexOf('.');
     
-    return name.substring(p + 1) + "[]";
+    return name.substring(p + 1);
   }
 
   /**
@@ -322,14 +355,14 @@ class RegexpNode {
     = new AnchorBeginOrNewline();
   
   static final AnchorBeginRelative ANCHOR_BEGIN_RELATIVE
-   =  new AnchorBeginRelative();
+   = new AnchorBeginRelative();
   
   static final AnchorEnd ANCHOR_END = new AnchorEnd();
   static final AnchorEndOnly ANCHOR_END_ONLY = new AnchorEndOnly();
   static final AnchorEndOrNewline ANCHOR_END_OR_NEWLINE
     = new AnchorEndOrNewline();
   
-  private static class AnchorBegin extends NullableNode {
+  static class AnchorBegin extends NullableNode {
     @Override
     int match(StringValue string, int length, int offset, RegexpState state)
     {
@@ -351,7 +384,7 @@ class RegexpNode {
     }
   }
   
-  private static class AnchorBeginRelative extends NullableNode {
+  static class AnchorBeginRelative extends NullableNode {
     @Override
     int match(StringValue string, int strlen, int offset, RegexpState state)
     {
@@ -599,9 +632,18 @@ class RegexpNode {
     }
 
     @Override
-    public String toString()
+    protected void toString(StringBuilder sb, Map<RegexpNode,Integer> map)
     {
-      return "CharLoop[" + _min + ", " + _max + ", " + _node + ", " + _next + "]";
+      if (toStringAdd(sb, map))
+	return;
+
+      sb.append(toStringName());
+      sb.append("[").append(_min).append(", ").append(_max).append(", ");
+
+      _node.toString(sb, map);
+      sb.append(", ");
+      _next.toString(sb, map);
+      sb.append("]");
     }
   }
   
@@ -764,6 +806,16 @@ class RegexpNode {
       return _head.prefix();
     }
 
+    RegexpNode getConcatHead()
+    {
+      return _head;
+    }
+
+    RegexpNode getConcatNext()
+    {
+      return _next;
+    }
+
     @Override
     int match(StringValue string, int length, int offset, RegexpState state)
     {
@@ -776,9 +828,17 @@ class RegexpNode {
     }
 
     @Override
-    public String toString()
+    protected void toString(StringBuilder sb, Map<RegexpNode,Integer> map)
     {
-      return "Concat[" + _head + ", " + _next + "]";
+      if (toStringAdd(sb, map))
+	return;
+
+      sb.append(toStringName());
+      sb.append("[");
+      _head.toString(sb, map);
+      sb.append(", ");
+      _next.toString(sb, map);
+      sb.append("]");
     }
   }
   
@@ -920,6 +980,26 @@ class RegexpNode {
       return _next.match(string, length, offset, state);
     }
   }
+
+  final static EmptyNode EMPTY = new EmptyNode();
+  
+  /**
+   * Matches an empty production
+   */
+  static class EmptyNode extends RegexpNode {
+    // needed for php/4e6b
+    
+    EmptyNode()
+    {
+    }
+    
+    
+    @Override
+    int match(StringValue string, int length, int offset, RegexpState state)
+    {
+      return offset;
+    }
+  }
   
   static class End extends RegexpNode {
     @Override
@@ -934,7 +1014,6 @@ class RegexpNode {
       return offset;
     }
   }
-
   
   static class Group extends RegexpNode {
     private final RegexpNode _node;
@@ -1054,9 +1133,17 @@ class RegexpNode {
     }
 
     @Override
-    public String toString()
+    protected void toString(StringBuilder sb, Map<RegexpNode,Integer> map)
     {
-      return "GroupHead[" + _group + ", " + _node + "]";
+      if (toStringAdd(sb, map))
+	return;
+
+      sb.append(toStringName());
+      sb.append("[");
+      sb.append(_group);
+      sb.append(", ");
+      _node.toString(sb, map);
+      sb.append("]");
     }
   }
   
@@ -1112,6 +1199,8 @@ class RegexpNode {
     /**
      * Create an or expression
      */
+    // php/4e6b
+    /*
     @Override
     RegexpNode createOr(RegexpNode node)
     {
@@ -1119,6 +1208,7 @@ class RegexpNode {
 
       return getHead();
     }
+    */
 
     @Override
     int minLength()
@@ -1153,9 +1243,17 @@ class RegexpNode {
     }
 
     @Override
-    public String toString()
+    protected void toString(StringBuilder sb, Map<RegexpNode,Integer> map)
     {
-      return "GroupTail[" + _group + ", " + _next + "]";
+      if (toStringAdd(sb, map))
+	return;
+
+      sb.append(toStringName());
+      sb.append("[");
+      sb.append(_group);
+      sb.append(", ");
+      _next.toString(sb, map);
+      sb.append("]");
     }
   }
   
@@ -1696,6 +1794,39 @@ class RegexpNode {
       }
 
       return -1;
+    }
+
+    @Override
+    protected void toString(StringBuilder sb, Map<RegexpNode,Integer> map)
+    {
+      if (toStringAdd(sb, map))
+	return;
+
+      sb.append(toStringName());
+      sb.append("[");
+      _left.toString(sb, map);
+      
+      for (Or ptr = _right; ptr != null; ptr = ptr._right) {
+	sb.append(",");
+	ptr._left.toString(sb, map);
+      }
+      
+      sb.append("]");
+    }
+
+    @Override
+    public String toString()
+    {
+      StringBuilder sb = new StringBuilder();
+      sb.append("Or[");
+      sb.append(_left);
+      
+      for (Or ptr = _right; ptr != null; ptr = ptr._right) {
+	sb.append(",");
+	sb.append(ptr._left);
+      }
+      sb.append("]");
+      return sb.toString();
     }
   }
   
@@ -2240,6 +2371,25 @@ class RegexpNode {
       return -1;
     }
   }
+  
+  static class Recursive extends RegexpNode {
+    private RegexpNode _top;
+
+    Recursive()
+    {
+    }
+
+    void setTop(RegexpNode top)
+    {
+      _top = top;
+    }
+    
+    @Override
+    int match(StringValue string, int length, int offset, RegexpState state)
+    {
+      return _top.match(string, length, offset, state);
+    }
+  }
     
   static class Set extends AbstractCharNode {
     private final boolean []_asciiSet;
@@ -2408,9 +2558,12 @@ class RegexpNode {
     }
 
     @Override
-    public String toString()
+    protected void toString(StringBuilder sb, Map<RegexpNode,Integer> map)
     {
-      return "StringNode[" + new String(_buffer, 0, _length) + "]";
+      sb.append(toStringName());
+      sb.append("[");
+      sb.append(_buffer, 0, _length);
+      sb.append("]");
     }
   }
   

@@ -13,6 +13,8 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>quercus: regexp with empty subexpression and disjunction (#2892, #2943, rep by koreth, cperz)</li>
+<li>quercus: support for (?R) in regexps (#2755, rep by atijms)</li>
 <li>jsf: Ice Faces Sample Apps throw exception (#2908, on behalf Eric T.)</li>
 <li>quercus: $a[3] = 'n' was modifying constants when $a is string (#2940, rep by koreth)</li>
 <li>quercus: php_uname('n') needs to return host name (#2931, rep by koreth)</li>

@@ -222,10 +222,10 @@ public class JdbcQueue extends PollingQueue {
       Connection conn = dataSource.getConnection();
       try {
 	String sql = ("SELECT m_id, msg_type, msg_id, delivered, body, header" +
-		      " FROM " + messageTable +
-		      " WHERE ?<m_id AND queue=?" +
-		      "   AND consumer IS NULL AND ?<=expire" +
-		      " ORDER BY m_id");
+		      " FROM " + messageTable
+		      + " WHERE ?<m_id AND queue=?"
+		      + "   AND consumer IS NULL AND ?<=expire"
+		      + " ORDER BY m_id");
 
 	PreparedStatement selectStmt = conn.prepareStatement(sql);
 
