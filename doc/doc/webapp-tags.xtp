@@ -887,6 +887,12 @@ element idle-time {
   </td>
   <td>position:absolute; bottom:0; right:0</td>
 </tr>
+<tr>
+  <td>disable-managed-bean-property-check</td>
+  <td>if true disables checking of setter's existence for managed-bean->managed-property.
+  </td>
+  <td>false</td>
+</tr>
 </deftable-childtags>
 
 <def title="&lt;jsf> schema">

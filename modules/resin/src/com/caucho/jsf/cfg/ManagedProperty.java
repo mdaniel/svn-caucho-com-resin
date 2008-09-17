@@ -32,22 +32,9 @@ import com.caucho.config.types.DescriptionGroupConfig;
 import java.lang.reflect.*;
 import java.util.*;
 
-import javax.el.*;
-
-import javax.faces.*;
-import javax.faces.application.*;
-import javax.faces.component.*;
-import javax.faces.component.html.*;
-import javax.faces.context.*;
-import javax.faces.convert.*;
-import javax.faces.el.*;
-import javax.faces.event.*;
-import javax.faces.validator.*;
-
 import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.types.*;
 import com.caucho.util.*;
+import com.caucho.server.webapp.WebApp;
 
 public class ManagedProperty extends DescriptionGroupConfig
 {
@@ -120,11 +107,12 @@ public class ManagedProperty extends DescriptionGroupConfig
     
     Method setter = findSetter(type, name);
 
-    /*
-    if (setter == null)
+    JsfPropertyGroup jsf = WebApp.getCurrent().getJsf();
+
+    if (setter == null &&
+        (jsf == null || ! jsf.isDisableManagedBeanPropertyCheck()))
       throw new ConfigException(L.l("'{0}' is an unknown property of '{1}'.",
-				    name, type.getName()));
-    */
+                                    _name, type.getName()));
 
     if (setter == null)
       return;
@@ -139,15 +127,19 @@ public class ManagedProperty extends DescriptionGroupConfig
     if (type == null)
       return null;
 
-    for (Method method : type.getDeclaredMethods()) {
-      if (! method.getName().equals(name))
-	continue;
-      else if (method.getParameterTypes().length != 1)
-	continue;
-      else if (Modifier.isStatic(method.getModifiers()))
-	continue;
+    while (! Object.class.equals(type)) {
+      for (Method method : type.getDeclaredMethods()) {
+        if (! method.getName().equals(name))
+          continue;
+        else if (method.getParameterTypes().length != 1)
+          continue;
+        else if (Modifier.isStatic(method.getModifiers()))
+          continue;
 
-      return method;
+        return method;
+      }
+
+      type = type.getSuperclass();
     }
 
     return null;

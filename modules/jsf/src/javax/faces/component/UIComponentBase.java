@@ -1200,7 +1200,7 @@ public abstract class UIComponentBase extends UIComponent
     public void add(int i, UIComponent child)
     {
       _list.add(i, child);
-      
+
       setParent(child);
 
       FacesContext context = FacesContext.getCurrentInstance();
@@ -1510,9 +1510,9 @@ public abstract class UIComponentBase extends UIComponent
 
   private static class ComponentMap extends HashMap<String,UIComponent>
   {
-    private UIComponent _parent;
+    private UIComponentBase _parent;
 
-    ComponentMap(UIComponent parent)
+    ComponentMap(UIComponentBase parent)
     {
       _parent = parent;
     }
@@ -1522,8 +1522,10 @@ public abstract class UIComponentBase extends UIComponent
     {
       if (key == null)
 	throw new NullPointerException();
+
+      _parent._facetsAndChildren = null;
       
-      UIComponent child = (UIComponent) o;
+      UIComponent child = o;
 
       UIComponent parent = child.getParent();
       if (parent instanceof UIComponentBase) {
@@ -1546,6 +1548,8 @@ public abstract class UIComponentBase extends UIComponent
     {
       if (key == null)
 	throw new NullPointerException();
+
+      _parent._facetsAndChildren = null;
 
       UIComponent oldChild = super.remove(key);
 

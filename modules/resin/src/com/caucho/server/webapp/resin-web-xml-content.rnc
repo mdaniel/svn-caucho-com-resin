@@ -310,6 +310,9 @@ r_jsf = element jsf {
 
  & (attribute developer-aid-link-style { string }
     | element developer-aid-link-style { string })?
+
+ & (attribute disable-managed-bean-property-check { r_boolean-Type }
+    | element disable-managed-bean-property-check { r_boolean-Type })?
 }
 
 r_state-serialization-method-Values = "hessian" | "java"
