@@ -34,6 +34,7 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.lib.file.BinaryInput;
+import com.caucho.quercus.lib.i18n.Decoder;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempCharBuffer;
 import com.caucho.vfs.TempStream;
@@ -1852,23 +1853,9 @@ abstract public class StringValue
   {
     StringValue sb = env.createUnicodeBuilder();
 
-    TempCharBuffer tb = TempCharBuffer.allocate();
-    char[] charBuf = tb.getBuffer();
-
-    try {
-      Reader in = toReader(charset);
-
-      int sublen;
-      while ((sublen = in.read(charBuf, 0, charBuf.length)) >= 0) {
-        sb.append(charBuf, 0, sublen);
-      }
-
-    } catch (IOException e) {
-      throw new QuercusModuleException(e.getMessage());
-
-    } finally {
-      TempCharBuffer.free(tb);
-    }
+    Decoder decoder = Decoder.create(charset);
+    
+    sb.append(decoder.decode(env, this));
 
     return sb;
   }
@@ -1883,24 +1870,10 @@ abstract public class StringValue
   {
     UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
-    TempCharBuffer tb = TempCharBuffer.allocate();
-    char[] charBuf = tb.getBuffer();
-
-    try {
-      Reader in = toReader(charset);
-
-      int sublen;
-      while ((sublen = in.read(charBuf, 0, charBuf.length)) >= 0) {
-        sb.append(charBuf, 0, sublen);
-      }
-
-    } catch (IOException e) {
-      throw new QuercusModuleException(e.getMessage());
-
-    } finally {
-      TempCharBuffer.free(tb);
-    }
-
+    Decoder decoder = Decoder.create(charset);
+    
+    sb.append(decoder.decode(env, this));
+    
     return sb;
   }
 

@@ -146,24 +146,28 @@ public class QuercusMimeUtility
    * @return encoded mime header
    */
   public static StringValue encodeMime(Env env,
-                              StringValue name,
-                              StringValue value,
-                              String inCharset,
-                              String outCharset,
-                              String scheme,
-                              String lineBreakChars,
-                              int lineLength)
+                                       StringValue name,
+                                       StringValue value,
+                                       String inCharset,
+                                       String outCharset,
+                                       String scheme,
+                                       String lineBreakChars,
+                                       int lineLength)
     throws UnsupportedEncodingException
   {
-    name = name.toUnicodeValue(env, inCharset);
-    value = value.toUnicodeValue(env, inCharset);
+    Decoder decoder = Decoder.create(inCharset);
+    
+    CharSequence nameUnicode = decoder.decode(env, name);
+
+    decoder.reset();
+    String valueUnicode = decoder.decode(env, value).toString();
 
     StringValue sb = env.createUnicodeBuilder();
-    sb.append(name);
+    sb.append(UnicodeUtility.encode(env, nameUnicode, outCharset));
     sb.append(':');
     sb.append(' ');
 
-    String word = encodeMimeWord(value.toString(),
+    String word = encodeMimeWord(valueUnicode.toString(),
                                  outCharset,
                                  scheme,
                                  lineBreakChars,
@@ -175,10 +179,10 @@ public class QuercusMimeUtility
   }
   
   public static String encodeMimeWord(String value,
-          String charset,
-          String scheme,
-          String lineBreakChars,
-          int lineLength)
+                                      String charset,
+                                      String scheme,
+                                      String lineBreakChars,
+                                      int lineLength)
     throws UnsupportedEncodingException
   {
     if (lineLength != 76)

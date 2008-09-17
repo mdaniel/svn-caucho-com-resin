@@ -39,6 +39,9 @@ import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.util.L10N;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 /**
@@ -62,6 +65,14 @@ public class UnicodeModule extends AbstractQuercusModule {
   private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
   /**
+   * Returns the extensions implemented by the module.
+   */
+  public String []getLoadedExtensions()
+  {
+    return new String[] { "iconv" };
+  }
+  
+  /**
    * Returns the default quercus.ini values.
    */
   public IniDefinitions getIniDefinitions()
@@ -74,18 +85,38 @@ public class UnicodeModule extends AbstractQuercusModule {
     return env.isUnicodeSemantics() ? BooleanValue.TRUE : BooleanValue.FALSE;
   }
 
-  public static StringValue unicode_decode(Env env,
-					   BytesValue str,
-					   String encoding)
+  public static Value unicode_decode(Env env,
+                                     BytesValue str,
+                                     String encoding,
+                                     @Optional int errorMode)
   {
-    return str.convertToUnicode(env, encoding);
+    try {
+      Decoder decoder = Decoder.create(encoding);
+      
+      return decoder.decodeUnicode(env, str);
+    } catch (UnsupportedCharsetException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l("unsupported charset {0}", encoding));
+
+      return BooleanValue.FALSE;
+    }
   }
 
-  public static StringValue unicode_encode(Env env,
-                                          UnicodeValue str,
-                                          String encoding)
+  public static Value unicode_encode(Env env,
+                                     UnicodeValue str,
+                                     String encoding,
+                                     @Optional int errorMode)
   {
-    return str.toBinaryValue(env, encoding);
+    try {
+      QuercusCharsetEncoder encoder = QuercusCharsetEncoder.create(encoding);
+      
+      return encoder.encode(env, str);
+    } catch (UnsupportedCharsetException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l("unsupported charset {0}", encoding));
+
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -103,15 +134,26 @@ public class UnicodeModule extends AbstractQuercusModule {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
 
-    haystack = haystack.convertToUnicode(env, charset);
-    needle = needle.convertToUnicode(env, charset);
+    try {
+      Decoder decoder = Decoder.create(charset);
+      
+      StringValue haystackUnicode = decoder.decodeUnicode(env, haystack);
+      
+      decoder.reset();
+      StringValue needleUnicode = decoder.decodeUnicode(env, needle);
+      
+      int index = haystackUnicode.indexOf(needleUnicode, offset);
+      
+      if (index < 0)
+        return BooleanValue.FALSE;
 
-    int index = haystack.indexOf(needle, offset);
+      return LongValue.create(index);
+    } catch (UnsupportedCharsetException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l("unsupported charset {0}", charset));
 
-    if (index < 0)
       return BooleanValue.FALSE;
-
-    return LongValue.create(index);
+    }
   }
 
   /**
@@ -130,15 +172,26 @@ public class UnicodeModule extends AbstractQuercusModule {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
 
-    haystack = haystack.convertToUnicode(env, charset);
-    needle = needle.convertToUnicode(env, charset);
+    try {
+      Decoder decoder = Decoder.create(charset);
+      
+      StringValue haystackUnicode = decoder.decodeUnicode(env, haystack);
+      
+      decoder.reset();
+      StringValue needleUnicode = decoder.decodeUnicode(env, needle);
+      
+      int index = haystackUnicode.lastIndexOf(needleUnicode);
+      
+      if (index < 0)
+        return BooleanValue.FALSE;
 
-    int index = haystack.lastIndexOf(needle);
+      return LongValue.create(index);
+    } catch (UnsupportedCharsetException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l("unsupported charset {0}", charset));
 
-    if (index < 0)
       return BooleanValue.FALSE;
-
-    return LongValue.create(index);
+    }
   }
 
   /**
@@ -161,57 +214,134 @@ public class UnicodeModule extends AbstractQuercusModule {
     if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
 
-    StringValue unicodeStr = str.convertToUnicode(env, charset);
+    try {
+      Decoder decoder = Decoder.create(charset);
 
-    int tail;
-    int strlen = unicodeStr.length();
+      CharSequence unicodeStr = decoder.decode(env, str);
+      
+      if (decoder.hasError()) {
+        log.log(Level.FINE, L.l("string has invalid {0} encoding", charset));
+        env.notice(L.l("string has invalid {0} encoding", charset));
+        
+        return BooleanValue.FALSE;
+      }
 
-    // Imitating PHP5 behavior
-    if (offset < 0)
-      offset = strlen + offset;
+      int tail;
+      int strlen = unicodeStr.length();
 
-    if (length < 0)
-      tail = strlen + length;
-    else if (length > strlen - offset)
-      tail = strlen;
-    else
-      tail = offset + length;
+      int newOffset = offset;
+      
+      if (offset < 0)
+        newOffset = strlen + offset;
 
-    if (offset < 0 || tail < offset)
-      return str.EMPTY;
+      if (length < 0) {
+        if (offset < 0)
+          tail = strlen;
+        else
+          tail = strlen + length;
+      }
+      else if (length > strlen - newOffset)
+        tail = strlen;
+      else
+        tail = newOffset + length;
 
-    unicodeStr = unicodeStr.substring(offset, tail);
-    
-    return str.create(env, unicodeStr, charset);
+      if (newOffset < 0 || tail < newOffset)
+        return str.EMPTY;
+
+      unicodeStr = unicodeStr.subSequence(newOffset, tail);
+      
+      QuercusCharsetEncoder encoder = QuercusCharsetEncoder.create(charset);
+      StringValue encodedStr = encoder.encode(env, unicodeStr);
+      
+      return encodedStr;
+    } catch (UnsupportedCharsetException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l("unsupported charset {0}", charset));
+
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
    * Returns encoded string from decoded argument string.
    *
    * @param env
-   * @param in_charset charset to decode from
-   * @param out_charset charset to decode to
+   * @param inCharset charset to decode from
+   * @param outCharset charset to decode to
    * @param str to decode and encode
    */
   public static Value iconv(Env env,
-                       String in_charset,
-                       String out_charset,
-                       StringValue str)
+                            String inCharset,
+                            String outCharset,
+                            StringValue str)
   {
-    if (out_charset.endsWith("//TRANSLIT")) {
+    boolean isIgnoreErrors = false;
+    
+    // options should be on outCharset
+    if (inCharset.endsWith("//IGNORE"))
+      inCharset = inCharset.substring(0, inCharset.length() - 8);
+    else if (inCharset.endsWith("//TRANSLIT"))
+      inCharset = inCharset.substring(0, inCharset.length() - 10);
+    
+    if (outCharset.endsWith("//IGNORE")) {
+      isIgnoreErrors = true;
+      
+      outCharset = outCharset.substring(0, outCharset.length() - 8);
+    }
+    else if (outCharset.endsWith("//TRANSLIT")) {
       env.stub("Iconv TRANSLIT option not supported");
 
-      int length = out_charset.length() - "//TRANSLIT".length();
-
-      out_charset = out_charset.substring(0, length);
+      outCharset = outCharset.substring(0, outCharset.length() - 10);
     }
-
+    
+    boolean isStartUtf8 = false;
+    boolean isEndUtf8 = false;
+    
+    if (inCharset.equalsIgnoreCase("utf8")
+        || inCharset.equalsIgnoreCase("utf-8"))
+      isStartUtf8 = true;
+    
+    if (outCharset.equalsIgnoreCase("utf8")
+        || outCharset.equalsIgnoreCase("utf-8"))
+      isEndUtf8 = true;
+    
+    if (isStartUtf8 && isEndUtf8)
+      return UnicodeUtility.utf8Clean(env, str, null, isIgnoreErrors);
+    
+    CharSequence unicodeStr;
+    
     try {
-      return UnicodeUtility.decodeEncode(env, str, in_charset, out_charset);
-    }
-    catch (UnsupportedEncodingException e) {
+      Decoder decoder;
+      
+      if (isStartUtf8)
+        decoder = new Utf8Decoder(inCharset);
+      else
+        decoder = new GenericDecoder(inCharset);
+      
+      decoder.setIgnoreErrors(isIgnoreErrors);
+
+      unicodeStr = decoder.decode(env, str);
+    } catch (UnsupportedCharsetException e) {
       log.log(Level.FINE, e.getMessage(), e);
-      env.warning(L.l("error converting {1} to {2}", in_charset, out_charset));
+      env.warning(L.l("unsupported input charset {0}", inCharset));
+
+      return BooleanValue.FALSE;
+    }
+    
+    try {
+      QuercusCharsetEncoder encoder;
+      
+      if (isEndUtf8)
+        encoder = new Utf8Encoder(outCharset);
+      else
+        encoder = QuercusCharsetEncoder.create(outCharset);
+      
+      encoder.setIgnoreErrors(isIgnoreErrors);
+      
+      return encoder.encode(env, unicodeStr);
+    } catch (UnsupportedCharsetException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l("unsupported output charset {0}", outCharset));
 
       return BooleanValue.FALSE;
     }
@@ -299,8 +429,26 @@ public class UnicodeModule extends AbstractQuercusModule {
   {
     if (charset.length() == 0 )
       charset = env.getIniString("iconv.internal_encoding");
+    
+    try {
+      Decoder decoder = Decoder.create(charset);
 
-    return LongValue.create(str.convertToUnicode(env, charset).length());
+      CharSequence unicodeStr = decoder.decode(env, str);
+      
+      if (decoder.hasError()) {
+        log.log(Level.FINE, L.l("string has invalid {0} encoding", charset));
+        env.notice(L.l("string has invalid {0} encoding", charset));
+        
+        return BooleanValue.FALSE;
+      }
+      
+      return LongValue.create(unicodeStr.length());
+    } catch (UnsupportedCharsetException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l("unsupported charset {0}", charset));
+
+      return BooleanValue.FALSE;
+    }
   }
   
   /**
@@ -434,5 +582,3 @@ public class UnicodeModule extends AbstractQuercusModule {
   static final IniDefinition INI_ICONV_INTERNAL_ENCODING
     = _iniDefinitions.add("iconv.internal_encoding", "utf-8", PHP_INI_ALL);
 }
-
-//XXX: "//TRANSLIT" and "//IGNORE" charset suffixes

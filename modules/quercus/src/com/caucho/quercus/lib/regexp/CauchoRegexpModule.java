@@ -98,6 +98,11 @@ public class CauchoRegexpModule
                            StringValue string,
                            @Optional @Reference Value regsV)
   {
+    if (pattern.length() == 0) {
+      env.warning(L.l("empty pattern argument"));
+      return BooleanValue.FALSE;
+    }
+    
     return eregImpl(env, pattern, string, regsV, false);
   }
 
@@ -111,6 +116,13 @@ public class CauchoRegexpModule
                             StringValue string,
                             @Optional @Reference Value regsV)
   {
+    //  php/1511 : error when pattern argument is null or an empty string
+    
+    if (pattern.length() == 0) {
+      env.warning(L.l("empty pattern argument"));
+      return BooleanValue.FALSE;
+    }
+    
     return eregImpl(env, pattern, string, regsV, true);
   }
 
@@ -119,29 +131,21 @@ public class CauchoRegexpModule
    *
    * @param env the calling environment
    */
-  protected static Value eregImpl(Env env,
-                                  Value rawPattern,
-                                  StringValue string,
-                                  Value regsV,
-                                  boolean isCaseInsensitive)
+  public static Value eregImpl(Env env,
+                               Value rawPattern,
+                               StringValue string,
+                               Value regsV,
+                               boolean isCaseInsensitive)
   {
-    // php/1511 : error when pattern argument is null or an empty string
-
-    if (rawPattern.length() == 0) {
-      env.warning(L.l("empty pattern argument"));
-      return BooleanValue.FALSE;
-    }
-
     // php/1512 : non-string pattern argument is converted to
     // an integer value and formatted as a string.
 
     StringValue rawPatternStr;
 
-    if (! (rawPattern instanceof StringValue)) {
+    if (! rawPattern.isString())
       rawPatternStr = rawPattern.toLongValue().toStringValue();
-    } else {
+    else
       rawPatternStr = rawPattern.toStringValue();
-    }
 
     StringValue cleanPattern = cleanEregRegexp(env, rawPatternStr, false);
 
@@ -814,21 +818,14 @@ public class CauchoRegexpModule
    * Replaces values using regexps
    */
 
-  protected static Value eregReplaceImpl(Env env,
-                                  Value pattern,
-                                  Value replacement,
-                                  StringValue subject,
-                                  boolean isCaseInsensitive)
+  public static Value eregReplaceImpl(Env env,
+                                      Value pattern,
+                                      Value replacement,
+                                      StringValue subject,
+                                      boolean isCaseInsensitive)
   {
     StringValue patternStr;
     StringValue replacementStr;
-
-    // php/1511 : error when pattern argument is null or an empty string
-
-    if (pattern.length() == 0) {
-      env.warning(L.l("empty pattern argument"));
-      return BooleanValue.FALSE;
-    }
 
     // php/150u : If a non-string type argument is passed
     // for the pattern or replacement argument, it is

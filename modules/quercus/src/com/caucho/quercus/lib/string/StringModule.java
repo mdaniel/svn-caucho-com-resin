@@ -3494,8 +3494,8 @@ public class StringModule extends AbstractQuercusModule {
   {
     StringValue needle;
 
-    if (needleV instanceof StringValue)
-      needle = (StringValue) needleV;
+    if (needleV.isString())
+      needle = needleV.toStringValue();
     else
       needle = StringValue.create((char) needleV.toInt());
 

@@ -29,106 +29,177 @@
 
 package com.caucho.quercus.lib.i18n;
 
-import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.*;
-import com.caucho.vfs.*;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.util.logging.*;
-
-public class UnicodeUtility {
-  private static final Logger log
-    = Logger.getLogger(UnicodeUtility.class.getName());
-
-  public static StringValue decodeEncode(Env env,
-					StringValue str,
-					String inCharset,
-					String outCharset)
-    throws UnsupportedEncodingException
+public class UnicodeUtility
+{
+  public static StringValue utf8Clean(Env env,
+                                      StringValue str,
+                                      String replacement,
+                                      boolean isIgnore)
   {
-    return decodeEncode(env, str, inCharset, outCharset, 0, Integer.MAX_VALUE);
-  }
-
-  public static StringValue decodeEncode(Env env,
-					 StringValue str,
-					 String inCharset,
-					 String outCharset,
-					 int offset)
-    throws UnsupportedEncodingException
-  {
-    return decodeEncode(env, str, inCharset, outCharset,
-                        offset, Integer.MAX_VALUE);
-  }
-
-  /**
-   * Decodes and encodes to specified charsets at the same time.
-   */
-  public static StringValue decodeEncode(Env env,
-					 StringValue str,
-					 String inCharset,
-					 String outCharset,
-					 int offset,
-					 int length)
-    throws UnsupportedEncodingException
-  {
-    TempCharBuffer tb = TempCharBuffer.allocate();
-    char[] charBuf = tb.getBuffer();
-
-    try {
-      Reader in;
-
-      try {
-        in = str.toReader(inCharset);
-      } catch (IOException e) {
-        log.log(Level.WARNING, e.toString(), e);
+    StringValue sb = str.createStringBuilder();
     
-        in = str.toReader("utf-8");
-      }
-
-      TempStream ts = new TempStream();
-      WriteStream out = new WriteStream(ts);
-
-      try {
-        out.setEncoding(outCharset);
-      } catch (IOException e) {
-        log.log(Level.WARNING, e.toString(), e);
+    int len = str.length();
     
-        out.setEncoding("utf-8");
-      }
-
-      while (offset > 0) {
-        if (in.read() < 0)
-          break;
-        offset--;
-      }
-
-      int sublen;
-
-      while (length > 0 &&
-             (sublen = in.read(charBuf, 0, charBuf.length)) >= 0) {
-
-        sublen = Math.min(length, sublen);
-
-        out.print(charBuf, 0, sublen);
-        length -= sublen;
-      }
-
-      out.flush();
-
-      StringValue sb = env.createBinaryBuilder();
-      for (TempBuffer ptr = ts.getHead(); ptr != null; ptr = ptr.getNext()) {
-        sb.append(ptr.getBuffer(), 0, ptr.getLength());
-      }
+    for (int i = 0; i < len; i++) {
+      char ch = str.charAt(i);
       
-      return sb;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
+      if (ch <= 0x7F)
+        sb.append(ch);
+      else if (0xC2 <= ch && ch <= 0xDF) {
+        char ch2;
+        if (i + 1 < len
+            && 0x80 <= (ch2 = str.charAt(i + 1)) && ch2 <= 0xBF) {
+          i++;
+          sb.append(ch);
+          sb.append(ch2);
+        }
+        else if (isIgnore) {
+        }
+        else if (replacement != null)
+          sb.append(replacement);
+        else
+          return sb;
+      }
+      else if (0xE0 <= ch && ch <= 0xEF) {
+        char ch2;
+        char ch3;
+        if (i + 2 < len
+            && 0x80 <= (ch2 = str.charAt(i + 1)) && ch2 <= 0xBF
+            && 0x80 <= (ch3 = str.charAt(i + 2)) && ch3 <= 0xBF) {
+          i += 2;
+          sb.append(ch);
+          sb.append(ch2);
+          sb.append(ch3);
+        }
+        else if (isIgnore) {
+        }
+        else if (replacement != null)
+          sb.append(replacement);
+        else
+          return sb;
+      }
+      else if (0xF0 <= ch && ch <= 0xF4) {
+        char ch2;
+        char ch3;
+        char ch4;
+        
+        if (i + 3 < len
+            && 0x80 <= (ch2 = str.charAt(i + 1)) && ch2 <= 0xBF
+            && 0x80 <= (ch3 = str.charAt(i + 2)) && ch3 <= 0xBF
+            && 0x80 <= (ch4 = str.charAt(i + 3)) && ch4 <= 0xBF) {
+          i += 3;
+          sb.append(ch);
+          sb.append(ch2);
+          sb.append(ch3);
+          sb.append(ch4);
+        }
+        else if (isIgnore) {
+        }
+        else if (replacement != null)
+          sb.append(replacement);
+        else
+          return sb;
+      }
+      else if (isIgnore) {
+      }
+      else if (replacement != null)
+        sb.append(replacement);
+      else
+        return sb;
     }
+    
+    return sb;
+  }
+  
+  public static CharSequence decode(Env env,
+                                    StringValue str,
+                                    String charset)
+  {
+    return decode(env, str, charset, null, false);
+  }
+  
+  public static CharSequence decode(Env env,
+                                    StringValue str,
+                                    String charset,
+                                    String replacement,
+                                    boolean isIgnoreErrors)
+  {
+    Decoder decoder = Decoder.create(charset);
+    
+    decoder.setReplacement(replacement);
+    decoder.setIgnoreErrors(isIgnoreErrors);
+    
+    return decoder.decode(env, str);
+  }
+  
+  public static StringValue encode(Env env,
+                                   CharSequence str,
+                                   String charset)
+  {
+    return encode(env, str, charset, null, false);
+  }
+  
+  public static StringValue encode(Env env,
+                                   CharSequence str,
+                                   String charset,
+                                   String replacement,
+                                   boolean isIgnoreErrors)
+  {
+    QuercusCharsetEncoder encoder = QuercusCharsetEncoder.create(charset);
+    
+    encoder.setReplacement(replacement);
+    encoder.setIgnoreErrors(isIgnoreErrors);
+    
+    return encoder.encode(env, str);
+  }
+  
+  public static StringValue decodeEncode(Env env,
+                                         StringValue str,
+                                         String inCharset,
+                                         String outCharset,
+                                         String replacement,
+                                         boolean isIgnoreErrors)
+  {
+    boolean isStartUtf8 = false;
+    boolean isEndUtf8 = false;
+    
+    if (inCharset.equalsIgnoreCase("utf8")
+        || inCharset.equalsIgnoreCase("utf-8"))
+      isStartUtf8 = true;
+    
+    if (outCharset.equalsIgnoreCase("utf8")
+        || outCharset.equalsIgnoreCase("utf-8"))
+      isEndUtf8 = true;
+    
+    if (isStartUtf8 && isEndUtf8)
+      return UnicodeUtility.utf8Clean(env, str, null, isIgnoreErrors);
+    
+    // decode phase
+    
+    CharSequence unicodeStr;
+    
+    Decoder decoder;
+    if (isStartUtf8)
+      decoder = new Utf8Decoder(inCharset);
+    else
+      decoder = new GenericDecoder(inCharset);
+    
+    decoder.setIgnoreErrors(isIgnoreErrors);
 
-    finally {
-      TempCharBuffer.free(tb);
-    }
+    unicodeStr = decoder.decode(env, str);
+    
+    // encode phase
+    
+    QuercusCharsetEncoder encoder;
+    if (isEndUtf8)
+      encoder = new Utf8Encoder(outCharset);
+    else
+      encoder = QuercusCharsetEncoder.create(outCharset);
+    
+    encoder.setIgnoreErrors(isIgnoreErrors);
+    
+    return encoder.encode(env, unicodeStr);
   }
 }

@@ -36,6 +36,7 @@ import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.VariableArguments;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.MailModule;
+import com.caucho.quercus.lib.regexp.CauchoRegexpModule;
 import com.caucho.quercus.lib.regexp.RegexpModule;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -46,7 +47,11 @@ import com.caucho.vfs.Encoding;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MbstringModule
@@ -78,6 +83,26 @@ public class MbstringModule
   {
     return _iniDefinitions;
   }
+  
+  /**
+   * Checks if the string is correctly encoded.
+   * XXX: no args
+   */
+  public boolean mb_check_encoding(Env env,
+                                   @Optional Value var,
+                                   @Optional String encoding)
+  {
+    if (encoding == null || encoding.length() == 0)
+      encoding = getEncoding(env);
+   
+    Decoder decoder = Decoder.create(encoding);
+    
+    if (! var.isDefault())
+      return decoder.isDecodable(env, var.toStringValue());
+   
+    else
+      throw new UnimplementedException("mb_check_encoding() with no args");
+  }
 
   /**
    * Upper-cases, lower-cases, or capitalizes first letter of words.
@@ -89,11 +114,12 @@ public class MbstringModule
   {
     if (mode == MB_CASE_TITLE) {
       encoding = getEncoding(env, encoding);
+      
+      CharSequence unicodeStr = decode(env, str, encoding);
 
-      StringValue unicodeStr = str.convertToUnicode(env, encoding);
       unicodeStr = toUpperCaseTitle(env, unicodeStr);
-
-      return str.create(env, unicodeStr, encoding);
+      
+      return encode(env, unicodeStr, encoding);
     }
     else if (mode == MB_CASE_LOWER)
       return mb_strtolower(env, str, encoding);
@@ -106,22 +132,40 @@ public class MbstringModule
   /**
    * Converts string of one encoding to another.
    */
-  public static StringValue mb_convert_encoding(Env env,
-                              StringValue str,
-                              String destEncoding,
-                              @Optional() String fromEncodings)
+  public static Value mb_convert_encoding(Env env,
+                                          StringValue str,
+                                          String destEncoding,
+                                          @Optional Value fromEncodings)
   {
-    // XXX: fallback encoding
-    int tail = fromEncodings.indexOf(',', 1);
+    ArrayList<String> charsetList = getEncodingList(env, fromEncodings);
+    
+    CharSequence unicodeStr = null;
+    for (int i = 0; i < charsetList.size(); i++) {
+      String charset = charsetList.get(i);
 
-    String srcEncoding;
+      try {
+        unicodeStr = decode(env, str, charset);
+      } catch (UnsupportedCharsetException e) {
+        // should probably not log anything here because this is normal
+        // behavior because of fallback encodings
+        continue;
+      }
+    }
+    
+    if (unicodeStr == null) {
+      log.log(Level.FINE, L.l("unsupported character encoding {0}", fromEncodings));
+      env.warning(L.l("unsupported character encoding {0}", fromEncodings));
+      return str;
+    }
+    
+    try {
+      return encode(env, unicodeStr, destEncoding);
+    } catch (UnsupportedCharsetException e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(L.l("unsupported character encoding {0}", fromEncodings));
 
-    if (tail < 0)
-      srcEncoding = fromEncodings;
-    else
-      srcEncoding = getEncoding(env, fromEncodings.substring(0, tail).trim());
-
-    return decodeEncode(env, str, srcEncoding, destEncoding);
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -160,7 +204,6 @@ public class MbstringModule
       srcEncoding = getEncoding(env, fromEncodings.substring(0, tail).trim());
 
     Value decoded = decodeAll(env, vars, srcEncoding);
-
     vars.set(encodeAll(env, decoded, toEncoding));
 
     return env.createString(srcEncoding);
@@ -196,21 +239,121 @@ public class MbstringModule
   /**
    * Detects encoding of string.
    */
-  public static StringValue mb_detect_encoding(Env env,
-                              StringValue str,
-                              @Optional Value encoding_list,
-                              @Optional boolean strict)
+  public static Value mb_detect_encoding(Env env,
+                                         StringValue str,
+                                         @Optional Value encodingV,
+                                         @Optional boolean isStrict)
   {
-    throw new UnimplementedException("mb_detect_encoding");
+    // XXX: strict
+    
+    ArrayList<String> encodingList = getDetectOrderList(env, encodingV);   
+    
+    int len = encodingList.size();
+    for (int i = 0; i < len; i++) {
+      String charset = encodingList.get(i);
+      
+      Decoder decoder = Decoder.create(charset);
+      
+      if (decoder.isDecodable(env, str))
+        return env.createString(charset);
+    }
+    
+    return BooleanValue.FALSE;
   }
 
   /**
    * Specifies order of charsets to test when detecting encoding.
    */
   public static Value mb_detect_order(Env env,
-                              Value encoding_list)
+                                      @Optional Value encodingV)
   {
-    throw new UnimplementedException("mb_detect_order");
+    if (encodingV.isDefault()) {
+      ArrayValue array = new ArrayValueImpl();
+      
+      ArrayList<String> list = getDetectOrderList(env, encodingV);
+      
+      for (String encoding : list) {
+        array.put(encoding);
+      }
+      
+      return array;
+    }
+    else {
+      ArrayList<String> list = new ArrayList<String>();
+      
+      if (encodingV.isArray()) {
+        Iterator<Value> iter = encodingV.getValueIterator(env);
+        
+        while (iter.hasNext()) {
+          list.add(iter.next().toString());
+        }
+      }
+      else
+        parseCommaSeparatedList(list, encodingV.toString());
+      
+      env.setSpecialValue("mb.detect_order", list);
+      
+      return BooleanValue.TRUE;
+    }
+  }
+  
+  private static ArrayList<String> getDetectOrderList(Env env,
+                                                         Value encodingV)
+  {
+    if (encodingV.isDefault() && env.getSpecialValue("mb.detect_order") != null)
+      return (ArrayList<String>) env.getSpecialValue("mb.detect_order");
+    
+    ArrayList<String> list = new ArrayList<String>();
+    
+    if (encodingV.isDefault()) {
+      String encodings = env.getIniString("mbstring.detect_order");
+      
+      if (encodings != null)
+        parseCommaSeparatedList(list, encodings);
+      else {
+        list.add("ASCII");
+        list.add("UTF-8");
+      }
+    }
+    else if (encodingV.isArray()) {
+      Iterator<Value> iter = encodingV.getValueIterator(env);
+      
+      while (iter.hasNext()) {
+        list.add(iter.next().toString());
+      }
+    }
+    else {
+      String encodings = encodingV.toString();
+      
+      if (encodings.equalsIgnoreCase("auto")) {
+        list.add("ASCII");
+        list.add("JIS");
+        list.add("UTF-8");
+        list.add("EUC-JP");
+        list.add("SJIS");
+      }
+      else
+        parseCommaSeparatedList(list, encodingV.toString());
+    }
+    
+    return list;
+  }
+  
+  private static void parseCommaSeparatedList(ArrayList<String> list,
+                                              String str)
+  {
+    int start = 0;
+    int index;
+    
+    while ((index = str.indexOf(",", start)) >= 0) {
+      String charset = str.substring(start, index).trim();
+      
+      start = index + 1;
+      
+      list.add(charset);
+    }
+    
+    list.add(str.substring(start).trim());
   }
 
   /**
@@ -264,7 +407,8 @@ public class MbstringModule
 
     // XXX: option
 
-    Value val = RegexpModule.ereg(env, pattern, string, null);
+    Value val = CauchoRegexpModule.eregImpl(env, pattern, string,
+                                            null, false);
 
     if (val == BooleanValue.FALSE)
       return BooleanValue.FALSE;
@@ -289,7 +433,10 @@ public class MbstringModule
 
     //XXX: option
 
-    Value val = RegexpModule.ereg_replace(env, pattern, replacement, subject);
+    Value val = RegexpModule.eregi_replace(env,
+                                           pattern,
+                                           replacement,
+                                           subject);
 
     return encodeAll(env, val, encoding);
   }
@@ -602,28 +749,45 @@ public class MbstringModule
    * Returns and/or sets the encoding for mail.
    */
   public static Value mb_language(Env env,
-                              @Optional String language)
+                                  @Optional String language)
   {
-    String encoding = getEncoding(env);
+    String encoding = getEncodingLanguage(env);
 
-    if (language.length() == 0) {
+    if (language == null || language.length() == 0) {
       if (encoding.equalsIgnoreCase("ISO-2022-JP"))
         return env.createString("Japanese");
       else if (encoding.equalsIgnoreCase("ISO-8859-1"))
         return env.createString("English");
       else if (encoding.equalsIgnoreCase("UTF-8"))
         return env.createString("uni");
+      else
+        return env.createString(encoding);
     }
     else if (language.equals("Japanese") || language.equals("ja"))
-      setEncoding(env, "ISO-2022-JP");
+      setEncodingLanguage(env, "ISO-2022-JP");
     else if (language.equals("English") || language.equals("en"))
-      setEncoding(env, "ISO-8859-1");
+      setEncodingLanguage(env, "ISO-8859-1");
     else if (language.equals("uni"))
-      setEncoding(env, "UTF-8");
+      setEncodingLanguage(env, "UTF-8");
     else
       return BooleanValue.FALSE;
 
     return BooleanValue.TRUE;
+  }
+  
+  private static String getEncodingLanguage(Env env)
+  {
+    String encoding = (String) env.getSpecialValue("mb.internal_encoding");
+    
+    if (encoding == null)
+      return "ISO-8859-1";
+    
+    return encoding;
+  }
+  
+  private static void setEncodingLanguage(Env env, String encoding)
+  {
+    env.setSpecialValue("mb.internal_encoding", encoding);
   }
 
   /**
@@ -657,17 +821,12 @@ public class MbstringModule
       return contents;
     
     String fromEncoding = getEncoding(env);
+    
+    Decoder decoder = getDecoder(env, fromEncoding);
+    CharSequence contentsUnicode = decoder.decode(env, contents);
 
-    contents = contents.convertToUnicode(env, fromEncoding);
-
-    try {
-      byte []bytes = contents.toString().getBytes(toEncoding);
-
-      return env.createBinaryBuilder(bytes);
-    }
-    catch (UnsupportedEncodingException e) {
-      throw new QuercusModuleException(e);
-    }
+    QuercusCharsetEncoder encoder = getEncoder(env, toEncoding);
+    return encoder.encode(env, contentsUnicode);
   }
 
   /**
@@ -731,6 +890,8 @@ public class MbstringModule
                               @Optional StringValue additionalHeaders,
                               @Optional StringValue additionalParameters)
   {
+    //XXX: not correct
+    
     String encoding = getEncoding(env);
 
     subject = subject.toBinaryValue(env, encoding);
@@ -776,8 +937,8 @@ public class MbstringModule
                               @Optional String encoding)
   {
     encoding = getEncoding(env, encoding);
-
-    StringValue unicodeStr = str.convertToUnicode(env, encoding);
+    
+    CharSequence unicodeStr = decode(env, str, encoding);
 
     int len = unicodeStr.length();
     int end = start + length;
@@ -792,9 +953,11 @@ public class MbstringModule
     if (Character.isHighSurrogate(unicodeStr.charAt(start)))
       start--;
 
-    unicodeStr = unicodeStr.substring(start, end);
+    StringBuilder sb = new StringBuilder();
+    
+    sb.append(unicodeStr, start, end);
 
-    return unicodeStr.toBinaryValue(env, encoding);
+    return encode(env, sb, encoding);
   }
 
   /**
@@ -808,8 +971,8 @@ public class MbstringModule
                               @Optional("") String encoding)
   {
     encoding = getEncoding(env, encoding);
-
-    StringValue unicodeStr = str.convertToUnicode(env, encoding);
+    
+    CharSequence unicodeStr = decode(env, str, encoding);
 
     int len = unicodeStr.length();
     int end = start + width;
@@ -820,18 +983,18 @@ public class MbstringModule
     if (start < 0 || start > end)
       return str.EMPTY;
 
-    unicodeStr = unicodeStr.substring(start, end);
+    StringBuilder sb = new StringBuilder();
 
     if (end < len && trimmarker.length() > 0) {
-      StringValue sb = env.createUnicodeBuilder();
-
       sb.append(unicodeStr);
-      sb.append(trimmarker.convertToUnicode(env, encoding));
+      sb.append(decode(env, trimmarker, encoding));
 
       unicodeStr = sb;
     }
+    else
+      sb.append(unicodeStr, start, end);
 
-    return str.create(env, unicodeStr, encoding);
+    return encode(env, sb, encoding);
   }
 
   /**
@@ -886,8 +1049,8 @@ public class MbstringModule
    * Converts all characters to lower-case.
    */
   public static StringValue mb_strtolower(Env env,
-                              StringValue str,
-                              @Optional("") String encoding)
+                                          StringValue str,
+                                          @Optional("") String encoding)
   {
     encoding = getEncoding(env, encoding);
 
@@ -901,8 +1064,8 @@ public class MbstringModule
    * Converts all characters to upper-case.
    */
   public static StringValue mb_strtoupper(Env env,
-                              StringValue str,
-                              @Optional("") String encoding)
+                                          StringValue str,
+                                          @Optional("") String encoding)
   {
     encoding = getEncoding(env, encoding);
 
@@ -998,7 +1161,7 @@ public class MbstringModule
     if (val == BooleanValue.FALSE)
       return str.EMPTY;
     
-    return str.create(env, val.toStringValue(), encoding);
+    return encode(env, val.toStringValue(), encoding);
   }
 
 
@@ -1008,15 +1171,15 @@ public class MbstringModule
    * Returns string with words capitalized and intermediate letters are
    * made lower-case.
    */
-  private static StringValue toUpperCaseTitle(Env env, StringValue string)
+  private static CharSequence toUpperCaseTitle(Env env, CharSequence str)
   {
-    StringValue sb = string.createStringBuilder();
+    StringBuilder sb = new StringBuilder();
 
-    int strLen = string.length();
+    int strLen = str.length();
     boolean isWordStart = true;
 
     for (int i = 0; i < strLen; i++) {
-      char ch = string.charAt(i);
+      char ch = str.charAt(i);
 
       switch (ch) {
       case ' ': case '\t': case '\r': case '\n':
@@ -1035,6 +1198,99 @@ public class MbstringModule
     }
 
     return sb;
+  }
+  
+  private static CharSequence decode(Env env,
+                                     StringValue str,
+                                     String encoding)
+  {
+    if (str.isUnicode())
+      return str;
+    
+    Decoder decoder = getDecoder(env, encoding);
+    
+    return decoder.decode(env, str);
+  }
+  
+  private static Decoder getDecoder(Env env, String encoding)
+  {
+    Decoder decoder = Decoder.create(encoding);
+    
+    String ini = env.getIniString("mbstring.substitute_character");
+    
+    if (ini == null) {
+      decoder.setReplacement("?");
+    }
+    else if (ini.equalsIgnoreCase("none")) {
+      decoder.setIgnoreErrors(true);
+    }
+    else if (ini.equalsIgnoreCase("long")) {
+      decoder.setReplaceUnicode(true);
+    }
+    else {
+      int len = ini.length();
+      
+      int value = 0;
+      
+      for (int i = 0; i < len; i++) {
+        char ch = ini.charAt(i);
+        
+        if ('0' <= ch && ch <= '9')
+          value = value * 10 + ini.charAt(i) - '0';
+        else
+          break;
+      }
+      
+      // XXX: surrogate pairs
+      decoder.setReplacement("" + (char) value);
+    }
+    
+    return decoder;
+  }
+  
+  private static StringValue encode(Env env,
+                                    CharSequence str,
+                                    String encoding)
+  {
+    QuercusCharsetEncoder encoder = getEncoder(env, encoding);
+
+    return encoder.encode(env, str);
+  }
+  
+  private static QuercusCharsetEncoder getEncoder(Env env, String encoding)
+  {
+    QuercusCharsetEncoder encoder = QuercusCharsetEncoder.create(encoding);
+    
+    String ini = env.getIniString("mbstring.substitute_character");
+    
+    if (ini == null) {
+      encoder.setReplacement("?");
+    }
+    else if (ini.equalsIgnoreCase("none")) {
+      encoder.setIgnoreErrors(true);
+    }
+    else if (ini.equalsIgnoreCase("long")) {
+      encoder.setReplaceUnicode(true);
+    }
+    else {
+      int len = ini.length();
+      
+      int value = 0;
+      
+      for (int i = 0; i < len; i++) {
+        char ch = ini.charAt(i);
+        
+        if ('0' <= ch && ch <= '9')
+          value = value * 10 + ini.charAt(i) - '0';
+        else
+          break;
+      }
+      
+      // XXX: surrogate pairs
+      encoder.setReplacement("" + (char) value);
+    }
+    
+    return encoder;
   }
 
   private static String getEncoding(Env env)
@@ -1069,36 +1325,94 @@ public class MbstringModule
     else
       return env.getOutputEncoding();
   }
+  
+  private static ArrayList<String> getEncodingList(Env env, Value encodingV)
+  {
+    ArrayList<String> list = new ArrayList<String>();
+    
+    if (encodingV.isDefault()) {
+      list.add(getEncoding(env));
+    }
+    else if (encodingV.isArray()) {
+      Iterator<Value> iter = encodingV.getValueIterator(env);
+      
+      while (iter.hasNext()) {
+        list.add(iter.next().toString());
+      }
+    }
+    else {
+      String encodings = encodingV.toString();
+      
+      if (encodings.equals("auto")) {
+        list.add("ASCII");
+        list.add("JIS");
+        list.add("UTF-8");
+        list.add("EUC-JP");
+        list.add("SJIS");
+      }
+      else {
+        int start = 0;
+        int index;
+        
+        while ((index = encodings.indexOf(",", start)) >= 0) {
+          String charset = encodings.substring(start, index).trim();
+          
+          start = index + 1;
+          
+          list.add(charset);
+        }
+        
+        list.add(encodings.substring(start).trim());
+      }
+    }
+    
+    return list;
+  }
 
   /**
    * Recursively decodes objects and arrays.
    */
   private static Value decodeAll(Env env,
-                              Value val,
-                              String encoding)
+                                 Value val,
+                                 String encoding)
   {
+    Decoder decoder = getDecoder(env, encoding);
+    
+    return decodeAll(env, val, decoder);
+  }
+  
+  /**
+   * Recursively decodes objects and arrays.
+   */
+  private static Value decodeAll(Env env,
+                                 Value val,
+                                 Decoder decoder)
+  {
+    decoder.reset();
+    
     val = val.toValue();
 
-    if (val instanceof StringValue)
-      return ((StringValue)val).convertToUnicode(env, encoding);
+    if (val.isString()) {
+      return decoder.decodeUnicode(env, val.toStringValue());
+    }
 
-    else if (val instanceof ArrayValue) {
+    else if (val.isArray()) {
       ArrayValue array = new ArrayValueImpl();
 
       for (Map.Entry<Value,Value> entry : ((ArrayValue)val).entrySet()) {
         array.put(entry.getKey(),
-                  decodeAll(env, entry.getValue(), encoding));
+                  decodeAll(env, entry.getValue(), decoder));
       }
 
       return array;
-    } else if (val instanceof ObjectValue) {
+    } else if (val.isObject()) {
 
-      ObjectValue obj = (ObjectValue)val;
+      ObjectValue obj = (ObjectValue) val.toObject(env);
 
       for (Map.Entry<Value,Value> entry : obj.entrySet()) {
         obj.putField(env,
                      entry.getKey().toStringValue(),
-                     decodeAll(env, entry.getValue(), encoding));
+                     decodeAll(env, entry.getValue(), decoder));
       }
 
       return obj;
@@ -1113,49 +1427,45 @@ public class MbstringModule
                                  Value val,
                                  String encoding)
   {
+    QuercusCharsetEncoder encoder = getEncoder(env, encoding);
+    
+    return encodeAll(env, val, encoder);
+  }
+  
+  /**
+   * Recursively encodes objects and arrays.
+   */
+  private static Value encodeAll(Env env,
+                                 Value val,
+                                 QuercusCharsetEncoder encoder)
+  {
     val = val.toValue();
 
-    if (val instanceof StringValue) {
-      StringValue sb = env.createBinaryBuilder();
-      
-      sb.append(env, (StringValue) val, encoding);
-      
-      return sb;
+    if (val.isString()) {
+      return encoder.encode(env, val.toStringValue());
     }
-    else if (val instanceof ArrayValue) {
+    else if (val.isArray()) {
       ArrayValue array = new ArrayValueImpl();
 
       for (Map.Entry<Value,Value> entry : ((ArrayValue)val).entrySet()) {
         array.put(entry.getKey(),
-                  encodeAll(env, entry.getValue(), encoding));
+                  encodeAll(env, entry.getValue(), encoder));
       }
 
       return array;
-    } else if (val instanceof ObjectValue) {
+    } else if (val.isObject()) {
 
       ObjectValue obj = (ObjectValue)val;
 
       for (Map.Entry<Value,Value> entry : obj.entrySet()) {
         obj.putField(env,
                      entry.getKey().toStringValue(),
-                     encodeAll(env, entry.getValue(), encoding));
+                     encodeAll(env, entry.getValue(), encoder));
       }
 
       return obj;
     } else
       return val;
-  }
-
-  private static StringValue decodeEncode(Env env,
-                              StringValue val,
-                              String srcEncoding,
-                              String destEncoding)
-  {
-    try {
-      return UnicodeUtility.decodeEncode(env, val, srcEncoding, destEncoding);
-    } catch (UnsupportedEncodingException e) {
-      throw new QuercusModuleException(e.getMessage());
-    }
   }
 
   /**
