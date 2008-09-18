@@ -39,13 +39,18 @@ public class Arg {
   private final Expr _default;
 
   private final boolean _isReference;
+  private final String _expectedClass;
 
 
-  public Arg(String name, Expr defaultExpr, boolean isReference)
+  public Arg(String name,
+	     Expr defaultExpr,
+	     boolean isReference,
+	     String expectedClass)
   {
     _name = name.intern();
     _default = defaultExpr;
     _isReference = isReference;
+    _expectedClass = expectedClass;
 
     if (_default == null)
       throw new IllegalStateException();
@@ -73,6 +78,14 @@ public class Arg {
   public boolean isReference()
   {
     return _isReference;
+  }
+
+  /**
+   * Returns the expected classname
+   */
+  public String getExpectedClass()
+  {
+    return _expectedClass;
   }
   
   public String toString()

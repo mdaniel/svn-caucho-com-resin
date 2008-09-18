@@ -1688,7 +1688,7 @@ public class QuercusParser {
 	token = parseToken();
       }
 
-      Arg arg = new Arg(argName, defaultExpr, isReference);
+      Arg arg = new Arg(argName, defaultExpr, isReference, expectedClass);
 
       if (argMap.get(argName) != null && _quercus.isStrict()) {
         throw error(L.l("aliasing of function argument '{0}'", argName));

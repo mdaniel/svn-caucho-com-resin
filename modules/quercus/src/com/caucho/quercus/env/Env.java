@@ -4372,6 +4372,20 @@ public class Env {
   }
 
   /**
+   * Check for type hinting
+   */
+  public void checkTypeHint(Value value,
+			    String type,
+			    String argName,
+			    String functionName)
+  {
+    if (value.isNull()) {
+      error(L.l("'{0}' is an unexpected value for arg '{1}' in function '{2}', expected '{3}'",
+		value, argName, functionName, type));
+    }
+  }
+      
+  /**
    * A fatal runtime error.
    */
   public Value error(String msg)

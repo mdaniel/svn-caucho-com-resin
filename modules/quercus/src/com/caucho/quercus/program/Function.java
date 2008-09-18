@@ -319,8 +319,18 @@ public class Function extends AbstractFunction {
         map.put(arg.getName(), args[i].toRefVar());
       }
       else {
+	Var var = args[i].copy().toVar();
+
+	if (arg.getExpectedClass() != null
+	    && arg.getDefault() == null) {
+	  env.checkTypeHint(var,
+			    arg.getExpectedClass(),
+			    arg.getName(),
+			    getName());
+	}
+	  
         // quercus/0d04
-        map.put(arg.getName(), args[i].copy().toVar());
+        map.put(arg.getName(), var);
       }
     }
 
