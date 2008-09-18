@@ -44,14 +44,14 @@ public class JstlTlvXmlChoose
       _hasWhen = true;
 
       if (_hasOtherwise)
-        throw error(L.l("<{0}:when> is not allowed after <{0}:otherwise>",
+        throw node.error(L.l("<{0}:when> is not allowed after <{0}:otherwise>",
                         getQName().getPrefix()));
     }
     else if (node instanceof JstlTlvXmlOtherwise) {
       _hasOtherwise = true;
     }
     else if (node instanceof CustomTag)
-      throw error(L.l(
+      throw node.error(L.l(
         "<{0}> is not allowed as a child of <{1}>.  Only <{2}:when> and <{2}:otherwise> are allowed children.",
         node.getTagName(),
         getTagName(),
