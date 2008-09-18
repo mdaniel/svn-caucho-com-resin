@@ -262,8 +262,9 @@ public class MailModule extends AbstractQuercusModule {
       String name = entry.getKey();
       String value = entry.getValue();
 
+      /*
       System.out.println("MAIL-HEADER: " + name + " " + value);
-      
+      */
       
       if ("".equals(value)) {
       }

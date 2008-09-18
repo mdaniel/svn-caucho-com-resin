@@ -1374,10 +1374,10 @@ public class Var extends Value
   @Override
   public Value callMethod(Env env,
                           int hash, char []name, int nameLen,
-                          Value a0, Value a1)
+                          Value a1, Value a2)
   {
     return _value.callMethod(env, hash, name, nameLen,
-                             a0, a1);
+                             a1, a2);
   }
 
   /**
