@@ -160,6 +160,7 @@ public class InterpretedClassDef extends ClassDef
   {
     if (_constructor != null) {
       cl.setConstructor(_constructor);
+
       cl.addMethod("__construct", _constructor);
     }
     

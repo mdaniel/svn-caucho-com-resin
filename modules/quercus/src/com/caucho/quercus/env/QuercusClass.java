@@ -200,9 +200,15 @@ public class QuercusClass {
 
       classDef.initClass(this);
     }
-
+    
     if (_constructor == null && parent != null)
       _constructor = parent.getConstructor();
+    
+    // php/093n
+    if (_constructor != null
+        && ! _constructor.getName().equals("__construct")) {
+      addMethod(_className, _constructor);
+    }
 
     if (_destructor == null && parent != null)
       _destructor = parent.getDestructor();
@@ -506,6 +512,20 @@ public class QuercusClass {
    * Adds a method.
    */
   public void addMethod(String name, AbstractFunction fun)
+  {
+    //php/09j9
+    // XXX: this is a hack to get Zend Framework running, the better fix is
+    // to initialize all interface classes before any concrete classes
+    AbstractFunction existingFun = _methodMap.get(name);
+    
+    if (existingFun == null || ! fun.isAbstract())
+      _methodMap.put(name, fun);
+  }
+  
+  /*
+   * Adds a method if it does not exist.
+   */
+  public void addMethodIfNotExist(String name, AbstractFunction fun)
   {
     //php/09j9
     // XXX: this is a hack to get Zend Framework running, the better fix is
