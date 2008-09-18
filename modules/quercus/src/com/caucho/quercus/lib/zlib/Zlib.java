@@ -339,7 +339,7 @@ public class Zlib {
    */
   @ReturnNullAsFalse
   public StringValue gzgetss(int length,
-			     @Optional String allowedTags)
+			     @Optional StringValue allowedTags)
   {
     try {
       if (_in == null)
