@@ -3139,8 +3139,8 @@ public class StringModule extends AbstractQuercusModule {
               && i + 1 < j
               && j < len)
             set.add(str.substring(i + 1, j));
-          else
-            i = j;
+          
+          i = j;
         
         default:
           continue;

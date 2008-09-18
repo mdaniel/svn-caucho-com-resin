@@ -312,9 +312,9 @@ public class ZlibModule extends AbstractQuercusModule {
    * Reads a line from the zip stream, stripping tags.
    */
   public static Value gzgetss(Env env,
-			      @NotNull BinaryInput is,
-			      int length,
-			      @Optional String allowedTags)
+                              @NotNull BinaryInput is,
+                              int length,
+                              @Optional Value allowedTags)
   {
     return FileModule.fgetss(env, is, length, allowedTags);
   }

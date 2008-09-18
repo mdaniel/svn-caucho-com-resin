@@ -644,9 +644,9 @@ public class FileModule extends AbstractQuercusModule {
    * Returns the next line stripping tags
    */
   public static Value fgetss(Env env,
-			     BinaryInput is,
-			     @Optional("0x7fffffff") int length,
-			     @Optional String allowedTags)
+                             BinaryInput is,
+                             @Optional("0x7fffffff") int length,
+                             @Optional Value allowedTags)
   {
     // php/161a
 
