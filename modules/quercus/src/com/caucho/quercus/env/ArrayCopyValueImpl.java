@@ -81,6 +81,17 @@ public class ArrayCopyValueImpl extends ArrayValueImpl
 
     return super.put(key, value);
   }
+  
+  /**
+   * Adds a new value.
+   */
+  public Value append(Value key, Value value)
+  {
+    if (_root != null)
+      _root.setModified();
+
+    return super.append(key, value);
+  }
 
   /**
    * Add to the beginning

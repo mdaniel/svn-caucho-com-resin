@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.logging.*;
 
 /**
  * Specialized stream to handle sockets.
@@ -40,6 +41,9 @@ import java.net.Socket;
  * a SocketException, SocketStream will throw a ClientDisconnectException.
  */
 public class SocketStream extends StreamImpl {
+  private static final Logger log
+    = Logger.getLogger(SocketStream.class.getName());
+  
   private static byte []UNIX_NEWLINE = new byte[] { (byte) '\n' };
 
   private Socket _s;
@@ -182,6 +186,7 @@ public class SocketStream extends StreamImpl {
       if (_throwReadInterrupts)
         throw e;
 
+      log.log(Level.FINER, e.toString(), e);
       // server/0611
       /*
       try {

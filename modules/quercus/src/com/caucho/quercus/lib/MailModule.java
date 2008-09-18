@@ -45,6 +45,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -103,10 +104,36 @@ public class MailModule extends AbstractQuercusModule {
 
       if (user == null)
 	user = env.getIni("sendmail_from");
-      if (user != null && ! user.toString().equals(""))
-        props.put("mail.from", user.toString());
+      
+      if (user != null && ! user.toString().equals("")) {
+	String userString = user.toString();
+
+	/*
+	int p = userString.indexOf('<');
+	int q = userString.indexOf('>');
+	
+	if (p >= 0 && q >= 0) {
+	  userString = userString.substring(p + 1, q);
+	}
+	System.out.println("USER: " + userString);
+	*/
+	
+        props.put("mail.from", userString);
+      }
       else if (System.getProperty("mail.from") != null)
         props.put("mail.from", System.getProperty("mail.from"));
+      else {
+	try {
+	  InetAddress addr = InetAddress.getLocalHost();
+	  
+	  String email = (System.getProperty("user.name")
+			  + "@" + addr.getHostName());
+
+	  props.put("mail.from", email);
+	} catch (Exception e) {
+	  log.log(Level.FINER, e.toString(), e);
+	}
+      }
 
       String username = env.getIniString("smtp_username");
       String password = env.getIniString("smtp_password");
@@ -235,6 +262,9 @@ public class MailModule extends AbstractQuercusModule {
       String name = entry.getKey();
       String value = entry.getValue();
 
+      System.out.println("MAIL-HEADER: " + name + " " + value);
+      
+      
       if ("".equals(value)) {
       }
       else if (name.equalsIgnoreCase("From")) {

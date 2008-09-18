@@ -92,6 +92,7 @@ public class SocketInputOutput
   public void init()
   {
     SocketStream sock = new SocketStream(_socket);
+    sock.setThrowReadInterrupts(true);
 
     WriteStream os = new WriteStream(sock);
     ReadStream is = new ReadStream(sock, os);

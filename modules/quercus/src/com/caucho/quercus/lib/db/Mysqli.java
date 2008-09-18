@@ -792,6 +792,9 @@ public class Mysqli extends JdbcConnectionResource {
 
     setResultResource(null);
 
+    if (log.isLoggable(Level.FINE))
+      log.fine("mysql_query(" + sql + ")");
+
     try {
       // Check for valid conneciton
 
@@ -845,7 +848,8 @@ public class Mysqli extends JdbcConnectionResource {
     } catch (SQLException e) {
       saveErrors(e);
 
-      log.log(Level.FINEST, e.toString(), e);
+      log.log(Level.FINER, e.toString(), e);
+      
       return BooleanValue.FALSE;
     } catch (IllegalStateException e) {
       log.log(Level.FINEST, e.toString(), e);

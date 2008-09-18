@@ -337,7 +337,7 @@ public class ArrayValueImpl extends ArrayValue
   /**
    * Adds a new value.
    */
-  public Value put(Value key, Value value)
+  public Value append(Value key, Value value)
   {
     if (_isDirty)
       copyOnWrite();
@@ -364,7 +364,7 @@ public class ArrayValueImpl extends ArrayValue
       entry._value = value;
     }
 
-    return value;
+    return this;
   }
 
   /**

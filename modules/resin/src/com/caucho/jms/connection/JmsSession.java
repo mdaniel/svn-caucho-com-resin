@@ -848,7 +848,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     MessageImpl message = _messageFactory.copy(appMessage);
 
     long now = Alarm.getExactTime();
-    long expiration = now + timeout;
+    long expireTime = now + timeout;
 
     message.setJMSMessageID(queue.generateMessageID());
     if (message.getJMSDestination() == null)
@@ -857,7 +857,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     if (message.getJMSTimestamp() == 0)
       message.setJMSTimestamp(now);
     if (message.getJMSExpiration() == 0)
-      message.setJMSExpiration(expiration);
+      message.setJMSExpiration(expireTime);
     message.setJMSPriority(priority);
 
     // ejb/0970
@@ -874,7 +874,9 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       if (_transactedMessages == null)
 	_transactedMessages = new ArrayList<TransactedMessage>();
 
-      TransactedMessage transMsg = new SendMessage(queue, message);
+      TransactedMessage transMsg = new SendMessage(queue,
+						   message,
+						   expireTime);
       
       _transactedMessages.add(transMsg);
 
@@ -885,7 +887,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       if (log.isLoggable(Level.FINE))
 	log.fine(queue + " sending " + message);
       
-      queue.send(this, message, priority, expiration);
+      queue.send(this, message, priority, expireTime);
     }
   }
 
@@ -1144,17 +1146,24 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   class SendMessage extends TransactedMessage {
     private final AbstractDestination _queue;
     private final MessageImpl _message;
+    private final long _expires;
     
-    SendMessage(AbstractDestination queue, MessageImpl message)
+    SendMessage(AbstractDestination queue,
+		MessageImpl message,
+		long expires)
     {
       _queue = queue;
       _message = message;
+      _expires = expires;
     }
 
     void commit()
       throws JMSException
     {
-      _queue.send(JmsSession.this, _message, _message.getJMSPriority(), 0);
+      _queue.send(JmsSession.this,
+		  _message,
+		  _message.getJMSPriority(),
+		  _expires);
     }
 
     void rollback()

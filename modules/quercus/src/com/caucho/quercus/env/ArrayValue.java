@@ -410,7 +410,12 @@ abstract public class ArrayValue extends Value {
    * Adds a new value.
    */
   @Override
-  abstract public Value put(Value key, Value value);
+  public Value put(Value key, Value value)
+  {
+    append(key, value);
+    
+    return value;
+  }
 
   /**
    * Add
@@ -670,12 +675,7 @@ abstract public class ArrayValue extends Value {
    *
    * XXX: change name to appendArg
    */
-  public ArrayValue append(Value key, Value value)
-  {
-    put(key, value);
-
-    return this;
-  }
+  abstract public Value append(Value key, Value value);
 
   /**
    * Appends as an argument - only called from compiled code

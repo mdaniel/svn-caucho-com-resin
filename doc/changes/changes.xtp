@@ -13,6 +13,9 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>quercus: stream_get_meta_data not properly recording timeouts (#2944, rep by koreth)</li>
+<li>jms: jdbc/transaction session not properly setting expires time (#2939, rep by Vinay Reddy)</li>
+<li>quercus: regression for array assignment (#2946, rep by koreth)</li>
 <li>quercus: regexp with empty subexpression and disjunction (#2892, #2943, rep by koreth, cperz)</li>
 <li>quercus: support for (?R) in regexps (#2755, rep by atijms)</li>
 <li>jsf: Ice Faces Sample Apps throw exception (#2908, on behalf Eric T.)</li>

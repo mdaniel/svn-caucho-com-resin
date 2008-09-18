@@ -339,7 +339,16 @@ public class StreamModule extends AbstractQuercusModule {
     env.stub("stream_get_meta_data");
     
     ArrayValue array = new ArrayValueImpl();    
-    array.put(env.createString("timed_out"), BooleanValue.FALSE);
+
+    boolean isTimeout = false;
+    
+    if (stream instanceof AbstractBinaryInputOutput)
+      isTimeout = ((AbstractBinaryInputOutput) stream).isTimeout();
+
+    if (isTimeout)
+      array.put(env.createString("timed_out"), BooleanValue.TRUE);
+    else
+      array.put(env.createString("timed_out"), BooleanValue.FALSE);
     
     return array;
   }
@@ -390,15 +399,20 @@ public class StreamModule extends AbstractQuercusModule {
   public static boolean stream_set_timeout(Env env,
                                            @NotNull Value stream,
                                            int seconds,
-                                           @Optional("-1") int milliseconds)
+                                           @Optional("-1") int microseconds)
   {
     if (stream == null)
       return false;
 
     Object obj = stream.toJavaObject();
 
+    long timeout = 1000L * seconds;
+
+    if (microseconds > 0)
+      timeout += microseconds / 1000;
+
     if (obj instanceof AbstractBinaryInputOutput)
-      ((AbstractBinaryInputOutput) obj).setTimeout(1000L * seconds);
+      ((AbstractBinaryInputOutput) obj).setTimeout(timeout);
 
     return true;
   }

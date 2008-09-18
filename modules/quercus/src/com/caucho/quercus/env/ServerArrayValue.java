@@ -40,7 +40,8 @@ import java.util.Set;
 /**
  * Represents the server
  */
-public class ServerArrayValue extends ArrayValueImpl {
+public class ServerArrayValue extends ArrayValueImpl
+{
   private static final StringValue SERVER_ADDR_V
     = new StringBuilderValue("SERVER_ADDR");
   private static final StringValue SERVER_NAME_V
@@ -113,12 +114,12 @@ public class ServerArrayValue extends ArrayValueImpl {
   /**
    * Adds a new value.
    */
-  public Value put(Value key, Value value)
+  public Value append(Value key, Value value)
   {
     if (! _isFilled)
       fillMap();
 
-    return super.put(key, value);
+    return super.append(key, value);
   }
 
   /**

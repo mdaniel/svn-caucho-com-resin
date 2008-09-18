@@ -164,7 +164,7 @@ abstract public class AbstractDestination
   abstract public void send(JmsSession session,
 			    MessageImpl msg,
 			    int priority,
-			    long timeout)
+			    long expires)
     throws JMSException;
   
   /**

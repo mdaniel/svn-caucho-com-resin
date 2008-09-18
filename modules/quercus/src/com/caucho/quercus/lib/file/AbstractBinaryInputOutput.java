@@ -59,7 +59,8 @@ public class AbstractBinaryInputOutput
 
   // Set to true when EOF is read from the input stream.
 
-  private boolean _isEOF = false;
+  private boolean _isTimeout;
+  private boolean _isEOF;
 
   protected AbstractBinaryInputOutput(Env env)
   {
@@ -125,18 +126,27 @@ public class AbstractBinaryInputOutput
   public int read()
     throws IOException
   {
-    if (_is != null) {
-      int c = _is.read();
+    try {
+      if (_is != null) {
+	int c = _is.read();
 
-      if (c == -1)
-        _isEOF = true;
+	if (c == -1)
+	  _isEOF = true;
+	else
+	  _isEOF = false;
+
+	return c;
+      }
       else
-        _isEOF = false;
+	return -1;
+    } catch (IOException e) {
+      _isTimeout = true;
+      _isEOF = true;
 
-      return c;
-    }
-    else
+      log.log(Level.FINER, e.toString(), e);
+
       return -1;
+    }
   }
 
   /**
@@ -145,18 +155,27 @@ public class AbstractBinaryInputOutput
   public int read(byte []buffer, int offset, int length)
     throws IOException
   {
-    if (_is != null) {
-      int c = _is.read(buffer, offset, length);
+    try {
+      if (_is != null) {
+	int c = _is.read(buffer, offset, length);
 
-      if (c == -1)
-        _isEOF = true;
+	if (c == -1)
+	  _isEOF = true;
+	else
+	  _isEOF = false;
+
+	return c;
+      }
       else
-        _isEOF = false;
+	return -1;
+    } catch (IOException e) {
+      _isTimeout = true;
+      _isEOF = true;
 
-      return c;
-    }
-    else
+      log.log(Level.FINER, e.toString(), e);
+
       return -1;
+    }
   }
 
   /**
@@ -165,18 +184,27 @@ public class AbstractBinaryInputOutput
   public int read(char []buffer, int offset, int length)
     throws IOException
   {
-    if (_is != null) {
-      int c = _is.read(buffer, offset, length);
+    try {
+      if (_is != null) {
+	int c = _is.read(buffer, offset, length);
 
-      if (c == -1)
-        _isEOF = true;
+	if (c == -1)
+	  _isEOF = true;
+	else
+	  _isEOF = false;
+
+	return c;
+      }
       else
-        _isEOF = false;
+	return -1;
+    } catch (IOException e) {
+      _isTimeout = true;
+      _isEOF = true;
 
-      return c;
-    }
-    else
+      log.log(Level.FINER, e.toString(), e);
+
       return -1;
+    }
   }
 
   /**
@@ -219,8 +247,15 @@ public class AbstractBinaryInputOutput
   public void writeToStream(OutputStream os, int length)
     throws IOException
   {
-    if (_is != null) {
-      _is.writeToStream(os, length);
+    try {
+      if (_is != null) {
+	_is.writeToStream(os, length);
+      }
+    } catch (IOException e) {
+      _isTimeout = true;
+      _isEOF = true;
+
+      log.log(Level.FINER, e.toString(), e);
     }
   }
 
@@ -230,7 +265,16 @@ public class AbstractBinaryInputOutput
   public StringValue readLine(long length)
     throws IOException
   {
-    return _lineReader.readLine(_env, this, length);
+    try {
+      return _lineReader.readLine(_env, this, length);
+    } catch (IOException e) {
+      _isTimeout = true;
+      _isEOF = true;
+
+      log.log(Level.FINER, e.toString(), e);
+
+      return _env.getEmptyString();
+    }
   }
 
   /**
@@ -252,9 +296,16 @@ public class AbstractBinaryInputOutput
   {
     if (_is == null)
       return true;
-    else {
+    else
       return _isEOF;
-    }
+  }
+
+  /**
+   * Returns true on the EOF.
+   */
+  public boolean isTimeout()
+  {
+    return _isTimeout;
   }
 
   /**
