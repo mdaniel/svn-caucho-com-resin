@@ -1037,7 +1037,7 @@ public class Var extends Value
   public Value put(Value index, Value value)
   {
     // php/33m{g,h}
-    _value = _value.append(index, value);
+    _value = _value.toAutoArray().append(index, value);
 
     return value;
   }
