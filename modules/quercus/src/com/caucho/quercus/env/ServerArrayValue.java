@@ -114,7 +114,7 @@ public class ServerArrayValue extends ArrayValueImpl
   /**
    * Adds a new value.
    */
-  public Value append(Value key, Value value)
+  public ArrayValue append(Value key, Value value)
   {
     if (! _isFilled)
       fillMap();

@@ -675,7 +675,7 @@ abstract public class ArrayValue extends Value {
    *
    * XXX: change name to appendArg
    */
-  abstract public Value append(Value key, Value value);
+  abstract public ArrayValue append(Value key, Value value);
 
   /**
    * Appends as an argument - only called from compiled code

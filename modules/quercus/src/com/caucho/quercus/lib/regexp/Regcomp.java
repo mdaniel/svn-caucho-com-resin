@@ -752,7 +752,7 @@ class Regcomp {
       // php/4e3o
       // first literal closing bracket need not be escaped
       if (ch == ']') {
-        if (charRead == 1 && first == '^') {
+        if (charRead == 1) {
           pattern.ungetc(ch);
           ch = '\\';
         }

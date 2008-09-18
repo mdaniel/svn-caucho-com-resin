@@ -102,7 +102,7 @@ public class ArrayValueWrapper extends ArrayValue {
    * Adds a new value.
    */
   @Override
-  public Value append(Value key, Value value)
+  public ArrayValue append(Value key, Value value)
   {
     return _array.append(key, value);
   }

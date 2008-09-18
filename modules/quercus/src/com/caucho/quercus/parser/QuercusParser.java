@@ -3272,24 +3272,24 @@ public class QuercusParser {
           
           if ("bool".equalsIgnoreCase(type)
               || "boolean".equalsIgnoreCase(type))
-            return _factory.createToBoolean(parseTerm());
+            return _factory.createToBoolean(parseExpr());
           else if ("int".equalsIgnoreCase(type)
                    || "integer".equalsIgnoreCase(type))
-            return _factory.createToLong(parseTerm());
+            return _factory.createToLong(parseExpr());
           else if ("float".equalsIgnoreCase(type)
-                || "double".equalsIgnoreCase(type)
-                || "real".equalsIgnoreCase(type))
-            return _factory.createToDouble(parseTerm());
+                   || "double".equalsIgnoreCase(type)
+                   || "real".equalsIgnoreCase(type))
+            return _factory.createToDouble(parseExpr());
           else if ("string".equalsIgnoreCase(type))
-            return _factory.createToString(parseTerm());
+            return _factory.createToString(parseExpr());
           else if ("binary".equalsIgnoreCase(type))
-            return _factory.createToBinary(parseTerm());
+            return _factory.createToBinary(parseExpr());
           else if ("unicode".equalsIgnoreCase(type))
-            return _factory.createToUnicode(parseTerm());
+            return _factory.createToUnicode(parseExpr());
           else if ("object".equalsIgnoreCase(type))
-            return _factory.createToObject(parseTerm());
+            return _factory.createToObject(parseExpr());
           else if ("array".equalsIgnoreCase(type))
-            return _factory.createToArray(parseTerm());
+            return _factory.createToArray(parseExpr());
         }
 
         return expr;
@@ -5423,8 +5423,7 @@ public class QuercusParser {
     _insensitiveReserved.put("for", FOR);
     _insensitiveReserved.put("function", FUNCTION);
     _insensitiveReserved.put("class", CLASS);
-    // quercus/0261
-    // _insensitiveReserved.put("new", NEW);
+    _insensitiveReserved.put("new", NEW);
     _insensitiveReserved.put("return", RETURN);
     _insensitiveReserved.put("break", BREAK);
     _insensitiveReserved.put("continue", CONTINUE);
