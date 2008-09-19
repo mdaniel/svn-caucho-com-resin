@@ -874,7 +874,8 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       if (_transactedMessages == null)
 	_transactedMessages = new ArrayList<TransactedMessage>();
 
-      TransactedMessage transMsg = new SendMessage(queue, message);
+      TransactedMessage transMsg
+	= new SendMessage(queue, message, expiration);
       
       _transactedMessages.add(transMsg);
 
@@ -1144,17 +1145,21 @@ public class JmsSession implements XASession, ThreadTask, XAResource
   class SendMessage extends TransactedMessage {
     private final AbstractDestination _queue;
     private final MessageImpl _message;
+    private final long _expires;
     
-    SendMessage(AbstractDestination queue, MessageImpl message)
+    SendMessage(AbstractDestination queue,
+		MessageImpl message,
+		long expires)
     {
       _queue = queue;
       _message = message;
+      _expires = expires;
     }
 
     void commit()
       throws JMSException
     {
-      _queue.send(JmsSession.this, _message, 0);
+      _queue.send(JmsSession.this, _message, _expires);
     }
 
     void rollback()

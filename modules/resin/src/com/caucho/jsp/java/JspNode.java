@@ -971,8 +971,11 @@ public abstract class JspNode {
 
     String fragmentVar = frag.getFragmentName();
 
-    cb.append(fragmentVar + " = _CauchoFragment.create(" + fragmentVar + ", " +
-	      index + ", " + contextVar + ", ");
+    cb.append(fragmentVar + " = _CauchoFragment.create(" + fragmentVar
+	      + ", " + index
+	      + ", _jsp_parentContext"
+	      + ", " + contextVar
+	      + ", ");
 
     JspNode parentTag = getParentTagNode();
 

@@ -81,6 +81,21 @@ public class Taglib extends TagLibraryInfo {
       throw new JspParseException(e);
     }
   }
+  
+  Taglib(Taglib taglib, String prefix)
+    throws JspParseException
+  {
+    this(prefix, taglib.getURI(), taglib._tldTaglib, taglib._tagFileManager);
+  }
+
+  public Taglib create(String prefix)
+    throws JspParseException
+  {
+    if (prefix.equals(getPrefixString()))
+      return this;
+    else
+      return new Taglib(this, prefix);
+  }
 
   /**
    * Gets a new instance of the validator to check the page.

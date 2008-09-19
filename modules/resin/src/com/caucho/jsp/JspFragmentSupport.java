@@ -45,6 +45,9 @@ import java.util.logging.Logger;
 abstract public class JspFragmentSupport extends JspFragment {
   private static final Logger log = Log.open(JspFragmentSupport.class);
 
+  // the parent page context
+  protected JspContext _jsp_parentContext;
+
   // the page context
   protected PageContextImpl pageContext;
 
