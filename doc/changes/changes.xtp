@@ -12,6 +12,7 @@
 
 <s2 title="3.1.8 snapshot">
 <ul>
+<li>jsp: tag fragment with tag variable compilation failure (#2904, rep by Herve Prisciandaro)</li>
 <li>jsp: taglib prefix was stored across jsp/tag files (#2936, rep by jlawrie)</li>
 <li>jms: jdbc/transaction session not properly setting expires time (#2939, rep by Vinay Reddy)</li>
 <li>jni: resin.def improperly defined getFdMax (fixed by wesley)</li>

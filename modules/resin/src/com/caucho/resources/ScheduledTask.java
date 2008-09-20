@@ -93,7 +93,7 @@ public class ScheduledTask extends BeanConfig
   {
     _trigger = _timerTrigger;
 
-    _timerTrigger.setFirstTime(Alarm.getCurrentTime() + delay.getPeriod());
+    _timerTrigger.setFirstTime(Alarm.getExactTime() + delay.getPeriod());
   }
 
   /**
@@ -186,7 +186,7 @@ public class ScheduledTask extends BeanConfig
 
   private void start()
   {
-    long now = Alarm.getCurrentTime();
+    long now = Alarm.getExactTime();
     
     long nextTime = _trigger.nextTime(now);
 
@@ -243,7 +243,7 @@ public class ScheduledTask extends BeanConfig
       thread.setContextClassLoader(oldLoader);
     }
 
-    long now = Alarm.getCurrentTime();
+    long now = Alarm.getExactTime();
     long nextTime = _trigger.nextTime(now);
 
     if (_isActive)
