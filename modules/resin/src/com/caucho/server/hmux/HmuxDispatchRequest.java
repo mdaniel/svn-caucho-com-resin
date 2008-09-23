@@ -255,10 +255,15 @@ public class HmuxDispatchRequest {
       crc64 = Crc64.generate(crc64, com.caucho.Version.FULL_VERSION);
     
     queryServer(os);
-    
-    writeString(os, HMUX_HOST, host.getHostName());
 
-    if (hostName.equals(host.getHostName())) {
+    String canonicalHostName = host.getHostName();
+
+    if (canonicalHostName.equals("default"))
+      canonicalHostName = "";
+    
+    writeString(os, HMUX_HOST, canonicalHostName);
+
+    if (hostName.equals(canonicalHostName)) {
       crc64 = queryCluster(os, host, crc64);
       
       WebAppController controller = host.findByURI(url);

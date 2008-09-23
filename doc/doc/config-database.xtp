@@ -222,27 +222,78 @@ and provides connections to a database.</p>
   <th>Description</th>
   <th>Default</th>
 </tr>
-<tr><td>jndi-name</td><td>JNDI name to store the pool under.  Servlets, jsp, and
+<tr>
+  <td>jndi-name</td>
+  <td>JNDI name to store the pool under.  Servlets, jsp, and
 other java code use this name.  The path is relative to
-<code>java:comp/env</code></td><td> 
-</td></tr><tr><td>driver</td><td>Configure the database <a href="#driver">driver</a>.</td><td>
-</td></tr><tr><td>backup-driver</td><td>Configure a backup <a href="#driver">driver</a>.</td><td>
-
-</td></tr><tr><td>max-connections</td><td><a href="#pooling">Pooling parameter</a> - maximum number of allowed connections</td><td>20
-</td></tr><tr><td>max-idle-time</td><td><a href="#pooling">Pooling parameter</a> - maximum time an idle connection is kept in
-the pool</td><td>30 sec
-</td></tr><tr><td>max-active-time</td><td><a href="#pooling">Pooling parameter</a> - maximum time a connection allowed to be active
-</td><td>6 hours
-</td></tr><tr><td>max-pool-time</td><td><a href="#pooling">Pooling parameter</a> - maximum time a connection is kept in the pool</td><td>24 hours
-</td></tr><tr><td>connection-wait-time</td><td><a href="#pooling">Pooling parameter</a> - how long to wait for an idle connection (Resin 1.2.3)</td><td>10 minutes
-</td></tr><tr><td>max-overflow-connections</td><td><a href="#pooling">Pooling parameter</a> - how many "overflow" connection are allowed if the connection wait times out.</td><td>0
-
-</td></tr><tr><td>ping-table</td><td><a href="#reliability">Reliability parameter</a> - The database table used to "ping", checking that the connection is still live.</td><td>n/a
-</td></tr><tr><td>ping</td><td><a href="#reliability">Reliability parameter</a> - test for live connections before allocating them from the pool.</td><td>false
-</td></tr><tr><td>ping-interval</td><td><a href="#reliability">Reliability parameter</a> - set the minimum interval for pings, instead of doing a ping every time</td><td>1s
-
-</td></tr><tr><td>prepared-statement-cache-size</td><td>A cache that holds prepared statements, a reused prepared statement avoids the overhead of the driver making the prepared statement</td><td>0
-</td></tr><tr><td>spy</td><td>A debugging aid, if true, generate <code>info</code> level log events that reveal the SQL that is used with the connections.</td><td>false
+<code>java:comp/env</code></td>
+  <td> </td>
+</tr>
+<tr>
+  <td>driver</td>
+  <td>Configure the database <a href="#driver">driver</a>.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>backup-driver</td>
+  <td>Configure a backup <a href="#driver">driver</a>.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>max-connections</td>
+  <td><a href="#pooling">Pooling parameter</a> - maximum number of allowed connections</td>
+  <td>1024</td>
+</tr>
+<tr>
+  <td>max-idle-time</td>
+  <td><a href="#pooling">Pooling parameter</a> - maximum time an idle connection is kept in
+the pool</td>
+  <td>30 sec</td>
+</tr>
+<tr>
+  <td>max-active-time</td>
+  <td><a href="#pooling">Pooling parameter</a> - maximum time a connection allowed to be active</td>
+  <td>6 hours</td>
+</tr>
+<tr>
+  <td>max-pool-time</td>
+  <td><a href="#pooling">Pooling parameter</a> - maximum time a connection is kept in the pool</td>
+  <td>24 hours</td>
+</tr>
+<tr>
+  <td>connection-wait-time</td>
+  <td><a href="#pooling">Pooling parameter</a> - how long to wait for an idle connection (Resin 1.2.3)</td>
+  <td>30 sec</td>
+</tr>
+<tr>
+  <td>max-overflow-connections</td>
+  <td><a href="#pooling">Pooling parameter</a> - how many "overflow" connection are allowed if the connection wait times out.</td>
+  <td>1024</td>
+</tr>
+<tr>
+ <td>ping-table</td>
+ <td><a href="#reliability">Reliability parameter</a> - The database table used to "ping", checking that the connection is still live.</td>
+ <td>n/a</td>
+</tr>
+<tr>
+  <td>ping</td>
+  <td><a href="#reliability">Reliability parameter</a> - test for live connections before allocating them from the pool.</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>ping-interval</td>
+  <td><a href="#reliability">Reliability parameter</a> - set the minimum interval for pings, instead of doing a ping every time</td>
+  <td>1s</td>
+</tr>
+<tr>
+  <td>prepared-statement-cache-size</td>
+  <td>A cache that holds prepared statements, a reused prepared statement avoids the overhead of the driver making the prepared statement</td>
+  <td>0</td>
+</tr>
+<tr>
+  <td>spy</td>
+  <td>A debugging aid, if true, generate <code>info</code> level log events that reveal the SQL that is used with the connections.</td>
+  <td>false
 <!--
 <tr><td>xa<td><td>Set true o
 -->

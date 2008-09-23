@@ -113,10 +113,11 @@
   
   <target name="artifacts" depends="init, compat">
     <mkdir dir="artifacts"/>
-    
+    <!--
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="cxf"/>
     </antcall>
+    -->
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="mule"/>
@@ -132,11 +133,13 @@
       <param name="artifact.name" value="wicket"/>
       <param name="artifact.jar" value="resin-wicket.jar"/>
     </antcall>
-    
+
+    <!--
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="xfire"/>
       <param name="artifact.jar" value="resin-xfire.jar"/>
     </antcall>
+    -->
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="xwork2"/>
@@ -357,6 +360,15 @@
       <filterset>
         <filter token="HTTP_PORT" value="${resin.http}"/>
         <filter token="HTTPS_PORT" value="${resin.https}"/>
+      </filterset>
+    </copy>
+    
+    <copy tofile="modules/resin/src/manifest"
+          file="modules/resin/src/manifest.in"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="VERSION" value="${version}"/>
       </filterset>
     </copy>
   </target>

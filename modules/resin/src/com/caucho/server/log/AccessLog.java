@@ -301,6 +301,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       case 'r': case 's':
       case 'T': case 'D': case 'o':
       case 'u': case 'U':
+      case 'v':
 	if (cb.length() > 0)
 	  segments.add(new Segment(this, Segment.TEXT, cb.toString()));
 	cb.clear();
@@ -551,6 +552,15 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
           buffer[offset++] = (byte) '"';
           offset = print(buffer, offset, value);
           buffer[offset++] = (byte) '"';
+        }
+	break;
+
+      case 'v':
+	value = request.getServerName();
+        if (value == null)
+          buffer[offset++] = (byte) '-';
+        else {
+          offset = print(buffer, offset, value);
         }
 	break;
 

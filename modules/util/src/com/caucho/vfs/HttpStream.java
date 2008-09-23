@@ -760,7 +760,14 @@ class HttpStream extends StreamImpl {
         _chunkLength = 0;
       }
 
-      _attributes.put(key.toLowerCase().toString(), value);
+      String keyString = key.toLowerCase().toString();
+      
+      String oldValue = (String) _attributes.put(keyString, value);
+
+      if (oldValue != null) {
+	value = oldValue + '\n' + value;
+	_attributes.put(keyString, value);
+      }
     }
   }
 

@@ -69,6 +69,15 @@ class WatchdogTask implements Runnable
     return _lifecycle.getStateName();
   }
 
+  int getPid()
+  {
+    WatchdogProcess process = _process;
+    if (process != null)
+      return process.getPid();
+    else
+      return 0;
+  }
+
   public void start()
   {
     if (! _lifecycle.toActive())

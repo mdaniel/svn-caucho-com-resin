@@ -273,6 +273,9 @@ class WatchdogManager extends ProtocolDispatchServer {
       
 	sb.append("  root: " + watchdog.getResinRoot() + "\n");
 	sb.append("  conf: " + watchdog.getResinConf() + "\n");
+
+	if (watchdog.getPid() > 0)
+	  sb.append("  pid: " + watchdog.getPid());
       }
     }
     

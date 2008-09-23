@@ -160,21 +160,23 @@ public class TaglibManager {
     
     Taglib taglib = _taglibMap.get(uri);
 
+    if (taglib == null) {
+      // jsp/188u
+      String mapLocation = _uriLocationMap.get(uri);
+
+      if (mapLocation != null)
+	location = mapLocation;
+
+      taglib = readTaglib(prefix, uri, location);
+
+      if (taglib != null)
+	_taglibMap.put(uri, taglib);
+    }
+
     if (taglib != null)
-      return taglib;
-
-    // jsp/188u
-    String mapLocation = _uriLocationMap.get(uri);
-
-    if (mapLocation != null)
-      location = mapLocation;
-
-    taglib = readTaglib(prefix, uri, location);
-
-    if (taglib != null)
-      _taglibMap.put(uri, taglib);
-
-    return taglib;
+      return taglib.create(prefix);
+    else
+      return null;
   }
 
   /**

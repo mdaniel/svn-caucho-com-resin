@@ -1556,6 +1556,7 @@ public class JavaJspGenerator extends JspGenerator {
 
     out.println();
     out.println("static _CauchoFragment create(_CauchoFragment frag, int code,");
+    out.println("                              javax.servlet.jsp.JspContext _jsp_parentContext,");
     out.println("                              com.caucho.jsp.PageContextImpl pageContext,");
     out.println("                              javax.servlet.jsp.tagext.JspTag parent,");
     out.println("                              javax.servlet.jsp.tagext.JspFragment jspBody,");
@@ -1566,6 +1567,7 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("  frag = new _CauchoFragment();");
     out.println();
     out.println("frag._frag_code = code;");
+    out.println("frag._jsp_parentContext = _jsp_parentContext;");
     out.println("frag.pageContext = pageContext;");
     out.println("frag._jsp_env = pageContext.getELContext();");
     out.println("frag._jsp_parent_tag = parent;");

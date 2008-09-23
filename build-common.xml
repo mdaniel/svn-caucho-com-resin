@@ -490,10 +490,12 @@
   </target>
 
   <target name="resin.artifacts.dist" depends="init">
+    <!--
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="cxf"/>
       <param name="artifacts" value="${resin.artifacts}"/>
     </antcall>
+    -->
     
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="mule"/>
@@ -1000,9 +1002,11 @@
   </target>
 
   <target name="artifact.dist" depends="init">
+    <!--
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="cxf"/>
     </antcall>
+    -->
     
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="mule"/>

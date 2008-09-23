@@ -50,7 +50,8 @@ import java.util.logging.Logger;
 /**
  * Stores the entire information for a tag library.
  */
-public class Taglib extends TagLibraryInfo {
+public class Taglib extends TagLibraryInfo
+{
   private static final Logger log = Log.open(Taglib.class);
   static final L10N L = new L10N(Taglib.class);
 
@@ -62,7 +63,9 @@ public class Taglib extends TagLibraryInfo {
   private ArrayList<Taglib> _libraryList
     = new ArrayList<Taglib>();
   
-  Taglib(String prefix, String uri, TldTaglib tldTaglib,
+  Taglib(String prefix,
+	 String uri,
+	 TldTaglib tldTaglib,
 	 TagFileManager tagFileManager)
     throws JspParseException
   {
@@ -80,6 +83,21 @@ public class Taglib extends TagLibraryInfo {
     } catch (Exception e) {
       throw new JspParseException(e);
     }
+  }
+  
+  Taglib(Taglib taglib, String prefix)
+    throws JspParseException
+  {
+    this(prefix, taglib.getURI(), taglib._tldTaglib, taglib._tagFileManager);
+  }
+
+  public Taglib create(String prefix)
+    throws JspParseException
+  {
+    if (prefix.equals(getPrefixString()))
+      return this;
+    else
+      return new Taglib(this, prefix);
   }
 
   /**
@@ -296,7 +314,7 @@ public class Taglib extends TagLibraryInfo {
 
   public String toString()
   {
-    return "Taglib[prefix=" + prefix + ",uri=" + uri + "]";
+    return "Taglib[prefix=" + this.prefix + ",uri=" + this.uri + "]";
   }
 
   class TagFileInfoExt extends TagFileInfo
@@ -324,5 +342,4 @@ public class Taglib extends TagLibraryInfo {
       return _tagInfo;
     }
   }
-    
 }

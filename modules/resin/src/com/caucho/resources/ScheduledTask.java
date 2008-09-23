@@ -93,7 +93,7 @@ public class ScheduledTask extends BeanConfig
   {
     _trigger = _timerTrigger;
 
-    _timerTrigger.setFirstTime(Alarm.getCurrentTime() + delay.getPeriod());
+    _timerTrigger.setFirstTime(Alarm.getExactTime() + delay.getPeriod());
   }
 
   /**
@@ -180,15 +180,15 @@ public class ScheduledTask extends BeanConfig
       _timerTrigger.setFirstTime(Long.MAX_VALUE / 2);
       _trigger = _timerTrigger;
     }
-    
+
     Environment.addEnvironmentListener(this);
   }
 
   private void start()
   {
-    long now = Alarm.getCurrentTime();
+    long now = Alarm.getExactTime();
     
-    long nextTime = _trigger.nextTime(now);
+    long nextTime = _trigger.nextTime(now + 500);
 
     _isActive = true;
 
@@ -239,8 +239,8 @@ public class ScheduledTask extends BeanConfig
       _threadPool.execute(_task);
 
       // XXX: needs QA
-      long now = Alarm.getCurrentTime();
-      long nextTime = _trigger.nextTime(now);
+      long now = Alarm.getExactTime();
+      long nextTime = _trigger.nextTime(now + 500);
 
       if (_isActive)
 	alarm.queue(nextTime - now);

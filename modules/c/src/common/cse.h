@@ -174,8 +174,8 @@ typedef struct resin_host_t {
   
   struct web_app_t *applications;
 
-  char error_message[1024];
-  char config_source[1024];
+  char error_message[256];
+  char config_source[256];
 } resin_host_t;
 
 typedef struct config_t {
@@ -208,6 +208,8 @@ typedef struct config_t {
   char error_message[1024];
   char *iis_priority;
   int override_iis_authentication;
+
+  int default_host_max;
   
   srun_t **srun_list;
   int srun_capacity;

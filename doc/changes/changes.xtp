@@ -13,6 +13,16 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>host: modified default virtual host handling to use "default" as the host name instead of "" (#2917, rep by Brad Bourne)</li>
+<li>build: add manifest version automatically as part of build (#2952, rep by stbu)</li>
+<li>database: increased default database connection-max dramatically and add threadDump if it's exceeded (#2897, rep by Dennis Devota)</li>
+<li>jsp: jsp:param for include needs to use form-url-encoding (#2838, rep by bearbibeault)</li>
+<li>boot: resin.jar "status" returns the PID of the started server (#2855, rep by Jens Christensen)</li>
+<li>server: scheduled-task needs to use Alarm.getExactTime to avoid extra calls (#2894, rep by Riccardo Cohen)</li>
+<li>server: http proxy handle multiple response headers (#2900, rep by ksullivan)</li>
+<li>jsp: tag fragment with tag variable compilation failure (#2904, rep by Herve Prisciandaro)</li>
+<li>jsp: taglib prefix was stored across jsp/tag files (#2936, rep by jlawrie)</li>
+<li>log: access logging adds '%v' for virtual hosts (#2949, rep by Alex Sharaz)</li>
 <li>quercus: type hinting checks for null (#2886, rep by PeterJanRoes)</li>
 <li>quercus: stream_get_meta_data not properly recording timeouts (#2944, rep by koreth)</li>
 <li>jms: jdbc/transaction session not properly setting expires time (#2939, rep by Vinay Reddy)</li>

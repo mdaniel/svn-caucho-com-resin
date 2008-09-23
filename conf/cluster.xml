@@ -1,5 +1,5 @@
 <!--
-   - Resin 3.2 configuration file.
+   - Resin 3.2 configuration file for a clustered/load-balance environment
   -->
 <resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="http://caucho.com/ns/resin/core">
@@ -75,10 +75,10 @@
 
     <server-default>
       <!-- The http port -->
-      <http address="*" port="@HTTP_PORT@"/>
+      <http address="*" port="8080"/>
 
       <!-- SSL port configuration: -->
-      <http address="*" port="@HTTPS_PORT@">
+      <http address="*" port="8443">
         <jsse-ssl self-signed-certificate-name="resin@localhost"/>
       </http>
 
@@ -277,8 +277,31 @@
   </cluster>
 
   <!--
-     - Clustered configuration for the load-balance tier would belong
-     - here.  See cluster.xml for an example.
+     - Configuration for the web-tier/load-balancer
     -->
+  <resin:if test="${resin.professional}">
+    <cluster id="web-tier" root-directory="web-tier">
+      <server-default>
+        <!-- The http port -->
+        <http address="*" port="9080"/>
+      </server-default>
+
+      <server id="web-a" address="127.0.0.1" port="6700"/>
+
+      <cache path="cache" memory-size="64M"/>
+
+      <development-mode-error-page/>
+
+      <host id="">
+        <web-app id="/">
+
+           <rewrite-dispatch>
+             <load-balance regexp="" cluster="app-tier"/>
+           </rewrite-dispatch>
+
+        </web-app>
+      </host>
+    </cluster>
+  </resin:if>
 </resin>
 

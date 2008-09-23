@@ -209,8 +209,17 @@ public class HttpProxyServlet extends GenericServlet {
 	}
 	else if (name.equalsIgnoreCase("location"))
 	  location = (String) rs.getAttribute("location");
-	else
-	  res.addHeader(name, (String) rs.getAttribute(name));
+	else {
+	  String value = (String) rs.getAttribute(name);
+
+	  if (value.indexOf('\n') >= 0) {
+	    for (String subValue : value.split("[\\n]")) {
+	      res.addHeader(name, subValue);
+	    }
+	  }
+	  else
+	    res.addHeader(name, value);
+	}
       }
 
       if (location == null) {

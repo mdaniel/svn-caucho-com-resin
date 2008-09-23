@@ -158,38 +158,6 @@ public class JspDoBody extends JspNode {
     else {
       out.println(name + ".invoke(null);");
     }
-
-    /*
-    if (vars.size() > 0) {
-      out.popDepth();
-      out.println("} finally {");
-      out.pushDepth();
-    }
-
-    for (int i = 0; i < vars.size(); i++) {
-      TldVariable var = vars.get(i);
-
-      if (var.getScope().equals("AT_END"))
-	continue;
-      
-      String srcName = var.getNameGiven();
-      String dstName = srcName;
-      
-      if (srcName == null) {
-	srcName = var.getAlias();
-	dstName = "_jsp_var_from_attribute_" + i;
-      }
-      else
-	dstName = "\"" + dstName + "\"";
-
-      out.println("pageContext.setAttribute(\"" + srcName + "\", _jsp_parentContext.getAttribute(" + dstName + "));");
-    }
-
-    if (vars.size() > 0) {
-      out.popDepth();
-      out.println("}");
-    }
-    */
     
     out.popDepth();
     out.println("}");

@@ -52,16 +52,16 @@ import java.io.PrintWriter;
 public class RequestDispatcherImpl implements RequestDispatcher {
   private static final L10N L = new L10N(RequestDispatcherImpl.class);
   
-  private static final String REQUEST_URI =
-    "javax.servlet.include.request_uri";
-  private static final String CONTEXT_PATH =
-    "javax.servlet.include.context_path";
-  private static final String SERVLET_PATH =
-    "javax.servlet.include.servlet_path";
-  private static final String PATH_INFO =
-    "javax.servlet.include.path_info";
-  private static final String QUERY_STRING =
-    "javax.servlet.include.query_string";
+  private static final String REQUEST_URI
+    = "javax.servlet.include.request_uri";
+  private static final String CONTEXT_PATH
+    = "javax.servlet.include.context_path";
+  private static final String SERVLET_PATH
+    = "javax.servlet.include.servlet_path";
+  private static final String PATH_INFO
+    = "javax.servlet.include.path_info";
+  private static final String QUERY_STRING
+    = "javax.servlet.include.query_string";
 
   private static final String FWD_REQUEST_URI =
     "javax.servlet.forward.request_uri";

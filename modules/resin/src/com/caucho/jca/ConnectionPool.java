@@ -34,6 +34,7 @@ import com.caucho.config.types.Period;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ConnectionPoolMXBean;
+import com.caucho.server.resin.Resin;
 import com.caucho.sql.ManagedConnectionImpl;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
@@ -77,12 +78,12 @@ public class ConnectionPool extends AbstractManagedObject
   private UserTransactionProxy _tm;
 
   // the maximum number of connections
-  private int _maxConnections = 128;
+  private int _maxConnections = 1024;
 
   // the maximum number of overflow connections
-  private int _maxOverflowConnections = 0;
+  private int _maxOverflowConnections = 1024;
 
-  // the maximum number of connections being created
+  // the maximum number of connections in the process of creation
   private int _maxCreateConnections = 5;
 
   // max idle size
@@ -97,11 +98,14 @@ public class ConnectionPool extends AbstractManagedObject
   // time a connection is allowed to be used (24h default)
   private long _maxPoolTime = 24L * 3600L * 1000L;
 
-  // the time to wait for a connection (10m)
-  private long _connectionWaitTime = 600 * 1000L;
+  // the time to wait for a connection (30s)
+  private long _connectionWaitTime = 30 * 1000L;
 
   // the time to wait for a connection
   private long _connectionWaitCount = _connectionWaitTime / 1000L;
+
+  // debugging timeout for a connection-overflow thread dump
+  private long _threadDumpTimeout;
 
   // True if the connector supports local transactions.
   private boolean _enableLocalTransaction = true;
@@ -783,9 +787,9 @@ public class ConnectionPool extends AbstractManagedObject
                             UserPoolItem oldUserItem)
     throws ResourceException
   {
-    long timeoutCount = _connectionWaitCount;
+    long timeoutCount = _connectionWaitCount + 1;
 
-    while (_lifecycle.isActive()) {
+    while (_lifecycle.isActive() && timeoutCount-- >= 0) {
       UserPoolItem userPoolItem = allocateIdle(mcf, subject,
                                                info, oldUserItem);
 
@@ -796,13 +800,21 @@ public class ConnectionPool extends AbstractManagedObject
 
       if (userPoolItem != null)
         return userPoolItem;
-
-      if (timeoutCount-- < 0)
-        break;
     }
 
     if (! _lifecycle.isActive())
       throw new IllegalStateException(L.l("connection pool closed"));
+
+    log.warning(this + " pool overflow");
+
+    Resin resin = Resin.getCurrent();
+
+    synchronized (this) {
+      if (resin != null && _threadDumpTimeout < Alarm.getCurrentTime()) {
+	_threadDumpTimeout = Alarm.getCurrentTime() + 600 * 1000L;
+	resin.dumpThreads();
+      }
+    }
 
     UserPoolItem userPoolItem = create(mcf, subject, info, true, oldUserItem);
 

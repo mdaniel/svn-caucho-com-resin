@@ -127,6 +127,11 @@ public class JniProcess extends Process
     return getInputStream();
   }
 
+  public int getPid()
+  {
+    return _pid;
+  }
+
   public int waitFor()
   {
     int pid = _pid;

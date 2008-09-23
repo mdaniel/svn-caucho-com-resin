@@ -938,14 +938,42 @@ public class PageContextImpl extends PageContext
   public void include(String relativeUrl, String query, boolean flush)
     throws ServletException, IOException
   {
-    if ("".equals(query)) {
+    if (! "".equals(query)) {
+      relativeUrl = encode(relativeUrl, query);
     }
-    else if (relativeUrl.indexOf('?') > 0)
-      relativeUrl = relativeUrl + '&' + query;
-    else
-      relativeUrl = relativeUrl + '?' + query;
 
     include(relativeUrl, flush);
+  }
+
+  private String encode(String relativeUrl, String query)
+  {
+    StringBuilder sb = new StringBuilder();
+    sb.append(relativeUrl);
+
+    if (relativeUrl.indexOf('?') > 0)
+      sb.append('&');
+    else
+      sb.append('?');
+
+    int len = query.length();
+
+    for (int i = 0; i < len; i++) {
+      char ch = query.charAt(i);
+
+      switch (ch) {
+      case ' ':
+	sb.append('+');
+	break;
+      case '+':
+	sb.append("%2b");
+	break;
+      default:
+	sb.append(ch);
+	break;
+      }
+    }
+
+    return sb.toString();
   }
   
   /**
@@ -1003,12 +1031,8 @@ public class PageContextImpl extends PageContext
   public void forward(String relativeUrl, String query)
     throws ServletException, IOException
   {
-    if ("".equals(query)) {
-    }
-    else if (relativeUrl.indexOf('?') > 0)
-      relativeUrl = relativeUrl + '&' + query;
-    else
-      relativeUrl = relativeUrl + '?' + query;
+    if (! "".equals(query))
+      relativeUrl = encode(relativeUrl, query);
 
     forward(relativeUrl);
   }

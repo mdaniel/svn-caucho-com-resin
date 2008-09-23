@@ -29,6 +29,7 @@
 
 package com.caucho.boot;
 
+import com.caucho.bootjni.JniProcess;
 import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.log.RotateStream;
@@ -69,11 +70,17 @@ class WatchdogProcess
 
   private ServerSocket _ss;
   private Process _process;
+  private int _pid;
 
   WatchdogProcess(String id, Watchdog watchdog)
   {
     _id = id;
     _watchdog = watchdog;
+  }
+
+  int getPid()
+  {
+    return _pid;
   }
 
   public void run()
@@ -96,6 +103,11 @@ class WatchdogProcess
 
       if (_process != null) {
 	try {
+	  if (_process instanceof JniProcess)
+	    _pid = ((JniProcess) _process).getPid();
+	  else
+	    _pid = 0;
+	  
 	  runInstance(jvmOut, _ss, _process);
 	} finally {
 	  destroy();

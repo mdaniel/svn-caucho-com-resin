@@ -262,6 +262,16 @@ class Watchdog
       return task.getState();
   }
 
+  int getPid()
+  {
+    WatchdogTask task = _task;
+    
+    if (task != null)
+      return task.getPid();
+    else
+      return 0;
+  }
+
   boolean isVerbose()
   {
     return _config.isVerbose();

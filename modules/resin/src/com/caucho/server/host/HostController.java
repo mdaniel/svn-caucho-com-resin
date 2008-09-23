@@ -152,7 +152,10 @@ public class HostController
    */
   public String getHostName()
   {
-    return _hostName;
+    if ("".equals(_hostName))
+      return "default";
+    else
+      return _hostName;
   }
 
   /**

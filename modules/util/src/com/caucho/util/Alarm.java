@@ -335,7 +335,7 @@ public class Alarm implements ThreadTask {
 
       long wakeTime;
 
-      if (delta >= 1000)
+      if (delta >= 2000)
 	wakeTime = delta + getCurrentTime();
       else
 	wakeTime = delta + getExactTime();

@@ -918,6 +918,13 @@ public class Resin implements EnvironmentBean, SchemaBean
   }
 
   /**
+   * Dump threads for debugging
+   */
+  public void dumpThreads()
+  {
+  }
+
+  /**
    * Returns true if active.
    */
   public boolean isActive()
