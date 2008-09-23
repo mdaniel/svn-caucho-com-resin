@@ -59,6 +59,7 @@
 
 #define CACHE_SIZE 16384
 #define AUTO_WRITE_TIME (15 * 60)
+#define DEFAULT_HOST_MAX 256
 
 #define HMUX_DISPATCH_QUERY           'q'
 #define HMUX_DISPATCH_QUERY_CLUSTER   's'
@@ -803,6 +804,7 @@ write_config(config_t *config)
   char temp[1024];
   char buffer[1024];
   char *tail;
+  int default_host_count = 0;
 
   if (! *config->config_path)
     return;
@@ -836,6 +838,12 @@ write_config(config_t *config)
   if (fd < 0)
     return;
 
+  for (host = config->hosts; host; host = host->next) {
+    if (! host->canonical->name[0]) {
+      default_host_count++;
+    }
+  }
+
   memset(&s, 0, sizeof(s));
   s.socket = fd;
 
@@ -866,6 +874,16 @@ write_config(config_t *config)
   for (host = config->hosts; host; host = host->next) {
     web_app_t *web_app;
     int i;
+
+    if (config->default_host_max < default_host_count
+	&& host != host->canonical
+	&& ! host->canonical->name[0]) {
+      /*
+       * if too many default hosts, don't write them to avoid
+       * a potential DOS issue
+       */
+      continue;
+    }
 
     if (host->port) {
       sprintf(buffer, "%s:%d", host->name, host->port);

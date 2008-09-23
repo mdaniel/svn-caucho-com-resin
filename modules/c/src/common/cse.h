@@ -208,6 +208,8 @@ typedef struct config_t {
   char error_message[1024];
   char *iis_priority;
   int override_iis_authentication;
+
+  int default_host_max;
   
   srun_t **srun_list;
   int srun_capacity;
