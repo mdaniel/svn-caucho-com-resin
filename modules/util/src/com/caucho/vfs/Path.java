@@ -644,6 +644,13 @@ public abstract class Path {
   }
 
   /**
+   * Clears any status cache
+   */
+  public void clearStatusCache()
+  {
+  }
+  
+  /**
    * Returns the length of the file in bytes.
    * @return 0 for non-files
    */
@@ -1063,6 +1070,8 @@ public abstract class Path {
    */
   public final ReadStream openRead() throws IOException
   {
+    clearStatusCache();
+    
     StreamImpl impl = openReadImpl();
     impl.setPath(this);
 
@@ -1074,6 +1083,8 @@ public abstract class Path {
    */
   public final WriteStream openWrite() throws IOException
   {
+    clearStatusCache();
+    
     StreamImpl impl = openWriteImpl();
     impl.setPath(this);
     return new WriteStream(impl);
@@ -1087,6 +1098,8 @@ public abstract class Path {
    */
   public ReadWritePair openReadWrite() throws IOException
   {
+    clearStatusCache();
+    
     StreamImpl impl = openReadWriteImpl();
     impl.setPath(this);
     WriteStream writeStream = new WriteStream(impl);
@@ -1105,6 +1118,8 @@ public abstract class Path {
    */
   public void openReadWrite(ReadStream is, WriteStream os) throws IOException
   {
+    clearStatusCache();
+    
     StreamImpl impl = openReadWriteImpl();
     impl.setPath(this);
 
@@ -1117,6 +1132,8 @@ public abstract class Path {
    */
   public WriteStream openAppend() throws IOException
   {
+    clearStatusCache();
+    
     StreamImpl impl = openAppendImpl();
     return new WriteStream(impl);
   }
@@ -1126,6 +1143,8 @@ public abstract class Path {
    */
   public RandomAccessStream openRandomAccess() throws IOException
   {
+    clearStatusCache();
+    
     throw new UnsupportedOperationException(getClass().getName());
   }
 

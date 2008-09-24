@@ -741,8 +741,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     String host = _request.getHeader("Host");
     String serverName = app.getHostName();
 
-    if (serverName == null || serverName.equals(""))
+    if (serverName == null
+	|| serverName.equals("")
+	|| serverName.equals("default")) {
       serverName = _request.getServerName();
+    }
 
     int port = _request.getServerPort();
 

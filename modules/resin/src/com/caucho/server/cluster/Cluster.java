@@ -100,6 +100,8 @@ public class Cluster
 
   private ClusterServer[] _serverArray = new ClusterServer[0];
 
+  private ClusterServer _selfServer;
+
   private StoreManager _clusterStore;
 
   private boolean _isDynamicServerEnable = false;
@@ -126,6 +128,8 @@ public class Cluster
 
     _clusterLocal.set(this, _classLoader);
   
+    _serverId = _serverIdLocal.get();
+    
     Environment.addEnvironmentListener(this, _classLoader);
 
     WebBeansContainer.create().addSingletonByName(new Var(), "cluster");
@@ -351,9 +355,9 @@ public class Cluster
     _serverArray = new ClusterServer[_serverList.size()];
     _serverList.toArray(_serverArray);
 
-    ClusterServer selfServer = getSelfServer();
-
-    if (selfServer == server) {
+    if (server.getId().equals(_serverId)) {
+      _selfServer = server;
+      
       WebBeansContainer webBeans = WebBeansContainer.create();
       
       webBeans.addSingletonByName(new ServerVar(server), "server");
@@ -598,9 +602,7 @@ public class Cluster
    */
   public ClusterServer getSelfServer()
   {
-    _serverId = _serverIdLocal.get();
-
-    return getServer(_serverId);
+    return _selfServer;
   }
 
   /**

@@ -80,13 +80,29 @@ public class FileServlet extends GenericServlet {
   {
     _characterEncoding = encoding;
   }
-
+  
   /**
    * Flag to disable the "Range" header.
    */
   public void setEnableRange(boolean isEnable)
   {
     _isEnableRange = isEnable;
+  }
+
+  /**
+   * Clears the cache
+   */
+  public void clearCache()
+  {
+    _pathCache.clear();
+  }
+
+  /**
+   * Removes an entry from the cache
+   */
+  public void removeCacheEntry(String uri)
+  {
+    _pathCache.remove(uri);
   }
   
   @Override
@@ -503,14 +519,12 @@ public class FileServlet extends GenericServlet {
   }
 
   static class Cache {
-    private final static long UPDATE_INTERVAL = 2000L;
-    
     QDate _calendar;
     Path _path;
     boolean _isDirectory;
     boolean _canRead;
     long _length;
-    long _lastCheck;
+    long _expireTime;
     long _lastModified = 0xdeadbabe1ee7d00dL;
     String _relPath;
     String _etag;
@@ -574,21 +588,7 @@ public class FileServlet extends GenericServlet {
 
     void update()
     {
-      long now = Alarm.getCurrentTime();
-      if (_lastCheck + UPDATE_INTERVAL < now) {
-        synchronized (this) {
-	  if (now <= _lastCheck + UPDATE_INTERVAL)
-	    return;
-
-	  if (_lastCheck == 0) {
-	    updateData();
-	    _lastCheck = now;
-	    return;
-	  }
-
-	  _lastCheck = now;
-	}
-
+      synchronized (this) {
 	updateData();
       }
     }
