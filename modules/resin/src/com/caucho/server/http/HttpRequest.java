@@ -185,6 +185,10 @@ public class HttpRequest extends AbstractHttpRequest
       start();
       _response.start();
 
+      // XXX: use same one for keepalive?
+      _requestFacade = new HttpServletRequestImpl(this);
+      _responseFacade = new HttpServletResponseImpl(_response);
+
       try {
 	try {
 	  if (! readRequest(_rawRead)) {
@@ -282,9 +286,6 @@ public class HttpRequest extends AbstractHttpRequest
 
 	setInvocation(invocation);
 
-	_requestFacade = new HttpServletRequestImpl(this);
-	_responseFacade = new HttpServletResponseImpl(_response);
-
 	invocation.service(_requestFacade, _responseFacade);
       } finally {
 	finish();
@@ -310,7 +311,7 @@ public class HttpRequest extends AbstractHttpRequest
       if (_server instanceof Server) {
 	WebApp webApp = ((Server) _server).getDefaultWebApp();
 	if (webApp != null)
-	  webApp.accessLog(this, _response);
+	  webApp.accessLog(_requestFacade, _responseFacade);
       }
 
       return false;
