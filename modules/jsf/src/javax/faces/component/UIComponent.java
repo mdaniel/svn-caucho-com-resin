@@ -401,7 +401,7 @@ public abstract class UIComponent
         attributes.put("caucho.jsf.component.stack", temp);
 
         if (temp.length > 0)
-          attributes.put("component", temp.length - 1);
+          attributes.put("component", temp[temp.length - 1]);
         else
           attributes.remove("component");
       }
