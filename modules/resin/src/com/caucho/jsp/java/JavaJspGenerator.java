@@ -994,6 +994,7 @@ public class JavaJspGenerator extends JspGenerator {
       out.println("java.lang.Throwable exception = ((com.caucho.jsp.PageContextImpl) pageContext).getThrowable();");
     }
     out.println("javax.servlet.jsp.tagext.JspTag _jsp_parent_tag = null;");
+    out.println("com.caucho.jsp.PageContextImpl _jsp_parentContext = pageContext;");
 
     generateContentType(out);
     
