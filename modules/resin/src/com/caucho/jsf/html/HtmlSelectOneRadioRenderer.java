@@ -70,7 +70,9 @@ class HtmlSelectOneRadioRenderer extends SelectRenderer
     String []value = paramMap.get(clientId);
 
     if (value != null && value.length > 0)
-      ((EditableValueHolder) component).setSubmittedValue(value[0]);
+      ((EditableValueHolder) component).setSubmittedValue(value);
+    else
+      ((EditableValueHolder) component).setSubmittedValue("");
   }
   
   /**

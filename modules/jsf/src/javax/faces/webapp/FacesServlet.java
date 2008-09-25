@@ -38,6 +38,7 @@ import javax.faces.context.*;
 import javax.faces.lifecycle.*;
 
 import javax.servlet.*;
+import javax.servlet.jsp.JspException;
 import javax.servlet.http.*;
 
 public final class FacesServlet implements Servlet
@@ -156,6 +157,13 @@ public final class FacesServlet implements Servlet
       }
 
     } catch (FacesException e) {
+      for (Throwable cause = e; cause != null; cause = cause.getCause()) {
+        if (cause instanceof ServletException)
+          throw (ServletException) cause;
+        else if (cause instanceof JspException)
+          throw new ServletException(cause);
+      }
+      
       throw new ServletException(e);
     } finally {
       if (context != null)

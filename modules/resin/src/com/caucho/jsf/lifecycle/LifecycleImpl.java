@@ -45,10 +45,10 @@ import javax.faces.lifecycle.*;
 import javax.faces.render.*;
 
 import javax.servlet.http.*;
+import javax.servlet.jsp.JspException;
+import javax.servlet.ServletException;
 
-import com.caucho.config.*;
 import com.caucho.jsf.application.*;
-import com.caucho.util.*;
 
 /**
  * The default lifecycle implementation
@@ -386,13 +386,17 @@ public class LifecycleImpl extends Lifecycle
   {
     for (Throwable cause = e; cause != null; cause = cause.getCause()) {
       if (cause instanceof DisplayableException) {
-	if (e instanceof RuntimeException)
-	  throw (RuntimeException) e;
-	else
-	  throw new FacesException(e);
+        if (e instanceof RuntimeException)
+          throw (RuntimeException) e;
+        else
+          throw new FacesException(e);
       }
+      else if (cause instanceof ServletException)
+        throw new FacesException(e);
+      else if (cause instanceof JspException)
+        throw new FacesException(e);
     }
-    
+
     ExternalContext extContext = context.getExternalContext();
     Object response = extContext.getResponse();
 
