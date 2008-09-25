@@ -34,6 +34,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.RefVar;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
+import com.caucho.quercus.lib.VariableModule;
 
 /**
  * Represents a PHP reference argument.
@@ -68,11 +69,8 @@ public class RefExpr extends UnaryExpr {
   {
     // quercus/0d28
     Value value = getExpr().evalRef(env);
-
-    if (value instanceof Var)
-      return new RefVar((Var) value);
-    else
-      return value;
+    
+    return value.toRef();
   }
 
   /**
