@@ -27,45 +27,45 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
-
-import java.util.ArrayList;
+package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.BreakValue;
-import com.caucho.quercus.env.ContinueValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.env.NullValue;
 
 /**
- * Represents a break expression statement in a PHP program.
+ * Represents a PHP array reference expression.
  */
-public class BreakStatement extends Statement {
-  protected final Expr _target;
-  protected final ArrayList<String> _loopLabelList;
-  
-  //public static final BreakStatement BREAK = new BreakStatement();
-  
-  public BreakStatement(Location location,
-                        Expr target,
-                        ArrayList<String> loopLabelList)
+public class ArrayGetGetExpr extends ArrayGetExpr {
+  public ArrayGetGetExpr(Location location, Expr expr, Expr index)
   {
-    super(location);
-    
-    _target = target;
-    _loopLabelList = loopLabelList;
+    super(location, expr, index);
+  }
+
+  public ArrayGetGetExpr(Expr expr, Expr index)
+  {
+    super(expr, index);
   }
 
   /**
-   * Executes the statement, returning the expression value.
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
    */
-  public Value execute(Env env)
+  public void evalAssign(Env env, Value value)
   {
-    if (_target == null)
-      return BreakValue.BREAK;
-    else
-      return new BreakValue(_target.eval(env).toInt());
+    Value array = _expr.evalArray(env);
+    Value index = _index.eval(env);
+
+    _expr.evalAssign(env, array.append(index, value));
+  }
+
+  public String toString()
+  {
+    return _expr + "[" + _index + "]";
   }
 }
 

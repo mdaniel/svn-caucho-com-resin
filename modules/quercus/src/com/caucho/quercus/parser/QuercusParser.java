@@ -212,6 +212,9 @@ public class QuercusParser {
   
   private int _classesParsed;
   private int _functionsParsed;
+  
+  private ArrayList<String> _loopLabelList = new ArrayList<String>();
+  private int _labelsCreated;
 
   QuercusParser(Quercus quercus)
   {
@@ -1150,6 +1153,8 @@ public class QuercusParser {
 
     boolean oldTop = _isTop;
     _isTop = false;
+    
+    String label = pushSwitchLabel();
 
     try {
       expect('(');
@@ -1254,10 +1259,12 @@ public class QuercusParser {
 	expect('}');
 
       return _factory.createSwitch(location, test,
-				   caseList, blockList,
-				   defaultBlock);
+                                   caseList, blockList,
+                                   defaultBlock, label);
     } finally {
       _isTop = oldTop;
+      
+      popLoopLabel();
     }
   }
 
@@ -1269,6 +1276,8 @@ public class QuercusParser {
   {
     boolean oldTop = _isTop;
     _isTop = false;
+    
+    String label = pushWhileLabel();
 
     try {
       Location location = getLocation();
@@ -1296,9 +1305,11 @@ public class QuercusParser {
 	block = parseStatement();
       }
 
-      return _factory.createWhile(location, test, block);
+      return _factory.createWhile(location, test, block, label);
     } finally {
       _isTop = oldTop;
+      
+      popLoopLabel();
     }
   }
 
@@ -1311,6 +1322,8 @@ public class QuercusParser {
     boolean oldTop = _isTop;
     _isTop = false;
 
+    String label = pushDoLabel();
+    
     try {
       Location location = getLocation();
 
@@ -1325,9 +1338,11 @@ public class QuercusParser {
 
       expect(')');
     
-      return _factory.createDo(location, test, block);
+      return _factory.createDo(location, test, block, label);
     } finally {
       _isTop = oldTop;
+      
+      popLoopLabel();
     }
   }
 
@@ -1340,6 +1355,8 @@ public class QuercusParser {
     boolean oldTop = _isTop;
     _isTop = false;
     
+    String label = pushForLabel();
+    
     try {
       Location location = getLocation();
 
@@ -1349,9 +1366,9 @@ public class QuercusParser {
 
       int token = parseToken();
       if (token != ';') {
-	_peekToken = token;
-	init = parseTopCommaExpr();
-	expect(';');
+        _peekToken = token;
+        init = parseTopCommaExpr();
+        expect(';');
       }
 
       Expr test = null;
@@ -1371,9 +1388,9 @@ public class QuercusParser {
 
       token = parseToken();
       if (token != ')') {
-	_peekToken = token;
-	incr = parseTopCommaExpr();
-	expect(')');
+        _peekToken = token;
+        incr = parseTopCommaExpr();
+        expect(')');
       }
 
       Statement block;
@@ -1381,19 +1398,21 @@ public class QuercusParser {
       token = parseToken();
 
       if (token == ':') {
-	block = _factory.createBlock(getLocation(), parseStatementList());
+        block = _factory.createBlock(getLocation(), parseStatementList());
 
-	expect(ENDFOR);
+        expect(ENDFOR);
       }
       else {
-	_peekToken = token;
-	
-	block = parseStatement();
+        _peekToken = token;
+        
+        block = parseStatement();
       }
 
-      return _factory.createFor(location, init, test, incr, block);
+      return _factory.createFor(location, init, test, incr, block, label);
     } finally {
       _isTop = oldTop;
+      
+      popLoopLabel();
     }
   }
 
@@ -1405,6 +1424,8 @@ public class QuercusParser {
   {
     boolean oldTop = _isTop;
     _isTop = false;
+    
+    String label = pushForeachLabel();
     
     try {
       Location location = getLocation();
@@ -1419,9 +1440,9 @@ public class QuercusParser {
 
       int token = parseToken();
       if (token == '&')
-	isRef = true;
+        isRef = true;
       else
-	_peekToken = token;
+        _peekToken = token;
 
       AbstractVarExpr valueExpr = (AbstractVarExpr) parseLeftHandSide();
 
@@ -1431,48 +1452,49 @@ public class QuercusParser {
       token = parseToken();
 
       if (token == ARRAY_RIGHT) {
-	if (isRef)
-	  throw error(L.l("key reference is forbidden in foreach"));
+        if (isRef)
+          throw error(L.l("key reference is forbidden in foreach"));
 	
-	keyVar = valueExpr;
+        keyVar = valueExpr;
 
-	token = parseToken();
+        token = parseToken();
 
-	if (token == '&')
-	  isRef = true;
-	else
-	  _peekToken = token;
+        if (token == '&')
+          isRef = true;
+        else
+          _peekToken = token;
 
-	valueVar = (AbstractVarExpr) parseLeftHandSide();
+        valueVar = (AbstractVarExpr) parseLeftHandSide();
 
-	token = parseToken();
+        token = parseToken();
       }
       else
-	valueVar = valueExpr;
-      
+        valueVar = valueExpr;
 
       if (token != ')')
-	throw error(L.l("expected ')' in foreach"));
+        throw error(L.l("expected ')' in foreach"));
     
       Statement block;
 
       token = parseToken();
 
       if (token == ':') {
-	block = _factory.createBlock(getLocation(), parseStatementList());
+        block = _factory.createBlock(getLocation(), parseStatementList());
 
-	expect(ENDFOREACH);
+        expect(ENDFOREACH);
       }
       else {
-	_peekToken = token;
+        _peekToken = token;
 
-	block = parseStatement();
+        block = parseStatement();
       }
 
       return _factory.createForeach(location, objExpr, keyVar,
-				    valueVar, isRef, block);
+                                    valueVar, isRef, block, label);
     } finally {
       _isTop = oldTop;
+      
+      popLoopLabel();
     }
   }
 
@@ -1717,13 +1739,8 @@ public class QuercusParser {
   private Statement parseBreak()
     throws IOException
   {
-    Scope scope = _scope;
-
-    /* XXX: check for is loop/break
-    if (scope.isFunction()) {
+    if (! _isTop && _loopLabelList.size() == 0)
       throw error(L.l("cannot 'break' inside a function"));
-    }
-    */
     
     Location location = getLocation();
     
@@ -1733,14 +1750,18 @@ public class QuercusParser {
     case ';':
       _peekToken = token;
 
-      return _factory.createBreak(location, null);
+      return _factory.createBreak(location,
+                                  null,
+                                  (ArrayList<String>) _loopLabelList.clone());
       
     default:
       _peekToken = token;
 
       Expr expr = parseTopExpr();
 
-      return _factory.createBreak(location, expr);
+      return _factory.createBreak(location,
+                                  expr,
+                                  (ArrayList<String>) _loopLabelList.clone());
     }
   }
 
@@ -1750,12 +1771,8 @@ public class QuercusParser {
   private Statement parseContinue()
     throws IOException
   {
-    // Scope scope = _scope;
-
-    /* XXX: add isLoop/Switch check, e.g. as a flag like top
-    if (scope.isFunction())
-      throw error(L.l("cannot 'continue' a function"));
-    */
+    if (! _isTop && _loopLabelList.size() == 0)
+      throw error(L.l("cannot 'continue' inside a function"));
     
     Location location = getLocation();
 
@@ -1765,14 +1782,18 @@ public class QuercusParser {
     case ';':
       _peekToken = token;
 
-      return _factory.createContinue(location, null);
+      return _factory.createContinue(location,
+                                     null,
+                                     (ArrayList<String>) _loopLabelList.clone());
       
     default:
       _peekToken = token;
 
       Expr expr = parseTopExpr();
 
-      return _factory.createContinue(location, expr);
+      return _factory.createContinue(location,
+                                     expr,
+                                     (ArrayList<String>) _loopLabelList.clone());
     }
   }
   
@@ -5337,6 +5358,81 @@ public class QuercusParser {
   public Location getLocation()
   {
     return _parserLocation.getLocation();
+  }
+  
+  private String pushWhileLabel()
+  {
+    return pushLoopLabel(createWhileLabel());
+  }
+  
+  private String pushDoLabel()
+  {
+    return pushLoopLabel(createDoLabel());
+  }
+  
+  private String pushForLabel()
+  {
+    return pushLoopLabel(createForLabel());
+  }
+  
+  private String pushForeachLabel()
+  {
+    return pushLoopLabel(createForeachLabel());
+  }
+  
+  private String pushSwitchLabel()
+  {
+    return pushLoopLabel(createSwitchLabel());
+  }
+  
+  private String pushLoopLabel(String label)
+  {
+    _loopLabelList.add(label);
+    
+    return label;
+  }
+  
+  private String popLoopLabel()
+  {
+    int size = _loopLabelList.size();
+    
+    if (size == 0)
+      return null;
+    else
+      return _loopLabelList.remove(size - 1);
+  }
+  
+  private String createWhileLabel()
+  {
+    return "while_" + _labelsCreated++;
+  }
+  
+  private String createDoLabel()
+  {
+    return "do_" + _labelsCreated++;
+  }
+  
+  private String createForLabel()
+  {
+    return "for_" + _labelsCreated++;
+  }
+  
+  private String createForeachLabel()
+  {
+    return "foreach_" + _labelsCreated++;
+  }
+  
+  private String createSwitchLabel()
+  {
+    return "switch_" + _labelsCreated++;
+  }
+  
+  /*
+   * Returns true if this is a switch label.
+   */
+  public static boolean isSwitchLabel(String label)
+  {
+    return label != null && label.startsWith("switch");
   }
 
   private class ParserLocation {

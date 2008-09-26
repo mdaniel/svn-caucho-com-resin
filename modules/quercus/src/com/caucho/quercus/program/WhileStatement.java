@@ -42,13 +42,18 @@ import com.caucho.quercus.expr.Expr;
 public class WhileStatement extends Statement {
   protected final Expr _test;
   protected final Statement _block;
+  protected final String _label;
 
-  public WhileStatement(Location location, Expr test, Statement block)
+  public WhileStatement(Location location,
+                        Expr test,
+                        Statement block,
+                        String label)
   {
     super(location);
 
     _test = test;
     _block = block;
+    _label = label;
     
     block.setParent(this);
   }

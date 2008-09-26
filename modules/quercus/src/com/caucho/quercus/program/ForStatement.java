@@ -44,8 +44,10 @@ public class ForStatement extends Statement {
   protected final Expr _test;
   protected final Expr _incr;
   protected final Statement _block;
+  protected final String _label;
 
-  public ForStatement(Location location, Expr init, Expr test, Expr incr, Statement block)
+  public ForStatement(Location location, Expr init, Expr test, Expr incr,
+                      Statement block, String label)
   {
     super(location);
 
@@ -54,6 +56,7 @@ public class ForStatement extends Statement {
     _incr = incr;
 
     _block = block;
+    _label = label;
     
     block.setParent(this);
   }

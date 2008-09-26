@@ -48,12 +48,14 @@ public class SwitchStatement extends Statement {
   protected final BlockStatement[] _blocks;
 
   protected final Statement _defaultBlock;
+  protected final String _label;
 
   public SwitchStatement(Location location,
                          Expr value,
                          ArrayList<Expr[]> caseList,
                          ArrayList<BlockStatement> blockList,
-                         Statement defaultBlock)
+                         Statement defaultBlock,
+                         String label)
   {
     super(location);
 
@@ -73,6 +75,8 @@ public class SwitchStatement extends Statement {
     
     if (_defaultBlock != null)
       _defaultBlock.setParent(this);
+    
+    _label = label;
   }
 
   /**

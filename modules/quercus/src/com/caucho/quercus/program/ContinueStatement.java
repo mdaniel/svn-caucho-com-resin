@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.program;
 
+import java.util.ArrayList;
+
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.ContinueValue;
 import com.caucho.quercus.env.Env;
@@ -41,20 +43,16 @@ import com.caucho.quercus.expr.Expr;
 public class ContinueStatement extends Statement {
   //public static final ContinueStatement CONTINUE = new ContinueStatement();
   
-  protected Expr _target;
+  protected final Expr _target;
+  protected final ArrayList<String> _loopLabelList;
   
-  /**
-   * Creates the continue statement.
-   */
-  protected ContinueStatement()
-  {
-    super(Location.UNKNOWN);
-  }
-  
-  public ContinueStatement(Location location, Expr target)
+  public ContinueStatement(Location location,
+                           Expr target,
+                           ArrayList<String> loopLabelList)
   {
     super(location);
     _target = target;
+    _loopLabelList = loopLabelList;
   }
 
   /**

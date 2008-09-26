@@ -179,7 +179,12 @@ public class ExprFactory {
                                      Expr base,
                                      Expr index)
   {
-    return new ArrayGetExpr(location, base, index);
+    if (base instanceof ArrayGetExpr
+        || base instanceof FieldGetExpr
+        || base instanceof FieldVarGetExpr)
+      return new ArrayGetGetExpr(location, base, index);
+    else
+      return new ArrayGetExpr(location, base, index);
   }
 
   /**
@@ -1102,73 +1107,84 @@ public class ExprFactory {
    * Creates a switch statement
    */
   public Statement createSwitch(Location loc,
-				Expr value,
-				ArrayList<Expr[]> caseList,
-				ArrayList<BlockStatement> blockList,
-				Statement defaultBlock)
+                                Expr value,
+                                ArrayList<Expr[]> caseList,
+                                ArrayList<BlockStatement> blockList,
+                                Statement defaultBlock,
+                                String label)
   {
-    return new SwitchStatement(loc, value, caseList, blockList, defaultBlock);
+    return new SwitchStatement(loc, value, caseList, blockList,
+                               defaultBlock, label);
   }
 
   /**
    * Creates a for statement
    */
   public Statement createFor(Location loc,
-			     Expr init,
-			     Expr test,
-			     Expr incr,
-			     Statement block)
+                             Expr init,
+                             Expr test,
+                             Expr incr,
+                             Statement block,
+                             String label)
   {
-    return new ForStatement(loc, init, test, incr, block);
+    return new ForStatement(loc, init, test, incr, block, label);
   }
 
   /**
    * Creates a foreach statement
    */
   public Statement createForeach(Location loc,
-				 Expr objExpr,
-				 AbstractVarExpr key,
-				 AbstractVarExpr value,
-				 boolean isRef,
-				 Statement block)
+                                 Expr objExpr,
+                                 AbstractVarExpr key,
+                                 AbstractVarExpr value,
+                                 boolean isRef,
+                                 Statement block,
+                                 String label)
   {
-    return new ForeachStatement(loc, objExpr, key, value, isRef, block);
+    return new ForeachStatement(loc, objExpr, key, value, isRef,
+                                block, label);
   }
 
   /**
    * Creates a while statement
    */
   public Statement createWhile(Location loc,
-			       Expr test,
-			       Statement block)
+                               Expr test,
+                               Statement block,
+                               String label)
   {
-    return new WhileStatement(loc, test, block);
+    return new WhileStatement(loc, test, block, label);
   }
 
   /**
    * Creates a do-while statement
    */
   public Statement createDo(Location loc,
-			    Expr test,
-			    Statement block)
+                            Expr test,
+                            Statement block,
+                            String label)
   {
-    return new DoStatement(loc, test, block);
+    return new DoStatement(loc, test, block, label);
   }
 
   /**
    * Creates a break statement
    */
-  public BreakStatement createBreak(Location location, Expr target)
+  public BreakStatement createBreak(Location location,
+                                    Expr target,
+                                    ArrayList<String> loopLabelList)
   {
-    return new BreakStatement(location, target);
+    return new BreakStatement(location, target, loopLabelList);
   }
 
   /**
    * Creates a continue statement
    */
-  public ContinueStatement createContinue(Location location, Expr target)
+  public ContinueStatement createContinue(Location location,
+                                          Expr target,
+                                          ArrayList<String> loopLabelList)
   {
-    return new ContinueStatement(location, target);
+    return new ContinueStatement(location, target, loopLabelList);
   }
 
   /**

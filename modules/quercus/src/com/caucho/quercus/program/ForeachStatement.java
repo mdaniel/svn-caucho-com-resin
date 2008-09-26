@@ -54,13 +54,16 @@ public class ForeachStatement
   protected final boolean _isRef;
 
   protected final Statement _block;
+  
+  protected final String _label;
 
   public ForeachStatement(Location location,
                           Expr objExpr,
                           AbstractVarExpr key,
                           AbstractVarExpr value,
                           boolean isRef,
-                          Statement block)
+                          Statement block,
+                          String label)
   {
     super(location);
 
@@ -71,6 +74,7 @@ public class ForeachStatement
     _isRef = isRef;
 
     _block = block;
+    _label = label;
     
     block.setParent(this);
   }

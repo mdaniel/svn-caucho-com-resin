@@ -1908,6 +1908,23 @@ public class Quercus
     _superGlobals.add("_SERVER");
     _superGlobals.add("_SESSION");
     _superGlobals.add("_REQUEST");
+    
+    /*
+    String includePath;
+    
+    if (Path.isWindows())
+      includePath = "."
+                    + FileModule.PATH_SEPARATOR
+                    + "C:\\php5\\pear";
+    else
+      includePath = "."
+                    + FileModule.PATH_SEPARATOR
+                    + "/usr/share/php"
+                    + FileModule.PATH_SEPARATOR
+                    + "/usr/share/pear";
+    
+    INI_INCLUDE_PATH = _ini.add("include_path", includePath, IniDefinition.PHP_INI_ALL);
+    */
   }
 
   public static final IniDefinition INI_INCLUDE_PATH
