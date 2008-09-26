@@ -133,9 +133,9 @@ public class RequestAdapter extends RequestWrapper
     _response = response;
     _webApp = app;
 
-    if (request == this ||
-	request instanceof CauchoRequest &&
-	((CauchoRequest) request).getRequestDepth(0) > MAX_DEPTH) {
+    if (request == this
+	|| (request instanceof CauchoRequest
+	    && ((CauchoRequest) request).getRequestDepth(0) > MAX_DEPTH)) {
       throw new ServletException(L.l("too many servlet includes `{0}'",
                                      request.getRequestURI()));
     }
@@ -151,6 +151,16 @@ public class RequestAdapter extends RequestWrapper
     _webApp = app;
   }
 
+  public AbstractHttpRequest getAbstractHttpRequest()
+  {
+    HttpServletRequest request = getRequest();
+
+    if (request instanceof AbstractHttpRequest)
+      return (AbstractHttpRequest) request;
+    else
+      return null;
+  }
+  
   protected HttpServletResponse getResponse()
   {
     return _response;

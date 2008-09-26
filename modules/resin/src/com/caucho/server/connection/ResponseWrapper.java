@@ -85,6 +85,14 @@ public class ResponseWrapper implements ServletResponse {
   {
     return _response;
   }
+
+  public AbstractHttpResponse getAbstractHttpResponse()
+  {
+    if (_response instanceof AbstractHttpResponse)
+      return (AbstractHttpResponse) _response;
+    else
+      return null;
+  }
   
   /**
    * Sets the response content type.  The content type includes

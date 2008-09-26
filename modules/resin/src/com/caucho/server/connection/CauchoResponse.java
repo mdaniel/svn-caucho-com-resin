@@ -70,4 +70,6 @@ public interface CauchoResponse extends HttpServletResponse {
   public void killCache();
   public void setNoCache(boolean killCache);
   public void setPrivateCache(boolean isPrivate);
+
+  public AbstractHttpResponse getAbstractHttpResponse();
 }

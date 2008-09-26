@@ -2190,6 +2190,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return null;
   }
 
+  public AbstractHttpResponse getAbstractHttpResponse()
+  {
+    return this;
+  }
+
   public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
   {
     throw new IllegalStateException(L.l("'{0}' does not support upgrading",

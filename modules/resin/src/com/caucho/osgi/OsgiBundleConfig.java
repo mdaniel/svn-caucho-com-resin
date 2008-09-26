@@ -97,6 +97,7 @@ public class OsgiBundleConfig
    */
   public void setStart(boolean isStart)
   {
+    _isStart = isStart;
   }
 
   @PostConstruct

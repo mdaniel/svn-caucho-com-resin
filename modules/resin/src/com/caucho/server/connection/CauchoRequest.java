@@ -64,4 +64,6 @@ public interface CauchoRequest extends HttpServletRequest {
     throws ServletException, IOException;
 
   // public HashMap<String,String> setRoleMap(HashMap<String,String> roleMap);
+  
+  public AbstractHttpRequest getAbstractHttpRequest();
 }

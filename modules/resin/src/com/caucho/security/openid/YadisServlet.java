@@ -103,7 +103,7 @@ public class YadisServlet extends GenericServlet
     }
 
     res.setHeader("Content-Type", "application/xrds+xml");
-    res.setHeader("Vary", "Accept");
+    res.setHeader("Vary", "Accept-Encoding");
     
     xrd.print(out);
   }

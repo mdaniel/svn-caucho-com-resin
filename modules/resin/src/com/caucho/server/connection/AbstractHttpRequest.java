@@ -2442,6 +2442,11 @@ public abstract class AbstractHttpRequest
       _attributeListeners = app.getRequestAttributeListeners();
   }
 
+  public AbstractHttpRequest getAbstractHttpRequest()
+  {
+    return this;
+  }
+
   /**
    * Sets the start time to the current time.
    */
