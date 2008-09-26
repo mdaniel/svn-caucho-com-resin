@@ -506,6 +506,11 @@ public class RequestAdapter extends RequestWrapper
 
     return null;
   }
+
+  public boolean isComet()
+  {
+    return false;
+  }
   
   public void killKeepalive()
   {

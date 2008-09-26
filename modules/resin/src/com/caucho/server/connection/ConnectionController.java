@@ -164,6 +164,14 @@ public class ConnectionController
   }
 
   /**
+   * Returns true for an active comet connection.
+   */
+  public boolean isComet()
+  {
+    return _conn != null && _conn.isComet();
+  }
+
+  /**
    * Returns true if the connection is active.
    */
   public final boolean isClosed()

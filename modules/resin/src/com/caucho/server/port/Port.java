@@ -1441,6 +1441,8 @@ public class Port
 
   /**
    * Suspends the controller (for comet-style ajax)
+   *
+   * @return true if the connection was added to the suspend list
    */
   boolean suspend(TcpConnection conn)
   {
@@ -1456,8 +1458,9 @@ public class Port
 	_suspendList.add(conn);
 	return true;
       }
-      else
+      else {
 	return false;
+      }
     }
 
     if (isResume) {

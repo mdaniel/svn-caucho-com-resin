@@ -384,7 +384,7 @@ public class ErrorPageManager {
       }
     }
 
-    response.setContentType("text/html");
+    response.setContentType("text/html; charset=utf-8");
 
     String encoding = CharacterEncoding.getLocalEncoding();
 

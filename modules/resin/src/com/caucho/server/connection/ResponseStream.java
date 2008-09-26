@@ -667,11 +667,11 @@ class ResponseStream extends ToByteResponseStream {
     _allowFlush = true;
     
     flushBuffer();
-
+    
     int bufferStart = _bufferStartOffset;
     _bufferStartOffset = 0;
     _isClosed = true;
-    
+
     // flushBuffer can force 304 and then a cache write which would
     // complete the finish.
     if (isClosed || _next == null) {
@@ -718,13 +718,24 @@ class ResponseStream extends ToByteResponseStream {
       }
 
       CauchoRequest req = _response.getRequest();
-      if (! req.allowKeepalive()) {
+      if (req.isComet()) {
+      }
+      else if (! req.allowKeepalive()) {
+	_isClosed = true;
         if (log.isLoggable(Level.FINE)) {
           log.fine(dbgId() + "close stream");
         }
       
         _next.close();
       }
+      else {
+	_isClosed = true;
+	
+        if (log.isLoggable(Level.FINE)) {
+          log.fine(dbgId() + "finish/keepalive");
+        }
+      }
+      
       /*
       else if (flush) {
         //_next.flush();

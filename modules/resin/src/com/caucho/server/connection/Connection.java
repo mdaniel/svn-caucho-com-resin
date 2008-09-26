@@ -150,6 +150,14 @@ public abstract class Connection
   }
 
   /**
+   * Returns true for a comet connection
+   */
+  public boolean isComet()
+  {
+    return false;
+  }
+
+  /**
    * Connection controller.
    */
   protected void setController(ConnectionController controller)

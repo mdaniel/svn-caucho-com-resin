@@ -207,7 +207,12 @@ public class HttpResponse extends AbstractHttpResponse
 	       _statusCode + " " + _statusMessage);
     }
 
-    if (! containsHeader("Server"))
+    if (containsHeader("Server")) {
+    }
+    else if (Alarm.isTest()) {
+      os.print("\r\nServer: Resin/1.1");
+    }
+    else
       os.write(_resinServerBytes, 0, _resinServerBytes.length);
 
     if (statusCode >= 400) {

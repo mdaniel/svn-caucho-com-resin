@@ -2559,6 +2559,11 @@ public abstract class AbstractHttpRequest
     return _keepalive;
   }
 
+  public boolean isComet()
+  {
+    return _tcpConn != null && _tcpConn.isComet();
+  }
+
   /**
    * Returns true if keepalives are allowed.
    *

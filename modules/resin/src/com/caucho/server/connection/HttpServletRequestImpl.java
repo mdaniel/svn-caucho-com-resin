@@ -894,6 +894,11 @@ public class HttpServletRequestImpl implements CauchoRequest
   {
     _request.setHasCookie();
   }
+
+  public boolean isComet()
+  {
+    return _request.isComet();
+  }
   
   public void killKeepalive()
   {

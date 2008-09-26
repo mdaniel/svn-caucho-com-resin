@@ -59,6 +59,7 @@ public interface CauchoRequest extends HttpServletRequest {
   public Cookie getCookie(String name);
   public void setHasCookie();
   public void killKeepalive();
+  public boolean isComet();
   public boolean allowKeepalive();
   public boolean authenticate()
     throws ServletException, IOException;

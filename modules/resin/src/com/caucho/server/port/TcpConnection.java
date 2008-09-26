@@ -484,7 +484,8 @@ public class TcpConnection extends Connection
     return _isWake;
   }
 
-  boolean isComet()
+  @Override
+  public boolean isComet()
   {
     return _state.isComet();
   }
@@ -522,6 +523,9 @@ public class TcpConnection extends Connection
   public boolean toKeepalive()
   {
     if (! _isKeepalive) {
+      if (getController() != null)
+	return false;
+      
       _isKeepalive = _port.allowKeepalive(_connectionStartTime);
     }
     
@@ -782,7 +786,6 @@ public class TcpConnection extends Connection
       return true;
     }
     else {
-      log.fine(dbgId() + " wake failed");
       return false;
     }
   }
@@ -881,6 +884,8 @@ public class TcpConnection extends Connection
   @Override
   protected void closeControllerImpl()
   {
+    _state = _state.toComplete();
+    
     getPort().resume(this);
   }
   
@@ -1054,6 +1059,18 @@ public class TcpConnection extends Connection
 	return IDLE;
       else
 	throw new IllegalStateException(this + " is an illegal idle state");
+    }
+    
+    ConnectionState toComplete()
+    {
+      switch (this) {
+      case CLOSED:
+      case DESTROYED:
+	return this;
+
+      default:
+	return COMPLETE;
+      }
     }
     
     ConnectionState toClosed()
@@ -1257,7 +1274,7 @@ public class TcpConnection extends Connection
     public void run()
     {
       boolean isValid = false;
-      
+
       try {
         if (getRequest().handleResume()
 	    && _port.suspend(TcpConnection.this)) {

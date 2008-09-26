@@ -2245,7 +2245,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	handleNotModified(_isTopCache);
       }
 
-      if (controller != null && controller.isSuspended())
+      if (controller != null && controller.isComet())
 	isClose = false;
 
       // include() files finish too, but shouldn't force a flush, hence
@@ -2255,7 +2255,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	_responseStream.close();
       else if (_responseStream != _originalResponseStream)
 	_responseStream.finish();
-      else if (controller == null || ! controller.isSuspended())
+      else if (controller == null || ! controller.isComet())
 	_responseStream.finish();
       else
 	_responseStream.flush();
