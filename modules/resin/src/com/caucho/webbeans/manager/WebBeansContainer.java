@@ -360,14 +360,16 @@ public class WebBeansContainer
     comp.setName(name);
     comp.setType(_wbWebBeans.createComponentType(componentType));
 
-    WbBinding binding = new WbBinding();
-    binding.setClass(Named.class);
-    binding.addValue("value", name);
+    if (name != null) {
+      WbBinding binding = new WbBinding();
+      binding.setClass(Named.class);
+      binding.addValue("value", name);
 
-    ArrayList<WbBinding> bindingList = new ArrayList<WbBinding>();
-    bindingList.add(binding);
+      ArrayList<WbBinding> bindingList = new ArrayList<WbBinding>();
+      bindingList.add(binding);
     
-    comp.setBindingList(bindingList);
+      comp.setBindingList(bindingList);
+    }
     
     comp.init();
 

@@ -662,7 +662,7 @@ public class OsgiBundle implements Bundle
    */
   public long getLastModified()
   {
-    return _jar.getLastModified();
+    return _jar.getContainer().getLastModified();
   }
 
   /**

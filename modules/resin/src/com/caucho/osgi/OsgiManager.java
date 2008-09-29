@@ -133,6 +133,17 @@ public class OsgiManager
 
     _systemBundle = new OsgiSystemBundle(this);
     _bundleList.add(_systemBundle);
+
+    OsgiWebBeansBundle webBeansBundle = new OsgiWebBeansBundle(this);
+    addBundle(webBeansBundle);
+
+    try {
+      webBeansBundle.start();
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public static OsgiManager getCurrent()
@@ -180,13 +191,18 @@ public class OsgiManager
 
     OsgiBundle bundle = new OsgiBundle(nextBundleId(), this, jar);
 
+    addBundle(bundle);
+
+    return bundle;
+  }
+
+  void addBundle(OsgiBundle bundle)
+  {
     synchronized (_bundleList) {
       _bundleList.add(bundle);
     }
 
     sendBundleEvent(BundleEvent.INSTALLED, bundle);
-
-    return bundle;
   }
 
   /**
@@ -219,7 +235,7 @@ public class OsgiManager
     return null;
   }
 
-  private long nextBundleId()
+  long nextBundleId()
   {
     synchronized (this) {
       return _nextBundleId++;
