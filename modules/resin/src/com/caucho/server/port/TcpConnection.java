@@ -490,6 +490,12 @@ public class TcpConnection extends Connection
     return _state.isComet();
   }
 
+  @Override
+  public boolean isDuplex()
+  {
+    return _state.isDuplex();
+  }
+
   /**
    * Begins an active connection.
    */
@@ -963,6 +969,11 @@ public class TcpConnection extends Connection
     boolean isComet()
     {
       return this == COMET;
+    }
+    
+    boolean isDuplex()
+    {
+      return this == DUPLEX || this == DUPLEX_KEEPALIVE;
     }
     
     /**

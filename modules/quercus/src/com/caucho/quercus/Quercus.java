@@ -133,8 +133,10 @@ public class Quercus
   private LruCache<String, QuercusProgram> _evalCache
     = new LruCache<String, QuercusProgram>(4096);
 
-  private TimedCache<IncludeKey, Path> _includeCache
-    = new TimedCache<IncludeKey, Path>(4096, 10000);
+  private int _includeCacheMax = 8192;
+  private long _includeCacheTimeout = 10000L;
+
+  private TimedCache<IncludeKey, Path> _includeCache;
 
   //private LruCache<DefinitionKey,SoftReference<DefinitionState>> _defCache
   //    = new LruCache<DefinitionKey,SoftReference<DefinitionState>>(4096);
@@ -180,27 +182,9 @@ public class Quercus
     
     _moduleContext = getLocalContext();
     
-    initStaticFunctions();
-    initStaticClasses();
-    initStaticClassServices();
-
     _pageManager = createPageManager();
     
     _sessionManager = createSessionManager();
-
-    _workDir = getWorkDir();
-
-    _iniDefinitions.addAll(_ini);
-
-    initLocal();
-  }
-
-  public Env createEnv(QuercusPage page,
-                       WriteStream out,
-                       HttpServletRequest request,
-                       HttpServletResponse response)
-  {
-    return new Env(this, page, out, request, response);
   }
   
   /**
@@ -243,6 +227,26 @@ public class Quercus
   public long getDependencyCheckInterval()
   {
     return 2000L;
+  }
+
+  public int getIncludeCacheMax()
+  {
+    return _includeCacheMax;
+  }
+
+  public void setIncludeCacheMax(int cacheMax)
+  {
+    _includeCacheMax = cacheMax;
+  }
+
+  public void setIncludeCacheTimeout(long timeout)
+  {
+    _includeCacheTimeout = timeout;
+  }
+
+  public long getIncludeCacheTimeout()
+  {
+    return _includeCacheTimeout;
   }
 
   public String getVersion()
@@ -845,7 +849,7 @@ public class Quercus
   /**
    * Returns an include path.
    */
-  public Path getIncludeCache(String include,
+  public Path getIncludeCache(StringValue include,
                               String includePath,
                               Path pwd,
                               Path scriptPwd)
@@ -860,7 +864,7 @@ public class Quercus
   /**
    * Adds an include path.
    */
-  public void putIncludeCache(String include,
+  public void putIncludeCache(StringValue include,
                               String includePath,
                               Path pwd,
                               Path scriptPwd,
@@ -1335,6 +1339,25 @@ public class Quercus
   public HashMap<String, Value> getConstMap()
   {
     return _constMap;
+  }
+
+  /**
+   * Initialize the enging
+   */
+  public void init()
+  {
+    initStaticFunctions();
+    initStaticClasses();
+    initStaticClassServices();
+
+    _workDir = getWorkDir();
+
+    _iniDefinitions.addAll(_ini);
+    
+    _includeCache = new TimedCache<IncludeKey, Path>(getIncludeCacheMax(),
+						     getIncludeCacheTimeout());
+
+    initLocal();
   }
 
   /**
@@ -1842,6 +1865,14 @@ public class Quercus
   {
   }
 
+  public Env createEnv(QuercusPage page,
+                       WriteStream out,
+                       HttpServletRequest request,
+                       HttpServletResponse response)
+  {
+    return new Env(this, page, out, request, response);
+  }
+
   public void close()
   {
     _sessionManager.close();
@@ -1859,12 +1890,15 @@ public class Quercus
   }
 
   static class IncludeKey {
-    private final String _include;
+    private final StringValue _include;
     private final String _includePath;
     private final Path _pwd;
     private final Path _scriptPwd;
 
-    IncludeKey(String include, String includePath, Path pwd, Path scriptPwd)
+    IncludeKey(StringValue include,
+	       String includePath,
+	       Path pwd,
+	       Path scriptPwd)
     {
       _include = include;
       _includePath = includePath;
@@ -1891,10 +1925,10 @@ public class Quercus
 
       IncludeKey key = (IncludeKey) o;
 
-      return (_include.equals(key._include) &&
-              _includePath.equals(key._includePath) &&
-              _pwd.equals(key._pwd) &&
-              _scriptPwd.equals(key._scriptPwd));
+      return (_include.equals(key._include)
+	      && _includePath.equals(key._includePath)
+	      && _pwd.equals(key._pwd)
+	      && _scriptPwd.equals(key._scriptPwd));
     }
   }
 

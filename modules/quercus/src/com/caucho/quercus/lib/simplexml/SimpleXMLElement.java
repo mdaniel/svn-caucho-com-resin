@@ -589,7 +589,7 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
     Document document = null;
 
     if (dataIsUrl) {
-      Path path = env.lookup(data.toString());
+      Path path = env.lookup(data.toStringValue());
 
       // PHP throws an Exception instead
       if (path == null) {

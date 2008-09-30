@@ -158,6 +158,14 @@ public abstract class Connection
   }
 
   /**
+   * Returns true for a duplex connection
+   */
+  public boolean isDuplex()
+  {
+    return false;
+  }
+
+  /**
    * Connection controller.
    */
   protected void setController(ConnectionController controller)

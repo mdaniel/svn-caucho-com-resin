@@ -293,7 +293,7 @@ public class MiscModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     }
 
-    Path path = env.lookup(browscap.toString());
+    Path path = env.lookup(browscap.toStringValue());
     if (path == null) {
       env.warning(L.l("Browscap file not found."));
       return BooleanValue.FALSE;

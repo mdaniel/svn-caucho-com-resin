@@ -1359,7 +1359,7 @@ public class FileModule extends AbstractQuercusModule {
       
       if (mode.startsWith("r")) {
         if (useIncludePath)
-          path = env.lookupInclude(filename.toString());
+          path = env.lookupInclude(filename.toStringValue());
 
         if (path == null) {
           env.warning(L.l("{0} cannot be read", filename));

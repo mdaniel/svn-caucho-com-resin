@@ -361,16 +361,6 @@ public class StringBuilderValue
   }
 
   /**
-   * Converts to a string builder
-   */
-  @Override
-  public StringValue toStringBuilder()
-  {
-    // XXX: can this just return this, or does it need to return a copy?
-    return new StringBuilderValue(_buffer, 0, _length);
-  }
-
-  /**
    * Returns true if the value is empty.
    */
   @Override
@@ -798,9 +788,56 @@ public class StringBuilderValue
    * Converts to a string builder
    */
   @Override
+  public StringValue toStringBuilder()
+  {
+    // XXX: can this just return this, or does it need to return a copy?
+    return new StringBuilderValue(_buffer, 0, _length);
+  }
+
+  /**
+   * Converts to a string builder
+   */
+  @Override
   public StringValue toStringBuilder(Env env)
   {
-    return new StringBuilderValue(_buffer, 0, _length);
+    // add padding since the string will likely be appended
+    
+    int length = (_length + 64) & ~0x1f;
+
+    StringBuilderValue v = new StringBuilderValue(length);
+
+    System.arraycopy(_buffer, 0, v._buffer, 0, _length);
+
+    v._length = _length;
+    
+    return v;
+  }
+
+  /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder(Env env, Value value)
+  {
+    int length = _length;
+
+    if (value instanceof StringValue) {
+      length += ((StringValue) value).length();
+    }
+    
+    // add padding since the string will likely be appended
+    
+    length = (length + 64) & ~0x1f;
+
+    StringBuilderValue v = new StringBuilderValue(length);
+
+    System.arraycopy(_buffer, 0, v._buffer, 0, _length);
+
+    v._length = _length;
+
+    value.appendTo(v);
+    
+    return v;
   }
 
   //

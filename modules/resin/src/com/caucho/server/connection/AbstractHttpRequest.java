@@ -2564,6 +2564,11 @@ public abstract class AbstractHttpRequest
     return _tcpConn != null && _tcpConn.isComet();
   }
 
+  public boolean isDuplex()
+  {
+    return _tcpConn != null && _tcpConn.isDuplex();
+  }
+
   /**
    * Returns true if keepalives are allowed.
    *

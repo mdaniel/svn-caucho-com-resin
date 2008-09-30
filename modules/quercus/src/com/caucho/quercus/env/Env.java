@@ -3739,7 +3739,7 @@ public class Env {
     }
 
     if (url != null) {
-      includeOnce(url.toString());
+      includeOnce(new StringBuilderValue(url.toString()));
       return true;
     }
     else {
@@ -3917,7 +3917,7 @@ public class Env {
   /**
    * Evaluates an included file.
    */
-  public Value requireOnce(String include)
+  public Value requireOnce(StringValue include)
   {
     return include(getSelfDirectory(), include, true, true);
   }
@@ -3925,7 +3925,7 @@ public class Env {
   /**
    * Evaluates an included file.
    */
-  public Value require(String include)
+  public Value require(StringValue include)
   {
     return include(getSelfDirectory(), include, true, false);
   }
@@ -3933,7 +3933,7 @@ public class Env {
   /**
    * Evaluates an included file.
    */
-  public Value include(String include)
+  public Value include(StringValue include)
   {
     return include(getSelfDirectory(), include, false, false);
   }
@@ -3941,7 +3941,7 @@ public class Env {
   /**
    * Evaluates an included file.
    */
-  public Value includeOnce(String include)
+  public Value includeOnce(StringValue include)
   {
     return include(getSelfDirectory(), include, false, true);
   }
@@ -3949,8 +3949,8 @@ public class Env {
   /**
    * Evaluates an included file.
    */
-  public Value includeOnce(Path scriptPwd, String include,
-		       boolean isRequire)
+  public Value includeOnce(Path scriptPwd, StringValue include,
+			   boolean isRequire)
   {
     return include(scriptPwd, include, isRequire, true);
   }
@@ -3958,7 +3958,7 @@ public class Env {
   /**
    * Evaluates an included file.
    */
-  public Value include(Path scriptPwd, String include,
+  public Value include(Path scriptPwd, StringValue include,
 		       boolean isRequire, boolean isOnce)
   {
     try {
@@ -4051,20 +4051,20 @@ public class Env {
   /**
    * Looks up the path.
    */
-  public Path lookup(String relPath)
+  public Path lookup(StringValue relPath)
   {
-    return lookupInclude(getSelfDirectory(), relPath);
+    return lookupInclude(getSelfDirectory(), relPath.toString());
   }
 
   /**
    * Looks up the path.
    */
-  public Path lookupInclude(String relPath)
+  public Path lookupInclude(StringValue relPath)
   {
     return lookupInclude(relPath, getPwd(), getSelfDirectory());
   }
 
-  private Path lookupInclude(String include, Path pwd, Path scriptPwd)
+  private Path lookupInclude(StringValue include, Path pwd, Path scriptPwd)
   {
     String includePath = getDefaultIncludePath();
     
@@ -4107,8 +4107,12 @@ public class Env {
     return includePath;
   }
     
-  private Path lookupIncludeImpl(String include, Path pwd, Path scriptPwd)
+  private Path lookupIncludeImpl(StringValue includeValue,
+				 Path pwd,
+				 Path scriptPwd)
   {
+    String include = includeValue.toString();
+    
     // php/0b0g
 
     Path path = lookupInclude(pwd, include);
@@ -5329,4 +5333,3 @@ public class Env {
     SPECIAL_VARS.put("HTTP_RAW_POST_DATA", HTTP_RAW_POST_DATA);
   }
 }
-

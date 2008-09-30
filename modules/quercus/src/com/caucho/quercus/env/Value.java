@@ -830,6 +830,22 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Converts to a string builder
+   */
+  public StringValue toStringBuilder(Env env, Value value)
+  {
+    return toStringBuilder(env).appendUnicode(value);
+  }
+
+  /**
+   * Converts to a string builder
+   */
+  public StringValue toStringBuilder(Env env, StringValue value)
+  {
+    return toStringBuilder(env).appendUnicode(value);
+  }
+
+  /**
    * Converts to a long vaule
    */
   public LongValue toLongValue()

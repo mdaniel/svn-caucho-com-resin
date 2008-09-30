@@ -899,6 +899,11 @@ public class HttpServletRequestImpl implements CauchoRequest
   {
     return _request.isComet();
   }
+
+  public boolean isDuplex()
+  {
+    return _request.isDuplex();
+  }
   
   public void killKeepalive()
   {

@@ -33,6 +33,7 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.vfs.Path;
 
 /**
@@ -79,9 +80,9 @@ public class IncludeExpr extends UnaryExpr {
    */
   public Value eval(Env env)
   {
-    String name = _expr.evalString(env);
+    StringValue name = _expr.eval(env).toStringValue();
       
-    env.pushCall(this, NullValue.NULL, new Value[] { env.createString(name) });
+    env.pushCall(this, NullValue.NULL, new Value[] { name });
     try {
       return env.include(_dir, name, _isRequire, false);
     } finally {

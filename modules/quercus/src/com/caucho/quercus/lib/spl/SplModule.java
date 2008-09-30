@@ -172,7 +172,7 @@ public class SplModule extends AbstractQuercusModule
     String filePrefix = className.toLowerCase();
 
     for (String ext : extensionList) {
-      String filename = filePrefix + ext;
+      StringValue filename = new StringBuilderValue(filePrefix).append(ext);
 
       env.include(filename);
       

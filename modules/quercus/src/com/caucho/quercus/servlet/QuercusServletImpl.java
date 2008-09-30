@@ -82,6 +82,8 @@ public class QuercusServletImpl
     checkServletAPIVersion();
     
     getQuercus().setPwd(new FilePath(_servletContext.getRealPath("/")));
+
+    getQuercus().init();
   }
 
   /*
@@ -152,7 +154,7 @@ public class QuercusServletImpl
 
         String prepend = env.getIniString("auto_prepend_file");
         if (prepend != null) {
-          Path prependPath = env.lookup(prepend);
+          Path prependPath = env.lookup(env.createString(prepend));
           
           if (prependPath == null)
             env.error(L.l("auto_prepend_file '{0}' not found.", prepend));
@@ -166,7 +168,7 @@ public class QuercusServletImpl
 
         String append = env.getIniString("auto_append_file");
         if (append != null) {
-          Path appendPath = env.lookup(append);
+          Path appendPath = env.lookup(env.createString(append));
           
           if (appendPath == null)
             env.error(L.l("auto_append_file '{0}' not found.", append));

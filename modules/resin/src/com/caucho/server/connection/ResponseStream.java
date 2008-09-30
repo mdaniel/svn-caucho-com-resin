@@ -718,7 +718,7 @@ class ResponseStream extends ToByteResponseStream {
       }
 
       CauchoRequest req = _response.getRequest();
-      if (req.isComet()) {
+      if (req.isComet() || req.isDuplex()) {
       }
       else if (! req.allowKeepalive()) {
 	_isClosed = true;

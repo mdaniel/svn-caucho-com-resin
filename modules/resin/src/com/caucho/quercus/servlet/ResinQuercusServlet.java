@@ -32,6 +32,7 @@ package com.caucho.quercus.servlet;
 import com.caucho.quercus.*;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusValueException;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.resin.Resin;
@@ -138,7 +139,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
 
         String prepend = env.getIniString("auto_prepend_file");
         if (prepend != null) {
-          Path prependPath = env.lookup(prepend);
+          Path prependPath = env.lookup(new StringBuilderValue(prepend));
           
           if (prependPath == null)
             env.error(L.l("auto_prepend_file '{0}' not found.", prepend));
@@ -152,7 +153,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
 
         String append = env.getIniString("auto_append_file");
         if (append != null) {
-          Path appendPath = env.lookup(append);
+          Path appendPath = env.lookup(new StringBuilderValue(append));
           
           if (appendPath == null)
             env.error(L.l("auto_append_file '{0}' not found.", append));
