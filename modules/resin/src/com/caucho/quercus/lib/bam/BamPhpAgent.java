@@ -118,6 +118,8 @@ public class BamPhpAgent extends SimpleBamService {
     if (_script == null)
       throw new ConfigException(L.l("script path not specified"));
 
+    _quercus.init();
+    
     try {
       _page = _quercus.parse(_script);
     } catch (Exception e) {

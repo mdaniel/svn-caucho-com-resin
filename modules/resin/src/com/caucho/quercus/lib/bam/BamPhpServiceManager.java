@@ -127,6 +127,8 @@ public class BamPhpServiceManager implements BamServiceManager {
     if (_script == null)
       throw new ConfigException(L.l("script path not specified"));
 
+    _quercus.init();
+
     _broker.addServiceManager(this);
   }
 
