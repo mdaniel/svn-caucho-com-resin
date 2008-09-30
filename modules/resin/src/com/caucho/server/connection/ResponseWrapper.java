@@ -34,6 +34,7 @@ import javax.servlet.http.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
+import com.caucho.util.L10N;
 
 /**
  * Wraps a servlet response in another response.  Filters may
@@ -44,6 +45,8 @@ import java.util.Locale;
  * @since servlet 2.3
  */
 public class ResponseWrapper implements ServletResponse {
+  private static final L10N L = new L10N(ResponseWrapper.class);
+  
   // the wrapped response
   protected HttpServletResponse _response;
   
@@ -450,5 +453,15 @@ public class ResponseWrapper implements ServletResponse {
   public boolean isDisabled()
   {
     return false;
+  }
+
+  //
+  // caucho methods
+  //
+
+  public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
+  {
+    throw new IllegalStateException(L.l("'{0}' does not support upgrading",
+					this));
   }
 }

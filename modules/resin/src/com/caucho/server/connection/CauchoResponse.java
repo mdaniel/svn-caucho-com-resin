@@ -72,4 +72,5 @@ public interface CauchoResponse extends HttpServletResponse {
   public void setPrivateCache(boolean isPrivate);
 
   public AbstractHttpResponse getAbstractHttpResponse();
+  public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler);
 }

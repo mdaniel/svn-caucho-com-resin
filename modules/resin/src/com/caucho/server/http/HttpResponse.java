@@ -207,13 +207,9 @@ public class HttpResponse extends AbstractHttpResponse
 	       _statusCode + " " + _statusMessage);
     }
 
-    if (containsHeader("Server")) {
-    }
-    else if (Alarm.isTest()) {
-      os.print("\r\nServer: Resin/1.1");
-    }
-    else
+    if (! containsHeader("Server")) {
       os.write(_resinServerBytes, 0, _resinServerBytes.length);
+    }
 
     if (statusCode >= 400) {
       removeHeader("ETag");

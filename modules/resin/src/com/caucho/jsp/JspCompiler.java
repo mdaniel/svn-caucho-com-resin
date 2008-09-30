@@ -65,6 +65,13 @@ import java.util.logging.Logger;
 
 /**
  * Compilation interface for JSP pages.
+ *
+ * <pre>
+ * com.caucho.jsp.JspCompiler [flags] jsp1 jsp2 ...");
+ *     -app-dir  : The directory root of the web-app.");
+ *     -class-dir: The working directory to use as output.");
+ *     -conf: A configuration file for the compiler.");
+ * </pre>
  */
 public class JspCompiler implements EnvironmentBean {
   private static final L10N L = new L10N(JspCompiler.class);
@@ -616,6 +623,13 @@ public class JspCompiler implements EnvironmentBean {
   /**
    * Callable by applications to initialize the compiler.  This call
    * will configure the JspCompiler, but not start any compilations.
+   *
+   * <pre>
+   * com.caucho.jsp.JspCompiler [flags] jsp1 jsp2 ...");
+   *     -app-dir  : The directory root of the web-app.");
+   *     -class-dir: The working directory to use as output.");
+   *     -conf: A configuration file for the compiler.");
+   * </pre>
    */
   public int configureFromArgs(String []args)
     throws Exception

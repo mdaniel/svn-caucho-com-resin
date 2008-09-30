@@ -384,7 +384,7 @@ public class ErrorPageManager {
       }
     }
 
-    response.setContentType("text/html; charset=utf-8");
+    response.setContentType("text/html");
 
     String encoding = CharacterEncoding.getLocalEncoding();
 
@@ -394,6 +394,8 @@ public class ErrorPageManager {
       Locale locale = Locale.getDefault();
       if (! "ISO-8859-1".equals(Encoding.getMimeName(locale)))
 	response.setLocale(Locale.getDefault());
+      else
+	response.setCharacterEncoding("utf-8");
     }
 
     PrintWriter out = response.getWriter();
@@ -529,7 +531,7 @@ public class ErrorPageManager {
 	  || code == HttpServletResponse.SC_NOT_MODIFIED)
         return;
 
-      response.setContentType("text/html");
+      response.setContentType("text/html; charset=utf-8");
       PrintWriter out = response.getWriter();
 
       out.println("<html>");

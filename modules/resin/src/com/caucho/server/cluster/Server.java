@@ -111,7 +111,7 @@ public class Server extends ProtocolDispatchServer
 
   private HostContainer _hostContainer;
 
-  private String _serverHeader = "Resin/" + com.caucho.Version.VERSION;
+  private String _serverHeader;
 
   private GitRepository _git;
 
@@ -184,6 +184,11 @@ public class Server extends ProtocolDispatchServer
     _clusterServer = clusterServer;
     _resin = _clusterServer.getCluster().getResin();
 
+    if (! Alarm.isTest())
+      _serverHeader = "Resin/" + com.caucho.Version.VERSION;
+    else
+      _serverHeader = "Resin/1.1";
+    
     try {
       Thread thread = Thread.currentThread();
 
