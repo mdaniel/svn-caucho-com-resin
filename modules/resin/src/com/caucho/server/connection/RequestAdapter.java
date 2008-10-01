@@ -511,6 +511,11 @@ public class RequestAdapter extends RequestWrapper
   {
     return false;
   }
+
+  public boolean isDuplex()
+  {
+    return false;
+  }
   
   public void killKeepalive()
   {

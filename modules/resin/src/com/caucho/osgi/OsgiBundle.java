@@ -90,6 +90,8 @@ public class OsgiBundle implements Bundle
   private ArrayList<ServiceUse> _serviceUseList
     = new ArrayList<ServiceUse>();
 
+  private String _importAttr;
+
   private String _activatorClassName;
   private OsgiBundleContext _bundleContext;
 
@@ -135,6 +137,10 @@ public class OsgiBundle implements Bundle
 
 	if (exportList != null)
 	  _importList.addAll(exportList);
+
+	_importAttr = attr.getValue("Import-Package");
+
+	parseImport(_importAttr);
 
 	_activatorClassName = attr.getValue("Bundle-Activator");
       } catch (Exception e) {
@@ -249,6 +255,74 @@ public class OsgiBundle implements Bundle
       
       _exportList.add(loader);
     }
+  }
+
+  private void parseImport(String importString)
+  {
+    try {
+      Reader in = new java.io.StringReader(importString);
+
+      while (parseImportChunk(in) == ',') {
+      }
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  private int parseImportChunk(Reader in)
+    throws IOException
+  {
+    ArrayList<String> packageList = new ArrayList<String>();
+
+    while (true) {
+      int ch = parsePackageName(in, packageList);
+
+      if (ch != ';') {
+	System.out.println("PACKAGE: " + packageList);
+	
+	return ch;
+      }
+    }
+  }
+
+  private int parsePackageName(Reader in, ArrayList<String> packageList)
+    throws IOException
+  {
+    int ch = skipWhitespace(in);
+
+    if (ch < 0)
+      return ch;
+
+    if (! Character.isJavaIdentifierStart((char) ch)) {
+      throw new IOException(L.l("unexpected OSGI import-package character for '{0}'",
+				_importAttr));
+    }
+
+    StringBuilder name = new StringBuilder();
+
+    for (;
+	 Character.isJavaIdentifierPart((char) ch) || ch == '.';
+	 ch = in.read()) {
+      name.append((char) ch);
+    }
+
+    packageList.add(name.toString());
+
+    for (; Character.isWhitespace((char) ch); ch = in.read()) {
+    }
+    
+    return ch;
+  }
+
+  private int skipWhitespace(Reader in)
+    throws IOException
+  {
+    int ch;
+    
+    for (ch = in.read(); Character.isWhitespace(ch); ch = in.read()) {
+    }
+
+    return ch;
   }
   
   private ArrayList<PackageItem> parseItems(String attr)
