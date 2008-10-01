@@ -175,11 +175,11 @@ public class FunctionExpr extends Expr {
       env.checkTimeout();
 	
       if (isRef)
-	return fun.callRef(env, args);
+        return fun.callRef(env, args);
       else if (isCopy)
-	return fun.callCopy(env, args);
+        return fun.callCopy(env, args);
       else
-	return fun.call(env, args);
+        return fun.call(env, args);
     //} catch (Exception e) {
     //  throw QuercusException.create(e, env.getStackTrace());
     } finally {

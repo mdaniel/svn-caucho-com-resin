@@ -166,6 +166,8 @@ abstract public class JavaInvoker
 
 	for (int i = 0; i < argLength - envOffset; i++) {
 	  boolean isReference = false;
+      boolean isPassThru = false;
+      
 	  boolean isNotNull = false;
 
 	  for (Annotation ann : _paramAnn[i + envOffset]) {
@@ -175,13 +177,15 @@ abstract public class JavaInvoker
 	      Optional opt = (Optional) ann;
 
 	      if (! opt.value().equals("")) {
-		Expr expr = QuercusParser.parseDefault(opt.value());
+	        Expr expr = QuercusParser.parseDefault(opt.value());
 
-		_defaultExprs[i] = expr;
+	        _defaultExprs[i] = expr;
 	      } else
-		_defaultExprs[i] = exprFactory.createDefault();
+	        _defaultExprs[i] = exprFactory.createDefault();
 	    } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
 	      isReference = true;
+        } else if (PassThru.class.isAssignableFrom(ann.annotationType())) {
+          isPassThru = true;
 	    } else if (NotNull.class.isAssignableFrom(ann.annotationType())) {
 	      isNotNull = true;
 	    }
@@ -193,11 +197,19 @@ abstract public class JavaInvoker
 	    _marshalArgs[i] = marshalFactory.createReference();
 
 	    if (! Value.class.equals(argType)
-		&& ! Var.class.equals(argType)) {
+	        && ! Var.class.equals(argType)) {
 	      throw new QuercusException(L.l("reference must be Value or Var for {0}",
 					     _name));
 	    }
 	  }
+      else if (isPassThru) {
+        _marshalArgs[i] = marshalFactory.createValuePassThru();
+        
+        if (! Value.class.equals(argType)) {
+              throw new QuercusException(L.l("pass thru must be Value for {0}",
+                                             _name));
+            }
+      }
 	  else
 	    _marshalArgs[i] = marshalFactory.create(argType, isNotNull);
 	}

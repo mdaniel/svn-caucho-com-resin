@@ -187,7 +187,18 @@ public class ObjectExtValue extends ObjectValue
       }
     }
 
-    return getFieldExt(env, name);
+    // php/09km, php/09kn
+    // push/pop to prevent infinite recursion
+    
+    // needs to be outside try block because push may fail if already exist
+    if (! env.pushFieldGet(_className, name))
+      return NullValue.NULL;
+    
+    try {
+      return getFieldExt(env, name);
+    } finally {
+      env.popFieldGet(_className, name);
+    }
   }
 
   /**
@@ -204,7 +215,18 @@ public class ObjectExtValue extends ObjectValue
       }
     }
 
-    return getFieldExt(env, name);
+    // php/09km, php/09kn
+    // push/pop to prevent infinite recursion
+    
+    // needs to be outside try block because push may fail if already exist
+    if (! env.pushFieldGet(_className, name))
+      return NullValue.NULL;
+    
+    try {
+      return getFieldExt(env, name);
+    } finally {
+      env.popFieldGet(_className, name);
+    }
   }
   
   /**

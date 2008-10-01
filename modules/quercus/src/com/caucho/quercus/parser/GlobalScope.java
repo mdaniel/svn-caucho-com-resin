@@ -144,7 +144,7 @@ public class GlobalScope extends Scope {
    */
   protected void addConditionalClass(InterpretedClassDef def)
   {
-    _conditionalClassMap.put(def.getCompilationName(), def);
+    _classList.add(def);
   }
 
   /**

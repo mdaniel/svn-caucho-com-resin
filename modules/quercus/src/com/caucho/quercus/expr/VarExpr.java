@@ -184,11 +184,11 @@ public class VarExpr
       else {
         Value array = value.toAutoArray();
 
-	if (array != value) {
-	  env.setGlobalValue(_name, array);
+        if (array != value) {
+          env.setGlobalValue(_name, array);
 
-	  value = array;
-	}
+          value = array;
+        }
       }
     } else {
       value = env.getVar(_name);
@@ -199,7 +199,7 @@ public class VarExpr
         env.setValue(_name, value);
       }
       else {
-	value = value.toAutoArray();
+        value = value.toAutoArray();
       }
     }
 

@@ -967,6 +967,22 @@ public class JavaAdapterVar extends Var
     
     return retValue;
   }
+  
+  /**
+   * Sets the array value, returning the new array, e.g. to handle
+   * string update ($a[0] = 'A').
+   */
+  @Override
+  public Value append(Value index, Value value)
+  {
+    setRaw(getValue());
+    
+    Value retValue = super.append(index, value);
+    
+    setValue(getRawValue());
+    
+    return retValue;
+  }
 
   /**
    * Return unset the value.

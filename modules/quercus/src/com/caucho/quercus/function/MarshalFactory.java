@@ -257,5 +257,12 @@ public class MarshalFactory {
   {
     return ReferenceMarshal.MARSHAL;
   }
+  
+  public Marshal createValuePassThru()
+  {
+    Thread.dumpStack();
+    
+    return ValueMarshal.MARSHAL_PASS_THRU;
+  }
 }
 

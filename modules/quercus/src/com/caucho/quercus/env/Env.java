@@ -78,6 +78,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.TimeZone;
@@ -257,6 +258,9 @@ public class Env {
   private QuercusClass _callingClass;
 
   private Value [] _functionArgs;
+  
+  private LinkedList<FieldGetEntry> _fieldGetList
+    = new LinkedList<FieldGetEntry>();
 
   private Path _selfPath;
   private Path _selfDirectory;
@@ -1755,11 +1759,9 @@ public class Env {
   {
     Var var = _map.get(name);
 
-    // getRef should not be looking for the superglobals.  The
-    // parse-time code should convert those into direct global calls
-    /* (XXX: this should be deleted unless the regressions freak)
+    // required for $$ref where $ref is the name of a superglobal
     if (var == null) {
-      var = getSpecialRef(name);
+      var = getGlobalSpecialRef(name);
 
       if (var != null) {
         var.setGlobal();
@@ -1768,7 +1770,6 @@ public class Env {
         var = _map.get(name);
       }
     }
-    */
 
     return var;
   }
@@ -2343,6 +2344,31 @@ public class Env {
       return _callArgStack[_callStackTop - depth - 1];
     else
       return null;
+  }
+  
+  /*
+   * Returns true if <code>name</code> doesn't already exist on the
+   * field __get() stack.
+   */
+  public boolean pushFieldGet(String className, StringValue fieldName)
+  {
+    FieldGetEntry entry = new FieldGetEntry(className, fieldName);
+    
+    if (_fieldGetList.contains(entry))
+      return false;
+    else {
+      _fieldGetList.add(entry);
+      
+      return true;
+    }
+  }
+  
+  public void popFieldGet(String className, StringValue fieldName)
+  {
+    FieldGetEntry entry = new FieldGetEntry(className, fieldName);
+    
+    if (_fieldGetList.size() > 0)
+      _fieldGetList.removeLast();
   }
   
   /*
@@ -5247,6 +5273,28 @@ public class Env {
   public String dbgId()
   {
     return "Quercus[" + _selfPath + "] ";
+  }
+  
+  static class FieldGetEntry {
+    private final String _className;
+    private final StringValue _fieldName;
+    
+    FieldGetEntry(String className, StringValue fieldName)
+    {
+      _className = className;
+      _fieldName = fieldName;
+    }
+    
+    public boolean equals(Object o)
+    {
+      if (! (o instanceof FieldGetEntry))
+        return false;
+      
+      FieldGetEntry entry = (FieldGetEntry) o;
+      
+      return entry._className.equals(_className)
+             && entry._fieldName.equals(_fieldName);
+    }
   }
 
   static class ClassKey {

@@ -74,7 +74,7 @@ public class AssignRefExpr extends Expr {
     // indicates value should be a reference
     Value value = _value.evalRef(env);
     
-    _var.evalAssign(env, value);
+    _var.evalAssign(env, value.toRefVar());
 
     return value;
   }

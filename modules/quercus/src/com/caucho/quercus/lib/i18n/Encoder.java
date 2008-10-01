@@ -87,8 +87,20 @@ abstract public class Encoder
     _isReplaceUnicode = isReplaceUnicode;
   }
   
+  public void reset()
+  {
+  }
+  
   abstract public boolean isEncodable(Env env, StringValue str);
   
   abstract public StringValue encode(Env env, CharSequence str);
+  
+  public final StringValue encode(Env env, CharSequence str, boolean isReset)
+  {
+    if (isReset)
+      reset();
+    
+    return encode(env, str);
+  }
   
 }

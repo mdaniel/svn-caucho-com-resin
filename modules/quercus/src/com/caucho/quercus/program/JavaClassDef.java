@@ -70,7 +70,8 @@ public class JavaClassDef extends ClassDef {
   private final String _name;
   private final Class _type;
 
-  private final HashSet<String> _instanceOfSet = new HashSet<String>();
+  private HashSet<String> _instanceOfSet;
+  private HashSet<String> _instanceOfSetLowerCase;
   
   private final boolean _isAbstract;
   private final boolean _isInterface;
@@ -138,8 +139,6 @@ public class JavaClassDef extends ClassDef {
     if (type.isArray() && ! isArray())
       throw new IllegalStateException(L.l("'{0}' needs to be called with JavaArrayClassDef",
 					  type));
-
-    fillInstanceOfSet(_type);
   }
   
   public JavaClassDef(ModuleContext moduleContext,
@@ -159,14 +158,17 @@ public class JavaClassDef extends ClassDef {
     if (type == null)
       return;
     
-    _instanceOfSet.add(type.getSimpleName());
+    String name = type.getSimpleName();
+    
+    _instanceOfSet.add(name);
+    _instanceOfSetLowerCase.add(name.toLowerCase());
 
     fillInstanceOfSet(type.getSuperclass());
 
     Class []ifaceList = type.getInterfaces();
     if (ifaceList != null) {
       for (Class iface : ifaceList)
-	fillInstanceOfSet(iface);
+        fillInstanceOfSet(iface);
     }
   }
 
@@ -254,7 +256,15 @@ public class JavaClassDef extends ClassDef {
   @Override
   public boolean isA(String name)
   {
-    return _instanceOfSet.contains(name);
+    if (_instanceOfSet == null) {
+      _instanceOfSet = new HashSet<String>();
+      _instanceOfSetLowerCase = new HashSet<String>();
+      
+      fillInstanceOfSet(_type);
+    }
+    
+    return _instanceOfSet.contains(name)
+           || _instanceOfSetLowerCase.contains(name.toLowerCase());
   }
 
   private boolean hasInterface(String name, Class type)

@@ -36,7 +36,15 @@ import com.caucho.quercus.expr.Expr;
 
 public class ValueMarshal extends Marshal
 {
-  public static final ValueMarshal MARSHAL = new ValueMarshal();
+  public static final Marshal MARSHAL = new ValueMarshal(false);
+  public static final Marshal MARSHAL_PASS_THRU = new ValueMarshal(true);
+  
+  private boolean _isPassThru;
+  
+  protected ValueMarshal(boolean isPassThru)
+  {
+    _isPassThru = isPassThru;
+  }
   
   public boolean isReadOnly()
   {
@@ -59,8 +67,14 @@ public class ValueMarshal extends Marshal
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    // php/3c81
-    return value.toValue();
+    if (_isPassThru) {
+      // php/0433
+      return value;
+    }
+    else {
+      // php/3c81
+      return value.toValue();
+    }
   }
 
   public Value unmarshal(Env env, Object value)

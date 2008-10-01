@@ -104,14 +104,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
   {
     Value obj = _expr.evalArray(env);
 
-    if (obj instanceof ArrayValue) {
-      ArrayValue array = (ArrayValue) obj;
-      Value key = array.createTailKey();
-
-      return array.getRef(key);
-    }
-    else
-      return NullValue.NULL;
+    return obj.putRef();
   }
 
   /**

@@ -362,7 +362,6 @@ class JsonDecoder {
 	      return errorReturn(env, "invalid escaped hex character");
 	  }
 
-	  System.out.println("HEX: " + hex);
 	  if (hex < 0x80)
 	    sbv.append((char)hex);
 	  else if (hex < 0x800) {

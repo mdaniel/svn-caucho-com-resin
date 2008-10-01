@@ -1041,6 +1041,17 @@ public class Var extends Value
 
     return value;
   }
+  
+  /**
+   * Sets the array value, returning the new array, e.g. to handle
+   * string update ($a[0] = 'A').
+   */
+  public Value append(Value index, Value value)
+  {
+    _value = _value.append(index, value);
+    
+    return this;
+  }
 
   /**
    * Returns the array ref.

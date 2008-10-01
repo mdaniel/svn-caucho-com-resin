@@ -498,18 +498,18 @@ public class MbstringModule
 
     if (regs == null) {
       if (isCaseSensitive)
-        return RegexpModule.ereg(env, pattern, string, null);
+        return CauchoRegexpModule.eregImpl(env, pattern, string, null, false);
       else
-        return RegexpModule.eregi(env, pattern, string, null);
+        return CauchoRegexpModule.eregImpl(env, pattern, string, null, true);
     }
 
     Value val;
     Var regVar = new Var();
 
     if (isCaseSensitive)
-      val = RegexpModule.ereg(env, pattern, string, regVar);
+      val = CauchoRegexpModule.eregImpl(env, pattern, string, regVar, false);
     else
-      val = RegexpModule.eregi(env, pattern, string, regVar);
+      val = CauchoRegexpModule.eregImpl(env, pattern, string, regVar, true);
 
     if (regVar.isset()) {
       regs.clear();
@@ -1442,7 +1442,7 @@ public class MbstringModule
     val = val.toValue();
 
     if (val.isString()) {
-      return encoder.encode(env, val.toStringValue());
+      return encoder.encode(env, val.toStringValue(), true);
     }
     else if (val.isArray()) {
       ArrayValue array = new ArrayValueImpl();

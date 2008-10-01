@@ -109,7 +109,7 @@ public class FunctionScope extends Scope {
                                       String parentName,
                                       ArrayList<String> ifaceList,
                                       int index,
-				      boolean isTop)
+                                      boolean isTop)
   {
     InterpretedClassDef existingClass = _classMap.get(name);
 

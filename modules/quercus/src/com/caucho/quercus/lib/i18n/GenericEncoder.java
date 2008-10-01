@@ -92,9 +92,10 @@ public class GenericEncoder
       ByteBuffer out = ByteBuffer.wrap(tempBuf.getBuffer());
       
       StringValue sb = env.createBinaryBuilder();
-      
+
       while (in.hasRemaining()) {
         CoderResult coder = _encoder.encode(in, out, false);
+
         if (! fill(sb, in, out, coder))
           return sb;
         
@@ -143,6 +144,11 @@ public class GenericEncoder
     }
     
     return true;
+  }
+  
+  public void reset()
+  {
+    _encoder.reset();
   }
 
 }

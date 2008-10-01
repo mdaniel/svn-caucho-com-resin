@@ -596,7 +596,7 @@ public class StringBuilderValue
       
       int index = (int) indexL;
 
-      StringBuilderValue sb = new StringBuilderValue(this);
+      StringBuilderValue sb = (StringBuilderValue) toStringBuilder();
       
       int padLen = index - len;
 

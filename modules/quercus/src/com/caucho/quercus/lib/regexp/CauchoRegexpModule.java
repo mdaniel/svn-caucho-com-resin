@@ -800,6 +800,11 @@ public class CauchoRegexpModule
           Value replacement,
           StringValue subject)
   {
+    if (pattern.length() == 0) {
+      env.warning(L.l("empty pattern argument"));
+      return BooleanValue.FALSE;
+    }
+    
     return eregReplaceImpl(env, pattern, replacement, subject, false);
   }
 
@@ -811,6 +816,11 @@ public class CauchoRegexpModule
           Value replacement,
           StringValue subject)
   {
+    if (pattern.length() == 0) {
+      env.warning(L.l("empty pattern argument"));
+      return BooleanValue.FALSE;
+    }
+    
     return eregReplaceImpl(env, pattern, replacement, subject, true);
   }
 

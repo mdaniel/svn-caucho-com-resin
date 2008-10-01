@@ -217,7 +217,7 @@ abstract public class ClassDef {
 
     for (int i = 0; i < _ifaceList.length; i++) {
       if (_ifaceList[i].equalsIgnoreCase(name))
-	return true;
+        return true;
     }
 
     return false;
