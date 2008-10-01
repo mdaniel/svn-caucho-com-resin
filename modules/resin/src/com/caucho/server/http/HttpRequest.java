@@ -33,7 +33,6 @@ import com.caucho.log.Log;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.Connection;
-import com.caucho.server.connection.ConnectionController;
 import com.caucho.server.connection.HttpServletRequestImpl;
 import com.caucho.server.connection.HttpServletResponseImpl;
 import com.caucho.server.dispatch.BadRequestException;
@@ -43,6 +42,7 @@ import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.port.ServerRequest;
 import com.caucho.server.port.TcpServerRequest;
 import com.caucho.server.port.TcpConnection;
+import com.caucho.server.port.TcpCometController;
 import com.caucho.server.cluster.*;
 import com.caucho.server.webapp.*;
 import com.caucho.util.CharBuffer;
@@ -340,33 +340,31 @@ public class HttpRequest extends AbstractHttpRequest
     throws IOException
   {
     boolean isResume = false;
-    ConnectionController controller = null;
+    TcpCometController comet = null;
     
     try {
       try {
 	setStartTime();
 	
-	Connection conn = getConnection();
-	controller = conn.getController();
-
-	if (controller == null) {
-	  killKeepalive();
+	if (! isComet()) {
 	  return false;
 	}
+	
+	TcpConnection conn = (TcpConnection) getConnection();
 
-	controller.startResume();
+	// for stats
+	// conn.startResume();
 
 	if (_invocation.doResume(_requestFacade, _responseFacade)) {
-	  controller = null;
 	  isResume = true;
 	}
 	else
-	  killKeepalive();
+	  complete();
       } finally {
-	finish();
-
-	if (controller != null)
-	  controller.close();
+	if (isResume)
+	  finish();
+	else
+	  _response.finish();
       }
     } catch (ClientDisconnectException e) {
       _response.killCache();
@@ -390,7 +388,7 @@ public class HttpRequest extends AbstractHttpRequest
                (isKeepalive() ? "keepalive" : "no-keepalive"));
     }
 
-    return isResume && controller == null;
+    return isResume && isComet();
   }
 
   /**
@@ -1489,10 +1487,8 @@ public class HttpRequest extends AbstractHttpRequest
   {
     super.finish();
 
-    ConnectionController comet = getConnection().getController();
-
     // on a comet request, don't skip the content
-    if (comet == null) {
+    if (! isComet()) {
       skip();
     }
   }

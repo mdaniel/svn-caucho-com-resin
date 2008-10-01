@@ -50,8 +50,6 @@ public abstract class Connection
   private final ReadStream _readStream;
   private final WriteStream _writeStream;
 
-  protected ConnectionController _controller;
-
   public Connection()
   {
     _readStream = new ReadStream();
@@ -163,54 +161,5 @@ public abstract class Connection
   public boolean isDuplex()
   {
     return false;
-  }
-
-  /**
-   * Connection controller.
-   */
-  protected void setController(ConnectionController controller)
-  {
-    synchronized (this) {
-      if (_controller != null)
-	throw new IllegalStateException(L.l("ConnectionController is already set."));
-
-      _controller = controller;
-    }
-  }
-
-  /**
-   * Connection controller.
-   */
-  public ConnectionController getController()
-  {
-    return _controller;
-  }
-
-  /**
-   * Wake the controller.
-   */
-  protected boolean wake()
-  {
-    return false;
-  }
-
-  /**
-   * Connection controller.
-   */
-  void closeController(ConnectionController controller)
-  {
-    synchronized (this) {
-      if (_controller == controller)
-	_controller = null;
-      else
-	controller = null;
-    }
-
-    if (controller != null)
-      closeControllerImpl();
-  }
-
-  protected void closeControllerImpl()
-  {
   }
 }

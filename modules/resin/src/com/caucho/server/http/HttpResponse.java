@@ -109,8 +109,10 @@ public class HttpResponse extends AbstractHttpResponse
   @Override
   public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
   {
-    TcpDuplexController controller
-      = new TcpDuplexController((TcpServerRequest) getOriginalRequest(), handler);
+    TcpConnection conn
+      = (TcpConnection) ((TcpServerRequest) getOriginalRequest()).getConnection();
+    
+    TcpDuplexController controller = conn.toDuplex(handler);
     
     setStatus(101);
     setContentLength(0);

@@ -48,7 +48,6 @@ public class TcpDuplexController extends ConnectionController
 
   private ClassLoader _loader;
   
-  private TcpServerRequest _request;
   private TcpConnection _conn;
   private long _maxIdleTime;
 
@@ -58,37 +57,27 @@ public class TcpDuplexController extends ConnectionController
   private TcpDuplexHandler _handler;
   private String _readThreadName;
 
-  public TcpDuplexController(TcpServerRequest request,
+  public TcpDuplexController(TcpConnection conn,
 			     TcpDuplexHandler handler)
   {
-    super(request.getConnection());
-
     if (handler == null)
       throw new NullPointerException(L.l("handler is a required argument"));
 
-    _conn = (TcpConnection) request.getConnection();
+    _conn = conn;
     _handler = handler;
     
-    _request = request;
     _loader = Thread.currentThread().getContextClassLoader();
 
     _is = _conn.getReadStream();
     _os = _conn.getWriteStream();
     
     _readThreadName = ("resin-" + _handler.getClass().getSimpleName()
-		       + "-read-" + request.getConnection().getId());
-  }
-
-  private static AbstractHttpRequest
-    getAbstractHttpRequest(ServletRequest request)
-  {
-    return (AbstractHttpRequest) request;
+		       + "-read-" + conn.getId());
   }
 
   /**
    * Returns true for a duplex controller
    */
-  @Override
   public boolean isDuplex()
   {
     return true;
@@ -153,7 +142,6 @@ public class TcpDuplexController extends ConnectionController
   public void close()
   {
     _conn = null;
-    _request = null;
     _is = null;
     _os = null;
     _handler = null;
@@ -174,7 +162,7 @@ public class TcpDuplexController extends ConnectionController
       thread.setName(_readThreadName);
       thread.setContextClassLoader(_loader);
 
-      TcpConnection conn = (TcpConnection) getConnection();
+      TcpConnection conn = _conn;
       ReadStream is = _is;
       TcpDuplexHandler handler = _handler;
       
@@ -197,15 +185,14 @@ public class TcpDuplexController extends ConnectionController
   @Override
   public String toString()
   {
-    TcpServerRequest request = _request;
+    TcpConnection conn = _conn;
 
-    if (request == null || request.getConnection() == null)
+    if (conn == null)
       return getClass().getSimpleName() + "[closed]";
     else if (Alarm.isTest())
       return getClass().getSimpleName() + "[" + _handler + "]";
     else
       return (getClass().getSimpleName() + "["
-	      + request.getConnection().getId()
-	      + "," + _handler + "]");
+	      + conn.getId() + "," + _handler + "]");
   }
 }

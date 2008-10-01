@@ -42,7 +42,7 @@ import com.caucho.util.*;
  * Public API to control a comet connection.
  */
 public class HttpConnectionController extends ConnectionController
-  implements CometController
+					      /*  implements CometController */
 {
   private HttpServletRequestImpl _request;
   private HashMap<String,Object> _map
@@ -57,7 +57,7 @@ public class HttpConnectionController extends ConnectionController
 
   public HttpConnectionController(HttpServletRequestImpl request)
   {
-    super(request.getConnection());
+    //super(request.getConnection());
 
     _request = request;
   }

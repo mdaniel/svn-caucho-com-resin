@@ -36,6 +36,7 @@ import com.caucho.management.server.TcpConnectionMXBean;
 import com.caucho.server.connection.*;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.QSocket;
 import com.caucho.vfs.ReadStream;
@@ -54,6 +55,7 @@ import java.util.logging.Logger;
  */
 public class TcpConnection extends Connection
 {
+  private static final L10N L = new L10N(TcpConnection.class);
   private static final Logger log
     = Logger.getLogger(TcpConnection.class.getName());
   
@@ -79,6 +81,7 @@ public class TcpConnection extends Connection
   private final Object _requestLock = new Object();
 
   private ConnectionState _state = ConnectionState.IDLE;
+  private ConnectionController _controller;
   
   private boolean _isClosed;
 
@@ -223,17 +226,6 @@ public class TcpConnection extends Connection
   /**
    * Sets the keepalive state.  Called only by the SelectManager and Port.
    */
-  public void setKeepalive()
-  {
-    if (_isKeepalive)
-      log.warning(this + " illegal state: setting keepalive with active keepalive: ");
-    
-    _isKeepalive = true;
-  }
-
-  /**
-   * Sets the keepalive state.  Called only by the SelectManager and Port.
-   */
   public void clearKeepalive()
   {
     if (! _isKeepalive)
@@ -312,6 +304,9 @@ public class TcpConnection extends Connection
     _request = request;
   }
 
+  /**
+   * Returns true if the connection is secure, i.e. a SSL connection
+   */
   @Override
   public boolean isSecure()
   {
@@ -528,12 +523,10 @@ public class TcpConnection extends Connection
 
   public boolean toKeepalive()
   {
-    if (! _isKeepalive) {
-      if (getController() != null)
-	return false;
-      
-      _isKeepalive = _port.allowKeepalive(_connectionStartTime);
-    }
+    if (! _isKeepalive)
+      return false;
+    
+    _isKeepalive = _port.allowKeepalive(_connectionStartTime);
     
     return _isKeepalive;
   }
@@ -544,8 +537,11 @@ public class TcpConnection extends Connection
   public void start()
   {
   }
-  
-  RequestState handleConnection()
+
+  /**
+   * Handles a new connection/socket from the client.
+   */
+  RequestState handleRequests()
   {
     Thread thread = Thread.currentThread();
     ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
@@ -569,8 +565,10 @@ public class TcpConnection extends Connection
        }
 
        result = RequestState.EXIT;
+       
        synchronized (_requestLock) {
-         isKeepalive = getRequest().handleRequest();
+	 if (! getRequest().handleRequest())
+	   _isKeepalive = false;
        }
 
        // statistics
@@ -614,7 +612,7 @@ public class TcpConnection extends Connection
 	   return RequestState.EXIT;
 	 }
        }
-     } while (isKeepalive
+     } while (_isKeepalive
 	      && (result = keepaliveRead()) == RequestState.REQUEST);
 
      isValid = true;
@@ -651,8 +649,9 @@ public class TcpConnection extends Connection
   private RequestState keepaliveRead()
     throws IOException
   {
-    if (waitForKeepalive())
+    if (waitForKeepalive()) {
       return RequestState.REQUEST;
+    }
     
     Port port = _port;
     
@@ -749,39 +748,54 @@ public class TcpConnection extends Connection
   }
 
   /**
-   * Sets controller
+   * Starts a comet request
    */
-  @Override
-  public void setController(ConnectionController controller)
+  public TcpCometController toComet()
   {
-    super.setController(controller);
+    if (_controller != null)
+      throw new IllegalStateException(L.l("comet mode can't start in state '{0}'",
+					  _state));
 
-    if (controller.isDuplex()) {
-      if (log.isLoggable(Level.FINER))
-	log.finer(this + " starting duplex");
+    TcpCometController controller = new TcpCometController(this);
+    _controller = controller;
+
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " starting comet");
       
-      TcpDuplexController duplex = (TcpDuplexController) controller;
+    _state = ConnectionState.COMET;
+
+    return controller;
+  }
+
+  /**
+   * Starts a full duplex (tcp style) request for hmtp/xmpp
+   */
+  public TcpDuplexController toDuplex(TcpDuplexHandler handler)
+  {
+    if (_controller != null)
+      throw new IllegalStateException(L.l("duplex mode can't start in state '{0}'",
+					  _state));
+    
+    TcpDuplexController duplex = new TcpDuplexController(this, handler);
+
+    _controller = duplex;
+
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " starting duplex");
       
-      _state = ConnectionState.DUPLEX;
-      _readTask = new DuplexReadTask(duplex);
-    }
-    else {
-      if (log.isLoggable(Level.FINER))
-	log.finer(this + " starting comet");
-      
-      _state = ConnectionState.COMET;
-    }
+    _state = ConnectionState.DUPLEX;
+    _isKeepalive = false;
+    _readTask = new DuplexReadTask(duplex);
+
+    return duplex;
   }
 
   /**
    * Wakes the connection (comet-style).
    */
-  @Override
   protected boolean wake()
   {
-    ConnectionController controller = getController();
-
-    if (controller == null)
+    if (! _state.isComet())
       return false;
     
     _isWake = true;
@@ -841,7 +855,8 @@ public class TcpConnection extends Connection
 
     getRequest().protocolCloseEvent();
      
-    ConnectionController controller = getController();
+    ConnectionController controller = _controller;
+    
     if (controller != null)
       controller.close();
     
@@ -884,13 +899,21 @@ public class TcpConnection extends Connection
     }
   }
 
+  public void closeController(TcpCometController controller)
+  {
+    if (controller == _controller) {
+      _controller = null;
+
+      closeControllerImpl();
+    }
+  }
+
   /**
    * Closes the controller.
    */
-  @Override
   protected void closeControllerImpl()
   {
-    _state = _state.toComplete();
+    _state = _state.toCompleteComet();
     
     getPort().resume(this);
   }
@@ -913,7 +936,7 @@ public class TcpConnection extends Connection
   /**
    * Completion processing at the end of the thread
    */
-  void finish()
+  void finishThread()
   {
     closeImpl();
 
@@ -1084,6 +1107,14 @@ public class TcpConnection extends Connection
       }
     }
     
+    ConnectionState toCompleteComet()
+    {
+      if (this == COMET)
+	return REQUEST;
+      else
+	return this;
+    }
+    
     ConnectionState toClosed()
     {
       if (this != DESTROYED)
@@ -1098,8 +1129,14 @@ public class TcpConnection extends Connection
     {
       doAccept(true);
     }
-      
-    void doAccept(boolean isStart)
+
+    /**
+     * Loop to accept new connections.
+     *
+     * @param isThreadStart true if the thread has just started to
+     * properly account for thread housekeeping
+     */
+    void doAccept(boolean isThreadStart)
     {
       Port port = _port;
 
@@ -1126,11 +1163,10 @@ public class TcpConnection extends Connection
         _thread = thread;
 	_state = _state.toAccept();
 
-        // while (! _state.isClosed()) {
         while (! _port.isClosed() && _state != ConnectionState.DESTROYED) {
           _state = _state.toAccept();
 
-          if (! _port.accept(TcpConnection.this, isStart)) {
+          if (! _port.accept(TcpConnection.this, isThreadStart)) {
             close();
             break;
           }
@@ -1138,7 +1174,7 @@ public class TcpConnection extends Connection
 	  if (_readTask != _keepaliveTask)
 	    Thread.dumpStack();
 	  
-          isStart = false;
+          isThreadStart = false;
         
           _connectionStartTime = Alarm.getCurrentTime();
           
@@ -1148,9 +1184,10 @@ public class TcpConnection extends Connection
           }
 
 	  _request.startConnection();
+	  _isKeepalive = true;
 
-	  result = handleConnection();
-	  
+	  result = handleRequests();
+
           if (result == RequestState.THREAD_DETACHED) {
             break;
           }
@@ -1173,7 +1210,7 @@ public class TcpConnection extends Connection
           destroy();
 
 	if (result != RequestState.THREAD_DETACHED)
-	  finish();
+	  finishThread();
       }
     }
 
@@ -1204,7 +1241,7 @@ public class TcpConnection extends Connection
       try {
 	_state = _state.toActive();
 	
-        result = handleConnection();
+        result = handleRequests();
          
         isValid = true;
       } finally {
@@ -1276,7 +1313,7 @@ public class TcpConnection extends Connection
           destroy();
 
 	if (result != RequestState.THREAD_DETACHED)
-	  finish();
+	  finishThread();
       }    
     }
   }
@@ -1287,15 +1324,24 @@ public class TcpConnection extends Connection
       boolean isValid = false;
 
       try {
+	TcpCometController comet = (TcpCometController) _controller;
+
+	if (comet != null)
+	  comet.startResume();
+	
         if (getRequest().handleResume()
 	    && _port.suspend(TcpConnection.this)) {
 	  isValid = true;
+	}
+	else if (_isKeepalive) {
+	  isValid = true;
+	  _keepaliveTask.run();
 	}
       } catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
       } finally {
         if (! isValid) {
-	  finish();
+	  finishThread();
 	}
       }
     }

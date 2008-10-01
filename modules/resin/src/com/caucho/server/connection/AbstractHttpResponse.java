@@ -2179,6 +2179,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     return true;
   }
 
+  /*
   protected ConnectionController getController()
   {
     if (_originalRequest instanceof AbstractHttpRequest) {
@@ -2189,6 +2190,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     else
       return null;
   }
+  */
 
   public AbstractHttpResponse getAbstractHttpResponse()
   {
@@ -2221,17 +2223,17 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     if (_isClosed)
       return;
 
-    ConnectionController controller = null;
+    boolean isComet = false;
+    Connection conn = null;
 
     try {
       if (_originalRequest instanceof AbstractHttpRequest) {
 	AbstractHttpRequest request = (AbstractHttpRequest) _originalRequest;
 	
-	Connection conn = request.getConnection();
-	controller = conn.getController();
+	conn = request.getConnection();
 
 	try {
-	  if (controller == null || ! controller.isSuspended())
+	  if (! conn.isComet())
 	    request.skip();
 	} catch (BadRequestException e) {
 	  log.warning(e.toString());
@@ -2245,7 +2247,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	handleNotModified(_isTopCache);
       }
 
-      if (controller != null && controller.isComet())
+      isComet = conn != null && conn.isComet();
+      
+      if (isComet)
 	isClose = false;
 
       // include() files finish too, but shouldn't force a flush, hence
@@ -2255,19 +2259,19 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	_responseStream.close();
       else if (_responseStream != _originalResponseStream)
 	_responseStream.finish();
-      else if (controller == null || ! controller.isComet())
-	_responseStream.finish();
-      else
+      else if (isComet)
 	_responseStream.flush();
+      else
+	_responseStream.finish();
 
       if (_responseStream != _originalResponseStream) {
 	if (isClose)
 	  _originalResponseStream.close();
-	else if (controller == null)
+	else if (! isComet)
 	  _originalResponseStream.finish();
       }
 
-      if (controller == null)
+      if (! isComet)
 	_isClosed = true;
 
       if (_rawWrite == null) {
@@ -2317,7 +2321,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       
       throw e;
     } finally {
-      if (controller == null)
+      if (! isComet)
 	_isClosed = true;
 
       AbstractCacheFilterChain cache = _cacheInvocation;

@@ -38,145 +38,11 @@ import java.util.logging.Logger;
  */
 public class ConnectionController
 {
-  private static final Logger log
-    = Logger.getLogger(ConnectionController.class.getName());
-
-  private Connection _conn;
-  
-  private boolean _isTimeout;
-
-  private boolean _isInitial = true;
-  private boolean _isSuspended;
-  private boolean _isComplete;
-
   /**
    * Creates a new TcpConnectionController.
-   *
-   * @param conn The TCP connection
    */
-  protected ConnectionController(Connection conn)
+  protected ConnectionController()
   {
-    _conn = conn;
-
-    conn.setController(this);
-  }
-
-  public Connection getConnection()
-  {
-    return _conn;
-  }
-
-  /**
-   * Returns true if the connection is the initial request
-   */
-  public final boolean isInitial()
-  {
-    return _isInitial;
-  }
-
-  /**
-   * Returns true if the connection should be suspended
-   */
-  public final boolean isSuspended()
-  {
-    return _isSuspended;
-  }
-
-  /**
-   * Suspend the connection on the next request
-   */
-  public final void suspend()
-  {
-    if (! _isComplete)
-      _isSuspended = true;
-  }
-
-  /**
-   * Returns true if the connection is complete.
-   */
-  public final boolean isComplete()
-  {
-    return _isComplete;
-  }
-
-  /**
-   * Complete the connection
-   */
-  public final void complete()
-  {
-    _isComplete = true;
-    _isSuspended = false;
-    wake();
-  }
-
-  /**
-   * Suspend the connection on the next request
-   */
-  public final void startResume()
-  {
-    _isSuspended = false;
-    _isInitial = false;
-  }
-  
-  /**
-   * Wakes the connection.
-   */
-  public final boolean wake()
-  {
-    Connection conn = _conn;
-
-    if (conn != null)
-      return conn.wake();
-    else
-      return false;
-  }
-
-  /**
-   * Returns true for a duplex controller
-   */
-  public boolean isDuplex()
-  {
-    return false;
-  }
-
-  /**
-   * Sets the timeout.
-   */
-  public final void timeout()
-  {
-    _isTimeout = true;
-  }
-
-  /**
-   * Return true if timed out
-   */
-  public final boolean isTimeout()
-  {
-    return _isTimeout;
-  }
-
-  /**
-   * Returns true if the connection is active.
-   */
-  public final boolean isActive()
-  {
-    return _conn != null && ! _isTimeout;
-  }
-
-  /**
-   * Returns true for an active comet connection.
-   */
-  public boolean isComet()
-  {
-    return _conn != null && _conn.isComet();
-  }
-
-  /**
-   * Returns true if the connection is active.
-   */
-  public final boolean isClosed()
-  {
-    return _conn == null;
   }
 
   /**
@@ -184,12 +50,5 @@ public class ConnectionController
    */
   public void close()
   {
-    complete();
-    
-    Connection conn = _conn;
-    _conn = null;
-
-    if (conn != null)
-      conn.closeController(this);
   }
 }

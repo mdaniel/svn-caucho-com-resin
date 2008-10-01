@@ -29,6 +29,8 @@
 
 package com.caucho.server.connection;
 
+import com.caucho.server.port.TcpCometController;
+import com.caucho.server.port.TcpConnection;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
@@ -66,7 +68,7 @@ public class HttpServletRequestImpl implements CauchoRequest
 
   private AbstractHttpResponse _response;
 
-  private HttpConnectionController _comet;
+  private TcpCometController _comet;
 
   private boolean _isSuspend;
   
@@ -461,9 +463,8 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public void suspend()
   {
-    if (_comet == null) {
-      _comet = new HttpConnectionController(this);
-    }
+    if (_comet == null)
+      _comet = ((TcpConnection) _request.getConnection()).toComet();
 
     _comet.suspend();
   }
@@ -898,6 +899,18 @@ public class HttpServletRequestImpl implements CauchoRequest
   public boolean isComet()
   {
     return _request.isComet();
+  }
+
+  public TcpCometController toComet()
+  {
+    _comet = ((TcpConnection) _request.getConnection()).toComet();
+    
+    return _comet;
+  }
+
+  public TcpCometController getCometController()
+  {
+    return _comet;
   }
 
   public boolean isDuplex()

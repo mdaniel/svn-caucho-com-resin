@@ -2656,9 +2656,7 @@ public abstract class AbstractHttpRequest
 
   public void cleanup()
   {
-    ConnectionController comet = getConnection().getController();
-
-    if (comet == null) {
+    if (! isComet()) {
       _session = null;
       
       if (_attributes.size() > 0) {
