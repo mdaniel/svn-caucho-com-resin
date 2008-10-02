@@ -168,8 +168,7 @@ public class XmlParseTag extends BodyTagSupport {
         reader = tempReader;
       }
       else
-	throw new JspException(L.l("doc attribute must be a Reader or String at `{0}'",
-				   null));
+	throw new JspException(L.l("No XML document supplied via a doc attribute or inside the body of <x:parse> tag."));
 
       InputSource is = new InputSource(reader);
 
