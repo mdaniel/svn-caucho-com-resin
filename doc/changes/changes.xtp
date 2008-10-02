@@ -13,6 +13,16 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>quercus: Array expression fails to compile (#2986, rep by koreth)</li>
+<li>quercus: Call-time pass by reference returns screwy results from substr() (#2973, rep by koreth)</li>
+<li>quercus: printf() decimal format specifier doesn't work (#2972, rep by koreth)</li>
+<li>quercus: DOMImplementation creates XML parsers instead of HTML (#2975, rep by bago)</li>
+<li>quercus: moodle support (#2929, rep by D. Savill)</li>
+<li>quercus: Can't mix key/value and nonkeyed array autoinitialization (#2948, rep by koreth)</li>
+<li>quercus: iconv() doesn't support target encoding modifier (#2255, rep by koreth)</li>
+<li>quercus: Static class method can't access private instance fields (#2933, rep by koreth)</li>
+<li>quercus: array_fill_keys() needs to copy, not reference, values (#2930, rep by koreth)</li>
+<li>quercus: mb_detect_encoding not implemented in Quercus (#2868, rep by iRideSnow )</li>
 <li>mod_caucho: potential DOS issue with mod_caucho and virtual hosts (#2950, rep by Pieter Schoenmakers)</li>
 <li>file: remove cache timeout in FileServlet for coherency, since
 the performance is handled by the proxy cache (rep by Vinod Mehra)</li>
