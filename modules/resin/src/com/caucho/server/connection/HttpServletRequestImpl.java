@@ -29,7 +29,7 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.server.port.TcpCometController;
+import com.caucho.server.connection.ConnectionCometController;
 import com.caucho.server.port.TcpConnection;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
@@ -68,7 +68,7 @@ public class HttpServletRequestImpl implements CauchoRequest
 
   private AbstractHttpResponse _response;
 
-  private TcpCometController _comet;
+  private ConnectionCometController _comet;
 
   private boolean _isSuspend;
   
@@ -464,7 +464,7 @@ public class HttpServletRequestImpl implements CauchoRequest
   public void suspend()
   {
     if (_comet == null)
-      _comet = ((TcpConnection) _request.getConnection()).toComet();
+      _comet = _request.getConnection().toComet();
 
     _comet.suspend();
   }
@@ -901,14 +901,14 @@ public class HttpServletRequestImpl implements CauchoRequest
     return _request.isComet();
   }
 
-  public TcpCometController toComet()
+  public ConnectionCometController toComet()
   {
-    _comet = ((TcpConnection) _request.getConnection()).toComet();
+    _comet = _request.getConnection().toComet();
     
     return _comet;
   }
 
-  public TcpCometController getCometController()
+  public ConnectionCometController getCometController()
   {
     return _comet;
   }

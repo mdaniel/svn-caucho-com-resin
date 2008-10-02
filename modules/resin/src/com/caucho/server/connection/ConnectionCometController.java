@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.port;
+package com.caucho.server.connection;
 
 import java.util.*;
 import javax.servlet.*;
@@ -41,10 +41,10 @@ import com.caucho.util.*;
 /**
  * Public API to control a comet connection.
  */
-public class TcpCometController
+public class ConnectionCometController extends ConnectionController
   implements CometController
 {
-  private TcpConnection _conn;
+  private Connection _conn;
   
   private HashMap<String,Object> _map;
   
@@ -56,7 +56,7 @@ public class TcpCometController
   
   private long _maxIdleTime;
 
-  public TcpCometController(TcpConnection conn)
+  public ConnectionCometController(Connection conn)
   {
     _conn = conn;
   }
@@ -143,7 +143,7 @@ public class TcpCometController
    */
   public final boolean wake()
   {
-    TcpConnection conn = _conn;
+    Connection conn = _conn;
 
     if (conn != null)
       return conn.wake();
@@ -210,10 +210,15 @@ public class TcpCometController
    */
   public void setAttribute(String name, Object value)
   {
-    if (_map != null) {
-      synchronized (_map) {
-	_map.put(name, value);
+    if (_map == null) {
+      synchronized (this) {
+	if (_map == null)
+	  _map = new HashMap<String,Object>(8);
       }
+    }
+      
+    synchronized (_map) {
+      _map.put(name, value);
     }
   }
   
@@ -244,18 +249,16 @@ public class TcpCometController
   {
     // complete();
     
-    TcpConnection conn = _conn;
+    Connection conn = _conn;
     _conn = null;
 
-    /*
     if (conn != null)
       conn.closeController(this);
-    */
   }
 
   public String toString()
   {
-    TcpConnection conn = _conn;
+    Connection conn = _conn;
 
     if (conn == null)
       return getClass().getSimpleName() + "[closed]";

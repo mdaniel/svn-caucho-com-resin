@@ -162,4 +162,29 @@ public abstract class Connection
   {
     return false;
   }
+
+  /**
+   * Starts a comet request
+   */
+  public ConnectionCometController toComet()
+  {
+    ConnectionCometController controller = new ConnectionCometController(this);
+
+    return controller;
+  }
+
+  /**
+   * Close the controller
+   */
+  public void closeController(ConnectionCometController controller)
+  {
+  }
+
+  /**
+   * Wakes the connection
+   */
+  protected boolean wake()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 }

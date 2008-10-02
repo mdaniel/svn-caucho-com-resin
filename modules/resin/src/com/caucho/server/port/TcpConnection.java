@@ -750,13 +750,14 @@ public class TcpConnection extends Connection
   /**
    * Starts a comet request
    */
-  public TcpCometController toComet()
+  @Override
+  public ConnectionCometController toComet()
   {
     if (_controller != null)
       throw new IllegalStateException(L.l("comet mode can't start in state '{0}'",
 					  _state));
 
-    TcpCometController controller = new TcpCometController(this);
+    ConnectionCometController controller = new ConnectionCometController(this);
     _controller = controller;
 
     if (log.isLoggable(Level.FINER))
@@ -899,7 +900,7 @@ public class TcpConnection extends Connection
     }
   }
 
-  public void closeController(TcpCometController controller)
+  public void closeController(ConnectionCometController controller)
   {
     if (controller == _controller) {
       _controller = null;
@@ -1324,7 +1325,8 @@ public class TcpConnection extends Connection
       boolean isValid = false;
 
       try {
-	TcpCometController comet = (TcpCometController) _controller;
+	ConnectionCometController comet
+	  = (ConnectionCometController) _controller;
 
 	if (comet != null)
 	  comet.startResume();
