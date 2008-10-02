@@ -595,7 +595,7 @@ public abstract class JdbcConnectionResource
         return BooleanValue.FALSE;
 
       if (checkSql(_conn, sql))
-	return BooleanValue.TRUE;
+        return BooleanValue.TRUE;
       
       // XXX: test for performance
       boolean canSeek = true;
@@ -617,7 +617,7 @@ public abstract class JdbcConnectionResource
         _rs = createResult(_env, stmt, rs);
         _affectedRows = 0;
 
-	// XXX: if these are needed, get them lazily for performance
+        // XXX: if these are needed, get them lazily for performance
         // _warnings = stmt.getWarnings();
       } else {
         // Statement.execute(String) returns false when SQL statement does
@@ -638,7 +638,7 @@ public abstract class JdbcConnectionResource
         if (_rs != null)
           _rs.setAffectedRows(_affectedRows);
 
-	// XXX: if these are neede, get them lazily for performance
+        // XXX: if these are needed, get them lazily for performance
         // _warnings = stmt.getWarnings();
 
         // for php/430a

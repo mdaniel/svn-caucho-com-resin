@@ -461,6 +461,11 @@ public class MysqlModule extends AbstractQuercusModule {
       int jdbcField = fieldOffset + 1;
       int jdbcColumnType = md.getColumnType(jdbcField);
 
+      System.err.println("MysqlModule->mysql_fetch_field(): " + md);
+      for (int i = fieldOffset + 1; i < md.getColumnCount(); i++) {
+        System.err.println(md.getColumnName(i));
+      }
+      
       String catalogName = md.getCatalogName(jdbcField);
       String tableName = md.getTableName(jdbcField);
       
@@ -468,6 +473,8 @@ public class MysqlModule extends AbstractQuercusModule {
 
       String columnName = md.getColumnName(jdbcField);
       String columnLabel = md.getColumnLabel(jdbcField);
+      
+      System.err.println(columnName + " . " + columnLabel);
       
       if (schemaName == null || "".equals(schemaName))
         schemaName = tableName;
@@ -509,6 +516,8 @@ public class MysqlModule extends AbstractQuercusModule {
       int multipleKey = 0;
       int uniqueKey = 0;
 
+      System.err.println("MysqlModule->mysql_fetch_field: " + columnMd);
+      
       if (columnMd != null) {
         zerofill = columnMd.isZeroFill() ? 1 : 0;
         primaryKey = columnMd.isPrimaryKey() ? 1 : 0;

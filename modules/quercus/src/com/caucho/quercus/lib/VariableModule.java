@@ -571,7 +571,7 @@ public class VariableModule extends AbstractQuercusModule {
    * Serializes the value to a string.
    */
   public static String serialize(Env env,
-                                 @ReadOnly Value v)
+                                 @PassThru @ReadOnly Value v)
   {
     StringBuilder sb = new StringBuilder();
 
@@ -584,8 +584,8 @@ public class VariableModule extends AbstractQuercusModule {
    * Converts the variable to a specified tyep.
    */
   public static boolean settype(Env env,
-				@Reference Value var,
-				String type)
+                                @Reference Value var,
+                                String type)
   {
     Value value = var.toValue();
 

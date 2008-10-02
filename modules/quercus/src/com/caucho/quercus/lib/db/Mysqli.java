@@ -210,7 +210,7 @@ public class Mysqli extends JdbcConnectionResource {
       }
       
       ConnectionEntry jConn
-	= env.getConnection(driver, url, userName, password, ! isNewLink);
+        = env.getConnection(driver, url, userName, password, ! isNewLink);
 
       checkDriverVersion(env, jConn);
 
@@ -1163,7 +1163,7 @@ public class Mysqli extends JdbcConnectionResource {
       try {
         stmt = conn.createStatement();
 
-	_conn.markForPoolRemoval();
+        _conn.markForPoolRemoval();
 
         ResultSet rs = stmt.executeQuery("KILL CONNECTION " + threadId);
         
@@ -1243,21 +1243,18 @@ public class Mysqli extends JdbcConnectionResource {
    */
   private int getWarningCount(Env env)
   {
-    if (getWarnings() != null) {
-      JdbcResultResource warningResult;
-      warningResult = metaQuery(env, "SHOW WARNINGS", getCatalog().toString());
-      int warningCount = 0;
+    JdbcResultResource warningResult;
+    warningResult = metaQuery(env, "SHOW WARNINGS", getCatalog().toString());
+    int warningCount = 0;
 
-      if (warningResult != null) {
-        warningCount =
-          JdbcResultResource.getNumRows(warningResult.getResultSet());
-      }
+    if (warningResult != null) {
+      warningCount
+        = JdbcResultResource.getNumRows(warningResult.getResultSet());
+    }
 
-      if (warningCount >= 0)
-        return warningCount;
-      else
-        return 0;
-    } else
+    if (warningCount >= 0)
+      return warningCount;
+    else
       return 0;
   }
 
@@ -1602,6 +1599,28 @@ public class Mysqli extends JdbcConnectionResource {
     */
 
     return super.close(env);
+  }
+  
+  /**
+   * Converts to a string.
+   */
+  public String toString()
+  {
+    if (_conn != null) {
+      Class cls = _conn.getConnection().getClass();
+      
+      Method []methods = cls.getDeclaredMethods();
+      
+      for (int i = 0; i < methods.length; i++) {
+        if (methods[i].getName().equals("toString")
+            && methods[i].getParameterTypes().length == 0)
+          return "Mysqli[" + _conn.getConnection() + "]";
+      }
+
+      return "Mysqli[" + cls.getCanonicalName() + "]";
+    }
+    else
+      return "Mysqli[" + null + "]";
   }
 
   public enum LastSqlType {

@@ -139,7 +139,7 @@ public class ConnectionEntry implements EnvCleanup
   {
     try {
       if (! _isReuse) {
-	cleanup();
+        cleanup();
       }
     } catch (SQLException e) {
       log.log(Level.WARNING, e.toString(), e);

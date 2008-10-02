@@ -799,8 +799,8 @@ public class Env {
    * a new connection and add it to the pool.
    */
   public ConnectionEntry getConnection(String driver, String url,
-				       String userName, String password,
-				       boolean isReuse)
+                                       String userName, String password,
+                                       boolean isReuse)
     throws Exception
   {
     // XXX: connections might not be reusable (see gallery2), because
@@ -818,7 +818,7 @@ public class Env {
       database = findDatabase(driver, url);
 
       if (database == null)
-	return null;
+        return null;
     }
     
     ConnectionEntry entry = new ConnectionEntry(this);
@@ -1770,6 +1770,9 @@ public class Env {
         var = _map.get(name);
       }
     }
+    
+    if (var == null)
+      var = getGlobalScriptContextRef(name);
 
     return var;
   }

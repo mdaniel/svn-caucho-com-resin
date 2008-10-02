@@ -209,7 +209,11 @@ public class QuercusScriptEngineFactory implements ScriptEngineFactory
    */
   protected Quercus createQuercus()
   {
-    return new Quercus();
+    Quercus quercus = new Quercus();
+    
+    quercus.init();
+    
+    return quercus;
   }
 
   public String toString()

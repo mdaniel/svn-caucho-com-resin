@@ -1990,7 +1990,9 @@ public class StringModule extends AbstractQuercusModule {
             if (isAlt)
               sb.append('#');
             sb.append(flags);
+            
             sb.append(format, head, j);
+   
             sb.append(ch);
 
             segments.add(LongPrintfSegment.create(env, sb.toString(), index++));
@@ -2012,11 +2014,27 @@ public class StringModule extends AbstractQuercusModule {
               segments.add(new TextPrintfSegment(sb));
             sb.setLength(0);
 
+            // php/115k
+            if (isLeft && flags.length() == 1 && flags.charAt(0) == '0')
+              isLeft = false;
+            
+            // php/115k
+            if (format.charAt(head) == '.') {
+              for (int k = 0; k < flags.length(); k++) {
+                if (flags.charAt(k) == '0') {
+                  flags.setLength(k);
+                  break;
+                }
+              }
+            }
+            
             if (isLeft)
               sb.append('-');
             if (isAlt)
               sb.append('#');
+
             sb.append(flags);
+
             sb.append(format, head, j);
             sb.append(ch);
 

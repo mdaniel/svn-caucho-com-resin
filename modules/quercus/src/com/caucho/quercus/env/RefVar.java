@@ -226,6 +226,42 @@ public class RefVar extends Value
     return _var;
   }
 
+  @Override
+  public StringValue toStringValue()
+  {
+    return _var.toStringValue();
+  }
+
+  @Override
+  public StringValue toBinaryValue(Env env)
+  {
+    return _var.toBinaryValue(env);
+  }
+
+  @Override
+  public StringValue toUnicodeValue(Env env)
+  {
+    return _var.toUnicodeValue(env);
+  }
+
+  @Override
+  public StringValue toStringBuilder()
+  {
+    return _var.toStringBuilder();
+  }
+
+  @Override
+  public StringValue toStringBuilder(Env env)
+  {
+    return _var.toStringBuilder(env);
+  }
+
+  @Override
+  public java.io.InputStream toInputStream()
+  {
+    return _var.toInputStream();
+  }
+  
   /**
    * Negates the value.
    */
