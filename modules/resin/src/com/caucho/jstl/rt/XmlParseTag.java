@@ -32,22 +32,21 @@ package com.caucho.jstl.rt;
 import com.caucho.jsp.BodyContentImpl;
 import com.caucho.jsp.PageContextImpl;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
-import com.caucho.xml.Xml;
-import com.caucho.xml.XmlParser;
+import com.caucho.vfs.TempCharReader;
+import com.caucho.vfs.Vfs;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.xml.sax.*;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLFilter;
+import org.xml.sax.XMLReader;
 
-import javax.xml.parsers.*;
-import javax.xml.transform.sax.SAXTransformerFactory;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.dom.DOMResult;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.sax.TransformerHandler;
 import java.io.Reader;
 
 public class XmlParseTag extends BodyTagSupport {
@@ -56,8 +55,7 @@ public class XmlParseTag extends BodyTagSupport {
   private Object _xml;
   private String _systemId;
   private Object _filter;
-  private XMLReader _saxReader;
-  
+
   private String _var;
   private String _scope;
   
@@ -94,14 +92,6 @@ public class XmlParseTag extends BodyTagSupport {
   public void setFilter(Object filter)
   {
     _filter = filter;
-  }
-
-  /**
-   * Sets the sax reader
-   */
-  public void setSaxReader(XMLReader reader)
-  {
-    _saxReader = reader;
   }
 
   /**
@@ -142,17 +132,29 @@ public class XmlParseTag extends BodyTagSupport {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
       BodyContentImpl body = (BodyContentImpl) getBodyContent();
 
-      Reader reader;
+      XMLReader xmlReader = null;
+      Reader reader = null;
+      InputSource is;
 
       if (_xml != null) {
         Object obj = _xml;
 
-        if (obj instanceof Reader)
+        if (obj instanceof Reader) {
           reader = (Reader) obj;
-        else if (obj instanceof String)
+
+          is = new InputSource(reader);
+        }
+        else if (obj instanceof String) {
           reader = Vfs.openString((String) obj).getReader();
+
+          is = new InputSource(reader);
+        } else if (obj instanceof XMLReader) {
+          xmlReader = (XMLReader) obj;
+
+          is = new InputSource();
+        }
         else
-          throw new JspException(L.l("xml must be Reader or String at `{0}'",
+          throw new JspException(L.l("xml must be java.io.Reader, String or org.xml.sax.XMLReader at `{0}'",
                                      obj));
       }
       else if (body != null) {
@@ -166,64 +168,57 @@ public class XmlParseTag extends BodyTagSupport {
           tempReader.unread();
         
         reader = tempReader;
+
+        is = new InputSource(reader);
       }
       else
 	throw new JspException(L.l("No XML document supplied via a doc attribute or inside the body of <x:parse> tag."));
 
-      InputSource is = new InputSource(reader);
-
       if (_systemId != null)
         is.setSystemId(_systemId);
 
-      Document doc = null;
-
       XMLFilter filter = (XMLFilter) _filter;
 
-      if (_filter != null) {
-	SAXParserFactory factory = SAXParserFactory.newInstance();
-	SAXParser saxParser = factory.newSAXParser();
-	XMLReader parser = saxParser.getXMLReader();
+      if (xmlReader == null)
+        xmlReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
 
-	filter.setParent(parser);
+      // jsp/1g05
+      if (_filter != null && _var == null && _varDom == null) {
+        filter.setParent(xmlReader);
+        
+        filter.parse(is);
+      } else {
+        Document doc = DocumentBuilderFactory.newInstance()
+            .newDocumentBuilder()
+            .newDocument();
 
-        if (_var != null || _varDom != null) {
+        TransformerHandler handler =
+            ((SAXTransformerFactory) SAXTransformerFactory.newInstance()).newTransformerHandler();
 
-          TransformerFactory saxTrFactory = SAXTransformerFactory.newInstance();
-          Transformer transformer = saxTrFactory.newTransformer();
+        handler.setResult(new DOMResult(doc));
 
-          DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-          doc = dbFactory.newDocumentBuilder().newDocument();
+        if (filter != null) {
+          filter.setParent(xmlReader);
+          filter.setContentHandler(handler);
 
-          DOMResult result = new DOMResult(doc);
-          transformer.transform(new SAXSource(filter, is), result);
-
-          if (_var != null)
-            CoreSetTag.setValue(pageContext, _var, _scope, doc);
-
-          if (_varDom != null)
-            CoreSetTag.setValue(pageContext, _varDom, _scope, doc);
-          
-        }
-        else {
           filter.parse(is);
+        } else {
+          xmlReader.setContentHandler(handler);
+
+          xmlReader.parse(is);
         }
 
-        reader.close();
-      }
-      else {
-	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-	DocumentBuilder parser = factory.newDocumentBuilder();
+        if (_var == null && _varDom == null)
+          throw new JspException(L.l("x:parse needs either var or varDom"));
 
-	doc = parser.parse(is);
+        if (_var != null)
+          CoreSetTag.setValue(pageContext, _var, _scope, doc);
 
-	reader.close();
+        if (_varDom != null)
+          CoreSetTag.setValue(pageContext, _varDom, _scopeDom, doc);
 
-	if (_var != null)
-	  CoreSetTag.setValue(pageContext, _var, _scope, doc);
-	else if (_varDom != null)
-	  CoreSetTag.setValue(pageContext, _varDom, _scopeDom, doc);
-	else
-	  throw new JspException(L.l("x:parse needs either var or varDom"));
+        if (reader != null)
+          reader.close();
       }
     } catch (JspException e) {
       throw e;
