@@ -509,8 +509,6 @@ public class MysqlModule extends AbstractQuercusModule {
       int multipleKey = 0;
       int uniqueKey = 0;
 
-      System.err.println("MysqlModule->mysql_fetch_field: " + columnMd);
-      
       if (columnMd != null) {
         zerofill = columnMd.isZeroFill() ? 1 : 0;
         primaryKey = columnMd.isPrimaryKey() ? 1 : 0;
