@@ -29,16 +29,9 @@
 
 package com.caucho.quercus.lib.i18n;
 
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.IllegalCharsetNameException;
-import java.nio.charset.UnsupportedCharsetException;
-import java.util.logging.Logger;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeBuilderValue;
-import com.caucho.util.L10N;
 
 abstract public class Decoder
 {
@@ -47,6 +40,7 @@ abstract public class Decoder
   
   protected boolean _isIgnoreErrors = false;
   protected boolean _isReplaceUnicode = false;
+  protected boolean _isAllowMalformedOut = false;
   
   protected boolean _hasError;
   
@@ -92,6 +86,11 @@ abstract public class Decoder
   public final void setReplaceUnicode(boolean isReplaceUnicode)
   {
     _isReplaceUnicode = isReplaceUnicode;
+  }
+  
+  public final void setAllowMalformedOut(boolean isAllowMalformedOut)
+  {
+    _isAllowMalformedOut = isAllowMalformedOut;
   }
   
   public void reset()

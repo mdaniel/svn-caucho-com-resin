@@ -1871,6 +1871,7 @@ abstract public class StringValue
     UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     Decoder decoder = Decoder.create(charset);
+    decoder.setAllowMalformedOut(true);
     
     sb.append(decoder.decode(env, this));
     

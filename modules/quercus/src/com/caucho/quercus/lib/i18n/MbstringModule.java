@@ -950,7 +950,7 @@ public class MbstringModule
       return str.EMPTY;
 
     // XXX: not quite exactly the same behavior as PHP
-    if (Character.isHighSurrogate(unicodeStr.charAt(start)))
+    if (start < len && Character.isHighSurrogate(unicodeStr.charAt(start)))
       start--;
 
     StringBuilder sb = new StringBuilder();
@@ -986,7 +986,7 @@ public class MbstringModule
     StringBuilder sb = new StringBuilder();
 
     if (end < len && trimmarker.length() > 0) {
-      sb.append(unicodeStr);
+      sb.append(unicodeStr, start, end - 1);
       sb.append(decode(env, trimmarker, encoding));
 
       unicodeStr = sb;

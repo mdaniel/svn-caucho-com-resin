@@ -210,6 +210,52 @@ public class UnicodeBuilderValue extends StringBuilderValue
   {
     return new UnicodeBuilderValue(_buffer, 0, _length);
   }
+  
+  /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder(Env env)
+  {
+    // add padding since the string will likely be appended
+    
+    int length = (_length + 64) & ~0x1f;
+
+    UnicodeBuilderValue v = new UnicodeBuilderValue(length);
+
+    System.arraycopy(_buffer, 0, v._buffer, 0, _length);
+
+    v._length = _length;
+    
+    return v;
+  }
+
+  /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder(Env env, Value value)
+  {
+    int length = _length;
+
+    if (value instanceof StringValue) {
+      length += ((StringValue) value).length();
+    }
+    
+    // add padding since the string will likely be appended
+    
+    length = (length + 64) & ~0x1f;
+
+    UnicodeBuilderValue v = new UnicodeBuilderValue(length);
+
+    System.arraycopy(_buffer, 0, v._buffer, 0, _length);
+
+    v._length = _length;
+
+    value.appendTo(v);
+    
+    return v;
+  }
 
   /**
    * Converts to a UnicodeValue.
@@ -528,14 +574,6 @@ public class UnicodeBuilderValue extends StringBuilderValue
     return new UnicodeBuilderValue(length);
   }
 
-  /**
-   * Converts to a string builder
-   */
-  @Override
-  public StringValue toStringBuilder(Env env)
-  {
-    return new UnicodeBuilderValue(_buffer, 0, _length);
-  }
   @Override
   public String toDebugString()
   {

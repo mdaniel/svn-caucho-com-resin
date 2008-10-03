@@ -155,6 +155,8 @@ public class GenericDecoder
       }
       else if (_replacement != null)
         sb.append(_replacement);
+      else if (_isAllowMalformedOut)
+        sb.append((char) in.get(errorPosition));
       else
         return false;
     }

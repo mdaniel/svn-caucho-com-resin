@@ -99,6 +99,8 @@ public class Utf8Decoder
         }
         else if (_replacement != null)
           sb.append(_replacement);
+        else if (_isAllowMalformedOut)
+          sb.append((char) ch);
         else
           return sb;
       }
@@ -130,6 +132,8 @@ public class Utf8Decoder
         }
         else if (_replacement != null)
           sb.append(_replacement);
+        else if (_isAllowMalformedOut)
+          sb.append((char) ch);
         else
           return sb;
       }
@@ -165,6 +169,8 @@ public class Utf8Decoder
         }
         else if (_replacement != null)
           sb.append(_replacement);
+        else if (_isAllowMalformedOut)
+          sb.append((char) ch);
         else
           return sb;
       }
@@ -172,6 +178,8 @@ public class Utf8Decoder
       }
       else if (_replacement != null)
         sb.append(_replacement);
+      else if (_isAllowMalformedOut)
+        sb.append((char) ch);
       else
         return sb;
     }

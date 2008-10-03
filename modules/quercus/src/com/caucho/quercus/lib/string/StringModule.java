@@ -4079,6 +4079,11 @@ public class StringModule extends AbstractQuercusModule {
                              int start,
                              @Optional Value lenV)
   {
+    int len = lenV.toInt();
+    
+    if (start > 0 && len < 0)
+      return BooleanValue.FALSE;
+    
     int strLen = string.length();
     if (start < 0)
       start = strLen + start;
@@ -4090,7 +4095,6 @@ public class StringModule extends AbstractQuercusModule {
       return string.substring(start);
     }
     else {
-      int len = lenV.toInt();
       int end;
 
       if (len < 0)
@@ -4099,7 +4103,7 @@ public class StringModule extends AbstractQuercusModule {
         end = start + len;
 
       if (end <= start)
-        return BooleanValue.FALSE;
+        return string.EMPTY;
       else if (strLen <= end)
         return string.substring(start);
       else
