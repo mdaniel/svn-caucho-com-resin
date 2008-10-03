@@ -13,6 +13,7 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>jstl: Added org.xml.sax.XMLReader support for x:parse doc attribute</li>
 <li>quercus: Array expression fails to compile (#2986, rep by koreth)</li>
 <li>quercus: Call-time pass by reference returns screwy results from substr() (#2973, rep by koreth)</li>
 <li>quercus: printf() decimal format specifier doesn't work (#2972, rep by koreth)</li>
