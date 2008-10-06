@@ -184,12 +184,11 @@ public class WebBeansContainer
     synchronized (_localContainer) {
       webBeans = _localContainer.getLevel(loader);
 
-      if (webBeans != null)
-	return webBeans;
+      if (webBeans == null) {
+	webBeans = new WebBeansContainer(loader);
       
-      webBeans = new WebBeansContainer(loader);
-      
-      _localContainer.set(webBeans);
+	_localContainer.set(webBeans, loader);
+      }
     }
 
     return webBeans;

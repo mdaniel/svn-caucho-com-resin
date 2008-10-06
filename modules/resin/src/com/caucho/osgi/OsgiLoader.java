@@ -78,7 +78,7 @@ public class OsgiLoader extends Loader implements EnvironmentListener
 
   public void addInstall(Path path)
   {
-    OsgiBundle bundle = _manager.addPath(path);
+    OsgiBundle bundle = _manager.addPath(path, null);
 
     addBundle(bundle);
 
@@ -87,7 +87,7 @@ public class OsgiLoader extends Loader implements EnvironmentListener
 
   public void addPath(Path path)
   {
-    OsgiBundle bundle = _manager.addPath(path);
+    OsgiBundle bundle = _manager.addPath(path, null);
 
     addBundle(bundle);
   }

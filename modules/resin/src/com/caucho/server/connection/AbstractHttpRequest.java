@@ -346,6 +346,23 @@ public abstract class AbstractHttpRequest
   }
 
   /**
+   * Returns true if the client has disconnected
+   */
+  public boolean isClientDisconnect()
+  {
+    return _response.isClientDisconnect();
+  }
+
+  /**
+   * Sets the client disconnect
+   */
+  public void clientDisconnect()
+  {
+    if (_tcpConn != null)
+      _tcpConn.close();
+  }
+
+  /**
    * Returns the response for this request.
    */
   public CauchoResponse getResponse()

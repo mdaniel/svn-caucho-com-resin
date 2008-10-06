@@ -30,6 +30,8 @@
 package com.caucho.osgi;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 import com.caucho.util.L10N;
 import com.caucho.server.repository.ModuleRepository;
 import com.caucho.vfs.Path;
@@ -55,6 +57,9 @@ public class OsgiBundleConfig
   private String _artifact;
 
   private boolean _isStart;
+  private boolean _isExport = true;
+
+  private ContainerProgram _program = new ContainerProgram();
 
   /**
    * Sets a specific path to a jar file
@@ -100,6 +105,19 @@ public class OsgiBundleConfig
     _isStart = isStart;
   }
 
+  /**
+   * Sets true if the bundle should export to the web-app
+   */
+  public void setExport(boolean isExport)
+  {
+    _isExport = isExport;
+  }
+
+  public void addBuilderProgram(ConfigProgram program)
+  {
+    _program.addProgram(program);
+  }
+
   @PostConstruct
   public void init()
   {
@@ -125,10 +143,11 @@ public class OsgiBundleConfig
 				    _module));
 
     OsgiManager manager = OsgiManager.create();
+    OsgiBundle bundle;
 
     if (_isStart)
-      manager.addStartupBundle(path);
+      bundle = manager.addStartupBundle(path, _program, _isExport);
     else
-      manager.addPath(path);
+      bundle = manager.addPath(path, _program, _isExport);
   }
 }

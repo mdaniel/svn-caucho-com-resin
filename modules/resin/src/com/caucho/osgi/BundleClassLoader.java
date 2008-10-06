@@ -39,11 +39,9 @@ import java.util.HashMap;
 /**
  * OSGi bundle class loader
  */
-public class BundleClassLoader extends DynamicClassLoader
+public class BundleClassLoader extends EnvironmentClassLoader
 {
   private static final L10N L = new L10N(BundleClassLoader.class);
-
-  private String _id;
 
   private Path _jar;
 
@@ -55,9 +53,7 @@ public class BundleClassLoader extends DynamicClassLoader
    */
   BundleClassLoader(ClassLoader parent, String id, Path jarPath)
   {
-    super(parent);
-
-    _id = id;
+    super(parent, id);
 
     if (id == null)
       throw new IllegalArgumentException(L.l("BundleClassLoader requires a bundle id."));
@@ -98,6 +94,6 @@ public class BundleClassLoader extends DynamicClassLoader
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _id + "," + _jar + "]";
+    return getClass().getSimpleName() + "[" + getId() + "," + _jar + "]";
   }
 }

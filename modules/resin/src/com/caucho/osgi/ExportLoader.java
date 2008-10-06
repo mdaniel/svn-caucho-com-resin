@@ -64,14 +64,14 @@ public class ExportLoader extends Loader implements Dependency
 
   private String _packageName;
   private String _packagePath;
-  private String _version;
+  private OsgiVersion _version;
   
   private CodeSource _codeSource;
 
   /**
    * Creates a export loader.
    */
-  ExportLoader(JarPath jar, String packageName, String version)
+  ExportLoader(JarPath jar, String packageName, OsgiVersion version)
   {
     _jar = jar;
     _depend = new Depend(jar);

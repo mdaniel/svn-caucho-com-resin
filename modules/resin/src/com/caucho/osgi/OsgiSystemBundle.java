@@ -66,7 +66,7 @@ public class OsgiSystemBundle extends OsgiBundle
 
   OsgiSystemBundle(OsgiManager manager)
   {
-    super(0, manager, null);
+    super(0, manager, null, null, false);
   }
 
   ClassLoader getClassLoader()

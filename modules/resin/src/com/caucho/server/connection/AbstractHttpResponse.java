@@ -119,6 +119,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
   private boolean _isHeaderWritten;
   private boolean _isChunked;
+  private boolean _isClientDisconnect;
   protected final QDate _calendar = new QDate(false);
 
   protected final CharBuffer _cb = new CharBuffer();
@@ -199,6 +200,24 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     else {
       return ((AbstractHttpRequest) _originalRequest).isIgnoreClientDisconnect();
     }
+  }
+
+  /**
+   * Return true if the client has disconnected
+   */
+  public boolean isClientDisconnect()
+  {
+    return _isClientDisconnect;
+  }
+
+  /**
+   * Called when the client has disconnected
+   */
+  public void clientDisconnect()
+  {
+    _originalRequest.clientDisconnect();
+    
+    _isClientDisconnect = true;
   }
 
   /**
@@ -309,6 +328,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     _isHeaderWritten = false;
     _isChunked = false;
+    _isClientDisconnect = false;
     _charEncoding = null;
     _hasCharEncoding = false;
     _contentType = null;
@@ -2311,6 +2331,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       }
     } catch (ClientDisconnectException e) {
       _request.killKeepalive();
+      _isClientDisconnect = true;
 
       if (isIgnoreClientDisconnect())
 	log.fine(e.toString());
@@ -2318,6 +2339,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	throw e;
     } catch (IOException e) {
       _request.killKeepalive();
+      _isClientDisconnect = true;
       
       throw e;
     } finally {

@@ -123,28 +123,13 @@ public class JniStream extends StreamImpl {
 
     int result = _socket.write(buf, offset, length);
 
-    if (result < -1)
+    if (result <= -1) {
+      // server/1l21: -1 with exception is necessary to catch client disconnect
       throw exception(result);
+    }
 
     _totalWriteBytes += result;
   }
-
-  /* XXX: dead code 2005-05-24
-  public boolean write(byte []buf1, int off1, int len1,
-		       byte []buf2, int off2, int len2,
-		       boolean isEnd)
-    throws IOException
-  {
-    int result = writeNative2(_socket.getFd(),
-			      buf1, off1, len1,
-			      buf2, off2, len2);
-
-    if (result < -1)
-      throw exception(result);
-
-    return true;
-  }
-  */
 
   public void flush()
     throws IOException

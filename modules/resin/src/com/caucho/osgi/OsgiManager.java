@@ -30,6 +30,7 @@
 package com.caucho.osgi;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.PathPatternType;
 import com.caucho.java.WorkDir;
@@ -96,7 +97,10 @@ public class OsgiManager
   private ArrayList<OsgiBundle> _bundleList
     = new ArrayList<OsgiBundle>();
 
-  private HashMap<String,ExportBundleClassLoader> _exportMap
+  private HashMap<String,ArrayList<ExportBundleClassLoader>> _exportMap
+    = new HashMap<String,ArrayList<ExportBundleClassLoader>>();
+
+  private HashMap<String,ExportBundleClassLoader> _publishedExportMap
     = new HashMap<String,ExportBundleClassLoader>();
 
   private HashMap<String,ArrayList<ServiceReference>> _serviceReferenceMap
@@ -173,23 +177,30 @@ public class OsgiManager
     return _workRoot;
   }
 
-  void addStartupBundle(Path path)
+  OsgiBundle addStartupBundle(Path path,
+			      ConfigProgram program,
+			      boolean isExport)
   {
-    OsgiBundle bundle = addPath(path);
+    OsgiBundle bundle = addPath(path, program, isExport);
 
     synchronized (_pendingStartupList) {
       _pendingStartupList.add(bundle);
     }
+
+    return bundle;
   }
 
   /**
    * Adds a new jar
    */
-  public OsgiBundle addPath(Path path)
+  public OsgiBundle addPath(Path path,
+			    ConfigProgram program,
+			    boolean isExport)
   {
     JarPath jar = JarPath.create(path);
 
-    OsgiBundle bundle = new OsgiBundle(nextBundleId(), this, jar);
+    OsgiBundle bundle = new OsgiBundle(nextBundleId(), this, jar,
+				       program, isExport);
 
     addBundle(bundle);
 
@@ -242,16 +253,51 @@ public class OsgiManager
     }
   }
 
-  public ExportBundleClassLoader getExportLoader(String name)
+  public ExportBundleClassLoader getExportLoader(String name,
+						 OsgiVersionRange versionRange)
   {
-    return _exportMap.get(name);
+    ArrayList<ExportBundleClassLoader> loaderList = _exportMap.get(name);
+
+    if (loaderList == null)
+      return null;
+
+    ExportBundleClassLoader bestLoader = null;
+
+    for (int i = 0; i < loaderList.size(); i++) {
+      ExportBundleClassLoader loader = loaderList.get(i);
+      
+      if (versionRange != null && ! versionRange.isMatch(loader.getVersion()))
+	continue;
+
+      if (bestLoader == null)
+	bestLoader = loader;
+      else if (bestLoader.getVersion().compareTo(loader.getVersion()) < 0)
+	bestLoader = loader;
+    }
+
+    return bestLoader;
   }
 
   public void putExportLoader(String name,
 			      ExportBundleClassLoader loader)
   {
-    _exportMap.put(name, loader);
-    _exportMap.put(name.replace('.', '/'), loader);
+    ArrayList<ExportBundleClassLoader> loaderList
+      = _exportMap.get(name);
+
+    if (loaderList == null)
+      loaderList = new ArrayList<ExportBundleClassLoader>();
+
+    loaderList.add(loader);
+    
+    _exportMap.put(name, loaderList);
+    _exportMap.put(name.replace('.', '/'), loaderList);
+  }
+
+  public void publishExportLoader(String name,
+				  ExportBundleClassLoader loader)
+  {
+    _publishedExportMap.put(name, loader);
+    _publishedExportMap.put(name.replace('.', '/'), loader);
   }
 
   /**
@@ -269,10 +315,11 @@ public class OsgiManager
     ExportBundleClassLoader loader;
 
     synchronized (_exportMap) {
-      loader = _exportMap.get(packageName);
+      loader = _publishedExportMap.get(packageName);
 
       try {
-	return loader.findClassImpl(name);
+	if (loader != null)
+	  return loader.findClassImpl(name);
       } catch (Exception e) {
       }
     }
@@ -295,7 +342,7 @@ public class OsgiManager
     ExportBundleClassLoader loader;
 
     synchronized (_exportMap) {
-      loader = _exportMap.get(packageName);
+      loader = _publishedExportMap.get(packageName);
 
       try {
 	return loader.getResource(name);
@@ -309,7 +356,8 @@ public class OsgiManager
   public void buildImportClassPath(StringBuilder head)
   {
     synchronized (_exportMap) {
-      for (ExportBundleClassLoader exportLoader : _exportMap.values()) {
+      for (ExportBundleClassLoader exportLoader
+	     : _publishedExportMap.values()) {
 	for (Loader loader : exportLoader.getLoaders()) {
 	  loader.buildClassPath(head);
 	}

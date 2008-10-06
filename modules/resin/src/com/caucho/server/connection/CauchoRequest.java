@@ -62,6 +62,8 @@ public interface CauchoRequest extends HttpServletRequest {
   public boolean isComet();
   public boolean isDuplex();
   public boolean allowKeepalive();
+  public boolean isClientDisconnect();
+  public void clientDisconnect();
   public boolean authenticate()
     throws ServletException, IOException;
 

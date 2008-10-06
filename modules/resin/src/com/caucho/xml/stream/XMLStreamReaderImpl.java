@@ -601,12 +601,16 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     if (_current > 0)
       return _current;
     else {
-      if (_eofEncountered)
-        return _current = -1;
-
-      _eofEncountered = true;
+      if (_eofEncountered) {
+	_current = -1;
+      }
+      else {
+	_eofEncountered = true;
       
-      return _current = END_DOCUMENT;
+	_current = END_DOCUMENT;
+      }
+
+      return _current;
     }
   }
 
@@ -1259,7 +1263,9 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
   private String charName(int ch)
   {
-    if (ch > 0x20 && ch <= 0x7f)
+    if (ch < 0)
+      return "end of file";
+    else if (ch > 0x20 && ch <= 0x7f)
       return "'" + (char) ch + "'";
     else
       return "0x" + Integer.toHexString(ch);

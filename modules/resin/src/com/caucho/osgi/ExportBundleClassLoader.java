@@ -32,6 +32,8 @@ package com.caucho.osgi;
 import com.caucho.loader.*;
 import com.caucho.util.*;
 
+import java.util.HashMap;
+
 /**
  * OSGi exported bundle class loader
  */
@@ -40,16 +42,19 @@ public class ExportBundleClassLoader extends DynamicClassLoader
   private static final L10N L = new L10N(ExportBundleClassLoader.class);
 
   private String _symbolicName;
-  private String _version;
+  private OsgiVersion _version;
 
   private String _packageName;
+
+  private HashMap<String,ExportBundleClassLoader> _importMap
+    = new HashMap<String,ExportBundleClassLoader>();
   
   /**
    * Creates a new export class loader.
    */
   protected ExportBundleClassLoader(ClassLoader parent,
 				    String symbolicName,
-				    String version)
+				    OsgiVersion version)
   {
     super(parent);
 
@@ -65,11 +70,44 @@ public class ExportBundleClassLoader extends DynamicClassLoader
    */
   public static ExportBundleClassLoader create(ClassLoader parent,
 					       String symbolicName,
-					       String version)
+					       OsgiVersion version)
   {
     return new ExportBundleClassLoader(parent,
 				       symbolicName,
 				       version);
+  }
+
+  public void addImport(String name, ExportBundleClassLoader loader)
+  {
+    _importMap.put(name, loader);
+  }
+
+  @Override
+  protected Class findImportClass(String name)
+  {
+    int p = name.lastIndexOf('.');
+
+    if (p < 0)
+      return null;
+
+    String packageName = name.substring(0, p);
+
+    ExportBundleClassLoader loader = _importMap.get(packageName);
+
+    if (loader != null) {
+      try {
+	return loader.findClassImpl(name);
+      } catch (ClassNotFoundException e) {
+	// log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+
+    return null;
+  }
+
+  public OsgiVersion getVersion()
+  {
+    return _version;
   }
 
   @Override

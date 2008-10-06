@@ -69,7 +69,6 @@ class ResponseStream extends ToByteResponseStream {
   private int _contentLength;
   // True for the first chunk
   private boolean _isFirst;
-  private boolean _isDisconnected;
   private boolean _isCommitted;
 
   private boolean _allowFlush = true;
@@ -103,7 +102,6 @@ class ResponseStream extends ToByteResponseStream {
     _isClosed = false;
     _isHead = false;
     _cacheStream = null;
-    _isDisconnected = false;
     _isCommitted = false;
     _isFirst = true;
     _bufferStartOffset = 0;
@@ -329,10 +327,10 @@ class ResponseStream extends ToByteResponseStream {
 	return buffer;
       }
     } catch (ClientDisconnectException e) {
+      _response.clientDisconnect();
       _response.killCache();
 
       if (_response.isIgnoreClientDisconnect()) {
-        _isDisconnected = true;
 	return _next.getBuffer();
       }
       else
@@ -492,24 +490,22 @@ class ResponseStream extends ToByteResponseStream {
 	}
       }
 
-      if (! _isDisconnected)
+      if (! _response.isClientDisconnect())
         _contentLength += length;
     } catch (ClientDisconnectException e) {
       // server/183c
       _response.killCache();
+      _response.clientDisconnect();
 
-      if (_response.isIgnoreClientDisconnect())
-        _isDisconnected = true;
-      else {
+      if (! _response.isIgnoreClientDisconnect())
         throw e;
-      }
     }
   }
   
   private boolean lengthException(byte []buf, int offset, int length,
 				  long contentLengthHeader)
   {
-    if (_isDisconnected || _isHead || _isClosed) {
+    if (_response.isClientDisconnect() || _isHead || _isClosed) {
     }
     else if (contentLengthHeader < _contentLength) {
       CauchoRequest request = _response.getRequest();
@@ -607,9 +603,9 @@ class ResponseStream extends ToByteResponseStream {
           _next.flush();
       }
     } catch (ClientDisconnectException e) {
-      if (_response.isIgnoreClientDisconnect())
-        _isDisconnected = true;
-      else
+      _response.clientDisconnect();
+      
+      if (! _response.isIgnoreClientDisconnect())
         throw e;
     }
   }
@@ -743,10 +739,11 @@ class ResponseStream extends ToByteResponseStream {
       }
       */
     } catch (ClientDisconnectException e) {
-      if (_response.isIgnoreClientDisconnect())
-        _isDisconnected = true;
-      else
+      _response.clientDisconnect();
+      
+      if (! _response.isIgnoreClientDisconnect()) {
         throw e;
+      }
     }
   }
 

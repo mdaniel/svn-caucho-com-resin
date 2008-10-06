@@ -285,9 +285,9 @@ public class WriteStream extends OutputStreamWithBuffer
     int bufferLength = buffer.length;
     int writeLength = _writeLength;
 
-    if (bufferLength <= length &&
-	_source.write(buffer, 0, writeLength,
-		      buf, offset, length, false)) {
+    if (bufferLength <= length
+	&& _source.write(buffer, 0, writeLength,
+			 buf, offset, length, false)) {
       _position += (writeLength + length);
       return;
     }

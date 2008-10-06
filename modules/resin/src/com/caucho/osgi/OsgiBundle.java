@@ -30,17 +30,21 @@
 package com.caucho.osgi;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.types.BeanConfig;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.PathPatternType;
-import com.caucho.loader.Loader;
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.Loader;
 import com.caucho.make.DependencyContainer;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
 import java.net.URL;
@@ -71,9 +75,13 @@ public class OsgiBundle implements Bundle
   private JarPath _jar;
   
   private String _symbolicName;
-  private String _version = "0.0.0";
+  
+  private OsgiVersion _version = new OsgiVersion(0, 0, 0, null);
 
   private BundleClassLoader _loader;
+
+  private ConfigProgram _program;
+  private boolean _isExport;
 
   private TreeMap<String,String> _headerMap
     = new TreeMap<String,String>();
@@ -98,12 +106,18 @@ public class OsgiBundle implements Bundle
   private int _state;
   private long _lastModified;
 
-  OsgiBundle(long id, OsgiManager manager, JarPath jar)
+  OsgiBundle(long id,
+	     OsgiManager manager,
+	     JarPath jar,
+	     ConfigProgram program,
+	     boolean isExport)
   {
     _id = id;
     _manager = manager;
     _jar = jar;
     _lastModified = Alarm.getCurrentTime();
+    _program = program;
+    _isExport = isExport;
 
     if (jar != null) {
       try {
@@ -125,6 +139,10 @@ public class OsgiBundle implements Bundle
 	if (_symbolicName == null)
 	  throw new ConfigException(L.l("'{0}' needs a Bundle-SymbolicName in its manifest.  OSGi bundles require a Bundle-SymbolicName",
 					jar.getNativePath()));
+	
+	String versionString = attr.getValue("Bundle-Version");
+	
+	_version = OsgiVersion.create(versionString);
 
 	String exportAttr = attr.getValue("Export-Package");
 
@@ -135,12 +153,18 @@ public class OsgiBundle implements Bundle
 
 	addExports(exportList);
 
+	_importAttr = attr.getValue("Import-Package");
+
 	if (exportList != null)
 	  _importList.addAll(exportList);
 
-	_importAttr = attr.getValue("Import-Package");
+	if (_importAttr != null) {
+	  ArrayList<PackageItem> importList = null;
 
-	parseImport(_importAttr);
+	  importList = parseItems(_importAttr);
+
+	  _importList.addAll(importList);
+	}
 
 	_activatorClassName = attr.getValue("Bundle-Activator");
       } catch (Exception e) {
@@ -180,14 +204,22 @@ public class OsgiBundle implements Bundle
 
     try {
       thread.setContextClassLoader(_loader);
+
+      log.fine(this + " starting");
+
+      if (_program != null) {
+	_program.configure(new BundleConfig());
+      }
+
+      _loader.start();
       
       if (_activatorClassName == null) {
-	log.finer(this + " active with no Bundle-Activator");
-
 	_state = ACTIVE;
       
 	return;
       }
+      
+      log.finer(this + " active with Bundle-Activator=" + _activatorClassName);
     
       Class cl = loadClass(_activatorClassName);
 
@@ -219,7 +251,8 @@ public class OsgiBundle implements Bundle
     for (PackageItem item : _importList) {
       String packageName = item.getPrimaryPackage();
 
-      ExportBundleClassLoader loader = _manager.getExportLoader(packageName);
+      ExportBundleClassLoader loader
+	= _manager.getExportLoader(packageName, item.getVersionRange());
 
       if (loader == null)
 	throw new NullPointerException();
@@ -236,93 +269,27 @@ public class OsgiBundle implements Bundle
     for (PackageItem item : exportList) {
       String packageName = item.getPrimaryPackage();
 
-      ExportBundleClassLoader loader = _manager.getExportLoader(packageName);
+      ExportBundleClassLoader loader;
 
-      if (loader == null) {
-	loader = ExportBundleClassLoader.create(_manager.getParentLoader(),
-						_symbolicName,
-						_version);
+      loader = ExportBundleClassLoader.create(_manager.getParentLoader(),
+					      _symbolicName,
+					      _version);
 
-	String version = _version;
+      OsgiVersion version = _version;
 	
-	for (String name : item.getPackageNames()) {
-	  ExportLoader exportLoader = new ExportLoader(_jar, name, version);
-	  loader.addLoader(exportLoader);
+      for (String name : item.getPackageNames()) {
+	ExportLoader exportLoader = new ExportLoader(_jar, name, version);
+	loader.addLoader(exportLoader);
 
-	  _manager.putExportLoader(name, loader);
+	_manager.putExportLoader(name, loader);
+
+	if (_isExport) {
+	  _manager.publishExportLoader(name, loader);
 	}
       }
       
       _exportList.add(loader);
     }
-  }
-
-  private void parseImport(String importString)
-  {
-    try {
-      Reader in = new java.io.StringReader(importString);
-
-      while (parseImportChunk(in) == ',') {
-      }
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-  }
-
-  private int parseImportChunk(Reader in)
-    throws IOException
-  {
-    ArrayList<String> packageList = new ArrayList<String>();
-
-    while (true) {
-      int ch = parsePackageName(in, packageList);
-
-      if (ch != ';') {
-	System.out.println("PACKAGE: " + packageList);
-	
-	return ch;
-      }
-    }
-  }
-
-  private int parsePackageName(Reader in, ArrayList<String> packageList)
-    throws IOException
-  {
-    int ch = skipWhitespace(in);
-
-    if (ch < 0)
-      return ch;
-
-    if (! Character.isJavaIdentifierStart((char) ch)) {
-      throw new IOException(L.l("unexpected OSGI import-package character for '{0}'",
-				_importAttr));
-    }
-
-    StringBuilder name = new StringBuilder();
-
-    for (;
-	 Character.isJavaIdentifierPart((char) ch) || ch == '.';
-	 ch = in.read()) {
-      name.append((char) ch);
-    }
-
-    packageList.add(name.toString());
-
-    for (; Character.isWhitespace((char) ch); ch = in.read()) {
-    }
-    
-    return ch;
-  }
-
-  private int skipWhitespace(Reader in)
-    throws IOException
-  {
-    int ch;
-    
-    for (ch = in.read(); Character.isWhitespace(ch); ch = in.read()) {
-    }
-
-    return ch;
   }
   
   private ArrayList<PackageItem> parseItems(String attr)
@@ -347,8 +314,9 @@ public class OsgiBundle implements Bundle
       else if (Character.isJavaIdentifierPart(ch)) {
       }
       else {
-	throw new ConfigException(L.l("'{0}' is an illegal OSGi package/version string",
-				      attr));
+	throw new ConfigException(L.l("'{0}' is an illegal OSGi package/version string at '{1}'",
+				      attr,
+				      ch));
       }
 
       if (item == null) {
@@ -385,9 +353,11 @@ public class OsgiBundle implements Bundle
 	if (i < len && (ch == '"' || ch == '\'')) {
 	  char end = ch;
 
-	  for (i++; i < len && ch != end; i++) {
+	  for (i++; i < len && (ch = attr.charAt(i)) != end; i++) {
 	    value.append(ch);
 	  }
+
+	  i++;
 	}
 	else {
 	  for (;
@@ -784,6 +754,8 @@ public class OsgiBundle implements Bundle
     private ArrayList<String> _packages = new ArrayList<String>();
     private HashMap<String,String> _attr = new HashMap<String,String>();
 
+    private OsgiVersionRange _versionRange;
+
     public void addPackage(String packageName)
     {
       _packages.add(packageName);
@@ -805,11 +777,38 @@ public class OsgiBundle implements Bundle
     public void putAttribute(String key, String value)
     {
       _attr.put(key, value);
+
+      if ("version".equals(key))
+	_versionRange = OsgiVersionRange.create(value);
+    }
+
+    public OsgiVersion getVersion()
+    {
+      if (_versionRange != null)
+	return _versionRange.getMin();
+      else
+	return null;
+    }
+
+    public OsgiVersionRange getVersionRange()
+    {
+      return _versionRange;
+    }
+
+    public void setVersionRange(OsgiVersionRange version)
+    {
+      _versionRange = version;
     }
 
     public String toString()
     {
-      return "PackageItem[" + _packages + "," + _attr + "]";
+      if (_versionRange != null) {
+	return ("PackageItem[" + _packages
+		+ "," + _versionRange
+		+ "," + _attr + "]");
+      }
+      else
+	return "PackageItem[" + _packages + "," + _attr + "]";
     }
   }
 
@@ -852,6 +851,42 @@ public class OsgiBundle implements Bundle
     boolean removeUse()
     {
       return --_count > 0;
+    }
+  }
+
+  /**
+   * Configuration for the bundle
+   */
+  class BundleConfig implements EnvironmentBean {
+    /**
+     * Returns the class loader
+     */
+    public ClassLoader getClassLoader()
+    {
+      return _loader;
+    }
+
+    public ServiceConfig createService()
+    {
+      return new ServiceConfig();
+    }
+  }
+
+  class ServiceConfig extends BeanConfig {
+    ServiceConfig()
+    {
+    }
+
+    public void init()
+    {
+      super.init();
+
+      if (_comp != null) {
+	WebBeansContainer webBeans
+	  = WebBeansContainer.create(_manager.getParentLoader());
+
+	webBeans.addComponent(_comp);
+      }
     }
   }
 }

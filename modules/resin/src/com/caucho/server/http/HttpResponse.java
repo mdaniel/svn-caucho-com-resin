@@ -142,6 +142,8 @@ public class HttpResponse extends AbstractHttpResponse
   protected void writeContinueInt(WriteStream os)
     throws IOException
   {
+    // #2938, server/0558
+    /*
     os.print("HTTP/1.1 100 Continue");
 
     if (! containsHeader("Server"))
@@ -156,6 +158,9 @@ public class HttpResponse extends AbstractHttpResponse
 
     os.write(_dateBuffer, 0, _dateBufferLength);
     os.flush();
+    */
+    
+    os.print("HTTP/1.1 100 Continue\r\n\r\n");
   }
 
   /**

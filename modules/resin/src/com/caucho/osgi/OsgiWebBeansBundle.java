@@ -70,7 +70,7 @@ public class OsgiWebBeansBundle extends OsgiBundle
 
   OsgiWebBeansBundle(OsgiManager manager)
   {
-    super(manager.nextBundleId(), manager, null);
+    super(manager.nextBundleId(), manager, null, null, false);
 
     _webBeans = WebBeansContainer.create();
   }

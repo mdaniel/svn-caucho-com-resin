@@ -927,6 +927,16 @@ public class HttpServletRequestImpl implements CauchoRequest
   {
     return _request.allowKeepalive();
   }
+
+  public boolean isClientDisconnect()
+  {
+    return _request.isClientDisconnect();
+  }
+
+  public void clientDisconnect()
+  {
+    _request.clientDisconnect();
+  }
   
   public boolean authenticate()
     throws ServletException, IOException

@@ -526,6 +526,15 @@ public class RequestAdapter extends RequestWrapper
     return true;
   }
 
+  public boolean isClientDisconnect()
+  {
+    return false;
+  }
+
+  public void clientDisconnect()
+  {
+  }
+
   /**
    * Sets the role map.
    */
