@@ -688,7 +688,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     path = cb.toString();
     
     setHeader("Location", path);
-    setHeader("Content-Type", "text/html");
+    setHeader("Content-Type", "text/html; charset=utf-8");
 
     // The data is required for some WAP devices that can't handle an
     // empty response.
