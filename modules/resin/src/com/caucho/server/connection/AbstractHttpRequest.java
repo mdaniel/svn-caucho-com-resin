@@ -264,11 +264,9 @@ public abstract class AbstractHttpRequest
    *
    * @param s the raw connection stream
    */
-  protected void start()
+  protected void startRequest()
     throws IOException
   {
-    startResume();
-    
     _invocation = null;
 
     _varyCookies = false;
@@ -306,22 +304,6 @@ public abstract class AbstractHttpRequest
 
     if (_attributes.size() > 0)
       _attributes.clear();
-  }
-
-  /**
-   * Prepare the Request object for a new request.
-   *
-   * @param s the raw connection stream
-   */
-  protected void startResume()
-    throws IOException
-  {
-    _oldProvider = SecurityContext.setProvider(this);
-    
-    if (_tcpConn != null)
-      _tcpConn.beginActive();
-    else
-      _startTime = Alarm.getCurrentTime();
   }
 
   /**
@@ -2581,6 +2563,11 @@ public abstract class AbstractHttpRequest
     return _tcpConn != null && _tcpConn.isComet();
   }
 
+  public boolean isSuspend()
+  {
+    return _tcpConn != null && _tcpConn.isSuspend();
+  }
+
   public boolean isDuplex()
   {
     return _tcpConn != null && _tcpConn.isDuplex();
@@ -2632,19 +2619,41 @@ public abstract class AbstractHttpRequest
     if (session != null)
       session.save();
   }
-  
+
+  /**
+   * Prepare the Request object for a new request.
+   *
+   * @param s the raw connection stream
+   */
+  protected void startInvocation()
+    throws IOException
+  {
+    _oldProvider = SecurityContext.setProvider(this);
+    
+    if (_tcpConn != null)
+      _tcpConn.beginActive();
+    else
+      _startTime = Alarm.getCurrentTime();
+  }
+
+  /**
+   * Cleans up at the end of the invocation
+   */
+  public void finishInvocation()
+  {
+    SecurityContextProvider oldProvider = _oldProvider;
+    _oldProvider = null;
+      
+    SecurityContext.setProvider(oldProvider);
+  }
+	   
   /**
    * Cleans up at the end of the request
    */
-  public void finish()
+  public void finishRequest()
     throws IOException
   {
     try {
-      SecurityContextProvider oldProvider = _oldProvider;
-      _oldProvider = null;
-      
-      SecurityContext.setProvider(oldProvider);
-
       SessionImpl session = _session;
 
       // server/0219
@@ -2666,8 +2675,11 @@ public abstract class AbstractHttpRequest
       }
       _closeOnExit.clear();
 
-      if (_tcpConn != null)
+      if (_tcpConn != null) {
 	_tcpConn.endActive();
+
+	_tcpConn.finishRequest();
+      }
     }
   }
 

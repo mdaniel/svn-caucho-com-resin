@@ -44,11 +44,16 @@ public class ConnectionController
   protected ConnectionController()
   {
   }
+  
+  public boolean isSuspended()
+  {
+    return false;
+  }
 
   /**
    * Closes the connection.
    */
-  public void close()
+  public void closeImpl()
   {
   }
 }

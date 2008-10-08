@@ -487,8 +487,9 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public void complete()
   {
-    if (_comet != null)
+    if (_comet != null) {
       _comet.complete();
+    }
   }
 
   /**
@@ -511,7 +512,7 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public boolean isResumed()
   {
-    return false;
+    return _comet != null && ! _comet.isInitial() && ! _comet.isComplete();
   }
 
   /**
@@ -521,7 +522,7 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public boolean isTimeout()
   {
-    return false;
+    return _comet != null && _comet.isTimeout();
   }
 
   /**

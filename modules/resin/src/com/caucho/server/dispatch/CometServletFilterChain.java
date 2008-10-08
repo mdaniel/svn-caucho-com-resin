@@ -112,6 +112,7 @@ public class CometServletFilterChain extends AbstractFilterChain {
       controller = ((HttpServletRequestImpl) request).toComet();
 
       if (_servlet.service(request, response, controller)) {
+	request.suspend();
 	controller = null;
       }
     } catch (UnavailableException e) {
@@ -167,6 +168,7 @@ public class CometServletFilterChain extends AbstractFilterChain {
       if (controller == null)
 	return false;
       else if (_servlet.resume(request, response, controller)) {
+	request.suspend();
 	controller = null;
 	return true;
       }

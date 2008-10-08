@@ -121,12 +121,10 @@ public class ConnectionCometController extends ConnectionController
    */
   public final void complete()
   {
-    close();
-    /*
     _isComplete = true;
     _isSuspended = false;
+
     wake();
-    */
   }
 
   /**
@@ -165,6 +163,9 @@ public class ConnectionCometController extends ConnectionController
   public final void timeout()
   {
     _isTimeout = true;
+    _isComplete = true;
+
+    wake();
   }
 
   /**
@@ -188,7 +189,7 @@ public class ConnectionCometController extends ConnectionController
    */
   public boolean isComet()
   {
-    return _conn != null;
+    return _conn != null && ! _isComplete;
   }
   
   /**
@@ -239,13 +240,19 @@ public class ConnectionCometController extends ConnectionController
    */
   public final boolean isClosed()
   {
-    return _conn == null;
+    return _conn == null || _isComplete;
   }
 
   /**
    * Closes the connection.
    */
   public void close()
+  {
+    complete();
+  }
+
+  @Override
+  public void closeImpl()
   {
     // complete();
     
@@ -262,6 +269,8 @@ public class ConnectionCometController extends ConnectionController
 
     if (conn == null)
       return getClass().getSimpleName() + "[closed]";
+    else if (_isComplete)
+      return getClass().getSimpleName() + "[complete]";
     else if (Alarm.isTest())
       return getClass().getSimpleName() + "[]";
     else

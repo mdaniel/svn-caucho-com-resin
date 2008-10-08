@@ -377,7 +377,8 @@ public class HmuxRequest extends AbstractHttpRequest
     boolean hasRequest = false;
     
     try {
-      start();
+      startRequest();
+      
       _response.start();
 
       try {
@@ -457,6 +458,8 @@ public class HmuxRequest extends AbstractHttpRequest
 	_requestFacade = new HttpServletRequestImpl(this);
 	_responseFacade = new HttpServletResponseImpl(_response);
 
+	startInvocation();
+
         invocation.service(_requestFacade, _responseFacade);
       } catch (ClientDisconnectException e) {
         throw e;
@@ -474,11 +477,13 @@ public class HmuxRequest extends AbstractHttpRequest
 	return false;
       }
     } finally {
+      finishInvocation();
+      
       if (! hasRequest)
 	_response.setHeaderWritten(true);
       
       try {
-	finish();
+	finishRequest();
 	_response.finish();
       } catch (ClientDisconnectException e) {
         throw e;
@@ -582,10 +587,10 @@ public class HmuxRequest extends AbstractHttpRequest
    * Clears variables at the start of a new request.
    */
   @Override
-  protected void start()
+  protected void startRequest()
     throws IOException
   {
-    super.start();
+    super.startRequest();
 
     _method.clear();
     _methodString = null;

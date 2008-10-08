@@ -218,7 +218,7 @@ public class WebAppFilterChain extends AbstractFilterChain {
 
       // needed for things like closing the session
       if (request instanceof AbstractHttpRequest)
-        ((AbstractHttpRequest) request).finish();
+        ((AbstractHttpRequest) request).finishInvocation();
         
       try {
 	if (_accessLog != null) {
@@ -286,7 +286,7 @@ public class WebAppFilterChain extends AbstractFilterChain {
 
       // needed for things like closing the session
       if (request instanceof AbstractHttpRequest)
-        ((AbstractHttpRequest) request).finish();
+        ((AbstractHttpRequest) request).finishInvocation();
 
       /*
       try {

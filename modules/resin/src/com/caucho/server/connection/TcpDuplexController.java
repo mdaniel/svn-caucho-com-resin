@@ -135,11 +135,16 @@ public class TcpDuplexController extends ConnectionController
     return _handler;
   }
 
+  public void close()
+  {
+    closeImpl();
+  }
+  
   /**
    * Closes the connection.
    */
   @Override
-  public void close()
+  public void closeImpl()
   {
     _conn = null;
     _is = null;
@@ -147,7 +152,7 @@ public class TcpDuplexController extends ConnectionController
     _handler = null;
     _loader = null;
     
-    super.close();
+    super.closeImpl();
   }
 
   public boolean serviceRead()

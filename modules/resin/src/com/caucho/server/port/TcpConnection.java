@@ -485,6 +485,11 @@ public class TcpConnection extends Connection
     return _state.isComet();
   }
 
+  public boolean isSuspend()
+  {
+    return _controller != null && _controller.isSuspended();
+  }
+
   @Override
   public boolean isDuplex()
   {
@@ -859,7 +864,7 @@ public class TcpConnection extends Connection
     ConnectionController controller = _controller;
     
     if (controller != null)
-      controller.close();
+      controller.closeImpl();
     
     _isKeepalive = false;
 
@@ -871,9 +876,9 @@ public class TcpConnection extends Connection
 
     if (log.isLoggable(Level.FINER)) {
       if (port != null)
-	log.finer(dbgId() + "closing connection " + this + ", total=" + port.getConnectionCount());
+	log.finer(dbgId() + " closing connection " + this + ", total=" + port.getConnectionCount());
       else
-	log.finer(dbgId() + "closing connection " + this);
+	log.finer(dbgId() + " closing connection " + this);
     }
     _isWake = false;
 
@@ -907,6 +912,21 @@ public class TcpConnection extends Connection
 
       closeControllerImpl();
     }
+  }
+
+  /**
+   * Finish a request.
+   */
+  public void finishRequest()
+  {
+    ConnectionController controller = _controller;
+    _controller = null;
+
+    if (controller != null)
+      controller.closeImpl();
+
+    // XXX: to finishRequest
+    _state = _state.toCompleteComet();
   }
 
   /**

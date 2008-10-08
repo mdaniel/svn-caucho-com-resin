@@ -53,7 +53,7 @@ public class StubServletRequest extends AbstractHttpRequest {
     super(null, null);
 
     try {
-      start();
+      startRequest();
     } catch (Throwable e) {
     }
   }

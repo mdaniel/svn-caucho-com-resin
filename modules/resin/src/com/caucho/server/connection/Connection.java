@@ -156,6 +156,14 @@ public abstract class Connection
   }
 
   /**
+   * Returns true for a comet connection
+   */
+  public boolean isSuspend()
+  {
+    return false;
+  }
+
+  /**
    * Returns true for a duplex connection
    */
   public boolean isDuplex()
@@ -185,6 +193,6 @@ public abstract class Connection
    */
   protected boolean wake()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return false;
   }
 }
