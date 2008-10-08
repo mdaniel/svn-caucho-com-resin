@@ -316,13 +316,6 @@ public class QuercusProgram {
   public Value execute(Env env)
   {
     return _statement.execute(env);
-
-    /*
-    if (value != null)
-      return value;
-    else
-      return NullValue.NULL;
-    */
   }
 
   /**
@@ -354,10 +347,6 @@ public class QuercusProgram {
     }
   }
 
-  //
-  // Java generation code follows
-  //
-  
   public String toString()
   {
     return "QuercusProgram[" + _sourceFile + "]";

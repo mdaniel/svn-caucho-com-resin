@@ -1763,16 +1763,9 @@ public class Env {
     if (var == null) {
       var = getGlobalSpecialRef(name);
 
-      if (var != null) {
-        var.setGlobal();
-        _globalMap.put(name, var);
-
-        var = _map.get(name);
-      }
+      if (var == null)
+        var = getGlobalScriptContextRef(name);
     }
-    
-    if (var == null)
-      var = getGlobalScriptContextRef(name);
 
     return var;
   }
@@ -1796,10 +1789,10 @@ public class Env {
       var = getGlobalSpecialRef(name);
 
       if (var == null)
-	var = getGlobalScriptContextRef(name);
+        var = getGlobalScriptContextRef(name);
       
       if (var == null)
-	var = new Var();
+        var = new Var();
       
       _globalMap.put(name, var);
     }
