@@ -258,6 +258,7 @@ public class ConnectionCometController extends ConnectionController
     
     Connection conn = _conn;
     _conn = null;
+    _isComplete = true;
 
     if (conn != null)
       conn.closeController(this);
@@ -269,11 +270,27 @@ public class ConnectionCometController extends ConnectionController
 
     if (conn == null)
       return getClass().getSimpleName() + "[closed]";
-    else if (_isComplete)
-      return getClass().getSimpleName() + "[complete]";
-    else if (Alarm.isTest())
-      return getClass().getSimpleName() + "[]";
+
+    StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getSimpleName()).append("[");
+
+    if (Alarm.isTest())
+      sb.append("test");
     else
-      return getClass().getSimpleName() + "[" + conn.getId() + "]";
+      sb.append(conn.getId());
+
+    if (_isComplete)
+      sb.append(",complete");
+    
+    if (_isSuspended)
+      sb.append(",suspended");
+    
+    if (_conn instanceof TcpConnection
+	&& ((TcpConnection) _conn).isWake())
+      sb.append(",wake");
+
+    sb.append("]");
+
+    return sb.toString();
   }
 }

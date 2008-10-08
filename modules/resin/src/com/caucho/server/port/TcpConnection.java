@@ -474,7 +474,7 @@ public class TcpConnection extends Connection
     _isWake = true;
   }
 
-  boolean isWake()
+  public boolean isWake()
   {
     return _isWake;
   }
@@ -570,6 +570,8 @@ public class TcpConnection extends Connection
        }
 
        result = RequestState.EXIT;
+
+       _isWake = false;
        
        synchronized (_requestLock) {
 	 if (! getRequest().handleRequest())
@@ -880,7 +882,6 @@ public class TcpConnection extends Connection
       else
 	log.finer(dbgId() + " closing connection " + this);
     }
-    _isWake = false;
 
     try {
       getWriteStream().close();
@@ -1350,6 +1351,8 @@ public class TcpConnection extends Connection
 
 	if (comet != null)
 	  comet.startResume();
+
+	_isWake = false;
 	
         if (getRequest().handleResume()
 	    && _port.suspend(TcpConnection.this)) {

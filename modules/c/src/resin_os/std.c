@@ -210,8 +210,6 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
   if (result > 0)
     return result;
   else if (result == 0) {
-    conn->ops->close(conn);
-
     return result;
   }
   else {
