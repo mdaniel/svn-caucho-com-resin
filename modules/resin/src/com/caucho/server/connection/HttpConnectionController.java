@@ -127,11 +127,11 @@ public class HttpConnectionController extends ConnectionController
    * Closes the connection.
    */
   @Override
-  public void close()
+  public void closeImpl()
   {
     _request = null;
     
-    super.close();
+    super.closeImpl();
   }
 
   public String toString()
