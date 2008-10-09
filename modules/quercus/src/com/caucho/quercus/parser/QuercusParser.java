@@ -3293,24 +3293,24 @@ public class QuercusParser {
           
           if ("bool".equalsIgnoreCase(type)
               || "boolean".equalsIgnoreCase(type))
-            return _factory.createToBoolean(parseExpr());
+            return _factory.createToBoolean(parseAssignExpr());
           else if ("int".equalsIgnoreCase(type)
                    || "integer".equalsIgnoreCase(type))
-            return _factory.createToLong(parseExpr());
+            return _factory.createToLong(parseAssignExpr());
           else if ("float".equalsIgnoreCase(type)
                    || "double".equalsIgnoreCase(type)
                    || "real".equalsIgnoreCase(type))
-            return _factory.createToDouble(parseExpr());
+            return _factory.createToDouble(parseAssignExpr());
           else if ("string".equalsIgnoreCase(type))
-            return _factory.createToString(parseExpr());
+            return _factory.createToString(parseAssignExpr());
           else if ("binary".equalsIgnoreCase(type))
-            return _factory.createToBinary(parseExpr());
+            return _factory.createToBinary(parseAssignExpr());
           else if ("unicode".equalsIgnoreCase(type))
-            return _factory.createToUnicode(parseExpr());
+            return _factory.createToUnicode(parseAssignExpr());
           else if ("object".equalsIgnoreCase(type))
-            return _factory.createToObject(parseExpr());
+            return _factory.createToObject(parseAssignExpr());
           else if ("array".equalsIgnoreCase(type))
-            return _factory.createToArray(parseExpr());
+            return _factory.createToArray(parseAssignExpr());
         }
 
         return expr;

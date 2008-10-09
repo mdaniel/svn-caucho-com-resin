@@ -1594,7 +1594,7 @@ public class Env {
     if (var != null)
       return var;
 
-    var = getGlobalSpecialRef(name);
+    var = getSuperGlobalRef(name);
 
     if (var == null)
       var = getGlobalScriptContextRef(name);
@@ -1748,10 +1748,14 @@ public class Env {
 
     // required for $$ref where $ref is the name of a superglobal
     if (var == null) {
-      var = getGlobalSpecialRef(name);
+      var = getSuperGlobalRef(name);
+      
+      // _SESSION acts like a super global
+      if (var == null && name.equals("_SESSION"))
+        var = getGlobalVar("_SESSION");
 
-      if (var == null)
-        var = getGlobalScriptContextRef(name);
+      //if (var == null)
+        //var = getGlobalScriptContextRef(name);
     }
 
     return var;
@@ -1773,7 +1777,7 @@ public class Env {
     Var var = _globalMap.get(name);
 
     if (var == null) {
-      var = getGlobalSpecialRef(name);
+      var = getSuperGlobalRef(name);
 
       if (var == null)
         var = getGlobalScriptContextRef(name);
@@ -1785,6 +1789,256 @@ public class Env {
     }
 
     return var;
+  }
+  
+  /**
+   * Returns a superglobal.
+   */
+  private Var getSuperGlobalRef(String name)
+  {
+    Var var;
+    
+    switch (SPECIAL_VARS.get(name)) {
+      case _ENV: {
+        var = new Var();
+
+        _globalMap.put(name, var);
+
+        var.set(new ArrayValueImpl());
+
+        return var;
+      }
+
+      case HTTP_POST_VARS:
+        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+          return null;
+      case _POST: {
+        var = new Var();
+
+        _globalMap.put(name, var);
+
+        ArrayValue post = new ArrayValueImpl();
+
+        var.set(post);
+
+        if (_request == null)
+          return null;
+
+        if (! "POST".equals(_request.getMethod()))
+          return var;
+
+        if (_postArray != null) {
+          for (Map.Entry<Value, Value> entry : _postArray.entrySet()) {
+            post.put(entry.getKey(), entry.getValue());
+          }
+        }
+        
+        return var;
+      }
+
+      case HTTP_POST_FILES:
+        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+          return null;
+      case _FILES: {
+        var = new Var();
+
+        _globalMap.put(name, var);
+
+        ArrayValue files = new ArrayValueImpl();
+
+        if (_files != null) {
+          for (Map.Entry<Value, Value> entry : _files.entrySet()) {
+            files.put(entry.getKey(), entry.getValue());
+          }
+        }
+
+        var.set(files);
+        
+        return var;
+      }
+
+      case HTTP_GET_VARS:
+        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+          return null;
+      
+      case _GET: {
+        var = new Var();
+
+        ArrayValue array = new ArrayValueImpl();
+
+        var.set(array);
+        _globalMap.put(name, var);
+
+        String queryString = _request.getQueryString();
+        if (queryString == null)
+          return var;
+
+        StringUtility.parseStr(this,
+                               queryString,
+                               array,
+                               true,
+                               getHttpInputEncoding());
+        
+        return var;
+      }
+      
+      case _REQUEST: {
+        var = new Var();
+        
+        ArrayValue array = new ArrayValueImpl();
+
+        var.set(array);
+
+        _globalMap.put(name, var);
+
+        if (_request == null)
+          return var;
+        
+        try {
+          String encoding = getHttpInputEncoding();
+          
+          if (encoding == null)
+            encoding = "iso-8859-1";
+          
+          _request.setCharacterEncoding(encoding);
+        } catch (Exception e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
+        
+        ArrayList<String> keys = new ArrayList<String>();
+        keys.addAll(_request.getParameterMap().keySet());
+
+        Collections.sort(keys);
+
+        boolean isMagicQuotes = getIniBoolean("magic_quotes_gpc");
+        
+        for (String key : keys) {
+          String []value = _request.getParameterValues(key);
+
+          Post.addFormValue(this,
+                            array,
+                            key,
+                            value,
+                            isMagicQuotes);
+        }
+
+        if (name.equals("_REQUEST") && _postArray != null) {
+          
+          for (Map.Entry<Value, Value> entry : _postArray.entrySet()) {
+            Value key = entry.getKey();
+            Value value = entry.getValue();
+            
+            Value existingValue = array.get(key);
+            
+            if (existingValue.isArray() && value.isArray())
+             existingValue.toArrayValue(this).putAll(value.toArrayValue(this));
+            else
+              array.put(entry.getKey(), entry.getValue().copy());
+          }
+        }
+
+        Cookie []cookies = _request.getCookies();
+        for (int i = 0; cookies != null && i < cookies.length; i++) {   
+          Cookie cookie = cookies[i];
+
+          String decodedValue = decodeValue(cookie.getValue());
+
+          Post.addFormValue(this,
+                            array,
+                            cookie.getName(),
+                            new String[] { decodedValue },
+                            isMagicQuotes);
+        }
+        
+        return var;
+      }
+
+      case HTTP_RAW_POST_DATA: {
+        if (! Quercus.INI_ALWAYS_POPULATE_RAW_POST_DATA.getAsBoolean(this))
+          return null;
+        
+        if (_inputData == null)
+          return null;
+        
+        var = new Var();
+        
+        _globalMap.put(name, var);
+        
+        var.set(_inputData);
+        
+        return var;
+      }
+    
+      case HTTP_SERVER_VARS:
+        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+          return null;
+      
+      case _SERVER: {
+        var = new Var();
+
+        _globalMap.put(name, var);
+
+        var.set(new ServerArrayValue(this));
+
+        return var;
+      }
+
+      case _GLOBAL: {
+        var = new Var();
+
+        _globalMap.put(name, var);
+
+        var.set(new GlobalArrayValue(this));
+
+        return var;
+      }
+
+      case HTTP_COOKIE_VARS:
+        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+          return null;
+      
+      case _COOKIE: {
+        var = new Var();
+        _globalMap.put(name, var);
+
+        if (_request == null)
+          return var;
+        
+        ArrayValue array = new ArrayValueImpl();
+
+        Cookie []cookies = _request.getCookies();
+        if (cookies != null) {
+          for (int i = 0; i < cookies.length; i++) {
+            Cookie cookie = cookies[i];
+
+            String value = decodeValue(cookie.getValue());
+
+            StringValue valueAsValue = createString(value);
+
+            if (getIniBoolean("magic_quotes_gpc")) // php/0876
+              valueAsValue = StringModule.addslashes(valueAsValue);
+
+            array.append(createString(cookie.getName()), valueAsValue);
+          }
+        }
+
+        var.set(array);
+
+        return var;
+      }
+
+      case PHP_SELF: {
+        var = new Var();
+        _globalMap.put(name, var);
+
+        var.set(getGlobalVar("_SERVER").get(PHP_SELF_STRING));
+
+        return var;
+      }
+      
+      default:
+        return null;
+    }
   }
 
   /**
@@ -1798,246 +2052,10 @@ public class Env {
       var = _globalMap.get(name);
       
       if (var != null)
-	return var;
-    }
-
-    switch (SPECIAL_VARS.get(name)) {
-    case _ENV: {
-      var = new Var();
-
-      _globalMap.put(name, var);
-
-      var.set(new ArrayValueImpl());
-
-      return var;
-    }
-
-    case HTTP_POST_VARS:
-      if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
-	return null;
-    case _POST: {
-      var = new Var();
-
-      _globalMap.put(name, var);
-
-      ArrayValue post = new ArrayValueImpl();
-
-      var.set(post);
-
-      if (_request == null)
-        return null;
-
-      if (! "POST".equals(_request.getMethod()))
         return var;
-
-      if (_postArray != null) {
-        for (Map.Entry<Value, Value> entry : _postArray.entrySet()) {
-          post.put(entry.getKey(), entry.getValue());
-        }
-      }
-    }
-    break;
-
-
-    case HTTP_POST_FILES:
-      if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
-	return null;
-    case _FILES: {
-      var = new Var();
-
-      _globalMap.put(name, var);
-
-      ArrayValue files = new ArrayValueImpl();
-
-      if (_files != null) {
-        for (Map.Entry<Value, Value> entry : _files.entrySet()) {
-          files.put(entry.getKey(), entry.getValue());
-        }
-      }
-
-      var.set(files);
-    }
-    break;
-
-    case HTTP_GET_VARS:
-      if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
-        return null;
-      
-    case _GET: {
-      var = new Var();
-
-      ArrayValue array = new ArrayValueImpl();
-
-      var.set(array);
-      _globalMap.put(name, var);
-
-      String queryString = _request.getQueryString();
-      if (queryString == null)
-        return var;
-
-      StringUtility.parseStr(this,
-                             queryString,
-                             array,
-                             true,
-                             getHttpInputEncoding());
-      
-      return var;
-    }
-      
-    case _REQUEST: {
-      var = new Var();
-      
-      ArrayValue array = new ArrayValueImpl();
-
-      var.set(array);
-
-      _globalMap.put(name, var);
-
-      if (_request == null)
-        return var;
-      
-      try {
-        String encoding = getHttpInputEncoding();
-        
-        if (encoding == null)
-          encoding = "iso-8859-1";
-        
-        _request.setCharacterEncoding(encoding);
-      } catch (Exception e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
-	  
-      ArrayList<String> keys = new ArrayList<String>();
-      keys.addAll(_request.getParameterMap().keySet());
-
-      Collections.sort(keys);
-
-      boolean isMagicQuotes = getIniBoolean("magic_quotes_gpc");
-      
-      for (String key : keys) {
-        String []value = _request.getParameterValues(key);
-
-        Post.addFormValue(this,
-                          array,
-                          key,
-                          value,
-                          isMagicQuotes);
-      }
-
-      if (name.equals("_REQUEST") && _postArray != null) {
-        
-        for (Map.Entry<Value, Value> entry : _postArray.entrySet()) {
-          Value key = entry.getKey();
-          Value value = entry.getValue();
-          
-          Value existingValue = array.get(key);
-          
-          if (existingValue.isArray() && value.isArray())
-           existingValue.toArrayValue(this).putAll(value.toArrayValue(this));
-          else
-            array.put(entry.getKey(), entry.getValue().copy());
-        }
-      }
-
-      Cookie []cookies = _request.getCookies();
-      for (int i = 0; cookies != null && i < cookies.length; i++) {   
-        Cookie cookie = cookies[i];
-
-        String decodedValue = decodeValue(cookie.getValue());
-
-        Post.addFormValue(this,
-                          array,
-                          cookie.getName(),
-                          new String[] { decodedValue },
-                          isMagicQuotes);
-      }
-      
-      return var;
     }
 
-    case HTTP_RAW_POST_DATA: {
-      if (! Quercus.INI_ALWAYS_POPULATE_RAW_POST_DATA.getAsBoolean(this))
-        return null;
-      
-      if (_inputData == null)
-        return null;
-      
-      var = new Var();
-      
-      _globalMap.put(name, var);
-      
-      var.set(_inputData);
-      
-      return var;
-    }
-    
-    case HTTP_SERVER_VARS:
-      if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
-	return null;
-      
-    case _SERVER: {
-      var = new Var();
-
-      _globalMap.put(name, var);
-
-      var.set(new ServerArrayValue(this));
-
-      return var;
-    }
-
-    case _GLOBAL: {
-      var = new Var();
-
-      _globalMap.put(name, var);
-
-      var.set(new GlobalArrayValue(this));
-
-      return var;
-    }
-
-    case HTTP_COOKIE_VARS:
-      if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
-	return null;
-      
-    case _COOKIE: {
-      var = new Var();
-      _globalMap.put(name, var);
-
-      if (_request == null)
-        return var;
-      
-      ArrayValue array = new ArrayValueImpl();
-
-      Cookie []cookies = _request.getCookies();
-      if (cookies != null) {
-        for (int i = 0; i < cookies.length; i++) {
-          Cookie cookie = cookies[i];
-
-          String value = decodeValue(cookie.getValue());
-
-          StringValue valueAsValue = createString(value);
-
-          if (getIniBoolean("magic_quotes_gpc")) // php/0876
-            valueAsValue = StringModule.addslashes(valueAsValue);
-
-          array.append(createString(cookie.getName()), valueAsValue);
-        }
-      }
-
-      var.set(array);
-
-      return var;
-    }
-
-    case PHP_SELF: {
-      var = new Var();
-      _globalMap.put(name, var);
-
-      var.set(getGlobalVar("_SERVER").get(PHP_SELF_STRING));
-
-      return var;
-    }
-    }
+    var = getSuperGlobalRef(name);
 
     return var;
   }
@@ -2052,18 +2070,18 @@ public class Env {
 
     if (value == null) {
       Bindings bindings
-	= _scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
+      = _scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
 
       if (bindings != null)
-	value = bindings.get(name);
+        value = bindings.get(name);
     }
 
     if (value == null) {
       Bindings bindings
-	= _scriptContext.getBindings(ScriptContext.GLOBAL_SCOPE);
+      = _scriptContext.getBindings(ScriptContext.GLOBAL_SCOPE);
 
       if (bindings != null)
-	value = bindings.get(name);
+        value = bindings.get(name);
     }
 
     if (value != null) {
