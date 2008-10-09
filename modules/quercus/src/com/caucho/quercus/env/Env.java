@@ -352,10 +352,16 @@ public class Env {
     _classDef = _freeClassDefList.allocate();
     if (_classDef == null || _classDef.length != defClasses.length)
       _classDef = new ClassDef[defClasses.length];
+    else {
+      // list should have been zeroed on call to free
+    }
 
     _qClass = _freeClassList.allocate();
     if (_qClass == null || _qClass.length != defClasses.length)
       _qClass = new QuercusClass[defClasses.length];
+    else {
+      // list should have been zeroed on call to free
+    }
     
     _originalOut = out;
     _out = out;
@@ -1749,10 +1755,6 @@ public class Env {
     // required for $$ref where $ref is the name of a superglobal
     if (var == null) {
       var = getSuperGlobalRef(name);
-      
-      // _SESSION acts like a super global
-      if (var == null && name.equals("_SESSION"))
-        var = getGlobalVar("_SESSION");
 
       //if (var == null)
         //var = getGlobalScriptContextRef(name);
@@ -2023,6 +2025,12 @@ public class Env {
         }
 
         var.set(array);
+
+        return var;
+      }
+      
+      case _SESSION: {
+        var = _globalMap.get("_SESSION");
 
         return var;
       }
@@ -5243,18 +5251,34 @@ public class Env {
 
     AbstractFunction []fun = _fun;
     _fun = null;
-    if (fun != null)
+    if (fun != null) {
+      for (int i = 0; i < fun.length; i++) {
+        fun[i] = null;
+      }
+      
       _freeFunList.free(fun);
+    }
 
     ClassDef []classDef = _classDef;
     _classDef = null;
-    if (classDef != null)
+    if (classDef != null) {
+      // php/0b3b
+      for (int i = 0; i < classDef.length; i++) {
+        classDef[i] = null;
+      }
+      
       _freeClassDefList.free(classDef);
+    }
 
     QuercusClass []qClass = _qClass;
     _qClass = null;
-    if (qClass != null)
+    if (qClass != null) {
+      for (int i = 0; i < qClass.length; i++) {
+        qClass[i] = null;
+      }
+      
       _freeClassList.free(qClass);
+    }
   }
 
   public void sessionWriteClose()
