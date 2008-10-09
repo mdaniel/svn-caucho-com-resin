@@ -1922,6 +1922,14 @@ abstract public class Value implements java.io.Serializable
   {
     return NullValue.NULL;
   }
+  
+  public final Value putField(Env env, StringValue name, Value value,
+                              Value innerIndex, Value innerValue)
+  {
+    Value result = value.append(innerIndex, innerValue);
+
+    return putField(env, name, result);
+  }
 
   /**
    * Returns true if the field is set
@@ -2048,7 +2056,7 @@ abstract public class Value implements java.io.Serializable
   {
     return putThisField(env, env.createString(name), value);
   }
-
+  
   /**
    * Returns the array ref.
    */
@@ -2136,11 +2144,14 @@ abstract public class Value implements java.io.Serializable
   /**
    * Sets the array ref.
    */
-  public final Value put(Value index, Value value, Value toReturn)
+  public final Value put(Value index, Value value,
+                         Value innerIndex, Value innerValue)
   {
-    put(index, value);
+    Value result = value.append(innerIndex, innerValue);
     
-    return toReturn;
+    put(index, result);
+    
+    return innerValue;
   }
 
   /**
