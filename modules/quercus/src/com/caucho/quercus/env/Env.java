@@ -166,6 +166,12 @@ public class Env {
   private static final FreeList<AbstractFunction[]> _freeFunList
     = new FreeList<AbstractFunction[]>(256);
 
+  private static final FreeList<ClassDef[]> _freeClassDefList
+    = new FreeList<ClassDef[]>(256);
+
+  private static final FreeList<QuercusClass[]> _freeClassList
+    = new FreeList<QuercusClass[]>(256);
+
   protected final Quercus _quercus;
   private final boolean _isUnicodeSemantics; 
   private QuercusPage _page;
@@ -229,8 +235,8 @@ public class Env {
   private ArrayList<String> _includePathList;
   private HashMap<Path,ArrayList<Path>> _includePathMap;
 
-  private LinkedHashMap<Path,QuercusPage> _includeMap
-    = new LinkedHashMap<Path,QuercusPage>();
+  private HashMap<Path,QuercusPage> _includeMap
+    = new HashMap<Path,QuercusPage>();
   
   private boolean _isAllowUrlInclude;
   private boolean _isAllowUrlFopen;
@@ -343,8 +349,13 @@ public class Env {
 
     ClassDef []defClasses = quercus.getClassDefMap();
 
-    _classDef = new ClassDef[defClasses.length];
-    _qClass = new QuercusClass[_classDef.length];
+    _classDef = _freeClassDefList.allocate();
+    if (_classDef == null || _classDef.length != defClasses.length)
+      _classDef = new ClassDef[defClasses.length];
+
+    _qClass = _freeClassList.allocate();
+    if (_qClass == null || _qClass.length != defClasses.length)
+      _qClass = new QuercusClass[defClasses.length];
     
     _originalOut = out;
     _out = out;
@@ -389,41 +400,17 @@ public class Env {
       
       setInputData(bb);
     }
-    /*
-    Cluster cluster = Cluster.getLocal();
-
-    if (cluster != null) {
-      ClusterServer selfServer = cluster.getSelfServer();
-
-      if (selfServer != null)
-        setIni("caucho.server_id", selfServer.getId());
-    }
-    */
 
     // Define the constant string PHP_VERSION
 
-    VariableModule.define(this,
-      this.createString("PHP_VERSION"),
-      OptionsModule.phpversion(this, null),
-      true);
+    addConstant("PHP_VERSION", OptionsModule.phpversion(this, null), true);
     
     // STDIN, STDOUT, STDERR
     // php://stdin, php://stdout, php://stderr
     if (response == null) {
-      VariableModule.define(this,
-                            this.createString("STDOUT"),
-                            wrapJava(new PhpStdout()),
-                            false);
-      
-      VariableModule.define(this,
-                            this.createString("STDERR"),
-                            wrapJava(new PhpStderr()),
-                            false);
-
-      VariableModule.define(this,
-                            this.createString("STDIN"),
-                            wrapJava(new PhpStdin(this)),
-                            false);
+      addConstant("STDOUT", wrapJava(new PhpStdout()), false);
+      addConstant("STDERR", wrapJava(new PhpStderr()), false);
+      addConstant("STDIN", wrapJava(new PhpStdin(this)), false);
     }
   }
 
@@ -3823,13 +3810,14 @@ public class Env {
     ClassKey key = new ClassKey(def, parent);
 
     SoftReference<QuercusClass> qClassRef = _classCache.get(key);
-    QuercusClass qClass;
+
+    QuercusClass qClass = null;
 
     if (qClassRef != null) {
       qClass = qClassRef.get();
 
       if (qClass != null) {
-        return new QuercusClass(qClass, parent);
+	return new QuercusClass(qClass, parent);
       }
     }
 
@@ -4263,8 +4251,16 @@ public class Env {
   {
     ArrayValue array = new ArrayValueImpl();
 
+    ArrayList<String> list = new ArrayList<String>();
+
     for (Path path : _includeMap.keySet()) {
-      array.put(createString(path.toString()));
+      list.add(path.toString());
+    }
+      
+    Collections.sort(list);
+    
+    for (String pathName : list) {
+      array.put(createString(pathName));
     }
     
     return array;
@@ -5231,6 +5227,16 @@ public class Env {
     _fun = null;
     if (fun != null)
       _freeFunList.free(fun);
+
+    ClassDef []classDef = _classDef;
+    _classDef = null;
+    if (classDef != null)
+      _freeClassDefList.free(classDef);
+
+    QuercusClass []qClass = _qClass;
+    _qClass = null;
+    if (qClass != null)
+      _freeClassList.free(qClass);
   }
 
   public void sessionWriteClose()

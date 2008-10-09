@@ -13,7 +13,9 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
-<li>error-page: xss issue with utf-7 encoding (#2965, rep by Moshe Ben-Abu)</li>
+<li>quercus: dependency checking needs to use timeout (#2981, rep by Steven Grimm)</li>
+<li>quercus: compilation thread was blocking the execution thread (#2991, rep by Scott Landshof)</li>
+<li>(2008-10-08) error-page: xss issue with utf-7 encoding (#2965, rep by Moshe Ben-Abu)</li>
 <li>filter: added HeaderFilter for standard headers like P3P, and like the Apache "Header" command (#2953, rep by Sean Moore)</li>
 <li>comet: client disconnect needs to set isClosed flag (#2924, #2961, rep by Martin Thompson)</li>
 <li>jstl: Added org.xml.sax.XMLReader support for x:parse doc attribute</li>

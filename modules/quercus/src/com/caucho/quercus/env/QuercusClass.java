@@ -86,14 +86,6 @@ public class QuercusClass {
   private final IntMap _fieldMap;
   
   private final HashMap<StringValue,Expr> _fieldInitMap;
-
-  /*
-  private final IdentityHashMap<String,AbstractFunction> _methodMap
-    = new IdentityHashMap<String,AbstractFunction>();
-  
-  private final HashMap<String,AbstractFunction> _lowerMethodMap
-    = new HashMap<String,AbstractFunction>();
-  */
   
   private final MethodMap<AbstractFunction> _methodMap;
 
@@ -101,8 +93,7 @@ public class QuercusClass {
 
   private final HashMap<String,ArrayList<StaticField>> _staticFieldExprMap;
 
-  private final HashMap<String,Value> _staticFieldMap
-    = new LinkedHashMap<String,Value>();
+  private HashMap<String,Value> _staticFieldMap;
 
   public QuercusClass(ClassDef classDef, QuercusClass parent)
   {
@@ -121,7 +112,7 @@ public class QuercusClass {
     
     _initializers = new ArrayList<InstanceInitializer>();
     _fieldNames = new ArrayList<StringValue>();
-    _fieldMap = new IntMap();
+    _fieldMap = new IntMap(16);
   
     _fieldInitMap = new HashMap<StringValue,Expr>();
     _methodMap = new MethodMap<AbstractFunction>();
@@ -616,6 +607,11 @@ public class QuercusClass {
 
   public void init(Env env)
   {
+    if (_staticFieldExprMap.size() == 0)
+      return;
+
+    _staticFieldMap = new LinkedHashMap<String,Value>();
+    
     for (Map.Entry<String,ArrayList<StaticField>> map
 	   : _staticFieldExprMap.entrySet()) {
       if (env.isInitializedClass(map.getKey()))
@@ -650,7 +646,12 @@ public class QuercusClass {
 
   public Var getStaticField(Env env, String name)
   {
-    Value value = _staticFieldMap.get(name);
+    Value value;
+
+    if (_staticFieldMap != null)
+      value = _staticFieldMap.get(name);
+    else
+      value = null;
     
     if (value != null) {
       String fullName = _className + "::" + name;

@@ -35,12 +35,15 @@ import com.caucho.quercus.page.QuercusPage;
 import com.caucho.vfs.BasicDependencyContainer;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.Dependency;
 import com.caucho.vfs.PersistentDependency;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import java.util.logging.Logger;
 
 /**
  * Represents a compiled Quercus program.
@@ -73,6 +76,9 @@ public class QuercusProgram {
   private BasicDependencyContainer _depend
     = new BasicDependencyContainer();
 
+  private BasicDependencyContainer _topDepend
+    = new BasicDependencyContainer();
+
   /**
    * Creates a new quercus program
    *
@@ -90,6 +96,9 @@ public class QuercusProgram {
   {
     _quercus = quercus;
     _depend.setCheckInterval(quercus.getDependencyCheckInterval());
+
+    _topDepend.setCheckInterval(quercus.getDependencyCheckInterval());
+    _topDepend.add(new PageDependency());
 
     _sourceFile = sourceFile;
     if (sourceFile != null)
@@ -124,6 +133,9 @@ public class QuercusProgram {
     _quercus = quercus;
     _sourceFile = sourceFile;
     _compiledPage = page;
+    
+    _topDepend.setCheckInterval(quercus.getDependencyCheckInterval());
+    _topDepend.add(new PageDependency());
   }
 
   /**
@@ -207,10 +219,7 @@ public class QuercusProgram {
    */
   public boolean isModified()
   {
-    if (_compiledPage != null)
-      return _compiledPage.isModified();
-    else
-      return _depend.isModified();
+    return _topDepend.isModified();
   }
 
   /**
@@ -350,6 +359,27 @@ public class QuercusProgram {
   public String toString()
   {
     return "QuercusProgram[" + _sourceFile + "]";
+  }
+
+  class PageDependency implements Dependency {
+    public boolean isModified()
+    {
+      if (_compiledPage != null)
+	return _compiledPage.isModified();
+      else
+	return _depend.isModified();
+    }
+  
+    public boolean logModified(Logger log)
+    {
+      if (isModified()) {
+	log.finer(_sourceFile + " is modified");
+
+	return true;
+      }
+      else
+	return false;
+    }
   }
 }
 
