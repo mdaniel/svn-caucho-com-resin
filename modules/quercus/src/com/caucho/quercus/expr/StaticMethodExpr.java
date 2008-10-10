@@ -143,7 +143,7 @@ public class StaticMethodExpr extends Expr {
       args[i] = _args[i].evalArg(env);
     }
     
-    QuercusClass oldClass = env.setCallingClass(cl);
+    //QuercusClass oldClass = env.setCallingClass(cl);
     env.pushCall(this, thisValue, args);
     
     try {
@@ -153,7 +153,7 @@ public class StaticMethodExpr extends Expr {
     } finally {
       env.popCall();
       
-      env.setCallingClass(oldClass);
+      //env.setCallingClass(oldClass);
     }
   }
 
@@ -167,15 +167,25 @@ public class StaticMethodExpr extends Expr {
   public Value evalRef(Env env)
   {
     QuercusClass cl = env.findClass(_className);
-
+    
     if (cl == null) {
       env.error(getLocation(), L.l("no matching class {0}", _className));
+      
+      return NullValue.NULL;
     }
-
+    
+    //QuercusClass oldClass = env.setCallingClass(cl);
+    
     // qa/0954 - what appears to be a static call may be a call to a super constructor
     Value thisValue = env.getThis();
+    
+    try {
+      env.checkTimeout();
 
-    return cl.callMethodRef(env, thisValue, _hash, _name, _name.length, _args);
+      return cl.callMethodRef(env, thisValue, _hash, _name, _name.length, _args);
+    } finally {
+      //env.setCallingClass(oldClass);
+    }
   }
   
   public String toString()

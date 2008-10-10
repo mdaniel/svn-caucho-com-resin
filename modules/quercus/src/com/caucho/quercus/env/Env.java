@@ -3560,8 +3560,8 @@ public class Env {
     if (cl != null)
       return cl;
 
-    cl = createClassImpl(name, useAutoload, useImport);
-
+    cl = createClassFromCache(name, useAutoload, useImport);
+    
     if (cl != null) {
       _classMap.put(cl.getName(), cl);
       _lowerClassMap.put(cl.getName().toLowerCase(), cl);
@@ -3572,7 +3572,77 @@ public class Env {
       return cl;
     }
     else
-      return null;
+      return findClassExt(name, useAutoload, useImport);
+  }
+  
+  private QuercusClass findClassExt(String name,
+                                    boolean useAutoload,
+                                    boolean useImport)
+  {
+    if (useAutoload) {
+      StringValue nameString = createString(name);
+      
+      if (! _autoloadClasses.contains(name)) {
+        try {
+          _autoloadClasses.add(name);
+
+          int size = _autoloadList != null ? _autoloadList.size() : 0;
+
+          for (int i = 0; i < size; i++) {
+            Callback cb = _autoloadList.get(i);
+
+            cb.call(this, nameString);
+            
+            // php/0977
+            QuercusClass cls = findClass(name, false, useImport);
+            
+            if (cls != null)
+              return cls;
+          }
+
+          if (size == 0) {
+            if (_autoload == null)
+              _autoload = findFunction("__autoload");
+            
+            if (_autoload != null) {
+              _autoload.call(this, nameString);
+
+              // php/0976
+              return findClass(name, false, useImport);
+            }
+          }
+        } finally {
+          _autoloadClasses.remove(name);
+        }
+      }
+    }
+    
+    if (useImport) {
+      if (importPhpClass(name)) {
+        return findClass(name, false, false);
+      }
+      else {
+        try {
+          JavaClassDef javaClassDef = getJavaClassDefinition(name, true);
+
+          if (javaClassDef != null) {
+            QuercusClass cls = createQuercusClass(javaClassDef, null);
+            
+            _classMap.put(cls.getName(), cls);
+            _lowerClassMap.put(cls.getName().toLowerCase(), cls);
+            
+            cls.init(this);
+            
+            return cls;
+          }
+        }
+        catch (Exception e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
+      }
+    }
+    
+    return null;
   }
 
   /**
@@ -3615,7 +3685,7 @@ public class Env {
    * 
    * @return the found class or null if no class found.
    */
-  private QuercusClass createClassImpl(String name,
+  private QuercusClass createClassFromCache(String name,
                                        boolean useAutoload,
                                        boolean useImport)
   {
@@ -3641,70 +3711,8 @@ public class Env {
 
     if (staticClass != null)
       return createQuercusClass(staticClass, null); // XXX: cache
-
-    if (useAutoload) {
-      StringValue nameString = createString(name);
-      
-      if (! _autoloadClasses.contains(name)) {
-        try {
-          _autoloadClasses.add(name);
-
-          int size = _autoloadList != null ? _autoloadList.size() : 0;
-
-          for (int i = 0; i < size; i++) {
-            Callback cb = _autoloadList.get(i);
-
-            cb.call(this, nameString);
-            
-            // php/0977
-            QuercusClass cls = findClass(name, false, useImport);
-            
-            if (cls != null)
-              return cls;
-            
-            //QuercusClass cls = createClassImpl(name, false, useImport);
-                  
-            //if (cls != null)
-              //return cls;
-          }
-
-	      if (size == 0) {
-            if (_autoload == null)
-              _autoload = findFunction("__autoload");
-            
-            if (_autoload != null) {
-              _autoload.call(this, nameString);
-
-              // php/0976
-              return findClass(name, false, useImport);
-              
-              //return createClassImpl(name, false, useImport);
-            }
-          }
-        } finally {
-          _autoloadClasses.remove(name);
-        }
-      }
-    }
-    
-    if (useImport) {
-      if (importPhpClass(name)) {
-        return createClassImpl(name, false, false);
-      }
-      else {
-        try {
-          JavaClassDef javaClassDef = getJavaClassDefinition(name, true);
-
-          if (javaClassDef != null)
-            return createQuercusClass(javaClassDef, null);
-        }
-        catch (Exception e) {
-          log.log(Level.FINER, e.toString(), e);
-        }
-      }
-    }
-    
-    return null;
+    else
+      return null;
   }
   
   /*

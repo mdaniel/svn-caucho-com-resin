@@ -271,7 +271,7 @@ public class QuercusClass {
   {
     return _parent;
   }
-  
+
   /*
    * Returns the class definitions for this class.
    */
@@ -652,7 +652,7 @@ public class QuercusClass {
       value = _staticFieldMap.get(name);
     else
       value = null;
-    
+
     if (value != null) {
       String fullName = _className + "::" + name;
       
