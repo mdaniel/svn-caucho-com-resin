@@ -1739,8 +1739,13 @@ public class QuercusParser {
   private Statement parseBreak()
     throws IOException
   {
+    // commented out for adodb (used by Moodle and others)
+    // XXX: should only throw fatal error if break statement is reached
+    //      during execution
+    /*
     if (! _isTop && _loopLabelList.size() == 0)
       throw error(L.l("cannot 'break' inside a function"));
+    */
     
     Location location = getLocation();
     
@@ -1771,8 +1776,10 @@ public class QuercusParser {
   private Statement parseContinue()
     throws IOException
   {
+    /*
     if (! _isTop && _loopLabelList.size() == 0)
       throw error(L.l("cannot 'continue' inside a function"));
+    */
     
     Location location = getLocation();
 
