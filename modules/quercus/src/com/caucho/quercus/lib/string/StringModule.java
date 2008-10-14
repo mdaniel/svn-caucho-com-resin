@@ -4085,11 +4085,14 @@ public class StringModule extends AbstractQuercusModule {
     if (start < 0)
       start = strLen + start;
 
-    if (start < 0 || strLen < start)
+    if (start < 0 || start >= strLen)
       return BooleanValue.FALSE;
 
     if (lenV.isDefault()) {
       return string.substring(start);
+    }
+    else if (len == 0) {
+      return string.EMPTY;
     }
     else {
       int end;

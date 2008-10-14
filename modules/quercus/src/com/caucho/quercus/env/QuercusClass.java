@@ -198,7 +198,7 @@ public class QuercusClass {
     // php/093n
     if (_constructor != null
         && ! _constructor.getName().equals("__construct")) {
-      addMethod(_className, _constructor);
+      addMethodIfNotExist(_className, _constructor);
     }
 
     if (_destructor == null && parent != null)
@@ -523,7 +523,7 @@ public class QuercusClass {
     // to initialize all interface classes before any concrete classes
     AbstractFunction existingFun = _methodMap.get(name);
     
-    if (existingFun == null || ! fun.isAbstract())
+    if (existingFun == null && ! fun.isAbstract())
       _methodMap.put(name, fun);
   }
 

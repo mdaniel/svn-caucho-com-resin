@@ -1756,8 +1756,8 @@ public class Env {
     if (var == null) {
       var = getSuperGlobalRef(name);
 
-      //if (var == null)
-        //var = getGlobalScriptContextRef(name);
+      if (var == null)
+        var = getGlobalScriptContextRef(name);
     }
 
     return var;
@@ -2073,7 +2073,11 @@ public class Env {
     if (_scriptContext == null)
       return null;
 
-    Var var = null;
+    Var var = _globalMap.get(name);
+    
+    if (var != null)
+      return var;
+    
     Object value = _scriptContext.getAttribute(name);
 
     if (value == null) {
