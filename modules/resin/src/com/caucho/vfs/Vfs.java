@@ -315,6 +315,53 @@ public final class Vfs {
     return lookup(path).openAppend();
   }
 
+  public static String decode(String uri)
+  {
+    StringBuilder sb = new StringBuilder();
+
+    int len = uri.length();
+
+    for (int i = 0; i < len; i++) {
+      char ch = uri.charAt(i);
+
+      if (ch != '%' || len <= i + 2) {
+	sb.append(ch);
+	continue;
+      }
+
+      int d1 = uri.charAt(i + 1);
+      int d2 = uri.charAt(i + 2);
+      int v = 0;
+
+      if ('0' <= d1 && d1 <= '9')
+	v = 16 * v + d1 - '0';
+      else if ('a' <= d1 && d1 <= 'f')
+	v = 16 * v + d1 - 'a' + 10;
+      else if ('A' <= d1 && d1 <= 'F')
+	v = 16 * v + d1 - 'A' + 10;
+      else {
+	sb.append('%');
+	continue;
+      }
+
+      if ('0' <= d2 && d2 <= '9')
+	v = 16 * v + d2 - '0';
+      else if ('a' <= d2 && d2 <= 'f')
+	v = 16 * v + d2 - 'a' + 10;
+      else if ('A' <= d2 && d2 <= 'F')
+	v = 16 * v + d2 - 'A' + 10;
+      else {
+	sb.append('%');
+	continue;
+      }
+
+      sb.append((char) v);
+      i += 2;
+    }
+
+    return sb.toString();
+  }
+
   /**
    * Initialize the JNI.
    */

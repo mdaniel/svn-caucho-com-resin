@@ -13,6 +13,13 @@
 
 <s2 title="3.2.1 snapshot">
 <ul>
+<li>web-app: add expand-fileset-cleanup to &lt;web-app (#3001, rep by Bill Au)</li>
+<li>jni: openssl not timing out properly (#2988, rep by Tom Hintz)</li>
+<li>mod_caucho: use time(0) instead of request->time (#2974, rep by ahoogerhuis)</li>
+<li>mod_caucho: use ssl_var_lookup for SSL variables (#2871, rep by Michael Schiemer)</li>
+<li>jms: ejb-message-listener needs to use createXASession() call for XA sessions (#2937, rep by Reggie Vito)</li>
+<li>jni: jni_vfs.c missing #include &lt;limits.h> (#2992, rep by thintz)</li>
+<li>config: include files for ${__DIR__} with spaces not properly handled (#2891, rep by cperz)</li>
 <li>quercus: dependency checking needs to use timeout (#2981, rep by Steven Grimm)</li>
 <li>quercus: compilation thread was blocking the execution thread (#2991, rep by Scott Landshof)</li>
 <li>(2008-10-08) error-page: xss issue with utf-7 encoding (#2965, rep by Moshe Ben-Abu)</li>

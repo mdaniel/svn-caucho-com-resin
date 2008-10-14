@@ -91,7 +91,8 @@ public class HttpResponse extends AbstractHttpResponse
 
     setStatus(101);
 
-    finish(); // don't need to flush since it'll close anyway
+    finishInvocation(); // don't need to flush since it'll close anyway
+    finishRequest(); // don't need to flush since it'll close anyway
   }
 
   /**

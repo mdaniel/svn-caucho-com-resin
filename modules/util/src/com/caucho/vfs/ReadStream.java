@@ -1095,6 +1095,8 @@ public final class ReadStream extends InputStream
       _sibling.flush();
 
     _readOffset = 0;
+    _readLength = 0;
+    
     _readLength = _source.read(_readBuffer, 0, _readBuffer.length);
     
     // Setting to 0 is needed to avoid int to long conversion errors with AIX

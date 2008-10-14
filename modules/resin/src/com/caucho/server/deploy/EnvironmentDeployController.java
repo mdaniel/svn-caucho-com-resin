@@ -181,6 +181,9 @@ abstract public class
       _configDefaults.add(config);
 
       addConfigMode(config);
+
+      if (config.getExpandCleanupFileset() != null)
+	setExpandCleanupFileSet(config.getExpandCleanupFileset());
     }
   }
 

@@ -71,6 +71,7 @@ public class AbstractBinaryInputOutput
   protected AbstractBinaryInputOutput(Env env, ReadStream is, WriteStream os)
   {
     this(env);
+    
     init(is, os);
   }
 
@@ -130,10 +131,8 @@ public class AbstractBinaryInputOutput
       if (_is != null) {
 	int c = _is.read();
 
-	if (c == -1)
+	if (c < 0)
 	  _isEOF = true;
-	else
-	  _isEOF = false;
 
 	return c;
       }
@@ -159,10 +158,8 @@ public class AbstractBinaryInputOutput
       if (_is != null) {
 	int c = _is.read(buffer, offset, length);
 
-	if (c == -1)
+	if (c < 0)
 	  _isEOF = true;
-	else
-	  _isEOF = false;
 
 	return c;
       }
@@ -266,7 +263,9 @@ public class AbstractBinaryInputOutput
     throws IOException
   {
     try {
-      return _lineReader.readLine(_env, this, length);
+      StringValue line = _lineReader.readLine(_env, this, length);
+
+      return line;
     } catch (IOException e) {
       _isTimeout = true;
       _isEOF = true;
@@ -294,10 +293,7 @@ public class AbstractBinaryInputOutput
    */
   public boolean isEOF()
   {
-    if (_is == null)
-      return true;
-    else
-      return _isEOF;
+    return _is == null || _isEOF;
   }
 
   /**
@@ -313,10 +309,10 @@ public class AbstractBinaryInputOutput
    */
   public long getPosition()
   {
-    if (_is == null)
-      return -1;
-    else
+    if (_is != null)
       return _is.getPosition();
+    else
+      return -1;
   }
 
   /**
@@ -341,17 +337,17 @@ public class AbstractBinaryInputOutput
     long position;
 
     switch (whence) {
-      case BinaryStream.SEEK_CUR:
-        position = getPosition() + offset;
-        break;
-      case BinaryStream.SEEK_END:
-        // don't necessarily have an end
-        position = getPosition();
-        break;
-      case BinaryStream.SEEK_SET:
-      default:
-        position = offset;
-        break;
+    case BinaryStream.SEEK_CUR:
+      position = getPosition() + offset;
+      break;
+    case BinaryStream.SEEK_END:
+      // don't necessarily have an end
+      position = getPosition();
+      break;
+    case BinaryStream.SEEK_SET:
+    default:
+      position = offset;
+      break;
     }
 
     if (! setPosition(position))

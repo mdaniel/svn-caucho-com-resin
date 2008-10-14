@@ -297,6 +297,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     throws IOException
   {
     finishInvocation(true);
+
+    // server/125i
+    finishRequest(true);
     // getStream().flush();
   }
 
@@ -559,7 +562,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     setStatus(code, value);
     try {
       if (code == SC_NOT_MODIFIED || code == SC_NO_CONTENT) {
-        finish();
+        finishInvocation();
         return;
       }
       else if (errorManager != null) {
@@ -568,7 +571,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
         // _request.killKeepalive();
         // close, but don't force a flush
         // XXX: finish(false);
-        finish();
+        finishInvocation();
         return;
       }
 
@@ -628,7 +631,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     _request.killKeepalive();
     // close, but don't force a flush
-    finish();
+    finishInvocation();
   }
 
   /**
@@ -1984,7 +1987,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
         _cacheInvocation = null;
         _matchCacheEntry = null;
 
-        finish(); // Don't force a flush to avoid extra TCP packet
+        finishInvocation(); // Don't force a flush to avoid extra TCP packet
       
         return true;
       }
@@ -2224,12 +2227,21 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   }
   
   /**
-   * Complete the request.  Flushes the streams, completes caching
+   * Complete the invocation.  Flushes the streams, completes caching
    * and writes the appropriate logs.
    */
-  public void finish() throws IOException
+  public void finishInvocation() throws IOException
   {
     finishInvocation(false);
+  }
+  
+  /**
+   * Complete the invocation.  Flushes the streams, completes caching
+   * and writes the appropriate logs.
+   */
+  public void finishRequest() throws IOException
+  {
+    finishRequest(false);
   }
 
   /**
@@ -2238,7 +2250,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
    *
    * @param isClose true if the response should be flushed.
    */
-  private void finishInvocation(boolean isClose) throws IOException
+  private void finishInvocation(boolean isClose)
+    throws IOException
   {
     if (_isClosed)
       return;
@@ -2251,16 +2264,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	AbstractHttpRequest request = (AbstractHttpRequest) _originalRequest;
 	
 	conn = request.getConnection();
-
-	try {
-	  if (! conn.isSuspend())
-	    request.skip();
-	} catch (BadRequestException e) {
-	  log.warning(e.toString());
-	  log.log(Level.FINE, e.toString(), e);
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
       }
 
       if (_statusCode == SC_NOT_MODIFIED && _request.isInitial()) {
@@ -2269,42 +2272,72 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
       isSuspend = conn != null && conn.isSuspend();
       
-      if (isSuspend)
-	isClose = false;
-
-      // include() files finish too, but shouldn't force a flush, hence
-      // flush is false
-      // Never send flush?
       if (isClose)
 	_responseStream.close();
       else if (_responseStream != _originalResponseStream)
 	_responseStream.finish();
-      else if (isSuspend)
+      else
 	_responseStream.flush();
-      else
-	_responseStream.finish();
 
-      if (_responseStream != _originalResponseStream) {
-	if (isClose)
-	  _originalResponseStream.close();
-	else if (! isSuspend)
-	  _originalResponseStream.finish();
+      if (_rawWrite != null) {
+	_rawWrite.flushBuffer();
+      }
+    } catch (ClientDisconnectException e) {
+      _request.killKeepalive();
+      _isClientDisconnect = true;
+
+      if (isIgnoreClientDisconnect())
+	log.fine(e.toString());
+      else
+	throw e;
+    } catch (IOException e) {
+      _request.killKeepalive();
+      _isClientDisconnect = true;
+      
+      throw e;
+    }
+  }
+
+  /**
+   * Complete the request.  Flushes the streams, completes caching
+   * and writes the appropriate logs.
+   *
+   * @param isClose true if the response should be flushed.
+   */
+  private void finishRequest(boolean isClose) throws IOException
+  {
+    if (_isClosed)
+      return;
+
+    Connection conn = null;
+
+    try {
+      if (_originalRequest instanceof AbstractHttpRequest) {
+	AbstractHttpRequest request = (AbstractHttpRequest) _originalRequest;
+	
+	conn = request.getConnection();
+
+	try {
+	  request.skip();
+	} catch (BadRequestException e) {
+	  log.warning(e.toString());
+	  log.log(Level.FINE, e.toString(), e);
+	} catch (Exception e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
       }
 
-      if (! isSuspend)
-	_isClosed = true;
+      // include() files finish too, but shouldn't force a flush, hence
+      // flush is false
+      // Never send flush?
+      _responseStream.close();
 
-      if (_rawWrite == null) {
-      }
-      // server/0550
-      // else if (isClose)
-      // _rawWrite.close();
-      else
+      _isClosed = true;
+
+      if (_rawWrite != null)
 	_rawWrite.flushBuffer();
 
-      if (_cacheInvocation == null) {
-      }
-      else if (_newCacheEntry != null) {
+      if (_newCacheEntry != null && _cacheInvocation != null) {
 	OutputStream cacheStream = _cacheStream;
 	_cacheStream = null;
 	
@@ -2343,8 +2376,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       
       throw e;
     } finally {
-      if (! isSuspend)
-	_isClosed = true;
+      _isClosed = true;
 
       AbstractCacheFilterChain cache = _cacheInvocation;
       _cacheInvocation = null;

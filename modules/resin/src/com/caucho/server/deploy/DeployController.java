@@ -453,8 +453,8 @@ abstract public class DeployController<I extends DeployInstance>
 
     DeployInstance instance = getDeployInstance();
 
-    return (instance != null &&
-            instance.getConfigException() != null);
+    return (instance != null
+	    && instance.getConfigException() != null);
   }
 
   /**
@@ -467,8 +467,8 @@ abstract public class DeployController<I extends DeployInstance>
     
     DeployInstance instance = getDeployInstance();
 
-    return (instance != null &&
-            instance.getConfigException() != null);
+    return (instance != null
+	    && instance.getConfigException() != null);
   }
 
   /**

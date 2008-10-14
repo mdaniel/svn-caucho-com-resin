@@ -190,7 +190,7 @@ class WatchdogConfig
   /**
    * Adds a http.
    */
-  public void addHttp(Port port)
+  public void addHttp(OpenPort port)
     throws ConfigException
   {
     _ports.add(port);

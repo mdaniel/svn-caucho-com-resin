@@ -36,6 +36,7 @@ import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.config.types.Period;
 import com.caucho.config.types.RawString;
+import com.caucho.config.types.FileSetType;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -58,6 +59,9 @@ public class DeployConfig {
 
   // The archive path;
   private String _archivePath;
+
+  // The expansion cleanup set
+  private FileSetType _expandCleanupFileset;
 
   // startup mode
   private String _startupMode;
@@ -131,6 +135,22 @@ public class DeployConfig {
   public boolean isSkipDefaultConfig()
   {
     return _isSkipDefaultConfig;
+  }
+
+  /**
+   * Sets the archive auto-remove file set.
+   */
+  public void setExpandCleanupFileset(FileSetType fileset)
+  {
+    _expandCleanupFileset = fileset;
+  }
+
+  /**
+   * Gets the archive auto-remove file set.
+   */
+  public FileSetType getExpandCleanupFileset()
+  {
+    return _expandCleanupFileset;
   }
 
   /**

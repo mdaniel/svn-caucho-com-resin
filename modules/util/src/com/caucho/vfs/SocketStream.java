@@ -178,8 +178,9 @@ public class SocketStream extends StreamImpl {
 
       int readLength = _is.read(buf, offset, length);
 
-      if (readLength >= 0)
+      if (readLength >= 0) {
         _totalReadBytes += readLength;
+      }
 
       return readLength;
     } catch (IOException e) {
@@ -221,7 +222,12 @@ public class SocketStream extends StreamImpl {
     try {
       s.setSoTimeout((int) timeout);
 
-      return read(buf, offset, length);
+      int readLength = read(buf, offset, length);
+
+      if (readLength > 0)
+	System.out.println("READ: " + new String(buf, offset, readLength));
+
+      return readLength;
     } finally {
       s.setSoTimeout(oldTimeout);
     }

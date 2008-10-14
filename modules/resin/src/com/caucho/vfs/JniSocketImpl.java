@@ -21,7 +21,8 @@ import java.util.logging.Logger;
  * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
 public class JniSocketImpl extends QSocket {
-  private final static Logger log = Log.open(JniSocketImpl.class);
+  private final static Logger log
+    = Logger.getLogger(JniSocketImpl.class.getName());
   
   private long _fd;
   private JniStream _stream;

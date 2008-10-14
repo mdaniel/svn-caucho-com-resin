@@ -172,17 +172,17 @@ public class ErrorPageManager {
     Throwable rootExn = e;
     Throwable errorPageExn = null;
     LineMap lineMap = null;
-
-    if (response instanceof AbstractHttpResponse) {
-      ((AbstractHttpResponse) response).killCache();
-      ((AbstractHttpResponse) response).setNoCache(true);
-    }
-
+    
     try {
       response.reset();
     } catch (IllegalStateException e1) {
     }
 
+    if (response instanceof AbstractHttpResponse) {
+      ((AbstractHttpResponse) response).killCache();
+      ((AbstractHttpResponse) response).setNoCache(true);
+    }
+    
     if (rootExn instanceof ClientDisconnectException)
       throw (ClientDisconnectException) rootExn;
 
@@ -287,7 +287,7 @@ public class ErrorPageManager {
       _parent.sendServletError(e, req, res);
       return;
     }
-
+    
     if (badRequest) {
       title = rootExn.getMessage();
       doStackTrace = false;
@@ -597,9 +597,9 @@ public class ErrorPageManager {
                                     int code, String message)
     throws ServletException, IOException
   {
-    if (code == HttpServletResponse.SC_OK ||
-        code == HttpServletResponse.SC_MOVED_TEMPORARILY ||
-        code == HttpServletResponse.SC_NOT_MODIFIED)
+    if (code == HttpServletResponse.SC_OK
+	|| code == HttpServletResponse.SC_MOVED_TEMPORARILY
+	|| code == HttpServletResponse.SC_NOT_MODIFIED)
       return false;
 
     if (request.getRequestDepth(0) > 16)
@@ -643,8 +643,9 @@ public class ErrorPageManager {
 
         //disp.forward(request, this, "GET", false);
 
-	if (disp != null)
+	if (disp != null) {
 	  ((RequestDispatcherImpl) disp).error(request, response);
+	}
 	else
 	  return false;
       } catch (Throwable e) {

@@ -163,7 +163,7 @@ public class SocketInputOutput
   public void cleanup()
   {
     super.close();
-
+    
     Socket s = _socket;
     _socket = null;
 

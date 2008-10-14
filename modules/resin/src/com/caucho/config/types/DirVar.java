@@ -51,8 +51,11 @@ public class DirVar {
     if (env != null) {
       String file = env.getBaseUri();
 
-      if (file != null)
-	return Vfs.lookup(file).getParent().getURL();
+      if (file != null) {
+	String dir = Vfs.lookup(file).getParent().getURL();
+	
+	return Vfs.decode(dir);
+      }
       else
 	return null;
     }

@@ -563,7 +563,7 @@ class DispatchRequest extends RequestAdapter {
   /**
    * Cleans up at the end of the request
    */
-  public void finish()
+  public void finishRequest()
     throws IOException
   {
     SessionImpl session = _session;

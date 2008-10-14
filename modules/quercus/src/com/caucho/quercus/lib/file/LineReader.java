@@ -63,7 +63,6 @@ public class LineReader
     int ch;
 
     for (; length > 0 && (ch = input.read()) >= 0; length--) {
-
       // php/161[pq] newlines
       if (ch == '\n') {
         sb.appendByte((byte) ch);

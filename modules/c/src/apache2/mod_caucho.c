@@ -39,6 +39,7 @@
 #include "http_core.h"
 #include "http_protocol.h"
 #include "http_connection.h"
+#include "mod_ssl.h"
 
 #ifdef DEBUG
 #include <time.h>
@@ -597,7 +598,6 @@ write_env(stream_t *s, request_rec *r)
     cse_write_string(s, CSE_AUTH_TYPE, r->ap_auth_type);
 
   /* mod_ssl */
-#ifdef EAPI
   {
     static char *vars[] = { "SSL_CLIENT_S_DN",
                             "SSL_CIPHER",
@@ -608,22 +608,20 @@ write_env(stream_t *s, request_rec *r)
                             0};
     char *var;
     int i;
-    int v;
     
-    if ((v = ap_hook_call("ap::mod_ssl::var_lookup", &var, r->pool, r->server,
-                          r->connection, r, "SSL_CLIENT_CERT"))) {
+    if ((var = ssl_var_lookup(r->pool, r->server, r->connection,
+			    "SSL_CLIENT_CERT"))) {
       cse_write_string(s, CSE_CLIENT_CERT, var);
     }
 
     for (i = 0; vars[i]; i++) {
-      if ((v = ap_hook_call("ap::mod_ssl::var_lookup", &var,
-                            r->pool, r->server, r->connection, r, vars[i]))) {
+      if ((var = ssl_var_lookup(r->pool, r->server, r->connection,
+			      vars[i]))) {
         cse_write_string(s, HMUX_HEADER, vars[i]);
         cse_write_string(s, HMUX_STRING, var);
       }
     }
   }
-#endif  
 }
 
 /**
@@ -1036,7 +1034,7 @@ caucho_host_status(request_rec *r, config_t *config, resin_host_t *host)
 {
   web_app_t *app;
   location_t *loc;
-  unsigned int now = (unsigned int) (r->request_time / 1000000);
+  unsigned int now = time(0);
   
   /* check updates as appropriate */
   cse_match_host(config, host->name, host->port, now);
@@ -1260,11 +1258,13 @@ cse_dispatch(request_rec *r)
   int port = ap_get_server_port(r);
   const char *uri = r->uri;
   resin_host_t *host;
-  unsigned int now = (unsigned int) (r->request_time / 1000000);
+  unsigned int now;
   int len;
 
   if (config == NULL || ! uri)
     return DECLINED;
+
+  now = time(0);
  
   LOG(("%s:%d:cse_dispatch(): [%d] host %s\n",
        __FILE__, __LINE__, getpid(), host_name ? host_name : "null"));

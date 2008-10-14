@@ -682,10 +682,6 @@ elif test -r "${apache_include}/apr_thread_mutex.h" -o -n "${apr_inc}"; then
   echo "Using Apache 2.0 configuration ${apache_conf}"
 
   plugins="$plugins apache2"
-elif test -n "${apache_include}/ap.h"; then
-  echo "Using Apache 1.3 configuration ${apache_conf}"
-
-  plugins="$plugins apache1"
 else
   AC_MSG_ERROR([Can't find valid Apache directory ${apache_inc}])
 fi
@@ -1167,7 +1163,6 @@ AC_OUTPUT([
 Makefile
 modules/c/src/Makefile
 modules/c/src/common/Makefile
-modules/c/src/apache1/Makefile
 modules/c/src/apache2/Makefile
 modules/c/src/resin_os/Makefile
 ], [])

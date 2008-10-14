@@ -29,6 +29,7 @@
 
 package com.caucho.boot;
 
+import java.net.*;
 import java.util.logging.*;
 import javax.annotation.*;
 
@@ -38,6 +39,7 @@ import com.caucho.server.cluster.*;
 import com.caucho.server.port.*;
 import com.caucho.server.http.*;
 import com.caucho.util.*;
+import com.caucho.vfs.*;
 import com.caucho.webbeans.manager.*;
 
 /**
@@ -54,7 +56,32 @@ public class OpenPort extends Port
   {
   }
 
+  /**
+   * Sets the SSL factory
+   */
+  public SSLFactory createOpenssl()
+    throws ConfigException
+  {
+    return new DummyOpenSSLFactory();
+  }
+
   public void addBuilderProgram(ConfigProgram program)
   {
+  }
+
+  public static class DummyOpenSSLFactory implements SSLFactory {
+    public void addBuilderProgram(ConfigProgram program)
+    {
+    }
+
+    public QServerSocket create(InetAddress host, int port)
+    {
+      return null;
+    }
+  
+    public QServerSocket bind(QServerSocket ss)
+    {
+      return null;
+    }
   }
 }

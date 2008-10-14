@@ -484,7 +484,6 @@ public class HmuxRequest extends AbstractHttpRequest
       
       try {
 	finishRequest();
-	_response.finish();
       } catch (ClientDisconnectException e) {
         throw e;
       } catch (Exception e) {

@@ -316,10 +316,13 @@ public class HttpRequest extends AbstractHttpRequest
 
       return false;
     } finally {
-      finishInvocation();
+      if (hasRequest) {
+	finishInvocation();
 
-      if (! isSuspend())
-	finishRequest();
+	if (! isSuspend()) {
+	  finishRequest();
+	}
+      }
     }
 
     if (log.isLoggable(Level.FINE)) {

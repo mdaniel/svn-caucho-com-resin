@@ -554,9 +554,11 @@ class PoolItem implements ConnectionEventListener, XAResource {
    */
   public void localTransactionCommitted(ConnectionEvent event)
   {
-    if (_xid != null)
+    if (_isLocalTransaction) {
+    }
+    else if (_xid != null)
       throw new IllegalStateException(L.l("attempted to commit() local transaction from an active XA transaction."));
-    else if (! _isLocalTransaction)
+    else
       throw new IllegalStateException(L.l("attempted to commit() with no active local transaction."));
 
     // #2627, server/30c4
@@ -938,13 +940,14 @@ class PoolItem implements ConnectionEventListener, XAResource {
 	  log.finer("commit-local: " + _localTransaction);
 	  
 	try {
-	  _isLocalTransaction = false;
 	  _localTransaction.commit();
 	} catch (ResourceException e) {
 	  if (logFiner)
 	    log.finer("commit failed: " + _localTransaction + " " + e);
 	  
 	  throw new XAExceptionWrapper(e);
+	} finally {
+	  _isLocalTransaction = false;
 	}
       }
       else {

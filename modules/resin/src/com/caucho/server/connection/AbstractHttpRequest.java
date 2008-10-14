@@ -2645,6 +2645,12 @@ public abstract class AbstractHttpRequest
     _oldProvider = null;
       
     SecurityContext.setProvider(oldProvider);
+
+    try {
+      _response.finishInvocation();
+    } catch (IOException e) {
+      log.finer(e.toString());
+    }
   }
 	   
   /**
@@ -2654,6 +2660,8 @@ public abstract class AbstractHttpRequest
     throws IOException
   {
     try {
+      _response.finishRequest();
+
       SessionImpl session = _session;
 
       // server/0219
@@ -2661,7 +2669,7 @@ public abstract class AbstractHttpRequest
 
       if (session != null)
         session.finish();
-
+      
       cleanup();
     } finally {
       for (int i = _closeOnExit.size() - 1; i >= 0; i--) {

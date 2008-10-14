@@ -86,7 +86,8 @@ class NamedDispatcherImpl implements RequestDispatcher {
     try {
       _includeFilterChain.doFilter(req, subResponse);
     } finally {
-      subResponse.finish();
+      subResponse.finishInvocation();
+      subResponse.finishRequest();
     }
 
     if (reqAdapt != null)
@@ -111,7 +112,8 @@ class NamedDispatcherImpl implements RequestDispatcher {
     // if it's not handled.
     // server/1328
     if (res instanceof AbstractHttpResponse) {
-      ((AbstractHttpResponse) res).finish();
+      ((AbstractHttpResponse) res).finishInvocation();
+      ((AbstractHttpResponse) res).finishRequest();
     }
     else {
         try {

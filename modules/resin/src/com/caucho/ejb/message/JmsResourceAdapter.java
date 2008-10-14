@@ -202,12 +202,15 @@ public class JmsResourceAdapter implements ResourceAdapter {
     Consumer(Connection conn, Destination destination)
       throws Exception
     {
-      boolean transacted = true;
-
-      _session = conn.createSession(transacted, _acknowledgeMode);
-
-      if (_session instanceof XASession)
-	_xaResource = ((XASession) _session).getXAResource();
+      if (conn instanceof XAConnection) {
+	XASession xaSession = ((XAConnection) conn).createXASession();
+	_session = xaSession;
+	_xaResource = xaSession.getXAResource();
+      }
+      else {
+	boolean transacted = false;
+	_session = conn.createSession(transacted, _acknowledgeMode);
+      }
 
       _endpoint = _endpointFactory.createEndpoint(_xaResource);
       

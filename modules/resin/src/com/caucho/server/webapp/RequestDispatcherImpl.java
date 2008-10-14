@@ -325,7 +325,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 	*/
       }
     } finally {
-      subRequest.finish();
+      subRequest.finishRequest();
       
       thread.setContextClassLoader(oldLoader);
 
@@ -513,7 +513,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       thread.setContextClassLoader(oldLoader);
       // XXX: In many cases, able to use clear()?
 
-      subRequest.finish();
+      subRequest.finishRequest();
 
       /* XXX:
       if (s != null)

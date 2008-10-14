@@ -406,9 +406,12 @@ public class Port
 
       return _sslFactory;
     } catch (Throwable e) {
+      e.printStackTrace();
+      
       log.log(Level.FINER, e.toString(), e);
 
-      throw new ConfigException(L.l("<openssl> requires Resin Professional.  See http://www.caucho.com for more information."));
+      throw new ConfigException(L.l("<openssl> requires Resin Professional.  See http://www.caucho.com for more information."),
+				e);
     }
   }
 

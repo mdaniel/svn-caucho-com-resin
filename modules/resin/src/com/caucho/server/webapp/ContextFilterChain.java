@@ -139,7 +139,7 @@ public class ContextFilterChain implements FilterChain {
       }
       
       if (response instanceof AbstractHttpResponse)
-        ((AbstractHttpResponse) response).finish();
+        ((AbstractHttpResponse) response).finishInvocation();
 
       thread.setContextClassLoader(oldLoader);
     }
