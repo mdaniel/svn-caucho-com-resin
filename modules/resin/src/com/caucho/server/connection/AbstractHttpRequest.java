@@ -2565,7 +2565,7 @@ public abstract class AbstractHttpRequest
 
   public boolean isSuspend()
   {
-    return _tcpConn != null && _tcpConn.isSuspend();
+    return _tcpConn != null && (_tcpConn.isSuspend() || _tcpConn.isDuplex());
   }
 
   public boolean isDuplex()

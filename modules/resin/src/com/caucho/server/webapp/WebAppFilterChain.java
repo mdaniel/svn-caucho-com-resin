@@ -203,7 +203,7 @@ public class WebAppFilterChain extends AbstractFilterChain {
       }
 
       if (_isTop) {
-	((CauchoResponse) response).close();
+	//((CauchoResponse) response).close();
 	
 	try {
 	  if (ut != null)

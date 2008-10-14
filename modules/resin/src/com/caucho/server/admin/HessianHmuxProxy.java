@@ -32,9 +32,10 @@ package com.caucho.server.admin;
 import com.caucho.hessian.io.AbstractHessianInput;
 import com.caucho.hessian.io.AbstractHessianOutput;
 import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.hessian.io.HessianOutput;
+import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.HessianProtocolException;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.ReadWritePair;
@@ -50,6 +51,8 @@ import java.lang.reflect.Proxy;
  * use HessianProxyFactory to create proxy clients.
  */
 public class HessianHmuxProxy implements InvocationHandler {
+  private static final L10N L = new L10N(HessianHmuxProxy.class);
+  
   private Path _path;
   
   private HessianHmuxProxy(Path url)
@@ -122,6 +125,14 @@ public class HessianHmuxProxy implements InvocationHandler {
 	throw new HessianProtocolException(code + ": " + sb);
       }
 
+      int ch = is.read();
+
+      if (ch != 'H')
+	throw new HessianProtocolException(L.l("expected 'H' at '{0}'", ch));
+
+      int major = is.read();
+      int minor = is.read();
+
       AbstractHessianInput in = new Hessian2Input(is);
 
       return in.readReply(method.getReturnType());
@@ -145,8 +156,9 @@ public class HessianHmuxProxy implements InvocationHandler {
     WriteStream os = pair.getWriteStream();
 
     try {
-      AbstractHessianOutput out = new HessianOutput(os);
-
+      Hessian2Output out = new Hessian2Output(os);
+      
+      out.writeVersion();
       out.call(methodName, args);
       out.flush();
 
