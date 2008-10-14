@@ -77,6 +77,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -157,9 +158,11 @@ public class Env {
     LruCache<ClassKey,SoftReference<QuercusClass>> _classCache
     = new LruCache<ClassKey,SoftReference<QuercusClass>>(4096);
 
+  /*
   private static final
     LruCache<IncludeKey,SoftReference<IncludeCache>> _includeCache
     = new LruCache<IncludeKey,SoftReference<IncludeCache>>(4096);
+  */
 
   private static ThreadLocal<Env> _threadEnv = new ThreadLocal<Env>();
 
@@ -235,6 +238,8 @@ public class Env {
   private ArrayList<String> _includePathList;
   private HashMap<Path,ArrayList<Path>> _includePathMap;
 
+  // php/
+  // XXX: may require a LinkedHashMap for ordering?
   private HashMap<Path,QuercusPage> _includeMap
     = new HashMap<Path,QuercusPage>();
   
@@ -1779,7 +1784,7 @@ public class Env {
     Var var = _globalMap.get(name);
 
     if (var == null) {
-      var = getSuperGlobalRef(name);
+      var = getSuperGlobalRef(name, true);
 
       if (var == null)
         var = getGlobalScriptContextRef(name);
@@ -1798,6 +1803,14 @@ public class Env {
    */
   private Var getSuperGlobalRef(String name)
   {
+    return getSuperGlobalRef(name, false);
+  }
+  
+  /**
+   * Returns a superglobal.
+   */
+  private Var getSuperGlobalRef(String name, boolean isLongArrays)
+  {
     Var var;
     
     switch (SPECIAL_VARS.get(name)) {
@@ -1812,7 +1825,8 @@ public class Env {
       }
 
       case HTTP_POST_VARS:
-        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+        if (! isLongArrays
+            || ! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
       case _POST: {
         var = new Var();
@@ -1839,7 +1853,8 @@ public class Env {
       }
 
       case HTTP_POST_FILES:
-        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+        if (! isLongArrays
+            || ! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
       case _FILES: {
         var = new Var();
@@ -1860,7 +1875,8 @@ public class Env {
       }
 
       case HTTP_GET_VARS:
-        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+        if (! isLongArrays
+            || ! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
       
       case _GET: {
@@ -1871,6 +1887,9 @@ public class Env {
         var.set(array);
         _globalMap.put(name, var);
 
+        if (_request == null)
+          return var;
+        
         String queryString = _request.getQueryString();
         if (queryString == null)
           return var;
@@ -1956,7 +1975,8 @@ public class Env {
       }
 
       case HTTP_RAW_POST_DATA: {
-        if (! Quercus.INI_ALWAYS_POPULATE_RAW_POST_DATA.getAsBoolean(this))
+        if (! isLongArrays
+            || ! Quercus.INI_ALWAYS_POPULATE_RAW_POST_DATA.getAsBoolean(this))
           return null;
         
         if (_inputData == null)
@@ -1972,7 +1992,8 @@ public class Env {
       }
     
       case HTTP_SERVER_VARS:
-        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+        if (! isLongArrays
+            || ! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
       
       case _SERVER: {
@@ -1996,7 +2017,8 @@ public class Env {
       }
 
       case HTTP_COOKIE_VARS:
-        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+        if (! isLongArrays
+            || ! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
       
       case _COOKIE: {
@@ -3801,8 +3823,22 @@ public class Env {
    */
   public Value getDeclaredClasses()
   {
-    // return _defState.getDeclaredClasses(this);
-    return NullValue.NULL;
+    ArrayList<String> list = new ArrayList<String>();
+
+    for (Map.Entry<String, ClassDef> entry : _quercus.getClassMap().entrySet()) {
+      list.add(entry.getKey());
+    }
+    
+    Collections.sort(list);
+    
+    ArrayValue array = new ArrayValueImpl();
+    
+    Iterator<String> iter = list.iterator();
+    while (iter.hasNext()) {
+      array.put(iter.next());
+    }
+    
+    return array;
   }
 
   /**

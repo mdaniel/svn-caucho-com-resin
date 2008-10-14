@@ -238,13 +238,38 @@ public class MailModule extends AbstractQuercusModule {
                                                   String to)
     throws MessagingException
   {
-    String []split = to.split("[ \t,]|<.*>");
+    String []split = to.split(",");
 
     ArrayList<Address> addresses = new ArrayList<Address>();
 
     for (int i = 0; i < split.length; i++) {
-      if (split[i].length() > 0) {
-        Address addr = new InternetAddress(split[i]);
+      String addrStr = split[i];
+      
+      if (addrStr.length() > 0) {
+        int openBracket = addrStr.indexOf('<');
+        
+        // XXX: javamail may be too strict, so we quote spaces in brackets
+        if (openBracket >= 0 && ! addrStr.contains("\"")) {
+          int closeBracket = addrStr.indexOf('>', openBracket + 1);
+        
+          if (closeBracket > openBracket) {
+            int space = addrStr.indexOf(' ', openBracket + 1);
+            
+            if (openBracket < space && space < closeBracket) {
+              StringBuilder sb = new StringBuilder();
+              
+              sb.append(addrStr, 0, openBracket + 1);
+              sb.append("\"");
+              sb.append(addrStr, openBracket + 1, closeBracket);
+              sb.append("\"");
+              sb.append(addrStr, closeBracket, addrStr.length());
+              
+              addrStr = sb.toString();
+            }
+          }
+        }
+        
+        Address addr = new InternetAddress(addrStr);
 
         addresses.add(addr);
         msg.addRecipient(type, addr);
@@ -269,7 +294,10 @@ public class MailModule extends AbstractQuercusModule {
       if ("".equals(value)) {
       }
       else if (name.equalsIgnoreCase("From")) {
-	msg.setFrom(new InternetAddress(value));
+        msg.setFrom(new InternetAddress(value));
+      }
+      else if (name.equalsIgnoreCase("To")) {
+        addRecipients(msg, Message.RecipientType.TO, value);
       }
       else
         msg.addHeader(name, value);
@@ -328,9 +356,8 @@ public class MailModule extends AbstractQuercusModule {
 
       String value = buffer.toString();
 
-      if (! "".equals(value)) {
-        headerMap.put(name.toLowerCase(), value);
-      }
+      if (! "".equals(value))
+        headerMap.put(name, value);
     }
 
     return headerMap;

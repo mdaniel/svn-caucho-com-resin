@@ -320,9 +320,9 @@ public class ImageModule extends AbstractQuercusModule {
 				 double start, double end,
 				 int color)
   {
-    Arc2D arc = new Arc2D.Double(cx-width/2, cy-height/2,
-				 width, height, -1 * start, -1 *(end-start),
-				 Arc2D.OPEN);
+    Arc2D arc = new Arc2D.Double(cx-width / 2, cy-height / 2,
+                                 width, height, -1 * start, -1 * (end-start),
+                                 Arc2D.OPEN);
     image.stroke(arc, color);
     return true;
   }
@@ -818,14 +818,17 @@ public class ImageModule extends AbstractQuercusModule {
 				       int style)
   {
     int type = Arc2D.PIE;
-    if ((style & IMG_ARC_CHORD)!=0) type = Arc2D.CHORD;
-    if ((style & IMG_ARC_PIE)!=0)   type = Arc2D.PIE;
+    
+    if ((style & IMG_ARC_CHORD) != 0)
+      type = Arc2D.CHORD;
+    
     Arc2D arc =
       new Arc2D.Double(cx-width/2, cy-height/2,
-		       width, height, -1 * start,
-		       -1 *(end-start), type);
-    if ((style & IMG_ARC_NOFILL)==0) image.fill(arc, color);
-    if ((style & IMG_ARC_EDGED)!=0)  image.stroke(arc, color);
+                       width, height, -1 * start,
+                       -1 * (end-start), type);
+    if ((style & IMG_ARC_NOFILL) == 0) image.fill(arc, color);
+    if ((style & IMG_ARC_EDGED) != 0)  image.stroke(arc, color);
+    
     return true;
   }
 
