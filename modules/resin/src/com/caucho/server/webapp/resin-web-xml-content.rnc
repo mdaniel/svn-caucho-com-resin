@@ -1129,9 +1129,9 @@ r_web-app-Basis =
 
   & r_ejb-ref*
 
-  & r_expand-cleanup-fileset*
-
   & r_error-page*
+
+  & r_expand-cleanup-fileset*
 
   & r_filter*
 
