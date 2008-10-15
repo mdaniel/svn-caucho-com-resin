@@ -575,9 +575,12 @@ public class JdbcResultResource {
             // php/144b
             if (bytes == null)
               bytes = rs.getBytes(column);
+            
+            if (bytes == null)
+              return NullValue.NULL;
 
-	    if (bytes != null)
-	      bb.append(bytes);
+            if (bytes != null)
+              bb.append(bytes);
             
             return bb;
           }

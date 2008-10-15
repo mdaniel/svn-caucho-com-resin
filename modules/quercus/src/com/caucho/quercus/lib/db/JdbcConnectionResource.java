@@ -95,6 +95,8 @@ public abstract class JdbcConnectionResource
   public JdbcConnectionResource(Env env)
   {
     _env = env;
+    
+    env.addCleanup(this);
   }
 
   /**
@@ -544,8 +546,9 @@ public abstract class JdbcConnectionResource
    */
   public void cleanup()
   {
-    if (log.isLoggable(Level.FINER))
+    if (log.isLoggable(Level.FINER)) {
       log.finer(this +  " cleanup()");
+    }
 
     try {
       Statement stmt = _stmt;

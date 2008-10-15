@@ -1606,7 +1606,7 @@ public class Mysqli extends JdbcConnectionResource {
    */
   public String toString()
   {
-    if (_conn != null) {
+    if (_conn != null && _conn.getConnection() != null) {
       Class cls = _conn.getConnection().getClass();
       
       Method []methods = cls.getDeclaredMethods();
