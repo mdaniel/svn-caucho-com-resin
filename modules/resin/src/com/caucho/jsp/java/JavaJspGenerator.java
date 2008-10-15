@@ -1695,8 +1695,9 @@ public class JavaJspGenerator extends JspGenerator {
       out.pushDepth();
       out.println("com.caucho.vfs.Dependency depend;");
       out.println("depend = (com.caucho.vfs.Dependency) _caucho_depends.get(i);");
-      out.println("if (depend.isModified())");
+      out.println("if (depend.isModified()) {");
       out.println("  return true;");
+      out.println("}");
       out.popDepth();
       out.println("}");
       out.println("return false;");

@@ -252,7 +252,7 @@ public class ClassDependency implements PersistentDependency {
 
   public int hashCode()
   {
-    return _cl.hashCode();
+    return _className.hashCode();
   }
 
   public boolean equals(Object o)
@@ -344,5 +344,10 @@ public class ClassDependency implements PersistentDependency {
       
       return a.getReturnType().getName().compareTo(b.getReturnType().getName());
     }
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _className + "]";
   }
 }

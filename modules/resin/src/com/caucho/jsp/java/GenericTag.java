@@ -170,8 +170,7 @@ abstract public class GenericTag extends JspContainerNode
   public void endElement()
     throws Exception
   {
-    if (_tagClass != null)
-      _gen.addDepend(_tagClass);
+    addTagDepend();
 	
     Hashtable<String,Object> tags = new Hashtable<String,Object>();
 
@@ -243,6 +242,12 @@ abstract public class GenericTag extends JspContainerNode
 	throw error(messages[0].getMessage());
       }
     }
+  }
+
+  protected void addTagDepend()
+  {
+    if (_tagClass != null)
+      _gen.addDepend(_tagClass);
   }
   
   /**

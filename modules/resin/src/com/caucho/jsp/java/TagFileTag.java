@@ -272,6 +272,11 @@ public class TagFileTag extends GenericTag {
     return name;
   }
 
+  @Override
+  protected void addTagDepend()
+  {
+  }
+
   private int indexOf(ArrayList<QName> names, String name)
   {
     for (int i = 0; i < names.size(); i++) {

@@ -285,7 +285,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
     
     if (_depends == null)
       return false;
-    
+
     for (int i = 0; i < _depends.size(); i++) {
       Dependency depend = _depends.get(i);
 
@@ -329,8 +329,9 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
 
       for (int i = 0; i < _depends.size(); i++) {
 	Dependency depend = _depends.get(i);
-	if (depend.isModified())
+	if (depend.isModified()) {
 	  return true;
+	}
       }
       
       return false;
@@ -340,6 +341,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
 
       if (! isModified)
         _lastUpdateCheck = now;
+      
       return isModified;
     }
   }
