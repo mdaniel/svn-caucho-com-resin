@@ -567,6 +567,11 @@ public class RequestAdapter extends RequestWrapper
     return true;
   }
 
+  public boolean isSuspend()
+  {
+    return false;
+  }
+
   /**
    * Frees the adapter for reuse.
    */

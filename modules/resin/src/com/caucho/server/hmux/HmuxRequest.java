@@ -477,13 +477,15 @@ public class HmuxRequest extends AbstractHttpRequest
 	return false;
       }
     } finally {
-      finishInvocation();
-      
-      if (! hasRequest)
-	_response.setHeaderWritten(true);
       
       try {
-	finishRequest();
+	if (hasRequest) {
+	  // server/0190
+	  finishInvocation();
+	  finishRequest();
+	}
+	else
+	  _response.setHeaderWritten(true);
       } catch (ClientDisconnectException e) {
         throw e;
       } catch (Exception e) {

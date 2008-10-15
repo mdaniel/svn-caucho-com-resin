@@ -59,6 +59,7 @@ public interface CauchoRequest extends HttpServletRequest {
   public Cookie getCookie(String name);
   public void setHasCookie();
   public void killKeepalive();
+  public boolean isSuspend(); // XXX: isComplete()?
   public boolean isComet();
   public boolean isDuplex();
   public boolean allowKeepalive();

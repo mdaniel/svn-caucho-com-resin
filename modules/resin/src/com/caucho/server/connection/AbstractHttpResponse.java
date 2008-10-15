@@ -291,15 +291,17 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   }
 
   /**
-   * Closes the request.
+   * Closes the request, called from web-app for early close.
    */
   public void close()
     throws IOException
   {
-    finishInvocation(true);
-
     // server/125i
-    finishRequest(true);
+    if (! _request.isSuspend()) {
+      finishInvocation(true);
+
+      finishRequest(true);
+    }
     // getStream().flush();
   }
 
@@ -2271,7 +2273,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       }
 
       isSuspend = conn != null && conn.isSuspend();
-      
+
       if (isClose)
 	_responseStream.close();
       else if (_responseStream != _originalResponseStream)
