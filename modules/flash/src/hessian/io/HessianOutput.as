@@ -55,6 +55,8 @@ package hessian.io
   import flash.utils.describeType;
   import flash.utils.getQualifiedClassName;
 
+  import hessian.util.IntrospectionUtil;
+
   /**
    * A writer for the Hessian 1.0 protocol.  A Hessian 2.0 compatible reader
    * must be able to read the output of this implementation.
@@ -337,28 +339,39 @@ package hessian.io
       // writeReplace not supported at this time
       // to save processing time
 
-      className = getQualifiedClassName(object) as String;
-      className = className.replace("::", ".");
+      var type:XML = describeType(object);
 
-      if (object.hasOwnProperty("hessianTypeName"))
+      if (type.@alias != null && type.@alias.length() != 0)
+        className = type.@alias;
+      else if (object.hasOwnProperty("hessianTypeName"))
         className = object.hessianTypeName;
+      else {
+        className = getQualifiedClassName(object) as String;
+        className = className.replace("::", ".");
+      }
+
+      trace("className = " + className);
 
       var ref:int = writeObjectBegin(className);
 
-      writeObject10(object);
+      writeObject10(object, type);
     }
 
-    private function writeObject10(obj:Object):void
+    private function writeObject10(obj:Object, type:XML):void
     {
-      var type:XML = describeType(obj);
+      var metadata:XMLList = null;
       var variables:XMLList = type.variable;
       var accessors:XMLList = type.accessor;	
 
       var key:String = null;
 
       for each(var variable:XML in variables) {
-        key = variable.@name;
+        metadata = variable.metadata;
 
+        if (IntrospectionUtil.getMetadata(metadata, "Transient") != null)
+          continue;
+
+        key = variable.@name;
         if (key != "hessianTypeName") {
           writeObject(key);
           writeObject(obj[key]);
@@ -369,18 +382,17 @@ package hessian.io
       // they do not appear as variables, but rather as 
       // <accessor>'s with Bindable metadata children
       for each(var accessor:XML in accessors) {
-        var metadata:XMLList = accessor.metadata;
+        metadata = accessor.metadata;
 
-        for each(var metadatum:XML in metadata) {
-          if (metadatum.@name == "Bindable") {
-            key = accessor.@name;
+        if (IntrospectionUtil.getMetadata(metadata, "Transient") != null)
+          continue;
 
-            if (key != "hessianTypeName") {
-              writeObject(key);
-              writeObject(obj[key]);
-            }
+        if (IntrospectionUtil.getMetadata(metadata, "Bindable") != null) {
+          key = accessor.@name;
 
-            break;
+          if (key != "hessianTypeName") {
+            writeObject(key);
+            writeObject(obj[key]);
           }
         }
       }

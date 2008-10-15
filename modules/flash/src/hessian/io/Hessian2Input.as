@@ -51,6 +51,7 @@ package hessian.io
 	import flash.errors.EOFError;
 	import flash.errors.IllegalOperationError;
 	import flash.errors.IOError;
+  import flash.net.getClassByAlias;
 	import flash.utils.ByteArray;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.IDataInput;
@@ -1632,20 +1633,12 @@ package hessian.io
       var fieldNames:Array = def.getFieldNames();
       var value:Object = null;
 
-      var cl:Class = getDefinitionByName(type) as Class;
+      var cl:Class = getClassDefinition(type, expectedClass);
 
-      if (cl != null)
-        value = new cl();
+      value = new cl();
 
-      else if (expectedClass != null)
-        value = new expectedClass();
-
-      else {
-        value = new Object();
-
-        if (type != null && type != "")
-          value.hessianTypeName = type;
-      }
+      if (cl == Object && type != null && type != "")
+        value.hessianTypeName = type;
 
       addRef(value);
 
@@ -2173,25 +2166,12 @@ package hessian.io
     {
       var type:String = readType();
 
-      var cl:Class = null;
+      var cl:Class = getClassDefinition(type, expectedClass);
       
-      try {
-        cl = getDefinitionByName(type) as Class;
-      }
-      catch (e:Error) {}
+      var obj:Object = new cl();
 
-      var obj:Object = null;
-
-      if (cl != null)
-        obj = new cl();
-      else if (expectedClass != null)
-        obj = new expectedClass();
-      else {
-        obj = new Object();
-
-        if (type != null && type != "")
-          obj.hessianTypeName = type;
-      }
+      if (cl == Object && type != null && type != "")
+        obj.hessianTypeName = type;
 
       addRef(obj);
 
@@ -2210,18 +2190,7 @@ package hessian.io
                               expectedClass:Class = null):Object
     {
       var array:Array = new Array();
-      var cl:Class = null;
-
-      try {
-        cl = getDefinitionByName(type) as Class;
-      }
-      catch (e:Error) {}
-
-      if (cl == null)
-        cl = expectedClass;
-
-      if (cl == null)
-        cl = Object;
+      var cl:Class = getClassDefinition(type, expectedClass);
 
       addRef(array);
 
@@ -2246,10 +2215,26 @@ package hessian.io
                                     expectedClass:Class = null):Object
     {
       var array:Array = new Array();
+      var cl:Class = getClassDefinition(type, expectedClass);
+
+      addRef(array);
+
+      for (var i:int = 0; i < length; i++)
+        array.push(readObject(cl));
+
+      return array;
+    }
+
+    private function getClassDefinition(type:String, 
+                                        expectedClass:Class = null):Class
+    {
       var cl:Class = null;
 
       try {
-        cl = getDefinitionByName(type) as Class;
+        cl = getClassByAlias(type) as Class;
+
+        if (cl == null)
+          cl = getDefinitionByName(type) as Class;
       }
       catch (e:Error) {}
 
@@ -2259,12 +2244,7 @@ package hessian.io
       if (cl == null)
         cl = Object;
 
-      addRef(array);
-
-      for (var i:int = 0; i < length; i++)
-        array.push(readObject(cl));
-
-      return array;
+      return cl;
     }
   }
 }

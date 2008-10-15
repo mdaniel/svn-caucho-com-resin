@@ -54,6 +54,7 @@ package hessian.client
   import flash.net.URLRequest;
   import flash.net.URLStream;
   import flash.utils.ByteArray;
+  import flash.utils.Dictionary;
   import flash.utils.describeType;
 
   import hessian.io.Hessian2Input;
@@ -81,7 +82,7 @@ package hessian.client
   public class HessianOperation extends AbstractOperation
   {
     protected var _returnType:Class;
-    protected var _tokens:Object = new Object();
+    protected var _tokens:Dictionary = new Dictionary();
     protected var _input:Hessian2Input = new Hessian2Input();
     protected var _output:HessianOutput = new HessianOutput();
 
@@ -150,6 +151,7 @@ package hessian.client
     public function handleIOError(event:IOErrorEvent):void
     {
       dispatchEvent(event);
+      service.dispatchEvent(event);
     }
 
     /** @private */
