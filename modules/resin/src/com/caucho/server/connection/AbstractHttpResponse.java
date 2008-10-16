@@ -2402,8 +2402,12 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     AbstractCacheEntry cacheEntry = _newCacheEntry;
     _newCacheEntry = null;
 
-    if (cacheEntry != null)
+    if (cacheEntry != null) {
       cache.killCaching(cacheEntry);
+      _cacheStream = null;
+      _cacheWriter = null;
+      _responseStream.killCaching();
+    }
   }
 
   TempBuffer getBuffer()

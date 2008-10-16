@@ -167,6 +167,19 @@ public class ErrorPageManager {
                                ServletResponse res)
     throws IOException
   {
+    try {
+      sendServletErrorImpl(e, req, res);
+    } finally {
+      if (res instanceof CauchoResponse)
+	((CauchoResponse) res).close();
+    }
+  }
+  
+  public void sendServletErrorImpl(Throwable e,
+				   ServletRequest req,
+				   ServletResponse res)
+    throws IOException
+  {
     HttpServletResponse response = (HttpServletResponse) res;
     HttpServletRequest request = (HttpServletRequest) req;
     Throwable rootExn = e;
@@ -515,6 +528,24 @@ public class ErrorPageManager {
   public void sendError(CauchoRequest request,
                         CauchoResponse response,
                         int code, String message)
+    throws IOException
+  {
+    try {
+      sendErrorImpl(request, response, code, message);
+    } finally {
+      response.close();
+    }
+  }
+
+  /**
+   * Sends an HTTP error to the browser.
+   *
+   * @param code the HTTP error code
+   * @param value a string message
+   */
+  public void sendErrorImpl(CauchoRequest request,
+			    CauchoResponse response,
+			    int code, String message)
     throws IOException
   {
     response.resetBuffer();

@@ -779,6 +779,11 @@ class ResponseStream extends ToByteResponseStream {
       return (byte) ('a' + value - 10);
   }
 
+  protected void killCaching()
+  {
+    _cacheStream = null;
+  }
+
   private void writeCache(byte []buf, int offset, int length)
     throws IOException
   {

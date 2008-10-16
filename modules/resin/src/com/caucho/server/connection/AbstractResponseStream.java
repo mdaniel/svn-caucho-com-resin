@@ -291,4 +291,8 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
     throws IOException
   {
   }
+
+  protected void killCaching()
+  {
+  }
 }
