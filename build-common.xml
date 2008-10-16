@@ -490,12 +490,10 @@
   </target>
 
   <target name="resin.artifacts.dist" depends="init">
-    <!--
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="cxf"/>
       <param name="artifacts" value="${resin.artifacts}"/>
     </antcall>
-    -->
     
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="mule"/>
@@ -1002,11 +1000,9 @@
   </target>
 
   <target name="artifact.dist" depends="init">
-    <!--
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="cxf"/>
     </antcall>
-    -->
     
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="mule"/>
@@ -1047,6 +1043,250 @@
         <include name="**/*.rpm"/>
       </fileset>
     </copy>
+  </target>
+  
+  <!--
+     - debian
+    -->
+  
+  <target name="debian-libexec" depends="init">
+    <property name="libexec" value="${dist}/libexec"/>
+    
+    <delete dir="${libexec}"/>
+    <mkdir dir="${libexec}"/>
+    
+    <copy todir="${libexec}" preservelastmodified="true">
+      <fileset dir="${resin.install}">
+	<include name="automake/*"/>
+	<include name="configure.ac"/>
+	<include name="configure"/>
+	<include name="Makefile.am"/>
+	<include name="Makefile.in"/>
+	<include name="aclocal.m4"/>
+	
+	<include name="modules/c/src/Makefile.in"/>
+	
+	<include name="modules/c/src/apache1/*.c"/>
+	<include name="modules/c/src/apache1/*.h"/>
+	<include name="modules/c/src/apache1/Makefile.in"/>
+	
+	<include name="modules/c/src/apache2/*.c"/>
+	<include name="modules/c/src/apache2/*.h"/>
+	<include name="modules/c/src/apache2/Makefile.in"/>
+	
+	<include name="modules/c/src/common/*.c"/>
+	<include name="modules/c/src/common/*.h"/>
+	<include name="modules/c/src/common/Makefile.in"/>
+	
+	<include name="modules/c/src/resin_os/*.c"/>
+	<include name="modules/c/src/resin_os/*.h"/>
+	<include name="modules/c/src/resin_os/Makefile.in"/>
+	
+	<include name="modules/c/src/resin/Makefile.in"/>
+	<include name="modules/c/src/resinssl/Makefile.in"/>
+      </fileset>
+
+      <fileset dir="${install}">
+	<include name="modules/c/src/resin/*.c"/>
+	<include name="modules/c/src/resin/*.h"/>
+	<include name="modules/c/src/resinssl/*.c"/>
+	<include name="modules/c/src/resinssl/*.h"/>
+      </fileset>
+
+    </copy>
+    
+    <chmod perm="ugo+rx">
+      <fileset dir="${libexec}">
+        <include name="configure"/>
+      </fileset>
+    </chmod>
+    
+    <exec dir="${libexec}" executable="configure">
+    </exec>
+    
+    <exec dir="${libexec}" executable="make">
+    </exec>
+    
+    <exec dir="${libexec}" executable="make">
+      <arg value="install"/>
+    </exec>
+  </target>
+  
+  <target name="debian" depends="compile,resin.dist.jar,debian-libexec">
+    <exec executable="debian-perm">
+      <arg value="-r"/>
+    </exec>
+      
+    <delete dir="dist-debian"/>
+    
+    <mkdir dir="dist-debian/var/log/resin"/>
+    
+    <mkdir dir="dist-debian/var/www/resin"/>
+    
+    <mkdir dir="dist-debian/etc/resin"/>
+    <copy todir="dist-debian/etc/resin"
+          preservelastmodified="true"
+          overwrite="true">
+      <fileset dir="${resin.install}/conf">
+        <include name="admin-users.xml"/>
+        <include name="app-default.xml"/>
+      </fileset>
+    </copy>
+    
+    <copy tofile="dist-debian/etc/resin/resin.xml"
+          file="${resin.install}/conf/resin.xml.in"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="HTTP_PORT" value="80"/>
+        <filter token="HTTPS_PORT" value="8443"/>
+      </filterset>
+    </copy>
+    
+    <copy tofile="dist-debian/etc/init.d/resin"
+          file="${resin.install}/contrib/init.resin.in"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="JAVA_HOME" value="/usr/java"/>
+        <filter token="resin_home" value="/usr/lib/resin"/>
+        <filter token="resin_root" value="-root-directory /var/www/resin"/>
+        <filter token="resin_log" value="-log-directory /var/log/resin"/>
+        <filter token="resin_conf" value="-conf /etc/resin/resin.xml"/>
+      </filterset>
+    </copy>
+    
+    <chmod perm="ugo+rx">
+      <fileset dir="dist-debian">
+        <include name="etc/init.d/resin"/>
+      </fileset>
+    </chmod>
+
+    <mkdir dir="dist-debian/usr/lib/${shortproduct}-${version}/lib"/>
+    <mkdir dir="dist-debian/usr/lib/${shortproduct}-${version}/libexec"/>
+    <mkdir dir="dist-debian/usr/lib/${shortproduct}-${version}/licenses"/>
+    <mkdir dir="dist-debian/usr/lib/${shortproduct}-${version}/keys"/>
+    
+    <copy todir="dist-debian/usr/lib/${shortproduct}-${version}"
+          preservelastmodified="true"
+          overwrite="true">
+      <fileset dir="${dist}/${shortproduct}-${version}">
+        <include name="lib/activation.jar"/>
+        <include name="lib/javaee-16.jar"/>
+        <include name="lib/javamail-141.jar"/>
+        <include name="lib/osgi-14.jar"/>
+        <include name="lib/jaxrpc-15.jar"/>
+        <include name="lib/jsf-12.jar"/>
+        <include name="lib/pro.jar"/>
+        <include name="lib/resin.jar"/>
+        <include name="lib/webutil.jar"/>
+      </fileset>
+      
+      <fileset dir="${resin.install}">
+        <include name="lib/activation.jar"/>
+        <include name="lib/javamail-141.jar"/>
+        <include name="lib/osgi-14.jar"/>
+        <include name="lib/jcache.jar"/>
+        <include name="lib/jaxrpc-15.jar"/>
+        <include name="lib/jsf-12.jar"/>
+        <include name="lib/webutil.jar"/>
+	
+        <include name="bin/resin.sh"/>
+      </fileset>
+      
+      <fileset dir="dist/libexec">
+        <include name="**"/>
+      </fileset>
+    </copy>
+    
+    <chmod perm="ugo+rx">
+      <fileset dir="dist-debian/usr/lib/${shortproduct}-${version}">
+        <include name="configure"/>
+        <include name="bin/resin.sh"/>
+      </fileset>
+    </chmod>
+    
+    <exec executable="ln">
+      <arg value="-s"/>
+      <arg value="${shortproduct}-${version}"/>
+      <arg value="dist-debian/usr/lib/resin"/>
+    </exec>
+    
+    <copy todir="dist-debian/var/www/resin"
+          preservelastmodified="true"
+          overwrite="true">
+      <fileset dir="${dist}/${shortproduct}-${version}">
+        <include name="doc/**"/>
+      </fileset>
+    </copy>
+    
+    <copy todir="dist-debian/var/www/resin/hosts/default"
+          preservelastmodified="true"
+          overwrite="true">
+      <fileset dir="${dist}/${shortproduct}-${version}">
+        <include name="webapps/ROOT/index.jsp"/>
+      </fileset>
+    </copy>
+
+    <copy file="${install}/debian/control"
+          tofile="dist-debian/DEBIAN/control"/>
+
+    <copy file="${install}/debian/conffiles"
+          tofile="dist-debian/DEBIAN/conffiles"/>
+    
+    <exec executable="debian-perm"/>
+        
+    <exec executable="dpkg">
+      <arg value="-b"/>
+      <arg value="dist-debian"/>
+      <arg value="${dist}/${shortproduct}_${version}-i386.deb"/>
+    </exec>
+  </target>
+  
+  <target name="debian-src" depends="">
+    <exec executable="debian-perm">
+      <arg value="-r"/>
+      <arg value="dist-debian-src"/>
+    </exec>
+      
+    <delete dir="dist-debian-src"/>
+    
+    <mkdir dir="dist-debian-src/usr/local/share/resin"/>
+    
+    <copy todir="dist-debian-src/usr/local/share/resin"
+          preservelastmodified="true"
+          overwrite="true">
+      <fileset dir="${resindir}">
+	<exclude name="**/classes/**"/>
+	<exclude name="**/dist/**"/>
+	<exclude name="**/*~"/>
+	<exclude name="**/*.class"/>
+	<exclude name="**/.svn/*"/>
+
+	<include name="modules/**"/>
+	<include name="conf/**"/>
+	<include name="artifacts/**"/>
+      </fileset>
+    </copy>
+
+    <copy file="${install}/debian/control"
+          tofile="dist-debian-src/DEBIAN/control"/>
+    
+    <exec executable="debian-perm"/>
+        
+    <exec executable="dpkg">
+      <arg value="-b"/>
+      <arg value="dist-debian-src"/>
+      <arg value="${dist}/${shortproduct}-src_${version}-i386.deb"/>
+    </exec>
+  </target>
+
+  <target name="debian-perm">
+    <exec executable="cc">
+      <arg value="-o"/>
+      <arg value="debian-perm"/>
+      <arg value="c/debian-perm.c"/>
+    </exec>
   </target>
 
   <target name="clean" depends="init">

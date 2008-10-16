@@ -2,6 +2,7 @@ start = ivy-module
 
 artifact = element artifact {
   attribute conf { string }?
+  & attribute classifier { string }?
   & attribute ext { string }?
   & attribute name { string }?
   & attribute url { string }?

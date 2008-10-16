@@ -113,11 +113,10 @@
   
   <target name="artifacts" depends="init, compat">
     <mkdir dir="artifacts"/>
-    <!--
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="cxf"/>
+      <param name="artifact.jar" value="resin-cxf.jar"/>
     </antcall>
-    -->
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="mule"/>
@@ -134,12 +133,10 @@
       <param name="artifact.jar" value="resin-wicket.jar"/>
     </antcall>
 
-    <!--
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="xfire"/>
       <param name="artifact.jar" value="resin-xfire.jar"/>
     </antcall>
-    -->
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="xwork2"/>

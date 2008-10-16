@@ -16,6 +16,7 @@ chown_rec(char *path, int uid, int gid)
     fprintf(stderr, "can't chown %s\n", path);
     exit(1);
   }
+  lchown(path, uid, gid);
 
   dir = opendir(path);
   if (! dir)
@@ -36,13 +37,19 @@ int
 main(int argc, char **argv)
 {
   struct passwd *user;
+  char *root;
+
+  if (argc > 2)
+    root = argv[2];
+  else
+    root = "dist-debian";
 
   if (argv[1] && ! strcmp(argv[1], "-r")) {
     struct stat my_stat;
 
     stat("build.xml", &my_stat);
       
-    chown_rec("dist-debian", my_stat.st_uid, my_stat.st_gid);
+    chown_rec(root, my_stat.st_uid, my_stat.st_gid);
     return 0;
   }
 
@@ -55,6 +62,7 @@ main(int argc, char **argv)
   chown_rec("dist-debian", 0, 0);
   chown_rec("dist-debian/var/www/resin", user->pw_uid, user->pw_gid);
   chown_rec("dist-debian/var/log/resin", user->pw_uid, user->pw_gid);
+  chown_rec("dist-debian/usr/local/share/resin", user->pw_uid, user->pw_gid);
 
   return 0;
 }

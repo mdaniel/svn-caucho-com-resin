@@ -1,0 +1,5 @@
+/etc/resin/resin.xml
+/etc/resin/admin-users.xml
+/etc/resin/app-default.xml
+/etc/init.d/resin
+/var/www/resin/hosts/default/webapps/ROOT/index.jsp
