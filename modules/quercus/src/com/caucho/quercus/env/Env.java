@@ -1784,7 +1784,7 @@ public class Env {
     Var var = _globalMap.get(name);
 
     if (var == null) {
-      var = getSuperGlobalRef(name, true);
+      var = getSuperGlobalRef(name);
 
       if (var == null)
         var = getGlobalScriptContextRef(name);
@@ -1797,19 +1797,11 @@ public class Env {
 
     return var;
   }
-  
+
   /**
    * Returns a superglobal.
    */
   private Var getSuperGlobalRef(String name)
-  {
-    return getSuperGlobalRef(name, false);
-  }
-  
-  /**
-   * Returns a superglobal.
-   */
-  private Var getSuperGlobalRef(String name, boolean isLongArrays)
   {
     Var var;
     
@@ -1825,8 +1817,7 @@ public class Env {
       }
 
       case HTTP_POST_VARS:
-        if (! isLongArrays
-            || ! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
       case _POST: {
         var = new Var();
@@ -1853,8 +1844,7 @@ public class Env {
       }
 
       case HTTP_POST_FILES:
-        if (! isLongArrays
-            || ! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
       case _FILES: {
         var = new Var();
@@ -1875,8 +1865,7 @@ public class Env {
       }
 
       case HTTP_GET_VARS:
-        if (! isLongArrays
-            || ! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
       
       case _GET: {
@@ -1975,8 +1964,7 @@ public class Env {
       }
 
       case HTTP_RAW_POST_DATA: {
-        if (! isLongArrays
-            || ! Quercus.INI_ALWAYS_POPULATE_RAW_POST_DATA.getAsBoolean(this))
+        if (! Quercus.INI_ALWAYS_POPULATE_RAW_POST_DATA.getAsBoolean(this))
           return null;
         
         if (_inputData == null)
@@ -1992,8 +1980,7 @@ public class Env {
       }
     
       case HTTP_SERVER_VARS:
-        if (! isLongArrays
-            || ! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
       
       case _SERVER: {
@@ -2017,8 +2004,7 @@ public class Env {
       }
 
       case HTTP_COOKIE_VARS:
-        if (! isLongArrays
-            || ! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
       
       case _COOKIE: {
