@@ -202,7 +202,7 @@
     <property name="artifact.dist" value="${artifacts}/${artifact.name}/dist"/>
     <property name="artifact.lib" value="${artifacts}/${artifact.name}/lib"/>
     <property name="artifact.ext" value="jar"/>
-    <property name="artifact.jar" value="${artifact.name}.${artifact.ext}"/>
+    <property name="artifact.jar" value="resin-${artifact.name}.${artifact.ext}"/>
 
     <property file="${artifact.src}/module.properties"/>
 
@@ -403,14 +403,14 @@
     <property name="artifact.src" value="${artifacts}/${artifact.name}/src"/>
     <property name="artifact.build" value="${artifacts}/${artifact.name}/classes"/>
     <property name="artifact.dist" value="${artifacts}/${artifact.name}/dist"/>
-    <property name="artifact.jar" value="${artifact.name}.jar"/>
+    <property name="artifact.jar" value="resin-${artifact.name}.jar"/>
 
     <property file="${artifact.src}/module.properties"/>
 
     <mkdir dir="${dist}/${dist.name}/ivy2/caucho/${artifact.name}/jars"/>
     
     <copy tofile="${dist}/${dist.name}/ivy2/caucho/${artifact.name}/jars/${artifact.name}-${version}.jar"
-          file="${artifact.dist}/${artifact.name}.jar"/>
+          file="${artifact.dist}/${artifact.jar}"/>
   </target>
 	  
   <target name="resin.dist.jar"

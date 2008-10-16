@@ -49,6 +49,8 @@ import java.util.Map;
  * Represents the application's view of the query.
  */
 public class UserQuery implements AmberQuery {
+  private static final int LIMIT_INF = Integer.MAX_VALUE / 2;
+  
   private AmberConnection _aConn;
   private AbstractQuery _query;
   private ResultSetImpl _rs;
@@ -358,7 +360,9 @@ public class UserQuery implements AmberQuery {
       _rs.setCacheChunk(cacheChunk, metaData);
       _rs.setUserQuery(this);
     }
-
+    else if (maxResults < 0)
+      maxResults = LIMIT_INF;
+    
     if (maxResults > 0) {
       ResultSet rs;
 
@@ -407,7 +411,7 @@ public class UserQuery implements AmberQuery {
 
     int row = 0;
 
-    if (maxResults > 0) {
+    if (maxResults > 0 && maxResults < LIMIT_INF) {
       JdbcMetaData metaData = _aConn.getAmberManager().getMetaData();
 
       // XXX: should limit meta-data as well?

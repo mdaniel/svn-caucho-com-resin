@@ -115,32 +115,26 @@
     <mkdir dir="artifacts"/>
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="cxf"/>
-      <param name="artifact.jar" value="resin-cxf.jar"/>
     </antcall>
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="mule"/>
-      <param name="artifact.jar" value="resin-mule.jar"/>
     </antcall>
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="spring"/>
-      <param name="artifact.jar" value="resin-spring.jar"/>
     </antcall>
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="wicket"/>
-      <param name="artifact.jar" value="resin-wicket.jar"/>
     </antcall>
 
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="xfire"/>
-      <param name="artifact.jar" value="resin-xfire.jar"/>
     </antcall>
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="xwork2"/>
-      <param name="artifact.jar" value="resin-xwork2.jar"/>
     </antcall>
   </target>
   
