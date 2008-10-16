@@ -2232,11 +2232,19 @@ package hessian.io
 
       try {
         cl = getClassByAlias(type) as Class;
-
-        if (cl == null)
-          cl = getDefinitionByName(type) as Class;
       }
-      catch (e:Error) {}
+      catch (e:Error) {
+        trace("Cannot file class by alias '" + type + "': " + e);
+      }
+
+      if (cl == null) {
+        try {
+          cl = getDefinitionByName(type) as Class;
+        }
+        catch (e:Error) {
+          trace("Cannot file class by name '" + type + "': " + e);
+        }
+      }
 
       if (cl == null)
         cl = expectedClass;
