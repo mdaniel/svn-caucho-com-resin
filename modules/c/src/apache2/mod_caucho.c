@@ -39,13 +39,10 @@
 #include "http_core.h"
 #include "http_protocol.h"
 #include "http_connection.h"
-#ifndef WIN32
-#include "mod_ssl.h"
-#else
+
 APR_DECLARE_OPTIONAL_FN(char *, ssl_var_lookup,
 						(apr_pool_t *, server_rec *,
 						conn_rec *, request_rec *, char*));
-#endif
 
 #ifdef DEBUG
 #include <time.h>
