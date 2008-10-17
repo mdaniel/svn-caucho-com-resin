@@ -587,6 +587,7 @@
         <include name="LICENSE"/>
         <include name="README"/>
         <include name="build.xml"/>
+        <include name="build-common.xml"/>
         <include name="configure.ac"/>
         <include name="configure"/>
         <include name="aclocal.m4"/>

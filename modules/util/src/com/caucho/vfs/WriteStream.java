@@ -324,7 +324,10 @@ public class WriteStream extends OutputStreamWithBuffer
   public byte []nextBuffer(int offset) throws IOException
   {
     _writeLength = 0;
-    _source.write(_writeBuffer, 0, offset, false);
+
+    if (_source != null)
+      _source.write(_writeBuffer, 0, offset, false);
+    
     _position += offset;
 
     if (_implicitFlush)
