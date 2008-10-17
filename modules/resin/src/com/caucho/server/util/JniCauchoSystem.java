@@ -55,7 +55,6 @@ public class JniCauchoSystem {
 
 	  _system = (JniCauchoSystem) cl.newInstance();
 	} catch (Throwable e) {
-	  e.printStackTrace();
 	  log.log(Level.FINEST, e.toString(), e);
 	}
 

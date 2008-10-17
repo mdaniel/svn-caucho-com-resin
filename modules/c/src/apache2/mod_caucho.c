@@ -55,6 +55,8 @@
 #define apr_thread_mutex_unlock(a)
 #endif
 
+static APR_OPTIONAL_FN_TYPE(ssl_var_lookup) *g_ssl_lookup = NULL;
+
 /*
  * Apache magic module declaration.
  */
@@ -598,7 +600,7 @@ write_env(stream_t *s, request_rec *r)
     cse_write_string(s, CSE_AUTH_TYPE, r->ap_auth_type);
 
   /* mod_ssl */
-  {
+  if (g_ssl_lookup) {
     static char *vars[] = { "SSL_CLIENT_S_DN",
                             "SSL_CIPHER",
                             "SSL_CIPHER_EXPORT",
@@ -609,13 +611,13 @@ write_env(stream_t *s, request_rec *r)
     char *var;
     int i;
     
-    if ((var = ssl_var_lookup(r->pool, r->server, r->connection,
+    if ((var = g_ssl_lookup(r->pool, r->server, r->connection, r,
 			    "SSL_CLIENT_CERT"))) {
       cse_write_string(s, CSE_CLIENT_CERT, var);
     }
 
     for (i = 0; vars[i]; i++) {
-      if ((var = ssl_var_lookup(r->pool, r->server, r->connection,
+      if ((var = g_ssl_lookup(r->pool, r->server, r->connection, r,
 			      vars[i]))) {
         cse_write_string(s, HMUX_HEADER, vars[i]);
         cse_write_string(s, HMUX_STRING, var);
@@ -1348,6 +1350,8 @@ prefork_post_config(apr_pool_t *p, apr_pool_t *plog,
   g_start_time = time(0);
   
   ap_add_version_component(p, VERSION);
+
+  g_ssl_lookup = APR_RETRIEVE_OPTIONAL_FN(ssl_var_lookup);
 
   return OK;
 }
