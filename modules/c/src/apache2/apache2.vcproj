@@ -75,7 +75,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libapr.lib libhttpd.lib ws2_32.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="libapr.lib libaprutil.lib libhttpd.lib ws2_32.lib odbc32.lib odbccp32.lib"
 				OutputFile="Release/mod_caucho.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
