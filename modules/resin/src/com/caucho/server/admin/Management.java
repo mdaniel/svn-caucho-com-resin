@@ -70,7 +70,7 @@ public class Management
 
   private HostConfig _hostConfig;
 
-  private ManagementAuthenticator _auth;
+  private ManagementAuthenticator _auth = new ManagementAuthenticator();
 
   protected TransactionManager _transactionManager;
 
@@ -154,9 +154,6 @@ public class Management
    */
   public void addUser(User user)
   {
-    if (_auth == null)
-      _auth = new ManagementAuthenticator();
-
     _auth.addUser(user.getName(), user.getPasswordUser());
   }
 

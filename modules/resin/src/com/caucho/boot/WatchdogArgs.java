@@ -545,8 +545,13 @@ class WatchdogArgs
 
     public boolean isResinProfessional()
     {
+      return isProfessional();
+    }
+
+    public boolean isProfessional()
+    {
       loadLicenses();
-      
+
       return _isResinProfessional;
     }
 

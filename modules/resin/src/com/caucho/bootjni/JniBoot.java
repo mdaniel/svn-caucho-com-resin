@@ -27,14 +27,10 @@ public class JniBoot implements Boot {
       
       _jniProcess = (JniProcessAPI) cl.newInstance();
     } catch (RuntimeException e) {
-      e.printStackTrace();
       throw e;
     } catch (Error e) {
-      e.printStackTrace();
       throw e;
     } catch (Exception e) {
-      e.printStackTrace();
-      
       throw new RuntimeException(e);
     }
   }
