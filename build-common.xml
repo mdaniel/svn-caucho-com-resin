@@ -1244,7 +1244,7 @@
     </exec>
   </target>
   
-  <target name="debian-src" depends="">
+  <target name="debian-src" depends="init">
     <exec executable="debian-perm">
       <arg value="-r"/>
       <arg value="dist-debian-src"/>
