@@ -14,7 +14,7 @@ chown_rec(char *path, int uid, int gid)
   
   if (chown(path, uid, gid) < 0) {
     fprintf(stderr, "can't chown %s\n", path);
-    exit(1);
+    return;
   }
   lchown(path, uid, gid);
 
