@@ -86,6 +86,11 @@ package hessian.client
         introspect();
     }
 
+    public function set autoAlias(a:Boolean):void
+    {
+      _input.autoAlias = a;
+    }
+
     /** @private */
     protected function introspect():void
     {

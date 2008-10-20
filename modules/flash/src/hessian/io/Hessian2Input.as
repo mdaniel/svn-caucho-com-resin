@@ -52,6 +52,7 @@ package hessian.io
 	import flash.errors.IllegalOperationError;
 	import flash.errors.IOError;
   import flash.net.getClassByAlias;
+	import flash.net.registerClassAlias;
 	import flash.utils.ByteArray;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.IDataInput;
@@ -106,6 +107,9 @@ package hessian.io
     /** @private */
     protected var _refs:Array;
 
+    /** @private */
+    protected var _autoAlias:Boolean = false;
+
     /**
      * Creates a new Hessian2Input.
      *
@@ -133,6 +137,21 @@ package hessian.io
       _buffer = new ByteArray();
       _offset = 0;
       _length = 0;
+    }
+
+    /**
+      * When set to true, autoAlias forces an alias to be registered for
+      * classes received by this input.  This may help performance in cases
+      * where libraries are linked as RSLs.  Defaults to false.
+      */
+    public function set autoAlias(a:Boolean):void
+    {
+      _autoAlias = a;
+    }
+
+    public function get autoAlias():Boolean
+    {
+      return _autoAlias;
     }
 
     /**
@@ -2230,19 +2249,25 @@ package hessian.io
     {
       var cl:Class = null;
 
-      try {
-        cl = getClassByAlias(type) as Class;
-      }
-      catch (e:Error) {
-        trace("Cannot file class by alias '" + type + "': " + e);
-      }
-
-      if (cl == null) {
+      if (type.length > 0) {
         try {
-          cl = getDefinitionByName(type) as Class;
+          cl = getClassByAlias(type) as Class;
         }
         catch (e:Error) {
-          trace("Cannot file class by name '" + type + "': " + e);
+          trace("Cannot file class by alias '" + type + "': " + e);
+        }
+
+        if (cl == null) {
+          try {
+            cl = getDefinitionByName(type) as Class;
+
+            if (cl != null && _autoAlias) {
+              registerClassAlias(type, cl);
+            }
+          }
+          catch (e:Error) {
+            trace("Cannot file class by name '" + type + "': " + e);
+          }
         }
       }
 

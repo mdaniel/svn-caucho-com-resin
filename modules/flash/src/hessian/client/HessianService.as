@@ -72,6 +72,7 @@ package hessian.client
   public dynamic class HessianService extends AbstractService
   {
     private var _api:Class;
+    private var _autoAlias:Boolean = false;
 
     /**
      * Constructor.
@@ -151,6 +152,16 @@ package hessian.client
 
       if (api != null)
         introspect();
+    }
+
+    public function set autoAlias(a:Boolean):void
+    {
+      _autoAlias = a;
+    }
+
+    public function get autoAlias():Boolean
+    {
+      return _autoAlias;
     }
 
     public function toString():String

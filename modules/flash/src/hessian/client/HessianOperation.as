@@ -93,6 +93,7 @@ package hessian.client
       super(service, name);
 
       _returnType = returnType;
+      _input.autoAlias = service.autoAlias;
     }
 
     /** 

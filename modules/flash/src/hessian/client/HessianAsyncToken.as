@@ -70,10 +70,11 @@ package hessian.client
   public class HessianAsyncToken extends EventDispatcher
   {
     private var _returnType:Class;
-    private var _input:Hessian2Input = new Hessian2Input();
+    private var _input:Hessian2Input;
 
     /** @private */
     public function HessianAsyncToken(request:URLRequest, 
+                                      input:Hessian2Input,
                                       returnType:Class = null)
     {
       var stream:URLStream = new URLStream();
@@ -81,7 +82,8 @@ package hessian.client
       stream.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
       stream.load(request);
 
-     _returnType = returnType;
+      _returnType = returnType;
+      _input = input;
     }
 
     /** @private */
