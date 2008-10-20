@@ -85,9 +85,9 @@ public class ListValueAttribute extends Attribute {
    * Creates the child bean.
    */
   @Override
-  public Object create(Object parent)
+  public Object create(Object parent, QName name)
     throws ConfigException
   {
-    return _type.create(parent);
+    return _type.create(parent, name);
   }
 }

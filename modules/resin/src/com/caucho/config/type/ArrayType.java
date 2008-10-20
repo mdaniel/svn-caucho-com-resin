@@ -79,7 +79,7 @@ public class ArrayType extends ConfigType
    * Creates a new instance
    */
   @Override
-  public Object create(Object parent)
+  public Object create(Object parent, QName name)
   {
     return new ArrayList();
   }

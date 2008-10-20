@@ -46,6 +46,7 @@ import com.caucho.xml.*;
 import com.caucho.vfs.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
+import com.caucho.xml.QName;
 
 import org.w3c.dom.*;
 

@@ -35,6 +35,7 @@ import com.caucho.naming.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.manager.*;
+import com.caucho.xml.QName;
 
 import javax.webbeans.*;
 
@@ -70,7 +71,7 @@ public class AbstractBeanType extends BeanType
    * Returns an InterfaceConfig object
    */
   @Override
-  public Object create(Object parent)
+  public Object create(Object parent, QName name)
   {
     InterfaceConfig cfg = new InterfaceConfig(_type, _type.getSimpleName());
     
