@@ -27,55 +27,51 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.attribute;
-
-import java.lang.reflect.*;
-import java.util.*;
+package com.caucho.config.types;
 
 import com.caucho.config.*;
 import com.caucho.config.type.*;
-import com.caucho.util.L10N;
-import com.caucho.xml.QName;
+import com.caucho.config.j2ee.*;
+import com.caucho.jca.program.*;
+import com.caucho.naming.*;
+import com.caucho.util.*;
+import com.caucho.webbeans.*;
+import com.caucho.webbeans.cfg.*;
+import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.context.*;
 
-public class EntryAttribute extends Attribute {
-  private final ConfigType _type;
+import java.util.*;
+import java.lang.reflect.*;
+import java.lang.annotation.*;
 
-  public EntryAttribute()
-  {
-    _type = TypeFactory.getType(EntryHolder.class);
-  }
+import javax.annotation.*;
+
+import javax.resource.spi.*;
+
+import javax.webbeans.*;
+
+/**
+ * Custom bean configured by namespace
+ */
+public class CustomBeanConfig extends WbComponentConfig {
+  private static final L10N L = new L10N(CustomBeanConfig.class);
+
+  private String _filename;
+  private int _line;
   
-  /**
-   * Returns the config type of the attribute value.
-   */
-  public ConfigType getConfigType()
+  public void setConfigLocation(String filename, int line)
   {
-    return _type;
-  }
-  
-  /**
-   * Sets the value of the attribute
-   */
-  @Override
-  public void setValue(Object bean, QName name, Object value)
-    throws ConfigException
-  {
-    try {
-      EntryHolder entry = (EntryHolder) value;
-      
-      ((Map) bean).put(entry.getKey(), entry.getValue());
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
+    _filename = filename;
+    _line = line;
   }
 
-  /**
-   * Creates the child bean.
-   */
-  @Override
-  public Object create(Object parent, QName name)
-    throws ConfigException
+  public String getFilename()
   {
-    return _type.create(parent, name);
+    return _filename;
+  }
+
+  public int getLine()
+  {
+    return _line;
   }
 }

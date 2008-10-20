@@ -33,59 +33,69 @@ import java.lang.reflect.*;
 
 import com.caucho.config.*;
 import com.caucho.config.type.*;
-import com.caucho.config.types.*;
+import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-public class EnvironmentAttribute extends Attribute {
-  private final ConfigType _type;
+public class CustomBeanAttribute extends Attribute {
+  private static final L10N L = new L10N(CustomBeanAttribute.class);
+  
+  private final ConfigType _configType;
+  private final Method _setMethod;
 
-  public EnvironmentAttribute(ConfigType type)
+  public CustomBeanAttribute()
   {
-    _type = type;
+    this(null, TypeFactory.getType(CustomBeanConfig.class));
   }
   
-  /**
-   * Returns the config type of the attribute value.
-   */
+  public CustomBeanAttribute(Method setMethod, ConfigType configType)
+  {
+    _configType = configType;
+    _setMethod = setMethod;
+  }
+
   public ConfigType getConfigType()
   {
-    return _type;
-  }
-  
-  /**
-   * Sets the value of the attribute
-   */
-  @Override
-  public void setText(Object bean, QName name, String value)
-    throws ConfigException
-  {
-    setValue(bean, name, _type.valueOf(value));
-  }
-  
-  /**
-   * Sets the value of the attribute
-   */
-  @Override
-  public void setValue(Object bean, QName name, Object value)
-    throws ConfigException
-  {
+    return _configType;
   }
 
   /**
    * Creates the child bean.
    */
   @Override
-  public Object create(Object parent, QName name)
+    public Object create(Object parent, QName qName)
     throws ConfigException
   {
-    Object value = _type.create(parent, name);
+    String uri = qName.getNamespaceURI();
+    String localName = qName.getLocalName();
 
-    if (value instanceof InterfaceConfig) {
-      ((InterfaceConfig) value).setDeploy(true);
-      ((InterfaceConfig) value).setFactory(false);
+    if (! uri.startsWith("urn:java:"))
+      throw new IllegalStateException(L.l("'{0}' is an unexpected namespace, expected 'urn:java:...'", uri));
+
+    String className = uri.substring("uri:java:".length()) + '.' + localName;
+    Class cl = null;
+
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    try {
+      cl = Class.forName(className, false, loader);
+    } catch (ClassNotFoundException e) {
+      throw new ConfigException(L.l("'{0}' is an unknown class for element '{1}'",
+				    className, qName), e);
     }
 
-    return value;
+    CustomBeanConfig config = new CustomBeanConfig();
+
+    config.setClass(cl);
+
+    return config;
+  }
+  
+  /**
+   * Sets the value of the attribute
+   */
+  public void setValue(Object bean, QName name, Object value)
+    throws ConfigException
+  {
   }
 }

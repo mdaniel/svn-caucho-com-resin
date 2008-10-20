@@ -86,6 +86,8 @@ public class BeanType extends ConfigType
   private Attribute _addProgram;
   private Attribute _addContentProgram;
   private Attribute _setProperty;
+
+  private Attribute _addCustomBean;
   
   private ComponentImpl _component;
 
@@ -111,11 +113,16 @@ public class BeanType extends ConfigType
     return _beanClass;
   }
 
+  protected void setAddCustomBean(Attribute addCustomBean)
+  {
+    _addCustomBean = addCustomBean;
+  }
+
   /**
    * Creates a new instance
    */
   @Override
-  public Object create(Object parent)
+  public Object create(Object parent, QName name)
   {
     try {
       if (_component == null) {
@@ -206,6 +213,11 @@ public class BeanType extends ConfigType
       if (attr != null)
 	return attr;
     }
+
+    if (_addCustomBean != null
+	&& name.getNamespaceURI().startsWith("urn:java:")) {
+      return _addCustomBean;
+    }
     
     return null;
   }
@@ -288,7 +300,7 @@ public class BeanType extends ConfigType
       }
     }
     else if (_addText != null) {
-      Object bean = create(null);
+      Object bean = create(null, TEXT);
       _addText.setText(bean, TEXT, text);
 
       inject(bean);
@@ -297,7 +309,7 @@ public class BeanType extends ConfigType
       return bean;
     }
     else if (_addProgram != null || _addContentProgram != null) {
-      Object bean = create(null);
+      Object bean = create(null, TEXT);
 
       inject(bean);
       
@@ -451,6 +463,9 @@ public class BeanType extends ConfigType
 	if (_setProperty == null)
 	  _setProperty = parentBean._setProperty;
 
+	if (_addCustomBean == null)
+	  _addCustomBean = parentBean._addCustomBean;
+
 	for (Map.Entry<QName,Attribute> entry : parentBean._nsAttributeMap.entrySet()) {
 	  if (_nsAttributeMap.get(entry.getKey()) == null)
 	    _nsAttributeMap.put(entry.getKey(), entry.getValue());
@@ -524,6 +539,14 @@ public class BeanType extends ConfigType
 		&& paramTypes[0].equals(String.class)
 		&& paramTypes[1].equals(int.class))) {
 	_setConfigLocation = method;
+      }
+      else if ((name.equals("addCustomBean")
+		&& paramTypes.length == 1
+		&& paramTypes[0].equals(CustomBeanConfig.class))) {
+	ConfigType customBeanType
+	  = TypeFactory.getType(CustomBeanConfig.class);
+
+	_addCustomBean = new CustomBeanAttribute(method, customBeanType);
       }
       else if (name.equals("setProperty")
 	       && paramTypes.length == 2

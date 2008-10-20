@@ -31,6 +31,7 @@ package com.caucho.webbeans.cfg;
 
 import com.caucho.bytecode.*;
 import com.caucho.config.*;
+import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.webbeans.Singleton;
@@ -159,6 +160,14 @@ public class WbWebBeans {
   public WbComponentTypes createComponentTypes()
   {
     return new WbComponentTypes();
+  }
+
+  /**
+   * Adds a namespace bean
+   */
+  public void addCustomBean(CustomBeanConfig bean)
+  {
+    System.out.println("BEAN: " + bean);
   }
 
   /**

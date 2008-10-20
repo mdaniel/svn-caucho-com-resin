@@ -86,7 +86,7 @@ public class TextAttribute extends Attribute {
    * Creates the child bean.
    */
   @Override
-  public Object create(Object parent)
+  public Object create(Object parent, QName name)
     throws ConfigException
   {
     return null;

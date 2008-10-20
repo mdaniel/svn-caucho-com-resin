@@ -70,7 +70,7 @@ abstract public class ConfigType
   /**
    * Creates a new instance of the type.
    */
-  public Object create(Object parent)
+  public Object create(Object parent, QName name)
   {
     return null;
   }

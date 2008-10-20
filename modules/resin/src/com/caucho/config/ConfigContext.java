@@ -572,7 +572,7 @@ public class ConfigContext {
 	return;
       }
       else
-	childBean = attrStrategy.create(bean);
+	childBean = attrStrategy.create(bean, qName);
 
       if (childBean != null) {
 	ConfigType childBeanType = TypeFactory.getType(childBean.getClass());
@@ -667,7 +667,7 @@ public class ConfigContext {
 	}
       }
       else
-	childBean = type.create(null);
+	childBean = type.create(null, TEXT);
 
       if (childBean != null) {
 	ConfigType childBeanType = TypeFactory.getType(childBean.getClass());
@@ -1204,11 +1204,13 @@ public class ConfigContext {
 
     TypeFactory factory = TypeFactory.getFactory();
 
+    QName qName = ((QElement) childElt).getQName();
+
     ConfigType childType
       = factory.getEnvironmentType(((QElement) childElt).getQName());
 
     if (childType != null) {
-      Object childBean = childType.create(null);
+      Object childBean = childType.create(null, qName);
       
       configureNode(childElt, childBean, childType);
       

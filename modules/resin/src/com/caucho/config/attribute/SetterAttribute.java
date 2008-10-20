@@ -94,11 +94,11 @@ public class SetterAttribute extends Attribute {
    * Creates the child bean.
    */
   @Override
-  public Object create(Object parent)
+  public Object create(Object parent, QName name)
     throws ConfigException
   {
     try {
-      return _type.create(parent);
+      return _type.create(parent, name);
     } catch (Exception e) {
       throw ConfigException.create(_setter, e);
     }

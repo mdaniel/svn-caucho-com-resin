@@ -4,6 +4,10 @@ start = w_web-beans
 
 w_Any = text | (attribute * {string} | element * { w_Any })*
 
+w_bean-Custom = element * - w:* {
+  string
+}
+
 w_binding = element binding {
   string
 }
@@ -61,7 +65,9 @@ w_scope = element scope {
 }
 
 w_web-beans = element web-beans {
-  w_component*
+  w_bean-Custom*
+  
+  & w_component*
 
   & w_component-types*
 

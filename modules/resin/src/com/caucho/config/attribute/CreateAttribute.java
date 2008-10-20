@@ -99,7 +99,7 @@ public class CreateAttribute extends Attribute {
    * Creates the child bean.
    */
   @Override
-  public Object create(Object parent)
+  public Object create(Object parent, QName name)
     throws ConfigException
   {
     try {
