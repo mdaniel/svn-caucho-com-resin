@@ -1039,7 +1039,9 @@ caucho_host_status(request_rec *r, config_t *config, resin_host_t *host)
 {
   web_app_t *app;
   location_t *loc;
-  unsigned int now = (unsigned int) (r->request_time / 1000000);
+  unsigned int now;
+
+  now = time(0);
   
   /* check updates as appropriate */
   cse_match_host(config, host->name, host->port, now);
@@ -1268,11 +1270,13 @@ cse_dispatch(request_rec *r)
   int port = ap_get_server_port(r);
   const char *uri = r->uri;
   resin_host_t *host;
-  unsigned int now = (unsigned int) (r->request_time / 1000000);
+  unsigned int now;
   int len;
 
   if (config == NULL || ! uri)
     return DECLINED;
+
+  now = time(0);
  
   LOG(("%s:%d:cse_dispatch(): [%d] host %s\n",
        __FILE__, __LINE__, getpid(), host_name ? host_name : "null"));

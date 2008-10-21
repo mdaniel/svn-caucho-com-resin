@@ -12,6 +12,11 @@
 
 <s2 title="3.1.8 snapshot">
 <ul>
+<li>web-app: add expand-fileset-cleanup to &lt;web-app (#3001, rep by Bill Au)</li>
+<li>jni: keepalive select issue with premature close (#2962, rep by Martin Thompson)</li>
+<li>mod_caucho: potential DOS issue with mod_caucho and virtual hosts (#2950, rep by Pieter Schoenmakers)</li>
+<li>file: remove cache timeout in FileServlet for coherency, since
+the performance is handled by the proxy cache (rep by Vinod Mehra)</li>
 <li>jsp: tag fragment with tag variable compilation failure (#2904, rep by Herve Prisciandaro)</li>
 <li>jsp: taglib prefix was stored across jsp/tag files (#2936, rep by jlawrie)</li>
 <li>jms: jdbc/transaction session not properly setting expires time (#2939, rep by Vinay Reddy)</li>

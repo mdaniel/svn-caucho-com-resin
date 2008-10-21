@@ -2462,6 +2462,12 @@ public abstract class AbstractHttpRequest
     if (tcpConn == null)
       return true;
 
+    if (_tcpConn.getController() != null) {
+      _keepalive = false;
+
+      return _keepalive;
+    }
+
     if (! tcpConn.allowKeepalive())
       _keepalive = false;
 

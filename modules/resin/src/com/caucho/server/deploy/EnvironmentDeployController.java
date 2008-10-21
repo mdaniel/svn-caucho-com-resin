@@ -180,6 +180,9 @@ abstract public class
     if (! _configDefaults.contains(config)) {
       _configDefaults.add(config);
 
+      if (config.getExpandCleanupFileset() != null)
+	setExpandCleanupFileSet(config.getExpandCleanupFileset());
+      
       addConfigMode(config);
     }
   }

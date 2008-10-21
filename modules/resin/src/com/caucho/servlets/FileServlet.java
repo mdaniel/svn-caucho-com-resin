@@ -523,14 +523,11 @@ public class FileServlet extends GenericServlet {
   }
 
   static class Cache {
-    private final static long UPDATE_INTERVAL = 2000L;
-    
     QDate _calendar;
     Path _path;
     boolean _isDirectory;
     boolean _canRead;
     long _length;
-    long _lastCheck;
     long _lastModified = 0xdeadbabe1ee7d00dL;
     String _relPath;
     String _etag;
@@ -594,21 +591,7 @@ public class FileServlet extends GenericServlet {
 
     void update()
     {
-      long now = Alarm.getCurrentTime();
-      if (_lastCheck + UPDATE_INTERVAL < now) {
-        synchronized (this) {
-	  if (now <= _lastCheck + UPDATE_INTERVAL)
-	    return;
-
-	  if (_lastCheck == 0) {
-	    updateData();
-	    _lastCheck = now;
-	    return;
-	  }
-
-	  _lastCheck = now;
-	}
-
+      synchronized (this) {
 	updateData();
       }
     }
