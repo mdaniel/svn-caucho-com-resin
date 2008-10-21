@@ -324,7 +324,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 	if (sha1 != null)
 	  sha1 = sha1.trim();
 
-	GitCommit commit = _git.parseCommit(sha1);
+	GitCommit commit = getGit().parseCommit(sha1);
 
 	String tree = commit.getTree();
 	
@@ -342,6 +342,9 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 
+      return false;
+    } catch (Exception e) {
+      e.printStackTrace();
       return false;
     }
   }

@@ -130,6 +130,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper
   {
     response.addHeader(name, value);
   }
+  
   /**
    * Returns true if the output headers include <code>name</code>
    *
@@ -139,6 +140,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper
   {
     return response.containsHeader(name);
   }
+  
   /**
    * Sets a header by converting a date to a string.
    *

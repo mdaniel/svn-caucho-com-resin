@@ -131,6 +131,10 @@ public class HmuxClient
     try {
       stream = _client.open();
 
+      if (stream == null)
+	throw new IllegalStateException(L.l("Can't connect to '{0}'",
+					    _client));
+
       long id = 0;
 
       stream.querySet(id, to, "", query);

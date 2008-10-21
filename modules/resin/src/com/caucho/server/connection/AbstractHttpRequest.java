@@ -50,6 +50,7 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestAttributeEvent;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletResponse;
@@ -1033,8 +1034,10 @@ public abstract class AbstractHttpRequest
     _readEncoding = encoding;
     
     try {
-      if (_hasReadStream)
-	_readStream.setEncoding(_readEncoding);
+      // server/122d (tck)
+      //if (_hasReadStream)
+      
+      _readStream.setEncoding(_readEncoding);
     } catch (UnsupportedEncodingException e) {
       throw e;
     } catch (java.nio.charset.UnsupportedCharsetException e) {
@@ -2147,20 +2150,27 @@ public abstract class AbstractHttpRequest
    */
   public void setAttribute(String name, Object value)
   {
+    setAttribute(this, name, value);
+  }
+
+  protected void setAttribute(ServletRequest request,
+			      String name,
+			      Object value)
+  {
     if (value != null) {
       Object oldValue = _attributes.put(name, value);
-
+      
       for (int i = 0; i < _attributeListeners.length; i++) {
 	ServletRequestAttributeEvent event;
 
 	if (oldValue != null) {
-	  event = new ServletRequestAttributeEvent(getWebApp(), this,
+	  event = new ServletRequestAttributeEvent(getWebApp(), request,
 						   name, oldValue);
 
 	  _attributeListeners[i].attributeReplaced(event);
 	}
 	else {
-	  event = new ServletRequestAttributeEvent(getWebApp(), this,
+	  event = new ServletRequestAttributeEvent(getWebApp(), request,
 						   name, value);
 
 	  _attributeListeners[i].attributeAdded(event);
@@ -2168,7 +2178,7 @@ public abstract class AbstractHttpRequest
       }
     }
     else
-      removeAttribute(name);
+      removeAttribute(request, name);
   }
 
   /**
@@ -2178,12 +2188,23 @@ public abstract class AbstractHttpRequest
    */
   public void removeAttribute(String name)
   {
+    removeAttribute(this, name);
+  }
+
+  /**
+   * Removes the value of the named request attribute.
+   *
+   * @param name the attribute name.
+   */
+  protected void removeAttribute(ServletRequest request,
+				 String name)
+  {
     Object oldValue = _attributes.remove(name);
     
     for (int i = 0; i < _attributeListeners.length; i++) {
       ServletRequestAttributeEvent event;
 
-      event = new ServletRequestAttributeEvent(getWebApp(), this,
+      event = new ServletRequestAttributeEvent(getWebApp(), request,
 					       name, oldValue);
 
       _attributeListeners[i].attributeRemoved(event);

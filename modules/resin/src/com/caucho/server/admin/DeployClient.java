@@ -143,13 +143,15 @@ public class DeployClient
     return (String) querySet(query);
   }
 
-  public HostQuery []listHosts() {
+  public HostQuery []listHosts()
+  {
     ListHostsQuery query = new ListHostsQuery();
 
-    return (HostQuery []) querySet(query);
+    return (HostQuery []) queryGet(query);
   }
 
-  public WebAppQuery []listWebApps(String[] hosts) {
+  public WebAppQuery []listWebApps(String[] hosts)
+  {
     ListWebAppsQuery []query = new ListWebAppsQuery[hosts.length];
 
     for (int i = 0; i < hosts.length; i++) {
@@ -159,7 +161,7 @@ public class DeployClient
       query[i] = q;
     }
 
-    return (WebAppQuery []) querySet(query);
+    return (WebAppQuery []) queryGet(query);
   }
 
   public Boolean []start(String [][]apps)

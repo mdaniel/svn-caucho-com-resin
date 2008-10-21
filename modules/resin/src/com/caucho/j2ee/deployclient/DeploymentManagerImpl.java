@@ -112,6 +112,10 @@ public class DeploymentManagerImpl implements DeploymentManager {
   {
     HostQuery []hosts = _deployClient.listHosts();
 
+    if (hosts == null)
+      throw new IllegalStateException(L.l("'{0}' does not return any hosts",
+					  _deployClient));
+
     Target []targets = new Target[hosts.length];
 
     for (int i = 0; i < hosts.length; i++) {
@@ -192,7 +196,6 @@ public class DeploymentManagerImpl implements DeploymentManager {
     throws IllegalStateException
   {
     try {
-
       QDocument doc = new QDocument();
 
       DOMBuilder builder = new DOMBuilder();
@@ -210,7 +213,10 @@ public class DeploymentManagerImpl implements DeploymentManager {
       String type = XPath.evalString("/deployment-plan/archive-type", doc);
       String name = XPath.evalString("/deployment-plan/name", doc);
 
-      _deployClient.deployJar(Vfs.lookup(archive.getAbsolutePath()), "wars/default/" + name, _user, "", null, null);
+      String tag = type + "s/default/" + name;
+
+      _deployClient.deployJar(Vfs.lookup(archive.getAbsolutePath()),
+			      tag, _user, "", null, null);
 
       TargetModuleID []targetModules = new TargetModuleID[targetList.length];
 

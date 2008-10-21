@@ -370,7 +370,7 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public void setAttribute(String name, Object o)
   {
-    _request.setAttribute(name, o);
+    _request.setAttribute(this, name, o);
   }
 
   /**
@@ -388,7 +388,7 @@ public class HttpServletRequestImpl implements CauchoRequest
    */
   public void removeAttribute(String name)
   {
-    _request.removeAttribute(name);
+    _request.removeAttribute(this, name);
   }
 
   /**

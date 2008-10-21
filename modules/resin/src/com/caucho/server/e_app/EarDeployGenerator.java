@@ -30,6 +30,7 @@
 package com.caucho.server.e_app;
 
 import com.caucho.config.ConfigException;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.ExpandDeployGenerator;
 import com.caucho.server.webapp.WebAppContainer;
@@ -43,7 +44,8 @@ import java.util.ArrayList;
 public class EarDeployGenerator
   extends ExpandDeployGenerator<EarDeployController>
 {
-  private final EarDeployGeneratorAdmin _admin = new EarDeployGeneratorAdmin(this);
+  private final EarDeployGeneratorAdmin _admin
+    = new EarDeployGeneratorAdmin(this);
 
   private String _urlPrefix = "";
 
@@ -64,6 +66,15 @@ public class EarDeployGenerator
       setExtension(".ear");
     } catch (Exception e) {
       throw new RuntimeException(e);
+    }
+
+    if (Server.getCurrent() != null) {
+      setGit(Server.getCurrent().getGit());
+      String hostName = parentContainer.getHostName();
+      if ("".equals(hostName))
+	hostName = "default";
+    
+      setGitPath("ears/" + hostName);
     }
 
     _parentContainer = parentContainer;
@@ -141,9 +152,14 @@ public class EarDeployGenerator
 
     Path rootDirectory;
 
+    Path repRefPath = getGitRefPath(name);
+
     if (archivePath.isDirectory()) {
       rootDirectory = getExpandDirectory().lookup(archiveName);
       archivePath = null;
+    }
+    else if (repRefPath.canRead()) {
+      rootDirectory = getExpandDirectory().lookup(getExpandName(name));
     }
     else {
       rootDirectory = getExpandDirectory().lookup(getExpandName(name));
@@ -156,6 +172,13 @@ public class EarDeployGenerator
       = new EarDeployController(name, rootDirectory, _parentContainer);
 
     controller.setArchivePath(archivePath);
+
+    if (getGitPath() != null) {
+      String ref = getGitPath() + "/" + name;
+
+      controller.setGit(getGit());
+      controller.setGitRefPath(getGit().getRefPath(ref));
+    }
 
     for (EarConfig config : _earDefaultList)
       controller.addConfigDefault(config);
