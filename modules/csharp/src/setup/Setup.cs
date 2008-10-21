@@ -50,8 +50,9 @@ namespace Caucho
       int longPathLength
      );
     
-    private static String APACHE_2_2 = "Software\\Apache Software Foundation\\Apache";
-    private static String APACHE_2 = "Software\\Apache Group\\Apache";
+    private static String REG_APACHE_2_2 = "Software\\Apache Software Foundation\\Apache";
+    private static String REG_APACHE_2 = "Software\\Apache Group\\Apache";
+    private static String REG_SERVICES = "SYSTEM\\CurrentControlSet\\Services";
     
     private String _resinHome;
     private String _apacheHome;
@@ -99,22 +100,22 @@ namespace Caucho
     public void FindApache(ArrayList homes) {
       String apacheHome = null;
       
-      apacheHome = FindApacheInRegistry(Registry.LocalMachine, APACHE_2_2);
+      apacheHome = FindApacheInRegistry(Registry.LocalMachine, REG_APACHE_2_2);
       
       if (apacheHome != null)
         homes.Add(Util.GetCanonicalPath(apacheHome));
       
-      apacheHome = FindApacheInRegistry(Registry.CurrentUser, APACHE_2_2);
+      apacheHome = FindApacheInRegistry(Registry.CurrentUser, REG_APACHE_2_2);
       
       if (apacheHome != null)
         homes.Add(Util.GetCanonicalPath(apacheHome));
       
-      apacheHome = FindApacheInRegistry(Registry.LocalMachine, APACHE_2);
+      apacheHome = FindApacheInRegistry(Registry.LocalMachine, REG_APACHE_2);
       
       if (apacheHome != null)
         homes.Add(Util.GetCanonicalPath(apacheHome));
       
-      apacheHome = FindApacheInRegistry(Registry.CurrentUser, APACHE_2);
+      apacheHome = FindApacheInRegistry(Registry.CurrentUser, REG_APACHE_2);
       if (apacheHome != null)
         homes.Add(Util.GetCanonicalPath(apacheHome));
       
@@ -320,7 +321,7 @@ namespace Caucho
     public String FindApacheServiceName(String apacheHome) {
       String apacheHomeLower = apacheHome.ToLower();
       String result = null;
-      RegistryKey services = Registry.LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Services");
+      RegistryKey services = Registry.LocalMachine.OpenSubKey(REG_SERVICES);
       foreach (String name in services.GetSubKeyNames()) {
         Console.WriteLine("Service: " + name);
         RegistryKey key = services.OpenSubKey(name);
@@ -470,20 +471,20 @@ namespace Caucho
     }
     
     public void CopyIsapiFilter(String resinHome, String iisScripts) {
-        String filterPath = iisScripts + "\\isapi_srun.dll";
-        if (File.Exists(filterPath))
-          File.Delete(filterPath);
-        
-        File.Copy(resinHome + "\\win32\\isapi_srun.dll", filterPath);
+      String filterPath = iisScripts + "\\isapi_srun.dll";
+      if (File.Exists(filterPath))
+        File.Delete(filterPath);
+      
+      File.Copy(resinHome + "\\win32\\isapi_srun.dll", filterPath);
     }
     
-   public void RemoveIsapiFilter(String iisScripts) {
-        String filterPath = iisScripts + "\\isapi_srun.dll";
-        File.Delete(filterPath);
+    public void RemoveIsapiFilter(String iisScripts) {
+      String filterPath = iisScripts + "\\isapi_srun.dll";
+      File.Delete(filterPath);
     }
     
     public void StopIIS(){
-       ServiceController sc = new ServiceController("W3SVC");
+      ServiceController sc = new ServiceController("W3SVC");
       
       if (sc.Status == ServiceControllerStatus.Running) {
         sc.Stop();
@@ -542,7 +543,7 @@ namespace Caucho
       return configInfo;
     }
     
-    private String FindIIS() {      
+    private String FindIIS() {
       String result = null;
       
       DirectoryEntry entry = new DirectoryEntry("IIS://localhost/W3SVC/1/ROOT/scripts");

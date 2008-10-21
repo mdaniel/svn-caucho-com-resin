@@ -33,19 +33,32 @@ using System.Text;
 using System.IO;
 using Microsoft.Win32;
 
-
 namespace Caucho
 {
   public class Util
   {
+    private static String CURRENT_RESIN_IN_REGISTRY = "Software\\Caucho Technology\\Resin\\CurrentVersion";
+    
     public static String FindResinInRegistry() {
       RegistryKey key
-        = Registry.LocalMachine.OpenSubKey("Software\\Caucho Technology\\Resin\\CurrentVersion");
+        = Registry.LocalMachine.OpenSubKey(CURRENT_RESIN_IN_REGISTRY);
       
       if (key == null)
         return null;
       else
         return (String)key.GetValue("Resin Home");
+    }
+    
+    public static void SetResinInRegistry(String resinHome) {
+      RegistryKey key
+        = Registry.LocalMachine.OpenSubKey(CURRENT_RESIN_IN_REGISTRY, true);
+      
+      if (key != null) {
+        key.SetValue("Resin Home", resinHome);
+        key.Flush();
+        key.Close();
+      }
+
     }
     
     public static String Canonicalize(String path) {

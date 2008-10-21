@@ -44,6 +44,7 @@ namespace Caucho
   {
     public static String HKEY_JRE = "Software\\JavaSoft\\Java Runtime Environment";
     public static String HKEY_JDK = "Software\\JavaSoft\\Java Development Kit";
+    public static String CAUCHO_APP_DATA = "Caucho Technology\\Resin";
     
     public static String USAGE = @"usage: {0} [flags]
   -h                 : this help
@@ -85,7 +86,7 @@ namespace Caucho
     private String _passToServiceArgs;
     private String _command;
     
-    private Process _process; 
+    private Process _process;
     
     public Resin(String[] args)
     {
@@ -275,7 +276,6 @@ namespace Caucho
     }
     
     public int Execute() {
-      
       if (_help) {
         Usage(ServiceName);
         
@@ -415,9 +415,15 @@ namespace Caucho
 
       return txInst;
     }
-    
+    private static String GetResinAppDataDir() {
+      return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + '\\' + CAUCHO_APP_DATA;
+    }
     public static void storeState(Hashtable state, String serviceName) {
-      FileStream fs = new FileStream(serviceName + ".srv", FileMode.Create, FileAccess.Write);
+      String dir = GetResinAppDataDir();
+      if (! Directory.Exists(dir))
+        Directory.CreateDirectory(dir);
+      
+      FileStream fs = new FileStream(dir + '\\' + serviceName + ".srv", FileMode.Create, FileAccess.Write);
       BinaryFormatter serializer = new BinaryFormatter();
       serializer.Serialize(fs, state);
       fs.Flush();
@@ -425,7 +431,8 @@ namespace Caucho
     }
     
     public static Hashtable loadState(String serviceName) {
-      FileStream fs = new FileStream(serviceName + ".srv", FileMode.Open, FileAccess.Read);
+      String dir = GetResinAppDataDir();
+      FileStream fs = new FileStream(dir + '\\' + serviceName + ".srv", FileMode.Open, FileAccess.Read);
       BinaryFormatter serializer = new BinaryFormatter();
       Hashtable state = (Hashtable)serializer.Deserialize(fs);
       fs.Close();
@@ -494,31 +501,44 @@ namespace Caucho
       
       if (_service) {
         startInfo.RedirectStandardError = true;
+        startInfo.RedirectStandardOutput = true;
         Process process = Process.Start(startInfo);
         
         StringBuilder error = new StringBuilder();
+        StringBuilder output = new StringBuilder();
         process.ErrorDataReceived += delegate(Object sendingProcess, DataReceivedEventArgs err) {
-          error.Append(err.Data);
+          error.Append(err.Data).Append('\n');
+        };
+        process.OutputDataReceived += delegate(object sender, DataReceivedEventArgs err) { 
+          output.Append(err.Data).Append('\n');
         };
         process.BeginErrorReadLine();
+        process.BeginOutputReadLine();
         
         while (! process.HasExited)
           process.WaitForExit(500);
         
         process.CancelErrorRead();
+        process.CancelOutputRead();
         
         if (process.HasExited && process.ExitCode != 0) {
-          String message = "Error Executing Resin Using: " + startInfo.FileName + " " + startInfo.Arguments;
+          StringBuilder messageBuilder = new StringBuilder("Error Executing Resin Using: ");
+          messageBuilder.Append(startInfo.FileName).Append(' ').Append(startInfo.Arguments);
           
-          EventLog.WriteEntry(ServiceName, message, EventLogEntryType.Error);
+          if (output.Length > 0)
+            messageBuilder.Append('\n').Append(output);
+          
           if (error.Length > 0)
-            EventLog.WriteEntry(ServiceName, error.ToString(), EventLogEntryType.Error);
+            messageBuilder.Append('\n').Append(error);
+          
+          String message = messageBuilder.ToString();
+          EventLog.WriteEntry(ServiceName, message, EventLogEntryType.Error);
           
           throw new ApplicationException(message);
-        } 
+        }
       } else {
         _process = Process.Start(startInfo);
-      }      
+      }
     }
     
     public void StopResin() {
@@ -560,7 +580,6 @@ namespace Caucho
     }
     
     public static int Main(String []args) {
-      //Service workaround: only the env will always have the args
       Resin resin = new Resin(Environment.GetCommandLineArgs());
       return resin.Execute();
     }
@@ -639,7 +658,7 @@ namespace Caucho
       
       return null;
     }
-   
+    
     public static String GetJavaHome(String resinHome, String javaHome) {
       String path = null;
       

@@ -103,7 +103,7 @@ namespace Caucho
       this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
       this.ClientSize = new System.Drawing.Size(135, 130);
       this.Controls.Add(groupBox);
-      this.Text = "Resin";
+      this.Text = Version.VERSION;
       groupBox.ResumeLayout(false);
       groupBox.PerformLayout();
       this.ResumeLayout(false);

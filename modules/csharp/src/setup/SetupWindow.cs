@@ -280,7 +280,7 @@ namespace Caucho
       Controls.Add(okButton);
       Controls.Add(serversGrp);
       Controls.Add(generalGrp);
-      Text = "Resin Setup";
+      Text = "Setup " + Version.VERSION;
       generalGrp.ResumeLayout(false);
       generalGrp.PerformLayout();
       serversGrp.ResumeLayout(false);
@@ -297,6 +297,8 @@ namespace Caucho
       
       if (iis && ! CheckIIS(iisScripts))
         return;
+      
+      Util.SetResinInRegistry(resinHome);
       
       if (apache) {
         try {
@@ -385,7 +387,7 @@ Would you like the setup to attempt stopping IIS Service and copying the filter?
           if (result.Status == ConfigureInfo.REMOVED_OK) {
             String serviceName = _setup.FindApacheServiceName(apacheHome);
             
-             if (serviceName != null)
+            if (serviceName != null)
               RestartApache("Apache is successfully re-configured.", serviceName);
             else
               MessageBox.Show(

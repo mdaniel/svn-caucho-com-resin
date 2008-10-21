@@ -433,6 +433,17 @@
         <filter token="VERSION_DATE" value="${vdate}"/>
       </filterset>
     </copy>
+
+    <copy file="${modules}/csharp/src/common/Version.cs.in"
+          tofile="${modules}/csharp/src/common/Version.cs"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="VERSION" value="${version}"/>
+        <filter token="DATE" value="${date}"/>
+        <filter token="VERSION_DATE" value="${vdate}"/>
+      </filterset>
+    </copy>
   </target>
 
   <target name="javaee" depends="ejb, jca, jms, jpa, jsdk, jstl, jta, jws, webbeans">
