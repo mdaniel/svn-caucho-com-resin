@@ -84,9 +84,9 @@ public class CustomBeanAttribute extends Attribute {
 				    className, qName), e);
     }
 
-    CustomBeanConfig config = new CustomBeanConfig();
+    CustomBeanConfig config = new CustomBeanConfig(qName, cl);
 
-    config.setClass(cl);
+    config.setScope("singleton");
 
     return config;
   }

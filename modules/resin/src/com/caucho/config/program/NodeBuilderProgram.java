@@ -33,6 +33,8 @@ import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.L10N;
 import com.caucho.xml.QElement;
+import com.caucho.xml.QName;
+import com.caucho.xml.QNode;
 
 import org.w3c.dom.Node;
 
@@ -47,9 +49,18 @@ public class NodeBuilderProgram extends FlowProgram {
 
   private final Node _node;
 
-  public NodeBuilderProgram( Node node)
+  public NodeBuilderProgram(Node node)
   {
     _node = node;
+  }
+
+  @Override
+  public QName getName()
+  {
+    if (_node instanceof QNode)
+      return ((QNode) _node).getQName();
+    else
+      return null;
   }
 
   @Override

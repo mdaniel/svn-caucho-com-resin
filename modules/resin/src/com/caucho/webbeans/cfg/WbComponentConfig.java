@@ -252,6 +252,14 @@ public class WbComponentConfig {
     _init.addProgram(init);
   }
 
+  public void addInitProgram(ConfigProgram program)
+  {
+    if (_init == null)
+      _init = new ContainerProgram();
+
+    _init.addProgram(program);
+  }
+
   public ContainerProgram getInit()
   {
     return _init;

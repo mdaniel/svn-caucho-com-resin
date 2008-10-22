@@ -51,6 +51,15 @@ public class NodeBuilderChildProgram extends FlowProgram {
   }
 
   @Override
+  public QName getName()
+  {
+    if (_node instanceof QNode)
+      return ((QNode) _node).getQName();
+    else
+      return null;
+  }
+
+  @Override
   public void inject(Object bean, ConfigContext env)
     throws ConfigException
   {

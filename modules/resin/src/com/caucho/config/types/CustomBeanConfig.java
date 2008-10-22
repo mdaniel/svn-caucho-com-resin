@@ -30,6 +30,7 @@
 package com.caucho.config.types;
 
 import com.caucho.config.*;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.type.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.jca.program.*;
@@ -39,6 +40,7 @@ import com.caucho.webbeans.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.*;
+import com.caucho.xml.QName;
 
 import java.util.*;
 import java.lang.reflect.*;
@@ -53,11 +55,27 @@ import javax.webbeans.*;
 /**
  * Custom bean configured by namespace
  */
-public class CustomBeanConfig extends WbComponentConfig {
+public class CustomBeanConfig {
   private static final L10N L = new L10N(CustomBeanConfig.class);
+
+  private Class _class;
+  private WbComponentConfig _component = new WbComponentConfig();
+  private ConfigType _configType;
+
+  private QName _name;
 
   private String _filename;
   private int _line;
+
+  public CustomBeanConfig(QName name, Class cl)
+  {
+    _name = name;
+
+    _class = cl;
+    _component.setClass(cl);
+
+    _configType = TypeFactory.getType(cl);
+  }
   
   public void setConfigLocation(String filename, int line)
   {
@@ -73,5 +91,38 @@ public class CustomBeanConfig extends WbComponentConfig {
   public int getLine()
   {
     return _line;
+  }
+
+  public void setClass(Class cl)
+  {
+    _component.setClass(cl);
+  }
+
+  public void setScope(String scope)
+  {
+    _component.setScope(scope);
+  }
+
+  public void addBuilderProgram(ConfigProgram program)
+  {
+    QName name = program.getName();
+
+    if (name != null) {
+      if (! name.getNamespaceURI().equals(_name.getNamespaceURI()))
+	throw new ConfigException(L.l("'{0}' is an unknown field name.  Fields must belong to the same namespace as the class",
+				      name.getCanonicalName()));
+      
+      if (_configType.getAttribute(name) == null)
+	throw new ConfigException(L.l("'{0}' is an unknown field for '{1}'",
+				      name.getLocalName(), _class.getName()));
+    }
+    
+    _component.addInitProgram(program);
+  }
+
+  @PostConstruct
+  public void init()
+  {
+    _component.init();
   }
 }

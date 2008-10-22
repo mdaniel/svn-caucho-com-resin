@@ -32,11 +32,20 @@ package com.caucho.config.program;
 import com.caucho.config.*;
 import com.caucho.config.type.*;
 import com.caucho.webbeans.context.DependentScope;
+import com.caucho.xml.QName;
 
 /**
  * A saved program for configuring an object.
  */
 public abstract class ConfigProgram {
+  /**
+   * Returns the program's QName
+   */
+  public QName getName()
+  {
+    return null;
+  }
+  
   /**
    * Configures the bean using the current program.
    * 

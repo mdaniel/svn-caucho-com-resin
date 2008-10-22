@@ -5,7 +5,11 @@ start = w_web-beans
 w_Any = text | (attribute * {string} | element * { w_Any })*
 
 w_bean-Custom = element * - w:* {
-  string
+  w_bean-Field-Custom*
+}
+
+w_bean-Field-Custom = element * - w:* {
+  w_Any
 }
 
 w_binding = element binding {
