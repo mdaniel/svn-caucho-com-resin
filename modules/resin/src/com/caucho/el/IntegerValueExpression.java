@@ -86,4 +86,12 @@ public class IntegerValueExpression extends AbstractValueExpression
   {
     return new Integer((int) _expr.evalLong(context));
   }
+
+  @Override
+  public Class getType(ELContext context)
+    throws PropertyNotFoundException,
+	   ELException
+  {
+    return getExpectedType();
+  }
 }

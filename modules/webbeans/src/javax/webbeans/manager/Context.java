@@ -27,23 +27,27 @@
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
+package javax.webbeans.manager;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Annotation;
 
 /**
- * The @Standard annotation for web beans
+ * Representation of a scope context
  */
+public interface Context
+{
+  /**
+   * Returns true if the scope is currently active.
+   */
+  public boolean isActive();
+  
+  /**
+   * Returns the scope annotation type.
+   */
+  public Class<? extends Annotation> getScopeType();
 
-@ComponentType
-@Documented
-@Retention(RUNTIME)
-@Target({TYPE, METHOD})
-public @interface Standard {
+  /**
+   * Returns a instance of a bean, creating if necessary
+   */
+  public <T> T get(Bean<T> bean, boolean create);
 }

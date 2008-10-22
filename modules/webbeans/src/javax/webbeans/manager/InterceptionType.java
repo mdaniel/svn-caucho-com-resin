@@ -27,23 +27,17 @@
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+package javax.webbeans.manager;
 
 /**
- * The @Standard annotation for web beans
+ * interceptor types
  */
-
-@ComponentType
-@Documented
-@Retention(RUNTIME)
-@Target({TYPE, METHOD})
-public @interface Standard {
+public enum InterceptionType
+{
+  AROUND_INVOKE,
+  POST_CONSTRUCT,
+  PRE_DESTROY,
+  PRE_PASSIVATE,
+  POST_ACTIVATE,
 }
+

@@ -326,9 +326,11 @@ public class JspCompilerInstance {
       if (Boolean.TRUE.equals(jspPropertyGroup.isXml()))
 	_parseState.setXml(true);
       
-      if (Boolean.FALSE.equals(jspPropertyGroup.isXml()))
+      if (Boolean.FALSE.equals(jspPropertyGroup.isXml())) {
+	_parseState.setXml(false);
 	_parseState.setForbidXml(true);
-      
+      }
+
       if (jspPropertyGroup.getPageEncoding() != null) {
 	try {
 	  _parseState.setPageEncoding(jspPropertyGroup.getPageEncoding());

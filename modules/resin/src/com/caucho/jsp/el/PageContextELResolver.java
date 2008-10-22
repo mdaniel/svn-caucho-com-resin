@@ -41,11 +41,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.PropertyResourceBundle;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Variable resolution for JSP variables
  */
 public class PageContextELResolver extends AbstractVariableResolver {
+  private final static Logger log
+    = Logger.getLogger(PageContextELResolver.class.getName());
+  
   private final PageContextImpl _pageContext;
 
   private final ELResolver []_customResolvers;
@@ -153,35 +158,43 @@ public class PageContextELResolver extends AbstractVariableResolver {
   @Override
   public Object getValue(ELContext env, Object base, Object property)
   {
-    env.setPropertyResolved(false);
+    try {
+      env.setPropertyResolved(false);
 
-    for (int i = 0; i < _customResolvers.length; i++) {
-      Object value = _customResolvers[i].getValue(env, base, property);
+      for (int i = 0; i < _customResolvers.length; i++) {
+	Object value = _customResolvers[i].getValue(env, base, property);
 
-      if (env.isPropertyResolved()) {
-	return value;
+	if (env.isPropertyResolved()) {
+	  return value;
+	}
       }
-    }
     
-    if (base != null) {
-      if (base instanceof Map)
-	return _mapResolver.getValue(env, base, property);
-      else if (base instanceof List)
-	return _listResolver.getValue(env, base, property);
-      else if (base.getClass().isArray())
-	return _arrayResolver.getValue(env, base, property);
-      else if (base instanceof PropertyResourceBundle)
-      	return _bundleResolver.getValue(env, base, property);
-      else
-	return _beanResolver.getValue(env, base, property);
-    }
-    else if (property instanceof String) {
-      env.setPropertyResolved(true);
+      if (base != null) {
+	if (base instanceof Map)
+	  return _mapResolver.getValue(env, base, property);
+	else if (base instanceof List)
+	  return _listResolver.getValue(env, base, property);
+	else if (base.getClass().isArray())
+	  return _arrayResolver.getValue(env, base, property);
+	else if (base instanceof PropertyResourceBundle)
+	  return _bundleResolver.getValue(env, base, property);
+	else
+	  return _beanResolver.getValue(env, base, property);
+      }
+      else if (property instanceof String) {
+	env.setPropertyResolved(true);
 
-      return _pageContext.findAttribute(property.toString());
-    }
-    else
+	return _pageContext.findAttribute(property.toString());
+      }
+      else
+	return null;
+    } catch (ELException e) {
+      // jsp/3094
+      
+      log.log(Level.FINER, e.toString(), e);
+
       return null;
+    }
   }
   
   @Override

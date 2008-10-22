@@ -29,21 +29,22 @@
 
 package javax.webbeans;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 /**
- * The @Standard annotation for web beans
+ * The @Stereotype annotation for web beans
  */
-
-@ComponentType
-@Documented
+@Documented  
 @Retention(RUNTIME)
-@Target({TYPE, METHOD})
-public @interface Standard {
+@Target(ANNOTATION_TYPE)
+public @interface Stereotype {
+  public Class<?>[] requiredTypes() default {};
+  
+  public Class<? extends Annotation>[] supportedScopes() default {};
 }

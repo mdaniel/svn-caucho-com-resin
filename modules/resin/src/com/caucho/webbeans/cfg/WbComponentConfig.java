@@ -77,6 +77,9 @@ public class WbComponentConfig {
 
   protected ComponentImpl _comp;
 
+  // XXX: temp for osgi
+  private boolean _isService;
+
   public WbComponentConfig()
   {
     _webbeans = WebBeansContainer.create().getWbWebBeans();
@@ -304,6 +307,17 @@ public class WbComponentConfig {
   public ComponentImpl getComponentFactory()
   {
     return _comp;
+  }
+
+  // XXX: temp for OSGI
+  public boolean isService()
+  {
+    return _isService;
+  }
+
+  public void setService(boolean isService)
+  {
+    _isService = isService;
   }
 
   /**

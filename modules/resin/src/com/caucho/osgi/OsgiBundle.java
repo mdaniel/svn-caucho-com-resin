@@ -32,6 +32,7 @@ package com.caucho.osgi;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.BeanConfig;
+import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.PathPatternType;
 import com.caucho.loader.DynamicClassLoader;
@@ -44,6 +45,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
+import com.caucho.webbeans.cfg.WbComponentConfig;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
@@ -857,7 +859,7 @@ public class OsgiBundle implements Bundle
   /**
    * Configuration for the bundle
    */
-  class BundleConfig implements EnvironmentBean {
+  public class BundleConfig implements EnvironmentBean {
     /**
      * Returns the class loader
      */
@@ -869,6 +871,21 @@ public class OsgiBundle implements Bundle
     public ServiceConfig createService()
     {
       return new ServiceConfig();
+    }
+
+    /**
+     * Adds a namespace bean
+     */
+    public void addCustomBean(CustomBeanConfig bean)
+    {
+      WbComponentConfig comp = bean.getComponent();
+
+      if (comp.isService() && comp.getComponent() != null) {
+	WebBeansContainer webBeans
+	  = WebBeansContainer.create(_manager.getParentLoader());
+
+	webBeans.addComponent(comp.getComponent());
+      }
     }
   }
 

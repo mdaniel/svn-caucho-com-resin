@@ -24,8 +24,6 @@
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
- *
- * $Id: TagData.java,v 1.2 2004/09/29 00:12:48 cvs Exp $
  */
 
 package javax.servlet.jsp.tagext;
@@ -61,7 +59,7 @@ public class TagData implements Cloneable {
   public TagData(Object [][]attrs)
   {
     attributes = new Hashtable();
-    
+
     for (int i = 0; attrs != null && i < attrs.length; i++) {
       attributes.put(attrs[i][0], attrs[i][1]);
     }
@@ -98,10 +96,7 @@ public class TagData implements Cloneable {
   {
     Object value = this.attributes.get(name);
 
-    if (value != null)
-      return value.toString();
-    else
-      return null;
+    return (String) value;
   }
 
   /**

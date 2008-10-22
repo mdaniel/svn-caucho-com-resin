@@ -58,6 +58,9 @@ import javax.webbeans.*;
 public class CustomBeanConfig {
   private static final L10N L = new L10N(CustomBeanConfig.class);
 
+  private static final String RESIN_NS
+    = "http://caucho.com/ns/resin";
+
   private Class _class;
   private WbComponentConfig _component = new WbComponentConfig();
   private ConfigType _configType;
@@ -105,19 +108,35 @@ public class CustomBeanConfig {
 
   public void addBuilderProgram(ConfigProgram program)
   {
-    QName name = program.getName();
+    QName name = program.getQName();
 
-    if (name != null) {
-      if (! name.getNamespaceURI().equals(_name.getNamespaceURI()))
-	throw new ConfigException(L.l("'{0}' is an unknown field name.  Fields must belong to the same namespace as the class",
-				      name.getCanonicalName()));
-      
+    if (name == null) {
+      _component.addInitProgram(program);
+    }
+    
+    else if (name.getNamespaceURI().equals(_name.getNamespaceURI())) {
       if (_configType.getAttribute(name) == null)
 	throw new ConfigException(L.l("'{0}' is an unknown field for '{1}'",
 				      name.getLocalName(), _class.getName()));
+      
+      _component.addInitProgram(program);
     }
-    
-    _component.addInitProgram(program);
+
+    else if (name.getNamespaceURI().equals(RESIN_NS)) {
+      // XXX: temp
+
+      // XXX: service scope?
+      _component.setService(true);
+    }
+    else {
+      throw new ConfigException(L.l("'{0}' is an unknown field name.  Fields must belong to the same namespace as the class",
+				    name.getCanonicalName()));
+    }
+  }
+
+  public WbComponentConfig getComponent()
+  {
+    return _component;
   }
 
   @PostConstruct

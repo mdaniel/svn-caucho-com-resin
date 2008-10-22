@@ -179,11 +179,28 @@ abstract public class GenericTag extends JspContainerNode
       Object value = _attributeValues.get(i);
       String name = qName.getName();
 
+      TagAttributeInfo attrInfo = getAttributeInfo(qName);
+      Method method = getAttributeMethod(qName);
+      
+      Class type = null;
+
+      if (method != null)
+	type = method.getParameterTypes()[0];
+      
       if (value instanceof JspAttribute) {
 	JspAttribute attr = (JspAttribute) value;
 
-	if (attr.isStatic())
-	  tags.put(name, attr.getStaticText());
+	if (attr.isStatic()) {
+	  String textValue = attr.getStaticText();
+
+	  /*
+	  if (type != null)
+	    tags.put(name, staticStringToValue(type, textValue));
+	  else
+	    tags.put(name, textValue);
+	  */
+	  tags.put(name, textValue);
+	}
 	else
 	  tags.put(name, TagData.REQUEST_TIME_VALUE);
       }
@@ -192,17 +209,9 @@ abstract public class GenericTag extends JspContainerNode
       else
         tags.put(name, value);
 
-      TagAttributeInfo attrInfo = getAttributeInfo(qName);
-
       String typeName = null;
 
       boolean isFragment = false;
-      Method method = getAttributeMethod(qName);
-      
-      Class type = null;
-
-      if (method != null)
-	type = method.getParameterTypes()[0];
 
       if (attrInfo != null) {
 	typeName = attrInfo.getTypeName();

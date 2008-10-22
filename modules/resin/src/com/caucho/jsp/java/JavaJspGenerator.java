@@ -1345,6 +1345,12 @@ public class JavaJspGenerator extends JspGenerator {
       throw new ELException(e);
     }
 
+    if (void.class.equals(retType) && expr.isLiteralText()) {
+      // jsp/18v3
+      throw error(L.l("deferredMethod with string literal '{0}' cannot return void '{1}'",
+		      value, sigString));
+    }
+
     MethodExpr methodExpr = new MethodExpr(value, expr, args, retType);
 
     int index = _methodExprList.indexOf(methodExpr);
@@ -2450,5 +2456,6 @@ public class JavaJspGenerator extends JspGenerator {
     _primitiveClasses.put("long", long.class);
     _primitiveClasses.put("float", float.class);
     _primitiveClasses.put("double", double.class);
+    _primitiveClasses.put("void", void.class);
   }
 }

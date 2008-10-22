@@ -1170,6 +1170,9 @@ public abstract class JspNode {
       else if (type.equals(ValueExpression.class)) {
         int exprIndex;
 
+	boolean isValueDeferred
+	  = attrInfo != null && attrInfo.getExpectedTypeName() != null;
+	
 	String typeName = attrInfo != null ? attrInfo.getExpectedTypeName() : "";
 
         if (isEmpty)
@@ -1177,8 +1180,23 @@ public abstract class JspNode {
         else
           exprIndex = _gen.addValueExpr(value, typeName);
 
-        if (value.indexOf("#{") < 0)
+	if (isValueDeferred
+	    && value.indexOf("#{") < 0
+	    && value.indexOf("${") >= 0) {
+	  throw error(L.l("ValueExpression '{0}' must use deferred syntax '#{...}'",
+			  value));
+	}
+	else if (! isValueDeferred
+		 && value.indexOf("#{") >= 0
+		 && value.indexOf("${") < 0) {
+	  throw error(L.l("ValueExpression '{0}' must no use deferred syntax '${...}'",
+			  value));
+	}
+
+
+        if (value.indexOf("#{") < 0 && value.indexOf("${") < 0) {
           return ("_caucho_value_expr_" + exprIndex);
+	}
         else {
           StringBuilder sb = new StringBuilder();
 
@@ -1206,6 +1224,10 @@ public abstract class JspNode {
           exprIndex = _gen.addMethodExpr("", sig);
         else
           exprIndex = _gen.addMethodExpr(value, sig);
+	
+	if (value.indexOf("${") >= 0)
+	  throw error(L.l("MethodExpression '{0}' must use deferred syntax '$#{...}'",
+			  value));
       
         return ("_caucho_method_expr_" + exprIndex);
       }
@@ -1239,10 +1261,10 @@ public abstract class JspNode {
       }
       else if (! rtexpr && hasELAttribute(value, isELIgnored)) {
 	// JSP.2.3.6 says this is an error
-	// jsp/184v vs jsp/18cr vs jsp/18f5
+	// jsp/184v vs jsp/18cr vs jsp/18f5 vs jsp/18f7 (tck)
 	// #2112
 
-	if (String.class.equals(type))
+	if (String.class.equals(type) && _gen.isELIgnore())
 	  return '"' + escapeJavaString(value) + '"';
 	else
 	  throw error(L.l("EL expression '{0}' is only allowed for attributes with rtexprvalue='true'.",
@@ -1254,7 +1276,6 @@ public abstract class JspNode {
           return '"' + value + '"';
         else
           return generateELValue(type, value);
-
       }
       else if (! rtexpr
 	       && hasDeferredAttribute(value, isELIgnored)
@@ -1709,6 +1730,33 @@ public abstract class JspNode {
       return obj;
     else
       return null;
+  }
+
+  /**
+   * Converts a string-valued expression to the given type.
+   */
+  Object staticStringToValue(Class type, String obj)
+  {
+    if (boolean.class.equals(type) || Boolean.class.equals(type))
+      return Boolean.valueOf(obj);
+    else if (byte.class.equals(type) || Byte.class.equals(type))
+      return Byte.parseByte(obj);
+    else if (char.class.equals(type) || Character.class.equals(type))
+      return obj.charAt(0);
+    else if (short.class.equals(type) || Short.class.equals(type))
+      return Short.parseShort(obj);
+    else if (int.class.equals(type) || Integer.class.equals(type))
+      return Integer.parseInt(obj);
+    else if (long.class.equals(type) || Long.class.equals(type))
+      return Long.parseLong(obj);
+    else if (float.class.equals(type) || Float.class.equals(type))
+      return Float.parseFloat(obj);
+    else if (double.class.equals(type) || Double.class.equals(type))
+      return Double.parseDouble(obj);
+    else if (type.isAssignableFrom(String.class))
+      return obj;
+    else
+      return obj; // XXX:
   }
   
   protected String generateObject(Object obj)

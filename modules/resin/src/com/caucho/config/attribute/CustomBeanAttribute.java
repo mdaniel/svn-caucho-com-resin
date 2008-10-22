@@ -97,5 +97,11 @@ public class CustomBeanAttribute extends Attribute {
   public void setValue(Object bean, QName name, Object value)
     throws ConfigException
   {
+    try {
+      if (_setMethod != null)
+	_setMethod.invoke(bean, value);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
 }

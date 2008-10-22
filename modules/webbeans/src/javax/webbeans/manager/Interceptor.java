@@ -27,23 +27,29 @@
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
+package javax.webbeans.manager;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Set;
 
 /**
- * The @Standard annotation for web beans
+ * Metadata for for an interceptor
  */
+public abstract class Interceptor extends Bean<Object>
+{
+  protected Interceptor(Manager manager)
+  {
+    super(manager);
+  }
 
-@ComponentType
-@Documented
-@Retention(RUNTIME)
-@Target({TYPE, METHOD})
-public @interface Standard {
+  /**
+   * Returns the bindings for the interceptor
+   */
+  public abstract Set<Annotation> getInterceptorBindingTypes();
+
+  /**
+   * Returns the intercepted method for a type
+   */
+  public abstract Method getMethod(InterceptionType type);
 }

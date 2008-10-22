@@ -50,7 +50,8 @@ import java.util.logging.Logger;
  */
 abstract public class JspGenerator {
   static final L10N L = new L10N(JspGenerator.class);
-  static final Logger log = Log.open(JspGenerator.class);
+  static final Logger log
+    = Logger.getLogger(JspGenerator.class.getName());
 
   protected JspParser _jspParser;
   protected JspCompiler _jspCompiler;

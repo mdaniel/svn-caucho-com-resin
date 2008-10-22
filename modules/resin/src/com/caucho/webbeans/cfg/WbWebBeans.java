@@ -167,7 +167,6 @@ public class WbWebBeans {
    */
   public void addCustomBean(CustomBeanConfig bean)
   {
-    System.out.println("BEAN: " + bean);
   }
 
   /**

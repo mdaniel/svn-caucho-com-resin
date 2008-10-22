@@ -86,4 +86,12 @@ public class LongValueExpression extends AbstractValueExpression
   {
     return new Long(_expr.evalLong(context));
   }
+
+  @Override
+  public Class getType(ELContext context)
+    throws PropertyNotFoundException,
+	   ELException
+  {
+    return getExpectedType();
+  }
 }

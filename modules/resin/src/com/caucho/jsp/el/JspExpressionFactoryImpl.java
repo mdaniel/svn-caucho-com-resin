@@ -129,34 +129,34 @@ public class JspExpressionFactoryImpl extends ExpressionFactory {
     CoerceType type = _coerceMap.get(expectedType);
 
     if (type == null)
-      return new ObjectValueExpression(expr, expression);
+      return new ObjectValueExpression(expr, expression, expectedType);
 
     switch (type) {
     case BOOLEAN:
-      return new BooleanValueExpression(expr, expression);
+      return new BooleanValueExpression(expr, expression, expectedType);
     case CHARACTER:
-      return new CharacterValueExpression(expr, expression);
+      return new CharacterValueExpression(expr, expression, expectedType);
     case BYTE:
-      return new ByteValueExpression(expr, expression);
+      return new ByteValueExpression(expr, expression, expectedType);
     case SHORT:
-      return new ShortValueExpression(expr, expression);
+      return new ShortValueExpression(expr, expression, expectedType);
     case INTEGER:
-      return new IntegerValueExpression(expr, expression);
+      return new IntegerValueExpression(expr, expression, expectedType);
     case LONG:
-      return new LongValueExpression(expr, expression);
+      return new LongValueExpression(expr, expression, expectedType);
     case FLOAT:
-      return new FloatValueExpression(expr, expression);
+      return new FloatValueExpression(expr, expression, expectedType);
     case DOUBLE:
-      return new DoubleValueExpression(expr, expression);
+      return new DoubleValueExpression(expr, expression, expectedType);
     case STRING:
-      return new StringValueExpression(expr, expression);
+      return new StringValueExpression(expr, expression, expectedType);
     case BIG_DECIMAL:
-      return new BigDecimalValueExpression(expr, expression);
+      return new BigDecimalValueExpression(expr, expression, expectedType);
     case BIG_INTEGER:
-      return new BigIntegerValueExpression(expr, expression);
+      return new BigIntegerValueExpression(expr, expression, expectedType);
     }
 
-    return new ObjectValueExpression(expr, expression);
+    return new ObjectValueExpression(expr, expression, expectedType);
   }
 
   public ValueExpression

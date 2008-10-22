@@ -28,15 +28,18 @@
 
 package javax.webbeans;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
  * The @BindingType annotation for web beans
  */
-@Target({TYPE})
+@Target(ANNOTATION_TYPE)
 @Retention(RUNTIME)
+@Documented  
 public @interface BindingType {
 }

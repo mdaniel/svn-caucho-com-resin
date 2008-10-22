@@ -27,23 +27,34 @@
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
+package javax.webbeans.manager;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Annotation;
+import java.util.Set;
 
 /**
- * The @Standard annotation for web beans
+ * Internal implementation for a Decorator
  */
+public abstract class Decorator extends Bean<Object>
+{
+  protected Decorator(Manager manager)
+  {
+    super(manager);
+  }
 
-@ComponentType
-@Documented
-@Retention(RUNTIME)
-@Target({TYPE, METHOD})
-public @interface Standard {
+  /**
+   * Returns the type of the delegated object
+   */
+  public abstract Class<?> getDelegateType();
+
+  /**
+   * Returns the bindings for the delegated object
+   */
+  public abstract Set<Annotation> getDelegateBindingTypes();
+
+  /**
+   * Sets the delegate for an object
+   */
+  public abstract void setDelegate(Object instance,
+				   Object delegate);
 }

@@ -41,7 +41,7 @@ public abstract class ConfigProgram {
   /**
    * Returns the program's QName
    */
-  public QName getName()
+  public QName getQName()
   {
     return null;
   }

@@ -51,7 +51,7 @@ public class NodeBuilderChildProgram extends FlowProgram {
   }
 
   @Override
-  public QName getName()
+  public QName getQName()
   {
     if (_node instanceof QNode)
       return ((QNode) _node).getQName();
