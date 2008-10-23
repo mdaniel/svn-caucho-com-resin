@@ -19,39 +19,24 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.jsp.java;
+package com.caucho.server.security;
 
-import javax.servlet.jsp.tagext.TagLibraryInfo;
+import java.security.Principal;
 
 /**
- * Stores the entire information for a tag library.
+ * Maps roles (permissions) to users and groups.
  */
-public class TagTaglib extends TagLibraryInfo {
-  public TagTaglib(String prefix, String uri)
-  {
-    super(prefix, uri);
-  }
-
-  @Override
-  public TagLibraryInfo []getTagLibraryInfos()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  public void setJspVersion(String version)
-  {
-    this.jspversion = version;
-  }
-
-  public String toString()
-  {
-    return "TagTaglib[prefix=" + this.prefix + ",uri=" + this.uri + "]";
-  }
+public interface RoleMap {
+  /**
+   * Returns true if the user has permission for the role
+   */
+  public Boolean isUserInRole(String role, Principal user);
 }

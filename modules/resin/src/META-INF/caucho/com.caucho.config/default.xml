@@ -146,6 +146,9 @@
 
     <bean name="resource-ref"
           class="com.caucho.config.types.ResourceRef"/>
+    
+    <bean name="role-map"
+          class="com.caucho.server.security.RoleMap"/>
 
     <bean name="security-role-ref"
           class="com.caucho.config.types.SecurityRoleRef"/>

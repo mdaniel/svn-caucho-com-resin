@@ -65,7 +65,7 @@ public class TagFileManager {
       if (location.startsWith("urn:jsptagdir:"))
 	location = location.substring("urn:jsptagdir:".length());
 
-      TagLibraryInfo taglib = new TagTaglib(prefix, originalLocation);
+      TagTaglib taglib = new TagTaglib(prefix, originalLocation);
       
       String uri = location;
       
@@ -98,12 +98,12 @@ public class TagFileManager {
   public TagInfo getTag(String prefix, String location)
     throws JspParseException
   {
-    TagLibraryInfo taglib = new TagTaglib(prefix, location);
+    TagTaglib taglib = new TagTaglib(prefix, location);
     
     return getTag(location, taglib);
   }
 
-  public TagInfo getTag(String location, TagLibraryInfo taglib)
+  public TagInfo getTag(String location, TagTaglib taglib)
     throws JspParseException
   {
     JspResourceManager resourceManager = _jspCompiler.getResourceManager();
@@ -118,12 +118,12 @@ public class TagFileManager {
   public TagInfo getTag(Path path, String prefix, String location)
     throws JspParseException
   {
-    TagLibraryInfo taglib = new TagTaglib(prefix, location);
+    TagTaglib taglib = new TagTaglib(prefix, location);
     
     return getTag(path, location, taglib);
   }
 
-  public TagInfo getTag(Path path, String location, TagLibraryInfo taglib)
+  public TagInfo getTag(Path path, String location, TagTaglib taglib)
     throws JspParseException
   {
     if (path == null || ! path.canRead())

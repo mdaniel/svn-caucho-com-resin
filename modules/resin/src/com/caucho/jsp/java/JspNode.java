@@ -223,6 +223,14 @@ public abstract class JspNode {
   }
 
   /**
+   * True for 2.1 or later taglib
+   */
+  public boolean isJsp21()
+  {
+    return true;
+  }
+
+  /**
    * Returns the static text.
    */
   public String getStaticText()
@@ -1237,7 +1245,9 @@ public abstract class JspNode {
       }
       else if (value.indexOf("#{") >= 0
 	       && value.indexOf("${") < 0
-	       && rtexpr) {
+	       && rtexpr
+	       && isJsp21()) {
+	// jsp/10h2
 	throw error(L.l("deferred expression '{0}' is not allowed here",
 			value));
       }

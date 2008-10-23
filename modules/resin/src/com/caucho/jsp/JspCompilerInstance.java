@@ -566,7 +566,7 @@ public class JspCompilerInstance {
     }
   }
 
-  public TagInfo compileTag(TagLibraryInfo taglib)
+  public TagInfo compileTag(TagTaglib taglib)
     throws Exception
   {
     TagInfo preloadTag = preloadTag(taglib);
@@ -596,7 +596,7 @@ public class JspCompilerInstance {
     }
   }
 
-  private TagInfo generateTag(TagLibraryInfo taglib)
+  private TagInfo generateTag(TagTaglib taglib)
     throws Exception
   {
     LineMap lineMap = null;
@@ -626,6 +626,9 @@ public class JspCompilerInstance {
 
       Path implicitTld = _jspPath.lookup(_jspPath.getParent() + "/implicit.tld");
 
+      // jsp/10h4
+      taglib.setJspVersion("2.0");
+      
       if (implicitTld.canRead()) {
 	Config config = new Config();
 	ImplicitTld tldTaglib = new ImplicitTld();
@@ -636,7 +639,12 @@ public class JspCompilerInstance {
 	    && tldTaglib.getJspVersion().compareTo("2.0") < 0)
 	  throw new ConfigException(L.l("'{0}' must have a jsp-version 2.0 or greater",
 					implicitTld));
+
+	taglib.setJspVersion(tldTaglib.getJspVersion());
       }
+
+      if (taglib.getRequiredVersion().compareTo("2.1") < 0)
+	_parseState.setDeferredSyntaxAllowedAsLiteral(true);
       
       if (isXml) {
 	_parseState.setELIgnoredDefault(false);

@@ -78,6 +78,12 @@ abstract public class GenericTag extends JspContainerNode
   }
 
   @Override
+  public boolean isJsp21()
+  {
+    return ! isPre21Taglib();
+  }
+
+  @Override
   public boolean isPre21Taglib()
   {
     if (_tagInfo == null)

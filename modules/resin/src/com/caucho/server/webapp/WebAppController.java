@@ -676,10 +676,17 @@ public class WebAppController
 
     public String getName()
     {
+      String name;
+      
       if (getWarName() != null)
-        return "/" + getWarName();
+        name = getWarName();
       else
-        return getId();
+        name = getId();
+
+      if (name.startsWith("/"))
+	return name;
+      else
+	return "/" + name;
     }
 
     public Path getAppDir()
