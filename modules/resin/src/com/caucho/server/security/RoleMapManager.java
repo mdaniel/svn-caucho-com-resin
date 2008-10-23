@@ -31,6 +31,7 @@ package com.caucho.server.security;
 
 import com.caucho.loader.EnvironmentLocal;
 
+import java.util.ArrayList;
 import java.security.Principal;
 import javax.annotation.PostConstruct;
 
