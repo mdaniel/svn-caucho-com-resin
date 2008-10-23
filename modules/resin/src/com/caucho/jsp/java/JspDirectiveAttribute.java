@@ -64,7 +64,7 @@ public class JspDirectiveAttribute extends JspNode {
   private Boolean _isRtexprvalue;
   private String _description;
 
-  private boolean _deferredValue;
+  private Boolean _deferredValue;
   private String _deferredValueType;
   private Boolean _deferredMethod;
   private String _deferredMethodSignature;
@@ -183,17 +183,17 @@ public class JspDirectiveAttribute extends JspNode {
     if (_isFragment)
       attr.setType(JspFragment.class);
     
-    if (_deferredValue && _deferredValueType != null)
+    if (_deferredValue != null && _deferredValueType != null)
       throw error(L.l("@attribute deferredValue and deferredValueType may not both be specified"));
     
-    if (Boolean.FALSE.equals(_deferredMethod) && _deferredMethodSignature != null)
+    if (_deferredMethod != null && _deferredMethodSignature != null)
       throw error(L.l("@attribute deferredMethod and deferredMethodSignature may not both be specified"));
     
-    if ((_deferredValue || _deferredValueType != null)
+    if ((_deferredValue != null || _deferredValueType != null)
 	&& (_deferredMethod != null || _deferredMethodSignature != null))
       throw error(L.l("@attribute deferredValue and deferredMethod may not both be specified"));
 
-    if (_deferredValue || _deferredValueType != null) {
+    if (Boolean.TRUE.equals(_deferredValue) || _deferredValueType != null) {
       attr.setDeferredValue(new TldAttribute.DeferredValue());
 
       if (_deferredValueType != null)

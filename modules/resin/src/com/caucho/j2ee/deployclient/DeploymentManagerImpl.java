@@ -31,6 +31,7 @@ package com.caucho.j2ee.deployclient;
 import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.HostQuery;
 import com.caucho.server.admin.WebAppQuery;
+import com.caucho.server.admin.StatusQuery;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
 import com.caucho.xml.DOMBuilder;
@@ -195,6 +196,31 @@ public class DeploymentManagerImpl implements DeploymentManager {
                                    File deploymentPlan)
     throws IllegalStateException
   {
+    return distributeImpl(targetList, archive, null, deploymentPlan, null);
+  }
+
+  /**
+   * Deploys the object.
+   */
+  public ProgressObject distribute(Target []targetList,
+                                   InputStream archive,
+                                   InputStream deploymentPlan)
+    throws IllegalStateException
+  {
+    return distributeImpl(targetList, null, archive, null, deploymentPlan);
+  }
+
+
+  /**
+   * Deploys the object.
+   */
+  public ProgressObject distributeImpl(Target []targetList,
+				       File archive,
+				       InputStream archiveStream,
+				       File deploymentPlan,
+				       InputStream deploymentPlanStream)
+    throws IllegalStateException
+  {
     try {
       QDocument doc = new QDocument();
 
@@ -208,15 +234,22 @@ public class DeploymentManagerImpl implements DeploymentManager {
       xml.setContentHandler(builder);
       xml.setCoalescing(true);
 
-      xml.parse(Vfs.lookup(deploymentPlan.getAbsolutePath()));
+      if (deploymentPlan != null)
+	xml.parse(Vfs.lookup(deploymentPlan.getAbsolutePath()));
+      else
+	xml.parse(deploymentPlanStream);
 
       String type = XPath.evalString("/deployment-plan/archive-type", doc);
       String name = XPath.evalString("/deployment-plan/name", doc);
 
       String tag = type + "s/default/" + name;
 
-      _deployClient.deployJar(Vfs.lookup(archive.getAbsolutePath()),
-			      tag, _user, "", null, null);
+      if (archive != null)
+	_deployClient.deployJar(Vfs.lookup(archive.getAbsolutePath()),
+				tag, _user, "", null, null);
+      else
+	_deployClient.deployJar(archiveStream,
+				tag, _user, "", null, null);
 
       TargetModuleID []targetModules = new TargetModuleID[targetList.length];
 
@@ -229,7 +262,15 @@ public class DeploymentManagerImpl implements DeploymentManager {
 
       ProgressObjectImpl result = new ProgressObjectImpl(targetModules);
 
-      result.completed(L.l("application {0} deployed from {1}", name, archive));
+      StatusQuery status = _deployClient.status(tag);
+      System.out.println("STATUS: " + status);
+
+      if (status.getMessage() == null)
+	result.completed(L.l("application {0} deployed from {1}",
+			     name, archive));
+      else
+	result.failed(L.l("application {0} failed from {1}: {2}",
+			  name, archive, status.getMessage()));
 
       return result;
     }
@@ -242,18 +283,6 @@ public class DeploymentManagerImpl implements DeploymentManager {
       throw ex;
     }
   }
-
-  /**
-   * Deploys the object.
-   */
-  public ProgressObject distribute(Target []targetList,
-                                   InputStream archive,
-                                   InputStream deploymentPlan)
-    throws IllegalStateException
-  {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
 
   /**
    * Starts the modules.

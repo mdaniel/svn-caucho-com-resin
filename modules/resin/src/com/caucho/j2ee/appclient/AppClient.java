@@ -49,6 +49,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -345,6 +346,9 @@ public class AppClient implements EnvironmentBean
 
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, L.l("work-directory is {0}", WorkDir.getLocalWorkDir()));
+
+      WebBeansContainer webBeans = WebBeansContainer.create();
+      webBeans.addSingleton(new ResinVar(), "resin");
 
       _ejbContext = new InitialContext(_ejbEnv);
 

@@ -65,6 +65,15 @@ class WrapperPage extends Page {
       _childPage.init(path);
   }
 
+  public void caucho_init(ServletConfig config)
+    throws ServletException
+  {
+    if (_childPage != null)
+      _childPage.caucho_init(config);
+    else
+      _child.init(config);
+  }
+
   /**
    * Forward the initialization to the wrapped page.
    */

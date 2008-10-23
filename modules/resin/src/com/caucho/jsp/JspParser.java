@@ -521,6 +521,9 @@ public class JspParser {
 	      break;
 	    }
 
+	    // jsp/18cw
+	    _parseState.setAction(true);
+
 	    ch = readName(ch);
 	    String name = _tag.toString();
             int tagCode = getTag(name);

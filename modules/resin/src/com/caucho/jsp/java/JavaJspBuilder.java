@@ -260,6 +260,9 @@ public class JavaJspBuilder extends JspBuilder {
     }
 
     if (tagInfo == null) {
+      // jsp/18cw
+      _parseState.setAction(true);
+      
       JspXmlElement elt = new JspXmlElement();
       elt.setGenerator(_gen);
       elt.setParseState(_parseState);

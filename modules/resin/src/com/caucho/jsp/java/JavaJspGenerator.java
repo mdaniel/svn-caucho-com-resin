@@ -30,6 +30,7 @@
 package com.caucho.jsp.java;
 
 import com.caucho.config.types.Signature;
+import com.caucho.el.Expr;
 import com.caucho.java.CompileClassNotFound;
 import com.caucho.java.LineMap;
 import com.caucho.java.LineMapWriter;
@@ -1345,13 +1346,28 @@ public class JavaJspGenerator extends JspGenerator {
       throw new ELException(e);
     }
 
-    if (void.class.equals(retType) && expr.isLiteralText()) {
-      // jsp/18v3
-      throw error(L.l("deferredMethod with string literal '{0}' cannot return void '{1}'",
-		      value, sigString));
-    }
-
     MethodExpr methodExpr = new MethodExpr(value, expr, args, retType);
+    
+    if (expr.isLiteralText()) {
+      if (void.class.equals(retType)) {
+      // jsp/18v3
+	throw error(L.l("deferredMethod with string literal '{0}' cannot return void '{1}'",
+			value, sigString));
+      }
+
+      Object testValue = expr.getValue(null);
+
+      try {
+	System.out.println("COERCE: " + testValue + " " + retType);
+	System.out.println("V: " + Expr.coerceToType(testValue, retType));
+      } catch (Exception e) {
+	e.printStackTrace();
+	
+	// jsp/18v4 (tck)
+	throw error(L.l("string literal '{0}' can't return type '{1}'",
+			value, sigString));
+      }
+    }
 
     int index = _methodExprList.indexOf(methodExpr);
     if (index >= 0)
@@ -1824,7 +1840,7 @@ public class JavaJspGenerator extends JspGenerator {
       out.println("static boolean _jsp_isTagInit;");
 
     out.println();
-    out.println("public void init(ServletConfig config)");
+    out.println("public void caucho_init(ServletConfig config)");
     out.println("{");
     out.pushDepth();
 
@@ -1841,7 +1857,7 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("  = (com.caucho.server.webapp.WebApp) config.getServletContext();");
       
     if (! isTag()) {
-      out.println("super.init(config);");
+      out.println("init(config);");
 
       out.println("_jsp_pageManager = webApp.getJspApplicationContext().getPageManager();");
     }
@@ -1909,7 +1925,7 @@ public class JavaJspGenerator extends JspGenerator {
     }
 
     for (String tagClass : _tagFileClassList) {
-      out.println("new " + tagClass + "().init(config);");
+      out.println("new " + tagClass + "().caucho_init(config);");
     }
 
     out.popDepth();

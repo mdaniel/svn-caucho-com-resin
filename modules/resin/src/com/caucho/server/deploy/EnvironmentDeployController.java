@@ -152,6 +152,21 @@ abstract public class
   }
 
   /**
+   * Returns the error message
+   */
+  public String getErrorMessage()
+  {
+    Throwable exn = getConfigException();
+
+    if (exn instanceof ConfigException)
+      return exn.getMessage();
+    else if (exn != null)
+      return exn.toString();
+    else
+      return null;
+  }
+
+  /**
    * Returns the configure exception.
    */
   @Override

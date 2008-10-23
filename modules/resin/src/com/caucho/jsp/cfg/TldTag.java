@@ -52,6 +52,8 @@ public class TldTag implements DependencyBean {
   private final static L10N L = new L10N(TldTag.class);
   private final static Logger log
     = Logger.getLogger(TldTag.class.getName());
+
+  private TldTaglib _taglib;
   
   private String _name;
   private String _tagClassName;
@@ -79,6 +81,15 @@ public class TldTag implements DependencyBean {
     = new ArrayList<PersistentDependency>();
 
   private TldTag _baseTag;
+
+  TldTag(TldTaglib taglib)
+  {
+    _taglib = taglib;
+  }
+
+  public TldTag()
+  {
+  }
 
   /**
    * Sets the config location.
@@ -420,6 +431,15 @@ public class TldTag implements DependencyBean {
   public void addAttribute(TldAttribute attribute)
   {
     TagAttributeInfo attrInfo;
+
+    if (attribute.getDeferredValue() != null
+	&& _taglib != null
+	&& _taglib.getJspVersion() != null
+	&& _taglib.getJspVersion().compareTo("2.1") < 0) {
+      // jsp/18u9
+      throw new ConfigException(L.l("<deferred-value> for tag '{0}' requires a taglib with jsp-version 2.1 or later",
+				    getName()));
+    }
 
     Class type = attribute.getType();
     attrInfo = new TagAttributeInfo(attribute.getName(),

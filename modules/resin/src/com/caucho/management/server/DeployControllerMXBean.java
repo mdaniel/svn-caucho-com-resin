@@ -73,6 +73,12 @@ public interface DeployControllerMXBean extends ManagedObjectMXBean
   public String getState();
 
   /**
+   * Returns any error message
+   */
+  @Description("Any startup error message")
+  public String getErrorMessage();
+
+  /**
    * Returns the time the controller was last started.
    */
   @Description("The current time of the last start")

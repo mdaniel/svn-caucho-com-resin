@@ -31,21 +31,55 @@ package com.caucho.git;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.java.WorkDir;
 
 import java.io.*;
 import java.security.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.*;
 
 /**
  * Tree structure from a jar
  */
 public class GitCommitJar {
+  private static final Logger log
+    = Logger.getLogger(GitCommitJar.class.getName());
+  
   private GitCommitTree _commit = new GitCommitTree();
 
   private Path _jar;
 
+  private Path _tempJar;
+
   public GitCommitJar(Path jar)
+    throws IOException
+  {
+    init(jar);
+  }
+
+  public GitCommitJar(InputStream is)
+    throws IOException
+  {
+    Path dir = WorkDir.getLocalWorkDir();
+
+    Path path = dir.createTempFile("git", "tmp");
+
+    try {
+      WriteStream os = path.openWrite();
+      os.writeStream(is);
+      os.close();
+
+      init(path);
+
+      _tempJar = path;
+    } catch (IOException e) {
+      path.remove();
+    }
+  }
+
+  private void init(Path jar)
     throws IOException
   {
     _jar = jar;
@@ -55,6 +89,15 @@ public class GitCommitJar {
     fillLengthMap(lengthMap, jar);
 
     ReadStream is = jar.openRead();
+
+    fillCommit(lengthMap, is);
+
+    _commit.commit();
+  }
+
+  private void fillCommit(HashMap<String,Long> lengthMap, InputStream is)
+    throws IOException
+  {
     try {
       ZipInputStream zin = new ZipInputStream(is);
 
@@ -77,8 +120,6 @@ public class GitCommitJar {
     } finally {
       is.close();
     }
-
-    _commit.commit();
   }
 
   public String []getCommitList()
@@ -152,6 +193,17 @@ public class GitCommitJar {
 	}
       } finally {
 	file.close();
+      }
+    }
+  }
+
+  public void close()
+  {
+    if (_tempJar != null) {
+      try {
+	_tempJar.remove();
+      } catch (IOException e) {
+	log.log(Level.FINER, e.toString(), e);
       }
     }
   }

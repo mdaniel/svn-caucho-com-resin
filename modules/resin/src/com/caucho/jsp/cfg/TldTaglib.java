@@ -291,6 +291,14 @@ public class TldTaglib implements DependencyBean
   }
 
   /**
+   * Creates a new tag instance
+   */
+  public TldTag createTag()
+  {
+    return new TldTag(this);
+  }
+
+  /**
    * Adds a tag
    */
   public void addTag(TldTag tag)

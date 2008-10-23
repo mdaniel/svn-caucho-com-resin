@@ -1165,16 +1165,20 @@ public abstract class JspNode {
       value = "0";
 
     try {
+      String typeName = attrInfo != null ? attrInfo.getExpectedTypeName() : "";
+
+      boolean isValueDeferred
+	= (attrInfo != null && attrInfo.isDeferredValue()
+	   || typeName != null && ! "".equals(typeName));
+
+      boolean isMethodDeferred
+	= (attrInfo != null && attrInfo.isDeferredMethod());
+
       if (JspFragment.class.equals(type))
 	return generateFragmentParameter(value, rtexpr);
       else if (type.equals(ValueExpression.class)) {
         int exprIndex;
-
-	boolean isValueDeferred
-	  = attrInfo != null && attrInfo.getExpectedTypeName() != null;
 	
-	String typeName = attrInfo != null ? attrInfo.getExpectedTypeName() : "";
-
         if (isEmpty)
           exprIndex = _gen.addValueExpr("", typeName);
         else
@@ -1189,7 +1193,7 @@ public abstract class JspNode {
 	else if (! isValueDeferred
 		 && value.indexOf("#{") >= 0
 		 && value.indexOf("${") < 0) {
-	  throw error(L.l("ValueExpression '{0}' must no use deferred syntax '${...}'",
+	  throw error(L.l("ValueExpression '{0}' must not use deferred syntax '${...}'",
 			  value));
 	}
 
@@ -1230,6 +1234,12 @@ public abstract class JspNode {
 			  value));
       
         return ("_caucho_method_expr_" + exprIndex);
+      }
+      else if (value.indexOf("#{") >= 0
+	       && value.indexOf("${") < 0
+	       && rtexpr) {
+	throw error(L.l("deferred expression '{0}' is not allowed here",
+			value));
       }
       else if (com.caucho.el.Expr.class.equals(type)) {
         int exprIndex;
@@ -1364,9 +1374,9 @@ public abstract class JspNode {
       
       return ("_caucho_value_expr_" + exprIndex);
     }
-    else if (type.equals(Object.class) &&
-             value.contains("#{") &&
-             CustomTag.class.equals(getClass())) {
+    else if (type.equals(Object.class)
+	     && value.contains("#{")
+	     && CustomTag.class.equals(getClass())) {
       int exprIndex;
 
       exprIndex = _gen.addValueExpr(value, "");

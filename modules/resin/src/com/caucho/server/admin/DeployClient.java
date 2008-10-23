@@ -65,6 +65,38 @@ public class DeployClient
   {
     GitCommitJar commit = new GitCommitJar(jar);
 
+    try {
+      return deployJar(commit, tag, user, message, version, extraAttr);
+    } finally {
+      commit.close();
+    }
+  }
+
+  public String deployJar(InputStream jar,
+			  String tag,
+			  String user,
+			  String message,
+			  String version,
+			  HashMap<String,String> extraAttr)
+    throws IOException
+  {
+    GitCommitJar commit = new GitCommitJar(jar);
+
+    try {
+      return deployJar(commit, tag, user, message, version, extraAttr);
+    } finally {
+      commit.close();
+    }
+  }
+
+  public String deployJar(GitCommitJar commit,
+			  String tag,
+			  String user,
+			  String message,
+			  String version,
+			  HashMap<String,String> extraAttr)
+    throws IOException
+  {
     String []files = getCommitList(commit.getCommitList());
 
     for (String file : files) {
@@ -134,13 +166,23 @@ public class DeployClient
     }
   }
 
-  public String commit(String tag, String sha1, String user, String message,
-		       HashMap<String,String> attr)
+  public String commit(String tag,
+				   String sha1,
+				   String user,
+				   String message,
+				   HashMap<String,String> attr)
   {
     DeployCommitQuery query
       = new DeployCommitQuery(tag, sha1, user, message, attr);
 
     return (String) querySet(query);
+  }
+
+  public StatusQuery status(String tag)
+  {
+    StatusQuery query = new StatusQuery(tag);
+
+    return (StatusQuery) queryGet(query);
   }
 
   public HostQuery []listHosts()

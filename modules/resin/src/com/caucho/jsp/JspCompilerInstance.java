@@ -29,14 +29,18 @@
 
 package com.caucho.jsp;
 
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
 import com.caucho.java.JavaCompiler;
 import com.caucho.java.LineMap;
 import com.caucho.jsp.cfg.JspConfig;
 import com.caucho.jsp.cfg.JspPropertyGroup;
+import com.caucho.jsp.cfg.ImplicitTld;
 import com.caucho.jsp.java.JspTagSupport;
 import com.caucho.jsp.java.TagTaglib;
 import com.caucho.log.Log;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 import com.caucho.xml.Xml;
@@ -57,7 +61,10 @@ import java.util.logging.Logger;
  * Compilation interface for JSP pages.
  */
 public class JspCompilerInstance {
-  private static final Logger log = Log.open(JspCompilerInstance.class);
+  private static final L10N L = new L10N(JspCompilerInstance.class);
+  
+  private static final Logger log
+    = Logger.getLogger(JspCompilerInstance.class.getName());
 
   // The underlying compiler
   private JspCompiler _jspCompiler;
@@ -567,7 +574,7 @@ public class JspCompilerInstance {
     if (preloadTag != null)
       return preloadTag;
 
-    return generateTag(taglib );
+    return generateTag(taglib);
   }
 
   private TagInfo preloadTag(TagLibraryInfo taglib)
@@ -616,6 +623,20 @@ public class JspCompilerInstance {
 
       _parseState.setTag(true);
       _isXml = isXml;
+
+      Path implicitTld = _jspPath.lookup(_jspPath.getParent() + "/implicit.tld");
+
+      if (implicitTld.canRead()) {
+	Config config = new Config();
+	ImplicitTld tldTaglib = new ImplicitTld();
+
+	config.configure(tldTaglib, implicitTld);
+
+	if (tldTaglib.getJspVersion() != null
+	    && tldTaglib.getJspVersion().compareTo("2.0") < 0)
+	  throw new ConfigException(L.l("'{0}' must have a jsp-version 2.0 or greater",
+					implicitTld));
+      }
       
       if (isXml) {
 	_parseState.setELIgnoredDefault(false);

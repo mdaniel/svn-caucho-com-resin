@@ -109,6 +109,7 @@ public class PageContextWrapper extends PageContextImpl {
   /**
    * Returns the servlet response for the page.
    */
+  @Override
   public HttpServletRequest getCauchoRequest()
   {
     return _parent.getCauchoRequest();
@@ -183,10 +184,13 @@ public class PageContextWrapper extends PageContextImpl {
   /**
    * Returns the variable resolver
    */
+  // jsp/10c4
+  /*
   public javax.servlet.jsp.el.VariableResolver getVariableResolver()
   {
     return _parent.getVariableResolver();
   }
+  */
 
   /**
    * Returns the current out.

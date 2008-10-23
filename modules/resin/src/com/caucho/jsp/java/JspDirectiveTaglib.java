@@ -63,7 +63,7 @@ public class JspDirectiveTaglib extends JspNode {
     else if (TAGDIR.equals(name))
       _tagDir = value;
     else {
-      throw error(L.l("`{0}' is an unknown JSP taglib directive attributes.  See the JSP documentation for a complete list of page directive attributes.",
+      throw error(L.l("'{0}' is an unknown JSP taglib directive attributes.  See the JSP documentation for a complete list of page directive attributes.",
                       name.getName()));
     }
   }
@@ -75,15 +75,15 @@ public class JspDirectiveTaglib extends JspNode {
     throws JspParseException
   {
     if (_prefix == null)
-      throw error(L.l("<{0}> needs a `prefix' attribute.",
+      throw error(L.l("<{0}> needs a 'prefix' attribute.",
                       getTagName()));
     
     if (_uri == null && _tagDir == null)
-      throw error(L.l("<{0}> needs a `uri' or `tagdir' attribute.",
+      throw error(L.l("<{0}> needs a 'uri' or 'tagdir' attribute.",
                       getTagName()));
     
     if (_uri != null && _tagDir != null)
-      throw error(L.l("<{0}> can't have both a `uri' an a `tagdir' attribute.",
+      throw error(L.l("<{0}> can't have both a 'uri' an a 'tagdir' attribute.",
                       getTagName()));
 
     if (_uri != null) {
@@ -94,6 +94,10 @@ public class JspDirectiveTaglib extends JspNode {
       _gen.addTaglibDir(_prefix, _tagDir);
       addNamespace(_prefix, "urn:jsptld:" + _tagDir);
     }
+
+    if (_gen.getParseState().isAction())
+      throw error(L.l("<{0}> cannot occur after a tag action.  Taglib directives must appear before any tags.",
+		      getTagName()));
   }
   
   /**

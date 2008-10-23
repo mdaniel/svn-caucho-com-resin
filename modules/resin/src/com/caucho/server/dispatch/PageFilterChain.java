@@ -241,7 +241,7 @@ public class PageFilterChain implements FilterChain
 	  ServletConfigImpl config = new ServletConfigImpl();
 	  config.setServletContext(_application);
 	  config.setServletName(req.getServletPath());
-	  newPage.init(config);
+	  newPage.caucho_init(config);
 	}
       }
 

@@ -677,7 +677,7 @@ public class WebAppController
     public String getName()
     {
       if (getWarName() != null)
-        return getWarName();
+        return "/" + getWarName();
       else
         return getId();
     }

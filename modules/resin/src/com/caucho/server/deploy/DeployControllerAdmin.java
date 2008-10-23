@@ -113,6 +113,11 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     return getController().getState();
   }
 
+  public String getErrorMessage()
+  {
+    return getController().getErrorMessage();
+  }
+
   public Date getStartTime()
   {
     return new Date(getController().getStartTime());

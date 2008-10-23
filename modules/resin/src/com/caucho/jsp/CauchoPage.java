@@ -33,9 +33,13 @@ import com.caucho.server.webapp.WebApp;
 import com.caucho.vfs.Path;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletConfig;
 
 public interface CauchoPage {
   public void init(Path path)
+    throws ServletException;
+  
+  public void caucho_init(ServletConfig cxt)
     throws ServletException;
     
   public WebApp _caucho_getApplication();

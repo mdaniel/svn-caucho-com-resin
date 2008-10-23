@@ -533,7 +533,10 @@ public class PageContextImpl extends PageContext
     if ((value = getAttribute(name)) != null)
       return value;
 
-    if ((value = getCauchoRequest().getAttribute(name)) != null)
+    HttpServletRequest req = getCauchoRequest();
+
+    if (req != null &&
+	(value = getCauchoRequest().getAttribute(name)) != null)
       return value;
 
     HttpSession session = getSession();
@@ -846,8 +849,12 @@ public class PageContextImpl extends PageContext
 
   public HttpSession getSession()
   {
-    if (_session == null)
-      _session = getCauchoRequest().getSession(false);
+    if (_session == null) {
+      HttpServletRequest req = getCauchoRequest();
+
+      if (req != null)
+	_session = req.getSession(false);
+    }
     
     return _session;
   }
@@ -2027,6 +2034,11 @@ public class PageContextImpl extends PageContext
     {
       return _variableMapper;
     }
+
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + PageContextImpl.this + "]";
+    }
   }
 
   public class PageFunctionMapper extends javax.el.FunctionMapper {
@@ -2055,8 +2067,15 @@ public class PageContextImpl extends PageContext
         if (expr != null)
           return expr;
       }
+
+      Object value = PageContextImpl.this.resolveVariable(var);
+
+      if (value instanceof ValueExpression)
+	return (ValueExpression) value;
       
-      ValueExpression expr = super.resolveVariable(var);
+      ValueExpression expr;
+
+      expr = super.resolveVariable(var);
 
       return expr;
     }
@@ -2073,6 +2092,11 @@ public class PageContextImpl extends PageContext
       _map.put(var, expr);
       
       return expr;
+    }
+
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + PageContextImpl.this + "]";
     }
   }
 }

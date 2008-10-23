@@ -93,6 +93,12 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   {
   }
 
+  public void caucho_init(ServletConfig config)
+    throws ServletException
+  {
+    init(config);
+  }
+
   void _caucho_setContentType(String contentType)
   {
     _contentType = contentType;

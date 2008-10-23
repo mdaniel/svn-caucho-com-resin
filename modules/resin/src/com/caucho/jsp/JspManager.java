@@ -401,7 +401,7 @@ public class JspManager extends PageManager {
     if (config == null)
       config = new JspServletConfig(_webApp, null, servletName);
 
-    page.init(config);
+    page.caucho_init(config);
     
     return page;
   }
