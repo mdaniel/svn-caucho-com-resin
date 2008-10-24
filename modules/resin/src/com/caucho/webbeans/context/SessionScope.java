@@ -32,21 +32,48 @@ package com.caucho.webbeans.context;
 import com.caucho.server.dispatch.ServletInvocation;
 import com.caucho.webbeans.component.*;
 
+import java.lang.annotation.Annotation;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
 
 /**
  * The session scope value
  */
 public class SessionScope extends ScopeContext {
-  public <T> T get(ComponentFactory<T> component, boolean create)
+  
+  /**
+   * Returns true if the scope is currently active.
+   */
+  public boolean isActive()
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
     if (request != null) {
       HttpSession session = ((HttpServletRequest) request).getSession();
-      ComponentImpl comp = (ComponentImpl) component;
+
+      return session != null;
+    }
+
+    return false;
+  }
+  
+  /**
+   * Returns the scope annotation type.
+   */
+  public Class<? extends Annotation> getScopeType()
+  {
+    return SessionScoped.class;
+  }
+  
+  public <T> T get(Bean<T> bean, boolean create)
+  {
+    ServletRequest request = ServletInvocation.getContextRequest();
+
+    if (request != null) {
+      HttpSession session = ((HttpServletRequest) request).getSession();
+      ComponentImpl comp = (ComponentImpl) bean;
       
       return (T) session.getAttribute(comp.getScopeId());
     }
@@ -54,25 +81,25 @@ public class SessionScope extends ScopeContext {
       return null;
   }
   
-  public <T> void put(ComponentFactory<T> component, T value)
+  public <T> void put(Bean<T> bean, T value)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
     if (request != null) {
       HttpSession session = ((HttpServletRequest) request).getSession();
-      ComponentImpl comp = (ComponentImpl) component;
+      ComponentImpl comp = (ComponentImpl) bean;
       
       session.setAttribute(comp.getScopeId(), value);
     }
   }
   
-  public <T> void remove(ComponentFactory<T> component)
+  public <T> void remove(Bean<T> bean)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
     if (request != null) {
       HttpSession session = ((HttpServletRequest) request).getSession();
-      ComponentImpl comp = (ComponentImpl) component;
+      ComponentImpl comp = (ComponentImpl) bean;
       
       session.removeAttribute(comp.getScopeId());
     }

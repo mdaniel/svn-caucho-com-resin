@@ -37,25 +37,27 @@ import java.util.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
 
 /**
  * The singleton scope value
  */
 public class ScopeMap<T> {
-  private transient final HashMap _map = new HashMap();
+  private transient final HashMap<Bean<T>,T> _map
+    = new HashMap<Bean<T>,T>(8);
   
-  public <T> T get(ComponentFactory<T> component)
+  public T get(Bean<T> bean)
   {
-    return (T) _map.get(component);
+    return _map.get(bean);
   }
   
-  public <T> void put(ComponentFactory<T> component, T value)
+  public void put(Bean<T> bean, T value)
   {
-    _map.put(component, value);
+    _map.put(bean, value);
   }
   
-  public <T> void remove(ComponentFactory<T> component)
+  public void remove(Bean<T> bean)
   {
-    _map.remove(component);
+    _map.remove(bean);
   }
 }

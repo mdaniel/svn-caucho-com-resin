@@ -1814,7 +1814,7 @@ public class WebApp extends ServletContextImpl
 
       try {
 	ServletAuthenticator auth
-	  = webBeans.getByType(ServletAuthenticator.class);;
+	  = webBeans.getInstanceByType(ServletAuthenticator.class);
 
 	setAttribute("caucho.authenticator", auth);
       } catch (Exception e) {

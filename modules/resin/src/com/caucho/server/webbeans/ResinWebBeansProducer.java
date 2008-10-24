@@ -42,6 +42,7 @@ import javax.ejb.*;
 import javax.management.*;
 import javax.transaction.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Manager;
 
 /**
  * Resin WebBeans producer for the main singletons.
@@ -56,7 +57,7 @@ public class ResinWebBeansProducer
    */
   @Produces
   @Standard
-  public Container getContainer()
+  public Manager getManager()
   {
     return WebBeansContainer.create();
   }

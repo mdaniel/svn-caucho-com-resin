@@ -32,24 +32,51 @@ package com.caucho.webbeans.context;
 import com.caucho.server.dispatch.ServletInvocation;
 import com.caucho.webbeans.component.ComponentImpl;
 
+import java.lang.annotation.Annotation;
 import javax.servlet.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
 
 /**
  * Configuration for the xml web bean component.
  */
-public class RequestScope extends ScopeContext {
-  public <T> T get(ComponentFactory<T> component, boolean create)
+public class RequestScope extends ScopeContext
+{
+  /**
+   * Returns true if the scope is currently active.
+   */
+  public boolean isActive()
+  {
+    ServletRequest request = ServletInvocation.getContextRequest();
+
+    return request != null;
+  }
+  
+  /**
+   * Returns the scope annotation type.
+   */
+  public Class<? extends Annotation> getScopeType()
+  {
+    return RequestScoped.class;
+  }
+
+  /**
+   * Returns the value in the request scope
+   *
+   * @param bean the component to retrieve
+   * @param create if true, create a new instance if it doesn't already exist
+   */
+  public <T> T get(Bean<T> bean, boolean create)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
     if (request != null) {
-      ComponentImpl comp = (ComponentImpl) component;
+      ComponentImpl comp = (ComponentImpl) bean;
 
       Object value = request.getAttribute(comp.getScopeId());
 
       if (value == null && create) {
-	value = component.create();
+	value = bean.create();
 	
 	request.setAttribute(comp.getScopeId(), value);
       }
@@ -60,12 +87,12 @@ public class RequestScope extends ScopeContext {
       return null;
   }
   
-  public <T> void put(ComponentFactory<T> component, T value)
+  public <T> void put(Bean<T> bean, T value)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
     if (request != null) {
-      ComponentImpl comp = (ComponentImpl) component;
+      ComponentImpl comp = (ComponentImpl) bean;
       
       request.setAttribute(comp.getScopeId(), value);
     }

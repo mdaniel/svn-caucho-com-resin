@@ -599,17 +599,13 @@ public class EjbMessageBean extends EjbBean {
 
       WebBeansContainer webBeans = WebBeansContainer.create();
 
-      ComponentFactory raFactory = webBeans.resolveByType(raClass);
+      ResourceAdapter ra
+	= (ResourceAdapter) webBeans.getInstanceByType(raClass);
 
-      if (raFactory == null) {
+      if (ra == null) {
 	throw error(L.l("resource-adapter '{0}' must be configured in a <connector> tag.",
 			raClass.getName()));
       }
-
-      ResourceAdapter ra = (ResourceAdapter) raFactory.get();
-
-      if (ra == null)
-	throw new NullPointerException();
 
     return deployMessageServer(ejbManager, javaGen, ra, _activationSpec);
   }

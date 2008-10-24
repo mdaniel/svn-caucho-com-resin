@@ -33,6 +33,7 @@ import com.caucho.util.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.server.dispatch.ServletInvocation;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 import javax.faces.*;
@@ -41,6 +42,7 @@ import javax.faces.component.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
 
 /**
  * The conversation scope value
@@ -53,11 +55,29 @@ public class ConversationScope extends ScopeContext
   public ConversationScope()
   {
   }
+  
+  /**
+   * Returns true if the scope is currently active.
+   */
+  public boolean isActive()
+  {
+    FacesContext facesContext = FacesContext.getCurrentInstance();
+
+    return facesContext != null;
+  }
+  
+  /**
+   * Returns the scope annotation type.
+   */
+  public Class<? extends Annotation> getScopeType()
+  {
+    return ConversationScoped.class;
+  }
 
   /**
    * Returns the current value of the component in the conversation scope.
    */
-  public <T> T get(ComponentFactory<T> component, boolean create)
+  public <T> T get(Bean<T> bean, boolean create)
   {
     FacesContext facesContext = FacesContext.getCurrentInstance();
 
@@ -86,7 +106,7 @@ public class ConversationScope extends ScopeContext
     }
 
     if (map != null)
-      return (T) map.get(((ComponentImpl) component).getScopeId());
+      return (T) map.get(((ComponentImpl) bean).getScopeId());
     else
       return null;
   }
@@ -94,7 +114,7 @@ public class ConversationScope extends ScopeContext
   /**
    * Sets the current value of the component in the conversation scope.
    */
-  public <T> void put(ComponentFactory<T> component, T value)
+  public <T> void put(Bean<T> bean, T value)
   {
     FacesContext facesContext = FacesContext.getCurrentInstance();
 
@@ -125,13 +145,13 @@ public class ConversationScope extends ScopeContext
       scope._conversationMap.put(id, map);
     }
     
-    map.put(((ComponentImpl) component).getScopeId(), value);
+    map.put(((ComponentImpl) bean).getScopeId(), value);
   }
   
   /**
    * Removes the current value of the component in the conversation scope.
    */
-  public <T> void remove(ComponentFactory<T> component)
+  public <T> void remove(Bean<T> bean)
   {
     FacesContext facesContext = FacesContext.getCurrentInstance();
 
@@ -152,7 +172,7 @@ public class ConversationScope extends ScopeContext
     HashMap map = scope._conversationMap.get(id);
 
     if (map != null)
-      map.remove(((ComponentImpl) component).getScopeId());
+      map.remove(((ComponentImpl) bean).getScopeId());
   }
 
   /**

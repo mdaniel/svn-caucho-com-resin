@@ -52,12 +52,19 @@ import java.lang.reflect.*;
 
 import javax.el.*;
 import javax.webbeans.*;
+import javax.webbeans.Observer;
+import javax.webbeans.manager.Bean;
+import javax.webbeans.manager.Context;
+import javax.webbeans.manager.Decorator;
+import javax.webbeans.manager.Interceptor;
+import javax.webbeans.manager.InterceptionType;
+import javax.webbeans.manager.Manager;
 
 /**
  * The web beans container for a given environment.
  */
 public class WebBeansContainer
-  implements ScanListener, EnvironmentListener, Container,
+  implements Manager, ScanListener, EnvironmentListener,
 	     java.io.Serializable
 {
   private static final L10N L = new L10N(WebBeansContainer.class);
@@ -102,8 +109,8 @@ public class WebBeansContainer
   private HashMap<Class,ClassComponent> _transientMap
     = new HashMap<Class,ClassComponent>();
 
-  private HashMap<FactoryBinding,ComponentFactory> _objectFactoryMap
-    = new HashMap<FactoryBinding,ComponentFactory>();
+  private HashMap<FactoryBinding,Bean> _objectFactoryMap
+    = new HashMap<FactoryBinding,Bean>();
 
   private ArrayList<WebBeansRootContext> _pendingRootContextList
     = new ArrayList<WebBeansRootContext>();
@@ -273,9 +280,9 @@ public class WebBeansContainer
     addComponentRec(type, comp);
   }
 
-  public ArrayList<ComponentFactory> getBeansOfType(Type type)
+  public ArrayList<Bean> getBeansOfType(Type type)
   {
-    ArrayList<ComponentFactory> beans = new ArrayList<ComponentFactory>();
+    ArrayList<Bean> beans = new ArrayList<Bean>();
     
     WebComponent webComponent = _componentMap.get(type);
 
@@ -702,33 +709,10 @@ public class WebBeansContainer
   /**
    * Returns the component which matches the apiType and binding types
    */
-  public <T> ComponentFactory<T> resolveByType(Class<T> apiType,
-					       Annotation...bindingTypes)
+  public <T> Bean<T> resolveByTypeOld(Class<T> apiType,
+						  Annotation...bindingTypes)
   {
     return bind("", apiType, bindingTypes);
-  }
-
-  /**
-   * Returns the component which matches the apiType and binding types
-   */
-  public <T> T getByType(Class<T> apiType, Annotation...bindingTypes)
-  {
-    ComponentFactory<T> factory =  bind("", apiType, bindingTypes);
-
-    if (factory != null)
-      return factory.get();
-    else
-      return null;
-  }
-  
-  public void addContext(Class<Annotation> scopeType, Context context)
-  {
-    _contextMap.put(scopeType, context);
-  }
-  
-  public Context getContext(Class<Annotation> scopeType)
-  {
-    return _contextMap.get(scopeType);
   }
 
   /**
@@ -785,7 +769,7 @@ public class WebBeansContainer
    */
   public <T> T createTransientObject(Class<T> type)
   {
-    ComponentFactory<T> factory = createTransient(type);
+    Bean<T> factory = createTransient(type);
 
     return factory.create();
   }
@@ -802,10 +786,10 @@ public class WebBeansContainer
   }
 
   /**
-   * Returns a ComponentFactory for a class, but does not register the
+   * Returns a Bean for a class, but does not register the
    * component with webbeans.
    */
-  public <T> ComponentFactory<T> createTransient(Class<T> type)
+  public <T> Bean<T> createTransient(Class<T> type)
   {
     synchronized (_transientMap) {
       ClassComponent comp = _transientMap.get(type);
@@ -896,25 +880,25 @@ public class WebBeansContainer
    * Returns a new instance for a class, but does not register the
    * component with webbeans.
    */
-  public ComponentFactory createFactory(Class type, Annotation ... ann)
+  public <T> ComponentImpl<T> createFactory(Class<T> type, Annotation ... ann)
   {
     FactoryBinding binding = new FactoryBinding(type, ann);
     
     synchronized (_objectFactoryMap) {
-      ComponentFactory factory = _objectFactoryMap.get(binding);
+      Bean<T> factory = _objectFactoryMap.get(binding);
 
       if (factory != null)
-	return factory;
+	return (ComponentImpl<T>) factory;
 
       if (ann == null)
 	ann = NULL_ANN;
       
-      factory = resolveByType(type, ann);
+      factory = resolveByTypeOld(type, ann);
 
       if (factory != null) {
 	_objectFactoryMap.put(binding, factory);
 
-	return factory;
+	return (ComponentImpl<T>) factory;
       }
       
       if (type.isInterface())
@@ -940,6 +924,266 @@ public class WebBeansContainer
 
       return comp;
     }
+  }
+
+  //
+  // javax.webbeans.Manager API
+  //
+  
+  //
+  // bean resolution and instantiation
+  //
+
+  /**
+   * Adds a new bean definition to the manager
+   */
+  public Manager addBean(Bean<?> bean)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the bean definitions matching a given name
+   *
+   * @param name the name of the bean to match
+   */
+  public Set<Bean<?>> resolveByName(String name)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the beans matching a class and annotation set
+   *
+   * @param type the bean's class
+   * @param bindings required @BindingType annotations
+   */
+  public <T> Set<Bean<T>> resolveByType(Class<T> type,
+					Annotation... bindings)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the beans matching a generic type and annotation set
+   *
+   * @param type the bean's primary type
+   * @param bindings required @BindingType annotations
+   */
+  public <T> Set<Bean<T>> resolveByType(TypeLiteral<T> type,
+					Annotation... bindings)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns an instance for the given bean.  This method will obey
+   * the scope of the bean, so a singleton will return the single bean.
+   *
+   * @param bean the metadata for the bean
+   *
+   * @return an instance of the bean obeying scope
+   */
+  public <T> T getInstance(Bean<T> bean)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns an instance of bean matching a given name
+   *
+   * @param name the name of the bean to match
+   */
+  public Object getInstanceByName(String name)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Creates an instance for the given type.  This method will obey
+   * the scope of the bean, so a singleton will return the single bean.
+   *
+   * @param type the bean's class
+   * @param bindings required @BindingType annotations
+   */
+  public <T> T getInstanceByType(Class<T> type,
+				 Annotation... bindings)
+  {
+    ComponentImpl<T> factory = bind("", type, bindings);
+
+    if (factory != null)
+      return (T) factory.get();
+    else
+      return null;
+  }
+
+  /**
+   * Creates an instance for the given type.  This method will obey
+   * the scope of the bean, so a singleton will return the single bean.
+   *
+   * @param type the bean's primary type
+   * @param bindings required @BindingType annotations
+   */
+  public <T> T getInstanceByType(TypeLiteral<T> type,
+				 Annotation... bindings)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  //
+  // scopes
+  //
+
+  /**
+   * Adds a new scope context
+   */
+  public void addContext(Context context)
+  {
+    _contextMap.put(context.getScopeType(), context);
+  }
+
+  /**
+   * Returns the scope context for the given type
+   */
+  public Context getContext(Class<Annotation> scopeType)
+  {
+    return _contextMap.get(scopeType);
+  }
+
+  //
+  // event management
+  //
+
+  /**
+   * Fires an event
+   *
+   * @param event the event to fire
+   * @param bindings the event bindings
+   */
+  public void fireEvent(Object event,
+			Annotation... bindings)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Registers an event observer
+   *
+   * @param observer the observer object
+   * @param eventType the type of event to listen for
+   * @param bindings the binding set for the event
+   */
+  public <T> void addObserver(Observer<T> observer,
+			      Class<T> eventType,
+			      Annotation... bindings)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Registers an event observer
+   *
+   * @param observer the observer object
+   * @param eventType the type of event to listen for
+   * @param bindings the binding set for the event
+   */
+  public <T> void addObserver(Observer<T> observer,
+			      TypeLiteral<T> eventType,
+			      Annotation... bindings)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Removes an event observer
+   *
+   * @param observer the observer object
+   * @param eventType the type of event to listen for
+   * @param bindings the binding set for the event
+   */
+  public <T> void removeObserver(Observer<T> observer,
+				 Class<T> eventType,
+				 Annotation... bindings)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Removes an event observer
+   *
+   * @param observer the observer object
+   * @param eventType the type of event to listen for
+   * @param bindings the binding set for the event
+   */
+  public <T> void removeObserver(Observer<T> observer,
+				 TypeLiteral<T> eventType,
+				 Annotation... bindings)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the observers listening for an event
+   *
+   * @param eventType event to resolve
+   * @param bindings the binding set for the event
+   */
+  public <T> Set<Observer<T>> resolveObservers(T event,
+					       Annotation... bindings)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  //
+  // interceptor support
+  //
+
+  /**
+   * Adds a new interceptor
+   */
+  public Manager addInterceptor(Interceptor interceptor)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Resolves the interceptors for a given interceptor type
+   *
+   * @param type the main interception type
+   * @param bindings qualifying bindings
+   *
+   * @return the matching interceptors
+   */
+  public List<Interceptor> resolveInterceptors(InterceptionType type,
+					       Annotation... bindings)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  //
+  // decorator
+  //
+
+  /**
+   * Adds a new decorator
+   */
+  public Manager addDecorator(Decorator decorator)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Resolves the decorators for a given set of types
+   *
+   * @param types the types to match for the decorator
+   * @param bindings qualifying bindings
+   *
+   * @return the matching interceptors
+   */
+  public List<Decorator> resolveDecorators(Set<Class<?>> types,
+					   Annotation... bindings)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   //
@@ -1212,7 +1456,7 @@ public class WebBeansContainer
    */
   public Object writeReplace()
   {
-    return new WebBeansHandle(Container.class);
+    return new WebBeansHandle(Manager.class);
   }
 
   public String toString()

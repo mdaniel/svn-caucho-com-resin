@@ -29,7 +29,11 @@
 
 package com.caucho.webbeans.context;
 
+import java.lang.annotation.Annotation;
+
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
+import javax.webbeans.manager.Context;
 
 import com.caucho.webbeans.component.*;
 
@@ -37,10 +41,32 @@ import com.caucho.webbeans.component.*;
  * Context for a named EL bean scope
  */
 abstract public class ScopeContext implements Context {
-  abstract public <T> T get(ComponentFactory<T> comp, boolean create);
+  /**
+   * Returns true if the scope is currently active.
+   */
+  public boolean isActive()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
   
-  abstract public <T> void put(ComponentFactory<T> comp, T value);
+  /**
+   * Returns the scope annotation type.
+   */
+  abstract public Class<? extends Annotation> getScopeType();
 
+  /**
+   * Returns a instance of a bean, creating if necessary
+   */
+  abstract public <T> T get(Bean<T> bean, boolean create);
+
+  /**
+   * Returns a instance of a bean, creating if necessary
+   */
+  public <T> void put(Bean<T> bean, T value)
+  {
+    // XXX: needs to be removed?
+  }
+  
   /**
    * Returns true if a value in the target scope can be safely be injected
    * into this scope

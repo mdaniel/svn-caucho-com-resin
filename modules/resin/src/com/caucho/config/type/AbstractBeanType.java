@@ -111,17 +111,17 @@ public class AbstractBeanType extends BeanType
 
     WebBeansContainer webBeans = WebBeansContainer.create();
 
-    ComponentFactory factory;
+    Object value;
 
     if (! text.equals(""))
-      factory = webBeans.resolveByType(_type, Names.create(text));
+      value = webBeans.getInstanceByType(_type, Names.create(text));
     else
-      factory = webBeans.resolveByType(_type);
+      value = webBeans.getInstanceByType(_type);
 
-    if (factory != null)
-      return factory.get();
+    if (value != null)
+      return value;
 
-    Object value = Jndi.lookup(text);
+    value = Jndi.lookup(text);
 
     if (value != null)
       return value;

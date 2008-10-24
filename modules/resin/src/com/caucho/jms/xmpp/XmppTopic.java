@@ -72,14 +72,9 @@ public class XmppTopic extends AbstractTopic
   {
     super.init();
 
-    WebBeansContainer container = WebBeansContainer.create();
-
-    ComponentFactory comp = container.resolveByType(XmppProtocol.class);
-
-    if (comp == null)
-      throw new java.lang.IllegalStateException(L.l("Need xmpp protocol"));
+    WebBeansContainer webBeans = WebBeansContainer.create();
     
-    XmppProtocol xmpp = (XmppProtocol) comp.get();
+    XmppProtocol xmpp = webBeans.getInstanceByType(XmppProtocol.class);
 
     if (xmpp == null)
       throw new java.lang.IllegalStateException(L.l("Need xmpp protocol"));

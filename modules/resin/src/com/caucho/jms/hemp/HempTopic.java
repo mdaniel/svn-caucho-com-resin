@@ -98,17 +98,12 @@ public class HempTopic extends AbstractTopic
     super.init();
 
     if (_broker == null) {
-      WebBeansContainer container = WebBeansContainer.create();
-
-      ComponentFactory comp = container.resolveByType(BamBroker.class);
-
-      if (comp == null)
-	throw new ConfigException(L.l("hmpp protocol needs broker"));
+      WebBeansContainer webBeans = WebBeansContainer.create();
     
-      _broker = (BamBroker) comp.get();
+      _broker = webBeans.getInstanceByType(BamBroker.class);
 
       if (_broker == null)
-	throw new ConfigException(L.l("Need xmpp protocol"));
+	throw new ConfigException(L.l("hmpp protocol needs a BamBroker"));
 
       _brokerStream = _broker.getBrokerStream();
     }

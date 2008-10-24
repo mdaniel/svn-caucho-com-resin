@@ -132,14 +132,12 @@ public class ScheduledTask extends BeanConfig
     
     _url = url;
 
-    ComponentFactory comp
-      = WebBeansContainer.create().resolveByType(WebApp.class);
+    _webApp
+      = WebBeansContainer.create().getInstanceByType(WebApp.class);
 
-    if (comp == null)
+    if (_webApp == null)
       throw new ConfigException(L.l("relative url '{0}' requires web-app context",
 				    url));
-
-    _webApp = (WebApp) comp.get();
   }
 
   /**

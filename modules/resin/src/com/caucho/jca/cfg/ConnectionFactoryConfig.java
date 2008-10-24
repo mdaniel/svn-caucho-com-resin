@@ -202,19 +202,16 @@ public class ConnectionFactoryConfig extends BeanConfig {
     }
       
     WebBeansContainer webBeans = WebBeansContainer.create();
-    
-    ComponentFactory<ResourceAdapterController> raComp
-      = webBeans.resolveByType(ResourceAdapterController.class,
-			       Names.create(ra.getResourceAdapterClass().getName()));
 
-    if (raComp == null) {
+    ResourceAdapterController raController
+      = webBeans.getInstanceByType(ResourceAdapterController.class,
+				   Names.create(ra.getResourceAdapterClass().getName()));
+    
+    if (raController == null) {
       throw new ConfigException(L.l("'{0}' does not have a configured resource-adapter for '{1}'.",
 				    ra.getResourceAdapterClass().getName(),
 				    cl.getName()));
     }
-
-    ResourceAdapterController raController
-      = (ResourceAdapterController) raComp.get();
 
     return raController.getResourceAdapter();
   }

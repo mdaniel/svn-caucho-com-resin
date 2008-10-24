@@ -104,7 +104,7 @@ public class WebBeansHandle implements Serializable, HessianHandle {
       }
       
       WebBeansContainer webBeans = WebBeansContainer.create();
-      ComponentFactory comp = webBeans.bindByBindings("", _type, bindingList);
+      ComponentImpl comp = webBeans.bindByBindings("", _type, bindingList);
 
       if (comp != null)
 	return comp.get();

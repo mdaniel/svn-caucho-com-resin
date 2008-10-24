@@ -64,17 +64,16 @@ public class ResourceAdapterAssociationProgram extends ConfigProgram {
 
     WebBeansContainer webBeans = WebBeansContainer.create();
     
-    ComponentFactory<ResourceAdapterController> comp
-      = webBeans.resolveByType(ResourceAdapterController.class,
-			       Names.create(ra.getResourceAdapterClass().getName()));
-
-    if (comp == null) {
+    _raController
+      = webBeans.getInstanceByType(ResourceAdapterController.class,
+				   Names.create(ra.getResourceAdapterClass().getName()));
+    
+    if (_raController == null) {
       throw new ConfigException(L.l("'{0}' does not have a configured resource-adapter for '{1}'.",
 				    ra.getResourceAdapterClass().getName(),
 				    cl.getName()));
     }
 
-    _raController = (ResourceAdapterController) comp.get();
   }
   
   /**

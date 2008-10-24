@@ -33,20 +33,40 @@ import com.caucho.loader.*;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.webbeans.component.*;
 
+import java.lang.annotation.Annotation;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
 
 /**
  * The application scope value
  */
 public class ApplicationScope extends ScopeContext {
-  public <T> T get(ComponentFactory<T> component, boolean create)
+  /**
+   * Returns true if the scope is currently active.
+   */
+  public boolean isActive()
+  {
+    WebApp webApp = WebApp.getLocal();
+
+    return webApp != null;
+  }
+  
+  /**
+   * Returns the scope annotation type.
+   */
+  public Class<? extends Annotation> getScopeType()
+  {
+    return ApplicationScoped.class;
+  }
+  
+  public <T> T get(Bean<T> bean, boolean create)
   {
     WebApp webApp = WebApp.getLocal();
 
     if (webApp != null) {
-      ComponentImpl comp = (ComponentImpl) component;
+      ComponentImpl comp = (ComponentImpl) bean;
       
       return (T) webApp.getAttribute(comp.getScopeId());
     }
@@ -54,23 +74,23 @@ public class ApplicationScope extends ScopeContext {
       return null;
   }
   
-  public <T> void put(ComponentFactory<T> component, T value)
+  public <T> void put(Bean<T> bean, T value)
   {
     WebApp webApp = WebApp.getLocal();
 
     if (webApp != null) {
-      ComponentImpl comp = (ComponentImpl) component;
+      ComponentImpl comp = (ComponentImpl) bean;
       
       webApp.setAttribute(comp.getScopeId(), value);
     }
   }
   
-  public <T> void remove(ComponentFactory<T> component)
+  public <T> void remove(Bean<T> bean)
   {
     WebApp webApp = WebApp.getLocal();
 
     if (webApp != null) {
-      ComponentImpl comp = (ComponentImpl) component;
+      ComponentImpl comp = (ComponentImpl) bean;
       
       webApp.removeAttribute(comp.getScopeId());
     }

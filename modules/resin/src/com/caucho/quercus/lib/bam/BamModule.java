@@ -101,7 +101,7 @@ public class BamModule extends AbstractQuercusModule
     // create a connection lazily
     if (connection == null) {
       HempBroker broker = 
-        WebBeansContainer.getCurrent().getByType(HempBroker.class);
+        WebBeansContainer.getCurrent().getInstanceByType(HempBroker.class);
 
       String jid = "php@" + env.getGlobalVar("_SERVER").get(SERVER_NAME);
       String resource = env.getGlobalVar("_SERVER").get(PHP_SELF).toString();

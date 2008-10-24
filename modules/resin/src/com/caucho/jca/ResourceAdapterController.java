@@ -37,6 +37,7 @@ import com.caucho.webbeans.component.*;
 import java.util.logging.Logger;
 import javax.resource.spi.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
 
 /**
  * Controller for a resource-adapter
@@ -47,13 +48,13 @@ public class ResourceAdapterController implements EnvironmentListener
   private static final Logger log
     = Logger.getLogger(ResourceAdapterController.class.getName());
 
-  private final ComponentFactory<ResourceAdapter> _comp;
+  private final ComponentImpl<ResourceAdapter> _comp;
   private final ResourceArchive _raConfig;
 
   private Lifecycle _lifecycle = new Lifecycle();
   private ResourceAdapter _ra;
 
-  public ResourceAdapterController(ComponentFactory<ResourceAdapter> comp,
+  public ResourceAdapterController(ComponentImpl<ResourceAdapter> comp,
 				   ResourceArchive raConfig)
   {
     _comp = comp;
@@ -77,7 +78,7 @@ public class ResourceAdapterController implements EnvironmentListener
     if (! _lifecycle.toActive())
       return;
 
-    _ra = _comp.get();
+    _ra = (ResourceAdapter) _comp.get();
 
     try {
       _ra.start(ResourceManagerImpl.create());

@@ -41,6 +41,7 @@ import com.caucho.webbeans.*;
 import com.caucho.webbeans.bytecode.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.context.*;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -48,11 +49,14 @@ import java.util.*;
 
 import javax.annotation.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
 
 /**
  * Configuration for the xml web bean component.
  */
-public class ComponentImpl implements ComponentFactory, ObjectProxy {
+public class ComponentImpl<T> extends Bean<T>
+  implements ObjectProxy
+{
   private static final L10N L = new L10N(ComponentImpl.class);
 
   private static final Object []NULL_ARGS = new Object[0];
@@ -86,6 +90,8 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
 
   public ComponentImpl(WbWebBeans webbeans)
   {
+    super(WebBeansContainer.create());
+    
     _webbeans = webbeans;
   }
 
@@ -395,26 +401,27 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
     return create();
   }
 
-  public Object get(ConfigContext env)
+  public T get(ConfigContext env)
   {
     if (_scope != null) {
-      Object value = _scope.get(this, false);
+      T value = _scope.get(this, false);
 
       if (value != null)
 	return value;
     }
     else {
-      Object value = env.get(this);
+      T value = (T) env.get(this);
 
       if (value != null)
 	return value;
     }
 
-    Object value;
+    T value;
 
     if (_scope != null) {
       value = createNew(null);
       _scope.put(this, value);
+      
       env = new ConfigContext(this, value, _scope);
     }
     else {
@@ -429,12 +436,12 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   /**
    * Creates a new instance of the component.
    */
-  public Object create()
+  public T create()
   {
     try {
       ConfigContext env = new ConfigContext(_scope);
       
-      Object value = createNew(env);
+      T value = createNew(env);
 
       env.put(this, value);
 
@@ -454,10 +461,10 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   /**
    * Creates a new instance of the component.
    */
-  public Object createNoInit()
+  public T createNoInit()
   {
     try {
-      Object value = createNew(null);
+      T value = createNew(null);
 
       if (_injectProgram.length > 0) {
         ConfigContext env = new ConfigContext(this, value, null);
@@ -481,7 +488,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
    * @param env the configuration environment
    * @return the new object
    */
-  protected Object createNew(ConfigContext env)
+  protected T createNew(ConfigContext env)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -489,7 +496,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   /**
    * Initialize the created value
    */
-  protected Object init(Object value, ConfigContext env)
+  protected T init(T value, ConfigContext env)
   {
     if (_init != null)
       _init.inject(value, env);
@@ -529,7 +536,7 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   /**
    * Destroys the value
    */
-  public void destroy(Object value)
+  public void destroy(T value)
   {
     destroy(value, null);
   }
@@ -551,6 +558,93 @@ public class ComponentImpl implements ComponentFactory, ObjectProxy {
   {
     return _scopeId;
   }
+
+  //
+  // metadata for the bean
+  //
+
+  /**
+   * Returns the bean's binding types
+   */
+  public Set<Annotation> getBindingTypes()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the bean's deployment type
+   */
+  public Class<Annotation> getDeploymentType()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the bean's name or null if the bean does not have a
+   * primary name.
+   */
+      /*
+  public String getName()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+      */
+
+  /**
+   * Returns true if the bean can be null
+   */
+  public boolean isNullable()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns true if the bean is serializable
+   */
+  public boolean isSerializable()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the bean's scope
+   */
+  public Class<Annotation> getScopeType()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Returns the types that the bean implements
+   */
+  public Set<Class<?>> getTypes()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  //
+  // lifecycle
+  //
+
+  /**
+   * Create a new instance of the bean.
+   */
+  /*
+  public T create()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  */
+
+  /**
+   * Destroys a bean instance
+   */
+  /*
+  public void destroy(T instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  */
 
   //
   // ObjectProxy

@@ -109,11 +109,7 @@ public abstract class AbstractLogin implements LoginFilter {
       try {
 	WebBeansContainer webBeans = WebBeansContainer.create();
 
-	ComponentFactory factory
-	  = webBeans.resolveByType(ServletAuthenticator.class);
-
-	if (factory != null)
-	  _auth = (ServletAuthenticator) factory.get();
+	_auth = webBeans.getInstanceByType(ServletAuthenticator.class);
       } catch (Exception e) {
         log.log(Level.FINER, e.toString(), e);
       }

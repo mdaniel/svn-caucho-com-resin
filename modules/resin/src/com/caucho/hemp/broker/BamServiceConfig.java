@@ -63,9 +63,9 @@ public class BamServiceConfig extends BeanConfig
   
   public BamServiceConfig()
   {
-    WebBeansContainer webBeans = WebBeansContainer.getCurrent();
+    WebBeansContainer webBeans = WebBeansContainer.create();
 
-    _broker = webBeans.getByType(BamBroker.class);
+    _broker = webBeans.getInstanceByType(BamBroker.class);
 
     setScope("singleton");
   }

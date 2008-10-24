@@ -31,11 +31,14 @@ package com.caucho.webbeans.context;
 
 import com.caucho.loader.*;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.webbeans.Singleton;
 import com.caucho.webbeans.component.*;
 
+import java.lang.annotation.Annotation;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
 
 /**
  * The singleton scope value
@@ -43,21 +46,35 @@ import javax.webbeans.*;
 public class SingletonScope extends ScopeContext {
   private final static EnvironmentLocal<ScopeMap> _localScopeMap
     = new EnvironmentLocal<ScopeMap>();
+
+  /**
+   * Returns true if the scope is currently active.
+   */
+  public boolean isActive()
+  {
+    return true;
+  }
   
-  public <T> T get(ComponentFactory<T> component, boolean create)
+  /**
+   * Returns the scope annotation type.
+   */
+  public Class<? extends Annotation> getScopeType()
+  {
+    return Singleton.class;
+  }
+  
+  public <T> T get(Bean<T> bean, boolean create)
   {
     ScopeMap map = _localScopeMap.get();
 
     if (map != null) {
-      ComponentImpl comp = (ComponentImpl) component;
-      
-      return (T) map.get(comp);
+      return (T) map.get(bean);
     }
     else
       return null;
   }
   
-  public <T> void put(ComponentFactory<T> component, T value)
+  public <T> void put(Bean<T> bean, T value)
   {
     ScopeMap map;
     
@@ -66,14 +83,15 @@ public class SingletonScope extends ScopeContext {
 
       if (map == null) {
 	map = new ScopeMap();
+	
 	_localScopeMap.set(map);
       }
     }
 
-    map.put(component, value);
+    map.put(bean, value);
   }
   
-  public <T> void remove(ComponentFactory<T> component)
+  public <T> void remove(Bean<T> component)
   {
     ScopeMap map = _localScopeMap.getLevel();
 
