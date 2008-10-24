@@ -158,10 +158,14 @@ abstract public class
   {
     Throwable exn = getConfigException();
 
-    if (exn instanceof ConfigException)
+    if (exn instanceof ConfigException) {
+      exn.printStackTrace();
       return exn.getMessage();
-    else if (exn != null)
+    }
+    else if (exn != null) {
+      exn.printStackTrace();
       return exn.toString();
+    }
     else
       return null;
   }

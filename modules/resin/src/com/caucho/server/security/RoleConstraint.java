@@ -31,6 +31,7 @@ package com.caucho.server.security;
 
 import com.caucho.util.CharBuffer;
 
+import java.security.Principal;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -68,12 +69,16 @@ public class RoleConstraint extends AbstractConstraint {
                               ServletContext application)
     throws ServletException, IOException
   {
+    Principal user = request.getUserPrincipal();
+    
     for (int i = 0; _roles != null && i < _roles.length; i++) {
-      if (_roles[i].equals("*"))
+      String role = _roles[i];
+      
+      if (role.equals("*"))
         return true;
-      if (request.isUserInRole(_roles[i])) {
+
+      if (request.isUserInRole(role))
         return true;
-      }
     }
     
     response.sendError(HttpServletResponse.SC_FORBIDDEN, null);

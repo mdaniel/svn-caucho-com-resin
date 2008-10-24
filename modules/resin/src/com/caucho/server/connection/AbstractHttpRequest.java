@@ -37,6 +37,7 @@ import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.port.TcpConnection;
 import com.caucho.server.security.AbstractAuthenticator;
 import com.caucho.server.security.AbstractLogin;
+import com.caucho.server.security.RoleMapManager;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
@@ -1797,14 +1798,32 @@ public abstract class AbstractHttpRequest
       return _runAs.equals(role);
     
     WebApp app = getWebApp();
+    
+    Principal user = getUserPrincipal();
+
+    if (user == null) {
+      if (log.isLoggable(Level.FINE))
+        log.fine("no user for isUserInRole");
+    
+      return false;
+    }
+
+    RoleMapManager roleManager = app != null ? app.getRoleMapManager() : null;
+
+    if (roleManager != null) {
+      Boolean result = roleManager.isUserInRole(role, user);
+
+      if (result != null) {
+	if (log.isLoggable(Level.FINE))
+	  log.fine(this + " userInRole(" + role + ")->" + result);
+	
+	return result;
+      }
+    }
+    
     AbstractLogin login = app == null ? null : app.getLogin();
 
-    if (login == null)
-      return false;
-    
     boolean inRole = false;
-      
-    Principal user = getUserPrincipal();
 
     try {
       inRole = login.isUserInRole(this, getResponse(), app, user, role);

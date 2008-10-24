@@ -63,12 +63,6 @@ public interface WebAppMXBean extends DeployControllerMXBean {
   //
   // Configuration attributes
   //
-  
-  /**
-   * Returns the root directory.
-   */
-  @Description("The configured filesystem directory for the web-app")
-  public String getRootDirectory();
 
   /**
    * Returns the application's context path.

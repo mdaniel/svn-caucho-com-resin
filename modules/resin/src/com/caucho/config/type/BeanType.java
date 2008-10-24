@@ -216,6 +216,7 @@ public class BeanType extends ConfigType
     }
 
     if (_addCustomBean != null
+	&& name.getNamespaceURI() != null
 	&& name.getNamespaceURI().startsWith("urn:java:")) {
       return _addCustomBean;
     }

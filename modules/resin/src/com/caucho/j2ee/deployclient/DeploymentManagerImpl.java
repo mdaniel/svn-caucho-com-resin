@@ -33,11 +33,11 @@ import com.caucho.server.admin.HostQuery;
 import com.caucho.server.admin.WebAppQuery;
 import com.caucho.server.admin.StatusQuery;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Vfs;
-import com.caucho.xml.DOMBuilder;
-import com.caucho.xml.QDocument;
-import com.caucho.xml.Xml;
+import com.caucho.vfs.*;
+import com.caucho.xml.*;
 import com.caucho.xpath.XPath;
+
+import org.w3c.dom.*;
 
 import javax.enterprise.deploy.model.DeployableObject;
 import javax.enterprise.deploy.shared.DConfigBeanVersionType;
@@ -53,7 +53,7 @@ import javax.enterprise.deploy.spi.exceptions.TargetException;
 import javax.enterprise.deploy.spi.status.ProgressObject;
 import java.io.File;
 import java.io.InputStream;
-import java.util.Locale;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -251,6 +251,8 @@ public class DeploymentManagerImpl implements DeploymentManager {
 	_deployClient.deployJar(archiveStream,
 				tag, _user, "", null, null);
 
+      deployExtraFiles(tag, doc);
+
       TargetModuleID []targetModules = new TargetModuleID[targetList.length];
 
       for (int i = 0; i < targetList.length; i++) {
@@ -263,7 +265,6 @@ public class DeploymentManagerImpl implements DeploymentManager {
       ProgressObjectImpl result = new ProgressObjectImpl(targetModules);
 
       StatusQuery status = _deployClient.status(tag);
-      System.out.println("STATUS: " + status);
 
       if (status.getMessage() == null)
 	result.completed(L.l("application {0} deployed from {1}",
@@ -281,6 +282,49 @@ public class DeploymentManagerImpl implements DeploymentManager {
       ex.initCause(e);
 
       throw ex;
+    }
+  }
+
+  private void deployExtraFiles(String tag, Node doc)
+  {
+    try {
+      Iterator iter = XPath.select("/deployment-plan/ext-file", doc);
+
+      while (iter.hasNext()) {
+	Node node = (Node) iter.next();
+
+	String name = XPath.evalString("name", node);
+	Node data = XPath.find("data", node);
+
+	if (data != null) {
+	  data = data.getFirstChild();
+
+	  TempOutputStream os = new TempOutputStream();
+
+	  XmlPrinter printer = new XmlPrinter(os);
+
+	  printer.printXml(data);
+
+	  os.close();
+
+	  long length = os.getLength();
+
+	  if (length == 0)
+	    continue;
+	  
+	  InputStream is = os.openInputStreamNoFree();
+
+	  String sha1 = _deployClient.calculateFileDigest(is, length);
+
+	  _deployClient.sendFile(sha1, length, os.openInputStream());
+      
+	  _deployClient.addDeployFile(tag, name, sha1);
+	}
+      }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 

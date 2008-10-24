@@ -379,6 +379,9 @@ public class EnterpriseApplication
    */
   public void setConfigException(Throwable e)
   {
+    if (e != null)
+      e.printStackTrace();
+    
     _configException = e;
 
     for (WebAppController controller : _webApps) {

@@ -126,6 +126,26 @@ public class DeployClient
     return result.getCommitList();
   }
 
+  public String calculateFileDigest(InputStream is, long length)
+    throws IOException
+  {
+    return GitCommitTree.calculateBlobDigest(is, length);
+  }
+
+  public String addDeployFile(String tag, String name, String sha1)
+  {
+    DeployAddFileQuery query
+      = new DeployAddFileQuery(tag, name, sha1);
+
+    return (String) querySet(query);
+  }
+	  
+  public boolean sendFile(String sha1, long length, InputStream is)
+    throws IOException
+  {
+    return sendFile(sha1, GitCommitTree.writeBlob(is, length));
+  }
+
   public boolean sendFile(String sha1, InputStream is)
     throws IOException
   {
@@ -167,10 +187,10 @@ public class DeployClient
   }
 
   public String commit(String tag,
-				   String sha1,
-				   String user,
-				   String message,
-				   HashMap<String,String> attr)
+		       String sha1,
+		       String user,
+		       String message,
+		       HashMap<String,String> attr)
   {
     DeployCommitQuery query
       = new DeployCommitQuery(tag, sha1, user, message, attr);

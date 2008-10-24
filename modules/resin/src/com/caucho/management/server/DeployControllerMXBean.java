@@ -44,6 +44,12 @@ public interface DeployControllerMXBean extends ManagedObjectMXBean
   //
   
   /**
+   * Returns the root directory.
+   */
+  @Description("The configured filesystem directory for the web-app")
+  public String getRootDirectory();
+  
+  /**
    * Returns the startup mode, one of "default", "automatic", "lazy", or "manual".
    */
   @Description("The configured startup-mode, one of `default', `automatic', `lazy', or `manual'")

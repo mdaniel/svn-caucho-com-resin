@@ -29,6 +29,7 @@
 
 package com.caucho.server.security;
 
+import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
 
 import java.util.ArrayList;
@@ -43,6 +44,8 @@ public class RoleMapManager
   private static final EnvironmentLocal<RoleMapManager> _localManager
     = new EnvironmentLocal<RoleMapManager>();
 
+  private final String _id;
+  
   private final RoleMapManager _parent;
 
   private ArrayList<RoleMap> _roleMapList
@@ -50,6 +53,8 @@ public class RoleMapManager
 
   private RoleMapManager(RoleMapManager parent)
   {
+    _id = Environment.getEnvironmentName();
+    
     _parent = parent;
   }
 
@@ -86,5 +91,31 @@ public class RoleMapManager
   public void addRoleMap(RoleMap roleMap)
   {
     _roleMapList.add(roleMap);
+  }
+
+  /**
+   * Checks for role matching.
+   */
+  public Boolean isUserInRole(String role, Principal user)
+  {
+    int size = _roleMapList.size();
+    for (int i = 0; i < size; i++) {
+      RoleMap roleMap = _roleMapList.get(i);
+
+      Boolean result = roleMap.isUserInRole(role, user);
+
+      if (result != null)
+	return result;
+    }
+
+    if (_parent != null)
+      return _parent.isUserInRole(role, user);
+    else
+      return null;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _id + "]";
   }
 }

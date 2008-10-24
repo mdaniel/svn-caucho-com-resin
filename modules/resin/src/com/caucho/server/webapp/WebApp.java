@@ -213,6 +213,8 @@ public class WebApp extends ServletContextImpl
   // Old login manager for compat
   private AbstractLogin _loginManager;
 
+  private RoleMapManager _roleMapManager;
+
   // The security constraints
   private ConstraintManager _constraintManager;
 
@@ -1141,6 +1143,14 @@ public class WebApp extends ServletContextImpl
   }
 
   /**
+   * Returns the RoleMapManager
+   */
+  public RoleMapManager getRoleMapManager()
+  {
+    return _roleMapManager;
+  }
+
+  /**
    * Adds rewrite-dispatch.
    */
   public RewriteDispatch createRewriteDispatch()
@@ -1825,6 +1835,8 @@ public class WebApp extends ServletContextImpl
 
       if (getSessionManager() != null)
         getSessionManager().init();
+      
+      _roleMapManager = RoleMapManager.create();
 
       _characterEncoding = CharacterEncoding.getLocalEncoding();
 
