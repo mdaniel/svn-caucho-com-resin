@@ -517,6 +517,7 @@ public class JspCompilerInstance {
 	_parseState.setELIgnoredDefault(false);
 	
 	Xml xml = new Xml();
+	_parseState.setXml(xml);
 	xml.setContentHandler(new JspContentHandler(_jspBuilder));
 	_jspPath.setUserPath(_uri);
 	xml.setNamespaceAware(true);
@@ -650,6 +651,7 @@ public class JspCompilerInstance {
 	_parseState.setELIgnoredDefault(false);
 	
 	Xml xml = new Xml();
+	_parseState.setXml(xml);
 	xml.setContentHandler(new JspContentHandler(_jspBuilder));
 	_jspPath.setUserPath(_uri);
 	xml.setNamespaceAware(true);

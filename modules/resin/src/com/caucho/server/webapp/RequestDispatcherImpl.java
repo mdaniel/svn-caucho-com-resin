@@ -146,6 +146,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     if (res instanceof CauchoResponse)
       cauchoRes = (CauchoResponse) res;
 
+    System.out.println("COMMIT: " + res);
+    // jsp/15m8
     if (res.isCommitted() && method == null) {
       IllegalStateException exn;
       exn = new IllegalStateException("forward() not allowed after buffer has committed.");
@@ -157,6 +159,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       }
       
       _webApp.log(exn.getMessage(), exn);
+
+      return;
     }
 
     if (res instanceof AbstractHttpResponse)
@@ -292,8 +296,9 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
       invocation.service(topRequest, res);
 
-      if (cauchoRes != null)
+      if (cauchoRes != null) {
         cauchoRes.close();
+      }
       else {
 	// server/10ab
 	try {

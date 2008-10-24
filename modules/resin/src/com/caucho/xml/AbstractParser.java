@@ -192,6 +192,14 @@ abstract public class AbstractParser implements XMLReader, Parser
     _owner = doc;
   }
 
+  public String getEncoding()
+  {
+    if (_owner != null)
+      return _owner.getEncoding();
+    else
+      return null;
+  }
+
   public void setFilename(String filename)
   {
     _filename = filename;

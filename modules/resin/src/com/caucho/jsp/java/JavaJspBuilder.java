@@ -187,6 +187,9 @@ public class JavaJspBuilder extends JspBuilder {
   public void endDocument()
     throws JspParseException
   {
+    if (_parseState.getXml() != null
+	&& _parseState.getXml().getEncoding() != null)
+      _parseState.setPageEncoding(_parseState.getXml().getEncoding());
   }
 
   /**

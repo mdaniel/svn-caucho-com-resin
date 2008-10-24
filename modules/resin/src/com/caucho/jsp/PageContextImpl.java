@@ -998,10 +998,18 @@ public class PageContextImpl extends PageContext
 
     if (relativeUrl != null && ! relativeUrl.startsWith("/")) {
       String path = RequestAdapter.getPageServletPath(req);
-      if (path == null)
-        path = RequestAdapter.getPagePathInfo(req);
-      if (path == null)
+
+      String pathInfo = RequestAdapter.getPagePathInfo(req);
+
+      if (path != null) {
+	if (pathInfo != null)
+	  path += pathInfo;
+      }
+      else if (pathInfo != null)
+	path = pathInfo;
+      else
         path = "/";
+      
       int p = path.lastIndexOf('/');
       if (p >= 0) {
 	_cb.clear();
@@ -1067,7 +1075,7 @@ public class PageContextImpl extends PageContext
     HttpServletResponse res = (HttpServletResponse) getResponse();
 
     if (res.isCommitted())
-      throw new IOException(L.l("can't forward after writing HTTP headers"));
+      throw new IllegalStateException(L.l("can't forward after writing HTTP headers"));
     
     _out.clear();
 

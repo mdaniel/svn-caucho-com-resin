@@ -161,14 +161,16 @@ class DispatchResponse extends AbstractHttpResponse
   public boolean isCommitted()
   {
     /**
-     * Includes are not committed in the sense of top-level requests because
-     * they don't have headers
+     * JSP TCK requires this to return true if the request is committed,
+     * making bug #2481 not possible to resolve (unless we add a config
+     * option)
      */
-    // jsp/15m2
-    // return _next.isCommitted();
     
+    // jsp/15m2
     // #2481, server/10y5
-    return false;
+    // jsp/15lg (tck)
+    
+    return _next.isCommitted();
   }
 
   /**

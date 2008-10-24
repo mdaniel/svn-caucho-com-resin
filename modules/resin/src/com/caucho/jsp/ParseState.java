@@ -39,8 +39,10 @@ import com.caucho.util.L10N;
 import com.caucho.util.StringCharCursor;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.PersistentDependency;
+import com.caucho.vfs.TempCharBuffer;
 import com.caucho.vfs.Path;
 import com.caucho.xml.QName;
+import com.caucho.xml.Xml;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -50,7 +52,8 @@ import java.util.logging.Logger;
  */
 public class ParseState {
   private static final L10N L = new L10N(ParseState.class);
-  static final Logger log = Log.open(ParseState.class);
+  private static final Logger log
+    = Logger.getLogger(ParseState.class.getName());
 
   private Application _application;
 
@@ -81,7 +84,7 @@ public class ParseState {
   private boolean _isXml = false;
   private boolean _isForbidXml = false;
 
-  private int _buffer = 8192;
+  private int _buffer = TempCharBuffer.SIZE;
   private boolean _isBufferSet = false;
 
   // true after an action has been read
@@ -109,7 +112,8 @@ public class ParseState {
   private ArrayList<PersistentDependency> _depends
     = new ArrayList<PersistentDependency>();
   private LineMap _lineMap;
-  
+
+  private Xml _xml;
   private Namespace _namespaces;
 
   /**
@@ -387,11 +391,27 @@ public class ParseState {
   }
 
   /**
+   * Sets the XML parser
+   */
+  public void setXml(Xml xml)
+  {
+    _xml = xml;
+  }
+
+  public Xml getXml()
+  {
+    return _xml;
+  }
+
+  /**
    * Sets the JSP's character encoding
    */
   public void setCharEncoding(String charEncoding)
     throws JspParseException
   {
+    if ("UTF-16".equalsIgnoreCase(charEncoding))
+      charEncoding = "UTF-16LE";
+    
     /*
     if (_charEncoding != null &&
 	! _charEncoding.equalsIgnoreCase(charEncoding))
@@ -418,6 +438,12 @@ public class ParseState {
   {
     if (pageEncoding == null)
       return;
+
+    if (_xml != null && _pageEncoding == null)
+      _pageEncoding = _xml.getEncoding();
+
+    if ("UTF-16".equalsIgnoreCase(pageEncoding))
+      pageEncoding = "UTF-16LE";
 
     if (_pageEncoding == null
 	|| _pageEncoding.equalsIgnoreCase(pageEncoding)) {
