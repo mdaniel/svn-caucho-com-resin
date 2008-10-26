@@ -39,6 +39,10 @@ import com.caucho.webbeans.component.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.webbeans.manager.Bean;
 
 /**
  * Configuration for the xml web bean component.
@@ -128,6 +132,25 @@ public class WebComponent {
     }
     
     return matchComp;
+  }
+  
+  public Set<Bean> resolve(Annotation []bindings)
+    throws ConfigException
+  {
+    Set<Bean> beanSet = null;
+
+    for (int i = 0; i < _componentList.size(); i++) {
+      ComponentImpl comp = _componentList.get(i);
+
+      if (comp.isMatch(bindings)) {
+	if (beanSet == null)
+	  beanSet = new HashSet<Bean>();
+	
+	beanSet.add(comp);
+      }
+    }
+
+    return beanSet;
   }
 
   ArrayList<ComponentImpl> getComponentList()

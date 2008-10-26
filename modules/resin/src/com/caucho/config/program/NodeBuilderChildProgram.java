@@ -59,6 +59,11 @@ public class NodeBuilderChildProgram extends FlowProgram {
       return null;
   }
 
+  public Node getNode()
+  {
+    return _node;
+  }
+
   @Override
   public void inject(Object bean, ConfigContext env)
     throws ConfigException

@@ -63,7 +63,7 @@ public class WbComponentConfig {
   
   private Class _cl;
 
-  private WbComponentType _type;
+  private Class<? extends Annotation> _deploymentType;
 
   private String _name;
   
@@ -123,40 +123,21 @@ public class WbComponentConfig {
   /**
    * Sets the component type.
    */
-  public void setType(Class type)
+  public void setDeploymentType(Class type)
   {
-    if (! type.isAnnotationPresent(ComponentType.class))
-      throw new ConfigException(L.l("'{0}' is an invalid component annotation.  Component types must be annotated by @ComponentType.",
+    if (! type.isAnnotationPresent(DeploymentType.class))
+      throw new ConfigException(L.l("'{0}' is an invalid deployment-type annotation because it's missing a @DeploymentType annotation.",
 				    type.getName()));
     
-    _type = _webbeans.createComponentType(type);
+    _deploymentType = type;
   }
 
   /**
    * Gets the component type.
    */
-  public WbComponentType getType()
+  public Class<? extends Annotation> getDeploymentType()
   {
-    return _type;
-  }
-
-  /**
-   * Sets the component type.
-   */
-  public void setComponentType(WbComponentType type)
-  {
-    if (type == null)
-      throw new NullPointerException();
-    
-    _type = type;
-  }
-
-  /**
-   * Sets the component type.
-   */
-  public WbComponentType getComponentType()
-  {
-    return _type;
+    return _deploymentType;
   }
 
   /**
@@ -220,17 +201,22 @@ public class WbComponentConfig {
       } catch (ClassNotFoundException e) {
       }
 
-      if (cl == null)
-	throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
-
-      if (! Annotation.class.isAssignableFrom(cl))
-	throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
-
-      if (! cl.isAnnotationPresent(ScopeType.class))
-	throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
-
-      _scope = cl;
+      setScopeType(cl);
     }
+  }
+
+  public void setScopeType(Class cl)
+  {
+    if (cl == null)
+      throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
+
+    if (! Annotation.class.isAssignableFrom(cl))
+      throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
+
+    if (! cl.isAnnotationPresent(ScopeType.class))
+      throw new ConfigException(L.l("'{0}' is an invalid scope.  The scope must be a valid @ScopeType annotation."));
+
+    _scope = cl;
   }
 
   /**
@@ -366,13 +352,13 @@ public class WbComponentConfig {
 
     comp.setBindingList(_bindingList);
 
-    if (_type != null)
-      comp.setType(_type);
-    else
-      comp.setType(_webbeans.createComponentType(Component.class));
+    if (_deploymentType != null)
+      comp.setDeploymentType(_deploymentType);
 
-    if (_scope != null)
+    if (_scope != null) {
+      comp.setScopeType(_scope);
       comp.setScope(_webbeans.getScopeContext(_scope));
+    }
 
     if (_newArgs != null)
       comp.setNewArgs(_newArgs);

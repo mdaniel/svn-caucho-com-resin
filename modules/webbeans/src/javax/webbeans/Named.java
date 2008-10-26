@@ -30,15 +30,17 @@ package javax.webbeans;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
  * The @Named annotation for web beans
  */
-@BindingType
-@Target({TYPE, METHOD, FIELD, PARAMETER})
+
+@Documented  
 @Retention(RUNTIME)
+@Target({TYPE, METHOD})
 public @interface Named {
   String value() default "";
 }

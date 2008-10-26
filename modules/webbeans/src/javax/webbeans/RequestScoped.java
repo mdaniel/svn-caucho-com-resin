@@ -31,6 +31,7 @@ package javax.webbeans;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -38,7 +39,8 @@ import java.lang.annotation.Target;
  * The @RequestScoped represents the servlet request scope
  */
 @ScopeType
-@Target({TYPE, METHOD})
+@Documented  
 @Retention(RUNTIME)
+@Target({TYPE, METHOD})
 public @interface RequestScoped {
 }

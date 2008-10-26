@@ -38,8 +38,8 @@ import java.lang.annotation.Target;
 /**
  * The @BindingType annotation for web beans
  */
-@Target(ANNOTATION_TYPE)
-@Retention(RUNTIME)
 @Documented  
+@Retention(RUNTIME)
+@Target(ANNOTATION_TYPE)
 public @interface BindingType {
 }

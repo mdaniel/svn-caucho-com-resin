@@ -31,14 +31,16 @@ package javax.webbeans;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
  * The @ConversationScoped represents the JSF conversation scope
  */
-@ScopeType
-@Target({TYPE, METHOD})
+@ScopeType(passivating=true)
+@Documented
 @Retention(RUNTIME)
+@Target({TYPE, METHOD})
 public @interface ConversationScoped {
 }

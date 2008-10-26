@@ -30,7 +30,7 @@
 package com.caucho.config.types;
 
 import com.caucho.config.*;
-import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.*;
 import com.caucho.config.type.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.jca.program.*;
@@ -40,9 +40,11 @@ import com.caucho.webbeans.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.*;
+import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.xml.QName;
 
 import java.util.*;
+import java.util.logging.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 
@@ -52,17 +54,22 @@ import javax.resource.spi.*;
 
 import javax.webbeans.*;
 
+import org.w3c.dom.Node;
+
 /**
  * Custom bean configured by namespace
  */
 public class CustomBeanConfig {
+  private static final Logger log
+    = Logger.getLogger(CustomBeanConfig.class.getName());
+  
   private static final L10N L = new L10N(CustomBeanConfig.class);
 
   private static final String RESIN_NS
     = "http://caucho.com/ns/resin";
 
   private Class _class;
-  private WbComponentConfig _component = new WbComponentConfig();
+  private ClassComponent _component = new ClassComponent();
   private ConfigType _configType;
 
   private QName _name;
@@ -70,12 +77,15 @@ public class CustomBeanConfig {
   private String _filename;
   private int _line;
 
+  private ContainerProgram _init;
+
   public CustomBeanConfig(QName name, Class cl)
   {
     _name = name;
 
     _class = cl;
-    _component.setClass(cl);
+    _component.setInstanceClass(cl);
+    // _component.setScopeClass(Dependent.class);
 
     _configType = TypeFactory.getType(cl);
   }
@@ -96,45 +106,186 @@ public class CustomBeanConfig {
     return _line;
   }
 
+  /*
   public void setClass(Class cl)
   {
-    _component.setClass(cl);
+    _component.setInstanceClass(cl);
   }
 
   public void setScope(String scope)
   {
     _component.setScope(scope);
   }
+  */
 
+  private void addInitProgram(ConfigProgram program)
+  {
+    if (_init == null) {
+      _init = new ContainerProgram();
+      _component.setInit(_init);
+    }
+
+    _init.addProgram(program);
+  }
+  
   public void addBuilderProgram(ConfigProgram program)
   {
     QName name = program.getQName();
 
     if (name == null) {
-      _component.addInitProgram(program);
+      addInitProgram(program);
+
+      return;
     }
     
-    else if (name.getNamespaceURI().equals(_name.getNamespaceURI())) {
+    Class cl = createClass(name);
+
+    if (cl == null) {
+    }
+    else if (Annotation.class.isAssignableFrom(cl)) {
+      ConfigType type = TypeFactory.getType(cl);
+
+      Object bean = type.create(null, name);
+
+      Node node = getProgramNode(program);
+
+      if (node != null)
+	ConfigContext.getCurrent().configureNode(node, bean, type);
+      
+      Annotation ann = (Annotation) type.replaceObject(bean);
+
+      addAnnotation(ann);
+
+      return;
+      /*
+	if (name.getNamespaceURI().equals(RESIN_NS)) {
+	// XXX: temp
+
+	// XXX: service scope?
+	_component.setService(true);
+      */
+    }
+    
+    if (name.getNamespaceURI().equals(_name.getNamespaceURI())) {
       if (_configType.getAttribute(name) == null)
 	throw new ConfigException(L.l("'{0}' is an unknown field for '{1}'",
 				      name.getLocalName(), _class.getName()));
       
-      _component.addInitProgram(program);
+      addInitProgram(program);
     }
 
-    else if (name.getNamespaceURI().equals(RESIN_NS)) {
-      // XXX: temp
-
-      // XXX: service scope?
-      _component.setService(true);
-    }
-    else {
+    else
       throw new ConfigException(L.l("'{0}' is an unknown field name.  Fields must belong to the same namespace as the class",
 				    name.getCanonicalName()));
+  }
+
+  private Node getProgramNode(ConfigProgram program)
+  {
+    if (program instanceof NodeBuilderChildProgram)
+      return ((NodeBuilderChildProgram) program).getNode();
+    return null;
+  }
+
+  private void addAnnotation(Annotation ann)
+  {
+    Class type = ann.annotationType();
+
+    Class metaType = null;
+
+    if (type.isAnnotationPresent(ScopeType.class)) {
+      metaType = ScopeType.class;
+
+      _component.setScopeType(type);
+    }
+    
+    if (type.isAnnotationPresent(DeploymentType.class)) {
+      if (metaType != null)
+	throw new ConfigException(L.l("@{0} is an illegal @DeploymentType because it also has a @{1} annotation",
+				      type.getName(), metaType.getName()));
+      
+      metaType = DeploymentType.class;
+
+      _component.setDeploymentType(type);
+    }
+    
+    if (type.isAnnotationPresent(BindingType.class)) {
+      if (metaType != null)
+	throw new ConfigException(L.l("@{0} is an illegal @BindingType because it also has a @{1} annotation",
+				      type.getName(), metaType.getName()));
+      
+      metaType = BindingType.class;
+
+      _component.addBinding(ann);
+    }
+
+    if (type.equals(Named.class)) {
+      metaType = Named.class;
+
+      _component.setName(((Named) ann).value());
+    }
+    
+    if (type.isAnnotationPresent(Stereotype.class)) {
+      metaType = Stereotype.class;
+
+      addStereotype(type);
+    }
+
+    if (metaType == null)
+      throw new ConfigException(L.l("'{0}' is an invalid annotation.  An annotation must be a @BindingType, @ScopeType, @DeploymentType",
+				    ann));
+  }
+
+  private void addStereotype(Class type)
+  {
+    for (Annotation ann : type.getAnnotations()) {
+      Class annType = ann.annotationType();
+      
+      if (annType.equals(Named.class)) {
+	if (_component.getName() == null)
+	  _component.setName("");
+      }
+      else if (annType.isAnnotationPresent(DeploymentType.class)) {
+	if (_component.getDeploymentType() == null)
+	  _component.setDeploymentType(annType);
+      }
+      else if (annType.isAnnotationPresent(ScopeType.class)) {
+	if (_component.getScopeType() == null)
+	  _component.setScopeType(annType);
+      }
+      else if (annType.isAnnotationPresent(BindingType.class)) {
+	_component.addBinding(ann);
+      }
     }
   }
 
-  public WbComponentConfig getComponent()
+  private Class createClass(QName name)
+  {
+    String uri = name.getNamespaceURI();
+
+    if (uri.equals(RESIN_NS))
+      uri = "urn:java:com.caucho.webbeans";
+
+    if (! uri.startsWith("urn:java:"))
+      return null;
+
+    String pkg = uri.substring("urn:java:".length());
+
+    String className = pkg + "." + name.getLocalName();
+
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+      Class cl = Class.forName(className, false, loader);
+
+      return cl;
+    } catch (ClassNotFoundException e) {
+      log.log(Level.FINEST, e.toString(), e);
+
+      return null;
+    }
+  }
+
+  public ComponentImpl getComponent()
   {
     return _component;
   }
@@ -142,6 +293,10 @@ public class CustomBeanConfig {
   @PostConstruct
   public void init()
   {
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
     _component.init();
+
+    webBeans.addBean(_component);
   }
 }

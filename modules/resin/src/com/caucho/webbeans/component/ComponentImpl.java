@@ -64,7 +64,7 @@ public class ComponentImpl<T> extends Bean<T>
 
   protected WbWebBeans _webbeans;
   
-  private WbComponentType _type;
+  private Class<? extends Annotation> _deploymentType;
 
   private Type _targetType;
 
@@ -73,12 +73,16 @@ public class ComponentImpl<T> extends Bean<T>
   private String _name;
   
   private boolean _hasBinding;
+
+  private LinkedHashSet<Class<?>> _types
+    = new LinkedHashSet<Class<?>>();
   
   private ArrayList<WbBinding> _bindingList
     = new ArrayList<WbBinding>();
 
   private WebBeansHandle _handle;
 
+  private Class<? extends Annotation> _scopeType;
   protected ScopeContext _scope;
   private String _scopeId;
 
@@ -114,34 +118,6 @@ public class ComponentImpl<T> extends Bean<T>
   public String getName()
   {
     return _name;
-  }
-
-  public void addNameBinding(String name)
-  {
-    WbBinding binding = new WbBinding();
-    binding.setClass(Named.class);
-    binding.addValue("value", name);
-
-    _bindingList.add(binding);
-  }
-
-  /**
-   * Gets the component type.
-   */
-  public WbComponentType getType()
-  {
-    return _type;
-  }
-
-  /**
-   * Sets the component type.
-   */
-  public void setType(WbComponentType type)
-  {
-    if (type == null)
-      throw new NullPointerException();
-    
-    _type = type;
   }
   
   public void setTargetType(Type type)
@@ -180,6 +156,11 @@ public class ComponentImpl<T> extends Bean<T>
       return String.valueOf(_targetType);
   }
 
+  public void addBinding(Annotation binding)
+  {
+    _bindingList.add(new WbBinding(binding));
+  }
+  
   /**
    * Adds a component binding.
    */
@@ -199,6 +180,16 @@ public class ComponentImpl<T> extends Bean<T>
   public void setScope(ScopeContext scope)
   {
     _scope = scope;
+    if (_scope != null)
+      _scopeType = _scope.getScopeType();
+  }
+
+  /**
+   * Sets the scope annotation.
+   */
+  public void setScopeType(Class<? extends Annotation> scopeType)
+  {
+    _scopeType = scopeType;
   }
 
   /**
@@ -263,14 +254,42 @@ public class ComponentImpl<T> extends Bean<T>
    */
   public void init()
   {
-    introspect();
+    introspectTypes(getTargetClass());
     
-    if (_type == null)
-      _type = _webbeans.createComponentType(Component.class);
+    introspect();
+
+    if (_deploymentType == null)
+      _deploymentType = Production.class;
+
+    if (_bindingList.size() == 0)
+      _bindingList.add(new WbBinding(new AnnotationLiteral<Current>() {}));
+
+    if (_scopeType == null)
+      _scopeType = Dependent.class;
 
     generateScopeId();
 
     _handle = new WebBeansHandle(_targetType, _bindingList);
+  }
+
+  /**
+   * Introspects all the types implemented by the class
+   */
+  private void introspectTypes(Class cl)
+  {
+    if (cl == null || cl.equals(Object.class))
+      return;
+
+    if (_types.contains(cl))
+      return;
+
+    _types.add(cl);
+
+    introspectTypes(cl.getSuperclass());
+
+    for (Class iface : cl.getInterfaces()) {
+      introspectTypes(iface);
+    }
   }
 
   protected void introspect()
@@ -330,6 +349,16 @@ public class ComponentImpl<T> extends Bean<T>
   {
     for (int i = 0; i < bindList.size(); i++) {
       if (! isMatch(bindList.get(i)))
+	return false;
+    }
+    
+    return true;
+  }
+
+  public boolean isMatch(Annotation []bindings)
+  {
+    for (Annotation binding : bindings) {
+      if (! isMatch(binding))
 	return false;
     }
     
@@ -568,15 +597,35 @@ public class ComponentImpl<T> extends Bean<T>
    */
   public Set<Annotation> getBindingTypes()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    Set<Annotation> set = new LinkedHashSet<Annotation>();
+
+    for (WbBinding binding : _bindingList) {
+      set.add(binding.getAnnotation());
+    }
+
+    return set;
+  }
+
+  /**
+   * Sets the component type.
+   */
+  public void setDeploymentType(Class<? extends Annotation> type)
+  {
+    if (type == null)
+      throw new NullPointerException();
+
+    if (_deploymentType != null && ! _deploymentType.equals(type))
+      throw new ConfigException(L.l("deployment-type must be unique"));
+    
+    _deploymentType = type;
   }
 
   /**
    * Returns the bean's deployment type
    */
-  public Class<Annotation> getDeploymentType()
+  public Class<? extends Annotation> getDeploymentType()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _deploymentType;
   }
 
   /**
@@ -595,7 +644,7 @@ public class ComponentImpl<T> extends Bean<T>
    */
   public boolean isNullable()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return false;
   }
 
   /**
@@ -603,7 +652,7 @@ public class ComponentImpl<T> extends Bean<T>
    */
   public boolean isSerializable()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return false;
   }
 
   /**
@@ -611,7 +660,7 @@ public class ComponentImpl<T> extends Bean<T>
    */
   public Class<Annotation> getScopeType()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return (Class<Annotation>) _scopeType;
   }
 
   /**
@@ -619,7 +668,7 @@ public class ComponentImpl<T> extends Bean<T>
    */
   public Set<Class<?>> getTypes()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _types;
   }
 
   //
@@ -700,27 +749,25 @@ public class ComponentImpl<T> extends Bean<T>
     else
       sb.append(String.valueOf(_targetType));
     sb.append("[");
-
-    for (WbBinding binding : _bindingList) {
-      sb.append(binding.toDebugString());
-      sb.append(",");
-    }
-
-    if (_type != null) {
-      sb.append("@");
-      sb.append(_type.getType().getSimpleName());
-    }
-    else
-      sb.append("@null");
-    
-    if (_scope != null) {
-      sb.append(", @");
-      sb.append(_scope.getClass().getSimpleName());
-    }
     
     if (_name != null) {
-      sb.append(", name=");
+      sb.append("name=");
       sb.append(_name);
+    }
+
+    for (WbBinding binding : _bindingList) {
+      sb.append(",");
+      sb.append(binding.toDebugString());
+    }
+
+    if (_deploymentType != null) {
+      sb.append(", @");
+      sb.append(_deploymentType.getSimpleName());
+    }
+    
+    if (_scopeType != null) {
+      sb.append(", @");
+      sb.append(_scopeType.getSimpleName());
     }
 
     sb.append("]");
@@ -741,9 +788,9 @@ public class ComponentImpl<T> extends Bean<T>
       sb.append(String.valueOf(_targetType));
     sb.append(", ");
 
-    if (_type != null) {
+    if (_deploymentType != null) {
       sb.append("@");
-      sb.append(_type.getType().getSimpleName());
+      sb.append(_deploymentType.getSimpleName());
     }
     else
       sb.append("@null");

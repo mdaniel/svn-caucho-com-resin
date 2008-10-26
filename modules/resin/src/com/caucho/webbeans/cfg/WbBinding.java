@@ -52,12 +52,16 @@ public class WbBinding {
   private ArrayList<WbBindingValue> _valueList
     = new ArrayList<WbBindingValue>();
 
+  private Annotation _annotation;
+
   public WbBinding()
   {
   }
 
   public WbBinding(Annotation ann)
   {
+    _annotation = ann;
+    
     setClass(ann.annotationType());
 
     try {
@@ -74,6 +78,11 @@ public class WbBinding {
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+  }
+
+  public Annotation getAnnotation()
+  {
+    return _annotation;
   }
 
   public void addValue(WbBindingValue value)

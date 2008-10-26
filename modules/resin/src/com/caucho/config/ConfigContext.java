@@ -399,9 +399,9 @@ public class ConfigContext {
    * @return the configured bean, possibly the replaced object
    * @throws LineConfigException
    */
-  private Object configureNode(Node node,
-                               Object bean,
-                               ConfigType type)
+  public Object configureNode(Node node,
+			      Object bean,
+			      ConfigType type)
     throws LineConfigException
   {
     Thread thread = Thread.currentThread();

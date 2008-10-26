@@ -78,6 +78,11 @@ public class ClassComponent extends ComponentImpl {
     super(webbeans);
   }
 
+  public ClassComponent()
+  {
+    this(WebBeansContainer.create().getWbWebBeans());
+  }
+
   public void setInstanceClass(Class cl)
   {
     _cl = cl;
@@ -132,22 +137,7 @@ public class ClassComponent extends ComponentImpl {
     Class cl = getInstanceClass();
     Class scopeClass = null;
 
-    if (getType() == null) {
-      for (Annotation ann : cl.getDeclaredAnnotations()) {
-	if (ann.annotationType().isAnnotationPresent(ComponentType.class)) {
-	  if (getType() != null)
-	    throw new ConfigException(L.l("{0}: component type annotation @{1} conflicts with @{2}.  WebBeans components may only have a single @ComponentType.",
-					  cl.getName(),
-					  getType().getType().getName(),
-					  ann.annotationType().getName()));
-	
-	  setType(_webbeans.createComponentType(ann.annotationType()));
-	}
-      }
-    }
-
-    if (getType() == null)
-      setType(_webbeans.createComponentType(Component.class));
+    introspectDeploymentType(cl);
 
     if (getScope() == null) {
       for (Annotation ann : cl.getDeclaredAnnotations()) {
@@ -164,7 +154,7 @@ public class ClassComponent extends ComponentImpl {
       }
     }
 
-    if (getName() == null) {
+    if ("".equals(getName())) {
       String name = cl.getSimpleName();
 
       name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
@@ -179,6 +169,26 @@ public class ClassComponent extends ComponentImpl {
       introspectBindings();
     
     introspectMBean();
+  }
+
+  private void introspectDeploymentType(Class cl)
+  {
+    if (getDeploymentType() == null) {
+      for (Annotation ann : cl.getDeclaredAnnotations()) {
+	if (ann.annotationType().isAnnotationPresent(DeploymentType.class)) {
+	  if (getDeploymentType() != null)
+	    throw new ConfigException(L.l("{0}: component type annotation @{1} conflicts with @{2}.  WebBeans components may only have a single @DeploymentType.",
+					  cl.getName(),
+					  getDeploymentType().getName(),
+					  ann.annotationType().getName()));
+	
+	  setDeploymentType(ann.annotationType());
+	}
+      }
+    }
+
+    if (getDeploymentType() == null)
+      setDeploymentType(Production.class);
   }
 
   /**

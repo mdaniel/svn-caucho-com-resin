@@ -29,21 +29,17 @@
 
 package javax.webbeans;
 
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 /**
- * The @Standard DeploymentType for web beans
+ * The @DeploymentType meta-annotation for web beans
  */
-
-@DeploymentType
 @Documented
 @Retention(RUNTIME)
-@Target({TYPE, METHOD})
-public @interface Standard {
+@Target(ANNOTATION_TYPE)
+public @interface DeploymentType {
 }

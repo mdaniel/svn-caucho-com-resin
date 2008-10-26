@@ -29,77 +29,60 @@
 
 package com.caucho.config.attribute;
 
-import java.lang.reflect.*;
-
 import com.caucho.config.*;
 import com.caucho.config.type.*;
-import com.caucho.config.types.CustomBeanConfig;
+import com.caucho.config.types.AnnotationConfig;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-public class CustomBeanAttribute extends Attribute {
-  private static final L10N L = new L10N(CustomBeanAttribute.class);
-  
-  private final ConfigType _configType;
-  private final Method _setMethod;
+public class AnnotationAttribute extends Attribute {
+  private static final L10N L = new L10N(AnnotationAttribute.class);
 
-  public CustomBeanAttribute()
+  private String _name;
+  private ConfigType _type;
+
+  public AnnotationAttribute(String name, Class type)
   {
-    this(null, TypeFactory.getType(CustomBeanConfig.class));
+    _name = name;
+    _type = TypeFactory.getType(type);
   }
   
-  public CustomBeanAttribute(Method setMethod, ConfigType configType)
-  {
-    _configType = configType;
-    _setMethod = setMethod;
-  }
-
+  /**
+   * Returns the config type of the attribute value.
+   */
   public ConfigType getConfigType()
   {
-    return _configType;
-  }
-
-  /**
-   * Creates the child bean.
-   */
-  @Override
-    public Object create(Object parent, QName qName)
-    throws ConfigException
-  {
-    String uri = qName.getNamespaceURI();
-    String localName = qName.getLocalName();
-
-    if (! uri.startsWith("urn:java:"))
-      throw new IllegalStateException(L.l("'{0}' is an unexpected namespace, expected 'urn:java:...'", uri));
-
-    String className = uri.substring("uri:java:".length()) + '.' + localName;
-    Class cl = null;
-
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
-    try {
-      cl = Class.forName(className, false, loader);
-    } catch (ClassNotFoundException e) {
-      throw new ConfigException(L.l("'{0}' is an unknown class for element '{1}'",
-				    className, qName), e);
-    }
-
-    CustomBeanConfig config = new CustomBeanConfig(qName, cl);
-
-    // config.setScope("singleton");
-
-    return config;
+    return _type;
   }
   
   /**
    * Sets the value of the attribute
    */
+  @Override
+  public void setText(Object bean, QName name, String value)
+    throws ConfigException
+  {
+    try {
+      AnnotationConfig ann = (AnnotationConfig) bean;
+
+      ann.setAttribute(name.getLocalName(), _type.valueOf(value));
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+  
+  /**
+   * Sets the value of the attribute
+   */
+  @Override
   public void setValue(Object bean, QName name, Object value)
     throws ConfigException
   {
     try {
-      if (_setMethod != null)
-	_setMethod.invoke(bean, value);
+      AnnotationConfig ann = (AnnotationConfig) bean;
+
+      ann.setAttribute(name.getLocalName(), value);
+      //_putMethod.invoke(bean, name.getLocalName(), value);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

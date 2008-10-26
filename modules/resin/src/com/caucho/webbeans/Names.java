@@ -45,7 +45,7 @@ public final class Names {
     return new Named() {
 	public Class annotationType() { return Named.class; }
 
-	public String value() { return name; }
+        public String value() { return name; }
       };
   }
 }

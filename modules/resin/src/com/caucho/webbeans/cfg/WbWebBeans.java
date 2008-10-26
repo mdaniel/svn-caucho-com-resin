@@ -266,9 +266,12 @@ public class WbWebBeans {
 	_pendingComponentList.clear();
 
 	for (ComponentImpl comp : componentList) {
-	  if (comp.getType().isEnabled()) {
+	  /*
+	  if (_deploymentTypes.contains(comp.getDeploymentType())) {
 	    webBeans.addComponent(comp);
 	  }
+	  */
+	  webBeans.addComponent(comp);
 	}
       }
     } catch (Exception e) {

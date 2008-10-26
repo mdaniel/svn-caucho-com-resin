@@ -30,6 +30,7 @@ package javax.webbeans;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -37,7 +38,8 @@ import java.lang.annotation.Target;
  * The @New annotation for web beans
  */
 @BindingType
-@Target({FIELD, METHOD, PARAMETER, TYPE})
+@Documented  
 @Retention(RUNTIME)
+@Target({FIELD, METHOD, PARAMETER, TYPE})
 public @interface New {
 }

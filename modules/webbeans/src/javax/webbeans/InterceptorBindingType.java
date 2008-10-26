@@ -30,13 +30,15 @@ package javax.webbeans;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
  * The @InterceptorBindingType annotation for web beans
  */
-@Target({TYPE})
+@Documented
 @Retention(RUNTIME)
+@Target(ANNOTATION_TYPE)
 public @interface InterceptorBindingType {
 }

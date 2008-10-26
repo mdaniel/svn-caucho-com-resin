@@ -29,21 +29,32 @@
 
 package javax.webbeans;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.*;
+import java.lang.reflect.*;
 
 /**
- * The @Standard DeploymentType for web beans
+ * Usable API for Annotations types.
  */
+public abstract class AnnotationLiteral<T extends Annotation>
+  implements Annotation
+{
+  @SuppressWarnings("unchecked")
+  public final Class<T> annotationType()
+  {
+    Type type = getClass().getGenericSuperclass();
 
-@DeploymentType
-@Documented
-@Retention(RUNTIME)
-@Target({TYPE, METHOD})
-public @interface Standard {
+    if (type instanceof ParameterizedType) {
+      ParameterizedType pType = (ParameterizedType) type;
+
+      return (Class) pType.getActualTypeArguments()[0];
+    }
+    else
+      throw new UnsupportedOperationException(type.toString());
+  }
+
+  @Override
+  public String toString()
+  {
+    return annotationType().getName() + "[]";
+  }
 }

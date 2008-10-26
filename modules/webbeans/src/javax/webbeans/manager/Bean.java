@@ -64,7 +64,7 @@ public abstract class Bean<T>
   /**
    * Returns the bean's deployment type
    */
-  public abstract Class<Annotation> getDeploymentType();
+  public abstract Class<? extends Annotation> getDeploymentType();
 
   /**
    * Returns the bean's name or null if the bean does not have a
@@ -85,7 +85,7 @@ public abstract class Bean<T>
   /**
    * Returns the bean's scope
    */
-  public abstract Class<Annotation> getScopeType();
+  public abstract Class<? extends Annotation> getScopeType();
 
   /**
    * Returns the types that the bean implements

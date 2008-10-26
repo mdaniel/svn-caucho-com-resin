@@ -88,9 +88,9 @@ public class ProducesComponent extends ComponentImpl {
 	setName(((Named) ann).value());
       }
       
-      if (ann.annotationType().isAnnotationPresent(ComponentType.class)) {
-	if (getType() == null)
-	  setType(_webbeans.createComponentType(ann.annotationType()));
+      if (ann.annotationType().isAnnotationPresent(DeploymentType.class)) {
+	if (getDeploymentType() == null)
+	  setDeploymentType(ann.annotationType());
       }
 	
       if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
@@ -117,8 +117,8 @@ public class ProducesComponent extends ComponentImpl {
     if (bindingList.size() > 0)
       setBindingList(bindingList);
     
-    if (getType() == null)
-      setType(_producer.getType());
+    if (getDeploymentType() == null)
+      setDeploymentType(_producer.getDeploymentType());
   }
 
   @Override
@@ -198,7 +198,7 @@ public class ProducesComponent extends ComponentImpl {
     sb.append(".");
     sb.append(_method.getName());
     sb.append("(), @");
-    sb.append(getType().getType().getSimpleName());
+    sb.append(getDeploymentType().getSimpleName());
     sb.append("]");
 
     return sb.toString();

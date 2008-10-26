@@ -88,6 +88,9 @@ public class WebBeansContainer
   private HashMap<Path,WbWebBeans> _webBeansMap
     = new HashMap<Path,WbWebBeans>();
 
+  private HashSet<Class<? extends Annotation>> _deploymentSet
+    = new HashSet<Class<? extends Annotation>>();
+
   private HashMap<Type,WebComponent> _componentMap
     = new HashMap<Type,WebComponent>();
 
@@ -148,6 +151,9 @@ public class WebBeansContainer
     _contextMap.put(ConversationScoped.class, new ConversationScope());
     _contextMap.put(ApplicationScoped.class, new ApplicationScope());
     _contextMap.put(Singleton.class, new SingletonScope());
+
+    _deploymentSet.add(Standard.class);
+    _deploymentSet.add(Production.class);
 
     if (_classLoader != null)
       _classLoader.addScanListener(this);
@@ -359,12 +365,12 @@ public class WebBeansContainer
 
   public void addSingleton(Object object,
 			   String name,
-			   Class componentType)
+			   Class deploymentType)
   {
     SingletonComponent comp = new SingletonComponent(_wbWebBeans, object);
 
     comp.setName(name);
-    comp.setType(_wbWebBeans.createComponentType(componentType));
+    comp.setDeploymentType(deploymentType);
 
     if (name != null) {
       WbBinding binding = new WbBinding();
@@ -453,8 +459,7 @@ public class WebBeansContainer
     if (context != null)
       return (ScopeContext) context;
     else
-      throw new IllegalArgumentException(L.l("'{0}' is an unknown scope.",
-					     scope.getName()));
+      return null;
   }
 
   /**
@@ -606,6 +611,34 @@ public class WebBeansContainer
     }
     else if (_parent != null) {
       return _parent.bind(location, type, bindingList);
+    }
+    else {
+      return null;
+    }
+  }
+
+  /**
+   * Returns the web beans component with a given binding list.
+   */
+  private Set resolve(Type type,
+		      Annotation []bindings)
+  {
+    _wbWebBeans.init();
+    
+    WebComponent component = _componentMap.get(type);
+
+    if (component != null) {
+      Set beans = component.resolve(bindings);
+
+      if (log.isLoggable(Level.FINER))
+	log.finer(this + " bind(" + getSimpleName(type) + ") -> " + beans);
+
+      if (beans != null)
+	return beans;
+    }
+    
+    if (_parent != null) {
+      return _parent.resolve(type, bindings);
     }
     else {
       return null;
@@ -939,7 +972,11 @@ public class WebBeansContainer
    */
   public Manager addBean(Bean<?> bean)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    for (Class type : bean.getTypes()) {
+      addComponentByType(type, (ComponentImpl) bean);
+    }
+
+    return this;
   }
 
   /**
@@ -961,7 +998,7 @@ public class WebBeansContainer
   public <T> Set<Bean<T>> resolveByType(Class<T> type,
 					Annotation... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return resolve(type, bindings);
   }
 
   /**
@@ -973,7 +1010,7 @@ public class WebBeansContainer
   public <T> Set<Bean<T>> resolveByType(TypeLiteral<T> type,
 					Annotation... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return (Set<Bean<T>>) resolve(type.getType(), bindings);
   }
 
   /**
@@ -1264,7 +1301,7 @@ public class WebBeansContainer
       _pendingBindList.clear();
       
       for (ComponentImpl comp : bindList) {
-	if (comp.getType().isEnabled())
+	if (_deploymentSet.contains(comp.getDeploymentType()))
 	  comp.bind();
       }
     } catch (ConfigException e) {

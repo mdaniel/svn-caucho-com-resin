@@ -41,6 +41,7 @@ import com.caucho.xml.QName;
 import java.beans.*;
 import java.io.*;
 import java.net.URL;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
@@ -363,6 +364,9 @@ public class TypeFactory implements AddLoaderListener
       Class compType = type.getComponentType();
       
       return new ArrayType(getType(compType), compType);
+    }
+    else if (Annotation.class.isAssignableFrom(type)) {
+      return new AnnotationInterfaceType(type);
     }
     else if (type.isInterface()) {
       return new InterfaceType(type);
