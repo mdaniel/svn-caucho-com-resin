@@ -289,7 +289,7 @@ public class ConfigContext {
     try {
       _currentBuilder.set(this);
 
-      ConfigType type = TypeFactory.getType(bean.getClass());
+      ConfigType type = TypeFactory.getType(bean);
 
       configureBean(bean, top);
 
@@ -331,7 +331,7 @@ public class ConfigContext {
 
       _dependList = getDependencyList(top);
 
-      ConfigType type = TypeFactory.getType(bean.getClass());
+      ConfigType type = TypeFactory.getType(bean);
 
       configureNode(top, bean, type);
     } finally {
@@ -368,7 +368,7 @@ public class ConfigContext {
 
       _baseUri = attribute.getBaseURI();
       
-      ConfigType type = TypeFactory.getType(bean.getClass());
+      ConfigType type = TypeFactory.getType(bean);
 
       QName qName = ((QAbstractNode) attribute).getQName();
       
@@ -534,7 +534,7 @@ public class ConfigContext {
 				    (Element) childNode);
 
 	if (childBean != null) {
-	  ConfigType childBeanType = TypeFactory.getType(childBean.getClass());
+	  ConfigType childBeanType = TypeFactory.getType(childBean);
 
 	  // server/02e3
 	  // childBeanType.init(childBean);
@@ -575,7 +575,7 @@ public class ConfigContext {
 	childBean = attrStrategy.create(bean, qName);
 
       if (childBean != null) {
-	ConfigType childBeanType = TypeFactory.getType(childBean.getClass());
+	ConfigType childBeanType = TypeFactory.getType(childBean);
 	
 	if (childNode instanceof Element)
 	  configureNode(childNode, childBean, childBeanType);
@@ -634,7 +634,7 @@ public class ConfigContext {
       Object childBean = createResinType(type, (Element) childNode);
 
       if (childBean != null) {
-	ConfigType childBeanType = TypeFactory.getType(childBean.getClass());
+	ConfigType childBeanType = TypeFactory.getType(childBean);
 	
 	childBeanType.init(childBean);
 
@@ -648,7 +648,7 @@ public class ConfigContext {
 
       if ((text = getTextValue(childNode)) != null) {
 	boolean isTrim = isTrim(childNode);
-	  
+
 	if (isEL() && type.isEL()
 	    && (text.indexOf("#{") >= 0 || text.indexOf("${") >= 0)) {
 	  if (isTrim)
@@ -670,7 +670,7 @@ public class ConfigContext {
 	childBean = type.create(null, TEXT);
 
       if (childBean != null) {
-	ConfigType childBeanType = TypeFactory.getType(childBean.getClass());
+	ConfigType childBeanType = TypeFactory.getType(childBean);
 	
 	if (childNode instanceof Element)
 	  configureNode(childNode, childBean, childBeanType);

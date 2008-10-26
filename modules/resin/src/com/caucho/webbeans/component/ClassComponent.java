@@ -63,7 +63,7 @@ public class ClassComponent extends ComponentImpl {
 
   private Constructor _ctor;
   private ConfigProgram []_newArgs;
-  private ComponentImpl []_ctorArgs;
+  private Arg []_ctorArgs;
 
   private Object _scopeAdapter;
 
@@ -386,7 +386,7 @@ public class ClassComponent extends ComponentImpl {
 	args = new Object[_ctorArgs.length];
 
 	for (int i = 0; i < args.length; i++)
-	  args[i] = _ctorArgs[i].create();
+	  args[i] = _ctorArgs[i].eval(env);
       }
       else
 	args = NULL_ARGS;
@@ -440,24 +440,28 @@ public class ClassComponent extends ComponentImpl {
 	Type []param = _ctor.getGenericParameterTypes();
 	Annotation [][]paramAnn = _ctor.getParameterAnnotations();
 
-	ComponentImpl []ctorArgs = new ComponentImpl[param.length];
+	Arg []ctorArgs = new Arg[param.length];
 
 	for (int i = 0; i < param.length; i++) {
 	  ComponentImpl arg;
-	  
+
 	  if (_newArgs != null && i < _newArgs.length) {
 	    ConfigProgram argProgram = _newArgs[i];
 	    ConfigType type = TypeFactory.getType(param[i]);
 
-	    ctorArgs[i] = createArg(type, argProgram);
+	    ctorArgs[i] = new ProgramArg(type, argProgram);
 	  }
 
-	  if (ctorArgs[i] == null)
-	    ctorArgs[i] = _webbeans.bindParameter(loc, param[i], paramAnn[i]);
+	  if (ctorArgs[i] == null) {
+	    ComponentImpl comp = _webbeans.bindParameter(loc, param[i],
+							 paramAnn[i]);
 
-	  if (ctorArgs[i] == null)
-	    throw new ConfigException(L.l("{0} does not have valid arguments",
-					  _ctor));
+	    if (comp == null)
+	      throw new ConfigException(L.l("{0} does not have valid arguments",
+					    _ctor));
+
+	    ctorArgs[i] = new ComponentArg(comp);
+	  }
 	}
 	
 	_ctorArgs = ctorArgs;
@@ -636,5 +640,39 @@ public class ClassComponent extends ComponentImpl {
     }
 
     return observer;
+  }
+
+  abstract static class Arg {
+    abstract public Object eval(ConfigContext env);
+  }
+
+  static class ComponentArg extends Arg {
+    private ComponentImpl _comp;
+
+    ComponentArg(ComponentImpl comp)
+    {
+      _comp = comp;
+    }
+    
+    public Object eval(ConfigContext env)
+    {
+      return _comp.create();
+    }
+  }
+
+  static class ProgramArg extends Arg {
+    private ConfigType _type;
+    private ConfigProgram _program;
+
+    ProgramArg(ConfigType type, ConfigProgram program)
+    {
+      _type = type;
+      _program = program;
+    }
+    
+    public Object eval(ConfigContext env)
+    {
+      return _program.configure(_type, env);
+    }
   }
 }

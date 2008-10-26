@@ -92,10 +92,8 @@ public class RemoteClient extends BeanConfig
 
     comp.setBindingList(getBindingList());
 
-    if (getType() != null)
-      comp.setType(getType());
-    else
-      comp.setType(webBeans.createComponentType(Component.class));
+    if (getDeploymentType() != null)
+      comp.setDeploymentType(getDeploymentType());
 
     comp.init();
 

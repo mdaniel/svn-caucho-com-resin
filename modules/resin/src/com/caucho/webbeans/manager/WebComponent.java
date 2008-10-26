@@ -111,11 +111,13 @@ public class WebComponent {
       else if (matchComp.getBindingList().size() == bindList.size()
 	       && comp.getBindingList().size() != bindList.size()) {
       }
-      else if (matchComp.getType().getPriority() < comp.getType().getPriority()) {
+      else if (getPriority(matchComp.getDeploymentType())
+	       < getPriority(comp.getDeploymentType())) {
 	matchComp = comp;
 	secondComp = null;
       }
-      else if (comp.getType().getPriority() < matchComp.getType().getPriority()) {
+      else if (getPriority(comp.getDeploymentType())
+	       < getPriority(matchComp.getDeploymentType())) {
       }
       else {
 	secondComp = comp;
@@ -182,11 +184,13 @@ public class WebComponent {
       else if (matchComp.getBindingList().size() == bindList.size()
 	       && comp.getBindingList().size() != bindList.size()) {
       }
-      else if (matchComp.getType().getPriority() < comp.getType().getPriority()) {
+      else if (getPriority(matchComp.getDeploymentType())
+	       < getPriority(comp.getDeploymentType())) {
 	matchComp = comp;
 	secondComp = null;
       }
-      else if (comp.getType().getPriority() < matchComp.getType().getPriority()) {
+      else if (getPriority(comp.getDeploymentType())
+	       < getPriority(matchComp.getDeploymentType())) {
       }
       else {
 	secondComp = comp;
@@ -203,6 +207,11 @@ public class WebComponent {
     }
     
     return matchComp;
+  }
+
+  private int getPriority(Class deploymentType)
+  {
+    return 1;
   }
 
   static String getName(Type type)

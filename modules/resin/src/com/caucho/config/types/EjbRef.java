@@ -329,9 +329,8 @@ public class EjbRef extends BaseRef implements ObjectProxy {
       if (comp == null) {
         comp = new ObjectProxyComponent(webBeans, this, _home);
         comp.setName(_ejbRefName);
-        comp.addNameBinding(_ejbRefName);
         // weaker priority
-        comp.setType(webBeans.createComponentType(Standard.class));
+        comp.setDeploymentType(Production.class);
 
         webBeans.addComponent(comp);
       }
@@ -349,9 +348,8 @@ public class EjbRef extends BaseRef implements ObjectProxy {
       if (comp == null) {
         comp = new ObjectProxyComponent(webBeans, this, _remote);
         comp.setName(_ejbRefName);
-        comp.addNameBinding(_ejbRefName);
         // weaker priority
-        comp.setType(webBeans.createComponentType(Standard.class));
+        comp.setDeploymentType(Production.class);
 
         webBeans.addComponent(comp);
       }

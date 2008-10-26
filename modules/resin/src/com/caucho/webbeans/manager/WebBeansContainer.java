@@ -976,6 +976,9 @@ public class WebBeansContainer
       addComponentByType(type, (ComponentImpl) bean);
     }
 
+    if (bean.getName() != null)
+      addComponentByName(bean.getName(), (ComponentImpl) bean);
+    
     return this;
   }
 

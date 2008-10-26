@@ -32,6 +32,7 @@ package com.caucho.config.attribute;
 import java.lang.reflect.*;
 
 import com.caucho.config.*;
+import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.type.*;
 import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.util.L10N;
@@ -63,7 +64,7 @@ public class CustomBeanAttribute extends Attribute {
    * Creates the child bean.
    */
   @Override
-    public Object create(Object parent, QName qName)
+  public Object create(Object parent, QName qName)
     throws ConfigException
   {
     String uri = qName.getNamespaceURI();
@@ -92,6 +93,24 @@ public class CustomBeanAttribute extends Attribute {
   }
   
   /**
+   * Sets the value of the attribute as text
+   */
+  public void setText(Object bean, QName name, String value)
+    throws ConfigException
+  {
+    CustomBeanConfig config = (CustomBeanConfig) create(bean, name);
+
+    if (! value.trim().equals("")) {
+      config.addArg(new TextArgProgram(value));
+    }
+
+    config.init();
+
+    setValue(bean, name, config);
+  }
+  
+  
+  /**
    * Sets the value of the attribute
    */
   public void setValue(Object bean, QName name, Object value)
@@ -102,6 +121,26 @@ public class CustomBeanAttribute extends Attribute {
 	_setMethod.invoke(bean, value);
     } catch (Exception e) {
       throw ConfigException.create(e);
+    }
+  }
+  
+  static class TextArgProgram extends ConfigProgram {
+    private String _arg;
+
+    TextArgProgram(String arg)
+    {
+      _arg = arg;
+    }
+    
+    public void inject(Object bean, ConfigContext env)
+    {
+      throw new UnsupportedOperationException(getClass().getName());
+    }
+
+    public Object configure(ConfigType type, ConfigContext env)
+      throws ConfigException
+    {
+      return type.valueOf(_arg);
     }
   }
 }

@@ -46,6 +46,7 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 import com.caucho.webbeans.cfg.WbComponentConfig;
+import com.caucho.webbeans.component.ComponentImpl;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
@@ -878,14 +879,16 @@ public class OsgiBundle implements Bundle
      */
     public void addCustomBean(CustomBeanConfig bean)
     {
-      WbComponentConfig comp = bean.getComponent();
+      ComponentImpl comp = bean.getComponent();
 
-      if (comp.isService() && comp.getComponent() != null) {
+      /*
+      if (comp.isService()) {
 	WebBeansContainer webBeans
 	  = WebBeansContainer.create(_manager.getParentLoader());
 
-	webBeans.addComponent(comp.getComponent());
+	webBeans.addComponent(comp);
       }
+      */
     }
   }
 

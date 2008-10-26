@@ -5,15 +5,20 @@ start = w_WebBeans
 w_Any = text | (attribute * {string} | element * { w_Any })*
 
 w_bean-Custom = element * - w:* {
-  w_bean-Field-Custom*
+  (w_bean-Field-Custom*
 
-  & element Named { attribute value { string }? | string }?
+   & (attribute value { string }
+      | element value { w_Any })*
   
-  & element ApplicationScoped { empty }?
-  & element ConversationScoped { empty }?
-  & element RequestScoped { empty }?
-  & element SessionScoped { empty }?
-  & element Dependent { empty }?
+   & (attribute name { string }
+      | element Named { attribute value { string }? | string }?)
+  
+   & element ApplicationScoped { empty }?
+   & element ConversationScoped { empty }?
+   & element RequestScoped { empty }?
+   & element SessionScoped { empty }?
+   & element Dependent { empty }?)
+  | string
 }
 
 w_bean-Field-Custom = element * - w:* {

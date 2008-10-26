@@ -33,6 +33,7 @@ import com.caucho.config.*;
 import com.caucho.config.attribute.*;
 import com.caucho.config.program.*;
 import com.caucho.config.types.RawString;
+import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.loader.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
@@ -79,6 +80,9 @@ public class TypeFactory implements AddLoaderListener
   
   private final HashMap<String,ConfigType> _typeMap
     = new HashMap<String,ConfigType>();
+  
+  private final HashMap<String,CustomBeanType> _customBeanMap
+    = new HashMap<String,CustomBeanType>();
 
   private final HashMap<QName,ConfigType> _attrMap
     = new HashMap<QName,ConfigType>();
@@ -116,6 +120,17 @@ public class TypeFactory implements AddLoaderListener
       _parent = null;
 
     init(loader);
+  }
+
+  /**
+   * Returns the appropriate strategy.
+   */
+  public static ConfigType getType(Object bean)
+  {
+    if (bean instanceof CustomBeanConfig)
+      return ((CustomBeanConfig) bean).getConfigType();
+	
+    return getType(bean.getClass());
   }
 
   /**
@@ -376,6 +391,30 @@ public class TypeFactory implements AddLoaderListener
     }
     else
       return new BeanType(type);
+  }
+
+  /**
+   * Returns the appropriate strategy.
+   */
+  public static CustomBeanType getCustomBeanType(Class type)
+  {
+    TypeFactory factory = getFactory(type.getClassLoader());
+
+    return factory.getCustomBeanTypeImpl(type);
+  }
+
+  private CustomBeanType getCustomBeanTypeImpl(Class type)
+  {
+    synchronized (_customBeanMap) {
+      CustomBeanType beanType = _customBeanMap.get(type.getName());
+
+      if (beanType == null) {
+	beanType = new CustomBeanType(type);
+	_customBeanMap.put(type.getName(), beanType);
+      }
+
+      return beanType;
+    }
   }
 
   /**

@@ -90,7 +90,7 @@ public abstract class Attribute {
   {
     if (value.trim().equals(""))
       return;
-    
+
     throw new ConfigException(L.l("'{0}' does not allow text for attribute {1}.",
 				  getConfigType().getTypeName(),
 				  name));

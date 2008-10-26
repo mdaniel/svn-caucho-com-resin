@@ -72,6 +72,8 @@ public class CustomBeanConfig {
   private ClassComponent _component = new ClassComponent();
   private ConfigType _configType;
 
+  private ArrayList<ConfigProgram> _args;
+
   private QName _name;
 
   private String _filename;
@@ -87,7 +89,12 @@ public class CustomBeanConfig {
     _component.setInstanceClass(cl);
     // _component.setScopeClass(Dependent.class);
 
-    _configType = TypeFactory.getType(cl);
+    _configType = TypeFactory.getCustomBeanType(cl);
+  }
+
+  public ConfigType getConfigType()
+  {
+    return _configType;
   }
   
   public void setConfigLocation(String filename, int line)
@@ -117,6 +124,14 @@ public class CustomBeanConfig {
     _component.setScope(scope);
   }
   */
+
+  public void addArg(ConfigProgram arg)
+  {
+    if (_args == null)
+      _args = new ArrayList<ConfigProgram>();
+
+    _args.add(arg);
+  }
 
   private void addInitProgram(ConfigProgram program)
   {
@@ -186,7 +201,7 @@ public class CustomBeanConfig {
     return null;
   }
 
-  private void addAnnotation(Annotation ann)
+  public void addAnnotation(Annotation ann)
   {
     Class type = ann.annotationType();
 
@@ -262,8 +277,9 @@ public class CustomBeanConfig {
   {
     String uri = name.getNamespaceURI();
 
-    if (uri.equals(RESIN_NS))
-      uri = "urn:java:com.caucho.webbeans";
+    if (uri.equals(RESIN_NS)) {
+      return createResinClass(name.getLocalName());
+    }
 
     if (! uri.startsWith("urn:java:"))
       return null;
@@ -285,6 +301,33 @@ public class CustomBeanConfig {
     }
   }
 
+  private Class createResinClass(String name)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+    try {
+      String className = "javax.webbeans." + name;
+      
+      Class cl = Class.forName(className, false, loader);
+
+      return cl;
+    } catch (ClassNotFoundException e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+    
+    try {
+      String className = "com.caucho.config." + name;
+      
+      Class cl = Class.forName(className, false, loader);
+
+      return cl;
+    } catch (ClassNotFoundException e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    return null;
+  }
+
   public ComponentImpl getComponent()
   {
     return _component;
@@ -294,6 +337,9 @@ public class CustomBeanConfig {
   public void init()
   {
     WebBeansContainer webBeans = WebBeansContainer.create();
+
+    if (_args != null)
+      _component.setNewArgs(_args);
 
     _component.init();
 

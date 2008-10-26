@@ -124,7 +124,6 @@ abstract public class SessionServer extends AbstractServer
 	  comp.setTargetType(api);
 
 	  comp.setName(beanName);
-	  comp.addNameBinding(beanName);
 
 	  comp.init();
 	  webBeans.addComponentByName(beanName, comp);
@@ -141,7 +140,6 @@ abstract public class SessionServer extends AbstractServer
 	  comp.setTargetType(api);
 
 	  comp.setName(beanName);
-	  comp.addNameBinding(beanName);
 
 	  comp.init();
 	  webBeans.addComponentByName(beanName, comp);

@@ -47,8 +47,7 @@ abstract public class FactoryComponent extends ComponentImpl {
 
     setTargetType(targetType);
     setName(name);
-    addNameBinding(name);
-    setType(_webbeans.createComponentType(Component.class));
+    setDeploymentType(Production.class);
   }
 
   @Override

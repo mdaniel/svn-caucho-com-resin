@@ -62,7 +62,7 @@ abstract public class AbstractBeanConfig {
 
   private Class _cl;
 
-  private WbComponentType _type;
+  private Class<? extends Annotation> _deploymentType;
   
   private ArrayList<WbBinding> _bindingList
     = new ArrayList<WbBinding>();
@@ -153,21 +153,19 @@ abstract public class AbstractBeanConfig {
    */
   public void setComponentType(Class type)
   {
-    if (! type.isAnnotationPresent(ComponentType.class))
-      throw new ConfigException(L.l("'{0}' is an invalid component annotation.  Component types must be annotated by @ComponentType.",
+    if (! type.isAnnotationPresent(DeploymentType.class))
+      throw new ConfigException(L.l("'{0}' is an invalid component annotation because deployment types must be annotated by @DeploymentType.",
 				    type.getName()));
 
-    WebBeansContainer webBeans = WebBeansContainer.create();
-    
-    _type = webBeans.createComponentType(type);
+    _deploymentType = type;
   }
 
   /**
    * Gets the component type.
    */
-  public WbComponentType getComponentType()
+  public Class<? extends Annotation> getDeploymentType()
   {
-    return _type;
+    return _deploymentType;
   }
 
   /**
@@ -270,13 +268,11 @@ abstract public class AbstractBeanConfig {
 
     comp.setBindingList(_bindingList);
 
-    if (_type != null)
-      comp.setType(_type);
-    else
-      comp.setType(wbWebBeans.createComponentType(ComponentType.class));
+    if (_deploymentType != null)
+      comp.setDeploymentType(_deploymentType);
 
     if (_scope != null)
-      comp.setScope(webBeans.getScopeContext(_scope));
+      comp.setScopeType(_scope);
 
     comp.init();
 
