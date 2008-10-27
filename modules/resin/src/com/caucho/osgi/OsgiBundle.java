@@ -109,6 +109,8 @@ public class OsgiBundle implements Bundle
   private int _state;
   private long _lastModified;
 
+  private OsgiBundleAdmin _admin;
+
   OsgiBundle(long id,
 	     OsgiManager manager,
 	     JarPath jar,
@@ -180,6 +182,9 @@ public class OsgiBundle implements Bundle
     }
 
     _state = INSTALLED;
+
+    _admin = new OsgiBundleAdmin(this);
+    _admin.register();
   }
 
   OsgiManager getManager()

@@ -84,6 +84,8 @@ public class WebBeansContainer
   private ClassLoader _tempClassLoader;
 
   private WbWebBeans _wbWebBeans;
+
+  private int _beanId;
   
   private HashMap<Path,WbWebBeans> _webBeansMap
     = new HashMap<Path,WbWebBeans>();
@@ -258,6 +260,8 @@ public class WebBeansContainer
     if (comp.isSingleton()) {
       _pendingSingletonList.add(comp);
     }
+
+    registerJmx(comp);
   }
   
   public void addComponentByName(String name, ComponentImpl comp)
@@ -978,8 +982,18 @@ public class WebBeansContainer
 
     if (bean.getName() != null)
       addComponentByName(bean.getName(), (ComponentImpl) bean);
+
+    registerJmx(bean);
     
     return this;
+  }
+
+  private void registerJmx(Bean bean)
+  {
+    int id = _beanId++;
+    WebBeanAdmin admin = new WebBeanAdmin(bean, _beanId);
+
+    admin.register();
   }
 
   /**

@@ -320,27 +320,47 @@ function display_jmx($mbean_server, $group_mbeans)
 	echo "<td>" . $attr_name . "</td>";
 
 	$v = $mbean->$attr_name;
+	
+	echo "<td>";
 
-	if ($v === false)
-	  $v = "false";
-	else if ($v === true)
-	  $v = "true";
-	else if ($v === null)
-	  $v = "null";
-	else
-	  $v = (string) $v;
+	display_jmx_data($v);
+	
+        echo "</td>\n";
 
-        $v = substr($v, 0, 60);
-	if (strlen($v) >= 60)
-	  $v .= "...";
-	  
-	echo "<td>" . $v . "</td>\n";
         echo "</tr>";
       }
     }
   }
   
   echo "</table>";
+}
+
+function display_jmx_data($v)
+{
+  if (is_array($v)) {
+    echo "<pre>{\n";
+    foreach ($v as $k => $v) {
+      echo "  ";
+      if (is_string($v))
+        echo "\"$v\",\n";
+      else
+        var_dump($v);
+    }
+    echo "}</pre>";
+  }
+  else if ($v === false)
+    echo "false";
+  else if ($v === true)
+    echo "true";
+  else if ($v === null)
+    echo "null";
+  else {
+    $v = (string) $v;
+
+    $v = wordwrap($v);
+	  
+    echo $v;
+  }
 }
 
 function jmx_partition($mbean_list, $keys)

@@ -61,20 +61,11 @@ foreach ($mbean_group as $group_name => $group_mbeans) {
 
 	$v = $mbean->$attr_name;
 
-	if ($v === false)
-	  $v = "false";
-	else if ($v === true)
-	  $v = "true";
-	else if ($v === null)
-	  $v = "null";
-	else
-	  $v = (string) $v;
-
-        $v = substr($v, 0, 60);
-	if (strlen($v) >= 60)
-	  $v .= "...";
+	echo "<td>";
+	
+	display_jmx_data($v);
 	  
-	echo "<td>" . $v . "</td>\n";
+	echo "</td>\n";
         echo "</tr>";
       }
     }
