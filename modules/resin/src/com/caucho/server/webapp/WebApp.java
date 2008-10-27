@@ -322,7 +322,7 @@ public class WebApp extends ServletContextImpl
 
     _controller = controller;
     _appDir = controller.getRootDirectory();
-
+    
     try {
       _classLoader
 	= new EnvironmentClassLoader(controller.getParentClassLoader(),
@@ -2177,6 +2177,15 @@ public class WebApp extends ServletContextImpl
   }
 
   /**
+   * Fills the invocation for a rewrite-dispatch/dispatch request.
+   */
+  public void buildDispatchInvocation(Invocation invocation)
+    throws ServletException
+  {
+    buildDispatchInvocation(invocation, _filterMapper);
+  }
+
+  /**
    * Fills the invocation for subrequests.
    */
   public void buildDispatchInvocation(Invocation invocation,
@@ -2249,6 +2258,7 @@ public class WebApp extends ServletContextImpl
     Invocation includeInvocation = new SubInvocation();
     Invocation forwardInvocation = new SubInvocation();
     Invocation errorInvocation = new SubInvocation();
+    Invocation dispatchInvocation = new SubInvocation();
     InvocationDecoder decoder = new InvocationDecoder();
 
     String rawURI = escapeURL(_contextPath + url);
@@ -2257,11 +2267,13 @@ public class WebApp extends ServletContextImpl
       decoder.splitQuery(includeInvocation, rawURI);
       decoder.splitQuery(forwardInvocation, rawURI);
       decoder.splitQuery(errorInvocation, rawURI);
+      decoder.splitQuery(dispatchInvocation, rawURI);
 
       if (_parent != null) {
         _parent.buildIncludeInvocation(includeInvocation);
         _parent.buildForwardInvocation(forwardInvocation);
         _parent.buildErrorInvocation(errorInvocation);
+        _parent.buildDispatchInvocation(dispatchInvocation);
       }
       else if (! _lifecycle.waitForActive(_activeWaitTime)) {
 	throw new IllegalStateException(L.l("'{0}' is restarting and is not yet ready to receive requests",
@@ -2279,11 +2291,16 @@ public class WebApp extends ServletContextImpl
         chain = _servletMapper.mapServlet(errorInvocation);
         _errorFilterMapper.buildDispatchChain(errorInvocation, chain);
         errorInvocation.setWebApp(this);
+
+        chain = _servletMapper.mapServlet(dispatchInvocation);
+        _filterMapper.buildDispatchChain(dispatchInvocation, chain);
+        dispatchInvocation.setWebApp(this);
       }
 
       disp = new RequestDispatcherImpl(includeInvocation,
                                        forwardInvocation,
                                        errorInvocation,
+				       dispatchInvocation,
                                        this);
 
       getDispatcherCache().put(url, disp);
@@ -2391,6 +2408,7 @@ public class WebApp extends ServletContextImpl
       disp = new RequestDispatcherImpl(loginInvocation,
                                        loginInvocation,
                                        errorInvocation,
+				       loginInvocation,
                                        this);
       disp.setLogin(true);
 

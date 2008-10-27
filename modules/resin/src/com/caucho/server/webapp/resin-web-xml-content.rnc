@@ -559,6 +559,9 @@ r_rewrite-dispatch-Contents =
   element dispatch {
     r_rewrite-Group
 
+    & (attribute target { string }
+       | element target { string })?
+
     & r_rewrite-conditions-Type
   }*
 
