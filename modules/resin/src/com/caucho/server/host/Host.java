@@ -440,6 +440,13 @@ public class Host extends WebAppContainer
   }
 
   /**
+   * Initialization before configuration
+   */
+  public void preConfigInit()
+  {
+  }
+
+  /**
    * Starts the host.
    */
   public void start()

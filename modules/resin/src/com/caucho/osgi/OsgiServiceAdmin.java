@@ -27,49 +27,63 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.management.server;
 
-import com.caucho.jmx.Description;
-import com.caucho.jmx.Units;
+package com.caucho.osgi;
 
-import java.util.Date;
+import com.caucho.management.server.*;
+
+import java.util.Map;
+import org.osgi.framework.Bundle;
 
 /**
- * MBean API for an OsgiBundle
- *
- * <pre>
- * resin:type=OsgiBundle,name=com.caucho.MyBundle
- * </pre>
+ * Administration for an OSGI service
  */
-@Description("Manages an OSGI Bundle")
-public interface OsgiBundleMXBean extends ManagedObjectMXBean {
-  /**
-   * Returns the symbolic name
-   */
-  @Description("Returns the bundle's symbolic name")
-  public String getSymbolicName();
+public class OsgiServiceAdmin extends AbstractManagedObject
+  implements OsgiServiceMXBean
+{
+  private OsgiServiceRegistration _service;
   
+  public OsgiServiceAdmin(OsgiServiceRegistration service)
+  {
+    _service = service;
+  }
+
   /**
-   * Returns the bundle id
+   * Returns the name as symbolic name
    */
-  @Description("Returns the bundle's osgi id")
-  public long getBundleId();
-  
+  public String getName()
+  {
+    String []classNames = getObjectClass();
+
+    if (classNames != null && classNames.length > 0)
+      return classNames[0];
+    else
+      return null;
+  }
+
   /**
-   * Returns the bundle location URL
+   * Returns the external classes
    */
-  @Description("Returns the bundle's osgi location")
-  public String getLocation();
-  
+  public String []getObjectClass()
+  {
+    return (String []) _service.getProperty("objectClass");
+  }
+
   /**
-   * Returns the bundle state
+   * Returns the owning bundle
    */
-  @Description("Returns the bundle's state")
-  public String getState();
-  
-  /**
-   * Returns the bundle version
-   */
-  @Description("Returns the bundle's version")
-  public String getVersion();
+  public OsgiBundleMXBean getBundle()
+  {
+    return _service.getBundle().getAdmin();
+  }
+
+  void register()
+  {
+    registerSelf();
+  }
+
+  void unregister()
+  {
+    unregisterSelf();
+  }
 }

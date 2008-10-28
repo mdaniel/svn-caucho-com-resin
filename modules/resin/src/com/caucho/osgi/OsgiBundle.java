@@ -40,6 +40,7 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.Loader;
 import com.caucho.make.DependencyContainer;
+import com.caucho.management.server.OsgiBundleMXBean;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
@@ -124,6 +125,8 @@ public class OsgiBundle implements Bundle
     _program = program;
     _isExport = isExport;
 
+    _bundleContext = new OsgiBundleContext(manager, this);
+
     if (jar != null) {
       try {
 	Manifest manifest = jar.getManifest();
@@ -180,19 +183,14 @@ public class OsgiBundle implements Bundle
 				      _symbolicName + "-" + id,
 				      jar.getContainer());
     }
-
-    _state = INSTALLED;
-
-    _admin = new OsgiBundleAdmin(this);
-    _admin.register();
   }
 
-  OsgiManager getManager()
+  protected OsgiManager getManager()
   {
     return _manager;
   }
   
-  ClassLoader getClassLoader()
+  protected ClassLoader getClassLoader()
   {
     return _loader;
   }
@@ -200,6 +198,19 @@ public class OsgiBundle implements Bundle
   ArrayList<ExportBundleClassLoader> getExports()
   {
     return _exportList;
+  }
+
+  public OsgiVersion getVersion()
+  {
+    return _version;
+  }
+
+  void install()
+  {
+    _state = INSTALLED;
+
+    _admin = new OsgiBundleAdmin(this);
+    _admin.register();
   }
 
   /**
@@ -238,8 +249,6 @@ public class OsgiBundle implements Bundle
 
       BundleActivator activator = (BundleActivator) cl.newInstance();
 
-      _bundleContext = new OsgiBundleContext(_manager, this);
-      
       _state = STARTING;
 
       activator.start(_bundleContext);
@@ -422,6 +431,11 @@ public class OsgiBundle implements Bundle
   public String getSymbolicName()
   {
     return _symbolicName;
+  }
+
+  void setSymbolicName(String symbolicName)
+  {
+    _symbolicName = symbolicName;
   }
 
   /**
@@ -644,7 +658,7 @@ public class OsgiBundle implements Bundle
   public Class loadClass(String name)
     throws ClassNotFoundException
   {
-    return Class.forName(name, false, _loader);
+    return Class.forName(name, false, getClassLoader());
   }
 
   /**
@@ -672,7 +686,7 @@ public class OsgiBundle implements Bundle
   public Enumeration getResources(String name)
     throws IOException
   {
-    return _loader.getResources(name);
+    return getClassLoader().getResources(name);
   }
 
   /**
@@ -747,6 +761,14 @@ public class OsgiBundle implements Bundle
   public BundleContext getBundleContext()
   {
     return _bundleContext;
+  }
+
+  /**
+   * Returns the admin
+   */
+  public OsgiBundleMXBean getAdmin()
+  {
+    return _admin;
   }
 
   @Override

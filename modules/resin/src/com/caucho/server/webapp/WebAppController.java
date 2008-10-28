@@ -107,9 +107,6 @@ public class WebAppController
     _container = container;
 
     setContextPath(contextPath);
-
-    getVariableMap().put("app", new Var());
-    getVariableMap().put("webApp", new Var());
   }
 
   /**
@@ -482,8 +479,6 @@ public class WebAppController
   @Override
   protected void initBegin()
   {
-    getVariableMap().put("app-dir", getRootDirectory());
-
     super.initBegin();
   }
 
@@ -519,13 +514,8 @@ public class WebAppController
     throws Throwable
   {
     WebBeansContainer webBeans = WebBeansContainer.create();
-    webBeans.addSingleton(app, getContextPath(), Standard.class);
+    webBeans.addSingleton(app, null, Standard.class);
     webBeans.addSingleton(getVar(), "webApp", Standard.class);
-    webBeans.addSingleton(getVar(), "app", Standard.class);
-
-    for (Map.Entry<String,Object> entry : getVariableMap().entrySet()) {
-      webBeans.addSingleton(entry.getValue(), entry.getKey(), Standard.class);
-    }
     
     app.setRegexp(_regexpValues);
     app.setDynamicDeploy(isDynamicDeploy());

@@ -82,6 +82,7 @@ public class BeanType extends ConfigType
   private Method _setParent;
   private Method _replaceObject;
   private Method _setConfigLocation;
+  private Method _setConfigNode;
   
   private Attribute _addText;
   private Attribute _addProgram;
@@ -167,6 +168,14 @@ public class BeanType extends ConfigType
   public void beforeConfigure(ConfigContext env, Object bean, Node node)
   {
     super.beforeConfigure(env, bean, node);
+
+    if (_setConfigNode != null) {
+      try {
+	_setConfigNode.invoke(bean, node);
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+    }
 
     if (_setConfigLocation != null && node instanceof QNode) {
       String filename = ((QNode) node).getFilename();
@@ -452,6 +461,9 @@ public class BeanType extends ConfigType
 	
 	if (_setConfigLocation == null)
 	  _setConfigLocation = parentBean._setConfigLocation;
+	
+	if (_setConfigNode == null)
+	  _setConfigNode = parentBean._setConfigNode;
 
 	if (_addText == null)
 	  _addText = parentBean._addText;
@@ -541,6 +553,11 @@ public class BeanType extends ConfigType
 		&& paramTypes[0].equals(String.class)
 		&& paramTypes[1].equals(int.class))) {
 	_setConfigLocation = method;
+      }
+      else if ((name.equals("setConfigNode")
+		&& paramTypes.length == 1
+		&& paramTypes[0].equals(Node.class))) {
+	_setConfigNode = method;
       }
       else if ((name.equals("addCustomBean")
 		&& paramTypes.length == 1

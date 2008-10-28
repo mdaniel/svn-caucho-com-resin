@@ -253,7 +253,7 @@ public class JspCompilerInstance {
     if (appDir == null && app != null)
       appDir = app.getAppDir();
 
-    if (app != null && app.has23Config())
+    if (app != null && app.hasPre23Config())
       _parseState.setELIgnoredDefault(true);
 
     JspConfig jspConfig = null;
@@ -323,7 +323,7 @@ public class JspCompilerInstance {
       _parseState.setJspPropertyGroup(jspPropertyGroup);
       _parseState.setSession(jspPropertyGroup.isSession());
       _parseState.setScriptingInvalid(jspPropertyGroup.isScriptingInvalid());
-      
+
       if (jspPropertyGroup.isELIgnored() != null)
 	_parseState.setELIgnored(Boolean.TRUE.equals(jspPropertyGroup.isELIgnored()))
 	  ;
@@ -527,10 +527,8 @@ public class JspCompilerInstance {
 	WebApp app = _jspCompiler.getWebApp();
 
 	// jsp/0135
-	/*
-	if (_jspPropertyGroup == null && app != null && app.has23Config())
-   	  _parseState.setELIgnored(true);
-	*/
+	if (app != null && app.hasPre23Config())
+   	  _parseState.setELIgnoredDefault(true);
 	
 	_parser.parse(_jspPath, _uri);
       }

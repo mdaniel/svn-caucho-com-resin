@@ -39,6 +39,12 @@ public interface EnvironmentDeployInstance extends DeployInstance {
    * Sets the root.
    */
   public void setRootDirectory(Path root);
+
+  /**
+   * Initialization before any configuration
+   */
+  public void preConfigInit()
+    throws Exception;
   
   /**
    * Initialize the instance.

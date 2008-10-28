@@ -785,6 +785,7 @@ public class WebAppContainer
       decoder.splitQuery(includeInvocation, rawURI);
       decoder.splitQuery(forwardInvocation, rawURI);
       decoder.splitQuery(errorInvocation, rawURI);
+      decoder.splitQuery(dispatchInvocation, rawURI);
 
       buildIncludeInvocation(includeInvocation);
       buildForwardInvocation(forwardInvocation);

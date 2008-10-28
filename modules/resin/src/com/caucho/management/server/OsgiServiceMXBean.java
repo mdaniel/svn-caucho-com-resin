@@ -35,41 +35,21 @@ import com.caucho.jmx.Units;
 import java.util.Date;
 
 /**
- * MBean API for an OsgiBundle
+ * MBean API for an OsgiService
  *
  * <pre>
- * resin:type=OsgiBundle,name=com.caucho.MyBundle
+ * resin:type=OsgiService,name=com.caucho.MyBundle
  * </pre>
  */
-@Description("Manages an OSGI Bundle")
-public interface OsgiBundleMXBean extends ManagedObjectMXBean {
+@Description("Manages an OSGI Service")
+public interface OsgiServiceMXBean extends ManagedObjectMXBean {
   /**
-   * Returns the symbolic name
+   * Returns the bundle
    */
-  @Description("Returns the bundle's symbolic name")
-  public String getSymbolicName();
+  public OsgiBundleMXBean getBundle();
   
   /**
-   * Returns the bundle id
+   * Returns the external classes
    */
-  @Description("Returns the bundle's osgi id")
-  public long getBundleId();
-  
-  /**
-   * Returns the bundle location URL
-   */
-  @Description("Returns the bundle's osgi location")
-  public String getLocation();
-  
-  /**
-   * Returns the bundle state
-   */
-  @Description("Returns the bundle's state")
-  public String getState();
-  
-  /**
-   * Returns the bundle version
-   */
-  @Description("Returns the bundle's version")
-  public String getVersion();
+  public String []getObjectClass();
 }

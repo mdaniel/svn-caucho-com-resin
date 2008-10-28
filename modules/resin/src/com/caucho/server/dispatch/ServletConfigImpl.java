@@ -39,6 +39,7 @@ import com.caucho.jsp.Page;
 import com.caucho.jsp.QServlet;
 import com.caucho.naming.Jndi;
 import com.caucho.remote.server.*;
+import com.caucho.security.BasicPrincipal;
 import com.caucho.server.connection.StubServletRequest;
 import com.caucho.server.connection.StubServletResponse;
 import com.caucho.server.webapp.WebApp;
@@ -52,6 +53,7 @@ import javax.naming.NamingException;
 import javax.servlet.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.security.Principal;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -106,6 +108,8 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
 
   private Object _servlet;
   private FilterChain _servletChain;
+
+  private Principal _runAs;
 
   /**
    * Creates a new servlet configuration object.
@@ -284,6 +288,17 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   public Enumeration getInitParameterNames()
   {
     return Collections.enumeration(_initParams.keySet());
+  }
+
+  /**
+   * Sets the run-as
+   */
+  public void setRunAs(RunAs runAs)
+  {
+    String roleName = runAs.getRoleName();
+
+    if (roleName != null)
+      _runAs = new BasicPrincipal(roleName);
   }
 
   /**
@@ -958,5 +973,19 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
   public String toString()
   {
     return "ServletConfigImpl[name=" + _servletName + ",class=" + _servletClass + "]";
+  }
+
+  public static class RunAs {
+    private String _roleName;
+
+    public void setRoleName(String roleName)
+    {
+      _roleName = roleName;
+    }
+
+    public String getRoleName()
+    {
+      return _roleName;
+    }
   }
 }

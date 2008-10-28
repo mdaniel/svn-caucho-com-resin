@@ -40,6 +40,7 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.vfs.*;
 
 import javax.annotation.PostConstruct;
@@ -56,24 +57,30 @@ import java.util.zip.*;
 import org.osgi.framework.*;
 
 /**
- * An osgi-bundle
+ * An osgi-bundle for exporting web-beans events
  */
-public class OsgiSystemBundle extends OsgiBundle
+public class AbstractOsgiBundle extends OsgiBundle
 {
-  private static final L10N L = new L10N(OsgiSystemBundle.class);
-  private static final Logger log
-    = Logger.getLogger(OsgiSystemBundle.class.getName());
-
-  OsgiSystemBundle(OsgiManager manager)
+  protected AbstractOsgiBundle(OsgiManager manager)
   {
-    super(0, manager, null, null, false);
+    this(manager, null);
+  }
+  
+  protected AbstractOsgiBundle(OsgiManager manager, String name)
+  {
+    super(manager.nextBundleId(), manager, null, null, false);
 
-    setSymbolicName("systemBundle");
+    manager.addBundle(this);
+
+    if (name == null)
+      name = getClass().getName();
+    
+    setSymbolicName(name);
 
     install();
   }
 
-  ClassLoader getClassLoader()
+  protected ClassLoader getClassLoader()
   {
     return getManager().getParentLoader();
   }
@@ -87,7 +94,7 @@ public class OsgiSystemBundle extends OsgiBundle
    */
   public String getLocation()
   {
-    return "systemLoader";
+    return getClass().getName();
   }
 
   /**
@@ -96,6 +103,7 @@ public class OsgiSystemBundle extends OsgiBundle
   public void start(int options)
     throws BundleException
   {
+    start();
   }
 
   /**
@@ -244,22 +252,5 @@ public class OsgiSystemBundle extends OsgiBundle
 				 boolean recurse)
   {
     throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Returns the bundle's context
-   */
-  public BundleContext getBundleContext()
-  {
-    return null;
-  }
-
-  @Override
-  public String toString()
-  {
-    return (getClass().getSimpleName()
-	    + "[" + getBundleId()
-	    + "," + getSymbolicName()
-	    + "," + getLocation() + "]");
   }
 }

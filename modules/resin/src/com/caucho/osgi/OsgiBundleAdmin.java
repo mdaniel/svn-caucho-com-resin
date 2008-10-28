@@ -32,6 +32,9 @@ package com.caucho.osgi;
 
 import com.caucho.management.server.*;
 
+import java.util.Map;
+import org.osgi.framework.Bundle;
+
 /**
  * Administration for an OSGI bundle
  */
@@ -43,6 +46,11 @@ public class OsgiBundleAdmin extends AbstractManagedObject
   public OsgiBundleAdmin(OsgiBundle bundle)
   {
     _bundle = bundle;
+  }
+
+  protected void addObjectNameProperties(Map<String,String> props)
+  {
+    props.put("id", String.valueOf(_bundle.getBundleId()));
   }
 
   /**
@@ -59,6 +67,55 @@ public class OsgiBundleAdmin extends AbstractManagedObject
   public String getSymbolicName()
   {
     return _bundle.getSymbolicName();
+  }
+
+  /**
+   * Returns the bundle id
+   */
+  public long getBundleId()
+  {
+    return _bundle.getBundleId();
+  }
+
+  /**
+   * Returns the bundle location
+   */
+  public String getLocation()
+  {
+    return _bundle.getLocation();
+  }
+
+  /**
+   * Returns the bundle state
+   */
+  public String getState()
+  {
+    int state = _bundle.getState();
+
+    switch (state) {
+    case Bundle.UNINSTALLED:
+      return "UNINSTALLED";
+    case Bundle.INSTALLED:
+      return "INSTALLED";
+    case Bundle.RESOLVED:
+      return "RESOLVED";
+    case Bundle.STARTING:
+      return "STARTING";
+    case Bundle.STOPPING:
+      return "STOPPING";
+    case Bundle.ACTIVE:
+      return "ACTIVE";
+    default:
+      return "state(" + Integer.toHexString(state) + ")";
+    }
+  }
+
+  /**
+   * Returns the bundle version
+   */
+  public String getVersion()
+  {
+    return _bundle.getVersion().toVersionString();
   }
 
   void register()

@@ -76,9 +76,8 @@ public class JspDirectivePage extends JspNode {
 
       if (! _parseState.setELIgnored(isIgnored))
 	throw error(L.l("isELIgnored values conflict"));
-
-      _parseState.markELIgnoredSet();
     }
+    
     /*
     else if (name.equals("isScriptingInvalid"))
       _parseState.setScriptingInvalid(value.equals("true"));

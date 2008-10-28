@@ -49,6 +49,8 @@ import com.caucho.make.AlwaysModified;
 import com.caucho.make.DependencyContainer;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.naming.Jndi;
+import com.caucho.osgi.OsgiBundle;
+import com.caucho.osgi.OsgiManager;
 import com.caucho.server.cache.AbstractCache;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
@@ -278,6 +280,8 @@ public class WebApp extends ServletContextImpl
 
   private boolean _cookieHttpOnly;
 
+  private OsgiBundle _osgiBundle;
+
   // special
   private int _jspState;
   private JspPropertyGroup _jsp;
@@ -330,11 +334,20 @@ public class WebApp extends ServletContextImpl
     _controller = controller;
     _appDir = controller.getRootDirectory();
 
-    try {
-      _classLoader
-	= EnvironmentClassLoader.create(controller.getParentClassLoader(),
-					"web-app:" + getURL());
+    setParent(controller.getContainer());
 
+    _classLoader
+      = EnvironmentClassLoader.create(controller.getParentClassLoader(),
+				      "web-app:" + getURL());
+    
+    _lifecycle = new Lifecycle(log, toString(), Level.INFO);
+
+    initConstructor();
+  }
+
+  private void initConstructor()
+  {
+    try {
       // the JSP servlet needs to initialize the JspFactory
       JspServlet.initStatic();
 
@@ -343,8 +356,6 @@ public class WebApp extends ServletContextImpl
       // _classLoader.setId("web-app:" + getURL());
 
       _appLocal.set(this, _classLoader);
-
-      setParent(controller.getContainer());
 
       Vfs.setPwd(_appDir, _classLoader);
       WorkDir.setLocalWorkDir(_appDir.lookup("WEB-INF/work"), _classLoader);
@@ -400,9 +411,21 @@ public class WebApp extends ServletContextImpl
       }
     } catch (Throwable e) {
       setConfigException(e);
-    } finally {
-      _lifecycle = new Lifecycle(log, toString(), Level.INFO);
     }
+  }
+
+  /**
+   * Initialization before configuration
+   */
+  public void preConfigInit()
+  {
+    OsgiManager manager = OsgiManager.create();
+
+    _osgiBundle = new OsgiWebAppBundle(manager, this);
+
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
+    webBeans.addSingleton(_osgiBundle.getBundleContext());
   }
 
   /**
@@ -1430,7 +1453,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Returns true for JSP 1.x
    */
-  public boolean has23Config()
+  public boolean hasPre23Config()
   {
     return _jspState == JSP_1;
   }
@@ -1824,8 +1847,8 @@ public class WebApp extends ServletContextImpl
       WebAppController parent = null;
       if (_controller != null)
         parent = _controller.getParent();
-      if (_isInheritSession && parent != null &&
-          _sessionManager != parent.getWebApp().getSessionManager()) {
+      if (_isInheritSession && parent != null
+	  && _sessionManager != parent.getWebApp().getSessionManager()) {
         SessionManager sessionManager = _sessionManager;
         _sessionManager = parent.getWebApp().getSessionManager();
 

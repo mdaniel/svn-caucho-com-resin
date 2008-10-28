@@ -59,9 +59,8 @@ public class ParseState {
 
   private JspPropertyGroup _jspPropertyGroup = new JspPropertyGroup();
 
-  private boolean _isELIgnored = false;
-  private boolean _isELIgnoredSet = false;
-  private boolean _isELIgnoredDefault = true;
+  private Boolean _isELIgnored;
+  private boolean _isELIgnoredDefault = false;
   
   private boolean _isScriptingInvalid = false;
   
@@ -144,7 +143,10 @@ public class ParseState {
    */
   public boolean isELIgnored()
   {
-    return _isELIgnored;
+    if (_isELIgnored != null)
+      return _isELIgnored;
+    else
+      return _isELIgnoredDefault;
   }
 
   /**
@@ -152,20 +154,11 @@ public class ParseState {
    */
   public boolean setELIgnored(boolean isELIgnored)
   {
-    boolean oldELIgnored = _isELIgnored;
+    Boolean oldIsIgnored = _isELIgnored;
     
     _isELIgnored = isELIgnored;
-    _isELIgnoredDefault = false;
-    
-    return (oldELIgnored == isELIgnored || ! _isELIgnoredSet);
-  }
 
-  /**
-   * Mark the el-ignored attribute as set.
-   */
-  public void markELIgnoredSet()
-  {
-    _isELIgnoredSet = true;
+    return oldIsIgnored != null && oldIsIgnored != isELIgnored;
   }
 
   /**
@@ -173,8 +166,7 @@ public class ParseState {
    */
   public void setELIgnoredDefault(boolean isELIgnored)
   {
-    if (_isELIgnoredDefault)
-      _isELIgnored = isELIgnored;
+    _isELIgnoredDefault = isELIgnored;
   }
 
   /**

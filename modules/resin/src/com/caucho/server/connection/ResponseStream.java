@@ -182,6 +182,18 @@ class ResponseStream extends ToByteResponseStream {
     return _isCommitted || _isClosed;
   }
 
+  public boolean isFlushed()
+  {
+    try {
+      // server/05e8
+      if (_contentLength > 0 && _contentLength < getBufferOffset())
+	return true;
+    } catch (Exception e) {
+    }
+    
+    return false;
+  }
+
   public void clear()
     throws IOException
   {

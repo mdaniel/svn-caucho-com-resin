@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.osgi;
+package com.caucho.server.webapp;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
@@ -36,6 +36,7 @@ import com.caucho.loader.Loader;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.DependencyContainer;
+import com.caucho.osgi.*;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
@@ -59,78 +60,24 @@ import org.osgi.framework.*;
 /**
  * An osgi-bundle for exporting web-beans events
  */
-public class OsgiWebBeansBundle extends AbstractOsgiBundle
-  implements ServiceListener
+public class OsgiWebAppBundle extends AbstractOsgiBundle
 {
-  private static final L10N L = new L10N(OsgiWebBeansBundle.class);
+  private static final L10N L = new L10N(OsgiWebAppBundle.class);
   private static final Logger log
-    = Logger.getLogger(OsgiWebBeansBundle.class.getName());
+    = Logger.getLogger(OsgiWebAppBundle.class.getName());
 
-  private WebBeansContainer _webBeans;
+  private WebApp _webApp;
 
-  OsgiWebBeansBundle(OsgiManager manager)
+  OsgiWebAppBundle(OsgiManager manager, WebApp webApp)
   {
-    super(manager, "WebBeansBundle");
+    super(manager, "WebAppBundle");
 
-    _webBeans = WebBeansContainer.create();
+    _webApp = webApp;
   }
 
   @Override
   protected ClassLoader getClassLoader()
   {
-    return getManager().getParentLoader();
-  }
-
-  //
-  // Bundle API
-  //
-
-  /**
-   * Start the bundle
-   */
-  public void start()
-    throws BundleException
-  {
-    getManager().addServiceListener(this, this, null);
-  }
-
-  //
-  // service listener
-  //
-  
-  /**
-   * Called on a service event
-   */
-  public void serviceChanged(ServiceEvent event)
-  {
-    ServiceReference ref = event.getServiceReference();
-    int eventType = event.getType();
-
-    if (eventType == ServiceEvent.UNREGISTERING) {
-      // XXX: need to remove from WebBeans
-      return;
-    }
-
-    try {
-      Object service = getService(ref);
-
-      String []classNames = (String []) ref.getProperty("objectClass");
-      Class type = ref.getBundle().loadClass(classNames[0]);
-
-      String name = (String) ref.getProperty("com.caucho.webbeans.name");
-    
-      _webBeans.addSingleton(service, name, type);
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-  }
-
-  @Override
-  public String toString()
-  {
-    return (getClass().getSimpleName()
-	    + "[" + getBundleId()
-	    + "," + getSymbolicName()
-	    + "," + getLocation() + "]");
+    return _webApp.getClassLoader();
   }
 }

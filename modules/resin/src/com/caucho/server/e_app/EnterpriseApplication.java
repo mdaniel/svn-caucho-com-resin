@@ -398,6 +398,13 @@ public class EnterpriseApplication
   }
 
   /**
+   * Initialization before configuration
+   */
+  public void preConfigInit()
+  {
+  }
+
+  /**
    * Configures the application.
    */
   @PostConstruct

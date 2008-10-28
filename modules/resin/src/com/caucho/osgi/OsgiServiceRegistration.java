@@ -76,6 +76,8 @@ public class OsgiServiceRegistration implements ServiceRegistration
 
   private OsgiServiceReference _reference;
 
+  private OsgiServiceAdmin _admin;
+
   OsgiServiceRegistration(OsgiManager manager,
 			  OsgiBundle bundle,
 			  String []classNames,
@@ -92,6 +94,10 @@ public class OsgiServiceRegistration implements ServiceRegistration
     _properties.put("objectClass", classNames);
 
     _reference = new OsgiServiceReference(manager, bundle, classNames, this);
+
+    _admin = new OsgiServiceAdmin(this);
+
+    _admin.register();
   }
   
   /**
@@ -129,7 +135,8 @@ public class OsgiServiceRegistration implements ServiceRegistration
       _reference.unregister();
       
       _manager.unregisterService(getReference());
-
+      
+      _admin.register();
     } finally {
       _service = null;
     }
@@ -168,6 +175,16 @@ public class OsgiServiceRegistration implements ServiceRegistration
     _properties.keySet().toArray(keys);
       
     return keys;
+  }
+
+  OsgiBundle getBundle()
+  {
+    return _bundle;
+  }
+  
+  OsgiServiceAdmin getAdmin()
+  {
+    return _admin;
   }
 
   @Override

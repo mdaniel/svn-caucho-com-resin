@@ -354,11 +354,10 @@ abstract public class
       // set from external error, like .ear
       instance.setConfigException(_configException);
 
-      configureInstanceVariables(instance);
-
       extendJMXContext(_jmxContext);
-
       Jmx.setContextProperties(_jmxContext, classLoader);
+      
+      configureInstanceVariables(instance);
 
       ArrayList<DeployConfig> initList = new ArrayList<DeployConfig>();
 
@@ -372,6 +371,8 @@ abstract public class
 
       if (getArchivePath() != null)
         Environment.addDependency(getArchivePath());
+
+      instance.preConfigInit();
 
       for (DeployConfig config : initList) {
         ConfigProgram program = config.getBuilderProgram();

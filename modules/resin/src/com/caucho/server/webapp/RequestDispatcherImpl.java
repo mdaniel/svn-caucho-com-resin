@@ -146,7 +146,6 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     if (res instanceof CauchoResponse)
       cauchoRes = (CauchoResponse) res;
 
-    System.out.println("COMMIT: " + res);
     // jsp/15m8
     if (res.isCommitted() && method == null) {
       IllegalStateException exn;
@@ -290,6 +289,16 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 	response.setRequest(subRequest);
 	response.setResponseStream(response.getOriginalStream());
       }
+
+      // server/1732 wants this commented out
+      // jsp/15m9 (tck)
+      ServletResponse ptr = res;
+      while (ptr instanceof AbstractHttpResponse) {
+	ptr = ((AbstractHttpResponse) ptr).getResponse();
+
+	if (ptr != null)
+	  ptr.resetBuffer();
+      }
       
       res.resetBuffer();
       res.setContentLength(-1);
@@ -314,20 +323,6 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 	    os.close();
         } catch (IllegalStateException e) {
         }
-
-	// server/1732 wants this commented out
-	/*
-	// TCK wants the code (test?)
-	ServletResponse ptr = res;
-	while (ptr instanceof HttpServletResponseWrapper) {
-	  ptr = ((HttpServletResponseWrapper) ptr).getResponse();
-
-	  if (ptr instanceof AbstractHttpResponse) {
-	    ((AbstractHttpResponse) ptr).finish();
-	    break;
-	  }
-	}
-	*/
       }
     } finally {
       subRequest.finishRequest();
@@ -363,6 +358,18 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       
       if (oldForward == null)
 	req.removeAttribute("caucho.forward");
+
+      // server/1732 wants this commented out
+      // jsp/15m9 (tck)
+      ServletResponse ptr = res;
+      while (ptr instanceof AbstractHttpResponse) {
+	ptr = ((AbstractHttpResponse) ptr).getResponse();
+
+	if (ptr instanceof CauchoResponse) {
+	  ((CauchoResponse) ptr).close();
+	  break;
+	}
+      }
     }
   }
 

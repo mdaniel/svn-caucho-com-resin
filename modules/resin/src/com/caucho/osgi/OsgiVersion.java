@@ -134,6 +134,14 @@ class OsgiVersion {
     return sb.toString();
   }
 
+  public String toVersionString()
+  {
+    StringBuilder sb = new StringBuilder();
+    toString(sb);
+
+    return sb.toString();
+  }
+
   void toString(StringBuilder sb)
   {
     if (_major == Integer.MAX_VALUE) {

@@ -44,7 +44,8 @@ import java.util.logging.Logger;
  * API for handling the PrintWriter/ServletOutputStream
  */
 public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
-  private static final Logger log = Log.open(AbstractResponseStream.class);
+  private static final Logger log
+    = Logger.getLogger(AbstractResponseStream.class.getName());
   private static final L10N L = new L10N(AbstractResponseStream.class);
 
   /**
@@ -58,6 +59,14 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
    * Returns true for a Caucho response stream.
    */
   abstract public boolean isCauchoResponseStream();
+
+  /**
+   * Returns true if data has been sent
+   */
+  public boolean isFlushed()
+  {
+    return false;
+  }
   
   /**
    * Sets the encoding.

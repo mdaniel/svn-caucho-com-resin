@@ -90,6 +90,8 @@ public class JspPropertyGroup {
   private boolean _isTrimWhitespace = false;
   private boolean _isDeferredSyntaxAllowedAsLiteral = false;
 
+  private boolean _isELIgnoredForOldWebApp = false;
+
   public JspPropertyGroup()
   {
   }
