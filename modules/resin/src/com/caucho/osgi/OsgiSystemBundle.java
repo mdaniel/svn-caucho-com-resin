@@ -73,7 +73,7 @@ public class OsgiSystemBundle extends OsgiBundle
     install();
   }
 
-  ClassLoader getClassLoader()
+  protected ClassLoader getClassLoader()
   {
     return getManager().getParentLoader();
   }
