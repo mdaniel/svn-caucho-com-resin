@@ -78,7 +78,6 @@ public class VarInfo {
   {
     _isGlobal = true;
   }
-
  
   @Override
   public String toString()

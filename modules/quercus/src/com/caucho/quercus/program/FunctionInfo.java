@@ -66,6 +66,7 @@ public class FunctionInfo
 
   private boolean _isVariableArgs;
   private boolean _isUsesSymbolTable;
+  private boolean _isUsesGlobal;
 
   private boolean _isReadOnly = true;
 
@@ -279,6 +280,22 @@ public class FunctionInfo
   {
     _isUsesSymbolTable = isUsesSymbolTable;
   }
+  
+  /*
+   * True if the global statement is used.
+   */
+  public boolean isUsesGlobal()
+  {
+    return _isUsesGlobal;
+  }
+  
+  /*
+   * True if the global statement is used.
+   */
+  public void setUsesGlobal(boolean isUsesGlobal)
+  {
+    _isUsesGlobal = isUsesGlobal;
+  }
 
   /**
    * Returns true if the out is used.
@@ -323,10 +340,10 @@ public class FunctionInfo
       var = createVarInfo(name);
 
       if (_isGlobal)
-	var.setGlobal();
+        var.setGlobal();
 
       if (Quercus.isSuperGlobal(name))
-	var.setGlobal();
+        var.setGlobal();
       
       _varMap.put(name, var);
     }

@@ -173,6 +173,7 @@ public class VarExpr
   {
     Value value;
 
+    /*
     if (_var.isGlobal()) {
       value = env.getGlobalValue(_name);
 
@@ -190,7 +191,8 @@ public class VarExpr
           value = array;
         }
       }
-    } else {
+    */
+    //} else {
       value = env.getVar(_name);
 
       if (value == null) {
@@ -201,7 +203,7 @@ public class VarExpr
       else {
         value = value.toAutoArray();
       }
-    }
+   // }
 
     return value;
   }
@@ -217,6 +219,7 @@ public class VarExpr
   {
     Value value;
 
+    /*
     if (_var.isGlobal()) {
       value = env.getGlobalValue(_name);
 
@@ -226,6 +229,7 @@ public class VarExpr
         env.setGlobalValue(_name, value);
       }
     } else {
+    */
       value = env.getValue(_name);
 
       if (value == null || value.isString() || value.isNull()) {
@@ -233,7 +237,7 @@ public class VarExpr
 
         env.setValue(_name, value);
       }
-    }
+    //}
 
     return value;
   }
@@ -246,9 +250,9 @@ public class VarExpr
    */
   public Value evalRef(Env env)
   {
-    if (getVarInfo().isGlobal())
-      return env.getGlobalVar(_name);
-    else
+    //if (getVarInfo().isGlobal())
+      //return env.getGlobalVar(_name);
+    //else
       return env.getVar(_name);
   }
 
@@ -263,9 +267,9 @@ public class VarExpr
     // quercus/043k
     // quercus/0443
 
-    if (getVarInfo().isGlobal())
-      return env.getGlobalVar(_name);
-    else
+    //if (getVarInfo().isGlobal())
+      //return env.getGlobalVar(_name);
+    //else
       return env.getVar(_name);
   }
 

@@ -31,8 +31,6 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.*;
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.function.Marshal;
-import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.lib.ErrorModule;
 import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.lib.OptionsModule;
@@ -70,15 +68,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Array;
 import java.net.URL;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.IdentityHashMap;
@@ -1763,6 +1758,9 @@ public class Env {
 
       if (var == null)
         var = getGlobalScriptContextRef(name);
+      
+      if (var != null)
+        _map.put(name, var);
     }
 
     return var;

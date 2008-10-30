@@ -949,28 +949,31 @@ public class QuercusParser {
       Expr expr = parseTopExpr();
 
       if (expr instanceof VarExpr) {
-	VarExpr var = (VarExpr) expr;
+        VarExpr var = (VarExpr) expr;
 
-	// php/3a6g, php/3a58
-	var.getVarInfo().setGlobal();
+        _function.setUsesGlobal(true);
+        
+        // php/323c
+        // php/3a6g, php/3a58
+        //var.getVarInfo().setGlobal();
 
-	statementList.add(_factory.createGlobal(location, var));
+        statementList.add(_factory.createGlobal(location, var));
       }
       else if (expr instanceof VarVarExpr) {
-	VarVarExpr var = (VarVarExpr) expr;
+        VarVarExpr var = (VarVarExpr) expr;
 
-	statementList.add(_factory.createVarGlobal(location, var));
+        statementList.add(_factory.createVarGlobal(location, var));
       }
       else
-	throw error(L.l("unknown expr {0} to global", expr));
+        throw error(L.l("unknown expr {0} to global", expr));
 
       // statementList.add(new ExprStatement(expr));
 
       int token = parseToken();
 
       if (token != ',') {
-	_peekToken = token;
-	return _factory.createBlock(location, statementList);
+        _peekToken = token;
+        return _factory.createBlock(location, statementList);
       }
     }
   }
