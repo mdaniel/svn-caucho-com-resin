@@ -930,6 +930,7 @@ public class JavaJspGenerator extends JspGenerator {
     out.print(", ");
     out.print(_parseState.isPrintNullAsBlank());
     out.println(");");
+    out.println("javax.servlet.jsp.PageContext _jsp_parentContext = pageContext;");
     out.println("javax.servlet.jsp.JspWriter out = pageContext.getOut();");
     out.println("final javax.el.ELContext _jsp_env = pageContext.getELContext();");
     out.println("javax.servlet.ServletConfig config = getServletConfig();");
