@@ -96,6 +96,11 @@ public class CustomBeanConfig {
   {
     return _configType;
   }
+
+  public Class getClassType()
+  {
+    return _class;
+  }
   
   public void setConfigLocation(String filename, int line)
   {
@@ -336,13 +341,18 @@ public class CustomBeanConfig {
   @PostConstruct
   public void init()
   {
+    initComponent();
+    
     WebBeansContainer webBeans = WebBeansContainer.create();
 
+    webBeans.addBean(_component);
+  }
+
+  public void initComponent()
+  {
     if (_args != null)
       _component.setNewArgs(_args);
 
     _component.init();
-
-    webBeans.addBean(_component);
   }
 }

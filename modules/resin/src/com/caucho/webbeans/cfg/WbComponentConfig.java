@@ -401,12 +401,18 @@ public class WbComponentConfig {
 
   public Object getObject()
   {
-    return _comp.get();
+    if (_comp != null)
+      return _comp.get();
+    else
+      return null;
   }
 
   public Object createObjectNoInit()
   {
-    return _comp.createNoInit();
+    if (_comp != null)
+      return _comp.createNoInit();
+    else
+      return null;
   }
 
   private void introspect()

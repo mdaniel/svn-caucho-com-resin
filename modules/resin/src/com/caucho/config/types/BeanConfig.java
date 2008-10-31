@@ -67,6 +67,8 @@ public class BeanConfig extends WbComponentConfig {
   private Class _mbeanClass;
 
   private Class _beanConfigClass;
+
+  private CustomBeanConfig _customBean;
   
   public BeanConfig()
   {
@@ -142,6 +144,15 @@ public class BeanConfig extends WbComponentConfig {
     setClass(cl);
   }
 
+  @Override
+  public Class getClassType()
+  {
+    if (_customBean != null)
+      return _customBean.getClassType();
+    else
+      return super.getClassType();
+  }
+
   /**
    * Check the class
    */
@@ -208,9 +219,21 @@ public class BeanConfig extends WbComponentConfig {
   {
     return _uri;
   }
+
+  public void addCustomBean(CustomBeanConfig customBean)
+  {
+    _customBean = customBean;
+  }
   
   public void init()
   {
+    if (_customBean != null) {
+      _customBean.initComponent();
+      _comp = _customBean.getComponent();
+      
+      return;
+    }
+    
     super.init();
 
     try {

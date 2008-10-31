@@ -134,6 +134,9 @@
     
   <bean name="osgi-bundle"
         class="com.caucho.osgi.OsgiBundleConfig"/>
+    
+  <bean name="osgi-service"
+        class="com.caucho.osgi.OsgiServiceConfig"/>
 
   <bean name="persistent-store"
         class="com.caucho.server.cluster.PersistentStoreConfig"/>

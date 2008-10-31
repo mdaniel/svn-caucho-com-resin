@@ -84,8 +84,8 @@ class CompilingClassEntry extends ClassEntry {
     String sourcePath = _loader.prefixClassPath(_loader.getLoader().getSourcePath());
 
     // deal with windows case nuttiness
-    if (CauchoSystem.isWindows() &&
-	! _loader.checkSource(_loader.getSource(), javaName))
+    if (CauchoSystem.isWindows()
+	&& ! _loader.checkSource(_loader.getSource(), javaName))
       return;
 
     _loader.compileClass(javaFile, classFile, sourcePath, false);
@@ -95,7 +95,7 @@ class CompilingClassEntry extends ClassEntry {
 		   getName(), classFile));
     }
     else if (javaFile.exists())
-      throw new CompileClassNotFound(L.l("compiling {0} didn't produce a {1}. class",
+      throw new CompileClassNotFound(L.l("{1} does not have a class file because compiling {0} didn't produce a {1} class",
 					 javaFile, getName()));
 
     setDependPath(classFile);

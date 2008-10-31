@@ -545,6 +545,9 @@ public class OsgiBundle implements Bundle
 
   Object getService(ServiceReference ref)
   {
+    if (ref == null)
+      return null;
+    
     synchronized (_serviceUseList) {
       for (int i = 0; i < _serviceUseList.size(); i++) {
 	ServiceUse use = _serviceUseList.get(i);
