@@ -34,7 +34,6 @@ import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.Period;
 import com.caucho.git.GitRepository;
 import com.caucho.loader.Environment;
-import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.Crc64;
@@ -72,6 +71,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
   private GitRepository _git;
   private String _gitPath;
+  private String _entryNamePrefix = "";
 
   private String _extension = ".jar";
   
@@ -325,6 +325,11 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   public void setGitPath(String gitPath)
   {
     _gitPath = gitPath;
+  }
+
+  public void setEntryNamePrefix(String entryNamePrefix)
+  {
+    _entryNamePrefix = entryNamePrefix;
   }
 
   /**
@@ -792,8 +797,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     String []pathList = _git.listRefs(_gitPath);
 
     // collect all the new repository expand directories
+    // server/12p6 make sure webapps are prefixed with a '/'
     for (String pathName : pathList) {
-      entryNames.add(pathName);
+      entryNames.add(_entryNamePrefix + pathName);
     }
   }
   

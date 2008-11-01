@@ -100,6 +100,8 @@ public class WebAppExpandDeployGenerator
 	hostName = "default";
     
       setGitPath("wars/" + hostName);
+      
+      setEntryNamePrefix("/");
     }
 
     _admin = new WebAppExpandDeployGeneratorAdmin(this);
