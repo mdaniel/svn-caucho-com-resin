@@ -34,6 +34,7 @@ import com.caucho.jmx.*;
 import com.caucho.webbeans.cfg.WbWebBeans;
 import com.caucho.webbeans.context.DependentScope;
 import com.caucho.webbeans.context.SingletonScope;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -55,9 +56,9 @@ public class SingletonClassComponent extends ClassComponent
   
   private Object _value;
   
-  public SingletonClassComponent(WbWebBeans webbeans)
+  public SingletonClassComponent(WebBeansContainer webBeans)
   {
-    super(webbeans);
+    super(webBeans);
     
     super.setScope(new SingletonScope());
   }

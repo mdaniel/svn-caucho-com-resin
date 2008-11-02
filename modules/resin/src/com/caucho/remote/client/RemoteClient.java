@@ -90,7 +90,8 @@ public class RemoteClient extends BeanConfig
       addOptionalStringProperty("name", getName());
     }
 
-    comp.setBindingList(getBindingList());
+    for (WbBinding binding : getBindingList())
+      comp.addBinding(binding.getAnnotation());
 
     if (getDeploymentType() != null)
       comp.setDeploymentType(getDeploymentType());

@@ -69,7 +69,7 @@ public class CustomBeanConfig {
     = "http://caucho.com/ns/resin";
 
   private Class _class;
-  private ClassComponent _component = new ClassComponent();
+  private ClassComponent _component;
   private ConfigType _configType;
 
   private ArrayList<ConfigProgram> _args;
@@ -86,8 +86,12 @@ public class CustomBeanConfig {
     _name = name;
 
     _class = cl;
-    _component.setInstanceClass(cl);
-    // _component.setScopeClass(Dependent.class);
+
+    if (! Annotation.class.isAssignableFrom(cl)) {
+      _component = new ClassComponent();
+      _component.setTargetType(cl);
+      // _component.setScopeClass(Dependent.class);
+    }
 
     _configType = TypeFactory.getCustomBeanType(cl);
   }
@@ -138,11 +142,13 @@ public class CustomBeanConfig {
     _args.add(arg);
   }
 
-  private void addInitProgram(ConfigProgram program)
+  public void addInitProgram(ConfigProgram program)
   {
     if (_init == null) {
       _init = new ContainerProgram();
-      _component.setInit(_init);
+
+      if (_component != null)
+	_component.setInit(_init);
     }
 
     _init.addProgram(program);
@@ -177,13 +183,6 @@ public class CustomBeanConfig {
       addAnnotation(ann);
 
       return;
-      /*
-	if (name.getNamespaceURI().equals(RESIN_NS)) {
-	// XXX: temp
-
-	// XXX: service scope?
-	_component.setService(true);
-      */
     }
     
     if (name.getNamespaceURI().equals(_name.getNamespaceURI())) {
@@ -341,11 +340,13 @@ public class CustomBeanConfig {
   @PostConstruct
   public void init()
   {
-    initComponent();
+    if (_component != null) {
+      initComponent();
     
-    WebBeansContainer webBeans = WebBeansContainer.create();
+      WebBeansContainer webBeans = WebBeansContainer.create();
 
-    webBeans.addBean(_component);
+      webBeans.addBean(_component);
+    }
   }
 
   public void initComponent()

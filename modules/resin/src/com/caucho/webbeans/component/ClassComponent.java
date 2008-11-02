@@ -49,6 +49,7 @@ import java.util.*;
 
 import javax.annotation.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
 
 /**
  * Configuration for the xml web bean component.
@@ -58,8 +59,9 @@ public class ClassComponent extends ComponentImpl {
 
   private static final Object []NULL_ARGS = new Object[0];
   
-  private Class _cl;
   private boolean _isBound;
+
+  private Class _instanceClass;
 
   private Constructor _ctor;
   private ConfigProgram []_newArgs;
@@ -68,32 +70,18 @@ public class ClassComponent extends ComponentImpl {
   private Object _scopeAdapter;
 
   private HashMap<Method,ArrayList<WbInterceptor>> _interceptorMap;
-  private Class _proxyClass;
 
   private String _mbeanName;
   private Class _mbeanInterface;
 
-  public ClassComponent(WbWebBeans webbeans)
+  public ClassComponent(WebBeansContainer webBeans)
   {
-    super(webbeans);
+    super(webBeans);
   }
 
   public ClassComponent()
   {
-    this(WebBeansContainer.create().getWbWebBeans());
-  }
-
-  public void setInstanceClass(Class cl)
-  {
-    _cl = cl;
-
-    if (getTargetType() == null)
-      setTargetType(cl);
-  }
-
-  public Class getInstanceClass()
-  {
-    return _cl;
+    this(WebBeansContainer.create());
   }
 
   public void setConstructor(Constructor ctor)
@@ -111,6 +99,11 @@ public class ClassComponent extends ComponentImpl {
     return _mbeanInterface;
   }
 
+  private Class getInstanceClass()
+  {
+    return _instanceClass;
+  }
+
   /**
    * Sets the init program.
    */
@@ -122,37 +115,19 @@ public class ClassComponent extends ComponentImpl {
     }
   }
 
-  public void init()
-  {
-    introspect();
-
-    super.init();
-  }
-
   /**
    * Called for implicit introspection.
    */
   public void introspect()
   {
-    Class cl = getInstanceClass();
+    Class cl = getTargetClass();
     Class scopeClass = null;
+
+    introspectTypes(cl);
 
     introspectDeploymentType(cl);
 
-    if (getScope() == null) {
-      for (Annotation ann : cl.getDeclaredAnnotations()) {
-	if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
-	  if (scopeClass != null)
-	    throw new ConfigException(L.l("{0}: @ScopeType annotation @{1} conflicts with @{2}.  WebBeans components may only have a single @ScopeType.",
-					  cl.getName(),
-					  scopeClass.getName(),
-					  ann.annotationType().getName()));
-
-	  scopeClass = ann.annotationType();
-	  setScope(_webbeans.getScopeContext(scopeClass));
-	}
-      }
-    }
+    introspectScope(cl);
 
     if ("".equals(getName())) {
       String name = cl.getSimpleName();
@@ -162,59 +137,13 @@ public class ClassComponent extends ComponentImpl {
       setName(name);
     }
 
-    introspectProduces();
     introspectConstructor();
+    introspectProduces(cl);
 
-    if (getBindingList().size() == 0)
+    if (getBindingTypes().size() == 0)
       introspectBindings();
     
     introspectMBean();
-  }
-
-  private void introspectDeploymentType(Class cl)
-  {
-    if (getDeploymentType() == null) {
-      for (Annotation ann : cl.getDeclaredAnnotations()) {
-	if (ann.annotationType().isAnnotationPresent(DeploymentType.class)) {
-	  if (getDeploymentType() != null)
-	    throw new ConfigException(L.l("{0}: component type annotation @{1} conflicts with @{2}.  WebBeans components may only have a single @DeploymentType.",
-					  cl.getName(),
-					  getDeploymentType().getName(),
-					  ann.annotationType().getName()));
-	
-	  setDeploymentType(ann.annotationType());
-	}
-      }
-    }
-
-    if (getDeploymentType() == null)
-      setDeploymentType(Production.class);
-  }
-
-  /**
-   * Introspects the methods for any @Produces
-   */
-  private void introspectProduces()
-  {
-    if (_cl == null)
-      return;
-    
-    for (Method method : _cl.getDeclaredMethods()) {
-      if (Modifier.isStatic(method.getModifiers()))
-	continue;
-
-      if (! method.isAnnotationPresent(Produces.class))
-	continue;
-
-      if (method.isAnnotationPresent(In.class))
-	throw error(method, L.l("@Produces method may not have an @In annotation."));
-
-      ProducesComponent comp = new ProducesComponent(_webbeans, this, method);
-
-      _webbeans.addWbComponent(comp);
-      
-      comp.init();
-    }
   }
 
   /**
@@ -226,10 +155,15 @@ public class ClassComponent extends ComponentImpl {
       return;
     
     try {
+      Class cl = getInstanceClass();
+
+      if (cl == null)
+	cl = getTargetClass();
+      
       Constructor best = null;
       Constructor second = null;
 
-      for (Constructor ctor : _cl.getDeclaredConstructors()) {
+      for (Constructor ctor : cl.getDeclaredConstructors()) {
 	if (_newArgs != null
 	    && ctor.getParameterTypes().length != _newArgs.length) {
 	  continue;
@@ -256,11 +190,11 @@ public class ClassComponent extends ComponentImpl {
 
       if (second != null)
 	throw new ConfigException(L.l("{0}: WebBean does not have a unique constructor.  One constructor must be marked with @In or have a binding annotation.",
-				      _cl.getName()));
+				      cl.getName()));
 
       if (best == null)
 	throw new ConfigException(L.l("{0}: no constructor found",
-				      _cl.getName()));
+				      cl.getName()));
 
       _ctor = best;
     } catch (RuntimeException e) {
@@ -275,12 +209,12 @@ public class ClassComponent extends ComponentImpl {
    */
   private void introspectMBean()
   {
-    if (_cl == null)
+    if (getTargetClass() == null)
       return;
     else if (_mbeanInterface != null)
       return;
     
-    for (Class iface : _cl.getInterfaces()) {
+    for (Class iface : getTargetClass().getInterfaces()) {
       if (iface.getName().endsWith("MBean")
 	  || iface.getName().endsWith("MXBean")) {
 	_mbeanInterface = iface;
@@ -358,7 +292,7 @@ public class ClassComponent extends ComponentImpl {
 
 	value = _scopeAdapter;
 	if (value == null) {
-	  ScopeAdapter scopeAdapter = ScopeAdapter.create(getInstanceClass());
+	  ScopeAdapter scopeAdapter = ScopeAdapter.create(getTargetClass());
 	  _scopeAdapter = scopeAdapter.wrap(this);
 	  value = _scopeAdapter;
 	}
@@ -417,18 +351,20 @@ public class ClassComponent extends ComponentImpl {
 	return;
       _isBound = true;
 
+      Class cl = getTargetClass();
+
       ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
-      InjectIntrospector.introspectInject(injectList, _cl);
+      InjectIntrospector.introspectInject(injectList, cl);
       _injectProgram = new ConfigProgram[injectList.size()];
       injectList.toArray(_injectProgram);
       
       ArrayList<ConfigProgram> initList = new ArrayList<ConfigProgram>();
-      InjectIntrospector.introspectInit(initList, _cl);
+      InjectIntrospector.introspectInit(initList, cl);
       _initProgram = new ConfigProgram[initList.size()];
       initList.toArray(_initProgram);
       
       ArrayList<ConfigProgram> destroyList = new ArrayList<ConfigProgram>();
-      InjectIntrospector.introspectDestroy(destroyList, _cl);
+      InjectIntrospector.introspectDestroy(destroyList, cl);
       _destroyProgram = new ConfigProgram[destroyList.size()];
       destroyList.toArray(_destroyProgram);
       
@@ -453,50 +389,37 @@ public class ClassComponent extends ComponentImpl {
 	  }
 
 	  if (ctorArgs[i] == null) {
-	    ComponentImpl comp = _webbeans.bindParameter(loc, param[i],
-							 paramAnn[i]);
+	    Bean bean = bindParameter(loc, param[i], paramAnn[i]);
 
-	    if (comp == null)
+	    if (bean == null)
 	      throw new ConfigException(L.l("{0} does not have valid arguments",
 					    _ctor));
 
-	    ctorArgs[i] = new ComponentArg(comp);
+	    // XXX:
+	    ctorArgs[i] = new ComponentArg((ComponentImpl) bean);
 	  }
 	}
 	
 	_ctorArgs = ctorArgs;
       }
 
-      introspectObservers();
+      introspectObservers(getTargetClass());
 
-      /*
-      introspectInterceptors();
-
-      if (_interceptorMap != null) {
-	_proxyClass = InterceptorGenerator.gen(getInstanceClass(),
-					       _ctor, _interceptorMap);
-
-	Constructor proxyCtor = _proxyClass.getConstructors()[0];
-
-	_ctor = proxyCtor;
-      }
-      */
-
-      PojoBean bean = new PojoBean(_cl);
+      PojoBean bean = new PojoBean(getTargetClass());
       bean.setSingleton(isSingleton());
       bean.introspect();
 
       Class instanceClass = bean.generateClass();
 
-      if (instanceClass == _cl && isSingleton())
-	instanceClass = SerializationAdapter.gen(_cl);
+      if (instanceClass == _instanceClass && isSingleton())
+	instanceClass = SerializationAdapter.gen(_instanceClass);
 
-      if (instanceClass != null && instanceClass != _cl) {
+      if (instanceClass != null && instanceClass != _instanceClass) {
 	try {
 	  if (_ctor != null)
 	    _ctor = instanceClass.getConstructor(_ctor.getParameterTypes());
 	  
-	  setInstanceClass(instanceClass);
+	  _instanceClass = instanceClass;
 	} catch (Exception e) {
 	  throw ConfigException.create(e);
 	}
@@ -519,127 +442,7 @@ public class ClassComponent extends ComponentImpl {
    */
   protected void introspectBindings()
   {
-    ArrayList<WbBinding> bindings = new ArrayList<WbBinding>();
-    
-    for (Annotation ann : getInstanceClass().getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(BindingType.class))
-	bindings.add(new WbBinding(ann));
-
-      if (ann instanceof Named)
-	setName(((Named) ann).value());
-    }
-
-    if (bindings.size() > 0)
-      setBindingList(bindings);
-  }
-
-  /**
-   * Introspects any observers.
-   */
-  protected void introspectObservers()
-  {
-    for (Method method : getInstanceClass().getDeclaredMethods()) {
-      int param = findObserverAnnotation(method);
-
-      if (param < 0)
-	continue;
-
-      if (method.isAnnotationPresent(In.class))
-	throw error(method, "@Observer may not have an @In attribute");
-
-      ArrayList<WbBinding> bindingList = new ArrayList<WbBinding>();
-      
-      Annotation [][]annList = method.getParameterAnnotations();
-      if (annList != null && annList[param] != null) {
-	for (Annotation ann : annList[param]) {
-	  if (ann.annotationType().isAnnotationPresent(EventBindingType.class))
-	    bindingList.add(new WbBinding(ann));
-	}
-      }
-
-      ObserverImpl observer = new ObserverImpl(this, method, param);
-      observer.setBindingList(bindingList);
-
-      _webbeans.getContainer().addObserver(observer);
-    }
-  }
-
-  /**
-   * Introspects any intercepted methods
-   */
-  protected void introspectInterceptors()
-  {
-    for (Method method : getInstanceClass().getMethods()) {
-      if (method.getDeclaringClass().equals(Object.class))
-	continue;
-      
-      ArrayList<Annotation> interceptorTypes = findInterceptorTypes(method);
-
-      if (interceptorTypes == null)
-	continue;
-
-      ArrayList<WbInterceptor> interceptors
-	= _webbeans.findInterceptors(interceptorTypes);
-
-      if (interceptors != null) {
-	if (_interceptorMap == null)
-	  _interceptorMap = new HashMap<Method,ArrayList<WbInterceptor>>();
-
-	_interceptorMap.put(method, interceptors);
-      }
-    }
-  }
-
-  private ArrayList<Annotation> findInterceptorTypes(Method method)
-  {
-    ArrayList<Annotation> types = null;
-
-    for (Annotation ann : method.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(InterceptorBindingType.class)) {
-	if (types == null)
-	  types = new ArrayList<Annotation>();
-
-	types.add(ann);
-      }
-    }
-
-    return types;
-  }
-  
-  private boolean hasBindingAnnotation(Constructor ctor)
-  {
-    if (ctor.isAnnotationPresent(In.class))
-      return true;
-
-    Annotation [][]paramAnn = ctor.getParameterAnnotations();
-
-    for (Annotation []annotations : paramAnn) {
-      for (Annotation ann : annotations) {
-	if (ann.annotationType().isAnnotationPresent(BindingType.class))
-	  return true;
-      }
-    }
-
-    return false;
-  }
-
-  private int findObserverAnnotation(Method method)
-  {
-    Annotation [][]paramAnn = method.getParameterAnnotations();
-    int observer = -1;
-
-    for (int i = 0; i < paramAnn.length; i++) {
-      for (Annotation ann : paramAnn[i]) {
-	if (ann instanceof Observes) {
-	  if (observer >= 0)
-	    throw WebBeansContainer.error(method, L.l("Only one param may have an @Observer"));
-	  
-	  observer = i;
-	}
-      }
-    }
-
-    return observer;
+    introspectBindings(getTargetClass().getAnnotations());
   }
 
   abstract static class Arg {

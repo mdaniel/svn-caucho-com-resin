@@ -44,6 +44,7 @@ import java.util.ArrayList;
 
 import javax.annotation.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
 
 /**
  * Configuration for a @Produces method
@@ -52,18 +53,18 @@ public class ProducesComponent extends ComponentImpl {
   private static final L10N L = new L10N(ProducesComponent.class);
 
   private static final Object []NULL_ARGS = new Object[0];
-  private final ComponentImpl _producer;
+  private final Bean _producer;
   private final Method _method;
 
-  private ComponentImpl []_args;
+  private Bean []_args;
 
   private boolean _isBound;
 
-  public ProducesComponent(WbWebBeans webbeans,
-			   ComponentImpl producer,
+  public ProducesComponent(WebBeansContainer webBeans,
+			   Bean producer,
 			   Method method)
   {
-    super(webbeans);
+    super(webBeans);
 
     _producer = producer;
     _method = method;
@@ -71,37 +72,15 @@ public class ProducesComponent extends ComponentImpl {
     setTargetType(method.getGenericReturnType());
   }
 
-  /**
-   * Initialization.
-   */
-  public void init()
-  {
-    super.init();
-  }
-
   public void introspect()
   {
-    ArrayList<WbBinding> bindingList = new ArrayList<WbBinding>();
+    introspectTypes(getTargetType());
     
-    for (Annotation ann : _method.getAnnotations()) {
-      if (ann instanceof Named) {
-	setName(((Named) ann).value());
-      }
-      
-      if (ann.annotationType().isAnnotationPresent(DeploymentType.class)) {
-	if (getDeploymentType() == null)
-	  setDeploymentType(ann.annotationType());
-      }
-	
-      if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
-	if (getScope() == null)
-	  setScope(_webbeans.getScopeContext(ann.annotationType()));
-      }
-	
-      if (ann.annotationType().isAnnotationPresent(BindingType.class)) {
-	bindingList.add(new WbBinding(ann));
-      }
-    }
+    Annotation []annotations = _method.getAnnotations();
+
+    introspectBindings(annotations);
+    introspectDeploymentType(annotations);
+    introspectScope(annotations);
 
     if (getName() == null) {
       String methodName = _method.getName();
@@ -113,19 +92,13 @@ public class ProducesComponent extends ComponentImpl {
       else
 	setName(methodName);
     }
-
-    if (bindingList.size() > 0)
-      setBindingList(bindingList);
-    
-    if (getDeploymentType() == null)
-      setDeploymentType(_producer.getDeploymentType());
   }
 
   @Override
   public Object createNew(ConfigContext env)
   {
     try {
-      Object factory = _producer.get();
+      Object factory = _webBeans.getInstance(_producer, env);
 
       if (_args == null)
 	bind();
@@ -135,7 +108,7 @@ public class ProducesComponent extends ComponentImpl {
 	args = new Object[_args.length];
 
 	for (int i = 0; i < args.length; i++)
-	  args[i] = _args[i].get();
+	  args[i] = _webBeans.getInstance(_args[i], env);
       }
       else
 	args = NULL_ARGS;
@@ -167,10 +140,10 @@ public class ProducesComponent extends ComponentImpl {
       Type []param = _method.getGenericParameterTypes();
       Annotation [][]paramAnn = _method.getParameterAnnotations();
 
-      _args = new ComponentImpl[param.length];
+      _args = new Bean[param.length];
 
       for (int i = 0; i < param.length; i++) {
-	_args[i] = _webbeans.bindParameter(loc, param[i], paramAnn[i]);
+	_args[i] = bindParameter(loc, param[i], paramAnn[i]);
 
 	if (_args[i] == null)
 	  throw error(_method, L.l("Type '{0}' for method parameter #{1} has no matching component.",
@@ -197,8 +170,12 @@ public class ProducesComponent extends ComponentImpl {
     sb.append(_method.getDeclaringClass().getSimpleName());
     sb.append(".");
     sb.append(_method.getName());
-    sb.append("(), @");
-    sb.append(getDeploymentType().getSimpleName());
+    sb.append("()");
+
+    if (getDeploymentType() != null) {
+      sb.append(", @");
+      sb.append(getDeploymentType().getSimpleName());
+    }
     sb.append("]");
 
     return sb.toString();

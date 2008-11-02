@@ -250,12 +250,12 @@ abstract public class AbstractBeanConfig {
     ComponentImpl comp;
 
     if (value != null) {
-      comp = new SingletonComponent(wbWebBeans, value);
+      comp = new SingletonComponent(webBeans, value);
     }
     else {
-      ClassComponent classComp = new SingletonClassComponent(wbWebBeans);
+      ClassComponent classComp = new SingletonClassComponent(webBeans);
 
-      classComp.setInstanceClass(_cl);
+      classComp.setImplementationClass(_cl);
 
       comp = classComp;
     }
@@ -266,7 +266,8 @@ abstract public class AbstractBeanConfig {
     if (_name != null)
       comp.setName(_name);
 
-    comp.setBindingList(_bindingList);
+    for (WbBinding binding : _bindingList)
+      comp.addBinding(binding.getAnnotation());
 
     if (_deploymentType != null)
       comp.setDeploymentType(_deploymentType);

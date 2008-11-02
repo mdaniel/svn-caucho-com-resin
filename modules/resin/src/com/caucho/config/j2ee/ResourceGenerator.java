@@ -43,6 +43,7 @@ import javax.persistence.*;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import javax.webbeans.manager.Bean;
 import javax.rmi.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -63,7 +64,8 @@ public class ResourceGenerator extends ValueGenerator {
   
   private final String _location;
 
-  private ComponentImpl _component;
+  private WebBeansContainer _webBeans;
+  private Bean _bean;
   private boolean _isBound;
 
   ResourceGenerator(Class type,
@@ -93,15 +95,15 @@ public class ResourceGenerator extends ValueGenerator {
    */
   public Object create()
   {
-    if (_component == null && ! _isBound) {
+    if (_bean == null && ! _isBound) {
       _isBound = false;
       
       WebBeansContainer webBeans = WebBeansContainer.create();
 
       if (_mappedName != null && ! "".equals(_mappedName)) {
-	_component = webBeans.bind(_location, _type, _mappedName);
+	_bean = InjectIntrospector.bind(_location, _type, _mappedName);
 	
-	if (_component == null) {
+	if (_bean == null) {
 	  Object value = getJndiValue(_type);
 
 	  if (value != null)
@@ -111,9 +113,9 @@ public class ResourceGenerator extends ValueGenerator {
 	}
       }
       else if (_jndiName != null && ! "".equals(_jndiName)) {
-	_component = webBeans.bind(_location, _type, _jndiName);
+	_bean = InjectIntrospector.bind(_location, _type, _jndiName);
 	
-	if (_component == null) {
+	if (_bean == null) {
 	  Object value = getJndiValue(_type);
 
 	  if (value != null)
@@ -121,10 +123,10 @@ public class ResourceGenerator extends ValueGenerator {
 	}
       }
 
-      if (_component == null) {
-	_component = webBeans.bind(_location, _type);
+      if (_bean == null) {
+	_bean = InjectIntrospector.bind(_location, _type);
 	
-	if (_component == null) {
+	if (_bean == null) {
 	  Object value = getJndiValue(_type);
 
 	  if (value != null)
@@ -134,17 +136,17 @@ public class ResourceGenerator extends ValueGenerator {
 	}
       }
 
-      if (_component != null && _jndiName != null && ! "".equals(_jndiName)) {
+      if (_bean != null && _jndiName != null && ! "".equals(_jndiName)) {
 	try {
-	  Jndi.bindDeepShort(_jndiName, _component);
+	  Jndi.bindDeepShort(_jndiName, _bean);
 	} catch (NamingException e) {
 	  throw ConfigException.create(e);
 	}
       }
     }
 
-    if (_component != null)
-      return _component.get();
+    if (_bean != null)
+      return _webBeans.getInstance(_bean);
     else
       return getJndiValue(_type);
   }

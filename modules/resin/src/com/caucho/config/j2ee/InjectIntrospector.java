@@ -52,6 +52,7 @@ import javax.naming.*;
 import javax.interceptor.*;
 import javax.persistence.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
 //import javax.xml.ws.WebServiceRef;
 
 import java.beans.Introspector;
@@ -486,27 +487,25 @@ public class InjectIntrospector {
     if (! "".equals(pContext.name()))
       jndiName = pContext.name();
     
-    WebBeansContainer webBeans = WebBeansContainer.create();
-    
-    ComponentImpl component;
+    Bean bean;
 
     if ("".equals(unitName)) {
-      component = webBeans.bind(location, EntityManager.class);
+      bean = bind(location, EntityManager.class, null);
 
-      if (component == null)
+      if (bean == null)
 	throw new ConfigException(location + L.l("@PersistenceContext cannot find any persistence contexts.  No JPA persistence-units have been deployed"));
     }
     else {
-      component = webBeans.bind(location, EntityManager.class, unitName);
+      bean = bind(location, EntityManager.class, unitName);
 
-      if (component == null)
+      if (bean == null)
 	throw new ConfigException(location + L.l("'{0}' is an unknown @PersistenceContext.",
 						 unitName));
     }
 
-    bindJndi(location, jndiName, component);
+    bindJndi(location, jndiName, bean);
 
-    return new ComponentValueGenerator(location, component);
+    return new ComponentValueGenerator(location, (ComponentImpl) bean);
   }
 
   private static ValueGenerator
@@ -549,16 +548,16 @@ public class InjectIntrospector {
     
     WebBeansContainer webBeans = WebBeansContainer.create();
     
-    ComponentImpl component;
+    Bean component;
 
     if ("".equals(unitName)) {
-      component = webBeans.bind(location, EntityManagerFactory.class);
+      component = bind(location, EntityManagerFactory.class);
 
       if (component == null)
 	throw new ConfigException(location + L.l("@PersistenceUnit cannot find any persistence units.  No JPA persistence-units have been deployed"));
     }
     else {
-      component = webBeans.bind(location, EntityManagerFactory.class, unitName);
+      component = bind(location, EntityManagerFactory.class, unitName);
 
       if (component == null)
 	throw new ConfigException(location + L.l("@PersistenceUnit(unitName='{0}') is an unknown persistence unit.  No matching JPA persistence-units have been deployed", unitName));
@@ -645,14 +644,12 @@ public class InjectIntrospector {
     if (value != null)
       return new SingletonGenerator(value);
     
-    WebBeansContainer webBeans = WebBeansContainer.create();
-
-    ComponentImpl component = null;
+    Bean component = null;
 
     if (mappedName == null || "".equals(mappedName))
       mappedName = jndiName;
 
-    component = webBeans.bind(location, type, mappedName);
+    component = bind(location, type, mappedName);
 
     if (component != null) {
       bindJndi(location, jndiName, component);
@@ -661,7 +658,7 @@ public class InjectIntrospector {
     }
     
     if (component == null && beanName != null && ! "".equals(beanName)) {
-      component = webBeans.bind(location, type, beanName);
+      component = bind(location, type, beanName);
       if (component != null) {
 	bindJndi(location, jndiName, component);
       
@@ -670,7 +667,7 @@ public class InjectIntrospector {
     }
     
     if (component == null && jndiName != null && ! "".equals(jndiName)) {
-      component = webBeans.bind(location, type, jndiName);
+      component = bind(location, type, jndiName);
 
       if (component != null) {
 	bindJndi(location, jndiName, component);
@@ -680,7 +677,7 @@ public class InjectIntrospector {
     }
 
     if (component == null)
-      component = webBeans.bind(location, type);
+      component = bind(location, type);
 
     if (component != null) {
       bindJndi(location, jndiName, component);
@@ -710,6 +707,30 @@ public class InjectIntrospector {
     else
       return getJndiValue(_type);
     */
+  }
+
+  public static Bean bind(String location, Class type)
+  {
+    return bind(location, type, null);
+  }
+
+  public static Bean bind(String location, Class type, String name)
+  {
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
+    Set<Bean> beans = webBeans.resolveByType(type);
+
+    if (beans == null || beans.size() == 0)
+      return null;
+
+    for (Bean bean : beans) {
+      // XXX: dup
+      
+      if (name == null || name.equals(bean.getName()))
+	return bean;
+    }
+
+    return null;
   }
 
   private static void bindJndi(String location, String name, Object value)

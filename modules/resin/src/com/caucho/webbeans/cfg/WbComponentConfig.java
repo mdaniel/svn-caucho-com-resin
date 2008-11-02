@@ -332,11 +332,11 @@ public class WbComponentConfig {
     ClassComponent comp;
 
     if (Singleton.class.equals(_scope))
-      comp = new SingletonClassComponent(_webbeans);
+      comp = new SingletonClassComponent(WebBeansContainer.create());
     else
-      comp = new ClassComponent(_webbeans);
+      comp = new ClassComponent(WebBeansContainer.create());
 
-    comp.setInstanceClass(_cl);
+    comp.setImplementationClass(_cl);
     comp.setTargetType(_cl);
 
     if (_name != null) {
@@ -350,7 +350,8 @@ public class WbComponentConfig {
     if (getMBeanName() != null)
       comp.setMBeanName(getMBeanName());
 
-    comp.setBindingList(_bindingList);
+    for (WbBinding binding : _bindingList)
+      comp.addBinding(binding.getAnnotation());
 
     if (_deploymentType != null)
       comp.setDeploymentType(_deploymentType);

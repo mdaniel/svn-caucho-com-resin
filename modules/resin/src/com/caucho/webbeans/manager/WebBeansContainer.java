@@ -30,6 +30,7 @@
 package com.caucho.webbeans.manager;
 
 import com.caucho.config.program.MethodComponentProgram;
+import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
@@ -78,6 +79,9 @@ public class WebBeansContainer
   
   private static final Annotation []NULL_ANN = new Annotation[0];
 
+  private static final Annotation []CURRENT_ANN
+    = new Annotation[] { new AnnotationLiteral<Current>() {} };
+
   private WebBeansContainer _parent;
   
   private EnvironmentClassLoader _classLoader;
@@ -93,8 +97,15 @@ public class WebBeansContainer
   private HashSet<Class<? extends Annotation>> _deploymentSet
     = new HashSet<Class<? extends Annotation>>();
 
+  private HashMap<Class,Integer> _deploymentMap
+    = new HashMap<Class,Integer>();
+				  
+
   private HashMap<Type,WebComponent> _componentMap
     = new HashMap<Type,WebComponent>();
+
+  private HashMap<BaseType,WebComponent> _componentBaseTypeMap
+    = new HashMap<BaseType,WebComponent>();
 
   private HashMap<String,ComponentImpl> _namedComponentMap
     = new HashMap<String,ComponentImpl>();
@@ -154,8 +165,8 @@ public class WebBeansContainer
     _contextMap.put(ApplicationScoped.class, new ApplicationScope());
     _contextMap.put(Singleton.class, new SingletonScope());
 
-    _deploymentSet.add(Standard.class);
-    _deploymentSet.add(Production.class);
+    _deploymentMap.put(Standard.class, 0);
+    _deploymentMap.put(Production.class, 1);
 
     if (_classLoader != null)
       _classLoader.addScanListener(this);
@@ -263,6 +274,20 @@ public class WebBeansContainer
 
     registerJmx(comp);
   }
+
+  public void setDeploymentTypes(ArrayList<Class> deploymentList)
+  {
+    if (deploymentList.size() < 1 ||
+	! deploymentList.get(0).equals(Standard.class)) {
+      throw new ConfigException(L.l("<Deploy> must contain @javax.webbeans.Standard as its first element because @Standard is always an enabled @DeploymentType"));
+    }
+
+    _deploymentMap.clear();
+
+    for (int i = 0; i < deploymentList.size(); i++) {
+      _deploymentMap.put(deploymentList.get(i), i);
+    }
+  }
   
   public void addComponentByName(String name, ComponentImpl comp)
   {
@@ -279,108 +304,74 @@ public class WebBeansContainer
   {
     if (type == null)
       return;
+
+    addComponentByType(BaseType.create(type, null), comp);
+  }
+    
+  private void addComponentByType(BaseType type, ComponentImpl comp)
+  {
+    if (type == null)
+      return;
     
     if (log.isLoggable(Level.FINE))
       log.fine(comp.toDebugString() + " added to " + this);
 
     if (comp.isSingleton()) {
       _pendingSingletonList.add(comp);
-    }      
+    }
 
-    addComponentRec(type, comp);
+    WebComponent webComponent;
+
+    synchronized (_componentMap) {
+      webComponent = _componentBaseTypeMap.get(type);
+
+      if (webComponent == null) {
+	webComponent = new WebComponent(this, type);
+      
+	_componentBaseTypeMap.put(type, webComponent);
+      }
+    }
+
+    webComponent.addComponent(comp);
   }
 
   public ArrayList<Bean> getBeansOfType(Type type)
   {
     ArrayList<Bean> beans = new ArrayList<Bean>();
-    
-    WebComponent webComponent = _componentMap.get(type);
+
+    WebComponent webComponent = getWebComponent(type);
 
     if (webComponent == null)
       return beans;
 
-    beans.addAll(webComponent.getComponentList());
+    beans.addAll(webComponent.resolve(new Annotation[0]));
 
     return beans;
-  }
-    
-  private void addComponentRec(Type type, ComponentImpl comp)
-  {
-    if (type == null || Object.class.equals(type))
-      return;
-    
-    WebComponent webComponent = _componentMap.get(type);
-
-    if (webComponent == null) {
-      webComponent = new WebComponent(type);
-      _componentMap.put(type, webComponent);
-    }
-
-    webComponent.addComponent(comp);
-
-    Class cl;
-
-    if (type instanceof Class)
-      cl = (Class) type;
-    else if (type instanceof ParameterizedType) {
-      cl = (Class) ((ParameterizedType) type).getRawType();
-      addComponentRec(cl, comp);
-      return;
-    }
-    else {
-      return;
-    }
-
-    addComponentRec(cl.getSuperclass(), comp);
-
-    for (Class subClass : cl.getInterfaces()) {
-      addComponentRec(subClass, comp);
-    }
   }
 
   public void addSingleton(Object object)
   {
-    SingletonComponent comp = new SingletonComponent(_wbWebBeans, object);
-
-    comp.init();
-
-    addComponent(comp);
+    addBean(new SingletonComponent(object));
   }
 
   public void addSingleton(Object object, String name)
   {
-    SingletonComponent comp = new SingletonComponent(_wbWebBeans, object);
-
-    comp.setName(name);
-    
-    comp.init();
-
-    addComponent(comp);
+    addBean(new SingletonComponent(object, name));
   }
 
   public void addSingleton(Object object,
 			   String name,
 			   Class deploymentType)
   {
-    SingletonComponent comp = new SingletonComponent(_wbWebBeans, object);
+    addBean(new SingletonComponent(object, name, null, deploymentType));
+  }
 
-    comp.setName(name);
-    comp.setDeploymentType(deploymentType);
-
-    if (name != null) {
-      WbBinding binding = new WbBinding();
-      binding.setClass(Named.class);
-      binding.addValue("value", name);
-
-      ArrayList<WbBinding> bindingList = new ArrayList<WbBinding>();
-      bindingList.add(binding);
-    
-      comp.setBindingList(bindingList);
-    }
-    
-    comp.init();
-
-    addComponent(comp);
+  public void addSingleton(Object object,
+			   String name,
+			   Class deploymentType,
+			   Type ...api)
+  {
+    addBean(new SingletonComponent(object, name, api, deploymentType));
   }
   
   /**
@@ -391,12 +382,7 @@ public class WebBeansContainer
    */
   public void addSingletonByName(Object object, String name)
   {
-    SingletonComponent comp = new SingletonComponent(_wbWebBeans, object);
-
-    comp.setName(name);
-    comp.init();
-    
-    _namedComponentMap.put(name, comp);
+    addBean(new SingletonComponent(object, name, new Type[0]));
   }
 
 
@@ -465,18 +451,47 @@ public class WebBeansContainer
 			    boolean isOptional)
     throws ConfigException
   {
-    ComponentImpl component;
+    if (field.isAnnotationPresent(New.class))
+      throw new IllegalStateException(L.l("can't cope with new"));
+    
+    Annotation []bindings = getBindings(field.getAnnotations());
       
-    component = bind(location(field),
-		     field.getGenericType(),
-		     field.getAnnotations());
+    Set set = resolve(field.getGenericType(), bindings);
 
-    if (component != null)
-      component.createProgram(injectList, field);
-    else if (! isOptional)
-      throw injectError(field, L.l("Can't find a component for '{0}'",
+    if (set != null && set.size() == 1) {
+      Iterator iter = set.iterator();
+      if (iter.hasNext()) {
+	Bean bean = (Bean) iter.next();
+
+	injectList.add(new FieldComponentProgram(this, bean, field));
+	return;
+      }
+    }
+
+    if (set != null && set.size() > 1) {
+      throw injectError(field, L.l("Can't inject a bean for '{0}' because multiple beans match: {1}",
+				   field.getType().getName(),
+				   set));
+    }
+    
+    if (! isOptional)
+      throw injectError(field, L.l("Can't find a component for '{0}' because no beans match",
 				   field.getType().getName()));
+  }
 
+  private Annotation []getBindings(Annotation []annotations)
+  {
+    ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
+
+    for (Annotation ann : annotations) {
+      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	bindingList.add(ann);
+    }
+
+    Annotation []bindings = new Annotation[bindingList.size()];
+    bindingList.toArray(bindings);
+
+    return bindings;
   }
 
   /**
@@ -497,7 +512,7 @@ public class WebBeansContainer
       ComponentImpl []args = new ComponentImpl[paramTypes.length];
 
       for (int i = 0; i < args.length; i++) {
-	args[i] = bind(location(method), paramTypes[i], paramAnn[i]);
+	args[i] = null;//bind(location(method), paramTypes[i], paramAnn[i]);
 
 	if (args[i] == null) {
 	  throw error(method,
@@ -512,151 +527,6 @@ public class WebBeansContainer
     } catch (Exception e) {
       throw LineConfigException.create(method, e);
     }
-  }
-
-  /**
-   * Returns the web beans component corresponding to a method
-   * and a @Named value
-   */
-  public ComponentImpl bind(String location, Type type, String name)
-  {
-    ArrayList<Binding> bindingList = new ArrayList<Binding>();
-
-    Binding binding = new Binding(Named.class);
-    binding.put("value", name);
-
-    bindingList.add(binding);
-
-    return bindByBindings(location, type, bindingList);
-  }
-
-  /**
-   * Returns the web beans component corresponding to the return type.
-   */
-  public ComponentImpl bind(String location, Type type)
-  {
-    ArrayList<Binding> bindingList = new ArrayList<Binding>();
-
-    return bindByBindings(location, type, bindingList);
-  }
-
-  /**
-   * Returns the web beans component corresponding to a method
-   * parameter.
-   */
-  public ComponentImpl bind(String location,
-			    Type type,
-			    Annotation []paramAnn)
-  {
-    ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
-
-    boolean isNew = false;
-    for (Annotation ann : paramAnn) {
-      if (ann instanceof New)
-	isNew = true;
-      else if (ann.annotationType().isAnnotationPresent(BindingType.class))
-	bindingList.add(ann);
-    }
-
-    if (isNew)
-      return bindNew(location, (Class) type);
-    else
-      return bind(location, type, bindingList);
-  }
-
-  /**
-   * Binds for the @New expression
-   */
-  private ComponentImpl bindNew(String location, Class type)
-  {
-    ComponentImpl component = bind(location, type, new Annotation[0]);
-
-    if (component == null) {
-      ClassComponent newComp = new ClassComponent(_wbWebBeans);
-      newComp.setInstanceClass(type);
-      newComp.setTargetType(type);
-      newComp.init();
-
-      addComponent(newComp);
-
-      component = newComp;
-    }
-
-    return component;
-  }
-
-  /**
-   * Returns the web beans component with a given binding list.
-   */
-  public ComponentImpl bind(String location,
-			    Type type,
-			    ArrayList<Annotation> bindingList)
-  {
-    _wbWebBeans.init();
-    
-    WebComponent component = _componentMap.get(type);
-
-    if (component != null) {
-      ComponentImpl comp = component.bind(location, bindingList);
-
-      if (log.isLoggable(Level.FINER))
-	log.finer(this + " bind(" + getSimpleName(type) + ") returns " + comp);
-      
-      return comp;
-    }
-    else if (_parent != null) {
-      return _parent.bind(location, type, bindingList);
-    }
-    else {
-      return null;
-    }
-  }
-
-  /**
-   * Returns the web beans component with a given binding list.
-   */
-  private Set resolve(Type type,
-		      Annotation []bindings)
-  {
-    _wbWebBeans.init();
-    
-    WebComponent component = _componentMap.get(type);
-
-    if (component != null) {
-      Set beans = component.resolve(bindings);
-
-      if (log.isLoggable(Level.FINER))
-	log.finer(this + " bind(" + getSimpleName(type) + ") -> " + beans);
-
-      if (beans != null)
-	return beans;
-    }
-    
-    if (_parent != null) {
-      return _parent.resolve(type, bindings);
-    }
-    else {
-      return null;
-    }
-  }
-
-  /**
-   * Returns the web beans component with a given binding list.
-   */
-  public ComponentImpl bindByBindings(String location,
-				      Type type,
-				      ArrayList<Binding> bindingList)
-  {
-    _wbWebBeans.init();
-    
-    WebComponent component = _componentMap.get(type);
-
-    if (component != null)
-      return component.bindByBindings(location, type, bindingList);
-    else if (_parent != null)
-      return _parent.bindByBindings(location, type, bindingList);
-    else
-      return null;
   }
 
   /**
@@ -733,15 +603,6 @@ public class WebBeansContainer
   //
   // javax.webbeans.Container
   //
-
-  /**
-   * Returns the component which matches the apiType and binding types
-   */
-  public <T> Bean<T> resolveByTypeOld(Class<T> apiType,
-						  Annotation...bindingTypes)
-  {
-    return bind("", apiType, bindingTypes);
-  }
 
   /**
    * Sends the specified event to any observer instances in the scope
@@ -828,8 +689,8 @@ public class WebBeansContainer
 	else if (Modifier.isAbstract(type.getModifiers()))
 	  throw new ConfigException(L.l("'{0}' cannot be an abstract.  createTransient requires a concrete type.", type.getName()));
 	
-	comp = new ClassComponent(_wbWebBeans);
-	comp.setInstanceClass(type);
+	comp = new ClassComponent(this);
+	comp.setTargetType(type);
 
 	try {
 	  Constructor nullCtor = type.getConstructor(new Class[0]);
@@ -910,6 +771,8 @@ public class WebBeansContainer
    */
   public <T> ComponentImpl<T> createFactory(Class<T> type, Annotation ... ann)
   {
+    throw new UnsupportedOperationException();
+    /*
     FactoryBinding binding = new FactoryBinding(type, ann);
     
     synchronized (_objectFactoryMap) {
@@ -921,7 +784,7 @@ public class WebBeansContainer
       if (ann == null)
 	ann = NULL_ANN;
       
-      factory = resolveByTypeOld(type, ann);
+      factory = resolveByType(type, ann);
 
       if (factory != null) {
 	_objectFactoryMap.put(binding, factory);
@@ -952,6 +815,7 @@ public class WebBeansContainer
 
       return comp;
     }
+    */
   }
 
   //
@@ -967,8 +831,20 @@ public class WebBeansContainer
    */
   public Manager addBean(Bean<?> bean)
   {
-    for (Class type : bean.getTypes()) {
-      addComponentByType(type, (ComponentImpl) bean);
+    if (bean instanceof CauchoBean) {
+      CauchoBean cauchoBean = (CauchoBean) bean;
+
+      Iterator iter = cauchoBean.getGenericTypes().iterator();
+      while (iter.hasNext()) {
+	BaseType type = (BaseType) iter.next();
+	
+	addComponentByType(type, (ComponentImpl) bean);
+      }
+    }
+    else {
+      for (Class type : bean.getTypes()) {
+	addComponentByType(type, (ComponentImpl) bean);
+      }
     }
 
     if (bean.getName() != null)
@@ -1006,7 +882,12 @@ public class WebBeansContainer
   public <T> Set<Bean<T>> resolveByType(Class<T> type,
 					Annotation... bindings)
   {
-    return resolve(type, bindings);
+    Set<Bean<T>> set = resolve(type, bindings);
+
+    if (set != null)
+      return set;
+    else
+      return new HashSet<Bean<T>>();
   }
 
   /**
@@ -1018,9 +899,94 @@ public class WebBeansContainer
   public <T> Set<Bean<T>> resolveByType(TypeLiteral<T> type,
 					Annotation... bindings)
   {
-    return (Set<Bean<T>>) resolve(type.getType(), bindings);
+    Set<Bean<T>> set = (Set<Bean<T>>) resolve(type.getType(), bindings);
+
+    if (set != null)
+      return set;
+    else
+      return new HashSet<Bean<T>>();
   }
 
+  /**
+   * Returns the web beans component with a given binding list.
+   */
+  public Set resolve(Type type,
+		     Annotation []bindings)
+  {
+    _wbWebBeans.init();
+
+    if (bindings == null || bindings.length == 0) {
+      if (Object.class.equals(type))
+	return resolveAllBeans();
+      
+      bindings = CURRENT_ANN;
+    }
+    
+    WebComponent component = getWebComponent(type);
+
+    if (component != null) {
+      Set beans = component.resolve(bindings);
+
+      if (log.isLoggable(Level.FINER))
+	log.finer(this + " bind(" + getSimpleName(type) + ") -> " + beans);
+
+      if (beans != null)
+	return beans;
+    }
+    
+    if (_parent != null) {
+      return _parent.resolve(type, bindings);
+    }
+    else {
+      return null;
+    }
+  }
+
+  int getDeploymentPriority(Class deploymentType)
+  {
+    Integer value = _deploymentMap.get(deploymentType);
+
+    if (value != null)
+      return value;
+    else
+      return -1;
+  }
+
+  private Set resolveAllBeans()
+  {
+    Annotation []bindings = new Annotation[0];
+    
+    synchronized (_componentMap) {
+      LinkedHashSet beans = new LinkedHashSet();
+
+      for (WebComponent comp : _componentBaseTypeMap.values()) {
+	Set set = comp.resolve(bindings);
+
+	beans.addAll(set);
+      }
+
+      return beans;
+    }
+  }
+
+  private WebComponent getWebComponent(Type type)
+  {
+    synchronized (_componentMap) {
+      WebComponent comp = _componentMap.get(type);
+
+      if (comp == null) {
+	BaseType baseType = BaseType.create(type, null);
+
+	comp = _componentBaseTypeMap.get(baseType);
+
+	if (comp != null)
+	  _componentMap.put(type, comp);
+      }
+
+      return comp;
+    }
+  }
+  
   /**
    * Returns an instance for the given bean.  This method will obey
    * the scope of the bean, so a singleton will return the single bean.
@@ -1031,7 +997,20 @@ public class WebBeansContainer
    */
   public <T> T getInstance(Bean<T> bean)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return (T) ((ComponentImpl) bean).get();
+  }
+
+  /**
+   * Returns an instance for the given bean.  This method will obey
+   * the scope of the bean, so a singleton will return the single bean.
+   *
+   * @param bean the metadata for the bean
+   *
+   * @return an instance of the bean obeying scope
+   */
+  public <T> T getInstance(Bean<T> bean, ConfigContext env)
+  {
+    return (T) ((ComponentImpl) bean).get(env);
   }
 
   /**
@@ -1054,12 +1033,19 @@ public class WebBeansContainer
   public <T> T getInstanceByType(Class<T> type,
 				 Annotation... bindings)
   {
-    ComponentImpl<T> factory = bind("", type, bindings);
+    Set<Bean<T>> set = resolveByType(type, bindings);
 
-    if (factory != null)
-      return (T) factory.get();
-    else
-      return null;
+    if (set != null) {
+      Iterator<Bean<T>> iter = set.iterator();
+
+      if (iter.hasNext()) {
+	Bean<T> bean = iter.next();
+      
+	return (T) getInstance(bean);
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -1309,7 +1295,7 @@ public class WebBeansContainer
       _pendingBindList.clear();
       
       for (ComponentImpl comp : bindList) {
-	if (_deploymentSet.contains(comp.getDeploymentType()))
+	if (_deploymentMap.get(comp.getDeploymentType()) != null)
 	  comp.bind();
       }
     } catch (ConfigException e) {
@@ -1387,6 +1373,7 @@ public class WebBeansContainer
   public void environmentStop(EnvironmentClassLoader loader)
   {
     _componentMap = null;
+    _componentBaseTypeMap = null;
     _namedComponentMap = null;
   }
 

@@ -90,12 +90,15 @@ import javax.servlet.http.*;
 import javax.webbeans.*;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.osgi.framework.BundleContext;
 
 /**
  * Resin's webApp implementation.
@@ -425,7 +428,8 @@ public class WebApp extends ServletContextImpl
 
     WebBeansContainer webBeans = WebBeansContainer.create();
 
-    webBeans.addSingleton(_osgiBundle.getBundleContext());
+    webBeans.addSingleton(_osgiBundle.getBundleContext(),
+			  null, null, BundleContext.class);
   }
 
   /**

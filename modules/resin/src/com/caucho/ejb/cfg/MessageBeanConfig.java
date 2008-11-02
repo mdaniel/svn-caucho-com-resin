@@ -131,7 +131,7 @@ public class MessageBeanConfig extends AbstractBeanConfig
       bean.setActivationSpec(_activationSpec);
     }
     else {
-      ComponentImpl destComp;
+      Object destComp;
 
       Class destinationType = _destinationType;
       
@@ -139,22 +139,23 @@ public class MessageBeanConfig extends AbstractBeanConfig
 	destinationType = Destination.class;
 
       if (_destinationName != null)
-	destComp = webBeans.bind(loc, destinationType, _destinationName);
+	destComp = webBeans.getInstanceByName(_destinationName);
       else
-	destComp = webBeans.bind(loc, destinationType);
+	destComp = webBeans.getInstanceByType(destinationType);
 
       if (destComp == null)
-	throw new ConfigException(L.l("'{0}' is an unknown destination type '{1}'",
+	throw new ConfigException(L.l("{0}: '{1}' is an unknown destination type '{2}'",
+				      loc,
 				      _destinationName,
 				      _destinationType.getName()));
 
-      bean.setDestinationValue((Destination) destComp.get());
+      bean.setDestinationValue((Destination) destComp);
 
-      ComponentImpl comp = webBeans.bind(loc, ConnectionFactory.class);
+      Object comp = webBeans.getInstanceByType(ConnectionFactory.class);
 
       if (comp == null)
 	throw new ConfigException(L.l("ejb-message-bean requires a configured JMS ConnectionFactory"));
-      bean.setConnectionFactoryValue((ConnectionFactory) comp.get());
+      bean.setConnectionFactoryValue((ConnectionFactory) comp);
     }
 
     bean.init();

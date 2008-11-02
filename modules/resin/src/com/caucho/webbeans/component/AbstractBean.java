@@ -1,0 +1,727 @@
+/*
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.webbeans.component;
+
+import com.caucho.config.program.FieldComponentProgram;
+import com.caucho.config.*;
+import com.caucho.config.j2ee.*;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.types.*;
+import com.caucho.naming.*;
+import com.caucho.util.*;
+import com.caucho.webbeans.*;
+import com.caucho.webbeans.bytecode.*;
+import com.caucho.webbeans.cfg.*;
+import com.caucho.webbeans.context.*;
+import com.caucho.webbeans.event.ObserverImpl;
+import com.caucho.webbeans.manager.WebBeansContainer;
+
+import java.lang.reflect.*;
+import java.lang.annotation.*;
+import java.util.*;
+import java.io.Serializable;
+
+import javax.annotation.*;
+import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
+import javax.webbeans.manager.Manager;
+
+/**
+ * Configuration for the xml web bean component.
+ */
+abstract public class AbstractBean<T> extends CauchoBean<T>
+  implements ObjectProxy
+{
+  private static final L10N L = new L10N(AbstractBean.class);
+
+  private static final Object []NULL_ARGS = new Object[0];
+  private static final ConfigProgram []NULL_INJECT = new ConfigProgram[0];
+
+  private static final HashSet<Class> _reservedTypes
+    = new HashSet<Class>();
+
+  protected WebBeansContainer _webBeans;
+  
+  private Type _targetType;
+  
+  private Class<? extends Annotation> _deploymentType;
+
+  private LinkedHashSet<BaseType> _types
+    = new LinkedHashSet<BaseType>();
+
+  private LinkedHashSet<Class<?>> _typeClasses
+    = new LinkedHashSet<Class<?>>();
+
+  private String _name;
+  
+  private ArrayList<Annotation> _bindings
+    = new ArrayList<Annotation>();
+
+  private Class<? extends Annotation> _scopeType;
+  
+  private HashMap<Method,ArrayList<WbInterceptor>> _interceptorMap;
+
+  private boolean _isNullable;
+
+  protected ScopeContext _scope;
+
+  protected ConfigProgram []_injectProgram = NULL_INJECT;
+  protected ConfigProgram []_initProgram = NULL_INJECT;
+  protected ConfigProgram []_destroyProgram = NULL_INJECT;
+  
+  public AbstractBean(WebBeansContainer manager)
+  {
+    super(manager);
+
+    _webBeans = manager;
+  }
+
+  public WebBeansContainer getWebBeans()
+  {
+    return _webBeans;
+  }
+
+  /**
+   * Sets the component type.
+   */
+  public void setDeploymentType(Class<? extends Annotation> type)
+  {
+    if (type == null)
+      throw new NullPointerException();
+
+    if (! type.isAnnotationPresent(DeploymentType.class))
+      throw new ConfigException(L.l("'{0}' is an invalid deployment type because it does not implement @javax.webbeans.DeploymentType",
+				    type));
+
+    if (_deploymentType != null && ! _deploymentType.equals(type))
+      throw new ConfigException(L.l("deployment-type must be unique"));
+    
+    _deploymentType = type;
+  }
+
+  /**
+   * Returns the bean's deployment type
+   */
+  public Class<? extends Annotation> getDeploymentType()
+  {
+    return _deploymentType;
+  }
+
+  public void setTargetType(Type type)
+  {
+    _targetType = type;
+  }
+  
+  public Type getTargetType()
+  {
+    return _targetType;
+  }
+  
+  public String getTargetSimpleName()
+  {
+    if (_targetType instanceof Class)
+      return ((Class) _targetType).getSimpleName();
+    else
+      return String.valueOf(_targetType);
+  }
+  
+  public Class getTargetClass()
+  {
+    if (_targetType instanceof Class)
+      return ((Class) _targetType);
+    else if (_targetType instanceof ParameterizedType)
+      return (Class) ((ParameterizedType) _targetType).getRawType();
+    else
+      return (Class) _targetType;
+  }
+
+  public String getTargetName()
+  {
+    if (_targetType instanceof Class)
+      return ((Class) _targetType).getName();
+    else
+      return String.valueOf(_targetType);
+  }
+
+  /**
+   * Returns the bean's EL binding name.
+   */
+  public void setName(String name)
+  {
+    _name = name;
+  }
+
+  /**
+   * Gets the bean's EL binding name.
+   */
+  @Override
+  public String getName()
+  {
+    return _name;
+  }
+
+  public void addBinding(Annotation binding)
+  {
+    if (! binding.annotationType().isAnnotationPresent(BindingType.class))
+      throw new ConfigException(L.l("'{0}' is not a valid binding because it does not have a @javax.webbeans.BindingType annotation",
+				    binding));
+    
+    _bindings.add(binding);
+  }
+
+  /**
+   * Returns the bean's binding types
+   */
+  public Set<Annotation> getBindingTypes()
+  {
+    Set<Annotation> set = new LinkedHashSet<Annotation>();
+
+    for (Annotation binding : _bindings) {
+      set.add(binding);
+    }
+
+    return set;
+  }
+
+  /**
+   * Sets the scope annotation.
+   */
+  public void setScopeType(Class<? extends Annotation> scopeType)
+  {
+    if (! scopeType.isAnnotationPresent(ScopeType.class))
+      throw new ConfigException(L.l("'{0}' is not a valid scope because it does not have a @javax.webbeans.ScopeType annotation",
+				    scopeType));
+    
+    _scopeType = scopeType;
+  }
+
+  /**
+   * Returns the scope
+   */
+  public Class<? extends Annotation> getScopeType()
+  {
+    return _scopeType;
+  }
+
+  /**
+   * Returns the types that the bean implements
+   */
+  public Set<Class<?>> getTypes()
+  {
+    return _typeClasses;
+  }
+
+  /**
+   * Returns the types that the bean implements
+   */
+  public Set<BaseType> getGenericTypes()
+  {
+    return _types;
+  }
+
+  /**
+   * Initialization.
+   */
+  protected void init()
+  {
+    introspect();
+    
+    if (_deploymentType == null)
+      _deploymentType = Production.class;
+
+    if (_bindings.size() == 0)
+      addBinding(new AnnotationLiteral<Current>() {});
+
+    if (_scopeType == null)
+      _scopeType = Dependent.class;
+  }
+
+  protected void introspect()
+  {
+    Class cl = getTargetClass();
+    
+    if (_types.size() == 0)
+      introspectTypes(cl);
+  }
+
+  /**
+   * Introspects all the types implemented by the class
+   */
+  protected void introspectTypes(Type type)
+  {
+    if (_types.size() == 0)
+      introspectTypes(type, null);
+  }
+
+  /**
+   * Introspects all the types implemented by the class
+   */
+  private void introspectTypes(Type type, HashMap paramMap)
+  {
+    if (type == null || _reservedTypes.contains(type))
+      return;
+
+    Class cl = addType(type, paramMap);
+    
+    if (cl == null)
+      return;
+    
+    introspectTypes(cl.getGenericSuperclass(), paramMap);
+
+    for (Type iface : cl.getGenericInterfaces()) {
+      introspectTypes(iface, paramMap);
+    }
+  }
+
+  protected Class addType(Type type)
+  {
+    return addType(type, null);
+  }
+
+  protected Class addType(Type type, HashMap paramMap)
+  {
+    BaseType baseType = BaseType.create(type, paramMap);
+
+    if (baseType == null)
+      return null;
+
+    if (_types.contains(baseType))
+      return null;
+    
+    _types.add(baseType);
+
+    if (! _typeClasses.contains(baseType.getRawClass()))
+      _typeClasses.add(baseType.getRawClass());
+
+    return baseType.getRawClass();
+  }
+
+  /**
+   * Called for implicit introspection.
+   */
+  protected void introspectDeploymentType(Class cl)
+  {
+    introspectDeploymentType(cl.getAnnotations());
+  }
+
+  /**
+   * Called for implicit introspection.
+   */
+  protected void introspectDeploymentType(Annotation []annotations)
+  {
+    Class deploymentType = null;
+
+    if (getDeploymentType() == null) {
+      for (Annotation ann : annotations) {
+	if (ann.annotationType().isAnnotationPresent(DeploymentType.class)) {
+	  if (deploymentType != null)
+	    throw new ConfigException(L.l("{0}: @DeploymentType annotation @{1} is invalid because it conflicts with @{2}.  WebBeans components may only have a single @DeploymentType.",
+					  getTargetName(),
+					  deploymentType.getName(),
+					  ann.annotationType().getName()));
+
+	  deploymentType = ann.annotationType();
+	  setDeploymentType(deploymentType);
+	}
+      }
+    }
+  }
+
+  /**
+   * Called for implicit introspection.
+   */
+  protected void introspectScope(Class cl)
+  {
+    introspectScope(cl.getAnnotations());
+  }
+
+  /**
+   * Called for implicit introspection.
+   */
+  protected void introspectScope(Annotation []annotations)
+  {
+    Class scopeClass = null;
+
+    if (getScopeType() == null) {
+      for (Annotation ann : annotations) {
+	if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
+	  if (scopeClass != null)
+	    throw new ConfigException(L.l("{0}: @ScopeType annotation @{1} conflicts with @{2}.  WebBeans components may only have a single @ScopeType.",
+					  getTargetName(),
+					  scopeClass.getName(),
+					  ann.annotationType().getName()));
+
+	  scopeClass = ann.annotationType();
+	  setScopeType(scopeClass);
+	}
+      }
+    }
+  }
+
+  /**
+   * Introspects the binding annotations
+   */
+  protected void introspectBindings(Annotation []annotations)
+  {
+    if (_bindings.size() == 0) {
+      for (Annotation ann : annotations) {
+	if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	  addBinding(ann);
+
+	if (ann instanceof Named && getName() == null)
+	  setName(((Named) ann).value());
+      }
+    }
+  }
+
+  /**
+   * Introspects the methods for any @Produces
+   */
+  protected void introspectProduces(Class cl)
+  {
+    if (cl == null)
+      return;
+
+    introspectProduces(cl.getDeclaredMethods());
+  }
+
+  /**
+   * Introspects the methods for any @Produces
+   */
+  protected void introspectProduces(Method []methods)
+  {
+    for (Method method : methods) {
+      if (Modifier.isStatic(method.getModifiers()))
+	continue;
+
+      if (! method.isAnnotationPresent(Produces.class))
+	continue;
+
+      if (method.isAnnotationPresent(In.class))
+	throw ConfigException.create(method, L.l("@Produces method may not have an @In annotation."));
+
+      WebBeansContainer webBeans = (WebBeansContainer) getManager();
+
+
+      ProducesComponent comp = new ProducesComponent(webBeans, this, method);
+
+      comp.init();
+
+      webBeans.addBean(comp);
+    }
+  }
+
+  /**
+   * Introspects any observers.
+   */
+  protected void introspectObservers(Class cl)
+  {
+    introspectObservers(cl.getDeclaredMethods());
+  }
+
+  /**
+   * Introspects any observers.
+   */
+  protected void introspectObservers(Method []methods)
+  {
+    for (Method method : methods) {
+      int param = findObserverAnnotation(method);
+
+      if (param < 0)
+	continue;
+
+      if (method.isAnnotationPresent(In.class))
+	throw ConfigException.create(method, "@Observer may not have an @In attribute");
+
+      ArrayList<WbBinding> bindingList = new ArrayList<WbBinding>();
+      
+      Annotation [][]annList = method.getParameterAnnotations();
+      if (annList != null && annList[param] != null) {
+	for (Annotation ann : annList[param]) {
+	  if (ann.annotationType().isAnnotationPresent(EventBindingType.class))
+	    bindingList.add(new WbBinding(ann));
+	}
+      }
+
+      ObserverImpl observer = new ObserverImpl(_webBeans, this, method, param);
+      observer.setBindingList(bindingList);
+
+      _webBeans.addObserver(observer);
+    }
+  }
+
+  /**
+   * Introspects any intercepted methods
+   */
+  protected void introspectInterceptors(Class cl)
+  {
+    introspectInterceptors(cl.getMethods());
+  }
+  
+  /**
+   * Introspects any intercepted methods
+   */
+  protected void introspectInterceptors(Method []methods)
+  {
+    for (Method method : methods) {
+      if (method.getDeclaringClass().equals(Object.class))
+	continue;
+      
+      ArrayList<Annotation> interceptorTypes = findInterceptorTypes(method);
+
+      if (interceptorTypes == null)
+	continue;
+
+      /* XXX:
+      ArrayList<WbInterceptor> interceptors
+	= _webBeans.findInterceptors(interceptorTypes);
+
+      if (interceptors != null) {
+	if (_interceptorMap == null)
+	  _interceptorMap = new HashMap<Method,ArrayList<WbInterceptor>>();
+
+	_interceptorMap.put(method, interceptors);
+      }
+      */
+    }
+  }
+
+  private ArrayList<Annotation> findInterceptorTypes(Method method)
+  {
+    ArrayList<Annotation> types = null;
+
+    for (Annotation ann : method.getAnnotations()) {
+      if (ann.annotationType().isAnnotationPresent(InterceptorBindingType.class)) {
+	if (types == null)
+	  types = new ArrayList<Annotation>();
+
+	types.add(ann);
+      }
+    }
+
+    return types;
+  }
+  
+  boolean hasBindingAnnotation(Constructor ctor)
+  {
+    if (ctor.isAnnotationPresent(In.class))
+      return true;
+
+    Annotation [][]paramAnn = ctor.getParameterAnnotations();
+
+    for (Annotation []annotations : paramAnn) {
+      for (Annotation ann : annotations) {
+	if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	  return true;
+      }
+    }
+
+    return false;
+  }
+
+  private int findObserverAnnotation(Method method)
+  {
+    Annotation [][]paramAnn = method.getParameterAnnotations();
+    int observer = -1;
+
+    for (int i = 0; i < paramAnn.length; i++) {
+      for (Annotation ann : paramAnn[i]) {
+	if (ann instanceof Observes) {
+	  if (observer >= 0)
+	    throw WebBeansContainer.error(method, L.l("Only one param may have an @Observer"));
+	  
+	  observer = i;
+	}
+      }
+    }
+
+    return observer;
+  }
+
+  public boolean isMatch(ArrayList<Annotation> bindings)
+  {
+    for (int i = 0; i < bindings.size(); i++) {
+      if (! isMatch(bindings.get(i)))
+	return false;
+    }
+    
+    return true;
+  }
+
+  public boolean isMatch(Annotation []bindings)
+  {
+    for (Annotation binding : bindings) {
+      if (! isMatch(binding))
+	return false;
+    }
+    
+    return true;
+  }
+
+  /**
+   * Returns true if at least one of this component's bindings match
+   * the injection binding.
+   */
+  public boolean isMatch(Annotation bindAnn)
+  {
+    for (int i = 0; i < _bindings.size(); i++) {
+      // XXX:
+      if (_bindings.get(i).equals(bindAnn))
+	return true;
+    }
+    
+    return false;
+  }
+
+  /**
+   * Returns the bean's name or null if the bean does not have a
+   * primary name.
+   */
+      /*
+  public String getName()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+      */
+
+  /**
+   * Returns true if the bean can be null
+   */
+  public boolean isNullable()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the bean is serializable
+   */
+  public boolean isSerializable()
+  {
+    return Serializable.class.isAssignableFrom(getTargetClass());
+  }
+
+  protected Bean bindParameter(String loc,
+			       Type type,
+			       Annotation []bindings)
+  {
+    Set set = _webBeans.resolve(type, bindings);
+
+    if (set == null || set.size() == 0)
+      return null;
+
+    if (set.size() > 1) {
+      throw new ConfigException(L.l("{0}: can't bind webbeans '{1}' because multiple matching beans were found: {2}",
+				    loc, type, set));
+    }
+
+    Iterator iter = set.iterator();
+    if (iter.hasNext()) {
+      Bean bean = (Bean) iter.next();
+
+      return bean;
+    }
+
+    return null;
+  }
+
+  public String toDebugString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getTargetSimpleName());
+    sb.append("[");
+    
+    if (_name != null) {
+      sb.append("name=");
+      sb.append(_name);
+    }
+
+    for (Annotation binding : _bindings) {
+      sb.append(",");
+      sb.append(binding);
+    }
+
+    if (_deploymentType != null) {
+      sb.append(", @");
+      sb.append(_deploymentType.getSimpleName());
+    }
+    
+    if (_scopeType != null) {
+      sb.append(", @");
+      sb.append(_scopeType.getSimpleName());
+    }
+
+    sb.append("]");
+
+    return sb.toString();
+  }
+
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+
+    sb.append(getTargetSimpleName());
+    sb.append(", ");
+
+    if (_deploymentType != null) {
+      sb.append("@");
+      sb.append(_deploymentType.getSimpleName());
+    }
+    else
+      sb.append("@null");
+    
+    if (_name != null) {
+      sb.append(", ");
+      sb.append("name=");
+      sb.append(_name);
+    }
+    
+    if (_scope != null) {
+      sb.append(", @");
+      sb.append(_scope.getClass().getSimpleName());
+    }
+
+    sb.append("]");
+
+    return sb.toString();
+  }
+
+  static {
+    _reservedTypes.add(java.io.Closeable.class);
+    _reservedTypes.add(java.io.Serializable.class);
+    _reservedTypes.add(Cloneable.class);
+    _reservedTypes.add(Object.class);
+    _reservedTypes.add(Comparable.class);
+  }
+}

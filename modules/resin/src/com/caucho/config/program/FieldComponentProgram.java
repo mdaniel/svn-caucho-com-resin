@@ -34,10 +34,12 @@ import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.context.DependentScope;
+import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.util.*;
 
 import java.util.logging.*;
 import java.lang.reflect.*;
+import javax.webbeans.manager.Bean;
 
 public class FieldComponentProgram extends ConfigProgram
 {
@@ -45,12 +47,16 @@ public class FieldComponentProgram extends ConfigProgram
   private static final Logger log
     = Logger.getLogger(FieldComponentProgram.class.getName());
 
-  private ComponentImpl _component;
+  private WebBeansContainer _manager;
+  private Bean _bean;
   private Field _field;
 
-  public FieldComponentProgram(ComponentImpl component, Field field)
+  public FieldComponentProgram(WebBeansContainer manager,
+			       Bean bean,
+			       Field field)
   {
-    _component = component;
+    _manager = manager;
+    _bean = bean;
     _field = field;
 
     field.setAccessible(true);
@@ -60,7 +66,7 @@ public class FieldComponentProgram extends ConfigProgram
   {
     Object value = null;
     try {
-      value = _component.get(env);
+      value = _manager.getInstance(_bean, env);
 
       _field.set(bean, value);
     } catch (IllegalArgumentException e) {

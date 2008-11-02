@@ -90,6 +90,7 @@ public class BeanType extends ConfigType
   private Attribute _setProperty;
 
   private Attribute _addCustomBean;
+  private Attribute _addAnnotation;
   
   private ComponentImpl _component;
 
@@ -118,6 +119,11 @@ public class BeanType extends ConfigType
   protected void setAddCustomBean(Attribute addCustomBean)
   {
     _addCustomBean = addCustomBean;
+  }
+
+  protected void setAddAnnotation(Attribute addAnnotation)
+  {
+    _addAnnotation = addAnnotation;
   }
 
   /**
@@ -628,6 +634,7 @@ public class BeanType extends ConfigType
       }
     }
   }
+
 
   private void fillCreateMap(HashMap<String,Method> createMap,
 			     Method []methods)

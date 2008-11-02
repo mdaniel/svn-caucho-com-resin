@@ -79,6 +79,5 @@ public class OsgiServiceConfig extends BeanConfig
     Dictionary properties = null;
 
     bundle.registerService(interfaces, service, properties);
-    System.out.println("OOK: " + service);
   }
 }

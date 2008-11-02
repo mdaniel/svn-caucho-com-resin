@@ -29,42 +29,36 @@
 
 package com.caucho.config.attribute;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 
 import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.type.*;
-import com.caucho.config.types.AnnotationConfig;
 import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-public class CustomBeanAnnotationAttribute extends Attribute {
-  private static final L10N L = new L10N(CustomBeanAnnotationAttribute.class);
+public class CustomBeanProgramAttribute extends Attribute {
+  private static final L10N L = new L10N(CustomBeanProgramAttribute.class);
 
-  private static final QName VALUE = new QName("value");
+  public static final CustomBeanProgramAttribute ATTRIBUTE
+    = new CustomBeanProgramAttribute();
 
-  private final ConfigType _configType;
-
-  public CustomBeanAnnotationAttribute(Class cl)
+  private CustomBeanProgramAttribute()
   {
-    _configType = TypeFactory.getType(cl);
   }
 
   public ConfigType getConfigType()
   {
-    return _configType;
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
-   * Creates the child bean.
+   * Returns true for a program-style attribute.
    */
-  @Override
-  public Object create(Object parent, QName qName)
-    throws ConfigException
+  public boolean isProgram()
   {
-    return _configType.create(parent, qName);
+    return true;
   }
   
   /**
@@ -73,14 +67,12 @@ public class CustomBeanAnnotationAttribute extends Attribute {
   public void setValue(Object bean, QName name, Object value)
     throws ConfigException
   {
-    CustomBeanConfig customBean = (CustomBeanConfig) bean;
+    try {
+      CustomBeanConfig customBean = (CustomBeanConfig) bean;
 
-    if (value instanceof Annotation) {
-      customBean.addAnnotation((Annotation) value);
-    }
-    else {
-      AnnotationConfig annConfig = (AnnotationConfig) value;
-      customBean.addAnnotation(annConfig.replace());
+      customBean.addInitProgram((ConfigProgram) value);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
   }
   
@@ -88,19 +80,35 @@ public class CustomBeanAnnotationAttribute extends Attribute {
    * Sets the value of the attribute
    */
   @Override
-  public void setText(Object parent, QName name, String text)
+  public void setText(Object bean, QName name, String text)
     throws ConfigException
   {
-    Object bean = create(parent, name);
+    try {
+      CustomBeanConfig customBean = (CustomBeanConfig) bean;
 
-    Attribute attr = _configType.getAttribute(VALUE);
+      customBean.addInitProgram(new TextArgProgram(text));
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+  
+  static class TextArgProgram extends ConfigProgram {
+    private String _arg;
 
-    if (attr == null)
-      throw new ConfigException(L.l("'{0}' does not have a 'value' attribute, so it cannot have a text value.",
-				    name));
+    TextArgProgram(String arg)
+    {
+      _arg = arg;
+    }
+    
+    public void inject(Object bean, ConfigContext env)
+    {
+      throw new UnsupportedOperationException(getClass().getName());
+    }
 
-    attr.setText(bean, VALUE, text);
-
-    setValue(parent, name, bean);
+    public Object configure(ConfigType type, ConfigContext env)
+      throws ConfigException
+    {
+      return type.valueOf(_arg);
+    }
   }
 }

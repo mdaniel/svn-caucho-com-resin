@@ -54,7 +54,7 @@ import javax.webbeans.manager.Bean;
 /**
  * Configuration for the xml web bean component.
  */
-public class ComponentImpl<T> extends Bean<T>
+public class ComponentImpl<T> extends AbstractBean<T>
   implements ObjectProxy
 {
   private static final L10N L = new L10N(ComponentImpl.class);
@@ -62,116 +62,22 @@ public class ComponentImpl<T> extends Bean<T>
   private static final Object []NULL_ARGS = new Object[0];
   private static final ConfigProgram []NULL_INJECT = new ConfigProgram[0];
 
-  protected WbWebBeans _webbeans;
-  
-  private Class<? extends Annotation> _deploymentType;
-
-  private Type _targetType;
-
   private boolean _isFromClass;
-
-  private String _name;
   
   private boolean _hasBinding;
-
-  private LinkedHashSet<Class<?>> _types
-    = new LinkedHashSet<Class<?>>();
   
   private ArrayList<WbBinding> _bindingList
     = new ArrayList<WbBinding>();
 
   private WebBeansHandle _handle;
 
-  private Class<? extends Annotation> _scopeType;
-  protected ScopeContext _scope;
   private String _scopeId;
-
-  protected ConfigProgram []_injectProgram = NULL_INJECT;
-  protected ConfigProgram []_initProgram = NULL_INJECT;
-  protected ConfigProgram []_destroyProgram = NULL_INJECT;
   
   private ContainerProgram _init;
 
-  public ComponentImpl(WbWebBeans webbeans)
+  public ComponentImpl(WebBeansContainer webbeans)
   {
-    super(WebBeansContainer.create());
-    
-    _webbeans = webbeans;
-  }
-
-  public WbWebBeans getWebBeans()
-  {
-    return _webbeans;
-  }
-
-  /**
-   * Returns the component's EL binding name.
-   */
-  public void setName(String name)
-  {
-    _name = name;
-  }
-
-  /**
-   * Gets the component's EL binding name.
-   */
-  public String getName()
-  {
-    return _name;
-  }
-  
-  public void setTargetType(Type type)
-  {
-    _targetType = type;
-  }
-  
-  public Type getTargetType()
-  {
-    return _targetType;
-  }
-  
-  public String getTargetSimpleName()
-  {
-    if (_targetType instanceof Class)
-      return ((Class) _targetType).getSimpleName();
-    else
-      return String.valueOf(_targetType);
-  }
-  
-  public Class getTargetClass()
-  {
-    if (_targetType instanceof Class)
-      return ((Class) _targetType);
-    else if (_targetType instanceof ParameterizedType)
-      return (Class) ((ParameterizedType) _targetType).getRawType();
-    else
-      return (Class) _targetType;
-  }
-
-  public String getClassName()
-  {
-    if (_targetType instanceof Class)
-      return ((Class) _targetType).getName();
-    else
-      return String.valueOf(_targetType);
-  }
-
-  public void addBinding(Annotation binding)
-  {
-    _bindingList.add(new WbBinding(binding));
-  }
-  
-  /**
-   * Adds a component binding.
-   */
-  public void setBindingList(ArrayList<WbBinding> bindingList)
-  {
-    _bindingList = bindingList;
-  }
-  
-  public ArrayList<WbBinding> getBindingList()
-  {
-    return _bindingList;
+    super(webbeans);
   }
 
   /**
@@ -180,16 +86,6 @@ public class ComponentImpl<T> extends Bean<T>
   public void setScope(ScopeContext scope)
   {
     _scope = scope;
-    if (_scope != null)
-      _scopeType = _scope.getScopeType();
-  }
-
-  /**
-   * Sets the scope annotation.
-   */
-  public void setScopeType(Class<? extends Annotation> scopeType)
-  {
-    _scopeType = scopeType;
   }
 
   /**
@@ -254,153 +150,32 @@ public class ComponentImpl<T> extends Bean<T>
    */
   public void init()
   {
-    introspectTypes(getTargetClass());
-    
-    introspect();
-
-    if (_deploymentType == null)
-      _deploymentType = Production.class;
-
-    if (_bindingList.size() == 0)
-      _bindingList.add(new WbBinding(new AnnotationLiteral<Current>() {}));
-
-    if (_scopeType == null)
-      _scopeType = Dependent.class;
+    super.init();
 
     generateScopeId();
 
-    _handle = new WebBeansHandle(_targetType, _bindingList);
-  }
-
-  /**
-   * Introspects all the types implemented by the class
-   */
-  private void introspectTypes(Class cl)
-  {
-    if (cl == null || cl.equals(Object.class))
-      return;
-
-    if (_types.contains(cl))
-      return;
-
-    _types.add(cl);
-
-    introspectTypes(cl.getSuperclass());
-
-    for (Class iface : cl.getInterfaces()) {
-      introspectTypes(iface);
-    }
-  }
-
-  protected void introspect()
-  {
+    _handle = new WebBeansHandle(getTargetType(), _bindingList);
   }
 
   private void generateScopeId()
   {
     long crc64 = 17;
 
-    crc64 = Crc64.generate(crc64, String.valueOf(_targetType));
+    crc64 = Crc64.generate(crc64, String.valueOf(getTargetType()));
 
-    if (_name != null)
-      crc64 = Crc64.generate(crc64, _name);
+    if (getName() != null)
+      crc64 = Crc64.generate(crc64, getName());
 
+    /*
     for (WbBinding binding : _bindingList) {
       crc64 = binding.generateCrc64(crc64);
     }
+    */
 
     StringBuilder sb = new StringBuilder();
     Base64.encode(sb, crc64);
 
     _scopeId = sb.toString();
-  }
-
-  /**
-   * Called for implicit introspection.
-   */
-  protected void introspectScope(Class type)
-  {
-    Class scopeClass = null;
-
-    if (getScope() == null) {
-      for (Annotation ann : type.getDeclaredAnnotations()) {
-	if (ann.annotationType().isAnnotationPresent(ScopeType.class)) {
-	  if (scopeClass != null)
-	    throw new ConfigException(L.l("{0}: @ScopeType annotation @{1} conflicts with @{2}.  WebBeans components may only have a single @ScopeType.",
-					  type.getName(),
-					  scopeClass.getName(),
-					  ann.annotationType().getName()));
-
-	  scopeClass = ann.annotationType();
-	  setScope(_webbeans.getScopeContext(scopeClass));
-	}
-      }
-    }
-  }
-
-  /**
-   * Introspects the methods for any @Produces
-   */
-  protected void introspectBindings()
-  {
-  }
-
-  public boolean isMatch(ArrayList<Annotation> bindList)
-  {
-    for (int i = 0; i < bindList.size(); i++) {
-      if (! isMatch(bindList.get(i)))
-	return false;
-    }
-    
-    return true;
-  }
-
-  public boolean isMatch(Annotation []bindings)
-  {
-    for (Annotation binding : bindings) {
-      if (! isMatch(binding))
-	return false;
-    }
-    
-    return true;
-  }
-
-  /**
-   * Returns true if at least one of this component's bindings match
-   * the injection binding.
-   */
-  public boolean isMatch(Annotation bindAnn)
-  {
-    for (int i = 0; i < _bindingList.size(); i++) {
-      if (_bindingList.get(i).isMatch(bindAnn))
-	return true;
-    }
-    
-    return false;
-  }
-
-  public boolean isMatchByBinding(ArrayList<Binding> bindList)
-  {
-    for (int i = 0; i < bindList.size(); i++) {
-      if (! isMatchByBinding(bindList.get(i)))
-	return false;
-    }
-    
-    return true;
-  }
-
-  /**
-   * Returns true if at least one of this component's bindings match
-   * the injection binding.
-   */
-  public boolean isMatchByBinding(Binding binding)
-  {
-    for (int i = 0; i < _bindingList.size(); i++) {
-      if (_bindingList.get(i).isMatch(binding))
-	return true;
-    }
-    
-    return false;
   }
 
   /**
@@ -580,7 +355,7 @@ public class ComponentImpl<T> extends Bean<T>
   public void createProgram(ArrayList<ConfigProgram> initList, Field field)
     throws ConfigException
   {
-    initList.add(new FieldComponentProgram(this, field));
+    // initList.add(new FieldComponentProgram(this, field));
   }
 
   public String getScopeId()
@@ -591,85 +366,6 @@ public class ComponentImpl<T> extends Bean<T>
   //
   // metadata for the bean
   //
-
-  /**
-   * Returns the bean's binding types
-   */
-  public Set<Annotation> getBindingTypes()
-  {
-    Set<Annotation> set = new LinkedHashSet<Annotation>();
-
-    for (WbBinding binding : _bindingList) {
-      set.add(binding.getAnnotation());
-    }
-
-    return set;
-  }
-
-  /**
-   * Sets the component type.
-   */
-  public void setDeploymentType(Class<? extends Annotation> type)
-  {
-    if (type == null)
-      throw new NullPointerException();
-
-    if (_deploymentType != null && ! _deploymentType.equals(type))
-      throw new ConfigException(L.l("deployment-type must be unique"));
-    
-    _deploymentType = type;
-  }
-
-  /**
-   * Returns the bean's deployment type
-   */
-  public Class<? extends Annotation> getDeploymentType()
-  {
-    return _deploymentType;
-  }
-
-  /**
-   * Returns the bean's name or null if the bean does not have a
-   * primary name.
-   */
-      /*
-  public String getName()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-      */
-
-  /**
-   * Returns true if the bean can be null
-   */
-  public boolean isNullable()
-  {
-    return false;
-  }
-
-  /**
-   * Returns true if the bean is serializable
-   */
-  public boolean isSerializable()
-  {
-    return false;
-  }
-
-  /**
-   * Returns the bean's scope
-   */
-  public Class<Annotation> getScopeType()
-  {
-    return (Class<Annotation>) _scopeType;
-  }
-
-  /**
-   * Returns the types that the bean implements
-   */
-  public Set<Class<?>> getTypes()
-  {
-    return _types;
-  }
 
   //
   // lifecycle
@@ -721,7 +417,7 @@ public class ComponentImpl<T> extends Bean<T>
 
     ComponentImpl comp = (ComponentImpl) obj;
 
-    if (! _targetType.equals(comp._targetType)) {
+    if (! getTargetType().equals(comp.getTargetType())) {
       return false;
     }
 
@@ -738,77 +434,6 @@ public class ComponentImpl<T> extends Bean<T>
     }
 
     return true;
-  }
-
-  public String toDebugString()
-  {
-    StringBuilder sb = new StringBuilder();
-
-    if (_targetType instanceof Class)
-      sb.append(((Class) _targetType).getSimpleName());
-    else
-      sb.append(String.valueOf(_targetType));
-    sb.append("[");
-    
-    if (_name != null) {
-      sb.append("name=");
-      sb.append(_name);
-    }
-
-    for (WbBinding binding : _bindingList) {
-      sb.append(",");
-      sb.append(binding.toDebugString());
-    }
-
-    if (_deploymentType != null) {
-      sb.append(", @");
-      sb.append(_deploymentType.getSimpleName());
-    }
-    
-    if (_scopeType != null) {
-      sb.append(", @");
-      sb.append(_scopeType.getSimpleName());
-    }
-
-    sb.append("]");
-
-    return sb.toString();
-  }
-
-  public String toString()
-  {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append(getClass().getSimpleName());
-    sb.append("[");
-
-    if (_targetType instanceof Class)
-      sb.append(((Class) _targetType).getSimpleName());
-    else
-      sb.append(String.valueOf(_targetType));
-    sb.append(", ");
-
-    if (_deploymentType != null) {
-      sb.append("@");
-      sb.append(_deploymentType.getSimpleName());
-    }
-    else
-      sb.append("@null");
-    
-    if (_name != null) {
-      sb.append(", ");
-      sb.append("name=");
-      sb.append(_name);
-    }
-    
-    if (_scope != null) {
-      sb.append(", @");
-      sb.append(_scope.getClass().getSimpleName());
-    }
-
-    sb.append("]");
-
-    return sb.toString();
   }
 
   protected static String getSimpleName(Type type)

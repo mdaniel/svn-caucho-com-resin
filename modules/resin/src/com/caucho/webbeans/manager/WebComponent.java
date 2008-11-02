@@ -39,29 +39,47 @@ import com.caucho.webbeans.component.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.*;
 
 import javax.webbeans.manager.Bean;
+import javax.webbeans.NonBinding;
 
 /**
  * Configuration for the xml web bean component.
  */
-public class WebComponent {
-  private static L10N L = new L10N(WebComponent.class);
+public class WebComponent<T> {
+  private static final Logger log
+    = Logger.getLogger(WebComponent.class.getName());
+  private static final L10N L = new L10N(WebComponent.class);
+
+  private static final Class []NULL_ARG = new Class[0];
+
+  private WebBeansContainer _webBeans;
   
-  private Type _type;
+  private BaseType _type;
 
-  private ArrayList<ComponentImpl> _componentList
-    = new ArrayList<ComponentImpl>();
+  private ArrayList<BeanEntry<T>> _beanList
+    = new ArrayList<BeanEntry<T>>();
 
-  public WebComponent(Type type)
+  public WebComponent(WebBeansContainer webBeans, BaseType type)
   {
+    _webBeans = webBeans;
     _type = type;
   }
 
-  public void addComponent(ComponentImpl comp)
+  public void addComponent(Bean<T> bean)
   {
+    for (BeanEntry<T> beanEntry : _beanList) {
+      if (beanEntry.isMatch(bean))
+	return;
+    }
+
+    _beanList.add(new BeanEntry<T>(bean));
+
+    /*
     for (int i = _componentList.size() - 1; i >= 0; i--) {
       ComponentImpl oldComponent = _componentList.get(i);
 
@@ -77,6 +95,7 @@ public class WebComponent {
     }
 
     _componentList.add(comp);
+    */
   }
   
   public void createProgram(ArrayList<ConfigProgram> initList,
@@ -84,134 +103,47 @@ public class WebComponent {
 			    ArrayList<Annotation> bindList)
     throws ConfigException
   {
+    /*
     ComponentImpl comp = bind(WebBeansContainer.location(field), bindList);
 
     comp.createProgram(initList, field);
+    */
   }
   
-  public ComponentImpl bind(String location, ArrayList<Annotation> bindList)
-    throws ConfigException
+  public Set<Bean<T>> resolve(Annotation []bindings)
   {
-    ComponentImpl matchComp = null;
-    ComponentImpl secondComp = null;
+    LinkedHashSet<Bean<T>> beans = null;
 
-    for (int i = 0; i < _componentList.size(); i++) {
-      ComponentImpl comp = _componentList.get(i);
+    int priority = 0;
 
-      if (! comp.isMatch(bindList))
-	continue;
+    for (BeanEntry<T> beanEntry : _beanList) {
+      if (beanEntry.isMatch(bindings)) {
+	Bean<T> bean = beanEntry.getBean();
 
-      if (matchComp == null)
-	matchComp = comp;
-      else if (comp.getBindingList().size() == bindList.size()
-	       && matchComp.getBindingList().size() != bindList.size()) {
-	matchComp = comp;
-	secondComp = null;
-      }
-      else if (matchComp.getBindingList().size() == bindList.size()
-	       && comp.getBindingList().size() != bindList.size()) {
-      }
-      else if (getPriority(matchComp.getDeploymentType())
-	       < getPriority(comp.getDeploymentType())) {
-	matchComp = comp;
-	secondComp = null;
-      }
-      else if (getPriority(comp.getDeploymentType())
-	       < getPriority(matchComp.getDeploymentType())) {
-      }
-      else {
-	secondComp = comp;
-      }
-    }
+	int beanPriority
+	  = _webBeans.getDeploymentPriority(bean.getDeploymentType());
 
-    if (matchComp == null) {
-      return null;
-    }
-    else if (matchComp != null && secondComp != null) {
-	throw new ConfigException(location +
-				  L.l("WebBeans conflict between '{0}' and '{1}'.  WebBean injection must match uniquely.",
-					      matchComp, secondComp));
-    }
-    
-    return matchComp;
-  }
-  
-  public Set<Bean> resolve(Annotation []bindings)
-    throws ConfigException
-  {
-    Set<Bean> beanSet = null;
+	if (beanPriority < priority)
+	  continue;
 
-    for (int i = 0; i < _componentList.size(); i++) {
-      ComponentImpl comp = _componentList.get(i);
+	if (priority < beanPriority && bindings.length > 0) {
+	  beans = null;
+	  priority = beanPriority;
+	}
 
-      if (comp.isMatch(bindings)) {
-	if (beanSet == null)
-	  beanSet = new HashSet<Bean>();
+	if (beans == null)
+	  beans = new LinkedHashSet<Bean<T>>();
 	
-	beanSet.add(comp);
+	beans.add(beanEntry.getBean());
       }
     }
 
-    return beanSet;
-  }
-
-  ArrayList<ComponentImpl> getComponentList()
-  {
-    return _componentList;
-  }
-  
-  public ComponentImpl bindByBindings(String location,
-				      Type type,
-				      ArrayList<Binding> bindList)
-    throws ConfigException
-  {
-    ComponentImpl matchComp = null;
-    ComponentImpl secondComp = null;
-
-    for (int i = 0; i < _componentList.size(); i++) {
-      ComponentImpl comp = _componentList.get(i);
-
-      if (! comp.isMatchByBinding(bindList))
-	continue;
-
-      if (matchComp == null)
-	matchComp = comp;
-      else if (comp.getBindingList().size() == bindList.size()
-	       && matchComp.getBindingList().size() != bindList.size()) {
-	matchComp = comp;
-	secondComp = null;
-      }
-      else if (matchComp.getBindingList().size() == bindList.size()
-	       && comp.getBindingList().size() != bindList.size()) {
-      }
-      else if (getPriority(matchComp.getDeploymentType())
-	       < getPriority(comp.getDeploymentType())) {
-	matchComp = comp;
-	secondComp = null;
-      }
-      else if (getPriority(comp.getDeploymentType())
-	       < getPriority(matchComp.getDeploymentType())) {
-      }
-      else {
-	secondComp = comp;
-      }
-    }
-
-    if (matchComp == null) {
-      return null;
-    }
-    else if (matchComp != null && secondComp != null) {
-      throw new ConfigException(location
-				+ L.l("Injection of '{0}' conflicts between '{1}' and '{2}'.  WebBean injection must match uniquely.",
-				      getName(type), matchComp, secondComp));
-    }
-    
-    return matchComp;
+    return beans;
   }
 
   private int getPriority(Class deploymentType)
   {
-    return 1;
+    return _webBeans.getDeploymentPriority(deploymentType);
   }
 
   static String getName(Type type)
@@ -220,5 +152,134 @@ public class WebComponent {
       return ((Class) type).getName();
     else
       return String.valueOf(type);
+  }
+
+  static class BeanEntry<T> {
+    private Bean<T> _bean;
+    private Binding []_bindings;
+
+    BeanEntry(Bean<T> bean)
+    {
+      _bean = bean;
+
+      Set<Annotation> bindings = bean.getBindingTypes();
+      
+      _bindings = new Binding[bindings.size()];
+
+      int i = 0;
+      for (Annotation binding : bindings) {
+	_bindings[i++] = new Binding(binding);
+      }
+    }
+
+    Bean<T> getBean()
+    {
+      return _bean;
+    }
+
+    boolean isMatch(Bean<T> bean)
+    {
+      // ioc/0213
+      return _bean == bean;
+    }
+
+    boolean isMatch(Annotation []bindingArgs)
+    {
+      for (Annotation arg : bindingArgs) {
+	if (! isMatch(arg))
+	  return false;
+      }
+
+      return true;
+    }
+
+    private boolean isMatch(Annotation arg)
+    {
+      for (Binding binding : _bindings) {
+	if (binding.isMatch(arg))
+	  return true;
+      }
+
+      return false;
+    }
+  }
+
+  static class Binding {
+    private Annotation _ann;
+
+    private ArrayList<Method> _methodList
+      = new ArrayList<Method>();
+
+    Binding(Annotation ann)
+    {
+      _ann = ann;
+
+      Method []methods = ann.annotationType().getMethods();
+
+      for (Method method : methods) {
+	if (method.getName().equals("annotationType"))
+	  continue;
+	else if (method.isAnnotationPresent(NonBinding.class))
+	  continue;
+	else if (method.getParameterTypes().length > 0)
+	  continue;
+	else if (Object.class.equals(method.getDeclaringClass()))
+	  continue;
+	else if (Annotation.class.equals(method.getDeclaringClass()))
+	  continue;
+
+	_methodList.add(method);
+      }
+    }
+
+    boolean isMatch(Annotation ann)
+    {
+      if (! _ann.annotationType().equals(ann.annotationType()))
+	return false;
+
+      for (int i = 0; i < _methodList.size(); i++) {
+	Method method = _methodList.get(i);
+
+	try {
+	  Object a = method.invoke(_ann);
+
+	  Object b;
+
+	  if (method.getDeclaringClass().isAssignableFrom(ann.getClass()))
+	    b = method.invoke(ann);
+	  else {
+	    Method bMethod = null;
+
+	    try {
+	      bMethod = 
+		ann.getClass().getMethod(method.getName(), NULL_ARG);
+	    } catch (NoSuchMethodException e) {
+	      log.log(Level.FINEST, e.toString(), e);
+	    }
+
+	    if (bMethod != null) {
+	      bMethod.setAccessible(true);
+	      b = bMethod.invoke(ann);
+	    }
+	    else
+	      b = method.getDefaultValue();
+	  }
+
+	  if (a == b)
+	    continue;
+	  else if (a == null)
+	    return false;
+	  else if (! a.equals(b))
+	    return false;
+	} catch (Exception e) {
+	  e.printStackTrace();
+	  log.log(Level.WARNING, e.toString(), e);
+
+	  return false;
+	}
+      }
+
+      return true;
+    }
   }
 }

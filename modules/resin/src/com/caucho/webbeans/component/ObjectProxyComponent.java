@@ -51,7 +51,7 @@ public class ObjectProxyComponent extends ComponentImpl {
                               ObjectProxy proxy,
                               Class type)
   {
-    super(webBeans.getWbWebBeans());
+    super(webBeans);
     
     _proxy = proxy;
     setTargetType(type);

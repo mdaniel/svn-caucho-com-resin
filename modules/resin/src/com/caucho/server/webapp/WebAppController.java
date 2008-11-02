@@ -41,6 +41,7 @@ import com.caucho.util.Alarm;
 import com.caucho.vfs.Path;
 import com.caucho.webbeans.manager.*;
 
+import javax.servlet.ServletContext;
 import javax.servlet.jsp.el.ELException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -514,8 +515,9 @@ public class WebAppController
     throws Throwable
   {
     WebBeansContainer webBeans = WebBeansContainer.create();
-    webBeans.addSingleton(app, null, Standard.class);
-    webBeans.addSingleton(getVar(), "webApp", Standard.class);
+    webBeans.addSingleton(app, null, Standard.class,
+			  WebApp.class, ServletContext.class);
+    webBeans.addSingleton(getVar(), "webApp", Standard.class, void.class);
     
     app.setRegexp(_regexpValues);
     app.setDynamicDeploy(isDynamicDeploy());

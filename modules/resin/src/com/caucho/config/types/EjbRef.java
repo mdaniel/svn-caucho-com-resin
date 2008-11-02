@@ -50,6 +50,7 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
@@ -314,44 +315,52 @@ public class EjbRef extends BaseRef implements ObjectProxy {
     context.add(this);
     
     WebBeansContainer webBeans = WebBeansContainer.create();
-    ComponentImpl comp = null;
+    Bean comp = null;
 
     if (_home != null) {
       if (comp == null && _ejbLink != null)
-        comp = webBeans.bind(_loc, _home, _ejbLink);
+        comp = InjectIntrospector.bind(_loc, _home, _ejbLink);
       
       if (comp == null)
-        comp = webBeans.bind(_loc, _home, _ejbRefName);
+        comp = InjectIntrospector.bind(_loc, _home, _ejbRefName);
       
       if (comp == null)
-        comp = webBeans.bind(_loc, _home);
+        comp = InjectIntrospector.bind(_loc, _home);
 
       if (comp == null) {
-        comp = new ObjectProxyComponent(webBeans, this, _home);
-        comp.setName(_ejbRefName);
+	ComponentImpl compImpl;
+	
+        compImpl = new ObjectProxyComponent(webBeans, this, _home);
+        compImpl.setName(_ejbRefName);
         // weaker priority
-        comp.setDeploymentType(Production.class);
+        compImpl.setDeploymentType(Production.class);
 
-        webBeans.addComponent(comp);
+        webBeans.addBean(compImpl);
+
+	comp = compImpl;
       }
     }
     else if (_remote != null) {
       if (comp == null && _ejbLink != null)
-        comp = webBeans.bind(_loc, _home, _ejbLink);
+        comp = InjectIntrospector.bind(_loc, _home, _ejbLink);
 
       if (comp == null)
-        comp = webBeans.bind(_loc, _remote, _ejbRefName);
+        comp = InjectIntrospector.bind(_loc, _remote, _ejbRefName);
       
       if (comp == null)
-        comp = webBeans.bind(_loc, _remote);
+        comp = InjectIntrospector.bind(_loc, _remote);
 
       if (comp == null) {
-        comp = new ObjectProxyComponent(webBeans, this, _remote);
-        comp.setName(_ejbRefName);
+	ComponentImpl compImpl;
+	
+        compImpl = new ObjectProxyComponent(webBeans, this, _remote);
+        compImpl.setName(_ejbRefName);
         // weaker priority
-        comp.setDeploymentType(Production.class);
+        compImpl.setDeploymentType(Production.class);
 
-        webBeans.addComponent(comp);
+        webBeans.addComponent(compImpl);
+
+	comp = compImpl;
       }
     }
 

@@ -89,6 +89,7 @@ public class WebBeansHandle implements Serializable, HessianHandle {
   public Object readResolve()
   {
     try {
+      /*
       ArrayList<Binding> bindingList = new ArrayList<Binding>();
       
       for (Map.Entry<Class,HashMap<String,Object>> entry : _binding.entrySet()) {
@@ -113,6 +114,8 @@ public class WebBeansHandle implements Serializable, HessianHandle {
 			this));
 	return null;
       }
+      */
+      return null;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

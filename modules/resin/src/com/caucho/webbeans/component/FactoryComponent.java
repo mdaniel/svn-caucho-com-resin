@@ -43,7 +43,7 @@ import com.caucho.webbeans.manager.*;
 abstract public class FactoryComponent extends ComponentImpl {
   public FactoryComponent(Class targetType, String name)
   {
-    super(WebBeansContainer.create().getWbWebBeans());
+    super(WebBeansContainer.create());
 
     setTargetType(targetType);
     setName(name);

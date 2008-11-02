@@ -27,50 +27,23 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.session;
+package com.caucho.webbeans.component;
 
-import com.caucho.config.ConfigContext;
-import java.lang.annotation.*;
-import javax.webbeans.*;
+import java.lang.reflect.Type;
+import java.util.Set;
 
-import com.caucho.webbeans.component.ComponentImpl;
-import com.caucho.webbeans.context.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
+import javax.webbeans.manager.Bean;
+import javax.webbeans.manager.Manager;
 
 /**
- * Component for session beans
+ * Configuration for the xml web bean component.
  */
-public class StatelessComponent extends ComponentImpl
+abstract public class CauchoBean<T> extends Bean<T>
 {
-  private final StatelessProvider _provider;
-
-  public StatelessComponent(StatelessProvider provider, Class api)
+  protected CauchoBean(Manager manager)
   {
-    super(WebBeansContainer.create());
-
-    _provider = provider;
+    super(manager);
   }
-
-  @Override
-  public void setScope(ScopeContext scope)
-  {
-  }
-
-  @Override
-  public Object get()
-  {
-    return _provider.__caucho_get();
-  }
-
-  @Override
-  public Object get(ConfigContext env)
-  {
-    return _provider.__caucho_get();
-  }
-
-  @Override
-  public Object create()
-  {
-    return _provider.__caucho_get();
-  }
+  
+  abstract public Set<BaseType> getGenericTypes();
 }

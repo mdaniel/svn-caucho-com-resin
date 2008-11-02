@@ -31,11 +31,12 @@ package com.caucho.config.program;
 
 import com.caucho.naming.*;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.component.ComponentImpl;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.naming.*;
 import javax.persistence.*;
 import javax.rmi.*;
+import javax.webbeans.manager.Bean;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -47,17 +48,19 @@ public class ComponentValueGenerator extends ValueGenerator {
     = Logger.getLogger(ComponentValueGenerator.class.getName());
   private static final L10N L = new L10N(ComponentValueGenerator.class);
 
-  private final ComponentImpl _comp;
+  private final WebBeansContainer _webBeans;
+  private final Bean _comp;
   
   private final String _location;
 
-  public ComponentValueGenerator(String location, ComponentImpl comp)
+  public ComponentValueGenerator(String location, Bean comp)
   {
     if (comp == null)
       throw new NullPointerException();
     
     _location = location;
 
+    _webBeans = WebBeansContainer.create();
     _comp = comp;
   }
 
@@ -66,6 +69,6 @@ public class ComponentValueGenerator extends ValueGenerator {
    */
   public Object create()
   {
-    return _comp.get();
+    return _webBeans.getInstance(_comp);
   }
 }

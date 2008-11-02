@@ -74,6 +74,8 @@ public class CustomBeanType extends ConfigType
   private static final Object _introspectLock = new Object();
 
   private final Class _beanClass;
+
+  private final ConfigType _beanType;
   
   private HashMap<QName,Attribute> _nsAttributeMap
     = new HashMap<QName,Attribute>();
@@ -84,6 +86,8 @@ public class CustomBeanType extends ConfigType
   public CustomBeanType(Class beanClass)
   {
     _beanClass = beanClass;
+
+    _beanType = TypeFactory.getType(beanClass);
 
     _nsAttributeMap.put(R_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
     _nsAttributeMap.put(W_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
@@ -118,6 +122,12 @@ public class CustomBeanType extends ConfigType
 
     if (attr != null) {
       return attr;
+    }
+
+    attr = _beanType.getAttribute(qName);
+
+    if (attr != null) {
+      return CustomBeanProgramAttribute.ATTRIBUTE;
     }
     
     if (qName.getNamespaceURI() != null

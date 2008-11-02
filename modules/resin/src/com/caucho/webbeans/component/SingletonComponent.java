@@ -32,6 +32,7 @@ package com.caucho.webbeans.component;
 import com.caucho.config.ConfigContext;
 import java.io.Closeable;
 import java.lang.annotation.*;
+import java.lang.reflect.Type;
 import javax.webbeans.*;
 
 import com.caucho.webbeans.cfg.WbWebBeans;
@@ -47,26 +48,62 @@ public class SingletonComponent extends ClassComponent
   private static final Object []NULL_ARGS = new Object[0];
 
   private Object _value;
+  
+  public SingletonComponent(Object value)
+  {
+    this(value, null, null, null);
+  }
 
-  public SingletonComponent(WbWebBeans webBeans, Object value)
+  public SingletonComponent(Object value, String name)
+  {
+    this(value, name, null, null);
+  }
+
+  public SingletonComponent(Object value,
+			    String name,
+			    Type []api)
+  {
+    this(value, name, api, null);
+  }
+
+  public SingletonComponent(Object value,
+			    String name,
+			    Type []api,
+			    Class<? extends Annotation> deploymentType)
+  {
+    super(WebBeansContainer.create());
+    
+    _value = value;
+    setTargetType(value.getClass());
+    
+    super.setScope(new SingletonScope());
+    
+    setName(name);
+
+    if (api != null) {
+      if (api.length == 0)
+	addType(void.class);
+      
+      for (Type type : api) {
+	addType(type);
+      }
+    }
+
+    if (deploymentType != null)
+      setDeploymentType(deploymentType);
+
+    init();
+  }
+
+  /**
+   * Special for internal use
+   */
+  public SingletonComponent(WebBeansContainer webBeans, Object value)
   {
     super(webBeans);
     
     _value = value;
 
-    setInstanceClass(value.getClass());
-    setTargetType(value.getClass());
-
-    super.setScope(new SingletonScope());
-  }
-
-  public SingletonComponent(WebBeansContainer webBeans, Object value)
-  {
-    super(webBeans.getWbWebBeans());
-    
-    _value = value;
-
-    setInstanceClass(value.getClass());
     setTargetType(value.getClass());
     
     super.setScope(new SingletonScope());

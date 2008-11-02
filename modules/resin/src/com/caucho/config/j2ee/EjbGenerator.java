@@ -96,6 +96,7 @@ public class EjbGenerator extends ValueGenerator {
    */
   public Object create()
   {
+    /*
     if (_component == null && ! _isBound) {
       _isBound = false;
       
@@ -151,6 +152,8 @@ public class EjbGenerator extends ValueGenerator {
       return _component.get();
     else
       return getJndiValue(_type);
+    */
+    return null;
   }
 
   private Object getJndiValue(Class type)

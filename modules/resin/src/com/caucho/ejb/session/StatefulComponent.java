@@ -46,7 +46,7 @@ public class StatefulComponent extends ComponentImpl {
 
   public StatefulComponent(StatefulProvider provider)
   {
-    super(WebBeansContainer.create().getWbWebBeans());
+    super(WebBeansContainer.create());
     
     _provider = provider;
   }

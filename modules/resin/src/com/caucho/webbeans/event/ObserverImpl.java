@@ -33,6 +33,7 @@ import java.util.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
 
 import com.caucho.config.*;
 import com.caucho.util.*;
@@ -48,7 +49,8 @@ public class ObserverImpl {
 
   private static final Object []NULL_ARGS = new Object[0];
 
-  private final ComponentImpl _component;
+  private final WebBeansContainer _webBeans;
+  private final AbstractBean _bean;
   
   private final Method _method;
   private final int _paramIndex;
@@ -56,16 +58,18 @@ public class ObserverImpl {
   private boolean _hasBinding;
   private boolean _ifExists;
 
-  private ComponentImpl []_args;
+  private Bean []_args;
   
   private ArrayList<WbBinding> _bindingList
     = new ArrayList<WbBinding>();
 
-  public ObserverImpl(ComponentImpl comp,
+  public ObserverImpl(WebBeansContainer webBeans,
+		      AbstractBean bean,
 		      Method method,
 		      int paramIndex)
   {
-    _component = comp;
+    _webBeans = webBeans;
+    _bean = bean;
     _method = method;
     _method.setAccessible(true);
     _paramIndex = paramIndex;
@@ -133,14 +137,13 @@ public class ObserverImpl {
 
       _args = new ComponentImpl[param.length];
 
-      WebBeansContainer webBeans = _component.getWebBeans().getContainer();
       String loc = LineConfigException.loc(_method);
       
       for (int i = 0; i < param.length; i++) {
 	if (hasObserves(annList[i]))
 	  continue;
 
-	ComponentImpl comp = webBeans.bind(loc, param[i], annList[i]);
+	ComponentImpl comp = null;//webBeans.bind(loc, param[i], annList[i]);
 
 	if (comp == null) {
 	  throw new ConfigException(loc
@@ -193,19 +196,19 @@ public class ObserverImpl {
     Object obj;
 
     if (_ifExists)
-      obj = _component.getIfExists();
+      obj = _webBeans.getInstance(_bean); // .getIfExists();
     else
-      obj = _component.get();
+      obj = _webBeans.getInstance(_bean);
 
     try {
       if (obj != null) {
 	Object []args = new Object[_args.length];
 
 	for (int i = 0; i < _args.length; i++) {
-	  ComponentImpl comp = _args[i];
+	  Bean bean = _args[i];
 	  
-	  if (comp != null)
-	    args[i] = comp.get();
+	  if (bean != null)
+	    args[i] = _webBeans.getInstance(bean);
 	  else
 	    args[i] = event;
 	}
@@ -230,7 +233,7 @@ public class ObserverImpl {
 
     ObserverImpl comp = (ObserverImpl) obj;
 
-    if (! _component.equals(comp._component)) {
+    if (! _bean.equals(comp._bean)) {
       return false;
     }
 
@@ -258,7 +261,7 @@ public class ObserverImpl {
     sb.append(_method.getName());
     sb.append("[");
 
-    ComponentImpl comp = _component;
+    ComponentImpl comp = (ComponentImpl) _bean;
     sb.append(comp.getTargetSimpleName());
     sb.append("]");
 

@@ -170,6 +170,14 @@ public class WbWebBeans {
   }
 
   /**
+   * Adds a deploy
+   */
+  public DeployConfig createDeploy()
+  {
+    return new DeployConfig();
+  }
+
+  /**
    * Adds the interceptors
    */
   public Interceptors createInterceptors()
@@ -246,11 +254,10 @@ public class WbWebBeans {
 	  ClassComponent component;
 
 	  if (cl.isAnnotationPresent(Singleton.class))
-	    component = new SingletonClassComponent(this);
+	    component = new SingletonClassComponent(WebBeansContainer.create());
 	  else
-	    component = new ClassComponent(this);
+	    component = new ClassComponent(WebBeansContainer.create());
 	
-	  component.setInstanceClass(cl);
 	  component.setTargetType(cl);
 	  component.setFromClass(true);
 	  component.introspect();
@@ -294,13 +301,6 @@ public class WbWebBeans {
   public ScopeContext getScopeContext(Class cl)
   {
     return _webBeansContainer.getScopeContext(cl);
-  }
-
-  public ComponentImpl bindParameter(String loc,
-				     Type type,
-				     Annotation []annotations)
-  {
-    return _webBeansContainer.bind(loc, type, annotations);
   }
 
   @Override
@@ -347,6 +347,32 @@ public class WbWebBeans {
 	_enabledInterceptors = new ArrayList<WbInterceptor>();
     
       _enabledInterceptors.add(new WbInterceptor(cl));
+    }
+  }
+
+  public class DeployConfig {
+    private ArrayList<Class> _deployList
+      = new ArrayList<Class>();
+
+    public void addCustomBean(CustomBeanConfig config)
+    {
+      Class cl = config.getClassType();
+      
+      if (! Annotation.class.isAssignableFrom(cl))
+	throw new ConfigException(L.l("'{0}' is not valid because <Deploy> can only contain annotation members",
+				      cl.getName()));
+
+      if (! cl.isAnnotationPresent(DeploymentType.class))
+	throw new ConfigException(L.l("'{0}' must have a @DeploymentType annotation because because <Deploy> can only contain @DeploymentType annotations",
+				      cl.getName()));
+
+      _deployList.add(cl);
+    }
+    
+    @PostConstruct
+    public void init()
+    {
+      _webBeansContainer.setDeploymentTypes(_deployList);
     }
   }
 }
