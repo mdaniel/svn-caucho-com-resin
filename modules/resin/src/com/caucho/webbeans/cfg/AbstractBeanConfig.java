@@ -255,7 +255,7 @@ abstract public class AbstractBeanConfig {
     else {
       ClassComponent classComp = new SingletonClassComponent(webBeans);
 
-      classComp.setImplementationClass(_cl);
+      classComp.setTargetType(_cl);
 
       comp = classComp;
     }

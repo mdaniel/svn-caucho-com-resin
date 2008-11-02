@@ -336,7 +336,6 @@ public class WbComponentConfig {
     else
       comp = new ClassComponent(WebBeansContainer.create());
 
-    comp.setImplementationClass(_cl);
     comp.setTargetType(_cl);
 
     if (_name != null) {
