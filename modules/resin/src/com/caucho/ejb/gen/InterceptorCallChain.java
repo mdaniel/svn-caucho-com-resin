@@ -42,6 +42,7 @@ import javax.annotation.security.*;
 import javax.ejb.*;
 import javax.interceptor.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
 
 /**
  * Represents the interception
@@ -276,7 +277,7 @@ public class InterceptorCallChain extends AbstractCallChain {
 
 	out.println();
 	out.print("private static ");
-	out.printClass(ComponentFactory.class);
+	out.printClass(Bean.class);
 	out.println(" " + var + "_f;");
 	
 	out.print("private transient ");

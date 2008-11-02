@@ -228,9 +228,6 @@ public class WbWebBeans {
       WbComponentType type = createComponentType(Standard.class);
       type.setPriority(0);
       _componentTypeList.add(type);
-      type = createComponentType(Component.class);
-      type.setPriority(1);
-      _componentTypeList.add(type);
     }
 
     update();
@@ -315,20 +312,7 @@ public class WbWebBeans {
   public class WbComponentTypes {
     public void addComponentType(Class cl)
     {
-      if (! cl.isAnnotationPresent(ComponentType.class))
-	throw new ConfigException(L.l("'{0}' is missing a @ComponentType annotation.  Component annotations must be annotated with @ComponentType.",
-				      cl.getName()));
-
-      if (_componentTypeList == null)
-	_componentTypeList = new ArrayList<WbComponentType>();
-
-      int priority =  _componentTypeList.size();
-
-      WbComponentType type = createComponentType(cl);
-
-      type.setPriority(priority);
-      
-      _componentTypeList.add(type);
+      throw new UnsupportedOperationException();
     }
   }
 

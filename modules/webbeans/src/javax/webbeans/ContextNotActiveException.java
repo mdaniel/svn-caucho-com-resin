@@ -28,15 +28,28 @@
 
 package javax.webbeans;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.*;
-
 /**
- * The @Observes annotation for web beans
+ * Exception thrown when a webbean definition is inconsistent or invalid
  */
-@Documented
-@Retention(RUNTIME)
-@Target({PARAMETER})
-public @interface Observes {
+
+public class ContextNotActiveException extends ExecutionException
+{
+  public ContextNotActiveException()
+  {
+  }
+
+  public ContextNotActiveException(String message)
+  {
+    super(message);
+  }
+
+  public ContextNotActiveException(Throwable cause)
+  {
+    super(cause);
+  }
+  
+  public ContextNotActiveException(String message, Throwable cause)
+  {
+    super(message, cause);
+  }
 }

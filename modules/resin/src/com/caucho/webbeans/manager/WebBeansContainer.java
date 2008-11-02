@@ -1458,7 +1458,7 @@ public class WebBeansContainer
       
       Class cl = Class.forName(className, false, _tempClassLoader);
       
-      return cl.isAnnotationPresent(ComponentType.class);
+      return cl.isAnnotationPresent(DeploymentType.class);
     } catch (ClassNotFoundException e) {
     }
 

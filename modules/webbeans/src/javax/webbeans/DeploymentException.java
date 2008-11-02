@@ -29,21 +29,27 @@
 package javax.webbeans;
 
 /**
- * The web bean component
+ * Exception during runtime for webbeans
  */
-public interface ComponentFactory<T> {
-  /**
-   * Creates a new component instance
-   */
-  public T create();
 
-  /**
-   * Destroys a component instance
-   */
-  public void destroy(T instance);
+public class DeploymentException extends RuntimeException
+{
+  public DeploymentException()
+  {
+  }
+
+  public DeploymentException(String message)
+  {
+    super(message);
+  }
+
+  public DeploymentException(Throwable cause)
+  {
+    super(cause);
+  }
   
-  /**
-   * Returns the appropriate component instance, creating if necessary
-   */
-  public T get();
+  public DeploymentException(String message, Throwable cause)
+  {
+    super(message, cause);
+  }
 }

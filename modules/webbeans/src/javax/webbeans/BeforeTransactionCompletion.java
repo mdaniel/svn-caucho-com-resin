@@ -33,10 +33,10 @@ import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
 
 /**
- * The @Observes annotation for web beans
+ * The transaction annotation for web beans
  */
-@Documented
+
 @Retention(RUNTIME)
 @Target({PARAMETER})
-public @interface Observes {
+public @interface BeforeTransactionCompletion {
 }

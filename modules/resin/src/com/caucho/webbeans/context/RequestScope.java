@@ -101,12 +101,12 @@ public class RequestScope extends ScopeContext
   /**
    * Removes the scope value for the given component.
    */
-  public <T> void remove(ComponentFactory<T> component)
+  public <T> void remove(Bean<T> bean)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
     if (request != null) {
-      ComponentImpl comp = (ComponentImpl) component;
+      ComponentImpl comp = (ComponentImpl) bean;
       
       request.removeAttribute(comp.getScopeId());
     }

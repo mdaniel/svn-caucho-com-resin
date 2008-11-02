@@ -30,14 +30,15 @@ package javax.webbeans;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
- * The @Component annotation for web beans
+ * An event @BindingType
  */
-@ComponentType
-@Target({TYPE, METHOD})
+
+@BindingType
+@Documented
 @Retention(RUNTIME)
-public @interface Component {
+@Target({FIELD,METHOD,PARAMETER,TYPE})
+public @interface Observable {
 }

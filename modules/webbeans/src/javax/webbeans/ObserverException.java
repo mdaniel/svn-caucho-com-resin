@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,15 +29,28 @@
 
 package javax.webbeans;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.*;
-
 /**
- * The @Observes annotation for web beans
+ * Exception during runtime for webbeans
  */
-@Documented
-@Retention(RUNTIME)
-@Target({PARAMETER})
-public @interface Observes {
+
+public class ObserverException extends ExecutionException
+{
+  public ObserverException()
+  {
+  }
+
+  public ObserverException(String message)
+  {
+    super(message);
+  }
+
+  public ObserverException(Throwable cause)
+  {
+    super(cause);
+  }
+  
+  public ObserverException(String message, Throwable cause)
+  {
+    super(message, cause);
+  }
 }

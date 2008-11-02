@@ -28,15 +28,28 @@
 
 package javax.webbeans;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.*;
-
 /**
- * The @Observes annotation for web beans
+ * Exception during runtime for webbeans
  */
-@Documented
-@Retention(RUNTIME)
-@Target({PARAMETER})
-public @interface Observes {
+
+public class ExecutionException extends RuntimeException
+{
+  public ExecutionException()
+  {
+  }
+
+  public ExecutionException(String message)
+  {
+    super(message);
+  }
+
+  public ExecutionException(Throwable cause)
+  {
+    super(cause);
+  }
+  
+  public ExecutionException(String message, Throwable cause)
+  {
+    super(message, cause);
+  }
 }

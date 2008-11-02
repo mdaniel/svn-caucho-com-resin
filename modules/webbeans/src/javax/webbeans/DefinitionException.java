@@ -28,16 +28,28 @@
 
 package javax.webbeans;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
 /**
- * The @Application annotation for web beans
+ * Exception thrown when a webbean definition is inconsistent or invalid
  */
-@ComponentType
-@Target({TYPE, METHOD})
-@Retention(RUNTIME)
-public @interface Application {
+
+public class DefinitionException extends RuntimeException
+{
+  public DefinitionException()
+  {
+  }
+
+  public DefinitionException(String message)
+  {
+    super(message);
+  }
+
+  public DefinitionException(Throwable cause)
+  {
+    super(cause);
+  }
+  
+  public DefinitionException(String message, Throwable cause)
+  {
+    super(message, cause);
+  }
 }

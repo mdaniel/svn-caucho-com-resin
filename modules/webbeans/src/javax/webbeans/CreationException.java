@@ -29,15 +29,28 @@
 
 package javax.webbeans;
 
-import static java.lang.annotation.ElementType.*;
-import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Target;
-
 /**
- * The @ComponentType meta-annotation for web beans
+ * Exception during runtime for webbeans
  */
-@Target(TYPE)
-@Retention(RUNTIME)
-public @interface ComponentType {
+
+public class CreationException extends ExecutionException
+{
+  public CreationException()
+  {
+  }
+
+  public CreationException(String message)
+  {
+    super(message);
+  }
+
+  public CreationException(Throwable cause)
+  {
+    super(cause);
+  }
+  
+  public CreationException(String message, Throwable cause)
+  {
+    super(message, cause);
+  }
 }
