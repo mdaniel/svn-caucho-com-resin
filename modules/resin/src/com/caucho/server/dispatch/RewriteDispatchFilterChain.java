@@ -70,7 +70,6 @@ public class RewriteDispatchFilterChain implements FilterChain {
     RequestDispatcherImpl disp
       = (RequestDispatcherImpl) req.getRequestDispatcher(_url);
 
-    System.out.println("DISP: " + req + " " + req.getUserPrincipal());
     disp.dispatch(request, response);
   }
 
