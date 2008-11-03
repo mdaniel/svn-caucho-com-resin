@@ -72,7 +72,7 @@ public class EventHandler extends Handler {
     if (filter != null && ! filter.isLoggable(record))
       return;
 
-    _webBeans.raiseEvent(record);
+    _webBeans.fireEvent(record);
   }
 
   /**
