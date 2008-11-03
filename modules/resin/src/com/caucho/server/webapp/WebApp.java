@@ -75,6 +75,7 @@ import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
+import com.caucho.webbeans.CauchoDeployment;
 import com.caucho.webbeans.el.WebBeansELResolver;
 import com.caucho.webbeans.manager.*;
 import com.caucho.webbeans.component.*;
@@ -429,7 +430,7 @@ public class WebApp extends ServletContextImpl
     WebBeansContainer webBeans = WebBeansContainer.create();
 
     webBeans.addSingleton(_osgiBundle.getBundleContext(),
-			  null, null, BundleContext.class);
+			  CauchoDeployment.class, null, BundleContext.class);
   }
 
   /**

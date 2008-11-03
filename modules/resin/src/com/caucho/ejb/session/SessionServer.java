@@ -83,10 +83,9 @@ abstract public class SessionServer extends AbstractServer
       
       WebBeansContainer webBeans = WebBeansContainer.create();
 
-      SingletonComponent comp
-        = new SingletonComponent(webBeans, getSessionContext());
-      comp.setTargetType(SessionContext.class);
-      comp.init();
+      SingletonBean comp
+        = new SingletonBean(getSessionContext(), null, SessionContext.class);
+
       webBeans.addComponent(comp);
 
       if (_localHomeClass != null)

@@ -143,12 +143,20 @@ public class ObserverImpl {
 	if (hasObserves(annList[i]))
 	  continue;
 
-	ComponentImpl comp = null;//webBeans.bind(loc, param[i], annList[i]);
-
-	if (comp == null) {
+	Set beans = _webBeans.resolveByType(param[i], annList[i]);
+	
+	if (beans == null || beans.size() == 0) {
 	  throw new ConfigException(loc
 				    + L.l("Parameter '{0}' binding does not have a matching component",
 					  getSimpleName(param[i])));
+	}
+	
+	ComponentImpl comp = null;
+
+	// XXX: error checking
+	Iterator iter = beans.iterator();
+	if (iter.hasNext()) {
+	  comp = (ComponentImpl) iter.next();
 	}
 
 	_args[i] = comp;

@@ -329,12 +329,12 @@ public class WbComponentConfig {
 
     introspect();
     
-    ClassComponent comp;
+    SimpleBean comp;
 
     if (Singleton.class.equals(_scope))
       comp = new SingletonClassComponent(WebBeansContainer.create());
     else
-      comp = new ClassComponent(WebBeansContainer.create());
+      comp = new SimpleBean(WebBeansContainer.create());
 
     comp.setTargetType(_cl);
 

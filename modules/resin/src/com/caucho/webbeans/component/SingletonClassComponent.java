@@ -48,13 +48,20 @@ import javax.webbeans.*;
 /**
  * Configuration for a singleton component.
  */
-public class SingletonClassComponent extends ClassComponent
+public class SingletonClassComponent extends SimpleBean
   implements Closeable
 {
   private static final Logger log
     = Logger.getLogger(SingletonClassComponent.class.getName());
   
   private Object _value;
+
+  public SingletonClassComponent(Class type)
+  {
+    super(type);
+    
+    super.setScope(new SingletonScope());
+  }
   
   public SingletonClassComponent(WebBeansContainer webBeans)
   {

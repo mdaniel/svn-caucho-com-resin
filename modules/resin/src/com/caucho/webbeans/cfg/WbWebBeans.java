@@ -243,21 +243,21 @@ public class WbWebBeans {
 	_pendingClasses.clear();
 
 	for (Class cl : pendingClasses) {
+	  if (webBeans.getWebComponent(cl) != null)
+	    continue;
 	  /*
 	    if (_componentTypeMap.get(cl.getName()) != null)
 	    continue;
 	  */
 
-	  ClassComponent component;
+	  SimpleBean component;
 
 	  if (cl.isAnnotationPresent(Singleton.class))
-	    component = new SingletonClassComponent(WebBeansContainer.create());
+	    component = new SingletonClassComponent(cl);
 	  else
-	    component = new ClassComponent(WebBeansContainer.create());
-	
-	  component.setTargetType(cl);
+	    component = new SimpleBean(cl);
+
 	  component.setFromClass(true);
-	  component.introspect();
 	  component.init();
 
 	  _pendingComponentList.add(component);
@@ -270,12 +270,8 @@ public class WbWebBeans {
 	_pendingComponentList.clear();
 
 	for (ComponentImpl comp : componentList) {
-	  /*
-	  if (_deploymentTypes.contains(comp.getDeploymentType())) {
-	    webBeans.addComponent(comp);
-	  }
-	  */
-	  webBeans.addComponent(comp);
+	  if (webBeans.getWebComponent(comp.getTargetType()) == null)
+	    webBeans.addBean(comp);
 	}
       }
     } catch (Exception e) {

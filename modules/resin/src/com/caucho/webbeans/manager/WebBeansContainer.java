@@ -122,8 +122,8 @@ public class WebBeansContainer
   private HashMap<Class,ArrayList<ObserverMap>> _observerListCache
     = new HashMap<Class,ArrayList<ObserverMap>>();
 
-  private HashMap<Class,ClassComponent> _transientMap
-    = new HashMap<Class,ClassComponent>();
+  private HashMap<Class,SimpleBean> _transientMap
+    = new HashMap<Class,SimpleBean>();
 
   private HashMap<FactoryBinding,Bean> _objectFactoryMap
     = new HashMap<FactoryBinding,Bean>();
@@ -166,7 +166,8 @@ public class WebBeansContainer
     _contextMap.put(Singleton.class, new SingletonScope());
 
     _deploymentMap.put(Standard.class, 0);
-    _deploymentMap.put(Production.class, 1);
+    _deploymentMap.put(CauchoDeployment.class, 1);
+    _deploymentMap.put(Production.class, 2);
 
     if (_classLoader != null)
       _classLoader.addScanListener(this);
@@ -228,6 +229,16 @@ public class WebBeansContainer
   public ClassLoader getClassLoader()
   {
     return _classLoader;
+  }
+
+  public WebBeansContainer getParent()
+  {
+    return _parent;
+  }
+
+  public void setParent(WebBeansContainer parent)
+  {
+    _parent = parent;
   }
 
   private void init()
@@ -349,29 +360,64 @@ public class WebBeansContainer
     return beans;
   }
 
-  public void addSingleton(Object object)
+  /**
+   * Registers a singleton as a WebBean.  The value will be introspected
+   * for its annotations like a SimpleBean to determine its attributes
+   *
+   * @param value the singleton value to register with the manager
+   */
+  public void addSingleton(Object value)
   {
-    addBean(new SingletonComponent(object));
+    addBean(new SingletonBean(value));
   }
 
-  public void addSingleton(Object object, String name)
+  /**
+   * Registers a singleton as a WebBean.  The value will be introspected
+   * for its annotations like a SimpleBean to determine its attributes.
+   * The name parameter override any introspected values.
+   *
+   * @param value the singleton value to register with the manager
+   * @param name the WebBeans @Named value for the singleton
+   */
+  public void addSingleton(Object object,
+			   String name)
   {
-    addBean(new SingletonComponent(object, name));
+    addBean(new SingletonBean(object, name));
   }
 
+  /**
+   * Registers a singleton as a WebBean.  The value will be introspected
+   * for its annotations like a SimpleBean to determine its attributes.
+   * The name and api parameters override any introspected values.
+   *
+   * @param value the singleton value to register with the manager
+   * @param name the WebBeans @Named value for the singleton
+   * @param api the exported types for the singleton
+   */
   public void addSingleton(Object object,
 			   String name,
-			   Class deploymentType)
-  {
-    addBean(new SingletonComponent(object, name, null, deploymentType));
-  }
-
-  public void addSingleton(Object object,
-			   String name,
-			   Class deploymentType,
 			   Type ...api)
   {
-    addBean(new SingletonComponent(object, name, api, deploymentType));
+    addBean(new SingletonBean(object, name, api));
+  }
+
+  /**
+   * Registers a singleton as a WebBean.  The value will be introspected
+   * for its annotations like a SimpleBean to determine its attributes.
+   * The name, deployment type, and api parameters override any
+   * introspected values.
+   *
+   * @param value the singleton value to register with the manager
+   * @param deploymentType the WebBeans @DeploymentType value for the singleton
+   * @param name the WebBeans @Named value for the singleton
+   * @param api the exported types for the singleton
+   */
+  public void addSingleton(Object object,
+			   Class deploymentType,
+			   String name,
+			   Type ...api)
+  {
+    addBean(new SingletonBean(object, deploymentType, name, api));
   }
   
   /**
@@ -382,7 +428,7 @@ public class WebBeansContainer
    */
   public void addSingletonByName(Object object, String name)
   {
-    addBean(new SingletonComponent(object, name, new Type[0]));
+    addBean(new SingletonBean(object, name, new Type[0]));
   }
 
 
@@ -604,33 +650,6 @@ public class WebBeansContainer
   // javax.webbeans.Container
   //
 
-  /**
-   * Sends the specified event to any observer instances in the scope
-   */
-  public void raiseEvent(Object event, Annotation... bindings)
-  {
-    if (_parent != null)
-      _parent.raiseEvent(event, bindings);
-
-    ArrayList<ObserverMap> observerList;
-
-    synchronized (_observerListCache) {
-      observerList = _observerListCache.get(event.getClass());
-
-      if (observerList == null) {
-	observerList = new ArrayList<ObserverMap>();
-	
-	fillObserverList(observerList, event.getClass());
-	_observerListCache.put(event.getClass(), observerList);
-      }
-    }
-
-    int size = observerList.size();
-    for (int i = 0; i < size; i++) {
-      observerList.get(i).raiseEvent(event, bindings);
-    }
-  }
-
   public Conversation createConversation()
   {
     return (Conversation) _contextMap.get(ConversationScoped.class);
@@ -681,7 +700,7 @@ public class WebBeansContainer
   public <T> Bean<T> createTransient(Class<T> type)
   {
     synchronized (_transientMap) {
-      ClassComponent comp = _transientMap.get(type);
+      SimpleBean comp = _transientMap.get(type);
 
       if (comp == null) {
 	if (type.isInterface())
@@ -689,7 +708,7 @@ public class WebBeansContainer
 	else if (Modifier.isAbstract(type.getModifiers()))
 	  throw new ConfigException(L.l("'{0}' cannot be an abstract.  createTransient requires a concrete type.", type.getName()));
 	
-	comp = new ClassComponent(this);
+	comp = new SimpleBean(this);
 	comp.setTargetType(type);
 
 	try {
@@ -899,10 +918,22 @@ public class WebBeansContainer
   public <T> Set<Bean<T>> resolveByType(TypeLiteral<T> type,
 					Annotation... bindings)
   {
-    Set<Bean<T>> set = (Set<Bean<T>>) resolve(type.getType(), bindings);
+    return resolveByType(type.getType(), bindings);
+  }
+
+  /**
+   * Returns the beans matching a class and annotation set
+   *
+   * @param type the bean's class
+   * @param bindings required @BindingType annotations
+   */
+  public <T> Set<Bean<T>> resolveByType(Type type,
+					Annotation... bindings)
+  {
+    Set set = resolve(type, bindings);
 
     if (set != null)
-      return set;
+      return (Set<Bean<T>>) set;
     else
       return new HashSet<Bean<T>>();
   }
@@ -942,7 +973,7 @@ public class WebBeansContainer
     }
   }
 
-  int getDeploymentPriority(Class deploymentType)
+  public int getDeploymentPriority(Class deploymentType)
   {
     Integer value = _deploymentMap.get(deploymentType);
 
@@ -969,7 +1000,7 @@ public class WebBeansContainer
     }
   }
 
-  private WebComponent getWebComponent(Type type)
+  public WebComponent getWebComponent(Type type)
   {
     synchronized (_componentMap) {
       WebComponent comp = _componentMap.get(type);
@@ -1086,15 +1117,30 @@ public class WebBeansContainer
   //
 
   /**
-   * Fires an event
-   *
-   * @param event the event to fire
-   * @param bindings the event bindings
+   * Sends the specified event to any observer instances in the scope
    */
-  public void fireEvent(Object event,
-			Annotation... bindings)
+  public void fireEvent(Object event, Annotation... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (_parent != null)
+      _parent.fireEvent(event, bindings);
+
+    ArrayList<ObserverMap> observerList;
+
+    synchronized (_observerListCache) {
+      observerList = _observerListCache.get(event.getClass());
+
+      if (observerList == null) {
+	observerList = new ArrayList<ObserverMap>();
+	
+	fillObserverList(observerList, event.getClass());
+	_observerListCache.put(event.getClass(), observerList);
+      }
+    }
+
+    int size = observerList.size();
+    for (int i = 0; i < size; i++) {
+      observerList.get(i).raiseEvent(event, bindings);
+    }
   }
 
   /**
@@ -1243,7 +1289,7 @@ public class WebBeansContainer
 	  webBeans = new WbWebBeans(this, root);
 	  _webBeansMap.put(root, webBeans);
 
-	  Path path = root.lookup("META-INF/web-beans.xml");
+	  Path path = root.lookup("web-beans.xml");
 	  
 	  if (path.canRead()) {
 	    path.setUserPath(path.getURL());
@@ -1256,7 +1302,8 @@ public class WebBeansContainer
 	  try {
 	    Class cl = Class.forName(className, false, _classLoader);
 
-	    webBeans.addScannedClass(cl);
+	    if (! cl.isInterface())
+	      webBeans.addScannedClass(cl);
 	  } catch (ClassNotFoundException e) {
 	    log.log(Level.FINER, e.toString(), e);
 	  }
@@ -1429,7 +1476,7 @@ public class WebBeansContainer
    */
   public boolean isRootScannable(Path root)
   {
-    if (! root.lookup("META-INF/web-beans.xml").canRead())
+    if (! root.lookup("web-beans.xml").canRead())
       return false;
 
     WebBeansRootContext context = _rootContextMap.get(root);
@@ -1455,10 +1502,22 @@ public class WebBeansContainer
   {
     try {
       String className = annotationName.toString();
+
+      if (className.startsWith("javax.webbeans"))
+	return true;
       
       Class cl = Class.forName(className, false, _tempClassLoader);
-      
-      return cl.isAnnotationPresent(DeploymentType.class);
+
+      Annotation []annList = cl.getAnnotations();
+
+      if (annList != null) {
+	for (Annotation ann : annList) {
+	  Class annType = ann.annotationType();
+	  
+	  if (annType.getName().startsWith("javax.webbeans"))
+	    return true;
+	}
+      }
     } catch (ClassNotFoundException e) {
     }
 

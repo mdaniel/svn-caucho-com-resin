@@ -52,10 +52,11 @@ import javax.webbeans.*;
 import javax.webbeans.manager.Bean;
 
 /**
- * Configuration for the xml web bean component.
+ * SimpleBean represents a POJO Java bean registered as a WebBean.
  */
-public class ClassComponent extends ComponentImpl {
-  private static final L10N L = new L10N(ClassComponent.class);
+public class SimpleBean extends ComponentImpl
+{
+  private static final L10N L = new L10N(SimpleBean.class);
 
   private static final Object []NULL_ARGS = new Object[0];
   
@@ -74,14 +75,46 @@ public class ClassComponent extends ComponentImpl {
   private String _mbeanName;
   private Class _mbeanInterface;
 
-  public ClassComponent(WebBeansContainer webBeans)
+  public SimpleBean(WebBeansContainer webBeans)
   {
     super(webBeans);
   }
 
-  public ClassComponent()
+  public SimpleBean()
   {
     this(WebBeansContainer.create());
+  }
+
+  public SimpleBean(Class type)
+  {
+    this(WebBeansContainer.create());
+
+    validateType(type);
+
+    setTargetType(type);
+  }
+
+  private void validateType(Class type)
+  {
+    if (type.isInterface())
+      throw new ConfigException(L.l("'{0}' is an invalid SimpleBean because it is an interface",
+				    type));
+    
+    Type []typeParam = type.getTypeParameters();
+    if (typeParam != null && typeParam.length > 0) {
+      StringBuilder sb = new StringBuilder();
+      sb.append(type.getName());
+      sb.append("<");
+      for (int i = 0; i < typeParam.length; i++) {
+	if (i > 0)
+	  sb.append(",");
+	sb.append(typeParam[i]);
+      }
+      sb.append(">");
+      
+      throw new ConfigException(L.l("'{0}' is an invalid SimpleBean class because it defines type variables",
+				    sb));
+    }
   }
 
   public void setConstructor(Constructor ctor)
@@ -125,9 +158,7 @@ public class ClassComponent extends ComponentImpl {
 
     introspectTypes(cl);
 
-    introspectDeploymentType(cl);
-
-    introspectScope(cl);
+    introspectClass(cl);
 
     if ("".equals(getName())) {
       String name = cl.getSimpleName();
@@ -389,14 +420,7 @@ public class ClassComponent extends ComponentImpl {
 	  }
 
 	  if (ctorArgs[i] == null) {
-	    Bean bean = bindParameter(loc, param[i], paramAnn[i]);
-
-	    if (bean == null)
-	      throw new ConfigException(L.l("{0} does not have valid arguments",
-					    _ctor));
-
-	    // XXX:
-	    ctorArgs[i] = new ComponentArg((ComponentImpl) bean);
+	    ctorArgs[i] = new BeanArg(loc, param[i], paramAnn[i]);
 	  }
 	}
 	
@@ -432,7 +456,7 @@ public class ClassComponent extends ComponentImpl {
     Object value = program.configure(type);
 
     if (value != null)
-      return new SingletonComponent(getWebBeans(), value);
+      return new SingletonBean(getWebBeans(), value);
     else
       return null;
   }
@@ -446,20 +470,44 @@ public class ClassComponent extends ComponentImpl {
   }
 
   abstract static class Arg {
+    public void bind()
+    {
+    }
+    
     abstract public Object eval(ConfigContext env);
   }
 
-  static class ComponentArg extends Arg {
-    private ComponentImpl _comp;
+  class BeanArg extends Arg {
+    private String _loc;
+    private Type _type;
+    private Annotation []_bindings;
+    private Bean _bean;
 
-    ComponentArg(ComponentImpl comp)
+    BeanArg(String loc, Type type, Annotation []bindings)
     {
-      _comp = comp;
+      _loc = loc;
+      _type = type;
+      _bindings = bindings;
+      bind();
+    }
+
+    public void bind()
+    {
+      if (_bean == null) {
+	_bean = bindParameter(_loc, _type, _bindings);
+
+	if (_bean == null)
+	  throw new ConfigException(L.l("{0}: {1} does not have valid arguments",
+					_loc, _ctor));
+      }
     }
     
     public Object eval(ConfigContext env)
     {
-      return _comp.create();
+      if (_bean == null)
+	bind();
+      
+      return _webBeans.getInstance(_bean, env);
     }
   }
 

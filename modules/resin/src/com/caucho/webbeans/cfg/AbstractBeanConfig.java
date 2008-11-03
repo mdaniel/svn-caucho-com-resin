@@ -250,10 +250,10 @@ abstract public class AbstractBeanConfig {
     ComponentImpl comp;
 
     if (value != null) {
-      comp = new SingletonComponent(webBeans, value);
+      comp = new SingletonBean(webBeans, value);
     }
     else {
-      ClassComponent classComp = new SingletonClassComponent(webBeans);
+      SimpleBean classComp = new SingletonClassComponent(webBeans);
 
       classComp.setTargetType(_cl);
 

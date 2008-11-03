@@ -48,7 +48,7 @@ import javax.webbeans.manager.Manager;
  * Resin WebBeans producer for the main singletons.
  */
 
-@Standard
+@CauchoDeployment
 @Singleton
 public class ResinWebBeansProducer
 {
@@ -76,7 +76,7 @@ public class ResinWebBeansProducer
    * Returns the MBeanServer
    */
   @Produces
-  @Standard
+  @CauchoDeployment
   public MBeanServer getMBeanServer()
   {
     return Jmx.getGlobalMBeanServer();
@@ -86,7 +86,7 @@ public class ResinWebBeansProducer
    * Returns the TransactionManager
    */
   @Produces
-  @Standard
+  @CauchoDeployment
   public TransactionManager getTransactionManager()
   {
     return TransactionManagerImpl.getInstance();
@@ -96,7 +96,7 @@ public class ResinWebBeansProducer
    * Returns the UserTransaction
    */
   @Produces
-  @Standard
+  @CauchoDeployment
   public UserTransaction getUserTransaction()
   {
     return UserTransactionProxy.getInstance();
@@ -106,7 +106,7 @@ public class ResinWebBeansProducer
    * Returns the ScheduledExecutorService
    */
   @Produces
-  @Standard
+  @CauchoDeployment
   public ScheduledExecutorService getScheduledExecutorService()
   {
     return ScheduledThreadPool.getLocal();
@@ -116,7 +116,7 @@ public class ResinWebBeansProducer
    * Returns the javax.ejb.TimerService
    */
   @Produces
-  @Standard
+  @CauchoDeployment
   public TimerService getTimerService()
   {
     return EjbTimerService.getCurrent();

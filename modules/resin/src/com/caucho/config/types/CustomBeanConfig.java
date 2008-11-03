@@ -69,7 +69,7 @@ public class CustomBeanConfig {
     = "http://caucho.com/ns/resin";
 
   private Class _class;
-  private ClassComponent _component;
+  private SimpleBean _component;
   private ConfigType _configType;
 
   private ArrayList<ConfigProgram> _args;
@@ -88,8 +88,7 @@ public class CustomBeanConfig {
     _class = cl;
 
     if (! Annotation.class.isAssignableFrom(cl)) {
-      _component = new ClassComponent();
-      _component.setTargetType(cl);
+      _component = new SimpleBean(cl);
       // _component.setScopeClass(Dependent.class);
     }
 
@@ -246,7 +245,7 @@ public class CustomBeanConfig {
     if (type.isAnnotationPresent(Stereotype.class)) {
       metaType = Stereotype.class;
 
-      addStereotype(type);
+      _component.addStereotype(ann);
     }
 
     if (metaType == null)

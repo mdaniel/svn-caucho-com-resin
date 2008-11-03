@@ -40,36 +40,56 @@ import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.*;
 
 /**
- * Component for a singleton beans
+ * SingletonBean represents a singleton instance exported as a web beans.
+ *
+ * <code><pre>
+ * @Current Manager manager;
+ *
+ * manager.addBean(new SingletonBean(myValue));
+ * </pre></code>
  */
-public class SingletonComponent extends ClassComponent
+public class SingletonBean extends SimpleBean
   implements Closeable
 {
   private static final Object []NULL_ARGS = new Object[0];
 
   private Object _value;
-  
-  public SingletonComponent(Object value)
+
+  /**
+   * Creates a WebBeans Bean for the value by introspecting the
+   * value's annotations and methods.
+   *
+   * @param value the singleton value
+   */
+  public SingletonBean(Object value)
   {
     this(value, null, null, null);
   }
 
-  public SingletonComponent(Object value, String name)
+
+  /**
+   * Creates a WebBeans Bean for the value by introspecting the
+   * value's annotations and methods.
+   *
+   * @param value the singleton value
+   * @param name the webbean name
+   */
+  public SingletonBean(Object value, String name)
   {
     this(value, name, null, null);
   }
-
-  public SingletonComponent(Object value,
-			    String name,
-			    Type []api)
+  
+  public SingletonBean(Object value,
+		       String name,
+		       Type ...api)
   {
-    this(value, name, api, null);
+    this(value, null, name, api);
   }
-
-  public SingletonComponent(Object value,
-			    String name,
-			    Type []api,
-			    Class<? extends Annotation> deploymentType)
+  
+  public SingletonBean(Object value,
+		       Class<? extends Annotation> deploymentType,
+		       String name,
+		       Type ...api)
   {
     super(WebBeansContainer.create());
     
@@ -96,9 +116,9 @@ public class SingletonComponent extends ClassComponent
   }
 
   /**
-   * Special for internal use
+   * Special constructor for internal use
    */
-  public SingletonComponent(WebBeansContainer webBeans, Object value)
+  public SingletonBean(WebBeansContainer webBeans, Object value)
   {
     super(webBeans);
     

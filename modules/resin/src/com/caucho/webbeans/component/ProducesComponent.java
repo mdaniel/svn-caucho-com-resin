@@ -72,26 +72,37 @@ public class ProducesComponent extends ComponentImpl {
     setTargetType(method.getGenericReturnType());
   }
 
+  @Override
+  protected void initDefault()
+  {
+    if (getDeploymentType() == null
+	&& _producer.getDeploymentType() != null) {
+      setDeploymentType(_producer.getDeploymentType());
+    }
+    
+    super.initDefault();
+  }
+
   public void introspect()
   {
     introspectTypes(getTargetType());
     
     Annotation []annotations = _method.getAnnotations();
 
-    introspectBindings(annotations);
-    introspectDeploymentType(annotations);
-    introspectScope(annotations);
+    introspectAnnotations(annotations);
+  }
 
-    if (getName() == null) {
-      String methodName = _method.getName();
+  @Override
+  protected String getDefaultName()
+  { 
+    String methodName = _method.getName();
       
-      if (methodName.startsWith("get") && methodName.length() > 3) {
-	setName(Character.toLowerCase(methodName.charAt(3))
-		+ methodName.substring(4));
-      }
-      else
-	setName(methodName);
+    if (methodName.startsWith("get") && methodName.length() > 3) {
+      return (Character.toLowerCase(methodName.charAt(3))
+	      + methodName.substring(4));
     }
+    else
+      return methodName;
   }
 
   @Override

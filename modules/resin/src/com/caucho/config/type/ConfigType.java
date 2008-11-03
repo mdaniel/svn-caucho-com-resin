@@ -166,8 +166,8 @@ abstract public class ConfigType
    */
   public Attribute getAttribute(QName qName)
   {
-    throw new ConfigException(L.l("{0} does not allow attributes at '{1}'",
-				  getTypeName(), qName));
+    // ioc/0250
+    return null;
   }
 
   /**

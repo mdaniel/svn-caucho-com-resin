@@ -82,7 +82,7 @@ public class RemoteClient extends BeanConfig
     
     WebBeansContainer webBeans = WebBeansContainer.create();
 
-    ClassComponent comp = new SingletonComponent(webBeans, proxy);
+    SimpleBean comp = new SingletonBean(webBeans, proxy);
 
     if (getName() != null) {
       comp.setName(getName());

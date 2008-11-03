@@ -71,6 +71,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   protected WebBeansContainer _webBeans;
   
   private Type _targetType;
+  private BaseType _baseType;
   
   private Class<? extends Annotation> _deploymentType;
 
@@ -86,6 +87,9 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     = new ArrayList<Annotation>();
 
   private Class<? extends Annotation> _scopeType;
+
+  private ArrayList<Annotation> _stereotypes
+    = new ArrayList<Annotation>();
   
   private HashMap<Method,ArrayList<WbInterceptor>> _interceptorMap;
 
@@ -138,6 +142,8 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   public void setTargetType(Type type)
   {
     _targetType = type;
+
+    _baseType = BaseType.create(type, null);
   }
   
   public Type getTargetType()
@@ -155,12 +161,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   
   public Class getTargetClass()
   {
-    if (_targetType instanceof Class)
-      return ((Class) _targetType);
-    else if (_targetType instanceof ParameterizedType)
-      return (Class) ((ParameterizedType) _targetType).getRawType();
-    else
-      return (Class) _targetType;
+    return _baseType.getRawClass();
   }
 
   public String getTargetName()
@@ -219,6 +220,11 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     if (! scopeType.isAnnotationPresent(ScopeType.class))
       throw new ConfigException(L.l("'{0}' is not a valid scope because it does not have a @javax.webbeans.ScopeType annotation",
 				    scopeType));
+
+    if (_scopeType != null && ! _scopeType.equals(scopeType))
+      throw new ConfigException(L.l("'{0}' conflicts with an earlier scope type definition '{1}'.  ScopeType must be defined exactly once.",
+				    scopeType.getName(),
+				    _scopeType.getName()));
     
     _scopeType = scopeType;
   }
@@ -229,6 +235,18 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   public Class<? extends Annotation> getScopeType()
   {
     return _scopeType;
+  }
+
+  /**
+   * Adds a stereotype
+   */
+  public void addStereotype(Annotation stereotype)
+  {
+    if (! stereotype.annotationType().isAnnotationPresent(Stereotype.class))
+      throw new ConfigException(L.l("'{0}' is not a valid stereotype because it does not have a @javax.webbeans.Stereotype annotation",
+				    stereotype));
+    
+    _stereotypes.add(stereotype);
   }
 
   /**
@@ -253,7 +271,14 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   protected void init()
   {
     introspect();
-    
+
+    initStereotypes();
+
+    initDefault();
+  }
+
+  protected void initDefault()
+  {
     if (_deploymentType == null)
       _deploymentType = Production.class;
 
@@ -262,6 +287,17 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 
     if (_scopeType == null)
       _scopeType = Dependent.class;
+
+    if ("".equals(_name)) {
+      _name = getDefaultName();
+    }
+  }
+
+  protected String getDefaultName()
+  {
+    String name = getTargetSimpleName();
+
+    return Character.toLowerCase(name.charAt(0)) + name.substring(1);
   }
 
   protected void introspect()
@@ -322,6 +358,19 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
       _typeClasses.add(baseType.getRawClass());
 
     return baseType.getRawClass();
+  }
+
+  protected void introspectClass(Class cl)
+  {
+    introspectAnnotations(cl.getAnnotations());
+  }
+
+  protected void introspectAnnotations(Annotation []annotations)
+  {
+    introspectDeploymentType(annotations);
+    introspectScope(annotations);
+    introspectBindings(annotations);
+    introspectStereotypes(annotations);
   }
 
   /**
@@ -398,6 +447,83 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 
 	if (ann instanceof Named && getName() == null)
 	  setName(((Named) ann).value());
+      }
+    }
+  }
+
+  /**
+   * Called for implicit introspection.
+   */
+  protected void introspectStereotypes(Class cl)
+  {
+    introspectStereotypes(cl.getAnnotations());
+  }
+
+  /**
+   * Adds the stereotypes from the bean's annotations
+   */
+  protected void introspectStereotypes(Annotation []annotations)
+  {
+    if (_stereotypes.size() == 0) {
+      for (Annotation ann : annotations) {
+	Class annType = ann.annotationType();
+      
+	if (annType.isAnnotationPresent(Stereotype.class)) {
+	  _stereotypes.add(ann);
+	}
+      }
+    }
+  }
+
+  /**
+   * Adds any values from the stereotypes
+   */
+  protected void initStereotypes()
+  {
+    if (_scopeType == null) {
+      for (Annotation stereotype : _stereotypes) {
+	Class stereotypeType = stereotype.annotationType();
+	
+	for (Annotation ann : stereotypeType.getDeclaredAnnotations()) {
+	  Class annType = ann.annotationType();
+	  
+	  if (annType.isAnnotationPresent(ScopeType.class))
+	    setScopeType(annType);
+	}
+      }
+    }
+    
+    if (_deploymentType == null) {
+      for (Annotation stereotype : _stereotypes) {
+	Class stereotypeType = stereotype.annotationType();
+	
+	for (Annotation ann : stereotypeType.getDeclaredAnnotations()) {
+	  Class annType = ann.annotationType();
+
+	  if (! annType.isAnnotationPresent(DeploymentType.class))
+	    continue;
+
+	  // XXX: potential issue where getDeploymentPriority isn't set yet
+	  
+	  if (_deploymentType == null
+	      || (_webBeans.getDeploymentPriority(_deploymentType)
+		  < _webBeans.getDeploymentPriority(annType))) {
+	    _deploymentType = annType;
+	  }
+	}
+      }
+    }
+    
+    if (_name == null) {
+      for (Annotation stereotype : _stereotypes) {
+	Class stereotypeType = stereotype.annotationType();
+	
+	for (Annotation ann : stereotypeType.getDeclaredAnnotations()) {
+	  Class annType = ann.annotationType();
+	  
+	  if (annType.equals(Named.class))
+	    _name = "";
+	}
       }
     }
   }
