@@ -132,7 +132,6 @@ public abstract class AbstractHttpRequest
 
   protected Invocation _invocation;
   
-  private SecurityContextProvider _oldProvider;
   private String _runAs;
 
   private boolean _keepalive;
@@ -173,6 +172,8 @@ public abstract class AbstractHttpRequest
 
   private boolean _hasReader;
   private boolean _hasInputStream;
+
+  private SecurityContextProvider _oldProvider;
 
   // HttpServletRequest stuff
   private final Form _formParser = new Form();
@@ -287,7 +288,6 @@ public abstract class AbstractHttpRequest
     _keepalive = true;
     _isSessionIdFromCookie = false;
 
-    _oldProvider = null;
     _runAs = null;
 
     _attributeListeners = NULL_LISTENERS;
@@ -301,10 +301,34 @@ public abstract class AbstractHttpRequest
    *
    * @param s the raw connection stream
    */
-  protected void resume()
+  protected void startInvocation()
     throws IOException
   {
     _oldProvider = SecurityContext.setProvider(this);
+  }
+
+  /**
+   * Finish the invocation
+   *
+   * @param s the raw connection stream
+   */
+  protected void finishInvocation()
+    throws IOException
+  {
+    SecurityContextProvider oldProvider = _oldProvider;
+    _oldProvider = null;
+    
+    SecurityContext.setProvider(oldProvider);
+  }
+
+  /**
+   * Prepare the Request object for a new request.
+   *
+   * @param s the raw connection stream
+   */
+  protected void resume()
+    throws IOException
+  {
     _startTime = Alarm.getCurrentTime();
     
     if (_tcpConn != null)
@@ -2501,11 +2525,6 @@ public abstract class AbstractHttpRequest
     throws IOException
   {
     try {
-      SecurityContextProvider oldProvider = _oldProvider;
-      _oldProvider = null;
-      
-      SecurityContext.setProvider(oldProvider);
-
       SessionImpl session = _session;
 
       // server/0219

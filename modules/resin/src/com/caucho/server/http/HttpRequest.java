@@ -166,7 +166,10 @@ public class HttpRequest extends AbstractHttpRequest
     throws IOException
   {
     boolean hasRequest = false;
+    
     try {
+      startInvocation();
+      
       start();
       _response.start();
 
@@ -297,6 +300,8 @@ public class HttpRequest extends AbstractHttpRequest
 
       return false;
     } finally {
+      finishInvocation();
+      
       if (hasRequest)
         _response.finish();
       else
@@ -324,6 +329,8 @@ public class HttpRequest extends AbstractHttpRequest
     ConnectionController controller = null;
     
     try {
+      startInvocation();
+      
       try {
 	setStartTime();
 	
@@ -359,6 +366,8 @@ public class HttpRequest extends AbstractHttpRequest
 
       return false;
     } finally {
+      finishInvocation();
+      
       _response.finish();
     }
 

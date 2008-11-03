@@ -355,6 +355,7 @@ public class HmuxRequest extends AbstractHttpRequest
     boolean hasRequest = false;
     
     try {
+      startInvocation();
       start();
       _response.start();
 
@@ -447,6 +448,8 @@ public class HmuxRequest extends AbstractHttpRequest
 	return false;
       }
     } finally {
+      finishInvocation();
+      
       if (! hasRequest)
 	_response.setHeaderWritten(true);
       

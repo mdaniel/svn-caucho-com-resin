@@ -12,6 +12,7 @@
 
 <s2 title="3.1.8 snapshot">
 <ul>
+<li>memory: removed potential ThreadLocal leak with SecurityContext (#3031, rep by Mattias Jiderhamn)</li>
 <li>rewrite-dispatch: dispatch with target (#2774, rep by Leonid Geller)</li>
 <li>web-app: add expand-fileset-cleanup to &lt;web-app (#3001, rep by Bill Au)</li>
 <li>jni: keepalive select issue with premature close (#2962, rep by Martin Thompson)</li>
