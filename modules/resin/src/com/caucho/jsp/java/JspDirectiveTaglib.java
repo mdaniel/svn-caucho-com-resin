@@ -94,10 +94,6 @@ public class JspDirectiveTaglib extends JspNode {
       _gen.addTaglibDir(_prefix, _tagDir);
       addNamespace(_prefix, "urn:jsptld:" + _tagDir);
     }
-
-    if (_gen.getParseState().isAction())
-      throw error(L.l("<{0}> cannot occur after a tag action.  Taglib directives must appear before any tags.",
-		      getTagName()));
   }
   
   /**

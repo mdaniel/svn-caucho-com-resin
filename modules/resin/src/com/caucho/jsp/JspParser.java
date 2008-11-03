@@ -521,9 +521,6 @@ public class JspParser {
 	      break;
 	    }
 
-	    // jsp/18cw
-	    _parseState.setAction(true);
-
 	    ch = readName(ch);
 	    String name = _tag.toString();
             int tagCode = getTag(name);
@@ -1705,6 +1702,12 @@ public class JspParser {
       throw error(L.l("The taglib prefix '{0}' must be defined before it is used.",
 		      prefix));
     }
+
+    if (_prefixes.contains(prefix))
+      throw error(L.l(
+        "<{0}> cannot occur after an action that uses the same prefix: {1}.",
+        JSP_DIRECTIVE_TAGLIB.getName(),
+        prefix));
 
     String uri = null;
     p = keys.indexOf(URI);

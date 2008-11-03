@@ -86,9 +86,6 @@ public class ParseState {
   private int _buffer = TempCharBuffer.SIZE;
   private boolean _isBufferSet = false;
 
-  // true after an action has been read
-  private boolean _isAction;
-
   private String _info;
   private String _errorPage;
   private String _contentType;
@@ -499,22 +496,6 @@ public class ParseState {
   public void setExtends(Class extendsValue)
   {
     _extends = extendsValue;
-  }
-
-  /**
-   * Set true on an action
-   */
-  public void setAction(boolean isAction)
-  {
-    _isAction = true;
-  }
-
-  /**
-   * Set true on an action
-   */
-  public boolean isAction()
-  {
-    return _isAction;
   }
 
   /**
