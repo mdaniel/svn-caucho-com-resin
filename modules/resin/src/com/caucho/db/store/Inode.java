@@ -116,7 +116,7 @@ public class Inode {
   
   public static final long DOUBLE_INDIRECT_MAX
     = (SINGLE_INDIRECT_MAX
-       + DOUBLE_INDIRECT_BLOCKS * (BLOCK_SIZE / 8) * BLOCK_SIZE);
+       + DOUBLE_INDIRECT_BLOCKS * (BLOCK_SIZE / 8L) * BLOCK_SIZE);
   
   private static final byte []NULL_BYTES = new byte[INODE_SIZE];
 
@@ -304,7 +304,7 @@ public class Inode {
 
       return sublen;
     }
-    else if (fileLength <= FRAGMENT_MAX) {
+    else if (fileOffset < FRAGMENT_MAX) {
       long fragAddr = readFragmentAddr(inode, inodeOffset, store, fileOffset);
       int fragOffset = (int) (fileOffset % FRAGMENT_SIZE);
 
@@ -484,10 +484,14 @@ public class Inode {
 	if (BLOCK_SIZE < sublen)
 	  sublen = BLOCK_SIZE;
 
-	long blockAddr = store.allocateFragment(xa);
+	Block block = store.allocateBlock();
+	
+	long blockAddr = Store.blockIdToAddress(block.getBlockId());
+
+	block.free();
 
 	if (blockAddr == 0)
-	  throw new IllegalStateException(L.l("illegal fragment"));
+	  throw new IllegalStateException(L.l("illegal block"));
 
 	writeBlockAddr(inode, inodeOffset,
 		       store, xa,
@@ -556,7 +560,7 @@ public class Inode {
 
       return sublen;
     }
-    else if (fileLength <= FRAGMENT_MAX) {
+    else if (fileOffset < FRAGMENT_MAX) {
       long fragAddr = readFragmentAddr(inode, inodeOffset, store, fileOffset);
       int fragOffset = (int) (fileOffset % Inode.INODE_BLOCK_SIZE);
 
@@ -1043,23 +1047,31 @@ public class Inode {
 			    long fileOffset)
     throws IOException
   {
-    if (fileOffset <= FRAGMENT_MAX)
+    if (fileOffset < FRAGMENT_MAX)
       throw new IllegalStateException("block/fragment mixup");
     
-    else if (fileOffset <= DOUBLE_INDIRECT_MAX) {
-      long indirectAddr;
-      indirectAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
+    else if (fileOffset < DOUBLE_INDIRECT_MAX) {
+      long indAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
-      if (indirectAddr == 0)
-	throw new IllegalStateException(L.l("null block id"));
+      if (indAddr == 0) {
+	throw new IllegalStateException(L.l("{0} null block id", store));
+      }
 
       int blockCount = (int) ((fileOffset - FRAGMENT_MAX) / BLOCK_SIZE);
 
-      int offset = 8 * blockCount;
+      int dblBlockCount = blockCount / (BLOCK_SIZE / 8);
 
-      long blockAddr = store.readFragmentLong(indirectAddr, offset);
+      int dblBlockIndex = 8 * (SINGLE_INDIRECT_BLOCKS + dblBlockCount);
 
-      return blockAddr;
+      long dblIndAddr = store.readFragmentLong(indAddr, dblBlockIndex);
+
+      if (dblIndAddr == 0) {
+	throw new IllegalStateException(L.l("null indirect block id"));
+      }
+      
+      int blockOffset = 8 * (blockCount % (BLOCK_SIZE / 8));
+
+      return store.readBlockLong(dblIndAddr, blockOffset);
     }
     else
       throw new IllegalStateException(L.l("size over {0}M not supported",
@@ -1074,21 +1086,22 @@ public class Inode {
 				     long fileOffset, long blockAddr)
     throws IOException
   {
-    if (fileOffset <= FRAGMENT_MAX)
+    if (fileOffset < FRAGMENT_MAX)
       throw new IllegalStateException("block/fragment mixup");
     
-    else if (fileOffset <= DOUBLE_INDIRECT_MAX) {
-      long indAddr;
-      indAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
+    else if (fileOffset < DOUBLE_INDIRECT_MAX) {
+      long indAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
-      if (indAddr == 0)
-	throw new IllegalStateException(L.l("null block id"));
+      if (indAddr == 0) {
+	throw new IllegalStateException(L.l("{0} null block id", store));
+      }
 
       int blockCount = (int) ((fileOffset - FRAGMENT_MAX) / BLOCK_SIZE);
 
       int dblBlockCount = blockCount / (BLOCK_SIZE / 8);
+      int dblBlockIndex = 8 * (SINGLE_INDIRECT_BLOCKS + dblBlockCount);
 
-      long dblIndAddr = store.readFragmentLong(indAddr, dblBlockCount * 8);
+      long dblIndAddr = store.readFragmentLong(indAddr, dblBlockIndex);
 
       if (dblIndAddr == 0) {
 	Block block = store.allocateBlock();
@@ -1097,12 +1110,12 @@ public class Inode {
 
 	block.free();
 
-	store.writeBlockLong(xa, indAddr, dblBlockCount * 8, dblIndAddr);
+	store.writeFragmentLong(xa, indAddr, dblBlockIndex, dblIndAddr);
       }
 
       int blockOffset = 8 * (blockCount % (BLOCK_SIZE / 8));
       
-      store.writeFragmentLong(xa, dblIndAddr, blockOffset, blockAddr);
+      store.writeBlockLong(xa, dblIndAddr, blockOffset, blockAddr);
     }
     else
       throw new IllegalStateException(L.l("size over {0}M not supported",

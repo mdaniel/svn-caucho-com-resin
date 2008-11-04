@@ -12,6 +12,7 @@
 
 <s2 title="3.1.8 snapshot">
 <ul>
+<li>boot: watchdog kill NPE (#3009, rep by stbu)</li>
 <li>memory: removed potential ThreadLocal leak with SecurityContext (#3031, rep by Mattias Jiderhamn)</li>
 <li>rewrite-dispatch: dispatch with target (#2774, rep by Leonid Geller)</li>
 <li>web-app: add expand-fileset-cleanup to &lt;web-app (#3001, rep by Bill Au)</li>

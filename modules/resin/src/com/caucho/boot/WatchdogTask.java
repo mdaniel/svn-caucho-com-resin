@@ -109,7 +109,11 @@ class WatchdogTask implements Runnable
 	} catch (Exception e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	} finally {
-	  _process.destroy();
+	  WatchdogProcess process = _process;
+	  _process = null;
+
+	  if (process != null)
+	    process.destroy();
 	}
       }
     } finally {
