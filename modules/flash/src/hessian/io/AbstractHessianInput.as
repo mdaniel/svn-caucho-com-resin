@@ -118,6 +118,16 @@ package hessian.io
     }
 
     /**
+     * Reads the number of method arguments
+     *
+     * @return -1 for a variable length (hessian 1.0)
+     */
+    public function readMethodArgLength():int
+    {
+      return -1;
+    }
+
+    /**
      * Starts reading the call, including the headers.
      *
      * <p>The call expects the following protocol data

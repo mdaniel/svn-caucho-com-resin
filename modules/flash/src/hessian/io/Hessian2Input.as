@@ -187,13 +187,10 @@ package hessian.io
     {
       var tag:int = read();
 
-      if (tag != 'c'.charCodeAt())
-        throw new Error("expected hessian call ('c') at code=" + tag + " ch=" + String.fromCharCode(tag));
+      if (tag != 'C'.charCodeAt())
+        throw new Error("expected hessian call ('C') at code=" + tag + " ch=" + String.fromCharCode(tag));
 
-      var major:int = read();
-      var minor:int = read();
-
-      return (major << 16) + minor;
+      return 0;
     }
 
     /**
@@ -210,14 +207,21 @@ package hessian.io
     public function readEnvelope():int
     {
       var tag:int = read();
+      var version:int = 0;
       
+      if (tag == 'H'.charCodeAt()) {
+        var major:int = read();
+        var minor:int = read();
+
+        version = (major << 16) + minor;
+
+        tag = read();
+      }
+
       if (tag != 'E'.charCodeAt())
         throw new Error("expected hessian Envelope ('E') at code=" + tag + " ch=" + String.fromCharCode(tag));
 
-      var major:int = read();
-      var minor:int = read();
-
-      return (major << 16) + minor;
+      return version;
     }
 
     /**
@@ -225,7 +229,7 @@ package hessian.io
      *
      * <p>A successful completion will have a single value:
      *   <pre>
-     *   z
+     *   Z
      *   </pre>
      * </p>
      */
@@ -233,7 +237,7 @@ package hessian.io
     {
       var tag:int = read();
 
-      if (tag != 'z'.charCodeAt())
+      if (tag != 'Z'.charCodeAt())
         throw new Error("expected end of envelope");
     }
 
@@ -243,7 +247,7 @@ package hessian.io
      * <p>A successful completion will have a single value:
      *
      *   <pre>
-     *   m b16 b8 method
+     *   string
      *   </pre>
      * </p>
      *
@@ -251,26 +255,21 @@ package hessian.io
      */
     public override function readMethod():String 
     {
-      var tag:int = read();
-
-      if (tag != 'm'.charCodeAt())
-        throw new Error("expected hessian method ('m') at code=" + tag + " ch=" + String.fromCharCode(tag));
-
-      var d1:int = read();
-      var d2:int = read();
-
-      _isLastChunk = true;
-      _chunkLength = d1 * 256 + d2;
-      _sbuf = "";
-
-      var ch:int;
-      while ((ch = parseChar()) >= 0)
-        _sbuf += String.fromCharCode(ch);
-
-      // XXX verify that this actually copies _sbuf
-      _method = _sbuf;
+      _method = readString();
 
       return _method;
+    }
+
+    /**
+     * Returns the number of method arguments
+     *
+     * <pre>
+     * int
+     * </pre>
+     */
+    public override function readMethodArgLength():int
+    {
+      return readInt();
     }
 
     /**
@@ -288,9 +287,6 @@ package hessian.io
     {
       readCall();
 
-      while (readHeader() != null)
-        readObject();
-
       readMethod();
     }
 
@@ -300,22 +296,11 @@ package hessian.io
      * <p>The call expects the following protocol data
      *
      *   <pre>
-     *   z
      *   </pre>
      * </p>
      */
     public override function completeCall():void
     {
-      var tag:int = read();
-
-      if (tag == 'z'.charCodeAt()) {
-      }
-
-      else if (tag < 0)
-        throw new Error("expected end of call ('z') at end of stream.");
-
-      else
-        throw new Error("expected end of call ('z') at '" + String.fromCharCode(tag) + "'.  Check method arguments and ensure method overloading is enabled if necessary");
     }
 
     /**
@@ -330,26 +315,26 @@ package hessian.io
     {
       var tag:int = read();
 
-      if (tag != 'r'.charCodeAt())
-        throw new Error("expected hessian reply");
-
-      var major:int = read();
-      var minor:int = read();
-
-      tag = read();
-
-      if (tag == 'f'.charCodeAt())
-        throw prepareFault();
-
+      if (tag == 'R'.charCodeAt())
+        return readObject(expectedClass);
+      else if (tag == 'F'.charCodeAt())
+        throw prepareFault(readObject());
       else {
-        if (tag >= 0)
-          _offset--;
+        var response:String = new String(tag);
 
-        var value:Object = readObject(expectedClass);
+        try {
+          var ch:int;
 
-        completeValueReply();
+          while ((ch = read()) >= 0) {
+            response += String.fromCharCode(ch);
+          }
+        }
+        catch (e:Error) {
+          trace(e);
+        }
 
-        return value;
+        throw new Error("expected hessian reply at " + codeName(tag) + "\n" +
+                        response);
       }
     }
 
@@ -360,27 +345,13 @@ package hessian.io
      *
      *   <pre>
      *   r
-     *   v
      *   </pre>
      * </p>
      */
     public override function startReply():void
     {
-      var tag:int = read();
-
-      if (tag != 'r'.charCodeAt())
-        throw new Error("expected hessian reply");
-
-      var major:int = read();
-      var minor:int = read();
-
-      tag = read();
-
-      if (tag == 'f'.charCodeAt())
-        throw prepareFault();
-
-      else if (tag >= 0)
-        _offset--;
+      // XXX: for variable length (?)
+      readReply(Object);
     }
 
     /**
@@ -388,10 +359,8 @@ package hessian.io
      * 
      * @return The fault.
      */
-    private function prepareFault():Error
+    private function prepareFault(fault:Object):Error
     {
-      var fault:Object = readFault();
-
       var detail:Object = fault.detail;
       var msg:String = fault.message;
 
@@ -426,10 +395,6 @@ package hessian.io
      */
     public override function completeReply():void
     {
-      var tag:int = read();
-
-      if (tag != 'z'.charCodeAt())
-        throw new Error("expected end of reply");
     }
 
     /**
@@ -437,7 +402,7 @@ package hessian.io
      *
      * <p>A successful completion will have a single value:
      *   <pre>
-     *   z
+     *   Z
      *   </pre>
      * </p>
      */
@@ -445,7 +410,7 @@ package hessian.io
     {
       var tag:int = read();
       
-      if (tag != 'z'.charCodeAt())
+      if (tag != 'Z'.charCodeAt())
         error("expected end of reply");
     }
 
@@ -462,25 +427,6 @@ package hessian.io
      */
     public override function readHeader():String 
     {
-      var tag:int = read();
-
-      if (tag == 'H'.charCodeAt()) {
-        _isLastChunk = true;
-        _chunkLength = (read() << 8) + read();
-
-        _sbuf = "";
-
-        var ch:int;
-
-        while ((ch = parseChar()) >= 0)
-          _sbuf += String.fromCharCode(ch);
-
-        return _sbuf;
-      }
-
-      if (tag >= 0)
-        _offset--;
-
       return null;
     }
 
@@ -519,7 +465,7 @@ package hessian.io
      *
      * <p>A successful completion will have a single value:
      *   <pre>
-     *   z
+     *   Z
      *   </pre>
      * </p>
      */
@@ -527,7 +473,7 @@ package hessian.io
     {
       var tag:int = read();
       
-      if (tag != 'z'.charCodeAt())
+      if (tag != 'Z'.charCodeAt())
         error("expected end of message");
     }
 
@@ -592,7 +538,7 @@ package hessian.io
         case 0xb4: case 0xb5: case 0xb6: case 0xb7:
         case 0xb8: case 0xb9: case 0xba: case 0xbb:
         case 0xbc: case 0xbd: case 0xbe: case 0xbf:
-          return tag != Hessian2Constants.INT_ZERO;
+          return tag != Hessian2Constants.BC_INT_ZERO;
 
         // INT_BYTE = 0
         case 0xc8: 
@@ -627,7 +573,7 @@ package hessian.io
         case 0xe4: case 0xe5: case 0xe6: case 0xe7:
         case 0xe8: case 0xe9: case 0xea: case 0xeb:
         case 0xec: case 0xed: case 0xee: case 0xef:
-          return tag != Hessian2Constants.LONG_ZERO;
+          return tag != Hessian2Constants.BC_LONG_ZERO;
 
         // LONG_BYTE = 0
         case 0xf8: 
@@ -652,7 +598,7 @@ package hessian.io
           read();
           return true;
 
-        case Hessian2Constants.LONG_INT:
+        case Hessian2Constants.BC_LONG_INT:
           return (0x1000000 * read()
                   + 0x10000 * read()
                   + 0x100 * read()
@@ -661,23 +607,23 @@ package hessian.io
         case 'L'.charCodeAt():
           return parseLong() != 0;
 
-        case Hessian2Constants.DOUBLE_ZERO:
+        case Hessian2Constants.BC_DOUBLE_ZERO:
           return false;
 
-        case Hessian2Constants.DOUBLE_ONE:
+        case Hessian2Constants.BC_DOUBLE_ONE:
           return true;
 
-        case Hessian2Constants.DOUBLE_BYTE:
+        case Hessian2Constants.BC_DOUBLE_BYTE:
           return read() != 0;
 
-        case Hessian2Constants.DOUBLE_SHORT:
+        case Hessian2Constants.BC_DOUBLE_SHORT:
           return (0x100 * read() + read()) != 0;
 
-        case Hessian2Constants.DOUBLE_FLOAT:
+        case Hessian2Constants.BC_DOUBLE_MILL:
           {
-            var f:int = parseInteger();
+            var mills:int = parseInteger();
 
-            return Float.intBitsToFloat(f) != 0;
+            return mills != 0;
           }
 
         case 'D'.charCodeAt():
@@ -736,23 +682,23 @@ package hessian.io
         case 0xb4: case 0xb5: case 0xb6: case 0xb7:
         case 0xb8: case 0xb9: case 0xba: case 0xbb:
         case 0xbc: case 0xbd: case 0xbe: case 0xbf:
-          return tag - Hessian2Constants.INT_ZERO;
+          return tag - Hessian2Constants.BC_INT_ZERO;
 
         /* byte int */
         case 0xc0: case 0xc1: case 0xc2: case 0xc3:
         case 0xc4: case 0xc5: case 0xc6: case 0xc7:
         case 0xc8: case 0xc9: case 0xca: case 0xcb:
         case 0xcc: case 0xcd: case 0xce: case 0xcf:
-          return ((tag - Hessian2Constants.INT_BYTE_ZERO) << 8) + read();
+          return ((tag - Hessian2Constants.BC_INT_BYTE_ZERO) << 8) + read();
 
         /* short int */
         case 0xd0: case 0xd1: case 0xd2: case 0xd3:
         case 0xd4: case 0xd5: case 0xd6: case 0xd7:
-          return ((tag - Hessian2Constants.INT_SHORT_ZERO) << 16) + 
+          return ((tag - Hessian2Constants.BC_INT_SHORT_ZERO) << 16) + 
                  256 * read() + read();
 
         case 'I'.charCodeAt():
-        case Hessian2Constants.LONG_INT:
+        case Hessian2Constants.BC_LONG_INT:
           return ((read() << 24)
                 + (read() << 16)
                 + (read() << 8)
@@ -766,44 +712,44 @@ package hessian.io
         case 0xe4: case 0xe5: case 0xe6: case 0xe7:
         case 0xe8: case 0xe9: case 0xea: case 0xeb:
         case 0xec: case 0xed: case 0xee: case 0xef:
-          return tag - Hessian2Constants.LONG_ZERO;
+          return tag - Hessian2Constants.BC_LONG_ZERO;
 
         /* byte long */
         case 0xf0: case 0xf1: case 0xf2: case 0xf3:
         case 0xf4: case 0xf5: case 0xf6: case 0xf7:
         case 0xf8: case 0xf9: case 0xfa: case 0xfb:
         case 0xfc: case 0xfd: case 0xfe: case 0xff:
-          return ((tag - Hessian2Constants.LONG_BYTE_ZERO) << 8) + read();
+          return ((tag - Hessian2Constants.BC_LONG_BYTE_ZERO) << 8) + read();
 
         /* short long */
         case 0x38: case 0x39: case 0x3a: case 0x3b:
         case 0x3c: case 0x3d: case 0x3e: case 0x3f:
-          return ((tag - Hessian2Constants.LONG_SHORT_ZERO) << 16) + 
+          return ((tag - Hessian2Constants.BC_LONG_SHORT_ZERO) << 16) + 
                  256 * read() + read();
 
         case 'L'.charCodeAt():
           return int(parseLong());
 
-        case Hessian2Constants.DOUBLE_ZERO:
+        case Hessian2Constants.BC_DOUBLE_ZERO:
           return 0;
 
-        case Hessian2Constants.DOUBLE_ONE:
+        case Hessian2Constants.BC_DOUBLE_ONE:
           return 1;
 
         //case LONG_BYTE:
-        case Hessian2Constants.DOUBLE_BYTE:
+        case Hessian2Constants.BC_DOUBLE_BYTE:
           return _offset < _length ? _buffer[_offset++] : read();
 
         //case INT_SHORT:
         //case LONG_SHORT:
-        case Hessian2Constants.DOUBLE_SHORT:
+        case Hessian2Constants.BC_DOUBLE_SHORT:
           return int(256 * read() + read());
 
-        case Hessian2Constants.DOUBLE_FLOAT:
+        case Hessian2Constants.BC_DOUBLE_MILL:
           {
-            var f:int = parseInteger();
+            var mills:int = parseInteger();
 
-            return int(Float.intBitsToFloat(f));
+            return int(0.001 & mills);
           }
 
         case 'D'.charCodeAt():
@@ -859,33 +805,33 @@ package hessian.io
         case 0xb4: case 0xb5: case 0xb6: case 0xb7:
         case 0xb8: case 0xb9: case 0xba: case 0xbb:
         case 0xbc: case 0xbd: case 0xbe: case 0xbf:
-          return tag - Hessian2Constants.INT_ZERO;
+          return tag - Hessian2Constants.BC_INT_ZERO;
 
         /* byte int */
         case 0xc0: case 0xc1: case 0xc2: case 0xc3:
         case 0xc4: case 0xc5: case 0xc6: case 0xc7:
         case 0xc8: case 0xc9: case 0xca: case 0xcb:
         case 0xcc: case 0xcd: case 0xce: case 0xcf:
-          return ((tag - Hessian2Constants.INT_BYTE_ZERO) << 8) + read();
+          return ((tag - Hessian2Constants.BC_INT_BYTE_ZERO) << 8) + read();
 
         /* short int */
         case 0xd0: case 0xd1: case 0xd2: case 0xd3:
         case 0xd4: case 0xd5: case 0xd6: case 0xd7:
-          return ((tag - Hessian2Constants.INT_SHORT_ZERO) << 16) + 
+          return ((tag - Hessian2Constants.BC_INT_SHORT_ZERO) << 16) + 
                  256 * read() + read();
 
         //case LONG_BYTE:
-        case Hessian2Constants.DOUBLE_BYTE:
+        case Hessian2Constants.BC_DOUBLE_BYTE:
           return /* (byte) */ (_offset < _length ? _buffer[_offset++] : read()) 
                               & 0xFF;
 
         //case INT_SHORT:
         //case LONG_SHORT:
-        case Hessian2Constants.DOUBLE_SHORT:
+        case Hessian2Constants.BC_DOUBLE_SHORT:
           return /* (short) */ (256 * read() + read()) & 0xFFFF;
 
         case 'I'.charCodeAt():
-        case Hessian2Constants.LONG_INT:
+        case Hessian2Constants.BC_LONG_INT:
           return parseInteger();
 
         // direct long
@@ -896,35 +842,35 @@ package hessian.io
         case 0xe4: case 0xe5: case 0xe6: case 0xe7:
         case 0xe8: case 0xe9: case 0xea: case 0xeb:
         case 0xec: case 0xed: case 0xee: case 0xef:
-          return tag - Hessian2Constants.LONG_ZERO;
+          return tag - Hessian2Constants.BC_LONG_ZERO;
 
         /* byte long */
         case 0xf0: case 0xf1: case 0xf2: case 0xf3:
         case 0xf4: case 0xf5: case 0xf6: case 0xf7:
         case 0xf8: case 0xf9: case 0xfa: case 0xfb:
         case 0xfc: case 0xfd: case 0xfe: case 0xff:
-          return ((tag - Hessian2Constants.LONG_BYTE_ZERO) << 8) + read();
+          return ((tag - Hessian2Constants.BC_LONG_BYTE_ZERO) << 8) + read();
 
         /* short long */
         case 0x38: case 0x39: case 0x3a: case 0x3b:
         case 0x3c: case 0x3d: case 0x3e: case 0x3f:
-          return ((tag - Hessian2Constants.LONG_SHORT_ZERO) << 16) + 
+          return ((tag - Hessian2Constants.BC_LONG_SHORT_ZERO) << 16) + 
                  256 * read() + read();
 
         case 'L'.charCodeAt():
           return parseLong();
 
-        case Hessian2Constants.DOUBLE_ZERO:
+        case Hessian2Constants.BC_DOUBLE_ZERO:
           return 0;
 
-        case Hessian2Constants.DOUBLE_ONE:
+        case Hessian2Constants.BC_DOUBLE_ONE:
           return 1;
 
-        case Hessian2Constants.DOUBLE_FLOAT:
+        case Hessian2Constants.BC_DOUBLE_MILL:
           {
-            var f:int = parseInteger();
+            var mills:int = parseInteger();
 
-            return Float.intBitsToFloat(f);
+            return Math.floor(Number(0.001 * mills));
           }
 
         case 'D'.charCodeAt():
@@ -987,16 +933,16 @@ package hessian.io
         case 0xc4: case 0xc5: case 0xc6: case 0xc7:
         case 0xc8: case 0xc9: case 0xca: case 0xcb:
         case 0xcc: case 0xcd: case 0xce: case 0xcf:
-          return ((tag - Hessian2Constants.INT_BYTE_ZERO) << 8) + read();
+          return ((tag - Hessian2Constants.BC_INT_BYTE_ZERO) << 8) + read();
 
         /* short int */
         case 0xd0: case 0xd1: case 0xd2: case 0xd3:
         case 0xd4: case 0xd5: case 0xd6: case 0xd7:
-          return ((tag - Hessian2Constants.INT_SHORT_ZERO) << 16) + 
+          return ((tag - Hessian2Constants.BC_INT_SHORT_ZERO) << 16) + 
                  256 * read() + read();
 
         case 'I'.charCodeAt():
-        case Hessian2Constants.LONG_INT:
+        case Hessian2Constants.BC_LONG_INT:
           return parseInteger();
 
         // direct long
@@ -1007,42 +953,42 @@ package hessian.io
         case 0xe4: case 0xe5: case 0xe6: case 0xe7:
         case 0xe8: case 0xe9: case 0xea: case 0xeb:
         case 0xec: case 0xed: case 0xee: case 0xef:
-          return tag - Hessian2Constants.LONG_ZERO;
+          return tag - Hessian2Constants.BC_LONG_ZERO;
 
         /* byte long */
         case 0xf0: case 0xf1: case 0xf2: case 0xf3:
         case 0xf4: case 0xf5: case 0xf6: case 0xf7:
         case 0xf8: case 0xf9: case 0xfa: case 0xfb:
         case 0xfc: case 0xfd: case 0xfe: case 0xff:
-          return ((tag - Hessian2Constants.LONG_BYTE_ZERO) << 8) + read();
+          return ((tag - Hessian2Constants.BC_LONG_BYTE_ZERO) << 8) + read();
 
         /* short long */
         case 0x38: case 0x39: case 0x3a: case 0x3b:
         case 0x3c: case 0x3d: case 0x3e: case 0x3f:
-          return ((tag - Hessian2Constants.LONG_SHORT_ZERO) << 16) + 
+          return ((tag - Hessian2Constants.BC_LONG_SHORT_ZERO) << 16) + 
                  256 * read() + read();
 
         case 'L'.charCodeAt():
           return /* (double) */ parseLong();
 
-        case Hessian2Constants.DOUBLE_ZERO:
+        case Hessian2Constants.BC_DOUBLE_ZERO:
           return 0;
 
-        case Hessian2Constants.DOUBLE_ONE:
+        case Hessian2Constants.BC_DOUBLE_ONE:
           return 1;
 
-        case Hessian2Constants.DOUBLE_BYTE:
+        case Hessian2Constants.BC_DOUBLE_BYTE:
           return /* (byte) */ (_offset < _length ? _buffer[_offset++] : read())
                               & 0xFF;
 
-        case Hessian2Constants.DOUBLE_SHORT:
+        case Hessian2Constants.BC_DOUBLE_SHORT:
           return /* (short) */(256 * read() + read()) & 0xFFFF;
 
-        case Hessian2Constants.DOUBLE_FLOAT:
+        case Hessian2Constants.BC_DOUBLE_MILL:
           {
-            var f:int = parseInteger();
+            var mills:int = parseInteger();
 
-            return Float.intBitsToFloat(f);
+            return 0.001 * mills;
           }
 
         case 'D'.charCodeAt():
@@ -1068,10 +1014,12 @@ package hessian.io
     {
       var tag:int = read();
 
-      if (tag != 'd'.charCodeAt())
-        throw error("expected date");
-
-      return parseLong();
+      if (tag == Hessian2Constants.BC_DATE)
+        return parseLong();
+      else if (tag == Hessian2Constants.BC_DATE_MINUTE)
+        return parseInteger() * 60000;
+      else
+        throw expect("date", tag);
     }
 
     /**
@@ -1104,10 +1052,8 @@ package hessian.io
           return -1;
 
         case 'S'.charCodeAt():
-        case 's'.charCodeAt():
-        case 'X'.charCodeAt():
-        case 'x'.charCodeAt():
-          _isLastChunk = tag == 'S'.charCodeAt() || tag == 'X'.charCodeAt();
+        case Hessian2Constants.BC_STRING_CHUNK:
+          _isLastChunk = tag == 'S'.charCodeAt();
           _chunkLength = (read() << 8) + read();
 
           _chunkLength--;
@@ -1153,10 +1099,8 @@ package hessian.io
           return parseDouble().toString();
 
         case 'S'.charCodeAt():
-        case 's'.charCodeAt():
-        case 'X'.charCodeAt():
-        case 'x'.charCodeAt():
-          _isLastChunk = tag == 'S'.charCodeAt() || tag == 'X'.charCodeAt();
+        case Hessian2Constants.BC_STRING_CHUNK:
+          _isLastChunk = tag == 'S'.charCodeAt();
           _chunkLength = (read() << 8) + read();
 
           _sbuf = "";
@@ -1180,6 +1124,17 @@ package hessian.io
         case 0x1c: case 0x1d: case 0x1e: case 0x1f:
           _isLastChunk = true;
           _chunkLength = tag - 0x00;
+
+          _sbuf = "";
+
+          while ((ch = parseChar()) >= 0)
+            _sbuf += String.fromCharCode(ch);
+
+          return _sbuf;
+
+        case 0x30: case 0x31: case 0x32: case 0x33:
+          _isLastChunk = true;
+          _chunkLength = (tag - 0x30) * 256 + read();
 
           _sbuf = "";
 
@@ -1216,7 +1171,7 @@ package hessian.io
           return null;
 
         case 'B'.charCodeAt():
-        case 'b'.charCodeAt():
+        case Hessian2Constants.BC_BINARY_CHUNK:
           _isLastChunk = tag == 'B'.charCodeAt();
           _chunkLength = (read() << 8) + read();
 
@@ -1245,6 +1200,19 @@ package hessian.io
 
           return buffer;
 
+        case 0x34: case 0x35: case 0x36: case 0x37:
+          _isLastChunk = true;
+          _chunkLength = (tag - 0x34) * 256 + read();
+
+          buffer = new ByteArray();
+
+          while ((b = parseByte()) >= 0)
+            buffer.writeByte(b);
+
+          buffer.position = 0;
+
+          return buffer;
+
         default:
           throw expect("bytes", tag);
       }
@@ -1260,7 +1228,7 @@ package hessian.io
       var map:Object = new Object();
 
       var code:int = read();
-      for (; code > 0 && code != 'z'.charCodeAt(); code = read()) {
+      for (; code > 0 && code != 'Z'.charCodeAt(); code = read()) {
         _offset--;
 
         var key:Object = readObject();
@@ -1270,7 +1238,7 @@ package hessian.io
           map[key] = value;
       }
 
-      if (code != 'z'.charCodeAt())
+      if (code != 'Z'.charCodeAt())
         throw expect("fault", code);
 
       return map;
@@ -1291,64 +1259,105 @@ package hessian.io
       var tag:int = _offset < _length ? (_buffer[_offset++] & 0xff) : read();
 
       var ref:int;
+      var size:int;
       var type:String;
       var length:int;
+      var def:ObjectDefinition;
 
       switch (tag) {
         case 'N'.charCodeAt():
           return null;
 
-        case 'M'.charCodeAt():
+        case 'H'.charCodeAt():
           return readMap(cl);
 
-        case 'O'.charCodeAt():
+        case 'M'.charCodeAt():
+          type = readType();
+
+          var obj:Object = readMap(getClassDefinition(type, cl));
+
+          if (cl == Object && type != null && type.length > 0)
+            obj.hessianTypeName = type;
+
+          return obj;
+
+        case 'C'.charCodeAt():
           {
             readObjectDefinition();
 
             return readObject(cl);
           }
 
-        case 'o'.charCodeAt():
+        case 0x60: case 0x61: case 0x62: case 0x63:
+        case 0x64: case 0x65: case 0x66: case 0x67:
+        case 0x68: case 0x69: case 0x6a: case 0x6b:
+        case 0x6c: case 0x6d: case 0x6e: case 0x6f:
           {
-            ref = readInt();
+            ref = tag - 0x60;
+            size = _classDefs.length;
 
-            var def:ObjectDefinition = _classDefs[ref] as ObjectDefinition;
+            if (ref < 0 || size <= ref)
+              throw new HessianProtocolError("'" + ref + "' is an unknown class definition");
+
+            def = _classDefs[ref] as ObjectDefinition;
 
             return readObjectInstance(def, cl);
           }
 
-        case 'V'.charCodeAt():
-          {
-            type = readType();
-            length = readLength();
-
-            return readList(length, type, cl);
-          }
-
-        case 'v'.charCodeAt():
+        case 'O'.charCodeAt():
           {
             ref = readInt();
-            type = _types[ref] as String;
+            size = _classDefs.length;
+
+            if (ref < 0 || size <= ref)
+              throw new HessianProtocolError("'" + ref + "' is an unknown class definition");
+
+            def = _classDefs[ref] as ObjectDefinition;
+
+            return readObjectInstance(def, cl);
+          }
+
+        case Hessian2Constants.BC_LIST_VARIABLE:
+          {
+            type = readType();
+
+            return readList(-1, type, cl);
+          }
+
+        case Hessian2Constants.BC_LIST_FIXED:
+          {
+            type = readType();
             length = readInt();
 
             return readLengthList(length, type, cl);
           }
 
-        case 'R'.charCodeAt():
+        case 0x70: case 0x71: case 0x72: case 0x73:
+        case 0x74: case 0x75: case 0x76: case 0x77:
           {
-            return _refs[parseInteger()];
+            length = tag - 0x70;
+            type = readType();
+
+            return readLengthList(length, type, cl);
           }
 
-        case Hessian2Constants.REF_BYTE: 
+        case Hessian2Constants.BC_LIST_VARIABLE_UNTYPED:
           {
-            return _refs[read()];
+            return readList(-1, null, cl);
           }
 
-        case Hessian2Constants.REF_SHORT: 
+        case 0x78: case 0x79: case 0x7a: case 0x7b:
+        case 0x7c: case 0x7d: case 0x7e: case 0x7f:
           {
-            ref = 256 * read() + read();
+            length = tag - 0x78;
+            type = readType();
 
-            return _refs[ref];
+            return readLengthList(length, type, cl);
+          }
+
+        case Hessian2Constants.BC_REF: 
+          {
+            return _refs[readInt()];
           }
       }
 
@@ -1376,6 +1385,9 @@ package hessian.io
       var type:String;
       var length:int;
       var ref:int;
+      var len:int;
+      var i:int;
+      var def:ObjectDefinition;
 
       switch (tag) {
         case 'N'.charCodeAt():
@@ -1407,19 +1419,19 @@ package hessian.io
         case 0xb4: case 0xb5: case 0xb6: case 0xb7:
         case 0xb8: case 0xb9: case 0xba: case 0xbb:
         case 0xbc: case 0xbd: case 0xbe: case 0xbf:
-          return tag - Hessian2Constants.INT_ZERO;
+          return tag - Hessian2Constants.BC_INT_ZERO;
 
         /* byte int */
         case 0xc0: case 0xc1: case 0xc2: case 0xc3:
         case 0xc4: case 0xc5: case 0xc6: case 0xc7:
         case 0xc8: case 0xc9: case 0xca: case 0xcb:
         case 0xcc: case 0xcd: case 0xce: case 0xcf:
-          return ((tag - Hessian2Constants.INT_BYTE_ZERO) << 8) + read();
+          return ((tag - Hessian2Constants.BC_INT_BYTE_ZERO) << 8) + read();
 
         /* short int */
         case 0xd0: case 0xd1: case 0xd2: case 0xd3:
         case 0xd4: case 0xd5: case 0xd6: case 0xd7:
-          return ((tag - Hessian2Constants.INT_SHORT_ZERO) << 16) + 
+          return ((tag - Hessian2Constants.BC_INT_SHORT_ZERO) << 16) + 
                  256 * read() + read();
 
         case 'I'.charCodeAt():
@@ -1433,53 +1445,56 @@ package hessian.io
         case 0xe4: case 0xe5: case 0xe6: case 0xe7:
         case 0xe8: case 0xe9: case 0xea: case 0xeb:
         case 0xec: case 0xed: case 0xee: case 0xef:
-          return tag - Hessian2Constants.LONG_ZERO;
+          return tag - Hessian2Constants.BC_LONG_ZERO;
 
         /* byte long */
         case 0xf0: case 0xf1: case 0xf2: case 0xf3:
         case 0xf4: case 0xf5: case 0xf6: case 0xf7:
         case 0xf8: case 0xf9: case 0xfa: case 0xfb:
         case 0xfc: case 0xfd: case 0xfe: case 0xff:
-          return ((tag - Hessian2Constants.LONG_BYTE_ZERO) << 8) + read();
+          return ((tag - Hessian2Constants.BC_LONG_BYTE_ZERO) << 8) + read();
 
         /* short long */
         case 0x38: case 0x39: case 0x3a: case 0x3b:
         case 0x3c: case 0x3d: case 0x3e: case 0x3f:
-          return ((tag - Hessian2Constants.LONG_SHORT_ZERO) << 16) + 
+          return ((tag - Hessian2Constants.BC_LONG_SHORT_ZERO) << 16) + 
                  256 * read() + read();
 
-        case Hessian2Constants.LONG_INT:
+        case Hessian2Constants.BC_LONG_INT:
           return parseInteger();
 
         case 'L'.charCodeAt():
           return parseLong();
 
-        case Hessian2Constants.DOUBLE_ZERO:
+        case Hessian2Constants.BC_DOUBLE_ZERO:
           return new Number(0);
 
-        case Hessian2Constants.DOUBLE_ONE:
+        case Hessian2Constants.BC_DOUBLE_ONE:
           return new Number(1);
 
-        case Hessian2Constants.DOUBLE_BYTE:
+        case Hessian2Constants.BC_DOUBLE_BYTE:
           return new Number(read());
 
-        case Hessian2Constants.DOUBLE_SHORT:
+        case Hessian2Constants.BC_DOUBLE_SHORT:
           return new Number(256 * read() + read());
 
-        case Hessian2Constants.DOUBLE_FLOAT:
+        case Hessian2Constants.BC_DOUBLE_MILL:
           {
-            var f:int = parseInteger();
+            var mills:int = parseInteger();
 
-            return Float.intBitsToFloat(f);
+            return Number(0.001 * mills)
           }
 
         case 'D'.charCodeAt():
           return parseDouble();
 
-        case 'd'.charCodeAt():
+        case Hessian2Constants.BC_DATE:
           return new Date(parseLong());
 
-        case 's'.charCodeAt():
+        case Hessian2Constants.BC_DATE_MINUTE:
+          return new Date(parseInteger() * 60000);
+
+        case Hessian2Constants.BC_STRING_CHUNK:
         case 'S'.charCodeAt(): 
           {
             _isLastChunk = (tag == 'S'.charCodeAt());
@@ -1514,7 +1529,20 @@ package hessian.io
             return _sbuf;
           }
 
-        case 'b'.charCodeAt():
+        case 0x30: case 0x31: case 0x32: case 0x33:
+          {
+            _isLastChunk = true;
+            _chunkLength = (tag - 0x30) * 256 + read();
+
+            _sbuf = "";
+
+            while ((ch = parseChar()) >= 0)
+              _sbuf += String.fromCharCode(ch);
+
+            return _sbuf;
+          }
+
+        case Hessian2Constants.BC_BINARY_CHUNK:
         case 'B'.charCodeAt(): 
           {
             _isLastChunk = (tag == 'B'.charCodeAt());
@@ -1538,12 +1566,12 @@ package hessian.io
         case 0x2c: case 0x2d: case 0x2e: case 0x2f:
           {
             _isLastChunk = true;
-            var len:int = tag - 0x20;
+            len = tag - 0x20;
             _chunkLength = 0;
 
             buffer = new ByteArray();
 
-            for (var i:int = 0; i < len; i++)
+            for (i = 0; i < len; i++)
               buffer.writeByte(read());
 
             buffer.position = 0;
@@ -1551,62 +1579,122 @@ package hessian.io
             return buffer;
           }
 
-        case 'V'.charCodeAt(): 
+        case 0x34: case 0x35: case 0x36: case 0x37:
+          {
+            _isLastChunk = true;
+            len = (tag - 0x34) * 256 + read();
+            _chunkLength = 0;
+
+            buffer = new ByteArray();
+
+            for (i = 0; i < len; i++)
+              buffer.writeByte(read());
+
+            buffer.position = 0;
+
+            return buffer;
+          }
+
+        case Hessian2Constants.BC_LIST_VARIABLE:
           {
             type = readType();
-            length = readLength();
+
+            return readList(-1, type);
+          }
+
+        case Hessian2Constants.BC_LIST_VARIABLE_UNTYPED:
+          {
+            return readList(-1, null);
+          }
+
+        case Hessian2Constants.BC_LIST_FIXED:
+          {
+            type = readType();
+            length = readInt();
 
             return readList(length, type);
           }
 
-        // direct lists
-        case 'v'.charCodeAt(): 
+        case Hessian2Constants.BC_LIST_FIXED_UNTYPED:
           {
-            ref = readInt();
-            type = _types[ref] as String;
             length = readInt();
 
-            return readLengthList(length, type);
+            return readLengthList(length, null);
           }
 
-        case 'M'.charCodeAt(): 
+        // compact fixed list
+        case 0x70: case 0x71: case 0x72: case 0x73:
+        case 0x74: case 0x75: case 0x76: case 0x77:
+          {
+            type = readType();
+            length = tag - 0x70;
+
+            return readList(length, type);
+          }
+
+        // compact fixed untyped list
+        case 0x78: case 0x79: case 0x7a: case 0x7b:
+        case 0x7c: case 0x7d: case 0x7e: case 0x7f:
+          {
+            length = tag - 0x78;
+
+            return readList(length, type);
+          }
+
+        case 'H'.charCodeAt(): 
           return readMap();
 
-        case 'O'.charCodeAt(): 
+        case 'M'.charCodeAt(): 
+          type = readType();
+
+          var obj:Object = readMap(getClassDefinition(type));
+
+          if (type != null && type.length > 0)
+            obj.hessianTypeName = type;
+
+          return obj;
+
+        case 'C'.charCodeAt(): 
           {
             readObjectDefinition();
 
             return readObject();
           }
 
-        case 'o'.charCodeAt(): 
+        case 0x60: case 0x61: case 0x62: case 0x63:
+        case 0x64: case 0x65: case 0x66: case 0x67:
+        case 0x68: case 0x69: case 0x6a: case 0x6b:
+        case 0x6c: case 0x6d: case 0x6e: case 0x6f:
           {
-            ref = readInt();
+            ref = tag - 0x60;
 
-            var def:ObjectDefinition = _classDefs[ref] as ObjectDefinition;
+            if (_classDefs == null)
+              throw error("No classes defined at reference '{0}'" + tag);
+
+            def = _classDefs[ref] as ObjectDefinition;
 
             return readObjectInstance(def);
           }
 
-        case 'R'.charCodeAt(): 
+        case 'O'.charCodeAt(): 
           {
-            return _refs[parseInteger()];
+            ref = readInt();
+
+            if (_classDefs == null)
+              throw error("No classes defined at reference '{0}'" + tag);
+
+            def = _classDefs[ref] as ObjectDefinition;
+
+            return readObjectInstance(def);
           }
 
-        case Hessian2Constants.REF_BYTE: 
+        case Hessian2Constants.BC_REF:
           {
-            return _refs[read()];
-          }
-
-        case Hessian2Constants.REF_SHORT: 
-          {
-            ref = 256 * read() + read();
-
-            return _refs[ref];
+            return _refs[readInt()];
           }
 
         default:
-          throw error("unknown code: 0x" + tag.toString(16) + " " + String.fromCharCode(tag));
+          throw error("unknown code: " + codeName(tag));
       }
     }
 
@@ -1656,7 +1744,7 @@ package hessian.io
 
       value = new cl();
 
-      if (cl == Object && type != null && type != "")
+      if (cl == Object && type != null && type.length > 0)
         value.hessianTypeName = type;
 
       addRef(value);
@@ -1735,7 +1823,7 @@ package hessian.io
           _offset--;
       }
 
-      return (code < 0 || code == 'z'.charCodeAt());
+      return (code < 0 || code == 'Z'.charCodeAt());
     }
 
     /**
@@ -1745,7 +1833,7 @@ package hessian.io
     {
       var code:int = _offset < _length ? (_buffer[_offset++] & 0xff) : read();
 
-      if (code != 'z'.charCodeAt())
+      if (code != 'Z'.charCodeAt())
         throw error("unknown code:" + String.fromCharCode(code));
     }
 
@@ -1756,7 +1844,7 @@ package hessian.io
     {
       var code:int = _offset < _length ? (_buffer[_offset++] & 0xff) : read();
 
-      if (code != 'z'.charCodeAt())
+      if (code != 'Z'.charCodeAt())
         throw error("unknown code:" + String.fromCharCode(code));
     }
 
@@ -1767,7 +1855,7 @@ package hessian.io
     {
       var code:int = _offset < _length ? (_buffer[_offset++] & 0xff) : read();
 
-      if (code != 'z'.charCodeAt())
+      if (code != 'Z'.charCodeAt())
         throw error("unknown code:" + String.fromCharCode(code));
     }
 
@@ -1812,17 +1900,31 @@ package hessian.io
     /**
      * Reads an object type.
      *
+     * <pre>
+     * type ::= string
+     * type ::= int
+     * </pre>
+     *
      * @return The type value read as a String.
      */
     public override function readType():String
     {
       var code:int = _offset < _length ? (_buffer[_offset++] & 0xff) : read();
+      _offset--;
 
       switch (code) {
-        case 't'.charCodeAt():
+        case 0x00: case 0x01: case 0x02: case 0x03:
+        case 0x04: case 0x05: case 0x06: case 0x07:
+        case 0x08: case 0x09: case 0x0a: case 0x0b:
+        case 0x0c: case 0x0d: case 0x0e: case 0x0f:
+        case 0x10: case 0x11: case 0x12: case 0x13:
+        case 0x14: case 0x15: case 0x16: case 0x17:
+        case 0x18: case 0x19: case 0x1a: case 0x1b:
+        case 0x1c: case 0x1d: case 0x1e: case 0x1f:
+        case 0x30: case 0x31: case 0x32: case 0x33:
+        case Hessian2Constants.BC_STRING_CHUNK: case 'S':
           {
-            var len:int = 256 * read() + read();
-            var type:String = readLenString(len);
+            var type:String = readString();
 
             if (_types == null)
               _types = new Array();
@@ -1832,18 +1934,14 @@ package hessian.io
             return type;
           }
 
-        case 'T'.charCodeAt():
-          return _types[readInt()] as String;
-
-        case Hessian2Constants.TYPE_REF:
-          return _types[readInt()] as String;
-          
         default:
           {
-            if (code >= 0)
-              _offset--;
+            var ref:int = readInt();
+
+            if (_types == null || _types.size <= ref)
+              throw new RangeError("type ref #" + ref + " is greater than the number of valid types (" + (_types == null ? 0 : _types.size) + ")");
           
-            return "";
+            return _types[ref] as String;
           }
       }
     }
@@ -1861,20 +1959,7 @@ package hessian.io
      */
     public override function readLength():int
     {
-      var code:int = read();
-
-      if (code == Hessian2Constants.LENGTH_BYTE)
-        return read();
-
-      else if (code == 'l'.charCodeAt())
-        return parseInteger();
-
-      else {
-        if (code >= 0)
-          _offset--;
-
-        return -1;
-      }
+      throw new IllegalOperationError();
     }
 
     /**
@@ -1901,17 +1986,15 @@ package hessian.io
         b8 = buffer[offset + 3] & 0xff;
 
         _offset = offset + 4;
-
-        return (b32 << 24) + (b24 << 16) + (b16 << 8) + b8;
       }
       else {
         b32 = read();
         b24 = read();
         b16 = read();
         b8 = read();
-
-        return (b32 << 24) + (b24 << 16) + (b16 << 8) + b8;
       }
+
+      return (b32 << 24) + (b24 << 16) + (b16 << 8) + b8;
     }
 
     /**
@@ -1997,15 +2080,13 @@ package hessian.io
         var code:int = _offset < _length ? (_buffer[_offset++] & 0xff) : read();
 
         switch (code) {
-          case 's'.charCodeAt():
-          case 'x'.charCodeAt():
+          case Hessian2Constants.BC_STRING_CHUNK:
             _isLastChunk = false;
 
             _chunkLength = (read() << 8) + read();
             break;
             
           case 'S'.charCodeAt():
-          case 'X'.charCodeAt():
             _isLastChunk = true;
 
             _chunkLength = (read() << 8) + read();
@@ -2074,7 +2155,7 @@ package hessian.io
         var code:int = read();
 
         switch (code) {
-          case 'b'.charCodeAt():
+          case Hessian2Constants.BC_BINARY_CHUNK:
             _isLastChunk = false;
 
             _chunkLength = (read() << 8) + read();
@@ -2093,6 +2174,11 @@ package hessian.io
             _isLastChunk = true;
 
             _chunkLength = code - 0x20;
+            break;
+
+          case 0x34: case 0x35: case 0x36: case 0x37:
+            _isLastChunk = true;
+            _chunkLength = (code - 0x34) * 256 + read();
             break;
 
           default:
@@ -2178,19 +2264,26 @@ package hessian.io
         return new HessianProtocolError(msg);
     }
 
+    /** @private */
+    protected function codeName(ch:int):String
+    {
+      if (ch < 0) 
+        return "end of file";
+      else
+        return "0x" + (ch & 0xff).toString(16) + 
+               " (" + String.fromCharCode(ch) + ")";
+    }
+
     // The following functions duplicate the functionality of the 
     // SerializerFactory infrastructure in the Java implementation
 
-    private function readMap(expectedClass:Class = null):Object
+    private function readMap(cl:Class = null):Object
     {
-      var type:String = readType();
+      // have to do this because "Object" is not a compile-time constant
+      if (cl == null)
+        cl = Object;
 
-      var cl:Class = getClassDefinition(type, expectedClass);
-      
       var obj:Object = new cl();
-
-      if (cl == Object && type != null && type != "")
-        obj.hessianTypeName = type;
 
       addRef(obj);
 
@@ -2249,7 +2342,7 @@ package hessian.io
     {
       var cl:Class = null;
 
-      if (type.length > 0) {
+      if (type != null && type.length > 0) {
         try {
           cl = getClassByAlias(type) as Class;
         }
