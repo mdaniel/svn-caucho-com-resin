@@ -1050,8 +1050,13 @@ public class JavaJspGenerator extends JspGenerator {
       out.println("\");");
     }
     
-    if (encoding != null)
+    if (encoding != null) {
+      out.println("String _caucho_request_character_encoding = request.getCharacterEncoding();");
+      out.println("if (_caucho_request_character_encoding == null || \"\".equals(_caucho_request_character_encoding))");
+      out.pushDepth();
       out.println("request.setCharacterEncoding(\"" + encoding + "\");");
+      out.popDepth();
+    }
   }
 
   private void printTry(JspJavaWriter out) throws IOException
