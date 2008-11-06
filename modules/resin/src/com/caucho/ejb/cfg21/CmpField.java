@@ -169,7 +169,7 @@ public class CmpField extends CmpProperty {
 			 Character.toUpperCase(name.charAt(0)) +
 			 name.substring(1));
 	
-    ApiMethod getter = getEntity().getMethod(getEntity().getEJBClassWrapper(),
+    ApiMethod getter = getEntity().getMethod(getEntity().getEJBClass(),
 					     getterName,
 					     new Class[0]);
 
