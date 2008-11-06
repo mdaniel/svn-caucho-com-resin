@@ -25,37 +25,13 @@
   <dependencies>
     <dependency>
       <groupId>com.caucho</groupId>
-      <artifactId>resin-ejb</artifactId>
+      <artifactId>resin-javaee</artifactId>
       <version>@VERSION@</version>
     </dependency>
-    
+
     <dependency>
       <groupId>com.caucho</groupId>
       <artifactId>resin-hessian</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-j2ee-management</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-jca</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-jms</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-jsdk</artifactId>
       <version>@VERSION@</version>
     </dependency>
     
@@ -67,37 +43,7 @@
     
     <dependency>
       <groupId>com.caucho</groupId>
-      <artifactId>resin-jstl</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-jpa</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-jta</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-jws</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.caucho</groupId>
       <artifactId>resin-quercus</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-support</artifactId>
       <version>@VERSION@</version>
     </dependency>
     
@@ -106,13 +52,7 @@
       <artifactId>resin-util</artifactId>
       <version>@VERSION@</version>
     </dependency>
-    
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin-webbeans</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-    
+
     <dependency>
       <groupId>javax.activation</groupId>
       <artifactId>activation</artifactId>
