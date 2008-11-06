@@ -1108,7 +1108,7 @@
           file="${dist}/${shortproduct}-${version}-src.tar.gz"/>
   </target>
 
-  <target name="maven-dist" depends="init">
+  <target name="maven-dist" depends="init, ant, maven-plugin, support">
     <property name="maven" value="${maven.root}/com/caucho/"/>
     
     <antcall target="maven2-module" inheritRefs="true">
