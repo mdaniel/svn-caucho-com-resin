@@ -169,7 +169,7 @@ public class SimpleLoader extends Loader {
   public void setPrefix(String prefix)
   {
     _prefix = prefix;
-    
+
     if (prefix != null)
       _pathPrefix = prefix.replace('.', '/');
   }

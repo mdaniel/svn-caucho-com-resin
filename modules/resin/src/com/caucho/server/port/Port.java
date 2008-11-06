@@ -1514,6 +1514,8 @@ public class Port
           isStart = _startThreadCount + _idleThreadCount < _acceptThreadMin;
           if (_connectionMax <= _connectionCount)
             isStart = false;
+	  if (! _lifecycle.isActive())
+	    isStart = false;
 
           if (! isStart) {
             Thread.interrupted();

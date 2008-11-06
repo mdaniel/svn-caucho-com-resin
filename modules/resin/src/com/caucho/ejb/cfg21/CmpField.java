@@ -169,9 +169,9 @@ public class CmpField extends CmpProperty {
 			 Character.toUpperCase(name.charAt(0)) +
 			 name.substring(1));
 	
-    ApiMethod getter = getEntity().getMethod(getEntity().getEJBClass(),
-					     getterName,
-					     new Class[0]);
+    ApiMethod getter = getEntity().getMethod(getEntity().getEJBClassWrapper(),
+						    getterName,
+						    new Class[0]);
 
     if (getter == null)
       throw new ConfigException(L.l("{0}: '{1}' is an unknown cmp-field.  cmp-fields must have matching getter methods.",

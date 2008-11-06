@@ -267,10 +267,13 @@ public abstract class AbstractEnhancedType extends Type {
           _instanceClass = Class.forName(getBeanClass().getName(), false, loader);
         }
         else {
+	  /*
           ClassLoader loader = _instanceLoader;
 
           if (loader == null)
             loader = getPersistenceUnit().getEnhancedLoader();
+	  */
+	  ClassLoader loader = getPersistenceUnit().getEnhancedLoader();
 
           _instanceClass = Class.forName(getInstanceClassName(), false, loader);
         }

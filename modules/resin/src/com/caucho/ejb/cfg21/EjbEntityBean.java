@@ -1173,6 +1173,11 @@ public class EjbEntityBean extends Ejb21Bean {
     server.setRemoteHomeClass(getRemoteHomeClass());
     server.setRemoteObjectClass(getRemoteClass());
 
+    AmberPersistenceUnit ejbAmber = ejbManager.createEjbPersistenceUnit();
+
+    if (ejbAmber != null)
+      javaGen.setLoader(ejbAmber.getEnhancedLoader());
+
     Class contextImplClass = javaGen.loadClass(getSkeletonName());
 
     server.setContextImplClass(contextImplClass);
