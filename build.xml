@@ -1050,7 +1050,7 @@
   </target>
   -->
 
-  <target name="maven-dist" depends="init, compile, ant, eclipse, artifacts">
+  <target name="maven-dist" depends="init, compile, ant, eclipse, netbeans, maven-plugin, artifacts">
     <property name="maven" value="${maven.root}/com/caucho/"/>
     
     <antcall target="maven2-module" inheritRefs="true">
