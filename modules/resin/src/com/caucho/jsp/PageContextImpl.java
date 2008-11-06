@@ -1345,6 +1345,7 @@ public class PageContextImpl extends PageContext
         _responseAdapter.finish();
 	//_responseAdapter.close();
 	ToCharResponseAdapter resAdapt = _responseAdapter;
+	_responseAdapter = null;
 	ToCharResponseAdapter.free(resAdapt);
       }
 

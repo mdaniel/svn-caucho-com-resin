@@ -12,7 +12,7 @@
 
 <s2 title="3.1.8 snapshot">
 <ul>
-<li>jni: missing nativeTruncate (#3024, rep by Richard Grantham)</li>
+<li>jni: missing nativeTruncate (#2993, #3024, rep by Richard Grantham, Juan Andrade)</li>
 <li>boot: watchdog kill NPE (#3009, rep by stbu)</li>
 <li>memory: removed potential ThreadLocal leak with SecurityContext (#3031, rep by Mattias Jiderhamn)</li>
 <li>rewrite-dispatch: dispatch with target (#2774, rep by Leonid Geller)</li>

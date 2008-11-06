@@ -225,6 +225,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     throws ServletException, IOException
   {
     _isActive = true;
+    _alarm.queue(60000);
     
     Environment.addClassLoaderListener(new CloseListener(this));
     
@@ -661,7 +662,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       flush();
     } finally {
       alarm = _alarm;
-      if (alarm != null && _autoFlushTime > 0)
+      if (alarm != null && _isActive && _autoFlushTime > 0)
 	alarm.queue(_autoFlushTime);
     }
   }

@@ -2527,8 +2527,8 @@ public abstract class AbstractHttpRequest
     try {
       SessionImpl session = _session;
 
-      // server/0219
-      // _invocation = null;
+      // server/0219, but needed for memory
+      _invocation = null;
       
       if (session != null)
         session.finish();
