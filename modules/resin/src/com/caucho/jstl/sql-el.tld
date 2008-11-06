@@ -107,7 +107,7 @@
 
   <tag>
     <name>setDataSource</name>
-    <tag-class>com.caucho.jstl.rt.SqlSetDataSourceTag</tag-class>
+    <tag-class>com.caucho.jstl.el.SqlSetDataSourceTag</tag-class>
     <body-content>empty</body-content>
 
     <attribute>
