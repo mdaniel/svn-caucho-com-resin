@@ -47,7 +47,7 @@
 
   <tag>
     <name>update</name>
-    <tag-class>com.caucho.jstl.rt.SqlUpdateTag</tag-class>
+    <tag-class>com.caucho.jstl.el.SqlUpdateTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -155,7 +155,7 @@
 
   <tag>
     <name>transaction</name>
-    <tag-class>com.caucho.jstl.rt.SqlTransactionTag</tag-class>
+    <tag-class>com.caucho.jstl.el.SqlTransactionTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
