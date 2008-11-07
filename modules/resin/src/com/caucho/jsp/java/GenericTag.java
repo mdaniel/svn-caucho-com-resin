@@ -130,7 +130,8 @@ abstract public class GenericTag extends JspContainerNode
 	    || JavaJspBuilder.JSTL_FMT_URI.equals(uri)
 	    || JavaJspBuilder.JSTL_XML_URI.equals(uri)
 	    || JavaJspBuilder.JSTL_EL_XML_URI.equals(uri)
-	    || JavaJspBuilder.JSTL_SQL_URI.equals(uri));
+	    || JavaJspBuilder.JSTL_SQL_URI.equals(uri)
+	    || JavaJspBuilder.JSTL_EL_SQL_URI.equals(uri));
   }
 
   public void setTagClass(Class cl)

@@ -89,7 +89,7 @@
 
   <tag>
     <name>dateParam</name>
-    <tag-class>com.caucho.jstl.rt.SqlDateParamTag</tag-class>
+    <tag-class>com.caucho.jstl.el.SqlDateParamTag</tag-class>
     <body-content>empty</body-content>
 
     <attribute>
