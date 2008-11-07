@@ -34,6 +34,7 @@ import com.caucho.jsp.TagInstance;
 import com.caucho.vfs.WriteStream;
 import com.caucho.xml.QName;
 
+import javax.servlet.jsp.tagext.TagInfo;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -236,11 +237,13 @@ public class JstlCoreForEach extends JstlNode {
     }
     else {
       _isDeclaration = true;
-      
-      String id = "_jsp_loop_" + _gen.uniqueId();
-      
-      _tag = parent.addTag(_gen, getQName(), null, null,
+
+      TagInfo tagInfo = _gen.getTag(getQName());
+
+      _tag = parent.addTag(_gen, getQName(), tagInfo, null,
 			   _attributeNames, _attributeValues, false);
+
+      String id = "_jsp_loop_" + _gen.uniqueId();
 
       _tag.setId(id);
       
@@ -482,7 +485,11 @@ public class JstlCoreForEach extends JstlNode {
     if (_itemsAttr != null)
       out.print(_itemsAttr.generateValue(Object.class));
     else
-      out.print(generateValue(Object.class, _items));
+      out.print(generateParameterValue(Object.class,
+                                       _items,
+                                       true,
+                                       _tag.getAttributeInfo("items"),
+                                       _parseState.isELIgnored()));
     out.println(";");
 
     String mapperVar = "_jsp_vm_" + uniqueId;

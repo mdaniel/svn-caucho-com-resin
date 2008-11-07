@@ -421,6 +421,9 @@ public class TagInstance {
 
   public TagAttributeInfo getAttributeInfo(String name)
   {
+    if (_tagInfo == null)
+      return null;
+
     TagAttributeInfo attrs[] = _tagInfo.getAttributes();
 
     if (attrs == null)

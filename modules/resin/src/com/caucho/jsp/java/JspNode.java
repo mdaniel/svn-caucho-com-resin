@@ -1243,11 +1243,12 @@ public abstract class JspNode {
       
         return ("_caucho_method_expr_" + exprIndex);
       }
-      else if (value.indexOf("#{") >= 0
+      else if (! isValueDeferred
+               && value.indexOf("#{") >= 0
 	       && value.indexOf("${") < 0
 	       && rtexpr
 	       && isJsp21()) {
-	// jsp/10h2
+	// jsp/10h2, jsp/1cn0, jsp/10h3
 	throw error(L.l("deferred expression '{0}' is not allowed here",
 			value));
       }
