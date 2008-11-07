@@ -30,13 +30,17 @@
 package com.caucho.jsp.el;
 
 import com.caucho.jsp.TaglibManager;
+import com.caucho.jsp.PageContextImpl;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
+import com.caucho.util.FreeList;
 
 import javax.el.ELContextListener;
 import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
-import javax.servlet.jsp.JspApplicationContext;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.servlet.jsp.*;
 
 public class JspApplicationContextImpl implements JspApplicationContext
 {
@@ -52,6 +56,9 @@ public class JspApplicationContextImpl implements JspApplicationContext
   private ELContextListener []_listenerArray = new ELContextListener[0];
 
   private boolean _hasRequest;
+
+  private FreeList<PageContextImpl> _freePages
+    = new FreeList<PageContextImpl>(256);
 
   public JspApplicationContextImpl(WebApp webApp)
   {
@@ -138,6 +145,92 @@ public class JspApplicationContextImpl implements JspApplicationContext
   public ExpressionFactory getExpressionFactory()
   {
     return _expressionFactory;
+  }
+
+  //
+  // page context stuff
+  //
+  
+  public PageContextImpl allocatePageContext(Servlet servlet,
+						    ServletRequest request,
+						    ServletResponse response,
+						    String errorPageURL,
+						    boolean needsSession,
+						    int buffer,
+						    boolean autoFlush)
+  {
+    PageContextImpl pc = _freePages.allocate();
+    if (pc == null)
+      pc = new PageContextImpl();
+
+    try {
+      pc.initialize(servlet, request, response, errorPageURL,
+                    needsSession, buffer, autoFlush);
+    } catch (Exception e) {
+    }
+
+    return pc;
+  }
+
+  /**
+   * The jsp page context initialization.
+   */
+  public PageContextImpl allocatePageContext(Servlet servlet,
+						    WebApp app,
+						    ServletRequest request,
+						    ServletResponse response,
+						    String errorPageURL,
+						    HttpSession session,
+						    int buffer,
+						    boolean autoFlush,
+						    boolean isPrintNullAsBlank)
+  {
+    PageContextImpl pc = _freePages.allocate();
+    if (pc == null)
+      pc = new PageContextImpl();
+
+    pc.initialize(servlet, app, request, response, errorPageURL,
+		  session, buffer, autoFlush, isPrintNullAsBlank);
+
+    return pc;
+  }
+
+  public PageContext getPageContext(Servlet servlet,
+				    ServletRequest request,
+				    ServletResponse response,
+				    String errorPageURL,
+				    boolean needsSession,
+				    int buffer,
+				    boolean autoFlush)
+  {
+    return allocatePageContext(servlet, request, response,
+			       errorPageURL, needsSession,
+			       buffer, autoFlush);
+  }
+
+  /**
+   * Frees a page context after the JSP page is done with it.
+   *
+   * @param pc the PageContext to free
+   */
+  public void releasePageContext(PageContext pc)
+  {
+    if (pc != null) {
+      pc.release();
+
+      if (pc instanceof PageContextImpl)
+	_freePages.free((PageContextImpl) pc);
+    }
+  }
+
+  public void freePageContext(PageContextImpl pc)
+  {
+    if (pc != null) {
+      pc.release();
+
+      if (pc instanceof PageContextImpl)
+	_freePages.free((PageContextImpl) pc);
+    }
   }
 
   public String toString()

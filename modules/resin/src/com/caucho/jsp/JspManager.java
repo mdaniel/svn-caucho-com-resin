@@ -38,13 +38,14 @@ import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
+import com.caucho.util.FreeList;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 
 import javax.servlet.*;
-import javax.servlet.jsp.HttpJspPage;
-import javax.servlet.jsp.JspFactory;
+import javax.servlet.http.*;
+import javax.servlet.jsp.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;

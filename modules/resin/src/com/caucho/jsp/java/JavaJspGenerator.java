@@ -911,7 +911,7 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("com.caucho.server.webapp.WebApp _jsp_application = _caucho_getApplication();");
     out.println("javax.servlet.ServletContext application = _jsp_application;");
 
-    out.print("com.caucho.jsp.PageContextImpl pageContext = com.caucho.jsp.QJspFactory.allocatePageContext(");
+    out.print("com.caucho.jsp.PageContextImpl pageContext = _jsp_application.getJspApplicationContext().allocatePageContext(");
     out.print("this, _jsp_application, request, response, ");
     if (_parseState.getErrorPage() == null) 
       out.print("null");
@@ -1181,7 +1181,7 @@ public class JavaJspGenerator extends JspGenerator {
       out.pushDepth();
     }
     
-    out.println("com.caucho.jsp.QJspFactory.freePageContext(pageContext);");
+    out.println("_jsp_application.getJspApplicationContext().freePageContext(pageContext);");
 
     if (_hasReleaseTag) {
       out.popDepth();

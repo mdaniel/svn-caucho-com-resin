@@ -137,6 +137,7 @@ public class PageContextImpl extends PageContext
   private VariableResolver _varResolver;
   private ELContext _elContext;
   private ELResolver _elResolver;
+  
   private javax.el.FunctionMapper _functionMapper;
   private PageVariableMapper _variableMapper;
   private boolean _hasException;
@@ -145,7 +146,7 @@ public class PageContextImpl extends PageContext
 
   private ExpressionEvaluatorImpl _expressionEvaluator;
 
-  PageContextImpl()
+  public PageContextImpl()
   {
     _attributes = new HashMapImpl<String,Object>();
     
@@ -1336,6 +1337,7 @@ public class PageContextImpl extends PageContext
       _out = null;
       _topOut = null;
       _nodeEnv = null;
+      
       _jspOutputStream.release();
       AbstractResponseStream responseStream = _responseStream;
       _responseStream = null;
