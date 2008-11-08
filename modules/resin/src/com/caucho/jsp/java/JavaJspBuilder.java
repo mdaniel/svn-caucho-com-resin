@@ -755,5 +755,12 @@ public class JavaJspBuilder extends JspBuilder {
 	   JstlTlvXmlOtherwise.class);
     addMap(_jstlTlvTagMap, "resin-xml", "otherwise", JSTL_EL_XML_URI,
 	   JstlTlvXmlOtherwise.class);
+
+    addMap(_jstlTlvTagMap, "resin-sql", "update", JSTL_SQL_URI,
+           JstlTlvSqlUpdate.class);
+    addMap(_jstlTlvTagMap, "resin-sql", "update", JSTL_RT_SQL_URI,
+           JstlTlvSqlUpdate.class);
+    addMap(_jstlTlvTagMap, "resin-sql", "update", JSTL_EL_SQL_URI,
+           JstlTlvSqlUpdate.class);
   }
 }

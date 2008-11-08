@@ -200,6 +200,10 @@
       <name>items</name>
       <required>true</required>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+      <deferred-value>
+        <type>java.lang.String</type>
+      </deferred-value>
     </attribute>
 
     <attribute>
