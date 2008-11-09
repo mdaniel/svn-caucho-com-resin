@@ -11,7 +11,26 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="3.2.1 snapshot">
+<s2 title="4.0.0 snapshot">
+<ul>
+<li>boot: watchdog kill NPE (#3009, rep by stbu)</li>
+<li>persistent-store: sessions larger than 4M were not properly persisted (#3025, rep by mate)</li>
+<li>memory: removed potential ThreadLocal leak with SecurityContext (#3031, rep by Mattias Jiderhamn)</li>
+<li>admin: OSGi bundles now registered as OsgiBundleMXBean</li>
+<li>admin: WebBeans now registered as WebBeanMXBean</li>
+<li>Servlet: various fixes for Servlet TCK</li>
+<li>JSP: various fixes for JSP TCK</li>
+<li>WebBeans: javax.webbeans.manager.Manager and Bean are new SPI for WebBeans</li>
+<li>WebBeans: @Current replaces @In as default @BindingType</li>
+<li>WebBeans: &lt;Deploy> enables @DeploymentType and establishes priority</li>
+<li>WebBeans: @DeploymentType replaces old @ComponentType</li>
+<li>WebBeans: @Named semantics changes for new draft - Named is no longer a @BindingType and no longer automatically names beans</li> 
+<li>WebBeans: move web-beans.xml to root from META_INF for new draft</li>
+<li>WebBeans: new XML web-beans.xml syntax for new draft</li>
+</ul>
+</s2>
+
+<s2 title="3.2.1">
 <ul>
 <li>web-app: add expand-fileset-cleanup to &lt;web-app (#3001, rep by Bill Au)</li>
 <li>jni: openssl not timing out properly (#2988, rep by Tom Hintz)</li>

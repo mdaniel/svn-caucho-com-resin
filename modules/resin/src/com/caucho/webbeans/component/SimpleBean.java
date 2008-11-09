@@ -70,8 +70,6 @@ public class SimpleBean extends ComponentImpl
 
   private Object _scopeAdapter;
 
-  private HashMap<Method,ArrayList<WbInterceptor>> _interceptorMap;
-
   private String _mbeanName;
   private Class _mbeanInterface;
 
@@ -431,6 +429,7 @@ public class SimpleBean extends ComponentImpl
 
       PojoBean bean = new PojoBean(getTargetClass());
       bean.setSingleton(isSingleton());
+      bean.setBindings(getBindingArray());
       bean.introspect();
 
       Class instanceClass = bean.generateClass();

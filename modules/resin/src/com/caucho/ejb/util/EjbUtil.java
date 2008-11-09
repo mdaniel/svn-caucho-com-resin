@@ -29,7 +29,12 @@
 
 package com.caucho.ejb.util;
 
+import com.caucho.webbeans.manager.WebBeansContainer;
+
 import java.lang.reflect.*;
+import java.util.List;
+
+import javax.webbeans.manager.Decorator;
 
 /**
  * Utilities
@@ -64,5 +69,68 @@ public class EjbUtil {
     method.setAccessible(true);
     
     return method;
+  }
+
+  public static Object generateDelegate(List<Decorator> beans,
+					Object tail)
+  {
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
+    for (int i = beans.size() - 1; i >= 0; i--) {
+      Decorator bean = beans.get(i);
+
+      Object instance = webBeans.getInstance(bean);
+
+      bean.setDelegate(instance, tail);
+
+      tail = instance;
+    }
+    
+    return tail;
+  }
+
+  public static Object []generateProxyDelegate(WebBeansContainer webBeans,
+					       List<Decorator> beans,
+					       Object proxy)
+  {
+    Object []instances = new Object[beans.size()];
+
+    for (int i = 0; i < beans.size(); i++) {
+      Decorator bean = beans.get(i);
+
+      Object instance = webBeans.getInstance(bean);
+
+      bean.setDelegate(instance, proxy);
+
+      instances[beans.size() - 1 - i] = instance;
+    }
+    
+    return instances;
+  }
+
+  public static int nextDelegate(Object []beans,
+				 Class api,
+				 int index)
+  {
+    for (index--; index >= 0; index--) {
+      if (api.isAssignableFrom(beans[index].getClass()))
+	return index;
+    }
+
+    return index;
+  }
+
+  public static int nextDelegate(Object []beans,
+				 Class []apis,
+				 int index)
+  {
+    for (index--; index >= 0; index--) {
+      for (Class api : apis) {
+	if (api.isAssignableFrom(beans[index].getClass()))
+	  return index;
+      }
+    }
+
+    return index;
   }
 }

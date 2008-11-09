@@ -184,6 +184,7 @@ public class HttpRequest extends AbstractHttpRequest
     
     try {
       startRequest();
+      startInvocation();
       
       _response.start();
 
@@ -316,12 +317,10 @@ public class HttpRequest extends AbstractHttpRequest
 
       return false;
     } finally {
-      if (hasRequest) {
-	finishInvocation();
+      finishInvocation();
 
-	if (! isSuspend()) {
-	  finishRequest();
-	}
+      if (hasRequest && ! isSuspend()) {
+	finishRequest();
       }
     }
 
@@ -343,11 +342,11 @@ public class HttpRequest extends AbstractHttpRequest
     throws IOException
   {
     try {
+      startInvocation();
+
       if (! isComet())
 	return false;
 	
-      startInvocation();
-
       _invocation.doResume(_requestFacade, _responseFacade);
     } catch (ClientDisconnectException e) {
       _response.killCache();

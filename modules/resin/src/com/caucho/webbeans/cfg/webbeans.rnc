@@ -22,6 +22,8 @@ w_bean-Custom = element * - w:* {
    & element Production { empty }?
    
    & element Current { empty }?
+   
+   & element Decorator { empty }?
   )
   | string
 }
@@ -62,6 +64,10 @@ w_component-types =  element component-types {
   w_component-type*
 }
 
+w_decorators = element Decorators {
+  w_bean-Field-Custom*
+}
+
 w_name = element name {
   string
 }
@@ -70,14 +76,8 @@ w_init = element init {
   w_Any
 }
 
-w_interceptor = element interceptor {
-  w_binding
-
-  & w_class
-}
-
-w_interceptors = element interceptors {
-  element interceptor { string }*
+w_interceptors = element Interceptors {
+  w_bean-Field-Custom*
 }
 
 w_producer = element producer {
@@ -103,9 +103,9 @@ w_standard = element Standard {
 w_WebBeans = element WebBeans {
   w_bean-Custom*
 
+  & w_decorators?
+  
   & w_deploy?
   
-  & w_interceptor*
-
   & w_interceptors?
 }

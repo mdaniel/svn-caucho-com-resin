@@ -85,6 +85,10 @@ public class PojoBean extends BeanGenerator {
 
   public void introspect()
   {
+    super.introspect();
+    
+    introspectClass(_beanClass.getJavaClass());
+    
     for (ApiMethod method : _beanClass.getMethods()) {
       if (Object.class.equals(method.getDeclaringClass()))
 	continue;
@@ -97,6 +101,10 @@ public class PojoBean extends BeanGenerator {
       int index = _businessMethods.size();
       BusinessMethodGenerator bizMethod
 	= new BusinessMethodGenerator(_view, method, method.getMethod(), index);
+
+      // ioc/0i10
+      if (_businessMethods.contains(bizMethod))
+	continue;
 
       bizMethod.introspect(method.getMethod(), method.getMethod());
 
@@ -112,6 +120,7 @@ public class PojoBean extends BeanGenerator {
 
       if (bizMethod.isEnhanced()) {
 	_isEnhanced = true;
+
 	_businessMethods.add(bizMethod);
       }
     }
@@ -121,6 +130,31 @@ public class PojoBean extends BeanGenerator {
 	&& hasTransientInject(_beanClass.getJavaClass())) {
       _isReadResolveEnhanced = true;
       _isEnhanced = true;
+    }
+
+    if (getDecoratorTypes().size() > 0)
+      _isEnhanced = true;
+  }
+
+  protected void introspectClass(Class cl)
+  {
+    ArrayList<Annotation> interceptorBindingList
+      = new ArrayList<Annotation>();
+    
+    for (Annotation ann : cl.getAnnotations()) {
+      if (ann.annotationType().isAnnotationPresent(Stereotype.class)) {
+	for (Annotation sAnn : ann.annotationType().getAnnotations()) {
+	  Class sAnnType = sAnn.annotationType();
+	  
+	  if (sAnnType.isAnnotationPresent(InterceptorBindingType.class)) {
+	    interceptorBindingList.add(sAnn);
+	  }
+	}
+      }
+    }
+
+    if (interceptorBindingList.size() > 0) {
+      _view.setInterceptorBindings(interceptorBindingList);
     }
   }
 

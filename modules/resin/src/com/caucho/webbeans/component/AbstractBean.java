@@ -43,6 +43,7 @@ import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.event.ObserverImpl;
 import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.webbeans.manager.CurrentLiteral;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -67,6 +68,9 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 
   private static final HashSet<Class> _reservedTypes
     = new HashSet<Class>();
+
+  public static final Annotation []CURRENT_ANN
+    = new Annotation[] { new CurrentLiteral() };
 
   protected WebBeansContainer _webBeans;
   
@@ -210,6 +214,20 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     }
 
     return set;
+  }
+
+  /**
+   * Returns an array of the binding annotations
+   */
+  public Annotation []getBindingArray()
+  {
+    if (_bindings == null || _bindings.size() == 0)
+      return new Annotation[] { new CurrentLiteral() };
+
+    Annotation []bindings = new Annotation[_bindings.size()];
+    _bindings.toArray(bindings);
+    
+    return bindings;
   }
 
   /**
@@ -521,8 +539,61 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 	for (Annotation ann : stereotypeType.getDeclaredAnnotations()) {
 	  Class annType = ann.annotationType();
 	  
-	  if (annType.equals(Named.class))
+	  if (annType.equals(Named.class)) {
+	    Named named = (Named) ann;
 	    _name = "";
+
+	    if (! "".equals(named.value()))
+	      throw new ConfigException(L.l("@Named must not have a value in a @Stereotype definition; it must have an empty value=\"\"."));
+	  }
+	}
+      }
+    }
+    
+    for (Annotation stereotypeAnn : _stereotypes) {
+      Class stereotypeType = stereotypeAnn.annotationType();
+
+      for (Annotation ann : stereotypeType.getDeclaredAnnotations()) {
+	Class annType = ann.annotationType();
+
+	if (annType.isAnnotationPresent(BindingType.class)) {
+	  throw new ConfigException(L.l("'{0}' is not allowed on @Stereotype '{1}' because stereotypes may not have @BindingType annotations",
+					ann, stereotypeAnn));
+	}
+
+	if (ann instanceof Stereotype) {
+	  Stereotype stereotype = (Stereotype) ann;
+      
+	  for (Class requiredType : stereotype.requiredTypes()) {
+	    if (! requiredType.isAssignableFrom(getTargetClass())) {
+	      throw new ConfigException(L.l("'{0}' may not have '{1}' because it does not implement the required type '{2}'",
+					    getTargetName(),
+					    stereotypeAnn,
+					    requiredType.getName()));
+	    }
+	  }
+
+	  boolean hasScope = stereotype.supportedScopes().length == 0;
+	  for (Class supportedScope : stereotype.supportedScopes()) {
+	    Class scopeType = getScopeType();
+	    if (scopeType == null)
+	      scopeType = Dependent.class;
+	    
+	    if (supportedScope.equals(scopeType))
+	      hasScope = true;
+	  }
+
+	  if (! hasScope) {
+	    ArrayList<String> scopeNames = new ArrayList<String>();
+
+	    for (Class supportedScope : stereotype.supportedScopes())
+	      scopeNames.add("@" + supportedScope.getSimpleName());
+	    
+	    throw new ConfigException(L.l("'{0}' may not have '{1}' because it does not implement a supported scope {2}",
+					  getTargetName(),
+					  stereotypeAnn,
+					  scopeNames));
+	  }
 	}
       }
     }

@@ -35,6 +35,7 @@ import com.caucho.vfs.*;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.lang.ref.WeakReference;
 
 /**
  * Data for the cluster's object.
@@ -47,10 +48,10 @@ public class ClusterObject {
   private final HashKey _storeId;
 
   private final StoreManager _storeManager;
-  private final Store _store;
+  
+  private WeakReference<Store> _storeRef;
 
   private Object _objectManagerKey; // key for the object manager
-  private ObjectManager _objectManager;
   
   private int _primary;
   private int _secondary;
@@ -93,9 +94,8 @@ public class ClusterObject {
     _storeId = store.getId();
     
     _storeManager = store.getStoreManager();
-    _objectManager = store.getObjectManager();
-    _store = store;
-    _maxIdleTime = _store.getMaxIdleTime();
+    _storeRef = new WeakReference<Store>(store);
+    _maxIdleTime = store.getMaxIdleTime();
     
     _primary = primary;
     _secondary = secondary;
@@ -112,8 +112,6 @@ public class ClusterObject {
                 int tertiary)
   {
     _storeManager = storeManager;
-    _objectManager = null;
-    _store = null;
     
     _primary = primary;
     _secondary = secondary;
@@ -127,18 +125,13 @@ public class ClusterObject {
     _expireInterval = getMaxIdleTime() + getAccessWindow();
   }
 
-  public void setObjectManager(ObjectManager objectManager)
-  {
-    _objectManager = objectManager;
-  }
-
   // XXX: move to objectStore manager?
   public boolean isPrimary()
   {
-    if (_store != null && _store.isAlwaysLoad())
+    if (getStore() != null && getStore().isAlwaysLoad())
       return false;
     
-    else if (_store == null && _storeManager.isAlwaysLoad())
+    else if (getStore() == null && _storeManager.isAlwaysLoad())
       return false;
     
     Cluster cluster = _storeManager.getCluster();
@@ -147,11 +140,36 @@ public class ClusterObject {
  }
 
   /**
-   * Returns the objectStore.
+   * Returns the store.
    */
   public Store getStore()
   {
-    return _store;
+    WeakReference<Store> storeRef = _storeRef;
+
+    Store store;
+
+    if (storeRef != null) {
+      store = storeRef.get();
+
+      if (store != null)
+	return store;
+    }
+
+    store = _storeManager.getStore(_storeId);
+    if (store != null)
+      _storeRef = new WeakReference<Store>(store);
+    
+    return store;
+  }
+
+  public ObjectManager getObjectManager()
+  {
+    Store store = getStore();
+
+    if (store != null)
+      return store.getObjectManager();
+    else
+      return null;
   }
 
   /**
@@ -453,7 +471,7 @@ public class ClusterObject {
       _isValid = false;
     }
 
-    if (! _isDirty && ! _store.isAlwaysSave())
+    if (! _isDirty && ! getStore().isAlwaysSave())
       return;
 
     _isDirty = false;
@@ -463,7 +481,7 @@ public class ClusterObject {
     try {
       DigestOutputStream digestStream = new DigestOutputStream(tempStream);
 
-      _objectManager.store(digestStream, obj);
+      getObjectManager().store(digestStream, obj);
 
       digestStream.close();
  
@@ -523,7 +541,7 @@ public class ClusterObject {
   boolean loadImpl(InputStream is, Object value, byte []dataHash)
     throws IOException
   {
-    _objectManager.load(is, value);
+    getObjectManager().load(is, value);
 
     _dataHash = dataHash;
  
@@ -563,8 +581,9 @@ public class ClusterObject {
    */
   public void removeImpl()
   {
-    if (_objectManager != null && getObjectManagerKey() != null)
-      _objectManager.notifyRemove(getObjectManagerKey());
+    ObjectManager objectManager = getObjectManager();
+    if (objectManager != null && getObjectManagerKey() != null)
+      objectManager.notifyRemove(getObjectManagerKey());
 
     _isDead = true; // XXX: ? 
   }

@@ -80,7 +80,7 @@ public class WebBeansContainer
   private static final Annotation []NULL_ANN = new Annotation[0];
 
   private static final Annotation []CURRENT_ANN
-    = new Annotation[] { new AnnotationLiteral<Current>() {} };
+    = new Annotation[] { new CurrentLiteral() };
 
   private WebBeansContainer _parent;
   
@@ -99,7 +99,6 @@ public class WebBeansContainer
 
   private HashMap<Class,Integer> _deploymentMap
     = new HashMap<Class,Integer>();
-				  
 
   private HashMap<Type,WebComponent> _componentMap
     = new HashMap<Type,WebComponent>();
@@ -121,6 +120,9 @@ public class WebBeansContainer
 
   private HashMap<Class,ArrayList<ObserverMap>> _observerListCache
     = new HashMap<Class,ArrayList<ObserverMap>>();
+
+  private ArrayList<DecoratorEntry> _decoratorList
+    = new ArrayList<DecoratorEntry>();
 
   private HashMap<Class,SimpleBean> _transientMap
     = new HashMap<Class,SimpleBean>();
@@ -497,6 +499,10 @@ public class WebBeansContainer
 			    boolean isOptional)
     throws ConfigException
   {
+    // ioc/0i36
+    if (field.isAnnotationPresent(Decorates.class))
+      return;
+    
     if (field.isAnnotationPresent(New.class))
       throw new IllegalStateException(L.l("can't cope with new"));
     
@@ -1028,7 +1034,13 @@ public class WebBeansContainer
    */
   public <T> T getInstance(Bean<T> bean)
   {
-    return (T) ((ComponentImpl) bean).get();
+    if (bean instanceof ComponentImpl)
+      return (T) ((ComponentImpl) bean).get();
+    else {
+      // XXX: scope
+      
+      return (T) bean.create();
+    }
   }
 
   /**
@@ -1246,7 +1258,9 @@ public class WebBeansContainer
    */
   public Manager addDecorator(Decorator decorator)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _decoratorList.add(new DecoratorEntry(decorator));
+
+    return this;
   }
 
   /**
@@ -1260,7 +1274,51 @@ public class WebBeansContainer
   public List<Decorator> resolveDecorators(Set<Class<?>> types,
 					   Annotation... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    ArrayList<Decorator> decorators = new ArrayList<Decorator>();
+
+    if (bindings.length == 0)
+      bindings = CURRENT_ANN;
+
+    for (DecoratorEntry entry : _decoratorList) {
+      Decorator decorator = entry.getDecorator();
+      
+      if (types.contains(decorator.getDelegateType())
+	  && entry.isMatch(bindings)) {
+	decorators.add(decorator);
+      }
+    }
+
+    return decorators;
+  }
+
+  public List<Decorator> resolveDecorators(Class type)
+  {
+    ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
+
+    for (Annotation ann : type.getAnnotations()) {
+      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	bindingList.add(ann);
+    }
+    
+    if (bindingList.size() == 0)
+      bindingList.add(new CurrentLiteral());
+
+    Annotation []bindings = new Annotation[bindingList.size()];
+    bindingList.toArray(bindings);
+
+    
+    ArrayList<Decorator> decorators = new ArrayList<Decorator>();
+
+    for (DecoratorEntry entry : _decoratorList) {
+      Decorator decorator = entry.getDecorator();
+
+      if (decorator.getDelegateType().isAssignableFrom(type)
+	  && entry.isMatch(bindings)) {
+	decorators.add(decorator);
+      }
+    }
+
+    return decorators;
   }
 
   //

@@ -35,6 +35,7 @@ import com.caucho.util.L10N;
 
 import javax.ejb.*;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -46,6 +47,8 @@ abstract public class View {
 
   protected final BeanGenerator _bean;
   protected final ApiClass _api;
+
+  protected ArrayList<Annotation> _interceptorBindings;
 
   protected View(BeanGenerator bean, ApiClass api)
   {
@@ -92,6 +95,22 @@ abstract public class View {
   protected ApiClass getApi()
   {
     return _api;
+  }
+
+  /**
+   * Returns any interceptor bindings
+   */
+  public ArrayList<Annotation> getInterceptorBindings()
+  {
+    return _interceptorBindings;
+  }
+
+  /**
+   * Sets any interceptor bindings
+   */
+  public void setInterceptorBindings(ArrayList<Annotation> bindings)
+  {
+    _interceptorBindings = bindings;
   }
 
   /**

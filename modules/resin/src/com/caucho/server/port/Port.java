@@ -1532,9 +1532,16 @@ public class Port
           if (_connectionMax <= _connectionCount)
             isStart = false;
 
+	  if (! _lifecycle.isActive())
+	    isStart = false;
+
           if (! isStart) {
             Thread.interrupted();
-            wait(60000);
+
+	    if (_lifecycle.isActive())
+	      wait(60000);
+	    else
+	      wait(200);
           }
 
           if (isStart) {

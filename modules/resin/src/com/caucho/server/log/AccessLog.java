@@ -239,8 +239,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     throws ServletException, IOException
   {
     _isActive = true;
-    
-    Environment.addClassLoaderListener(new CloseListener(this));
+    _alarm.queue(60000);
     
     if (_format == null)
       _format = "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"";
@@ -258,7 +257,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     _logWriter.init();
     _sharedBufferLock = _logWriter.getBufferLock();
 
-    if (_autoFlushTime > 0)
+    if (_autoFlushTime > 0 && _alarm != null)
       _alarm.queue(_autoFlushTime);
   }
 
@@ -695,7 +694,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       flush();
     } finally {
       alarm = _alarm;
-      if (alarm != null && _autoFlushTime > 0)
+      if (alarm != null && _isActive && _autoFlushTime > 0)
 	alarm.queue(_autoFlushTime);
     }
   }
@@ -703,12 +702,14 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   /**
    * Closes the log, flushing the results.
    */
+  @PostConstruct
+  @Override
   public void destroy()
     throws IOException
   {
     _isActive = false;
     
-    Alarm alarm = _alarm;;
+    Alarm alarm = _alarm;
     _alarm = null;
 
     if (alarm != null)

@@ -135,7 +135,6 @@ public abstract class AbstractHttpRequest
 
   protected Invocation _invocation;
   
-  private SecurityContextProvider _oldProvider;
   private String _runAs;
 
   private boolean _keepalive;
@@ -179,6 +178,8 @@ public abstract class AbstractHttpRequest
 
   private boolean _hasReader;
   private boolean _hasInputStream;
+
+  private SecurityContextProvider _oldProvider;
 
   // HttpServletRequest stuff
   private final Form _formParser = new Form();
@@ -299,7 +300,6 @@ public abstract class AbstractHttpRequest
     _keepalive = true;
     _isSessionIdFromCookie = false;
 
-    _oldProvider = null;
     _runAs = null;
 
     _attributeListeners = NULL_LISTENERS;
@@ -2683,9 +2683,9 @@ public abstract class AbstractHttpRequest
   {
     SecurityContextProvider oldProvider = _oldProvider;
     _oldProvider = null;
-      
+    
     SecurityContext.setProvider(oldProvider);
-
+    
     try {
       _response.finishInvocation();
     } catch (IOException e) {
@@ -2700,12 +2700,13 @@ public abstract class AbstractHttpRequest
     throws IOException
   {
     try {
+      // server/0219, but must be freed for GC
+      _invocation = null;
+      
       _response.finishRequest();
 
       SessionImpl session = _session;
 
-      // server/0219
-      // _invocation = null;
 
       if (session != null)
         session.finish();

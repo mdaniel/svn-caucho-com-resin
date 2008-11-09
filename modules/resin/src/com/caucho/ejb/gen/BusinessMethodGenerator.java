@@ -444,6 +444,18 @@ public class BusinessMethodGenerator implements EjbCallChain {
     return true;
   }
 
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (! (o instanceof BusinessMethodGenerator))
+      return false;
+
+    BusinessMethodGenerator bizMethod = (BusinessMethodGenerator) o;
+
+    return _apiMethod.getName().equals(bizMethod._apiMethod.getName());
+  }
+
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _apiMethod + "]";

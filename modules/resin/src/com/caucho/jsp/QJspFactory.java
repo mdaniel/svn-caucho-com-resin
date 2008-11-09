@@ -45,9 +45,6 @@ import javax.servlet.jsp.PageContext;
 public class QJspFactory extends JspFactory {
   private static JspEngineInfo _engineInfo = new EngineInfo();
 
-  private static FreeList<PageContextImpl> _freePages
-    = new FreeList<PageContextImpl>(256);
-  
   private static QJspFactory _factory;
   
   static public QJspFactory create()
@@ -58,17 +55,15 @@ public class QJspFactory extends JspFactory {
     return _factory;
   }
 
-  public static PageContextImpl allocatePageContext(Servlet servlet,
-						    ServletRequest request,
-						    ServletResponse response,
-						    String errorPageURL,
-						    boolean needsSession,
-						    int buffer,
-						    boolean autoFlush)
+  public PageContext getPageContext(Servlet servlet,
+				    ServletRequest request,
+				    ServletResponse response,
+				    String errorPageURL,
+				    boolean needsSession,
+				    int buffer,
+				    boolean autoFlush)
   {
-    PageContextImpl pc = _freePages.allocate();
-    if (pc == null)
-      pc = new PageContextImpl();
+    PageContextImpl pc = new PageContextImpl();
 
     try {
       pc.initialize(servlet, request, response, errorPageURL,
@@ -80,42 +75,6 @@ public class QJspFactory extends JspFactory {
   }
 
   /**
-   * The jsp page context initialization.
-   */
-  public static PageContextImpl allocatePageContext(Servlet servlet,
-						    WebApp app,
-						    ServletRequest request,
-						    ServletResponse response,
-						    String errorPageURL,
-						    HttpSession session,
-						    int buffer,
-						    boolean autoFlush,
-						    boolean isPrintNullAsBlank)
-  {
-    PageContextImpl pc = _freePages.allocate();
-    if (pc == null)
-      pc = new PageContextImpl();
-
-    pc.initialize(servlet, app, request, response, errorPageURL,
-		  session, buffer, autoFlush, isPrintNullAsBlank);
-
-    return pc;
-  }
-
-  public PageContext getPageContext(Servlet servlet,
-				    ServletRequest request,
-				    ServletResponse response,
-				    String errorPageURL,
-				    boolean needsSession,
-				    int buffer,
-				    boolean autoFlush)
-  {
-    return allocatePageContext(servlet, request, response,
-			       errorPageURL, needsSession,
-			       buffer, autoFlush);
-  }
-
-  /**
    * Frees a page context after the JSP page is done with it.
    *
    * @param pc the PageContext to free
@@ -124,19 +83,6 @@ public class QJspFactory extends JspFactory {
   {
     if (pc != null) {
       pc.release();
-
-      if (pc instanceof PageContextImpl)
-	_freePages.free((PageContextImpl) pc);
-    }
-  }
-
-  public static void freePageContext(PageContext pc)
-  {
-    if (pc != null) {
-      pc.release();
-
-      if (pc instanceof PageContextImpl)
-	_freePages.free((PageContextImpl) pc);
     }
   }
 

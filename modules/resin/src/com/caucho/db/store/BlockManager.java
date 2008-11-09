@@ -218,7 +218,7 @@ public final class BlockManager
     // the LRU dirty write might have timing issues
     
     Block block = _blockCache.get(blockId);
-
+    
     while (block == null || ! block.allocate()) {
       // Find any matching block in the process of being written
       Block dirtyBlock = null;

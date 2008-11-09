@@ -349,8 +349,10 @@ public class WbComponentConfig {
     if (getMBeanName() != null)
       comp.setMBeanName(getMBeanName());
 
-    for (WbBinding binding : _bindingList)
-      comp.addBinding(binding.getAnnotation());
+    for (WbBinding binding : _bindingList) {
+      if (binding.getAnnotation() != null)
+	comp.addBinding(binding.getAnnotation());
+    }
 
     if (_deploymentType != null)
       comp.setDeploymentType(_deploymentType);

@@ -70,9 +70,8 @@ public class PageContextELResolver extends AbstractVariableResolver {
   public PageContextELResolver(PageContextImpl pageContext,
 			       ELResolver []customResolvers)
   {
-    _customResolvers = customResolvers;
-
     _pageContext = pageContext;
+    _customResolvers = customResolvers;
   }
 
   public ELResolver []getCustomResolvers()

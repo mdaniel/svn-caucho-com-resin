@@ -378,6 +378,7 @@ public class HmuxRequest extends AbstractHttpRequest
     
     try {
       startRequest();
+      startInvocation();
       
       _response.start();
 
@@ -477,11 +478,11 @@ public class HmuxRequest extends AbstractHttpRequest
 	return false;
       }
     } finally {
+      finishInvocation();
       
       try {
 	if (hasRequest) {
 	  // server/0190
-	  finishInvocation();
 	  finishRequest();
 	}
 	else

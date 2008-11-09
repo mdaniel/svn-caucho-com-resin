@@ -35,17 +35,23 @@ import com.caucho.util.L10N;
 import com.caucho.java.*;
 import com.caucho.java.gen.*;
 import com.caucho.vfs.*;
+import com.caucho.webbeans.manager.*;
 
 import java.io.*;
+import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import javax.interceptor.*;
 import javax.ejb.*;
+import javax.webbeans.manager.Decorator;
 
 /**
  * Generates the skeleton for a bean.
  */
-abstract public class BeanGenerator extends GenClass {
+abstract public class BeanGenerator extends GenClass
+{
   private static final L10N L = new L10N(BeanGenerator.class);
 
   protected final ApiClass _ejbClass;
@@ -55,6 +61,11 @@ abstract public class BeanGenerator extends GenClass {
   private Method _aroundInvokeMethod;
 
   private ArrayList<Class> _defaultInterceptors
+    = new ArrayList<Class>();
+
+  private Annotation []_bindings;
+
+  private ArrayList<Class> _decorators
     = new ArrayList<Class>();
 
   protected BeanGenerator(String fullClassName, ApiClass ejbClass)
@@ -112,11 +123,86 @@ abstract public class BeanGenerator extends GenClass {
   }
 
   /**
+   * Gets the bindings for the decorators
+   */
+  public Annotation []getBindings()
+  {
+    return _bindings;
+  }
+
+  /**
+   * Sets the bindings for the decorators
+   */
+  public void setBindings(Annotation []annotation)
+  {
+    _bindings = annotation;
+  }
+
+  /**
    * Introspects the bean.
    */
   public void introspect()
   {
     _aroundInvokeMethod = findAroundInvokeMethod(_ejbClass.getJavaClass());
+
+    introspectDecorators(_ejbClass.getJavaClass());
+  }
+
+  /**
+   * Finds the matching decorators for the class
+   */
+  protected void introspectDecorators(Class cl)
+  {
+    if (cl.isAnnotationPresent(javax.webbeans.Decorator.class))
+      return;
+    
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
+    HashSet<Class<?>> types = new HashSet<Class<?>>();
+    for (Class iface : cl.getInterfaces()) {
+      fillTypes(types, iface);
+    }
+
+    List<Decorator> decorators = webBeans.resolveDecorators(types, _bindings);
+    for (Decorator decorator : decorators) {
+      fillTypes(_decorators, decorator.getDelegateType());
+    }
+  }
+
+  protected void fillTypes(HashSet<Class<?>> types, Class type)
+  {
+    if (type == null)
+      return;
+    
+    types.add(type);
+
+    fillTypes(types, type.getSuperclass());
+
+    for (Class iface : type.getInterfaces()) {
+      fillTypes(types, iface);
+    }
+  }
+
+  protected void fillTypes(ArrayList<Class> types, Class type)
+  {
+    if (type == null || types.contains(type))
+      return;
+
+    types.add(type);
+
+    fillTypes(types, type.getSuperclass());
+
+    for (Class iface : type.getInterfaces()) {
+      fillTypes(types, iface);
+    }
+  }
+
+  /**
+   * Returns the decorator classes
+   */
+  public ArrayList<Class> getDecoratorTypes()
+  {
+    return _decorators;
   }
 
   private static Method findAroundInvokeMethod(Class cl)
@@ -243,5 +329,10 @@ abstract public class BeanGenerator extends GenClass {
       value = "(double) " + value;
 
     return value;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _ejbClass.getJavaClass().getSimpleName() + "]";
   }
 }

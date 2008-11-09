@@ -135,12 +135,13 @@ public class PageContextImpl extends PageContext
   private final CharBuffer _cb = new CharBuffer();
 
   private VariableResolver _varResolver;
+  
   private ELContext _elContext;
   private ELResolver _elResolver;
   private javax.el.FunctionMapper _functionMapper;
   private PageVariableMapper _variableMapper;
   private boolean _hasException;
-
+  
   private HashMap<String,Method> _functionMap;
 
   private ExpressionEvaluatorImpl _expressionEvaluator;
@@ -265,8 +266,8 @@ public class PageContextImpl extends PageContext
     _webApp = app;
     _locale = null;
 
-    // major performance issue if null
-    //_elContext = null;
+    _elContext = null;
+    _elResolver = null;
 
     _hasException = false;
     //if (_attributes.size() > 0)
@@ -1279,30 +1280,30 @@ public class PageContextImpl extends PageContext
    */
   public ELContext getELContext()
   {
-    if (_elContext == null) {
-      _elContext = new PageELContext();
+    if (_elContext != null)
+      return _elContext;
 
-      WebApp webApp = getApplication();
+    WebApp webApp = getApplication();
       
-      JspApplicationContextImpl jspContext
-	= (JspApplicationContextImpl) webApp.getJspApplicationContext();
+    JspApplicationContextImpl jspContext
+      = (JspApplicationContextImpl) webApp.getJspApplicationContext();
 
-      ELResolver []resolverArray = jspContext.getELResolverArray();
+    ELResolver []resolverArray = jspContext.getELResolverArray();
+
+    _elContext = new PageELContext();
+    _elResolver = new PageContextELResolver(this, resolverArray);
       
-      _elResolver = new PageContextELResolver(this, resolverArray);
+    _functionMapper = new PageFunctionMapper();
+    _variableMapper = new PageVariableMapper();
 
-      ELContextListener []listenerArray = jspContext.getELListenerArray();
+    ELContextListener []listenerArray = jspContext.getELListenerArray();
 
-      if (listenerArray.length > 0) {
-	ELContextEvent event = new ELContextEvent(_elContext);
+    if (listenerArray.length > 0) {
+      ELContextEvent event = new ELContextEvent(_elContext);
 
-	for (int i = 0; i < listenerArray.length; i++) {
-	  listenerArray[i].contextCreated(event);
-	}
+      for (int i = 0; i < listenerArray.length; i++) {
+	listenerArray[i].contextCreated(event);
       }
-      
-      _functionMapper = new PageFunctionMapper();
-      _variableMapper = new PageVariableMapper();
     }
     
     return _elContext;
@@ -1362,15 +1363,18 @@ public class PageContextImpl extends PageContext
       _out = null;
       _topOut = null;
       _nodeEnv = null;
+      
       _jspOutputStream.release();
       AbstractResponseStream responseStream = _responseStream;
       _responseStream = null;
-
-      if (_responseAdapter != null) {
+      
+      ToCharResponseAdapter resAdapt = _responseAdapter;
+      _responseAdapter = null;
+      if (resAdapt != null) {
         // jsp/15l3
-        _responseAdapter.finish();
+        resAdapt.finish();
 	//_responseAdapter.close();
-	ToCharResponseAdapter resAdapt = _responseAdapter;
+	
 	ToCharResponseAdapter.free(resAdapt);
       }
 

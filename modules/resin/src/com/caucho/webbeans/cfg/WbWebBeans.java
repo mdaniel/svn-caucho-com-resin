@@ -73,6 +73,9 @@ public class WbWebBeans {
     = new ArrayList<ComponentImpl>();
 
   private ArrayList<WbInterceptor> _enabledInterceptors;
+  
+  private ArrayList<Class> _decoratorList
+    = new ArrayList<Class>();
 
   private ArrayList<Class> _pendingClasses
     = new ArrayList<Class>();
@@ -186,6 +189,14 @@ public class WbWebBeans {
   }
 
   /**
+   * Adds the decorators
+   */
+  public Decorators createDecorators()
+  {
+    return new Decorators();
+  }
+
+  /**
    * Returns the enabled interceptors
    */
   public ArrayList<WbInterceptor> getEnabledInterceptors()
@@ -229,6 +240,13 @@ public class WbWebBeans {
       type.setPriority(0);
       _componentTypeList.add(type);
     }
+
+    for (Class cl : _decoratorList) {
+      DecoratorBean decorator = new DecoratorBean(_webBeansContainer, cl);
+
+      _webBeansContainer.addDecorator(decorator);
+    }
+    _decoratorList.clear();
 
     update();
   }
@@ -321,12 +339,44 @@ public class WbWebBeans {
   }
 
   public class Interceptors {
+    public void addCustomBean(CustomBeanConfig config)
+    {
+      Class cl = config.getClassType();
+      
+      if (cl.isInterface())
+	throw new ConfigException(L.l("'{0}' is not valid because <Interceptors> can only contain interceptor implementations",
+				      cl.getName()));
+
+      if (! cl.isAnnotationPresent(Interceptor.class))
+	throw new ConfigException(L.l("'{0}' must have an @Interceptor annotation because it is an interceptor implementation",
+				      cl.getName()));
+
+      addInterceptor(cl);
+    }
+    
     public void addInterceptor(Class cl)
     {
       if (_enabledInterceptors == null)
 	_enabledInterceptors = new ArrayList<WbInterceptor>();
     
       _enabledInterceptors.add(new WbInterceptor(cl));
+    }
+  }
+
+  public class Decorators {
+    public void addCustomBean(CustomBeanConfig config)
+    {
+      Class cl = config.getClassType();
+      
+      if (cl.isInterface())
+	throw new ConfigException(L.l("'{0}' is not valid because <Decorators> can only contain decorator implementations",
+				      cl.getName()));
+
+      if (! cl.isAnnotationPresent(Decorator.class))
+	throw new ConfigException(L.l("'{0}' must have an @Decorator annotation because it is a decorator implementation",
+				      cl.getName()));
+
+      _decoratorList.add(cl);
     }
   }
 
