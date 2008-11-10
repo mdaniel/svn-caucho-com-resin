@@ -2527,8 +2527,11 @@ public abstract class AbstractHttpRequest
     try {
       SessionImpl session = _session;
 
-      // server/0219, but needed for memory
-      _invocation = null;
+      // server/0219, needed for memory, but also comet
+      Connection conn = getConnection();
+
+      if (conn.getController() == null)
+	_invocation = null;
       
       if (session != null)
         session.finish();

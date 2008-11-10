@@ -1250,18 +1250,16 @@ public class Port
    */
   public boolean allowKeepalive(long acceptStartTime)
   {
-    synchronized (_keepaliveCountLock) {
-      if (! _lifecycle.isActive())
-	return false;
-      else if (acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime())
-	return false;
-      else if (_keepaliveMax <= _keepaliveCount)
-	return false;
-      else if (_connectionMax <= _connectionCount + _minSpareConnection)
-	return false;
-      else
-	return true;
-    }
+    if (! _lifecycle.isActive())
+      return false;
+    else if (acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime())
+      return false;
+    else if (_keepaliveMax <= _keepaliveCount)
+      return false;
+    else if (_connectionMax <= _connectionCount + _minSpareConnection)
+      return false;
+    else
+      return true;
   }
 
   /**
@@ -1504,13 +1502,16 @@ public class Port
       boolean isStart;
 
       try {
-        // need delay to avoid spawing too many threads over a short time,
-        // when the load doesn't justify it
-        Thread.yield();
 	
         // Thread.sleep(10);
 
         synchronized (this) {
+	  // need delay to avoid spawning too many threads over a short time,
+	  // when the load doesn't justify it
+	  if (_idleThreadCount > 0) {
+	    wait(1);
+	  }
+	  
           isStart = _startThreadCount + _idleThreadCount < _acceptThreadMin;
           if (_connectionMax <= _connectionCount)
             isStart = false;

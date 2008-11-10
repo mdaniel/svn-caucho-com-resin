@@ -37,6 +37,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -67,7 +68,7 @@ public class ServletInvocation {
   private String _servletName;
   private FilterChain _filterChain;
 
-  private long _requestCount;
+  private AtomicLong _requestCount = new AtomicLong();
 
   private HashMap<String,String> _securityRoleMap;
 
@@ -230,7 +231,7 @@ public class ServletInvocation {
    */
   public long getRequestCount()
   {
-    return _requestCount;
+    return _requestCount.get();
   }
 
   /**
@@ -250,9 +251,7 @@ public class ServletInvocation {
   public void service(ServletRequest request, ServletResponse response)
     throws IOException, ServletException
   {
-    synchronized (this) {
-      _requestCount++;
-    }
+    _requestCount.incrementAndGet();
 
     ThreadLocal<ServletRequest> requestThreadLocal = _requestThreadLocal;
     ServletRequest oldRequest = requestThreadLocal.get();

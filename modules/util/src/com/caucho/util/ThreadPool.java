@@ -30,6 +30,7 @@
 package com.caucho.util;
 
 import com.caucho.config.ConfigException;
+import com.caucho.util.Alarm;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -48,6 +49,8 @@ public class ThreadPool {
   private static final int DEFAULT_THREAD_MAX = 8192;
   private static final int DEFAULT_THREAD_IDLE_MIN = 10;
   private static final int DEFAULT_THREAD_IDLE_GAP = 5;
+
+  private static final long OVERFLOW_TIMEOUT = 5000L;
 
   private static ThreadPool _globalThreadPool;
 
@@ -88,6 +91,9 @@ public class ThreadPool {
   private int _idleCount;
   // number of threads which are in the process of starting
   private int _startCount;
+
+  // time before a thread can expire itself
+  private long _threadIdleOverflowExpire;
 
   private final Object _executorLock = new Object();
   // number of executor tasks running
@@ -673,7 +679,10 @@ public class ThreadPool {
 	    isIdle = true;
 	  
 	    synchronized (_idleLock) {
-	      if (_threadIdleMax < _idleCount) {
+	      long now = Alarm.getCurrentTime();
+	      if (_threadIdleMax < _idleCount
+		  && _threadIdleOverflowExpire < now) {
+		_threadIdleOverflowExpire = now + OVERFLOW_TIMEOUT;
 		return;
 	      }
 	      
@@ -731,9 +740,14 @@ public class ThreadPool {
 
 	    // check to see if we're over the idle thread limit
 	    synchronized (_idleLock) {
+	      long now = Alarm.getCurrentTime();
+	      
 	      if (_isIdle
-		  && (_threadIdleMax < _idleCount
+		  && ((_threadIdleMax < _idleCount
+		       && _threadIdleOverflowExpire < now)
 		      || _resetCount != _threadResetCount)) {
+		_threadIdleOverflowExpire = now + OVERFLOW_TIMEOUT;
+		
 		isDead = true;
 
 		isReset = _resetCount != _threadResetCount;
@@ -805,7 +819,10 @@ public class ThreadPool {
       if (doStart) {
 	try {
 	  Item poolItem = new Item();
-    
+
+	  _threadIdleOverflowExpire
+	    = Alarm.getCurrentTime() + OVERFLOW_TIMEOUT;
+	  
 	  Thread thread = new Thread(poolItem, poolItem.getName());
 	  thread.setDaemon(true);
 

@@ -337,7 +337,7 @@ public class HttpRequest extends AbstractHttpRequest
 	Connection conn = getConnection();
 	controller = conn.getController();
 
-	if (controller == null) {
+	if (controller == null || _invocation == null) {
 	  killKeepalive();
 	}
 	else if (_invocation.doResume(this, _response)) {
