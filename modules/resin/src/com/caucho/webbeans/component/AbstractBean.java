@@ -97,6 +97,8 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   
   private HashMap<Method,ArrayList<WbInterceptor>> _interceptorMap;
 
+  private ArrayList<ProducesComponent> _producesList;
+
   private boolean _isNullable;
 
   protected ScopeContext _scope;
@@ -293,6 +295,12 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     initStereotypes();
 
     initDefault();
+
+    if (_producesList != null) {
+      for (ProducesComponent producesBean : _producesList) {
+	_webBeans.addBean(producesBean);
+      }
+    }
   }
 
   protected void initDefault()
@@ -622,18 +630,20 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
       if (! method.isAnnotationPresent(Produces.class))
 	continue;
 
-      if (method.isAnnotationPresent(In.class))
-	throw ConfigException.create(method, L.l("@Produces method may not have an @In annotation."));
-
-      WebBeansContainer webBeans = (WebBeansContainer) getManager();
-
-
-      ProducesComponent comp = new ProducesComponent(webBeans, this, method);
-
-      comp.init();
-
-      webBeans.addBean(comp);
+      addProduces(method, method.getAnnotations());
     }
+  }
+
+  protected void addProduces(Method method, Annotation []annList)
+  {
+    ProducesComponent comp
+      = new ProducesComponent(_webBeans, this, method, annList);
+
+    comp.init();
+
+    if (_producesList == null)
+      _producesList = new ArrayList<ProducesComponent>();
+    _producesList.add(comp);
   }
 
   /**

@@ -53,8 +53,10 @@ public class ProducesComponent extends ComponentImpl {
   private static final L10N L = new L10N(ProducesComponent.class);
 
   private static final Object []NULL_ARGS = new Object[0];
+  
   private final Bean _producer;
   private final Method _method;
+  private final Annotation []_annotationList;
 
   private Bean []_args;
 
@@ -62,12 +64,14 @@ public class ProducesComponent extends ComponentImpl {
 
   public ProducesComponent(WebBeansContainer webBeans,
 			   Bean producer,
-			   Method method)
+			   Method method,
+			   Annotation []annList)
   {
     super(webBeans);
 
     _producer = producer;
     _method = method;
+    _annotationList = annList;
 
     setTargetType(method.getGenericReturnType());
   }
@@ -87,7 +91,7 @@ public class ProducesComponent extends ComponentImpl {
   {
     introspectTypes(getTargetType());
     
-    Annotation []annotations = _method.getAnnotations();
+    Annotation []annotations = _annotationList;
 
     introspectAnnotations(annotations);
   }

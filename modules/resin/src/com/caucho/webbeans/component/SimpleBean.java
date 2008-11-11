@@ -64,6 +64,9 @@ public class SimpleBean extends ComponentImpl
 
   private Class _instanceClass;
 
+  private ArrayList<SimpleBeanMethod> _methodList
+    = new ArrayList<SimpleBeanMethod>();
+
   private Constructor _ctor;
   private ConfigProgram []_newArgs;
   private Arg []_ctorArgs;
@@ -144,6 +147,30 @@ public class SimpleBean extends ComponentImpl
       _newArgs = new ConfigProgram[args.size()];
       args.toArray(_newArgs);
     }
+  }
+
+  /**
+   * Adds a configured method
+   */
+  public void addMethod(SimpleBeanMethod simpleMethod)
+  {
+    Method method = simpleMethod.getMethod();
+    Annotation []annotations = simpleMethod.getAnnotations();
+
+    if (isAnnotationPresent(annotations, Produces.class))
+      addProduces(method, annotations);
+    else
+      System.out.println("M: " + method);
+  }
+
+  private boolean isAnnotationPresent(Annotation []annotations, Class type)
+  {
+    for (Annotation ann : annotations) {
+      if (ann.annotationType().equals(type))
+	return true;
+    }
+
+    return false;
   }
 
   /**

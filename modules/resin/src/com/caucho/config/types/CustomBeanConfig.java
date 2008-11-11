@@ -185,11 +185,14 @@ public class CustomBeanConfig {
     }
     
     if (name.getNamespaceURI().equals(_name.getNamespaceURI())) {
-      if (_configType.getAttribute(name) == null)
+      Method method;
+      
+      if (_configType.getAttribute(name) != null)
+	addInitProgram(program);
+      else {
 	throw new ConfigException(L.l("'{0}' is an unknown field for '{1}'",
 				      name.getLocalName(), _class.getName()));
-      
-      addInitProgram(program);
+      }
     }
 
     else
@@ -251,6 +254,14 @@ public class CustomBeanConfig {
     if (metaType == null)
       throw new ConfigException(L.l("'{0}' is an invalid annotation.  An annotation must be a @BindingType, @ScopeType, @DeploymentType",
 				    ann));
+  }
+
+  public void addMethod(CustomBeanMethodConfig methodConfig)
+  {
+    Method method = methodConfig.getMethod();
+    Annotation []annList = methodConfig.getAnnotations();
+
+    _component.addMethod(new SimpleBeanMethod(method, annList));
   }
 
   private void addStereotype(Class type)
@@ -354,5 +365,10 @@ public class CustomBeanConfig {
       _component.setNewArgs(_args);
 
     _component.init();
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _class.getSimpleName() + "]";
   }
 }

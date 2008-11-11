@@ -64,6 +64,12 @@ public class AnnotationConfig implements InvocationHandler {
 
   private HashMap<String,Object> _valueMap = new HashMap<String,Object>(8);
   
+  public AnnotationConfig(Class annotationType)
+  {
+    this((AnnotationInterfaceType) TypeFactory.getType(annotationType),
+	 annotationType);
+  }
+
   public AnnotationConfig(AnnotationInterfaceType configType,
 			  Class annotationType)
   {

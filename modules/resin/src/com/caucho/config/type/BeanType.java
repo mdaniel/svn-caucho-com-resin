@@ -30,6 +30,7 @@
 package com.caucho.config.type;
 
 import java.beans.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.*;
@@ -568,6 +569,14 @@ public class BeanType extends ConfigType
       else if ((name.equals("addCustomBean")
 		&& paramTypes.length == 1
 		&& paramTypes[0].equals(CustomBeanConfig.class))) {
+	ConfigType customBeanType
+	  = TypeFactory.getType(CustomBeanConfig.class);
+
+	_addCustomBean = new CustomBeanAttribute(method, customBeanType);
+      }
+      else if ((name.equals("addAnnotation")
+		&& paramTypes.length == 1
+		&& paramTypes[0].equals(Annotation.class))) {
 	ConfigType customBeanType
 	  = TypeFactory.getType(CustomBeanConfig.class);
 

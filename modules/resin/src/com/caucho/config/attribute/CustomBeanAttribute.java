@@ -29,11 +29,13 @@
 
 package com.caucho.config.attribute;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 
 import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.type.*;
+import com.caucho.config.types.AnnotationConfig;
 import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
@@ -85,11 +87,16 @@ public class CustomBeanAttribute extends Attribute {
 				    className, qName), e);
     }
 
-    CustomBeanConfig config = new CustomBeanConfig(qName, cl);
+    if (Annotation.class.isAssignableFrom(cl)) {
+      return new AnnotationConfig(cl);
+    }
+    else {
+      CustomBeanConfig config = new CustomBeanConfig(qName, cl);
 
-    // config.setScope("singleton");
+      // config.setScope("singleton");
 
-    return config;
+      return config;
+    }
   }
   
   /**
@@ -117,6 +124,9 @@ public class CustomBeanAttribute extends Attribute {
     throws ConfigException
   {
     try {
+      if (value instanceof AnnotationConfig)
+	value = ((AnnotationConfig) value).replace();
+      
       if (_setMethod != null)
 	_setMethod.invoke(bean, value);
     } catch (Exception e) {

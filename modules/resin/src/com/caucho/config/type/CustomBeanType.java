@@ -76,6 +76,8 @@ public class CustomBeanType extends ConfigType
   private final Class _beanClass;
 
   private final ConfigType _beanType;
+
+  private String _namespaceURI;
   
   private HashMap<QName,Attribute> _nsAttributeMap
     = new HashMap<QName,Attribute>();
@@ -88,6 +90,9 @@ public class CustomBeanType extends ConfigType
     _beanClass = beanClass;
 
     _beanType = TypeFactory.getType(beanClass);
+
+    int p = beanClass.getName().lastIndexOf('.');
+    _namespaceURI = "urn:java:" + beanClass.getName().substring(0, p);
 
     _nsAttributeMap.put(R_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
     _nsAttributeMap.put(W_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
@@ -130,18 +135,33 @@ public class CustomBeanType extends ConfigType
       return CustomBeanProgramAttribute.ATTRIBUTE;
     }
     
-    if (qName.getNamespaceURI() != null
-	&& qName.getNamespaceURI().startsWith("urn:java:")) {
-      Class cl = createClass(qName);
+    if (qName.getNamespaceURI() == null
+	|| ! qName.getNamespaceURI().startsWith("urn:java:"))
+      return null;
 
-      if (cl == null)
-	throw new ConfigException(L.l("'{0}' cannot be instantiated because it does not map to a known class",
-				      qName));
+    Method method = null;
+    if (qName.getNamespaceURI().equals(_namespaceURI)
+	&& (method = findMethod(qName.getLocalName())) != null) {
+      return new CustomBeanMethodAttribute(_beanClass, method);
+    }
 
-      if (Annotation.class.isAssignableFrom(cl))
-	return new CustomBeanAnnotationAttribute(cl);
-      else
-	return new CustomBeanArgAttribute(cl);
+    Class cl = createClass(qName);
+
+    if (cl == null)
+      throw new ConfigException(L.l("'{0}' cannot be instantiated because it does not map to a known class",
+				    qName));
+
+    if (Annotation.class.isAssignableFrom(cl))
+      return new CustomBeanAnnotationAttribute(cl);
+    else
+      return new CustomBeanArgAttribute(cl);
+  }
+
+  private Method findMethod(String name)
+  {
+    for (Method method : _beanClass.getMethods()) {
+      if (method.getName().equals(name))
+	return method;
     }
 
     return null;
