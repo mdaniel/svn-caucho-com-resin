@@ -55,6 +55,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.ArrayList;
@@ -165,7 +166,7 @@ public class Port
   private volatile long _lifetimeWriteBytes;
 
   // total keepalive
-  private volatile int _keepaliveCount;
+  private AtomicInteger _keepaliveCount = new AtomicInteger();
   // thread-based
   private volatile int _keepaliveThreadCount;
   private final Object _keepaliveCountLock = new Object();
@@ -855,9 +856,7 @@ public class Port
    */
   public int getKeepaliveCount()
   {
-    synchronized (_keepaliveCountLock) {
-      return _keepaliveCount;
-    }
+    return _keepaliveCount.get();
   }
 
   public Lifecycle getLifecycleState()
@@ -1355,18 +1354,16 @@ public class Port
    */
   public boolean allowKeepalive(long acceptStartTime)
   {
-    synchronized (_keepaliveCountLock) {
-      if (! _lifecycle.isActive())
-	return false;
-      else if (acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime())
-	return false;
-      else if (_keepaliveMax <= _keepaliveCount)
-	return false;
-      else if (_connectionMax <= _connectionCount + _minSpareConnection)
-	return false;
-      else
-	return true;
-    }
+    if (! _lifecycle.isActive())
+      return false;
+    else if (acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime())
+      return false;
+    else if (_keepaliveMax <= _keepaliveCount)
+      return false;
+    else if (_connectionMax <= _connectionCount + _minSpareConnection)
+      return false;
+    else
+      return true;
   }
 
   /**
@@ -1374,34 +1371,32 @@ public class Port
    */
   boolean keepaliveBegin(TcpConnection conn, long acceptStartTime)
   {
-    synchronized (_keepaliveCountLock) {
-      if (! _lifecycle.isActive())
-        return false;
-      else if (_connectionMax <= _connectionCount + _minSpareConnection) {
-	log.warning(conn + " failed keepalive, connection-max=" + _connectionCount);
+    if (! _lifecycle.isActive())
+      return false;
+    else if (_connectionMax <= _connectionCount + _minSpareConnection) {
+      log.warning(conn + " failed keepalive, connection-max=" + _connectionCount);
 	
-        return false;
-      }
-      else if (false &&
-	       acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime()) {
-	// #2262 - skip this check to avoid confusing the load balancer
-	// the keepalive check is in allowKeepalive
-	log.warning(conn + " failed keepalive, delay=" + (Alarm.getCurrentTime() - acceptStartTime));
-	
-	return false;
-      }
-      else if (false && _keepaliveMax <= _keepaliveCount) {
-	// #2262 - skip this check to avoid confusing the load balancer
-	// the keepalive check is in allowKeepalive
-	log.warning(conn + " failed keepalive, keepalive-max " + _keepaliveCount);
-	
-        return false;
-      }
-
-      _keepaliveCount++;
-
-      return true;
+      return false;
     }
+    else if (false &&
+	     acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime()) {
+      // #2262 - skip this check to avoid confusing the load balancer
+      // the keepalive check is in allowKeepalive
+      log.warning(conn + " failed keepalive, delay=" + (Alarm.getCurrentTime() - acceptStartTime));
+	
+      return false;
+    }
+    else if (false && _keepaliveMax <= _keepaliveCount) {
+      // #2262 - skip this check to avoid confusing the load balancer
+      // the keepalive check is in allowKeepalive
+      log.warning(conn + " failed keepalive, keepalive-max " + _keepaliveCount);
+	
+      return false;
+    }
+
+    _keepaliveCount.incrementAndGet();
+
+    return true;
   }
 
   /**
@@ -1409,16 +1404,11 @@ public class Port
    */
   void keepaliveEnd(TcpConnection conn)
   {
-    synchronized (_keepaliveCountLock) {
-      _keepaliveCount--;
+    long count = _keepaliveCount.decrementAndGet();
 
-      if (_keepaliveCount < 0) {
-        int count = _keepaliveCount;
-        _keepaliveCount = 0;
-
-        log.warning(conn + " internal error: negative keepalive count " + count);
-	Thread.dumpStack();
-      }
+    if (count < 0) {
+      log.warning(conn + " internal error: negative keepalive count " + count);
+      Thread.dumpStack();
     }
   }
   

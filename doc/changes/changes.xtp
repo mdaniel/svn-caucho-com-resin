@@ -13,6 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>thread: thread pool load smoothing (rep by Martin Thompson)</li>
 <li>boot: watchdog kill NPE (#3009, rep by stbu)</li>
 <li>persistent-store: sessions larger than 4M were not properly persisted (#3025, rep by mate)</li>
 <li>memory: removed potential ThreadLocal leak with SecurityContext (#3031, rep by Mattias Jiderhamn)</li>
