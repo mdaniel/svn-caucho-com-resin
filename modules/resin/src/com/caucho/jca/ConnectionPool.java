@@ -604,7 +604,7 @@ public class ConnectionPool extends AbstractManagedObject
           log.log(Level.FINE, e.toString(), e);
         } finally {
           synchronized (_pool) {
-            _pool.notify();
+            _pool.notifyAll();
           }
 	}
       }
@@ -966,7 +966,7 @@ public class ConnectionPool extends AbstractManagedObject
         if (poolItem != null)
           _pool.add(poolItem);
 
-        _pool.notify();
+        _pool.notifyAll();
       }
     }
   }
@@ -1019,7 +1019,7 @@ public class ConnectionPool extends AbstractManagedObject
 
     synchronized (_pool) {
       _pool.remove(item);
-      _pool.notify();
+      _pool.notifyAll();
     }
 
     try {
