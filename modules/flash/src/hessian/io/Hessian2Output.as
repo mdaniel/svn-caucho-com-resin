@@ -58,16 +58,24 @@ package hessian.io
   import hessian.util.IntrospectionUtil;
 
   /**
-   * A writer for the Hessian 1.0 protocol.  A Hessian 2.0 compatible reader
-   * must be able to read the output of this implementation.
-   *
+   * A writer for the Hessian 2.0 protocol.
    */
-  public class HessianOutput extends AbstractHessianOutput
+  public class Hessian2Output extends AbstractHessianOutput
   {
+    private const SIZE:int = 4096;
+
     private var _out:IDataOutput;
-    private var _version:int = 1;
     private var _refs:Dictionary;
+
+    private var _classRefs:Object;
+    private var _numClassRefs:int = 0;
+
+    private var _typeRefs:Dictionary;
     private var _numRefs:int = 0;
+
+    private var _buffer:ByteArray = new ByteArray();
+
+    private var _isStreaming:Boolean;
 
     /**
      * Creates a new HessianOutput.
@@ -77,7 +85,7 @@ package hessian.io
      * @see #init(IDataOutput)
      *
      */
-    public function HessianOutput(out:IDataOutput = null)
+    public function Hessian2Output(out:IDataOutput = null):void
     {
       init(out);
     }
@@ -100,162 +108,28 @@ package hessian.io
      *
      * <p>
      *   <code><pre>
-     *   c major minor
-     *   m b16 b8 method-namek
-     *   </pre></code>
-     * </p>
-     *
-     * @param method The method name to call.
-    public override function startCall(method:String = null):void
-    {
-      if (method == null) {
-        _out.writeByte('c'.charCodeAt());
-        _out.writeByte(0);
-        _out.writeByte(1);
-      }
-      else {
-        _out.writeByte('c'.charCodeAt());
-        _out.writeByte(_version);
-        _out.writeByte(0);
-
-        _out.writeByte('m'.charCodeAt());
-        var len:int = method.length;
-        _out.writeByte(len >> 8);
-        _out.writeByte(len);
-        printString(method, 0, len);
-      }
-    }
-     */
-
-    /**
-     * Writes the method tag.
-     *
-     * <p>
-     *   <code><pre>
-     *   m b16 b8 method-name
+     *   C
+     *   string # method name
+     *   int    # arg count
      *   </pre></code>
      * </p>
      *
      * @param method The method name to call.
      */
-    public function writeMethod(method:String):void
+    public override function startCall(method:String, length:int):void
     {
-      _out.writeByte('m'.charCodeAt());
-      var len:int = method.length;
-      _out.writeByte(len >> 8);
-      _out.writeByte(len);
-      printString(method, 0, len);
-    }
+      var offset:int = _buffer.position;
 
-    /**
-     * Completes the method call.
-     *
-     * <p>
-     *   <code><pre>
-     *   z
-     *   </pre></code>
-     * </p>
-     *
-     */
-    public override function completeCall():void
-    {
-      _out.writeByte('z'.charCodeAt());
-    }
-
-    /**
-     * Starts the reply.
-     *
-     * <p>A successful completion will have a single value:
-     *   <pre>
-     *   r
-     *   </pre>
-     * </p>
-     */
-    public override function startReply():void
-    {
-      _out.writeByte('r'.charCodeAt());
-      _out.writeByte(1);
-      _out.writeByte(0);
-    }
-
-    /**
-     * Completes reading the reply.
-     *
-     * <p>A successful completion will have a single value:
-     *   <pre>
-     *   z
-     *   </pre>
-     * </p>
-     */
-    public override function completeReply():void
-    {
-      _out.writeByte('z'.charCodeAt());
-    }
-
-    /**
-     * Writes a header name.  The header value must immediately follow.
-     *
-     * <p>
-     *   <code><pre>
-     *   H b16 b8 foo <em>value</em>
-     *   </pre></code>
-     * </p>
-     *
-     * @param name The header name.
-     */
-    public override function writeHeader(name:String):void
-    {
-      var len:int = name.length;
-
-      _out.writeByte('H'.charCodeAt());
-      _out.writeByte(len >> 8);
-      _out.writeByte(len);
-
-      printString(name);
-    }
-
-    /**
-     * Writes a fault.  
-     *
-     * <p>
-     *   The fault will be written
-     *   as a descriptive string followed by an object:
-     *   <code><pre>
-     *   f
-     *   &lt;string>code
-     *   &lt;string>the fault code
-     *
-     *   &lt;string>message
-     *   &lt;string>the fault mesage
-     *
-     *   &lt;string>detail
-     *   mt\x00\xnnjavax.ejb.FinderException
-     *       ...
-     *   z
-     *   z
-     *   </pre></code>
-     * </p>
-     *
-     * @param code The fault code, a three digit number.
-     * @param message The fault message.
-     * @param detail The fault detail.
-     */
-    public override function writeFault(code:String, 
-                                        message:String, 
-                                        detail:Object):void
-    {
-      _out.writeByte('f'.charCodeAt());
-      writeString("code");
-      writeString(code);
-
-      writeString("message");
-      writeString(message);
-
-      if (detail != null) {
-        writeString("detail");
-        writeObject(detail);
+      if (SIZE < offset + 32) {
+        flush();
+        offset = _buffer.position; // XXX this doesn't make sense
       }
-      _out.writeByte('z'.charCodeAt());
+
+      var buffer:ByteArray = _buffer;
+
+      buffer.writeByte('C'.charCodeAt());
+      writeString(method);
+      writeInt(length);
     }
 
     /**
@@ -350,12 +224,62 @@ package hessian.io
         className = className.replace("::", ".");
       }
 
-      writeObjectBegin(className, type);
-      writeObject10(object, type);
+      var def:ObjectDefinition = writeObjectBegin(className, type);
+      writeInstance(object, def);
     }
 
-    private function writeObject10(obj:Object, type:XML):void
+    /**
+      * Writes the definition of the object before writing the object itself,
+      * which may be the explicit definition if the type has not yet been
+      * encountered or it may just be a reference to the object if we have
+      * seen it before.
+      */
+    public override function writeObjectBegin(className:String, 
+                                              type:XML):ObjectDefinition
     {
+      if (_classRefs == null)
+        _classRefs = new Object();
+
+      var ref:int = -1;
+      var def:ObjectDefinition = _classRefs[className];
+
+      if (def != null) {
+        if (SIZE < _buffer.position + 32)
+          flush();
+
+        ref = def.ref;
+
+        if (ref <= Hessian2Constants.OBJECT_DIRECT_MAX) {
+          _buffer.writeByte(Hessian2Constants.BC_OBJECT_DIRECT + ref);
+        }
+        else {
+          _buffer.writeByte(0);
+          writeInt(ref);
+        }
+      }
+      else {
+        ref = _numClassRefs++;
+
+        var fieldNames:Array = getFieldNames(type);
+        def = new ObjectDefinition(className, fieldNames, ref);
+        _classRefs[className] = def;
+
+        if (SIZE < _buffer.position + 32)
+          flush();
+
+        _buffer.writeByte('C'.charCodeAt());
+
+        writeString(className);
+
+        def.write(this);
+      }
+
+      return def;
+    }
+
+    private function getFieldNames(type:XML):Array
+    {
+      var fieldNames:Array = new Array();
       var metadata:XMLList = null;
       var variables:XMLList = type.variable;
       var accessors:XMLList = type.accessor;	
@@ -369,10 +293,9 @@ package hessian.io
           continue;
 
         key = variable.@name;
-        if (key != "hessianTypeName") {
-          writeObject(key);
-          writeObject(obj[key]);
-        }
+
+        if (key != "hessianTypeName")
+          fieldNames.push(key);
       }
 
       // This is needed to handle Bindable properties:
@@ -387,23 +310,28 @@ package hessian.io
         if (IntrospectionUtil.getMetadata(metadata, "Bindable") != null) {
           key = accessor.@name;
 
-          if (key != "hessianTypeName") {
-            writeObject(key);
-            writeObject(obj[key]);
-          }
+          if (key != "hessianTypeName")
+            fieldNames.push(key);
         }
       }
 
-      for (key in obj) {
-        if (key != "hessianTypeName") {
-          writeObject(key);
-          writeObject(obj[key]);
-        }
-      }
-
-      writeMapEnd();
+      return fieldNames;
     }
 
+    private function writeInstance(instance:Object, def:ObjectDefinition):void
+    {
+      for each (var fieldName:String in def.fieldNames)
+        writeObject(instance[fieldName]);
+
+      /* 
+         XXX per-instance variables
+      for (key in obj) {
+        if (key != "hessianTypeName")
+          writeObject(instance[key]);
+      }
+      */
+    }
+    
     /**
      * Writes the list header to the stream.  List writers will call
      * <code>writeListBegin</code> followed by the list contents and then
@@ -429,22 +357,40 @@ package hessian.io
     public override function writeListBegin(length:int, 
                                             type:String = null):Boolean
     {
-      _out.writeByte('V'.charCodeAt());
+      flushIfFull();
 
-      if (type != null) {
-        _out.writeByte('t'.charCodeAt());
-        printLenString(type);
+      if (length < 0) {
+        if (type != null) {
+          _buffer.writeByte(Hessian2Constants.BC_LIST_VARIABLE);
+          writeType(type);
+        }
+        else 
+          _buffer.writeByte(Hessian2Constants.BC_LIST_VARIABLE_UNTYPED);
+
+        return true;
       }
+      else if (length <= Hessian2Constants.LIST_DIRECT_MAX) {
+        if (type != null) {
+          _buffer.writeByte(Hessian2Constants.BC_LIST_DIRECT + length);
+          writeType(type);
+        }
+        else 
+          _buffer.writeByte(Hessian2Constants.BC_LIST_DIRECT_UNTYPED + length);
 
-      if (length >= 0) {
-        _out.writeByte('l'.charCodeAt());
-        _out.writeByte(length >> 24);
-        _out.writeByte(length >> 16);
-        _out.writeByte(length >> 8);
-        _out.writeByte(length);
+        return false;
       }
+      else {
+        if (type != null) {
+          _buffer.writeByte(Hessian2Constants.BC_LIST_FIXED);
+          writeType(type);
+        }
+        else 
+          _buffer.writeByte(Hessian2Constants.BC_LIST_FIXED_UNTYPED);
 
-      return true;
+        writeInt(length);
+
+        return false;
+      }
     }
 
     /**
@@ -452,7 +398,9 @@ package hessian.io
      */
     public override function writeListEnd():void
     {
-      _out.writeByte('z'.charCodeAt());
+      flushIfFull();
+
+      _buffer.writeByte(Hessian2Constants.BC_END);
     }
 
     /**
@@ -470,13 +418,15 @@ package hessian.io
      */
     public override function writeMapBegin(type:String):void
     {
-      _out.writeByte('M'.charCodeAt());
-      _out.writeByte('t'.charCodeAt());
+      if (SIZE < _buffer.position + 32)
+        flush();
 
-      if (type == null || type == "Object")
-        type = "";
-
-      printLenString(type);
+      if (type != null && type != "Object") {
+        _buffer.writeByte(Hessian2Constants.BC_MAP);
+        writeType(type);
+      }
+      else 
+        _buffer.writeByte(Hessian2Constants.BC_MAP_UNTYPED);
     }
 
     /**
@@ -484,7 +434,43 @@ package hessian.io
      */
     public override function writeMapEnd():void
     {
-      _out.writeByte('z'.charCodeAt());
+      flushIfFull();
+
+      _buffer.writeByte(Hessian2Constants.BC_END);
+    }
+
+    /**
+     * <code><pre>
+     * type ::= string
+     *      ::= int
+     * </code></pre>
+     */
+    private function writeType(type:String):void
+    {
+      flushIfFull();
+
+      var len:int = type.length;
+
+      if (len == 0)
+        throw new IllegalOperationError("empty type is not allowed");
+
+      if (_typeRefs == null)
+        _typeRefs = new Dictionary();
+
+      var typeRef:int = -1;
+      var typeRefV:Object = _typeRefs[type];
+
+      if (typeRefV != null) {
+        typeRef = typeRefV as int;
+
+        writeInt(typeRef);
+      }
+      else {
+        typeRef = typeRefV as int;
+        _typeRefs.put[type] = typeRef;
+
+        writeString(type);
+      }
     }
 
     /**
@@ -502,10 +488,13 @@ package hessian.io
      */
     public override function writeBoolean(value:Boolean):void
     {
+      if (SIZE < _buffer.position + 16)
+        flush();
+
       if (value)
-        _out.writeByte('T'.charCodeAt());
+        _buffer.writeByte('T'.charCodeAt());
       else
-        _out.writeByte('F'.charCodeAt());
+        _buffer.writeByte('F'.charCodeAt());
     }
 
     /**
@@ -522,11 +511,31 @@ package hessian.io
      */
     public override function writeInt(value:int):void
     {
-      _out.writeByte('I'.charCodeAt());
-      _out.writeByte(value >> 24);
-      _out.writeByte(value >> 16);
-      _out.writeByte(value >> 8);
-      _out.writeByte(value);
+      if (SIZE < _buffer.position + 16)
+        flush();
+
+      if (Hessian2Constants.INT_DIRECT_MIN <= value && 
+          Hessian2Constants.INT_DIRECT_MAX >= value) {
+        _buffer.writeByte(value + Hessian2Constants.BC_INT_ZERO);
+      }
+      else if (Hessian2Constants.INT_BYTE_MIN <= value && 
+               Hessian2Constants.INT_BYTE_MAX >= value) {
+        _buffer.writeByte((value >> 8) + Hessian2Constants.BC_INT_BYTE_ZERO);
+        _buffer.writeByte(value);
+      }
+      else if (Hessian2Constants.INT_SHORT_MIN <= value && 
+               Hessian2Constants.INT_SHORT_MAX >= value) {
+        _buffer.writeByte((value >> 16) + Hessian2Constants.BC_INT_SHORT_ZERO);
+        _buffer.writeByte(value >> 8)
+        _buffer.writeByte(value);
+      }
+      else {
+        _buffer.writeByte('I'.charCodeAt());
+        _buffer.writeByte(value >> 24);
+        _buffer.writeByte(value >> 16);
+        _buffer.writeByte(value >> 8);
+        _buffer.writeByte(value);
+      }
     }
 
     /**
@@ -543,15 +552,42 @@ package hessian.io
      */
     public override function writeLong(value:Number):void
     {
-      _out.writeByte('L'.charCodeAt());
-      _out.writeByte(0xFF & (value >> 56));
-      _out.writeByte(0xFF & (value >> 48));
-      _out.writeByte(0xFF & (value >> 40));
-      _out.writeByte(0xFF & (value >> 32));
-      _out.writeByte(0xFF & (value >> 24));
-      _out.writeByte(0xFF & (value >> 16));
-      _out.writeByte(0xFF & (value >> 8));
-      _out.writeByte(0xFF & (value));
+      if (SIZE < _buffer.position + 16)
+        flush();
+
+      if (Hessian2Constants.LONG_DIRECT_MIN <= value && 
+          Hessian2Constants.LONG_DIRECT_MAX >= value) {
+        _buffer.writeByte(value + Hessian2Constants.BC_LONG_ZERO);
+      }
+      else if (Hessian2Constants.LONG_BYTE_MIN <= value && 
+               Hessian2Constants.LONG_BYTE_MAX >= value) {
+        _buffer.writeByte((value >> 8) + Hessian2Constants.BC_LONG_BYTE_ZERO);
+        _buffer.writeByte(value);
+      }
+      else if (Hessian2Constants.LONG_SHORT_MIN <= value && 
+               Hessian2Constants.LONG_SHORT_MAX >= value) {
+        _buffer.writeByte((value >> 16) + Hessian2Constants.BC_LONG_SHORT_ZERO);
+        _buffer.writeByte(value >> 8)
+        _buffer.writeByte(value);
+      }
+      else if (-0x80000000 <= value && value <= 0x7fffffff) {
+        _buffer.writeByte(Hessian2Constants.BC_LONG_INT);
+        _buffer.writeByte(value >> 24);
+        _buffer.writeByte(value >> 16);
+        _buffer.writeByte(value >> 8);
+        _buffer.writeByte(value);
+      }
+      else {
+        _buffer.writeByte('L'.charCodeAt());
+        _buffer.writeByte(value >> 56);
+        _buffer.writeByte(value >> 48);
+        _buffer.writeByte(value >> 40);
+        _buffer.writeByte(value >> 32);
+        _buffer.writeByte(value >> 24);
+        _buffer.writeByte(value >> 16);
+        _buffer.writeByte(value >> 8);
+        _buffer.writeByte(value);
+      }
     }
 
     /**
@@ -568,10 +604,49 @@ package hessian.io
      */
     public override function writeDouble(value:Number):void
     {
+      if (SIZE < _buffer.position + 16)
+        flush();
+
+      var intValue:int = int(value);
+
+      if (intValue == value) {
+        if (intValue == 0) {
+          _buffer.writeByte(Hessian2Constants.BC_DOUBLE_ZERO);
+          return;
+        }
+        else if (intValue == 1) {
+          _buffer.writeByte(Hessian2Constants.BC_DOUBLE_ONE);
+          return;
+        }
+        else if (-0x80 <= intValue && intValue < 0x80) {
+          _buffer.writeByte(Hessian2Constants.BC_DOUBLE_BYTE);
+          _buffer.writeByte(intValue);
+          return;
+        }
+        else if (-0x8000 <= intValue && intValue < 0x8000) {
+          _buffer.writeByte(Hessian2Constants.BC_DOUBLE_SHORT);
+          _buffer.writeByte(intValue >> 8);
+          _buffer.writeByte(intValue);
+          return;
+        }
+      }
+
+      var mills:int = int(value * 1000);
+
+      if (0.001 * mills == value) {
+        _buffer.writeByte(Hessian2Constants.BC_DOUBLE_MILL);
+        _buffer.writeByte(mills >> 24);
+        _buffer.writeByte(mills >> 16);
+        _buffer.writeByte(mills >> 8);
+        _buffer.writeByte(mills);
+
+        return;
+      }
+
       var bits:ByteArray = Double.doubleToLongBits(value);
 
-      _out.writeByte('D'.charCodeAt());
-      _out.writeBytes(bits);
+      _buffer.writeByte('D'.charCodeAt());
+      _buffer.writeBytes(bits);
     }
 
     /**
@@ -579,7 +654,8 @@ package hessian.io
      *
      * <p>
      *   <code><pre>
-     *   T  b64 b56 b48 b40 b32 b24 b16 b8
+     *   date ::= d   b64 b56 b48 b40 b32 b24 b16 b8
+     *        ::= x65 b32 b24 b16 b8
      *   </pre></code>
      * </p>
      *
@@ -587,17 +663,37 @@ package hessian.io
      */
     public override function writeUTCDate(time:Number):void
     {
-      _out.writeByte('d'.charCodeAt());
+      if (SIZE < _buffer.position + 16)
+        flush();
+
+      if (time % 60000 == 0) {
+        // compact date ::= x65 b32 b24 b16 b8
+
+        var minutes:Number = time / 60000;
+        var shifted:Number = minutes / 0x80000000;
+
+        if ((shifted == 0) || (shifted == -1)) {
+          _buffer.writeByte(Hessian2Constants.BC_DATE_MINUTE);
+          _buffer.writeByte(minutes >> 24);
+          _buffer.writeByte(minutes >> 16);
+          _buffer.writeByte(minutes >> 8);
+          _buffer.writeByte(minutes);
+        }
+
+        return;
+      }
+
+      _buffer.writeByte(Hessian2Constants.BC_DATE);
 
       if (time >= 0) {
-        _out.writeByte(0xFF & (time / 0x100000000000000));
-        _out.writeByte(0xFF & (time / 0x1000000000000));
-        _out.writeByte(0xFF & (time / 0x10000000000));
-        _out.writeByte(0xFF & (time / 0x100000000));
-        _out.writeByte(0xFF & (time >> 24));
-        _out.writeByte(0xFF & (time >> 16));
-        _out.writeByte(0xFF & (time >> 8));
-        _out.writeByte(0xFF & (time));
+        _buffer.writeByte(time / 0x100000000000000);
+        _buffer.writeByte(time / 0x1000000000000);
+        _buffer.writeByte(time / 0x10000000000);
+        _buffer.writeByte(time / 0x100000000);
+        _buffer.writeByte(time >> 24);
+        _buffer.writeByte(time >> 16);
+        _buffer.writeByte(time >> 8);
+        _buffer.writeByte(time);
       }
       else {
         var abs:Number = Math.abs(time);
@@ -608,15 +704,15 @@ package hessian.io
 
         var lsi:Number = 0x100000000 - (abs % 0x100000000);
 
-        _out.writeByte(0xFF & (msi >> 24));
-        _out.writeByte(0xFF & (msi >> 16));
-        _out.writeByte(0xFF & (msi >> 8));
-        _out.writeByte(0xFF & (msi));
+        _buffer.writeByte(msi >> 24);
+        _buffer.writeByte(msi >> 16);
+        _buffer.writeByte(msi >> 8);
+        _buffer.writeByte(msi);
 
-        _out.writeByte(0xFF & (lsi >> 24));
-        _out.writeByte(0xFF & (lsi >> 16));
-        _out.writeByte(0xFF & (lsi >> 8));
-        _out.writeByte(0xFF & (lsi));
+        _buffer.writeByte(lsi >> 24);
+        _buffer.writeByte(lsi >> 16);
+        _buffer.writeByte(lsi >> 8);
+        _buffer.writeByte(lsi);
       }
     }
 
@@ -632,6 +728,9 @@ package hessian.io
      */
     public override function writeNull():void
     {
+      if (SIZE < _buffer.position + 16)
+        flush();
+
       _out.writeByte('N'.charCodeAt());
     }
 
@@ -661,11 +760,11 @@ package hessian.io
                                          offset:int = 0, 
                                          length:int = 0):void
     {
+      if (SIZE < _buffer.position + 16)
+        flush();
+
       if (value == null)
         _out.writeByte('N'.charCodeAt());
-
-      else if (value is Array)
-        writeCharArray(value as Array, offset, length);
 
       else {
         length = value.length;
@@ -674,15 +773,18 @@ package hessian.io
         while (length > 0x8000) {
           var sublen:int = 0x8000;
 
+          if (SIZE < _buffer.position + 16)
+            flush();
+
           // chunk can't end in high surrogate
           var tail:int = value.charCodeAt(offset + sublen - 1);
 
           if (0xd800 <= tail && tail <= 0xdbff)
             sublen--;
 
-          _out.writeByte('s'.charCodeAt());
-          _out.writeByte(sublen >> 8);
-          _out.writeByte(sublen);
+          _buffer.writeByte(Hessian2Constants.BC_STRING_CHUNK);
+          _buffer.writeByte(sublen >> 8);
+          _buffer.writeByte(sublen);
 
           printString(value, offset, sublen);
 
@@ -690,62 +792,24 @@ package hessian.io
           offset += sublen;
         }
 
-        _out.writeByte('S'.charCodeAt());
-        _out.writeByte(length >> 8);
-        _out.writeByte(length);
+        if (SIZE < _buffer.position + 16)
+          flush();
+
+        if (length <= Hessian2Constants.STRING_DIRECT_MAX) {
+          _buffer.writeByte(Hessian2Constants.BC_STRING_DIRECT + length);
+        }
+        else if (length <= Hessian2Constants.STRING_SHORT_MAX) {
+          _buffer.writeByte(Hessian2Constants.BC_STRING_SHORT + (length >> 8));
+          _buffer.writeByte(length);
+        }
+        else {
+          _buffer.writeByte('S'.charCodeAt());
+          _buffer.writeByte(length >> 8);
+          _buffer.writeByte(length);
+        }
 
         printString(value, offset, length);
       }
-    }
-
-    /**
-     * Writes a string value to the stream using UTF-8 encoding.
-     * The string will be written with the following syntax:
-     *
-     * <p>
-     *   <code><pre>
-     *   S b16 b8 string-value
-     *   </pre></code>
-     * </p>
-     *
-     * <p>
-     *   If the value is null, it will be written as
-     *
-     *   <code><pre>
-     *   N
-     *   </pre></code>
-     * </p>
-     *
-     * @param buffer The character buffer value to write.
-     * @param offset The offset in the array of where to start.
-     * @param length The length in the array to write.
-     */
-    private function writeCharArray(buffer:Array, offset:int, length:int):void
-    {
-      while (length > 0x8000) {
-        var sublen:int = 0x8000;
-
-        // chunk can't end in high surrogate
-        var tail:int = buffer[offset + sublen - 1];
-
-        if (0xd800 <= tail && tail <= 0xdbff)
-          sublen--;
-
-        _out.writeByte('s'.charCodeAt());
-        _out.writeByte(sublen >> 8);
-        _out.writeByte(sublen);
-
-        printCharArray(buffer, offset, sublen);
-
-        length -= sublen;
-        offset += sublen;
-      }
-
-      _out.writeByte('S'.charCodeAt());
-      _out.writeByte(length >> 8);
-      _out.writeByte(length);
-
-      printCharArray(buffer, offset, length);
     }
 
     /**
@@ -774,94 +838,57 @@ package hessian.io
                                         offset:int = 0, 
                                         length:int = -1):void
     {
-      if (buffer == null)
-        _out.writeByte('N'.charCodeAt());
+      if (buffer == null) {
+        if (SIZE < _buffer.position + 16)
+          flush();
 
+        _buffer.writeByte('N'.charCodeAt());
+      }
       else {
-        if (length < 0)
-          length = buffer.length;
+        flush();
 
-        while (length > 0x8000) {
-          var sublen:int = 0x8000;
+        while (SIZE - _buffer.position - 3 < length) {
+          var sublen:int = SIZE - _buffer.position - 3;
 
-          _out.writeByte('b'.charCodeAt());
-          _out.writeByte(sublen >> 8);
-          _out.writeByte(sublen);
+          if (sublen < 16) {
+            flushBuffer();
 
-          _out.writeBytes(buffer, offset, sublen);
+            if (length < sublen)
+              sublen = length;
+          }
+
+          _buffer.writeByte(Hessian2Constants.BC_BINARY_CHUNK);
+          _buffer.writeByte(sublen >> 8);
+          _buffer.writeByte(sublen);
+
+          _buffer.writeBytes(buffer, offset, sublen);
 
           length -= sublen;
           offset += sublen;
+
+          flushBuffer();
         }
 
-        _out.writeByte('B'.charCodeAt());
-        _out.writeByte(length >> 8);
-        _out.writeByte(length);
-        _out.writeBytes(buffer, offset, length);
+        if (SIZE < _buffer.position + 16)
+          flushBuffer();
+
+        if (length <= Hessian2Constants.BINARY_DIRECT_MAX) {
+          _buffer.writeByte(Hessian2Constants.BC_BINARY_DIRECT + length);
+        }
+        else if (length <= Hessian2Constants.BINARY_SHORT_MAX) {
+          _buffer.writeByte(Hessian2Constants.BC_BINARY_SHORT + (length >> 8));
+          _buffer.writeByte(length);
+        }
+        else {
+          _buffer.writeByte('B'.charCodeAt());
+          _buffer.writeByte(length >> 8);
+          _buffer.writeByte(length);
+        }
+
+        _buffer.writeBytes(buffer, offset, length);
       }
     }
   
-    /**
-     * Writes a byte buffer to the stream.
-     */
-    public override function writeByteBufferStart():void
-    {
-    }
-  
-    /**
-     * Writes a byte buffer to the stream.
-     *
-     * <p>
-     *   <code><pre>
-     *   b b16 b18 bytes
-     *   </pre></code>
-     * </p>
-     *
-     * @param buffer The byte buffer value to write.
-     * @param offset The offset in the array of where to start.
-     * @param length The length in the array to write.
-     */
-    public override function writeByteBufferPart(buffer:ByteArray,
-                                                 offset:int,
-                                                 length:int):void
-    {
-      while (length > 0) {
-        var sublen:int = length;
-
-        if (0x8000 < sublen)
-          sublen = 0x8000;
-
-        _out.writeByte('b'.charCodeAt());
-        _out.writeByte(sublen >> 8);
-        _out.writeByte(sublen);
-
-        _out.writeBytes(buffer, offset, sublen);
-
-        length -= sublen;
-        offset += sublen;
-      }
-    }
-  
-    /**
-     * Writes the last chunk of a byte buffer to the stream.
-     *
-     * <p>
-     *   <code><pre>
-     *   b b16 b18 bytes
-     *   </pre></code>
-     * </p>
-     *
-     * @param buffer The byte buffer value to write.
-     * @param offset The offset in the array of where to start.
-     * @param length The length in the array to write.
-     */
-    public override function writeByteBufferEnd(buffer:ByteArray,
-                                                offset:int,
-                                                length:int):void
-    {
-      writeBytes(buffer, offset, length);
-    }
-
     /**
      * Writes a reference.
      *
@@ -875,11 +902,11 @@ package hessian.io
      */
     public override function writeRef(value:int):void
     {
-      _out.writeByte('R'.charCodeAt());
-      _out.writeByte(value >> 24);
-      _out.writeByte(value >> 16);
-      _out.writeByte(value >> 8);
-      _out.writeByte(value);
+      if (SIZE < _buffer.position + 16)
+        flush();
+
+      _buffer.writeByte(Hessian2Constants.BC_REF);
+      writeInt(value);
     }
 
     /**
@@ -924,7 +951,6 @@ package hessian.io
     {
       if (_refs != null) {
         _refs = new Dictionary();
-        _numRefs = 0;
       }
     }
 
@@ -939,7 +965,6 @@ package hessian.io
     {
       if (_refs != null) {
         delete _refs[obj];
-        _numRefs--;
 
         return true;
       }
@@ -977,14 +1002,17 @@ package hessian.io
      */
     public function printLenString(value:String):void
     {
+      if (SIZE < _buffer.position + 16)
+        flush();
+
       if (value == null) {
-        _out.writeByte(0);
-        _out.writeByte(0);
+        _buffer.writeByte(0);
+        _buffer.writeByte(0);
       }
       else {
         var len:int = value.length;
-        _out.writeByte(len >> 8);
-        _out.writeByte(len);
+        _buffer.writeByte(len >> 8);
+        _buffer.writeByte(len);
 
         printString(value, 0, len);
       }
@@ -1005,50 +1033,48 @@ package hessian.io
         length = value.length;
 
       for (var i:int = 0; i < length; i++) {
+        if (SIZE < _buffer.position + 16)
+          flush();
+
         var ch:int = value.charCodeAt(i + offset);
 
         if (ch < 0x80)
-          _out.writeByte(ch);
+          _buffer.writeByte(ch);
 
         else if (ch < 0x800) {
-          _out.writeByte(0xc0 + ((ch >> 6) & 0x1f));
-          _out.writeByte(0x80 + (ch & 0x3f));
+          _buffer.writeByte(0xc0 + ((ch >> 6) & 0x1f));
+          _buffer.writeByte(0x80 + (ch & 0x3f));
         }
 
         else {
-          _out.writeByte(0xe0 + ((ch >> 12) & 0xf));
-          _out.writeByte(0x80 + ((ch >> 6) & 0x3f));
-          _out.writeByte(0x80 + (ch & 0x3f));
+          _buffer.writeByte(0xe0 + ((ch >> 12) & 0xf));
+          _buffer.writeByte(0x80 + ((ch >> 6) & 0x3f));
+          _buffer.writeByte(0x80 + (ch & 0x3f));
         }
       }
     }
 
-    /**
-     * Prints a character array to the stream, encoded as UTF-8.
-     *
-     * @param value The character array value to write.
-     * @param offset The offset in the string of where to start.
-     * @param length The length in the string to write.
-     */
-    public function printCharArray(value:Array, offset:int, length:int):void
+    private function flushIfFull():void
     {
-      for (var i:int = 0; i < length; i++) {
-        var ch:int = value[i + offset];
-
-        if (ch < 0x80)
-          _out.writeByte(ch);
-
-        else if (ch < 0x800) {
-          _out.writeByte(0xc0 + ((ch >> 6) & 0x1f));
-          _out.writeByte(0x80 + (ch & 0x3f));
-        }
-
-        else {
-          _out.writeByte(0xe0 + ((ch >> 12) & 0xf));
-          _out.writeByte(0x80 + ((ch >> 6) & 0x3f));
-          _out.writeByte(0x80 + (ch & 0x3f));
-        }
+      if (SIZE < _buffer.position + 32) {
+        _buffer.position = 0;
+        _out.writeBytes(_buffer);
       }
+    }
+
+    public function flush():void
+    {
+      flushBuffer();
+    }
+
+    public function flushBuffer():void
+    {
+      _out.writeBytes(_buffer);
+    }
+
+    public function close():void
+    {
+      flush();
     }
   }
 }

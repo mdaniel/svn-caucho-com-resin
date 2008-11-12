@@ -98,7 +98,7 @@ package hessian.io
 
     [ArrayElementType("hessian.io::ObjectDefinition")]
     /** @private */
-    protected var _classDefs:Array;
+    protected var _classRefs:Array;
 
     [ArrayElementType("String")]
     /** @private */
@@ -1294,12 +1294,12 @@ package hessian.io
         case 0x6c: case 0x6d: case 0x6e: case 0x6f:
           {
             ref = tag - 0x60;
-            size = _classDefs.length;
+            size = _classRefs.length;
 
             if (ref < 0 || size <= ref)
               throw new HessianProtocolError("'" + ref + "' is an unknown class definition");
 
-            def = _classDefs[ref] as ObjectDefinition;
+            def = _classRefs[ref] as ObjectDefinition;
 
             return readObjectInstance(def, cl);
           }
@@ -1307,12 +1307,12 @@ package hessian.io
         case 'O'.charCodeAt():
           {
             ref = readInt();
-            size = _classDefs.length;
+            size = _classRefs.length;
 
             if (ref < 0 || size <= ref)
               throw new HessianProtocolError("'" + ref + "' is an unknown class definition");
 
-            def = _classDefs[ref] as ObjectDefinition;
+            def = _classRefs[ref] as ObjectDefinition;
 
             return readObjectInstance(def, cl);
           }
@@ -1668,10 +1668,10 @@ package hessian.io
           {
             ref = tag - 0x60;
 
-            if (_classDefs == null)
+            if (_classRefs == null)
               throw error("No classes defined at reference '{0}'" + tag);
 
-            def = _classDefs[ref] as ObjectDefinition;
+            def = _classRefs[ref] as ObjectDefinition;
 
             return readObjectInstance(def);
           }
@@ -1680,10 +1680,10 @@ package hessian.io
           {
             ref = readInt();
 
-            if (_classDefs == null)
+            if (_classRefs == null)
               throw error("No classes defined at reference '{0}'" + tag);
 
-            def = _classDefs[ref] as ObjectDefinition;
+            def = _classRefs[ref] as ObjectDefinition;
 
             return readObjectInstance(def);
           }
@@ -1718,10 +1718,10 @@ package hessian.io
 
       var def:ObjectDefinition = new ObjectDefinition(type, fieldNames);
 
-      if (_classDefs == null)
-        _classDefs = new Array();
+      if (_classRefs == null)
+        _classRefs = new Array();
 
-      _classDefs.push(def);
+      _classRefs.push(def);
     }
 
     /**
@@ -1736,8 +1736,8 @@ package hessian.io
     private function readObjectInstance(def:ObjectDefinition,
                                         expectedClass:Class = null):Object
     {
-      var type:String = def.getType();
-      var fieldNames:Array = def.getFieldNames();
+      var type:String = def.type;
+      var fieldNames:Array = def.fieldNames;
       var value:Object = null;
 
       var cl:Class = getClassDefinition(type, expectedClass);

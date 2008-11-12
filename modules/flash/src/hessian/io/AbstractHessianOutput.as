@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2007 Caucho Technology, Inc.  All rights reserved.
+ * Copyright (c) 2001-2008 Caucho Technology, Inc.  All rights reserved.
  *
  * The Apache Software License, Version 1.1
  *
@@ -66,7 +66,9 @@ package hessian.io
      */
     public function call(method:String, args:Array):void 
     {
-      startCall(method);
+      var length:int = args != null ? args.length : 0;
+
+      startCall(method, length);
 
       if (args != null) {
         for (var i:int = 0; i < args.length; i++)
@@ -76,17 +78,7 @@ package hessian.io
       completeCall();
     }
 
-    /**
-     * Starts the method call:
-     *
-     * <code><pre>
-     * c major minor
-     * m b16 b8 method-namek
-     * </pre></code>
-     *
-     * @param method the method name to call.
-     */
-    public function startCall(method:String = null):void
+    public function startCall(method:String, length:int):void
     {
       throw new IllegalOperationError();
     }
@@ -99,20 +91,6 @@ package hessian.io
      * </pre></code>
      */
     public function writeHeader(name:String):void
-    {
-      throw new IllegalOperationError();
-    }
-
-    /**
-     * Writes the method tag.
-     *
-     * <code><pre>
-     * m b16 b8 method-name
-     * </pre></code>
-     *
-     * @param method the method name to call.
-     */
-    public function writeMethod(method:String):void
     {
       throw new IllegalOperationError();
     }
@@ -429,11 +407,12 @@ package hessian.io
      *
      * @return true if the object has already been defined.
      */
-    public function writeObjectBegin(type:String):int
+    public function writeObjectBegin(className:String, 
+                                     type:XML):ObjectDefinition
     {
-      writeMapBegin(type);
+      writeMapBegin(className);
 
-      return -2;
+      return null;
     }
 
     /**

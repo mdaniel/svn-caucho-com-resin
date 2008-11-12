@@ -53,21 +53,38 @@ package hessian.io
   {
     private var _type:String;
     private var _fieldNames:Array;
+    private var _ref:int;
 
-    public function ObjectDefinition(type:String, fieldNames:Array)
+    public function ObjectDefinition(type:String, 
+                                     fieldNames:Array, 
+                                     ref:int = -1)
     {
       _type = type;
       _fieldNames = fieldNames;
+      _ref = ref;
     }
 
-    public function getType():String
+    public function get type():String
     {
       return _type;
     }
 
-    public function getFieldNames():Array
+    public function get fieldNames():Array
     {
       return _fieldNames;
+    }
+
+    public function get ref():int
+    {
+      return _ref;
+    }
+
+    public function write(out:Hessian2Output):void
+    {
+      out.writeInt(fieldNames.length);
+
+      for each (var fieldName:String in fieldNames)
+        out.writeString(fieldNames);
     }
   }
 }
