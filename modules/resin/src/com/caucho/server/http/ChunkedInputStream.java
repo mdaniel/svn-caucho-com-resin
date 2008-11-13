@@ -125,8 +125,12 @@ class ChunkedInputStream extends StreamImpl  {
 	//if (dbg.canWrite())
 	//  dbg.println("unexpected chunk whitespace.");
       }
-      else
-	throw new IOException("HTTP/1.1 protocol error: bad chunk");
+      else {
+	throw new IOException("HTTP/1.1 protocol error: bad chunk at "
+			      + "'" + (char) ch
+			      + "' 0x" + Integer.toHexString(ch)
+			      + " length=" + length);
+      }
     }
 
     if (ch == '\r')

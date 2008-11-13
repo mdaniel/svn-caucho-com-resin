@@ -77,6 +77,11 @@ public class AnnotationConfig implements InvocationHandler {
     _annotationType = annotationType;
   }
 
+  public ConfigType getConfigType()
+  {
+    return _configType;
+  }
+
   public void setAttribute(String name, Object value)
   {
     if ("#text".equals(name))

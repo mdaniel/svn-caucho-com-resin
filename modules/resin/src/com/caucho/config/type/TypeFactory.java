@@ -34,6 +34,7 @@ import com.caucho.config.attribute.*;
 import com.caucho.config.program.*;
 import com.caucho.config.types.RawString;
 import com.caucho.config.types.CustomBeanConfig;
+import com.caucho.config.types.AnnotationConfig;
 import com.caucho.loader.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
@@ -129,6 +130,8 @@ public class TypeFactory implements AddLoaderListener
   {
     if (bean instanceof CustomBeanConfig)
       return ((CustomBeanConfig) bean).getConfigType();
+    else if (bean instanceof AnnotationConfig)
+      return ((AnnotationConfig) bean).getConfigType();
 	
     return getType(bean.getClass());
   }

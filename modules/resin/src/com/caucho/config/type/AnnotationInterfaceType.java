@@ -139,6 +139,7 @@ public class AnnotationInterfaceType extends ConfigType
       name = "value";
 
     Attribute attr = _attributeMap.get(name);
+    System.out.println("GET-A: " + attr + " " + name);
 
     return attr;
   }

@@ -127,8 +127,16 @@ public class CustomBeanAttribute extends Attribute {
       if (value instanceof AnnotationConfig)
 	value = ((AnnotationConfig) value).replace();
       
-      if (_setMethod != null)
+      if (_setMethod != null && value != null) {
+	if (! _setMethod.getParameterTypes()[0].isAssignableFrom(value.getClass()))
+	  throw new ConfigException(L.l("'{0}.{1}' is not assignable from {2}",
+					_setMethod.getDeclaringClass().getSimpleName(),
+					_setMethod.getName(),
+					value));
+	
+					
 	_setMethod.invoke(bean, value);
+      }
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

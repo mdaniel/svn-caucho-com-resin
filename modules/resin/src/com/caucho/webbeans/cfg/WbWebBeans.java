@@ -91,6 +91,10 @@ public class WbWebBeans {
     _webBeansFile.setUserPath(_webBeansFile.getURL());
   }
 
+  public void setSchemaInstance(String schema)
+  {
+  }
+
   /**
    * returns the owning container.
    */
@@ -384,13 +388,9 @@ public class WbWebBeans {
     private ArrayList<Class> _deployList
       = new ArrayList<Class>();
 
-    public void addCustomBean(CustomBeanConfig config)
+    public void addAnnotation(Annotation ann)
     {
-      Class cl = config.getClassType();
-      
-      if (! Annotation.class.isAssignableFrom(cl))
-	throw new ConfigException(L.l("'{0}' is not valid because <Deploy> can only contain annotation members",
-				      cl.getName()));
+      Class cl = ann.annotationType();
 
       if (! cl.isAnnotationPresent(DeploymentType.class))
 	throw new ConfigException(L.l("'{0}' must have a @DeploymentType annotation because because <Deploy> can only contain @DeploymentType annotations",

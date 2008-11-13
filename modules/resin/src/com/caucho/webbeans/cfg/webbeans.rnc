@@ -1,5 +1,7 @@
 default namespace w = "urn:java:javax.webbeans"
 
+namespace xsi="http://www.w3.org/2001/XMLSchema-instance"
+
 start = w_WebBeans
 
 w_Any = text | (attribute * {string} | element * { w_Any })*
@@ -101,7 +103,9 @@ w_standard = element Standard {
 }  
 
 w_WebBeans = element WebBeans {
-  w_bean-Custom*
+  attribute xsi:schemaLocation { string }?
+  
+  & w_bean-Custom*
 
   & w_decorators?
   

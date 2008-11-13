@@ -150,11 +150,11 @@ public class Port
 
   // statistics
 
-  private volatile int _threadCount;
+  private final AtomicInteger _threadCount = new AtomicInteger();
   private final Object _threadCountLock = new Object();
 
   private volatile int _idleThreadCount;
-  private volatile int _startThreadCount;
+  private final AtomicInteger _startThreadCount = new AtomicInteger();
 
   private volatile int _connectionCount;
 
@@ -168,7 +168,7 @@ public class Port
   // total keepalive
   private AtomicInteger _keepaliveCount = new AtomicInteger();
   // thread-based
-  private volatile int _keepaliveThreadCount;
+  private AtomicInteger _keepaliveThreadCount = new AtomicInteger();
   private final Object _keepaliveCountLock = new Object();
 
   // True if the port has been bound
@@ -832,7 +832,7 @@ public class Port
    */
   public int getThreadCount()
   {
-    return _threadCount;
+    return _threadCount.get();
   }
 
   /**
@@ -840,7 +840,7 @@ public class Port
    */
   public int getActiveThreadCount()
   {
-    return _threadCount - _idleThreadCount;
+    return _threadCount.get() - _idleThreadCount;
   }
 
   /**
@@ -877,7 +877,7 @@ public class Port
    */
   public int getActiveConnectionCount()
   {
-    return _threadCount - _idleThreadCount;
+    return _threadCount.get() - _idleThreadCount;
   }
 
   /**
@@ -893,9 +893,7 @@ public class Port
    */
   public int getKeepaliveThreadCount()
   {
-    synchronized (_keepaliveCountLock) {
-      return _keepaliveThreadCount;
-    }
+    return _keepaliveThreadCount.get();
   }
 
   /**
@@ -914,7 +912,7 @@ public class Port
    */
   public int getFreeKeepalive()
   {
-    int freeKeepalive = _keepaliveMax - _keepaliveCount;
+    int freeKeepalive = _keepaliveMax - _keepaliveCount.get();
     int freeConnections = _connectionMax - _connectionCount - _minSpareConnection;
     int freeSelect = _server.getFreeSelectKeepalive();
 
@@ -1262,10 +1260,10 @@ public class Port
         _idleThreadCount++;
 
         if (isStart) {
-          _startThreadCount--;
+          int count = _startThreadCount.decrementAndGet();
 
-          if (_startThreadCount < 0) {
-	    _startThreadCount = 0;
+          if (count < 0) {
+	    _startThreadCount.set(0);
 	    log.warning(conn + " _startThreadCount assertion failure");
 	    // conn.getStartThread().printStackTrace();
           }
@@ -1301,8 +1299,9 @@ public class Port
       synchronized (this) {
         _idleThreadCount--;
 
-        if (_idleThreadCount + _startThreadCount < _acceptThreadMin) {
-          notify();
+        if (_idleThreadCount + _startThreadCount.get()
+	    < _acceptThreadMin) {
+          notifyAll();
         }
       }
     }
@@ -1324,9 +1323,7 @@ public class Port
    */
   void startConnection(TcpConnection conn)
   {
-    synchronized (this) {
-      _startThreadCount--;
-    }
+    _startThreadCount.decrementAndGet();
   }
 
   /**
@@ -1334,9 +1331,7 @@ public class Port
    */
   void threadBegin(TcpConnection conn)
   {
-    synchronized (_threadCountLock) {
-      _threadCount++;
-    }
+    _threadCount.incrementAndGet();
   }
 
   /**
@@ -1344,9 +1339,7 @@ public class Port
    */
   void threadEnd(TcpConnection conn)
   {
-    synchronized (_threadCountLock) {
-      _threadCount--;
-    }
+    _threadCount.decrementAndGet();
   }
 
   /**
@@ -1358,7 +1351,7 @@ public class Port
       return false;
     else if (acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime())
       return false;
-    else if (_keepaliveMax <= _keepaliveCount)
+    else if (_keepaliveMax <= _keepaliveCount.get())
       return false;
     else if (_connectionMax <= _connectionCount + _minSpareConnection)
       return false;
@@ -1386,7 +1379,7 @@ public class Port
 	
       return false;
     }
-    else if (false && _keepaliveMax <= _keepaliveCount) {
+    else if (false && _keepaliveMax <= _keepaliveCount.get()) {
       // #2262 - skip this check to avoid confusing the load balancer
       // the keepalive check is in allowKeepalive
       log.warning(conn + " failed keepalive, keepalive-max " + _keepaliveCount);
@@ -1417,9 +1410,7 @@ public class Port
    */
   void keepaliveThreadBegin()
   {
-    synchronized (_keepaliveCountLock) {
-      _keepaliveThreadCount++;
-    }
+    _keepaliveThreadCount.incrementAndGet();
   }
   
   /**
@@ -1427,9 +1418,7 @@ public class Port
    */
   void keepaliveThreadEnd()
   {
-    synchronized (_keepaliveCountLock) {
-      _keepaliveThreadCount--;
-    }
+    _keepaliveThreadCount.decrementAndGet();
   }
 
   /**
@@ -1517,7 +1506,8 @@ public class Port
         // XXX: Thread.sleep(10);
 
         synchronized (this) {
-          isStart = _startThreadCount + _idleThreadCount < _acceptThreadMin;
+          isStart = (_startThreadCount.get() + _idleThreadCount
+		     < _acceptThreadMin);
 	  
           if (_connectionMax <= _connectionCount)
             isStart = false;
@@ -1536,7 +1526,8 @@ public class Port
 
           if (isStart) {
             _connectionCount++;
-            _startThreadCount++;
+
+	    _startThreadCount.incrementAndGet();
           }
         }
 
@@ -1718,7 +1709,7 @@ public class Port
 
     // ping the accept port to wake the listening threads
     if (localPort > 0) {
-      int idleCount = _idleThreadCount + _startThreadCount;
+      int idleCount = _idleThreadCount + _startThreadCount.get();
 
       for (int i = 0; i < idleCount + 10; i++) {
         try {
