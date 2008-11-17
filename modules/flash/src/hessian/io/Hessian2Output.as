@@ -667,18 +667,7 @@ package hessian.io
         flush();
 
       if (time % 60000 == 0) {
-        // compact date ::= x65 b32 b24 b16 b8
-
-        var minutes:Number = time / 60000;
-        var shifted:Number = minutes / 0x80000000;
-
-        if ((shifted == 0) || (shifted == -1)) {
-          _buffer.writeByte(Hessian2Constants.BC_DATE_MINUTE);
-          _buffer.writeByte(minutes >> 24);
-          _buffer.writeByte(minutes >> 16);
-          _buffer.writeByte(minutes >> 8);
-          _buffer.writeByte(minutes);
-        }
+        writeUTCMinutes(time);
 
         return;
       }
@@ -713,6 +702,35 @@ package hessian.io
         _buffer.writeByte(lsi >> 16);
         _buffer.writeByte(lsi >> 8);
         _buffer.writeByte(lsi);
+      }
+    }
+
+    private function writeUTCMinutes(time:Number):void 
+    {
+      // compact date ::= x65 b32 b24 b16 b8
+
+      var minutes:Number = time / 60000;
+      var shifted:int = int((minutes / 0x80000000) & 0xFFFFFFFF);
+
+      if ((shifted == 0) || (shifted == -1)) {
+        _buffer.writeByte(Hessian2Constants.BC_DATE_MINUTE);
+
+        if (time >= 0) {
+          _buffer.writeByte(minutes >> 24);
+          _buffer.writeByte(minutes >> 16);
+          _buffer.writeByte(minutes >> 8);
+          _buffer.writeByte(minutes);
+        }
+        else {
+          var abs:Number = Math.abs(minutes);
+
+          var lsi:Number = 0x100000000 - (abs % 0x100000000);
+
+          _buffer.writeByte(lsi >> 24);
+          _buffer.writeByte(lsi >> 16);
+          _buffer.writeByte(lsi >> 8);
+          _buffer.writeByte(lsi);
+        }
       }
     }
 
@@ -846,6 +864,10 @@ package hessian.io
       }
       else {
         flush();
+
+        if (length < 0) {
+          length = buffer.length - offset;
+        }
 
         while (SIZE - _buffer.position - 3 < length) {
           var sublen:int = SIZE - _buffer.position - 3;
