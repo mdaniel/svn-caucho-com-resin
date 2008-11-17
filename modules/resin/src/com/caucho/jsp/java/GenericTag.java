@@ -777,16 +777,26 @@ abstract public class GenericTag extends JspContainerNode
       TagVariableInfo tagVar = tagVars[i];
 
       String name = null;
-      if (tagVar.getNameGiven() != null)
+      
+      String attributeName = tagVar.getNameFromAttribute();
+
+      if (attributeName != null)
+	name = tagData.getAttributeString(attributeName);
+
+      if (name == null || "".equals(name) || "null".equals(name))
+	name = null;
+
+      if (tagVar.getNameGiven() != null) {
+	if (name != null)
+	  throw error(L.l("name-given='{0}' conflicts with name-from-attribute='{1}' because the attribute value is the same as name-given.",
+			  tagVar.getNameGiven(),
+			  attributeName));
+			  
+	  
         name = tagVar.getNameGiven();
-      else {
-        String attributeName = tagVar.getNameFromAttribute();
-
-        name = tagData.getAttributeString(attributeName);
-
-        if (name == null || "".equals(name) || "null".equals(name))
-          continue;
       }
+      else if (name == null)
+	continue;
 
       vars[i] = new VariableInfo(name, tagVar.getClassName(),
                                  tagVar.getDeclare(), tagVar.getScope());

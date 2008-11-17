@@ -975,6 +975,25 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   }
 
   /**
+   * Deploy the archive.
+   */
+  public boolean deploy(String name)
+  {
+    DeployController controller
+      = getDeployContainer().findController(nameToEntryName(name));
+
+    if (controller == null) {
+      if (log.isLoggable(Level.FINE))
+        log.finer(L.l("{0} can't deploy '{1}' because it's not a known controller: {2}",
+		      this, name, getNamesAsString()));
+
+      return false;
+    }
+    
+    return true;
+  }
+
+  /**
    * Start the archive.
    */
   public boolean start(String name)

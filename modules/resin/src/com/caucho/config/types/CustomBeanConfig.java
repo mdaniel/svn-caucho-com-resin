@@ -238,6 +238,16 @@ public class CustomBeanConfig {
 
       _component.addBinding(ann);
     }
+    
+    if (type.isAnnotationPresent(InterceptorBindingType.class)) {
+      if (metaType != null)
+	throw new ConfigException(L.l("@{0} is an illegal @InterceptorBindingType because it also has a @{1} annotation",
+				      type.getName(), metaType.getName()));
+      
+      metaType = InterceptorBindingType.class;
+
+      _component.addInterceptorBinding(ann);
+    }
 
     if (type.equals(Named.class)) {
       metaType = Named.class;
@@ -252,7 +262,7 @@ public class CustomBeanConfig {
     }
 
     if (metaType == null)
-      throw new ConfigException(L.l("'{0}' is an invalid annotation.  An annotation must be a @BindingType, @ScopeType, @DeploymentType",
+      throw new ConfigException(L.l("'{0}' is an invalid annotation.  An annotation must be a @BindingType, @ScopeType, @DeploymentType, @InterceptorBindingType",
 				    ann));
   }
 

@@ -36,7 +36,7 @@ public class WebAppCommandQuery implements Serializable {
   private WebAppCommand _command;
 
   public enum WebAppCommand {
-    START, STOP, UNDEPLOY
+    DEPLOY, START, STOP, UNDEPLOY
   }
 
   public String getHost()

@@ -49,11 +49,21 @@ public interface ScanListener {
    * Called to check if the archive should be scan.
    */
   public boolean isRootScannable(Path root);
+
+  /**
+   * Returns the state when scanning the class
+   *
+   * @param name the class name
+   * @param modifiers the class modifiers
+   *
+   * @return DENY, ALLOW or MATCH
+   */
+  public ScanMatch isScanMatchClass(String name, int modifiers);
   
   /**
    * Returns true if the string matches an annotation class.
    */
-  public boolean isScanMatch(CharBuffer string);
+  public boolean isScanMatchAnnotation(CharBuffer string);
   
   /**
    * Callback to note the class matches

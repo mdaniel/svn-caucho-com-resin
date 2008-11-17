@@ -189,7 +189,7 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     return new MBeanNotificationInfo[] { status };
   }
 
-  synchronized public void lifecycleEvent(int oldState, int newState)
+  public void lifecycleEvent(int oldState, int newState)
   {
     Logger log = _controller.getLog();
 
@@ -199,8 +199,11 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     String newValue = Lifecycle.getStateName(newState);
     String message = newValue;
 
+    if (newValue.equals("failed"))
+      Thread.dumpStack();
+
     if (log.isLoggable(Level.FINEST))
-      log.log(Level.FINEST,  toString() + " lifecycleEvent `" + newValue  + "'");
+      log.finest(this + " lifecycleEvent " + oldValue + " -> " + newValue);
 
     if (newState == Lifecycle.IS_ACTIVE) {
       LifecycleNotification notif;

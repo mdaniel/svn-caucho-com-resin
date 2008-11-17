@@ -128,7 +128,7 @@ public interface Manager
   /**
    * Returns the scope context for the given type
    */
-  public Context getContext(Class<Annotation> scopeType);
+  public Context getContext(Class<? extends Annotation> scopeType);
 
   //
   // event management

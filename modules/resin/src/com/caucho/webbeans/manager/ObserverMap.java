@@ -39,44 +39,84 @@ import com.caucho.webbeans.event.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.ArrayList;
+import java.util.Set;
+import javax.webbeans.Observer;
 
 /**
  * Matches bindings
  */
 public class ObserverMap {
-  private static L10N L = new L10N(ObserverMap.class);
+  private static final L10N L = new L10N(ObserverMap.class);
   
   private Class _type;
 
-  private ArrayList<ObserverImpl> _observerList
-    = new ArrayList<ObserverImpl>();
+  private ArrayList<ObserverEntry> _observerList
+    = new ArrayList<ObserverEntry>();
 
   public ObserverMap(Class type)
   {
     _type = type;
   }
 
-  public void addObserver(ObserverImpl observer)
+  public void addObserver(Observer observer, Annotation []bindings)
   {
-    for (int i = _observerList.size() - 1; i >= 0; i--) {
-      ObserverImpl oldObserver = _observerList.get(i);
+    ObserverEntry entry = new ObserverEntry(observer, bindings);
 
-      if (observer.equals(oldObserver)) {
-	return;
+    _observerList.add(entry);
+  }
+
+  public <T> void resolveObservers(Set<Observer<T>> set, Annotation []bindings)
+  {
+    for (int i = 0; i < _observerList.size(); i++) {
+      ObserverEntry observer = _observerList.get(i);
+
+      if (observer.isMatch(bindings)) {
+	set.add(observer.getObserver());
+      }
+    }
+  }
+
+  public void fireEvent(Object event, Annotation []bindings)
+  {
+    for (int i = 0; i < _observerList.size(); i++) {
+      ObserverEntry observer = _observerList.get(i);
+
+      if (observer.isMatch(bindings)) {
+	observer.getObserver().notify(event);
+      }
+    }
+  }
+
+  static class ObserverEntry {
+    private final Observer _observer;
+    private final Binding []_bindings;
+
+    ObserverEntry(Observer observer, Annotation []bindings)
+    {
+      _observer = observer;
+
+      _bindings = new Binding[bindings.length];
+      for (int i = 0; i < bindings.length; i++) {
+	_bindings[i] = new Binding(bindings[i]);
       }
     }
 
-    _observerList.add(observer);
-  }
+    Observer getObserver()
+    {
+      return _observer;
+    }
 
-  public void raiseEvent(Object event, Annotation []bindList)
-  {
-    for (int i = 0; i < _observerList.size(); i++) {
-      ObserverImpl observer = _observerList.get(i);
-
-      if (observer.isMatch(bindList)) {
-	observer.raiseEvent(event);
+    boolean isMatch(Annotation []bindings)
+    {
+      if (bindings.length < _bindings.length)
+	return false;
+      
+      for (Binding binding : _bindings) {
+	if (! binding.isMatch(bindings))
+	  return false;
       }
+
+      return true;
     }
   }
 }

@@ -33,9 +33,13 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.ConfigContext;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.*;
+import com.caucho.webbeans.manager.*;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.util.ArrayList;
 import java.util.logging.Logger;
+import javax.webbeans.BindingType;
 
 
 public class PostConstructProgram extends ConfigProgram
@@ -45,11 +49,53 @@ public class PostConstructProgram extends ConfigProgram
   private static final L10N L = new L10N(PostConstructProgram.class);
 
   private Method _init;
+  private ParamProgram []_program;
 
   public PostConstructProgram(Method init)
   {
     _init = init;
     _init.setAccessible(true);
+
+    introspect();
+  }
+
+  protected void introspect()
+  {
+    // XXX: type
+    Class []paramTypes = _init.getParameterTypes();
+
+    if (paramTypes.length == 0)
+      return;
+
+    _program = new ParamProgram[paramTypes.length];
+    
+    Annotation [][]paramAnns = _init.getParameterAnnotations();
+
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    
+    for (int i = 0; i < paramTypes.length; i++) {
+      Annotation []bindings = createBindings(paramAnns[i]);
+      
+      _program[i] = new ParamProgram(webBeans, paramTypes[i], bindings);
+    }
+  }
+
+  Annotation []createBindings(Annotation []annotations)
+  {
+    ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
+
+    for (Annotation ann : annotations) {
+      if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	bindingList.add(ann);
+    }
+
+    if (bindingList.size() == 0)
+      return null;
+
+    Annotation []bindings = new Annotation[bindingList.size()];
+    bindingList.toArray(bindings);
+
+    return bindings;
   }
 
   @Override
@@ -57,11 +103,19 @@ public class PostConstructProgram extends ConfigProgram
     throws ConfigException
   {
     try {
-      _init.invoke(bean);
-    } catch (RuntimeException e) {
-      throw e;
+      if (_program != null) {
+	Object []args = new Object[_program.length];
+
+	for (int i = 0; i < args.length; i++) {
+	  args[i] = _program[i].eval(env);
+	}
+	
+	_init.invoke(bean, args);
+      }
+      else
+	_init.invoke(bean);
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      throw ConfigException.create(_init, e);
     }
   }
 
@@ -101,5 +155,25 @@ public class PostConstructProgram extends ConfigProgram
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _init + "]";
+  }
+
+  static class ParamProgram {
+    private final WebBeansContainer _webBeans;
+    private final Type _type;
+    private final Annotation []_bindings;
+
+    ParamProgram(WebBeansContainer webBeans,
+		 Type type,
+		 Annotation []bindings)
+    {
+      _webBeans = webBeans;
+      _type = type;
+      _bindings = bindings;
+    }
+
+    public Object eval(ConfigContext env)
+    {
+      return _webBeans.getInstanceByType((Class) _type, _bindings);
+    }
   }
 }

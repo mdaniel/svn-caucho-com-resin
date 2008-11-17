@@ -313,7 +313,7 @@ public class ClusterObject {
     Cluster cluster = _storeManager.getCluster();
     ClusterServer []serverList = cluster.getServerList();
     
-    if (serverList.length > 1)
+    if (serverList.length > 0)
       return serverList[_primary % serverList.length];
     else
       return null;
@@ -341,7 +341,7 @@ public class ClusterObject {
     Cluster cluster = _storeManager.getCluster();
     ClusterServer []serverList = cluster.getServerList();
     
-    if (serverList.length > 1)
+    if (serverList.length > 2)
       return serverList[_tertiary % serverList.length];
     else
       return null;

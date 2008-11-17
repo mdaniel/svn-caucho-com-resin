@@ -226,20 +226,108 @@ public class DeployClient
     return (WebAppQuery []) queryGet(query);
   }
 
-  public Boolean []start(String [][]apps)
+  /**
+   * Deploys a controller, but does not start it
+   *
+   * @param type the controller type: war, ear, etc.
+   * @param host the virtual host
+   * @param name the web-app/ear name
+   */
+  public Boolean deploy(String type, String host, String name)
   {
-    return executeWebAppCommand(apps, WebAppCommandQuery.WebAppCommand.START);
+    String tag = type + "/" + host + "/" + name;
+
+    return deploy(tag);
   }
 
-  public Boolean [] stop(String [][]apps)
+  /**
+   * Undeploy controller based on a deployment tag: wars/foo.com/my-war
+   *
+   * @param tag the encoded controller name
+   */
+  public Boolean deploy(String tag)
   {
-    return executeWebAppCommand(apps, WebAppCommandQuery.WebAppCommand.STOP);
+    ControllerDeployQuery query = new ControllerDeployQuery(tag);
+
+    return (Boolean) querySet(query);
   }
 
-  public Boolean [] undeploy(String [][]apps)
+  /**
+   * Starts a controller
+   *
+   * @param type the controller type: war, ear, etc.
+   * @param host the virtual host
+   * @param name the web-app/ear name
+   */
+  public Boolean start(String type, String host, String name)
   {
-    return executeWebAppCommand(apps,
-                                WebAppCommandQuery.WebAppCommand.UNDEPLOY);
+    String tag = type + "/" + host + "/" + name;
+
+    return start(tag);
+  }
+
+  /**
+   * Starts a controller based on a deployment tag: wars/foo.com/my-war
+   *
+   * @param tag the encoded controller name
+   */
+  public Boolean start(String tag)
+  {
+    ControllerStartQuery query = new ControllerStartQuery(tag);
+
+    return (Boolean) querySet(query);
+  }
+
+  /**
+   * Stops a controller
+   *
+   * @param type the controller type: war, ear, etc.
+   * @param host the virtual host
+   * @param name the web-app/ear name
+   */
+  public Boolean stop(String type, String host, String name)
+  {
+    String tag = type + "/" + host + "/" + name;
+
+    return stop(tag);
+  }
+
+  /**
+   * Stops a controller based on a deployment tag: wars/foo.com/my-war
+   *
+   * @param tag the encoded controller name
+   */
+  public Boolean stop(String tag)
+  {
+    ControllerStopQuery query = new ControllerStopQuery(tag);
+
+    return (Boolean) querySet(query);
+  }
+
+  /**
+   * Undeploys a controller
+   *
+   * @param type the controller type: war, ear, etc.
+   * @param host the virtual host
+   * @param name the web-app/ear name
+   */
+  public Boolean undeploy(String type, String host, String name)
+  {
+    String tag = type + "/" + host + "/" + name;
+
+    return undeploy(tag);
+  }
+
+  /**
+   * Undeploy a controller based on a deployment tag: wars/foo.com/my-war
+   *
+   * @param tag the encoded controller name
+   */
+  public Boolean undeploy(String tag)
+  {
+    ControllerUndeployQuery query = new ControllerUndeployQuery(tag);
+
+    return (Boolean) querySet(query);
   }
 
   public Boolean []executeWebAppCommand(String [][]apps,

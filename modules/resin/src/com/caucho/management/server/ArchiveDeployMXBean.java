@@ -58,20 +58,43 @@ public interface ArchiveDeployMXBean
   public String getArchivePath(@Description("The archive name, without a file extension") String name);
 
   @Description("Returns the location of an expanded archive, or null if no archive with the passed name is deployed")
-  public String getExpandPath(@Description("The archive name, without a file extension") String name);
+  public String getExpandPath(String name);
 
+  /**
+   * Deploys the resource with the given name
+   *
+   * @param name the resource's name, e.g. "/my-web-app"
+   */
+  @Description("Deploy the resource associated with the archive")
+  public void deploy(String name);
+
+  /**
+   * Starts the resource with the given name
+   *
+   * @param name the resource's name, e.g. "/my-web-app"
+   */
   @Description("Start the resource associated with the archive")
-  public void start(@Description("The archive name, without a file extension") String name);
+  public void start(String name);
 
+  /**
+   * Stops the resource with the given name
+   *
+   * @param name the resource's name, e.g. "/my-web-app"
+   */
   @Description("Stop the resource associated with the archive")
-  public void stop(@Description("The archive name, without a file extension") String name);
+  public void stop(String name);
 
+  /**
+   * Undeploys the resource with the given name
+   *
+   * @param name the resource's name, e.g. "/my-web-app"
+   */
   @Description("Stop the resource associated with the archive and delete the archive")
-  public void undeploy(@Description("The archive name, without a file extension") String name);
+  public void undeploy(String name);
 
   @Description("Returns a list of the current set of archive names")
   public String[] getNames();
 
   @Description("Returns an exception for the named archive or null if there is no exception")
-  public Throwable getConfigException(@Description("The archive name, without a file extension") String name);
+  public Throwable getConfigException(String name);
 }

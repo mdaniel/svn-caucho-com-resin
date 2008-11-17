@@ -46,6 +46,7 @@ import com.caucho.webbeans.manager.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
+import java.util.logging.*;
 
 import javax.annotation.*;
 import javax.webbeans.*;
@@ -57,6 +58,8 @@ import javax.webbeans.manager.Bean;
 public class SimpleBean extends ComponentImpl
 {
   private static final L10N L = new L10N(SimpleBean.class);
+  private static final Logger log
+    = Logger.getLogger(SimpleBean.class.getName());
 
   private static final Object []NULL_ARGS = new Object[0];
   
@@ -93,6 +96,38 @@ public class SimpleBean extends ComponentImpl
     validateType(type);
 
     setTargetType(type);
+  }
+
+  /**
+   * Checks for validity for classpath scanning.
+   */
+  public static boolean isValid(Class type)
+  {
+    if (type.isInterface())
+      return false;
+    
+    if (type.getTypeParameters() != null
+	&& type.getTypeParameters().length > 0) {
+      return false;
+    }
+
+    if (! isValidConstructor(type))
+      return false;
+    
+    return true;
+  }
+
+  public static boolean isValidConstructor(Class type)
+  {
+    for (Constructor ctor : type.getConstructors()) {
+      if (ctor.getParameterTypes().length == 0)
+	return true;
+
+      if (ctor.isAnnotationPresent(Initializer.class))
+	return true;
+    }
+
+    return false;
   }
 
   private void validateType(Class type)
@@ -159,6 +194,9 @@ public class SimpleBean extends ComponentImpl
 
     if (isAnnotationPresent(annotations, Produces.class))
       addProduces(method, annotations);
+    else if (isAnnotationDeclares(annotations, InterceptorBindingType.class)) {
+      _methodList.add(simpleMethod);
+    }
     else
       System.out.println("M: " + method);
   }
@@ -167,6 +205,16 @@ public class SimpleBean extends ComponentImpl
   {
     for (Annotation ann : annotations) {
       if (ann.annotationType().equals(type))
+	return true;
+    }
+
+    return false;
+  }
+
+  private boolean isAnnotationDeclares(Annotation []annotations, Class type)
+  {
+    for (Annotation ann : annotations) {
+      if (ann.annotationType().isAnnotationPresent(type))
 	return true;
     }
 
@@ -239,17 +287,27 @@ public class SimpleBean extends ComponentImpl
 	}
 	else if (best.getParameterTypes().length == 0) {
 	}
-	else {
-	  second = ctor;
+	else if (ctor.getParameterTypes().length == 1
+		 && ctor.getParameterTypes()[0].equals(String.class)) {
+	  second = best;
+	  best = ctor;
 	}
       }
 
-      if (second != null)
-	throw new ConfigException(L.l("{0}: WebBean does not have a unique constructor.  One constructor must be marked with @In or have a binding annotation.",
-				      cl.getName()));
-
       if (best == null)
 	throw new ConfigException(L.l("{0}: no constructor found",
+				      cl.getName()));
+
+      if (second == null) {
+      }
+      else if (best.getDeclaringClass().getName().startsWith("java.lang")
+	       && best.getParameterTypes().length == 1
+	       && best.getParameterTypes()[0].equals(String.class)) {
+	log.fine(L.l("{0}: WebBean does not have a unique constructor, choosing String-arg constructor",
+		     cl.getName()));
+      }
+      else
+	throw new ConfigException(L.l("{0}: WebBean does not have a unique constructor.  One constructor must be marked with @In or have a binding annotation.",
 				      cl.getName()));
 
       _ctor = best;
@@ -407,6 +465,8 @@ public class SimpleBean extends ComponentImpl
 	return;
       _isBound = true;
 
+      super.bind();
+
       Class cl = getTargetClass();
 
       ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
@@ -457,6 +517,14 @@ public class SimpleBean extends ComponentImpl
       PojoBean bean = new PojoBean(getTargetClass());
       bean.setSingleton(isSingleton());
       bean.setBindings(getBindingArray());
+
+      bean.setInterceptorBindings(getInterceptorBindingArray());
+
+      for (SimpleBeanMethod method : _methodList) {
+	bean.setMethodAnnotations(method.getMethod(),
+				  method.getAnnotations());
+      }
+      
       bean.introspect();
 
       Class instanceClass = bean.generateClass();
@@ -472,6 +540,15 @@ public class SimpleBean extends ComponentImpl
 	  _instanceClass = instanceClass;
 	} catch (Exception e) {
 	  throw ConfigException.create(e);
+	}
+      }
+
+      if (instanceClass != null) {
+	for (Method method : instanceClass.getDeclaredMethods()) {
+	  if (method.getName().equals("__caucho_postConstruct")) {
+	    method.setAccessible(true);
+	    _cauchoPostConstruct = method;
+	  }
 	}
       }
     }

@@ -33,7 +33,9 @@ import java.util.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 import javax.webbeans.*;
+import javax.webbeans.Observer;
 import javax.webbeans.manager.Bean;
+import javax.webbeans.manager.Context;
 
 import com.caucho.config.*;
 import com.caucho.util.*;
@@ -44,7 +46,7 @@ import com.caucho.webbeans.manager.*;
 /**
  * Implements a single observer.
  */
-public class ObserverImpl {
+public class ObserverImpl implements Observer {
   private static final L10N L = new L10N(ObserverImpl.class);
 
   private static final Object []NULL_ARGS = new Object[0];
@@ -59,9 +61,6 @@ public class ObserverImpl {
   private boolean _ifExists;
 
   private Bean []_args;
-  
-  private ArrayList<WbBinding> _bindingList
-    = new ArrayList<WbBinding>();
 
   public ObserverImpl(WebBeansContainer webBeans,
 		      AbstractBean bean,
@@ -85,19 +84,6 @@ public class ObserverImpl {
   public Class getType()
   {
     return _method.getParameterTypes()[_paramIndex];
-  }
-
-  /**
-   * Adds a component binding.
-   */
-  public void setBindingList(ArrayList<WbBinding> bindingList)
-  {
-    _bindingList = bindingList;
-  }
-  
-  public ArrayList<WbBinding> getBindingList()
-  {
-    return _bindingList;
   }
 
   /**
@@ -174,37 +160,16 @@ public class ObserverImpl {
     return false;
   }
 
-  public boolean isMatch(Annotation []bindList)
+  public void notify(Object event)
   {
-    int size = _bindingList.size();
-    
-    if (bindList.length < size)
-      return false;
-    
-    for (int i = 0; i < size; i++) {
-      WbBinding binding = _bindingList.get(i);
+    Object obj = null;
 
-      boolean isMatch = false;
-      for (Annotation ann : bindList) {
-	if (binding.isMatch(ann)) {
-	  isMatch = true;
-	  break;
-	}
-      }
+    if (_ifExists) {
+      Context context = _webBeans.getContext(_bean.getScopeType());
 
-      if (! isMatch)
-	return false;
+      if (context != null && context.isActive())
+	obj = context.get(_bean, false);
     }
-    
-    return true;
-  }
-
-  public void raiseEvent(Object event)
-  {
-    Object obj;
-
-    if (_ifExists)
-      obj = _webBeans.getInstance(_bean); // .getIfExists();
     else
       obj = _webBeans.getInstance(_bean);
 
@@ -245,18 +210,6 @@ public class ObserverImpl {
       return false;
     }
 
-    int size = _bindingList.size();
-
-    if (size != comp._bindingList.size()) {
-      return false;
-    }
-
-    for (int i = size - 1; i >= 0; i--) {
-      if (! comp._bindingList.contains(_bindingList.get(i))) {
-	return false;
-      }
-    }
-
     return true;
   }
 
@@ -264,13 +217,15 @@ public class ObserverImpl {
   {
     StringBuilder sb = new StringBuilder();
 
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
     sb.append(_method.getDeclaringClass().getSimpleName());
     sb.append(".");
     sb.append(_method.getName());
     sb.append("[");
 
-    ComponentImpl comp = (ComponentImpl) _bean;
-    sb.append(comp.getTargetSimpleName());
+    sb.append(_method.getParameterTypes()[_paramIndex].getSimpleName());
+    sb.append("]");
     sb.append("]");
 
     return sb.toString();

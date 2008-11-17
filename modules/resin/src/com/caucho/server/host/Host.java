@@ -373,9 +373,11 @@ public class Host extends WebAppContainer
   public void setConfigException(Throwable e)
   {
     if (e != null) {
-      // XXX:
       _configException = e;
       getEnvironmentClassLoader().addDependency(AlwaysModified.create());
+
+      if (log.isLoggable(Level.FINE))
+	log.log(Level.FINE, e.toString(), e);
     }
   }
 

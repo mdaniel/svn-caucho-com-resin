@@ -253,7 +253,8 @@ public class JspCompilerInstance {
     if (appDir == null && app != null)
       appDir = app.getAppDir();
 
-    if (app != null && app.hasPre23Config())
+    if (app != null && app.hasPre23Config()
+	&& _parseState.getELIgnoredDefault() == null)
       _parseState.setELIgnoredDefault(true);
 
     JspConfig jspConfig = null;
@@ -289,7 +290,8 @@ public class JspCompilerInstance {
     if (jspConfig != null) {
       jspList.addAll(jspConfig.findJspPropertyGroupList(_uri));
 
-      _parseState.setELIgnoredDefault(false);
+      if (_parseState.getELIgnoredDefault() == null)
+	_parseState.setELIgnoredDefault(false);
     }
 
     JspResourceManager resourceManager = _jspCompiler.getResourceManager();
@@ -324,9 +326,10 @@ public class JspCompilerInstance {
       _parseState.setSession(jspPropertyGroup.isSession());
       _parseState.setScriptingInvalid(jspPropertyGroup.isScriptingInvalid());
 
-      if (jspPropertyGroup.isELIgnored() != null)
-	_parseState.setELIgnored(Boolean.TRUE.equals(jspPropertyGroup.isELIgnored()))
-	  ;
+      if (jspPropertyGroup.isELIgnored() != null) {
+	_parseState.setELIgnoredDefault(Boolean.TRUE.equals(jspPropertyGroup.isELIgnored()));
+      }
+      
       _parseState.setVelocityEnabled(jspPropertyGroup.isVelocityEnabled());
       _parseState.setPageEncoding(jspPropertyGroup.getPageEncoding());
       
@@ -514,7 +517,8 @@ public class JspCompilerInstance {
       _parser.getParseState().setForbidXml(isForbidXml);
 
       if (isXml) {
-	_parseState.setELIgnoredDefault(false);
+	if (_parseState.getELIgnoredDefault() == null)
+	  _parseState.setELIgnoredDefault(false);
 	
 	Xml xml = new Xml();
 	_parseState.setXml(xml);
@@ -527,8 +531,10 @@ public class JspCompilerInstance {
 	WebApp app = _jspCompiler.getWebApp();
 
 	// jsp/0135
-	if (app != null && app.hasPre23Config())
-   	  _parseState.setELIgnoredDefault(true);
+	if (app != null && app.hasPre23Config()) {
+	  if (_parseState.getELIgnoredDefault() == null)
+	    _parseState.setELIgnoredDefault(true);
+	}
 	
 	_parser.parse(_jspPath, _uri);
       }
@@ -646,7 +652,8 @@ public class JspCompilerInstance {
 	_parseState.setDeferredSyntaxAllowedAsLiteral(true);
       
       if (isXml) {
-	_parseState.setELIgnoredDefault(false);
+	if (_parseState.getELIgnoredDefault() == null)
+	  _parseState.setELIgnoredDefault(false);
 	
 	Xml xml = new Xml();
 	_parseState.setXml(xml);

@@ -39,7 +39,8 @@ import com.caucho.xml.QName;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class JspDirectiveVariable extends JspNode {
+public class JspDirectiveVariable extends JspNode
+{
   private static final QName NAME_GIVEN = new QName("name-given");
   private static final QName NAME_FROM_ATTRIBUTE =
     new QName("name-from-attribute");
@@ -78,6 +79,10 @@ public class JspDirectiveVariable extends JspNode {
 	throw error(L.l("@variable name-given '{0}' is already used by another variable.",
 			value));
       }
+      else if (gen.findNameFromAttributeVariable(value) != null) {
+	throw error(L.l("@variable name-from-attribute '{0}' is already used by another variable.",
+			value));
+      }
       else if (gen.findAttribute(value) != null) {
 	throw error(L.l("@variable name-given '{0}' is already used by an attribute.",
 			value));
@@ -91,6 +96,10 @@ public class JspDirectiveVariable extends JspNode {
     }
     else if (NAME_FROM_ATTRIBUTE.equals(name)) {
       if (gen.findVariable(value) != null) {
+	throw error(L.l("@variable name-from-attribute '{0}' is already used by another variable.",
+			value));
+      }
+      else if (gen.findNameFromAttributeVariable(value) != null) {
 	throw error(L.l("@variable name-from-attribute '{0}' is already used by another variable.",
 			value));
       }

@@ -572,6 +572,11 @@ public class RequestAdapter extends RequestWrapper
     return false;
   }
 
+  public boolean hasRequest()
+  {
+    return false;
+  }
+
   /**
    * Frees the adapter for reuse.
    */

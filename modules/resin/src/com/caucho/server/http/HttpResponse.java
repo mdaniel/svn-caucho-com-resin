@@ -179,6 +179,9 @@ public class HttpResponse extends AbstractHttpResponse
 				    boolean isHead)
     throws IOException
   {
+    if (! _request.hasRequest())
+      return false;
+    
     boolean isChunked = false;
 
     int version = _request.getVersion();

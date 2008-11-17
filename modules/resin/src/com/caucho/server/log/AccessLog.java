@@ -239,7 +239,9 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     throws ServletException, IOException
   {
     _isActive = true;
-    _alarm.queue(60000);
+
+    if (_alarm != null)
+      _alarm.queue(60000);
     
     if (_format == null)
       _format = "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"";
@@ -702,7 +704,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   /**
    * Closes the log, flushing the results.
    */
-  @PostConstruct
   @Override
   public void destroy()
     throws IOException

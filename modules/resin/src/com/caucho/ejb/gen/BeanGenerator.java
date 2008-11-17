@@ -42,6 +42,7 @@ import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import javax.interceptor.*;
 import javax.ejb.*;
@@ -65,8 +66,13 @@ abstract public class BeanGenerator extends GenClass
 
   private Annotation []_bindings;
 
+  private Annotation []_interceptorBindings;
+
   private ArrayList<Class> _decorators
     = new ArrayList<Class>();
+
+  private HashMap<Method,Annotation[]> _methodAnnotations
+    = new HashMap<Method,Annotation[]>();
 
   protected BeanGenerator(String fullClassName, ApiClass ejbClass)
   {
@@ -138,6 +144,39 @@ abstract public class BeanGenerator extends GenClass
     _bindings = annotation;
   }
 
+
+  /**
+   * Gets the bindings for the interceptors
+   */
+  public Annotation []getInterceptorBindings()
+  {
+    return _interceptorBindings;
+  }
+
+  /**
+   * Sets the bindings for the interceptors
+   */
+  public void setInterceptorBindings(Annotation []annotation)
+  {
+    _interceptorBindings = annotation;
+  }
+
+  /**
+   * Adds the method annotations
+   */
+  public void setMethodAnnotations(Method method, Annotation []annotations)
+  {
+    _methodAnnotations.put(method, annotations);
+  }
+
+  /**
+   * Adds the method annotations
+   */
+  public Annotation []getMethodAnnotations(Method method)
+  {
+    return _methodAnnotations.get(method);
+  }
+
   /**
    * Introspects the bean.
    */
@@ -148,6 +187,11 @@ abstract public class BeanGenerator extends GenClass
     introspectDecorators(_ejbClass.getJavaClass());
   }
 
+  public boolean isAnnotationPresent(Class cl)
+  {
+    return _ejbClass.getJavaClass().isAnnotationPresent(cl);
+  }
+  
   /**
    * Finds the matching decorators for the class
    */

@@ -1090,7 +1090,9 @@ public class ConnectionPool extends AbstractManagedObject
       }
 
       pool.clear();
-      _idlePool.clear();
+
+      if (_idlePool != null)
+	_idlePool.clear();
     }
   }
 

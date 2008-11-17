@@ -158,6 +158,11 @@ public class ResourceDeployAdmin
     return getResourceDeploy().getNames();
   }
 
+  public void deploy(String name)
+  {
+    getResourceDeploy().start(name);
+  }
+
   public void start(String name)
   {
     getResourceDeploy().start(name);

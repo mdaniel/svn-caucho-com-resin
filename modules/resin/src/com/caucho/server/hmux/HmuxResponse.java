@@ -70,6 +70,9 @@ public class HmuxResponse extends AbstractHttpResponse {
 				    boolean isHead)
     throws IOException
   {
+    if (! _request.hasRequest())
+      return false;
+    
     CharBuffer cb = _cb;
     cb.clear();
     cb.append((char) ((_statusCode / 100) % 10 + '0'));

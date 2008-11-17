@@ -50,6 +50,7 @@ import java.util.*;
 import javax.annotation.*;
 import javax.webbeans.*;
 import javax.webbeans.manager.Bean;
+import javax.webbeans.manager.Context;
 
 /**
  * Configuration for the xml web bean component.
@@ -195,11 +196,7 @@ public class ComponentImpl<T> extends AbstractBean<T>
   public Object get()
   {
     if (_scope != null) {
-      Object value = _scope.get(this, false);
-
-      if (value != null) {
-	return value;
-      }
+      return _scope.get(this, true);
     }
     
     return create();
@@ -313,6 +310,14 @@ public class ComponentImpl<T> extends AbstractBean<T>
       inject.inject(value, env);
     }
 
+    if (_cauchoPostConstruct != null) {
+      try {
+	_cauchoPostConstruct.invoke(value);
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+    }
+
     if (_destroyProgram.length > 0) {
       env.addDestructor(this, value);
     }
@@ -350,6 +355,12 @@ public class ComponentImpl<T> extends AbstractBean<T>
    */
   public void bind()
   {
+    if (getScopeType() != null) {
+      Context context = _webBeans.getContext(getScopeType());
+
+      if (context instanceof ScopeContext)
+	_scope = (ScopeContext) context;
+    }
   }
 
   public void createProgram(ArrayList<ConfigProgram> initList, Field field)

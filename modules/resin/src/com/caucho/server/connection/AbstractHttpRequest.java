@@ -309,6 +309,14 @@ public abstract class AbstractHttpRequest
   }
 
   /**
+   * Returns true if a request has been set
+   */
+  public boolean hasRequest()
+  {
+    return false;
+  }
+
+  /**
    * Returns true if client disconnects should be ignored.
    */
   public boolean isIgnoreClientDisconnect()
@@ -2706,7 +2714,6 @@ public abstract class AbstractHttpRequest
       _response.finishRequest();
 
       SessionImpl session = _session;
-
 
       if (session != null)
         session.finish();

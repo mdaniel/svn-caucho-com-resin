@@ -68,7 +68,8 @@ import java.util.concurrent.*;
  */
 public class InjectIntrospector {
   private static final L10N L = new L10N(InjectIntrospector.class);
-  private static final Logger log = Log.open(InjectIntrospector.class);
+  private static final Logger log
+    = Logger.getLogger(InjectIntrospector.class.getName());
 
   private static HashMap<Class,Class> _primitiveTypeMap
     = new HashMap<Class,Class>();
@@ -93,16 +94,20 @@ public class InjectIntrospector {
     introspectInit(initList, type.getSuperclass());
 
     for (Method method : type.getDeclaredMethods()) {
-      if (! method.isAnnotationPresent(PostConstruct.class))
+      if (! method.isAnnotationPresent(PostConstruct.class)
+	  && ! method.isAnnotationPresent(Initializer.class)) {
 	continue;
+      }
 
       if (method.getParameterTypes().length == 1
 	  && InvocationContext.class.equals(method.getParameterTypes()[0]))
 	continue;
       
-      if (method.getParameterTypes().length != 0)
+      if (method.isAnnotationPresent(PostConstruct.class)
+	  && method.getParameterTypes().length != 0) {
           throw new ConfigException(location(method)
 				    + L.l("{0}: @PostConstruct is requires zero arguments"));
+      }
 	
       PostConstructProgram initProgram
 	= new PostConstructProgram(method);
@@ -218,6 +223,7 @@ public class InjectIntrospector {
       String fieldName = method.getName();
       Class []param = method.getParameterTypes();
 
+      /*
       if (hasBindingAnnotation(method)) {
         WebBeansContainer webBeans = WebBeansContainer.create();
 
@@ -225,6 +231,7 @@ public class InjectIntrospector {
 
         continue;
       }
+      */
 
       if (param.length != 1)
         continue;
@@ -439,8 +446,10 @@ public class InjectIntrospector {
       gen = generateWebService(location, type, jndiName, webService);
     }
     */
+    /*
     else if (hasBindingAnnotation(method))
       introspectWebBean(injectList, method);
+    */
 
     if (gen != null)
       injectList.add(new MethodGeneratorProgram(method, gen));

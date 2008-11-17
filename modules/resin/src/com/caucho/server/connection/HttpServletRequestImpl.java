@@ -964,6 +964,11 @@ public class HttpServletRequestImpl implements CauchoRequest
     return _request.isSuspend();
   }
 
+  public boolean hasRequest()
+  {
+    return _request.hasRequest();
+  }
+
   @Override
   public String toString()
   {

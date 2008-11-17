@@ -550,6 +550,13 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
+   * Deploy the controller from an admin command.
+   */
+  public void deploy()
+  {
+  }
+
+  /**
    * Force an instance start from an admin command.
    */
   public final void start()

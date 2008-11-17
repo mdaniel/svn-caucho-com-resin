@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.manager;
 
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.logging.*;
 import javax.jms.*;
@@ -43,6 +44,7 @@ import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.ScanListener;
+import com.caucho.loader.enhancer.ScanMatch;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -414,7 +416,17 @@ public class EjbContainer implements ScanListener, EnvironmentListener
     }
   }
 
-  public boolean isScanMatch(CharBuffer annotationName)
+  public ScanMatch isScanMatchClass(String className, int modifiers)
+  {
+    if (Modifier.isInterface(modifiers))
+      return ScanMatch.DENY;
+    else if (Modifier.isAbstract(modifiers))
+      return ScanMatch.DENY;
+    else
+      return ScanMatch.ALLOW;
+  }
+
+  public boolean isScanMatchAnnotation(CharBuffer annotationName)
   {
     if (annotationName.matches("javax.ejb.Stateless"))
       return true;

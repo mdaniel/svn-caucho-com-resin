@@ -110,6 +110,8 @@ public class HttpRequest extends AbstractHttpRequest
   private int _headerCapacity = 256;
   private int _headerSize;
 
+  private boolean _hasRequest;
+
   private ChunkedInputStream _chunkedInputStream = new ChunkedInputStream();
   private ContentLengthStream _contentLengthStream = new ContentLengthStream();
 
@@ -168,6 +170,15 @@ public class HttpRequest extends AbstractHttpRequest
   {
     return true;
   }
+
+  /**
+   * Returns true if the request exists
+   */
+  @Override
+  public boolean hasRequest()
+  {
+    return _hasRequest;
+  }
   
   /**
    * Handles a new HTTP request.
@@ -180,7 +191,7 @@ public class HttpRequest extends AbstractHttpRequest
   public boolean handleRequest()
     throws IOException
   {
-    boolean hasRequest = false;
+    _hasRequest = false;
     
     try {
       startRequest();
@@ -202,7 +213,7 @@ public class HttpRequest extends AbstractHttpRequest
 
 	setStartTime();
 
-	hasRequest = true;
+	_hasRequest = true;
 
 	_isSecure = _conn.isSecure() || _conn.getLocalPort() == 443;
 
@@ -319,7 +330,7 @@ public class HttpRequest extends AbstractHttpRequest
     } finally {
       finishInvocation();
 
-      if (hasRequest && ! isSuspend()) {
+      if (! isSuspend()) {
 	finishRequest();
       }
     }

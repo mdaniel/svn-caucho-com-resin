@@ -144,8 +144,8 @@ public class ScanManager {
       
 	ReadStream is = Vfs.openRead(zipFile.getInputStream(entry));
 	try {
-	  ByteCodeClassScanner classScanner =
-	    new ByteCodeClassScanner(path.getPath(), is, matcher);
+	  ByteCodeClassScanner classScanner
+	    = new ByteCodeClassScanner(path.getPath(), is, matcher);
 
 	  classScanner.scan();
 	} finally {
@@ -248,7 +248,7 @@ public class ScanManager {
     /**
      * Returns true if the annotation class is a match.
      */
-    public boolean isMatch(CharBuffer annotationClassName)
+    public boolean isClassMatch(String className, int modifiers)
     {
       int activeCount = 0;
 
@@ -258,7 +258,37 @@ public class ScanManager {
 	if (listener == null)
 	  continue;
 
-	if (listener.isScanMatch(annotationClassName)) {
+	ScanMatch scanMatch
+	  = listener.isScanMatchClass(className, modifiers);
+	
+	if (scanMatch == ScanMatch.MATCH) {
+	  listener.classMatchEvent(_loader, _root, getClassName());
+	  _currentListeners[i] = null;
+	}
+	else if (scanMatch == ScanMatch.DENY) {
+	  _currentListeners[i] = null;
+	}
+	else
+	  activeCount++;
+      }
+
+      return activeCount == 0;
+    }
+    
+    /**
+     * Returns true if the annotation class is a match.
+     */
+    public boolean isAnnotationMatch(CharBuffer annotationClassName)
+    {
+      int activeCount = 0;
+
+      for (int i = _listeners.length - 1; i >= 0; i--) {
+	ScanListener listener = _currentListeners[i];
+
+	if (listener == null)
+	  continue;
+
+	if (listener.isScanMatchAnnotation(annotationClassName)) {
 	  listener.classMatchEvent(_loader, _root, getClassName());
 	  _currentListeners[i] = null;
 	}

@@ -44,6 +44,7 @@ import java.lang.annotation.*;
 import java.util.*;
 import javax.ejb.*;
 import javax.webbeans.*;
+import javax.webbeans.Interceptor;
 
 /**
  * Generates the skeleton for a session bean.
@@ -138,17 +139,37 @@ public class PojoBean extends BeanGenerator {
 
   protected void introspectClass(Class cl)
   {
+    if (isAnnotationPresent(Interceptor.class)
+	|| isAnnotationPresent(Decorator.class)) {
+      return;
+    }
+    
     ArrayList<Annotation> interceptorBindingList
       = new ArrayList<Annotation>();
-    
-    for (Annotation ann : cl.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(Stereotype.class)) {
-	for (Annotation sAnn : ann.annotationType().getAnnotations()) {
-	  Class sAnnType = sAnn.annotationType();
+
+    Annotation []xmlInterceptorBindings = getInterceptorBindings();
+
+    if (xmlInterceptorBindings != null) {
+      for (Annotation ann : xmlInterceptorBindings) {
+	interceptorBindingList.add(ann);
+      }
+    }
+    else {
+      for (Annotation ann : cl.getAnnotations()) {
+	Class annType = ann.annotationType();
+      
+	if (annType.isAnnotationPresent(Stereotype.class)) {
+	  for (Annotation sAnn : ann.annotationType().getAnnotations()) {
+	    Class sAnnType = sAnn.annotationType();
 	  
-	  if (sAnnType.isAnnotationPresent(InterceptorBindingType.class)) {
-	    interceptorBindingList.add(sAnn);
+	    if (sAnnType.isAnnotationPresent(InterceptorBindingType.class)) {
+	      interceptorBindingList.add(sAnn);
+	    }
 	  }
+	}
+	  
+	if (annType.isAnnotationPresent(InterceptorBindingType.class)) {
+	  interceptorBindingList.add(ann);
 	}
       }
     }
@@ -224,10 +245,13 @@ public class PojoBean extends BeanGenerator {
       method.generatePrologueTop(out, map);
     }
 
-    for (Constructor ctor : _beanClass.getJavaClass().getDeclaredConstructors()) {
+    for (Constructor ctor
+	   : _beanClass.getJavaClass().getDeclaredConstructors()) {
       if (Modifier.isPublic(ctor.getModifiers()))
 	generateConstructor(out, ctor);
     }
+
+    generatePostConstruct(out);
 
     map = new HashMap();
     for (BusinessMethodGenerator method : _businessMethods) {
@@ -266,9 +290,24 @@ public class PojoBean extends BeanGenerator {
     out.println();
     out.println("private Object readResolve()");
     out.println("{");
-    out.println("  System.out.println(\"resolve-me\");");
-    
     out.println("  return this;");
+    out.println("}");
+  }
+
+  protected void generatePostConstruct(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("private void __caucho_postConstruct()");
+    out.println("{");
+    out.pushDepth();
+
+    HashMap map = new HashMap();
+    for (BusinessMethodGenerator method : _businessMethods) {
+      method.generatePostConstruct(out, map);
+    }
+
+    out.popDepth();
     out.println("}");
   }
 

@@ -251,6 +251,8 @@ public class DeploymentManagerImpl implements DeploymentManager {
 	_deployClient.deployJar(archiveStream,
 				tag, _user, "", null, null);
 
+      _deployClient.deploy(tag);
+
       deployExtraFiles(tag, doc);
 
       TargetModuleID []targetModules = new TargetModuleID[targetList.length];
@@ -317,6 +319,8 @@ public class DeploymentManagerImpl implements DeploymentManager {
 	  String sha1 = _deployClient.calculateFileDigest(is, length);
 
 	  _deployClient.sendFile(sha1, length, os.openInputStream());
+
+	  _deployClient.deploy(tag);
       
 	  _deployClient.addDeployFile(tag, name, sha1);
 	}
@@ -334,23 +338,17 @@ public class DeploymentManagerImpl implements DeploymentManager {
   public ProgressObject start(TargetModuleID []moduleIDList)
     throws IllegalStateException
   {
-    String [][]apps = new String[moduleIDList.length][2];
+    StringBuilder sb = new StringBuilder();
 
     for (int i = 0; i < moduleIDList.length; i++) {
       TargetModuleID targetModuleID = moduleIDList[i];
 
-      apps[i][0] = targetModuleID.getTarget().getName();
-      apps[i][1] = targetModuleID.getModuleID();
-    }
-    
-    _deployClient.start(apps);
+      String host = targetModuleID.getTarget().getName();
+      String webApp = targetModuleID.getModuleID();
 
-    StringBuilder sb = new StringBuilder();
-
-    for (int i = 0; i < apps.length; i++) {
-      String []app = apps[i];
-
-      sb.append(app[0]).append(':').append(app[1]).append(' ');
+      _deployClient.start("war", host, webApp);
+      
+      sb.append(host).append(':').append(webApp).append(' ');
     }
 
     ProgressObjectImpl result = new ProgressObjectImpl(moduleIDList);
@@ -366,23 +364,17 @@ public class DeploymentManagerImpl implements DeploymentManager {
   public ProgressObject stop(TargetModuleID []moduleIDList)
     throws IllegalStateException
   {
-    String [][]apps = new String[moduleIDList.length][2];
+    StringBuilder sb = new StringBuilder();
 
     for (int i = 0; i < moduleIDList.length; i++) {
       TargetModuleID targetModuleID = moduleIDList[i];
 
-      apps[i][0] = targetModuleID.getTarget().getName();
-      apps[i][1] = targetModuleID.getModuleID();
-    }
+      String host = targetModuleID.getTarget().getName();
+      String webApp = targetModuleID.getModuleID();
 
-    _deployClient.stop(apps);
-
-    StringBuilder sb = new StringBuilder();
-
-    for (int i = 0; i < apps.length; i++) {
-      String []app = apps[i];
-
-      sb.append(app[0]).append(':').append(app[1]).append(' ');
+      _deployClient.stop("war", host, webApp);
+      
+      sb.append(host).append(':').append(webApp).append(' ');
     }
 
     ProgressObjectImpl result = new ProgressObjectImpl(moduleIDList);
@@ -398,23 +390,17 @@ public class DeploymentManagerImpl implements DeploymentManager {
   public ProgressObject undeploy(TargetModuleID []moduleIDList)
     throws IllegalStateException
   {
-    String [][]apps = new String[moduleIDList.length][2];
+    StringBuilder sb = new StringBuilder();
 
     for (int i = 0; i < moduleIDList.length; i++) {
       TargetModuleID targetModuleID = moduleIDList[i];
 
-      apps[i][0] = targetModuleID.getTarget().getName();
-      apps[i][1] = targetModuleID.getModuleID();
-    }
+      String host = targetModuleID.getTarget().getName();
+      String webApp = targetModuleID.getModuleID();
 
-    _deployClient.undeploy(apps);
-
-    StringBuilder sb = new StringBuilder();
-
-    for (int i = 0; i < apps.length; i++) {
-      String []app = apps[i];
-
-      sb.append(app[0]).append(':').append(app[1]).append(' ');
+      _deployClient.undeploy("war", host, webApp);
+      
+      sb.append(host).append(':').append(webApp).append(' ');
     }
 
     ProgressObjectImpl result = new ProgressObjectImpl(moduleIDList);

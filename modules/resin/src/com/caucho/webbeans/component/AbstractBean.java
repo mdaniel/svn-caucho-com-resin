@@ -90,6 +90,8 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   private ArrayList<Annotation> _bindings
     = new ArrayList<Annotation>();
 
+  private ArrayList<Annotation> _interceptorBindings;
+
   private Class<? extends Annotation> _scopeType;
 
   private ArrayList<Annotation> _stereotypes
@@ -106,6 +108,8 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   protected ConfigProgram []_injectProgram = NULL_INJECT;
   protected ConfigProgram []_initProgram = NULL_INJECT;
   protected ConfigProgram []_destroyProgram = NULL_INJECT;
+
+  protected Method _cauchoPostConstruct;
   
   public AbstractBean(WebBeansContainer manager)
   {
@@ -195,6 +199,9 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     return _name;
   }
 
+  /**
+   * Adds a binding annotation
+   */
   public void addBinding(Annotation binding)
   {
     if (! binding.annotationType().isAnnotationPresent(BindingType.class))
@@ -228,6 +235,48 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 
     Annotation []bindings = new Annotation[_bindings.size()];
     _bindings.toArray(bindings);
+    
+    return bindings;
+  }
+
+  /**
+   * Adds a binding annotation
+   */
+  public void addInterceptorBinding(Annotation binding)
+  {
+    if (! binding.annotationType().isAnnotationPresent(InterceptorBindingType.class))
+      throw new ConfigException(L.l("'{0}' is not a valid binding because it does not have a @javax.webbeans.InterceptorBindingType annotation",
+				    binding));
+    if (_interceptorBindings == null)
+      _interceptorBindings = new ArrayList<Annotation>();
+    
+    _interceptorBindings.add(binding);
+  }
+
+  /**
+   * Returns the bean's binding types
+   */
+  public Set<Annotation> getInterceptorBindingTypes()
+  {
+    Set<Annotation> set = new LinkedHashSet<Annotation>();
+
+    for (Annotation binding : _interceptorBindings) {
+      set.add(binding);
+    }
+
+    return set;
+  }
+
+  /**
+   * Returns an array of the binding annotations
+   */
+  public Annotation []getInterceptorBindingArray()
+  {
+    if (_interceptorBindings == null)
+      return null;
+
+    Annotation []bindings = new Annotation[_interceptorBindings.size()];
+    _interceptorBindings.toArray(bindings);
     
     return bindings;
   }
@@ -646,6 +695,11 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     _producesList.add(comp);
   }
 
+  protected void addMethod(Method method, Annotation []annList)
+  {
+    SimpleBeanMethod beanMethod = new SimpleBeanMethod(method, annList);
+  }
+
   /**
    * Introspects any observers.
    */
@@ -659,29 +713,35 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
    */
   protected void introspectObservers(Method []methods)
   {
+    Arrays.sort(methods, new MethodNameComparator());
+    
     for (Method method : methods) {
       int param = findObserverAnnotation(method);
 
       if (param < 0)
 	continue;
 
-      if (method.isAnnotationPresent(In.class))
-	throw ConfigException.create(method, "@Observer may not have an @In attribute");
+      Type eventType = method.getGenericParameterTypes()[param];
 
-      ArrayList<WbBinding> bindingList = new ArrayList<WbBinding>();
+      ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
       
       Annotation [][]annList = method.getParameterAnnotations();
       if (annList != null && annList[param] != null) {
 	for (Annotation ann : annList[param]) {
-	  if (ann.annotationType().isAnnotationPresent(EventBindingType.class))
-	    bindingList.add(new WbBinding(ann));
+	  if (ann.annotationType().equals(IfExists.class))
+	    continue;
+	  
+	  if (ann.annotationType().isAnnotationPresent(BindingType.class))
+	    bindingList.add(ann);
 	}
       }
 
-      ObserverImpl observer = new ObserverImpl(_webBeans, this, method, param);
-      observer.setBindingList(bindingList);
+      Annotation []bindings = new Annotation[bindingList.size()];
+      bindingList.toArray(bindings);
 
-      _webBeans.addObserver(observer);
+      ObserverImpl observer = new ObserverImpl(_webBeans, this, method, param);
+
+      _webBeans.addObserver(observer, (Class) eventType, bindings);
     }
   }
 
@@ -922,6 +982,13 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     sb.append("]");
 
     return sb.toString();
+  }
+
+  static class MethodNameComparator implements Comparator<Method> {
+    public int compare(Method a, Method b)
+    {
+      return a.getName().compareTo(b.getName());
+    }
   }
 
   static {

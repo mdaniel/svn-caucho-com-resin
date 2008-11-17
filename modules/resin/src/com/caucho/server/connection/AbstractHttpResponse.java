@@ -1777,7 +1777,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   /**
    * Returns true if the headers have been written.
    */
-  final public boolean isHeaderWritten()
+  public boolean isHeaderWritten()
   {
     return _isHeaderWritten;
   }
@@ -1796,7 +1796,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   final void writeContinue()
     throws IOException
   {
-    if (! _isHeaderWritten) {
+    if (isHeaderWritten()) {
       writeContinueInt(_rawWrite);
       _rawWrite.flush();
     }
@@ -1821,7 +1821,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected boolean writeHeaders(WriteStream os, int length)
     throws IOException
   {
-    if (_isHeaderWritten)
+    if (isHeaderWritten())
       return _isChunked;
 
     // server/1373 for getBufferSize()

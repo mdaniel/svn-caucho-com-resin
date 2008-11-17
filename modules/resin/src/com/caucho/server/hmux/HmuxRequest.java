@@ -374,7 +374,7 @@ public class HmuxRequest extends AbstractHttpRequest
     _serverType = 0;
     _uri.setLength(0);
 
-    boolean hasRequest = false;
+    _hasRequest = false;
     
     try {
       startRequest();
@@ -399,7 +399,7 @@ public class HmuxRequest extends AbstractHttpRequest
       if (_isSecure)
         getClientCertificate();
 
-      hasRequest = true;
+      _hasRequest = true;
       // setStartDate();
 
       if (_server == null || _server.isDestroyed()) {
@@ -478,15 +478,14 @@ public class HmuxRequest extends AbstractHttpRequest
 	return false;
       }
     } finally {
+      if (! _hasRequest)
+	_response.setHeaderWritten(true);
+      
       finishInvocation();
       
       try {
-	if (hasRequest) {
-	  // server/0190
-	  finishRequest();
-	}
-	else
-	  _response.setHeaderWritten(true);
+	// server/0190
+	finishRequest();
       } catch (ClientDisconnectException e) {
         throw e;
       } catch (Exception e) {
@@ -636,7 +635,7 @@ public class HmuxRequest extends AbstractHttpRequest
       switch (code) {
       case -1:
         if (isLoggable)
-          log.fine(dbgId() + "end of file");
+          log.fine(dbgId() + "r: end of file");
         return false;
 
       case HMUX_CHANNEL:
@@ -648,13 +647,13 @@ public class HmuxRequest extends AbstractHttpRequest
 
       case HMUX_QUIT:
         if (isLoggable)
-          log.fine(dbgId() + (char) code + ": end of request");
+          log.fine(dbgId() + (char) code + "-r: end of request");
         
         return hasURI;
 
       case HMUX_EXIT:
         if (isLoggable)
-          log.fine(dbgId() + (char) code + ": end of socket");
+          log.fine(dbgId() + (char) code + "-r: end of socket");
 
         killKeepalive();
         
@@ -664,7 +663,7 @@ public class HmuxRequest extends AbstractHttpRequest
         len = (is.read() << 8) + is.read();
 
         if (len != 4) {
-          log.fine(dbgId() + (char) code + ": protocol length (" + len + ") must be 4.");
+          log.fine(dbgId() + (char) code + "-r: protocol length (" + len + ") must be 4.");
           killKeepalive();
           return false;
         }
@@ -678,7 +677,7 @@ public class HmuxRequest extends AbstractHttpRequest
 	boolean isKeepalive = false;
         if (value == HMUX_CLUSTER_PROTOCOL) {
           if (isLoggable)
-            log.fine(dbgId() + (char) code + ": cluster protocol");
+            log.fine(dbgId() + (char) code + "-r: cluster protocol");
           _filter.setClientClosed(true);
 	  
 	  if (_server == null || _server.isDestroyed()) {
@@ -689,7 +688,7 @@ public class HmuxRequest extends AbstractHttpRequest
         }
         else if (value == HMUX_DISPATCH_PROTOCOL) {
           if (isLoggable)
-            log.fine(dbgId() + (char) code + ": dispatch protocol");
+            log.fine(dbgId() + (char) code + "-r: dispatch protocol");
           _filter.setClientClosed(true);
 	  
 	  if (_server == null || _server.isDestroyed()) {
@@ -712,13 +711,13 @@ public class HmuxRequest extends AbstractHttpRequest
 
 	  if (ext != null) {
 	    if (isLoggable)
-	      log.fine(dbgId() + (char) code + ": extension " + ext);
+	      log.fine(dbgId() + (char) code + "-r: extension " + ext);
 	    _filter.setClientClosed(true);
 
 	    result = ext.handleRequest(this, is, _rawWrite);
 	  }
 	  else {
-	    log.fine(dbgId() + (char) code + ": unknown protocol (" + value + ")");
+	    log.fine(dbgId() + (char) code + "-r: unknown protocol (" + value + ")");
 	    result = HMUX_EXIT;
 	  }
 	}
@@ -1026,7 +1025,7 @@ public class HmuxRequest extends AbstractHttpRequest
       BamStream brokerStream = broker.getBrokerStream();
 
       if (log.isLoggable(Level.FINER))
-	log.fine(dbgId() + (char) HMTP_QUERY_GET + " hmtp message"
+	log.fine(dbgId() + (char) HMTP_QUERY_GET + "-r: hmtp message"
 		 + " to=" + to + " from=" + from + " " + query);
 
       if (brokerStream != null) {
@@ -1050,7 +1049,7 @@ public class HmuxRequest extends AbstractHttpRequest
     BamStream brokerStream = broker.getBrokerStream();
 
     if (log.isLoggable(Level.FINER))
-      log.fine(dbgId() + (char) HMTP_QUERY_GET + " queryGet id=" + id
+      log.fine(dbgId() + (char) HMTP_QUERY_GET + "-r: queryGet id=" + id
 	       + " to=" + to + " from=" + from + " " + query);
 
     if (from != null && ! "".equals(from)) {
@@ -1080,9 +1079,11 @@ public class HmuxRequest extends AbstractHttpRequest
       writeString(HMUX_STRING, to);
       writeObject(out, result);
 
-      if (log.isLoggable(Level.FINER))
-	log.finer(this + " queryResult to=" + from + " from=" + to +
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(dbgId() + (char) HMTP_QUERY_RESULT + "-w:"
+		  + " queryResult to=" + from + " from=" + to +
 		  " result=" + (result != null ? result.getClass() : null));
+      }
     }
   }
 
@@ -1156,8 +1157,18 @@ public class HmuxRequest extends AbstractHttpRequest
   private Object readObject()
     throws IOException
   {
-    if (_in == null)
-      _in = new Hessian2StreamingInput(_rawRead);
+    if (_in == null) {
+      InputStream is = _rawRead;
+
+      /*
+      if (log.isLoggable(Level.FINEST)) {
+	is = new HessianDebugInputStream(is, log, Level.FINEST);
+	is.startTop2();
+      }
+      */
+	
+      _in = new Hessian2StreamingInput(is);
+    }
 
     return _in.readObject();
   }
@@ -1597,7 +1608,7 @@ public class HmuxRequest extends AbstractHttpRequest
     os.print(cb.getBuffer(), 0, len);
 
     if (log.isLoggable(Level.FINE))
-      log.fine(dbgId() + (char)code + " " + cb);
+      log.fine(dbgId() + (char)code + "-w: " + cb);
   }
   
   public void protocolCloseEvent()
@@ -1807,8 +1818,11 @@ public class HmuxRequest extends AbstractHttpRequest
     public void flush()
       throws IOException
     {
+      if (! _request._hasRequest)
+	return;
+      
       if (log.isLoggable(Level.FINE))
-	log.fine(_request.dbgId() + (char) HMUX_FLUSH + ":flush");
+	log.fine(_request.dbgId() + (char) HMUX_FLUSH + "-w:flush");
 
       _os.write(HMUX_FLUSH);
       _os.write(0);
@@ -1835,9 +1849,9 @@ public class HmuxRequest extends AbstractHttpRequest
       if (! _isClientClosed) {
 	if (log.isLoggable(Level.FINE)) {
           if (keepalive)
-            log.fine(_request.dbgId() + (char) HMUX_QUIT + ": quit channel");
+            log.fine(_request.dbgId() + (char) HMUX_QUIT + "-w: quit channel");
           else
-            log.fine(_request.dbgId() + (char) HMUX_EXIT + ": exit socket");
+            log.fine(_request.dbgId() + (char) HMUX_EXIT + "-w: exit socket");
         }
 
         if (keepalive)

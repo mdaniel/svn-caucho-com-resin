@@ -82,6 +82,24 @@ public class WebBeansContainer
   private static final Annotation []CURRENT_ANN
     = new Annotation[] { new CurrentLiteral() };
 
+  private static final Class []_forbiddenAnnotations = {
+    javax.persistence.Entity.class,
+    javax.ejb.Stateful.class,
+    javax.ejb.Stateless.class,
+    // javax.ejb.Singleton.class,
+    javax.ejb.MessageDriven.class,
+  };
+
+  private static final Class []_forbiddenClasses = {
+    javax.servlet.Servlet.class,
+    javax.servlet.Filter.class,
+    javax.servlet.ServletContextListener.class,
+    javax.servlet.http.HttpSessionListener.class,
+    javax.servlet.ServletRequestListener.class,
+    javax.ejb.EnterpriseBean.class,
+    javax.faces.component.UIComponent.class,
+  };
+
   private WebBeansContainer _parent;
   
   private EnvironmentClassLoader _classLoader;
@@ -635,24 +653,6 @@ public class WebBeansContainer
   
 
   //
-  // events
-  //
-  
-  public void addObserver(ObserverImpl observer)
-  {
-    synchronized (_observerMap) {
-      ObserverMap map = _observerMap.get(observer.getType());
-      
-      if (map == null) {
-	map = new ObserverMap(observer.getType());
-	_observerMap.put(observer.getType(), map);
-      }
-
-      map.addObserver(observer);
-    }
-  }
-
-  //
   // javax.webbeans.Container
   //
 
@@ -1101,7 +1101,7 @@ public class WebBeansContainer
   public <T> T getInstanceByType(TypeLiteral<T> type,
 				 Annotation... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return (T) getInstanceByType((Class) type.getType(), bindings);
   }
 
   //
@@ -1119,7 +1119,7 @@ public class WebBeansContainer
   /**
    * Returns the scope context for the given type
    */
-  public Context getContext(Class<Annotation> scopeType)
+  public Context getContext(Class<? extends Annotation> scopeType)
   {
     return _contextMap.get(scopeType);
   }
@@ -1133,8 +1133,16 @@ public class WebBeansContainer
    */
   public void fireEvent(Object event, Annotation... bindings)
   {
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " fireEvent " + event);
+
+    fireEventImpl(event, bindings);
+  }
+  
+  protected void fireEventImpl(Object event, Annotation... bindings)
+  {
     if (_parent != null)
-      _parent.fireEvent(event, bindings);
+      _parent.fireEventImpl(event, bindings);
 
     ArrayList<ObserverMap> observerList;
 
@@ -1145,13 +1153,15 @@ public class WebBeansContainer
 	observerList = new ArrayList<ObserverMap>();
 	
 	fillObserverList(observerList, event.getClass());
+	
 	_observerListCache.put(event.getClass(), observerList);
       }
     }
 
     int size = observerList.size();
+
     for (int i = 0; i < size; i++) {
-      observerList.get(i).raiseEvent(event, bindings);
+      observerList.get(i).fireEvent(event, bindings);
     }
   }
 
@@ -1166,7 +1176,26 @@ public class WebBeansContainer
 			      Class<T> eventType,
 			      Annotation... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (eventType.getTypeParameters() != null
+	&& eventType.getTypeParameters().length > 0) {
+      throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's a parameterized type.",
+					     eventType));
+    }
+    
+    synchronized (_observerMap) {
+      ObserverMap map = _observerMap.get(eventType);
+      
+      if (map == null) {
+	map = new ObserverMap(eventType);
+	_observerMap.put(eventType, map);
+      }
+
+      map.addObserver(observer, bindings);
+    }
+    
+    synchronized (_observerListCache) {
+      _observerListCache.clear();
+    }
   }
 
   /**
@@ -1180,7 +1209,7 @@ public class WebBeansContainer
 			      TypeLiteral<T> eventType,
 			      Annotation... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    addObserver(observer, (Class) eventType.getType(), bindings);
   }
 
   /**
@@ -1208,8 +1237,12 @@ public class WebBeansContainer
 				 TypeLiteral<T> eventType,
 				 Annotation... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    removeObserver(observer, (Class) eventType.getType(), bindings);
   }
+
+  //
+  // events
+  //
 
   /**
    * Returns the observers listening for an event
@@ -1220,7 +1253,14 @@ public class WebBeansContainer
   public <T> Set<Observer<T>> resolveObservers(T event,
 					       Annotation... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    HashSet<Observer<T>> set = new HashSet<Observer<T>>();
+    
+    ObserverMap map = _observerMap.get(event);
+
+    if (map != null)
+      map.resolveObservers(set, bindings);
+
+    return set;
   }
 
   //
@@ -1276,7 +1316,7 @@ public class WebBeansContainer
   {
     ArrayList<Decorator> decorators = new ArrayList<Decorator>();
 
-    if (bindings.length == 0)
+    if (bindings == null || bindings.length == 0)
       bindings = CURRENT_ANN;
 
     for (DecoratorEntry entry : _decoratorList) {
@@ -1356,12 +1396,29 @@ public class WebBeansContainer
 	  }
 	}
 
+	class_loop:
 	for (String className : context.getClassNameList()) {
 	  try {
 	    Class cl = Class.forName(className, false, _classLoader);
 
-	    if (! cl.isInterface())
-	      webBeans.addScannedClass(cl);
+	    if (! SimpleBean.isValid(cl))
+	      continue;
+	    
+	    if (cl.getDeclaringClass() != null
+		&& ! Modifier.isStatic(cl.getModifiers()))
+	      continue;
+
+	    for (Class forbiddenAnnotation : _forbiddenAnnotations) {
+	      if (cl.isAnnotationPresent(forbiddenAnnotation))
+		continue class_loop;
+	    }
+
+	    for (Class forbiddenClass : _forbiddenClasses) {
+	      if (forbiddenClass.isAssignableFrom(cl))
+		continue class_loop;
+	    }
+	    
+	    webBeans.addScannedClass(cl);
 	  } catch (ClassNotFoundException e) {
 	    log.log(Level.FINER, e.toString(), e);
 	  }
@@ -1556,7 +1613,22 @@ public class WebBeansContainer
     }
   }
 
-  public boolean isScanMatch(CharBuffer annotationName)
+  /**
+   * Checks if the class can be a simple class
+   */
+  public ScanMatch isScanMatchClass(String className, int modifiers)
+  {
+    if (Modifier.isInterface(modifiers))
+      return ScanMatch.DENY;
+    else if (! Modifier.isPublic(modifiers))
+      return ScanMatch.DENY;
+    else if (Modifier.isAbstract(modifiers))
+      return ScanMatch.ALLOW;
+    else
+      return ScanMatch.MATCH;
+  }
+
+  public boolean isScanMatchAnnotation(CharBuffer annotationName)
   {
     try {
       String className = annotationName.toString();

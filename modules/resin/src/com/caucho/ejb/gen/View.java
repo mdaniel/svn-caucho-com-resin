@@ -34,6 +34,8 @@ import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import javax.ejb.*;
+import javax.webbeans.Interceptor;
+import javax.webbeans.Decorator;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -110,6 +112,12 @@ abstract public class View {
    */
   public void setInterceptorBindings(ArrayList<Annotation> bindings)
   {
+    if (_bean.isAnnotationPresent(Interceptor.class)
+	|| _bean.isAnnotationPresent(Decorator.class)) {
+      throw new IllegalStateException(L.l("{0}: invalid because introspectors and decorators may not have interceptors",
+					  this));
+    }
+    
     _interceptorBindings = bindings;
   }
 
@@ -269,4 +277,8 @@ abstract public class View {
     return name + ")";
   }
 
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getEjbClass() + "]";
+  }
 }

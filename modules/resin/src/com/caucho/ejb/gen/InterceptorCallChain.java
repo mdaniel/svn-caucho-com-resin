@@ -50,6 +50,8 @@ import javax.webbeans.manager.Bean;
 public class InterceptorCallChain extends AbstractCallChain {
   private static final L10N L = new L10N(InterceptorCallChain.class);
 
+  private static final Annotation []NULL_ANN_LIST = new Annotation[0];
+
   private View _view;
   private BusinessMethodGenerator _next;
 
@@ -92,17 +94,23 @@ public class InterceptorCallChain extends AbstractCallChain {
   }
   
   /**
-   * Returns true if the business method has any active XA annotation.
+   * Returns true if the method is an interceptor
    */
   public boolean isEnhanced()
   {
-    return (_defaultInterceptors.size() > 0
-	    || (! _isExcludeDefaultInterceptors
-		&& _view.getBean().getDefaultInterceptors().size() > 0)
-	    || _classInterceptors.size() > 0
-	    || _methodInterceptors.size() > 0
-	    || _decoratorType != null
-	    || getAroundInvokeMethod() != null);
+    if (_view.getBean().isAnnotationPresent(Interceptor.class)
+	|| _view.getBean().isAnnotationPresent(Decorator.class)) {
+      return false;
+    }
+    else {
+      return (_defaultInterceptors.size() > 0
+	      || (! _isExcludeDefaultInterceptors
+		  && _view.getBean().getDefaultInterceptors().size() > 0)
+	      || _classInterceptors.size() > 0
+	      || _methodInterceptors.size() > 0
+	      || _decoratorType != null
+	      || getAroundInvokeMethod() != null);
+    }
   }
 
   public ArrayList<Class> getInterceptors()
@@ -130,6 +138,12 @@ public class InterceptorCallChain extends AbstractCallChain {
 
     _implMethod = implMethod;
 
+    // interceptors aren't intercepted
+    if (_view.getBean().isAnnotationPresent(Interceptor.class)
+	|| _view.getBean().isAnnotationPresent(Decorator.class)) {
+      return;
+    }
+
     Interceptors iAnn;
     
     iAnn = (Interceptors) apiClass.getAnnotation(Interceptors.class);
@@ -147,33 +161,34 @@ public class InterceptorCallChain extends AbstractCallChain {
 	  _classInterceptors.add(iClass);
       }
     }
+
+    Annotation []apiAnnList = getMethodAnnotations(apiMethod);
+    Annotation []implAnnList = getMethodAnnotations(implMethod);
     
-    iAnn = (Interceptors) apiMethod.getAnnotation(Interceptors.class);
+    iAnn = getAnnotation(apiAnnList, Interceptors.class);
 
     if (iAnn != null) {
       for (Class iClass : iAnn.value())
 	_methodInterceptors.add(iClass);
     }
 
-    if (implMethod != null) {
-      iAnn = (Interceptors) implMethod.getAnnotation(Interceptors.class);
+    iAnn = getAnnotation(implAnnList, Interceptors.class);
 
-      if (apiMethod != implMethod && iAnn != null) {
-	for (Class iClass : iAnn.value())
-	  _methodInterceptors.add(iClass);
-      }
+    if (apiMethod != implMethod && iAnn != null) {
+      for (Class iClass : iAnn.value())
+	_methodInterceptors.add(iClass);
     }
 
-    if (apiMethod.isAnnotationPresent(ExcludeClassInterceptors.class))
+    if (isAnnotationPresent(apiAnnList, ExcludeClassInterceptors.class))
       _isExcludeClassInterceptors = true;
 
-    if (implMethod.isAnnotationPresent(ExcludeClassInterceptors.class))
+    if (isAnnotationPresent(implAnnList, ExcludeClassInterceptors.class))
       _isExcludeClassInterceptors = true;
 
-    if (apiMethod.isAnnotationPresent(ExcludeDefaultInterceptors.class))
+    if (isAnnotationPresent(apiAnnList, ExcludeDefaultInterceptors.class))
       _isExcludeDefaultInterceptors = true;
 
-    if (implMethod.isAnnotationPresent(ExcludeDefaultInterceptors.class))
+    if (isAnnotationPresent(implAnnList, ExcludeDefaultInterceptors.class))
       _isExcludeDefaultInterceptors = true;
 
     // webbeans annotations
@@ -181,10 +196,10 @@ public class InterceptorCallChain extends AbstractCallChain {
     
     ArrayList<Annotation> interceptorTypes = new ArrayList<Annotation>();
     
-    if (_view.getInterceptorBindings() != null)
+    if (isValidMethod() && _view.getInterceptorBindings() != null)
       interceptorTypes.addAll(_view.getInterceptorBindings());
     
-    for (Annotation ann : implMethod.getAnnotations()) {
+    for (Annotation ann : implAnnList) {
       Class annType = ann.annotationType();
       
       if (annType.isAnnotationPresent(InterceptorBindingType.class)) {
@@ -192,7 +207,6 @@ public class InterceptorCallChain extends AbstractCallChain {
 	  interceptorTypes.add(ann);
       }
     }
-
 
     if (interceptorTypes.size() > 0) {
       ArrayList<Class> interceptors
@@ -202,14 +216,64 @@ public class InterceptorCallChain extends AbstractCallChain {
 	_methodInterceptors.addAll(interceptors);
     }
 
-    ArrayList<Class> decorators = _view.getBean().getDecoratorTypes();
+    if (isValidMethod()) {
+      ArrayList<Class> decorators = _view.getBean().getDecoratorTypes();
 
-    for (Class decorator : decorators) {
-      for (Method method : decorator.getMethods()) {
-	if (isMatch(method, apiMethod))
-	  _decoratorType = decorator;
+      for (Class decorator : decorators) {
+	for (Method method : decorator.getMethods()) {
+	  if (isMatch(method, apiMethod))
+	    _decoratorType = decorator;
+	}
       }
     }
+  }
+
+  protected Annotation []getMethodAnnotations(Method method)
+  {
+    if (method == null)
+      return NULL_ANN_LIST;
+    
+    Annotation []annList = _view.getBean().getMethodAnnotations(method);
+
+    if (annList != null)
+      return annList;
+    else
+      return method.getAnnotations();
+  }
+
+  protected boolean isAnnotationPresent(Annotation[]annList, Class type)
+  {
+    for (Annotation ann : annList) {
+      if (ann.annotationType().equals(type))
+	return true;
+    }
+
+    return false;
+  }
+
+  protected <T> T getAnnotation(Annotation[]annList, Class<T> type)
+  {
+    for (Annotation ann : annList) {
+      if (ann.annotationType().equals(type))
+	return (T) ann;
+    }
+
+    return null;
+  }
+
+  protected boolean isValidMethod()
+  {
+    if (Modifier.isStatic(_implMethod.getModifiers()))
+      return false;
+    
+    if (Modifier.isFinal(_implMethod.getModifiers()))
+      return false;
+    
+    if (! Modifier.isPublic(_implMethod.getModifiers())
+	&& ! Modifier.isProtected(_implMethod.getModifiers()))
+      return false;
+
+    return true;
   }
 
   private boolean isMatch(Method methodA, Method methodB)
@@ -288,7 +352,8 @@ public class InterceptorCallChain extends AbstractCallChain {
     }
     
     out.println("private static java.lang.reflect.Method []" + _uniqueName + "_methodChain;");
-    out.println("private transient Object []" + _uniqueName + "_objectChain;");
+    out.println("private transient Object []" + _uniqueName + "_objectChain");
+    out.println("  = com.caucho.ejb.util.EjbUtil.NULL_OBJECT_ARRAY;");
 
     Class cl = _implMethod.getDeclaringClass();
     
@@ -357,6 +422,12 @@ public class InterceptorCallChain extends AbstractCallChain {
 
       _interceptorVarMap.put(iClass, var);
     }
+  }
+
+  public void generatePostConstruct(JavaWriter out, HashMap map)
+    throws IOException
+  {
+    out.println("" + _uniqueName + "_objectChain = null;");
   }
 
   public void generateDecoratorPrologue(JavaWriter out, HashMap map)

@@ -29,6 +29,7 @@
 
 package com.caucho.bytecode;
 
+import com.caucho.loader.enhancer.ScanMatch;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -75,7 +76,13 @@ public class ByteCodeClassScanner {
       _is.skip(2); // major
       _is.skip(2); // minor
 
-      return parseConstantPool();
+      boolean isMatch = parseConstantPool();
+
+      int modifiers = readShort();
+
+      boolean isClassMatch = _matcher.isClassMatch(_className, modifiers);
+
+      return isClassMatch;
     } catch (Exception e) {
       log.log(Level.WARNING,
 	      "failed scanning class " + _className + "\n" + e.toString(),
@@ -164,7 +171,7 @@ public class ByteCodeClassScanner {
 	  int length = readShort();
 
 	  if (parseUtf8ForAnnotation(_cb, length)) {
-	    if (_matcher.isMatch(_cb))
+	    if (_matcher.isAnnotationMatch(_cb))
 	      return true;
 	  }
 

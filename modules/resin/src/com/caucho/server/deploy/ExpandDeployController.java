@@ -223,6 +223,19 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   }
 
   /**
+   * Deploys the controller
+   */
+  public void deploy()
+  {
+    try {
+      expandArchive();
+    } catch (Exception e) {
+      // XXX: better exception
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
    * Expand an archive file.  The _archiveExpandLock must be obtained
    * before the expansion.
    */

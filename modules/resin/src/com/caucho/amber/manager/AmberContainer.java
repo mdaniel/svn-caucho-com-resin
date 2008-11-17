@@ -39,6 +39,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.EnhancerManager;
 import com.caucho.loader.enhancer.ScanListener;
+import com.caucho.loader.enhancer.ScanMatch;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.webbeans.manager.*;
@@ -47,6 +48,7 @@ import javax.sql.DataSource;
 import javax.persistence.*;
 import javax.persistence.spi.*;
 import java.io.InputStream;
+import java.lang.reflect.Modifier;
 import java.net.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -1057,7 +1059,21 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     }
   }
 
-  public boolean isScanMatch(CharBuffer annotationName)
+  public ScanMatch isScanMatchClass(String className, int modifiers)
+  {
+    if (Modifier.isInterface(modifiers))
+      return ScanMatch.DENY;
+    else if (Modifier.isAbstract(modifiers))
+      return ScanMatch.DENY;
+    else if (Modifier.isFinal(modifiers))
+      return ScanMatch.DENY;
+    else if (! Modifier.isPublic(modifiers))
+      return ScanMatch.DENY;
+    else
+      return ScanMatch.ALLOW;
+  }
+
+  public boolean isScanMatchAnnotation(CharBuffer annotationName)
   {
     if (annotationName.matches("javax.persistence.Entity"))
       return true;

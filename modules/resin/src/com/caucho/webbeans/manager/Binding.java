@@ -83,6 +83,16 @@ public class Binding {
     }
   }
 
+  boolean isMatch(Annotation []annList)
+  {
+    for (Annotation ann : annList) {
+      if (isMatch(ann))
+	return true;
+    }
+
+    return false;
+  }
+
   boolean isMatch(Annotation ann)
   {
     if (! _ann.annotationType().equals(ann.annotationType()))

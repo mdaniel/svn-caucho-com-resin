@@ -100,6 +100,11 @@ abstract public class ExpandDeployGeneratorAdmin<C extends ExpandDeployGenerator
     return getDeployGenerator().getNames();
   }
 
+  public void deploy(String name)
+  {
+    getDeployGenerator().deploy(name);
+  }
+
   public void start(String name)
   {
     getDeployGenerator().start(name);

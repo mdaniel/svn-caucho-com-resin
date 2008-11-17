@@ -206,6 +206,15 @@ public class BusinessMethodGenerator implements EjbCallChain {
     _security.generateConstructor(out, prologueMap);
   }
 
+  public final void generatePostConstruct(JavaWriter out, HashMap map)
+    throws IOException
+  {
+    if (! isEnhanced())
+      return;
+
+    _interceptor.generatePostConstruct(out, map);
+  }
+
   public final void generate(JavaWriter out, HashMap prologueMap)
     throws IOException
   {

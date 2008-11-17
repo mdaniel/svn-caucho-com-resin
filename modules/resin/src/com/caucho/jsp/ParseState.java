@@ -60,7 +60,7 @@ public class ParseState {
   private JspPropertyGroup _jspPropertyGroup = new JspPropertyGroup();
 
   private Boolean _isELIgnored;
-  private boolean _isELIgnoredDefault = false;
+  private Boolean _isELIgnoredDefault;
   
   private boolean _isScriptingInvalid = false;
   
@@ -142,8 +142,10 @@ public class ParseState {
   {
     if (_isELIgnored != null)
       return _isELIgnored;
-    else
+    else if (_isELIgnoredDefault != null)
       return _isELIgnoredDefault;
+    else
+      return false;
   }
 
   /**
@@ -155,7 +157,7 @@ public class ParseState {
     
     _isELIgnored = isELIgnored;
 
-    return oldIsIgnored != null && oldIsIgnored != isELIgnored;
+    return oldIsIgnored == null || oldIsIgnored.equals(isELIgnored);
   }
 
   /**
@@ -164,6 +166,14 @@ public class ParseState {
   public void setELIgnoredDefault(boolean isELIgnored)
   {
     _isELIgnoredDefault = isELIgnored;
+  }
+
+  /**
+   * Set if JSP EL is ignored.
+   */
+  public Boolean getELIgnoredDefault()
+  {
+    return _isELIgnoredDefault;
   }
 
   /**

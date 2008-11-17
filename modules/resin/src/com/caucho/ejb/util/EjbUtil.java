@@ -40,6 +40,8 @@ import javax.webbeans.manager.Decorator;
  * Utilities
  */
 public class EjbUtil {
+  public static final Object []NULL_OBJECT_ARRAY = new Object[0];
+  
   private EjbUtil()
   {
   }
