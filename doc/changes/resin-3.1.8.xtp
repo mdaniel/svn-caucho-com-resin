@@ -1,0 +1,34 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 3.1.8 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Resin 3.1.x">
+
+<p>Resin 3.1.x is now the stable branch.  Only important bug fixes will
+be applied to new versions of the 3.1.x branch.</p>
+
+<p>For new features, the 3.2.x branch is now the development branch.</p>
+
+</s1>
+
+<s1 title="Bugs">
+
+<ul>
+<li>JNI fixes for the FilePath.nativeTruncate linking</li>
+<li>Cleaned up several potential classloader cleaks</li>
+<li>Smoothed the thread pool allocation to reduce stress on the OS/JVM locking</li>
+<li>Fixed potential DOS issue with mod_caucho and virtual hosts.</li>
+<li>Added expand-fileset-cleanup to &lt;web-app> configuration</li>
+<li>Cleaned up Port delay for long polling performance</li>
+</ul>
+
+</s1>
+
+</body>
+</document>

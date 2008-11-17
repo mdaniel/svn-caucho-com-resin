@@ -10,9 +10,9 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.8 snapshot">
+<s2 title="3.1.8">
 <ul>
-<li>thread: thread pool load smoothing (rep by Martin Thompson)</li>
+<li>(2008-11-17) thread: thread pool load smoothing (rep by Martin Thompson)</li>
 <li>jni: missing nativeTruncate (#2993, #3024, rep by Richard Grantham, Juan Andrade)</li>
 <li>boot: watchdog kill NPE (#3009, rep by stbu)</li>
 <li>memory: removed potential ThreadLocal leak with SecurityContext (#3031, rep by Mattias Jiderhamn)</li>
