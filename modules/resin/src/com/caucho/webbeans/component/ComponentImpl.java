@@ -198,8 +198,14 @@ public class ComponentImpl<T> extends AbstractBean<T>
     if (_scope != null) {
       return _scope.get(this, true);
     }
-    
-    return create();
+    else {
+      Context context = _webBeans.getContext(getScopeType());
+
+      if (context != null)
+	return context.get(this, true);
+      else
+	return create();
+    }
   }
 
   public T get(ConfigContext env)
@@ -356,10 +362,7 @@ public class ComponentImpl<T> extends AbstractBean<T>
   public void bind()
   {
     if (getScopeType() != null) {
-      Context context = _webBeans.getContext(getScopeType());
-
-      if (context instanceof ScopeContext)
-	_scope = (ScopeContext) context;
+      _scope = _webBeans.getScopeContext(getScopeType());
     }
   }
 

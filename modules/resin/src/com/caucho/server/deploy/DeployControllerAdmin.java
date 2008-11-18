@@ -199,9 +199,6 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     String newValue = Lifecycle.getStateName(newState);
     String message = newValue;
 
-    if (newValue.equals("failed"))
-      Thread.dumpStack();
-
     if (log.isLoggable(Level.FINEST))
       log.finest(this + " lifecycleEvent " + oldValue + " -> " + newValue);
 

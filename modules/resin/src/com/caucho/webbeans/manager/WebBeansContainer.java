@@ -52,6 +52,7 @@ import java.lang.annotation.*;
 import java.lang.reflect.*;
 
 import javax.el.*;
+import javax.naming.*;
 import javax.webbeans.*;
 import javax.webbeans.Observer;
 import javax.webbeans.manager.Bean;
@@ -82,23 +83,26 @@ public class WebBeansContainer
   private static final Annotation []CURRENT_ANN
     = new Annotation[] { new CurrentLiteral() };
 
-  private static final Class []_forbiddenAnnotations = {
-    javax.persistence.Entity.class,
-    javax.ejb.Stateful.class,
-    javax.ejb.Stateless.class,
-    // javax.ejb.Singleton.class,
-    javax.ejb.MessageDriven.class,
+  private static final String []FORBIDDEN_ANNOTATIONS = {
+    "javax.persistence.Entity",
+    "javax.ejb.Stateful",
+    "javax.ejb.Stateless",
+    "javax.ejb.Singleton",
+    "javax.ejb.MessageDriven"
   };
 
-  private static final Class []_forbiddenClasses = {
-    javax.servlet.Servlet.class,
-    javax.servlet.Filter.class,
-    javax.servlet.ServletContextListener.class,
-    javax.servlet.http.HttpSessionListener.class,
-    javax.servlet.ServletRequestListener.class,
-    javax.ejb.EnterpriseBean.class,
-    javax.faces.component.UIComponent.class,
+  private static final String []FORBIDDEN_CLASSES = {
+    "javax.servlet.Servlet",
+    "javax.servlet.Filter",
+    "javax.servlet.ServletContextListener",
+    "javax.servlet.http.HttpSessionListener",
+    "javax.servlet.ServletRequestListener",
+    "javax.ejb.EnterpriseBean",
+    "javax.faces.component.UIComponent"
   };
+
+  private final Class []_forbiddenAnnotations;
+  private final Class []_forbiddenClasses;
 
   private WebBeansContainer _parent;
   
@@ -124,8 +128,8 @@ public class WebBeansContainer
   private HashMap<BaseType,WebComponent> _componentBaseTypeMap
     = new HashMap<BaseType,WebComponent>();
 
-  private HashMap<String,ComponentImpl> _namedComponentMap
-    = new HashMap<String,ComponentImpl>();
+  private HashMap<String,Bean> _namedComponentMap
+    = new HashMap<String,Bean>();
 
   private HashMap<Path,WebBeansRootContext> _rootContextMap
     = new HashMap<Path,WebBeansRootContext>();
@@ -168,6 +172,44 @@ public class WebBeansContainer
 
     if (_classLoader != null) {
       _parent = WebBeansContainer.create(_classLoader.getParent());
+    }
+
+    ArrayList<Class> forbiddenAnnotations = new ArrayList<Class>();
+    ArrayList<Class> forbiddenClasses = new ArrayList<Class>();
+
+    for (String className : FORBIDDEN_ANNOTATIONS) {
+      try {
+	Class cl = Class.forName(className, false, _classLoader);
+
+	if (cl != null)
+	  forbiddenAnnotations.add(cl);
+      } catch (Throwable e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+
+    for (String className : FORBIDDEN_CLASSES) {
+      try {
+	Class cl = Class.forName(className, false, _classLoader);
+
+	if (cl != null)
+	  forbiddenClasses.add(cl);
+      } catch (Throwable e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+
+    _forbiddenAnnotations = new Class[forbiddenAnnotations.size()];
+    forbiddenAnnotations.toArray(_forbiddenAnnotations);
+
+    _forbiddenClasses = new Class[forbiddenClasses.size()];
+    forbiddenClasses.toArray(_forbiddenClasses);
+
+    try {
+      InitialContext ic = new InitialContext();
+      ic.rebind("java:comp/Manager", new WebBeansJndiProxy());
+    } catch (Throwable e) {
+      log.log(Level.FINEST, e.toString(), e);
     }
     
     _localContainer.set(this, _classLoader);
@@ -283,29 +325,6 @@ public class WebBeansContainer
     return _wbWebBeans.createComponentType(cl);
   }
 
-  public void addComponent(ComponentImpl comp)
-  {
-    addComponentByType(comp.getTargetType(), comp);
-
-    String name = comp.getName();
-
-    /*
-    if (name != null && comp.getScope() != null)
-      _namedComponentMap.put(name, comp);
-    */
-    // ioc/0030
-    if (name != null)
-      _namedComponentMap.put(name, comp);
-
-    _pendingBindList.add(comp);
-
-    if (comp.isSingleton()) {
-      _pendingSingletonList.add(comp);
-    }
-
-    registerJmx(comp);
-  }
-
   public void setDeploymentTypes(ArrayList<Class> deploymentList)
   {
     if (deploymentList.size() < 1 ||
@@ -320,7 +339,7 @@ public class WebBeansContainer
     }
   }
   
-  public void addComponentByName(String name, ComponentImpl comp)
+  public void addComponentByName(String name, Bean comp)
   {
     _namedComponentMap.put(name, comp);
   }
@@ -331,7 +350,7 @@ public class WebBeansContainer
    * @param type the interface type to expose the component
    * @param comp the component to register
    */
-  public void addComponentByType(Type type, ComponentImpl comp)
+  public void addComponentByType(Type type, Bean comp)
   {
     if (type == null)
       return;
@@ -339,17 +358,13 @@ public class WebBeansContainer
     addComponentByType(BaseType.create(type, null), comp);
   }
     
-  private void addComponentByType(BaseType type, ComponentImpl comp)
+  private void addComponentByType(BaseType type, Bean bean)
   {
     if (type == null)
       return;
     
     if (log.isLoggable(Level.FINE))
-      log.fine(comp.toDebugString() + " added to " + this);
-
-    if (comp.isSingleton()) {
-      _pendingSingletonList.add(comp);
-    }
+      log.fine(bean + " added to " + this);
 
     WebComponent webComponent;
 
@@ -363,7 +378,7 @@ public class WebBeansContainer
       }
     }
 
-    webComponent.addComponent(comp);
+    webComponent.addComponent(bean);
   }
 
   public ArrayList<Bean> getBeansOfType(Type type)
@@ -602,9 +617,9 @@ public class WebBeansContainer
   /**
    * Finds a component by its component name.
    */
-  public ComponentImpl findByName(String name)
+  public Bean findByName(String name)
   {
-    ComponentImpl comp = _namedComponentMap.get(name);
+    Bean comp = _namedComponentMap.get(name);
     
     if (comp != null)
       return comp;
@@ -619,9 +634,10 @@ public class WebBeansContainer
    */
   public Object getObjectByName(String name)
   {
-    ComponentImpl comp = _namedComponentMap.get(name);
-    if (comp != null)
-      return comp.get();
+
+    Bean bean = _namedComponentMap.get(name);
+    if (bean != null)
+      return getInstance(bean);
     else if (_parent != null)
       return _parent.getObjectByName(name);
     else
@@ -863,17 +879,17 @@ public class WebBeansContainer
       while (iter.hasNext()) {
 	BaseType type = (BaseType) iter.next();
 	
-	addComponentByType(type, (ComponentImpl) bean);
+	addComponentByType(type, bean);
       }
     }
     else {
       for (Class type : bean.getTypes()) {
-	addComponentByType(type, (ComponentImpl) bean);
+	addComponentByType(type, bean);
       }
     }
 
     if (bean.getName() != null)
-      addComponentByName(bean.getName(), (ComponentImpl) bean);
+      addComponentByName(bean.getName(), bean);
 
     registerJmx(bean);
     
@@ -1037,9 +1053,12 @@ public class WebBeansContainer
     if (bean instanceof ComponentImpl)
       return (T) ((ComponentImpl) bean).get();
     else {
-      // XXX: scope
-      
-      return (T) bean.create();
+      Context context = getContext(bean.getScopeType());
+
+      if (context != null)
+	return (T) context.get(bean, true);
+      else
+	return (T) bean.create();
     }
   }
 
@@ -1063,7 +1082,14 @@ public class WebBeansContainer
    */
   public Object getInstanceByName(String name)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    Bean bean = _namedComponentMap.get(name);
+
+    if (bean != null)
+      return getInstance(bean);
+    else if (_parent != null)
+      return _parent.getInstanceByName(name);
+    else
+      return null;
   }
 
   /**
@@ -1078,7 +1104,11 @@ public class WebBeansContainer
   {
     Set<Bean<T>> set = resolveByType(type, bindings);
 
-    if (set != null) {
+    if (set == null || set.size() == 0) {
+      throw new UnsatisfiedDependencyException(L.l("'{0}' does not match any configured beans",
+						   type.getName()));
+    }
+    else if (set.size() == 1) {
       Iterator<Bean<T>> iter = set.iterator();
 
       if (iter.hasNext()) {
@@ -1086,6 +1116,11 @@ public class WebBeansContainer
       
 	return (T) getInstance(bean);
       }
+    }
+    else {
+      throw new AmbiguousDependencyException(L.l("'{0}' matches too many configured beans {1}",
+						   type.getName(),
+						   set));
     }
 
     return null;
@@ -1121,7 +1156,13 @@ public class WebBeansContainer
    */
   public Context getContext(Class<? extends Annotation> scopeType)
   {
-    return _contextMap.get(scopeType);
+    Context context = _contextMap.get(scopeType);
+
+    if (context != null && context.isActive())
+      return context;
+    else
+      throw new ContextNotActiveException(L.l("'@{0}' is not an active WebBeans context.",
+					      scopeType.getName()));
   }
 
   //

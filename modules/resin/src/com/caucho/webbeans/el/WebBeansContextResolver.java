@@ -82,12 +82,10 @@ public class WebBeansContextResolver extends ELResolver {
     String name = (String) property;
 
     WebBeansContainer webBeans = WebBeansContainer.create();
-    ComponentImpl value = webBeans.findByName(name);
+    Object result = webBeans.getInstanceByName(name);
 
-    if (value != null) {
+    if (result != null) {
       context.setPropertyResolved(true);
-
-      Object result = value.get();
 
       return result;
     }

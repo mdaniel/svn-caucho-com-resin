@@ -238,9 +238,9 @@ public class Config {
 
       WebBeansContainer webBeans = WebBeansContainer.create();
 
-      if (webBeans != null && webBeans.findByName("__FILE__") == null)
+      if (webBeans != null && webBeans.getObjectByName("__FILE__") == null)
 	webBeans.addSingleton(FileVar.__FILE__, "__FILE__");
-      if (webBeans != null && webBeans.findByName("__DIR__") == null)
+      if (webBeans != null && webBeans.getObjectByName("__DIR__") == null)
 	webBeans.addSingleton(DirVar.__DIR__, "__DIR__");
       
       return builder.configure(obj, topNode);

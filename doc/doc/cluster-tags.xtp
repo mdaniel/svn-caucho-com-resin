@@ -660,9 +660,9 @@ items earlier)</td>
   <td>true</td>
 </tr>
 <tr>
-  <td>save-triplicate</td>
+  <td>triplicate</td>
   <td>Saves three copies of all distributed objects (3.2.0).</td>
-  <td>true</td>
+  <td>false</td>
 </tr>
 <tr>
   <td>wait-for-acknowledge</td>
