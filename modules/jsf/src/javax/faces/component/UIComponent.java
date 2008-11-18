@@ -121,8 +121,14 @@ public abstract class UIComponent
       throw new NullPointerException();
 
     if (clientId.equals(getClientId(context))) {
-      callback.invokeContextCallback(context, this);
-      return true;
+      try {
+        callback.invokeContextCallback(context, this);
+
+        return true;
+      }
+      catch (Exception e) {
+        throw new FacesException(e);
+      }
     }
     else {
       Iterator<UIComponent> iter = getFacetsAndChildren();

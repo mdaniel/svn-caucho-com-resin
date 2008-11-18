@@ -62,6 +62,9 @@ public class EnumConverter
                             String value)
     throws ConverterException
   {
+    if (context == null || component == null)
+      throw new NullPointerException();
+
     if (_targetClass == null) {
       FacesMessage msg = createFacesMessageForEnumNoClass(context,
                                                           component,
@@ -93,6 +96,9 @@ public class EnumConverter
                             Object value)
     throws ConverterException
   {
+    if (context == null || component == null)
+      throw new NullPointerException();
+    
     if (_targetClass == null) {
       FacesMessage msg = createFacesMessageForEnumNoClass(context,
                                                           component,

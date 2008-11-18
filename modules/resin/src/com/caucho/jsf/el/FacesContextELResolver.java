@@ -338,7 +338,8 @@ public class FacesContextELResolver extends CompositeELResolver {
       if (env.isPropertyResolved())
 	return value;
 
-      return null;
+      throw new PropertyNotFoundException(L.l("Property '{0}' is unbound",
+                                              property));
     }
     else
       return null;
