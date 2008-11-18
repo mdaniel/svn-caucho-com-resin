@@ -935,7 +935,7 @@ public class OsgiBundle implements Bundle
 	WebBeansContainer webBeans
 	  = WebBeansContainer.create(_manager.getParentLoader());
 
-	webBeans.addComponent(_comp);
+	webBeans.addBean(_comp);
       }
     }
   }

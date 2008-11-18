@@ -106,12 +106,7 @@ public class ResinModule
   {
     WebBeansContainer webBeans = WebBeansContainer.create();
 
-    ComponentImpl comp = webBeans.findByName(name);
-
-    if (comp != null)
-      return comp.get();
-    else
-      return null;
+    return webBeans.getInstanceByName(name);
   }
 
   /**

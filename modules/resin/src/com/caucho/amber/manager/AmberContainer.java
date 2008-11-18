@@ -909,8 +909,8 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
       _persistenceContextMap.put(unitName, persistenceContext);
 
       WebBeansContainer webBeans = WebBeansContainer.create(_parentLoader);
-      webBeans.addComponent(new EntityManagerFactoryComponent(this, provider, unit));
-      webBeans.addComponent(new PersistenceContextComponent(unitName, persistenceContext));
+      webBeans.addBean(new EntityManagerFactoryComponent(this, provider, unit));
+      webBeans.addBean(new PersistenceContextComponent(unitName, persistenceContext));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

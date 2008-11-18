@@ -33,6 +33,7 @@ import com.caucho.config.types.BeanConfig;
 import com.caucho.config.*;
 import com.caucho.naming.*;
 import com.caucho.webbeans.cfg.*;
+import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 import com.caucho.util.L10N;
 
@@ -171,7 +172,7 @@ public class InterfaceConfig extends BeanConfig {
     if (_valueName != null) {
       WebBeansContainer webBeans = WebBeansContainer.create();
       
-      _comp = webBeans.findByName(_valueName);
+      _comp = (ComponentImpl) webBeans.findByName(_valueName);
 
       if (_comp == null) {
 	_value = Jndi.lookup(_valueName);

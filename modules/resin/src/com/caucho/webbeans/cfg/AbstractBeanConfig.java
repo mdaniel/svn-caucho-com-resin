@@ -277,7 +277,7 @@ abstract public class AbstractBeanConfig {
 
     comp.init();
 
-    webBeans.addComponent(comp);
+    webBeans.addBean(comp);
 
     if (_jndiName != null) {
       try {

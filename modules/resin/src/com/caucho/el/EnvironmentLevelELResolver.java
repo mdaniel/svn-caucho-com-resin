@@ -149,11 +149,11 @@ public class EnvironmentLevelELResolver extends ELResolver {
     String var = (String) property;
 
     if (_webBeans != null) {
-      ComponentImpl comp = _webBeans.findByName(var);
+      Object value = _webBeans.getInstanceByName(var);
 
-      if (comp != null) {
-	Object value = comp.get();
+      if (value != null) {
 	env.setPropertyResolved(true);
+	
 	return value;
       }
     }

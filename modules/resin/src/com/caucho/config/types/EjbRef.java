@@ -358,7 +358,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
         // weaker priority
         compImpl.setDeploymentType(Production.class);
 
-        webBeans.addComponent(compImpl);
+        webBeans.addBean(compImpl);
 
 	comp = compImpl;
       }

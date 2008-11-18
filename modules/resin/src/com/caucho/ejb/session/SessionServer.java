@@ -86,7 +86,7 @@ abstract public class SessionServer extends AbstractServer
       SingletonBean comp
         = new SingletonBean(getSessionContext(), null, SessionContext.class);
 
-      webBeans.addComponent(comp);
+      webBeans.addBean(comp);
 
       if (_localHomeClass != null)
 	_localHome = (EJBLocalHome) getLocalObject(_localHomeClass);
