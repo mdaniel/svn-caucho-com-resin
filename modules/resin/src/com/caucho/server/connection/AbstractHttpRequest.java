@@ -1817,6 +1817,7 @@ public abstract class AbstractHttpRequest
     }
 
     RoleMapManager roleManager = app != null ? app.getRoleMapManager() : null;
+    System.out.println("ROLE_MANAGER: " + roleManager + " " + app);
 
     if (roleManager != null) {
       Boolean result = roleManager.isUserInRole(role, user);

@@ -37,7 +37,7 @@ import javax.servlet.jsp.tagext.JspFragment;
  */
 public class TldAttribute {
   private String _name;
-  private boolean _required;
+  private Boolean _required;
   private boolean _rtexprvalue;
   private Class _type;
   private String _description;
@@ -87,6 +87,14 @@ public class TldAttribute {
    * Returns true if the attribute is required.
    */
   public boolean getRequired()
+  {
+    return _required != null && _required;
+  }
+
+  /**
+   * Returns true if the attribute is required.
+   */
+  public Boolean getRequiredVar()
   {
     return _required;
   }

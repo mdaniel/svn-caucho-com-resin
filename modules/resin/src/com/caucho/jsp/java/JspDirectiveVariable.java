@@ -112,8 +112,14 @@ public class JspDirectiveVariable extends JspNode
       
       _nameFromAttribute = value;
     }
-    else if (ALIAS.equals(name))
+    else if (ALIAS.equals(name)) {
+      if (gen.findAttribute(value) != null) {
+	throw error(L.l("@variable alias '{0}' is already used by an attribute.",
+			value));
+      }
+      
       _alias = value;
+    }
     else if (VARIABLE_CLASS.equals(name))
       _variableClass = value;
     else if (DECLARE.equals(name))
@@ -231,6 +237,10 @@ public class JspDirectiveVariable extends JspNode
       if (! String.class.equals(attr.getType()))
 	throw error(L.l("name-from-attribute variable '{0}' needs a matching String attribute, not '{1}' .  name-from-attribute requires a matching String attribute.",
 			_nameFromAttribute, attr.getType().getName()));
+
+      if (! attr.getRequired() && attr.getRequiredVar() != null)
+	throw error(L.l("name-from-attribute attribute '{0}' must be required",
+			_nameFromAttribute));
 
       return;
     }

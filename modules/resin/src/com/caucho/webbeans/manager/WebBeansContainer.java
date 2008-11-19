@@ -892,6 +892,14 @@ public class WebBeansContainer
       addComponentByName(bean.getName(), bean);
 
     registerJmx(bean);
+
+    if (bean instanceof ComponentImpl) {
+      ComponentImpl cauchoBean = (ComponentImpl) bean;
+
+      if (cauchoBean.isSingleton()) {
+	_pendingSingletonList.add(cauchoBean);
+      }
+    }
     
     return this;
   }

@@ -188,7 +188,10 @@ public class PageContextELResolver extends AbstractVariableResolver {
       else
 	return null;
     } catch (ELException e) {
-      // jsp/3094
+      // jsp/3094 vs jsp/30cc
+
+      if (e.getCause() != null)
+	throw e;
       
       log.log(Level.FINER, e.toString(), e);
 

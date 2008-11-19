@@ -99,6 +99,7 @@ public class RoleMapManager
   public Boolean isUserInRole(String role, Principal user)
   {
     int size = _roleMapList.size();
+    
     for (int i = 0; i < size; i++) {
       RoleMap roleMap = _roleMapList.get(i);
 

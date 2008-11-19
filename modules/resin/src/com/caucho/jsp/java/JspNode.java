@@ -1244,6 +1244,7 @@ public abstract class JspNode {
         return ("_caucho_method_expr_" + exprIndex);
       }
       else if (! isValueDeferred
+	       && ! _gen.getParseState().isDeferredSyntaxAllowedAsLiteral()
                && value.indexOf("#{") >= 0
 	       && value.indexOf("${") < 0
 	       && rtexpr
