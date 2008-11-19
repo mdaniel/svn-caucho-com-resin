@@ -46,7 +46,7 @@ public class SchemaImpl implements Schema {
   
   private Item _startItem;
 
-  SchemaImpl(GrammarPattern grammar)
+  public SchemaImpl(GrammarPattern grammar)
     throws RelaxException
   {
     _startItem = grammar.getStart().createItem(grammar);

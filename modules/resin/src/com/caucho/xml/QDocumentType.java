@@ -37,7 +37,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 
-public class QDocumentType extends QNode implements DocumentType {
+public class QDocumentType extends QNode implements DocumentType
+{
   String _name;
   HashMap<String,QElementDef> _elements = new HashMap<String,QElementDef>();
   HashMap<String,QEntity> _entities = new HashMap<String,QEntity>();
@@ -191,6 +192,11 @@ public class QDocumentType extends QNode implements DocumentType {
   public QElementDef getElement(String name)
   {
     return _elements.get(name);
+  }
+
+  public HashMap<String,QElementDef> getElementMap()
+  {
+    return _elements;
   }
 
   QElementDef addElement(String name)

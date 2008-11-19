@@ -62,7 +62,7 @@ public class JstlCoreOut extends JstlNode {
     else if (DEFAULT.equals(name))
       _default = value;
     else
-      throw error(L.l("`{0}' is an unknown attribute for <{1}>.",
+      throw error(L.l("'{0}' is an unknown attribute for <{1}>.",
                       name.getName(), getTagName()));
   }
   

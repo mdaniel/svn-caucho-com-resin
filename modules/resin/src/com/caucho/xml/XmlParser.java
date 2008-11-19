@@ -41,6 +41,7 @@ import com.caucho.xml.readers.XmlReader;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
@@ -412,6 +413,10 @@ public class XmlParser extends AbstractParser {
 	      ch = _reader.read();
 	    } else
 	      throw error(L.l("expected `<!DOCTYPE' declaration at {0}", declName));
+
+	    if (isDtdValidating()) {
+	      generateDtdValidator(_dtd);
+	    }
 	  } else if (_forgiving) {
 	    addText("<!");
 	  } else
@@ -3002,6 +3007,20 @@ public class XmlParser extends AbstractParser {
     }
     
     return new XmlParseException(_filename, _line, text);
+  }
+
+  private void generateDtdValidator(QDocumentType dtd)
+    throws SAXException
+  {
+    DtdRelaxGenerator gen = new DtdRelaxGenerator(dtd);
+    ContentHandler handler = gen.generate();
+
+    if (handler != null) {
+      handler.setDocumentLocator(_locator);
+      handler.startDocument();
+
+      _contentHandler = new TeeContentHandler(handler, _contentHandler);
+    }
   }
 
   public void free()

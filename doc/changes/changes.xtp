@@ -13,6 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>memory: DispatchRequest._invocation needs to be cleared (rep by Mattias Jiderhamn)</li>
 <li>session: clustering triplicate='true' with only one server (rep by Mark Morgan)</li>
 <li>database: NPE in ConnectionPool.destroy() (#3070, rep by dicr)</li>
 <li>thread: thread pool load smoothing (rep by Martin Thompson)</li>

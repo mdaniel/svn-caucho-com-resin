@@ -198,6 +198,9 @@ public class ComponentImpl<T> extends AbstractBean<T>
     if (_scope != null) {
       return _scope.get(this, true);
     }
+    else if (Dependent.class.equals(getScopeType())) {
+      return create();
+    }
     else {
       Context context = _webBeans.getContext(getScopeType());
 

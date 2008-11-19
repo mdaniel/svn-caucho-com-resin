@@ -525,6 +525,7 @@ public class JspCompilerInstance {
 	xml.setContentHandler(new JspContentHandler(_jspBuilder));
 	_jspPath.setUserPath(_uri);
 	xml.setNamespaceAware(true);
+	xml.setDtdValidating(true);
 	xml.parse(_jspPath);
       }
       else {
@@ -660,6 +661,7 @@ public class JspCompilerInstance {
 	xml.setContentHandler(new JspContentHandler(_jspBuilder));
 	_jspPath.setUserPath(_uri);
 	xml.setNamespaceAware(true);
+	xml.setDtdValidating(true);
 	xml.parse(_jspPath);
       }
       else

@@ -310,4 +310,13 @@ abstract public class JspBuilder {
    * Returns the current node.
    */
   abstract public JspNode getCurrentNode();
+
+  public void startTagDependent()
+  {
+  }
+
+  public boolean isTagDependent()
+  {
+    return false;
+  }
 }

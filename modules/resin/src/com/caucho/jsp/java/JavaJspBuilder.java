@@ -69,6 +69,11 @@ public class JavaJspBuilder extends JspBuilder {
   
   public static final String JSF_CORE_URI = "http://java.sun.com/jsf/core";
   
+  public static final QName JSP_BODY_NAME
+    = new QName("jsp", "body", JspNode.JSP_NS);
+  public static final QName JSP_ATTR_NAME
+    = new QName("jsp", "attribute", JspNode.JSP_NS);
+  
   private static L10N L = new L10N(JavaJspBuilder.class);
   private static Logger log = Logger.getLogger(JavaJspBuilder.class.getName());
   
@@ -108,6 +113,9 @@ public class JavaJspBuilder extends JspBuilder {
   private JspNode _openNode;
 
   private boolean _isPrototype;
+
+  private int _elementDepth;
+  private boolean _isTagDependent;
 
   /**
    * Creates the JSP builder.
@@ -163,10 +171,12 @@ public class JavaJspBuilder extends JspBuilder {
         _gen = new JavaTagGenerator(_tagManager);
       else
         _gen = new JavaJspGenerator(_tagManager);
+      
       _gen.setParseState(getParseState());
       _gen.setJspCompiler(getJspCompiler());
       _gen.setJspParser(getJspParser());
       _gen.setRequireSource(getRequireSource());
+      _gen.setJspBuilder(this);
     
       _rootNode = new JspTop();
       _rootNode.setParseState(getParseState());
@@ -202,6 +212,20 @@ public class JavaJspBuilder extends JspBuilder {
   {
     Class cl = null;
 
+    _elementDepth++;
+    
+    if (! _isTagDependent) {
+    }
+    else if (_elementDepth == 2
+	     && (JSP_ATTR_NAME.equals(qname) || JSP_BODY_NAME.equals(qname))) {
+      _isTagDependent = false;
+    }
+    else {
+      createElementNode(qname);
+      
+      return;
+    }
+
     if (isFastJstl())
       cl = _fastTagMap.get(qname);
 
@@ -210,7 +234,7 @@ public class JavaJspBuilder extends JspBuilder {
 
       if (JsfFacetNode.class.equals(type) &&
 	  _currentNode != null &&
-	  !JsfTagNode.class.isAssignableFrom(_currentNode.getClass())) {
+	  ! JsfTagNode.class.isAssignableFrom(_currentNode.getClass())) {
       }
       else {
 	cl = type;
@@ -239,14 +263,7 @@ public class JavaJspBuilder extends JspBuilder {
     }
 
     if (isPrototype()) {
-      JspXmlElement elt = new JspXmlElement();
-      elt.setGenerator(_gen);
-      elt.setParseState(_parseState);
-      elt.setQName(qname);
-      elt.setParent(_currentNode);
-      elt.setStartLocation(_sourcePath, _filename, _line);
-
-      _openNode = elt;
+      createElementNode(qname);
 
       return;
     }
@@ -262,18 +279,14 @@ public class JavaJspBuilder extends JspBuilder {
       throw error(e);
     }
 
-    if (tagInfo == null) {      
-      JspXmlElement elt = new JspXmlElement();
-      elt.setGenerator(_gen);
-      elt.setParseState(_parseState);
-      elt.setQName(qname);
-      elt.setParent(_currentNode);
-      elt.setStartLocation(_sourcePath, _filename, _line);
-
-      _openNode = elt;
+    if (tagInfo == null) {
+      createElementNode(qname);
 
       return;
     }
+
+    if ("tagdependent".equals(tagInfo.getBodyContent()))
+      startTagDependent();
 
     Class tagClass = null;
     
@@ -318,7 +331,6 @@ public class JavaJspBuilder extends JspBuilder {
       _openNode.setStartLocation(_sourcePath, _filename, _line);
     }
     else if (Tag.class.isAssignableFrom(tagClass)) {
-
       CustomTag customTag = null;
 
       Class c = _jstlTlvTagMap.get(qname);
@@ -380,6 +392,33 @@ public class JavaJspBuilder extends JspBuilder {
       throw _gen.error(L.l("<{0}>: tag class {0} must either implement Tag or SimpleTag.", qname.getName(), tagClass.getName()));
   }
 
+  @Override
+  public void startTagDependent()
+  {
+    if (! _isTagDependent) {
+      _isTagDependent = true;
+      _elementDepth = 1;
+    }
+  }
+
+  @Override
+  public boolean isTagDependent()
+  {
+    return _isTagDependent;
+  }
+
+  protected void createElementNode(QName qname)
+  {
+    JspXmlElement elt = new JspXmlElement();
+    elt.setGenerator(_gen);
+    elt.setParseState(_parseState);
+    elt.setQName(qname);
+    elt.setParent(_currentNode);
+    elt.setStartLocation(_sourcePath, _filename, _line);
+
+    _openNode = elt;
+  }
+
   /**
    * Starts a prefix mapping.
    *
@@ -432,6 +471,8 @@ public class JavaJspBuilder extends JspBuilder {
       throw error(L.l("Close tag </{0}> does not match the current tag, <{1}>.", name, _currentNode.getTagName()));
     }
 
+    _elementDepth--;
+
     try {
       JspNode node = _currentNode;
       
@@ -448,6 +489,9 @@ public class JavaJspBuilder extends JspBuilder {
     } catch (Exception e) {
       throw new JspParseException(e);
     }
+
+    if (_elementDepth <= 0)
+      _isTagDependent = false;
   }
   
   /**

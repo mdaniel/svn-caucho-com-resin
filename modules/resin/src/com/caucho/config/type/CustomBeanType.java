@@ -159,12 +159,20 @@ public class CustomBeanType extends ConfigType
 
   private Method findMethod(String name)
   {
-    for (Method method : _beanClass.getMethods()) {
+    return findMethod(_beanClass, name);
+  }
+
+  private Method findMethod(Class cl, String name)
+  {
+    if (cl == null || cl.equals(Object.class))
+      return null;
+    
+    for (Method method : cl.getDeclaredMethods()) {
       if (method.getName().equals(name))
 	return method;
     }
 
-    return null;
+    return findMethod(cl.getSuperclass(), name);
   }
 
   private Class createClass(QName name)

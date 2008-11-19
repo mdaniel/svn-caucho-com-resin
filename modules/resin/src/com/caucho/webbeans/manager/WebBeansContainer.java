@@ -169,11 +169,13 @@ public class WebBeansContainer
   private WebBeansContainer(ClassLoader loader)
   {
     _classLoader = Environment.getEnvironmentClassLoader(loader);
+      
+    _localContainer.set(this, _classLoader);
 
     if (_classLoader != null) {
       _parent = WebBeansContainer.create(_classLoader.getParent());
     }
-
+    
     ArrayList<Class> forbiddenAnnotations = new ArrayList<Class>();
     ArrayList<Class> forbiddenClasses = new ArrayList<Class>();
 
@@ -274,6 +276,8 @@ public class WebBeansContainer
       webBeans = _localContainer.getLevel(loader);
 
       if (webBeans == null) {
+	loader = Environment.getEnvironmentClassLoader(loader);
+	
 	webBeans = new WebBeansContainer(loader);
       
 	_localContainer.set(webBeans, loader);
@@ -364,7 +368,7 @@ public class WebBeansContainer
       return;
     
     if (log.isLoggable(Level.FINE))
-      log.fine(bean + " added to " + this);
+      log.fine(bean + "(" + type + ") added to " + this);
 
     WebComponent webComponent;
 
@@ -375,6 +379,7 @@ public class WebBeansContainer
 	webComponent = new WebComponent(this, type);
       
 	_componentBaseTypeMap.put(type, webComponent);
+	_componentMap.clear();
       }
     }
 
@@ -659,7 +664,7 @@ public class WebBeansContainer
       program = _injectMap.get(cl);
 
       if (program == null) {
-	program = InjectIntrospector.introspectProgram(cl);
+	program = InjectIntrospector.introspectProgram(cl, null);
 	_injectMap.put(cl, program);
       }
     }
@@ -1472,7 +1477,7 @@ public class WebBeansContainer
 	    log.log(Level.FINER, e.toString(), e);
 	  }
 	}
-	
+
 	webBeans.update();
 
 	webBeans.init();
@@ -1732,7 +1737,7 @@ public class WebBeansContainer
   public String toString()
   {
     if (_classLoader != null && _classLoader.getId() != null)
-      return "WebBeansContainer[" + _classLoader.getId() + "]";
+      return "WebBeansContainer" + "[" + _classLoader.getId() + "]";
     else
       return "WebBeansContainer[]";
   }

@@ -87,7 +87,7 @@ public class WbWebBeans {
     _webBeansContainer = webBeansContainer;
     
     _root = root;
-    _webBeansFile = root.lookup("META-INF/web-beans.xml");
+    _webBeansFile = root.lookup("web-beans.xml");
     _webBeansFile.setUserPath(_webBeansFile.getURL());
   }
 
@@ -261,16 +261,13 @@ public class WbWebBeans {
 
     try {
       if (_pendingClasses.size() > 0) {
-	ArrayList<Class> pendingClasses = new ArrayList<Class>(_pendingClasses);
+	ArrayList<Class> pendingClasses
+	  = new ArrayList<Class>(_pendingClasses);
 	_pendingClasses.clear();
 
 	for (Class cl : pendingClasses) {
 	  if (webBeans.getWebComponent(cl) != null)
 	    continue;
-	  /*
-	    if (_componentTypeMap.get(cl.getName()) != null)
-	    continue;
-	  */
 
 	  SimpleBean component;
 
@@ -282,10 +279,13 @@ public class WbWebBeans {
 	  component.setFromClass(true);
 	  component.init();
 
-	  _pendingComponentList.add(component);
+	  webBeans.addBean(component);
+
+	  //_pendingComponentList.add(component);
 	}
       }
 
+      /*
       if (_pendingComponentList.size() > 0) {
 	ArrayList<ComponentImpl> componentList
 	  = new ArrayList<ComponentImpl>(_pendingComponentList);
@@ -296,6 +296,7 @@ public class WbWebBeans {
 	    webBeans.addBean(comp);
 	}
       }
+      */
     } catch (Exception e) {
       throw LineConfigException.create(_webBeansFile.getURL(), 1, e);
     }

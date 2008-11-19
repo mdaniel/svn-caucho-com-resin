@@ -66,6 +66,16 @@ class QContentParticle {
     _children.set(index, child);
   }
 
+  public char getSeparator()
+  {
+    return (char) _separator;
+  }
+
+  public char getRepeat()
+  {
+    return (char) _repeat;
+  }
+
   public void print(XmlPrinter os) throws IOException
   {
     os.print("(");

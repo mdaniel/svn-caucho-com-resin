@@ -186,9 +186,9 @@ public class JspDirectiveTag extends JspNode {
 			value, oldValue));
       }
 	
-      if (value.equals("scriptless") ||
-	  value.equals("tagdependent") ||
-	  value.equals("empty")) {
+      if (value.equals("scriptless")
+	  || value.equals("tagdependent")
+	  || value.equals("empty")) {
       }
       else
 	throw error(L.l("'{0}' is an unknown body-content value for the JSP tag directive attribute.  'scriptless', 'tagdependent', and 'empty' are the allowed values.",

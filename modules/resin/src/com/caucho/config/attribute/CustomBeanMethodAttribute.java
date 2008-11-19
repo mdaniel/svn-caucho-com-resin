@@ -78,7 +78,6 @@ public class CustomBeanMethodAttribute extends Attribute {
   {
     CustomBeanConfig customBean = (CustomBeanConfig) bean;
 
-    System.out.println("ADD: " + value + " " + bean);
     customBean.addMethod((CustomBeanMethodConfig) value);
   }
   

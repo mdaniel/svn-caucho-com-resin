@@ -163,8 +163,8 @@ abstract public class GenericTag extends JspContainerNode
     else if (node instanceof JspAttribute) {
       super.addChild(node);
     }
-    else if (node instanceof StaticText &&
-             ((StaticText) node).isWhitespace()) {
+    else if (node instanceof StaticText
+	     && ((StaticText) node).isWhitespace()) {
     }
     else {
       throw error(L.l("<{0}> must be empty.  Since <{0}> has a body-content of 'empty', it must not have any content.",

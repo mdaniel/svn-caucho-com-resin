@@ -121,7 +121,17 @@ public class JspBody extends JspFragmentNode {
       throw error(L.l("jsp:body is not allowed in <{0}>",
 		      parent.getTagName()));
     }
+
+    if (parent instanceof GenericTag) {
+      GenericTag tag = (GenericTag) parent;
+
+      if ("tagdependent".equals(tag.getBodyContent())
+	  && _gen.getJspBuilder() != null) {
+	_gen.getJspBuilder().startTagDependent();
+      }
+    }
   }
+
 
   /**
    * Generates the XML text representation for the tag validation.

@@ -399,7 +399,7 @@ public class BeanType extends ConfigType
 
 	  InjectIntrospector.introspectInject(_injectList, _beanClass);
 
-	  InjectIntrospector.introspectInit(_initList, _beanClass);
+	  InjectIntrospector.introspectInit(_initList, _beanClass, null);
 	}
       } finally {
 	_isIntrospecting = false;

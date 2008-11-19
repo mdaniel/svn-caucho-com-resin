@@ -925,7 +925,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     if (_initProgram != null)
       injectList.add(_initProgram);
     
-    InjectIntrospector.introspectInit(injectList, getEjbClass());
+    InjectIntrospector.introspectInit(injectList, getEjbClass(), null);
     // XXX: add init from xml here
 
     ConfigProgram []injectArray = new ConfigProgram[injectList.size()];

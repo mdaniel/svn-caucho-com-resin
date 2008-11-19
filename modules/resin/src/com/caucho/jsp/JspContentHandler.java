@@ -93,7 +93,8 @@ public class JspContentHandler extends DefaultHandler {
     try {
       setLocation();
 
-      if (_builder.getGenerator().isELIgnore()) {
+      if (_builder.getGenerator().isELIgnore()
+	  || _builder.isTagDependent()) {
 	String s = new String(buf, offset, length);
       
 	_builder.text(s);

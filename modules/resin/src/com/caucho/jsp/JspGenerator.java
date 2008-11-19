@@ -56,6 +56,7 @@ abstract public class JspGenerator {
   protected JspParser _jspParser;
   protected JspCompiler _jspCompiler;
   protected JspCompilerInstance _jspCompilerInstance;
+  protected JspBuilder _jspBuilder;
   
   // maps lines in the generated code back to lines in
   // the JSP file.
@@ -95,6 +96,21 @@ abstract public class JspGenerator {
   public JspParser getJspParser()
   {
     return _jspParser;
+  }
+  
+  public void setJspBuilder(JspBuilder builder)
+  {
+    _jspBuilder = builder;
+  }
+
+  public JspBuilder getJspBuilder()
+  {
+    return _jspBuilder;
+  }
+
+  public boolean isTagDependent()
+  {
+    return getJspBuilder() != null && getJspBuilder().isTagDependent();
   }
   
   public LineMap getLineMap()

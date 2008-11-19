@@ -483,8 +483,8 @@ public abstract class JspNode {
     
     if (node instanceof JspAttribute) {
     }
-    else if (node instanceof StaticText &&
-	     ((StaticText) node).isWhitespace()) {
+    else if (node instanceof StaticText
+	     && ((StaticText) node).isWhitespace()) {
     }
     else
       throw node.error(L.l("<{0}> does not allow any child elements at {1}",

@@ -74,28 +74,43 @@ public class InjectIntrospector {
   private static HashMap<Class,Class> _primitiveTypeMap
     = new HashMap<Class,Class>();
 
-  public static InjectProgram introspectProgram(Class type)
+  public static InjectProgram
+    introspectProgram(Class type,
+		      HashMap<Method,Annotation[]> methodAnnMap)
   {
     ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
 
+    if (methodAnnMap == null)
+      methodAnnMap = new HashMap<Method,Annotation[]>();
+
     introspectInject(injectList, type);
-    introspectInit(injectList, type);
+    introspectInit(injectList, type, methodAnnMap);
 
     return new InjectProgram(injectList);
   }
   
   public static void
-    introspectInit(ArrayList<ConfigProgram> initList, Class type)
+    introspectInit(ArrayList<ConfigProgram> initList,
+		   Class type,
+		   HashMap<Method,Annotation[]> methodAnnotationMap)
     throws ConfigException
   {
     if (type == null || type.equals(Object.class))
       return;
 
-    introspectInit(initList, type.getSuperclass());
+    introspectInit(initList, type.getSuperclass(), methodAnnotationMap);
 
     for (Method method : type.getDeclaredMethods()) {
-      if (! method.isAnnotationPresent(PostConstruct.class)
-	  && ! method.isAnnotationPresent(Initializer.class)) {
+      Annotation []annList = null;
+
+      if (methodAnnotationMap != null)
+	annList = methodAnnotationMap.get(method);
+
+      if (annList == null)
+	annList = method.getAnnotations();
+      
+      if (! isAnnotationPresent(annList, PostConstruct.class)
+	  && ! isAnnotationPresent(annList, Initializer.class)) {
 	continue;
       }
 
@@ -103,7 +118,7 @@ public class InjectIntrospector {
 	  && InvocationContext.class.equals(method.getParameterTypes()[0]))
 	continue;
       
-      if (method.isAnnotationPresent(PostConstruct.class)
+      if (isAnnotationPresent(annList, PostConstruct.class)
 	  && method.getParameterTypes().length != 0) {
           throw new ConfigException(location(method)
 				    + L.l("{0}: @PostConstruct is requires zero arguments"));
@@ -115,6 +130,32 @@ public class InjectIntrospector {
       if (! initList.contains(initProgram))
 	initList.add(initProgram);
     }
+  }
+
+  private static boolean isAnnotationPresent(Annotation []annList, Class type)
+  {
+    if (annList == null)
+      return false;
+
+    for (Annotation ann : annList) {
+      if (ann.annotationType().equals(type))
+	return true;
+    }
+
+    return false;
+  }
+
+  private static Annotation getAnnotation(Annotation []annList, Class type)
+  {
+    if (annList == null)
+      return null;
+
+    for (Annotation ann : annList) {
+      if (ann.annotationType().equals(type))
+	return ann;
+    }
+
+    return null;
   }
   
   public static void

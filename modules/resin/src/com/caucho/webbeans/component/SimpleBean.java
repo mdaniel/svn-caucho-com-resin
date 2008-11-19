@@ -469,13 +469,21 @@ public class SimpleBean extends ComponentImpl
 
       Class cl = getTargetClass();
 
+      HashMap<Method,Annotation[]> methodMap
+	= new HashMap<Method,Annotation[]>();
+
+      for (SimpleBeanMethod beanMethod : _methodList) {
+	methodMap.put(beanMethod.getMethod(),
+		      beanMethod.getAnnotations());
+      }
+
       ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
       InjectIntrospector.introspectInject(injectList, cl);
       _injectProgram = new ConfigProgram[injectList.size()];
       injectList.toArray(_injectProgram);
       
       ArrayList<ConfigProgram> initList = new ArrayList<ConfigProgram>();
-      InjectIntrospector.introspectInit(initList, cl);
+      InjectIntrospector.introspectInit(initList, cl, methodMap);
       _initProgram = new ConfigProgram[initList.size()];
       initList.toArray(_initProgram);
       

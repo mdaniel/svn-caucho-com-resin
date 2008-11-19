@@ -42,8 +42,6 @@ import java.util.ArrayList;
  */
 public class CustomTag extends GenericTag
 {
-  protected String _bodyContent;
-  
   /**
    * Generates code before the actual JSP.
    */
@@ -120,7 +118,7 @@ public class CustomTag extends GenericTag
 			   && analyzedTag.getStartReturnsBuffered());
     boolean hasEndTag = analyzedTag.getDoEnd();
     
-    if ("empty".equalsIgnoreCase(_bodyContent)) {
+    if ("empty".equalsIgnoreCase(getBodyContent())) {
       if (! isEmpty)
 	throw error(L.l("<{0}> expects an empty body", getTagName()));
     }

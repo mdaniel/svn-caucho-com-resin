@@ -49,6 +49,32 @@ class QElementDef extends QNode {
   public String getTagName() { return "#element"; }
   public short getNodeType() { return Node.ELEMENT_NODE; }
 
+  public String getName()
+  {
+    return _name;
+  }
+
+  public Object getContent()
+  {
+    return _content;
+  }
+
+  public QContentParticle getContentParticle()
+  {
+    if (_content instanceof QContentParticle)
+      return ((QContentParticle) _content);
+    else
+      return null;
+  }
+
+  public String getContentString()
+  {
+    if (_content instanceof String)
+      return (String) _content;
+    else
+      return null;
+  }
+
   Node importNode(QDocument owner, boolean deep) 
   {
     QElementDef def = new QElementDef(_name);
@@ -164,5 +190,10 @@ class QElementDef extends QNode {
       }
       os.println(">");
     }
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 }

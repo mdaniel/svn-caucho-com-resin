@@ -83,6 +83,7 @@ abstract public class AbstractParser implements XMLReader, Parser
   boolean _isXmlnsAttribute;
   
   boolean _isValidating = false;
+  boolean _isDtdValidating;
 
   boolean _isJsp;
 
@@ -285,6 +286,22 @@ abstract public class AbstractParser implements XMLReader, Parser
   public void setValidating(boolean isValidating)
   {
     _isValidating = isValidating;
+  }
+
+  /**
+   * Returns true if the XML should be validated
+   */
+  public boolean isDtdValidating()
+  {
+    return _isDtdValidating;
+  }
+
+  /**
+   * Set true if the XML should be validated
+   */
+  public void setDtdValidating(boolean isValidating)
+  {
+    _isDtdValidating = isValidating;
   }
 
   /**

@@ -104,6 +104,14 @@ public class VerifierHandlerImpl extends DefaultHandler
   }
 
   /**
+   * Creates the Verifier Handler.
+   */
+  public VerifierHandlerImpl(SchemaImpl schema)
+  {
+    this(schema, (VerifierImpl) schema.newVerifier());
+  }
+
+  /**
    * Sets the locator.
    */
   public void setDocumentLocator(Locator locator)
