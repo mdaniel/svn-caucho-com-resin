@@ -372,6 +372,14 @@ public class JavaJspGenerator extends JspGenerator {
   }
 
   /**
+   * True for a pre jsp21 tag
+   */
+  public boolean isPre21()
+  {
+    return _parseState.getJspVersion().compareTo("2.1") < 0;
+  }
+
+  /**
    * Adds a taglib.
    */
   public void addOptionalTaglib(String prefix, String uri)

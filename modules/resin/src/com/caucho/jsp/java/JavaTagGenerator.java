@@ -34,7 +34,6 @@ import com.caucho.jsp.ParseTagManager;
 import com.caucho.jsp.cfg.TldAttribute;
 import com.caucho.jsp.cfg.TldTag;
 import com.caucho.jsp.cfg.TldVariable;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.servlet.jsp.tagext.TagInfo;
@@ -55,7 +54,8 @@ import java.util.logging.Logger;
  */
 public class JavaTagGenerator extends JavaJspGenerator {
   static final L10N L = new L10N(JavaTagGenerator.class);
-  static final Logger log = Log.open(JavaTagGenerator.class);
+  static final Logger log
+    = Logger.getLogger(JavaTagGenerator.class.getName());
 
   private static HashSet<String> _reserved
     = new HashSet<String>();
@@ -67,7 +67,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
   private String _example = null;
   private String _bodyContent = null;
   private String _dynamicAttributes = null;
-  
+
   private ArrayList<TldAttribute> _attributes = new ArrayList<TldAttribute>();
   private ArrayList<TldVariable> _variables = new ArrayList<TldVariable>();
 

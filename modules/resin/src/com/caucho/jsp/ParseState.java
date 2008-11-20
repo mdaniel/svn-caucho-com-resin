@@ -113,6 +113,8 @@ public class ParseState {
   private Xml _xml;
   private Namespace _namespaces;
 
+  private String _jspVersion = "2.1";
+
   /**
    * Create a new parse state instance.
    */
@@ -616,6 +618,22 @@ public class ParseState {
   public void setDeferredSyntaxAllowedAsLiteral(boolean trim)
   {
     _isDeferredSyntaxAllowedAsLiteral = trim;
+  }
+
+  /**
+   * Set the version
+   */
+  public void setJspVersion(String version)
+  {
+    _jspVersion = version;
+  }
+
+  /**
+   * Set the version
+   */
+  public String getJspVersion()
+  {
+    return _jspVersion;
   }
   
   /**

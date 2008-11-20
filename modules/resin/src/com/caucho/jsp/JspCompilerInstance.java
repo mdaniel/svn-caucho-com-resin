@@ -649,8 +649,10 @@ public class JspCompilerInstance {
 	taglib.setJspVersion(tldTaglib.getJspVersion());
       }
 
-      if (taglib.getRequiredVersion().compareTo("2.1") < 0)
+      if (taglib.getRequiredVersion().compareTo("2.1") < 0) {
+	_parseState.setJspVersion("2.0");
 	_parseState.setDeferredSyntaxAllowedAsLiteral(true);
+      }
       
       if (isXml) {
 	if (_parseState.getELIgnoredDefault() == null)

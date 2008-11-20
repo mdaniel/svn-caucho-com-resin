@@ -107,20 +107,32 @@ public class JspDirectiveAttribute extends JspNode {
     else if (DESCRIPTION.equals(name))
       _description = value;
     else if (DEFERRED_VALUE.equals(name)) {
+      if (_gen.isPre21())
+	throw error("deferredValue requires JSP 2.1 or later tag file");
+      
       _deferredValue = attributeToBoolean(name.getName(), value);
       if (_deferredValue)
 	_type = "javax.el.ValueExpression";
     }
     else if (DEFERRED_VALUE_TYPE.equals(name)) {
+      if (_gen.isPre21())
+	throw error("deferredValueType requires JSP 2.1 or later tag file");
+      
       _type = "javax.el.ValueExpression";
       _deferredValueType = value;
     }
     else if (DEFERRED_METHOD.equals(name)) {
+      if (_gen.isPre21())
+	throw error("deferredMethod requires JSP 2.1 or later tag file");
+      
       _deferredMethod = attributeToBoolean(name.getName(), value);
       if (Boolean.TRUE.equals(_deferredMethod))
 	_type = "javax.el.MethodExpression";
     }
     else if (DEFERRED_METHOD_SIGNATURE.equals(name)) {
+      if (_gen.isPre21())
+	throw error("deferredMethodSignature requires JSP 2.1 or later tag file");
+      
       try {
 	new Signature(value);
       } catch (Exception e) {
