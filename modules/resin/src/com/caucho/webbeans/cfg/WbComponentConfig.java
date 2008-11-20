@@ -396,8 +396,7 @@ public class WbComponentConfig {
   protected void deploy()
   {
     if (_comp != null) {
-      _webbeans.addWbComponent(_comp);
-      _webbeans.init();
+      _webbeans.getContainer().addBean(_comp);
     }
   }
 

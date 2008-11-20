@@ -1012,6 +1012,9 @@ public class JavaJspGenerator extends JspGenerator {
   {
     String encoding = Encoding.getMimeName(_parseState.getCharEncoding());
 
+    if (encoding == null && isXml())
+      encoding = "UTF-8";
+
     if (encoding == null)
       encoding = Encoding.getMimeName(_parseState.getPageEncoding());
 
@@ -1024,19 +1027,19 @@ public class JavaJspGenerator extends JspGenerator {
     */
 
     String contentType = _parseState.getContentType();
-    if (contentType != null && contentType.equals("text/html"))
-      contentType = null;
 
     out.print("response.setContentType(\"");
-    if (contentType == null)
-      out.print("text/html");
-    else {
+    if (contentType != null)
       out.printJavaString(contentType);
-    }
-    out.println("\");");
+    else if (isXml())
+      out.print("text/xml");
+    else
+      out.print("text/html");
 
-    if (encoding == null && isXml())
-      encoding = "UTF-8";
+    out.println("\");");
+    
+    if (contentType != null && contentType.equals("text/html"))
+      contentType = null;
 
     if (encoding == null) {
       // server/1204
@@ -1363,11 +1366,8 @@ public class JavaJspGenerator extends JspGenerator {
       Object testValue = expr.getValue(null);
 
       try {
-	System.out.println("COERCE: " + testValue + " " + retType);
-	System.out.println("V: " + Expr.coerceToType(testValue, retType));
+	Expr.coerceToType(testValue, retType);
       } catch (Exception e) {
-	e.printStackTrace();
-	
 	// jsp/18v4 (tck)
 	throw error(L.l("string literal '{0}' can't return type '{1}'",
 			value, sigString));
@@ -2172,7 +2172,7 @@ public class JavaJspGenerator extends JspGenerator {
 	&& tag.getAnalyzedTag().getHasInjection()) {
       out.print("_jsp_inject_" + tag.getId() + " = ");
       out.println("com.caucho.config.j2ee.InjectIntrospector.introspectProgram("
-		  + tag.getTagClass().getName() + ".class);");
+		  + tag.getTagClass().getName() + ".class, null);");
     }
 
     Iterator<TagInstance> iter = tag.iterator();

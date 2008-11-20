@@ -199,7 +199,7 @@ public class JavaJspBuilder extends JspBuilder {
   {
     if (_parseState.getXml() != null
 	&& _parseState.getXml().getEncoding() != null)
-      _parseState.setPageEncoding(_parseState.getXml().getEncoding());
+      _parseState.setXmlPageEncoding(_parseState.getXml().getEncoding());
   }
 
   /**

@@ -91,6 +91,7 @@ public class ParseState {
   private String _contentType;
   private String _charEncoding;
   private String _pageEncoding;
+  private String _xmlPageEncoding;
   private Class _extends;
 
   private boolean _recycleTags = true;
@@ -429,6 +430,13 @@ public class ParseState {
     return _charEncoding;
   }
 
+  public void setXmlPageEncoding(String pageEncoding)
+    throws JspParseException
+  {
+    _xmlPageEncoding = pageEncoding;
+    setPageEncoding(pageEncoding);
+  }
+  
   /**
    * Sets the JSP's page encoding
    */
@@ -448,12 +456,13 @@ public class ParseState {
 	|| _pageEncoding.equalsIgnoreCase(pageEncoding)) {
       _pageEncoding = pageEncoding;
     }
-    else if ("UTF-16".equalsIgnoreCase(_pageEncoding)
+    else if (("UTF-16".equalsIgnoreCase(_pageEncoding)
+	      || "UTF-16LE".equalsIgnoreCase(_pageEncoding))
 	     && ("UTF-16LE".equalsIgnoreCase(pageEncoding)
 		 || "UTF-16BE".equalsIgnoreCase(pageEncoding))) {
       _pageEncoding = pageEncoding;
     }
-    else if ("UTF-16".equalsIgnoreCase(pageEncoding)
+    else if ("UTF-16LE".equalsIgnoreCase(pageEncoding)
 	     && ("UTF-16LE".equalsIgnoreCase(_pageEncoding)
 		 || "UTF-16BE".equalsIgnoreCase(_pageEncoding))) {
     }
@@ -473,7 +482,20 @@ public class ParseState {
    */
   public String getPageEncoding()
   {
-    return _pageEncoding;
+    if (_pageEncoding != null)
+      return _pageEncoding;
+    else if (_xmlPageEncoding != null)
+      return "utf-8";
+    else
+      return null;
+  }
+
+  /**
+   * Gets the JSP's character encoding
+   */
+  public String getXmlPageEncoding()
+  {
+    return _xmlPageEncoding;
   }
 
   /**

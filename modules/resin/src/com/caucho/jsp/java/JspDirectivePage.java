@@ -119,7 +119,7 @@ public class JspDirectivePage extends JspNode {
 
       try {
         _parseState.setPageEncoding(value);
-        _parseState.setCharEncoding(value);
+        // _parseState.setCharEncoding(value);
       } catch (JspParseException e) {
         log.log(Level.FINER, e.toString(), e);
 
