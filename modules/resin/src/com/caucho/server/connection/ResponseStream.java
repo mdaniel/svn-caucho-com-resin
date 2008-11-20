@@ -185,10 +185,15 @@ class ResponseStream extends ToByteResponseStream {
   public boolean isFlushed()
   {
     try {
+      int bufferOffset = getBufferOffset();
+      
       // server/05e8
-      if (_contentLength > 0 && _contentLength < getBufferOffset())
+      if (_contentLength > 0 && _contentLength <= bufferOffset)
 	return true;
     } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      return true;
     }
     
     return false;

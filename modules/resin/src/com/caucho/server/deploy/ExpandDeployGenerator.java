@@ -492,7 +492,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   {
     if (isModified()) {
       try {
-	deploy();
+	deployStart();
       } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
@@ -530,7 +530,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   {
     if (isModified()) {
       try {
-	deploy();
+	deployStart();
       } catch (Throwable e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
@@ -540,12 +540,13 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   /**
    * Deploys the objects.
    */
-  private void deploy()
+  private void deployStart()
     throws Exception
   {
     boolean isDeploying = false;
-    
-    log.finer(this + " redeploy " + _isDeploying);
+
+    if (! _isDeploying)
+      log.finer(this + " deploy/start " + _isDeploying);
 
     try {
       ArrayList<String> updatedNames = null;

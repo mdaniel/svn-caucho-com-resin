@@ -227,6 +227,9 @@ abstract public class ExpandDeployController<I extends DeployInstance>
    */
   public void deploy()
   {
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " deploying");
+    
     try {
       expandArchive();
     } catch (Exception e) {
@@ -344,6 +347,10 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 	Path pwd = getRootDirectory();
 
 	pwd.mkdirs();
+
+	if (log.isLoggable(Level.FINE))
+	  log.fine(this + " expanding .git repository tag=" + gitRefPath
+		   + " tree=" + tree + " -> root=" + getRootDirectory());
 
 	expandRepositoryTree(pwd, tree);
 	

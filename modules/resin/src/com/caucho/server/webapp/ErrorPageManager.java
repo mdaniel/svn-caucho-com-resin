@@ -49,6 +49,7 @@ import com.caucho.vfs.Encoding;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
@@ -366,9 +367,11 @@ public class ErrorPageManager {
       if (request instanceof HttpServletRequest)
         request.setAttribute(ERROR_URI,
                              ((HttpServletRequest) request).getRequestURI());
-      if (request instanceof AbstractHttpRequest)
-        request.setAttribute(AbstractHttpRequest.SERVLET_NAME,
-                             ((AbstractHttpRequest) request).getServletName());
+
+      String servletName = getServletName(request);
+
+      if (servletName != null)
+        request.setAttribute(AbstractHttpRequest.SERVLET_NAME, servletName);
 
       request.setAttribute(STATUS_CODE, new Integer(500));
       request.setAttribute(MESSAGE, errorPageExn.getMessage());
@@ -517,6 +520,17 @@ public class ErrorPageManager {
     }
 
     out.close();
+  }
+
+  private String getServletName(ServletRequest request)
+  {
+    if (request instanceof AbstractHttpRequest)
+      return ((AbstractHttpRequest) request).getServletName();
+    else if (request instanceof ServletRequestWrapper)
+      return getServletName(((ServletRequestWrapper) request).getRequest());
+    else {
+      return null;
+    }
   }
 
   /**
