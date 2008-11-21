@@ -36,6 +36,7 @@ import javax.el.*;
 import javax.faces.context.*;
 import javax.faces.event.*;
 import javax.faces.model.*;
+import javax.faces.FacesException;
 
 import javax.servlet.jsp.jstl.sql.Result;
 
@@ -446,6 +447,73 @@ public class UIData extends UIComponentBase
   public void setFooter(UIComponent footer)
   {
     getFacets().put("footer", footer);
+  }
+
+  @Override
+  public boolean invokeOnComponent(FacesContext context,
+                                   String clientId,
+                                   ContextCallback callback)
+    throws FacesException
+  {
+    if (context == null || clientId == null || callback == null)
+      throw new NullPointerException();
+
+
+    if (clientId.equals(this.getClientId(context))) {
+      try {
+        callback.invokeContextCallback(context, this);
+
+        return true;
+      }
+      catch (Exception e) {
+        throw new FacesException(e);
+      }
+    }
+
+    String head = getClientId(context) + SEPARATOR_CHAR;
+
+    int oldIdx = getRowIndex();
+
+    String tail = Character.toString(SEPARATOR_CHAR) + oldIdx + SEPARATOR_CHAR; 
+
+    if (head.endsWith(tail))
+      head = head.substring(0, head.length() - tail.length() + 1);
+
+    if (! clientId.startsWith(head))
+      return false;
+
+    int separatorIdx = clientId.indexOf(SEPARATOR_CHAR, head.length());
+
+    int newIdx;
+
+    try {
+      newIdx = Integer.parseInt(clientId.substring(head.length(), separatorIdx));
+    }
+    catch (Exception e) {
+      throw new FacesException("clientId '" +
+                               clientId +
+                               "' is expected to contain a positive integer at position '" +
+                               head.length() +
+                               "'");
+    } 
+
+    try {
+      setRowIndex(newIdx);
+
+      if (! isRowAvailable())
+        return false;
+
+      for (Iterator<UIComponent> it = getFacetsAndChildren(); it.hasNext();) {
+        if (it.next().invokeOnComponent(context, clientId, callback))
+          return true;
+      }
+    } catch (Exception e) {
+      throw new FacesException(e);
+    } finally {
+      this.setRowIndex(oldIdx);
+    }
+
+    return false;
   }
 
   //
