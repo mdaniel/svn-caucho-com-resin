@@ -43,48 +43,30 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @author Scott Ferguson, Emil Ong
- * 
+ * @author Emil Ong
  */
 
-package hessian.io 
+package hessian.util
 {
-  internal class ObjectDefinition
-  {
-    private var _type:String;
-    private var _fieldNames:Array;
-    private var _ref:int;
-
-    public function ObjectDefinition(type:String, 
-                                     fieldNames:Array, 
-                                     ref:int = -1)
+  public class ByteUtils {
+    public static function castToByte(i:int):int
     {
-      _type = type;
-      _fieldNames = fieldNames;
-      _ref = ref;
+      var bits:uint = i & 0xFF;
+
+      if (bits >= 0x80)
+        bits = -(0x100 - bits);
+
+      return bits;
     }
 
-    public function get type():String
+    public static function castToShort(i:int):int
     {
-      return _type;
-    }
+      var bits:uint = i & 0xFFFF;
 
-    public function get fieldNames():Array
-    {
-      return _fieldNames;
-    }
+      if (bits >= 0x8000)
+        bits = -(0x10000 - bits);
 
-    public function get ref():int
-    {
-      return _ref;
-    }
-
-    public function write(out:Hessian2Output):void
-    {
-      out.writeInt(fieldNames.length);
-
-      for each (var fieldName:String in fieldNames)
-        out.writeString(fieldName);
+      return bits;
     }
   }
 }

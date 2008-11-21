@@ -57,6 +57,8 @@ package hessian.io
 	import flash.utils.getDefinitionByName;
 	import flash.utils.IDataInput;
 
+	import hessian.util.ByteUtils;
+
   /**
    * A reader for the Hessian 2.0 protocol.
    *
@@ -820,15 +822,12 @@ package hessian.io
           return ((tag - Hessian2Constants.BC_INT_SHORT_ZERO) << 16) + 
                  256 * read() + read();
 
-        //case LONG_BYTE:
         case Hessian2Constants.BC_DOUBLE_BYTE:
-          return /* (byte) */ (_offset < _length ? _buffer[_offset++] : read()) 
-                              & 0xFF;
+          return ByteUtils.castToByte((_offset < _length ? _buffer[_offset++] 
+                                                         : read()));
 
-        //case INT_SHORT:
-        //case LONG_SHORT:
         case Hessian2Constants.BC_DOUBLE_SHORT:
-          return /* (short) */ (256 * read() + read()) & 0xFFFF;
+          return ByteUtils.castToShort((256 * read() + read()) & 0xFFFF);
 
         case 'I'.charCodeAt():
         case Hessian2Constants.BC_LONG_INT:
@@ -978,11 +977,11 @@ package hessian.io
           return 1;
 
         case Hessian2Constants.BC_DOUBLE_BYTE:
-          return /* (byte) */ (_offset < _length ? _buffer[_offset++] : read())
-                              & 0xFF;
+          return ByteUtils.castToByte(_offset < _length ? _buffer[_offset++]
+                                                        : read());
 
         case Hessian2Constants.BC_DOUBLE_SHORT:
-          return /* (short) */(256 * read() + read()) & 0xFFFF;
+          return ByteUtils.castToShort((256 * read() + read()) & 0xFFFF);
 
         case Hessian2Constants.BC_DOUBLE_MILL:
           {
@@ -2345,17 +2344,21 @@ package hessian.io
       if (type != null && type.length > 0) {
         try {
           cl = getClassByAlias(type) as Class;
+          trace("Found class " + cl + " by alias " + type);
         }
         catch (e:Error) {
-          trace("Cannot file class by alias '" + type + "': " + e);
+          trace("Cannot find class by alias '" + type + "': " + e);
         }
 
         if (cl == null) {
           try {
             cl = getDefinitionByName(type) as Class;
 
-            if (cl != null && _autoAlias) {
-              registerClassAlias(type, cl);
+            if (cl != null) {
+              trace("Found class " + cl + " by alias " + type);
+
+              if (_autoAlias)
+                registerClassAlias(type, cl);
             }
           }
           catch (e:Error) {

@@ -118,12 +118,8 @@ package hessian.io
      */
     public override function startCall(method:String, length:int):void
     {
-      var offset:int = _buffer.position;
-
-      if (SIZE < offset + 32) {
+      if (SIZE < _buffer.position + 32)
         flush();
-        offset = _buffer.position; // XXX this doesn't make sense
-      }
 
       var buffer:ByteArray = _buffer;
 
@@ -243,21 +239,7 @@ package hessian.io
       var ref:int = -1;
       var def:ObjectDefinition = _classRefs[className];
 
-      if (def != null) {
-        if (SIZE < _buffer.position + 32)
-          flush();
-
-        ref = def.ref;
-
-        if (ref <= Hessian2Constants.OBJECT_DIRECT_MAX) {
-          _buffer.writeByte(Hessian2Constants.BC_OBJECT_DIRECT + ref);
-        }
-        else {
-          _buffer.writeByte(0);
-          writeInt(ref);
-        }
-      }
-      else {
+      if (def == null) {
         ref = _numClassRefs++;
 
         var fieldNames:Array = getFieldNames(type);
@@ -272,6 +254,19 @@ package hessian.io
         writeString(className);
 
         def.write(this);
+      }
+
+      if (SIZE < _buffer.position + 32)
+        flush();
+
+      ref = def.ref;
+
+      if (ref <= Hessian2Constants.OBJECT_DIRECT_MAX) {
+        _buffer.writeByte(Hessian2Constants.BC_OBJECT_DIRECT + ref);
+      }
+      else {
+        _buffer.writeByte(0);
+        writeInt(ref);
       }
 
       return def;
@@ -579,14 +574,8 @@ package hessian.io
       }
       else {
         _buffer.writeByte('L'.charCodeAt());
-        _buffer.writeByte(value >> 56);
-        _buffer.writeByte(value >> 48);
-        _buffer.writeByte(value >> 40);
-        _buffer.writeByte(value >> 32);
-        _buffer.writeByte(value >> 24);
-        _buffer.writeByte(value >> 16);
-        _buffer.writeByte(value >> 8);
-        _buffer.writeByte(value);
+
+        write8ByteLong(value);
       }
     }
 
@@ -673,19 +662,24 @@ package hessian.io
       }
 
       _buffer.writeByte(Hessian2Constants.BC_DATE);
+      
+      write8ByteLong(time);
+    }
 
-      if (time >= 0) {
-        _buffer.writeByte(time / 0x100000000000000);
-        _buffer.writeByte(time / 0x1000000000000);
-        _buffer.writeByte(time / 0x10000000000);
-        _buffer.writeByte(time / 0x100000000);
-        _buffer.writeByte(time >> 24);
-        _buffer.writeByte(time >> 16);
-        _buffer.writeByte(time >> 8);
-        _buffer.writeByte(time);
+    private function write8ByteLong(value:Number):void
+    {
+      if (value >= 0) {
+        _buffer.writeByte(value / 0x100000000000000);
+        _buffer.writeByte(value / 0x1000000000000);
+        _buffer.writeByte(value / 0x10000000000);
+        _buffer.writeByte(value / 0x100000000);
+        _buffer.writeByte(value >> 24);
+        _buffer.writeByte(value >> 16);
+        _buffer.writeByte(value >> 8);
+        _buffer.writeByte(value);
       }
       else {
-        var abs:Number = Math.abs(time);
+        var abs:Number = Math.abs(value);
 
         var msi:Number = 0x100000000 - Math.abs(abs / 0x100000000);
         if (msi == 0x100000000)
