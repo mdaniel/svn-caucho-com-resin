@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.gen;
 
+import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 import com.caucho.webbeans.component.*;
@@ -43,6 +44,8 @@ import javax.ejb.*;
 import javax.interceptor.*;
 import javax.webbeans.*;
 import javax.webbeans.manager.Bean;
+import javax.webbeans.manager.Interceptor;
+import javax.webbeans.manager.InterceptionType;
 
 /**
  * Represents the interception
@@ -56,20 +59,31 @@ public class InterceptorCallChain extends AbstractCallChain {
   private BusinessMethodGenerator _next;
 
   private String _uniqueName;
+  private String _chainName;
   private Method _implMethod;
   
-  private ArrayList<Class> _defaultInterceptors = new ArrayList<Class>();
-  private ArrayList<Class> _classInterceptors = new ArrayList<Class>();
-  private ArrayList<Class> _methodInterceptors = new ArrayList<Class>();
+  private ArrayList<Class> _defaultInterceptors
+    = new ArrayList<Class>();
+  
+  private ArrayList<Class> _classInterceptors
+    = new ArrayList<Class>();
 
   private boolean _isExcludeDefaultInterceptors;
   private boolean _isExcludeClassInterceptors;
+
+  private InterceptionType _interceptionType = InterceptionType.AROUND_INVOKE;
   
-  private ArrayList<Class> _interceptors = new ArrayList<Class>();
+  private ArrayList<Annotation> _interceptorBinding
+    = new ArrayList<Annotation>();
+  
+  private ArrayList<Interceptor> _interceptors
+    = new ArrayList<Interceptor>();
+
+  private InterceptionBinding _bindingEntry;
 
   // map from the interceptor class to the local variable for the interceptor
-  private HashMap<Class,String> _interceptorVarMap
-    = new HashMap<Class,String>();
+  private HashMap<Interceptor,String> _interceptorVarMap
+    = new HashMap<Interceptor,String>();
   
   // interceptors we're responsible for initializing
   private ArrayList<Class> _ownInterceptors = new ArrayList<Class>();
@@ -107,13 +121,13 @@ public class InterceptorCallChain extends AbstractCallChain {
 	      || (! _isExcludeDefaultInterceptors
 		  && _view.getBean().getDefaultInterceptors().size() > 0)
 	      || _classInterceptors.size() > 0
-	      || _methodInterceptors.size() > 0
+	      || _interceptorBinding.size() > 0
 	      || _decoratorType != null
 	      || getAroundInvokeMethod() != null);
     }
   }
 
-  public ArrayList<Class> getInterceptors()
+  public ArrayList<Interceptor> getInterceptors()
   {
     return _interceptors;
   }
@@ -148,11 +162,14 @@ public class InterceptorCallChain extends AbstractCallChain {
     
     iAnn = (Interceptors) apiClass.getAnnotation(Interceptors.class);
 
+    /*
     if (iAnn != null) {
       for (Class iClass : iAnn.value())
 	_classInterceptors.add(iClass);
     }
+    */
 
+    /*
     if (implClass != null) {
       iAnn = (Interceptors) implClass.getAnnotation(Interceptors.class);
 
@@ -161,23 +178,28 @@ public class InterceptorCallChain extends AbstractCallChain {
 	  _classInterceptors.add(iClass);
       }
     }
+    */
 
     Annotation []apiAnnList = getMethodAnnotations(apiMethod);
     Annotation []implAnnList = getMethodAnnotations(implMethod);
     
     iAnn = getAnnotation(apiAnnList, Interceptors.class);
 
+    /*
     if (iAnn != null) {
       for (Class iClass : iAnn.value())
-	_methodInterceptors.add(iClass);
+	_methodInterceptors.add(new InterceptorBean(iClass));
     }
+    */
 
     iAnn = getAnnotation(implAnnList, Interceptors.class);
 
+    /*
     if (apiMethod != implMethod && iAnn != null) {
       for (Class iClass : iAnn.value())
-	_methodInterceptors.add(iClass);
+	_methodInterceptors.add(new InterceptorBean(iClass));
     }
+    */
 
     if (isAnnotationPresent(apiAnnList, ExcludeClassInterceptors.class))
       _isExcludeClassInterceptors = true;
@@ -194,26 +216,27 @@ public class InterceptorCallChain extends AbstractCallChain {
     // webbeans annotations
     WebBeansContainer webBeans = WebBeansContainer.create();
     
-    ArrayList<Annotation> interceptorTypes = new ArrayList<Annotation>();
+    HashMap<Class,Annotation> interceptorTypes
+      = new HashMap<Class,Annotation>();
     
-    if (isValidMethod() && _view.getInterceptorBindings() != null)
-      interceptorTypes.addAll(_view.getInterceptorBindings());
+    if (isValidMethod() && _view.getInterceptorBindings() != null) {
+      for (Annotation ann : _view.getInterceptorBindings()) {
+	interceptorTypes.put(ann.annotationType(), ann);
+      }
+    }
     
     for (Annotation ann : implAnnList) {
       Class annType = ann.annotationType();
       
       if (annType.isAnnotationPresent(InterceptorBindingType.class)) {
-	if (! interceptorTypes.contains(ann))
-	  interceptorTypes.add(ann);
+	interceptorTypes.put(ann.annotationType(), ann);
       }
     }
 
     if (interceptorTypes.size() > 0) {
-      ArrayList<Class> interceptors
-	= webBeans.findInterceptors(interceptorTypes);
-      
-      if (interceptors != null)
-	_methodInterceptors.addAll(interceptors);
+      _interceptionType = InterceptionType.AROUND_INVOKE;
+      _interceptorBinding
+	= new ArrayList<Annotation>(interceptorTypes.values());
     }
 
     if (isValidMethod()) {
@@ -310,11 +333,32 @@ public class InterceptorCallChain extends AbstractCallChain {
       out.println();
       out.print("private static ");
       out.printClass(WebBeansContainer.class);
-      out.print(" __caucho_manager = ");
+      out.println(" __caucho_manager");
+      out.print(" = ");
       out.printClass(WebBeansContainer.class);
       out.println(".create();");
     }
 
+    if (map.get("__caucho_interceptor_beans") == null) {
+      map.put("__caucho_interceptor_beans", true);
+      
+      out.println();
+      out.print("private static final ");
+      out.print("java.util.ArrayList<");
+      out.printClass(Interceptor.class);
+      out.println("> __caucho_interceptor_beans");
+      out.print("  = new java.util.ArrayList<");
+      out.printClass(Interceptor.class);
+      out.println(">();");
+
+      out.println();
+      out.print("private transient Object []");
+      out.println("__caucho_interceptor_objects;");
+    }
+
+    _uniqueName = "_" + _implMethod.getName() + "_v" + out.generateId();
+
+    /*
     if (! _isExcludeDefaultInterceptors)
       _interceptors.addAll(_view.getBean().getDefaultInterceptors());
 
@@ -323,11 +367,12 @@ public class InterceptorCallChain extends AbstractCallChain {
       _interceptors.addAll(_classInterceptors);
     
     _interceptors.addAll(_methodInterceptors);
+    */
 
-    if (_interceptors.size() > 0 || getAroundInvokeMethod() != null)
+    if (hasInterceptor())
       generateInterceptorPrologue(out, map);
 
-    if (_decoratorType != null)
+    if (hasDecorator())
       generateDecoratorPrologue(out, map);
     
     _next.generatePrologue(out, map);
@@ -336,8 +381,13 @@ public class InterceptorCallChain extends AbstractCallChain {
   public void generateInterceptorPrologue(JavaWriter out, HashMap map)
     throws IOException
   {
-    _uniqueName = "_v" + out.generateId();
-    
+    generateInterceptorMethod(out, map);
+    generateInterceptorChain(out, map);
+  }
+
+  public void generateInterceptorMethod(JavaWriter out, HashMap map)
+    throws IOException
+  {
     out.println();
     out.println("private static java.lang.reflect.Method " + _uniqueName + "_method;");
     out.println("private static java.lang.reflect.Method " + _uniqueName + "_implMethod;");
@@ -351,10 +401,6 @@ public class InterceptorCallChain extends AbstractCallChain {
       out.println("private static java.lang.reflect.Method __caucho_aroundInvokeMethod;");
     }
     
-    out.println("private static java.lang.reflect.Method []" + _uniqueName + "_methodChain;");
-    out.println("private transient Object []" + _uniqueName + "_objectChain");
-    out.println("  = com.caucho.ejb.util.EjbUtil.NULL_OBJECT_ARRAY;");
-
     Class cl = _implMethod.getDeclaringClass();
     
     out.println();
@@ -371,11 +417,18 @@ public class InterceptorCallChain extends AbstractCallChain {
 		      _implMethod.getParameterTypes());
     out.println(";");
     out.println(_uniqueName + "_method.setAccessible(true);");
+
+    String superMethodName;
+
+    if (hasDecorator())
+      superMethodName = "__caucho_" + _implMethod.getName() + "_decorator";
+    else
+      superMethodName = "__caucho_" + _implMethod.getName();
     
     out.print(_uniqueName + "_implMethod = ");
     generateGetMethod(out,
 		      _next.getView().getBeanClassName(),
-		      "__caucho_" + _implMethod.getName(),
+		      superMethodName,
 		      _implMethod.getParameterTypes());
     out.println(";");
     out.println(_uniqueName + "_implMethod.setAccessible(true);");
@@ -391,6 +444,44 @@ public class InterceptorCallChain extends AbstractCallChain {
       out.println(";");
       out.println("__caucho_aroundInvokeMethod.setAccessible(true);");
     }
+    
+    out.popDepth();
+    out.println("} catch (Exception e) {");
+    out.println("  throw new RuntimeException(e);");
+    out.println("}");
+    out.popDepth();
+    out.println("}");
+  }
+
+  public void generateInterceptorChain(JavaWriter out, HashMap map)
+    throws IOException
+  {
+    _bindingEntry
+      = new InterceptionBinding(_interceptionType, _interceptorBinding);
+    
+    _chainName  = (String) map.get(_bindingEntry);
+
+    if (_chainName != null) {
+      return;
+    }
+
+    _chainName = _uniqueName;
+    map.put(_bindingEntry, _chainName);
+    
+    out.println("private static int []"
+		+ _chainName + "_objectIndexChain;");
+    
+    out.println("private static java.lang.reflect.Method []"
+		+ _chainName + "_methodChain;");
+    
+    Class cl = _implMethod.getDeclaringClass();
+    
+    out.println();
+    out.println("static {");
+    out.pushDepth();
+    
+    out.println("try {");
+    out.pushDepth();
 
     generateMethodChain(out);
     
@@ -401,7 +492,8 @@ public class InterceptorCallChain extends AbstractCallChain {
     out.popDepth();
     out.println("}");
 
-    for (Class iClass : _interceptors) {
+    /*
+    for (Interceptor interceptor : _interceptors) {
       String var = (String) map.get("interceptor-" + iClass.getName());
       if (var == null) {
 	var = "__caucho_i" + out.generateId();
@@ -417,17 +509,153 @@ public class InterceptorCallChain extends AbstractCallChain {
 
 	map.put("interceptor-" + iClass.getName(), var);
 
-	_ownInterceptors.add(iClass);
+	_ownInterceptors.add(interceptor);
       }
 
-      _interceptorVarMap.put(iClass, var);
+      _interceptorVarMap.put(interceptor, var);
     }
+    */
+  }
+
+  protected void generateMethodChain(JavaWriter out)
+    throws IOException
+  {
+    out.println(_chainName + "_objectIndexChain =");
+    out.println("  com.caucho.ejb.util.EjbUtil.createInterceptors(");
+    out.println("    __caucho_manager,");
+    out.println("    __caucho_interceptor_beans,");
+    out.print("    " + InterceptionType.class.getName()
+	      + "." + _interceptionType);
+
+    for (int i = 0; i < _interceptorBinding.size(); i++) {
+      out.println(",");
+
+      out.pushDepth();
+      out.pushDepth();
+      generateAnnotation(out, _interceptorBinding.get(i));
+      out.popDepth();
+      out.popDepth();
+    }
+
+    out.println(");");
+
+    out.println();
+    out.println(_chainName + "_methodChain = ");
+    out.println("  com.caucho.ejb.util.EjbUtil.createMethods(");
+    out.println("    __caucho_interceptor_beans,");
+    out.println("    " + InterceptionType.class.getName()
+		+ "." + _interceptionType + ",");
+    out.println("    " + _chainName + "_objectIndexChain);");
+
+    /*
+    if (getAroundInvokeMethod() != null) {
+      out.println("__caucho_aroundInvokeMethod, ");
+    }
+    
+    out.popDepth();
+    out.println("};");
+    */
+  }
+
+  protected void generateAnnotation(JavaWriter out,
+				    Annotation ann)
+    throws IOException
+  {
+    out.print("new javax.webbeans.AnnotationLiteral<");
+    out.printClass(ann.annotationType());
+    out.print(">() {");
+
+    boolean isFirst = true;
+    for (Method method : ann.annotationType().getMethods()) {
+      if (method.getDeclaringClass().equals(Object.class))
+	continue;
+      
+      if (method.getDeclaringClass().equals(Annotation.class))
+	continue;
+      
+      if (method.getName().equals("annotationType"))
+	continue;
+
+      if (method.getParameterTypes().length > 0)
+	continue;
+
+      if (void.class.equals(method.getReturnType()))
+	continue;
+
+      if (method.isAnnotationPresent(NonBinding.class))
+	continue;
+
+      out.pushDepth();
+      
+      if (! isFirst)
+	out.print(",");
+      isFirst = false;
+
+      out.println();
+
+      out.print("public ");
+      out.printClass(method.getReturnType());
+      out.print(" " + method.getName() + "() { return ");
+
+      Object value = null;
+      
+      try {
+	value = method.invoke(ann);
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+
+      printValue(out, value);
+      
+      out.println("; }");
+
+      out.popDepth();
+    }
+    
+    out.print("}");
+  }
+
+  private void printValue(JavaWriter out, Object value)
+    throws IOException
+  {
+    if (value == null)
+      out.print("null");
+    else if (value instanceof String) {
+      out.print("\"");
+      out.printJavaString((String) value);
+      out.print("\"");
+    }
+    else if (value instanceof Character) {
+      out.print("\'");
+      out.printJavaString(String.valueOf(value));
+      out.print("\'");
+    }
+    else if (value instanceof Enum) {
+      out.printClass(value.getClass());
+      out.print("." + value);
+    }
+    else
+      out.print(value);
   }
 
   public void generatePostConstruct(JavaWriter out, HashMap map)
     throws IOException
   {
-    out.println("" + _uniqueName + "_objectChain = null;");
+    if (map.get("interceptor_object_init") == null) {
+      map.put("interceptor_object_init", true);
+
+      out.println("int size = __caucho_interceptor_beans.size();");
+      out.println("__caucho_interceptor_objects = new Object[size];");
+      
+      out.println("for (int i = 0; i < size; i++) {");
+      out.pushDepth();
+
+      out.print("__caucho_interceptor_objects[i] = ");
+      out.println("__caucho_manager.getInstance(__caucho_interceptor_beans.get(i));");
+      
+      out.popDepth();
+      out.println("}");
+    }
   }
 
   public void generateDecoratorPrologue(JavaWriter out, HashMap map)
@@ -475,6 +703,9 @@ public class InterceptorCallChain extends AbstractCallChain {
     }
 
     _decoratorLocalVar = _decoratorClass + "_tl";
+
+    if (hasInterceptor())
+      generateDecoratorMethod(out);
   }
 
   private void generateDecoratorClass(JavaWriter out)
@@ -576,7 +807,9 @@ public class InterceptorCallChain extends AbstractCallChain {
     out.print("public ");
     out.printClass(method.getReturnType());
     out.print(" ");
+
     out.print(method.getName());
+    
     out.print("(");
 
     Class []paramTypes = method.getParameterTypes();
@@ -751,30 +984,31 @@ public class InterceptorCallChain extends AbstractCallChain {
     
     _next.generateConstructor(out, map);
   }
+  
+  private boolean hasInterceptor()
+  {
+    return (_interceptors.size() > 0
+	    || _interceptorBinding.size() > 0
+	    || getAroundInvokeMethod() != null);
+  }
+  
+  private boolean hasDecorator()
+  {
+    return _decoratorType != null;
+  }
 
   @Override
   public void generateCall(JavaWriter out)
     throws IOException
   {
-    boolean hasInterceptor = 
-      _interceptors.size() > 0 || getAroundInvokeMethod() != null;
-    
-    if (! hasInterceptor && _decoratorType == null) {
+    if (! hasInterceptor() && ! hasDecorator()) {
       _next.generateCall(out);
       return;
     }
 
-    if (hasInterceptor) {
+    if (hasInterceptor()) {
       out.println("try {");
       out.pushDepth();
-
-      out.print("if (");
-      generateThis(out);
-      out.println("." + _uniqueName + "_objectChain == null) {");
-      out.pushDepth();
-      generateObjectChain(out);
-      out.popDepth();
-      out.println("}");
 
       if (! void.class.equals(_implMethod.getReturnType())) {
 	out.printClass(_implMethod.getReturnType());
@@ -795,14 +1029,26 @@ public class InterceptorCallChain extends AbstractCallChain {
       generateThis(out);
       out.print("." + _uniqueName + "_implMethod, ");
       generateThis(out);
-      out.print("." + _uniqueName + "_methodChain, ");
+      out.print("." + _chainName + "_methodChain, ");
       generateThis(out);
-      out.print("." + _uniqueName + "_objectChain, ");
-      out.print("new Object[] { ");
-      for (int i = 0; i < _implMethod.getParameterTypes().length; i++) {
-	out.print("a" + i + ", ");
+      out.print(".__caucho_interceptor_objects, ");
+      generateThis(out);
+      out.print("." + _chainName + "_objectIndexChain, ");
+
+      Class []paramTypes = _implMethod.getParameterTypes();
+      
+      if (paramTypes.length == 0) {
+	out.print("com.caucho.ejb.util.EjbUtil.NULL_OBJECT_ARRAY");
       }
-      out.println("}).proceed();");
+      else {
+	out.print("new Object[] { ");
+	for (int i = 0; i < _implMethod.getParameterTypes().length; i++) {
+	  out.print("a" + i + ", ");
+	}
+	out.print("}");
+      }
+      
+      out.println(").proceed();");
 
       _next.generatePreReturn(out);
     
@@ -842,6 +1088,38 @@ public class InterceptorCallChain extends AbstractCallChain {
     }
   }
 
+  protected void generateDecoratorMethod(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.print("private ");
+    out.printClass(_implMethod.getReturnType());
+    out.print(" __caucho_");
+    out.print(_implMethod.getName());
+    out.print("_decorator(");
+
+    Class []types = _implMethod.getParameterTypes();
+    for (int i = 0; i < types.length; i++) {
+      Class type = types[i];
+	
+      if (i != 0)
+	out.print(", ");
+
+      out.printClass(type);
+      out.print(" a" + i);
+    }
+    
+    out.println(")");
+    _next.generateThrows(out, _implMethod.getExceptionTypes());
+    out.println("{");
+    out.pushDepth();
+
+    generateDelegator(out);
+
+    out.popDepth();
+    out.println("}");
+  }
+
   protected void generateDelegator(JavaWriter out)
     throws IOException
   {
@@ -855,6 +1133,13 @@ public class InterceptorCallChain extends AbstractCallChain {
     out.print(_delegateVar + ".");
     out.print(_implMethod.getName());
     out.print("(");
+
+    for (int i = 0; i < _implMethod.getParameterTypes().length; i++) {
+      if (i != 0)
+	out.print(", ");
+
+      out.print("a" + i);
+    }
       
     out.println(");");
   }
@@ -888,40 +1173,16 @@ public class InterceptorCallChain extends AbstractCallChain {
     return findInterceptorMethod(cl.getSuperclass());
   }
 
-  protected void generateMethodChain(JavaWriter out)
-    throws IOException
-  {
-    out.println(_uniqueName + "_methodChain = new java.lang.reflect.Method[] {");
-    out.pushDepth();
-
-    for (Class iClass : _interceptors) {
-      Method method = findInterceptorMethod(iClass);
-
-      if (method == null)
-	throw new IllegalStateException(L.l("Can't find @AroundInvoke in '{0}'",
-					    iClass.getName()));
-      
-      generateGetMethod(out, method);
-      out.println(", ");
-    }
-
-    if (getAroundInvokeMethod() != null) {
-      out.println("__caucho_aroundInvokeMethod, ");
-    }
-    
-    out.popDepth();
-    out.println("};");
-  }
-
+  /*
   protected void generateObjectChain(JavaWriter out)
     throws IOException
   {
     generateThis(out);
     out.print("." + _uniqueName + "_objectChain = new Object[] { ");
 
-    for (Class iClass : _interceptors) {
+    for (Interceptor interceptor : _interceptors) {
       generateThis(out);
-      out.print("." + _interceptorVarMap.get(iClass) + ", ");
+      out.print("." + _interceptorVarMap.get(interceptor) + ", ");
     }
 
     if (getAroundInvokeMethod() != null) {
@@ -931,6 +1192,7 @@ public class InterceptorCallChain extends AbstractCallChain {
     
     out.println("};");
   }
+  */
   
   protected void generateGetMethod(JavaWriter out, Method method)
     throws IOException
@@ -981,5 +1243,37 @@ public class InterceptorCallChain extends AbstractCallChain {
       out.print("Double");
     else
       throw new IllegalStateException(type.getName());
+  }
+
+  static class InterceptionBinding {
+    private final InterceptionType _type;
+    private final ArrayList<Annotation> _binding;
+
+    public InterceptionBinding(InterceptionType type,
+			       ArrayList<Annotation> binding)
+    {
+      _type = type;
+      _binding = binding;
+    }
+
+    @Override
+    public int hashCode()
+    {
+      return _type.hashCode() * 65521 + _binding.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+      if (o == this)
+	return true;
+      else if (! (o instanceof InterceptionBinding))
+	return false;
+
+      InterceptionBinding binding = (InterceptionBinding) o;
+
+      return (_type.equals(binding._type)
+	      && _binding.equals(binding._binding));
+    }
   }
 }

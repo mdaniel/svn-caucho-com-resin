@@ -47,6 +47,7 @@ import java.util.zip.*;
 
 import javax.annotation.PostConstruct;
 import javax.webbeans.*;
+import javax.webbeans.manager.Interceptor;
 
 /**
  * Configuration for a classloader root containing webbeans
@@ -72,7 +73,7 @@ public class WbWebBeans {
   private ArrayList<ComponentImpl> _pendingBindList
     = new ArrayList<ComponentImpl>();
 
-  private ArrayList<WbInterceptor> _enabledInterceptors;
+  private ArrayList<Interceptor> _interceptorList;
   
   private ArrayList<Class> _decoratorList
     = new ArrayList<Class>();
@@ -162,14 +163,6 @@ public class WbWebBeans {
   }
 
   /**
-   * Adds a component.
-   */
-  public WbComponentTypes createComponentTypes()
-  {
-    return new WbComponentTypes();
-  }
-
-  /**
    * Adds a namespace bean
    */
   public void addCustomBean(CustomBeanConfig bean)
@@ -201,37 +194,6 @@ public class WbWebBeans {
   }
 
   /**
-   * Returns the enabled interceptors
-   */
-  public ArrayList<WbInterceptor> getEnabledInterceptors()
-  {
-    return _enabledInterceptors;
-  }
-
-  /**
-   * Returns matching interceptors
-   */
-  public ArrayList<WbInterceptor>
-    findInterceptors(ArrayList<Annotation> bindingList)
-  {
-    ArrayList<WbInterceptor> list = null;
-
-    if (_enabledInterceptors != null) {
-      for (WbInterceptor interceptor : _enabledInterceptors) {
-	if (! interceptor.isMatch(bindingList))
-	  continue;
-      
-	if (list == null)
-	  list = new ArrayList<WbInterceptor>();
-
-	list.add(interceptor);
-      }
-    }
-    
-    return list;
-  }
-
-  /**
    * Initialization and validation on parse completion.
    */
   @PostConstruct
@@ -253,6 +215,11 @@ public class WbWebBeans {
     _decoratorList.clear();
 
     update();
+    
+    if (_interceptorList != null) {
+      _webBeansContainer.setInterceptorList(_interceptorList);
+      _interceptorList = null;
+    }
   }
 
   public void update()
@@ -319,6 +286,17 @@ public class WbWebBeans {
     return _webBeansContainer.getScopeContext(cl);
   }
 
+  public void addInterceptor(Class cl)
+  {
+    if (_interceptorList == null)
+      _interceptorList = new ArrayList<Interceptor>();
+
+    InterceptorBean bean = new InterceptorBean(_webBeansContainer, cl);
+    bean.init();
+
+    _interceptorList.add(bean);
+  }
+
   @Override
   public String toString()
   {
@@ -326,21 +304,6 @@ public class WbWebBeans {
       return "WbWebBeans[" + _root.getURL() + "]";
     else
       return "WbWebBeans[]";
-  }
-
-  public class WbComponentTypes {
-    public void addComponentType(Class cl)
-    {
-      throw new UnsupportedOperationException();
-    }
-  }
-
-  public void addEnabledInterceptor(Class cl)
-  {
-    if (_enabledInterceptors == null)
-      _enabledInterceptors = new ArrayList<WbInterceptor>();
-    
-    _enabledInterceptors.add(new WbInterceptor(cl));
   }
 
   public class Interceptors {
@@ -352,19 +315,11 @@ public class WbWebBeans {
 	throw new ConfigException(L.l("'{0}' is not valid because <Interceptors> can only contain interceptor implementations",
 				      cl.getName()));
 
-      if (! cl.isAnnotationPresent(Interceptor.class))
+      if (! cl.isAnnotationPresent(javax.webbeans.Interceptor.class))
 	throw new ConfigException(L.l("'{0}' must have an @Interceptor annotation because it is an interceptor implementation",
 				      cl.getName()));
 
       addInterceptor(cl);
-    }
-    
-    public void addInterceptor(Class cl)
-    {
-      if (_enabledInterceptors == null)
-	_enabledInterceptors = new ArrayList<WbInterceptor>();
-    
-      _enabledInterceptors.add(new WbInterceptor(cl));
     }
   }
 

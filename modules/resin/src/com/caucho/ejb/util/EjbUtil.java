@@ -30,20 +30,78 @@
 package com.caucho.ejb.util;
 
 import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.util.L10N;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.webbeans.manager.Decorator;
+import javax.webbeans.manager.Interceptor;
+import javax.webbeans.manager.InterceptionType;
 
 /**
  * Utilities
  */
 public class EjbUtil {
+  private static final L10N L = new L10N(EjbUtil.class);
+  
   public static final Object []NULL_OBJECT_ARRAY = new Object[0];
   
   private EjbUtil()
   {
+  }
+
+  public static int []createInterceptors(WebBeansContainer manager,
+					 ArrayList<Interceptor> beans,
+					 InterceptionType type,
+					 Annotation ...bindings)
+  {
+    List<Interceptor> interceptors;
+
+    if (bindings != null && bindings.length > 0) {
+      interceptors = manager.resolveInterceptors(type, bindings);
+    }
+    else
+      interceptors = new ArrayList<Interceptor>();
+
+    int []indexList = new int[interceptors.size()];
+
+    for (int i = 0; i < interceptors.size(); i++) {
+      Interceptor interceptor = interceptors.get(i);
+
+      int index = beans.indexOf(interceptor);
+      if (index >= 0)
+	indexList[i] = index;
+      else {
+	indexList[i] = beans.size();
+	beans.add(interceptor);
+      }
+    }
+
+    return indexList;
+  }
+
+  public static Method []createMethods(ArrayList<Interceptor> beans,
+				       InterceptionType type,
+				       int []indexChain)
+  {
+    Method []methods = new Method[indexChain.length];
+
+    for (int i = 0; i < indexChain.length; i++) {
+      int index = indexChain[i];
+      
+      Method method = beans.get(index).getMethod(type);
+
+      if (method == null)
+	throw new IllegalStateException(L.l("'{0}' is an unknown interception method in '{1}'",
+					   type, beans.get(index)));
+
+      methods[i] = method;
+    }
+    
+    return methods;
   }
 
   public static Method getMethod(Class cl,

@@ -143,6 +143,9 @@ public class WebBeansContainer
   private HashMap<Class,ArrayList<ObserverMap>> _observerListCache
     = new HashMap<Class,ArrayList<ObserverMap>>();
 
+  private ArrayList<InterceptorEntry> _interceptorList
+    = new ArrayList<InterceptorEntry>();
+
   private ArrayList<DecoratorEntry> _decoratorList
     = new ArrayList<DecoratorEntry>();
 
@@ -469,44 +472,6 @@ public class WebBeansContainer
   public void addSingletonByName(Object object, String name)
   {
     addBean(new SingletonBean(object, name, new Type[0]));
-  }
-
-
-  public void addEnabledInterceptor(Class cl)
-  {
-    _wbWebBeans.addEnabledInterceptor(cl);
-  }
-
-  public ArrayList<Class> findInterceptors(ArrayList<Annotation> annList)
-  {
-    ArrayList<Class> list = new ArrayList<Class>();
-
-    ArrayList<WbInterceptor> interceptors
-      = _wbWebBeans.findInterceptors(annList);
-
-    // root interceptors take priority
-    if (interceptors != null) {
-      addInterceptorClasses(list, interceptors);
-      
-      return list;
-    }
-
-    for (WbWebBeans wbWebBeans : _webBeansMap.values()) {
-      interceptors = wbWebBeans.findInterceptors(annList);
-
-      if (interceptors != null)
-	addInterceptorClasses(list, interceptors);
-    }
-
-    return list;
-  }
-
-  private void addInterceptorClasses(ArrayList<Class> classes,
-				     ArrayList<WbInterceptor> interceptors)
-  {
-    for (WbInterceptor interceptor : interceptors) {
-      classes.add(interceptor.getInterceptorClass());
-    }
   }
 
   /**
@@ -1066,7 +1031,12 @@ public class WebBeansContainer
     if (bean instanceof ComponentImpl)
       return (T) ((ComponentImpl) bean).get();
     else {
-      Context context = getContext(bean.getScopeType());
+      Class scopeType = bean.getScopeType();
+
+      if (Dependent.class.equals(scopeType))
+	return (T) bean.create();
+      
+      Context context = getContext(scopeType);
 
       if (context != null)
 	return (T) context.get(bean, true);
@@ -1322,11 +1292,19 @@ public class WebBeansContainer
   //
 
   /**
-   * Adds a new interceptor
+   * Adds a new interceptor to the manager
    */
   public Manager addInterceptor(Interceptor interceptor)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _interceptorList.add(new InterceptorEntry(interceptor));
+
+    return this;
+  }
+
+  public void setInterceptorList(List<Interceptor> interceptorList)
+  {
+    for (Interceptor interceptor : interceptorList)
+      addInterceptor(interceptor);
   }
 
   /**
@@ -1340,7 +1318,22 @@ public class WebBeansContainer
   public List<Interceptor> resolveInterceptors(InterceptionType type,
 					       Annotation... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (bindings == null || bindings.length == 0)
+      throw new IllegalArgumentException(L.l("resolveInterceptors requires at least one @InterceptorBindingType"));
+    
+    ArrayList<Interceptor> interceptorList = new ArrayList<Interceptor>();
+
+    for (InterceptorEntry entry : _interceptorList) {
+      Interceptor interceptor = entry.getInterceptor();
+      
+      if (interceptor.getMethod(type) == null)
+	continue;
+
+      if (entry.isMatch(bindings))
+	interceptorList.add(interceptor);
+    }
+
+    return interceptorList;
   }
 
   //

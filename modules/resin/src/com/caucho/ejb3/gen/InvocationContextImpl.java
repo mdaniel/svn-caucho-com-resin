@@ -40,6 +40,7 @@ public class InvocationContextImpl implements InvocationContext {
   
   private final Method []_chainMethods;
   private final Object []_chainObjects;
+  private final int []_chainIndex;
   
   private Object []_param;
 
@@ -51,6 +52,7 @@ public class InvocationContextImpl implements InvocationContext {
 			       Method implMethod,
 			       Method []chainMethods,
 			       Object []chainObjects,
+			       int []chainIndex,
 			       Object []param)
   {
     _target = target;
@@ -58,6 +60,7 @@ public class InvocationContextImpl implements InvocationContext {
     _implMethod = implMethod;
     _chainMethods = chainMethods;
     _chainObjects = chainObjects;
+    _chainIndex = chainIndex;
     _param = param;
   }
   
@@ -96,10 +99,10 @@ public class InvocationContextImpl implements InvocationContext {
   {
     try {
       // ioc/0c57
-      if (_index < _chainObjects.length) {
+      if (_index < _chainIndex.length) {
 	int i = _index++;
 
-	return _chainMethods[i].invoke(_chainObjects[i], this);
+	return _chainMethods[i].invoke(_chainObjects[_chainIndex[i]], this);
       }
       else
 	return _implMethod.invoke(_target, _param);
