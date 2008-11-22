@@ -29,7 +29,6 @@
 
 package com.caucho.util;
 
-import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,8 +42,6 @@ public class Alarm implements ThreadTask {
   static private final Logger log
     = Logger.getLogger(Alarm.class.getName());
   
-  static private final Integer timeLock = new Integer(0);
-
   static private final ClassLoader _systemLoader
     = ClassLoader.getSystemClassLoader();
 
@@ -63,9 +60,6 @@ public class Alarm implements ThreadTask {
   static private volatile int _runningAlarmCount;
   
   static private long _testTime;
-  static private int _testCount;
-
-  static private final Method _nanoTimeMethod;
 
   private long _wakeTime;
   private AlarmListener _listener;
@@ -504,7 +498,6 @@ public class Alarm implements ThreadTask {
     Alarm alarm = null;
     long wakeTime = item._wakeTime;
 
-    long now = getExactTime();
     while (i > 1 && wakeTime < (alarm = heap[parent = (i >> 1)])._wakeTime) {
       heap[i] = alarm;
       alarm._heapIndex = i;
@@ -633,7 +626,7 @@ public class Alarm implements ThreadTask {
     }
     
     try {
-      Thread.currentThread().sleep(10);
+      Thread.sleep(10);
     } catch (Exception e) {
     }
   }
@@ -719,18 +712,5 @@ public class Alarm implements ThreadTask {
 
   static {
     _currentTime = System.currentTimeMillis();
-
-    Method nanoTimeMethod;
-
-    try
-    {
-      nanoTimeMethod = System.class.getMethod("nanoTime", null);
-    }
-    catch (NoSuchMethodException e)
-    {
-      nanoTimeMethod = null;
-    }
-
-    _nanoTimeMethod = nanoTimeMethod;
   }
 }

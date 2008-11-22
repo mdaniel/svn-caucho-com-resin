@@ -30,14 +30,14 @@
 package com.caucho.vfs;
 
 public class FileStatus {
-  private static long S_IFMT = 00170000;
-  private static long S_IFSOCK = 0140000;
-  private static long S_IFLNK	= 0120000;
-  private static long S_IFREG = 0100000;
-  private static long S_IFBLK = 0060000;
-  private static long S_IFDIR = 0040000;
-  private static long S_IFCHR = 0020000;
-  private static long S_IFIFO = 0010000;
+  public static long S_IFMT = 00170000;
+  public static long S_IFSOCK = 0140000;
+  public static long S_IFLNK	= 0120000;
+  public static long S_IFREG = 0100000;
+  public static long S_IFBLK = 0060000;
+  public static long S_IFDIR = 0040000;
+  public static long S_IFCHR = 0020000;
+  public static long S_IFIFO = 0010000;
 
   private long _st_dev;
   private long _st_ino;

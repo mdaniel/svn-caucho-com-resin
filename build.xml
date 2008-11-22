@@ -335,7 +335,7 @@
     </antcall>
   </target>
   
-  <target name="resin-kernel" depends="init">
+  <target name="resin-kernel" depends="init, webbeans, osgi, jsdk">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="kernel"/>
       <param name="module.dist" value="${lib}"/>

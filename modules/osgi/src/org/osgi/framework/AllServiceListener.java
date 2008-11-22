@@ -29,8 +29,6 @@
 
 package org.osgi.framework;
 
-import java.util.EventListener;
-
 /**
  * Listens for service events
  */

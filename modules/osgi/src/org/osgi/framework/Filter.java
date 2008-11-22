@@ -29,11 +29,7 @@
 
 package org.osgi.framework;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.net.URL;
 import java.util.Dictionary;
-import java.util.Enumeration;
 
 /**
  * A filter for objects

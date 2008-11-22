@@ -60,13 +60,6 @@ public class CaseInsensitiveIntMap {
   }
 
   /**
-   * Create a new IntMap for cloning.
-   */
-  private CaseInsensitiveIntMap(boolean dummy)
-  {
-  }
-
-  /**
    * Clear the hashmap.
    */
   public void clear()
