@@ -9,7 +9,7 @@
   <property name="shell" value="bash"/>
 
   <target name="compile" 
-          depends="init, hessian, javaee, jaxstream, jcache, jsf, portlet, script, resin-util, quercus, resin, ecmascript, webbeans, webutil, conf, ext">
+          depends="init, hessian, javaee, jaxstream, jcache, jsf, portlet, script, resin-kernel, quercus, resin, ecmascript, webbeans, webutil, conf, ext">
   </target>
 
   <!--
@@ -335,11 +335,11 @@
     </antcall>
   </target>
   
-  <target name="resin-util" depends="init">
+  <target name="resin-kernel" depends="init">
     <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="util"/>
+      <param name="module.name" value="kernel"/>
       <param name="module.dist" value="${lib}"/>
-      <param name="module.jar" value="resin-util.jar"/>
+      <param name="module.jar" value="resin-kernel.jar"/>
     </antcall>
   </target>
 
@@ -504,7 +504,7 @@
     </antcall>
   </target>
   
-  <target name="resin" depends="init, resin-xml, hessian, jcache, javaee, jsf, portlet, script, resin-util, osgi, version, resin-compile"/>
+  <target name="resin" depends="init, resin-xml, hessian, jcache, javaee, jsf, portlet, script, resin-kernel, osgi, version, resin-compile"/>
 
   <!--
   <target name="jaf" depends="init">
@@ -700,7 +700,7 @@
       -->
       <packageset dir="${modules}/script/src"/>
       <packageset dir="${modules}/unix/src"/>
-      <packageset dir="${modules}/util/src"/>
+      <packageset dir="${modules}/kernel/src"/>
       <packageset dir="${modules}/webbeans/src"/>
       <packageset dir="${modules}/webutil/src"/>
       <packageset dir="${promodules}/pro/src"/>
@@ -1137,9 +1137,9 @@
     -->
 
     <antcall target="maven2-module" inheritRefs="true">
-      <param name="module.name" value="util"/>
-      <param name="jar.name" value="resin-util.jar"/>
-      <param name="maven.name" value="resin-util"/>
+      <param name="module.name" value="kernel"/>
+      <param name="jar.name" value="caucho-kernel.jar"/>
+      <param name="maven.name" value="caucho-kernel"/>
     </antcall>
   </target>
 

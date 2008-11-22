@@ -475,7 +475,7 @@
         <exclude name="**/.*"/>
       </fileset>
       
-      <fileset dir="${resin.modules}/util/classes">
+      <fileset dir="${resin.modules}/kernel/classes">
         <exclude name="**/.*"/>
       </fileset>
       
@@ -779,9 +779,9 @@
         <exclude name="com/caucho/burlap/EJBServlet.class"/>
         <exclude name="com/caucho/burlap/BurlapContextFactory.class"/>
         <exclude name="com/caucho/hessian/test/**"/>
-        <include name="com/caucho/util/CharBuffer.class"/>
-        <include name="com/caucho/util/CharBuffer$CBInputStream.class"/>
-        <include name="com/caucho/util/CharSegment.class"/>
+        <include name="com/caucho/kernel/CharBuffer.class"/>
+        <include name="com/caucho/kernel/CharBuffer$CBInputStream.class"/>
+        <include name="com/caucho/kernel/CharSegment.class"/>
         <include name="com/caucho/hessian/**"/>
         <include name="com/caucho/burlap/**/"/>
         <include name="com/caucho/services/**"/>
@@ -820,9 +820,9 @@
         <exclude name="**/.svn/**"/>
         <exclude name="com/caucho/hessian/io/Hessian2*"/>
         <exclude name="com/caucho/hessian/io/HessianDebug*"/>
-        <include name="com/caucho/util/CharBuffer.class"/>
-        <include name="com/caucho/util/CharBuffer$CBInputStream.class"/>
-        <include name="com/caucho/util/CharSegment.class"/>
+        <include name="com/caucho/kernel/CharBuffer.class"/>
+        <include name="com/caucho/kernel/CharBuffer$CBInputStream.class"/>
+        <include name="com/caucho/kernel/CharSegment.class"/>
         <include name="com/caucho/hessian/io/**"/>
         <include name="com/caucho/hessian/client/**"/>
       </fileset>
@@ -852,8 +852,8 @@
 
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/quercus.jar"
           file="${resin.lib}/quercus.jar"/>
-    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/resin-util.jar"
-          file="${resin.lib}/resin-util.jar"/>
+    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/resin-kernel.jar"
+          file="${resin.lib}/resin-kernel.jar"/>
     <copy tofile="${install}/php/quercus-war/WEB-INF/lib/javamail-141.jar"
           file="${resin.lib}/javamail-141.jar"/>
     <!--
@@ -864,7 +864,7 @@
     <jar destfile="${dist}/quercus-${version}.war">
       <fileset dir="${install}/php/quercus-war">
         <include name="WEB-INF/lib/quercus.jar"/>
-        <include name="WEB-INF/lib/resin-util.jar"/>
+        <include name="WEB-INF/lib/resin-kernel.jar"/>
         <include name="WEB-INF/lib/javamail-141.jar"/>
 	<!--
         <include name="WEB-INF/lib/script-10.jar"/>
@@ -881,12 +881,12 @@
     </jar>
     
     <delete file="${install}/php/quercus-war/WEB-INF/lib/quercus.jar"/>
-    <delete file="${install}/php/quercus-war/WEB-INF/lib/resin-util.jar"/>
+    <delete file="${install}/php/quercus-war/WEB-INF/lib/resin-kernel.jar"/>
     <delete file="${install}/php/quercus-war/WEB-INF/lib/javamail-14.jar"/>
     <delete file="${install}/php/quercus-war/WEB-INF/lib/script-10.jar"/>
 
     <jar destfile="${dist}/quercus-${version}-src.jar">
-      <fileset dir="${resin.modules}/util/src">
+      <fileset dir="${resin.modules}/kernel/src">
         <exclude name=".cvsignore"/>
         <exclude name=".svnignore"/>
         <exclude name="*~"/>
