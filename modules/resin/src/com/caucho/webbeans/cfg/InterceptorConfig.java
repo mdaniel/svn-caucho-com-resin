@@ -65,6 +65,6 @@ public class InterceptorConfig {
       throw new ConfigException(L.l("'class' is a required attribute of <interceptor>"));
     
     WebBeansContainer webBeans = WebBeansContainer.create();
-    webBeans.addEnabledInterceptor(_class);
+    webBeans.addInterceptor(new InterceptorBean(_class));
   }
 }
