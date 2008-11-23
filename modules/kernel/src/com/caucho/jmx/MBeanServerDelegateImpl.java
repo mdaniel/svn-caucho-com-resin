@@ -35,6 +35,8 @@ import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
 
+import com.caucho.server.util.CauchoSystem;
+
 /**
  * The main interface for retrieving and managing JMX objects.
  */
@@ -76,6 +78,7 @@ public class MBeanServerDelegateImpl extends MBeanServerDelegate {
   /**
    * Returns the implementation version.
    */
+  @Override
   public String getImplementationVersion()
   {
     return "Resin-" + CauchoSystem.getVersion();

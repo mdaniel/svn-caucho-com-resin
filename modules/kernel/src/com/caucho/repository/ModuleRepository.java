@@ -27,12 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.repository;
+package com.caucho.repository;
 
 import com.caucho.config.ConfigException;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.L10N;
-import com.caucho.server.resin.Resin;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
 
@@ -45,7 +44,7 @@ import java.util.logging.Logger;
 /**
  * The module repository holds the module jars for osgi and ivy.
  */
-public class ModuleRepository
+abstract public class ModuleRepository
 {
   private static final Logger log
     = Logger.getLogger(ModuleRepository.class.getName());
@@ -54,34 +53,21 @@ public class ModuleRepository
   private static final EnvironmentLocal<ModuleRepository> _currentRepository
     = new EnvironmentLocal<ModuleRepository>();
     
-  private Path _root;
-
   private ArrayList<Resolver> _resolverList = new ArrayList<Resolver>();
 
   /**
    * The module repository is created once by the Management class.
    */
-  public ModuleRepository()
+  protected ModuleRepository()
   {
     _currentRepository.set(this);
   }
 
-  public void setPath(Path root)
+  abstract public Path getRoot();
+ 
+  public void addResolver(Resolver resolver)
   {
-    _root = root;
-  }
-
-  private Path getRoot()
-  {
-    if (_root == null)
-      _root = Resin.getCurrent().getManagement().getPath().lookup("ivy");
-
-    return _root;
-  }
-
-  public void addResolver(ResolverConfig resolverConfig)
-  {
-    _resolverList.add(resolverConfig.getResolver());
+    _resolverList.add(resolver);
   }
 
   public void init()

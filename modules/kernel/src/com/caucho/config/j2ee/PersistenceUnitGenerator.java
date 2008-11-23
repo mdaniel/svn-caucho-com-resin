@@ -30,22 +30,14 @@
 package com.caucho.config.j2ee;
 
 import com.caucho.config.program.ValueGenerator;
-import com.caucho.amber.manager.EntityManagerProxy;
-import com.caucho.amber.manager.AmberContainer;
-import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
-import com.caucho.config.ConfigContext;
 import com.caucho.naming.*;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.*;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.logging.Level;
+import javax.webbeans.AnnotationLiteral;
+
 import java.util.logging.Logger;
 
 
@@ -55,7 +47,7 @@ public class PersistenceUnitGenerator extends ValueGenerator
     = Logger.getLogger(PersistenceUnitGenerator.class.getName());
   private static final L10N L = new L10N(PersistenceUnitGenerator.class);
 
-  private AmberContainer _amber;
+  private WebBeansContainer _webBeans = WebBeansContainer.create();
   
   private String _location;
   private String _jndiName;
@@ -94,10 +86,11 @@ public class PersistenceUnitGenerator extends ValueGenerator
    */
   public Object create()
   {
-    if (_amber == null)
-      _amber = AmberContainer.getCurrent();
-
-    EntityManagerFactory factory = _amber.getEntityManagerFactory(_unitName);
+    EntityManagerFactory factory
+      = _webBeans.getInstanceByType(EntityManagerFactory.class,
+	   new AnnotationLiteral<JpaPersistenceContext>() {
+	     public String value() { return _unitName; }
+      });
 
     if (factory == null)
       throw new ConfigException(_location

@@ -27,14 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.repository;
+package com.caucho.repository;
 
 import com.caucho.config.ConfigException;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.ivy.IvyPattern;
 import com.caucho.util.Hex;
 import com.caucho.util.L10N;
-import com.caucho.server.resin.Resin;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.Path;
 

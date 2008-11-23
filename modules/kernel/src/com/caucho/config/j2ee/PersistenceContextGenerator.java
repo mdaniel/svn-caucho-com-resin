@@ -30,24 +30,15 @@
 package com.caucho.config.j2ee;
 
 import com.caucho.config.program.ValueGenerator;
-import com.caucho.amber.manager.EntityManagerProxy;
-import com.caucho.amber.manager.AmberContainer;
-import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
-import com.caucho.config.ConfigContext;
-import com.caucho.naming.*;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.*;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.webbeans.AnnotationLiteral;
 
+import java.util.*;
+import java.util.logging.Logger;
 
 public class PersistenceContextGenerator
   extends ValueGenerator
@@ -113,15 +104,24 @@ public class PersistenceContextGenerator
     if (_manager != null)
       return _manager;
 
-    AmberContainer amber = AmberContainer.getCurrent();
+    WebBeansContainer webBeans = WebBeansContainer.create();
 
     EntityManager manager;
 
-    if (PersistenceContextType.EXTENDED.equals(_type))
-      manager = amber.getExtendedPersistenceContext(_unitName);
-    else
-      manager = amber.getPersistenceContext(_unitName);
-
+    if (PersistenceContextType.EXTENDED.equals(_type)) {
+      manager = webBeans.getInstanceByType(EntityManager.class,
+	          new AnnotationLiteral<JpaPersistenceContext>() {
+	           public String value() { return _unitName; }
+	           public boolean extended() { return true; }
+                  });
+    }
+    else {
+      manager = webBeans.getInstanceByType(EntityManager.class,
+          new AnnotationLiteral<JpaPersistenceContext>() {
+           public String value() { return _unitName; }
+          });
+    }
+ 
     if (manager == null)
       throw new ConfigException(_location
 				+ L.l("@PersistenceContext '{0}' is an unknown unit",

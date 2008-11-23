@@ -737,8 +737,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     } finally {
       thread.setContextClassLoader(oldLoader);
 
+      // XXX: needs to register as a listener
       // drain the thread pool for GC
-      ResinThreadPoolExecutor.getThreadPool().stopEnvironment(this); 
+      // ResinThreadPoolExecutor.getThreadPool().stopEnvironment(this); 
     }
   }
 
@@ -892,16 +893,16 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 	ManagementFactory.getPlatformMBeanServer();
       }
 
+      Jndi.bindDeep("java:comp/env/jmx/MBeanServer",
+                    Jmx.getGlobalMBeanServer());
+      Jndi.bindDeep("java:comp/env/jmx/GlobalMBeanServer",
+                    Jmx.getGlobalMBeanServer());
+      
       TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
       // TransactionManagerImpl.setLocal(tm);
       //Jndi.bindDeep("java:comp/TransactionManager", tm);
 
       UserTransactionProxy ut = UserTransactionProxy.getInstance();
-
-      Jndi.bindDeep("java:comp/env/jmx/MBeanServer",
-                    Jmx.getGlobalMBeanServer());
-      Jndi.bindDeep("java:comp/env/jmx/GlobalMBeanServer",
-                    Jmx.getGlobalMBeanServer());
       
       Jndi.bindDeep("java:comp/UserTransaction", ut);
 
@@ -910,7 +911,6 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       // as an extended UserTransaction
       Jndi.bindDeep("java:comp/TransactionManager", tm);
       Jndi.bindDeep("java:/TransactionManager", tm);
-      
       Jndi.bindDeep("java:comp/ThreadPool",
 		    ResinThreadPoolExecutor.getThreadPool());
 
