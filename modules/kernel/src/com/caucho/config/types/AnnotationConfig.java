@@ -29,26 +29,10 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.*;
 import com.caucho.config.type.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.jca.program.*;
-import com.caucho.naming.*;
-import com.caucho.util.*;
-import com.caucho.webbeans.*;
-import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.*;
-
 import java.util.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
-
-import javax.annotation.*;
-
-import javax.resource.spi.*;
-
-import javax.webbeans.*;
 
 /**
  * Configuration for the xml web bean component.

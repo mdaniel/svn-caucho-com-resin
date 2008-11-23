@@ -19,8 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -29,29 +28,24 @@
 
 package com.caucho.jmx;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.component.WebBeansHandle;
 
 import java.util.logging.Logger;
-import javax.management.*;
 
 /**
  * JNDI object for the Resin mbean server.
  */
-public class GlobalMBeanServer extends AbstractMBeanServer
-  implements java.io.Serializable
-{
-  private static final L10N L = new L10N(GlobalMBeanServer.class);
+public class LocalMBeanServer extends AbstractMBeanServer {
+  private static final L10N L = new L10N(LocalMBeanServer.class);
   private static final Logger log
-    = Logger.getLogger(GlobalMBeanServer.class.getName());
+    = Logger.getLogger(LocalMBeanServer.class.getName());
 
   private ClassLoader _loader;
   
   /**
    * Creates an MBeanServerProxy based on the context class loader.
    */
-  public GlobalMBeanServer()
+  public LocalMBeanServer()
   {
     this(Thread.currentThread().getContextClassLoader());
   }
@@ -59,7 +53,7 @@ public class GlobalMBeanServer extends AbstractMBeanServer
   /**
    * Creates an MBeanServerProxy based on the context class loader.
    */
-  public GlobalMBeanServer(ClassLoader loader)
+  public LocalMBeanServer(ClassLoader loader)
   {
     super(Jmx.getMBeanServer().getDefaultDomain());
 
@@ -73,28 +67,25 @@ public class GlobalMBeanServer extends AbstractMBeanServer
   {
     AbstractMBeanServer envServer = Jmx.getMBeanServer();
 
-    // server/2102 vs server/211{1,2}
-    return envServer.createContext(loader);
+    return envServer.createContext(_loader);
   }
 
   /**
    * Returns the local context.
    */
-  @Override
   protected MBeanContext getCurrentContext(ClassLoader loader)
   {
     AbstractMBeanServer envServer = Jmx.getMBeanServer();
 
-    return envServer.getCurrentContext(loader);
+    return envServer.getCurrentContext(_loader);
   }
 
   /**
    * Returns the local context.
    */
-  @Override
   protected void setCurrentContext(MBeanContext context, ClassLoader loader)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    throw new UnsupportedOperationException(getClass().getSimpleName());
   }
 
   /**
@@ -104,23 +95,14 @@ public class GlobalMBeanServer extends AbstractMBeanServer
   {
     AbstractMBeanServer envServer = Jmx.getMBeanServer();
 
-    return envServer.getContext(loader);
+    return envServer.getContext(_loader);
   }
 
   /**
-   * Returns the local view.
+   * Returns the local context.
    */
-  protected MBeanView getView()
+  protected void removeContext(ClassLoader loader, MBeanContext context)
   {
-    return createContext().getGlobalView();
-  }
-
-  /**
-   * Serialization.
-   */
-  private Object writeReplace()
-  {
-    return new WebBeansHandle(MBeanServer.class);
   }
 
   /**
@@ -128,6 +110,6 @@ public class GlobalMBeanServer extends AbstractMBeanServer
    */
   public String toString()
   {
-    return getClass().getSimpleName() +  "[]";
+    return "LocalMBeanServer[]";
   }
 }

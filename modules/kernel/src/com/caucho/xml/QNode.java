@@ -373,10 +373,12 @@ public abstract class QNode extends QAbstractNode {
       return index;
     }
 
+    /*
     // for quercus
     public Iterator<Node> iterator()
     {
       return new NodeListIterator(null, this);
     }
+    */
   }
 }

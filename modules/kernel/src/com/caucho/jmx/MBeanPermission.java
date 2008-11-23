@@ -28,8 +28,6 @@
 
 package com.caucho.jmx;
 
-import com.caucho.log.Log;
-
 import java.security.BasicPermission;
 import java.util.logging.Logger;
 
@@ -37,7 +35,8 @@ import java.util.logging.Logger;
  * Static convenience methods.
  */
 public class MBeanPermission extends BasicPermission {
-  private final static Logger log = Log.open(MBeanPermission.class);
+  private final static Logger log 
+    = Logger.getLogger(MBeanPermission.class.getName());
 
   public MBeanPermission()
   {

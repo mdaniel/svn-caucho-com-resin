@@ -28,7 +28,6 @@
 
 package com.caucho.jmx;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.management.loading.ClassLoaderRepository;
@@ -40,7 +39,8 @@ import java.util.logging.Logger;
  */
 public class ClassLoaderRepositoryImpl implements ClassLoaderRepository {
   private static final L10N L = new L10N(ClassLoaderRepositoryImpl.class);
-  private static final Logger log = Log.open(ClassLoaderRepositoryImpl.class);
+  private static final Logger log
+    = Logger.getLogger(ClassLoaderRepositoryImpl.class.getName());
 
   private ArrayList<ClassLoader> _loaders = new ArrayList<ClassLoader>();
   

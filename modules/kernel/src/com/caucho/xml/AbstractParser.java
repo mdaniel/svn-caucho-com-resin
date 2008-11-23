@@ -28,11 +28,9 @@
 
 package com.caucho.xml;
 
-import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
 import com.caucho.vfs.VfsStream;
 
 import org.w3c.dom.Document;
@@ -47,6 +45,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.logging.Logger;
 
+@SuppressWarnings("deprecation")
 abstract public class AbstractParser implements XMLReader, Parser
 {
   static final Logger log = Logger.getLogger(AbstractParser.class.getName());

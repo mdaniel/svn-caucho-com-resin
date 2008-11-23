@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.type;
+package com.caucho.config.converter;
 
 /**
  * Converts from a string value to a type

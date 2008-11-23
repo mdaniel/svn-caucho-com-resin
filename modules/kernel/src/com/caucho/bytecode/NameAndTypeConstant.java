@@ -28,8 +28,6 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
-
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -37,8 +35,6 @@ import java.util.logging.Logger;
  * Represents a name and type ref in the constant pool.
  */
 public class NameAndTypeConstant extends ConstantPoolEntry {
-  static private final Logger log = Log.open(NameAndTypeConstant.class);
-
   private int _nameIndex;
   private int _descriptorIndex;
 

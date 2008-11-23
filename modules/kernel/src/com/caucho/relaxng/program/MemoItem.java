@@ -28,7 +28,6 @@
 
 package com.caucho.relaxng.program;
 
-import com.caucho.log.Log;
 import com.caucho.relaxng.RelaxException;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -43,7 +42,8 @@ import java.util.logging.Logger;
  */
 public class MemoItem extends Item {
   protected final static L10N L = new L10N(MemoItem.class);
-  protected final static Logger log = Log.open(MemoItem.class);
+  protected final static Logger log
+    = Logger.getLogger(MemoItem.class.getName());
 
   private LruCache<Object,Item> _memoMap;
   private Item _item;

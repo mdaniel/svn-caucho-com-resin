@@ -28,8 +28,6 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
-
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -37,7 +35,7 @@ import java.util.logging.Logger;
  * Represents a utf-8n constant.
  */
 public class Utf8Constant extends ConstantPoolEntry {
-  static private final Logger log = Log.open(Utf8Constant.class);
+  static private final Logger log = Logger.getLogger(Utf8Constant.class.getName());
 
   private String _value;
 

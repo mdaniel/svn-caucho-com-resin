@@ -33,9 +33,6 @@ import com.caucho.vfs.Vfs;
 import com.caucho.naming.Jndi;
 import com.caucho.naming.ObjectProxy;
 import com.caucho.util.L10N;
-import com.caucho.ejb.EJBServer;
-import com.caucho.ejb.cfg.MessageDestination;
-import com.caucho.ejb.manager.EjbContainer;
 
 import javax.annotation.PostConstruct;
 import javax.naming.NamingException;
@@ -124,12 +121,14 @@ public class MessageDestinationRef
     boolean bind = false;
 
     if (_link == null && _foreignName == null) {
+    	/*
       EJBServer server = EJBServer.getLocal();
 
       if (server != null)
         _link = _refName;
       else
         _foreignName = _refName;
+        */
     }
 
     String fullRefName = Jndi.getFullName(_refName);

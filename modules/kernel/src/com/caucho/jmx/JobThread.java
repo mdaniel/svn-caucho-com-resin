@@ -31,7 +31,6 @@ package com.caucho.jmx;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
-import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
@@ -45,7 +44,8 @@ import java.util.logging.Logger;
  */
 class JobThread implements Runnable {
   private static final L10N L = new L10N(JobThread.class);
-  private static final Logger log = Log.open(JobThread.class);
+  private static final Logger log
+    = Logger.getLogger(JobThread.class.getName());
 
   private static JobThread _job = new JobThread();
 

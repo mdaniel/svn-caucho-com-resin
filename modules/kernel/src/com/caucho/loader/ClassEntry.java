@@ -29,7 +29,6 @@
 
 package com.caucho.loader;
 
-import com.caucho.log.Log;
 import com.caucho.make.DependencyContainer;
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.L10N;

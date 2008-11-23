@@ -29,7 +29,6 @@
 
 package com.caucho.relaxng.program;
 
-import com.caucho.log.Log;
 import com.caucho.relaxng.RelaxException;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
@@ -42,7 +41,8 @@ import java.util.logging.Logger;
  */
 abstract public class NameClassItem {
   protected final static L10N L = new L10N(NameClassItem.class);
-  protected final static Logger log = Log.open(NameClassItem.class);
+  protected final static Logger log
+    = Logger.getLogger(NameClassItem.class.getName());
 
   /**
    * Adds to the first set, the set of element names possible.

@@ -29,20 +29,17 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
  * Interface to the bytecode parser.
  */
 public class ByteCodeParser {
-  private static final Logger log = Log.open(ByteCode.class);
   private static final L10N L = new L10N(ByteCode.class);
 
   static final int CP_CLASS = 7;

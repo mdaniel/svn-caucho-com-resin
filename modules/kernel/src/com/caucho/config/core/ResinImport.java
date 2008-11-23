@@ -34,7 +34,6 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.FileSetType;
 import com.caucho.loader.Environment;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
@@ -49,7 +48,8 @@ import java.util.logging.Logger;
 public class ResinImport extends ResinControl
 {
   private static final L10N L = new L10N(ResinImport.class);
-  private static final Logger log = Log.open(ResinImport.class);
+  private static final Logger log
+    = Logger.getLogger(ResinImport.class.getName());
 
   private Path _path;
   private FileSetType _fileSet;

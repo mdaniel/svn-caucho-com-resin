@@ -29,15 +29,10 @@
 
 package com.caucho.config.program;
 
-import com.caucho.naming.*;
 import com.caucho.util.L10N;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
-import javax.naming.*;
-import javax.persistence.*;
-import javax.rmi.*;
 import javax.webbeans.manager.Bean;
-import java.util.*;
 import java.util.logging.Logger;
 
 /**

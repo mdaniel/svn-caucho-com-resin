@@ -31,19 +31,11 @@ package com.caucho.webbeans.component;
 
 import com.caucho.config.ConfigContext;
 import com.caucho.jmx.*;
-import com.caucho.webbeans.cfg.WbWebBeans;
-import com.caucho.webbeans.context.DependentScope;
 import com.caucho.webbeans.context.SingletonScope;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
 import java.util.logging.*;
-import java.util.ArrayList;
 import java.io.Closeable;
-
-import javax.annotation.*;
-import javax.webbeans.*;
 
 /**
  * Configuration for a singleton component.

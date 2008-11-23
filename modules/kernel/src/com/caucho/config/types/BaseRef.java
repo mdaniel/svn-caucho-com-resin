@@ -30,23 +30,15 @@
 package com.caucho.config.types;
 
 import com.caucho.bytecode.*;
-import com.caucho.ejb.*;
-import com.caucho.util.BeanUtil;
-import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import java.lang.reflect.*;
-import java.util.logging.Logger;
 
 /**
  * Base configuration for ejb-ref and resource-env-ref.
  */
 abstract public class BaseRef {
-  private static final L10N L = new L10N(BaseRef.class);
-  private static final Logger log
-    = Logger.getLogger(BaseRef.class.getName());
-
   protected final Path _modulePath;
 
   protected String _sourceEjbName;

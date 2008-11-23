@@ -28,8 +28,6 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Modifier;

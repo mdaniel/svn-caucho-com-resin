@@ -65,9 +65,6 @@ public class Config {
   private static final Logger log
     = Logger.getLogger(Config.class.getName());
   
-  private HashMap<String,Object> _vars
-    = new HashMap<String,Object>();
-  
   // the context class loader of the config
   private ClassLoader _classLoader;
 

@@ -28,17 +28,12 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
-
 import java.io.IOException;
-import java.util.logging.Logger;
 
 /**
  * Represents a double constant.
  */
 public class DoubleConstant extends ConstantPoolEntry {
-  static private final Logger log = Log.open(DoubleConstant.class);
-
   private double _value;
 
   /**

@@ -29,22 +29,12 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.WriteStream;
-
 import java.io.*;
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
  * Represents a generic attribute
  */
 public class CodeWriterAttribute extends CodeAttribute {
-  static private final Logger log
-    = Logger.getLogger(CodeAttribute.class.getName());
-
   private int _stack;
   private ByteArrayOutputStream _bos;
 

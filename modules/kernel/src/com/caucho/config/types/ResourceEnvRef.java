@@ -32,7 +32,6 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.FieldValueProgram;
 import com.caucho.config.program.MethodValueProgram;
-import com.caucho.ejb.*;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -86,6 +85,7 @@ public class ResourceEnvRef extends BaseRef {
    * Initialize the resource.
    */
   // XXX TCK: @PostConstruct, needs QA, called from EjbConfig.
+  /*
   public void initBinding(AbstractServer ejbServer)
     throws Exception
   {
@@ -125,6 +125,7 @@ public class ResourceEnvRef extends BaseRef {
       }
     }
   }
+  */
 
   public String toString()
   {

@@ -39,7 +39,8 @@ import java.util.logging.Logger;
  * Encapsulates the managed object.
  */
 public class MBeanStub implements Serializable {
-  private static final Logger log = Log.open(MBeanStub.class);
+  private static final Logger log 
+    = Logger.getLogger(MBeanStub.class.getName());
   private static final L10N L = new L10N(MBeanStub.class);
 
   private String _name;

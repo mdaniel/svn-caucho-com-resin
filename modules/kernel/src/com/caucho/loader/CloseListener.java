@@ -28,7 +28,6 @@
 
 package com.caucho.loader;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Method;
@@ -40,7 +39,8 @@ import java.util.logging.Logger;
  */
 public class CloseListener implements ClassLoaderListener {
   private static final L10N L = new L10N(CloseListener.class);
-  private static final Logger log = Log.open(CloseListener.class);
+  private static final Logger log
+    = Logger.getLogger(CloseListener.class.getName());
 
   private Object _resource;
 

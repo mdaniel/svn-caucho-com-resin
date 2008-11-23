@@ -32,14 +32,8 @@ package com.caucho.config.types;
 import com.caucho.config.*;
 import com.caucho.config.program.*;
 import com.caucho.config.type.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.jca.program.*;
-import com.caucho.naming.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.*;
-import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.xml.QName;
 
@@ -49,8 +43,6 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 
 import javax.annotation.*;
-
-import javax.resource.spi.*;
 
 import javax.webbeans.*;
 

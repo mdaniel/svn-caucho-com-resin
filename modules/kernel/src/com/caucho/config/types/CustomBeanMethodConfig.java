@@ -29,42 +29,14 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.*;
-import com.caucho.config.program.*;
-import com.caucho.config.type.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.jca.program.*;
-import com.caucho.naming.*;
-import com.caucho.util.*;
-import com.caucho.webbeans.*;
-import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
-import com.caucho.xml.QName;
-
 import java.util.*;
-import java.util.logging.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
-
-import javax.annotation.*;
-
-import javax.resource.spi.*;
-
-import javax.webbeans.*;
-
-import org.w3c.dom.Node;
 
 /**
  * Custom bean configured by namespace
  */
 public class CustomBeanMethodConfig {
-  private static final Logger log
-    = Logger.getLogger(CustomBeanMethodConfig.class.getName());
-  
-  private static final L10N L = new L10N(CustomBeanMethodConfig.class);
-
   private Method _method;
   
   private ArrayList<Annotation> _annotationList

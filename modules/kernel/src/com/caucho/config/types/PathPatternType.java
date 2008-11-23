@@ -29,7 +29,6 @@
 package com.caucho.config.types;
 
 import com.caucho.config.ConfigException;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -43,7 +42,7 @@ import java.util.regex.PatternSyntaxException;
  */
 public class PathPatternType {
   static final L10N L = new L10N(PathPatternType.class);
-  static final Logger log = Log.open(PathPatternType.class);
+  static final Logger log = Logger.getLogger(PathPatternType.class.getName());
 
   private Pattern _pattern;
 

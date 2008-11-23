@@ -28,7 +28,6 @@
 
 package com.caucho.java;
 
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
@@ -44,7 +43,8 @@ import java.util.logging.Logger;
  * Compiles Java source, returning the loaded class.
  */
 public class ExternalCompiler extends AbstractJavaCompiler {
-  protected static final Logger log = Log.open(ExternalCompiler.class);
+  protected static final Logger log
+    = Logger.getLogger(ExternalCompiler.class.getName());
   
   Process _process;
   String _userPrefix;

@@ -28,8 +28,6 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
-
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -37,8 +35,6 @@ import java.util.logging.Logger;
  * Represents a generic attribute
  */
 public class SignatureAttribute extends Attribute {
-  static private final Logger log = Log.open(SignatureAttribute.class);
-
   private String _signature;
 
   SignatureAttribute()

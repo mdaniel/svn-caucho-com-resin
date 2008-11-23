@@ -29,18 +29,15 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
 import com.caucho.util.IntArray;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
  * Visitor for travelling the code.
  */
 public class CodeVisitor {
-  static private final Logger log = Log.open(CodeVisitor.class);
   static private final L10N L = new L10N(CodeVisitor.class);
 
   private JavaClass _javaClass;

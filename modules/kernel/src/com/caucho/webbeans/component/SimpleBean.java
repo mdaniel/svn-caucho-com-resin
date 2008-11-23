@@ -34,7 +34,7 @@ import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.type.*;
 import com.caucho.config.types.*;
-import com.caucho.ejb3.gen.*;
+import com.caucho.config.gen.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.bytecode.*;

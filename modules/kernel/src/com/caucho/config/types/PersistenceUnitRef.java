@@ -29,10 +29,7 @@
 
 package com.caucho.config.types;
 
-import com.caucho.amber.manager.AmberContainer;
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.EJBServer;
 import com.caucho.naming.Jndi;
 import com.caucho.naming.ObjectProxy;
 import com.caucho.util.L10N;
@@ -179,6 +176,7 @@ public class PersistenceUnitRef implements ObjectProxy {
       log.finer(L.l("look up persistence unit {0}", _persistenceUnitName));
 
     // XXX: TCK, ejb30/persistence/ee/packaging/web/standalone, needs a test case.
+    /*
     try {
       Object obj = new InitialContext().lookup(AmberContainer.getPersistenceUnitJndiPrefix()
                                                + _persistenceUnitName);
@@ -193,6 +191,7 @@ public class PersistenceUnitRef implements ObjectProxy {
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, e.toString(), e);
     }
+    */
   }
 
   /**

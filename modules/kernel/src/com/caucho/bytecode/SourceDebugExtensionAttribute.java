@@ -28,17 +28,12 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
-
 import java.io.IOException;
-import java.util.logging.Logger;
 
 /**
  * Represents a generic attribute
  */
 public class SourceDebugExtensionAttribute extends Attribute {
-  static private final Logger log = Log.open(SourceDebugExtensionAttribute.class);
-
   private String _value;
 
   public SourceDebugExtensionAttribute(String value)

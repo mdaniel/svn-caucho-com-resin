@@ -28,7 +28,6 @@
 
 package com.caucho.java;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -39,7 +38,8 @@ import java.util.logging.Logger;
  */
 abstract public class AbstractJavaCompiler implements Runnable {
   protected static final L10N L = new L10N(AbstractJavaCompiler.class);
-  protected static final Logger log = Log.open(AbstractJavaCompiler.class);
+  protected static final Logger log
+    = Logger.getLogger(AbstractJavaCompiler.class.getName());
 
   private ClassLoader _loader;
   

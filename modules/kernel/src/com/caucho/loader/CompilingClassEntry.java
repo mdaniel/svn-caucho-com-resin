@@ -30,7 +30,6 @@
 package com.caucho.loader;
 
 import com.caucho.java.CompileClassNotFound;
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
@@ -43,7 +42,8 @@ import java.util.logging.Level;
 
 class CompilingClassEntry extends ClassEntry {
   private static final L10N L = new L10N(CompilingClassEntry.class);
-  private static final Logger log = Log.open(CompilingClassEntry.class);
+  private static final Logger log
+    = Logger.getLogger(CompilingClassEntry.class.getName());
   
   private CompilingLoader _loader;
   private boolean _compileIsModified;

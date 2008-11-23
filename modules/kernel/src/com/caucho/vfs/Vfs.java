@@ -30,7 +30,6 @@
 package com.caucho.vfs;
 
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.server.hmux.HmuxPath;
 import com.caucho.util.CharBuffer;
 
 import java.io.IOException;
@@ -404,7 +403,8 @@ public final class Vfs {
     _localSchemeMap.setGlobal(DEFAULT_SCHEME_MAP);
     
     DEFAULT_SCHEME_MAP.put("file", pwd);
-    
+
+    /* XXX:
     DEFAULT_SCHEME_MAP.put("memory", new MemoryScheme());
     
     DEFAULT_SCHEME_MAP.put("jar", new JarScheme(null)); 
@@ -418,6 +418,7 @@ public final class Vfs {
     DEFAULT_SCHEME_MAP.put("tcps", new TcpsPath(null, null, null, "127.0.0.1", 0));
     // DEFAULT_SCHEME_MAP.put("log", new LogPath(null, "/", null, "/"));
     DEFAULT_SCHEME_MAP.put("merge", new MergePath());
+    */
 
     StreamImpl stdout = StdoutStream.create();
     StreamImpl stderr = StderrStream.create();
@@ -427,8 +428,9 @@ public final class Vfs {
     DEFAULT_SCHEME_MAP.put("null", new ConstPath(null, nullStream));
     DEFAULT_SCHEME_MAP.put("jndi", new JndiPath());
     
+    /*
     DEFAULT_SCHEME_MAP.put("config", new ConfigPath());
     DEFAULT_SCHEME_MAP.put("spy", new SpyScheme()); 
-
+    */
   }
 }

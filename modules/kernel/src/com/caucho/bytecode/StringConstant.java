@@ -28,17 +28,12 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
-
 import java.io.IOException;
-import java.util.logging.Logger;
 
 /**
  * Represents a string pointer in the constant pool.
  */
 public class StringConstant extends ConstantPoolEntry {
-  static private final Logger log = Log.open(StringConstant.class);
-
   private int _stringIndex;
 
   /**

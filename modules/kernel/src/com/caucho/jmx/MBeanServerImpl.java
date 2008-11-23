@@ -29,7 +29,6 @@
 
 package com.caucho.jmx;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.management.MBeanServerDelegate;
@@ -41,9 +40,9 @@ import java.util.logging.Logger;
  * The main interface for retrieving and managing JMX objects.
  */
 class MBeanServerImpl extends AbstractMBeanServer {
-  private static final L10N L = new L10N(MBeanServerImpl.class);
-  
-  private static final Logger log = Log.open(MBeanServerImpl.class);
+  private static final L10N L = new L10N(MBeanServerImpl.class);  
+  private static final Logger log
+    = Logger.getLogger(MBeanServerImpl.class.getName());
 
   private MBeanContext _context;
 

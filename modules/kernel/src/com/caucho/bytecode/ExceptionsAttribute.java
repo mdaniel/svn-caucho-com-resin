@@ -28,21 +28,17 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
  * Represents a generic attribute
  */
 public class ExceptionsAttribute extends Attribute {
-  static private final Logger log = Log.open(ExceptionsAttribute.class);
-
   private ArrayList<String> _exceptions = new ArrayList<String>();
 
   ExceptionsAttribute(String name)

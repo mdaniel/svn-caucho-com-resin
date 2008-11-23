@@ -28,20 +28,13 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
-import com.caucho.util.L10N;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Logger;
 
 /**
  * Interface to the bytecode compiler.
  */
 public class ByteCode {
-  static private final Logger log = Log.open(ByteCode.class);
-  static private final L10N L = new L10N(ByteCode.class);
-
   /**
    * Reads the class from the classpath.
    */

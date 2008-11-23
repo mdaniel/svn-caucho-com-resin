@@ -29,11 +29,8 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.IntArray;
-import com.caucho.util.L10N;
-
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,9 +39,7 @@ import java.util.logging.Logger;
  * Visitor for travelling the code.
  */
 public class CodeEnhancer extends CodeVisitor {
-  static private final Logger log = Log.open(CodeEnhancer.class);
-  static private final L10N L = new L10N(CodeEnhancer.class);
-
+  static private final Logger log = Logger.getLogger(CodeEnhancer.class.getName());
   private ByteBuffer _code;
 
   private ArrayList<Jump> _jumps;

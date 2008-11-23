@@ -28,7 +28,6 @@
 
 package com.caucho.naming.mbean;
 
-import com.caucho.log.Log;
 import com.caucho.naming.AbstractModel;
 import com.caucho.naming.ContextImpl;
 import com.caucho.util.L10N;
@@ -43,7 +42,8 @@ import java.util.logging.Logger;
  * the <code>AbstractModel</code>.
  */
 public class MBeanContextImpl extends ContextImpl {
-  protected static final Logger dbg = Log.open(MBeanContextImpl.class);
+  protected static final Logger dbg
+    = Logger.getLogger(MBeanContextImpl.class.getName());
   protected static final L10N L = new L10N(MBeanContextImpl.class);
 
   /**

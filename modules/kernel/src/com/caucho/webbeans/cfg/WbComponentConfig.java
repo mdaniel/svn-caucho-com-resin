@@ -33,8 +33,8 @@ import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.*;
 import com.caucho.config.types.*;
-import com.caucho.ejb.cfg.*;
-import com.caucho.ejb3.gen.*;
+// import com.caucho.ejb.cfg.*;
+import com.caucho.config.gen.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.component.*;
@@ -316,6 +316,7 @@ public class WbComponentConfig {
       throw new ConfigException(L.l("<{0}> requires a class attribute",
 				    getTagName()));
 
+    /* XXX:
     if (_cl.isAnnotationPresent(Stateless.class)) {
       StatelessBeanConfig cfg = new StatelessBeanConfig(this);
       cfg.init();
@@ -326,6 +327,7 @@ public class WbComponentConfig {
       cfg.init();
       return;
     }
+    */
 
     introspect();
     

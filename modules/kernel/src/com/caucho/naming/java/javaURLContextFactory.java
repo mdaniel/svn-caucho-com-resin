@@ -30,7 +30,6 @@
 package com.caucho.naming.java;
 
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.log.Log;
 import com.caucho.naming.*;
 import com.caucho.util.L10N;
 

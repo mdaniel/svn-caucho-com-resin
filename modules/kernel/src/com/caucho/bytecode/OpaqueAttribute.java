@@ -29,8 +29,6 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
-
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -38,8 +36,6 @@ import java.util.logging.Logger;
  * Represents a generic attribute
  */
 public class OpaqueAttribute extends Attribute {
-  static private final Logger log = Log.open(OpaqueAttribute.class);
-
   private byte []_value;
 
   OpaqueAttribute(String name)

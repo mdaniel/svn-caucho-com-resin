@@ -29,19 +29,14 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 /**
  * Represents a constant pool entry.
  */
 public class ConstantPool {
-  static private final Logger log = Log.open(ConstantPool.class);
-
   public static final int CP_CLASS = 7;
   public static final int CP_FIELD_REF = 9;
   public static final int CP_METHOD_REF = 10;

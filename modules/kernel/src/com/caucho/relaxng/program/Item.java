@@ -29,7 +29,6 @@
 
 package com.caucho.relaxng.program;
 
-import com.caucho.log.Log;
 import com.caucho.relaxng.RelaxException;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -45,7 +44,8 @@ import java.util.logging.Logger;
  */
 abstract public class Item {
   protected final static L10N L = new L10N(Item.class);
-  protected final static Logger log = Log.open(Item.class);
+  protected final static Logger log
+    = Logger.getLogger(Item.class.getName());
 
   private static final Iterator<Item> EMPTY_ITEM_ITERATOR;
   

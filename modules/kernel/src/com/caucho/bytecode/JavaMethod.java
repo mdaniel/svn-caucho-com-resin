@@ -29,8 +29,6 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.*;
@@ -42,7 +40,7 @@ import java.util.logging.Logger;
  * Represents a java field.
  */
 public class JavaMethod extends JMethod {
-  static private final Logger log = Log.open(JavaMethod.class);
+  static private final Logger log = Logger.getLogger(JavaMethod.class.getName());
 
   private static final JClass []NULL_CLASS = new JClass[0];
 

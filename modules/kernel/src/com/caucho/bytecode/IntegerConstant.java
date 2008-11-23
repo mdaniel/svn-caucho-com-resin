@@ -28,8 +28,6 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
-
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -37,8 +35,6 @@ import java.util.logging.Logger;
  * Represents an integer constant.
  */
 public class IntegerConstant extends ConstantPoolEntry {
-  static private final Logger log = Log.open(IntegerConstant.class);
-
   private int _value;
 
   /**

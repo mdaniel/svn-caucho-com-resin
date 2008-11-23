@@ -29,7 +29,6 @@
 
 package com.caucho.jmx;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.management.*;
@@ -40,7 +39,8 @@ import java.util.logging.Logger;
  */
 class MBeanWrapper implements DynamicMBean {
   private static L10N L = new L10N(MBeanWrapper.class);
-  private static Logger log = Log.open(MBeanWrapper.class);
+  private static Logger log
+    = Logger.getLogger(MBeanWrapper.class.getName());
   
   private MBeanContext _context;
 

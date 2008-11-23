@@ -29,21 +29,17 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
  * Represents a generic attribute
  */
 public class CodeAttribute extends Attribute {
-  static private final Logger log = Log.open(CodeAttribute.class);
-
   private JavaClass _jClass;
   private int _maxStack;
   private int _maxLocals;

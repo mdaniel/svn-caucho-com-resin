@@ -28,7 +28,6 @@
 
 package com.caucho.config.functions;
 
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;

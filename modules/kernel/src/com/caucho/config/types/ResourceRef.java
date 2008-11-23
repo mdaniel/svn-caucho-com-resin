@@ -197,7 +197,7 @@ public class ResourceRef implements Validator {
     Class cl = _type;
 
     if (javax.sql.DataSource.class.equals(_type))
-      cl = com.caucho.sql.DBPool.class;
+      cl = Class.forName("com.caucho.sql.DBPool");
     /*
     else if (javax.sql.XADataSource.class.equals(_type))
       cl = com.caucho.sql.XAPool.class;

@@ -28,26 +28,22 @@
 
 package com.caucho.jmx;
 
-import com.caucho.log.Log;
-
 import javax.management.MBeanServer;
+import javax.management.MBeanServerBuilder;
 import javax.management.MBeanServerDelegate;
-import java.lang.reflect.Method;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Resin implementation for an MBeanServer factory.
  */
-public class EnvironmentMBeanServerBuilder { // extends MBeanServerBuilder {
-  private static final Logger log = Log.open(EnvironmentMBeanServerBuilder.class);
+public class MBeanServerBuilderImpl extends MBeanServerBuilder {
+  private static final Logger log
+    = Logger.getLogger(MBeanServerBuilderImpl.class.getName());
 
-  private static MBeanServer _globalServer;
+  private static boolean _isInit;
+  private static boolean _isJdkManagementInit;
 
-  private MBeanServer _mbeanServer;
-  private boolean _isInit;
-  
-  public EnvironmentMBeanServerBuilder()
+  public MBeanServerBuilderImpl()
   {
   }
   
@@ -56,7 +52,7 @@ public class EnvironmentMBeanServerBuilder { // extends MBeanServerBuilder {
    */
   public MBeanServerDelegate newMBeanServerDelegate()
   {
-    return new MBeanServerDelegateImpl("Resin-JMX");
+    return new MBeanServerDelegateImpl("Resin");
   }
   
   /**
@@ -66,47 +62,38 @@ public class EnvironmentMBeanServerBuilder { // extends MBeanServerBuilder {
 				    MBeanServer outer,
 				    MBeanServerDelegate delegate)
   {
-    if (! _isInit) {
-      _isInit = true;
+    // return EnvironmentMBeanServerBuilder.getGlobal(defaultDomain);
+    EnvironmentMBeanServerBuilder.getGlobal(defaultDomain);
 
-      try {
-	Class cl = Class.forName("java.lang.management.ManagementFactory");
+    if (! _isJdkManagementInit) {
+      Exception e = new Exception();
+      e.fillInStackTrace();
+      StackTraceElement []stackTrace = e.getStackTrace();
 
-	Method method = cl.getMethod("getPlatformMBeanServer", new Class[0]);
-
-	_mbeanServer = (MBeanServer) method.invoke(null, new Object[0]);
-
-	return _mbeanServer;
-      } catch (ClassNotFoundException e) {
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+      for (int i = 0; i < stackTrace.length; i++) {
+	if (stackTrace[i].getClassName().equals("java.lang.management.ManagementFactory")) {
+	  _isJdkManagementInit = true;
+	  
+	  return Jmx.getGlobalMBeanServer();
+	}
       }
     }
 
-    if (_mbeanServer == null) {
-      if (defaultDomain == null)
-	defaultDomain = "resin";
+    if (! _isInit) {
+      _isInit = true;
+      
+      Jmx.getContextMBeanServer();
+    }
     
-      //_mbeanServer = new EnvironmentMBeanServer(defaultDomain);
-    }
+    if (defaultDomain == null)
+      defaultDomain = "resin";
 
-    return _mbeanServer;
-  }
-  
-  /**
-   * Creates the mbean server
-   */
-  public static MBeanServer getGlobal(String defaultDomain)
-  {
-    if (_globalServer == null) {
-      if (defaultDomain == null)
-	defaultDomain = "resin";
-
-      MBeanServerDelegateImpl delegate;
-      delegate = new MBeanServerDelegateImpl("Resin-JMX");
-      _globalServer = new EnvironmentMBeanServer(defaultDomain, delegate);
-    }
-
-    return _globalServer;
+    /*
+    if ("resin".equals(defaultDomain))
+      return Jmx.getContextMBeanServer();
+    else
+      return new MBeanServerImpl(defaultDomain, delegate);
+    */
+    return new MBeanServerImpl(defaultDomain, delegate);
   }
 }

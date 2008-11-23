@@ -34,7 +34,6 @@ import com.caucho.bytecode.JavaClass;
 import com.caucho.bytecode.SourceDebugExtensionAttribute;
 import com.caucho.config.*;
 import com.caucho.loader.DynamicClassLoader;
-import com.caucho.log.Log;
 import com.caucho.make.Make;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
@@ -57,7 +56,8 @@ import java.util.regex.Pattern;
  */
 public class JavaCompiler {
   static final L10N L = new L10N(JavaCompiler.class);
-  static final Logger log = Log.open(JavaCompiler.class);
+  static final Logger log 
+    = Logger.getLogger(JavaCompiler.class.getName());
   
   private static final Object LOCK = new Object();
 

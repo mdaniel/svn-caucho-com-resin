@@ -33,7 +33,6 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.*;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -49,7 +48,8 @@ import java.util.logging.Logger;
  */
 public class ResinInclude extends ResinControl {
   private static final L10N L = new L10N(ResinInclude.class);
-  private static final Logger log = Log.open(ResinInclude.class);
+  private static final Logger log 
+    = Logger.getLogger(ResinInclude.class.getName());
 
   private Path _path;
   private boolean _isOptional = true;

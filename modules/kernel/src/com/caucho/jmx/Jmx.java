@@ -29,7 +29,6 @@
 
 package com.caucho.jmx;
 
-import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -51,7 +50,8 @@ import java.util.regex.*;
  */
 public class Jmx {
   private static final L10N L = new L10N(Jmx.class);
-  private static final Logger log = Log.open(Jmx.class);
+  private static final Logger log 
+    = Logger.getLogger(Jmx.class.getName());
 
   private static EnvironmentMBeanServer _mbeanServer;
   private static MBeanServer _globalMBeanServer;

@@ -28,8 +28,6 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.log.Log;
-
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -37,8 +35,6 @@ import java.util.logging.Logger;
  * Represents a generic attribute
  */
 abstract public class Attribute {
-  static private final Logger log = Log.open(Attribute.class);
-
   private String _name;
 
   Attribute(String name)

@@ -28,7 +28,6 @@
 
 package com.caucho.java;
 
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 import com.caucho.vfs.IOExceptionWrapper;
@@ -44,7 +43,8 @@ import java.util.logging.Logger;
  * Compiles Groovy source, returning the loaded class.
  */
 public class GroovyCompiler extends AbstractJavaCompiler {
-  protected static final Logger log = Log.open(GroovyCompiler.class);
+  protected static final Logger log 
+    = Logger.getLogger(GroovyCompiler.class.getName());
 
   private final static String GROOVY_COMPILER =
     "org.codehaus.groovy.tools.FileSystemCompiler";

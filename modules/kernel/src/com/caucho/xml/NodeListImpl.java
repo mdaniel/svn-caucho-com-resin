@@ -29,8 +29,6 @@
 package com.caucho.xml;
 
 import com.caucho.util.CharBuffer;
-import com.caucho.xpath.pattern.NodeListIterator;
-
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -101,9 +99,11 @@ public class NodeListImpl implements NodeList {
     return cb.toString();
   }
 
+  /*
   // for quercus
   public Iterator<Node> iterator()
   {
     return new NodeListIterator(null, this);
   }
+  */
 }
