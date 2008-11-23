@@ -29,7 +29,7 @@
 
 package com.caucho.loader;
 
-import com.caucho.jca.UserTransactionProxy;
+import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.enhancer.ScanListener;
@@ -38,7 +38,6 @@ import com.caucho.osgi.OsgiManager;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.naming.Jndi;
-import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.ResinThreadPoolExecutor;
 import com.caucho.vfs.Vfs;
 
@@ -737,9 +736,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     } finally {
       thread.setContextClassLoader(oldLoader);
 
-      // XXX: needs to register as a listener
-      // drain the thread pool for GC
-      // ResinThreadPoolExecutor.getThreadPool().stopEnvironment(this); 
+       // drain the thread pool for GC
+      ResinThreadPoolExecutor.getThreadPool().stopEnvironment(this); 
     }
   }
 
@@ -898,22 +896,14 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       Jndi.bindDeep("java:comp/env/jmx/GlobalMBeanServer",
                     Jmx.getGlobalMBeanServer());
       
-      TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
-      // TransactionManagerImpl.setLocal(tm);
-      //Jndi.bindDeep("java:comp/TransactionManager", tm);
-
-      UserTransactionProxy ut = UserTransactionProxy.getInstance();
-      
-      Jndi.bindDeep("java:comp/UserTransaction", ut);
-
-      // server/16g0
-      // Applications are incorrectly using TransactionManager
-      // as an extended UserTransaction
-      Jndi.bindDeep("java:comp/TransactionManager", tm);
-      Jndi.bindDeep("java:/TransactionManager", tm);
-      Jndi.bindDeep("java:comp/ThreadPool",
-		    ResinThreadPoolExecutor.getThreadPool());
-
+      try {
+	Class cl = Class.forName("com.caucho.server.resin.EnvInit");
+	
+	cl.newInstance();
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+ 
       /*
       try {
         Jndi.rebindDeep("java:comp/ORB",

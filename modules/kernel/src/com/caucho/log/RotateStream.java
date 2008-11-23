@@ -50,7 +50,8 @@ import java.util.logging.Logger;
  * getStream instead of using the StreamImpl interface.
  */
 public class RotateStream extends StreamImpl implements AlarmListener {
-  private static final Logger log = Log.open(RotateStream.class);
+  private static final Logger log
+    = Logger.getLogger(RotateStream.class.getName());
   
   private static HashMap<Path,SoftReference<RotateStream>> _streams
     = new HashMap<Path,SoftReference<RotateStream>>();

@@ -29,25 +29,12 @@
 
 package com.caucho.log.handler;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.*;
-import com.caucho.log.*;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
 import com.caucho.webbeans.manager.*;
 
-import javax.annotation.PostConstruct;
-import javax.management.*;
-import javax.webbeans.*;
-import javax.jms.*;
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.*;
 import java.util.logging.Logger;
 import java.util.logging.LogRecord;
-import java.util.logging.Level;
 import java.util.logging.Filter;
-import java.util.logging.Formatter;
 import java.util.logging.Handler;
 
 /**
