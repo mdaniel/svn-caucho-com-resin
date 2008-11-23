@@ -29,14 +29,7 @@
 
 package com.caucho.webbeans.context;
 
-import com.caucho.loader.*;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.webbeans.component.*;
-
 import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.webbeans.*;
 import javax.webbeans.manager.Bean;
 
 /**

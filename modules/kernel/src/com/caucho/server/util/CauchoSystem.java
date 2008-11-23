@@ -41,6 +41,7 @@ import com.caucho.vfs.Vfs;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,6 +69,9 @@ public class CauchoSystem {
   static boolean _isTestWindows;
 
   static boolean _hasJni;
+  
+  static String _resinVersion;
+  static String _resinFullVersion;
 
   private static int _isUnix = -1;
   private static String _newline;
@@ -199,11 +203,47 @@ public class CauchoSystem {
     return _rootDirectory;
   }
    */
-
+  
+  public static String getVersion()
+  {
+    if (_resinVersion == null) {
+      try {
+	Class cl = Class.forName("com.caucho.Version");
+	Field field = cl.getField("VERSION");
+	
+	_resinVersion = (String) field.get(null);
+      } catch (Exception e) {
+	log.log(Level.FINER, e.toString(), e);
+	
+	_resinVersion = "unknown";
+      }
+    }
+    
+    return _resinVersion;
+  }
+  
+  public static String getFullVersion()
+  {
+    if (_resinFullVersion == null) {
+      try {
+	Class cl = Class.forName("com.caucho.Version");
+	Field field = cl.getField("FULL_VERSION");
+	
+	_resinFullVersion = (String) field.get(null);
+      } catch (Exception e) {
+	log.log(Level.FINER, e.toString(), e);
+	
+	_resinFullVersion = "unknown";
+      }
+    }
+    
+    return _resinFullVersion;
+  }
+ 
   public static long getVersionId()
   {
     if (_version == 0) {
-      _version = Crc64.generate(com.caucho.Version.FULL_VERSION);
+      _version = Crc64.generate(getFullVersion());
     }
 
     return _version;

@@ -36,14 +36,15 @@ import java.util.logging.*;
 import javax.webbeans.*;
 
 import com.caucho.util.*;
-import com.caucho.hessian.io.HessianHandle;
+// import com.caucho.hessian.io.HessianHandle;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.manager.*;
 
 /**
  * Handle for webbeans serialization
  */
-public class WebBeansHandle implements Serializable, HessianHandle {
+public class WebBeansHandle implements Serializable //, HessianHandle
+{
   private static final L10N L = new L10N(WebBeansHandle.class);
   private static final Logger log
     = Logger.getLogger(WebBeansHandle.class.getName());

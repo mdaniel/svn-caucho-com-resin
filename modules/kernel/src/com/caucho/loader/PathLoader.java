@@ -29,7 +29,6 @@
 
 package com.caucho.loader;
 
-import com.caucho.log.Log;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
 
@@ -42,7 +41,8 @@ import java.util.logging.Logger;
  * Class loader which loads specific paths.
  */
 public class PathLoader extends Loader implements Dependency {
-  private static final Logger log = Log.open(PathLoader.class);
+  private static final Logger log
+    = Logger.getLogger(PathLoader.class.getName());
 
   private HashMap<String,Path> _pathMap = new HashMap<String,Path>();
 

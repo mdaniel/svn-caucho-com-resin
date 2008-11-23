@@ -29,14 +29,9 @@
 
 package com.caucho.webbeans.context;
 
-import com.caucho.server.webapp.WebApp;
 import com.caucho.webbeans.component.ComponentImpl;
 
 import java.io.Closeable;
-import java.util.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
 
 
 /**

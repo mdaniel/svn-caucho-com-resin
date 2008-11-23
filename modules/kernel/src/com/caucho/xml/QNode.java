@@ -28,7 +28,7 @@
 
 package com.caucho.xml;
 
-import com.caucho.xpath.pattern.NodeListIterator;
+// import com.caucho.xpath.pattern.NodeListIterator;
 
 import org.w3c.dom.DOMException;
 import org.w3c.dom.NamedNodeMap;

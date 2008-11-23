@@ -28,7 +28,6 @@
 
 package com.caucho.loader;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Method;
@@ -40,7 +39,8 @@ import java.util.logging.Logger;
  */
 public class StartListener implements EnvironmentListener {
   private static final L10N L = new L10N(StartListener.class);
-  private static final Logger log = Log.open(StartListener.class);
+  private static final Logger log
+    = Logger.getLogger(StartListener.class.getName());
 
   private Object _resource;
 

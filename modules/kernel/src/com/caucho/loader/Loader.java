@@ -30,7 +30,6 @@
 package com.caucho.loader;
 
 import com.caucho.config.ConfigException;
-import com.caucho.log.Log;
 import com.caucho.vfs.Path;
 import com.caucho.server.util.*;
 

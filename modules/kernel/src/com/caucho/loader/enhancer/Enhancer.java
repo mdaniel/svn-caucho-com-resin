@@ -31,7 +31,6 @@ package com.caucho.loader.enhancer;
 
 import com.caucho.bytecode.JavaClass;
 import com.caucho.java.gen.GenClass;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -41,11 +40,12 @@ import java.util.logging.Logger;
  */
 abstract public class Enhancer {
   private static final L10N L = new L10N(Enhancer.class);
-  private static final Logger log = Log.open(Enhancer.class);
+  private static final Logger log
+    = Logger.getLogger(Enhancer.class.getName());
 
-  private static final int ACC_PUBLIC = 0x1;
-  private static final int ACC_PRIVATE = 0x2;
-  private static final int ACC_PROTECTED = 0x4;
+  public static final int ACC_PUBLIC = 0x1;
+  public static final int ACC_PRIVATE = 0x2;
+  public static final int ACC_PROTECTED = 0x4;
   
   private String _baseSuffix = ""; // "__ResinBase"
   

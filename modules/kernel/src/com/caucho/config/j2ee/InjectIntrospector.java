@@ -34,13 +34,10 @@ import com.caucho.config.program.ComponentValueGenerator;
 import com.caucho.config.program.FieldGeneratorProgram;
 import com.caucho.config.program.MethodGeneratorProgram;
 import com.caucho.config.program.ValueGenerator;
-import com.caucho.amber.manager.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
-import com.caucho.config.program.ConfigProgram;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
 import com.caucho.webbeans.component.ComponentImpl;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
@@ -61,7 +58,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.concurrent.*;
 
 /**
  * Analyzes a bean for @Inject tags.
@@ -520,7 +516,7 @@ public class InjectIntrospector {
 			       PersistenceContext pContext)
     throws ConfigException
   {
-    AmberContainer.create().start();
+    // AmberContainer.create().start();
 
     PersistenceContextType pType = pContext.type();
 
@@ -565,7 +561,7 @@ public class InjectIntrospector {
 				       PersistenceContext pContext)
     throws ConfigException
   {
-    AmberContainer.create().start();
+    // AmberContainer.create().start();
     
     if (! type.isAssignableFrom(EntityManager.class)) {
       throw new ConfigException(location + L.l("@PersistenceContext field type '{0}' must be assignable from EntityManager", type.getName()));

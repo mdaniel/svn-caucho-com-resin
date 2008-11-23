@@ -35,7 +35,6 @@ import java.util.*;
 import javax.servlet.http.*;
 
 import com.caucho.loader.*;
-import com.caucho.server.connection.ScopeRemoveListener;
 import com.caucho.webbeans.component.*;
 
 /**

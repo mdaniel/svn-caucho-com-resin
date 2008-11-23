@@ -30,8 +30,6 @@
 package com.caucho.loader;
 
 import com.caucho.config.ConfigException;
-import com.caucho.log.Log;
-import com.caucho.util.CharBuffer;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 
@@ -48,7 +46,8 @@ import java.util.logging.Logger;
  * picks up new jars.
  */
 public class SimpleLoader extends Loader {
-  private static final Logger log = Log.open(SimpleLoader.class);
+  private static final Logger log
+    = Logger.getLogger(SimpleLoader.class.getName());
   
   // The class directory
   private Path _path;

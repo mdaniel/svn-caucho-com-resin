@@ -226,9 +226,9 @@ public class WebBeansContainer
     
     _wbWebBeans = new WbWebBeans(this, Vfs.lookup());
 
-    _contextMap.put(RequestScoped.class, new RequestScope());
-    _contextMap.put(SessionScoped.class, new SessionScope());
-    _contextMap.put(ConversationScoped.class, new ConversationScope());
+    addContext("com.caucho.server.context.RequestScope");
+    addContext("com.caucho.server.context.SessionScope");
+    addContext("com.caucho.server.context.ConversationScope");
     _contextMap.put(ApplicationScoped.class, new ApplicationScope());
     _contextMap.put(Singleton.class, new SingletonScope());
 
@@ -240,6 +240,20 @@ public class WebBeansContainer
       _classLoader.addScanListener(this);
     
     Environment.addEnvironmentListener(this, _classLoader);
+  }
+  
+  private void addContext(String contextClassName)
+  {
+    try {
+      Class cl = Class.forName(contextClassName);
+      Context context = (Context) cl.newInstance();
+      
+      addContext(context);
+    } catch (ClassNotFoundException e) {
+      log.log(Level.FINER, e.toString(), e);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
 
   /**

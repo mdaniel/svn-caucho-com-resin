@@ -30,24 +30,13 @@
 package com.caucho.webbeans.component;
 
 import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.type.*;
-import com.caucho.config.types.*;
-import com.caucho.config.gen.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.*;
-import com.caucho.webbeans.bytecode.*;
-import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.context.*;
-import com.caucho.webbeans.event.*;
 import com.caucho.webbeans.manager.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
 
-import javax.annotation.*;
 import javax.webbeans.AnnotationLiteral;
 import javax.webbeans.BindingType;
 import javax.webbeans.Current;

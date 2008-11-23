@@ -200,6 +200,8 @@ public class MessageDestinationRef
   private Object lookupByLink(String link, Class type)
     throws NamingException
   {
+	return null;
+	/*
     Object target = null;
 
     String archiveName;
@@ -227,13 +229,6 @@ public class MessageDestinationRef
 	if (true)
 	  throw new IllegalStateException();
 	
-	/*
-        dest = ejbContainer.getMessageDestination(path, name);
-	
-        if (dest == null && archiveName == null)
-          dest = ejbServer.getMessageDestination(name);
-	*/
-
         if (dest != null) {
 
           target = dest.getResolvedDestination();
@@ -263,6 +258,7 @@ public class MessageDestinationRef
       log.log(Level.CONFIG, L.l("{0} resolved", this));
 
     return target;
+    */
   }
 
   private Object lookupByForeignJndi(String foreignName, Class type)

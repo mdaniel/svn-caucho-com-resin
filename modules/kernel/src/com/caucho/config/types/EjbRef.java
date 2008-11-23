@@ -29,32 +29,15 @@
 
 package com.caucho.config.types;
 
-import com.caucho.bytecode.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.ejb.*;
-import com.caucho.ejb.cfg.EjbConfig;
-import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.naming.Jndi;
 import com.caucho.naming.ObjectProxy;
-import com.caucho.util.BeanUtil;
 import com.caucho.util.L10N;
-import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.manager.*;
-
 import javax.annotation.PostConstruct;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -281,10 +264,11 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   public void bind()
     throws Exception
   {
-    initBinding(null);
+    // initBinding(null);
   }
 
   // XXX TCK, needs QA @PostConstruct, called from EjbConfig.deployBeans()
+  /*
   public void initBinding(AbstractServer ejbServer)
     throws Exception
   {
@@ -374,6 +358,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
       throw e;
     }
   }
+  */
 
   /**
    * Creates the object from the proxy.

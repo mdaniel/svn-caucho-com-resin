@@ -28,7 +28,7 @@
 
 package com.caucho.xml;
 
-import com.caucho.xpath.pattern.NodeListIterator;
+// import com.caucho.xpath.pattern.NodeListIterator;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -120,9 +120,11 @@ public class QDeepNodeList implements NodeList {
     return end == null ? null : end._next;
   }
 
+  /*
   // for quercus
   public Iterator<Node> iterator()
   {
     return new NodeListIterator(null, this);
   }
+  */
 }

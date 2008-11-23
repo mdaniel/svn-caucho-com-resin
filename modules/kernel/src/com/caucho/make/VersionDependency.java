@@ -28,7 +28,7 @@
 
 package com.caucho.make;
 
-import com.caucho.Version;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.PersistentDependency;
 
 import java.util.logging.Logger;
@@ -55,7 +55,7 @@ public class VersionDependency implements PersistentDependency {
    */
   public VersionDependency()
   {
-    _version = Version.FULL_VERSION;
+    _version = CauchoSystem.getFullVersion();
   }
   
   /**
@@ -63,7 +63,7 @@ public class VersionDependency implements PersistentDependency {
    */
   public boolean isModified()
   {
-    return ! Version.FULL_VERSION.equals(_version);
+    return ! CauchoSystem.getFullVersion().equals(_version);
   }
   
   /**
@@ -71,8 +71,8 @@ public class VersionDependency implements PersistentDependency {
    */
   public boolean logModified(Logger log)
   {
-    if (! Version.FULL_VERSION.equals(_version)) {
-      log.info("Resin version has changed to " + Version.FULL_VERSION);
+    if (! CauchoSystem.getFullVersion().equals(_version)) {
+      log.info("Resin version has changed to " + CauchoSystem.getFullVersion());
       return true;
     }
     else

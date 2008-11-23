@@ -32,7 +32,6 @@ package com.caucho.loader;
 import com.caucho.config.ConfigException;
 import com.caucho.java.CompileClassNotFound;
 import com.caucho.java.JavaCompiler;
-import com.caucho.log.Log;
 import com.caucho.make.AlwaysModified;
 import com.caucho.make.Make;
 import com.caucho.server.util.CauchoSystem;
@@ -56,7 +55,8 @@ import java.util.logging.Logger;
  * A class loader that automatically compiles Java.
  */
 public class CompilingLoader extends Loader implements Make {
-  private static final Logger log = Log.open(CompilingLoader.class);
+  private static final Logger log
+    = Logger.getLogger(CompilingLoader.class.getName());
   private static final L10N L = new L10N(CompilingLoader.class);
 
   private static final char []INNER_CLASS_SEPARATORS =

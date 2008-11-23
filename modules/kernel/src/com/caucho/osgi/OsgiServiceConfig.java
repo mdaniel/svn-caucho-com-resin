@@ -33,20 +33,12 @@ import java.util.*;
 import java.util.logging.*;
 
 import javax.annotation.*;
-import javax.jms.*;
-import javax.resource.spi.*;
-
 import com.caucho.config.*;
-import com.caucho.config.annotation.Start;
 import com.caucho.config.types.*;
-import com.caucho.webbeans.cfg.AbstractBeanConfig;
-import com.caucho.webbeans.component.ComponentImpl;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import com.caucho.util.*;
 import org.osgi.framework.*;
-
-import javax.webbeans.In;
 
 /**
  * osgi-service configuration

@@ -28,7 +28,6 @@
 
 package com.caucho.loader;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.lang.ref.WeakReference;
@@ -41,7 +40,8 @@ import java.util.logging.Logger;
  */
 public class WeakDestroyListener implements EnvironmentListener {
   private static final L10N L = new L10N(WeakDestroyListener.class);
-  private static final Logger log = Log.open(WeakDestroyListener.class);
+  private static final Logger log
+    = Logger.getLogger(WeakDestroyListener.class.getName());
 
   private Method _preDestroy;
   private WeakReference<Object> _objRef;

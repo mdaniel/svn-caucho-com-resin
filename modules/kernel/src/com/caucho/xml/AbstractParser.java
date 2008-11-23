@@ -29,9 +29,11 @@
 package com.caucho.xml;
 
 import com.caucho.util.L10N;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.VfsStream;
+import com.caucho.vfs.Vfs;
 
 import org.w3c.dom.Document;
 import org.xml.sax.*;

@@ -30,12 +30,11 @@
 package com.caucho.webbeans.context;
 
 import com.caucho.loader.*;
-import com.caucho.server.webapp.WebApp;
 import com.caucho.webbeans.component.*;
 
 import java.lang.annotation.Annotation;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.util.Hashtable;
+
 import javax.webbeans.*;
 import javax.webbeans.manager.Bean;
 
@@ -43,15 +42,15 @@ import javax.webbeans.manager.Bean;
  * The application scope value
  */
 public class ApplicationScope extends ScopeContext {
+  private Hashtable _map = new Hashtable();
+  
   /**
    * Returns true if the scope is currently active.
    */
   public boolean isActive()
   {
-    WebApp webApp = WebApp.getLocal();
-
-    return webApp != null;
-  }
+    return true;
+   }
   
   /**
    * Returns the scope annotation type.
@@ -63,37 +62,25 @@ public class ApplicationScope extends ScopeContext {
   
   public <T> T get(Bean<T> bean, boolean create)
   {
-    WebApp webApp = WebApp.getLocal();
-
-    if (webApp != null) {
-      ComponentImpl comp = (ComponentImpl) bean;
+    Object v = _map.get(bean);
       
-      return (T) webApp.getAttribute(comp.getScopeId());
+    if (v == null && create) {
+      v = bean.create();
+      // XXX: delete because of optimistic locking
+      _map.put(bean, v);
     }
-    else
-      return null;
+    
+    return (T) v;
   }
   
   public <T> void put(Bean<T> bean, T value)
   {
-    WebApp webApp = WebApp.getLocal();
-
-    if (webApp != null) {
-      ComponentImpl comp = (ComponentImpl) bean;
-      
-      webApp.setAttribute(comp.getScopeId(), value);
-    }
+    _map.put(bean, value);
   }
   
   public <T> void remove(Bean<T> bean)
   {
-    WebApp webApp = WebApp.getLocal();
-
-    if (webApp != null) {
-      ComponentImpl comp = (ComponentImpl) bean;
-      
-      webApp.removeAttribute(comp.getScopeId());
-    }
+    _map.remove(bean);
   }
 
   @Override

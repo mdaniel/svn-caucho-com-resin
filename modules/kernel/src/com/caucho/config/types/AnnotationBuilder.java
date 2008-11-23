@@ -29,14 +29,10 @@
 package com.caucho.config.types;
 
 import com.caucho.config.ConfigException;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 
 /**
  * Configuration for an annotation
