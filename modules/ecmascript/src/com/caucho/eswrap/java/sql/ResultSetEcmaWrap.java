@@ -31,7 +31,6 @@ package com.caucho.eswrap.java.sql;
 import com.caucho.es.Call;
 import com.caucho.es.ESBase;
 import com.caucho.es.Global;
-import com.caucho.log.Log;
 import com.caucho.util.NullIterator;
 
 import java.io.InputStream;
@@ -44,7 +43,7 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 
 public class ResultSetEcmaWrap {
-  private static final Logger log = Log.open(ResultSet.class);
+  private static final Logger log = Logger.getLogger(ResultSet.class.getName());
 
   public static String getString(ResultSet rs, ESBase col)
     throws Throwable

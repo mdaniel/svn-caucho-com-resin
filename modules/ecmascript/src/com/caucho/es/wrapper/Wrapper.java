@@ -34,7 +34,6 @@ import com.caucho.es.ESBeanWrapper;
 import com.caucho.es.Global;
 import com.caucho.java.JavaCompiler;
 import com.caucho.loader.SimpleLoader;
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
@@ -59,7 +58,8 @@ import java.util.logging.Logger;
 
 public class Wrapper {
   private static final Integer LOCK = new Integer(0);
-  private static final Logger log = Log.open(Wrapper.class);
+  private static final Logger log
+    = Logger.getLogger(Wrapper.class.getName());
   
   private String name;
   private String javaClassName;

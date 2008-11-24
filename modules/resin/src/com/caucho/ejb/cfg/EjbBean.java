@@ -43,7 +43,6 @@ import com.caucho.config.LineConfigException;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.types.*;
 import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.gen.*;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.java.gen.CallChain;
 import com.caucho.java.gen.GenClass;

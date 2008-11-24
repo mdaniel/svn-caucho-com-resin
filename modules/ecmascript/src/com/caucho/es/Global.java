@@ -33,7 +33,6 @@ import com.caucho.es.wrapper.Wrapper;
 import com.caucho.java.LineMap;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.SimpleLoader;
-import com.caucho.log.Log;
 import com.caucho.util.FreeList;
 import com.caucho.util.IntMap;
 import com.caucho.util.LruCache;
@@ -49,7 +48,7 @@ import java.util.logging.Logger;
  */
 public class Global extends ESBase {
   private static Integer LOCK = new Integer(0);
-  private static final Logger log = Log.open(Global.class);
+  private static final Logger log = Logger.getLogger(Global.class.getName());
 
   private final static int OBJECT = 0;
   private final static int FUNCTION = OBJECT + 1;

@@ -37,7 +37,6 @@ import com.caucho.config.gen.MessageGenerator;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.JndiBuilder;
 import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.gen.*;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.message.*;
 import com.caucho.java.gen.JavaClassGenerator;
