@@ -31,7 +31,6 @@ package com.caucho.server.dispatch;
 
 import com.caucho.config.ConfigException;
 import com.caucho.i18n.CharacterEncoding;
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -46,7 +45,8 @@ import java.util.logging.Logger;
  * Decodes invocation URI.
  */
 public class InvocationDecoder {
-  static final Logger log = Log.open(InvocationDecoder.class);
+  private static final Logger log
+    = Logger.getLogger(InvocationDecoder.class.getName());
   static final L10N L = new L10N(InvocationDecoder.class);
 
   // The character encoding

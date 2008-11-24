@@ -29,7 +29,6 @@
 
 package com.caucho.jca;
 
-import com.caucho.log.Log;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
 import com.caucho.webbeans.component.*;

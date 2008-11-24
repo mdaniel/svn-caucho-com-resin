@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -26,41 +27,55 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.field;
+package com.caucho.server.repository;
 
-import com.caucho.amber.type.EntityType;
-import com.caucho.java.JavaWriter;
+import com.caucho.config.ConfigException;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.repository.ModuleRepository;
+import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.WriteStream;
 
+import java.io.InputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Configuration for a bean's field
+ * The module repository holds the module jars for osgi and ivy.
  */
-public class MapManyToManyField extends MapElementField {
-  private static final L10N L = new L10N(MapManyToManyField.class);
-  protected static final Logger log
-    = Logger.getLogger(MapManyToManyField.class.getName());
-
-  public MapManyToManyField(EntityType entityType)
-  {
-    super(entityType);
-  }
+public class ModuleRepositoryImpl extends ModuleRepository
+{
+  private static final Logger log
+    = Logger.getLogger(ModuleRepositoryImpl.class.getName());
+  private static final L10N L = new L10N(ModuleRepositoryImpl.class);
+    
+  private Path _root;
 
   /**
-   * Generates the select clause.
+   * The module repository is created once by the Management class.
    */
-  public String generateLoadSelect(String id)
+  public ModuleRepositoryImpl()
   {
-    return null;
   }
 
-  /**
-   * Generates the set property.
-   */
-  public void generateGetterMethod(JavaWriter out)
-    throws IOException
+  public void setPath(Path root)
   {
+    _root = root;
+  }
+
+  public Path getRoot()
+  {
+    if (_root == null)
+      _root = Resin.getCurrent().getManagement().getPath().lookup("ivy");
+
+    return _root;
+  }
+
+  public void addResolver(ResolverConfig resolverConfig)
+  {
+    addResolverImpl(resolverConfig.getResolver());
   }
 }

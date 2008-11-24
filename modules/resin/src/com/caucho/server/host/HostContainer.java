@@ -31,7 +31,6 @@ package com.caucho.server.host;
 
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.log.Log;
 import com.caucho.make.AlwaysModified;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;

@@ -29,7 +29,6 @@
 package com.caucho.resources;
 
 import com.caucho.config.ConfigException;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;

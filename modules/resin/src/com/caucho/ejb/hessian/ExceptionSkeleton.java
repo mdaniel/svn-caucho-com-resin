@@ -31,7 +31,6 @@ package com.caucho.ejb.hessian;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
 import com.caucho.ejb.protocol.Skeleton;
-import com.caucho.log.Log;
 
 import javax.jms.JMSException;
 import java.io.InputStream;
@@ -48,7 +47,8 @@ import java.util.logging.Logger;
  * to execute the request.
  */
 public class ExceptionSkeleton extends Skeleton {
-  protected static Logger log = Log.open(ExceptionSkeleton.class);
+  protected static Logger log
+    = Logger.getLogger(ExceptionSkeleton.class.getName());
 
   ExceptionSkeleton()
     throws JMSException

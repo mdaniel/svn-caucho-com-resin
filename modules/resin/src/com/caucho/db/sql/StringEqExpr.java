@@ -28,15 +28,11 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.log.Log;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
 class StringEqExpr extends Expr {
-  private static final Logger log = Log.open(StringEqExpr.class);
-
   private ColumnExpr _column;
   private Expr _right;
 

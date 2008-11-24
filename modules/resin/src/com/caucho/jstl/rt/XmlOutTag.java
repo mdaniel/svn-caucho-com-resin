@@ -29,7 +29,6 @@
 package com.caucho.jstl.rt;
 
 import com.caucho.jsp.PageContextImpl;
-import com.caucho.log.Log;
 import com.caucho.xpath.Env;
 import com.caucho.xpath.Expr;
 import com.caucho.xpath.XPath;
@@ -46,7 +45,8 @@ import java.util.logging.Logger;
 import java.io.IOException;
 
 public class XmlOutTag extends TagSupport {
-  private static final Logger log = Log.open(XmlOutTag.class);
+  private static final Logger log 
+    = Logger.getLogger(XmlOutTag.class.getName());
   private Expr _select;
   private boolean _escapeXml = true;
 

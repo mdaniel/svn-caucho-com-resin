@@ -29,16 +29,12 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.log.Log;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.logging.Logger;
 
 class InExpr extends Expr {
-  private static final Logger log = Log.open(InExpr.class);
-
   private Expr _expr;
   private final HashSet<String> _values;
   private final boolean _isNot;

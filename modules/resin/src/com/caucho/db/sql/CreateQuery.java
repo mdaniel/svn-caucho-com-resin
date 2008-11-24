@@ -31,15 +31,12 @@ package com.caucho.db.sql;
 import com.caucho.db.Database;
 import com.caucho.db.store.Transaction;
 import com.caucho.db.table.TableFactory;
-import com.caucho.log.Log;
 import com.caucho.sql.SQLExceptionWrapper;
 
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public class CreateQuery extends Query {
-  private static final Logger log = Log.open(CreateQuery.class);
-
   private TableFactory _factory;
 
   CreateQuery(Database db, String sql, TableFactory factory)

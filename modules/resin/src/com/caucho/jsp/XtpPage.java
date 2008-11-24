@@ -31,7 +31,6 @@ package com.caucho.jsp;
 
 import com.caucho.java.JavaCompiler;
 import com.caucho.java.LineMap;
-import com.caucho.log.Log;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.RequestAdapter;
@@ -92,7 +91,8 @@ import java.util.concurrent.*;
  * XtpPage represents the compiled page.
  */
 class XtpPage extends Page {
-  private static final Logger log = Log.open(XtpPage.class);
+  private static final Logger log
+    = Logger.getLogger(XtpPage.class.getName());
 
   private boolean _strictXml;
   private boolean _toLower = true;

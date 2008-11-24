@@ -30,7 +30,6 @@
 package com.caucho.server.webapp;
 
 import com.caucho.config.types.PathBuilder;
-import com.caucho.log.Log;
 import com.caucho.server.deploy.DeployConfig;
 import com.caucho.server.deploy.DeployControllerAdmin;
 import com.caucho.server.deploy.EnvironmentDeployController;
@@ -58,7 +57,8 @@ public class WebAppController
   extends EnvironmentDeployController<WebApp,WebAppConfig>
 {
   private static final L10N L = new L10N(WebAppController.class);
-  private static final Logger log = Log.open(WebAppController.class);
+  private static final Logger log
+    = Logger.getLogger(WebAppController.class.getName());
 
   protected WebAppContainer _container;
 

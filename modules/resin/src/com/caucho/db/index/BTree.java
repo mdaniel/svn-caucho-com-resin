@@ -35,7 +35,6 @@ import com.caucho.db.store.BlockManager;
 import com.caucho.db.store.Lock;
 import com.caucho.db.store.Store;
 import com.caucho.db.store.Transaction;
-import com.caucho.log.Log;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -66,7 +65,8 @@ import java.util.logging.Logger;
  */
 public final class BTree {
   private final static L10N L = new L10N(BTree.class);
-  private final static Logger log = Log.open(BTree.class);
+  private final static Logger log
+    = Logger.getLogger(BTree.class.getName());
   
   public final static long FAIL = 0;
   private final static int BLOCK_SIZE = Store.BLOCK_SIZE;

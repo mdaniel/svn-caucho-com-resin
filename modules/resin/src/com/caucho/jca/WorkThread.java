@@ -28,7 +28,6 @@
 
 package com.caucho.jca;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadTask;
 
@@ -42,7 +41,8 @@ import java.util.logging.Logger;
  */
 public class WorkThread implements ThreadTask {
   private static final L10N L = new L10N(WorkThread.class);
-  private static final Logger log = Log.open(WorkThread.class);
+  private static final Logger log
+    = Logger.getLogger(WorkThread.class.getName());
 
   private boolean _isStarted;
   private WorkManagerImpl _manager;

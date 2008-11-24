@@ -33,7 +33,6 @@ import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.AmberType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -45,7 +44,8 @@ import java.util.logging.Logger;
  */
 public class VersionField extends PropertyField {
   private static final L10N L = new L10N(VersionField.class);
-  private static final Logger log = Log.open(VersionField.class);
+  private static final Logger log
+    = Logger.getLogger(VersionField.class.getName());
 
   public VersionField(EntityType entityType, String name)
     throws ConfigException

@@ -28,8 +28,6 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.log.Log;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -43,7 +41,8 @@ import java.util.logging.Logger;
  * Represents the final servlet in a filter chain.
  */
 public class ErrorPageFilter implements Filter {
-  private static final Logger log = Log.open(ErrorPageFilter.class);
+  private static final Logger log
+    = Logger.getLogger(ErrorPageFilter.class.getName());
   
   public static String REQUEST_URI = "javax.servlet.include.request_uri";
   public static String CONTEXT_PATH = "javax.servlet.include.context_path";

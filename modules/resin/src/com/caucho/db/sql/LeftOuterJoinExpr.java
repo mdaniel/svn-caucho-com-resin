@@ -29,7 +29,6 @@
 package com.caucho.db.sql;
 
 import com.caucho.db.table.TableIterator;
-import com.caucho.log.Log;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -37,8 +36,6 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 class LeftOuterJoinExpr extends RowIterateExpr {
-  private static final Logger log = Log.open(LeftOuterJoinExpr.class);
-
   private Expr _expr;
   private FromItem _table;
   private int _tableIndex;

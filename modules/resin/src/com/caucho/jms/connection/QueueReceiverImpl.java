@@ -33,7 +33,6 @@ import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
 import com.caucho.jms.selector.Selector;
 import com.caucho.jms.selector.SelectorParser;
-import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.AlarmListener;

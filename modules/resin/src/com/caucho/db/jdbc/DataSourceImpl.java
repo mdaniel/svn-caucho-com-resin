@@ -30,7 +30,6 @@
 package com.caucho.db.jdbc;
 
 import com.caucho.db.Database;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -44,7 +43,8 @@ import java.util.logging.Logger;
  * Non-pooled data source.
  */
 public class DataSourceImpl implements DataSource {
-  private static final Logger log = Log.open(DataSourceImpl.class);
+  private static final Logger log 
+    = Logger.getLogger(DataSourceImpl.class.getName());
   private static final L10N L = new L10N(DataSourceImpl.class);
 
   private Database _database;

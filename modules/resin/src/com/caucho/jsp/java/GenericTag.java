@@ -45,12 +45,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a custom tag.
  */
 abstract public class GenericTag extends JspContainerNode
 {
+  private static final Logger log
+    = Logger.getLogger(GenericTag.class.getName());
   private static final String DEFAULT_VAR_TYPE = "java.lang.String";
 
   private static final HashSet<String> _primTypes

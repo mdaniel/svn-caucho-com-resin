@@ -29,7 +29,6 @@
 package com.caucho.security;
 
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.security.*;
@@ -134,7 +133,7 @@ public class PolicyImpl extends Policy {
   private Logger log()
   {
     if (_log == null)
-      _log = Log.open(PolicyImpl.class);
+      _log = Logger.getLogger(PolicyImpl.class.getName());
 
     return _log;
   }

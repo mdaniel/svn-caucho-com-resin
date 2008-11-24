@@ -31,7 +31,6 @@ package com.caucho.db.sql;
 import com.caucho.db.Database;
 import com.caucho.db.store.Transaction;
 import com.caucho.db.table.TableIterator;
-import com.caucho.log.Log;
 import com.caucho.sql.SQLExceptionWrapper;
 
 import java.io.IOException;
@@ -39,8 +38,6 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public class ExistsQuery extends SelectQuery {
-  private static final Logger log = Log.open(ExistsQuery.class);
-
   private static Expr []_nullExprs = new Expr[0];
 
   protected ExistsQuery(Database db, String sql)

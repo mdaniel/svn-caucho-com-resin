@@ -32,7 +32,6 @@ package com.caucho.server.webapp;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
-import com.caucho.log.Log;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.vfs.Path;

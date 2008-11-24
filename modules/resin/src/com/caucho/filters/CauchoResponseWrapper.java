@@ -29,7 +29,6 @@
 
 package com.caucho.filters;
 
-import com.caucho.log.Log;
 import com.caucho.server.connection.AbstractResponseStream;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.ResponseWrapper;
@@ -52,7 +51,8 @@ import java.util.logging.Logger;
  */
 public class CauchoResponseWrapper extends ResponseWrapper
   implements CauchoResponse {
-  private static final Logger log = Log.open(CauchoResponseWrapper.class);
+  private static final Logger log
+    = Logger.getLogger(CauchoResponseWrapper.class.getName());
 
   private FlushBuffer _flushBuffer;
   

@@ -28,7 +28,6 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.log.Log;
 import com.caucho.util.FreeList;
 import com.caucho.vfs.FlushBuffer;
 

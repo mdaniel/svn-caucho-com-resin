@@ -29,7 +29,6 @@
 
 package com.caucho.server.http;
 
-import com.caucho.log.Log;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.Connection;

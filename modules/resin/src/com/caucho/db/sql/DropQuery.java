@@ -31,7 +31,6 @@ package com.caucho.db.sql;
 
 import com.caucho.db.Database;
 import com.caucho.db.store.Transaction;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.sql.SQLException;
@@ -39,8 +38,6 @@ import java.util.logging.Logger;
 
 class DropQuery extends Query {
   private static final L10N L = new L10N(DropQuery.class);
-  
-  private static final Logger log = Log.open(DropQuery.class);
 
   private Database _database;
   private String _tableName;

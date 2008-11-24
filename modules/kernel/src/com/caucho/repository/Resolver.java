@@ -29,17 +29,12 @@
 
 package com.caucho.repository;
 
-import com.caucho.config.ConfigException;
-import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.ivy.IvyPattern;
 import com.caucho.util.Hex;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.Path;
-
 import java.io.InputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

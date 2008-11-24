@@ -30,23 +30,16 @@
 package com.caucho.naming.hessian;
 
 import com.caucho.hessian.client.HessianProxyFactory;
-import com.caucho.log.Log;
-import com.caucho.util.L10N;
-
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.NamingException;
 import javax.naming.spi.ObjectFactory;
 import java.util.Hashtable;
-import java.util.logging.Logger;
 
 /**
  * Create a remote object
  */
 public class hessianURLContextFactory implements ObjectFactory {
-  private static L10N L = new L10N(hessianURLContextFactory.class);
-  private static Logger dbg = Log.open(hessianURLContextFactory.class);
-
   private HessianProxyFactory _proxyFactory = new HessianProxyFactory();
   private HessianModel _model;
 

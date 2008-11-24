@@ -28,15 +28,10 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.log.Log;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 class BetweenExpr extends Expr {
-  private static final Logger log = Log.open(BetweenExpr.class);
-
   private Expr _expr;
   private Expr _min;
   private Expr _max;

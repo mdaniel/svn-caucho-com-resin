@@ -30,7 +30,6 @@
 package com.caucho.server.security;
 
 import com.caucho.config.ConfigException;
-import com.caucho.log.Log;
 import com.caucho.util.InetNetwork;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -76,7 +75,8 @@ import java.util.logging.Logger;
  * </pre>
  */
 public class IPConstraint extends AbstractConstraint {
-  static final Logger log = Log.open(IPConstraint.class);
+  private static final Logger log
+    = Logger.getLogger(IPConstraint.class.getName());
   static L10N L = new L10N(IPConstraint.class);
 
   private ArrayList<InetNetwork> _allowNetworkList;

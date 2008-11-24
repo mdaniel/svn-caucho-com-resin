@@ -28,7 +28,6 @@
 
 package com.caucho.xsl;
 
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharCursor;
 import com.caucho.util.CharScanner;
@@ -62,7 +61,8 @@ import java.util.logging.Logger;
  * &lt;xsl:value-of select='...'/>
  */
 class XslParser {
-  static final Logger log = Log.open(XslParser.class);
+  private static final Logger log
+    = Logger.getLogger(XslParser.class.getName());
   static final L10N L = new L10N(XslParser.class);
 
   private static final String XSLNS = Generator.XSLNS;

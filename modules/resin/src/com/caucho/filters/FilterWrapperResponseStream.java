@@ -28,7 +28,6 @@
 
 package com.caucho.filters;
 
-import com.caucho.log.Log;
 import com.caucho.server.connection.ToByteResponseStream;
 import com.caucho.util.L10N;
 
@@ -37,7 +36,8 @@ import java.io.OutputStream;
 import java.util.logging.Logger;
 
 public class FilterWrapperResponseStream extends ToByteResponseStream {
-  static final Logger log = Log.open(FilterWrapperResponseStream.class);
+  private static final Logger log
+    = Logger.getLogger(FilterWrapperResponseStream.class.getName());
   
   static final L10N L = new L10N(FilterWrapperResponseStream.class);
 

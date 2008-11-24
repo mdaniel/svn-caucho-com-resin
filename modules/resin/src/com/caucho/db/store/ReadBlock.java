@@ -29,7 +29,6 @@
 
 package com.caucho.db.store;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -38,7 +37,8 @@ import java.util.logging.Logger;
  * Represents a versioned row
  */
 public class ReadBlock extends Block {
-  private static final Logger log = Log.open(ReadBlock.class);
+  private static final Logger log
+    = Logger.getLogger(ReadBlock.class.getName());
   private static final L10N L = new L10N(ReadBlock.class);
 
   private byte []_buffer;

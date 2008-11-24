@@ -6,8 +6,6 @@
 
 package com.caucho.vfs;
 
-import com.caucho.log.Log;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;

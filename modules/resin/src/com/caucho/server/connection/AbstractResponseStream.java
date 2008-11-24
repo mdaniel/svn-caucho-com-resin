@@ -28,7 +28,6 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.OutputStreamWithBuffer;
 import com.caucho.vfs.Path;

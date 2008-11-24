@@ -30,8 +30,6 @@
 package com.caucho.jsp;
 
 import com.caucho.el.Expr;
-import com.caucho.log.Log;
-
 import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
@@ -43,7 +41,8 @@ import java.util.logging.Logger;
  * Abstract implementation for the fragment support.
  */
 public class ELExprFragment extends JspFragment {
-  private static final Logger log = Log.open(ELExprFragment.class);
+  private static final Logger log 
+    = Logger.getLogger(ELExprFragment.class.getName());
 
   // the page context
   private PageContextImpl _pageContext;

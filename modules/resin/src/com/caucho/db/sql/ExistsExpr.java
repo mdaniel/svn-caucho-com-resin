@@ -28,7 +28,6 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.sql.SQLException;
@@ -37,8 +36,7 @@ import java.util.logging.Logger;
 
 public class ExistsExpr extends SubSelectExpr {
   protected static final L10N L = new L10N(ExistsExpr.class);
-  private static final Logger log = Log.open(ExistsExpr.class);
-
+ 
   private int _groupIndex;
   private ExistsQuery _exists;
 

@@ -31,7 +31,6 @@ package com.caucho.db.sql;
 
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
-import com.caucho.log.Log;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
@@ -44,7 +43,6 @@ import java.util.logging.Logger;
 
 abstract public class Expr {
   protected static final L10N L = new L10N(Expr.class);
-  private static final Logger log = Log.open(Expr.class);
 
   public static final int UNKNOWN = -1;
   public static final int FALSE = 0;

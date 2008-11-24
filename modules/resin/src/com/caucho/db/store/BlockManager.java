@@ -29,7 +29,6 @@
 
 package com.caucho.db.store;
 
-import com.caucho.log.Log;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.BlockManagerMXBean;
 import com.caucho.util.L10N;
@@ -48,7 +47,8 @@ public final class BlockManager
   extends AbstractManagedObject
   implements BlockManagerMXBean
 {
-  private static final Logger log = Log.open(BlockManager.class);
+  private static final Logger log
+    = Logger.getLogger(BlockManager.class.getName());
   private static final L10N L = new L10N(BlockManager.class);
 
   private static BlockManager _staticManager;

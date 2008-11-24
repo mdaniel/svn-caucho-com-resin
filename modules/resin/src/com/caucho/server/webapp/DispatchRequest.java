@@ -30,7 +30,6 @@
 package com.caucho.server.webapp;
 
 import com.caucho.i18n.CharacterEncoding;
-import com.caucho.log.Log;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.Form;

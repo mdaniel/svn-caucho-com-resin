@@ -34,7 +34,6 @@ import com.caucho.el.ExprEnv;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.jsp.el.*;
 import com.caucho.jstl.JstlPageContext;
-import com.caucho.log.Log;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractResponseStream;
 import com.caucho.server.connection.CauchoRequest;
@@ -95,7 +94,8 @@ import java.util.logging.Logger;
 
 public class PageContextImpl extends PageContext
   implements ExprEnv, JstlPageContext, VariableResolver {
-  private static final Logger log = Log.open(PageContextImpl.class);
+  private static final Logger log
+    = Logger.getLogger(PageContextImpl.class.getName());
   static final L10N L = new L10N(PageContextImpl.class);
   
   private JspWriterAdapter _jspAdapter = new JspWriterAdapter();

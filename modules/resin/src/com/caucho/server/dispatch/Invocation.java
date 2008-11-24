@@ -29,7 +29,6 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.log.Log;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.util.L10N;

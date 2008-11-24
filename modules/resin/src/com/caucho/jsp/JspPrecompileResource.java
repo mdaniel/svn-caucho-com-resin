@@ -35,7 +35,6 @@ import com.caucho.config.types.PathPatternType;
 import com.caucho.java.JavaCompiler;
 import com.caucho.java.LineMap;
 import com.caucho.lifecycle.Lifecycle;
-import com.caucho.log.Log;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CompileException;

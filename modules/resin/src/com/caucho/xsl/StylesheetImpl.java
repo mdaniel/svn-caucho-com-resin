@@ -30,7 +30,6 @@
 package com.caucho.xsl;
 
 import com.caucho.java.LineMap;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntArray;
 import com.caucho.vfs.Path;
@@ -76,7 +75,8 @@ import java.util.logging.Logger;
  * routines.
  */
 public class StylesheetImpl extends AbstractStylesheet  {
-  static final Logger log = Log.open(StylesheetImpl.class);
+  private static final Logger log
+    = Logger.getLogger(StylesheetImpl.class.getName());
 
   public char []text; // static buffer of the text nodes
 

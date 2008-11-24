@@ -38,7 +38,6 @@ import com.caucho.jsp.*;
 import com.caucho.jsp.cfg.TldFunction;
 import com.caucho.jsp.el.JspELParser;
 import com.caucho.loader.DynamicClassLoader;
-import com.caucho.log.Log;
 import com.caucho.make.ClassDependency;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.IntMap;

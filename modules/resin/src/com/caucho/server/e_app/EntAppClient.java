@@ -39,7 +39,6 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.log.Log;
 import com.caucho.naming.Jndi;
 import com.caucho.server.deploy.DeployInstance;
 import com.caucho.util.Alarm;
@@ -67,7 +66,8 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
   /* implements EnvironmentBean, EnvironmentListener, AlarmListener */
 
   static final L10N L = new L10N(EntAppClient.class);
-  static final Logger log = Log.open(EntAppClient.class);
+  private static final Logger log
+    = Logger.getLogger(EntAppClient.class.getName());
 
   private EnvironmentClassLoader _loader;
 

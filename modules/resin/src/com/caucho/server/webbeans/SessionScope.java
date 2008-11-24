@@ -27,10 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
+package com.caucho.server.webbeans;
 
 import com.caucho.server.dispatch.ServletInvocation;
 import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.context.ApplicationScope;
+import com.caucho.webbeans.context.DestructionListener;
+import com.caucho.webbeans.context.ScopeContext;
+import com.caucho.webbeans.context.SingletonScope;
 
 import java.lang.annotation.Annotation;
 import javax.servlet.*;

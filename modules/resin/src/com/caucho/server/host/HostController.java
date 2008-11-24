@@ -32,7 +32,6 @@ package com.caucho.server.host;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.el.EL;
-import com.caucho.log.Log;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.server.deploy.DeployController;
 import com.caucho.server.deploy.DeployControllerAdmin;

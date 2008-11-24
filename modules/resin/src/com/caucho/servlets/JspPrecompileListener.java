@@ -29,7 +29,6 @@
 
 package com.caucho.servlets;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -40,7 +39,8 @@ import java.util.logging.Logger;
 public class JspPrecompileListener
   extends com.caucho.jsp.JspPrecompileListener {
   private static final L10N L = new L10N(JspPrecompileListener.class);
-  private static final Logger log = Log.open(JspPrecompileListener.class);
+  private static final Logger log
+    = Logger.getLogger(JspPrecompileListener.class.getName());
 
   public void init()
   {

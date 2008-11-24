@@ -28,7 +28,6 @@
 
 package com.caucho.servlets.webdav;
 
-import com.caucho.log.Log;
 import com.caucho.server.webapp.Application;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.HTTPUtil;
@@ -84,7 +83,8 @@ import java.util.logging.Logger;
  * </pre>
  */
 public class WebDavServlet extends GenericServlet {
-  private static final Logger log = Log.open(WebDavServlet.class);
+  private static final Logger log
+    = Logger.getLogger(WebDavServlet.class.getName());
   
   private QDate _calendar = new QDate();
 

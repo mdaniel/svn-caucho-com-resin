@@ -29,7 +29,6 @@
 
 package com.caucho.jsp;
 
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
@@ -49,7 +48,8 @@ import java.util.logging.Logger;
  */
 public class BodyContentImpl extends AbstractBodyContent {
   static final L10N L = new L10N(BodyContentImpl.class);
-  static final Logger log = Log.open(BodyContentImpl.class);
+  private static final Logger log
+    = Logger.getLogger(BodyContentImpl.class.getName());
   
   private static final FreeList<BodyContentImpl> _freeList
     = new FreeList<BodyContentImpl>(32);

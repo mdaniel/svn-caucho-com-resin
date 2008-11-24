@@ -28,7 +28,6 @@
 
 package com.caucho.sql.spy;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.sql.ConnectionEventListener;
@@ -42,7 +41,8 @@ import javax.sql.StatementEventListener;
  * Spying on a connection.
  */
 public class SpyPooledConnection implements javax.sql.PooledConnection {
-  protected final static Logger log = Log.open(SpyPooledConnection.class);
+  protected final static Logger log
+    = Logger.getLogger(SpyPooledConnection.class.getName());
   protected final static L10N L = new L10N(SpyPooledConnection.class);
 
   protected String _id;

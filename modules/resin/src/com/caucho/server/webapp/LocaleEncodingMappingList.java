@@ -28,7 +28,6 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
@@ -39,7 +38,8 @@ import java.util.logging.Logger;
  */
 public class LocaleEncodingMappingList {
   static final L10N L = new L10N(LocaleEncodingMappingList.class);
-  static final Logger log = Log.open(LocaleEncodingMappingList.class);
+  static final Logger log
+    = Logger.getLogger(LocaleEncodingMappingList.class.getName());
 
   private WebApp _app;
 

@@ -28,7 +28,6 @@
 
 package com.caucho.server.session;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
@@ -39,7 +38,8 @@ import java.util.logging.Logger;
  * A factory for creating sessions.
  */
 public class SessionFactory  {
-  static protected final Logger log = Log.open(SessionFactory.class);
+  private static final Logger log
+    = Logger.getLogger(SessionFactory.class.getName());
   static final L10N L = new L10N(SessionFactory.class);
 
   private SessionManager _manager;

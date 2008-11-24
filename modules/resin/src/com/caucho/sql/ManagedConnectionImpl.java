@@ -29,7 +29,6 @@
 
 package com.caucho.sql;
 
-import com.caucho.log.Log;
 import com.caucho.sql.spy.SpyConnection;
 import com.caucho.sql.spy.SpyXAResource;
 import com.caucho.util.Alarm;
@@ -68,7 +67,8 @@ import java.util.logging.Logger;
  */
 public class ManagedConnectionImpl
   implements ManagedConnection, javax.sql.ConnectionEventListener {
-  protected static final Logger log = Log.open(ManagedConnectionImpl.class);
+  protected static final Logger log
+    = Logger.getLogger(ManagedConnectionImpl.class.getName());
   protected static L10N L = new L10N(ManagedConnectionImpl.class);
 
   // Identifier for spy, etc.

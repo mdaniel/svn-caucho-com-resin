@@ -28,7 +28,6 @@
 
 package com.caucho.jms.selector;
 
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
@@ -42,7 +41,8 @@ import java.util.logging.Logger;
  * Parsing the selector.
  */
 public class SelectorParser  {
-  static final Logger log = Log.open(SelectorParser.class);
+  static final Logger log
+    = Logger.getLogger(SelectorParser.class.getName());
   static final L10N L = new L10N(SelectorParser.class);
   
   static final int TRUE = 1;

@@ -28,7 +28,6 @@
 
 package com.caucho.xpath.pattern;
 
-import com.caucho.log.Log;
 import com.caucho.xpath.Env;
 import com.caucho.xpath.ExprEnvironment;
 import com.caucho.xpath.XPathException;
@@ -49,7 +48,8 @@ import java.util.logging.Logger;
  * match patterns.
  */
 abstract public class AbstractPattern {
-  protected static final Logger log = Log.open(AbstractPattern.class);
+  protected static final Logger log
+    = Logger.getLogger(AbstractPattern.class.getName());
 
   // This is the value Axis wants
   public static final String XMLNS = "http://www.w3.org/2000/xmlns/";

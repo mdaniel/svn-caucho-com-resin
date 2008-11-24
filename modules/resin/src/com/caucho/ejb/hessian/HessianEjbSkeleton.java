@@ -31,16 +31,11 @@ package com.caucho.ejb.hessian;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.server.HessianSkeleton;
-import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.Skeleton;
 import com.caucho.hessian.io.HessianRemoteResolver;
-import com.caucho.log.Log;
-import com.caucho.util.CharBuffer;
-
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**

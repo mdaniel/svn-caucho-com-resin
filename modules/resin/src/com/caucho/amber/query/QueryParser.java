@@ -38,23 +38,15 @@ import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.AmberType;
 import com.caucho.jdbc.JdbcMetaData;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -62,7 +54,8 @@ import java.util.logging.Logger;
  * the parsed expressions.
  */
 public class QueryParser {
-  static final Logger log = Log.open(QueryParser.class);
+  static final Logger log
+    = Logger.getLogger(QueryParser.class.getName());
   static final L10N L = new L10N(QueryParser.class);
 
   public final static int IDENTIFIER = 128;

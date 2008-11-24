@@ -29,7 +29,6 @@
 
 package com.caucho.security;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.security.*;

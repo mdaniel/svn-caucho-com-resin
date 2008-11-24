@@ -29,7 +29,6 @@
 package com.caucho.jca.cfg;
 
 import com.caucho.jca.ResourceManagerConfig;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -38,9 +37,6 @@ import java.util.logging.Logger;
  * Configuration for a connector.
  */
 public class ResinConnectorConfig {
-  private static final L10N L = new L10N(ResinConnectorConfig.class);
-  private static final Logger log = Log.open(ResinConnectorConfig.class);
-
   private final ResourceManagerConfig _rm;
 
   private ConnectorConfig _conn;

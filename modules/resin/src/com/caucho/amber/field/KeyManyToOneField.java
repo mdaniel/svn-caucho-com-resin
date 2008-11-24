@@ -40,7 +40,6 @@ import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.AmberType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -54,7 +53,8 @@ import java.util.logging.Logger;
  */
 public class KeyManyToOneField extends ManyToOneField implements IdField {
   private static final L10N L = new L10N(KeyManyToOneField.class);
-  protected static final Logger log = Log.open(KeyManyToOneField.class);
+  protected static final Logger log
+    = Logger.getLogger(KeyManyToOneField.class.getName());
 
   // fields
   private ArrayList<KeyPropertyField> _idFields =

@@ -29,7 +29,6 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempBuffer;
 
@@ -41,7 +40,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class WrapperResponseStream extends AbstractResponseStream {
-  static final Logger log = Log.open(WrapperResponseStream.class);
+  private static final Logger log
+    = Logger.getLogger(WrapperResponseStream.class.getName());
   
   static final L10N L = new L10N(WrapperResponseStream.class);
 

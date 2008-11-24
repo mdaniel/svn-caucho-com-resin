@@ -29,7 +29,6 @@
 
 package com.caucho.xsl;
 
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.ExceptionWrapper;
 import com.caucho.vfs.MergePath;
@@ -79,7 +78,8 @@ import java.util.logging.Logger;
  * </pre></code>
  */
 public class Xsl extends AbstractStylesheetFactory {
-  static final Logger log = Log.open(Xsl.class);
+  private static final Logger log
+    = Logger.getLogger(Xsl.class.getName());
 
   public Xsl() {}
 

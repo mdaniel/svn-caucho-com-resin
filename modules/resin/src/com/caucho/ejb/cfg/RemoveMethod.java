@@ -29,18 +29,16 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.ConfigException;
+import com.caucho.config.gen.BeanGenerator;
+import com.caucho.config.gen.BusinessMethodGenerator;
+import com.caucho.config.gen.View;
 import com.caucho.util.L10N;
-import com.caucho.ejb.gen.*;
-
 import java.lang.reflect.*;
 
 /**
  * Configuration for remove-method.
  */
 public class RemoveMethod {
-  private static final L10N L = new L10N(RemoveMethod.class);
-
   private BeanMethod _beanMethod;
   private boolean _retainIfException;
 

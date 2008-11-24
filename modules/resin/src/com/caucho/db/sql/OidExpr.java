@@ -30,14 +30,11 @@ package com.caucho.db.sql;
 
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
-import com.caucho.log.Log;
 
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
 class OidExpr extends Expr {
-  private static final Logger log = Log.open(OidExpr.class);
-
   private Table _table;
   
   private int _tableIndex;

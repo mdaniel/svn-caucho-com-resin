@@ -29,8 +29,6 @@
 
 package com.caucho.vfs;
 
-import com.caucho.log.Log;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -45,7 +43,8 @@ import java.util.logging.Logger;
  * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
 public class QServerSocketWrapper extends QServerSocket {
-  private static final Logger log = Log.open(QServerSocketWrapper.class);
+  private static final Logger log
+    = Logger.getLogger(QServerSocketWrapper.class.getName());
   
   private ServerSocket _ss;
   private boolean _tcpNoDelay = true;

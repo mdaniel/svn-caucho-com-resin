@@ -28,7 +28,6 @@
 
 package com.caucho.sql.spy;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.sql.XAConnection;
@@ -41,7 +40,8 @@ import java.util.logging.Logger;
  */
 public class SpyXAConnection extends SpyPooledConnection
   implements javax.sql.XAConnection {
-  protected final static Logger log = Log.open(SpyXAConnection.class);
+  protected final static Logger log
+    = Logger.getLogger(SpyXAConnection.class.getName());
   protected final static L10N L = new L10N(SpyXAConnection.class);
 
   // The underlying connection

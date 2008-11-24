@@ -29,7 +29,6 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -45,7 +44,8 @@ import java.util.logging.Logger;
  * Bare-bones servlet context implementation.
  */
 public class ServletContextImpl implements ServletContext {
-  static final Logger log = Log.open(ServletContextImpl.class);
+  static final Logger log
+    = Logger.getLogger(ServletContextImpl.class.getName());
   static final L10N L = new L10N(ServletContextImpl.class);
 
   private String _name;

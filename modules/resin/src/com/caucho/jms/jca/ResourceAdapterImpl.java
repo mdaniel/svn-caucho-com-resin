@@ -29,7 +29,6 @@
 package com.caucho.jms.jca;
 
 import com.caucho.config.ConfigException;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.jms.ConnectionFactory;
@@ -50,7 +49,8 @@ import java.util.logging.Logger;
  * The JCA resource adapter.
  */
 public class ResourceAdapterImpl implements ResourceAdapter {
-  private static final Logger log = Log.open(ResourceAdapterImpl.class);
+  private static final Logger log
+    = Logger.getLogger(ResourceAdapterImpl.class.getName());
   private static final L10N L = new L10N(ResourceAdapterImpl.class);
 
   private BootstrapContext _ctx;

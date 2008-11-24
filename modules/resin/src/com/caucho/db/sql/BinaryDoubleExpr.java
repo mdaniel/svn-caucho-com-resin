@@ -29,15 +29,11 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.log.Log;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
 class BinaryDoubleExpr extends Expr {
-  private static final Logger log = Log.open(BinaryDoubleExpr.class);
-
   private Expr _left;
   private Expr _right;
   private int _op;

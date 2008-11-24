@@ -29,7 +29,6 @@
 
 package com.caucho.server.security;
 
-import com.caucho.log.Log;
 import com.caucho.server.dispatch.UrlMap;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
@@ -45,7 +44,8 @@ import java.util.regex.PatternSyntaxException;
  * Configuration for the security-constraint.
  */
 public class SecurityConstraint {
-  static final Logger log = Log.open(SecurityConstraint.class);
+  static final Logger log
+    = Logger.getLogger(SecurityConstraint.class.getName());
   static L10N L = new L10N(SecurityConstraint.class);
 
   private AbstractConstraint _constraint;

@@ -29,7 +29,6 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.log.Log;
 import com.caucho.util.FreeList;
 import com.caucho.server.dispatch.*;
 

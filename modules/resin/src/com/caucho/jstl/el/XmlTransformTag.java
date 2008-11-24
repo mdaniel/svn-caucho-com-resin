@@ -32,7 +32,6 @@ package com.caucho.jstl.el;
 import com.caucho.el.Expr;
 import com.caucho.jsp.PageContextImpl;
 import com.caucho.jstl.NameValueTag;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
@@ -61,7 +60,8 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
-  private static final Logger log = Log.open(XmlTransformTag.class);
+  private static final Logger log
+    = Logger.getLogger(XmlTransformTag.class.getName());
   private static final L10N L = new L10N(XmlTransformTag.class);
   
   private Expr _xml;

@@ -28,7 +28,6 @@
 
 package com.caucho.xml2;
 
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -50,7 +49,8 @@ import java.util.logging.Logger;
  * XMLWriter to create a DOM document.
  */
 public class DOMBuilder implements XMLWriter, ContentHandler, ErrorHandler {
-  static final Logger log = Log.open(DOMBuilder.class);
+  static final Logger log
+    = Logger.getLogger(DOMBuilder.class.getName());
   static final L10N L = new L10N(DOMBuilder.class);
   static final String XMLNS = XmlParser.XMLNS;
   

@@ -28,7 +28,6 @@
 
 package com.caucho.xpath.pattern;
 
-import com.caucho.log.Log;
 import com.caucho.xml.XmlUtil;
 import com.caucho.xpath.ExprEnvironment;
 import com.caucho.xpath.StylesheetEnv;
@@ -48,7 +47,8 @@ import java.util.logging.Logger;
  * Iterates through matching nodes.
  */
 public abstract class NodeIterator implements ExprEnvironment, Iterator<Node> {
-  protected static final Logger log = Log.open(NodeIterator.class);
+  protected static final Logger log
+    = Logger.getLogger(NodeIterator.class.getName());
   
   protected ExprEnvironment _env;
 

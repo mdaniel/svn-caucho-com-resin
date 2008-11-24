@@ -28,7 +28,6 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 
 import java.sql.SQLException;
@@ -36,8 +35,6 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 class AndExpr extends Expr {
-  private static final Logger log = Log.open(AndExpr.class);
-
   private ArrayList<Expr> _exprs = new ArrayList<Expr>();
 
   AndExpr()

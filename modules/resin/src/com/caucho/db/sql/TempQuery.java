@@ -30,14 +30,11 @@
 package com.caucho.db.sql;
 
 import com.caucho.db.store.Transaction;
-import com.caucho.log.Log;
 
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public class TempQuery extends Query {
-  private static final Logger log = Log.open(Query.class);
-
   protected TempQuery(FromItem []fromItems)
   {
     super(null, "temp", fromItems);

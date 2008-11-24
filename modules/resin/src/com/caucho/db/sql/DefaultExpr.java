@@ -28,14 +28,10 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.log.Log;
-
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
 class DefaultExpr extends Expr {
-  private static final Logger log = Log.open(DefaultExpr.class);
-
   private Expr _expr;
   private Expr _default;
 

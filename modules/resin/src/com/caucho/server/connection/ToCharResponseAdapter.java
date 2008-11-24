@@ -29,7 +29,6 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.log.Log;
 import com.caucho.util.FreeList;
 
 import javax.servlet.http.HttpServletResponse;
@@ -37,7 +36,8 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 public class ToCharResponseAdapter extends ResponseAdapter {
-  private static final Logger log = Log.open(ToCharResponseAdapter.class);
+  private static final Logger log
+    = Logger.getLogger(ToCharResponseAdapter.class.getName());
   
   private static final FreeList<ToCharResponseAdapter> _freeList
     = new FreeList<ToCharResponseAdapter>(32);

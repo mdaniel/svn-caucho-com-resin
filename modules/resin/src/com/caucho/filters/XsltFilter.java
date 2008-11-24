@@ -29,7 +29,6 @@
 package com.caucho.filters;
 
 import com.caucho.loader.DynamicClassLoader;
-import com.caucho.log.Log;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.RequestAdapter;
 import com.caucho.util.CompileException;
@@ -78,7 +77,8 @@ import java.util.logging.Logger;
  */
 public class XsltFilter implements Filter {
   private static final L10N L = new L10N(XsltFilter.class);
-  private static final Logger log = Log.open(XsltFilter.class);
+  private static final Logger log
+    = Logger.getLogger(XsltFilter.class.getName());
   
   private String _mimeType = "x-application/xslt";
   private MergePath _stylePath;

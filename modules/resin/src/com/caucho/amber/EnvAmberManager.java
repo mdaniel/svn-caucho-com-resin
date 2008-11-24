@@ -45,7 +45,6 @@ import com.caucho.config.ConfigException;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.enhancer.EnhancerManager;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 

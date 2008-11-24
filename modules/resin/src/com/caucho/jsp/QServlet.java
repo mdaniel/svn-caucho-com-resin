@@ -29,7 +29,6 @@
 
 package com.caucho.jsp;
 
-import com.caucho.log.Log;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.RequestAdapter;
@@ -64,7 +63,8 @@ abstract public class QServlet implements Servlet {
   static final String COPYRIGHT =
     "Copyright(c) 1998-2008 Caucho Technology.  All rights reserved.";
 
-  private static final Logger log = Log.open(QServlet.class);
+  private static final Logger log
+    = Logger.getLogger(QServlet.class.getName());
   private static final L10N L = new L10N(QServlet.class);
 
   protected WebApp _webApp;

@@ -34,7 +34,6 @@ import com.caucho.db.store.Transaction;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
-import com.caucho.log.Log;
 import com.caucho.sql.SQLExceptionWrapper;
 
 import java.sql.SQLException;
@@ -42,8 +41,6 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 class InsertQuery extends Query {
-  private static final Logger log = Log.open(InsertQuery.class);
-
   private Table _table;
       
   private ArrayList<Column> _columns;

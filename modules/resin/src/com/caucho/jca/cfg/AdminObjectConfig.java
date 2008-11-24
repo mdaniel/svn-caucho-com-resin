@@ -29,7 +29,6 @@
 package com.caucho.jca.cfg;
 
 import com.caucho.config.ConfigException;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -39,7 +38,6 @@ import java.util.logging.Logger;
  */
 public class AdminObjectConfig extends ObjectConfig {
   private static final L10N L = new L10N(AdminObjectConfig.class);
-  private static final Logger log = Log.open(AdminObjectConfig.class);
 
   private Class _interfaceClass;
   private Class _objectClass;

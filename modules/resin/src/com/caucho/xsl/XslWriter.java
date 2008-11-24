@@ -28,7 +28,6 @@
 
 package com.caucho.xsl;
 
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntArray;
 import com.caucho.util.L10N;
@@ -63,7 +62,8 @@ import java.util.logging.Logger;
  * getPage.
  */
 public class XslWriter extends Writer implements ExtendedLocator {
-  static final Logger log = Log.open(XslWriter.class);
+  private static final Logger log
+   = Logger.getLogger(XslWriter.class.getName());
   static final L10N L = new L10N(XslWriter.class);
 
   // This is the value Axis wants

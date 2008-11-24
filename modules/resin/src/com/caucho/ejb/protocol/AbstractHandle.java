@@ -28,8 +28,6 @@
 
 package com.caucho.ejb.protocol;
 
-import com.caucho.log.Log;
-
 import javax.ejb.EJBObject;
 import javax.ejb.Handle;
 import java.util.logging.Level;
@@ -46,7 +44,8 @@ import java.util.logging.Logger;
  * </pre></code>
  */
 abstract public class AbstractHandle implements Handle {
-  protected static final Logger log = Log.open(AbstractHandle.class);
+  private static final Logger log
+    = Logger.getLogger(AbstractHandle.class.getName());
   
   /**
    * Returns the server id for the handle.

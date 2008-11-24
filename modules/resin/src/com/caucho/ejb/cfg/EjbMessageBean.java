@@ -30,6 +30,10 @@
 package com.caucho.ejb.cfg;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.gen.ApiClass;
+import com.caucho.config.gen.ApiMethod;
+import com.caucho.config.gen.BeanGenerator;
+import com.caucho.config.gen.MessageGenerator;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.JndiBuilder;
 import com.caucho.ejb.AbstractServer;

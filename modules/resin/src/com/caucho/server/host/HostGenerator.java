@@ -28,7 +28,6 @@
 
 package com.caucho.server.host;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 
@@ -40,7 +39,8 @@ import java.util.logging.Logger;
  */
 abstract public class HostGenerator implements Dependency {
   static final L10N L = new L10N(HostGenerator.class);
-  static final Logger log = Log.open(HostGenerator.class);
+  static final Logger log
+    = Logger.getLogger(HostGenerator.class.getName());
 
   private HostContainer _container;
 

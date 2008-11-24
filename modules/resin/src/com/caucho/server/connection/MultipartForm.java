@@ -28,7 +28,6 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.HashMapImpl;
@@ -47,7 +46,8 @@ import java.util.logging.Logger;
  * Multipart form handling.
  */
 class MultipartForm {
-  static final Logger log = Log.open(MultipartForm.class);
+  private static final Logger log
+    = Logger.getLogger(MultipartForm.class.getName());
   static final L10N L = new L10N(MultipartForm.class);
   
   static void parsePostData(HashMapImpl<String,String[]> table,

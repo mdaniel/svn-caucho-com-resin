@@ -28,7 +28,6 @@
 
 package com.caucho.xsl;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.xml.DOMBuilder;
 import com.caucho.xml.QDocument;
@@ -45,7 +44,8 @@ import java.util.logging.Logger;
 
 public class TransformerHandlerImpl extends DOMBuilder
   implements TransformerHandler {
-  protected static final Logger log = Log.open(TransformerHandlerImpl.class);
+  protected static final Logger log
+    = Logger.getLogger(TransformerHandlerImpl.class.getName());
   protected static final L10N L = new L10N(TransformerHandlerImpl.class);
   
   private javax.xml.transform.Transformer _transformer;

@@ -33,7 +33,6 @@ import com.caucho.burlap.io.BurlapOutput;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.Skeleton;
-import com.caucho.log.Log;
 import com.caucho.services.name.NameServerRemote;
 
 import javax.ejb.EJBHome;
@@ -52,7 +51,8 @@ import java.util.logging.Logger;
  * to execute the request.
  */
 public class NameContextSkeleton extends Skeleton {
-  protected static final Logger log = Log.open(NameContextSkeleton.class);
+  protected static final Logger log
+    = Logger.getLogger(NameContextSkeleton.class.getName());
 
   private BurlapProtocol _protocol;
   private String _prefix;

@@ -31,7 +31,6 @@ package com.caucho.jsp;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.PathPatternType;
-import com.caucho.log.Log;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 

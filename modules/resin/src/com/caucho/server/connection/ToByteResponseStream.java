@@ -29,7 +29,6 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.TempBuffer;
@@ -44,7 +43,8 @@ import java.util.logging.Logger;
  * Handles the dual char/byte buffering for the response stream.
  */
 public abstract class ToByteResponseStream extends AbstractResponseStream {
-  private static final Logger log = Log.open(ToByteResponseStream.class);
+  private static final Logger log 
+    = Logger.getLogger(ToByteResponseStream.class.getName());
   private static final L10N L = new L10N(ToByteResponseStream.class);
 
   protected static final int SIZE = TempBuffer.SIZE;

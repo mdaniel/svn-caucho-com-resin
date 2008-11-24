@@ -29,7 +29,6 @@
 
 package com.caucho.db.store;
 
-import com.caucho.log.Log;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.util.SyncCacheListener;
@@ -42,7 +41,8 @@ import java.util.logging.Logger;
  * Represents a versioned row
  */
 abstract public class Block implements SyncCacheListener {
-  private static final Logger log = Log.open(Block.class);
+  private static final Logger log
+    = Logger.getLogger(Block.class.getName());
   private static final L10N L = new L10N(Block.class);
 
   protected static final FreeList<byte[]> _freeBuffers

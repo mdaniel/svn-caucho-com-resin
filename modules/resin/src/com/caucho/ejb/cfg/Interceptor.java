@@ -30,7 +30,6 @@
 package com.caucho.ejb.cfg;
 
 import com.caucho.bytecode.*;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.PersistentDependency;
 
@@ -48,7 +47,8 @@ import javax.interceptor.InvocationContext;
  * Configuration for an interceptor.
  */
 public class Interceptor {
-  private static Logger log = Log.open(Interceptor.class);
+  private static Logger log
+    = Logger.getLogger(Interceptor.class.getName());
   private static final L10N L = new L10N(Interceptor.class);
 
   private String _interceptorClass;

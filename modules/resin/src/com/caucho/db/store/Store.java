@@ -31,7 +31,6 @@ package com.caucho.db.store;
 
 import com.caucho.db.Database;
 import com.caucho.lifecycle.Lifecycle;
-import com.caucho.log.Log;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -84,7 +83,8 @@ import java.util.logging.Logger;
  * associated with a transaction.
  */
 public class Store {
-  private final static Logger log = Log.open(Store.class);
+  private final static Logger log
+    = Logger.getLogger(Store.class.getName());
   private final static L10N L = new L10N(Store.class);
   
   public final static int BLOCK_BITS = 16;

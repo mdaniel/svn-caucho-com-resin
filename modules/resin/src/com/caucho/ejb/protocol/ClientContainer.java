@@ -30,7 +30,6 @@
 package com.caucho.ejb.protocol;
 
 import com.caucho.ejb.AbstractServer;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 

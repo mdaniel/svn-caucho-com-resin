@@ -31,19 +31,16 @@ package com.caucho.db.fun;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.FunExpr;
 import com.caucho.db.sql.QueryContext;
-import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.logging.Logger;
 
 public class NowExpr extends FunExpr {
   protected static final L10N L = new L10N(NowExpr.class);
-  private static final Logger log = Log.open(NowExpr.class);
-
+  
   protected void addArg(Expr expr)
     throws SQLException
   {

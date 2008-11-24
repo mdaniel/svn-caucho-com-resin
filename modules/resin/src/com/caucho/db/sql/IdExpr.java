@@ -31,7 +31,6 @@ package com.caucho.db.sql;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.sql.SQLException;
@@ -40,7 +39,6 @@ import java.util.logging.Logger;
 
 class IdExpr extends Expr {
   private static final L10N L = new L10N(IdExpr.class);
-  private static final Logger log = Log.open(IdExpr.class);
 
   private FromItem _fromItem;
   private Column _column;

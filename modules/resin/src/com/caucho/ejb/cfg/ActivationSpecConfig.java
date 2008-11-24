@@ -33,7 +33,6 @@ import javax.resource.spi.*;
 
 import com.caucho.config.types.BeanConfig;
 import com.caucho.config.*;
-import com.caucho.webbeans.cfg.*;
 import com.caucho.util.L10N;
 
 /**

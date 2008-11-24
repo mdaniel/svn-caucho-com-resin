@@ -28,7 +28,6 @@
 
 package com.caucho.xpath;
 
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
@@ -54,7 +53,8 @@ import java.util.logging.Logger;
  * Parses an XPath expression.
  */
 class XPathParser {
-  private static final Logger log = Log.open(XPathParser.class);
+  private static final Logger log
+    = Logger.getLogger(XPathParser.class.getName());
   private static final L10N L = new L10N(XPathParser.class);
 
   private final static int ANCESTOR_AXIS = 0;

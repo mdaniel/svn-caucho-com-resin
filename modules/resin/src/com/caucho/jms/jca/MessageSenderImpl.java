@@ -28,7 +28,6 @@
 
 package com.caucho.jms.jca;
 
-import com.caucho.log.Log;
 import com.caucho.services.message.MessageSender;
 import com.caucho.services.message.MessageServiceException;
 import com.caucho.util.L10N;
@@ -43,7 +42,8 @@ import java.util.logging.Logger;
  * The managed factory implementation.
  */
 class MessageSenderImpl implements MessageSender {
-  protected static final Logger log = Log.open(MessageSenderImpl.class);
+  protected static final Logger log
+    = Logger.getLogger(MessageSenderImpl.class.getName());
   private static final L10N L = new L10N(MessageSenderImpl.class);
 
   private MessageSenderManager _manager;

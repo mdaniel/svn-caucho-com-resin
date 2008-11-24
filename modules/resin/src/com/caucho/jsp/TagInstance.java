@@ -29,7 +29,6 @@
 package com.caucho.jsp;
 
 import com.caucho.jsp.java.JspTagFileSupport;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
@@ -46,7 +45,8 @@ import java.util.logging.Logger;
  */
 public class TagInstance {
   static final L10N L = new L10N(TagInstance.class);
-  static final Logger log = Log.open(TagInstance.class);
+  private static final Logger log
+    = Logger.getLogger(TagInstance.class.getName());
 
   // Special object to note that the attribute varies
   private static final Object VARIES = new Varies();

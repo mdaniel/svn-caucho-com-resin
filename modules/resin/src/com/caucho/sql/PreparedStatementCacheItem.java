@@ -28,7 +28,6 @@
 
 package com.caucho.sql;
 
-import com.caucho.log.Log;
 import com.caucho.util.CacheListener;
 
 import java.lang.ref.SoftReference;
@@ -40,7 +39,8 @@ import java.util.logging.Logger;
  * Represtents a prepared statement.
  */
 class PreparedStatementCacheItem implements CacheListener {
-  private final static Logger log = Log.open(PreparedStatementCacheItem.class);
+  private final static Logger log
+    = Logger.getLogger(PreparedStatementCacheItem.class.getName());
 
   private PreparedStatementKey _key;
   private SoftReference<PreparedStatement> _pStmtRef;

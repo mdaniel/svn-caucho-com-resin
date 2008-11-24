@@ -29,7 +29,6 @@
 package com.caucho.db.sql;
 
 import com.caucho.db.table.Table;
-import com.caucho.log.Log;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -38,8 +37,6 @@ import java.util.logging.Logger;
  * Represents a table binding for a from.
  */
 class FromItem {
-  private static final Logger log = Log.open(FromItem.class);
-
   private Table _table;
   private String _name;
 

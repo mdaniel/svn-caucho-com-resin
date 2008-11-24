@@ -29,7 +29,6 @@
 
 package com.caucho.sql;
 
-import com.caucho.log.Log;
 import com.caucho.jca.IdlePoolSet;
 import com.caucho.server.cluster.*;
 import com.caucho.server.resin.Resin;

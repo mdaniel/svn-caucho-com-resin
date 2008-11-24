@@ -29,7 +29,6 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.log.Log;
 import com.caucho.util.QDate;
 
 import java.io.InputStream;
@@ -38,8 +37,6 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 class ParamExpr extends Expr {
-  private static final Logger log = Log.open(ParamExpr.class);
-  
   private static final int NULL = 0;
   private static final int BOOLEAN = NULL + 1;
   private static final int STRING = BOOLEAN + 1;

@@ -28,15 +28,12 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.log.Log;
 import com.caucho.util.IntArray;
 
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
 abstract class Order {
-  private static final Logger log = Log.open(Order.class);
-
   private boolean _isAscending = true;
 
   protected Order _next;

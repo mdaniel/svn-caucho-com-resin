@@ -33,16 +33,10 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
 
-import com.caucho.util.*;
-
 /**
  * Represents an introspected method.
  */
 public class ApiMethod {
-  private static final L10N L = new L10N(ApiMethod.class);
-
-  private ApiClass _apiClass;
-  
   private Method _method;
   private Class _returnType;
   private Class []_parameterTypes;
@@ -58,7 +52,6 @@ public class ApiMethod {
 		   Method method,
 		   HashMap<String,Type> typeMap)
   {
-    _apiClass = apiClass;
     _method = method;
 
     introspect(method, typeMap);

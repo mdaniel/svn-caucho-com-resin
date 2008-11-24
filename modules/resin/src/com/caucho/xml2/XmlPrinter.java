@@ -29,7 +29,6 @@
 package com.caucho.xml2;
 
 import com.caucho.java.LineMap;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
@@ -63,7 +62,8 @@ import java.util.logging.Logger;
  * </pre></code>
  */
 public class XmlPrinter implements XMLWriter {
-  static final Logger log = Log.open(XmlPrinter.class);
+  static final Logger log
+    = Logger.getLogger(XmlPrinter.class.getName());
   static final L10N L = new L10N(XmlPrinter.class);
   
   private static final int NO_PRETTY = 0;

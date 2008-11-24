@@ -41,11 +41,14 @@ import java.beans.PropertyEditorManager;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a Java scriptlet.
  */
 public class JspSetProperty extends JspContainerNode {
+  private static final Logger log
+    = Logger.getLogger(JspSetProperty.class.getName());
   private static final QName NAME = new QName("name");
   private static final QName PROPERTY = new QName("property");
   private static final QName PARAM = new QName("param");

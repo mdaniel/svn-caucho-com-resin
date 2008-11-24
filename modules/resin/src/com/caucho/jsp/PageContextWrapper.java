@@ -29,7 +29,6 @@
 
 package com.caucho.jsp;
 
-import com.caucho.log.Log;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.FreeList;

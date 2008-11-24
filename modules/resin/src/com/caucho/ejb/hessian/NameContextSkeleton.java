@@ -34,7 +34,6 @@ import com.caucho.ejb.protocol.Skeleton;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.HessianProtocolException;
-import com.caucho.log.Log;
 import com.caucho.services.name.NameServerRemote;
 
 import javax.ejb.EJBHome;

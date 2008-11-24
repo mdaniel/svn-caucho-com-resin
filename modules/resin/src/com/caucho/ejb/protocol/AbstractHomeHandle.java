@@ -28,7 +28,6 @@
 
 package com.caucho.ejb.protocol;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.ejb.EJBHome;
@@ -41,7 +40,8 @@ import java.util.logging.Logger;
  */
 abstract public class AbstractHomeHandle implements HomeHandle {
   private static L10N L = new L10N(AbstractHomeHandle.class);
-  protected static final Logger log = Log.open(AbstractHomeHandle.class);
+  private static final Logger log 
+    = Logger.getLogger(AbstractHomeHandle.class.getName());
 
   /**
    * Returns the remote API class.

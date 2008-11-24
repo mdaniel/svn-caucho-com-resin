@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.logging.*;
 
 public class JspDirectivePage extends JspNode {
+  private static final Logger log
+    = Logger.getLogger(JspDirectivePage.class.getName());
   static L10N L = new L10N(JspDirectivePage.class);
   
   private static final QName IS_EL_IGNORED = new QName("isELIgnored");

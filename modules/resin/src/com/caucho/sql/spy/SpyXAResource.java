@@ -28,7 +28,6 @@
 
 package com.caucho.sql.spy;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.transaction.xa.XAException;
@@ -41,7 +40,8 @@ import java.util.logging.Logger;
  * Spying on a connection.
  */
 public class SpyXAResource implements XAResource {
-  protected final static Logger log = Log.open(SpyXAResource.class);
+  protected final static Logger log 
+    = Logger.getLogger(SpyXAResource.class.getName());
   protected final static L10N L = new L10N(SpyXAResource.class);
 
   // The underlying resource

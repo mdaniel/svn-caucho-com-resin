@@ -29,7 +29,6 @@
 package com.caucho.xsl.java;
 
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CompileException;
 import com.caucho.util.L10N;
@@ -53,7 +52,8 @@ import java.util.logging.Logger;
  */
 public abstract class XslNode {
   static final L10N L = new L10N(XslNode.class);
-  static final Logger log = Log.open(XslNode.class);
+  private static final Logger log
+    = Logger.getLogger(XslNode.class.getName());
 
   protected String _systemId;
   protected String _filename;

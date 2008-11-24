@@ -56,13 +56,14 @@ import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ResinMXBean;
 import com.caucho.management.server.ThreadPoolMXBean;
 import com.caucho.naming.Jndi;
+import com.caucho.repository.ModuleRepository;
 import com.caucho.server.admin.TransactionManager;
 import com.caucho.server.admin.Management;
 import com.caucho.server.cache.TempFileManager;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.repository.ModuleRepository;
+import com.caucho.server.repository.ModuleRepositoryImpl;
 import com.caucho.server.util.*;
 import com.caucho.server.webbeans.ResinWebBeansProducer;
 import com.caucho.util.Alarm;
@@ -159,7 +160,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private Path _managementPath;
   protected Management _management;
-  private ModuleRepository _repository = new ModuleRepository();
+  private ModuleRepositoryImpl _repository = new ModuleRepositoryImpl();
   private TempFileManager _tempFileManager;
 
   private HempBrokerManager _brokerManager;

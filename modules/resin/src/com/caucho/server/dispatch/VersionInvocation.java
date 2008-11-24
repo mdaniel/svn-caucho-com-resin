@@ -29,7 +29,6 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.log.Log;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.connection.AbstractHttpRequest;
@@ -45,7 +44,8 @@ import java.util.logging.Logger;
 public class VersionInvocation extends Invocation
 {
   static final L10N L = new L10N(Invocation.class);
-  static final Logger log = Logger.getLogger(Invocation.class.getName());
+  private static final Logger log
+    = Logger.getLogger(Invocation.class.getName());
 
   private final Invocation _invocation;
   private final WebApp _webApp;

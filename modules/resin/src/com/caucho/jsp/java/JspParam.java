@@ -35,11 +35,14 @@ import com.caucho.xml.QName;
 
 import java.io.IOException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a Java scriptlet.
  */
 public class JspParam extends JspNode {
+  private static final Logger log
+    = Logger.getLogger(JspParam.class.getName());
   private static final QName NAME = new QName("name");
   private static final QName VALUE = new QName("value");
   

@@ -36,7 +36,6 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
-import com.caucho.log.Log;
 import com.caucho.make.AlwaysModified;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
@@ -80,7 +79,8 @@ public class WebAppContainer
   implements DispatchBuilder, ClassLoaderListener, EnvironmentListener
 {
   static final L10N L = new L10N(WebApp.class);
-  static final Logger log = Log.open(WebAppContainer.class);
+  private static final Logger log
+    = Logger.getLogger(WebAppContainer.class.getName());
 
   // The owning dispatch server
   private DispatchServer _dispatchServer;

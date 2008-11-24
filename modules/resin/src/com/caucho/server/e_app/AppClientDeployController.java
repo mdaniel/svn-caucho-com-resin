@@ -29,7 +29,6 @@
 package com.caucho.server.e_app;
 
 import com.caucho.config.Config;
-import com.caucho.log.Log;
 import com.caucho.server.deploy.ExpandDeployController;
 import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
@@ -44,7 +43,8 @@ import java.util.logging.Logger;
  * A configuration entry for Enterprise Application clients
  */
 public class AppClientDeployController extends ExpandDeployController<EntAppClient> {
-  private static final Logger log = Log.open(AppClientDeployController.class);
+  private static final Logger log
+    = Logger.getLogger(AppClientDeployController.class.getName());
   private static final L10N L = new L10N(AppClientDeployController.class);
 
   // The ear name

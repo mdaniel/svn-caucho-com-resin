@@ -29,7 +29,6 @@
 
 package com.caucho.server.deploy;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 
@@ -43,7 +42,8 @@ import java.util.logging.Logger;
  */
 public class DeployListGenerator<E extends DeployController>
   extends DeployGenerator<E> implements Dependency {
-  private static final Logger log = Log.open(DeployListGenerator.class);
+  private static final Logger log
+    = Logger.getLogger(DeployListGenerator.class.getName());
   private static final L10N L = new L10N(DeployListGenerator.class);
 
   private ArrayList<DeployGenerator<E>> _generatorList

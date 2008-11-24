@@ -43,7 +43,6 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.MergePath;
@@ -68,7 +67,8 @@ public class EJBServer
   implements EnvironmentBean
 {
   static final L10N L = new L10N(EJBServer.class);
-  protected static final Logger log = Log.open(EJBServer.class);
+  protected static final Logger log
+    = Logger.getLogger(EJBServer.class.getName());
 
   private static EnvironmentLocal<EJBServer> _localServer
     = new EnvironmentLocal<EJBServer>("caucho.ejb-server");

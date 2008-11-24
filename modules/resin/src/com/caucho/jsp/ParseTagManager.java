@@ -29,7 +29,6 @@
 
 package com.caucho.jsp;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.xml.QName;
@@ -44,7 +43,8 @@ import java.util.logging.Logger;
  */
 public class ParseTagManager {
   static final L10N L = new L10N(ParseTagManager.class);
-  private static final Logger log = Log.open(ParseTagManager.class);
+  private static final Logger log
+    = Logger.getLogger(ParseTagManager.class.getName());
 
   private JspResourceManager _resourceManager;
   private TaglibManager _taglibManager;

@@ -32,7 +32,6 @@ import com.caucho.config.types.Period;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
-import com.caucho.log.Log;
 import com.caucho.transaction.xalog.AbstractXALogManager;
 import com.caucho.transaction.xalog.AbstractXALogStream;
 import com.caucho.util.Crc64;

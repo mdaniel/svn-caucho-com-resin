@@ -28,7 +28,6 @@
 
 package com.caucho.vfs;
 
-import com.caucho.log.Log;
 import com.caucho.util.IntMap;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
@@ -49,7 +48,8 @@ import java.util.logging.Logger;
  * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
 public class QSocketWrapper extends QSocket {
-  private static final Logger log = Log.open(QSocketWrapper.class);
+  private static final Logger log
+    = Logger.getLogger(QSocketWrapper.class.getName());
   private static Class sslSocketClass;
   private static IntMap sslKeySizes;
   

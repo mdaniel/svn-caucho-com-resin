@@ -30,7 +30,6 @@ package com.caucho.server.dispatch;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
-import com.caucho.log.Log;
 import com.caucho.util.IntArray;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
@@ -42,7 +41,8 @@ import java.util.logging.Logger;
  */
 public class RunAt {
   static L10N L = new L10N(RunAt.class);
-  private static final Logger log = Log.open(RunAt.class);
+  private static final Logger log
+    = Logger.getLogger(RunAt.class.getName());
 
   private QDate _cal = QDate.createLocal();
 

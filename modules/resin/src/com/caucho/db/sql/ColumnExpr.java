@@ -31,14 +31,11 @@ package com.caucho.db.sql;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
-import com.caucho.log.Log;
 
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
 class ColumnExpr extends Expr {
-  private static final Logger log = Log.open(ColumnExpr.class);
-
   private Table _table;
   
   private int _tableIndex;

@@ -33,7 +33,6 @@ import com.caucho.jms.JmsRuntimeException;
 import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
 import com.caucho.jms.selector.*;
-import com.caucho.log.Log;
 import com.caucho.util.*;
 
 import javax.jms.*;

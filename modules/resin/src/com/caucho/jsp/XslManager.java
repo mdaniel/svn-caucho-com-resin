@@ -29,7 +29,6 @@
 package com.caucho.jsp;
 
 import com.caucho.loader.DynamicClassLoader;
-import com.caucho.log.Log;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
@@ -51,7 +50,8 @@ import java.lang.ref.SoftReference;
 import java.util.logging.Logger;
 
 class XslManager {
-  private static final Logger log = Log.open(XslManager.class);
+  private static final Logger log
+    = Logger.getLogger(XslManager.class.getName());
   static final L10N L = new L10N(XslManager.class);
 
   private WebApp _webApp;

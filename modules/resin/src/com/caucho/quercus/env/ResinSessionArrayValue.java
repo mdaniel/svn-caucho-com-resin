@@ -29,16 +29,8 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.lib.UnserializeReader;
 import com.caucho.server.cluster.ClusterObject;
-import com.caucho.util.CacheListener;
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.IdentityHashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

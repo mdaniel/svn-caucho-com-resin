@@ -29,7 +29,6 @@
 
 package com.caucho.naming.mbean;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.naming.Context;
@@ -43,9 +42,6 @@ import java.util.logging.Logger;
  * Create a remote object
  */
 public class mbeanURLContextFactory implements ObjectFactory {
-  private static L10N L = new L10N(mbeanURLContextFactory.class);
-  private static Logger dbg = Log.open(mbeanURLContextFactory.class);
-
   /**
    * Returns the object instance for the given name.
    */

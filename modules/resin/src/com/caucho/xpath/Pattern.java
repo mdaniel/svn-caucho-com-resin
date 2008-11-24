@@ -28,7 +28,6 @@
 
 package com.caucho.xpath;
 
-import com.caucho.log.Log;
 import com.caucho.xpath.pattern.AbstractPattern;
 import com.caucho.xpath.pattern.NodeIterator;
 
@@ -49,7 +48,8 @@ import java.util.logging.Logger;
  * match patterns.
  */
 public class Pattern {
-  protected final static Logger log = Log.open(Pattern.class);
+  protected final static Logger log
+    = Logger.getLogger(Pattern.class.getName());
   
   private AbstractPattern pattern;
 

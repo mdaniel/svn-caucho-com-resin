@@ -29,7 +29,6 @@
 
 package com.caucho.server.hmux;
 
-import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.*;
 
@@ -48,7 +47,8 @@ import java.util.logging.Logger;
  * Underlying stream handling HTTP requests.
  */
 class HmuxStream extends StreamImpl {
-  private static final Logger log = Log.open(HmuxStream.class);
+  private static final Logger log
+    = Logger.getLogger(HmuxStream.class.getName());
   // reserved headers that should not be passed to the HTTP server
   private static HashMap<String,String> _reserved;
 

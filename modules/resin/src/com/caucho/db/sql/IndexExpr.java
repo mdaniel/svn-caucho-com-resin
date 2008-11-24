@@ -31,7 +31,6 @@ package com.caucho.db.sql;
 import com.caucho.db.index.BTree;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.TableIterator;
-import com.caucho.log.Log;
 import com.caucho.sql.SQLExceptionWrapper;
 
 import java.io.IOException;
@@ -39,8 +38,6 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 class IndexExpr extends RowIterateExpr {
-  private static final Logger log = Log.open(IndexExpr.class);
-
   private IdExpr _columnExpr;
   private Column _column;
   private BTree _index;

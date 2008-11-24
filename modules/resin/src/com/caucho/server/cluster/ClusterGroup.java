@@ -29,7 +29,6 @@
 package com.caucho.server.cluster;
 
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -42,7 +41,8 @@ import java.util.logging.Logger;
  */
 public class ClusterGroup {
   private static final L10N L = new L10N(ClusterGroup.class);
-  private static final Logger log = Log.open(ClusterGroup.class);
+  private static final Logger log
+    = Logger.getLogger(ClusterGroup.class.getName());
 
   static protected final EnvironmentLocal<ClusterGroup> _clusterGroupLocal
     = new EnvironmentLocal<ClusterGroup>();

@@ -31,7 +31,6 @@ package com.caucho.jsp;
 
 import com.caucho.java.LineMap;
 import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.log.Log;
 import com.caucho.server.webapp.Application;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharScanner;

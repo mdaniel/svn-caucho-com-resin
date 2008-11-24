@@ -29,7 +29,6 @@
 package com.caucho.jms.selector;
 
 import com.caucho.jms.message.ObjectConverter;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.jms.JMSException;
@@ -40,7 +39,8 @@ import java.util.logging.Logger;
  * The base selector.
  */
 abstract public class Selector  {
-  protected static final Logger log = Log.open(Selector.class);
+  protected static final Logger log
+    = Logger.getLogger(Selector.class.getName());
   static final L10N L = new L10N(Selector.class);
 
   protected final static Object NULL = new Object();

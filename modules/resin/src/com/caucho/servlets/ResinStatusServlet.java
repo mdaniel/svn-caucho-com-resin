@@ -31,7 +31,6 @@ package com.caucho.servlets;
 
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
-import com.caucho.log.Log;
 import com.caucho.management.server.*;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
@@ -62,7 +61,8 @@ import java.util.logging.Logger;
  * a role.)
  */
 public class ResinStatusServlet extends GenericServlet {
-  static final protected Logger log = Log.open(ResinStatusServlet.class);
+  static final protected Logger log
+    = Logger.getLogger(ResinStatusServlet.class.getName());
   static final L10N L = new L10N(ResinStatusServlet.class);
 
   private static final long SECOND = 1000L;

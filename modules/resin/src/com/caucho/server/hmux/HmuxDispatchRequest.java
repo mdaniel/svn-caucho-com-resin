@@ -29,7 +29,6 @@
 
 package com.caucho.server.hmux;
 
-import com.caucho.log.Log;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterPort;
 import com.caucho.server.cluster.ClusterServer;
@@ -50,7 +49,8 @@ import java.util.logging.Logger;
  * Handles the filter mapping (config) requests from a remote dispatcher.
  */
 public class HmuxDispatchRequest {
-  private static final Logger log = Log.open(HmuxDispatchRequest.class);
+  private static final Logger log
+    = Logger.getLogger(HmuxDispatchRequest.class.getName());
 
   // other, specialized protocols
   public static final int HMUX_HOST =      'h';

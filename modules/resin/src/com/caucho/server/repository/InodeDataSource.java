@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.ivy.IvyPattern;
 import com.caucho.util.L10N;
+import com.caucho.repository.DataSource;
 import com.caucho.server.cache.TempFileInode;
 import com.caucho.server.resin.Resin;
 import com.caucho.vfs.Path;

@@ -30,7 +30,6 @@
 package com.caucho.jsp;
 
 import com.caucho.java.LineMap;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;

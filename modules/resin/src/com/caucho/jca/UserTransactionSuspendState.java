@@ -28,7 +28,6 @@
 
 package com.caucho.jca;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -38,7 +37,8 @@ import java.util.logging.Logger;
  * Saved state for a suspend.
  */
 public class UserTransactionSuspendState {
-  private static final Logger log = Log.open(UserTransactionSuspendState.class);
+  private static final Logger log
+    = Logger.getLogger(UserTransactionSuspendState.class.getName());
   private static final L10N L = new L10N(UserTransactionSuspendState.class);
 
   private ArrayList<PoolItem> _poolItems = new ArrayList<PoolItem>();

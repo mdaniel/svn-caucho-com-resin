@@ -29,7 +29,6 @@
 
 package com.caucho.jms.jca;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.jms.JMSException;
@@ -47,7 +46,8 @@ import java.util.logging.Logger;
  */
 public class MessageListenerSpec implements ActivationSpec {
   private static final L10N L = new L10N(MessageListenerSpec.class);
-  private static final Logger log = Log.open(MessageListenerSpec.class);
+  private static final Logger log
+    = Logger.getLogger(MessageListenerSpec.class.getName());
 
   private ResourceAdapterImpl _ra;
   

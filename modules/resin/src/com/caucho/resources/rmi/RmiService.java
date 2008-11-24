@@ -29,7 +29,6 @@
 package com.caucho.resources.rmi;
 
 import com.caucho.config.ConfigException;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.resource.spi.ResourceAdapterInternalException;
@@ -43,7 +42,8 @@ import java.util.logging.Logger;
  *
  */
 public class RmiService {
-  static protected final Logger log = Log.open(RmiService.class);
+  static private final Logger log
+   = Logger.getLogger(RmiService.class.getName());
   static final L10N L = new L10N(RmiService.class);
 
   private RmiRegistry _registry;

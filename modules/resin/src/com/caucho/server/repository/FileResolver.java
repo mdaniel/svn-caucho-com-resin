@@ -27,12 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.repository;
+package com.caucho.server.repository;
 
 import com.caucho.config.ConfigException;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.ivy.IvyPattern;
 import com.caucho.util.L10N;
+import com.caucho.repository.DataSource;
+import com.caucho.repository.ModuleNotFoundException;
+import com.caucho.repository.Resolver;
 import com.caucho.server.cache.TempFileInode;
 import com.caucho.server.cache.TempFileManager;
 import com.caucho.server.resin.Resin;

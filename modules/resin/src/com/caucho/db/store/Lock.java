@@ -29,7 +29,6 @@
 
 package com.caucho.db.store;
 
-import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
@@ -42,7 +41,8 @@ import java.util.logging.Logger;
  */
 public final class Lock {
   private final static L10N L = new L10N(Lock.class);
-  private final static Logger log = Log.open(Lock.class);
+  private final static Logger log
+    = Logger.getLogger(Lock.class.getName());
 
   private final String _id;
 

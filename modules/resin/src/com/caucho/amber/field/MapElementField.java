@@ -31,7 +31,6 @@ package com.caucho.amber.field;
 import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.EntityType;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -44,7 +43,8 @@ import java.util.logging.Logger;
 public class MapElementField extends AssociationField
   implements MapField {
   private static final L10N L = new L10N(MapElementField.class);
-  protected static final Logger log = Log.open(MapElementField.class);
+  protected static final Logger log
+    = Logger.getLogger(MapElementField.class.getName());
 
   private ArrayList<AmberColumn> _indexColumns;
   

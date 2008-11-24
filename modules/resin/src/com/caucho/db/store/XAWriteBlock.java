@@ -29,7 +29,6 @@
 
 package com.caucho.db.store;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -39,7 +38,6 @@ import java.util.logging.Logger;
  * Represents a write (dirty) block.
  */
 public class XAWriteBlock extends WriteBlock {
-  private static final Logger log = Log.open(XAWriteBlock.class);
   private static final L10N L = new L10N(XAWriteBlock.class);
 
   private byte []_buffer;

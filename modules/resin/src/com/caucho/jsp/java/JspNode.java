@@ -36,7 +36,6 @@ import com.caucho.jsp.JspParser;
 import com.caucho.jsp.Namespace;
 import com.caucho.jsp.ParseState;
 import com.caucho.jsp.TagInstance;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CompileException;
 import com.caucho.util.L10N;
@@ -64,7 +63,8 @@ import java.util.logging.Logger;
 
 public abstract class JspNode {
   static final L10N L = new L10N(JspNode.class);
-  static final Logger log = Log.open(JspNode.class);
+  private static final Logger log 
+    = Logger.getLogger(JspNode.class.getName());
 
   static final String JSP_NS = JspParser.JSP_NS;
 

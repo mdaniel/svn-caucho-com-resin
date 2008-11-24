@@ -46,6 +46,7 @@ import com.caucho.vfs.BufferedReaderAdapter;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
+import com.caucho.webbeans.context.ScopeRemoveListener;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;

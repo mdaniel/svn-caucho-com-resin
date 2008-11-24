@@ -28,7 +28,6 @@
 
 package com.caucho.jca;
 
-import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
@@ -47,7 +46,8 @@ import java.util.logging.Logger;
  */
 public class WorkManagerImpl implements WorkManager {
   private static final L10N L = new L10N(WorkManagerImpl.class);
-  private static final Logger log = Log.open(WorkManagerImpl.class);
+  private static final Logger log
+    = Logger.getLogger(WorkManagerImpl.class.getName());
 
   private ArrayList<Work> _activeTasks = new ArrayList<Work>();
 

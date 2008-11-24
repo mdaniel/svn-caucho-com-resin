@@ -29,15 +29,12 @@
 package com.caucho.db.sql;
 
 import com.caucho.db.table.TableIterator;
-import com.caucho.log.Log;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
-class RowIterateExpr extends Expr {
-  private static final Logger log = Log.open(RowIterateExpr.class);
-  
+class RowIterateExpr extends Expr { 
   /**
    * Sets the initial row.
    */

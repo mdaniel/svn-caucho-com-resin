@@ -28,7 +28,6 @@
 
 package com.caucho.servlets.webdav;
 
-import com.caucho.log.Log;
 import com.caucho.util.NullIterator;
 
 import javax.servlet.ServletContext;
@@ -43,7 +42,8 @@ import java.util.logging.Logger;
  * Represents a virtual filesystem.
  */
 public abstract class AbstractPath {
-  protected static final Logger log = Log.open(AbstractPath.class);
+  protected static final Logger log
+    = Logger.getLogger(AbstractPath.class.getName());
 
   /**
    * Returns true if the named file is a file.

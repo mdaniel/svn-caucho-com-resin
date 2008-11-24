@@ -28,7 +28,6 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.log.Log;
 import com.caucho.util.FreeList;
 
 import java.util.logging.Logger;
@@ -37,8 +36,6 @@ import java.util.logging.Logger;
  * Represents a row of a group item.
  */
 class GroupItem {
-  private static final Logger log = Log.open(GroupItem.class);
-
   private static FreeList<GroupItem> _freeList = new FreeList<GroupItem>(256);
   
   private Data []_data;

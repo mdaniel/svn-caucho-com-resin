@@ -28,7 +28,6 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.log.Log;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.transaction.TransactionImpl;
@@ -49,7 +48,8 @@ import java.util.logging.Logger;
  * be the servlet itself.
  */
 public class ContextFilterChain implements FilterChain {
-  private static final Logger log = Log.open(ContextFilterChain.class);
+  private static final Logger log
+    = Logger.getLogger(ContextFilterChain.class.getName());
   
   // Next filter chain
   private FilterChain _next;

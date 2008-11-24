@@ -32,7 +32,6 @@ package com.caucho.ejb;
 import com.caucho.ejb.protocol.ProtocolContainer;
 import com.caucho.ejb.protocol.Skeleton;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.log.Log;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.util.CauchoSystem;
@@ -58,7 +57,8 @@ import java.util.logging.Logger;
  */
 public class EJBServlet extends GenericServlet {
   private static final L10N L = new L10N(EJBServlet.class);
-  private final Logger log = Log.open(EJBServlet.class);
+  private final Logger log
+    = Logger.getLogger(EJBServlet.class.getName());
 
   private String _urlPrefix;
 

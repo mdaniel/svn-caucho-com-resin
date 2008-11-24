@@ -28,8 +28,6 @@
 
 package com.caucho.jsp;
 
-import com.caucho.log.Log;
-
 import javax.el.ELContext;
 import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.JspException;
@@ -43,7 +41,8 @@ import java.util.logging.Logger;
  * Abstract implementation for the fragment support.
  */
 abstract public class JspFragmentSupport extends JspFragment {
-  private static final Logger log = Log.open(JspFragmentSupport.class);
+  private static final Logger log
+    = Logger.getLogger(JspFragmentSupport.class.getName());
 
   // the parent page context
   protected JspContext _jsp_parentContext;

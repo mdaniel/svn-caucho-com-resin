@@ -28,8 +28,6 @@
 
 package com.caucho.jms.jca;
 
-import com.caucho.log.Log;
-
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.resource.spi.endpoint.MessageEndpoint;
@@ -40,7 +38,8 @@ import java.util.logging.Logger;
  * The JMS MessageListener endpoint
  */
 public class ListenerEndpoint implements MessageEndpoint, MessageListener {
-  private static final Logger log = Log.open(ListenerEndpoint.class);
+  private static final Logger log 
+    = Logger.getLogger(ListenerEndpoint.class.getName());
 
   private MessageListener _listener;
   

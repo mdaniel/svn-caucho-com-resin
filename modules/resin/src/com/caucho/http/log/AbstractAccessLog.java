@@ -28,7 +28,6 @@
 
 package com.caucho.http.log;
 
-import com.caucho.log.Log;
 import com.caucho.vfs.Path;
 
 import javax.servlet.ServletContext;
@@ -42,7 +41,8 @@ import java.util.logging.Logger;
  * Represents an log of every top-level request to the server.
  */
 abstract public class AbstractAccessLog {
-  protected static final Logger log = Log.open(AbstractAccessLog.class);
+  protected static final Logger log
+    = Logger.getLogger(AbstractAccessLog.class.getName());
 
   protected Path path;
 

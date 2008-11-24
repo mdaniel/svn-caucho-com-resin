@@ -28,7 +28,6 @@
 
 package com.caucho.jca;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.lang.ref.SoftReference;
@@ -42,7 +41,8 @@ import java.util.logging.Logger;
  */
 public class ThreadConnectionManager {
   private static final L10N L = new L10N(ThreadConnectionManager.class);
-  private static final Logger log = Log.open(ThreadConnectionManager.class);
+  private static final Logger log
+    = Logger.getLogger(ThreadConnectionManager.class.getName());
 
   private static final ThreadLocal<ThreadConnectionManager> _threadManager
     = new ThreadLocal<ThreadConnectionManager>();

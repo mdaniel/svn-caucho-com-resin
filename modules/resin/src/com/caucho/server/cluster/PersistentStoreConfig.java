@@ -30,7 +30,6 @@
 package com.caucho.server.cluster;
 
 import com.caucho.config.ConfigException;
-import com.caucho.log.Log;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 

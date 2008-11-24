@@ -30,7 +30,6 @@
 package com.caucho.jstl.el;
 
 import com.caucho.el.Expr;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.el.ELContext;
@@ -45,7 +44,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SqlTransactionTag extends TagSupport implements TryCatchFinally  {
-  private static final Logger log = Log.open(SqlTransactionTag.class);
+  private static final Logger log
+    = Logger.getLogger(SqlTransactionTag.class.getName());
   private static final L10N L = new L10N(SqlTransactionTag.class);
   
   private Expr _dataSource;

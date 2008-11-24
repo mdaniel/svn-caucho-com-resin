@@ -31,7 +31,6 @@ package com.caucho.db.jdbc;
 import com.caucho.db.Database;
 import com.caucho.db.sql.Query;
 import com.caucho.db.store.Transaction;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.sql.Array;
@@ -57,7 +56,8 @@ import java.util.logging.Logger;
  */
 public class ConnectionImpl implements java.sql.Connection {
   private static final L10N L = new L10N(ConnectionImpl.class);
-  private static final Logger log = Log.open(ConnectionImpl.class);
+  private static final Logger log
+    = Logger.getLogger(ConnectionImpl.class.getName());
 
   private Database _db;
   private PooledConnectionImpl _pooledConnection;

@@ -28,7 +28,6 @@
 
 package com.caucho.naming.hessian;
 
-import com.caucho.log.Log;
 import com.caucho.naming.AbstractModel;
 import com.caucho.naming.ContextImpl;
 import com.caucho.util.L10N;
@@ -43,7 +42,8 @@ import java.util.logging.Logger;
  * the <code>AbstractModel</code>.
  */
 public class HessianContextImpl extends ContextImpl {
-  protected static final Logger dbg = Log.open(HessianContextImpl.class);
+  protected static final Logger dbg 
+    = Logger.getLogger(HessianContextImpl.class.getName());
   protected static final L10N L = new L10N(HessianContextImpl.class);
 
   /**

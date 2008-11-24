@@ -31,14 +31,10 @@ package com.caucho.db.sql;
 import com.caucho.db.jdbc.GeneratedKeysResultSet;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
-import com.caucho.log.Log;
-
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
 class AutoIncrementExpr extends Expr {
-  private static final Logger log = Log.open(AutoIncrementExpr.class);
-
   private Table _table;
 
   AutoIncrementExpr(Table table)

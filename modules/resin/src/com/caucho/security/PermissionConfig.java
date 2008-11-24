@@ -30,7 +30,6 @@ package com.caucho.security;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.InstantiationConfig;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.security.Permission;
@@ -40,7 +39,6 @@ import java.util.logging.Logger;
  * Permission configuration.
  */
 public class PermissionConfig {
-  static final Logger log = Log.open(PermissionConfig.class);
   static final L10N L = new L10N(PermissionConfig.class);
 
   private InstantiationConfig _type;

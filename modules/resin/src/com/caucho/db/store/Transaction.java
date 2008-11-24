@@ -30,7 +30,6 @@
 package com.caucho.db.store;
 
 import com.caucho.db.jdbc.ConnectionImpl;
-import com.caucho.log.Log;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 import com.caucho.util.LongKeyHashMap;
@@ -46,7 +45,8 @@ import java.util.logging.Logger;
  * Represents a single transaction.
  */
 public class Transaction extends StoreTransaction {
-  private static final Logger log = Log.open(Transaction.class);
+  private static final Logger log
+    = Logger.getLogger(Transaction.class.getName());
   private static final L10N L = new L10N(Transaction.class);
 
   private static long AUTO_COMMIT_TIMEOUT = 30000L;

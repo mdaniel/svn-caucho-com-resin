@@ -31,7 +31,6 @@ package com.caucho.server.dispatch;
 
 import com.caucho.servlet.comet.CometFilter;
 import com.caucho.servlet.comet.CometFilterChain;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.servlet.Filter;

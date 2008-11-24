@@ -40,7 +40,6 @@ import com.caucho.db.store.Block;
 import com.caucho.db.store.Lock;
 import com.caucho.db.store.Store;
 import com.caucho.db.store.Transaction;
-import com.caucho.log.Log;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -70,7 +69,8 @@ import java.util.logging.Logger;
  * </pre>
  */
 public class Table extends Store {
-  private final static Logger log = Log.open(Table.class);
+  private final static Logger log
+    = Logger.getLogger(Table.class.getName());
   private final static L10N L = new L10N(Table.class);
 
   private final static int ROOT_DATA_OFFSET = STORE_CREATE_END;

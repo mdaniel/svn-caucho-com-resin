@@ -28,6 +28,7 @@
 
 package com.caucho.ejb.cfg;
 
+import com.caucho.config.gen.ApplicationExceptionConfig;
 import com.caucho.j2ee.cfg.J2eeSecurityRole;
 
 import java.util.ArrayList;

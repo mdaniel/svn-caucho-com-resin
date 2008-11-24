@@ -28,7 +28,6 @@
 
 package com.caucho.server.host;
 
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -40,7 +39,8 @@ import java.util.logging.Logger;
  * Domain name normalization
  */
 public class DomainName {
-  static final Logger log = Log.open(DomainName.class);
+  static final Logger log 
+    = Logger.getLogger(DomainName.class.getName());
   static final L10N L = new L10N(DomainName.class);
 
   private final static char ENCODE[];

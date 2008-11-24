@@ -32,7 +32,6 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.jca.cfg.ConnectorConfig;
 import com.caucho.jca.cfg.ResourceAdapterConfig;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -47,7 +46,8 @@ import java.util.logging.Logger;
  */
 public class ResourceManagerConfig {
   private static final L10N L = new L10N(ResourceManagerConfig.class);
-  private static final Logger log = Log.open(ResourceManagerConfig.class);
+  private static final Logger log
+    = Logger.getLogger(ResourceManagerConfig.class.getName());
 
   private ResourceManagerImpl _rm;
 

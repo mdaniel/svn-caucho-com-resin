@@ -34,7 +34,6 @@ import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.type.*;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 

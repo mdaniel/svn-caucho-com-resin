@@ -30,7 +30,6 @@ package com.caucho.resources.rmi;
 
 import com.caucho.config.ConfigException;
 import com.caucho.jca.AbstractResourceAdapter;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.resource.spi.BootstrapContext;
@@ -52,7 +51,8 @@ import java.util.logging.Logger;
 
 public class RmiRegistry extends AbstractResourceAdapter 
 {
-  static protected final Logger log = Log.open(RmiRegistry.class);
+  static private final Logger log 
+    = Logger.getLogger(RmiRegistry.class.getName());
   static final L10N L = new L10N(RmiRegistry.class);
 
   private String _server = "localhost";

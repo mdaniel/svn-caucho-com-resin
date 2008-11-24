@@ -31,7 +31,6 @@ package com.caucho.jsp;
 
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.TimedCache;
 import com.caucho.vfs.Path;
@@ -52,7 +51,8 @@ import java.lang.reflect.Method;
  */
 public class BundleManager {
   private static final L10N L = new L10N(BundleManager.class);
-  private static final Logger log = Log.open(BundleManager.class);
+  private static final Logger log
+    = Logger.getLogger(BundleManager.class.getName());
 
   public static final LocalizationContext NULL_BUNDLE
     = new LocalizationContext();

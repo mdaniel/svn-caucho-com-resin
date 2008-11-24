@@ -28,7 +28,6 @@
 
 package com.caucho.xsl.fun;
 
-import com.caucho.log.Log;
 import com.caucho.vfs.Path;
 import com.caucho.xml.CauchoNode;
 import com.caucho.xml.LooseHtml;
@@ -57,7 +56,8 @@ import java.util.logging.Logger;
  * The document(...) function.
  */
 public class DocumentFun extends XPathFun {
-  static final Logger log = Log.open(DocumentFun.class);
+  private static final Logger log
+    = Logger.getLogger(DocumentFun.class.getName());
 
   TransformerImpl _transformer;
   boolean _isHtml;

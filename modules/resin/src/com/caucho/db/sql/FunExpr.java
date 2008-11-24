@@ -28,7 +28,6 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
@@ -37,7 +36,6 @@ import java.util.logging.Logger;
 
 abstract public class FunExpr extends Expr {
   protected static final L10N L = new L10N(FunExpr.class);
-  private static final Logger log = Log.open(FunExpr.class);
   
   private static QDate _gmtDate = new QDate();
 

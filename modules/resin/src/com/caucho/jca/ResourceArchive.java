@@ -37,7 +37,6 @@ import com.caucho.jca.cfg.MessageListenerConfig;
 import com.caucho.jca.cfg.ResourceAdapterConfig;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentBean;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Jar;
 import com.caucho.vfs.Path;

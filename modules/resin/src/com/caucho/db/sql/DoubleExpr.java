@@ -28,15 +28,11 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.log.Log;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
 class DoubleExpr extends Expr {
-  private static final Logger log = Log.open(DoubleExpr.class);
-
   private double _value;
 
   DoubleExpr(double value)

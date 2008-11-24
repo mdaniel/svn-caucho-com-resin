@@ -31,7 +31,6 @@ package com.caucho.jsp;
 
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.Environment;
-import com.caucho.log.Log;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.ToCharResponseAdapter;
 import com.caucho.server.webapp.WebApp;
@@ -62,7 +61,8 @@ import java.util.logging.Logger;
  * Represents a compiled JSP page.
  */
 abstract public class Page implements Servlet, ServletConfig, CauchoPage {
-  protected static final Logger _caucho_log = Log.open(Page.class);
+  protected static final Logger _caucho_log
+    = Logger.getLogger(Page.class.getName());
 
   private ServletConfig _config;
   private WebApp _webApp;

@@ -28,18 +28,10 @@
 
 package com.caucho.amber.session;
 
-import com.caucho.log.Log;
-import com.caucho.util.L10N;
-
-import java.util.logging.Logger;
-
 /**
  * Implements the session.
  */
 public class SessionImpl {
-  private static L10N L = new L10N(SessionImpl.class);
-  private static Logger log = Log.open(SessionImpl.class);
-
   public String toString()
   {
     return "SessionImpl[]";

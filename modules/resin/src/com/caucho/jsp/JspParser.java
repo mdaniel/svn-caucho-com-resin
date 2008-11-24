@@ -31,7 +31,6 @@ package com.caucho.jsp;
 
 import com.caucho.java.LineMap;
 import com.caucho.jsp.java.JspNode;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.LineCompileException;
@@ -52,7 +51,8 @@ import java.util.logging.Logger;
  */
 public class JspParser {
   static L10N L = new L10N(JspParser.class);
-  static final Logger log = Log.open(JspParser.class);
+  private static final Logger log
+    = Logger.getLogger(JspParser.class.getName());
   
   public static final String JSP_NS = "http://java.sun.com/JSP/Page";
   public static final String JSTL_CORE_URI = "http://java.sun.com/jsp/jstl/core";

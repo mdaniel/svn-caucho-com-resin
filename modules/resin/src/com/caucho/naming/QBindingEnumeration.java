@@ -28,7 +28,6 @@
 
 package com.caucho.naming;
 
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -42,7 +41,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class QBindingEnumeration implements NamingEnumeration {
-  private static final Logger log = Log.open(QBindingEnumeration.class);
+  private static final Logger log
+    = Logger.getLogger(QBindingEnumeration.class.getName());
   private static final L10N L = new L10N(QBindingEnumeration.class);
 
   private ContextImpl _context;

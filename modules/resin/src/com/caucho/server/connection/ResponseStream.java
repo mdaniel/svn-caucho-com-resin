@@ -29,7 +29,6 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.log.Log;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ClientDisconnectException;
@@ -43,7 +42,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 class ResponseStream extends ToByteResponseStream {
-  static final Logger log = Logger.getLogger(ResponseStream.class.getName());
+  private static final Logger log
+    = Logger.getLogger(ResponseStream.class.getName());
   
   static final L10N L = new L10N(ResponseStream.class);
 

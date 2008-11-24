@@ -28,7 +28,6 @@
 
 package com.caucho.server.port;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -38,7 +37,8 @@ import java.util.logging.Logger;
  */
 abstract public class AbstractSelectManager {
   private static final L10N L = new L10N(AbstractSelectManager.class);
-  private static final Logger log = Log.open(AbstractSelectManager.class);
+  private static final Logger log
+    = Logger.getLogger(AbstractSelectManager.class.getName());
 
   /**
    * Sets the timeout.

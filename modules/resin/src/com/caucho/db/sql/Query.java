@@ -34,7 +34,6 @@ import com.caucho.db.store.Transaction;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
-import com.caucho.log.Log;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -47,7 +46,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 abstract public class Query {
-  private static final Logger log = Log.open(Query.class);
+  private static final Logger log
+    = Logger.getLogger(Query.class.getName());
   private static final L10N L = new L10N(Query.class);
 
   private Database _db;

@@ -29,7 +29,6 @@
 package com.caucho.xpath;
 
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.log.Log;
 import com.caucho.util.LruCache;
 import com.caucho.xpath.pattern.AbstractPattern;
 import com.caucho.xpath.pattern.FromContext;

@@ -39,7 +39,6 @@ import com.caucho.db.table.TableFactory;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.CloseListener;
 import com.caucho.loader.Environment;
-import com.caucho.log.Log;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;

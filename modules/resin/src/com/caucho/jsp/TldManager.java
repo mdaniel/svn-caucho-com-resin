@@ -35,7 +35,6 @@ import com.caucho.config.types.FileSetType;
 import com.caucho.jsp.cfg.*;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
@@ -60,7 +59,8 @@ import java.util.zip.ZipFile;
  */
 public class TldManager {
   static final L10N L = new L10N(TldManager.class);
-  private static final Logger log = Log.open(TldManager.class);
+  private static final Logger log
+    = Logger.getLogger(TldManager.class.getName());
 
   private static ArrayList<TldPreload> _cauchoTaglibs;
   private static ArrayList<TldPreload> _globalTaglibs;

@@ -28,7 +28,6 @@
 
 package com.caucho.jsp;
 
-import com.caucho.log.Log;
 import com.caucho.vfs.TempStream;
 
 import javax.servlet.jsp.tagext.PageData;
@@ -37,7 +36,8 @@ import java.io.InputStream;
 import java.util.logging.Logger;
 
 public class QPageData extends PageData {
-  private static final Logger log = Log.open(QPageData.class);
+  private static final Logger log
+    = Logger.getLogger(QPageData.class.getName());
   
   private TempStream _ts;
 

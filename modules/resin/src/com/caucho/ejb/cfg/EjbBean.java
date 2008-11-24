@@ -30,6 +30,12 @@
 package com.caucho.ejb.cfg;
 
 import com.caucho.bytecode.*;
+import com.caucho.config.gen.ApiClass;
+import com.caucho.config.gen.ApiMethod;
+import com.caucho.config.gen.BeanGenerator;
+import com.caucho.config.gen.BusinessMethodGenerator;
+import com.caucho.config.gen.TransactionChain;
+import com.caucho.config.gen.View;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigException;

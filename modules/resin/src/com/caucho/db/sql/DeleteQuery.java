@@ -33,15 +33,12 @@ import com.caucho.db.Database;
 import com.caucho.db.store.Transaction;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
 class DeleteQuery extends Query {
-  private static final Logger log = Log.open(DeleteQuery.class);
-
   private final Table _table;
 
   DeleteQuery(Database db, String sql, Table table)

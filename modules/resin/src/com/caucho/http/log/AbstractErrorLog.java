@@ -28,7 +28,6 @@
 
 package com.caucho.http.log;
 
-import com.caucho.log.Log;
 import com.caucho.vfs.WriteStream;
 
 import javax.servlet.ServletContext;
@@ -42,7 +41,8 @@ import java.util.logging.Logger;
  * Represents an log of every error log request to the server.
  */
 abstract public class AbstractErrorLog {
-  protected static final Logger log = Log.open(AbstractErrorLog.class);
+  protected static final Logger log
+    = Logger.getLogger(AbstractErrorLog.class.getName());
 
   protected WriteStream logStream;
 

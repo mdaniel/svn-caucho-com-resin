@@ -32,7 +32,6 @@ package com.caucho.jca;
 import com.caucho.jca.cfg.ResourceAdapterConfig;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;

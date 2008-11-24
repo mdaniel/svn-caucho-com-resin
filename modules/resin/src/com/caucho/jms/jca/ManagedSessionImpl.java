@@ -28,7 +28,6 @@
 
 package com.caucho.jms.jca;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.jms.*;
@@ -49,7 +48,8 @@ import java.util.logging.Logger;
  * The managed session
  */
 public class ManagedSessionImpl implements ManagedConnection {
-  protected static final Logger log = Log.open(ManagedSessionImpl.class);
+  private static final Logger log
+    = Logger.getLogger(ManagedSessionImpl.class.getName());
   private static final L10N L = new L10N(ManagedSessionImpl.class);
 
   private ConnectionEventListener _listener;

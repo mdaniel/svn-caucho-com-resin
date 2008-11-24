@@ -29,7 +29,6 @@
 
 package com.caucho.jca;
 
-import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
@@ -53,7 +52,8 @@ import java.util.logging.Logger;
  */
 class PoolItem implements ConnectionEventListener, XAResource {
   private static final L10N L = new L10N(PoolItem.class);
-  private static final Logger log = Log.open(PoolItem.class);
+  private static final Logger log
+    = Logger.getLogger(PoolItem.class.getName());
 
   private ConnectionPool _cm;
   

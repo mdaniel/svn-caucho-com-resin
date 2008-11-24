@@ -31,7 +31,6 @@ package com.caucho.transaction;
 
 import com.caucho.jca.UserTransactionImpl;
 import com.caucho.jca.UserTransactionSuspendState;
-import com.caucho.log.Log;
 import com.caucho.transaction.xalog.AbstractXALogStream;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -52,7 +51,8 @@ import java.util.logging.Logger;
  * associated with a single thread.
  */
 public class TransactionImpl implements Transaction, AlarmListener {
-  private static final Logger log = Log.open(TransactionImpl.class);
+  private static final Logger log
+    = Logger.getLogger(TransactionImpl.class.getName());
   private static final L10N L = new L10N(TransactionImpl.class);
 
   private final static long DEFAULT_TIMEOUT = 60000;

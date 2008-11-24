@@ -29,7 +29,6 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.AbstractPrintWriter;
 
@@ -38,7 +37,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ResponseWriter extends AbstractPrintWriter {
-  static final Logger log = Log.open(ResponseWriter.class);
+  private static final Logger log
+    = Logger.getLogger(ResponseWriter.class.getName());
   static final L10N L = new L10N(ResponseWriter.class);
   
   private AbstractResponseStream _out;

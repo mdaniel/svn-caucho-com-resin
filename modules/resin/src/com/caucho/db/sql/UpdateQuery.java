@@ -34,7 +34,6 @@ import com.caucho.db.store.Transaction;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
-import com.caucho.log.Log;
 
 import java.sql.SQLException;
 import java.util.logging.Logger;

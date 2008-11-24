@@ -28,7 +28,6 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.log.Log;
 import com.caucho.server.connection.CauchoRequest;
 
 import javax.servlet.FilterChain;
@@ -45,7 +44,8 @@ import java.util.logging.Logger;
  * be the servlet itself.
  */
 public class SecurityRoleMapFilterChain implements FilterChain {
-  private static final Logger log = Log.open(SecurityRoleMapFilterChain.class);
+  private static final Logger log
+    = Logger.getLogger(SecurityRoleMapFilterChain.class.getName());
   
   // Next filter chain
   private FilterChain _next;

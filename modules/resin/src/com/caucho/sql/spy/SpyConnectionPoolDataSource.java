@@ -28,7 +28,6 @@
 
 package com.caucho.sql.spy;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.sql.ConnectionPoolDataSource;
@@ -41,7 +40,8 @@ import java.util.logging.Logger;
  * Spying on a driver.
  */
 public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
-  protected final static Logger log = Log.open(SpyConnectionPoolDataSource.class);
+  protected final static Logger log
+    = Logger.getLogger(SpyConnectionPoolDataSource.class.getName());
   protected final static L10N L = new L10N(SpyConnectionPoolDataSource.class);
 
   private static int _staticId;

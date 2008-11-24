@@ -38,7 +38,6 @@ import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.jsp.cfg.ImplicitTld;
 import com.caucho.jsp.java.JspTagSupport;
 import com.caucho.jsp.java.TagTaglib;
-import com.caucho.log.Log;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;

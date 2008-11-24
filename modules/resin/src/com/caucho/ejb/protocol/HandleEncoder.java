@@ -29,7 +29,6 @@
 package com.caucho.ejb.protocol;
 
 import com.caucho.ejb.AbstractServer;
-import com.caucho.log.Log;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
@@ -42,7 +41,8 @@ import java.util.logging.Logger;
  */
 public class HandleEncoder {
   private static final L10N L = new L10N(HandleEncoder.class);
-  private static final Logger log = Log.open(HandleEncoder.class);
+  private static final Logger log
+    = Logger.getLogger(HandleEncoder.class.getName());
 
   private final String _serverId;
   private AbstractServer _server;

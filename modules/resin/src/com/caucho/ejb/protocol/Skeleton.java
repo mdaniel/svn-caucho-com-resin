@@ -28,8 +28,6 @@
 
 package com.caucho.ejb.protocol;
 
-import com.caucho.log.Log;
-
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.logging.Logger;
@@ -43,7 +41,8 @@ import java.util.logging.Logger;
  * to execute the request.
  */
 abstract public class Skeleton {
-  protected static final Logger log = Log.open(Skeleton.class);
+  private static final Logger log
+    = Logger.getLogger(Skeleton.class.getName());
 
   public void setDebug(boolean isDebug)
   {

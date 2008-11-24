@@ -43,7 +43,6 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.SimpleLoader;
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppController;
@@ -75,7 +74,8 @@ import java.util.logging.Logger;
  */
 public class JspCompiler implements EnvironmentBean {
   private static final L10N L = new L10N(JspCompiler.class);
-  private static final Logger log = Log.open(JspCompiler.class);
+  private static final Logger log
+    = Logger.getLogger(JspCompiler.class.getName());
 
   private ClassLoader _loader;
 

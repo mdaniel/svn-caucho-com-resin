@@ -28,7 +28,6 @@
 
 package com.caucho.sql;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.resource.ResourceException;
@@ -43,7 +42,8 @@ import java.util.logging.Logger;
  * The wrapped data source.
  */
 public class DataSourceImpl implements DataSource {
-  protected static final Logger log = Log.open(DataSourceImpl.class);
+  protected static final Logger log
+    = Logger.getLogger(DataSourceImpl.class.getName());
   private static final L10N L = new L10N(DataSourceImpl.class);
 
   private final ManagedFactoryImpl _managedFactory;

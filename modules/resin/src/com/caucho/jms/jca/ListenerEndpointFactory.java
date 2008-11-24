@@ -30,7 +30,6 @@ package com.caucho.jms.jca;
 
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.resource.spi.UnavailableException;
@@ -44,7 +43,8 @@ import java.util.logging.Logger;
  * The JMS MessageListener endpoing factory
  */
 public class ListenerEndpointFactory implements MessageEndpointFactory {
-  private static final Logger log = Log.open(ListenerEndpointFactory.class);
+  private static final Logger log
+    = Logger.getLogger(ListenerEndpointFactory.class.getName());
   private static final L10N L = new L10N(ListenerEndpointFactory.class);
 
   private ConfigProgram _program;

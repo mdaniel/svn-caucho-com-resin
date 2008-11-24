@@ -28,7 +28,6 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.sql.SQLException;
@@ -39,7 +38,6 @@ import java.util.logging.Logger;
  */
 public class GroupResultExpr extends Expr implements GroupExpr {
   protected static final L10N L = new L10N(GroupResultExpr.class);
-  private static final Logger log = Log.open(GroupResultExpr.class);
 
   private static final int LONG_VALUE = 1;
   private static final int DOUBLE_VALUE = 2;

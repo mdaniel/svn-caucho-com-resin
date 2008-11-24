@@ -29,7 +29,6 @@
 
 package com.caucho.server.e_app;
 
-import com.caucho.log.Log;
 import com.caucho.server.deploy.DeployControllerAdmin;
 import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.webapp.WebAppContainer;
@@ -48,7 +47,8 @@ import java.util.logging.Logger;
 public class EarDeployController
   extends EnvironmentDeployController<EnterpriseApplication,EarConfig>
 {
-  private static final Logger log = Log.open(EarDeployController.class);
+  private static final Logger log
+    = Logger.getLogger(EarDeployController.class.getName());
   private static final L10N L = new L10N(EarDeployController.class);
 
   private WebAppContainer _container;

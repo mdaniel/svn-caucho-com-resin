@@ -28,7 +28,6 @@
 
 package com.caucho.jsp;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -39,9 +38,6 @@ import java.util.logging.Logger;
  * Stores the information for the .tags
  */
 public class TagManager {
-  static final L10N L = new L10N(TagManager.class);
-  private static final Logger log = Log.open(TagManager.class);
-  
   protected HashMap<String,Taglib> _taglibMap = new HashMap<String,Taglib>();
 
   private JspResourceManager _resourceManager;

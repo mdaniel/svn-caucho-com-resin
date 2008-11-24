@@ -32,7 +32,6 @@ package com.caucho.db.sql;
 import com.caucho.db.Database;
 import com.caucho.db.store.Transaction;
 import com.caucho.db.table.TableIterator;
-import com.caucho.log.Log;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.CharBuffer;
 
@@ -42,8 +41,6 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 
 public class SelectQuery extends Query {
-  private static final Logger log = Log.open(SelectQuery.class);
-
   private Expr []_results;
   private String []_resultNames;
 

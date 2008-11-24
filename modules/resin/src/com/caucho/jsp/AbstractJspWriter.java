@@ -28,7 +28,6 @@
 
 package com.caucho.jsp;
 
-import com.caucho.log.Log;
 import com.caucho.vfs.FlushBuffer;
 
 import javax.servlet.jsp.JspWriter;
@@ -42,7 +41,8 @@ import java.util.logging.Logger;
  * A buffered JSP writer encapsulating a Writer.
  */
 abstract class AbstractJspWriter extends BodyContent implements FlushBuffer {
-  protected static final Logger log = Log.open(AbstractJspWriter.class);
+  private static final Logger log
+    = Logger.getLogger(AbstractJspWriter.class.getName());
   private JspWriter _parent;
 
   // the underlying writer

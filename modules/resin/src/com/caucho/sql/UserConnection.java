@@ -29,7 +29,6 @@
 
 package com.caucho.sql;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.sql.*;
@@ -47,7 +46,8 @@ import java.util.logging.Logger;
  * and close any statements.
  */
 public class UserConnection implements java.sql.Connection {
-  protected static final Logger log = Log.open(UserConnection.class);
+  protected static final Logger log
+    = Logger.getLogger(UserConnection.class.getName());
   protected static final L10N L = new L10N(UserConnection.class);
 
   // The parent XAConnectionAdapter

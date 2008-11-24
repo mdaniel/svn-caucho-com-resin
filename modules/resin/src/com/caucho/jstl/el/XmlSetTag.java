@@ -29,7 +29,6 @@
 package com.caucho.jstl.el;
 
 import com.caucho.jsp.PageContextImpl;
-import com.caucho.log.Log;
 import com.caucho.xpath.Env;
 import com.caucho.xpath.XPath;
 import com.caucho.xpath.XPathException;
@@ -42,7 +41,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class XmlSetTag extends TagSupport {
-  private static final Logger log = Log.open(XmlSetTag.class);
+  private static final Logger log
+    = Logger.getLogger(XmlSetTag.class.getName());
   private com.caucho.xpath.Expr _select;
   
   private String _var;

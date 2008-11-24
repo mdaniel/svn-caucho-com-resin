@@ -29,7 +29,6 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.log.Log;
 import com.caucho.util.CharCursor;
 import com.caucho.util.HashMapImpl;
 import com.caucho.util.StringCharCursor;
@@ -45,7 +44,7 @@ import java.util.logging.Logger;
  * Form handling.
  */
 public class Form {
-  static final Logger log = Log.open(Form.class);
+  static final Logger log = Logger.getLogger(Form.class.getName());
 
   private final ByteToChar _converter = ByteToChar.create();
   

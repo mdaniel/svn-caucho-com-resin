@@ -34,7 +34,6 @@ import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.java.WorkDir;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.*;
-import com.caucho.log.Log;
 import com.caucho.server.deploy.EnvironmentDeployInstance;
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;

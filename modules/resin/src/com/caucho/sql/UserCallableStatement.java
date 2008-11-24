@@ -28,7 +28,6 @@
 
 package com.caucho.sql;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.io.InputStream;
@@ -45,7 +44,8 @@ import java.util.logging.Logger;
  */
 public class UserCallableStatement extends UserPreparedStatement
   implements CallableStatement {
-  protected final static Logger log = Log.open(UserCallableStatement.class);
+  protected final static Logger log
+    = Logger.getLogger(UserCallableStatement.class.getName());
   protected static L10N L = new L10N(UserCallableStatement.class);
 
   protected CallableStatement _cstmt;

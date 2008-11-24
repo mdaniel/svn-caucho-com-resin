@@ -28,7 +28,6 @@
 
 package com.caucho.sql.spy;
 
-import com.caucho.log.Log;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 
@@ -43,7 +42,8 @@ import java.util.logging.*;
  * Spying on a statement;
  */
 public class SpyStatement implements java.sql.Statement {
-  protected final static Logger log = Log.open(SpyStatement.class);
+  protected final static Logger log
+    = Logger.getLogger(SpyStatement.class.getName());
   protected final static L10N L = new L10N(SpyConnection.class);
 
   protected String _id;

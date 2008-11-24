@@ -28,7 +28,6 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.log.Log;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.e_app.EarDeployController;
@@ -40,7 +39,8 @@ import java.util.logging.Logger;
  * The generator for the ear deploy
  */
 public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> {
-  private static final Logger log = Log.open(WebAppEarDeployGenerator.class);
+  private static final Logger log
+    = Logger.getLogger(WebAppEarDeployGenerator.class.getName());
 
   private WebAppContainer _container;
   

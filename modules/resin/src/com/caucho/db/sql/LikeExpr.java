@@ -29,8 +29,6 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.log.Log;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -38,8 +36,9 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 class LikeExpr extends Expr {
-  private static final Logger log = Log.open(LikeExpr.class);
-
+  private static final Logger log
+    = Logger.getLogger(LikeExpr.class.getName());
+  
   private Expr _expr;
   private String _pattern;
   private Pattern _regexp;

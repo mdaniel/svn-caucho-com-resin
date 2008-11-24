@@ -30,7 +30,6 @@
 package com.caucho.servlets;
 
 import com.caucho.config.types.Period;
-import com.caucho.log.Log;
 import com.caucho.server.webapp.Application;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
@@ -70,7 +69,8 @@ import java.util.logging.Logger;
  * </pre>
  */
 public class FastCGIServlet extends GenericServlet {
-  static final protected Logger log = Log.open(FastCGIServlet.class);
+  static final protected Logger log
+    = Logger.getLogger(FastCGIServlet.class.getName());
   static final L10N L = new L10N(FastCGIServlet.class);
   
   private static final int FCGI_BEGIN_REQUEST = 1;

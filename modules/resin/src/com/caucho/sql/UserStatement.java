@@ -28,7 +28,6 @@
 
 package com.caucho.sql;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.sql.Connection;
@@ -43,7 +42,8 @@ import java.util.logging.Logger;
  * User-view of a statement;
  */
 public class UserStatement implements Statement {
-  protected final static Logger log = Log.open(UserStatement.class);
+  private final static Logger log
+    = Logger.getLogger(UserStatement.class.getName());
   protected final static L10N L = new L10N(UserStatement.class);
 
   // The connection

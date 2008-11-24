@@ -33,7 +33,6 @@ import com.caucho.java.JavaCompiler;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.SimpleLoader;
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
@@ -88,7 +87,8 @@ import java.util.logging.Logger;
  */
 abstract public class AbstractStylesheetFactory
   extends SAXTransformerFactory {
-  static final Logger log = Log.open(AbstractStylesheetFactory.class);
+  static final Logger log
+    = Logger.getLogger(AbstractStylesheetFactory.class.getName());
   static final L10N L = new L10N(AbstractStylesheetFactory.class);
 
   private static

@@ -28,15 +28,11 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.log.Log;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
 class NotExpr extends Expr {
-  private static final Logger log = Log.open(NotExpr.class);
-
   private Expr _sub;
 
   NotExpr(Expr sub)

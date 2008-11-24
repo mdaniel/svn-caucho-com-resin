@@ -29,18 +29,11 @@
 
 package com.caucho.db.store;
 
-import com.caucho.log.Log;
-import com.caucho.util.L10N;
-
 import java.io.IOException;
-import java.util.logging.Logger;
 /**
  * Represents a single transaction.
  */
 abstract public class StoreTransaction {
-  private static final Logger log = Log.open(StoreTransaction.class);
-  private static final L10N L = new L10N(StoreTransaction.class);
-
   /**
    * Returns a read block.
    */

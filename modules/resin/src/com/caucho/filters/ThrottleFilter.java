@@ -28,7 +28,6 @@
 
 package com.caucho.filters;
 
-import com.caucho.log.Log;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
@@ -47,7 +46,8 @@ import java.util.logging.Logger;
  */
 public class ThrottleFilter implements Filter {
   private static final L10N L = new L10N(ThrottleFilter.class);
-  private static final Logger log = Log.open(ThrottleFilter.class);
+  private static final Logger log
+    = Logger.getLogger(ThrottleFilter.class.getName());
 
   private IntMap _throttleCache = new IntMap();
 

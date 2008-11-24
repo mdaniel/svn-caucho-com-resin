@@ -29,7 +29,6 @@
 
 package com.caucho.server.hmux;
 
-import com.caucho.log.Log;
 import com.caucho.vfs.StreamImpl;
 
 import java.io.IOException;
@@ -41,7 +40,8 @@ import java.util.logging.Logger;
  * Facade to HmuxStream to properly handle the close.
  */
 class HmuxStreamWrapper extends StreamImpl {
-  private static final Logger log = Log.open(HmuxStream.class);
+  private static final Logger log
+    = Logger.getLogger(HmuxStream.class.getName());
   
   private HmuxStream _stream;
 

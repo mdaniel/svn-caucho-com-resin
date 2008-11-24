@@ -30,7 +30,6 @@
 package com.caucho.jsp;
 
 import com.caucho.bytecode.*;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.annotation.Resource;

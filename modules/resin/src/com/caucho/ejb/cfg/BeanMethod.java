@@ -30,6 +30,7 @@
 package com.caucho.ejb.cfg;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.gen.ApiMethod;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.*;

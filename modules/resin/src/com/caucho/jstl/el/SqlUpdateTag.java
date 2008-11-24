@@ -30,7 +30,6 @@ package com.caucho.jstl.el;
 
 import com.caucho.el.Expr;
 import com.caucho.jsp.PageContextImpl;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.el.ELContext;
@@ -48,7 +47,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SqlUpdateTag extends BodyTagSupport implements SQLExecutionTag {
-  private static final Logger log = Log.open(SqlUpdateTag.class);
+  private static final Logger log
+    = Logger.getLogger(SqlUpdateTag.class.getName());
   private static final L10N L = new L10N(SqlUpdateTag.class);
   
   private Expr _sql;

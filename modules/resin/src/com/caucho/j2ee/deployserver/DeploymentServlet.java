@@ -33,7 +33,6 @@ import com.caucho.config.Config;
 import com.caucho.hessian.io.*;
 import com.caucho.j2ee.deployclient.TargetImpl;
 import com.caucho.j2ee.deployclient.TargetModuleIDImpl;
-import com.caucho.log.Log;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 

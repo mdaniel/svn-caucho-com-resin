@@ -29,7 +29,6 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.servlet.ServletOutputStream;
@@ -42,7 +41,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class IncludeResponseStream extends ToByteResponseStream {
-  static final Logger log = Log.open(IncludeResponseStream.class);
+  private static final Logger log
+    = Logger.getLogger(IncludeResponseStream.class.getName());
   
   static final L10N L = new L10N(IncludeResponseStream.class);
 

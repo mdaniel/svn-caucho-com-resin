@@ -29,7 +29,6 @@
 package com.caucho.server.webapp;
 
 import com.caucho.config.types.PathBuilder;
-import com.caucho.log.Log;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.vfs.Path;
@@ -46,7 +45,8 @@ import java.util.regex.Pattern;
  */
 public class WebAppRegexpDeployGenerator
   extends DeployGenerator<WebAppController> {
-  private static final Logger log = Log.open(WebAppSingleDeployGenerator.class);
+  private static final Logger log
+    = Logger.getLogger(WebAppSingleDeployGenerator.class.getName());
 
   private WebAppContainer _container;
   

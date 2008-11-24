@@ -30,7 +30,6 @@ package com.caucho.xsl;
 
 import com.caucho.java.JavaWriter;
 import com.caucho.java.LineMap;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharScanner;
 import com.caucho.util.IntArray;
@@ -79,7 +78,8 @@ import java.util.logging.Logger;
  * generation.
  */
 abstract class Generator {
-  private static final Logger log = Log.open(Generator.class);
+  private static final Logger log
+    = Logger.getLogger(Generator.class.getName());
   protected static final L10N L = new L10N(Generator.class);
 
   public static final String XSLNS = "http://www.w3.org/1999/XSL/Transform";

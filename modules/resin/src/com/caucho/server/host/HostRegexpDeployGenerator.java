@@ -30,7 +30,6 @@
 package com.caucho.server.host;
 
 import com.caucho.config.Config;
-import com.caucho.log.Log;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.vfs.Path;
@@ -46,7 +45,8 @@ import java.util.regex.Pattern;
  * The generator for the web-app deploy
  */
 public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
-  private static final Logger log = Log.open(HostSingleDeployGenerator.class);
+  private static final Logger log
+    = Logger.getLogger(HostSingleDeployGenerator.class.getName());
 
   private HostContainer _container;
 

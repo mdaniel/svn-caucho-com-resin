@@ -28,7 +28,6 @@
 
 package com.caucho.naming;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.naming.Name;
@@ -62,7 +61,8 @@ import java.util.logging.Logger;
  */
 public class DirContextImpl extends ContextImpl implements DirContext {
   protected static L10N L = new L10N(DirContextImpl.class);
-  protected static Logger log = Log.open(DirContextImpl.class);
+  protected static Logger log 
+    = Logger.getLogger(DirContextImpl.class.getName());
 
   /**
    * Creates a <code>DirContextImpl</code>.

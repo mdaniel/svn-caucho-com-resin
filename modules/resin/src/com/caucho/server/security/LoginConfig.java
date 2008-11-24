@@ -31,7 +31,6 @@ package com.caucho.server.security;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.servlet.ServletException;
@@ -41,7 +40,8 @@ import java.util.logging.Logger;
  * Configuration for the login-config.
  */
 public class LoginConfig {
-  static final Logger log = Log.open(LoginConfig.class);
+  private static final Logger log
+    = Logger.getLogger(LoginConfig.class.getName());
   static final L10N L = new L10N(LoginConfig.class);
 
   private String _authMethod = "basic";

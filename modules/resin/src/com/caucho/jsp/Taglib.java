@@ -33,7 +33,6 @@ import com.caucho.jsp.cfg.TldTag;
 import com.caucho.jsp.cfg.TldTagFile;
 import com.caucho.jsp.cfg.TldTaglib;
 import com.caucho.jsp.cfg.TldValidator;
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
@@ -52,7 +51,8 @@ import java.util.logging.Logger;
  */
 public class Taglib extends TagLibraryInfo
 {
-  private static final Logger log = Log.open(Taglib.class);
+  private static final Logger log 
+    = Logger.getLogger(Taglib.class.getName());
   static final L10N L = new L10N(Taglib.class);
 
   private TldTaglib _tldTaglib;

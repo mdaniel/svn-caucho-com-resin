@@ -34,7 +34,6 @@ import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JTypeWrapper;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -47,7 +46,8 @@ import java.util.logging.Logger;
  */
 public class EntityMapField extends AbstractField {
   private static final L10N L = new L10N(EntityMapField.class);
-  protected static final Logger log = Log.open(EntityMapField.class);
+  protected static final Logger log
+    = Logger.getLogger(EntityMapField.class.getName());
 
   private ArrayList<AmberColumn> _indexColumns;
   private JMethod _mapMethod;

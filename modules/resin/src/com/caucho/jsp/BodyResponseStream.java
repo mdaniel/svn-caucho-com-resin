@@ -28,7 +28,6 @@
 
 package com.caucho.jsp;
 
-import com.caucho.log.Log;
 import com.caucho.server.connection.AbstractResponseStream;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Encoding;
@@ -42,7 +41,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class BodyResponseStream extends AbstractResponseStream {
-  static final Logger log
+  private static final Logger log
     = Logger.getLogger(BodyResponseStream.class.getName());
   
   static final L10N L = new L10N(BodyResponseStream.class);

@@ -29,7 +29,6 @@
 
 package com.caucho.servlets;
 
-import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.CharBuffer;
@@ -59,7 +58,8 @@ import java.util.logging.Logger;
  * CGI
  */
 public class CGIServlet extends GenericServlet {
-  static protected final Logger log = Log.open(CGIServlet.class);
+  static protected final Logger log
+    = Logger.getLogger(CGIServlet.class.getName());
   static final L10N L = new L10N(CGIServlet.class);
 
   private static String REQUEST_URI = "javax.servlet.include.request_uri";

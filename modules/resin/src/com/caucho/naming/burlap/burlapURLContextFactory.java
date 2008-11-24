@@ -30,7 +30,6 @@
 package com.caucho.naming.burlap;
 
 import com.caucho.burlap.client.BurlapProxyFactory;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.naming.Context;
@@ -45,7 +44,8 @@ import java.util.logging.Logger;
  */
 public class burlapURLContextFactory implements ObjectFactory {
   private static L10N L = new L10N(burlapURLContextFactory.class);
-  private static Logger dbg = Log.open(burlapURLContextFactory.class);
+  private static Logger dbg
+    = Logger.getLogger(burlapURLContextFactory.class.getName());
 
   private BurlapProxyFactory _proxyFactory = new BurlapProxyFactory();
   private BurlapModel _model;

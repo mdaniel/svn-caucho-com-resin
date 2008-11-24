@@ -28,7 +28,6 @@
 
 package com.caucho.naming;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.naming.Context;
@@ -43,7 +42,8 @@ import java.util.logging.Logger;
  * Error context always throwing NamingExceptions.
  */
 public class ErrorContext implements Context {
-  protected static final Logger log = Log.open(ErrorContext.class);
+  protected static final Logger log
+    = Logger.getLogger(ErrorContext.class.getName());
   protected static L10N L = new L10N(ErrorContext.class);
 
   protected NamingException exception;

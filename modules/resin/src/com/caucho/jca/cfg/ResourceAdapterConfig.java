@@ -30,7 +30,6 @@
 package com.caucho.jca.cfg;
 
 import com.caucho.config.ConfigException;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -41,7 +40,8 @@ import java.util.logging.Logger;
  */
 public class ResourceAdapterConfig extends ObjectConfig {
   private static final L10N L = new L10N(ResourceAdapterConfig.class);
-  private static final Logger log = Log.open(ResourceAdapterConfig.class);
+  private static final Logger log
+    = Logger.getLogger(ResourceAdapterConfig.class.getName());
 
   private Class _adapterClass;
 

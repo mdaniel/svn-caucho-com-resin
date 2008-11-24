@@ -30,12 +30,12 @@
 package com.caucho.ejb.cfg;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.gen.ApplicationExceptionConfig;
 import com.caucho.config.types.FileSetType;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -48,7 +48,8 @@ import java.util.logging.Logger;
  */
 public class EjbConfig {
   private static final L10N L = new L10N(EjbConfig.class);
-  private static final Logger log = Log.open(EjbConfig.class);
+  private static final Logger log
+    = Logger.getLogger(EjbConfig.class.getName());
 
   private final EjbContainer _ejbContainer;
 

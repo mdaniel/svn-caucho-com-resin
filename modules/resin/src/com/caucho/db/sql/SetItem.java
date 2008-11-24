@@ -30,7 +30,6 @@ package com.caucho.db.sql;
 
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
-import com.caucho.log.Log;
 
 import java.util.logging.Logger;
 
@@ -38,8 +37,6 @@ import java.util.logging.Logger;
  * Represents a table binding for a from.
  */
 class SetItem {
-  private static final Logger log = Log.open(SetItem.class);
-
   private Table _table;
   private Column _column;
   private Expr _expr;

@@ -32,7 +32,6 @@ import com.caucho.db.Database;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableFactory;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
@@ -44,7 +43,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Parser {
-  private static final Logger log = Log.open(Parser.class);
+  private static final Logger log
+    = Logger.getLogger(Parser.class.getName());
   private static final L10N L = new L10N(Parser.class);
 
   final static int IDENTIFIER = 128;

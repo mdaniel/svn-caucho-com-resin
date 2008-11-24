@@ -36,7 +36,6 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.CacheUpdate;
 import com.caucho.amber.type.*;
 import com.caucho.config.ConfigException;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.lang.ref.SoftReference;

@@ -29,7 +29,6 @@
 package com.caucho.jca.cfg;
 
 import com.caucho.config.ConfigException;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -40,7 +39,6 @@ import java.util.logging.Logger;
  */
 public class MessageListenerConfig extends ObjectConfig {
   private static final L10N L = new L10N(MessageListenerConfig.class);
-  private static final Logger log = Log.open(MessageListenerConfig.class);
 
   private Class _type;
   private Class _activationSpecClass;

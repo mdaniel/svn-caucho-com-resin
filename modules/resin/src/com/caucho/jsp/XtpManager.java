@@ -28,7 +28,6 @@
 
 package com.caucho.jsp;
 
-import com.caucho.log.Log;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
@@ -71,7 +70,8 @@ import java.util.logging.Logger;
  * @see Page
  */
 public class XtpManager extends PageManager {
-  private static final Logger log = Log.open(XtpManager.class);
+  private static final Logger log
+    = Logger.getLogger(XtpManager.class.getName());
 
   private boolean _strictXml;
   private boolean _toLower = true;

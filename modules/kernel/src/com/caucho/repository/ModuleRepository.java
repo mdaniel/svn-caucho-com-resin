@@ -65,7 +65,7 @@ abstract public class ModuleRepository
 
   abstract public Path getRoot();
  
-  public void addResolver(Resolver resolver)
+  public void addResolverImpl(Resolver resolver)
   {
     _resolverList.add(resolver);
   }

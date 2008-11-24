@@ -28,8 +28,6 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.log.Log;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -44,7 +42,8 @@ import java.util.logging.Logger;
  * be the servlet itself.
  */
 public class DispatchFilterChain implements FilterChain {
-  private static final Logger log = Log.open(DispatchFilterChain.class);
+  private static final Logger log
+    = Logger.getLogger(DispatchFilterChain.class.getName());
   
   // Next filter chain
   private FilterChain _next;

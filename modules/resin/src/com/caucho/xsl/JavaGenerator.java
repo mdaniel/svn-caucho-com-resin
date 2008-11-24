@@ -31,7 +31,6 @@ package com.caucho.xsl;
 import com.caucho.java.JavaCompiler;
 import com.caucho.java.JavaWriter;
 import com.caucho.loader.DynamicClassLoader;
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntArray;
@@ -71,7 +70,8 @@ import java.util.logging.Logger;
  * </pre>
  */
 public class JavaGenerator extends Generator {
-  private static final Logger log = Log.open(JavaGenerator.class);
+  private static final Logger log
+    = Logger.getLogger(JavaGenerator.class.getName());
 
   private static HashMap<QName,Class> _tagMap;
   private static HashMap<QName,Class> _topTagMap;

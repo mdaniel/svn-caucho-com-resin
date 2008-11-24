@@ -38,7 +38,6 @@ import com.caucho.java.JavaCompiler;
 import com.caucho.java.gen.DependencyComponent;
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -49,7 +48,8 @@ import java.util.logging.Logger;
  */
 public class AmberGeneratorImpl implements AmberGenerator {
   private static final L10N L = new L10N(AmberGeneratorImpl.class);
-  private static final Logger log = Log.open(AmberGeneratorImpl.class);
+  private static final Logger log
+    = Logger.getLogger(AmberGeneratorImpl.class.getName());
 
   private AmberPersistenceUnit _amberPersistenceUnit;
 

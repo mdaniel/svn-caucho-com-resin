@@ -31,8 +31,6 @@ package com.caucho.jstl.el;
 import com.caucho.el.Expr;
 import com.caucho.jsp.BodyContentImpl;
 import com.caucho.jsp.PageContextImpl;
-import com.caucho.log.Log;
-
 import javax.el.ELContext;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
@@ -41,7 +39,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CoreOutTag extends BodyTagSupport {
-  private static final Logger log = Log.open(CoreOutTag.class);
+  private static final Logger log
+    = Logger.getLogger(CoreOutTag.class.getName());
   
   private Expr _value;
   private Expr _escapeXml;

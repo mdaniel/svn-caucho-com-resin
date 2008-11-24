@@ -34,7 +34,6 @@ import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.type.EntityType;
 import com.caucho.java.JavaWriter;
-import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -48,7 +47,8 @@ import java.util.logging.Logger;
  */
 public class SubId extends Id {
   private static final L10N L = new L10N(SubId.class);
-  private static final Logger log = Log.open(SubId.class);
+  private static final Logger log
+    = Logger.getLogger(SubId.class.getName());
 
   private Id _parentId;
   private LinkColumns _link;

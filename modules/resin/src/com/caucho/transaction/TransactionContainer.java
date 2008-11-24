@@ -28,7 +28,6 @@
 
 package com.caucho.transaction;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.naming.InitialContext;
@@ -44,7 +43,8 @@ import java.util.logging.Logger;
  */
 public class TransactionContainer {
   private static final L10N L = new L10N(TransactionContainer.class);
-  private static final Logger log = Log.open(TransactionContainer.class);
+  private static final Logger log
+    = Logger.getLogger(TransactionContainer.class.getName());
 
   private static TransactionContainer _container;
 

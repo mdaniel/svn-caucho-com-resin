@@ -29,7 +29,6 @@
 package com.caucho.jca.cfg;
 
 import com.caucho.config.ConfigException;
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -39,7 +38,6 @@ import java.util.logging.Logger;
  */
 public class OutboundResourceAdapterConfig {
   private static final L10N L = new L10N(OutboundResourceAdapterConfig.class);
-  private static final Logger log = Log.open(OutboundResourceAdapterConfig.class);
 
   private ResourceAdapterConfig _resourceAdapter;
   private String _trans;

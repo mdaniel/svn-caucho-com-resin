@@ -28,7 +28,6 @@
 
 package com.caucho.server.security;
 
-import com.caucho.log.Log;
 import com.caucho.util.InetNetwork;
 import com.caucho.util.L10N;
 import com.caucho.util.LongKeyMap;
@@ -43,7 +42,8 @@ import java.util.logging.Logger;
  * A class to forbid hosts by IP.
  */
 public class ForbidHost {
-  static final protected Logger log = Log.open(ForbidHost.class);
+  static final protected Logger log
+    = Logger.getLogger(ForbidHost.class.getName());
   static final L10N L = new L10N(ForbidHost.class);
 
   private LongKeyMap _forbiddenHosts;

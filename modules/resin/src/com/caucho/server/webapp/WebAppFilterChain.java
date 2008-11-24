@@ -31,7 +31,6 @@ package com.caucho.server.webapp;
 
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.jca.UserTransactionImpl;
-import com.caucho.log.Log;
 import com.caucho.servlet.comet.CometFilterChain;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.AbstractHttpRequest;

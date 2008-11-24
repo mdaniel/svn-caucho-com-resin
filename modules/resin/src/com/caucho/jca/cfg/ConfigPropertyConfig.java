@@ -28,7 +28,6 @@
 
 package com.caucho.jca.cfg;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -38,8 +37,7 @@ import java.util.logging.Logger;
  */
 public class ConfigPropertyConfig {
   private static final L10N L = new L10N(ConfigPropertyConfig.class);
-  private static final Logger log = Log.open(ConfigPropertyConfig.class);
-
+ 
   private String _name;
   private Class _type;
   private Object _value;
