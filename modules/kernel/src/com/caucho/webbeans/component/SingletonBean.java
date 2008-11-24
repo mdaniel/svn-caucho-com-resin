@@ -76,19 +76,35 @@ public class SingletonBean extends SimpleBean
    */
   public SingletonBean(Object value, String name)
   {
-    this(value, name, null, null);
+    this(value, name, null, null, null);
   }
   
   public SingletonBean(Object value,
 		       String name,
 		       Type ...api)
   {
-    this(value, null, name, api);
+    this(value, null, name, null, api);
+  }
+  
+  public SingletonBean(Object value,
+		       String name,
+		       Annotation []binding)
+  {
+    this(value, null, name, binding);
   }
   
   public SingletonBean(Object value,
 		       Class<? extends Annotation> deploymentType,
 		       String name,
+		       Type ...api)
+  {
+    this(value, deploymentType, name, null, api);
+  }
+  
+  public SingletonBean(Object value,
+		       Class<? extends Annotation> deploymentType,
+		       String name,
+		       Annotation []binding,
 		       Type ...api)
   {
     super(WebBeansContainer.create());
@@ -111,6 +127,11 @@ public class SingletonBean extends SimpleBean
 
     if (deploymentType != null)
       setDeploymentType(deploymentType);
+
+    if (binding != null) {
+      for (Annotation ann : binding)
+	addBinding(ann);
+    }
 
     init();
   }

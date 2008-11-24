@@ -430,7 +430,8 @@ public class WebApp extends ServletContextImpl
     WebBeansContainer webBeans = WebBeansContainer.create();
 
     webBeans.addSingleton(_osgiBundle.getBundleContext(),
-			  CauchoDeployment.class, null, BundleContext.class);
+			  CauchoDeployment.class, (String) null,
+			  BundleContext.class);
   }
 
   /**

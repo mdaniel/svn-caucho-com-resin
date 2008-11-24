@@ -185,11 +185,17 @@ class ResponseStream extends ToByteResponseStream {
   public boolean isFlushed()
   {
     try {
-      int bufferOffset = getBufferOffset();
-      
-      // server/05e8
-      if (_contentLength > 0 && _contentLength <= bufferOffset)
+      if (_isCommitted)
 	return true;
+
+      if (_contentLength > 0) {
+	flushCharBuffer();
+	int bufferOffset = getByteBufferOffset();
+
+	// server/05e8
+	if (_contentLength <= bufferOffset)
+	  return true;
+      }
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
       
@@ -293,8 +299,6 @@ class ResponseStream extends ToByteResponseStream {
     if (_isClosed)
       return _next.getBuffer();
     
-    _isCommitted = true;
-    
     int startOffset = _bufferStartOffset;
     _bufferStartOffset = 0;
 
@@ -302,6 +306,8 @@ class ResponseStream extends ToByteResponseStream {
     long lengthHeader = _response.getContentLengthHeader();
 
     if (lengthHeader > 0 && lengthHeader < _contentLength + length) {
+      _isCommitted = true;
+    
       lengthException(_next.getBuffer(), startOffset, length, lengthHeader);
 
       length = (int) (lengthHeader - _contentLength);
@@ -579,8 +585,6 @@ class ResponseStream extends ToByteResponseStream {
     throws IOException
   {
     super.flushBuffer();
-    
-    _isCommitted = true;
   }
 
   /**

@@ -681,9 +681,9 @@ public class DBPool
       name = _var;
 
     if (name != null)
-      WebBeansContainer.create().addSingleton(this, name);
+      WebBeansContainer.create().addSingleton(this, name, DataSource.class);
     else
-      WebBeansContainer.create().addSingleton(this);
+      WebBeansContainer.create().addSingleton(this, DataSource.class);
  }
 
   /**

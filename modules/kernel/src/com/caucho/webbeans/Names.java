@@ -38,14 +38,19 @@ public final class Names {
   /**
    * Creates a new @Named annotation with the given value
    */
-  public static Named create(String value)
+  public static Name create(String value)
   {
     final String name = value;
     
-    return new Named() {
-	public Class annotationType() { return Named.class; }
+    return new Name() {
+      public Class annotationType() { return Name.class; }
 
-        public String value() { return name; }
-      };
+      public String value() { return name; }
+
+      public String toString()
+      {
+	return "@Name('" + name + "')";
+      }
+    };
   }
 }

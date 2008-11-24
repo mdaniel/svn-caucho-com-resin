@@ -226,9 +226,9 @@ public class WebBeansContainer
     
     _wbWebBeans = new WbWebBeans(this, Vfs.lookup());
 
-    addContext("com.caucho.server.context.RequestScope");
-    addContext("com.caucho.server.context.SessionScope");
-    addContext("com.caucho.server.context.ConversationScope");
+    addContext("com.caucho.server.webbeans.RequestScope");
+    addContext("com.caucho.server.webbeans.SessionScope");
+    addContext("com.caucho.server.webbeans.ConversationScope");
     _contextMap.put(ApplicationScoped.class, new ApplicationScope());
     _contextMap.put(Singleton.class, new SingletonScope());
 
@@ -423,9 +423,9 @@ public class WebBeansContainer
    *
    * @param value the singleton value to register with the manager
    */
-  public void addSingleton(Object value)
+  public void addSingleton(Object value, Type... api)
   {
-    addBean(new SingletonBean(value));
+    addBean(new SingletonBean(value, null, api));
   }
 
   /**
@@ -437,9 +437,14 @@ public class WebBeansContainer
    * @param name the WebBeans @Named value for the singleton
    */
   public void addSingleton(Object object,
-			   String name)
+			   String name,
+			   Type ... api)
   {
-    addBean(new SingletonBean(object, name));
+    addBean(new SingletonBean(object,
+			      null,
+			      name,
+			      new Annotation[] { Names.create(name) },
+			      api));
   }
 
   /**
@@ -451,12 +456,14 @@ public class WebBeansContainer
    * @param name the WebBeans @Named value for the singleton
    * @param api the exported types for the singleton
    */
+  /*
   public void addSingleton(Object object,
 			   String name,
 			   Type ...api)
   {
     addBean(new SingletonBean(object, name, api));
   }
+  */
 
   /**
    * Registers a singleton as a WebBean.  The value will be introspected
@@ -975,16 +982,22 @@ public class WebBeansContainer
       if (log.isLoggable(Level.FINER))
 	log.finer(this + " bind(" + getSimpleName(type) + ") -> " + beans);
 
-      if (beans != null)
+      if (beans != null && beans.size() > 0)
 	return beans;
     }
     
     if (_parent != null) {
       return _parent.resolve(type, bindings);
     }
-    else {
-      return null;
+    
+    for (Annotation ann : bindings) {
+      if (! ann.annotationType().isAnnotationPresent(BindingType.class)) {
+	throw new IllegalArgumentException(L.l("'{0}' is an invalid binding annotation because it does not have a @BindingType meta-annotation",
+					       ann));
+      }
     }
+
+    return null;
   }
 
   public int getDeploymentPriority(Class deploymentType)
@@ -1102,8 +1115,9 @@ public class WebBeansContainer
     Set<Bean<T>> set = resolveByType(type, bindings);
 
     if (set == null || set.size() == 0) {
-      throw new UnsatisfiedDependencyException(L.l("'{0}' does not match any configured beans",
-						     type.getName()));
+      throw new UnsatisfiedDependencyException(L.l("'{0}' does not match any configured beans with binding {1}",
+						   type.getName(),
+						   toList(bindings)));
     }
     else if (set.size() == 1) {
       Iterator<Bean<T>> iter = set.iterator();
@@ -1121,6 +1135,20 @@ public class WebBeansContainer
     }
 
     return null;
+  }
+
+  /**
+   * Convert an annotation array to a list for debugging purposes
+   */
+  private ArrayList<Annotation> toList(Annotation []annList)
+  {
+    ArrayList<Annotation> list = new ArrayList<Annotation>();
+
+    for (Annotation ann : annList) {
+      list.add(ann);
+    }
+
+    return list;
   }
 
   /**

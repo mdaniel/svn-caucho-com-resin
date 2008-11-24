@@ -381,7 +381,14 @@ public class HttpResponse extends AbstractHttpResponse
       if (debug)
         log.fine(_request.dbgId() + "Content-Length: " + _contentLength);
     }
-    else if (statusCode == SC_NOT_MODIFIED || statusCode == SC_NO_CONTENT) {
+    else if (statusCode == SC_NOT_MODIFIED) {
+      // #3089
+      // In the HTTP spec, a 304 has no message body so the content-length
+      // is not needed.  The content-length is not explicitly forbidden,
+      // but does cause problems with certain clients.
+      hasContentLength = true;
+    }
+    else if (statusCode == SC_NO_CONTENT) {
       hasContentLength = true;
       os.write(_contentLengthBytes, 0, _contentLengthBytes.length);
       os.print(0);

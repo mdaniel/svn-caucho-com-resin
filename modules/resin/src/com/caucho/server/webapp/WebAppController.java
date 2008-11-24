@@ -516,7 +516,7 @@ public class WebAppController
     throws Throwable
   {
     WebBeansContainer webBeans = WebBeansContainer.create();
-    webBeans.addSingleton(app, CauchoDeployment.class, null,
+    webBeans.addSingleton(app, CauchoDeployment.class, (String) null,
 			  WebApp.class, ServletContext.class);
     webBeans.addSingleton(getVar(), CauchoDeployment.class,
 			  "webApp", void.class);

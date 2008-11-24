@@ -202,6 +202,15 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   }
 
   /**
+   * Returns the byte offset.
+   */
+  public int getByteBufferOffset()
+    throws IOException
+  {
+    return _byteLength;
+  }
+
+  /**
    * Sets the byte offset.
    */
   public void setBufferOffset(int offset)

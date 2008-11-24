@@ -45,6 +45,7 @@ import java.util.Set;
 import java.util.logging.*;
 
 import javax.webbeans.manager.Bean;
+import javax.webbeans.BindingType;
 import javax.webbeans.NonBinding;
 
 /**
@@ -186,8 +187,14 @@ public class WebComponent<T> {
     boolean isMatch(Annotation []bindingArgs)
     {
       for (Annotation arg : bindingArgs) {
-	if (! isMatch(arg))
+	if (! isMatch(arg)) {
+	  if (! arg.annotationType().isAnnotationPresent(BindingType.class)) {
+	    throw new ConfigException(L.l("'{0}' is an invalid binding annotation because it does not have a @BindingType meta-annotation.",
+					  arg));
+	  }
+	  
 	  return false;
+	}
       }
 
       return true;

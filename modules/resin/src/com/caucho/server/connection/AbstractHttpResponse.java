@@ -883,8 +883,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return;
 
     // server/05e8
-    if (_responseStream != null && _responseStream.isFlushed())
+    if (_responseStream != null && _responseStream.isFlushed()) {
       return;
+    }
 
     int i = 0;
     boolean hasHeader = false;
@@ -930,8 +931,9 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return;
 
     // server/05e8
-    if (_responseStream != null && _responseStream.isFlushed())
+    if (_responseStream != null && _responseStream.isFlushed()) {
       return;
+    }
 
     _headerKeys.add(key);
     _headerValues.add(value);
