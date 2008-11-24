@@ -404,21 +404,22 @@ public final class Vfs {
     
     DEFAULT_SCHEME_MAP.put("file", pwd);
 
-    /* XXX:
     DEFAULT_SCHEME_MAP.put("memory", new MemoryScheme());
     
     DEFAULT_SCHEME_MAP.put("jar", new JarScheme(null)); 
+    /* XXX:
     DEFAULT_SCHEME_MAP.put("mailto",
 				 new MailtoPath(null, null, null, null));
+    */
     DEFAULT_SCHEME_MAP.put("classpath", new ClasspathPath(null, "", ""));
     DEFAULT_SCHEME_MAP.put("http", new HttpPath("127.0.0.1", 0));
     DEFAULT_SCHEME_MAP.put("https", new HttpsPath("127.0.0.1", 0));
-    DEFAULT_SCHEME_MAP.put("hmux", new HmuxPath("127.0.0.1", 0));
+    // DEFAULT_SCHEME_MAP.put("hmux", new HmuxPath("127.0.0.1", 0));
     DEFAULT_SCHEME_MAP.put("tcp", new TcpPath(null, null, null, "127.0.0.1", 0));
     DEFAULT_SCHEME_MAP.put("tcps", new TcpsPath(null, null, null, "127.0.0.1", 0));
     // DEFAULT_SCHEME_MAP.put("log", new LogPath(null, "/", null, "/"));
+
     DEFAULT_SCHEME_MAP.put("merge", new MergePath());
-    */
 
     StreamImpl stdout = StdoutStream.create();
     StreamImpl stderr = StderrStream.create();
