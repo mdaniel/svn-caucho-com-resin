@@ -49,7 +49,6 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
-import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.component.*;
 
 import javax.ejb.*;

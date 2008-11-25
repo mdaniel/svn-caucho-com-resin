@@ -35,7 +35,6 @@ import javax.webbeans.*;
 
 
 import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 /**

@@ -37,7 +37,6 @@ import javax.naming.*;
 import javax.webbeans.*;
 
 import com.caucho.naming.*;
-import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.*;
 
 /**

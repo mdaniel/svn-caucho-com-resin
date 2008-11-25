@@ -33,7 +33,6 @@ import javax.ejb.*;
 import com.caucho.config.*;
 import com.caucho.ejb.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.context.*;
 
 /**
  * Abstract base class for an stateless session context

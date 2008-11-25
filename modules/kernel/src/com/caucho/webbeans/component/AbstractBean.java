@@ -41,7 +41,6 @@ import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.bytecode.*;
 import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.event.ObserverImpl;
 import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.webbeans.manager.CurrentLiteral;

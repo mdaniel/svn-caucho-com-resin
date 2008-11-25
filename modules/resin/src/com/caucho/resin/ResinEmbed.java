@@ -45,7 +45,6 @@ import com.caucho.server.port.*;
 import com.caucho.server.resin.*;
 import com.caucho.server.webapp.*;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.context.*;
 
 /**
  * Embeddable version of the Resin server.

@@ -37,7 +37,6 @@ import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.webbeans.Singleton;
 import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.lang.annotation.*;

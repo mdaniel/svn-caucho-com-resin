@@ -39,7 +39,6 @@ import java.lang.reflect.Type;
 import javax.webbeans.*;
 
 import com.caucho.webbeans.cfg.WbWebBeans;
-import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.*;
 
 /**

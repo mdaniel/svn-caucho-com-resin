@@ -34,7 +34,6 @@ import com.caucho.config.ConfigContext;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
-import com.caucho.webbeans.context.*;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;

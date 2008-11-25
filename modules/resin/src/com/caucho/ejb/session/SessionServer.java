@@ -35,7 +35,6 @@ import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.ejb.*;
