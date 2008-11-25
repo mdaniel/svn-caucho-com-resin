@@ -51,7 +51,7 @@ public class BamConnectionFactoryImpl implements BamConnectionFactory
   {
     WebBeansContainer manager = WebBeansContainer.getCurrent();
 
-    _broker = manager.getObject(BamBroker.class);
+    _broker = manager.getInstanceByType(BamBroker.class);
 
     if (_broker == null)
       throw new IllegalStateException(L.l("No BamBroker defined in current context"));

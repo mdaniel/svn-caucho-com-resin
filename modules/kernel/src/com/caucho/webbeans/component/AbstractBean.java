@@ -29,6 +29,7 @@
 
 package com.caucho.webbeans.component;
 
+import com.caucho.config.annotation.ServiceType;
 import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
@@ -96,6 +97,10 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 
   private ArrayList<Annotation> _stereotypes
     = new ArrayList<Annotation>();
+
+  // general custom annotations
+  private HashMap<Class,Annotation> _annotationMap
+    = new HashMap<Class,Annotation>();
   
   private HashMap<Method,ArrayList<WbInterceptor>> _interceptorMap;
 
@@ -319,6 +324,26 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   }
 
   /**
+   * Adds a custom
+   */
+  public void addAnnotation(Annotation annotation)
+  {
+    _annotationMap.put(annotation.annotationType(), annotation);
+  }
+
+  /**
+   * Returns the services
+   */
+  public Annotation []getAnnotations()
+  {
+    Annotation []annotations = new Annotation[_annotationMap.size()];
+
+    _annotationMap.values().toArray(annotations);
+    
+    return annotations;
+  }
+
+  /**
    * Returns the types that the bean implements
    */
   public Set<Class<?>> getTypes()
@@ -446,6 +471,11 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     introspectScope(annotations);
     introspectBindings(annotations);
     introspectStereotypes(annotations);
+
+    for (Annotation ann : annotations) {
+      if (_annotationMap.get(ann.annotationType()) == null)
+	_annotationMap.put(ann.annotationType(), ann);
+    }
   }
 
   /**

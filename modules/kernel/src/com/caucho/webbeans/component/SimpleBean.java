@@ -245,6 +245,8 @@ public class SimpleBean extends ComponentImpl
 
     if (getBindingTypes().size() == 0)
       introspectBindings();
+
+    introspectObservers(cl);
     
     introspectMBean();
   }
@@ -519,7 +521,7 @@ public class SimpleBean extends ComponentImpl
 	_ctorArgs = ctorArgs;
       }
 
-      introspectObservers(getTargetClass());
+      // introspectObservers(getTargetClass());
 
       PojoBean bean = new PojoBean(getTargetClass());
       bean.setSingleton(isSingleton());

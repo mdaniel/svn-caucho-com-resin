@@ -51,6 +51,7 @@ import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
+import com.caucho.webbeans.component.SingletonBean;
 import com.caucho.webbeans.manager.*;
 
 import java.net.*;
@@ -512,12 +513,15 @@ public class Host extends WebAppContainer
       _bamBroker.addAlias(alias);
       
       if (brokerManager != null)
-	brokerManager.addBroker(hostName, _bamBroker);
+	brokerManager.addBroker(alias, _bamBroker);
     }
 
     WebBeansContainer webBeans = WebBeansContainer.getCurrent();
 
-    webBeans.addSingleton(_bamBroker, "bamBroker");
+    SingletonBean bean
+      = new SingletonBean(_bamBroker, "bamBroker", BamBroker.class);
+
+    webBeans.addBean(bean);
   }
 
   /**

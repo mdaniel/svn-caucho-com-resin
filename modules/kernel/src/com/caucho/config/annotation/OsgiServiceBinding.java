@@ -29,17 +29,20 @@
 
 package com.caucho.config.annotation;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.*;
 
+import javax.webbeans.BindingType;
+
 /**
- * The @ServiceType annotation marks a ScopeType annotation as being
- * load-on-startup.
+ * The @OsgiServiceBinding fires a startup event to register the
+ * bean as an osgi service.
  */
 
+@BindingType
 @Documented
-@Target({ANNOTATION_TYPE})
+@Target({TYPE, METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
-public @interface ServiceType {
+public @interface OsgiServiceBinding {
 }

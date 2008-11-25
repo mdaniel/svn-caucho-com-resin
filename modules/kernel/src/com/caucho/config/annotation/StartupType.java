@@ -34,12 +34,22 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.*;
 
 /**
- * The @ServiceType annotation marks a ScopeType annotation as being
- * load-on-startup.
+ * The @StartupType annotation marks an annotation as triggering a
+ * startup event for the bean.
+ *
+ * When Resin's WebBeans starts, it will fire Bean events with
+ * the @BindingType for the startup annotation, e.g.
+ *
+ * <code><pre>
+ *  fireEvent(bean, [@ServiceBinding]);
+ * </pre></code>
+ *
+ * The event handling is handled by a normal observer which will register
+ * or start the bean as appropriate.
  */
 
 @Documented
 @Target({ANNOTATION_TYPE})
 @Retention(RUNTIME)
-public @interface ServiceType {
+public @interface StartupType {
 }

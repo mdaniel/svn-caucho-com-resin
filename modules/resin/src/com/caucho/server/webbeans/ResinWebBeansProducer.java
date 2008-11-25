@@ -29,19 +29,24 @@
 
 package com.caucho.server.webbeans;
 
+import com.caucho.config.annotation.ServiceBinding;
+import com.caucho.config.annotation.OsgiServiceBinding;
 import com.caucho.ejb.timer.EjbTimerService;
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.jmx.Jmx;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.webbeans.manager.BeanStartupEvent;
 import com.caucho.server.util.ScheduledThreadPool;
 import com.caucho.transaction.*;
 
 import java.util.concurrent.*;
+import java.util.logging.*;
 import javax.ejb.*;
 import javax.management.*;
 import javax.transaction.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
 import javax.webbeans.manager.Manager;
 
 /**
@@ -52,6 +57,9 @@ import javax.webbeans.manager.Manager;
 @Singleton
 public class ResinWebBeansProducer
 {
+  private static final Logger log
+    = Logger.getLogger(ResinWebBeansProducer.class.getName());
+  
   /**
    * Returns the web beans container.
    */
@@ -120,5 +128,40 @@ public class ResinWebBeansProducer
   public TimerService getTimerService()
   {
     return EjbTimerService.getCurrent();
+  }
+
+  //
+  // event listeners
+  //
+
+  /**
+   * Starts a bean based on a ServiceStartup event
+   */
+  public void serviceStartup(@Observes @ServiceBinding BeanStartupEvent beanEvent)
+  {
+    Bean bean = beanEvent.getBean();
+    
+    if (log.isLoggable(Level.FINER))
+      log.fine(bean + " starting at initialization");
+    
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
+    webBeans.getInstance(bean);
+  }
+
+  /**
+   * Registers a bean with OSGi based on a ServiceStartup event
+   */
+  public void osgiServiceStartup(@Observes @OsgiServiceBinding
+				 BeanStartupEvent beanEvent)
+  {
+    Bean bean = beanEvent.getBean();
+    
+    if (log.isLoggable(Level.FINER))
+      log.fine(bean + " starting at initialization");
+    
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
+    webBeans.getInstance(bean);
   }
 }

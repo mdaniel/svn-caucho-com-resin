@@ -30,6 +30,7 @@
 package com.caucho.config.types;
 
 import com.caucho.config.*;
+import com.caucho.config.annotation.StartupType;
 import com.caucho.config.program.*;
 import com.caucho.config.type.*;
 import com.caucho.util.*;
@@ -205,6 +206,8 @@ public class CustomBeanConfig {
 
     Class metaType = null;
 
+    _component.addAnnotation(ann);
+
     if (type.isAnnotationPresent(ScopeType.class)) {
       metaType = ScopeType.class;
 
@@ -253,6 +256,11 @@ public class CustomBeanConfig {
       _component.addStereotype(ann);
     }
 
+    if (type.isAnnotationPresent(StartupType.class)) {
+      metaType = StartupType.class;
+    }
+
+    // ioc/0l00
     if (metaType == null)
       throw new ConfigException(L.l("'{0}' is an invalid annotation.  An annotation must be a @BindingType, @ScopeType, @DeploymentType, @InterceptorBindingType",
 				    ann));

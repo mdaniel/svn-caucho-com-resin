@@ -40,6 +40,8 @@ abstract public class AbstractBamService implements BamService
 {
   private static final Logger log
     = Logger.getLogger(AbstractBamService.class.getName());
+
+  private BamStream _brokerStream;
   
   private String _jid;
 
@@ -70,6 +72,22 @@ abstract public class AbstractBamService implements BamService
   public boolean stopAgent(String jid)
   {
     return false;
+  }
+
+  /**
+   * Returns the stream to the broker
+   */
+  public BamStream getBrokerStream()
+  {
+    return _brokerStream;
+  }
+
+  /**
+   * Sets the stream to the broker
+   */
+  public void setBrokerStream(BamStream brokerStream)
+  {
+    _brokerStream = brokerStream;
   }
 
   /**

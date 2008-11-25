@@ -27,19 +27,36 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.annotation;
+package com.caucho.webbeans.manager;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.*;
+import javax.webbeans.manager.Bean;
+import javax.webbeans.manager.Manager;
 
 /**
- * The @ServiceType annotation marks a ScopeType annotation as being
- * load-on-startup.
+ * An event at webbeans startup
  */
+public class BeanStartupEvent {
+  private final Manager _manager;
+  private final Bean _bean;
 
-@Documented
-@Target({ANNOTATION_TYPE})
-@Retention(RUNTIME)
-public @interface ServiceType {
+  public BeanStartupEvent(Manager manager, Bean bean)
+  {
+    _manager = manager;
+    _bean = bean;
+  }
+
+  public Manager getManager()
+  {
+    return _manager;
+  }
+
+  public Bean getBean()
+  {
+    return _bean;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _bean + "]";
+  }
 }

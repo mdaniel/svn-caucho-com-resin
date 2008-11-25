@@ -27,19 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.annotation;
+package com.caucho.hemp;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.*;
 
+import javax.webbeans.BindingType;
+
 /**
- * The @ServiceType annotation marks a ScopeType annotation as being
- * load-on-startup.
+ * The @BamServiceBinding is used to locate the bam service registry.
  */
 
+@BindingType
 @Documented
-@Target({ANNOTATION_TYPE})
+@Target({TYPE, METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
-public @interface ServiceType {
+public @interface BamServiceBinding {
 }

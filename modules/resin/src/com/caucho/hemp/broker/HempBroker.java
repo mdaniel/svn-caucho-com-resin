@@ -33,16 +33,25 @@ import com.caucho.bam.BamServiceManager;
 import com.caucho.bam.BamBroker;
 import com.caucho.bam.BamConnection;
 import com.caucho.bam.BamError;
-import com.caucho.hemp.*;
 import com.caucho.bam.BamService;
+import com.caucho.bam.AbstractBamService;
 import com.caucho.bam.BamStream;
+import com.caucho.hemp.*;
+import com.caucho.loader.Environment;
 import com.caucho.server.resin.*;
 import com.caucho.util.*;
+import com.caucho.hemp.BamServiceBinding;
+import com.caucho.webbeans.manager.BeanStartupEvent;
+import com.caucho.webbeans.component.CauchoBean;
+
 import java.util.*;
 import java.util.logging.*;
+import java.lang.annotation.Annotation;
 import java.lang.ref.*;
 import java.io.Serializable;
-
+import javax.webbeans.Observes;
+import javax.webbeans.manager.Bean;
+import javax.webbeans.manager.Manager;
 
 /**
  * Broker
@@ -755,6 +764,53 @@ public class HempBroker implements BamBroker, BamStream
     }
   }
 
+  //
+  // webbeans callbacks
+  //
+
+  /**
+   * Called when a @BamService is annotated on the service
+   */
+  public void registerBamService(@Observes @BamServiceBinding
+				 BeanStartupEvent event)
+  {
+    Manager manager = event.getManager();
+    Bean bean = event.getBean();
+
+    if (bean instanceof CauchoBean) {
+      CauchoBean cauchoBean = (CauchoBean) bean;
+
+      AbstractBamService service
+	= (AbstractBamService) manager.getInstance(bean);
+
+      Annotation []ann = cauchoBean.getAnnotations();
+
+      service.setBrokerStream(this);
+
+      String jid = getJid(service, ann);
+
+      service.setJid(jid);
+
+      int threadMax = getThreadMax(ann);
+
+      BamService bamService = service;
+
+      // queue
+      if (threadMax > 0) {
+	bamService = new MemoryQueueServiceFilter(bamService,
+						  getBrokerStream(),
+						  threadMax);
+      }
+
+      addService(bamService);
+
+      Environment.addCloseListener(new ServiceClose(bamService));
+    }
+    else {
+      log.warning(this + " can't register " + bean + " because it's not a CauchoBean");
+    }
+  }
+
   public void close()
   {
     _manager.removeBroker(_domain);
@@ -766,10 +822,68 @@ public class HempBroker implements BamBroker, BamStream
     _serviceCache.clear();
     _agentMap.clear();
   }
+
+  private String getJid(BamService service, Annotation []annList)
+  {
+    com.caucho.config.BamService bamAnn = findBamService(annList);
+
+    String name = "";
+
+    if (bamAnn != null)
+      name = bamAnn.name();
+    
+    if (name == null || "".equals(name))
+      name = service.getJid();
+
+    if (name == null || "".equals(name))
+      name = service.getClass().getSimpleName();
+
+    String jid = name;
+    if (jid.indexOf('@') < 0 && jid.indexOf('/') < 0)
+      jid = name + "@" + getJid();
+
+    return jid;
+  }
+
+  private int getThreadMax(Annotation []annList)
+  {
+    com.caucho.config.BamService bamAnn = findBamService(annList);
+
+    if (bamAnn != null)
+      return bamAnn.threadMax();
+    else
+      return 1;
+  }
+
+  private com.caucho.config.BamService findBamService(Annotation []annList)
+  {
+    for (Annotation ann : annList) {
+      if (ann.annotationType().equals(com.caucho.config.BamService.class))
+	return (com.caucho.config.BamService) ann;
+
+      // XXX: stereotypes
+    }
+
+    return null;
+  }
   
   @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _domain + "]";
+  }
+
+  class ServiceClose {
+    private BamService _service;
+
+    ServiceClose(BamService service)
+    {
+      _service = service;
+    }
+    
+    public void close()
+    {
+      removeService(_service);
+    }
   }
 }

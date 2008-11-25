@@ -135,8 +135,10 @@ public class CustomBeanType extends ConfigType
       return CustomBeanProgramAttribute.ATTRIBUTE;
     }
     
-    if (qName.getNamespaceURI() == null
-	|| ! qName.getNamespaceURI().startsWith("urn:java:"))
+    if (qName.getNamespaceURI() == null)
+      return null;
+    else if (! qName.getNamespaceURI().startsWith("urn:java:")
+	     && ! qName.getNamespaceURI().equals(RESIN_NS))
       return null;
 
     Method method = null;

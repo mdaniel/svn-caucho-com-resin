@@ -103,6 +103,7 @@ public class GenericService extends SimpleBamService
   @PostConstruct
   public void init()
   {
+    /*
     if (getJid() == null)
       throw new ConfigException(L.l("{0} requires a jid",
 				    getClass().getSimpleName()));
@@ -115,6 +116,7 @@ public class GenericService extends SimpleBamService
       log.fine(this + " init");
 
     _brokerStream = _broker.getBrokerStream();
+    */
   }
 
   protected BamStream createQueue(BamStream stream)

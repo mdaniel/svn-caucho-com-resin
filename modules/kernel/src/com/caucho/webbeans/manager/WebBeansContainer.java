@@ -30,8 +30,7 @@
 package com.caucho.webbeans.manager;
 
 import com.caucho.config.*;
-import com.caucho.config.annotation.DefaultScopeContext;
-import com.caucho.config.annotation.ServiceType;
+import com.caucho.config.annotation.StartupType;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.MethodComponentProgram;
@@ -165,8 +164,8 @@ public class WebBeansContainer
   private ArrayList<ComponentImpl> _pendingBindList
     = new ArrayList<ComponentImpl>();
 
-  private ArrayList<Bean> _pendingServiceList
-    = new ArrayList<Bean>();
+  private ArrayList<CauchoBean> _pendingServiceList
+    = new ArrayList<CauchoBean>();
 
   private HashMap<Class,InjectProgram> _injectMap
     = new HashMap<Class,InjectProgram>();
@@ -876,6 +875,9 @@ public class WebBeansContainer
 	
 	addComponentByType(type, bean);
       }
+
+      if (isStartupPresent(cauchoBean.getAnnotations()))
+	_pendingServiceList.add(cauchoBean);
     }
     else {
       for (Class type : bean.getTypes()) {
@@ -887,17 +889,6 @@ public class WebBeansContainer
       addComponentByName(bean.getName(), bean);
 
     registerJmx(bean);
-
-    if (bean.getScopeType().isAnnotationPresent(ServiceType.class)) {
-      _pendingServiceList.add(bean);
-    }
-    else if (bean instanceof ComponentImpl) {
-      ComponentImpl cauchoBean = (ComponentImpl) bean;
-
-      if (cauchoBean.isSingleton()) {
-	_pendingServiceList.add(cauchoBean);
-      }
-    }
     
     return this;
   }
@@ -987,7 +978,8 @@ public class WebBeansContainer
       Set beans = component.resolve(bindings);
 
       if (log.isLoggable(Level.FINER))
-	log.finer(this + " bind(" + getSimpleName(type) + ") -> " + beans);
+	log.finer(this + " bind(" + getSimpleName(type)
+		  + "," + toList(bindings) + ") -> " + beans);
 
       if (beans != null && beans.size() > 0)
 	return beans;
@@ -1074,31 +1066,8 @@ public class WebBeansContainer
 
       if (context != null)
 	return (T) context.get(bean, true);
-      else if (scopeType.isAnnotationPresent(DefaultScopeContext.class)) {
-	context = addDefaultScopeContext(scopeType);
-
-	return (T) context.get(bean, true);
-      }
       else
 	return (T) bean.create();
-    }
-  }
-
-  private Context addDefaultScopeContext(Class scopeType)
-  {
-    DefaultScopeContext ann
-      = (DefaultScopeContext) scopeType.getAnnotation(DefaultScopeContext.class);
-
-    Class cl = ann.value();
-
-    try {
-      Context context = (Context) cl.newInstance();
-      
-      addContext(context);
-
-      return context;
-    } catch (Exception e) {
-      throw ConfigException.create(e);
     }
   }
 
@@ -1215,9 +1184,6 @@ public class WebBeansContainer
 
     if (context != null && context.isActive())
       return context;
-    else if (scopeType.isAnnotationPresent(DefaultScopeContext.class)) {
-      return addDefaultScopeContext(scopeType);
-    }
     else
       throw new ContextNotActiveException(L.l("'@{0}' is not an active WebBeans context.",
 					      scopeType.getName()));
@@ -1636,20 +1602,68 @@ public class WebBeansContainer
    */
   private void startServices()
   {
-    ArrayList<Bean> services;
+    ArrayList<CauchoBean> services;
 
     synchronized (_pendingServiceList) {
       if (_pendingServiceList.size() == 0)
 	return;
 
-      services = new ArrayList<Bean>();
+      services = new ArrayList<CauchoBean>();
       services.addAll(_pendingServiceList);
       _pendingServiceList.clear();
     }
 
-    for (Bean singleton : services) {
-      getInstance(singleton);
+    for (CauchoBean bean : services) {
+      registerBean(bean, bean.getAnnotations());
     }
+  }
+
+  private boolean isStartupPresent(Annotation []annList)
+  {
+    for (Annotation ann : annList) {
+      Class<? extends Annotation> annType = ann.annotationType();
+      
+      if (annType.isAnnotationPresent(StartupType.class)) {
+	return true;
+      }
+      else if (annType.isAnnotationPresent(Stereotype.class)
+	       && isStartupPresent(annType.getAnnotations())) {
+	return true;
+      }
+    }
+
+    return false;
+  }
+
+  private void registerBean(Bean bean, Annotation []annList)
+  {
+    for (Annotation ann : annList) {
+      Class<? extends Annotation> annType = ann.annotationType();
+      
+      if (annType.isAnnotationPresent(StartupType.class)) {
+	registerBean(bean, ann);
+      }
+      else if (annType.isAnnotationPresent(Stereotype.class)) {
+	registerBean(bean, annType.getAnnotations());
+      }
+    }
+  }
+
+  private void registerBean(Bean bean, Annotation ann)
+  {
+    ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
+
+    for (Annotation bindingAnn : ann.annotationType().getAnnotations()) {
+      Class<? extends Annotation> annType = bindingAnn.annotationType();
+
+      if (annType.isAnnotationPresent(BindingType.class))
+	bindingList.add(bindingAnn);
+    }
+
+    Annotation []bindings = new Annotation[bindingList.size()];
+    bindingList.toArray(bindings);
+
+    fireEvent(new BeanStartupEvent(this, bean), bindings);
   }
 
   /**

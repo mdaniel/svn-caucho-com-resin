@@ -29,6 +29,7 @@
 
 package com.caucho.webbeans.component;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
 
@@ -46,4 +47,9 @@ abstract public class CauchoBean<T> extends Bean<T>
   }
   
   abstract public Set<BaseType> getGenericTypes();
+
+  /**
+   * Returns all of the custom annotations
+   */
+  abstract public Annotation []getAnnotations();
 }

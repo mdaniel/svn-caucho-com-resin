@@ -32,19 +32,15 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
 
-import javax.webbeans.ScopeType;
-import com.caucho.config.annotation.ServiceType;
-import com.caucho.config.annotation.DefaultScopeContext;
-import com.caucho.config.scope.ServiceScope;
+import javax.webbeans.Stereotype;
 
 /**
- * @Service is a @ScopeType that automatically starts the bean when the
- * environment starts.
+ * @Service is a startup @Stereotype for an @ApplicationScoped bean
+ * that starts automatically.
  */
 
-@ScopeType
-@ServiceType
-@DefaultScopeContext(ServiceScope.class)
+@Stereotype
+@ServiceStartup  
 @Documented  
 @Retention(RUNTIME)
 @Target({METHOD, TYPE})

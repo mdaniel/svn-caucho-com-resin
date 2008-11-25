@@ -27,19 +27,27 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.annotation;
+package com.caucho.config;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.*;
 
+import javax.webbeans.BindingType;
+import com.caucho.config.annotation.StartupType;
+import com.caucho.hemp.BamServiceBinding;
+
 /**
- * The @ServiceType annotation marks a ScopeType annotation as being
- * load-on-startup.
+ * The @BamService registers a bean with the bam service registry.
  */
 
+@StartupType
+@BamServiceBinding  
 @Documented
-@Target({ANNOTATION_TYPE})
+@Target({TYPE, METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
-public @interface ServiceType {
+public @interface BamService {
+  public String name() default "";
+
+  public int threadMax() default 1;
 }

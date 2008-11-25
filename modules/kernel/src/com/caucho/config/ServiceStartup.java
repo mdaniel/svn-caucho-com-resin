@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,27 +19,31 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.config.annotation;
+package com.caucho.config;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
 
+import com.caucho.config.annotation.StartupType;
+import com.caucho.config.annotation.ServiceBinding;
+
 /**
- * The @ServiceType annotation marks a ScopeType annotation as being
- * load-on-startup.
+ * @ServiceStartup is a @StartupType that automatically starts the
+ * bean when the environment starts.
  */
 
-@Documented
-@Target({ANNOTATION_TYPE})
+@StartupType
+@ServiceBinding  
+@Documented  
 @Retention(RUNTIME)
-public @interface ServiceType {
+@Target({METHOD, TYPE})
+public @interface ServiceStartup {
 }
