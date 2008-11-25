@@ -36,6 +36,7 @@ import java.lang.reflect.Method;
 import java.util.logging.Logger;
 
 import javax.faces.context.*;
+import javax.faces.FacesException;
 
 public class PropertyBeanProgram extends BeanProgram
 {
@@ -45,11 +46,20 @@ public class PropertyBeanProgram extends BeanProgram
 
   private Method _method;
   private AbstractValue _value;
+  private String _name;
+  private boolean _isValid;
 
   public PropertyBeanProgram(Method method, AbstractValue value)
-  {
+   {
     _method = method;
     _value = value;
+    _isValid = true;
+  }
+
+  public PropertyBeanProgram(String name, boolean valid)
+  {
+    _name = name;
+    _isValid = valid;                                                                                       
   }
 
   /**
@@ -58,6 +68,11 @@ public class PropertyBeanProgram extends BeanProgram
   public void configure(FacesContext context, Object bean)
     throws ConfigException
   {
+    if (! _isValid)
+      throw new FacesException(L.l("'{0}' is unknown property of '{1}'",
+                                   _name,
+                                   bean.getClass()));
+
     try {
       _method.invoke(bean, _value.getValue(context));
     } catch (RuntimeException e) {

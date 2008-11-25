@@ -28,17 +28,21 @@
 
 package com.caucho.jsf.cfg;
 
-import com.caucho.config.types.DescriptionGroupConfig;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
-import com.caucho.config.*;
 import com.caucho.util.*;
-import com.caucho.server.webapp.WebApp;
+
+import com.caucho.config.types.DescriptionGroupConfig;
 
 public class ManagedProperty extends DescriptionGroupConfig
 {
   private static final L10N L = new L10N(ManagedProperty.class);
+  static final protected Logger log
+    = Logger.getLogger(ManagedProperty.class.getName());
+
   
   private String _id;
 
@@ -107,19 +111,16 @@ public class ManagedProperty extends DescriptionGroupConfig
     
     Method setter = findSetter(type, name);
 
-    JsfPropertyGroup jsf = WebApp.getCurrent().getJsf();
+    if (setter == null) {
+      if (log.isLoggable(Level.FINER))
+        log.finer(L.l("'{0}' is unknown property of '{1}'", _name, type.getName()));
 
-    if (setter == null &&
-        (jsf == null || ! jsf.isDisableManagedBeanPropertyCheck()))
-      throw new ConfigException(L.l("'{0}' is an unknown property of '{1}'.",
-                                    _name, type.getName()));
+      program.add(new PropertyBeanProgram(_name, false));
+    } else {
+      Class propType = setter.getParameterTypes()[0];
 
-    if (setter == null)
-      return;
-
-    Class propType = setter.getParameterTypes()[0];
-
-    program.add(new PropertyBeanProgram(setter, _value.getValue(propType)));
+      program.add(new PropertyBeanProgram(setter, _value.getValue(propType)));
+    }
   }
 
   private static Method findSetter(Class type, String name)

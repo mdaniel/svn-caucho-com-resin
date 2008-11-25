@@ -65,6 +65,7 @@ class HtmlMessagesRenderer extends Renderer
 
     ResponseWriter out = context.getResponseWriter();
 
+    String id;
     String dir;
     String lang;
     String layout;
@@ -82,6 +83,8 @@ class HtmlMessagesRenderer extends Renderer
     String warnStyle;
     boolean isShowSummary;
     boolean isShowDetail;
+
+    id = component.getId();
     
     if (component instanceof HtmlMessages) {
       HtmlMessages htmlComp = (HtmlMessages) component;
@@ -147,7 +150,10 @@ class HtmlMessagesRenderer extends Renderer
 	else
 	  out.startElement("ul", component);
 
-	if (dir != null)
+        if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
+          out.writeAttribute("id", component.getClientId(context), "id");
+
+        if (dir != null)
 	  out.writeAttribute("dir", dir, "dir");
 
 	if (lang != null)

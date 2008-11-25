@@ -290,7 +290,21 @@ public class LifecycleImpl extends Lifecycle
 
   private String calculateViewId(FacesContext context)
   {
-    return JspViewHandler.createViewId(context);
+     Map map = context.getExternalContext().getRequestMap();
+
+    String viewId = (String)
+      map.get("javax.servlet.include.path_info");
+
+    if (viewId == null)
+      viewId = context.getExternalContext().getRequestPathInfo();
+
+    if (viewId == null)
+      viewId = (String) map.get("javax.servlet.include.servlet_path");
+
+    if (viewId == null)
+      viewId = context.getExternalContext().getRequestServletPath();
+
+    return viewId;
   }
   
   public void render(FacesContext context)

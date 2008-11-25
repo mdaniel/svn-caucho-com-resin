@@ -62,6 +62,7 @@ class HtmlMessageRenderer extends Renderer
   {
     ResponseWriter out = context.getResponseWriter();
 
+    String id;
     String dir;
     String lang;
     String errorClass;
@@ -79,6 +80,8 @@ class HtmlMessageRenderer extends Renderer
     String warnStyle;
     boolean isShowSummary;
     boolean isShowDetail;
+
+    id = component.getId();
     
     if (component instanceof HtmlMessage) {
       HtmlMessage htmlComp = (HtmlMessage) component;
@@ -174,17 +177,23 @@ class HtmlMessageRenderer extends Renderer
 	    style = warnStyle;
 	}
 
-	boolean hasSpan = (dir != null
-			   || lang != null
-			   || style != null
-			   || styleClass != null
-			   || title != null
-			   || tooltip);
+        boolean hasSpan = (dir != null
+                           || lang != null
+                           || style != null
+                           || styleClass != null
+                           || title != null
+                           || tooltip
+                           || (id != null &&
+                               ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX)));
 
-	if (hasSpan)
-	  out.startElement("span", component);
+        if (hasSpan) {
+          out.startElement("span", component);
 
-	if (dir != null)
+          if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
+            out.writeAttribute("id", component.getClientId(context), "id");
+        }
+
+        if (dir != null)
 	  out.writeAttribute("dir", dir, "dir");
 
 	if (lang != null)

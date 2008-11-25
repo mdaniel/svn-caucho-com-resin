@@ -199,6 +199,8 @@ public class ManagedBeanConfig
       elContext.setPropertyResolved(isPropertyResolved);
       
       return value;
+    } catch (FacesException e) {
+      throw e;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
