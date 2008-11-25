@@ -37,7 +37,6 @@ import javax.jms.*;
 import javax.resource.spi.*;
 
 import com.caucho.bam.*;
-import com.caucho.config.*;
 import com.caucho.config.annotation.Start;
 import com.caucho.config.types.*;
 import com.caucho.webbeans.cfg.AbstractBeanConfig;
