@@ -29,11 +29,16 @@
 
 package com.caucho.webbeans.manager;
 
-import com.caucho.config.program.MethodComponentProgram;
-import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.*;
+import com.caucho.config.annotation.DefaultScopeContext;
+import com.caucho.config.annotation.ServiceType;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.MethodComponentProgram;
+import com.caucho.config.program.FieldComponentProgram;
+import com.caucho.config.scope.ApplicationScope;
+import com.caucho.config.scope.ScopeContext;
+import com.caucho.config.scope.SingletonScope;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.*;
 import com.caucho.util.*;
@@ -161,8 +166,8 @@ public class WebBeansContainer
   private ArrayList<ComponentImpl> _pendingBindList
     = new ArrayList<ComponentImpl>();
 
-  private ArrayList<ComponentImpl> _pendingSingletonList
-    = new ArrayList<ComponentImpl>();
+  private ArrayList<Bean> _pendingServiceList
+    = new ArrayList<Bean>();
 
   private HashMap<Class,InjectProgram> _injectMap
     = new HashMap<Class,InjectProgram>();
@@ -229,8 +234,8 @@ public class WebBeansContainer
     addContext("com.caucho.server.webbeans.RequestScope");
     addContext("com.caucho.server.webbeans.SessionScope");
     addContext("com.caucho.server.webbeans.ConversationScope");
-    _contextMap.put(ApplicationScoped.class, new ApplicationScope());
-    _contextMap.put(Singleton.class, new SingletonScope());
+    addContext(new SingletonScope());
+    addContext(new ApplicationScope());
 
     _deploymentMap.put(Standard.class, 0);
     _deploymentMap.put(CauchoDeployment.class, 1);
@@ -884,11 +889,14 @@ public class WebBeansContainer
 
     registerJmx(bean);
 
-    if (bean instanceof ComponentImpl) {
+    if (bean.getScopeType().isAnnotationPresent(ServiceType.class)) {
+      _pendingServiceList.add(bean);
+    }
+    else if (bean instanceof ComponentImpl) {
       ComponentImpl cauchoBean = (ComponentImpl) bean;
 
       if (cauchoBean.isSingleton()) {
-	_pendingSingletonList.add(cauchoBean);
+	_pendingServiceList.add(cauchoBean);
       }
     }
     
@@ -1067,8 +1075,31 @@ public class WebBeansContainer
 
       if (context != null)
 	return (T) context.get(bean, true);
+      else if (scopeType.isAnnotationPresent(DefaultScopeContext.class)) {
+	context = addDefaultScopeContext(scopeType);
+
+	return (T) context.get(bean, true);
+      }
       else
 	return (T) bean.create();
+    }
+  }
+
+  private Context addDefaultScopeContext(Class scopeType)
+  {
+    DefaultScopeContext ann
+      = (DefaultScopeContext) scopeType.getAnnotation(DefaultScopeContext.class);
+
+    Class cl = ann.value();
+
+    try {
+      Context context = (Context) cl.newInstance();
+      
+      addContext(context);
+
+      return context;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
   }
 
@@ -1185,6 +1216,9 @@ public class WebBeansContainer
 
     if (context != null && context.isActive())
       return context;
+    else if (scopeType.isAnnotationPresent(DefaultScopeContext.class)) {
+      return addDefaultScopeContext(scopeType);
+    }
     else
       throw new ContextNotActiveException(L.l("'@{0}' is not an active WebBeans context.",
 					      scopeType.getName()));
@@ -1595,27 +1629,28 @@ public class WebBeansContainer
     
     _wbWebBeans.init();
 
-    startSingletons();
+    startServices();
   }
 
   /**
-   * Initialize all the singletons
+   * Initialize all the services
    */
-  private void startSingletons()
+  private void startServices()
   {
-    ArrayList<ComponentImpl> singletons;
+    ArrayList<Bean> services;
 
-    synchronized (_pendingSingletonList) {
-      if (_pendingSingletonList.size() == 0)
+    synchronized (_pendingServiceList) {
+      if (_pendingServiceList.size() == 0)
 	return;
 
-      singletons = new ArrayList<ComponentImpl>();
-      singletons.addAll(_pendingSingletonList);
-      _pendingSingletonList.clear();
+      services = new ArrayList<Bean>();
+      services.addAll(_pendingServiceList);
+      _pendingServiceList.clear();
     }
 
-    for (ComponentImpl singleton : singletons)
-      singleton.get();
+    for (Bean singleton : services) {
+      getInstance(singleton);
+    }
   }
 
   /**

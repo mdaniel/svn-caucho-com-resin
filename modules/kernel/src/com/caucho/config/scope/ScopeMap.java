@@ -24,17 +24,33 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.config.program;
+package com.caucho.config.scope;
 
-import com.caucho.config.*;
-import com.caucho.config.scope.DependentScope;
-import com.caucho.config.type.*;
+import java.util.*;
+import javax.webbeans.manager.Bean;
 
 /**
- * A saved program that avoids interpreting flow operations
+ * The singleton scope value
  */
-public abstract class FlowProgram extends ConfigProgram {
+public class ScopeMap<T> {
+  private transient final HashMap<Bean<T>,T> _map
+    = new HashMap<Bean<T>,T>(8);
+  
+  public T get(Bean<T> bean)
+  {
+    return _map.get(bean);
+  }
+  
+  public void put(Bean<T> bean, T value)
+  {
+    _map.put(bean, value);
+  }
+  
+  public void remove(Bean<T> bean)
+  {
+    _map.remove(bean);
+  }
 }

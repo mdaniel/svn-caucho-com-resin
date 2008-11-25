@@ -5,3 +5,4 @@ ldap=com.caucho.server.security.LdapAuthenticator
 null=com.caucho.server.security.NullAuthenticator
 properties=com.caucho.server.security.PropertyAuthenticator
 xml=com.caucho.server.security.XmlAuthenticator
+Xml=com.caucho.server.security.XmlAuthenticator

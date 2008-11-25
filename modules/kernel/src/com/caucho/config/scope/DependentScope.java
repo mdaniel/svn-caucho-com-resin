@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
+package com.caucho.config.scope;
 
 import com.caucho.loader.Environment;
 import com.caucho.webbeans.component.ComponentImpl;

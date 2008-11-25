@@ -24,17 +24,16 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.config.program;
-
-import com.caucho.config.*;
-import com.caucho.config.scope.DependentScope;
-import com.caucho.config.type.*;
+package com.caucho.config.scope;
 
 /**
- * A saved program that avoids interpreting flow operations
+ * Called when the object is removed from a scope.
  */
-public abstract class FlowProgram extends ConfigProgram {
+public interface ScopeRemoveListener
+{
+  public void removeEvent(Object scope, String name);
 }
+

@@ -32,8 +32,8 @@ package com.caucho.config.program;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.scope.DependentScope;
 import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.DependentScope;
 import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.util.*;
 

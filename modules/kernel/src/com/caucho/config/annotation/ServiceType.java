@@ -27,33 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
+package com.caucho.config.annotation;
 
-import com.caucho.webbeans.component.ComponentImpl;
-
-import java.io.Closeable;
-
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.*;
 
 /**
- * The application scope value
+ * The @ServiceType annotation marks a ScopeType annotation as being
+ * load-on-startup.
  */
-public class ComponentDestructor implements Closeable {
-  private ComponentImpl _owner;
-  private Object _value;
-
-  public ComponentDestructor(ComponentImpl owner, Object value)
-  {
-    _owner = owner;
-    _value = value;
-  }
-
-  public void close()
-  {
-    _owner.destroy(_value, null);
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _owner + "," + _value + "]";
-  }
+@Documented
+@Target({ANNOTATION_TYPE})
+@Retention(RUNTIME)
+public @interface ServiceType {
 }

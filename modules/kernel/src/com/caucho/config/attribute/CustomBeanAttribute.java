@@ -37,6 +37,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.type.*;
 import com.caucho.config.types.AnnotationConfig;
 import com.caucho.config.types.CustomBeanConfig;
+import com.caucho.config.types.BeanConfig;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
@@ -71,6 +72,24 @@ public class CustomBeanAttribute extends Attribute {
   {
     String uri = qName.getNamespaceURI();
     String localName = qName.getLocalName();
+
+    if (uri.equals("urn:java:com.caucho.config.driver")) {
+      TypeFactory factory = TypeFactory.getFactory();
+      
+      Class api;
+
+      if (parent instanceof BeanConfig) {
+	api = ((BeanConfig) parent).getBeanConfigClass();
+      }
+      else if (_setMethod != null)
+	api = _setMethod.getParameterTypes()[0];
+      else
+	api = _configType.getType();
+
+      Class cl = factory.getDriverClassByScheme(api, localName);
+
+      return new CustomBeanConfig(qName, cl);
+    }
 
     if (! uri.startsWith("urn:java:"))
       throw new IllegalStateException(L.l("'{0}' is an unexpected namespace, expected 'urn:java:...'", uri));

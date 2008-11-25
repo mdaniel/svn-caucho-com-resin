@@ -31,6 +31,7 @@ package com.caucho.webbeans.cfg;
 
 import com.caucho.bytecode.*;
 import com.caucho.config.*;
+import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
@@ -92,7 +93,7 @@ public class WbWebBeans {
     _webBeansFile.setUserPath(_webBeansFile.getURL());
   }
 
-  public void setSchemaInstance(String schema)
+  public void setSchemaLocation(String schema)
   {
   }
 

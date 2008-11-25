@@ -29,6 +29,7 @@
 
 package com.caucho.server.connection;
 
+import com.caucho.config.scope.ScopeRemoveListener;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextProvider;
@@ -46,7 +47,6 @@ import com.caucho.vfs.BufferedReaderAdapter;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
-import com.caucho.webbeans.context.ScopeRemoveListener;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -1818,7 +1818,6 @@ public abstract class AbstractHttpRequest
     }
 
     RoleMapManager roleManager = app != null ? app.getRoleMapManager() : null;
-    System.out.println("ROLE_MANAGER: " + roleManager + " " + app);
 
     if (roleManager != null) {
       Boolean result = roleManager.isUserInRole(role, user);

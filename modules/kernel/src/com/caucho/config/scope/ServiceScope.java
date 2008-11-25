@@ -27,29 +27,61 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
+package com.caucho.config.scope;
 
-import java.util.*;
+import com.caucho.loader.*;
+import com.caucho.config.Service;
+import com.caucho.webbeans.component.*;
+
+import java.lang.annotation.Annotation;
+import java.util.Hashtable;
+
+import javax.webbeans.*;
 import javax.webbeans.manager.Bean;
 
 /**
- * The singleton scope value
+ * The service scope manages load-on-startup services which also
+ * publish to osgi.
  */
-public class ScopeMap<T> {
-  private transient final HashMap<Bean<T>,T> _map
-    = new HashMap<Bean<T>,T>(8);
+public class ServiceScope extends ScopeContext
+{
+  private Hashtable _map = new Hashtable();
   
-  public T get(Bean<T> bean)
+  /**
+   * Returns true if the scope is currently active.
+   */
+  public boolean isActive()
   {
-    return _map.get(bean);
+    return true;
+   }
+  
+  /**
+   * Returns the scope annotation type.
+   */
+  public Class<? extends Annotation> getScopeType()
+  {
+    return Service.class;
   }
   
-  public void put(Bean<T> bean, T value)
+  public <T> T get(Bean<T> bean, boolean create)
+  {
+    Object v = _map.get(bean);
+      
+    if (v == null && create) {
+      v = bean.create();
+      // XXX: delete because of optimistic locking
+      _map.put(bean, v);
+    }
+    
+    return (T) v;
+  }
+  
+  public <T> void put(Bean<T> bean, T value)
   {
     _map.put(bean, value);
   }
   
-  public void remove(Bean<T> bean)
+  public <T> void remove(Bean<T> bean)
   {
     _map.remove(bean);
   }

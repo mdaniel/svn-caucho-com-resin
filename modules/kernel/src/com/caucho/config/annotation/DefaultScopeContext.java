@@ -24,17 +24,21 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.config.program;
+package com.caucho.config.annotation;
 
-import com.caucho.config.*;
-import com.caucho.config.scope.DependentScope;
-import com.caucho.config.type.*;
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.*;
 
 /**
- * A saved program that avoids interpreting flow operations
+ * Marks the default Context implementation class for the scope
  */
-public abstract class FlowProgram extends ConfigProgram {
+@Documented
+@Target({ANNOTATION_TYPE})
+@Retention(RUNTIME)
+public @interface DefaultScopeContext {
+  Class value();
 }

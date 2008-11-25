@@ -32,8 +32,8 @@ package com.caucho.config.program;
 import java.lang.reflect.*;
 
 import com.caucho.config.*;
+import com.caucho.config.scope.DependentScope;
 import com.caucho.util.*;
-import com.caucho.webbeans.context.DependentScope;
 
 /**
  * Injects a field with a constant value

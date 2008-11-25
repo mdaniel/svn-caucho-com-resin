@@ -24,17 +24,36 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.config.program;
+package com.caucho.config.scope;
 
-import com.caucho.config.*;
-import com.caucho.config.scope.DependentScope;
-import com.caucho.config.type.*;
+import com.caucho.webbeans.component.ComponentImpl;
+
+import java.io.Closeable;
+
 
 /**
- * A saved program that avoids interpreting flow operations
+ * The application scope value
  */
-public abstract class FlowProgram extends ConfigProgram {
+public class ComponentDestructor implements Closeable {
+  private ComponentImpl _owner;
+  private Object _value;
+
+  public ComponentDestructor(ComponentImpl owner, Object value)
+  {
+    _owner = owner;
+    _value = value;
+  }
+
+  public void close()
+  {
+    _owner.destroy(_value, null);
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _owner + "," + _value + "]";
+  }
 }

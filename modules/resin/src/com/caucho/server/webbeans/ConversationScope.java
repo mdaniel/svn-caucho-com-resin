@@ -31,9 +31,9 @@ package com.caucho.server.webbeans;
 
 import com.caucho.util.*;
 import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.context.ApplicationScope;
-import com.caucho.webbeans.context.ScopeContext;
-import com.caucho.webbeans.context.SingletonScope;
+import com.caucho.config.scope.ApplicationScope;
+import com.caucho.config.scope.ScopeContext;
+import com.caucho.config.scope.SingletonScope;
 import com.caucho.server.dispatch.ServletInvocation;
 
 import java.lang.annotation.Annotation;

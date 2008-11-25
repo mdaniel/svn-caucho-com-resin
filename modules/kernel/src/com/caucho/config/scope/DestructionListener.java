@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
+package com.caucho.config.scope;
 
 import java.io.Serializable;
 import java.lang.ref.WeakReference;

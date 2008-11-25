@@ -30,6 +30,8 @@
 package com.caucho.webbeans.component;
 
 import com.caucho.config.ConfigContext;
+import com.caucho.config.scope.ScopeContext;
+
 import java.lang.annotation.*;
 import javax.naming.*;
 import javax.webbeans.*;

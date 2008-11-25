@@ -30,6 +30,9 @@
 package com.caucho.webbeans.component;
 
 import com.caucho.config.ConfigContext;
+import com.caucho.config.scope.ScopeContext;
+import com.caucho.config.scope.SingletonScope;
+
 import java.io.Closeable;
 import java.lang.annotation.*;
 import java.lang.reflect.Type;

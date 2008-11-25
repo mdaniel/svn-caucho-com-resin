@@ -32,6 +32,7 @@ package com.caucho.jsp;
 import com.caucho.config.ConfigContext;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.scope.DependentScope;
 import com.caucho.java.JavaCompiler;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.Environment;
@@ -44,7 +45,6 @@ import com.caucho.util.LruCache;
 import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
-import com.caucho.webbeans.context.DependentScope;
 
 import javax.servlet.*;
 import javax.servlet.http.*;

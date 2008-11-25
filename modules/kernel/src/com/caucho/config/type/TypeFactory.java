@@ -518,6 +518,42 @@ public class TypeFactory implements AddLoaderListener
     }
   }
 
+  /**
+   * Returns a driver by the scheme
+   */
+  public Class getDriverClassByScheme(Class api, String scheme)
+  {
+    String typeName = getDriverType(api.getName(), scheme);
+
+    if (typeName == null) {
+      ArrayList<String> schemes = new ArrayList<String>();
+
+      getDriverSchemes(schemes, api.getName());
+
+      Collections.sort(schemes);
+      
+      throw new ConfigException(L.l("'{0}' is an unknown scheme for driver '{1}'.  The available schemes are '{2}'",
+				    scheme, api.getName(), schemes));
+    }
+
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      Class cl = Class.forName(typeName, false, loader);
+
+      if (! api.isAssignableFrom(cl))
+	throw new ConfigException(L.l("'{0}' is not assignable to '{1}' for scheme '{2}'",
+				      cl.getName(), api.getName(),
+				      scheme));
+
+      return cl;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(L.l("'{0}' is an undefined class for scheme '{1}'",
+				    typeName, scheme), e);
+    }
+  }
+
   public ContainerProgram getUrlProgram(String url)
   {
     String properties = "";

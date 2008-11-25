@@ -30,8 +30,8 @@
 package com.caucho.webbeans.component;
 
 import com.caucho.config.ConfigContext;
+import com.caucho.config.scope.SingletonScope;
 import com.caucho.jmx.*;
-import com.caucho.webbeans.context.SingletonScope;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.util.logging.*;

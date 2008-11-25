@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,21 +19,34 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
+package com.caucho.config;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.*;
+
+import javax.webbeans.ScopeType;
+import com.caucho.config.annotation.ServiceType;
+import com.caucho.config.annotation.DefaultScopeContext;
+import com.caucho.config.scope.ServiceScope;
 
 /**
- * Called when the object is removed from a scope.
+ * @Service is a @ScopeType that automatically starts the bean when the
+ * environment starts.
  */
-public interface ScopeRemoveListener
-{
-  public void removeEvent(Object scope, String name);
-}
 
+@ScopeType
+@ServiceType
+@DefaultScopeContext(ServiceScope.class)
+@Documented  
+@Retention(RUNTIME)
+@Target({METHOD, TYPE})
+public @interface Service {
+}

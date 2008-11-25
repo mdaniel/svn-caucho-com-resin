@@ -27,57 +27,84 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
+package com.caucho.config.scope;
+
+import com.caucho.loader.*;
+import com.caucho.webbeans.component.*;
 
 import java.lang.annotation.Annotation;
+import java.util.Hashtable;
 
 import javax.webbeans.*;
 import javax.webbeans.manager.Bean;
-import javax.webbeans.manager.Context;
-
-import com.caucho.webbeans.component.*;
 
 /**
- * Context for a named EL bean scope
+ * The application scope value
  */
-abstract public class ScopeContext implements Context {
+public class ApplicationScope extends ScopeContext {
+  private Hashtable _map = new Hashtable();
+  
   /**
    * Returns true if the scope is currently active.
    */
   public boolean isActive()
   {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+    return true;
+   }
   
   /**
    * Returns the scope annotation type.
    */
-  abstract public Class<? extends Annotation> getScopeType();
-
-  /**
-   * Returns a instance of a bean, creating if necessary
-   */
-  abstract public <T> T get(Bean<T> bean, boolean create);
-
-  /**
-   * Returns a instance of a bean, creating if necessary
-   */
-  public <T> void put(Bean<T> bean, T value)
+  public Class<? extends Annotation> getScopeType()
   {
-    // XXX: needs to be removed?
+    return ApplicationScoped.class;
   }
   
-  /**
-   * Returns true if a value in the target scope can be safely be injected
-   * into this scope
-   */
+  public <T> T get(Bean<T> bean, boolean create)
+  {
+    Object v = _map.get(bean);
+      
+    if (v == null && create) {
+      v = bean.create();
+      // XXX: delete because of optimistic locking
+      _map.put(bean, v);
+    }
+    
+    return (T) v;
+  }
+  
+  public <T> void put(Bean<T> bean, T value)
+  {
+    _map.put(bean, value);
+  }
+  
+  public <T> void remove(Bean<T> bean)
+  {
+    _map.remove(bean);
+  }
+
+  @Override
   public boolean canInject(ScopeContext scope)
   {
-    return (getClass().equals(scope.getClass())
-	    || scope instanceof SingletonScope);
+    return (scope instanceof SingletonScope
+	    || scope instanceof ApplicationScope);
   }
 
   public void addDestructor(ComponentImpl comp, Object value)
   {
+    EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
+
+    if (loader != null) {
+      DestructionListener listener
+	= (DestructionListener) loader.getAttribute("caucho.destroy");
+
+      if (listener == null) {
+	listener = new DestructionListener();
+	loader.setAttribute("caucho.destroy", listener);
+	loader.addListener(listener);
+      }
+      
+      listener.addValue(comp, value);
+    }
   }
 }

@@ -33,8 +33,8 @@ import com.caucho.config.program.ValueGenerator;
 import com.caucho.config.ConfigContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.scope.DependentScope;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.context.DependentScope;
 
 import javax.rmi.PortableRemoteObject;
 import java.lang.reflect.Field;

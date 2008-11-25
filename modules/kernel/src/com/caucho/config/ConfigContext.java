@@ -29,6 +29,8 @@ package com.caucho.config;
 
 import com.caucho.config.program.NodeBuilderChildProgram;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.scope.DependentScope;
+import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.types.Validator;
 import com.caucho.config.type.*;
 import com.caucho.config.types.*;
@@ -39,8 +41,6 @@ import com.caucho.loader.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.webbeans.component.ComponentImpl;
-import com.caucho.webbeans.context.DependentScope;
-import com.caucho.webbeans.context.ScopeContext;
 import com.caucho.xml.*;
 
 import org.w3c.dom.*;

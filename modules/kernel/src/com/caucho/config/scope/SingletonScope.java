@@ -27,67 +27,75 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.context;
+package com.caucho.config.scope;
 
 import com.caucho.loader.*;
+import com.caucho.webbeans.Singleton;
 import com.caucho.webbeans.component.*;
 
 import java.lang.annotation.Annotation;
-import java.util.Hashtable;
-
-import javax.webbeans.*;
 import javax.webbeans.manager.Bean;
 
 /**
- * The application scope value
+ * The singleton scope value
  */
-public class ApplicationScope extends ScopeContext {
-  private Hashtable _map = new Hashtable();
-  
+public class SingletonScope extends ScopeContext {
+  private final static EnvironmentLocal<ScopeMap> _localScopeMap
+    = new EnvironmentLocal<ScopeMap>();
+
   /**
    * Returns true if the scope is currently active.
    */
   public boolean isActive()
   {
     return true;
-   }
+  }
   
   /**
    * Returns the scope annotation type.
    */
   public Class<? extends Annotation> getScopeType()
   {
-    return ApplicationScoped.class;
+    return Singleton.class;
   }
   
   public <T> T get(Bean<T> bean, boolean create)
   {
-    Object v = _map.get(bean);
-      
-    if (v == null && create) {
-      v = bean.create();
-      // XXX: delete because of optimistic locking
-      _map.put(bean, v);
+    ScopeMap map = _localScopeMap.get();
+
+    if (map != null) {
+      return (T) map.get(bean);
     }
-    
-    return (T) v;
+    else
+      return null;
   }
   
   public <T> void put(Bean<T> bean, T value)
   {
-    _map.put(bean, value);
+    ScopeMap map;
+    
+    synchronized (this) {
+      map = _localScopeMap.getLevel();
+
+      if (map == null) {
+	map = new ScopeMap();
+	
+	_localScopeMap.set(map);
+      }
+    }
+
+    map.put(bean, value);
   }
   
-  public <T> void remove(Bean<T> bean)
+  public <T> void remove(Bean<T> component)
   {
-    _map.remove(bean);
-  }
+    ScopeMap map = _localScopeMap.getLevel();
 
-  @Override
-  public boolean canInject(ScopeContext scope)
-  {
-    return (scope instanceof SingletonScope
-	    || scope instanceof ApplicationScope);
+    if (map != null) {
+      synchronized (map) {
+	map.remove(component);
+      }
+    }
   }
 
   public void addDestructor(ComponentImpl comp, Object value)
