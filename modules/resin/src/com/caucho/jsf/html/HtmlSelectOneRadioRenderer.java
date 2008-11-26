@@ -340,7 +340,8 @@ class HtmlSelectOneRadioRenderer extends SelectRenderer
 
       if (selectItem.isEscape())
         label = Html.escapeHtml(label);
-      
+
+      out.writeText(" ", component, null);
       out.writeText(label, "itemLabel");
       out.endElement("label");
       
