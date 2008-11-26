@@ -1379,19 +1379,14 @@ public class ApplicationImpl
     public Object getValue(Object base, int index)
       throws javax.faces.el.PropertyNotFoundException
     {
-      if (base == null) {
-        throw new javax.faces.el.PropertyNotFoundException(
-          "base can not be null");
-
-      }
+      if (base == null)
+        return null;
       else if (base.getClass().isArray()) {
         try {
           return Array.get(base, index);
         }
         catch (ArrayIndexOutOfBoundsException e) {
-          throw new javax.faces.el.PropertyNotFoundException("index '" +
-                                                             index +
-                                                             "' is out of bounds");
+          return null;
         }
       }
       else if (base instanceof List) {
@@ -1401,9 +1396,7 @@ public class ApplicationImpl
           return list.get(index);
         }
         catch (IndexOutOfBoundsException e) {
-          throw new javax.faces.el.PropertyNotFoundException("index '" +
-                                                             index +
-                                                             "' is out of bounds");
+          return null;
         }
       }
       else {
