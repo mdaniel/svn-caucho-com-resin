@@ -1379,36 +1379,50 @@ public class Quercus
     initLocal();
   }
 
+  public void addModule(QuercusModule module)
+  {
+    ModuleInfo info = new ModuleInfo(_moduleContext,
+				     module.getClass().getSimpleName(),
+				     module);
+
+    addModuleInfo(info);
+  }
+
   /**
    * Initializes from the ModuleContext
    */
   private void initModules()
   {
     for (ModuleInfo info : _moduleContext.getModules()) {
-      if (info.getModule() instanceof ModuleStartupListener)
-	_moduleStartupListeners.add((ModuleStartupListener)info.getModule());
+      addModuleInfo(info);
+    }
+  }
 
-      for (String ext : info.getLoadedExtensions())
-	_extensionSet.add(ext);
+  protected void addModuleInfo(ModuleInfo info)
+  {
+    if (info.getModule() instanceof ModuleStartupListener)
+      _moduleStartupListeners.add((ModuleStartupListener)info.getModule());
 
-      Map<String, Value> map = info.getConstMap();
+    for (String ext : info.getLoadedExtensions())
+      _extensionSet.add(ext);
 
-      if (map != null)
-	_constMap.putAll(map);
+    Map<String, Value> map = info.getConstMap();
 
-      _iniDefinitions.addAll(info.getIniDefinitions());
+    if (map != null)
+      _constMap.putAll(map);
 
-      for (Map.Entry<String, AbstractFunction> entry
-	     : info.getFunctions().entrySet()) {
-	String funName = entry.getKey();
-	AbstractFunction fun = entry.getValue();
+    _iniDefinitions.addAll(info.getIniDefinitions());
+
+    for (Map.Entry<String, AbstractFunction> entry
+	   : info.getFunctions().entrySet()) {
+      String funName = entry.getKey();
+      AbstractFunction fun = entry.getValue();
       
-	_funMap.put(funName, fun);
-	_lowerFunMap.put(funName.toLowerCase(), fun);
+      _funMap.put(funName, fun);
+      _lowerFunMap.put(funName.toLowerCase(), fun);
 
-	int id = getFunctionId(funName);
-	_functionMap[id] = fun;
-      }
+      int id = getFunctionId(funName);
+      _functionMap[id] = fun;
     }
   }
 

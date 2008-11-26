@@ -182,6 +182,7 @@ abstract public class ConfigType
 
     if (attr != null) {
       attr.setValue(bean, name, attr.getConfigType().valueOf(value));
+      
       return true;
     }
     else
