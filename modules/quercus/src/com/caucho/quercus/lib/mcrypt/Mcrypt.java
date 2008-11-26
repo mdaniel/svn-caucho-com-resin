@@ -108,7 +108,7 @@ public class Mcrypt {
       _cipher.init(Cipher.ENCRYPT_MODE, _key, _iv);
 
       if (isPadded())
-	data = pad(data);
+        data = pad(data);
 
       return _cipher.doFinal(data);
     } catch (Exception e) {
@@ -290,7 +290,10 @@ public class Mcrypt {
   private boolean isPadded()
   {
     return (McryptModule.MCRYPT_DES.equals(_algorithm)
-	    || McryptModule.MCRYPT_3DES.equals(_algorithm));
+            || McryptModule.MCRYPT_3DES.equals(_algorithm)
+            || McryptModule.MCRYPT_RIJNDAEL_128.equals(_algorithm)
+            || McryptModule.MCRYPT_RIJNDAEL_192.equals(_algorithm)
+            || McryptModule.MCRYPT_RIJNDAEL_256.equals(_algorithm));
   }
 
   /**
