@@ -101,13 +101,13 @@ public class Quercus
   /*
   private ClassDef _stdClassDef;
   private QuercusClass _stdClass;
+  */
 
   private HashMap<String, ClassDef> _staticClasses
     = new HashMap<String, ClassDef>();
 
   private HashMap<String, ClassDef> _lowerStaticClasses
     = new HashMap<String, ClassDef>();
-  */
 
   private HashMap<String, JavaClassDef> _javaClassWrappers
     = new HashMap<String, JavaClassDef>();
@@ -283,16 +283,22 @@ public class Quercus
   public ModuleContext getLocalContext(ClassLoader loader)
   {
     synchronized (this) {
-      if (_moduleContext == null)
-	_moduleContext = createModuleContext(loader);
+      if (_moduleContext == null) {
+	_moduleContext = createModuleContext(null, loader);
+	_moduleContext.init();
+      }
     }
 
     return _moduleContext;
   }
 
-  protected ModuleContext createModuleContext(ClassLoader loader)
+  protected ModuleContext createModuleContext(ModuleContext parent,
+					      ClassLoader loader)
   {
-    return new ModuleContext(loader);
+    if (parent != null)
+      return new ModuleContext(parent, loader);
+    else
+      return new ModuleContext(loader);
   }
 
   /**
@@ -605,6 +611,7 @@ public class Quercus
   /**
    * Adds a module
    */
+  /*
   public void addModule(QuercusModule module)
     throws ConfigException
   {
@@ -614,6 +621,7 @@ public class Quercus
       throw ConfigException.create(e);
     }
   }
+  */
 
   /**
    * Adds a java class
@@ -623,9 +631,9 @@ public class Quercus
   {
     try {
       if (type.isAnnotationPresent(ClassImplementation.class))
-        introspectJavaImplClass(name, type, null);
+        _moduleContext.introspectJavaImplClass(name, type, null);
       else
-        introspectJavaClass(name, type, null, null);
+        _moduleContext.introspectJavaClass(name, type, null, null);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
@@ -655,11 +663,14 @@ public class Quercus
   public void addImplClass(String name, Class type)
     throws ConfigException
   {
+    throw new UnsupportedOperationException("XXX: need to merge with ModuleContext: " + name);
+    /*
     try {
       introspectJavaImplClass(name, type, null);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+    */
   }
 
   /**
@@ -674,19 +685,19 @@ public class Quercus
     
     synchronized (_javaClassWrappers) {
       def = _javaClassWrappers.get(className);
+    }
 
-      if (def == null) {
-        try {
-          def = getModuleContext().getJavaClassDefinition(type, className);
+    if (def == null) {
+      try {
+	def = getModuleContext().getJavaClassDefinition(type, className);
 
-          _javaClassWrappers.put(className, def);
-        } catch (RuntimeException e) {
-          _classNotFoundCache.put(className, className);
-          
-          throw e;
-        } catch (Exception e) {
-          throw new QuercusRuntimeException(e);
-        }
+	synchronized (_javaClassWrappers) {
+	  _javaClassWrappers.put(className, def);
+	}
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new QuercusRuntimeException(e);
       }
     }
 
@@ -1262,15 +1273,14 @@ public class Quercus
    */
   public ClassDef findClass(String name)
   {
-    return _moduleContext.findClass(name);
-    /*
-    ClassDef def = _staticClasses.get(name);
+    synchronized (_staticClasses) {
+      ClassDef def = _staticClasses.get(name);
 
-    if (def == null)
-      def = _lowerStaticClasses.get(name.toLowerCase());
+      if (def == null)
+	def = _lowerStaticClasses.get(name.toLowerCase());
 
-    return def;
-    */
+      return def;
+    }
   }
 
   /**
@@ -1278,10 +1288,7 @@ public class Quercus
    */
   public HashMap<String, ClassDef> getClassMap()
   {
-    /*
     return _staticClasses;
-    */
-    return _moduleContext.getClassMap();
   }
 
   /**
@@ -1359,9 +1366,8 @@ public class Quercus
    */
   public void init()
   {
-    initStaticFunctions();
-    initStaticClasses();
-    initStaticClassServices();
+    initModules();
+    initClasses();
 
     _workDir = getWorkDir();
 
@@ -1371,6 +1377,64 @@ public class Quercus
 						     getIncludeCacheTimeout());
 
     initLocal();
+  }
+
+  /**
+   * Initializes from the ModuleContext
+   */
+  private void initModules()
+  {
+    for (ModuleInfo info : _moduleContext.getModules()) {
+      if (info.getModule() instanceof ModuleStartupListener)
+	_moduleStartupListeners.add((ModuleStartupListener)info.getModule());
+
+      for (String ext : info.getLoadedExtensions())
+	_extensionSet.add(ext);
+
+      Map<String, Value> map = info.getConstMap();
+
+      if (map != null)
+	_constMap.putAll(map);
+
+      _iniDefinitions.addAll(info.getIniDefinitions());
+
+      for (Map.Entry<String, AbstractFunction> entry
+	     : info.getFunctions().entrySet()) {
+	String funName = entry.getKey();
+	AbstractFunction fun = entry.getValue();
+      
+	_funMap.put(funName, fun);
+	_lowerFunMap.put(funName.toLowerCase(), fun);
+
+	int id = getFunctionId(funName);
+	_functionMap[id] = fun;
+      }
+    }
+  }
+
+  /**
+   * Initializes from the ModuleContext
+   */
+  private void initClasses()
+  {
+    for (Map.Entry<String,JavaClassDef> entry
+	   : _moduleContext.getWrapperMap().entrySet()) {
+      String name = entry.getKey();
+      JavaClassDef def = entry.getValue();
+      
+      _javaClassWrappers.put(name, def);
+      _lowerJavaClassWrappers.put(name.toLowerCase(), def);
+    }
+    
+    for (Map.Entry<String,ClassDef> entry
+	   : _moduleContext.getClassMap().entrySet()) {
+      
+      String name = entry.getKey();
+      ClassDef def = entry.getValue();
+      
+      _staticClasses.put(name, def);
+      _lowerStaticClasses.put(name.toLowerCase(), def);
+    }
   }
 
   /**
@@ -1457,141 +1521,6 @@ public class Quercus
     }
   }
 
-  /**
-   * Scans the classpath for META-INF/services/com.caucho.quercus.QuercusModule
-   */
-  private void initStaticFunctions()
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader loader = thread.getContextClassLoader();
-
-    try {
-      String quercusModule
-        = "META-INF/services/com.caucho.quercus.QuercusModule";
-      Enumeration<URL> urls = loader.getResources(quercusModule);
-
-      HashSet<URL> urlSet = new HashSet<URL>();
-
-      // gets rid of duplicate entries found by different classloaders
-      while (urls.hasMoreElements()) {
-        URL url = urls.nextElement();
-
-        urlSet.add(url);
-      }
-
-      for (URL url : urlSet) {
-        InputStream is = null;
-        ReadStream rs = null;
-        try {
-          is = url.openStream();
-	  
-          rs = new ReadStream(new VfsStream(is, null));
-
-          parseServicesModule(rs);
-        } catch (Throwable e) {
-          log.log(Level.WARNING, e.toString(), e);
-        } finally {
-          if (rs != null)
-            rs.close();
-          if (is != null)
-            is.close();
-        }
-      }
-
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-  }
-
-  /**
-   * Parses the services file, looking for PHP services.
-   */
-  private void parseServicesModule(ReadStream in)
-    throws IOException, ClassNotFoundException,
-           IllegalAccessException, InstantiationException
-  {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    String line;
-
-    while ((line = in.readLine()) != null) {
-      int p = line.indexOf('#');
-
-      if (p >= 0)
-        line = line.substring(0, p);
-
-      line = line.trim();
-
-      if (line.length() > 0) {
-        String className = line;
-
-        try {
-          Class cl;
-          try {
-            cl = Class.forName(className, false, loader);
-          }
-          catch (ClassNotFoundException e) {
-            throw new ClassNotFoundException(L.l("'{0}' not valid {1}", className, e.toString()));
-          }
-
-          introspectPhpModuleClass(cl);
-        } catch (Throwable e) {
-          log.info("Failed loading " + className + "\n" + e.toString());
-          log.log(Level.FINE, e.toString(), e);
-        }
-      }
-    }
-  }
-
-  /**
-   * Introspects the module class for functions.
-   *
-   * @param cl the class to introspect.
-   */
-  private void introspectPhpModuleClass(Class cl)
-    throws IllegalAccessException, InstantiationException, ConfigException
-  {
-    synchronized (_modules) {
-      if (_modules.get(cl.getName()) != null)
-	return;
-      
-      log.finest("Quercus loading module " + cl.getName());
-
-      QuercusModule module = (QuercusModule) cl.newInstance();
-
-      ModuleContext context = getLocalContext();
-
-      ModuleInfo info = context.addModule(cl.getName(), module);
-
-      _modules.put(cl.getName(), info);
-
-      if (info.getModule() instanceof ModuleStartupListener)
-	_moduleStartupListeners.add((ModuleStartupListener)info.getModule());
-
-      for (String ext : info.getLoadedExtensions())
-	_extensionSet.add(ext);
-
-      Map<String, Value> map = info.getConstMap();
-
-      if (map != null)
-	_constMap.putAll(map);
-
-      _iniDefinitions.addAll(info.getIniDefinitions());
-
-      synchronized (_functionNameMap) {
-	for (Map.Entry<String, AbstractFunction> entry : info.getFunctions().entrySet()) {
-	  String funName = entry.getKey();
-	  AbstractFunction fun = entry.getValue();
-      
-	  _funMap.put(funName, fun);
-	  _lowerFunMap.put(funName.toLowerCase(), fun);
-      
-	  int id = getFunctionId(funName);
-	  _functionMap[id] = fun;
-	}
-      }
-    }
-  }
-
   public static Value objectToValue(Object obj)
   {
     if (obj == null)
@@ -1612,243 +1541,6 @@ public class Quercus
 
       return null;
     }
-  }
-
-  /**
-   * Scans the classpath for META-INF/services/com.caucho.quercus.QuercusClass
-   */
-  private void initStaticClassServices()
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader loader = thread.getContextClassLoader();
-
-    try {
-      String quercusModule
-        = "META-INF/services/com.caucho.quercus.QuercusClass";
-      Enumeration<URL> urls = loader.getResources(quercusModule);
-      
-      HashSet<URL> urlSet = new HashSet<URL>();
-
-      // gets rid of duplicate entries found by different classloaders
-      while (urls.hasMoreElements()) {
-        URL url = urls.nextElement();
-
-        urlSet.add(url);
-      }
-
-      for (URL url : urlSet) {
-        InputStream is = null;
-        ReadStream rs = null;
-        try {
-          is = url.openStream();
-	  
-          rs = new ReadStream(new VfsStream(is, null));
-	  
-          parseClassServicesModule(rs);
-        } catch (Throwable e) {
-          log.log(Level.WARNING, e.toString(), e);
-        } finally {
-          if (rs != null)
-            rs.close();
-          if (is != null)
-            is.close();
-        }
-      }
-
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-  }
-
-  /**
-   * Parses the services file, looking for PHP services.
-   */
-  private void parseClassServicesModule(ReadStream in)
-    throws IOException, ClassNotFoundException,
-           IllegalAccessException, InstantiationException,
-           ConfigException, NoSuchMethodException, InvocationTargetException
-  {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    String line;
-
-    while ((line = in.readLine()) != null) {
-      int p = line.indexOf('#');
-
-      if (p >= 0)
-        line = line.substring(0, p);
-
-      line = line.trim();
-
-      if (line.length() == 0)
-        continue;
-
-      String[] args = line.split(" ");
-
-      String className = args[0];
-
-      Class cl;
-
-      try {
-        cl = Class.forName(className, false, loader);
-
-        String phpClassName = null;
-        String extension = null;
-        String definedBy = null;
-
-        for (int i = 1; i < args.length; i++) {
-          if ("as".equals(args[i])) {
-            i++;
-            if (i >= args.length)
-              throw new IOException(L.l("expecting Quercus class name after '{0}' in definition for class {1}", "as", className));
-
-            phpClassName = args[i];
-          }
-          else if ("provides".equals(args[i])) {
-            i++;
-            if (i >= args.length)
-              throw new IOException(L.l("expecting name of extension after '{0}' in definition for class {1}", "extension", className));
-
-            extension = args[i];
-          }
-          else if ("definedBy".equals(args[i])) {
-            i++;
-            if (i >= args.length)
-              throw new IOException(L.l("expecting name of class implementing JavaClassDef after '{0}' in definition for class {1}", "definedBy", className));
-
-            definedBy = args[i];
-          }
-          else {
-            throw new IOException(L.l("unknown token '{0}' in definition for class {1} ", args[i], className));
-          }
-        }
-
-        if (phpClassName == null)
-          phpClassName = className.substring(className.lastIndexOf('.') + 1);
-
-
-        Class javaClassDefClass;
-
-        if (definedBy != null) {
-          javaClassDefClass = Class.forName(definedBy, false, loader);
-        }
-        else
-          javaClassDefClass = null;
-
-        introspectJavaClass(phpClassName, cl, extension, javaClassDefClass);
-      } catch (Exception e) {
-        log.info("Failed loading " + className + "\n" + e.toString());
-        log.log(Level.FINE, e.toString(), e);
-      }
-    }
-  }
-
-  /**
-   * Introspects the module class for functions.
-   *
-   * @param name the php class name
-   * @param type the class to introspect.
-   * @param extension the extension provided by the class, or null
-   * @param javaClassDefClass
-   */
-  private void introspectJavaClass(String name, Class type, String extension,
-                                   Class javaClassDefClass)
-    throws IllegalAccessException, InstantiationException, ConfigException,
-           NoSuchMethodException, InvocationTargetException
-  {
-    ModuleContext context = getLocalContext();
-
-    /*
-    if (type.isAnnotationPresent(ClassImplementation.class)) {
-      if (javaClassDefClass != null)
-        throw new UnimplementedException();
-
-      ClassDef def = context.addClassImpl(name, type, extension);
-    }
-    else {
-    */
-      JavaClassDef def = context.addClass(name, type,
-					  extension, javaClassDefClass);
-
-      synchronized (_javaClassWrappers) {
-	_javaClassWrappers.put(name, def);
-	_lowerJavaClassWrappers.put(name.toLowerCase(), def);
-      }
-
-      /*
-      _staticClasses.put(name, def);
-      _lowerStaticClasses.put(name.toLowerCase(), def);
-      */
-      // }
-
-    if (extension != null)
-      _extensionSet.add(extension);
-  }
-
-  /**
-   * Introspects the module class for functions.
-   *
-   * @param name the php class name
-   * @param type the class to introspect.
-   * @param extension the extension provided by the class, or null
-   */
-  private void introspectJavaImplClass(String name,
-                                       Class type,
-                                       String extension)
-    throws IllegalAccessException, InstantiationException, ConfigException
-  {
-    if (log.isLoggable(Level.FINEST)) {
-      if (extension == null)
-        log.finest(L.l("Quercus loading class {0} with type {1}", name, type.getName()));
-      else
-        log.finest(L.l("Quercus loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
-    }
-
-    ModuleContext context = getLocalContext();
-
-    // JavaImplClassDef def = context.addClassImpl(name, type, extension);
-    try {
-      JavaClassDef def = context.addClass(name, type, extension, null);
-
-      /*
-	_staticClasses.put(name, def);
-	_lowerStaticClasses.put(name.toLowerCase(), def);
-      */
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-  }
-
-  /**
-   * Scans the classpath for META-INF/services/com.caucho.quercus.QuercusClass
-   */
-  private void initStaticClasses()
-  {
-    /*
-    _stdClassDef = new InterpretedClassDef("stdClass", null, new String[0]);
-    _stdClass = new QuercusClass(_stdClassDef, null);
-
-    _staticClasses.put(_stdClass.getName(), _stdClassDef);
-    _lowerStaticClasses.put(_stdClass.getName().toLowerCase(), _stdClassDef);
-
-    InterpretedClassDef exn = new InterpretedClassDef("Exception",
-						      null,
-						      new String[0]);
-
-    try {
-      exn.setConstructor(new StaticFunction(_moduleContext,
-					    null,
-					    Quercus.class.getMethod("exnConstructor", new Class[] { Env.class, Value.class, String.class })));
-    } catch (Exception e) {
-      throw new QuercusException(e);
-    }
-    
-    // QuercusClass exnCl = new QuercusClass(exn, null);
-
-    _staticClasses.put(exn.getName(), exn);
-    _lowerStaticClasses.put(exn.getName().toLowerCase(), exn);
-    */
   }
 
   /**

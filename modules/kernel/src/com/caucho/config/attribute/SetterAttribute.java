@@ -40,9 +40,10 @@ public class SetterAttribute extends Attribute {
   private final L10N L = new L10N(SetterAttribute.class);
   
   private final Method _setter;
-  private final ConfigType _type;
+  private final Class _type;
+  private ConfigType _configType;
 
-  public SetterAttribute(Method setter, ConfigType type)
+  public SetterAttribute(Method setter, Class type)
   {
     _setter = setter;
     _setter.setAccessible(true);
@@ -54,7 +55,10 @@ public class SetterAttribute extends Attribute {
    */
   public ConfigType getConfigType()
   {
-    return _type;
+    if (_configType == null)
+      _configType = TypeFactory.getType(_type);
+    
+    return _configType;
   }
   
   /**
@@ -65,7 +69,7 @@ public class SetterAttribute extends Attribute {
     throws ConfigException
   {
     try {
-      _setter.invoke(bean, _type.valueOf(value));
+      _setter.invoke(bean, getConfigType().valueOf(value));
     } catch (Exception e) {
       throw ConfigException.create(_setter, e);
     }
@@ -98,7 +102,7 @@ public class SetterAttribute extends Attribute {
     throws ConfigException
   {
     try {
-      return _type.create(parent, name);
+      return getConfigType().create(parent, name);
     } catch (Exception e) {
       throw ConfigException.create(_setter, e);
     }

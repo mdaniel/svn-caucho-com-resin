@@ -361,7 +361,7 @@ public class TypeFactory implements AddLoaderListener
 	throw ConfigException.create(e);
       }
     }
-    else if ((editor = PropertyEditorManager.findEditor(type)) != null)
+    else if ((editor = findEditor(type)) != null)
       return new PropertyEditorType(type, editor);
     else if (type.getEnumConstants() != null)
       return new EnumType(type);
@@ -396,6 +396,19 @@ public class TypeFactory implements AddLoaderListener
       return new BeanType(type);
   }
 
+  /**
+   * Returns the Java bean property editor
+   */
+  private static PropertyEditor findEditor(Class type)
+  {
+    // none of the caucho classes has a ProperyEditorManager
+    
+    if (type.getName().startsWith("com.caucho"))
+      return null;
+    else
+      return PropertyEditorManager.findEditor(type);
+  }
+  
   /**
    * Returns the appropriate strategy.
    */

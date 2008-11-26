@@ -897,15 +897,6 @@ public class JavaClassDef extends ClassDef {
 
 
     introspectAnnotations(_type);
-
-    try {
-      Method method = _type.getMethod("iterator", new Class[0]);
-
-      if (method != null
-	  && Iterator.class.isAssignableFrom(method.getReturnType()))
-        _iteratorMethod = method;
-    } catch (Exception e) {
-    }
   }
 
   private void introspectAnnotations(Class type)
@@ -1206,6 +1197,12 @@ public class JavaClassDef extends ClassDef {
 
       if (method.getDeclaringClass() == Object.class)
         continue;
+      
+      if ("iterator".equals(method.getName())
+	  && method.getParameterTypes().length == 0
+	  && Iterator.class.isAssignableFrom(method.getReturnType())) {
+	_iteratorMethod = method;
+      }
 
       if ("printRImpl".equals(method.getName())) {
         _printRImpl = method;

@@ -36,6 +36,7 @@ import javax.naming.Name;
 import javax.naming.NameNotFoundException;
 import javax.naming.NameParser;
 import javax.naming.NamingException;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,6 +47,9 @@ public class Jndi {
   private static Logger log
     = Logger.getLogger(Jndi.class.getName());
   private static L10N L = new L10N(Jndi.class);
+
+  private static final WeakHashMap<ClassLoader,Context> _javaCompEnvMap
+    = new WeakHashMap<ClassLoader,Context>();
 
   private Jndi() {}
 
@@ -60,10 +64,34 @@ public class Jndi {
       return "java:comp/env/" + shortName;
   }
 
+  private static Context getShortContext(String shortName)
+    throws NamingException
+  {
+    if (shortName.startsWith("java:"))
+      return new InitialContext();
+    else {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      synchronized (_javaCompEnvMap) {
+	Context context = (Context) _javaCompEnvMap.get(loader);
+
+	if (context == null) {
+	  context = (Context) new InitialContext().lookup("java:comp/env");
+	  _javaCompEnvMap.put(loader, context);
+	}
+
+	return context;
+      }
+    }
+  }
+  
   public static void bindDeepShort(String name, Object obj)
     throws NamingException
   {
-    bindImpl(new InitialContext(), getFullName(name), obj, name);
+    String fullName = getFullName(name);
+    Context context = getShortContext(name);
+      
+    bindImpl(context, name, obj, fullName);
   }
 
   public static void bindDeepShort(Context context, String name, Object obj)
@@ -95,7 +123,10 @@ public class Jndi {
       Object value = null;
 
       try {
-	value = context.lookup(name);
+	if (context instanceof ContextImpl)
+	  value = ((ContextImpl) context).lookupImpl(name);
+	else
+	  value = context.lookup(name);
       } catch (NameNotFoundException e) {
       }
       
@@ -112,7 +143,10 @@ public class Jndi {
     Object sub = null;
 
     try {
-      sub = context.lookup(parsedName.get(0));
+      if (context instanceof ContextImpl)
+	sub = ((ContextImpl) context).lookupImpl(parsedName.get(0));
+      else
+	sub = context.lookup(parsedName.get(0));
     } catch (NameNotFoundException e) {
     }
 

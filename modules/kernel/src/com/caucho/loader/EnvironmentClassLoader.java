@@ -905,7 +905,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader
                     Jmx.getGlobalMBeanServer());
       
       try {
-	Class cl = Class.forName("com.caucho.server.resin.EnvInit");
+	Class cl = Class.forName("com.caucho.server.resin.EnvInit",
+				 false,
+				 systemLoader);
 	
 	cl.newInstance();
       } catch (Exception e) {

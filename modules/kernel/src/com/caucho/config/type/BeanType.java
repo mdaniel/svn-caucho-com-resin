@@ -379,7 +379,7 @@ public class BeanType extends ConfigType
   @Override
   public void introspect()
   {
-    synchronized (_introspectLock) {
+   synchronized (_introspectLock) {
       if (_isIntrospecting)
 	return;
     
@@ -505,16 +505,14 @@ public class BeanType extends ConfigType
    */
   public void introspectMethods(Method []methods)
   {
-    try {
-      _stringConstructor
-	= _beanClass.getConstructor(new Class[] { String.class } );
-    } catch (NoSuchMethodException e) {
-    }
+    Constructor []constructors = _beanClass.getConstructors();
 
-    HashMap<String,Method> createMap = new HashMap<String,Method>();
+    _stringConstructor = findConstructor(constructors, String.class);
+
+    HashMap<String,Method> createMap = new HashMap<String,Method>(8);
     fillCreateMap(createMap, methods);
 
-    HashMap<String,Method> setterMap = new HashMap<String,Method>();
+    HashMap<String,Method> setterMap = new HashMap<String,Method>(8);
     fillSetterMap(setterMap, methods);
 
     for (Method method : methods) {
@@ -599,7 +597,7 @@ public class BeanType extends ConfigType
       else if ((name.startsWith("set") || name.startsWith("add"))
 	       && paramTypes.length == 1
 	       && createMap.get(name.substring(3)) == null) {
-	ConfigType type = TypeFactory.getType(paramTypes[0]);
+	Class type = paramTypes[0];
 
 	String propName = toXmlName(name.substring(3));
 	
@@ -631,7 +629,7 @@ public class BeanType extends ConfigType
       else if ((name.startsWith("create")
 		&& paramTypes.length == 0
 		&& ! void.class.equals(method.getReturnType()))) {
-	ConfigType type = TypeFactory.getType(method.getReturnType());
+	Class type = method.getReturnType();
 
 	Method setter = setterMap.get(name.substring(6));
 
@@ -642,6 +640,32 @@ public class BeanType extends ConfigType
 	_attributeMap.put(propName, attr);
       }
     }
+  }
+
+  private static Constructor findConstructor(Constructor []constructors,
+					     Class ...types)
+  {
+    for (Constructor ctor : constructors) {
+      Class []paramTypes = ctor.getParameterTypes();
+
+      if (isMatch(paramTypes, types))
+	return ctor;
+    }
+
+    return null;
+  }
+
+  private static boolean isMatch(Class []aTypes, Class []bTypes)
+  {
+    if (aTypes.length != bTypes.length)
+      return false;
+
+    for (int i = aTypes.length - 1; i >= 0; i--) {
+      if (! aTypes[i].equals(bTypes[i]))
+	return false;
+    }
+
+    return true;
   }
 
 

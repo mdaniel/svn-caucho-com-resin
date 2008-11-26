@@ -90,8 +90,19 @@ public class ResinQuercus extends Quercus
       ModuleContext context = _localModuleContext.getLevel(loader);
 
       if (context == null) {
-	context = createModuleContext(loader);
+	ClassLoader envLoader = Environment.getEnvironmentClassLoader(loader);
+
+	ModuleContext parent = null;
+    
+	if (envLoader != null) {
+	  parent = getLocalContext(envLoader.getParent());
+	}
+
+	context = createModuleContext(parent, loader);
+	
 	_localModuleContext.set(context, loader);
+
+	context.init();
       }
 
       return context;
@@ -99,9 +110,13 @@ public class ResinQuercus extends Quercus
   }
 
   @Override
-  protected ModuleContext createModuleContext(ClassLoader loader)
+  protected ModuleContext createModuleContext(ModuleContext parent,
+					      ClassLoader loader)
   {
-    return new ResinModuleContext(loader);
+    if (parent != null)
+      return new ResinModuleContext(parent, loader);
+    else
+      return new ResinModuleContext(loader);
   }
 
   public String getCookieName()

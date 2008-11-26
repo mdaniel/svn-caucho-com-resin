@@ -35,16 +35,21 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
+import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.JavaArrayClassDef;
 import com.caucho.util.L10N;
+import com.caucho.vfs.*;
 
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
@@ -61,6 +66,9 @@ public class ModuleContext
 
   private ClassLoader _loader;
 
+  private HashSet<URL> _serviceClassUrls = new HashSet<URL>();
+  private HashSet<URL> _serviceModuleUrls = new HashSet<URL>();
+
   private HashMap<String, QuercusModule> _modules
     = new HashMap<String, QuercusModule>();
 
@@ -70,30 +78,15 @@ public class ModuleContext
   private HashSet<String> _extensionSet
     = new HashSet<String>();
 
-  private HashMap<String, Value> _constMap
-    = new HashMap<String, Value>();
-
-  private HashMap<String, StaticFunction> _staticFunctions
-    = new HashMap<String, StaticFunction>();
-  
   private ClassDef _stdClassDef;
   private QuercusClass _stdClass;
 
   private HashMap<String, ClassDef> _staticClasses
     = new HashMap<String, ClassDef>();
 
-  private HashMap<String, ClassDef> _lowerStaticClasses
-    = new HashMap<String, ClassDef>();
-
   private HashMap<String, JavaClassDef> _javaClassWrappers
     = new HashMap<String, JavaClassDef>();
 
-  private HashMap<String, JavaClassDef> _lowerJavaClassWrappers
-    = new HashMap<String, JavaClassDef>();
-
-  private HashMap<String, StringValue> _iniMap
-    = new HashMap<String, StringValue>();
-  
   private HashMap<String, HashSet<String>> _extensionClasses
     = new HashMap<String, HashSet<String>>();
 
@@ -122,7 +115,24 @@ public class ModuleContext
     _stdClass = new QuercusClass(this, _stdClassDef, null);
 
     _staticClasses.put(_stdClass.getName(), _stdClassDef);
-    _lowerStaticClasses.put(_stdClass.getName().toLowerCase(), _stdClassDef);
+  }
+
+  /**
+   * Constructor.
+   */
+  public ModuleContext(ModuleContext parent, ClassLoader loader)
+  {
+    this(loader);
+
+    _serviceClassUrls.addAll(parent._serviceClassUrls);
+    _serviceModuleUrls.addAll(parent._serviceModuleUrls);
+
+    _modules.putAll(parent._modules);
+    _moduleInfoMap.putAll(parent._moduleInfoMap);
+    _extensionSet.addAll(parent._extensionSet);
+    _staticClasses.putAll(parent._staticClasses);
+    _javaClassWrappers.putAll(parent._javaClassWrappers);
+    _extensionClasses.putAll(parent._extensionClasses);
   }
 
   public static ModuleContext getLocalContext(ClassLoader loader)
@@ -138,6 +148,38 @@ public class ModuleContext
 
     return context;
     */
+  }
+
+  /**
+   * Tests if the URL has already been loaded for the context classes
+   */
+  public boolean hasServiceClass(URL url)
+  {
+    return _serviceClassUrls.contains(url);
+  }
+
+  /**
+   * Adds a URL for the context classes
+   */
+  public void addServiceClass(URL url)
+  {
+    _serviceClassUrls.add(url);
+  }
+
+  /**
+   * Tests if the URL has already been loaded for the context module
+   */
+  public boolean hasServiceModule(URL url)
+  {
+    return _serviceModuleUrls.contains(url);
+  }
+
+  /**
+   * Adds a URL for the context module
+   */
+  public void addServiceModule(URL url)
+  {
+    _serviceModuleUrls.add(url);
   }
 
   /**
@@ -178,9 +220,9 @@ public class ModuleContext
 
 	if (javaClassDefClass != null) {
 	  Constructor constructor
-	    =  javaClassDefClass.getConstructor(ModuleContext.class,
-						String.class,
-						Class.class);
+	    = javaClassDefClass.getConstructor(ModuleContext.class,
+					       String.class,
+					       Class.class);
 
 	  def = (JavaClassDef) constructor.newInstance(this, name, type);
 	}
@@ -192,10 +234,10 @@ public class ModuleContext
 	}
 
 	_javaClassWrappers.put(name, def);
-	_lowerJavaClassWrappers.put(name.toLowerCase(), def);
+	// _lowerJavaClassWrappers.put(name.toLowerCase(), def);
 
 	_staticClasses.put(name, def);
-	_lowerStaticClasses.put(name.toLowerCase(), def);
+	// _lowerStaticClasses.put(name.toLowerCase(), def);
 
 	// def.introspect();
 
@@ -212,8 +254,10 @@ public class ModuleContext
    */
   public JavaClassDef getJavaClassDefinition(Class type, String className)
   {
+    JavaClassDef def;
+    
     synchronized (_javaClassWrappers) {
-      JavaClassDef def = _javaClassWrappers.get(className);
+      def = _javaClassWrappers.get(className);
 
       if (def != null)
 	return def;
@@ -224,9 +268,9 @@ public class ModuleContext
 	def = createDefaultJavaClassDef(className, type);
 
       _javaClassWrappers.put(className, def);
-
-      return def;
     }
+
+    return def;
   }
   
   /**
@@ -305,6 +349,7 @@ public class ModuleContext
   /**
    * Finds the java class wrapper.
    */
+  /*
   public ClassDef findJavaClassWrapper(String name)
   {
     synchronized (_javaClassWrappers) {
@@ -316,6 +361,7 @@ public class ModuleContext
       return _lowerJavaClassWrappers.get(name.toLowerCase());
     }
   }
+  */
 
   public MarshalFactory getMarshalFactory()
   {
@@ -337,6 +383,7 @@ public class ModuleContext
   /**
    * Returns an array of the defined functions.
    */
+  /*
   public ArrayValue getDefinedFunctions()
   {
     ArrayValue internal = new ArrayValueImpl();
@@ -349,6 +396,7 @@ public class ModuleContext
 
     return internal;
   }
+  */
 
   /**
    * Returns the stdClass definition.
@@ -361,6 +409,7 @@ public class ModuleContext
   /**
    * Returns the class with the given name.
    */
+  /*
   public ClassDef findClass(String name)
   {
     synchronized (_staticClasses) {
@@ -372,6 +421,7 @@ public class ModuleContext
       return def;
     }
   }
+  */
 
   /**
    * Returns the class maps.
@@ -380,6 +430,16 @@ public class ModuleContext
   {
     synchronized (_staticClasses) {
       return new HashMap<String,ClassDef>(_staticClasses);
+    }
+  }
+
+  /**
+   * Returns the class maps.
+   */
+  public HashMap<String, JavaClassDef> getWrapperMap()
+  {
+    synchronized (_javaClassWrappers) {
+      return new HashMap<String,JavaClassDef>(_javaClassWrappers);
     }
   }
 
@@ -430,11 +490,6 @@ public class ModuleContext
     return _extensionClasses.get(ext);
   }
 
-  public HashMap<String, Value> getConstMap()
-  {
-    return _constMap;
-  }
-
   /**
    * Creates a static function.
    */
@@ -444,12 +499,377 @@ public class ModuleContext
     return new StaticFunction(this, module, method);
   }
 
-  /**
-   * Returns a named constant.
-   */
-  public Value getConstant(String name)
+  public void init()
   {
-    return _constMap.get(name);
+    initStaticFunctions();
+    initStaticClassServices();
+    
+    //initStaticClasses();
+  }
+
+  /**
+   * Scans the classpath for META-INF/services/com.caucho.quercus.QuercusModule
+   */
+  private void initStaticFunctions()
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+
+    try {
+      String quercusModule
+        = "META-INF/services/com.caucho.quercus.QuercusModule";
+      Enumeration<URL> urls = loader.getResources(quercusModule);
+
+      HashSet<URL> urlSet = new HashSet<URL>();
+
+      // gets rid of duplicate entries found by different classloaders
+      while (urls.hasMoreElements()) {
+        URL url = urls.nextElement();
+
+	if (! hasServiceModule(url)) {
+	  addServiceModule(url);
+
+	  urlSet.add(url);
+	}
+      }
+
+      for (URL url : urlSet) {
+        InputStream is = null;
+        ReadStream rs = null;
+        try {
+          is = url.openStream();
+	  
+          rs = new ReadStream(new VfsStream(is, null));
+
+          parseServicesModule(rs);
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        } finally {
+          if (rs != null)
+            rs.close();
+          if (is != null)
+            is.close();
+        }
+      }
+
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  /**
+   * Parses the services file, looking for PHP services.
+   */
+  private void parseServicesModule(ReadStream in)
+    throws IOException, ClassNotFoundException,
+           IllegalAccessException, InstantiationException
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    String line;
+
+    while ((line = in.readLine()) != null) {
+      int p = line.indexOf('#');
+
+      if (p >= 0)
+        line = line.substring(0, p);
+
+      line = line.trim();
+
+      if (line.length() > 0) {
+        String className = line;
+
+        try {
+          Class cl;
+          try {
+            cl = Class.forName(className, false, loader);
+          }
+          catch (ClassNotFoundException e) {
+            throw new ClassNotFoundException(L.l("'{0}' not valid {1}", className, e.toString()));
+          }
+
+          introspectPhpModuleClass(cl);
+        } catch (Throwable e) {
+          log.info("Failed loading " + className + "\n" + e.toString());
+          log.log(Level.FINE, e.toString(), e);
+        }
+      }
+    }
+  }
+
+  /**
+   * Returns the configured modules
+   */
+  public ArrayList<ModuleInfo> getModules()
+  {
+    synchronized (_modules) {
+      return new ArrayList<ModuleInfo>(_moduleInfoMap.values());
+    }
+  }
+
+  /**
+   * Introspects the module class for functions.
+   *
+   * @param cl the class to introspect.
+   */
+  private void introspectPhpModuleClass(Class cl)
+    throws IllegalAccessException, InstantiationException, ConfigException
+  {
+    synchronized (_modules) {
+      if (_modules.get(cl.getName()) != null)
+	return;
+      
+      log.finest("Quercus loading module " + cl.getName());
+
+      QuercusModule module = (QuercusModule) cl.newInstance();
+
+      ModuleInfo info = addModule(cl.getName(), module);
+
+      /*
+      _modules.put(cl.getName(), info);
+
+      if (info.getModule() instanceof ModuleStartupListener)
+	_moduleStartupListeners.add((ModuleStartupListener)info.getModule());
+
+      for (String ext : info.getLoadedExtensions())
+	_extensionSet.add(ext);
+
+      Map<String, Value> map = info.getConstMap();
+
+      if (map != null)
+	_constMap.putAll(map);
+
+      _iniDefinitions.addAll(info.getIniDefinitions());
+
+      synchronized (_staticFunctionMap) {
+	for (Map.Entry<String, AbstractFunction> entry
+	       : info.getFunctions().entrySet()) {
+	  String funName = entry.getKey();
+	  AbstractFunction fun = entry.getValue();
+      
+	  _staticFunctionMap.put(funName, fun);
+	  
+	  // _lowerFunMap.put(funName.toLowerCase(), fun);
+
+	  int id = getFunctionId(funName);
+	  _functionMap[id] = fun;
+	}
+      }
+      */
+    }
+  }
+
+  /**
+   * Scans the classpath for META-INF/services/com.caucho.quercus.QuercusClass
+   */
+  private void initStaticClassServices()
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+
+    try {
+      String quercusModule
+        = "META-INF/services/com.caucho.quercus.QuercusClass";
+      Enumeration<URL> urls = loader.getResources(quercusModule);
+      
+      HashSet<URL> urlSet = new HashSet<URL>();
+
+      // gets rid of duplicate entries found by different classloaders
+      while (urls.hasMoreElements()) {
+        URL url = urls.nextElement();
+
+	if (! hasServiceClass(url)) {
+	  addServiceClass(url);
+
+	  urlSet.add(url);
+	}
+      }
+
+      for (URL url : urlSet) {
+        InputStream is = null;
+        ReadStream rs = null;
+        try {
+          is = url.openStream();
+	  
+          rs = new ReadStream(new VfsStream(is, null));
+	  
+          parseClassServicesModule(rs);
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        } finally {
+          if (rs != null)
+            rs.close();
+          if (is != null)
+            is.close();
+        }
+      }
+
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  /**
+   * Parses the services file, looking for PHP services.
+   */
+  private void parseClassServicesModule(ReadStream in)
+    throws IOException, ClassNotFoundException,
+           IllegalAccessException, InstantiationException,
+           ConfigException, NoSuchMethodException, InvocationTargetException
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    String line;
+
+    while ((line = in.readLine()) != null) {
+      int p = line.indexOf('#');
+
+      if (p >= 0)
+        line = line.substring(0, p);
+
+      line = line.trim();
+
+      if (line.length() == 0)
+        continue;
+
+      String[] args = line.split(" ");
+
+      String className = args[0];
+
+      Class cl;
+
+      try {
+        cl = Class.forName(className, false, loader);
+
+        String phpClassName = null;
+        String extension = null;
+        String definedBy = null;
+
+        for (int i = 1; i < args.length; i++) {
+          if ("as".equals(args[i])) {
+            i++;
+            if (i >= args.length)
+              throw new IOException(L.l("expecting Quercus class name after '{0}' in definition for class {1}", "as", className));
+
+            phpClassName = args[i];
+          }
+          else if ("provides".equals(args[i])) {
+            i++;
+            if (i >= args.length)
+              throw new IOException(L.l("expecting name of extension after '{0}' in definition for class {1}", "extension", className));
+
+            extension = args[i];
+          }
+          else if ("definedBy".equals(args[i])) {
+            i++;
+            if (i >= args.length)
+              throw new IOException(L.l("expecting name of class implementing JavaClassDef after '{0}' in definition for class {1}", "definedBy", className));
+
+            definedBy = args[i];
+          }
+          else {
+            throw new IOException(L.l("unknown token '{0}' in definition for class {1} ", args[i], className));
+          }
+        }
+
+        if (phpClassName == null)
+          phpClassName = className.substring(className.lastIndexOf('.') + 1);
+
+        Class javaClassDefClass;
+
+        if (definedBy != null) {
+          javaClassDefClass = Class.forName(definedBy, false, loader);
+        }
+        else
+          javaClassDefClass = null;
+
+        introspectJavaClass(phpClassName, cl, extension, javaClassDefClass);
+      } catch (Exception e) {
+        log.info("Failed loading " + className + "\n" + e.toString());
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
+  }
+
+  /**
+   * Introspects the module class for functions.
+   *
+   * @param name the php class name
+   * @param type the class to introspect.
+   * @param extension the extension provided by the class, or null
+   * @param javaClassDefClass
+   */
+  public void introspectJavaClass(String name, Class type, String extension,
+				  Class javaClassDefClass)
+    throws IllegalAccessException, InstantiationException, ConfigException,
+           NoSuchMethodException, InvocationTargetException
+  {
+    JavaClassDef def = addClass(name, type, extension, javaClassDefClass);
+
+    synchronized (_javaClassWrappers) {
+      _javaClassWrappers.put(name, def);
+      // _lowerJavaClassWrappers.put(name.toLowerCase(), def);
+    }
+
+    if (extension != null)
+      _extensionSet.add(extension);
+  }
+
+  /**
+   * Introspects the module class for functions.
+   *
+   * @param name the php class name
+   * @param type the class to introspect.
+   * @param extension the extension provided by the class, or null
+   */
+  public void introspectJavaImplClass(String name,
+				      Class type,
+				      String extension)
+    throws IllegalAccessException, InstantiationException, ConfigException
+  {
+    if (log.isLoggable(Level.FINEST)) {
+      if (extension == null)
+        log.finest(L.l("Quercus loading class {0} with type {1}", name, type.getName()));
+      else
+        log.finest(L.l("Quercus loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
+    }
+
+    try {
+      JavaClassDef def = addClass(name, type, extension, null);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  /**
+   * Scans the classpath for META-INF/services/com.caucho.quercus.QuercusClass
+   */
+  private void initStaticClasses()
+  {
+    /*
+    _stdClassDef = new InterpretedClassDef("stdClass", null, new String[0]);
+    _stdClass = new QuercusClass(_stdClassDef, null);
+
+    _staticClasses.put(_stdClass.getName(), _stdClassDef);
+    _lowerStaticClasses.put(_stdClass.getName().toLowerCase(), _stdClassDef);
+
+    InterpretedClassDef exn = new InterpretedClassDef("Exception",
+						      null,
+						      new String[0]);
+
+    try {
+      exn.setConstructor(new StaticFunction(_moduleContext,
+					    null,
+					    Quercus.class.getMethod("exnConstructor", new Class[] { Env.class, Value.class, String.class })));
+    } catch (Exception e) {
+      throw new QuercusException(e);
+    }
+    
+    // QuercusClass exnCl = new QuercusClass(exn, null);
+
+    _staticClasses.put(exn.getName(), exn);
+    _lowerStaticClasses.put(exn.getName().toLowerCase(), exn);
+    */
   }
 
   public static Value objectToValue(Object obj)

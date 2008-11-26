@@ -56,6 +56,13 @@ public class ResinModuleContext extends ModuleContext {
   {
     super(loader);
   }
+  /**
+   * Constructor.
+   */
+  public ResinModuleContext(ModuleContext parent, ClassLoader loader)
+  {
+    super(parent, loader);
+  }
 
   @Override
   protected JavaClassDef createDefaultJavaClassDef(String className,

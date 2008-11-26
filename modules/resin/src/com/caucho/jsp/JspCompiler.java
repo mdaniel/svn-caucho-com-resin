@@ -514,7 +514,7 @@ public class JspCompiler implements EnvironmentBean {
 
     // If the loading fails, remove the class because it may be corrupted
     try {
-      Class cl = CauchoSystem.loadClass(className, false, jspLoader);
+      Class cl = Class.forName(className, false, jspLoader);
 
       readSmap(parentLoader, className);
 

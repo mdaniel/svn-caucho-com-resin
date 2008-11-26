@@ -35,7 +35,10 @@ import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.PropertyValueProgram;
+import com.caucho.config.type.ConfigType;
+import com.caucho.config.type.TypeFactory;
 import com.caucho.config.types.InitParam;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.naming.Jndi;
 import com.caucho.tools.profiler.ConnectionPoolDataSourceWrapper;
 import com.caucho.tools.profiler.DriverWrapper;
@@ -44,7 +47,7 @@ import com.caucho.tools.profiler.ProfilerPointConfig;
 import com.caucho.tools.profiler.XADataSourceWrapper;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
-import com.caucho.lifecycle.Lifecycle;
+import com.caucho.xml.QName;
 
 import javax.annotation.PostConstruct;
 import javax.resource.spi.ManagedConnectionFactory;
@@ -92,6 +95,10 @@ public class DriverConfig
    * connect method to find the password.
    */
   public static final String PROPERTY_PASSWORD = "password" ;
+
+  private static final QName URL = new QName("url");
+  private static final QName USER = new QName("user");
+  private static final QName PASSWORD = new QName("password");
 
   private DBPoolImpl _dbPool;
 
@@ -712,44 +719,34 @@ public class DriverConfig
                                         _driverClass, getDBPool().getName()));
     }
 
-    try {
-      // server/14g1
-      if (_driverURL != null) {
-        PropertyValueProgram program;
-        program = new PropertyValueProgram("url", _driverURL);
-        program.configure(driverObject);
+    ConfigType configType = TypeFactory.getType(driverObject);
+
+    // server/14g1
+    if (_driverURL != null) {
+      if (! configType.setProperty(driverObject, URL, _driverURL)) {
+	if (! (driverObject instanceof Driver)) {
+	  throw new ConfigException(L.l("database: 'url' is an unknown property of '{0}'",
+					driverObject.getClass().getName()));
+	}
       }
-    } catch (Exception e) {
-      if (driverObject instanceof Driver)
-        log.log(Level.FINEST, e.toString(), e);
-      else
-        throw new SQLExceptionWrapper(e);
     }
-
-    try {
-      if (_user != null) { // && ! (driverObject instanceof Driver)) {
-        PropertyValueProgram program;
-        program = new PropertyValueProgram("user", _user);
-        program.configure(driverObject);
+    
+    if (_user != null) {
+      if (! configType.setProperty(driverObject, USER, _user)) {
+	if (! (driverObject instanceof Driver)) {
+	  throw new ConfigException(L.l("database: 'user' is an unknown property of '{0}'",
+					driverObject.getClass().getName()));
+	}
       }
-    } catch (Exception e) {
-      log.log(Level.FINEST, e.toString(), e);
-
-      if (! (driverObject instanceof Driver))
-        throw new SQLExceptionWrapper(e);
     }
-
-    try {
-      if (_password != null) { // && ! (driverObject instanceof Driver)) {
-        PropertyValueProgram program;
-        program = new PropertyValueProgram("password", _password);
-        program.configure(driverObject);
+    
+    if (_password != null) {
+      if (! configType.setProperty(driverObject, PASSWORD, _password)) {
+	if (! (driverObject instanceof Driver)) {
+	  throw new ConfigException(L.l("database: 'password' is an unknown property of '{0}'",
+					driverObject.getClass().getName()));
+	}
       }
-    } catch (Exception e) {
-      log.log(Level.FINEST, e.toString(), e);
-
-      if (! (driverObject instanceof Driver))
-        throw new SQLExceptionWrapper(e);
     }
 
     try {

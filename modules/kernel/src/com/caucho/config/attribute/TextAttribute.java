@@ -38,9 +38,10 @@ import com.caucho.xml.QName;
 
 public class TextAttribute extends Attribute {
   private final Method _setter;
-  private final ConfigType _type;
+  private final Class _type;
+  private ConfigType _configType;
 
-  public TextAttribute(Method setter, ConfigType type)
+  public TextAttribute(Method setter, Class type)
   {
     _setter = setter;
     _type = type;
@@ -51,7 +52,10 @@ public class TextAttribute extends Attribute {
    */
   public ConfigType getConfigType()
   {
-    return _type;
+    if (_configType == null)
+      _configType = TypeFactory.getType(_type);
+    
+    return _configType;
   }
   
   /**
@@ -62,7 +66,7 @@ public class TextAttribute extends Attribute {
     throws ConfigException
   {
     try {
-      _setter.invoke(bean, _type.valueOf(value));
+      _setter.invoke(bean, getConfigType().valueOf(value));
     } catch (Exception e) {
       throw ConfigException.create(_setter, e);
     }

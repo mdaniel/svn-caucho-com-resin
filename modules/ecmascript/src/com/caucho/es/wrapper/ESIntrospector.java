@@ -51,8 +51,8 @@ public class ESIntrospector {
   /**
    * Cache of analyzed classes to avoid duplication.
    */
-  static WeakLruCache<Class,SoftReference<ESBeanInfo>> _beanMap =
-    new WeakLruCache<Class,SoftReference<ESBeanInfo>>(256);
+  static WeakLruCache<Class,SoftReference<ESBeanInfo>> _beanMap
+    = new WeakLruCache<Class,SoftReference<ESBeanInfo>>(256);
   
   static Integer NULL = new Integer(0);
   final static int METHOD = 1;

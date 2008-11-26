@@ -106,8 +106,8 @@ public class WebBeansContainer
     "javax.faces.component.UIComponent"
   };
 
-  private final Class []_forbiddenAnnotations;
-  private final Class []_forbiddenClasses;
+  private static final Class []_forbiddenAnnotations;
+  private static final Class []_forbiddenClasses;
 
   private String _id;
 
@@ -192,37 +192,6 @@ public class WebBeansContainer
 
     if (isSetLocal)
       _localContainer.set(this, _classLoader);
-    
-    ArrayList<Class> forbiddenAnnotations = new ArrayList<Class>();
-    ArrayList<Class> forbiddenClasses = new ArrayList<Class>();
-
-    for (String className : FORBIDDEN_ANNOTATIONS) {
-      try {
-	Class cl = Class.forName(className, false, _classLoader);
-
-	if (cl != null)
-	  forbiddenAnnotations.add(cl);
-      } catch (Throwable e) {
-	log.log(Level.FINEST, e.toString(), e);
-      }
-    }
-
-    for (String className : FORBIDDEN_CLASSES) {
-      try {
-	Class cl = Class.forName(className, false, _classLoader);
-
-	if (cl != null)
-	  forbiddenClasses.add(cl);
-      } catch (Throwable e) {
-	log.log(Level.FINEST, e.toString(), e);
-      }
-    }
-
-    _forbiddenAnnotations = new Class[forbiddenAnnotations.size()];
-    forbiddenAnnotations.toArray(_forbiddenAnnotations);
-
-    _forbiddenClasses = new Class[forbiddenClasses.size()];
-    forbiddenClasses.toArray(_forbiddenClasses);
 
     try {
       InitialContext ic = new InitialContext();
@@ -1913,5 +1882,38 @@ public class WebBeansContainer
 
       return true;
     }
+  }
+
+  static {
+    ArrayList<Class> forbiddenAnnotations = new ArrayList<Class>();
+    ArrayList<Class> forbiddenClasses = new ArrayList<Class>();
+
+    for (String className : FORBIDDEN_ANNOTATIONS) {
+      try {
+	Class cl = Class.forName(className);
+
+	if (cl != null)
+	  forbiddenAnnotations.add(cl);
+      } catch (Throwable e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+
+    for (String className : FORBIDDEN_CLASSES) {
+      try {
+	Class cl = Class.forName(className);
+
+	if (cl != null)
+	  forbiddenClasses.add(cl);
+      } catch (Throwable e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+
+    _forbiddenAnnotations = new Class[forbiddenAnnotations.size()];
+    forbiddenAnnotations.toArray(_forbiddenAnnotations);
+
+    _forbiddenClasses = new Class[forbiddenClasses.size()];
+    forbiddenClasses.toArray(_forbiddenClasses);
   }
 }

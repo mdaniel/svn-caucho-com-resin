@@ -283,7 +283,7 @@ public class JspManager extends PageManager {
 
     // If the loading fails, remove the class because it may be corrupted
     try {
-      cl = CauchoSystem.loadClass(fullClassName, false, loader);
+      cl = Class.forName(fullClassName, false, loader);
     } catch (ClassNotFoundException e) {
       log.finest(e.toString());
 

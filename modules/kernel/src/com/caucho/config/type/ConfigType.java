@@ -171,6 +171,24 @@ abstract public class ConfigType
   }
 
   /**
+   * Sets a property based on an attribute name, returning true if
+   * successful.
+   */
+  public boolean setProperty(Object bean,
+			     QName name,
+			     Object value)
+  {
+    Attribute attr = getAttribute(name);
+
+    if (attr != null) {
+      attr.setValue(bean, name, attr.getConfigType().valueOf(value));
+      return true;
+    }
+    else
+      return false;
+  }
+
+  /**
    * Returns the program attribute.
    */
   public Attribute getProgramAttribute()
@@ -190,7 +208,9 @@ abstract public class ConfigType
   /**
    * Called before the children are configured.
    */
-  public void beforeConfigureBean(ConfigContext builder, Object bean, Node node)
+  public void beforeConfigureBean(ConfigContext builder,
+				  Object bean,
+				  Node node)
   {
   }
 

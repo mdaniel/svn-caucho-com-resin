@@ -45,11 +45,24 @@ public class PropertyValueProgram extends ConfigProgram {
   private final QName _qName;
   private final Object _value;
 
+  private Attribute _attr;
+
   public PropertyValueProgram(String name, Object value)
+  {
+    this(null, name, value);
+  }
+
+  public PropertyValueProgram(Class type, String name, Object value)
   {
     _name = name;
     _qName = new QName(name);
     _value = value;
+
+    if (type != null) {
+      ConfigType configType = TypeFactory.getType(type);
+
+      _attr = configType.getAttribute(_qName);
+    }
   }
   
   /**
@@ -71,9 +84,13 @@ public class PropertyValueProgram extends ConfigProgram {
   public void inject(Object bean, ConfigContext env)
   {
     try {
-      ConfigType type = TypeFactory.getType(bean.getClass());
+      Attribute attr = _attr;
 
-      Attribute attr = type.getAttribute(_qName);
+      if (attr == null) {
+	ConfigType type = TypeFactory.getType(bean.getClass());
+
+	attr = type.getAttribute(_qName);
+      }
 
       if (attr != null)
 	attr.setValue(bean, _qName, attr.getConfigType().valueOf(_value));

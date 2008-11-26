@@ -39,9 +39,11 @@ import com.caucho.xml.QName;
 public class CreateAttribute extends Attribute {
   private final Method _create;
   private final Method _setter;
-  private final ConfigType _type;
+  private Class _type;
+  
+  private ConfigType _configType;
 
-  public CreateAttribute(Method create, ConfigType type)
+  public CreateAttribute(Method create, Class type)
   {
     _create = create;
     if (_create != null)
@@ -51,11 +53,12 @@ public class CreateAttribute extends Attribute {
     _setter = null;
   }
 
-  public CreateAttribute(Method create, ConfigType type, Method setter)
+  public CreateAttribute(Method create, Class type, Method setter)
   {
     _create = create;
     if (_create != null)
       _create.setAccessible(true);
+    
     _type = type;
 
     _setter = setter;
@@ -68,7 +71,10 @@ public class CreateAttribute extends Attribute {
    */
   public ConfigType getConfigType()
   {
-    return _type;
+    if (_configType == null)
+      _configType = TypeFactory.getType(_type);
+    
+    return _configType;
   }
 
   /**

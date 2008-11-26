@@ -208,14 +208,20 @@ public class Jmx {
    * @param object the object to be registered as an MBean
    * @param name the name of the mbean.
    *
-   * @return the instantiated object.
+   * @return the instantiated object or null if the object
+   * doesn't have an MBean interface.
    */
   public static ObjectInstance register(Object object, ObjectName name)
     throws InstanceAlreadyExistsException,
 	   MBeanRegistrationException,
 	   NotCompliantMBeanException
   {
-    return getMBeanServer().registerMBean(createMBean(object, name), name);
+    DynamicMBean dynMBean = createMBean(object, name);
+
+    if (dynMBean != null)
+      return getMBeanServer().registerMBean(dynMBean, name);
+    else
+      return null;
   }
   
   /**
@@ -240,10 +246,14 @@ public class Jmx {
 
       AbstractMBeanServer mbeanServer = getMBeanServer();
 
-      if (mbeanServer != null)
-	return mbeanServer.registerMBean(createMBean(object, name), name);
-      else
-	return null;
+      if (mbeanServer != null) {
+	DynamicMBean dynMBean = createMBean(object, name);
+
+	if (dynMBean != null)
+	  return mbeanServer.registerMBean(dynMBean, name);
+      }
+
+      return null;
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -256,14 +266,14 @@ public class Jmx {
     throws NotCompliantMBeanException
   {
     if (obj == null)
-      throw new NotCompliantMBeanException(L.l("{0} mbean is null", name));
+      return null;
     else if (obj instanceof DynamicMBean)
       return (DynamicMBean) obj;
 
     Class ifc = getMBeanInterface(obj.getClass());
 
     if (ifc == null)
-      throw new NotCompliantMBeanException(L.l("{0} mbean has no MBean interface", name));
+      return null;
 
     return new IntrospectionMBean(obj, ifc);
   }
