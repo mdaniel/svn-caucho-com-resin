@@ -538,6 +538,7 @@ public class HtmlMessages extends UIMessages
       _infoClass,
       _infoStyle,
       _lang,
+      _layout,
       _style,
       _styleClass,
       _title,
@@ -564,6 +565,7 @@ public class HtmlMessages extends UIMessages
     _infoClass = (String) state[i++];
     _infoStyle = (String) state[i++];
     _lang = (String) state[i++];
+    _layout = (String) state[i++];
     _style = (String) state[i++];
     _styleClass = (String) state[i++];
     _title = (String) state[i++];

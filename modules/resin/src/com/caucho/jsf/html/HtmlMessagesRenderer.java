@@ -78,7 +78,6 @@ class HtmlMessagesRenderer extends Renderer
     String style;
     String styleClass;
     String title;
-    boolean tooltip;
     String warnClass;
     String warnStyle;
     boolean isShowSummary;
@@ -109,7 +108,6 @@ class HtmlMessagesRenderer extends Renderer
       style = htmlComp.getStyle();
       styleClass = htmlComp.getStyleClass();
       title = htmlComp.getTitle();
-      tooltip = htmlComp.isTooltip();
 
       warnClass = htmlComp.getWarnClass();
       warnStyle = htmlComp.getWarnStyle();
@@ -136,7 +134,6 @@ class HtmlMessagesRenderer extends Renderer
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
       title = (String) attrMap.get("title");
-      tooltip = Boolean.TRUE.equals(attrMap.get("tooltip"));
     }
 
     boolean isFirst = true;
