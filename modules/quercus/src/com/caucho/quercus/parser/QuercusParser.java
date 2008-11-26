@@ -246,7 +246,9 @@ public class QuercusParser {
     _encoding = encoding;
 
     if (sourceFile != null) {
-      _parserLocation.setFileName(sourceFile.getPath());
+      // php/600a
+      // need to return proper Windows paths (for joomla)
+      _parserLocation.setFileName(sourceFile.getNativePath());
       _sourceFile = sourceFile;
     }
     else {

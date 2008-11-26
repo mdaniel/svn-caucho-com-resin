@@ -3388,11 +3388,15 @@ public class Env {
     
     try {
       def = _quercus.getJavaClassDefinition(className);
-    }
-    catch (Throwable e) {
-      if (useImport) {
+      
+      if (def == null && useImport) {
+        useImport = false;
         def = importJavaClass(className);
       }
+    }
+    catch (Throwable e) {
+      if (useImport)
+        def = importJavaClass(className);
       else
         log.log(Level.FINER, e.toString(), e);
     }
@@ -3680,6 +3684,9 @@ public class Env {
       }
       
       QuercusClass qClass = createQuercusClass(def, parentClass);
+      
+      // php/09p9
+      qClass.init(this);
 
       _classMap.put(name, qClass);
       _lowerClassMap.put(name.toLowerCase(), qClass);

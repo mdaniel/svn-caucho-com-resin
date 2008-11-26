@@ -1003,28 +1003,39 @@ public class MiscModule extends AbstractQuercusModule {
 
     int length = format.length();
     for (int i = 0; i < length; i++) {
-      char ch = format.charAt(i);
+      char ch = format.charAt(i++);
       
       int count = 0;
-      char ch1 = ' ';
-      for (i++;
-	   i < length && '0' <= (ch1 = format.charAt(i)) && ch1 <= '9';
-	   i++) {
-	count = 10 * count + ch1 - '0';
-      }
       
-      if (count == 0)
-	count = 1;
-
-      if (i < length)
-	i--;
+      if (i < length && format.charAt(i) == '*') {
+        count = Integer.MAX_VALUE;
+        
+        i++;
+      }
+      else {
+        while (i < length) {
+          int ch1 = format.charAt(i);
+          
+          if ('0' <= ch1 && ch1 <= '9') {
+            count = count * 10 + ch1 - '0';
+            
+            i++;
+          }
+          else
+            break;
+        }
+        
+        if (count == 0)
+          count = 1;
+      }
 
       StringBuilder sb = new StringBuilder();
       
-      for (i++; i < length && (ch1 = format.charAt(i)) != '/'; i++) {
-	sb.append(ch1);
+      int ch1;
+      for (; i < length && (ch1 = format.charAt(i)) != '/'; i++) {
+        sb.append((char) ch1);
       }
-
+      
       String name = sb.toString();
 
       switch (ch) {
@@ -1154,15 +1165,27 @@ public class MiscModule extends AbstractQuercusModule {
     {
       StringValue bb = env.createBinaryBuilder();
       
-      for (int i = 0; i < _length; i++) {
-	int ch = is.read();
+      int i = 0;
+      
+      while (i < _length) {
+        int ch = is.read();
+        bb.appendByte(ch);
+        
+        i++;
+        
+        if (ch != _pad)
+          break;
+      }
+      
+      for (; i < _length; i++) {
+        int ch = is.read();
 
-	if (ch == _pad) {
-	}
-	else if (ch >= 0)
-	  bb.appendByte(ch);
-	else
-	  break;
+        if (ch == _pad) {
+        }
+        else if (ch >= 0)
+          bb.appendByte(ch);
+        else
+          break;
       }
 
       result.put(_name, bb);
@@ -1493,8 +1516,8 @@ public class MiscModule extends AbstractQuercusModule {
       for (int j = 0; j < _length; j++) {
 	Value key;
 
-	if (_name == "")
-	  key = LongValue.create(j);
+	if (_name.length() == 0)
+	  key = LongValue.create(j + 1);
 	else if (_length == 1)
 	  key = new StringBuilderValue(_name);
 	else {
@@ -1570,8 +1593,8 @@ public class MiscModule extends AbstractQuercusModule {
       for (int j = 0; j < _length; j++) {
 	Value key;
 
-	if (_name == "")
-	  key = LongValue.create(j);
+	if (_name.length() == 0)
+	  key = LongValue.create(j + 1);
 	else if (_length == 1)
 	  key = env.createString(_name);
 	else {
@@ -1647,8 +1670,8 @@ public class MiscModule extends AbstractQuercusModule {
       for (int j = 0; j < _length; j++) {
 	Value key;
 
-	if (_name == "")
-	  key = LongValue.create(j);
+	if (_name.length() == 0)
+	  key = LongValue.create(j + 1);
 	else if (_length == 1)
 	  key = env.createString(_name);
 	else {

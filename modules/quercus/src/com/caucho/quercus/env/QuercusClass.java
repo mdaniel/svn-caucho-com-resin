@@ -168,7 +168,7 @@ public class QuercusClass {
         throw new NullPointerException("classDef:" + _classDef
                                        + " i:" + i + " parent:" + parent);
       }
-      
+
       classDef.init();
 
       for (String iface : classDef.getInterfaces()) {

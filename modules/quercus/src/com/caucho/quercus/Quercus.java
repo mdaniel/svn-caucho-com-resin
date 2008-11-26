@@ -111,6 +111,9 @@ public class Quercus
 
   private HashMap<String, JavaClassDef> _javaClassWrappers
     = new HashMap<String, JavaClassDef>();
+  
+  private LruCache<String, String> _classNotFoundCache
+    = new LruCache<String, String>(256);
 
   private HashMap<String, JavaClassDef> _lowerJavaClassWrappers
     = new HashMap<String, JavaClassDef>();
@@ -666,19 +669,24 @@ public class Quercus
   {
     JavaClassDef def;
     
+    if (_classNotFoundCache.get(className) != null)
+      return null;
+    
     synchronized (_javaClassWrappers) {
       def = _javaClassWrappers.get(className);
 
       if (def == null) {
-	try {
-	  def = getModuleContext().getJavaClassDefinition(type, className);
+        try {
+          def = getModuleContext().getJavaClassDefinition(type, className);
 
-	  _javaClassWrappers.put(className, def);
-	} catch (RuntimeException e) {
-	  throw e;
-	} catch (Exception e) {
-	  throw new QuercusRuntimeException(e);
-	}
+          _javaClassWrappers.put(className, def);
+        } catch (RuntimeException e) {
+          _classNotFoundCache.put(className, className);
+          
+          throw e;
+        } catch (Exception e) {
+          throw new QuercusRuntimeException(e);
+        }
       }
     }
 
@@ -694,19 +702,24 @@ public class Quercus
   {
     JavaClassDef def;
     
+    if (_classNotFoundCache.get(className) != null)
+      return null;
+    
     synchronized (_javaClassWrappers) {
       def = _javaClassWrappers.get(className);
 
       if (def == null) {
-	try {
-	  def = getModuleContext().getJavaClassDefinition(className);
+        try {
+          def = getModuleContext().getJavaClassDefinition(className);
 
-	  _javaClassWrappers.put(className, def);
-	} catch (RuntimeException e) {
-	  throw e;
-	} catch (Exception e) {
-	  throw new QuercusRuntimeException(e);
-	}
+          _javaClassWrappers.put(className, def);
+        } catch (RuntimeException e) {
+          _classNotFoundCache.put(className, className);
+          
+          throw e;
+        } catch (Exception e) {
+          throw new QuercusRuntimeException(e);
+        }
       }
     }
 
