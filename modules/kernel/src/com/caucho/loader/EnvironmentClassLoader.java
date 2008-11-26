@@ -555,14 +555,22 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   /**
    * Returns the osgi manager
    */
-  public OsgiManager getOsgiManager()
+  public OsgiManager createOsgiManager()
   {
     synchronized (this) {
       if (_osgiManager == null)
-	_osgiManager = new OsgiManager(getParent());
+	_osgiManager = new OsgiManager(this, getParent());
       
       return _osgiManager;
     }
+  }
+
+  /**
+   * Returns the osgi manager
+   */
+  public OsgiManager getOsgiManager()
+  {
+    return _osgiManager;
   }
 
   /**

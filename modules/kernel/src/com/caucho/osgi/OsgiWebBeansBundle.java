@@ -40,10 +40,14 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
+import com.caucho.webbeans.Names;
+import com.caucho.webbeans.manager.CurrentLiteral;
+import com.caucho.webbeans.component.SingletonBean;
 import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.vfs.*;
 
 import javax.annotation.PostConstruct;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.security.CodeSource;
 import java.security.cert.Certificate;
@@ -115,11 +119,27 @@ public class OsgiWebBeansBundle extends AbstractOsgiBundle
       Object service = getService(ref);
 
       String []classNames = (String []) ref.getProperty("objectClass");
-      Class type = ref.getBundle().loadClass(classNames[0]);
+      Class []types = new Class[classNames.length];
 
-      String name = (String) ref.getProperty("com.caucho.webbeans.name");
+      for (int i = 0; i < types.length; i++)
+	types[i] = ref.getBundle().loadClass(classNames[i]);
+
+      String name = (String) ref.getProperty("javax.webbeans.Named");
+
+      ArrayList<Annotation> bindingList
+	= new ArrayList<Annotation>();
+
+      bindingList.add(new CurrentLiteral());
+      if (name != null)
+	bindingList.add(Names.create(name));
+
+      Annotation []bindings = new Annotation[bindingList.size()];
+      bindingList.toArray(bindings);
+
+      SingletonBean bean = new SingletonBean(service, null, name,
+					     bindings, types);
     
-      _webBeans.addSingleton(service, name, type);
+      _webBeans.addBean(bean);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

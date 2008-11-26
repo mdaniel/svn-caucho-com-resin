@@ -77,6 +77,7 @@ public class OsgiBundle implements Bundle
   private OsgiManager _manager;
   
   private JarPath _jar;
+  private Path _path;
   
   private String _symbolicName;
   
@@ -114,74 +115,98 @@ public class OsgiBundle implements Bundle
 
   OsgiBundle(long id,
 	     OsgiManager manager,
-	     JarPath jar,
+	     Path path,
 	     ConfigProgram program,
 	     boolean isExport)
   {
     _id = id;
     _manager = manager;
-    _jar = jar;
+    _path = path;
     _lastModified = Alarm.getCurrentTime();
     _program = program;
     _isExport = isExport;
 
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " initializing");
+
     _bundleContext = new OsgiBundleContext(manager, this);
 
-    if (jar != null) {
-      try {
-	Manifest manifest = jar.getManifest();
+    if (_path != null && _path.getTail().endsWith(".jar"))
+      _jar = JarPath.create(_path);
 
-	if (manifest == null)
-	  throw new ConfigException(L.l("OSGi bundle '{0}' does not have a manifest, which is required by the OSGi specification",
-					jar.getContainer().getNativePath()));
+    try {
+      if (_jar != null)
+	parseManifest(_jar.getManifest());
+      else if (_path != null)
+	parseManifest(readManifest(_path));
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
 
-	Attributes attr = manifest.getMainAttributes();
-
-	for (Map.Entry entry : attr.entrySet()) {
-	  _headerMap.put(String.valueOf(entry.getKey()),
-			 String.valueOf(entry.getValue()));
-	}
-	
-	_symbolicName = attr.getValue("Bundle-SymbolicName");
-
-	if (_symbolicName == null)
-	  throw new ConfigException(L.l("'{0}' needs a Bundle-SymbolicName in its manifest.  OSGi bundles require a Bundle-SymbolicName",
-					jar.getNativePath()));
-	
-	String versionString = attr.getValue("Bundle-Version");
-	
-	_version = OsgiVersion.create(versionString);
-
-	String exportAttr = attr.getValue("Export-Package");
-
-	ArrayList<PackageItem> exportList = null;
-      
-	if (exportAttr != null)
-	  exportList = parseItems(exportAttr);
-
-	addExports(exportList);
-
-	_importAttr = attr.getValue("Import-Package");
-
-	if (exportList != null)
-	  _importList.addAll(exportList);
-
-	if (_importAttr != null) {
-	  ArrayList<PackageItem> importList = null;
-
-	  importList = parseItems(_importAttr);
-
-	  _importList.addAll(importList);
-	}
-
-	_activatorClassName = attr.getValue("Bundle-Activator");
-      } catch (Exception e) {
-	throw ConfigException.create(e);
-      }
-
+    if (_path != null) {
       _loader = new BundleClassLoader(_manager.getParentLoader(),
 				      _symbolicName + "-" + id,
-				      jar.getContainer());
+				      _path);
+    }
+  }
+
+  private void parseManifest(Manifest manifest)
+  {
+    if (manifest == null)
+      throw new ConfigException(L.l("OSGi bundle '{0}' does not have a manifest, which is required by the OSGi specification",
+				    _path.getNativePath()));
+
+    Attributes attr = manifest.getMainAttributes();
+
+    for (Map.Entry entry : attr.entrySet()) {
+      _headerMap.put(String.valueOf(entry.getKey()),
+		     String.valueOf(entry.getValue()));
+    }
+	
+    _symbolicName = attr.getValue("Bundle-SymbolicName");
+
+    if (_symbolicName == null)
+      throw new ConfigException(L.l("'{0}' needs a Bundle-SymbolicName in its manifest.  OSGi bundles require a Bundle-SymbolicName",
+				    _path.getNativePath()));
+	
+    String versionString = attr.getValue("Bundle-Version");
+	
+    _version = OsgiVersion.create(versionString);
+
+    String exportAttr = attr.getValue("Export-Package");
+
+    ArrayList<PackageItem> exportList = null;
+      
+    if (exportAttr != null)
+      exportList = parseItems(exportAttr);
+
+    addExports(exportList);
+
+    _importAttr = attr.getValue("Import-Package");
+
+    if (exportList != null)
+      _importList.addAll(exportList);
+
+    if (_importAttr != null) {
+      ArrayList<PackageItem> importList = null;
+
+      importList = parseItems(_importAttr);
+
+      _importList.addAll(importList);
+    }
+
+    _activatorClassName = attr.getValue("Bundle-Activator");
+  }
+
+  private Manifest readManifest(Path path)
+    throws IOException
+  {
+    InputStream is = path.lookup("META-INF/MANIFEST.MF").openRead();
+
+    try {
+      return new Manifest(is);
+    } finally {
+      is.close();
     }
   }
 
@@ -295,7 +320,7 @@ public class OsgiBundle implements Bundle
       OsgiVersion version = _version;
 	
       for (String name : item.getPackageNames()) {
-	ExportLoader exportLoader = new ExportLoader(_jar, name, version);
+	ExportLoader exportLoader = new ExportLoader(_path, name, version);
 	loader.addLoader(exportLoader);
 
 	_manager.putExportLoader(name, loader);
@@ -398,6 +423,11 @@ public class OsgiBundle implements Bundle
     return _jar;
   }
 
+  Path getPath()
+  {
+    return _path;
+  }
+
   Class loadClassImpl(String name)
   {
     for (ExportBundleClassLoader loader : _exportList) {
@@ -443,7 +473,7 @@ public class OsgiBundle implements Bundle
    */
   public String getLocation()
   {
-    return _jar.getURL();
+    return _path.getURL();
   }
 
   /**

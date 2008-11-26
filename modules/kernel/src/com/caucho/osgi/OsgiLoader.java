@@ -66,7 +66,7 @@ public class OsgiLoader extends Loader implements EnvironmentListener
 
   public OsgiLoader()
   {
-    this(OsgiManager.create());
+    this(OsgiManager.getCurrent());
   }
 
   public OsgiLoader(OsgiManager manager)
@@ -106,11 +106,14 @@ public class OsgiLoader extends Loader implements EnvironmentListener
   protected void buildClassPath(ArrayList<String> list)
   {
     for (OsgiBundle bundle : _bundleList) {
-      JarPath jar = bundle.getJar();
-      String pathName = jar.getContainer().getNativePath();
+      Path path = bundle.getPath();
 
-      if (! list.contains(pathName))
-	list.add(pathName);
+      if (path != null) {
+	String pathName = path.getNativePath();
+
+	if (! list.contains(pathName))
+	  list.add(pathName);
+      }
     }
   }
 

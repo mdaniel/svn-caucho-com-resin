@@ -44,6 +44,7 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
 import java.net.URL;
@@ -83,7 +84,7 @@ public class OsgiManager
   private static final EnvironmentLocal<OsgiManager> _localOsgi
     = new EnvironmentLocal<OsgiManager>();
 
-  private ClassLoader _classLoader;
+  private EnvironmentClassLoader _classLoader;
   private ClassLoader _parentLoader;
 
   private long _nextBundleId = 1;
@@ -93,6 +94,8 @@ public class OsgiManager
   private OsgiLoader _exportLoader;
 
   private Path _workRoot;
+
+  private WebBeansContainer _serviceWebBeansContainer;
   
   private ArrayList<OsgiBundle> _bundleList
     = new ArrayList<OsgiBundle>();
@@ -124,19 +127,22 @@ public class OsgiManager
   /**
    * Constructor should be called only from EnvironmentClassLoader
    */
-  public OsgiManager(ClassLoader parentLoader)
+  public OsgiManager(EnvironmentClassLoader classLoader,
+		     ClassLoader parentLoader)
   {
-    _classLoader = Thread.currentThread().getContextClassLoader();
-    
-    _parentLoader = _classLoader.getParent();
+    _classLoader = classLoader;
+    _parentLoader = parentLoader;
 
     _exportLoader = new OsgiLoader(this);
 
-    if (_parentLoader instanceof DynamicClassLoader)
-      ((DynamicClassLoader) _parentLoader).addLoader(_exportLoader);
+    _classLoader.addLoader(_exportLoader);
 
     _systemBundle = new OsgiSystemBundle(this);
     _bundleList.add(_systemBundle);
+
+    WebBeansContainer webBeans = WebBeansContainer.create();
+
+    _serviceWebBeansContainer = webBeans.createParent("osgi:");
 
     OsgiWebBeansBundle webBeansBundle = new OsgiWebBeansBundle(this);
     addBundle(webBeansBundle);
@@ -157,13 +163,6 @@ public class OsgiManager
     return loader.getOsgiManager();
   }
 
-  public static OsgiManager create()
-  {
-    EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
-
-    return loader.getOsgiManager();
-  }
-
   public ClassLoader getParentLoader()
   {
     return _parentLoader;
@@ -175,6 +174,14 @@ public class OsgiManager
       _workRoot = WorkDir.getLocalWorkDir(_parentLoader).lookup("_osgi");
 
     return _workRoot;
+  }
+
+  /**
+   * Returns the web beans container for the published service beans
+   */
+  WebBeansContainer getServiceWebBeansContainer()
+  {
+    return _serviceWebBeansContainer;
   }
 
   OsgiBundle addStartupBundle(Path path,
@@ -197,9 +204,7 @@ public class OsgiManager
 			    ConfigProgram program,
 			    boolean isExport)
   {
-    JarPath jar = JarPath.create(path);
-
-    OsgiBundle bundle = new OsgiBundle(nextBundleId(), this, jar,
+    OsgiBundle bundle = new OsgiBundle(nextBundleId(), this, path,
 				       program, isExport);
 
     addBundle(bundle);

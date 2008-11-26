@@ -66,9 +66,11 @@ public class OsgiBundleConfig
    */
   public void setPath(Path path)
   {
+    /*
     if (! path.getTail().endsWith(".jar"))
       throw new ConfigException(L.l("osgi-bundle path='{0}' must be a jar file.",
 				    path));
+    */
 
     _path = path;
   }
@@ -142,7 +144,7 @@ public class OsgiBundleConfig
       throw new ConfigException(L.l("Can't find module '{0}'",
 				    _module));
 
-    OsgiManager manager = OsgiManager.create();
+    OsgiManager manager = OsgiManager.getCurrent();
     OsgiBundle bundle;
 
     if (_isStart)

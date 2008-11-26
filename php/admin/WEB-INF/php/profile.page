@@ -40,11 +40,11 @@ if ($profile) {
 
     echo "<form action='?q=profile' method='post' style='display:inline'>";
     echo "Period: <select type='select' name='period'>";
-    echo "  <option>10ms";
+    echo "  <option selected>10ms";
     echo "  <option>25ms";
     echo "  <option>100ms";
     echo "  <option>250ms";
-    echo "  <option selected>1000ms";
+    echo "  <option>1000ms";
     echo "  <option>2500ms";
     echo "  <option>10000ms";
     echo "</select>";

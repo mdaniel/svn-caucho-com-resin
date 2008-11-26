@@ -35,6 +35,7 @@ import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.MethodComponentProgram;
 import com.caucho.config.program.FieldComponentProgram;
+import com.caucho.config.program.FieldEventProgram;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.scope.SingletonScope;
@@ -57,6 +58,7 @@ import java.lang.reflect.*;
 import javax.el.*;
 import javax.naming.*;
 import javax.webbeans.*;
+import javax.webbeans.Observable;
 import javax.webbeans.Observer;
 import javax.webbeans.manager.Bean;
 import javax.webbeans.manager.Context;
@@ -106,6 +108,8 @@ public class WebBeansContainer
 
   private final Class []_forbiddenAnnotations;
   private final Class []_forbiddenClasses;
+
+  private String _id;
 
   private WebBeansContainer _parent;
   
@@ -172,15 +176,22 @@ public class WebBeansContainer
 
   private RuntimeException _configException;
 
-  private WebBeansContainer(ClassLoader loader)
+  private WebBeansContainer(String id,
+			    WebBeansContainer parent,
+			    EnvironmentClassLoader loader,
+			    boolean isSetLocal)
   {
-    _classLoader = Environment.getEnvironmentClassLoader(loader);
-      
-    _localContainer.set(this, _classLoader);
+    _id = id;
+    
+    _classLoader = loader;
 
-    if (_classLoader != null) {
+    if (parent != null)
+      _parent = parent;
+    else if (_classLoader != null)
       _parent = WebBeansContainer.create(_classLoader.getParent());
-    }
+
+    if (isSetLocal)
+      _localContainer.set(this, _classLoader);
     
     ArrayList<Class> forbiddenAnnotations = new ArrayList<Class>();
     ArrayList<Class> forbiddenClasses = new ArrayList<Class>();
@@ -220,8 +231,6 @@ public class WebBeansContainer
       log.log(Level.FINEST, e.toString(), e);
     }
     
-    _localContainer.set(this, _classLoader);
-
     if (_classLoader != null)
       _tempClassLoader = _classLoader.getNewTempClassLoader();
     else
@@ -239,7 +248,7 @@ public class WebBeansContainer
     _deploymentMap.put(CauchoDeployment.class, 1);
     _deploymentMap.put(Production.class, 2);
 
-    if (_classLoader != null)
+    if (_classLoader != null && isSetLocal)
       _classLoader.addScanListener(this);
     
     Environment.addEnvironmentListener(this, _classLoader);
@@ -296,15 +305,36 @@ public class WebBeansContainer
       webBeans = _localContainer.getLevel(loader);
 
       if (webBeans == null) {
-	loader = Environment.getEnvironmentClassLoader(loader);
+	EnvironmentClassLoader envLoader
+	  = Environment.getEnvironmentClassLoader(loader);
+
+	String id;
+
+	if (envLoader != null)
+	  id = envLoader.getId();
+	else
+	  id = "";
 	
-	webBeans = new WebBeansContainer(loader);
+	webBeans = new WebBeansContainer(id, null, envLoader, true);
       
 	_localContainer.set(webBeans, loader);
       }
     }
 
     return webBeans;
+  }
+
+  /**
+   * Returns the current active container.
+   */
+  public WebBeansContainer createParent(String prefix)
+  {
+    _parent = new WebBeansContainer(prefix + _id,
+				    _parent,
+				    _classLoader,
+				    false);
+    
+    return _parent;
   }
 
   public WbWebBeans getWbWebBeans()
@@ -534,6 +564,11 @@ public class WebBeansContainer
       throw new IllegalStateException(L.l("can't cope with new"));
     
     Annotation []bindings = getBindings(field.getAnnotations());
+    
+    if (field.isAnnotationPresent(Observable.class)) {
+      injectList.add(new FieldEventProgram(this, field, bindings));
+      return;
+    }
       
     Set set = resolve(field.getGenericType(), bindings);
 
@@ -1819,10 +1854,7 @@ public class WebBeansContainer
 
   public String toString()
   {
-    if (_classLoader != null && _classLoader.getId() != null)
-      return "WebBeansContainer" + "[" + _classLoader.getId() + "]";
-    else
-      return "WebBeansContainer[]";
+    return getClass().getSimpleName() + "[" + _id + "]";
   }
 
   static String getSimpleName(Type type)

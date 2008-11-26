@@ -58,8 +58,8 @@ public class ExportLoader extends Loader implements Dependency
   private static final Logger log
     = Logger.getLogger(ExportLoader.class.getName());
   
-  // The exported jar
-  private JarPath _jar;
+  // The exported path
+  private Path _path;
   private Depend _depend;
 
   private String _packageName;
@@ -71,10 +71,10 @@ public class ExportLoader extends Loader implements Dependency
   /**
    * Creates a export loader.
    */
-  ExportLoader(JarPath jar, String packageName, OsgiVersion version)
+  ExportLoader(Path path, String packageName, OsgiVersion version)
   {
-    _jar = jar;
-    _depend = new Depend(jar);
+    _path = path;
+    _depend = new Depend(path);
     
     _packageName = packageName;
     _packagePath = packageName.replace('.', '/');
@@ -87,7 +87,7 @@ public class ExportLoader extends Loader implements Dependency
   protected void init()
   {
     try {
-      _codeSource = new CodeSource(new URL(_jar.getContainer().getURL()), (Certificate []) null);
+      _codeSource = new CodeSource(new URL(_path.getURL()), (Certificate []) null);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -100,7 +100,7 @@ public class ExportLoader extends Loader implements Dependency
   {
     super.setLoader(loader);
 
-    loader.addURL(_jar);
+    loader.addURL(_path);
   }
   
   /**
@@ -127,7 +127,7 @@ public class ExportLoader extends Loader implements Dependency
   @Override
   protected void buildClassPath(ArrayList<String> pathList)
   {
-    String path = _jar.getContainer().getNativePath();
+    String path = _path.getNativePath();
 
     if (! pathList.contains(path))
       pathList.add(path);
@@ -145,7 +145,7 @@ public class ExportLoader extends Loader implements Dependency
     if (! pathName.startsWith(_packagePath))
       return null;
 
-    Path path = _jar.lookup(pathName);
+    Path path = _path.lookup(pathName);
 
     if (path.exists())
       return path;

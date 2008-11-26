@@ -29,6 +29,7 @@
 
 package com.caucho.server.webbeans;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.annotation.ServiceBinding;
 import com.caucho.config.annotation.OsgiServiceBinding;
 import com.caucho.ejb.timer.EjbTimerService;
@@ -39,7 +40,11 @@ import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.webbeans.manager.BeanStartupEvent;
 import com.caucho.server.util.ScheduledThreadPool;
 import com.caucho.transaction.*;
+import com.caucho.util.L10N;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Set;
 import java.util.concurrent.*;
 import java.util.logging.*;
 import javax.ejb.*;
@@ -48,6 +53,8 @@ import javax.transaction.*;
 import javax.webbeans.*;
 import javax.webbeans.manager.Bean;
 import javax.webbeans.manager.Manager;
+
+import org.osgi.framework.BundleContext;
 
 /**
  * Resin WebBeans producer for the main singletons.
@@ -59,6 +66,7 @@ public class ResinWebBeansProducer
 {
   private static final Logger log
     = Logger.getLogger(ResinWebBeansProducer.class.getName());
+  private static final L10N L = new L10N(ResinWebBeansProducer.class);
   
   /**
    * Returns the web beans container.
@@ -161,7 +169,27 @@ public class ResinWebBeansProducer
       log.fine(bean + " starting at initialization");
     
     WebBeansContainer webBeans = WebBeansContainer.create();
+    BundleContext bundle = webBeans.getInstanceByType(BundleContext.class);
 
-    webBeans.getInstance(bean);
+    if (bundle == null)
+      throw new ConfigException(L.l("The current environment does not have a BundleContext"));
+
+    Object service = webBeans.getInstance(bean);
+
+    Set<Class> typeSet = bean.getTypes();
+      
+    String types[] = new String[typeSet.size()];
+    int i = 0;
+    for (Class type : typeSet) {
+      types[i++] = type.getName();
+    }
+    Dictionary properties = new Hashtable();
+
+    String name = bean.getName();
+
+    if (name != null)
+      properties.put("javax.webbeans.Named", name);
+
+    bundle.registerService(types, service, properties);
   }
 }

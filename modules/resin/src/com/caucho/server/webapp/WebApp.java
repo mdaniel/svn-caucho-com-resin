@@ -423,7 +423,7 @@ public class WebApp extends ServletContextImpl
    */
   public void preConfigInit()
   {
-    OsgiManager manager = OsgiManager.create();
+    OsgiManager manager = _classLoader.createOsgiManager();
 
     _osgiBundle = new OsgiWebAppBundle(manager, this);
 

@@ -69,7 +69,7 @@ public class AbstractOsgiBundle extends OsgiBundle
   protected AbstractOsgiBundle(OsgiManager manager, String name)
   {
     super(manager.nextBundleId(), manager, null, null, false);
-
+    
     manager.addBundle(this);
 
     if (name == null)
