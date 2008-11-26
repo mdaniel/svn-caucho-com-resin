@@ -15,6 +15,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -52,6 +53,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -244,6 +246,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -441,6 +444,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -642,6 +646,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -782,6 +787,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -927,6 +933,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -1012,6 +1019,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -1032,7 +1040,7 @@
       <name>immediate</name>
       <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
-    
+
     <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -1047,7 +1055,7 @@
       <name>required</name>
       <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
-    
+
     <attribute>
       <name>requiredMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -1253,6 +1261,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -1288,7 +1297,7 @@
       <name>required</name>
       <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
-    
+
     <attribute>
       <name>requiredMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -1496,6 +1505,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -1711,6 +1721,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -1831,6 +1842,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -1950,6 +1962,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -1970,7 +1983,7 @@
       <name>immediate</name>
       <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
-    
+
     <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -2157,6 +2170,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -2177,7 +2191,7 @@
       <name>immediate</name>
       <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
-    
+
     <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -2192,7 +2206,7 @@
       <name>required</name>
       <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
-    
+
     <attribute>
       <name>requiredMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -2384,6 +2398,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -2438,7 +2453,7 @@
 	</method-signature>
       </deferred-method>
     </attribute>
-    
+
     <attribute>
       <name>valueChangeListener</name>
       <deferred-method>
@@ -2606,6 +2621,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -2823,6 +2839,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -3045,6 +3062,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -3065,7 +3083,7 @@
       <name>immediate</name>
       <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
-    
+
     <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -3262,6 +3280,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -3282,7 +3301,7 @@
       <name>immediate</name>
       <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
-    
+
     <attribute>
       <name>converterMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -3297,7 +3316,7 @@
       <name>required</name>
       <deferred-value><type>Boolean</type></deferred-value>
     </attribute>
-    
+
     <attribute>
       <name>requiredMessage</name>
       <deferred-value><type>String</type></deferred-value>
@@ -3489,6 +3508,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -3561,6 +3581,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -3633,6 +3654,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -3781,6 +3803,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -3963,6 +3986,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
@@ -4148,6 +4172,7 @@
     <attribute>
       <name>id</name>
       <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
     </attribute>
 
     <attribute>
