@@ -166,7 +166,7 @@ class HtmlMessageRenderer extends Renderer
 	  if (infoClass != null)
 	    styleClass = infoClass;
 
-	  if (errorStyle != null)
+	  if (infoStyle != null)
 	    style = infoStyle;
 	}
 	else if (FacesMessage.SEVERITY_WARN.equals(msg.getSeverity())) {
@@ -205,6 +205,7 @@ class HtmlMessageRenderer extends Renderer
 	if (styleClass != null)
 	  out.writeAttribute("class", styleClass, "styleClass");
 
+        boolean summaryDone = false;
 	if (isShowSummary) {
 	  if (tooltip && isShowDetail) {
 	    out.writeAttribute("title", msg.getSummary(), "title");
@@ -212,11 +213,16 @@ class HtmlMessageRenderer extends Renderer
 	  else if (title != null) {
 	    out.writeAttribute("title", title, "title");
 	    out.writeText(msg.getSummary(), "summary");
+            summaryDone = true;
 	  }
 	  else {
 	    out.writeText(msg.getSummary(), "summary");
+            summaryDone = true;
 	  }
 	}
+
+        if (summaryDone)
+          out.writeText("   ", null);
 
 	if (isShowDetail)
 	  out.writeText(msg.getDetail(), "detail");
