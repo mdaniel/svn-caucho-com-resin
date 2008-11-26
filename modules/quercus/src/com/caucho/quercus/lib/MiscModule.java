@@ -1561,26 +1561,26 @@ public class MiscModule extends AbstractQuercusModule {
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
-	Value arg;
+        Value arg;
 
-	if (i < args.length) {
-	  arg = args[i];
-	  i++;
-	}
-	else if (_length == Integer.MAX_VALUE)
-	  return i;
-	else {
-	  env.warning("a: not enough arguments");
+        if (i < args.length) {
+          arg = args[i];
+          i++;
+        }
+        else if (_length == Integer.MAX_VALUE)
+          return i;
+        else {
+          env.warning("a: not enough arguments");
 
-	  return i;
-	}
+          return i;
+        }
  
-	double d = arg.toDouble();
-	long v = Double.doubleToLongBits(d);
+        double d = arg.toDouble();
+        long v = Double.doubleToLongBits(d);
 
-	for (int k = 7; k >= 0; k--) {
-	  bb.appendByte((int) (v >> (8 * k)));
-	}
+        for (int k = 7; k >= 0; k--) {
+          bb.appendByte((int) (v >> (8 * k) & 0xff));
+        }
       }
 
       return i;
@@ -1638,26 +1638,26 @@ public class MiscModule extends AbstractQuercusModule {
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
-	Value arg;
+        Value arg;
 
-	if (i < args.length) {
-	  arg = args[i];
-	  i++;
-	}
-	else if (_length == Integer.MAX_VALUE)
-	  return i;
-	else {
-	  env.warning("a: not enough arguments");
+        if (i < args.length) {
+          arg = args[i];
+          i++;
+        }
+        else if (_length == Integer.MAX_VALUE)
+          return i;
+        else {
+          env.warning("a: not enough arguments");
 
-	  return i;
-	}
- 
-	double d = arg.toDouble();
-	int v = Float.floatToIntBits((float) d);
+          return i;
+        }
+     
+        double d = arg.toDouble();
+        int v = Float.floatToIntBits((float) d);
 
-	for (int k = 3; k >= 0; k--) {
-	  bb.appendByte((int) (v >> (8 * k)));
-	}
+        for (int k = 3; k >= 0; k--) {
+          bb.appendByte((int) (v >> (8 * k) & 0xff));
+        }
       }
 
       return i;
