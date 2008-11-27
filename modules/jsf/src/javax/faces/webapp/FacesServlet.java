@@ -51,6 +51,8 @@ public final class FacesServlet implements Servlet
   public static final String LIFECYCLE_ID_ATTR
     = "javax.faces.LIFECYCLE_ID";
 
+  private static boolean _isInitialized = false;
+
   private ServletConfig _config;
   private ServletContext _webApp;
 
@@ -77,27 +79,35 @@ public final class FacesServlet implements Servlet
     _config = config;
     _webApp = config.getServletContext();
 
-    try {
-      Class cl = Class.forName("com.caucho.jsf.webapp.FacesServletImpl");
+    if (!_isInitialized) {
+      try {
+        Class cl = Class.forName("com.caucho.jsf.webapp.FacesServletImpl");
 
-      Servlet servlet = (Servlet) cl.newInstance();
+        Servlet servlet = (Servlet) cl.newInstance();
 
-      Method init = cl.getMethod("init", new Class[] { ServletConfig.class });
+        Method init = cl.getMethod("init", new Class[]{ServletConfig.class});
 
-      init.invoke(servlet, config);
-    } catch (ClassNotFoundException e) {
-      log.log(Level.FINER, e.toString(), e);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (InvocationTargetException e) {
-      if (e.getCause() instanceof RuntimeException)
-	throw (RuntimeException) e.getCause();
-      else if (e.getCause() instanceof ServletException)
-	throw (ServletException) e.getCause();
-      else
-	throw new ServletException(e);
-    } catch (Exception e) {
-      throw new ServletException(e);
+        init.invoke(servlet, config);
+
+        _isInitialized = true;
+      }
+      catch (ClassNotFoundException e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+      catch (RuntimeException e) {
+        throw e;
+      }
+      catch (InvocationTargetException e) {
+        if (e.getCause() instanceof RuntimeException)
+          throw (RuntimeException) e.getCause();
+        else if (e.getCause() instanceof ServletException)
+          throw (ServletException) e.getCause();
+        else
+          throw new ServletException(e);
+      }
+      catch (Exception e) {
+        throw new ServletException(e);
+      }
     }
 
     _facesContextFactory = (FacesContextFactory)
