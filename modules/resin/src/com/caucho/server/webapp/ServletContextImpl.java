@@ -57,7 +57,7 @@ public class ServletContextImpl implements ServletContext {
 
   private HashMap<String,String> _initParams = new HashMap<String,String>();
 
-  public Path getAppDir()
+  public Path getRootDirectory()
   {
     return Vfs.lookup();
   }
@@ -250,7 +250,7 @@ public class ServletContextImpl implements ServletContext {
    */
   public String getRealPath(String uri)
   {
-    return getAppDir().lookup("./" + uri).getNativePath();
+    return getRootDirectory().lookup("./" + uri).getNativePath();
   }
 
   /**
@@ -267,7 +267,8 @@ public class ServletContextImpl implements ServletContext {
     
     String realPath = getRealPath(name);
 
-    Path path = getAppDir().lookupNative(realPath);
+    Path rootDirectory = getRootDirectory();
+    Path path = rootDirectory.lookupNative(realPath);
 
     if (path.exists())
       return new URL(path.getURL());
@@ -280,7 +281,8 @@ public class ServletContextImpl implements ServletContext {
    */
   public InputStream getResourceAsStream(String uripath)
   {
-    Path path = getAppDir().lookupNative(getRealPath(uripath));
+    Path rootDirectory = getRootDirectory();
+    Path path = rootDirectory.lookupNative(getRealPath(uripath));
 
     try {
       if (path.canRead())
@@ -302,7 +304,7 @@ public class ServletContextImpl implements ServletContext {
     if (! prefix.endsWith("/"))
       prefix = prefix + "/";
 
-    Path path = getAppDir().lookup(getRealPath(prefix));
+    Path path = getRootDirectory().lookup(getRealPath(prefix));
 
     HashSet<String> set = new HashSet<String>();
 

@@ -64,6 +64,15 @@ public class HmuxResponse extends AbstractHttpResponse {
       return ((AbstractHttpRequest) _request).isTop();
     }
   }
+
+  /**
+   * headersWritten cannot be undone for hmux
+   */
+  @Override
+  public void setHeaderWritten(boolean isWritten)
+  {
+    // server/265a
+  }
   
   protected boolean writeHeadersInt(WriteStream os,
 				    int length,

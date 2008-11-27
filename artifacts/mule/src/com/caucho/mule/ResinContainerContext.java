@@ -30,10 +30,12 @@
 package com.caucho.mule;
 
 import java.io.Reader;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.webbeans.ComponentFactory;
+import javax.webbeans.manager.Bean;
 
 import com.caucho.util.L10N;
 import com.caucho.webbeans.manager.*;
@@ -51,8 +53,8 @@ public class ResinContainerContext implements UMOContainerContext
   private static final Logger log = 
     Logger.getLogger(ResinContainerContext.class.getName());
 
-  private final WeakHashMap<Class,ComponentFactory> _componentMap
-    = new WeakHashMap<Class,ComponentFactory>();
+  private final WeakHashMap<Class,Bean> _beanMap
+    = new WeakHashMap<Class,Bean>();
 
   private final WebBeansContainer _webBeans = WebBeansContainer.create();
 
@@ -103,34 +105,32 @@ public class ResinContainerContext implements UMOContainerContext
 
     if (key instanceof Class) {
       Class clazz = (Class) key;
-      ComponentFactory component = null;
+      Bean bean = null;
 
       if (log.isLoggable(Level.FINE))
         log.fine("Creating new instance from " + clazz);
 
-      synchronized (_componentMap) {
-        component = _componentMap.get(clazz);
+      synchronized (_beanMap) {
+        bean = _beanMap.get(clazz);
 
-        if (component == null) {
-          component = _webBeans.resolveByType(clazz);
+        if (bean == null) {
+          Set<Bean> set = _webBeans.resolveByType(clazz);
 
-          if (component == null)
-            component = _webBeans.createTransient(clazz);
+	  Iterator<Bean> iter = set.iterator();
+	  if (iter.hasNext())
+	    bean = iter.next();
 
-          _componentMap.put(clazz, component);
+          if (bean == null)
+            bean = _webBeans.createTransient(clazz);
+
+          _beanMap.put(clazz, bean);
         }
       }
 
-      return component.get();
+      return _webBeans.getInstance(bean);
     }
     else if (key instanceof String) {
-      ComponentFactory component = _webBeans.findByName((String) key);
-
-      if (component == null) {
-        throw new ObjectNotFoundException(L.l("Cannot find component with name '{0}'", key));
-      }
-
-      return component.get();
+      return _webBeans.getInstanceByName((String) key);
     }
     else {
       throw new ObjectNotFoundException(L.l("Component keys of type {0} are not understood", key.getClass().getName()));

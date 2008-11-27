@@ -307,8 +307,10 @@ public class ServletMapper {
 
     invocation.setServletName(servletName);
     
-    if (log.isLoggable(Level.FINE))
-      log.fine("invoke (uri:" + contextURI + " -> " + servletName + ")");
+    if (log.isLoggable(Level.FINE)) {
+      log.fine(_servletContext + " invoke (uri:"   
+	       + contextURI + " -> " + servletName + ")");
+    }
 
     ServletConfigImpl config = _servletManager.getServlet(servletName);
 

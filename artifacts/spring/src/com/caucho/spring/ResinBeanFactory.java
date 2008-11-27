@@ -32,6 +32,7 @@ package com.caucho.spring;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 import com.caucho.util.*;
+import javax.webbeans.manager.*;
 
 import org.springframework.beans.*;
 import org.springframework.beans.factory.*;
@@ -62,9 +63,9 @@ public class ResinBeanFactory extends DefaultListableBeanFactory
   @Override
   public boolean containsBeanDefinition(String beanName)
   {
-    ComponentImpl comp = _webBeans.findByName(beanName);
+    Bean bean = _webBeans.findByName(beanName);
 
-    return comp != null;
+    return bean != null;
   }
 
   /**
@@ -78,11 +79,6 @@ public class ResinBeanFactory extends DefaultListableBeanFactory
 
   public Object getBean(String name, Class requiredType, Object []args)
   {
-    ComponentImpl comp = _webBeans.findByName(name);
-
-    if (comp != null)
-      return comp.get();
-
-    throw new NoSuchBeanDefinitionException(name);
+    return _webBeans.getInstanceByName(name);
   }
 }

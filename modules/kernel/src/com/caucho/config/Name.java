@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,38 +19,31 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans;
+package com.caucho.config;
 
-import javax.webbeans.*;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import javax.webbeans.BindingType;
 
 /**
- * Utility class for creating @Name annotations
+ * The @Name binding is a general binding type used for Resin-configured
+ * objects like databases.
  */
-public final class Names {
-  /**
-   * Creates a new @Named annotation with the given value
-   */
-  public static Name create(String value)
-  {
-    final String name = value;
-    
-    return new Name() {
-      public Class annotationType() { return Name.class; }
 
-      public String value() { return name; }
-
-      public String toString()
-      {
-	return "@Name('" + name + "')";
-      }
-    };
-  }
+@BindingType
+@Documented  
+@Retention(RUNTIME)
+@Target({FIELD, METHOD, PARAMETER, TYPE})
+public @interface Name {
+  String value() default "";
 }

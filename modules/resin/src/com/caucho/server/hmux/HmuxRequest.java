@@ -349,6 +349,15 @@ public class HmuxRequest extends AbstractHttpRequest
   }
 
   /**
+   * Returns true if a valid HTTP request has started.
+   */
+  @Override
+  public boolean hasRequest()
+  {
+    return _hasRequest;
+  }
+
+  /**
    * Handles a new request.  Initializes the protocol handler and
    * the request streams.
    *
@@ -1592,7 +1601,7 @@ public class HmuxRequest extends AbstractHttpRequest
     os.print(value);
     
     if (log.isLoggable(Level.FINE))
-      log.fine(dbgId() + (char)code + " " + value);
+      log.fine(dbgId() + (char)code + "-w " + value);
   }
 
   void writeString(int code, CharBuffer cb)

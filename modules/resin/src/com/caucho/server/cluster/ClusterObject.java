@@ -476,6 +476,10 @@ public class ClusterObject {
 
     _isDirty = false;
 
+    // XXX: quercus
+    if (getObjectManager() == null)
+      return;
+    
     TempOutputStream tempStream = new TempOutputStream();
 
     try {

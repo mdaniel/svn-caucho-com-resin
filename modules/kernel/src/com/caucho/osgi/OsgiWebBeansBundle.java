@@ -40,7 +40,7 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.Names;
+import com.caucho.config.Names;
 import com.caucho.webbeans.manager.CurrentLiteral;
 import com.caucho.webbeans.component.SingletonBean;
 import com.caucho.webbeans.manager.WebBeansContainer;

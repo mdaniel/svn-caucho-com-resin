@@ -32,6 +32,7 @@ package com.caucho.jca.cfg;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.Names;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.*;
 import com.caucho.jca.*;

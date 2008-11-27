@@ -1787,7 +1787,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   /**
    * Returns true if the headers have been written.
    */
-  final public void setHeaderWritten(boolean isWritten)
+  public void setHeaderWritten(boolean isWritten)
   {
     _isHeaderWritten = isWritten;
   }
