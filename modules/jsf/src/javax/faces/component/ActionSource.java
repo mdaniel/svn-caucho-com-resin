@@ -28,25 +28,29 @@
 
 package javax.faces.component;
 
-import java.util.*;
-
-import javax.el.*;
-
 import javax.faces.el.*;
 import javax.faces.event.*;
 
 public interface ActionSource
 {
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public MethodBinding getAction();
   
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public void setAction(MethodBinding action);
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public MethodBinding getActionListener();
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public void setActionListener(MethodBinding action);
 
   public boolean isImmediate();

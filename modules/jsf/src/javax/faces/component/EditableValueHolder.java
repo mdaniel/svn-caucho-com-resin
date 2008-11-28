@@ -54,16 +54,24 @@ public interface EditableValueHolder extends ValueHolder
 
   public void setImmediate(boolean immediate);
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public MethodBinding getValidator();
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public void setValidator(MethodBinding validator);
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public MethodBinding getValueChangeListener();
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public void setValueChangeListener(MethodBinding binding);
 
   public void addValidator(Validator validator);

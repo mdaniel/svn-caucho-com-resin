@@ -55,7 +55,7 @@ public class UISelectOne extends UIInput
     return COMPONENT_FAMILY;
   }
 
-  public void validateValue(FacesContext context, Object value)
+  protected void validateValue(FacesContext context, Object value)
   {
     super.validateValue(context, value);
 

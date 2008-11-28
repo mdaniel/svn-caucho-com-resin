@@ -58,9 +58,7 @@ public class FacesContextFactoryImpl extends FacesContextFactory
 				       (HttpServletRequest) request,
 				       (HttpServletResponse) response);
 
-    FacesContext.setCurrentInstance(facesContext);
-
-    return facesContext;
+     return facesContext;
   }
 
   Application getApplication()

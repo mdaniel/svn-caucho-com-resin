@@ -116,7 +116,7 @@ public abstract class FacesContext {
     return context;
   }
 
-  public static void setCurrentInstance(FacesContext context)
+  protected static void setCurrentInstance(FacesContext context)
   {
     _currentInstance.set(context);
   }

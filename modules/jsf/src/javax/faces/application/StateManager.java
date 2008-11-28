@@ -42,7 +42,9 @@ public abstract class StateManager
   public static final String STATE_SAVING_METHOD_SERVER
     = "server";
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public SerializedView saveSerializedView(FacesContext context)
   {
     return null;
@@ -61,13 +63,17 @@ public abstract class StateManager
     return new Object[] { view.getStructure(), view.getState() };
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   protected Object getTreeStructureToSave(FacesContext context)
   {
     return null;
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   protected Object getComponentStateToSave(FacesContext context)
   {
     return null;
@@ -91,7 +97,9 @@ public abstract class StateManager
     }
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public void writeState(FacesContext context,
 			 SerializedView state)
     throws IOException
@@ -102,7 +110,9 @@ public abstract class StateManager
 					 String viewId,
 					 String renderKitIt);
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   protected UIViewRoot restoreTreeStructure(FacesContext context,
 					    String viewId,
 					    String renderKitId)
@@ -110,7 +120,9 @@ public abstract class StateManager
     return null;
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   protected void restoreComponentState(FacesContext context,
 				       UIViewRoot viewRoot,
 				       String renderKitId)
@@ -125,7 +137,9 @@ public abstract class StateManager
     return STATE_SAVING_METHOD_CLIENT.equals(value);
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public class SerializedView {
     private Object _state;
     private Object _structure;

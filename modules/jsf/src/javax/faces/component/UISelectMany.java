@@ -104,7 +104,7 @@ public class UISelectMany extends UIInput
   // validate
   //
 
-  public void validateValue(FacesContext context, Object value)
+  protected void validateValue(FacesContext context, Object value)
   {
     super.validateValue(context, value);
     

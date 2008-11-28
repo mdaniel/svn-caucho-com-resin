@@ -28,18 +28,20 @@
 
 package javax.faces.webapp;
 
-import java.io.*;
+import java.util.logging.Logger;
 
 import javax.el.*;
 
 import javax.faces.component.*;
 import javax.faces.context.*;
 
-import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 
 public abstract class UIComponentTagBase implements JspTag
 {
+  protected static java.util.logging.Logger log =
+    Logger.getLogger(UIComponentTagBase.class.getName());
+  
   protected abstract FacesContext getFacesContext();
   
   protected ELContext getELContext()

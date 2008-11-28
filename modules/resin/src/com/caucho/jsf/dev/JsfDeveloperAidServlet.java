@@ -531,8 +531,6 @@ public class JsfDeveloperAidServlet
     finally {
       if (context != null)
         context.release();
-
-      FacesContext.setCurrentInstance(oldContext);
     }
   }
 

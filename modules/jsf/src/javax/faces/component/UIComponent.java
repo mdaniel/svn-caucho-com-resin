@@ -49,12 +49,18 @@ public abstract class UIComponent
 
   private Map<Class<? extends SystemEvent>, ComponentSystemEventListener []> _componentEventListenerMap;
 
+  protected Map<String,ValueExpression> bindings;
+
   public abstract Map<String,Object> getAttributes();
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public abstract ValueBinding getValueBinding(String name);
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public abstract void setValueBinding(String name, ValueBinding binding);
 
   /**

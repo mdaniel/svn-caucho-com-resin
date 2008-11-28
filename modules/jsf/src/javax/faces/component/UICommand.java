@@ -179,7 +179,9 @@ public class UICommand extends UIComponentBase
     super.queueEvent(event);
   }
   
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public MethodBinding getAction()
   {
     if (_actionExpr == null)
@@ -190,7 +192,9 @@ public class UICommand extends UIComponentBase
       return new MethodBindingAdapter(_actionExpr);
   }
   
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public void setAction(MethodBinding action)
   {
     if (action != null)
@@ -199,7 +203,9 @@ public class UICommand extends UIComponentBase
       _actionExpr = null;
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public MethodBinding getActionListener()
   {
     FacesListener []listeners = getFacesListeners(FacesListener.class);
@@ -213,7 +219,9 @@ public class UICommand extends UIComponentBase
     return null;
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public void setActionListener(MethodBinding action)
   {
     if (action == null)
@@ -410,7 +418,9 @@ public class UICommand extends UIComponentBase
       return _expr.getExpressionString();
     }
   
-    @Deprecated
+    /**
+   * @deprecated
+   */
       public Object invoke(FacesContext context, Object []param)
       throws EvaluationException, javax.faces.el.MethodNotFoundException
     {
@@ -431,7 +441,9 @@ public class UICommand extends UIComponentBase
       }
     }
 
-    @Deprecated
+    /**
+   * @deprecated
+   */
       public Class getType(FacesContext context)
       throws EvaluationException, javax.faces.el.PropertyNotFoundException
     {

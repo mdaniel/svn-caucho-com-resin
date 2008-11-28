@@ -28,18 +28,11 @@
 
 package javax.faces.webapp;
 
-import java.io.*;
-import java.util.*;
-
 import javax.el.*;
 
-import javax.faces.*;
 import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.context.*;
-import javax.faces.el.*;
-import javax.faces.event.*;
-import javax.faces.render.*;
 
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
@@ -63,14 +56,12 @@ public abstract class UIComponentTag extends UIComponentClassicTagBase
 					     UIComponent.class);
   }
 
-  public boolean hasBinding()
+  protected boolean hasBinding()
   {
     return _binding != null;
   }
 
-  public void setRendered(String rendered)
-    throws JspException
-  {
+  public void setRendered(String rendered) {
     FacesContext context = FacesContext.getCurrentInstance();
 
     Application app = context.getApplication();
@@ -81,7 +72,7 @@ public abstract class UIComponentTag extends UIComponentClassicTagBase
 					     boolean.class);
   }
 
-  public boolean isSuppressed()
+  protected boolean isSuppressed()
   {
     return false;
   }

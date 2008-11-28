@@ -65,7 +65,9 @@ public abstract class ResponseStateManager
     writeState(context, view);
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public void writeState(FacesContext context,
 			 StateManager.SerializedView state)
     throws IOException
@@ -84,14 +86,18 @@ public abstract class ResponseStateManager
     };
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public Object getTreeStructureToRestore(FacesContext context,
 					  String viewId)
   {
     return null;
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public Object getComponentStateToRestore(FacesContext context)
   {
     return null;

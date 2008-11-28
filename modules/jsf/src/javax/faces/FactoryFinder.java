@@ -37,7 +37,7 @@ import javax.faces.context.*;
 import javax.faces.lifecycle.*;
 import javax.faces.render.*;
 
-public class FactoryFinder
+public final class FactoryFinder
 {
   private static final Logger log
     = Logger.getLogger(FactoryFinder.class.getName());
@@ -61,6 +61,9 @@ public class FactoryFinder
   private static final
     WeakHashMap<ClassLoader,HashMap<String,Object>> _factoryMap
     = new WeakHashMap<ClassLoader,HashMap<String,Object>>();
+
+  FactoryFinder(){
+  }
 
   public static Object getFactory(String factoryName)
   {

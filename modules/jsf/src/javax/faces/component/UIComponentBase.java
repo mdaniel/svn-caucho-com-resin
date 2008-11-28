@@ -48,7 +48,7 @@ import javax.faces.render.*;
 
 public abstract class UIComponentBase extends UIComponent
 {
-  private static final Logger log
+  protected static final Logger log
     = Logger.getLogger(UIComponentBase.class.getName());
   
   private static final UIComponent []NULL_FACETS_AND_CHILDREN
@@ -88,7 +88,7 @@ public abstract class UIComponentBase extends UIComponent
 
   private AttributeMap _attributeMap;
   
-  protected Map<String,ValueExpression> _bindings;
+
   
   private FacesListener []_facesListeners
     = NULL_FACES_LISTENERS;
@@ -101,7 +101,9 @@ public abstract class UIComponentBase extends UIComponent
     return _attributeMap;
   }
   
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public ValueBinding getValueBinding(String name)
   {
     ValueExpression expr = getValueExpression(name);
@@ -114,7 +116,9 @@ public abstract class UIComponentBase extends UIComponent
       return new ValueBindingAdapter(expr);
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public void setValueBinding(String name, ValueBinding binding)
   {
     setValueExpression(name, new ValueExpressionAdapter(binding));
@@ -138,8 +142,8 @@ public abstract class UIComponentBase extends UIComponent
     else if ("binding".equals(name))
       return _bindingExpr;
     
-    if (_bindings != null)
-      return _bindings.get(name);
+    if (bindings != null)
+      return bindings.get(name);
     else
       return null;
   }
@@ -184,14 +188,14 @@ public abstract class UIComponentBase extends UIComponent
 	  getAttributes().put(name, expr.getValue(null));
 	}
 	else {
-	  if (_bindings == null)
-	    _bindings = new HashMap<String,ValueExpression>();
+	  if (bindings == null)
+	    bindings = new HashMap<String,ValueExpression>();
 	  
-	  _bindings.put(name, expr);
+	  bindings.put(name, expr);
 	}
       }
-      else if (_bindings != null)
-	_bindings.remove(name);
+      else if (bindings != null)
+	bindings.remove(name);
     } catch (ELException e) {
       throw new FacesException(e);
     }
@@ -235,11 +239,6 @@ public abstract class UIComponentBase extends UIComponent
       _clientId = myId;
 
     return _clientId;
-  }
-
-  public String getFamily()
-  {
-    return null;
   }
 
   public String getId()
@@ -871,17 +870,17 @@ public abstract class UIComponentBase extends UIComponent
   }
 
   private Object []saveBindings(FacesContext context) {
-    if (_bindings == null)
+    if (bindings == null)
       return null;
 
-    Set<String> keys = _bindings.keySet();
+    Set<String> keys = bindings.keySet();
     Object [] result = new Object [keys.size() * 2];
 
     int index = 0;
     for (String key : keys) {
       result [index++] = key;
 
-      ValueExpression valueExpression = _bindings.get(key);
+      ValueExpression valueExpression = bindings.get(key);
 
       result [index++] = saveAttachedState(context, valueExpression);
     }
@@ -894,7 +893,7 @@ public abstract class UIComponentBase extends UIComponent
 
     if (state.length == 0) return;
 
-    _bindings = new HashMap<String, ValueExpression>();
+    bindings = new HashMap<String, ValueExpression>();
 
 
     for (int i = 0; i < state.length / 2; i++) {
@@ -905,7 +904,7 @@ public abstract class UIComponentBase extends UIComponent
       ValueExpression valueExpression 
         = (ValueExpression) restoreAttachedState(context, state [index + 1]);
 
-      _bindings.put(key, valueExpression);
+      bindings.put(key, valueExpression);
     }
   }
 
@@ -945,8 +944,8 @@ public abstract class UIComponentBase extends UIComponent
     if (savedBindings != null)
       restoreBindings(context, savedBindings);
 
-    if (_bindings != null) {
-      for (Map.Entry<String,ValueExpression> entry : _bindings.entrySet()) {
+    if (bindings != null) {
+      for (Map.Entry<String,ValueExpression> entry : bindings.entrySet()) {
 	setValueExpression(entry.getKey(), entry.getValue());
       }
     }

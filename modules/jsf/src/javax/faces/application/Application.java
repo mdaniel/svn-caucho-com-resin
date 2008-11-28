@@ -62,10 +62,14 @@ public abstract class Application
 
   public abstract void setNavigationHandler(NavigationHandler handler);
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public abstract PropertyResolver getPropertyResolver();
 
-  @Deprecated
+ /**
+  * @deprecated
+  */
   public abstract void setPropertyResolver(PropertyResolver resolver);
 
   /**
@@ -76,10 +80,14 @@ public abstract class Application
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public abstract VariableResolver getVariableResolver();
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public abstract void setVariableResolver(VariableResolver resolver);
 
   /**
@@ -112,10 +120,12 @@ public abstract class Application
   public abstract UIComponent createComponent(String componentType)
     throws FacesException;
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public abstract UIComponent createComponent(ValueBinding componentBinding,
-					      FacesContext context,
-					      String componentType)
+                                              FacesContext context,
+                                              String componentType)
     throws FacesException;
 
   /**
@@ -163,7 +173,9 @@ public abstract class Application
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public abstract MethodBinding createMethodBinding(String ref,
 						    Class []param)
     throws ReferenceSyntaxException;
@@ -203,7 +215,9 @@ public abstract class Application
 
   public abstract Iterator<String> getValidatorIds();
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public abstract ValueBinding createValueBinding(String ref)
     throws ReferenceSyntaxException;
 

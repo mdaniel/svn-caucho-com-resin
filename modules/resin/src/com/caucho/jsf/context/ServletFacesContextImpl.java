@@ -89,6 +89,8 @@ public class ServletFacesContextImpl extends FacesContext
     _webApp = webApp;
     _request = request;
     _response = response;
+
+    setCurrentInstance(this);
   }
   
   public Application getApplication()

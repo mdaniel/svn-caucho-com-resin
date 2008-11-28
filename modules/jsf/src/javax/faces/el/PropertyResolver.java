@@ -28,9 +28,9 @@
 
 package javax.faces.el;
 
-import javax.faces.context.*;
-
-@Deprecated
+/**
+ * @deprecated
+ */
 public abstract class PropertyResolver
 {
   public abstract Object getValue(Object base,

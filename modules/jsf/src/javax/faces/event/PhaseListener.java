@@ -29,8 +29,9 @@
 package javax.faces.event;
 
 import java.util.*;
+import java.io.Serializable;
 
-public interface PhaseListener extends EventListener
+public interface PhaseListener extends EventListener, Serializable
 {
   public void afterPhase(PhaseEvent event);
   

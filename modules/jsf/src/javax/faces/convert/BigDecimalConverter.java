@@ -36,8 +36,8 @@ public class BigDecimalConverter implements Converter
 {
   public static final String CONVERTER_ID
     = "javax.faces.BigDecimal";
-  public static final String BIGDECIMAL_ID
-    = "javax.faces.converter.BigDecimalConverter.BIGDECIMAL";
+  public static final String DECIMAL_ID
+    = "javax.faces.converter.BigDecimalConverter.DECIMAL";
   public static final String STRING_ID
     = "javax.faces.converter.STRING";
   
@@ -58,13 +58,13 @@ public class BigDecimalConverter implements Converter
     try {
       return new java.math.BigDecimal(value.toString());
     } catch (NumberFormatException e) {
-      String summary = Util.l10n(context, BIGDECIMAL_ID,
+      String summary = Util.l10n(context, DECIMAL_ID,
 				"{2}: \"{0}\" must be a number.",
 				 value,
 				 getExample(),
 				 Util.getLabel(context, component));
       
-      String detail = Util.l10n(context, BIGDECIMAL_ID + "_detail",
+      String detail = Util.l10n(context, DECIMAL_ID + "_detail",
 				"{2}: \"{0}\" must be a number.  Example: {1}.",
 				value,
 				getExample(),

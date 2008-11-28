@@ -37,7 +37,9 @@ public abstract class StateManagerWrapper extends StateManager
 {
   abstract protected StateManager getWrapped();
   
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public SerializedView saveSerializedView(FacesContext context)
   {
     return getWrapped().saveSerializedView(context);
@@ -51,13 +53,17 @@ public abstract class StateManagerWrapper extends StateManager
     return getWrapped().saveView(context);
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   protected Object getTreeStructureToSave(FacesContext context)
   {
     return getWrapped().getTreeStructureToSave(context);
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   protected Object getComponentStateToSave(FacesContext context)
   {
     return getWrapped().getComponentStateToSave(context);
@@ -73,7 +79,9 @@ public abstract class StateManagerWrapper extends StateManager
     getWrapped().writeState(context, state);
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public void writeState(FacesContext context,
 			 SerializedView state)
     throws IOException
@@ -88,7 +96,9 @@ public abstract class StateManagerWrapper extends StateManager
     return getWrapped().restoreView(context, viewId, renderKitId);
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   protected UIViewRoot restoreTreeStructure(FacesContext context,
 					    String viewId,
 					    String renderKitId)
@@ -96,7 +106,9 @@ public abstract class StateManagerWrapper extends StateManager
     return getWrapped().restoreTreeStructure(context, viewId, renderKitId);
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   protected void restoreComponentState(FacesContext context,
 				       UIViewRoot viewRoot,
 				       String renderKitId)

@@ -23,27 +23,21 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
-package javax.faces.el;
+package javax.faces.webapp;
 
-import javax.faces.context.*;
+import javax.servlet.jsp.tagext.TagSupport;
 
-/**
- * @deprecated
- */
-public abstract class MethodBinding
+public class AttributeTag
+  extends TagSupport
 {
-  public abstract Object invoke(FacesContext context,
-				Object []params)
-    throws EvaluationException, MethodNotFoundException;
-
-  public abstract Class getType(FacesContext context)
-    throws MethodNotFoundException;
-
-  public String getExpressionString()
+  public void setName(String name)
   {
-    return null;
+  }
+
+  public void setValue(String value)
+  {
   }
 }

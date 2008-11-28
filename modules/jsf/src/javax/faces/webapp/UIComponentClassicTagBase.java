@@ -31,6 +31,7 @@ package javax.faces.webapp;
 import java.io.*;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 import javax.faces.application.*;
 import javax.faces.component.*;
@@ -45,7 +46,11 @@ public abstract class UIComponentClassicTagBase
   extends UIComponentTagBase
   implements JspIdConsumer, BodyTag
 {
-  protected static final String UNIQUE_ID_PREFIX = "_id_";
+  protected static final String UNIQUE_ID_PREFIX = "j_id_";
+  
+  protected static Logger log
+    = Logger.getLogger(UIComponentClassicTagBase.class.getName());
+
 
   private String _id;
   private String _jspId;
@@ -61,8 +66,9 @@ public abstract class UIComponentClassicTagBase
 
   private UIComponent _component;
   private boolean _created;
+
   
-  protected UIComponentClassicTagBase()
+  public UIComponentClassicTagBase()
   {
     _facesContext = FacesContext.getCurrentInstance();
   }
@@ -124,7 +130,13 @@ public abstract class UIComponentClassicTagBase
     _id = id;
   }
 
-  public String getId()
+  protected String getFacesJspId(){
+    if (true) throw new UnsupportedOperationException("unimplemented");
+
+    return null;
+  }
+
+  protected String getId()
   {
     return _id;
   }
@@ -432,7 +444,7 @@ public abstract class UIComponentClassicTagBase
     }
   }
 
-  public List<String> getCreatedComponents()
+  protected List<String> getCreatedComponents()
   {
     throw new UnsupportedOperationException();
   }
@@ -442,12 +454,16 @@ public abstract class UIComponentClassicTagBase
     return _facesContext;
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   protected void setupResponseWriter()
   {
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   protected void encodeBegin()
     throws IOException
   {
@@ -458,7 +474,9 @@ public abstract class UIComponentClassicTagBase
       component.encodeBegin(context);
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   protected void encodeChildren()
     throws IOException
   {
@@ -469,7 +487,9 @@ public abstract class UIComponentClassicTagBase
       component.encodeChildren(context);
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   protected void encodeEnd()
     throws IOException
   {

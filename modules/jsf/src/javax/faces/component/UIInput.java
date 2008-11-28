@@ -324,7 +324,9 @@ public class UIInput extends UIOutput
     _isValid = valid;
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public MethodBinding getValueChangeListener()
   {
     FacesListener []listeners = getFacesListeners(FacesListener.class);
@@ -340,7 +342,9 @@ public class UIInput extends UIOutput
     return null;
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public void setValueChangeListener(MethodBinding binding)
   {
     ValueChangeListener listener
@@ -384,7 +388,9 @@ public class UIInput extends UIOutput
     return _validators;
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public MethodBinding getValidator()
   {
     int length = _validators.length;
@@ -401,7 +407,9 @@ public class UIInput extends UIOutput
     return null;
   }
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public void setValidator(MethodBinding binding)
   {
     ValidatorAdapter adapter = new ValidatorAdapter(binding);
@@ -648,7 +656,7 @@ public class UIInput extends UIOutput
       return ! oldValue.equals(newValue);
   }
 
-  public void validateValue(FacesContext context, Object value)
+  protected void validateValue(FacesContext context, Object value)
   {
     if (! isValid()) {
     }

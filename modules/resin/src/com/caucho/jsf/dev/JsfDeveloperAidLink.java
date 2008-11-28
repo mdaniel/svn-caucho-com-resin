@@ -38,6 +38,10 @@ public class JsfDeveloperAidLink
 {
   private String _style;
 
+  public String getFamily() {
+    return null;
+  }
+
   public void setStyle(String style)
   {
     _style = style;

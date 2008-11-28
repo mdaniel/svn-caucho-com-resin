@@ -30,26 +30,37 @@ package javax.faces.el;
 
 import javax.faces.context.*;
 
-@Deprecated
-public abstract class ValueBinding
-{
-  @Deprecated
+/**
+ * @deprecated
+ */
+public abstract class ValueBinding {
+  /**
+   * @deprecated
+   */
   public abstract Object getValue(FacesContext context)
     throws EvaluationException, PropertyNotFoundException;
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public abstract void setValue(FacesContext context, Object value)
     throws EvaluationException, PropertyNotFoundException;
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public abstract boolean isReadOnly(FacesContext context)
     throws EvaluationException, PropertyNotFoundException;
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public abstract Class getType(FacesContext context)
     throws EvaluationException, PropertyNotFoundException;
 
-  @Deprecated
+  /**
+   * @deprecated
+   */
   public String getExpressionString()
   {
     return null;

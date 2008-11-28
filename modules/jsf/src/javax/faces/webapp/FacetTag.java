@@ -28,20 +28,8 @@
 
 package javax.faces.webapp;
 
-import java.io.*;
-import java.util.*;
-
-import javax.el.*;
-
-import javax.faces.*;
-import javax.faces.component.*;
-import javax.faces.context.*;
-import javax.faces.el.*;
-import javax.faces.event.*;
-import javax.faces.render.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.TagSupport;
 
 public class FacetTag extends TagSupport
 {
@@ -58,6 +46,7 @@ public class FacetTag extends TagSupport
   }
 
   public int doStartTag()
+    throws JspException
   {
     return EVAL_BODY_INCLUDE;
   }

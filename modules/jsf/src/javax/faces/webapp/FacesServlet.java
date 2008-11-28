@@ -51,8 +51,6 @@ public final class FacesServlet implements Servlet
   public static final String LIFECYCLE_ID_ATTR
     = "javax.faces.LIFECYCLE_ID";
 
-  private static boolean _isInitialized = false;
-
   private ServletConfig _config;
   private ServletContext _webApp;
 
@@ -79,7 +77,7 @@ public final class FacesServlet implements Servlet
     _config = config;
     _webApp = config.getServletContext();
 
-    if (!_isInitialized) {
+    if (_webApp.getAttribute("com.caucho.jsf.webapp.initialized") == null) {
       try {
         Class cl = Class.forName("com.caucho.jsf.webapp.FacesServletImpl");
 
@@ -89,7 +87,8 @@ public final class FacesServlet implements Servlet
 
         init.invoke(servlet, config);
 
-        _isInitialized = true;
+        _webApp.setAttribute("com.caucho.jsf.webapp.initialized",
+                             java.lang.Boolean.TRUE);
       }
       catch (ClassNotFoundException e) {
         log.log(Level.FINER, e.toString(), e);
@@ -144,8 +143,6 @@ public final class FacesServlet implements Servlet
       return;
     }    
 
-    FacesContext oldContext = FacesContext.getCurrentInstance();
-
     FacesContext context = null;
     
     try {
@@ -178,8 +175,6 @@ public final class FacesServlet implements Servlet
     } finally {
       if (context != null)
 	context.release();
-      
-      FacesContext.setCurrentInstance(oldContext);
     }
   }
 
