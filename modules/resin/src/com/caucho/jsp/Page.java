@@ -31,6 +31,7 @@ package com.caucho.jsp;
 
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.Environment;
+import com.caucho.make.DependencyContainer;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.ToCharResponseAdapter;
 import com.caucho.server.webapp.WebApp;
@@ -66,13 +67,13 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
 
   private ServletConfig _config;
   private WebApp _webApp;
-  
-  private ArrayList<PersistentDependency> _depends;
+
+  private DependencyContainer _depends = new DependencyContainer();
+  private ArrayList<PersistentDependency> _dependList;
   private ArrayList<Depend> _cacheDepends;
+  
   private String _media;
   protected String _contentType;
-  protected boolean _alwaysModified;
-  protected boolean _neverModified;
 
   private PageManager.Entry _entry;
   private long _lastModified;
@@ -80,8 +81,6 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   private String _etag;
   private QDate _calendar;
   
-  private long _updateInterval = Environment.getDependencyCheckInterval();
-  private long _lastUpdateCheck;
   private JspManager _jspManager;
 
   private boolean _isRecompiling = false;
@@ -106,7 +105,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
 
   void _caucho_setUpdateInterval(long updateInterval)
   {
-    _updateInterval = updateInterval;
+    _depends.setCheckInterval(updateInterval);
   }
 
   void _caucho_setJspManager(JspManager manager)
@@ -147,8 +146,9 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
    */
   protected void _caucho_setAlwaysModified()
   {
-    if (_cacheDepends == null)
-      _alwaysModified = true;
+    if (_cacheDepends == null) {
+      _depends.setModified(true);
+    }
   }
 
   /**
@@ -157,7 +157,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
    */
   protected void _caucho_setModified()
   {
-    _alwaysModified = true;
+    _depends.setModified(true);
   }
 
   /**
@@ -166,7 +166,8 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
    */
   protected void _caucho_setNeverModified(boolean modified)
   {
-    _neverModified = modified;
+    _depends.setCheckInterval(-1);
+    _depends.setModified(false);
   }
 
   /**
@@ -190,11 +191,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
    */
   protected void _caucho_addDepend(PersistentDependency depend)
   {
-    if (_depends == null)
-      _depends = new ArrayList<PersistentDependency>();
-
-    if (! _depends.contains(depend))
-      _depends.add(depend);
+    _depends.add(depend);
   }
 
   /**
@@ -221,9 +218,6 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
                                    long lastModified,
                                    long length)
   {
-    if (_depends == null)
-      _depends = new ArrayList<PersistentDependency>();
-
     Depend depend = new Depend(path, lastModified, length);
     depend.setRequireSource(getRequireSource());
 
@@ -235,8 +229,6 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
    */
   protected void _caucho_setCacheable()
   {
-    _cacheDepends = new ArrayList<Depend>();
-    _alwaysModified = false;
   }
 
 
@@ -286,20 +278,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
    */
   public boolean _caucho_isModified()
   {
-    if (_alwaysModified || _isDead)
-      return true;
-    
-    if (_depends == null)
-      return false;
-
-    for (int i = 0; i < _depends.size(); i++) {
-      Dependency depend = _depends.get(i);
-
-      if (depend.isModified())
-	return true;
-    }
-
-    return false;
+    return _isDead || _depends.isModified();
   }
 
   /***
@@ -307,49 +286,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
    */
   public boolean cauchoIsModified()
   {
-    long now = Alarm.getCurrentTime();
-
-    if (_alwaysModified || _isDead)
-      return true;
-    else if (now < _lastUpdateCheck + _updateInterval)
-      return false;
-
-    /* XXX: this check is redundant, because the invocation has already
-     * checked it.
-    ClassLoader classLoader = getClass().getClassLoader();
-
-    if (classLoader instanceof DynamicClassLoader) {
-      DynamicClassLoader dynLoader;
-      dynLoader = (DynamicClassLoader) getClass().getClassLoader();
-
-      if (dynLoader.isModified())
-        return true;
-    }
-    */
-      
-    if (_neverModified) {
-      _lastUpdateCheck = now;
-
-      if (_depends == null)
-	return false;
-
-      for (int i = 0; i < _depends.size(); i++) {
-	Dependency depend = _depends.get(i);
-	if (depend.isModified()) {
-	  return true;
-	}
-      }
-      
-      return false;
-    }
-    else {
-      boolean isModified = _caucho_isModified();
-
-      if (! isModified)
-        _lastUpdateCheck = now;
-      
-      return isModified;
-    }
+    return (_isDead || _depends.isModified());
   }
 
   protected HashMap<String,Method> _caucho_getFunctionMap()
@@ -482,12 +419,16 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
    */
   public long _caucho_lastModified()
   {
+    return 0;
+    
+    /*
     if (_cacheDepends == null) {
       return 0;
     }
     else {
       return calculateLastModified(_depends, _cacheDepends);
     }
+    */
   }
 
   /**

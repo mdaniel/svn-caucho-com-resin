@@ -29,6 +29,8 @@
 
 package com.caucho.security;
 
+import com.caucho.server.port.ServerRequest;
+import com.caucho.server.port.TcpConnection;
 import com.caucho.util.L10N;
 
 import java.security.*;
@@ -38,14 +40,9 @@ import java.util.logging.Logger;
  * Defines a proxy for the current security context.
  */
 public class SecurityContext {
-  static final Logger log = Logger.getLogger(SecurityContext.class.getName());
-  static final L10N L = new L10N(SecurityContext.class);
-
-  /**
-   * Mapping from threads to providers.
-   */
-  private static ThreadLocal<SecurityContextProvider> _providers
-    = new ThreadLocal<SecurityContextProvider>();
+  private static final Logger log
+    = Logger.getLogger(SecurityContext.class.getName());
+  private static final L10N L = new L10N(SecurityContext.class);
 
   /**
    * The context cannot be instantiated.
@@ -171,20 +168,11 @@ public class SecurityContext {
    */
   public static SecurityContextProvider getProvider()
   {
-    return _providers.get();
-  }
+    ServerRequest request = TcpConnection.getCurrentRequest();
 
-  /**
-   * Sets the provider for the current thread.
-   *
-   * @param provider the new provider
-   */
-  public static SecurityContextProvider setProvider(SecurityContextProvider provider)
-  {
-    SecurityContextProvider oldProvider = _providers.get();
-    
-    _providers.set(provider);
-
-    return oldProvider;
+    if (request instanceof SecurityContextProvider)
+      return (SecurityContextProvider) request;
+    else
+      return null;
   }
 }

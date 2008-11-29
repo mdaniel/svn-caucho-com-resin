@@ -180,14 +180,14 @@ public abstract class AbstractHttpRequest
   private boolean _hasReader;
   private boolean _hasInputStream;
 
-  private SecurityContextProvider _oldProvider;
-
   // HttpServletRequest stuff
   private final Form _formParser = new Form();
-  private final HashMapImpl<String,String[]> _form = new HashMapImpl<String,String[]>();
+  private final HashMapImpl<String,String[]> _form
+    = new HashMapImpl<String,String[]>();
   private HashMapImpl<String,String[]> _filledForm;
   
-  private final HashMapImpl<String,Object> _attributes = new HashMapImpl<String,Object>();
+  private final HashMapImpl<String,Object> _attributes
+    = new HashMapImpl<String,Object>();
 
   private ArrayList<Locale> _locales = new ArrayList<Locale>();
 
@@ -2677,8 +2677,6 @@ public abstract class AbstractHttpRequest
   protected void startInvocation()
     throws IOException
   {
-    _oldProvider = SecurityContext.setProvider(this);
-    
     if (_tcpConn != null)
       _tcpConn.beginActive();
     else
@@ -2690,11 +2688,6 @@ public abstract class AbstractHttpRequest
    */
   public void finishInvocation()
   {
-    SecurityContextProvider oldProvider = _oldProvider;
-    _oldProvider = null;
-    
-    SecurityContext.setProvider(oldProvider);
-    
     try {
       _response.finishInvocation();
     } catch (IOException e) {

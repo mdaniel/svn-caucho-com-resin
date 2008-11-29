@@ -13,6 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>server: ThreadLocal removal/cleanup</li>
 <li>admin: change profile default to 10ms</li>
 <li>http: 304 should not return content-length (#3089, rep by Andrew Phillips)</li>
 <li>admin: changed log-service default logging level to WARNING (rep by Bryant Harris)</li>

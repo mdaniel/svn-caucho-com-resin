@@ -35,6 +35,7 @@ import com.caucho.util.Log;
 import com.caucho.vfs.Dependency;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 /**
@@ -47,7 +48,7 @@ public class DependencyContainer implements Dependency
   private ArrayList<Dependency> _dependencyList = new ArrayList<Dependency>();
 
   // Marks if the last check returned modified
-  private boolean _isModified;
+  private volatile boolean _isModified;
   // Marks if the modification has been logged
   private boolean _isModifiedLog;
 
@@ -55,9 +56,9 @@ public class DependencyContainer implements Dependency
   private long _checkInterval = 2000L;
 
   // When the dependency check last occurred
-  private long _lastCheckTime = 0;
+  private volatile long _checkExpiresTime = 0;
 
-  private volatile boolean _isChecking;
+  private final AtomicBoolean _isChecking = new AtomicBoolean();
 
   public DependencyContainer()
   {
@@ -121,7 +122,7 @@ public class DependencyContainer implements Dependency
     else
       _checkInterval = checkInterval;
 
-    _lastCheckTime = 0;
+    _checkExpiresTime = 0;
   }
 
   /**
@@ -139,7 +140,11 @@ public class DependencyContainer implements Dependency
   public void setModified(boolean isModified)
   {
     _isModified = isModified;
-    _lastCheckTime = 0;
+
+    if (_isModified)
+      _checkExpiresTime = Long.MAX_VALUE / 2;
+    else
+      _checkExpiresTime = Alarm.getCurrentTime() + _checkInterval;
     
     if (! isModified)
       _isModifiedLog = false;
@@ -150,7 +155,7 @@ public class DependencyContainer implements Dependency
    */
   public void resetDependencyCheckInterval()
   {
-    _lastCheckTime = 0;
+    _checkExpiresTime = 0;
   }
 
   /**
@@ -158,9 +163,7 @@ public class DependencyContainer implements Dependency
    */
   public void clearModified()
   {
-    _isModified = false;
-    _lastCheckTime = Alarm.getCurrentTime();
-    _isModifiedLog = false;
+    setModified(false);
   }
 
   /**
@@ -168,38 +171,30 @@ public class DependencyContainer implements Dependency
    */
   public boolean isModified()
   {
-    synchronized (this) {
-      if (_isChecking || _isModified) {
-	return _isModified;
-      }
+    long now = Alarm.getCurrentTime();
 
-      _isChecking = true;
-    }
+    if (now < _checkExpiresTime)
+      return _isModified;
+    
+    if (_isChecking.getAndSet(true))
+      return _isModified;
 
     try {
-      long now = Alarm.getCurrentTime();
-
-      if (now < _lastCheckTime + _checkInterval) {
-	return _isModified;
-      }
-
-      _lastCheckTime = now;
+      _checkExpiresTime = now + _checkInterval;
 
       for (int i = _dependencyList.size() - 1; i >= 0; i--) {
 	Dependency dependency = _dependencyList.get(i);
 
 	if (dependency.isModified()) {
-	  _isModified = true;
+	  setModified(true);
         
 	  return _isModified;
 	}
       }
-
-      // _isModified = false;
       
       return _isModified;
     } finally {
-      _isChecking = false;
+      _isChecking.set(false);
     }
   }
 
@@ -228,7 +223,7 @@ public class DependencyContainer implements Dependency
    */
   public boolean isModifiedNow()
   {
-    _lastCheckTime = 0;
+    _checkExpiresTime = 0;
 
     return isModified();
   }

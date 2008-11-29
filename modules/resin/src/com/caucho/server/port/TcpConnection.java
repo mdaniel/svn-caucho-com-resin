@@ -44,6 +44,7 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,7 +60,10 @@ public class TcpConnection extends Connection
   private static final Logger log
     = Logger.getLogger(TcpConnection.class.getName());
   
-  private static int _connectionCount;
+  private static final ThreadLocal<ServerRequest> _currentRequest
+    = new ThreadLocal<ServerRequest>();
+
+  private static final AtomicInteger _connectionCount = new AtomicInteger();
 
   private int _connectionId;  // The connection's id
   private final String _id;
@@ -78,7 +82,6 @@ public class TcpConnection extends Connection
   private boolean _isSecure; // port security overrisde
   
   private final Admin _admin = new Admin();
-  private final Object _requestLock = new Object();
 
   private ConnectionState _state = ConnectionState.IDLE;
   private ConnectionController _controller;
@@ -114,9 +117,7 @@ public class TcpConnection extends Connection
    */
   TcpConnection(Port port, QSocket socket)
   {
-    synchronized (TcpConnection.class) {
-      _connectionId = _connectionCount++;
-    }
+    _connectionId = _connectionCount.incrementAndGet();
     
     _port = port;
     _socket = socket;
@@ -144,12 +145,26 @@ public class TcpConnection extends Connection
     }
   }
 
+  /**
+   * Returns the ServerRequest for the current thread.
+   */
+  public static ServerRequest getCurrentRequest()
+  {
+    return _currentRequest.get();
+  }
+
+  /**
+   * Sets an exception to mark the location of the thread start.
+   */
   public void setStartThread()
   {
     _startThread = new Exception();
     _startThread.fillInStackTrace();
   }
 
+  /**
+   * Returns an exception marking the location of the thread start
+   */
   public Exception getStartThread()
   {
     return _startThread;
@@ -558,6 +573,8 @@ public class TcpConnection extends Connection
      // clear the interrupted flag
      Thread.interrupted();
 
+     _currentRequest.set(_request);
+
      boolean isStatKeepalive = _state.isKeepalive();
      boolean isKeepalive;
      do {
@@ -572,11 +589,9 @@ public class TcpConnection extends Connection
        result = RequestState.EXIT;
 
        _isWake = false;
-       
-       synchronized (_requestLock) {
-	 if (! getRequest().handleRequest())
-	   _isKeepalive = false;
-       }
+
+       if (! getRequest().handleRequest())
+	 _isKeepalive = false;
 
        // statistics
        if (_requestStartTime > 0) {
@@ -637,6 +652,8 @@ public class TcpConnection extends Connection
       }
     } finally {
       thread.setContextClassLoader(systemLoader);
+
+      _currentRequest.set(null);
 
       if (! isValid)
         destroy();

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -27,6 +28,9 @@
  */
 
 package com.caucho.util;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 /**
  * FreeList provides a simple class to manage free objects.  This is useful
@@ -36,8 +40,8 @@ package com.caucho.util;
  * do nothing.
  */
 public final class FreeList<T> {
-  private T _freeStack[];
-  private int _top;
+  private final AtomicReferenceArray<T> _freeStack;
+  private final AtomicInteger _top = new AtomicInteger();
 
   /**
    * Create a new free list.
@@ -46,8 +50,9 @@ public final class FreeList<T> {
    */
   public FreeList(int size)
   {
-    _freeStack = (T []) new Object[size];
+    _freeStack = new AtomicReferenceArray(size);
   }
+  
   /**
    * Try to get an object from the free list.  Returns null if the free list
    * is empty.
@@ -56,13 +61,14 @@ public final class FreeList<T> {
    */
   public T allocate()
   {
-    synchronized (_freeStack) {
-      if (_top > 0)
-        return _freeStack[--_top];
-      else
-        return null;
-    }
+    int top = _top.get();
+
+    if (top > 0 && _top.compareAndSet(top, top - 1))
+      return _freeStack.getAndSet(top - 1, null);
+    else
+      return null;
   }
+  
   /**
    * Frees the object.  If the free list is full, the object will be garbage
    * collected.
@@ -71,19 +77,22 @@ public final class FreeList<T> {
    */
   public boolean free(T obj)
   {
-    synchronized (_freeStack) {
-      if (_top < _freeStack.length) {
-        _freeStack[_top++] = obj;
-        return true;
-      }
-      else
-        return false;
+    int top = _top.get();
+
+    if (top < _freeStack.length()) {
+      boolean isFree = _freeStack.compareAndSet(top, null, obj);
+      
+      _top.compareAndSet(top, top + 1);
+
+      return isFree;
     }
+    else
+      return false;
   }
 
   public boolean allowFree(T obj)
   {
-    return _top < _freeStack.length;
+    return _top.get() < _freeStack.length();
   }
 
   /**
@@ -105,13 +114,11 @@ public final class FreeList<T> {
    */
   public boolean checkDuplicate(T obj)
   {
-    synchronized (_freeStack) {
-      int top = _top;
+    int top = _top.get();
 
-      for (int i = _top - 1; i >= 0; i--) {
-        if (_freeStack[i] == obj)
-          return true;
-      }
+    for (int i = top - 1; i >= 0; i--) {
+      if (_freeStack.get(i) == obj)
+	return true;
     }
 
     return false;

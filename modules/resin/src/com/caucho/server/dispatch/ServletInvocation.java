@@ -29,6 +29,9 @@
 
 package com.caucho.server.dispatch;
 
+import com.caucho.server.port.TcpConnection;
+import com.caucho.server.port.ServerRequest;
+  
 import com.caucho.servlet.comet.CometFilterChain;
 import com.caucho.util.L10N;
 
@@ -51,9 +54,6 @@ public class ServletInvocation {
   static final L10N L = new L10N(ServletInvocation.class);
 
   private final boolean _isFiner;
-
-  private static final ThreadLocal<ServletRequest> _requestThreadLocal
-    = new ThreadLocal<ServletRequest>();
 
   private ClassLoader _classLoader;
   
@@ -239,7 +239,12 @@ public class ServletInvocation {
    */
   public static ServletRequest getContextRequest()
   {
-    return _requestThreadLocal.get();
+    ServerRequest req = TcpConnection.getCurrentRequest();
+
+    if (req instanceof ServletRequest)
+      return (ServletRequest) req;
+    else
+      return null;
   }
 
   /**
@@ -253,19 +258,10 @@ public class ServletInvocation {
   {
     _requestCount.incrementAndGet();
 
-    ThreadLocal<ServletRequest> requestThreadLocal = _requestThreadLocal;
-    ServletRequest oldRequest = requestThreadLocal.get();
-
-    try {
-      requestThreadLocal.set(request);
-
-      if (_isFiner)
-	log.finer("Dispatch '" + _contextUri + "' to " + _filterChain);
+    if (_isFiner)
+      log.finer("Dispatch '" + _contextUri + "' to " + _filterChain);
       
-      _filterChain.doFilter(request, response);
-    } finally {
-      requestThreadLocal.set(oldRequest);
-    }
+    _filterChain.doFilter(request, response);
   }
 
   /**

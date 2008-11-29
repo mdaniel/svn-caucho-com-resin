@@ -55,10 +55,17 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Represents a protocol connection.
@@ -103,8 +110,8 @@ public class Port
 
   private InetAddress _socketAddress;
 
-  private int _acceptThreadMin = DEFAULT;
-  private int _acceptThreadMax = DEFAULT;
+  private int _idleThreadMin = DEFAULT;
+  private int _idleThreadMax = DEFAULT;
 
   private int _acceptListenBacklog = DEFAULT;
 
@@ -120,6 +127,7 @@ public class Port
   // default timeout
   private long _socketTimeout = DEFAULT;
 
+  private long _suspendReaperTimeout = 60000L;
   private long _suspendTimeMax = DEFAULT;
 
   private boolean _tcpNoDelay = true;
@@ -138,25 +146,26 @@ public class Port
   // the selection manager
   private AbstractSelectManager _selectManager;
 
-  // active list of all connections
-  private ArrayList<TcpConnection> _activeList
-    = new ArrayList<TcpConnection>();
+  // active set of all connections
+  private Set<TcpConnection> _activeConnectionSet
+    = Collections.synchronizedSet(new HashSet<TcpConnection>());
 
-  // server push (comet) suspend list
-  private ArrayList<TcpConnection> _suspendList
-    = new ArrayList<TcpConnection>();
+  // server push (comet) suspend set
+  private Set<TcpConnection> _suspendConnectionSet
+    = Collections.synchronizedSet(new HashSet<TcpConnection>());
 
+  private final AtomicInteger _idleThreadCount = new AtomicInteger();
+  private final AtomicInteger _startThreadCount = new AtomicInteger();
+
+  // semaphore to request a new start thread
+  private final Semaphore _startThreadSemaphore = new Semaphore(0);
+
+  // reaper alarm for timed out comet requests
   private Alarm _suspendAlarm;
 
   // statistics
 
   private final AtomicInteger _threadCount = new AtomicInteger();
-  private final Object _threadCountLock = new Object();
-
-  private volatile int _idleThreadCount;
-  private final AtomicInteger _startThreadCount = new AtomicInteger();
-
-  private volatile int _connectionCount;
 
   private volatile long _lifetimeRequestCount;
   private volatile long _lifetimeKeepaliveCount;
@@ -172,8 +181,8 @@ public class Port
   private final Object _keepaliveCountLock = new Object();
 
   // True if the port has been bound
-  private volatile boolean _isBind;
-  private volatile boolean _isPostBind;
+  private final AtomicBoolean _isBind = new AtomicBoolean();
+  private final AtomicBoolean _isPostBind = new AtomicBoolean();
 
   // The port lifecycle
   private final Lifecycle _lifecycle = new Lifecycle();
@@ -207,11 +216,11 @@ public class Port
     if (protocolServer instanceof Server) {
       Server server = (Server) protocolServer;
 
-      if (_acceptThreadMax == DEFAULT)
-	_acceptThreadMax = server.getAcceptThreadMax();
+      if (_idleThreadMax == DEFAULT)
+	_idleThreadMax = server.getAcceptThreadMax();
 
-      if (_acceptThreadMin == DEFAULT)
-	_acceptThreadMin = server.getAcceptThreadMin();
+      if (_idleThreadMin == DEFAULT)
+	_idleThreadMin = server.getAcceptThreadMin();
 
       if (_acceptListenBacklog == DEFAULT)
 	_acceptListenBacklog = server.getAcceptListenBacklog();
@@ -486,7 +495,7 @@ public class Port
     if (minSpare < 1)
       throw new ConfigException(L.l("accept-thread-min must be at least 1."));
 
-    _acceptThreadMin = minSpare;
+    _idleThreadMin = minSpare;
   }
 
   /**
@@ -494,7 +503,7 @@ public class Port
    */
   public int getAcceptThreadMin()
   {
-    return _acceptThreadMin;
+    return _idleThreadMin;
   }
 
   /**
@@ -506,7 +515,7 @@ public class Port
     if (maxSpare < 1)
       throw new ConfigException(L.l("accept-thread-max must be at least 1."));
 
-    _acceptThreadMax = maxSpare;
+    _idleThreadMax = maxSpare;
   }
 
   /**
@@ -514,7 +523,7 @@ public class Port
    */
   public int getAcceptThreadMax()
   {
-    return _acceptThreadMax;
+    return _idleThreadMax;
   }
 
   /**
@@ -676,7 +685,7 @@ public class Port
    */
   public int getConnectionCount()
   {
-    return _connectionCount;
+    return _activeConnectionSet.size();
   }
 
   /**
@@ -684,7 +693,7 @@ public class Port
    */
   public int getCometIdleCount()
   {
-    return _suspendList.size();
+    return _suspendConnectionSet.size();
   }
 
   /**
@@ -840,7 +849,7 @@ public class Port
    */
   public int getActiveThreadCount()
   {
-    return _threadCount.get() - _idleThreadCount;
+    return _threadCount.get() - _idleThreadCount.get();
   }
 
   /**
@@ -848,7 +857,7 @@ public class Port
    */
   public int getIdleThreadCount()
   {
-    return _idleThreadCount;
+    return _idleThreadCount.get();
   }
 
   /**
@@ -877,7 +886,7 @@ public class Port
    */
   public int getActiveConnectionCount()
   {
-    return _threadCount.get() - _idleThreadCount;
+    return _threadCount.get() - _idleThreadCount.get();
   }
 
   /**
@@ -908,12 +917,22 @@ public class Port
   }
 
   /**
+   * Returns true if the port should start a new thread because there are
+   * less than _idleThreadMin accepting threads.
+   */
+  private boolean isStartThreadRequired()
+  {
+    return (_startThreadCount.get() + _idleThreadCount.get() < _idleThreadMin);
+  }
+
+  /**
    * Returns the accept pool.
    */
   public int getFreeKeepalive()
   {
     int freeKeepalive = _keepaliveMax - _keepaliveCount.get();
-    int freeConnections = _connectionMax - _connectionCount - _minSpareConnection;
+    int freeConnections = (_connectionMax - _activeConnectionSet.size()
+			   - _minSpareConnection);
     int freeSelect = _server.getFreeSelectKeepalive();
 
     if (freeKeepalive < freeConnections)
@@ -973,11 +992,8 @@ public class Port
   public void bind()
     throws Exception
   {
-    synchronized (this) {
-      if (_isBind)
-        return;
-      _isBind = true;
-    }
+    if (_isBind.getAndSet(true))
+      return;
 
     if (_protocol == null)
       throw new IllegalStateException(L.l("'{0}' must have a configured protocol before starting.", this));
@@ -1040,7 +1056,7 @@ public class Port
     if (ss == null)
       throw new NullPointerException();
 
-    _isBind = true;
+    _isBind.set(true);
 
     if (_protocol == null)
       throw new IllegalStateException(L.l("'{0}' must have a configured protocol before starting.", this));
@@ -1063,11 +1079,8 @@ public class Port
 
   public void postBind()
   {
-    synchronized (this) {
-      if (_isPostBind)
-        return;
-      _isPostBind = true;
-    }
+    if (_isPostBind.getAndSet(true))
+      return;
 
     if (_tcpNoDelay)
       _serverSocket.setTcpNoDelay(_tcpNoDelay);
@@ -1165,7 +1178,7 @@ public class Port
       thread.start();
 
       _suspendAlarm = new Alarm(new SuspendReaper());
-      _suspendAlarm.queue(60000);
+      _suspendAlarm.queue(_suspendReaperTimeout);
 
       isValid = true;
     } finally {
@@ -1209,10 +1222,8 @@ public class Port
   {
     TcpConnection []connections;
 
-    synchronized (this) {
-      connections = new TcpConnection[_activeList.size()];
-      _activeList.toArray(connections);
-    }
+    connections = new TcpConnection[_activeConnectionSet.size()];
+    _activeConnectionSet.toArray(connections);
 
     long now = Alarm.getExactTime();
     TcpConnectionInfo []infoList = new TcpConnectionInfo[connections.length];
@@ -1256,22 +1267,20 @@ public class Port
   public boolean accept(TcpConnection conn, boolean isStart)
   {
     try {
-      synchronized (this) {
-        _idleThreadCount++;
+      _idleThreadCount.incrementAndGet();
+      
+      if (isStart) {
+	int count = _startThreadCount.decrementAndGet();
 
-        if (isStart) {
-          int count = _startThreadCount.decrementAndGet();
+	if (count < 0) {
+	  _startThreadCount.set(0);
+	  log.warning(conn + " _startThreadCount assertion failure");
+	  // conn.getStartThread().printStackTrace();
+	}
+      }
 
-          if (count < 0) {
-	    _startThreadCount.set(0);
-	    log.warning(conn + " _startThreadCount assertion failure");
-	    // conn.getStartThread().printStackTrace();
-          }
-        }
-
-        if (_acceptThreadMax < _idleThreadCount) {
-          return false;
-        }
+      if (_idleThreadMax < _idleThreadCount.get()) {
+	return false;
       }
 
       while (_lifecycle.isActive()) {
@@ -1287,7 +1296,7 @@ public class Port
 	    socket.close();
         }
         else {
-          if (_acceptThreadMax < _idleThreadCount) {
+          if (_idleThreadMax < _idleThreadCount.get()) {
             return false;
           }
         }
@@ -1296,13 +1305,10 @@ public class Port
       if (_lifecycle.isActive() && log.isLoggable(Level.FINER))
         log.log(Level.FINER, e.toString(), e);
     } finally {
-      synchronized (this) {
-        _idleThreadCount--;
-
-        if (_idleThreadCount + _startThreadCount.get()
-	    < _acceptThreadMin) {
-          notifyAll();
-        }
+      if (isStartThreadRequired()) {
+	// if there are not enough idle threads, wake the manager to
+	// create a new one
+	_startThreadSemaphore.release();
       }
     }
 
@@ -1353,7 +1359,8 @@ public class Port
       return false;
     else if (_keepaliveMax <= _keepaliveCount.get())
       return false;
-    else if (_connectionMax <= _connectionCount + _minSpareConnection)
+    else if (_connectionMax
+	     <= _activeConnectionSet.size() + _minSpareConnection)
       return false;
     else
       return true;
@@ -1366,8 +1373,10 @@ public class Port
   {
     if (! _lifecycle.isActive())
       return false;
-    else if (_connectionMax <= _connectionCount + _minSpareConnection) {
-      log.warning(conn + " failed keepalive, connection-max=" + _connectionCount);
+    else if (_connectionMax
+	     <= _activeConnectionSet.size() + _minSpareConnection) {
+      log.warning(conn + " failed keepalive, active-connections="
+		  + _activeConnectionSet.size());
 	
       return false;
     }
@@ -1430,19 +1439,19 @@ public class Port
   {
     boolean isResume = false;
 
-    synchronized (_suspendList) {
-      if (conn.isWake()) {
-	isResume = true;
-	conn.setResume();
-      }
-      else if (conn.isComet()) {
-	conn.toSuspend();
-	_suspendList.add(conn);
-	return true;
-      }
-      else {
-	return false;
-      }
+    if (conn.isWake()) {
+      isResume = true;
+      conn.setResume();
+    }
+    else if (conn.isComet()) {
+      conn.toSuspend();
+
+      _suspendConnectionSet.add(conn);
+	
+      return true;
+    }
+    else {
+      return false;
     }
 
     if (isResume) {
@@ -1458,9 +1467,7 @@ public class Port
    */
   boolean detach(TcpConnection conn)
   {
-    synchronized (_suspendList) {
-      return _suspendList.remove(conn);
-    }
+    return _suspendConnectionSet.remove(conn);
   }
 
   /**
@@ -1468,18 +1475,15 @@ public class Port
    */
   boolean resume(TcpConnection conn)
   {
-    synchronized (_suspendList) {
-      if (! _suspendList.remove(conn)) {
-	return false;
-      }
-      
+    if (_suspendConnectionSet.remove(conn)) {
       conn.setResume();
-    }
 
-    if (conn != null)
       ThreadPool.getThreadPool().schedule(conn.getResumeTask());
 
-    return true;
+      return true;
+    }
+    else
+      return false;
   }
 
   /**
@@ -1496,64 +1500,44 @@ public class Port
   public void run()
   {
     while (! _lifecycle.isDestroyed()) {
-      boolean isStart;
-
       try {
         // need delay to avoid spawing too many threads over a short time,
         // when the load doesn't justify it
         Thread.yield();
+
+	// Clear the pending startThread requests because we're about to
+	// start handling them
+	_startThreadSemaphore.drainPermits();
 	
         // XXX: Thread.sleep(10);
 
-        synchronized (this) {
-          isStart = (_startThreadCount.get() + _idleThreadCount
-		     < _acceptThreadMin);
-	  
-          if (_connectionMax <= _connectionCount)
-            isStart = false;
+	TcpConnection startConn = null;
+	
+	boolean isStart = (isStartThreadRequired()
+			   && _lifecycle.isActive()
+			   && _connectionMax <= _activeConnectionSet.size());
 
-	  if (! _lifecycle.isActive())
-	    isStart = false;
-
-          if (! isStart) {
-            Thread.interrupted();
-
-	    if (_lifecycle.isActive())
-	      wait(60000);
-	    else
-	      wait(200);
-          }
-
-          if (isStart) {
-            _connectionCount++;
-
-	    _startThreadCount.incrementAndGet();
-          }
-        }
-
-        if (isStart && _lifecycle.isActive()) {
-          TcpConnection conn = _freeConn.allocate();
-          if (conn == null) {
-            conn = new TcpConnection(this, _serverSocket.createSocket());
-            conn.setRequest(_protocol.createRequest(conn));
-          }
-	  else {
-	    // XXX: remove when 3.2 stable
-	    if (! conn._isFree) {
-	      log.warning(conn + " unfree allocate");
-	      Thread.dumpStack();
-	    }
-	    conn._isFree = false;
+	if (isStart) {
+	  startConn = _freeConn.allocate();
+	    
+	  if (startConn == null) {
+	    startConn = new TcpConnection(this, _serverSocket.createSocket());
+	    startConn.setRequest(_protocol.createRequest(startConn));
 	  }
+	    
+	  _startThreadCount.incrementAndGet();
+	  _activeConnectionSet.add(startConn);
+	}
+	else if (_lifecycle.isActive())
+	  _startThreadSemaphore.tryAcquire(1, 60000, TimeUnit.MILLISECONDS);
+	else
+	  _startThreadSemaphore.tryAcquire(1, 200, TimeUnit.MILLISECONDS);
 
-	  synchronized (this) {
-	    _activeList.add(conn);
-	  }
-
-          ThreadPool.getThreadPool().schedule(conn.getReadTask());
+        if (startConn != null) {
+          ThreadPool.getThreadPool().schedule(startConn.getReadTask());
         }
       } catch (Throwable e) {
-        e.printStackTrace();
+        log.log(Level.SEVERE, e.toString(), e);
       }
     }
   }
@@ -1623,16 +1607,9 @@ public class Port
    */
   private void closeConnection(TcpConnection conn)
   {
-    synchronized (this) {
-      _activeList.remove(conn);
-      
-      if (_connectionCount-- == _connectionMax) {
-        try {
-          notify();
-        } catch (Throwable e) {
-        }
-      }
-    }
+    _activeConnectionSet.remove(conn);
+
+    _startThreadSemaphore.release();
   }
 
   /**
@@ -1695,12 +1672,8 @@ public class Port
       }
     }
 
-    /*
-    ArrayList<TcpConnection> connections = new ArrayList<TcpConnection>();
-    synchronized (this) {
-      connections.addAll(_activeConnections);
-    }
-    */
+    // wake the start thread
+    _startThreadSemaphore.release();
 
     // Close the socket server socket and send some request to make
     // sure the Port accept thread is woken and dies.
@@ -1709,7 +1682,7 @@ public class Port
 
     // ping the accept port to wake the listening threads
     if (localPort > 0) {
-      int idleCount = _idleThreadCount + _startThreadCount.get();
+      int idleCount = _idleThreadCount.get() + _startThreadCount.get();
 
       for (int i = 0; i < idleCount + 10; i++) {
         try {
@@ -1759,12 +1732,15 @@ public class Port
 	ArrayList<TcpConnection> oldList = null;
 
 	long now = Alarm.getCurrentTime();
-	synchronized (_suspendList) {
-	  for (int i = _suspendList.size() - 1; i >=0; i--) {
-	    TcpConnection conn = _suspendList.get(i);
+	
+	synchronized (_suspendConnectionSet) {
+	  Iterator<TcpConnection> iter = _suspendConnectionSet.iterator();
+	  
+	  while (iter.hasNext()) {
+	    TcpConnection conn = iter.next();
 
 	    if (conn.getSuspendTime() + _suspendTimeMax < now) {
-	      _suspendList.remove(i);
+	      iter.remove();
 	      
 	      if (oldList == null)
 		oldList = new ArrayList<TcpConnection>();
@@ -1786,7 +1762,7 @@ public class Port
 	}
       } finally {
 	if (! isClosed())
-	  alarm.queue(60000);
+	  alarm.queue(_suspendReaperTimeout);
       }
     }
   }

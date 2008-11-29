@@ -61,6 +61,8 @@ import com.caucho.server.dispatch.*;
 import com.caucho.server.host.Host;
 import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.AccessLog;
+import com.caucho.server.port.TcpConnection;
+import com.caucho.server.port.ServerRequest;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.server.security.*;
@@ -123,9 +125,6 @@ public class WebApp extends ServletContextImpl
 
   private static EnvironmentLocal<WebApp> _appLocal
     = new EnvironmentLocal<WebApp>("caucho.application");
-
-  private static ThreadLocal<ServletRequest> _requestThreadLocal
-    = new ThreadLocal<ServletRequest>();
 
   static String []_classLoaderHackPackages;
 
@@ -1788,14 +1787,14 @@ public class WebApp extends ServletContextImpl
     return _lifecycle.isDestroyed();
   }
 
-  static ThreadLocal<ServletRequest> getRequestThreadLocal()
-  {
-    return _requestThreadLocal;
-  }
-
   public static ServletRequest getThreadRequest()
   {
-    return _requestThreadLocal.get();
+    ServerRequest serverRequest = TcpConnection.getCurrentRequest();
+
+    if (serverRequest instanceof ServletRequest)
+      return (ServletRequest) serverRequest;
+    else
+      return null;
   }
 
   /**
