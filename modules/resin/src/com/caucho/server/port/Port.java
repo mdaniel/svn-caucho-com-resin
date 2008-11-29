@@ -1513,11 +1513,9 @@ public class Port
 
 	TcpConnection startConn = null;
 	
-	boolean isStart = (isStartThreadRequired()
-			   && _lifecycle.isActive()
-			   && _connectionMax <= _activeConnectionSet.size());
-
-	if (isStart) {
+	if (isStartThreadRequired()
+	    && _lifecycle.isActive()
+	    && _activeConnectionSet.size() <= _connectionMax) {
 	  startConn = _freeConn.allocate();
 	    
 	  if (startConn == null) {
