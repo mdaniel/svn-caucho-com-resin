@@ -944,10 +944,14 @@ public class JavaJspGenerator extends JspGenerator {
     out.println(");");
 
     out.println();
-    out.println("TagState _jsp_state = new TagState();");
-    // out.println("TagState _jsp_state = _jsp_freeState.allocate();");
-    //out.println("if (_jsp_state == null)");
-    //out.println("  _jsp_state = new TagState();");
+    if (_rootNode.hasCustomTag()) {
+      out.println("TagState _jsp_state = new TagState();");
+      // out.println("TagState _jsp_state = _jsp_freeState.allocate();");
+      //out.println("if (_jsp_state == null)");
+      //out.println("  _jsp_state = new TagState();");
+    }
+    else
+      out.println("TagState _jsp_state = null;");
     
     out.println();
     out.println("try {");
@@ -964,8 +968,10 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("} finally {");
     out.pushDepth();
 
-    //out.println("if (! _jsp_freeState.free(_jsp_state))");
-    out.println("_jsp_state.release();");
+    if (_rootNode.hasCustomTag()) {
+      //out.println("if (! _jsp_freeState.free(_jsp_state))");
+      out.println("_jsp_state.release();");
+    }
     
     out.println("_jsp_pageManager.freePageContext(pageContext);");
     

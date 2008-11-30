@@ -157,6 +157,10 @@ public class Port
   private final AtomicInteger _idleThreadCount = new AtomicInteger();
   private final AtomicInteger _startThreadCount = new AtomicInteger();
 
+  // timeout to limit the thread close rate
+  private long _idleCloseTimeout = 15000L;
+  private volatile long _idleCloseExpire;
+
   // semaphore to request a new start thread
   private final Semaphore _startThreadSemaphore = new Semaphore(0);
 
@@ -1267,7 +1271,7 @@ public class Port
   public boolean accept(TcpConnection conn, boolean isStart)
   {
     try {
-      _idleThreadCount.incrementAndGet();
+      int idleThreadCount = _idleThreadCount.incrementAndGet();
       
       if (isStart) {
 	int count = _startThreadCount.decrementAndGet();
@@ -1279,11 +1283,16 @@ public class Port
 	}
       }
 
-      if (_idleThreadMax < _idleThreadCount.get()) {
-	return false;
-      }
-
       while (_lifecycle.isActive()) {
+	long now = Alarm.getCurrentTime();
+      
+	if (_idleThreadMax < _idleThreadCount.get()
+	    && _idleCloseExpire < now) {
+	  _idleCloseExpire = now + _idleCloseTimeout;
+	
+	  return false;
+	}
+
         QSocket socket = conn.startSocket();
 
         Thread.interrupted();
@@ -1295,16 +1304,13 @@ public class Port
 	  else
 	    socket.close();
         }
-        else {
-          if (_idleThreadMax < _idleThreadCount.get()) {
-            return false;
-          }
-        }
       }
     } catch (Throwable e) {
       if (_lifecycle.isActive() && log.isLoggable(Level.FINER))
         log.log(Level.FINER, e.toString(), e);
     } finally {
+      _idleThreadCount.decrementAndGet();
+      
       if (isStartThreadRequired()) {
 	// if there are not enough idle threads, wake the manager to
 	// create a new one
@@ -1517,11 +1523,13 @@ public class Port
 	    && _lifecycle.isActive()
 	    && _activeConnectionSet.size() <= _connectionMax) {
 	  startConn = _freeConn.allocate();
-	    
+	  
 	  if (startConn == null) {
 	    startConn = new TcpConnection(this, _serverSocket.createSocket());
 	    startConn.setRequest(_protocol.createRequest(startConn));
 	  }
+	  else
+	    startConn._isFree = false; // XXX: validation for 4.0
 	    
 	  _startThreadCount.incrementAndGet();
 	  _activeConnectionSet.add(startConn);
@@ -1579,7 +1587,7 @@ public class Port
   {
     closeConnection(conn);
 
-    // XXX: remove when 3.2 stable
+    // XXX: remove when 4.0 stable
     if (conn._isFree) {
       log.warning(conn + " double free");
       Thread.dumpStack();
