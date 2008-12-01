@@ -212,17 +212,15 @@ public class DispatchServer implements Dependency {
     LruCache<Object,Invocation> invocationCache = _invocationCache;
 
     if (invocationCache != null) {
-      synchronized (invocationCache) {
-	Invocation oldInvocation;
-	oldInvocation = invocationCache.get(protocolKey);
+      Invocation oldInvocation;
+      oldInvocation = invocationCache.get(protocolKey);
 
-	// server/10r2
-	if (oldInvocation != null && ! oldInvocation.isModified())
-	  return oldInvocation;
+      // server/10r2
+      if (oldInvocation != null && ! oldInvocation.isModified())
+	return oldInvocation;
 
-	if (invocation.getURLLength() < _maxURLLength) {
-	  invocationCache.put(protocolKey, invocation);
-	}
+      if (invocation.getURLLength() < _maxURLLength) {
+	invocationCache.put(protocolKey, invocation);
       }
     }
 
@@ -247,9 +245,7 @@ public class DispatchServer implements Dependency {
     LruCache<Object,Invocation> invocationCache = _invocationCache;
 
     if (invocationCache != null) {
-      synchronized (invocationCache) {
-	invocationCache.clear();
-      }
+      invocationCache.clear();
     }
   }
 

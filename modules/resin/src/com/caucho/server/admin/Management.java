@@ -263,6 +263,9 @@ public class Management
   @PostConstruct
   public void init()
   {
+    if (true)
+      return;
+    
     try {
       if (! _lifecycle.toInit())
 	return;
@@ -277,16 +280,9 @@ public class Management
 
       if (_transactionManager != null)
 	_transactionManager.start();
-
-      HempBrokerManager brokerManager = HempBrokerManager.getCurrent();
-
-      String brokerName = _resin.getServer().getBamAdminName();
-    
-      _adminBroker = new HempBroker(brokerName);
-
-      brokerManager.addBroker(brokerName, _adminBroker);
-      brokerManager.addBroker("resin.caucho", _adminBroker);
     } catch (Exception e) {
+      e.printStackTrace();
+      
       throw ConfigException.create(e);
     }
   }
@@ -299,6 +295,18 @@ public class Management
     try {
       if (getPath() != null)
         getPath().mkdirs();
+
+      HempBrokerManager brokerManager = HempBrokerManager.getCurrent();
+
+      // XXX:
+      if (_adminBroker == null) {
+	String brokerName = _resin.getServer().getBamAdminName();
+    
+	_adminBroker = new HempBroker(brokerName);
+
+	brokerManager.addBroker(brokerName, _adminBroker);
+	brokerManager.addBroker("resin.caucho", _adminBroker);
+      }
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
