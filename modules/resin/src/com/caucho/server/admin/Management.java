@@ -66,7 +66,7 @@ public class Management
   private Server _server;
   private Path _path;
   
-  private final BamBroker _adminBroker;
+  private BamBroker _adminBroker;
 
   private HostConfig _hostConfig;
 
@@ -79,22 +79,6 @@ public class Management
   public Management()
   {
     _resin = Resin.getCurrent();
-
-    HempBrokerManager brokerManager = HempBrokerManager.getCurrent();
-
-    String serverId = _resin.getServerId();
-    
-    String brokerName;
-    
-    if (! "".equals(serverId))
-      brokerName = serverId + ".resin.caucho";
-    else
-      brokerName = "default.resin.caucho";
-    
-    _adminBroker = new HempBroker(brokerName);
-
-    brokerManager.addBroker(brokerName, _adminBroker);
-    brokerManager.addBroker("resin.caucho", _adminBroker);
   }
 
   public static Path getCurrentPath()
@@ -293,6 +277,15 @@ public class Management
 
       if (_transactionManager != null)
 	_transactionManager.start();
+
+      HempBrokerManager brokerManager = HempBrokerManager.getCurrent();
+
+      String brokerName = _resin.getServer().getBamAdminName();
+    
+      _adminBroker = new HempBroker(brokerName);
+
+      brokerManager.addBroker(brokerName, _adminBroker);
+      brokerManager.addBroker("resin.caucho", _adminBroker);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

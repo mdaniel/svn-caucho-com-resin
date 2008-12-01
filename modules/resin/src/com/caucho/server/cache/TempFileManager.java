@@ -34,6 +34,7 @@ import com.caucho.db.Database;
 import com.caucho.db.store.RawTransaction;
 import com.caucho.db.store.Store;
 import com.caucho.db.store.StoreTransaction;
+import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
 import com.caucho.vfs.OutputStreamWithBuffer;
 import com.caucho.vfs.Path;
@@ -65,8 +66,20 @@ public class TempFileManager
       Database database = new Database();
       database.ensureMemoryCapacity(1024 * 1024);
       database.init();
+
+      Resin resin = Resin.getCurrent();
+      String serverId = "";
+
+      if (resin != null)
+	serverId = resin.getServerId();
+
+      String name = "temp_file_" + serverId;
+
+      Path storePath = path.lookup(name);
+
+      storePath.remove();
     
-      _store = new Store(database, "temp-file", null, path);
+      _store = new Store(database, name, null, storePath);
       _store.setFlushDirtyBlocksOnCommit(false);
       _store.create();
     } catch (Exception e) {

@@ -99,6 +99,8 @@ public class Cluster
     = new ArrayList<ClusterServer>();
 
   private ClusterServer[] _serverArray = new ClusterServer[0];
+  
+  private ClusterTriad _triad;
 
   private ClusterServer _selfServer;
 
@@ -142,9 +144,7 @@ public class Cluster
    */
   public static Cluster getLocal()
   {
-    Cluster cluster = _clusterLocal.get();
-
-    return cluster;
+    return getCurrent();
   }
 
   /**
@@ -483,6 +483,16 @@ public class Cluster
 
     return null;
   }
+  
+  /**
+   * Returns the owning triad for a cluster server.
+   * 
+   * @return the corresponding triad
+   */
+  public ClusterTriad getTriad(ClusterServer server)
+  {
+    return _triad;
+  }
 
   /**
    * Returns the cluster store.
@@ -527,6 +537,23 @@ public class Cluster
   }
 
   /**
+   * Returns the distributed cache manager.
+   */
+  public DistributedCacheManager getDistributedCacheManager()
+  {
+    return getResin().getServer().getDistributedCacheManager();
+  }
+
+  /**
+   * Creates the cluster's distributed cache manager
+   */
+  protected DistributedCacheManager
+    createDistributedCacheManager(Server server)
+  {
+    return new FileCacheManager(server);
+  }
+
+  /**
    * Adds a program.
    */
   public void addBuilderProgram(ConfigProgram program)
@@ -540,6 +567,12 @@ public class Cluster
   public void start()
     throws ConfigException
   {
+    if (_triad == null && _serverList.size() > 0) {
+      _triad = new ClusterTriad(this,
+	                        _serverList.size() > 0 ? _serverList.get(0) : null,
+	                        _serverList.size() > 1 ? _serverList.get(1) : null,
+	                        _serverList.size() > 2 ? _serverList.get(2) : null);
+    }
     String serverId = _serverIdLocal.get();
 
     if (serverId == null)

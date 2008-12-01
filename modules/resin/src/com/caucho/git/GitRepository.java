@@ -102,7 +102,14 @@ public class GitRepository {
     }
   }
 
-  public Object objectType(String sha1)
+  /**
+   * Returns the object type of the specified file.
+   *
+   * @param sha1 the sha1 hash identifier of the file
+   *
+   * @return "blob", "commit" or "tree"
+   */
+  public GitType objectType(String sha1)
     throws IOException
   {
     GitObjectStream is = open(sha1);
@@ -185,6 +192,13 @@ public class GitRepository {
     }
   }
 
+  /**
+   * Parses and returns the commit file specified by the sha1 hash.
+   *
+   * @param sha1 the sha1 hash identifier of the commit file
+   *
+   * @return the parsed GitCommit structure
+   */
   public GitCommit parseCommit(String sha1)
     throws IOException
   {
@@ -200,6 +214,13 @@ public class GitRepository {
     }
   }
 
+  /**
+   * Parses and returns the tree (directory) specified by the sha1 hash.
+   *
+   * @param sha1 the sha1 hash identifier of the tree file
+   *
+   * @return the parsed GitTree structure
+   */
   public GitTree parseTree(String sha1)
     throws IOException
   {
@@ -247,6 +268,13 @@ public class GitRepository {
     return path.exists();
   }
 
+  /**
+   * Opens an object file specified by a sha1 hash.
+   *
+   * @param sha1 the sha1 hash identifier for the file
+   *
+   * @return an opened GitObjectStream to the file
+   */
   private GitObjectStream open(String sha1)
     throws IOException
   {

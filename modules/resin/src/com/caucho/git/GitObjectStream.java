@@ -33,16 +33,20 @@ import com.caucho.util.*;
 import com.caucho.vfs.*;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.zip.*;
 
 /**
  * Top-level class for a repository
  */
 public class GitObjectStream {
+  private static final HashMap<String,GitType> _gitTypeMap
+    = new HashMap<String,GitType>();
+  
   private ReadStream _rawStream;
   private InflaterInputStream _is;
 
-  private String _type;
+  private GitType _type;
   private long _length;
   
   public GitObjectStream(Path path)
@@ -59,7 +63,7 @@ public class GitObjectStream {
       type.append((char) ch);
     }
 
-    _type = type.toString();
+    _type = _gitTypeMap.get(type.toString());
 
     long length = 0;
     while ((ch = _is.read()) >= 0 && '0' <= ch && ch <= '9') {
@@ -73,7 +77,7 @@ public class GitObjectStream {
     }
   }
 
-  public String getType()
+  public GitType getType()
   {
     return _type;
   }
@@ -176,5 +180,11 @@ public class GitObjectStream {
     return (getClass().getSimpleName()
 	    + "[type=" + _type
 	    + ",length=" + _length + "]");
+  }
+
+  static {
+    _gitTypeMap.put("blob", GitType.BLOB);
+    _gitTypeMap.put("tree", GitType.TREE);
+    _gitTypeMap.put("commit", GitType.COMMIT);
   }
 }

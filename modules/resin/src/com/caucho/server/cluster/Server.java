@@ -29,9 +29,9 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.amber.manager.PersistenceEnvironmentListener;
 import com.caucho.bam.BamBroker;
 import com.caucho.bam.BamStream;
+import com.caucho.cache.DistributedCache;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ConfigProgram;
@@ -78,7 +78,6 @@ import com.caucho.vfs.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
-import javax.resource.spi.ResourceAdapter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -104,7 +103,7 @@ public class Server extends ProtocolDispatchServer
 
   private final ClusterServer _clusterServer;
   private final Resin _resin;
-
+  
   private EnvironmentClassLoader _classLoader;
 
   private Throwable _configException;
@@ -115,12 +114,9 @@ public class Server extends ProtocolDispatchServer
 
   private GitRepository _git;
 
-  private String _url = "";
+  private DistributedCacheManager _distributedCacheManager;
+
   private int _urlLengthMax = 8192;
-
-  private int _srunCount;
-
-  private AccessLog _accessLog;
 
   private long _waitForActiveTime = 10000L;
 
@@ -169,6 +165,15 @@ public class Server extends ProtocolDispatchServer
   private boolean _isBindPortsAtEnd = true;
   private volatile boolean _isStartedPorts;
 
+  //
+  // internal databases
+  //
+
+  // reliable system store
+  private DistributedCache _systemStore;
+
+  // stats
+
   private long _startTime;
 
   private final Lifecycle _lifecycle;
@@ -188,11 +193,13 @@ public class Server extends ProtocolDispatchServer
       _serverHeader = "Resin/" + com.caucho.Version.VERSION;
     else
       _serverHeader = "Resin/1.1";
+
+    Cluster cluster = clusterServer.getCluster();
     
     try {
       Thread thread = Thread.currentThread();
 
-      ClassLoader loader = clusterServer.getCluster().getClassLoader();
+      ClassLoader loader = cluster.getClassLoader();
       _classLoader = (EnvironmentClassLoader) loader;
 
       Environment.addClassLoaderListener(this, _classLoader);
@@ -306,6 +313,25 @@ public class Server extends ProtocolDispatchServer
   protected ClusterServer getClusterServer()
   {
     return _clusterServer;
+  }
+
+  /**
+   * Returns the distributed cache manager
+   */
+  public DistributedCacheManager getDistributedCacheManager()
+  {
+    if (_distributedCacheManager == null)
+      _distributedCacheManager = getCluster().createDistributedCacheManager(this);
+
+    return _distributedCacheManager;
+  }
+
+  /**
+   * Returns the bam name.
+   */
+  public String getBamAdminName()
+  {
+    return getClusterServer().getBamAdminName();
   }
 
   /**
@@ -880,8 +906,6 @@ public class Server extends ProtocolDispatchServer
    */
   public void setAccessLog(AccessLog log)
   {
-    _accessLog = log;
-
     Environment.setAttribute("caucho.server.access-log", log);
   }
 
@@ -1261,6 +1285,14 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
+   * Returns the reliable system store
+   */
+  public DistributedCache getSystemStore()
+  {
+    return _systemStore;
+  }
+
+  /**
    * Handles the case where a class loader is activated.
    */
   public void classLoaderInit(DynamicClassLoader loader)
@@ -1345,6 +1377,13 @@ public class Server extends ProtocolDispatchServer
 	  getSelectManager().setSelectMax(_keepaliveSelectMax);
       }
     }
+    
+    if (_distributedCacheManager == null)
+      _distributedCacheManager = getCluster().createDistributedCacheManager(this);
+
+    _systemStore = new DistributedCache();
+    _systemStore.setName("resin:system");
+    // XXX: need to set reliability values
   }
 
   /**
@@ -1849,7 +1888,6 @@ public class Server extends ProtocolDispatchServer
       _classLoader.destroy();
 
       _hostContainer = null;
-      _accessLog = null;
       _cache = null;
     } finally {
       DynamicClassLoader.setOldLoader(thread, oldLoader);

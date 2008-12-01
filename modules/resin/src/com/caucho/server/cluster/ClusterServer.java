@@ -133,6 +133,17 @@ public class ClusterServer {
   }
 
   /**
+   * Returns the bam name
+   */
+  public String getBamAdminName()
+  {
+    if ("".equals(_id))
+      return "default.resin.admin";
+    else
+      return _id + ".resin.admin";
+  }
+
+  /**
    * Returns the cluster.
    */
   public Cluster getCluster()
@@ -146,6 +157,14 @@ public class ClusterServer {
   public Machine getMachine()
   {
     return _machine;
+  }
+
+  /**
+   * Returns the owning triad
+   */
+  public ClusterTriad getClusterTriad()
+  {
+    return _cluster.getTriad(this);
   }
 
   /**
