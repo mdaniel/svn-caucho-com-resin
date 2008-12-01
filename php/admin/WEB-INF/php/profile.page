@@ -6,6 +6,7 @@
 require_once "WEB-INF/php/inc.php";
 
 $profile = @new Java("com.caucho.profile.Profile");
+$profileQuercus = isset($_POST['profile_quercus']);
 
 if ($profile) {
   if ($_POST['action'] == 'stop') {
@@ -15,7 +16,7 @@ if ($profile) {
     $profile->start();
 
     if ($_POST['period'] >= 10) {
-      $profile->setPeriod($_POST['period']);
+      $profile->setPeriod($_POST['period'] . "ms");
     }
 
     if ($_POST['depth'] >= 1) {
@@ -28,7 +29,18 @@ if ($profile) {
     echo "Period: {$profile->period}ms Depth: {$profile->depth}";
 
     echo "<form action='?q=profile' method='post' style='display:inline'>";
-    echo "<input type='submit' name='action' value='stop'>";
+    echo "<input type='hidden' name='period' ";
+    echo        "value='" . $_POST['period'] . "'/>";
+    echo "<input type='hidden' name='depth' ";
+    echo        "value='" . $_POST['depth'] . "'/>";
+
+    if ($profileQuercus) {
+      echo "<input type='hidden' name='profile_quercus' ";
+      echo        "value='profile_quercus'/>";
+    }
+
+    echo "<input type='submit' name='action' value='stop'/>";
+
     echo "</form>";
 
     echo "</h2>\n";
@@ -40,26 +52,61 @@ if ($profile) {
 
     echo "<form action='?q=profile' method='post' style='display:inline'>";
     echo "Period: <select type='select' name='period'>";
-    echo "  <option selected>10ms";
-    echo "  <option>25ms";
-    echo "  <option>100ms";
-    echo "  <option>250ms";
-    echo "  <option>1000ms";
-    echo "  <option>2500ms";
-    echo "  <option>10000ms";
+
+    $PERIODS = Array(10, 25, 100, 250, 1000, 2500, 10000);
+
+    if (!isset($_POST['period']) || 
+        !is_numeric($_POST['period']) ||
+        !in_array($_POST['period'], $PERIODS))
+      $postedPeriod = 10;
+    else
+      $postedPeriod = $_POST['period'];
+
+    foreach ($PERIODS as $period) {
+      if ($period == $postedPeriod) 
+        echo "  <option selected value='{$period}'>{$period}ms</option>";
+      else
+        echo "  <option value='{$period}'>{$period}ms</option>";
+    }
+
     echo "</select>";
+
     echo " Depth: <select type='select' name='depth'>";
-    echo "  <option>2";
-    echo "  <option>4";
-    echo "  <option>8";
-    echo "  <option>12";
-    echo "  <option selected>16";
-    echo "  <option>20";
-    echo "  <option>32";
-    echo "  <option>250";
+
+    $DEPTHS = Array(2, 4, 8, 12, 16, 20, 32, 250);
+
+    if (!isset($_POST['depth']) || 
+        !is_numeric($_POST['depth']) ||
+        !in_array(intval($_POST['depth']), $DEPTHS))
+      $postedDepth = 16;
+    else
+      $postedDepth = $_POST['depth'];
+
+    foreach ($DEPTHS as $depth) {
+      if ($depth == $postedDepth) 
+        echo "  <option selected>{$depth}</option>";
+      else
+        echo "  <option>{$depth}</option>";
+    }
+
     echo "</select>";
-    echo "<input type='submit' name='action' value='start'>";
+
+    echo "<input type='submit' name='action' value='start'/><br/>";
+
+    echo "<span title='Highlight Quercus function names in stacks and ";
+    echo              "decode Quercus-generated Java class names and ";
+    echo              "functions to their original PHP names'>";
+
+    if ($profileQuercus) 
+      echo "<input type='checkbox' name='profile_quercus' checked/>";
+    else
+      echo "<input type='checkbox' name='profile_quercus'/>";
+
+    echo "Enable Quercus profiling mode</span>";
     echo "</form>";
+
+    if ($profileQuercus) 
+      echo "<br/>* indicates stack trace contains PHP function calls";
   }
 
   $results = $profile->getResults();
@@ -109,9 +156,18 @@ if ($profile) {
       echo "<a id='s_{$name}_{$i}' href=\"javascript:show('t_{$name}_{$i}');hide('s_{$name}_{$i}');show('h_{$name}_{$i}');\">show</a> ";
       echo "<a id='h_{$name}_{$i}' href=\"javascript:hide('t_{$name}_{$i}');show('s_{$name}_{$i}');hide('h_{$name}_{$i}');\" style='display:none'>hide</a> ";
       echo "</td>";
-      echo "<td>";
+
+      if ($profileQuercus)
+        echo "<td class='quercus'>";
+      else 
+        echo "<td>";
+
       $stack = $entry->getStackTrace()[0];
-      echo "{$entry->getDescription()}\n";
+      echo print_stack_entry($stack);
+
+      if (contains_quercus_calls($entry))
+        echo "*";
+
       echo "</td>";
       echo "</tr>\n";
 
@@ -120,11 +176,15 @@ if ($profile) {
       echo "</td>";
       echo "<td colspan='2'>";
 
-      echo "<pre>";
+      if ($profileQuercus)
+        echo "<div class='quercus-stack-trace'>";
+      else
+        echo "<div class='stack-trace'>";
+
       foreach ($entry->getStackTrace() as $stack) {
-        echo "  at {$stack->getClassName()}.{$stack->getMethodName()}({$stack->getArg()})\n";
+        echo "  at " . print_stack_entry($stack);
       }
-      echo "</pre>";
+      echo "</div>";
       echo "</td>";
       echo "</tr>\n";
     }
@@ -242,4 +302,59 @@ function is_keepalive($stackTrace)
   return false;
 }
 
+function is_quercus($className)
+{
+  return strpos($className, "_quercus._") === 0;
+}
+
+function contains_quercus_calls($entry)
+{
+  global $profileQuercus;
+
+  if ($profileQuercus) {
+    foreach ($entry->getStackTrace() as $stack) {
+      if (is_quercus($stack->className))
+        return true;
+    }
+  }
+
+  return false;
+}
+
+function decode_quercus_class_name($className)
+{
+  $parts = explode("$", $className);
+  $script = $parts[0];
+  $function = $parts[1];
+
+  $script = substr($script, strlen("_quercus._"));
+  $script = str_replace("._", "/", $script);
+  $script = str_replace("__", ".", $script);
+  $script = str_replace("_22d", "-", $script);
+
+  ereg("fun_(.*)_[0-9]*", $function, $matches);
+
+  return Array($script, $matches[1]);
+}
+
+function print_stack_entry($stack)
+{
+  global $profileQuercus;
+
+  if ($profileQuercus && is_quercus($stack->className)) {
+    $result = decode_quercus_class_name($stack->className);
+    $script = $result[0];
+    $function = $result[1];
+    $arg = $stack->getArg();
+
+    if ($function == "")
+      return "<b>{$script}: &lt;top level&gt;</b>\n";
+    else 
+      return "<b>{$script}: {$function}({$arg})</b>\n";
+  }
+  else {
+    $methodName = str_replace("<init>", "&lt;init&gt;", $stack->methodName);
+    return "{$stack->className}.{$methodName}({$stack->getArg()})\n";
+  }
+}
 ?>

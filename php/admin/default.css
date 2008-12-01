@@ -132,6 +132,30 @@ pre {
   background: #99bbff;
 }
 
+.threads .quercus td {
+  background: #f4f4f4;
+}
+
+.threads div.stack-trace {
+  background : #ffeecc;
+  color : black;
+  font-family : monospace;
+  font-size : .9em;
+  white-space : pre;
+}
+
+.threads div.quercus-stack-trace {
+  background : #ffeecc;
+  color : gray;
+  font-family : monospace;
+  font-size : .9em;
+  white-space : pre;
+}
+
+.threads div.quercus-stack-trace b {
+  color : black;
+}
+
 table.data {
   font-size: 100%;
   color: black;
