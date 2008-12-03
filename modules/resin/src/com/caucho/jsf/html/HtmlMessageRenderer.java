@@ -221,11 +221,12 @@ class HtmlMessageRenderer extends Renderer
 	  }
 	}
 
-        if (summaryDone)
-          out.writeText("   ", null);
-
-	if (isShowDetail)
+	if (isShowDetail) {
+          if (summaryDone)
+            out.writeText(" ", null);
+          
 	  out.writeText(msg.getDetail(), "detail");
+        }
 
 	if (hasSpan)
 	  out.endElement("span");
