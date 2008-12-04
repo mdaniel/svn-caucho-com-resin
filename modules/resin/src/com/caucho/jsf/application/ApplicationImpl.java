@@ -42,6 +42,7 @@ import com.caucho.jsf.el.ValueExpressionAdapter;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.jsp.BundleManager;
 
 import javax.el.*;
 import javax.el.PropertyNotFoundException;
@@ -70,6 +71,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.jsp.JspApplicationContext;
 import javax.servlet.jsp.JspFactory;
+import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 import java.beans.FeatureDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Array;
@@ -148,6 +150,8 @@ public class ApplicationImpl
 
   private ProjectStage _projectStage;
 
+  private BundleManager _bundleManager;
+
   public ApplicationImpl()
   {
     WebApp webApp = WebApp.getLocal();
@@ -156,6 +160,10 @@ public class ApplicationImpl
 
     JspApplicationContext appContext
       = jspFactory.getJspApplicationContext(webApp);
+
+    _defaultNavigationHandler = new NavigationHandlerImpl();
+
+    _bundleManager = BundleManager.create();
 
     _jsfExpressionFactory = appContext.getExpressionFactory();
 
@@ -367,8 +375,6 @@ public class ApplicationImpl
 		 LengthValidator.class.getName());
     addValidator(LongRangeValidator.VALIDATOR_ID,
 		 LongRangeValidator.class.getName());
-
-    _defaultNavigationHandler = new NavigationHandlerImpl();
   }
 
   public void addManagedBean(String name, ManagedBeanConfig managedBean)
@@ -434,6 +440,24 @@ public class ApplicationImpl
   public ResourceBundle getResourceBundle(FacesContext context,
 					  String name)
   {
+    UIViewRoot viewRoot = context.getViewRoot();
+
+    Locale locale = null;
+    
+    if (viewRoot != null)
+      locale = viewRoot.getLocale();
+    
+    LocalizationContext l10nCtx = null;
+
+    if (locale != null)
+      l10nCtx = _bundleManager.getBundle(name, locale);
+
+    if (l10nCtx == null)
+      l10nCtx = _bundleManager.getBundle(name);
+
+    if (l10nCtx != null)
+      return l10nCtx.getResourceBundle();
+
     return null;
   }
 

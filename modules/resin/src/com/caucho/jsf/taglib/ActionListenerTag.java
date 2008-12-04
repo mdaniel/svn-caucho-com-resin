@@ -86,11 +86,11 @@ public class ActionListenerTag extends TagSupport
 
     if (parent.getCreated()) {
       ValueExpression bindingExpr = null;
-      
+
       if (_binding != null) {
-	bindingExpr = (ValueExpression) _binding.getValue(context.getELContext());
+        listener = (ActionListener) _binding.getValue(context.getELContext());
       }
-      
+
       if (listener == null && _type != null) {
 	String className = (String) _type.getValue(context.getELContext());
 

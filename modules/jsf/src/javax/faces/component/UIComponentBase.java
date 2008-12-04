@@ -917,14 +917,17 @@ public abstract class UIComponentBase extends UIComponent
 	FacesListener listener = _facesListeners[i];
 
 	int index = 2 * i;
-	
-	savedListeners[index] = listener.getClass();
 
-	if (listener instanceof StateHolder) {
-	  StateHolder holder = (StateHolder) listener;
-	  
+        if (listener instanceof java.io.Serializable) {
+          savedListeners[index] = java.io.Serializable.class;
+          savedListeners[index + 1] = listener;
+        } else if (listener instanceof StateHolder) {
+          savedListeners[index] = listener.getClass();
+          StateHolder holder = (StateHolder) listener;
 	  savedListeners[index + 1] = holder.saveState(context);
-	}
+        } else {
+          savedListeners[index] = listener.getClass();
+        }
       }
 
       return savedListeners;
@@ -974,29 +977,34 @@ public abstract class UIComponentBase extends UIComponent
     restoreListeners(context, savedListeners);
   }
 
-  private void restoreListeners(FacesContext context, Object []savedListeners)
+  private void restoreListeners(FacesContext context, Object[] savedListeners)
   {
     if (savedListeners != null) {
       _facesListeners = new FacesListener[savedListeners.length / 2];
 
       for (int i = 0; i < _facesListeners.length; i++) {
-	int index = 2 * i;
-	
-	Class cl = (Class) savedListeners[index];
+        int index = 2 * i;
 
-	try {
-	  FacesListener listener = (FacesListener) cl.newInstance();
+        Class cl = (Class) savedListeners[index];
 
-	  if (listener instanceof StateHolder) {
-	    StateHolder holder = (StateHolder) listener;
+        try {
+          if (java.io.Serializable.class.equals(cl)) {
+            _facesListeners[i] = (FacesListener) savedListeners[index + 1];
+          }
+          else {
+            FacesListener listener = (FacesListener) cl.newInstance();
 
-	    holder.restoreState(context, savedListeners[index + 1]);
-	  }
+            if (listener instanceof StateHolder) {
+              StateHolder holder = (StateHolder) listener;
 
-	  _facesListeners[i] = listener;
-	} catch (Exception e) {
-	  throw new FacesException(e);
-	}
+              holder.restoreState(context, savedListeners[index + 1]);
+            }
+            _facesListeners[i] = listener;
+          }
+        }
+        catch (Exception e) {
+          throw new FacesException(e);
+        }
       }
     }
   }

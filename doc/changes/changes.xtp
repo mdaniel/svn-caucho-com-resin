@@ -13,6 +13,8 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>jsf: Application MessageBundle fixes (#3056, rep by freemant)</li>
+<li>jsf: JSF State with Serializable ActionListener (#3058, rep by freemant)</li>
 <li>server: ThreadLocal removal/cleanup</li>
 <li>admin: change profile default to 10ms</li>
 <li>http: 304 should not return content-length (#3089, rep by Andrew Phillips)</li>
