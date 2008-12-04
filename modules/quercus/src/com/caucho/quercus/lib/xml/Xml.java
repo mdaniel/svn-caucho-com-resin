@@ -432,7 +432,7 @@ public class Xml {
       return 0;
 
     if (_xmlString == null)
-      _xmlString = data.toStringBuilder();
+      _xmlString = data.toStringBuilder(env);
 
     InputSource is;
     

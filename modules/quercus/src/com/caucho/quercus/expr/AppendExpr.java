@@ -84,13 +84,20 @@ public class AppendExpr extends Expr
   {
     Value value = _value.eval(env);
 
-    StringValue sb = value.toStringBuilder(env);
+    StringValue sb;
+    
+    if (_next != null)
+      sb = value.toStringBuilder(env, _next.eval(env));
+    else
+      sb = value.toStringBuilder(env);
 
+    /*
     for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
       Value ptrValue = ptr._value.eval(env);
       
       sb = sb.appendUnicode(ptrValue);
     }
+    */
 
     return sb;
   }
@@ -100,7 +107,7 @@ public class AppendExpr extends Expr
   {
     Value value = _value.eval(env);
 
-    StringValue sb = value.toStringBuilder();
+    StringValue sb = value.toStringBuilder(env);
 
     for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
       sb = sb.appendUnicode(ptr._value.eval(env));

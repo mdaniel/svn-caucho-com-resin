@@ -113,7 +113,7 @@ public class Quercus
     = new HashMap<String, JavaClassDef>();
   
   private LruCache<String, String> _classNotFoundCache
-    = new LruCache<String, String>(256);
+    = new LruCache<String, String>(64);
 
   private HashMap<String, JavaClassDef> _lowerJavaClassWrappers
     = new HashMap<String, JavaClassDef>();
@@ -148,8 +148,8 @@ public class Quercus
   private long _defCacheMissCount;
 
   // XXX: needs to be a timed LRU
-  private LruCache<String, SessionArrayValue> _sessionMap
-    = new LruCache<String, SessionArrayValue>(4096);
+  //private LruCache<String, SessionArrayValue> _sessionMap
+  //  = new LruCache<String, SessionArrayValue>(4096);
 
   private HashMap<String, Object> _specialMap
     = new HashMap<String, Object>();
@@ -1297,7 +1297,7 @@ public class Quercus
   public QuercusModule findModule(String name)
   {
     ModuleInfo moduleInfo =  _modules.get(name);
-
+    
     return moduleInfo == null ? null : moduleInfo.getModule();
   }
 
@@ -1400,6 +1400,8 @@ public class Quercus
 
   protected void addModuleInfo(ModuleInfo info)
   {
+    _modules.put(info.getName(), info);
+    
     if (info.getModule() instanceof ModuleStartupListener)
       _moduleStartupListeners.add((ModuleStartupListener)info.getModule());
 

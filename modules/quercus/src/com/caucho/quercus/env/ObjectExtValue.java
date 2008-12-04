@@ -1281,6 +1281,27 @@ public class ObjectExtValue extends ObjectValue
   }
 
   /**
+   * Exports the value.
+   */
+  @Override
+  public void varExport(StringBuilder sb)
+  {
+    sb.append(getName());
+    sb.append("::__setState(array(\n");
+    
+    for (Map.Entry<Value,Value> entry : entrySet()) {
+      sb.append("\t");
+      entry.getKey().varExport(sb);
+      
+      sb.append(" => ");
+      entry.getValue().varExport(sb);
+      sb.append(",\n");
+    }
+    
+    sb.append("))");
+  }
+  
+  /**
    * Converts to a string.
    * @param env
    */

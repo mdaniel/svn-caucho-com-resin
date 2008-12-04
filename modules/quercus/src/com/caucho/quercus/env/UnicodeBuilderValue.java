@@ -70,12 +70,6 @@ public class UnicodeBuilderValue extends StringBuilderValue
     super(buffer, offset, length);
   }
 
-  private UnicodeBuilderValue(char []buffer, int offset, int length,
-                             String copy)
-  {
-    super(buffer, offset, length);
-  }
-
   public UnicodeBuilderValue(char []buffer)
   {
     super(buffer, 0, buffer.length);
@@ -112,6 +106,22 @@ public class UnicodeBuilderValue extends StringBuilderValue
     super(v1);
   }
 
+  public UnicodeBuilderValue(StringBuilderValue v)
+  {
+    if (v._isCopy) {
+      _buffer = new char[v._buffer.length];
+      System.arraycopy(v._buffer, 0, _buffer, 0, v._length);
+      _length = v._length;
+    }
+    else {
+      _buffer = v._buffer;
+      _length = v._length;
+      v._isCopy = true;
+      
+      _bufferOwner = v;
+    }
+  }
+  
   /**
    * Creates the string.
    */
@@ -208,7 +218,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
   @Override
   public StringValue toStringBuilder()
   {
-    return new UnicodeBuilderValue(_buffer, 0, _length);
+    return new UnicodeBuilderValue(this);
   }
   
   /**
@@ -217,17 +227,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
   @Override
   public StringValue toStringBuilder(Env env)
   {
-    // add padding since the string will likely be appended
-    
-    int length = (_length + 64) & ~0x1f;
-
-    UnicodeBuilderValue v = new UnicodeBuilderValue(length);
-
-    System.arraycopy(_buffer, 0, v._buffer, 0, _length);
-
-    v._length = _length;
-    
-    return v;
+    return new UnicodeBuilderValue(this);
   }
 
   /**
@@ -236,21 +236,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
   @Override
   public StringValue toStringBuilder(Env env, Value value)
   {
-    int length = _length;
-
-    if (value instanceof StringValue) {
-      length += ((StringValue) value).length();
-    }
-    
-    // add padding since the string will likely be appended
-    
-    length = (length + 64) & ~0x1f;
-
-    UnicodeBuilderValue v = new UnicodeBuilderValue(length);
-
-    System.arraycopy(_buffer, 0, v._buffer, 0, _length);
-
-    v._length = _length;
+    UnicodeBuilderValue v = new UnicodeBuilderValue(this);
 
     value.appendTo(v);
     
@@ -522,14 +508,6 @@ public class UnicodeBuilderValue extends StringBuilderValue
   {
     return _buffer;
   }
-  
-  /**
-   * Returns the buffer backing this StringBuilderValue.
-   */
-  public char []getBuffer()
-  {
-    return _buffer;
-  }
 
   /**
    * Prints the value.
@@ -619,21 +597,7 @@ public class UnicodeBuilderValue extends StringBuilderValue
 
     out.print("\"");
   }
-
-  //
-  // java.lang.Object methods
-  //
-
-  private void copyOnWrite()
-  {
-    if (_isCopy) {
-      _isCopy = false;
-      char []buffer = new char[_buffer.length];
-      System.arraycopy(_buffer, 0, buffer, 0, _length);
-      _buffer = buffer;
-    }
-  }
-
+  
   //
   // static helper functions
   //

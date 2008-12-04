@@ -623,6 +623,23 @@ public class Var extends Value
   {
     return _value.toStringBuilder(env);
   }
+  
+  /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder(Env env, Value value)
+  {
+    return _value.toStringBuilder(env, value);
+  }
+  
+  /**
+   * Converts to a string builder
+   */
+  public StringValue toStringBuilder(Env env, StringValue value)
+  {
+    return _value.toStringBuilder(env, value);
+  }
 
   @Override
   public java.io.InputStream toInputStream()
