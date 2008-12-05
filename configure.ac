@@ -952,7 +952,7 @@ OPENSSL_LIB=${withval}
 if test ! -r "${OPENSSL_LIB}/libssl.a" -a \
         ! -r "${OPENSSL_LIB}/libssl.dylib" -a \
 	! -r "${OPENSSL_LIB}/libssl.so"; then
-  AC_MSG_ERROR([Can't find valid OpenSSL library ${OPENSSL_LIB}])
+  AC_MSG_ERROR([Can't find valid OpenSSL library ${OPENSSL_LIB}/libssl.*])
 fi
 ])
 

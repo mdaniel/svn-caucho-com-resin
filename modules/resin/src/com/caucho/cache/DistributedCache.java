@@ -60,6 +60,8 @@ public class DistributedCache implements Cache
   private LruCache<Object,HashKey> _keyHashCache
     = new LruCache<Object,HashKey>(512);
 
+  private boolean _isInit;
+
   private DistributedCacheManager _distributedCacheManager;
 
   /**
@@ -84,23 +86,29 @@ public class DistributedCache implements Cache
   @PostConstruct
   public void init()
   {
-    _contextId = Environment.getEnvironmentName();
-
-    _id = _contextId + ":" + _name;
+    synchronized (this) {
+      if (_isInit)
+	return;
+      _isInit = true;
     
-    if (_valueSerializer == null)
-      _valueSerializer = new HessianSerializer();
+      _contextId = Environment.getEnvironmentName();
+
+      _id = _contextId + ":" + _name;
     
-    if (_keySerializer == null)
-      _keySerializer = new HessianSerializer();
+      if (_valueSerializer == null)
+	_valueSerializer = new HessianSerializer();
+    
+      if (_keySerializer == null)
+	_keySerializer = new HessianSerializer();
 
-    Cluster cluster = Cluster.getCurrent();
+      Cluster cluster = Cluster.getCurrent();
 
-    if (cluster == null)
-      throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a clustered environment",
-				    getClass().getSimpleName()));
+      if (cluster == null)
+	throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a clustered environment",
+				      getClass().getSimpleName()));
 
-    _distributedCacheManager = cluster.getDistributedCacheManager();
+      _distributedCacheManager = cluster.getDistributedCacheManager();
+    }
   }
   
   /**
@@ -147,12 +155,12 @@ public class DistributedCache implements Cache
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-			       byte[] oldValueHash,
-			       Object value)
+			       Object value,
+			       byte[] oldValueHash)
   {
-    HashKey hashKey = getHashKey(key);
+    put(key, value);
     
-    return false;
+    return true;
   }
 
   /**

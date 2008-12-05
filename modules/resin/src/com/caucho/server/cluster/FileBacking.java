@@ -258,9 +258,9 @@ public class FileBacking {
       }
 
       String sql = ("CREATE TABLE " + _tableName + " (\n"
-                    + "  id BINARY(20) PRIMARY KEY,\n"
-                    + "  store_id BINARY(20),\n"
-                    + "  data_hash BINARY(20),\n"
+                    + "  id BINARY(32) PRIMARY KEY,\n"
+                    + "  store_id BINARY(32),\n"
+                    + "  data_hash BINARY(32),\n"
 		    + "  data BLOB,\n"
 		    + "  expire_interval BIGINT,\n"
 		    + "  update_time BIGINT,\n"

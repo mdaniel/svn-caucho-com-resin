@@ -66,8 +66,6 @@ public class Management
   private Server _server;
   private Path _path;
   
-  private BamBroker _adminBroker;
-
   private HostConfig _hostConfig;
 
   private ManagementAuthenticator _auth = new ManagementAuthenticator();
@@ -157,7 +155,10 @@ public class Management
    */
   public BamBroker getAdminBroker()
   {
-    return _adminBroker;
+    if (_server != null)
+      return _server.getBamBroker();
+    else
+      return null;
   }
 
   /**
@@ -296,6 +297,7 @@ public class Management
       if (getPath() != null)
         getPath().mkdirs();
 
+      /*
       HempBrokerManager brokerManager = HempBrokerManager.getCurrent();
 
       // XXX:
@@ -307,6 +309,7 @@ public class Management
 	brokerManager.addBroker(brokerName, _adminBroker);
 	brokerManager.addBroker("resin.caucho", _adminBroker);
       }
+      */
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

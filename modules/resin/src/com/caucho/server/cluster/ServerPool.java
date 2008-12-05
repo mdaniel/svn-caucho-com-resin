@@ -854,6 +854,8 @@ public class ServerPool
           _activeCount++;
 	  _keepaliveCountTotal++;
 
+	  stream.clearFreeTime();
+
           return stream;
         }
       }

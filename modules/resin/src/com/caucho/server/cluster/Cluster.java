@@ -545,15 +545,6 @@ public class Cluster
   }
 
   /**
-   * Creates the cluster's distributed cache manager
-   */
-  protected DistributedCacheManager
-    createDistributedCacheManager(Server server)
-  {
-    return new FileCacheManager(server);
-  }
-
-  /**
    * Adds a program.
    */
   public void addBuilderProgram(ConfigProgram program)
@@ -573,6 +564,7 @@ public class Cluster
 	                        _serverList.size() > 1 ? _serverList.get(1) : null,
 	                        _serverList.size() > 2 ? _serverList.get(2) : null);
     }
+
     String serverId = _serverIdLocal.get();
 
     if (serverId == null)

@@ -37,6 +37,7 @@ public class DeployCommitQuery implements java.io.Serializable
   private String _hex;
   private String _user;
   private String _message;
+  private String _version;
   private HashMap<String,String> _attr;
 
   private DeployCommitQuery()
@@ -47,12 +48,14 @@ public class DeployCommitQuery implements java.io.Serializable
 			   String hex,
 			   String user,
 			   String message,
+			   String version,
 			   HashMap<String,String> attr)
   {
     _tag = tag;
     _hex = hex;
     _user = user;
     _message = message;
+    _version = version;
     _attr = attr;
   }
 
@@ -66,9 +69,19 @@ public class DeployCommitQuery implements java.io.Serializable
     return _hex;
   }
 
+  public String getUser()
+  {
+    return _user;
+  }
+
   public String getMessage()
   {
     return _message;
+  }
+
+  public String getVersion()
+  {
+    return _version;
   }
 
   @Override

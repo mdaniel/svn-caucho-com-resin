@@ -215,6 +215,14 @@ public final class ReadStream extends InputStream
   {
     return _readTime;
   }
+
+  /**
+   * Returns the last read-time.
+   */
+  public void clearReadTime()
+  {
+    _readTime = 0;
+  }
   
   /**
    * Sets the current read position.

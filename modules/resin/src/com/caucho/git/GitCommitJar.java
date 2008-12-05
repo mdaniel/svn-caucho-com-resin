@@ -50,7 +50,7 @@ public class GitCommitJar {
   private GitCommitTree _commit = new GitCommitTree();
 
   private Path _jar;
-
+  
   private Path _tempJar;
 
   public GitCommitJar(Path jar)

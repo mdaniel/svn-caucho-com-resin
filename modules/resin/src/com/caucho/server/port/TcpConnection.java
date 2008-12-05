@@ -43,7 +43,9 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -645,6 +647,10 @@ public class TcpConnection extends Connection
      
       if (log.isLoggable(Level.FINER)) {
         log.finer(dbgId() + e);
+      }
+    } catch (InterruptedIOException e) {
+      if (log.isLoggable(Level.FINEST)) {
+        log.log(Level.FINEST, dbgId() + e, e);
       }
     } catch (IOException e) {
       if (log.isLoggable(Level.FINE)) {

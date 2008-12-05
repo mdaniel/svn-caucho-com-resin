@@ -52,6 +52,16 @@ public class GitTree {
     return _treeMap;
   }
 
+  public String getHash(String name)
+  {
+    Entry entry = getMap().get(name);
+
+    if (entry != null)
+      return entry.getSha1();
+    else
+      return null;
+  }
+
   public void addBlob(String name, int mode, String sha1)
   {
     Entry entry = new Entry(name, 0100000 | (mode & 0777), sha1);

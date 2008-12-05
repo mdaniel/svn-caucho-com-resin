@@ -98,12 +98,13 @@ public class HmuxClient
       long id = 0;
 
       stream.queryGet(id, to, "", query);
+      stream.writeQuit();
 
       Object result = stream.readQueryResult(id);
 
       int code = stream.getReadStream().read();
 
-      if (code == 'Q')
+      if (code == 'Q' || code == 'Y')
 	isQuit = true;
       else if (code != 'X')
 	throw new IllegalStateException("unexpected code " + (char) code);
@@ -138,12 +139,13 @@ public class HmuxClient
       long id = 0;
 
       stream.querySet(id, to, "", query);
+      stream.writeQuit();
 
       Object result = stream.readQueryResult(id);
 
       int code = stream.getReadStream().read();
 
-      if (code == 'Q')
+      if (code == 'Q' || code == 'Y')
 	isQuit = true;
       else if (code != 'X')
 	throw new IllegalStateException("unexpected code " + (char) code);

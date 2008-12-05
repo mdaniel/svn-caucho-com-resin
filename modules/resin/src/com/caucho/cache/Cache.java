@@ -62,7 +62,7 @@ public interface Cache
    *
    * @return true if the update succeeds, false if it fails
    */
-  public boolean compareAndPut(Object key, byte[] oldValueHash, Object value);
+  public boolean compareAndPut(Object key, Object value, byte[] oldValueHash);
 
   /**
    * Removes the entry from the cache

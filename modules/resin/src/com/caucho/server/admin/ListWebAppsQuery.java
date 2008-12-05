@@ -33,6 +33,15 @@ import java.io.Serializable;
 public class ListWebAppsQuery implements Serializable {
   private String _host;
 
+  public ListWebAppsQuery()
+  {
+  }
+
+  public ListWebAppsQuery(String host)
+  {
+    _host = host;
+  }
+
   public String getHost()
   {
     return _host;
@@ -41,5 +50,11 @@ public class ListWebAppsQuery implements Serializable {
   public void setHost(String host)
   {
     _host = host;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _host + "]";
   }
 }

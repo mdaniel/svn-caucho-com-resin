@@ -137,7 +137,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
                                             Target []targetList)
     throws TargetException, IllegalStateException
   {
-    return new TargetModuleID[0];
+    return getAvailableModules(moduleType, targetList);
   }
 
   /**
@@ -157,24 +157,24 @@ public class DeploymentManagerImpl implements DeploymentManager {
                                               Target []targetList)
     throws TargetException, IllegalStateException
   {
-    String[] hosts = new String[targetList.length];
-
+    ArrayList<TargetModuleID> resultList = new ArrayList<TargetModuleID>();
+    
     for (int i = 0; i < targetList.length; i++) {
       Target target = targetList[i];
 
-      hosts[i] = target.getName();
+      WebAppQuery []webApps = _deployClient.listWebApps(target.getName());
+
+      for (int j = 0; webApps != null && j < webApps.length; j++) {
+	String host = webApps[j].getHost();
+	String tag = webApps[j].getTag();
+
+	resultList.add(new TargetModuleIDImpl(new TargetImpl(host, null),
+					      tag));
+      }
     }
 
-    WebAppQuery []apps = _deployClient.listWebApps(hosts);
-
-    TargetModuleID []result = new TargetModuleID[apps.length];
-
-    for (int i = 0; i < apps.length; i++) {
-      WebAppQuery app = apps[i];
-
-      result[i] = new TargetModuleIDImpl(new TargetImpl(app.getHost(), null),
-                                         app.getWebAppId());
-    }
+    TargetModuleID []result = new TargetModuleID[resultList.size()];
+    resultList.toArray(result);
 
     return result;
   }
@@ -245,11 +245,11 @@ public class DeploymentManagerImpl implements DeploymentManager {
       String tag = type + "s/default/" + name;
 
       if (archive != null)
-	_deployClient.deployJar(Vfs.lookup(archive.getAbsolutePath()),
-				tag, _user, "", null, null);
+	_deployClient.deployJarContents(Vfs.lookup(archive.getAbsolutePath()),
+					tag, _user, "", null, null);
       else
-	_deployClient.deployJar(archiveStream,
-				tag, _user, "", null, null);
+	_deployClient.deployJarContents(archiveStream,
+					tag, _user, "", null, null);
 
       _deployClient.deploy(tag);
 
@@ -260,8 +260,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
       for (int i = 0; i < targetList.length; i++) {
         Target target = targetList[i];
 
-        targetModules[i] = new TargetModuleIDImpl((TargetImpl) target,
-                                                  '/' + name);
+        targetModules[i] = new TargetModuleIDImpl((TargetImpl) target, tag);
       }
 
       ProgressObjectImpl result = new ProgressObjectImpl(targetModules);
@@ -344,11 +343,11 @@ public class DeploymentManagerImpl implements DeploymentManager {
       TargetModuleID targetModuleID = moduleIDList[i];
 
       String host = targetModuleID.getTarget().getName();
-      String webApp = targetModuleID.getModuleID();
+      String tag = targetModuleID.getModuleID();
 
-      _deployClient.start("war", host, webApp);
+      _deployClient.start(tag);
       
-      sb.append(host).append(':').append(webApp).append(' ');
+      sb.append(tag).append(' ');
     }
 
     ProgressObjectImpl result = new ProgressObjectImpl(moduleIDList);
@@ -364,17 +363,20 @@ public class DeploymentManagerImpl implements DeploymentManager {
   public ProgressObject stop(TargetModuleID []moduleIDList)
     throws IllegalStateException
   {
+    System.out.println("STOP:");
     StringBuilder sb = new StringBuilder();
 
     for (int i = 0; i < moduleIDList.length; i++) {
       TargetModuleID targetModuleID = moduleIDList[i];
 
       String host = targetModuleID.getTarget().getName();
-      String webApp = targetModuleID.getModuleID();
+      String tag = targetModuleID.getModuleID();
 
-      _deployClient.stop("war", host, webApp);
+      System.out.println("STOP2:" + tag);
+      _deployClient.stop(tag);
+      System.out.println("STOP2a:" + tag);
       
-      sb.append(host).append(':').append(webApp).append(' ');
+      sb.append(tag).append(' ');
     }
 
     ProgressObjectImpl result = new ProgressObjectImpl(moduleIDList);
@@ -392,15 +394,17 @@ public class DeploymentManagerImpl implements DeploymentManager {
   {
     StringBuilder sb = new StringBuilder();
 
+    System.out.println("UNDEPLOYA:");
     for (int i = 0; i < moduleIDList.length; i++) {
       TargetModuleID targetModuleID = moduleIDList[i];
 
       String host = targetModuleID.getTarget().getName();
-      String webApp = targetModuleID.getModuleID();
+      String tag = targetModuleID.getModuleID();
 
-      _deployClient.undeploy("war", host, webApp);
+      System.out.println("UNDEPLOY: " + tag);
+      _deployClient.undeploy(tag);
       
-      sb.append(host).append(':').append(webApp).append(' ');
+      sb.append(tag).append(' ');
     }
 
     ProgressObjectImpl result = new ProgressObjectImpl(moduleIDList);

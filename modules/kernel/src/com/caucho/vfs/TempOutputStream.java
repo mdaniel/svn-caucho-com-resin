@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -71,6 +72,11 @@ public class TempOutputStream extends OutputStream
     }
   }
 
+  public void write(byte []buffer)
+  {
+    write(buffer, 0, buffer.length);
+  }
+
   private void addBuffer(TempBuffer buf)
   {
     buf._next = null;
@@ -87,13 +93,11 @@ public class TempOutputStream extends OutputStream
 
   @Override
   public void flush()
-    throws IOException
   {
   }
 
   @Override
   public void close()
-    throws IOException
   {
   }
 

@@ -39,7 +39,7 @@ import java.util.zip.*;
 /**
  * Top-level class for a repository
  */
-public class GitObjectStream {
+public class GitObjectStream extends InputStream {
   private static final HashMap<String,GitType> _gitTypeMap
     = new HashMap<String,GitType>();
   
@@ -162,16 +162,37 @@ public class GitObjectStream {
   
   public InputStream getInputStream()
   {
-    return _is;
+    return this;
+  }
+
+  public int read()
+    throws IOException
+  {
+    return _is.read();
+  }
+
+  public int read(byte []buffer, int offset, int length)
+    throws IOException
+  {
+    return _is.read(buffer, offset, length);
   }
 
   public void close()
   {
-    ReadStream is = _rawStream;
+    ReadStream in = _rawStream;
     _rawStream = null;
 
-    if (is != null)
-      is.close();
+    if (in != null)
+      in.close();
+
+    InputStream is = _is;
+    _is = null;
+
+    try {
+      if (is != null)
+	is.close();
+    } catch (IOException e) {
+    }
   }
 
   @Override

@@ -106,9 +106,13 @@ public class QueryGet extends Packet {
   public void dispatch(BamStream handler, BamStream toSource)
   {
     if (! handler.queryGet(getId(), getTo(), getFrom(), getValue())) {
-      toSource.queryError(getId(), getFrom(), getTo(), getValue(),
-			      new BamError(BamError.TYPE_CANCEL,
-					    BamError.ITEM_NOT_FOUND));
+      String to = getFrom();
+      if (to == null)
+	to = toSource.getJid();
+      
+      toSource.queryError(getId(), to, getTo(), getValue(),
+			  new BamError(BamError.TYPE_CANCEL,
+				       BamError.ITEM_NOT_FOUND));
     }
   }
 

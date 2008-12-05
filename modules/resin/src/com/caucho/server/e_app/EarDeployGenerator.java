@@ -69,12 +69,13 @@ public class EarDeployGenerator
     }
 
     if (Server.getCurrent() != null) {
-      setGit(Server.getCurrent().getGit());
+      setRepository(Server.getCurrent().getDeployRepository());
+      
       String hostName = parentContainer.getHostName();
       if ("".equals(hostName))
 	hostName = "default";
     
-      setGitPath("ears/" + hostName);
+      setRepositoryTag("ears/" + hostName);
     }
 
     _parentContainer = parentContainer;
@@ -152,13 +153,13 @@ public class EarDeployGenerator
 
     Path rootDirectory;
 
-    Path repRefPath = getGitRefPath(name);
+    String tag = getRepositoryTag() + "/" + name;
 
     if (archivePath.isDirectory()) {
       rootDirectory = getExpandDirectory().lookup(archiveName);
       archivePath = null;
     }
-    else if (repRefPath.canRead()) {
+    else if (getRepository().getTagRoot(tag) != null) {
       rootDirectory = getExpandDirectory().lookup(getExpandName(name));
     }
     else {
@@ -173,12 +174,8 @@ public class EarDeployGenerator
 
     controller.setArchivePath(archivePath);
 
-    if (getGitPath() != null) {
-      String ref = getGitPath() + "/" + name;
-
-      controller.setGit(getGit());
-      controller.setGitRefPath(getGit().getRefPath(ref));
-    }
+    controller.setRepository(getRepository());
+    controller.setRepositoryTag(tag);
 
     for (EarConfig config : _earDefaultList)
       controller.addConfigDefault(config);

@@ -38,6 +38,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
+import com.caucho.server.distcache.CacheMapEntry;
 import com.caucho.server.admin.Management;
 
 import javax.sql.DataSource;
@@ -56,7 +57,7 @@ import java.util.logging.Logger;
 /**
  * Manages backing for the cache map.
  */
-class CacheMapBacking implements AlarmListener {
+public class CacheMapBacking implements AlarmListener {
   private static final L10N L = new L10N(CacheMapBacking.class);
   private static final Logger log
     = Logger.getLogger(CacheMapBacking.class.getName());
@@ -84,11 +85,11 @@ class CacheMapBacking implements AlarmListener {
   
   private String _countQuery;
 
-  private long _version;
+  private long _serverVersion;
 
   private Alarm _alarm;
   
-  CacheMapBacking(Path path, String serverName)
+  public CacheMapBacking(Path path, String serverName)
     throws Exception
   {
     _path = path;
@@ -99,48 +100,6 @@ class CacheMapBacking implements AlarmListener {
     
     if (_tableName == null)
       throw new NullPointerException();
-
-    init();
-  }
-
-  private void init()
-    throws Exception
-  {
-    _loadQuery = ("SELECT value,access_time,version"
-		  + " FROM " + _tableName
-		  + " WHERE id=? AND is_valid=1 AND is_dead=0");
-
-    _insertQuery = ("INSERT into " + _tableName
-		    + " (id,value,is_valid,is_dead,access_time,timeout,"
-		    + "  version) "
-		    + "VALUES(?,?,1,0,?,?,?)");
-
-    _updateSaveQuery
-      = ("UPDATE " + _tableName
-	 + " SET value=?,access_time=?,is_valid=1,is_dead=0,version=?"
-	 + " WHERE id=?");
-
-    _updateAccessQuery
-      = ("UPDATE " + _tableName
-	 + " SET access_time=?,version=?"
-	 + " WHERE id=?");
-
-    _removeQuery = ("UPDATE " + _tableName
-		    + " SET is_dead=1"
-		    + " WHERE id=?");
-
-    _updateValidQuery = ("UPDATE " + _tableName
-			 + " SET is_valid=0"
-			 + " WHERE id=? AND value <> ?");
-
-    _updateVersionQuery = ("UPDATE " + _tableName
-			   + " SET access_time=?, version=?"
-			   + " WHERE id=? AND value=?");
-
-    _timeoutQuery = ("DELETE FROM " + _tableName
-		     + " WHERE access_time + 5 * timeout / 4 < ?");
-    
-    _countQuery = "SELECT count(*) FROM " + _tableName;
     
     try {
       _path.mkdirs();
@@ -154,12 +113,7 @@ class CacheMapBacking implements AlarmListener {
     
     _dataSource = dataSource;
 
-    initDatabase();
-
-    _version = initVersion();
-
-    // _alarm = new Alarm(this);
-    // _alarm.queue(0);
+    init();
   }
 
   /**
@@ -168,6 +122,62 @@ class CacheMapBacking implements AlarmListener {
   public DataSource getDataSource()
   {
     return _dataSource;
+  }
+
+  /**
+   * Returns the data source.
+   */
+  public String getTableName()
+  {
+    return _tableName;
+  }
+
+  private void init()
+    throws Exception
+  {
+    _loadQuery = ("SELECT value,access_time,server_version,item_version"
+		  + " FROM " + _tableName
+		  + " WHERE id=? AND is_valid=1 AND is_removed=0");
+
+    _insertQuery = ("INSERT into " + _tableName
+		    + " (id,value,is_valid,is_removed,access_time,timeout,"
+		    + "  server_version,item_version) "
+		    + "VALUES(?,?,1,0,?,?,?,0)");
+
+    _updateSaveQuery
+      = ("UPDATE " + _tableName
+	 + " SET value=?,access_time=?,is_valid=1,is_removed=0,"
+	 + "     server_version=?,item_version=?"
+	 + " WHERE id=? AND item_version<=?");
+
+    _updateAccessQuery
+      = ("UPDATE " + _tableName
+	 + " SET access_time=?"
+	 + " WHERE id=?");
+
+    _removeQuery = ("UPDATE " + _tableName
+		    + " SET is_removed=1"
+		    + " WHERE id=?");
+
+    _updateValidQuery = ("UPDATE " + _tableName
+			 + " SET is_valid=0"
+			 + " WHERE id=? AND value <> ?");
+
+    _updateVersionQuery = ("UPDATE " + _tableName
+			   + " SET access_time=?, server_version=?"
+			   + " WHERE id=? AND value=?");
+
+    _timeoutQuery = ("DELETE FROM " + _tableName
+		     + " WHERE access_time + 5 * timeout / 4 < ?");
+    
+    _countQuery = "SELECT count(*) FROM " + _tableName;
+
+    initDatabase();
+
+    _serverVersion = initVersion();
+
+    // _alarm = new Alarm(this);
+    // _alarm.queue(0);
   }
 
   /**
@@ -182,8 +192,9 @@ class CacheMapBacking implements AlarmListener {
       Statement stmt = conn.createStatement();
       
       try {
-	String sql = ("SELECT id, value, timeout, access_time,"
-		      + "     version, is_dead, is_valid"
+	String sql = ("SELECT id, value, is_removed, is_valid,"
+		      + "     timeout, access_time,"
+		      + "     server_version, item_version"
                       + " FROM " + _tableName + " WHERE 1=0");
 
 	ResultSet rs = stmt.executeQuery(sql);
@@ -203,12 +214,13 @@ class CacheMapBacking implements AlarmListener {
       }
 
       String sql = ("CREATE TABLE " + _tableName + " (\n"
-                    + "  id BINARY(20) PRIMARY KEY,\n"
-                    + "  value BINARY(20),\n"
+                    + "  id BINARY(32) PRIMARY KEY,\n"
+                    + "  value BINARY(32),\n"
 		    + "  timeout BIGINT,\n"
 		    + "  access_time BIGINT,\n"
-		    + "  version INTEGER,\n"
-		    + "  is_dead BIT,\n"
+		    + "  item_version BIGINT,\n"
+		    + "  server_version INTEGER,\n"
+		    + "  is_removed BIT,\n"
 		    + "  is_valid BIT)");
 
 
@@ -231,7 +243,7 @@ class CacheMapBacking implements AlarmListener {
     try {
       Statement stmt = conn.createStatement();
       
-      String sql = ("SELECT MAX(version)"
+      String sql = ("SELECT MAX(server_version)"
 		    + " FROM " + _tableName);
 
       ResultSet rs = stmt.executeQuery(sql);
@@ -252,7 +264,7 @@ class CacheMapBacking implements AlarmListener {
    *
    * @return true on successful load
    */
-  public HashKey load(HashKey id)
+  public CacheMapEntry load(HashKey id)
   {
     CacheMapConnection conn = null;
     
@@ -267,9 +279,12 @@ class CacheMapBacking implements AlarmListener {
       if (rs.next()) {
 	byte []hash = rs.getBytes(1);
 	long accessTime = rs.getLong(2);
-	long version = rs.getLong(3);
+	long serverVersion = rs.getLong(3);
+	long itemVersion = rs.getLong(4);
 
-	return new HashKey(hash);
+	HashKey valueHash = new HashKey(hash);
+
+	return new CacheMapEntry(valueHash, null, itemVersion);
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -300,7 +315,7 @@ class CacheMapBacking implements AlarmListener {
       stmt.setBytes(2, value.getHash());
       stmt.setLong(3, Alarm.getCurrentTime());
       stmt.setLong(4, timeout);
-      stmt.setLong(5, _version);
+      stmt.setLong(5, _serverVersion);
 
       int count = stmt.executeUpdate();
         
@@ -325,7 +340,10 @@ class CacheMapBacking implements AlarmListener {
    * @param value the value hash
    * @param timeout the item's timeout
    */
-  public boolean updateSave(HashKey id, HashKey value, long timeout)
+  public boolean updateSave(HashKey id,
+			    HashKey value,
+			    long timeout,
+			    long itemVersion)
   {
     CacheMapConnection conn = null;
 
@@ -335,8 +353,11 @@ class CacheMapBacking implements AlarmListener {
       PreparedStatement stmt = conn.prepareUpdateSave();
       stmt.setBytes(1, value.getHash());
       stmt.setLong(2, Alarm.getCurrentTime());
-      stmt.setLong(3, _version);
-      stmt.setBytes(4, id.getHash());
+      stmt.setLong(3, _serverVersion);
+      stmt.setLong(4, itemVersion);
+      
+      stmt.setBytes(5, id.getHash());
+      stmt.setLong(6, itemVersion);
 
       int count = stmt.executeUpdate();
         

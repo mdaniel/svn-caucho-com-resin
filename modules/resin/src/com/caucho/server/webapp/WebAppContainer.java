@@ -124,25 +124,32 @@ public class WebAppContainer
   private Throwable _configException;
 
   // lifecycle
-  private final Lifecycle _lifecycle = new Lifecycle();
+  protected final Lifecycle _lifecycle;
 
   /**
    * Creates the webApp with its environment loader.
    */
   public WebAppContainer()
   {
-    this((EnvironmentClassLoader) Thread.currentThread().getContextClassLoader());
+    this((EnvironmentClassLoader) Thread.currentThread().getContextClassLoader(),
+	 null);
   }
 
   /**
    * Creates the webApp with its environment loader.
    */
-  public WebAppContainer(EnvironmentClassLoader loader)
+  public WebAppContainer(EnvironmentClassLoader loader,
+			 Lifecycle lifecycle)
   {
     _rootDir = Vfs.lookup();
     _docDir = Vfs.lookup();
 
     _classLoader = loader;
+
+    if (lifecycle == null)
+      lifecycle = new Lifecycle(log, toString(), Level.FINE);
+    
+    _lifecycle = lifecycle;
 
     /*
     Environment.addEnvironmentListener(this, loader);
@@ -636,22 +643,25 @@ public class WebAppContainer
   public void init()
     throws Exception
   {
-    if (! _lifecycle.toInitializing())
-      return;
-
-    log.fine(this + " initializing");
-
-    _lifecycle.toInit();
   }
 
+  public final void start()
+  {
+    if (! _lifecycle.toStarting())
+      return;
+
+    try {
+      startImpl();
+    } finally {
+      _lifecycle.toActive();
+    }
+  }
+  
   /**
    * Starts the container.
    */
-  protected void start()
+  protected void startImpl()
   {
-    if (! _lifecycle.toActive())
-      return;
-
     /*
     try {
       _earDeploy.start();
@@ -1200,5 +1210,11 @@ public class WebAppContainer
   public void environmentStop(EnvironmentClassLoader loader)
   {
     stop();
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _classLoader.getId() + "]";
   }
 }

@@ -33,6 +33,8 @@ package com.caucho.server.cluster;
  * Creates hashes for the identifiers.
  */
 public class HashKey {
+  public static final HashKey NULL = new HashKey(new byte[HashManager.SIZE]);
+  
   private final byte []_hash;
   
   /**

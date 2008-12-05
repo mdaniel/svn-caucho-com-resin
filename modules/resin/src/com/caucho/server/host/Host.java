@@ -101,8 +101,6 @@ public class Host extends WebAppContainer
   private boolean _isRootDirSet;
   private boolean _isDocDirSet;
 
-  private final Lifecycle _lifecycle;
-
   private String _configETag = null;
   
   /**
@@ -110,7 +108,8 @@ public class Host extends WebAppContainer
    */
   public Host(HostContainer parent, HostController controller, String hostName)
   {
-    super(EnvironmentClassLoader.create("host:" + hostName));
+    super(EnvironmentClassLoader.create("host:" + hostName),
+	  new Lifecycle(log, "Host[" + hostName + "]", Level.INFO));
 
     try {
       _controller = controller;
@@ -121,8 +120,6 @@ public class Host extends WebAppContainer
       _hostLocal.set(this, getClassLoader());
     } catch (Throwable e) {
       _configException = e;
-    } finally {
-      _lifecycle = new Lifecycle(log, toString(), Level.INFO);
     }
   }
 
@@ -452,11 +449,8 @@ public class Host extends WebAppContainer
   /**
    * Starts the host.
    */
-  public void start()
+  protected void startImpl()
   {
-    if (! _lifecycle.toStarting())
-      return;
-    
     if (getURL().equals("") && _parent != null) {
       _url = _parent.getURL();
     }
@@ -474,15 +468,13 @@ public class Host extends WebAppContainer
 
       initBam();
       
-      super.start();
+      super.startImpl();
       
       loader.start();
 
       if (_parent != null)
 	_parent.clearCache();
     } finally {
-      _lifecycle.toActive();
-      
       thread.setContextClassLoader(oldLoader);
     }
   }

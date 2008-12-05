@@ -359,13 +359,13 @@ public class BamSkeleton<C>
     }
   }
 
-  public void dispatchQueryResult(C target, long id, String to, String from,
-                                  Serializable value)
+  public boolean dispatchQueryResult(C target, long id, String to, String from,
+				     Serializable value)
   {
     Method queryHandler = _queryResultHandlers.get(value.getClass());
 
     if (queryHandler == null)
-      return;
+      return false;
     
     try {
       queryHandler.invoke(target, id, to, from, value);
@@ -376,15 +376,17 @@ public class BamSkeleton<C>
     catch (InvocationTargetException e) {
       log.log(Level.FINE, e.toString(), e);
     }
+
+    return true;
   }
 
-  public void dispatchQueryError(C target, long id, String to, String from,
-                                 Serializable value, BamError error)
+  public boolean dispatchQueryError(C target, long id, String to, String from,
+				    Serializable value, BamError error)
   {
     Method queryErrorHandler = _queryErrorHandlers.get(value.getClass());
 
     if (queryErrorHandler == null)
-      return;
+      return false;
     
     try {
       queryErrorHandler.invoke(target, id, to, from, value, error);
@@ -395,6 +397,8 @@ public class BamSkeleton<C>
     catch (InvocationTargetException e) {
       log.log(Level.FINE, e.toString(), e);
     }
+
+    return true;
   }
 
   public void dispatchPresence(C target, String to, String from,

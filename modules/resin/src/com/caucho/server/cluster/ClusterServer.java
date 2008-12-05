@@ -67,6 +67,8 @@ public class ClusterServer {
 
   private boolean _isDynamic;
 
+  private String _bamJid;
+  
   private ClusterPort _clusterPort;
   private boolean _isClusterPortConfig;
   
@@ -137,10 +139,22 @@ public class ClusterServer {
    */
   public String getBamAdminName()
   {
-    if ("".equals(_id))
-      return "default.resin.admin";
-    else
-      return _id + ".resin.admin";
+    if (_bamJid == null) {
+      StringBuilder sb = new StringBuilder();
+      
+      String clusterId = _cluster.getId();
+      if (clusterId.equals(""))
+	clusterId = "default";
+      
+      sb.append(clusterId.replace('.', '_'));
+      sb.append('.');
+      sb.append(getIndex());
+      sb.append(".resin.admin");
+
+      _bamJid = sb.toString();
+    }
+    
+    return _bamJid;
   }
 
   /**
@@ -165,6 +179,24 @@ public class ClusterServer {
   public ClusterTriad getClusterTriad()
   {
     return _cluster.getTriad(this);
+  }
+
+  /**
+   * Returns true if this server is a triad.
+   */
+  public boolean isTriad()
+  {
+    ClusterTriad triad = getClusterTriad();
+
+    return triad.isTriad(this);
+  }
+
+  /**
+   * Returns the triad owner
+   */
+  public ClusterTriad.Owner getTriadOwner()
+  {
+    return getClusterTriad().getOwner(getIndex());
   }
 
   /**

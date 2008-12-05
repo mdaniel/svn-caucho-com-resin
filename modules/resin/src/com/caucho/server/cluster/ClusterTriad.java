@@ -105,6 +105,16 @@ public final class ClusterTriad
   {
     return _serverC;
   }
+
+  /**
+   * Returns true for any of the triad servers.
+   */
+  public boolean isTriad(ClusterServer server)
+  {
+    return (_serverA == server
+	    || _serverB == server
+	    || _serverC == server);
+  }
   
   /**
    * Returns the primary server given an ownership tag.
@@ -150,28 +160,33 @@ public final class ClusterTriad
       return null;
      
     switch (owner) {
-    case A_B:
-    case A_C:
+    case B_A:
+    case C_A:
       return getServerA();
       
-    case B_C:
-    case B_A:
+    case A_B:
       if (getServerB() != null)
 	return getServerB();
       else
-	return getServerA();
+	return getServerC();
       
-    case C_A:
+    case A_C:
+      if (getServerC() != null)
+	return getServerC();
+      else
+	return getServerB();
+      
+    case B_C:
       if (getServerC() != null)
 	return getServerC();
       else
 	return getServerA();
       
     case C_B:
-      if (getServerC() != null)
-	return getServerC();
-      else
+      if (getServerB() != null)
 	return getServerB();
+      else
+	return getServerA();
       
     default:
 	throw new IllegalStateException(L.l("'{0}' is an unknown owner", owner));
@@ -204,7 +219,57 @@ public final class ClusterTriad
 	throw new IllegalStateException(L.l("'{0}' is an unknown owner", owner));
     }
   }
-  
+
+  /**
+   * Returns the best primary or secondary triad server.
+   */
+  public ClusterServer getActiveServer(Owner owner,
+				       ClusterServer oldServer)
+  {
+    ClusterServer server;
+    ServerPool pool;
+
+    server = getPrimary(owner);
+    pool = server != null ? server.getServerPool() : null;
+    
+    if (pool != null && pool.isActive() && server != oldServer)
+      return server;
+
+    server = getSecondary(owner);
+    pool = server != null ? server.getServerPool() : null;
+    
+    if (pool != null && pool.isActive() && server != oldServer)
+      return server;
+
+    server = getTertiary(owner);
+    pool = server != null ? server.getServerPool() : null;
+    
+    if (pool != null && pool.isActive() && server != oldServer)
+      return server;
+
+    // force the send
+
+    server = getPrimary(owner);
+    pool = server != null ? server.getServerPool() : null;
+    
+    if (pool != null && server != oldServer)
+      return server;
+
+    server = getSecondary(owner);
+    pool = server != null ? server.getServerPool() : null;
+    
+    if (pool != null && server != oldServer)
+      return server;
+
+    server = getTertiary(owner);
+    pool = server != null ? server.getServerPool() : null;
+    
+    if (pool != null && server != oldServer)
+      return server;
+
+    return null;
+  }
+
   /**
    * Returns the owner for an index
    */

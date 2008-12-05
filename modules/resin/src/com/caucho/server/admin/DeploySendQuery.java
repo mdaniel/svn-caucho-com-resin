@@ -6,36 +6,25 @@
 
 package com.caucho.server.admin;
 
+import com.caucho.vfs.*;
+import java.io.InputStream;
+import java.io.IOException;
 import java.util.*;
 
 public class DeploySendQuery implements java.io.Serializable
 {
-  private int _sequenceId;
   private String _sha1;
-  private byte []_buffer;
-  private int _length;
-  private boolean _isEnd;
+  private StreamSource _source;
 
   private DeploySendQuery()
   {
   }
 
-  public DeploySendQuery(int seq,
-			 String sha1,
-			 byte []buffer,
-			 int length,
-			 boolean isEnd)
+  public DeploySendQuery(String sha1,
+			 StreamSource source)
   {
-    _sequenceId = seq;
     _sha1 = sha1;
-    _buffer = buffer;
-    _length = length;
-    _isEnd = isEnd;
-  }
-
-  public int getSequenceId()
-  {
-    return _sequenceId;
+    _source = source;
   }
 
   public String getSha1()
@@ -43,25 +32,15 @@ public class DeploySendQuery implements java.io.Serializable
     return _sha1;
   }
 
-  public byte []getBuffer()
+  public InputStream getInputStream()
+    throws IOException
   {
-    return _buffer;
-  }
-
-  public int getLength()
-  {
-    return _length;
-  }
-
-  public boolean isEnd()
-  {
-    return _isEnd;
+    return _source.getInputStream();
   }
 
   @Override
   public String toString()
   {
-    return (getClass().getSimpleName()
-	    + "[" + _sequenceId + "," + _sha1 + "," + _isEnd + "]");
+    return (getClass().getSimpleName() + "[" + _sha1 + "]");
   }
 }

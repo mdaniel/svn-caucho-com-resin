@@ -41,7 +41,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>Null keys are not allowed.  LruCache is synchronized.
  */
 public class LruCache<K,V> {
-  private static final Integer NULL = new Integer(0);
+  private static final Object NULL = new Object();
+  private static final Object MISMATCH = new Object();
   
   // maximum allowed entries
   private int _capacity;
@@ -235,10 +236,7 @@ public class LruCache<K,V> {
    */
   public V put(K key, V value)
   {
-    V oldValue = put(key, value, true);
-
-    if (_isEnableListeners && oldValue instanceof CacheListener)
-      ((CacheListener) oldValue).removeEvent();
+    V oldValue = compareAndPut(null, key, value, false);
 
     return oldValue;
   }
@@ -254,7 +252,7 @@ public class LruCache<K,V> {
    */
   public V putIfNew(K key, V value)
   {
-    V oldValue = put(key, value, false);
+    V oldValue = compareAndPut(null, key, value, true);
 
     if (oldValue != null)
       return oldValue;
@@ -263,15 +261,33 @@ public class LruCache<K,V> {
   }
 
   /**
+   * Puts a new item in the cache if the current value matches oldValue.
+   *
+   * @param key the key
+   * @param value the new value
+   * @param testValue the value to test against the current
+   *
+   * @return true if the put succeeds
+   */
+  public boolean compareAndPut(V testValue, K key, V value)
+  {
+    V result = compareAndPut(testValue, key, value, true);
+
+    return testValue == result;
+  }
+
+  /**
    * Puts a new item in the cache.  If the cache is full, remove the
    * LRU item.
    *
    * @param key key to store data
    * @param value value to be stored
+   * @param testValue tests the current value in the cache
+   * @param isCompare if true, this is a compare and put
    *
    * @return old value stored under the key
    */
-  private V put(K key, V value, boolean replace)
+  private V compareAndPut(V testValue, K key, V value, boolean isCompare)
   {
     Object okey = key;
     
@@ -298,8 +314,13 @@ public class LruCache<K,V> {
 	if (item._key == okey || okey.equals(item._key)) {
 	  oldValue = item._value;
 
-	  if (replace)
-	    item._value = value;
+	  if (isCompare && testValue != oldValue) {
+	    updateLru(item);
+	    
+	    return oldValue;
+	  }
+
+	  item._value = value;
 	  
 	  if (value == oldValue)
 	    oldValue = null;
@@ -308,6 +329,10 @@ public class LruCache<K,V> {
 
 	  break;
 	}
+      }
+
+      if (isCompare && testValue != oldValue) {
+	return null;
       }
 
       if (item == null) {
@@ -334,12 +359,12 @@ public class LruCache<K,V> {
 	return null;
       }
 
-      if (_isEnableListeners && replace
+      if (_isEnableListeners
 	  && oldValue instanceof SyncCacheListener)
 	((SyncCacheListener) oldValue).syncRemoveEvent();
     }
 
-    if (_isEnableListeners && replace && oldValue instanceof CacheListener)
+    if (_isEnableListeners && oldValue instanceof CacheListener)
       ((CacheListener) oldValue).removeEvent();
 
     return oldValue;

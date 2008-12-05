@@ -35,6 +35,9 @@ import java.security.*;
  * Creates hashes for the identifiers.
  */
 public class HashManager {
+  public static final int SIZE = 32;
+  public static final String HASH_ALGORITHM = "SHA-256";
+  
   private MessageDigest _digest;
   
   /**
@@ -43,7 +46,7 @@ public class HashManager {
   public HashManager()
   {
     try {
-      _digest = MessageDigest.getInstance("SHA-1");
+      _digest = MessageDigest.getInstance(HASH_ALGORITHM);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

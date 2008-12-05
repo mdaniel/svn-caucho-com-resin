@@ -173,6 +173,22 @@ public class TempStream extends StreamImpl implements java.io.Serializable
     
     rs.init(tempReadStream, null);
   }
+
+  /**
+   * Returns an input stream to the contents, freeing the value
+   * automatically.
+   */
+  public InputStream getInputStream()
+    throws IOException
+  {
+    close();
+    
+    TempBuffer head = _head;
+    _head = null;
+    _tail = null;
+    
+    return new TempInputStream(head);
+  }
   
   public InputStream openInputStream()
     throws IOException

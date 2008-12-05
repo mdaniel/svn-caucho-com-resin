@@ -106,10 +106,15 @@ public class HempMemoryQueue implements BamStream, Runnable
    * Query an entity
    */
   public boolean queryGet(long id,
-			      String to,
-			      String from,
-			      Serializable query)
+			  String to,
+			  String from,
+			  Serializable query)
   {
+    if (from == null) {
+      Thread.dumpStack();
+      throw new NullPointerException();
+    }
+    
     enqueue(new QueryGet(id, to, from, query));
     
     return true;
@@ -237,11 +242,11 @@ public class HempMemoryQueue implements BamStream, Runnable
 
   protected void enqueue(Packet packet)
   {
-    if (log.isLoggable(Level.FINER)) {
+    if (log.isLoggable(Level.FINEST)) {
       int size = (_head - _tail + _queue.length) % _queue.length;
-      log.finer(this + " enqueue(" + size + ") " + packet);
+      log.finest(this + " enqueue(" + size + ") " + packet);
     }
-
+    
     boolean isStartThread = false;
     
     synchronized (this) {
@@ -305,8 +310,8 @@ public class HempMemoryQueue implements BamStream, Runnable
       boolean isValid = false;
       
       try {
-	if (log.isLoggable(Level.FINER))
-	  log.finer(this + " dequeue " + packet);
+	if (log.isLoggable(Level.FINEST))
+	  log.finest(this + " dequeue " + packet);
 	
 	packet.dispatch(getAgentStream(), _brokerStream);
 	

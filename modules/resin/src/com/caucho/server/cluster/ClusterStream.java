@@ -135,6 +135,15 @@ public class ClusterStream {
   }
 
   /**
+   * Sets the free time.
+   */
+  public void clearFreeTime()
+  {
+    _freeTime = 0;
+    _is.clearReadTime();
+  }
+
+  /**
    * Returns true if nearing end of free time.
    */
   public boolean isLongIdle()
@@ -144,13 +153,12 @@ public class ClusterStream {
     return (_pool.getLoadBalanceIdleTime() < now - _freeTime + 2000L);
   }
 
-  public boolean message(String to, String from,
-			 Serializable query)
+  public boolean message(String to, String from, Serializable query)
     throws IOException
   {
     WriteStream out = getWriteStream();
 
-    out.write(HmuxRequest.HMTP_MESSAGE);
+    out.write(HmuxRequest.ADMIN_MESSAGE);
     out.write(0);
     out.write(0);
 
@@ -160,9 +168,6 @@ public class ClusterStream {
     Hessian2StreamingOutput hOut = getHessianOutputStream();
 
     hOut.writeObject(query);
-
-    out.write(HmuxRequest.HMUX_QUIT);
-    out.flush();
 
     return true;
   }
@@ -173,7 +178,7 @@ public class ClusterStream {
   {
     WriteStream out = getWriteStream();
 
-    out.write(HmuxRequest.HMTP_QUERY_GET);
+    out.write(HmuxRequest.ADMIN_QUERY_GET);
     out.write(0);
     out.write(8);
 
@@ -184,20 +189,19 @@ public class ClusterStream {
     Hessian2StreamingOutput hOut = getHessianOutputStream();
 
     hOut.writeObject(query);
-
-    out.write(HmuxRequest.HMUX_QUIT);
-    out.flush();
 
     return true;
   }
 
-  public boolean querySet(long id, String to, String from,
-			      Serializable query)
+  public boolean querySet(long id,
+			  String to,
+			  String from,
+			  Serializable query)
     throws IOException
   {
     WriteStream out = getWriteStream();
 
-    out.write(HmuxRequest.HMTP_QUERY_SET);
+    out.write(HmuxRequest.ADMIN_QUERY_SET);
     out.write(0);
     out.write(8);
 
@@ -208,20 +212,19 @@ public class ClusterStream {
     Hessian2StreamingOutput hOut = getHessianOutputStream();
 
     hOut.writeObject(query);
-
-    out.write(HmuxRequest.HMUX_QUIT);
-    out.flush();
 
     return true;
   }
 
-  public boolean queryResult(long id, String to, String from,
-				 Serializable query)
+  public boolean queryResult(long id,
+			     String to,
+			     String from,
+			     Serializable query)
     throws IOException
   {
     WriteStream out = getWriteStream();
 
-    out.write(HmuxRequest.HMTP_QUERY_RESULT);
+    out.write(HmuxRequest.ADMIN_QUERY_RESULT);
     out.write(0);
     out.write(8);
 
@@ -232,9 +235,6 @@ public class ClusterStream {
     Hessian2StreamingOutput hOut = getHessianOutputStream();
 
     hOut.writeObject(query);
-
-    out.write(HmuxRequest.HMUX_QUIT);
-    out.flush();
 
     return true;
   }
@@ -246,7 +246,7 @@ public class ClusterStream {
 
     int code = in.read();
 
-    if (code != HmuxRequest.HMTP_QUERY_RESULT)
+    if (code != HmuxRequest.ADMIN_QUERY_RESULT)
       throw new IOException(L.l("expected query result at '" +
 				(char) code + "' " + code));
 
@@ -298,8 +298,14 @@ public class ClusterStream {
   {
     // #2369 - the load balancer might set its own view of the free
     // time
-    if (_is != null && _freeTime <= 0)
+    if (_is != null && _freeTime <= 0) {
       _freeTime = _is.getReadTime();
+      
+      if (_freeTime <= 0) {
+	// for write-only, the read time is zero
+	_freeTime = Alarm.getCurrentTime();
+      }
+    }
 
     _pool.free(this);
   }

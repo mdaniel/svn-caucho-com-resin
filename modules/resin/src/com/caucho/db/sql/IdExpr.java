@@ -224,6 +224,25 @@ class IdExpr extends Expr {
     row.evalToResult(_column, result);
   }
 
+  /**
+   * Evaluates the expression to a buffer
+   *
+   * @param result the result buffer
+   *
+   * @return the length of the result
+   */
+  @Override
+  public int evalToBuffer(QueryContext context,
+			  byte []buffer,
+			  int offset)
+    throws SQLException
+  {
+    TableIterator []rows = context.getTableIterators();
+    TableIterator row = rows[_tableIndex];
+
+    return row.getBuffer(_column, buffer, offset);
+  }
+
   public boolean evalEqual(QueryContext context, byte []matchBuffer)
     throws SQLException
   {

@@ -31,20 +31,20 @@ package com.caucho.server.admin;
 import java.io.Serializable;
 import java.net.URL;
 
-public class WebAppQuery
-  implements Serializable {
-  private String _webAppId;
+public class WebAppQuery implements Serializable {
+  private String _tag;
+  
   private String _host;
   private String _url;
 
-  public String getWebAppId()
+  public String getTag()
   {
-    return _webAppId;
+    return _tag;
   }
 
-  public void setWebAppId(String webAppId)
+  public void setTag(String tag)
   {
-    _webAppId = webAppId;
+    _tag = tag;
   }
 
   public String getHost()
@@ -65,5 +65,11 @@ public class WebAppQuery
   public void setUrl(String url)
   {
     _url = url;
+  }
+
+  public String toString()
+  {
+    return (getClass().getSimpleName()
+	    + "[" + _tag + "," + _host + "," + _url + "]");
   }
 }

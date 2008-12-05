@@ -1325,6 +1325,12 @@ public class WriteStream extends OutputStreamWithBuffer
     }
   }
 
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _source + "]";
+  }
+
   private class StreamWriter extends Writer
     implements EnclosedWriteStream, FlushBuffer {
     public final void write(char ch)

@@ -28,6 +28,7 @@
 
 package com.caucho.vfs;
 
+import java.io.InterruptedIOException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -183,6 +184,11 @@ public class SocketStream extends StreamImpl {
       }
 
       return readLength;
+    } catch (InterruptedIOException e) {
+      if (_throwReadInterrupts)
+        throw e;
+      
+      log.log(Level.FINEST, e.toString(), e);
     } catch (IOException e) {
       if (_throwReadInterrupts)
         throw e;
@@ -195,9 +201,9 @@ public class SocketStream extends StreamImpl {
       } catch (IOException e1) {
       }
       */
-
-      return -1;
     }
+
+    return -1;
   }
 
   /**

@@ -30,6 +30,8 @@
 package com.caucho.bam;
 
 import java.util.logging.*;
+import java.util.concurrent.atomic.*;
+
 import java.io.Serializable;
 
 /**
@@ -46,6 +48,9 @@ public class SimpleBamService extends AbstractBamService
     = Logger.getLogger(SimpleBamService.class.getName());
 
   private final BamSkeleton _skeleton;
+  
+  private AtomicReference<ProxyBamConnection> _bamConnection
+    = new AtomicReference<ProxyBamConnection>();
 
   protected SimpleBamService()
   {
@@ -63,6 +68,24 @@ public class SimpleBamService extends AbstractBamService
   public BamStream getAgentStream()
   {
     return this;
+  }
+
+  /**
+   * Returns a proxy bam connection for the service.
+   */
+  public BamConnection getBamConnection()
+  {
+    ProxyBamConnection conn = _bamConnection.get();
+
+    if (conn == null) {
+      conn = new ProxyBamConnection(getJid(), getBrokerStream());
+      
+      _bamConnection.compareAndSet(null, conn);
+
+      conn = _bamConnection.get();
+    }
+
+    return conn;
   }
   
   /**
@@ -107,12 +130,17 @@ public class SimpleBamService extends AbstractBamService
 			    String from,
 			    Serializable value)
   {
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " querySet id=" + id + " to=" + to
-		+ " from=" + from + " value=" + logValue(value));
+    if (_skeleton.dispatchQueryGet(this, id, to, from, value)) {
+      return true;
     }
-    
-    return _skeleton.dispatchQueryGet(this, id, to, from, value);
+    else {
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " queryGet(value=" + logValue(value)
+		 + " id=" + id + " to=" + to
+		 + " from=" + from + ")");
+
+      return false;
+    }
   }
   
   public boolean querySet(long id,
@@ -120,25 +148,35 @@ public class SimpleBamService extends AbstractBamService
 			    String from,
 			    Serializable value)
   {
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " querySet id=" + id + " to=" + to
-		+ " from=" + from + " value=" + logValue(value));
+    if (_skeleton.dispatchQuerySet(this, id, to, from, value)) {
+      return true;
     }
-    
-    return _skeleton.dispatchQuerySet(this, id, to, from, value);
+    else {
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " querySet(value=" + logValue(value)
+		 + " id=" + id + " to=" + to
+		 + " from=" + from + ")");
+
+      return false;
+    }
   }
   
   public void queryResult(long id,
-			    String to,
-			    String from,
-			    Serializable value)
+			  String to,
+			  String from,
+			  Serializable value)
   {
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " queryResult id=" + id + " to=" + to
-		+ " from=" + from + " value=" + logValue(value));
-    }
+    if (! _skeleton.dispatchQueryResult(this, id, to, from, value)) {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(this + " queryResult id=" + id + " to=" + to
+		  + " from=" + from + " value=" + logValue(value));
+      }
 
-     _skeleton.dispatchQueryResult(this, id, to, from, value);
+      ProxyBamConnection bamConnection = _bamConnection.get();
+
+      if (bamConnection != null)
+	bamConnection.onQueryResult(id, to, from, value);
+    }
   }
   
   public void queryError(long id,
@@ -147,13 +185,19 @@ public class SimpleBamService extends AbstractBamService
 			   Serializable value,
 			   BamError error)
   {
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " queryResult id=" + id + " to=" + to
-                + " from=" + from + " value=" + logValue(value) 
-                + " error=" + logValue(error));
-    }
+    if (! _skeleton.dispatchQueryError(this, id, to, from, value, error)) {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(this + " queryError id=" + id + " to=" + to
+		  + " from=" + from + " value=" + logValue(value) 
+		  + " error=" + logValue(error));
+      }
 
-    _skeleton.dispatchQueryError(this, id, to, from, value, error);
+
+      ProxyBamConnection bamConnection = _bamConnection.get();
+
+      if (bamConnection != null)
+	bamConnection.onQueryError(id, to, from, value, error);
+    }
   }
   
   /**

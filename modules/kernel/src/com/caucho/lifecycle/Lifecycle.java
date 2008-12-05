@@ -359,6 +359,9 @@ public final class Lifecycle implements LifecycleState {
   {
     if (_state == IS_ACTIVE)
       return true;
+
+    System.out.println("WAIT: " + this + " " + _state);
+    Thread.dumpStack();
     
     long waitEnd = Alarm.getCurrentTime() + timeout;
     

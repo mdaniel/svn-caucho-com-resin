@@ -34,6 +34,8 @@ import com.caucho.db.jdbc.DataSourceImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.FreeList;
+import com.caucho.util.IoUtil;
+import com.caucho.util.JdbcUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -56,7 +58,7 @@ import java.util.logging.Logger;
 /**
  * Manages the backing for the file database objects
  */
-class DataBacking implements AlarmListener {
+public class DataBacking implements AlarmListener {
   private static final L10N L = new L10N(DataBacking.class);
   private static final Logger log
     = Logger.getLogger(DataBacking.class.getName());
@@ -64,8 +66,8 @@ class DataBacking implements AlarmListener {
   private FreeList<DataConnection> _freeConn
     = new FreeList<DataConnection>(32);
 
-  private final Path _path;
   private final String _tableName;
+  private final String _mapTableName;
 
   // remove unused data after 1 hour
   private long _expireTimeout = 3600L * 1000L;
@@ -75,27 +77,31 @@ class DataBacking implements AlarmListener {
   private String _insertQuery;
   private String _loadQuery;
   private String _updateExpiresQuery;
-  private String _incrementUseQuery;
-  private String _decrementUseQuery;
   private String _timeoutQuery;
   
   private String _countQuery;
 
   private Alarm _alarm;
   
-  DataBacking(Path path, String serverName)
+  public DataBacking(String serverName,
+		     CacheMapBacking mapBacking)
     throws Exception
   {
-    _path = path;
+    _dataSource = mapBacking.getDataSource();
+    _mapTableName = mapBacking.getTableName();
+    
     _tableName = serverNameToTableName(serverName);
-
-    if (_path == null)
-      throw new NullPointerException();
     
     if (_tableName == null)
       throw new NullPointerException();
 
+
     init();
+  }
+
+  DataSource getDataSource()
+  {
+    return _dataSource;
   }
 
   private void init()
@@ -106,51 +112,25 @@ class DataBacking implements AlarmListener {
 		  + " WHERE id=?");
 
     _insertQuery = ("INSERT into " + _tableName
-		    + " (id,expire_time,use_count,data) "
-		    + "VALUES(?,?,0,?)");
+		    + " (id,expire_time,data) "
+		    + "VALUES(?,?,?)");
 
-    _updateExpiresQuery = ("UPDATE " + _tableName
+    // XXX: add random component to expire time?
+    _updateExpiresQuery = ("UPDATE " + _tableName + " AS d"
 			   + " SET expire_time=?"
-			   + " WHERE id=?");
-    
-    _incrementUseQuery = ("UPDATE " + _tableName
-			  + " SET use_count = use_count + 1"
-			  + " WHERE id=?");
-
-    _decrementUseQuery = ("UPDATE " + _tableName
-			  + " SET use_count = use_count - 1,"
-			  + "     expire_time=?"
-			  + " WHERE id=?");
+			   + " WHERE expire_time<? AND EXISTS "
+			   + "      (SELECT * FROM " + _mapTableName + " AS m"
+			   +   "       WHERE d.id = m.value)");
 
     _timeoutQuery = ("DELETE FROM " + _tableName
-		     + " WHERE use_count <= 0 AND expire_time < ?");
+		     + " WHERE expire_time < ?");
     
     _countQuery = "SELECT count(*) FROM " + _tableName;
-    
-    try {
-      _path.mkdirs();
-    } catch (IOException e) {
-    }
-
-    DataSourceImpl dataSource = new DataSourceImpl();
-    dataSource.setPath(_path);
-    dataSource.setRemoveOnError(true);
-    dataSource.init();
-    
-    _dataSource = dataSource;
 
     initDatabase();
 
     _alarm = new Alarm(this);
     _alarm.queue(0);
-  }
-
-  /**
-   * Returns the data source.
-   */
-  public DataSource getDataSource()
-  {
-    return _dataSource;
   }
 
   /**
@@ -165,7 +145,7 @@ class DataBacking implements AlarmListener {
       Statement stmt = conn.createStatement();
       
       try {
-	String sql = ("SELECT id, expire_time, use_count, data"
+	String sql = ("SELECT id, expire_time, data"
                       + " FROM " + _tableName + " WHERE 1=0");
 
 	ResultSet rs = stmt.executeQuery(sql);
@@ -185,9 +165,8 @@ class DataBacking implements AlarmListener {
       }
 
       String sql = ("CREATE TABLE " + _tableName + " (\n"
-                    + "  id BINARY(20) PRIMARY KEY,\n"
+                    + "  id BINARY(32) PRIMARY KEY,\n"
 		    + "  expire_time BIGINT,\n"
-		    + "  use_count INTEGER,\n"
 		    + "  data BLOB)");
 
 
@@ -240,6 +219,44 @@ class DataBacking implements AlarmListener {
     }
 
     return false;
+  }
+
+  /**
+   * Reads the object from the data store.
+   *
+   * @param id the hash identifier for the data
+   * @param os the WriteStream to hold the data
+   *
+   * @return true on successful load
+   */
+  public InputStream openInputStream(HashKey id)
+  {
+    DataConnection conn = null;
+    
+    try {
+      conn = getConnection();
+
+      PreparedStatement pstmt = conn.prepareLoad();
+      pstmt.setBytes(1, id.getHash());
+
+      ResultSet rs = pstmt.executeQuery();
+      
+      if (rs.next()) {
+	InputStream is = rs.getBinaryStream(1);
+
+	InputStream dataInputStream = new DataInputStream(conn, is);
+	conn = null;
+
+	return dataInputStream;
+      }
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+    } finally {
+      if (conn != null)
+	conn.close();
+    }
+
+    return null;
   }
   
   /**
@@ -334,72 +351,6 @@ class DataBacking implements AlarmListener {
   }
 
   /**
-   * Increment a use reference for the data.
-   *
-   * @param id the hash identifier for the data
-   *
-   * @return true if the database contains the id
-   */
-  public boolean incrementUse(HashKey id)
-  {
-    DataConnection conn = null;
-    
-    try {
-      conn = getConnection();
-      
-      PreparedStatement pstmt = conn.prepareIncrementUse();
-      
-      pstmt.setBytes(1, id.getHash());
-
-      int count = pstmt.executeUpdate();
-      
-      if (log.isLoggable(Level.FINER))
-        log.finer(this + " incrementUse " + id);
-
-      return count > 0;
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-    } finally {
-      if (conn != null)
-	conn.close();
-    }
-
-    return false;
-  }
-
-  /**
-   * Subtract a use reference for the data.  The expires time is updated
-   * simultaneously to handle simultaneous unlink and link.
-   */
-  public boolean decrementUse(HashKey id)
-  {
-    DataConnection conn = null;
-    
-    try {
-      conn = getConnection();
-      
-      PreparedStatement pstmt = conn.prepareDecrementUse();
-      
-      pstmt.setLong(1, _expireTimeout + Alarm.getCurrentTime());
-      pstmt.setBytes(2, id.getHash());
-
-      int count = pstmt.executeUpdate();
-      
-      if (log.isLoggable(Level.FINER))
-        log.finer(this + " decrementUse " + id);
-
-      return count > 0;
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-    } finally {
-      if (conn != null)
-	conn.close();
-    }
-
-    return false;
-  }
-
-  /**
    * Clears the expired data
    */
   public void removeExpiredData()
@@ -408,9 +359,17 @@ class DataBacking implements AlarmListener {
 
     try {
       conn = getConnection();
-      PreparedStatement pstmt = conn.prepareTimeout();
   
       long now = Alarm.getCurrentTime();
+      
+      PreparedStatement pstmt = conn.prepareUpdateExpires();
+
+      pstmt.setLong(1, now + 3L * 3600 * 1000L);
+      pstmt.setLong(2, now);
+
+      pstmt.executeUpdate();
+      
+      pstmt = conn.prepareTimeout();
 	
       pstmt.setLong(1, now);
 
@@ -530,14 +489,49 @@ class DataBacking implements AlarmListener {
     return getClass().getSimpleName() +  "[" + _tableName + "]";
   }
 
+  class DataInputStream extends InputStream {
+    private DataConnection _conn;
+    private InputStream _is;
+
+    DataInputStream(DataConnection conn, InputStream is)
+    {
+      _conn = conn;
+      _is = is;
+    }
+
+    public int read()
+      throws IOException
+    {
+      return _is.read();
+    }
+
+    public int read(byte []buffer, int offset, int length)
+      throws IOException
+    {
+      return _is.read(buffer, offset, length);
+    }
+
+    public void close()
+    {
+      DataConnection conn = _conn;
+      _conn = null;
+      
+      InputStream is = _is;
+      _is = null;
+
+      IoUtil.close(is);
+      
+      if (conn != null)
+	conn.close();
+    }
+  }
+
   class DataConnection {
     private Connection _conn;
     
     private PreparedStatement _loadStatement;
     private PreparedStatement _insertStatement;
     private PreparedStatement _updateExpiresStatement;
-    private PreparedStatement _incrementUseStatement;
-    private PreparedStatement _decrementUseStatement;
     private PreparedStatement _timeoutStatement;
     
     private PreparedStatement _countStatement;
@@ -572,24 +566,6 @@ class DataBacking implements AlarmListener {
 	_updateExpiresStatement = _conn.prepareStatement(_updateExpiresQuery);
 
       return _updateExpiresStatement;
-    }
-
-    PreparedStatement prepareIncrementUse()
-      throws SQLException
-    {
-      if (_incrementUseStatement == null)
-	_incrementUseStatement = _conn.prepareStatement(_incrementUseQuery);
-
-      return _incrementUseStatement;
-    }
-
-    PreparedStatement prepareDecrementUse()
-      throws SQLException
-    {
-      if (_decrementUseStatement == null)
-	_decrementUseStatement = _conn.prepareStatement(_decrementUseQuery);
-
-      return _decrementUseStatement;
     }
 
     PreparedStatement prepareTimeout()

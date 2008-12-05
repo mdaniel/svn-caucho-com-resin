@@ -387,11 +387,13 @@ public class HttpResponse extends AbstractHttpResponse
       // is not needed.  The content-length is not explicitly forbidden,
       // but does cause problems with certain clients.
       hasContentLength = true;
+      setHead();
     }
     else if (statusCode == SC_NO_CONTENT) {
       hasContentLength = true;
       os.write(_contentLengthBytes, 0, _contentLengthBytes.length);
       os.print(0);
+      setHead();
 
       if (debug)
         log.fine(_request.dbgId() + "Content-Length: 0");

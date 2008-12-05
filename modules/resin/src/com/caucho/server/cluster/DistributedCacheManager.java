@@ -38,11 +38,11 @@ import com.caucho.util.LruCache;
  */
 abstract public class DistributedCacheManager
 {
-  private final Cluster _cluster;
+  private final Server _server;
 
-  DistributedCacheManager(Cluster cluster)
+  protected DistributedCacheManager(Server server)
   {
-    _cluster = cluster;
+    _server = server;
   }
 
   /**
@@ -50,7 +50,7 @@ abstract public class DistributedCacheManager
    */
   protected Cluster getCluster()
   {
-    return _cluster;
+    return _server.getCluster();
   }
 
   /**
@@ -64,4 +64,10 @@ abstract public class DistributedCacheManager
   abstract public void put(HashKey hashKey,
 			   Object value,
 			   CacheSerializer serializer);
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _server.getServerId() + "]";
+  }
 }

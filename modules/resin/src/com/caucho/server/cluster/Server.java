@@ -38,6 +38,9 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.git.GitRepository;
+import com.caucho.hemp.broker.HempBroker;
+import com.caucho.hemp.broker.HempBrokerManager;
+import com.caucho.hemp.broker.DomainManager;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
@@ -51,6 +54,8 @@ import com.caucho.management.server.ServerMXBean;
 import com.caucho.security.PermissionManager;
 import com.caucho.server.admin.Management;
 import com.caucho.server.cache.AbstractCache;
+import com.caucho.server.deploy.DeployRepository;
+import com.caucho.server.deploy.FileDeployRepository;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.Invocation;
@@ -83,6 +88,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -101,7 +107,7 @@ public class Server extends ProtocolDispatchServer
   private static final EnvironmentLocal<String> _serverIdLocal
     = new EnvironmentLocal<String>("caucho.server-id");
 
-  private final ClusterServer _clusterServer;
+  private final ClusterServer _selfServer;
   private final Resin _resin;
   
   private EnvironmentClassLoader _classLoader;
@@ -112,7 +118,13 @@ public class Server extends ProtocolDispatchServer
 
   private String _serverHeader;
 
+  private HempBrokerManager _brokerManager;
+  private DomainManager _domainManager;
+  private HempBroker _broker;
+
   private GitRepository _git;
+  private DeployRepository _deployRepository;
+  private FileDeployRepository _localDeployRepository;
 
   private DistributedCacheManager _distributedCacheManager;
 
@@ -163,7 +175,7 @@ public class Server extends ProtocolDispatchServer
   protected AbstractCache _cache;
 
   private boolean _isBindPortsAtEnd = true;
-  private volatile boolean _isStartedPorts;
+  private AtomicBoolean _isStartedPorts = new AtomicBoolean();
 
   //
   // internal databases
@@ -186,8 +198,8 @@ public class Server extends ProtocolDispatchServer
     if (clusterServer == null)
       throw new NullPointerException();
 
-    _clusterServer = clusterServer;
-    _resin = _clusterServer.getCluster().getResin();
+    _selfServer = clusterServer;
+    _resin = _selfServer.getCluster().getResin();
 
     if (! Alarm.isTest())
       _serverHeader = "Resin/" + com.caucho.Version.VERSION;
@@ -212,7 +224,7 @@ public class Server extends ProtocolDispatchServer
       try {
         thread.setContextClassLoader(_classLoader);
 	
-	_serverIdLocal.set(_clusterServer.getId());
+	_serverIdLocal.set(_selfServer.getId());
 
         _hostContainer = new HostContainer();
         _hostContainer.setClassLoader(_classLoader);
@@ -222,7 +234,15 @@ public class Server extends ProtocolDispatchServer
 
 	_alarm = new Alarm(this);
 
-	_clusterServer.getServerProgram().configure(this);
+	_brokerManager = createBrokerManager();
+	_domainManager = createDomainManager();
+
+	_broker = new HempBroker(getBamAdminName());
+	
+	_brokerManager.addBroker(getBamAdminName(), _broker);
+	_brokerManager.addBroker("resin.caucho", _broker);
+
+	_selfServer.getServerProgram().configure(this);
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
@@ -281,6 +301,14 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
+   * Returns the admin path
+   */
+  public Path getAdminPath()
+  {
+    return _resin.getManagement().getPath();
+  }
+
+  /**
    * Returns the repository
    */
   public GitRepository getGit()
@@ -308,11 +336,79 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
+   * Returns the deployment repository
+   */
+  public DeployRepository getDeployRepository()
+  {
+    synchronized (this) {
+      if (_deployRepository == null)
+	_deployRepository = createDeployRepository();
+    }
+
+    _deployRepository.init();
+
+    return _deployRepository;
+  }
+
+  /**
+   * Returns the local deployment repository
+   */
+  public FileDeployRepository getLocalDeployRepository()
+  {
+    synchronized (this) {
+      if (_localDeployRepository == null)
+	_localDeployRepository = new FileDeployRepository(this);
+    }
+
+    return _localDeployRepository;
+  }
+
+  /**
+   * Creates a new deployment repository
+   */
+  protected DeployRepository createDeployRepository()
+  {
+    return getLocalDeployRepository();
+  }
+
+  /**
+   * Creates the bam domain manager
+   */
+  protected DomainManager createDomainManager()
+  {
+    return null;
+  }
+
+  /**
+   * Creates the bam broker manager
+   */
+  protected HempBrokerManager createBrokerManager()
+  {
+    return new HempBrokerManager();
+  }
+
+  /**
    * Returns the cluster server
    */
   protected ClusterServer getClusterServer()
   {
-    return _clusterServer;
+    return getSelfServer();
+  }
+
+  /**
+   * Returns the self server
+   */
+  public ClusterServer getSelfServer()
+  {
+    return _selfServer;
+  }
+
+  /**
+   * Returns the self server's triad
+   */
+  public ClusterTriad getTriad()
+  {
+    return _selfServer.getCluster().getTriad(_selfServer);
   }
 
   /**
@@ -321,9 +417,49 @@ public class Server extends ProtocolDispatchServer
   public DistributedCacheManager getDistributedCacheManager()
   {
     if (_distributedCacheManager == null)
-      _distributedCacheManager = getCluster().createDistributedCacheManager(this);
+      _distributedCacheManager = createDistributedCacheManager();
 
     return _distributedCacheManager;
+  }
+
+  /**
+   * Returns the distributed cache manager
+   */
+  protected DistributedCacheManager createDistributedCacheManager()
+  {
+    return new FileCacheManager(this);
+  }
+
+  /**
+   * Returns the bam broker.
+   */
+  public BamBroker getBamBroker()
+  {
+    return _broker;
+  }
+
+  /**
+   * Returns the stream to the public broker.
+   */
+  public BamStream getBamStream()
+  {
+    return getBamBroker().getBrokerStream();
+  }
+
+  /**
+   * Returns the bam broker.
+   */
+  public BamBroker getAdminBroker()
+  {
+    return getBamBroker();
+  }
+
+  /**
+   * Returns the stream to the admin broker.
+   */
+  public BamStream getAdminStream()
+  {
+    return getAdminBroker().getBrokerStream();
   }
 
   /**
@@ -554,7 +690,7 @@ public class Server extends ProtocolDispatchServer
    */
   public void setKeepaliveTimeout(Period period)
   {
-    _clusterServer.setKeepaliveTimeout(period);
+    _selfServer.setKeepaliveTimeout(period);
   }
 
   /**
@@ -562,7 +698,7 @@ public class Server extends ProtocolDispatchServer
    */
   public long getKeepaliveTimeout()
   {
-    return _clusterServer.getKeepaliveTimeout();
+    return _selfServer.getKeepaliveTimeout();
   }
 
   /**
@@ -676,7 +812,7 @@ public class Server extends ProtocolDispatchServer
    */
   public void setSocketTimeout(Period period)
   {
-    _clusterServer.setSocketTimeout(period);
+    _selfServer.setSocketTimeout(period);
   }
 
   /**
@@ -684,7 +820,7 @@ public class Server extends ProtocolDispatchServer
    */
   public long getSocketTimeout()
   {
-    return _clusterServer.getSocketTimeout();
+    return _selfServer.getSocketTimeout();
   }
 
   /**
@@ -764,7 +900,7 @@ public class Server extends ProtocolDispatchServer
    */
   public String getServerId()
   {
-    return _clusterServer.getId();
+    return _selfServer.getId();
   }
 
   /**
@@ -879,7 +1015,7 @@ public class Server extends ProtocolDispatchServer
    */
   public Cluster getCluster()
   {
-    return _clusterServer.getCluster();
+    return _selfServer.getCluster();
   }
 
   /**
@@ -1049,7 +1185,7 @@ public class Server extends ProtocolDispatchServer
   //
   public int getServerIndex()
   {
-    return _clusterServer.getIndex();
+    return _selfServer.getIndex();
   }
 
   //
@@ -1281,7 +1417,7 @@ public class Server extends ProtocolDispatchServer
    */
   public Collection<Port> getPorts()
   {
-    return Collections.unmodifiableList(_clusterServer.getPorts());
+    return Collections.unmodifiableList(_selfServer.getPorts());
   }
 
   /**
@@ -1289,6 +1425,16 @@ public class Server extends ProtocolDispatchServer
    */
   public DistributedCache getSystemStore()
   {
+    synchronized (this) {
+      if (_systemStore == null) {
+	_systemStore = new DistributedCache();
+	_systemStore.setName("resin:system");
+	// XXX: need to set reliability values
+      }
+    }
+
+    _systemStore.init();
+    
     return _systemStore;
   }
 
@@ -1379,11 +1525,10 @@ public class Server extends ProtocolDispatchServer
     }
     
     if (_distributedCacheManager == null)
-      _distributedCacheManager = getCluster().createDistributedCacheManager(this);
+      _distributedCacheManager = createDistributedCacheManager();
 
-    _systemStore = new DistributedCache();
-    _systemStore.setName("resin:system");
-    // XXX: need to set reliability values
+    // initialize the store
+    getSystemStore();
   }
 
   /**
@@ -1432,8 +1577,8 @@ public class Server extends ProtocolDispatchServer
           log.info("");
 
           log.info("server     = "
-		   + _clusterServer.getClusterPort().getAddress()
-		   + ":" + _clusterServer.getClusterPort().getPort()
+		   + _selfServer.getClusterPort().getAddress()
+		   + ":" + _selfServer.getClusterPort().getPort()
 		   + " (" + getCluster().getId()
 		   + ":" + getServerId() + ")");
         }
@@ -1458,6 +1603,8 @@ public class Server extends ProtocolDispatchServer
 	  || ! selectManager.start()) {
 	initSelectManager(null);
       }
+
+      startClusterPort();
 
       if (! _isBindPortsAtEnd) {
         bindPorts();
@@ -1512,24 +1659,43 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
+   * Start the cluster port
+   */
+  private void startClusterPort()
+    throws Exception
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    try {
+      thread.setContextClassLoader(_classLoader);
+
+      Port port = _selfServer.getClusterPort();
+
+      if (port != null) {
+	port.setServer(this);
+	port.bind();
+	port.start();
+      }
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+
+  /**
    * Bind the ports.
    */
   public void bindPorts()
     throws Exception
   {
-    synchronized (this) {
-      if (_isStartedPorts)
-        return;
-
-      _isStartedPorts = true;
-    }
+    if (_isStartedPorts.getAndSet(true))
+      return;
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       thread.setContextClassLoader(_classLoader);
 
-      ArrayList<Port> ports = _clusterServer.getPorts();
+      ArrayList<Port> ports = _selfServer.getPorts();
       if (ports.size() > 0) {
 	log.info("");
       
@@ -1559,7 +1725,7 @@ public class Server extends ProtocolDispatchServer
     try {
       thread.setContextClassLoader(_classLoader);
 
-      ArrayList<Port> ports = _clusterServer.getPorts();
+      ArrayList<Port> ports = _selfServer.getPorts();
       for (int i = 0; i < ports.size(); i++) {
         Port port = ports.get(i);
 
@@ -1585,12 +1751,12 @@ public class Server extends ProtocolDispatchServer
         // XXX: message slightly wrong
         log.warning("Resin restarting due to configuration change");
 
-        _clusterServer.getCluster().getResin().destroy();
+        _selfServer.getCluster().getResin().destroy();
         return;
       }
 
       try {
-	ArrayList<Port> ports = _clusterServer.getPorts();
+	ArrayList<Port> ports = _selfServer.getPorts();
 	
         for (int i = 0; i < ports.size(); i++) {
           Port port = ports.get(i);
@@ -1806,7 +1972,7 @@ public class Server extends ProtocolDispatchServer
       if (getSelectManager() != null)
         getSelectManager().stop();
 
-      ArrayList<Port> ports = _clusterServer.getPorts();
+      ArrayList<Port> ports = _selfServer.getPorts();
       for (int i = 0; i < ports.size(); i++) {
         Port port = ports.get(i);
 
@@ -1815,6 +1981,13 @@ public class Server extends ProtocolDispatchServer
         } catch (Throwable e) {
           log.log(Level.WARNING, e.toString(), e);
         }
+      }
+
+      try {
+	if (_selfServer.getClusterPort() != null)
+	  _selfServer.getClusterPort().close();
+      } catch (Throwable e) {
+	log.log(Level.WARNING, e.toString(), e);
       }
 
       try {
@@ -1902,7 +2075,7 @@ public class Server extends ProtocolDispatchServer
   public String toString()
   {
     return (getClass().getSimpleName() + "[id=" + getServerId()
-	    + ",cluster=" + _clusterServer.getCluster().getId() + "]");
+	    + ",cluster=" + _selfServer.getCluster().getId() + "]");
   }
 
   public static class SelectManagerCompat {

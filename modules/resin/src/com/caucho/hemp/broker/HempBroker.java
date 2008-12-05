@@ -63,6 +63,8 @@ public class HempBroker implements BamBroker, BamStream
   private static final L10N L = new L10N(HempBroker.class);
 
   private HempBrokerManager _manager;
+  private DomainManager _domainManager;
+  
   // agents
   private final HashMap<String,WeakReference<BamStream>> _agentMap
     = new HashMap<String,WeakReference<BamStream>>();
@@ -70,8 +72,8 @@ public class HempBroker implements BamBroker, BamStream
   private final HashMap<String,BamService> _serviceMap
     = new HashMap<String,BamService>();
   
-  private final HashMap<String,WeakReference<BamService>> _serviceCache
-    = new HashMap<String,WeakReference<BamService>>();
+  private final Map<String,WeakReference<BamService>> _serviceCache
+    = Collections.synchronizedMap(new HashMap<String,WeakReference<BamService>>());
   
   private String _serverId = Resin.getCurrent().getServerId();
 
@@ -86,12 +88,15 @@ public class HempBroker implements BamBroker, BamStream
   public HempBroker()
   {
     _manager = HempBrokerManager.getCurrent();
+    _domainManager = DomainManager.getCurrent();
+    
     _domainService = new HempDomainService(this, "");
   }
 
   public HempBroker(String domain)
   {
     _manager = HempBrokerManager.getCurrent();
+    _domainManager = DomainManager.getCurrent();
     
     _domain = domain;
     _managerJid = domain;
@@ -249,9 +254,7 @@ public class HempBroker implements BamBroker, BamStream
       _serviceMap.remove(jid);
     }
     
-    synchronized (_serviceCache) {
-      _serviceCache.remove(jid);
-    }
+    _serviceCache.remove(jid);
     
     synchronized (_agentMap) {
       _agentMap.remove(jid);
@@ -617,22 +620,13 @@ public class HempBroker implements BamBroker, BamStream
     BamService service = findService(jid);
 
     if (service == null) {
-      return null;
+      return putAgentStream(jid, findDomain(jid));
     }
     else if (jid.equals(service.getJid())) {
       agentStream = service.getAgentStream(); 
 
       if (agentStream != null) {
-        synchronized (_agentMap) {
-          WeakReference<BamStream> ref = _agentMap.get(jid);
-
-          if (ref != null)
-            return ref.get();
-
-          _agentMap.put(jid, new WeakReference<BamStream>(agentStream));
-
-          return agentStream;
-        }
+	return putAgentStream(jid, agentStream);
       }
     }
     else {
@@ -650,41 +644,59 @@ public class HempBroker implements BamBroker, BamStream
     return null;
   }
 
+  private BamStream putAgentStream(String jid, BamStream agentStream)
+  {
+    if (agentStream == null)
+      return null;
+    
+    synchronized (_agentMap) {
+      WeakReference<BamStream> ref = _agentMap.get(jid);
+
+      if (ref != null)
+	return ref.get();
+
+      _agentMap.put(jid, new WeakReference<BamStream>(agentStream));
+
+      return agentStream;
+    }
+  }
+
   protected BamService findService(String jid)
   {
     if (jid == null)
       return null;
 
-    synchronized (_serviceCache) {
-      WeakReference<BamService> ref = _serviceCache.get(jid);
+    WeakReference<BamService> ref = _serviceCache.get(jid);
+
+    if (ref != null)
+      return ref.get();
+
+    if (startServiceFromManager(jid)) {
+      ref = _serviceCache.get(jid);
 
       if (ref != null)
 	return ref.get();
     }
 
-    if (startServiceFromManager(jid)) {
-      synchronized (_serviceCache) {
-        WeakReference<BamService> ref = _serviceCache.get(jid);
-
-        if (ref != null)
-          return ref.get();
-      }
-    }
-
     if (jid.indexOf('/') < 0 && jid.indexOf('@') < 0) {
-      BamService service = findDomain(jid);
+      BamBroker broker = _manager.findBroker(jid);
+      BamService service = null;
+
+      if (broker instanceof HempBroker) {
+	HempBroker hempBroker = (HempBroker) broker;
+
+	service = hempBroker.getDomainService();
+      }
 
       if (service != null) {
-        synchronized (_serviceCache) {
-          WeakReference<BamService> ref = _serviceCache.get(jid);
+	ref = _serviceCache.get(jid);
 
-          if (ref != null)
-            return ref.get();
+	if (ref != null)
+	  return ref.get();
 
-          _serviceCache.put(jid, new WeakReference<BamService>(service));
+	_serviceCache.put(jid, new WeakReference<BamService>(service));
 
-          return service;
-        }
+	return service;
       }
     }
     
@@ -704,7 +716,7 @@ public class HempBroker implements BamBroker, BamStream
       return null;
   }
 
-  protected BamService findDomain(String domain)
+  protected BamStream findDomain(String domain)
   {
     if (domain == null)
       return null;
@@ -714,15 +726,18 @@ public class HempBroker implements BamBroker, BamStream
     if (broker instanceof HempBroker) {
       HempBroker hempBroker = (HempBroker) broker;
 
-      return hempBroker.getDomainService();
+      BamService service = hempBroker.getDomainService();
+
+      return service.getAgentStream();
     }
     
-    if (broker == null || broker == this)
+    if (broker == this)
       return null;
 
-    // construct foreign
-
-    return null;
+    if (_domainManager != null)
+      return _domainManager.findDomain(domain);
+    else
+      return null;
   }
 
   protected boolean startServiceFromManager(String jid)
@@ -755,9 +770,7 @@ public class HempBroker implements BamBroker, BamStream
       }
     }
     
-    synchronized (_serviceCache) {
-      _serviceCache.remove(jid);
-    }
+    _serviceCache.remove(jid);
     
     synchronized (_agentMap) {
       _agentMap.remove(jid);
@@ -817,7 +830,7 @@ public class HempBroker implements BamBroker, BamStream
 
     for (String alias : _aliasList)
       _manager.removeBroker(alias);
-    
+
     _serviceMap.clear();
     _serviceCache.clear();
     _agentMap.clear();

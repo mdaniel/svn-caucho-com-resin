@@ -810,8 +810,6 @@ public class Resin implements EnvironmentBean, SchemaBean
       // force a GC on start
       System.gc();
       
-      startManagement();
-
       Path repositoryPath = getManagement().getPath().lookup("ivy");
 
       ClusterServer clusterServer = null;
@@ -1319,12 +1317,6 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
 
     start();
-  }
-  
-  private void startManagement()
-  {
-    //_j2eeDomainManagedObject = J2EEManagedObject.register(new J2EEDomain());
-    //_jvmManagedObject = J2EEManagedObject.register(new JVM());
   }
 
   private void addRandom()

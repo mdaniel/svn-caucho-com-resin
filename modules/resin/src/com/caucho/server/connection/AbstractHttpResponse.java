@@ -379,7 +379,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   /**
    * For a HEAD request, the response stream should write no data.
    */
-  void setHead()
+  protected void setHead()
   {
     _originalResponseStream.setHead();
   }
@@ -1851,41 +1851,46 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     if (_sessionId != null && ! _hasSessionCookie) {
       _hasSessionCookie = true;
-      
-      SessionManager manager = webApp.getSessionManager();
 
-      String cookieName;
-
-      if (_request.isSecure())
-	cookieName = manager.getSSLCookieName();
-      else
-	cookieName = manager.getCookieName();
-      
-      CookieImpl cookie = new CookieImpl(cookieName, _sessionId);
-      cookie.setVersion(manager.getCookieVersion());
-      String domain = manager.getCookieDomain();
-      if (domain != null)
-        cookie.setDomain(domain);
-      long maxAge = manager.getCookieMaxAge();
-      if (maxAge > 0)
-        cookie.setMaxAge((int) (maxAge / 1000));
-      cookie.setPath("/");
-      
-      cookie.setPort(manager.getCookiePort());
-      if (manager.getCookieSecure()) {
-	cookie.setSecure(_request.isSecure());
-	/*
-	else if (manager.getCookiePort() == null)
-	  cookie.setPort(String.valueOf(_request.getServerPort()));
-	*/
-      }
-
-      addCookie(cookie);
+      createServletCookie(webApp);
     }
 
     _isChunked = writeHeadersInt(os, length, isHead);
 
     return _isChunked;
+  }
+
+  private void createServletCookie(WebApp webApp)
+  {
+    SessionManager manager = webApp.getSessionManager();
+
+    String cookieName;
+
+    if (_request.isSecure())
+      cookieName = manager.getSSLCookieName();
+    else
+      cookieName = manager.getCookieName();
+      
+    CookieImpl cookie = new CookieImpl(cookieName, _sessionId);
+    cookie.setVersion(manager.getCookieVersion());
+    String domain = manager.getCookieDomain();
+    if (domain != null)
+      cookie.setDomain(domain);
+    long maxAge = manager.getCookieMaxAge();
+    if (maxAge > 0)
+      cookie.setMaxAge((int) (maxAge / 1000));
+    cookie.setPath("/");
+      
+    cookie.setPort(manager.getCookiePort());
+    if (manager.getCookieSecure()) {
+      cookie.setSecure(_request.isSecure());
+      /*
+	else if (manager.getCookiePort() == null)
+	cookie.setPort(String.valueOf(_request.getServerPort()));
+      */
+    }
+
+    addCookie(cookie);
   }
 
   /**

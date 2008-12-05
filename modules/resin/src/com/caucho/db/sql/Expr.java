@@ -431,6 +431,9 @@ abstract public class Expr {
 	return offset;
       }
       
+    case Column.BINARY:
+      return evalToBuffer(context, buffer, off);
+
     default:
       throw new UnsupportedOperationException(getClass().getName() + " unknown column: " + columnType);
     }

@@ -33,6 +33,7 @@ import com.caucho.cache.CacheEntry;
 import com.caucho.cache.CacheSerializer;
 import com.caucho.config.ConfigException;
 import com.caucho.server.cache.TempFileManager;
+import com.caucho.server.distcache.CacheMapEntry;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
@@ -45,6 +46,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
+import java.util.logging.*;
 import java.security.MessageDigest;
 import java.security.DigestOutputStream;
 import java.util.zip.DeflaterOutputStream;
@@ -55,6 +57,9 @@ import java.util.zip.InflaterInputStream;
  */
 public class FileCacheManager extends DistributedCacheManager
 {
+  private static final Logger log
+    = Logger.getLogger(FileCacheManager.class.getName());
+  
   private static final L10N L = new L10N(FileCacheManager.class);
   
   private TempFileManager _tempFileManager;
@@ -62,12 +67,12 @@ public class FileCacheManager extends DistributedCacheManager
   private CacheMapBacking _cacheMapBacking;
   private DataBacking _dataBacking;
 
-  private final LruCache<HashKey,Entry> _entryCache
-    = new LruCache<HashKey,Entry>(8 * 1024);
+  private final LruCache<HashKey,CacheMapEntry> _entryCache
+    = new LruCache<HashKey,CacheMapEntry>(8 * 1024);
   
   FileCacheManager(Server server)
   {
-    super(server.getCluster());
+    super(server);
 
     try {
       _tempFileManager = Resin.getCurrent().getTempFileManager();
@@ -76,9 +81,8 @@ public class FileCacheManager extends DistributedCacheManager
       Path adminPath = resin.getManagement().getPath();
       String serverId = server.getServerId();
 
-      _dataBacking = new DataBacking(adminPath, serverId);
-
       _cacheMapBacking = new CacheMapBacking(adminPath, serverId);
+      _dataBacking = new DataBacking(serverId, _cacheMapBacking);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
@@ -89,15 +93,15 @@ public class FileCacheManager extends DistributedCacheManager
    */
   public Object get(HashKey key, CacheSerializer serializer)
   {
-    Entry entry = _entryCache.get(key);
+    CacheMapEntry entry = _entryCache.get(key);
 
     if (entry == null) {
-      HashKey valueHash = _cacheMapBacking.load(key);
+      entry = _cacheMapBacking.load(key);
 
-      entry = new Entry();
-      entry.setValueHash(valueHash);
+      CacheMapEntry oldEntry = _entryCache.putIfNew(key, entry);
 
-      entry = _entryCache.putIfNew(key, entry);
+      if (entry.getVersion() < oldEntry.getVersion())
+	entry = oldEntry;
     }
     
     Object value = entry.getValue();
@@ -105,16 +109,13 @@ public class FileCacheManager extends DistributedCacheManager
     if (value != null)
       return value;
 
-    HashKey valueHash;
+    HashKey valueHash = entry.getValueHash();
 
-    do {
-      valueHash = entry.getValueHash();
+    value = readData(valueHash, serializer);
 
-      if (valueHash == null)
-	return null;
-
-      value = readData(valueHash, serializer);
-    } while (! entry.compareAndSetValue(valueHash, value));
+    // use the old value if it's been overwritten
+    if (entry.getValue() == null)
+      entry.setValue(value);
 
     return value;
   }
@@ -126,38 +127,45 @@ public class FileCacheManager extends DistributedCacheManager
   {
     long timeout = 60000L;
     
-    Entry entry = _entryCache.get(key);
+    CacheMapEntry oldEntry = _entryCache.get(key);
 
-    HashKey oldValueHash = entry != null ? entry.getValueHash() : null;
+    HashKey oldValueHash = oldEntry != null ? oldEntry.getValueHash() : null;
     
     HashKey valueHash = writeData(oldValueHash, value, serializer);
 
-    boolean isNew = entry == null || entry.getValueHash() == null;
+    if (valueHash.equals(oldValueHash))
+      return;
 
-    if (entry == null) {
-      Entry newEntry = new Entry();
-      newEntry.setValueHash(valueHash);
-      newEntry.setValue(value);
+    long version = oldEntry != null ? oldEntry.getVersion() + 1 : 1;
 
-      entry = _entryCache.putIfNew(key, newEntry);
+    CacheMapEntry entry = new CacheMapEntry(valueHash, value, version);
 
-      if (entry != newEntry && entry.getValueHash() != null)
-	isNew = true;
+    // the failure cases are not errors because this put() could
+    // be immediately followed by an overwriting put()
+
+    if (! _entryCache.compareAndPut(oldEntry, key, entry)) {
+      log.fine(this + " entry update failed due to timing conflict"
+	       + " (key=" + key + ")");
+      
+      return;
     }
 
-    entry.setValueHash(valueHash);
-    entry.setValue(value);
-
-    if (! isNew || ! _cacheMapBacking.insert(key, valueHash, timeout)) {
-      if (! _cacheMapBacking.updateSave(key, valueHash, timeout)) {
-	_cacheMapBacking.insert(key, valueHash, timeout);
+    if (oldEntry == null) {
+      if (_cacheMapBacking.insert(key, valueHash, timeout)) {
+      }
+      else {
+	log.fine(this + " db insert failed due to timing conflict"
+		 + "(key=" + key + ")");
       }
     }
-
-    // XXX: the use isn't handled properly because matching data
-    // doesn't get and increment and we need to decrement the old use
-
-    _dataBacking.incrementUse(valueHash);
+    else {
+      if (_cacheMapBacking.updateSave(key, valueHash, timeout, version)) {
+      }
+      else {
+	log.fine(this + " db update failed due to timing conflict"
+		 + "(key=" + key + ")");
+      }
+    }
   }
 
   protected HashKey writeData(HashKey oldValueHash,
@@ -169,8 +177,7 @@ public class FileCacheManager extends DistributedCacheManager
     try {
       os = new TempOutputStream();
 
-      MessageDigest digest = MessageDigest.getInstance("SHA");
-      DigestOutputStream mOut = new DigestOutputStream(os, digest);
+      MessageDigestOutputStream mOut = new MessageDigestOutputStream(os);
       DeflaterOutputStream gzOut = new DeflaterOutputStream(mOut);
 
       serializer.serialize(value, gzOut);
@@ -178,7 +185,7 @@ public class FileCacheManager extends DistributedCacheManager
       gzOut.finish();
       mOut.close();
       
-      byte []hash = digest.digest();
+      byte []hash = mOut.getDigest();
 
       HashKey valueHash = new HashKey(hash);
 
@@ -195,11 +202,8 @@ public class FileCacheManager extends DistributedCacheManager
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
-      try {
-	if (os != null)
-	  os.close();
-      } catch (IOException e) {
-      }
+      if (os != null)
+	os.close();
     }
   }
 
@@ -236,51 +240,8 @@ public class FileCacheManager extends DistributedCacheManager
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
-      try {
-	if (os != null)
-	  os.close();
-      } catch (IOException e) {
-      }
-    }
-  }
-
-  static class Entry {
-    HashKey _valueHash;
-    SoftReference _valueRef;
-
-    public HashKey getValueHash()
-    {
-      return _valueHash;
-    }
-    
-    public void setValueHash(HashKey valueHash)
-    {
-      _valueHash = valueHash;
-    }
-
-    public void setValue(Object value)
-    {
-      _valueRef = new SoftReference(value);
-    }
-
-    public boolean compareAndSetValue(HashKey valueHash, Object value)
-    {
-      if (valueHash.equals(_valueHash)) {
-	_valueRef = new SoftReference(value);
-	return true;
-      }
-      else
-	return false;
-    }
-
-    public Object getValue()
-    {
-      SoftReference valueRef = _valueRef;
-
-      if (valueRef != null)
-	return valueRef.get();
-      else
-	return null;
+      if (os != null)
+	os.close();
     }
   }
 }

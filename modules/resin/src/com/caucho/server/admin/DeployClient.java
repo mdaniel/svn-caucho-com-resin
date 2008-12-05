@@ -55,12 +55,24 @@ public class DeployClient
     _deployJid = "deploy@resin.caucho";
   }
 
-  public String deployJar(Path jar,
-			  String tag,
-			  String user,
-			  String message,
-			  String version,
-			  HashMap<String,String> extraAttr)
+  /**
+   * Uploads the contents of a jar/zip file to a Resin server.  
+   * The jar is unzipped and each component is uploaded separately.
+   * For wars, this means that only the changed files need updates.
+   *
+   * @param jar path to the jar file
+   * @param tag symbolic name of the jar file to add
+   * @param user user name for the commit message
+   * @param message the commit message
+   * @param version the symbolic version for the jar
+   * @param extraAttr any extra information for the commit
+   */
+  public String deployJarContents(Path jar,
+				  String tag,
+				  String user,
+				  String message,
+				  String version,
+				  HashMap<String,String> extraAttr)
     throws IOException
   {
     GitCommitJar commit = new GitCommitJar(jar);
@@ -70,178 +82,81 @@ public class DeployClient
     } finally {
       commit.close();
     }
-  }
-
-  public String deployJar(InputStream jar,
-			  String tag,
-			  String user,
-			  String message,
-			  String version,
-			  HashMap<String,String> extraAttr)
-    throws IOException
-  {
-    GitCommitJar commit = new GitCommitJar(jar);
-
-    try {
-      return deployJar(commit, tag, user, message, version, extraAttr);
-    } finally {
-      commit.close();
-    }
-  }
-
-  public String deployJar(GitCommitJar commit,
-			  String tag,
-			  String user,
-			  String message,
-			  String version,
-			  HashMap<String,String> extraAttr)
-    throws IOException
-  {
-    String []files = getCommitList(commit.getCommitList());
-
-    for (String file : files) {
-      InputStream is = commit.openFile(file);
-
-      try {
-	sendFile(file, is);
-      } finally {
-	if (is != null)
-	  is.close();
-      }
-    }
-
-    return commit(tag, commit.getDigest(), user, message, extraAttr);
-  }
-
-  //
-  // low-level routines
-  //
-
-  public String []getCommitList(String []commitList)
-  {
-    DeployCommitListQuery query = new DeployCommitListQuery(commitList);
-    
-    DeployCommitListQuery result = (DeployCommitListQuery) queryGet(query);
-
-    return result.getCommitList();
-  }
-
-  public String calculateFileDigest(InputStream is, long length)
-    throws IOException
-  {
-    return GitCommitTree.calculateBlobDigest(is, length);
-  }
-
-  public String addDeployFile(String tag, String name, String sha1)
-  {
-    DeployAddFileQuery query
-      = new DeployAddFileQuery(tag, name, sha1);
-
-    return (String) querySet(query);
-  }
-	  
-  public boolean sendFile(String sha1, long length, InputStream is)
-    throws IOException
-  {
-    return sendFile(sha1, GitCommitTree.writeBlob(is, length));
-  }
-
-  public boolean sendFile(String sha1, InputStream is)
-    throws IOException
-  {
-    try {
-      int i = 0;
-
-      DeploySendQuery query;
-      boolean isEnd = false;
-      
-      while (! isEnd) {
-	byte []buffer = new byte[8192];
-
-	int len = is.read(buffer, 0, buffer.length);
-
-	if (len <= 0) {
-	  isEnd = true;
-	}
-	else if (len < buffer.length) {
-	  int len2 = is.read(buffer, len, buffer.length - len);
-
-	  if (len2 > 0)
-	    len = len + len2;
-	  else
-	    isEnd = true;
-	}
-
-	query = new DeploySendQuery(i++, sha1, buffer, len, isEnd);
-
-	Boolean value = (Boolean) querySet(query);
-
-	if (value == null || ! value)
-	  return false;
-      }
-
-      return true;
-    } finally {
-      is.close();
-    }
-  }
-
-  public String commit(String tag,
-		       String sha1,
-		       String user,
-		       String message,
-		       HashMap<String,String> attr)
-  {
-    DeployCommitQuery query
-      = new DeployCommitQuery(tag, sha1, user, message, attr);
-
-    return (String) querySet(query);
-  }
-
-  public StatusQuery status(String tag)
-  {
-    StatusQuery query = new StatusQuery(tag);
-
-    return (StatusQuery) queryGet(query);
-  }
-
-  public HostQuery []listHosts()
-  {
-    ListHostsQuery query = new ListHostsQuery();
-
-    return (HostQuery []) queryGet(query);
-  }
-
-  public WebAppQuery []listWebApps(String[] hosts)
-  {
-    ListWebAppsQuery []query = new ListWebAppsQuery[hosts.length];
-
-    for (int i = 0; i < hosts.length; i++) {
-      ListWebAppsQuery q = new ListWebAppsQuery();
-      q.setHost(hosts[i]);
-
-      query[i] = q;
-    }
-
-    return (WebAppQuery []) queryGet(query);
   }
 
   /**
-   * Deploys a controller, but does not start it
+   * Uploads a stream to a jar/zip file to a Resin server
    *
-   * @param type the controller type: war, ear, etc.
-   * @param host the virtual host
-   * @param name the web-app/ear name
+   * @param is stream containing a jar/zip
+   * @param tag symbolic name of the jar file to add
+   * @param user user name for the commit message
+   * @param message the commit message
+   * @param version the symbolic version for the jar
+   * @param extraAttr any extra information for the commit
    */
-  public Boolean deploy(String type, String host, String name)
+  public String deployJarContents(InputStream is,
+				  String tag,
+				  String user,
+				  String message,
+				  String version,
+				  HashMap<String,String> extraAttr)
+    throws IOException
   {
-    String tag = type + "/" + host + "/" + name;
+    GitCommitJar commit = new GitCommitJar(is);
+
+    try {
+      return deployJar(commit, tag, user, message, version, extraAttr);
+    } finally {
+      commit.close();
+    }
+  }
+
+  /**
+   * Undeploys a tag
+   *
+   * @param tag symbolic name of the jar file to add
+   * @param user user name for the commit message
+   * @param message the commit message
+   */
+  public String undeploy(String tag,
+			 String user,
+			 String message,
+			 HashMap<String,String> extraAttr)
+    throws IOException
+  {
+    RemoveTagQuery query = new RemoveTagQuery(tag, user, message);
+
+    return (String) querySet(query);
+  }
+
+  /**
+   * Deploys a war, but does not start it
+   *
+   * @param host the virtual host
+   * @param name the web-app name
+   */
+  public Boolean deployWar(String host, String name)
+  {
+    String tag = createTag("wars", host, name);
 
     return deploy(tag);
   }
 
   /**
-   * Undeploy controller based on a deployment tag: wars/foo.com/my-war
+   * Deploys an ear, but does not start it
+   *
+   * @param host the virtual host
+   * @param name the ear name
+   */
+  public Boolean deployEar(String host, String name)
+  {
+    String tag = createTag("ears", host, name);
+
+    return deploy(tag);
+  }
+
+  /**
+   * Deploy controller based on a deployment tag: wars/foo.com/my-war
    *
    * @param tag the encoded controller name
    */
@@ -261,11 +176,11 @@ public class DeployClient
    */
   public Boolean start(String type, String host, String name)
   {
-    String tag = type + "/" + host + "/" + name;
+    String tag = createTag(type, host, name);
 
     return start(tag);
   }
-
+  
   /**
    * Starts a controller based on a deployment tag: wars/foo.com/my-war
    *
@@ -287,7 +202,7 @@ public class DeployClient
    */
   public Boolean stop(String type, String host, String name)
   {
-    String tag = type + "/" + host + "/" + name;
+    String tag = createTag(type, host, name);
 
     return stop(tag);
   }
@@ -313,7 +228,7 @@ public class DeployClient
    */
   public Boolean undeploy(String type, String host, String name)
   {
-    String tag = type + "/" + host + "/" + name;
+    String tag = createTag(type, host, name);
 
     return undeploy(tag);
   }
@@ -330,24 +245,105 @@ public class DeployClient
     return (Boolean) querySet(query);
   }
 
-  public Boolean []executeWebAppCommand(String [][]apps,
-                                        WebAppCommandQuery.WebAppCommand command)
+  //
+  // low-level routines
+  //
+
+  private String deployJar(GitCommitJar commit,
+			   String tag,
+			   String user,
+			   String message,
+			   String version,
+			   HashMap<String,String> extraAttr)
+    throws IOException
   {
-    WebAppCommandQuery []query = new WebAppCommandQuery[apps.length];
+    String []files = getCommitList(commit.getCommitList());
 
-    for (int i = 0; i < apps.length; i++) {
-      String []app = apps[i];
+    for (String sha1 : files) {
+      GitJarStreamSource gitSource = new GitJarStreamSource(sha1, commit);
+      StreamSource source = new StreamSource(gitSource);
 
-      WebAppCommandQuery q = new WebAppCommandQuery();
+      DeploySendQuery query = new DeploySendQuery(sha1, source);
 
-      q.setHost(app[0]);
-      q.setWebAppId(app[1]);
-      q.setCommand(command);
-
-      query[i] = q;
+      querySet(query);
     }
 
-    return (Boolean[]) querySet(query);
+    String result = commit(tag, commit.getDigest(), user, message, version, extraAttr);
+
+    deploy(tag);
+
+    return result;
+  }
+
+  public void sendFile(String sha1,
+		       long length,
+		       InputStream is)
+    throws IOException
+  {
+    InputStream blobIs = GitCommitTree.writeBlob(is, length);
+
+    InputStreamSource iss = new InputStreamSource(blobIs);
+    
+    StreamSource source = new StreamSource(iss);
+
+    DeploySendQuery query = new DeploySendQuery(sha1, source);
+
+    querySet(query);
+  }
+
+  private String []getCommitList(String []commitList)
+  {
+    DeployCommitListQuery query = new DeployCommitListQuery(commitList);
+    
+    DeployCommitListQuery result = (DeployCommitListQuery) queryGet(query);
+
+    return result.getCommitList();
+  }
+
+  public String calculateFileDigest(InputStream is, long length)
+    throws IOException
+  {
+    return GitCommitTree.calculateBlobDigest(is, length);
+  }
+
+  public String addDeployFile(String tag, String name, String sha1)
+  {
+    DeployAddFileQuery query
+      = new DeployAddFileQuery(tag, name, sha1);
+
+    return (String) querySet(query);
+  }
+
+  private String commit(String tag,
+			String sha1,
+			String user,
+			String message,
+			String version,
+			HashMap<String,String> attr)
+  {
+    DeployCommitQuery query
+      = new DeployCommitQuery(tag, sha1, user, message, version, attr);
+
+    return (String) querySet(query);
+  }
+  
+  public StatusQuery status(String tag)
+  {
+    StatusQuery query = new StatusQuery(tag);
+
+    return (StatusQuery) queryGet(query);
+  }
+
+  public HostQuery []listHosts()
+  {
+    ListHostsQuery query = new ListHostsQuery();
+
+    return (HostQuery []) queryGet(query);
+  }
+
+  public WebAppQuery []listWebApps(String host)
+  {
+    return (WebAppQuery []) queryGet(new ListWebAppsQuery(host));
   }
 
   private Serializable queryGet(Serializable query)
@@ -366,6 +362,14 @@ public class DeployClient
     else {
       return (Serializable) _client.querySet(_deployJid, query);
     }
+  }
+
+  private String createTag(String type, String host, String name)
+  {
+    while (name.startsWith("/"))
+      name = name.substring(1);
+    
+    return type + "/" + host + "/" + name;
   }
 
   @Override

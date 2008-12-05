@@ -32,7 +32,6 @@ package com.caucho.server.deploy;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.Period;
-import com.caucho.git.GitRepository;
 import com.caucho.loader.Environment;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -44,6 +43,8 @@ import com.caucho.vfs.Path;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.TreeMap;
@@ -69,8 +70,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   private Path _archiveDirectory;
   private Path _expandDirectory;
 
-  private GitRepository _git;
-  private String _gitPath;
+  private DeployRepository _repository;
+  private String _repositoryTag;
+  
   private String _entryNamePrefix = "";
 
   private String _extension = ".jar";
@@ -304,40 +306,40 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   }
 
   /**
-   * The Git repository
+   * The repository
    */
-  public void setGit(GitRepository git)
+  public void setRepository(DeployRepository repository)
   {
-    _git = git;
+    _repository = repository;
   }
 
   /**
-   * The Git repository
+   * The repository
    */
-  public GitRepository getGit()
+  public DeployRepository getRepository()
   {
-    return _git;
+    return _repository;
   }
 
   /**
-   * The Git ref directory
+   * The repository tag
    */
-  public void setGitPath(String gitPath)
+  public void setRepositoryTag(String repositoryTag)
   {
-    _gitPath = gitPath;
+    _repositoryTag = repositoryTag;
+  }
+
+  /**
+   * The repository tag
+   */
+  public String getRepositoryTag()
+  {
+    return _repositoryTag;
   }
 
   public void setEntryNamePrefix(String entryNamePrefix)
   {
     _entryNamePrefix = entryNamePrefix;
-  }
-
-  /**
-   * The Git ref directory
-   */
-  public String getGitPath()
-  {
-    return _gitPath;
   }
 
   /**
@@ -641,21 +643,38 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
       expandDigest = expandDirectory.getCrc64();
     
     digest = Crc64.generate(digest, expandDigest);
-
-    if (_git != null && _gitPath != null) {
-      String []tags = _git.listRefs(_gitPath);
-
-      for (int i = 0; tags != null && i < tags.length; i++) {
-	digest = Crc64.generate(digest, tags[i]);
-      }
+    
+    if (_repository != null && _repositoryTag != null) {
+      digest = calculateRepositoryDigest(digest);
     }
 
     return digest;
   }
 
-  public Path getGitRefPath(String name)
+  private long calculateRepositoryDigest(long digest)
   {
-    return _git.getRefPath(_gitPath + "/" + name);
+    String prefix = getRepositoryTag() + "/";
+    
+    ArrayList<String> tags = new ArrayList<String>();
+    Map<String,DeployTagEntry> tagMap = _repository.getTagMap();
+
+    for (String key : tagMap.keySet()) {
+      if (key.startsWith(prefix))
+	tags.add(key);
+    }
+
+    Collections.sort(tags);
+
+    for (String tag : tags) {
+      digest = Crc64.generate(digest, tag);
+
+      DeployTagEntry entry = tagMap.get(tag);
+
+      if (entry.getRoot() != null)
+	digest = Crc64.generate(digest, entry.getRoot());
+    }
+
+    return digest;
   }
 
   public ArrayList<String> getVersionNames(String name)
@@ -792,15 +811,21 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   private void addRepositoryEntryNames(TreeSet<String> entryNames)
     throws IOException
   {
-    if (_git == null || _gitPath == null)
+    if (_repository == null || getRepositoryTag() == null)
       return;
     
-    String []pathList = _git.listRefs(_gitPath);
+    String prefix = getRepositoryTag() + "/";
+    
+    Map<String,DeployTagEntry> tagMap = _repository.getTagMap();
 
-    // collect all the new repository expand directories
-    // server/12p6 make sure webapps are prefixed with a '/'
-    for (String pathName : pathList) {
-      entryNames.add(_entryNamePrefix + pathName);
+    for (String key : tagMap.keySet()) {
+      if (key.startsWith(prefix)) {
+	String pathName = key.substring(prefix.length());
+
+	// collect all the new repository expand directories
+	// server/12p6 make sure webapps are prefixed with a '/'
+	entryNames.add(_entryNamePrefix + pathName);
+      }
     }
   }
   
@@ -980,6 +1005,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
    */
   public boolean deploy(String name)
   {
+    update();
+    
     DeployController controller
       = getDeployContainer().findController(nameToEntryName(name));
 

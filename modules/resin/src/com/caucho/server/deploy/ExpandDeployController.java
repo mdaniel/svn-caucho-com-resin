@@ -65,8 +65,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   private Path _rootDirectory;
   private Path _archivePath;
 
-  private GitRepository _git;
-  private Path _gitRefPath;
+  private DeployRepository _repository;
+  private String _repositoryTag;
 
   private FileSetType _expandCleanupFileSet;
 
@@ -124,35 +124,35 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   }
 
   /**
-   * The Git repository
+   * Returns the repository
    */
-  public GitRepository getGit()
+  public DeployRepository getRepository()
   {
-    return _git;
+    return _repository;
   }
 
   /**
-   * The Git repository
+   * Sets the repository
    */
-  public void setGit(GitRepository git)
+  public void setRepository(DeployRepository repository)
   {
-    _git = git;
+    _repository = repository;
   }
 
   /**
-   * The Git ref path
+   * The repository tag
    */
-  public Path getGitRefPath()
+  public String getRepositoryTag()
   {
-    return _gitRefPath;
+    return _repositoryTag;
   }
 
   /**
-   * The Git ref path
+   * The repository tag
    */
-  public void setGitRefPath(Path path)
+  public void setRepositoryTag(String tag)
   {
-    _gitRefPath = path;
+    _repositoryTag = tag;
   }
 
   /**
@@ -218,8 +218,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     if (oldController.getArchivePath() != null)
       setArchivePath(oldController.getArchivePath());
 
-    if (oldController.getGitRefPath() != null)
-      setGitRefPath(oldController.getGitRefPath());
+    if (oldController.getRepositoryTag() != null)
+      setRepositoryTag(oldController.getRepositoryTag());
   }
 
   /**
@@ -323,42 +323,26 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   private boolean expandRepositoryImpl()
     throws IOException
   {
-    Path gitRefPath = getGitRefPath();
-
-    if (gitRefPath == null || ! gitRefPath.canRead())
-      return false;
-
     try {
-      String sha1 = null;
-
-      ReadStream is = null;
-      try {
-	is = gitRefPath.openRead();
-
-	sha1 = is.readLine();
-
-	if (sha1 != null)
-	  sha1 = sha1.trim();
-
-	GitCommit commit = getGit().parseCommit(sha1);
-
-	String tree = commit.getTree();
-	
-	Path pwd = getRootDirectory();
-
-	pwd.mkdirs();
-
-	if (log.isLoggable(Level.FINE))
-	  log.fine(this + " expanding .git repository tag=" + gitRefPath
-		   + " tree=" + tree + " -> root=" + getRootDirectory());
-
-	expandRepositoryTree(pwd, tree);
-	
+      if (_repository == null)
 	return false;
-      } finally {
-	if (is != null)
-	  is.close();
-      }
+      
+      String tree = _repository.getTagRoot(getRepositoryTag());
+
+      if (tree == null)
+	return false;
+      
+      Path pwd = getRootDirectory();
+
+      pwd.mkdirs();
+
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " expanding .git repository tag=" + getRepositoryTag()
+		 + " tree=" + tree + " -> root=" + getRootDirectory());
+
+      _repository.expandToPath(pwd, tree);
+	
+      return true;
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -366,30 +350,6 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     } catch (Exception e) {
       e.printStackTrace();
       return false;
-    }
-  }
-
-  private void expandRepositoryTree(Path pwd, String treeDigest)
-    throws IOException
-  {
-    GitTree tree = _git.parseTree(treeDigest);
-
-    for (GitTree.Entry entry : tree.entries()) {
-      String name = entry.getName();
-      String sha1 = entry.getSha1();
-      Path subPath = pwd.lookup(name);
-
-      if (entry.isDir()) {
-	subPath.mkdirs();
-
-	expandRepositoryTree(subPath, sha1);
-      }
-      else if (entry.isFile()) {
-	_git.copyToFile(subPath, sha1);
-      }
-      else {
-	log.warning(this + " unknown entry " + entry);
-      }
     }
   }
 

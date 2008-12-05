@@ -113,6 +113,7 @@ public class GitRepository {
     throws IOException
   {
     GitObjectStream is = open(sha1);
+
     try {
       return is.getType();
     } finally {
@@ -144,27 +145,6 @@ public class GitRepository {
     }
   }
 
-  public String []listRefs(String dir)
-  {
-    try {
-      Path path = _root.lookup("refs").lookup(dir);
-
-      if (path.isDirectory())
-	return path.list();
-      else
-	return new String[0];
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      return new String[0];
-    }
-  }
-
-  public Path getRefPath(String path)
-  {
-    return _root.lookup("refs").lookup(path);
-  }
-
   public void writeTag(String tag, String hex)
   {
     Path path = _root.lookup("refs").lookup(tag);
@@ -192,6 +172,27 @@ public class GitRepository {
     }
   }
 
+  public String []listRefs(String dir)
+  {
+    try {
+      Path path = _root.lookup("refs").lookup(dir);
+
+      if (path.isDirectory())
+	return path.list();
+      else
+	return new String[0];
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return new String[0];
+    }
+  }
+
+  public Path getRefPath(String path)
+  {
+    return _root.lookup("refs").lookup(path);
+  }
+
   /**
    * Parses and returns the commit file specified by the sha1 hash.
    *
@@ -204,7 +205,7 @@ public class GitRepository {
   {
     GitObjectStream is = open(sha1);
     try {
-      if (! "commit".equals(is.getType()))
+      if (is.getType() != GitType.COMMIT)
 	throw new IOException(L.l("'{0}' is an unexpected type, expected 'commit'",
 				  is.getType()));
       
@@ -225,14 +226,73 @@ public class GitRepository {
     throws IOException
   {
     GitObjectStream is = open(sha1);
+    
     try {
-      if (! "tree".equals(is.getType()))
-	throw new IOException(L.l("'{0}' is an unexpected type, expected 'commit'",
+      if (GitType.TREE != is.getType())
+	throw new IOException(L.l("'{0}' is an unexpected type, expected 'tree'",
 				  is.getType()));
       
       return is.parseTree();
     } finally {
       is.close();
+    }
+  }
+
+  /**
+   * Returns an input stream to a blob
+   */
+  public InputStream openBlob(String sha1)
+    throws IOException
+  {
+    GitObjectStream is = open(sha1);
+    
+    if (is.getType() != GitType.BLOB) {
+      is.close();
+      throw new IOException(L.l("'{0}' is an unexpected type, expected 'blob'",
+				is.getType()));
+    }
+      
+    return is;
+  }
+
+  public void expandToPath(Path path, String sha1)
+    throws IOException
+  {
+    GitObjectStream is = open(sha1);
+    
+    try {
+      if (GitType.TREE == is.getType()) {
+	GitTree tree = is.parseTree();
+	is.close();
+
+	expandTreeToPath(path, tree);
+      }
+      else if (GitType.BLOB == is.getType()) {
+	WriteStream os = path.openWrite();
+
+	try {
+	  os.writeStream(is.getInputStream());
+	} finally {
+	  os.close();
+	}
+      }
+      else
+	throw new IOException(L.l("'{0}' is an unexpected type, expected 'blob' or 'tree'",
+				  is.getType()));
+    } finally {
+      is.close();
+    }
+  }
+
+  private void expandTreeToPath(Path path, GitTree tree)
+    throws IOException
+  {
+    path.mkdirs();
+    
+    for (GitTree.Entry entry : tree.entries()) {
+      String name = entry.getName();
+
+      expandToPath(path.lookup(name), entry.getSha1());
     }
   }
 
@@ -242,8 +302,8 @@ public class GitRepository {
     GitObjectStream is = open(sha1);
     
     try {
-      if (! "blob".equals(is.getType()))
-	throw new IOException(L.l("'{0}' is an unexpected type, expected 'blot'",
+      if (GitType.BLOB != is.getType())
+	throw new IOException(L.l("'{0}' is an unexpected type, expected 'blob'",
 				  is.getType()));
 
       WriteStream os = path.openWrite();
@@ -275,7 +335,7 @@ public class GitRepository {
    *
    * @return an opened GitObjectStream to the file
    */
-  private GitObjectStream open(String sha1)
+  public GitObjectStream open(String sha1)
     throws IOException
   {
     String prefix = sha1.substring(0, 2);
@@ -304,6 +364,46 @@ public class GitRepository {
     } finally {
       is.close();
     }
+  }
+
+  /**
+   * Writes a file to the repository
+   */
+  public String writeInputStream(InputStream is)
+    throws IOException
+  {
+    TempStream tempOs = new TempStream();
+
+    WriteStream out = new WriteStream(tempOs);
+
+    out.writeStream(is);
+
+    out.close();
+
+    int length = tempOs.getLength();
+
+    String type = "blob";
+
+    TempOutputStream os = new TempOutputStream();
+
+    String sha1 = writeData(os, type, tempOs.getInputStream(), length);
+
+    return writeFile(os, sha1);
+  }
+
+  /**
+   * Writes a file to the repository
+   */
+  public String writeInputStream(InputStream is, long length)
+    throws IOException
+  {
+    String type = "blob";
+
+    TempOutputStream os = new TempOutputStream();
+
+    String sha1 = writeData(os, type, is, length);
+
+    return writeFile(os, sha1);
   }
 
   /**
@@ -429,6 +529,65 @@ public class GitRepository {
       
     return hex;
   }
+
+  /**
+   * Opens a stream to the raw git file.
+   */
+  public InputStream openRawGitFile(String sha1)
+    throws IOException
+  {
+    Path objectPath = lookupPath(sha1);
+
+    return objectPath.openRead();
+  }
+
+  /**
+   * Writes a raw git file directly to the repository with an expected
+   * sha1.  The write will verify that the stream matches the expected
+   * content.
+   */
+  public String writeRawGitFile(String sha1, InputStream is)
+    throws IOException
+  {
+    Path objectPath = lookupPath(sha1);
+
+    if (objectPath.exists())
+      return sha1;
+
+    objectPath.getParent().mkdirs();
+    
+    Path tmpDir = _root.lookup("tmp");
+    tmpDir.mkdirs();
+
+    Path tmp = _root.lookup("tmp").lookup("tmp." + sha1);
+
+    try {
+      WriteStream tmpOut = tmp.openWrite();
+      
+      try {
+	tmpOut.writeStream(is);
+      } finally {
+	tmpOut.close();
+      }
+
+      String newHex = validate(tmp);
+
+      if (! sha1.equals(newHex))
+	throw new RuntimeException(L.l("'{0}' does not match expected '{1}'",
+				       newHex, sha1));
+
+      tmp.renameTo(objectPath);
+      
+      if (log.isLoggable(Level.FINER))
+	log.finer(this + " addRawGitFile " + sha1 + " " + objectPath);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      tmp.remove();
+    }
+      
+    return sha1;
+  }
   
   private Path lookupPath(String sha1)
   {
@@ -436,6 +595,31 @@ public class GitRepository {
     String suffix = sha1.substring(2);
     
     return _root.lookup("objects").lookup(prefix).lookup(suffix);
+  }
+
+  private String validate(Path path)
+    throws IOException, NoSuchAlgorithmException
+  {
+    ReadStream is = path.openRead();
+
+    try {
+      MessageDigest md = MessageDigest.getInstance("SHA-1");
+      
+      InflaterInputStream zin = new InflaterInputStream(is);
+      DigestInputStream din = new DigestInputStream(zin, md);
+
+      int ch;
+      while ((ch = din.read()) >= 0) {
+      }
+
+      din.close();
+
+      byte []digest = md.digest();
+
+      return Hex.toHex(digest);
+    } finally {
+      is.close();
+    }
   }
 
   private String writeData(OutputStream os, String type,

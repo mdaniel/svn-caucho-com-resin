@@ -98,6 +98,19 @@ public class HempBrokerManager
 
   public BamBroker findBroker(String name)
   {
+    if (name == null)
+      return null;
+    
+    int p = name.indexOf('@');
+    int q = name.indexOf('/');
+
+    if (p >= 0 && q >= 0)
+      name = name.substring(p + 1, q);
+    else if (p >= 0)
+      name = name.substring(p + 1);
+    else if (q >= 0)
+      name = name.substring(0, q);
+    
     WeakReference<BamBroker> brokerRef = null;
     
     synchronized (_brokerMap) {
@@ -109,12 +122,16 @@ public class HempBrokerManager
 
     Server server = Server.getCurrent();
 
-    if (server == null)
+    if (server == null || ! server.isActive())
       return null;
     
     Host host = server.getHost(name, 5222);
 
     if (host == null)
+      return null;
+
+    // XXX: need to determine actual host
+    if ("default".equals(host.getHostName()))
       return null;
 
     BamBroker broker = host.getBamBroker();
