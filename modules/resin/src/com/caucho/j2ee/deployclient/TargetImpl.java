@@ -92,6 +92,16 @@ public class TargetImpl
     return _name.compareTo(o._name);
   }
 
+  public boolean equals(Object o)
+  {
+    if (! (o instanceof TargetImpl))
+      return false;
+
+    TargetImpl target = (TargetImpl) o;
+
+    return _name.equals(target.getName());
+  }
+
   /**
    * Returns the target description.
    */
