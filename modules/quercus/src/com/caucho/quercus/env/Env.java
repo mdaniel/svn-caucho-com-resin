@@ -4429,6 +4429,46 @@ public class Env {
   /**
    * Returns the first value
    */
+  public static Value first(Value value, double a1)
+  {
+    return value;
+  }
+
+  /**
+   * Returns the first value
+   */
+  public static long first(long value, Value a1)
+  {
+    return value;
+  }
+
+  /**
+   * Returns the first value
+   */
+  public static double first(double value, Value a1)
+  {
+    return value;
+  }
+
+  /**
+   * Returns the first value
+   */
+  public static long first(long value, double a1)
+  {
+    return value;
+  }
+
+  /**
+   * Returns the first value
+   */
+  public static double first(double value, double a1)
+  {
+    return value;
+  }
+
+  /**
+   * Returns the first value
+   */
   public static Value first(Value value, Value a1, Value a2)
   {
     return value;
