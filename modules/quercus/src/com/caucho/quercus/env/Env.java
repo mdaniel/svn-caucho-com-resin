@@ -1756,13 +1756,9 @@ public class Env {
 
     // required for $$ref where $ref is the name of a superglobal
     if (var == null) {
-      var = getSuperGlobalRef(name);
-
-      if (var == null)
-        var = getGlobalScriptContextRef(name);
-      
-      if (var != null)
-        _map.put(name, var);
+      // php/0809
+      if (Quercus.isSuperGlobal(name))
+	return getGlobalRef(name);
     }
 
     return var;
@@ -2072,6 +2068,9 @@ public class Env {
     }
 
     var = getSuperGlobalRef(name);
+
+    if (var != null)
+      _globalMap.put(name, var);
 
     return var;
   }
