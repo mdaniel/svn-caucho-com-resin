@@ -295,10 +295,7 @@ public class Quercus
   protected ModuleContext createModuleContext(ModuleContext parent,
 					      ClassLoader loader)
   {
-    if (parent != null)
-      return new ModuleContext(parent, loader);
-    else
-      return new ModuleContext(loader);
+    return new ModuleContext(parent, loader);
   }
 
   /**
@@ -1297,8 +1294,18 @@ public class Quercus
   public QuercusModule findModule(String name)
   {
     ModuleInfo moduleInfo =  _modules.get(name);
-    
-    return moduleInfo == null ? null : moduleInfo.getModule();
+    QuercusModule module = null;
+
+    if (moduleInfo != null)
+      module = moduleInfo.getModule();
+    else
+      module = getModuleContext().findModule(name);
+
+    if (module == null)
+      throw new IllegalStateException(L.l("'{0}' is an unknown quercus module",
+					  name));
+
+    return module;
   }
 
   /**

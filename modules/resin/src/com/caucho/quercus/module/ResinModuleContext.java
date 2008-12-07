@@ -45,20 +45,6 @@ public class ResinModuleContext extends ModuleContext {
   /**
    * Constructor.
    */
-  public ResinModuleContext()
-  {
-  }
-
-  /**
-   * Constructor.
-   */
-  public ResinModuleContext(ClassLoader loader)
-  {
-    super(loader);
-  }
-  /**
-   * Constructor.
-   */
   public ResinModuleContext(ModuleContext parent, ClassLoader loader)
   {
     super(parent, loader);

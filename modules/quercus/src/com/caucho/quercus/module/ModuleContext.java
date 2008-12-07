@@ -66,11 +66,10 @@ public class ModuleContext
 
   private ClassLoader _loader;
 
+  private ModuleContext _parent;
+
   private HashSet<URL> _serviceClassUrls = new HashSet<URL>();
   private HashSet<URL> _serviceModuleUrls = new HashSet<URL>();
-
-  private HashMap<String, QuercusModule> _modules
-    = new HashMap<String, QuercusModule>();
 
   private HashMap<String, ModuleInfo> _moduleInfoMap
     = new HashMap<String, ModuleInfo>();
@@ -96,15 +95,7 @@ public class ModuleContext
   /**
    * Constructor.
    */
-  public ModuleContext()
-  {
-    this(Thread.currentThread().getContextClassLoader());
-  }
-
-  /**
-   * Constructor.
-   */
-  public ModuleContext(ClassLoader loader)
+  private ModuleContext(ClassLoader loader)
   {
     _loader = loader;
     
@@ -124,15 +115,18 @@ public class ModuleContext
   {
     this(loader);
 
-    _serviceClassUrls.addAll(parent._serviceClassUrls);
-    _serviceModuleUrls.addAll(parent._serviceModuleUrls);
+    _parent = parent;
 
-    _modules.putAll(parent._modules);
-    _moduleInfoMap.putAll(parent._moduleInfoMap);
-    _extensionSet.addAll(parent._extensionSet);
-    _staticClasses.putAll(parent._staticClasses);
-    _javaClassWrappers.putAll(parent._javaClassWrappers);
-    _extensionClasses.putAll(parent._extensionClasses);
+    if (parent != null) {
+      _serviceClassUrls.addAll(parent._serviceClassUrls);
+      _serviceModuleUrls.addAll(parent._serviceModuleUrls);
+
+      _moduleInfoMap.putAll(parent._moduleInfoMap);
+      _extensionSet.addAll(parent._extensionSet);
+      _staticClasses.putAll(parent._staticClasses);
+      _javaClassWrappers.putAll(parent._javaClassWrappers);
+      _extensionClasses.putAll(parent._extensionClasses);
+    }
   }
 
   public static ModuleContext getLocalContext(ClassLoader loader)
@@ -448,7 +442,12 @@ public class ModuleContext
    */
   public QuercusModule findModule(String name)
   {
-    return _modules.get(name);
+    ModuleInfo info = _moduleInfoMap.get(name);
+
+    if (info != null)
+      return info.getModule();
+    else
+      return null;
   }
 
   /**
@@ -513,12 +512,14 @@ public class ModuleContext
   private void initStaticFunctions()
   {
     Thread thread = Thread.currentThread();
-    ClassLoader loader = thread.getContextClassLoader();
+    ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
+      thread.setContextClassLoader(_loader);
+      
       String quercusModule
         = "META-INF/services/com.caucho.quercus.QuercusModule";
-      Enumeration<URL> urls = loader.getResources(quercusModule);
+      Enumeration<URL> urls = _loader.getResources(quercusModule);
 
       HashSet<URL> urlSet = new HashSet<URL>();
 
@@ -554,6 +555,8 @@ public class ModuleContext
 
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
   }
 
@@ -601,7 +604,7 @@ public class ModuleContext
    */
   public ArrayList<ModuleInfo> getModules()
   {
-    synchronized (_modules) {
+    synchronized (_moduleInfoMap) {
       return new ArrayList<ModuleInfo>(_moduleInfoMap.values());
     }
   }
@@ -614,8 +617,8 @@ public class ModuleContext
   private void introspectPhpModuleClass(Class cl)
     throws IllegalAccessException, InstantiationException, ConfigException
   {
-    synchronized (_modules) {
-      if (_modules.get(cl.getName()) != null)
+    synchronized (_moduleInfoMap) {
+      if (_moduleInfoMap.get(cl.getName()) != null)
 	return;
       
       log.finest("Quercus loading module " + cl.getName());
@@ -892,6 +895,12 @@ public class ModuleContext
 
       return null;
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _loader + "]";
   }
 }
 

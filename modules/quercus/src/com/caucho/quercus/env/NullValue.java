@@ -376,9 +376,10 @@ public class NullValue extends Value
   }
 
   /**
-   * Creates an array automatically
+   * Sets the array value, returning the new array, e.g. to handle
+   * string update ($a[0] = 'A').  Creates an array automatically if
+   * necessary.
    */
-  @Override
   public Value append(Value index, Value value)
   {
     return new ArrayValueImpl().append(index, value);

@@ -262,5 +262,11 @@ public class ModuleInfo {
       return null;
     }
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _name + "]";
+  }
 }
 

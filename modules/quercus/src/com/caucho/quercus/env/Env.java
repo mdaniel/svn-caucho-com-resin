@@ -1698,8 +1698,10 @@ public class Env {
   {
     Var oldVar = _globalMap.remove(name);
 
+    /* php/323a
     if (oldVar != null)
       oldVar.set(UnsetValue.UNSET);
+    */
 
     return null;
   }

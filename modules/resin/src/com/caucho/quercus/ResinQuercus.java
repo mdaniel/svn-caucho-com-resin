@@ -113,10 +113,7 @@ public class ResinQuercus extends Quercus
   protected ModuleContext createModuleContext(ModuleContext parent,
 					      ClassLoader loader)
   {
-    if (parent != null)
-      return new ResinModuleContext(parent, loader);
-    else
-      return new ResinModuleContext(loader);
+    return new ResinModuleContext(parent, loader);
   }
 
   public String getCookieName()

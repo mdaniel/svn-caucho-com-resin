@@ -137,10 +137,7 @@ public class VarExpr
   {
     Value value;
 
-    if (_var.isGlobal())
-      value = env.getGlobalValue(_name);
-    else
-      value = env.getValue(_name);
+    value = env.getValue(_name);
 
     if (value != null)
       return value;

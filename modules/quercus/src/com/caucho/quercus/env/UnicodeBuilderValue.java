@@ -119,6 +119,13 @@ public class UnicodeBuilderValue extends StringBuilderValue
       v._isCopy = true;
     }
   }
+
+  public UnicodeBuilderValue(StringBuilderValue v, boolean isCopy)
+  {
+    _buffer = new char[v._buffer.length];
+    System.arraycopy(v._buffer, 0, _buffer, 0, v._length);
+    _length = v._length;
+  }
   
   /**
    * Creates the string.
@@ -239,6 +246,15 @@ public class UnicodeBuilderValue extends StringBuilderValue
     value.appendTo(v);
     
     return v;
+  }
+
+  /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue copyStringBuilder()
+  {
+    return new UnicodeBuilderValue(this, true);
   }
 
   /**

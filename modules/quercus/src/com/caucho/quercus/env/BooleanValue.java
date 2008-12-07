@@ -197,6 +197,19 @@ public class BooleanValue extends Value
   }
 
   /**
+   * Sets the array value, returning the new array, e.g. to handle
+   * string update ($a[0] = 'A').  Creates an array automatically if
+   * necessary.
+   */
+  public Value append(Value index, Value value)
+  {
+    if (_value)
+      return this;
+    else
+      return new ArrayValueImpl().append(index, value);
+  }
+
+  /**
    * Converts to a key.
    */
   public Value toKey()

@@ -189,6 +189,13 @@ public class StringBuilderValue
       v._isCopy = true;
     }
   }
+  
+  public StringBuilderValue(StringBuilderValue v, boolean isCopy)
+  {
+    _buffer = new char[v._buffer.length];
+    System.arraycopy(v._buffer, 0, _buffer, 0, v._length);
+    _length = v._length;
+  }
 
   public StringBuilderValue(Value v1, Value v2)
   {
@@ -543,7 +550,10 @@ public class StringBuilderValue
   @Override
   public Value append(Value index, Value value)
   {
-    return setCharValueAt(index.toLong(), value.toString());
+    if (length() > 0)
+      return setCharValueAt(index.toLong(), value.toString());
+    else
+      return new ArrayValueImpl().append(index, value);
   }
 
   /**
@@ -623,7 +633,9 @@ public class StringBuilderValue
       
       int index = (int) indexL;
 
-      StringBuilderValue sb = (StringBuilderValue) toStringBuilder();
+      StringBuilderValue sb = (StringBuilderValue) copyStringBuilder();
+
+      sb.ensureCapacity(index + 1);
       
       int padLen = index - len;
 
@@ -818,6 +830,14 @@ public class StringBuilderValue
   public StringValue toStringBuilder()
   {
     return new StringBuilderValue(this);
+  }
+
+  /**
+   * Converts to a string builder
+   */
+  public StringValue copyStringBuilder()
+  {
+    return new StringBuilderValue(this, true);
   }
 
   /**

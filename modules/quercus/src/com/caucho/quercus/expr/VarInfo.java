@@ -39,8 +39,6 @@ public class VarInfo {
 
   private final String _name;
   
-  private boolean _isGlobal;
-
   public VarInfo(String name, FunctionInfo function)
   {
     _name = name.intern();
@@ -61,22 +59,6 @@ public class VarInfo {
   public FunctionInfo getFunction()
   {
     return _function;
-  }
-
-  /**
-   * True if the variable is global.
-   */
-  public boolean isGlobal()
-  {
-    return _isGlobal;
-  }
-
-  /**
-   * True if the variable is global.
-   */
-  public void setGlobal()
-  {
-    _isGlobal = true;
   }
  
   @Override
