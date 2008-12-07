@@ -50,12 +50,14 @@ public class MysqlLatin1Utility
         '\u02DC', '\u2122', '\u0161', '\u203A',
         '\u0153', '\u009D', '\u017E', '\u0178'};
   
-  private static IntMap UNICODE_MAP = new IntMap();
+  private static final byte []UNICODE_MAP = new byte[0x2400];
   
   static {
-    for (int i = 0; i < C1_MAP.length; i++) {
-      UNICODE_MAP.put(new Integer(C1_MAP[i]), i + 0x80);
-    }
+    for (int i = 0; i < UNICODE_MAP.length; i++)
+      UNICODE_MAP[i] = (byte) i;
+    
+    for (int i = 0; i < C1_MAP.length; i++)
+      UNICODE_MAP[C1_MAP[i]] = (byte) (i + 0x80);
   }
   
   public static String decode(byte []bytes)
@@ -86,18 +88,14 @@ public class MysqlLatin1Utility
       // there was a previous error in converting to a Java String
       if (ch == 0xfffd)
         return null;
-      
-      int value = UNICODE_MAP.get(ch);
-      
-      if (value != IntMap.NULL) {
-        bytes[i] = (byte) value;
-      }
-      else {
+
+      if (ch < UNICODE_MAP.length)
+        bytes[i] = UNICODE_MAP[ch];
+      else
         bytes[i] = (byte) ch;
         
         //System.err.println("MysqlLatinUtility->encode(): " + Integer.toHexString((byte) ch) + " . " + Integer.toHexString(ch) + " . " + ch);
         
-      }
     }
     
     return bytes;

@@ -117,8 +117,6 @@ public class UnicodeBuilderValue extends StringBuilderValue
       _buffer = v._buffer;
       _length = v._length;
       v._isCopy = true;
-      
-      _bufferOwner = v;
     }
   }
   

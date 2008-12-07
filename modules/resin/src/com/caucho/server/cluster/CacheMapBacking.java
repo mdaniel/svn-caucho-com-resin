@@ -34,11 +34,13 @@ import com.caucho.db.jdbc.DataSourceImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.FreeList;
+import com.caucho.util.JdbcUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 import com.caucho.server.distcache.CacheMapEntry;
+import com.caucho.server.distcache.CacheData;
 import com.caucho.server.admin.Management;
 
 import javax.sql.DataSource;
@@ -50,6 +52,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -84,8 +87,10 @@ public class CacheMapBacking implements AlarmListener {
   private String _timeoutQuery;
   
   private String _countQuery;
+  private String _updatesSinceQuery;
 
   private long _serverVersion;
+  private long _startupLastAccessTime;
 
   private Alarm _alarm;
   
@@ -132,6 +137,14 @@ public class CacheMapBacking implements AlarmListener {
     return _tableName;
   }
 
+  /**
+   * Returns the max access time detected on startup.
+   */
+  public long getStartupLastAccessTime()
+  {
+    return _startupLastAccessTime;
+  }
+
   private void init()
     throws Exception
   {
@@ -140,9 +153,10 @@ public class CacheMapBacking implements AlarmListener {
 		  + " WHERE id=? AND is_valid=1 AND is_removed=0");
 
     _insertQuery = ("INSERT into " + _tableName
-		    + " (id,value,is_valid,is_removed,access_time,timeout,"
-		    + "  server_version,item_version) "
-		    + "VALUES(?,?,1,0,?,?,?,0)");
+		    + " (id,value,is_valid,is_removed,"
+		    + "  item_version,access_time,timeout,"
+		    + "  server_version) "
+		    + "VALUES(?,?,1,0,?,?,?,?)");
 
     _updateSaveQuery
       = ("UPDATE " + _tableName
@@ -171,10 +185,16 @@ public class CacheMapBacking implements AlarmListener {
 		     + " WHERE access_time + 5 * timeout / 4 < ?");
     
     _countQuery = "SELECT count(*) FROM " + _tableName;
+    
+    _updatesSinceQuery = ("SELECT id,value,item_version,access_time,is_removed"
+			  + " FROM " + _tableName
+			  + " WHERE access_time<?"
+			  + " OFFSET ? LIMIT 1024");
 
     initDatabase();
 
     _serverVersion = initVersion();
+    _startupLastAccessTime = initLastAccessTime();
 
     // _alarm = new Alarm(this);
     // _alarm.queue(0);
@@ -257,6 +277,82 @@ public class CacheMapBacking implements AlarmListener {
   }
 
   /**
+   * Returns the maximum access time on startup
+   */
+  private long initLastAccessTime()
+    throws Exception
+  {
+    Connection conn = _dataSource.getConnection();
+
+    try {
+      Statement stmt = conn.createStatement();
+      
+      String sql = ("SELECT MAX(access_time)"
+		    + " FROM " + _tableName);
+
+      ResultSet rs = stmt.executeQuery(sql);
+      if (rs.next())
+	return rs.getLong(1);
+    } finally {
+      conn.close();
+    }
+
+    return 0;
+  }
+
+  /**
+   * Returns the maximum access time on startup
+   */
+  public ArrayList<CacheData> getUpdates(long accessTime, int offset)
+  {
+    Connection conn = null;
+
+    try {
+      conn = _dataSource.getConnection();
+
+      String sql;
+      sql = ("SELECT id,value,item_version,access_time,is_removed"
+	     + " FROM " + _tableName
+	     + " WHERE ?<=access_time"
+	     + " LIMIT 1024");
+      
+      PreparedStatement pstmt = conn.prepareStatement(sql);
+
+      pstmt.setLong(1, accessTime);
+
+      ArrayList<CacheData> entryList = new ArrayList<CacheData>();
+
+      ResultSet rs = pstmt.executeQuery();
+
+      rs.relative(offset);
+      while (rs.next()) {
+	byte []keyHash = rs.getBytes(1);
+	byte []valueHash = rs.getBytes(2);
+	long version = rs.getLong(3);
+	long itemAccessTime = rs.getLong(4);
+	boolean isRemoved = rs.getBoolean(5);
+
+	entryList.add(new CacheData(new HashKey(keyHash),
+				    new HashKey(valueHash),
+				    version,
+				    itemAccessTime,
+				    isRemoved));
+      }
+
+      if (entryList.size() > 0)
+	return entryList;
+      else
+	return null;
+    } catch (SQLException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      JdbcUtil.close(conn);
+    }
+
+    return null;
+  }
+
+  /**
    * Reads the object from the data store.
    *
    * @param id the hash identifier for the data
@@ -303,7 +399,10 @@ public class CacheMapBacking implements AlarmListener {
    * @param value the value hash
    * @param timeout the item's timeout
    */
-  public boolean insert(HashKey id, HashKey value, long timeout)
+  public boolean insert(HashKey id,
+			HashKey value,
+			long version,
+			long timeout)
   {
     CacheMapConnection conn = null;
 
@@ -313,9 +412,10 @@ public class CacheMapBacking implements AlarmListener {
       PreparedStatement stmt = conn.prepareInsert();
       stmt.setBytes(1, id.getHash());
       stmt.setBytes(2, value.getHash());
-      stmt.setLong(3, Alarm.getCurrentTime());
-      stmt.setLong(4, timeout);
-      stmt.setLong(5, _serverVersion);
+      stmt.setLong(3, version);
+      stmt.setLong(4, Alarm.getCurrentTime());
+      stmt.setLong(5, timeout);
+      stmt.setLong(6, _serverVersion);
 
       int count = stmt.executeUpdate();
         

@@ -308,6 +308,15 @@ public class RefVar extends Value
   }
 
   /**
+   * Increment the following value.
+   */
+  @Override
+  public Value increment(int incr)
+  {
+    return _var.increment(incr);
+  }
+
+  /**
    * Subtracts to the following value.
    */
   @Override

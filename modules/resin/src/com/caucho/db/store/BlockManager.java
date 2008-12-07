@@ -61,6 +61,8 @@ public final class BlockManager
 
   private BlockManager(int capacity)
   {
+    super(ClassLoader.getSystemClassLoader());
+    
     _blockCache = new LongKeyLruCache<Block>(capacity);
 
     // the first store id is not available to allow for tests for zero.

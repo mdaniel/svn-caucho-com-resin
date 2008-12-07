@@ -376,6 +376,15 @@ public class NullValue extends Value
   }
 
   /**
+   * Creates an array automatically
+   */
+  @Override
+  public Value append(Value index, Value value)
+  {
+    return new ArrayValueImpl().append(index, value);
+  }
+
+  /**
    * Casts to an array.
    */
   @Override

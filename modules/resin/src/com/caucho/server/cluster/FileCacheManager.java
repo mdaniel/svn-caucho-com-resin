@@ -151,7 +151,7 @@ public class FileCacheManager extends DistributedCacheManager
     }
 
     if (oldEntry == null) {
-      if (_cacheMapBacking.insert(key, valueHash, timeout)) {
+      if (_cacheMapBacking.insert(key, valueHash, version, timeout)) {
       }
       else {
 	log.fine(this + " db insert failed due to timing conflict"

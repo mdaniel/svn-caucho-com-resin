@@ -120,7 +120,7 @@ public class ArrayValueImpl extends ArrayValue
     map.put(copy, this);
 
     for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
-      put(ptr._key, ptr._value.toValue().copy(env, map));
+      append(ptr._key, ptr._value.toValue().copy(env, map));
     }
   }
 
@@ -134,7 +134,7 @@ public class ArrayValueImpl extends ArrayValue
     this();
     
     for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
-      put(ptr._key, ptr._value.toValue().copyTree(env, root));
+      append(ptr._key, ptr._value.toValue().copyTree(env, root));
     }
   }
 
@@ -144,7 +144,7 @@ public class ArrayValueImpl extends ArrayValue
 
     for (int i = 0; i < keys.length; i++) {
       if (keys[i] != null)
-	put(keys[i], values[i]);
+	append(keys[i], values[i]);
       else
 	put(values[i]);
     }
@@ -596,14 +596,16 @@ public class ArrayValueImpl extends ArrayValue
   {
     key = key.toKey();
 
-    int hashMask = _hashMask;
-    int hash = key.hashCode() & hashMask;
+    int hash = key.hashCode() & _hashMask;
 
     for (Entry entry = _entries[hash];
          entry != null;
          entry = entry._nextHash) {
-      if (key.equals(entry._key))
-        return entry._value.toValue(); // quercus/39a1
+      if (key.equals(entry._key)) {
+        return entry._value;
+	
+        // return entry._value.toValue(); // php/39a1
+      }
     }
 
     return UnsetValue.UNSET;

@@ -28,6 +28,7 @@
 
 package com.caucho.naming;
 
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.L10N;
 
 import javax.naming.Context;
@@ -48,8 +49,8 @@ public class Jndi {
     = Logger.getLogger(Jndi.class.getName());
   private static L10N L = new L10N(Jndi.class);
 
-  private static final WeakHashMap<ClassLoader,Context> _javaCompEnvMap
-    = new WeakHashMap<ClassLoader,Context>();
+  private static final EnvironmentLocal<Context> _javaCompEnvMap
+    = new EnvironmentLocal<Context>();
 
   private Jndi() {}
 
@@ -70,18 +71,14 @@ public class Jndi {
     if (shortName.startsWith("java:"))
       return new InitialContext();
     else {
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
-      synchronized (_javaCompEnvMap) {
-	Context context = (Context) _javaCompEnvMap.get(loader);
+      Context context = (Context) _javaCompEnvMap.getLevel();
 
-	if (context == null) {
-	  context = (Context) new InitialContext().lookup("java:comp/env");
-	  _javaCompEnvMap.put(loader, context);
-	}
-
-	return context;
+      if (context == null) {
+	context = (Context) new InitialContext().lookup("java:comp/env");
+	_javaCompEnvMap.set(context);
       }
+
+      return context;
     }
   }
   

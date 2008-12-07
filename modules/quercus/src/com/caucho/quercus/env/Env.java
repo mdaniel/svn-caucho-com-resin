@@ -3269,7 +3269,7 @@ public class Env {
     if (_isUnicodeSemantics)
       return new UnicodeBuilderValue(buffer, length);
     else
-      return new StringBuilderValue(buffer, 0, length);
+      return new StringBuilderValue(buffer, length);
   }
   
   /**
@@ -5166,6 +5166,60 @@ public class Env {
   public static Value comma(Value a0, Value a1, Value a2, Value a3, Value a4)
   {
     return a4;
+  }
+
+  // long comma
+
+  /**
+   * Returns the last value.
+   */
+  public static long comma(Value a0, long a1)
+  {
+    return a1;
+  }
+
+  /**
+   * Returns the last value.
+   */
+  public static long comma(long a0, long a1)
+  {
+    return a1;
+  }
+
+  /**
+   * Returns the last value.
+   */
+  public static Value comma(long a0, Value a1)
+  {
+    return a1;
+  }
+
+  //
+  // comma
+  //
+
+  /**
+   * Returns the last value.
+   */
+  public static double comma(Value a0, double a1)
+  {
+    return a1;
+  }
+
+  /**
+   * Returns the last value.
+   */
+  public static double comma(double a0, double a1)
+  {
+    return a1;
+  }
+
+  /**
+   * Returns the last value.
+   */
+  public static Value comma(double a0, Value a1)
+  {
+    return a1;
   }
 
   public String toString()

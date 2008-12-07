@@ -341,37 +341,6 @@ public class MathModule extends AbstractQuercusModule {
   }
 
   /**
-   * valueToBase implementation to convert a long to hex.
-   */
-
-  private static StringValue valueToBase16(Env env, long value)
-  {
-    if (value == 0)
-      return env.createString("0");
-
-    StringBuilder sb = new StringBuilder();
-
-    // Ignore sign bit
-
-    if (value < 0)
-      value = -value;
-
-    do {
-      int d = (int) (value & 0xF);
-      value >>= 4;
-
-      if (d < 10)
-        sb.append((char) (d + '0'));
-      else
-        sb.append((char) (d + 'a' - 10));
-    } while (value != 0);
-
-    sb.reverse();
-
-    return env.createString(sb.toString());
-  }
-
-  /**
    * Convert a number between arbitrary bases
    *
    * @param number A string represeantion of an binary number.
@@ -438,7 +407,28 @@ public class MathModule extends AbstractQuercusModule {
    */
   public static StringValue dechex(Env env, long value)
   {
-    return valueToBase16(env, value);
+    if (value == 0)
+      return env.createString("0");
+
+    char []buffer = new char[16];
+
+    int i = 16;
+    while (value != 0) {
+      int d = (int) (value & 0xf);
+      
+      value = value >>> 4;
+      
+      if (d < 10)
+        buffer[--i] = (char) (d + '0');
+      else
+        buffer[--i] = (char) (d + 'a' - 10);
+    }
+
+    for (int j = i; j < 16; j++) {
+      buffer[j - i] = buffer[j];
+    }
+
+    return env.createString(buffer, 16 - i);
   }
 
   /**

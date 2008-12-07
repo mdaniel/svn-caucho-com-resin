@@ -1996,17 +1996,25 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         }
       }
     } finally {
-      _closeListener = null;
-      _listeners = null;
-      _entryCache = null;
-      _makeList = null;
       _loaders = null;
       _jarLoader = null;
+      _pathLoader = null;
+
+      _nativePath = null;
+      _entryCache = null;
+      _resourceCache = null;
+      
       _dependencies = null;
-      _permissions = null;
+      _makeList = null;
+      
+      _listeners = null;
       _securityManager = null;
+      _permissions = null;
       _codeSource = null;
+      
       _classFileTransformerList = null;
+      _urls = null;
+      _closeListener = null;
 
       _lifecycle.toDestroy();
     }
@@ -2108,7 +2116,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   }
 
   // XXX: GC issues
-  /*n
+  /*
   protected void finalize()
   {
     destroy();

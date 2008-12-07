@@ -525,46 +525,54 @@ public class MBeanContext
    */
   public void destroy()
   {
-    if (_mbeans == null)
-      return;
-
-    log.finest(this + " destroy");
+    try {
+      if (_mbeans == null)
+	return;
     
-    ArrayList<ObjectName> list = new ArrayList<ObjectName>(_mbeans.keySet());
+      log.finest(this + " destroy");
+    
+      ArrayList<ObjectName> list = new ArrayList<ObjectName>(_mbeans.keySet());
 
-    ArrayList<Listener> listeners = new ArrayList<Listener>(_listeners);
+      ArrayList<Listener> listeners = new ArrayList<Listener>(_listeners);
 
-    for (int i = 0; i < listeners.size(); i++) {
-      Listener listener = listeners.get(i);
+      for (int i = 0; i < listeners.size(); i++) {
+	Listener listener = listeners.get(i);
 
-      try {
-	MBeanWrapper mbean = _globalView.getMBean(listener.getName());
+	try {
+	  MBeanWrapper mbean = _globalView.getMBean(listener.getName());
 
-	if (mbean != null)
-	  mbean.removeNotificationListener(listener.getListener(),
-					   listener.getFilter(),
-					   listener.getHandback());
-      } catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
+	  if (mbean != null)
+	    mbean.removeNotificationListener(listener.getListener(),
+					     listener.getFilter(),
+					     listener.getHandback());
+	} catch (Throwable e) {
+	  log.log(Level.FINER, e.toString(), e);
+	}
       }
-    }
 
-    for (int i = 0; i < list.size(); i++) {
-      ObjectName name = list.get(i);
+      for (int i = 0; i < list.size(); i++) {
+	ObjectName name = list.get(i);
 
-      try {
-        unregisterMBean(name);
-      } catch (Throwable e) {
-        log.log(Level.FINE, e.toString(), e);
+	try {
+	  unregisterMBean(name);
+	} catch (Throwable e) {
+	  log.log(Level.FINE, e.toString(), e);
+	}
       }
+
+      _mbeanServer.removeContext(this, _loader);
+    } finally {
+      _parent = null;
+      _mbeanServer = null;
+      _globalContext = null;
+      _delegate = null;
+      _loader = null;
+      _classLoaderRepository = null;
+      _mbeans = null;
+      _listeners = null;
+      _view = null;
+      _globalView = null;
     }
-
-    _mbeanServer.removeContext(this, _loader);
-
-    _listeners = null;
-    _mbeans = null;
-    _view = null;
-    _globalView = null;
   }
 
   /**

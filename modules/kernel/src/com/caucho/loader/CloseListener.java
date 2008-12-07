@@ -72,7 +72,7 @@ public class CloseListener implements ClassLoaderListener {
       return;
     
     try {
-      destroy.invoke(_resource, (Object []) null);
+      destroy.invoke(_resource);
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }

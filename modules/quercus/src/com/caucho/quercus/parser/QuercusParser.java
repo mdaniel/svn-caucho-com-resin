@@ -363,6 +363,8 @@ public class QuercusParser {
 
     Function fun = parser.parseFunction(name, argPath, codePath);
 
+    parser.close();
+
     return fun;
   }
   
@@ -5445,6 +5447,15 @@ public class QuercusParser {
   public static boolean isSwitchLabel(String label)
   {
     return label != null && label.startsWith("switch");
+  }
+
+  public void close()
+  {
+    ReadStream is = _is;
+    _is = null;
+
+    if (is != null)
+      is.close();
   }
 
   private class ParserLocation {

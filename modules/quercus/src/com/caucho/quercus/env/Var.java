@@ -82,9 +82,11 @@ public class Var extends Value
   @Override
   public Value set(Value value)
   {
-    _value = value.toValue();
+    // _value = value.toValue();
 
-    return _value;
+    _value = value;
+
+    return value;
   }
 
   /**
@@ -754,7 +756,7 @@ public class Var extends Value
   @Override
   public Value preincr(int incr)
   {
-    _value = _value.preincr(incr);
+    _value = _value.increment(incr);
 
     return _value;
   }
@@ -767,9 +769,18 @@ public class Var extends Value
   {
     Value value = _value;
 
-    _value = value.postincr(incr);
+    _value = value.increment(incr);
 
     return value;
+  }
+
+  /**
+   * Increment the following value.
+   */
+  @Override
+  public Value increment(int incr)
+  {
+    return _value.increment(incr);
   }
 
   /**
@@ -1054,7 +1065,8 @@ public class Var extends Value
   public Value put(Value index, Value value)
   {
     // php/33m{g,h}
-    _value = _value.toAutoArray().append(index, value);
+    // _value = _value.toAutoArray().append(index, value);
+    _value = _value.append(index, value);
 
     return value;
   }

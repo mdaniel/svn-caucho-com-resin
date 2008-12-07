@@ -46,6 +46,11 @@ public class DeployManager
   private Server _server;
   private DeployRepository _repository;
 
+  public DeployManager()
+  {
+    this(Server.getCurrent());
+  }
+
   public DeployManager(Server server)
   {
     _server = server;

@@ -43,13 +43,14 @@ public class StringBuilderValue
   extends StringValue
 {
   public static final StringBuilderValue EMPTY = new StringBuilderValue("");
+  
+  private static final int MIN_LENGTH = 32;
 
-  private final static StringBuilderValue []CHAR_STRINGS;
+  private static final StringBuilderValue []CHAR_STRINGS;
   
   protected char []_buffer;
   protected int _length;
   protected boolean _isCopy;
-  protected StringBuilderValue _bufferOwner;
  
   private int _hashCode;
 
@@ -57,13 +58,13 @@ public class StringBuilderValue
 
   public StringBuilderValue()
   {
-    _buffer = new char[128];
+    _buffer = new char[MIN_LENGTH];
   }
 
   public StringBuilderValue(int capacity)
   {
-    if (capacity < 64)
-      capacity = 64;
+    if (capacity < MIN_LENGTH)
+      capacity = MIN_LENGTH;
 
     _buffer = new char[capacity];
   }
@@ -74,6 +75,15 @@ public class StringBuilderValue
     _length = length;
 
     System.arraycopy(buffer, offset, _buffer, 0, length);
+  }
+
+  /**
+   * Creates a new StringBuilderValue with the buffer without copying.
+   */
+  public StringBuilderValue(char []buffer, int length)
+  {
+    _buffer = buffer;
+    _length = length;
   }
 
   public StringBuilderValue(byte []buffer, int offset, int length)
@@ -146,10 +156,11 @@ public class StringBuilderValue
   {
     int len = s.length;
 
-    if (len < 128)
-      _buffer = new char[128];
-    else
-      _buffer = new char[len + 32];
+    int bufferLength = MIN_LENGTH;
+    while (bufferLength < len)
+      bufferLength *= 2;
+    
+    _buffer = new char[bufferLength];
     
     _length = len;
 
@@ -160,7 +171,7 @@ public class StringBuilderValue
 
   public StringBuilderValue(Value v1)
   {
-    _buffer = new char[128];
+    _buffer = new char[MIN_LENGTH];
 
     v1.appendTo(this);
   }
@@ -176,14 +187,12 @@ public class StringBuilderValue
       _buffer = v._buffer;
       _length = v._length;
       v._isCopy = true;
-      
-      _bufferOwner = v;
     }
   }
 
   public StringBuilderValue(Value v1, Value v2)
   {
-    _buffer = new char[128];
+    _buffer = new char[MIN_LENGTH];
 
     v1.appendTo(this);
     v2.appendTo(this);
@@ -191,7 +200,7 @@ public class StringBuilderValue
 
   public StringBuilderValue(Value v1, Value v2, Value v3)
   {
-    _buffer = new char[128];
+    _buffer = new char[MIN_LENGTH];
 
     v1.appendTo(this);
     v2.appendTo(this);
@@ -409,8 +418,6 @@ public class StringBuilderValue
   @Override
   public StringValue appendTo(StringBuilderValue bb)
   {
-    copyOnWrite();
-    
     bb.append(_buffer, 0, _length);
 
     return bb;
@@ -422,8 +429,6 @@ public class StringBuilderValue
   @Override
   public StringValue appendTo(UnicodeBuilderValue bb)
   {
-    copyOnWrite();
-    
     bb.append(_buffer, 0, _length);
     
     return bb;
@@ -435,8 +440,6 @@ public class StringBuilderValue
   @Override
   public StringValue appendTo(LargeStringBuilderValue bb)
   {
-    copyOnWrite();
-    
     bb.append(_buffer, 0, _length);
     
     return bb;
@@ -449,21 +452,9 @@ public class StringBuilderValue
   @Override
   public StringValue appendTo(BinaryBuilderValue bb)
   {
-    copyOnWrite();
-    
     bb.append(_buffer, 0, _length);
     
     return bb;
-  }
-  
-  protected void copyOnWrite()
-  {
-    if (_isCopy) {
-      _isCopy = false;
-      char []buffer = new char[_buffer.length];
-      System.arraycopy(_buffer, 0, buffer, 0, _length);
-      _buffer = buffer;
-    }
   }
 
   /**
@@ -873,8 +864,6 @@ public class StringBuilderValue
   @Override
   public final StringValue append(String s)
   {
-    copyOnWrite();
-    
     int sublen = s.length();
 
     if (_buffer.length < _length + sublen)
@@ -893,8 +882,6 @@ public class StringBuilderValue
   @Override
   public final StringValue append(String s, int start, int end)
   {
-    copyOnWrite();
-    
     int sublen = end - start;
 
     if (_buffer.length < _length + sublen)
@@ -917,8 +904,6 @@ public class StringBuilderValue
   @Override
   public final StringValue append(char ch)
   {
-    copyOnWrite();
-    
     if (_buffer.length < _length + 1)
       ensureCapacity(_length + 1);
 
@@ -933,8 +918,6 @@ public class StringBuilderValue
   @Override
   public final StringValue append(char []buf, int offset, int length)
   {
-    copyOnWrite();
-    
     int end = _length + length;
     
     if (_buffer.length < end)
@@ -957,8 +940,6 @@ public class StringBuilderValue
   @Override
   public final StringValue appendUnicode(char []buf, int offset, int length)
   {
-    copyOnWrite();
-    
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
 
@@ -980,8 +961,6 @@ public class StringBuilderValue
   @Override
   public final StringValue append(char []buf)
   {
-    copyOnWrite();
-    
     int length = buf.length;
     
     if (_buffer.length < _length + length)
@@ -1005,8 +984,6 @@ public class StringBuilderValue
   @Override
   public final StringValue appendUnicode(char []buf)
   {
-    copyOnWrite();
-
     int length = buf.length;
     
     if (_buffer.length < _length + length)
@@ -1030,8 +1007,6 @@ public class StringBuilderValue
   @Override
   public final StringValue append(CharSequence buf, int head, int tail)
   {
-    copyOnWrite();
-    
     int length = tail - head;
     
     if (_buffer.length < _length + length)
@@ -1066,8 +1041,6 @@ public class StringBuilderValue
   // @Override
   public final StringValue append(StringBuilderValue sb, int head, int tail)
   {
-    copyOnWrite();
-    
     int length = tail - head;
     
     if (_buffer.length < _length + length)
@@ -1086,8 +1059,6 @@ public class StringBuilderValue
   @Override
   public final StringValue append(Value v)
   {
-    copyOnWrite();
-    
     /*
     if (v.length() == 0)
       return this;
@@ -1143,8 +1114,6 @@ public class StringBuilderValue
   @Override
   public StringValue appendUnicode(Value v)
   {
-    copyOnWrite();
-    
     v.appendTo(this);
 
     return this;
@@ -1156,8 +1125,6 @@ public class StringBuilderValue
   @Override
   public StringValue appendUnicode(Value v1, Value v2)
   {
-    copyOnWrite();
-    
     v1.appendTo(this);
     v2.appendTo(this);
 
@@ -1169,8 +1136,6 @@ public class StringBuilderValue
    */
   public StringValue append(byte []buf, int offset, int length)
   {
-    copyOnWrite();
-    
     int end = _length + length;
     
     if (_buffer.length < end)
@@ -1193,8 +1158,6 @@ public class StringBuilderValue
    */
   public final StringValue append(byte []buf)
   {
-    copyOnWrite();
-    
     return append(buf, 0, buf.length);
   }
 
@@ -1204,8 +1167,6 @@ public class StringBuilderValue
   @Override
   public final StringValue appendByte(int v)
   {
-    copyOnWrite();
-    
     int length = _length + 1;
 
     if (_buffer.length < length)
@@ -1249,8 +1210,6 @@ public class StringBuilderValue
   @Override
   public StringValue appendBytes(String s)
   {
-    copyOnWrite();
-    
     int sublen = s.length();
 
     if (_buffer.length < _length + sublen)
@@ -1269,8 +1228,6 @@ public class StringBuilderValue
   @Override
   public final StringValue appendBytes(byte []bytes, int offset, int end)
   {
-    copyOnWrite();
-    
     int length = _length + end - offset;
 
     if (_buffer.length < length)
@@ -1287,8 +1244,6 @@ public class StringBuilderValue
   public StringValue append(Reader reader, long length)
     throws IOException
   {
-    copyOnWrite();
-    
     // php/4407 - oracle clob callback passes very long length
 
     int sublen = (int) Math.min(8192L, length);
@@ -1394,7 +1349,7 @@ public class StringBuilderValue
     sb.append(length);
     sb.append(") \"");
 
-    int appendLength = length > 256 ? 256 : length;
+    int appendLength = length < 256 ? length : 256;
 
     for (int i = 0; i < appendLength; i++)
       sb.append(charAt(i));
@@ -1447,24 +1402,21 @@ public class StringBuilderValue
 
   protected void ensureCapacity(int newCapacity)
   {
-    if (newCapacity <= _buffer.length)
-      return;
-    else if (newCapacity < 4096)
-      newCapacity = 4 * newCapacity;
-    else
-      newCapacity = newCapacity + 4096;
-
-    assert newCapacity > _buffer.length : "cannot set new capacity to " + newCapacity;
-
-    char []buffer = new char[newCapacity];
-    System.arraycopy(_buffer, 0, buffer, 0, _length);
+    int bufferLength = _buffer.length;
     
-    if (_bufferOwner != null && _bufferOwner._buffer == _buffer) {
-      _bufferOwner._isCopy = false;
-      _bufferOwner = null; 
-    }
+    if (newCapacity <= bufferLength)
+      return;
 
+    if (bufferLength < MIN_LENGTH)
+      bufferLength = MIN_LENGTH;
+
+    while (bufferLength <= newCapacity)
+      bufferLength = 2 * bufferLength;
+
+    char []buffer = new char[bufferLength];
+    System.arraycopy(_buffer, 0, buffer, 0, _length);
     _buffer = buffer;
+    _isCopy = false;
   }
 
   /**

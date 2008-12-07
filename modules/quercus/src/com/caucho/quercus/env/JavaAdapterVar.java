@@ -667,7 +667,7 @@ public class JavaAdapterVar extends Var
   {
     setRaw(getValue());
     
-    Value value = super.preincr(incr);
+    Value value = increment(incr);
     
     setValue(getRawValue());
     
@@ -682,7 +682,7 @@ public class JavaAdapterVar extends Var
   {
     setRaw(getValue());
     
-    Value value = super.postincr(incr);
+    Value value = increment(incr);
     
     setValue(getRawValue());
     

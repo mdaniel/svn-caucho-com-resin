@@ -159,6 +159,8 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     _targetType = type;
 
     _baseType = BaseType.create(type, null);
+    
+    validateClass(_baseType.getRawClass());
   }
   
   public Type getTargetType()
@@ -947,6 +949,30 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     }
 
     return null;
+  }
+
+  protected void validateClass(Class cl)
+  {
+    ClassLoader webBeansLoader = _webBeans.getClassLoader();
+    
+    if (webBeansLoader == null)
+      webBeansLoader = ClassLoader.getSystemClassLoader();
+
+    ClassLoader beanLoader = cl.getClassLoader();
+
+    if (beanLoader == null)
+      beanLoader = ClassLoader.getSystemClassLoader();
+
+    for (ClassLoader loader = webBeansLoader;
+	 loader != null;
+	 loader = loader.getParent()) {
+      if (beanLoader == loader)
+	return;
+    }
+
+    throw new IllegalStateException(L.l("'{0}' is an invalid class because its classloader '{1}' does not belong to the webbeans classloader '{2}'",
+					cl, beanLoader,
+					webBeansLoader));
   }
 
   public String toDebugString()

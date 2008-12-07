@@ -107,6 +107,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   {
     super(parent);
 
+    if (parent == null)
+      Thread.dumpStack();
+
     if (id != null)
       setId(id);
 
@@ -801,6 +804,14 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       _attributes = null;
       _listeners = null;
       _scanListeners = null;
+      _osgiManager = null;
+      _stopListener = null;
+
+      EnvironmentAdmin admin = _admin;
+      _admin = null;
+
+      if (admin != null)
+	admin.unregister();
     }
   }
 

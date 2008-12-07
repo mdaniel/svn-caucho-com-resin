@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.HashKey;
+import com.caucho.server.cluster.HashManager;
 import com.caucho.server.cluster.DistributedCacheManager;
 import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
@@ -196,7 +197,8 @@ public class DistributedCache implements Cache
       return hashKey;
 
     try {
-      MessageDigest digest = MessageDigest.getInstance("SHA");
+      MessageDigest digest
+	= MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
 
       NullDigestOutputStream dOut = new NullDigestOutputStream(digest);
 

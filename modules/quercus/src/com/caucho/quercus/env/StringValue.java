@@ -708,17 +708,10 @@ abstract public class StringValue
   }
 
   /**
-   * Pre-increment the following value.
+   * Increment the following value.
    */
-  public Value preincr(int incr)
-  {
-    return postincr(incr);
-  }
-
-  /**
-   * Post-increment the following value.
-   */
-  public Value postincr(int incr)
+  @Override
+  public Value increment(int incr)
   {
     // php/03i6
     if (length() == 0) {

@@ -1523,12 +1523,6 @@ public class Server extends ProtocolDispatchServer
 	  getSelectManager().setSelectMax(_keepaliveSelectMax);
       }
     }
-    
-    if (_distributedCacheManager == null)
-      _distributedCacheManager = createDistributedCacheManager();
-
-    // initialize the store
-    getSystemStore();
   }
 
   /**
@@ -1610,6 +1604,12 @@ public class Server extends ProtocolDispatchServer
         bindPorts();
 	startPorts();
       }
+    
+      if (_distributedCacheManager == null)
+	_distributedCacheManager = createDistributedCacheManager();
+
+      // initialize the store
+      getSystemStore();
 
       _classLoader.start();
 

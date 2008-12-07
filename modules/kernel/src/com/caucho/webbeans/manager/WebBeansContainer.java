@@ -182,7 +182,7 @@ public class WebBeansContainer
 			    boolean isSetLocal)
   {
     _id = id;
-    
+
     _classLoader = loader;
 
     if (parent != null)
@@ -190,37 +190,47 @@ public class WebBeansContainer
     else if (_classLoader != null)
       _parent = WebBeansContainer.create(_classLoader.getParent());
 
-    if (isSetLocal)
-      _localContainer.set(this, _classLoader);
+    Thread thread = Thread.currentThread();
+    ClassLoader oldClassLoader = thread.getContextClassLoader();
 
     try {
-      InitialContext ic = new InitialContext();
-      ic.rebind("java:comp/Manager", new WebBeansJndiProxy());
-    } catch (Throwable e) {
-      log.log(Level.FINEST, e.toString(), e);
+      thread.setContextClassLoader(_classLoader);
+
+      if (isSetLocal)
+	_localContainer.set(this, _classLoader);
+
+      try {
+	InitialContext ic = new InitialContext();
+	ic.rebind("java:comp/Manager", new WebBeansJndiProxy());
+      } catch (Throwable e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
+    
+      if (_classLoader != null)
+	_tempClassLoader = _classLoader.getNewTempClassLoader();
+      else
+	_tempClassLoader = new DynamicClassLoader(null);
+    
+      _wbWebBeans = new WbWebBeans(this, Vfs.lookup());
+
+      addContext("com.caucho.server.webbeans.RequestScope");
+      addContext("com.caucho.server.webbeans.SessionScope");
+      addContext("com.caucho.server.webbeans.ConversationScope");
+      addContext(new SingletonScope());
+      addContext(new ApplicationScope());
+
+      _deploymentMap.put(Standard.class, 0);
+      _deploymentMap.put(CauchoDeployment.class, 1);
+      _deploymentMap.put(Production.class, 2);
+
+      if (_classLoader != null && isSetLocal) {
+	_classLoader.addScanListener(this);
+      }
+    
+      Environment.addEnvironmentListener(this, _classLoader);
+    } finally {
+      thread.setContextClassLoader(_classLoader);
     }
-    
-    if (_classLoader != null)
-      _tempClassLoader = _classLoader.getNewTempClassLoader();
-    else
-      _tempClassLoader = new DynamicClassLoader(null);
-    
-    _wbWebBeans = new WbWebBeans(this, Vfs.lookup());
-
-    addContext("com.caucho.server.webbeans.RequestScope");
-    addContext("com.caucho.server.webbeans.SessionScope");
-    addContext("com.caucho.server.webbeans.ConversationScope");
-    addContext(new SingletonScope());
-    addContext(new ApplicationScope());
-
-    _deploymentMap.put(Standard.class, 0);
-    _deploymentMap.put(CauchoDeployment.class, 1);
-    _deploymentMap.put(Production.class, 2);
-
-    if (_classLoader != null && isSetLocal)
-      _classLoader.addScanListener(this);
-    
-    Environment.addEnvironmentListener(this, _classLoader);
   }
   
   private void addContext(String contextClassName)
@@ -286,7 +296,7 @@ public class WebBeansContainer
 	
 	webBeans = new WebBeansContainer(id, null, envLoader, true);
       
-	_localContainer.set(webBeans, loader);
+	// _localContainer.set(webBeans, loader);
       }
     }
 
@@ -900,9 +910,20 @@ public class WebBeansContainer
   private void registerJmx(Bean bean)
   {
     int id = _beanId++;
-    WebBeanAdmin admin = new WebBeanAdmin(bean, _beanId);
 
-    admin.register();
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    try {
+      thread.setContextClassLoader(_classLoader);
+
+      /*
+      WebBeanAdmin admin = new WebBeanAdmin(bean, _beanId);
+
+      admin.register();
+      */
+    } finally {
+      thread.setContextClassLoader(_classLoader);
+    }
   }
 
   /**
@@ -1675,9 +1696,38 @@ public class WebBeansContainer
    */
   public void environmentStop(EnvironmentClassLoader loader)
   {
+    destroy();
+  }
+
+  public void destroy()
+  {
+    _parent = null;
+    _classLoader = null;
+    _tempClassLoader = null;
+
+    _wbWebBeans = null;
+
+    _webBeansMap = null;
+    _deploymentSet = null;
+    _deploymentMap = null;
+    
     _componentMap = null;
     _componentBaseTypeMap = null;
     _namedComponentMap = null;
+
+    _rootContextMap = null;
+    _contextMap = null;
+    _observerMap = null;
+    _observerListCache = null;
+
+    _interceptorList = null;
+    _decoratorList = null;
+    _transientMap = null;
+    _objectFactoryMap = null;
+    _pendingRootContextList = null;
+    _pendingBindList = null;
+    _pendingServiceList = null;
+    _injectMap = null;
   }
 
   public static ConfigException injectError(AccessibleObject prop, String msg)

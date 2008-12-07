@@ -39,7 +39,7 @@ import java.lang.ref.SoftReference;
  */
 public final class CacheMapEntry {
   public static final CacheMapEntry NULL
-    = new CacheMapEntry(HashKey.NULL, null, 0, 0);
+    = new CacheMapEntry(null, null, 0, 0);
   
   private final HashKey _valueHash;
   private final long _version;

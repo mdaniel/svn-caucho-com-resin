@@ -213,17 +213,9 @@ public class DoubleValue extends NumberValue
   }
 
   /**
-   * Pre-increment the following value.
+   * Increment the following value.
    */
-  public Value preincr(int incr)
-  {
-    return new DoubleValue(_value + incr);
-  }
-
-  /**
-   * Post-increment the following value.
-   */
-  public Value postincr(int incr)
+  public Value increment(int incr)
   {
     return new DoubleValue(_value + incr);
   }

@@ -76,6 +76,7 @@ public class DataBacking implements AlarmListener {
     
   private String _insertQuery;
   private String _loadQuery;
+  private String _dataAvailableQuery;
   private String _updateExpiresQuery;
   private String _timeoutQuery;
   
@@ -110,6 +111,10 @@ public class DataBacking implements AlarmListener {
     _loadQuery = ("SELECT data"
 		  + " FROM " + _tableName
 		  + " WHERE id=?");
+    
+    _dataAvailableQuery = ("SELECT 1"
+			   + " FROM " + _tableName
+			   + " WHERE id=?");
 
     _insertQuery = ("INSERT into " + _tableName
 		    + " (id,expire_time,data) "
@@ -212,6 +217,38 @@ public class DataBacking implements AlarmListener {
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    } finally {
+      if (conn != null)
+	conn.close();
+    }
+
+    return false;
+  }
+
+  /**
+   * Checks if we have the data
+   *
+   * @param id the hash identifier for the data
+   *
+   * @return true on successful load
+   */
+  public boolean isDataAvailable(HashKey id)
+  {
+    DataConnection conn = null;
+    
+    try {
+      conn = getConnection();
+
+      PreparedStatement pstmt = conn.prepareLoad();
+      pstmt.setBytes(1, id.getHash());
+
+      ResultSet rs = pstmt.executeQuery();
+      
+      if (rs.next()) {
+	return true;
+      }
+    } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       if (conn != null)
@@ -530,6 +567,7 @@ public class DataBacking implements AlarmListener {
     private Connection _conn;
     
     private PreparedStatement _loadStatement;
+    private PreparedStatement _dataAvailableStatement;
     private PreparedStatement _insertStatement;
     private PreparedStatement _updateExpiresStatement;
     private PreparedStatement _timeoutStatement;
@@ -548,6 +586,15 @@ public class DataBacking implements AlarmListener {
 	_loadStatement = _conn.prepareStatement(_loadQuery);
 
       return _loadStatement;
+    }
+
+    PreparedStatement prepareDataAvailable()
+      throws SQLException
+    {
+      if (_dataAvailableStatement == null)
+	_dataAvailableStatement = _conn.prepareStatement(_dataAvailableQuery);
+
+      return _dataAvailableStatement;
     }
 
     PreparedStatement prepareInsert()

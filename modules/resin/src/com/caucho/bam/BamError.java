@@ -30,6 +30,7 @@
 package com.caucho.bam;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 /**
  * BamError encapsulates error responses
@@ -63,11 +64,19 @@ public class BamError implements Serializable {
   public static final String TYPE_WAIT = "wait";
 
   // error groups urn:ietf:params:xml:ns:xmpp-streams
+
   /*
   public static final String BAD_FORMAT = "bad-format";
   public static final String BAD_NAMESPACE_PREFIX = "bad-namespace-prefix";
   public static final String CONFLICT = "conflict";
+  */
+
+  /**
+   * Error if the connection to the server failed.
+   */
   public static final String CONNECTION_TIMEOUT = "connection-timeout";
+
+  /*
   public static final String HOST_GONE = "host-gone";
   public static final String HOST_UNKNOWN = "host-unknown";
   public static final String IMPROPER_ADDRESSING = "improper-addressing";
@@ -78,8 +87,15 @@ public class BamError implements Serializable {
   public static final String INVALID_XML = "invalid-xml";
   public static final String NOT_AUTHORIZED = "not-authorized";
   public static final String POLICY_VIOLATION = "policy-violation";
+  */
+
+  /**
+   * Error if the connection to the remote connection failed.
+   */
   public static final String REMOTE_CONNECTION_FAILED
     = "remote-connection-failed";
+  
+  /*
   public static final String RESOURCE_CONSTRAINT = "resource-constraint";
   public static final String RESTRICTED_XML = "restricted-xml";
   public static final String SEE_OTHER_HOST = "see-other-host";
@@ -206,6 +222,9 @@ public class BamError implements Serializable {
    * The request was syntactically correct, but out-of-order ("wait")
    */
   public static final String UNEXPECTED_REQUEST = "unexpected-request";
+
+  private static final HashMap<String,ErrorGroup> _errorMap
+    = new HashMap<String,ErrorGroup>();
   
   private final String _type;
   private final String _group;
@@ -231,7 +250,7 @@ public class BamError implements Serializable {
    * @param group the error group
    */
   public BamError(String type,
-		   String group)
+		  String group)
   {
     _type = type;
     _group = group;
@@ -310,6 +329,22 @@ public class BamError implements Serializable {
     _extra = extra;
   }
 
+  public BamErrorPacketException createException()
+  {
+    ErrorGroup group = _errorMap.get(getGroup());
+
+    if (group == null)
+      return new BamErrorPacketException(this);
+
+    switch (group) {
+    case REMOTE_CONNECTION_FAILED:
+      return new BamRemoteConnectionFailedException(this);
+
+    default:
+      return new BamErrorPacketException(this);
+    }
+  }
+
   @Override
   public String toString()
   {
@@ -334,5 +369,37 @@ public class BamError implements Serializable {
     sb.append("]");
 
     return sb.toString();
+  }
+
+  public enum ErrorGroup {
+    BAD_FORMAT,
+      BAD_NAMESPACE_PREFIX,
+      CONFLICT,
+      CONNECTION_TIMEOUT,
+      HOST_GONE,
+      HOST_UNKNOWN,
+      IMPROPER_ADDRESSING,
+      INTERNAL_SERVER_ERROR,
+      INVALID_FROM,
+      INVALID_ID,
+      INVALID_NAMESPACE,
+      INVALID_XML,
+      NOT_AUTHORIZED,
+      POLICY_VIOLATION,
+      REMOTE_CONNECTION_FAILED,
+      RESOURCE_CONSTRAINT,
+      RESTRICTED_XML,
+      SEE_OTHER_HOST,
+      SYSTEM_SHUTDOWN,
+      UNDEFINED_CONDITION,
+      UNSUPPORTED_ENCODING,
+      UNSUPPORTED_STANZA_TYPE,
+      UNSUPPORTED_VERSION,
+      XML_NOT_WELL_FORMED,
+  }
+
+  static {
+    _errorMap.put(REMOTE_CONNECTION_FAILED,
+		  ErrorGroup.REMOTE_CONNECTION_FAILED);
   }
 }

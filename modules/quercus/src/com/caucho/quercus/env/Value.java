@@ -1578,15 +1578,21 @@ abstract public class Value implements java.io.Serializable
    */
   public Value preincr(int incr)
   {
-    long lValue = toLong();
-
-    return new LongValue(lValue + incr);
+    return increment(incr);
   }
 
   /**
    * Post-increment the following value.
    */
   public Value postincr(int incr)
+  {
+    return increment(incr);
+  }
+
+  /**
+   * Increment the following value.
+   */
+  public Value increment(int incr)
   {
     long lValue = toLong();
 

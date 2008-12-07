@@ -42,6 +42,9 @@ public class HashKey {
    */
   public HashKey(byte []hash)
   {
+    if (hash == null)
+      throw new NullPointerException();
+    
     _hash = hash;
   }
   

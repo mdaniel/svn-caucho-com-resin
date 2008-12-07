@@ -594,7 +594,12 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
   }
 
   public boolean relative(int rows)
+    throws SQLException
   {
+    while (rows-- > 0) {
+      next();
+    }
+      
     return false;
   }
 

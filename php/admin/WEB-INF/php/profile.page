@@ -213,6 +213,10 @@ function do_partition_profile($entries)
         && $stackTrace[0]->methodName == "wait") {
       $partition["wait"][] = $info;
     }
+    else if ($stackTrace[0]->className == "sun.misc.Unsafe"
+        && $stackTrace[0]->methodName == "park") {
+      $partition["wait"][] = $info;
+    }
     else if ($stackTrace[0]->className == "java.lang.Thread"
         && $stackTrace[0]->methodName == "sleep") {
       $partition["wait"][] = $info;
@@ -285,12 +289,12 @@ function is_accept($stackTrace)
 function is_keepalive($stackTrace)
 {
   for ($i = 0; $i < sizeof($stackTrace); $i++) {
-    if ($stackTrace[$i]->className != "com.caucho.server.port.TcpConnection"
-        || $stackTrace[$i]->methodName != "handleConnection") {
-      continue;
+    if ($stackTrace[$i - 1]->className == "com.caucho.server.port.TcpConnection"
+             && $stackTrace[$i - 1]->methodName == "keepaliveRead") {
+      return true;
     }
     else if ($stackTrace[$i - 1]->className == "com.caucho.server.port.TcpConnection"
-             && $stackTrace[$i - 1]->methodName == "keepaliveRead") {
+             && $stackTrace[$i - 1]->methodName == "waitForKeepalive") {
       return true;
     }
     else if ($stackTrace[$i - 1]->className == "com.caucho.vfs.ReadStream"

@@ -206,14 +206,12 @@ abstract public class AbstractBamConnection implements BamConnection {
 
     queryGet(to, query, callback);
 
-    if (callback.waitFor())
+    if (! callback.waitFor())
+      throw new RuntimeException(this + " queryGet timeout to=" + to + " query=" + query);
+    else if (callback.getError() != null)
+      throw callback.getError().createException();
+    else
       return callback.getResult();
-    else {
-      if (callback.getError() != null)
-	throw new RuntimeException(String.valueOf(callback.getError()));
-      else
-	throw new RuntimeException(this + " queryGet timeout to=" + to + " query=" + query);
-    }
   }
 
   /**
@@ -248,11 +246,13 @@ abstract public class AbstractBamConnection implements BamConnection {
 
     querySet(to, query, callback);
 
-    if (callback.waitFor())
-      return callback.getResult();
+
+    if (! callback.waitFor())
+      throw new RuntimeException(this + " queryGet timeout to=" + to + " query=" + query);
+    else if (callback.getError() != null)
+      throw callback.getError().createException();
     else
-      throw new RuntimeException("No valid return for " + query
-				 + "\n" + callback.getError());
+      return callback.getResult();
   }
 
   /**
