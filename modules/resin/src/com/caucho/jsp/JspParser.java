@@ -42,6 +42,7 @@ import com.caucho.xml.XmlChar;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -123,7 +124,8 @@ public class JspParser {
   
   private ArrayList<Include> _includes = new ArrayList<Include>();
 
-  private HashSet<String> _prefixes = new HashSet<String>();
+  private Set<String> _prefixes = new HashSet<String>();
+  private Set<String> _doneIncludes = new HashSet<String>();
   
   private Path _jspPath;
   private ReadStream _stream;
@@ -1703,7 +1705,7 @@ public class JspParser {
 		      prefix));
     }
 
-    if (_prefixes.contains(prefix))
+    if (_prefixes.contains(prefix) && ! _doneIncludes.contains(_filename))
       throw error(L.l(
         "<{0}> cannot occur after an action that uses the same prefix: {1}.",
         JSP_DIRECTIVE_TAGLIB.getName(),
@@ -2078,6 +2080,8 @@ public class JspParser {
       Include include = _includes.get(_includes.size() - 1);
       _includes.remove(_includes.size() - 1);
 
+      _doneIncludes.add(_filename);
+
       _stream = include._stream;
       _filename = _stream.getUserPath();
       _jspPath = _stream.getPath();
@@ -2101,7 +2105,7 @@ public class JspParser {
   /**
    * Creates an error message adding the filename and line.
    *
-   * @param message the error message
+   * @param e the exception
    */
   public JspParseException error(Exception e)
   {
