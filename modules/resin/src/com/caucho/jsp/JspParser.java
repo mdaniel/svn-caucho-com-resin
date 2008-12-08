@@ -125,7 +125,8 @@ public class JspParser {
   private ArrayList<Include> _includes = new ArrayList<Include>();
 
   private Set<String> _prefixes = new HashSet<String>();
-  private Set<String> _doneIncludes = new HashSet<String>();
+  // jsp/18cy, jsp/18cz
+  private Set<String> _localPrefixes = new HashSet<String>();
   
   private Path _jspPath;
   private ReadStream _stream;
@@ -1705,7 +1706,7 @@ public class JspParser {
 		      prefix));
     }
 
-    if (_prefixes.contains(prefix) && ! _doneIncludes.contains(_filename))
+    if (_localPrefixes.contains(prefix))
       throw error(L.l(
         "<{0}> cannot occur after an action that uses the same prefix: {1}.",
         JSP_DIRECTIVE_TAGLIB.getName(),
@@ -1860,9 +1861,11 @@ public class JspParser {
     Include inc = null;
 
     if (_stream != null) {
-      inc = new Include(_stream, _line, _uriPwd);
-	
+      inc = new Include(_localPrefixes, _stream, _line, _uriPwd);
+
       _includes.add(inc);
+      
+      _localPrefixes = new HashSet<String>();
     }
 
     _parseState.addDepend(stream.getPath());
@@ -1988,6 +1991,7 @@ public class JspParser {
     String local = name.substring(p + 1);
     
     _prefixes.add(prefix);
+    _localPrefixes.add(prefix);
 
     String url = Namespace.find(_namespaces, prefix);
 
@@ -2080,8 +2084,6 @@ public class JspParser {
       Include include = _includes.get(_includes.size() - 1);
       _includes.remove(_includes.size() - 1);
 
-      _doneIncludes.add(_filename);
-
       _stream = include._stream;
       _filename = _stream.getUserPath();
       _jspPath = _stream.getPath();
@@ -2089,6 +2091,7 @@ public class JspParser {
       _lineStart = _line;
       _uriPwd = include._uriPwd;
       _parseState.setUriPwd(_uriPwd);
+      _localPrefixes = include._localPrefixes;
 
       setLocation(_jspPath, _filename, _line);
       
@@ -2237,12 +2240,18 @@ public class JspParser {
     ReadStream _stream;
     int _line;
     String _uriPwd;
+    Set<String> _localPrefixes;
 
-    Include(ReadStream stream, int line, String uriPwd)
+    Include(Set<String> prefixes,
+            ReadStream stream,
+            int line,
+            String uriPwd
+    )
     {
       _stream = stream;
       _line = line;
       _uriPwd = uriPwd;
+      _localPrefixes = prefixes;
     }
   }
 }
