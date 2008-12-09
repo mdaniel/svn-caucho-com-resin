@@ -130,7 +130,15 @@ public class JdbcResultResource {
       if (rs != null)
         rs.close();
 
+      Statement stmt = _stmt;
       _stmt = null;
+
+      // XXX: statement no longer reused?
+      /*
+      if (stmt != null)
+	stmt.close();
+      */
+      
       _env = null;
 
       _conn = null;
@@ -665,8 +673,8 @@ public class JdbcResultResource {
         return env.createString(time);
       }
     } catch (SQLException e) {
-      if (log.isLoggable(Level.FINE))
-	log.log(Level.FINE, e.toString(), e);
+      if (log.isLoggable(Level.FINER))
+	log.log(Level.FINER, e.toString(), e);
 
       // php/1f0a - mysql jdbc driver issue with zero timestamp
       return env.createString("0000-00-00 00:00:00");

@@ -41,6 +41,7 @@ import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,6 +63,8 @@ public class QuercusClass {
   private final String _className;
 
   private QuercusClass _parent;
+  
+  private WeakReference<QuercusClass> _cacheRef;
 
   private boolean _isJavaWrapper;
   
@@ -94,6 +97,8 @@ public class QuercusClass {
   private final HashMap<String,ArrayList<StaticField>> _staticFieldExprMap;
 
   private HashMap<String,Value> _staticFieldMap;
+
+  private boolean _isModified;
 
   public QuercusClass(ClassDef classDef, QuercusClass parent)
   {
@@ -210,6 +215,8 @@ public class QuercusClass {
    */
   public QuercusClass(QuercusClass cacheClass, QuercusClass parent)
   {
+    _cacheRef = new WeakReference<QuercusClass>(cacheClass);
+    
     _javaClassDef = cacheClass._javaClassDef;
     _classDef = cacheClass._classDef;
     _className = cacheClass._className;
@@ -333,6 +340,36 @@ public class QuercusClass {
   public AbstractFunction getDestructor()
   {
     return _destructor;
+  }
+
+  /**
+   * Returns true if the class is modified for caching.
+   */
+  public boolean isModified()
+  {
+    if (_isModified)
+      return true;
+    else if (_parent != null)
+      return _parent.isModified();
+    else
+      return false;
+  }
+
+  /**
+   * Mark the class as modified for caching.
+   */
+  public void setModified()
+  {
+    if (! _isModified) {
+      _isModified = true;
+      
+      if (_cacheRef != null) {
+	QuercusClass cacheClass = _cacheRef.get();
+
+	if (cacheClass != null)
+	  cacheClass.setModified();
+      }
+    }
   }
   
   /**
@@ -504,6 +541,9 @@ public class QuercusClass {
    */
   public void addMethod(String name, AbstractFunction fun)
   {
+    if (fun == null)
+      throw new NullPointerException(L.l("'{0}' is a null function", name));
+    
     //php/09j9
     // XXX: this is a hack to get Zend Framework running, the better fix is
     // to initialize all interface classes before any concrete classes
@@ -518,6 +558,9 @@ public class QuercusClass {
    */
   public void addMethodIfNotExist(String name, AbstractFunction fun)
   {
+    if (fun == null)
+      throw new NullPointerException(L.l("'{0}' is a null function", name));
+    
     //php/09j9
     // XXX: this is a hack to get Zend Framework running, the better fix is
     // to initialize all interface classes before any concrete classes
@@ -656,14 +699,14 @@ public class QuercusClass {
     if (value != null) {
       String fullName = _className + "::" + name;
       
-      Var var = env.getGlobalRaw(fullName);
+      EnvVar envVar = env.getGlobalRaw(fullName);
 
-      if (var == null) {
-        var = env.getGlobalVar(fullName);
-        var.set(value);
+      if (envVar == null) {
+        envVar = env.getGlobalEnvVar(fullName);
+        envVar.set(value);
       }
       
-      return var;
+      return envVar.getRef();
     }
     
     QuercusClass parent = getParent();

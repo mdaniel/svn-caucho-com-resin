@@ -386,14 +386,6 @@ public class BinaryBuilderValue
   /**
    * Returns the character at an index
    */
-  public Value getRef(Value key)
-  {
-    return charValueAt(key.toLong());
-  }
-
-  /**
-   * Returns the character at an index
-   */
   @Override
   public Value charValueAt(long index)
   {

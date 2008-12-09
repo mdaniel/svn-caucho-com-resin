@@ -300,14 +300,14 @@ public class ArrayModule
   /**
    * Returns the size of the array.
    */
-  public static Value count(Env env,
-                            @ReadOnly Value value,
-                            @Optional("false") boolean recursive)
+  public static long count(Env env,
+			   @ReadOnly Value value,
+			   @Optional("false") boolean recursive)
   {
     if (! recursive)
-      return LongValue.create(value.getCount(env));
+      return value.getCount(env);
     else
-      return LongValue.create(value.getCountRecursive(env));
+      return value.getCountRecursive(env);
   }
 
   /**
@@ -501,15 +501,17 @@ public class ArrayModule
 
     ArrayValue newArray = new ArrayValueImpl(array.getSize());
 
-    for (Map.Entry<Value, Value> entry : array.entrySet()) {
-      Value entryValue = entry.getValue();
-      Value entryKey = entry.getKey();
-
+    int i = 0;
+    for (ArrayValue.Entry ptr = array.getHead();
+	 ptr != null;
+	 ptr = ptr.getNext()) {
+      Value entryKey = ptr.getKey();
+      Value entryValue = ptr.getValue();
 
       if (searchValue == null || searchValue instanceof DefaultValue)
-        newArray.put(entryKey);
+        newArray.append(LongValue.create(i++), entryKey);
       else if (entryValue.eq(searchValue))
-        newArray.put(entryKey);
+        newArray.append(LongValue.create(i++), entryKey);
     }
 
     return newArray;
@@ -1196,10 +1198,14 @@ public class ArrayModule
     if (array == null)
       return NullValue.NULL;
 
-    ArrayValue arrayValues = new ArrayValueImpl();
+    ArrayValue arrayValues = new ArrayValueImpl(array.getSize());
+    int i = 0;
 
-    for (Map.Entry<Value, Value> entry : array.entrySet())
-      arrayValues.put(entry.getValue());
+    for (ArrayValue.Entry ptr = array.getHead();
+	 ptr != null;
+	 ptr = ptr.getNext()) {
+      arrayValues.append(LongValue.create(i++), ptr.getValue());
+    }
 
     return arrayValues;
   }
@@ -1722,8 +1728,8 @@ case SORT_NUMERIC:
 
     if (start.eq(end)) {
     }
-    else if (start instanceof StringValue &&
-             (Math.abs(end.toChar() - start.toChar()) < step)) {
+    else if (start instanceof StringValue
+	     && (Math.abs(end.toChar() - start.toChar()) < step)) {
       env.warning("steps exceeds the specified range");
 
       return BooleanValue.FALSE;
@@ -3424,9 +3430,9 @@ case SORT_NUMERIC:
   /**
    * Returns the size of the array.
    */
-  public static Value sizeof(Env env,
-                             @ReadOnly Value value,
-                             @Optional("false") boolean recursive)
+  public static long sizeof(Env env,
+			    @ReadOnly Value value,
+			    @Optional("false") boolean recursive)
   {
     return count(env, value, recursive);
   }

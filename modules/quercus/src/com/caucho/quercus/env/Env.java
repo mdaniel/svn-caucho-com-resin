@@ -185,13 +185,13 @@ public class Env {
   private ArrayList<Shutdown> _shutdownList
     = new ArrayList<Shutdown>();
 
-  private final HashMap<String, Var> _globalMap
-    = new HashMap<String, Var>(1024);
+  private final HashMap<String, EnvVar> _globalMap
+    = new HashMap<String, EnvVar>(1024);
   
   private HashMap<String, Var> _staticMap
     = new HashMap<String, Var>();
   
-  private HashMap<String, Var> _map = _globalMap;
+  private Map<String, EnvVar> _map = _globalMap;
 
   private HashMap<String, Value> _constMap
     = new HashMap<String, Value>(1024);
@@ -1524,12 +1524,18 @@ public class Env {
    */
   public Value getValue(String name)
   {
-    Var var = getRef(name);
+    EnvVar var = getEnvVar(name);
 
+    // XXX: not auto-create?
+
+    return var.get();
+    
+    /*
     if (var != null)
       return var.toValue();
     else
       return NullValue.NULL;
+    */
   }
 
   /**
@@ -1546,12 +1552,18 @@ public class Env {
    */
   public Value getGlobalValue(String name)
   {
-    Var var = getGlobalRef(name);
+    EnvVar var = getGlobalEnvVar(name);
 
+    // XXX: don't allocate?
+
+    return var.get();
+
+    /*
     if (var != null)
       return var.toValue();
     else
       return NullValue.NULL;
+    */
   }
 
   /**
@@ -1564,24 +1576,8 @@ public class Env {
   {
     if (value != null)
       return (Var) value;
-    
-    Var var = _map.get(name);
 
-    if (var != null)
-      return var;
-
-    var = getRef(name);
-
-    if (var == null) {
-      var = new Var();
-
-      if (_map == _globalMap)
-        var.setGlobal();
-
-      _map.put(name, var);
-    }
-
-    return var;
+    return getRef(name);
   }
 
   /**
@@ -1595,24 +1591,149 @@ public class Env {
     if (value != null)
       return (Var) value;
 
-    Var var = _globalMap.get(name);
+    return getGlobalRef(name);
+  }
 
-    if (var != null)
-      return var;
+  /**
+   * Gets a value.
+   */
+  public Var getRef(String name)
+  {
+    EnvVar envVar = getEnvVar(name);
 
-    var = getSuperGlobalRef(name);
-
-    if (var == null)
-      var = getGlobalScriptContextRef(name);
-
-    if (var == null) {
-      var = new Var();
-      var.setGlobal();
-    }
+    // XXX: can return null?
     
-    _globalMap.put(name, var);
+    return envVar.getRef();
+
+    /*
+    Var var = _map.get(name);
+
+    // required for $$ref where $ref is the name of a superglobal
+    if (var == null) {
+      // php/0809
+      if (Quercus.isSuperGlobal(name))
+	return getGlobalRef(name);
+    }
 
     return var;
+    */
+  }
+
+  /**
+   * Returns the raw global lookup.
+   */
+  public EnvVar getGlobalRaw(String name)
+  {
+    return _globalMap.get(name);
+  }
+  
+  /**
+   * Gets a global value.
+   */
+  public Var getGlobalRef(String name)
+  {
+    EnvVar envVar = getGlobalEnvVar(name);
+
+    // XXX: not create?
+
+    return envVar.getRef();
+  }
+
+  /**
+   * Gets a variable
+   *
+   * @param name the variable name
+   * @param var the current value of the variable
+   */
+  public final EnvVar getEnvVar(String name)
+  {
+    EnvVar envVar = _map.get(name);
+
+    if (envVar != null)
+      return envVar;
+
+    if (_map == _globalMap)
+      return getGlobalEnvVar(name);
+    
+    envVar = getSuperGlobalRef(name);
+
+    if (envVar == null)
+      envVar = new EnvVarImpl(new Var());
+
+    _map.put(name, envVar);
+
+    return envVar;
+  }
+
+  /**
+   * Gets a variable
+   *
+   * @param name the variable name
+   * @param value the current value of the variable
+   */
+  public final EnvVar getGlobalEnvVar(String name)
+  {
+    EnvVar envVar = _globalMap.get(name);
+
+    if (envVar != null)
+      return envVar;
+      
+    envVar = getSuperGlobalRef(name);
+
+    if (envVar == null)
+      envVar = getGlobalScriptContextRef(name);
+
+    if (envVar == null) {
+      Var var = new Var();
+      var.setGlobal();
+      
+      envVar = new EnvVarImpl(var);
+    }
+    
+    _globalMap.put(name, envVar);
+
+    return envVar;
+  }
+
+  /**
+   * Pushes a new environment.
+   */
+  public Map<String,EnvVar> pushEnv(Map<String,EnvVar> map)
+  {
+    Map<String,EnvVar> oldEnv = _map;
+
+    _map = map;
+
+    return oldEnv;
+  }
+
+  /**
+   * Restores the old environment.
+   */
+  public void popEnv(Map<String,EnvVar> oldEnv)
+  {
+    _map = oldEnv;
+  }
+
+  /**
+   * Returns the current environment.
+   */
+  public Map<String,EnvVar> getEnv()
+  {
+    return _map;
+  }
+
+  /**
+   * Returns the current environment.
+   */
+  public HashMap<String,EnvVar> getGlobalEnv()
+  {
+    return _globalMap;
+  }
+
+  public boolean isGlobalEnv()
+  {
+    return _map == _globalMap;
   }
 
   /**
@@ -1648,7 +1769,10 @@ public class Env {
    */
   public final Var unsetVar(String name)
   {
-    _map.remove(name);
+    EnvVar envVar = _map.get(name);
+
+    if (envVar != null)
+      envVar.setRef(new Var());
 
     return null;
   }
@@ -1661,6 +1785,9 @@ public class Env {
    */
   public final Var setVar(String name, Value value)
   {
+    throw new UnsupportedOperationException();
+    
+    /*
     Var var;
 
     if (value instanceof Var) {
@@ -1675,6 +1802,7 @@ public class Env {
     _map.put(name, var);
 
     return var;
+    */
   }
 
   /**
@@ -1684,7 +1812,10 @@ public class Env {
    */
   public final Var unsetLocalVar(String name)
   {
-    _map.remove(name);
+    EnvVar envVar = _globalMap.get(name);
+
+    if (envVar != null)
+      envVar.setRef(new Var());
 
     return null;
   }
@@ -1696,12 +1827,10 @@ public class Env {
    */
   public final Var unsetGlobalVar(String name)
   {
-    Var oldVar = _globalMap.remove(name);
+    EnvVar envVar = _globalMap.get(name);
 
-    /* php/323a
-    if (oldVar != null)
-      oldVar.set(UnsetValue.UNSET);
-    */
+    if (envVar != null)
+      envVar.setRef(new Var());
 
     return null;
   }
@@ -1748,68 +1877,23 @@ public class Env {
   }
 
   /**
-   * Gets a value.
-   */
-  public Var getRef(String name)
-  {
-    Var var = _map.get(name);
-
-    // required for $$ref where $ref is the name of a superglobal
-    if (var == null) {
-      // php/0809
-      if (Quercus.isSuperGlobal(name))
-	return getGlobalRef(name);
-    }
-
-    return var;
-  }
-
-  /**
-   * Returns the raw global lookup.
-   */
-  public Var getGlobalRaw(String name)
-  {
-    return _globalMap.get(name);
-  }
-  
-  /**
-   * Gets a global value.
-   */
-  public Var getGlobalRef(String name)
-  {
-    Var var = _globalMap.get(name);
-
-    if (var == null) {
-      var = getSuperGlobalRef(name);
-
-      if (var == null)
-        var = getGlobalScriptContextRef(name);
-      
-      if (var == null)
-        var = new Var();
-      
-      _globalMap.put(name, var);
-    }
-
-    return var;
-  }
-
-  /**
    * Returns a superglobal.
    */
-  private Var getSuperGlobalRef(String name)
+  private EnvVar getSuperGlobalRef(String name)
   {
     Var var;
+    EnvVar envVar;
     
     switch (SPECIAL_VARS.get(name)) {
       case _ENV: {
         var = new Var();
+	envVar = new EnvVarImpl(var);
 
-        _globalMap.put(name, var);
+        _globalMap.put(name, envVar);
 
-        var.set(new ArrayValueImpl());
+        envVar.set(new ArrayValueImpl());
 
-        return var;
+        return envVar;
       }
 
       case HTTP_POST_VARS:
@@ -1817,18 +1901,19 @@ public class Env {
           return null;
       case _POST: {
         var = new Var();
+	envVar = new EnvVarImpl(var);
 
-        _globalMap.put(name, var);
+        _globalMap.put(name, envVar);
 
         ArrayValue post = new ArrayValueImpl();
 
-        var.set(post);
+        envVar.set(post);
 
         if (_request == null)
           return null;
 
         if (! "POST".equals(_request.getMethod()))
-          return var;
+          return envVar;
 
         if (_postArray != null) {
           for (Map.Entry<Value, Value> entry : _postArray.entrySet()) {
@@ -1836,7 +1921,7 @@ public class Env {
           }
         }
         
-        return var;
+        return envVar;
       }
 
       case HTTP_POST_FILES:
@@ -1844,8 +1929,9 @@ public class Env {
           return null;
       case _FILES: {
         var = new Var();
+	envVar = new EnvVarImpl(var);
 
-        _globalMap.put(name, var);
+        _globalMap.put(name, envVar);
 
         ArrayValue files = new ArrayValueImpl();
 
@@ -1855,9 +1941,9 @@ public class Env {
           }
         }
 
-        var.set(files);
+        envVar.set(files);
         
-        return var;
+        return envVar;
       }
 
       case HTTP_GET_VARS:
@@ -1866,18 +1952,20 @@ public class Env {
       
       case _GET: {
         var = new Var();
+	envVar = new EnvVarImpl(var);
+
+        _globalMap.put(name, envVar);
 
         ArrayValue array = new ArrayValueImpl();
 
-        var.set(array);
-        _globalMap.put(name, var);
+        envVar.set(array);
 
         if (_request == null)
-          return var;
+          return envVar;
         
         String queryString = _request.getQueryString();
         if (queryString == null)
-          return var;
+          return envVar;
 
         StringUtility.parseStr(this,
                                queryString,
@@ -1885,20 +1973,21 @@ public class Env {
                                true,
                                getHttpInputEncoding());
         
-        return var;
+        return envVar;
       }
       
       case _REQUEST: {
         var = new Var();
-        
+	envVar = new EnvVarImpl(var);
+
         ArrayValue array = new ArrayValueImpl();
 
-        var.set(array);
+        envVar.set(array);
 
-        _globalMap.put(name, var);
+        _globalMap.put(name, envVar);
 
         if (_request == null)
-          return var;
+          return envVar;
         
         try {
           String encoding = getHttpInputEncoding();
@@ -1956,7 +2045,7 @@ public class Env {
                             isMagicQuotes);
         }
         
-        return var;
+        return envVar;
       }
 
       case HTTP_RAW_POST_DATA: {
@@ -1967,12 +2056,13 @@ public class Env {
           return null;
         
         var = new Var();
-        
-        _globalMap.put(name, var);
+	envVar = new EnvVarImpl(var);
+
+        _globalMap.put(name, envVar);
         
         var.set(_inputData);
         
-        return var;
+        return envVar;
       }
     
       case HTTP_SERVER_VARS:
@@ -1981,22 +2071,24 @@ public class Env {
       
       case _SERVER: {
         var = new Var();
+	envVar = new EnvVarImpl(var);
 
-        _globalMap.put(name, var);
+        _globalMap.put(name, envVar);
 
         var.set(new ServerArrayValue(this));
 
-        return var;
+        return envVar;
       }
 
       case _GLOBAL: {
         var = new Var();
+	envVar = new EnvVarImpl(var);
 
-        _globalMap.put(name, var);
+        _globalMap.put(name, envVar);
 
         var.set(new GlobalArrayValue(this));
 
-        return var;
+        return envVar;
       }
 
       case HTTP_COOKIE_VARS:
@@ -2005,10 +2097,12 @@ public class Env {
       
       case _COOKIE: {
         var = new Var();
-        _globalMap.put(name, var);
+	envVar = new EnvVarImpl(var);
+
+        _globalMap.put(name, envVar);
 
         if (_request == null)
-          return var;
+          return envVar;
         
         ArrayValue array = new ArrayValueImpl();
 
@@ -2030,22 +2124,22 @@ public class Env {
 
         var.set(array);
 
-        return var;
+        return envVar;
       }
       
       case _SESSION: {
-        var = _globalMap.get("_SESSION");
-
-        return var;
+        return _globalMap.get("_SESSION");
       }
 
       case PHP_SELF: {
         var = new Var();
-        _globalMap.put(name, var);
+	envVar = new EnvVarImpl(var);
+
+        _globalMap.put(name, envVar);
 
         var.set(getGlobalVar("_SERVER").get(PHP_SELF_STRING));
 
-        return var;
+        return envVar;
       }
       
       default:
@@ -2056,40 +2150,29 @@ public class Env {
   /**
    * Gets a value.
    */
-  protected Var getGlobalSpecialRef(String name)
+  protected EnvVar getGlobalSpecialRef(String name)
   {
-    Var var = null;
-
-    if (_map != _globalMap) {
-      var = _globalMap.get(name);
-      
-      if (var != null)
-        return var;
-    }
-
-    var = getSuperGlobalRef(name);
-
-    if (var != null)
-      _globalMap.put(name, var);
-
-    return var;
+    if (_quercus.isSuperGlobal(name))
+      return _globalMap.get(name);
+    else
+      return null;
   }
 
-  protected Var getGlobalScriptContextRef(String name)
+  protected EnvVar getGlobalScriptContextRef(String name)
   {
     if (_scriptContext == null)
       return null;
 
-    Var var = _globalMap.get(name);
+    EnvVar envVar = _globalMap.get(name);
     
-    if (var != null)
-      return var;
+    if (envVar != null)
+      return envVar;
     
     Object value = _scriptContext.getAttribute(name);
 
     if (value == null) {
       Bindings bindings
-      = _scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
+	= _scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
 
       if (bindings != null)
         value = bindings.get(name);
@@ -2104,13 +2187,14 @@ public class Env {
     }
 
     if (value != null) {
-      var = new Var();
-      _globalMap.put(name, var);
-
-      var.set(wrapJava(value));
+      envVar = new EnvVarImpl(new Var());
+      
+      _globalMap.put(name, envVar);
+      
+      envVar.set(wrapJava(value));
     }
 
-    return var;
+    return envVar;
   }
 
   private static String decodeValue(String s)
@@ -2166,25 +2250,9 @@ public class Env {
    */
   public Var getVar(String name)
   {
-    Var var = _map.get(name);
+    EnvVar envVar = getEnvVar(name);
 
-    if (var != null)
-      return var;
-    
-    var = getRef(name);
-
-    if (var == null) {
-      var = new Var();
-
-      if (_map == _globalMap) {
-        // php/379c
-        var.setGlobal();
-      }
-
-      _map.put(name, var);
-    }
-
-    return var;
+    return envVar.getRef();
   }
 
   /**
@@ -2192,20 +2260,9 @@ public class Env {
    */
   public Var getGlobalVar(String name)
   {
-    Var var = getGlobalRef(name);
+    EnvVar envVar = getGlobalEnvVar(name);
 
-    if (var == null) {
-      var = new Var();
-      var.setGlobal();
-      _globalMap.put(name, var);
-    }
-
-    return var;
-  }
-
-  public boolean isGlobalEnv()
-  {
-    return _map == _globalMap;
+    return envVar.getRef();
   }
 
   /**
@@ -2213,14 +2270,42 @@ public class Env {
    */
   public Value setValue(String name, Value value)
   {
+    EnvVar envVar = getEnvVar(name);
+    
     if (value instanceof Var)
-      _map.put(name, (Var) value);
-    else {
-      Var var = getVar(name);
-      var.set(value);
-    }
+      envVar.setRef((Var) value);
+    else
+      envVar.set(value);
 
     return value;
+  }
+
+  /**
+   * Sets a value.
+   */
+  public Value setRef(String name, Value value)
+  {
+    EnvVar envVar = getEnvVar(name);
+    
+    if (value instanceof Var)
+      envVar.setRef((Var) value);
+    else
+      envVar.set(value);
+
+    return value;
+  }
+
+  /**
+   * Sets a value.
+   */
+  public static Var toRef(Value value)
+  {
+    // php/3243
+    
+    if (value instanceof Var)
+      return (Var) value;
+    else
+      return new Var(value);
   }
 
   /**
@@ -2239,12 +2324,12 @@ public class Env {
    */
   public Value setGlobalValue(String name, Value value)
   {
+    EnvVar envVar = getGlobalEnvVar(name);
+
     if (value instanceof Var)
-      _globalMap.put(name, (Var) value);
-    else {
-      Var var = getGlobalVar(name);
-      var.set(value);
-    }
+      envVar.setRef((Var) value);
+    else
+      envVar.set(value);
 
     return value;
   }
@@ -2438,42 +2523,6 @@ public class Env {
     }
 
     return trace;
-  }
-
-  /**
-   * Pushes a new environment.
-   */
-  public HashMap<String, Var> pushEnv(HashMap<String, Var> map)
-  {
-    HashMap<String, Var> oldEnv = _map;
-
-    _map = map;
-
-    return oldEnv;
-  }
-
-  /**
-   * Restores the old environment.
-   */
-  public void popEnv(HashMap<String, Var> oldEnv)
-  {
-    _map = oldEnv;
-  }
-
-  /**
-   * Returns the current environment.
-   */
-  public HashMap<String, Var> getEnv()
-  {
-    return _map;
-  }
-
-  /**
-   * Returns the current environment.
-   */
-  public HashMap<String, Var> getGlobalEnv()
-  {
-    return _globalMap;
   }
 
   /**
@@ -3704,8 +3753,8 @@ public class Env {
    * @return the found class or null if no class found.
    */
   private QuercusClass createClassFromCache(String name,
-                                       boolean useAutoload,
-                                       boolean useImport)
+					    boolean useAutoload,
+					    boolean useImport)
   {
     int id = _quercus.getClassId(name);
     
@@ -3871,6 +3920,11 @@ public class Env {
       throw createErrorException(L.l("'{0}' is an unknown class.", name));
   }
 
+  public void clearClassCache()
+  {
+    _classCache.clear();
+  }
+
   QuercusClass createQuercusClass(ClassDef def, QuercusClass parent)
   {
     ClassKey key = new ClassKey(def, parent);
@@ -3882,7 +3936,7 @@ public class Env {
     if (qClassRef != null) {
       qClass = qClassRef.get();
 
-      if (qClass != null) {
+      if (qClass != null && ! qClass.isModified()) {
 	return new QuercusClass(qClass, parent);
       }
     }
@@ -5175,6 +5229,23 @@ public class Env {
     */
     else
       return new Var(value);
+  }
+
+  /**
+   * Sets a reference
+   */
+  public static Var setEnvRef(Var oldVar, Value value)
+  {
+    // 3ab7
+    // XXX: need better test case, since that one isn't allowed by php
+    
+    if (value instanceof Var)
+      return (Var) value;
+    else {
+      oldVar.set(value);
+
+      return oldVar;
+    }
   }
 
   /**

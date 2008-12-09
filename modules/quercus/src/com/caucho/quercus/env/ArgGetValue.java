@@ -127,7 +127,7 @@ public class ArgGetValue extends Value
   /**
    * Converts to a reference.
    */
-  public Value getRef(Value index)
+  public Var getRef(Value index)
   {
     // php/3d1p
     return _obj.getArray(_index).getRef(index);
@@ -144,7 +144,7 @@ public class ArgGetValue extends Value
   /**
    * Converts to a reference variable.
    */
-  public Value getFieldRef(Env env, StringValue index)
+  public Var getFieldRef(Env env, StringValue index)
   {
     // php/3d2p
     return _obj.getObject(env, _index).getFieldRef(env, index);

@@ -1167,6 +1167,17 @@ public class Quercus
     return _functionMap;
   }
 
+  public int setFunction(String name, AbstractFunction fun)
+  {
+    int id = findFunctionId(name);
+    
+    synchronized (_functionNameMap) {
+      _functionMap[id] = fun;
+    }
+
+    return id;
+  }
+
   /**
    * Returns the id for a class name.
    */

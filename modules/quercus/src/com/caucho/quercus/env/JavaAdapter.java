@@ -393,7 +393,7 @@ abstract public class JavaAdapter extends ArrayValue
    */
   public Var getRef(Value index)
   {
-    Var var = new JavaAdapterVar(this, index);
+    Var var = new Var(new JavaAdapterVar(this, index));
     
     if (_refs == null)
       _refs = new HashMap<Value,Value>();

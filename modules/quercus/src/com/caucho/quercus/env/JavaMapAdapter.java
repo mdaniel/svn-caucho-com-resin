@@ -330,25 +330,10 @@ public class JavaMapAdapter
       Value key = wrapJava(entry.getKey());
       Value value = wrapJava(entry.getValue());
 
-      return new MapEntry(key, value);
+      return new ArrayValue.Entry(key, value);
     }
 
     public void remove()
-    {
-      throw new UnsupportedOperationException();
-    }
-  }
-
-  public static class MapEntry
-    extends ArrayValue.Entry
-  {
-    public MapEntry(Value key, Value value)
-    {
-      super(key, value);
-    }
-    
-    @Override
-    public Entry getNext()
     {
       throw new UnsupportedOperationException();
     }

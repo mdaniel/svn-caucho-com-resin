@@ -130,7 +130,7 @@ public class OutputBuffer {
     try {
       _out.flush();
 
-      StringValue bb = _env.createBinaryBuilder();
+      StringValue bb = _env.createBinaryBuilder(_tempStream.getLength());
 
       for (TempBuffer ptr = _tempStream.getHead();
 	   ptr != null;

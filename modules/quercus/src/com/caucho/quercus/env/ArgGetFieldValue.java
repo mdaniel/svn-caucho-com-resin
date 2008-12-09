@@ -121,7 +121,7 @@ public class ArgGetFieldValue extends Value {
    * Converts to a reference variable.
    */
   @Override
-  public Value getRef(Value index)
+  public Var getRef(Value index)
   {
     return _obj.getFieldArray(_env, _name).getRef(index);
   }
@@ -130,7 +130,7 @@ public class ArgGetFieldValue extends Value {
    * Converts to a reference variable.
    */
   @Override
-  public Value getFieldRef(Env env, StringValue name)
+  public Var getFieldRef(Env env, StringValue name)
   {
     // php/3d2q
     return _obj.getFieldObject(_env, _name).getFieldRef(_env, name);

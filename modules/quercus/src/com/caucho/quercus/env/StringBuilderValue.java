@@ -524,14 +524,6 @@ public class StringBuilderValue
   {
     return charValueAt(key.toLong());
   }
-
-  /**
-   * Returns the character at an index
-   */
-  public Value getRef(Value key)
-  {
-    return charValueAt(key.toLong());
-  }
   
   /**
    * Sets the array ref.
@@ -550,7 +542,7 @@ public class StringBuilderValue
   @Override
   public Value append(Value index, Value value)
   {
-    if (length() > 0)
+    if (_length > 0)
       return setCharValueAt(index.toLong(), value.toString());
     else
       return new ArrayValueImpl().append(index, value);
@@ -1101,7 +1093,7 @@ public class StringBuilderValue
   @Override
   public int indexOf(CharSequence match, int head)
   {
-    int length = length();
+    int length = _length;
     int matchLength = match.length();
 
     if (matchLength <= 0)
@@ -1115,11 +1107,11 @@ public class StringBuilderValue
     loop:
     for (; head <= end; head++) {
       if (_buffer[head] != first)
-    continue;
+	continue;
 
       for (int i = 1; i < matchLength; i++) {
-    if (_buffer[head + i] != match.charAt(i))
-      continue loop;
+	if (_buffer[head + i] != match.charAt(i))
+	  continue loop;
       }
 
       return head;

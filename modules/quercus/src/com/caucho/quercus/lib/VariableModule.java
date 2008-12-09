@@ -161,18 +161,18 @@ public class VariableModule extends AbstractQuercusModule {
   {
     ArrayValue result = new ArrayValueImpl();
 
-    HashMap<String,Var> map = env.getEnv();
+    Map<String,EnvVar> map = env.getEnv();
 
-    for (Map.Entry<String,Var> entry : map.entrySet()) {
+    for (Map.Entry<String,EnvVar> entry : map.entrySet()) {
       result.append(env.createString(entry.getKey()),
-		    entry.getValue().toValue());
+		    entry.getValue().get());
     }
 
-    HashMap<String,Var> globalMap = env.getGlobalEnv();
+    Map<String,EnvVar> globalMap = env.getGlobalEnv();
     if (map != globalMap) {
-      for (Map.Entry<String,Var> entry : globalMap.entrySet()) {
+      for (Map.Entry<String,EnvVar> entry : globalMap.entrySet()) {
 	result.append(env.createString(entry.getKey()),
-		      entry.getValue().toValue());
+		      entry.getValue().get());
       }
     }
 

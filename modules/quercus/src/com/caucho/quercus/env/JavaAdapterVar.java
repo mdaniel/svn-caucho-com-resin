@@ -43,10 +43,11 @@ import java.util.*;
 /**
  * Represents a PHP variable value.
  */
-public class JavaAdapterVar extends Var
+public class JavaAdapterVar extends Value
 {
   private JavaAdapter _adapter;
   private Value _key;
+  private Value _value;
 
   public JavaAdapterVar(JavaAdapter adapter, Value key)
   {
@@ -858,11 +859,11 @@ public class JavaAdapterVar extends Var
    * Returns the array ref.
    */
   @Override
-  public Value getRef(Value index)
+  public Var getRef(Value index)
   {
     setRaw(getValue());
     
-    Value value = super.getRef(index);
+    Var value = super.getRef(index);
     
     setValue(getRawValue());
     
@@ -1006,14 +1007,14 @@ public class JavaAdapterVar extends Var
    * Returns the field ref.
    */
   @Override
-  public Value getFieldRef(Env env, StringValue index)
+  public Var getFieldRef(Env env, StringValue index)
   {
     setRaw(getValue());
     
-    Value retValue = super.getFieldRef(env, index);
+    Var retValue = super.getFieldRef(env, index);
     
     setValue(getRawValue());
-    
+
     return retValue;
   }
 
@@ -1381,12 +1382,21 @@ public class JavaAdapterVar extends Var
     out.print("&");
     getValue().varDump(env, out, depth, valueSet);
   }
+
+  private void setRaw(Value value)
+  {
+    _value = value;
+  }
+
+  private Value getRawValue()
+  {
+    return _value;
+  }
   
   //
   // Java Serialization
   //
 
-  @Override
   public Object writeReplace()
   {
     return getValue();

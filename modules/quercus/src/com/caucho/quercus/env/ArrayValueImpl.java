@@ -91,8 +91,10 @@ public class ArrayValueImpl extends ArrayValue
     this(copy.getSize());
 
     for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
+      Value value = ptr._var != null ? ptr._var : ptr._value;
+      
       // php/0662 for copy
-      put(ptr._key, ptr._value.copyArrayItem());
+      put(ptr._key, value.copyArrayItem());
     }
   }
 
@@ -120,7 +122,9 @@ public class ArrayValueImpl extends ArrayValue
     map.put(copy, this);
 
     for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
-      append(ptr._key, ptr._value.toValue().copy(env, map));
+      Value value = ptr._var != null ? ptr._var.toValue() : ptr._value;
+      
+      append(ptr._key, value.copy(env, map));
     }
   }
 
@@ -134,7 +138,9 @@ public class ArrayValueImpl extends ArrayValue
     this();
     
     for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
-      append(ptr._key, ptr._value.toValue().copyTree(env, root));
+      Value value = ptr._var != null ? ptr._var.toValue() : ptr._value;
+      
+      append(ptr._key, value.copyTree(env, root));
     }
   }
 
@@ -176,7 +182,6 @@ public class ArrayValueImpl extends ArrayValue
 
       if (head != null) {
         ptrCopy._nextHash = head;
-        head._prevHash = ptrCopy;
       }
 
       entries[ptr._index] = ptrCopy;
@@ -348,17 +353,17 @@ public class ArrayValueImpl extends ArrayValue
     Entry entry = createEntry(key);
 
     // php/0434
-    Value oldValue = entry._value;
+    Var oldVar = entry._var;
 
     if (value instanceof Var) {
       // php/0a59
       Var var = (Var) value;
       var.setReference();
 
-      entry._value = var;
+      entry._var = var;
     }
-    else if (oldValue instanceof Var) {
-      oldValue.set(value);
+    else if (oldVar != null) {
+      oldVar.set(value);
     }
     else {
       entry._value = value;
@@ -562,7 +567,7 @@ public class ArrayValueImpl extends ArrayValue
     
     Value key = createTailKey();
 
-    put(key, value);
+    append(key, value);
 
     return value;
   }
@@ -602,7 +607,9 @@ public class ArrayValueImpl extends ArrayValue
          entry != null;
          entry = entry._nextHash) {
       if (key.equals(entry._key)) {
-        return entry._value;
+	Var var = entry._var;
+	
+        return var != null ? var.toValue() : entry._value;
 	
         // return entry._value.toValue(); // php/39a1
       }
@@ -626,8 +633,11 @@ public class ArrayValueImpl extends ArrayValue
     for (Entry entry = _entries[hash];
          entry != null;
          entry = entry._nextHash) {
-      if (key.equals(entry._key))
-        return entry._value;
+      if (key.equals(entry._key)) {
+	Var var = entry._var;
+	
+        return var != null ? var : entry._value;
+      }
     }
 
     return UnsetValue.UNSET;
@@ -698,17 +708,15 @@ public class ArrayValueImpl extends ArrayValue
 
     key = key.toKey();
     int hash = key.hashCode() & _hashMask;
+    Entry prevHash = null;
+    Entry nextHash = null;
 
     for (Entry entry = _entries[hash];
          entry != null;
-         entry = entry._nextHash) {
+         entry = nextHash) {
+      nextHash = entry._nextHash;
+
       if (key.equals(entry._key)) {
-        Entry nextHash = entry._nextHash;
-        Entry prevHash = entry._prevHash;
-
-        if (nextHash != null)
-          nextHash._prevHash = prevHash;
-
         if (prevHash != null)
           prevHash._nextHash = nextHash;
         else
@@ -742,6 +750,8 @@ public class ArrayValueImpl extends ArrayValue
 
 	return value;
       }
+
+      prevHash = nextHash;
     }
     
     return UnsetValue.UNSET;
@@ -757,15 +767,14 @@ public class ArrayValueImpl extends ArrayValue
     
     Entry entry = createEntry(index);
     // quercus/0431
-    Value value = entry._value;
+    Var var = entry._var;
 
-    if (value instanceof Var)
-      return (Var) value;
+    if (var != null)
+      return var;
 
-    Var var = new Var(value);
+    var = new Var(entry._value);
+    entry._var = var;
 
-    entry.setValue(var);
-    
     return var;
   }
 
@@ -803,9 +812,6 @@ public class ArrayValueImpl extends ArrayValue
     _nextAvailableIndex = key.nextIndex(_nextAvailableIndex);
 
     Entry head = _entries[hash];
-
-    if (head != null)
-      head._prevHash = newEntry;
 
     newEntry._nextHash = head;
     _entries[hash] = newEntry;
@@ -854,10 +860,6 @@ public class ArrayValueImpl extends ArrayValue
     Entry head = _entries[hash];
 
     entry._nextHash = head;
-    entry._prevHash = null;
-
-    if (head != null)
-      head._prevHash = entry;
 
     _entries[hash] = entry;
     _nextAvailableIndex = entry._key.nextIndex(_nextAvailableIndex);

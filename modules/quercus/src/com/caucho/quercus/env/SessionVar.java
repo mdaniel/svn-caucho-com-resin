@@ -34,18 +34,22 @@ import com.caucho.quercus.QuercusModuleException;
 /**
  * Represents a PHP variable value.
  */
-public class SessionVar extends Var {
+public class SessionVar extends Value {
+  private Value _value;
+  
   /**
    * Sets the value.
    */
   public Value set(Value value)
   {
     if (value instanceof SessionArrayValue) {
-      return super.set(value);
+      _value = value;
+      
+      return value;
     }
     else if (value instanceof ArrayValue) {
       ArrayValue arrayValue = (ArrayValue) value;
-      ArrayValue sessionValue = (ArrayValue) getRawValue();
+      ArrayValue sessionValue = (ArrayValue) _value;
 
       sessionValue.clear();
 
@@ -54,7 +58,9 @@ public class SessionVar extends Var {
       return value;
     }
     else if (! value.isset()) {
-      return super.set(value);
+      _value = value;
+      
+      return value;
     }
     else
       throw new QuercusModuleException(L.l("Can't set this variable"));

@@ -320,25 +320,10 @@ public class JavaCollectionAdapter extends JavaAdapter
     {
        Value val = wrapJava(_iterator.next());
 
-       return new CollectionValueEntry(LongValue.create(_index++), val);
+       return new ArrayValue.Entry(LongValue.create(_index++), val);
     }
 
     public void remove()
-    {
-      throw new UnsupportedOperationException();
-    }
-  }
-  
-  public static class CollectionValueEntry
-    extends ArrayValue.Entry
-  {
-    public CollectionValueEntry(Value key, Value value)
-    {
-      super(key, value);
-    }
-    
-    @Override
-    public Entry getNext()
     {
       throw new UnsupportedOperationException();
     }

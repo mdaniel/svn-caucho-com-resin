@@ -896,8 +896,8 @@ abstract public class ArrayValue extends Value {
    */
   public Map.Entry<Value, Value>[] toEntryArray()
   {
-    ArrayList<Map.Entry<Value, Value>> array =
-      new ArrayList<Map.Entry<Value, Value>>(getSize());
+    ArrayList<Map.Entry<Value, Value>> array
+      = new ArrayList<Map.Entry<Value, Value>>(getSize());
 
     for (Entry entry = getHead(); entry != null; entry = entry._next)
       array.add(entry);
@@ -1156,16 +1156,17 @@ abstract public class ArrayValue extends Value {
     entry.printRImpl(env, out, depth, valueSet);
   }
 
-  public static class Entry
+  public static final class Entry
     implements Map.Entry<Value,Value>, Serializable  
   {
     final Value _key;
+    
     Value _value;
+    Var _var;
 
     Entry _prev;
     Entry _next;
 
-    Entry _prevHash;
     Entry _nextHash;
 
     int _index;
@@ -1189,12 +1190,12 @@ abstract public class ArrayValue extends Value {
 
     public Value getRawValue()
     {
-      return _value;
+      return _var != null ? _var : _value;
     }
 
     public Value getValue()
     {
-      return _value.toValue();
+      return _var != null ? _var.toValue() : _value;
     }
 
     public Value getKey()
@@ -1206,7 +1207,7 @@ abstract public class ArrayValue extends Value {
     {
       // The value may be a var
       // XXX: need test
-      return _value.toValue();
+      return _var != null ? _var.toValue() : _var;
     }
 
     /**
@@ -1216,16 +1217,12 @@ abstract public class ArrayValue extends Value {
     {
       // php/376a
 
-      Value val = _value;
-
-      if (val instanceof Var)
-        return (Var) val;
+      if (_var != null)
+        return _var;
       else {
-        Var var = new Var(val);
+        _var = new Var(_value);
 
-        _value = var;
-
-        return var;
+        return _var;
       }
     }
 
@@ -1234,7 +1231,7 @@ abstract public class ArrayValue extends Value {
      */
     public Value toArgValue()
     {
-      return _value.toValue();
+      return _var != null ? _var.toValue() : _value;
     }
 
     public Value setValue(Value value)
@@ -1242,6 +1239,7 @@ abstract public class ArrayValue extends Value {
       Value oldValue = _value;
 
       _value = value;
+      _var = null;
 
       return oldValue;
     }
@@ -1251,15 +1249,10 @@ abstract public class ArrayValue extends Value {
      */
     public Value toRef()
     {
-      Value value = _value;
-
-      if (value instanceof Var)
-        return new RefVar((Var) value);
-      else {
-        _value = new Var(value);
-
-        return new RefVar((Var) _value);
-      }
+      if (_var == null)
+        _var = new Var(_value);
+      
+      return new RefVar(_var);
     }
 
     /**
@@ -1267,30 +1260,18 @@ abstract public class ArrayValue extends Value {
      */
     public Value toArgRef()
     {
-      Value value = _value;
-
-      if (value instanceof Var)
-        return new RefVar((Var) value);
-      else {
-        _value = new Var(_value);
-
-        return new RefVar((Var) _value);
-      }
+      if (_var == null)
+        _var = new Var(_value);
+      
+      return new RefVar(_var);
     }
 
     public Value toArg()
     {
-      // php/39a4
-      Value value = _value;
-
-      // php/39aj
-      if (value instanceof Var)
-        return value;
-      else {
-        _value = new Var(value);
-
-        return _value;
-      }
+      if (_var == null)
+        _var = new Var(_value);
+      
+      return _var;
     }
 
     public void varDumpImpl(Env env,
@@ -1311,7 +1292,7 @@ abstract public class ArrayValue extends Value {
 
       printDepth(out, 2 * depth);
 
-      _value.varDump(env, out, depth, valueSet);
+      getRawValue().varDump(env, out, depth, valueSet);
     }
 
     protected void printRImpl(Env env,
@@ -1324,8 +1305,8 @@ abstract public class ArrayValue extends Value {
       out.print("    [");
       out.print(_key);
       out.print("] => ");
-      if (_value != null)
-        _value.printR(env, out, depth + 1, valueSet);
+      if (getRawValue() != null)
+        getRawValue().printR(env, out, depth + 1, valueSet);
       out.println();
     }
 

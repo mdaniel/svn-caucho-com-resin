@@ -566,7 +566,12 @@ public class MemoryPath extends FilesystemPath {
 
       return newNode;
     }
-  };
+
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + this.name + "]";
+    }
+  }
 
   public class MemoryStream extends StreamImpl {
     Node _node;
@@ -642,6 +647,11 @@ public class MemoryPath extends FilesystemPath {
       }
 
       _node.lastModified = Alarm.getCurrentTime();
+    }
+
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _node + "]";
     }
   }
 }

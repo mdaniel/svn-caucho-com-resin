@@ -13,14 +13,13 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
-<<<<<<< .mine
+<li>quercus: experimental lazy function classloading (rep by koreth)</li>
+<li>quercus: NPE with func_get_args (#3103, rep by koreth)</li>
 <li>core: added StreamSource for hessian serialization</li>
 <li>hessian: added AbstractStreamSerializer and AbstractStreamDeserializer</li>
 <li>hessian: added *HessianSerializer and *HessianDeserializer pattern</li>
-=======
 <li>jsf: Application MessageBundle fixes (#3056, rep by freemant)</li>
 <li>jsf: JSF State with Serializable ActionListener (#3058, rep by freemant)</li>
->>>>>>> .r4879
 <li>server: ThreadLocal removal/cleanup</li>
 <li>admin: change profile default to 10ms</li>
 <li>http: 304 should not return content-length (#3089, rep by Andrew Phillips)</li>

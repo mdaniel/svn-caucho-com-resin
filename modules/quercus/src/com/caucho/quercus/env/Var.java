@@ -44,7 +44,7 @@ import java.util.*;
 /**
  * Represents a PHP variable value.
  */
-public class Var extends Value
+public final class Var extends Value
   implements Serializable
 {
   Value _value;
@@ -532,7 +532,7 @@ public class Var extends Value
    */
 
   @Override
-  public Value toValue()
+  public final Value toValue()
   {
     return _value;
   }
@@ -1002,7 +1002,7 @@ public class Var extends Value
    * Returns the array ref.
    */
   @Override
-  public Value getRef(Value index)
+  public Var getRef(Value index)
   {
     // php/3d1a
     if (! _value.isset())
@@ -1139,7 +1139,7 @@ public class Var extends Value
    * Returns the field ref.
    */
   @Override
-  public Value getFieldRef(Env env, StringValue name)
+  public Var getFieldRef(Env env, StringValue name)
   {
     // php/3a0r
     _value = _value.toAutoObject(env);
@@ -1227,7 +1227,7 @@ public class Var extends Value
    * Returns the field ref.
    */
   @Override
-  public Value getThisFieldRef(Env env, StringValue name)
+  public Var getThisFieldRef(Env env, StringValue name)
   {
     return _value.getThisFieldRef(env, name);
   }

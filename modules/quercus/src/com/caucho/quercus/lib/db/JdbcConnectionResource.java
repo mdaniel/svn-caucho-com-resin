@@ -589,7 +589,7 @@ public abstract class JdbcConnectionResource
 
     _rs = null;
 
-    Statement stmt = null;
+    Statement stmt = _stmt;
 
     try {
       Connection conn = getConnection(env);
@@ -608,8 +608,6 @@ public abstract class JdbcConnectionResource
       else
         stmt = conn.createStatement();
       
-      _stmt = stmt;
-
       stmt.setEscapeProcessing(false); // php/1406
 
       if (stmt.execute(sql)) {
@@ -645,8 +643,12 @@ public abstract class JdbcConnectionResource
         // _warnings = stmt.getWarnings();
 
         // for php/430a
-        if (! keepStatementOpen()) {
+	if (keepStatementOpen()) {
+	  _stmt = stmt;
+	}
+        else {
           _warnings = stmt.getWarnings();
+	  _stmt = null;
           stmt.close();
         }
       }

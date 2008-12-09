@@ -31,6 +31,8 @@ package com.caucho.quercus.program;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.EnvVar;
+import com.caucho.quercus.env.EnvVarImpl;
 import com.caucho.quercus.env.NullThisValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.UnsetValue;
@@ -42,6 +44,7 @@ import com.caucho.util.L10N;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -215,7 +218,7 @@ public class Function extends AbstractFunction {
 
   private Value callImpl(Env env, Expr []args, boolean isRef)
   {
-    HashMap<String,Var> map = new HashMap<String,Var>();
+    HashMap<String,EnvVar> map = new HashMap<String,EnvVar>();
 
     Value []values = new Value[args.length];
 
@@ -232,7 +235,7 @@ public class Function extends AbstractFunction {
       else if (arg.isReference()) {
         values[i] = args[i].evalRef(env);
 
-        map.put(arg.getName(), values[i].toRefVar());
+        map.put(arg.getName(), new EnvVarImpl(values[i].toRefVar()));
       }
       else {
         // php/0d04
@@ -240,7 +243,7 @@ public class Function extends AbstractFunction {
 
         Var var = values[i].toVar();
 
-        map.put(arg.getName(), var);
+        map.put(arg.getName(), new EnvVarImpl(var));
 
         values[i] = var.toValue();
       }
@@ -254,13 +257,15 @@ public class Function extends AbstractFunction {
       if (defaultExpr == null)
         return env.error("expected default expression");
       else if (arg.isReference())
-        map.put(arg.getName(), defaultExpr.evalRef(env).toVar());
+        map.put(arg.getName(),
+		new EnvVarImpl(defaultExpr.evalRef(env).toVar()));
       else {
-        map.put(arg.getName(), defaultExpr.eval(env).copy().toVar());
+        map.put(arg.getName(),
+		new EnvVarImpl(defaultExpr.eval(env).copy().toVar()));
       }
     }
 
-    HashMap<String,Var> oldMap = env.pushEnv(map);
+    Map<String,EnvVar> oldMap = env.pushEnv(map);
     Value []oldArgs = env.setFunctionArgs(values); // php/0476
     Value oldThis;
 
@@ -304,7 +309,7 @@ public class Function extends AbstractFunction {
 
   private Value callImpl(Env env, Value []args, boolean isRef)
   {
-    HashMap<String,Var> map = new HashMap<String,Var>();
+    HashMap<String,EnvVar> map = new HashMap<String,EnvVar>();
 
     for (int i = 0; i < args.length; i++) {
       Arg arg = null;
@@ -316,7 +321,7 @@ public class Function extends AbstractFunction {
       if (arg == null) {
       }
       else if (arg.isReference()) {
-        map.put(arg.getName(), args[i].toRefVar());
+        map.put(arg.getName(), new EnvVarImpl(args[i].toRefVar()));
       }
       else {
 	Var var = args[i].copy().toVar();
@@ -330,7 +335,7 @@ public class Function extends AbstractFunction {
 	}
 	  
         // quercus/0d04
-        map.put(arg.getName(), var);
+        map.put(arg.getName(), new EnvVarImpl(var));
       }
     }
 
@@ -342,13 +347,13 @@ public class Function extends AbstractFunction {
       if (defaultExpr == null)
         return env.error("expected default expression");
       else if (arg.isReference())
-        map.put(arg.getName(), defaultExpr.evalRef(env).toVar());
+        map.put(arg.getName(), new EnvVarImpl(defaultExpr.evalRef(env).toVar()));
       else {
-        map.put(arg.getName(), defaultExpr.eval(env).copy().toVar());
+        map.put(arg.getName(), new EnvVarImpl(defaultExpr.eval(env).copy().toVar()));
       }
     }
 
-    HashMap<String,Var> oldMap = env.pushEnv(map);
+    Map<String,EnvVar> oldMap = env.pushEnv(map);
     Value []oldArgs = env.setFunctionArgs(args);
     Value oldThis;
 
