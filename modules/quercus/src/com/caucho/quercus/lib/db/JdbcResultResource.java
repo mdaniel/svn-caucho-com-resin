@@ -126,22 +126,21 @@ public class JdbcResultResource {
     try {
       ResultSet rs = _rs;
       _rs = null;
-      
-      if (rs != null)
-        rs.close();
 
       Statement stmt = _stmt;
       _stmt = null;
 
+      JdbcConnectionResource conn = _conn;
+      _conn = null;
+      
+      if (rs != null)
+        rs.close();
+
       // XXX: statement no longer reused?
-      /*
-      if (stmt != null)
-	stmt.close();
-      */
+      if (stmt != null && conn != null)
+	conn.closeStatement(stmt);
       
       _env = null;
-
-      _conn = null;
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     }

@@ -48,4 +48,14 @@ public class JdbcUtil {
       log.log(Level.FINER, e.toString(), e);
     }
   }
+
+  public static void close(Statement stmt)
+  {
+    try {
+      if (stmt != null)
+	stmt.close();
+    } catch (SQLException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+  }
 }

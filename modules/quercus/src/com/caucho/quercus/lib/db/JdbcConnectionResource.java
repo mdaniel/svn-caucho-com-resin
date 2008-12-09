@@ -38,6 +38,7 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.util.JdbcUtil;
 
 import java.sql.*;
 import java.util.logging.Level;
@@ -519,6 +520,17 @@ public abstract class JdbcConnectionResource
 	    + Integer.parseInt(result[2]));
   }
 
+  public void closeStatement(Statement stmt)
+  {
+    if (stmt == null)
+      return;
+
+    if (_stmt == null && false)
+      _stmt = stmt;
+    else
+      JdbcUtil.close(stmt);
+  }
+
   /**
    * Closes the connection.
    */
@@ -590,6 +602,7 @@ public abstract class JdbcConnectionResource
     _rs = null;
 
     Statement stmt = _stmt;
+    _stmt = null;
 
     try {
       Connection conn = getConnection(env);
@@ -599,16 +612,19 @@ public abstract class JdbcConnectionResource
 
       if (checkSql(_conn, sql))
         return BooleanValue.TRUE;
+
+      // statement reuse does not gain performance significantly (< 1%)
+      if (true || stmt == null) {
+	// XXX: test for performance
+	boolean canSeek = true;
+	if (canSeek)
+	  stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+				      ResultSet.CONCUR_READ_ONLY);
+	else
+	  stmt = conn.createStatement();
       
-      // XXX: test for performance
-      boolean canSeek = true;
-      if (canSeek)
-        stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                    ResultSet.CONCUR_READ_ONLY);
-      else
-        stmt = conn.createStatement();
-      
-      stmt.setEscapeProcessing(false); // php/1406
+	stmt.setEscapeProcessing(false); // php/1406
+      }
 
       if (stmt.execute(sql)) {
         // Statement.execute(String) returns true when SQL statement is a
@@ -647,7 +663,7 @@ public abstract class JdbcConnectionResource
 	  _stmt = stmt;
 	}
         else {
-          _warnings = stmt.getWarnings();
+          // _warnings = stmt.getWarnings();
 	  _stmt = null;
           stmt.close();
         }
