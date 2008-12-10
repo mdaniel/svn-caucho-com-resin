@@ -111,6 +111,10 @@ abstract public class ClassDef {
   {
   }
   
+  public void init(QuercusClass cl)
+  {
+  }
+  
   /**
    * Returns the interfaces.
    */

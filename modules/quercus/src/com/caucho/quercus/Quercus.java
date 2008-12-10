@@ -1401,7 +1401,7 @@ public class Quercus
   public void addModule(QuercusModule module)
   {
     ModuleInfo info = new ModuleInfo(_moduleContext,
-				     module.getClass().getSimpleName(),
+				     module.getClass().getName(),
 				     module);
 
     addModuleInfo(info);
