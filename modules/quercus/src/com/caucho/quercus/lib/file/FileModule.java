@@ -1299,7 +1299,8 @@ public class FileModule extends AbstractQuercusModule {
   private static ProtocolWrapper getProtocolWrapper(Env env,
 						    StringValue pathName)
   {
-    ArrayValue url = (ArrayValue) UrlModule.parse_url(env, pathName);
+    ArrayValue url = (ArrayValue) UrlModule.parse_url(env, pathName,
+						      NullValue.NULL);
 
     Value scheme = url.get(env.createString("scheme"));
 
