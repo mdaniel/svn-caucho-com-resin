@@ -920,9 +920,9 @@ public class ArrayModule
     if (array.getSize() < 1)
       return NullValue.NULL;
 
-    Iterator<Value> iterator = array.keySet().iterator();
+    Value value = array.getHead().getValue();
 
-    Value firstValue = array.remove(iterator.next());
+    Value firstValue = array.remove(value);
 
     array.keyReset(0, NOT_STRICT);
 
@@ -970,14 +970,11 @@ public class ArrayModule
         endIndex += startIndex;
     }
 
-    Iterator<Map.Entry<Value, Value>> iterator = array.entrySet().iterator();
-
     ArrayValue slicedArray = new ArrayValueImpl();
 
-    for (int k = 0; k < endIndex && iterator.hasNext(); k++) {
-      Map.Entry<Value, Value> entry = iterator.next();
-
-      if (k >= startIndex) {
+    ArrayValue.Entry entry = array.getHead();
+    for (int k = 0; k < endIndex && entry != null; k++) {
+      if (startIndex <= k) {
         Value entryKey = entry.getKey();
 
         Value entryValue = entry.getValue();
@@ -987,6 +984,8 @@ public class ArrayModule
         else
           slicedArray.put(entryValue);
       }
+
+      entry = entry.getNext();
     }
 
     return slicedArray;
@@ -2573,22 +2572,26 @@ case SORT_NUMERIC:
     for (Value arg : args) {
       if (arg.isNull())
         return NullValue.NULL;
+
+      Value argValue = arg.toValue();
       
-      if (! (arg.toValue() instanceof ArrayValue))
+      if (! (argValue instanceof ArrayValue))
         continue;
 
-      ArrayValue array = (ArrayValue) arg.toValue();
+      ArrayValue array = (ArrayValue) argValue;
 
-      for (Map.Entry<Value, Value> entry : array.entrySet()) {
-        Value key = entry.getKey();
+      for (ArrayValue.Entry ptr = array.getHead();
+	   ptr != null;
+	   ptr = ptr.getNext()) {
+        Value key = ptr.getKey();
         
         // php/173z
-        Value value = ((ArrayValue.Entry) entry).getRawValue();
+        Value value = ptr.getRawValue();
 
         if (key.isNumberConvertible())
           result.put(value);
         else
-          result.put(key, value);
+          result.append(key, value);
       }
     }
 

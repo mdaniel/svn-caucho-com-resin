@@ -61,6 +61,33 @@ public class MysqlModule extends AbstractQuercusModule {
   public static final int MYSQL_USE_RESULT = 0x0;
   public static final int MYSQL_STORE_RESULT = 0x1;
 
+  private static final StringValue SV_NAME
+    = new StringBuilderValue("name");
+  private static final StringValue SV_TABLE
+    = new StringBuilderValue("table");
+  private static final StringValue SV_DEF
+    = new StringBuilderValue("def");
+  private static final StringValue SV_MAX_LENGTH
+    = new StringBuilderValue("max_length");
+  private static final StringValue SV_NOT_NULL
+    = new StringBuilderValue("not_null");
+  private static final StringValue SV_PRIMARY_KEY
+    = new StringBuilderValue("primary_key");
+  private static final StringValue SV_MULTIPLE_KEY
+    = new StringBuilderValue("multiple_key");
+  private static final StringValue SV_UNIQUE_KEY
+    = new StringBuilderValue("unique_key");
+  private static final StringValue SV_NUMERIC
+    = new StringBuilderValue("numeric");
+  private static final StringValue SV_BLOB
+    = new StringBuilderValue("blob");
+  private static final StringValue SV_TYPE
+    = new StringBuilderValue("type");
+  private static final StringValue SV_UNSIGNED
+    = new StringBuilderValue("unsigned");
+  private static final StringValue SV_ZEROFILL
+    = new StringBuilderValue("zerofill");
+
   public MysqlModule()
   {
   }
@@ -521,19 +548,27 @@ public class MysqlModule extends AbstractQuercusModule {
 
       ObjectValue fieldResult = env.createObject();
 
-      fieldResult.putField(env, "name", columnLabel);
-      fieldResult.putField(env, "table", tableName);
-      fieldResult.putField(env, "def", "");
-      fieldResult.putField(env, "max_length", maxLength);
-      fieldResult.putField(env, "not_null", notNull);
-      fieldResult.putField(env, "primary_key", primaryKey);
-      fieldResult.putField(env, "multiple_key", multipleKey);
-      fieldResult.putField(env, "unique_key", uniqueKey);
-      fieldResult.putField(env, "numeric", numeric);
-      fieldResult.putField(env, "blob", blob);
-      fieldResult.putField(env, "type", type);
-      fieldResult.putField(env, "unsigned", unsigned);
-      fieldResult.putField(env, "zerofill", zerofill);
+      fieldResult.putThisField(env, SV_NAME, env.createString(columnLabel));
+      fieldResult.putThisField(env, SV_TABLE, env.createString(tableName));
+      fieldResult.putThisField(env, SV_DEF, env.getEmptyString());
+      fieldResult.putThisField(env, SV_MAX_LENGTH,
+			       LongValue.create(maxLength));
+      fieldResult.putThisField(env, SV_NOT_NULL,
+			       LongValue.create(notNull));
+      fieldResult.putThisField(env, SV_PRIMARY_KEY,
+			       LongValue.create(primaryKey));
+      fieldResult.putThisField(env, SV_MULTIPLE_KEY,
+			       LongValue.create(multipleKey));
+      fieldResult.putThisField(env, SV_UNIQUE_KEY,
+			       LongValue.create(uniqueKey));
+      fieldResult.putThisField(env, SV_NUMERIC,
+			       LongValue.create(numeric));
+      fieldResult.putThisField(env, SV_BLOB,
+			       LongValue.create(blob));
+      fieldResult.putThisField(env, SV_TYPE, env.createString(type));
+      fieldResult.putThisField(env, SV_UNSIGNED,
+			       LongValue.create(unsigned));
+      fieldResult.putThisField(env, SV_ZEROFILL, LongValue.create(zerofill));
 
       return fieldResult;
     } catch (SQLException e) {

@@ -91,9 +91,9 @@ public class LruCache<K,V> {
   //
 
   // hit count statistics
-  private final AtomicLong _hitCount;
+  private final AtomicLong _hitCount = new AtomicLong();
   // miss count statistics
-  private final AtomicLong _missCount;
+  private final AtomicLong _missCount = new AtomicLong();
   
   /**
    * Create the LRU cache with a specific capacity.
@@ -127,15 +127,6 @@ public class LruCache<K,V> {
     
     if (_lruTimeout < 1)
       _lruTimeout = 1;
-
-    if (isStatistics) {
-      _hitCount = new AtomicLong();
-      _missCount = new AtomicLong();
-    }
-    else {
-      _hitCount = null;
-      _missCount = null;
-    }
   }
 
   /**
@@ -233,14 +224,12 @@ public class LruCache<K,V> {
     if (item != null) {
       updateLru(item);
 
-      if (_hitCount != null)
-	_hitCount.incrementAndGet();
+      _hitCount.incrementAndGet();
 
       return item._value;
     }
     else {
-      if (_missCount != null)
-	_missCount.incrementAndGet();
+      _missCount.incrementAndGet();
     }
 
     return null;

@@ -34,6 +34,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
 import com.caucho.util.L10N;
+import com.caucho.util.IoUtil;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.StringStream;
@@ -456,12 +457,15 @@ public class DOMDocument
   public boolean loadXML(Env env, StringValue source, @Optional Value options)
   {
     if (options != null)
-      env.stub(L.l("`{0}' is ignored", "options"));
+      env.stub(L.l("loadXML 'options' is ignored"));
 
     InputStream is = source.toInputStream();
+    ReadStream in = null;
 
     try {
-      getImpl().parseXMLDocument(_delegate, Vfs.openRead(is), null);
+      in = Vfs.openRead(is);
+      
+      getImpl().parseXMLDocument(_delegate, in, null);
     }
     catch (SAXException ex) {
       env.warning(ex);
@@ -473,14 +477,8 @@ public class DOMDocument
       return false;
     }
     finally {
-      if (is != null) {
-        try {
-          is.close();
-        }
-        catch (IOException ex) {
-          env.warning(ex);
-        }
-      }
+      IoUtil.close(is);
+      IoUtil.close(in);
     }
 
     return true;

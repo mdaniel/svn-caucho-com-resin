@@ -1495,8 +1495,6 @@ public class StringBuilderValue
 
       return l == r;
     }
-
-    rValue = rValue.toValue();
     
     if (rValue instanceof StringBuilderValue) {
       StringBuilderValue value = (StringBuilderValue) rValue;
