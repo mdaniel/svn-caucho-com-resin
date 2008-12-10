@@ -35,7 +35,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
-import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.JavaClassDef;

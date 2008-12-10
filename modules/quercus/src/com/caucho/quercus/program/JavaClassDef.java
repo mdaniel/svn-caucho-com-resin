@@ -37,6 +37,7 @@ import com.caucho.quercus.annotation.*;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralExpr;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.function.JavaMarshal;
 import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;

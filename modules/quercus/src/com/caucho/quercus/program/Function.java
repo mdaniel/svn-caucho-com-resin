@@ -40,6 +40,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.ExprFactory;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;

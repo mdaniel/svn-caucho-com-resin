@@ -35,7 +35,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.VariableArguments;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.L10N;
 
 import java.io.IOException;

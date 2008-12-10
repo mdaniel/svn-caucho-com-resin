@@ -33,7 +33,7 @@ import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
-import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.vfs.WriteStream;
 

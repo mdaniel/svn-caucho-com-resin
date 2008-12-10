@@ -31,6 +31,7 @@ package com.caucho.quercus.program;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.function.AbstractFunction;
 
 /**
  * Represents an unset function

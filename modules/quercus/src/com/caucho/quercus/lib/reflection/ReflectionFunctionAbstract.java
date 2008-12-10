@@ -34,7 +34,7 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.expr.RequiredExpr;
-import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.Arg;
 
 public abstract class ReflectionFunctionAbstract

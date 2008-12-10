@@ -31,7 +31,7 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.UnsetFunction;
 import com.caucho.util.Crc64;

@@ -35,7 +35,7 @@ import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.function.AbstractFunction;
 
 public class ProtocolWrapper {
   private QuercusClass _qClass;

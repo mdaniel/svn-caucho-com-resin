@@ -32,6 +32,7 @@ package com.caucho.quercus;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.annotation.ClassImplementation;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.lib.db.JavaSqlDriverWrapper;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.session.QuercusSessionManager;

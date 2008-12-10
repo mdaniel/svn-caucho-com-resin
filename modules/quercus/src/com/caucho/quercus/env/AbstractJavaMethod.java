@@ -38,7 +38,7 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.expr.DefaultExpr;
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.L10N;
 
 /**

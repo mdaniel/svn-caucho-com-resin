@@ -34,7 +34,7 @@ import com.caucho.quercus.expr.ClassConstExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.StringLiteralExpr;
 import com.caucho.quercus.module.ModuleContext;
-import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InstanceInitializer;
 import com.caucho.quercus.program.JavaClassDef;

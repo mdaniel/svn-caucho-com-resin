@@ -31,7 +31,7 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.vfs.WriteStream;
 

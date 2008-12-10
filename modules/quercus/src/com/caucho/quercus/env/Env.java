@@ -45,6 +45,7 @@ import com.caucho.quercus.module.ModuleStartupListener;
 import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.program.*;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.util.*;
 import com.caucho.vfs.ByteToChar;

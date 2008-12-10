@@ -40,8 +40,8 @@ import com.caucho.quercus.env.ArrayValue.AbstractGet;
 import com.caucho.quercus.env.ArrayValue.GetKey;
 import com.caucho.quercus.env.ArrayValue.KeyComparator;
 import com.caucho.quercus.env.ArrayValue.ValueComparator;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 

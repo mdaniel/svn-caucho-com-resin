@@ -34,6 +34,7 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.*;
+import com.caucho.quercus.function.*;
 import com.caucho.quercus.program.*;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;

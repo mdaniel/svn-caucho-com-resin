@@ -39,10 +39,10 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.module.ModuleInfo;
-import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 
 public class ReflectionExtension
