@@ -56,11 +56,22 @@ import java.util.logging.Logger;
 /**
  * PHP URL
  */
-public class UrlModule extends AbstractQuercusModule {
+public class UrlModule
+  extends AbstractQuercusModule
+{
   private static final L10N L = new L10N(UrlModule.class);
   private static final Logger log
     = Logger.getLogger(UrlModule.class.getName());
 
+  public static final int PHP_URL_SCHEME = 0;
+  public static final int PHP_URL_HOST = 1;
+  public static final int PHP_URL_PORT = 2;
+  public static final int PHP_URL_USER = 3;
+  public static final int PHP_URL_PASS = 4;
+  public static final int PHP_URL_PATH = 5;
+  public static final int PHP_URL_QUERY = 6;
+  public static final int PHP_URL_FRAGMENT = 7;
+  
   /**
    * Encodes base64
    */
@@ -472,15 +483,14 @@ public class UrlModule extends AbstractQuercusModule {
   /**
    * Parses the URL into an array.
    */
-  public static Value parse_url(Env env, StringValue str)
+  public static Value parse_url(Env env,
+                                StringValue str,
+                                @Optional Value componentV)
   {
-    if (str == null)
-      str = env.getEmptyString();
-
     int i = 0;
     int length = str.length();
 
-    StringValue sb = env.createUnicodeBuilder();
+    StringValue sb = str.createStringBuilder();
 
     ArrayValueImpl value = new ArrayValueImpl();
 
@@ -656,6 +666,27 @@ public class UrlModule extends AbstractQuercusModule {
     else
       value.put(env.createString("path"), sb);
 
+    if (! componentV.isDefault()) {
+      switch (componentV.toInt()) {
+        case PHP_URL_SCHEME:
+          return value.get(env.createString("scheme"));
+        case PHP_URL_HOST:
+          return value.get(env.createString("host"));
+        case PHP_URL_PORT:
+          return value.get(env.createString("port"));
+        case PHP_URL_USER:
+          return value.get(env.createString("user"));
+        case PHP_URL_PASS:
+          return value.get(env.createString("pass"));
+        case PHP_URL_PATH:
+          return value.get(env.createString("path"));
+        case PHP_URL_QUERY:
+          return value.get(env.createString("query"));
+        case PHP_URL_FRAGMENT:
+          return value.get(env.createString("fragment"));
+      }
+    }
+    
     return value;
   }
 

@@ -83,7 +83,7 @@ public class StringUtility
         for (; i < len && (ch = str.charAt(i)) == '&'; i++) {
         }
       
-        for (; i < len && (ch = str.charAt(i)) != '='; i++) {
+        for (; i < len && (ch = str.charAt(i)) != '=' && ch != '&'; i++) {
           i = addQueryChar(byteToChar, str, len, i, ch);
         }
 

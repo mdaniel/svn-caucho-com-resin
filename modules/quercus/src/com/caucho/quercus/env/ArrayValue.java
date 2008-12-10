@@ -974,14 +974,16 @@ abstract public class ArrayValue extends Value {
   @Override
   public void varExport(StringBuilder sb)
   {
-    sb.append("array(");
+    sb.append("array (");
+    sb.append("\n");
 
-    boolean isFirst = true;
+    //boolean isFirst = true;
     for (Entry entry = getHead(); entry != null; entry = entry._next) {
+      sb.append("  ");
       entry.getKey().varExport(sb);
       sb.append(" => ");
       entry.getValue().varExport(sb);
-      sb.append(", ");
+      sb.append(",\n");
     }
 
     sb.append(")");

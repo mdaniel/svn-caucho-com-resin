@@ -31,6 +31,7 @@ package com.caucho.quercus.lib;
 
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.VariableArguments;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -57,7 +58,7 @@ public class FunctionModule extends AbstractQuercusModule {
    */
   public static Value call_user_func(Env env,
                                      Callback function,
-                                     Value []args)
+                                     @Optional Value []args)
   {
     return function.call(env, args).copyReturn();
   }
@@ -67,7 +68,7 @@ public class FunctionModule extends AbstractQuercusModule {
    */
   public static Value call_user_func_array(Env env,
                                            Callback function,
-                                           Value arg)
+                                           @Optional Value arg)
   {
     ArrayValue argArray;
 

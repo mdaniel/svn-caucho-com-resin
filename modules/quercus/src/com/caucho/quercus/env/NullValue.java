@@ -532,7 +532,7 @@ public class NullValue extends Value
   @Override
   public void varExport(StringBuilder sb)
   {
-    sb.append("null");
+    sb.append("NULL");
   }
 
   /**

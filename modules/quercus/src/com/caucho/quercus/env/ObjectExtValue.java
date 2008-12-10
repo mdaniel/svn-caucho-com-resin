@@ -1287,10 +1287,10 @@ public class ObjectExtValue extends ObjectValue
   public void varExport(StringBuilder sb)
   {
     sb.append(getName());
-    sb.append("::__setState(array(\n");
+    sb.append("::__set_state(array(\n");
     
     for (Map.Entry<Value,Value> entry : entrySet()) {
-      sb.append("\t");
+      sb.append("   ");
       entry.getKey().varExport(sb);
       
       sb.append(" => ");

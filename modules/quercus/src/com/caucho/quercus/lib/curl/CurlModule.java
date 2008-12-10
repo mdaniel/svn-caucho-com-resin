@@ -175,7 +175,7 @@ public class CurlModule
   public static final int CURLINFO_SPEED_DOWNLOAD             = 117;
   public static final int CURLINFO_SPEED_UPLOAD               = 118;
   public static final int CURLINFO_FILETIME                   = 119;
-//  public static final int CURLINFO_SSL_VERIFYRESULT           = 120;
+  public static final int CURLINFO_SSL_VERIFYRESULT           = 120;
   public static final int CURLINFO_CONTENT_LENGTH_DOWNLOAD    = 121;
   public static final int CURLINFO_CONTENT_LENGTH_UPLOAD      = 122;
   public static final int CURLINFO_STARTTRANSFER_TIME         = 123;
@@ -378,8 +378,47 @@ public class CurlModule
 
     if (curl == null)
       return BooleanValue.FALSE;
+    
+    if (option.isDefault()) {
+      ArrayValue array = new ArrayValueImpl();
+      
+      putInfo(env, curl, array, "url", CURLINFO_EFFECTIVE_URL);
+      putInfo(env, curl, array, "http_code", CURLINFO_HTTP_CODE);
+      putInfo(env, curl, array, "header_size", CURLINFO_HEADER_SIZE);
+      putInfo(env, curl, array, "request_size", CURLINFO_REQUEST_SIZE);
+      putInfo(env, curl, array, "filetime", CURLINFO_FILETIME);
+      putInfo(env, curl, array,
+              "ssl_verify_result", CURLINFO_SSL_VERIFYRESULT);
+      putInfo(env, curl, array, "redirect_count", CURLINFO_REDIRECT_COUNT);
+      putInfo(env, curl, array, "total_time", CURLINFO_TOTAL_TIME);
+      putInfo(env, curl, array, "namelookup_time", CURLINFO_NAMELOOKUP_TIME);
+      putInfo(env, curl, array, "connect_time", CURLINFO_CONNECT_TIME);
+      putInfo(env, curl, array, "pretransfer_time", CURLINFO_PRETRANSFER_TIME);
+      putInfo(env, curl, array, "size_upload", CURLINFO_SIZE_UPLOAD);
+      putInfo(env, curl, array, "size_download", CURLINFO_SIZE_DOWNLOAD);
+      putInfo(env, curl, array, "speed_download", CURLINFO_SPEED_DOWNLOAD);
+      putInfo(env, curl, array, "speed_upload", CURLINFO_SPEED_UPLOAD);
+      putInfo(env, curl, array,
+              "download_content_length", CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+      putInfo(env, curl, array,
+              "upload_content_length", CURLINFO_CONTENT_LENGTH_UPLOAD);
+      putInfo(env, curl, array,
+              "starttransfer_time", CURLINFO_STARTTRANSFER_TIME);
+      putInfo(env, curl, array, "redirect_time", CURLINFO_REDIRECT_TIME);
+      
+      return array;
+    }
 
     return getInfo(env, curl, option.toInt());
+  }
+  
+  private static void putInfo(Env env,
+                              CurlResource curl,
+                              ArrayValue array,
+                              String name,
+                              int option)
+  {
+    array.put(env.createString(name), getInfo(env, curl, option));
   }
 
   private static Value getInfo(Env env,
@@ -391,7 +430,18 @@ public class CurlModule
         return env.createString(curl.getURL());
       case CURLINFO_HTTP_CODE:
         return LongValue.create(curl.getResponseCode());
+      case CURLINFO_HEADER_SIZE:
+        if (curl.getHeader() != null)
+          return LongValue.create(curl.getHeader().length());
+        else
+          return LongValue.ZERO;
+      case CURLINFO_REQUEST_SIZE:
+        break;
       case CURLINFO_FILETIME:
+        break;
+      case CURLINFO_SSL_VERIFYRESULT:
+        break;
+      case CURLINFO_REDIRECT_COUNT:
         break;
       case CURLINFO_TOTAL_TIME:
         break;
@@ -401,10 +451,6 @@ public class CurlModule
         break;
       case CURLINFO_PRETRANSFER_TIME:
         break;
-      case CURLINFO_STARTTRANSFER_TIME:
-        break;
-      case CURLINFO_REDIRECT_TIME:
-        break;
       case CURLINFO_SIZE_UPLOAD:
         break;
       case CURLINFO_SIZE_DOWNLOAD:
@@ -413,16 +459,17 @@ public class CurlModule
         break;
       case CURLINFO_SPEED_UPLOAD:
         break;
-      case CURLINFO_HEADER_SIZE:
-        return LongValue.create(curl.getHeader().length());
-      case CURLINFO_HEADER_OUT:
-        return curl.getHeader();
-      case CURLINFO_REQUEST_SIZE:
-        break;
       case CURLINFO_CONTENT_LENGTH_DOWNLOAD:
         return LongValue.create(curl.getContentLength());
       case CURLINFO_CONTENT_LENGTH_UPLOAD:
         break;
+      case CURLINFO_STARTTRANSFER_TIME:
+        break;
+      case CURLINFO_REDIRECT_TIME:
+        break;
+      
+      case CURLINFO_HEADER_OUT:
+        return curl.getHeader();
       case CURLINFO_CONTENT_TYPE:
         String type = curl.getContentType();
 
@@ -608,7 +655,7 @@ public class CurlModule
       return BooleanValue.FALSE;
 
     for (Map.Entry<Value,Value> entry: options.entrySet()) {
-      if (setOption(env, curl, entry.getKey().toInt(), entry.getValue()))
+      if (! setOption(env, curl, entry.getKey().toInt(), entry.getValue()))
         return BooleanValue.FALSE;
     }
 

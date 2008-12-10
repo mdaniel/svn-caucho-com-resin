@@ -300,6 +300,9 @@ public class JsonModule
                           StringValue s,
                           @Optional("false") boolean assoc)
   {
+    if (s.length() == 0)
+      return new ArrayValueImpl();
+    
     return (new JsonDecoder()).jsonDecode(env, s, assoc);
   }
 

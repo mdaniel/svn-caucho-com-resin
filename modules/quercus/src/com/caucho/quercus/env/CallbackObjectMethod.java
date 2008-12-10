@@ -47,8 +47,6 @@ public class CallbackObjectMethod extends Callback {
   private final String _methodName;
   private final int _hash;
   private final char []_name;
-  
-  private final AbstractFunction _fun;
 
   public CallbackObjectMethod(Env env, Value obj, String methodName)
   {
@@ -56,12 +54,6 @@ public class CallbackObjectMethod extends Callback {
     _methodName = methodName;
     _hash = MethodMap.hash(methodName);
     _name = _methodName.toCharArray();
-
-    // php/1h0n - can't trigger fatal error
-
-    // _fun = env.findMethod(_obj.getClassName(), _methodName);
-    QuercusClass cl = env.findClass(_obj.getClassName());
-    _fun = cl.findFunction(_methodName);
   }
 
   /**
@@ -72,12 +64,7 @@ public class CallbackObjectMethod extends Callback {
   @Override
   public Value call(Env env)
   {
-    if (! isValid())
-      return error(env);
-    
-    return _fun.callMethod(env, _obj);
-    
-    //return _obj.callMethod(env, _hash, _name, _name.length);
+    return _obj.callMethod(env, _hash, _name, _name.length);
   }
 
   /**
@@ -88,13 +75,8 @@ public class CallbackObjectMethod extends Callback {
   @Override
   public Value call(Env env, Value a1)
   {
-    if (! isValid())
-      return error(env);
-    
-    return _fun.callMethod(env, _obj, a1);
-    
-    //return _obj.callMethod(env, _hash, _name, _name.length,
-    //                       a1);
+    return _obj.callMethod(env, _hash, _name, _name.length,
+                           a1);
   }
 
   /**
@@ -105,13 +87,8 @@ public class CallbackObjectMethod extends Callback {
   @Override
   public Value call(Env env, Value a1, Value a2)
   {
-    if (! isValid())
-      return error(env);
-    
-    return _fun.callMethod(env, _obj, a1, a2);
-    
-    //return _obj.callMethod(env, _hash, _name, _name.length,
-    //                       a1, a2);
+    return _obj.callMethod(env, _hash, _name, _name.length,
+                           a1, a2);
   }
 
   /**
@@ -122,13 +99,8 @@ public class CallbackObjectMethod extends Callback {
   @Override
   public Value call(Env env, Value a1, Value a2, Value a3)
   {
-    if (! isValid())
-      return error(env);
-    
-    return _fun.callMethod(env, _obj, a1, a2, a3);
-    
-    //return _obj.callMethod(env, _hash, _name, _name.length,
-    //                       a1, a2, a3);
+    return _obj.callMethod(env, _hash, _name, _name.length,
+                           a1, a2, a3);
   }
 
   /**
@@ -140,13 +112,8 @@ public class CallbackObjectMethod extends Callback {
   public Value call(Env env, Value a1, Value a2, Value a3,
 			     Value a4)
   {
-    if (! isValid())
-      return error(env);
-    
-    return _fun.callMethod(env, _obj, a1, a2, a3, a4);
-    
-    //return _obj.callMethod(env, _hash, _name, _name.length,
-    //                       a1, a2, a3, a4);
+    return _obj.callMethod(env, _hash, _name, _name.length,
+                           a1, a2, a3, a4);
   }
 
   /**
@@ -158,24 +125,14 @@ public class CallbackObjectMethod extends Callback {
   public Value call(Env env, Value a1, Value a2, Value a3,
 		    Value a4, Value a5)
   {
-    if (! isValid())
-      return error(env);
-    
-    return _fun.callMethod(env, _obj, a1, a2, a3, a4, a5);
-    
-    //return _obj.callMethod(env, _hash, _name, _name.length,
-    //                       a1, a2, a3, a4, a5);
+    return _obj.callMethod(env, _hash, _name, _name.length,
+                           a1, a2, a3, a4, a5);
   }
 
   @Override
   public Value call(Env env, Value []args)
   {
-    if (! isValid())
-      return error(env);
-    
-    return _fun.callMethod(env, _obj, args);
-    
-    //return _obj.callMethod(env, _hash, _name, _name.length, args);
+    return _obj.callMethod(env, _hash, _name, _name.length, args);
   }
 
   @Override
@@ -194,7 +151,7 @@ public class CallbackObjectMethod extends Callback {
   @Override
   public boolean isValid()
   {
-    return _fun != null;
+    return true;
   }
 
   @Override
@@ -206,7 +163,7 @@ public class CallbackObjectMethod extends Callback {
   @Override
   public boolean isInternal()
   {
-    return _fun instanceof JavaInvoker;
+    return _obj.findFunction(_methodName) instanceof JavaInvoker;
   }
   
   private Value error(Env env)

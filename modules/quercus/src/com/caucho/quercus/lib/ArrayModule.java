@@ -198,7 +198,7 @@ public class ArrayModule
     int i = 0;
     for (Map.Entry<Value, Value> entry : array.entrySet()) {
       Value key = entry.getKey();
-      Value value = entry.getKey();
+      Value value = entry.getValue();
 
       if (i % size == 0) {
         currentArray = new ArrayValueImpl();
@@ -529,7 +529,6 @@ public class ArrayModule
    */
   public Value array_fill(Env env, long start, long num, Value value)
   {
-
     if (num < 0) {
       env.warning("Number of elements must be positive");
 
@@ -539,7 +538,7 @@ public class ArrayModule
     ArrayValue array = new ArrayValueImpl();
 
     for (long k = start; k < num + start; k++)
-      array.put(LongValue.create(k), value);
+      array.put(LongValue.create(k), value.copy());
 
     return array;
   }

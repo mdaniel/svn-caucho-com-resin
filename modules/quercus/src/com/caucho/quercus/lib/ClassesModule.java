@@ -324,6 +324,29 @@ public class ClassesModule extends AbstractQuercusModule {
   {
     return obj.findFunction(methodName.intern()) != null;
   }
+  
+  /**
+   * Returns true if the named property exists on the object.
+   */
+  public static Value property_exists(Env env,
+                                      Value obj,
+                                      StringValue name)
+  {
+    QuercusClass cls;
+    
+    if (obj.isString())
+      cls = env.findClass(obj.toString());
+    else if (obj.isObject())
+      cls = ((ObjectValue) obj.toValue()).getQuercusClass();
+    else {
+      env.warning("must pass in object or name of class");
+      return NullValue.NULL;
+    }
+    
+    if (cls != null && cls.findFieldIndex(name) >= 0)
+      return BooleanValue.TRUE;
+    else
+      return BooleanValue.FALSE;
+  }
 
-  // XXX: property_exists
 }

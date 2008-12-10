@@ -321,6 +321,9 @@ public class HttpModule extends AbstractQuercusModule {
   // XXX: see duplicate in env
   public static String urldecode(String s)
   {
+    if (s == null)
+      s = "";
+    
     int len = s.length();
     StringBuilder sb = new StringBuilder();
 

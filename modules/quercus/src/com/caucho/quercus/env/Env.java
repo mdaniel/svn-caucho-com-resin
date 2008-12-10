@@ -1952,7 +1952,7 @@ public class Env {
       
       case _GET: {
         var = new Var();
-	envVar = new EnvVarImpl(var);
+        envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
 
@@ -4006,10 +4006,10 @@ public class Env {
       int p = s.indexOf("::");
 
       if (p < 0)
-	return new CallbackFunction(this, s);
+        return new CallbackFunction(this, s);
       else {
-	String className = s.substring(0, p);
-	String methodName = s.substring(p + 2);
+        String className = s.substring(0, p);
+        String methodName = s.substring(p + 2);
 	
         QuercusClass cl = findClass(className);
 
