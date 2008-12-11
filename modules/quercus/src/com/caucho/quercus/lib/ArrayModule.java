@@ -910,8 +910,8 @@ public class ArrayModule
    * @param array the array to shift
    * @return the left most value in the array
    */
-  public Value array_shift(Env env,
-                           ArrayValue array)
+  public static Value array_shift(Env env,
+				  ArrayValue array)
   {
     if (array == null)
       return NullValue.NULL;
@@ -919,7 +919,7 @@ public class ArrayModule
     if (array.getSize() < 1)
       return NullValue.NULL;
 
-    Value value = array.getHead().getValue();
+    Value value = array.getHead().getKey();
 
     Value firstValue = array.remove(value);
 

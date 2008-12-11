@@ -94,7 +94,7 @@ public class ArrayValueImpl extends ArrayValue
       Value value = ptr._var != null ? ptr._var : ptr._value;
       
       // php/0662 for copy
-      put(ptr._key, value.copyArrayItem());
+      append(ptr._key, value.copyArrayItem());
     }
   }
 
@@ -751,7 +751,7 @@ public class ArrayValueImpl extends ArrayValue
 	return value;
       }
 
-      prevHash = nextHash;
+      prevHash = entry;
     }
     
     return UnsetValue.UNSET;
