@@ -66,6 +66,8 @@ public class QuercusClass {
   
   private WeakReference<QuercusClass> _cacheRef;
 
+  private boolean _isAbstract;
+  private boolean _isInterface;
   private boolean _isJavaWrapper;
   
   private ClassDef []_classDefList;
@@ -111,9 +113,12 @@ public class QuercusClass {
                       ClassDef classDef,
                       QuercusClass parent)
   {
-    _classDef = classDef;
+    _classDef = classDef.loadClassDef(); // force load of any lazy classes
     _className = classDef.getName();
     _parent = parent;
+
+    _isAbstract = _classDef.isAbstract();
+    _isInterface = _classDef.isInterface();
     
     _initializers = new ArrayList<InstanceInitializer>();
     _fieldNames = new ArrayList<StringValue>();
@@ -297,12 +302,12 @@ public class QuercusClass {
 
   public boolean isInterface()
   {
-    return _classDef.isInterface();
+    return _isInterface;
   }
   
   public boolean isAbstract()
   {
-    return _classDef.isAbstract();
+    return _isAbstract;
   }
   
   public boolean isFinal()
@@ -620,7 +625,7 @@ public class QuercusClass {
 
   public void validate(Env env)
   {
-    if (! _classDef.isAbstract() && ! _classDef.isInterface()) {
+    if (! _isAbstract && ! _isInterface) {
       for (AbstractFunction fun : _methodMap.values()) {
         /* XXX: abstract methods need to be validated
               php/393g, php/393i, php/39j2
@@ -758,11 +763,11 @@ public class QuercusClass {
    */
   public Value createObject(Env env)
   {
-    if (_classDef.isAbstract()) {
+    if (_isAbstract) {
       throw env.createErrorException(L.l("abstract class '{0}' cannot be instantiated.",
                                      _className));
     }
-    else if (_classDef.isInterface()) {
+    else if (_isInterface) {
       throw env.createErrorException(L.l("interface '{0}' cannot be instantiated.",
                                      _className));
     }
@@ -805,7 +810,7 @@ public class QuercusClass {
   /**
    * Creates a new instance.
    */
-  public Value callNew(Env env, Value []args)
+  public Value callNew(Env env, Value ...args)
   {
     QuercusClass oldCallingClass = env.setCallingClass(this);
     

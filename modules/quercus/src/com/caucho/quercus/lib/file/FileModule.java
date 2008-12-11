@@ -1299,13 +1299,12 @@ public class FileModule extends AbstractQuercusModule {
   private static ProtocolWrapper getProtocolWrapper(Env env,
 						    StringValue pathName)
   {
-    ArrayValue url = (ArrayValue) UrlModule.parse_url(env, pathName,
-						      NullValue.NULL);
+    int p = pathName.indexOf("://");
 
-    Value scheme = url.get(env.createString("scheme"));
-
-    if (scheme == UnsetValue.UNSET)
+    if (p < 0)
       return null;
+
+    String scheme = pathName.substring(0, p).toString();
 
     return StreamModule.getWrapper(scheme.toString());
   }

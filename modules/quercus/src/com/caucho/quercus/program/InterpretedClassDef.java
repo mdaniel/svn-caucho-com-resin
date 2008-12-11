@@ -50,6 +50,9 @@ public class InterpretedClassDef extends ClassDef
   protected boolean _isFinal;
   
   protected boolean _hasNonPublicMethods;
+
+  // true if defined in the top scope of a page
+  private boolean _isTopScope;
   
   protected final HashMap<String,AbstractFunction> _functionMap
     = new HashMap<String,AbstractFunction>();
@@ -144,6 +147,22 @@ public class InterpretedClassDef extends ClassDef
   public boolean getHasNonPublicMethods()
   {
     return _hasNonPublicMethods;
+  }
+
+  /**
+   * True if defined at the top-level scope
+   */
+  public boolean isTopScope()
+  {
+    return _isTopScope;
+  }
+
+  /**
+   * True if defined at the top-level scope
+   */
+  public void setTopScope(boolean isTopScope)
+  {
+    _isTopScope = isTopScope;
   }
   
   /*

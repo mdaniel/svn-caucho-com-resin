@@ -13,6 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>quercus: array($x = 3) compilation issue (#3139, rep by koreth)</li>
 <li>quercus: experimental lazy function classloading (rep by koreth)</li>
 <li>quercus: NPE with func_get_args (#3103, rep by koreth)</li>
 <li>core: added StreamSource for hessian serialization</li>

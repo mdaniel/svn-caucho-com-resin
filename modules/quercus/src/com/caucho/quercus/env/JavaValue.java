@@ -59,7 +59,7 @@ public class JavaValue extends ObjectValue
 
   public JavaValue(Env env, Object object, JavaClassDef def)
   {
-    super(env.createQuercusClass(def, null));
+    super(env.findClass(def.getName()));
 
     _env = env;
     _classDef = def;

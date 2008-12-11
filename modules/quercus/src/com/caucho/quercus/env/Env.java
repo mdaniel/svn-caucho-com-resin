@@ -150,16 +150,6 @@ public class Env {
 
   public static final Value []EMPTY_VALUE = new Value[0];
 
-  private static final
-    LruCache<ClassKey,SoftReference<QuercusClass>> _classCache
-    = new LruCache<ClassKey,SoftReference<QuercusClass>>(4096);
-
-  /*
-  private static final
-    LruCache<IncludeKey,SoftReference<IncludeCache>> _includeCache
-    = new LruCache<IncludeKey,SoftReference<IncludeCache>>(4096);
-  */
-
   private static ThreadLocal<Env> _threadEnv = new ThreadLocal<Env>();
 
   private static final FreeList<AbstractFunction[]> _freeFunList
@@ -171,20 +161,18 @@ public class Env {
   private static final FreeList<QuercusClass[]> _freeClassList
     = new FreeList<QuercusClass[]>(256);
 
+  private static final FreeList<Value[]> _freeConstList
+    = new FreeList<Value[]>(256);
+
   protected final Quercus _quercus;
   private final boolean _isUnicodeSemantics; 
   private QuercusPage _page;
 
   private Value _this = NullThisValue.NULL;
 
-  private ArrayList<EnvCleanup> _cleanupList
-    = new ArrayList<EnvCleanup>();
-
-  private ArrayList<ObjectExtValue> _objCleanupList
-    = new ArrayList<ObjectExtValue>();
-  
-  private ArrayList<Shutdown> _shutdownList
-    = new ArrayList<Shutdown>();
+  private ArrayList<EnvCleanup> _cleanupList;
+  private ArrayList<ObjectExtValue> _objCleanupList;
+  private ArrayList<Shutdown> _shutdownList;
 
   private final HashMap<String, EnvVar> _globalMap
     = new HashMap<String, EnvVar>(1024);
@@ -193,18 +181,6 @@ public class Env {
     = new HashMap<String, Var>();
   
   private Map<String, EnvVar> _map = _globalMap;
-
-  private HashMap<String, Value> _constMap
-    = new HashMap<String, Value>(1024);
-
-  private HashMap<String, Value> _lowerConstMap
-    = new HashMap<String, Value>(1024);
-
-  private HashMap<String, QuercusClass> _classMap
-    = new HashMap<String, QuercusClass>();
-
-  private HashMap<String, QuercusClass> _lowerClassMap
-    = new HashMap<String, QuercusClass>();
 
   private HashSet<String> _initializedClassSet
     = new HashSet<String>();
@@ -218,6 +194,9 @@ public class Env {
   // Class map
   public ClassDef []_classDef;
   public QuercusClass []_qClass;
+
+  // Constant map
+  public Value []_const;
 
   private IdentityHashMap<String, Value> _iniMap;
 
@@ -363,6 +342,14 @@ public class Env {
     else {
       // list should have been zeroed on call to free
     }
+    
+    Value []defConst = quercus.getConstantMap();
+    
+    _const = _freeConstList.allocate();
+    if (_const == null || _const.length != defConst.length)
+      _const = new Value[defConst.length];
+    
+    System.arraycopy(defConst, 0, _const, 0, defConst.length);
     
     _originalOut = out;
     _out = out;
@@ -726,6 +713,9 @@ public class Env {
    */
   public void addCleanup(EnvCleanup envCleanup)
   {
+    if (_cleanupList == null)
+      _cleanupList = new ArrayList<EnvCleanup>();
+    
     _cleanupList.add(envCleanup);
   }
 
@@ -735,6 +725,9 @@ public class Env {
    */
   public void addObjectCleanup(ObjectExtValue objCleanup)
   {
+    if (_objCleanupList == null)
+      _objCleanupList = new ArrayList<ObjectExtValue>();
+    
     _objCleanupList.add(objCleanup);
   }
 
@@ -746,6 +739,9 @@ public class Env {
    */
   public void removeCleanup(EnvCleanup envCleanup)
   {
+    if (_cleanupList == null)
+      return;
+    
     for (int i = _cleanupList.size() - 1; i >= 0; i--) {
       EnvCleanup res = _cleanupList.get(i);
 
@@ -2617,11 +2613,18 @@ public class Env {
    */
   private Value getConstantImpl(String name)
   {
-    Value value = _constMap.get(name);
+    int id = _quercus.getConstantId(name);
 
-    if (value != null)
-      return value;
+    if (id < _const.length) {
+      Value value = _const[id];
 
+      if (value != null)
+	return value;
+    }
+
+    return null;
+
+    /*
     value = _quercus.getConstant(name);
     if (value != null)
       return value;
@@ -2634,6 +2637,44 @@ public class Env {
     }
 
     return null;
+    */
+  }
+
+  /**
+   * Returns a constant.
+   */
+  public Value getConstant(int id)
+  {
+    if (_const.length <= id)
+      return _quercus.getConstantName(id);
+    
+    Value value = _const[id];
+
+    if (value != null)
+      return value;
+
+    int lowerId = _quercus.getConstantLower(id);
+
+    value = _const[lowerId];
+    if (value != null)
+      return value;
+
+    return _quercus.getConstantName(id);
+
+    /*
+    value = _quercus.getConstant(name);
+    if (value != null)
+      return value;
+
+    if (_lowerConstMap != null) {
+      value = _lowerConstMap.get(name.toLowerCase());
+
+      if (value != null)
+	return value;
+    }
+
+    return null;
+    */
   }
   
   /**
@@ -2641,7 +2682,13 @@ public class Env {
    */
   public Value removeConstant(String name)
   {
-    return _constMap.remove(name);
+    int id = _quercus.getConstantId(name);
+
+    Value value = _const[id];
+    
+    _const[id] = null;
+    
+    return value;
   }
 
   /**
@@ -2651,15 +2698,32 @@ public class Env {
                            Value value,
                            boolean isCaseInsensitive)
   {
-    Value oldValue = _constMap.get(name);
+    int id = _quercus.getConstantId(name);
 
-    if (oldValue != null)
-      return oldValue;
+    return addConstant(id, value, isCaseInsensitive);
+  }
 
-    _constMap.put(name, value);
+  /**
+   * Sets a constant.
+   */
+  public Value addConstant(int id,
+                           Value value,
+                           boolean isCaseInsensitive)
+  {
+    if (_const.length <= id) {
+      Value []newConst = new Value[id + 256];
+      System.arraycopy(_const, 0, newConst, 0, _const.length);
+      
+      _const = newConst;
+    }
+    
+    _const[id] = value;
 
-    if (_lowerConstMap != null && isCaseInsensitive)
-      _lowerConstMap.put(name.toLowerCase(), value);
+    if (isCaseInsensitive) {
+      int lowerId = _quercus.getConstantLower(id);
+
+      _const[lowerId] = value;
+    }
 
     return value;
   }
@@ -2671,12 +2735,10 @@ public class Env {
   {
     ArrayValue result = new ArrayValueImpl();
 
-    for (Map.Entry<String, Value> entry : _quercus.getConstMap().entrySet()) {
-      result.put(createString(entry.getKey()), entry.getValue());
-    }
-
-    for (Map.Entry<String, Value> entry : _constMap.entrySet()) {
-      result.put(createString(entry.getKey()), entry.getValue());
+    for (int i = 0; i < _const.length; i++) {
+      if (_const[i] != null) {
+	result.append(_quercus.getConstantName(i), _const[i]);
+      }
     }
 
     return result;
@@ -3615,35 +3677,46 @@ public class Env {
                                 boolean useAutoload,
                                 boolean useImport)
   {
-    QuercusClass cl = _classMap.get(name);
+    int id = _quercus.getClassId(name);
 
-    if (cl != null)
-      return cl;
+    return findClass(id, useAutoload, useImport);
+  }
 
-    cl = _lowerClassMap.get(name.toLowerCase());
-
-    if (cl != null)
-      return cl;
-
-    cl = createClassFromCache(name, useAutoload, useImport);
+  public QuercusClass findClass(int id,
+				boolean useAutoload,
+				boolean useImport)
+  {
+    if (id < _qClass.length && _qClass[id] != null)
+      return _qClass[id];
+    
+    QuercusClass cl = createClassFromCache(id, useAutoload, useImport);
     
     if (cl != null) {
-      _classMap.put(cl.getName(), cl);
-      _lowerClassMap.put(cl.getName().toLowerCase(), cl);
+      _qClass[id] = cl;
 
       // php/09b7
       cl.init(this);
 
       return cl;
     }
-    else
-      return findClassExt(name, useAutoload, useImport);
+    else {
+      String name = _quercus.getClassName(id);
+
+      QuercusClass qcl = findClassExt(name, useAutoload, useImport);
+
+      if (qcl != null)
+	_qClass[id] = qcl;
+
+      return qcl;
+    }
   }
   
   private QuercusClass findClassExt(String name,
                                     boolean useAutoload,
                                     boolean useImport)
   {
+    int id = _quercus.getClassId(name);
+    
     if (useAutoload) {
       StringValue nameString = createString(name);
       
@@ -3691,10 +3764,9 @@ public class Env {
           JavaClassDef javaClassDef = getJavaClassDefinition(name, true);
 
           if (javaClassDef != null) {
-            QuercusClass cls = createQuercusClass(javaClassDef, null);
-            
-            _classMap.put(cls.getName(), cls);
-            _lowerClassMap.put(cls.getName().toLowerCase(), cls);
+            QuercusClass cls = createQuercusClass(id, javaClassDef, null);
+
+	    _qClass[id] = cls;
             
             cls.init(this);
             
@@ -3711,37 +3783,78 @@ public class Env {
   }
 
   /**
-   * Finds the class with the given name.
-   *
-   * @param name the class name
-   * @param useAutoload use autoload to locate the class if necessary
-   * @return the found class or null if no class found.
+   * Returns the class with the given id
    */
-  public void addClass(String name, ClassDef def)
+  public QuercusClass getClass(int classId)
   {
+    QuercusClass qClass = _qClass[classId];
+
+    if (qClass != null)
+      return qClass;
+
+    ClassDef def = _classDef[classId];
+
+    if (def == null) {
+      return findClass(classId, true, false);
+    }
+
+    int parentId = -1;
+
+    if (def.getParentName() != null)
+      parentId = _quercus.getClassId(def.getParentName());
+    
+    addClass(def, classId, parentId);
+    
+    return _qClass[classId];
+  }
+
+  /**
+   * Adds the class with the given name
+   *
+   * @param def the class definition
+   * @param classId the identifier for the class name
+   * @param parentId the identifier for the parent class name
+   */
+  public void addClass(ClassDef def, int classId, int parentId)
+  {
+    def = def.loadClassDef();
+    
     // php/0cn2 - make sure interfaces have a QuercusClass
+    /* XXX: temp, needs to be argument
     for (String iface : def.getInterfaces()) {
       QuercusClass cl = findClass(iface);
     }
+    */
 
     QuercusClass parentClass = null;
-    
-    // php/1d1o
-    if (findClass(name, false, false) == null) {
-      String parentName = def.getParentName();
-      
-      if (parentName != null) {
-        parentClass = findAbstractClass(parentName);
-      }
-      
-      QuercusClass qClass = createQuercusClass(def, parentClass);
-      
-      // php/09p9
-      qClass.init(this);
 
-      _classMap.put(name, qClass);
-      _lowerClassMap.put(name.toLowerCase(), qClass);
+    if (parentId >= 0)
+      parentClass = getClass(parentId);
+
+    QuercusClass qClass = _quercus.getCachedClass(classId);
+
+    if (qClass == null
+	|| qClass.getClassDef() != def
+	|| qClass.getParent() != parentClass) {
+      qClass = createQuercusClass(classId, def, parentClass);
+
+      _quercus.setCachedClass(classId, qClass);
     }
+      
+    _qClass[classId] = qClass;
+    qClass.init(this);
+  }
+
+  public void addClass(String name, ClassDef def)
+  {
+    int id = _quercus.getClassId(name);
+
+    int parentId = -1;
+    
+    if (def.getParentName() != null)
+      parentId = _quercus.getClassId(def.getParentName());
+
+    addClass(def, id, parentId);
   }
 
   /**
@@ -3753,12 +3866,10 @@ public class Env {
    * 
    * @return the found class or null if no class found.
    */
-  private QuercusClass createClassFromCache(String name,
+  private QuercusClass createClassFromCache(int id,
 					    boolean useAutoload,
 					    boolean useImport)
   {
-    int id = _quercus.getClassId(name);
-    
     ClassDef classDef = _classDef[id];
 
     if (classDef != null) {
@@ -3770,15 +3881,15 @@ public class Env {
         parent = findClass(parentName);
 
       if (parentName == null || parent != null)
-        return createQuercusClass(classDef, parent);
+        return createQuercusClass(id, classDef, parent);
       else
         return null; // php/
     }
 
-    ClassDef staticClass = _quercus.findClass(name);
+    ClassDef staticClass = _quercus.getClassDef(id);
 
     if (staticClass != null)
-      return createQuercusClass(staticClass, null); // XXX: cache
+      return createQuercusClass(id, staticClass, null); // XXX: cache
     else
       return null;
   }
@@ -3923,29 +4034,26 @@ public class Env {
 
   public void clearClassCache()
   {
-    _classCache.clear();
+    // _classCache.clear();
   }
 
-  QuercusClass createQuercusClass(ClassDef def, QuercusClass parent)
+  QuercusClass createQuercusClass(int id,
+				  ClassDef def,
+				  QuercusClass parent)
   {
-    ClassKey key = new ClassKey(def, parent);
+    QuercusClass qClass = _quercus.getCachedClass(id);
 
-    SoftReference<QuercusClass> qClassRef = _classCache.get(key);
-
-    QuercusClass qClass = null;
-
-    if (qClassRef != null) {
-      qClass = qClassRef.get();
-
-      if (qClass != null && ! qClass.isModified()) {
-	return new QuercusClass(qClass, parent);
-      }
+    if (qClass == null
+	|| qClass.getClassDef() != def
+	|| qClass.getParent() != parent) {
+      qClass = new QuercusClass(getModuleContext(), def, parent);
+      _qClass[id] = qClass;
+      
+      qClass.validate(this);
+      _quercus.setCachedClass(id, qClass);
     }
-
-    qClass = new QuercusClass(getModuleContext(), def, parent);
-    qClass.validate(this);
-
-    _classCache.put(key, new SoftReference<QuercusClass>(qClass));
+    
+    _qClass[id] = qClass;
 
     return qClass;
   }
@@ -5364,6 +5472,9 @@ public class Env {
    */
   public void addShutdown(Callback callback, Value []args)
   {
+    if (_shutdownList == null)
+      _shutdownList = new ArrayList<Shutdown>();
+    
     _shutdownList.add(new Shutdown(callback, args));
   }
 
@@ -5402,23 +5513,29 @@ public class Env {
   private void cleanup()
   {
     // cleanup is in reverse order of creation
-    for (int i = _objCleanupList.size() - 1; i >= 0; i--) {
-      ObjectExtValue objCleanup = _objCleanupList.get(i);
-      try {
-	if (objCleanup != null)
-	  objCleanup.cleanup(this);
-      }
-      catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
+
+    if (_objCleanupList != null) {
+      for (int i = _objCleanupList.size() - 1; i >= 0; i--) {
+	ObjectExtValue objCleanup = _objCleanupList.get(i);
+	try {
+	  if (objCleanup != null)
+	    objCleanup.cleanup(this);
+	}
+	catch (Throwable e) {
+	  log.log(Level.FINER, e.toString(), e);
+	}
       }
     }
       
-    try {
-      for (int i = 0; i < _shutdownList.size(); i++)
-	_shutdownList.get(i).call(this);
-    }
-    catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
+    if (_shutdownList != null) {
+      for (int i = 0; i < _shutdownList.size(); i++) {
+	try {
+	  _shutdownList.get(i).call(this);
+	}
+	catch (Throwable e) {
+	  log.log(Level.FINE, e.toString(), e);
+	}
+      }
     }
 
     try {
@@ -5427,18 +5544,20 @@ public class Env {
       log.log(Level.FINE, e.toString(), e);
     }
 
-    ArrayList<EnvCleanup> cleanupList
-      = new ArrayList<EnvCleanup>(_cleanupList);
+    if (_cleanupList != null) {
+      ArrayList<EnvCleanup> cleanupList
+	= new ArrayList<EnvCleanup>(_cleanupList);
 
-    // cleanup is in reverse order of creation
-    for (int i = cleanupList.size() - 1; i >= 0; i--) {
-      EnvCleanup envCleanup = cleanupList.get(i);
-      try {
-	if (envCleanup != null)
-	  envCleanup.cleanup();
-      }
-      catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
+      // cleanup is in reverse order of creation
+      for (int i = cleanupList.size() - 1; i >= 0; i--) {
+	EnvCleanup envCleanup = cleanupList.get(i);
+	try {
+	  if (envCleanup != null)
+	    envCleanup.cleanup();
+	}
+	catch (Throwable e) {
+	  log.log(Level.FINER, e.toString(), e);
+	}
       }
     }
 

@@ -121,8 +121,11 @@ public class GlobalScope extends Scope {
                                        name, parentName, ifaceArray,
                                        index);
 
-      if (isTop)
+      if (isTop) {
+	cl.setTopScope(true);
+	
 	_classMap.put(name, cl);
+      }
     }
     else {
       // class statically redeclared

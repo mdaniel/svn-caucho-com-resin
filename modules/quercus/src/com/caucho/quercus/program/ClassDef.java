@@ -107,6 +107,14 @@ abstract public class ClassDef {
     _ifaceList = ifaceList;
   }
 
+  /**
+   * forces a load of any lazy ClassDef
+   */
+  public ClassDef loadClassDef()
+  {
+    return this;
+  }
+
   public void init()
   {
   }

@@ -972,7 +972,10 @@ public class ArrayModule
     ArrayValue slicedArray = new ArrayValueImpl();
 
     ArrayValue.Entry entry = array.getHead();
+    ArrayValue.Entry next = null;
     for (int k = 0; k < endIndex && entry != null; k++) {
+      next = entry.getNext();
+      
       if (startIndex <= k) {
         Value entryKey = entry.getKey();
 
@@ -984,7 +987,7 @@ public class ArrayModule
           slicedArray.put(entryValue);
       }
 
-      entry = entry.getNext();
+      entry = next;
     }
 
     return slicedArray;
@@ -2579,10 +2582,12 @@ case SORT_NUMERIC:
 
       ArrayValue array = (ArrayValue) argValue;
 
+      ArrayValue.Entry next = null;
       for (ArrayValue.Entry ptr = array.getHead();
 	   ptr != null;
-	   ptr = ptr.getNext()) {
+	   ptr = next) {
         Value key = ptr.getKey();
+	next = ptr.getNext();
         
         // php/173z
         Value value = ptr.getRawValue();
