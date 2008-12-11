@@ -607,7 +607,9 @@ public class JavaValue extends ObjectValue
     
     _classDef = _env.getJavaClassDefinition((String) in.readObject());
 
-    setQuercusClass(_env.createQuercusClass(_classDef, null));
+    int id = _env.getQuercus().getClassId(_classDef.getName());
+
+    setQuercusClass(_env.createQuercusClass(id, _classDef, null));
 
     _object = in.readObject();
   }
