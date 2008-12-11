@@ -85,6 +85,21 @@ public class DeployManager
 			      message, version);
   }
 
+  /**
+   * Removes a tag
+   *
+   * @param tag the symbolic tag for the repository
+   * @param user the user adding a tag.
+   * @param message user's message for the commit
+   */
+  public boolean removeTag(String tag,
+			   String user,
+			   String message)
+  {
+    return _repository.removeTag(tag, user, _server.getServerId(),
+				 message);
+  }
+
   //
   // git management
   //

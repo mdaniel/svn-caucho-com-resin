@@ -156,6 +156,14 @@ public class TcpConnection extends Connection
   }
 
   /**
+   * For QA only, set the current request.
+   */
+  public static void qaSetCurrentRequest(ServerRequest request)
+  {
+    _currentRequest.set(request);
+  }
+
+  /**
    * Sets an exception to mark the location of the thread start.
    */
   public void setStartThread()

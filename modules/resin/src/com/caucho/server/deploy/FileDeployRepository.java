@@ -123,6 +123,30 @@ public class FileDeployRepository extends DeployRepository
   }
 
   /**
+   * Adds a tag
+   *
+   * @param tag the symbolic tag for the repository
+   * @param sha1 the root for the tag's content
+   * @param user the user adding a tag.
+   * @param server the server adding a tag.
+   * @param message user's message for the commit
+   * @param version symbolic version name for the commit
+   */
+  public boolean removeTag(String tag,
+			   String user,
+			   String server,
+			   String message)
+  {
+    DeployTagMap tagMap;
+
+    do {
+      tagMap = removeTagData(tag, user, server, message);
+    } while (! setTagMap(tagMap));
+
+    return true;
+  }
+
+  /**
    * Removes a tag
    *
    * @param tag the symbolic tag for the repository

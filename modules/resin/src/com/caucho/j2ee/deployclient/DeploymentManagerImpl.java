@@ -31,6 +31,7 @@ package com.caucho.j2ee.deployclient;
 import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.HostQuery;
 import com.caucho.server.admin.WebAppQuery;
+import com.caucho.server.admin.TagQuery;
 import com.caucho.server.admin.StatusQuery;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
@@ -162,11 +163,11 @@ public class DeploymentManagerImpl implements DeploymentManager {
     for (int i = 0; i < targetList.length; i++) {
       Target target = targetList[i];
 
-      WebAppQuery []webApps = _deployClient.listWebApps(target.getName());
+      TagQuery []tags = _deployClient.listTags(target.getName());
 
-      for (int j = 0; webApps != null && j < webApps.length; j++) {
-	String host = webApps[j].getHost();
-	String tag = webApps[j].getTag();
+      for (int j = 0; tags != null && j < tags.length; j++) {
+	String host = tags[j].getHost();
+	String tag = tags[j].getTag();
 
 	resultList.add(new TargetModuleIDImpl(new TargetImpl(host, null),
 					      tag));
@@ -363,7 +364,6 @@ public class DeploymentManagerImpl implements DeploymentManager {
   public ProgressObject stop(TargetModuleID []moduleIDList)
     throws IllegalStateException
   {
-    System.out.println("STOP:");
     StringBuilder sb = new StringBuilder();
 
     for (int i = 0; i < moduleIDList.length; i++) {
@@ -394,7 +394,6 @@ public class DeploymentManagerImpl implements DeploymentManager {
   {
     StringBuilder sb = new StringBuilder();
 
-    System.out.println("UNDEPLOYA:");
     for (int i = 0; i < moduleIDList.length; i++) {
       TargetModuleID targetModuleID = moduleIDList[i];
 
@@ -402,6 +401,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
       String tag = targetModuleID.getModuleID();
 
       System.out.println("UNDEPLOY: " + tag);
+
       _deployClient.undeploy(tag);
       
       sb.append(tag).append(' ');

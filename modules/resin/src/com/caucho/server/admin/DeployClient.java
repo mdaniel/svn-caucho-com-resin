@@ -346,6 +346,11 @@ public class DeployClient
     return (WebAppQuery []) queryGet(new ListWebAppsQuery(host));
   }
 
+  public TagQuery []listTags(String host)
+  {
+    return (TagQuery []) queryGet(new ListTagsQuery(host));
+  }
+
   private Serializable queryGet(Serializable query)
   {
     if (_conn != null)

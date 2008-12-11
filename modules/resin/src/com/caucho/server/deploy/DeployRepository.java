@@ -187,13 +187,11 @@ abstract public class DeployRepository
    * Removes a tag
    *
    * @param tag the symbolic tag for the repository
-   * @param sha1 the root for the tag's content
    * @param user the user adding a tag.
    * @param server the server adding a tag.
    * @param message user's message for the commit
    */
   abstract public boolean removeTag(String tag,
-				    String sha1,
 				    String user,
 				    String server,
 				    String message);
@@ -202,7 +200,6 @@ abstract public class DeployRepository
    * Creates a tag entry
    *
    * @param tag the symbolic tag for the repository
-   * @param sha1 the root for the tag's content
    * @param user the user adding a tag.
    * @param server the server adding a tag.
    * @param message user's message for the commit
@@ -236,6 +233,53 @@ abstract public class DeployRepository
 	= new TreeMap<String,DeployTagEntry>(tagMap);
     
       newTagMap.put(tag, entry);
+
+      DeployTagMap newDeployTagMap = new DeployTagMap(this,
+						      deployTagMap,
+						      newTagMap);
+
+      if (_tagMap == deployTagMap) {
+	return newDeployTagMap;
+      }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new DeployRepositoryException(e);
+    }
+
+    return null;
+  }
+
+  /**
+   * Removes a tag entry
+   *
+   * @param tag the symbolic tag for the repository
+   * @param user the user adding a tag.
+   * @param server the server adding a tag.
+   * @param message user's message for the commit
+   * @param version symbolic version name for the commit
+   */
+  protected DeployTagMap removeTagData(String tag,
+				       String user,
+				       String server,
+				       String message)
+  {
+    try {
+      update();
+	
+      DeployTagMap deployTagMap = _tagMap;
+      
+      Map<String,DeployTagEntry> tagMap = deployTagMap.getTagMap();
+
+      DeployTagEntry oldEntry = tagMap.get(tag);
+
+      if (oldEntry == null)
+	return deployTagMap;
+
+      Map<String,DeployTagEntry> newTagMap
+	= new TreeMap<String,DeployTagEntry>(tagMap);
+    
+      newTagMap.remove(tag);
 
       DeployTagMap newDeployTagMap = new DeployTagMap(this,
 						      deployTagMap,
