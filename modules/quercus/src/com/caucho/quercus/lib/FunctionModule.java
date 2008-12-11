@@ -58,7 +58,7 @@ public class FunctionModule extends AbstractQuercusModule {
    */
   public static Value call_user_func(Env env,
                                      Callback function,
-                                     @Optional Value []args)
+                                     Value []args)
   {
     return function.call(env, args).copyReturn();
   }
@@ -68,7 +68,7 @@ public class FunctionModule extends AbstractQuercusModule {
    */
   public static Value call_user_func_array(Env env,
                                            Callback function,
-                                           @Optional Value arg)
+                                           Value arg)
   {
     ArrayValue argArray;
 

@@ -348,6 +348,9 @@ public class Env {
     _const = _freeConstList.allocate();
     if (_const == null || _const.length != defConst.length)
       _const = new Value[defConst.length];
+    else {
+      // list should have been zeroed on call to free
+    }
     
     System.arraycopy(defConst, 0, _const, 0, defConst.length);
     
@@ -2130,7 +2133,7 @@ public class Env {
 
       case PHP_SELF: {
         var = new Var();
-	envVar = new EnvVarImpl(var);
+        envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
 
@@ -5604,6 +5607,17 @@ public class Env {
       
       _freeClassList.free(qClass);
     }
+    
+    Value []consts = _const;
+    _const = null;
+    if (consts != null) {
+      for (int i = 0; i < consts.length; i++) {
+        consts[i] = null;
+      }
+      
+      _freeConstList.free(consts);
+    }
+    
   }
 
   public void sessionWriteClose()
