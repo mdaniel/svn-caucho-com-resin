@@ -3882,7 +3882,7 @@ public class Env {
           if (javaClassDef != null) {
             QuercusClass cls = createQuercusClass(id, javaClassDef, null);
 
-	    _qClass[id] = cls;
+            _qClass[id] = cls;
             
             cls.init(this);
             
@@ -3903,10 +3903,28 @@ public class Env {
    */
   public QuercusClass getClass(int classId)
   {
+    if (_qClass.length <= classId) {
+      QuercusClass []oldClassList = _qClass;
+
+      _qClass = new QuercusClass[classId + 256];
+      
+      System.arraycopy(oldClassList, 0, _qClass, 0, oldClassList.length);
+    }
+    
     QuercusClass qClass = _qClass[classId];
 
     if (qClass != null)
       return qClass;
+    
+    if (_classDef.length <= classId) {
+      ClassDef []oldClassDefList = _classDef;
+
+      _classDef = new ClassDef[classId + 256];
+      
+      System.arraycopy(oldClassDefList, 0,
+                       _classDef, 0,
+                       oldClassDefList.length);
+    }
 
     ClassDef def = _classDef[classId];
 
@@ -4184,8 +4202,8 @@ public class Env {
     }
     
     if (qClass == null
-	|| qClass.getClassDef() != def
-	|| qClass.getParent() != parent) {
+        || qClass.getClassDef() != def
+        || qClass.getParent() != parent) {
       qClass = new QuercusClass(getModuleContext(), def, parent);
       _qClass[id] = qClass;
       
