@@ -3420,7 +3420,8 @@ public class Env {
 
       EnvVar newEnvVar = _globalMap.get(oldEntry.getKey());
 
-      oldEnvVar.setRef(newEnvVar.getRef());
+      if (newEnvVar != null)
+	oldEnvVar.setRef(newEnvVar.getRef());
     }
   }
 
