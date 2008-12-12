@@ -173,7 +173,7 @@ abstract public class AbstractCache implements Cache
   {
     HashKey hashKey = getHashKey(key);
     
-    return false;
+    return _distributedCacheManager.remove(hashKey);
   }
 
   /**

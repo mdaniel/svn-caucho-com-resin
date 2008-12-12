@@ -63,7 +63,7 @@ public interface ServerRequest {
   public boolean handleRequest() throws IOException;
   
   /**
-   * Resumes processing after a wair.
+   * Resumes processing after a wait.
    */
   public boolean handleResume() throws IOException;
 

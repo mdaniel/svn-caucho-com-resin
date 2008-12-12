@@ -1678,6 +1678,13 @@ public class Port
       }
     }
 
+    Set<TcpConnection> activeSet
+      = new HashSet<TcpConnection>(_activeConnectionSet);
+
+    for (TcpConnection conn : activeSet) {
+      conn.destroy();
+    }
+
     // wake the start thread
     _startThreadSemaphore.release();
 

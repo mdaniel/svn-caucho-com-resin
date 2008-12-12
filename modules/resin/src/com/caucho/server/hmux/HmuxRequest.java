@@ -652,6 +652,11 @@ public class HmuxRequest extends AbstractHttpRequest
     while (true) {
       code = is.read();
 
+      if (_server.isDestroyed()) {
+	log.fine(dbgId() + " request after server close");
+	return false;
+      }
+
       switch (code) {
       case -1:
         if (isLoggable)

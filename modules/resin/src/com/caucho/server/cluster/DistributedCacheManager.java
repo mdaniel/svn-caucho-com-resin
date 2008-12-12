@@ -65,6 +65,11 @@ abstract public class DistributedCacheManager
 			   Object value,
 			   CacheSerializer serializer);
 
+  /**
+   * Removes a cache entry
+   */
+  abstract public boolean remove(HashKey hashKey);
+
   @Override
   public String toString()
   {

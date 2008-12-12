@@ -168,6 +168,47 @@ public class FileCacheManager extends DistributedCacheManager
     }
   }
 
+  /**
+   * Sets a cache entry
+   */
+  public boolean remove(HashKey key)
+  {
+    long timeout = 60000L;
+    
+    CacheMapEntry oldEntry = _entryCache.get(key);
+
+    HashKey oldValueHash = oldEntry != null ? oldEntry.getValueHash() : null;
+
+    long version = oldEntry != null ? oldEntry.getVersion() + 1 : 1;
+
+    CacheMapEntry entry = new CacheMapEntry(null, null, version);
+
+    // the failure cases are not errors because this put() could
+    // be immediately followed by an overwriting put()
+
+    if (! _entryCache.compareAndPut(oldEntry, key, entry)) {
+      log.fine(this + " entry remove failed due to timing conflict"
+	       + " (key=" + key + ")");
+      
+      return oldValueHash != null;
+    }
+
+    if (oldEntry == null) {
+      log.fine(this + " db remove failed due to timing conflict"
+	       + "(key=" + key + ")");
+    }
+    else {
+      if (_cacheMapBacking.updateSave(key, null, timeout, version)) {
+      }
+      else {
+	log.fine(this + " db remove failed due to timing conflict"
+		 + "(key=" + key + ")");
+      }
+    }
+
+    return oldValueHash != null;
+  }
+
   protected HashKey writeData(HashKey oldValueHash,
 			      Object value,
 			      CacheSerializer serializer)

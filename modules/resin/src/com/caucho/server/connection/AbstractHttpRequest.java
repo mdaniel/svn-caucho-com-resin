@@ -2752,6 +2752,13 @@ public abstract class AbstractHttpRequest
     }
   }
 
+  /**
+   * Called by server shutdown to kill any active threads
+   */
+  public void shutdown()
+  {
+  }
+
   protected String dbgId()
   {
     return "Tcp[" + _conn.getId() + "] ";
