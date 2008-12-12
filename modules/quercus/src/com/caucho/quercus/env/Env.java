@@ -4175,7 +4175,7 @@ public class Env {
     QuercusClass qClass = _quercus.getCachedClass(id);
 
     // php/0ac0
-    if (_qClass.length < id) {
+    if (_qClass.length <= id) {
       QuercusClass []oldClassList = _qClass;
       
       _qClass = new QuercusClass[id + 256];
