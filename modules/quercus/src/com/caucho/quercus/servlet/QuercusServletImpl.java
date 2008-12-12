@@ -148,9 +148,9 @@ public class QuercusServletImpl
       try {
         env.start();
         
-        env.setGlobalValue("request", env.wrapJava(request));
-        env.setGlobalValue("response", env.wrapJava(response));
-        env.setGlobalValue("servletContext", env.wrapJava(_servletContext));
+        env.setScriptGlobal("request", request);
+        env.setScriptGlobal("response", response);
+        env.setScriptGlobal("servletContext", _servletContext);
 
         String prepend = env.getIniString("auto_prepend_file");
         if (prepend != null) {

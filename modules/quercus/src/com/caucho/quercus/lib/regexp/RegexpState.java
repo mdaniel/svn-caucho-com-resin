@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.regexp;
 import java.util.*;
 import java.util.logging.*;
 
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.util.*;
@@ -95,110 +96,142 @@ public class RegexpState {
 
   public boolean find()
   {
-    if (log.isLoggable(Level.FINEST))
-      log.finest(this + " find()");
+    try {
+      if (log.isLoggable(Level.FINEST))
+	log.finest(this + " find()");
     
-    int minLength = _regexp._minLength;
-    boolean []firstSet = _regexp._firstSet;
+      int minLength = _regexp._minLength;
+      boolean []firstSet = _regexp._firstSet;
 
-    int length = _subject.length();
+      int length = _subject.length();
 
-    for (; _first + minLength <= length; _first++) {
-      if (firstSet != null && _first < length) {
-        char firstChar = _subject.charAt(_first);
+      for (; _first + minLength <= length; _first++) {
+	if (firstSet != null && _first < length) {
+	  char firstChar = _subject.charAt(_first);
 	
-        if (firstChar < 256 && ! firstSet[firstChar])
-          continue;
-      }
+	  if (firstChar < 256 && ! firstSet[firstChar])
+	    continue;
+	}
 
-      clearGroup();
-      int offset = _regexp._prog.match(_subject, length, _first, this);
+	clearGroup();
+	int offset = _regexp._prog.match(_subject, length, _first, this);
 
-      if (offset >= 0) {
-        _groupBegin[0] = _first;
-        _groupEnd[0] = offset;
+	if (offset >= 0) {
+	  _groupBegin[0] = _first;
+	  _groupEnd[0] = offset;
 
-        if (_first < offset)
-          _first = offset;
-        else
-          _first += 1;
+	  if (_first < offset)
+	    _first = offset;
+	  else
+	    _first += 1;
           
-        return true;
+	  return true;
+	}
       }
-    }
 
-    _first = length + 1;
+      _first = length + 1;
     
-    return false;
+      return false;
+    } catch (StackOverflowError e) {
+      log.warning(L.l("regexp '{0}' produces a StackOverflowError for\n{1}",
+		      _regexp, _subject));
+      
+      throw new QuercusRuntimeException(L.l("regexp '{0}' produces a StackOverflowError",
+				     _regexp), e);
+    }
   }
 
   public boolean find(Env env, StringValue subject)
   {
-    subject = _regexp.convertSubject(env, subject);
+    try {
+      subject = _regexp.convertSubject(env, subject);
     
-    _subject = subject;
-    _first = 0;
+      _subject = subject;
+      _first = 0;
 
-    return find();
+      return find();
+    } catch (StackOverflowError e) {
+      log.warning(L.l("regexp '{0}' produces a StackOverflowError for\n{1}",
+		      _regexp, subject));
+      
+      throw new QuercusRuntimeException(L.l("regexp '{0}' produces a StackOverflowError",
+				     _regexp), e);
+    }
   }
 
   public int find(Env env, StringValue subject, int first)
   {
-    if (log.isLoggable(Level.FINEST))
-      log.finest(this + " find(" + subject + ")");
+    try {
+      if (log.isLoggable(Level.FINEST))
+	log.finest(this + " find(" + subject + ")");
     
-    subject = _regexp.convertSubject(env, subject);
+      subject = _regexp.convertSubject(env, subject);
     
-    _subject = subject;
+      _subject = subject;
 
-    _first = first;
-    clearGroup();
+      _first = first;
+      clearGroup();
 
-    return _regexp._prog.match(_subject, subject.length(), first, this);
+      return _regexp._prog.match(_subject, subject.length(), first, this);
+    } catch (StackOverflowError e) {
+      log.warning(L.l("regexp '{0}' produces a StackOverflowError for\n{1}",
+		      _regexp, subject));
+      
+      throw new QuercusRuntimeException(L.l("regexp '{0}' produces a StackOverflowError",
+					    _regexp), e);
+    }
   }
   
   /**
    * XXX: not proper behaviour with /g
    */
   public int exec(Env env, StringValue subject, int start)
-  { 
-    if (log.isLoggable(Level.FINEST))
-      log.finest(this + " exec(" + subject + ")");
+  {
+    try {
+      if (log.isLoggable(Level.FINEST))
+	log.finest(this + " exec(" + subject + ")");
     
-    subject = _regexp.convertSubject(env, subject);
+      subject = _regexp.convertSubject(env, subject);
 
-    clearGroup();
+      clearGroup();
     
-    _start = start;
-    _first = start;
+      _start = start;
+      _first = start;
 
-    _subject = subject;
-    int subjectLength = subject.length();
+      _subject = subject;
+      int subjectLength = subject.length();
 
-    int minLength = _regexp._minLength;
-    boolean []firstSet = _regexp._firstSet;
-    int end = subject.length() - minLength;
-    RegexpNode prog = _regexp._prog;
+      int minLength = _regexp._minLength;
+      boolean []firstSet = _regexp._firstSet;
+      int end = subject.length() - minLength;
+      RegexpNode prog = _regexp._prog;
 
-    for (; start <= end; start++) {
-      if (firstSet != null && (start < end || minLength > 0)) {
-	char firstChar = subject.charAt(start);
+      for (; start <= end; start++) {
+	if (firstSet != null && (start < end || minLength > 0)) {
+	  char firstChar = subject.charAt(start);
 	
-	if (firstChar < 256 && ! firstSet[firstChar])
-	  continue;
-      }
+	  if (firstChar < 256 && ! firstSet[firstChar])
+	    continue;
+	}
       
-      int value = prog.match(subject, subjectLength, start, this);
+	int value = prog.match(subject, subjectLength, start, this);
 
-      if (value >= 0) {
-	_groupBegin[0] = start;
-	_groupEnd[0] = value;
+	if (value >= 0) {
+	  _groupBegin[0] = start;
+	  _groupEnd[0] = value;
 	
-	return start;
+	  return start;
+	}
       }
-    }
 
-    return -1;
+      return -1;
+    } catch (StackOverflowError e) {
+      log.warning(L.l("regexp '{0}' produces a StackOverflowError for\n{1}",
+		      _regexp, subject));
+      
+      throw new QuercusRuntimeException(L.l("regexp '{0}' produces a StackOverflowError",
+				     _regexp), e);
+    }
   }
 
   private void clearGroup()

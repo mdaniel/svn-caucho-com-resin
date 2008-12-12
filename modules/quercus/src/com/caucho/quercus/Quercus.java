@@ -112,7 +112,7 @@ public class Quercus
 
   private final IniDefinitions _iniDefinitions = new IniDefinitions();
   
-  private IdentityHashMap<String, Value> _iniMap;
+  private HashMap<String, Value> _iniMap;
 
   private HashMap<Value, Value> _serverEnvMap
     = new HashMap<Value, Value>();
@@ -786,10 +786,10 @@ public class Quercus
   /**
    * Returns a map of the ini values that have been explicitly set.
    */
-  public IdentityHashMap<String, Value> getIniMap(boolean create)
+  public HashMap<String, Value> getIniMap(boolean create)
   {
     if (_iniMap == null && create)
-      _iniMap = new IdentityHashMap<String, Value>();
+      _iniMap = new HashMap<String, Value>();
 
     return _iniMap;
   }

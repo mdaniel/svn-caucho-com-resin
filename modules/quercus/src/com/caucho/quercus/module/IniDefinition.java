@@ -33,7 +33,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.Quercus;
 import com.caucho.util.L10N;
 
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 
 public class IniDefinition {
   private L10N L = new L10N(IniDefinition.class);
@@ -186,7 +186,7 @@ public class IniDefinition {
   /**
    * Set the ini value for the given scope.
    */
-  protected void set(IdentityHashMap<String, Value> map,
+  protected void set(HashMap<String, Value> map,
                      int scope,
                      Value value)
   {
@@ -207,8 +207,8 @@ public class IniDefinition {
       map.put(_name, value);
   }
 
-  private Value get(IdentityHashMap<String, Value> envMap,
-                    IdentityHashMap<String, Value> quercusMap)
+  private Value get(HashMap<String, Value> envMap,
+                    HashMap<String, Value> quercusMap)
   {
     Value value =  null;
 
@@ -288,8 +288,8 @@ public class IniDefinition {
     return getAsBooleanValue(env.getIniMap(false), env.getQuercus().getIniMap(false));
   }
 
-  private BooleanValue getAsBooleanValue(IdentityHashMap<String, Value> overrideMap,
-                                         IdentityHashMap<String, Value> iniMap)
+  private BooleanValue getAsBooleanValue(HashMap<String, Value> overrideMap,
+                                         HashMap<String, Value> iniMap)
   {
     Value value = get(overrideMap, iniMap);
 
@@ -306,8 +306,8 @@ public class IniDefinition {
     return getAsLongValue(env.getIniMap(false), env.getQuercus().getIniMap(false));
   }
 
-  private LongValue getAsLongValue(IdentityHashMap<String, Value> overrideMap,
-                                         IdentityHashMap<String, Value> iniMap)
+  private LongValue getAsLongValue(HashMap<String, Value> overrideMap,
+                                         HashMap<String, Value> iniMap)
   {
     Value value = get(overrideMap, iniMap);
 
@@ -387,7 +387,7 @@ public class IniDefinition {
     }
 
     @Override
-    public void set(IdentityHashMap<String, Value> map,
+    public void set(HashMap<String, Value> map,
                     int scope,
                     Value value)
     {
@@ -421,7 +421,7 @@ public class IniDefinition {
     }
 
     @Override
-    public void set(IdentityHashMap<String, Value> map,
+    public void set(HashMap<String, Value> map,
                     int scope,
                     Value value)
     {

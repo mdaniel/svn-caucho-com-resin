@@ -13,6 +13,8 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>server: 304 was not properly ignoring content (#3089, rep by Andrew Phillips)</li>
+<li>quercus: catch regexp stack overflow and log (rep by koreth)</li>
 <li>quercus: array_shift regression (#3150, rep by koreth)</li>
 <li>quercus: array($x = 3) compilation issue (#3139, rep by koreth)</li>
 <li>quercus: experimental lazy function classloading (rep by koreth)</li>

@@ -36,8 +36,10 @@ import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReadOnly;
+import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
@@ -76,6 +78,8 @@ public class ResinModule
   public final static int XA_STATUS_PREPARING = 7;
   public final static int XA_STATUS_COMMITTING = 8;
   public final static int XA_STATUS_ROLLING_BACK = 9;
+
+  private LruCache<String,SaveState> _saveState;
 
   /**
    * Converts a string into its binary representation, according to the
@@ -348,5 +352,43 @@ public class ResinModule
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
+  }
+
+  /**
+   * Restore the current state
+   */
+  public boolean resin_restore_state(Env env)
+  {
+    if (_saveState == null)
+      return false;
+
+    SaveState saveState = _saveState.get(env.getSelfPath().getURL());
+
+    if (saveState != null && ! saveState.isModified()) {
+      env.restoreState(saveState);
+      
+      return true;
+    }
+    else
+      return false;
+  }
+
+  /**
+   * Save the current state
+   */
+  public boolean resin_save_state(Env env)
+  {
+    if (_saveState == null)
+      _saveState = new LruCache<String,SaveState>(256);
+
+    SaveState saveState = env.saveState();
+
+    if (saveState != null) {
+      _saveState.put(env.getSelfPath().getURL(), saveState);
+    
+      return true;
+    }
+    else
+      return false;
   }
 }

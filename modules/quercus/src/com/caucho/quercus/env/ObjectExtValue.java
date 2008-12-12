@@ -106,6 +106,40 @@ public class ObjectExtValue extends ObjectValue
     _incompleteObjectName = copy._incompleteObjectName;
   }
 
+  public ObjectExtValue(Env env,
+			IdentityHashMap<Value,Value> copyMap,
+			ObjectExtValue copy)
+  {
+    super(copy.getQuercusClass());
+
+    _methodMap = copy._methodMap;
+
+    _size = copy._size;
+    _isFieldInit = copy._isFieldInit;
+    
+    Entry []copyEntries = copy._entries;
+    
+    _entries = new Entry[copyEntries.length];
+    _hashMask = copy._hashMask;
+
+    int len = copyEntries.length;
+    for (int i = 0; i < len; i++) {
+      Entry entry = copyEntries[i];
+
+      for (; entry != null; entry = entry._next) {
+	Entry entryCopy = new Entry(env, copyMap, entry);
+
+	entryCopy._next = _entries[i];
+	if (_entries[i] != null)
+	  _entries[i]._prev = entryCopy;
+
+	_entries[i] = entryCopy;
+      }
+    }
+    
+    _incompleteObjectName = copy._incompleteObjectName;
+  }
+
   private void init()
   {
     _entries = new Entry[DEFAULT_SIZE];
@@ -1176,10 +1210,9 @@ public class ObjectExtValue extends ObjectValue
     if (oldValue != null)
       return oldValue;
 
-    // XXX:
-    // return new ObjectExtValue(env, map, _cl, getArray());
-
-    return this;
+    // php/4048 - needs to be deep copy
+    
+    return new ObjectExtValue(env, map, this);
   }
 
   /**
@@ -1766,6 +1799,13 @@ public class ObjectExtValue extends ObjectValue
       _key = key;
       _visibility = visibility;
       _value = value;
+    }
+
+    public Entry(Env env, IdentityHashMap<Value,Value> map, Entry entry)
+    {
+      _key = entry._key;
+      _visibility = entry._visibility;
+      _value = entry._value.copy(env, map);
     }
 
     public Value getValue()

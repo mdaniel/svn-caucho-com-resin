@@ -165,25 +165,10 @@ public class Env {
     = new FreeList<Value[]>(256);
 
   protected final Quercus _quercus;
-  private final boolean _isUnicodeSemantics; 
   private QuercusPage _page;
 
-  private Value _this = NullThisValue.NULL;
-
-  private ArrayList<EnvCleanup> _cleanupList;
-  private ArrayList<ObjectExtValue> _objCleanupList;
-  private ArrayList<Shutdown> _shutdownList;
-
-  private final HashMap<String, EnvVar> _globalMap
-    = new HashMap<String, EnvVar>(1024);
-  
-  private HashMap<String, Var> _staticMap
-    = new HashMap<String, Var>();
-  
-  private Map<String, EnvVar> _map = _globalMap;
-
-  private HashSet<String> _initializedClassSet
-    = new HashSet<String>();
+  private HashMap<String,Value> _scriptGlobalMap
+    = new HashMap<String,Value>(16);
 
   // Function map
   public AbstractFunction []_fun;
@@ -198,14 +183,33 @@ public class Env {
   // Constant map
   public Value []_const;
 
-  private IdentityHashMap<String, Value> _iniMap;
+  // Globals
+  private Map<String, EnvVar> _globalMap
+    = new HashMap<String, EnvVar>();
+
+  private EnvVar []_globalList;
+  
+  private HashMap<String, Var> _staticMap
+    = new HashMap<String, Var>();
+  
+  // Current env
+  private Map<String, EnvVar> _map = _globalMap;
+
+  private HashMap<String, Value> _iniMap;
 
   // specialMap is used for implicit resources like the mysql link
   private HashMap<String, Object> _specialMap
     = new HashMap<String, Object>();
 
+  private HashSet<String> _initializedClassSet
+    = new HashSet<String>();
+
   // include_path ini
   private int _iniCount = 1;
+
+  private ArrayList<EnvCleanup> _cleanupList;
+  private ArrayList<ObjectExtValue> _objCleanupList;
+  private ArrayList<Shutdown> _shutdownList;
 
   private String _defaultIncludePath;
   private String _includePath;
@@ -213,11 +217,13 @@ public class Env {
   private ArrayList<String> _includePathList;
   private HashMap<Path,ArrayList<Path>> _includePathMap;
 
-  // php/
   // XXX: may require a LinkedHashMap for ordering?
   private HashMap<Path,QuercusPage> _includeMap
     = new HashMap<Path,QuercusPage>();
   
+  private Value _this = NullThisValue.NULL;
+
+  private final boolean _isUnicodeSemantics; 
   private boolean _isAllowUrlInclude;
   private boolean _isAllowUrlFopen;
   
@@ -416,9 +422,37 @@ public class Env {
     this(quercus, null, null, null, null);
   }
 
+  public static Env getCurrent()
+  {
+    return  _threadEnv.get();
+  }
+
   public static Env getInstance()
   {
-    return _threadEnv.get();
+    return getCurrent();
+  }
+
+  //
+  // script accessible methods
+  //
+
+  /**
+   * External calls to set a global value.
+   */
+  public Value setScriptGlobal(String name, Object object)
+  {
+    Value value;
+
+    if (object instanceof Value)
+      value = (Value) object;
+    else if (object == null)
+      value = NullValue.NULL;
+    else
+      value = wrapJava(object);
+    
+    _scriptGlobalMap.put(name, value);
+
+    return value;
   }
 
   //
@@ -1410,10 +1444,10 @@ public class Env {
   /**
    * Returns a map of the ini values that have been explicitly set.
    */
-  public IdentityHashMap<String, Value> getIniMap(boolean create)
+  public HashMap<String, Value> getIniMap(boolean create)
   {
     if (_iniMap == null && create)
-      _iniMap = new IdentityHashMap<String,Value>();
+      _iniMap = new HashMap<String,Value>();
 
     return _iniMap;
   }
@@ -1680,6 +1714,17 @@ public class Env {
       
     envVar = getSuperGlobalRef(name);
 
+    if (envVar == null) {
+      // variables set by the caller, e.g. the servlet
+      
+      Value value = _scriptGlobalMap.get(name);
+
+      if (value != null) {
+	envVar = new EnvVarImpl(new Var());
+	envVar.setRef(value);
+      }
+    }
+
     if (envVar == null)
       envVar = getGlobalScriptContextRef(name);
 
@@ -1726,7 +1771,7 @@ public class Env {
   /**
    * Returns the current environment.
    */
-  public HashMap<String,EnvVar> getGlobalEnv()
+  public Map<String,EnvVar> getGlobalEnv()
   {
     return _globalMap;
   }
@@ -2320,16 +2365,13 @@ public class Env {
   }
 
   /**
-   * Sets a value.
+   * External calls to set a global value.
    */
   public Value setGlobalValue(String name, Value value)
   {
     EnvVar envVar = getGlobalEnvVar(name);
 
-    if (value instanceof Var)
-      envVar.setRef((Var) value);
-    else
-      envVar.set(value);
+    envVar.setRef(value);
 
     return value;
   }
@@ -3310,6 +3352,85 @@ public class Env {
       return _classDef[id];
     else
       return null;
+  }
+
+  /**
+   * Saves the current state
+   */
+  public SaveState saveState()
+  {
+    if (_globalMap != _map)
+      throw new QuercusException(L.l("Env.saveState() only allowed at top level"));
+    
+    return new SaveState(this,
+			 _fun,
+			 _classDef,
+			 _qClass,
+			 _const,
+			 _globalMap);
+  }
+
+  EnvVar []getGlobalList()
+  {
+    return _globalList;
+  }
+
+  /**
+   * Returns true for any special variables, i.e. which should not be
+   * saved
+   */
+  boolean isSpecialVar(String name)
+  {
+    if (_quercus.isSuperGlobal(name))
+      return true;
+    else if (_scriptGlobalMap.get(name) != null)
+      return true;
+
+    return false;
+  }
+
+  /**
+   * Restores to a given state
+   */
+  public void restoreState(SaveState saveState)
+  {
+    AbstractFunction []fun = saveState.getFunctionList();
+    System.arraycopy(fun, 0, _fun, 0, fun.length);
+    
+    ClassDef []classDef = saveState.getClassDefList();
+    if (_classDef.length < classDef.length)
+      _classDef = new ClassDef[classDef.length];
+      
+    System.arraycopy(classDef, 0, _classDef, 0, classDef.length);
+    
+    QuercusClass []qClass = saveState.getQuercusClassList();
+    if (_qClass.length < qClass.length)
+      _qClass = new QuercusClass[qClass.length];
+    
+    System.arraycopy(qClass, 0, _qClass, 0, qClass.length);
+    
+    Value []constList = saveState.getConstantList();
+    if (_const.length < constList.length)
+      _const = new Value[constList.length];
+    
+    System.arraycopy(constList, 0, _const, 0, constList.length);
+
+    IntMap globalNameMap = saveState.getGlobalNameMap();
+    Value []globalList = saveState.getGlobalList();
+
+    Map<String,EnvVar> oldGlobal = _globalMap;
+
+    _globalMap = new LazySymbolMap(globalNameMap, globalList);
+    _map = _globalMap;
+
+    // php/4045 - set the vars for any active EnvVar entries
+    for (Map.Entry<String,EnvVar> oldEntry : oldGlobal.entrySet()) {
+      EnvVar oldEnvVar = oldEntry.getValue();
+
+      EnvVar newEnvVar = _globalMap.get(oldEntry.getKey());
+
+      oldEnvVar.setRef(newEnvVar.getRef());
+    }
   }
 
   /**
