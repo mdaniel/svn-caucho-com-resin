@@ -3968,6 +3968,7 @@ public class Env {
     QuercusClass qClass = _quercus.getCachedClass(classId);
 
     if (qClass == null
+	|| qClass.isModified()
 	|| qClass.getClassDef() != def
 	|| qClass.getParent() != parentClass) {
       qClass = createQuercusClass(classId, def, parentClass);
@@ -4208,8 +4209,9 @@ public class Env {
     }
     
     if (qClass == null
-        || qClass.getClassDef() != def
-        || qClass.getParent() != parent) {
+	|| qClass.isModified()
+	|| qClass.getClassDef() != def
+	|| qClass.getParent() != parent) {
       qClass = new QuercusClass(getModuleContext(), def, parent);
       _qClass[id] = qClass;
       

@@ -143,12 +143,18 @@ if ($profile) {
 
     echo "</th></tr>\n";
 
+    $total_percent = 0;
     for ($i = 0; $i < sizeof($entries); $i++) {
       $entry = $entries[$i];
 
+      $percent = 100 * $entry->getCount() / $totalTicks;
+      $total_percent += $percent;
+
       echo "<tr>";
       echo "<td align='right'>";
-      printf("%9.3f%%", 100 * $entry->getCount() / $totalTicks);
+      printf("%9.3f%%", $percent);
+      echo "</td><td align='right'>";
+      printf("%9.3f%%", $total_percent);
       echo "</td><td align='right'>";
       printf("%.3fs", $entry->getCount() * $profile->period * 0.001);
       echo "</td>";
@@ -172,9 +178,9 @@ if ($profile) {
       echo "</tr>\n";
 
       echo "<tr id='t_{$name}_{$i}' style='display:none'>";
-      echo "<td colspan='2'>";
+      echo "<td colspan='3'>";
       echo "</td>";
-      echo "<td colspan='2'>";
+      echo "<td colspan='3'>";
 
       if ($profileQuercus)
         echo "<div class='quercus-stack-trace'>";
