@@ -3956,17 +3956,15 @@ public class Env {
 
       _quercus.setCachedClass(classId, qClass);
     }
-
-    /*
-    if (_qClass.length < classId) {
+    
+    if (_qClass.length <= classId) {
       QuercusClass []oldClassList = _qClass;
-      
+
       _qClass = new QuercusClass[classId + 256];
       
       System.arraycopy(oldClassList, 0, _qClass, 0, oldClassList.length);
     }
-    */
-    
+
     _qClass[classId] = qClass;
     qClass.init(this);
   }
