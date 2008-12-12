@@ -13,6 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>quercus: resin_save_state()/resin_restore_state() (rep by koreth)</li>
 <li>server: 304 was not properly ignoring content (#3089, rep by Andrew Phillips)</li>
 <li>quercus: catch regexp stack overflow and log (rep by koreth)</li>
 <li>quercus: array_shift regression (#3150, rep by koreth)</li>

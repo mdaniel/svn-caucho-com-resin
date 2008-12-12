@@ -189,9 +189,6 @@ public class Env {
 
   private EnvVar []_globalList;
   
-  private HashMap<String, Var> _staticMap
-    = new HashMap<String, Var>();
-  
   // Current env
   private Map<String, EnvVar> _map = _globalMap;
 
@@ -1796,15 +1793,9 @@ public class Env {
    */
   public final Var getStaticVar(String name)
   {
-    Var var = _staticMap.get(name);
+    String staticName = "\0resin:static:" + name;
 
-    if (var == null) {
-      var = new Var();
-      var.setGlobal();
-      _staticMap.put(name, var);
-    }
-
-    return var;
+    return getGlobalVar(name);
   }
 
   /**
