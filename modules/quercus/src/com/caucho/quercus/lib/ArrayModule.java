@@ -1360,7 +1360,7 @@ public class ArrayModule
     case SORT_STRING:
       array.sort(CS_VALUE_NORMAL, NO_KEY_RESET, NOT_STRICT);
       break;
-case SORT_NUMERIC:
+    case SORT_NUMERIC:
       array.sort(CN_VALUE_NORMAL, NO_KEY_RESET, NOT_STRICT);
       break;
     case SORT_LOCALE_STRING:

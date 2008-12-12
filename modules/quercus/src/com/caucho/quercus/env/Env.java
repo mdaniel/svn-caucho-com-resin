@@ -3955,7 +3955,17 @@ public class Env {
 
       _quercus.setCachedClass(classId, qClass);
     }
+
+    /*
+    if (_qClass.length < classId) {
+      QuercusClass []oldClassList = _qClass;
       
+      _qClass = new QuercusClass[classId + 256];
+      
+      System.arraycopy(oldClassList, 0, _qClass, 0, oldClassList.length);
+    }
+    */
+    
     _qClass[classId] = qClass;
     qClass.init(this);
   }
@@ -4093,10 +4103,17 @@ public class Env {
   {
     ArrayList<String> list = new ArrayList<String>();
 
-    for (Map.Entry<String, ClassDef> entry : _quercus.getClassMap().entrySet()) {
-      list.add(entry.getKey());
+    for (int i = 0; i < _classDef.length; i++) {
+      if (_classDef[i] != null)
+        list.add(_classDef[i].getName());
     }
     
+    HashMap<String, ClassDef> classMap = getModuleContext().getClassMap();
+    
+    for (Map.Entry<String, ClassDef> entry : classMap.entrySet()) {
+      list.add(entry.getKey());
+    }
+
     Collections.sort(list);
     
     ArrayValue array = new ArrayValueImpl();
@@ -4153,11 +4170,20 @@ public class Env {
   }
 
   QuercusClass createQuercusClass(int id,
-				  ClassDef def,
-				  QuercusClass parent)
+                                  ClassDef def,
+                                  QuercusClass parent)
   {
     QuercusClass qClass = _quercus.getCachedClass(id);
 
+    // php/0ac0
+    if (_qClass.length < id) {
+      QuercusClass []oldClassList = _qClass;
+      
+      _qClass = new QuercusClass[id + 256];
+      
+      System.arraycopy(oldClassList, 0, _qClass, 0, oldClassList.length);
+    }
+    
     if (qClass == null
 	|| qClass.getClassDef() != def
 	|| qClass.getParent() != parent) {
@@ -4167,7 +4193,7 @@ public class Env {
       qClass.validate(this);
       _quercus.setCachedClass(id, qClass);
     }
-    
+
     _qClass[id] = qClass;
 
     return qClass;
