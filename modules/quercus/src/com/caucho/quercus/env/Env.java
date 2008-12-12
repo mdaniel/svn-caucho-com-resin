@@ -4012,6 +4012,12 @@ public class Env {
 					    boolean useAutoload,
 					    boolean useImport)
   {
+    if (_classDef.length <= id) {
+      ClassDef []def = new ClassDef[id + 256];
+      System.arraycopy(_classDef, 0, def, 0, _classDef.length);
+      _classDef = def;
+    }
+    
     ClassDef classDef = _classDef[id];
 
     if (classDef != null) {
