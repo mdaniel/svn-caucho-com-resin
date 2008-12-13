@@ -39,19 +39,19 @@ import java.io.OutputStream;
 import java.util.Map;
 
 /**
- * Public API for the deployment
+ * Public API for the repository
  */
-public class DeployManager
+public class RepositoryManager
 {
   private Server _server;
   private DeployRepository _repository;
 
-  public DeployManager()
+  public RepositoryManager()
   {
     this(Server.getCurrent());
   }
 
-  public DeployManager(Server server)
+  protected RepositoryManager(Server server)
   {
     _server = server;
     
@@ -65,6 +65,10 @@ public class DeployManager
   {
     return _repository.getTagMap();
   }
+
+  //
+  // tag management
+  //
 
   /**
    * Adds a tag

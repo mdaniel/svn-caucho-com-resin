@@ -41,14 +41,14 @@ import java.util.Map;
 /**
  * Public API for the deployment
  */
-public class LocalDeployManager
+public class LocalRepositoryManager
 {
-  private static final L10N L = new L10N(LocalDeployManager.class);
+  private static final L10N L = new L10N(LocalRepositoryManager.class);
   
   private Server _server;
   private DeployRepository _repository;
 
-  public LocalDeployManager()
+  public LocalRepositoryManager()
   {
     _server = Server.getCurrent();
 

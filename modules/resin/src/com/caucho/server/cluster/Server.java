@@ -71,7 +71,7 @@ import com.caucho.server.port.AbstractSelectManager;
 import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolDispatchServer;
 import com.caucho.server.repository.DeployRepository;
-import com.caucho.server.repository.FileDeployRepository;
+import com.caucho.server.repository.FileRepository;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.server.webapp.ErrorPage;
@@ -126,7 +126,7 @@ public class Server extends ProtocolDispatchServer
 
   private GitRepository _git;
   private DeployRepository _deployRepository;
-  private FileDeployRepository _localDeployRepository;
+  private FileRepository _localDeployRepository;
 
   private DistributedCacheManager _distributedCacheManager;
 
@@ -355,11 +355,11 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the local deployment repository
    */
-  public FileDeployRepository getLocalDeployRepository()
+  public FileRepository getLocalDeployRepository()
   {
     synchronized (this) {
       if (_localDeployRepository == null)
-	_localDeployRepository = new FileDeployRepository(this);
+	_localDeployRepository = new FileRepository(this);
     }
 
     return _localDeployRepository;

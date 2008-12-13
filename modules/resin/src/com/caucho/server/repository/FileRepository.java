@@ -62,12 +62,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.management.ObjectName;
 
-public class FileDeployRepository extends DeployRepository
+public class FileRepository extends DeployRepository
 {
   private static final Logger log
-    = Logger.getLogger(FileDeployRepository.class.getName());
+    = Logger.getLogger(FileRepository.class.getName());
 
-  private static final L10N L = new L10N(FileDeployRepository.class);
+  private static final L10N L = new L10N(FileRepository.class);
 
   private GitRepository _git;
   
@@ -75,7 +75,7 @@ public class FileDeployRepository extends DeployRepository
   
   private DeployTagMap _tagMap;
 
-  public FileDeployRepository(Server server)
+  public FileRepository(Server server)
   {
     super(server);
     
