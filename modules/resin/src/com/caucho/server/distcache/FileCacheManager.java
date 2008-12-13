@@ -35,6 +35,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.server.cache.TempFileManager;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.resin.Resin;
+import com.caucho.util.Alarm;
 import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -138,7 +139,10 @@ public class FileCacheManager extends DistributedCacheManager
 
     long version = oldEntry != null ? oldEntry.getVersion() + 1 : 1;
 
-    CacheMapEntry entry = new CacheMapEntry(valueHash, value, version);
+    long expireTime = Alarm.getExactTime() + 100L;
+
+    CacheMapEntry entry = new CacheMapEntry(valueHash, value, version,
+					    expireTime, true);
 
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
@@ -180,8 +184,10 @@ public class FileCacheManager extends DistributedCacheManager
     HashKey oldValueHash = oldEntry != null ? oldEntry.getValueHash() : null;
 
     long version = oldEntry != null ? oldEntry.getVersion() + 1 : 1;
-
-    CacheMapEntry entry = new CacheMapEntry(null, null, version);
+    
+    long expireTime = Alarm.getCurrentTime() + 100L;
+    CacheMapEntry entry = new CacheMapEntry(null, null, version,
+					    expireTime, true);
 
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
