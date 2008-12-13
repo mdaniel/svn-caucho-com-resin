@@ -70,7 +70,7 @@ import com.caucho.server.log.AccessLog;
 import com.caucho.server.port.AbstractSelectManager;
 import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolDispatchServer;
-import com.caucho.server.repository.DeployRepository;
+import com.caucho.server.repository.Repository;
 import com.caucho.server.repository.FileRepository;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
@@ -125,8 +125,8 @@ public class Server extends ProtocolDispatchServer
   private HempBroker _broker;
 
   private GitRepository _git;
-  private DeployRepository _deployRepository;
-  private FileRepository _localDeployRepository;
+  private Repository _repository;
+  private FileRepository _localRepository;
 
   private DistributedCacheManager _distributedCacheManager;
 
@@ -340,37 +340,37 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the deployment repository
    */
-  public DeployRepository getDeployRepository()
+  public Repository getRepository()
   {
     synchronized (this) {
-      if (_deployRepository == null)
-	_deployRepository = createDeployRepository();
+      if (_repository == null)
+	_repository = createRepository();
     }
 
-    _deployRepository.init();
+    _repository.init();
 
-    return _deployRepository;
+    return _repository;
   }
 
   /**
-   * Returns the local deployment repository
+   * Returns the local repository
    */
-  public FileRepository getLocalDeployRepository()
+  public FileRepository getLocalRepository()
   {
     synchronized (this) {
-      if (_localDeployRepository == null)
-	_localDeployRepository = new FileRepository(this);
+      if (_localRepository == null)
+	_localRepository = new FileRepository(this);
     }
 
-    return _localDeployRepository;
+    return _localRepository;
   }
 
   /**
    * Creates a new deployment repository
    */
-  protected DeployRepository createDeployRepository()
+  protected Repository createRepository()
   {
-    return getLocalDeployRepository();
+    return getLocalRepository();
   }
 
   /**

@@ -37,7 +37,7 @@ import java.io.*;
 /**
  * Represents a committed tag root
  */
-public class DeployTagEntry
+public class RepositoryTagEntry
 {
   private final String _sha1; // sha1 of the entry itself
   
@@ -49,7 +49,7 @@ public class DeployTagEntry
   /**
    * Create an entry from an existing repository item.
    */
-  public DeployTagEntry(String sha1,
+  public RepositoryTagEntry(String sha1,
 			String tag,
 			String root,
 			String parent)
@@ -64,7 +64,7 @@ public class DeployTagEntry
   /**
    * Create a new entry, storing the serialized form in the repository.
    */
-  public DeployTagEntry(DeployRepository repository,
+  public RepositoryTagEntry(Repository repository,
 			String tag,
 			String root,
 			String parent)
@@ -92,7 +92,7 @@ public class DeployTagEntry
   /**
    * Create a new entry, storing the serialized form in the repository.
    */
-  public DeployTagEntry(DeployRepository repository,
+  public RepositoryTagEntry(Repository repository,
 			String sha1)
     throws IOException
   {

@@ -35,7 +35,7 @@ import com.caucho.git.GitRepository;
 import com.caucho.git.GitTree;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
-import com.caucho.server.repository.DeployRepository;
+import com.caucho.server.repository.Repository;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.vfs.Depend;
@@ -66,7 +66,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   private Path _rootDirectory;
   private Path _archivePath;
 
-  private DeployRepository _repository;
+  private Repository _repository;
   private String _repositoryTag;
 
   private FileSetType _expandCleanupFileSet;
@@ -127,7 +127,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   /**
    * Returns the repository
    */
-  public DeployRepository getRepository()
+  public Repository getRepository()
   {
     return _repository;
   }
@@ -135,7 +135,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   /**
    * Sets the repository
    */
-  public void setRepository(DeployRepository repository)
+  public void setRepository(Repository repository)
   {
     _repository = repository;
   }

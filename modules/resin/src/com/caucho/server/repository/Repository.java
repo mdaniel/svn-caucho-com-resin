@@ -62,21 +62,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.management.ObjectName;
 
-abstract public class DeployRepository
+abstract public class Repository
 {
   private static final Logger log
-    = Logger.getLogger(DeployRepository.class.getName());
+    = Logger.getLogger(Repository.class.getName());
 
-  private static final L10N L = new L10N(DeployRepository.class);
+  private static final L10N L = new L10N(Repository.class);
 
   private Server _server;
 
   private String _repositoryTag;
 
   private String _repositoryHash;
-  private DeployTagMap _tagMap = new DeployTagMap();
+  private RepositoryTagMap _tagMap = new RepositoryTagMap();
 
-  public DeployRepository(Server server)
+  public Repository(Server server)
   {
     _server = server;
 
@@ -122,7 +122,7 @@ abstract public class DeployRepository
     }
     else {
       try {
-	DeployTagMap tagMap = new DeployTagMap(this, sha1);
+	RepositoryTagMap tagMap = new RepositoryTagMap(this, sha1);
 
 	return setTagMap(tagMap);
       } catch (IOException e) {
@@ -148,7 +148,7 @@ abstract public class DeployRepository
   /**
    * Returns the tag map.
    */
-  public Map<String,DeployTagEntry> getTagMap()
+  public Map<String,RepositoryTagEntry> getTagMap()
   {
     return _tagMap.getTagMap();
   }
@@ -158,7 +158,7 @@ abstract public class DeployRepository
    */
   public String getTagRoot(String tag)
   {
-    DeployTagEntry entry = getTagMap().get(tag);
+    RepositoryTagEntry entry = getTagMap().get(tag);
 
     if (entry != null)
       return entry.getRoot();
@@ -205,7 +205,7 @@ abstract public class DeployRepository
    * @param message user's message for the commit
    * @param version symbolic version name for the commit
    */
-  protected DeployTagMap addTagData(String tag,
+  protected RepositoryTagMap addTagData(String tag,
 				    String root,
 				    String user,
 				    String server,
@@ -215,36 +215,36 @@ abstract public class DeployRepository
     try {
       update();
 	
-      DeployTagMap deployTagMap = _tagMap;
+      RepositoryTagMap repositoryTagMap = _tagMap;
       
-      Map<String,DeployTagEntry> tagMap = deployTagMap.getTagMap();
+      Map<String,RepositoryTagEntry> tagMap = repositoryTagMap.getTagMap();
 
       if (! validateFile(root))
-	throw new DeployRepositoryException(L.l("'{0}' is an invalid .git file",
+	throw new RepositoryException(L.l("'{0}' is an invalid .git file",
 						root));
 
-      DeployTagEntry oldEntry = tagMap.get(tag);
+      RepositoryTagEntry oldEntry = tagMap.get(tag);
       String parent = null;
 
-      DeployTagEntry entry
-	= new DeployTagEntry(this, tag, root, parent);
+      RepositoryTagEntry entry
+	= new RepositoryTagEntry(this, tag, root, parent);
 
-      Map<String,DeployTagEntry> newTagMap
-	= new TreeMap<String,DeployTagEntry>(tagMap);
+      Map<String,RepositoryTagEntry> newTagMap
+	= new TreeMap<String,RepositoryTagEntry>(tagMap);
     
       newTagMap.put(tag, entry);
 
-      DeployTagMap newDeployTagMap = new DeployTagMap(this,
-						      deployTagMap,
+      RepositoryTagMap newDeployTagMap = new RepositoryTagMap(this,
+						      repositoryTagMap,
 						      newTagMap);
 
-      if (_tagMap == deployTagMap) {
+      if (_tagMap == repositoryTagMap) {
 	return newDeployTagMap;
       }
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new DeployRepositoryException(e);
+      throw new RepositoryException(e);
     }
 
     return null;
@@ -259,7 +259,7 @@ abstract public class DeployRepository
    * @param message user's message for the commit
    * @param version symbolic version name for the commit
    */
-  protected DeployTagMap removeTagData(String tag,
+  protected RepositoryTagMap removeTagData(String tag,
 				       String user,
 				       String server,
 				       String message)
@@ -267,37 +267,37 @@ abstract public class DeployRepository
     try {
       update();
 	
-      DeployTagMap deployTagMap = _tagMap;
+      RepositoryTagMap repositoryTagMap = _tagMap;
       
-      Map<String,DeployTagEntry> tagMap = deployTagMap.getTagMap();
+      Map<String,RepositoryTagEntry> tagMap = repositoryTagMap.getTagMap();
 
-      DeployTagEntry oldEntry = tagMap.get(tag);
+      RepositoryTagEntry oldEntry = tagMap.get(tag);
 
       if (oldEntry == null)
-	return deployTagMap;
+	return repositoryTagMap;
 
-      Map<String,DeployTagEntry> newTagMap
-	= new TreeMap<String,DeployTagEntry>(tagMap);
+      Map<String,RepositoryTagEntry> newTagMap
+	= new TreeMap<String,RepositoryTagEntry>(tagMap);
     
       newTagMap.remove(tag);
 
-      DeployTagMap newDeployTagMap = new DeployTagMap(this,
-						      deployTagMap,
+      RepositoryTagMap newDeployTagMap = new RepositoryTagMap(this,
+						      repositoryTagMap,
 						      newTagMap);
 
-      if (_tagMap == deployTagMap) {
+      if (_tagMap == repositoryTagMap) {
 	return newDeployTagMap;
       }
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new DeployRepositoryException(e);
+      throw new RepositoryException(e);
     }
 
     return null;
   }
 
-  protected boolean setTagMap(DeployTagMap tagMap)
+  protected boolean setTagMap(RepositoryTagMap tagMap)
   {
     synchronized (this) {
       if (_tagMap.getSequence() < tagMap.getSequence()) {

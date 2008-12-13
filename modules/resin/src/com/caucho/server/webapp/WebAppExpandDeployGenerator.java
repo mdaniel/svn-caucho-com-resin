@@ -34,7 +34,7 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.ExpandDeployGenerator;
-import com.caucho.server.repository.DeployRepository;
+import com.caucho.server.repository.Repository;
 import com.caucho.server.cluster.Server;
 import com.caucho.vfs.CaseInsensitive;
 import com.caucho.vfs.Path;

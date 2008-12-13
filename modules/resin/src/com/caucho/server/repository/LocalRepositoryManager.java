@@ -46,7 +46,7 @@ public class LocalRepositoryManager
   private static final L10N L = new L10N(LocalRepositoryManager.class);
   
   private Server _server;
-  private DeployRepository _repository;
+  private Repository _repository;
 
   public LocalRepositoryManager()
   {
@@ -58,7 +58,7 @@ public class LocalRepositoryManager
   /**
    * Returns the current tag map.
    */
-  public Map<String,DeployTagEntry> getTagMap()
+  public Map<String,RepositoryTagEntry> getTagMap()
   {
     return _repository.getTagMap();
   }

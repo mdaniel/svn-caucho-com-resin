@@ -62,7 +62,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.management.ObjectName;
 
-public class FileRepository extends DeployRepository
+public class FileRepository extends Repository
 {
   private static final Logger log
     = Logger.getLogger(FileRepository.class.getName());
@@ -73,7 +73,7 @@ public class FileRepository extends DeployRepository
   
   private String _repositoryHash;
   
-  private DeployTagMap _tagMap;
+  private RepositoryTagMap _tagMap;
 
   public FileRepository(Server server)
   {
@@ -111,7 +111,7 @@ public class FileRepository extends DeployRepository
 			String message,
 			String version)
   {
-    DeployTagMap tagMap;
+    RepositoryTagMap tagMap;
 
     do {
       tagMap = addTagData(tag, root, user,
@@ -137,7 +137,7 @@ public class FileRepository extends DeployRepository
 			   String server,
 			   String message)
   {
-    DeployTagMap tagMap;
+    RepositoryTagMap tagMap;
 
     do {
       tagMap = removeTagData(tag, user, server, message);
@@ -200,7 +200,7 @@ public class FileRepository extends DeployRepository
     try {
       return _git.contains(sha1) && _git.objectType(sha1) == GitType.BLOB;
     } catch (IOException e) {
-      throw new DeployRepositoryException(e);
+      throw new RepositoryException(e);
     }
   }
 
@@ -212,7 +212,7 @@ public class FileRepository extends DeployRepository
     try {
       return _git.contains(sha1) ? _git.objectType(sha1) : null;
     } catch (IOException e) {
-      throw new DeployRepositoryException(e);
+      throw new RepositoryException(e);
     }
   }
 
@@ -225,7 +225,7 @@ public class FileRepository extends DeployRepository
     try {
       return _git.writeFile(path);
     } catch (IOException e) {
-      throw new DeployRepositoryException(e);
+      throw new RepositoryException(e);
     }
   }
 
@@ -238,7 +238,7 @@ public class FileRepository extends DeployRepository
     try {
       return _git.writeInputStream(is);
     } catch (IOException e) {
-      throw new DeployRepositoryException(e);
+      throw new RepositoryException(e);
     }
   }
 
@@ -251,7 +251,7 @@ public class FileRepository extends DeployRepository
     try {
       return _git.writeInputStream(is, length);
     } catch (IOException e) {
-      throw new DeployRepositoryException(e);
+      throw new RepositoryException(e);
     }
   }
 
@@ -332,7 +332,7 @@ public class FileRepository extends DeployRepository
       is = _git.open(sha1);
     
       if (is.getType() != GitType.BLOB)
-	throw new DeployRepositoryException(L.l("'{0}' is an unexpected type, expected 'blob'",
+	throw new RepositoryException(L.l("'{0}' is an unexpected type, expected 'blob'",
 						is.getType()));
 
       WriteStream out = null;
@@ -349,7 +349,7 @@ public class FileRepository extends DeployRepository
 	  out.close();
       }
     } catch (IOException e) {
-      throw new DeployRepositoryException(e);
+      throw new RepositoryException(e);
     } finally {
       is.close();
     }
@@ -363,7 +363,7 @@ public class FileRepository extends DeployRepository
     try {
       _git.expandToPath(path, rootSha1);
     } catch (IOException e) {
-      throw new DeployRepositoryException(e);
+      throw new RepositoryException(e);
     }
   }
 }

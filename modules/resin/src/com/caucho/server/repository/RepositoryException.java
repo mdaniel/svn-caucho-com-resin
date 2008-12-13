@@ -47,22 +47,22 @@ import java.util.logging.Logger;
 /**
  * General deployment exception.
  */
-public class DeployRepositoryException extends RuntimeException {
-  public DeployRepositoryException()
+public class RepositoryException extends RuntimeException {
+  public RepositoryException()
   {
   }
   
-  public DeployRepositoryException(String msg)
+  public RepositoryException(String msg)
   {
     super(msg);
   }
   
-  public DeployRepositoryException(String msg, Throwable cause)
+  public RepositoryException(String msg, Throwable cause)
   {
     super(msg, cause);
   }
   
-  public DeployRepositoryException(Throwable cause)
+  public RepositoryException(Throwable cause)
   {
     super(cause);
   }

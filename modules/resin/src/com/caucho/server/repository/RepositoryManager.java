@@ -44,7 +44,7 @@ import java.util.Map;
 public class RepositoryManager
 {
   private Server _server;
-  private DeployRepository _repository;
+  private Repository _repository;
 
   public RepositoryManager()
   {
@@ -61,7 +61,7 @@ public class RepositoryManager
   /**
    * Returns the current tag map.
    */
-  public Map<String,DeployTagEntry> getTagMap()
+  public Map<String,RepositoryTagEntry> getTagMap()
   {
     return _repository.getTagMap();
   }

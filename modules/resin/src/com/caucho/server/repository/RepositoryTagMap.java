@@ -39,9 +39,9 @@ import java.util.*;
 /**
  * Map of the current tags.
  */
-public class DeployTagMap
+public class RepositoryTagMap
 {
-  private static final L10N L = new L10N(DeployTagMap.class);
+  private static final L10N L = new L10N(RepositoryTagMap.class);
   
   private final String _commitHash;
   private final GitCommit _commit;
@@ -50,15 +50,15 @@ public class DeployTagMap
 
   private final GitTree _tree;
     
-  private final Map<String,DeployTagEntry> _tagMap;
+  private final Map<String,RepositoryTagEntry> _tagMap;
   
-  public DeployTagMap()
+  public RepositoryTagMap()
   {
     _commitHash = null;
     _commit = null;
     _sequence = 0;
     _tagMap
-      = Collections.unmodifiableMap(new HashMap<String,DeployTagEntry>());
+      = Collections.unmodifiableMap(new HashMap<String,RepositoryTagEntry>());
 
     _tree = null;
   }
@@ -75,7 +75,7 @@ public class DeployTagMap
   }
   */
   
-  public DeployTagMap(DeployRepository repository,
+  public RepositoryTagMap(Repository repository,
 		      String commitHash)
     throws IOException
   {
@@ -90,9 +90,9 @@ public class DeployTagMap
     _tagMap = readTagMap(repository, _tree.getHash("tags"));
   }
   
-  public DeployTagMap(DeployRepository repository,
-		      DeployTagMap parent,
-		      Map<String,DeployTagEntry> tagMap)
+  public RepositoryTagMap(Repository repository,
+		      RepositoryTagMap parent,
+		      Map<String,RepositoryTagEntry> tagMap)
     throws IOException
   {
     _tagMap = Collections.unmodifiableMap(tagMap);
@@ -120,7 +120,7 @@ public class DeployTagMap
     _tree.addBlob("tags", 0775, tagHash);
 
     for (String key : tagMap.keySet()) {
-      DeployTagEntry entry = tagMap.get(key);
+      RepositoryTagEntry entry = tagMap.get(key);
 
       String sha1 = entry.getSha1();
       String root = entry.getRoot();
@@ -166,17 +166,17 @@ public class DeployTagMap
   /**
    * Returns the deployment's tag map.
    */
-  public Map<String,DeployTagEntry> getTagMap()
+  public Map<String,RepositoryTagEntry> getTagMap()
   {
     return _tagMap;
   }
 
-  private Map<String,DeployTagEntry> readTagMap(DeployRepository repository,
+  private Map<String,RepositoryTagEntry> readTagMap(Repository repository,
 						String sha1)
     throws IOException
   {
-    TreeMap<String,DeployTagEntry> map
-      = new TreeMap<String,DeployTagEntry>();
+    TreeMap<String,RepositoryTagEntry> map
+      = new TreeMap<String,RepositoryTagEntry>();
 
     InputStream is = repository.openBlob(sha1);
     try {
@@ -187,7 +187,7 @@ public class DeployTagMap
       while ((tag = in.readLine()) != null) {
 	String entrySha1 = in.readLine();
 
-	DeployTagEntry entry = new DeployTagEntry(repository, entrySha1);
+	RepositoryTagEntry entry = new RepositoryTagEntry(repository, entrySha1);
 
 	map.put(tag, entry);
       }
@@ -201,7 +201,7 @@ public class DeployTagMap
   private void writeTagMap(WriteStream out)
     throws IOException
   {
-    for (Map.Entry<String,DeployTagEntry> entry : _tagMap.entrySet()) {
+    for (Map.Entry<String,RepositoryTagEntry> entry : _tagMap.entrySet()) {
       out.println(entry.getKey());
       out.println(entry.getValue().getSha1());
     }

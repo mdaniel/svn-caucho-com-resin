@@ -38,8 +38,8 @@ import com.caucho.util.AlarmListener;
 import com.caucho.util.Crc64;
 import com.caucho.util.L10N;
 import com.caucho.util.WeakAlarm;
-import com.caucho.server.repository.DeployRepository;
-import com.caucho.server.repository.DeployTagEntry;
+import com.caucho.server.repository.Repository;
+import com.caucho.server.repository.RepositoryTagEntry;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.Path;
 
@@ -72,7 +72,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   private Path _archiveDirectory;
   private Path _expandDirectory;
 
-  private DeployRepository _repository;
+  private Repository _repository;
   private String _repositoryTag;
   
   private String _entryNamePrefix = "";
@@ -310,7 +310,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   /**
    * The repository
    */
-  public void setRepository(DeployRepository repository)
+  public void setRepository(Repository repository)
   {
     _repository = repository;
   }
@@ -318,7 +318,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   /**
    * The repository
    */
-  public DeployRepository getRepository()
+  public Repository getRepository()
   {
     return _repository;
   }
@@ -658,7 +658,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     String prefix = getRepositoryTag() + "/";
     
     ArrayList<String> tags = new ArrayList<String>();
-    Map<String,DeployTagEntry> tagMap = _repository.getTagMap();
+    Map<String,RepositoryTagEntry> tagMap = _repository.getTagMap();
 
     for (String key : tagMap.keySet()) {
       if (key.startsWith(prefix))
@@ -670,7 +670,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     for (String tag : tags) {
       digest = Crc64.generate(digest, tag);
 
-      DeployTagEntry entry = tagMap.get(tag);
+      RepositoryTagEntry entry = tagMap.get(tag);
 
       if (entry.getRoot() != null)
 	digest = Crc64.generate(digest, entry.getRoot());
@@ -818,7 +818,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     
     String prefix = getRepositoryTag() + "/";
     
-    Map<String,DeployTagEntry> tagMap = _repository.getTagMap();
+    Map<String,RepositoryTagEntry> tagMap = _repository.getTagMap();
 
     for (String key : tagMap.keySet()) {
       if (key.startsWith(prefix)) {
