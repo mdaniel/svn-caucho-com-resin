@@ -55,7 +55,7 @@ public class RepositoryManager
   {
     _server = server;
     
-    _repository = _server.getDeployRepository();
+    _repository = _server.getRepository();
   }
 
   /**

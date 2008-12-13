@@ -52,7 +52,7 @@ public class LocalRepositoryManager
   {
     _server = Server.getCurrent();
 
-    _repository = _server.getLocalDeployRepository();
+    _repository = _server.getLocalRepository();
   }
 
   /**

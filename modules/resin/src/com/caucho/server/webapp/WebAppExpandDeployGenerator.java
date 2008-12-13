@@ -95,7 +95,7 @@ public class WebAppExpandDeployGenerator
     }
 
     if (Server.getCurrent() != null) {
-      setRepository(Server.getCurrent().getDeployRepository());
+      setRepository(Server.getCurrent().getRepository());
       
       String hostName = webAppContainer.getHostName();
       if ("".equals(hostName))

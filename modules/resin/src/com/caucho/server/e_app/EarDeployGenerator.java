@@ -69,7 +69,7 @@ public class EarDeployGenerator
     }
 
     if (Server.getCurrent() != null) {
-      setRepository(Server.getCurrent().getDeployRepository());
+      setRepository(Server.getCurrent().getRepository());
       
       String hostName = parentContainer.getHostName();
       if ("".equals(hostName))
