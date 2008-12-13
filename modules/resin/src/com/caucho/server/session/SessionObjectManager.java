@@ -31,6 +31,10 @@ package com.caucho.server.session;
 
 import com.caucho.hessian.io.*;
 import com.caucho.server.cluster.*;
+import com.caucho.server.distcache.ClusterObject;
+import com.caucho.server.distcache.ObjectManager;
+import com.caucho.server.distcache.Store;
+
 import java.io.*;
 
 /**

@@ -31,9 +31,9 @@ package com.caucho.server.session;
 
 import com.caucho.hessian.io.*;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.server.cluster.ClusterObject;
-import com.caucho.server.cluster.ObjectManager;
-import com.caucho.server.cluster.Store;
+import com.caucho.server.distcache.ClusterObject;
+import com.caucho.server.distcache.ObjectManager;
+import com.caucho.server.distcache.Store;
 import com.caucho.server.security.AbstractAuthenticator;
 import com.caucho.server.security.ServletAuthenticator;
 import com.caucho.util.Alarm;

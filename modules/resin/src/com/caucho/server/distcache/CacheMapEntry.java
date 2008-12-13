@@ -29,7 +29,6 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.server.cluster.HashKey;
 import com.caucho.util.Alarm;
 
 import java.lang.ref.SoftReference;
@@ -39,31 +38,30 @@ import java.lang.ref.SoftReference;
  */
 public final class CacheMapEntry {
   public static final CacheMapEntry NULL
-    = new CacheMapEntry(null, null, 0, 0);
+    = new CacheMapEntry(null, null, 0, 0, false);
   
   private final HashKey _valueHash;
   private final long _version;
   private final long _expireTime;
+
+  private final boolean _isServerVersionValid;
   
   private SoftReference _valueRef;
 
   public CacheMapEntry(HashKey valueHash,
 		       Object value,
 		       long version,
-		       long expireTime)
+		       long expireTime,
+		       boolean isServerVersionValid)
   {
     _valueHash = valueHash;
     _version = version;
     
     _expireTime = expireTime;
+    _isServerVersionValid = isServerVersionValid;
 
     if (value != null)
       _valueRef = new SoftReference(value);
-  }
-
-  public CacheMapEntry(HashKey valueHash, Object value, long version)
-  {
-    this(valueHash, value, version, Alarm.getExactTime() + 100L);
   }
 
   public HashKey getValueHash()
@@ -92,9 +90,18 @@ public final class CacheMapEntry {
       return null;
   }
 
+  /**
+   * Returns true if the server version (startup count) matches
+   * the database.
+   */
+  public boolean isServerVersionValid()
+  {
+    return _isServerVersionValid;
+  }
+
   public boolean isExpired()
   {
-    return _expireTime < Alarm.getExactTime();
+    return (_expireTime < Alarm.getExactTime() || ! _isServerVersionValid);
   }
 
   public String toString()

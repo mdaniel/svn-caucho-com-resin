@@ -412,6 +412,9 @@ class ParamExpr extends Expr {
 
       return _bytes.length;
     }
+    else if (_type == NULL) {
+      return -1;
+    }
     else
       return super.evalToBuffer(context, buffer, offset, typecode);
   }

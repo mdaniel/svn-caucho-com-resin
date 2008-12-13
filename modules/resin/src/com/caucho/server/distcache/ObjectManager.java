@@ -19,8 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -29,65 +28,50 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.util.Alarm;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import java.lang.ref.SoftReference;
 
 /**
- * Full data from the dat map
+ * Base class for the distributed objects
  */
-public final class CacheData {
-  private final HashKey _key;
-  private final HashKey _value;
-  private final long _version;
-  private final long _accessTime;
-  private final boolean _isRemoved;
+public interface ObjectManager {
+  /**
+   * Returns the maximum idle time.
+   */
+  public long getMaxIdleTime();
+  
+  /**
+   * Creates the cluster object
+   */
+  public ClusterObject createClusterObject(String id);
+  
+  /**
+   * Loads the object from the input stream.
+   */
+  public void load(InputStream in, Object object)
+    throws IOException;
+  
+  /**
+   * Returns true if the object is empty.
+   */
+  public boolean isEmpty(Object object)
+    throws IOException;
+  
+  /**
+   * Stores the object in the output stream.
+   */
+  public void store(OutputStream out, Object object)
+    throws IOException;
 
-  public CacheData(HashKey key,
-		   HashKey value,
-		   long version,
-		   long accessTime,
-		   boolean isRemoved)
-  {
-    _key = key;
-    _value = value;
-    _version = version;
-    
-    _accessTime = accessTime;
-    _isRemoved = isRemoved;
-  }
+  /**
+   * Notifies that an object is updated.
+   */
+  public void notifyUpdate(Object key);
 
-  public HashKey getKey()
-  {
-    return _key;
-  }
-
-  public HashKey getValue()
-  {
-    return _value;
-  }
-
-  public long getVersion()
-  {
-    return _version;
-  }
-
-  public long getAccessTime()
-  {
-    return _accessTime;
-  }
-
-  public boolean isRemoved()
-  {
-    return _isRemoved;
-  }
-
-  public String toString()
-  {
-    return (getClass().getSimpleName()
-	    + "[key=" + _key
-	    + ",value=" + _value
-	    + ",version=" + _version
-	    + "]");
-  }
+  /**
+   * Notifies an object has been removed.
+   */
+  public void notifyRemove(Object key);
 }

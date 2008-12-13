@@ -60,6 +60,8 @@ import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationMatcher;
+import com.caucho.server.distcache.DistributedCacheManager;
+import com.caucho.server.distcache.FileCacheManager;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
@@ -295,7 +297,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the resin server
    */
-  protected Resin getResin()
+  public Resin getResin()
   {
     return _resin;
   }
@@ -1990,6 +1992,9 @@ public class Server extends ProtocolDispatchServer
 	log.log(Level.WARNING, e.toString(), e);
       }
 
+      // notify other servers that we've stopped
+      notifyStop();
+
       try {
         ThreadPool.getThreadPool().interrupt();
       } catch (Throwable e) {
@@ -2020,6 +2025,13 @@ public class Server extends ProtocolDispatchServer
       
       super.stop();
     }
+  }
+
+  /**
+   * Notifications to cluster servers that we've stopped.
+   */
+  protected void notifyStop()
+  {
   }
 
   /**

@@ -303,9 +303,13 @@ class BinaryColumn extends Column {
 		  TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {
-    expr.evalToBuffer(context,
-		      iter.getBuffer(), iter.getRowOffset() + _columnOffset);
-    setNonNull(iter.getBuffer(), iter.getRowOffset());
+    if (expr.evalToBuffer(context, iter.getBuffer(),
+			  iter.getRowOffset() + _columnOffset) >= 0) {
+      setNonNull(iter.getBuffer(), iter.getRowOffset());
+    }
+    else
+      setNull(iter.getBuffer(), iter.getRowOffset());
+    
     
     iter.setDirty();
   }

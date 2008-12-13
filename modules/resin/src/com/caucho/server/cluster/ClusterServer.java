@@ -645,6 +645,24 @@ public class ClusterServer {
   }
 
   /**
+   * Notify that a start event has been received.
+   */
+  public void notifyStart()
+  {
+    if (_serverPool != null)
+      _serverPool.notifyStart();
+  }
+
+  /**
+   * Notify that a start event has been received.
+   */
+  public void notifyStop()
+  {
+    if (_serverPool != null)
+      _serverPool.notifyStop();
+  }
+
+  /**
    * Starts the server.
    */
   public Server startServer()
@@ -675,6 +693,7 @@ public class ClusterServer {
   //
   // admin
   //
+  
   /**
    * Returns the admin object
    */

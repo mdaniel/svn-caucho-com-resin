@@ -29,7 +29,8 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.server.cluster.ClusterObject;
+import com.caucho.server.distcache.ClusterObject;
+
 import java.util.IdentityHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;

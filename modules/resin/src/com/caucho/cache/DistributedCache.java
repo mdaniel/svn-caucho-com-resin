@@ -32,9 +32,9 @@ package com.caucho.cache;
 import com.caucho.config.ConfigException;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.HashKey;
-import com.caucho.server.cluster.HashManager;
-import com.caucho.server.cluster.DistributedCacheManager;
+import com.caucho.server.distcache.DistributedCacheManager;
+import com.caucho.server.distcache.HashKey;
+import com.caucho.server.distcache.HashManager;
 import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
 

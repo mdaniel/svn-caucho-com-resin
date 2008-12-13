@@ -29,65 +29,52 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.util.Alarm;
-
-import java.lang.ref.SoftReference;
+import com.caucho.cache.CacheEntry;
+import com.caucho.cache.CacheSerializer;
+import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.Server;
+import com.caucho.util.LruCache;
 
 /**
- * Full data from the dat map
+ * Manages the distributed cache
  */
-public final class CacheData {
-  private final HashKey _key;
-  private final HashKey _value;
-  private final long _version;
-  private final long _accessTime;
-  private final boolean _isRemoved;
+abstract public class DistributedCacheManager
+{
+  private final Server _server;
 
-  public CacheData(HashKey key,
-		   HashKey value,
-		   long version,
-		   long accessTime,
-		   boolean isRemoved)
+  protected DistributedCacheManager(Server server)
   {
-    _key = key;
-    _value = value;
-    _version = version;
-    
-    _accessTime = accessTime;
-    _isRemoved = isRemoved;
+    _server = server;
   }
 
-  public HashKey getKey()
+  /**
+   * Returns the owning cluster
+   */
+  protected Cluster getCluster()
   {
-    return _key;
+    return _server.getCluster();
   }
 
-  public HashKey getValue()
-  {
-    return _value;
-  }
+  /**
+   * Gets a cache entry
+   */
+  abstract public Object get(HashKey hashKey, CacheSerializer serializer);
 
-  public long getVersion()
-  {
-    return _version;
-  }
+  /**
+   * Sets a cache entry
+   */
+  abstract public void put(HashKey hashKey,
+			   Object value,
+			   CacheSerializer serializer);
 
-  public long getAccessTime()
-  {
-    return _accessTime;
-  }
+  /**
+   * Removes a cache entry
+   */
+  abstract public boolean remove(HashKey hashKey);
 
-  public boolean isRemoved()
-  {
-    return _isRemoved;
-  }
-
+  @Override
   public String toString()
   {
-    return (getClass().getSimpleName()
-	    + "[key=" + _key
-	    + ",value=" + _value
-	    + ",version=" + _version
-	    + "]");
+    return getClass().getSimpleName() + "[" + _server.getServerId() + "]";
   }
 }

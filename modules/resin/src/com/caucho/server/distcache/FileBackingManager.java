@@ -19,8 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -29,65 +28,27 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.util.Alarm;
-
-import java.lang.ref.SoftReference;
+import com.caucho.vfs.Path;
 
 /**
- * Full data from the dat map
+ * Manages the object backing for a context.
  */
-public final class CacheData {
-  private final HashKey _key;
-  private final HashKey _value;
-  private final long _version;
-  private final long _accessTime;
-  private final boolean _isRemoved;
+public class FileBackingManager {
+  private Path _path;
 
-  public CacheData(HashKey key,
-		   HashKey value,
-		   long version,
-		   long accessTime,
-		   boolean isRemoved)
+  /**
+   * Sets the top-level path for the backing manager.
+   */
+  public void setPath(Path path)
   {
-    _key = key;
-    _value = value;
-    _version = version;
-    
-    _accessTime = accessTime;
-    _isRemoved = isRemoved;
+    _path = path;
   }
 
-  public HashKey getKey()
+  /**
+   * Gets the top-level path for the backing manager.
+   */
+  public Path getPath()
   {
-    return _key;
-  }
-
-  public HashKey getValue()
-  {
-    return _value;
-  }
-
-  public long getVersion()
-  {
-    return _version;
-  }
-
-  public long getAccessTime()
-  {
-    return _accessTime;
-  }
-
-  public boolean isRemoved()
-  {
-    return _isRemoved;
-  }
-
-  public String toString()
-  {
-    return (getClass().getSimpleName()
-	    + "[key=" + _key
-	    + ",value=" + _value
-	    + ",version=" + _version
-	    + "]");
+    return _path;
   }
 }

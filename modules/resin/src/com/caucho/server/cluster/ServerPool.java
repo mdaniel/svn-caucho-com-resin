@@ -454,6 +454,8 @@ public class ServerPool
    */
   public final boolean isActive()
   {
+    return _state == ST_ACTIVE;
+    /*
     switch (_state) {
     case ST_ACTIVE:
       return true;
@@ -468,6 +470,7 @@ public class ServerPool
     default:
       return false;
     }
+    */
   }
   
   /**
@@ -1053,6 +1056,24 @@ public class ServerPool
     synchronized (this) {
       _activeCount--;
     }
+  }
+
+  /**
+   * Notify that a start has occurred.
+   */
+  public void notifyStart()
+  {
+    clearRecycle();
+    wake();
+  }
+
+  /**
+   * Notify that a stop has occurred.
+   */
+  public void notifyStop()
+  {
+    clearRecycle();
+    toFail();
   }
 
   /**
