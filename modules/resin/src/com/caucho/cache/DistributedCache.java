@@ -45,7 +45,7 @@ import javax.annotation.PostConstruct;
 /**
  * Implements the distributed cache
  */
-public class DistributedCache implements Cache
+public class DistributedCache extends AbstractCache
 {
   private static final L10N L = new L10N(DistributedCache.class);
 
