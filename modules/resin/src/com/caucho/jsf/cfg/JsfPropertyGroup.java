@@ -53,7 +53,6 @@ public class JsfPropertyGroup {
 
   private boolean _enableDeveloperAid;
   private String _developerAidLinkStyle;
-  private boolean _isDisableManagedBeanPropertyCheck = false;
 
   public JsfPropertyGroup()
   {
@@ -145,16 +144,6 @@ public class JsfPropertyGroup {
   public void setDeveloperAidLinkStyle(String developerAidLinkStyle)
   {
     _developerAidLinkStyle = developerAidLinkStyle;
-  }
-
-  public boolean isDisableManagedBeanPropertyCheck()
-  {
-    return _isDisableManagedBeanPropertyCheck;
-  }
-
-  public void setDisableManagedBeanPropertyCheck(boolean disableManagedBeanPropertyCheck)
-  {
-    _isDisableManagedBeanPropertyCheck = disableManagedBeanPropertyCheck;
   }
 
   static {

@@ -40,7 +40,7 @@ import javax.faces.render.*;
 /**
  * The HTML textarea renderer
  */
-class HtmlInputTextareaRenderer extends Renderer
+class HtmlInputTextareaRenderer extends BaseRenderer
 {
   public static final Renderer RENDERER = new HtmlInputTextareaRenderer();
 
@@ -149,7 +149,11 @@ class HtmlInputTextareaRenderer extends Renderer
       tabindex = htmlInput.getTabindex();
       title = htmlInput.getTitle();
       
-      value = htmlInput.getValue();
+      value = htmlInput.getSubmittedValue();
+      if (value == null)
+        value = toString(context, component, htmlInput.getValue());
+      else
+        value = value.toString();
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
@@ -194,6 +198,10 @@ class HtmlInputTextareaRenderer extends Renderer
       title = (String) attrMap.get("title");
       
       value = attrMap.get("value");
+      if (value == null)
+        value = "";
+      else
+        value = value.toString();
     }
 
     out.startElement("textarea", component);
@@ -279,7 +287,7 @@ class HtmlInputTextareaRenderer extends Renderer
       out.writeAttribute("title", title, "title");
     
     if (value != null)
-      out.writeText(String.valueOf(value), "value");
+      out.writeText(value, "value");
 
     out.endElement("textarea");
   }

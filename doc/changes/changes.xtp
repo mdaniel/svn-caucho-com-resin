@@ -13,6 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>jsf: invalid input is not redisplayed in JSF UI Input (#3057, rep by freemant)</li>
 <li>quercus: resin_save_state()/resin_restore_state() (rep by koreth)</li>
 <li>server: 304 was not properly ignoring content (#3089, rep by Andrew Phillips)</li>
 <li>quercus: catch regexp stack overflow and log (rep by koreth)</li>

@@ -40,7 +40,7 @@ import javax.faces.render.*;
 /**
  * The HTML text renderer
  */
-class HtmlInputSecretRenderer extends Renderer
+class HtmlInputSecretRenderer extends BaseRenderer
 {
   public static final Renderer RENDERER = new HtmlInputSecretRenderer();
 
@@ -152,8 +152,12 @@ class HtmlInputSecretRenderer extends Renderer
       styleClass = htmlInput.getStyleClass();
       tabindex = htmlInput.getTabindex();
       title = htmlInput.getTitle();
-      
-      value = htmlInput.getValue();
+
+      value = htmlInput.getSubmittedValue();
+      if (value == null)
+        value = toString(context, component, htmlInput.getValue());
+      else
+        value = value.toString();
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
@@ -199,6 +203,10 @@ class HtmlInputSecretRenderer extends Renderer
       title = (String) attrMap.get("title");
       
       value = attrMap.get("value");
+      if (value == null)
+        value = "";
+      else
+        value = value.toString();
     }
 
     out.startElement("input", component);
@@ -276,9 +284,6 @@ class HtmlInputSecretRenderer extends Renderer
     if (readonly)
       out.writeAttribute("readonly", "readonly", "readonly");
 
-    if (redisplay)
-      out.writeAttribute("redisplay", "redisplay", "redisplay");
-
     if (size > 0)
       out.writeAttribute("size", String.valueOf(size), "size");
 
@@ -295,7 +300,7 @@ class HtmlInputSecretRenderer extends Renderer
       out.writeAttribute("title", title, "title");
 
     if (redisplay && value != null)
-      out.writeAttribute("value", String.valueOf(value), "value");
+      out.writeAttribute("value", value, "value");
 
     out.endElement("input");
   }

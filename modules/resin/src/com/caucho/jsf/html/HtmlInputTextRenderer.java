@@ -162,7 +162,12 @@ class HtmlInputTextRenderer extends BaseRenderer
       tabindex = htmlInput.getTabindex();
       title = htmlInput.getTitle();
       
-      value = htmlInput.getValue();
+      value = htmlInput.getSubmittedValue();      
+      if (value == null)
+        value = toString(context, component, htmlInput.getValue());
+      else
+        value = value.toString();
+
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
@@ -208,6 +213,10 @@ class HtmlInputTextRenderer extends BaseRenderer
       title = (String) attrMap.get("title");
       
       value = attrMap.get("value");
+      if (value == null)
+        value = "";
+      else
+        value = value.toString();
     }
 
     out.startElement("input", component);
@@ -300,7 +309,7 @@ class HtmlInputTextRenderer extends BaseRenderer
     if (title != null)
       out.writeAttribute("title", title, "title");
 
-    out.writeAttribute("value", toString(context, component, value), "value");
+    out.writeAttribute("value", value, "value");
 
     out.endElement("input");
   }
