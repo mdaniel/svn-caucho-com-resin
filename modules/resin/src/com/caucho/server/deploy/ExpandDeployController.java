@@ -35,6 +35,7 @@ import com.caucho.git.GitRepository;
 import com.caucho.git.GitTree;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
+import com.caucho.server.repository.DeployRepository;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.vfs.Depend;

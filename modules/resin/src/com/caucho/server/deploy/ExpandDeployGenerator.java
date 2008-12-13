@@ -38,6 +38,8 @@ import com.caucho.util.AlarmListener;
 import com.caucho.util.Crc64;
 import com.caucho.util.L10N;
 import com.caucho.util.WeakAlarm;
+import com.caucho.server.repository.DeployRepository;
+import com.caucho.server.repository.DeployTagEntry;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.Path;
 

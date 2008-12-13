@@ -27,35 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.server.repository;
 
 import com.caucho.server.cluster.Server;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import java.io.InputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 
 /**
  * Public API for the deployment
  */
-public class DeployManager
+public class LocalDeployManager
 {
+  private static final L10N L = new L10N(LocalDeployManager.class);
+  
   private Server _server;
   private DeployRepository _repository;
 
-  public DeployManager()
+  public LocalDeployManager()
   {
-    this(Server.getCurrent());
-  }
+    _server = Server.getCurrent();
 
-  public DeployManager(Server server)
-  {
-    _server = server;
-    
-    _repository = _server.getDeployRepository();
+    _repository = _server.getLocalDeployRepository();
   }
 
   /**
@@ -64,40 +61,6 @@ public class DeployManager
   public Map<String,DeployTagEntry> getTagMap()
   {
     return _repository.getTagMap();
-  }
-
-  /**
-   * Adds a tag
-   *
-   * @param tag the symbolic tag for the repository
-   * @param sha1 the root for the tag's content
-   * @param user the user adding a tag.
-   * @param message user's message for the commit
-   * @param version symbolic version name for the commit
-   */
-  public boolean setTag(String tag,
-			String sha1,
-			String user,
-			String message,
-			String version)
-  {
-    return _repository.setTag(tag, sha1, user, _server.getServerId(),
-			      message, version);
-  }
-
-  /**
-   * Removes a tag
-   *
-   * @param tag the symbolic tag for the repository
-   * @param user the user adding a tag.
-   * @param message user's message for the commit
-   */
-  public boolean removeTag(String tag,
-			   String user,
-			   String message)
-  {
-    return _repository.removeTag(tag, user, _server.getServerId(),
-				 message);
   }
 
   //
@@ -118,44 +81,6 @@ public class DeployManager
   public boolean isBlob(String sha1)
   {
     return _repository.isBlob(sha1);
-  }
-  
-  /**
-   * Adds a new path to the repository
-   */
-  public String addPath(String url)
-  {
-    Path path = Vfs.lookup(url);
-
-    return _repository.addPath(path);
-  }
-  
-  /**
-   * Adds the raw git file to the repository.
-   *
-   * @param sha1 the sha1 hash of the file's contents
-   * @param is the input stream to the contents
-   */
-  public void writeRawGitFile(String sha1, InputStream is)
-    throws IOException
-  {
-    _repository.writeRawGitFile(sha1, is);
-  }
-  
-  /**
-   * Writes a file to a stream
-   */
-  public void writeToStream(OutputStream os, String sha1)
-  {
-    _repository.writeToStream(os, sha1);
-  }
-  
-  /**
-   * Extracts the git tree to a path
-   */
-  public void expandToPath(Path path, String sha1)
-  {
-    _repository.expandToPath(path, sha1);
   }
   
   @Override

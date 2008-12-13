@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.deploy;
+package com.caucho.server.repository;
 
 import com.caucho.vfs.*;
 
