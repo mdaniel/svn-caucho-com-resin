@@ -76,10 +76,13 @@ public class RepositoryTagMap
   */
   
   public RepositoryTagMap(Repository repository,
-		      String commitHash)
+			  String commitHash)
     throws IOException
   {
     _commitHash = commitHash;
+
+    // force loading and validation from backend
+    repository.validateFile(commitHash);
 
     _commit = repository.readCommit(commitHash);
 

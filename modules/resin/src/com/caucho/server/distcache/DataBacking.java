@@ -121,11 +121,11 @@ public class DataBacking implements AlarmListener {
 		    + "VALUES(?,?,?)");
 
     // XXX: add random component to expire time?
-    _updateExpiresQuery = ("UPDATE " + _tableName + " AS d"
+    _updateExpiresQuery = ("UPDATE " + _tableName
 			   + " SET expire_time=?"
 			   + " WHERE expire_time<? AND EXISTS "
 			   + "      (SELECT * FROM " + _mapTableName + " AS m"
-			   +   "       WHERE d.id = m.value)");
+			   +   "       WHERE id = m.value)");
 
     _timeoutQuery = ("DELETE FROM " + _tableName
 		     + " WHERE expire_time < ?");

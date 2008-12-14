@@ -485,7 +485,7 @@ public class UrlModule
    */
   public static Value parse_url(Env env,
                                 StringValue str,
-                                @Optional Value componentV)
+                                @Optional("-1") int component)
   {
     int i = 0;
     int length = str.length();
@@ -666,25 +666,23 @@ public class UrlModule
     else
       value.put(env.createString("path"), sb);
 
-    if (! componentV.isDefault()) {
-      switch (componentV.toInt()) {
-        case PHP_URL_SCHEME:
-          return value.get(env.createString("scheme"));
-        case PHP_URL_HOST:
-          return value.get(env.createString("host"));
-        case PHP_URL_PORT:
-          return value.get(env.createString("port"));
-        case PHP_URL_USER:
-          return value.get(env.createString("user"));
-        case PHP_URL_PASS:
-          return value.get(env.createString("pass"));
-        case PHP_URL_PATH:
-          return value.get(env.createString("path"));
-        case PHP_URL_QUERY:
-          return value.get(env.createString("query"));
-        case PHP_URL_FRAGMENT:
-          return value.get(env.createString("fragment"));
-      }
+    switch (component) {
+    case PHP_URL_SCHEME:
+      return value.get(env.createString("scheme"));
+    case PHP_URL_HOST:
+      return value.get(env.createString("host"));
+    case PHP_URL_PORT:
+      return value.get(env.createString("port"));
+    case PHP_URL_USER:
+      return value.get(env.createString("user"));
+    case PHP_URL_PASS:
+      return value.get(env.createString("pass"));
+    case PHP_URL_PATH:
+      return value.get(env.createString("path"));
+    case PHP_URL_QUERY:
+      return value.get(env.createString("query"));
+    case PHP_URL_FRAGMENT:
+      return value.get(env.createString("fragment"));
     }
     
     return value;

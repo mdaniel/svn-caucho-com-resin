@@ -1935,6 +1935,9 @@ public class Env {
       case HTTP_POST_VARS:
         if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
+	else
+	  return getGlobalEnvVar("_POST");
+	
       case _POST: {
         var = new Var();
 	envVar = new EnvVarImpl(var);
@@ -1963,6 +1966,9 @@ public class Env {
       case HTTP_POST_FILES:
         if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
+	else
+	  return getGlobalEnvVar("_FILES");
+	
       case _FILES: {
         var = new Var();
 	envVar = new EnvVarImpl(var);
@@ -1985,6 +1991,8 @@ public class Env {
       case HTTP_GET_VARS:
         if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
+	else
+	  return getGlobalEnvVar("_GET");
       
       case _GET: {
         var = new Var();
@@ -2104,6 +2112,8 @@ public class Env {
       case HTTP_SERVER_VARS:
         if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
+	else
+	  return getGlobalEnvVar("_SERVER");
       
       case _SERVER: {
         var = new Var();
@@ -2130,6 +2140,8 @@ public class Env {
       case HTTP_COOKIE_VARS:
         if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
+	else
+	  return getGlobalEnvVar("_COOKIE");
       
       case _COOKIE: {
         var = new Var();
@@ -2394,8 +2406,8 @@ public class Env {
    */
   public final Var getStaticClassFieldVar(String className, String name)
   {
-    QuercusClass cl = findAbstractClass(className);
-    
+    QuercusClass cl = getClass(className);
+
     Var var = cl.getStaticField(this, name);
     
     if (var == null) {
@@ -3822,6 +3834,8 @@ public class Env {
 
       if (qcl != null)
 	_qClass[id] = qcl;
+      else
+	throw new QuercusException(L.l("'{0}' is an unknown class", name));
 
       return qcl;
     }
@@ -3929,7 +3943,7 @@ public class Env {
     ClassDef def = _classDef[classId];
 
     if (def == null) {
-      return findClass(classId, true, false);
+      return findClass(classId, true, true);
     }
 
     int parentId = -1;

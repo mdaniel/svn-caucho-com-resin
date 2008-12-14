@@ -112,7 +112,7 @@
           class="com.caucho.osgi.OsgiBundleConfig"/>
 
     <bean name="persistent-store"
-          class="com.caucho.server.cluster.PersistentStoreConfig"/>
+          class="com.caucho.server.distcache.PersistentStoreConfig"/>
 
     <bean name="persistence-manager"
           class="com.caucho.amber.cfg.PersistenceManager"/>

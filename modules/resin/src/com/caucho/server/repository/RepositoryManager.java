@@ -29,6 +29,8 @@
 
 package com.caucho.server.repository;
 
+import com.caucho.git.GitTree;
+import com.caucho.git.GitType;
 import com.caucho.server.cluster.Server;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -119,9 +121,17 @@ public class RepositoryManager
   /**
    * Returns true if the file is a blob.
    */
-  public boolean isBlob(String sha1)
+  public GitType getType(String sha1)
   {
-    return _repository.isBlob(sha1);
+    return _repository.getType(sha1);
+  }
+
+  /**
+   * Returns true if the file is a blob.
+   */
+  public final boolean isBlob(String sha1)
+  {
+    return getType(sha1) == GitType.BLOB;
   }
   
   /**
@@ -132,6 +142,15 @@ public class RepositoryManager
     Path path = Vfs.lookup(url);
 
     return _repository.addPath(path);
+  }
+  
+  /**
+   * Adds a .git tree to the repository
+   */
+  public String addTree(GitTree tree)
+    throws IOException
+  {
+    return _repository.addTree(tree);
   }
   
   /**

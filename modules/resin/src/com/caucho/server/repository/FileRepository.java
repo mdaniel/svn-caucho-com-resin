@@ -195,18 +195,6 @@ public class FileRepository extends Repository
   /**
    * Returns true if the file is a blob.
    */
-  public boolean isBlob(String sha1)
-  {
-    try {
-      return _git.contains(sha1) && _git.objectType(sha1) == GitType.BLOB;
-    } catch (IOException e) {
-      throw new RepositoryException(e);
-    }
-  }
-
-  /**
-   * Returns true if the file is a blob.
-   */
   public GitType getType(String sha1)
   {
     try {

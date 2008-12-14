@@ -365,16 +365,10 @@ public class ReflectionClass
     if (cls == null)
       return;
     
-    HashMap<String, Value> fieldMap = cls.getStaticFieldMap();
+    for (String name : cls.getStaticFieldNames()) {
+      Var field = cls.getStaticField(env, name);
 
-    if (fieldMap != null) {
-      for (Map.Entry<String, Value> entry : fieldMap.entrySet()) {
-	String name = entry.getKey();
-      
-	Var field = cls.getStaticField(env, name);
-
-	array.put(StringValue.create(name), field.toValue());
-      }
+      array.put(StringValue.create(name), field.toValue());
     }
     
     addStaticFields(env, array, cls.getParent());

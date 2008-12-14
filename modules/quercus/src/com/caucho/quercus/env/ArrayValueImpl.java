@@ -94,7 +94,12 @@ public class ArrayValueImpl extends ArrayValue
       Value value = ptr._var != null ? ptr._var : ptr._value;
       
       // php/0662 for copy
-      append(ptr._key, value.copyArrayItem());
+      Entry entry = getEntry(ptr._key);
+
+      if (ptr._var != null)
+	entry._var = ptr._var;
+      else
+	entry._value = ptr._value.copyArrayItem();
     }
   }
 
@@ -176,7 +181,8 @@ public class ArrayValueImpl extends ArrayValue
     
     Entry prev = null;
     for (Entry ptr = _head; ptr != null; ptr = ptr._next) {
-      Entry ptrCopy = new Entry(ptr._key, ptr._value.copyArrayItem());
+      // Entry ptrCopy = new Entry(ptr._key, ptr._value.copyArrayItem());
+      Entry ptrCopy = new Entry(ptr);
 
       Entry head = entries[ptr._index];
 
@@ -344,8 +350,9 @@ public class ArrayValueImpl extends ArrayValue
    */
   public ArrayValue append(Value key, Value value)
   {
-    if (_isDirty)
+    if (_isDirty) {
       copyOnWrite();
+    }
 
     if (key instanceof UnsetValue) // php/4a4h
       key = createTailKey();
@@ -530,17 +537,19 @@ public class ArrayValueImpl extends ArrayValue
    */
   public Value getArray(Value index)
   {
-    if (_isDirty)
+    if (_isDirty) {
       copyOnWrite();
+    }
     
-    Value value = get(index);
+    Entry entry = getEntry(index);
+    Value value = entry.toValue();
 
     Value array = value.toAutoArray();
     
     if (value != array) {
       value = array;
 
-      put(index, value);
+      entry.set(array);
     }
 
     return value;

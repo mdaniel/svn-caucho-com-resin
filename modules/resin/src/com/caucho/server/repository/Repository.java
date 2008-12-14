@@ -341,24 +341,77 @@ abstract public class Repository
   /**
    * Returns true if the file is a blob.
    */
-  abstract public boolean isBlob(String sha1);
+  abstract public GitType getType(String sha1);
 
   /**
    * Returns true if the file is a blob.
    */
-  abstract public GitType getType(String sha1);
+  public final boolean isBlob(String sha1)
+  {
+    return GitType.BLOB == getType(sha1);
+  }
+
+  /**
+   * Returns true if the file is a tree
+   */
+  public final boolean isTree(String sha1)
+  {
+    return GitType.TREE == getType(sha1);
+  }
+
+  /**
+   * Returns true if the file is a commit
+   */
+  public final boolean isCommit(String sha1)
+  {
+    return GitType.COMMIT == getType(sha1);
+  }
   
   /**
    * Validates a file, checking that it and its dependencies exist.
    */
   public boolean validateFile(String sha1)
+    throws IOException
   {
     GitType type = getType(sha1);
 
-    if (type == null)
+    if (type == GitType.BLOB) {
+      if (log.isLoggable(Level.FINEST))
+	log.finest(this + " valid " + type + " " + sha1);
+      
+      return true;
+    }
+    else if (type == GitType.COMMIT) {
+      GitCommit commit = readCommit(sha1);
+
+      if (commit == null)
+	return false;
+      
+      return validateFile(commit.getTree());
+    }
+    else if (type == GitType.TREE) {
+      GitTree tree = readTree(sha1);
+
+      for (GitTree.Entry entry : tree.entries()) {
+	if (! validateFile(entry.getSha1())) {
+	  if (log.isLoggable(Level.FINE))
+	    log.fine(this + " invalid " + entry);
+
+	  return false;
+	}
+      }
+      
+      if (log.isLoggable(Level.FINEST))
+	log.finest(this + " valid " + type + " " + sha1);
+      
+      return true;
+    }
+    else {
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " invalid " + sha1);
+      
       return false;
-    
-    return true;
+    }
   }
 
   /**

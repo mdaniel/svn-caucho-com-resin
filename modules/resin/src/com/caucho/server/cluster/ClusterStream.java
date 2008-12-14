@@ -29,6 +29,7 @@
 
 package com.caucho.server.cluster;
 
+import com.caucho.bam.BamError;
 import com.caucho.hessian.io.*;
 import com.caucho.server.hmux.*;
 import com.caucho.util.*;
@@ -273,6 +274,31 @@ public class ClusterStream {
     Serializable result = (Serializable) hIn.readObject();
 
     return result;
+  }
+
+  public boolean queryError(long id,
+			    String to,
+			    String from,
+			    Serializable query,
+			    BamError error)
+    throws IOException
+  {
+    WriteStream out = getWriteStream();
+
+    out.write(HmuxRequest.ADMIN_QUERY_ERROR);
+    out.write(0);
+    out.write(8);
+
+    writeLong(id);
+    writeString(to);
+    writeString(from);
+
+    Hessian2StreamingOutput hOut = getHessianOutputStream();
+    
+    hOut.writeObject(query);
+    hOut.writeObject(error);
+
+    return true;
   }
 
   /**

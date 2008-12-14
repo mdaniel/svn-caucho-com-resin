@@ -98,8 +98,6 @@ public class QuercusClass {
 
   private final HashMap<String,ArrayList<StaticField>> _staticFieldExprMap;
 
-  private HashMap<String,Value> _staticFieldMap;
-
   private boolean _isModified;
 
   public QuercusClass(ClassDef classDef, QuercusClass parent)
@@ -592,6 +590,19 @@ public class QuercusClass {
   }
 
   /**
+   * Returns the static field names.
+   */
+  public ArrayList<String> getStaticFieldNames()
+  {
+    ArrayList<String> names = new ArrayList<String>();
+
+    if (_staticFieldExprMap != null)
+      names.addAll(_staticFieldExprMap.keySet());
+
+    return names;
+  }
+
+  /**
    * Adds a constant definition
    */
   public void addConstant(String name, Expr expr)
@@ -658,8 +669,6 @@ public class QuercusClass {
     if (_staticFieldExprMap.size() == 0)
       return;
 
-    _staticFieldMap = new LinkedHashMap<String,Value>();
-    
     for (Map.Entry<String,ArrayList<StaticField>> map
 	   : _staticFieldExprMap.entrySet()) {
       if (env.isInitializedClass(map.getKey()))
@@ -675,59 +684,50 @@ public class QuercusClass {
         else
           val = expr.eval(env);
 
-        _staticFieldMap.put(field._name, val);
+	String fullName = _className + "::" + field._name;
+	
+        env.setGlobalValue(fullName, val);
       }
       
       env.addInitializedClass(map.getKey());
     }
   }
-  
-  /*
-  public void setStaticField(String name, Value val)
-  {
-    Var var = new Var();
-    var.set(val);
-    
-    _staticFieldMap.put(name, var);
-  }
-  */
 
   public Var getStaticField(Env env, String name)
   {
+    Var var = getStaticFieldRec(env, name);
+
+    if (var != null)
+      return var;
+
+    /*
+    String fullName = _className + "::" + name;
+      
+    EnvVar envVar = env.getGlobalEnvVar(fullName);
+      
+    return envVar.getRef();
+    */
+
+    return null;
+  }
+
+  protected Var getStaticFieldRec(Env env, String name)
+  {
     Value value;
-
-    if (_staticFieldMap != null)
-      value = _staticFieldMap.get(name);
-    else
-      value = null;
-
-    if (value != null) {
-      String fullName = _className + "::" + name;
+    
+    String fullName = _className + "::" + name;
       
-      EnvVar envVar = env.getGlobalRaw(fullName);
+    EnvVar envVar = env.getGlobalRaw(fullName);
 
-      if (envVar == null) {
-        envVar = env.getGlobalEnvVar(fullName);
-        envVar.set(value);
-      }
-      
+    if (envVar != null)
       return envVar.getRef();
-    }
     
     QuercusClass parent = getParent();
     
     if (parent != null)
-      return parent.getStaticField(env, name);
+      return parent.getStaticFieldRec(env, name);
     else
       return null;
-  }
-  
-  /*
-   * Returns the static fields.
-   */
-  public HashMap<String, Value> getStaticFieldMap()
-  {
-    return _staticFieldMap;
   }
   
   //

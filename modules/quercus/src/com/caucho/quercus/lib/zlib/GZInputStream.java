@@ -232,11 +232,17 @@ public class GZInputStream extends InputStream
     byte flg;
 
     int length = _in.read(_tbuffer, 0, 10);
-    if (length != 10) {
+
+    if (length < 0) {
+      _isGzip = false;
+      return;
+    }
+    else if (length != 10) {
       _isGzip = false;
       _in.unread(_tbuffer, 0, length);
       return;
     }
+    
     if (_tbuffer[0] != (byte)0x1f || _tbuffer[1] != (byte)0x8b) {
       _isGzip = false;
       _in.unread(_tbuffer, 0, length);

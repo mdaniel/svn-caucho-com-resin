@@ -1384,8 +1384,8 @@ public class FileModule extends AbstractQuercusModule {
 
           return input;
         } catch (IOException e) {
-          
           log.log(Level.FINE, e.toString(), e);
+	  
           env.warning(L.l("{0} cannot be read", path.getFullPath()));
 
           return null;

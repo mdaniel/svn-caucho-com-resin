@@ -207,7 +207,7 @@ abstract public class AbstractBamConnection implements BamConnection {
     queryGet(to, query, callback);
 
     if (! callback.waitFor())
-      throw new RuntimeException(this + " queryGet timeout to=" + to + " query=" + query);
+      throw new BamTimeoutException(this + " queryGet timeout to=" + to + " query=" + query);
     else if (callback.getError() != null)
       throw callback.getError().createException();
     else

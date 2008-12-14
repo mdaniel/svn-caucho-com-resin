@@ -51,11 +51,10 @@ public class ZlibProtocolWrapper extends ProtocolWrapper {
     boolean useIncludePath = 
       (options.toLong() & StreamModule.STREAM_USE_PATH) != 0;
 
-    ArrayValue components = (ArrayValue) UrlModule.parse_url(env, path, NullValue.NULL);
-
-    Value pathComponent = components.get(env.createString("path"));
+    Value pathComponent
+      = UrlModule.parse_url(env, path, UrlModule.PHP_URL_PATH);
     
-    if (pathComponent == UnsetValue.UNSET) {
+    if (! pathComponent.isset()) {
       log.info(L.l("no path component found in '{0}'", path.toString()));
       return null;
     }

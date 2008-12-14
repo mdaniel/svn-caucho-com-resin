@@ -13,6 +13,13 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>quercus: compress.zlib parsing error (#3171, rep by koreth)</li>
+<li>quercus: $_SERVER and $HTTP_SERVER_VARS not identical (#3168, rep by koreth)</li>
+<li>quercus: stream_get_meta_data extra logging (#3170, rep by koreth)</li>
+<li>quercus: class static fields must be handled as mangled globals (#3155, #3165, rep by koreth)</li>
+<li>quercus: DoubleValue issues in assignments, e.g. for commas (#3163, rep by koreth)</li>
+<li>quercus: array copy-on-write issues with latest optimizations (#3160, rep by koreth)</li>
+<li>quercus: unset compilation issues with latest optimizations (#3157, rep by koreth)</li>
 <li>jsf: invalid input is not redisplayed in JSF UI Input (#3057, rep by freemant)</li>
 <li>quercus: resin_save_state()/resin_restore_state() (rep by koreth)</li>
 <li>server: 304 was not properly ignoring content (#3089, rep by Andrew Phillips)</li>

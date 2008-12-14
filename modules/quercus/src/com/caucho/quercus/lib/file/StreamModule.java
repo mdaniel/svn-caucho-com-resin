@@ -336,8 +336,6 @@ public class StreamModule extends AbstractQuercusModule {
     if (stream == null)
       return BooleanValue.FALSE;
     
-    env.stub("stream_get_meta_data");
-    
     ArrayValue array = new ArrayValueImpl();    
 
     boolean isTimeout = false;

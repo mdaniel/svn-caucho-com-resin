@@ -339,6 +339,9 @@ public class BamError implements Serializable {
     switch (group) {
     case REMOTE_CONNECTION_FAILED:
       return new BamRemoteConnectionFailedException(this);
+      
+    case FEATURE_NOT_IMPLEMENTED:
+      return new BamFeatureNotImplementedException(this);
 
     default:
       return new BamErrorPacketException(this);
@@ -396,10 +399,14 @@ public class BamError implements Serializable {
       UNSUPPORTED_STANZA_TYPE,
       UNSUPPORTED_VERSION,
       XML_NOT_WELL_FORMED,
+
+      FEATURE_NOT_IMPLEMENTED
   }
 
   static {
     _errorMap.put(REMOTE_CONNECTION_FAILED,
 		  ErrorGroup.REMOTE_CONNECTION_FAILED);
+    _errorMap.put(FEATURE_NOT_IMPLEMENTED,
+		  ErrorGroup.FEATURE_NOT_IMPLEMENTED);
   }
 }

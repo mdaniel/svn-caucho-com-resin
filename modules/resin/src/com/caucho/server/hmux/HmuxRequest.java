@@ -197,8 +197,8 @@ public class HmuxRequest extends AbstractHttpRequest
   public static final int ADMIN_QUERY_RESULT =  '6';
   public static final int BAM_QUERY_RESULT =    '7';
   
-  public static final int ADMIN_ERROR =         '8';
-  public static final int BAM_ERROR =           '9';
+  public static final int ADMIN_QUERY_ERROR =   '8';
+  public static final int BAM_QUERY_ERROR =     '9';
   
   public static final int ADMIN_PRESENCE =      '-';
   public static final int BAM_PRESENCE =        '=';
@@ -1049,6 +1049,28 @@ public class HmuxRequest extends AbstractHttpRequest
 	  break;
 	}
 
+      case ADMIN_QUERY_ERROR:
+	{
+	  len = (is.read() << 8) + is.read();
+	  long id = readLong(is);
+
+	  readHmtpQueryError(code, is, id, _server.getAdminStream());
+	  
+	  hasURI = true;
+	  break;
+	}
+
+      case BAM_QUERY_ERROR:
+	{
+	  len = (is.read() << 8) + is.read();
+	  long id = readLong(is);
+
+	  readHmtpQueryError(code, is, id, _server.getBamStream());
+	  
+	  hasURI = true;
+	  break;
+	}
+
       default:
         len = (is.read() << 8) + is.read();
 
@@ -1238,6 +1260,27 @@ public class HmuxRequest extends AbstractHttpRequest
     }
 
     brokerStream.queryResult(id, to, from, value);
+  }
+
+  private void readHmtpQueryError(int code,
+				  ReadStream is,
+				   long id,
+				   BamStream brokerStream)
+    throws IOException
+  {
+    String to = readString(is);
+    String from = readString(is);
+
+    Serializable query = (Serializable) readObject();
+    BamError error = (BamError) readObject();
+
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(dbgId() + (char) code + "-r: HMTP queryError("
+		+ query + ", error=" + error + ", id=" + id
+		+ " to=" + to + " from=" + from + ")");
+    }
+
+    brokerStream.queryError(id, to, from, query, error);
   }
 
   private Object readObject()

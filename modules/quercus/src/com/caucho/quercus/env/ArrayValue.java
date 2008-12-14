@@ -1185,6 +1185,17 @@ abstract public class ArrayValue extends Value {
       _value = value;
     }
 
+    public Entry(Entry entry)
+    {
+      _key = entry._key;
+      _var = entry._var;
+
+      if (_var == null)
+	_value = entry._value.copyArrayItem();
+      else
+	_value = NullValue.NULL;
+    }
+
     public Entry getNext()
     {
       return _next;
@@ -1209,7 +1220,7 @@ abstract public class ArrayValue extends Value {
     {
       // The value may be a var
       // XXX: need test
-      return _var != null ? _var.toValue() : _var;
+      return _var != null ? _var.toValue() : _value;
     }
 
     /**
@@ -1242,6 +1253,20 @@ abstract public class ArrayValue extends Value {
 
       _value = value;
       _var = null;
+
+      return oldValue;
+    }
+
+    public Value set(Value value)
+    {
+      Value oldValue = _value;
+
+      if (value instanceof Var)
+	_var = (Var) value;
+      else if (_var != null)
+	_var.set(value);
+      else
+	_value = value;
 
       return oldValue;
     }
