@@ -92,7 +92,7 @@ public class ResinImport extends ResinControl
     }
     else if (_path.canRead() && ! _path.isDirectory()) {
     }
-    else if (_isOptional) {
+    else if (_isOptional && ! _path.exists()) {
       log.finer(L.l("resin:import '{0}' is not readable.", _path));
 
       Environment.addDependency(new Depend(_path));

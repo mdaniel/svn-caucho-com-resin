@@ -151,13 +151,13 @@ public class CGIServlet extends GenericServlet {
 	pathInfo = null;
     }
 
-    String realPath = req.getRealPath(scriptPath);
+    String realPath = getServletContext().getRealPath(scriptPath);
 
     Path vfsPath = Vfs.lookup(realPath);
 
     if (! vfsPath.canRead() || vfsPath.isDirectory()) {
       if (log.isLoggable(Level.FINE))
-        log.fine(L.l("script `{0}' is unreadable", vfsPath));
+        log.fine(L.l("script '{0}' is unreadable", vfsPath));
 
       res.sendError(res.SC_NOT_FOUND);
 

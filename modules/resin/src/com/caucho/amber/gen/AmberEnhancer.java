@@ -497,7 +497,9 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       init.invoke(null, Vfs.lookup());
 
       return (Boolean) modified.invoke(null);
-    } catch (Exception e) {
+    } catch (ClassNotFoundException e) {
+      log.log(Level.FINEST, e.toString(), e);
+    } catch (NoSuchMethodException e) {
       log.log(Level.FINEST, e.toString(), e);
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);

@@ -3835,7 +3835,7 @@ public class Env {
       if (qcl != null)
 	_qClass[id] = qcl;
       else
-	throw new QuercusException(L.l("'{0}' is an unknown class", name));
+	return null;
 
       return qcl;
     }
@@ -3943,7 +3943,13 @@ public class Env {
     ClassDef def = _classDef[classId];
 
     if (def == null) {
-      return findClass(classId, true, true);
+      QuercusClass cl = findClass(classId, true, true);
+      
+      if (cl != null)
+	return cl;
+      else
+	throw new QuercusException(L.l("'{0}' is an unknown class",
+				       _quercus.getClassName(classId)));
     }
 
     int parentId = -1;

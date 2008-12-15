@@ -237,18 +237,21 @@ public class Host extends WebAppContainer
    */
   public String getURL()
   {
-    if (_url != null)
+    if (_url != null && ! "".equals(_url))
       return _url;
-    else if (_hostName == null || _hostName.equals("")) {
+    else if (_hostName == null
+	     || _hostName.equals("")
+	     || _hostName.equals("default")) {
       Server server = getServer();
 
       if (server == null)
-	return "";
+	return "http://localhost";
 
       for (Port port : server.getPorts()) {
 	if ("http".equals(port.getProtocolName())) {
 	  String address = port.getAddress();
-	  if (address == null)
+	  
+	  if (address == null || address.equals(""))
 	    address = "localhost";
 	  
 	  return "http://" + address + ":" + port.getPort();
@@ -258,18 +261,20 @@ public class Host extends WebAppContainer
       for (Port port : server.getPorts()) {
 	if ("https".equals(port.getProtocolName())) {
 	  String address = port.getAddress();
-	  if (address == null)
+	  if (address == null || address.equals(""))
 	    address = "localhost";
 	  
 	  return "https://" + address + ":" + port.getPort();
 	}
       }
 
-      return "";
+      return "http://localhost";
     }
     else if (_hostName.startsWith("http:")
 	     || _hostName.startsWith("https:"))
       return _hostName;
+    else if (_hostName.equals("") || _hostName.equals("default"))
+      return "http://localhost";
     else
       return "http://" + _hostName;
   }

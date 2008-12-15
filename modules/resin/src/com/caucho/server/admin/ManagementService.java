@@ -85,7 +85,7 @@ abstract public class ManagementService
 
     WebAppConfig webAppConfig = new WebAppConfig();
     webAppConfig.setId(_serviceName);
-    webAppConfig.setRootDirectory(new RawString("/admin-dummy-root"));
+    webAppConfig.setRootDirectory(new RawString("memory:/admin-dummy-root"));
 
     hostConfig.addBuilderProgram(new PropertyValueProgram("web-app", webAppConfig));
 

@@ -174,7 +174,7 @@ abstract public class AbstractConfigIntrospector {
   public void validateConstructor(Class type)
     throws ConfigException
   {
-    for (Constructor ctor : type.getConstructors()) {
+    for (Constructor ctor : type.getDeclaredConstructors()) {
       Class []param = ctor.getParameterTypes();
 
       if (param.length == 0

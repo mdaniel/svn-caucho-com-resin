@@ -13,6 +13,11 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>config: webApp.url should default to http://localhost instead of http://default (#3035, rep by skipper13)</li>
+<li>config: resin:import will throw config exception is include file exists bug is not readable (#3076, rep by dicr)</li>
+<li>server: reduce default BlockManager size (#3054, rep by Daniel Vydra)</li>
+<li>amber: @Entity wasn't allowing protected constructor (#3071, rep by dicr)</li>
+<li>admin: log-service default changed to 'warning' (#3084, rep by Bryant Harris)</li>
 <li>build: debian web user should be 'www-data' (#3124, rep by Geert Van Damme)</li>
 <li>quercus: $GLOBALS array regression (#3176, rep by koreth)</li>
 <li>quercus: compress.zlib parsing error (#3171, rep by koreth)</li>

@@ -50,7 +50,7 @@ import java.util.HashMap;
  */
 public class RequestAdapter extends RequestWrapper
   implements CauchoRequest {
-  static final L10N L = new L10N(RequestAdapter.class);
+  private static final L10N L = new L10N(RequestAdapter.class);
 
   static final int MAX_DEPTH = 64;
   
@@ -82,7 +82,6 @@ public class RequestAdapter extends RequestWrapper
 
   protected RequestAdapter()
   {
-    super(null);
   }
   
   protected RequestAdapter(HttpServletRequest request, WebApp app)

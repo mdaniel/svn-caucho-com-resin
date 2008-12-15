@@ -97,12 +97,12 @@ public class Database
 
     long minSize = 1 * 1024 * 1024;
 
-    long memorySize = Runtime.getRuntime().maxMemory() / 16;
+    long memorySize = Runtime.getRuntime().maxMemory() / 64;
 
-    if (minSize < memorySize)
-      minSize = memorySize;
+    if (memorySize < minSize)
+      memorySize = minSize;
 
-    _blockManager = BlockManager.create((int) (minSize / Store.BLOCK_SIZE));
+    _blockManager = BlockManager.create((int) (memorySize / Store.BLOCK_SIZE));
   }
 
   /**
