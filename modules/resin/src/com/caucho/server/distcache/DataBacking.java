@@ -124,8 +124,8 @@ public class DataBacking implements AlarmListener {
     _updateExpiresQuery = ("UPDATE " + _tableName
 			   + " SET expire_time=?"
 			   + " WHERE expire_time<? AND EXISTS "
-			   + "      (SELECT * FROM " + _mapTableName + " AS m"
-			   +   "       WHERE id = m.value)");
+			   + "      (SELECT * FROM " + _mapTableName
+			   +   "       WHERE " + _tableName + ".id = " + _mapTableName + ".value)");
 
     _timeoutQuery = ("DELETE FROM " + _tableName
 		     + " WHERE expire_time < ?");

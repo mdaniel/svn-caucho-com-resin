@@ -541,7 +541,7 @@ public class ArrayValueImpl extends ArrayValue
       copyOnWrite();
     }
     
-    Entry entry = getEntry(index);
+    Entry entry = createEntry(index);
     Value value = entry.toValue();
 
     Value array = value.toAutoArray();

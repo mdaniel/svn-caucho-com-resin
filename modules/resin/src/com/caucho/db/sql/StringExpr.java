@@ -82,6 +82,27 @@ class StringExpr extends Expr {
     return _value;
   }
 
+  /**
+   * Evaluates the expression to a buffer
+   *
+   * @param result the result buffer
+   *
+   * @return the length of the result
+   */
+  public int evalToBuffer(QueryContext context,
+			  byte []buffer,
+			  int offset)
+    throws SQLException
+  {
+    String v = evalString(context);
+
+    for (int i = 0; i < v.length(); i++) {
+      buffer[offset + i] = (byte) v.charAt(i);
+    }
+
+    return v.length();
+  }
+
   public String toString()
   {
     return "'" + _value + "'";

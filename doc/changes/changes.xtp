@@ -13,6 +13,8 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>build: debian web user should be 'www-data' (#3124, rep by Geert Van Damme)</li>
+<li>quercus: $GLOBALS array regression (#3176, rep by koreth)</li>
 <li>quercus: compress.zlib parsing error (#3171, rep by koreth)</li>
 <li>quercus: $_SERVER and $HTTP_SERVER_VARS not identical (#3168, rep by koreth)</li>
 <li>quercus: stream_get_meta_data extra logging (#3170, rep by koreth)</li>

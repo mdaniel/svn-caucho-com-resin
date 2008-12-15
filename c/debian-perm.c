@@ -53,10 +53,10 @@ main(int argc, char **argv)
     return 0;
   }
 
-  user = getpwnam("resin");
+  user = getpwnam("www-data");
 
   if (! user) {
-    fprintf(stderr, "can't find resin");
+    fprintf(stderr, "can't find www-data");
   }
   
   chown_rec("dist-debian", 0, 0);
