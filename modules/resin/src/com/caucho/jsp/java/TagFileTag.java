@@ -97,6 +97,12 @@ public class TagFileTag extends GenericTag {
     _children = null;
   }
 
+  @Override
+  public boolean hasCustomTag()
+  {
+    return super.hasCustomTag() || (_body != null && _body.hasCustomTag());
+  }
+
   /**
    * Generates the code for a custom tag.
    *
