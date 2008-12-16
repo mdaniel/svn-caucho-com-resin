@@ -244,6 +244,18 @@ public class BamError implements Serializable {
   }
 
   /**
+   * Misc error
+   *
+   * @param text an error text
+   */
+  public BamError(String text)
+  {
+    _type = TYPE_CANCEL;
+    _group = INTERNAL_SERVER_ERROR;
+    _text = text;
+  }
+
+  /**
    * An error response
    *
    * @param type the error type

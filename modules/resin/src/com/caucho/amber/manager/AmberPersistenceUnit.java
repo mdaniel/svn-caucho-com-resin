@@ -61,6 +61,7 @@ import com.caucho.util.LruCache;
 import com.caucho.webbeans.manager.*;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
@@ -231,8 +232,11 @@ public class AmberPersistenceUnit {
       name = "default";
 
     WebBeansContainer webBeans = WebBeansContainer.create(_amberContainer.getParentClassLoader());
-    webBeans.addSingleton(new AmberEntityManagerFactory(this), name);
-    webBeans.addSingleton(new EntityManagerProxy(this), name);
+
+    webBeans.addSingleton(new AmberEntityManagerFactory(this), name,
+			  EntityManagerFactory.class);
+    webBeans.addSingleton(new EntityManagerProxy(this), name,
+			  EntityManager.class);
   }
 
   public EntityManager getEntityManager()

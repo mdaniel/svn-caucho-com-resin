@@ -325,7 +325,6 @@ public class ManyToOneField extends CascadableField {
     ArrayList<AmberColumn> targetIdColumns = _targetType.getId().getColumns();
 
     while (targetIdColumns.size() == 0) {
-
       parentType = parentType.getParentType();
 
       if (parentType == null)
@@ -335,7 +334,6 @@ public class ManyToOneField extends CascadableField {
     }
 
     for (AmberColumn keyColumn : targetIdColumns) {
-
       String columnName;
 
       columnName = getName() + '_' + keyColumn.getName();
@@ -352,7 +350,9 @@ public class ManyToOneField extends CascadableField {
           joinColumn = _joinColumnMap.get(keyColumn.getName());
 
         if (joinColumn != null) {
-          columnName = joinColumn.getName();
+	  // jpa/0h0d
+	  if (! "".equals(joinColumn.getName()))
+	    columnName = joinColumn.getName();
 
           nullable = joinColumn.isNullable();
           unique = joinColumn.isUnique();

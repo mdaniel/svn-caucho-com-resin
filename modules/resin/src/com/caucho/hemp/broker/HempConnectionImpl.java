@@ -29,11 +29,7 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.bam.BamQueryCallback;
-import com.caucho.bam.BamStream;
-import com.caucho.bam.BamError;
-import com.caucho.bam.BamConnection;
-import com.caucho.bam.BamService;
+import com.caucho.bam.*;
 
 import com.caucho.util.*;
 import java.io.Serializable;
@@ -157,10 +153,12 @@ public class HempConnectionImpl implements BamConnection
 
     queryGet(to, query, callback);
 
-    if (callback.waitFor())
-      return callback.getResult();
+    if (! callback.waitFor())
+      throw new BamTimeoutException(this + " queryGet timeout to=" + to + " query=" + query);
+    else if (callback.getError() != null)
+      throw callback.getError().createException();
     else
-      throw new RuntimeException(String.valueOf(callback.getError()));
+      return callback.getResult();
   }
 
   /**

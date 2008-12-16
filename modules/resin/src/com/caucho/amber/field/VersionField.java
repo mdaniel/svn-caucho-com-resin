@@ -38,6 +38,7 @@ import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.util.logging.Logger;
+import java.sql.Timestamp;
 
 /**
  * Configuration for a bean's field
@@ -90,7 +91,12 @@ public class VersionField extends PropertyField {
     // jpa/0x02
     out.println();
     out.println("if (" + generateIsNull() + ")");
-    out.println("  " + generateSuperSetter("this", "new Integer(1)") + ";");
+
+    if (type.getJavaTypeName().equals(Timestamp.class.getName()))
+      out.println("  " + generateSuperSetter("this", "new java.sql.Timestamp(com.caucho.util.Alarm.getExactTime())") + ";");
+    else
+      out.println("  " + generateSuperSetter("this", "new Integer(1)") + ";");
+      
     out.println("else");
     out.println("  " + generateSuperSetter("this", type.generateIncrementVersion(getter)) + ";");
 

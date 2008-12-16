@@ -396,8 +396,8 @@ public class WebBeansContainer
     if (type == null)
       return;
     
-    if (log.isLoggable(Level.FINE))
-      log.fine(bean + "(" + type + ") added to " + this);
+    if (log.isLoggable(Level.FINEST))
+      log.finest(bean + "(" + type + ") added to " + this);
 
     WebComponent webComponent;
 
@@ -1019,6 +1019,35 @@ public class WebBeansContainer
 	throw new IllegalArgumentException(L.l("'{0}' is an invalid binding annotation because it does not have a @BindingType meta-annotation",
 					       ann));
       }
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns the web beans component with a given binding list.
+   */
+  public Set<Bean> resolveAllByType(Class type)
+  {
+    _wbWebBeans.init();
+
+    Annotation []bindings = new Annotation[0];
+    
+    WebComponent component = getWebComponent(type);
+
+    if (component != null) {
+      Set beans = component.resolve(bindings);
+
+      if (log.isLoggable(Level.FINER))
+	log.finer(this + " bind(" + getSimpleName(type)
+		  + "," + toList(bindings) + ") -> " + beans);
+
+      if (beans != null && beans.size() > 0)
+	return beans;
+    }
+    
+    if (_parent != null) {
+      return _parent.resolveAllByType(type);
     }
 
     return null;

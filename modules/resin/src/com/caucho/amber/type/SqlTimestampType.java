@@ -135,7 +135,7 @@ public class SqlTimestampType extends AmberType {
                                  String value)
     throws IOException
   {
-    value = "new java.sql.Timestamp(new java.util.Date().getTime())";
+    value = "new java.sql.Timestamp(com.caucho.util.Alarm.getExactTime())";
     out.println(pstmt + ".setTimestamp(" + index + "++, " + value + ");");
   }
 
@@ -146,7 +146,7 @@ public class SqlTimestampType extends AmberType {
   public String generateIncrementVersion(String value)
     throws IOException
   {
-    return "new java.sql.Timestamp(new java.util.Date().getTime())";
+    return "new java.sql.Timestamp(com.caucho.util.Alarm.getExactTime())";
   }
 
   /**

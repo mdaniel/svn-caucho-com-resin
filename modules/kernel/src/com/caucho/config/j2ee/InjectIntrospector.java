@@ -764,7 +764,7 @@ public class InjectIntrospector {
   {
     WebBeansContainer webBeans = WebBeansContainer.create();
 
-    Set<Bean> beans = webBeans.resolveByType(type);
+    Set<Bean> beans = webBeans.resolveAllByType(type);
 
     if (beans == null || beans.size() == 0)
       return null;

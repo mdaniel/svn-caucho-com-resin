@@ -576,6 +576,16 @@ public class SelectResult {
 	
 	return value;
       }
+      
+    case Column.INT:
+      {
+	long value = (((long) read() << 24) +
+		      ((long) read() << 16) +
+		      ((long) read() << 8) +
+		      ((long) read()));
+	
+	return value;
+      }
 
     case Column.VARCHAR:
       {

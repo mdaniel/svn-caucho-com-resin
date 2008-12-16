@@ -1684,7 +1684,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   public static JoinColumn getJoinColumn(JoinColumns joinColumns,
-                                          String keyName)
+					 String keyName)
   {
     if (joinColumns == null)
       return null;

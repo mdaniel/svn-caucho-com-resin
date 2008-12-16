@@ -983,6 +983,12 @@ public final class SessionManager implements AlarmListener
                                    HttpServletRequest request,
 				   boolean fromCookie)
   {
+    if (_sessions == null) {
+      log.fine(this + " createSession called when sessionManager closed");
+      
+      return null;
+    }
+    
     String id = oldId;
 
     if (id == null || id.length() < 4

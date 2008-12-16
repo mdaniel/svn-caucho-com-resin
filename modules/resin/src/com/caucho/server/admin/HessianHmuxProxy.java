@@ -63,8 +63,12 @@ public class HessianHmuxProxy implements InvocationHandler {
   public static <X> X create(Path url, Class<X> api)
   {
     Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+
+    if (loader == null)
+      loader = ClassLoader.getSystemClassLoader();
     
-    return (X) Proxy.newProxyInstance(thread.getContextClassLoader(),
+    return (X) Proxy.newProxyInstance(loader,
 				      new Class[] { api },
 				      new HessianHmuxProxy(url));
   }
