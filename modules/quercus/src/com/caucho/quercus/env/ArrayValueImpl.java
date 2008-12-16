@@ -142,6 +142,8 @@ public class ArrayValueImpl extends ArrayValue
   {
     this();
     
+    root.putCopy(copy, this);
+    
     for (Entry ptr = copy.getHead(); ptr != null; ptr = ptr._next) {
       Value value = ptr._var != null ? ptr._var.toValue() : ptr._value;
       
@@ -281,7 +283,14 @@ public class ArrayValueImpl extends ArrayValue
   @Override
   public Value copyTree(Env env, CopyRoot root)
   {
-    return new ArrayCopyValueImpl(env, this, root);
+    // php/420d
+    
+    Value copy = root.getCopy(this);
+    
+    if (copy != null)
+      return copy;
+    else
+      return new ArrayCopyValueImpl(env, this, root);
   }
   
   /**

@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import java.util.IdentityHashMap;
+
 /**
  * Root for saving copy information for the serialization cache.
  */
@@ -39,6 +41,9 @@ public class CopyRoot implements EnvCleanup
   private Value _root;
   private boolean _isModified;
 
+  private IdentityHashMap<Value,Value> _copyMap
+    = new IdentityHashMap<Value,Value>();
+  
   public CopyRoot(UnserializeCacheEntry entry)
   {
     _entry = entry;
@@ -75,6 +80,16 @@ public class CopyRoot implements EnvCleanup
     // clear when setting root since the unserialization process itself
     // sets the modify flag
     _isModified = false;
+  }
+  
+  public void putCopy(Value value, Value copy)
+  {
+    _copyMap.put(value, copy);
+  }
+  
+  public Value getCopy(Value value)
+  {
+    return _copyMap.get(value);
   }
 
   public void allocate(Env env)

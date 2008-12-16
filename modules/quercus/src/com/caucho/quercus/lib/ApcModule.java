@@ -186,7 +186,7 @@ public class ApcModule extends AbstractQuercusModule {
     Value value = entry.getValue(env);
     
     if (value != null)
-      initObject(env, value);
+      initObject(env, new IdentityHashMap<Value,Value>(), value);
 
     if (value != null) {
       return value;
@@ -198,9 +198,16 @@ public class ApcModule extends AbstractQuercusModule {
   /*
    * Updates the value's class with a currently available one.
    */
-  private static void initObject(Env env, Value value)
+  private static void initObject(Env env,
+                                 IdentityHashMap<Value,Value> valueMap,
+                                 Value value)
   {
     if (value.isObject()) {
+      if (valueMap.containsKey(value))
+        return;
+      
+      valueMap.put(value, value);
+      
       ObjectValue obj = (ObjectValue) value.toValue().toObject(env);
 
       String className;
@@ -218,10 +225,15 @@ public class ApcModule extends AbstractQuercusModule {
       }
     }
     else if (value.isArray()) {
+      if (valueMap.containsKey(value))
+        return;
+      
+      valueMap.put(value, value);
+      
       Iterator<Value> iter = value.getValueIterator(env);
       
       while (iter.hasNext()) {
-        initObject(env, iter.next());
+        initObject(env, valueMap, iter.next());
       }
     }
   }

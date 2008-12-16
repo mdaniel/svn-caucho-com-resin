@@ -77,6 +77,8 @@ public class ObjectExtValue extends ObjectValue
   public ObjectExtValue(Env env, ObjectExtValue copy, CopyRoot root)
   {
     super(copy.getQuercusClass());
+    
+    root.putCopy(copy, this);
 
     _methodMap = copy._methodMap;
 
@@ -1221,7 +1223,14 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value copyTree(Env env, CopyRoot root)
   {
-    return new CopyObjectExtValue(env, this, root);
+    // php/420c
+    
+    Value copy = root.getCopy(this);
+    
+    if (copy != null)
+      return copy;
+    else
+      return new CopyObjectExtValue(env, this, root);
   }
 
   /**
@@ -1917,7 +1926,12 @@ public class ObjectExtValue extends ObjectValue
 
     Entry copyTree(Env env, CopyRoot root)
     {
-      return new Entry(_key, _value.copyTree(env, root), _visibility);
+      Value copy = root.getCopy(_value);
+      
+      if (copy == null)
+        copy = _value.copyTree(env, root);
+
+      return new Entry(_key, copy, _visibility);
     }
 
     public int compareTo(Map.Entry<Value, Value> other)
