@@ -94,12 +94,12 @@ public class ArrayValueImpl extends ArrayValue
       Value value = ptr._var != null ? ptr._var : ptr._value;
       
       // php/0662 for copy
-      Entry entry = getEntry(ptr._key);
+      Entry entry = createEntry(ptr._key);
 
       if (ptr._var != null)
-	entry._var = ptr._var;
+        entry._var = ptr._var;
       else
-	entry._value = ptr._value.copyArrayItem();
+        entry._value = ptr._value.copyArrayItem();
     }
   }
 
