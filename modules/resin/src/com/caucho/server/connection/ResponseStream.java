@@ -69,7 +69,6 @@ class ResponseStream extends ToByteResponseStream {
   private int _contentLength;
   // True for the first chunk
   private boolean _isFirst;
-  private boolean _isCommitted;
 
   private boolean _allowFlush = true;
   private boolean _isHead = false;
@@ -102,7 +101,6 @@ class ResponseStream extends ToByteResponseStream {
     _isClosed = false;
     _isHead = false;
     _cacheStream = null;
-    _isCommitted = false;
     _isFirst = true;
     _bufferStartOffset = 0;
   }
@@ -118,7 +116,7 @@ class ResponseStream extends ToByteResponseStream {
   /**
    * Sets the underlying cache stream for a cached request.
    *
-   * @param cache the cache stream.
+   * @param cacheStream the cache stream.
    */
   public void setByteCacheStream(OutputStream cacheStream)
   {

@@ -66,6 +66,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   
   private boolean _isHead;
   private boolean _isClosed;
+  protected boolean _isCommitted;
   protected boolean _isFinished;
 
   private EncodingWriter _toByte = Encoding.getLatin1Writer();
@@ -94,6 +95,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     _isHead = false;
     _isClosed = false;
     _isFinished = false;
+    _isCommitted = false;
     _isOutputStreamOnly = false;
 
     _toByte = Encoding.getLatin1Writer();
@@ -482,6 +484,8 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     _charLength = 0;
 
     if (charLength > 0 && ! _isOutputStreamOnly) {
+      _isCommitted = true;
+      
       _toByte.write(this, _charBuffer, 0, charLength);
 
       if (_bufferCapacity <= _byteLength + _bufferSize)
@@ -520,6 +524,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   protected void flushByteBuffer()
     throws IOException
   {
+    _isCommitted = true;
     _tail.setLength(_byteLength);
     _bufferSize += _byteLength;
     _byteLength = 0;
