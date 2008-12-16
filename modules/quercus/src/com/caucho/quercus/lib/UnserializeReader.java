@@ -30,9 +30,6 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.program.Visibility;
-import com.caucho.util.IntMap;
-import com.caucho.util.IntSet;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
@@ -290,47 +287,52 @@ public final class UnserializeReader {
       }
     case 'R':
       {
-        _useReference = true;
-	
         expect(':');
 
-        int value = (int) readInt();
+        int index = (int) readInt();
 
         expect(';');
         
-        if (value - 1 >= _valueList.size()) {
-          throw new IOException(L.l("reference out of range: {0}, size {1}",
-                                    value - 1, _valueList.size()));
+        if (index - 1 >= _valueList.size()) {
+          throw new IOException(L.l("reference out of range: {0}, size {1}, index {2}",
+                                    index - 1, _valueList.size(), _index));
           //return BooleanValue.FALSE;
         }
         
-        Value ref = _valueList.get(value - 1);
-        
+        Value ref = _valueList.get(index - 1);
+
         return ref;
       }
     case 'r':
       {
-        _useReference = true;
-        
         expect(':');
 
-        int value = (int) readInt();
+        int index = (int) readInt();
 
         expect(';');
         
-        if (value - 1 >= _valueList.size()) {
-          throw new IOException(L.l("reference out of range: {0}, size {1}",
-                                    value - 1, _valueList.size()));
+        if (index - 1 >= _valueList.size()) {
+          throw new IOException(L.l("reference out of range: {0}, size {1}, index {2}",
+                                    index - 1, _valueList.size(), _index));
           //return BooleanValue.FALSE;
         }
         
-        Value ref = _valueList.get(value - 1).copy();
+        Value value = _valueList.get(index - 1).copy();
         
-        return ref;
+        if (_useReference)
+          value = createReference(value);
+        
+        return value;
+        
       }
 
     default:
-      return BooleanValue.FALSE;
+      throw new IOException(L.l("option not recognized '{0}' (0x{1}) at index {2}",
+                                String.valueOf((char) ch),
+                                Integer.toHexString(ch),
+                                _index));
+      
+      //return BooleanValue.FALSE;
     }
   }
   
@@ -501,29 +503,29 @@ public final class UnserializeReader {
           switch (read()) {
             case 's':
             case 'S':
-              {
-                expect(':');
-                int keyLen = (int) readInt();
-                expect(':');
-                expect('"');
+            {
+              expect(':');
+              int keyLen = (int) readInt();
+              expect(':');
+              expect('"');
 
-                _index += keyLen;
+              _index += keyLen;
 
-                expect('"');
-                expect(';');
+              expect('"');
+              expect(';');
                 
-                break;
-              }
+              break;
+            }
 
             case 'i':
-              {
-                expect(':');
+            {
+              expect(':');
 
-                for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
-                }
-                
-                break;
+              for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
               }
+                
+              break;
+            }
           }
 
           populateReferenceList();
@@ -545,9 +547,9 @@ public final class UnserializeReader {
 
       case 'R':
       {
-        _useReference = true;
-        
         _referenceList.add(Boolean.FALSE);
+        
+        _useReference = true;
         
         expect(':');
 
@@ -562,10 +564,10 @@ public final class UnserializeReader {
       
       case 'r':
       {
-        _useReference = true;
-        
         _referenceList.add(Boolean.FALSE);
         
+        _useReference = true;
+
         expect(':');
 
         int value = (int) readInt();
