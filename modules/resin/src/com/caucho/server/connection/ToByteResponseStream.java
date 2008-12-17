@@ -484,12 +484,12 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     _charLength = 0;
 
     if (charLength > 0 && ! _isOutputStreamOnly) {
-      _isCommitted = true;
-      
       _toByte.write(this, _charBuffer, 0, charLength);
 
       if (_bufferCapacity <= _byteLength + _bufferSize)
 	flushByteBuffer();
+      // jsp/0182 jsp/0502 jsp/0503
+      _isCommitted = true;
     }
   }
 
@@ -524,7 +524,6 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   protected void flushByteBuffer()
     throws IOException
   {
-    _isCommitted = true;
     _tail.setLength(_byteLength);
     _bufferSize += _byteLength;
     _byteLength = 0;
@@ -546,6 +545,8 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
       ptr = next;
     } while (ptr != null);
 
+    // jsp/0182 jsp/0502 jsp/0503
+    _isCommitted = true;
     _tail = _head;
     _byteBuffer = _tail.getBuffer();
     _bufferSize = 0;
