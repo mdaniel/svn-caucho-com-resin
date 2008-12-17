@@ -3600,7 +3600,7 @@ public class Env {
   }
 
   /**
-   * Returns an introspected Java class defintion.
+   * Returns an introspected Java class definition.
    */
   public JavaClassDef getJavaClassDefinition(String className)
   {
@@ -3618,12 +3618,12 @@ public class Env {
   public JavaClassDef getJavaClassDefinition(Class type)
   { 
     JavaClassDef def = _quercus.getJavaClassDefinition(type, type.getName());
-
+    
     return def;
   }
   
   private JavaClassDef getJavaClassDefinition(String className,
-					      boolean useImport)
+                                              boolean useImport)
   { 
     JavaClassDef def = null;
     
@@ -4033,15 +4033,9 @@ public class Env {
 					    boolean useAutoload,
 					    boolean useImport)
   {
-    if (_classDef.length <= id) {
-      ClassDef []def = new ClassDef[id + 256];
-      System.arraycopy(_classDef, 0, def, 0, _classDef.length);
-      _classDef = def;
-    }
-    
-    ClassDef classDef = _classDef[id];
-
-    if (classDef != null) {
+    if (id < _classDef.length && _classDef[id] != null) {
+      ClassDef classDef = _classDef[id];
+      
       String parentName = classDef.getParentName();
 
       QuercusClass parent = null;

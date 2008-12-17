@@ -116,231 +116,6 @@ public class MathModule extends AbstractQuercusModule {
   }
 
   /**
-   * Given a string that contains a number in a base, parse
-   * the number into an integer or double value.
-   *
-   * @param number A string represeantion of an binary number.
-   * @param base The base of the number parameter.
-   * @return the number as a Value.
-   */
-
-  private static Value baseToValue(Env env, String number, int base)
-  {
-    boolean isLong = true;
-
-    final long cutoff = Long.MAX_VALUE / base;
-    final long cutlim = Long.MAX_VALUE % base;
-
-    long num = 0;
-    BigInteger bigNum = null;
-    BigInteger bigBase = BigInteger.valueOf(base);
-
-    final int len = number.length();
-
-    for (int i = 0; i < len; i++) {
-      int ch = number.charAt(i);
-
-      int value;
-
-      if ('0' <= ch && ch <= '9')
-        value = ch - '0';
-      else if ('a' <= ch && ch <= 'z')
-        value = ch - 'a' + 10;
-      else if ('A' <= ch && ch <= 'Z')
-        value = ch - 'A' + 10;
-      else
-        continue;
-
-      if (value >= base)
-        continue;
-
-      if (isLong) {
-        // Integer
-
-        if (num < cutoff || (num == cutoff && value <= cutlim)) {
-          num = num * base + value;
-        } else {
-          bigNum = BigInteger.valueOf(num);
-          isLong = false;
-        }
-      }
-
-      if (!isLong) {
-        // BigInteger
-        //
-        // num = num * base + value
-
-        BigInteger tmp = bigNum.multiply(bigBase);
-
-        BigInteger bigValue = BigInteger.valueOf(value);
-
-        bigNum = tmp.add(bigValue);
-      }
-    }
-
-    if (!isLong) {
-      // Load BigIntegerValue wrapper, it contains a Java BigInteger
-
-      JavaClassDef jClassDef = env.getJavaClassDefinition(BigInteger.class);
-
-      if (jClassDef == null)
-        throw new NullPointerException("jClassDef returned by getJavaClassDefinition() is null");
-
-      return new BigIntegerValue(env, bigNum, jClassDef);
-    } else
-      return LongValue.create(num);
-  }
-
-  /**
-   * Given a value, convert to a string that represents the
-   * value in the given base.
-   *
-   * @param number A string represeantion of an binary number.
-   * @param base The base of the number parameter.
-   * @return the number as a string.
-   */
-
-  private static StringValue valueToBase(Env env, Value value, int base)
-  {
-    if (value instanceof BigIntegerValue) {
-      return valueToBase(env, (BigIntegerValue) value, base);
-    } else if (value instanceof LongValue) {
-      return valueToBase(env, (LongValue) value, base);
-    } else {
-      return env.getEmptyString();
-    }
-  }
-
-  /**
-   * valueToBase implementation for an integer LongValue.
-   */
-
-  private static StringValue valueToBase(Env env, LongValue value, int base)
-  {
-    long val = value.toLong();
-
-    if (val == 0)
-      return env.createString("0");
-
-    StringBuilder sb = new StringBuilder();
-
-    // Ignore sign bit
-
-    if (val < 0)
-      val = -val;
-
-    do {
-      int d = (int) (val % base);
-      val /= base;
-
-      if (d < 10)
-        sb.append((char) (d + '0'));
-      else
-        sb.append((char) (d - 10 + 'a'));
-    } while (val != 0);
-
-    sb.reverse();
-
-    return env.createString(sb.toString());
-  }
-
-  /**
-   * valueToBase implementation for an integer BigIntegerValue.
-   */
-
-  private static StringValue valueToBase(Env env, BigIntegerValue value, int base)
-  {
-    BigInteger bigNum = value.toBigInteger();
-    BigInteger bigZero = BigInteger.valueOf(0);
-    BigInteger bigBase = BigInteger.valueOf(base);
-
-    if (bigNum.equals(bigZero))
-      return env.createString("0.0");
-
-    StringBuilder sb = new StringBuilder();
-
-    // Ignore sign bit
-
-    if (bigNum.compareTo(bigZero) < 0)
-      bigNum = bigNum.negate();
-
-    do {
-      // d = (int) (bigNum % base);
-      // bigNum /= base;
-
-      BigInteger bigD = bigNum.mod(bigBase);
-      int d = bigD.intValue();
-      bigNum = bigNum.divide(bigBase);
-
-      if (d < 10)
-        sb.append((char) (d + '0'));
-      else
-        sb.append((char) (d - 10 + 'a'));
-    // while (bigNum != 0)
-    } while (bigNum.compareTo(bigZero) != 0);
-
-    sb.reverse();
-
-    return env.createString(sb.toString());
-  }
-
-  /**
-   * valueToBase implementation to convert a long to binary.
-   */
-
-  private static StringValue valueToBase2(Env env, long value)
-  {
-    if (value == 0)
-      return env.createString("0");
-
-    StringBuilder sb = new StringBuilder();
-
-    // Ignore sign bit
-
-    if (value < 0)
-      value = -value;
-
-    do {
-      int d = (int) (value & 1);
-      value >>= 1;
-
-      sb.append((d == 0) ? '0' : '1');
-    } while (value != 0);
-
-    sb.reverse();
-
-    return env.createString(sb.toString());
-  }
-
-  /**
-   * valueToBase implementation to convert a long to oct.
-   */
-
-  private static StringValue valueToBase8(Env env, long value)
-  {
-    if (value == 0)
-      return env.createString("0");
-
-    StringBuilder sb = new StringBuilder();
-
-    // Ignore sign bit
-
-    if (value < 0)
-      value = -value;
-
-    do {
-      int d = (int) (value & 7);
-      value >>= 3;
-
-      sb.append((char) (d + '0'));
-    } while (value != 0);
-
-    sb.reverse();
-
-    return env.createString(sb.toString());
-  }
-
-  /**
    * Convert a number between arbitrary bases
    *
    * @param number A string represeantion of an binary number.
@@ -348,8 +123,10 @@ public class MathModule extends AbstractQuercusModule {
    * @param toBase The base of convert to.
    * @return the number as a Value, either a LongValue or a DoubleValue.
    */
-
-  public static Value base_convert(Env env, StringValue number, int fromBase, int toBase)
+  public static Value base_convert(Env env,
+                                   StringValue str,
+                                   int fromBase,
+                                   int toBase)
   {
     if (fromBase < 2 || fromBase > 36) {
       env.warning(L.l("invalid `{0}' ({1})", "from base", fromBase));
@@ -360,21 +137,130 @@ public class MathModule extends AbstractQuercusModule {
       env.warning(L.l("invalid `{0}' ({1})", "to base", toBase));
       return BooleanValue.FALSE;
     }
+    
+    Number num = baseToInt(env, str, fromBase);
+    
+    if (num instanceof BigInteger)
+      return intToBase(env, (BigInteger) num, toBase);
+    else
+      return intToBase(env, num.longValue(), toBase);
+  }
+  
+  private static Number baseToInt(Env env, StringValue str, int base)
+  {
+    long result = 0L;
 
-    Value val = baseToValue(env, number.toString(), fromBase);
-    return valueToBase(env, val, toBase);
+    boolean isLong = true;
+    
+    int len = str.length();
+    
+    for (int i = 0; i < len; i++) {
+      int ch = str.charAt(i);
+      
+      int d;
+      
+      if ('0' <= ch && ch <= '9')
+        d = ch - '0';
+      else if ('a' <= ch && ch <= 'z')
+        d = ch - 'a' + 10;
+      else if ('A' <= ch && ch <= 'Z')
+        d = ch - 'A' + 10;
+      else
+        continue;
+      
+      if (base <= d)
+        continue;
+      
+      if (result * base + d < result) {
+        isLong = false;
+        break;
+      }
+      
+      result = result * base + d;
+    }
+    
+    if (isLong)
+      return Long.valueOf(result);
+    else
+      return new BigInteger(str.toString(), base);
+  }
+  
+  private static Value intToBase(Env env, long num, int base)
+  {
+    if (num == 0)
+      return env.createString("0");
+    
+    // ignore sign
+    if (num < 0)
+      num = num ^ Long.MAX_VALUE + 1;
+    
+    int bufLen = 64;
+    char []buffer = new char[bufLen];
+    
+    int i = bufLen;
+    while (num != 0 && i > 0) {
+      int d = (int) (num % base);
+
+      if (d < 10)
+        buffer[--i] = (char) (d + '0');
+      else
+        buffer[--i] = (char) (d + 'a' - 10);
+
+      num = num / base;
+    }
+    
+    for (int j = i; j < bufLen; j++) {
+      buffer[j - i] = buffer[j];
+    }
+
+    return env.createString(buffer, bufLen - i);
+  }
+  
+  private static Value intToBase(Env env, BigInteger num, int base)
+  {
+    BigInteger toBaseBig = BigInteger.valueOf(base);
+    BigInteger zero = BigInteger.valueOf(0);
+    
+    StringValue sb = env.createStringBuilder();
+    
+    do {
+      BigInteger []resultArray = num.divideAndRemainder(toBaseBig);
+      
+      num = resultArray[0];
+      int d = resultArray[1].intValue();
+      
+      if (d < 10)
+        sb.append((char) (d + '0'));
+      else
+        sb.append((char) (d + 'a' - 10));
+      
+    } while (num.compareTo(zero) != 0);
+
+    StringValue toReturn = env.createStringBuilder();
+    
+    int len = sb.length();
+    for (int i = len - 1; i >= 0; i--) {
+      toReturn.append(sb.charAt(i));
+    }
+
+    return toReturn;
   }
 
   /**
    * Returns the decimal equivalent of the binary number represented by the
    * binary string argument.
    *
-   * @param bin A string represeantion of an binary number.
+   * @param bin A string representation of an binary number.
    * @return the decimal equivalent of the binary number
    */
   public static Value bindec(Env env, StringValue bin)
   {
-     return baseToValue(env, bin.toString(), 2);
+     Number num = baseToInt(env, bin, 2);
+     
+     if (num instanceof Long)
+       return LongValue.create(num.longValue());
+     else
+       return env.wrapJava(num);
   }
 
   public static double ceil(double value)
@@ -398,7 +284,31 @@ public class MathModule extends AbstractQuercusModule {
    */
   public static StringValue decbin(Env env, long value)
   {
-    return valueToBase2(env, value);
+    return env.createString(intToBase(env, value, 2).toString());
+    
+    /*
+    value = value & 037777777777L;
+    
+    if (value == 0)
+      return env.createString("0");
+    
+    char []buffer = new char[32];
+
+    int i = 32;
+    while (value != 0 && i >= 0) {
+      int d = (int) (value & 0x01);
+      
+      value = value >>> 1;
+      
+      buffer[--i] = (char) (d + '0');
+    }
+
+    for (int j = i; j < 32; j++) {
+      buffer[j - i] = buffer[j];
+    }
+
+    return env.createString(buffer, 32 - i);
+    */
   }
 
   /**
@@ -407,9 +317,14 @@ public class MathModule extends AbstractQuercusModule {
    */
   public static StringValue dechex(Env env, long value)
   {
+    return env.createString(intToBase(env, value, 16).toString());
+    
+    /*
+    value = value & 037777777777L;
+    
     if (value == 0)
       return env.createString("0");
-
+    
     char []buffer = new char[16];
 
     int i = 16;
@@ -429,6 +344,7 @@ public class MathModule extends AbstractQuercusModule {
     }
 
     return env.createString(buffer, 16 - i);
+    */
   }
 
   /**
@@ -437,7 +353,31 @@ public class MathModule extends AbstractQuercusModule {
    */
   public static StringValue decoct(Env env, long value)
   {
-    return valueToBase8(env, value);
+    return env.createString(intToBase(env, value, 8).toString());
+    
+    /*
+    value = value & 037777777777L;
+    
+    if (value == 0)
+      return env.createString("0");
+    
+    char []buffer = new char[11];
+
+    int i = 11;
+    while (value != 0 && i > 0) {
+      int d = (int) (value & 0x7);
+      
+      value = value >>> 3;
+      
+      buffer[--i] = (char) (d + '0');
+    }
+
+    for (int j = i; j < 11; j++) {
+      buffer[j - i] = buffer[j];
+    }
+
+    return env.createString(buffer, 11 - i);
+    */
   }
 
   public static double deg2rad(double value)
@@ -467,7 +407,12 @@ public class MathModule extends AbstractQuercusModule {
 
   public static Value hexdec(Env env, StringValue s)
   {
-    return baseToValue(env, s.toString(), 16);
+    Number num = baseToInt(env, s, 16);
+    
+    if (num instanceof Long)
+      return LongValue.create(num.longValue());
+    else
+      return env.wrapJava(num);
   }
 
   public static double hypot(double a, double b)
@@ -646,7 +591,12 @@ public class MathModule extends AbstractQuercusModule {
    */
   public static Value octdec(Env env, StringValue oct)
   {
-    return baseToValue(env, oct.toString(), 8);
+    Number num = baseToInt(env, oct, 8);
+    
+    if (num instanceof Long)
+      return LongValue.create(num.longValue());
+    else
+      return env.wrapJava(num);
   }
 
   public static double pi()

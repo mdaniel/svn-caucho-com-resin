@@ -2728,7 +2728,7 @@ public class StringModule extends AbstractQuercusModule {
       count++;
     }
 
-    if (count != 0) {
+    if (count != 0 && result != null) {
       countV.set(LongValue.create(count));
 
       int subjectLength = subject.length();

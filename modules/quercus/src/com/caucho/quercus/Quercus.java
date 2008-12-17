@@ -639,7 +639,6 @@ public class Quercus
    */
   public void addJavaClass(String phpName, String className)
   {
-
     Class type;
 
     try {

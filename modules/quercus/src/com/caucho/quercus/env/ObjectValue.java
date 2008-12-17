@@ -50,6 +50,10 @@ abstract public class ObjectValue extends Value {
   
   protected String _incompleteObjectName;
   
+  protected ObjectValue()
+  {
+  }
+  
   protected ObjectValue(QuercusClass quercusClass)
   {
     _quercusClass = quercusClass;

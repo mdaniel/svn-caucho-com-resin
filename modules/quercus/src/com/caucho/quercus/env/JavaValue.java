@@ -59,8 +59,11 @@ public class JavaValue extends ObjectValue
 
   public JavaValue(Env env, Object object, JavaClassDef def)
   {
-    super(env.findClass(def.getName()));
-
+    super();
+    
+    int id = env.getQuercus().getClassId(def.getName());
+    setQuercusClass(env.createQuercusClass(id, def, null));
+    
     _env = env;
     _classDef = def;
     _object = object;
