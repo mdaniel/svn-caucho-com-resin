@@ -13,6 +13,8 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>gzip: if application sets Vary, do not add extra Vary (#3043, rep by Eric Bowman)</li>
+<li>config: Resin config vars like ${server} should not affect JSP EL (#3078, rep by Jan Kriesten)</li>
 <li>jmx: remove admin-dummy-root for remote service (#3087, rep by dicr)</li>
 <li>jstl: ${cookie.foo} with no cookies causes NPE (#3023, rep by vicsanca)</li>
 <li>session: SessionManager.createSession check for initialization (#3074, rep by dicr)</li>

@@ -31,6 +31,7 @@ package com.caucho.server.cluster;
 
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.jmx.Jmx;
@@ -137,7 +138,7 @@ public class Cluster
     
     Environment.addEnvironmentListener(this, _classLoader);
 
-    WebBeansContainer.create().addSingletonByName(new Var(), "cluster");
+    Config.setProperty("cluster", new Var(), _classLoader);
 
     _rootDirectory = Vfs.getPwd();
   }
@@ -360,10 +361,8 @@ public class Cluster
 
     if (server.getId().equals(_serverId)) {
       _selfServer = server;
-      
-      WebBeansContainer webBeans = WebBeansContainer.create();
-      
-      webBeans.addSingletonByName(new ServerVar(server), "server");
+
+      Config.setProperty("server", new ServerVar(server));
     }
   }
 

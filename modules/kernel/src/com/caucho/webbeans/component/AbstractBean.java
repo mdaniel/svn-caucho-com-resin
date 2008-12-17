@@ -49,6 +49,7 @@ import com.caucho.webbeans.manager.CurrentLiteral;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
+import java.util.logging.*;
 import java.io.Serializable;
 
 import javax.annotation.*;
@@ -63,6 +64,8 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   implements ObjectProxy
 {
   private static final L10N L = new L10N(AbstractBean.class);
+  private static final Logger log
+    = Logger.getLogger(AbstractBean.class.getName());
 
   private static final Object []NULL_ARGS = new Object[0];
   private static final ConfigProgram []NULL_INJECT = new ConfigProgram[0];
@@ -970,9 +973,17 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 	return;
     }
 
-    throw new IllegalStateException(L.l("'{0}' is an invalid class because its classloader '{1}' does not belong to the webbeans classloader '{2}'",
-					cl, beanLoader,
-					webBeansLoader));
+    if (false) {
+      // server/2pad
+      throw new IllegalStateException(L.l("'{0}' is an invalid class because its classloader '{1}' does not belong to the webbeans classloader '{2}'",
+					  cl, beanLoader,
+					  webBeansLoader));
+    }
+    else {
+      log.fine(L.l("'{0}' is an invalid class because its classloader '{1}' does not belong to the webbeans classloader '{2}'",
+		   cl, beanLoader,
+		   webBeansLoader));
+    }
   }
 
   public String toDebugString()

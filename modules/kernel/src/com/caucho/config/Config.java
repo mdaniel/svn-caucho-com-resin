@@ -34,6 +34,9 @@ import com.caucho.config.type.*;
 import com.caucho.config.types.*;
 import com.caucho.el.EL;
 import com.caucho.el.EnvironmentContext;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.relaxng.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
@@ -64,6 +67,9 @@ public class Config {
   private static final L10N L = new L10N(Config.class);
   private static final Logger log
     = Logger.getLogger(Config.class.getName());
+
+  private static final EnvironmentLocal<ConfigProperties> _envProperties
+    = new EnvironmentLocal<ConfigProperties>();
   
   // the context class loader of the config
   private ClassLoader _classLoader;
@@ -123,6 +129,66 @@ public class Config {
   public void setIgnoreEnvironment(boolean isIgnore)
   {
     _isIgnoreEnvironment = isIgnore;
+  }
+
+  /**
+   * Returns an environment property
+   */
+  public static Object getProperty(String key)
+  {
+    ConfigProperties props = _envProperties.get();
+
+    if (props != null)
+      return props.get(key);
+    else
+      return null;
+  }
+
+  /**
+   * Sets a environment property
+   */
+  public static void setProperty(String key, Object value)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    setProperty(key, value, loader);
+  }
+
+  /**
+   * Sets a environment property
+   */
+  public static void setProperty(String key, Object value, ClassLoader loader)
+  {
+    ConfigProperties props = _envProperties.getLevel(loader);
+
+    if (props == null) {
+      props = createConfigProperties(loader);
+    }
+
+    props.put(key, value);
+  }
+
+  private static ConfigProperties createConfigProperties(ClassLoader loader)
+  {
+    EnvironmentClassLoader envLoader
+      = Environment.getEnvironmentClassLoader(loader);
+
+    ConfigProperties props = _envProperties.getLevel(envLoader);
+
+    if (props != null)
+      return props;
+
+    if (envLoader != null) {
+      ConfigProperties parent = createConfigProperties(envLoader.getParent());
+      
+      props = new ConfigProperties(parent);
+    }
+    else
+      props = new ConfigProperties(null);
+
+    _envProperties.set(props, envLoader);
+
+    return props;
   }
 
   /**
@@ -793,6 +859,33 @@ public class Config {
     } finally {
       if (is != null)
 	is.close();
+    }
+  }
+
+  static class ConfigProperties {
+    private ConfigProperties _parent;
+    private HashMap<String,Object> _properties = new HashMap<String,Object>(8);
+
+    ConfigProperties(ConfigProperties parent)
+    {
+      _parent = parent;
+    }
+
+    public Object get(String key)
+    {
+      Object value = _properties.get(key);
+
+      if (value != null)
+	return value;
+      else if (_parent != null)
+	return _parent.get(key);
+      else
+	return null;
+    }
+
+    public void put(String key, Object value)
+    {
+      _properties.put(key, value);
     }
   }
 }

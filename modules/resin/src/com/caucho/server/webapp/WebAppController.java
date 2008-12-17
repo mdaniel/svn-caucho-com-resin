@@ -29,6 +29,7 @@
 
 package com.caucho.server.webapp;
 
+import com.caucho.config.Config;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.server.deploy.DeployConfig;
 import com.caucho.server.deploy.DeployControllerAdmin;
@@ -516,10 +517,10 @@ public class WebAppController
     throws Throwable
   {
     WebBeansContainer webBeans = WebBeansContainer.create();
+    
     webBeans.addSingleton(app, CauchoDeployment.class, (String) null,
 			  WebApp.class, ServletContext.class);
-    webBeans.addSingleton(getVar(), CauchoDeployment.class,
-			  "webApp", void.class);
+    Config.setProperty("webApp", getVar());
     
     app.setRegexp(_regexpValues);
     app.setDynamicDeploy(isDynamicDeploy());

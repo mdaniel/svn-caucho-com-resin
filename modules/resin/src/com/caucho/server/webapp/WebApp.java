@@ -341,7 +341,7 @@ public class WebApp extends ServletContextImpl
 
     _classLoader
       = EnvironmentClassLoader.create(controller.getParentClassLoader(),
-				      "web-app:" + getURL());
+				      "web-app:" + getId());
     
     _lifecycle = new Lifecycle(log, toString(), Level.INFO);
 
@@ -356,7 +356,7 @@ public class WebApp extends ServletContextImpl
 
       _classLoader.addParentPriorityPackages(_classLoaderHackPackages);
 
-      // _classLoader.setId("web-app:" + getURL());
+      // _classLoader.setId("web-app:" + getId());
 
       _appLocal.set(this, _classLoader);
 
@@ -704,6 +704,17 @@ public class WebApp extends ServletContextImpl
   {
     if (_parent != null)
       return _parent.getURL() + _contextPath;
+    else
+      return _contextPath;
+  }
+
+  /**
+   * Gets the URL
+   */
+  public String getId()
+  {
+    if (_parent != null)
+      return _parent.getId() + _contextPath;
     else
       return _contextPath;
   }
@@ -1808,7 +1819,7 @@ public class WebApp extends ServletContextImpl
       return;
 
     try {
-      _classLoader.setId("web-app:" + getURL());
+      _classLoader.setId("web-app:" + getId());
 
       _invocationDependency.setCheckInterval(getEnvironmentClassLoader().getDependencyCheckInterval());
 
@@ -1836,7 +1847,7 @@ public class WebApp extends ServletContextImpl
       for (int i = 0; i < _appGenerators.size(); i++)
         _parent.addDeploy(_appGenerators.get(i));
 
-      _classLoader.setId("web-app:" + getURL());
+      _classLoader.setId("web-app:" + getId());
 
       WebBeansContainer webBeans = WebBeansContainer.getCurrent();
 
@@ -2959,7 +2970,7 @@ public class WebApp extends ServletContextImpl
 
   public String toString()
   {
-    return "WebApp[" + getURL() + "]";
+    return "WebApp[" + getId() + "]";
   }
 
   static class FilterChainEntry {

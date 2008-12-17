@@ -246,12 +246,12 @@ public class Resin implements EnvironmentBean, SchemaBean
       Environment.addChildLoaderListener(new WebBeansAddLoaderListener());
       WebBeansContainer webBeans = WebBeansContainer.create();
 
-      webBeans.addSingleton(getResinHome(), "resinHome", Standard.class);
-      webBeans.addSingleton(new Var(), "resin", Standard.class);
-      webBeans.addSingleton(new Var(), "server", Standard.class);
-      webBeans.addSingleton(new JavaVar(), "java", Standard.class);
-      webBeans.addSingleton(System.getProperties(), "system", Standard.class);
-      webBeans.addSingleton(System.getenv(), "getenv", Standard.class);
+      Config.setProperty("resinHome", getResinHome());
+      Config.setProperty("resin", new Var());
+      Config.setProperty("server", new Var());
+      Config.setProperty("java", new JavaVar());
+      Config.setProperty("system", System.getProperties());
+      Config.setProperty("getenv", System.getenv());
 
       _brokerManager = new HempBrokerManager();
 

@@ -48,6 +48,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 import com.caucho.webbeans.cfg.WbComponentConfig;
 import com.caucho.webbeans.component.ComponentImpl;
+import com.caucho.webbeans.component.SingletonBean;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
@@ -250,6 +251,13 @@ public class OsgiBundle implements Bundle
       thread.setContextClassLoader(_loader);
 
       log.fine(this + " starting");
+
+      WebBeansContainer webBeans = WebBeansContainer.create();
+
+      SingletonBean bean = new SingletonBean(_bundleContext, null,
+					       BundleContext.class);
+
+      webBeans.addBean(bean);
 
       if (_program != null) {
 	_program.configure(new BundleConfig());

@@ -589,6 +589,14 @@ public class WebAppContainer
   }
 
   /**
+   * Returns the URL for the container.
+   */
+  public String getId()
+  {
+    return getURL();
+  }
+
+  /**
    * Returns the host name for the container.
    */
   public String getHostName()

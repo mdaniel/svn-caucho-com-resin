@@ -235,6 +235,26 @@ public class Host extends WebAppContainer
   /**
    * Returns the URL for the container.
    */
+  public String getId()
+  {
+    if (_url != null && ! "".equals(_url))
+      return _url;
+    else if (_hostName == null
+	     || _hostName.equals("")) {
+      return getURL();
+    }
+    else if (_hostName.startsWith("http:")
+	     || _hostName.startsWith("https:"))
+      return _hostName;
+    else if (_hostName.equals(""))
+      return "http://default";
+    else
+      return "http://" + _hostName;
+  }
+  
+  /**
+   * Returns the URL for the container.
+   */
   public String getURL()
   {
     if (_url != null && ! "".equals(_url))

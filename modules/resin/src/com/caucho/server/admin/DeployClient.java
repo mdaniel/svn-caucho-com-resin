@@ -291,7 +291,7 @@ public class DeployClient
     querySet(query);
   }
 
-  private String []getCommitList(String []commitList)
+  public String []getCommitList(String []commitList)
   {
     DeployCommitListQuery query = new DeployCommitListQuery(commitList);
     

@@ -89,6 +89,7 @@ public class ConfigELContext extends ELContext {
     _stackResolver.push(new ListELResolver());
     
     _stackResolver.push(new SystemPropertiesResolver());
+    _stackResolver.push(new ConfigPropertiesResolver());
     _stackResolver.push(new WebBeansContextResolver());
   }
 }

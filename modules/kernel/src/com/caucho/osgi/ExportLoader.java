@@ -73,8 +73,12 @@ public class ExportLoader extends Loader implements Dependency
    */
   ExportLoader(Path path, String packageName, OsgiVersion version)
   {
-    _path = path;
     _depend = new Depend(path);
+    
+    if (! (path instanceof JarPath) && path.getPath().endsWith(".jar"))
+      path = JarPath.create(path);
+    
+    _path = path;
     
     _packageName = packageName;
     _packagePath = packageName.replace('.', '/');

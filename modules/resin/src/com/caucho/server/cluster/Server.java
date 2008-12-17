@@ -1675,9 +1675,11 @@ public class Server extends ProtocolDispatchServer
       Port port = _selfServer.getClusterPort();
 
       if (port != null) {
+	log.info("");
 	port.setServer(this);
 	port.bind();
 	port.start();
+	log.info("");
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -1699,7 +1701,9 @@ public class Server extends ProtocolDispatchServer
       thread.setContextClassLoader(_classLoader);
 
       ArrayList<Port> ports = _selfServer.getPorts();
-      if (ports.size() > 0) {
+      if (ports.size() > 0
+	  && (ports.get(0) != _selfServer.getClusterPort()
+	      || ports.size() > 1)) {
 	log.info("");
       
 	for (int i = 0; i < ports.size(); i++) {
