@@ -93,6 +93,16 @@ public class GlobalArrayValue extends ArrayValueImpl {
   }
 
   /**
+   * Returns the value as an array.
+   */
+  public Value getArray(Value index)
+  {
+    Value array = getRef(index).toAutoArray();
+
+    return array;
+  }
+  
+  /**
    * Unsets a value.
    */
   @Override
