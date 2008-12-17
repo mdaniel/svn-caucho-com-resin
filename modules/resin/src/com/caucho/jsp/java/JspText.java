@@ -168,6 +168,51 @@ public class JspText extends JspNode {
       _children.get(i).generate(out);
   }
 
+  //jsp/0416
+  @Override
+  public void generatePrologue(JspJavaWriter out)
+    throws Exception
+  {
+    if (_children == null)
+      return;
+
+    for (int i = 0; i < _children.size(); i++) {
+      JspNode child = _children.get(i);
+
+      child.generatePrologue(out);
+    }
+  }
+
+  //jsp/0416
+  @Override
+  public void generateTagStateChildren(JspJavaWriter out)
+    throws Exception
+  {
+    if (_children != null) {
+      for (int i = 0; i < _children.size(); i++) {
+	JspNode child = _children.get(i);
+
+	child.generateTagState(out);
+      }
+    }
+  }
+
+  //jsp/0416
+  @Override
+  public boolean hasCustomTag()
+  {
+    for (int i = 0; _children != null && i < _children.size(); i++) {
+      JspNode child = _children.get(i);
+
+      if (child instanceof CustomTag)
+        return true;
+
+      if (child.hasCustomTag())
+        return true;
+    }
+    return false;
+  }
+
   /**
    * Generates the code for the static text
    *
