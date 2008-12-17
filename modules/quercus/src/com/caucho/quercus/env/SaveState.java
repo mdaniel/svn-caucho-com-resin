@@ -30,12 +30,15 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.EnvVar;
 import com.caucho.util.IntMap;
+import com.caucho.vfs.Path;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -51,16 +54,19 @@ public class SaveState {
 
   private IntMap _globalNameMap = new IntMap();
   private Value []_globalValues;
+  
+  private HashMap<Path,QuercusPage> _includeMap;
 
   /**
    * Creates a new save state.
    */
   SaveState(Env env,
-	    AbstractFunction []fun,
-	    ClassDef []classDef,
-	    QuercusClass []qClass,
-	    Value []constants,
-	    Map<String,EnvVar> globalMap)
+            AbstractFunction []fun,
+            ClassDef []classDef,
+            QuercusClass []qClass,
+            Value []constants,
+            Map<String,EnvVar> globalMap,
+            HashMap<Path,QuercusPage> includeMap)
   {
     _fun = new AbstractFunction[fun.length];
     System.arraycopy(fun, 0, _fun, 0, fun.length);
@@ -75,6 +81,8 @@ public class SaveState {
     System.arraycopy(constants, 0, _const, 0, constants.length);
 
     saveGlobals(env, globalMap);
+    
+    _includeMap = new HashMap<Path,QuercusPage>(includeMap);
   }
 
   /**
@@ -123,6 +131,14 @@ public class SaveState {
   public Value []getGlobalList()
   {
     return _globalValues;
+  }
+  
+  /**
+   * Returns the list of included pages.
+   */
+  public HashMap<Path,QuercusPage> getIncludeMap()
+  {
+    return _includeMap;
   }
   
   public boolean isModified()

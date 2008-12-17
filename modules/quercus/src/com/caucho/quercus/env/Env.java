@@ -3366,11 +3366,12 @@ public class Env {
       throw new QuercusException(L.l("Env.saveState() only allowed at top level"));
     
     return new SaveState(this,
-			 _fun,
-			 _classDef,
-			 _qClass,
-			 _const,
-			 _globalMap);
+                         _fun,
+                         _classDef,
+                         _qClass,
+                         _const,
+                         _globalMap,
+                         _includeMap);
   }
 
   EnvVar []getGlobalList()
@@ -3398,6 +3399,9 @@ public class Env {
   public void restoreState(SaveState saveState)
   {
     AbstractFunction []fun = saveState.getFunctionList();
+    if (_fun.length < fun.length)
+      _fun = new AbstractFunction[fun.length];
+    
     System.arraycopy(fun, 0, _fun, 0, fun.length);
     
     ClassDef []classDef = saveState.getClassDefList();
@@ -3433,8 +3437,13 @@ public class Env {
       EnvVar newEnvVar = _globalMap.get(oldEntry.getKey());
 
       if (newEnvVar != null)
-	oldEnvVar.setRef(newEnvVar.getRef());
+        oldEnvVar.setRef(newEnvVar.getRef());
     }
+    
+    
+    // php/404j - include_once
+    HashMap<Path,QuercusPage> includeMap = saveState.getIncludeMap();
+    _includeMap = new HashMap<Path,QuercusPage>(includeMap);
   }
 
   /**
