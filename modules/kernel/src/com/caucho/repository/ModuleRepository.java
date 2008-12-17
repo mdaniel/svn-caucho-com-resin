@@ -38,6 +38,7 @@ import com.caucho.vfs.WriteStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -92,17 +93,17 @@ abstract public class ModuleRepository
    */
   public Path findArtifact(String org,
 			   String module,
-			   String artifact,
+			   String name,
 			   String rev,
 			   String ext)
   {
+    if (name == null)
+      throw new NullPointerException(L.l("'name' is required in findArtifact"));
+    
     if (module == null)
-      throw new NullPointerException(L.l("'module' is required in findArtifact"));
+      module = name;
     
-    if (artifact == null)
-      artifact = module;
-    
-    Path path = findArtifactInCache(org, module, artifact, rev, ext);
+    Path path = findArtifactInCache(org, module, name, rev, ext);
 
     if (path != null)
       return path;
@@ -112,7 +113,7 @@ abstract public class ModuleRepository
     for (Resolver resolver : _resolverList) {
       DataSource source = null;
       try {
-	source = resolver.resolveArtifact(org, module, artifact, rev, ext);
+	source = resolver.resolveArtifact(org, module, name, rev, ext);
       } catch (ModuleNotFoundException e) {
 	log.log(Level.FINEST, e.toString(), e);
 	
@@ -120,7 +121,7 @@ abstract public class ModuleRepository
       }
 
       if (source != null) {
-	return fillCache(org, module, artifact, rev, ext, source);
+	return fillCache(org, module, name, rev, ext, source);
       }
     }
 
@@ -168,42 +169,62 @@ abstract public class ModuleRepository
 
   private Path findArtifactInCache(String org,
 				   String module,
-				   String artifact,
+				   String name,
 				   String rev,
 				   String ext)
   {
-    Path path = getRoot().lookup(org);
+    Path path = findModuleInCache(org, module);
 
-    if (! (path.isDirectory() && path.canRead()))
-      return null;
-
-    path = path.lookup(module);
-
-    if (! (path.isDirectory() && path.canRead()))
-      return null;
-
-    path = path.lookup(ext + "s");
-
-    if (! (path.isDirectory() && path.canRead()))
+    if (path == null)
       return null;
 
     if (rev == null) {
-      ArrayList<String> revList = findRevList(path, artifact + "_", "." + ext);
+      ArrayList<String> revList = findRevList(path, name + "-", "." + ext);
 
       if (revList == null || revList.size() == 0)
 	return null;
 
-      rev = revList.get(0);
+      Collections.sort(revList);
+
+      rev = revList.get(revList.size() - 1);
     }
 
-    String name = artifact + "_" + rev + "." + ext;
+    String pathName = name + "-" + rev + "." + ext;
 
-    path = path.lookup(name);
+    path = path.lookup(pathName);
 
     if (! (path.canRead() && path.isFile()))
       return null;
     
     return path;
+  }
+
+  private Path findModuleInCache(String org,
+				 String module)
+  {
+    try {
+      Path root = getRoot();
+    
+      if (org != null) {
+	Path path = root.lookup(org).lookup(module);
+
+	if (! path.isDirectory() || ! path.canRead())
+	  return null;
+      }
+
+      for (String orgName : root.list()) {
+	Path path = root.lookup(orgName).lookup(module);
+
+	if (path.isDirectory() && path.canRead())
+	  return path;
+      }
+
+      return null;
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+
+      return null;
+    }
   }
 
   private Path findArtifactInCacheValidate(String org,
@@ -237,6 +258,9 @@ abstract public class ModuleRepository
 	throw new ConfigException(L.l("org={0}, module={1} has no valid {2}s version.",
 				    org, module, ext));
       }
+
+      // XXX: not proper
+      Collections.sort(revList);
 
       rev = revList.get(0);
     }

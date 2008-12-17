@@ -107,6 +107,23 @@ public class ClassLoaderConfig {
   }
 
   /**
+   * Adds a jar dependency, to be loaded from the repository
+   */
+  public ModuleConfig createDependency()
+  {
+    ModuleConfig module = new ModuleConfig();
+
+    return module;
+  }
+
+  /**
+   * Adds a jar dependency, to be loaded from the repository
+   */
+  public void addDependency(ModuleConfig config)
+  {
+  }
+
+  /**
    * Adds an ivy class loader.
    */
   public void addIvyLoader(IvyLoader loader)

@@ -887,6 +887,18 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return;
     }
 
+    setHeaderImpl(key, value);
+  }
+
+
+  /**
+   * Sets a header, replacing an already-existing header.
+   *
+   * @param key the header key to set.
+   * @param value the header value to set.
+   */
+  protected void setHeaderImpl(String key, String value)
+  {
     int i = 0;
     boolean hasHeader = false;
 

@@ -455,7 +455,8 @@ public class WebBeansContainer
     addBean(new SingletonBean(object,
 			      null,
 			      name,
-			      new Annotation[] { Names.create(name) },
+			      new Annotation[] { Names.create(name),
+						 CurrentLiteral.CURRENT },
 			      api));
   }
 

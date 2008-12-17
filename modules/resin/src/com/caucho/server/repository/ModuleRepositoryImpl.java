@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 
 /**
  * The module repository holds the module jars for osgi and ivy.
@@ -53,6 +54,9 @@ public class ModuleRepositoryImpl extends ModuleRepository
   private static final L10N L = new L10N(ModuleRepositoryImpl.class);
     
   private Path _root;
+
+  private ArrayList<JarsDirectory> _jarsList
+    = new ArrayList<JarsDirectory>();
 
   /**
    * The module repository is created once by the Management class.
@@ -77,5 +81,23 @@ public class ModuleRepositoryImpl extends ModuleRepository
   public void addResolver(ResolverConfig resolverConfig)
   {
     addResolverImpl(resolverConfig.getResolver());
+  }
+
+  public JarsDirectory createJars()
+  {
+    return new JarsDirectory(this);
+  }
+
+  public void addJars(JarsDirectory jars)
+  {
+    _jarsList.add(jars);
+  }
+
+  @PostConstruct
+  public void init()
+  {
+    for (JarsDirectory jars : _jarsList) {
+      jars.update();
+    }
   }
 }

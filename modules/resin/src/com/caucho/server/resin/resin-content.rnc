@@ -510,13 +510,18 @@ r_protocol =
   }
 
 r_module-repository = element module-repository {
-  element resolver {
-    (attribute uri { string }
-     | element uri { string })
-     
-    & (attribute artifact-pattern { string }
-       | element artifact-pattern { string })*
+  element jars {
+    (attribute path { string }
+     | element path { string })
   }*
+  
+  & element resolver {
+      (attribute uri { string }
+       | element uri { string })
+     
+      & (attribute artifact-pattern { string }
+         | element artifact-pattern { string })*
+    }*
 }
 
 r_resin = element resin {

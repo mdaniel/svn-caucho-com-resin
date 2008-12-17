@@ -49,10 +49,10 @@ public class ModuleConfig
   private Path _path;
 
   private String _org;
-  private String _module;
+  private String _name;
   private String _rev;
 
-  private String _artifact;
+  private String _module;
 
   /**
    * Sets a specific path to a jar file
@@ -75,6 +75,14 @@ public class ModuleConfig
   }
 
   /**
+   * Sets the artifact name
+   */
+  public void setName(String name)
+  {
+    _name = name;
+  }
+
+  /**
    * Sets the module name
    */
   public void setModule(String module)
@@ -83,15 +91,7 @@ public class ModuleConfig
   }
 
   /**
-   * Sets the artifact name (defaults to module)
-   */
-  public void setArtifact(String artifact)
-  {
-    _artifact = artifact;
-  }
-
-  /**
-   * Sets the module version
+   * Sets the artifact version
    */
   public void setRev(String rev)
   {
@@ -108,8 +108,8 @@ public class ModuleConfig
   @PostConstruct
   public void init()
   {
-    if (_path == null && _module == null)
-      throw new ConfigException(L.l("module requires either a 'path' or a 'module' attribute"));
+    if (_path == null && _name == null)
+      throw new ConfigException(L.l("module requires either a 'path' or a 'name' attribute"));
 
     Path path = null;
     
@@ -122,12 +122,12 @@ public class ModuleConfig
       if (repository == null)
 	throw new IllegalStateException(L.l("ModuleRepository is not properly initialized"));
 
-      path = repository.findArtifact(_org, _module, _artifact, _rev, "jar");
+      path = repository.findArtifact(_org, _module, _name, _rev, "jar");
     }
 
     if (path == null)
-      throw new ConfigException(L.l("Can't find module '{0}'",
-				    _module));
+      throw new ConfigException(L.l("Can't find artifact '{0}'",
+				    _name));
 
     EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
 

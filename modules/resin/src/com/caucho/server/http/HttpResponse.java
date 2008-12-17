@@ -237,7 +237,7 @@ public class HttpResponse extends AbstractHttpResponse
 
       // even in case of 302, this may be needed for filters which
       // automatically set cache headers
-      setHeader("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
+      setHeaderImpl("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
       os.print("\r\nCache-Control: no-cache");
 
       if (debug) {
@@ -256,7 +256,7 @@ public class HttpResponse extends AbstractHttpResponse
         log.fine(_request.dbgId() + "Cache-Control: private");
     }
     else if (! containsHeader("Cache-Control")) {
-      setHeader("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
+      setHeaderImpl("Expires", "Thu, 01 Dec 1994 16:00:00 GMT");
       os.print("\r\nCache-Control: no-cache");
 
       if (debug) {

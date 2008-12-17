@@ -118,10 +118,8 @@ public class SingletonBean extends SimpleBean
     
     setName(name);
 
-    if (api != null) {
-      if (api.length == 0)
-	addType(void.class);
-      
+    // for null API, use void.class
+    if (api != null && api.length > 0) {
       for (Type type : api) {
 	addType(type);
       }
