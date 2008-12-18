@@ -35,7 +35,7 @@ import com.caucho.util.L10N;
 class JsonDecoder {
   private static final L10N L = new L10N(JsonDecoder.class);
 
-  private StringValue _string;
+  private StringValue _str;
   private int _len;
   private int _offset;
 
@@ -45,8 +45,8 @@ class JsonDecoder {
                           StringValue s,
                           boolean assoc)
   {
-    _string = s;
-    _len = _string.length();
+    _str = s;
+    _len = _str.length();
     _offset = 0;
 
     _isAssociative = assoc;
@@ -54,7 +54,9 @@ class JsonDecoder {
     Value val = jsonDecodeImpl(env);
 
     // Should now be at end of string or have only white spaces left.
-    if (skipWhitespace() >= 0)
+    skipWhitespace();
+    
+    if (_offset < _len)
       return errorReturn(env, "expected no more input");
 
     return val;
@@ -67,128 +69,150 @@ class JsonDecoder {
    */
   private Value jsonDecodeImpl(Env env)
   {
-    for (int ch = skipWhitespace(); ch >= 0; ch = read()) {
+    skipWhitespace();
+    
+    if (_offset >= _len)
+      return errorReturn(env);
+    
+    char ch = _str.charAt(_offset);
 
-      switch (ch) {
-        case '"':
-          return decodeString(env);
-
-        case 't':
-          if (read() == 'r'
-	      && read() == 'u'
-	      && read() == 'e')
-            return BooleanValue.TRUE;
-          else
-            return errorReturn(env, "expected 'true'");
-
-        case 'f':
-          if (read() == 'a'
-	      && read() == 'l'
-	      && read() == 's'
-	      && read() == 'e')
-            return BooleanValue.FALSE;
-          else
-            return errorReturn(env, "expected 'false'");
-
-        case 'n':
-          if (read() == 'u'
-	      && read() == 'l'
-	      && read() == 'l')
-            return NullValue.NULL;
-          else
-            return errorReturn(env, "expected 'null'");
-
-        case '[':
-          return decodeArray(env);
-
-        case '{':
-          return decodeObject(env);
-
-        default:
-          if (ch == '-' || ('0' <= ch && ch <= '9'))
-            return decodeNumber(env, ch);
-          else
-            return errorReturn(env);
-      }
+    if (ch == '"') {
+      return decodeString(env);
     }
-
-    return errorReturn(env);
+    else if (ch == 't') {
+      if (_offset + 3 < _len
+          && _str.charAt(_offset + 1) == 'r'
+          && _str.charAt(_offset + 2) == 'u'
+          && _str.charAt(_offset + 3) == 'e') {
+        _offset += 4;
+        return BooleanValue.TRUE;
+      }
+      else
+        return errorReturn(env, "expected 'true'");
+    }
+    else if (ch == 'f') {
+      if (_offset + 4 < _len
+          && _str.charAt(_offset + 1) == 'a'
+          && _str.charAt(_offset + 2) == 'l'
+          && _str.charAt(_offset + 3) == 's'
+          && _str.charAt(_offset + 4) == 'e') {
+        _offset += 5;
+        return BooleanValue.FALSE;
+      }
+      else
+        return errorReturn(env, "expected 'false'");
+    }
+    else if (ch == 'n') {
+      if (_offset + 3 < _len
+          && _str.charAt(_offset + 1) == 'u'
+          && _str.charAt(_offset + 2) == 'l'
+          && _str.charAt(_offset + 3) == 'l') {
+        _offset += 4;
+        return NullValue.NULL;
+      }
+      else
+        return errorReturn(env, "expected 'null'");
+    }
+    else if (ch == '[') {
+      return decodeArray(env);
+    }
+    else if (ch == '{') {
+      return decodeObject(env);
+    }
+    else {
+      if (ch == '-' || ('0' <= ch && ch <= '9'))
+        return decodeNumber(env);
+      else
+        return errorReturn(env);
+    }
   }
 
   /**
    * Checks to see if there is a valid number per JSON Internet Draft.
    */
-  private Value decodeNumber(Env env, int ch)
+  private Value decodeNumber(Env env)
   {
     StringBuilder sb = new StringBuilder();
 
+    char ch;
+    
     // (-)?
-    if (ch == '-') {
-      sb.append((char)ch);
-      ch = read();
+    if ((ch = _str.charAt(_offset)) == '-') {
+      sb.append(ch);
+      
+      _offset++;
     }
 
-    // (0) | ([1-9] [0-9]+)
-    if (ch >= 0) {
-      if (ch == '0') {
-        sb.append((char)ch);
-        ch = read();
-      }
-      else if ('1' <= ch && ch <= '9') {
-        sb.append((char)ch);
-        ch = read();
+    if (_offset >= _len)
+      return errorReturn(env, "expected 1-9");
 
-        while ('0' <= ch && ch <= '9') {
-          sb.append((char)ch);
-          ch = read();
-        }
+    ch = _str.charAt(_offset++);
+    
+    // (0) | ([1-9] [0-9]*)
+    if (ch == '0') {
+      sb.append(ch);
+    }
+    else if ('1' <= ch && ch <= '9') {
+      sb.append(ch);
+
+      while (_offset < _len
+             && '0' <= (ch = _str.charAt(_offset)) && ch <= '9') {
+        _offset++;
+          
+        sb.append(ch);
       }
-      else
-        return errorReturn(env, "expected 1-9");
     }
 
     int integerEnd = sb.length();
 
     // ((decimalPoint) [0-9]+)?
-    if (ch == '.') {
-      sb.append((char)ch);
-      ch = read();
-
-      while ('0' <= ch && ch <= '9') {
-        sb.append((char)ch);
-        ch = read();
+    if (_offset < _len && (ch = _str.charAt(_offset)) == '.') {
+      _offset++;
+      
+      sb.append(ch);
+      
+      while (_offset < _len
+             && '0' <= (ch = _str.charAt(_offset)) && ch <= '9') {
+        _offset++;
+        sb.append(ch);
       }
     }
 
     // ((e | E) (+ | -)? [0-9]+)
-    if (ch == 'e' || ch == 'E') {
-      sb.append((char)ch);
-      ch = read();
+    if (_offset < _len && (ch = _str.charAt(_offset)) == 'e' || ch == 'E') {
+      _offset++;
+      
+      sb.append(ch);
 
-      if (ch == '+' || ch == '-') {
-        sb.append((char)ch);
-        ch = read();
+      if (_offset < _len && (ch = _str.charAt(_offset)) == '+' || ch == '-') {
+        _offset++;
+        
+        sb.append(ch);
       }
 
-      if ('0' <= ch && ch <= '9') {
-        sb.append((char)ch);
-        ch = read();
-
-        while ('0' <= ch && ch <= '9') {
-          sb.append((char)ch);
-          ch = read();
+      if (_offset < _len && '0' <= (ch = _str.charAt(_offset)) && ch <= '9') {
+        _offset++;
+        
+        sb.append(ch);
+        
+        while (_offset < _len) {
+          if ('0' <= (ch = _str.charAt(_offset)) && ch <= '9') {
+            _offset++;
+            
+            sb.append(ch);
+          }
+          else
+            break;
         }
       }
       else
         return errorReturn(env, "expected 0-9 exponent");
     }
 
-    unread();
-
     if (integerEnd != sb.length())
-      return new DoubleValue(Double.parseDouble(sb.toString()));
+      return DoubleValue.create(Double.parseDouble(sb.toString()));
     else
-      return new LongValue(Long.parseLong(sb.toString()));
+      return LongValue.create(Long.parseLong(sb.toString()));
   }
 
   /**
@@ -198,24 +222,34 @@ class JsonDecoder {
   {
     ArrayValueImpl array = new ArrayValueImpl();
 
+    _offset++;
+    
     while (true) {
-      int ch = skipWhitespace();
-
-      if (ch == ']')
+      skipWhitespace();
+      
+      if (_offset >= _len)
+        return errorReturn(env, "expected either ',' or ']'");
+      
+      if (_str.charAt(_offset) == ']') {
+        _offset++;
         break;
-
-      unread();
+      }
 
       array.append(jsonDecodeImpl(env));
 
-      ch = skipWhitespace();
+      skipWhitespace();
 
+      if (_offset >= _len)
+        return errorReturn(env, "expected either ',' or ']'");
+      
+      char ch = _str.charAt(_offset++);
+      
       if (ch == ',') {
       }
       else if (ch == ']')
         break;
       else
-        errorReturn(env, "expected either ',' or ']'");
+        return errorReturn(env, "expected either ',' or ']'");
     }
 
     return array;
@@ -236,26 +270,31 @@ class JsonDecoder {
   {
     ArrayValue array = new ArrayValueImpl();
 
+    _offset++;
+    
     while (true) {
-      int ch = skipWhitespace();
+      skipWhitespace();
 
-      if (ch == '}')
+      if (_offset >= _len || _str.charAt(_offset) == '}') {
         break;
-
-      unread();
+      }
 
       Value name = jsonDecodeImpl(env);
 
-      ch = skipWhitespace();
+      skipWhitespace();
 
-      if (ch != ':')
+      if (_offset >= _len || _str.charAt(_offset++) != ':')
         return errorReturn(env, "expected ':'");
 
       array.append(name, jsonDecodeImpl(env));
 
-      ch = skipWhitespace();
+      skipWhitespace();
 
-      if (ch == ',') {
+      char ch;
+      
+      if (_offset >= _len)
+        return errorReturn(env, "expected either ',' or '}'");
+      else if ((ch = _str.charAt(_offset++)) == ',') {
       }
       else if (ch == '}')
         break;
@@ -273,26 +312,30 @@ class JsonDecoder {
   {
     ObjectValue object = env.createObject();
 
+    _offset++;
+    
     while (true) {
-      int ch = skipWhitespace();
+      skipWhitespace();
 
-      if (ch == '}')
+      if (_offset >= _len || _str.charAt(_offset) == '}')
         break;
-
-      unread();
-
+      
       Value name = jsonDecodeImpl(env);
 
-      ch = skipWhitespace();
+      skipWhitespace();
 
-      if (ch != ':')
+      if (_offset >= _len || _str.charAt(_offset++) != ':')
         return errorReturn(env, "expected ':'");
 
       object.putField(env, name.toString(), jsonDecodeImpl(env));
 
-      ch = skipWhitespace();
+      skipWhitespace();
 
-      if (ch == ',') {
+      char ch;
+      
+      if (_offset >= _len)
+        return errorReturn(env, "expected either ',' or '}'");
+      else if ((ch = _str.charAt(_offset++)) == ',') {
       }
       else if (ch == '}')
         break;
@@ -308,79 +351,85 @@ class JsonDecoder {
    */
   private Value decodeString(Env env)
   {
-    StringValue sbv = env.createUnicodeBuilder();
+    StringValue sb = env.createUnicodeBuilder();
 
-    for (int ch = read(); ch >= 0; ch = read()) {
-
+    _offset++;
+    
+    while (_offset < _len) {
+      char ch = _str.charAt(_offset++);
+      
       switch (ch) {
+
         // Escaped Characters
       case '\\':
-	ch = read();
-	if (ch < 0)
-	  return errorReturn(env, "invalid escape character");
+        if (_offset >= _len)
+          return errorReturn(env, "invalid escape character");
+        
+        ch = _str.charAt(_offset++);
+          
+        switch (ch) {
+          case '"':
+            sb.append('"');
+            break;
+          case '\\':
+            sb.append('\\');
+            break;
+          case '/':
+            sb.append('/');
+            break;
+          case 'b':
+            sb.append('\b');
+            break;
+          case 'f':
+            sb.append('\f');
+            break;
+          case 'n':
+            sb.append('\n');
+            break;
+          case 'r':
+            sb.append('\r');
+            break;
+          case 't':
+            sb.append('\t');
+            break;
+          case 'u':
+          case 'U':
+            int hex = 0;
 
-	switch (ch) {
-	case '"':
-	  sbv.append('"');
-	  break;
-	case '\\':
-	  sbv.append('\\');
-	  break;
-	case '/':
-	  sbv.append('/');
-	  break;
-	case 'b':
-	  sbv.append('\b');
-	  break;
-	case 'f':
-	  sbv.append('\f');
-	  break;
-	case 'n':
-	  sbv.append('\n');
-	  break;
-	case 'r':
-	  sbv.append('\r');
-	  break;
-	case 't':
-	  sbv.append('\t');
-	  break;
-	case 'u':
-	case 'U':
-	  int hex = 0;
+            for (int i = 0; _offset < _len && i < 4; i++) {
+              hex = hex << 4;
+              ch = _str.charAt(_offset++);
 
-	  for (int i = 0; i < 4; i++) {
-	    hex = hex << 4;
-	    ch = read();
+              if ('0' <= ch && ch <= '9')
+                hex += ch - '0';
+              else if (ch >= 'a' && ch <= 'f')
+                hex += ch - 'a' + 10;
+              else if (ch >= 'A' && ch <= 'F')
+                hex += ch - 'A' + 10;
+              else
+                return errorReturn(env, "invalid escaped hex character");
+            }
 
-	    if ('0' <= ch && ch <= '9')
-	      hex += ch - '0';
-	    else if (ch >= 'a' && ch <= 'f')
-	      hex += ch - 'a' + 10;
-	    else if (ch >= 'A' && ch <= 'F')
-	      hex += ch - 'A' + 10;
-	    else
-	      return errorReturn(env, "invalid escaped hex character");
-	  }
+            if (hex < 0x80)
+              sb.append((char)hex);
+            else if (hex < 0x800) {
+              sb.append((char) (0xc0 + (hex >> 6)));
+              sb.append((char) (0x80 + (hex & 0x3f)));
+            }
+            else {
+              sb.append((char) (0xe0 + (hex >> 12)));
+              sb.append((char) (0x80 + ((hex >> 6) & 0x3f)));
+              sb.append((char) (0x80 + (hex & 0x3f)));
+            }
+          }
+        
+        break;
 
-	  if (hex < 0x80)
-	    sbv.append((char)hex);
-	  else if (hex < 0x800) {
-	    sbv.append((char) (0xc0 + (hex >> 6)));
-	    sbv.append((char) (0x80 + (hex & 0x3f)));
-	  }
-	  else {
-	    sbv.append((char) (0xe0 + (hex >> 12)));
-	    sbv.append((char) (0x80 + ((hex >> 6) & 0x3f)));
-	    sbv.append((char) (0x80 + (hex & 0x3f)));
-	  }
-	}
-	break;
+        case '"':
+          return sb;
 
-      case '"':
-	return sbv;
-
-      default:
-	sbv.append((char)ch);
+        default:
+          sb.append(ch);
       }
     }
 
@@ -406,7 +455,7 @@ class JsonDecoder {
       end = _len;
     }
 
-    String token = _string.substring(start, end).toString();
+    String token = _str.substring(start, end).toString();
 
     if (message != null)
       env.warning(L.l("error parsing '{0}': {1}", token, message));
@@ -416,39 +465,18 @@ class JsonDecoder {
     return NullValue.NULL;
   }
 
-  private void unread()
+  private void skipWhitespace()
   {
-    if (_offset > 0)
-      _offset--;
-  }
-
-  private int peek(int index)
-  {
-    if (0 <= index && index < _len)
-      return _string.charAt(index);
-    else
-      return -1;
-  }
-
-  private int read()
-  {
-    if (_offset < _len)
-      return _string.charAt(_offset++);
-    else
-      return -1;
-  }
-
-  private int skipWhitespace()
-  {
-    int ch = read();
-    for (; ch >= 0; ch = read()) {
-      if (ch != ' ' &&
-          ch != '\n' &&
-          ch != '\r' &&
-          ch != '\t')
+    while (_offset < _len) {
+      char ch = _str.charAt(_offset);
+      
+      if (ch == ' ' ||
+          ch == '\n' ||
+          ch == '\r' ||
+          ch == '\t')
+        _offset++;
+      else
         break;
     }
-
-    return ch;
   }
 }
