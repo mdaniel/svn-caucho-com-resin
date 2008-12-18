@@ -65,16 +65,16 @@ public class TransportConstraint extends AbstractConstraint {
   /**
    * Returns true if the user is authorized for the resource.
    */
-  public boolean isAuthorized(HttpServletRequest request,
-                              HttpServletResponse response,
-                              ServletContext application)
+  public AuthorizationResult isAuthorized(HttpServletRequest request,
+					  HttpServletResponse response,
+					  ServletContext application)
     throws ServletException, IOException
   {
     if (_transport == null)
-      return true;
+      return AuthorizationResult.ALLOW;
     
     if (request.isSecure())
-      return true;
+      return AuthorizationResult.ALLOW;
 
     Application app = (Application) application;
     Host host = (Host) app.getParent();
@@ -90,7 +90,8 @@ public class TransportConstraint extends AbstractConstraint {
 	url += "?" + request.getQueryString();
 
       response.sendRedirect(url);
-      return false;
+      
+      return AuthorizationResult.DENY_SENT_RESPONSE;
     }
     
     String url = request.getRequestURL().toString();
@@ -102,11 +103,12 @@ public class TransportConstraint extends AbstractConstraint {
         response.sendRedirect(url + "?" + queryString);
       else
         response.sendRedirect(url);
-      return false;
+      
+      return AuthorizationResult.DENY_SENT_RESPONSE;
     }
     
     response.sendError(HttpServletResponse.SC_FORBIDDEN, null);
 
-    return false;
+    return AuthorizationResult.DENY_SENT_RESPONSE;
   }
 }

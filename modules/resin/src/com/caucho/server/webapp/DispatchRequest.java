@@ -529,8 +529,15 @@ class DispatchRequest extends RequestAdapter {
     return session;
   }
 
+  public boolean isAuthRequested()
+  {
+    if (! (getRequest() instanceof CauchoRequest))
+      return false;
+    else
+      return ((CauchoRequest) getRequest()).isAuthRequested();
+  }
+
   public boolean authenticate()
-    throws ServletException, IOException
   {
     if (! (getRequest() instanceof CauchoRequest))
       return false;

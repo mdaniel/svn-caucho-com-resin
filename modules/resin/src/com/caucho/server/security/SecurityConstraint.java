@@ -226,6 +226,14 @@ public class SecurityConstraint {
   }
 
   /**
+   * Returns true for a fallthrough.
+   */
+  public boolean isFallthrough()
+  {
+    return false;
+  }
+
+  /**
    * Returns the applicable methods if the URL matches.
    */
   public ArrayList<String> getMethods(String url)

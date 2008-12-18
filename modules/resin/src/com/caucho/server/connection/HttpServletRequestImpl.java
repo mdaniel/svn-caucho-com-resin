@@ -938,9 +938,13 @@ public class HttpServletRequestImpl implements CauchoRequest
   {
     _request.clientDisconnect();
   }
+
+  public boolean isAuthRequested()
+  {
+    return _request.isAuthRequested();
+  }
   
   public boolean authenticate()
-    throws ServletException, IOException
   {
     return _request.authenticate();
   }

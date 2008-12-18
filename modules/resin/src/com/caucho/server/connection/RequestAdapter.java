@@ -560,8 +560,12 @@ public class RequestAdapter extends RequestWrapper
     return super.isUserInRole(role);
   }
   
+  public boolean isAuthRequested()
+  {
+    return false;
+  }
+  
   public boolean authenticate()
-    throws ServletException, IOException
   {
     return true;
   }

@@ -88,6 +88,7 @@ public class BeanType extends ConfigType
   private Attribute _addText;
   private Attribute _addProgram;
   private Attribute _addContentProgram;
+  private Attribute _addBean; // add(Object)
   private Attribute _setProperty;
 
   private Attribute _addCustomBean;
@@ -236,6 +237,11 @@ public class BeanType extends ConfigType
 	&& name.getNamespaceURI().startsWith("urn:java:")) {
       return _addCustomBean;
     }
+    else if (_addBean != null
+	&& name.getNamespaceURI() != null
+	&& name.getNamespaceURI().startsWith("urn:java:")) {
+      return _addBean;
+    }
     
     return null;
   }
@@ -259,6 +265,14 @@ public class BeanType extends ConfigType
   public Attribute getContentProgramAttribute()
   {
     return _addContentProgram;
+  }
+
+  /**
+   * Returns any add attributes to add arbitrary content
+   */
+  public Attribute getAddAttribute(Class cl)
+  {
+    return _addBean; // XXX: check type
   }
 
   /**
@@ -593,6 +607,12 @@ public class BeanType extends ConfigType
 	       && paramTypes.length == 1) {
 	// XXX: use annotation
 	_setParent = method;
+      }
+      else if (name.equals("add")
+	       && paramTypes.length == 1) {
+	ConfigType type = TypeFactory.getType(paramTypes[0]);
+	
+	_addBean = new AddAttribute(method, type);
       }
       else if ((name.startsWith("set") || name.startsWith("add"))
 	       && paramTypes.length == 1

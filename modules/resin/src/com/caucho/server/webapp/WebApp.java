@@ -144,6 +144,9 @@ public class WebApp extends ServletContextImpl
   // The webApp entry
   private WebAppController _controller;
 
+  // The webbeans container
+  private WebBeansContainer _webBeans;
+
   // The webApp directory.
   private final Path _appDir;
 
@@ -1849,15 +1852,21 @@ public class WebApp extends ServletContextImpl
 
       _classLoader.setId("web-app:" + getId());
 
-      WebBeansContainer webBeans = WebBeansContainer.getCurrent();
+      _webBeans = WebBeansContainer.getCurrent();
 
       try {
 	ServletAuthenticator auth
-	  = webBeans.getInstanceByType(ServletAuthenticator.class);
+	  = _webBeans.getInstanceByType(ServletAuthenticator.class);
 
 	setAttribute("caucho.authenticator", auth);
       } catch (Exception e) {
-	log.fine(e.toString());
+	log.finest(e.toString());
+      }
+
+      try {
+	_login = _webBeans.getInstanceByType(AbstractLogin.class);
+      } catch (Exception e) {
+	log.finest(e.toString());
       }
 
       WebAppController parent = null;
@@ -2661,7 +2670,9 @@ public class WebApp extends ServletContextImpl
    */
   public AbstractLogin getLogin()
   {
-    if (_loginFactory != null) {
+    if (_login != null)
+      return _login;
+    else if (_loginFactory != null) {
       synchronized (_loginFactory) {
 	_login = _loginFactory.getLoginObject();
       }

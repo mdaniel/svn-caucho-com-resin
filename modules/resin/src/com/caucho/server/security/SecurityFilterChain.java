@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -38,6 +39,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -91,45 +93,35 @@ public class SecurityFilterChain extends AbstractFilterChain {
     if (constraints == null)
       constraints = _constraints;
 
+    AuthorizationResult result = AuthorizationResult.NONE;
+    
     boolean isPrivateCache = false;
     if (constraints != null) {
       // non-authentication constraints are first
-      for (int i = 0; i < constraints.length; i++) {
-	AbstractConstraint constraint = constraints[i];
-	
-	if (constraint.needsAuthentication())
-	  continue;
+      for (AbstractConstraint constraint : constraints) {
+	result = constraint.isAuthorized(req, res, _webApp);
 
-        if (! constraint.isAuthorized(req, res, _webApp))
-          return;
-	
 	if (constraint.isPrivateCache())
 	  isPrivateCache = true;
-      }
-
-      boolean hasAuth = false;
-      for (int i = 0; i < constraints.length; i++) {
-	AbstractConstraint constraint = constraints[i];
 	
-        if (! constraint.needsAuthentication())
-	  continue;
-
-        if (! hasAuth) {
-          hasAuth = true;
-          if (! req.authenticate())
-            return;
-        }
-        
-        if (! constraint.isAuthorized(req, res, _webApp))
-          return;
-	
-	if (constraint.isPrivateCache())
-	  isPrivateCache = true;
+        if (! result.isFallthrough())
+          break;
       }
     }
 
     if (isPrivateCache)
       res.setPrivateCache(true);
+
+    if (result.isFail()) {
+      if (req.isAuthRequested())
+	req.authenticate();
+      
+      if (! result.isResponseSent() && res.getStatusCode() / 100 == 2) {
+	res.sendError(HttpServletResponse.SC_FORBIDDEN);
+      }
+      
+      return;
+    }
     
     _next.doFilter(request, response);
   }

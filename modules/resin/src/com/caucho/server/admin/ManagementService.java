@@ -38,6 +38,7 @@ import com.caucho.server.hmux.HmuxRequest;
 import com.caucho.server.host.HostConfig;
 import com.caucho.server.security.AbstractConstraint;
 import com.caucho.server.security.SecurityConstraint;
+import com.caucho.server.security.AuthorizationResult;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.InetNetwork;
 import com.caucho.util.L10N;
@@ -244,12 +245,15 @@ abstract public class ManagementService
       _service = service;
     }
 
-    public boolean isAuthorized(HttpServletRequest request,
-                                HttpServletResponse response,
-                                ServletContext application)
+    public AuthorizationResult isAuthorized(HttpServletRequest request,
+					    HttpServletResponse response,
+					    ServletContext application)
       throws ServletException, IOException
     {
-      return _service.isAuthorized(request, response, application);
+      if (_service.isAuthorized(request, response, application))
+	return AuthorizationResult.ALLOW;
+      else
+	return AuthorizationResult.DENY_SENT_RESPONSE;
     }
   }
 }

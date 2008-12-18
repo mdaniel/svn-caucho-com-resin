@@ -135,11 +135,12 @@ public abstract class AbstractHttpRequest
   protected AbstractHttpResponse _response;
 
   protected Invocation _invocation;
-  
-  private String _runAs;
 
   private boolean _keepalive;
   private long _startTime;
+  
+  private String _runAs;
+  private boolean _isAuthRequested;
 
   protected CharSegment _hostHeader;
   protected boolean _expect100Continue;
@@ -153,7 +154,7 @@ public abstract class AbstractHttpRequest
   private String _varyCookie;
   private boolean _hasCookie;
   private boolean _isSessionIdFromCookie;
-  
+
   protected int _sessionGroup;
 
   private long _contentLength;
@@ -302,6 +303,7 @@ public abstract class AbstractHttpRequest
     _isSessionIdFromCookie = false;
 
     _runAs = null;
+    _isAuthRequested = false;
 
     _attributeListeners = NULL_LISTENERS;
 
@@ -1637,53 +1639,71 @@ public abstract class AbstractHttpRequest
   }
 
   /**
+   * Returns true if any authentication is requested
+   */
+  public boolean isAuthRequested()
+  {
+    return _isAuthRequested;
+  }
+
+  /**
    * Authenticate the user.
    */
   public boolean authenticate()
-    throws ServletException, IOException
   {
-    Principal user = null;
-        
-    if (_session == null)
-      getSession(false);
-
-      // If the user object is already an attribute, return it.
-    if (_session != null) {
-      user = _session.getUser();
-      if (user != null)
-        return true;
-    }
-
-    WebApp app = getWebApp();
-    if (app == null) {
-      if (log.isLoggable(Level.FINE))
-	log.finer("authentication failed, no web-app found");
-      
-      _response.sendError(HttpServletResponse.SC_FORBIDDEN);
-      return false;
-    }
-
-    // If the authenticator can find the user, return it.
-    AbstractLogin login = app.getLogin();
-
-    if (login != null) {
-      user = login.authenticate(this, getResponse(), app);
-      if (user == null)
-        return false;
+    try {
+      Principal user = null;
         
       if (_session == null)
-        getSession(true);
-        
-      _session.setUser(user);
+	getSession(false);
 
-      return true;
-    }
-    else {
-      if (log.isLoggable(Level.FINE))
-	log.finer("authentication failed, no login module found for "
-		  + app);
+      // If the user object is already an attribute, return it.
+      if (_session != null) {
+	user = _session.getUser();
+	if (user != null)
+	  return true;
+      }
+
+      WebApp app = getWebApp();
+      if (app == null) {
+	if (log.isLoggable(Level.FINE))
+	  log.finer("authentication failed, no web-app found");
       
-      _response.sendError(HttpServletResponse.SC_FORBIDDEN);
+	_response.sendError(HttpServletResponse.SC_FORBIDDEN);
+	return false;
+      }
+
+      // If the authenticator can find the user, return it.
+      AbstractLogin login = app.getLogin();
+
+      if (login != null) {
+	user = login.authenticate(this, getResponse(), app);
+      
+	if (user == null)
+	  return false;
+
+	if (_session == null)
+	  getSession(true);
+        
+	_session.setUser(user);
+
+	return true;
+      }
+      else {
+	if (log.isLoggable(Level.FINE))
+	  log.finer("authentication failed, no login module found for "
+		    + app);
+      
+	_response.sendError(HttpServletResponse.SC_FORBIDDEN);
+	return false;
+      }
+    } catch (ServletException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
       return false;
     }
   }
@@ -1706,6 +1726,8 @@ public abstract class AbstractHttpRequest
    */
   public Principal getUserPrincipal()
   {
+    _isAuthRequested = true;
+    
     try {
       Principal user;
       user = (Principal) getAttribute(AbstractAuthenticator.LOGIN_NAME);

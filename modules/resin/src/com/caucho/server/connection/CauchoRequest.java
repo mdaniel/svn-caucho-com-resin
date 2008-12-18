@@ -67,8 +67,9 @@ public interface CauchoRequest extends HttpServletRequest {
   public boolean allowKeepalive();
   public boolean isClientDisconnect();
   public void clientDisconnect();
-  public boolean authenticate()
-    throws ServletException, IOException;
+
+  public boolean isAuthRequested();
+  public boolean authenticate();
 
   // public HashMap<String,String> setRoleMap(HashMap<String,String> roleMap);
   

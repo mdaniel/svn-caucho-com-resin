@@ -134,6 +134,11 @@ public class CustomBeanConfig {
     _args.add(arg);
   }
 
+  public void addAdd(ConfigProgram add)
+  {
+    addInitProgram(add);
+  }
+
   public void addInitProgram(ConfigProgram program)
   {
     if (_init == null) {
@@ -375,6 +380,11 @@ public class CustomBeanConfig {
       _component.setNewArgs(_args);
 
     _component.init();
+  }
+
+  public Object toObject()
+  {
+    return _component.create();
   }
 
   public String toString()

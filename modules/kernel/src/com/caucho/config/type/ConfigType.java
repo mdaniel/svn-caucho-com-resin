@@ -207,6 +207,14 @@ abstract public class ConfigType
   }
 
   /**
+   * Returns any add attributes to add arbitrary content
+   */
+  public Attribute getAddAttribute(Class cl)
+  {
+    return null;
+  }
+
+  /**
    * Called before the children are configured.
    */
   public void beforeConfigureBean(ConfigContext builder,

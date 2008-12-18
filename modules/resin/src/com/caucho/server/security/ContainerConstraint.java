@@ -76,19 +76,23 @@ public class ContainerConstraint extends AbstractConstraint {
    *
    * @return true if the request is authorized.
    */
-  public boolean isAuthorized(HttpServletRequest request,
-			      HttpServletResponse response,
-			      ServletContext application)
+  public AuthorizationResult isAuthorized(HttpServletRequest request,
+					  HttpServletResponse response,
+					  ServletContext application)
     throws ServletException, IOException
   {
+    AuthorizationResult result = AuthorizationResult.NONE;
+    
     for (int i = 0; i < _constraints.size(); i++) {
       AbstractConstraint constraint = _constraints.get(i);
 
-      if (! constraint.isAuthorized(request, response, application))
-	return false;
+      result = constraint.isAuthorized(request, response, application);
+
+      if (! result.isFallthrough())
+	return result;
     }
 
-    return true;
+    return result;
   }
 
   /**

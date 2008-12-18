@@ -78,12 +78,16 @@ public class CustomBeanType extends ConfigType
   private final ConfigType _beanType;
 
   private String _namespaceURI;
+
+  private boolean _hasZeroArg;
   
   private HashMap<QName,Attribute> _nsAttributeMap
     = new HashMap<QName,Attribute>();
   
   private HashMap<String,Attribute> _attributeMap
     = new HashMap<String,Attribute>();
+
+  private Attribute _addAttribute;
 
   public CustomBeanType(Class beanClass)
   {
@@ -94,11 +98,22 @@ public class CustomBeanType extends ConfigType
     int p = beanClass.getName().lastIndexOf('.');
     _namespaceURI = "urn:java:" + beanClass.getName().substring(0, p);
 
-    _nsAttributeMap.put(R_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
-    _nsAttributeMap.put(W_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
-    _nsAttributeMap.put(A_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
+    _hasZeroArg = false;
+
+    try {
+      _hasZeroArg = beanClass.getConstructor(new Class[0]) != null;
+    } catch (Exception e) {
+    }
+
+    // server/1a75
+    if (! _hasZeroArg) {
+      // XXX: also check for value method
+      _nsAttributeMap.put(R_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
+      _nsAttributeMap.put(W_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
+      _nsAttributeMap.put(A_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
     
-    _nsAttributeMap.put(TEXT, CustomBeanValueArgAttribute.ATTRIBUTE);
+      _nsAttributeMap.put(TEXT, CustomBeanValueArgAttribute.ATTRIBUTE);
+    }
   }
 
   /**
@@ -155,6 +170,12 @@ public class CustomBeanType extends ConfigType
 
     if (Annotation.class.isAssignableFrom(cl))
       return new CustomBeanAnnotationAttribute(cl);
+
+    AddAttribute addAttribute = (AddAttribute) _beanType.getAddAttribute(cl);
+    
+    if (addAttribute != null) {
+      return new CustomBeanAddAttribute(cl);
+    }
     else
       return new CustomBeanArgAttribute(cl);
   }

@@ -19,63 +19,37 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.security;
+package com.caucho.security;
 
+import com.caucho.util.CharBuffer;
+import com.caucho.server.connection.CauchoRequest;
+
+import java.security.Principal;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-abstract public class AbstractConstraint {
-  /**
-   * Returns true if the constraint requires authentication.
-   */
-  public boolean needsAuthentication()
-  {
-    return false;
-  }
-  
-  /**
-   * Returns true if any cache needs to be private.
-   */
-  public boolean isPrivateCache()
-  {
-    return true;
-  }
-  
+public class IfSecure implements ServletRequestPredicate {
   /**
    * Returns true if the user is authorized for the resource.
-   *
-   * <p>isAuthorized must provide the response if the user is not
-   * authorized.  Typically this will just call sendError.
-   *
-   * <p>isAuthorized will be called after all the other filters, but
-   * before the servlet.service().
-   *
-   * @param request the servlet request
-   * @param response the servlet response
-   *
-   * @return true if the request is authorized.
    */
-  abstract public AuthorizationResult
-    isAuthorized(HttpServletRequest request,
-		 HttpServletResponse response,
-		 ServletContext application)
-    throws ServletException, IOException;
-
-  /**
-   * converts the sub constraints to an array.
-   */
-  protected AbstractConstraint []toArray()
+  public boolean isMatch(HttpServletRequest request)
   {
-    return new AbstractConstraint[] { this };
+    return request.isSecure();
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }

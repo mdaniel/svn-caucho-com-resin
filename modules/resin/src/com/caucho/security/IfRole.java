@@ -27,9 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.security;
+package com.caucho.security;
 
 import com.caucho.util.CharBuffer;
+import com.caucho.server.connection.CauchoRequest;
 
 import java.security.Principal;
 import javax.servlet.ServletContext;
@@ -38,10 +39,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class RoleConstraint extends AbstractConstraint {
+public class IfRole implements ServletRequestPredicate {
   private String []_roles;
 
-  public void addRoleName(String role)
+  public void addName(String role)
   {
     if (_roles == null)
       _roles = new String[] { role };
@@ -52,54 +53,41 @@ public class RoleConstraint extends AbstractConstraint {
       _roles = newRoles;
     }
   }
-  
-  /**
-   * Returns true if the constraint requires authentication.
-   */
-  public boolean needsAuthentication()
-  {
-    return _roles != null && _roles.length > 0;
-  }
 
   /**
    * Returns true if the user is authorized for the resource.
    */
-  public AuthorizationResult
-    isAuthorized(HttpServletRequest request,
-		 HttpServletResponse response,
-		 ServletContext application)
-    throws ServletException, IOException
+  public boolean isMatch(HttpServletRequest request)
   {
     Principal user = request.getUserPrincipal();
+
+    if (user == null)
+      return false;
     
-    for (int i = 0; _roles != null && i < _roles.length; i++) {
-      String role = _roles[i];
-      
+    for (String role : _roles) {
       if (role.equals("*"))
-        return AuthorizationResult.ALLOW;
+        return true;
 
       if (request.isUserInRole(role))
-        return AuthorizationResult.ALLOW;
+        return true;
     }
-    
-    response.sendError(HttpServletResponse.SC_FORBIDDEN, null);
 
-    return AuthorizationResult.DENY_SENT_RESPONSE;
+    return false;
   }
 
   public String toString()
   {
-    CharBuffer cb = new CharBuffer();
+    StringBuilder sb = new StringBuilder();
 
-    cb.append(getClass().getSimpleName());
-    cb.append("[");
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
     for (int i = 0; i < _roles.length; i++) {
       if (i != 0)
-        cb.append(',');
-      cb.append(_roles[i]);
+        sb.append(',');
+      sb.append(_roles[i]);
     }
-    cb.append("]");
+    sb.append("]");
     
-    return cb.close();
+    return sb.toString();
   }
 }

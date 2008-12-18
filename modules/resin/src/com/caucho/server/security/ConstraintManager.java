@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -96,7 +97,7 @@ public class ConstraintManager extends FilterChainBuilder {
     loop:
     for (int i = 0; i < _constraints.size(); i++) {
       SecurityConstraint constraint = _constraints.get(i);
-        
+
       if (constraint.isMatch(uri)) {
 	AbstractConstraint absConstraint = constraint.getConstraint();
 
@@ -140,14 +141,16 @@ public class ConstraintManager extends FilterChainBuilder {
 
 	    // server/12ba - the first constraint matches, following are
 	    // ignored
-	    
-	    break loop;
+
+	    if (! constraint.isFallthrough())
+	      break loop;
 	  }
 	}
 	else {
 	  // server/1233
 	  
-	  break loop;
+	  if (! constraint.isFallthrough())
+	    break loop;
 	}
       }
     }
