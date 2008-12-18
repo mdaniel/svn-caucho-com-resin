@@ -92,6 +92,8 @@ public abstract class AbstractLogin implements LoginFilter {
    */
   protected ServletAuthenticator _auth;
 
+  private boolean _isSessionSaveLogin;
+
   /**
    * Sets the authenticator.
    */
@@ -122,6 +124,22 @@ public abstract class AbstractLogin implements LoginFilter {
     }
     
     return _auth;
+  }
+
+  /**
+   * Sets true if the user should be saved in the session.
+   */
+  public void setSessionSaveLogin(boolean isSave)
+  {
+    _sessionSaveLogin = isSave;
+  }
+
+  /**
+   * Sets true if the user should be saved in the session.
+   */
+  public boolean isSessionSaveLogin()
+  {
+    return _sessionSaveLogin;
   }
   
   /**
