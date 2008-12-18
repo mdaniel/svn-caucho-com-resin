@@ -131,7 +131,7 @@ public abstract class AbstractLogin implements LoginFilter {
    */
   public void setSessionSaveLogin(boolean isSave)
   {
-    _sessionSaveLogin = isSave;
+    _isSessionSaveLogin = isSave;
   }
 
   /**
@@ -139,7 +139,7 @@ public abstract class AbstractLogin implements LoginFilter {
    */
   public boolean isSessionSaveLogin()
   {
-    return _sessionSaveLogin;
+    return _isSessionSaveLogin;
   }
   
   /**
