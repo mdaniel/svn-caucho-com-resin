@@ -554,7 +554,7 @@ public class FilePath extends FilesystemPath {
 
   public int hashCode()
   {
-    return getPath().hashCode();
+    return getFullPath().hashCode();
   }
 
   public boolean equals(Object b)
@@ -567,7 +567,7 @@ public class FilePath extends FilesystemPath {
 
     FilePath file = (FilePath) b;
 
-    return getPath().equals(file.getPath());
+    return getFullPath().equals(file.getFullPath());
   }
 
   /**
