@@ -71,9 +71,7 @@ public class FormLoginServlet extends GenericServlet {
     String username = request.getParameter("j_username");
     String password = request.getParameter("j_password");
 
-    ServletAuthenticator auth = login.getAuthenticator();
-
-    Principal user = auth.login(req, res, app, username, password);
+    Principal user = login.getUserPrincipal(req);
 
     if (log.isLoggable(Level.FINE))
       log.fine(this + " login " + user);

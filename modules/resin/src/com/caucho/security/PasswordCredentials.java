@@ -27,60 +27,38 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.security;
-
-import com.caucho.config.types.BeanConfig;
-import com.caucho.config.*;
-import com.caucho.webbeans.cfg.*;
-import com.caucho.util.L10N;
+package com.caucho.security;
 
 /**
- * The login configures a basic: or form:.
+ * Password-based credentials
  */
-public class Login extends BeanConfig {
-  private static final L10N L = new L10N(Login.class);
+public class PasswordCredentials implements Credentials
+{
+  private char []_password;
 
-  public Login()
+  public PasswordCredentials()
   {
-    setScope("singleton");
-    setName("login");
+  }
+
+  public PasswordCredentials(char []password)
+  {
+    _password = password;
+  }
+
+  public char []getPassword()
+  {
+    return _password;
+  }
+
+  public void setPassword(char []password)
+  {
+    _password = password;
   }
 
   @Override
-  public Class getBeanConfigClass()
-  {
-    return LoginFilter.class;
-  }
-
-  /**
-   * Override the old meaning of type for backward compat.
-   */
-  @Override
-  public void setType(Class cl)
-  {
-    setClass(cl);
-  }
-
-  /**
-   * Check for correct type.
-   */
-  @Override
-  public void setClass(Class cl)
-  {
-    super.setClass(cl);
-
-    if (! LoginFilter.class.isAssignableFrom(cl))
-      throw new ConfigException(L.l("<login> class '{0}' must implement com.caucho.server.security.LoginFilter"));
-  }
-
-  public AbstractLogin getLoginObject()
-  {
-    return (AbstractLogin) getComponentFactory().get();
-  }
-
   public String toString()
   {
-    return "Login[]";
+    return getClass().getSimpleName() + "[]";
   }
 }
 

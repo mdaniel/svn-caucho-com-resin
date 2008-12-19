@@ -251,9 +251,9 @@ public class MBeanContext
       throw new MBeanRegistrationException(e);
     }
 
-    if (log.isLoggable(Level.FINER)
+    if (log.isLoggable(Level.FINEST)
 	&& ! name.equals(_mbeanServer.SERVER_DELEGATE_NAME)) {
-      log.finer(getDebugName(name, mbean) + " registered in " + this);
+      log.finest(getDebugName(name, mbean) + " registered in " + this);
     }
 
     addMBean(name, mbean);

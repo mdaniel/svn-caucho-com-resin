@@ -51,6 +51,8 @@ import com.caucho.management.server.HostMXBean;
 import com.caucho.naming.Jndi;
 import com.caucho.osgi.OsgiBundle;
 import com.caucho.osgi.OsgiManager;
+import com.caucho.security.Authenticator;
+import com.caucho.security.Login;
 import com.caucho.server.cache.AbstractCache;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
@@ -65,7 +67,11 @@ import com.caucho.server.port.TcpConnection;
 import com.caucho.server.port.ServerRequest;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
-import com.caucho.server.security.*;
+import com.caucho.security.RoleMapManager;
+import com.caucho.server.security.ConstraintManager;
+import com.caucho.server.security.LoginConfig;
+import com.caucho.server.security.SecurityConstraint;
+import com.caucho.server.security.TransportConstraint;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.util.CauchoSystem;
 //import com.caucho.soa.client.WebServiceClient;
@@ -214,12 +220,7 @@ public class WebApp extends ServletContextImpl
   private final Object _dispatcherCacheLock = new Object();
   private LruCache<String,RequestDispatcherImpl> _dispatcherCache;
 
-  // login configuration factory for lazy start
-  private Login _loginFactory;
-  private AbstractLogin _login;
-  
-  // Old login manager for compat
-  private AbstractLogin _loginManager;
+  private Login _login;
 
   private RoleMapManager _roleMapManager;
 
@@ -1171,9 +1172,8 @@ public class WebApp extends ServletContextImpl
    * Sets the login
    */
   public void setLoginConfig(LoginConfig loginConfig)
-    throws Throwable
   {
-    _loginManager = loginConfig.getLogin();
+    _login = loginConfig.getLogin();
   }
 
   /**
@@ -1181,7 +1181,7 @@ public class WebApp extends ServletContextImpl
    */
   public void setLogin(Login login)
   {
-    _loginFactory = login;
+    _login = login;
   }
 
   /**
@@ -1854,17 +1854,20 @@ public class WebApp extends ServletContextImpl
 
       _webBeans = WebBeansContainer.getCurrent();
 
+      /*
       try {
-	ServletAuthenticator auth
-	  = _webBeans.getInstanceByType(ServletAuthenticator.class);
+	Authenticator auth = _webBeans.getInstanceByType(Authenticator.class);
 
 	setAttribute("caucho.authenticator", auth);
       } catch (Exception e) {
 	log.finest(e.toString());
       }
+      */
 
       try {
-	_login = _webBeans.getInstanceByType(AbstractLogin.class);
+	_login = _webBeans.getInstanceByType(Login.class);
+	
+	setAttribute("caucho.login", _login);
       } catch (Exception e) {
 	log.finest(e.toString());
       }
@@ -2668,27 +2671,17 @@ public class WebApp extends ServletContextImpl
   /**
    * Gets the login manager.
    */
-  public AbstractLogin getLogin()
+  public Login getLogin()
   {
-    if (_login != null)
-      return _login;
-    else if (_loginFactory != null) {
-      synchronized (_loginFactory) {
-	_login = _loginFactory.getLoginObject();
-      }
-
-      return _login;
-    }
-    else
-      return _loginManager;
+    return _login;
   }
 
   /**
    * Gets the authenticator
    */
-  public ServletAuthenticator getAuthenticator()
+  public Authenticator getAuthenticator()
   {
-    AbstractLogin login = getLogin();
+    Login login = getLogin();
 
     if (login != null)
       return login.getAuthenticator();

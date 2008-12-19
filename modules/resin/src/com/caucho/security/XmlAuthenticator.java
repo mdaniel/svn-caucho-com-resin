@@ -30,7 +30,7 @@
 package com.caucho.security;
 
 import com.caucho.config.*;
-import com.caucho.server.security.*;
+import com.caucho.security.BasicPrincipal;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
@@ -48,8 +48,7 @@ import java.util.logging.*;
  * The XML authenticator reads a static file for authentication.
  *
  * <code><pre>
- * &lt;sec:XmlAuthenticator xmlns:sec="urn:java:com.caucho.resin.security">
- * &lt;/sec:XmlAuthenticator>
+ * &lt;authenticator url="xml:path=WEB-INF/users.xml"/>
  * </pre></code>
  *
  * <p>The format of the static file is as follows:
@@ -64,13 +63,237 @@ import java.util.logging.*;
  * <p>The authenticator can also be configured in the resin-web.xml:
  *
  * <code><pre>
- * &lt;sec:XmlAuthenticator xmlns:sec="urn:java:com.caucho.security">
- *   &lt;password-digest>none&lt;/password-digest>
+ * &lt;authenticator url="xml:password-digest=none">
+ *   &lt;init>
  *     &lt;user name="Harry Potter" password="quidditch" roles="user,captain"/>
  *   &lt;/init>
- * &lt;/sec:XmlAuthenticator>
+ * &lt;/authenticator>
  * </pre></code>
  */
-public class XmlAuthenticator extends com.caucho.server.security.XmlAuthenticator
+public class XmlAuthenticator extends AbstractAuthenticator
 {
+  private static final Logger log =
+    Logger.getLogger(XmlAuthenticator.class.getName());
+  
+  private Path _path;
+  private Hashtable<String,PasswordUser> _userMap
+    = new Hashtable<String,PasswordUser>();
+
+  private Depend _depend;
+  private long _lastCheck;
+
+  /**
+   * Sets the path to the XML file.
+   */
+  public void setPath(Path path)
+  {
+    _path = path;
+  }
+
+  /**
+   * Gets the path to the XML file.
+   */
+  public Path getPath()
+  {
+    return _path;
+  }
+
+  /**
+   * Adds a user from the configuration.
+   *
+   * <pre>
+   * &lt;init user='Harry Potter:quidditch:user,webdav'/>
+   * </pre>
+   */
+  public void addUser(User user)
+  {
+    _userMap.put(user.getName(), user.getPasswordUser());
+  }
+
+  /**
+   * Initialize the XML authenticator.
+   */
+  @PostConstruct
+  public synchronized void init()
+    throws ServletException
+  {
+    super.init();
+
+    reload();
+  }
+  
+  /**
+   * Returns the PasswordUser
+   */
+  @Override
+  protected PasswordUser getUser(String userName)
+  {
+    if  (userName == null)
+      return null;
+    
+    if (isModified())
+      reload();
+
+    PasswordUser user = _userMap.get(userName);
+
+    if (user != null)
+      return user.copy();
+    else
+      return null;
+  }
+
+  /**
+   * Reload the authenticator.
+   */
+  public synchronized void reload()
+  {
+    if (_path == null)
+      return;
+    
+    try {
+      _lastCheck = Alarm.getCurrentTime();
+      _depend = new Depend(_path);
+
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " loading users from " + _path);
+      
+      _userMap = new Hashtable<String,PasswordUser>();
+      
+      new Config().configureBean(this, _path);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  private boolean isModified()
+  {
+    if (_path == null)
+      return false;
+    else if (_depend == null)
+      return true;
+    else if (Alarm.getCurrentTime() < _lastCheck + 5000)
+      return false;
+    else {
+      _lastCheck = Alarm.getCurrentTime();
+      return _depend.isModified();
+    }
+  }
+
+  public static class User {
+    private String _name;
+    private String _password;
+    
+    private Principal _principal;
+    private String []_roles = new String[0];
+
+    private boolean _isDisabled;
+
+    public User()
+    {
+    }
+    
+    User(String name, String password, Principal principal)
+    {
+      _name = name;
+      _password = password;
+      _principal = principal;
+    }
+
+    public void setName(String name)
+    {
+      _name = name;
+
+      if (_principal == null)
+	_principal = new BasicPrincipal(name);
+    }
+
+    public String getName()
+    {
+      return _name;
+    }
+
+    public void setPassword(String password)
+    {
+      _password = password;
+    }
+
+    public void setPrincipal(Principal principal)
+    {
+      _principal = principal;
+    }
+
+    Principal getPrincipal()
+    {
+      return _principal;
+    }
+
+    public void addRoles(String roles)
+    {
+      for (String role : roles.split("[ ,]")) {
+        addRole(role);
+      }
+    }
+
+    public void setEnable(boolean isEnabled)
+    {
+      _isDisabled = ! isEnabled;
+    }
+
+    public void setDisable(boolean isDisabled)
+    {
+      _isDisabled = isDisabled;
+    }
+    
+    public void addRole(String role)
+    {
+      if ("disabled".equals(role))
+	_isDisabled = true;
+      
+      String []newRoles = new String[_roles.length + 1];
+      System.arraycopy(_roles, 0, newRoles, 0, _roles.length);
+      newRoles[_roles.length] = role;
+
+      _roles = newRoles;
+    }
+
+    String []getRoles()
+    {
+      return _roles;
+    }
+
+    public void addText(String userParam)
+    {
+      int p1 = userParam.indexOf(':');
+
+      if (p1 < 0)
+	return;
+
+      String name = userParam.substring(0, p1);
+      int p2 = userParam.indexOf(':', p1 + 1);
+      String password;
+      String roles;
+
+      if (p2 < 0) {
+	password = userParam.substring(p1 + 1);
+	roles = "user";
+      }
+      else {
+	password = userParam.substring(p1 + 1, p2);
+	roles = userParam.substring(p2 + 1);
+      }
+
+      setName(name);
+      setPassword(password);
+      addRoles(roles);
+    }
+
+    public PasswordUser getPasswordUser()
+    {
+      boolean isAnonymous = false;
+      
+      return new PasswordUser(_principal, _password.toCharArray(),
+			      _isDisabled, isAnonymous,
+			      _roles);
+    }
+  }
 }

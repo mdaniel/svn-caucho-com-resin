@@ -142,6 +142,44 @@ public class Base64 {
     }
   }
 
+  public static void encode(StringBuilder cb, byte []buffer,
+                            int offset, int length)
+  {
+    while (length >= 3) {
+      int data = (buffer[offset] & 0xff) << 16;
+      data += (buffer[offset + 1] & 0xff) << 8;
+      data += (buffer[offset + 2] & 0xff);
+      
+      cb.append(Base64.encode(data >> 18));
+      cb.append(Base64.encode(data >> 12));
+      cb.append(Base64.encode(data >> 6));
+      cb.append(Base64.encode(data));
+
+      offset += 3;
+      length -= 3;
+    }
+
+    if (length == 2) {
+      int b1 = buffer[offset] & 0xff;
+      int b2 = buffer[offset + 1] & 0xff;
+      
+      int data = (b1 << 16) + (b2 << 8);
+      
+      cb.append(Base64.encode(data >> 18));
+      cb.append(Base64.encode(data >> 12));
+      cb.append(Base64.encode(data >> 6));
+      cb.append('=');
+    }
+    else if (length == 1) {
+      int data = (buffer[offset] & 0xff) << 16;
+      
+      cb.append(Base64.encode(data >> 18));
+      cb.append(Base64.encode(data >> 12));
+      cb.append('=');
+      cb.append('=');
+    }
+  }
+
   public static void oldEncode(CharBuffer cb, byte []buffer,
 			       int offset, int length)
   {

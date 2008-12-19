@@ -939,14 +939,14 @@ public class HttpServletRequestImpl implements CauchoRequest
     _request.clientDisconnect();
   }
 
-  public boolean isAuthRequested()
+  public boolean isLoginRequested()
   {
-    return _request.isAuthRequested();
+    return _request.isLoginRequested();
   }
   
-  public boolean authenticate()
+  public boolean login()
   {
-    return _request.authenticate();
+    return _request.login();
   }
 
   public Connection getConnection()

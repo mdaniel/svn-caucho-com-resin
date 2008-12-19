@@ -30,7 +30,8 @@ package com.caucho.server.admin;
 
 import com.caucho.config.*;
 import com.caucho.security.BasicPrincipal;
-import com.caucho.server.security.*;
+import com.caucho.security.AbstractAuthenticator;
+import com.caucho.security.PasswordUser;
 import com.caucho.util.*;
 
 import java.security.Principal;
@@ -40,7 +41,7 @@ import java.util.logging.*;
 /**
  * Special authenticator for management
  */
-public class ManagementAuthenticator extends AbstractPasswordAuthenticator {
+public class ManagementAuthenticator extends AbstractAuthenticator {
   private static final Logger log
     = Logger.getLogger(ManagementAuthenticator.class.getName());
   

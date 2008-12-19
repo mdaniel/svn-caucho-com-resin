@@ -41,35 +41,6 @@ import com.caucho.security.*;
  * &lt;authenticator url="anonymous:"/>
  * </pre></code>
  */
-public class AnonymousAuthenticator extends AbstractAuthenticator
+public class AnonymousAuthenticator extends com.caucho.security.AnonymousAuthenticator
 {
-  private Principal _user = new BasicPrincipal("anonymous");
-
-  /**
-   * Authenticate (login) the user.
-   */
-  protected Principal loginImpl(HttpServletRequest request,
-                                HttpServletResponse response,
-                                ServletContext application,
-                                String user, String password)
-    throws ServletException
-  {
-    return _user;
-  }
-
-  /**
-   * The anonymous user is in the "user" role
-   *
-   * @param request the servlet request
-   * @param user the user to test
-   * @param role the role to test
-   */
-  public boolean isUserInRole(HttpServletRequest request,
-                              HttpServletResponse response,
-                              ServletContext application,
-                              Principal user, String role)
-    throws ServletException
-  {
-    return user == _user && "user".equals(role);
-  }
 }

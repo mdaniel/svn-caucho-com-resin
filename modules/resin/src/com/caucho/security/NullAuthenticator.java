@@ -39,12 +39,29 @@ import javax.servlet.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
-import com.caucho.server.security.*;
 import com.caucho.security.BasicPrincipal;
 
 /**
  * The null authenticator creates a dummy user.
  */
-public class NullAuthenticator extends com.caucho.server.security.NullAuthenticator
-{
+public class NullAuthenticator extends AbstractAuthenticator {
+  @Override
+  protected Principal authenticate(Principal user,
+				   PasswordCredentials cred,
+				   Object details)
+  {
+    return new BasicPrincipal(user.getName());
+  }
+
+  /**
+   * Returns true if the user plays the named role.
+   *
+   * @param user the user to test
+   * @param role the role to test
+   */
+  @Override
+  public boolean isUserInRole(Principal user, String role)
+  {
+    return user != null && "user".equals(role);
+  }
 }

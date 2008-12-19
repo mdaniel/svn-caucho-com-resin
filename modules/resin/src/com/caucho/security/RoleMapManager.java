@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.security;
+package com.caucho.security;
 
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;

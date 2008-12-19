@@ -1,7 +1,7 @@
 <config xmlns="http://caucho.com/ns/resin">
   <namespace name="http://caucho.com/ns/resin" default="true">
     <bean name="authenticator"
-          class="com.caucho.server.security.AuthenticatorConfig"/>
+          class="com.caucho.security.Authenticator"/>
 
     <bean name="bam-service"
           class="com.caucho.hemp.broker.BamServiceConfig"/>
@@ -148,7 +148,7 @@
           class="com.caucho.config.types.ResourceRef"/>
     
     <bean name="role-map"
-          class="com.caucho.server.security.RoleMap"/>
+          class="com.caucho.security.RoleMap"/>
 
     <bean name="security-role-ref"
           class="com.caucho.config.types.SecurityRoleRef"/>

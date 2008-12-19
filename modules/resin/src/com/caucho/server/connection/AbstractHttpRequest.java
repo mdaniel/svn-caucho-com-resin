@@ -31,14 +31,15 @@ package com.caucho.server.connection;
 
 import com.caucho.config.scope.ScopeRemoveListener;
 import com.caucho.i18n.CharacterEncoding;
+import com.caucho.security.AbstractLogin;
+import com.caucho.security.Login;
+import com.caucho.security.RoleMapManager;
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextProvider;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.port.TcpConnection;
 import com.caucho.server.security.AbstractAuthenticator;
-import com.caucho.server.security.AbstractLogin;
-import com.caucho.server.security.RoleMapManager;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
@@ -140,7 +141,7 @@ public abstract class AbstractHttpRequest
   private long _startTime;
   
   private String _runAs;
-  private boolean _isAuthRequested;
+  private boolean _isLoginRequested;
 
   protected CharSegment _hostHeader;
   protected boolean _expect100Continue;
@@ -303,7 +304,7 @@ public abstract class AbstractHttpRequest
     _isSessionIdFromCookie = false;
 
     _runAs = null;
-    _isAuthRequested = false;
+    _isLoginRequested = false;
 
     _attributeListeners = NULL_LISTENERS;
 
@@ -1601,7 +1602,7 @@ public abstract class AbstractHttpRequest
    */
   public String getAuthType()
   {
-    Object login = getAttribute(com.caucho.server.security.AbstractAuthenticator.LOGIN_NAME);
+    Object login = getAttribute(AbstractLogin.LOGIN_NAME);
 
     if (login instanceof X509Certificate)
       return CLIENT_CERT_AUTH;
@@ -1641,28 +1642,22 @@ public abstract class AbstractHttpRequest
   /**
    * Returns true if any authentication is requested
    */
-  public boolean isAuthRequested()
+  public boolean isLoginRequested()
   {
-    return _isAuthRequested;
+    return _isLoginRequested;
   }
 
   /**
    * Authenticate the user.
    */
-  public boolean authenticate()
+  public boolean login()
   {
     try {
       Principal user = null;
-        
-      if (_session == null)
-	getSession(false);
+      user = (Principal) getAttribute(AbstractLogin.LOGIN_NAME);
 
-      // If the user object is already an attribute, return it.
-      if (_session != null) {
-	user = _session.getUser();
-	if (user != null)
-	  return true;
-      }
+      if (user != null)
+	return true;
 
       WebApp app = getWebApp();
       if (app == null) {
@@ -1670,22 +1665,20 @@ public abstract class AbstractHttpRequest
 	  log.finer("authentication failed, no web-app found");
       
 	_response.sendError(HttpServletResponse.SC_FORBIDDEN);
+	
 	return false;
       }
 
       // If the authenticator can find the user, return it.
-      AbstractLogin login = app.getLogin();
+      Login login = app.getLogin();
 
       if (login != null) {
-	user = login.authenticate(this, getResponse(), app);
+	user = login.login(this, getResponse());
       
 	if (user == null)
 	  return false;
-
-	if (_session == null)
-	  getSession(true);
-        
-	_session.setUser(user);
+	
+	setAttribute(AbstractLogin.LOGIN_NAME, user);
 
 	return true;
       }
@@ -1695,12 +1688,9 @@ public abstract class AbstractHttpRequest
 		    + app);
       
 	_response.sendError(HttpServletResponse.SC_FORBIDDEN);
+	
 	return false;
       }
-    } catch (ServletException e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      return false;
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -1726,55 +1716,35 @@ public abstract class AbstractHttpRequest
    */
   public Principal getUserPrincipal()
   {
-    _isAuthRequested = true;
+    _isLoginRequested = true;
     
-    try {
-      Principal user;
-      user = (Principal) getAttribute(AbstractAuthenticator.LOGIN_NAME);
+    Principal user;
+    user = (Principal) getAttribute(AbstractLogin.LOGIN_NAME);
 
-      if (user != null)
-	return user;
-
-      if (_session == null)
-        getSession(false);
-      
-      // If the user object is already an attribute, return it.
-      if (_session != null) {
-        user = _session.getUser();
-        if (user != null)
-          return user;
-      }
-
-      WebApp app = getWebApp();
-      if (app == null)
-        return null;
-    
-      // If the authenticator can find the user, return it.
-      AbstractLogin login = app.getLogin();
-
-      if (login != null) {
-        user = login.getUserPrincipal(this, getResponse(), app);
-
-        if (user != null) {
-          getSession(true);
-          
-          _session.setUser(user);
-
-	  _response.setPrivateCache(true);
-        }
-	else {
-	  // server/123h, server/1920
-	  // distinguishes between setPrivateCache and setPrivateOrResinCache
-	  // _response.setPrivateOrResinCache(true);
-	}
-      }
-
+    if (user != null)
       return user;
-    } catch (ServletException e) {
-      log.log(Level.WARNING, e.toString(), e);
 
+    WebApp app = getWebApp();
+    if (app == null)
       return null;
+    
+    // If the authenticator can find the user, return it.
+    Login login = app.getLogin();
+
+    if (login != null) {
+      user = login.getUserPrincipal(this);
+
+      if (user != null) {
+	_response.setPrivateCache(true);
+      }
+      else {
+	// server/123h, server/1920
+	// distinguishes between setPrivateCache and setPrivateOrResinCache
+	// _response.setPrivateOrResinCache(true);
+      }
     }
+
+    return user;
   }
 
   /**
@@ -1852,18 +1822,9 @@ public abstract class AbstractHttpRequest
       }
     }
     
-    AbstractLogin login = app == null ? null : app.getLogin();
+    Login login = app == null ? null : app.getLogin();
 
-    boolean inRole = false;
-
-    try {
-      inRole = login.isUserInRole(this, getResponse(), app, user, role);
-    } catch (ServletException e) {
-      if (app != null)
-        app.log(String.valueOf(e), e);
-      
-      log.log(Level.FINE, e.toString(), e);
-    }
+    boolean inRole = login.isUserInRole(user, role);
       
     if (log.isLoggable(Level.FINE)) {
       if (user == null)
@@ -2399,7 +2360,12 @@ public abstract class AbstractHttpRequest
    */
   public ServletContext getServletContext()
   {
-    return null;
+    Invocation invocation = _invocation;
+
+    if (invocation != null)
+      return invocation.getWebApp();
+    else
+      return null;
   }
 
   /**

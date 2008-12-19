@@ -34,6 +34,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.hessian.io.*;
 import com.caucho.management.server.SessionManagerMXBean;
+import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.dispatch.DispatchServer;
@@ -42,7 +43,6 @@ import com.caucho.server.distcache.ClusterObject;
 import com.caucho.server.distcache.Store;
 import com.caucho.server.distcache.StoreManager;
 import com.caucho.server.resin.Resin;
-import com.caucho.server.security.ServletAuthenticator;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -296,7 +296,7 @@ public final class SessionManager implements AlarmListener
   /**
    * Returns the SessionManager's authenticator
    */
-  ServletAuthenticator getAuthenticator()
+  Authenticator getAuthenticator()
   {
     return _webApp.getAuthenticator();
   }

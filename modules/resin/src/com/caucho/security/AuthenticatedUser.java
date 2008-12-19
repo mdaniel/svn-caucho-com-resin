@@ -20,23 +20,26 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.security;
+package com.caucho.security;
 
-import java.security.Principal;
+import java.security.*;
 
 /**
- * Maps roles (permissions) to users and groups.
+ * Representes an authenticated user
  */
-public interface RoleMap {
-  /**
-   * Returns true if the user has permission for the role
-   */
-  public Boolean isUserInRole(String role, Principal user);
+public interface AuthenticatedUser extends Principal
+{
+  public Principal getPrincipal();
+  
+  public boolean isUserInRole(String role);
+
+  public void logout();
 }
+

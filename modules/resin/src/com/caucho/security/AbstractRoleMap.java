@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.security;
+package com.caucho.security;
 
 import java.security.Principal;
 import javax.annotation.PostConstruct;

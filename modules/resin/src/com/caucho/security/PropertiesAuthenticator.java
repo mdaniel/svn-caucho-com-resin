@@ -29,14 +29,27 @@
 
 package com.caucho.security;
 
+import com.caucho.config.*;
+import com.caucho.security.BasicPrincipal;
+import com.caucho.util.Alarm;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Path;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.security.Principal;
+import java.util.*;
+import java.util.logging.*;
+import java.io.*;
+
 /**
- * The Properties authenticator reads a properties file for authentication.
+ * The Property authenticator reads a properties file for authentication.
  *
  * <code><pre>
- * &lt;sec:PropertiesAuthenticator
- *        xmlns:sec="urn:java:com.caucho.resin.security">
- *   &lt;path>WEB-INF/users.xml&lt;/path>
- * &lt;/sec:PropertiesAuthenticator>
+ * &lt;authenticator url="prop:path=WEB-INF/users.xml"/>
  * </pre></code>
  *
  * <p>The format of the static file is as follows:
@@ -48,10 +61,198 @@ package com.caucho.security;
  * <p>The authenticator can also be configured in the resin-web.xml:
  *
  * <code><pre>
- * &lt;sec:PropertiesAuthenticator password-digest="none">
- *    Harry Potter=quidditch,user,captain
- * &lt;/sec:PropertiesAuthenticator>
+ * &lt;authenticator url="prop:password-digest=none">
+ *   &lt;init>
+ *     Harry Potter=quidditch,user,captain
+ *   &lt;/init>
+ * &lt;/authenticator>
  * </pre></code>
  */
-public class PropertiesAuthenticator extends com.caucho.server.security.PropertyAuthenticator {
+public class PropertiesAuthenticator extends AbstractAuthenticator {
+  private static final Logger log =
+    Logger.getLogger(PropertiesAuthenticator.class.getName());
+  
+  private Path _path;
+  private Hashtable<String,PasswordUser> _userMap
+    = new Hashtable<String,PasswordUser>();
+
+  private Depend _depend;
+  private long _lastCheck;
+
+  /**
+   * Sets the path to the property file.
+   */
+  public void setPath(Path path)
+  {
+    _path = path;
+  }
+
+  /**
+   * Gets the path to the property file.
+   */
+  public Path getPath()
+  {
+    return _path;
+  }
+
+  /**
+   * Sets the properties value
+   *
+   * <pre>
+   * &lt;init value='Harry Potter=quidditch,user,webdav'/>
+   * </pre>
+   */
+  public void setValue(Properties value)
+  {
+    for (Map.Entry entry : value.entrySet()) {
+      String name = (String) entry.getKey();
+      String userValue = (String) entry.getValue();
+
+      _userMap.put(name, createUser(name, userValue));
+    }
+  }
+
+  /**
+   * Initialize the properties authenticator.
+   */
+  @PostConstruct
+  public synchronized void init()
+    throws ServletException
+  {
+    super.init();
+
+    reload();
+  }
+  
+  /**
+   * Returns the PasswordUser
+   */
+  @Override
+  protected PasswordUser getUser(String userName)
+  {
+    if  (userName == null)
+      return null;
+    
+    if (isModified())
+      reload();
+
+    PasswordUser user = _userMap.get(userName).copy();
+
+    if (user != null)
+      return user.copy();
+    else
+      return null;
+  }
+
+  /**
+   * Reload the authenticator.
+   */
+  protected void reload()
+  {
+    if (_path == null)
+      return;
+    
+    synchronized (this) {
+      try {
+	_lastCheck = Alarm.getCurrentTime();
+	_depend = new Depend(_path);
+
+	if (log.isLoggable(Level.FINE))
+	  log.fine(this + " loading users from " + _path);
+      
+	_userMap = new Hashtable<String,PasswordUser>();
+
+	Properties props = new Properties();
+	InputStream is = _path.openRead();
+	try {
+	  props.load(is);
+	} finally {
+	  is.close();
+	}
+
+	setValue(props);
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+    }
+  }
+
+  /**
+   * Creates the password user based on a name and a comma-separated value
+   */
+  protected PasswordUser createUser(String name, String value)
+  {
+    String []values = value.trim().split("[,]");
+
+    Principal principal = new BasicPrincipal(name);
+
+    if (values.length < 1) {
+      return new PasswordUser(principal, new char[0],
+			      true, false,
+			      new String[0]);
+    }
+
+    String password = values[0].trim();
+    boolean isDisabled = false;
+    boolean isAnonymous = false;
+    ArrayList<String> roles = new ArrayList<String>();
+      
+    for (int i = 1; i < values.length; i++) {
+      String item = values[i].trim();
+	
+      if (item.equals("disabled"))
+	isDisabled = true;
+      else if (! item.equals(""))
+	roles.add(item);
+    }
+
+    if (roles.size() == 0)
+      roles.add("user");
+
+    String []roleArray = new String[roles.size()];
+    roles.toArray(roleArray);
+
+    return new PasswordUser(principal, password.toCharArray(),
+			    isDisabled, isAnonymous,
+			    roleArray);
+  }
+
+  private boolean isModified()
+  {
+    if (_path == null)
+      return false;
+    else if (_depend == null)
+      return true;
+    else if (Alarm.getCurrentTime() < _lastCheck + 5000)
+      return false;
+    else {
+      _lastCheck = Alarm.getCurrentTime();
+      return _depend.isModified();
+    }
+  }
+
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+
+    boolean hasValue = false;
+    if (getPath() != null) {
+      hasValue = true;
+      sb.append(getPath());
+    }
+
+    if (getPasswordDigest() != null) {
+      if (! hasValue)
+	sb.append(",");
+      
+      sb.append(getPasswordDigest());
+    }
+
+    sb.append("]");
+
+    return sb.toString();
+  }
 }

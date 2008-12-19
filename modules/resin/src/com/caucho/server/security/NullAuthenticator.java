@@ -28,51 +28,8 @@
 
 package com.caucho.server.security;
 
-import java.io.*;
-import java.util.*;
-import java.security.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.security.BasicPrincipal;
-
 /**
  * The null authenticator creates a dummy user.
  */
-public class NullAuthenticator extends AbstractAuthenticator {
-  public Principal loginImpl(HttpServletRequest request,
-                             HttpServletResponse response,
-                             ServletContext app,
-                             String user, String password)
-    throws ServletException
-  {
-    return new BasicPrincipal(user);
-  }
-  
-  public Principal getUserPrincipalImpl(HttpServletRequest request,
-                                        ServletContext application)
-    throws ServletException
-  {
-    return null;
-  }
-
-  /**
-   * Returns true if the user plays the named role.
-   *
-   * @param request the servlet request
-   * @param user the user to test
-   * @param role the role to test
-   */
-  public boolean isUserInRole(HttpServletRequest request,
-                              HttpServletResponse response,
-                              ServletContext application,
-                              Principal user, String role)
-    throws ServletException
-  {
-    return user != null && "user".equals(role);
-  }
+public class NullAuthenticator extends com.caucho.security.NullAuthenticator {
 }

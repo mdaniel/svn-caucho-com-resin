@@ -71,6 +71,9 @@ public class RoleConstraint extends AbstractConstraint {
     throws ServletException, IOException
   {
     Principal user = request.getUserPrincipal();
+
+    if (user == null)
+      return AuthorizationResult.DENY;
     
     for (int i = 0; _roles != null && i < _roles.length; i++) {
       String role = _roles[i];
@@ -81,10 +84,8 @@ public class RoleConstraint extends AbstractConstraint {
       if (request.isUserInRole(role))
         return AuthorizationResult.ALLOW;
     }
-    
-    response.sendError(HttpServletResponse.SC_FORBIDDEN, null);
 
-    return AuthorizationResult.DENY_SENT_RESPONSE;
+    return AuthorizationResult.DENY;
   }
 
   public String toString()

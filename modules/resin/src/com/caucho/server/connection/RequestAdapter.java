@@ -560,12 +560,12 @@ public class RequestAdapter extends RequestWrapper
     return super.isUserInRole(role);
   }
   
-  public boolean isAuthRequested()
+  public boolean isLoginRequested()
   {
     return false;
   }
   
-  public boolean authenticate()
+  public boolean login()
   {
     return true;
   }

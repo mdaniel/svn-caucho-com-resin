@@ -41,5 +41,55 @@ import java.security.cert.X509Certificate;
  * Implements the "CLIENT-CERT" auth-method.  CLIENT-CERT uses the
  * SSL authentication with WWW-Authenticate and SC_UNAUTHORIZE.
  */
-public class ClientCertLogin extends com.caucho.server.security.ClientCertLogin {
+public class ClientCertLogin extends AbstractLogin {
+  /**
+   * Returns the authentication type.
+   */
+  public String getAuthType()
+  {
+    return "CLIENT-CERT";
+  }
+  
+  /**
+   * Logs a user in with a user name and a password.  Basic authentication
+   * extracts the user and password from the authorization header.  If
+   * the user/password is missing, authenticate will send a basic challenge.
+   *
+   * @param request servlet request
+   * @param response servlet response, in case any cookie need sending.
+   * @param application servlet application
+   *
+   * @return the logged in principal on success, null on failure.
+   */
+  public Principal authenticate(HttpServletRequest request,
+                                HttpServletResponse response,
+                                ServletContext application)
+    throws ServletException, IOException
+  {
+    return getUserPrincipal(request, response, application);
+  }
+  
+  /**
+   * Returns the current user with the user name and password.
+   *
+   * @param request servlet request
+   * @param response servlet response, in case any cookie need sending.
+   * @param application servlet application
+   *
+   * @return the logged in principal on success, null on failure.
+   */
+  public Principal getUserPrincipal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    ServletContext application)
+    throws ServletException
+  {
+    X509Certificate []certs;
+
+    certs = (X509Certificate []) request.getAttribute("javax.servlet.request.X509Certificate");
+
+    if (certs != null)
+      return certs[0].getSubjectDN();
+    else
+      return null;
+  }
 }

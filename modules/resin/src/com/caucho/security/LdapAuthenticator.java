@@ -19,8 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -31,7 +30,6 @@ package com.caucho.security;
 
 import com.caucho.config.types.InitParam;
 import com.caucho.security.BasicPrincipal;
-import com.caucho.server.security.*;
 
 import javax.annotation.PostConstruct;
 import javax.naming.Context;
@@ -52,11 +50,160 @@ import java.util.logging.*;
  * provided by the JDK.
  *
  * <code><pre>
- * &lt;sec:LdapAuthenticator xmlns:sec="urn:java:com.caucho.resin.security">
- *   &lt;url>ldap://localhost:389&lt;/url>
- * &lt;/sec:LdapAuthenticator>
+ * &lt;authenticator url="ldap:url=ldap://localhost:389">
+ * &lt;/authenticator>
  * </code></pre>
  */
-public class LdapAuthenticator extends com.caucho.server.security.LdapAuthenticator
-{
+public class LdapAuthenticator extends AbstractAuthenticator {
+  private static final Logger log
+    = Logger.getLogger(LdapAuthenticator.class.getName());
+
+  private String _host = "ldap://localhost:389";
+  
+  private String _userAttribute = "uid";
+  private String _passwordAttribute = "userPassword";
+  private String _baseDn;
+  private String _dnPrefix;
+  private String _dnSuffix;
+  
+  private Hashtable<String,String> _jndiEnv
+    = new Hashtable<String,String>();
+
+  public LdapAuthenticator()
+  {
+    _jndiEnv.put(Context.INITIAL_CONTEXT_FACTORY,
+		 "com.sun.jndi.ldap.LdapCtxFactory");
+    _jndiEnv.put(Context.PROVIDER_URL,
+		 "ldap://localhost:389");
+  }
+  
+  public void setDNPrefix(String prefix)
+  {
+    _dnPrefix = prefix;
+  }
+  
+  public void setDNSuffix(String suffix)
+  {
+    _dnSuffix = suffix;
+  }
+
+  public void setBaseDn(String baseDn)
+  {
+    _baseDn = baseDn;
+  }
+  
+  public void setHost(String host)
+  {
+    if (! host.startsWith("ldap:"))
+      host = "ldap://" + host;
+    
+    setURL(host);
+  }
+  
+  public void addJNDIEnv(InitParam init)
+  {
+    _jndiEnv.putAll(init.getParameters());
+  }
+
+  public void setURL(String url)
+  {
+    _jndiEnv.put(Context.PROVIDER_URL, url);
+  }
+
+  public void setUserAttribute(String user)
+  {
+    _userAttribute = user;
+  }
+
+  public void setPasswordAttribute(String password)
+  {
+    _passwordAttribute = password;
+  }
+
+  /**
+   * Sets the Context.SECURITY_AUTHENTICATION
+   */
+  public void setSecurityAuthentication(String type)
+  {
+    _jndiEnv.put(Context.SECURITY_AUTHENTICATION, type);
+  }
+
+  /**
+   * Sets the Context.SECURITY_PRINCIPAL
+   */
+  public void setSecurityPrincipal(String user)
+  {
+    _jndiEnv.put(Context.SECURITY_PRINCIPAL, user);
+  }
+
+  /**
+   * Sets the Context.SECURITY_CREDENTIALS
+   */
+  public void setSecurityCredentials(String password)
+  {
+    _jndiEnv.put(Context.SECURITY_CREDENTIALS, password);
+  }
+
+  /**
+   * Initialize the authenticator.
+   */
+  @PostConstruct
+  public void init()
+    throws ServletException
+  {
+    super.init();
+  }
+  
+  /**
+   * Authenticate (login) the user.
+   */
+  protected PasswordUser getUser(String userName)
+  {
+    try {
+      Hashtable env = new Hashtable();
+
+      env.putAll(_jndiEnv);
+
+      InitialDirContext ic = new InitialDirContext(env);
+
+      String query = _userAttribute + '=' + userName;
+
+      if (_baseDn != null && ! _baseDn.equals(""))
+	query = _baseDn + ',' + query;
+
+      if (_dnPrefix != null && ! _dnPrefix.equals(""))
+	query = _dnPrefix + ',' + query;
+
+      if (_dnSuffix != null && ! _dnSuffix.equals(""))
+	query = query + ',' + _dnSuffix;
+
+      Attributes attributes = ic.getAttributes(query);
+
+      if (log.isLoggable(Level.FINE))
+	log.fine("ldap-authenticator: " + query + "->" + (attributes != null));
+
+      if (attributes == null)
+	return null;
+
+      Attribute passwordAttr = attributes.get(_passwordAttribute);
+
+      if (passwordAttr == null)
+	return null;
+      
+      String ldapPassword = (String) passwordAttr.get();
+
+      Principal principal = new BasicPrincipal(userName);
+
+      boolean isDisabled = false;
+      boolean isAnonymous = false;
+      
+      return new PasswordUser(principal, ldapPassword.toCharArray(),
+			      isDisabled, isAnonymous,
+			      new String[] { "user" });
+    } catch (NamingException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return null;
+    }
+  }
 }

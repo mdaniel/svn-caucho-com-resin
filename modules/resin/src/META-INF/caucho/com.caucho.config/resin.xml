@@ -1,7 +1,7 @@
 <namespace xmlns="http://caucho.com/ns/resin">
 
   <bean name="authenticator"
-        class="com.caucho.server.security.ServletAuthenticator"/>
+        class="com.caucho.security.Authenticator"/>
 
   <bean name="bam-service"
         class="com.caucho.hemp.broker.BamServiceConfig"/>
@@ -178,7 +178,7 @@
         class="com.caucho.config.types.ResourceRef"/>
     
   <bean name="role-map"
-        class="com.caucho.server.security.RoleMap"/>
+        class="com.caucho.security.RoleMap"/>
 
   <bean name="scheduled-task"
         class="com.caucho.resources.ScheduledTask"/>

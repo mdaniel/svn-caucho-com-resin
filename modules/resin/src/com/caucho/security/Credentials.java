@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free Software Foundation, Inc.
+ *
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,44 +29,10 @@
 
 package com.caucho.security;
 
-import java.security.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.security.*;
-
 /**
- * The anonymous authenticator always succeeds
- *
- * <code><pre>
- * &lt;authenticator url="anonymous:"/>
- * </pre></code>
+ * Credentials to log in a user.
  */
-public class AnonymousAuthenticator extends AbstractAuthenticator
+public interface Credentials
 {
-  private Principal _user = new BasicPrincipal("anonymous");
-
-  /**
-   * Authenticate (login) the user.
-   */
-  @Override
-  protected Principal authenticate(Principal user,
-				   PasswordCredentials cred,
-				   Object details)
-  {
-    return _user;
-  }
-
-  /**
-   * The anonymous user is in the "user" role
-   *
-   * @param request the servlet request
-   * @param user the user to test
-   * @param role the role to test
-   */
-  @Override
-  public boolean isUserInRole(Principal user, String role)
-  {
-    return user == _user && "user".equals(role);
-  }
 }
+

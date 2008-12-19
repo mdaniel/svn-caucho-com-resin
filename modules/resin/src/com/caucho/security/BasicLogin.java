@@ -29,6 +29,7 @@
 
 package com.caucho.security;
 
+import com.caucho.security.BasicPrincipal;
 import com.caucho.util.Base64;
 
 import javax.servlet.ServletContext;
@@ -43,5 +44,83 @@ import java.util.logging.Level;
  * Implements the "basic" auth-method.  Basic uses the
  * HTTP authentication with WWW-Authenticate and SC_UNAUTHORIZE.
  */
-public class BasicLogin extends com.caucho.server.security.BasicLogin {
+public class BasicLogin extends AbstractLogin {
+  protected String _realm;
+  
+  /**
+   * Sets the login realm.
+   */
+  public void setRealmName(String realm)
+  {
+    _realm = realm;
+  }
+
+  /**
+   * Gets the realm.
+   */
+  public String getRealmName()
+  {
+    return _realm;
+  }
+
+  /**
+   * Returns the authentication type.
+   */
+  public String getAuthType()
+  {
+    return "Basic";
+  }
+
+  /**
+   * Returns the principal from a basic authentication
+   *
+   * @param auth the authenticator for this application.
+   */
+  @Override
+  protected Principal getUserPrincipalImpl(HttpServletRequest request)
+  {
+    String value = request.getHeader("authorization");
+    if (value == null)
+      return null;
+    
+    int i = value.indexOf(' ');
+    if (i <= 0)
+      return null;
+
+    String decoded = Base64.decode(value.substring(i + 1));
+
+    int index = decoded.indexOf(':');
+    if (index < 0)
+      return null;
+
+    String userName = decoded.substring(0, index);
+    char []password = decoded.substring(index + 1).toCharArray();
+
+    Authenticator auth = getAuthenticator();
+    BasicPrincipal user = new BasicPrincipal(userName);
+
+    Credentials credentials = new PasswordCredentials(password);
+    Principal principal = auth.authenticate(user, credentials, request);
+
+    if (log.isLoggable(Level.FINE))
+      log.fine("basic: " + user + " -> " + principal); 
+
+    return principal;
+  }
+
+  /**
+   * Sends a challenge for basic authentication.
+   */
+  @Override
+  protected void loginChallenge(HttpServletRequest request,
+				HttpServletResponse response)
+    throws IOException
+  {
+    String realm = getRealmName();
+    if (realm == null)
+      realm = "resin";
+
+    response.setHeader("WWW-Authenticate", "Basic realm=\"" + realm + "\"");
+    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+  }
 }

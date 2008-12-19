@@ -529,20 +529,20 @@ class DispatchRequest extends RequestAdapter {
     return session;
   }
 
-  public boolean isAuthRequested()
+  public boolean isLoginRequested()
   {
     if (! (getRequest() instanceof CauchoRequest))
       return false;
     else
-      return ((CauchoRequest) getRequest()).isAuthRequested();
+      return ((CauchoRequest) getRequest()).isLoginRequested();
   }
 
-  public boolean authenticate()
+  public boolean login()
   {
     if (! (getRequest() instanceof CauchoRequest))
       return false;
     else
-      return ((CauchoRequest) getRequest()).authenticate();
+      return ((CauchoRequest) getRequest()).login();
   }
   
   /**

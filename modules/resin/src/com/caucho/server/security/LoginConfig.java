@@ -31,6 +31,11 @@ package com.caucho.server.security;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.security.Authenticator;
+import com.caucho.security.AbstractLogin;
+import com.caucho.security.BasicLogin;
+import com.caucho.security.DigestLogin;
+import com.caucho.security.Login;
 import com.caucho.util.L10N;
 
 import javax.servlet.ServletException;
@@ -50,7 +55,7 @@ public class LoginConfig {
   private ContainerProgram _formLoginConfig;
   private ContainerProgram _init;
 
-  private ServletAuthenticator _authenticator;
+  private Authenticator _authenticator;
 
   /**
    * Creates the login-config.
@@ -78,7 +83,7 @@ public class LoginConfig {
   /**
    * Sets the authenticator.
    */
-  public void setAuthenticator(ServletAuthenticator auth)
+  public void setAuthenticator(Authenticator auth)
   {
     _authenticator = auth;
   }
@@ -135,53 +140,56 @@ public class LoginConfig {
   /**
    * Returns the login.
    */
-  public AbstractLogin getLogin()
-    throws Exception
+  public Login getLogin()
   {
-    /*
-    if (auth == null)
-      throw new ServletException(L.l("Login needs an authenticator resource with JNDI name java:comp/env/caucho/auth"));
-    */
+    try {
+      /*
+	if (auth == null)
+	throw new ServletException(L.l("Login needs an authenticator resource with JNDI name java:comp/env/caucho/auth"));
+      */
 
-    AbstractLogin login;
+      AbstractLogin login;
 
-    if (_customType != null) {
-      login = (AbstractLogin) _customType.newInstance();
+      if (_customType != null) {
+	login = (AbstractLogin) _customType.newInstance();
       
-      if (_init != null)
-        _init.configure(login);
-    }
-    else if (_authMethod.equalsIgnoreCase("basic")) {
-      BasicLogin basicLogin = new BasicLogin();
-      basicLogin.setRealmName(_realmName);
-      login = basicLogin;
-    }
-    else if (_authMethod.equalsIgnoreCase("digest")) {
-      DigestLogin digestLogin = new DigestLogin();
-      digestLogin.setRealmName(_realmName);
-      login = digestLogin;
-    }
-    else if (_authMethod.equalsIgnoreCase("client-cert")) {
-      ClientCertLogin certLogin = new ClientCertLogin();
-      login = certLogin;
-    }
-    else if (_authMethod.equalsIgnoreCase("form")) {
-      login = new FormLogin();
+	if (_init != null)
+	  _init.configure(login);
+      }
+      else if (_authMethod.equalsIgnoreCase("basic")) {
+	BasicLogin basicLogin = new BasicLogin();
+	basicLogin.setRealmName(_realmName);
+	login = basicLogin;
+      }
+      else if (_authMethod.equalsIgnoreCase("digest")) {
+	DigestLogin digestLogin = new DigestLogin();
+	digestLogin.setRealmName(_realmName);
+	login = digestLogin;
+      }
+      else if (_authMethod.equalsIgnoreCase("client-cert")) {
+	ClientCertLogin certLogin = new ClientCertLogin();
+	login = certLogin;
+      }
+      else if (_authMethod.equalsIgnoreCase("form")) {
+	login = new FormLogin();
 
-      if (_formLoginConfig == null)
-	throw new ConfigException(L.l("'form' authentication requires form-login"));
+	if (_formLoginConfig == null)
+	  throw new ConfigException(L.l("'form' authentication requires form-login"));
 
-      _formLoginConfig.configure(login);
-    }
-    else
-      throw new ServletException(L.l("'{0}' is an unknown auth-type.",
-                                     _authMethod));
+	_formLoginConfig.configure(login);
+      }
+      else
+	throw new ConfigException(L.l("'{0}' is an unknown auth-type.",
+				       _authMethod));
 
-    if (_authenticator != null)
-      login.setAuthenticator(_authenticator);
+      if (_authenticator != null)
+	login.setAuthenticator(_authenticator);
     
-    login.init();
+      login.init();
 
-    return login;
+      return login;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
 }

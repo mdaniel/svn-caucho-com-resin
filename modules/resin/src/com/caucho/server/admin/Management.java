@@ -41,6 +41,8 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.host.HostConfig;
 import com.caucho.server.resin.*;
 import com.caucho.security.*;
+import com.caucho.security.PasswordUser;
+import com.caucho.security.AbstractAuthenticator;
 import com.caucho.server.security.*;
 import com.caucho.webbeans.manager.*;
 import com.caucho.util.L10N;

@@ -27,37 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.security;
+package com.caucho.security;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.Base64;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.security.MessageDigest;
+import java.security.Principal;
 
 /**
- * Calculates a digest for the user and password.
- *
- * <p>If the realm is missing, the digest will calculate:
- * <code><pre>
- * MD5(user + ':' + password)
- * </pre></code>
- *
- * <p>If the realm is specified, the digest will calculate:
- * <code><pre>
- * MD5(user + ':' + realm + ':' + password)
- * </pre></code>
- *
- * <p>The second version matches the way HTTP digest authentication
- * is handled, so it is the preferred method for storing passwords.
- *
- * <p>The returned result is the base64 encoding of the digest.
+ * Maps roles (permissions) to users and groups.
  */
-public class PasswordDigest extends com.caucho.security.PasswordDigest {
+public interface RoleMap {
+  /**
+   * Returns true if the user has permission for the role
+   */
+  public Boolean isUserInRole(String role, Principal user);
 }

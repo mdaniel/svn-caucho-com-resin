@@ -35,6 +35,8 @@ import com.caucho.lifecycle.*;
 import com.caucho.server.admin.*;
 import com.caucho.server.resin.*;
 import com.caucho.security.*;
+import com.caucho.security.PasswordDigest;
+import com.caucho.security.PasswordUser;
 import com.caucho.server.security.*;
 import com.caucho.webbeans.manager.*;
 import com.caucho.util.L10N;

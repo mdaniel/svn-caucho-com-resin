@@ -34,8 +34,10 @@ import com.caucho.server.webapp.WebApp;
 import com.caucho.server.distcache.ClusterObject;
 import com.caucho.server.distcache.ObjectManager;
 import com.caucho.server.distcache.Store;
-import com.caucho.server.security.AbstractAuthenticator;
-import com.caucho.server.security.ServletAuthenticator;
+import com.caucho.security.AbstractAuthenticator;
+import com.caucho.security.Authenticator;
+import com.caucho.security.Login;
+import com.caucho.security.AbstractLogin;
 import com.caucho.util.Alarm;
 import com.caucho.util.CacheListener;
 import com.caucho.util.L10N;
@@ -230,9 +232,9 @@ public class SessionImpl implements HttpSession, CacheListener {
   /**
    * Returns the authenticator
    */
-  public ServletAuthenticator getAuthenticator()
+  public Login getLogin()
   {
-    return _manager.getWebApp().getAuthenticator();
+    return _manager.getWebApp().getLogin();
   }
 
   /**
@@ -601,11 +603,11 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     try {
       // server/017s
-      ServletAuthenticator auth = getAuthenticator();
-      if (! (auth instanceof AbstractAuthenticator)
+      Login login = getLogin();
+      if (! (login instanceof AbstractLogin)
 	  || logout == Logout.INVALIDATE
 	  || (logout == Logout.TIMEOUT
-	      && ((AbstractAuthenticator) auth).getLogoutOnSessionTimeout())) {
+	      && ((AbstractLogin) login).getLogoutOnSessionTimeout())) {
 	// server/12i1, 12ch
 	logout(logout == Logout.TIMEOUT ? this : null);
       }
@@ -644,10 +646,10 @@ public class SessionImpl implements HttpSession, CacheListener {
       _user = null;
 
       try {
-	ServletAuthenticator auth = getAuthenticator();
+	Login login = getLogin();
 
-	if (auth != null)
-	  auth.logout(_manager.getWebApp(), timeoutSession, _id, user);
+	if (login != null)
+	  login.logout(user, null, null);
       } catch (Exception e) {
         log.log(Level.WARNING, e.toString(), e);
       }
