@@ -564,8 +564,6 @@ public abstract class JspContainerNode extends JspNode {
 
   /**
    * Generates the code for the children.
-   *
-   * @param out the output writer for the generated java.
    */
   public void generateChildrenEmpty()
     throws Exception

@@ -659,7 +659,15 @@ public class JstlCoreForEach extends JstlNode {
       out.popDepth();
     }
   }
-  
+
+
+  @Override
+  public boolean hasCustomTag()
+  {
+    // uses TagState directly
+    return true;
+  }
+
   /**
    * Generates code before the actual JSP.
    */

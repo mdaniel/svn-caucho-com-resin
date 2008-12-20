@@ -95,6 +95,15 @@ public class JstlCoreOut extends JstlNode {
             || hasScripting(_default) || hasScripting(_defaultAttr));
   }
 
+  @Override
+  public boolean hasCustomTag()
+  {
+    return (super.hasCustomTag()
+            || _valueAttr != null && _valueAttr.hasCustomTag()
+            || _escapeXmlAttr != null && _escapeXmlAttr.hasCustomTag()
+            || _defaultAttr != null && _defaultAttr.hasCustomTag());
+  }
+
   /**
    * Generates the XML text representation for the tag validation.
    *
@@ -123,7 +132,7 @@ public class JstlCoreOut extends JstlNode {
 
     os.print("</" + prefix + ":out>");
   }
-  
+
   /**
    * Generates the code for the c:out tag.
    */
