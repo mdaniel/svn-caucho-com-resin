@@ -122,6 +122,14 @@ public class FileCacheManager extends DistributedCacheManager
   }
 
   /**
+   * Gets a cache entry
+   */
+  public boolean get(HashKey key, OutputStream os, CacheConfig config)
+  {
+    return false;
+  }
+
+  /**
    * Sets a cache entry
    */
   public void put(HashKey key, Object value, CacheConfig config)
@@ -171,6 +179,14 @@ public class FileCacheManager extends DistributedCacheManager
 		 + "(key=" + key + ")");
       }
     }
+  }
+
+  /**
+   * Sets a cache entry
+   */
+  @Override
+  public void put(HashKey key, InputStream is, CacheConfig config)
+  {
   }
 
   /**

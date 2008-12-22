@@ -29,6 +29,8 @@
 
 package com.caucho.server.session;
 
+import com.caucho.cluster.ByteStreamCache;
+import com.caucho.cluster.TriplicateByteStreamCache;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
@@ -96,6 +98,7 @@ public final class SessionManager implements AlarmListener
   private final int _selfIndex;
   
   private final SessionObjectManager _objectManager;
+  private ByteStreamCache _sessionCache;
 
   // active sessions
   private LruCache<String,SessionImpl> _sessions;
@@ -196,6 +199,10 @@ public final class SessionManager implements AlarmListener
       _selfIndex = 0;
     
     _objectManager = new SessionObjectManager(this);
+    TriplicateByteStreamCache sessionCache = new TriplicateByteStreamCache();
+    sessionCache.setName("resin:session");
+    sessionCache.init();
+    _sessionCache = sessionCache;
 
     DispatchServer server = webApp.getDispatchServer();
     if (server != null) {
@@ -309,6 +316,14 @@ public final class SessionManager implements AlarmListener
   SessionObjectManager getObjectManager()
   {
     return _objectManager;
+  }
+
+  /**
+   * Returns the session cache
+   */
+  ByteStreamCache getCache()
+  {
+    return _sessionCache;
   }
 
   /**

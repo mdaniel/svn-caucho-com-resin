@@ -39,14 +39,16 @@ import com.caucho.server.distcache.HashManager;
 import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
 
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 import java.security.MessageDigest;
 import javax.annotation.PostConstruct;
 
 /**
  * Implements the distributed cache
  */
-abstract public class AbstractCache implements Cache
+abstract public class AbstractCache implements Cache, ByteStreamCache
 {
   private static final L10N L = new L10N(AbstractCache.class);
 
@@ -119,6 +121,17 @@ abstract public class AbstractCache implements Cache
   }
   
   /**
+   * Fills an output stream with the value for a key.
+   */
+  public boolean get(Object key, OutputStream os)
+    throws IOException
+  {
+    HashKey hashKey = getHashKey(key);
+
+    return _distributedCacheManager.get(hashKey, os, _config);
+  }
+  
+  /**
    * Returns the cache entry for the object with the given key.
    */
   public CacheEntry<Object> getEntry(Object key)
@@ -142,6 +155,20 @@ abstract public class AbstractCache implements Cache
   }
   
   /**
+   * Puts a new item in the cache.
+   *
+   * @param key the key of the item to put
+   * @param value the value of the item to put
+   */
+  public void put(Object key, InputStream is)
+    throws IOException
+  {
+    HashKey hashKey = getHashKey(key);
+
+    _distributedCacheManager.put(hashKey, is, _config);
+  }
+  
+  /**
    * Updates the cache if the old value hash matches the current value.
    * A null value for the old value hash only adds the entry if it's new
    *
@@ -156,6 +183,26 @@ abstract public class AbstractCache implements Cache
 			       byte[] oldValueHash)
   {
     put(key, value);
+    
+    return true;
+  }
+  
+  /**
+   * Updates the cache if the old value hash matches the current value.
+   * A null value for the old value hash only adds the entry if it's new
+   *
+   * @param key the key to compare
+   * @param oldValueHash the hash of the old value, returned by getEntry
+   * @param value the new value
+   *
+   * @return true if the update succeeds, false if it fails
+   */
+  public boolean compareAndPut(Object key,
+			       InputStream is,
+			       byte[] oldValueHash)
+    throws IOException
+  {
+    put(key, is);
     
     return true;
   }

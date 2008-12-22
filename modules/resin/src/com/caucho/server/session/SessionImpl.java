@@ -42,6 +42,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.CacheListener;
 import com.caucho.util.L10N;
 import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.vfs.TempOutputStream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.*;
@@ -365,7 +366,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   protected Map<String,Object> createValueMap()
   {
-    return new Hashtable<String,Object>(8);
+    return new TreeMap<String,Object>();
   }
 
   /**
@@ -778,18 +779,25 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (! _isValid)
       return false;
     
-    boolean isValid;
+    boolean isValid = false;
 
     // server/01k0
     if (_useCount > 1)
       return true;
 
-    ClusterObject clusterObject = _clusterObject;
+    try {
+      TempOutputStream os = new TempOutputStream();
 
-    if (clusterObject != null)
-      isValid = clusterObject.objectLoad(this);
-    else
-      isValid = true;
+      if (_manager.getCache().get(_id, os)) {
+	InputStream is = os.getInputStream();
+
+	System.out.println("IS: " + is);
+      
+	isValid = true;
+      }
+    } catch (IOException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
 
     return isValid;
   }
@@ -963,10 +971,16 @@ public class SessionImpl implements HttpSession, CacheListener {
       return;
     
     try {
-      ClusterObject clusterObject = _clusterObject;
-      if (clusterObject != null) {
-	clusterObject.objectStore(this);
-      }
+      TempOutputStream os = new TempOutputStream();
+      SessionSerializer out = new HessianSessionSerializer(os);
+
+      store(out);
+
+      out.close();
+
+      _manager.getCache().put(_id, os.getInputStream());
+
+      os.close();
     } catch (Throwable e) {
       log.log(Level.WARNING, this + ": can't serialize session", e);
     }
@@ -1143,6 +1157,102 @@ public class SessionImpl implements HttpSession, CacheListener {
 	  Object value = entry.getValue();
 
 	  out.writeString((String) entry.getKey());
+
+	  if (ignoreNonSerializable && ! (value instanceof Serializable)) {
+	    out.writeObject(null);
+	    continue;
+	  }
+
+	  try {
+	    out.writeObject(value);
+	  } catch (NotSerializableException e) {
+	    log.warning(L.l("{0}: failed storing persistent session attribute '{1}'.  Persistent session values must extend java.io.Serializable.\n{2}", 
+			    this, entry.getKey(), String.valueOf(e)));
+	    throw e;
+	  }
+	}
+      }
+    }
+  }
+
+  /**
+   * Saves the object to the input stream.
+   */
+  public void store(SessionSerializer out)
+    throws IOException
+  {
+    Set<Map.Entry<String,Object>> set = null;
+    
+    HttpSessionEvent event = null;
+    ArrayList<HttpSessionActivationListener> listeners;
+    
+    synchronized (_values) {
+      set = getEntrySet();
+
+      int size = set == null ? 0 : set.size();
+
+      if (size == 0) {
+	out.writeInt(0);
+	return;
+      }
+
+      listeners = new ArrayList<HttpSessionActivationListener>();
+
+      if (_manager.getActivationListeners() != null)
+	listeners.addAll(_manager.getActivationListeners());
+
+      for (Map.Entry entry : set) {
+	Object value = entry.getValue();
+	      
+	if (value instanceof HttpSessionActivationListener) {
+	  HttpSessionActivationListener listener
+	    = (HttpSessionActivationListener) value;
+
+	  if (event == null)
+	    event = new HttpSessionEvent(this);
+
+	  listeners.add(listener);
+	}
+      }
+    }
+
+    if (listeners != null && listeners.size() > 0) {
+      if (event == null)
+	event = new HttpSessionEvent(this);
+
+      for (HttpSessionActivationListener listener : listeners) {
+	listener.sessionWillPassivate(event);
+      }
+    }
+
+    synchronized (this) {
+      synchronized (_values) {
+	set = getEntrySet();
+
+	int size = set == null ? 0 : set.size();
+
+	out.writeInt(size);
+
+	if (size == 0)
+	  return;
+
+	boolean ignoreNonSerializable =
+	  getManager().getIgnoreSerializationErrors();
+
+	Map.Entry []entries = new Map.Entry[set.size()];
+      
+	Iterator iter = set.iterator();
+	int i = 0;
+	while (iter.hasNext()) {
+	  entries[i++] = (Map.Entry) iter.next();
+	}
+
+	Arrays.sort(entries, KEY_COMPARATOR);
+
+	for (Map.Entry entry : set) {
+	  Object value = entry.getValue();
+
+	  out.writeObject(entry.getKey());
 
 	  if (ignoreNonSerializable && ! (value instanceof Serializable)) {
 	    out.writeObject(null);

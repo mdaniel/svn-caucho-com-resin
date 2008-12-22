@@ -120,6 +120,21 @@ public class TempOutputStream extends OutputStream
   /**
    * Opens a read stream to the buffer.
    */
+  public InputStream getInputStream()
+    throws IOException
+  {
+    close();
+
+    TempBuffer head = _head;
+    _head = null;
+    _tail = null;
+    
+    return new TempInputStream(head);
+  }
+
+  /**
+   * Opens a read stream to the buffer.
+   */
   public InputStream openInputStream()
     throws IOException
   {

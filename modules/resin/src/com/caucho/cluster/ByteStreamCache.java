@@ -27,74 +27,59 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distcache;
-
-import com.caucho.cluster.CacheEntry;
-import com.caucho.cluster.CacheSerializer;
-import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.Server;
-import com.caucho.util.LruCache;
+package com.caucho.cluster;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
 /**
- * Manages the distributed cache
+ * Interface for a distributed cache.
  */
-abstract public class DistributedCacheManager
+public interface ByteStreamCache
 {
-  private final Server _server;
-
-  protected DistributedCacheManager(Server server)
-  {
-    _server = server;
-  }
-
   /**
-   * Returns the owning cluster
+   * Fills a stream for the content with the given key.
    */
-  protected Server getServer()
-  {
-    return _server;
-  }
-
+  public boolean get(Object key, OutputStream os)
+    throws IOException;
+  
   /**
-   * Gets a cache entry
+   * Returns the cache entry for the object with the given key.
    */
-  abstract public Object get(HashKey hashKey, CacheConfig config);
-
+  public CacheEntry getEntry(Object key);
+  
   /**
-   * Gets a cache entry
+   * Puts a new item in the cache.
+   *
+   * @param key the key of the item to put
+   * @param is stream to contain the value
    */
-  abstract public boolean get(HashKey hashKey,
-			      OutputStream os,
-			      CacheConfig config)
+  public void put(Object key, InputStream is)
+    throws IOException;
+  
+  /**
+   * Updates the cache if the old value hash matches the current value.
+   * A null value for the old value hash only adds the entry if it's new
+   *
+   * @param key the key to compare
+   * @param oldValueHash the hash of the old value, returned by getEntry
+   * @param value the new value
+   *
+   * @return true if the update succeeds, false if it fails
+   */
+  public boolean compareAndPut(Object key,
+			       InputStream is,
+			       byte[] oldValueHash)
     throws IOException;
 
   /**
-   * Sets a cache entry
+   * Removes the entry from the cache
    */
-  abstract public void put(HashKey hashKey,
-			   Object value,
-			   CacheConfig config);
+  public boolean remove(Object key);
 
   /**
-   * Sets a cache entry
+   * Removes the entry from the cache if the current entry matches the hash
    */
-  abstract public void put(HashKey hashKey,
-			   InputStream is,
-			   CacheConfig config)
-    throws IOException;
-
-  /**
-   * Removes a cache entry
-   */
-  abstract public boolean remove(HashKey hashKey);
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _server.getServerId() + "]";
-  }
+  public boolean compareAndRemove(Object key, byte[] oldValueHash);
 }

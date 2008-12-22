@@ -290,6 +290,14 @@ abstract public class Cluster
   }
 
   /**
+   * Adds a new triad to the cluster
+   */
+  public ClusterTriad createTriad()
+  {
+    throw new UnsupportedOperationException(L.l("<triad> requires Resin Professional"));
+  }
+
+  /**
    * Adds a new server to the cluster.
    */
   public Machine createMachine()
