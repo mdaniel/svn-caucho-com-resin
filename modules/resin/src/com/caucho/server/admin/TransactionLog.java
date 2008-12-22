@@ -30,6 +30,7 @@ package com.caucho.server.admin;
 
 import com.caucho.config.ConfigException;
 import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.Server;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.transaction.xalog.AbstractXALogManager;
 import com.caucho.util.L10N;
@@ -74,7 +75,7 @@ public class TransactionLog
   public void start()
   {
     if (_path == null) {
-      String serverId = Cluster.getServerId();
+      String serverId = Server.getCurrent().getServerId();
 
       if (serverId == null || serverId.length() == 0)
         serverId = "default";

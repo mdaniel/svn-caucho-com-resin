@@ -73,12 +73,12 @@ public class ManagedFactoryImpl
     _drivers = drivers;
     _backupDrivers = backupDrivers;
 
-    Cluster cluster = Cluster.getLocal();
-    if (cluster != null) {
-      ClusterServer server = cluster.getSelfServer();
+    Server server = Server.getCurrent();
+    if (server != null) {
+      ClusterServer selfServer = server.getSelfServer();
 
-      if (server != null && _drivers.length > 1)
-	_roundRobin = server.getIndex() % _drivers.length;
+      if (selfServer != null && _drivers.length > 1)
+	_roundRobin = selfServer.getIndex() % _drivers.length;
     }
   }
 

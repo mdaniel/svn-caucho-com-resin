@@ -107,7 +107,7 @@ public class Management
 
   public String getServerId()
   {
-    return Cluster.getServerId();
+    return Resin.getCurrent().getServerId();
   }
 
   /**
@@ -356,7 +356,7 @@ public class Management
   protected Cluster getCluster()
   {
     if (_cluster == null)
-      _cluster = Cluster.getLocal();
+      _cluster = Server.getCurrent().getCluster();
 
     return _cluster;
   }

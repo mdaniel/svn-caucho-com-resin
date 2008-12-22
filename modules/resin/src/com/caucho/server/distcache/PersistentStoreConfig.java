@@ -32,6 +32,7 @@ package com.caucho.server.distcache;
 import com.caucho.config.ConfigException;
 import com.caucho.naming.Jndi;
 import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
@@ -65,9 +66,9 @@ public class PersistentStoreConfig
   public void setType(String type)
     throws ConfigException
   {
-    Cluster cluster = Cluster.getLocal();
+    Server server = Server.getCurrent();
 
-    _store = cluster.createPersistentStore(type);
+    _store = server.createPersistentStore(type);
   }
 
   public StoreManager createInit()

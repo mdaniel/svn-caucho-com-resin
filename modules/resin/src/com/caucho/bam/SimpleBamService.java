@@ -48,6 +48,8 @@ public class SimpleBamService extends AbstractBamService
     = Logger.getLogger(SimpleBamService.class.getName());
 
   private final BamSkeleton _skeleton;
+
+  private BamStream _agentStream = this;
   
   private AtomicReference<ProxyBamConnection> _bamConnection
     = new AtomicReference<ProxyBamConnection>();
@@ -67,7 +69,15 @@ public class SimpleBamService extends AbstractBamService
    */
   public BamStream getAgentStream()
   {
-    return this;
+    return _agentStream;
+  }
+  
+  /**
+   * Sets the resource's stream
+   */
+  protected void setAgentStream(BamStream stream)
+  {
+    _agentStream = stream;
   }
 
   /**

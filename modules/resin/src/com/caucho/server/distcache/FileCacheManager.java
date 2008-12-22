@@ -29,8 +29,8 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.cache.CacheEntry;
-import com.caucho.cache.CacheSerializer;
+import com.caucho.cluster.CacheEntry;
+import com.caucho.cluster.CacheSerializer;
 import com.caucho.config.ConfigException;
 import com.caucho.server.cache.TempFileManager;
 import com.caucho.server.cluster.Server;
@@ -92,7 +92,7 @@ public class FileCacheManager extends DistributedCacheManager
   /**
    * Gets a cache entry
    */
-  public Object get(HashKey key, CacheSerializer serializer)
+  public Object get(HashKey key, CacheConfig config)
   {
     CacheMapEntry entry = _entryCache.get(key);
 
@@ -112,7 +112,7 @@ public class FileCacheManager extends DistributedCacheManager
 
     HashKey valueHash = entry.getValueHash();
 
-    value = readData(valueHash, serializer);
+    value = readData(valueHash, config.getValueSerializer());
 
     // use the old value if it's been overwritten
     if (entry.getValue() == null)
@@ -124,7 +124,7 @@ public class FileCacheManager extends DistributedCacheManager
   /**
    * Sets a cache entry
    */
-  public void put(HashKey key, Object value, CacheSerializer serializer)
+  public void put(HashKey key, Object value, CacheConfig config)
   {
     long timeout = 60000L;
     
@@ -132,7 +132,8 @@ public class FileCacheManager extends DistributedCacheManager
 
     HashKey oldValueHash = oldEntry != null ? oldEntry.getValueHash() : null;
     
-    HashKey valueHash = writeData(oldValueHash, value, serializer);
+    HashKey valueHash = writeData(oldValueHash, value,
+				  config.getValueSerializer());
 
     if (valueHash.equals(oldValueHash))
       return;

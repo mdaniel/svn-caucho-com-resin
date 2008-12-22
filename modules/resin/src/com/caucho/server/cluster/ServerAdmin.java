@@ -83,7 +83,8 @@ public class ServerAdmin extends AbstractEmitterObject
 
   public EnvironmentMXBean getEnvironment()
   {
-    return _server.getCluster().getEnvironmentAdmin();
+    // return _server.getEnvironmentAdmin();
+    return null;
   }
 
   /**

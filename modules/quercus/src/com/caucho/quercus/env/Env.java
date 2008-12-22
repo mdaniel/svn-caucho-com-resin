@@ -2495,6 +2495,18 @@ public class Env {
     else
       return null;
   }
+
+  //
+  // profiling
+  //
+  
+  public void pushProfile(int id)
+  {
+  }
+  
+  public void popProfile(long nanos)
+  {
+  }
   
   /*
    * Returns true if <code>name</code> doesn't already exist on the

@@ -628,13 +628,14 @@ if test -z "${LD_SHLIB}"; then
     darwin*)
         CFLAGS_SHLIB="-DSHARED_MODULE"
 	LD_SHLIB=${CC}
- 	LDFLAGS_SHLIB="-bundle -undefined suppress -flat_namespace"
+ 	LDFLAGS_SHLIB="-dynamiclib -undefined suppress -flat_namespace"
 	if test -n "$b64"; then
-  	  CFLAGS="$CFLAGS -m64"
-  	  LD_FLAGS_SHLIB="-m64 $LD_FLAGS_SHLIB"
+  	  CFLAGS="$CFLAGS -arch x86_64"
+  	  LDFLAGS_SHLIB="-arch x86_64 $LD_FLAGS_SHLIB"
 	fi
 	if test -n "$b64_jni"; then
   	  CFLAGS_JNI="$CFLAGS_JNI -m64"
+  	  LDFLAGS_SHLIB="-arch x86_64 $LD_FLAGS_SHLIB"
    	fi
         ;;
 

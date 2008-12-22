@@ -271,7 +271,6 @@ public class HmuxRequest extends AbstractHttpRequest
   private Server _server;
   private AbstractClusterRequest _clusterRequest;
   private HmuxDispatchRequest _dispatchRequest;
-  private Cluster _cluster;
 
   private HmuxProtocol _hmuxProtocol;
   private ErrorPageManager _errorManager = new ErrorPageManager(null);
@@ -299,14 +298,14 @@ public class HmuxRequest extends AbstractHttpRequest
 
     // XXX: response.setIgnoreClientDisconnect(server.getIgnoreClientDisconnect());
 
-    _cluster = Cluster.getLocal();
-    if (_cluster != null) {
+    _server = Server.getCurrent();
+    if (_server != null) {
       try {
 	Class cl = Class.forName("com.caucho.server.hmux.HmuxClusterRequest");
 
 	_clusterRequest = (AbstractClusterRequest) cl.newInstance();
 	_clusterRequest.setRequest(this);
-	_clusterRequest.setCluster(_cluster);
+	_clusterRequest.setServer(_server);
       } catch (ClassNotFoundException e) {
 	log.finer(e.toString());
       } catch (Throwable e) {
@@ -713,7 +712,7 @@ public class HmuxRequest extends AbstractHttpRequest
 	  if (_server == null || _server.isDestroyed()) {
 	    return false;
 	  }
-	  
+
           result = _clusterRequest.handleRequest(is, _rawWrite);
         }
         else if (value == HMUX_DISPATCH_PROTOCOL) {

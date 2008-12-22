@@ -31,8 +31,7 @@ package com.caucho.server.cluster;
 
 import com.caucho.bam.BamBroker;
 import com.caucho.bam.BamStream;
-import com.caucho.cache.DistributedCache;
-import com.caucho.cache.TriplicateCache;
+import com.caucho.cluster.TriplicateCache;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ConfigProgram;
@@ -61,6 +60,8 @@ import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationMatcher;
 import com.caucho.server.distcache.DistributedCacheManager;
 import com.caucho.server.distcache.FileCacheManager;
+import com.caucho.server.distcache.StoreManager;
+import com.caucho.server.distcache.FileStoreManager;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
@@ -110,8 +111,13 @@ public class Server extends ProtocolDispatchServer
   private static final EnvironmentLocal<String> _serverIdLocal
     = new EnvironmentLocal<String>("caucho.server-id");
 
-  private final ClusterServer _selfServer;
+  private static final EnvironmentLocal<Server> _serverLocal
+    = new EnvironmentLocal<Server>();
+
   private final Resin _resin;
+  private final ClusterServer _selfServer;
+
+  private final String _id;
   
   private EnvironmentClassLoader _classLoader;
 
@@ -184,6 +190,10 @@ public class Server extends ProtocolDispatchServer
   // internal databases
   //
 
+  // session store
+  private StoreManager _store;
+  private StoreManager _clusterStore;
+
   // reliable system store
   private TriplicateCache _systemStore;
 
@@ -202,20 +212,28 @@ public class Server extends ProtocolDispatchServer
       throw new NullPointerException();
 
     _selfServer = clusterServer;
-    _resin = _selfServer.getCluster().getResin();
+    Cluster cluster = clusterServer.getCluster();
+    _resin = cluster.getResin();
 
+    _id = cluster.getId() + ":" + clusterServer.getId();
+
+    // triad id can't include the server since it's used as part of
+    // cache ids
+    String triadId
+      = (cluster.getId() + ":" + _selfServer.getClusterTriad().getId());
+
+    _classLoader = EnvironmentClassLoader.create(_resin.getClassLoader(),
+						 "server:" + triadId);
+
+    _serverLocal.set(this, _classLoader);
+    
     if (! Alarm.isTest())
       _serverHeader = "Resin/" + com.caucho.Version.VERSION;
     else
       _serverHeader = "Resin/1.1";
-
-    Cluster cluster = clusterServer.getCluster();
     
     try {
       Thread thread = Thread.currentThread();
-
-      ClassLoader loader = cluster.getClassLoader();
-      _classLoader = (EnvironmentClassLoader) loader;
 
       Environment.addClassLoaderListener(this, _classLoader);
 
@@ -245,6 +263,8 @@ public class Server extends ProtocolDispatchServer
 	_brokerManager.addBroker(getBamAdminName(), _broker);
 	_brokerManager.addBroker("resin.caucho", _broker);
 
+	// Config.setProperty("server", new ServerVar(server), _classLoader);
+	
 	_selfServer.getServerProgram().configure(this);
       } finally {
         thread.setContextClassLoader(oldLoader);
@@ -263,12 +283,7 @@ public class Server extends ProtocolDispatchServer
    */
   public static Server getCurrent()
   {
-    Resin resin = Resin.getCurrent();
-
-    if (resin != null)
-      return resin.getServer();
-    else
-      return null;
+    return _serverLocal.get();
   }
 
   /**
@@ -301,6 +316,14 @@ public class Server extends ProtocolDispatchServer
   public Resin getResin()
   {
     return _resin;
+  }
+
+  /**
+   * Returns the cluster
+   */
+  public Cluster getCluster()
+  {
+    return _selfServer.getCluster();
   }
 
   /**
@@ -411,7 +434,7 @@ public class Server extends ProtocolDispatchServer
    */
   public ClusterTriad getTriad()
   {
-    return _selfServer.getCluster().getTriad(_selfServer);
+    return _selfServer.getClusterTriad();
   }
 
   /**
@@ -573,6 +596,78 @@ public class Server extends ProtocolDispatchServer
   public void setDevelopmentModeErrorPage(boolean isEnable)
   {
     _isDevelopmentModeErrorPage = isEnable;
+  }
+
+  /**
+   * Returns the cluster store.
+   */
+  public StoreManager getStore()
+  {
+    return _clusterStore;
+  }
+
+  /**
+   * Sets the cluster store.
+   */
+  protected void setStore(StoreManager store)
+  {
+    _clusterStore = store;
+  }
+
+  /**
+   * Creates a persistent store instance.
+   */
+  public StoreManager createPersistentStore(String type)
+  {
+    if (type.equals("file")) {
+      if (! Alarm.isTest())
+	throw new ConfigException(L.l("'file' store is no longer allowed.  Use 'cluster' store instead with a single server"));
+      
+      setStore(new FileStoreManager());
+    }
+    else if (type.equals("cluster")) {
+      setStore(new FileStoreManager());
+    }
+
+    if (getStore() == null)
+      throw new ConfigException(L.l("{0} is an unknown persistent-store type.  Only 'cluster' with a single server is allowed for Resin OpenSource.",
+				    type));
+
+    return getStore();
+  }
+  
+  public void startPersistentStore()
+  {
+    try {
+      if (_clusterStore != null)
+        _clusterStore.start();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  public StoreManager createJdbcStore()
+    throws ConfigException
+  {
+    if (getStore() != null)
+      throw new ConfigException(L.l("multiple jdbc stores are not allowed in a cluster."));
+
+    StoreManager store = null;
+
+    try {
+      Class cl = Class.forName("com.caucho.server.cluster.JdbcStoreManager");
+
+      store = (StoreManager) cl.newInstance();
+
+      setStore(store);
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+
+    if (store == null)
+      throw new ConfigException(L.l("'jdbc' persistent sessions are available in Resin Professional.  See http://www.caucho.com for information and licensing."));
+
+    return store;
   }
 
   /**
@@ -1011,14 +1106,6 @@ public class Server extends ProtocolDispatchServer
     throws Exception
   {
     _hostContainer.addHost(host);
-  }
-
-  /**
-   * Returns the cluster.
-   */
-  public Cluster getCluster()
-  {
-    return _selfServer.getCluster();
   }
 
   /**
@@ -1565,7 +1652,7 @@ public class Server extends ProtocolDispatchServer
 
 	log.info("");
 
-        Resin resin = Resin.getLocal();
+        Resin resin = Resin.getCurrent();
 
         if (resin != null) {
           log.info("resin.home = " + resin.getResinHome().getNativePath());
@@ -1614,6 +1701,8 @@ public class Server extends ProtocolDispatchServer
       // initialize the store
       getSystemStore();
 
+      getCluster().start();
+
       _classLoader.start();
 
       _hostContainer.start();
@@ -1621,7 +1710,7 @@ public class Server extends ProtocolDispatchServer
       // initialize the environment admin
       _classLoader.getAdmin();
 
-      getCluster().startPersistentStore();
+      startPersistentStore();
 
       // will only occur if bind-ports-at-end is true
       if (_isBindPortsAtEnd) {
@@ -1637,7 +1726,7 @@ public class Server extends ProtocolDispatchServer
 
       // dynamic updates from the cluster start after we're capable of
       // handling messages
-      getCluster().startClusterUpdate();
+      startClusterUpdate();
     } catch (RuntimeException e) {
       log.log(Level.WARNING, e.toString(), e);
       
@@ -1658,6 +1747,16 @@ public class Server extends ProtocolDispatchServer
       // _configException = e;
     } finally {
       thread.setContextClassLoader(oldLoader);
+    }
+  }
+
+  public void startClusterUpdate()
+  {
+    try {
+      if (_clusterStore != null)
+        _clusterStore.startUpdate();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
     }
   }
 

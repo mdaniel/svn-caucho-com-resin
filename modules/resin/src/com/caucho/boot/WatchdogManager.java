@@ -38,6 +38,7 @@ import com.caucho.log.EnvironmentStream;
 import com.caucho.log.LogConfig;
 import com.caucho.log.RotateStream;
 import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.SingleCluster;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.ServletMapping;
@@ -134,8 +135,9 @@ class WatchdogManager extends ProtocolDispatchServer {
 
     server.getConfig().logInit(logStream);
     
-    Cluster cluster = new Cluster();
-    ClusterServer clusterServer = new ClusterServer(cluster);
+    Cluster cluster = new SingleCluster();
+    ClusterServer clusterServer = cluster.createServer();
+    // cluster.addServer(clusterServer);
 
     if (_watchdogPort > 0)
       clusterServer.setPort(_watchdogPort);

@@ -29,7 +29,11 @@
 
 package com.caucho.server.cluster;
 
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
+
+import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -38,83 +42,224 @@ import java.util.logging.Logger;
  * For small clusters, the triad may only have 1 or 2 servers, so
  * server B and server C may return null.
  */
-public final class ClusterTriad
+abstract public class ClusterTriad
 {
   private static final L10N L = new L10N(ClusterTriad.class);
   private static final Logger log
     = Logger.getLogger(ClusterTriad.class.getName());
 
   private final Cluster _cluster;
+
+  private final int _index;
   
-  private final ClusterServer _serverA;
-  private final ClusterServer _serverB;
-  private final ClusterServer _serverC;
+  private String _id;
 
   /**
    * Creates a new triad for the cluster.
    * 
    * @param cluster the owning cluster
-   * @param serverA the triad's first server
-   * @param serverB the triad's second server
-   * @param serverC the triad's third server
+   * @param index the triad index
    */
-  ClusterTriad(Cluster cluster,
-      	       ClusterServer serverA,
-      	       ClusterServer serverB,
-      	       ClusterServer serverC)
+  protected ClusterTriad(Cluster cluster,
+			 int index)
   {
     _cluster = cluster;
-    
-    _serverA = serverA;
-    _serverB = serverB;
-    _serverC = serverC;
-    
-    if (_serverA == null)
-      throw new NullPointerException(L.l("ClusterTriad requires at least one server"));
-    
-    if (_serverB == null && _serverC != null)
-      throw new NullPointerException(L.l("ClusterTriad server B may not be null if server C is not null."));
+    _index = index;
+
+    if (index == 0)
+      _id = "main";
+    else
+      _id = String.valueOf(index);
   }
+
+  /**
+   * Returns the triad id.
+   */
+  public String getId()
+  {
+    return _id;
+  }
+
+  /**
+   * Returns the triad index.
+   */
+  public int getIndex()
+  {
+    return _index;
+  }
+
+  /**
+   * Returns the triad's cluster
+   */
+  public Cluster getCluster()
+  {
+    return _cluster;
+  }
+
+  /**
+   * Return the servers statically configured in the triad
+   */
+  abstract public ClusterServer []getServerList();
   
   /**
    * Returns the triad's first server
    * 
    * @return the first server.
    */
-  public ClusterServer getServerA()
-  {
-    return _serverA;
-  }
+  abstract public ClusterServer getServerA();
   
   /**
    * Returns the triad's second server
    * 
    * @return the second server.
    */
-  public ClusterServer getServerB()
-  {
-    return _serverB;
-  }
+  abstract public ClusterServer getServerB();
   
   /**
    * Returns the triad's third server
    * 
    * @return the third server.
    */
-  public ClusterServer getServerC()
-  {
-    return _serverC;
-  }
+  abstract public ClusterServer getServerC();
 
   /**
    * Returns true for any of the triad servers.
    */
   public boolean isTriad(ClusterServer server)
   {
-    return (_serverA == server
-	    || _serverB == server
-	    || _serverC == server);
+    return (getServerA() == server
+	    || getServerB() == server
+	    || getServerC() == server);
   }
+
+  //
+  // configuration
+  //
+
+  /**
+   * Creates a cluster server
+   */
+  abstract public ClusterServer createServer();
+
+  /**
+   * Creates a cluster machine
+   */
+  public Machine createMachine()
+  {
+    throw new UnsupportedOperationException(L.l("<machine> requires Resin Professional"));
+  }
+
+  /**
+   * Adds cluster server
+   */
+  public void addServer(ClusterServer server)
+  {
+  }
+
+  /**
+   * Adds a dynamic server
+   */
+  public void addDynamicServer(String serverId, String address, int port)
+    throws ConfigException
+  {
+    throw new ConfigException(L.l("addDynamicServer requires Resin Professional"));
+  }
+
+  /**
+   * Remove a dynamic server
+   */
+  public void removeDynamicServer(String serverId, String address, int port)
+    throws ConfigException
+  {
+    throw new ConfigException(L.l("removeDynamicServer requires Resin Professional"));
+  }
+
+  //
+  // lifecycle
+  //
+
+  /**
+   * Initializes the servers in the triad.
+   */
+  public void init()
+  {
+    for (ClusterServer server : getServerList()) {
+      try {
+	server.init();
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+    }
+  }
+
+  public void start()
+  {
+  }
+
+  /**
+   * Update for dynamic server
+   */
+  public void update()
+  {
+  }
+  
+  /**
+   * Closes the servers in the triad.
+   */
+  public void close()
+  {
+    for (ClusterServer server : getServerList()) {
+      try {
+	server.close();
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+  }
+
+  //
+  // utilities
+  //
+
+  /**
+   * Finds the first server with the given id
+   */
+  public ClusterServer findServer(String id)
+  {
+    for (ClusterServer server : getServerList()) {
+      if (server == null)
+	continue;
+
+      if (id.equals(server.getId()))
+	return server;
+    }
+
+    return null;
+  }
+
+  /**
+   * Finds the first server with the given address and port
+   */
+  public ClusterServer findServer(String address, int port)
+  {
+    for (ClusterServer server : getServerList()) {
+      if (server == null)
+	continue;
+
+      ClusterPort clusterPort = server.getClusterPort();
+      
+      if (address.equals(clusterPort.getAddress())
+	  && port == clusterPort.getPort()) {
+        return server;
+      }
+    }
+
+    return null;
+  }
+
+  //
+  // triad ownership
+  //
   
   /**
    * Returns the primary server given an ownership tag.
@@ -283,7 +428,10 @@ public final class ClusterTriad
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _cluster.getId() + "]";
+    return (getClass().getSimpleName()
+	    + "[" + getIndex()
+	    + "," + getId()
+	    + ",cluster=" + _cluster.getId() + "]");
   }
   
   /**

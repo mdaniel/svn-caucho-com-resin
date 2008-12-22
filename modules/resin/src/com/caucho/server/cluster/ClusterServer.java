@@ -59,11 +59,13 @@ public class ClusterServer {
 
   private static final long DEFAULT = 0xcafebabe;
 
-  private Cluster _cluster;
-  private Machine _machine;
+  private final Cluster _cluster;
+  private final ClusterTriad _triad;
+  private final int _index;
+  
   private String _id = "";
 
-  private int _index;
+  private Machine _machine;
 
   private boolean _isDynamic;
 
@@ -97,25 +99,14 @@ public class ClusterServer {
   
   private ClusterServerAdmin _admin = new ClusterServerAdmin(this);
 
-  public ClusterServer(Cluster cluster)
+  public ClusterServer(ClusterTriad triad, int index)
   {
-    this(new Machine(cluster));
-  }
-
-  public ClusterServer(Machine machine)
-  {
-    _machine = machine;
-    
-    _cluster = machine.getCluster();
+    _triad = triad;
+    _cluster = triad.getCluster();
+    _index = index;
 
     _clusterPort = new ClusterPort(this);
     _ports.add(_clusterPort);
-  }
-
-  public ClusterServer(Cluster cluster, boolean test)
-  {
-    _cluster = cluster;
-    _clusterPort = new ClusterPort(this);
   }
 
   /**
@@ -174,11 +165,19 @@ public class ClusterServer {
   }
 
   /**
+   * Returns the machine.
+   */
+  protected void setMachine(Machine machine)
+  {
+    _machine = machine;
+  }
+
+  /**
    * Returns the owning triad
    */
   public ClusterTriad getClusterTriad()
   {
-    return _cluster.getTriad(this);
+    return _triad;
   }
 
   /**
@@ -202,10 +201,12 @@ public class ClusterServer {
   /**
    * Returns the server index.
    */
+  /*
   void setIndex(int index)
   {
     _index = index;
   }
+  */
 
   /**
    * Returns the server index.
@@ -603,10 +604,7 @@ public class ClusterServer {
    */
   public ServerPool getServerPool()
   {
-    if (_cluster.getSelfServer() != this)
-      return _serverPool;
-    else
-      return null;
+    return _serverPool;
   }
 
   /**
@@ -629,19 +627,18 @@ public class ClusterServer {
    * Initialize
    */
   public void init()
-    throws Exception
   {
     if (! _isClusterPortConfig)
       applyPortDefaults(_clusterPort);
     
     _clusterPort.init();
 
-    if (_cluster != null) {
-      _serverPool = new ServerPool(_cluster.getServerId(), this);
+    if (! getId().equals(Resin.getCurrent().getServerId())) {
+      _serverPool = new ServerPool(Resin.getCurrent().getServerId(), this);
       _serverPool.init();
-
-      _admin.register();
     }
+
+    _admin.register();
   }
 
   /**
@@ -677,18 +674,22 @@ public class ClusterServer {
    * Generate the primary, secondary, tertiary, returning the value encoded
    * in a long.
    */
+  /*
   public long generateBackupCode()
   {
     return _cluster.generateBackupCode(_index);
   }
+  */
 
   /**
    * Adds the primary/backup/third digits to the id.
    */
+  /*
   public void generateBackupCode(StringBuilder cb)
   {
     _cluster.generateBackupCode(cb, generateBackupCode());
   }
+  */
 
   //
   // admin

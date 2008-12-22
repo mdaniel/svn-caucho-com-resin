@@ -305,7 +305,7 @@ public class HempMemoryQueue implements BamStream, Runnable
     Packet packet;
 
     Thread.currentThread().setContextClassLoader(_loader);
-    
+
     while ((packet = dequeue()) != null) {
       boolean isValid = false;
       

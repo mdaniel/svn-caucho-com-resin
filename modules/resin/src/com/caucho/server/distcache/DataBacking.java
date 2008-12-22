@@ -344,7 +344,8 @@ public class DataBacking implements AlarmListener {
 	  
       return true;
     } catch (SQLException e) {
-      log.log(Level.FINER, e.toString(), e);
+      log.finer(this + " " + e.toString());
+      log.log(Level.FINEST, e.toString(), e);
     } finally {
       if (conn != null)
 	conn.close();
@@ -367,9 +368,11 @@ public class DataBacking implements AlarmListener {
     try {
       conn = getConnection();
       PreparedStatement pstmt = conn.prepareUpdateExpires();
+
+      long expireTime = _expireTimeout + Alarm.getCurrentTime();
       
-      pstmt.setLong(1, _expireTimeout + Alarm.getCurrentTime());
-      pstmt.setBytes(2, id.getHash());
+      pstmt.setLong(1, expireTime);
+      pstmt.setLong(2, expireTime);
 
       int count = pstmt.executeUpdate();
       

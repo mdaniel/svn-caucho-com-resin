@@ -27,11 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cache;
+package com.caucho.cluster;
 
 import com.caucho.config.ConfigException;
 import com.caucho.loader.Environment;
-import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.Server;
+import com.caucho.server.distcache.CacheConfig;
 import com.caucho.server.distcache.DistributedCacheManager;
 import com.caucho.server.distcache.HashKey;
 import com.caucho.server.distcache.HashManager;
@@ -45,9 +46,9 @@ import javax.annotation.PostConstruct;
 /**
  * Implements the distributed cache
  */
-public class DistributedCache extends AbstractCache
+abstract public class AbstractCache implements Cache
 {
-  private static final L10N L = new L10N(DistributedCache.class);
+  private static final L10N L = new L10N(AbstractCache.class);
 
   private String _contextId;
   
@@ -55,8 +56,7 @@ public class DistributedCache extends AbstractCache
 
   private String _id;
 
-  private CacheSerializer _keySerializer;
-  private CacheSerializer _valueSerializer;
+  private CacheConfig _config = new CacheConfig();
 
   private LruCache<Object,HashKey> _keyHashCache
     = new LruCache<Object,HashKey>(512);
@@ -78,7 +78,7 @@ public class DistributedCache extends AbstractCache
    */
   public void setSerializer(CacheSerializer serializer)
   {
-    _valueSerializer = serializer;
+    _config.setValueSerializer(serializer);
   }
 
   /**
@@ -95,20 +95,16 @@ public class DistributedCache extends AbstractCache
       _contextId = Environment.getEnvironmentName();
 
       _id = _contextId + ":" + _name;
-    
-      if (_valueSerializer == null)
-	_valueSerializer = new HessianSerializer();
-    
-      if (_keySerializer == null)
-	_keySerializer = new HessianSerializer();
 
-      Cluster cluster = Cluster.getCurrent();
+      _config.init();
 
-      if (cluster == null)
+      Server server = Server.getCurrent();
+
+      if (server == null)
 	throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a clustered environment",
 				      getClass().getSimpleName()));
 
-      _distributedCacheManager = cluster.getDistributedCacheManager();
+      _distributedCacheManager = server.getDistributedCacheManager();
     }
   }
   
@@ -118,8 +114,8 @@ public class DistributedCache extends AbstractCache
   public Object get(Object key)
   {
     HashKey hashKey = getHashKey(key);
-    
-    return _distributedCacheManager.get(hashKey, _valueSerializer);
+
+    return _distributedCacheManager.get(hashKey, _config);
   }
   
   /**
@@ -142,7 +138,7 @@ public class DistributedCache extends AbstractCache
   {
     HashKey hashKey = getHashKey(key);
 
-    _distributedCacheManager.put(hashKey, value, _valueSerializer);
+    _distributedCacheManager.put(hashKey, value, _config);
   }
   
   /**
@@ -173,7 +169,7 @@ public class DistributedCache extends AbstractCache
   {
     HashKey hashKey = getHashKey(key);
     
-    return false;
+    return _distributedCacheManager.remove(hashKey);
   }
 
   /**
@@ -204,7 +200,7 @@ public class DistributedCache extends AbstractCache
 
       Object []fullKey = new Object[] { _id, key };
 
-      _keySerializer.serialize(fullKey, dOut);
+      _config.getKeySerializer().serialize(fullKey, dOut);
 
       hashKey = new HashKey(dOut.digest());
 

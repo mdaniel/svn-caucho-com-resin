@@ -103,6 +103,22 @@ public class ClusterServerAdmin extends AbstractManagedObject
     return _server.isDynamic();
   }
 
+  /**
+   * Returns true for a triad server
+   */
+  public boolean isTriadServer()
+  {
+    return _server.isTriad();
+  }
+
+  /**
+   * Returns true for the self server
+   */
+  public boolean isSelfServer()
+  {
+    return _server.isSelf();
+  }
+
   //
   // Client connection/load-balancing parameters
   //
@@ -320,14 +336,12 @@ public class ClusterServerAdmin extends AbstractManagedObject
   public void removeDynamicServer()
   {
     ClusterServer clusterServer = _server;
+    
     ClusterPort port = clusterServer.getClusterPort();
     
-    Cluster cluster = clusterServer.getCluster();
-    Server server = cluster.getResin().getServer();
-
-    server.removeDynamicServer(cluster.getId(),
-			       port.getAddress(),
-			       port.getPort());
+    clusterServer.getClusterTriad().removeDynamicServer(clusterServer.getId(),
+							port.getAddress(),
+							port.getPort());
   }
 
   protected void register()

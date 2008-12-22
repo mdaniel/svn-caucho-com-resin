@@ -27,20 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cache;
+package com.caucho.cluster;
 
 /**
- * Represents an item in the cache.
+ * Cache which stores consistent copies on the triad.
  */
-public interface CacheEntry<V>
+public class TriplicateCache extends AbstractCache
 {
-  /**
-   * Returns the item's value
-   */
-  public V getValue();
-
-  /**
-   * Returns the item's hash
-   */
-  public byte []getValueHash();
 }

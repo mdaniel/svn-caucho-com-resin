@@ -1697,7 +1697,7 @@ public class WebApp extends ServletContextImpl
    */
   public Cluster getCluster()
   {
-    return Cluster.getCluster(getClassLoader());
+    return getServer().getCluster();
   }
 
   /**

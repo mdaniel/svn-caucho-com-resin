@@ -48,8 +48,12 @@ public class StreamSourceHessianDeserializer extends AbstractStreamDeserializer
   {
     TempOutputStream out = new TempOutputStream();
 
-    in.readToOutputStream(out);
+    if (in.readToOutputStream(out)) {
+      return new StreamSource(out);
+    } else {
+      out.close();
 
-    return new StreamSource(out);
+      return null;
+    }
   }
 }

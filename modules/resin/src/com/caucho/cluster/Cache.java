@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cache;
+package com.caucho.cluster;
 
 /**
  * Interface for a distributed cache.

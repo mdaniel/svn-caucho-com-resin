@@ -34,7 +34,7 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
-import com.caucho.jmx.Jmx;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.StartLifecycleException;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
@@ -56,34 +56,24 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.webbeans.manager.*;
 
-import javax.management.ObjectName;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.lang.reflect.*;
+import javax.annotation.PostConstruct;
 
 /**
  * Defines a set of clustered servers.
  */
-public class Cluster
-  implements EnvironmentListener, EnvironmentBean, SchemaBean
+abstract public class Cluster
+  implements EnvironmentListener, SchemaBean
 {
   private static final L10N L = new L10N(Cluster.class);
   private static final Logger log = Logger.getLogger(Cluster.class.getName());
 
-  static protected final EnvironmentLocal<String> _serverIdLocal
-    = new EnvironmentLocal<String>("caucho.server-id");
-
-  static protected final EnvironmentLocal<Cluster> _clusterLocal
-    = new EnvironmentLocal<Cluster>("caucho.cluster");
-
-  private static final int DECODE[];
+  // private static final int DECODE[];
   
   private String _id = "";
-
-  private String _serverId = "";
-
-  private EnvironmentClassLoader _classLoader;
   
   private Resin _resin;
 
@@ -91,84 +81,29 @@ public class Cluster
 
   private ClusterAdmin _admin;
 
-  private ObjectName _objectName;
-
   private ArrayList<ContainerProgram> _serverDefaultList
     = new ArrayList<ContainerProgram>();
-
-  private ArrayList<Machine> _machineList
-    = new ArrayList<Machine>();
-
-  private ArrayList<ClusterServer> _serverList
-    = new ArrayList<ClusterServer>();
-
-  private ClusterServer[] _serverArray = new ClusterServer[0];
-  
-  private ClusterTriad _triad;
-
-  private ClusterServer _selfServer;
-
-  private StoreManager _clusterStore;
-
-  private boolean _isDynamicServerEnable = false;
 
   private ContainerProgram _serverProgram
     = new ContainerProgram();
 
-  private Server _server;
+  private final Lifecycle _lifecycle = new Lifecycle();
 
-  private long _version;
-
-  private volatile boolean _isClosed;
-
-  public Cluster(Resin resin)
+  protected Cluster(Resin resin)
   {
-    this();
-
     _resin = resin;
-  }
     
-  public Cluster()
-  {
-    _classLoader = EnvironmentClassLoader.create("cluster:??");
+    //_classLoader = EnvironmentClassLoader.create("cluster:??");
 
-    _clusterLocal.set(this, _classLoader);
+    //_clusterLocal.set(this, _classLoader);
   
-    _serverId = _serverIdLocal.get();
+    //_serverId = _serverIdLocal.get();
     
-    Environment.addEnvironmentListener(this, _classLoader);
+    Environment.addEnvironmentListener(this, resin.getClassLoader());
 
-    Config.setProperty("cluster", new Var(), _classLoader);
+    // Config.setProperty("cluster", new Var(), _classLoader);
 
     _rootDirectory = Vfs.getPwd();
-  }
-
-  /**
-   * Returns the currently active local cluster.
-   */
-  public static Cluster getLocal()
-  {
-    return getCurrent();
-  }
-
-  /**
-   * Returns the currently active local cluster.
-   */
-  public static Cluster getCurrent()
-  {
-    Cluster cluster = _clusterLocal.get();
-
-    return cluster;
-  }
-
-  /**
-   * Returns the currently active local cluster.
-   */
-  public static Cluster getCluster(ClassLoader loader)
-  {
-    Cluster cluster = _clusterLocal.get(loader);
-
-    return cluster;
   }
 
   /**
@@ -181,7 +116,7 @@ public class Cluster
     
     _id = id;
 
-    _classLoader.setId("cluster:" + _id);
+    // _classLoader.setId("cluster:" + _id);
   }
 
   /**
@@ -193,7 +128,7 @@ public class Cluster
   }
 
   /**
-   * Returns the owning resin server.
+   * Returns the owning resin container.
    */
   public Resin getResin()
   {
@@ -201,12 +136,22 @@ public class Cluster
   }
 
   /**
+   * Returns the server
+   */
+  public Server getServer()
+  {
+    return getResin().getServer();
+  }
+
+  /**
    * Returns the environment class loader.
    */
+  /*
   public ClassLoader getClassLoader()
   {
     return _classLoader;
   }
+  */
 
   /**
    * Returns the relax schema.
@@ -239,7 +184,8 @@ public class Cluster
    */
   public void setDynamicServerEnable(boolean isEnable)
   {
-    _isDynamicServerEnable = isEnable;
+    log.warning(L.l("{0}: dynamic-server-enable requires Resin Professional",
+		    this));
   }
 
   /**
@@ -247,7 +193,7 @@ public class Cluster
    */
   public boolean isDynamicServerEnable()
   {
-    return _isDynamicServerEnable;
+    return false;
   }
 
   /**
@@ -255,7 +201,7 @@ public class Cluster
    */
   public long getVersion()
   {
-    return _version;
+    return 0;
   }
 
   /**
@@ -267,15 +213,54 @@ public class Cluster
   }
 
   /**
+   * Returns the list of triads for the cluster
+   */
+  abstract public ClusterTriad []getTriadList();
+
+  /**
    * Finds the first server with the given server-id.
    */
   public ClusterServer findServer(String id)
   {
-    for (int i = _serverList.size() - 1; i >= 0; i--) {
-      ClusterServer server = _serverList.get(i);
+    for (ClusterTriad triad : getTriadList()) {
+      ClusterServer server = triad.findServer(id);
 
-      if (server != null && server.getId().equals(id))
+      if (server != null)
         return server;
+    }
+
+    return null;
+  }
+
+  /**
+   * Finds the first server with the given server-id.
+   */
+  public ClusterServer findServer(int triadIndex,
+				  int index)
+  {
+    for (ClusterTriad triad : getTriadList()) {
+      if (triad.getIndex() == triadIndex) {
+	for (ClusterServer server : triad.getServerList()) {
+	  if (server.getIndex() == index)
+	    return server;
+	}
+
+	return null;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Finds the first server with the given server-id.
+   */
+  public ClusterTriad findTriad(int triadIndex)
+  {
+    for (ClusterTriad triad : getTriadList()) {
+      if (triad.getIndex() == triadIndex) {
+	return triad;
+      }
     }
 
     return null;
@@ -286,18 +271,11 @@ public class Cluster
    */
   public ClusterServer findServer(String address, int port)
   {
-    for (int i = _serverList.size() - 1; i >= 0; i--) {
-      ClusterServer server = _serverList.get(i);
+    for (ClusterTriad triad : getTriadList()) {
+      ClusterServer server = triad.findServer(address, port);
 
-      if (server == null)
-	continue;
-
-      ClusterPort clusterPort = server.getClusterPort();
-      
-      if (clusterPort.getAddress().equals(address)
-	  && clusterPort.getPort() == port) {
+      if (server != null)
         return server;
-      }
     }
 
     return null;
@@ -316,45 +294,74 @@ public class Cluster
    */
   public Machine createMachine()
   {
-    Machine machine = new Machine(this);
-
-    _machineList.add(machine);
-
-    return machine;
+    throw new UnsupportedOperationException(L.l("<machine> requires Resin Professional"));
   }
 
   /**
-   * Adds a new server to the cluster.
+   * Adds a new server to the cluster during configuration.
    */
-  public ClusterServer createServer()
+  abstract public ClusterServer createServer();
+
+  /**
+   * Adds a new server to the cluster during configuration.
+   */
+  /*
+  protected ClusterServer createDynamicServer()
   {
-    Machine machine = createMachine();
-  
-    return machine.createServer();
+    throw new UnsupportedOperationException(L.l("{0}: createDynamicServer requires Resin Professional",
+						this));
   }
 
-  ClusterServer createServer(ClusterServer server)
+  ClusterServer createStaticServer(ClusterServer server)
   {
-    server.setIndex(_serverList.size());
+    if (_lifecycle.isActive())
+      throw new IllegalStateException(L.l("{0}: can't create static server after initialization", this));
+    
+    server.setIndex(_staticServerList.size());
 
-    for (int i = 0; i < _serverDefaultList.size(); i++)
-      _serverDefaultList.get(i).configure(server);
+    configureServerDefault(server);
 
     return server;
   }
 
+  protected ClusterServer createDynamicServer(ClusterServer server)
+  {
+    throw new UnsupportedOperationException(L.l("{0}: createDynamicServer requires Resin Professional",
+						this));
+  }
+  */
+
+  /**
+   * Configure the default values for the server
+   */
+  protected void configureServerDefault(ClusterServer server)
+  {
+    for (int i = 0; i < _serverDefaultList.size(); i++)
+      _serverDefaultList.get(i).configure(server);
+  }
+
   /**
    * Adds a new server to the cluster.
    */
-  public void addServer(ClusterServer server)
+  public void addDynamicServer(String serverId, String address, int port)
+    throws ConfigException
+  {
+    throw new UnsupportedOperationException(L.l("{0}: dynamic servers require Resin Professional", this));
+  }
+
+  /**
+   * Adds a new static server to the cluster.
+   */
+  /*
+  protected void addServerImpl(ClusterServer server)
     throws ConfigException
   {
     ClusterServer oldServer = findServer(server.getId());
 
     if (oldServer != null)
-      log.warning(L.l("duplicate <server> with id='{0}'",
-                      server.getId()));
-
+      throw new ConfigException(L.l("{0}: duplicate <server> with id='{1}'",
+				    this, server.getId()));
+    
     _serverList.add(server);
     _serverArray = new ClusterServer[_serverList.size()];
     _serverList.toArray(_serverArray);
@@ -365,77 +372,38 @@ public class Cluster
       Config.setProperty("server", new ServerVar(server));
     }
   }
+  */
 
-  /**
-   * Adds a new server to the cluster.
-   */
-  public void addDynamicServer(String serverId, String address, int port)
-    throws ConfigException
+  protected void setSelfServer(ClusterServer server)
   {
-    if (! isDynamicServerEnable()) {
-      log.warning(this + " forbidden dynamic-server add id=" + serverId
-		  + " " + address + ":" + port);
-      return;
-    }
+    // XXX: move to Server
     
-    try {
-      ClusterServer oldServer = findServer(serverId);
+    /*
+    if (! _serverId.equals(server.getId()))
+      throw new IllegalStateException(L.l("{0}: self server {1} does not match server id {2}",
+					  this, server, _serverId));
+    
+    _selfServer = server;
 
-      if (oldServer != null) {
-	throw new ConfigException(L.l("duplicate server with id='{0}'",
-				      serverId));
-      }
-      
-      oldServer = findServer(address, port);
-
-      if (oldServer != null) {
-	throw new ConfigException(L.l("duplicate server with '{0}:{1}'",
-				      address, port));
-      }
-
-      ClusterServer server = createServer();
-      server.setId(serverId);
-
-      server.setAddress(address);
-      server.setPort(port);
-
-      server.setDynamic(true);
-
-      addServer(server);
-      
-      server.init();
-
-      log.info(this + " add dynamic server " + server);
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
+    Config.setProperty("server", new ServerVar(server), _classLoader);
+    */
   }
 
-  /**
-   * Adds a new server to the cluster.
-   */
-  public void addDynamicServer(ClusterServer server)
+  /*
+  protected void removeServerImpl(int index)
     throws ConfigException
   {
     try {
       synchronized (this) {
-	for (ConfigProgram program : _serverDefaultList)
-	  program.configure(server);
-    
-	server.init();
-      
-	// XXX: default config
-	addServer(server);
-
-	_version++;
+	_serverList.set(index, null);
+	_serverArray = new ClusterServer[_serverList.size()];
+	_serverList.toArray(_serverArray);
       }
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
-
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " add dynamic server " + server);
   }
+  */
 
   /**
    * Adds a new server to the cluster.
@@ -443,32 +411,13 @@ public class Cluster
   public void removeDynamicServer(ClusterServer server)
     throws ConfigException
   {
-    if (! isDynamicServerEnable()) {
-      log.warning(this + " forbidden dynamic-server remove " + server);
-      return;
-    }
-    
-    try {
-      synchronized (this) {
-	// XXX: default config
-	
-	_serverList.remove(server);
-	_serverArray = new ClusterServer[_serverList.size()];
-	_serverList.toArray(_serverArray);
-
-	_version++;
-      }
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " remove dynamic server " + server);
+    throw new UnsupportedOperationException(L.l("{0}: dynamic servers require Resin Professional", this));
   }
 
   /**
    * Adds a srun server.
    */
+  /*
   public ServerConnector findConnector(String address, int port)
   {
     for (int i = _serverList.size() - 1; i >= 0; i--) {
@@ -485,58 +434,19 @@ public class Cluster
 
     return null;
   }
+  */
   
   /**
    * Returns the owning triad for a cluster server.
    * 
    * @return the corresponding triad
    */
+  /*
   public ClusterTriad getTriad(ClusterServer server)
   {
     return _triad;
   }
-
-  /**
-   * Returns the cluster store.
-   */
-  public StoreManager getStore()
-  {
-    return _clusterStore;
-  }
-
-  /**
-   * Sets the cluster store.
-   */
-  protected void setStore(StoreManager store)
-  {
-    _clusterStore = store;
-  }
-
-  public StoreManager createJdbcStore()
-    throws ConfigException
-  {
-    if (getStore() != null)
-      throw new ConfigException(L.l("multiple jdbc stores are not allowed in a cluster."));
-
-    StoreManager store = null;
-
-    try {
-      Class cl = Class.forName("com.caucho.server.cluster.JdbcStoreManager");
-
-      store = (StoreManager) cl.newInstance();
-
-      store.setCluster(this);
-
-      setStore(store);
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-
-    if (store == null)
-      throw new ConfigException(L.l("'jdbc' persistent sessions are available in Resin Professional.  See http://www.caucho.com for information and licensing."));
-
-    return store;
-  }
+  */
 
   /**
    * Returns the distributed cache manager.
@@ -554,118 +464,85 @@ public class Cluster
     _serverProgram.addProgram(program);
   }
 
+  //
+  // lifecycle
+  //
+
+  /**
+   * Returns true if the cluster is active
+   */
+  public boolean isActive()
+  {
+    return _lifecycle.isActive();
+  }
+
   /**
    * Initializes the cluster.
    */
-  public void start()
+  @PostConstruct
+  public void init()
     throws ConfigException
   {
-    if (_triad == null && _serverList.size() > 0) {
-      _triad = new ClusterTriad(this,
-	                        _serverList.size() > 0 ? _serverList.get(0) : null,
-	                        _serverList.size() > 1 ? _serverList.get(1) : null,
-	                        _serverList.size() > 2 ? _serverList.get(2) : null);
-    }
+    _lifecycle.toInit();
 
+    /*
     String serverId = _serverIdLocal.get();
 
     if (serverId == null)
       serverId = "";
 
     ClusterServer self = findServer(serverId);
+    */
 
+    /*
     if (self != null) {
+      _clusterLocal.set(this);
+    }
+    else if (_clusterLocal.get() == null && "".equals(serverId)) {
+      // if it's the empty cluster, add it
       _clusterLocal.set(this);
     }
     else if (_clusterLocal.get() == null && _serverList.size() == 0) {
       // if it's the empty cluster, add it
       _clusterLocal.set(this);
     }
+    */
 
-    try {
-      String name = _id;
+    _admin = new ClusterAdmin(this);
+    _admin.register();
 
-      if (name == null)
-        name = "";
-
-      ObjectName objectName = Jmx.getObjectName("type=Cluster,name=" + name);
-
-      _admin = new ClusterAdmin(this);
-
-      Jmx.register(_admin, objectName);
-
-      _objectName = objectName;
-    } catch (Exception e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-
-    for (ClusterServer server : _serverList) {
-      try {
-        server.init();
-      } catch (Exception e) {
-        throw ConfigException.create(e);
-      }
+    for (ClusterTriad triad : getTriadList()) {
+      triad.init();
     }
   }
 
   /**
-   * Returns the server id.
+   * Start the cluster.
    */
-  public static String getServerId()
+  public void start()
+    throws ConfigException
   {
-    return _serverIdLocal.get();
-  }
+    _lifecycle.toActive();
 
-  /**
-   * Returns the JMX object name.
-   */
-  public ObjectName getObjectName()
-  {
-    return _objectName == null ? null : _objectName;
-  }
-
-  /**
-   * Returns the server corresponding to the current server-id.
-   */
-  public ClusterServer getSelfServer()
-  {
-    return _selfServer;
+    for (ClusterTriad triad : getTriadList()) {
+      triad.start();
+    }
   }
 
   /**
    * Returns the server list.
    */
+  /*
   public ClusterServer []getServerList()
   {
     return _serverArray;
   }
-
-  /**
-   * Returns the machine list.
-   */
-  public ArrayList<Machine> getMachineList()
-  {
-    return _machineList;
-  }
-
-  /**
-   * Returns the server in the cluster with the given server-id.
-   */
-  public ClusterServer getServer(String serverId)
-  {
-    for (int i = 0; i < _serverList.size(); i++) {
-      ClusterServer server = _serverList.get(i);
-
-      if (server != null && server.getId().equals(serverId))
-        return server;
-    }
-
-    return null;
-  }
+  */
 
   /**
    * Returns the server with the matching index.
    */
+  /*
   public ClusterServer getServer(int index)
   {
     for (int i = 0; i < _serverList.size(); i++) {
@@ -677,10 +554,12 @@ public class Cluster
 
     return null;
   }
+  */
 
   /**
    * Returns the matching ports.
    */
+  /*
   public ArrayList<ClusterPort> getServerPorts(String serverId)
   {
     ArrayList<ClusterPort> ports = new ArrayList<ClusterPort>();
@@ -698,11 +577,7 @@ public class Cluster
 
     return ports;
   }
-
-  EnvironmentMXBean getEnvironmentAdmin()
-  {
-    return _classLoader.getAdmin();
-  }
+  */
   
   /**
    * Starts the server.
@@ -710,18 +585,11 @@ public class Cluster
   Server startServer(ClusterServer clusterServer)
     throws StartLifecycleException
   {
-    synchronized (this) {
-      if (_server != null)
-	return _server;
+    Server server = createResinServer(clusterServer);
 
-      Server server = createResinServer(clusterServer);
+    _serverProgram.configure(server);
 
-      _serverProgram.configure(server);
-
-      _server = server;
-
-      return server;
-    }
+    return server;
   }
 
   protected Server createResinServer(ClusterServer clusterServer)
@@ -737,6 +605,7 @@ public class Cluster
    * Generate the primary, secondary, tertiary, returning the value encoded
    * in a long.
    */
+  /*
   public long generateBackupCode(int index)
   {
     ClusterServer []srunList = getServerList();
@@ -811,25 +680,31 @@ public class Cluster
 
     return backupCode;
   }
+  */
 
   /**
    * Adds the primary/backup/third digits to the id.
    */
+  /*
   public void generateBackupCode(StringBuilder cb, long backupCode)
   {
     addDigit(cb, (int) (backupCode & 0xffff));
     addDigit(cb, (int) ((backupCode >> 16) & 0xffff));
     addDigit(cb, (int) ((backupCode >> 32) & 0xffff));
   }
-  
+  */
+
+  /*
   public void generateBackup(StringBuilder sb, int index)
   {
     generateBackupCode(sb, generateBackupCode(index));
   }
+  */
 
   /**
    * Returns the primary server.
    */
+  /*
   public ClusterServer getPrimary(String id, int offset)
   {
     ClusterServer []srunList = getServerList();
@@ -852,10 +727,12 @@ public class Cluster
     else
       return null;
   }
+  */
 
   /**
    * Returns the secondary server.
    */
+  /*
   public ClusterServer getSecondary(String id, int offset)
   {
     ClusterServer []srunList = getServerList();
@@ -878,10 +755,12 @@ public class Cluster
     else
       return null;
   }
+  */
 
   /**
    * Returns the tertiary server.
    */
+  /*
   public ClusterServer getTertiary(String id, int offset)
   {
     ClusterServer []srunList = getServerList();
@@ -904,10 +783,12 @@ public class Cluster
     else
       return null;
   }
+  */
 
   /**
    * Returns the primary server.
    */
+  /*
   public int getPrimaryIndex(String id, int offset)
   {
     ClusterServer []srunList = getServerList();
@@ -927,10 +808,12 @@ public class Cluster
 
     return index;
   }
+  */
 
   /**
    * Returns the secondary server.
    */
+  /*
   public int getSecondaryIndex(String id, int offset)
   {
     ClusterServer []srunList = getServerList();
@@ -950,10 +833,12 @@ public class Cluster
 
     return index;
   }
+  */
 
   /**
    * Returns the tertiary server.
    */
+  /*
   public int getTertiaryIndex(String id, int offset)
   {
     ClusterServer []srunList = getServerList();
@@ -973,7 +858,9 @@ public class Cluster
 
     return index;
   }
+  */
 
+  /*
   private void addDigit(StringBuilder cb, int digit)
   {
     ClusterServer []srunList = getServerList();
@@ -986,6 +873,7 @@ public class Cluster
       cb.append(convert(digit));
     }
   }
+  */
 
   /**
    * Handles the case where a class loader has completed initialization
@@ -1007,48 +895,6 @@ public class Cluster
    */
   public void startRemote()
   {
-  }
-
-  /**
-   * Creates a persistent store instance.
-   */
-  public StoreManager createPersistentStore(String type)
-  {
-    if (type.equals("file")) {
-      if (! Alarm.isTest())
-	throw new ConfigException(L.l("'file' store is no longer allowed.  Use 'cluster' store instead with a single server"));
-      
-      setStore(new FileStoreManager());
-    }
-    else if (type.equals("cluster")) {
-      setStore(new FileStoreManager());
-    }
-
-    if (getStore() == null)
-      throw new ConfigException(L.l("{0} is an unknown persistent-store type.  Only 'cluster' with a single server is allowed for Resin OpenSource.",
-				    type));
-
-    return getStore();
-  }
-  
-  public void startPersistentStore()
-  {
-    try {
-      if (_clusterStore != null)
-        _clusterStore.start();
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-  }
-
-  public void startClusterUpdate()
-  {
-    try {
-      if (_clusterStore != null)
-        _clusterStore.startUpdate();
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
   }
 
   /**
@@ -1089,19 +935,13 @@ public class Cluster
    */
   public void close()
   {
-    synchronized (this) {
-      if (_isClosed)
-        return;
+    if (! _lifecycle.toDestroy())
+      return;
 
-      _isClosed = true;
-    }
-
-    for (int i = 0; i < _serverList.size(); i++) {
-      ClusterServer server = _serverList.get(i);
-
+    for (ClusterTriad triad : getTriadList()) {
       try {
-        if (server != null)
-          server.close();
+        if (triad != null)
+          triad.close();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
@@ -1117,6 +957,7 @@ public class Cluster
   /**
    * Converts an integer to a printable character
    */
+  /*
   private static char convert(long code)
   {
     code = code & 0x3f;
@@ -1132,11 +973,14 @@ public class Cluster
     else
       return '-';
   }
+  */
 
+  /*
   public static int decode(int code)
   {
     return DECODE[code & 0x7f];
   }
+  */
   
   /**
    * EL variables
@@ -1270,9 +1114,11 @@ public class Cluster
     }
   }
 
+  /*
   static {
     DECODE = new int[128];
     for (int i = 0; i < 64; i++)
       DECODE[(int) convert(i)] = i;
   }
+  */
 }

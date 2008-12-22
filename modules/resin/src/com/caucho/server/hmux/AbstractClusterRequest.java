@@ -28,7 +28,7 @@
 
 package com.caucho.server.hmux;
 
-import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.Server;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -38,7 +38,7 @@ import java.io.IOException;
  * Handles cluster requests from a remote dispatcher.
  */
 abstract public class AbstractClusterRequest {
-  abstract public void setCluster(Cluster cluster);
+  abstract public void setServer(Server server);
   
   abstract public void setRequest(HmuxRequest request);
 

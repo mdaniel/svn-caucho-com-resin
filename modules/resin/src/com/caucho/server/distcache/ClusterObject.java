@@ -31,6 +31,7 @@ package com.caucho.server.distcache;
 
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
+import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.*;
 
@@ -136,9 +137,9 @@ public class ClusterObject {
     else if (getStore() == null && _storeManager.isAlwaysLoad())
       return false;
     
-    Cluster cluster = _storeManager.getCluster();
+    Server server = _storeManager.getServer();
     
-    return cluster.getSelfServer().getIndex() == _primary;
+    return server.getSelfServer().getIndex() == _primary;
  }
 
   /**
@@ -313,7 +314,7 @@ public class ClusterObject {
   public ClusterServer getPrimaryServer()
   {
     Cluster cluster = _storeManager.getCluster();
-    ClusterServer []serverList = cluster.getServerList();
+    ClusterServer []serverList = cluster.getTriadList()[0].getServerList();
     
     if (serverList.length > 0)
       return serverList[_primary % serverList.length];
@@ -327,7 +328,7 @@ public class ClusterObject {
   public ClusterServer getSecondaryServer()
   {
     Cluster cluster = _storeManager.getCluster();
-    ClusterServer []serverList = cluster.getServerList();
+    ClusterServer []serverList = cluster.getTriadList()[0].getServerList();
     
     if (serverList.length > 1)
       return serverList[_secondary % serverList.length];
@@ -341,7 +342,7 @@ public class ClusterObject {
   public ClusterServer getTertiaryServer()
   {
     Cluster cluster = _storeManager.getCluster();
-    ClusterServer []serverList = cluster.getServerList();
+    ClusterServer []serverList = cluster.getTriadList()[0].getServerList();
     
     if (serverList.length > 2)
       return serverList[_tertiary % serverList.length];

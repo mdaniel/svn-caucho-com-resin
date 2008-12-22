@@ -61,6 +61,7 @@ import com.caucho.server.admin.TransactionManager;
 import com.caucho.server.admin.Management;
 import com.caucho.server.cache.TempFileManager;
 import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.SingleCluster;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.repository.ModuleRepositoryImpl;
@@ -226,7 +227,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
       // server.root backwards compat
       String serverRoot = System.getProperty("server.root");
-
+      
       if (serverRoot != null)
 	setRootDirectory(Vfs.lookup(serverRoot));
 
@@ -556,7 +557,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   protected Cluster instantiateCluster()
   {
-    return new Cluster(this);
+    return new SingleCluster(this);
   }
 
   public void addCluster(Cluster cluster)
@@ -576,14 +577,6 @@ public class Resin implements EnvironmentBean, SchemaBean
   public void setEnvironmentSystemProperties(boolean isEnable)
   {
     EnvironmentProperties.enableEnvironmentSystemProperties(isEnable);
-  }
-
-  /**
-   * Creates the compatibility server.
-   */
-  public ServerCompatConfig createServer()
-  {
-    return new ServerCompatConfig(this);
   }
 
   /**
@@ -838,10 +831,12 @@ public class Resin implements EnvironmentBean, SchemaBean
 				 _dynamicServer.getPort());
       }
 
+      /*
       // XXX: get the server
       for (Cluster cluster : _clusters) {
 	cluster.start();
       }
+      */
 
       clusterServer = findClusterServer(_serverId);
 

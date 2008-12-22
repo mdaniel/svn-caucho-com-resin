@@ -235,11 +235,11 @@ public class JspDirectiveVariable extends JspNode
 	continue;
 
       if (! String.class.equals(attr.getType()))
-	throw error(L.l("name-from-attribute variable '{0}' needs a matching String attribute, not '{1}' .  name-from-attribute requires a matching String attribute.",
+	throw error(L.l("name-from-attribute variable '{0}' needs a matching String attribute, not '{1}', because the JSP 2.1 specification requires a String.",
 			_nameFromAttribute, attr.getType().getName()));
 
       if (! attr.getRequired() && attr.getRequiredVar() != null)
-	throw error(L.l("name-from-attribute attribute '{0}' must be required",
+	throw error(L.l("name-from-attribute '{0}' needs an attribute declaration with the required=\"true\" attribute, according to the JSP 2.1 specification.",
 			_nameFromAttribute));
 
       return;

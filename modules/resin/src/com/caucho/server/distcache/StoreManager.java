@@ -40,6 +40,7 @@ import com.caucho.management.server.PersistentStoreMXBean;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.ClusterStream;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.ServerPool;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -66,6 +67,7 @@ abstract public class StoreManager
   private static int DECODE[];
 
   private Cluster _cluster;
+  private Server _server;
   private String _serverId;
   
   private HashManager _hashManager;
@@ -101,9 +103,11 @@ abstract public class StoreManager
   {
     _hashManager = new HashManager();
     _storeMap = new HashMap<HashKey,Store>();
-    
+
     _clusterObjects = new LruCache<HashKey,ClusterObject>(4096);
     _clusterObjects.setEnableListeners(false);
+
+    _server = Server.getCurrent();
     
     _alarm = new Alarm(this);
 
@@ -124,6 +128,11 @@ abstract public class StoreManager
   public Cluster getCluster()
   {
     return _cluster;
+  }
+
+  public Server getServer()
+  {
+    return _server;
   }
 
   /**
@@ -336,21 +345,21 @@ abstract public class StoreManager
     _lifecycle.setName(toString());
 
     if (_cluster == null)
-      _cluster = Cluster.getLocal();
+      _cluster = Server.getCurrent().getCluster();
     
     if (_cluster != null) {
-      _serverId = Cluster.getServerId();
-      ClusterServer selfServer = _cluster.getSelfServer();
+      _serverId = Server.getCurrent().getServerId();
+      ClusterServer selfServer = Server.getCurrent().getSelfServer();
 
       if (selfServer != null)
 	_selfIndex = selfServer.getIndex();
-      else if (_cluster.getServerList().length > 1) {
+      else if (_cluster.getTriadList()[0].getServerList().length > 1) {
 	// XXX: error?
 	log.warning(L.l("cluster-store for '{0}' needs an <srun> configuration for it.",
 			_serverId));
       }
 
-      ClusterServer []serverList = _cluster.getServerList();
+      ClusterServer []serverList = _cluster.getTriadList()[0].getServerList();
       
       _serverList = new ClusterServer[serverList.length];
 

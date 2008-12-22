@@ -46,7 +46,7 @@ public final class SessionObjectManager implements ObjectManager
   private SerializerFactory _hessianFactory
     = new SerializerFactory();
 
-  private Cluster _cluster;
+  private Server _server;
   private Store _store;
  
   /**
@@ -55,7 +55,7 @@ public final class SessionObjectManager implements ObjectManager
   public SessionObjectManager(SessionManager sessionManager)
   {
     _sessionManager = sessionManager;
-    _cluster = Cluster.getCurrent();
+    _server = Server.getCurrent();
   }
 
   /**
@@ -79,6 +79,7 @@ public final class SessionObjectManager implements ObjectManager
    */
   public ClusterObject createClusterObject(String id)
   {
+    /* XXX
     if (_store != null) {
       int primary = _cluster.getPrimaryIndex(id, 0);
       int secondary = _cluster.getSecondaryIndex(id, 0);
@@ -88,6 +89,8 @@ public final class SessionObjectManager implements ObjectManager
     }
     else
       return null;
+    */
+    return null;
   }
 
   /**
@@ -170,11 +173,14 @@ public final class SessionObjectManager implements ObjectManager
   
   int getPrimaryIndex(String id)
   {
-    return _cluster.getPrimaryIndex(id, 0);
+    // XXX: return _cluster.getPrimaryIndex(id, 0);
+    return 0;
   }
 
   boolean isInSessionGroup(String id)
   {
+    return false;
+    /* XXX:
     int index = _cluster.getPrimaryIndex(id, 0);
   
     ClusterServer []serverList = _cluster.getServerList();
@@ -184,6 +190,7 @@ public final class SessionObjectManager implements ObjectManager
     }
     
     return false;
+    */
   }
 
   static class DistributedObjectInputStream extends ObjectInputStream {

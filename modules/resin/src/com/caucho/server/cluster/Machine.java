@@ -41,17 +41,15 @@ public class Machine {
     = Logger.getLogger(Machine.class.getName());
   private static final L10N L = new L10N(Machine.class);
 
-  private Cluster _cluster;
+  private ClusterTriad _triad;
   private String _id = "";
-  private int _index;
 
   private ArrayList<ClusterServer> _serverList
     = new ArrayList<ClusterServer>();
 
-  public Machine(Cluster cluster)
+  public Machine(ClusterTriad triad)
   {
-    _cluster = cluster;
-    _index = cluster.getMachineList().size();
+    _triad = triad;
   }
 
   /**
@@ -71,27 +69,11 @@ public class Machine {
   }
 
   /**
-   * Returns the machine index.
-   */
-  public int getIndex()
-  {
-    return _index;
-  }
-
-  /**
-   * Sets the machine index.
-   */
-  void setIndex(int index)
-  {
-    _index = index;
-  }
-
-  /**
    * Returns the cluster.
    */
-  public Cluster getCluster()
+  public ClusterTriad getClusterTriad()
   {
-    return _cluster;
+    return _triad;
   }
 
   /**
@@ -99,19 +81,35 @@ public class Machine {
    */
   public ClusterServer createServer()
   {
+    ClusterServer server = _triad.createServer();
+
+    server.setMachine(this);
+
+    _serverList.add(server);
+
+    return server;
+  }
+
+  /**
+   * Creates a new ClusterServer.
+   */
+  /*
+  public ClusterServer createDynamicServer()
+  {
     ClusterServer server = new ClusterServer(this);
 
     _serverList.add(server);
 
-    return _cluster.createServer(server);
+    return _cluster.createDynamicServer(server);
   }
+  */
 
   /**
    * Creates a new ClusterServer.
    */
   public void addServer(ClusterServer server)
   {
-    _cluster.addServer(server);
+    _triad.addServer(server);
   }
 
   /**
@@ -124,6 +122,6 @@ public class Machine {
 
   public String toString()
   {
-    return ("Machine[id=" + getId() + "]");
+    return getClass().getSimpleName() + "[id=" + getId() + "]";
   }
 }

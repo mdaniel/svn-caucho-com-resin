@@ -31,6 +31,8 @@ package com.caucho.server.distcache;
 
 import com.caucho.config.*;
 import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.Server;
+import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
@@ -83,13 +85,13 @@ public class FileStoreManager extends StoreManager {
     if (! super.init())
       return false;
 
-    Cluster cluster = Cluster.getCurrent();
+    Cluster cluster = Server.getCurrent().getCluster();
 
-    if (cluster.getServerList().length != 1)
+    if (cluster.getTriadList()[0].getServerList().length != 1)
       throw new ConfigException(L.l("file-store can only be used in single-server configurations."));
 
     try {
-      String serverId = Cluster.getServerId();
+      String serverId = Server.getCurrent().getServerId();
     
       String tableName = _backing.serverNameToTableName(serverId);
     

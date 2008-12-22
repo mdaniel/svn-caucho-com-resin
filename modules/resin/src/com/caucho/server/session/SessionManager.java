@@ -36,6 +36,7 @@ import com.caucho.hessian.io.*;
 import com.caucho.management.server.SessionManagerMXBean;
 import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.InvocationDecoder;
@@ -91,7 +92,7 @@ public final class SessionManager implements AlarmListener
   private final WebApp _webApp;
   private final SessionManagerAdmin _admin;
   
-  private final Cluster _cluster;
+  private final Server _server;
   private final int _selfIndex;
   
   private final SessionObjectManager _objectManager;
@@ -188,11 +189,12 @@ public final class SessionManager implements AlarmListener
   {
     _webApp = webApp;
     
-    _cluster = webApp.getCluster();
-    if (_cluster != null)
-      _selfIndex = _cluster.getSelfServer().getIndex();
+    _server = Server.getCurrent();
+    if (_server != null)
+      _selfIndex = _server.getSelfServer().getIndex();
     else
       _selfIndex = 0;
+    
     _objectManager = new SessionObjectManager(this);
 
     DispatchServer server = webApp.getDispatchServer();
@@ -687,17 +689,7 @@ public final class SessionManager implements AlarmListener
     if (! enable)
       return;
    
-    StoreManager store = _cluster.getStore();
-
-    if (store != null) {
-    }
-    else if (! Resin.getCurrent().isProfessional()) {
-      throw new ConfigException(L.l("use-persistent-store in <session-config> requires Resin professional."));
-    }
-    else
-      throw new ConfigException(L.l("use-persistent-store in <session-config> requires a configured <persistent-store> in the <server>"));
-    
-    _storeManager = store;
+    _storeManager = _server.getStore();
   }
 
   public String getDistributionId()
@@ -1072,16 +1064,18 @@ public final class SessionManager implements AlarmListener
       index = ((Number) owner).intValue();
     }
     else if (owner instanceof String) {
+      /* XXX:
       ClusterServer server = _cluster.getServer((String) owner);
 
       if (server != null)
 	index = server.getIndex();
+      */
     }
 
     if (index < 0)
       index = 0;
 
-    _cluster.generateBackup(sb, index);
+    // XXX: _cluster.generateBackup(sb, index);
 
     int length = _cookieLength;
 

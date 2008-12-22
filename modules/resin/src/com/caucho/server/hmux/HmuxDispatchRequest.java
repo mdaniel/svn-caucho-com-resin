@@ -32,6 +32,7 @@ package com.caucho.server.hmux;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterPort;
 import com.caucho.server.cluster.ClusterServer;
+import com.caucho.server.cluster.ClusterTriad;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.host.Host;
 import com.caucho.server.webapp.WebApp;
@@ -369,8 +370,13 @@ public class HmuxDispatchRequest {
 
     crc64 = Crc64.generate(crc64, cluster.getId());
 
-    ClusterServer []servers = cluster.getServerList();
-    if (servers.length > 0) {
+    ClusterTriad []triads = cluster.getTriadList();
+    
+    ClusterServer []servers = (triads.length > 0
+			       ? triads[0].getServerList()
+			       : null);
+    
+    if (servers != null && servers.length > 0) {
       ClusterServer server = servers[0];
 
       writeString(os, HmuxRequest.HMUX_HEADER, "live-time");

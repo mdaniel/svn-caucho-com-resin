@@ -42,7 +42,7 @@ public final class CacheMapEntry {
   
   private final HashKey _valueHash;
   private final long _version;
-  private final long _expireTime;
+  private final long _localExpireTime;
 
   private final boolean _isServerVersionValid;
   
@@ -51,13 +51,13 @@ public final class CacheMapEntry {
   public CacheMapEntry(HashKey valueHash,
 		       Object value,
 		       long version,
-		       long expireTime,
+		       long localExpireTime,
 		       boolean isServerVersionValid)
   {
     _valueHash = valueHash;
     _version = version;
     
-    _expireTime = expireTime;
+    _localExpireTime = localExpireTime;
     _isServerVersionValid = isServerVersionValid;
 
     if (value != null)
@@ -101,7 +101,8 @@ public final class CacheMapEntry {
 
   public boolean isExpired()
   {
-    return (_expireTime < Alarm.getExactTime() || ! _isServerVersionValid);
+    return (_localExpireTime < Alarm.getExactTime()
+	    || ! _isServerVersionValid);
   }
 
   public String toString()

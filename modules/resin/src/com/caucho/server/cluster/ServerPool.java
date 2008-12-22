@@ -30,7 +30,6 @@
 package com.caucho.server.cluster;
 
 import com.caucho.config.ConfigException;
-import com.caucho.management.server.ServerConnectorMXBean;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.util.QDate;
@@ -282,7 +281,6 @@ public class ServerPool
    * Initialize
    */
   public void init()
-    throws Exception
   {
     _warmupChunkTime = _loadBalanceWarmupTime / WARMUP_MAX;
     if (_warmupChunkTime <= 0)

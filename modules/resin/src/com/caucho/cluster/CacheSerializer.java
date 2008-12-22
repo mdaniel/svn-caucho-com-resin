@@ -27,23 +27,26 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.management.server;
+package com.caucho.cluster;
 
-import com.caucho.jmx.Description;
-import com.caucho.jmx.Units;
-
-import java.util.Date;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
- * A client-view of a cluster's server.  The load balancer and
- * persistent store will use the ClusterClient to communicate to
- * other servers in the cluster.
- *
- * The JMX name looks like:
- * <pre>
- *   resin:type=ServerConnectorn,name=web-a
- * </pre>
+ * Custom serialization for the cache
  */
-@Description("Client-view of a cluster's server, i.e. a target server with which this instance can communicate")
-public interface ServerConnectorMXBean extends ClusterServerMXBean {
+public interface CacheSerializer<V>
+{
+  /**
+   * Serialize the data
+   */
+  public void serialize(V value, OutputStream os)
+    throws IOException;
+  
+  /**
+   * Deserialize the data
+   */
+  public V deserialize(InputStream is)
+    throws IOException;
 }

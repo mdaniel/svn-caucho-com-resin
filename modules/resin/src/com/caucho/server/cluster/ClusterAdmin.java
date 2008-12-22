@@ -38,7 +38,8 @@ import com.caucho.management.server.HostMXBean;
 import com.caucho.management.server.PersistentStoreMXBean;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.ResinMXBean;
-import com.caucho.management.server.ServerConnectorMXBean;
+
+import java.util.ArrayList;
 
 public class ClusterAdmin extends AbstractManagedObject
   implements ClusterMXBean
@@ -62,12 +63,15 @@ public class ClusterAdmin extends AbstractManagedObject
   
   public PortMXBean getPort()
   {
+    /*
     ClusterServer clusterServer = _cluster.getSelfServer();
 
     if (clusterServer == null)
       return null;
 
      return clusterServer.getClusterPort().getAdmin();
+    */
+    return null;
   }
 
   public ResinMXBean getResin()
@@ -82,25 +86,19 @@ public class ClusterAdmin extends AbstractManagedObject
 
   public ClusterServerMXBean []getServers()
   {
-    ClusterServer selfServer = _cluster.getSelfServer();
+    ArrayList<ClusterServerMXBean> serverMBeansList
+      = new ArrayList<ClusterServerMXBean>();
 
-    ClusterServer[] serverList = _cluster.getServerList();
-
-    int len = serverList.length;
-
-    if (selfServer != null)
-      len--;
-
-    ClusterServerMXBean []serverMBeans = new ClusterServerMXBean[len];
-
-    int j = 0;
-
-    for (int i = 0; i < serverList.length; i++) {
-      ClusterServer server = serverList[i];
-
-      if (server != selfServer)
-        serverMBeans[j++] = server.getAdmin();
+    for (ClusterTriad triad : _cluster.getTriadList()) {
+      for (ClusterServer server : triad.getServerList()) {
+	if (server != null)
+	  serverMBeansList.add(server.getAdmin());
+      }
     }
+
+    ClusterServerMXBean []serverMBeans
+      = new ClusterServerMXBean[serverMBeansList.size()];
+    serverMBeansList.toArray(serverMBeans);
 
     return serverMBeans;
   }
@@ -110,9 +108,21 @@ public class ClusterAdmin extends AbstractManagedObject
    */
   public void addDynamicServer(String id, String address, int port)
   {
+    _cluster.addDynamicServer(id, address, port);
+    /*
     Server server = _cluster.getResin().getServer();
     
     server.addDynamicServer(_cluster.getId(), id, address, port);
+    */
+  }
+
+  //
+  // lifecycle
+  //
+
+  void register()
+  {
+    registerSelf();
   }
 
   @Override

@@ -31,6 +31,7 @@ package com.caucho.server.distcache;
 
 import com.caucho.cluster.CacheEntry;
 import com.caucho.cluster.CacheSerializer;
+import com.caucho.cluster.HessianSerializer;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.LruCache;
@@ -38,43 +39,67 @@ import com.caucho.util.LruCache;
 /**
  * Manages the distributed cache
  */
-abstract public class DistributedCacheManager
+public class CacheConfig
 {
-  private final Server _server;
+  private long _localReadTimeout = -1;
 
-  protected DistributedCacheManager(Server server)
+  private CacheSerializer _keySerializer;
+  private CacheSerializer _valueSerializer;
+
+  /**
+   * The local read timeout is the time a local copy of the
+   * cache is considered valid.
+   */
+  public long getLocalReadTimeout()
   {
-    _server = server;
+    return _localReadTimeout;
   }
 
   /**
-   * Returns the owning cluster
+   * The local read timeout is the time a local copy of the
+   * cache is considered valid.
    */
-  protected Server getServer()
+  public void setLocalReadTimeout(long timeout)
   {
-    return _server;
+    _localReadTimeout = timeout;
   }
 
   /**
-   * Gets a cache entry
+   * Returns the key serializer
    */
-  abstract public Object get(HashKey hashKey, CacheConfig config);
+  public CacheSerializer getKeySerializer()
+  {
+    return _keySerializer;
+  }
 
   /**
-   * Sets a cache entry
+   * Returns the value serializer
    */
-  abstract public void put(HashKey hashKey,
-			   Object value,
-			   CacheConfig config);
+  public CacheSerializer getValueSerializer()
+  {
+    return _valueSerializer;
+  }
 
   /**
-   * Removes a cache entry
+   * Sets the value serializer
    */
-  abstract public boolean remove(HashKey hashKey);
+  public void setValueSerializer(CacheSerializer serializer)
+  {
+    _valueSerializer = serializer;
+  }
+
+  public void init()
+  {
+    if (_keySerializer == null)
+      _keySerializer = new HessianSerializer();
+    
+    if (_valueSerializer == null)
+      _valueSerializer = new HessianSerializer();
+  }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _server.getServerId() + "]";
+    return getClass().getSimpleName() + "[]";
   }
 }

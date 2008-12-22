@@ -84,6 +84,18 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
   public boolean isDynamicServer();
 
   /**
+   * Returns true if this is a triad server
+   */
+  @Description("Returns true for a triad server")
+  public boolean isTriadServer();
+
+  /**
+   * Returns true for the server's own ClusterServer
+   */
+  @Description("Returns true for the server's own ClusterServer")
+  public boolean isSelfServer();
+
+  /**
    * Returns the timeout for assuming a target server remains unavailable once
    * a connection attempt fails. When the timeout period elapses another attempt
    * is made to connect to the target server

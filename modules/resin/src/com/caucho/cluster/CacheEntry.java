@@ -27,26 +27,20 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.cache;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+package com.caucho.cluster;
 
 /**
- * Custom serialization for the cache
+ * Represents an item in the cache.
  */
-public interface CacheSerializer<V>
+public interface CacheEntry<V>
 {
   /**
-   * Serialize the data
+   * Returns the item's value
    */
-  public void serialize(V value, OutputStream os)
-    throws IOException;
-  
+  public V getValue();
+
   /**
-   * Deserialize the data
+   * Returns the item's hash
    */
-  public V deserialize(InputStream is)
-    throws IOException;
+  public byte []getValueHash();
 }

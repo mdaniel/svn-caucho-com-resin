@@ -321,7 +321,7 @@ class ParamExpr extends Expr {
       return Double.parseDouble(_stringValue);
 
     default:
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException(_index + ":" + _type + " " + toString());
     }
   }
 
