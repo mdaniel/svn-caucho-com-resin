@@ -78,8 +78,13 @@ public class SessionScope extends ScopeContext {
     if (request != null) {
       HttpSession session = ((HttpServletRequest) request).getSession();
       ComponentImpl comp = (ComponentImpl) bean;
-      
-      return (T) session.getAttribute(comp.getScopeId());
+
+      Object result = session.getAttribute(comp.getScopeId());
+
+      if (result != null || ! create)
+        return (T) result;
+      else
+        return bean.create();
     }
     else
       return null;
