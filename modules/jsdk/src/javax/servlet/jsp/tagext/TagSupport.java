@@ -172,7 +172,7 @@ public class TagSupport implements IterationTag, Serializable {
   /**
    * Enumerates the tag's attributes.
    */
-  public Enumeration getValues()
+  public Enumeration<String> getValues()
   {
     if (values == null)
       values = new Hashtable();
