@@ -329,7 +329,7 @@ public class BeanELResolver extends ELResolver {
     private HashMap<String,BeanProperty> _propMap
       = new HashMap<String,BeanProperty>();
     
-    public BeanProperties(Class baseClass)
+    public BeanProperties(Class<?> baseClass)
     {
       _base = baseClass;
 
@@ -392,7 +392,7 @@ public class BeanELResolver extends ELResolver {
     private Class _base;
     private PropertyDescriptor _descriptor;
     
-    public BeanProperty(Class baseClass,
+    public BeanProperty(Class<?> baseClass,
 			PropertyDescriptor descriptor)
     {
       _base = baseClass;

@@ -34,21 +34,29 @@ import java.util.*;
 import java.lang.reflect.Array;
 
 public final class IteratedExpression {
-  private final ValueExpression _orig;
+  private final ValueExpression orig;
+  private final String delims; // XXX: needs test, equals/hashcode
+
+  public IteratedExpression(ValueExpression orig, String delims)
+  {
+    this.orig = orig;
+    this.delims = delims;
+  }
 
   public IteratedExpression(ValueExpression orig)
   {
-    _orig = orig;
+    this.orig = orig;
+    this.delims = null;
   }
 
   public ValueExpression getValueExpression()
   {
-    return _orig;
+    return this.orig;
   }
 
   public Object getItem(ELContext context, int i)
   {
-    Object items = _orig.getValue(context);
+    Object items = this.orig.getValue(context);
 
     if (items == null)
       return null;
@@ -120,7 +128,7 @@ public final class IteratedExpression {
 
   public int hashCode()
   {
-    return _orig.hashCode();
+    return this.orig.hashCode();
   }
 
   public boolean equals(Object o)
@@ -132,6 +140,6 @@ public final class IteratedExpression {
 
     IteratedExpression expr = (IteratedExpression) o;
 
-    return _orig.equals(expr._orig);
+    return this.orig.equals(expr.orig);
   }
 }

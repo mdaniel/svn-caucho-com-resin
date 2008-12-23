@@ -57,8 +57,7 @@ public class ResourceBundleELResolver extends ELResolver {
   }
 
   @Override
-  public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context,
-							   Object base)
+  public Iterator getFeatureDescriptors(ELContext context, Object base)
   {
     if (! (base instanceof ResourceBundle))
       return null;

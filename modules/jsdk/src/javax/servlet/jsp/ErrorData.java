@@ -32,7 +32,7 @@ package javax.servlet.jsp;
 /**
  * Information about an error for error pages.
  */
-public class ErrorData {
+public final class ErrorData {
   private Throwable _throwable;
   private int _statusCode;
   private String _uri;

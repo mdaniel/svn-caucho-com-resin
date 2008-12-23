@@ -93,9 +93,9 @@ public class ScopedAttributeELResolver extends ELResolver {
   }
 
   @Override
-    public Class getType(ELContext context,
-			 Object base,
-			 Object property)
+  public Class<?> getType(ELContext context,
+                          Object base,
+                          Object property)
   {
     if (base != null)
       return null;

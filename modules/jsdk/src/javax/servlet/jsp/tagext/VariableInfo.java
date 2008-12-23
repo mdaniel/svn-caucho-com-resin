@@ -53,7 +53,7 @@ public class VariableInfo {
    * } while (tag1.doAfterBody() == EVAL_BODY_TAG)
    * </pre></code>
    */
-  public static int NESTED = 0;
+  public final static int NESTED = 0;
   /**
    * Constant for variables initialized at the beginning of a tag.
    * These variables are initialized after doStartTag()
@@ -66,7 +66,7 @@ public class VariableInfo {
    * }
    * </pre></code>
    */
-  public static int AT_BEGIN = 1;
+  public final static int AT_BEGIN = 1;
   /**
    * Constant for variables initialized at the end of a tag.
    * These variables are initialized after doEndTag()
@@ -80,7 +80,7 @@ public class VariableInfo {
    * int foo = Integer.intValue(pageContext.getAttribute("foo"));
    * </pre></code>
    */
-  public static int AT_END = 2;
+  public final static int AT_END = 2;
 
   private String varName;
   private String className;

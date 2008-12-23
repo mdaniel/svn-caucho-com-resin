@@ -32,25 +32,25 @@ package javax.servlet.jsp.jstl.core;
 import javax.el.*;
 
 public final class IndexedValueExpression extends ValueExpression {
-  private Integer _i;
-  private ValueExpression _orig;
+  private Integer i;
+  private ValueExpression orig;
 
   public IndexedValueExpression(ValueExpression orig, int i)
   {
-    _orig = orig;
-    _i = Integer.valueOf(i);
+    this.orig = orig;
+    this.i = Integer.valueOf(i);
   }
 
   public IndexedValueExpression(ValueExpression orig, Integer i)
   {
-    _orig = orig;
-    _i = i;
+    this.orig = orig;
+    this.i = i;
   }
 
   @Override
   public String getExpressionString()
   {
-    return _orig.getExpressionString() + "[" + _i + "]";
+    return this.orig.getExpressionString() + "[" + this.i + "]";
   }
 
   @Override
@@ -85,22 +85,22 @@ public final class IndexedValueExpression extends ValueExpression {
   @Override
   public Object getValue(ELContext context)
   {
-    Object base = _orig.getValue(context);
+    Object base = this.orig.getValue(context);
 
-    return context.getELResolver().getValue(context, base, _i);
+    return context.getELResolver().getValue(context, base, this.i);
   }
 
   @Override
   public void setValue(ELContext context, Object value)
   {
-    Object base = _orig.getValue(context);
+    Object base = this.orig.getValue(context);
 
-    context.getELResolver().setValue(context, base, _i, value);
+    context.getELResolver().setValue(context, base, this.i, value);
   }
 
   public int hashCode()
   {
-    return 65521 * _orig.hashCode() + _i.hashCode();
+    return 65521 * this.orig.hashCode() + this.i.hashCode();
   }
 
   public boolean equals(Object obj)
@@ -112,6 +112,6 @@ public final class IndexedValueExpression extends ValueExpression {
 
     IndexedValueExpression expr = (IndexedValueExpression) obj;
 
-    return _orig.equals(expr._orig) && _i.equals(expr._i);    
+    return this.orig.equals(expr.orig) && this.i.equals(expr.i);
   }
 }

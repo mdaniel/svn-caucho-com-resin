@@ -35,7 +35,7 @@ import java.util.Map;
  * XML version of the page.
  */
 public abstract class TagLibraryValidator {
-  private Map _initParameters;
+  private Map<String, Object> _initParameters;
   /**
    * Zero-arg constructor for the validator.
    */
@@ -46,7 +46,7 @@ public abstract class TagLibraryValidator {
   /**
    * Returns an map of the init parameters specified in the .tld.
    */
-  public java.util.Map getInitParameters()
+  public java.util.Map<String, Object> getInitParameters()
   {
     return _initParameters;
   }
@@ -54,7 +54,7 @@ public abstract class TagLibraryValidator {
   /**
    * Sets the map of the init parameters specified in the .tld.
    */
-  public void setInitParameters(java.util.Map initParameters)
+  public void setInitParameters(java.util.Map<String, Object> initParameters)
   {
     _initParameters = initParameters;
   }
@@ -64,7 +64,7 @@ public abstract class TagLibraryValidator {
    *
    * @param prefix the value of the directive's prefix.
    * @param uri the value of the directive's URI.
-   * @param thePage the PageData representing the page.
+   * @param data the PageData representing the page.
    *
    * @return an array of validation messages
    */

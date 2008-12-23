@@ -35,12 +35,12 @@ package javax.el;
  */
 public class MethodInfo {
   private final String _name;
-  private final Class []_paramTypes;
+  private final Class[] _paramTypes;
   private final Class _returnType;
 
   public MethodInfo(String name,
-		    Class returnType,
-		    Class []paramTypes)
+                    Class<?> returnType,
+                    Class<?>[] paramTypes)
   {
     _name = name;
     _returnType = returnType;
@@ -52,7 +52,7 @@ public class MethodInfo {
     return _name;
   }
 
-  public Class<?> []getParamTypes()
+  public Class<?>[] getParamTypes()
   {
     return _paramTypes;
   }

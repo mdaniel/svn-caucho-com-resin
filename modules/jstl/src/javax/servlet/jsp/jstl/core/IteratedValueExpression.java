@@ -32,19 +32,21 @@ package javax.servlet.jsp.jstl.core;
 import javax.el.*;
 
 public final class IteratedValueExpression extends ValueExpression {
-  private Integer _i;
-  private IteratedExpression _orig;
+  private int i;
+  private IteratedExpression iteratedExpression;
 
-  public IteratedValueExpression(IteratedExpression orig, Integer i)
+  public IteratedValueExpression(IteratedExpression iteratedExpression,
+                                 int i)
   {
-    _orig = orig;
-    _i = i;
+    this.iteratedExpression = iteratedExpression;
+    this.i = i;
   }
 
   @Override
   public String getExpressionString()
   {
-    return _orig.getValueExpression().getExpressionString() + "[" + _i + "]";
+    return this.iteratedExpression.getValueExpression()
+      .getExpressionString() + "[" + this.i + "]";
   }
 
   @Override
@@ -79,7 +81,7 @@ public final class IteratedValueExpression extends ValueExpression {
   @Override
   public Object getValue(ELContext context)
   {
-    return _orig.getItem(context, _i);
+    return this.iteratedExpression.getItem(context, this.i);
   }
 
   @Override
@@ -89,7 +91,7 @@ public final class IteratedValueExpression extends ValueExpression {
 
   public int hashCode()
   {
-    return 65521 * _orig.hashCode() + _i.hashCode();
+    return 65521 * this.iteratedExpression.hashCode() + i;
   }
 
   public boolean equals(Object obj)
@@ -101,6 +103,7 @@ public final class IteratedValueExpression extends ValueExpression {
 
     IteratedValueExpression expr = (IteratedValueExpression) obj;
 
-    return _orig.equals(expr._orig) && _i.equals(expr._i);    
+    return this.iteratedExpression.equals(expr.iteratedExpression)
+           && this.i == expr.i;
   }
 }

@@ -40,7 +40,7 @@ import java.util.HashMap;
  */
 public class TldValidator {
   private Class _validatorClass;
-  private HashMap<String,String> _initParamMap = new HashMap<String,String>();
+  private HashMap<String, Object> _initParamMap = new HashMap<String, Object>();
   private String _description;
 
   /**
