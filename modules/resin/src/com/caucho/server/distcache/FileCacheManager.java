@@ -184,9 +184,13 @@ public class FileCacheManager extends DistributedCacheManager
   /**
    * Sets a cache entry
    */
-  @Override
-  public void put(HashKey key, InputStream is, CacheConfig config)
+  public void put(HashKey hashKey,
+                  InputStream is,
+                  long idleTimeout,
+                  CacheConfig config)
+    throws IOException
   {
+    if (true) throw new UnsupportedOperationException("unimplemented");
   }
 
   /**
