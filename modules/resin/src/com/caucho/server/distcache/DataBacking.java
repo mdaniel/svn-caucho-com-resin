@@ -83,6 +83,7 @@ public class DataBacking implements AlarmListener {
   private String _countQuery;
 
   private Alarm _alarm;
+  private long _expireReaperTimeout = 15 * 60 * 1000L;
   
   public DataBacking(String serverName,
 		     CacheMapBacking mapBacking)
@@ -135,7 +136,7 @@ public class DataBacking implements AlarmListener {
     initDatabase();
 
     _alarm = new Alarm(this);
-    _alarm.queue(0);
+    handleAlarm(_alarm);
   }
 
   /**

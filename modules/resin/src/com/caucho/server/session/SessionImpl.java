@@ -671,6 +671,9 @@ public class SessionImpl implements HttpSession, CacheListener {
       ClusterObject clusterObject = _clusterObject;
       // _clusterObject = null;
 
+      if (_isInvalidating)
+	_manager.getCache().remove(_id);
+
       if (clusterObject != null && _isInvalidating)
 	clusterObject.objectRemove();
     } catch (Exception e) {
@@ -791,7 +794,12 @@ public class SessionImpl implements HttpSession, CacheListener {
       if (_manager.getCache().get(_id, os)) {
 	InputStream is = os.getInputStream();
 
-	System.out.println("IS: " + is);
+	SessionDeserializer in = new HessianSessionDeserializer(is);
+
+	load(in);
+
+	in.close();
+	is.close();
       
 	isValid = true;
       }
@@ -842,7 +850,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     if (clusterObject != null)
       clusterObject.objectInvalidated();
-
+    
     // server/015a
     for (int i = 0; i < names.size(); i++) {
       String name = names.get(i);
@@ -978,7 +986,8 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       out.close();
 
-      _manager.getCache().put(_id, os.getInputStream());
+      _manager.getCache().put(_id, os.getInputStream(),
+			      getMaxInactiveInterval());
 
       os.close();
     } catch (Throwable e) {
@@ -1009,6 +1018,73 @@ public class SessionImpl implements HttpSession, CacheListener {
   public boolean isEmpty()
   {
     return _values == null || _values.size() == 0;
+  }
+
+  /**
+   * Loads the object from the input stream.
+   */
+  public void load(SessionDeserializer in)
+    throws IOException
+  {
+    HttpSessionEvent event = null;
+    ArrayList<HttpSessionActivationListener> listeners = null;
+
+    synchronized (this) {
+      synchronized (_values) {
+	// server/017u
+	_values.clear();
+	// unbind();
+
+	try {
+	  int size = in.readInt();
+
+	  //System.out.println("LOAD: " + size + " " + this + " " + _clusterObject + System.identityHashCode(this));
+
+	  for (int i = 0; i < size; i++) {
+	    String key = (String) in.readObject();
+	    Object value = in.readObject();
+
+	    if (value != null) {
+	      _values.put(key, value);
+	      
+	      if (value instanceof HttpSessionActivationListener) {
+		HttpSessionActivationListener listener
+		  = (HttpSessionActivationListener) value;
+
+		if (event == null)
+		  event = new HttpSessionEvent(this);
+
+		if (listeners == null)
+		  listeners = new ArrayList<HttpSessionActivationListener>();
+
+		listeners.add(listener);
+	      }
+	    }
+	  }
+	} catch (Exception e) {
+	  throw IOExceptionWrapper.create(e);
+	}
+      }
+    }
+
+    for (int i = 0; listeners != null && i < listeners.size(); i++) {
+      HttpSessionActivationListener listener = listeners.get(i);
+
+      if (event == null)
+	event = new HttpSessionEvent(this);
+	
+      listener.sessionDidActivate(event);
+    }
+
+    listeners = _manager.getActivationListeners();
+    for (int i = 0; listeners != null && i < listeners.size(); i++) {
+      HttpSessionActivationListener listener = listeners.get(i);
+
+      if (event == null)
+	event = new HttpSessionEvent(this);
+	
+      listener.sessionDidActivate(event);
+    }
   }
 
   /**

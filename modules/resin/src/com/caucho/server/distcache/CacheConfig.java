@@ -42,6 +42,7 @@ import com.caucho.util.LruCache;
 public class CacheConfig
 {
   private long _localReadTimeout = -1;
+  private long _idleTimeout = Long.MAX_VALUE / 2;
 
   private CacheSerializer _keySerializer;
   private CacheSerializer _valueSerializer;
@@ -62,6 +63,14 @@ public class CacheConfig
   public void setLocalReadTimeout(long timeout)
   {
     _localReadTimeout = timeout;
+  }
+
+  /**
+   * Returns the maximum idle time in the database.
+   */
+  public long getIdleTimeout()
+  {
+    return _idleTimeout;
   }
 
   /**

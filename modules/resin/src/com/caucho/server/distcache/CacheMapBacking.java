@@ -91,6 +91,7 @@ public class CacheMapBacking implements AlarmListener {
   private long _startupLastAccessTime;
 
   private Alarm _alarm;
+  private long _expireReaperTimeout = 5 * 60 * 1000L;
   
   public CacheMapBacking(Path path, String serverName)
     throws Exception
@@ -143,6 +144,10 @@ public class CacheMapBacking implements AlarmListener {
     return _startupLastAccessTime;
   }
 
+  //
+  // lifecycle
+  //
+
   private void init()
     throws Exception
   {
@@ -159,7 +164,7 @@ public class CacheMapBacking implements AlarmListener {
     _updateSaveQuery
       = ("UPDATE " + _tableName
 	 + " SET value=?,access_time=?,is_valid=1,is_removed=0,"
-	 + "     server_version=?,item_version=?"
+	 + "     server_version=?,item_version=?,timeout=?"
 	 + " WHERE id=? AND item_version<=?");
 
     _updateAccessQuery
@@ -194,8 +199,8 @@ public class CacheMapBacking implements AlarmListener {
     _serverVersion = initVersion();
     _startupLastAccessTime = initLastAccessTime();
 
-    // _alarm = new Alarm(this);
-    // _alarm.queue(0);
+    _alarm = new Alarm(this);
+    handleAlarm(_alarm);
   }
 
   /**
@@ -298,6 +303,15 @@ public class CacheMapBacking implements AlarmListener {
     return 0;
   }
 
+  public void close()
+  {
+    Alarm alarm = _alarm;
+    _alarm = null;
+
+    if (alarm != null)
+      alarm.close();
+  }
+
   /**
    * Returns the maximum access time on startup
    */
@@ -380,13 +394,14 @@ public class CacheMapBacking implements AlarmListener {
 
 	HashKey valueHash = hash != null ? new HashKey(hash) : null;
 
-	long expireTime = accessTime + 100L;
+	long expireTime = accessTime + 10000L;
 
 	return new CacheMapEntry(valueHash, null, itemVersion,
 				 expireTime,
 				 serverVersion == _serverVersion);
       }
     } catch (SQLException e) {
+      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     } finally {
       if (conn != null)
@@ -406,7 +421,7 @@ public class CacheMapBacking implements AlarmListener {
   public boolean insert(HashKey id,
 			HashKey value,
 			long version,
-			long timeout)
+			long idleTimeout)
   {
     CacheMapConnection conn = null;
 
@@ -421,7 +436,7 @@ public class CacheMapBacking implements AlarmListener {
 	stmt.setBytes(2, null);
       stmt.setLong(3, version);
       stmt.setLong(4, Alarm.getCurrentTime());
-      stmt.setLong(5, timeout);
+      stmt.setLong(5, idleTimeout);
       stmt.setLong(6, _serverVersion);
 
       int count = stmt.executeUpdate();
@@ -449,8 +464,8 @@ public class CacheMapBacking implements AlarmListener {
    */
   public boolean updateSave(HashKey id,
 			    HashKey value,
-			    long timeout,
-			    long itemVersion)
+			    long itemVersion,
+			    long idleTimeout)
   {
     CacheMapConnection conn = null;
 
@@ -465,9 +480,10 @@ public class CacheMapBacking implements AlarmListener {
       stmt.setLong(2, Alarm.getCurrentTime());
       stmt.setLong(3, _serverVersion);
       stmt.setLong(4, itemVersion);
+      stmt.setLong(5, idleTimeout);
       
-      stmt.setBytes(5, id.getHash());
-      stmt.setLong(6, itemVersion);
+      stmt.setBytes(6, id.getHash());
+      stmt.setLong(7, itemVersion);
 
       int count = stmt.executeUpdate();
         
@@ -499,12 +515,12 @@ public class CacheMapBacking implements AlarmListener {
       long now = Alarm.getCurrentTime();
 	
       pstmt.setLong(1, now);
-
       int count = pstmt.executeUpdate();
 
       if (count > 0)
 	log.finer(this + " expired " + count + " old data");
-    } catch (SQLException e) {
+    } catch (Exception e) {
+      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     } finally {
       conn.close();
@@ -550,7 +566,7 @@ public class CacheMapBacking implements AlarmListener {
       try {
 	removeExpiredData();
       } finally {
-	alarm.queue(15000L);
+	alarm.queue(_expireReaperTimeout);
       }
     }
   }

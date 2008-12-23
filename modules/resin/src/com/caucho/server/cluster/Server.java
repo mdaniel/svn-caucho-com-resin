@@ -2176,6 +2176,9 @@ public class Server extends ProtocolDispatchServer
 
       _classLoader.destroy();
 
+      if (_distributedCacheManager != null)
+	_distributedCacheManager.close();
+
       _hostContainer = null;
       _cache = null;
     } finally {

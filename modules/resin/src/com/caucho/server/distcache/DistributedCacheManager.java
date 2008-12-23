@@ -84,6 +84,7 @@ abstract public class DistributedCacheManager
    */
   abstract public void put(HashKey hashKey,
 			   InputStream is,
+			   long idleTimeout,
 			   CacheConfig config)
     throws IOException;
 
@@ -91,6 +92,13 @@ abstract public class DistributedCacheManager
    * Removes a cache entry
    */
   abstract public boolean remove(HashKey hashKey);
+
+  /**
+   * Closes the manager
+   */
+  public void close()
+  {
+  }
 
   @Override
   public String toString()

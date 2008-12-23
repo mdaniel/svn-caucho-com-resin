@@ -55,7 +55,8 @@ public interface ByteStreamCache
    * @param key the key of the item to put
    * @param is stream to contain the value
    */
-  public void put(Object key, InputStream is)
+  public void put(Object key, InputStream is,
+		  long idleTimeout)
     throws IOException;
   
   /**

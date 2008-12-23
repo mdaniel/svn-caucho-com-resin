@@ -160,12 +160,14 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
    * @param key the key of the item to put
    * @param value the value of the item to put
    */
-  public void put(Object key, InputStream is)
+  public void put(Object key,
+		  InputStream is,
+		  long idleTimeout)
     throws IOException
   {
     HashKey hashKey = getHashKey(key);
 
-    _distributedCacheManager.put(hashKey, is, _config);
+    _distributedCacheManager.put(hashKey, is, idleTimeout, _config);
   }
   
   /**
