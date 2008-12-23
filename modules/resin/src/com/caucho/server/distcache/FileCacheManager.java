@@ -190,7 +190,6 @@ public class FileCacheManager extends DistributedCacheManager
                   CacheConfig config)
     throws IOException
   {
-    if (true) throw new UnsupportedOperationException("unimplemented");
   }
 
   /**
