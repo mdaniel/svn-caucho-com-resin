@@ -58,6 +58,7 @@ public class ClusterServer {
     = Logger.getLogger(ClusterServer.class.getName());
 
   private static final long DEFAULT = 0xcafebabe;
+  private static final int DECODE[];
 
   private final Cluster _cluster;
   private final ClusterTriad _triad;
@@ -684,12 +685,12 @@ public class ClusterServer {
   /**
    * Adds the primary/backup/third digits to the id.
    */
-  /*
-  public void generateBackupCode(StringBuilder cb)
+  public void generateIdPrefix(StringBuilder cb)
   {
-    _cluster.generateBackupCode(cb, generateBackupCode());
+    cb.append(convert(getIndex()));
+    cb.append(convert(getClusterTriad().getIndex()));
+    cb.append(convert(getClusterTriad().getIndex() / 64));
   }
-  */
 
   //
   // admin
@@ -716,5 +717,32 @@ public class ClusterServer {
   public String toString()
   {
     return getClass().getSimpleName() + "[id=" + getId() + "]";
+  }
+  
+  private static char convert(long code)
+  {
+    code = code & 0x3f;
+    
+    if (code < 26)
+      return (char) ('a' + code);
+    else if (code < 52)
+      return (char) ('A' + code - 26);
+    else if (code < 62)
+      return (char) ('0' + code - 52);
+    else if (code == 62)
+      return '_';
+    else
+      return '-';
+  }
+
+  public static int decode(int code)
+  {
+    return DECODE[code & 0x7f];
+  }
+  
+  static {
+    DECODE = new int[128];
+    for (int i = 0; i < 64; i++)
+      DECODE[(int) convert(i)] = i;
   }
 }

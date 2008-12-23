@@ -95,6 +95,7 @@ public final class SessionManager implements AlarmListener
   private final SessionManagerAdmin _admin;
   
   private final Server _server;
+  private final ClusterServer _selfServer;
   private final int _selfIndex;
   
   private final SessionObjectManager _objectManager;
@@ -193,10 +194,8 @@ public final class SessionManager implements AlarmListener
     _webApp = webApp;
     
     _server = Server.getCurrent();
-    if (_server != null)
-      _selfIndex = _server.getSelfServer().getIndex();
-    else
-      _selfIndex = 0;
+    _selfServer = _server.getSelfServer();
+    _selfIndex = _selfServer.getIndex();
     
     _objectManager = new SessionObjectManager(this);
     TriplicateByteStreamCache sessionCache = new TriplicateByteStreamCache();
@@ -1071,25 +1070,33 @@ public final class SessionManager implements AlarmListener
     // the most random bit is the high bit
     int index = _selfIndex;
 
+    ClusterServer server = _selfServer;
+    
     // look at caucho.session-server-id for a hint of the owner
     Object owner = request.getAttribute("caucho.session-server-id");
+    
     if (owner == null) {
     }
     else if (owner instanceof Number) {
       index = ((Number) owner).intValue();
+
+      int triadIndex = _selfServer.getClusterTriad().getIndex();
+      
+      server = _selfServer.getCluster().findServer(triadIndex, index);
+
+      if (server == null)
+	server = _selfServer;
     }
     else if (owner instanceof String) {
-      /* XXX:
-      ClusterServer server = _cluster.getServer((String) owner);
+      server = _selfServer.getCluster().findServer((String) owner);
 
-      if (server != null)
-	index = server.getIndex();
-      */
+      if (server == null)
+	server = _selfServer;
     }
+    
+    index = server.getIndex();
 
-    if (index < 0)
-      index = 0;
-
+    server.generateIdPrefix(sb);
     // XXX: _cluster.generateBackup(sb, index);
 
     int length = _cookieLength;

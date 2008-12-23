@@ -1781,7 +1781,7 @@ public class Server extends ProtocolDispatchServer
 
       Port port = _selfServer.getClusterPort();
 
-      if (port != null) {
+      if (port != null && port.getPort() != 0) {
 	log.info("");
 	port.setServer(this);
 	port.bind();
@@ -1812,7 +1812,7 @@ public class Server extends ProtocolDispatchServer
 	  && (ports.get(0) != _selfServer.getClusterPort()
 	      || ports.size() > 1)) {
 	log.info("");
-      
+
 	for (int i = 0; i < ports.size(); i++) {
 	  Port port = ports.get(i);
 
