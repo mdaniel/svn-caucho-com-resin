@@ -54,6 +54,7 @@ import com.caucho.management.server.ServerMXBean;
 import com.caucho.security.PermissionManager;
 import com.caucho.server.admin.Management;
 import com.caucho.server.cache.AbstractCache;
+import com.caucho.server.cache.TempFileManager;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.Invocation;
@@ -222,7 +223,9 @@ public class Server extends ProtocolDispatchServer
     String triadId
       = (cluster.getId() + ":" + _selfServer.getClusterTriad().getId());
 
-    _classLoader = EnvironmentClassLoader.create(_resin.getClassLoader(),
+    ClassLoader parentClassLoader
+      = Thread.currentThread().getContextClassLoader();
+    _classLoader = EnvironmentClassLoader.create(parentClassLoader,
 						 "server:" + triadId);
 
     _serverLocal.set(this, _classLoader);
@@ -454,6 +457,11 @@ public class Server extends ProtocolDispatchServer
   protected DistributedCacheManager createDistributedCacheManager()
   {
     return new FileCacheManager(this);
+  }
+
+  public TempFileManager getTempFileManager()
+  {
+    return _resin.getTempFileManager();
   }
 
   /**

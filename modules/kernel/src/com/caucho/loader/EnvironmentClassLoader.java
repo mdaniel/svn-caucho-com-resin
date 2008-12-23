@@ -107,9 +107,6 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   {
     super(parent);
 
-    if (parent == null)
-      Thread.dumpStack();
-
     if (id != null)
       setId(id);
 

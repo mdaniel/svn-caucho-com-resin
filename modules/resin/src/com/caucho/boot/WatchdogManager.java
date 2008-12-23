@@ -42,10 +42,11 @@ import com.caucho.server.cluster.SingleCluster;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.ServletMapping;
-import com.caucho.server.resin.ResinELContext;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
 import com.caucho.server.port.ProtocolDispatchServer;
+import com.caucho.server.resin.Resin;
+import com.caucho.server.resin.ResinELContext;
 import com.caucho.server.util.*;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
@@ -134,11 +135,13 @@ class WatchdogManager extends ProtocolDispatchServer {
 					    _args.getServerId()));
 
     server.getConfig().logInit(logStream);
-    
-    Cluster cluster = new SingleCluster();
+
+    Resin resin = Resin.create();
+    Cluster cluster = resin.createCluster();
     ClusterServer clusterServer = cluster.createServer();
     // cluster.addServer(clusterServer);
 
+    clusterServer.setId("");
     if (_watchdogPort > 0)
       clusterServer.setPort(_watchdogPort);
     else
@@ -148,8 +151,12 @@ class WatchdogManager extends ProtocolDispatchServer {
 
     clusterServer.getClusterPort().setMinSpareListen(1);
     clusterServer.getClusterPort().setMaxSpareListen(2);
-      
-    _dispatchServer = new Server(clusterServer);
+
+    cluster.addServer(clusterServer);
+
+    resin.addCluster(cluster);
+
+    _dispatchServer = resin.createServer();
 
     HostConfig hostConfig = new HostConfig();
     hostConfig.setId("resin-admin");

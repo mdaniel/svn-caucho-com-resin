@@ -76,10 +76,9 @@ public class FileCacheManager extends DistributedCacheManager
     super(server);
 
     try {
-      _tempFileManager = Resin.getCurrent().getTempFileManager();
+      _tempFileManager = server.getTempFileManager();
 
-      Resin resin = server.getResin();
-      Path adminPath = resin.getManagement().getPath();
+      Path adminPath = server.getAdminPath();
       String serverId = server.getServerId();
 
       _cacheMapBacking = new CacheMapBacking(adminPath, serverId);

@@ -784,6 +784,24 @@ public class Resin implements EnvironmentBean, SchemaBean
     return _management;
   }
 
+  public Server createServer()
+  {
+    if (_server == null) {
+      ClusterServer clusterServer = findClusterServer(_serverId);
+
+      if (clusterServer == null)
+	throw new ConfigException(L().l("server-id '{0}' has no matching <server> definition.",
+					_serverId));
+
+
+      _server = clusterServer.startServer();
+
+      _server.start();
+    }
+
+    return _server;
+  }
+
   /**
    * Starts the server.
    */
@@ -838,16 +856,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       }
       */
 
-      clusterServer = findClusterServer(_serverId);
-
-      if (clusterServer == null)
-	throw new ConfigException(L().l("server-id '{0}' has no matching <server> definition.",
-					_serverId));
-
-
-      _server = clusterServer.startServer();
-
-      _server.start();
+      _server = createServer();
 
       Environment.start(getClassLoader());
 

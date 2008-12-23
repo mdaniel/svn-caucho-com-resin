@@ -91,6 +91,9 @@ abstract public class Cluster
 
   protected Cluster(Resin resin)
   {
+    if (resin == null)
+      throw new NullPointerException(L.l("resin argument is required"));
+    
     _resin = resin;
     
     //_classLoader = EnvironmentClassLoader.create("cluster:??");
@@ -98,7 +101,7 @@ abstract public class Cluster
     //_clusterLocal.set(this, _classLoader);
   
     //_serverId = _serverIdLocal.get();
-    
+
     Environment.addEnvironmentListener(this, resin.getClassLoader());
 
     // Config.setProperty("cluster", new Var(), _classLoader);
@@ -313,6 +316,10 @@ abstract public class Cluster
   /**
    * Adds a new server to the cluster during configuration.
    */
+  public void addServer(ClusterServer server)
+  {
+  }
+  
   /*
   protected ClusterServer createDynamicServer()
   {
