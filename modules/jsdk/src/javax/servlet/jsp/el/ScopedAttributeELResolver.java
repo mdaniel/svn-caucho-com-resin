@@ -93,7 +93,7 @@ public class ScopedAttributeELResolver extends ELResolver {
   }
 
   @Override
-  public Class<?> getType(ELContext context,
+  public Class<Object> getType(ELContext context,
                           Object base,
                           Object property)
   {

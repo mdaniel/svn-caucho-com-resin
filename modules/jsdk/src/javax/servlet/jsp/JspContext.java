@@ -94,7 +94,7 @@ public abstract class JspContext {
    * Lists attribute names in a given scope.  You should use the scope-specific
    * routines instead, like request.getAttributeNames
    */
-  public abstract Enumeration getAttributeNamesInScope(int scope);
+  public abstract Enumeration<String> getAttributeNamesInScope(int scope);
   
   /**
    * Returns the scope for an attribute.

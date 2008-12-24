@@ -118,11 +118,8 @@ public abstract class PageContext extends JspContext {
   /**
    * Includes the a page relative to the current URL.
    */
-  public void include(String relativeUrl)
-    throws ServletException, IOException
-  {
-    include(relativeUrl, true);
-  }
+  public abstract void include(String relativeUrl)
+    throws ServletException, IOException;
 
   /**
    * Includes the a page relative to the current URL.
@@ -169,6 +166,8 @@ public abstract class PageContext extends JspContext {
   /**
    * Returns an error data instance.
    */
-  public abstract ErrorData getErrorData();
+  public ErrorData getErrorData() {
+    return null;
+  }
 
 }

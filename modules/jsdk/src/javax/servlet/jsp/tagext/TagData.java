@@ -41,27 +41,28 @@ public class TagData implements Cloneable {
    */
   public static final Object REQUEST_TIME_VALUE = new RequestTimeValue();
 
-  private Hashtable attributes;
+  private Hashtable<String, Object> attributes;
 
   /**
    * Create a new TagData object based on an attribute key/value hash table.
    */
-  public TagData(Hashtable attrs)
+  public TagData(Hashtable<String, Object> attrs)
   {
-    this.attributes = new Hashtable(attrs);
     if (attrs == null)
       throw new NullPointerException();
+
+    this.attributes = attrs;
   }
-  
+
   /**
    * Create a new TagData object based on and array of attribute key/values.
    */
   public TagData(Object [][]attrs)
   {
-    attributes = new Hashtable();
+    attributes = new Hashtable<String, Object>();
 
     for (int i = 0; attrs != null && i < attrs.length; i++) {
-      attributes.put(attrs[i][0], attrs[i][1]);
+      attributes.put((String)attrs[i][0], attrs[i][1]);
     }
   }
 
@@ -84,7 +85,7 @@ public class TagData implements Cloneable {
   /**
    * Enumerates the attribute names.
    */
-  public Enumeration getAttributes()
+  public Enumeration<String> getAttributes()
   {
     return this.attributes.keys();
   }
@@ -110,9 +111,9 @@ public class TagData implements Cloneable {
   /**
    * Clone the tag data.
    */
-  public Object clone()
+  protected Object clone()
   {
-    return new TagData((Hashtable) attributes.clone());
+    return new TagData((Hashtable<String, Object>) attributes.clone());
   }
 
   static class RequestTimeValue {

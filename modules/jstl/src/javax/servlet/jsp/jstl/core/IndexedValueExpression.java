@@ -32,8 +32,8 @@ package javax.servlet.jsp.jstl.core;
 import javax.el.*;
 
 public final class IndexedValueExpression extends ValueExpression {
-  private Integer i;
-  private ValueExpression orig;
+  protected final Integer i;
+  protected final ValueExpression orig;
 
   public IndexedValueExpression(ValueExpression orig, int i)
   {

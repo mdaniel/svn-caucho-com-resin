@@ -268,6 +268,12 @@ abstract public class LoopTagSupport extends TagSupport
     deferredExpression = null;
   }
 
+  protected String getDelims()
+  {
+    return ",";// XXX: needs test
+  }
+
+
   public class Status implements LoopTagStatus {
     /**
    * Returns the current object.

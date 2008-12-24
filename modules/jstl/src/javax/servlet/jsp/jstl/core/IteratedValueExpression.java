@@ -32,8 +32,8 @@ package javax.servlet.jsp.jstl.core;
 import javax.el.*;
 
 public final class IteratedValueExpression extends ValueExpression {
-  private int i;
-  private IteratedExpression iteratedExpression;
+  protected final int i;
+  protected final IteratedExpression iteratedExpression;
 
   public IteratedValueExpression(IteratedExpression iteratedExpression,
                                  int i)

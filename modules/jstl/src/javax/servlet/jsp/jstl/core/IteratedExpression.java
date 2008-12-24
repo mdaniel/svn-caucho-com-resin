@@ -34,8 +34,8 @@ import java.util.*;
 import java.lang.reflect.Array;
 
 public final class IteratedExpression {
-  private final ValueExpression orig;
-  private final String delims; // XXX: needs test, equals/hashcode
+  protected final ValueExpression orig;
+  protected final String delims; // XXX: needs test, equals/hashcode
 
   public IteratedExpression(ValueExpression orig, String delims)
   {
