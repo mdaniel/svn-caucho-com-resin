@@ -61,11 +61,6 @@ public abstract class JspContext {
   public abstract void removeAttribute(String name);
   
   /**
-   * Return an enumeration of all the attribute names.
-   */
-  public abstract Enumeration getAttributeNames();
-
-  /**
    * Sets an attribute in a given scope.  You should use the scope-specific
    * routines instead, like request.setAttribute.
    *

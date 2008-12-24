@@ -112,7 +112,7 @@ public class SimpleTagSupport implements SimpleTag {
    *
    * @return the matching tag or null.
    */
-  public static final JspTag findAncestorWithClass(JspTag tag, Class cl)
+  public static final JspTag findAncestorWithClass(JspTag tag, Class<?> cl)
   {
     if (tag == null || cl == null)
       return null;

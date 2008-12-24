@@ -112,6 +112,7 @@ public class TagData implements Cloneable {
    * Clone the tag data.
    */
   protected Object clone()
+    throws CloneNotSupportedException
   {
     return new TagData((Hashtable<String, Object>) attributes.clone());
   }

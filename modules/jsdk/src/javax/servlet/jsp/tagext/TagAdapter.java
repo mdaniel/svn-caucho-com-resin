@@ -29,6 +29,7 @@
 package javax.servlet.jsp.tagext;
 
 import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.JspException;
 
 /**
  * Adapts an object to the tag hierarchy.
@@ -86,7 +87,7 @@ public class TagAdapter implements Tag {
   /**
    * Stubbed.
    */
-  public int doStartTag()
+  public int doStartTag() throws JspException
   {
     throw new UnsupportedOperationException();
   }
@@ -94,7 +95,7 @@ public class TagAdapter implements Tag {
   /**
    * Stubbed.
    */
-  public int doEndTag()
+  public int doEndTag() throws JspException
   {
     throw new UnsupportedOperationException();
   }

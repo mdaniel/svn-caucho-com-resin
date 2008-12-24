@@ -41,12 +41,6 @@ public final class IndexedValueExpression extends ValueExpression {
     this.i = Integer.valueOf(i);
   }
 
-  public IndexedValueExpression(ValueExpression orig, Integer i)
-  {
-    this.orig = orig;
-    this.i = i;
-  }
-
   @Override
   public String getExpressionString()
   {
