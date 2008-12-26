@@ -62,6 +62,11 @@ abstract public class DistributedCacheManager
   /**
    * Gets a cache entry
    */
+  abstract public CacheEntry getEntry(HashKey hashKey, CacheConfig config);
+
+  /**
+   * Gets a cache entry
+   */
   abstract public Object get(HashKey hashKey, CacheConfig config);
 
   /**
@@ -82,10 +87,10 @@ abstract public class DistributedCacheManager
   /**
    * Sets a cache entry
    */
-  abstract public void put(HashKey hashKey,
-			   InputStream is,
-			   long idleTimeout,
-			   CacheConfig config)
+  abstract public CacheEntry put(HashKey hashKey,
+				 InputStream is,
+				 long idleTimeout,
+				 CacheConfig config)
     throws IOException;
 
   /**

@@ -39,6 +39,7 @@ import com.caucho.util.JdbcUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.WriteStream;
 import com.caucho.server.admin.Management;
 
@@ -304,13 +305,14 @@ public class DataBacking implements AlarmListener {
    * @param is the input stream to the serialized object
    * @param length the length object the serialized object
    */
-  public boolean save(HashKey id, InputStream is, int length)
+  public boolean save(HashKey id, StreamSource source, int length)
+    throws IOException
   {
-    if (insert(id, is, length))
+    if (insert(id, source.openInputStream(), length))
       return true;
     else if (updateExpires(id))
       return true;
-    else if (insert(id, is, length))
+    else if (insert(id, source.openInputStream(), length))
       return true;
     else {
       log.warning(this + " can't save data '" + id + "'");

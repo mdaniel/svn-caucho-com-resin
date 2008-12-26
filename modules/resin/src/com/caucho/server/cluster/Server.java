@@ -2077,6 +2077,9 @@ public class Server extends ProtocolDispatchServer
       if (! _lifecycle.toStopping())
         return;
 
+      // notify other servers that we've stopped
+      notifyStop();
+
       Alarm alarm = _alarm;
       _alarm = null;
 
@@ -2103,9 +2106,6 @@ public class Server extends ProtocolDispatchServer
       } catch (Throwable e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
-
-      // notify other servers that we've stopped
-      notifyStop();
 
       try {
         ThreadPool.getThreadPool().interrupt();

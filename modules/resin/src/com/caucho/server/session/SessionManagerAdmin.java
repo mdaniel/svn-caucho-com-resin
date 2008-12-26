@@ -274,6 +274,7 @@ public class SessionManagerAdmin extends AbstractManagedObject
    */
   public String getSessionStoreType()
   {
+    /*
     Store store = _manager.getSessionStore();
 
     if (store == null)
@@ -284,6 +285,8 @@ public class SessionManagerAdmin extends AbstractManagedObject
     int p = className.lastIndexOf('.');
 
     return className.substring(p + 1);
+    */
+    return "unknown";
   }
   
   /**

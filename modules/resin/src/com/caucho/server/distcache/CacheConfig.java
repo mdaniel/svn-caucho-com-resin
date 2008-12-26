@@ -41,7 +41,8 @@ import com.caucho.util.LruCache;
  */
 public class CacheConfig
 {
-  private long _localReadTimeout = -1;
+  private long _localReadTimeout = 10L; // 10ms default timeout
+  
   private long _idleTimeout = Long.MAX_VALUE / 2;
 
   private CacheSerializer _keySerializer;

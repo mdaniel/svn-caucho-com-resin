@@ -341,7 +341,7 @@ class BinaryColumn extends Column {
 	throw new SQLExceptionWrapper(L.l("StringColumn '{0}.{1}' unique index set failed for {2}\n{3}",
 					  getTable().getName(),
 					  getName(),
-					  getString(block, rowOffset),
+					  getDebugString(block, rowOffset),
 					  e.toString()),
 				      e);
       }
@@ -362,6 +362,13 @@ class BinaryColumn extends Column {
 
     if (index != null)
       index.remove(block, rowOffset + _columnOffset, getLength(), xa);
+  }
+
+  private String getDebugString(byte []block, int rowOffset)
+  {
+    return getIndexKeyCompare().toString(block,
+					 rowOffset + _columnOffset,
+					 _length);
   }
 
   public String toString()

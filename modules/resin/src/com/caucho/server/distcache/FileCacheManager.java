@@ -39,6 +39,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.TempOutputStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
@@ -91,6 +92,25 @@ public class FileCacheManager extends DistributedCacheManager
   /**
    * Gets a cache entry
    */
+  public CacheEntry getEntry(HashKey key, CacheConfig config)
+  {
+    CacheMapEntry entry = _entryCache.get(key);
+
+    if (entry == null) {
+      entry = _cacheMapBacking.load(key);
+
+      CacheMapEntry oldEntry = _entryCache.putIfNew(key, entry);
+
+      if (entry.getVersion() < oldEntry.getVersion())
+	entry = oldEntry;
+    }
+
+    return entry;
+  }
+
+  /**
+   * Gets a cache entry
+   */
   public Object get(HashKey key, CacheConfig config)
   {
     CacheMapEntry entry = _entryCache.get(key);
@@ -109,7 +129,7 @@ public class FileCacheManager extends DistributedCacheManager
     if (value != null)
       return value;
 
-    HashKey valueHash = entry.getValueHash();
+    HashKey valueHash = entry.getValueHashKey();
 
     value = readData(valueHash, config.getValueSerializer());
 
@@ -137,7 +157,8 @@ public class FileCacheManager extends DistributedCacheManager
     
     CacheMapEntry oldEntry = _entryCache.get(key);
 
-    HashKey oldValueHash = oldEntry != null ? oldEntry.getValueHash() : null;
+    HashKey oldValueHash
+      = oldEntry != null ? oldEntry.getValueHashKey() : null;
     
     HashKey valueHash = writeData(oldValueHash, value,
 				  config.getValueSerializer());
@@ -183,12 +204,13 @@ public class FileCacheManager extends DistributedCacheManager
   /**
    * Sets a cache entry
    */
-  public void put(HashKey hashKey,
-                  InputStream is,
-                  long idleTimeout,
-                  CacheConfig config)
+  public CacheEntry put(HashKey hashKey,
+			InputStream is,
+			long idleTimeout,
+			CacheConfig config)
     throws IOException
   {
+    return null;
   }
 
   /**
@@ -200,7 +222,8 @@ public class FileCacheManager extends DistributedCacheManager
     
     CacheMapEntry oldEntry = _entryCache.get(key);
 
-    HashKey oldValueHash = oldEntry != null ? oldEntry.getValueHash() : null;
+    HashKey oldValueHash
+      = oldEntry != null ? oldEntry.getValueHashKey() : null;
 
     long version = oldEntry != null ? oldEntry.getVersion() + 1 : 1;
     
@@ -259,8 +282,9 @@ public class FileCacheManager extends DistributedCacheManager
 	return valueHash;
 
       int length = os.getLength();
-
-      if (! _dataBacking.save(valueHash, os.openInputStream(), length))
+      
+      StreamSource source = new StreamSource(os);
+      if (! _dataBacking.save(valueHash, source, length))
 	throw new RuntimeException(L.l("Can't save the data '{0}'",
 				       valueHash));
 

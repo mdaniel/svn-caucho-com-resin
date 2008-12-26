@@ -486,7 +486,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     if (context != null) {
       context.unregisterMBean(name);
 
-      log.finer(name + " unregistered from " + this);
+      log.finest(name + " unregistered from " + this);
     }
 
     // XXX: getDelegate().sendUnregisterNotification(name);

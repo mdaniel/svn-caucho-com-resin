@@ -226,8 +226,12 @@ public abstract class AbstractLogin implements Login {
     SessionImpl session = (SessionImpl) request.getSession(false);
     Principal user = null;
 
-    if (session != null)
-      user = session.getUser();
+    if (session != null) {
+      LoginPrincipal login = (LoginPrincipal) session.getAttribute(LOGIN_NAME);
+
+      if (login != null)
+	user = login.getUser();
+    }
     
     if (user != null)
       return user;
@@ -248,7 +252,7 @@ public abstract class AbstractLogin implements Login {
 	session = (SessionImpl) request.getSession(true);
 
       if (session != null) {
-	session.setUser(user);
+	session.setAttribute(LOGIN_NAME, new LoginPrincipal(user));
 	entry.addSession(session);
       }
       
@@ -266,7 +270,7 @@ public abstract class AbstractLogin implements Login {
     if (session != null) {
       entry = new PrincipalEntry(user);
       
-      session.setUser(user);
+      session.setAttribute(LOGIN_NAME, new LoginPrincipal(user));
       entry.addSession(session);
       
       _principalCache.put(session.getId(), entry);
@@ -358,6 +362,15 @@ public abstract class AbstractLogin implements Login {
     String sessionId = request.getRequestedSessionId();
       
     logoutImpl(user, request, response);
+  }
+  
+  /**
+   * Called when the session invalidates.
+   */
+  public void sessionInvalidate(HttpSession session,
+				boolean isTimeout)
+  {
+    
   }
   
   /**
@@ -471,7 +484,8 @@ public abstract class AbstractLogin implements Login {
 	try {
 	  if (session == timeoutSession) {
 	    sessions.remove(i);
-	    session.logout();
+	    // session.logout();
+	    // XXX: invalidate?
 	  }
 	  else if (session == null)
 	    sessions.remove(i);
@@ -496,13 +510,27 @@ public abstract class AbstractLogin implements Login {
 
 	try {
 	  if (session != null) {
-	    session.logout();
+	    // session.logout();
 	    session.invalidateLogout();  // #599,  server/12i3
 	  }
 	} catch (Exception e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	}
       }
+    }
+  }
+
+  static class LoginPrincipal implements java.io.Serializable {
+    private transient Principal _user;
+
+    LoginPrincipal(Principal user)
+    {
+      _user = user;
+    }
+
+    public Principal getUser()
+    {
+      return _user;
     }
   }
 }

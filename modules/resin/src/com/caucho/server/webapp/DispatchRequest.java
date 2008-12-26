@@ -576,7 +576,7 @@ class DispatchRequest extends RequestAdapter {
     _session = null;
 
     if (session != null)
-      session.finish();
+      session.finishRequest();
   }
 
   /**

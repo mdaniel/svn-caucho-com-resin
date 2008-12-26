@@ -107,11 +107,6 @@ public class SimpleBamService extends AbstractBamService
    */
   public void message(String to, String from, Serializable value)
   {
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " message to=" + to + " from=" + from
-		+ logValue(value));
-    }
-
     _skeleton.dispatchMessage(this, to, from, value);
   }
   
@@ -154,9 +149,9 @@ public class SimpleBamService extends AbstractBamService
   }
   
   public boolean querySet(long id,
-			    String to,
-			    String from,
-			    Serializable value)
+			  String to,
+			  String from,
+			  Serializable value)
   {
     if (_skeleton.dispatchQuerySet(this, id, to, from, value)) {
       return true;
@@ -190,23 +185,22 @@ public class SimpleBamService extends AbstractBamService
   }
   
   public void queryError(long id,
-			   String to,
-			   String from,
-			   Serializable value,
-			   BamError error)
+			 String to,
+			 String from,
+			 Serializable value,
+			 BamError error)
   {
     if (! _skeleton.dispatchQueryError(this, id, to, from, value, error)) {
-      if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " queryError id=" + id + " to=" + to
-		  + " from=" + from + " value=" + logValue(value) 
-		  + " error=" + logValue(error));
-      }
-
-
       ProxyBamConnection bamConnection = _bamConnection.get();
 
       if (bamConnection != null)
 	bamConnection.onQueryError(id, to, from, value, error);
+      else {
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " queryError " + error + " id=" + id + " to=" + to
+		    + " from=" + from + " value=" + logValue(value));
+	}
+      }
     }
   }
   

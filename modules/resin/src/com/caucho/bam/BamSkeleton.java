@@ -284,8 +284,13 @@ public class BamSkeleton<C>
   {
     Method messageHandler = _messageHandlers.get(value.getClass());
 
-    if (messageHandler == null)
+    if (messageHandler == null) {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(target + " message(unknown) " + value + " to=" + to + " from=" + from);
+      }
+
       return;
+    }
     
     try {
       messageHandler.invoke(target, to, from, value);
@@ -362,6 +367,9 @@ public class BamSkeleton<C>
   public boolean dispatchQueryResult(C target, long id, String to, String from,
 				     Serializable value)
   {
+    if (value == null)
+      return false;
+    
     Method queryHandler = _queryResultHandlers.get(value.getClass());
 
     if (queryHandler == null)

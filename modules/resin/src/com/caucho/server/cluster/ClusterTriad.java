@@ -132,6 +132,19 @@ abstract public class ClusterTriad
 	    || getServerC() == server);
   }
 
+  /**
+   * Finds the matching server.
+   */
+  public ClusterServer findServer(int index)
+  {
+    for (ClusterServer server : getServerList()) {
+      if (server != null && server.getIndex() == index)
+	return server;
+    }
+
+    return null;
+  }
+
   //
   // configuration
   //

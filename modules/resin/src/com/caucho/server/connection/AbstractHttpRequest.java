@@ -1338,8 +1338,7 @@ public abstract class AbstractHttpRequest
 
     _sessionIsLoaded = true;
 
-    boolean hasOldSession = _session != null;
-    _session = createSession(create, hasOldSession);
+    _session = createSession(create);
     
     return _session;
   }
@@ -1516,7 +1515,7 @@ public abstract class AbstractHttpRequest
    *
    * @return the current session
    */
-  private SessionImpl createSession(boolean create, boolean hasOldSession)
+  private SessionImpl createSession(boolean create)
   {
     SessionManager manager = getSessionManager();
 
@@ -1616,6 +1615,19 @@ public abstract class AbstractHttpRequest
   }
 
   /**
+   * Returns the login for the request.
+   */
+  protected Login getLogin()
+  {
+    WebApp webApp = getWebApp();
+
+    if (webApp != null)
+      return webApp.getLogin();
+    else
+      return null;
+  }
+
+  /**
    * Internal logging return to get the remote user.  If the request already
    * knows the user, get it, otherwise just return null.
    */
@@ -1624,14 +1636,10 @@ public abstract class AbstractHttpRequest
     if (_session == null)
       return null;
 
-    Principal user = _session.getUser();
+    Principal user = (Principal) getAttribute(AbstractLogin.LOGIN_NAME);
 
-    if (user == null) {
-      if (! create)
-        return null;
-
+    if (user == null && create)
       user = getUserPrincipal();
-    }
 
     if (user != null)
       return user.getName();
@@ -1752,8 +1760,11 @@ public abstract class AbstractHttpRequest
    */
   public void logout()
   {
-    if (_session != null)
-      _session.logout();
+    Login login = getLogin();
+
+    if (login != null) {
+      login.logout(getUserPrincipal(), this, getResponse());
+    }
   }
 
   /**
@@ -1761,8 +1772,11 @@ public abstract class AbstractHttpRequest
    */
   public void logoutUserPrincipal()
   {
+    // XXX:
+    /*
     if (_session != null)
       _session.logout();
+    */
   }
   
   /**
@@ -2698,7 +2712,7 @@ public abstract class AbstractHttpRequest
       SessionImpl session = _session;
 
       if (session != null)
-        session.finish();
+        session.finishRequest();
       
       cleanup();
     } finally {

@@ -98,8 +98,7 @@ public final class SessionManager implements AlarmListener
   private final ClusterServer _selfServer;
   private final int _selfIndex;
   
-  private final SessionObjectManager _objectManager;
-  private ByteStreamCache _sessionCache;
+  private ByteStreamCache _sessionStore;
 
   // active sessions
   private LruCache<String,SessionImpl> _sessions;
@@ -167,7 +166,7 @@ public final class SessionManager implements AlarmListener
   // Compatibility fields
   //
   
-  private Store _sessionStore;
+  // private Store _sessionStore;
   private int _alwaysLoadSession;
   private int _alwaysSaveSession;
 
@@ -196,12 +195,17 @@ public final class SessionManager implements AlarmListener
     _server = Server.getCurrent();
     _selfServer = _server.getSelfServer();
     _selfIndex = _selfServer.getIndex();
+
+    // copy defaults from store for backward compat
+    StoreManager store = _server.getStore();
+    if (store != null) {
+      setAlwaysSaveSession(store.isAlwaysSave());
+    }
     
-    _objectManager = new SessionObjectManager(this);
     TriplicateByteStreamCache sessionCache = new TriplicateByteStreamCache();
     sessionCache.setName("resin:session");
     sessionCache.init();
-    _sessionCache = sessionCache;
+    _sessionStore = sessionCache;
 
     DispatchServer server = webApp.getDispatchServer();
     if (server != null) {
@@ -308,21 +312,13 @@ public final class SessionManager implements AlarmListener
   {
     return _webApp.getAuthenticator();
   }
-  
-  /**
-   * Returns the object manager
-   */
-  SessionObjectManager getObjectManager()
-  {
-    return _objectManager;
-  }
 
   /**
    * Returns the session cache
    */
   ByteStreamCache getCache()
   {
-    return _sessionCache;
+    return _sessionStore;
   }
 
   /**
@@ -937,6 +933,7 @@ public final class SessionManager implements AlarmListener
     _sessions = new LruCache<String,SessionImpl>(_sessionMax);
     _sessionIter = _sessions.values();
 
+    /*
     if (_storeManager != null) {
       _sessionStore = _storeManager.createStore(_distributionId,
 						_objectManager);
@@ -954,6 +951,7 @@ public final class SessionManager implements AlarmListener
     }
 
     _objectManager.setStore(_sessionStore);
+    */
   }
 
   public void start()
@@ -965,7 +963,7 @@ public final class SessionManager implements AlarmListener
   /**
    * Returns the session store.
    */
-  public Store getSessionStore()
+  public ByteStreamCache getSessionStore()
   {
     return _sessionStore;
   }
@@ -1166,8 +1164,10 @@ public final class SessionManager implements AlarmListener
     }
 
     if (session == null && _sessionStore != null) {
+      /*
       if (! _objectManager.isInSessionGroup(key))
 	return null;
+      */
 
       session = create(key, now, create);
 
@@ -1194,7 +1194,7 @@ public final class SessionManager implements AlarmListener
       session.endUse();
       _sessions.remove(key);
       // XXX:
-      session._isValid = false;
+      // session._isValid = false;
         
       return null;
     }
@@ -1273,7 +1273,9 @@ public final class SessionManager implements AlarmListener
 	// if used by more than just us, 
 	return true;
       }
-      else*/ if (now <= 0) {
+      else*/
+
+      if (now <= 0) {
         return false;
       }
       else if (session.load()) {
@@ -1325,19 +1327,17 @@ public final class SessionManager implements AlarmListener
       long now = Alarm.getCurrentTime();
       long accessWindow = 0;
 
+      /* XXX:
       if (_sessionStore != null)
 	accessWindow = _sessionStore.getAccessWindowTime();
+      */
       
       synchronized (_sessions) {
 	_sessionIter = _sessions.values(_sessionIter);
 	while (_sessionIter.hasNext()) {
 	  SessionImpl session = _sessionIter.next();
 
-	  long maxIdleTime = session._maxInactiveInterval + accessWindow;
-
-	  if (session.inUse())
-	    liveSessions++;
-	  else if (session._accessTime + maxIdleTime < now)
+	  if (session.isIdle(now))
 	    _sessionList.add(session);
 	  else
 	    liveSessions++;
@@ -1352,6 +1352,10 @@ public final class SessionManager implements AlarmListener
 	SessionImpl session = _sessionList.get(i);
 
 	try {
+	  session.timeout();
+
+	  _sessions.remove(session.getId());
+	  /*
 	  if (! session.isValid())
 	    continue;
 
@@ -1370,6 +1374,7 @@ public final class SessionManager implements AlarmListener
 	  else {
 	    session.invalidateTimeout();
 	  }
+	  */
 	} catch (Throwable e) {
 	  log.log(Level.FINE, e.toString(), e);
 	}
@@ -1420,13 +1425,7 @@ public final class SessionManager implements AlarmListener
         log.fine("close session " + session.getId());
       
       try {
-        if (session.isValid()) {
-          synchronized (session) {
-	    // server/016i, server/018x
-	    if (! session.isEmpty())
-	      session.saveOnShutdown();
-          }
-        }
+	session.saveOnShutdown();
 
         _sessions.remove(session.getId());
       } catch (Exception e) {

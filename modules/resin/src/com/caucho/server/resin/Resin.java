@@ -975,21 +975,21 @@ public class Resin implements EnvironmentBean, SchemaBean
       }
 
       try {
-	Management management = _management;
-	_management = null;
-
-	if (management != null)
-	  management.destroy();
-      } catch (Throwable e) {
-	log().log(Level.WARNING, e.toString(), e);
-      }
-
-      try {
 	Server server = _server;
 	_server = null;
 
 	if (server != null)
 	  server.destroy();
+      } catch (Throwable e) {
+	log().log(Level.WARNING, e.toString(), e);
+      }
+
+      try {
+	Management management = _management;
+	_management = null;
+
+	if (management != null)
+	  management.destroy();
       } catch (Throwable e) {
 	log().log(Level.WARNING, e.toString(), e);
       }

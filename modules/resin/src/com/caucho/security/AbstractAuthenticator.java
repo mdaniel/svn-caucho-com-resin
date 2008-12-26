@@ -328,7 +328,7 @@ public class AbstractAuthenticator
 
     if (principal != null) {
       SessionImpl session = (SessionImpl) request.getSession();
-      session.setUser(principal);
+      // XXX: session.setUser(principal);
 
       if (_principalCache != null) {
 	PrincipalEntry entry = new PrincipalEntry(principal);
@@ -639,8 +639,10 @@ public class AbstractAuthenticator
     SessionImpl session = (SessionImpl) request.getSession(false);
     Principal user = null;
 
+    /*
     if (session != null)
       user = session.getUser();
+    */
     
     if (user != null)
       return user;
@@ -660,7 +662,7 @@ public class AbstractAuthenticator
       if (session == null)
 	session = (SessionImpl) request.getSession(true);
       
-      session.setUser(user);
+      // XXX: session.setUser(user);
       entry.addSession(session);
       
       return user;
@@ -673,7 +675,7 @@ public class AbstractAuthenticator
     else if (session != null) {
       entry = new PrincipalEntry(user);
       
-      session.setUser(user);
+      // XXX: session.setUser(user);
       entry.addSession(session);
       
       _principalCache.put(session.getId(), entry);
@@ -780,7 +782,8 @@ public class AbstractAuthenticator
 	try {
 	  if (session == timeoutSession) {
 	    sessions.remove(i);
-	    session.logout();
+	    // session.logout();
+	    // XXX: invalidate?
 	  }
 	  else if (session == null)
 	    sessions.remove(i);
@@ -805,7 +808,7 @@ public class AbstractAuthenticator
 
 	try {
 	  if (session != null) {
-	    session.logout();
+	    // session.logout();
 	    session.invalidateLogout();  // #599,  server/12i3
 	  }
 	} catch (Exception e) {

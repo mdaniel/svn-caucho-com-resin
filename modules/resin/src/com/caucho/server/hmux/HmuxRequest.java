@@ -670,8 +670,8 @@ public class HmuxRequest extends AbstractHttpRequest
 	break;
 
       case HMUX_YIELD:
-        if (isLoggable)
-          log.fine(dbgId() + (char) code + "-r: yield");
+        if (log.isLoggable(Level.FINER))
+          log.finer(dbgId() + (char) code + "-r: yield");
         break;
 
       case HMUX_QUIT:

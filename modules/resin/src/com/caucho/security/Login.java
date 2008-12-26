@@ -114,4 +114,10 @@ public interface Login {
   public void logout(Principal user,
 		     HttpServletRequest request,
                      HttpServletResponse response);
+  
+  /**
+   * Called when the session invalidates.
+   */
+  public void sessionInvalidate(HttpSession session,
+				boolean isTimeout);
 }

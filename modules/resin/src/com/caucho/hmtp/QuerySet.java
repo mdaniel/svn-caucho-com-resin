@@ -107,8 +107,9 @@ public class QuerySet extends Packet {
   {
     if (! handler.querySet(getId(), getTo(), getFrom(), getValue())) {
       toSource.queryError(getId(), getFrom(), getTo(), getValue(),
-			      new BamError(BamError.TYPE_CANCEL,
-					    BamError.ITEM_NOT_FOUND));
+			  new BamError(BamError.TYPE_CANCEL,
+				       BamError.ITEM_NOT_FOUND,
+				       handler + " does not support " + getValue()));
     }
   }
 

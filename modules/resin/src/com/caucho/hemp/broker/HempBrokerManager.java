@@ -74,8 +74,8 @@ public class HempBrokerManager
       _brokerMap.put(name, new WeakReference<BamBroker>(broker));
     }
 
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " add " + broker + " as '" + name + "'");
+    if (log.isLoggable(Level.FINEST))
+      log.finest(this + " add " + broker + " as '" + name + "'");
   }
 
   public BamBroker removeBroker(String name)

@@ -29,6 +29,7 @@
 
 package com.caucho.server.distcache;
 
+import com.caucho.cluster.CacheEntry;
 import com.caucho.util.Alarm;
 
 import java.lang.ref.SoftReference;
@@ -36,7 +37,7 @@ import java.lang.ref.SoftReference;
 /**
  * An entry in the cache map
  */
-public final class CacheMapEntry {
+public final class CacheMapEntry implements CacheEntry {
   public static final CacheMapEntry NULL
     = new CacheMapEntry(null, null, 0, 0, false);
   
@@ -64,7 +65,15 @@ public final class CacheMapEntry {
       _valueRef = new SoftReference(value);
   }
 
-  public HashKey getValueHash()
+  public byte []getValueHash()
+  {
+    if (_valueHash != null)
+      return _valueHash.getHash();
+    else
+      return null;
+  }
+
+  public HashKey getValueHashKey()
   {
     return _valueHash;
   }
