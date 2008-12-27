@@ -218,8 +218,12 @@ public class PasswordDigest {
 				  String realm,
 				  HttpServletRequest request)
   {
-    if (_digest == null)
+    if (_digest == null) {
       init();
+
+      if (_digest == null)
+	return null;
+    }
     
     try {
       synchronized (_digest) {
@@ -268,8 +272,12 @@ public class PasswordDigest {
 				  char []password,
 				  String realm)
   {
-    if (_digest == null)
+    if (_digest == null) {
       init();
+
+      if (_digest == null)
+	return null;
+    }
 
     try {
       synchronized (_digest) {

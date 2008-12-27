@@ -34,7 +34,7 @@ import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.dispatch.ServletConfigException;
 import com.caucho.server.security.CachingPrincipal;
 import com.caucho.server.session.SessionManager;
-import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -74,7 +74,7 @@ import java.util.logging.Logger;
  * </pre></code>
  */
 
-public class JdbcAuthenticator extends AbstractAuthenticator {
+public class JdbcAuthenticator extends AbstractCookieAuthenticator {
   private static final Logger log
     = Logger.getLogger(JdbcAuthenticator.class.getName());
   private static final L10N L = new L10N(JdbcAuthenticator.class);
@@ -91,6 +91,9 @@ public class JdbcAuthenticator extends AbstractAuthenticator {
   private String _roleQuery;
   
   protected boolean _useCookie;
+  
+  private String _authCookieName = "resinauthid";
+  
   protected int _cookieVersion = -1;
   protected String _cookieDomain;
   protected long _cookieMaxAge = 365L * 24L * 3600L * 1000L;
@@ -348,6 +351,20 @@ public class JdbcAuthenticator extends AbstractAuthenticator {
 
     return user;
   }
+
+  /**
+   * Returns the authentication cookie
+   */
+  @Override
+  public boolean isCookieSupported(String jUseCookieAuth)
+  {
+    if (_cookieQuery == null)
+      return false;
+    else if (_useCookie)
+      return true;
+    else
+      return ("true".equals(jUseCookieAuth) || "on".equals(jUseCookieAuth));
+  }
   
    /**
     * Adds a cookie to store authentication.
@@ -499,33 +516,6 @@ public class JdbcAuthenticator extends AbstractAuthenticator {
     }
   }
 
-  protected Principal getUserPrincipalImpl(HttpServletRequest request,
-                                           ServletContext application)
-    throws ServletException
-  {
-    if (_cookieQuery == null)
-      return null;
-    
-    Cookie cookie = null;
-    
-    if (request instanceof CauchoRequest)
-      cookie = ((CauchoRequest) request).getCookie("resinauthid");
-    else {
-      Cookie []cookies = request.getCookies();
-      for (int i = 0; cookies != null && i < cookies.length; i++) {
-        if (cookies[i].getName().equals("resinauthid")) {
-          cookie = cookies[i];
-          break;
-        }
-      }
-    }
-
-    if (cookie == null)
-      return null;
-
-    return authenticateCookie(cookie.getValue());
-  }
-
   /**
    * Authenticate based on a cookie.
    *
@@ -533,8 +523,7 @@ public class JdbcAuthenticator extends AbstractAuthenticator {
    *
    * @return the user for the cookie.
    */
-  public Principal authenticateCookie(String cookieValue)
-    throws ServletException
+  public Principal authenticateByCookie(String cookieValue)
   {
     if (_cookieQuery == null)
       return null;
@@ -559,7 +548,7 @@ public class JdbcAuthenticator extends AbstractAuthenticator {
       else
         return null;
     } catch (Exception e) {
-      throw new ServletException(e);
+      throw new RuntimeException(e);
     } finally {
       try {
         if (rs != null)
@@ -587,7 +576,7 @@ public class JdbcAuthenticator extends AbstractAuthenticator {
    *
    * @return true if the cookie value is valid, i.e. it's unique
    */
-  public boolean updateCookie(Principal user, String cookieValue)
+  public boolean associateCookie(Principal user, String cookieValue)
   {
     if (_cookieUpdate == null || user == null || cookieValue == null)
       return true;

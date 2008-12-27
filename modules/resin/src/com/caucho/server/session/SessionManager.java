@@ -1061,7 +1061,20 @@ public final class SessionManager implements AlarmListener
     return id;
   }
 
+  public String createCookieValue()
+  {
+    return createCookieValue(null);
+  }
+
   public String createSessionIdImpl(HttpServletRequest request)
+  {
+    // look at caucho.session-server-id for a hint of the owner
+    Object owner = request.getAttribute("caucho.session-server-id");
+
+    return createCookieValue(owner);
+  }
+
+  protected String createCookieValue(Object owner)
   {
     StringBuilder sb = new StringBuilder();
     // this section is the host specific session index
@@ -1069,9 +1082,6 @@ public final class SessionManager implements AlarmListener
     int index = _selfIndex;
 
     ClusterServer server = _selfServer;
-    
-    // look at caucho.session-server-id for a hint of the owner
-    Object owner = request.getAttribute("caucho.session-server-id");
     
     if (owner == null) {
     }

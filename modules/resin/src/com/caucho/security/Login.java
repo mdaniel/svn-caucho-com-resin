@@ -56,6 +56,8 @@ import java.util.logging.Logger;
  * @since Resin 4.0.0
  */
 public interface Login {
+  public static final String LOGIN_NAME = "caucho.login";
+
   /**
    * Returns the authentication type.  <code>getAuthType</code> is called
    * by <code>HttpServletRequest.getAuthType</code>.

@@ -45,6 +45,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Cookie;
 import java.lang.ref.SoftReference;
 import java.security.MessageDigest;
 import java.security.Principal;
@@ -203,6 +204,10 @@ public class AbstractAuthenticator
     }
   }
 
+  //
+  // Authenticator API
+  //
+
   /**
    * Authenticator main call to login a user.
    *
@@ -221,6 +226,78 @@ public class AbstractAuthenticator
     else
       return null;
   }
+
+  /**
+   * Returns true if the user plays the named role.
+   *
+   * @param request the servlet request
+   * @param user the user to test
+   * @param role the role to test
+   */
+  public boolean isUserInRole(Principal user, String role)
+  {
+    PasswordUser passwordUser = getUser(user);
+
+    if (passwordUser != null)
+      return passwordUser.isUserInRole(role);
+    else
+      return false;
+  }
+
+  /**
+   * Logs the user out from the session.
+   *
+   * @param application the application
+   * @param timeoutSession the session timing out, null if not a timeout logout
+   * @param user the logged in user
+   */
+  public void logout(Principal user)
+  {
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " logout " + user);
+
+    /*
+    if (sessionId != null) {
+      if (_principalCache == null) {
+      }
+      else if (timeoutSession != null) {
+	PrincipalEntry entry =  _principalCache.get(sessionId);
+	
+	if (entry != null && entry.logout(timeoutSession)) {
+	  _principalCache.remove(sessionId);
+	}
+      }
+      else {
+	PrincipalEntry entry =  _principalCache.remove(sessionId);
+
+	if (entry != null)
+	  entry.logout();
+      }
+
+      Application app = (Application) application;
+      SessionManager manager = app.getSessionManager();
+
+      if (manager != null) {
+	try {
+	  SessionImpl session = manager.getSession(sessionId,
+						   Alarm.getCurrentTime(),
+						   false, true);
+
+	  if (session != null) {
+	    session.finish();
+	    session.logout();
+	  }
+	} catch (Exception e) {
+	  log.log(Level.FINE, e.toString(), e);
+	}
+      }
+    }
+    */
+  }
+
+  //
+  // implementation methods
+  //
 
   /**
    * Main authenticator API.
@@ -264,18 +341,6 @@ public class AbstractAuthenticator
       
       return digest;
     }
-  }
-
-  /**
-   * Authenticate (login) the user.
-   */
-  protected Principal loginImpl(HttpServletRequest request,
-                                HttpServletResponse response,
-                                ServletContext application,
-                                String user, String password)
-    throws ServletException
-  {
-    return null;
   }
   
   /**
@@ -446,74 +511,6 @@ public class AbstractAuthenticator
   protected PasswordUser getUser(Principal principal)
   {
     return getUser(principal.getName());
-  }
-
-  /**
-   * Returns true if the user plays the named role.
-   *
-   * @param request the servlet request
-   * @param user the user to test
-   * @param role the role to test
-   */
-  public boolean isUserInRole(Principal user, String role)
-  {
-    PasswordUser passwordUser = getUser(user);
-
-    if (passwordUser != null)
-      return passwordUser.isUserInRole(role);
-    else
-      return false;
-  }
-
-  /**
-   * Logs the user out from the session.
-   *
-   * @param application the application
-   * @param timeoutSession the session timing out, null if not a timeout logout
-   * @param user the logged in user
-   */
-  public void logout(Principal user)
-  {
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " logout " + user);
-
-    /*
-    if (sessionId != null) {
-      if (_principalCache == null) {
-      }
-      else if (timeoutSession != null) {
-	PrincipalEntry entry =  _principalCache.get(sessionId);
-	
-	if (entry != null && entry.logout(timeoutSession)) {
-	  _principalCache.remove(sessionId);
-	}
-      }
-      else {
-	PrincipalEntry entry =  _principalCache.remove(sessionId);
-
-	if (entry != null)
-	  entry.logout();
-      }
-
-      Application app = (Application) application;
-      SessionManager manager = app.getSessionManager();
-
-      if (manager != null) {
-	try {
-	  SessionImpl session = manager.getSession(sessionId,
-						   Alarm.getCurrentTime(),
-						   false, true);
-
-	  if (session != null) {
-	    session.finish();
-	    session.logout();
-	  }
-	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
-      }
-    }
-    */
   }
 
   //

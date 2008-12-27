@@ -29,6 +29,8 @@
 
 package com.caucho.server.security;
 
+import com.caucho.server.connection.CauchoRequest;
+import com.caucho.server.port.TcpConnection;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
@@ -48,9 +50,86 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Backwards compatibility
+ *
  * @since Resin 2.0.2
  * @deprecated
  * @see com.caucho.security.AbstractLogin
  */
 public abstract class AbstractLogin extends com.caucho.security.AbstractLogin {
+  /**
+   * Authentication
+   */
+  @Override
+  public Principal getUserPrincipalImpl(HttpServletRequest request)
+  {
+    ServletContext app = request.getServletContext();
+
+    HttpServletResponse response = null;
+    
+    return getUserPrincipal(request, response, app);
+  }
+
+  protected Principal getUserPrincipal(HttpServletRequest request,
+				       HttpServletResponse response,
+				       ServletContext app)
+  {
+    return null;
+  }
+  
+  /**
+   * Authentication
+   */
+  @Override
+  public Principal login(HttpServletRequest request,
+			 HttpServletResponse response)
+  {
+    try {
+      ServletContext app = request.getServletContext();
+    
+      return authenticate(request, response, app);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  protected Principal authenticate(HttpServletRequest request,
+				   HttpServletResponse response,
+				   ServletContext app)
+    throws ServletException, IOException
+  {
+    return null;
+  }
+  
+  /**
+   * Returns true if the current user plays the named role.
+   * <code>isUserInRole</code> is called in response to the
+   * <code>HttpServletRequest.isUserInRole</code> call.
+   *
+   * @param user the logged in user
+   * @param role the role to check
+   *
+   * @return true if the user plays the named role
+   */
+  @Override
+  public boolean isUserInRole(Principal user, String role)
+  {
+    CauchoRequest request
+      = (CauchoRequest) TcpConnection.getCurrentRequest();
+
+    return isUserInRole(request,
+			null, // request.getResponse(),
+			request.getServletContext(),
+			user,
+			role);
+  }
+
+  protected boolean isUserInRole(HttpServletRequest request,
+				 HttpServletResponse response,
+				 ServletContext app,
+				 Principal user, String role)
+  {
+    return false;
+  }
 }
+

@@ -87,23 +87,19 @@ public abstract class AbstractLogin implements Login {
   protected final static Logger log
     = Logger.getLogger(AbstractLogin.class.getName());
 
-  public static final String LOGIN_NAME = "caucho.login";
-
   /**
    * The configured authenticator for the login.  Implementing classes will
    * typically delegate calls to the authenticator after extracting the
    * username and password.
    */
   protected Authenticator _auth;
+  protected SingleSignon _singleSignon;
 
   private WebBeansContainer _webBeans;
 
   private boolean _isSessionSaveLogin = true;
   private boolean _isLogoutOnTimeout = false;
   
-  protected int _principalCacheSize = 4096;
-  protected LruCache<String,PrincipalEntry> _principalCache;
-
   protected AbstractLogin()
   {
     _webBeans = WebBeansContainer.create();
@@ -156,22 +152,6 @@ public abstract class AbstractLogin implements Login {
   }
 
   /**
-   * Returns the size of the principal cache.
-   */
-  public int getPrincipalCacheSize()
-  {
-    return _principalCacheSize;
-  }
-
-  /**
-   * Sets the size of the principal cache.
-   */
-  public void setPrincipalCacheSize(int size)
-  {
-    _principalCacheSize = size;
-  }
-
-  /**
    * Sets true if the user should be saved in the session.
    */
   public void setSessionSaveLogin(boolean isSave)
@@ -195,8 +175,25 @@ public abstract class AbstractLogin implements Login {
   public void init()
     throws ServletException
   {
-    if (_principalCacheSize > 0)
-      _principalCache = new LruCache<String,PrincipalEntry>(_principalCacheSize);
+    try {
+      if (_auth == null)
+	_auth = _webBeans.getInstanceByType(Authenticator.class);
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+    
+    try {
+      if (_singleSignon == null)
+	_singleSignon = _webBeans.getInstanceByType(SingleSignon.class);
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    if (_singleSignon == null) {
+      MemorySingleSignon singleSignon = new MemorySingleSignon();
+      singleSignon.init();
+      _singleSignon = singleSignon;
+    }
   }
 
   /**
@@ -223,8 +220,12 @@ public abstract class AbstractLogin implements Login {
    */
   public Principal getUserPrincipal(HttpServletRequest request)
   {
+    Principal user = (Principal) request.getAttribute(LOGIN_NAME);
+
+    if (user != null)
+      return user;
+    
     SessionImpl session = (SessionImpl) request.getSession(false);
-    Principal user = null;
 
     if (session != null) {
       LoginPrincipal login = (LoginPrincipal) session.getAttribute(LOGIN_NAME);
@@ -236,14 +237,14 @@ public abstract class AbstractLogin implements Login {
     if (user != null)
       return user;
 
-    PrincipalEntry entry = null;
+    SingleSignonEntry entry = null;
     
-    if (_principalCache == null) {
+    if (_singleSignon == null) {
     }
     else if (session != null)
-      entry = _principalCache.get(session.getId());
+      entry = _singleSignon.get(session.getId());
     else if (request.getRequestedSessionId() != null)
-      entry = _principalCache.get(request.getRequestedSessionId());
+      entry = _singleSignon.get(request.getRequestedSessionId());
 
     if (entry != null) {
       user = entry.getPrincipal();
@@ -268,17 +269,16 @@ public abstract class AbstractLogin implements Login {
       session = (SessionImpl) request.getSession();
 
     if (session != null) {
-      entry = new PrincipalEntry(user);
-      
       session.setAttribute(LOGIN_NAME, new LoginPrincipal(user));
-      entry.addSession(session);
-      
-      _principalCache.put(session.getId(), entry);
+
+      if (_singleSignon != null) {
+	entry = _singleSignon.put(session.getId(), user);
+	entry.addSession(session);
+      }
     }
     else if (request.getRequestedSessionId() != null) {
-      entry = new PrincipalEntry(user);
-      
-      _principalCache.put(request.getRequestedSessionId(), entry);
+      if (_singleSignon != null)
+	_singleSignon.put(request.getRequestedSessionId(), user);
     }
 
     return user;
@@ -311,10 +311,13 @@ public abstract class AbstractLogin implements Login {
     // credentials) from the request and call auth.login.
     Principal user = getUserPrincipal(request);
 
-    if (user != null)
-      return user;
-
     try {
+      if (user != null) {
+	loginSuccessResponse(user, request, response);
+      
+	return user;
+      }
+
       loginChallenge(request, response);
     } catch (Exception e) {
       // XXX: better exception
@@ -329,6 +332,16 @@ public abstract class AbstractLogin implements Login {
    */
   protected void loginChallenge(HttpServletRequest request,
 				HttpServletResponse response)
+    throws ServletException, IOException
+  {
+  }
+
+  /**
+   * HTTP updates after a successful login
+   */
+  protected void loginSuccessResponse(Principal user,
+				      HttpServletRequest request,
+				      HttpServletResponse response)
     throws ServletException, IOException
   {
   }
@@ -370,7 +383,13 @@ public abstract class AbstractLogin implements Login {
   public void sessionInvalidate(HttpSession session,
 				boolean isTimeout)
   {
-    
+    //LoginPrincipal login = (LoginPrincipal) session.getAttribute(LOGIN_NAME);
+
+    if (session != null) {
+      if (_singleSignon != null) {
+	SingleSignonEntry entry = _singleSignon.remove(session.getId());
+      }
+    }
   }
   
   /**

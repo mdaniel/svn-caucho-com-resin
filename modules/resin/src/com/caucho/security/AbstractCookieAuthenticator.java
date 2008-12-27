@@ -27,9 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.security;
+package com.caucho.security;
 
 import com.caucho.security.BasicPrincipal;
+import com.caucho.server.security.PasswordDigest;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.Application;
@@ -44,10 +45,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Cookie;
 import java.lang.ref.SoftReference;
 import java.security.MessageDigest;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,8 +62,34 @@ import java.util.logging.Logger;
  * <p>The AbstractAuthenticator provides a single-signon cache.  Users
  * logged into one web-app will share the same principal.
  */
-public class AbstractAuthenticator
-  extends com.caucho.security.AbstractAuthenticator
+public class AbstractCookieAuthenticator extends AbstractAuthenticator
+  implements CookieAuthenticator
 {
-  
+  //
+  // CookieAuthenticator API
+  //
+
+  /**
+   * Test if cookie-based authentication is supported.
+   */
+  public boolean isCookieSupported(String jUseCookieAuth)
+  {
+    return false;
+  }
+
+  /**
+   * Associate the user with a cookie
+   */
+  public boolean associateCookie(Principal user, String cookieValue)
+  {
+    return false;
+  }
+
+  /**
+   * Authenticates the user based on the cookie
+   */
+  public Principal authenticateByCookie(String cookieValue)
+  {
+    return null;
+  }
 }

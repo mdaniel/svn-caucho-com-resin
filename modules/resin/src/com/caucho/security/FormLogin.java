@@ -30,7 +30,9 @@
 package com.caucho.security;
 
 import com.caucho.config.ConfigException;
+import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 
@@ -38,6 +40,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -55,11 +58,14 @@ public class FormLogin extends AbstractLogin
 {
   private static final L10N L = new L10N(FormLogin.class);
   
+  public static final String LOGIN_CHECK
+    = "com.caucho.security.form.login";
+  
   public static final String LOGIN_SAVED_PATH
     = "com.caucho.servlet.login.path";
   public static final String LOGIN_SAVED_QUERY
     = "com.caucho.servlet.login.query";
-  
+
   protected String _loginPage;
   protected String _errorPage;
   protected boolean _internalForward;
@@ -187,12 +193,29 @@ public class FormLogin extends AbstractLogin
    *
    * @param request servlet request
    * @param response servlet response, in case any cookie need sending.
-   * @param application servlet application
    *
    * @return the logged in principal on success, null on failure.
    */
+  @Override
   public Principal getUserPrincipalImpl(HttpServletRequest request)
   {
+    Principal user;
+    
+    Authenticator auth = getAuthenticator();
+    
+    if (auth instanceof CookieAuthenticator) {
+      CookieAuthenticator cookieAuth = (CookieAuthenticator) auth;
+      
+      Cookie resinAuth = ((CauchoRequest) request).getCookie("resinauthid");
+
+      if (resinAuth != null) {
+	user = cookieAuth.authenticateByCookie(resinAuth.getValue());
+
+	if (user != null)
+	  return user;
+      }
+    }
+    
     String userName = request.getParameter("j_username");
     String passwordString = request.getParameter("j_password");
 
@@ -201,14 +224,41 @@ public class FormLogin extends AbstractLogin
 
     char []password = passwordString.toCharArray();
 
-    Authenticator auth = getAuthenticator();
-    BasicPrincipal user = new BasicPrincipal(userName);
+    BasicPrincipal basicUser = new BasicPrincipal(userName);
 
     Credentials credentials = new PasswordCredentials(password);
     
-    Principal principal = auth.authenticate(user, credentials, request);
+    user = auth.authenticate(basicUser, credentials, request);
 
-    return principal;
+    return user;
+  }
+
+  /**
+   * Updates after a successful login
+   *
+   * @param request servlet request
+   * @param response servlet response, in case any cookie need sending.
+   *
+   * @return the logged in principal on success, null on failure.
+   */
+  @Override
+  public void loginSuccessResponse(Principal user,
+				   HttpServletRequest request,
+				   HttpServletResponse response)
+    throws ServletException, IOException
+  {
+    WebApp app = (WebApp) request.getServletContext();
+    
+    String jUseCookieAuth = (String) request.getParameter("j_use_cookie_auth");
+    
+    Authenticator auth = getAuthenticator();
+
+    if (auth instanceof CookieAuthenticator
+	&& ((CookieAuthenticator) auth).isCookieSupported(jUseCookieAuth)) {
+      CookieAuthenticator cookieAuth = (CookieAuthenticator) auth;
+      
+      generateCookie(user, cookieAuth, app, response);
+    }
   }
 
   /**
@@ -239,16 +289,13 @@ public class FormLogin extends AbstractLogin
     }
 
     WebApp app = (WebApp) request.getServletContext();
-
-    if (app == null) {
-      System.out.println("NULL-APP:");
-
-      return;
-    }
       
     String uri = request.getRequestURI();
 
-    if (path.endsWith("/j_security_check")) {
+    if (path.endsWith("/j_security_check")
+	&& request.getAttribute(LOGIN_CHECK) == null) {
+      request.setAttribute(LOGIN_CHECK, "login");
+      
       RequestDispatcher disp;
       disp = app.getNamedDispatcher("j_security_check");
 
@@ -283,12 +330,37 @@ public class FormLogin extends AbstractLogin
     }
 
     // Forwards to the loginPage, never redirects according to the spec.
-    request.setAttribute("caucho.login", "login");
+    request.setAttribute(LOGIN_CHECK, "login");
     //RequestDispatcher disp = app.getLoginDispatcher(loginPage);
     RequestDispatcher disp = app.getRequestDispatcher(_loginPage);
     disp.forward(request, response);
 
     if (log.isLoggable(Level.FINE))
       log.fine("the form request has no authenticated user");
+  }
+
+  private void generateCookie(Principal user,
+			      CookieAuthenticator auth,
+			      WebApp webApp,
+			      HttpServletResponse response)
+  {
+    if (webApp == null)
+      return;
+
+    SessionManager manager = webApp.getSessionManager();
+    String value = manager.createCookieValue();
+
+    Cookie cookie = new Cookie("resinauthid", value);
+    cookie.setVersion(1);
+
+    long cookieMaxAge = 365L * 24L * 3600L * 1000L;
+
+    cookie.setMaxAge((int) (cookieMaxAge / 1000L));
+    cookie.setPath("/");
+    cookie.setDomain(manager.getCookieDomain());
+
+    auth.associateCookie(user, value);
+
+    response.addCookie(cookie);
   }
 }

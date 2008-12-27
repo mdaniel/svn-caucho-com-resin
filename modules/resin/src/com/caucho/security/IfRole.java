@@ -40,18 +40,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class IfRole implements ServletRequestPredicate {
-  private String []_roles;
+  private String []_roles = new String[0];
 
   public void addName(String role)
   {
-    if (_roles == null)
-      _roles = new String[] { role };
-    else {
-      String []newRoles = new String[_roles.length + 1];
-      System.arraycopy(_roles, 0, newRoles, 0, _roles.length);
-      newRoles[_roles.length] = role;
-      _roles = newRoles;
-    }
+    String []newRoles = new String[_roles.length + 1];
+    System.arraycopy(_roles, 0, newRoles, 0, _roles.length);
+    newRoles[_roles.length] = role;
+    _roles = newRoles;
   }
 
   /**

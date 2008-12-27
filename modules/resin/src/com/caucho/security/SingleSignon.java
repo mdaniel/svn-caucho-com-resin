@@ -19,19 +19,27 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.jms;
+package com.caucho.security;
+
+import java.security.Principal;
 
 /**
- * Top-level JMS connection factory
+ * Cache to store login for multiple web-apps.
+ *
+ * @since Resin 4.0.0
  */
-public class ConnectionFactoryImpl
-  extends com.caucho.jms.connection.ConnectionFactoryImpl
-{
+public interface SingleSignon {
+  public SingleSignonEntry get(String id);
+  
+  public SingleSignonEntry put(String id, Principal user);
+  
+  public SingleSignonEntry remove(String id);
 }

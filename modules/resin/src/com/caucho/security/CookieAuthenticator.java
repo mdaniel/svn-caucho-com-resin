@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -26,12 +27,20 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jms;
+package com.caucho.security;
+
+import java.security.*;
+import javax.servlet.http.Cookie;
 
 /**
- * Top-level JMS connection factory
+ * Base implementation to log in a user.
  */
-public class ConnectionFactoryImpl
-  extends com.caucho.jms.connection.ConnectionFactoryImpl
+public interface CookieAuthenticator extends Authenticator
 {
+  public boolean isCookieSupported(String jUseCookieAuth);
+  
+  public Principal authenticateByCookie(String cookieValue);
+  
+  public boolean associateCookie(Principal user, String cookieValue);
 }
+
