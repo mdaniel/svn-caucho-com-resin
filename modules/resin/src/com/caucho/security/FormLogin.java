@@ -247,6 +247,9 @@ public class FormLogin extends AbstractLogin
 				   HttpServletResponse response)
     throws ServletException, IOException
   {
+    if (request.getAttribute(LOGIN_CHECK) != null)
+      return;
+    
     WebApp app = (WebApp) request.getServletContext();
     
     String jUseCookieAuth = (String) request.getParameter("j_use_cookie_auth");
@@ -258,6 +261,35 @@ public class FormLogin extends AbstractLogin
       CookieAuthenticator cookieAuth = (CookieAuthenticator) auth;
       
       generateCookie(user, cookieAuth, app, response);
+    }
+    String path = request.getServletPath();
+    
+    if (path == null)
+      path = request.getPathInfo();
+    else if (request.getPathInfo() != null)
+      path = path + request.getPathInfo();
+
+    if (path.equals("")) {
+      // Forward?
+      path = request.getContextPath() + "/";
+      response.sendRedirect(response.encodeRedirectURL(path));
+      return;
+    }
+
+    String uri = request.getRequestURI();
+
+    if (path.endsWith("/j_security_check")
+	&& request.getAttribute(LOGIN_CHECK) == null) {
+      request.setAttribute(LOGIN_CHECK, "login");
+      
+      RequestDispatcher disp;
+      disp = app.getNamedDispatcher("j_security_check");
+
+      if (disp == null)
+        throw new ServletException(L.l("j_security_check servlet must be defined to use form-based login."));
+      
+      disp.forward(request, response);
+      return;
     }
   }
 
@@ -292,8 +324,8 @@ public class FormLogin extends AbstractLogin
       
     String uri = request.getRequestURI();
 
-    if (path.endsWith("/j_security_check")
-	&& request.getAttribute(LOGIN_CHECK) == null) {
+    if (path.endsWith("/j_security_check")) {
+      //	&& request.getAttribute(LOGIN_CHECK) == null) {
       request.setAttribute(LOGIN_CHECK, "login");
       
       RequestDispatcher disp;

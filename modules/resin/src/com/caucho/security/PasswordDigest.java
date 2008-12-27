@@ -297,12 +297,7 @@ public class PasswordDigest {
 
         int len = _digest.digest(_digestBytes, 0, _digestBytes.length);
 
-	char []digest = new char[len];
-
-	for (int i = 0; i < len; i++)
-	  digest[i] = (char) _digestBytes[i];
-
-        return digest;
+	return digestToCharArray(_digestBytes, len);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -446,6 +441,6 @@ public class PasswordDigest {
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    return getClass().getSimpleName() + "[" + _algorithm + "," + _format + "]";
   }
 }

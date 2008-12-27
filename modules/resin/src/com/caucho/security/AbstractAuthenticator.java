@@ -37,6 +37,7 @@ import com.caucho.server.webapp.Application;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.util.Hex;
 import com.caucho.webbeans.component.*;
 
 import javax.annotation.PostConstruct;
@@ -69,9 +70,6 @@ public class AbstractAuthenticator
     = Logger.getLogger(AbstractAuthenticator.class.getName());
   static final L10N L = new L10N(AbstractAuthenticator.class);
   
-  protected int _principalCacheSize = 4096;
-  protected LruCache<String,PrincipalEntry> _principalCache;
-
   protected String _passwordDigestAlgorithm = "MD5-base64";
   protected String _passwordDigestRealm = "resin";
   protected PasswordDigest _passwordDigest;
@@ -79,22 +77,6 @@ public class AbstractAuthenticator
   private boolean _logoutOnTimeout = true;
 
   private Object _serializationHandle;
-
-  /**
-   * Returns the size of the principal cache.
-   */
-  public int getPrincipalCacheSize()
-  {
-    return _principalCacheSize;
-  }
-
-  /**
-   * Sets the size of the principal cache.
-   */
-  public void setPrincipalCacheSize(int size)
-  {
-    _principalCacheSize = size;
-  }
 
   /**
    * Returns the password digest
@@ -176,9 +158,6 @@ public class AbstractAuthenticator
   public void init()
     throws ServletException
   {
-    if (_principalCacheSize > 0)
-      _principalCache = new LruCache<String,PrincipalEntry>(_principalCacheSize);
-
     if (_passwordDigest != null) {
       if (_passwordDigest.getAlgorithm() == null
 	  || _passwordDigest.getAlgorithm().equals("none"))
@@ -223,6 +202,9 @@ public class AbstractAuthenticator
     if (credentials instanceof PasswordCredentials) {
       return authenticate(user, (PasswordCredentials) credentials, details);
     }
+    else if (credentials instanceof DigestCredentials) {
+      return authenticate(user, (DigestCredentials) credentials, details);
+    }
     else
       return null;
   }
@@ -255,48 +237,10 @@ public class AbstractAuthenticator
   {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " logout " + user);
-
-    /*
-    if (sessionId != null) {
-      if (_principalCache == null) {
-      }
-      else if (timeoutSession != null) {
-	PrincipalEntry entry =  _principalCache.get(sessionId);
-	
-	if (entry != null && entry.logout(timeoutSession)) {
-	  _principalCache.remove(sessionId);
-	}
-      }
-      else {
-	PrincipalEntry entry =  _principalCache.remove(sessionId);
-
-	if (entry != null)
-	  entry.logout();
-      }
-
-      Application app = (Application) application;
-      SessionManager manager = app.getSessionManager();
-
-      if (manager != null) {
-	try {
-	  SessionImpl session = manager.getSession(sessionId,
-						   Alarm.getCurrentTime(),
-						   false, true);
-
-	  if (session != null) {
-	    session.finish();
-	    session.logout();
-	  }
-	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
-      }
-    }
-    */
   }
 
   //
-  // implementation methods
+  // basic password authentication
   //
 
   /**
@@ -342,69 +286,10 @@ public class AbstractAuthenticator
       return digest;
     }
   }
-  
-  /**
-   * Validates the user when using HTTP Digest authentication.
-   * DigestLogin will call this
- method.  Most other AbstractLogin
-   * implementations, like BasicLogin and FormLogin, will use
-   * getUserPrincipal instead.
-   *
-   * <p>The HTTP Digest authentication uses the following algorithm
-   * to calculate the digest.  The digest is then compared to
-   * the client digest.
-   *
-   * <code><pre>
-   * A1 = MD5(username + ':' + realm + ':' + password)
-   * A2 = MD5(method + ':' + uri)
-   * digest = MD5(A1 + ':' + nonce + A2)
-   * </pre></code>
-   *
-   * @param request the request trying to authenticate.
-   * @param response the response for setting headers and cookies.
-   * @param app the servlet context
-   * @param user the username
-   * @param realm the authentication realm
-   * @param nonce the nonce passed to the client during the challenge
-   * @param uri te protected uri
-   * @param qop
-   * @param nc
-   * @param cnonce the client nonce
-   * @param clientDigest the client's calculation of the digest
-   *
-   * @return the logged in principal if successful
-   */
-  protected Principal loginDigest(HttpServletRequest request,
-				  HttpServletResponse response,
-				  ServletContext app,
-				  String user, String realm,
-				  String nonce, String uri,
-				  String qop, String nc, String cnonce,
-				  byte []clientDigest)
-    throws ServletException
-  {
-    Principal principal = null;
-    /*
-    loginDigestImpl(request, response, app,
-                                          user, realm, nonce, uri,
-                                          qop, nc, cnonce,
-                                          clientDigest);
-    */
 
-    if (principal != null) {
-      SessionImpl session = (SessionImpl) request.getSession();
-      // XXX: session.setUser(principal);
-
-      if (_principalCache != null) {
-	PrincipalEntry entry = new PrincipalEntry(principal);
-	entry.addSession(session);
-	
-        _principalCache.put(session.getId(), entry);
-      }
-    }
-
-    return principal;
-  }
+  //
+  // digest authentication
+  //
   
   /**
    * Validates the user when HTTP Digest authentication.
@@ -418,27 +303,23 @@ public class AbstractAuthenticator
    * digest = MD5(A1 + ':' + nonce + A2)
    * </pre></code>
    *
-   * @param request the request trying to authenticate.
-   * @param response the response for setting headers and cookies.
-   * @param app the servlet context
-   * @param user the username
-   * @param realm the authentication realm
-   * @param nonce the nonce passed to the client during the challenge
-   * @param uri te protected uri
-   * @param qop
-   * @param nc
-   * @param cnonce the client nonce
-   * @param clientDigest the client's calculation of the digest
+   * @param principal the user trying to authenticate.
+   * @param cred the digest credentials
    *
    * @return the logged in principal if successful
    */
-  protected Principal loginDigestImpl(HttpServletRequest request,
-				      String user, String realm,
-				      String nonce, String uri,
-				      String qop, String nc, String cnonce,
-				      byte []clientDigest)
-    throws ServletException
+  protected Principal authenticate(Principal principal,
+				   DigestCredentials cred,
+				   Object details)
   {
+    String cnonce = cred.getCnonce();
+    String method = cred.getMethod();
+    String nc = cred.getNc();
+    String nonce = cred.getNonce();
+    String qop = cred.getQop();
+    String realm = cred.getRealm();
+    byte []clientDigest = cred.getResponse();
+    String uri = cred.getUri();
     
     try {
       if (clientDigest == null)
@@ -446,7 +327,7 @@ public class AbstractAuthenticator
       
       MessageDigest digest = MessageDigest.getInstance("MD5");
       
-      byte []a1 = getDigestSecret(request, user, realm, "MD5");
+      byte []a1 = getDigestSecret(principal, realm);
 
       if (a1 == null)
         return null;
@@ -473,25 +354,58 @@ public class AbstractAuthenticator
       }
       digest.update((byte) ':');
 
-      byte []a2 = digest(request.getMethod() + ":" + uri);
+      byte []a2 = digest(method + ":" + uri);
 
       digestUpdateHex(digest, a2);
 
       byte []serverDigest = digest.digest();
 
-      if (clientDigest.length != serverDigest.length)
-        return null;
-
-      for (int i = 0; i < clientDigest.length; i++) {
-        if (serverDigest[i] != clientDigest[i])
-          return null;
-      }
-
-      return new BasicPrincipal(user);
+      if (isMatch(clientDigest, serverDigest))
+	return principal;
+      else
+	return null;
     } catch (Exception e) {
-      throw new ServletException(e);
+      throw new RuntimeException(e);
     }
   }
+
+  /**
+   * Returns the digest secret for Digest authentication.
+   */
+  protected byte []getDigestSecret(Principal principal, String realm)
+  {
+    PasswordUser user = getUser(principal);
+
+    if (user == null || user.isDisabled())
+      return null;
+
+    /*
+    if (_passwordDigest != null)
+      return _passwordDigest.stringToDigest(password);
+    */
+
+    String username = principal.getName();
+
+    try {
+      MessageDigest digest = MessageDigest.getInstance("MD5");
+
+      String string = username + ":" + realm + ":";
+      byte []data = string.getBytes("UTF8");
+      digest.update(data);
+      char []password = user.getPassword();
+
+      for (int i = 0; i < password.length; i++)
+	digest.update((byte) password[i]);
+      
+      return digest.digest();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  //
+  // abstract methods
+  //
 
   /**
    * Abstract method to return a user based on the name
@@ -567,33 +481,6 @@ public class AbstractAuthenticator
     return clientDigest;
   }
 
-  /**
-   * Returns the digest secret for Digest authentication.
-   */
-  protected byte []getDigestSecret(HttpServletRequest request,
-                                   String username, String realm,
-                                   String algorithm)
-    throws ServletException
-  {
-    String password = getDigestPassword(username, realm, request);
-    
-    if (password == null)
-      return null;
-
-    if (_passwordDigest != null)
-      return _passwordDigest.stringToDigest(password);
-
-    try {
-      MessageDigest digest = MessageDigest.getInstance(algorithm);
-
-      String string = username + ":" + realm + ":" + password;
-      byte []data = string.getBytes("UTF8");
-      return digest.digest(data);
-    } catch (Exception e) {
-      throw new ServletException(e);
-    }
-  }
-
   protected byte []digest(String value)
     throws ServletException
   {
@@ -608,99 +495,27 @@ public class AbstractAuthenticator
   }
 
   /**
-   * Returns the password for authenticators too lazy to calculate the
-   * digest.
+   * Tests passwords
    */
-  protected String getDigestPassword(String username,
-				     String realm,
-				     HttpServletRequest request)
+  private boolean isMatch(char []password, char []userPassword)
   {
-    return null;
-  }
+    int len = password.length;
 
-  /**
-   * Grab the user from the request, assuming the user has
-   * already logged in.  In other words, overriding methods could
-   * use cookies or the session to find the logged in principal, but
-   * shouldn't try to log the user in with form parameters.
-   *
-   * @param request the servlet request.
-   *
-   * @return a Principal representing the user or null if none has logged in.
-   */
-  public Principal getUserPrincipal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    ServletContext application)
-    throws ServletException
-  {
-    SessionImpl session = (SessionImpl) request.getSession(false);
-    Principal user = null;
+    if (len != userPassword.length)
+      return false;
 
-    /*
-    if (session != null)
-      user = session.getUser();
-    */
-    
-    if (user != null)
-      return user;
-
-    PrincipalEntry entry = null;
-    
-    if (_principalCache == null) {
-    }
-    else if (session != null)
-      entry = _principalCache.get(session.getId());
-    else if (request.getRequestedSessionId() != null)
-      entry = _principalCache.get(request.getRequestedSessionId());
-
-    if (entry != null) {
-      user = entry.getPrincipal();
-
-      if (session == null)
-	session = (SessionImpl) request.getSession(true);
-      
-      // XXX: session.setUser(user);
-      entry.addSession(session);
-      
-      return user;
+    for (int i = 0; i < len; i++) {
+      if (password[i] != userPassword[i])
+	return false;
     }
 
-    user = getUserPrincipalImpl(request, application);
-
-    if (user == null) {
-    }
-    else if (session != null) {
-      entry = new PrincipalEntry(user);
-      
-      // XXX: session.setUser(user);
-      entry.addSession(session);
-      
-      _principalCache.put(session.getId(), entry);
-    }
-    else if (request.getRequestedSessionId() != null) {
-      entry = new PrincipalEntry(user);
-      
-      _principalCache.put(request.getRequestedSessionId(), entry);
-    }
-
-    return user;
-  }
-  
-  /**
-   * Gets the user from a persistent cookie, uaing authenticateCookie
-   * to actually look the cookie up.
-   */
-  protected Principal getUserPrincipalImpl(HttpServletRequest request,
-                                           ServletContext application)
-    throws ServletException
-  {
-    return null;
+    return true;
   }
 
   /**
    * Tests passwords
    */
-  private boolean isMatch(char []password, char []userPassword)
+  private boolean isMatch(byte []password, byte []userPassword)
   {
     int len = password.length;
 
@@ -736,82 +551,5 @@ public class AbstractAuthenticator
     return (getClass().getSimpleName()
 	    + "[" + _passwordDigestAlgorithm
 	    + "," + _passwordDigestRealm + "]");
-  }
-
-  static class PrincipalEntry {
-    private Principal _principal;
-    private ArrayList<SoftReference<SessionImpl>> _sessions;
-
-    PrincipalEntry(Principal principal)
-    {
-      _principal = principal;
-    }
-
-    Principal getPrincipal()
-    {
-      return _principal;
-    }
-
-    void addSession(SessionImpl session)
-    {
-      if (_sessions == null)
-	_sessions = new ArrayList<SoftReference<SessionImpl>>();
-      
-      _sessions.add(new SoftReference<SessionImpl>(session));
-    }
-
-    /**
-     * Logout only the given session, returning true if it's the
-     * last session to logout.
-     */
-    boolean logout(HttpSession timeoutSession)
-    {
-      ArrayList<SoftReference<SessionImpl>> sessions = _sessions;
-
-      if (sessions == null)
-	return true;
-
-      boolean isEmpty = true;
-      for (int i = sessions.size() - 1; i >= 0; i--) {
-	SoftReference<SessionImpl> ref = sessions.get(i);
-	SessionImpl session = ref.get();
-
-	try {
-	  if (session == timeoutSession) {
-	    sessions.remove(i);
-	    // session.logout();
-	    // XXX: invalidate?
-	  }
-	  else if (session == null)
-	    sessions.remove(i);
-	  else
-	    isEmpty = false;
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
-      }
-
-      return isEmpty;
-    }
-      
-    void logout()
-    {
-      ArrayList<SoftReference<SessionImpl>> sessions = _sessions;
-      _sessions = null;
-      
-      for (int i = 0; sessions != null && i < sessions.size(); i++) {
-	SoftReference<SessionImpl> ref = sessions.get(i);
-	SessionImpl session = ref.get();
-
-	try {
-	  if (session != null) {
-	    // session.logout();
-	    session.invalidateLogout();  // #599,  server/12i3
-	  }
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
-      }
-    }
   }
 }

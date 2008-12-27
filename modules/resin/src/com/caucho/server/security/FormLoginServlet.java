@@ -28,6 +28,7 @@
 
 package com.caucho.server.security;
 
+import com.caucho.security.FormLogin;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.RequestDispatcherImpl;

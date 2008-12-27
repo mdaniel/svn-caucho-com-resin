@@ -28,49 +28,9 @@
 
 package com.caucho.server.security;
 
-import com.caucho.config.*;
-import com.caucho.config.types.Period;
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.dispatch.ServletConfigException;
-import com.caucho.server.session.SessionManager;
-import com.caucho.server.webapp.Application;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
-
-import javax.annotation.PostConstruct;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
-import java.security.Principal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
- * An authenticator using JDBC.
- *
- * <p>The default table schema looks something like:
- * <pre>
- * CREATE TABLE LOGIN (
- *   username VARCHAR(250) NOT NULL,
- *   password VARCHAR(250),
- *   cookie VARCHAR(250),
- *   PRIMARY KEY (username)
- * );
- * </pre>
- *
- * <code><pre>
- * &lt;authenticator url="jdbc:database=jdbc/user">
- * &lt;/authenticator>
- * </pre></code>
+ * @deprecated
+ * @see com.caucho.security.JdbcAuthenticator
  */
 
 public class JdbcAuthenticator extends com.caucho.security.JdbcAuthenticator {

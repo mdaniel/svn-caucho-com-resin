@@ -74,107 +74,14 @@ public class DigestLogin extends AbstractLogin {
   {
     return "Digest";
   }
-  
-  /**
-   * Logs a user in with a user name and a password.  Basic authentication
-   * extracts the user and password from the authorization header.  If
-   * the user/password is missing, authenticate will send a basic challenge.
-   *
-   * @param request servlet request
-   * @param response servlet response, in case any cookie need sending.
-   * @param application servlet application
-   *
-   * @return the logged in principal on success, null on failure.
-   */
-  public Principal authenticate(HttpServletRequest request,
-                                HttpServletResponse response,
-                                ServletContext application)
-    throws ServletException, IOException
-  {
-    Principal user;
-
-    // If the user is already logged-in, return the user
-    user = null;
-    //user = getAuthenticator().getUserPrincipal(request, response, application);
-    if (user != null)
-      return user;
-    
-    user = getDigestPrincipal(request, response, application);
-
-    if (user != null)
-      return user;
-
-    sendDigestChallenge(response, application);
-    
-    return null;
-  }
-  
-  /**
-   * Returns the current user with the user name and password.
-   *
-   * @param request servlet request
-   * @param response servlet response, in case any cookie need sending.
-   * @param application servlet application
-   *
-   * @return the logged in principal on success, null on failure.
-   */
-  public Principal getUserPrincipal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    ServletContext application)
-    throws ServletException
-  {
-    Authenticator auth = getAuthenticator();
-    
-    Principal user = null;//auth.getUserPrincipal(request, response, application);
-
-    if (user != null)
-      return user;
-    
-    return getDigestPrincipal(request, response, application);
-  }
 
   /**
-   * Sends a challenge for basic authentication.
-   */
-  protected void sendDigestChallenge(HttpServletResponse res,
-                                     ServletContext application)
-    throws ServletException, IOException
-  {
-    String realm = getRealmName();
-    if (realm == null)
-      realm = "resin";
-
-    CharBuffer cb = CharBuffer.allocate();
-    Base64.encode(cb, getRandomLong(application));
-    String nonce = cb.toString();
-    cb.clear();
-    cb.append("Digest ");
-    cb.append("realm=\"");
-    cb.append(realm);
-    cb.append("\", qop=\"auth\", ");
-    cb.append("nonce=\"");
-    cb.append(nonce);
-    cb.append("\"");
-
-    res.setHeader("WWW-Authenticate", cb.close());
-    
-    res.sendError(res.SC_UNAUTHORIZED);
-  }
-
-  protected long getRandomLong(ServletContext application)
-  {
-    return RandomUtil.getRandomLong();
-  }
-
-  /**
-   * Returns the principal from a basic authentication
+   * Returns the principal from a digest authentication
    *
    * @param auth the authenticator for this application.
    */
-  protected Principal getDigestPrincipal(HttpServletRequest request,
-                                         HttpServletResponse response,
-                                         ServletContext application)
-    throws ServletException
+  @Override
+  protected Principal getUserPrincipalImpl(HttpServletRequest request)
   {
     String value = request.getHeader("authorization");
 
@@ -220,23 +127,65 @@ public class DigestLogin extends AbstractLogin {
 
     byte []clientDigest = decodeDigest(digest);
 
-    if (clientDigest == null || username == null ||
-        uri == null || nonce == null)
+    if (clientDigest == null || username == null
+	|| uri == null || nonce == null)
       return null;
 
     Authenticator auth = getAuthenticator();
-    Principal principal = null;
-    /*
-    = auth.loginDigest(request, response, application,
-                                           username, realm, nonce, uri,
-                                           qop, nc, cnonce,
-                                           clientDigest);
-    */
-    
-    if (log.isLoggable(Level.FINE))
-      log.fine("digest: " + username + " -> " + principal);
+    Principal principal = new BasicPrincipal(username);
 
-    return principal;
+    DigestCredentials cred = new DigestCredentials();
+
+    cred.setCnonce(cnonce);
+    cred.setMethod(request.getMethod());
+    cred.setNc(nc);
+    cred.setNonce(nonce);
+    cred.setQop(qop);
+    cred.setRealm(realm);
+    cred.setResponse(decodeDigest(digest));
+    cred.setUri(uri);
+
+    Principal user;
+
+    user = auth.authenticate(principal, cred, request);
+
+    if (log.isLoggable(Level.FINE))
+      log.fine("digest: " + username + " -> " + user);
+
+    return user;
+  }
+
+  /**
+   * Sends a challenge for basic authentication.
+   */
+  protected void loginChallenge(HttpServletRequest req,
+				HttpServletResponse res)
+    throws ServletException, IOException
+  {
+    String realm = getRealmName();
+    if (realm == null)
+      realm = "resin";
+
+    StringBuilder cb = new StringBuilder();
+    Base64.encode(cb, RandomUtil.getRandomLong());
+    String nonce = cb.toString();
+    cb.setLength(0);
+    cb.append("Digest ");
+    cb.append("realm=\"");
+    cb.append(realm);
+    cb.append("\", qop=\"auth\", ");
+    cb.append("nonce=\"");
+    cb.append(nonce);
+    cb.append("\"");
+
+    res.setHeader("WWW-Authenticate", cb.toString());
+    
+    res.sendError(res.SC_UNAUTHORIZED);
+  }
+
+  protected long getRandomLong(ServletContext application)
+  {
+    return RandomUtil.getRandomLong();
   }
 
   protected byte []decodeDigest(String digest)
@@ -271,7 +220,6 @@ public class DigestLogin extends AbstractLogin {
   }
 
   protected String scanKey(CharCursor cursor)
-    throws ServletException
   {
     int ch;
     while (XmlChar.isWhitespace((ch = cursor.current())) || ch == ',') {
@@ -283,7 +231,7 @@ public class DigestLogin extends AbstractLogin {
       return null;
     
     if (! XmlChar.isNameStart(ch))
-      throw new ServletException("bad key: " + (char) ch + " " + cursor);
+      throw new RuntimeException("bad key: " + (char) ch + " " + cursor);
 
     CharBuffer cb = CharBuffer.allocate();
     while (XmlChar.isNameChar(ch = cursor.read())) {
@@ -296,14 +244,13 @@ public class DigestLogin extends AbstractLogin {
   }
 
   protected String scanValue(CharCursor cursor)
-    throws ServletException
   {
     int ch;
     skipWhitespace(cursor);
 
     ch = cursor.read();
     if (ch != '=')
-      throw new ServletException("expected '='");
+      throw new RuntimeException("expected '='");
 
     skipWhitespace(cursor);
     

@@ -181,7 +181,7 @@ public abstract class AbstractLogin implements Login {
     } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
     }
-    
+
     try {
       if (_singleSignon == null)
 	_singleSignon = _webBeans.getInstanceByType(SingleSignon.class);

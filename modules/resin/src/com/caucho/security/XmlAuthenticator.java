@@ -48,7 +48,7 @@ import java.util.logging.*;
  * The XML authenticator reads a static file for authentication.
  *
  * <code><pre>
- * &lt;authenticator url="xml:path=WEB-INF/users.xml"/>
+ * &lt;security:XmlAuthenticator path="WEB-INF/users.xml"/>
  * </pre></code>
  *
  * <p>The format of the static file is as follows:
@@ -63,11 +63,9 @@ import java.util.logging.*;
  * <p>The authenticator can also be configured in the resin-web.xml:
  *
  * <code><pre>
- * &lt;authenticator url="xml:password-digest=none">
- *   &lt;init>
- *     &lt;user name="Harry Potter" password="quidditch" roles="user,captain"/>
- *   &lt;/init>
- * &lt;/authenticator>
+ * &lt;security:XmlAuthenticator password-digest="none">
+ *   &lt;user name="Harry Potter" password="quidditch" roles="user,captain"/>
+ * &lt;/security:XmlAuthenticator>
  * </pre></code>
  */
 public class XmlAuthenticator extends AbstractAuthenticator
@@ -128,7 +126,7 @@ public class XmlAuthenticator extends AbstractAuthenticator
   @Override
   protected PasswordUser getUser(String userName)
   {
-    if  (userName == null)
+    if (userName == null)
       return null;
     
     if (isModified())

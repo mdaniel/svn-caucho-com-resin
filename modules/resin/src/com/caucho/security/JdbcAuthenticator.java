@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -69,8 +70,7 @@ import java.util.logging.Logger;
  * </pre>
  *
  * <code><pre>
- * &lt;authenticator url="jdbc:database=jdbc/user">
- * &lt;/authenticator>
+ * &lt;security:JdbcAuthenticator data-source="jdbc/user"/>
  * </pre></code>
  */
 
@@ -266,18 +266,8 @@ public class JdbcAuthenticator extends AbstractCookieAuthenticator {
   {
     super.init();
 
-    if (_dataSource == null) {
-      try {
-        Context ic = new InitialContext();
-
-        _dataSource = (DataSource) ic.lookup("java:comp/env/jdbc/db-pool");
-      } catch (Exception e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
-
-      if (_dataSource == null)
-        throw new ServletConfigException(L.l("Unknown database pool jdbc/db-pool."));
-    }
+    if (_dataSource == null)
+      throw new ConfigException(L.l("JdbcAuthenticator requires a 'data-source' attribute, because it depends on a JDBC database"));
 
     int i = _passwordQuery.indexOf('?');
     if (i < 0)
@@ -468,11 +458,7 @@ public class JdbcAuthenticator extends AbstractCookieAuthenticator {
    * Returns the password for authenticators too lazy to calculate the
    * digest.
    */
-  protected String getDigestPassword(HttpServletRequest request,
-                                     HttpServletResponse response,
-                                     ServletContext application,
-                                     String username, String realm)
-    throws ServletException
+  protected PasswordUser getUser(String username)
   {
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -494,9 +480,13 @@ public class JdbcAuthenticator extends AbstractCookieAuthenticator {
       
       String dbPassword = rs.getString(1);
 
-      return dbPassword;
+      return new PasswordUser(new BasicPrincipal(username),
+			      dbPassword.toCharArray(),
+			      false,
+			      false,
+			      new String[0]);
     } catch (Exception e) {
-      throw new ServletException(e);
+      throw new RuntimeException(e);
     } finally {
       try {
         if (rs != null)
