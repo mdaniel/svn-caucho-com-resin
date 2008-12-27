@@ -8,6 +8,7 @@ package com.caucho.server.admin;
 
 import com.caucho.bam.*;
 import com.caucho.git.*;
+import com.caucho.server.cluster.HmuxBamClient;
 import com.caucho.server.resin.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
@@ -26,7 +27,7 @@ public class DeployClient
   private BamConnection _conn;
   private String _deployJid;
   
-  private HmuxClient _client;
+  private HmuxBamClient _client;
 
   public DeployClient()
   {
@@ -50,7 +51,7 @@ public class DeployClient
   
   public DeployClient(String host, int port)
   {
-    _client = new HmuxClient(host, port);
+    _client = new HmuxBamClient(host, port);
     
     _deployJid = "deploy@resin.caucho";
   }
