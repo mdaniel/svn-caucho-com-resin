@@ -151,18 +151,26 @@ public class SimpleBamService extends AbstractBamService
   public boolean querySet(long id,
 			  String to,
 			  String from,
-			  Serializable value)
+			  Serializable query)
   {
-    if (_skeleton.dispatchQuerySet(this, id, to, from, value)) {
+    if (_skeleton.dispatchQuerySet(this, id, to, from, query)) {
       return true;
     }
     else {
-      if (log.isLoggable(Level.FINE))
-	log.fine(this + " querySet(value=" + logValue(value)
-		 + " id=" + id + " to=" + to
-		 + " from=" + from + ")");
+      String msg = (this + ": unknown querySet feature "
+		    + query + " for jid=" + getJid());
+    
+      BamError error = new BamError(BamError.TYPE_CANCEL,
+				    BamError.FEATURE_NOT_IMPLEMENTED,
+				    msg);
+				    
+      getBrokerStream().queryError(id, from, to, query, error);
+      
+      if (log.isLoggable(Level.FINE)) {
+	log.fine(msg);
+      }
 
-      return false;
+      return true;
     }
   }
   

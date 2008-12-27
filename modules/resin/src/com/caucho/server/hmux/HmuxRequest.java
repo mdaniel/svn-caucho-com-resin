@@ -202,6 +202,9 @@ public class HmuxRequest extends AbstractHttpRequest
   
   public static final int ADMIN_PRESENCE =      '-';
   public static final int BAM_PRESENCE =        '=';
+  
+  public static final int ADMIN_CONNECT =       '_';
+  public static final int BAM_CONNECT =         '+';
 
   public static final int HMUX_CLUSTER_PROTOCOL = 0x101;
   public static final int HMUX_DISPATCH_PROTOCOL = 0x102;
@@ -276,6 +279,8 @@ public class HmuxRequest extends AbstractHttpRequest
   private ErrorPageManager _errorManager = new ErrorPageManager(null);
 
   private int _srunIndex;
+
+  private BamConnection _bamConn;
 
   private HttpServletRequestImpl _requestFacade;
   private HttpServletResponseImpl _responseFacade;
@@ -366,6 +371,26 @@ public class HmuxRequest extends AbstractHttpRequest
   {
     return _hasRequest;
   }
+  
+  public boolean handleRequest()
+    throws IOException
+  {
+    try {
+      boolean result = handleRequestImpl();
+
+      System.out.println("DONE:");
+
+      return result;
+    } catch (RuntimeException e) {
+      e.printStackTrace();
+
+      throw e;
+    } catch (IOException e) {
+      e.printStackTrace();
+
+      throw e;
+    }
+  }
 
   /**
    * Handles a new request.  Initializes the protocol handler and
@@ -374,7 +399,7 @@ public class HmuxRequest extends AbstractHttpRequest
    * <p>Note: ClientDisconnectException must be rethrown to
    * the caller.
    */
-  public boolean handleRequest()
+  public boolean handleRequestImpl()
     throws IOException
   {
     // XXX: should be moved to TcpConnection
@@ -631,6 +656,11 @@ public class HmuxRequest extends AbstractHttpRequest
     _clientCert.clear();
 
     _pendingData = 0;
+    BamConnection bamConn = _bamConn;
+    _bamConn = null;
+
+    if (bamConn != null)
+      bamConn.close();
 
     _isSecure = _conn.isSecure();
   }
@@ -1070,6 +1100,26 @@ public class HmuxRequest extends AbstractHttpRequest
 	  break;
 	}
 
+      case ADMIN_CONNECT:
+	{
+	  len = (is.read() << 8) + is.read();
+
+	  hmtpConnect(code, _server.getAdminBroker());
+	  
+	  hasURI = true;
+	  break;
+	}
+
+      case BAM_CONNECT:
+	{
+	  len = (is.read() << 8) + is.read();
+
+	  hmtpConnect(code, _server.getBamBroker());
+	  
+	  hasURI = true;
+	  break;
+	}
+
       default:
         len = (is.read() << 8) + is.read();
 
@@ -1140,13 +1190,16 @@ public class HmuxRequest extends AbstractHttpRequest
 
     Serializable query = (Serializable) readObject();
 
-    BamStream brokerStream = broker.getBrokerStream();
-
     if (log.isLoggable(Level.FINER))
       log.fine(dbgId() + (char) code + "-r: HMTP queryGet " + query
 	       + " id=" + id + " to=" + to + " from=" + from);
 
-    if (from != null && ! "".equals(from)) {
+    if (_bamConn != null) {
+      _bamConn.getBrokerStream().queryGet(id, to, _bamConn.getJid(), query);
+    }
+    else if (from != null && ! "".equals(from)) {
+      BamStream brokerStream = broker.getBrokerStream();
+
       brokerStream.queryGet(id, to, from, query);
     }
     else {
@@ -1202,7 +1255,10 @@ public class HmuxRequest extends AbstractHttpRequest
       log.fine(dbgId() + (char) code + "-r: HMTP querySet " + query
 	       + " id=" + id + " to=" + to + " from=" + from);
 
-    if (from != null && ! "".equals(from)) {
+    if (_bamConn != null) {
+      _bamConn.getBrokerStream().querySet(id, to, _bamConn.getJid(), query);
+    }
+    else if (from != null && ! "".equals(from)) {
       brokerStream.querySet(id, to, from, query);
     }
     else {
@@ -1261,6 +1317,64 @@ public class HmuxRequest extends AbstractHttpRequest
     brokerStream.queryResult(id, to, from, value);
   }
 
+  void writeHmtpResult(long id,
+		       String to, String from,
+		       Serializable value)
+    throws IOException
+  {
+    WriteStream out = _rawWrite;
+
+    synchronized (out) {
+      out.write(BAM_QUERY_RESULT);
+      out.write(0);
+      out.write(8);
+      writeLong(out, id);
+      writeString(HMUX_STRING, from);
+      writeString(HMUX_STRING, to);
+      writeObject(out, value);
+
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(dbgId() + (char) BAM_QUERY_RESULT + "-w:"
+		  + " HMTP queryResult " + value
+		  + " to=" + from + " from=" + to);
+      }
+    }
+  }
+
+  void writeFlush()
+    throws IOException
+  {
+    WriteStream out = _rawWrite;
+
+    synchronized (out) {
+      out.flush();
+    }
+  }
+
+  void writeHmtpError(long id, String to, String from,
+		      Serializable value, BamError error)
+    throws IOException
+  {
+    WriteStream out = _rawWrite;
+
+    synchronized (out) {
+      out.write(BAM_QUERY_ERROR);
+      out.write(0);
+      out.write(8);
+      writeLong(out, id);
+      writeString(HMUX_STRING, from);
+      writeString(HMUX_STRING, to);
+      writeObject(out, value);
+      writeObject(out, error);
+
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(dbgId() + (char) BAM_QUERY_ERROR + "-w:"
+		  + " HMTP queryError " + error + " " + value 
+		  + " to=" + from + " from=" + to);
+      }
+    }
+  }
+
   private void readHmtpQueryError(int code,
 				  ReadStream is,
 				   long id,
@@ -1280,6 +1394,25 @@ public class HmuxRequest extends AbstractHttpRequest
     }
 
     brokerStream.queryError(id, to, from, query, error);
+  }
+
+  private void hmtpConnect(int code, BamBroker broker)
+    throws IOException
+  {
+    try {
+      _bamConn = broker.getConnection("client", null);
+
+      _bamConn.setStreamHandler(new HmuxBamCallback(this));
+
+      WriteStream os = _rawWrite;
+
+      writeString(code, _bamConn.getJid());
+      
+      if (log.isLoggable(Level.FINER))
+	log.fine(dbgId() + (char) code + "-r: HMTP connect " + _bamConn.getJid());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private Object readObject()
@@ -1741,6 +1874,11 @@ public class HmuxRequest extends AbstractHttpRequest
   
   public void protocolCloseEvent()
   {
+    BamConnection bamConn = _bamConn;
+    _bamConn = null;
+
+    if (bamConn != null)
+      bamConn.close();
   }
 
   @Override

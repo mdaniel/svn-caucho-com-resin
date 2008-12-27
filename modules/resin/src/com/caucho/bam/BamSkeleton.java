@@ -90,7 +90,7 @@ public class BamSkeleton<C>
     
     log.finest(L.l("{0} introspecting class {1}", this, cl.getName()));
 
-    Method[] methods = cl.getMethods();
+    Method[] methods = cl.getDeclaredMethods();
 
     for (int i = 0; i < methods.length; i++) {
       Method method = methods[i];
@@ -100,6 +100,8 @@ public class BamSkeleton<C>
       if (messageType != null) {
         log.finest(L.l("{0} found @Message handler type={1} method={2}",
 		       this, messageType.getName(), method));
+
+	method.setAccessible(true);
 	
         _messageHandlers.put(messageType, method);
         continue;
@@ -111,6 +113,8 @@ public class BamSkeleton<C>
         log.finest(L.l("{0} found @MessageError handler type={1} method={2}",
 		       this, messageType.getName(), method));
 	
+	method.setAccessible(true);
+	
         _messageErrorHandlers.put(messageType, method);
         continue;
       }
@@ -121,6 +125,8 @@ public class BamSkeleton<C>
         log.finest(L.l("{0} found @QueryGet handler type={1} method={2}",
 		       this, messageType.getName(), method));
 	
+	method.setAccessible(true);
+	
         _queryGetHandlers.put(messageType, method);
         continue;
       }
@@ -130,6 +136,8 @@ public class BamSkeleton<C>
       if (messageType != null) {
         log.finest(L.l("{0} found @QuerySet handler type={1} method={2}",
 		       this, messageType.getName(), method));
+	
+	method.setAccessible(true);
 
         _querySetHandlers.put(messageType, method);
         continue;
@@ -141,6 +149,8 @@ public class BamSkeleton<C>
         log.finest(L.l("{0} found @QueryResult handler type={1} method={2}",
 		       this, messageType.getName(), method));
 
+	method.setAccessible(true);
+	
         _queryResultHandlers.put(messageType, method);
         continue;
       }
@@ -151,6 +161,8 @@ public class BamSkeleton<C>
         log.finest(L.l("{0} found @QueryError handler type={1} method={2}",
 		       this, messageType.getName(), method));
 	
+	method.setAccessible(true);
+	
         _queryErrorHandlers.put(messageType, method);
         continue;
       }
@@ -160,6 +172,8 @@ public class BamSkeleton<C>
       if (messageType != null) {
         log.finest(L.l("{0} found @Presence handler type={1} method={2}",
 		       this, messageType.getName(), method));
+	
+	method.setAccessible(true);
 	
         _presenceHandlers.put(messageType, method);
 	
@@ -172,6 +186,8 @@ public class BamSkeleton<C>
         log.finest(L.l("{0} found @PresenceProbe handler type={1} method={2}",
 		       this, messageType.getName(), method));
 
+	method.setAccessible(true);
+	
         _presenceProbeHandlers.put(messageType, methods[i]);
 	
         continue;
@@ -183,6 +199,8 @@ public class BamSkeleton<C>
         log.finest(L.l("{0} found @PresenceSubscribe handler type={1} method={2}",
 		       this, messageType.getName(), method));
 	
+	method.setAccessible(true);
+	
         _presenceSubscribeHandlers.put(messageType, methods[i]);
         continue;
       }
@@ -193,6 +211,8 @@ public class BamSkeleton<C>
         log.finest(L.l("{0} found @PresenceSubscribe handler type={1} method={2}",
 		       this, messageType.getName(), method));
 
+	method.setAccessible(true);
+	
         _presenceSubscribedHandlers.put(messageType, methods[i]);
         continue;
       }
@@ -202,6 +222,8 @@ public class BamSkeleton<C>
       if (messageType != null) {
         log.finest(L.l("{0} found @PresenceUnsubscribe handler type={1} method={2}",
 		       this, messageType.getName(), method));
+	
+	method.setAccessible(true);
 
         _presenceUnsubscribeHandlers.put(messageType, methods[i]);
         continue;
@@ -212,8 +234,10 @@ public class BamSkeleton<C>
       if (messageType != null) {
         log.finest(L.l("{0} found @PresenceUnsubscribed handler type={1} method={2}",
 		       this, messageType.getName(), method));
+	
+	method.setAccessible(true);
 
-        _presenceUnsubscribedHandlers.put(messageType, methods[i]);
+        _presenceUnsubscribedHandlers.put(messageType, method);
         continue;
       }
 
@@ -223,7 +247,9 @@ public class BamSkeleton<C>
         log.finest(L.l("{0} found @PresenceUnavailable handler type={1} method={2}",
 		       this, messageType.getName(), method));
 	
-        _presenceUnavailableHandlers.put(messageType, methods[i]);
+	method.setAccessible(true);
+	
+        _presenceUnavailableHandlers.put(messageType, method);
         continue;
       }
 
@@ -233,6 +259,8 @@ public class BamSkeleton<C>
         log.finest(L.l("{0} found @PresenceError handler type={1} method={2}",
 		       this, messageType.getName(), method));
 
+	method.setAccessible(true);
+	
         _presenceErrorHandlers.put(messageType, methods[i]);
         continue;
       }
@@ -254,15 +282,27 @@ public class BamSkeleton<C>
 
   private Class getQueryMessageType(Class annotationType, Method method)
   {
+    if (! method.isAnnotationPresent(annotationType))
+      return null;
+    
     Class []paramTypes = method.getParameterTypes();
 
-    if (paramTypes.length < 4)
-      return null;
+    if (paramTypes.length != 4
+	|| ! long.class.equals(paramTypes[0])
+	|| ! String.class.equals(paramTypes[1])
+	|| ! String.class.equals(paramTypes[2])
+	|| ! Serializable.class.isAssignableFrom(paramTypes[3])) {
+      throw new BamException(method + " is an invalid @"
+			     + annotationType.getSimpleName()
+			     + " because queries require (long, String, String, MyValue)");
+    }
+    else if (! boolean.class.equals(method.getReturnType())) {
+      throw new BamException(method + " is an invalid @"
+			     + annotationType.getSimpleName()
+			     + " because queries must return boolean");
+    }
 
-    if (method.isAnnotationPresent(annotationType))
-      return paramTypes[3];
-    else
-      return null;
+    return paramTypes[3];
   }
  
   public static BamSkeleton getBamSkeleton(Class cl)

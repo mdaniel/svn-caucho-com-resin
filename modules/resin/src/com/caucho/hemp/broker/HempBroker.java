@@ -491,24 +491,35 @@ public class HempBroker implements BamBroker, BamStream
     BamStream stream = findAgent(to);
 
     if (stream != null) {
-      if (! stream.queryGet(id, to, from, query)) {
-	if (log.isLoggable(Level.FINE)) {
-	  log.fine(this + " queryGet to unknown feature to='" + to
-		   + "' from=" + from + " query='" + query + "'"
-		   + " stream=" + stream);
-	}
-	
-	String msg = L.l("'{0}' is an unknown feature for to='{1}'",
-			 query, to);
+      try {
+	if (! stream.queryGet(id, to, from, query)) {
+	  if (log.isLoggable(Level.FINE)) {
+	    log.fine(this + " queryGet to unknown feature to='" + to
+		     + "' from=" + from + " query='" + query + "'"
+		     + " stream=" + stream);
+	  }
+
+	  String msg = L.l("{0}: unknown queryGet feature {1} for jid={2} stream={3}",
+			   this, query, stream.getJid(), stream);
     
-	BamError error = new BamError(BamError.TYPE_CANCEL,
+	  BamError error = new BamError(BamError.TYPE_CANCEL,
 					BamError.FEATURE_NOT_IMPLEMENTED,
 					msg);
 	
-	queryError(id, from, to, query, error);
-      }
+	  queryError(id, from, to, query, error);
+	}
 
-      return true;
+	return true;
+      } catch (Exception e) {
+	String msg = L.l("'{0}' threw an unexpected exception for '{1}'\n{2}",
+			 to, query, e.toString());
+	
+	BamError error = new BamError(msg);
+	
+	queryError(id, from, to, query, error);
+
+	return true;
+      }
     }
 
     if (log.isLoggable(Level.FINE)) {
@@ -560,12 +571,12 @@ public class HempBroker implements BamBroker, BamStream
 	       + " query=" + query);
     }
 
-    String msg = L.l("'{0}' is an unknown feature for querySet",
-		     query);
+    String msg = L.l("{0}: unknown querySet feature {1} for jid={2} stream={3}",
+		     this, query, stream.getJid(), stream);
     
     BamError error = new BamError(BamError.TYPE_CANCEL,
-				    BamError.FEATURE_NOT_IMPLEMENTED,
-				    msg);
+				  BamError.FEATURE_NOT_IMPLEMENTED,
+				  msg);
 				    
     queryError(id, from, to, query, error);
 

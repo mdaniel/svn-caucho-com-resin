@@ -208,6 +208,8 @@ public class ResinBoot {
 				 _client.getWatchdogAddress(),
 				 _client.getWatchdogPort()));
       } catch (Exception e) {
+	e.printStackTrace();
+	
 	System.out.println(L().l("Resin/{0} can't stop -server '{1}' for watchdog at {2}:{3}.\n{4}",
 				 Version.VERSION, _client.getId(),
 				 _client.getWatchdogAddress(),
@@ -298,6 +300,9 @@ public class ResinBoot {
    */
   public static void main(String []argv)
   {
+    if (System.getProperty("log.level") != null)
+      Logger.getLogger("").setLevel(Level.FINER);
+    
     try {
       ResinBoot boot = new ResinBoot(argv);
 

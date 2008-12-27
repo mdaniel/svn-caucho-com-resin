@@ -26,8 +26,11 @@
  * @author Sam
  */
 
-package com.caucho.server.admin;
+package com.caucho.server.cluster;
 
+import com.caucho.bam.AbstractBamConnection;
+import com.caucho.bam.BamError;
+import com.caucho.bam.BamStream;
 import com.caucho.config.ConfigException;
 import com.caucho.hessian.io.ExtSerializerFactory;
 import com.caucho.hessian.io.Hessian2Input;
@@ -36,6 +39,7 @@ import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterPort;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.ClusterStream;
+import com.caucho.server.cluster.HmuxBamClient;
 import com.caucho.server.cluster.ServerPool;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
@@ -45,15 +49,15 @@ import com.caucho.vfs.WriteStream;
 import java.io.IOException;
 import java.io.Serializable;
 
-public class HmuxClient
+public class HmuxBamClient extends AbstractBamConnection
 {
-  private static final L10N L = new L10N(HmuxClient.class);
+  private static final L10N L = new L10N(HmuxBamClient.class);
 
   private final ServerPool _pool;
 
-  private ExtSerializerFactory _extFactory;
+  private HmuxBamConnection _conn;
 
-  public HmuxClient(String serverId)
+  public HmuxBamClient(String serverId)
   {
     _pool = findClient(serverId);
 
@@ -62,11 +66,49 @@ public class HmuxClient
                                     serverId));
   }
 
-  public HmuxClient(String host,
+  public HmuxBamClient(String host,
 		    int port)
   {
     _pool = createClient(host, port);
   }
+
+  //
+  // SimpleBamConnection API
+  //
+
+  /**
+   * Returns the broker stream
+   */
+  public BamStream getBrokerStream()
+  {
+    try {
+      if (_conn == null) {
+	ClusterStream stream = _pool.open();
+
+	if (stream == null)
+	  throw new RuntimeException(this + " can't connect to " + _pool);
+      
+	_conn = new HmuxBamConnection(this, stream);
+      }
+    
+      return _conn;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  //
+  // BamStream API
+  //
+
+  /**
+   * Returns the client jid
+   */
+  public String getJid()
+  {
+    return _conn.getJid();
+  }
+
 
   //
   // ServerPool creation utilities
@@ -109,6 +151,26 @@ public class HmuxClient
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+  }
+
+  /**
+   * Close the client
+   */
+  public boolean isClosed()
+  {
+    return _conn == null;
+  }
+
+  /**
+   * Closes the connection
+   */
+  public void close()
+  {
+    HmuxBamConnection conn = _conn;
+    _conn = null;
+    
+    if (conn != null)
+      conn.close();
   }
 
   @Override

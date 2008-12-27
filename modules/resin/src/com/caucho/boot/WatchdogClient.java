@@ -29,9 +29,11 @@
 
 package com.caucho.boot;
 
+import com.caucho.bam.BamConnection;
 import com.caucho.config.*;
 import com.caucho.config.program.*;
 import com.caucho.server.admin.HessianHmuxProxy;
+import com.caucho.server.cluster.HmuxBamClient;
 import com.caucho.server.util.*;
 import com.caucho.util.*;
 import com.caucho.Version;
@@ -56,16 +58,19 @@ import java.util.logging.Logger;
  */
 class WatchdogClient
 {
-  private static final L10N L
-    = new L10N(WatchdogClient.class);
+  private static final L10N L = new L10N(WatchdogClient.class);
   private static final Logger log
     = Logger.getLogger(WatchdogClient.class.getName());
+
+  public static final String WATCHDOG_JID = "watchdog@admin.resin.caucho";
   
   private final BootResinConfig _bootManager;
   private String _id = "";
 
   private WatchdogConfig _config;
   private Watchdog _watchdog;
+
+  private BamConnection _conn;
   
   private Boot _jniBoot;
 
@@ -161,17 +166,34 @@ class WatchdogClient
     return _config.getShutdownWaitTime();
   }
 
+  public int startSingle()
+    throws IOException
+  {
+    if (_watchdog == null)
+      _watchdog = new Watchdog(_config);
+    
+    return _watchdog.startSingle();
+  }
+
+  //
+  // watchdog commands
+  //
+
   public String statusWatchdog()
     throws IOException
   {
-    WatchdogAPI watchdog = getProxy();
+    
+    BamConnection conn = getConnection();
 
     try {
-      return watchdog.status(getAdminCookie());
-    } catch (ConfigException e) {
-      throw e;
-    } catch (IllegalStateException e) {
-      throw e;
+      ResultStatus status = (ResultStatus)
+	conn.queryGet(WATCHDOG_JID, new WatchdogStatusQuery());
+
+      if (status.isSuccess())
+	return status.getMessage();
+      
+      throw new RuntimeException(L.l("{0}: watchdog status failed because of '{1}'",
+				     this, status.getMessage()));
     } catch (Exception e) {
       Throwable e1 = e;
       
@@ -195,18 +217,20 @@ class WatchdogClient
       throw new ConfigException(L.l("<group-name> requires compiled JNI.  Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin_os.so."));
     }
     
-    WatchdogAPI watchdog = getProxy();
+    BamConnection conn = getConnection();
 
     try {
-      watchdog.start(getAdminCookie(), argv);
+      ResultStatus status = (ResultStatus)
+	conn.querySet(WATCHDOG_JID, new WatchdogStartQuery(argv));
 
-      return;
-    } catch (ConfigException e) {
-      throw e;
-    } catch (IllegalStateException e) {
-      throw e;
-    } catch (ConnectException e) {
-      log.log(Level.FINER, e.toString(), e);
+      if (status.isSuccess())
+	return;
+      
+      throw new RuntimeException(L.l("{0}: watchdog start failed because of '{1}'",
+				     this, status.getMessage()));
+
+    } catch (RuntimeException e) {
+      System.out.println(e.toString());
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -215,20 +239,18 @@ class WatchdogClient
   }
 
   public void stopWatchdog()
-    throws IOException
   {
-    WatchdogAPI watchdog = getProxy();
+    BamConnection conn = getConnection();
 
     try {
-      watchdog.stop(getAdminCookie(), getId());
-    } catch (ConfigException e) {
+      ResultStatus status = (ResultStatus)
+	conn.querySet(WATCHDOG_JID, new WatchdogStopQuery(getId()));
+
+      if (! status.isSuccess())
+	throw new RuntimeException(L.l("{0}: watchdog start failed because of '{1}'",
+				       this, status.getMessage()));
+    } catch (RuntimeException e) {
       throw e;
-    } catch (IllegalStateException e) {
-      throw e;
-    } catch (IOException e) {
-      throw new IllegalStateException(L.l("Can't connect to ResinWatchdogManager.\n{1}",
-					  Version.VERSION, e.toString()),
-				      e);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -237,18 +259,17 @@ class WatchdogClient
   public void killWatchdog()
     throws IOException
   {
-    WatchdogAPI watchdog = getProxy();
+    BamConnection conn = getConnection();
 
     try {
-      watchdog.kill(getAdminCookie(), getId());
-    } catch (ConfigException e) {
+      ResultStatus status = (ResultStatus)
+	conn.querySet(WATCHDOG_JID, new WatchdogKillQuery(getId()));
+
+      if (! status.isSuccess())
+	throw new RuntimeException(L.l("{0}: watchdog kill failed because of '{1}'",
+				       this, status.getMessage()));
+    } catch (RuntimeException e) {
       throw e;
-    } catch (IllegalStateException e) {
-      throw e;
-    } catch (IOException e) {
-      throw new IllegalStateException(L.l("Can't connect to ResinWatchdogManager.\n{1}",
-					  Version.VERSION, e.toString()),
-				      e);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -272,48 +293,33 @@ class WatchdogClient
     startWatchdog(argv);
   }
 
-  public int startSingle()
-    throws IOException
-  {
-    if (_watchdog == null)
-      _watchdog = new Watchdog(_config);
-    
-    return _watchdog.startSingle();
-  }
-
   public boolean shutdown()
     throws IOException
   {
-    WatchdogAPI watchdog = getProxy();
+    BamConnection conn = getConnection();
 
     try {
-      return watchdog.shutdown(getAdminCookie());
-    } catch (ConfigException e) {
+      ResultStatus status = (ResultStatus)
+	conn.querySet(WATCHDOG_JID, new WatchdogShutdownQuery());
+
+      if (! status.isSuccess())
+	throw new RuntimeException(L.l("{0}: watchdog shutdown failed because of '{1}'",
+				       this, status.getMessage()));
+    } catch (RuntimeException e) {
       throw e;
-    } catch (IllegalStateException e) {
-      throw e;
-    } catch (IOException e) {
-      throw new IllegalStateException(L.l("Can't connect to ResinWatchdogManager.\n{1}",
-					  Version.VERSION, e.toString()),
-				      e);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
-
-      return false;
     }
-  }
-  private WatchdogAPI getProxy()
-  {
-    String url = ("hmux://" + getWatchdogAddress() + ":"
-		  + getWatchdogPort()
-		  + "/watchdog");
-    
-    HashMap<String,Object> attr = new HashMap<String,Object>();
-    attr.put("host", "resin-admin");
-    
-    Path path = Vfs.lookup(url, attr);
 
-    return HessianHmuxProxy.create(path, WatchdogAPI.class);
+    return true;
+  }
+  
+  private BamConnection getConnection()
+  {
+    if (_conn == null)
+      _conn = new HmuxBamClient(getWatchdogAddress(), getWatchdogPort());
+
+    return _conn;
   }
   
   public void launchManager(String []argv)

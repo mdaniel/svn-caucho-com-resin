@@ -52,6 +52,29 @@ abstract public class AbstractBamConnection implements BamConnection {
   protected AbstractBamConnection()
   {
   }
+  
+  //
+  // handlers
+  //
+
+  /**
+   * Registers the stream handler
+   */
+  public void setStreamHandler(BamStream handler)
+  {
+  }
+
+  /**
+   * Registers the stream handler
+   */
+  public BamStream getStreamHandler()
+  {
+    return null;
+  }
+
+  //
+  // bam messages
+  //
 
   /**
    * Sends a message to a given jid
@@ -274,6 +297,10 @@ abstract public class AbstractBamConnection implements BamConnection {
     stream.querySet(id, to, getJid(), value);
   }
 
+  //
+  // callbacks
+  //
+
   /**
    * Callback for the response
    */
@@ -301,6 +328,17 @@ abstract public class AbstractBamConnection implements BamConnection {
 
     if (item != null)
       item.onQueryError(to, from, value, error);
+  }
+
+  //
+  // lifecycle (close)
+  //
+
+  /**
+   * Closes the connection
+   */
+  public void close()
+  {
   }
 
   @Override

@@ -158,42 +158,11 @@ class WatchdogManager extends ProtocolDispatchServer {
 
     _dispatchServer = resin.createServer();
 
-    HostConfig hostConfig = new HostConfig();
-    hostConfig.setId("resin-admin");
+    WatchdogService service
+      = new WatchdogService(this, "watchdog@admin.resin.caucho");
 
-    hostConfig.init();
-    
-    _dispatchServer.addHost(hostConfig);
-    _dispatchServer.init();
-    _dispatchServer.start();
-
-    Host host = _dispatchServer.getHost("resin-admin", 0);
-
-    WebAppConfig webAppConfig = new WebAppConfig();
-    webAppConfig.setId("");
-    webAppConfig.setRootDirectory(new RawString("watchdog-manager"));
-
-    host.addWebApp(webAppConfig);
-
-    WebApp webApp = host.findWebAppByURI("/");
-
-    host.start();
-    
-    ServletMapping servlet = webApp.createServletMapping();
-
-    servlet.setServletName("watchdog");
-    servlet.addURLPattern("/watchdog");
-    servlet.setServletClass("com.caucho.boot.WatchdogServlet");
-    servlet.init();
-
-    webApp.addServletMapping(servlet);
-    try {
-      host.updateWebAppDeploy("/");
-    } catch (Throwable e) {
-      log().log(Level.WARNING, e.toString(), e);
-    }
-
-    webApp.start();
+    service.setBrokerStream(_dispatchServer.getAdminStream());
+    _dispatchServer.getAdminBroker().addService(service);
   }
 
   static WatchdogManager getWatchdog()
