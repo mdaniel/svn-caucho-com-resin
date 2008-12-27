@@ -105,6 +105,11 @@ public class RegexpState {
 
       int length = _subject.length();
 
+      if (_regexp._isAnchorBegin) {
+	if (_first + minLength <= length)
+	  length = _first + minLength;
+      }
+
       for (; _first + minLength <= length; _first++) {
 	if (firstSet != null && _first < length) {
 	  char firstChar = _subject.charAt(_first);
@@ -205,6 +210,9 @@ public class RegexpState {
       boolean []firstSet = _regexp._firstSet;
       int end = subject.length() - minLength;
       RegexpNode prog = _regexp._prog;
+
+      if (_regexp._isAnchorBegin)
+	end = start;
 
       for (; start <= end; start++) {
 	if (firstSet != null && (start < end || minLength > 0)) {

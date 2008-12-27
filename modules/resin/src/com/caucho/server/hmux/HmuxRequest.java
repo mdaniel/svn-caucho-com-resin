@@ -378,8 +378,6 @@ public class HmuxRequest extends AbstractHttpRequest
     try {
       boolean result = handleRequestImpl();
 
-      System.out.println("DONE:");
-
       return result;
     } catch (RuntimeException e) {
       e.printStackTrace();

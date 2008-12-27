@@ -272,6 +272,21 @@ abstract public class Cluster
   /**
    * Finds the first server with the given server-id.
    */
+  public ClusterServer findServerByPrefix(String prefix)
+  {
+    for (ClusterTriad triad : getTriadList()) {
+      ClusterServer server = triad.findServerByPrefix(prefix);
+
+      if (server != null)
+        return server;
+    }
+
+    return null;
+  }
+
+  /**
+   * Finds the first server with the given server-id.
+   */
   public ClusterServer findServer(String address, int port)
   {
     for (ClusterTriad triad : getTriadList()) {

@@ -330,6 +330,22 @@ public class Resin implements EnvironmentBean, SchemaBean
   }
 
   /**
+   * Creates a new Resin instance
+   */
+  public static Resin createOpenSource()
+  {
+    return createOpenSource(Thread.currentThread().getContextClassLoader());
+  }
+
+  /**
+   * Creates a new Resin instance
+   */
+  public static Resin createOpenSource(ClassLoader loader)
+  {
+    return new Resin(loader, null);
+  }
+
+  /**
    * Returns the resin server.
    */
   public static Resin getLocal()

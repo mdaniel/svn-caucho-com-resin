@@ -113,16 +113,10 @@ public class FileCacheManager extends DistributedCacheManager
    */
   public Object get(HashKey key, CacheConfig config)
   {
-    CacheMapEntry entry = _entryCache.get(key);
+    CacheMapEntry entry = getLocalEntry(key);
 
-    if (entry == null) {
-      entry = _cacheMapBacking.load(key);
-
-      CacheMapEntry oldEntry = _entryCache.putIfNew(key, entry);
-
-      if (entry.getVersion() < oldEntry.getVersion())
-	entry = oldEntry;
-    }
+    if (entry == null)
+      return null;
     
     Object value = entry.getValue();
 
@@ -130,6 +124,9 @@ public class FileCacheManager extends DistributedCacheManager
       return value;
 
     HashKey valueHash = entry.getValueHashKey();
+
+    if (valueHash == null)
+      return null;
 
     value = readData(valueHash, config.getValueSerializer());
 
@@ -255,6 +252,25 @@ public class FileCacheManager extends DistributedCacheManager
     }
 
     return oldValueHash != null;
+  }
+  
+  CacheMapEntry getLocalEntry(HashKey key)
+  {
+    CacheMapEntry entry = _entryCache.get(key);
+
+    if (entry == null) {
+      entry = _cacheMapBacking.load(key);
+
+      if (entry == null)
+	return null;
+
+      CacheMapEntry oldEntry = _entryCache.putIfNew(key, entry);
+
+      if (entry.getVersion() < oldEntry.getVersion())
+	entry = oldEntry;
+    }
+
+    return entry;
   }
 
   protected HashKey writeData(HashKey oldValueHash,

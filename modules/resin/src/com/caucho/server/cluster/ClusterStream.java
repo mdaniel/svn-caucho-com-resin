@@ -401,6 +401,15 @@ public class ClusterStream {
   }
 
   /**
+   * Flush to the target
+   */
+  public void flush()
+    throws IOException
+  {
+    _os.flush();
+  }
+
+  /**
    * Writes a hmux int to the target.
    */
   public void writeInt(int code, int value)

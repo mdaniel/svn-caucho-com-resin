@@ -227,6 +227,11 @@ class RegexpNode {
     return null;
   }
 
+  boolean isAnchorBegin()
+  {
+    return false;
+  }
+
   RegexpNode getTail()
   {
     return this;
@@ -363,6 +368,12 @@ class RegexpNode {
     = new AnchorEndOrNewline();
   
   static class AnchorBegin extends NullableNode {
+    @Override
+    boolean isAnchorBegin()
+    {
+      return true;
+    }
+    
     @Override
     int match(StringValue string, int length, int offset, RegexpState state)
     {
@@ -805,6 +816,12 @@ class RegexpNode {
     {
       return _head.prefix();
     }
+    
+    @Override
+    boolean isAnchorBegin()
+    {
+      return _head.isAnchorBegin();
+    }
 
     RegexpNode getConcatHead()
     {
@@ -1114,6 +1131,12 @@ class RegexpNode {
     String prefix()
     {
       return _node.prefix();
+    }
+    
+    @Override
+    boolean isAnchorBegin()
+    {
+      return _node.isAnchorBegin();
     }
     
     @Override
@@ -1781,6 +1804,12 @@ class RegexpNode {
       firstSet = _right.firstSet(firstSet);
 
       return firstSet;
+    }
+    
+    @Override
+    boolean isAnchorBegin()
+    {
+      return _left.isAnchorBegin() && _right.isAnchorBegin();
     }
 
     @Override

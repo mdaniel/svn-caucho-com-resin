@@ -57,10 +57,12 @@ public class Regexp {
   int _nGroup;
   
   // optim stuff
+  
   CharBuffer _prefix; // initial string
   int _minLength; // minimum length possible for this regexp
   int _firstChar;
   boolean []_firstSet;
+  boolean _isAnchorBegin;
 
   StringValue []_groupNames;
   
@@ -194,6 +196,10 @@ public class Regexp {
   {
     _ignoreCase = (comp._flags & Regcomp.IGNORE_CASE) != 0;
     _isGlobal = (comp._flags & Regcomp.GLOBAL) != 0;
+    _isAnchorBegin = (comp._flags & Regcomp.ANCHORED) != 0;
+
+    if (prog.isAnchorBegin())
+      _isAnchorBegin = true;
 
     /*
     if (_ignoreCase)
@@ -214,7 +220,8 @@ public class Regexp {
     _nLoop = comp._nLoop;
     
     _groupNames = new StringValue[_nGroup + 1];
-    for (Map.Entry<Integer,StringValue> entry : comp._groupNameMap.entrySet()) {
+    for (Map.Entry<Integer,StringValue> entry
+	   : comp._groupNameMap.entrySet()) {
       StringValue groupName = entry.getValue();
 
       if (_isUnicode) {

@@ -70,6 +70,11 @@ public class ClusterServer {
 
   private boolean _isDynamic;
 
+  // unique identifier for the server within the cluster
+  private String _serverClusterId;
+  // unique identifier for the server within all Resin clusters
+  private String _serverDomainId;
+  // the bam admin name
   private String _bamJid;
   
   private ClusterPort _clusterPort;
@@ -108,6 +113,22 @@ public class ClusterServer {
 
     _clusterPort = new ClusterPort(this);
     _ports.add(_clusterPort);
+    
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(convert(getIndex()));
+    sb.append(convert(getClusterTriad().getIndex()));
+    sb.append(convert(getClusterTriad().getIndex() / 64));
+
+    _serverClusterId = sb.toString();
+      
+    String clusterId = _cluster.getId();
+    if (clusterId.equals(""))
+      clusterId = "default";
+      
+    _serverDomainId = _serverClusterId + "." + clusterId.replace('.', '_');
+
+    _bamJid = _serverDomainId + ".admin.resin";
   }
 
   /**
@@ -127,25 +148,26 @@ public class ClusterServer {
   }
 
   /**
+   * Returns the server's id within the cluster
+   */
+  public String getServerClusterId()
+  {
+    return _serverClusterId;
+  }
+
+  /**
+   * Returns the server's id within all Resin clusters
+   */
+  public String getServerDomainId()
+  {
+    return _serverDomainId;
+  }
+
+  /**
    * Returns the bam name
    */
   public String getBamAdminName()
   {
-    if (_bamJid == null) {
-      StringBuilder sb = new StringBuilder();
-      
-      String clusterId = _cluster.getId();
-      if (clusterId.equals(""))
-	clusterId = "default";
-      
-      sb.append(clusterId.replace('.', '_'));
-      sb.append('.');
-      sb.append(getIndex());
-      sb.append(".resin.admin");
-
-      _bamJid = sb.toString();
-    }
-    
     return _bamJid;
   }
 
@@ -210,7 +232,7 @@ public class ClusterServer {
   */
 
   /**
-   * Returns the server index.
+   * Returns the server index within the triad.
    */
   public int getIndex()
   {
@@ -687,9 +709,7 @@ public class ClusterServer {
    */
   public void generateIdPrefix(StringBuilder cb)
   {
-    cb.append(convert(getIndex()));
-    cb.append(convert(getClusterTriad().getIndex()));
-    cb.append(convert(getClusterTriad().getIndex() / 64));
+    cb.append(getServerClusterId());
   }
 
   //
