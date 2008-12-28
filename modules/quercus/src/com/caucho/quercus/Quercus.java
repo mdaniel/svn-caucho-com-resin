@@ -127,7 +127,8 @@ public class Quercus
   private Value []_constantNameList = new Value[256];
   private Value []_constantMap = new Value[256];
 
-  private IntMap _functionNameMap = new IntMap(8192);
+  // protected to allow locking from pro
+  protected IntMap _functionNameMap = new IntMap(8192);
   
   private AbstractFunction []_functionMap = new AbstractFunction[256];
 
@@ -258,6 +259,11 @@ public class Quercus
   public String getVersionDate()
   {
     return "20070628T2777";
+  }
+
+  public boolean isProfile()
+  {
+    return false;
   }
 
   protected PageManager createPageManager()
@@ -1125,18 +1131,23 @@ public class Quercus
 
         _functionNameMap.put(name, id);
 
-        if (_functionMap.length <= id) {
-          AbstractFunction []functionMap = new AbstractFunction[id + 256];
-          System.arraycopy(_functionMap, 0,
-			   functionMap, 0, _functionMap.length);
-          _functionMap = functionMap;
-        }
-
-        _functionMap[id] = new UndefinedFunction(name);
+	extendFunctionMap(name, id);
       }
 
       return id;
     }
+  }
+
+  protected void extendFunctionMap(String name, int id)
+  {
+    if (_functionMap.length <= id) {
+      AbstractFunction []functionMap = new AbstractFunction[id + 256];
+      System.arraycopy(_functionMap, 0,
+		       functionMap, 0, _functionMap.length);
+      _functionMap = functionMap;
+    }
+
+    _functionMap[id] = new UndefinedFunction(name);
   }
 
   /**
@@ -1169,7 +1180,7 @@ public class Quercus
 
   public int setFunction(String name, AbstractFunction fun)
   {
-    int id = findFunctionId(name);
+    int id = getFunctionId(name);
     
     synchronized (_functionNameMap) {
       _functionMap[id] = fun;
@@ -1535,8 +1546,7 @@ public class Quercus
       _funMap.put(funName, fun);
       _lowerFunMap.put(funName.toLowerCase(), fun);
 
-      int id = getFunctionId(funName);
-      _functionMap[id] = fun;
+      setFunction(funName, fun);
     }
   }
 

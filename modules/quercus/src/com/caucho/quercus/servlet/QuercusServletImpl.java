@@ -86,6 +86,13 @@ public class QuercusServletImpl
     getQuercus().init();
   }
 
+  /**
+   * Sets the profiling mode
+   */
+  public void setProfile(String profile)
+  {
+  }
+
   /*
    * Makes sure the servlet container supports Servlet API 2.4+.
    */
@@ -164,7 +171,7 @@ public class QuercusServletImpl
           }
         }
 
-        page.executeTop(env);
+        env.executeTop();
 
         String append = env.getIniString("auto_append_file");
         if (append != null) {

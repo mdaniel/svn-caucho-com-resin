@@ -323,6 +323,25 @@ public class JavaClassGenerator {
 
     compiler.compile(fullClassName.replace('.', '/') + ".java", null);
   }
+
+  /**
+   * Returns the pending Java files.
+   */
+  public String []getPendingFiles()
+  {
+    String []files = new String[_pendingFiles.size()];
+    _pendingFiles.toArray(files);
+    _pendingFiles.clear();
+
+    return files;
+  }
+
+  public void addPendingFiles(String []files)
+  {
+    for (String file : files) {
+      _pendingFiles.add(file);
+    }
+  }
   
   /**
    * Compiles the pending files

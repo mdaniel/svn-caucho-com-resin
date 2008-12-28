@@ -45,14 +45,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Represents a compiled Quercus program.
  */
 public class QuercusProgram {
+  private static final Logger log
+    = Logger.getLogger(QuercusProgram.class.getName());
+  
   private Quercus _quercus;
 
   private QuercusPage _compiledPage;
+  private QuercusPage _profilePage;
   
   private Path _sourceFile;
   
@@ -166,11 +171,46 @@ public class QuercusProgram {
   }
   
   /*
+   * Start compiling
+   */
+  public boolean startCompiling()
+  {
+    synchronized (this) {
+      if (_isCompiling)
+	return false;
+      
+      _isCompiling = true;
+
+      return true;
+    }
+  }
+  
+  /*
    * Set to true if this page is being compiled.
    */
-  public void setCompiling(boolean isCompiling)
+  public void finishCompiling()
   {
-    _isCompiling = isCompiling;
+    synchronized (this) {
+      _isCompiling = false;
+
+      notifyAll();
+    }
+  }
+  
+  /*
+   * Set to true if this page is being compiled.
+   */
+  public void waitForCompile()
+  {
+    synchronized (this) {
+      if (_isCompiling) {
+	try {
+	  wait(120000);
+	} catch (Exception e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
+      }
+    }
   }
   
   /*
@@ -237,6 +277,22 @@ public class QuercusProgram {
   public void setCompiledPage(QuercusPage page)
   {
     _compiledPage = page;
+  }
+
+  /**
+   * Returns the profiling page.
+   */
+  public QuercusPage getProfilePage()
+  {
+    return _profilePage;
+  }
+
+  /**
+   * Sets the profiling page.
+   */
+  public void setProfilePage(QuercusPage page)
+  {
+    _profilePage = page;
   }
 
   /**

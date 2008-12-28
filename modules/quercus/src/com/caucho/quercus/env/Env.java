@@ -165,6 +165,7 @@ public class Env {
     = new FreeList<Value[]>(256);
 
   protected final Quercus _quercus;
+  
   private QuercusPage _page;
 
   private HashMap<String,Value> _scriptGlobalMap
@@ -324,7 +325,7 @@ public class Env {
     // XXX: grab initial from page
     // _defState = new DefinitionState(quercus);
 
-    AbstractFunction []defFuns = quercus.getFunctionMap();
+    AbstractFunction []defFuns = getDefaultFunctionMap();
     _fun = _freeFunList.allocate();
     if (_fun == null || _fun.length != defFuns.length)
       _fun = new AbstractFunction[defFuns.length];
@@ -364,9 +365,7 @@ public class Env {
     _response = response;
 
     if (_page != null) {
-      _page.init(this);
-
-      _page.importDefinitions(this);
+      pageInit(_page);
     }
 
     setPwd(_quercus.getPwd());
@@ -429,6 +428,21 @@ public class Env {
     return getCurrent();
   }
 
+  protected AbstractFunction []getDefaultFunctionMap()
+  {
+    return getQuercus().getFunctionMap();
+  }
+
+  /**
+   * Initialize the page, loading any functions and classes
+   */
+  protected void pageInit(QuercusPage page)
+  {
+    page.init(this);
+
+    page.importDefinitions(this);
+  }
+  
   //
   // script accessible methods
   //
@@ -2838,6 +2852,10 @@ public class Env {
 
     return _defaultStreamContext;
   }
+
+  //
+  // function handling
+  //
   
   public ArrayValue getDefinedFunctions()
   {
@@ -3058,6 +3076,10 @@ public class Env {
     return BooleanValue.TRUE;
   }
 
+  //
+  // method handling
+  //
+
   /**
    * Finds the java reflection method for the function with the given name.
    *
@@ -3085,10 +3107,14 @@ public class Env {
     return fun;
   }
 
+  //
+  // evaluation
+  //
+  
   /**
-   * Compiles and calluates the given code
+   * Compiles and evalutes the given code
    *
-   * @param code the code to calluate
+   * @param code the code to evalute
    * @return the result
    */
   public Value evalCode(String code)
@@ -3108,7 +3134,61 @@ public class Env {
     else
       return value;
   }
+  
+  /**
+   * Evaluates the top-level code
+   *
+   * @return the result
+   */
+  public Value executeTop()
+  {
+    Path oldPwd = getPwd();
 
+    Path pwd = _page.getPwd(this);
+
+    setPwd(pwd);
+    try {
+      return executePage(_page);
+    } catch (QuercusLanguageException e) {
+      if (getExceptionHandler() != null) {
+        try {
+          getExceptionHandler().call(this, e.getValue());
+        }
+        catch (QuercusLanguageException e2) {
+          uncaughtExceptionError(e2);
+        }
+      }
+      else {
+        uncaughtExceptionError(e);
+      }
+      
+      return NullValue.NULL;
+    } finally {
+      setPwd(oldPwd);
+    }
+  }
+
+  /*
+   * Throws an error for this uncaught exception.
+   */
+  private void uncaughtExceptionError(QuercusLanguageException e)
+  {
+    Location location = e.getLocation(this);
+    String type = e.getValue().getClassName();
+    String message = e.getMessage(this);
+    
+    error(location,
+	  L.l("Uncaught exception of type '{0}' with message '{1}'", type, message));
+  }
+
+  /**
+   * Executes the given page
+   */
+  protected Value executePage(QuercusPage page)
+  {
+    return page.execute(this);
+  }
+  
   /**
    * Evaluates the named function.
    *
@@ -3124,6 +3204,10 @@ public class Env {
 
     return fun.call(this);
   }
+
+  //
+  // function calls (obsolete?)
+  //
 
   /**
    * Evaluates the named function.
@@ -5853,7 +5937,7 @@ public class Env {
 
   public String dbgId()
   {
-    return "Quercus[" + _selfPath + "] ";
+    return getClass().getSimpleName() + "[" + _selfPath + "] ";
   }
   
   static class FieldGetEntry {

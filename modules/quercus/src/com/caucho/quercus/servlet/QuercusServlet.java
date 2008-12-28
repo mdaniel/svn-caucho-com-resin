@@ -176,6 +176,15 @@ public class QuercusServlet
   }
 
   /**
+   * Set true if quercus should be compiled into Java.
+   */
+  public void setProfile(String profile)
+    throws ConfigException
+  {
+    _impl.setProfile(profile);
+  }
+
+  /**
    * Set true if the source php is required
    */
   public void setRequireSource(boolean isRequireSource)

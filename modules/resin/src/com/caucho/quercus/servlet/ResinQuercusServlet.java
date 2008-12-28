@@ -149,7 +149,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
           }
         }
 
-        page.executeTop(env);
+        env.executeTop();
 
         String append = env.getIniString("auto_append_file");
         if (append != null) {

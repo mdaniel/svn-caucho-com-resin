@@ -1809,7 +1809,7 @@ class RegexpNode {
     @Override
     boolean isAnchorBegin()
     {
-      return _left.isAnchorBegin() && _right.isAnchorBegin();
+      return _left.isAnchorBegin() && _right != null && _right.isAnchorBegin();
     }
 
     @Override

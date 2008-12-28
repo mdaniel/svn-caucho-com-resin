@@ -250,6 +250,14 @@ abstract public class AbstractFunction {
   }
 
   /**
+   * For lazy functions, returns the actual function
+   */
+  public AbstractFunction toFun()
+  {
+    return this;
+  }
+
+  /**
    * Returns the actual function
    */
   public AbstractFunction getActualFunction(int actualArgs)

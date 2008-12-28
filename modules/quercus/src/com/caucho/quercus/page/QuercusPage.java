@@ -68,6 +68,14 @@ abstract public class QuercusPage
   }
 
   /**
+   * Returns the profiling page, if any
+   */
+  public QuercusPage getProfilePage()
+  {
+    return null;
+  }
+
+  /**
    * Returns the page's path.
    */
   abstract public Path getSelfPath(Env env);
