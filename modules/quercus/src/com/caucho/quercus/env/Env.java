@@ -3148,7 +3148,7 @@ public class Env {
 
     setPwd(pwd);
     try {
-      return executePage(_page);
+      return executePageTop(_page);
     } catch (QuercusLanguageException e) {
       if (getExceptionHandler() != null) {
         try {
@@ -3186,7 +3186,21 @@ public class Env {
    */
   protected Value executePage(QuercusPage page)
   {
-    return page.execute(this);
+    if (page.getCompiledPage() != null)
+      return page.getCompiledPage().execute(this);
+    else
+      return page.execute(this);
+  }
+
+  /**
+   * Executes the given page
+   */
+  protected Value executePageTop(QuercusPage page)
+  {
+    if (page.getCompiledPage() != null)
+      return page.getCompiledPage().execute(this);
+    else
+      return page.execute(this);
   }
   
   /**
@@ -4517,15 +4531,13 @@ public class Env {
         return BooleanValue.TRUE;
       else if (page == null || page.isModified()) {
         page = _quercus.parse(path);
-        
-        page.init(this);
-        
-        page.importDefinitions(this);
+
+	pageInit(page);
         
         _includeMap.put(path, page);
       }
 
-      return page.execute(this);
+      return executePage(page);
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }

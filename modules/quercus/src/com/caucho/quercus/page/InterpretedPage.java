@@ -69,6 +69,15 @@ public class InterpretedPage extends QuercusPage
   {
     return _program.getProfilePage();
   }
+
+  /**
+   * Returns any profile page.
+   */
+  @Override
+  public QuercusPage getCompiledPage()
+  {
+    return _program.getCompiledPage();
+  }
   
   /**
    * Execute the program

@@ -58,6 +58,14 @@ public class RandomUtil {
   }
 
   /**
+   * Returns the next random double between 0 and 1
+   */
+  public synchronized static double nextDouble()
+  {
+    return getRandom().nextDouble();
+  }
+
+  /**
    * Adds a random number based on a string.
    */
   public static void addRandom(String random)

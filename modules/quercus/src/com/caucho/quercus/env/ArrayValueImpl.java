@@ -609,6 +609,9 @@ public class ArrayValueImpl extends ArrayValue
    */
   public Value createTailKey()
   {
+    if (_nextAvailableIndex < 0)
+      updateNextAvailableIndex();
+    
     return LongValue.create(_nextAvailableIndex);
   }
 
@@ -763,7 +766,7 @@ public class ArrayValueImpl extends ArrayValue
 	Value value = entry.getValue();
 
 	if (key.nextIndex(-1) == _nextAvailableIndex) {
-	  updateNextAvailableIndex();
+	  _nextAvailableIndex = -1;
 	}
 
 	return value;
@@ -827,7 +830,8 @@ public class ArrayValueImpl extends ArrayValue
     _size++;
 
     Entry newEntry = new Entry(key);
-    _nextAvailableIndex = key.nextIndex(_nextAvailableIndex);
+    if (_nextAvailableIndex >= 0)
+      _nextAvailableIndex = key.nextIndex(_nextAvailableIndex);
 
     Entry head = _entries[hash];
 
@@ -880,7 +884,8 @@ public class ArrayValueImpl extends ArrayValue
     entry._nextHash = head;
 
     _entries[hash] = entry;
-    _nextAvailableIndex = entry._key.nextIndex(_nextAvailableIndex);
+    if (_nextAvailableIndex >= 0)
+      _nextAvailableIndex = entry._key.nextIndex(_nextAvailableIndex);
     entry._index = hash;
   }
 
@@ -904,11 +909,8 @@ public class ArrayValueImpl extends ArrayValue
     if (_isDirty)
       copyOnWrite();
     
-    if (_tail != null) {
-      Value value = remove(_tail._key);
-      
-      return value;
-    }
+    if (_tail != null)
+      return remove(_tail._key);
     else
       return BooleanValue.FALSE;
   }

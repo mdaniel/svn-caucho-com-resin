@@ -89,7 +89,7 @@ public class QuercusServletImpl
   /**
    * Sets the profiling mode
    */
-  public void setProfile(String profile)
+  public void setProfileProbability(double probability)
   {
   }
 

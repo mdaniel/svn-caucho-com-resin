@@ -30,12 +30,15 @@
 package com.caucho.quercus.profile;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Report for a method (function)
  */
 public class ProfileMethod
 {
+  private final int _id;
   private final String _name;
   
   private long _count;
@@ -46,9 +49,18 @@ public class ProfileMethod
   private ArrayList<ProfileItem> _parentList = new ArrayList<ProfileItem>();
   private ArrayList<ProfileItem> _childList = new ArrayList<ProfileItem>();
 
-  public ProfileMethod(String name)
+  public ProfileMethod(int id, String name)
   {
+    _id = id;
     _name = name;
+  }
+
+  /**
+   * Returns the method's id.
+   */
+  public int getId()
+  {
+    return _id;
   }
 
   /**
@@ -92,11 +104,37 @@ public class ProfileMethod
   }
 
   /**
+   * Returns the parent items, sorted by micros.
+   */
+  public ArrayList<ProfileItem> getParentItemsByMicros()
+  {
+    ArrayList<ProfileItem> parentList
+      = new ArrayList<ProfileItem>(_parentList);
+
+    Collections.sort(parentList, new ItemMicrosComparator());
+    
+    return parentList;
+  }
+
+  /**
    * Returns the child items.
    */
   public ArrayList<ProfileItem> getChildItems()
   {
     return _childList;
+  }
+
+  /**
+   * Returns the child items, sorted by micros.
+   */
+  public ArrayList<ProfileItem> getChildItemsByMicros()
+  {
+    ArrayList<ProfileItem> childList
+      = new ArrayList<ProfileItem>(_childList);
+
+    Collections.sort(childList, new ItemMicrosComparator());
+    
+    return childList;
   }
 
   /**
@@ -130,6 +168,20 @@ public class ProfileMethod
 	    + ",self-micros=" + _selfMicros
 	    + ",total-micros=" + _totalMicros
 	    + "]");
+  }
+
+  static class ItemMicrosComparator implements Comparator<ProfileItem> {
+    public int compare(ProfileItem a, ProfileItem b)
+    {
+      long delta = b.getMicros() - a.getMicros();
+
+      if (delta == 0)
+	return 0;
+      else if (delta < 0)
+	return -1;
+      else
+	return 1;
+    }
   }
 }
 

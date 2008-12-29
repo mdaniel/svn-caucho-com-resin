@@ -176,12 +176,12 @@ public class QuercusServlet
   }
 
   /**
-   * Set true if quercus should be compiled into Java.
+   * Sets the frequency of profiling, expressed as a probability.
    */
-  public void setProfile(String profile)
+  public void setProfileProbability(double probability)
     throws ConfigException
   {
-    _impl.setProfile(profile);
+    _impl.setProfileProbability(probability);
   }
 
   /**

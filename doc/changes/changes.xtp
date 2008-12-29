@@ -13,6 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>quercus: add profile-probability="0.001" to QuercusServlet (#3200, rep by koreth)</li>
 <li>quercus: NPE for preg_match and "/^x|^x/" (#3198, rep by koreth)</li>
 <li>security: add WebBeans-style configuration, e.g. &lt;sec:FormLogin>, &lt;sec:XmlAuthenticator</li>
 <li>session: convert to TriplicateCache</li>

@@ -225,7 +225,9 @@ public class QuercusParser {
     _scope = _globalScope;
   }
 
-  public QuercusParser(Quercus quercus, Path sourceFile, ReadStream is)
+  public QuercusParser(Quercus quercus,
+		       Path sourceFile,
+		       ReadStream is)
   {
     this(quercus);
 

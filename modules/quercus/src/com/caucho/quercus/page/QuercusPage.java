@@ -59,6 +59,8 @@ abstract public class QuercusPage
   private HashMap<String,ClassDef> _classMap
     = new HashMap<String,ClassDef>();
 
+  private QuercusPage _profilePage;
+
   /**
    * Returns true if the page is modified.
    */
@@ -68,11 +70,35 @@ abstract public class QuercusPage
   }
 
   /**
+   * Returns the compiling page, if any
+   */
+  public QuercusPage getCompiledPage()
+  {
+    return null;
+  }
+
+  /**
+   * Returns the user name for profiling, if any
+   */
+  public String getUserPath()
+  {
+    return null;
+  }
+
+  /**
    * Returns the profiling page, if any
    */
   public QuercusPage getProfilePage()
   {
-    return null;
+    return _profilePage;
+  }
+
+  /**
+   * Sets the profiling page, if any
+   */
+  public void setProfilePage(QuercusPage profilePage)
+  {
+    _profilePage = profilePage;
   }
 
   /**

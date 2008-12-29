@@ -29,8 +29,10 @@
 
 package com.caucho.quercus.profile;
 
+import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
+import java.io.OutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,18 +45,55 @@ import java.util.HashMap;
  */
 public class ProfileReport
 {
+  private long _id;
+  
   private String _url;
-  private long _time;
+  private long _timestamp;
 
   private ArrayList<ProfileItem> _itemList = new ArrayList<ProfileItem>();
 
   private HashMap<String,ProfileMethod> _methodMap
     = new HashMap<String,ProfileMethod>();
 
-  public ProfileReport(String url, long time)
+  private long _totalMicros;
+
+  public ProfileReport(long id, String url, long timestamp)
   {
+    _id = id;
     _url = url;
-    _time = time;
+    _timestamp = timestamp;
+  }
+
+  /**
+   * Returns the report id
+   */
+  public long getId()
+  {
+    return _id;
+  }
+
+  /**
+   * Returns the url
+   */
+  public String getUrl()
+  {
+    return _url;
+  }
+
+  /**
+   * Returns the time
+   */
+  public long getTimestamp()
+  {
+    return _timestamp;
+  }
+
+  /**
+   * Returns the total time in microseconds
+   */
+  public long getTotalMicros()
+  {
+    return _totalMicros;
   }
 
   /**
@@ -66,29 +105,93 @@ public class ProfileReport
   }
 
   /**
+   * Returns the list of methods, sorted by self.
+   */
+  public ArrayList<ProfileMethod> getMethods()
+  {
+    ArrayList<ProfileMethod> methodList
+      = new ArrayList<ProfileMethod>(_methodMap.values());
+
+    return methodList;
+  }
+
+  /**
+   * Returns the list of methods, sorted by self.
+   */
+  public ArrayList<ProfileMethod> getMethodsBySelfMicros()
+  {
+    ArrayList<ProfileMethod> methodList
+      = new ArrayList<ProfileMethod>(_methodMap.values());
+
+    Collections.sort(methodList, new SelfMicrosComparator());
+
+    return methodList;
+  }
+
+  /**
    * Adds a profile item.
    */
   public void addItem(String name, String parent, long count, long micros)
   {
     ProfileItem item = new ProfileItem(name, parent, count, micros);
-
     _itemList.add(item);
 
     ProfileMethod method = getMethod(name);
     method.addParent(item);
 
-    if (! "__undefined__".equals(parent)) {
+    if ("__top__".equals(name)) {
+      _totalMicros = item.getMicros();
+    }
+    else {
       ProfileMethod parentMethod = getMethod(parent);
       parentMethod.addChild(item);
     }
   }
 
   /**
+   * Returns the method by its id.
+   */
+  public ProfileMethod findMethodByIndex(int id)
+  {
+    for (ProfileMethod method : _methodMap.values()) {
+      if (id == method.getId())
+	return method;
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns the method by its name.
+   */
+  public ProfileMethod findMethodByName(String name)
+  {
+    return _methodMap.get(name);
+  }
+
+  /**
+   * Returns the ProfileMethod for the given method name
+   */
+  protected ProfileMethod getMethod(String name)
+  {
+    ProfileMethod method = _methodMap.get(name);
+
+    if (method == null) {
+      method = new ProfileMethod(_methodMap.size(), name);
+      _methodMap.put(name, method);
+    }
+
+    return method;
+  }
+
+  /**
    * Printable flat report
    */
-  public void printHotSpotReport(WriteStream out)
+  public void printHotSpotReport(OutputStream os)
     throws IOException
   {
+    WriteStream out = Vfs.openWrite(os);
+    
     ArrayList<ProfileMethod> methodList
       = new ArrayList<ProfileMethod>(_methodMap.values());
 
@@ -107,7 +210,7 @@ public class ProfileReport
     }
 
     out.println();
-    out.println("Hot Spot Profile: " + _url + " at " + new Date(_time));
+    out.println("Hot Spot Profile: " + _url + " at " + new Date(_timestamp));
     out.println();
     out.println(" self(us)  total(us)  count   %time     %sum   name");
     out.println("----------------------------------------------------");
@@ -130,14 +233,17 @@ public class ProfileReport
     }
 
     out.println();
+    out.close();
   }
 
   /**
    * Printable hierarchy report
    */
-  public void printHierarchyReport(WriteStream out)
+  public void printHierarchyReport(OutputStream os)
     throws IOException
   {
+    WriteStream out = Vfs.openWrite(os);
+    
     ArrayList<ProfileMethod> methodList
       = new ArrayList<ProfileMethod>(_methodMap.values());
 
@@ -147,7 +253,7 @@ public class ProfileReport
     int maxNameLength = 0;
 
     out.println();
-    out.println("Hierarchy: " + _url + " at " + new Date(_time));
+    out.println("Hierarchy: " + _url + " at " + new Date(_timestamp));
     out.println();
     out.println(" total(us)  self(us)  count   %time     %sum   name");
     out.println("----------------------------------------------------");
@@ -164,6 +270,8 @@ public class ProfileReport
 
       ArrayList<ProfileItem> parentList
 	= new ArrayList<ProfileItem>(method.getParentItems());
+
+      Collections.sort(parentList, new ItemMicrosComparator());
 
       for (ProfileItem item : parentList) {
 	out.print("        ");
@@ -188,6 +296,8 @@ public class ProfileReport
       ArrayList<ProfileItem> childList
 	= new ArrayList<ProfileItem>(method.getChildItems());
 
+      Collections.sort(childList, new ItemMicrosComparator());
+      
       for (ProfileItem item : childList) {
 	out.print("        ");
 	out.print(String.format(" %7dus", item.getMicros()));
@@ -201,21 +311,8 @@ public class ProfileReport
     }
 
     out.println();
-  }
 
-  /**
-   * Returns the ProfileMethod for the given method name
-   */
-  protected ProfileMethod getMethod(String name)
-  {
-    ProfileMethod method = _methodMap.get(name);
-
-    if (method == null) {
-      method = new ProfileMethod(name);
-      _methodMap.put(name, method);
-    }
-
-    return method;
+    out.close();
   }
 
   @Override
@@ -242,6 +339,20 @@ public class ProfileReport
     public int compare(ProfileMethod a, ProfileMethod b)
     {
       long delta = b.getTotalMicros() - a.getTotalMicros();
+
+      if (delta == 0)
+	return 0;
+      else if (delta < 0)
+	return -1;
+      else
+	return 1;
+    }
+  }
+
+  static class ItemMicrosComparator implements Comparator<ProfileItem> {
+    public int compare(ProfileItem a, ProfileItem b)
+    {
+      long delta = b.getMicros() - a.getMicros();
 
       if (delta == 0)
 	return 0;
