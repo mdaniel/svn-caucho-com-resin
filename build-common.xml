@@ -79,7 +79,7 @@
     <condition property="maven.version" value="${version}">
       <isset property="version"/>
     </condition>
-    <property name="maven.version" value="3.2-SNAPSHOT"/>
+    <property name="maven.version" value="4.0-SNAPSHOT"/>
     
     <condition property="maven.metadata.template" value="release">
       <isset property="version"/>
@@ -92,7 +92,7 @@
     <property name="maven.m2" value="m2-snapshot"/>
     <property name="maven.root" value="${dist}/${maven.m2}"/>
     
-    <property name="version" value="3.2.s${snapshotdate}"/>
+    <property name="version" value="4.0.s${snapshotdate}"/>
     <property name="dist.name" value="${shortproduct}-${version}"/>
 
     <mkdir dir="${build}"/>
