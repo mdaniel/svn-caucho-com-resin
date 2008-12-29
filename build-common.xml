@@ -907,22 +907,22 @@
       </fileset>
     </jar>
 
-    <copy tofile="${dist}/quercus-3_2-snap.war"
+    <copy tofile="${dist}/quercus-4_0-snap.war"
           file="${dist}/quercus-${version}.war"/>
 
-    <copy tofile="${dist}/quercus-3_2-snap-src.jar"
+    <copy tofile="${dist}/quercus-4_0-snap-src.jar"
           file="${dist}/quercus-${version}-src.jar"/>
 
-    <copy tofile="${dist}/${shortproduct}-3_2-snap.zip"
+    <copy tofile="${dist}/${shortproduct}-4_0-snap.zip"
           file="${dist}/${shortproduct}-${version}.zip"/>
 
-    <copy tofile="${dist}/${shortproduct}-3_2-snap.tar.gz"
+    <copy tofile="${dist}/${shortproduct}-4_0-snap.tar.gz"
           file="${dist}/${shortproduct}-${version}.tar.gz"/>
 
-    <copy tofile="${dist}/${shortproduct}-3_2-snap-src.zip"
+    <copy tofile="${dist}/${shortproduct}-4_0-snap-src.zip"
           file="${dist}/${shortproduct}-${version}-src.zip"/>
 
-    <copy tofile="${dist}/${shortproduct}-3_2-snap-src.tar.gz"
+    <copy tofile="${dist}/${shortproduct}-4_0-snap-src.tar.gz"
           file="${dist}/${shortproduct}-${version}-src.tar.gz"/>
   </target>
 
