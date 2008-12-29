@@ -281,6 +281,7 @@ class JsonDecoder {
       skipWhitespace();
 
       if (_offset >= _len || _str.charAt(_offset) == '}') {
+	_offset++;
         break;
       }
 

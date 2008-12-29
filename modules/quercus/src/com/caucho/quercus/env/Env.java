@@ -436,11 +436,16 @@ public class Env {
   /**
    * Initialize the page, loading any functions and classes
    */
-  protected void pageInit(QuercusPage page)
+  protected QuercusPage pageInit(QuercusPage page)
   {
+    if (page.getCompiledPage() != null)
+      page = page.getCompiledPage();
+    
     page.init(this);
 
     page.importDefinitions(this);
+
+    return page;
   }
   
   //

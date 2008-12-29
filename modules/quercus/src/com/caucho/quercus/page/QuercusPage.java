@@ -144,6 +144,11 @@ abstract public class QuercusPage
    */
   public Value executeTop(Env env)
   {
+    QuercusPage compile = getCompiledPage();
+
+    if (compile != null)
+      return compile.executeTop(env);
+    
     Path oldPwd = env.getPwd();
 
     Path pwd = getPwd(env);
