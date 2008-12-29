@@ -758,7 +758,7 @@
 
     <generate-pdf name="book-reference"/>
 
-     <copy tofile="${build}/pdf/resin-3.2-reference.pdf"
+     <copy tofile="${build}/pdf/resin-4.0-reference.pdf"
 	   file="${build}/pdf/book-reference/book-reference.pdf"/>
   </target>
 
