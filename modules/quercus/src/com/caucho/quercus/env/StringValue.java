@@ -1670,6 +1670,14 @@ abstract public class StringValue
   }
 
   /**
+   * Returns a String substring
+   */
+  public String stringSubstring(int begin, int end)
+  {
+    return substring(begin, end).toString();
+  }
+
+  /**
    * Returns a character array
    */
   public char []toCharArray()

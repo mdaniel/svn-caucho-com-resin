@@ -692,6 +692,18 @@ public class StringBuilderValue
   }
 
   /**
+   * Returns a subsequence
+   */
+  @Override
+  public String stringSubstring(int start, int end)
+  {
+    if (end <= start)
+      return "";
+
+    return new String(_buffer, start, end - start);
+  }
+
+  /**
    * Convert to lower case.
    */
   @Override

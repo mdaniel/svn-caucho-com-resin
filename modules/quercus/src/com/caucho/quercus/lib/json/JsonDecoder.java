@@ -71,15 +71,17 @@ class JsonDecoder {
   {
     skipWhitespace();
     
-    if (_offset >= _len)
+    if (_len <= _offset)
       return errorReturn(env);
     
     char ch = _str.charAt(_offset);
 
-    if (ch == '"') {
+    switch (ch) {
+    case '"': { // "string"
       return decodeString(env);
     }
-    else if (ch == 't') {
+      
+    case 't': { // true
       if (_offset + 3 < _len
           && _str.charAt(_offset + 1) == 'r'
           && _str.charAt(_offset + 2) == 'u'
@@ -90,7 +92,8 @@ class JsonDecoder {
       else
         return errorReturn(env, "expected 'true'");
     }
-    else if (ch == 'f') {
+
+    case 'f': { // false
       if (_offset + 4 < _len
           && _str.charAt(_offset + 1) == 'a'
           && _str.charAt(_offset + 2) == 'l'
@@ -102,7 +105,8 @@ class JsonDecoder {
       else
         return errorReturn(env, "expected 'false'");
     }
-    else if (ch == 'n') {
+      
+    case 'n': { // null
       if (_offset + 3 < _len
           && _str.charAt(_offset + 1) == 'u'
           && _str.charAt(_offset + 2) == 'l'
@@ -113,17 +117,22 @@ class JsonDecoder {
       else
         return errorReturn(env, "expected 'null'");
     }
-    else if (ch == '[') {
+
+    case '[': { // ["foo", "bar", "baz"]
       return decodeArray(env);
     }
-    else if (ch == '{') {
+      
+    case  '{': {
       return decodeObject(env);
     }
-    else {
-      if (ch == '-' || ('0' <= ch && ch <= '9'))
-        return decodeNumber(env);
-      else
-        return errorReturn(env);
+
+    case '-':
+    case '0': case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9':
+      return decodeNumber(env);
+      
+    default:
+      return errorReturn(env);
     }
   }
 
@@ -132,87 +141,83 @@ class JsonDecoder {
    */
   private Value decodeNumber(Env env)
   {
-    StringBuilder sb = new StringBuilder();
-
+    int startOffset = _offset;
+    
+    long value = 0;
+    int sign = 1;
+    
     char ch;
     
     // (-)?
     if ((ch = _str.charAt(_offset)) == '-') {
-      sb.append(ch);
+      sign = -1;
       
       _offset++;
     }
 
-    if (_offset >= _len)
+    if (_len <= _offset)
       return errorReturn(env, "expected 1-9");
 
     ch = _str.charAt(_offset++);
     
     // (0) | ([1-9] [0-9]*)
     if (ch == '0') {
-      sb.append(ch);
     }
     else if ('1' <= ch && ch <= '9') {
-      sb.append(ch);
+      value = ch - '0';
 
       while (_offset < _len
              && '0' <= (ch = _str.charAt(_offset)) && ch <= '9') {
         _offset++;
           
-        sb.append(ch);
+        value = 10 * value + ch - '0';
       }
     }
 
-    int integerEnd = sb.length();
+    boolean isDouble = false;
 
     // ((decimalPoint) [0-9]+)?
     if (_offset < _len && (ch = _str.charAt(_offset)) == '.') {
       _offset++;
-      
-      sb.append(ch);
+
+      isDouble = true;
       
       while (_offset < _len
              && '0' <= (ch = _str.charAt(_offset)) && ch <= '9') {
         _offset++;
-        sb.append(ch);
       }
     }
 
     // ((e | E) (+ | -)? [0-9]+)
     if (_offset < _len && (ch = _str.charAt(_offset)) == 'e' || ch == 'E') {
       _offset++;
-      
-      sb.append(ch);
+
+      isDouble = true;
 
       if (_offset < _len && (ch = _str.charAt(_offset)) == '+' || ch == '-') {
         _offset++;
-        
-        sb.append(ch);
       }
 
-      if (_offset < _len && '0' <= (ch = _str.charAt(_offset)) && ch <= '9') {
+      while (_offset < _len
+	     && '0' <= (ch = _str.charAt(_offset)) && ch <= '9') {
         _offset++;
-        
-        sb.append(ch);
-        
-        while (_offset < _len) {
-          if ('0' <= (ch = _str.charAt(_offset)) && ch <= '9') {
-            _offset++;
-            
-            sb.append(ch);
-          }
-          else
-            break;
-        }
       }
-      else
-        return errorReturn(env, "expected 0-9 exponent");
+
+      /*
+      if (_offset < _len)
+        return errorReturn(env,
+			   L.l("expected 0-9 exponent at '{0}'", (char) ch));
+      */
     }
 
-    if (integerEnd != sb.length())
-      return DoubleValue.create(Double.parseDouble(sb.toString()));
+    if (isDouble) {
+      String strValue
+	= _str.stringSubstring(startOffset, _offset);
+      
+      return DoubleValue.create(Double.parseDouble(strValue));
+    }
     else
-      return LongValue.create(Long.parseLong(sb.toString()));
+      return LongValue.create(sign * value);
   }
 
   /**
@@ -317,14 +322,16 @@ class JsonDecoder {
     while (true) {
       skipWhitespace();
 
-      if (_offset >= _len || _str.charAt(_offset) == '}')
+      if (_len <= _offset || _str.charAt(_offset) == '}') {
+	_offset++;
         break;
+      }
       
       Value name = jsonDecodeImpl(env);
 
       skipWhitespace();
 
-      if (_offset >= _len || _str.charAt(_offset++) != ':')
+      if (_len <= _offset || _str.charAt(_offset++) != ':')
         return errorReturn(env, "expected ':'");
 
       object.putField(env, name.toString(), jsonDecodeImpl(env));
