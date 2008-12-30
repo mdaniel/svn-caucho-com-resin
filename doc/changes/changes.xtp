@@ -13,6 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>quercus: array copyOnWrite issue with _var vs _value (#3210, rep by koreth)</li>
 <li>quercus: array return value from external call (#347b, rep by koreth)</li>
 <li>quercus: json_decode of '{}' not handled properly, cont (#3201, rep by koreth)</li>
 <li>(2008-12-29) quercus: json_decode of '{}' not handled properly (#3197, rep by koreth)</li>
