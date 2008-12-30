@@ -52,9 +52,9 @@ public class OsgiBundleConfig
 
   private String _org;
   private String _module;
+  private String _name;
   private String _rev;
 
-  private String _artifact;
 
   private boolean _isStart;
   private boolean _isExport = true;
@@ -81,6 +81,14 @@ public class OsgiBundleConfig
   public void setOrg(String org)
   {
     _org = org;
+  }
+
+  /**
+   * Sets the name
+   */
+  public void setName(String name)
+  {
+    _name = name;
   }
 
   /**
@@ -123,8 +131,8 @@ public class OsgiBundleConfig
   @PostConstruct
   public void init()
   {
-    if (_path == null && _module == null)
-      throw new ConfigException(L.l("osgi-bundle requires either a 'path' or a 'module' attribute"));
+    if (_path == null && _name == null)
+      throw new ConfigException(L.l("osgi-bundle requires either a 'path' or a 'name' attribute"));
 
     Path path = null;
     
@@ -137,12 +145,12 @@ public class OsgiBundleConfig
       if (repository == null)
 	throw new IllegalStateException(L.l("ModuleRepository is not properly initialized"));
 
-      path = repository.findArtifact(_org, _module, _artifact, _rev, "jar");
+      path = repository.findArtifact(_org, _module, _name, _rev, "jar");
     }
 
     if (path == null)
       throw new ConfigException(L.l("Can't find module '{0}'",
-				    _module));
+				    _name));
 
     OsgiManager manager = OsgiManager.getCurrent();
     OsgiBundle bundle;

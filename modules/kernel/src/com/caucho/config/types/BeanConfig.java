@@ -215,6 +215,8 @@ public class BeanConfig extends WbComponentConfig {
       
       return;
     }
+
+    setService(true);
     
     super.init();
 

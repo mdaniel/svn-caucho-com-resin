@@ -363,6 +363,10 @@ public class WbComponentConfig {
       comp.setScope(_webbeans.getScopeContext(_scope));
     }
 
+    if (_isService) {
+      comp.addAnnotation(new AnnotationLiteral<Service>() {});
+    }
+
     if (_newArgs != null)
       comp.setNewArgs(_newArgs);
 

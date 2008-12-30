@@ -77,6 +77,9 @@ public class FormLoginServlet extends GenericServlet {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " login " + user);
 
+    if (res.isCommitted())
+      return;
+
     if (user == null) {
       // A failure internally redirects to the error page (not redirect)
       String errorPage = login.getFormErrorPage();
