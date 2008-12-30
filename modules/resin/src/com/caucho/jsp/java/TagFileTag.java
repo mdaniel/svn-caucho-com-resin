@@ -40,7 +40,7 @@ import java.util.ArrayList;
  * Represents a custom tag.
  */
 public class TagFileTag extends GenericTag {
-  private boolean _oldScriptingInvalid;
+  private boolean _oldLocalScriptingInvalid;
   private JspBody _body;
   private int _maxFragmentIndex;
   private String _contextVarName;
@@ -50,8 +50,8 @@ public class TagFileTag extends GenericTag {
    */
   public void endAttributes()
   {
-    _oldScriptingInvalid = _parseState.isScriptingInvalid();
-    _parseState.setScriptingInvalid(true);
+    _oldLocalScriptingInvalid = _parseState.isLocalScriptingInvalid();
+    _parseState.setLocalScriptingInvalid(true);
   }
   
   /**
@@ -62,7 +62,7 @@ public class TagFileTag extends GenericTag {
   {
     super.endElement();
     
-    _parseState.setScriptingInvalid(_oldScriptingInvalid);
+    _parseState.setLocalScriptingInvalid(_oldLocalScriptingInvalid);
     
     if (_children == null || _children.size() == 0)
       return;

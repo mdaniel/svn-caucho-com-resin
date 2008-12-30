@@ -48,7 +48,7 @@ public class JspAttribute extends JspFragmentNode {
   private boolean _trim = true;
   private TagInstance _tag;
 
-  private boolean _oldScriptingInvalid;
+  private boolean _oldLocalScriptingInvalid;
 
   public JspAttribute()
   {
@@ -91,7 +91,7 @@ public class JspAttribute extends JspFragmentNode {
   public void endAttributes()
     throws JspParseException
   {
-    _oldScriptingInvalid = _parseState.isScriptingInvalid();
+    _oldLocalScriptingInvalid = _parseState.isLocalScriptingInvalid();
     // jsp/18di
     // _parseState.setScriptingInvalid(true);
     
@@ -117,7 +117,7 @@ public class JspAttribute extends JspFragmentNode {
   public void endElement()
     throws JspParseException
   {
-    _parseState.setScriptingInvalid(_oldScriptingInvalid);
+    _parseState.setLocalScriptingInvalid(_oldLocalScriptingInvalid);
     
     if (_name == null)
       throw error(L.l("jsp:attribute needs a `name' attribute."));

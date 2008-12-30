@@ -1861,7 +1861,13 @@ public class JspParser {
     Include inc = null;
 
     if (_stream != null) {
-      inc = new Include(_localPrefixes, _stream, _line, _uriPwd);
+      inc = new Include(_localPrefixes,
+                        _stream,
+                        _line,
+                        _uriPwd,
+                        _parseState.isLocalScriptingInvalid());
+      
+      _parseState.setLocalScriptingInvalid(false);
 
       _includes.add(inc);
       
@@ -2090,8 +2096,10 @@ public class JspParser {
       _line = include._line;
       _lineStart = _line;
       _uriPwd = include._uriPwd;
-      _parseState.setUriPwd(_uriPwd);
       _localPrefixes = include._localPrefixes;
+
+      _parseState.setUriPwd(_uriPwd);
+      _parseState.setLocalScriptingInvalid(include._oldLocalScriptingDisabled);
 
       setLocation(_jspPath, _filename, _line);
       
@@ -2241,17 +2249,20 @@ public class JspParser {
     int _line;
     String _uriPwd;
     Set<String> _localPrefixes;
+    boolean _oldLocalScriptingDisabled;
 
     Include(Set<String> prefixes,
             ReadStream stream,
             int line,
-            String uriPwd
+            String uriPwd,
+            boolean oldLocalScriptingDisabled
     )
     {
       _stream = stream;
       _line = line;
       _uriPwd = uriPwd;
       _localPrefixes = prefixes;
+      _oldLocalScriptingDisabled = oldLocalScriptingDisabled;
     }
   }
 }

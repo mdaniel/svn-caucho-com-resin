@@ -42,7 +42,7 @@ import java.util.ArrayList;
 public class CustomSimpleTag extends GenericTag
 {
   JspBody _body;
-  private boolean _oldScriptingInvalid;
+  private boolean _oldLocalScriptingInvalid;
 
   /**
    * Simple tags can't be reused.
@@ -60,7 +60,7 @@ public class CustomSimpleTag extends GenericTag
   {
     super.endAttributes();
     
-    _oldScriptingInvalid = _parseState.isScriptingInvalid();
+    _oldLocalScriptingInvalid = _parseState.isLocalScriptingInvalid();
     // jsp/18dj
     // _parseState.setScriptingInvalid(true);
   }
@@ -73,7 +73,7 @@ public class CustomSimpleTag extends GenericTag
   {
     super.endElement();
     
-    _parseState.setScriptingInvalid(_oldScriptingInvalid);
+    _parseState.setLocalScriptingInvalid(_oldLocalScriptingInvalid);
     
     if (isEmpty())
       return;

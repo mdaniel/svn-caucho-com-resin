@@ -55,7 +55,8 @@ public class JspExpression extends JspNode {
   public void endElement()
     throws JspParseException
   {
-    if (_parseState.isScriptingInvalid())
+    if (_parseState.isScriptingInvalid() ||
+        _parseState.isLocalScriptingInvalid())
       throw error(L.l("Script expressions are forbidden here.  Scripting has been disabled either:\n1) disabled by the web.xml scripting-invalid\n2) disabled in a tag's descriptor\n3) forbidden in <jsp:attribute> or <jsp:body> tags."));
   }
   

@@ -62,6 +62,7 @@ public class ParseState {
   private Boolean _isELIgnoredDefault;
   
   private boolean _isScriptingInvalid = false;
+  private boolean _isLocalScriptingInvalid = false;
   
   private boolean _isVelocityEnabled;
 
@@ -179,7 +180,7 @@ public class ParseState {
   }
 
   /**
-   * Returns true if JSP scripting is invalidn.
+   * Returns true if JSP scripting is invalid.
    */
   public boolean isScriptingInvalid()
   {
@@ -192,6 +193,16 @@ public class ParseState {
   public void setScriptingInvalid(boolean isScriptingInvalid)
   {
     _isScriptingInvalid = isScriptingInvalid;
+  }
+
+  public boolean isLocalScriptingInvalid()
+  {
+    return _isLocalScriptingInvalid;
+  }
+
+  public void setLocalScriptingInvalid(boolean isLocalScriptingInvalid)
+  {
+    _isLocalScriptingInvalid = isLocalScriptingInvalid;
   }
 
   /**
