@@ -314,58 +314,5 @@ public class HttpModule extends AbstractQuercusModule {
 
     return true;
   }
-
-  /**
-   * Returns the decoded string.
-   */
-  // XXX: see duplicate in env
-  public static String urldecode(String s)
-  {
-    if (s == null)
-      s = "";
-    
-    int len = s.length();
-    StringBuilder sb = new StringBuilder();
-
-    for (int i = 0; i < len; i++) {
-      char ch = s.charAt(i);
-
-      if (ch == '%' && i + 2 < len) {
-        int d1 = s.charAt(i + 1);
-        int d2 = s.charAt(i + 2);
-
-        int v = 0;
-
-        if ('0' <= d1 && d1 <= '9')
-          v = 16 * (d1 - '0');
-        else if ('a' <= d1 && d1 <= 'f')
-          v = 16 * (d1 - 'a' + 10);
-        else if ('A' <= d1 && d1 <= 'F')
-          v = 16 * (d1 - 'A' + 10);
-        else {
-          sb.append('%');
-          continue;
-        }
-
-        if ('0' <= d2 && d2 <= '9')
-          v += (d2 - '0');
-        else if ('a' <= d2 && d2 <= 'f')
-          v += (d2 - 'a' + 10);
-        else if ('A' <= d2 && d2 <= 'F')
-          v += (d2 - 'A' + 10);
-        else {
-          sb.append('%');
-          continue;
-        }
-
-        i += 2;
-        sb.append((char) v);
-      }
-      else
-        sb.append(ch);
-    }
-
-    return sb.toString();
-  }
 }
 

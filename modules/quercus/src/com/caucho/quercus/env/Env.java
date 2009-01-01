@@ -1668,6 +1668,19 @@ public class Env {
     return var;
     */
   }
+  
+  /**
+   * Gets a value.
+   */
+  public Var getRef(String name, boolean isAutoCreate)
+  {
+    EnvVar envVar = getEnvVar(name, isAutoCreate);
+
+    if (envVar != null)
+      return envVar.getRef();
+    else
+      return null;
+  }
 
   /**
    * Returns the raw global lookup.
@@ -1689,13 +1702,18 @@ public class Env {
     return envVar.getRef();
   }
 
+  public final EnvVar getEnvVar(String name)
+  {
+    return getEnvVar(name, true);
+  }
+  
   /**
    * Gets a variable
    *
    * @param name the variable name
    * @param var the current value of the variable
    */
-  public final EnvVar getEnvVar(String name)
+  public final EnvVar getEnvVar(String name, boolean isAutoCreate)
   {
     EnvVar envVar = _map.get(name);
 
@@ -1703,11 +1721,16 @@ public class Env {
       return envVar;
 
     if (_map == _globalMap)
-      return getGlobalEnvVar(name);
+      return getGlobalEnvVar(name, isAutoCreate);
     
-    envVar = getSuperGlobalRef(name);
+    envVar = getSuperGlobalRef(name, true);
 
-    if (envVar == null)
+    // php/0809
+    if (envVar != null)
+      _globalMap.put(name, envVar);
+    else if (! isAutoCreate)
+      return null;
+    else
       envVar = new EnvVarImpl(new Var());
 
     _map.put(name, envVar);
@@ -1719,9 +1742,19 @@ public class Env {
    * Gets a variable
    *
    * @param name the variable name
-   * @param value the current value of the variable
    */
   public final EnvVar getGlobalEnvVar(String name)
+  {
+    return getGlobalEnvVar(name, true);
+  }
+  
+  /**
+   * Gets a variable
+   *
+   * @param name the variable name
+   * @param isAutoCreate
+   */
+  public final EnvVar getGlobalEnvVar(String name, boolean isAutoCreate)
   {
     EnvVar envVar = _globalMap.get(name);
 
@@ -1745,6 +1778,9 @@ public class Env {
       envVar = getGlobalScriptContextRef(name);
 
     if (envVar == null) {
+      if (! isAutoCreate)
+        return null;
+      
       Var var = new Var();
       var.setGlobal();
       
@@ -1867,7 +1903,7 @@ public class Env {
    */
   public final Var unsetLocalVar(String name)
   {
-    EnvVar envVar = _globalMap.get(name);
+    EnvVar envVar = _map.get(name);
 
     if (envVar != null)
       envVar.setRef(new Var());
@@ -1931,15 +1967,31 @@ public class Env {
     return value;
   }
 
+  private EnvVar getSuperGlobalRef(String name)
+  {
+    return getSuperGlobalRef(name, false);
+  }
+  
   /**
    * Returns a superglobal.
    */
-  private EnvVar getSuperGlobalRef(String name)
+  private EnvVar getSuperGlobalRef(String name, boolean isCheckGlobal)
   {
     Var var;
     EnvVar envVar;
     
-    switch (SPECIAL_VARS.get(name)) {
+    int specialVarId = SPECIAL_VARS.get(name);
+    
+    if (isCheckGlobal) {
+      if (specialVarId != IntMap.NULL) {
+        envVar = _globalMap.get(name);
+        
+        if (envVar != null)
+          return envVar;
+      }
+    }
+    
+    switch (specialVarId) {
       case _ENV: {
         var = new Var();
 	envVar = new EnvVarImpl(var);
@@ -2014,6 +2066,13 @@ public class Env {
 	  return getGlobalEnvVar("_GET");
       
       case _GET: {
+        if (isCheckGlobal) {
+          EnvVar e = _globalMap.get(name);
+          
+          if (e != null)
+            return e;
+        }
+        
         var = new Var();
         envVar = new EnvVarImpl(var);
 
@@ -2693,12 +2752,21 @@ public class Env {
   private Value getConstantImpl(String name)
   {
     int id = _quercus.getConstantId(name);
-
+    
     if (id < _const.length) {
       Value value = _const[id];
 
       if (value != null)
-	return value;
+        return value;
+    }
+    
+    int lowerId = _quercus.getConstantLower(id);
+
+    if (lowerId < _const.length) {
+      Value value = _const[lowerId];
+      
+      if (value != null)
+        return value;
     }
 
     return null;
@@ -2796,10 +2864,21 @@ public class Env {
       _const = newConst;
     }
     
+    if (_const[id] != null)
+      return notice(L.l("cannot redefine constant {0}",
+                        _quercus.getConstantName(id)));
+    
     _const[id] = value;
 
     if (isCaseInsensitive) {
       int lowerId = _quercus.getConstantLower(id);
+      
+      if (lowerId >= _const.length) {
+        Value []newConst = new Value[lowerId + 256];
+        System.arraycopy(_const, 0, newConst, 0, _const.length);
+        
+        _const = newConst;
+      }
 
       _const[lowerId] = value;
     }

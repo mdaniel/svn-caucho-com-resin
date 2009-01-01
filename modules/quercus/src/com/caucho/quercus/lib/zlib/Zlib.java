@@ -449,7 +449,7 @@ public class Zlib {
    */
   private int getCompressionLevel(String input)
   {
-    for( int i = input.length() - 1; i >= 0; i-- )
+    for (int i = input.length() - 1; i >= 0; i-- )
     {
       char ch = input.charAt(i);
       if( ch >= '0' && ch <= '9' )
@@ -464,14 +464,14 @@ public class Zlib {
    */
   private int getCompressionStrategy(String input)
   {
-    for( int i = input.length() - 1; i >= 0; i-- )
+    for (int i = input.length() - 1; i >= 0; i-- )
     {
       char ch = input.charAt(i);
       switch (ch) {
-      case 'f':
-        return Deflater.FILTERED;
-      case 'h':
-        return Deflater.HUFFMAN_ONLY;
+        case 'f':
+          return Deflater.FILTERED;
+        case 'h':
+          return Deflater.HUFFMAN_ONLY;
       }
     }
     return Deflater.DEFAULT_STRATEGY;

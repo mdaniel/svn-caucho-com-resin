@@ -40,6 +40,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.ExprFactory;
+import com.caucho.quercus.expr.RequiredExpr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.L10N;
 
@@ -325,15 +326,15 @@ public class Function extends AbstractFunction {
         map.put(arg.getName(), new EnvVarImpl(args[i].toRefVar()));
       }
       else {
-	Var var = args[i].copy().toVar();
+        Var var = args[i].copy().toVar();
 
-	if (arg.getExpectedClass() != null
-	    && arg.getDefault() == null) {
-	  env.checkTypeHint(var,
-			    arg.getExpectedClass(),
-			    arg.getName(),
-			    getName());
-	}
+        if (arg.getExpectedClass() != null
+            && arg.getDefault() instanceof RequiredExpr) {
+          env.checkTypeHint(var,
+                            arg.getExpectedClass(),
+                            arg.getName(),
+                            getName());
+        }
 	  
         // quercus/0d04
         map.put(arg.getName(), new EnvVarImpl(var));

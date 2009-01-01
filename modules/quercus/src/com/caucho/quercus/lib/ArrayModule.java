@@ -3408,7 +3408,7 @@ public class ArrayModule
 
     for (Value variableName : variables) {
       if (variableName.isString()) {
-        Var var = env.getRef(variableName.toString());
+        Var var = env.getRef(variableName.toString(), false);
 
         if (var != null)
           compactArray.put(variableName, var.toValue());

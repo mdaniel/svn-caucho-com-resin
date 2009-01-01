@@ -49,13 +49,13 @@ public class ZlibOutputStream extends AbstractBinaryOutput {
   private DeflaterOutputStream _out;
   private CRC32 _crc32;
 
-  private byte[] _header = {
-    (byte) 0x1f, (byte) 0x8b,  // gzip file identifier (ID1, ID2)
-    8,           // Deflate compression method (CM)
-    0,           // optional flags (FLG)
-    0, 0, 0, 0,  // modification time (MTIME)
-    0,           // extra optional flags (XFL)
-    0x3          // operating system (OS)
+  private static byte[] _header = {
+    (byte) 0x1f, (byte) 0x8b,   // gzip file identifier (ID1, ID2)
+    (byte) 0x8,                 // Deflate compression method (CM)
+    0,                          // optional flags (FLG)
+    0, 0, 0, 0,                 // modification time (MTIME)
+    0,                          // extra optional flags (XFL)
+    (byte) 0x3                  // operating system (OS)
   };
 
   private int _encodingMode;
@@ -101,7 +101,7 @@ public class ZlibOutputStream extends AbstractBinaryOutput {
   }
 
   /**
-   * @param out
+   * @param os
    * @param compressionLevel
    * @param strategy Deflate compression strategy
    */
@@ -111,9 +111,6 @@ public class ZlibOutputStream extends AbstractBinaryOutput {
     this(os, compressionLevel, strategy, ZlibModule.FORCE_GZIP);
   }
 
-  /**
-   * @param out
-   */
   public ZlibOutputStream(OutputStream os)
     throws IOException
   {
@@ -127,8 +124,8 @@ public class ZlibOutputStream extends AbstractBinaryOutput {
    * Creates a deflater based on the Zlib arguments.
    */
   private static Deflater createDeflater(int compressionLevel,
-					 int strategy,
-					 int encodingMode)
+                                         int strategy,
+                                         int encodingMode)
   {
     Deflater def;
 
@@ -178,20 +175,14 @@ public class ZlibOutputStream extends AbstractBinaryOutput {
     throws IOException
   {
     out.finish();
-
-    OutputStream os = _os;
-
+    
     if (_isGzip) {
       long crcValue = _crc32.getValue();
       
-      byte[] trailerCRC = new byte[4];
-      
-      trailerCRC[0] = (byte) crcValue;
-      trailerCRC[1] = (byte) (crcValue >> 8);
-      trailerCRC[2] = (byte) (crcValue >> 16);
-      trailerCRC[3] = (byte) (crcValue >> 24);
-      
-      _os.write(trailerCRC, 0, trailerCRC.length);
+      _os.write((byte) crcValue);
+      _os.write((byte) crcValue >> 8);
+      _os.write((byte) crcValue >> 16);
+      _os.write((byte) crcValue >> 24);
     }
 
     _os.write((byte) _inputSize);
@@ -218,9 +209,9 @@ public class ZlibOutputStream extends AbstractBinaryOutput {
       _out = null;
 
       if (out != null) {
-	finish(out);
+        finish(out);
 
-	out.close();
+        out.close();
       }
 
       _os.close();

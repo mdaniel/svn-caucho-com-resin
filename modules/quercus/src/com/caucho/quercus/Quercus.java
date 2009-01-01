@@ -1303,7 +1303,7 @@ public class Quercus
   {
     synchronized (_constantNameMap) {
       int id = _constantNameMap.get(name);
-
+      
       if (id < 0) {
 	id = _constantNameMap.size();
 
@@ -1330,10 +1330,14 @@ public class Quercus
 	}
 
 	// XXX: i18n
-	_constantNameList[id] = new StringBuilderValue(name);
-	_constantLowerMap[id] = getConstantId(name.toLowerCase());
+    _constantNameList[id] = new StringBuilderValue(name);
+    
+    // php/0501
+    int lowerId = getConstantId(name.toLowerCase());
+    
+    _constantLowerMap[id] = lowerId;
       }
-
+      
       return id;
     }
   }

@@ -41,6 +41,7 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.MethodMap;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
@@ -355,12 +356,12 @@ public class ReflectionClass
   {
     ArrayValue array = new ArrayValueImpl();
     
-    addStaticFields(env, array, _cls);
+    getStaticFields(env, array, _cls);
     
     return array;
   }
   
-  private void addStaticFields(Env env, ArrayValue array, QuercusClass cls)
+  private void getStaticFields(Env env, ArrayValue array, QuercusClass cls)
   {
     if (cls == null)
       return;
@@ -371,7 +372,7 @@ public class ReflectionClass
       array.put(StringValue.create(name), field.toValue());
     }
     
-    addStaticFields(env, array, cls.getParent());
+    getStaticFields(env, array, cls.getParent());
   }
   
   public Value getStaticPropertyValue(Env env,
@@ -400,7 +401,7 @@ public class ReflectionClass
   {
     ArrayValue array = new ArrayValueImpl();
     
-    addStaticFields(env, array, _cls);
+    getStaticFields(env, array, _cls);
     
     HashMap<StringValue, Expr> fieldMap = _cls.getClassVars();
     
