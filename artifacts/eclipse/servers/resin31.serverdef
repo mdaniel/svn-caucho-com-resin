@@ -106,6 +106,7 @@
   <classpath id="resin.project" >
     <fileset dir="${resinHome}">
       <include name="lib/*.jar" />
+      <exclude name="lib/resin.jar" />
     </fileset>
     
     <!-- required so validation works -->
