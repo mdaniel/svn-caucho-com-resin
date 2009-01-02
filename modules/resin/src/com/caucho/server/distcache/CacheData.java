@@ -39,22 +39,22 @@ import java.lang.ref.SoftReference;
 public final class CacheData {
   private final HashKey _key;
   private final HashKey _value;
+  private final int _flags;
   private final long _version;
   private final long _accessTime;
-  private final boolean _isRemoved;
 
   public CacheData(HashKey key,
 		   HashKey value,
+		   int flags,
 		   long version,
-		   long accessTime,
-		   boolean isRemoved)
+		   long accessTime)
   {
     _key = key;
     _value = value;
+    _flags = flags;
     _version = version;
     
     _accessTime = accessTime;
-    _isRemoved = isRemoved;
   }
 
   public HashKey getKey()
@@ -67,6 +67,11 @@ public final class CacheData {
     return _value;
   }
 
+  public int getFlags()
+  {
+    return _flags;
+  }
+
   public long getVersion()
   {
     return _version;
@@ -77,16 +82,12 @@ public final class CacheData {
     return _accessTime;
   }
 
-  public boolean isRemoved()
-  {
-    return _isRemoved;
-  }
-
   public String toString()
   {
     return (getClass().getSimpleName()
 	    + "[key=" + _key
 	    + ",value=" + _value
+	    + ",flags=" + Integer.toHexString(_flags)
 	    + ",version=" + _version
 	    + "]");
   }

@@ -66,7 +66,6 @@ public class Management
   private Cluster _cluster;
   private Resin _resin;
   private Server _server;
-  private Path _path;
   
   private HostConfig _hostConfig;
 
@@ -79,15 +78,6 @@ public class Management
   public Management()
   {
     _resin = Resin.getCurrent();
-  }
-
-  public static Path getCurrentPath()
-  {
-    Resin resin = Resin.getCurrent();
-
-    Management management = resin.getManagement();
-
-    return management.getPath();
   }
 
   public void setCluster(Cluster cluster)
@@ -116,21 +106,7 @@ public class Management
    */
   public void setPath(Path path)
   {
-    _path = path;
-  }
-  
-  public Path getPath()
-  {
-    Path path = _path;
-    
-    if (path == null)
-      path = _resin.getRootDirectory().lookup("admin");
-
-    if (path instanceof MemoryPath) { // QA
-      path = Vfs.lookup("file:/tmp/caucho/qa/admin");
-    }
-
-    return path;
+    _resin.setAdminPath(path);
   }
 
   /**
@@ -246,8 +222,7 @@ public class Management
   @Deprecated
   public void setManagementPath(Path managementPath)
   {
-    if (_path == null)
-      _path = managementPath;
+    setPath(managementPath);
   }
 
   /**
@@ -295,26 +270,6 @@ public class Management
    */
   public void start(Server server)
   {
-    try {
-      if (getPath() != null)
-        getPath().mkdirs();
-
-      /*
-      HempBrokerManager brokerManager = HempBrokerManager.getCurrent();
-
-      // XXX:
-      if (_adminBroker == null) {
-	String brokerName = _resin.getServer().getBamAdminName();
-    
-	_adminBroker = new HempBroker(brokerName);
-
-	brokerManager.addBroker(brokerName, _adminBroker);
-	brokerManager.addBroker("resin.caucho", _adminBroker);
-      }
-      */
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
   }
 
   public HostConfig getHostConfig()

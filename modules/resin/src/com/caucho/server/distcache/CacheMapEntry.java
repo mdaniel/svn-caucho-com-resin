@@ -39,9 +39,10 @@ import java.lang.ref.SoftReference;
  */
 public final class CacheMapEntry implements CacheEntry {
   public static final CacheMapEntry NULL
-    = new CacheMapEntry(null, null, 0, 0, false);
+    = new CacheMapEntry(null, null, 0, 0, 0, false);
   
   private final HashKey _valueHash;
+  private final int _flags;
   private final long _version;
   private final long _localExpireTime;
 
@@ -51,11 +52,13 @@ public final class CacheMapEntry implements CacheEntry {
 
   public CacheMapEntry(HashKey valueHash,
 		       Object value,
+		       int flags,
 		       long version,
 		       long localExpireTime,
 		       boolean isServerVersionValid)
   {
     _valueHash = valueHash;
+    _flags = flags;
     _version = version;
     
     _localExpireTime = localExpireTime;
@@ -76,6 +79,11 @@ public final class CacheMapEntry implements CacheEntry {
   public HashKey getValueHashKey()
   {
     return _valueHash;
+  }
+
+  public int getFlags()
+  {
+    return _flags;
   }
 
   public long getVersion()
@@ -118,6 +126,7 @@ public final class CacheMapEntry implements CacheEntry {
   {
     return (getClass().getSimpleName()
 	    + "[value=" + _valueHash
+	    + ",flags=" + Integer.toHexString(_flags)
 	    + ",version=" + _version
 	    + "]");
   }

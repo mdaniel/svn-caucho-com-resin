@@ -1188,10 +1188,9 @@ abstract public class ArrayValue extends Value {
     public Entry(Entry entry)
     {
       _key = entry._key;
-      _var = entry._var;
 
-      if (_var != null)
-        _value = entry._var.toValue().copyArrayItem();
+      if (entry._var != null)
+	_var = entry._var;
       else
         _value = entry._value.copyArrayItem();
     }

@@ -76,10 +76,8 @@ public class TransactionManager
 
   public Path getPath()
   {
-    if (_management != null)
-      return _management.getPath();
-    else if (_resin != null && _resin.getManagementPath() != null)
-      return _resin.getManagementPath();
+    if (_resin != null)
+      return _resin.getAdminPath();
     else if (_path != null)
       return _path;
     else

@@ -30,6 +30,7 @@
 package com.caucho.server.session;
 
 import com.caucho.cluster.ByteStreamCache;
+import com.caucho.cluster.AbstractCache;
 import com.caucho.cluster.TriplicateByteStreamCache;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
@@ -143,7 +144,12 @@ public final class SessionManager implements AlarmListener
   private int _reuseSessionId = COOKIE;
   private int _cookieLength = 21;
 
+  // persistence configuration
+
   private int _sessionSaveMode = SAVE_AFTER_REQUEST;
+
+  private boolean _isTriplicate = true;
+  private boolean _isBackup = true;
 
   //private SessionStore sessionStore;
   private StoreManager _storeManager;
@@ -196,15 +202,25 @@ public final class SessionManager implements AlarmListener
     _selfServer = _server.getSelfServer();
     _selfIndex = _selfServer.getIndex();
 
+    boolean isSaveBackup = true;
+    boolean isSaveTriplicate = true;
+    
     // copy defaults from store for backward compat
     StoreManager store = _server.getStore();
     if (store != null) {
       setAlwaysSaveSession(store.isAlwaysSave());
+
+      isSaveBackup = store.isSaveBackup();
+      isSaveTriplicate = store.isSaveTriplicate();
     }
-    
-    TriplicateByteStreamCache sessionCache = new TriplicateByteStreamCache();
+
+    AbstractCache sessionCache = new TriplicateByteStreamCache();
+
     sessionCache.setName("resin:session");
+    sessionCache.setBackup(isSaveBackup);
+    sessionCache.setTriplicate(isSaveTriplicate);
     sessionCache.init();
+
     _sessionStore = sessionCache;
 
     DispatchServer server = webApp.getDispatchServer();

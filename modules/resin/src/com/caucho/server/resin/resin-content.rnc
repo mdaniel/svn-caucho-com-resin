@@ -106,6 +106,8 @@ r_cluster-Content =
 
   & r_ssl-session-cookie?
 
+  & r_triad*
+  
   & r_url-character-encoding?
 
   & r_url-length-max?
@@ -766,6 +768,12 @@ r_transaction-log = element transaction-log {
 
 r_transaction-manager = element transaction-manager {
   r_transaction-log?
+}
+
+r_triad = element triad {
+  attribute id { string }?
+
+  & r_server+
 }
 
 r_url-character-encoding =

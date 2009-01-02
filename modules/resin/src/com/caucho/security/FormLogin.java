@@ -325,6 +325,10 @@ public class FormLogin extends AbstractLogin
     String uri = request.getRequestURI();
 
     if (path.endsWith("/j_security_check")) {
+      // server/12d8
+      RequestDispatcher disp = app.getRequestDispatcher(_errorPage);
+      disp.forward(request, response);
+      /*
       //	&& request.getAttribute(LOGIN_CHECK) == null) {
       request.setAttribute(LOGIN_CHECK, "login");
       
@@ -335,6 +339,7 @@ public class FormLogin extends AbstractLogin
         throw new ServletException(L.l("j_security_check servlet must be defined to use form-based login."));
       
       disp.forward(request, response);
+      */
       return;
     }
     else if (uri.equals(_loginPage) || uri.equals(_errorPage)) {

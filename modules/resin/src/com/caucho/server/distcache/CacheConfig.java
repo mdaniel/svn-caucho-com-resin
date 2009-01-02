@@ -41,12 +41,43 @@ import com.caucho.util.LruCache;
  */
 public class CacheConfig
 {
+  public static final int FLAG_EPHEMERAL  = 0x01;
+  public static final int FLAG_BACKUP     = 0x02;
+  public static final int FLAG_TRIPLICATE = 0x04;
+  
+  private int _flags = (FLAG_BACKUP
+			| FLAG_TRIPLICATE);
+  
   private long _localReadTimeout = 10L; // 10ms default timeout
   
   private long _idleTimeout = Long.MAX_VALUE / 2;
 
   private CacheSerializer _keySerializer;
   private CacheSerializer _valueSerializer;
+
+  /**
+   * Returns the flags
+   */
+  public int getFlags()
+  {
+    return _flags;
+  }
+
+  /**
+   * Sets the flags
+   */
+  public void setFlags(int flags)
+  {
+    _flags = flags;
+  }
+
+  /**
+   * Returns the maximum idle time in the database.
+   */
+  public long getIdleTimeout()
+  {
+    return _idleTimeout;
+  }
 
   /**
    * The local read timeout is the time a local copy of the
@@ -64,14 +95,6 @@ public class CacheConfig
   public void setLocalReadTimeout(long timeout)
   {
     _localReadTimeout = timeout;
-  }
-
-  /**
-   * Returns the maximum idle time in the database.
-   */
-  public long getIdleTimeout()
-  {
-    return _idleTimeout;
   }
 
   /**

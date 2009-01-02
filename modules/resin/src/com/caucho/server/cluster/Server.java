@@ -334,7 +334,7 @@ public class Server extends ProtocolDispatchServer
    */
   public Path getAdminPath()
   {
-    return _resin.getManagement().getPath();
+    return _resin.getAdminPath();
   }
 
   /**
@@ -1572,10 +1572,6 @@ public class Server extends ProtocolDispatchServer
     _classLoader.init();
 
     super.init();
-
-    // backwards compat
-    if (_resin != null && _resin.getManagementPath() != null)
-      createManagement().setManagementPath(_resin.getManagementPath());
 
     if (_resin != null) {
       createManagement().setCluster(getCluster());

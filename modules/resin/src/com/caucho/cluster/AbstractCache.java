@@ -84,6 +84,28 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
   }
 
   /**
+   * Sets the backup mode.
+   */
+  public void setBackup(boolean isBackup)
+  {
+    if (isBackup)
+      _config.setFlags(_config.getFlags() | CacheConfig.FLAG_BACKUP);
+    else
+      _config.setFlags(_config.getFlags() & ~CacheConfig.FLAG_BACKUP);
+  }
+
+  /**
+   * Sets the triplicate backup mode.
+   */
+  public void setTriplicate(boolean isTriplicate)
+  {
+    if (isTriplicate)
+      _config.setFlags(_config.getFlags() | CacheConfig.FLAG_TRIPLICATE);
+    else
+      _config.setFlags(_config.getFlags() & ~CacheConfig.FLAG_TRIPLICATE);
+  }
+
+  /**
    * Initialize the cache
    */
   @PostConstruct

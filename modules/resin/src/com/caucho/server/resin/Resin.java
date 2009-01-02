@@ -72,6 +72,7 @@ import com.caucho.util.CompileException;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.util.RandomUtil;
+import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
@@ -123,6 +124,8 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private Path _resinHome;
   private Path _rootDirectory;
+  
+  private Path _adminPath;
 
   private boolean _isGlobalSystemProperties;
 
@@ -159,8 +162,8 @@ public class Resin implements EnvironmentBean, SchemaBean
   private ArrayList<BoundPort> _boundPortList
     = new ArrayList<BoundPort>();
 
-  private Path _managementPath;
   protected Management _management;
+  
   private ModuleRepositoryImpl _repository = new ModuleRepositoryImpl();
   private TempFileManager _tempFileManager;
 
@@ -515,10 +518,26 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public Path getAdminPath()
   {
-    if (_management != null)
-      return _management.getPath();
+    Path path;
+    
+    if (_adminPath != null)
+      path = _adminPath;
     else
-      return getRootDirectory().lookup("admin");
+      path = getRootDirectory().lookup("admin");
+    
+    if (path instanceof MemoryPath) { // QA
+      path = Vfs.lookup("file:/tmp/caucho/qa/admin");
+    }
+
+    return path;
+  }
+
+  /**
+   * Sets the admin directory
+   */
+  public void setAdminPath(Path path)
+  {
+    _adminPath = path;
   }
 
   /**
@@ -700,18 +719,12 @@ public class Resin implements EnvironmentBean, SchemaBean
     if (_tempFileManager == null) {
       String fileName = "temp_" + _serverId + ".cache";
       
-      Path path = createManagement().getPath().lookup(fileName);
+      Path path = getAdminPath().lookup(fileName);
       
       _tempFileManager = new TempFileManager(path);
     }
     
     return _tempFileManager;
-  }
-
-  @Deprecated
-  public Path getManagementPath()
-  {
-    return _managementPath;
   }
 
   /**
@@ -837,7 +850,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       // force a GC on start
       System.gc();
       
-      Path repositoryPath = getManagement().getPath().lookup("ivy");
+      Path repositoryPath = getAdminPath().lookup("ivy");
 
       ClusterServer clusterServer = null;
 

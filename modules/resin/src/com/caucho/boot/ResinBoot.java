@@ -269,11 +269,16 @@ public class ResinBoot {
       try {
 	_client.shutdown();
 
-	System.out.println(L().l("Resin/{0} shutdown ResinWatchdogManager",
-				 Version.VERSION));
+	System.out.println(L().l("Resin/{0} shutdown watchdog at {1}:{2}",
+				 Version.VERSION,
+				 _client.getWatchdogAddress(),
+				 _client.getWatchdogPort()));
       } catch (Exception e) {
-	System.err.println(L().l("Resin/{0} can't shutdown ResinWatchdogManager.\n{1}",
-				 Version.VERSION, e.toString()));
+	System.err.println(L().l("Resin/{0} can't shutdown watchdog at {1}:{2}.\n{3}",
+				 Version.VERSION,
+				 _client.getWatchdogAddress(),
+				 _client.getWatchdogPort(),
+				 e.toString()));
 
 	log().log(Level.FINE, e.toString(), e);
 

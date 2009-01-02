@@ -84,6 +84,9 @@ abstract public class StoreManager
   protected boolean _isAlwaysLoad;
   protected boolean _isAlwaysSave;
   
+  protected boolean _isSaveBackup = true;
+  protected boolean _isSaveTriplicate = true;
+  
   protected HashMap<HashKey,Store> _storeMap;
   protected LruCache<HashKey,ClusterObject> _clusterObjects;
 
@@ -371,6 +374,38 @@ abstract public class StoreManager
     Environment.addEnvironmentListener(this);
 
     return true;
+  }
+
+  /**
+   * Returns the backup setting
+   */
+  public boolean isSaveBackup()
+  {
+    return _isSaveBackup;
+  }
+
+  /**
+   * Set the backup setting
+   */
+  public void setSaveBackup(boolean isSaveBackup)
+  {
+    _isSaveBackup = isSaveBackup;
+  }
+
+  /**
+   * Returns the triplicate setting
+   */
+  public boolean isSaveTriplicate()
+  {
+    return _isSaveTriplicate;
+  }
+
+  /**
+   * Set the triplicate setting
+   */
+  public void setSaveTriplicate(boolean isSaveTriplicate)
+  {
+    _isSaveTriplicate = isSaveTriplicate;
   }
 
   /**

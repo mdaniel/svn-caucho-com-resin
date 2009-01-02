@@ -77,8 +77,6 @@ class HmuxBamConnection extends AbstractBamStream
     _callback = new HmuxBamClientCallback(client, this, in);
 
     _jid = _callback.getJid();
-
-    System.out.println("JID: " + _jid);
   }
 
   //

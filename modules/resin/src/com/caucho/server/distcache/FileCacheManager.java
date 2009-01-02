@@ -164,11 +164,12 @@ public class FileCacheManager extends DistributedCacheManager
       return;
 
     long version = oldEntry != null ? oldEntry.getVersion() + 1 : 1;
+    int flags = config.getFlags();
 
     long expireTime = Alarm.getExactTime() + 100L;
 
-    CacheMapEntry entry = new CacheMapEntry(valueHash, value, version,
-					    expireTime, true);
+    CacheMapEntry entry = new CacheMapEntry(valueHash, value, flags,
+					    version, expireTime, true);
 
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
@@ -181,7 +182,7 @@ public class FileCacheManager extends DistributedCacheManager
     }
 
     if (oldEntry == null) {
-      if (_cacheMapBacking.insert(key, valueHash, version, timeout)) {
+      if (_cacheMapBacking.insert(key, valueHash, flags, version, timeout)) {
       }
       else {
 	log.fine(this + " db insert failed due to timing conflict"
@@ -223,9 +224,10 @@ public class FileCacheManager extends DistributedCacheManager
       = oldEntry != null ? oldEntry.getValueHashKey() : null;
 
     long version = oldEntry != null ? oldEntry.getVersion() + 1 : 1;
+    int flags = oldEntry != null ? oldEntry.getFlags() : 0;
     
     long expireTime = Alarm.getCurrentTime() + 100L;
-    CacheMapEntry entry = new CacheMapEntry(null, null, version,
+    CacheMapEntry entry = new CacheMapEntry(null, null, flags, version,
 					    expireTime, true);
 
     // the failure cases are not errors because this put() could
