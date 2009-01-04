@@ -32,14 +32,10 @@ package com.caucho.quercus.lib.db;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ResourceType;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.util.L10N;
 
+import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -930,5 +926,107 @@ public class MysqliResult extends JdbcResultResource {
   public int num_rows()
   {
     return _resultSetSize;
+  }
+
+  @Override
+  protected Value getColumnString(Env env,
+				  ResultSet rs,
+				  ResultSetMetaData md,
+				  int column)
+    throws SQLException
+  {
+    // php/1464, php/144f, php/144g, php/144b
+
+    // The "SET NAMES 'latin1'" in Mysqli is important to make the default
+    // encoding sane
+    
+    Mysqli mysqli = getMysqli();
+    Method getColumnCharacterSetMethod
+      = mysqli.getColumnCharacterSetMethod(md.getClass());
+
+    String encoding = null;
+
+    try {
+      encoding = (String) getColumnCharacterSetMethod.invoke(md, column);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    if (encoding == null) {
+      String value = rs.getString(column);
+
+      if (value != null)
+	return env.createString(value);
+      else
+	return NullValue.NULL;
+    }
+
+    // calling getString() will decode using the database encoding, so
+    // get bytes directly.  Also, getBytes is faster for MySQL since
+    // getString converts from bytes to string.
+
+    if ("UTF-8".equals(encoding)) {
+      byte []bytes = rs.getBytes(column);
+            
+      if (bytes == null)
+	return NullValue.NULL;
+
+      StringValue bb = env.createUnicodeBuilder();
+
+      int length = bytes.length;
+      int offset = 0;
+    
+      bb.appendUtf8(bytes);
+
+      /*
+      while (offset < length) {
+	int ch = bytes[offset++] & 0xff;
+
+	if (ch < 0x80) {
+	  bb.append((char) ch);
+	}
+	else if (ch < 0xe0) {
+	  int ch2 = bytes[offset++] & 0xff;
+	  int v = ((ch & 0x1f) << 6) + ((ch2 & 0x3f));
+
+	  bb.append((char) MysqlLatin1Utility.decode(v));
+	}
+	else {
+	  int ch2 = bytes[offset++] & 0xff;
+	  int ch3 = bytes[offset++] & 0xff;
+	  int v = ((ch & 0xf) << 12) + ((ch2 & 0x3f) << 6) + ((ch3 & 0x3f));
+
+	  bb.append((char) MysqlLatin1Utility.decode(v));
+	}
+      }
+      */
+
+      return bb;
+    }
+    else if ("Cp1252".equals(encoding) || "LATIN1".equals(encoding)) {
+      byte []bytes = rs.getBytes(column);
+            
+      if (bytes == null)
+	return NullValue.NULL;
+    
+      StringValue bb = env.createUnicodeBuilder();
+
+      bb.append(bytes);
+
+      return bb;
+    }
+    else {
+      String value = rs.getString(column);
+
+      if (value != null)
+	return env.createString(value);
+      else
+	return NullValue.NULL;
+    }
+  }
+
+  protected Mysqli getMysqli()
+  {
+    return (Mysqli) getConnection();
   }
 }

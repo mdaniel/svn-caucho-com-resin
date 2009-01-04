@@ -59,6 +59,14 @@ public class MysqlLatin1Utility
     for (int i = 0; i < C1_MAP.length; i++)
       UNICODE_MAP[C1_MAP[i]] = (byte) (i + 0x80);
   }
+
+  public static char decode(int ch)
+  {
+    if (0x80 <= ch && ch <= 0x9F)
+      return C1_MAP[ch - 0x80];
+    else
+      return (char) ch;
+  }
   
   public static String decode(byte []bytes)
   {

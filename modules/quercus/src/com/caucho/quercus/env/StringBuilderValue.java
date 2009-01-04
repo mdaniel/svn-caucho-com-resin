@@ -1186,6 +1186,49 @@ public class StringBuilderValue
   }
 
   /**
+   * Append a buffer to the value.
+   */
+  @Override
+  public StringValue appendUtf8(byte []buf, int offset, int length)
+  {
+    if (_buffer.length < _length + length)
+      ensureCapacity(_length + length);
+
+    char []charBuffer = _buffer;
+    int charLength = _length;
+
+    int end = offset + length;
+    
+    while (offset < end) {
+      int ch = buf[offset++] & 0xff;
+
+      if (ch < 0x80)
+	charBuffer[charLength++] = (char) ch;
+      else if (ch < 0xe0) {
+	int ch2 = buf[offset++] & 0xff;
+	
+	int v = (char) (((ch & 0x1f) << 6) + (ch2 & 0x3f));
+	
+	charBuffer[charLength++] = (char) (v & 0xff);
+      }
+      else {
+	int ch2 = buf[offset++] & 0xff;
+	int ch3 = buf[offset++] & 0xff;
+	
+	int v = (char) (((ch & 0xf) << 12)
+			+ ((ch2 & 0x3f) << 6)
+			+ ((ch3) << 6));
+	
+	charBuffer[charLength++] = (char) (v & 0xff);
+      }
+    }
+
+    _length = charLength;
+
+    return this;
+  }
+
+  /**
    * Append a Java byte to the value without conversions.
    */
   @Override

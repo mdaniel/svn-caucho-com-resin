@@ -587,7 +587,7 @@ public class QuercusParser {
 	      modifiers |= M_FINAL;
 	      break;
 	    case CLASS:
-	      parseClassDefinition(modifiers);
+	      statementList.add(parseClassDefinition(modifiers));
 	      break;
 	    default:
 	      throw error(L.l("expected 'class' at {0}",

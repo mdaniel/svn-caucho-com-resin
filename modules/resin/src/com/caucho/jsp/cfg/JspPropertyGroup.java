@@ -67,6 +67,7 @@ public class JspPropertyGroup {
   // Resin config
   private boolean _precompile = true;
   private boolean _fastJstl = true;
+  private boolean _fastJsf = true;
   private boolean _ideHack = false;
   private boolean _velocity = false;
   private boolean _session = true;
@@ -363,6 +364,22 @@ public class JspPropertyGroup {
   public boolean isFastJstl()
   {
     return _fastJstl;
+  }
+
+  /**
+   * Set if fast jsf is allowed.
+   */
+  public void setFastJsf(boolean fastJsf)
+  {
+    _fastJsf = fastJsf;
+  }
+
+  /**
+   * Return true if fast jsf is allowed.
+   */
+  public boolean isFastJsf()
+  {
+    return _fastJsf;
   }
 
   /**

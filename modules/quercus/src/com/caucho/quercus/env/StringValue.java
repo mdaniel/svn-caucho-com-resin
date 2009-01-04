@@ -1059,6 +1059,22 @@ abstract public class StringValue
   {
     return append(buf, 0, buf.length);
   }
+
+  /**
+   * Append a byte buffer to the value.
+   */
+  public StringValue appendUtf8(byte []buf, int offset, int length)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Append a byte buffer to the value.
+   */
+  public StringValue appendUtf8(byte []buf)
+  {
+    return appendUtf8(buf, 0, buf.length);
+  }
   
   /**
    * Append to a string builder.

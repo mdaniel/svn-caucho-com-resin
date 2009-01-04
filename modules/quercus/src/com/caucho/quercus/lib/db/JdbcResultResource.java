@@ -53,7 +53,8 @@ import java.util.logging.Logger;
  * Represents a JDBC Result value.
  */
 public class JdbcResultResource {
-  private static final Logger log = Log.open(JdbcResultResource.class);
+  private static final Logger log
+    = Logger.getLogger(JdbcResultResource.class.getName());
   private static final L10N L = new L10N(JdbcResultResource.class);
 
   public static final int FETCH_ASSOC = 0x1;
@@ -549,56 +550,10 @@ public class JdbcResultResource {
 
       case Types.VARCHAR:
       case Types.LONGVARCHAR:
-      {
-        StringValue bb = env.createUnicodeBuilder();
-        
-        try {
-          if (bb.isUnicode()) {
-            Reader reader = rs.getCharacterStream(column);
-            
-            if (reader == null) // || rs.wasNull())
-              return NullValue.NULL;
-            
-            bb.append(reader);
-          }
-          else {
-            byte []bytes = null;
-            
-            if (metaData.getClass().getName().equals("com.mysql.jdbc.ResultSetMetaData")) {
-              // calling getString() will decode using the database encoding
-              String s = rs.getString(column);
-              
-              if (s == null)
-                return NullValue.NULL;
-              
-              // php/1464, php/144f, php/144g
-              // attempt to convert to latin1 bytes,
-              // conversion may fail if there was a mismatch between database
-              // encoding and latin1 (implying that the database didn't encode
-              // the data that went into it)
-              bytes = MysqlLatin1Utility.encode(s);
-            }
-            
-            // php/144b
-            if (bytes == null)
-              bytes = rs.getBytes(column);
-            
-            if (bytes == null)
-              return NullValue.NULL;
-
-            if (bytes != null)
-              bb.append(bytes);
-            
-            return bb;
-          }
-        } catch (RuntimeException e) {
-          log.log(Level.WARNING, e.toString(), e);
-
-          return NullValue.NULL;
-        }
-
-        return bb;
-      }
+	if (env.isUnicodeSemantics())
+	  return getUnicodeColumnString(env, rs, metaData, column);
+	else
+	  return getColumnString(env, rs, metaData, column);
 
       case Types.TIME:
 	return getColumnTime(env, rs, column);
@@ -629,6 +584,48 @@ public class JdbcResultResource {
 
       return NullValue.NULL;
     }
+  }
+
+  protected Value getUnicodeColumnString(Env env,
+					 ResultSet rs,
+					 ResultSetMetaData md,
+					 int column)
+    throws IOException, SQLException
+  {
+    Reader reader = rs.getCharacterStream(column);
+            
+    if (reader == null) // || rs.wasNull())
+      return NullValue.NULL;
+            
+    StringValue bb = env.createUnicodeBuilder();
+        
+    bb.append(reader);
+
+    return bb;
+  }
+
+  protected Value getColumnString(Env env,
+				  ResultSet rs,
+				  ResultSetMetaData md,
+				  int column)
+    throws SQLException
+  {
+    // php/1464, php/144f, php/144g
+    // php/144b
+
+    // calling getString() will decode using the database encoding, so
+    // get bytes directly.  Also, getBytes is faster for MySQL since
+    // getString converts from bytes to string.
+    byte []bytes = rs.getBytes(column);
+            
+    if (bytes == null)
+      return NullValue.NULL;
+
+    StringValue bb = env.createUnicodeBuilder();
+
+    bb.append(bytes);
+            
+    return bb;
   }
 
   protected Value getColumnTime(Env env, ResultSet rs, int column)

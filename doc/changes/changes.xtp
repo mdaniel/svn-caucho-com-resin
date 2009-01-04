@@ -13,6 +13,8 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>quercus: abstract class not properly initialized in statement (#3216, rep by koreth)</li>
+<li>quercus: i18n issues with "set names" (#3203, rep by M Schmidt)</li>
 <li>quercus: array copyOnWrite issue with _var vs _value (#3210, rep by koreth)</li>
 <li>quercus: array return value from external call (#347b, rep by koreth)</li>
 <li>quercus: json_decode of '{}' not handled properly, cont (#3201, rep by koreth)</li>

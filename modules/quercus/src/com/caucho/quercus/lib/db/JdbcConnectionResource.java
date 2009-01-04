@@ -1174,9 +1174,9 @@ public abstract class JdbcConnectionResource
 
       // Extract database name if back quoted : "DROP DATABASE `DBNAME`"
 
-      if (tok.length() >= 2 &&
-        tok.charAt(0) == '`' &&
-        tok.charAt(tok.length() - 1) == '`') {
+      if (tok.length() >= 2
+	  && tok.charAt(0) == '`'
+	  && tok.charAt(tok.length() - 1) == '`') {
         tok = tok.substring(1, tok.length() - 1);
       }
 

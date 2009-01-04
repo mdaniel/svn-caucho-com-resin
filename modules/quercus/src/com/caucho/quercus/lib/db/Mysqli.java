@@ -70,6 +70,11 @@ public class Mysqli extends JdbcConnectionResource {
   protected static final String DRIVER
     = "com.mysql.jdbc.Driver";
 
+  private static volatile String _checkedDriverVersion = null;
+  private static Object _checkDriverLock = new Object();
+
+  private static MysqlMetaDataMethod _lastMetaDataMethod;
+
   /**
    * mysqli_multi_query populates _resultValues
    * NB: any updates (ie: INSERT, UPDATE, DELETE) will
@@ -93,10 +98,9 @@ public class Mysqli extends JdbcConnectionResource {
   
   private boolean _isPersistent;
 
-  private static volatile String _checkedDriverVersion = null;
-  private static Object _checkDriverLock = new Object();
-
   private LastSqlType _lastSql;
+
+  private MysqlMetaDataMethod _metaDataMethod;
 
   /**
     * This is the constructor for the mysqli class.
@@ -172,17 +176,17 @@ public class Mysqli extends JdbcConnectionResource {
    * Connects to the underlying database.
    */
   @Override
-    protected ConnectionEntry connectImpl(Env env,
-					  String host,
-					  String userName,
-					  String password,
-					  String dbname,
-					  int port,
-					  String socket,
-					  int flags,
-					  String driver,
-					  String url,
-					  boolean isNewLink)
+  protected ConnectionEntry connectImpl(Env env,
+					String host,
+					String userName,
+					String password,
+					String dbname,
+					int port,
+					String socket,
+					int flags,
+					String driver,
+					String url,
+					boolean isNewLink)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));
@@ -213,6 +217,14 @@ public class Mysqli extends JdbcConnectionResource {
         = env.getConnection(driver, url, userName, password, ! isNewLink);
 
       checkDriverVersion(env, jConn);
+
+      Connection conn = jConn.getConnection();
+      Statement stmt = conn.createStatement();
+
+      // php/1465
+      stmt.executeUpdate("SET NAMES 'latin1'");
+
+      stmt.close();
 
       return jConn;
     } catch (SQLException e) {
@@ -805,43 +817,58 @@ public class Mysqli extends JdbcConnectionResource {
 
       SqlParseToken tok = parseSqlToken(sql, null);
 
-      if (tok != null
-          && tok.matchesFirstChar('U', 'u')
-          && tok.matchesToken("USE")) {
-        // Mysql "USE DBNAME" statement.
-        //
-        // The Mysql JDBC driver does not properly implement getCatalog()
-        // when calls to setCatalog() are mixed with SQL USE statements.
-        // Work around this problem by translating a SQL USE statement
-        // into a JDBC setCatalog() invocation. The setCatalog() API in
-        // the ConnectorJ implementation just creates a USE statement
-        // anyway. This also makes sure the database pool logic knows
-        // which database is currently selected. If a second call to
-        // select the current database is found, it is a no-op.
+      if (tok != null) {
+	switch (tok.getFirstChar()) {
+	case 'u': case 'U':
+	  if (tok.matchesToken("USE")) {
+	    // Mysql "USE DBNAME" statement.
+	    //
+	    // The Mysql JDBC driver does not properly implement getCatalog()
+	    // when calls to setCatalog() are mixed with SQL USE statements.
+	    // Work around this problem by translating a SQL USE statement
+	    // into a JDBC setCatalog() invocation. The setCatalog() API in
+	    // the ConnectorJ implementation just creates a USE statement
+	    // anyway. This also makes sure the database pool logic knows
+	    // which database is currently selected. If a second call to
+	    // select the current database is found, it is a no-op.
 
-        tok = parseSqlToken(sql, tok);
+	    tok = parseSqlToken(sql, tok);
 
-        if (tok != null) {
-          String dbname = tok.toUnquotedString();
+	    if (tok != null) {
+	      String dbname = tok.toUnquotedString();
 
-          setCatalog(dbname);
+	      setCatalog(dbname);
 
-          return BooleanValue.TRUE;
-        }
-      }
-      else if (tok != null
-	       && tok.matchesFirstChar('U', 'u')
-	       && tok.matchesToken("UPDATE")) {
-        // SQL UPDATE statement
+	      return BooleanValue.TRUE;
+	    }
+	  }
+	  else if (tok != null && tok.matchesToken("UPDATE")) {
+	    // SQL UPDATE statement
 
-        _lastSql = LastSqlType.UPDATE;
-      }
-      else if (tok != null
-	       && tok.matchesFirstChar('D', 'd')
-	       && tok.matchesToken("DESCRIBE")) {
-        // SQL DESCRIBE statement
+	    _lastSql = LastSqlType.UPDATE;
+	  }
+	  break;
 
-        _lastSql = LastSqlType.DESCRIBE;
+	case 'd': case 'D':
+	  if (tok.matchesToken("DESCRIBE")) {
+	    // SQL DESCRIBE statement
+
+	    _lastSql = LastSqlType.DESCRIBE;
+	  }
+	  break;
+
+	case 's': case 'S':
+	  if (tok.matchesToken("SET")) {
+	    // SQL SET statement
+
+	    String lower = sql.toLowerCase();
+	    if (lower.indexOf(" names ") >= 0) {
+	      // php/1469 - need to control i18n 'names'
+	      return LongValue.ONE;
+	    }
+	  }
+	  break;
+	}
       }
 
       return super.realQuery(env, sql);
@@ -1475,6 +1502,26 @@ public class Mysqli extends JdbcConnectionResource {
   {
     _isPersistent = true;
   }
+
+  /**
+   * Returns the mysql getColumnCharacterSet method
+   */
+  Method getColumnCharacterSetMethod(Class metaDataClass)
+  {
+    if (_metaDataMethod == null) {
+      MysqlMetaDataMethod metaDataMethod = _lastMetaDataMethod;
+      
+      if (metaDataMethod == null
+	  || metaDataMethod.getMetaDataClass() != metaDataClass) {
+	metaDataMethod = new MysqlMetaDataMethod(metaDataClass);
+	_lastMetaDataMethod = metaDataMethod;
+      }
+
+      _metaDataMethod = metaDataMethod;
+    }
+
+    return _metaDataMethod.getColumnCharacterSetMethod();
+  }
   
   /**
    * Verify that the ConnectorJ driver version is 3.1.14 or newer.
@@ -1507,7 +1554,6 @@ public class Mysqli extends JdbcConnectionResource {
       }
     }
   }
-
 
   private static String checkDriverVersionImpl(Env env, Connection conn)
     throws SQLException
@@ -1628,4 +1674,32 @@ public class Mysqli extends JdbcConnectionResource {
     UPDATE,
     DESCRIBE
   };
+
+  static class MysqlMetaDataMethod {
+    private Class _resultSetMetaDataClass;
+    private Method _getColumnCharacterSetMethod;
+
+    MysqlMetaDataMethod(Class resultSetMetaDataClass)
+    {
+      _resultSetMetaDataClass = resultSetMetaDataClass;
+      
+      try {
+	_getColumnCharacterSetMethod
+	  = _resultSetMetaDataClass.getMethod("getColumnCharacterSet",
+					      new Class[] { int.class });
+      } catch (Exception e) {
+	log.log(Level.FINER, e.toString(), e);
+      }
+    }
+
+    Class getMetaDataClass()
+    {
+      return _resultSetMetaDataClass;
+    }
+
+    Method getColumnCharacterSetMethod()
+    {
+      return _getColumnCharacterSetMethod;
+    }
+  }
 }
