@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.BreakValue;
@@ -37,24 +37,21 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
 /**
- * Represents a for statement.
+ * Represents a do ... while statement.
  */
-public class ForStatement extends Statement {
-  protected final Expr _init;
+public class DoStatement extends Statement {
   protected final Expr _test;
-  protected final Expr _incr;
   protected final Statement _block;
   protected final String _label;
 
-  public ForStatement(Location location, Expr init, Expr test, Expr incr,
-                      Statement block, String label)
+  public DoStatement(Location location,
+                     Expr test,
+                     Statement block,
+                     String label)
   {
     super(location);
 
-    _init = init;
     _test = test;
-    _incr = incr;
-
     _block = block;
     _label = label;
     
@@ -70,10 +67,7 @@ public class ForStatement extends Statement {
   public Value execute(Env env)
   {
     try {
-      if (_init != null)
-        _init.eval(env);
-
-      while (_test == null || _test.evalBoolean(env)) {
+      do {
         env.checkTimeout();
 
         Value value = _block.execute(env);
@@ -101,13 +95,10 @@ public class ForStatement extends Statement {
         }
         else
           return value;
-
-        if (_incr != null)
-          _incr.eval(env);
-      }
+      } while (_test.evalBoolean(env));
     }
-    catch (RuntimeException t) {
-      rethrow(t, RuntimeException.class);
+    catch (RuntimeException e) {
+      rethrow(e, RuntimeException.class);
     }
 
     return null;

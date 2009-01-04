@@ -42,6 +42,7 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.quercus.expr.RequiredExpr;
 import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.statement.*;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;

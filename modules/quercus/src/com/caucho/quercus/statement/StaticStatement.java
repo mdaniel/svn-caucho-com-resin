@@ -27,75 +27,47 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.BreakValue;
-import com.caucho.quercus.env.ContinueValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.VarExpr;
 
 /**
- * Represents a do ... while statement.
+ * Represents a static statement in a PHP program.
  */
-public class DoStatement extends Statement {
-  protected final Expr _test;
-  protected final Statement _block;
-  protected final String _label;
-
-  public DoStatement(Location location,
-                     Expr test,
-                     Statement block,
-                     String label)
+public class StaticStatement extends Statement {
+  protected VarExpr _var;
+  protected Expr _initValue;
+  protected String _staticName;
+  
+  /**
+   * Creates the echo statement.
+   */
+  public StaticStatement(Location location, VarExpr var, Expr initValue)
   {
     super(location);
 
-    _test = test;
-    _block = block;
-    _label = label;
-    
-    block.setParent(this);
+    _var = var;
+    _initValue = initValue;
   }
-
-  @Override
-  public boolean isLoop()
-  {
-    return true;
-  }
-
+  
   public Value execute(Env env)
   {
     try {
-      do {
-        env.checkTimeout();
+      if (_staticName == null)
+        _staticName = env.createStaticName();
 
-        Value value = _block.execute(env);
+      Var var = env.getStaticVar(_staticName);
+      
+      env.setValue(_var.getName(), var);
 
-        if (value == null) {
-        }
-        else if (value instanceof ContinueValue) {
-          ContinueValue conValue = (ContinueValue) value;
-          
-          int target = conValue.getTarget();
-          
-          if (target > 1) {
-            return new ContinueValue(target - 1);
-          }
-        }
-        else if (value instanceof BreakValue) {
-          BreakValue breakValue = (BreakValue) value;
-          
-          int target = breakValue.getTarget();
-          
-          if (target > 1)
-            return new BreakValue(target - 1);
-          else
-            break;
-        }
-        else
-          return value;
-      } while (_test.evalBoolean(env));
+      if (! var.isset() && _initValue != null)
+        var.set(_initValue.eval(env));
+
     }
     catch (RuntimeException e) {
       rethrow(e, RuntimeException.class);

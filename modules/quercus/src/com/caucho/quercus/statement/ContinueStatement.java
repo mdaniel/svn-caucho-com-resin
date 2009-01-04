@@ -27,32 +27,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.statement;
 
 import java.util.ArrayList;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.BreakValue;
 import com.caucho.quercus.env.ContinueValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
 /**
- * Represents a break expression statement in a PHP program.
+ * Represents a continue expression statement in a PHP program.
  */
-public class BreakStatement extends Statement {
+public class ContinueStatement extends Statement {
+  //public static final ContinueStatement CONTINUE = new ContinueStatement();
+  
   protected final Expr _target;
   protected final ArrayList<String> _loopLabelList;
   
-  //public static final BreakStatement BREAK = new BreakStatement();
-  
-  public BreakStatement(Location location,
-                        Expr target,
-                        ArrayList<String> loopLabelList)
+  public ContinueStatement(Location location,
+                           Expr target,
+                           ArrayList<String> loopLabelList)
   {
     super(location);
-    
     _target = target;
     _loopLabelList = loopLabelList;
   }
@@ -63,9 +61,9 @@ public class BreakStatement extends Statement {
   public Value execute(Env env)
   {
     if (_target == null)
-      return BreakValue.BREAK;
+      return ContinueValue.CONTINUE;
     else
-      return new BreakValue(_target.eval(env).toInt());
+      return new ContinueValue(_target.eval(env).toInt());
   }
 }
 

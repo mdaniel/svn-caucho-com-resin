@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.expr;
 
-import com.caucho.quercus.program.StatementHandle;
+import com.caucho.quercus.statement.StatementHandle;
 
 /**
  * A handle to a top expression

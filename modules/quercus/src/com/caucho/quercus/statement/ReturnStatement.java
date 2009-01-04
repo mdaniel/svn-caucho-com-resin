@@ -27,40 +27,55 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.util.L10N;
+import com.caucho.quercus.expr.Expr;
 
 /**
- * Represents a class definition
+ * Represents a return expression statement in a PHP program.
  */
-public class ClassDefStatement extends Statement {
-  private final static L10N L = new L10N(ClassDefStatement.class);
+public class ReturnStatement extends Statement {
+  protected final Expr _expr;
   
-  protected final InterpretedClassDef _cl;
-
-  public ClassDefStatement(Location location, InterpretedClassDef cl)
+  /**
+   * Creates the echo statement.
+   */
+  public ReturnStatement(Expr expr)
+  {
+    _expr = expr;
+  }
+  
+  /**
+   * Creates the echo statement.
+   */
+  public ReturnStatement(Location location, Expr expr)
   {
     super(location);
 
-    _cl = cl;
+    _expr = expr;
   }
 
-  @Override
+  /**
+   * Executes the statement, returning the expression value.
+   */
   public Value execute(Env env)
   {
-    env.addClass(_cl.getName(), _cl);
-
-    return null;
+    if (_expr != null)
+      return _expr.eval(env);
+    else
+      return NullValue.NULL;
   }
 
-  public String toString()
+  /**
+   * Returns true if control can go past the statement.
+   */
+  public int fallThrough()
   {
-    return getClass().getSimpleName() + "[" + _cl + "]";
+    return RETURN;
   }
 }
 

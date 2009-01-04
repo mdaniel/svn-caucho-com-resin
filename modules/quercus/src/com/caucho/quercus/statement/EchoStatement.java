@@ -27,28 +27,37 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.expr.Expr;
 
 /**
- * Represents a compiled PHP program.
+ * Represents an echo statement in a PHP program.
  */
-public class NullStatement extends Statement {
-  public static final NullStatement NULL = new NullStatement();
+public class EchoStatement extends Statement {
+  protected final Expr _expr;
 
-  protected NullStatement()
-  {
-    super(Location.UNKNOWN);
-  }
-
+  private String _genId;
+  
   /**
-   * The null statement does nothing.
+   * Creates the echo statement.
    */
+  public EchoStatement(Location location, Expr expr)
+  {
+    super(location);
+
+    _expr = expr;
+  }
+  
   public Value execute(Env env)
   {
+    Value value = _expr.eval(env);
+
+    value.print(env);
+
     return null;
   }
 }

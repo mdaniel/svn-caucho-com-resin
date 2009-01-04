@@ -27,49 +27,64 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-
-import java.io.IOException;
+import com.caucho.quercus.expr.Expr;
 
 /**
- * Represents static text in a PHP program.
+ * Represents an if statement.
  */
-public class TextStatement extends Statement {
-  private String _value;
-  
-  /**
-   * Creates the text statement with its string.
-   */
-  public TextStatement(Location location, String value)
+public class IfStatement extends Statement {
+  private final Expr _test;
+  private final Statement _trueBlock;
+  private final Statement _falseBlock;
+
+  public IfStatement(Location location, Expr test, Statement trueBlock, Statement falseBlock)
   {
     super(location);
 
-    _value = value;
+    _test = test;
+    _trueBlock = trueBlock;
+    _falseBlock = falseBlock;
+
+    if (_trueBlock != null)
+      _trueBlock.setParent(this);
+
+    if (_falseBlock != null)
+      _falseBlock.setParent(this);
   }
 
-  protected String getValue()
+  protected Expr getTest()
   {
-    return _value;
+    return _test;
   }
-  
+
+  protected Statement getTrueBlock()
+  {
+    return _trueBlock;
+  }
+
+  protected Statement getFalseBlock()
+  {
+    return _falseBlock;
+  }
+
+  /**
+   * Executes the 'if' statement, returning any value.
+   */
   public Value execute(Env env)
   {
-    try {
-      env.getOut().print(_value);
+    if (_test.evalBoolean(env)) {
+      return _trueBlock.execute(env);
     }
-    catch (RuntimeException e) {
-      throw e;
+    else if (_falseBlock != null) {
+      return _falseBlock.execute(env);
     }
-    catch (IOException e) {
-      throw new QuercusException(e);
-    }
-
-    return null;
+    else
+      return null;
   }
 }
 

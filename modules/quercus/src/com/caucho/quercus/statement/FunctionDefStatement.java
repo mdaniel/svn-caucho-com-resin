@@ -27,45 +27,45 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.Function;
+import com.caucho.util.L10N;
 
 /**
- * Represents a throw expression statement in a Quercus program.
+ * Represents a function definition
  */
-public class ThrowStatement extends Statement {
-  protected Expr _expr;
+public class FunctionDefStatement extends Statement {
+  private final static L10N L = new L10N(FunctionDefStatement.class);
   
-  /**
-   * Creates the echo statement.
-   */
-  public ThrowStatement(Location location, Expr expr)
+  protected Function _fun;
+
+  public FunctionDefStatement(Location location, Function fun)
   {
     super(location);
-
-    _expr = expr;
+    
+    _fun = fun;
   }
-
-  /**
-   * Executes the statement, returning the expression value.
-   */
+  
   public Value execute(Env env)
   {
-    throw _expr.eval(env).toException(env,
-                                      getLocation().getFileName(),
-                                      getLocation().getLineNumber());
-  }
+    try {
+      String name = _fun.getName();
 
-  /**
-   * Returns true if control can go past the statement.
-   */
-  public int fallThrough()
-  {
-    return RETURN;
+      if (env.findFunction(name) == null)
+        env.addFunction(name, _fun);
+      else
+        env.error(getLocation(),
+                  L.l("function {0}() is already defined.", name));
+    }
+    catch (RuntimeException e) {
+      rethrow(e, RuntimeException.class);
+    }
+
+    return null;
   }
 }
+

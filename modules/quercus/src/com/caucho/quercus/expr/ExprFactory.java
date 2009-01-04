@@ -34,6 +34,7 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.*;
+import com.caucho.quercus.statement.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 

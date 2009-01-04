@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.BreakValue;
@@ -37,21 +37,24 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
 /**
- * Represents a while statement.
+ * Represents a for statement.
  */
-public class WhileStatement extends Statement {
+public class ForStatement extends Statement {
+  protected final Expr _init;
   protected final Expr _test;
+  protected final Expr _incr;
   protected final Statement _block;
   protected final String _label;
 
-  public WhileStatement(Location location,
-                        Expr test,
-                        Statement block,
-                        String label)
+  public ForStatement(Location location, Expr init, Expr test, Expr incr,
+                      Statement block, String label)
   {
     super(location);
 
+    _init = init;
     _test = test;
+    _incr = incr;
+
     _block = block;
     _label = label;
     
@@ -67,12 +70,24 @@ public class WhileStatement extends Statement {
   public Value execute(Env env)
   {
     try {
-      while (_test.evalBoolean(env)) {
+      if (_init != null)
+        _init.eval(env);
+
+      while (_test == null || _test.evalBoolean(env)) {
         env.checkTimeout();
 
         Value value = _block.execute(env);
-        
+
         if (value == null) {
+        }
+        else if (value instanceof ContinueValue) {
+          ContinueValue conValue = (ContinueValue) value;
+          
+          int target = conValue.getTarget();
+          
+          if (target > 1) {
+            return new ContinueValue(target - 1);
+          }
         }
         else if (value instanceof BreakValue) {
           BreakValue breakValue = (BreakValue) value;
@@ -84,21 +99,15 @@ public class WhileStatement extends Statement {
           else
             break;
         }
-        else if (value instanceof ContinueValue) {
-          ContinueValue conValue = (ContinueValue) value;
-          
-          int target = conValue.getTarget();
-          
-          if (target > 1) {
-            return new ContinueValue(target - 1);
-          }
-        }
         else
           return value;
+
+        if (_incr != null)
+          _incr.eval(env);
       }
     }
-    catch (RuntimeException e) {
-      rethrow(e, RuntimeException.class);
+    catch (RuntimeException t) {
+      rethrow(t, RuntimeException.class);
     }
 
     return null;

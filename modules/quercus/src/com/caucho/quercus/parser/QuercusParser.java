@@ -36,6 +36,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.*;
 import com.caucho.quercus.function.*;
 import com.caucho.quercus.program.*;
+import com.caucho.quercus.statement.*;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;

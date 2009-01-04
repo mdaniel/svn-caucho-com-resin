@@ -27,48 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.statement;
+
+import com.caucho.quercus.Location;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 
 /**
- * A handle to a statement
+ * Represents a compiled PHP program.
  */
-public class StatementHandle {
-  public static final StatementHandle NULL
-    = new StatementHandle(NullStatement.NULL);
+public class NullStatement extends Statement {
+  public static final NullStatement NULL = new NullStatement();
 
-  private final StatementHandle _parent;
-  private final StatementHandle _previous;
-
-  private Statement _statement;
-
-  public StatementHandle(StatementHandle parent, StatementHandle previous)
+  protected NullStatement()
   {
-    _parent = parent;
-    _previous = previous;
-  }
-
-  private StatementHandle(Statement statement)
-  {
-    _parent = null;
-    _previous = null;
-
-    _statement = statement;
+    super(Location.UNKNOWN);
   }
 
   /**
-   * Sets the statement.
+   * The null statement does nothing.
    */
-  public void setStatement(Statement statement)
+  public Value execute(Env env)
   {
-    _statement = statement;
-  }
-
-  /**
-   * Gets the statement.
-   */
-  public Statement getStatement()
-  {
-    return _statement;
+    return null;
   }
 }
 

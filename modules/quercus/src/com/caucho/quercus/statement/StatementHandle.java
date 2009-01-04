@@ -27,43 +27,48 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
-
-import com.caucho.quercus.Location;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.expr.Expr;
+package com.caucho.quercus.statement;
 
 /**
- * Represents an expression statement in a PHP program.
+ * A handle to a statement
  */
-public class ExprStatement extends Statement {
-  private Expr _expr;
-  
-  /**
-   * Creates the expression statement.
-   */
-  public ExprStatement(Location location, Expr expr)
-  {
-    super(location);
+public class StatementHandle {
+  public static final StatementHandle NULL
+    = new StatementHandle(NullStatement.NULL);
 
-    _expr = expr;
+  private final StatementHandle _parent;
+  private final StatementHandle _previous;
+
+  private Statement _statement;
+
+  public StatementHandle(StatementHandle parent, StatementHandle previous)
+  {
+    _parent = parent;
+    _previous = previous;
+  }
+
+  private StatementHandle(Statement statement)
+  {
+    _parent = null;
+    _previous = null;
+
+    _statement = statement;
   }
 
   /**
-   * Returns the expression.
+   * Sets the statement.
    */
-  public Expr getExpr()
+  public void setStatement(Statement statement)
   {
-    return _expr;
+    _statement = statement;
   }
-  
-  public Value execute(Env env)
-  {
-    // php/1a08
-    _expr.eval(env);
 
-    return null;
+  /**
+   * Gets the statement.
+   */
+  public Statement getStatement()
+  {
+    return _statement;
   }
 }
 

@@ -27,43 +27,41 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
-
-import java.util.ArrayList;
+package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.ContinueValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.InterpretedClassDef;
+import com.caucho.util.L10N;
 
 /**
- * Represents a continue expression statement in a PHP program.
+ * Represents a class definition
  */
-public class ContinueStatement extends Statement {
-  //public static final ContinueStatement CONTINUE = new ContinueStatement();
+public class ClassDefStatement extends Statement {
+  private final static L10N L = new L10N(ClassDefStatement.class);
   
-  protected final Expr _target;
-  protected final ArrayList<String> _loopLabelList;
-  
-  public ContinueStatement(Location location,
-                           Expr target,
-                           ArrayList<String> loopLabelList)
+  protected final InterpretedClassDef _cl;
+
+  public ClassDefStatement(Location location, InterpretedClassDef cl)
   {
     super(location);
-    _target = target;
-    _loopLabelList = loopLabelList;
+
+    _cl = cl;
   }
 
-  /**
-   * Executes the statement, returning the expression value.
-   */
+  @Override
   public Value execute(Env env)
   {
-    if (_target == null)
-      return ContinueValue.CONTINUE;
-    else
-      return new ContinueValue(_target.eval(env).toInt());
+    env.addClass(_cl.getName(), _cl);
+
+    return null;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _cl + "]";
   }
 }
 

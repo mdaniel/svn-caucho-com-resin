@@ -27,39 +27,45 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.statement;
+
+import java.util.ArrayList;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.env.BreakValue;
+import com.caucho.quercus.env.ContinueValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.expr.VarExpr;
+import com.caucho.quercus.expr.Expr;
 
 /**
- * Represents a global statement in a PHP program.
+ * Represents a break expression statement in a PHP program.
  */
-public class GlobalStatement extends Statement {
-  protected VarExpr _var;
+public class BreakStatement extends Statement {
+  protected final Expr _target;
+  protected final ArrayList<String> _loopLabelList;
   
-  /**
-   * Creates the echo statement.
-   */
-  public GlobalStatement(Location location, VarExpr var)
+  //public static final BreakStatement BREAK = new BreakStatement();
+  
+  public BreakStatement(Location location,
+                        Expr target,
+                        ArrayList<String> loopLabelList)
   {
     super(location);
     
-    _var = var;
+    _target = target;
+    _loopLabelList = loopLabelList;
   }
-  
+
+  /**
+   * Executes the statement, returning the expression value.
+   */
   public Value execute(Env env)
   {
-    try {
-      env.setValue(_var.getName(), env.getGlobalVar(_var.getName()));
-    }
-    catch (RuntimeException e) {
-      rethrow(e, RuntimeException.class);
-    }
-
-    return null;
+    if (_target == null)
+      return BreakValue.BREAK;
+    else
+      return new BreakValue(_target.eval(env).toInt());
   }
 }
 

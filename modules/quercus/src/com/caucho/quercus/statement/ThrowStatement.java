@@ -27,64 +27,45 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
 /**
- * Represents an if statement.
+ * Represents a throw expression statement in a Quercus program.
  */
-public class IfStatement extends Statement {
-  private final Expr _test;
-  private final Statement _trueBlock;
-  private final Statement _falseBlock;
-
-  public IfStatement(Location location, Expr test, Statement trueBlock, Statement falseBlock)
+public class ThrowStatement extends Statement {
+  protected Expr _expr;
+  
+  /**
+   * Creates the echo statement.
+   */
+  public ThrowStatement(Location location, Expr expr)
   {
     super(location);
 
-    _test = test;
-    _trueBlock = trueBlock;
-    _falseBlock = falseBlock;
-
-    if (_trueBlock != null)
-      _trueBlock.setParent(this);
-
-    if (_falseBlock != null)
-      _falseBlock.setParent(this);
-  }
-
-  protected Expr getTest()
-  {
-    return _test;
-  }
-
-  protected Statement getTrueBlock()
-  {
-    return _trueBlock;
-  }
-
-  protected Statement getFalseBlock()
-  {
-    return _falseBlock;
+    _expr = expr;
   }
 
   /**
-   * Executes the 'if' statement, returning any value.
+   * Executes the statement, returning the expression value.
    */
   public Value execute(Env env)
   {
-    if (_test.evalBoolean(env)) {
-      return _trueBlock.execute(env);
-    }
-    else if (_falseBlock != null) {
-      return _falseBlock.execute(env);
-    }
-    else
-      return null;
+    throw _expr.eval(env).toException(env,
+                                      getLocation().getFileName(),
+                                      getLocation().getLineNumber());
+  }
+
+  /**
+   * Returns true if control can go past the statement.
+   */
+  public int fallThrough()
+  {
+    return RETURN;
   }
 }
-

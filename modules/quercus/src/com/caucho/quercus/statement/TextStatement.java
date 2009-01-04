@@ -27,41 +27,46 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.util.L10N;
+
+import java.io.IOException;
 
 /**
- * Represents a function definition
+ * Represents static text in a PHP program.
  */
-public class FunctionDefStatement extends Statement {
-  private final static L10N L = new L10N(FunctionDefStatement.class);
+public class TextStatement extends Statement {
+  private String _value;
   
-  protected Function _fun;
-
-  public FunctionDefStatement(Location location, Function fun)
+  /**
+   * Creates the text statement with its string.
+   */
+  public TextStatement(Location location, String value)
   {
     super(location);
-    
-    _fun = fun;
+
+    _value = value;
+  }
+
+  protected String getValue()
+  {
+    return _value;
   }
   
   public Value execute(Env env)
   {
     try {
-      String name = _fun.getName();
-
-      if (env.findFunction(name) == null)
-        env.addFunction(name, _fun);
-      else
-        env.error(getLocation(),
-                  L.l("function {0}() is already defined.", name));
+      env.getOut().print(_value);
     }
     catch (RuntimeException e) {
-      rethrow(e, RuntimeException.class);
+      throw e;
+    }
+    catch (IOException e) {
+      throw new QuercusException(e);
     }
 
     return null;

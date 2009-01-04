@@ -27,38 +27,56 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
 /**
- * Represents an echo statement in a PHP program.
+ * Represents a return expression statement in a PHP program.
  */
-public class EchoStatement extends Statement {
-  protected final Expr _expr;
-
-  private String _genId;
+public class ReturnRefStatement extends Statement {
+  protected Expr _expr;
   
   /**
    * Creates the echo statement.
    */
-  public EchoStatement(Location location, Expr expr)
+  public ReturnRefStatement(Location location, Expr expr)
   {
     super(location);
 
     _expr = expr;
   }
-  
+
+  /**
+   * Executes the statement, returning the expression value.
+   */
   public Value execute(Env env)
   {
-    Value value = _expr.eval(env);
-
-    value.print(env);
+    try {
+      if (_expr != null) {
+        // php/0750
+        return _expr.evalRef(env);
+      }
+      else
+        return NullValue.NULL;
+    }
+    catch (RuntimeException e) {
+      rethrow(e, RuntimeException.class);
+    }
 
     return null;
+  }
+
+  /**
+   * Returns true if control can go past the statement.
+   */
+  public int fallThrough()
+  {
+    return RETURN;
   }
 }
 

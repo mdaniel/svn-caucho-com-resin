@@ -27,51 +27,41 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.VarExpr;
 
 /**
- * Represents a static statement in a PHP program.
+ * Represents an expression statement in a PHP program.
  */
-public class StaticStatement extends Statement {
-  protected VarExpr _var;
-  protected Expr _initValue;
-  protected String _staticName;
+public class ExprStatement extends Statement {
+  private Expr _expr;
   
   /**
-   * Creates the echo statement.
+   * Creates the expression statement.
    */
-  public StaticStatement(Location location, VarExpr var, Expr initValue)
+  public ExprStatement(Location location, Expr expr)
   {
     super(location);
 
-    _var = var;
-    _initValue = initValue;
+    _expr = expr;
+  }
+
+  /**
+   * Returns the expression.
+   */
+  public Expr getExpr()
+  {
+    return _expr;
   }
   
   public Value execute(Env env)
   {
-    try {
-      if (_staticName == null)
-        _staticName = env.createStaticName();
-
-      Var var = env.getStaticVar(_staticName);
-      
-      env.setValue(_var.getName(), var);
-
-      if (! var.isset() && _initValue != null)
-        var.set(_initValue.eval(env));
-
-    }
-    catch (RuntimeException e) {
-      rethrow(e, RuntimeException.class);
-    }
+    // php/1a08
+    _expr.eval(env);
 
     return null;
   }

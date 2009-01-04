@@ -33,6 +33,7 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.page.QuercusPage;
+import com.caucho.quercus.statement.*;
 import com.caucho.vfs.BasicDependencyContainer;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
