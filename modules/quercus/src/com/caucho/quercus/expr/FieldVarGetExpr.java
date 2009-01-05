@@ -72,7 +72,7 @@ public class FieldVarGetExpr extends AbstractVarExpr {
 
     // XXX: getFieldArg(isTop)
 
-    return value.getFieldArg(env, _nameExpr.evalStringValue(env));
+    return value.getFieldArg(env, _nameExpr.evalStringValue(env), isTop);
   }
 
   /**
