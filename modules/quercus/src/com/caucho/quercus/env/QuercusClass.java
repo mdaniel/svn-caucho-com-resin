@@ -98,6 +98,8 @@ public class QuercusClass {
 
   private final HashMap<String,ArrayList<StaticField>> _staticFieldExprMap;
 
+  private final HashSet<String> _instanceofSet;
+
   private boolean _isModified;
 
   public QuercusClass(ClassDef classDef, QuercusClass parent)
@@ -167,6 +169,8 @@ public class QuercusClass {
     
     _javaClassDef = javaClassDef;
 
+    _instanceofSet = new HashSet<String>();
+
     HashSet<String> ifaces = new HashSet<String>();
 
     for (int i = classDefList.length - 1; i >= 0; i--) {
@@ -179,14 +183,17 @@ public class QuercusClass {
 
       classDef.init();
 
+      _instanceofSet.add(classDef.getName());
+
       for (String iface : classDef.getInterfaces()) {
-        
         // XXX: php/0cn2, but this is wrong:
         QuercusClass cl = Env.getInstance().findClass(iface);
         
         if (cl == null)
           throw new QuercusRuntimeException(L.l("cannot find interface {0}",
                                                 iface));
+
+	_instanceofSet.addAll(cl.getInstanceofSet());
         
         ClassDef ifaceDef = cl.getClassDef();
         // ClassDef ifaceDef = moduleContext.findClass(iface);
@@ -249,6 +256,7 @@ public class QuercusClass {
     _methodMap = cacheClass._methodMap;
     _constMap = cacheClass._constMap;
     _staticFieldExprMap = cacheClass._staticFieldExprMap;
+    _instanceofSet = cacheClass._instanceofSet;
   }
 
   public ClassDef getClassDef()
@@ -264,6 +272,11 @@ public class QuercusClass {
   public MethodMap<AbstractFunction> getMethodMap()
   {
     return _methodMap;
+  }
+
+  public HashSet<String> getInstanceofSet()
+  {
+    return _instanceofSet;
   }
 
   /**
@@ -873,13 +886,7 @@ public class QuercusClass {
    */
   public boolean isA(String name)
   {
-    for (int i = _classDefList.length - 1; i >= 0; i--) {
-      if (_classDefList[i].isA(name)) {
-        return true;
-      }
-    }
-
-    return false;
+    return _instanceofSet.contains(name);
   }
   
   /*

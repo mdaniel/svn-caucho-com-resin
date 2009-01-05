@@ -61,9 +61,13 @@ class Regcomp {
   static final int END_ONLY = 0x40;
   static final int UNGREEDY = 0x80;
   static final int STRICT = 0x100;
+  static final int UTF8 = 0x200;
   
   static final HashMap<String,Integer> _characterClassMap
     = new HashMap<String,Integer>();
+
+  static final Map<String,RegexpSet> _unicodeBlockMap
+    = Collections.synchronizedMap(new HashMap<String,RegexpSet>());
   
   int _nGroup;
   int _nLoop;
@@ -791,6 +795,10 @@ class Regcomp {
 	  set.mergeOrInv(RegexpSet.WORD);
 	  break;
 
+	case 'p':
+	  set.mergeOr(parseUnicodeSet(pattern));
+	  break;
+
 	case 'b':
 	  ch = '\b';
 	  isChar = true;
@@ -896,6 +904,50 @@ class Regcomp {
 	set.setRange(Character.toLowerCase(a), Character.toLowerCase(b));
       }
     }
+  }
+
+  private RegexpSet parseUnicodeSet(PeekStream pattern)
+    throws IllegalRegexpException
+  {
+    expect('{', pattern.read());
+
+    StringBuilder sb = new StringBuilder();
+    int ch;
+
+    while ((ch = pattern.read()) >= 0 && ch != '}') {
+      sb.append((char) ch);
+    }
+
+    String name = sb.toString();
+
+    if (ch != '}')
+      throw new IllegalRegexpException(L.l("expected '}' at "
+					   + badChar(ch)));
+
+    _flags |= UTF8;
+
+    RegexpSet set = _unicodeBlockMap.get(name);
+
+    if (set != null)
+      return set;
+
+    Character.UnicodeBlock block = Character.UnicodeBlock.forName(name);
+
+    if (block == null)
+      throw new IllegalRegexpException(L.l("'{0}' is an unknown unicode block",
+					   name));
+
+    set = new RegexpSet();
+
+    for (ch = 0; ch < 65536; ch++) {
+      if (Character.UnicodeBlock.of(ch) == block) {
+	set.setRange(ch, ch);
+      }
+    }
+
+    _unicodeBlockMap.put(name, set);
+
+    return set;
   }
 
   /**
@@ -1348,7 +1400,7 @@ class Regcomp {
     byte category = 0;
     
     int ch2 = pattern.read();
-    
+
     switch (ch) {
     case 'C':
       switch (ch2) {

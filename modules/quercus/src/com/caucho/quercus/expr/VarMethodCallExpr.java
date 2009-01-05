@@ -92,7 +92,7 @@ public class VarMethodCallExpr extends Expr {
     Value []values = new Value[_args.length];
 
     for (int i = 0; i < values.length; i++) {
-      values[i] = _args[i].evalArg(env);
+      values[i] = _args[i].evalArg(env, true);
     }
 
     StringValue methodName = _name.eval(env).toStringValue();

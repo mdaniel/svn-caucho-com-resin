@@ -102,7 +102,7 @@ public class ClassMethodExpr extends Expr {
     
     for (int i = 0; i < values.length; i++) {
       // php/09e1
-      values[i] = _args[i].evalArg(env);
+      values[i] = _args[i].evalArg(env, true);
     }
 
     Value obj = env.getThis();

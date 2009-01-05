@@ -54,7 +54,8 @@ public class ArgGetValue extends Value
    * Returns the arg object for a field reference, e.g.
    * foo($a[0][1])
    */
-  public Value getArg(Value index)
+  @Override
+  public Value getArg(Value index, boolean isTop)
   {
     return new ArgGetValue(this, index); // php/3d1p
   }
@@ -63,7 +64,8 @@ public class ArgGetValue extends Value
    * Returns the arg object for a field reference, e.g.
    * foo($a[0]->x)
    */
-  public Value getFieldArg(Env env, StringValue index)
+  @Override
+  public Value getFieldArg(Env env, StringValue index, boolean isTop)
   {
     return new ArgGetFieldValue(env, this, index); // php/3d2p
   }

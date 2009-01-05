@@ -81,7 +81,7 @@ public class ArrayIsSetExpr extends Expr {
    */
   public boolean evalBoolean(Env env)
   {
-    Value array = _expr.evalArg(env);
+    Value array = _expr.eval(env);
     Value index = _index.eval(env);
 
     return array.get(index) != UnsetValue.UNSET;

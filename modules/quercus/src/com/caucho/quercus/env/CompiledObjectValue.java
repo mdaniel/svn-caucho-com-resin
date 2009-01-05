@@ -132,7 +132,7 @@ public class CompiledObjectValue extends ObjectValue
    * Returns the value as an argument which may be a reference.
    */
   @Override
-  public Value getFieldArg(Env env, StringValue key)
+  public Value getFieldArg(Env env, StringValue key, boolean isTop)
   {
     if (_fields.length > 0) {
       int index = _quercusClass.findFieldIndex(key);
@@ -149,7 +149,7 @@ public class CompiledObjectValue extends ObjectValue
     if (_object == null)
       _object = new ObjectExtValue(_quercusClass);
     
-    return _object.getFieldArg(env, key);
+    return _object.getFieldArg(env, key, isTop);
   }
 
   /**

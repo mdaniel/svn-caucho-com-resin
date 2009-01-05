@@ -106,11 +106,11 @@ public class ArrayFunExpr extends Expr {
     for (int i = 0; i < _values.length; i++) {
       Expr keyExpr = _keys[i];
       
-      Value value = _values[i].evalArg(env);
+      Value value = _values[i].evalArg(env, true);
       value = value.toArgValue();
 
       if (keyExpr != null) {
-        Value key = keyExpr.evalArg(env).toArgValue();
+        Value key = keyExpr.evalArg(env, true).toArgValue();
 
         array.put(key, value);
       }

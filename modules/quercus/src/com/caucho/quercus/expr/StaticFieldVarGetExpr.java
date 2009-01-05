@@ -89,7 +89,7 @@ public class StaticFieldVarGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public Value evalArg(Env env)
+  public Value evalArg(Env env, boolean isTop)
   {
     return env.getStaticClassFieldVar(_className, _varName.evalString(env));
   }

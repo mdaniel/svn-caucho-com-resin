@@ -874,11 +874,11 @@ public class JavaAdapterVar extends Value
    * Returns the array ref.
    */
   @Override
-  public Value getArg(Value index)
+  public Value getArg(Value index, boolean isTop)
   {
     setRaw(getValue());
     
-    Value value = super.getArg(index);
+    Value value = super.getArg(index, isTop);
     
     setValue(getRawValue());
     
@@ -1022,11 +1022,11 @@ public class JavaAdapterVar extends Value
    * Returns the array ref.
    */
   @Override
-  public Value getFieldArg(Env env, StringValue index)
+  public Value getFieldArg(Env env, StringValue index, boolean isTop)
   {
     setRaw(getValue());
     
-    Value retValue = super.getFieldArg(env, index);
+    Value retValue = super.getFieldArg(env, index, isTop);
     
     setValue(getRawValue());
     

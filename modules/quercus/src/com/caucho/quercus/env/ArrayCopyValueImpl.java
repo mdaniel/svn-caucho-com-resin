@@ -116,10 +116,11 @@ public class ArrayCopyValueImpl extends ArrayValueImpl
   /**
    * Returns the value as an argument which may be a reference.
    */
-  public Value getArg(Value index)
+  @Override
+  public Value getArg(Value index, boolean isTop)
   {
     // XXX:
-    return super.getArg(index);
+    return super.getArg(index, isTop);
   }
 
   /**

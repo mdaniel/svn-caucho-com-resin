@@ -145,9 +145,10 @@ public class CopyArrayValue extends ArrayValue {
   /**
    * Returns the value as an argument which may be a reference.
    */
-  public Value getArg(Value index)
+  @Override
+  public Value getArg(Value index, boolean isTop)
   {
-    return getCopyArray().getArg(index);
+    return getCopyArray().getArg(index, isTop);
   }
 
   /**

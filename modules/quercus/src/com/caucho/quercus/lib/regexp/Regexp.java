@@ -69,7 +69,7 @@ public class Regexp {
   boolean _isUnicode;
   boolean _isPHP5String;
   
-  boolean _isUTF8;
+  boolean _isUtf8;
   boolean _isEval;
   
   public Regexp(Env env, StringValue rawRegexp)
@@ -132,14 +132,14 @@ public class Regexp {
         case 'U': flags |= Regcomp.UNGREEDY; break;
         case 'X': flags |= Regcomp.STRICT; break;
         
-        case 'u': _isUTF8 = true; break;
+        case 'u': flags |= Regcomp.UTF8; break;
         case 'e': _isEval = true; break;
       }
     }
 
     // XXX: what if unicode.semantics='true'?
     
-    if (_isUTF8)
+    if ((flags & Regcomp.UTF8) != 0)
       pattern = fromUtf8(env, pattern);
 
     _pattern = pattern;
@@ -168,7 +168,7 @@ public class Regexp {
   
   public boolean isUTF8()
   {
-    return _isUTF8;
+    return _isUtf8;
   }
   
   public boolean isEval()
@@ -178,7 +178,7 @@ public class Regexp {
 
   public StringValue convertSubject(Env env, StringValue subject)
   {
-    if (_isUTF8)
+    if (isUTF8())
       return fromUtf8(env, subject);
     else
       return subject;
@@ -186,7 +186,7 @@ public class Regexp {
 
   public StringValue convertResult(Env env, StringValue result)
   {
-    if (_isUTF8)
+    if (isUTF8())
       return toUtf8(env, result);
     else
       return result;
@@ -197,6 +197,7 @@ public class Regexp {
     _ignoreCase = (comp._flags & Regcomp.IGNORE_CASE) != 0;
     _isGlobal = (comp._flags & Regcomp.GLOBAL) != 0;
     _isAnchorBegin = (comp._flags & Regcomp.ANCHORED) != 0;
+    _isUtf8 = (comp._flags & Regcomp.UTF8) != 0;
 
     if (prog.isAnchorBegin())
       _isAnchorBegin = true;
@@ -226,7 +227,7 @@ public class Regexp {
 
       if (_isUnicode) {
       }
-      else if (_isUTF8)
+      else if (isUTF8())
         groupName.toBinaryValue(env, "UTF-8");
       else
         groupName.toBinaryValue(env);

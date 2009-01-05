@@ -94,7 +94,7 @@ public class MethodCallExpr extends Expr {
     Value []args = new Value[_args.length];
 
     for (int i = 0; i < _args.length; i++)
-      args[i] = _args[i].evalArg(env);
+      args[i] = _args[i].evalArg(env, true);
 
     env.pushCall(this, obj, args);
 
@@ -123,7 +123,7 @@ public class MethodCallExpr extends Expr {
     Value []args = new Value[_args.length];
 
     for (int i = 0; i < _args.length; i++)
-      args[i] = _args[i].evalArg(env);
+      args[i] = _args[i].evalArg(env, true);
 
     env.pushCall(this, obj, args);
     

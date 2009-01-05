@@ -259,7 +259,8 @@ public class VarExpr
    * @param env the calling environment.
    * @return the expression value.
    */
-  public Value evalArg(Env env)
+  @Override
+  public Value evalArg(Env env, boolean isTop)
   {
     // quercus/043k
     // quercus/0443

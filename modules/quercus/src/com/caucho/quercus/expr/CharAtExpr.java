@@ -106,7 +106,8 @@ public class CharAtExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public Value evalArg(Env env)
+  @Override
+  public Value evalArg(Env env, boolean isTop)
   {
     return eval(env);
   }

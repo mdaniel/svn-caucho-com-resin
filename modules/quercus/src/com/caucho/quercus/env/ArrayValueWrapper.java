@@ -138,9 +138,9 @@ public class ArrayValueWrapper extends ArrayValue {
    * Returns the value as an argument which may be a reference.
    */
   @Override
-  public Value getArg(Value index)
+  public Value getArg(Value index, boolean isTop)
   {
-    return _array.getArg(index);
+    return _array.getArg(index, isTop);
   }
 
   /**

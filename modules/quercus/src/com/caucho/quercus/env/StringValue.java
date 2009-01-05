@@ -671,7 +671,7 @@ abstract public class StringValue
   /**
    * Returns the character at an index
    */
-  public Value getArg(Value key)
+  public Value getArg(Value key, boolean isTop)
   {
     // php/03ma
     return charValueAt(key.toLong());

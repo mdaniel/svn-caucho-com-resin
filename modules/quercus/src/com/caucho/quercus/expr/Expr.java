@@ -402,10 +402,11 @@ abstract public class Expr {
    * if the value is a reference.
    *
    * @param env the calling environment.
+   * @param isTail true for the top expression
    *
    * @return the expression value.
    */
-  public Value evalArg(Env env)
+  public Value evalArg(Env env, boolean isTop)
   {
     return eval(env);
   }

@@ -327,7 +327,8 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the value as an argument which may be a reference.
    */
-  public Value getArg(Value index)
+  @Override
+  public Value getArg(Value index, boolean isTop)
   {
     return get(index);
   }

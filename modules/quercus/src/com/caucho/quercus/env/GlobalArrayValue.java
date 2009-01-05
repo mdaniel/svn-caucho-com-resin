@@ -87,7 +87,8 @@ public class GlobalArrayValue extends ArrayValueImpl {
   /**
    * Returns the value as an argument which may be a reference.
    */
-  public Value getArg(Value index)
+  @Override
+  public Value getArg(Value index, boolean isTop)
   {
     return getRef(index);
   }

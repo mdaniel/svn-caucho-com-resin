@@ -152,9 +152,10 @@ public class VarVarExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public Value evalArg(Env env)
+  @Override
+  public Value evalArg(Env env, boolean isTop)
   {
-    String varName = _var.evalString(env).intern();
+    String varName = _var.evalString(env);
 
     Value value = env.getVar(varName);
 

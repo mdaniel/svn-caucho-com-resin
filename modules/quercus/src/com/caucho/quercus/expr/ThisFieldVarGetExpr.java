@@ -61,7 +61,8 @@ public class ThisFieldVarGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public Value evalArg(Env env)
+  @Override
+  public Value evalArg(Env env, boolean isTop)
   {
     Value value = env.getThis();
 

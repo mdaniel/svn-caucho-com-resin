@@ -128,7 +128,7 @@ abstract public class AbstractVarExpr extends Expr {
    *
    * @return the expression value.
    */
-  abstract public Value evalArg(Env env);
+  abstract public Value evalArg(Env env, boolean isTop);
 
   /**
    * Evaluates the expression as an argument.

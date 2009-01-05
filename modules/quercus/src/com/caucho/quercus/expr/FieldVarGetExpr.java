@@ -65,9 +65,12 @@ public class FieldVarGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public Value evalArg(Env env)
+  @Override
+  public Value evalArg(Env env, boolean isTop)
   {
-    Value value = _objExpr.evalArg(env);
+    Value value = _objExpr.evalArg(env, false);
+
+    // XXX: getFieldArg(isTop)
 
     return value.getFieldArg(env, _nameExpr.evalStringValue(env));
   }

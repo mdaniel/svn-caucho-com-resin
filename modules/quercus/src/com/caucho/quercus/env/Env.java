@@ -2985,6 +2985,7 @@ public class Env {
 	return null;
     }
 
+    /*
     AbstractFunction fun = _quercus.findFunctionImpl(name);
 
     if (fun != null)
@@ -3008,6 +3009,7 @@ public class Env {
     
     if (fun != null)
       return fun;
+    */
     
     if (_anonymousFunMap != null)
       return _anonymousFunMap.get(name);

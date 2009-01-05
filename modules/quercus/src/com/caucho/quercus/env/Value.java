@@ -1884,7 +1884,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns the field used as a method argument
    */
-  public Value getFieldArg(Env env, StringValue name)
+  public Value getFieldArg(Env env, StringValue name, boolean isTop)
   {
     return getFieldRef(env, name);
   }
@@ -2104,7 +2104,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns the array ref as a function argument.
    */
-  public Value getArg(Value index)
+  public Value getArg(Value index, boolean isTop)
   {
     return get(index);
   }

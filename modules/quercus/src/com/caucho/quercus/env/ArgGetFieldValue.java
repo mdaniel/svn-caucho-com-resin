@@ -47,7 +47,8 @@ public class ArgGetFieldValue extends Value {
   /**
    * Creates an argument which may create the given field.
    */
-  public Value getArg(Value name)
+  @Override
+  public Value getArg(Value name, boolean isTop)
   {
     // php/3d1q
     return new ArgGetValue(this, name);
@@ -57,7 +58,7 @@ public class ArgGetFieldValue extends Value {
    * Creates an argument which may create the given field.
    */
   @Override
-  public Value getFieldArg(Env env, StringValue name)
+  public Value getFieldArg(Env env, StringValue name, boolean isTop)
   {
     // php/3d2q
     return new ArgGetFieldValue(env, this, name);
@@ -136,9 +137,9 @@ public class ArgGetFieldValue extends Value {
     return _obj.getFieldObject(_env, _name).getFieldRef(_env, name);
   }
 
-  public String toString()
+  public StringValue toStringValue()
   {
-    return "Arg[" + _obj + "->" + _name + "]";
+    return toValue().toStringValue();
   }
 }
 

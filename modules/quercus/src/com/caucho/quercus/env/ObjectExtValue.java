@@ -317,12 +317,18 @@ public class ObjectExtValue extends ObjectValue
    * Returns the value as an argument which may be a reference.
    */
   @Override
-  public Value getFieldArg(Env env, StringValue name)
+  public Value getFieldArg(Env env, StringValue name, boolean isTop)
   {
     Entry entry = getEntry(name);
 
-    if (entry != null)
-      return entry.toArg();
+    if (entry != null) {
+      Value value = entry.getValue();
+
+      if (isTop || ! value.isset())
+	return entry.toArg();
+      else
+	return value;
+    }
     else
       return new ArgGetFieldValue(env, this, name);
   }

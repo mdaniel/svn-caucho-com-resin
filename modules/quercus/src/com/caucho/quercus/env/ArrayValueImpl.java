@@ -505,7 +505,8 @@ public class ArrayValueImpl extends ArrayValue
   /**
    * Returns the value as an argument which may be a reference.
    */
-  public Value getArg(Value index)
+  @Override
+  public Value getArg(Value index, boolean isTop)
   {
     if (_isDirty) // XXX: needed?
       copyOnWrite();
@@ -514,9 +515,12 @@ public class ArrayValueImpl extends ArrayValue
 
     if (entry != null) {
       // php/3d48, php/39aj
-      Value arg = entry.toArg();
+      Value value = entry.getValue();
 
-      return arg;
+      if (! isTop && value.isset())
+	return value;
+      else 
+	return entry.toArg();
     }
     else {
       // php/3d49

@@ -1015,12 +1015,12 @@ public final class Var extends Value
    * Returns the array ref.
    */
   @Override
-  public Value getArg(Value index)
+  public Value getArg(Value index, boolean isTop)
   {
     // php/0921, php/3921
     
     if (_value.isset())
-      return _value.getArg(index);
+      return _value.getArg(index, isTop);
     else
       return new ArgGetValue(this, index); // php/3d2p
   }
@@ -1151,10 +1151,10 @@ public final class Var extends Value
    * Returns the array ref.
    */
   @Override
-  public Value getFieldArg(Env env, StringValue name)
+  public Value getFieldArg(Env env, StringValue name, boolean isTop)
   {
     if (_value.isset())
-      return _value.getFieldArg(env, name);
+      return _value.getFieldArg(env, name, isTop);
     else {
       // php/3d1q
       return new ArgGetFieldValue(env, this, name);

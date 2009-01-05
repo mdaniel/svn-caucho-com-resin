@@ -152,11 +152,12 @@ public class ArrayGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public Value evalArg(Env env)
+  @Override
+  public Value evalArg(Env env, boolean isTop)
   {
-    Value value = _expr.evalArg(env); // php/0d2t
+    Value value = _expr.evalArg(env, false); // php/0d2t
 
-    return value.getArg(_index.eval(env));
+    return value.getArg(_index.eval(env), isTop);
   }
 
   /**

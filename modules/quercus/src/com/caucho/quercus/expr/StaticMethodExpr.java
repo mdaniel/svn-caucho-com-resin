@@ -140,7 +140,7 @@ public class StaticMethodExpr extends Expr {
     Value []args = new Value[_args.length];
     
     for (int i = 0; i < args.length; i++) {
-      args[i] = _args[i].evalArg(env);
+      args[i] = _args[i].evalArg(env, true);
     }
     
     //QuercusClass oldClass = env.setCallingClass(cl);

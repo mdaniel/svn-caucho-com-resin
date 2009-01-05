@@ -276,7 +276,7 @@ abstract public class AbstractFunction {
     Value[]values = new Value[args.length];
 
     for (int i = 0; i < args.length; i++)
-      values[i] = args[i].evalArg(env);
+      values[i] = args[i].evalArg(env, true);
 
     return values;
   }
@@ -434,7 +434,7 @@ abstract public class AbstractFunction {
     for (int i = 0; i < exprs.length; i++) {
       // quercus/0d19
       if (i < args.length && args[i].isReference())
-	argValues[i] = exprs[i].evalArg(env);
+	argValues[i] = exprs[i].evalArg(env, true);
       else
 	argValues[i] = exprs[i].eval(env);
     }
@@ -510,7 +510,7 @@ abstract public class AbstractFunction {
     for (int i = 0; i < exprs.length; i++) {
       // quercus/0d19
       if (i < args.length && args[i].isReference())
-	argValues[i] = exprs[i].evalArg(env);
+	argValues[i] = exprs[i].evalArg(env, true);
       else
 	argValues[i] = exprs[i].eval(env);
     }
@@ -579,7 +579,7 @@ abstract public class AbstractFunction {
 
     for (int i = 0; i < exprs.length; i++) {
       if (i < args.length && args[i].isReference()) {
-	argValues[i] = exprs[i].evalArg(env);
+	argValues[i] = exprs[i].evalArg(env, true);
       }
       else
 	argValues[i] = exprs[i].eval(env);
@@ -649,7 +649,7 @@ abstract public class AbstractFunction {
 
     for (int i = 0; i < exprs.length; i++) {
       if (i < args.length && args[i].isReference())
-	argValues[i] = exprs[i].evalArg(env);
+	argValues[i] = exprs[i].evalArg(env, true);
       else
 	argValues[i] = exprs[i].eval(env);
     }

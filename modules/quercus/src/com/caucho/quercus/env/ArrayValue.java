@@ -456,7 +456,7 @@ abstract public class ArrayValue extends Value {
    * Returns the value as an argument which may be a reference.
    */
   @Override
-  abstract public Value getArg(Value index);
+  abstract public Value getArg(Value index, boolean isTop);
 
   /**
    * Returns the field value, creating an object if it's unset.
