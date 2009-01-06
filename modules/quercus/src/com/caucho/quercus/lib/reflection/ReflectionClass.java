@@ -94,6 +94,9 @@ public class ReflectionClass
       cls = ((ObjectValue) obj.toValue()).getQuercusClass();
     else
       cls = env.findClass(obj.toString());
+    
+    if (cls == null)
+      throw new ReflectionException(L.l("class '{0}' doesn't exist", obj));
 
     return new ReflectionClass(cls);
   }
@@ -132,21 +135,23 @@ public class ReflectionClass
 
   public String getFileName()
   {
-    return null;
+    return _cls.getClassDef().getLocation().getFileName();
   }
   
   public int getStartLine()
   {
-    return -1;
+    return _cls.getClassDef().getLocation().getLineNumber();
   }
   
   public int getEndLine()
   {
-    return -1;
+    // TODO
+    return _cls.getClassDef().getLocation().getLineNumber();
   }
   
   public String getDocComment()
   {
+    // TODO
     return null;
   }
   

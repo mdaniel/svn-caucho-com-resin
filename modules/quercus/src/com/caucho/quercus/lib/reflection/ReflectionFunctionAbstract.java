@@ -72,26 +72,29 @@ public abstract class ReflectionFunctionAbstract
   
   public String getFileName()
   {
-    return null;
+    return _fun.getLocation().getFileName();
   }
   
   public int getStartLine()
   {
-    return -1;
+    return _fun.getLocation().getLineNumber();
   }
   
   public int getEndLine()
   {
-    return -1;
+    // TODO
+    return _fun.getLocation().getLineNumber();
   }
   
   public String getDocComment()
   {
+    // TODO
     return null;
   }
   
   public ArrayValue getStaticVariables()
   {
+    // TODO
     return null; 
   }
   
