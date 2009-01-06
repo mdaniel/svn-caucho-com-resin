@@ -573,7 +573,20 @@ if test -n "${b64_jni}"; then
    LIBEXEC=libexec64
 fi
 
-CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64"
+#
+# --enable-lfs
+#
+AC_ARG_ENABLE(lfs,
+[  --enable-lfs            Enable large file source support],
+[case "${enableval}" in
+ yes) lfs=true ;;
+ no)  lfs="";;
+ *) AC_MSG_ERROR(bad value ${enableval} for --enable-lfs) ;;
+ esac],[])
+
+if test -n "${lfs}"; then
+  CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64"
+fi
 
 #
 # fill in based on known configurations
@@ -733,7 +746,6 @@ case "$target_cpu" in
   i?86)
 	CPU=i386
 	resin_plugin="$resin_pro_plugin $resin_ssl_plugin"
-	CFLAGS_JNI="$CFLAGS_JNI -D_FILE_OFFSET_BITS=64"
 	;;
 
   sparc*)
@@ -748,7 +760,6 @@ case "$target_cpu" in
   x86_64)
 	CPU=$target_cpu
 	resin_plugin="$resin_pro_plugin $resin_ssl_plugin"
-	CFLAGS_JNI="$CFLAGS_JNI -D_FILE_OFFSET_BITS=64"
 	;;
 	
   *)
