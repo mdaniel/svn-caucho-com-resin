@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,41 +24,50 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
-package com.caucho.quercus.lib.spl;
+package com.caucho.quercus.env;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.annotation.Delegates;
+import com.caucho.vfs.Path;
 
-@Delegates(IteratorDelegate.class)
-public interface Iterator
-  extends Traversable
+import java.net.URL;
+
+/**
+ * Internal call to autoload an internally defined PHP, e.g. for the SPL
+ * library.
+ */
+public class InternalAutoloadCallback
 {
-  /**
-   * Returns the current value.
-   */
-  public Value current(Env env);
+  private final String _prefix;
+
+  public InternalAutoloadCallback(String prefix)
+  {
+    if (! prefix.endsWith("/"))
+      prefix = prefix + "/";
+
+    _prefix = prefix;
+  }
 
   /**
-   * Returns the current key.
+   * Evaluates the callback with 1 arguments.
+   *
+   * @param env the calling environment
    */
-  public Value key(Env env);
+  public QuercusClass loadClass(Env env, String name)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-  /**
-   * Advances to the next row.
-   */
-  public void next(Env env);
+    URL url = loader.getResource(_prefix + name + ".php");
 
-  /**
-   * Rewinds the iterator so it is at the first row.
-   */
-  public void rewind(Env env);
+    if (url == null)
+      return null;
 
-  /**
-   * Returns true if the iterator currently points to a valid row.
-   */
-  public boolean valid(Env env);
+    Path path = env.getPwd().lookup(url.toString());
+
+    env.executePage(path);
+    
+    return env.findClass(name, false, false);
+  }
 }
+

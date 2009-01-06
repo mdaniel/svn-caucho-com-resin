@@ -236,6 +236,7 @@ public class Env {
     = new HashSet<String>();
   
   private ArrayList<Callback> _autoloadList;
+  private InternalAutoloadCallback _internalAutoload;
 
   private long _startTime;
   private long _timeLimit = 600000L;
@@ -376,6 +377,9 @@ public class Env {
       // php/0b32
       _includeMap.put(_selfPath, _page);
     }
+
+    _internalAutoload
+      = new InternalAutoloadCallback("com/caucho/quercus/php/");
     
     if (_request != null && _request.getMethod().equals("POST")) {
       _postArray = new ArrayValueImpl();
@@ -4050,6 +4054,8 @@ public class Env {
                                     boolean useAutoload,
                                     boolean useImport)
   {
+    System.out.println("findClassExt: " + name + " " + useAutoload + " " + useImport);
+    
     int id = _quercus.getClassId(name);
     
     if (useAutoload) {
@@ -4081,7 +4087,10 @@ public class Env {
               _autoload.call(this, nameString);
 
               // php/0976
-              return findClass(name, false, useImport);
+	      QuercusClass cls = findClass(name, false, useImport);
+            
+	      if (cls != null)
+		return cls;
             }
           }
         } finally {
@@ -4113,8 +4122,10 @@ public class Env {
         }
       }
     }
-    
-    return null;
+
+    System.out.println("AUTL: " + name);
+
+    return _internalAutoload.loadClass(this, name);
   }
 
   /**
@@ -4626,6 +4637,19 @@ public class Env {
       return executePage(page);
     } catch (IOException e) {
       throw new QuercusModuleException(e);
+    }
+  }
+
+  void executePage(Path path)
+  {
+    try {
+      QuercusPage page = _quercus.parse(path);
+
+      pageInit(page);
+
+      executePage(page);
+    } catch (IOException e) {
+      throw new QuercusException(e);
     }
   }
   

@@ -24,41 +24,72 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
 package com.caucho.quercus.lib.spl;
 
+import com.caucho.quercus.annotation.Name;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.Callback;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.annotation.Delegates;
+import com.caucho.quercus.lib.ArrayModule;
+import com.caucho.vfs.WriteStream;
 
-@Delegates(IteratorDelegate.class)
-public interface Iterator
-  extends Traversable
+import java.io.IOException;
+import java.util.IdentityHashMap;
+import java.util.Map;
+
+public class FilterIterator extends IteratorIterator
+  implements Traversable,
+             Iterator,
+             OuterIterator
 {
-  /**
-   * Returns the current value.
-   */
-  public Value current(Env env);
+  @Name("__construct")
+  public FilterIterator(Env env,
+			Value iterator)
+  {
+    super(env, iterator);
+  }
 
   /**
-   * Returns the current key.
+   * Moves to the next value
    */
-  public Value key(Env env);
+  @Override
+  public void next(Env env)
+  {
+    super.next(env);
+    fetch(env);
+  }
 
   /**
-   * Advances to the next row.
+   * Resets the iterator
    */
-  public void next(Env env);
+  @Override
+  public void rewind(Env env)
+  {
+    super.rewind(env);
+    fetch(env);
+  }
 
   /**
-   * Rewinds the iterator so it is at the first row.
+   * Returns the next value
    */
-  public void rewind(Env env);
+  public void fetch(Env env)
+  {
+    for (; valid(env) && ! accept(env); super.next(env)) {
+    }
+  }
 
   /**
-   * Returns true if the iterator currently points to a valid row.
+   * Tests for acceptance
    */
-  public boolean valid(Env env);
+  public boolean accept(Env env)
+  {
+    return true;
+  }
 }
