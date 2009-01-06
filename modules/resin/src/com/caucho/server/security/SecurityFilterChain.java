@@ -97,7 +97,6 @@ public class SecurityFilterChain extends AbstractFilterChain {
     
     boolean isPrivateCache = false;
     if (constraints != null) {
-      // non-authentication constraints are first
       for (AbstractConstraint constraint : constraints) {
 	result = constraint.isAuthorized(req, res, _webApp);
 

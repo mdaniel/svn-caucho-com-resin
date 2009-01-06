@@ -109,6 +109,34 @@ public class BasicLogin extends AbstractLogin {
   }
 
   /**
+   * Returns the principal from a basic authentication
+   *
+   * @param auth the authenticator for this application.
+   */
+  @Override
+  protected boolean isSavedUserValid(HttpServletRequest request,
+				     Principal savedUser)
+  {
+    String value = request.getHeader("authorization");
+    if (value == null)
+      return true;
+    
+    int i = value.indexOf(' ');
+    if (i <= 0)
+      return true;
+
+    String decoded = Base64.decode(value.substring(i + 1));
+
+    int index = decoded.indexOf(':');
+    if (index < 0)
+      return true;
+
+    String userName = decoded.substring(0, index);
+
+    return savedUser.getName().equals(userName);
+  }
+
+  /**
    * Sends a challenge for basic authentication.
    */
   @Override

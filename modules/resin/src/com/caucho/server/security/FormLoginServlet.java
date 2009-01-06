@@ -92,8 +92,8 @@ public class FormLoginServlet extends GenericServlet {
         ((CauchoResponse) res).setNoCache(true);
       }
       else {
-        res.setDateHeader("Expires", 0);
-        res.setHeader("Cache-Control", "no-cache");
+	res.setDateHeader("Expires", 0);
+	res.setHeader("Cache-Control", "no-cache");
       }
       
       disp.error(req, res);

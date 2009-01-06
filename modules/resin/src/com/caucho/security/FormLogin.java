@@ -54,6 +54,8 @@ import java.util.logging.Level;
  *
  * @since Resin 2.0.2
  */
+@com.caucho.config.Service
+@javax.webbeans.ApplicationScoped
 public class FormLogin extends AbstractLogin
 {
   private static final L10N L = new L10N(FormLogin.class);
@@ -234,6 +236,18 @@ public class FormLogin extends AbstractLogin
   }
 
   /**
+   * Returns true if a new login overrides the saved user
+   */
+  @Override
+  protected boolean isSavedUserValid(HttpServletRequest request,
+				     Principal savedUser)
+  {
+    String userName = request.getParameter("j_username");
+
+    return userName == null || ! userName.equals(savedUser.getName());
+  }
+
+  /**
    * Updates after a successful login
    *
    * @param request servlet request
@@ -249,6 +263,7 @@ public class FormLogin extends AbstractLogin
   {
     if (request.getAttribute(LOGIN_CHECK) != null)
       return;
+    request.setAttribute(LOGIN_CHECK, "login");
     
     WebApp app = (WebApp) request.getServletContext();
     
@@ -262,6 +277,7 @@ public class FormLogin extends AbstractLogin
       
       generateCookie(user, cookieAuth, app, response);
     }
+
     String path = request.getServletPath();
     
     if (path == null)
@@ -278,10 +294,7 @@ public class FormLogin extends AbstractLogin
 
     String uri = request.getRequestURI();
 
-    if (path.endsWith("/j_security_check")
-	&& request.getAttribute(LOGIN_CHECK) == null) {
-      request.setAttribute(LOGIN_CHECK, "login");
-      
+    if (path.endsWith("/j_security_check")) {
       RequestDispatcher disp;
       disp = app.getNamedDispatcher("j_security_check");
 
@@ -325,7 +338,10 @@ public class FormLogin extends AbstractLogin
     String uri = request.getRequestURI();
 
     if (path.endsWith("/j_security_check")) {
-      // server/12d8
+      // server/12d8, server/12bs
+      response.setHeader("Cache-Control", "no-cache");
+      response.setDateHeader("Expires", 0);
+      
       RequestDispatcher disp = app.getRequestDispatcher(_errorPage);
       disp.forward(request, response);
       /*

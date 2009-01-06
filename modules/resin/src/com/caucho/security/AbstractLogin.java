@@ -138,7 +138,7 @@ public abstract class AbstractLogin implements Login {
   /**
    * Returns true if the user should be logged out on a session timeout.
    */
-  public boolean getLogoutOnSessionTimeout()
+  public boolean isLogoutOnSessionTimeout()
   {
     return _isLogoutOnTimeout;
   }
@@ -175,13 +175,17 @@ public abstract class AbstractLogin implements Login {
   public void init()
     throws ServletException
   {
+    // server/12cc - XXX: this should be allowed, though
+    /*
     try {
       if (_auth == null)
 	_auth = _webBeans.getInstanceByType(Authenticator.class);
     } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
     }
+    */
 
+    // XXX: order
     try {
       if (_singleSignon == null)
 	_singleSignon = _webBeans.getInstanceByType(SingleSignon.class);
@@ -224,18 +228,39 @@ public abstract class AbstractLogin implements Login {
 
     if (user != null)
       return user;
-    
+
+    user = findSavedUser(request);
+
+    // server/12c9 - new login overrides old
+    if (user != null && isSavedUserValid(request, user)) {
+      request.setAttribute(LOGIN_NAME, user);
+      
+      return user;
+    }
+
+    // server/12d2
+    user = getUserPrincipalImpl(request);
+
+    if (user != null) {
+      saveUser(request, user);
+    }
+
+    return user;
+  }
+
+  /**
+   * Looks up the user based on session or single signon.
+   */
+  protected Principal findSavedUser(HttpServletRequest request)
+  {
     SessionImpl session = (SessionImpl) request.getSession(false);
 
     if (session != null) {
       LoginPrincipal login = (LoginPrincipal) session.getAttribute(LOGIN_NAME);
 
       if (login != null)
-	user = login.getUser();
+	return login.getUser();
     }
-    
-    if (user != null)
-      return user;
 
     SingleSignonEntry entry = null;
     
@@ -247,50 +272,57 @@ public abstract class AbstractLogin implements Login {
       entry = _singleSignon.get(request.getRequestedSessionId());
 
     if (entry != null) {
-      user = entry.getPrincipal();
+      Principal user = entry.getPrincipal();
 
-      if (session == null && isSessionSaveLogin())
-	session = (SessionImpl) request.getSession(true);
-
-      if (session != null) {
-	session.setAttribute(LOGIN_NAME, new LoginPrincipal(user));
-	entry.addSession(session);
-      }
-      
-      return user;
+      if (user != null)
+	return user;
     }
 
-    user = getUserPrincipalImpl(request);
+    return null;
+  }
 
-    if (user == null)
-      return null;
+  /**
+   * Saves the user based on session or single signon.
+   */
+  protected void saveUser(HttpServletRequest request,
+			  Principal user)
+  {
+    request.setAttribute(LOGIN_NAME, user);
 
-    if (session == null && isSessionSaveLogin())
+    SessionImpl session = null;
+
+    if (isSessionSaveLogin())
       session = (SessionImpl) request.getSession();
 
     if (session != null) {
       session.setAttribute(LOGIN_NAME, new LoginPrincipal(user));
+    }
 
-      if (_singleSignon != null) {
-	entry = _singleSignon.put(session.getId(), user);
+    String sessionId = request.getRequestedSessionId();
+    if (_singleSignon != null && sessionId != null) {
+      SingleSignonEntry entry = _singleSignon.put(sessionId, user);
+
+      if (session != null)
 	entry.addSession(session);
-      }
     }
-    else if (request.getRequestedSessionId() != null) {
-      if (_singleSignon != null)
-	_singleSignon.put(request.getRequestedSessionId(), user);
-    }
-
-    return user;
   }
   
   /**
-   * Gets the user from a persistent cookie, uaing authenticateCookie
+   * Gets the user from a persistent cookie, using authenticateCookie
    * to actually look the cookie up.
    */
   protected Principal getUserPrincipalImpl(HttpServletRequest request)
   {
     return null;
+  }
+
+  /**
+   * Returns the non-authenticated principal for the user request
+   */
+  protected boolean isSavedUserValid(HttpServletRequest request,
+				     Principal savedUser)
+  {
+    return true;
   }
   
   /**
@@ -309,22 +341,35 @@ public abstract class AbstractLogin implements Login {
   {
     // Most login classes will extract the user and password (or some other
     // credentials) from the request and call auth.login.
-    Principal user = getUserPrincipal(request);
+    Principal user = getLoginPrincipalImpl(request);
 
     try {
       if (user != null) {
 	loginSuccessResponse(user, request, response);
+
+	saveUser(request, user);
       
 	return user;
       }
 
       loginChallenge(request, response);
     } catch (Exception e) {
+      // server/12d5
+      
       // XXX: better exception
       throw new RuntimeException(e);
     }
 
     return null;
+  }
+  
+  /**
+   * Gets the user from a persistent cookie, using authenticateCookie
+   * to actually look the cookie up.
+   */
+  protected Principal getLoginPrincipalImpl(HttpServletRequest request)
+  {
+    return getUserPrincipalImpl(request);
   }
 
   /**
@@ -386,7 +431,10 @@ public abstract class AbstractLogin implements Login {
     //LoginPrincipal login = (LoginPrincipal) session.getAttribute(LOGIN_NAME);
 
     if (session != null) {
-      if (_singleSignon != null) {
+      // server/12cg
+      if (_singleSignon == null) {
+      }
+      else if (! isTimeout || isLogoutOnSessionTimeout()) {
 	SingleSignonEntry entry = _singleSignon.remove(session.getId());
       }
     }
@@ -540,7 +588,8 @@ public abstract class AbstractLogin implements Login {
   }
 
   static class LoginPrincipal implements java.io.Serializable {
-    private transient Principal _user;
+    // server/12ci - XXX: this was transient before.
+    private Principal _user;
 
     LoginPrincipal(Principal user)
     {
@@ -550,6 +599,11 @@ public abstract class AbstractLogin implements Login {
     public Principal getUser()
     {
       return _user;
+    }
+
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _user + "]";
     }
   }
 }

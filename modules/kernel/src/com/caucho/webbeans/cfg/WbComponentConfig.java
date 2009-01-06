@@ -58,7 +58,7 @@ public class WbComponentConfig {
 
   private static final Object []NULL_ARGS = new Object[0];
 
-  private WbWebBeans _webbeans;
+  private WebBeansContainer _webbeans;
   
   private Class _cl;
 
@@ -81,10 +81,10 @@ public class WbComponentConfig {
 
   public WbComponentConfig()
   {
-    _webbeans = WebBeansContainer.create().getWbWebBeans();
+    _webbeans = WebBeansContainer.create();
   }
 
-  public WbComponentConfig(WbWebBeans webbeans)
+  public WbComponentConfig(WebBeansContainer webbeans)
   {
     _webbeans = webbeans;
   }
@@ -401,7 +401,7 @@ public class WbComponentConfig {
   protected void deploy()
   {
     if (_comp != null) {
-      _webbeans.getContainer().addBean(_comp);
+      _webbeans.addBean(_comp);
     }
   }
 

@@ -153,7 +153,7 @@ public class WbWebBeans {
    */
   public WbComponentConfig createComponent()
   {
-    return new WbComponentConfig(this);
+    return new WbComponentConfig(_webBeansContainer);
   }
 
   public void addWbComponent(ComponentImpl component)

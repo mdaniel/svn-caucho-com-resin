@@ -71,10 +71,10 @@ public class TransportConstraint extends AbstractConstraint {
     throws ServletException, IOException
   {
     if (_transport == null)
-      return AuthorizationResult.ALLOW;
+      return AuthorizationResult.DEFAULT_ALLOW;
     
     if (request.isSecure())
-      return AuthorizationResult.ALLOW;
+      return AuthorizationResult.DEFAULT_ALLOW;
 
     Application app = (Application) application;
     Host host = (Host) app.getParent();
