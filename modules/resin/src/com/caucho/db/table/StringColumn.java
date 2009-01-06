@@ -32,6 +32,7 @@ package com.caucho.db.table;
 import com.caucho.db.index.BTree;
 import com.caucho.db.index.KeyCompare;
 import com.caucho.db.index.StringKeyCompare;
+import com.caucho.db.index.SqlIndexAlreadyExistsException;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
@@ -327,10 +328,8 @@ class StringColumn extends Column {
 		     rowAddr,
 		     xa,
 		     false);
-      } catch (SQLException e) {
-	log.log(Level.FINER, e.toString(), e);
-	
-	throw new SQLExceptionWrapper(L.l("StringColumn '{0}.{1}' unique index set failed for {2}.\n{3}",
+      } catch (SqlIndexAlreadyExistsException e) {
+	throw new SqlIndexAlreadyExistsException(L.l("StringColumn '{0}.{1}' unique index set failed for {2}.\n{3}",
 					  getTable().getName(),
 					  getName(),
 					  getString(block, rowOffset),
@@ -347,7 +346,8 @@ class StringColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
-  void delete(Transaction xa, byte []block, int rowOffset)
+  @Override
+  void deleteIndex(Transaction xa, byte []block, int rowOffset)
     throws SQLException
   {
     BTree index = getIndex();
@@ -359,8 +359,8 @@ class StringColumn extends Column {
   public String toString()
   {
     if (getIndex() != null)
-      return "StringColumn[" + getName() + ",index]";
+      return getClass().getSimpleName() + "[" + getName() + ",index]";
     else
-      return "StringColumn[" + getName() + "]";
+      return getClass().getSimpleName() + "[" + getName() + "]";
   }
 }

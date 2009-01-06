@@ -538,7 +538,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    *
    * @return true if the session was found in the persistent store
    */
-  public boolean load()
+  public boolean load(boolean isNew)
   {
     if (! _isValid)
       return false;
@@ -551,12 +551,16 @@ public class SessionImpl implements HttpSession, CacheListener {
       ByteStreamCache cache = _manager.getCache();
 
       if (cache == null)
+	return ! isNew;
+
+      // server/015m
+      if (! isNew && _manager.isSaveOnShutdown())
 	return true;
 
       CacheEntry entry = cache.getEntry(_id);
 
-      if (entry == _cacheEntry)
-	return entry != null;
+      if (entry != null && entry == _cacheEntry)
+	return true;
       
       TempOutputStream os = new TempOutputStream();
 
@@ -706,6 +710,9 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     try {
       if (! _isModified && ! _manager.getAlwaysSaveSession())
+	return;
+      
+      if (! _manager.isPersistenceEnabled())
 	return;
       
       _isModified = false;
@@ -870,12 +877,13 @@ public class SessionImpl implements HttpSession, CacheListener {
 
   boolean isIdle(long now)
   {
-    long maxIdleTime = 5 * _idleTimeout / 4;
+    long maxIdleTime = _idleTimeout;
 
     if (inUse())
       return false;
-    else
+    else {
       return _accessTime + maxIdleTime < now;
+    }
   }
 
   /**
@@ -886,7 +894,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (! isValid())
       return;
 
-    if (_manager.getSessionStore() == null) {
+    if (! _manager.isPersistenceEnabled()) {
       // if no persistent store then invalidate
       // XXX: server/12cg - single signon shouldn't logout
       invalidateTimeout();

@@ -992,6 +992,11 @@ elif test -r /usr/lib/libcrypto.so; then
 elif test -r /usr/lib/libcrypto.dylib; then
   OPENSSL_LIB=/usr/lib
   
+elif test -r /usr/local/lib/libcrypto.so; then
+  OPENSSL_LIB=/usr/local/lib
+elif test -r /usr/lib/libcrypto.dylib; then
+  OPENSSL_LIB=/usr/local/lib
+  
 elif test -r /usr/local/ssl/lib/libcrypto.so; then
   OPENSSL_LIB=/usr/local/ssl/lib
 elif test -r /usr/local/ssl/lib/libcrypto.dylib; then

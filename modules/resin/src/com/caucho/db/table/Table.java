@@ -811,7 +811,7 @@ public class Table extends Store {
 	// xa.unlockWrite(_insertLock);
 	  
 	if (! isOkay)
-	  delete(xa, block, buffer, rowOffset);
+	  delete(xa, block, buffer, rowOffset, false);
       }
     } finally {
       queryContext.unlock();
@@ -835,7 +835,9 @@ public class Table extends Store {
     }
   }
   
-  void delete(Transaction xa, Block block, byte []buffer, int rowOffset)
+  void delete(Transaction xa, Block block,
+	      byte []buffer, int rowOffset,
+	      boolean isDeleteIndex)
     throws SQLException
   {
     byte rowState = buffer[rowOffset];
@@ -848,7 +850,13 @@ public class Table extends Store {
     Column []columns = _row.getColumns();
     
     for (int i = 0; i < columns.length; i++) {
-      columns[i].delete(xa, buffer, rowOffset);
+      columns[i].deleteData(xa, buffer, rowOffset);
+    }
+
+    if (isDeleteIndex) {
+      for (int i = 0; i < columns.length; i++) {
+	columns[i].deleteIndex(xa, buffer, rowOffset);
+      }
     }
 
     buffer[rowOffset] = 0;

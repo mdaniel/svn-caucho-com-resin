@@ -34,6 +34,7 @@ import com.caucho.cluster.CacheSerializer;
 import com.caucho.cluster.HessianSerializer;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
+import com.caucho.util.Alarm;
 import com.caucho.util.LruCache;
 
 /**
@@ -48,7 +49,8 @@ public class CacheConfig
   private int _flags = (FLAG_BACKUP
 			| FLAG_TRIPLICATE);
   
-  private long _localReadTimeout = 10L; // 10ms default timeout
+  private long _localReadTimeout
+    = Alarm.isTest() ? -1 : 10L; // 10ms default timeout, except for QA
   
   private long _idleTimeout = Long.MAX_VALUE / 2;
 
@@ -77,6 +79,26 @@ public class CacheConfig
   public long getIdleTimeout()
   {
     return _idleTimeout;
+  }
+
+  /**
+   * Sets the maximum idle time in the database.
+   */
+  public void setIdleTimeout(long idleTimeout)
+  {
+    if (idleTimeout < 0 || idleTimeout > Long.MAX_VALUE / 2)
+      idleTimeout = Long.MAX_VALUE / 2;
+    else
+      _idleTimeout = idleTimeout;
+  }
+
+  /**
+   * Returns the idle check window, i.e. the precision of the idle
+   * check.
+   */
+  public long getIdleCheckWindow()
+  {
+    return _idleTimeout / 4;
   }
 
   /**

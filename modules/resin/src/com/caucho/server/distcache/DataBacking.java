@@ -31,6 +31,7 @@ package com.caucho.server.distcache;
 
 import com.caucho.config.ConfigException;
 import com.caucho.db.jdbc.DataSourceImpl;
+import com.caucho.db.index.SqlIndexAlreadyExistsException;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.FreeList;
@@ -345,6 +346,12 @@ public class DataBacking implements AlarmListener {
       if (log.isLoggable(Level.FINER)) 
 	log.finer(this + " insert " + id + " length:" + length);
 	  
+      return true;
+    } catch (SqlIndexAlreadyExistsException e) {
+      // the data already exists in the cache, so this is okay
+      log.finer(this + " " + e.toString());
+      log.log(Level.FINEST, e.toString(), e);
+
       return true;
     } catch (SQLException e) {
       log.finer(this + " " + e.toString());

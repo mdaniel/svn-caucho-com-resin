@@ -30,6 +30,7 @@
 package com.caucho.cluster;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.types.Period;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.distcache.CacheConfig;
@@ -103,6 +104,38 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
       _config.setFlags(_config.getFlags() | CacheConfig.FLAG_TRIPLICATE);
     else
       _config.setFlags(_config.getFlags() & ~CacheConfig.FLAG_TRIPLICATE);
+  }
+
+  /**
+   * Sets the idle timeout
+   */
+  public void setIdleTimeout(Period period)
+  {
+    setIdleTimeoutMillis(period.getPeriod());
+  }
+
+  /**
+   * Gets the idle timeout
+   */
+  public long getIdleTimeout()
+  {
+    return _config.getIdleTimeout();
+  }
+
+  /**
+   * Sets the idle timeout
+   */
+  public void setIdleTimeoutMillis(long timeout)
+  {
+    _config.setIdleTimeout(timeout);
+  }
+
+  /**
+   * Returns the idle check window
+   */
+  public long getIdleCheckWindow()
+  {
+    return _config.getIdleCheckWindow();
   }
 
   /**

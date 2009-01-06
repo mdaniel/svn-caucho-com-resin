@@ -99,7 +99,7 @@ public final class SessionManager implements AlarmListener
   private final ClusterServer _selfServer;
   private final int _selfIndex;
   
-  private ByteStreamCache _sessionStore;
+  private AbstractCache _sessionStore;
 
   // active sessions
   private LruCache<String,SessionImpl> _sessions;
@@ -148,6 +148,7 @@ public final class SessionManager implements AlarmListener
 
   private int _sessionSaveMode = SAVE_AFTER_REQUEST;
 
+  private boolean _isPersistenceEnabled = false;
   private boolean _isTriplicate = true;
   private boolean _isBackup = true;
 
@@ -334,7 +335,10 @@ public final class SessionManager implements AlarmListener
    */
   ByteStreamCache getCache()
   {
-    return _sessionStore;
+    if (_isPersistenceEnabled)
+      return _sessionStore;
+    else
+      return null;
   }
 
   /**
@@ -712,10 +716,12 @@ public final class SessionManager implements AlarmListener
   public void setUsePersistentStore(boolean enable)
     throws Exception
   {
-    if (! enable)
-      return;
-   
-    _storeManager = _server.getStore();
+    _isPersistenceEnabled = enable;
+  }
+
+  public boolean isPersistenceEnabled()
+  {
+    return _isPersistenceEnabled;
   }
 
   public String getDistributionId()
@@ -949,6 +955,9 @@ public final class SessionManager implements AlarmListener
     _sessions = new LruCache<String,SessionImpl>(_sessionMax);
     _sessionIter = _sessions.values();
 
+    if (_sessionStore != null)
+      _sessionStore.setIdleTimeoutMillis(_sessionTimeout);
+    
     /*
     if (_storeManager != null) {
       _sessionStore = _storeManager.createStore(_distributionId,
@@ -1031,7 +1040,7 @@ public final class SessionManager implements AlarmListener
     }
 
     synchronized (session) {
-      if (_sessionStore != null && id.equals(oldId))
+      if (_isPersistenceEnabled && id.equals(oldId))
         load(session, now, true);
       else
 	session.create(now, true);
@@ -1209,7 +1218,7 @@ public final class SessionManager implements AlarmListener
       killSession = ! load(session, now, create);
       isNew = killSession;
     }
-    else if (! session.load()) {
+    else if (! session.load(isNew)) {
       // if the load failed, then the session died out from underneath
       session.reset(now);
       isNew = true;
@@ -1304,7 +1313,7 @@ public final class SessionManager implements AlarmListener
       if (now <= 0) {
         return false;
       }
-      else if (session.load()) {
+      else if (session.load(true)) { // load for a newly created session
         session.setAccess(now);
         return true;
       }
@@ -1351,13 +1360,7 @@ public final class SessionManager implements AlarmListener
 	return;
 
       long now = Alarm.getCurrentTime();
-      long accessWindow = 0;
 
-      /* XXX:
-      if (_sessionStore != null)
-	accessWindow = _sessionStore.getAccessWindowTime();
-      */
-      
       synchronized (_sessions) {
 	_sessionIter = _sessions.values(_sessionIter);
 	while (_sessionIter.hasNext()) {

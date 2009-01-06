@@ -515,7 +515,19 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
-  void delete(Transaction xa, byte []block, int rowOffset)
+  void deleteIndex(Transaction xa, byte []block, int rowOffset)
+    throws SQLException
+  {
+  }
+  
+  /**
+   * Deleting the row, based on the column.
+   *
+   * @param block the block's buffer
+   * @param rowOffset the offset of the row in the block
+   * @param expr the expression to store
+   */
+  void deleteData(Transaction xa, byte []block, int rowOffset)
     throws SQLException
   {
   }

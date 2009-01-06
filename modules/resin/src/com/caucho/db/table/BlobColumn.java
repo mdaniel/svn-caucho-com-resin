@@ -191,7 +191,7 @@ class BlobColumn extends Column {
    * @param expr the expression to store
    */
   @Override
-  void delete(Transaction xa, byte []block, int rowOffset)
+  void deleteData(Transaction xa, byte []block, int rowOffset)
     throws SQLException
   {
     if (! isNull(block, rowOffset)) {

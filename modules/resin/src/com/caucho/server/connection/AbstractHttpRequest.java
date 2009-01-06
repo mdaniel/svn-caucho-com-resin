@@ -1369,7 +1369,10 @@ public abstract class AbstractHttpRequest
     if (id == null)
       return false;
     
-    SessionImpl session = (SessionImpl) getSession(false);
+    SessionImpl session = _session;
+
+    if (session == null)
+      session = (SessionImpl) getSession(false);
 
     return session != null && session.isValid() && session.getId().equals(id);
   }

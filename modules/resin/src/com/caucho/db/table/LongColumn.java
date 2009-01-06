@@ -300,7 +300,8 @@ class LongColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
-  void delete(Transaction xa, byte []block, int rowOffset)
+  @Override
+  void deleteIndex(Transaction xa, byte []block, int rowOffset)
     throws SQLException
   {
     BTree index = getIndex();

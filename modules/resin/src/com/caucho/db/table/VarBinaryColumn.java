@@ -33,6 +33,7 @@ import com.caucho.db.index.BTree;
 import com.caucho.db.index.KeyCompare;
 import com.caucho.db.index.BinaryKeyCompare;
 import com.caucho.db.index.VarBinaryKeyCompare;
+import com.caucho.db.index.SqlIndexAlreadyExistsException;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
@@ -343,10 +344,8 @@ class VarBinaryColumn extends Column {
 		     rowAddr,
 		     xa,
 		     false);
-      } catch (SQLException e) {
-	log.log(Level.FINER, e.toString(), e);
-	
-	throw new SQLExceptionWrapper(L.l("StringColumn '{0}.{1}' unique index set failed for {2}\n{3}",
+      } catch (SqlIndexAlreadyExistsException e) {
+	throw new SqlIndexAlreadyExistsException(L.l("StringColumn '{0}.{1}' unique index set failed for {2}\n{3}",
 					  getTable().getName(),
 					  getName(),
 					  getString(block, rowOffset),
@@ -363,7 +362,8 @@ class VarBinaryColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
-  void delete(Transaction xa, byte []block, int rowOffset)
+  @Override
+  void deleteIndex(Transaction xa, byte []block, int rowOffset)
     throws SQLException
   {
     BTree index = getIndex();
