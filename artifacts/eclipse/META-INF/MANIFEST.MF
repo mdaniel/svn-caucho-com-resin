@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: com.caucho.resin.eclipse; singleton:=true
-Bundle-Version: 3.1.0
+Bundle-Version: 4.0.0
 Bundle-Vendor: Caucho Technology
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.jst.server.core,
@@ -12,7 +12,11 @@ Require-Bundle: org.eclipse.jst.server.core,
  org.eclipse.jst.common.project.facet.core,
  org.eclipse.wst.common.project.facet.core,
  org.eclipse.wst.common.project.facet.ui,
- org.eclipse.wst.server.core
-Eclipse-LazyStart: true
+ org.eclipse.wst.server.core,
+ org.eclipse.debug.core,
+ org.eclipse.wst.server.ui,
+ org.eclipse.core.variables
+Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: resin-eclipse.jar
-Bundle-RequiredExecutionEnvironment: J2SE-1.4
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: com.caucho.resin.eclipse;uses:="org.eclipse.core.runtime,org.eclipse.wst.server.core.model"

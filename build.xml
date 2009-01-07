@@ -44,7 +44,8 @@
         <include name="plugin.xml"/>
         <include name="buildfiles/*.xml"/>
         <include name="icons/**/*.png"/>
-        <include name="**/*.serverdef"/>
+        <include name="servers/*.serverdef"/>
+        <include name="conf/**"/>
         <include name="src/**"/>
         <exclude name="src/manifest"/>
       </fileset>
