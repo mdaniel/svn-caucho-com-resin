@@ -13,6 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>jsf: f:view not bound when using jsf:ri with xml syntax (#3102, rep by alex)</li>
 <li>(2008-01-05) quercus: instanceof issues with Exceptions (#3209, rep by koreth)</li>
 <li>quercus: regexp handling of /[\p{Arabic}]/ (#3131, rep by koreth)</li>
 <li>quercus: classes scope to the dynamic class, not static class (#3213, rep by koreth)</li>
