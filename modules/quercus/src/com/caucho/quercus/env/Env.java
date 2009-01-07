@@ -4054,8 +4054,6 @@ public class Env {
                                     boolean useAutoload,
                                     boolean useImport)
   {
-    System.out.println("findClassExt: " + name + " " + useAutoload + " " + useImport);
-    
     int id = _quercus.getClassId(name);
     
     if (useAutoload) {
@@ -4122,8 +4120,6 @@ public class Env {
         }
       }
     }
-
-    System.out.println("AUTL: " + name);
 
     return _internalAutoload.loadClass(this, name);
   }
