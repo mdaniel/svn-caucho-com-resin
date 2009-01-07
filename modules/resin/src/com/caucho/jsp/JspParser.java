@@ -1219,8 +1219,10 @@ public class JspParser {
     
     ArrayList<QName> keys = new ArrayList<QName>();
     ArrayList<String> values = new ArrayList<String>();
+    ArrayList<String> prefixes = new ArrayList<String>();
+    ArrayList<String> uris = new ArrayList<String>();
 
-    parseAttributes(keys, values);
+    parseAttributes(keys, values, prefixes, uris);
 
     ch = skipWhitespace(read());
 
@@ -1319,10 +1321,12 @@ public class JspParser {
 
     ArrayList<QName> keys = new ArrayList<QName>();
     ArrayList<String> values = new ArrayList<String>();
+    ArrayList<String> prefixes = new ArrayList<String>();
+    ArrayList<String> uris = new ArrayList<String>();
 
     unread(ch);
 
-    parseAttributes(keys, values);
+    parseAttributes(keys, values, prefixes, uris);
 
     QName qname = getElementQName(name);
 
@@ -1330,6 +1334,7 @@ public class JspParser {
     _lineStart = _line;
 
     _jspBuilder.startElement(qname);
+
 
     for (int i = 0; i < keys.size(); i++) {
       QName key = keys.get(i);
@@ -1339,7 +1344,14 @@ public class JspParser {
     }
 
     _jspBuilder.endAttributes();
-    
+
+    for (int i = 0; i < prefixes.size(); i++) {
+      String prefix = prefixes.get(i);
+      String uri = uris.get(i);
+
+      _jspBuilder.addNamespace(prefix, uri);
+    }
+
     if (qname.equals(JSP_DIRECTIVE_TAGLIB))
       processTaglibDirective(keys, values);
     
@@ -1427,12 +1439,11 @@ public class JspParser {
    * Parses the attributes of an element.
    */
   private void parseAttributes(ArrayList<QName> names,
-                               ArrayList<String> values)
+                               ArrayList<String> values,
+                               ArrayList<String> prefixes,
+                               ArrayList<String> uris)
     throws IOException, JspParseException
   {
-    names.clear();
-    values.clear();
-
     int ch = skipWhitespace(read());
 
     while (XmlChar.isNameStart(ch)) {
@@ -1447,6 +1458,9 @@ public class JspParser {
 
 	_jspBuilder.startPrefixMapping(prefix, value);
 	//_parseState.pushNamespace(prefix, value);
+        prefixes.add(prefix);
+        uris.add(value);
+        
         _namespaces = new Namespace(_namespaces, prefix, value);
       }
       else if (key.equals("xmlns")) {
