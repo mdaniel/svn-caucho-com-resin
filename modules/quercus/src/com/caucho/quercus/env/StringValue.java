@@ -1201,6 +1201,20 @@ abstract public class StringValue
   }
   
   /**
+   * Append a Java String to the value without conversions.
+   */
+  public StringValue appendBytes(StringValue s)
+  {
+    StringValue sb = this;
+    
+    for (int i = 0; i < s.length(); i++) {
+      sb = sb.appendByte(s.charAt(i));
+    }
+    
+    return sb;
+  }
+  
+  /**
    * Append a Java char[] to the value without conversions.
    */
   public StringValue appendBytes(char []buf, int offset, int length)

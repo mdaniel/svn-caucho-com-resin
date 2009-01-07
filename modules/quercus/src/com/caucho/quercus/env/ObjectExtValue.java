@@ -1350,6 +1350,38 @@ public class ObjectExtValue extends ObjectValue
   }
   
   /**
+   * Append to a string builder.
+   */
+  public StringValue appendTo(UnicodeBuilderValue sb)
+  {
+    return sb.append(toString(Env.getInstance()));
+  }
+
+  /**
+   * Append to a binary builder.
+   */
+  public StringValue appendTo(StringBuilderValue sb)
+  {
+    return sb.append(toString(Env.getInstance()));
+  }
+
+  /**
+   * Append to a binary builder.
+   */
+  public StringValue appendTo(BinaryBuilderValue sb)
+  {
+    return sb.appendBytes(toString(Env.getInstance()));
+  }
+  
+  /**
+   * Append to a binary builder.
+   */
+  public StringValue appendTo(LargeStringBuilderValue sb)
+  {
+    return sb.append(toString(Env.getInstance()));
+  }
+  
+  /**
    * Converts to a string builder
    */
   @Override
