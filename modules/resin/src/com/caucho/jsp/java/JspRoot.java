@@ -174,9 +174,10 @@ public class JspRoot extends JspContainerNode {
     os.print("<jsp:root xmlns:jsp=\"http://java.sun.com/JSP/Page\"");
 
     for (Map.Entry entry : _namespaceMap.entrySet()) {
-      os.print(" xmlns:" + entry.getKey() + "=\"" + entry.getValue() + "\"");
+      if (! "jsp".equals(entry.getKey()))
+        os.print(" xmlns:" + entry.getKey() + "=\"" + entry.getValue() + "\"");
     }
-    
+
     printJspId(os);
     os.print(" version=\"2.0\"");
     
