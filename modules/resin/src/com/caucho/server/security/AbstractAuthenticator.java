@@ -30,6 +30,7 @@
 package com.caucho.server.security;
 
 import com.caucho.security.BasicPrincipal;
+import com.caucho.security.PasswordCredentials;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.Application;
@@ -62,5 +63,49 @@ import java.util.logging.Logger;
 public class AbstractAuthenticator
   extends com.caucho.security.AbstractAuthenticator
 {
-  
+
+  //
+  // basic password authentication
+  //
+
+  /**
+   * Main authenticator API.
+   */
+  @Override
+  public Principal authenticate(Principal principal,
+				PasswordCredentials cred,
+				Object details)
+  {
+    HttpServletRequest request = (HttpServletRequest) details;
+
+    String userName = principal.getName();
+    String password = new String(cred.getPassword());
+
+    ServletContext webApp = request.getServletContext();
+    HttpServletResponse response
+      = (HttpServletResponse) request.getServletResponse();
+
+    return loginImpl(request, response, webApp, userName, password);
+  }
+
+  /**
+   * Backward compatiblity call
+   */
+  protected Principal loginImpl(HttpServletRequest request,
+				HttpServletResponse response,
+				ServletContext app,
+				String userName, String password)
+  {
+    return getUserPrincipal(request, response, app);
+  }
+
+  /**
+   * Backward compatiblity call
+   */
+  protected Principal getUserPrincipal(HttpServletRequest request,
+				       HttpServletResponse response,
+				       ServletContext app)
+  {
+    return null;
+  }
 }

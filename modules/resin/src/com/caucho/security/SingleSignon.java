@@ -37,9 +37,9 @@ import java.security.Principal;
  * @since Resin 4.0.0
  */
 public interface SingleSignon {
-  public SingleSignonEntry get(String id);
+  public Principal get(String id);
   
-  public SingleSignonEntry put(String id, Principal user);
+  public void put(String id, Principal user);
   
-  public SingleSignonEntry remove(String id);
+  public boolean remove(String id);
 }

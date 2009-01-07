@@ -135,6 +135,26 @@ public abstract class AbstractLogin implements Login {
     return _auth;
   }
 
+  protected SingleSignon getSingleSignon()
+  {
+    if (_singleSignon == null) {
+      Authenticator auth = getAuthenticator();
+
+      if (_auth instanceof AbstractAuthenticator) {
+	AbstractAuthenticator abstractAuth
+	  = (AbstractAuthenticator) auth;
+	
+	_singleSignon = abstractAuth.getSingleSignon();
+      }
+
+      if (_singleSignon == null) {
+	_singleSignon = new ClusterSingleSignon("login");
+      }
+    }
+
+    return _singleSignon;
+  }
+
   /**
    * Returns true if the user should be logged out on a session timeout.
    */
@@ -192,12 +212,6 @@ public abstract class AbstractLogin implements Login {
     } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
     }
-
-    if (_singleSignon == null) {
-      MemorySingleSignon singleSignon = new MemorySingleSignon();
-      singleSignon.init();
-      _singleSignon = singleSignon;
-    }
   }
 
   /**
@@ -253,32 +267,21 @@ public abstract class AbstractLogin implements Login {
    */
   protected Principal findSavedUser(HttpServletRequest request)
   {
+    SingleSignon singleSignon = getSingleSignon();
+    
     SessionImpl session = (SessionImpl) request.getSession(false);
 
-    if (session != null) {
-      LoginPrincipal login = (LoginPrincipal) session.getAttribute(LOGIN_NAME);
+    String sessionId;
 
-      if (login != null)
-	return login.getUser();
-    }
+    if (session != null)
+      sessionId = session.getId();
+    else
+      sessionId = request.getRequestedSessionId();
 
-    SingleSignonEntry entry = null;
-    
-    if (_singleSignon == null) {
-    }
-    else if (session != null)
-      entry = _singleSignon.get(session.getId());
-    else if (request.getRequestedSessionId() != null)
-      entry = _singleSignon.get(request.getRequestedSessionId());
-
-    if (entry != null) {
-      Principal user = entry.getPrincipal();
-
-      if (user != null)
-	return user;
-    }
-
-    return null;
+    if (sessionId != null)
+      return singleSignon.get(sessionId);
+    else
+      return null;
   }
 
   /**
@@ -288,23 +291,20 @@ public abstract class AbstractLogin implements Login {
 			  Principal user)
   {
     request.setAttribute(LOGIN_NAME, user);
+    
+    SingleSignon singleSignon = getSingleSignon();
+    
+    SessionImpl session = (SessionImpl) request.getSession(false);
 
-    SessionImpl session = null;
+    String sessionId;
 
-    if (isSessionSaveLogin())
-      session = (SessionImpl) request.getSession();
+    if (session != null)
+      sessionId = session.getId();
+    else
+      sessionId = request.getRequestedSessionId();
 
-    if (session != null) {
-      session.setAttribute(LOGIN_NAME, new LoginPrincipal(user));
-    }
-
-    String sessionId = request.getRequestedSessionId();
-    if (_singleSignon != null && sessionId != null) {
-      SingleSignonEntry entry = _singleSignon.put(sessionId, user);
-
-      if (session != null)
-	entry.addSession(session);
-    }
+    if (sessionId != null)
+      singleSignon.put(sessionId, user);
   }
   
   /**
@@ -420,6 +420,10 @@ public abstract class AbstractLogin implements Login {
     String sessionId = request.getRequestedSessionId();
       
     logoutImpl(user, request, response);
+    
+    SingleSignon singleSignon = getSingleSignon();
+
+    singleSignon.remove(sessionId);
   }
   
   /**
@@ -431,11 +435,11 @@ public abstract class AbstractLogin implements Login {
     //LoginPrincipal login = (LoginPrincipal) session.getAttribute(LOGIN_NAME);
 
     if (session != null) {
+      SingleSignon singleSignon = getSingleSignon();
+      
       // server/12cg
-      if (_singleSignon == null) {
-      }
-      else if (! isTimeout || isLogoutOnSessionTimeout()) {
-	SingleSignonEntry entry = _singleSignon.remove(session.getId());
+      if (! isTimeout || isLogoutOnSessionTimeout()) {
+	singleSignon.remove(session.getId());
       }
     }
   }

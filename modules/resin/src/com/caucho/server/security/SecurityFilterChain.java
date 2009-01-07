@@ -102,7 +102,7 @@ public class SecurityFilterChain extends AbstractFilterChain {
 
 	if (constraint.isPrivateCache())
 	  isPrivateCache = true;
-	
+
         if (! result.isFallthrough())
           break;
       }
@@ -111,12 +111,13 @@ public class SecurityFilterChain extends AbstractFilterChain {
     if (isPrivateCache)
       res.setPrivateCache(true);
 
-    if (req.isLoginRequested() && req.login()) {
-      if (result.isResponseSent())
-	return;
-    }
-
     if (result.isFail()) {
+      // server/1af3
+      if (req.isLoginRequested() && req.login()) {
+	if (result.isResponseSent())
+	  return;
+      }
+
       if (! result.isResponseSent() && res.getStatusCode() / 100 == 2) {
 	res.sendError(HttpServletResponse.SC_FORBIDDEN);
       }

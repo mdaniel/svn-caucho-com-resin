@@ -34,4 +34,12 @@ package com.caucho.cluster;
  */
 public class TriplicateCache extends AbstractCache
 {
+  public TriplicateCache()
+  {
+  }
+  
+  public TriplicateCache(String name)
+  {
+    setName(name);
+  }
 }

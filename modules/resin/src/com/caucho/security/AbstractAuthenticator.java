@@ -78,6 +78,8 @@ public class AbstractAuthenticator
 
   private Object _serializationHandle;
 
+  private SingleSignon _singleSignon;
+
   /**
    * Returns the password digest
    */
@@ -181,6 +183,8 @@ public class AbstractAuthenticator
         _passwordDigest.init();
       }
     }
+
+    _singleSignon = new ClusterSingleSignon("authenticator");
   }
 
   //
@@ -425,6 +429,18 @@ public class AbstractAuthenticator
   protected PasswordUser getUser(Principal principal)
   {
     return getUser(principal.getName());
+  }
+
+  //
+  // Compatibility
+  //
+
+  /**
+   * Returns the scoped single-signon
+   */
+  public SingleSignon getSingleSignon()
+  {
+    return _singleSignon;
   }
 
   //

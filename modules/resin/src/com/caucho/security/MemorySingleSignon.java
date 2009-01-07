@@ -47,7 +47,7 @@ public class MemorySingleSignon implements SingleSignon {
     = Logger.getLogger(MemorySingleSignon.class.getName());
   
   private int _cacheSize = 4096;
-  private LruCache<String,SingleSignonEntry> _cache;
+  private LruCache<String,Principal> _cache;
 
   /**
    * Returns the size of the principal cache.
@@ -72,13 +72,13 @@ public class MemorySingleSignon implements SingleSignon {
   public void init()
   {
     if (_cacheSize > 0)
-      _cache = new LruCache<String,SingleSignonEntry>(_cacheSize);
+      _cache = new LruCache<String,Principal>(_cacheSize);
   }
   
   /**
    * Returns any saved single signon entry.
    */
-  public SingleSignonEntry get(String id)
+  public Principal get(String id)
   {
     if (_cache != null) {
       return _cache.get(id);
@@ -92,18 +92,10 @@ public class MemorySingleSignon implements SingleSignon {
    *
    * @return the logged in principal on success, null on failure.
    */
-  public SingleSignonEntry put(String id, Principal user)
+  public void put(String id, Principal user)
   {
     synchronized (_cache) {
-      SingleSignonEntry entry = _cache.get(id);
-
-      if (entry == null) {
-	entry = new SingleSignonEntry(user);
-
-	_cache.put(id, entry);
-      }
-
-      return entry;
+      _cache.put(id, user);
     }
   }
   
@@ -112,8 +104,10 @@ public class MemorySingleSignon implements SingleSignon {
    *
    * @return the logged in principal on success, null on failure.
    */
-  public SingleSignonEntry remove(String id)
+  public boolean remove(String id)
   {
-    return _cache.remove(id);
+    _cache.remove(id);
+
+    return false;
   }
 }
