@@ -59,6 +59,7 @@
 
 #define CACHE_SIZE 16384
 #define AUTO_WRITE_TIME (15 * 60)
+#define DEFAULT_HOST_MAX 256
 
 #define HMUX_DISPATCH_QUERY           'q'
 #define HMUX_DISPATCH_QUERY_CLUSTER   's'
@@ -408,13 +409,19 @@ cse_create_host(config_t *config, const char *host_name, int port)
   config->hosts = host;
   
   pool = cse_create_pool(config);
-
-  /* add default match for fail-safe */
-  web_app = cse_add_application(pool, host, 0, "");
-  host->applications = web_app;
   host->pool = pool;
 
-  cse_add_match_pattern(pool, web_app, "/*");
+  if (*host_name) {
+    /* Initial configuration is an alias to the default host */
+    host->canonical = cse_create_host(config, "", 0);
+  }
+  else {
+    /* add default match for fail-safe */
+    web_app = cse_add_application(pool, host, 0, "");
+    host->applications = web_app;
+
+    cse_add_match_pattern(pool, web_app, "/*");
+  }
   
   return host;
 }
@@ -722,6 +729,8 @@ write_config(config_t *config)
   char temp[1024];
   char buffer[1024];
   char *tail;
+  int default_host_count = 0;
+  
   if (! *config->config_path)
     return;
   
@@ -755,6 +764,12 @@ write_config(config_t *config)
     return;
   }
 
+  for (host = config->hosts; host; host = host->next) {
+    if (! host->canonical->name[0]) {
+      default_host_count++;
+    }
+  }
+
   memset(&s, 0, sizeof(s));
   s.socket = fd;
 
@@ -780,6 +795,16 @@ write_config(config_t *config)
   for (host = config->hosts; host; host = host->next) {
     web_app_t *web_app;
     int i;
+
+    if (config->default_host_max < default_host_count
+	&& host != host->canonical
+	&& ! host->canonical->name[0]) {
+      /*
+       * if too many default hosts, don't write them to avoid
+       * a potential DOS issue
+       */
+      continue;
+    }
 
     if (host->port) {
       sprintf(buffer, "%s:%d", host->name, host->port);
@@ -1080,6 +1105,8 @@ cse_init_config(config_t *config)
   strcpy(config->session_cookie, "JSESSIONID");
 
   config->config_cluster.config = config;
+  
+  config->default_host_max = DEFAULT_HOST_MAX;
   
 #ifdef WIN32  
   {
