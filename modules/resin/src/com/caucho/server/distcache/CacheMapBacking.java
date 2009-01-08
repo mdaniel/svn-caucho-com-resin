@@ -148,16 +148,16 @@ public class CacheMapBacking implements AlarmListener {
   private void init()
     throws Exception
   {
-    _loadQuery = ("SELECT value,flags,server_version,item_version,expire_timeout,idle_timeout,load_read_timeout,access_time"
+    _loadQuery = ("SELECT value,flags,server_version,item_version,expire_timeout,idle_timeout,local_read_timeout,access_time"
 		  + " FROM " + _tableName
 		  + " WHERE id=?");
 
     _insertQuery = ("INSERT into " + _tableName
 		    + " (id,value,flags,"
 		    + "  item_version,server_version,"
-		    + "  expire_timeout,idle_timeout,local_read_timeout"
+		    + "  expire_timeout,idle_timeout,local_read_timeout,"
 		    + "  access_time)"
-		    + "VALUES(?,?,?,?,?,?,?,?,?)");
+		    + " VALUES (?,?,?,?,?,?,?,?,?)");
 
     _updateSaveQuery
       = ("UPDATE " + _tableName
@@ -176,7 +176,8 @@ public class CacheMapBacking implements AlarmListener {
 			   + " WHERE id=? AND value=?");
 
     _timeoutQuery = ("DELETE FROM " + _tableName
-		     + " WHERE access_time + 5 * timeout / 4 < ?");
+		     + " WHERE access_time + 5 * idle_timeout / 4 < ?"
+		     + " OR access_time + expire_timeout < ?");
     
     _countQuery = "SELECT count(*) FROM " + _tableName;
     
@@ -207,7 +208,8 @@ public class CacheMapBacking implements AlarmListener {
       
       try {
 	String sql = ("SELECT id, value, flags,"
-		      + "     load_read_timeout, idle_timeout, access_time,"
+		      + "     expire_timeout, idle_timeout, local_read_timeout,"
+		      + "     access_time,"
 		      + "     server_version, item_version"
                       + " FROM " + _tableName + " WHERE 1=0");
 
@@ -230,11 +232,12 @@ public class CacheMapBacking implements AlarmListener {
       String sql = ("CREATE TABLE " + _tableName + " (\n"
                     + "  id BINARY(32) PRIMARY KEY,\n"
                     + "  value BINARY(32),\n"
+		    + "  expire_timeout BIGINT,\n"
 		    + "  idle_timeout BIGINT,\n"
+		    + "  local_read_timeout BIGINT,\n"
 		    + "  access_time BIGINT,\n"
 		    + "  item_version BIGINT,\n"
 		    + "  flags INTEGER,\n"
-		    + "  local_read_timeout INTEGER,\n"
 		    + "  server_version INTEGER)");
 
       log.fine(sql);
