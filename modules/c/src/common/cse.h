@@ -201,7 +201,7 @@ typedef struct config_t {
   char session_cookie[256];
   char *iis_priority;
   int override_iis_authentication;
-  
+
   srun_t **srun_list;
   int srun_capacity;
 
@@ -210,6 +210,7 @@ typedef struct config_t {
   cluster_t config_cluster;
 
   resin_host_t *hosts;
+  int default_host_max;
 
   /* for direct dispatching */
   resin_host_t *manual_host;
