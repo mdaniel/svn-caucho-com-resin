@@ -30,6 +30,7 @@
 package com.caucho.server.distcache;
 
 import com.caucho.cluster.CacheEntry;
+import com.caucho.cluster.CacheLoader;
 import com.caucho.cluster.CacheSerializer;
 import com.caucho.cluster.HessianSerializer;
 import com.caucho.server.cluster.Cluster;
@@ -54,8 +55,28 @@ public class CacheConfig
   
   private long _idleTimeout = Long.MAX_VALUE / 2;
 
+  private long _expireTimeout = Long.MAX_VALUE / 2;
+
+  private CacheLoader _cacheLoader;
+
   private CacheSerializer _keySerializer;
   private CacheSerializer _valueSerializer;
+
+  /**
+   * The Cache will use a CacheLoader to populate cache misses.
+   */
+  public CacheLoader getCacheLoader()
+  {
+    return _cacheLoader;
+  }
+
+  /**
+   * The Cache will use a CacheLoader to populate cache misses.
+   */
+  public void setCacheLoader(CacheLoader cacheLoader)
+  {
+    _cacheLoader = cacheLoader;
+  }
 
   /**
    * Returns the flags
@@ -74,7 +95,50 @@ public class CacheConfig
   }
 
   /**
-   * Returns the maximum idle time in the database.
+   * The maximum valid time for an item.  Items stored in the cache
+   * for longer than the expire time are no longer valid and will
+   * return null from a get.
+   *
+   * Default is infinite.
+   */
+  public long getExpireTimeout()
+  {
+    return _expireTimeout;
+  }
+
+  /**
+   * The maximum valid time for an item.  Items stored in the cache
+   * for longer than the expire time are no longer valid and will
+   * return null from a get.
+   *
+   * Default is infinite.
+   */
+  public void setExpireTimeout(long expireTimeout)
+  {
+    if (expireTimeout < 0 || expireTimeout > Long.MAX_VALUE / 2)
+      expireTimeout = Long.MAX_VALUE / 2;
+    else
+      _expireTimeout = expireTimeout;
+  }
+
+  /**
+   * Returns the expire check window, i.e. the precision of the expire
+   * check.  Since an expired item can cause a massive cascade of
+   * attempted loads from the backup, the actual expiration is randomized.
+   */
+  public long getExpireCheckWindow()
+  {
+    return _expireTimeout / 4;
+  }
+
+  /**
+   * The maximum idle time for an item.  For example, session
+   * data might be removed if idle over 30 minutes.
+   *
+   * Cached data would typically have infinite idle time because
+   * it doesn't depend on how often it's accessed.
+   *
+   * Default is infinite.
    */
   public long getIdleTimeout()
   {
@@ -82,7 +146,11 @@ public class CacheConfig
   }
 
   /**
-   * Sets the maximum idle time in the database.
+   * The maximum idle time for an item.  For example, session
+   * data might be removed if idle over 30 minutes.
+   *
+   * Cached data would typically have infinite idle time because
+   * it doesn't depend on how often it's accessed.
    */
   public void setIdleTimeout(long idleTimeout)
   {

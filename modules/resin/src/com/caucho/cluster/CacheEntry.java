@@ -40,7 +40,22 @@ public interface CacheEntry<V>
   public V getValue();
 
   /**
-   * Returns the item's hash
+   * Returns the expire time.
    */
-  public byte []getValueHash();
+  public long getExpirationTime();
+
+  /**
+   * Returns the last access time for the item.
+   */
+  public long getLastAccessTime();
+
+  /**
+   * Returns the last update time for the item.
+   */
+  public long getLastUpdateTime();
+
+  /**
+   * Returns the item version.
+   */
+  public long getVersion();
 }

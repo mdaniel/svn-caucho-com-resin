@@ -1384,26 +1384,6 @@ public final class SessionManager implements AlarmListener
 	  session.timeout();
 
 	  _sessions.remove(session.getId());
-	  /*
-	  if (! session.isValid())
-	    continue;
-
-	  if (_storeManager == null) {
-	    // if no persistent store then invalidate
-	    // XXX: server/12cg - single signon shouldn't logout
-     	    session.invalidateTimeout();
-	  }
-	  else if (session.getSrunIndex() != _selfIndex && _selfIndex >= 0) {
-            if (log.isLoggable(Level.FINE))
-              log.fine(session + " timeout (backup)");
-            
-	    // if not the owner, then just remove
-	    _sessions.remove(session.getId());
-	  }
-	  else {
-	    session.invalidateTimeout();
-	  }
-	  */
 	} catch (Throwable e) {
 	  log.log(Level.FINE, e.toString(), e);
 	}
@@ -1468,11 +1448,6 @@ public final class SessionManager implements AlarmListener
       _admin.unregister();
 
     _sessionList = new ArrayList<SessionImpl>();
-
-    /*
-    if (_clusterManager != null)
-      _clusterManager.removeContext(_distributionId);
-    */
   }
 
   /**

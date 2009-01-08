@@ -35,7 +35,10 @@ package com.caucho.cluster;
 public interface Cache
 {
   /**
-   * Returns the object with the given key.
+   * Returns the object specified by the given key.
+   *
+   * If the item does not exist and a CacheLoader has been specified,
+   * the CacheLoader will be used to create a cache value.
    */
   public Object get(Object key);
   
@@ -45,32 +48,39 @@ public interface Cache
   public CacheEntry getEntry(Object key);
   
   /**
+   * Returns the object with the given key, but does not check
+   * distributed caches or trigger a CacheLoader.
+   */
+  public Object peek(Object key);
+  
+  /**
    * Puts a new item in the cache.
    *
    * @param key the key of the item to put
    * @param value the value of the item to put
    */
-  public void put(Object key, Object value);
+  public Object put(Object key, Object value);
   
   /**
    * Updates the cache if the old value hash matches the current value.
    * A null value for the old value hash only adds the entry if it's new
    *
    * @param key the key to compare
-   * @param oldValueHash the hash of the old value, returned by getEntry
+   * @param version the version of the old value returned by getEntry
    * @param value the new value
    *
    * @return true if the update succeeds, false if it fails
    */
-  public boolean compareAndPut(Object key, Object value, byte[] oldValueHash);
+  public boolean compareAndPut(Object key, long version, Object value);
 
   /**
    * Removes the entry from the cache
    */
-  public boolean remove(Object key);
+  public Object remove(Object key);
 
   /**
-   * Removes the entry from the cache if the current entry matches the hash
+   * Removes the entry from the cache if the current entry's version
+   * matches.
    */
-  public boolean compareAndRemove(Object key, byte[] oldValueHash);
+  public boolean compareAndRemove(Object key, long version);
 }

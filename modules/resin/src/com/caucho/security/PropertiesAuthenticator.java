@@ -49,7 +49,7 @@ import java.io.*;
  * The Property authenticator reads a properties file for authentication.
  *
  * <code><pre>
- * &lt;authenticator url="prop:path=WEB-INF/users.xml"/>
+ * &lt;sec:PropertiesAuthenticator path="WEB-INF/users.xml"/>
  * </pre></code>
  *
  * <p>The format of the static file is as follows:
@@ -61,11 +61,9 @@ import java.io.*;
  * <p>The authenticator can also be configured in the resin-web.xml:
  *
  * <code><pre>
- * &lt;authenticator url="prop:password-digest=none">
- *   &lt;init>
+ * &lt;sec:PropertiesAuthenticator password-digest="none">
  *     Harry Potter=quidditch,user,captain
- *   &lt;/init>
- * &lt;/authenticator>
+ * &lt;/sec:PropertiesAuthenticator>
  * </pre></code>
  */
 public class PropertiesAuthenticator extends AbstractAuthenticator {
@@ -128,7 +126,7 @@ public class PropertiesAuthenticator extends AbstractAuthenticator {
    * Returns the PasswordUser
    */
   @Override
-  protected PasswordUser getUser(String userName)
+  protected PasswordUser getPasswordUser(String userName)
   {
     if  (userName == null)
       return null;
@@ -136,7 +134,7 @@ public class PropertiesAuthenticator extends AbstractAuthenticator {
     if (isModified())
       reload();
 
-    PasswordUser user = _userMap.get(userName).copy();
+    PasswordUser user = _userMap.get(userName);
 
     if (user != null)
       return user.copy();

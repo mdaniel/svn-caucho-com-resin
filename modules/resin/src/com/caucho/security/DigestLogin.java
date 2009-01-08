@@ -47,6 +47,16 @@ import java.util.logging.Level;
 /**
  * Implements the "digest" auth-method.  Basic uses the
  * HTTP authentication with WWW-Authenticate and SC_UNAUTHORIZE.
+ *
+ * The HTTP Digest authentication uses the following algorithm
+ * to calculate the digest.  The digest is then compared to
+ * the client digest.
+ *
+ * <code><pre>
+ * A1 = MD5(username + ':' + realm + ':' + password)
+ * A2 = MD5(method + ':' + uri)
+ * digest = MD5(A1 + ':' + nonce + A2)
+ * </pre></code>
  */
 public class DigestLogin extends AbstractLogin {
   protected String _realm;
@@ -142,7 +152,7 @@ public class DigestLogin extends AbstractLogin {
     cred.setNonce(nonce);
     cred.setQop(qop);
     cred.setRealm(realm);
-    cred.setResponse(decodeDigest(digest));
+    cred.setResponse(clientDigest);
     cred.setUri(uri);
 
     Principal user;

@@ -28,12 +28,13 @@
 
 package com.caucho.server.security;
 
+import java.io.Serializable;
 import java.security.Principal;
 
 /**
  * Principal which has role methods.
  */
-public interface RolePrincipal extends Principal
+public interface RolePrincipal extends Principal, Serializable
 {
   public boolean isUserInRole(String role);
 }

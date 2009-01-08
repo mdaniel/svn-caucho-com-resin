@@ -101,11 +101,11 @@ public class ClusterSingleSignon implements SingleSignon {
   
   /**
    * Removes a principal from the single-signon
-   *
-   * @return the logged in principal on success, null on failure.
    */
   public boolean remove(String id)
   {
-    return _cache.remove(id);
+    _cache.remove(id);
+
+    return true;
   }
 }

@@ -39,14 +39,22 @@ import java.lang.ref.SoftReference;
  */
 public final class CacheMapEntry implements CacheEntry {
   public static final CacheMapEntry NULL
-    = new CacheMapEntry(null, null, 0, 0, 0, false);
+    = new CacheMapEntry(null, null, 0, 0, 0, 0, 0, 0, 0, false);
   
   private final HashKey _valueHash;
   private final int _flags;
   private final long _version;
-  private final long _localExpireTime;
+  
+  private final long _localReadTimeout;
+  private final long _idleTimeout;
+  private final long _expireTimeout;
+  
+  private final long _lastUpdateTime;
 
   private final boolean _isServerVersionValid;
+  
+  private long _lastAccessTime;
+  private long _lastRemoteAccessTime;
   
   private SoftReference _valueRef;
 
@@ -54,17 +62,128 @@ public final class CacheMapEntry implements CacheEntry {
 		       Object value,
 		       int flags,
 		       long version,
-		       long localExpireTime,
+		       long expireTimeout,
+		       long idleTimeout,
+		       long localReadTimeout,
+		       long lastAccessTime,
+		       long lastUpdateTime,
 		       boolean isServerVersionValid)
   {
     _valueHash = valueHash;
     _flags = flags;
     _version = version;
     
-    _localExpireTime = localExpireTime;
+    _localReadTimeout = localReadTimeout;
+    _idleTimeout = idleTimeout;
+    _expireTimeout = expireTimeout;
+    
+    _lastRemoteAccessTime = lastAccessTime;
+    _lastUpdateTime = lastUpdateTime;
+    
+    _lastAccessTime = Alarm.getExactTime();
+
     _isServerVersionValid = isServerVersionValid;
 
     if (value != null)
+      _valueRef = new SoftReference(value);
+  }
+
+  /**
+   * Returns the last access time.
+   */
+  public long getLastAccessTime()
+  {
+    return _lastAccessTime;
+  }
+
+  /**
+   * Sets the last access time.
+   */
+  public void setLastAccessTime(long accessTime)
+  {
+    _lastAccessTime = accessTime;
+  }
+
+  /**
+   * Returns the last remote access time.
+   */
+  public long getLastRemoteAccessTime()
+  {
+    return _lastRemoteAccessTime;
+  }
+
+  /**
+   * Sets the last remote access time.
+   */
+  public void setLastRemoteAccessTime(long accessTime)
+  {
+    _lastRemoteAccessTime = accessTime;
+  }
+
+  /**
+   * Returns the last update time.
+   */
+  public long getLastUpdateTime()
+  {
+    return _lastUpdateTime;
+  }
+
+  /**
+   * Returns the expiration time
+   */
+  public long getExpirationTime()
+  {
+    return _lastUpdateTime + _expireTimeout;
+  }
+
+  public boolean isLocalReadExpired()
+  {
+    return (_lastAccessTime + _localReadTimeout < Alarm.getExactTime()
+	    || ! _isServerVersionValid);
+  }
+
+  public boolean isExpired()
+  {
+    return (_lastUpdateTime + _expireTimeout < Alarm.getExactTime());
+  }
+
+  public int getFlags()
+  {
+    return _flags;
+  }
+
+  /**
+   * Returns the expire timeout for this entry.
+   */
+  public long getExpireTimeout()
+  {
+    return _expireTimeout;
+  }
+
+  /**
+   * Returns the idle timeout for this entry.
+   */
+  public long getIdleTimeout()
+  {
+    return _idleTimeout;
+  }
+
+  /**
+   * Returns the read timeout for a local cached entry
+   */
+  public long getLocalReadTimeout()
+  {
+    return _localReadTimeout;
+  }
+
+  public long getVersion()
+  {
+    return _version;
+  }
+
+  public void setValue(Object value)
+  {
+    if (value != null && (_valueRef == null || _valueRef.get() == null))
       _valueRef = new SoftReference(value);
   }
 
@@ -79,22 +198,6 @@ public final class CacheMapEntry implements CacheEntry {
   public HashKey getValueHashKey()
   {
     return _valueHash;
-  }
-
-  public int getFlags()
-  {
-    return _flags;
-  }
-
-  public long getVersion()
-  {
-    return _version;
-  }
-
-  public void setValue(Object value)
-  {
-    if (value != null && (_valueRef == null || _valueRef.get() == null))
-      _valueRef = new SoftReference(value);
   }
 
   public Object getValue()
@@ -114,12 +217,6 @@ public final class CacheMapEntry implements CacheEntry {
   public boolean isServerVersionValid()
   {
     return _isServerVersionValid;
-  }
-
-  public boolean isExpired()
-  {
-    return (_localExpireTime < Alarm.getExactTime()
-	    || ! _isServerVersionValid);
   }
 
   public String toString()

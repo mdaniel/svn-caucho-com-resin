@@ -1664,11 +1664,13 @@ public abstract class AbstractHttpRequest
   public boolean login()
   {
     try {
+      /*
       Principal user = null;
       user = (Principal) getAttribute(AbstractLogin.LOGIN_NAME);
 
       if (user != null)
 	return true;
+      */
 
       WebApp app = getWebApp();
       if (app == null) {
@@ -1684,14 +1686,17 @@ public abstract class AbstractHttpRequest
       Login login = app.getLogin();
 
       if (login != null) {
-	user = login.login(this, getResponse());
-      
+	Principal user = login.login(this, getResponse());
+
+	return user != null;
+	/*
 	if (user == null)
 	  return false;
 	
 	setAttribute(AbstractLogin.LOGIN_NAME, user);
 
 	return true;
+	*/
       }
       else {
 	if (log.isLoggable(Level.FINE))

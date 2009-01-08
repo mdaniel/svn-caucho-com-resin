@@ -222,7 +222,7 @@ public class AbstractAuthenticator
    */
   public boolean isUserInRole(Principal user, String role)
   {
-    PasswordUser passwordUser = getUser(user);
+    PasswordUser passwordUser = getPasswordUser(user);
 
     if (passwordUser != null)
       return passwordUser.isUserInRole(role);
@@ -254,7 +254,7 @@ public class AbstractAuthenticator
 				   PasswordCredentials cred,
 				   Object details)
   {
-    PasswordUser user = getUser(principal);
+    PasswordUser user = getPasswordUser(principal);
 
     if (user == null || user.isDisabled())
       return null;
@@ -378,7 +378,7 @@ public class AbstractAuthenticator
    */
   protected byte []getDigestSecret(Principal principal, String realm)
   {
-    PasswordUser user = getUser(principal);
+    PasswordUser user = getPasswordUser(principal);
 
     if (user == null || user.isDisabled())
       return null;
@@ -418,7 +418,7 @@ public class AbstractAuthenticator
    *
    * @return the populated PasswordUser value
    */
-  protected PasswordUser getUser(String userName)
+  protected PasswordUser getPasswordUser(String userName)
   {
     return null;
   }
@@ -426,9 +426,9 @@ public class AbstractAuthenticator
   /**
    * Returns the user based on a principal
    */
-  protected PasswordUser getUser(Principal principal)
+  protected PasswordUser getPasswordUser(Principal principal)
   {
-    return getUser(principal.getName());
+    return getPasswordUser(principal.getName());
   }
 
   //

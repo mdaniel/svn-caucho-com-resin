@@ -98,7 +98,7 @@ public abstract class AbstractLogin implements Login {
   private WebBeansContainer _webBeans;
 
   private boolean _isSessionSaveLogin = true;
-  private boolean _isLogoutOnTimeout = false;
+  private boolean _isLogoutOnTimeout = true;
   
   protected AbstractLogin()
   {
@@ -261,6 +261,52 @@ public abstract class AbstractLogin implements Login {
 
     return user;
   }
+  
+  /**
+   * Logs a user in.  The authenticate method is called during the
+   * security check.  If the user does not exist, <code>authenticate</code>
+   * sets the reponse error page and returns null.
+   *
+   * @param request servlet request
+   * @param response servlet response for a failed authentication.
+   * @param application servlet application
+   *
+   * @return the logged in principal on success, null on failure.
+   */
+  public Principal login(HttpServletRequest request,
+			 HttpServletResponse response)
+  {
+    // Most login classes will extract the user and password (or some other
+    // credentials) from the request and call auth.login.
+    Principal user;
+
+    user = findSavedUser(request);
+
+    // server/12c9 - new login overrides old
+    if (user != null && isSavedUserValid(request, user))
+      return user;
+    
+    user = getLoginPrincipalImpl(request);
+
+    try {
+      if (user != null) {
+	loginSuccessResponse(user, request, response);
+
+	saveUser(request, user);
+      
+	return user;
+      }
+
+      loginChallenge(request, response);
+    } catch (Exception e) {
+      // server/12d5
+      
+      // XXX: better exception
+      throw new RuntimeException(e);
+    }
+
+    return null;
+  }
 
   /**
    * Looks up the user based on session or single signon.
@@ -294,7 +340,12 @@ public abstract class AbstractLogin implements Login {
     
     SingleSignon singleSignon = getSingleSignon();
     
-    SessionImpl session = (SessionImpl) request.getSession(false);
+    SessionImpl session;
+
+    if (isSessionSaveLogin())
+      session = (SessionImpl) request.getSession(true);
+    else
+      session = (SessionImpl) request.getSession(false);
 
     String sessionId;
 
@@ -323,44 +374,6 @@ public abstract class AbstractLogin implements Login {
 				     Principal savedUser)
   {
     return true;
-  }
-  
-  /**
-   * Logs a user in.  The authenticate method is called during the
-   * security check.  If the user does not exist, <code>authenticate</code>
-   * sets the reponse error page and returns null.
-   *
-   * @param request servlet request
-   * @param response servlet response for a failed authentication.
-   * @param application servlet application
-   *
-   * @return the logged in principal on success, null on failure.
-   */
-  public Principal login(HttpServletRequest request,
-			 HttpServletResponse response)
-  {
-    // Most login classes will extract the user and password (or some other
-    // credentials) from the request and call auth.login.
-    Principal user = getLoginPrincipalImpl(request);
-
-    try {
-      if (user != null) {
-	loginSuccessResponse(user, request, response);
-
-	saveUser(request, user);
-      
-	return user;
-      }
-
-      loginChallenge(request, response);
-    } catch (Exception e) {
-      // server/12d5
-      
-      // XXX: better exception
-      throw new RuntimeException(e);
-    }
-
-    return null;
   }
   
   /**

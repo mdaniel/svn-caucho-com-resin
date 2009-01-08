@@ -229,7 +229,7 @@ public class PasswordDigest {
       synchronized (_digest) {
         _digest.reset();
 
-	updateDigest(_digest, user, password, realm);
+	updateDigest(_digest, user, password.toCharArray(), realm);
 
         int len = _digest.digest(_digestBytes, 0, _digestBytes.length);
 
@@ -282,18 +282,8 @@ public class PasswordDigest {
     try {
       synchronized (_digest) {
         _digest.reset();
-	
-	if (user != null) {
-	  addDigestUTF8(_digest, user);
-	  _digest.update((byte) ':');
-	}
-	
-	if (realm != null && ! realm.equals("none")) {
-	  addDigestUTF8(_digest, realm);
-	  _digest.update((byte) ':');
-	}
-	
-	addDigestUTF8(_digest, password);
+
+	updateDigest(_digest, user, password, realm);
 
         int len = _digest.digest(_digestBytes, 0, _digestBytes.length);
 
@@ -308,7 +298,7 @@ public class PasswordDigest {
    * Updates the digest based on the user:realm:password
    */
   protected void updateDigest(MessageDigest digest,
-			      String user, String password, String realm)
+			      String user, char []password, String realm)
   {
     if (user != null) {
       addDigestUTF8(digest, user);

@@ -244,7 +244,7 @@ public class FormLogin extends AbstractLogin
   {
     String userName = request.getParameter("j_username");
 
-    return userName == null || ! userName.equals(savedUser.getName());
+    return userName == null || userName.equals(savedUser.getName());
   }
 
   /**

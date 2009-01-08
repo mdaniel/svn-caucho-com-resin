@@ -85,7 +85,12 @@ public class AbstractAuthenticator
     HttpServletResponse response
       = (HttpServletResponse) request.getServletResponse();
 
-    return loginImpl(request, response, webApp, userName, password);
+    try {
+      return loginImpl(request, response, webApp, userName, password);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -95,8 +100,14 @@ public class AbstractAuthenticator
 				HttpServletResponse response,
 				ServletContext app,
 				String userName, String password)
+    throws ServletException
   {
-    return getUserPrincipal(request, response, app);
+    Principal user = getUserPrincipal(request, response, app);
+
+    if (user == null)
+      user = login(request, response, app);
+
+    return user;
   }
 
   /**
@@ -105,6 +116,18 @@ public class AbstractAuthenticator
   protected Principal getUserPrincipal(HttpServletRequest request,
 				       HttpServletResponse response,
 				       ServletContext app)
+    throws ServletException
+  {
+    return null;
+  }
+
+  /**
+   * Backward compatiblity call
+   */
+  protected Principal login(HttpServletRequest request,
+			    HttpServletResponse response,
+			    ServletContext app)
+    throws ServletException
   {
     return null;
   }

@@ -124,7 +124,7 @@ public class XmlAuthenticator extends AbstractAuthenticator
    * Returns the PasswordUser
    */
   @Override
-  protected PasswordUser getUser(String userName)
+  protected PasswordUser getPasswordUser(String userName)
   {
     if (userName == null)
       return null;

@@ -1866,10 +1866,10 @@ public class WebApp extends ServletContextImpl
 
       try {
 	_login = _webBeans.getInstanceByType(Login.class);
-	
+
 	setAttribute("caucho.login", _login);
       } catch (Exception e) {
-	log.finest(e.toString());
+	log.log(Level.FINEST, e.toString(), e);
       }
 
       WebAppController parent = null;

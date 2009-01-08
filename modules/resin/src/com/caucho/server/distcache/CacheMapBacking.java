@@ -148,20 +148,22 @@ public class CacheMapBacking implements AlarmListener {
   private void init()
     throws Exception
   {
-    _loadQuery = ("SELECT value,flags,access_time,server_version,item_version"
+    _loadQuery = ("SELECT value,flags,server_version,item_version,expire_timeout,idle_timeout,load_read_timeout,access_time"
 		  + " FROM " + _tableName
 		  + " WHERE id=?");
 
     _insertQuery = ("INSERT into " + _tableName
 		    + " (id,value,flags,"
-		    + "  item_version,access_time,timeout,"
-		    + "  server_version) "
-		    + "VALUES(?,?,?,?,?,?,?)");
+		    + "  item_version,server_version,"
+		    + "  expire_timeout,idle_timeout,local_read_timeout"
+		    + "  access_time)"
+		    + "VALUES(?,?,?,?,?,?,?,?,?)");
 
     _updateSaveQuery
       = ("UPDATE " + _tableName
-	 + " SET value=?,access_time=?,"
-	 + "     server_version=?,item_version=?,timeout=?"
+	 + " SET value=?,"
+	 + "     server_version=?,item_version=?,"
+	 + "     idle_timeout=?,access_time=?"
 	 + " WHERE id=? AND item_version<=?");
 
     _updateAccessQuery
@@ -205,7 +207,7 @@ public class CacheMapBacking implements AlarmListener {
       
       try {
 	String sql = ("SELECT id, value, flags,"
-		      + "     timeout, access_time,"
+		      + "     load_read_timeout, idle_timeout, access_time,"
 		      + "     server_version, item_version"
                       + " FROM " + _tableName + " WHERE 1=0");
 
@@ -228,10 +230,11 @@ public class CacheMapBacking implements AlarmListener {
       String sql = ("CREATE TABLE " + _tableName + " (\n"
                     + "  id BINARY(32) PRIMARY KEY,\n"
                     + "  value BINARY(32),\n"
-		    + "  timeout BIGINT,\n"
+		    + "  idle_timeout BIGINT,\n"
 		    + "  access_time BIGINT,\n"
 		    + "  item_version BIGINT,\n"
 		    + "  flags INTEGER,\n"
+		    + "  local_read_timeout INTEGER,\n"
 		    + "  server_version INTEGER)");
 
       log.fine(sql);
@@ -376,16 +379,19 @@ public class CacheMapBacking implements AlarmListener {
       if (rs.next()) {
 	byte []hash = rs.getBytes(1);
 	int flags = rs.getInt(2);
-	long accessTime = rs.getLong(3);
-	long serverVersion = rs.getLong(4);
-	long itemVersion = rs.getLong(5);
+	long serverVersion = rs.getLong(3);
+	long itemVersion = rs.getLong(4);
+	long expireTimeout = rs.getLong(5);
+	long idleTimeout = rs.getLong(6);
+	long localReadTimeout = rs.getLong(7);
+	long accessTime = rs.getLong(8);
+	long updateTime = accessTime;
 
 	HashKey valueHash = hash != null ? new HashKey(hash) : null;
 
-	long expireTime = accessTime + 10000L;
-
 	return new CacheMapEntry(valueHash, null, flags, itemVersion,
-				 expireTime,
+				 expireTimeout, idleTimeout, localReadTimeout,
+				 accessTime, updateTime,
 				 serverVersion == _serverVersion);
       }
     } catch (SQLException e) {
@@ -410,7 +416,9 @@ public class CacheMapBacking implements AlarmListener {
 			HashKey value,
 			int flags,
 			long version,
-			long idleTimeout)
+			long expireTimeout,
+			long idleTimeout,
+			long localReadTimeout)
   {
     CacheMapConnection conn = null;
 
@@ -425,9 +433,11 @@ public class CacheMapBacking implements AlarmListener {
 	stmt.setBytes(2, null);
       stmt.setLong(3, flags);
       stmt.setLong(4, version);
-      stmt.setLong(5, Alarm.getCurrentTime());
-      stmt.setLong(6, idleTimeout);
-      stmt.setLong(7, _serverVersion);
+      stmt.setLong(5, _serverVersion);
+      stmt.setLong(6, expireTimeout);
+      stmt.setLong(7, idleTimeout);
+      stmt.setLong(8, localReadTimeout);
+      stmt.setLong(9, Alarm.getCurrentTime());
 
       int count = stmt.executeUpdate();
         
@@ -467,10 +477,10 @@ public class CacheMapBacking implements AlarmListener {
 	stmt.setBytes(1, value.getHash());
       else
 	stmt.setBytes(1, null);
-      stmt.setLong(2, Alarm.getCurrentTime());
-      stmt.setLong(3, _serverVersion);
-      stmt.setLong(4, itemVersion);
-      stmt.setLong(5, idleTimeout);
+      stmt.setLong(2, _serverVersion);
+      stmt.setLong(3, itemVersion);
+      stmt.setLong(4, idleTimeout);
+      stmt.setLong(5, Alarm.getCurrentTime());
       
       stmt.setBytes(6, id.getHash());
       stmt.setLong(7, itemVersion);

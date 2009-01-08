@@ -64,23 +64,23 @@ public interface ByteStreamCache
    * A null value for the old value hash only adds the entry if it's new
    *
    * @param key the key to compare
-   * @param oldValueHash the hash of the old value, returned by getEntry
+   * @param oldVersion the version of the old value, returned by getEntry
    * @param value the new value
    *
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-			       InputStream is,
-			       byte[] oldValueHash)
+			       long oldVersion,
+			       InputStream is)
     throws IOException;
 
   /**
    * Removes the entry from the cache
    */
-  public boolean remove(Object key);
+  public Object remove(Object key);
 
   /**
    * Removes the entry from the cache if the current entry matches the hash
    */
-  public boolean compareAndRemove(Object key, byte[] oldValueHash);
+  public boolean compareAndRemove(Object key, long oldVersion);
 }

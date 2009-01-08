@@ -792,10 +792,18 @@ public class SessionImpl implements HttpSession, CacheListener {
 	return;
       }
 
-      listeners = new ArrayList<HttpSessionActivationListener>();
+      listeners = _manager.getActivationListeners();
 
-      if (_manager.getActivationListeners() != null)
-	listeners.addAll(_manager.getActivationListeners());
+      if (listeners != null && listeners.size() > 0) {
+	if (event == null)
+	  event = new HttpSessionEvent(this);
+
+	for (int i = 0; i < listeners.size(); i++) {
+	  HttpSessionActivationListener listener = listeners.get(i);
+	  
+	  listener.sessionWillPassivate(event);
+	}
+      }
 
       for (Map.Entry entry : set) {
 	Object value = entry.getValue();
@@ -807,17 +815,8 @@ public class SessionImpl implements HttpSession, CacheListener {
 	  if (event == null)
 	    event = new HttpSessionEvent(this);
 
-	  listeners.add(listener);
+	  listener.sessionWillPassivate(event);
 	}
-      }
-    }
-
-    if (listeners != null && listeners.size() > 0) {
-      if (event == null)
-	event = new HttpSessionEvent(this);
-
-      for (HttpSessionActivationListener listener : listeners) {
-	listener.sessionWillPassivate(event);
       }
     }
 
@@ -1033,15 +1032,6 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       if (login != null)
 	login.sessionInvalidate(this, logout == Logout.TIMEOUT);
-      /*
-      if (! (login instanceof AbstractLogin)
-	  || logout == Logout.INVALIDATE
-	  || (logout == Logout.TIMEOUT
-	      && ((AbstractLogin) login).getLogoutOnSessionTimeout())) {
-	// server/12i1, 12ch
-	logout(logout == Logout.TIMEOUT ? this : null);
-      }
-      */
 
       _manager.removeSession(this);
 
@@ -1062,8 +1052,24 @@ public class SessionImpl implements HttpSession, CacheListener {
       _isValid = false;
 
     try {
-      if (_isInvalidating && _manager.getSessionStore() != null)
-	_manager.getSessionStore().remove(_id);
+      if (_isInvalidating && _manager.getSessionStore() != null) {
+	boolean isRemove = false;
+	if (logout == Logout.TIMEOUT) {
+	  CacheEntry entry = _manager.getSessionStore().getEntry(_id);
+
+	  long now = Alarm.getCurrentTime();
+
+	  if (entry == null
+	      || entry.getLastAccessTime() + _idleTimeout < now) {
+	    isRemove = true;
+	  }
+	}
+	else
+	  isRemove = true;
+
+	if (isRemove)
+	  _manager.getSessionStore().remove(_id);
+      }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -1076,21 +1082,9 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   private void invalidateLocal()
   {
-    // ClusterObject clusterObject = _clusterObject;
-    
     if (_isValid && ! _isInvalidating) {
       if (_manager.isSaveOnlyOnShutdown()) {
 	save();
-	
-	/*
-	try {
-	  clusterObject.objectStore(this);
-	} catch (Exception e) {
-	  log.log(Level.WARNING, this + ": can't serialize session", e);
-	}
-        
-	// clusterObject.objectInvalidated();
-	*/
       }
     }
 
@@ -1123,11 +1117,6 @@ public class SessionImpl implements HttpSession, CacheListener {
       
       _values.clear();
     }
-
-    /* XXX:
-    if (clusterObject != null)
-      clusterObject.objectInvalidated();
-    */
     
     // server/015a
     for (int i = 0; i < names.size(); i++) {

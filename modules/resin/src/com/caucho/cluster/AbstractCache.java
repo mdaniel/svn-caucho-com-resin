@@ -69,11 +69,19 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
   private DistributedCacheManager _distributedCacheManager;
 
   /**
-   * Assign the name
+   * Assign the name.  The name is mandatory and must be unique.
    */
   public void setName(String name)
   {
     _name = name;
+  }
+
+  /**
+   * Assign the CacheLoader to populate the cache on a miss.
+   */
+  public void setCacheLoader(CacheLoader loader)
+  {
+    _config.setCacheLoader(loader);
   }
 
   /**
@@ -85,7 +93,10 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
   }
 
   /**
-   * Sets the backup mode.
+   * Sets the backup mode.  If backups are enabled, copies of the
+   * cache item will be sent to the owning triad server.
+   *
+   * Defaults to true.
    */
   public void setBackup(boolean isBackup)
   {
@@ -96,7 +107,10 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
   }
 
   /**
-   * Sets the triplicate backup mode.
+   * Sets the triplicate backup mode.  If triplicate backups is set,
+   * all triad servers have a copy of the cache item.
+   *
+   * Defaults to true.
    */
   public void setTriplicate(boolean isTriplicate)
   {
@@ -107,15 +121,66 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
   }
 
   /**
-   * Sets the idle timeout
+   * The maximum valid time for an item.  Items stored in the cache
+   * for longer than the expire time are no longer valid and will
+   * return null from a get.
+   *
+   * Default is infinite.
+   */
+  public long getExpireTimeout()
+  {
+    return _config.getExpireTimeout();
+  }
+
+  /**
+   * The maximum valid time for a cached item before it expires.
+   * Items stored in the cache for longer than the expire time are
+   * no longer valid and will return null from a get.
+   *
+   * Default is infinite.
+   */
+  public void setExpireTimeout(Period expireTimeout)
+  {
+    setExpireTimeoutMillis(expireTimeout.getPeriod());
+  }
+
+  /**
+   * The maximum valid time for an item.  Items stored in the cache
+   * for longer than the expire time are no longer valid and will
+   * return null from a get.
+   *
+   * Default is infinite.
+   */
+  public void setExpireTimeoutMillis(long expireTimeout)
+  {
+    _config.setExpireTimeout(expireTimeout);
+  }
+
+  /**
+   * The maximum idle time for an item, which is typically used for
+   * temporary data like sessions.  For example, session
+   * data might be removed if idle over 30 minutes.
+   *
+   * Cached data would have infinite idle time because
+   * it doesn't depend on how often it's accessed.
+   *
+   * Default is infinite.
    */
   public void setIdleTimeout(Period period)
   {
     setIdleTimeoutMillis(period.getPeriod());
   }
 
+
   /**
-   * Gets the idle timeout
+   * The maximum idle time for an item, which is typically used for
+   * temporary data like sessions.  For example, session
+   * data might be removed if idle over 30 minutes.
+   *
+   * Cached data would have infinite idle time because
+   * it doesn't depend on how often it's accessed.
+   *
+   * Default is infinite.
    */
   public long getIdleTimeout()
   {
@@ -123,7 +188,7 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
   }
 
   /**
-   * Sets the idle timeout
+   * Sets the idle timeout in milliseconds
    */
   public void setIdleTimeoutMillis(long timeout)
   {
@@ -131,11 +196,57 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
   }
 
   /**
-   * Returns the idle check window
+   * Returns the idle check window, used to minimize traffic when
+   * updating access times.
    */
   public long getIdleCheckWindow()
   {
     return _config.getIdleCheckWindow();
+  }
+
+  /**
+   * The local read timeout sets how long a local copy of
+   * a cache item can be reused before checking with the master copy.
+   *
+   * A read-only item could be infinite (-1).  A slow changing item
+   * like a list of bulletin-board comments could be 10s.  Even a relatively
+   * quicky changing item can be 10ms or 100ms.
+   *
+   * The default is 10ms
+   */
+  public void setLocalReadTimeout(Period period)
+  {
+    setLocalReadTimeoutMillis(period.getPeriod());
+  }
+
+  /**
+   * The local read timeout sets how long a local copy of
+   * a cache item can be reused before checking with the master copy.
+   *
+   * A read-only item could be infinite (-1).  A slow changing item
+   * like a list of bulletin-board comments could be 10s.  Even a relatively
+   * quicky changing item can be 10ms or 100ms.
+   *
+   * The default is 10ms
+   */
+  public void setLocalReadTimeoutMillis(long period)
+  {
+    _config.setLocalReadTimeout(period);
+  }
+
+  /**
+   * The local read timeout is how long a local copy of
+   * a cache item can be reused before checking with the master copy.
+   *
+   * A read-only item could be infinite (-1).  A slow changing item
+   * like a list of bulletin-board comments could be 10s.  Even a relatively
+   * quicky changing item can be 10ms or 100ms.
+   *
+   * The default is 10ms
+   */
+  public long getLocalReadTimeout()
+  {
+    return _config.getLocalReadTimeout();
   }
 
   /**
@@ -148,6 +259,9 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
       if (_isInit)
 	return;
       _isInit = true;
+
+      if (_name == null)
+	throw new ConfigException(L.l("'name' is a require attribute for any Cache"));
     
       _contextId = Environment.getEnvironmentName();
 
@@ -197,16 +311,13 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
   }
   
   /**
-   * Puts a new item in the cache.
-   *
-   * @param key the key of the item to put
-   * @param value the value of the item to put
+   * Returns the object with the given key.
    */
-  public void put(Object key, Object value)
+  public Object peek(Object key)
   {
     HashKey hashKey = getHashKey(key);
 
-    _distributedCacheManager.put(hashKey, value, _config);
+    return _distributedCacheManager.peek(hashKey, _config);
   }
   
   /**
@@ -214,6 +325,23 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
    *
    * @param key the key of the item to put
    * @param value the value of the item to put
+   */
+  public Object put(Object key, Object value)
+  {
+    HashKey hashKey = getHashKey(key);
+
+    _distributedCacheManager.put(hashKey, value, _config);
+
+    return null;
+  }
+  
+  /**
+   * Puts a new item in the cache with a custom idle
+   * timeout (used for sessions).
+   *
+   * @param key the key of the item to put
+   * @param value the value of the item to put
+   * @param idleTimeout the idle timeout for the item
    */
   public CacheEntry put(Object key,
 			InputStream is,
@@ -226,18 +354,18 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
   }
   
   /**
-   * Updates the cache if the old value hash matches the current value.
-   * A null value for the old value hash only adds the entry if it's new
+   * Updates the cache if the old version matches the current version.
+   * A zero value for the old value hash only adds the entry if it's new
    *
    * @param key the key to compare
-   * @param oldValueHash the hash of the old value, returned by getEntry
+   * @param version the version of the old value, returned by getEntry
    * @param value the new value
    *
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-			       Object value,
-			       byte[] oldValueHash)
+			       long version,
+			       Object value)
   {
     put(key, value);
     
@@ -245,18 +373,18 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
   }
   
   /**
-   * Updates the cache if the old value hash matches the current value.
-   * A null value for the old value hash only adds the entry if it's new
+   * Updates the cache if the old version matches the current value.
+   * A zero value for the old version only adds the entry if it's new
    *
    * @param key the key to compare
-   * @param oldValueHash the hash of the old value, returned by getEntry
+   * @param version the hash of the old version, returned by getEntry
    * @param value the new value
    *
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-			       InputStream is,
-			       byte[] oldValueHash)
+			       long version,
+			       InputStream is)
     throws IOException
   {
     put(key, is);
@@ -269,17 +397,19 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
    *
    * @return true if the object existed
    */
-  public boolean remove(Object key)
+  public Object remove(Object key)
   {
     HashKey hashKey = getHashKey(key);
     
-    return _distributedCacheManager.remove(hashKey);
+    _distributedCacheManager.remove(hashKey);
+
+    return null;
   }
 
   /**
-   * Removes the entry from the cache if the current entry matches the hash
+   * Removes the entry from the cache if the current entry matches the version
    */
-  public boolean compareAndRemove(Object key, byte[] oldValueHash)
+  public boolean compareAndRemove(Object key, long version)
   {
     HashKey hashKey = getHashKey(key);
     

@@ -78,6 +78,11 @@ abstract public class DistributedCacheManager
     throws IOException;
 
   /**
+   * Gets a cache entry
+   */
+  abstract public Object peek(HashKey hashKey, CacheConfig config);
+
+  /**
    * Sets a cache entry
    */
   abstract public void put(HashKey hashKey,

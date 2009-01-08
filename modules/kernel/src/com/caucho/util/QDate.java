@@ -945,6 +945,7 @@ public class QDate {
 	cb.append(LONG_WEEKDAY[getDayOfWeek() - 1]);
 	break;
 
+      case 'h':
       case 'b':
 	cb.append(SHORT_MONTH[(int) _month]);
 	break;
@@ -962,19 +963,44 @@ public class QDate {
 	cb.append((_dayOfMonth + 1) % 10);
 	break;
 
-      case 'H':
-	int hour = (int) (_timeOfDay / 3600000) % 24;
-	cb.append(hour / 10);
-	cb.append(hour % 10);
+      case 'D':
+	cb.append((_month + 1) / 10);
+	cb.append((_month + 1) % 10);
+	cb.append('/');
+	cb.append((_dayOfMonth + 1) / 10);
+	cb.append((_dayOfMonth + 1) % 10);
+	cb.append('/');
+	cb.append(_year / 10 % 10);
+	cb.append(_year % 10);
 	break;
 
-      case 'I':
-	hour = (int) (_timeOfDay / 3600000) % 12;
-	if (hour == 0)
-	  hour = 12;
-	cb.append(hour / 10);
-	cb.append(hour % 10);
+      case 'e':
+	if ((_dayOfMonth + 1) / 10 == 0)
+	  cb.append(' ');
+	else
+	  cb.append((_dayOfMonth + 1) / 10);
+	cb.append((_dayOfMonth + 1) % 10);
 	break;
+
+	// ISO year
+
+      case 'H':
+	{
+	  int hour = (int) (_timeOfDay / 3600000) % 24;
+	  cb.append(hour / 10);
+	  cb.append(hour % 10);
+	  break;
+	}
+
+      case 'I':
+	{
+	  int hour = (int) (_timeOfDay / 3600000) % 12;
+	  if (hour == 0)
+	    hour = 12;
+	  cb.append(hour / 10);
+	  cb.append(hour % 10);
+	  break;
+	}
 
       case 'j':
 	cb.append((_dayOfYear + 1) / 100);
@@ -993,12 +1019,14 @@ public class QDate {
 	break;
 
       case 'p':
-	hour = (int) (_timeOfDay / 3600000) % 24;
-	if (hour < 12)
-	  cb.append("am");
-	else
-	  cb.append("pm");
-	break;
+	{
+	  int hour = (int) (_timeOfDay / 3600000) % 24;
+	  if (hour < 12)
+	    cb.append("am");
+	  else
+	    cb.append("pm");
+	  break;
+	}
 
       case 'S':
 	cb.append((_timeOfDay / 10000) % 6);
@@ -1010,6 +1038,20 @@ public class QDate {
 	cb.append((_timeOfDay / 10) % 10);
 	cb.append(_timeOfDay % 10);
 	break;
+
+      case 'T':
+	{
+	  int hour = (int) (_timeOfDay / 3600000) % 24;
+	  cb.append(hour / 10);
+	  cb.append(hour % 10);
+	  cb.append(':');
+	  cb.append((_timeOfDay / 600000) % 6);
+	  cb.append((_timeOfDay / 60000) % 10);
+	  cb.append(':');
+	  cb.append((_timeOfDay / 10000) % 6);
+	  cb.append((_timeOfDay / 1000) % 10);
+	  break;
+	}
 
       case 'W':
 	int week = getWeek();
@@ -1062,6 +1104,10 @@ public class QDate {
         cb.append((offset / 3600000) % 10);
         cb.append((offset / 600000) % 6);
         cb.append((offset / 60000) % 10);
+	break;
+
+      case '%':
+	cb.append('%');
 	break;
 
       default:

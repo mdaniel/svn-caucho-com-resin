@@ -96,6 +96,12 @@ public class PasswordUser
 	 false, false, new String[] { "user" });
   }
 
+  public PasswordUser(String user, String password)
+  {
+    this(new BasicPrincipal(user), password.toCharArray(),
+	 false, false, new String[] { "user" });
+  }
+
   /**
    * Returns the logged-in user principal
    */

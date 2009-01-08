@@ -97,7 +97,7 @@ public class FileCacheManager extends DistributedCacheManager
     CacheMapEntry entry = _entryCache.get(key);
 
     if (entry == null) {
-      entry = _cacheMapBacking.load(key);
+      entry = _cacheMapBacking.load(key, config.getLocalReadTimeout());
 
       CacheMapEntry oldEntry = _entryCache.putIfNew(key, entry);
 
@@ -113,7 +113,7 @@ public class FileCacheManager extends DistributedCacheManager
    */
   public Object get(HashKey key, CacheConfig config)
   {
-    CacheMapEntry entry = getLocalEntry(key);
+    CacheMapEntry entry = getLocalEntry(key, config.getLocalReadTimeout());
 
     if (entry == null)
       return null;
@@ -140,6 +140,14 @@ public class FileCacheManager extends DistributedCacheManager
   /**
    * Gets a cache entry
    */
+  public Object peek(HashKey key, CacheConfig config)
+  {
+    return get(key, config);
+  }
+
+  /**
+   * Gets a cache entry
+   */
   public boolean get(HashKey key, OutputStream os, CacheConfig config)
   {
     return false;
@@ -150,8 +158,6 @@ public class FileCacheManager extends DistributedCacheManager
    */
   public void put(HashKey key, Object value, CacheConfig config)
   {
-    long timeout = 60000L;
-    
     CacheMapEntry oldEntry = _entryCache.get(key);
 
     HashKey oldValueHash
@@ -165,11 +171,23 @@ public class FileCacheManager extends DistributedCacheManager
 
     long version = oldEntry != null ? oldEntry.getVersion() + 1 : 1;
     int flags = config.getFlags();
+    
+    long expireTimeout = config.getExpireTimeout();
+    long idleTimeout = (oldEntry != null
+			? oldEntry.getIdleTimeout()
+			: config.getIdleTimeout());
+    long localReadTimeout = config.getLocalReadTimeout();
+    
+    long accessTime = Alarm.getExactTime();
+    long updateTime = Alarm.getExactTime();
 
-    long expireTime = Alarm.getExactTime() + 100L;
-
-    CacheMapEntry entry = new CacheMapEntry(valueHash, value, flags,
-					    version, expireTime, true);
+    CacheMapEntry entry = new CacheMapEntry(valueHash, value,
+					    flags, version,
+					    expireTimeout,
+					    idleTimeout,
+					    localReadTimeout,
+					    accessTime, updateTime,
+					    true);
 
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
@@ -182,7 +200,11 @@ public class FileCacheManager extends DistributedCacheManager
     }
 
     if (oldEntry == null) {
-      if (_cacheMapBacking.insert(key, valueHash, flags, version, timeout)) {
+      if (_cacheMapBacking.insert(key, valueHash,
+				  flags, version,
+				  expireTimeout,
+				  idleTimeout,
+				  localReadTimeout)) {
       }
       else {
 	log.fine(this + " db insert failed due to timing conflict"
@@ -190,7 +212,7 @@ public class FileCacheManager extends DistributedCacheManager
       }
     }
     else {
-      if (_cacheMapBacking.updateSave(key, valueHash, timeout, version)) {
+      if (_cacheMapBacking.updateSave(key, valueHash, version, idleTimeout)) {
       }
       else {
 	log.fine(this + " db update failed due to timing conflict"
@@ -226,9 +248,24 @@ public class FileCacheManager extends DistributedCacheManager
     long version = oldEntry != null ? oldEntry.getVersion() + 1 : 1;
     int flags = oldEntry != null ? oldEntry.getFlags() : 0;
     
-    long expireTime = Alarm.getCurrentTime() + 100L;
-    CacheMapEntry entry = new CacheMapEntry(null, null, flags, version,
-					    expireTime, true);
+    long expireTimeout = oldEntry != null ? oldEntry.getExpireTimeout() : 0;
+    long idleTimeout = oldEntry != null ? oldEntry.getIdleTimeout() : 0;
+    long localReadTimeout = (oldEntry != null
+			     ? oldEntry.getLocalReadTimeout()
+			     : 0);
+    
+    long accessTime = Alarm.getCurrentTime();
+    long updateTime = accessTime;
+    
+    long localExpireTime = accessTime + 100L;
+    CacheMapEntry entry = new CacheMapEntry(null, null,
+					    flags, version,
+					    expireTimeout,
+					    idleTimeout,
+					    localReadTimeout,
+					    accessTime,
+					    updateTime,
+					    true);
 
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
@@ -256,12 +293,12 @@ public class FileCacheManager extends DistributedCacheManager
     return oldValueHash != null;
   }
   
-  CacheMapEntry getLocalEntry(HashKey key)
+  CacheMapEntry getLocalEntry(HashKey key, long localReadTimeout)
   {
     CacheMapEntry entry = _entryCache.get(key);
 
     if (entry == null) {
-      entry = _cacheMapBacking.load(key);
+      entry = _cacheMapBacking.load(key, localReadTimeout);
 
       if (entry == null)
 	return null;
