@@ -97,7 +97,7 @@ public class FileCacheManager extends DistributedCacheManager
     CacheMapEntry entry = _entryCache.get(key);
 
     if (entry == null) {
-      entry = _cacheMapBacking.load(key, config.getLocalReadTimeout());
+      entry = _cacheMapBacking.load(key);
 
       CacheMapEntry oldEntry = _entryCache.putIfNew(key, entry);
 
@@ -298,7 +298,7 @@ public class FileCacheManager extends DistributedCacheManager
     CacheMapEntry entry = _entryCache.get(key);
 
     if (entry == null) {
-      entry = _cacheMapBacking.load(key, localReadTimeout);
+      entry = _cacheMapBacking.load(key);
 
       if (entry == null)
 	return null;
