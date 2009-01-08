@@ -231,12 +231,19 @@ public class AmberPersistenceUnit {
     if (name == null || "".equals(name))
       name = "default";
 
-    WebBeansContainer webBeans = WebBeansContainer.create(_amberContainer.getParentClassLoader());
+    WebBeansContainer webBeans
+      = WebBeansContainer.create(_amberContainer.getParentClassLoader());
 
-    webBeans.addSingleton(new AmberEntityManagerFactory(this), name,
-			  EntityManagerFactory.class);
+    EntityManagerFactory factory = new AmberEntityManagerFactory(this);
+
+    webBeans.addSingleton(factory, name, EntityManagerFactory.class);
     webBeans.addSingleton(new EntityManagerProxy(this), name,
 			  EntityManager.class);
+
+    String jndiName
+      = AmberContainer.getPersistenceContextJndiPrefix() + '/' + name;
+
+    Jndi.bindDeepShort(jndiName, factory);
   }
 
   public EntityManager getEntityManager()
