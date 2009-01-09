@@ -189,12 +189,17 @@ class RegexpSet {
     else
       return new RegexpNode.NotSet(_bitset, _range);
   }
+  
+  int getSize()
+  {
+    return _range.size();
+  }
 
   static {
     SPACE = new RegexpSet();
     SPACE.setRange(' ', ' ');
-    SPACE.setRange(0x9, 0xa); //tab to newline
-    SPACE.setRange(0xc, 0xd); //form feed to carriage return
+    SPACE.setRange(0x09, 0x0A); //tab to newline
+    SPACE.setRange(0x0C, 0x0D); //form feed to carriage return
 
     DOT = new RegexpSet();
     DOT.setRange('\n', '\n');

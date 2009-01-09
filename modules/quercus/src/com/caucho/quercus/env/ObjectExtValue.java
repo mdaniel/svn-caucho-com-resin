@@ -1387,11 +1387,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public StringValue toStringBuilder(Env env)
   {
-    StringValue value = env.createUnicodeBuilder();
-    
-    value.appendUnicode(toString(env));
-    
-    return value;
+    return toString(env).toStringBuilder(env);
   }
   
   /**

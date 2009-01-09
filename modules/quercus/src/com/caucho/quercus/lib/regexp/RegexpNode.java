@@ -197,6 +197,14 @@ class RegexpNode {
   {
     return Or.create(this, node);
   }
+  
+  /**
+   * Create a not expression
+   */
+  RegexpNode createNot()
+  {
+    return Not.create(this);
+  }
 
   //
   // optimization functions
@@ -1738,6 +1746,31 @@ class RegexpNode {
     }
   }
   
+  static class Not extends RegexpNode {
+    private RegexpNode _node;
+    
+    private Not(RegexpNode node)
+    {
+      _node = node;
+    }
+    
+    static Not create(RegexpNode node)
+    {
+      return new Not(node);
+    }
+    
+    @Override
+    int match(StringValue string, int strlen, int offset, RegexpState state)
+    {
+      int result = _node.match(string, strlen, offset, state);
+      
+      if (result >= 0)
+        return -1;
+      else
+        return offset + 1;
+    }
+  }
+  
   static class Or extends RegexpNode {
     private RegexpNode _left;
     private Or _right;
@@ -2444,7 +2477,9 @@ class RegexpNode {
 	return _range.contains(ch) ? offset + 1 : -1;
     }
   }
-    
+
+  
+  
   static class NotSet extends AbstractCharNode {
     private final boolean []_asciiSet;
     private final IntSet _range;

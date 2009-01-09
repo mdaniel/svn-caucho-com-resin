@@ -621,7 +621,7 @@ class Regcomp {
     throws IllegalRegexpException
   {
     if (test != value)
-      throw error(L.l("expected '{0}'", test));
+      throw error(L.l("expected '{0}'"));
   }
 
   private IllegalRegexpException error(String msg)
@@ -736,7 +736,7 @@ class Regcomp {
   {
     int first = pattern.peek();
     boolean isNot = false;
-    
+
     if (first == '^') {
       pattern.read();
       isNot = true;
@@ -749,6 +749,8 @@ class Regcomp {
     int ch;
 
     int charRead = 0;
+    
+    ArrayList<RegexpNode> nodeList = null;
     
     while ((ch = pattern.read()) >= 0) {
       charRead++;
@@ -796,7 +798,49 @@ class Regcomp {
 	  break;
 
 	case 'p':
-	  set.mergeOr(parseUnicodeSet(pattern));
+	  int ch2 = pattern.read();
+	  
+	  if (ch2 != '{') {
+	    if (nodeList == null)
+	      nodeList = new ArrayList<RegexpNode>();
+	    
+	    nodeList.add(parseUnicodeProperty(ch2, false));
+	  }
+	  else {
+	    StringBuilder sb = new StringBuilder();
+	    
+	    int ch3;
+	    
+	    while ((ch3 = pattern.read()) >= 0 && ch3 != '}') {
+	      sb.append((char) ch3);
+	    }
+
+	    String name = sb.toString();
+
+	    if (ch3 != '}')
+	      throw new IllegalRegexpException(L.l("expected '}' at "
+	                       + badChar(ch3)));
+	    
+	    int len = name.length();
+
+	    if (len == 1) {
+	      if (nodeList == null)
+	          nodeList = new ArrayList<RegexpNode>();
+	      
+	      nodeList.add(parseUnicodeProperty(name.charAt(0), false));
+	    }
+	    else if (len == 2) {
+	      if (nodeList == null)
+	          nodeList = new ArrayList<RegexpNode>();
+	      
+	      nodeList.add(parseUnicodeProperty(name.charAt(0),
+	                                        name.charAt(1),
+	                                        false));
+	    }
+	    else {
+	      set.mergeOr(getUnicodeSet(name));
+	    }
+	  }
 	  break;
 
 	case 'b':
@@ -836,15 +880,16 @@ class Regcomp {
 	}
       }
       else if (ch == '[') {
-	if (pattern.peek() == ':') {
-	  isChar = false;
-	  pattern.read();
-	  set.mergeOr(parseCharacterClass(pattern));
-	}
+        if (pattern.peek() == ':') {
+          isChar = false;
+          pattern.read();
+          
+          set.mergeOr(parseCharacterClass(pattern));
+        }
       }
 
       if (isDash && last != -1 && lastdash == -1) {
-	lastdash = last;
+        lastdash = last;
       }
       // c1-c2
       else if (isChar && lastdash != -1) {
@@ -865,6 +910,7 @@ class Regcomp {
 	lastdash = -1;
       }
       else if (last != -1) {
+        
 	setRange(set, last, last);
 
 	if (isChar)
@@ -879,16 +925,31 @@ class Regcomp {
       setRange(set, lastdash, lastdash);
       setRange(set, '-', '-');
     }
-    else if (last != -1)
+    else if (last != -1) {
       setRange(set, last, last);
+    }
     
     if (ch != ']')
       throw error(L.l("Expected ']'"));
 
-    if (isNot)
-      return set.createNotNode();
-    else
-      return set.createNode();
+    if (nodeList == null) {
+      if (isNot)
+        return set.createNotNode();
+      else
+        return set.createNode();
+    }
+    else {
+      RegexpNode setNode = set.createNode();
+
+      for (RegexpNode node : nodeList) {
+        setNode = setNode.createOr(node);
+      }
+        
+      if (isNot)
+        return setNode.createNot();
+      else
+        return setNode;
+    }
   }
 
   private void setRange(RegexpSet set, int a, int b)
@@ -906,46 +967,30 @@ class Regcomp {
     }
   }
 
-  private RegexpSet parseUnicodeSet(PeekStream pattern)
+  private RegexpSet getUnicodeSet(String name)
     throws IllegalRegexpException
   {
-    expect('{', pattern.read());
-
-    StringBuilder sb = new StringBuilder();
-    int ch;
-
-    while ((ch = pattern.read()) >= 0 && ch != '}') {
-      sb.append((char) ch);
-    }
-
-    String name = sb.toString();
-
-    if (ch != '}')
-      throw new IllegalRegexpException(L.l("expected '}' at "
-					   + badChar(ch)));
-
     _flags |= UTF8;
 
     RegexpSet set = _unicodeBlockMap.get(name);
 
-    if (set != null)
-      return set;
+    if (set == null) {
+      Character.UnicodeBlock block = Character.UnicodeBlock.forName(name);
 
-    Character.UnicodeBlock block = Character.UnicodeBlock.forName(name);
+      if (block == null)
+        throw new IllegalRegexpException(L.l("'{0}' is an unknown unicode block",
+                         name));
 
-    if (block == null)
-      throw new IllegalRegexpException(L.l("'{0}' is an unknown unicode block",
-					   name));
+      set = new RegexpSet();
 
-    set = new RegexpSet();
-
-    for (ch = 0; ch < 65536; ch++) {
-      if (Character.UnicodeBlock.of(ch) == block) {
-	set.setRange(ch, ch);
+      for (int ch = 0; ch < 65536; ch++) {
+        if (Character.UnicodeBlock.of(ch) == block) {
+          set.setRange(ch, ch);
+        }
       }
-    }
 
-    _unicodeBlockMap.put(name, set);
+      _unicodeBlockMap.put(name, set);
+    }
 
     return set;
   }
@@ -1365,7 +1410,7 @@ class Regcomp {
   }
   
   private RegexpNode parseUnicodeProperty(PeekStream pattern,
-					  boolean isNegated)
+                                          boolean isNegated)
     throws IllegalRegexpException
   {
     int ch = pattern.read();
@@ -1384,49 +1429,42 @@ class Regcomp {
     
     RegexpNode node;
     
-    if (isBraced)
-      node = parseBracedUnicodeProperty(ch, pattern, isNegated);
+    if (isBraced) {
+      int ch2 = pattern.read();
+      
+      if (ch2 == '}')
+        node = parseUnicodeProperty(ch, isNegated);
+      else {
+        node = parseUnicodeProperty(ch, ch2, isNegated);
+        
+        expect('}', pattern.read());
+      }
+    }
     else
-      node = parseUnbracedUnicodeProperty(ch, pattern, isNegated);
+      node = parseUnicodeProperty(ch, isNegated);
     
     return node;
   }
   
-  private RegexpNode parseBracedUnicodeProperty(int ch,
-						PeekStream pattern,
-						boolean isNegated)
+  private RegexpNode parseUnicodeProperty(int ch, int ch2,
+                                          boolean isNegated)
     throws IllegalRegexpException
   {
     byte category = 0;
     
-    int ch2 = pattern.read();
-
     switch (ch) {
     case 'C':
       switch (ch2) {
       case 'c':
-	expect('}', pattern.read());
-	       
         return isNegated ? RegexpNode.PROP_NOT_Cc : RegexpNode.PROP_Cc;
       case 'f':
-	expect('}', pattern.read());
-	       
         return isNegated ? RegexpNode.PROP_NOT_Cf : RegexpNode.PROP_Cf;
       case 'n':
-	expect('}', pattern.read());
-	       
         return isNegated ? RegexpNode.PROP_NOT_Cn : RegexpNode.PROP_Cn;
       case 'o':
-	expect('}', pattern.read());
-	       
         return isNegated ? RegexpNode.PROP_NOT_Co : RegexpNode.PROP_Co;
       case 's':
-	expect('}', pattern.read());
-	       
         return isNegated ? RegexpNode.PROP_NOT_Cs : RegexpNode.PROP_Cs;
-      case '}':
-        return isNegated ? RegexpNode.PROP_NOT_C : RegexpNode.PROP_C;
-	
       default:
         throw error(L.l("invalid Unicode category "
 			+ badChar(ch) + "" + badChar(ch2)));
@@ -1435,178 +1473,104 @@ class Regcomp {
     case 'L':
       switch (ch2) {
       case 'l':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Ll : RegexpNode.PROP_Ll;
+        return isNegated ? RegexpNode.PROP_NOT_Ll : RegexpNode.PROP_Ll;
       case 'm':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Lm : RegexpNode.PROP_Lm;
+        return isNegated ? RegexpNode.PROP_NOT_Lm : RegexpNode.PROP_Lm;
       case 'o':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Lo : RegexpNode.PROP_Lo;
-      case 't':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Lt : RegexpNode.PROP_Lt;
-      case 'u':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Lu : RegexpNode.PROP_Lu;
+        return isNegated ? RegexpNode.PROP_NOT_Lo : RegexpNode.PROP_Lo;
+      case 't':  
+        return isNegated ? RegexpNode.PROP_NOT_Lt : RegexpNode.PROP_Lt;
+      case 'u': 
+        return isNegated ? RegexpNode.PROP_NOT_Lu : RegexpNode.PROP_Lu;
 	
       case '}':
         return isNegated ? RegexpNode.PROP_NOT_L : RegexpNode.PROP_L;
 	
       default:
-	throw error(L.l("invalid Unicode category "
-			+ badChar(ch) + "" + badChar(ch2)));
+        throw error(L.l("invalid Unicode category {0}{1}",
+                        badChar(ch), badChar(ch2)));
       }
     case 'M':
       switch (ch2) {
       case 'c':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Mc : RegexpNode.PROP_Mc;
+        return isNegated ? RegexpNode.PROP_NOT_Mc : RegexpNode.PROP_Mc;
       case 'e':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Me : RegexpNode.PROP_Me;
+        return isNegated ? RegexpNode.PROP_NOT_Me : RegexpNode.PROP_Me;
       case 'n':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Mn : RegexpNode.PROP_Mn;
-	
-      case '}':
-        return isNegated ? RegexpNode.PROP_NOT_M : RegexpNode.PROP_M;
-	
+        return isNegated ? RegexpNode.PROP_NOT_Mn : RegexpNode.PROP_Mn;
       default:
-        throw error(L.l("invalid Unicode category " +
-			badChar(ch) + "" + badChar(ch2)));
+        throw error(L.l("invalid Unicode category {0}{1}",
+                        badChar(ch), badChar(ch2)));
       }
 
     case 'N':
       switch (ch2) {
       case 'd':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Nd : RegexpNode.PROP_Nd;
+        return isNegated ? RegexpNode.PROP_NOT_Nd : RegexpNode.PROP_Nd;
       case 'l':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Nl : RegexpNode.PROP_Nl;
+        return isNegated ? RegexpNode.PROP_NOT_Nl : RegexpNode.PROP_Nl;
       case 'o':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_No : RegexpNode.PROP_No;
-	
-      case '}':
-        return isNegated ? RegexpNode.PROP_NOT_N : RegexpNode.PROP_N;
-	
+        return isNegated ? RegexpNode.PROP_NOT_No : RegexpNode.PROP_No;
       default:
-        throw error(L.l("invalid Unicode category " +
-			badChar(ch) + "" + badChar(ch2)));
+        throw error(L.l("invalid Unicode category {0}{1}",
+                        badChar(ch), badChar(ch2)));
       }
 
     case 'P':
       switch (ch2) {
       case 'c':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Pc : RegexpNode.PROP_Pc;
-      case 'd':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Pd : RegexpNode.PROP_Pd;
+        return isNegated ? RegexpNode.PROP_NOT_Pc : RegexpNode.PROP_Pc;
+      case 'd':  
+        return isNegated ? RegexpNode.PROP_NOT_Pd : RegexpNode.PROP_Pd;
       case 'e':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Pe : RegexpNode.PROP_Pe;
+        return isNegated ? RegexpNode.PROP_NOT_Pe : RegexpNode.PROP_Pe;
       case 'f':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Pf : RegexpNode.PROP_Pf;
-      case 'i':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Pi : RegexpNode.PROP_Pi;
-      case 'o':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Po : RegexpNode.PROP_Po;
-      case 's':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Ps : RegexpNode.PROP_Ps;
-	
-      case '}':
-        return isNegated ? RegexpNode.PROP_NOT_P : RegexpNode.PROP_P;
-	
+        return isNegated ? RegexpNode.PROP_NOT_Pf : RegexpNode.PROP_Pf;
+      case 'i':     
+        return isNegated ? RegexpNode.PROP_NOT_Pi : RegexpNode.PROP_Pi;
+      case 'o':    
+        return isNegated ? RegexpNode.PROP_NOT_Po : RegexpNode.PROP_Po;
+      case 's':   
+        return isNegated ? RegexpNode.PROP_NOT_Ps : RegexpNode.PROP_Ps;
       default:
-        throw error(L.l("invalid Unicode category "
-			+ badChar(ch) + "" + badChar(ch2)));
+        throw error(L.l("invalid Unicode category {0}{1}",
+                        badChar(ch), badChar(ch2)));
       }
 
     case 'S':
       switch (ch2) {
-      case 'c':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Sc : RegexpNode.PROP_Sc;
+      case 'c': 
+        return isNegated ? RegexpNode.PROP_NOT_Sc : RegexpNode.PROP_Sc;
       case 'k':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Sk : RegexpNode.PROP_Sk;
-      case 'm':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Sm : RegexpNode.PROP_Sm;
+        return isNegated ? RegexpNode.PROP_NOT_Sk : RegexpNode.PROP_Sk;
+      case 'm':  
+        return isNegated ? RegexpNode.PROP_NOT_Sm : RegexpNode.PROP_Sm;
       case 'o':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_So : RegexpNode.PROP_So;
-	
-      case '}':
-        return isNegated ? RegexpNode.PROP_NOT_S : RegexpNode.PROP_S;
-	
+        return isNegated ? RegexpNode.PROP_NOT_So : RegexpNode.PROP_So;
       default:
-        throw error(L.l("invalid Unicode category "
-			+ badChar(ch) + "" + badChar(ch2)));
+        throw error(L.l("invalid Unicode category {0}{1}",
+                        badChar(ch), badChar(ch2)));
       }
 
     case 'Z':
       switch (ch2) {
       case 'l':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Zl : RegexpNode.PROP_Zl;
-      case 'p':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Zp : RegexpNode.PROP_Zp;
-      case 's':
-	expect('}', pattern.read());
-	       
-	return isNegated ? RegexpNode.PROP_NOT_Zs : RegexpNode.PROP_Zs;
-	
-      case '}':
-        return isNegated ? RegexpNode.PROP_NOT_Z : RegexpNode.PROP_Z;
-	
+        return isNegated ? RegexpNode.PROP_NOT_Zl : RegexpNode.PROP_Zl;
+      case 'p':   
+        return isNegated ? RegexpNode.PROP_NOT_Zp : RegexpNode.PROP_Zp;
+      case 's':   
+        return isNegated ? RegexpNode.PROP_NOT_Zs : RegexpNode.PROP_Zs;
       default:
-	throw error(L.l("invalid Unicode category " +
-			badChar(ch) + "" + badChar(ch2)));
+        throw error(L.l("invalid Unicode category {0}{1}",
+                        badChar(ch), badChar(ch2)));
       }
     }
-
-    if ((ch = pattern.read()) != '}')
-      throw error(L.l("expected '}' at " + badChar(ch)));
 
     throw new UnsupportedOperationException();
   }
   
-  private RegexpNode parseUnbracedUnicodeProperty(int ch,
-						  PeekStream pattern,
-						  boolean isNegated)
+  private RegexpNode parseUnicodeProperty(int ch,
+                                          boolean isNegated)
     throws IllegalRegexpException
   {
     switch (ch) {
