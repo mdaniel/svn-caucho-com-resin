@@ -29,17 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.Location;
-import com.caucho.util.RandomUtil;
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.logging.Logger;
-
 /**
  * Represents a PHP array value copied as part of deserialization or APC.
  *
@@ -146,7 +135,7 @@ public class ArrayCopyValueImpl extends ArrayValueImpl
   /**
    * Sets the array ref.
    */
-  public Value putRef()
+  public Var putRef()
   {
     _root.setModified();
 

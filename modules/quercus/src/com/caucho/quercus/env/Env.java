@@ -3571,7 +3571,8 @@ public class Env {
                          _qClass,
                          _const,
                          _globalMap,
-                         _includeMap);
+                         _includeMap,
+                         _importMap);
   }
 
   EnvVar []getGlobalList()
@@ -3640,10 +3641,13 @@ public class Env {
         oldEnvVar.setRef(newEnvVar.getRef());
     }
     
-    
     // php/404j - include_once
     HashMap<Path,QuercusPage> includeMap = saveState.getIncludeMap();
     _includeMap = new HashMap<Path,QuercusPage>(includeMap);
+    
+    // php/404l
+    // XXX: import and namespaces
+    _importMap = saveState.getImportMap().copy();
   }
 
   /**

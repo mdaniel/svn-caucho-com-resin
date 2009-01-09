@@ -161,4 +161,12 @@ public class QuercusModule extends AbstractQuercusModule
   {
     return env.getServletContext();
   }
+  
+  public static void quercus_import(Env env, String name)
+  {
+    if (name.endsWith("*"))
+      env.addWildcardImport(name);
+    else
+      env.putQualifiedImport(name);
+  }
 }

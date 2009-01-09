@@ -64,6 +64,8 @@ public class QuercusProgram {
   
   private boolean _isCompiling;
   private boolean _isCompilable = true;
+  
+  private Exception _compileException;
 
   private HashMap<String,Function> _functionMap;
   private HashMap<String,Function> _functionMapLowerCase
@@ -236,6 +238,16 @@ public class QuercusProgram {
   public boolean isCompilable()
   {
     return _isCompilable;
+  }
+  
+  public void setCompileException(Exception e)
+  {
+    _compileException = e;
+  }
+  
+  public Exception getCompileException()
+  {
+    return _compileException;
   }
 
   /**

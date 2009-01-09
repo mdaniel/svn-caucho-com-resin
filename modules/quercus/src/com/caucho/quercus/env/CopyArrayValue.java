@@ -163,7 +163,7 @@ public class CopyArrayValue extends ArrayValue {
   /**
    * Sets the array ref.
    */
-  public Value putRef()
+  public Var putRef()
   {
     return getCopyArray().putRef();
   }

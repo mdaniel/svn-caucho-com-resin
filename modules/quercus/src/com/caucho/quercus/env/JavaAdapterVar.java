@@ -958,11 +958,11 @@ public class JavaAdapterVar extends Value
    * Returns the array ref.
    */
   @Override
-  public Value putRef()
+  public Var putRef()
   {
     setRaw(getValue());
     
-    Value retValue = super.putRef();
+    Var retValue = super.putRef();
     
     setValue(getRawValue());
     

@@ -480,7 +480,7 @@ abstract public class ArrayValue extends Value {
    * Sets the array ref.
    */
   @Override
-  abstract public Value putRef();
+  abstract public Var putRef();
 
   /**
    * Creatse a tail index.

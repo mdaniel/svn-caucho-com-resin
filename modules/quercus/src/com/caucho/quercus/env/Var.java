@@ -1097,7 +1097,7 @@ public final class Var extends Value
    * Returns the array ref.
    */
   @Override
-  public Value putRef()
+  public Var putRef()
   {
     _value = _value.toAutoArray();
     

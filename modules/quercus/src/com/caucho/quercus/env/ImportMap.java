@@ -117,4 +117,20 @@ public class ImportMap
     
     return _wildcardPhpList;
   }
+  
+  public ImportMap copy()
+  {
+    ImportMap copy = new ImportMap();
+    
+    if (_qualifiedMap != null)
+      copy._qualifiedMap = new HashMap<String,String>(_qualifiedMap);
+    
+    if (_wildcardList != null)
+      copy._wildcardList = new ArrayList<String>(_wildcardList);
+
+    if (_wildcardPhpList != null)
+      copy._wildcardPhpList = new ArrayList<String>(_wildcardPhpList);
+    
+    return copy;
+  }
 }

@@ -56,6 +56,7 @@ public class SaveState {
   private Value []_globalValues;
   
   private HashMap<Path,QuercusPage> _includeMap;
+  private ImportMap _importMap;
 
   /**
    * Creates a new save state.
@@ -66,7 +67,8 @@ public class SaveState {
             QuercusClass []qClass,
             Value []constants,
             Map<String,EnvVar> globalMap,
-            HashMap<Path,QuercusPage> includeMap)
+            HashMap<Path,QuercusPage> includeMap,
+            ImportMap importMap)
   {
     _fun = new AbstractFunction[fun.length];
     System.arraycopy(fun, 0, _fun, 0, fun.length);
@@ -83,6 +85,7 @@ public class SaveState {
     saveGlobals(env, globalMap);
     
     _includeMap = new HashMap<Path,QuercusPage>(includeMap);
+    _importMap = importMap.copy();
   }
 
   /**
@@ -139,6 +142,14 @@ public class SaveState {
   public HashMap<Path,QuercusPage> getIncludeMap()
   {
     return _includeMap;
+  }
+  
+  /**
+   * Returns the import statements.
+   */
+  public ImportMap getImportMap()
+  {
+    return _importMap;
   }
   
   public boolean isModified()

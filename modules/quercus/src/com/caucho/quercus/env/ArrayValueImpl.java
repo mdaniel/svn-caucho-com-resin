@@ -597,7 +597,7 @@ public class ArrayValueImpl extends ArrayValue
   /**
    * Sets the array ref.
    */
-  public Value putRef()
+  public Var putRef()
   {
     if (_isDirty) 
       copyOnWrite();

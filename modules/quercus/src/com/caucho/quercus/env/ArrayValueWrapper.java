@@ -147,7 +147,7 @@ public class ArrayValueWrapper extends ArrayValue {
    * Sets the array ref.
    */
   @Override
-  public Value putRef()
+  public Var putRef()
   {
     return _array.putRef();
   }

@@ -2203,9 +2203,9 @@ abstract public class Value implements java.io.Serializable
   /**
    * Sets the array ref.
    */
-  public Value putRef()
+  public Var putRef()
   {
-    return NullValue.NULL;
+    return new Var();
   }
 
   /**

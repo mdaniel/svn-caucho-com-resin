@@ -336,7 +336,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Sets the array ref.
    */
-  public Value putRef()
+  public Var putRef()
   {
     throw new UnsupportedOperationException();
   }
