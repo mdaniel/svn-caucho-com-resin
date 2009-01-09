@@ -617,11 +617,11 @@ class Regcomp {
     return concat(tail, parseRec(pattern, groupTail).getHead());
   }
 
-  private void expect(char test, int value)
+  private void expect(char expected, int value)
     throws IllegalRegexpException
   {
-    if (test != value)
-      throw error(L.l("expected '{0}'"));
+    if (expected != value)
+      throw error(L.l("expected '{0}'"), String.valueOf(expected));
   }
 
   private IllegalRegexpException error(String msg)
@@ -1466,8 +1466,8 @@ class Regcomp {
       case 's':
         return isNegated ? RegexpNode.PROP_NOT_Cs : RegexpNode.PROP_Cs;
       default:
-        throw error(L.l("invalid Unicode category "
-			+ badChar(ch) + "" + badChar(ch2)));
+        throw error(L.l("invalid Unicode category {0}{1}",
+                        badChar(ch), badChar(ch2)));
       }
 
     case 'L':
