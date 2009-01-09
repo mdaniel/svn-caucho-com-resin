@@ -621,7 +621,7 @@ class Regcomp {
     throws IllegalRegexpException
   {
     if (expected != value)
-      throw error(L.l("expected '{0}'"), String.valueOf(expected));
+      throw error(L.l("expected '{0}'", String.valueOf(expected)));
   }
 
   private IllegalRegexpException error(String msg)
