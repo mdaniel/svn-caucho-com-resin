@@ -87,6 +87,8 @@ public class BootManagementConfig
       if (_auth != null)
 	_auth.init();
     } catch (Exception e) {
+      e.printStackTrace();
+      
       throw ConfigException.create(e);
     }
   }

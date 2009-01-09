@@ -30,6 +30,7 @@
 package com.caucho.security;
 
 import com.caucho.security.BasicPrincipal;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.security.PasswordDigest;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
@@ -184,7 +185,8 @@ public class AbstractAuthenticator
       }
     }
 
-    _singleSignon = new ClusterSingleSignon("authenticator");
+    if (Server.getCurrent() != null)
+      _singleSignon = new ClusterSingleSignon("authenticator");
   }
 
   //

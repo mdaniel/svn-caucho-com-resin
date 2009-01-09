@@ -48,6 +48,8 @@ abstract public class ClusterTriad
   private static final Logger log
     = Logger.getLogger(ClusterTriad.class.getName());
 
+  private final static Owner []OWNER_VALUES = Owner.class.getEnumConstants();
+  
   private final Cluster _cluster;
 
   private final int _index;
@@ -449,9 +451,7 @@ abstract public class ClusterTriad
    */
   public Owner getOwner(long index)
   {
-    Owner []ownerList = Owner.class.getEnumConstants();
-    
-    return ownerList[(int) (index % ownerList.length & 0x7fffffff)];
+    return OWNER_VALUES[(int) (index % OWNER_VALUES.length & 0x7fffffff)];
   }
 
   @Override

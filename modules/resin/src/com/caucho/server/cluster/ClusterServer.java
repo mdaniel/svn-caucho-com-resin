@@ -52,7 +52,7 @@ import java.util.logging.Logger;
  * communicate with this ClusterServer when it is active in another instance of
  * Resin .
  */
-public class ClusterServer {
+public final class ClusterServer {
   private static final L10N L = new L10N(ClusterServer.class);
   private static final Logger log
     = Logger.getLogger(ClusterServer.class.getName());
@@ -625,9 +625,19 @@ public class ClusterServer {
   /**
    * Returns the server connector.
    */
-  public ServerPool getServerPool()
+  public final ServerPool getServerPool()
   {
     return _serverPool;
+  }
+
+  /**
+   * Returns true if the server is remote and active.
+   */
+  public final boolean isActiveRemote()
+  {
+    ServerPool pool = _serverPool;
+
+    return pool != null && pool.isActive();
   }
 
   /**
