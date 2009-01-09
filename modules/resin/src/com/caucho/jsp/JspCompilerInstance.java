@@ -326,7 +326,7 @@ public class JspCompilerInstance {
       _parseState.setScriptingInvalid(jspPropertyGroup.isScriptingInvalid());
 
       if (jspPropertyGroup.isELIgnored() != null) {
-	_parseState.setELIgnoredDefault(Boolean.TRUE.equals(jspPropertyGroup.isELIgnored()));
+	_parseState.setELIgnored(Boolean.TRUE.equals(jspPropertyGroup.isELIgnored()));
       }
       
       _parseState.setVelocityEnabled(jspPropertyGroup.isVelocityEnabled());
@@ -654,10 +654,9 @@ public class JspCompilerInstance {
       }
       
       if (isXml) {
-	if (_parseState.getELIgnoredDefault() == null)
-	  _parseState.setELIgnoredDefault(false);
-	
-	Xml xml = new Xml();
+	_parseState.setELIgnoredDefault(false);
+
+        Xml xml = new Xml();
 	_parseState.setXml(xml);
 	xml.setContentHandler(new JspContentHandler(_jspBuilder));
 	_jspPath.setUserPath(_uri);

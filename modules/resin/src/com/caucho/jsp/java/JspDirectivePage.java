@@ -76,8 +76,13 @@ public class JspDirectivePage extends JspNode {
     if (IS_EL_IGNORED.equals(name)) {
       boolean isIgnored = value.equals("true");
 
-      if (! _parseState.setELIgnored(isIgnored))
-	throw error(L.l("isELIgnored values conflict"));
+      // jsp/1093
+      if (_isElIgnored != null)
+        throw error(L.l("isELIgnored values conflict"));
+
+      _isElIgnored = isIgnored;
+
+      _parseState.setELIgnored(isIgnored);
     }
     
     /*

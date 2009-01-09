@@ -154,13 +154,9 @@ public class ParseState {
   /**
    * Set if JSP EL is ignored.
    */
-  public boolean setELIgnored(boolean isELIgnored)
+  public void setELIgnored(boolean isELIgnored)
   {
-    Boolean oldIsIgnored = _isELIgnored;
-    
     _isELIgnored = isELIgnored;
-
-    return oldIsIgnored == null || oldIsIgnored.equals(isELIgnored);
   }
 
   /**

@@ -536,13 +536,13 @@ public class JspParser {
 	    if (_isTop && name.equals("jsp:root")) {
 	      if (_parseState.isForbidXml())
 		throw error(L.l("jsp:root must be in a JSP (XML) document, not a plain JSP."));
-	      
+
               _text.clear();
               _isXml = true;
 	      _parseState.setELIgnoredDefault(false);
 	      _parseState.setXml(true);
-
             }
+            
             _isTop = false;
 	    parseOpenTag(name, ch, tagCode == TAG_UNKNOWN);
 
