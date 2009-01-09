@@ -75,7 +75,7 @@ public class CacheMapBacking implements AlarmListener {
   
   private String _insertQuery;
   private String _updateSaveQuery;
-  private String _updateAccessQuery;
+  private String _updateUpdateTimeQuery;
   
   private String _updateVersionQuery;
   
@@ -85,7 +85,7 @@ public class CacheMapBacking implements AlarmListener {
   private String _updatesSinceQuery;
 
   private long _serverVersion;
-  private long _startupLastAccessTime;
+  private long _startupLastUpdateTime;
 
   private Alarm _alarm;
   private long _expireReaperTimeout = 5 * 60 * 1000L;
@@ -134,11 +134,11 @@ public class CacheMapBacking implements AlarmListener {
   }
 
   /**
-   * Returns the max access time detected on startup.
+   * Returns the max update time detected on startup.
    */
-  public long getStartupLastAccessTime()
+  public long getStartupLastUpdateTime()
   {
-    return _startupLastAccessTime;
+    return _startupLastUpdateTime;
   }
 
   //
@@ -148,7 +148,7 @@ public class CacheMapBacking implements AlarmListener {
   private void init()
     throws Exception
   {
-    _loadQuery = ("SELECT value,flags,server_version,item_version,expire_timeout,idle_timeout,local_read_timeout,access_time"
+    _loadQuery = ("SELECT value,flags,server_version,item_version,expire_timeout,idle_timeout,local_read_timeout,update_time"
 		  + " FROM " + _tableName
 		  + " WHERE id=?");
 
@@ -156,40 +156,40 @@ public class CacheMapBacking implements AlarmListener {
 		    + " (id,value,flags,"
 		    + "  item_version,server_version,"
 		    + "  expire_timeout,idle_timeout,local_read_timeout,"
-		    + "  access_time)"
+		    + "  update_time)"
 		    + " VALUES (?,?,?,?,?,?,?,?,?)");
 
     _updateSaveQuery
       = ("UPDATE " + _tableName
 	 + " SET value=?,"
 	 + "     server_version=?,item_version=?,"
-	 + "     idle_timeout=?,access_time=?"
+	 + "     idle_timeout=?,update_time=?"
 	 + " WHERE id=? AND item_version<=?");
 
-    _updateAccessQuery
+    _updateUpdateTimeQuery
       = ("UPDATE " + _tableName
-	 + " SET access_time=?"
-	 + " WHERE id=?");
+	 + " SET idle_timeout=?,update_time=?"
+	 + " WHERE id=? AND item_version=?");
 
     _updateVersionQuery = ("UPDATE " + _tableName
-			   + " SET access_time=?, server_version=?"
+			   + " SET update_time=?, server_version=?"
 			   + " WHERE id=? AND value=?");
 
     _timeoutQuery = ("DELETE FROM " + _tableName
-		     + " WHERE access_time + 5 * idle_timeout / 4 < ?"
-		     + " OR access_time + expire_timeout < ?");
+		     + " WHERE update_time + 5 * idle_timeout / 4 < ?"
+		     + " OR update_time + expire_timeout < ?");
     
     _countQuery = "SELECT count(*) FROM " + _tableName;
     
-    _updatesSinceQuery = ("SELECT id,value,item_version,access_time"
+    _updatesSinceQuery = ("SELECT id,value,item_version,update_time"
 			  + " FROM " + _tableName
-			  + " WHERE access_time<?"
+			  + " WHERE update_time<?"
 			  + " OFFSET ? LIMIT 1024");
 
     initDatabase();
 
     _serverVersion = initVersion();
-    _startupLastAccessTime = initLastAccessTime();
+    _startupLastUpdateTime = initLastUpdateTime();
 
     _alarm = new Alarm(this);
     handleAlarm(_alarm);
@@ -209,7 +209,7 @@ public class CacheMapBacking implements AlarmListener {
       try {
 	String sql = ("SELECT id, value, flags,"
 		      + "     expire_timeout, idle_timeout, local_read_timeout,"
-		      + "     access_time,"
+		      + "     update_time,"
 		      + "     server_version, item_version"
                       + " FROM " + _tableName + " WHERE 1=0");
 
@@ -235,7 +235,7 @@ public class CacheMapBacking implements AlarmListener {
 		    + "  expire_timeout BIGINT,\n"
 		    + "  idle_timeout BIGINT,\n"
 		    + "  local_read_timeout BIGINT,\n"
-		    + "  access_time BIGINT,\n"
+		    + "  update_time BIGINT,\n"
 		    + "  item_version BIGINT,\n"
 		    + "  flags INTEGER,\n"
 		    + "  server_version INTEGER)");
@@ -273,9 +273,9 @@ public class CacheMapBacking implements AlarmListener {
   }
 
   /**
-   * Returns the maximum access time on startup
+   * Returns the maximum update time on startup
    */
-  private long initLastAccessTime()
+  private long initLastUpdateTime()
     throws Exception
   {
     Connection conn = _dataSource.getConnection();
@@ -283,7 +283,7 @@ public class CacheMapBacking implements AlarmListener {
     try {
       Statement stmt = conn.createStatement();
       
-      String sql = ("SELECT MAX(access_time)"
+      String sql = ("SELECT MAX(update_time)"
 		    + " FROM " + _tableName);
 
       ResultSet rs = stmt.executeQuery(sql);
@@ -306,9 +306,9 @@ public class CacheMapBacking implements AlarmListener {
   }
 
   /**
-   * Returns the maximum access time on startup
+   * Returns the maximum update time on startup
    */
-  public ArrayList<CacheData> getUpdates(long accessTime, int offset)
+  public ArrayList<CacheData> getUpdates(long updateTime, int offset)
   {
     Connection conn = null;
 
@@ -316,14 +316,14 @@ public class CacheMapBacking implements AlarmListener {
       conn = _dataSource.getConnection();
 
       String sql;
-      sql = ("SELECT id,value,flags,item_version,access_time"
+      sql = ("SELECT id,value,flags,item_version,update_time"
 	     + " FROM " + _tableName
-	     + " WHERE ?<=access_time"
+	     + " WHERE ?<=update_time"
 	     + " LIMIT 1024");
       
       PreparedStatement pstmt = conn.prepareStatement(sql);
 
-      pstmt.setLong(1, accessTime);
+      pstmt.setLong(1, updateTime);
 
       ArrayList<CacheData> entryList = new ArrayList<CacheData>();
 
@@ -335,7 +335,7 @@ public class CacheMapBacking implements AlarmListener {
 	byte []valueHash = rs.getBytes(2);
 	int flags = rs.getInt(3);
 	long version = rs.getLong(4);
-	long itemAccessTime = rs.getLong(5);
+	long itemUpdateTime = rs.getLong(5);
 
 	HashKey value = valueHash != null ? new HashKey(valueHash) : null;
 
@@ -343,7 +343,7 @@ public class CacheMapBacking implements AlarmListener {
 				    value,
 				    flags,
 				    version,
-				    itemAccessTime));
+				    itemUpdateTime));
       }
 
       if (entryList.size() > 0)
@@ -387,8 +387,8 @@ public class CacheMapBacking implements AlarmListener {
 	long expireTimeout = rs.getLong(5);
 	long idleTimeout = rs.getLong(6);
 	long localReadTimeout = rs.getLong(7);
-	long accessTime = rs.getLong(8);
-	long updateTime = accessTime;
+	long updateTime = rs.getLong(8);
+	long accessTime = Alarm.getExactTime();
 
 	HashKey valueHash = hash != null ? new HashKey(hash) : null;
 
@@ -492,6 +492,47 @@ public class CacheMapBacking implements AlarmListener {
         
       if (log.isLoggable(Level.FINER)) 
 	log.finer(this + " updateSave key=" + id + " value=" + value);
+	  
+      return count > 0;
+    } catch (SQLException e) {
+      log.log(Level.FINER, e.toString(), e);
+    } finally {
+      if (conn != null)
+	conn.close();
+    }
+
+    return false;
+  }
+  
+  /**
+   * Updates the update time, returning true on success
+   *
+   * @param id the key hash
+   * @param itemVersion the value version
+   * @param idleTimeout the item's timeout
+   * @param updateTime the item's timeout
+   */
+  public boolean updateUpdateTime(HashKey id,
+				  long itemVersion,
+				  long idleTimeout,
+				  long updateTime)
+  {
+    CacheMapConnection conn = null;
+
+    try {
+      conn = getConnection();
+
+      PreparedStatement stmt = conn.prepareUpdateUpdateTime();
+      stmt.setLong(1, idleTimeout);
+      stmt.setLong(2, updateTime);
+      
+      stmt.setBytes(3, id.getHash());
+      stmt.setLong(4, itemVersion);
+
+      int count = stmt.executeUpdate();
+        
+      if (log.isLoggable(Level.FINER)) 
+	log.finer(this + " updateUpdateTime key=" + id);
 	  
       return count > 0;
     } catch (SQLException e) {
@@ -642,7 +683,7 @@ public class CacheMapBacking implements AlarmListener {
     
     private PreparedStatement _insertStatement;
     private PreparedStatement _updateSaveStatement;
-    private PreparedStatement _updateAccessStatement;
+    private PreparedStatement _updateUpdateTimeStatement;
     
     private PreparedStatement _removeStatement;
     
@@ -684,13 +725,15 @@ public class CacheMapBacking implements AlarmListener {
       return _updateSaveStatement;
     }
 
-    PreparedStatement prepareUpdateAccess()
+    PreparedStatement prepareUpdateUpdateTime()
       throws SQLException
     {
-      if (_updateAccessStatement == null)
-	_updateAccessStatement = _conn.prepareStatement(_updateAccessQuery);
+      if (_updateUpdateTimeStatement == null) {
+	_updateUpdateTimeStatement
+	  = _conn.prepareStatement(_updateUpdateTimeQuery);
+      }
 
-      return _updateAccessStatement;
+      return _updateUpdateTimeStatement;
     }
 
     PreparedStatement prepareUpdateVersion()

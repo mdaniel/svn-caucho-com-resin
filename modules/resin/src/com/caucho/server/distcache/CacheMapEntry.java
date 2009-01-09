@@ -88,6 +88,31 @@ public final class CacheMapEntry implements CacheEntry {
       _valueRef = new SoftReference(value);
   }
 
+  public CacheMapEntry(CacheMapEntry oldEntry,
+		       long idleTimeout,
+		       long lastUpdateTime)
+  {
+    _valueHash = oldEntry.getValueHashKey();
+    _flags = oldEntry.getFlags();
+    _version = oldEntry.getVersion();
+    
+    _expireTimeout = oldEntry.getExpireTimeout();
+    _idleTimeout = idleTimeout;
+    _localReadTimeout = oldEntry.getLocalReadTimeout();
+    
+    _lastRemoteAccessTime = lastUpdateTime;
+    _lastUpdateTime = lastUpdateTime;
+    
+    _lastAccessTime = Alarm.getExactTime();
+
+    _isServerVersionValid = oldEntry.isServerVersionValid();
+
+    Object value = oldEntry.getValue();
+    
+    if (value != null)
+      _valueRef = new SoftReference(value);
+  }
+
   /**
    * Returns the last access time.
    */
@@ -166,6 +191,20 @@ public final class CacheMapEntry implements CacheEntry {
   public long getIdleTimeout()
   {
     return _idleTimeout;
+  }
+
+  /**
+   * Returns the idle window to avoid too many updates
+   */
+  public long getIdleWindow()
+  {
+    long window = _idleTimeout / 4;
+    long windowMax = 15 * 60 * 1000L;
+
+    if (window < windowMax)
+      return window;
+    else
+      return windowMax;
   }
 
   /**
