@@ -66,9 +66,16 @@ public class ReflectionMethod extends ReflectionFunctionAbstract
     _clsName = clsName;
   }
   
-  public static ReflectionMethod __construct(Env env, String cls, String name)
+  public static ReflectionMethod __construct(Env env, Value obj, String name)
   {
-    return new ReflectionMethod(cls, env.findFunction(cls, name));
+    String clsName;
+    
+    if (obj.isObject())
+      clsName = obj.getClassName();
+    else
+      clsName = obj.toString();
+    
+    return new ReflectionMethod(clsName, env.findFunction(clsName, name));
   }
   
   public static String export(Env env,
