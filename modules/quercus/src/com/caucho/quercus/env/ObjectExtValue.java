@@ -202,31 +202,15 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public final Value getField(Env env, StringValue name)
   {
-    int hash = name.hashCode() & _hashMask;
-
-    for (Entry entry = _entries[hash];
-	 entry != null;
-	 entry = entry._next) {
-      if (name.equals(entry._key)) {
-        if (entry._visibility == FieldVisibility.PRIVATE) {
-          QuercusClass cls = env.getCallingClass();
-          
-          // XXX: this really only checks access from outside of class scope
-          // php/091m
-          if (cls != _quercusClass) {
-                env.error(L.l("Can't access private field '{0}::${1}'",
-                        _quercusClass.getName(), name));
-          }
-        }
-	
-        return entry._value.toValue();
-      }
-    }
+    Entry entry = getEntry(env, name);
+    
+    if (entry != null)
+      return entry._value.toValue();
 
     // php/09km, php/09kn
     // push/pop to prevent infinite recursion
     
-    // needs to be outside try block because push may fail if already exist
+    // needs to be outside try-finally because push may fail if already exist
     if (! env.pushFieldGet(_className, name))
       return NullValue.NULL;
     
@@ -243,18 +227,15 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value getThisField(Env env, StringValue name)
   {
-    int hash = name.hashCode() & _hashMask;
-
-    for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
-      if (name.equals(entry._key)) {
-        return entry._value.toValue();
-      }
-    }
+    Entry entry = getThisEntry(name);
+    
+    if (entry != null)
+      return entry._value.toValue();
 
     // php/09km, php/09kn
     // push/pop to prevent infinite recursion
     
-    // needs to be outside try block because push may fail if already exist
+    // needs to be outside try-finally because push may fail if already exist
     if (! env.pushFieldGet(_className, name))
       return NullValue.NULL;
     
@@ -293,7 +274,7 @@ public class ObjectExtValue extends ObjectValue
       return var;
     }
     
-    // needs to be outside try block because push may fail if already exist
+    // needs to be outside try-finally because push may fail if already exist
     if (! env.pushFieldGet(_className, name))
       return new Var();
     
@@ -310,6 +291,7 @@ public class ObjectExtValue extends ObjectValue
       env.popFieldGet(_className, name);
     }
     
+    // php/3d28
     entry = createEntry(name, FieldVisibility.PUBLIC);
 
     Value value = entry._value;
@@ -391,8 +373,21 @@ public class ObjectExtValue extends ObjectValue
       else
 	return value;
     }
-    else
-      return new ArgGetFieldValue(env, this, name);
+    
+    // needs to be outside try block because push may fail if already exist
+    if (! env.pushFieldGet(_className, name))
+      return UnsetValue.UNSET;
+    
+    try {
+      Value value = getFieldExt(env, name);
+      
+      if (value != UnsetValue.UNSET)
+        return value;
+    } finally {
+      env.popFieldGet(_className, name);
+    }
+    
+    return new ArgGetFieldValue(env, this, name);
   }
 
   /**
@@ -405,8 +400,21 @@ public class ObjectExtValue extends ObjectValue
 
     if (entry != null)
       return entry.toArg();
-    else
-      return new ArgGetFieldValue(env, this, name);
+    
+    // needs to be outside try block because push may fail if already exist
+    if (! env.pushFieldGet(_className, name))
+      return UnsetValue.UNSET;
+    
+    try {
+      Value value = getFieldExt(env, name);
+      
+      if (value != UnsetValue.UNSET)
+        return value;
+    } finally {
+      env.popFieldGet(_className, name);
+    }
+    
+    return new ArgGetFieldValue(env, this, name);
   }
 
   /**
