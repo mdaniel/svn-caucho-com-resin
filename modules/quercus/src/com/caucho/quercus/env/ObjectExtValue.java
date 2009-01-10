@@ -279,6 +279,46 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Var getFieldRef(Env env, StringValue name)
   {
+    int hash = name.hashCode() & _hashMask;
+
+    for (Entry entry = _entries[hash];
+     entry != null;
+     entry = entry._next) {
+      if (name.equals(entry._key)) {
+        if (entry._visibility == FieldVisibility.PRIVATE) {
+          QuercusClass cls = env.getCallingClass();
+          
+          // XXX: this really only checks access from outside of class scope
+          // php/091m
+          if (cls != _quercusClass) {
+                env.error(L.l("Can't access private field '{0}::${1}'",
+                        _quercusClass.getName(), name));
+          }
+        }
+
+        Value value = entry._value;
+        
+        if (value instanceof Var)
+          return (Var) value;
+        
+        Var var = new Var(value);
+        entry._value = var;
+        
+        return var;
+      }
+    }
+    
+    // needs to be outside try block because push may fail if already exist
+    if (! env.pushFieldGet(_className, name))
+      return new Var();
+    
+    try {
+      return new Var(getFieldExt(env, name));
+    } finally {
+      env.popFieldGet(_className, name);
+    }
+    
+    /*
     Entry entry = createEntry(name, FieldVisibility.PUBLIC);
 
     Value value = entry._value;
@@ -291,6 +331,7 @@ public class ObjectExtValue extends ObjectValue
     entry.setValue(var);
 
     return var;
+    */
   }
 
   /**
@@ -299,18 +340,31 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Var getThisFieldRef(Env env, StringValue name)
   {
-    Entry entry = createEntry(name, FieldVisibility.PUBLIC);
+    int hash = name.hashCode() & _hashMask;
 
-    Value value = entry._value;
-
-    if (value instanceof Var)
-      return (Var) value;
-
-    Var var = new Var(value);
-
-    entry.setValue(var);
-
-    return var;
+    for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
+      if (name.equals(entry._key)) {
+        Value value = entry._value;
+        
+        if (value instanceof Var)
+          return (Var) value;
+        
+        Var var = new Var(value);
+        entry._value = var;
+        
+        return var;
+      }
+    }
+    
+    // needs to be outside try block because push may fail if already exist
+    if (! env.pushFieldGet(_className, name))
+      return new Var();
+    
+    try {
+      return new Var(getFieldExt(env, name));
+    } finally {
+      env.popFieldGet(_className, name);
+    }
   }
 
   /**

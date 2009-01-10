@@ -143,6 +143,40 @@ public class FieldGetExpr extends AbstractVarExpr {
 
     obj.putField(env, _name, value);
   }
+  
+  /**
+   * Handles post increments.
+   */
+  @Override
+  public Value evalPostIncrement(Env env, int incr)
+  {
+    // php/09kp
+    
+    Value obj = _objExpr.evalObject(env);
+    Value value = obj.getField(env, _name);
+    
+    value = value.postincr(incr);
+    obj.putField(env, _name, value);
+    
+    return value;
+  }
+  
+  /**
+   * Handles post increments.
+   */
+  @Override
+  public Value evalPreIncrement(Env env, int incr)
+  {
+    // php/09kq
+    
+    Value obj = _objExpr.evalObject(env);
+    Value value = obj.getField(env, _name);
+    
+    value = value.preincr(incr);
+    obj.putField(env, _name, value);
+    
+    return value;
+  }
 
   /**
    * Evaluates the expression, creating an array if the field is unset.

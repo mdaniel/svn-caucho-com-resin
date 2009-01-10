@@ -56,9 +56,7 @@ public class PostIncrementExpr extends UnaryExpr {
 
   public Value eval(Env env)
   {
-    Value var = _expr.evalRef(env);
-
-    return var.postincr(_incr);
+    return _expr.evalPostIncrement(env, _incr);
   }
 
   /**

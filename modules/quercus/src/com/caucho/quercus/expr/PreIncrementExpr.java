@@ -57,9 +57,7 @@ public class PreIncrementExpr extends UnaryExpr {
 
   public Value eval(Env env)
   {
-    Value var = _expr.evalRef(env);
-
-    return var.preincr(_incr);
+    return _expr.evalPreIncrement(env, _incr);
   }
 
   /**

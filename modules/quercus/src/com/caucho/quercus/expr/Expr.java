@@ -419,6 +419,26 @@ abstract public class Expr {
     throw new RuntimeException(L.l("{0} is an invalid left-hand side of an assignment.",
 				   this));
   }
+  
+  /**
+   * Handles post increments.
+   */
+  public Value evalPostIncrement(Env env, int incr)
+  {
+    Value value = evalRef(env);
+    
+    return value.postincr(incr);
+  }
+  
+  /**
+   * Handles post increments.
+   */
+  public Value evalPreIncrement(Env env, int incr)
+  {
+    Value value = evalRef(env);
+    
+    return value.preincr(incr);
+  }
 
   /**
    * Evaluates the expression as a string
