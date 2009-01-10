@@ -300,8 +300,12 @@ public class ObjectExtValue extends ObjectValue
     try {
       Value value = getFieldExt(env, name);
       
-      if (value != UnsetValue.UNSET)
-        return new Var(value);
+      if (value != UnsetValue.UNSET) {
+        if (value instanceof Var)
+          return (Var) value;
+        else
+          return new Var(value);
+      }
     } finally {
       env.popFieldGet(_className, name);
     }
@@ -347,8 +351,12 @@ public class ObjectExtValue extends ObjectValue
     try {
       Value value = getFieldExt(env, name);
       
-      if (value != UnsetValue.UNSET)
-        return new Var(value);
+      if (value != UnsetValue.UNSET) {
+        if (value instanceof Var)
+          return (Var) value;
+        else
+          return new Var(value);
+      }
     } finally {
       env.popFieldGet(_className, name);
     }
