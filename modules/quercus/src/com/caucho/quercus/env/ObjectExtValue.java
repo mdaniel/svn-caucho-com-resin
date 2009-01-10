@@ -207,18 +207,7 @@ public class ObjectExtValue extends ObjectValue
     if (entry != null)
       return entry._value.toValue();
 
-    // php/09km, php/09kn
-    // push/pop to prevent infinite recursion
-    
-    // needs to be outside try-finally because push may fail if already exist
-    if (! env.pushFieldGet(_className, name))
-      return NullValue.NULL;
-    
-    try {
-      return getFieldExt(env, name);
-    } finally {
-      env.popFieldGet(_className, name);
-    }
+    return getFieldExt(env, name);
   }
 
   /**
@@ -232,18 +221,7 @@ public class ObjectExtValue extends ObjectValue
     if (entry != null)
       return entry._value.toValue();
 
-    // php/09km, php/09kn
-    // push/pop to prevent infinite recursion
-    
-    // needs to be outside try-finally because push may fail if already exist
-    if (! env.pushFieldGet(_className, name))
-      return NullValue.NULL;
-    
-    try {
-      return getFieldExt(env, name);
-    } finally {
-      env.popFieldGet(_className, name);
-    }
+    return getFieldExt(env, name);
   }
   
   /**
@@ -274,27 +252,19 @@ public class ObjectExtValue extends ObjectValue
       return var;
     }
     
-    // needs to be outside try-finally because push may fail if already exist
-    if (! env.pushFieldGet(_className, name))
-      return new Var();
+    Value value = getFieldExt(env, name);
     
-    try {
-      Value value = getFieldExt(env, name);
-      
-      if (value != UnsetValue.UNSET) {
-        if (value instanceof Var)
-          return (Var) value;
-        else
-          return new Var(value);
-      }
-    } finally {
-      env.popFieldGet(_className, name);
+    if (value != UnsetValue.UNSET) {
+      if (value instanceof Var)
+        return (Var) value;
+      else
+        return new Var(value);
     }
     
     // php/3d28
     entry = createEntry(name, FieldVisibility.PUBLIC);
 
-    Value value = entry._value;
+    value = entry._value;
 
     if (value instanceof Var)
       return (Var) value;
@@ -326,26 +296,18 @@ public class ObjectExtValue extends ObjectValue
       return var;
     }
     
-    // needs to be outside try block because push may fail if already exist
-    if (! env.pushFieldGet(_className, name))
-      return new Var();
+    Value value = getFieldExt(env, name);
     
-    try {
-      Value value = getFieldExt(env, name);
-      
-      if (value != UnsetValue.UNSET) {
-        if (value instanceof Var)
-          return (Var) value;
-        else
-          return new Var(value);
-      }
-    } finally {
-      env.popFieldGet(_className, name);
+    if (value != UnsetValue.UNSET) {
+      if (value instanceof Var)
+        return (Var) value;
+      else
+        return new Var(value);
     }
     
     entry = createEntry(name, FieldVisibility.PUBLIC);
 
-    Value value = entry._value;
+    value = entry._value;
 
     if (value instanceof Var)
       return (Var) value;
@@ -369,23 +331,15 @@ public class ObjectExtValue extends ObjectValue
       Value value = entry.getValue();
 
       if (isTop || ! value.isset())
-	return entry.toArg();
+        return entry.toArg();
       else
-	return value;
-    }
-    
-    // needs to be outside try block because push may fail if already exist
-    if (! env.pushFieldGet(_className, name))
-      return UnsetValue.UNSET;
-    
-    try {
-      Value value = getFieldExt(env, name);
-      
-      if (value != UnsetValue.UNSET)
         return value;
-    } finally {
-      env.popFieldGet(_className, name);
     }
+
+    Value value = getFieldExt(env, name);
+    
+    if (value != UnsetValue.UNSET)
+      return value;
     
     return new ArgGetFieldValue(env, this, name);
   }
@@ -401,18 +355,10 @@ public class ObjectExtValue extends ObjectValue
     if (entry != null)
       return entry.toArg();
     
-    // needs to be outside try block because push may fail if already exist
-    if (! env.pushFieldGet(_className, name))
-      return UnsetValue.UNSET;
+    Value value = getFieldExt(env, name);
     
-    try {
-      Value value = getFieldExt(env, name);
-      
-      if (value != UnsetValue.UNSET)
-        return value;
-    } finally {
-      env.popFieldGet(_className, name);
-    }
+    if (value != UnsetValue.UNSET)
+      return value;
     
     return new ArgGetFieldValue(env, this, name);
   }
@@ -427,8 +373,13 @@ public class ObjectExtValue extends ObjectValue
 
     if (entry != null)
       return entry.toArg();
-    else
-      return new ArgGetFieldValue(env, this, name);
+    
+    Value value = getFieldExt(env, name);
+    
+    if (value != UnsetValue.UNSET)
+      return value;
+    
+    return new ArgGetFieldValue(env, this, name);
   }
 
   /**
@@ -441,8 +392,13 @@ public class ObjectExtValue extends ObjectValue
 
     if (entry != null)
       return entry.toArg();
-    else
-      return new ArgGetFieldValue(env, this, name);
+
+    Value value = getFieldExt(env, name);
+    
+    if (value != UnsetValue.UNSET)
+      return value;
+    
+    return new ArgGetFieldValue(env, this, name);
   }
 
   /**

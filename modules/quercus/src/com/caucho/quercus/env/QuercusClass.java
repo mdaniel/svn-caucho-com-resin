@@ -979,8 +979,19 @@ public class QuercusClass {
    */
   public Value getField(Env env, Value qThis, StringValue name)
   {
-    if (_fieldGet != null)
-      return _fieldGet.callMethod(env, qThis, name);
+    // php/09km, php/09kn
+    // push/pop to prevent infinite recursion
+    
+    if (_fieldGet != null) {
+      if (! env.pushFieldGet(qThis.getClassName(), name))
+        return UnsetValue.UNSET;
+      
+      try {
+        return _fieldGet.callMethod(env, qThis, name);
+      } finally {
+        env.popFieldGet(_className, name);
+      }
+    }
     else
       return UnsetValue.UNSET;
   }
