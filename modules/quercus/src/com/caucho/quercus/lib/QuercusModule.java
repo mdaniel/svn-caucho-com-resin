@@ -162,6 +162,9 @@ public class QuercusModule extends AbstractQuercusModule
     return env.getServletContext();
   }
   
+  /*
+   * Special quercus-only import statements.
+   */
   public static void quercus_import(Env env, String name)
   {
     if (name.endsWith("*"))

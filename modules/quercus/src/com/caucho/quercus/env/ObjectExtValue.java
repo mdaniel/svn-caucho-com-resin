@@ -178,7 +178,7 @@ public class ObjectExtValue extends ObjectValue
     while (iter.hasNext()) {
       Entry newField = iter.next();
       
-      Entry entry = getEntry(newField._key);
+      Entry entry = getThisEntry(newField._key);
       
       if (entry != null)
         entry._value = newField._value;
@@ -279,33 +279,18 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Var getFieldRef(Env env, StringValue name)
   {
-    int hash = name.hashCode() & _hashMask;
+    Entry entry = getEntry(env, name);
 
-    for (Entry entry = _entries[hash];
-     entry != null;
-     entry = entry._next) {
-      if (name.equals(entry._key)) {
-        if (entry._visibility == FieldVisibility.PRIVATE) {
-          QuercusClass cls = env.getCallingClass();
-          
-          // XXX: this really only checks access from outside of class scope
-          // php/091m
-          if (cls != _quercusClass) {
-                env.error(L.l("Can't access private field '{0}::${1}'",
-                        _quercusClass.getName(), name));
-          }
-        }
-
-        Value value = entry._value;
-        
-        if (value instanceof Var)
-          return (Var) value;
-        
-        Var var = new Var(value);
-        entry._value = var;
-        
-        return var;
-      }
+    if (entry != null) {
+      Value value = entry._value;
+      
+      if (value instanceof Var)
+        return (Var) value;
+      
+      Var var = new Var(value);
+      entry._value = var;
+      
+      return var;
     }
     
     // needs to be outside try block because push may fail if already exist
@@ -313,13 +298,15 @@ public class ObjectExtValue extends ObjectValue
       return new Var();
     
     try {
-      return new Var(getFieldExt(env, name));
+      Value value = getFieldExt(env, name);
+      
+      if (value != UnsetValue.UNSET)
+        return new Var(value);
     } finally {
       env.popFieldGet(_className, name);
     }
     
-    /*
-    Entry entry = createEntry(name, FieldVisibility.PUBLIC);
+    entry = createEntry(name, FieldVisibility.PUBLIC);
 
     Value value = entry._value;
 
@@ -331,7 +318,6 @@ public class ObjectExtValue extends ObjectValue
     entry.setValue(var);
 
     return var;
-    */
   }
 
   /**
@@ -340,20 +326,18 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Var getThisFieldRef(Env env, StringValue name)
   {
-    int hash = name.hashCode() & _hashMask;
-
-    for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
-      if (name.equals(entry._key)) {
-        Value value = entry._value;
-        
-        if (value instanceof Var)
-          return (Var) value;
-        
-        Var var = new Var(value);
-        entry._value = var;
-        
-        return var;
-      }
+    Entry entry = getThisEntry(name);
+    
+    if (entry != null) {
+      Value value = entry._value;
+      
+      if (value instanceof Var)
+        return (Var) value;
+      
+      Var var = new Var(value);
+      entry._value = var;
+      
+      return var;
     }
     
     // needs to be outside try block because push may fail if already exist
@@ -361,10 +345,26 @@ public class ObjectExtValue extends ObjectValue
       return new Var();
     
     try {
-      return new Var(getFieldExt(env, name));
+      Value value = getFieldExt(env, name);
+      
+      if (value != UnsetValue.UNSET)
+        return new Var(value);
     } finally {
       env.popFieldGet(_className, name);
     }
+    
+    entry = createEntry(name, FieldVisibility.PUBLIC);
+
+    Value value = entry._value;
+
+    if (value instanceof Var)
+      return (Var) value;
+
+    Var var = new Var(value);
+
+    entry.setValue(var);
+
+    return var;
   }
 
   /**
@@ -373,7 +373,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value getFieldArg(Env env, StringValue name, boolean isTop)
   {
-    Entry entry = getEntry(name);
+    Entry entry = getEntry(env, name);
 
     if (entry != null) {
       Value value = entry.getValue();
@@ -393,7 +393,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value getThisFieldArg(Env env, StringValue name)
   {
-    Entry entry = getEntry(name);
+    Entry entry = getThisEntry(name);
 
     if (entry != null)
       return entry.toArg();
@@ -407,7 +407,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value getFieldArgRef(Env env, StringValue name)
   {
-    Entry entry = getEntry(name);
+    Entry entry = getEntry(env, name);
 
     if (entry != null)
       return entry.toArg();
@@ -421,7 +421,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value getThisFieldArgRef(Env env, StringValue name)
   {
-    Entry entry = getEntry(name);
+    Entry entry = getThisEntry(name);
 
     if (entry != null)
       return entry.toArg();
@@ -435,7 +435,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value putField(Env env, StringValue name, Value value)
   {
-    Entry entry = getEntry(name);
+    Entry entry = getEntry(env, name);
 
     if (entry == null) {
       Value oldValue = putFieldExt(env, name, value);
@@ -484,7 +484,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value putThisField(Env env, StringValue name, Value value)
   {
-    Entry entry = getEntry(name);
+    Entry entry = getThisEntry(name);
 
     if (entry == null) {
       Value oldValue = putFieldExt(env, name, value);
@@ -580,15 +580,40 @@ public class ObjectExtValue extends ObjectValue
   /**
    * Gets a new value.
    */
-  private Entry getEntry(StringValue name)
+  private Entry getEntry(Env env, StringValue name)
   {
     int hash = name.hashCode() & _hashMask;
 
-    for (Entry entry = _entries[hash];
-	 entry != null;
-	 entry = entry._next) {
+    for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
+      if (name.equals(entry._key)) {
+        if (entry._visibility == FieldVisibility.PRIVATE) {
+          QuercusClass cls = env.getCallingClass();
+          
+          // XXX: this really only checks access from outside of class scope
+          // php/091m
+          if (cls != _quercusClass) {
+                env.error(L.l("Can't access private field '{0}::${1}'",
+                        _quercusClass.getName(), name));
+          }
+        }
+        
+        return entry;
+      }
+    }
+
+    return null;
+  }
+  
+  /**
+   * Gets a new value.
+   */
+  private Entry getThisEntry(StringValue name)
+  {
+    int hash = name.hashCode() & _hashMask;
+
+    for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
       if (name.equals(entry._key))
-	return entry;
+        return entry;
     }
 
     return null;
