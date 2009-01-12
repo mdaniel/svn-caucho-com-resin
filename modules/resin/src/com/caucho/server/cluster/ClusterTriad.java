@@ -48,12 +48,12 @@ abstract public class ClusterTriad
   private static final Logger log
     = Logger.getLogger(ClusterTriad.class.getName());
 
-  private final static Owner []OWNER_VALUES = Owner.class.getEnumConstants();
+  public final static Owner []OWNER_VALUES = Owner.class.getEnumConstants();
   
   private final Cluster _cluster;
 
   private final int _index;
-  
+
   private String _id;
 
   /**
@@ -291,6 +291,11 @@ abstract public class ClusterTriad
   //
   // triad ownership
   //
+
+  /**
+   * Returns the OwnerServerTriad for the given owner.
+   */
+  abstract public OwnerServerTriad getOwnerServerTriad(Owner owner);
   
   /**
    * Returns the primary server given an ownership tag.

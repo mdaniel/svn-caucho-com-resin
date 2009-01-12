@@ -47,6 +47,8 @@ public class CacheConfig
   public static final int FLAG_EPHEMERAL  = 0x01;
   public static final int FLAG_BACKUP     = 0x02;
   public static final int FLAG_TRIPLICATE = 0x04;
+
+  private String _guid;
   
   private int _flags = (FLAG_BACKUP
 			| FLAG_TRIPLICATE);
@@ -77,6 +79,22 @@ public class CacheConfig
   public void setCacheLoader(CacheLoader cacheLoader)
   {
     _cacheLoader = cacheLoader;
+  }
+
+  /**
+   * Sets the globally-unique id for the cache
+   */
+  public String getGuid()
+  {
+    return _guid;
+  }
+
+  /**
+   * Sets the globally-unique id for the cache
+   */
+  public void setGuid(String guid)
+  {
+    _guid = guid;
   }
 
   /**

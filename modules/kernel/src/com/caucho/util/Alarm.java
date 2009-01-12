@@ -46,6 +46,7 @@ public class Alarm implements ThreadTask {
     = ClassLoader.getSystemClassLoader();
 
   static private volatile long _currentTime = System.currentTimeMillis();
+  static private volatile boolean _isCurrentTimeUsed;
 
   static private int _concurrentAlarmThrottle = 5;
   
@@ -206,8 +207,11 @@ public class Alarm implements ThreadTask {
   {
     if (_testTime > 0)
       return _testTime;
-    else if (_alarmThread != null)
+    else if (_alarmThread != null) {
+      _isCurrentTimeUsed = true;
+      
       return _currentTime;
+    }
     else
       return System.currentTimeMillis();
   }
@@ -637,6 +641,9 @@ public class Alarm implements ThreadTask {
   }
 
   static class AlarmThread extends Thread {
+    private static final long MIN = 10L;
+    private static final long MAX = 250L;
+      
     AlarmThread()
     {
       super("resin-timer");
@@ -645,14 +652,31 @@ public class Alarm implements ThreadTask {
     
     public void run()
     {
+      long sleepTime = MIN;
+      
       while (true) {
 	try {
+	  boolean isCurrentTimeUsed = _isCurrentTimeUsed;
+	  _isCurrentTimeUsed = false;
+
+	  if (isCurrentTimeUsed) {
+	    sleepTime = sleepTime / 2;
+	    if (sleepTime < MIN)
+	      sleepTime = MIN;
+	  }
+	  else {
+	    sleepTime = sleepTime + 1;
+	    
+	    if (MAX < sleepTime)
+	      sleepTime = MAX;
+	  }
+	  
 	  if (_testTime > 0)
 	    _currentTime = _testTime;
 	  else
 	    _currentTime = System.currentTimeMillis();
 	
-	  Thread.sleep(250);
+	  Thread.sleep(sleepTime);
 	} catch (Throwable e) {
 	}
       }

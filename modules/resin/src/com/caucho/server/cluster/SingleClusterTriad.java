@@ -103,6 +103,15 @@ public class SingleClusterTriad extends ClusterTriad
     return null;
   }
 
+  /**
+   * Returns the OwnerServerTriad for the given owner.
+   */
+  @Override
+  public OwnerServerTriad getOwnerServerTriad(Owner owner)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
   //
   // configuration
   //

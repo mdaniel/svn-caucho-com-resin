@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * <p>Null keys are not allowed.  LruCache is synchronized.
  */
-public class LruCache<K,V> {
+public final class LruCache<K,V> {
   private static final Object NULL = new Object();
   private static final Object MISMATCH = new Object();
   
@@ -91,9 +91,9 @@ public class LruCache<K,V> {
   //
 
   // hit count statistics
-  private final AtomicLong _hitCount = new AtomicLong();
+  private AtomicLong _hitCount;
   // miss count statistics
-  private final AtomicLong _missCount = new AtomicLong();
+  private AtomicLong _missCount;
   
   /**
    * Create the LRU cache with a specific capacity.
@@ -127,6 +127,11 @@ public class LruCache<K,V> {
     
     if (_lruTimeout < 1)
       _lruTimeout = 1;
+
+    if (isStatistics) {
+      _hitCount = new AtomicLong();
+      _missCount = new AtomicLong();
+    }
   }
 
   /**
@@ -216,22 +221,23 @@ public class LruCache<K,V> {
     for (item = _entries[hash];
 	 item != null;
 	 item = item._nextHash) {
-      if (item._key == okey || item._key.equals(okey)) {
-	break;
+      Object itemKey = item._key;
+      
+      if (itemKey == okey || itemKey.equals(okey)) {
+	updateLru(item);
+
+	AtomicLong hitCount = _hitCount;
+	if (hitCount != null)
+	  hitCount.incrementAndGet();
+
+	return item._value;
       }
     }
 
-    if (item != null) {
-      updateLru(item);
-
-      _hitCount.incrementAndGet();
-
-      return item._value;
-    }
-    else {
-      _missCount.incrementAndGet();
-    }
-
+    AtomicLong missCount = _missCount;
+    if (missCount != null)
+      missCount.incrementAndGet();
+    
     return null;
   }
 
@@ -386,16 +392,23 @@ public class LruCache<K,V> {
    */
   private void updateLru(CacheItem<K,V> item)
   {
-    if (_lruCounter < item._lruExpire
-	&& item._lruExpire < _lruCounter + _lruTimeout) {
+    long lruCounter = _lruCounter;
+    long itemCounter = item._lruCounter;
+
+    long delta = lruCounter - itemCounter;
+
+    if (_lruTimeout < delta || delta < 0) {
       // update LRU only if not used recently
-      return;
+      updateLruImpl(item);
     }
-    
+  }
+
+  private void updateLruImpl(CacheItem<K,V> item)
+  {
     synchronized (_lruLock) {
       _lruCounter = (_lruCounter + 1) & 0x3fffffff;
 
-      item._lruExpire = _lruCounter + _lruTimeout;
+      item._lruCounter = _lruCounter;
       
       CacheItem<K,V> prevLru = item._prevLru;
       CacheItem<K,V> nextLru = item._nextLru;
@@ -648,7 +661,7 @@ public class LruCache<K,V> {
     CacheItem<K,V> _prevLru;
     CacheItem<K,V> _nextLru;
     
-    volatile int _lruExpire; // LRU only updated after expire time
+    volatile int _lruCounter; // LRU only updated after expire time
     
     final K _key;
     V _value;

@@ -37,6 +37,7 @@ import com.caucho.server.distcache.CacheConfig;
 import com.caucho.server.distcache.DistributedCacheManager;
 import com.caucho.server.distcache.HashKey;
 import com.caucho.server.distcache.HashManager;
+import com.caucho.server.distcache.CacheKeyEntry;
 import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
 
@@ -53,16 +54,14 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
 {
   private static final L10N L = new L10N(AbstractCache.class);
 
-  private String _contextId;
-  
   private String _name = "";
 
-  private String _id;
+  private String _guid;
 
   private CacheConfig _config = new CacheConfig();
 
-  private LruCache<Object,HashKey> _keyHashCache
-    = new LruCache<Object,HashKey>(512);
+  private LruCache<Object,CacheKeyEntry> _entryCache
+    = new LruCache<Object,CacheKeyEntry>(512);
 
   private boolean _isInit;
 
@@ -263,9 +262,11 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
       if (_name == null)
 	throw new ConfigException(L.l("'name' is a require attribute for any Cache"));
     
-      _contextId = Environment.getEnvironmentName();
+      String contextId = Environment.getEnvironmentName();
 
-      _id = _contextId + ":" + _name;
+      _guid = contextId + ":" + _name;
+
+      _config.setGuid(_guid);
 
       _config.init();
 
@@ -280,13 +281,30 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
   }
   
   /**
-   * Returns the object with the given key.
+   * Returns the object with the given key without checking the backing store.
+   */
+  public Object peek(Object key)
+  {
+    CacheKeyEntry entry = _entryCache.get(key);
+
+    return entry.peek();
+  }
+  
+  /**
+   * Returns the object with the given key, checking the backing store if
+   * necessary.
    */
   public Object get(Object key)
   {
-    HashKey hashKey = getHashKey(key);
+    CacheKeyEntry entry = _entryCache.get(key);
 
-    return _distributedCacheManager.get(hashKey, _config);
+    if (entry == null) {
+      entry = _distributedCacheManager.getKey(key, _config);
+
+      _entryCache.put(key, entry);
+    }
+
+    return entry.get(_config);
   }
   
   /**
@@ -295,9 +313,15 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
   public boolean get(Object key, OutputStream os)
     throws IOException
   {
-    HashKey hashKey = getHashKey(key);
+    CacheKeyEntry entry = _entryCache.get(key);
 
-    return _distributedCacheManager.get(hashKey, os, _config);
+    if (entry == null) {
+      entry = _distributedCacheManager.getKey(key, _config);
+
+      _entryCache.put(key, entry);
+    }
+
+    return entry.getStream(os, _config);
   }
   
   /**
@@ -305,19 +329,15 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
    */
   public CacheEntry<Object> getEntry(Object key)
   {
-    HashKey hashKey = getHashKey(key);
-    
-    return _distributedCacheManager.getEntry(hashKey, _config);
-  }
-  
-  /**
-   * Returns the object with the given key.
-   */
-  public Object peek(Object key)
-  {
-    HashKey hashKey = getHashKey(key);
+    CacheKeyEntry entry = _entryCache.get(key);
 
-    return _distributedCacheManager.peek(hashKey, _config);
+    if (entry == null) {
+      entry = _distributedCacheManager.getKey(key, _config);
+
+      _entryCache.put(key, entry);
+    }
+
+    return entry.getValueEntry();
   }
   
   /**
@@ -328,11 +348,15 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
    */
   public Object put(Object key, Object value)
   {
-    HashKey hashKey = getHashKey(key);
+    CacheKeyEntry entry = _entryCache.get(key);
 
-    _distributedCacheManager.put(hashKey, value, _config);
+    if (entry == null) {
+      entry = _distributedCacheManager.getKey(key, _config);
 
-    return null;
+      _entryCache.put(key, entry);
+    }
+
+    return entry.put(value, _config);
   }
   
   /**
@@ -348,9 +372,15 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
 			long idleTimeout)
     throws IOException
   {
-    HashKey hashKey = getHashKey(key);
+    CacheKeyEntry entry = _entryCache.get(key);
 
-    return _distributedCacheManager.put(hashKey, is, idleTimeout, _config);
+    if (entry == null) {
+      entry = _distributedCacheManager.getKey(key, _config);
+
+      _entryCache.put(key, entry);
+    }
+
+    return entry.put(is, _config, idleTimeout);
   }
   
   /**
@@ -399,11 +429,15 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
    */
   public Object remove(Object key)
   {
-    HashKey hashKey = getHashKey(key);
-    
-    _distributedCacheManager.remove(hashKey);
+    CacheKeyEntry entry = _entryCache.get(key);
 
-    return null;
+    if (entry == null) {
+      entry = _distributedCacheManager.getKey(key, _config);
+
+      _entryCache.put(key, entry);
+    }
+
+    return entry.remove(_config);
   }
 
   /**
@@ -411,76 +445,14 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
    */
   public boolean compareAndRemove(Object key, long version)
   {
-    HashKey hashKey = getHashKey(key);
+    // HashKey hashKey = getHashKey(key);
     
     return false;
-  }
-
-  /**
-   * Returns the key hash
-   */
-  protected HashKey getHashKey(Object key)
-  {
-    HashKey hashKey = _keyHashCache.get(key);
-
-    if (hashKey != null)
-      return hashKey;
-
-    try {
-      MessageDigest digest
-	= MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
-
-      NullDigestOutputStream dOut = new NullDigestOutputStream(digest);
-
-      Object []fullKey = new Object[] { _id, key };
-
-      _config.getKeySerializer().serialize(fullKey, dOut);
-
-      hashKey = new HashKey(dOut.digest());
-
-      _keyHashCache.put(key, hashKey);
-
-      return hashKey;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _id + "]";
-  }
-
-  static class NullDigestOutputStream extends OutputStream {
-    private MessageDigest _digest;
-
-    NullDigestOutputStream(MessageDigest digest)
-    {
-      _digest = digest;
-    }
-
-    public void write(int value)
-    {
-      _digest.update((byte) value);
-    }
-
-    public void write(byte []buffer, int offset, int length)
-    {
-      _digest.update(buffer, offset, length);
-    }
-
-    public byte []digest()
-    {
-      return _digest.digest();
-    }
-
-    public void flush()
-    {
-    }
-
-    public void close()
-    {
-    }
+    return getClass().getSimpleName() + "[" + _guid + "]";
   }
 }

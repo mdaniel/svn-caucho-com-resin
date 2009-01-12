@@ -32,12 +32,14 @@ package com.caucho.server.distcache;
 import com.caucho.cluster.CacheEntry;
 import com.caucho.cluster.CacheSerializer;
 import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.ClusterTriad;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.LruCache;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
 
 /**
  * Manages the distributed cache
@@ -52,12 +54,33 @@ abstract public class DistributedCacheManager
   }
 
   /**
-   * Returns the owning cluster
+   * Returns the owning server
    */
   protected Server getServer()
   {
     return _server;
   }
+
+  /**
+   * Returns the owning cluster.
+   */
+  protected Cluster getCluster()
+  {
+    return _server.getCluster();
+  }
+
+  /**
+   * Returns the owning triad.
+   */
+  protected ClusterTriad getTriad()
+  {
+    return _server.getTriad();
+  }
+
+  /**
+   * Gets a cache key entry
+   */
+  abstract public CacheKeyEntry getKey(Object key, CacheConfig config);
 
   /**
    * Gets a cache entry
@@ -67,36 +90,44 @@ abstract public class DistributedCacheManager
   /**
    * Gets a cache entry
    */
-  abstract public Object get(HashKey hashKey, CacheConfig config);
+  //abstract public Object get(HashKey hashKey, CacheConfig config);
 
   /**
    * Gets a cache entry
    */
+  /*
   abstract public boolean get(HashKey hashKey,
 			      OutputStream os,
 			      CacheConfig config)
     throws IOException;
+  */
 
   /**
    * Gets a cache entry
    */
-  abstract public Object peek(HashKey hashKey, CacheConfig config);
+  //  abstract public Object peek(HashKey hashKey, CacheConfig config);
 
   /**
    * Sets a cache entry
    */
-  abstract public void put(HashKey hashKey,
+  public void put(HashKey hashKey,
 			   Object value,
-			   CacheConfig config);
+			   CacheConfig config)
+  {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Sets a cache entry
    */
-  abstract public CacheEntry put(HashKey hashKey,
+  public CacheEntry put(HashKey hashKey,
 				 InputStream is,
-				 long idleTimeout,
-				 CacheConfig config)
-    throws IOException;
+				 CacheConfig config,
+				 long idleTimeout)
+    throws IOException
+  {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Removes a cache entry
@@ -110,9 +141,64 @@ abstract public class DistributedCacheManager
   {
   }
 
+  /**
+   * Returns the key hash
+   */
+  protected HashKey createHashKey(Object key, CacheConfig config)
+  {
+    try {
+      MessageDigest digest
+	= MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
+
+      NullDigestOutputStream dOut = new NullDigestOutputStream(digest);
+
+      Object []fullKey = new Object[] { config.getGuid(), key };
+
+      config.getKeySerializer().serialize(fullKey, dOut);
+
+      HashKey hashKey = new HashKey(dOut.digest());
+
+      return hashKey;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _server.getServerId() + "]";
+  }
+
+  static class NullDigestOutputStream extends OutputStream {
+    private MessageDigest _digest;
+
+    NullDigestOutputStream(MessageDigest digest)
+    {
+      _digest = digest;
+    }
+
+    public void write(int value)
+    {
+      _digest.update((byte) value);
+    }
+
+    public void write(byte []buffer, int offset, int length)
+    {
+      _digest.update(buffer, offset, length);
+    }
+
+    public byte []digest()
+    {
+      return _digest.digest();
+    }
+
+    public void flush()
+    {
+    }
+
+    public void close()
+    {
+    }
   }
 }

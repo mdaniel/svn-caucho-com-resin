@@ -53,7 +53,7 @@ public final class CacheMapEntry implements CacheEntry {
 
   private final boolean _isServerVersionValid;
   
-  private long _lastAccessTime;
+  private volatile long _lastAccessTime;
   private long _lastRemoteAccessTime;
   
   private SoftReference _valueRef;
@@ -156,20 +156,20 @@ public final class CacheMapEntry implements CacheEntry {
   /**
    * Returns the expiration time
    */
-  public long getExpirationTime()
+  public final long getExpirationTime()
   {
     return _lastUpdateTime + _expireTimeout;
   }
 
-  public boolean isLocalReadExpired()
+  public final boolean isLocalReadExpired(long now)
   {
-    return (_lastAccessTime + _localReadTimeout < Alarm.getExactTime()
+    return (_lastAccessTime + _localReadTimeout < now
 	    || ! _isServerVersionValid);
   }
 
-  public boolean isExpired()
+  public final boolean isExpired(long now)
   {
-    return (_lastUpdateTime + _expireTimeout < Alarm.getExactTime());
+    return (_lastUpdateTime + _expireTimeout < now);
   }
 
   public int getFlags()
@@ -220,10 +220,26 @@ public final class CacheMapEntry implements CacheEntry {
     return _version;
   }
 
-  public void setValue(Object value)
+  /**
+   * Sets the deserialized value for the entry.
+   */
+  public final void setValue(Object value)
   {
     if (value != null && (_valueRef == null || _valueRef.get() == null))
       _valueRef = new SoftReference(value);
+  }
+
+  /**
+   * Returns the deserialized value for the entry.
+   */
+  public final Object getValue()
+  {
+    SoftReference valueRef = _valueRef;
+
+    if (valueRef != null)
+      return valueRef.get();
+    else
+      return null;
   }
 
   public byte []getValueHash()
@@ -237,16 +253,6 @@ public final class CacheMapEntry implements CacheEntry {
   public HashKey getValueHashKey()
   {
     return _valueHash;
-  }
-
-  public Object getValue()
-  {
-    SoftReference valueRef = _valueRef;
-
-    if (valueRef != null)
-      return valueRef.get();
-    else
-      return null;
   }
 
   /**

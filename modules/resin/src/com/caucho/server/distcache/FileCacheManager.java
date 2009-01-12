@@ -34,6 +34,7 @@ import com.caucho.cluster.CacheSerializer;
 import com.caucho.config.ConfigException;
 import com.caucho.server.cache.TempFileManager;
 import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ClusterTriad;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.Alarm;
 import com.caucho.util.LruCache;
@@ -69,8 +70,8 @@ public class FileCacheManager extends DistributedCacheManager
   private CacheMapBacking _cacheMapBacking;
   private DataBacking _dataBacking;
 
-  private final LruCache<HashKey,CacheMapEntry> _entryCache
-    = new LruCache<HashKey,CacheMapEntry>(8 * 1024);
+  private final LruCache<HashKey,CacheKeyEntry> _entryCache
+    = new LruCache<HashKey,CacheKeyEntry>(64 * 1024);
   
   public FileCacheManager(Server server)
   {
@@ -90,19 +91,40 @@ public class FileCacheManager extends DistributedCacheManager
   }
 
   /**
-   * Gets a cache entry
+   * Returns the key entry.
    */
-  public CacheEntry getEntry(HashKey key, CacheConfig config)
+  @Override
+  public CacheKeyEntry getKey(Object key, CacheConfig config)
   {
-    CacheMapEntry entry = _entryCache.get(key);
+    HashKey hashKey = createHashKey(key, config);
 
-    if (entry == null) {
-      entry = _cacheMapBacking.load(key);
+    CacheKeyEntry entry = _entryCache.get(hashKey);
 
-      CacheMapEntry oldEntry = _entryCache.putIfNew(key, entry);
+    while (entry == null) {
+      ClusterTriad.Owner owner = ClusterTriad.Owner.A_B;
+      
+      entry = new FileCacheKeyEntry(key, hashKey, owner, this);
 
-      if (entry.getVersion() < oldEntry.getVersion())
-	entry = oldEntry;
+      entry = _entryCache.putIfNew(hashKey, entry);
+    }
+
+    return entry;
+  }
+
+  /**
+   * Returns the key entry.
+   */
+  public CacheKeyEntry getKey(HashKey hashKey)
+  {
+    CacheKeyEntry entry = _entryCache.get(hashKey);
+
+    while (entry == null) {
+      ClusterTriad.Owner owner = ClusterTriad.Owner.A_B;
+      
+      entry = new FileCacheKeyEntry(null, hashKey, owner, this);
+
+      if (! _entryCache.compareAndPut(null, hashKey, entry))
+	entry = _entryCache.get(hashKey);
     }
 
     return entry;
@@ -111,9 +133,49 @@ public class FileCacheManager extends DistributedCacheManager
   /**
    * Gets a cache entry
    */
-  public Object get(HashKey key, CacheConfig config)
+  public CacheEntry getEntry(HashKey key, CacheConfig config)
   {
-    CacheMapEntry entry = getLocalEntry(key, config.getLocalReadTimeout());
+    CacheKeyEntry keyEntry = getLocalEntry(key);
+    CacheMapEntry entry = keyEntry.getEntry();
+
+    if (entry == null) {
+      entry = _cacheMapBacking.load(key);
+
+      keyEntry.compareAndSet(null, entry);
+
+      entry = keyEntry.getEntry();
+    }
+
+    return entry;
+  }
+
+  /**
+   * Gets a cache entry
+   */
+  public CacheMapEntry loadLocalEntry(CacheKeyEntry keyEntry)
+  {
+    HashKey key = keyEntry.getKeyHash();
+    CacheMapEntry entry = keyEntry.getEntry();
+
+    if (entry == null) {
+      entry = _cacheMapBacking.load(key);
+
+      keyEntry.compareAndSet(null, entry);
+
+      entry = keyEntry.getEntry();
+    }
+
+    return entry;
+  }
+
+  /**
+   * Gets a cache entry
+   */
+  public Object get(FileCacheKeyEntry keyEntry, CacheConfig config)
+  {
+    HashKey key = keyEntry.getKeyHash();
+    
+    CacheMapEntry entry = loadLocalEntry(keyEntry);
 
     if (entry == null)
       return null;
@@ -140,15 +202,19 @@ public class FileCacheManager extends DistributedCacheManager
   /**
    * Gets a cache entry
    */
+  /*
   public Object peek(HashKey key, CacheConfig config)
   {
     return get(key, config);
   }
+  */
 
   /**
    * Gets a cache entry
    */
-  public boolean get(HashKey key, OutputStream os, CacheConfig config)
+  public boolean get(FileCacheKeyEntry keyEntry,
+		     OutputStream os,
+		     CacheConfig config)
   {
     return false;
   }
@@ -158,7 +224,15 @@ public class FileCacheManager extends DistributedCacheManager
    */
   public void put(HashKey key, Object value, CacheConfig config)
   {
-    CacheMapEntry oldEntry = _entryCache.get(key);
+    CacheKeyEntry keyEntry = getKey(key);
+  }
+
+  public CacheMapEntry put(FileCacheKeyEntry keyEntry,
+			   Object value,
+			   CacheConfig config)
+  {
+    HashKey key = keyEntry.getKeyHash();
+    CacheMapEntry oldEntry = loadLocalEntry(keyEntry);
 
     HashKey oldValueHash
       = oldEntry != null ? oldEntry.getValueHashKey() : null;
@@ -167,7 +241,7 @@ public class FileCacheManager extends DistributedCacheManager
 				  config.getValueSerializer());
 
     if (valueHash.equals(oldValueHash))
-      return;
+      return oldEntry;
 
     long version = oldEntry != null ? oldEntry.getVersion() + 1 : 1;
     int flags = config.getFlags();
@@ -192,11 +266,11 @@ public class FileCacheManager extends DistributedCacheManager
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
 
-    if (! _entryCache.compareAndPut(oldEntry, key, entry)) {
+    if (! keyEntry.compareAndSet(oldEntry, entry)) {
       log.fine(this + " entry update failed due to timing conflict"
 	       + " (key=" + key + ")");
       
-      return;
+      return keyEntry.getEntry();
     }
 
     if (oldEntry == null) {
@@ -219,15 +293,17 @@ public class FileCacheManager extends DistributedCacheManager
 		 + "(key=" + key + ")");
       }
     }
+
+    return keyEntry.getEntry();
   }
 
   /**
    * Sets a cache entry
    */
-  public CacheEntry put(HashKey hashKey,
+  public CacheEntry put(FileCacheKeyEntry keyEntry,
 			InputStream is,
-			long idleTimeout,
-			CacheConfig config)
+			CacheConfig config,
+			long idleTimeout)
     throws IOException
   {
     return null;
@@ -238,9 +314,18 @@ public class FileCacheManager extends DistributedCacheManager
    */
   public boolean remove(HashKey key)
   {
-    long timeout = 60000L;
-    
-    CacheMapEntry oldEntry = _entryCache.get(key);
+    CacheKeyEntry keyEntry = getKey(key);
+
+    return false;
+  }
+  
+  /**
+   * Sets a cache entry
+   */
+  public boolean remove(FileCacheKeyEntry keyEntry, CacheConfig config)
+  {
+    HashKey key = keyEntry.getKeyHash();
+    CacheMapEntry oldEntry = loadLocalEntry(keyEntry);
 
     HashKey oldValueHash
       = oldEntry != null ? oldEntry.getValueHashKey() : null;
@@ -270,7 +355,7 @@ public class FileCacheManager extends DistributedCacheManager
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
 
-    if (! _entryCache.compareAndPut(oldEntry, key, entry)) {
+    if (! keyEntry.compareAndSet(oldEntry, entry)) {
       log.fine(this + " entry remove failed due to timing conflict"
 	       + " (key=" + key + ")");
       
@@ -282,6 +367,7 @@ public class FileCacheManager extends DistributedCacheManager
 	       + "(key=" + key + ")");
     }
     else {
+      long timeout = 60000;
       if (_cacheMapBacking.updateSave(key, null, timeout, version)) {
       }
       else {
@@ -293,23 +379,30 @@ public class FileCacheManager extends DistributedCacheManager
     return oldValueHash != null;
   }
   
-  CacheMapEntry getLocalEntry(HashKey key, long localReadTimeout)
+  CacheKeyEntry getLocalEntry(HashKey key)
   {
-    CacheMapEntry entry = _entryCache.get(key);
+    CacheKeyEntry keyEntry = getKey(key);
 
-    if (entry == null) {
-      entry = _cacheMapBacking.load(key);
+    CacheMapEntry valueEntry = keyEntry.getEntry();
+    
+    if (valueEntry != null) {
+      long idleTimeout = valueEntry.getIdleTimeout();
+      long updateTime = valueEntry.getLastUpdateTime();
 
-      if (entry == null)
-	return null;
+      long now = Alarm.getCurrentTime();
 
-      CacheMapEntry oldEntry = _entryCache.putIfNew(key, entry);
+      if (idleTimeout < CacheConfig.TIME_INFINITY
+	  && updateTime + valueEntry.getIdleWindow() < now) {
+	/* XXX:
+	CacheMapEntry newEntry
+	  = new CacheMapEntry(valueEntry, idleTimeout, now);
 
-      if (entry.getVersion() < oldEntry.getVersion())
-	entry = oldEntry;
+	saveUpdateTime(keyEntry, newEntry);
+	*/
+      }
     }
-
-    return entry;
+    
+    return keyEntry;
   }
 
   protected HashKey writeData(HashKey oldValueHash,
