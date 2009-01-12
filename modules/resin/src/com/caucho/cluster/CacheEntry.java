@@ -58,4 +58,19 @@ public interface CacheEntry<V>
    * Returns the item version.
    */
   public long getVersion();
+
+  /**
+   * Returns the idle timeout
+   */
+  public long getIdleTimeout();
+
+  /**
+   * Returns the lease timeout
+   */
+  public long getLeaseTimeout();
+
+  /**
+   * Returns the lease owner
+   */
+  public int getLeaseOwner();
 }

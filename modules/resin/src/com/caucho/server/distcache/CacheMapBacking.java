@@ -148,16 +148,17 @@ public class CacheMapBacking implements AlarmListener {
   private void init()
     throws Exception
   {
-    _loadQuery = ("SELECT value,flags,server_version,item_version,expire_timeout,idle_timeout,local_read_timeout,update_time"
+    _loadQuery = ("SELECT value,flags,server_version,item_version,expire_timeout,idle_timeout,lease_timeout,local_read_timeout,update_time"
 		  + " FROM " + _tableName
 		  + " WHERE id=?");
 
     _insertQuery = ("INSERT into " + _tableName
 		    + " (id,value,flags,"
 		    + "  item_version,server_version,"
-		    + "  expire_timeout,idle_timeout,local_read_timeout,"
+		    + "  expire_timeout,idle_timeout,"
+		    + "  lease_timeout,local_read_timeout,"
 		    + "  update_time)"
-		    + " VALUES (?,?,?,?,?,?,?,?,?)");
+		    + " VALUES (?,?,?,?,?,?,?,?,?,?)");
 
     _updateSaveQuery
       = ("UPDATE " + _tableName
@@ -208,7 +209,8 @@ public class CacheMapBacking implements AlarmListener {
       
       try {
 	String sql = ("SELECT id, value, flags,"
-		      + "     expire_timeout, idle_timeout, local_read_timeout,"
+		      + "     expire_timeout, idle_timeout,"
+		      + "     lease_timeout, local_read_timeout,"
 		      + "     update_time,"
 		      + "     server_version, item_version"
                       + " FROM " + _tableName + " WHERE 1=0");
@@ -234,6 +236,7 @@ public class CacheMapBacking implements AlarmListener {
                     + "  value BINARY(32),\n"
 		    + "  expire_timeout BIGINT,\n"
 		    + "  idle_timeout BIGINT,\n"
+		    + "  lease_timeout BIGINT,\n"
 		    + "  local_read_timeout BIGINT,\n"
 		    + "  update_time BIGINT,\n"
 		    + "  item_version BIGINT,\n"
@@ -386,14 +389,16 @@ public class CacheMapBacking implements AlarmListener {
 	long itemVersion = rs.getLong(4);
 	long expireTimeout = rs.getLong(5);
 	long idleTimeout = rs.getLong(6);
-	long localReadTimeout = rs.getLong(7);
-	long updateTime = rs.getLong(8);
+	long leaseTimeout = rs.getLong(7);
+	long localReadTimeout = rs.getLong(8);
+	long updateTime = rs.getLong(9);
 	long accessTime = Alarm.getExactTime();
 
 	HashKey valueHash = hash != null ? new HashKey(hash) : null;
 
 	return new CacheMapEntry(valueHash, null, flags, itemVersion,
-				 expireTimeout, idleTimeout, localReadTimeout,
+				 expireTimeout, idleTimeout,
+				 leaseTimeout, localReadTimeout,
 				 accessTime, updateTime,
 				 serverVersion == _serverVersion);
       }
@@ -421,6 +426,7 @@ public class CacheMapBacking implements AlarmListener {
 			long version,
 			long expireTimeout,
 			long idleTimeout,
+			long leaseTimeout,
 			long localReadTimeout)
   {
     CacheMapConnection conn = null;
@@ -439,8 +445,9 @@ public class CacheMapBacking implements AlarmListener {
       stmt.setLong(5, _serverVersion);
       stmt.setLong(6, expireTimeout);
       stmt.setLong(7, idleTimeout);
-      stmt.setLong(8, localReadTimeout);
-      stmt.setLong(9, Alarm.getCurrentTime());
+      stmt.setLong(8, leaseTimeout);
+      stmt.setLong(9, localReadTimeout);
+      stmt.setLong(10, Alarm.getCurrentTime());
 
       int count = stmt.executeUpdate();
         

@@ -85,7 +85,7 @@ abstract public class DistributedCacheManager
   /**
    * Gets a cache entry
    */
-  abstract public CacheEntry getEntry(HashKey hashKey, CacheConfig config);
+  // abstract public CacheEntry getEntry(HashKey hashKey, CacheConfig config);
 
   /**
    * Gets a cache entry

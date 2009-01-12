@@ -38,13 +38,19 @@ public class Hex {
    */
   public static String toHex(byte []bytes)
   {
-    int len = bytes.length;
-
+    return toHex(bytes, 0, bytes.length);
+  }
+  
+  /**
+   * Convert bytes to hex
+   */
+  public static String toHex(byte []bytes, int offset, int len)
+  {
     StringBuilder sb = new StringBuilder();
 
     for (int i = 0; i < len; i++) {
-      int d1 = (bytes[i] >> 4) & 0xf;
-      int d2 = (bytes[i]) & 0xf;
+      int d1 = (bytes[offset + i] >> 4) & 0xf;
+      int d2 = (bytes[offset + i]) & 0xf;
 
       if (d1 < 10)
 	sb.append((char) ('0' + d1));

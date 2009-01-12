@@ -204,6 +204,33 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
   }
 
   /**
+   * The lease timeout is the time a server can use the local version
+   * if it owns it, before a timeout.
+   */
+  public long getLeaseTimeout()
+  {
+    return _config.getLeaseTimeout();
+  }
+
+  /**
+   * The lease timeout is the time a server can use the local version
+   * if it owns it, before a timeout.
+   */
+  public void setLeaseTimeout(Period period)
+  {
+    setLeaseTimeoutMillis(period.getPeriod());
+  }
+
+  /**
+   * The lease timeout is the time a server can use the local version
+   * if it owns it, before a timeout.
+   */
+  public void setLeaseTimeoutMillis(long timeout)
+  {
+    _config.setLeaseTimeout(timeout);
+  }
+
+  /**
    * The local read timeout sets how long a local copy of
    * a cache item can be reused before checking with the master copy.
    *
@@ -337,7 +364,7 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
       _entryCache.put(key, entry);
     }
 
-    return entry.getValueEntry();
+    return entry.getEntry(_config);
   }
   
   /**

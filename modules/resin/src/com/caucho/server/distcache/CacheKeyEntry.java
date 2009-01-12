@@ -98,34 +98,6 @@ public class CacheKeyEntry {
   }
 
   /**
-   * Conditionally starts an update of a cache item, allowing only a
-   * single thread to update the data.
-   *
-   * @return true if the thread is allowed to update
-   */
-  public final boolean startReadUpdate()
-  {
-    return _isReadUpdate.compareAndSet(false, true);
-  }
-
-  /**
-   * Completes an update of a cache item.
-   */
-  public final void finishReadUpdate()
-  {
-    _isReadUpdate.set(false);
-  }
-
-  /**
-   * Sets the current value.
-   */
-  public final boolean compareAndSet(CacheMapEntry oldEntry,
-				     CacheMapEntry entry)
-  {
-    return _entryRef.compareAndSet(oldEntry, entry);
-  }
-
-  /**
    * Peeks the current value without checking the backing store.
    */
   public Object peek()
@@ -151,15 +123,15 @@ public class CacheKeyEntry {
   }
 
   /**
-   * Fills the value with a stream
+   * Returns the current value.
    */
-  public CacheEntry<Object> getValueEntry()
+  public CacheMapEntry getEntry(CacheConfig config)
   {
     return null;
   }
 
   /**
-   * Sets the current value
+   * Sets the value by an input stream
    */
   public Object put(Object value, CacheConfig config)
   {
@@ -181,6 +153,34 @@ public class CacheKeyEntry {
   public boolean remove(CacheConfig config)
   {
     return false;
+  }
+
+  /**
+   * Conditionally starts an update of a cache item, allowing only a
+   * single thread to update the data.
+   *
+   * @return true if the thread is allowed to update
+   */
+  public final boolean startReadUpdate()
+  {
+    return _isReadUpdate.compareAndSet(false, true);
+  }
+
+  /**
+   * Completes an update of a cache item.
+   */
+  public final void finishReadUpdate()
+  {
+    _isReadUpdate.set(false);
+  }
+
+  /**
+   * Sets the current value.
+   */
+  public final boolean compareAndSet(CacheMapEntry oldEntry,
+				     CacheMapEntry entry)
+  {
+    return _entryRef.compareAndSet(oldEntry, entry);
   }
   
   public String toString()

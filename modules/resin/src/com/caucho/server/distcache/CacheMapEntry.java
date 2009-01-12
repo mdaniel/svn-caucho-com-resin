@@ -39,21 +39,26 @@ import java.lang.ref.SoftReference;
  */
 public final class CacheMapEntry implements CacheEntry {
   public static final CacheMapEntry NULL
-    = new CacheMapEntry(null, null, 0, 0, 0, 0, 0, 0, 0, false);
+    = new CacheMapEntry(null, null, 0, 0, 0, 0, 0, 0, 0, 0, false);
   
   private final HashKey _valueHash;
   private final int _flags;
   private final long _version;
   
-  private final long _localReadTimeout;
-  private final long _idleTimeout;
   private final long _expireTimeout;
-  
+  private final long _idleTimeout;
+  private final long _leaseTimeout;
+  private final long _localReadTimeout;
+
   private final long _lastUpdateTime;
 
   private final boolean _isServerVersionValid;
   
   private volatile long _lastAccessTime;
+  
+  private int _leaseOwner = -1;
+  private long _leaseExpireTime;
+  
   private long _lastRemoteAccessTime;
   
   private SoftReference _valueRef;
@@ -64,6 +69,7 @@ public final class CacheMapEntry implements CacheEntry {
 		       long version,
 		       long expireTimeout,
 		       long idleTimeout,
+		       long leaseTimeout,
 		       long localReadTimeout,
 		       long lastAccessTime,
 		       long lastUpdateTime,
@@ -73,9 +79,10 @@ public final class CacheMapEntry implements CacheEntry {
     _flags = flags;
     _version = version;
     
-    _localReadTimeout = localReadTimeout;
-    _idleTimeout = idleTimeout;
     _expireTimeout = expireTimeout;
+    _idleTimeout = idleTimeout;
+    _leaseTimeout = leaseTimeout;
+    _localReadTimeout = localReadTimeout;
     
     _lastRemoteAccessTime = lastAccessTime;
     _lastUpdateTime = lastUpdateTime;
@@ -98,12 +105,16 @@ public final class CacheMapEntry implements CacheEntry {
     
     _expireTimeout = oldEntry.getExpireTimeout();
     _idleTimeout = idleTimeout;
+    _leaseTimeout = oldEntry.getLeaseTimeout();
     _localReadTimeout = oldEntry.getLocalReadTimeout();
     
     _lastRemoteAccessTime = lastUpdateTime;
     _lastUpdateTime = lastUpdateTime;
     
     _lastAccessTime = Alarm.getExactTime();
+
+    _leaseExpireTime = oldEntry._leaseExpireTime;
+    _leaseOwner = oldEntry._leaseOwner;
 
     _isServerVersionValid = oldEntry.isServerVersionValid();
 
@@ -161,15 +172,49 @@ public final class CacheMapEntry implements CacheEntry {
     return _lastUpdateTime + _expireTimeout;
   }
 
-  public final boolean isLocalReadExpired(long now)
+  public final boolean isLocalReadValid(int serverIndex, long now)
   {
-    return (_lastAccessTime + _localReadTimeout < now
-	    || ! _isServerVersionValid);
+    if (! _isServerVersionValid)
+      return false;
+    else if (now <= _lastAccessTime + _localReadTimeout)
+      return true;
+    else if (_leaseOwner == serverIndex && now <= _leaseExpireTime)
+      return true;
+    else
+      return false;
   }
 
   public final boolean isExpired(long now)
   {
     return (_lastUpdateTime + _expireTimeout < now);
+  }
+
+  public final boolean isLeaseExpired(long now)
+  {
+    System.out.println(this + " EXPIRE: " + _leaseExpireTime + " " + (now - _leaseExpireTime));
+    
+    return (_leaseExpireTime <= now);
+  }
+
+  /**
+   * Returns the lease owner
+   */
+  public final int getLeaseOwner()
+  {
+    return _leaseOwner;
+  }
+
+  /**
+   * Sets the owner
+   */
+  public final void setLeaseOwner(int leaseOwner, long now)
+  {
+    _leaseOwner = leaseOwner;
+
+    if (leaseOwner > 2)
+      _leaseExpireTime = now + _leaseTimeout;
+    else
+      _leaseExpireTime = 0;
   }
 
   public int getFlags()
@@ -213,6 +258,14 @@ public final class CacheMapEntry implements CacheEntry {
   public long getLocalReadTimeout()
   {
     return _localReadTimeout;
+  }
+
+  /**
+   * Returns the timeout for a lease of the cache entry
+   */
+  public long getLeaseTimeout()
+  {
+    return _leaseTimeout;
   }
 
   public long getVersion()
@@ -268,8 +321,9 @@ public final class CacheMapEntry implements CacheEntry {
   {
     return (getClass().getSimpleName()
 	    + "[value=" + _valueHash
-	    + ",flags=" + Integer.toHexString(_flags)
+	    + ",flags=0x" + Integer.toHexString(_flags)
 	    + ",version=" + _version
+	    + ",lease=" + _leaseOwner
 	    + "]");
   }
 }

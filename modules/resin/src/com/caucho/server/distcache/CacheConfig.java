@@ -52,13 +52,15 @@ public class CacheConfig
   
   private int _flags = (FLAG_BACKUP
 			| FLAG_TRIPLICATE);
+
+  private long _expireTimeout = TIME_INFINITY;
+  
+  private long _idleTimeout = TIME_INFINITY;
   
   private long _localReadTimeout
     = Alarm.isTest() ? -1 : 10L; // 10ms default timeout, except for QA
-  
-  private long _idleTimeout = TIME_INFINITY;
 
-  private long _expireTimeout = TIME_INFINITY;
+  private long _leaseTimeout = 5 * 60 * 1000; // 5 min lease timeout
 
   private CacheLoader _cacheLoader;
 
@@ -186,6 +188,24 @@ public class CacheConfig
   public long getIdleCheckWindow()
   {
     return _idleTimeout / 4;
+  }
+
+  /**
+   * The lease timeout is the time a server can use the local version
+   * if it owns it, before a timeout.
+   */
+  public long getLeaseTimeout()
+  {
+    return _leaseTimeout;
+  }
+
+  /**
+   * The lease timeout is the time a server can use the local version
+   * if it owns it, before a timeout.
+   */
+  public void setLeaseTimeout(long timeout)
+  {
+    _leaseTimeout = timeout;
   }
 
   /**
