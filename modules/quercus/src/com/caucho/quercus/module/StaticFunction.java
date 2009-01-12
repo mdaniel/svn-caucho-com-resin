@@ -93,6 +93,12 @@ public class StaticFunction extends JavaInvoker {
 
     return name;
   }
+  
+  @Override
+  public String getDeclaringClassName()
+  {
+    return _method.getDeclaringClass().getSimpleName();
+  }
 
   /**
    * Returns the owning module object.

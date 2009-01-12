@@ -63,6 +63,12 @@ public class JavaConstructor extends JavaInvoker {
     _constructor = cons;
     _argLength = cons.getParameterTypes().length;
   }
+  
+  @Override
+  public String getDeclaringClassName()
+  {
+    return getName();
+  }
 
   private static String getName(Constructor cons)
   {

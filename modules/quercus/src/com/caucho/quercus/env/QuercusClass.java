@@ -989,7 +989,7 @@ public class QuercusClass {
       try {
         return _fieldGet.callMethod(env, qThis, name);
       } finally {
-        env.popFieldGet(_className, name);
+        env.popFieldGet();
       }
     }
     else

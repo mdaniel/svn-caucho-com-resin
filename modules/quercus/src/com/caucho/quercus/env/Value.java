@@ -82,6 +82,17 @@ abstract public class Value implements java.io.Serializable
   }
   
   /**
+   * Returns true for an implementation of a class
+   */
+  final public boolean isA(Value value)
+  {
+    if (value.isObject())
+      return isA(value.getClassName());
+    else
+      return isA(value.toString());
+  }
+  
+  /**
    * Checks if 'this' is a valid protected call for 'className'
    */
   public void checkProtected(Env env, String className)

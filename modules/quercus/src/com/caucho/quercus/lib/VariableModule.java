@@ -72,7 +72,22 @@ public class VariableModule extends AbstractQuercusModule {
    */
   public static Value constant(Env env, String name)
   {
-    return env.getConstant(name);
+    if (name == null) {
+      env.warning(L.l("null passed as constant name"));
+      return NullValue.NULL;
+    }
+    
+    int i = name.indexOf("::");
+    
+    if (i > 0) {
+      String cls = name.substring(0, i);
+      
+      name = name.substring(i + 2);
+      
+      return env.getClass(cls).getConstant(env, name);
+    }
+    else
+      return env.getConstant(name);
   }
 
   /**

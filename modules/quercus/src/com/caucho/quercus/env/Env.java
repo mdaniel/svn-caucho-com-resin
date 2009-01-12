@@ -2601,18 +2601,15 @@ public class Env {
     if (_fieldGetList.contains(entry))
       return false;
     else {
-      _fieldGetList.add(entry);
+      _fieldGetList.push(entry);
       
       return true;
     }
   }
   
-  public void popFieldGet(String className, StringValue fieldName)
+  public void popFieldGet()
   {
-    FieldGetEntry entry = new FieldGetEntry(className, fieldName);
-    
-    if (_fieldGetList.size() > 0)
-      _fieldGetList.removeLast();
+    _fieldGetList.pop();
   }
   
   /*
