@@ -251,7 +251,7 @@ public class FileCacheManager extends DistributedCacheManager
 			? oldEntry.getIdleTimeout()
 			: config.getIdleTimeout());
     long localReadTimeout = config.getLocalReadTimeout();
-    long ownerReadTimeout = config.getOwnerReadTimeout();
+    long leaseTimeout = config.getLeaseTimeout();
     
     long accessTime = Alarm.getExactTime();
     long updateTime = Alarm.getExactTime();
@@ -260,8 +260,8 @@ public class FileCacheManager extends DistributedCacheManager
 					    flags, version,
 					    expireTimeout,
 					    idleTimeout,
+					    leaseTimeout,
 					    localReadTimeout,
-					    ownerReadTimeout,
 					    accessTime, updateTime,
 					    true);
 
@@ -280,8 +280,8 @@ public class FileCacheManager extends DistributedCacheManager
 				  flags, version,
 				  expireTimeout,
 				  idleTimeout,
-				  localReadTimeout,
-				  ownerReadTimeout)) {
+				  leaseTimeout,
+				  localReadTimeout)) {
       }
       else {
 	log.fine(this + " db insert failed due to timing conflict"

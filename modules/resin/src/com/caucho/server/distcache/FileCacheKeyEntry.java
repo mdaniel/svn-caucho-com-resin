@@ -85,11 +85,13 @@ public class FileCacheKeyEntry extends CacheKeyEntry {
   /**
    * Fills the value with a stream
    */
+  /*
   @Override
   public CacheEntry<Object> getValueEntry()
   {
     return null;
   }
+  */
 
   /**
    * Sets the current value
