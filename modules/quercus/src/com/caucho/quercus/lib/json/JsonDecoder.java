@@ -91,12 +91,13 @@ class JsonDecoder {
         char ch3 = _str.charAt(_offset + 2);
         char ch4 = _str.charAt(_offset + 3);
         
-        if (ch2 == 'r' || ch2 == 'R'
-            && ch3 == 'u' || ch3 == 'U'
-            && ch4 == 'e' || ch4 == 'E') {
+        if ((ch2 == 'r' || ch2 == 'R')
+            && (ch3 == 'u' || ch3 == 'U')
+            && (ch4 == 'e' || ch4 == 'E')) {
           if (_offset + 4 < _len
               && (ch = _str.charAt(_offset + 4)) != ','
               && ch != ']'
+              && ch != '}'
               && ! Character.isWhitespace(ch))
             return errorReturn(env, "malformed 'true'");
           else {
@@ -122,13 +123,14 @@ class JsonDecoder {
         char ch4 = _str.charAt(_offset + 3);
         char ch5 = _str.charAt(_offset + 4);
         
-        if (ch2 == 'a' || ch2 == 'A'
-            && ch3 == 'l' || ch3 == 'L'
-            && ch4 == 's' || ch4 == 'S'
-            && ch5 == 'e' || ch5 == 'E') {
+        if ((ch2 == 'a' || ch2 == 'A')
+            && (ch3 == 'l' || ch3 == 'L')
+            && (ch4 == 's' || ch4 == 'S')
+            && (ch5 == 'e' || ch5 == 'E')) {
           if (_offset + 5 < _len
               && (ch = _str.charAt(_offset + 5)) != ','
               && ch != ']'
+              && ch != '}'
               && ! Character.isWhitespace(ch))
             return errorReturn(env, "malformed 'false'");
           else {
@@ -153,12 +155,13 @@ class JsonDecoder {
         char ch3 = _str.charAt(_offset + 2);
         char ch4 = _str.charAt(_offset + 3);
         
-        if (ch2 == 'u' || ch2 == 'U'
-            && ch3 == 'l' || ch3 == 'L'
-            && ch4 == 'l' || ch4 == 'L') {
+        if ((ch2 == 'u' || ch2 == 'U')
+            && (ch3 == 'l' || ch3 == 'L')
+            && (ch4 == 'l' || ch4 == 'L')) {
           if (_offset + 4 < _len
               && (ch = _str.charAt(_offset + 4)) != ','
               && ch != ']'
+              && ch != '}'
               && ! Character.isWhitespace(ch))
             return errorReturn(env, "malformed 'null'");
           else {
