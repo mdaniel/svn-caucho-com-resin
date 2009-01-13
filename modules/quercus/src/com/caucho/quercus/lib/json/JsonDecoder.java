@@ -51,7 +51,7 @@ class JsonDecoder {
 
     _isAssociative = assoc;
 
-    Value val = jsonDecodeImpl(env);
+    Value val = jsonDecodeImpl(env, true);
 
     // Should now be at end of string or have only white spaces left.
     skipWhitespace();
@@ -67,7 +67,7 @@ class JsonDecoder {
    *
    * @return decoded PHP value 
    */
-  private Value jsonDecodeImpl(Env env)
+  private Value jsonDecodeImpl(Env env, boolean isTop)
   {
     skipWhitespace();
     
@@ -78,42 +78,98 @@ class JsonDecoder {
 
     switch (ch) {
     case '"': { // "string"
-      return decodeString(env);
+      _offset++;
+      return decodeString(env, true);
     }
-      
-    case 't': { // true
-      if (_offset + 3 < _len
-          && _str.charAt(_offset + 1) == 'r'
-          && _str.charAt(_offset + 2) == 'u'
-          && _str.charAt(_offset + 3) == 'e') {
-        _offset += 4;
-        return BooleanValue.TRUE;
+
+    case 'T':
+    case 't': {
+      if (isTop && _offset + 4 < _len)
+        return decodeString(env, false);
+      else if (_offset + 3 < _len) {
+        char ch2 = _str.charAt(_offset + 1);
+        char ch3 = _str.charAt(_offset + 2);
+        char ch4 = _str.charAt(_offset + 3);
+        
+        if (ch2 == 'r' || ch2 == 'R'
+            && ch3 == 'u' || ch3 == 'U'
+            && ch4 == 'e' || ch4 == 'E') {
+          if (_offset + 4 < _len
+              && (ch = _str.charAt(_offset + 4)) != ','
+              && ch != ']'
+              && ! Character.isWhitespace(ch))
+            return errorReturn(env, "malformed 'true'");
+          else {
+            _offset += 4;
+            return BooleanValue.TRUE;
+          }
+        }
       }
+      
+      if (isTop)
+        return decodeString(env, false);
       else
         return errorReturn(env, "expected 'true'");
     }
 
+    case 'F':
     case 'f': { // false
-      if (_offset + 4 < _len
-          && _str.charAt(_offset + 1) == 'a'
-          && _str.charAt(_offset + 2) == 'l'
-          && _str.charAt(_offset + 3) == 's'
-          && _str.charAt(_offset + 4) == 'e') {
-        _offset += 5;
-        return BooleanValue.FALSE;
+      if (isTop && _offset + 5 < _len)
+        return decodeString(env, false);
+      else if (_offset + 4 < _len) {
+        char ch2 = _str.charAt(_offset + 1);
+        char ch3 = _str.charAt(_offset + 2);
+        char ch4 = _str.charAt(_offset + 3);
+        char ch5 = _str.charAt(_offset + 4);
+        
+        if (ch2 == 'a' || ch2 == 'A'
+            && ch3 == 'l' || ch3 == 'L'
+            && ch4 == 's' || ch4 == 'S'
+            && ch5 == 'e' || ch5 == 'E') {
+          if (_offset + 5 < _len
+              && (ch = _str.charAt(_offset + 5)) != ','
+              && ch != ']'
+              && ! Character.isWhitespace(ch))
+            return errorReturn(env, "malformed 'false'");
+          else {
+            _offset += 5;
+            return BooleanValue.FALSE;
+          }
+        }
       }
+      
+      if (isTop)
+        return decodeString(env, false);
       else
         return errorReturn(env, "expected 'false'");
     }
-      
-    case 'n': { // null
-      if (_offset + 3 < _len
-          && _str.charAt(_offset + 1) == 'u'
-          && _str.charAt(_offset + 2) == 'l'
-          && _str.charAt(_offset + 3) == 'l') {
-        _offset += 4;
-        return NullValue.NULL;
+    
+    case 'N':
+    case 'n': {
+      if (isTop && _offset + 4 < _len)
+        return decodeString(env, false);
+      else if (_offset + 3 < _len) {
+        char ch2 = _str.charAt(_offset + 1);
+        char ch3 = _str.charAt(_offset + 2);
+        char ch4 = _str.charAt(_offset + 3);
+        
+        if (ch2 == 'u' || ch2 == 'U'
+            && ch3 == 'l' || ch3 == 'L'
+            && ch4 == 'l' || ch4 == 'L') {
+          if (_offset + 4 < _len
+              && (ch = _str.charAt(_offset + 4)) != ','
+              && ch != ']'
+              && ! Character.isWhitespace(ch))
+            return errorReturn(env, "malformed 'null'");
+          else {
+            _offset += 4;
+            return NullValue.NULL;
+          }
+        }
       }
+      
+      if (isTop)
+        return decodeString(env, false);
       else
         return errorReturn(env, "expected 'null'");
     }
@@ -240,7 +296,7 @@ class JsonDecoder {
         break;
       }
 
-      array.append(jsonDecodeImpl(env));
+      array.append(jsonDecodeImpl(env, false));
 
       skipWhitespace();
 
@@ -285,14 +341,14 @@ class JsonDecoder {
         break;
       }
 
-      Value name = jsonDecodeImpl(env);
+      Value name = jsonDecodeImpl(env, false);
 
       skipWhitespace();
 
       if (_offset >= _len || _str.charAt(_offset++) != ':')
         return errorReturn(env, "expected ':'");
 
-      array.append(name, jsonDecodeImpl(env));
+      array.append(name, jsonDecodeImpl(env, false));
 
       skipWhitespace();
 
@@ -328,14 +384,14 @@ class JsonDecoder {
         break;
       }
       
-      Value name = jsonDecodeImpl(env);
+      Value name = jsonDecodeImpl(env, false);
 
       skipWhitespace();
 
       if (_len <= _offset || _str.charAt(_offset++) != ':')
         return errorReturn(env, "expected ':'");
 
-      object.putField(env, name.toString(), jsonDecodeImpl(env));
+      object.putField(env, name.toString(), jsonDecodeImpl(env, false));
 
       skipWhitespace();
 
@@ -357,11 +413,9 @@ class JsonDecoder {
   /**
    * Returns a PHP string.
    */
-  private Value decodeString(Env env)
+  private Value decodeString(Env env, boolean isQuoted)
   {
     StringValue sb = env.createUnicodeBuilder();
-
-    _offset++;
     
     while (_offset < _len) {
       char ch = _str.charAt(_offset++);
@@ -441,7 +495,10 @@ class JsonDecoder {
       }
     }
 
-    return errorReturn(env, "error decoding string");
+    if (isQuoted)
+      return errorReturn(env, "error decoding string");
+    else
+      return sb;
   }
 
   private Value errorReturn(Env env)
@@ -451,19 +508,9 @@ class JsonDecoder {
 
   private Value errorReturn(Env env, String message)
   {
-    int start;
-    int end;
-
-    if (_offset < _len) {
-      start = _offset - 1;
-      end = _offset;
-    }
-    else {
-      start = _len - 1;
-      end = _len;
-    }
-
-    String token = _str.substring(start, end).toString();
+    int end = Math.min(_len, _offset + 1);
+    
+    String token = _str.substring(_offset, end).toString();
 
     if (message != null)
       env.warning(L.l("error parsing '{0}': {1}", token, message));
