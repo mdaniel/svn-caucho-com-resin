@@ -39,6 +39,7 @@ import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.connection.HttpServletRequestImpl;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.resin.Resin;
@@ -528,6 +529,8 @@ public class ErrorPageManager {
       return ((AbstractHttpRequest) request).getServletName();
     else if (request instanceof ServletRequestWrapper)
       return getServletName(((ServletRequestWrapper) request).getRequest());
+    else if (request instanceof CauchoRequest)
+      return getServletName(((CauchoRequest) request).getAbstractHttpRequest());
     else {
       return null;
     }
@@ -537,7 +540,7 @@ public class ErrorPageManager {
    * Sends an HTTP error to the browser.
    *
    * @param code the HTTP error code
-   * @param value a string message
+   * @param message a string message
    */
   public void sendError(CauchoRequest request,
                         CauchoResponse response,
@@ -555,7 +558,7 @@ public class ErrorPageManager {
    * Sends an HTTP error to the browser.
    *
    * @param code the HTTP error code
-   * @param value a string message
+   * @param message a string message
    */
   public void sendErrorImpl(CauchoRequest request,
 			    CauchoResponse response,
