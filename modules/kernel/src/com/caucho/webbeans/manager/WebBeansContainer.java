@@ -1649,6 +1649,8 @@ public class WebBeansContainer
     
     _wbWebBeans.init();
 
+    fireEvent(this, new AnnotationLiteral<Initialized>() {});
+
     startServices();
   }
 

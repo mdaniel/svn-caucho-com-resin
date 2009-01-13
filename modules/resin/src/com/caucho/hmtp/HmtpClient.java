@@ -29,10 +29,13 @@
 
 package com.caucho.hmtp;
 
+import com.caucho.bam.AbstractBamConnection;
 import com.caucho.bam.BamQueryCallback;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamConnection;
+import com.caucho.bam.BamException;
+import com.caucho.bam.BamRemoteConnectionFailedException;
 import com.caucho.hessian.io.*;
 
 import java.io.*;
@@ -44,7 +47,7 @@ import java.util.logging.*;
 /**
  * HMTP client protocol
  */
-public class HmtpClient implements BamConnection {
+public class HmtpClient extends AbstractBamConnection {
   private static final Logger log
     = Logger.getLogger(HmtpClient.class.getName());
 
@@ -62,24 +65,17 @@ public class HmtpClient implements BamConnection {
   protected InputStream _is;
   protected OutputStream _os;
 
-  private ClientBrokerStream _clientStream;
+  private BamException _connException;
+  
+  private ClientBrokerStream _brokerStream;
   private String _jid;
 
   private BamStream _streamHandler;
-
-  private HashMap<Long,QueryItem> _queryMap
-    = new HashMap<Long,QueryItem>();
-    
-  private long _qId;
-
-  private boolean _isFinest;
 
   public HmtpClient(String url)
   {
     _url = url;
     parseURL(url);
-
-    _isFinest = log.isLoggable(Level.FINEST);
   }
 
   protected void parseURL(String url)
@@ -127,53 +123,127 @@ public class HmtpClient implements BamConnection {
   }
 
   public void connect()
-    throws IOException
   {
     if (_s != null)
       throw new IllegalStateException(this + " is already connected");
 
-    openSocket(_host, _port);
+    try {
+      openSocket(_host, _port);
 
-    print(_os, "POST " + _path + " HTTP/1.1\r\n");
-    print(_os, "Host: " + _to + ":" + _port + "\r\n");
-    print(_os, "Upgrade: HMTP/0.9\r\n");
-    print(_os, "Content-Length: 0\r\n");
-    print(_os, "\r\n");
-    _os.flush();
+      // http upgrade
 
-    String result;
+      print(_os, "CONNECT " + _path + " HTTP/1.1\r\n");
+      print(_os, "Host: " + _to + ":" + _port + "\r\n");
+      print(_os, "Upgrade: HMTP/0.9\r\n");
+      print(_os, "Connection: Upgrade\r\n");
+      print(_os, "Content-Length: 0\r\n");
+      print(_os, "\r\n");
+      _os.flush();
 
-    result = readLine(_is);
+      String status = readLine(_is);
 
-    if (result.startsWith("HTTP/1.1 101")) {
-      if (log.isLoggable(Level.FINE))
-	log.fine(this + " " + result);
-      
-      while (! (result = readLine(_is)).trim().equals("")) {
+      String header;
+	
+      while (! (header = readLine(_is)).trim().equals("")) {
 	if (log.isLoggable(Level.FINE))
-	  log.fine(this + " " + result);
+	  log.fine(this + " " + header);
       }
 
-      _clientStream = new ClientBrokerStream(_is, _os);
+      if (status.startsWith("HTTP/1.1 101")) {
+	if (log.isLoggable(Level.FINE))
+	  log.fine(this + " " + status);
 
-      executeThread(new ClientAgentStream(this));
-    }
-    else {
-      if (log.isLoggable(Level.FINE))
-	log.fine(this + " " + result);
+	_brokerStream = new ClientBrokerStream(_is, _os);
+
+	executeThread(new ClientAgentStream(this));
+      }
+      else {
+	_os.close();
+
+	StringBuilder text = new StringBuilder();
+	try {
+	  int ch;
+	  while ((ch = _is.read()) >= 0)
+	    text.append((char) ch);
+	} catch (Exception e) {
+	  if (log.isLoggable(Level.FINER))
+	    log.log(Level.FINER, e.toString(), e);
+	}
+	
+	if (log.isLoggable(Level.FINE))
+	  log.fine(this + " " + status + "\n" + text);
       
-      throw new IOException("Unexpected result: " + result);
+	throw new BamRemoteConnectionFailedException("Failed to upgrade to HMTP\n" + status + "\n\n" + text);
+      }
+    } catch (BamException e) {
+      _connException = e;
+
+      throw _connException;
+    } catch (IOException e) {
+      _connException = new BamException(e);
+
+      throw _connException;
     }
   }
-
-  protected void executeThread (Runnable r)
+      
+  /**
+   * Login to the server
+   */
+  public void login(String uid, String password)
   {
-    Thread thread = new Thread(r);
-    thread.setDaemon(true);
-    thread.start();
-  }
-      
+    try {
+      AuthResult result;
+      result = (AuthResult) querySet("", new AuthQuery(uid, password));
 
+      _jid = result.getJid();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  Hessian2StreamingInput getStreamingInput()
+  {
+    return _brokerStream.getStreamingInput();
+  }
+
+  /**
+   * Returns the jid
+   */
+  public String getJid()
+  {
+    return _jid;
+  }
+
+  /**
+   * Returns the current stream to the broker, throwing an exception if
+   * it's unavailable
+   */
+  public BamStream getBrokerStream()
+  {
+    BamStream stream = _brokerStream;
+
+    if (stream != null)
+      return stream;
+    else if (_connException != null)
+      throw _connException;
+    else
+      throw new BamRemoteConnectionFailedException(_url + " connection has been closed");
+  }
+
+  public void flush()
+    throws IOException
+  {
+    ClientBrokerStream stream = _brokerStream;
+
+    if (stream != null)
+      stream.flush();
+  }
+
+  public boolean isClosed()
+  {
+    return _brokerStream == null;
+  }
+  
   protected void openSocket(String host, int port)
     throws IOException
   {
@@ -184,6 +254,17 @@ public class HmtpClient implements BamConnection {
     
     _os = new BufferedOutputStream(os);
     _is = new BufferedInputStream(is);
+  }
+
+  /**
+   * Spawns the thread to handle the inbound packets
+   */
+  protected void executeThread (Runnable r)
+  {
+    Thread thread = new Thread(r);
+    thread.setName("hmtp-reader-" + _host + "-" + _port);
+    thread.setDaemon(true);
+    thread.start();
   }
 
   protected void print(OutputStream os, String s)
@@ -208,351 +289,6 @@ public class HmtpClient implements BamConnection {
     return sb.toString();
   }
 
-  /**
-   * Login to the server
-   */
-  public void login(String uid, String password)
-  {
-    try {
-      AuthResult result;
-      result = (AuthResult) querySet("", new AuthQuery(uid, password));
-
-      _jid = result.getJid();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  Hessian2StreamingInput getStreamingInput()
-  {
-    return _clientStream.getStreamingInput();
-  }
-
-  /**
-   * Returns the jid
-   */
-  public String getJid()
-  {
-    return _jid;
-  }
-
-  /**
-   * Sets the message handler
-   */
-  public void setStreamHandler(BamStream handler)
-  {
-    _streamHandler = handler;
-  }
-
-  /**
-   * Gets the message listener
-   */
-  public BamStream getStreamHandler()
-  {
-    return _streamHandler;
-  }
-
-  /**
-   * Returns the client stream
-   */
-  public BamStream getBrokerStream()
-  {
-    return _clientStream;
-  }
-
-  /**
-   * Sends a message to a given jid
-   */
-  public void message(String to, Serializable value)
-  {
-    BamStream stream = _clientStream;
-
-    if (stream == null)
-      throw new IllegalStateException("connection is closed");
-    
-    stream.message(to, null, value);
-  }
-
-  /**
-   * Sends a presence packet to the server
-   */
-  public void presence(Serializable data)
-  {
-    BamStream stream = _clientStream;
-
-    if (stream == null)
-      throw new IllegalStateException("connection is closed");
-    
-    _clientStream.presence(null, null, data);
-  }
-
-  /**
-   * Sends a presence packet to the server
-   */
-  public void presence(String to, Serializable data)
-  {
-    BamStream stream = _clientStream;
-
-    if (stream == null)
-      throw new IllegalStateException("connection is closed");
-    
-    _clientStream.presence(to, null, data);
-  }
-
-  /**
-   * Sends a presence packet to the server
-   */
-  public void presenceUnavailable(Serializable data)
-  {
-    BamStream stream = _clientStream;
-
-    if (stream == null)
-      throw new IllegalStateException("connection is closed");
-    
-    _clientStream.presenceUnavailable(null, null, data);
-  }
-
-  /**
-   * Sends a presence packet to the server
-   */
-  public void presenceUnavailable(String to, Serializable data)
-  {
-    BamStream stream = _clientStream;
-
-    if (stream == null)
-      throw new IllegalStateException("connection is closed");
-    
-    _clientStream.presenceUnavailable(to, null, data);
-  }
-
-  /**
-   * Sends a presence probe packet to the server
-   */
-  public void presenceProbe(String to, Serializable data)
-  {
-    BamStream stream = _clientStream;
-
-    if (stream == null)
-      throw new IllegalStateException("connection is closed");
-    
-    _clientStream.presenceProbe(to, null, data);
-  }
-
-  /**
-   * Sends a presence subscribe packet to the server
-   */
-  public void presenceSubscribe(String to, Serializable data)
-  {
-    BamStream stream = _clientStream;
-
-    if (stream == null)
-      throw new IllegalStateException("connection is closed");
-    
-    _clientStream.presenceSubscribe(to, null, data);
-  }
-
-  /**
-   * Sends a presence subscribed packet to the server
-   */
-  public void presenceSubscribed(String to, Serializable data)
-  {
-    BamStream stream = _clientStream;
-
-    if (stream == null)
-      throw new IllegalStateException("connection is closed");
-    
-    _clientStream.presenceSubscribed(to, null, data);
-  }
-
-  /**
-   * Sends a presence subscribe packet to the server
-   */
-  public void presenceUnsubscribe(String to, Serializable data)
-  {
-    BamStream stream = _clientStream;
-
-    if (stream == null)
-      throw new IllegalStateException("connection is closed");
-    
-    _clientStream.presenceUnsubscribe(to, null, data);
-  }
-
-  /**
-   * Sends a presence subscribed packet to the server
-   */
-  public void presenceUnsubscribed(String to, Serializable data)
-  {
-    BamStream stream = _clientStream;
-
-    if (stream == null)
-      throw new IllegalStateException("connection is closed");
-    
-    _clientStream.presenceUnsubscribed(to, null, data);
-  }
-
-  /**
-   * Sends a presence packet to the server
-   */
-  public void presenceError(String to, Serializable data, BamError error)
-  {
-    BamStream stream = _clientStream;
-
-    if (stream == null)
-      throw new IllegalStateException("connection is closed");
-    
-    _clientStream.presenceError(to, null, data, error);
-  }
-
-  /**
-   * Sends a query-set packet to the server
-   */
-  public Serializable queryGet(String to,
-			       Serializable query)
-  {
-    WaitQueryCallback callback = new WaitQueryCallback();
-
-    queryGet(to, query, callback);
-
-    if (callback.waitFor())
-      return callback.getResult();
-    else
-      throw new RuntimeException(String.valueOf(callback.getError()));
-  }
-
-  /**
-   * Sends a query-get packet to the server
-   */
-  public void queryGet(String to,
-		       Serializable value,
-		       BamQueryCallback callback)
-  {
-    long id;
-      
-    synchronized (this) {
-      id = _qId++;
-
-      _queryMap.put(id, new QueryItem(id, callback));
-    }
-
-    BamStream stream = _clientStream;
-
-    if (stream == null)
-      throw new IllegalStateException("connection is closed");
-    
-    _clientStream.queryGet(id, to, null, value);
-  }
-
-  /**
-   * Sends a query-set packet to the server
-   */
-  public Serializable querySet(String to,
-			       Serializable query)
-  {
-    WaitQueryCallback callback = new WaitQueryCallback();
-
-    querySet(to, query, callback);
-
-    if (callback.waitFor())
-      return callback.getResult();
-    else
-      throw new RuntimeException("No valid return for " + query
-				 + "\n" + callback.getError());
-  }
-
-  /**
-   * Sends a query-set packet to the server
-   */
-  public void querySet(String to,
-		       Serializable value,
-		       BamQueryCallback callback)
-  {
-    long id;
-      
-    synchronized (this) {
-      id = _qId++;
-
-      _queryMap.put(id, new QueryItem(id, callback));
-    }
-
-    BamStream stream = _clientStream;
-
-    if (stream == null)
-      throw new IllegalStateException("connection is closed");
-    
-    stream.querySet(id, to, null, value);
-  }
-
-  /**
-   * Callback for the response
-   */
-  void onQueryResult(long id, String to, String from, Serializable value)
-  {
-    QueryItem item = null;
-    
-    synchronized (this) {
-      item = _queryMap.remove(id);
-    }
-
-    if (item != null)
-      item.onQueryResult(to, from, value);
-  }
-
-  /**
-   * Callback for the response
-   */
-  void onQueryError(long id,
-		    String to,
-		    String from,
-		    Serializable value,
-		    BamError error)
-  {
-    QueryItem item = null;
-    
-    synchronized (this) {
-      item = _queryMap.remove(id);
-    }
-
-    if (item != null)
-      item.onQueryError(to, from, value, error);
-  }
-
-  /**
-   * Low-level query response
-   */
-  /*
-  public void queryResult(long id, String to, Serializable value)
-    throws IOException
-  {
-    _clientStream.queryResult(id, to, null, value);
-  }
-  */
-
-  /**
-   * Low-level query error
-   */
-  /*
-  public void queryError(long id,
-			 String to,
-			 Serializable value,
-			 BamError error)
-  {
-    _clientStream.queryError(id, to, null, value, error);
-  }
-  */
-
-  public void flush()
-    throws IOException
-  {
-    ClientBrokerStream stream = _clientStream;
-
-    if (stream != null)
-      stream.flush();
-  }
-
-  public boolean isClosed()
-  {
-    return _clientStream == null;
-  }
 
   public void close()
   {
@@ -572,8 +308,8 @@ public class HmtpClient implements BamConnection {
 	is = _is;
 	_is = null;
 
-	stream = _clientStream;
-	_clientStream = null;
+	stream = _brokerStream;
+	_brokerStream = null;
 	
 	os = _os;
 	_os = null;

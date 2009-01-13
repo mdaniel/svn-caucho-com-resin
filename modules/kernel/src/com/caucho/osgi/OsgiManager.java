@@ -349,10 +349,8 @@ public class OsgiManager
     synchronized (_exportMap) {
       loader = _publishedExportMap.get(packageName);
 
-      try {
+      if (loader != null)
 	return loader.getResource(name);
-      } catch (Exception e) {
-      }
     }
     
     return null;

@@ -324,22 +324,27 @@ public class BamSkeleton<C>
   {
     Method messageHandler = _messageHandlers.get(value.getClass());
 
-    if (messageHandler == null) {
+    if (messageHandler != null) {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(target + " message(unknown) " + value + " to=" + to + " from=" + from);
+	log.finer(target + " message " + value + " {from:" + from + ", to:" + to + "}");
       }
-
-      return;
+      
+      try {
+	messageHandler.invoke(target, to, from, value);
+      }
+      catch (IllegalAccessException e) {
+	// XXX: error
+	log.log(Level.FINE, e.toString(), e);
+      }
+      catch (InvocationTargetException e) {
+	// XXX: error
+	log.log(Level.FINE, e.toString(), e);
+      }
     }
-    
-    try {
-      messageHandler.invoke(target, to, from, value);
-    }
-    catch (IllegalAccessException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-    catch (InvocationTargetException e) {
-      log.log(Level.FINE, e.toString(), e);
+    else {
+      if (log.isLoggable(Level.FINE)) {
+	log.fine(target + " unknown message " + value + " {from: " + from + " to: " + to + "}");
+      }
     }
   }
 
@@ -367,18 +372,24 @@ public class BamSkeleton<C>
   {
     Method queryHandler = _queryGetHandlers.get(value.getClass());
 
-    if (queryHandler == null)
-      return false;
-    
-    try {
-      return (Boolean) queryHandler.invoke(target, id, to, from, value);
+    if (queryHandler != null) {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(target + " queryGet " + value + " {id:" + id + ", from:" + from + " to: " + to + "}");
+      }
+      
+      try {
+	return (Boolean) queryHandler.invoke(target, id, to, from, value);
+      }
+      catch (IllegalAccessException e) {
+	log.log(Level.FINE, e.toString(), e);
+	return false;
+      }
+      catch (InvocationTargetException e) {
+	log.log(Level.FINE, e.toString(), e);
+	return false;
+      }
     }
-    catch (IllegalAccessException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return false;
-    }
-    catch (InvocationTargetException e) {
-      log.log(Level.FINE, e.toString(), e);
+    else {
       return false;
     }
   }
@@ -390,6 +401,10 @@ public class BamSkeleton<C>
 
     if (queryHandler == null)
       return false;
+    
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(target + " querySet " + value + " {id:" + id + ", from:" + from + " to: " + to + "}");
+    }
     
     try {
       return (Boolean) queryHandler.invoke(target, id, to, from, value);
@@ -415,6 +430,10 @@ public class BamSkeleton<C>
     if (queryHandler == null)
       return false;
     
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(target + " queryResult " + value + " {id:" + id + ", from:" + from + " to: " + to + "}");
+    }
+      
     try {
       queryHandler.invoke(target, id, to, from, value);
     }
@@ -435,6 +454,10 @@ public class BamSkeleton<C>
 
     if (queryErrorHandler == null)
       return false;
+    
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(target + " queryError " + value + " {id:" + id + ", from:" + from + " to: " + to + "}");
+    }
     
     try {
       queryErrorHandler.invoke(target, id, to, from, value, error);

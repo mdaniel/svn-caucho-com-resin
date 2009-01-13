@@ -191,8 +191,6 @@ public final class CacheMapEntry implements CacheEntry {
 
   public final boolean isLeaseExpired(long now)
   {
-    System.out.println(this + " EXPIRE: " + _leaseExpireTime + " " + (now - _leaseExpireTime));
-    
     return (_leaseExpireTime <= now);
   }
 
@@ -209,12 +207,16 @@ public final class CacheMapEntry implements CacheEntry {
    */
   public final void setLeaseOwner(int leaseOwner, long now)
   {
-    _leaseOwner = leaseOwner;
+    if (leaseOwner > 2) {
+      _leaseOwner = leaseOwner;
 
-    if (leaseOwner > 2)
       _leaseExpireTime = now + _leaseTimeout;
-    else
+    }
+    else {
+      _leaseOwner = -1;
+	
       _leaseExpireTime = 0;
+    }
   }
 
   public int getFlags()

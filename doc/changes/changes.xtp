@@ -13,6 +13,8 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>quercus: static variables related to late static binding (#3225, rep by koreth)</li>
+<li>osgi: getLocalResource needs to check for loader null (#3236, rep by koreth)</li>
 <li>jsf: f:view not bound when using jsf:ri with xml syntax (#3102, rep by alex)</li>
 <li>(2008-01-05) quercus: instanceof issues with Exceptions (#3209, rep by koreth)</li>
 <li>quercus: regexp handling of /[\p{Arabic}]/ (#3131, rep by koreth)</li>

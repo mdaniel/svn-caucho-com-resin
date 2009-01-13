@@ -38,6 +38,7 @@ import com.caucho.bam.AbstractBamService;
 import com.caucho.bam.BamStream;
 import com.caucho.hemp.*;
 import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.server.resin.*;
 import com.caucho.util.*;
 import com.caucho.hemp.BamServiceBinding;
@@ -61,6 +62,9 @@ public class HempBroker implements BamBroker, BamStream
   private static final Logger log
     = Logger.getLogger(HempBroker.class.getName());
   private static final L10N L = new L10N(HempBroker.class);
+
+  private static final EnvironmentLocal<HempBroker> _localBroker
+    = new EnvironmentLocal<HempBroker>();
 
   private HempBrokerManager _manager;
   private DomainManager _domainManager;
@@ -91,6 +95,9 @@ public class HempBroker implements BamBroker, BamStream
     _domainManager = DomainManager.getCurrent();
     
     _domainService = new HempDomainService(this, "");
+
+    if (_localBroker.getLevel() == null)
+      _localBroker.set(this);
   }
 
   public HempBroker(String domain)
@@ -102,6 +109,14 @@ public class HempBroker implements BamBroker, BamStream
     _managerJid = domain;
 
     _domainService = new HempDomainService(this, domain);
+
+    if (_localBroker.getLevel() == null)
+      _localBroker.set(this);
+  }
+
+  public static HempBroker getCurrent()
+  {
+    return _localBroker.get();
   }
 
   /**
@@ -454,6 +469,8 @@ public class HempBroker implements BamBroker, BamStream
    */
   public void message(String to, String from, Serializable value)
   {
+    Alarm.yieldIfTest();
+    
     BamStream stream = findAgent(to);
 
     if (stream != null)
@@ -472,6 +489,8 @@ public class HempBroker implements BamBroker, BamStream
 			       Serializable value,
 			       BamError error)
   {
+    Alarm.yieldIfTest();
+    
     BamStream stream = findAgent(to);
 
     if (stream != null)
@@ -488,6 +507,8 @@ public class HempBroker implements BamBroker, BamStream
   public boolean queryGet(long id, String to, String from,
 			      Serializable query)
   {
+    Alarm.yieldIfTest();
+    
     BamStream stream = findAgent(to);
 
     if (stream != null) {
@@ -543,6 +564,8 @@ public class HempBroker implements BamBroker, BamStream
    */
   public boolean querySet(long id, String to, String from, Serializable query)
   {
+    Alarm.yieldIfTest();
+    
     BamStream stream = findAgent(to);
 
     if (stream == null) {
@@ -588,6 +611,8 @@ public class HempBroker implements BamBroker, BamStream
    */
   public void queryResult(long id, String to, String from, Serializable value)
   {
+    Alarm.yieldIfTest();
+    
     BamStream stream = findAgent(to);
 
     if (stream != null)
@@ -605,6 +630,8 @@ public class HempBroker implements BamBroker, BamStream
 			 Serializable query,
 			 BamError error)
   {
+    Alarm.yieldIfTest();
+    
     BamStream stream = findAgent(to);
 
     if (stream != null)

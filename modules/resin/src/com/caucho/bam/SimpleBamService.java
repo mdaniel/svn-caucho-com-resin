@@ -133,18 +133,26 @@ public class SimpleBamService extends AbstractBamService
   public boolean queryGet(long id,
 			    String to,
 			    String from,
-			    Serializable value)
+			    Serializable query)
   {
-    if (_skeleton.dispatchQueryGet(this, id, to, from, value)) {
+    if (_skeleton.dispatchQueryGet(this, id, to, from, query)) {
       return true;
     }
     else {
-      if (log.isLoggable(Level.FINE))
-	log.fine(this + " queryGet(value=" + logValue(value)
-		 + " id=" + id + " to=" + to
-		 + " from=" + from + ")");
+      String msg = (this + " unknown queryGet "
+		    + query + " for jid=" + getJid());
+    
+      BamError error = new BamError(BamError.TYPE_CANCEL,
+				    BamError.FEATURE_NOT_IMPLEMENTED,
+				    msg);
+				    
+      getBrokerStream().queryError(id, from, to, query, error);
+      
+      if (log.isLoggable(Level.FINE)) {
+	log.fine(msg);
+      }
 
-      return false;
+      return true;
     }
   }
   
@@ -157,7 +165,7 @@ public class SimpleBamService extends AbstractBamService
       return true;
     }
     else {
-      String msg = (this + ": unknown querySet feature "
+      String msg = (this + " unknown querySet feature "
 		    + query + " for jid=" + getJid());
     
       BamError error = new BamError(BamError.TYPE_CANCEL,
@@ -181,8 +189,8 @@ public class SimpleBamService extends AbstractBamService
   {
     if (! _skeleton.dispatchQueryResult(this, id, to, from, value)) {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(this + " queryResult id=" + id + " to=" + to
-		  + " from=" + from + " value=" + logValue(value));
+	log.finer(this + " queryResult " + value + " {id:" + id
+		  + ", to:" + to + ", from:" + from + "}");
       }
 
       ProxyBamConnection bamConnection = _bamConnection.get();
@@ -199,16 +207,15 @@ public class SimpleBamService extends AbstractBamService
 			 BamError error)
   {
     if (! _skeleton.dispatchQueryError(this, id, to, from, value, error)) {
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(this + " queryError " + error + " " + value + " {id:" + id
+		  + ", from:" + from + "}");
+      }
+	
       ProxyBamConnection bamConnection = _bamConnection.get();
 
       if (bamConnection != null)
 	bamConnection.onQueryError(id, to, from, value, error);
-      else {
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " queryError " + error + " id=" + id + " to=" + to
-		    + " from=" + from + " value=" + logValue(value));
-	}
-      }
     }
   }
   

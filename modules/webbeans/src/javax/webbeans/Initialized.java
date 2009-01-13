@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,36 +19,27 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package javax.webbeans;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * General BAM exception
+ * The @Initialized event on startup
  */
-public class BamException extends RuntimeException {
-  public BamException()
-  {
-  }
-
-  public BamException(String msg)
-  {
-    super(msg);
-  }
-
-  public BamException(Throwable e)
-  {
-    super(e);
-  }
-
-  public BamException(String msg, Throwable e)
-  {
-    super(msg, e);
-  }
+@BindingType
+@Documented  
+@Retention(RUNTIME)
+@Target({FIELD, PARAMETER})
+public @interface Initialized {
 }

@@ -245,6 +245,16 @@ public class Alarm implements ThreadTask {
   {
     return _testTime > 0;
   }
+
+  /**
+   * Yield if in test mode to maintain ordering
+   */
+  public static void yieldIfTest()
+  {
+    if (_testTime > 0) {
+      Thread.yield();
+    }
+  }
   
   /**
    * Returns the wake time of this alarm.

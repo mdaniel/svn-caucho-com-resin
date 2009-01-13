@@ -452,7 +452,9 @@ public class ServerPool
    */
   public final boolean isActive()
   {
-    return _state == ST_ACTIVE;
+    int state = _state;
+    
+    return state == ST_ACTIVE || state == ST_STARTING || state == ST_WARMUP;
     /*
     switch (_state) {
     case ST_ACTIVE:

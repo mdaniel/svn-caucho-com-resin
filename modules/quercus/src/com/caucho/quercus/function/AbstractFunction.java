@@ -57,6 +57,8 @@ abstract public class AbstractFunction {
   protected Visibility _visibility = Visibility.PUBLIC;
   protected String _declaringClassName;
   
+  protected QuercusClass _bindingClass;
+  
   protected int _parseIndex;
   
   public AbstractFunction()
@@ -81,7 +83,7 @@ abstract public class AbstractFunction {
   }
   
   /*
-   * Returns the name of the implementing class.
+   * Returns the name of class lexically declaring the method
    */
   public String getDeclaringClassName()
   {
@@ -91,6 +93,22 @@ abstract public class AbstractFunction {
   public void setDeclaringClassName(String name)
   {
     _declaringClassName = name;
+  }
+  
+  /*
+   * Returns the name of class lexically binding the method
+   */
+  public String getBindingClassName()
+  {
+    if (_bindingClass != null)
+      return _bindingClass.getName();
+    else
+      return "<none>";
+  }
+  
+  public void setBindingClass(QuercusClass qcl)
+  {
+    _bindingClass = qcl;
   }
   
   /*

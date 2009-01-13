@@ -1694,6 +1694,8 @@ public class Server extends ProtocolDispatchServer
 
       startClusterPort();
 
+      notifyStart();
+
       if (! _isBindPortsAtEnd) {
         bindPorts();
 	startPorts();
@@ -2133,6 +2135,13 @@ public class Server extends ProtocolDispatchServer
       
       super.stop();
     }
+  }
+
+  /**
+   * Notifications to cluster servers that we've started
+   */
+  protected void notifyStart()
+  {
   }
 
   /**

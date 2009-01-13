@@ -36,7 +36,8 @@ import com.caucho.quercus.lib.VariableModule;
 /**
  * Parent of PHP exceptions
  */
-public class QuercusLanguageException extends QuercusException {
+public class QuercusLanguageException extends QuercusException
+{
   private static final StringValue FILE = new StringBuilderValue("file");
   private static final StringValue LINE = new StringBuilderValue("line");
   private static final StringValue MESSAGE

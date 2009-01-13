@@ -97,8 +97,11 @@ import javax.naming.NamingException;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.webbeans.*;
+import javax.webbeans.manager.Bean;
+import javax.webbeans.manager.Manager;
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1872,6 +1875,10 @@ public class WebApp extends ServletContextImpl
 	log.log(Level.FINEST, e.toString(), e);
       }
 
+      _webBeans.addObserver(new WebBeansObserver(),
+			    Manager.class,
+			    new AnnotationLiteral<Initialized>() {});
+
       WebAppController parent = null;
       if (_controller != null)
         parent = _controller.getParent();
@@ -2975,6 +2982,32 @@ public class WebApp extends ServletContextImpl
   public String toString()
   {
     return "WebApp[" + getId() + "]";
+  }
+
+  /**
+   * WebBeans callbacks
+   */
+  class WebBeansObserver implements Observer<Manager> {
+    public void notify(Manager manager)
+    {
+      // search for servlets
+
+      for (Bean bean : manager.resolveByType(Servlet.class, new CurrentLiteral())) {
+	if (bean instanceof CauchoBean) {
+	  CauchoBean cBean = (CauchoBean) bean;
+	  
+	  for (Annotation ann : cBean.getAnnotations()) {
+	    if (ann.annotationType().equals(javax.servlet.http.annotation.Servlet.class)) {
+	      //ServletConfigImpl config
+	      //  = new ServletConfigImpl(this, ann, manager.getInstance(bean));
+
+	      // _servletManager.addServlet(config);
+	      
+	    }
+	  }
+	}
+      }
+    }
   }
 
   static class FilterChainEntry {

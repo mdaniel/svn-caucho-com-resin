@@ -296,6 +296,9 @@ public class SimpleBean extends ComponentImpl
       }
 
       if (best == null)
+	best = cl.getConstructor(new Class[0]);
+
+      if (best == null)
 	throw new ConfigException(L.l("{0}: no constructor found",
 				      cl.getName()));
 

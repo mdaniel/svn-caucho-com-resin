@@ -20,35 +20,24 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package javax.servlet.http.annotation;
 
-/**
- * General BAM exception
- */
-public class BamException extends RuntimeException {
-  public BamException()
-  {
-  }
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-  public BamException(String msg)
-  {
-    super(msg);
-  }
+import javax.servlet.DispatcherType;
 
-  public BamException(Throwable e)
-  {
-    super(e);
-  }
-
-  public BamException(String msg, Throwable e)
-  {
-    super(msg, e);
-  }
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Servlet {
+  public String urlPattern();
 }

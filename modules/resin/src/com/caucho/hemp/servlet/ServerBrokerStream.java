@@ -64,7 +64,7 @@ public class ServerBrokerStream
 
   private String _jid;
 
-  ServerBrokerStream(BamBroker broker, ReadStream rs, WriteStream ws)
+  public ServerBrokerStream(BamBroker broker, ReadStream rs, WriteStream ws)
   {
     _broker = broker;
 

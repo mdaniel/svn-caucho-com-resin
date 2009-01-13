@@ -265,10 +265,12 @@ public class CustomBeanConfig {
       metaType = StartupType.class;
     }
 
-    // ioc/0l00
+    // ioc/0l00, server/6600
+    /*
     if (metaType == null)
       throw new ConfigException(L.l("'{0}' is an invalid annotation.  An annotation must be a @BindingType, @ScopeType, @DeploymentType, @InterceptorBindingType",
 				    ann));
+    */
   }
 
   public void addMethod(CustomBeanMethodConfig methodConfig)

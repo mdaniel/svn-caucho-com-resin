@@ -31,6 +31,7 @@ package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
@@ -61,12 +62,12 @@ public class StaticStatement extends Statement {
       if (_staticName == null)
         _staticName = env.createStaticName();
 
-      Value qThis = env.getThis();
+      QuercusClass cls = env.getCallingClass();
 
       String staticName = _staticName;
       
-      if (qThis != null)
-	staticName = qThis.getClassName() + "::" + staticName;
+      if (cls != null)
+	staticName = cls.getName() + "::" + staticName;
 
       Var var = env.getStaticVar(staticName);
       
