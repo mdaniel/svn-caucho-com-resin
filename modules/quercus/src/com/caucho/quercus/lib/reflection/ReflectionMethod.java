@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.reflection;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ArrayValue;
@@ -40,10 +41,13 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.Arg;
 import com.caucho.quercus.program.ClassDef;
+import com.caucho.util.L10N;
 
 public class ReflectionMethod extends ReflectionFunctionAbstract
   implements Reflector
 {
+  private static final L10N L = new L10N(ReflectionMethod.class);
+  
   public static final int IS_STATIC = 1;
   public static final int IS_ABSTRACT = 2;
   public static final int IS_FINAL = 4;
@@ -160,6 +164,9 @@ public class ReflectionMethod extends ReflectionFunctionAbstract
   public ReflectionClass getDeclaringClass(Env env)
   {
     String clsName = getFunction().getDeclaringClassName();
+    
+    if (clsName == null)
+      throw new QuercusException(L.l("class name is null {0}: {1}", getFunction(), getFunction().getClass()));
 
     return new ReflectionClass(env, clsName);
   }

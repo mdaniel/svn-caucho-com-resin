@@ -86,6 +86,27 @@ abstract public class ArrayValue extends Value {
   {
     return getSize() != 0;
   }
+  
+  /**
+   * Converts to a long.
+   */
+  @Override
+  public long toLong()
+  {
+    if (getSize() > 0)
+      return 1;
+    else
+      return 0;
+  }
+  
+  /**
+   * Converts to a double.
+   */
+  @Override
+  public double toDouble()
+  {
+    return toLong();
+  }
 
   /**
    * Converts to a string.
