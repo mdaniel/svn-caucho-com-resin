@@ -31,7 +31,7 @@ package com.caucho.server.session;
 
 import com.caucho.cluster.ByteStreamCache;
 import com.caucho.cluster.AbstractCache;
-import com.caucho.cluster.TriplicateByteStreamCache;
+import com.caucho.cluster.TriadByteStreamCache;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
@@ -215,7 +215,7 @@ public final class SessionManager implements AlarmListener
       isSaveTriplicate = store.isSaveTriplicate();
     }
 
-    AbstractCache sessionCache = new TriplicateByteStreamCache();
+    AbstractCache sessionCache = new TriadByteStreamCache();
 
     sessionCache.setName("resin:session");
     sessionCache.setBackup(isSaveBackup);

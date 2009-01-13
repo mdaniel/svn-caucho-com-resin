@@ -32,6 +32,6 @@ package com.caucho.cluster;
 /**
  * Cache which stores consistent copies on the triad.
  */
-public class TriplicateByteStreamCache extends AbstractCache
+public class TriadByteStreamCache extends AbstractCache
 {
 }

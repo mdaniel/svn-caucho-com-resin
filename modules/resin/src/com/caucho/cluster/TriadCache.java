@@ -32,13 +32,13 @@ package com.caucho.cluster;
 /**
  * Cache which stores consistent copies on the triad.
  */
-public class TriplicateCache extends AbstractCache
+public class TriadCache extends AbstractCache
 {
-  public TriplicateCache()
+  public TriadCache()
   {
   }
   
-  public TriplicateCache(String name)
+  public TriadCache(String name)
   {
     setName(name);
   }

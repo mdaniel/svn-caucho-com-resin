@@ -31,7 +31,7 @@ package com.caucho.server.cluster;
 
 import com.caucho.bam.BamBroker;
 import com.caucho.bam.BamStream;
-import com.caucho.cluster.TriplicateCache;
+import com.caucho.cluster.TriadCache;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ConfigProgram;
@@ -196,7 +196,7 @@ public class Server extends ProtocolDispatchServer
   private StoreManager _clusterStore;
 
   // reliable system store
-  private TriplicateCache _systemStore;
+  private TriadCache _systemStore;
 
   // stats
 
@@ -1521,11 +1521,11 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the reliable system store
    */
-  public TriplicateCache getSystemStore()
+  public TriadCache getSystemStore()
   {
     synchronized (this) {
       if (_systemStore == null) {
-	_systemStore = new TriplicateCache();
+	_systemStore = new TriadCache();
 	_systemStore.setName("resin:system");
 	// XXX: need to set reliability values
       }
