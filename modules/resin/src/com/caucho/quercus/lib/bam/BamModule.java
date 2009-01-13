@@ -169,7 +169,7 @@ public class BamModule extends AbstractQuercusModule
     try {
       client.connect();
     }
-    catch (IOException e) {
+    catch (Exception e) {
       return env.error("Unable to connect to BAM server", e);
     }
 
