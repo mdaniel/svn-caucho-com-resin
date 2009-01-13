@@ -5158,10 +5158,14 @@ public class Env {
    */
   public Value warning(String msg)
   {
-    if (log.isLoggable(Level.FINER)) {
-      QuercusException e = new QuercusException(msg);
+    int mask = 1 << B_WARNING;
+    
+    if ((_errorMask & mask) != 0) {
+      if (log.isLoggable(Level.FINER)) {
+        QuercusException e = new QuercusException(msg);
 
-      log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
+      }
     }
 
     return error(B_WARNING, "", msg + getFunctionLocation());
@@ -5430,8 +5434,11 @@ public class Env {
 
       log.log(Level.FINEST, e.toString(), e);
     }
-    else if (log.isLoggable(Level.FINE))
-      log.fine(this + " " + loc + msg);
+    
+    if ((_errorMask & mask) != 0) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(this + " " + loc + msg);
+    }
 
     if (code >= 0 && code < _errorHandlers.length
 	&& _errorHandlers[code] != null) {
