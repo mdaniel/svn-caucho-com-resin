@@ -3119,8 +3119,6 @@ public class Env {
   public AbstractFunction createAnonymousFunction(String args, String code)
     throws IOException
   {
-    log.log(Level.FINE, code);
-
     if (_anonymousFunMap == null)
       _anonymousFunMap = new HashMap<String, AbstractFunction>();
 
@@ -4021,8 +4019,8 @@ public class Env {
   }
 
   public QuercusClass findClass(int id,
-				boolean useAutoload,
-				boolean useImport)
+                                boolean useAutoload,
+                                boolean useImport)
   {
     if (id < _qClass.length && _qClass[id] != null)
       return _qClass[id];
@@ -5176,10 +5174,14 @@ public class Env {
    */
   public Value warning(Location location, String msg)
   {
-    if (log.isLoggable(Level.FINER)) {
-      QuercusException e = new QuercusException(msg);
+    int mask = 1 << B_WARNING;
+    
+    if ((_errorMask & mask) != 0) {
+      if (log.isLoggable(Level.FINER)) {
+        QuercusException e = new QuercusException(msg);
 
-      log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
+      }
     }
 
     return error(B_WARNING, location, "", msg + getFunctionLocation());

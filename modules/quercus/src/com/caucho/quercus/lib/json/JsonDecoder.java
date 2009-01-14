@@ -77,7 +77,7 @@ class JsonDecoder {
     char ch = _str.charAt(_offset);
 
     switch (ch) {
-    case '"': { // "string"
+    case '"': {
       _offset++;
       return decodeString(env, true);
     }
