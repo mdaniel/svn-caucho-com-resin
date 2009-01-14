@@ -348,13 +348,20 @@ public class ReflectionClass
       return new ReflectionClass(parent);
   }
   
-  public boolean isSubclassOf(ReflectionClass cls)
+  public boolean isSubclassOf(Env env, Object obj)
   {
+    String clsName;
+    
+    if (obj instanceof ReflectionClass)
+      clsName = ((ReflectionClass) obj).getName();
+    else
+      clsName = obj.toString();
+
     // php/520p
-    if (_cls.getName().equals(cls.getName()))
+    if (_cls.getName().equals(clsName))
       return false;
     
-    return _cls.isA(cls.getName());
+    return _cls.isA(clsName);
   }
   
   public ArrayValue getStaticProperties(Env env)

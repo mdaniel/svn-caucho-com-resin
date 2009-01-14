@@ -141,26 +141,38 @@ public class MiscModule extends AbstractQuercusModule {
   /**
    * Escapes characters in a string.
    */
-  public static String escapeshellarg(String arg)
+  public static StringValue escapeshellarg(Env env, StringValue arg)
   {
-    StringBuilder sb = new StringBuilder();
+    boolean isWindows = Path.isWindows();
+    
+    char quote;
+    if (isWindows)
+      quote = '"';
+    else
+      quote = '\'';
+    
+    StringValue sb = env.createStringBuilder();
 
-    sb.append('\'');
+    sb.append(quote);
     
     int len = arg.length();
 
     for (int i = 0; i < len; i++) {
       char ch = arg.charAt(i);
 
-      if (ch == '\'')
-	sb.append("\\\'");
+      if (ch == quote) {
+        sb.append('\\');
+        sb.append(ch);
+      }
+      else if (ch == '%' && isWindows)
+        sb.append(' ');
       else
-	sb.append(ch);
+        sb.append(ch);
     }
 
-    sb.append('\'');
+    sb.append(quote);
 
-    return sb.toString();
+    return sb;
   }
 
   /**
