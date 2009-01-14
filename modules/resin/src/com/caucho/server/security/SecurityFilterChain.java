@@ -103,8 +103,8 @@ public class SecurityFilterChain extends AbstractFilterChain {
 	if (constraint.isPrivateCache())
 	  isPrivateCache = true;
 
-        if (! result.isFallthrough())
-          break;
+	if (! result.isFallthrough())
+	  break;
       }
     }
 

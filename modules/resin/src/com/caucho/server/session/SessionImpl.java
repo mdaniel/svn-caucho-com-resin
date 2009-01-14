@@ -936,9 +936,10 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     long now = Alarm.getCurrentTime();
 
-    // server/015k
-    if (_isInvalidating || _accessTime + getMaxInactiveInterval() < now) {
-      // || _clusterObject == null)
+    // server/015k, server/10g2
+    if (_isInvalidating
+	|| ! _manager.isPersistenceEnabled()
+	|| _accessTime + getMaxInactiveInterval() < now) {
       notifyDestroy();
     }
 

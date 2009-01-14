@@ -298,11 +298,11 @@ public abstract class AbstractLogin implements Login {
       }
 
       loginChallenge(request, response);
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       // server/12d5
-      
-      // XXX: better exception
-      throw new RuntimeException(e);
+      throw new LoginException(e);
     }
 
     return null;

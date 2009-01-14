@@ -1529,8 +1529,19 @@ public abstract class AbstractHttpRequest
 
     long now = Alarm.getCurrentTime();
 
-    SessionImpl session;
+    SessionImpl session
+      = manager.createSession(create, this, id, now, _isSessionIdFromCookie);
 
+    if (session != null
+	&& id != null
+	&& ! session.getId().equals(id)
+	&& manager.enableSessionCookies()) {
+      getResponse().setSessionId(session.getId());
+    }
+        
+    return session;
+
+    /*
     if (id != null && id.length() > 6) {
       // server/01t0
       session = manager.getSession(id, now, false, _isSessionIdFromCookie);
@@ -1573,6 +1584,7 @@ public abstract class AbstractHttpRequest
       getResponse().setSessionId(session.getId());
 
     return session;
+    */
   }
 
   /**

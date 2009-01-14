@@ -184,10 +184,9 @@ public final class SessionManager implements AlarmListener
   private Alarm _alarm;
 
   // statistics
-  private Object _statisticsLock = new Object();
-  private long _sessionCreateCount;
-  private long _sessionTimeoutCount;
-  private long _sessionInvalidateCount;
+  private volatile long _sessionCreateCount;
+  private volatile long _sessionTimeoutCount;
+  private volatile long _sessionInvalidateCount;
 
   /**
    * Creates and initializes a new session manager
@@ -1002,57 +1001,6 @@ public final class SessionManager implements AlarmListener
   }
 
   /**
-   * Create a new session.
-   *
-   * @param oldId the id passed to the request.  Reuse if possible.
-   * @param now the current date
-   * @param sessionGroup the srun index for this machine
-   */
-  public SessionImpl createSession(String oldId, long now,
-                                   HttpServletRequest request,
-				   boolean fromCookie)
-  {
-    if (_sessions == null) {
-      log.fine(this + " createSession called when sessionManager closed");
-      
-      return null;
-    }
-    
-    String id = oldId;
-
-    if (id == null || id.length() < 4
-        || ! reuseSessionId(fromCookie)) {
-      // server/0175
-      // || ! _objectManager.isInSessionGroup(id)
-      
-      id = createSessionId(request, true);
-    }
-
-    SessionImpl session = create(id, now, true);
-
-    if (session == null)
-      return null;
-
-    session.addUse();
-
-    synchronized (_statisticsLock) {
-      _sessionCreateCount++;
-    }
-
-    synchronized (session) {
-      if (_isPersistenceEnabled && id.equals(oldId))
-        load(session, now, true);
-      else
-	session.create(now, true);
-    }
-
-    // after load so a reset doesn't clear any setting
-    handleCreateListeners(session);
-    
-    return session;
-  }
-
-  /**
    * Creates a pseudo-random session id.  If there's an old id and the
    * group matches, then use it because different webApps on the
    * same matchine should use the same cookie.
@@ -1168,6 +1116,89 @@ public final class SessionManager implements AlarmListener
   }
 
   /**
+   * Finds a session in the session store, creating one if 'create' is true
+   *
+   * @param create if the session doesn't exist, create it
+   * @param requestId the session id from the request
+   * @param now the time in milliseconds
+   * @param fromCookie true if the session id comes from a cookie
+   *
+   * @return the cached session.
+   */
+  public SessionImpl createSession(boolean isCreate,
+				   HttpServletRequest request,
+				   String sessionId,
+				   long now,
+				   boolean fromCookie)
+  {
+    if (_sessions == null)
+      return null;
+
+    SessionImpl session = _sessions.get(sessionId);
+    
+    if (session != null && ! session.addUse()) {
+      session = null;
+    }
+
+    boolean isNew = false;
+    boolean killSession = false;
+
+    if (session == null
+	&& sessionId != null
+	&& _sessionStore != null
+	&& _sessionStore.getEntry(sessionId) != null) {
+      session = create(sessionId, now, isCreate);
+
+      if (! session.addUse())
+	session = null;
+      
+      isNew = true;
+    }
+
+    if (session != null) {
+      if (! session.load(isNew)) {
+	// if the load failed, then the session died out from underneath
+	session.reset(now);
+	isNew = true;
+      }
+      
+      if (isNew)
+	handleCreateListeners(session);
+      else
+	session.setAccess(now);
+
+      return session;
+    }
+
+    if (! isCreate)
+      return null;
+
+    if (sessionId == null || ! reuseSessionId(fromCookie)) {
+      sessionId = createSessionId(request, true);
+    }
+
+    session = new SessionImpl(this, sessionId, now);
+
+    // If another thread has created and stored a new session,
+    // putIfNew will return the old session
+    session = _sessions.putIfNew(sessionId, session);
+
+    if (! sessionId.equals(session.getId()))
+      throw new IllegalStateException(sessionId + " != " + session.getId());
+
+    if (! session.addUse())
+      throw new IllegalStateException(L.l("Can't use session for unknown reason"));
+
+    _sessionCreateCount++;
+
+    session.create(now, true);
+    
+    handleCreateListeners(session);
+    
+    return session;
+  }
+
+  /**
    * Returns a session from the session store, returning null if there's
    * no cached session.
    *
@@ -1208,6 +1239,7 @@ public final class SessionManager implements AlarmListener
 
       if (! session.addUse())
 	session = null;
+      
       isNew = true;
     }
 
@@ -1242,20 +1274,62 @@ public final class SessionManager implements AlarmListener
   }
 
   /**
+   * Create a new session.
+   *
+   * @param oldId the id passed to the request.  Reuse if possible.
+   * @param now the current date
+   * @param sessionGroup the srun index for this machine
+   */
+  public SessionImpl createSession(String oldId, long now,
+                                   HttpServletRequest request,
+				   boolean fromCookie)
+  {
+    if (_sessions == null) {
+      log.fine(this + " createSession called when sessionManager closed");
+      
+      return null;
+    }
+    
+    String id = oldId;
+
+    if (id == null
+	|| id.length() < 4
+        || ! reuseSessionId(fromCookie)) {
+      // server/0175
+      // || ! _objectManager.isInSessionGroup(id)
+      
+      id = createSessionId(request, true);
+    }
+
+    SessionImpl session = create(id, now, true);
+
+    if (session == null)
+      return null;
+
+    session.addUse();
+
+    _sessionCreateCount++;
+
+    synchronized (session) {
+      if (_isPersistenceEnabled && id.equals(oldId))
+        load(session, now, true);
+      else
+	session.create(now, true);
+    }
+
+    // after load so a reset doesn't clear any setting
+    handleCreateListeners(session);
+    
+    return session;
+  }
+
+  /**
    * Creates a session.  It's already been established that the
    * key does not currently have a session.
    */
   private SessionImpl create(String key, long now, boolean isCreate)
   {
     SessionImpl session = new SessionImpl(this, key, now);
-
-    /*
-    Store sessionStore = _sessionStore;
-    if (sessionStore != null) {
-      ClusterObject clusterObject = sessionStore.createClusterObject(key);
-      session.setClusterObject(clusterObject);
-    }
-     */
 
     // If another thread has created and stored a new session,
     // putIfNew will return the old session
@@ -1373,9 +1447,7 @@ public final class SessionManager implements AlarmListener
 	}
       }
       
-      synchronized (_statisticsLock) {
-	_sessionTimeoutCount += _sessionList.size();
-      }
+      _sessionTimeoutCount += _sessionList.size();
 
       for (int i = 0; i < _sessionList.size(); i++) {
 	SessionImpl session = _sessionList.get(i);
@@ -1412,7 +1484,6 @@ public final class SessionManager implements AlarmListener
     
     ArrayList<SessionImpl> list = new ArrayList<SessionImpl>();
     
-    boolean isError = false;
     // XXX: messy way of dealing with saveOnlyOnShutdown
     synchronized (_sessions) {
       _sessionIter = _sessions.values(_sessionIter);
@@ -1427,6 +1498,7 @@ public final class SessionManager implements AlarmListener
       // _sessions.clear();
     }
 
+    boolean isError = false;
     for (int i = list.size() - 1; i >= 0; i--) {
       SessionImpl session = list.get(i);
       
