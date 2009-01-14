@@ -68,6 +68,8 @@ class WrapperPage extends Page {
   public void caucho_init(ServletConfig config)
     throws ServletException
   {
+    super.init(config);
+    
     if (_childPage != null)
       _childPage.caucho_init(config);
     else
