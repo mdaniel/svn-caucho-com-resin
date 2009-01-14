@@ -347,6 +347,17 @@ public final class Var extends Value
   }
 
   /**
+   * Converts to a java String object.
+   */
+  public String toJavaString()
+  {
+    if (_value.isObject())
+      return toString(Env.getInstance()).toString();
+    else
+      return toString();
+  }
+  
+  /**
    * Converts to an object.
    */
   @Override

@@ -1442,6 +1442,14 @@ public class ObjectExtValue extends ObjectValue
   }
   
   /**
+   * Converts to a java String object.
+   */
+  public String toJavaString()
+  {
+    return toString(Env.getInstance()).toString();
+  }
+  
+  /**
    * Converts to a string.
    * @param env
    */
@@ -1460,7 +1468,6 @@ public class ObjectExtValue extends ObjectValue
     } finally {
       env.setCallingClass(oldClass);
     }
-    
   }
 
   /**

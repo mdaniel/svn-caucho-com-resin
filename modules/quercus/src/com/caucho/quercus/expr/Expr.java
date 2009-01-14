@@ -449,7 +449,12 @@ abstract public class Expr {
    */
   public String evalString(Env env)
   {
-    return eval(env).toString();
+    Value value = eval(env);
+    
+    if (value.isObject())
+      return value.toString(env).toString();
+    else
+      return value.toString();
   }
 
   /**
