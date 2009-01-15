@@ -907,6 +907,17 @@ pageContext.setAttribute("digest_requestURI",digest_requestURI);
 </form>
 -->
 
+<example title="Calculating a digest using PHP">
+&lt;?php
+
+  $username = "harry";
+  $password = "quidditch";
+  $realm = "resin";
+
+  $digest = base64_encode(md5("$username:$realm:$password", true));
+?>  
+</example>
+
 <p>Unix users can quickly calculate a digest:</p>
 <example>
 echo -n "user:resin:password" | openssl dgst -md5 -binary | uuencode -m -
@@ -927,16 +938,6 @@ be used to calculate a digest.</p>
   PasswordDigest passwordDigest = PasswordDigest();
 
   String digest = passwordDigest.getPasswordDigest(username, password, realm);
-</example>
-
-<example title="Calculating a digest - PHP example">
-  $username = ...;
-  $password = ...;
-  $realm = "resin";
-
-  $passwordDigest = new Java("com.caucho.server.security.PasswordDigest");
-
-  $digest = $passwordDigest-&gt;getPasswordDigest($username, $password, $realm);
 </example>
 
 <p>
