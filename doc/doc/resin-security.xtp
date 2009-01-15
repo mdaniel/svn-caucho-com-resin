@@ -10,10 +10,45 @@
 
 <localtoc/>
 
-<s1 title="Quick Start">
+<s1 title="Samples">
 
-<p>The following sample shows how to protect a section of a web-site
-with a password, using a login form.</p>
+<s2 title="Local Access Authorization">
+
+<p>If you want an administration page to be accessible only from a
+local network, you can use the &lt;sec:Allow> and &lt;sec:IfNetwork> tags
+together to ensure only local requests are authorized.</p>
+
+<example title="WEB-INF/resin-web.xml - local network only">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+          xmlns:sec="urn:java:com.caucho.security">
+
+  &lt;sec:Allow url-pattern="/admin/*">
+    &lt;sec:IfNetwork>
+      &lt;sec:value>127.0.0.1&lt;/sec:value>
+      &lt;sec:value>192.168.0.0/16&lt;/sec:value>
+    &lt;/sec:IfNetwork>
+  &lt;/sec:Allow>
+
+&lt;/web-app>
+</example>
+
+<ul>
+<li>&lt;sec:Allow> creates an allow authorization rule.  If all the contents
+match, the pattern is allowed.</li>
+<li>&lt;sec:IfNetwork> matches a set of IP addresses using standard network
+notation.  If any address matches, &lt;sec:IfNetwork> is true.</li>
+</ul>
+
+<p>Because the local access protection only involves authorization, it's
+a shorter example than cases requiring a login.</p>
+
+</s2>
+
+<s2 title="XML Authentication">
+
+<p>If a section of a web-site needs basic password protection, you can
+use HTTP Basic authentication, an &lt;sec:IfRule> authorization and an
+XML authenticator as follows.</p>
 
 <example title="WEB-INF/resin-web.xml - Simple Password Protection">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
@@ -21,15 +56,26 @@ with a password, using a login form.</p>
 
   &lt;sec:Allow url-pattern="/secure/*">
     &lt;sec:IfRole name="*"/>
-  &lt;/sec:Allow url-pattern="/secure/*">
+  &lt;/sec:Allow>
 
   &lt;sec:FormLogin login-page="/login.jsp"/>
 
-  &lt;sec:PropertiesAuthenticator password-digest="none">
-     harry=quidditch,user
-  &lt;/sec:PropertiesAuthenticator>
+  &lt;sec:XmlAuthenticator>
+     &lt;sec:user name="harry" password="uTOZTGaB6pooMDvqvl2Lbg==" group="user"/>
+  &lt;/sec:XmlAuthenticator>
 
 &lt;/web-app>
+</example>
+
+<p>For security, the password is secured with an MD5 hash, because
+plaintext passwords aren't very security at all.  The easiest way to
+generate the hash is with a short PHP script:</p>
+
+<example title="PHP generation of MD5 hash">
+&lt;?php
+
+echo base64_encode(md5("harry:resin:quidditch", true)) . "\n";
+
 </example>
 
 <ul>
@@ -39,11 +85,11 @@ providing an authorization context.</li>
 <li>&lt;sec:IfRole> protects the web-app through login (as opposed to
 by IP address or by SSL)</li>
 <li>&lt;sec:FormLogin> specifies the form login method</li>
-<li>&lt;sec:PropertiesAuthenticator> defines the login users and passwords.
-The properties authenticator specifies a simple .properties file user definition.</li>
-<li>password-digest=none disables the default MD5-digest for the
-passwords.  Only recommended for examples.</li>
+<li>&lt;sec:XmlAuthenticator> defines the login users and passwords.
+The XML authenticator specifies a simple XML file for user definition.</li>
 </ul>
+
+</s2>
 
 </s1>
 
@@ -970,7 +1016,7 @@ passwords that are not in digest form.</p>
 	 
   &lt;sec:XmlAuthenticator&lt;/type&gt;
     &lt;sec:password-digest&gt;none&lt;/sec:password-digest&gt;
-    &lt;sec:user&gt; name="harry" password="quidditch" group="user"/>
+    &lt;sec:user name="harry" password="quidditch" group="user"/>
   &lt;/sec:XmlAuthenticator>
 &lt;/web-app>
 
@@ -1098,6 +1144,30 @@ virtual hosts that do not share some portion of their domain name.  For example,
 </s1>
 
 <s1 title="Login">
+
+<s2 title="BasicLogin" type="defun">
+
+<p>Configures HTTP basic login, which can be convenient for a quick protection
+of internal pages or administration when writing a form isn't necessary.</p>
+
+<example title="WEB-INF/resin-web.xml sec:BasicLogin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+          xmlns:sec="urn:java:com.caucho.security">
+
+  &lt;sec:BasicLogin/>
+
+  &lt;sec:Allow url-pattern="/foo/*">
+     &lt;sec:IfRole name="user"/>
+  &lt;/sec:Allow>
+
+  &lt;sec:XmlAuthenticator>
+     ...
+  &lt;/sec:XmlAuthenticator>
+  
+&lt;/web-app>  
+</example>
+
+</s2>
 
 <s2 title="FormLogin" type="defun">
 <p>Configures authentication for forms.  The login form has
@@ -1228,7 +1298,7 @@ into one class.</p>
 
 <s1 title="Authorization">
 
-<s2 title="security-constraint" type="defun">
+<s2 title="sec:Allow" type="defun">
 <parents>web-app</parents>
 
 <p>Selects protected areas of the web site.  Sites using
@@ -1240,54 +1310,30 @@ security constraints.</p>
 <p>Security constraints can also be custom classes.</p>
 
 <example title="Protecting all pages for logged-in users">
-&lt;web-app&gt;
-  ...
-&lt;security-constraint&gt;
-  &lt;web-resource-collection&gt;
-    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
-  &lt;/web-resource-collection&gt;
-  &lt;auth-constraint role-name='user'/&gt;
-&lt;/security-constraint&gt;
-  ...
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:sec="urn:java:com.caucho.security">
+	 
+  &lt;sec:IfAllow url-pattern="/*">
+    &lt;sec:IfRole name="*"/>
+  &lt;/sec:IfAllow>
+
 &lt;/web-app&gt;
 </example>
-</s2>
 
-<s2 title="web-resource-collection" type="defun">
-<parents>security-constraint</parents>
-
-<p>Specifies a collection of areas of the web site.</p>
-
-<deftable-childtags>
-<tr><td>url-pattern</td><td>url patterns describing the resource
-</td></tr><tr><td>http-method</td><td>HTTP methods to be restricted.
-</td></tr></deftable-childtags>
-</s2>
-
-<s2 title="auth-constraint" type="defun">
-<parents>security-constraint</parents>
-
-<p>Requires that authenticated users fill the specified role.
-In Resin's JdbcAuthenticator, normal users are in the "user" role.
-Think of a role as a group of users.</p>
-
-<deftable-childtags>
-<tr><td>role-name</td><td>Roles which are allowed to access the resource.
-</td></tr></deftable-childtags>
-
-<example title="Protecting webdav for webdav users">
-&lt;security-constraint&gt;
-  &lt;auth-constraint role-name='webdav'/&gt;
-
-  &lt;web-resource-collection&gt;
-    &lt;url-pattern&gt;/webdav/*&lt;/url-pattern&gt;
-  &lt;/web-resource-collection&gt;
-&lt;/security-constraint&gt;
-</example>
+<deftable title="sec:Allow attributes">
+<tr>
+  <td>url-pattern</td>
+  <td>url patterns describing the resource</td>
+</tr>
+<tr>
+  <td>http-method</td>
+  <td>HTTP methods to be restricted.</td>
+</tr>
+</deftable>
 
 </s2>
 
-<s2 title="ip-constraint" version="Resin 2.0.6" type="defun">
+<s2 title="sec:IfNetwork" version="Resin 4.0.0" type="defun">
 <parents>security-constraint</parents>
 
 <p>Allow or deny requests based on the ip address of the client.
@@ -1312,31 +1358,24 @@ first 24 bits of the ip are matched - any ip address that begins with
 optional.</p> 
 
 <example title="Block out known trouble makers">
-&lt;security-constraint&gt;
-  &lt;ip-constraint&gt;
-    &lt;deny&gt;205.11.12.3&lt;/deny&gt;
-    &lt;deny&gt;213.43.62.45&lt;/deny&gt;
-    &lt;deny&gt;123.4.45.6&lt;/deny&gt;
-    &lt;deny&gt;233.15.25.35&lt;/deny&gt;
-    &lt;deny&gt;233.14.87.12&lt;/deny&gt;
-  &lt;/ip-constraint&gt;
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+          xmlns:sec="urn:java:com.caucho.security">
 
-  &lt;web-resource-collection&gt;
-    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
-  &lt;/web-resource-collection&gt;
-&lt;/security-constraint&gt;
+  &lt;sec:Deny>
+    &lt;sec:IfNetwork>
+       &lt;sec:value>205.11.12.3&lt;/sec:value>
+       &lt;sec:value>213.43.62.45&lt;/sec:value>
+       &lt;sec:value>123.4.45.6&lt;/sec:value>
+       &lt;sec:value>233.15.25.35&lt;/sec:value>
+       &lt;sec:value>233.14.87.12&lt;/sec:value>
+    &lt;/sec:IfNetwork>
+  &lt;/sec:Deny>
+  
+&lt;/web-app&gt;
 </example>
 
 <p>Be careful with deny - some ISP's (like AOL) use proxies and the ip of many
 different users may appear to be the same ip to your server.</p>
-
-<deftable-childtags>
-<tr><td>allow</td><td>add an ip address to allow</td><td>default is to allow all ip addresses
-</td></tr><tr><td>deny</td><td>add an ip address to deny</td><td>default is to deny no ip addresses
-</td></tr><tr><td>error-code</td><td>error code to send if request is denied</td><td>403
-</td></tr><tr><td>error-message</td><td>error message to send if request is denied</td><td>Forbidden IP Address
-</td></tr><tr><td>cache-size</td><td>cache size, the result of applying rules for an ip is cached for subsequent requests</td><td>256
-</td></tr></deftable-childtags>
 
 <p>If only <var>deny</var> is used, then all ip's are allowed if they do not match
 a <code>deny</code>.  If only <var>allow</var> is used, then an ip is denied unless it
@@ -1345,26 +1384,51 @@ matches an <code>allow</code>. If both are used, then the ip must match both an
 
 </s2>
 
-<s2 title="user-data-constraint" type="defun">
-<parents>security-constraint</parents>
+<s2 title="sec:IfRole" type="defun">
+<parents>sec:Allow, sec:Deny</parents>
+
+<p>Requires that authenticated users fill the specified role.
+In Resin's DatabaseAuthenticator, normal users are in the "user" role.
+Think of a role as a group of users.</p>
+
+<deftable title="IfRole attributes">
+<tr>
+  <th>attribute</th>
+  <th>description</th>
+</tr>  
+<tr>
+  <td>name</td>
+  <td>Roles which are allowed to access the resource.</td>
+</tr>
+</deftable>
+
+<example title="WEB-INF/resin-web.xml Protecting webdav for webdav users">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+        xmlns:sec="urn:java:com.caucho.security">
+	
+  &lt;sec:Allow url-pattern="/webdav/*">
+    &lt;sec:IfRole name='webdav'/>
+  &lt;/sec:Allow>
+  
+&lt;/web-app>
+</example>
+
+</s2>
+
+<s2 title="sec:IfSecure" type="defun">
+<parents>sec:Allow, sec:Deny</parents>
 
 <p>Restricts access to secure transports, i.e. SSL.</p>
 
-<deftable-childtags>
-<tr><td>transport-guarantee</td><td>Required transport properties.  NONE,
-INTEGRAL, and CONFIDENTIAL are allowed values.
-</td></tr></deftable-childtags>
-
-<example>
-&lt;security-constraint&gt;
-  &lt;user-data-constraint&gt;
-    &lt;transport-guarantee&gt;CONFIDENTIAL&lt;/transport-guarantee&gt;
-  &lt;/user-data-constraint&gt;
-
-  &lt;web-resource-collection&gt;
-    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
-  &lt;/web-resource-collection&gt;
-&lt;/security-constraint&gt;
+<example title="WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:sec="urn:java:com.caucho.security"
+	 
+  &lt;sec:Allow>
+    &lt;sec:IfSecure/>
+  &lt;/sec:Allow>
+  
+&lt;/web-app&gt;
 </example>
 
 <p>
@@ -1378,105 +1442,60 @@ If the default rewriting of the host is not appropriate, you can set the
 <a config-tag="secure-host-name"/> for the host:
 </p>
 
-<example>
-  &lt;host id='...'&gt;
-    &lt;secure-host-name&gt;https://hogwarts.com&lt;/secure-host-name&gt;
-
- ...
-</example>
-
-<example>
-  &lt;host id='...'&gt;
-    &lt;secure-host-name&gt;https://hogwarts.com:8443&lt;/secure-host-name&gt;
-
+<example title="WEB-INF/resin-web.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="app-tier">
   ...
+  
+  &lt;host id="..."&gt;
+    &lt;secure-host-name&gt;https://hogwarts.com&lt;/secure-host-name&gt;
+    ...
+&lt;/resin> 
 </example>
 
 </s2>
 
-<s2 title="transport-guarantee" type="defun">
-<p>Restricts access to secure transports, i.e. SSL.</p>
-</s2>
+<s2 title="constraint" version="Resin 4.0" type="defun">
 
-<s2 title="constraint" version="Resin 2.0.1" type="defun">
-<parents>security-constraint</parents>
+<p>Any custom class that extends <a href="javadoc:com.caucho.security.RequestPredicate">com.caucho.security.RequestPredicate</a> can be used as
+an &lt;IfXXX> rule.  Just create the class and instantiate it directly:</p>
 
-<p>Defines a custom constraint.  The custom constraint specifies a <var>resin:type</var> which extends <a href="javadoc|com.caucho.server.security.AbstractConstraint|"/>.  
-<a href="ioc-bean.xtp">Bean-style initialization</a> is used to
-initialize the constraint.</p>
+<example title="WEB-INF/resin-web.xml - custom rule ">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:sec="urn:java:com.caucho.security"
+         xmlns:foo="urn:java:com.foo"
+
+ &lt;sec:Allow url-pattern="/safe/*"
+    &lt;foo:IfMyTest value="value"/>
+ &lt;/sec:Allow url-pattern="/safe/*"
+
+&lt;/web-app&gt;
+</example>
 
 <example>
-...
-&lt;security-constraint&gt;
-  &lt;constraint resin:type="example.CustomConstraint&gt;
-    &lt;init&gt;
-      &lt;policy&gt;strict&lt;/policy&gt;
-    &lt;/init&gt;
-  &lt;/constraint&gt;
-  &lt;web-resource-collection url-pattern='/*'/&gt;
-&lt;/security-constraint&gt;
-...
+package com.foo;
+
+import javax.servlet.http.HttpServletRequest;
+import com.caucho.security.ServletRequestPredicate;
+
+public class IfMyTest extends ServletRequestPredicate {
+  private String _value;
+
+  public void setValue(String value)
+  {
+    _value = value;
+  }
+
+  public boolean isMatch(HttpServletRequest request)
+  {
+    return _value.equals(request.getHeader("Foo"));
+  }
+}
 </example>
 
 </s2>
 
 </s1> <!-- Security-Constraints -->
-
-
-<s1 title="Custom Security Constraints">
-
-<p>Any custom security constraint is checked after any authentication (login)
-but before any filters or servlets are applied.  The security constraint will
-return true if the request is allowed and false if it's forbidden.  If the
-request is forbidden, it's the constraint's responsibility to use response.sendError() or to return an error page.</p>
-
-<example>
-package example;
-
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import com.caucho.server.security.*;
-
-public class CustomSecurity extends AbstractConstraint {
-  private String foo = "false";
-
-  public void setFoo(String foo)
-  {
-    this.foo = foo;
-  }
-
-  public boolean needsAuthentication()
-    return false;
-  }
-
-  public boolean isAuthorized(HttpServletRequest request,
-                              HttpServletResponse response,
-                              ServletContext application)
-    throws ServletException, IOException
-  {
-    if (foo.equals(request.getParameter("test")))
-      return true;
-
-    response.sendError(response.SC_FORBIDDEN);
-
-    return false;
-  }
-}
-</example>
-
-<p>The <code>needsAuthentication</code> method tells Resin that it needs to
-log in the user before checking the authorization.  This would allow
-the custom authorizer to check user roles or the user principle for
-the proper permissions.</p>
-
-<example>
-&lt;constraint resin:type="example.CustomSecurity"&gt;
-  &lt;foo&gt;test-value&lt;/foo&gt;
-&lt;/constraint&gt;
-</example>
-
-</s1>
 
 <s1 name="protectall" title="Protecting static files from viewing by anyone">
 
@@ -1490,7 +1509,7 @@ be served to a browser.</p>
 from viewing.</p>
 </s2>
 
-<s2 title="Security constraint requiring role nobody">
+<s2 title="sec:Deny">
 <p>Use a security constraint that requires a <var>role</var> that nobody
 will ever have.</p>
 
@@ -1499,65 +1518,15 @@ will ever have.</p>
         xmlns:sec="urn:java:com.caucho.security"&gt;
   ...
   &lt;!-- protect all .properties files --&gt;
-  &lt;sec:Allow url-pattern="*.properties">
-    &lt;sec:IfRole name="nobody"/&gt;
-  &lt;/sec:Allow>
+  &lt;sec:Deny url-pattern="*.properties"/>
 
   &lt;!-- protect the config/ subdirectory --&gt;
-  &lt;sec:Allow url-pattern="/config/*">
-    &lt;sec:IfRole name="nobody"/>
-  &lt;/sec:Allow&gt;
-  ...
-&lt;/web-app&gt;
-</example>
-</s2>
-
-<s2 title="A servlet that returns a 403 error">
-<p>Use a simple servlet that returns a 403 error, which means
-"Forbidden".  Resin provides the servlet <a href="javadoc|com.caucho.servlets.ErrorStatusServlet|"/> which is useful for
-this:</p>
-
-<example title="Using ErrorStatusServlet to protect static files">
-&lt;web-app&gt;
-  ...
-  &lt;servlet&gt;
-    &lt;servlet-name&gt;forbidden&lt;/servlet-name&gt;
-    &lt;servlet-class&gt;com.caucho.servlets.ErrorStatusServlet&lt;/servlet-class&gt;
-    &lt;init&gt;
-      &lt;status-code&gt;403&lt;/status-code&gt;
-    &lt;/init&gt;
-  &lt;/servlet&gt;
-
-  &lt;servlet-mapping url-pattern="*.properties" servlet-name="forbidden"/&gt;
-  &lt;servlet-mapping url-pattern="/config/*" servlet-name="forbidden"/&gt;
+  &lt;sec:Deny url-pattern="/config/*"/>
   ...
 &lt;/web-app&gt;
 </example>
 
-<p>Or you could implement your own servlet:</p>
-
-<example title="servlet to protect static files - WEB-INF/classes/example/servlets/Forbidden.java">
-package example.servlets;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import java.io.IOException;
-
-/**
- * Respond with a 403 error
- */
-public class Forbidden extends GenericServlet {
-  public void service(ServletRequest request, ServletResponse response)
-    throws ServletException, IOException
-  {
-    HttpServletResponse res = (HttpServletResponse) response;
-    res.sendError(403);
-  }
-}
-</example>
 </s2>
-
 </s1>
 
 <s1 name="aboutssl" title="What SSL provides">
