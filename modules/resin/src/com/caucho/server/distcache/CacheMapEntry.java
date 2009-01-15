@@ -285,6 +285,14 @@ public final class CacheMapEntry implements CacheEntry {
   }
 
   /**
+   * Returns true if the value is null
+   */
+  public boolean isValueNull()
+  {
+    return _valueHash == null;
+  }
+
+  /**
    * Returns the deserialized value for the entry.
    */
   public final Object getValue()

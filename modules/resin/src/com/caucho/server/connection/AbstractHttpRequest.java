@@ -1533,8 +1533,7 @@ public abstract class AbstractHttpRequest
       = manager.createSession(create, this, id, now, _isSessionIdFromCookie);
 
     if (session != null
-	&& id != null
-	&& ! session.getId().equals(id)
+	&& (id == null || ! session.getId().equals(id))
 	&& manager.enableSessionCookies()) {
       getResponse().setSessionId(session.getId());
     }
@@ -2735,6 +2734,8 @@ public abstract class AbstractHttpRequest
         session.finishRequest();
       
       cleanup();
+    } catch (Exception e) {
+      e.printStackTrace();
     } finally {
       for (int i = _closeOnExit.size() - 1; i >= 0; i--) {
         Path path = _closeOnExit.get(i);

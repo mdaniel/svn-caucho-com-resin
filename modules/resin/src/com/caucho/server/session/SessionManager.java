@@ -32,6 +32,7 @@ package com.caucho.server.session;
 import com.caucho.cluster.ByteStreamCache;
 import com.caucho.cluster.AbstractCache;
 import com.caucho.cluster.TriadByteStreamCache;
+import com.caucho.cluster.CacheEntry;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
@@ -1136,44 +1137,41 @@ public final class SessionManager implements AlarmListener
 
     SessionImpl session = _sessions.get(sessionId);
     
-    if (session != null && ! session.addUse()) {
-      session = null;
-    }
-
     boolean isNew = false;
     boolean killSession = false;
 
     if (session == null
 	&& sessionId != null
-	&& _sessionStore != null
-	&& _sessionStore.getEntry(sessionId) != null) {
-      session = create(sessionId, now, isCreate);
+	&& _sessionStore != null) {
+      CacheEntry entry = _sessionStore.getEntry(sessionId);
 
-      if (! session.addUse())
-	session = null;
+      if (entry != null && ! entry.isValueNull()) {
+	session = create(sessionId, now, isCreate);
       
-      isNew = true;
+	isNew = true;
+      }
     }
 
     if (session != null) {
-      if (! session.load(isNew)) {
-	// if the load failed, then the session died out from underneath
-	session.reset(now);
-	isNew = true;
-      }
-      
-      if (isNew)
-	handleCreateListeners(session);
-      else
+      if (session.load(isNew)) {
+	session.addUse();
 	session.setAccess(now);
-
-      return session;
+	
+	return session;
+      }
+      else {
+	// if the load failed, then the session died out from underneath
+	if (! isNew)
+	  session.reset(now);
+      }
     }
 
     if (! isCreate)
       return null;
 
-    if (sessionId == null || ! reuseSessionId(fromCookie)) {
+    if (sessionId == null
+	|| sessionId.length() <= 6
+	|| ! reuseSessionId(fromCookie)) {
       sessionId = createSessionId(request, true);
     }
 

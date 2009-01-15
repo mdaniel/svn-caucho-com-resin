@@ -35,6 +35,11 @@ package com.caucho.cluster;
 public interface CacheEntry<V>
 {
   /**
+   * Returns true for a null entry
+   */
+  public boolean isValueNull();
+  
+  /**
    * Returns the item's value
    */
   public V getValue();

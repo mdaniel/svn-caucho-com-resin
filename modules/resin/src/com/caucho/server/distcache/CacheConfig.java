@@ -58,7 +58,7 @@ public class CacheConfig
   private long _idleTimeout = TIME_INFINITY;
   
   private long _localReadTimeout
-    = Alarm.isTest() ? -1 : 10L; // 10ms default timeout, except for QA
+    = Alarm.isTest() ? -1 : 250L; // 250ms default timeout, except for QA
 
   private long _leaseTimeout = 5 * 60 * 1000; // 5 min lease timeout
 
