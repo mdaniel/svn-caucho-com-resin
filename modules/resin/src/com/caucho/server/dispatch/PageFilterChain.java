@@ -138,7 +138,7 @@ public class PageFilterChain implements FilterChain
     else
       page = null;
 
-    if (page == null || page.cauchoIsModified()) {
+    if (page == null || page._caucho_isModified()) {
       try {
 	_pageRef = null;
 	
