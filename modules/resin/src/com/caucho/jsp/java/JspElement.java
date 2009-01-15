@@ -103,6 +103,21 @@ public class JspElement extends JspContainerNode {
     return false;
   }
 
+  @Override
+  public boolean hasCustomTag()
+  {
+    if (super.hasCustomTag())
+      return true;
+
+    // jsp/0433
+    for (JspAttribute attrValue : _attrValues) {
+      if (attrValue.hasCustomTag())
+        return true;
+    }
+
+    return false;
+  }
+
   /**
    * Generates the XML text representation for the tag validation.
    *
