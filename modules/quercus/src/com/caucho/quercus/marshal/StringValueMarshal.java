@@ -54,12 +54,12 @@ public class StringValueMarshal extends Marshal
 
   public Object marshal(Env env, Expr expr, Class expectedClass)
   {
-    return expr.eval(env).toStringValue();
+    return expr.eval(env).toStringValue(env);
   }
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    return value.toStringValue();
+    return value.toStringValue(env);
   }
 
   public Value unmarshal(Env env, Object value)
@@ -67,7 +67,7 @@ public class StringValueMarshal extends Marshal
     if (value instanceof StringValue)
       return (StringValue) value;
     else if (value instanceof Value)
-      return ((Value) value).toStringValue();
+      return ((Value) value).toStringValue(env);
     else if (value != null)
       return env.createString(String.valueOf(value));
     else

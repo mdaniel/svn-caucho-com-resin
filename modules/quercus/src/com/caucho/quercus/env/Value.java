@@ -751,7 +751,15 @@ abstract public class Value implements java.io.Serializable
    */
   public StringValue toStringValue()
   {
-    return Env.getInstance().createString(toString());
+    return toStringValue(Env.getInstance());
+  }
+  
+  /*
+   * Converts to a StringValue.
+   */
+  public StringValue toStringValue(Env env)
+  {
+    return toStringBuilder(env);
   }
 
   /**

@@ -612,6 +612,12 @@ public final class Var extends Value
   {
     return _value.toStringValue();
   }
+  
+  @Override
+  public StringValue toStringValue(Env env)
+  {
+    return _value.toStringValue(env);
+  }
 
   @Override
   public StringValue toBinaryValue(Env env)

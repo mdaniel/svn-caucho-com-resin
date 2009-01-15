@@ -2620,7 +2620,7 @@ public class FileModule extends AbstractQuercusModule {
     if (path == null)
       return BooleanValue.FALSE;
 
-    String pathStr = path.realPath();
+    String pathStr = path.getNativePath();
 
     if (pathStr == null)
       pathStr = path.getFullPath();
