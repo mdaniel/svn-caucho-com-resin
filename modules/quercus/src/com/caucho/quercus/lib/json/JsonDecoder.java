@@ -191,7 +191,10 @@ class JsonDecoder {
       return decodeNumber(env);
       
     default:
-      return errorReturn(env);
+      if (isTop)
+        return decodeString(env, false);
+      else
+        return errorReturn(env);
     }
   }
 
