@@ -44,6 +44,26 @@ a shorter example than cases requiring a login.</p>
 
 </s2>
 
+<s2 title="Hide URLs from browsing">
+
+<p>In cases like WEB-INF, when you want to protect files from any
+browsing, local or not, you can use a single &lt;sec:Deny> authorization
+to prevent access.</p>
+
+<example title="hiding /hidden/*">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+          xmlns:sec="urn:java:com.caucho.security">
+
+  &lt;sec:Deny>
+     &lt;sec:url-pattern>/hidden/*&lt;/sec:url-pattern>
+     &lt;sec:url-pattern>*.hidden&lt;/sec:url-pattern>
+  &lt;/sec:Deny>
+
+&lt;/web-app>
+</example>
+
+</s2>
+
 <s2 title="XML Authentication">
 
 <p>If a section of a web-site needs basic password protection, you can

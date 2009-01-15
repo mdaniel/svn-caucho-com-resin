@@ -49,25 +49,25 @@ import java.util.logging.Logger;
  *
  * <pre>
  * &lt;sec:Allow url-pattern="/admin/*"&gt;
- *   &lt;sec:Address value="192.168.17.0/24"/&gt;
+ *   &lt;sec:IfNetwork name="192.168.17.0/24"/&gt;
  * &lt;/sec:Allow>
  * </pre>
  * 
  * <pre> 
  * &lt;sec:Deny>
- *   &lt;sec:Address>
+ *   &lt;sec:IfNetwork>
  *     &lt;value>205.11.12.3&lt;/value>
  *     &lt;value>123.4.45.6&lt;/value>
  *     &lt;value>233.15.25.35&lt;/value>
  *     &lt;value>233.14.87.12&lt;/value>
- *   &lt;/sec:Address&gt;
+ *   &lt;/sec:IfNetwork&gt;
  * &lt;/sec:Deny&gt;
  * </pre>
  */
-public class IfAddress implements ServletRequestPredicate {
+public class IfNetwork implements ServletRequestPredicate {
   private static final Logger log
-    = Logger.getLogger(IfAddress.class.getName());
-  static L10N L = new L10N(IfAddress.class);
+    = Logger.getLogger(IfNetwork.class.getName());
+  static L10N L = new L10N(IfNetwork.class);
 
   private ArrayList<InetNetwork> _networkList = new ArrayList<InetNetwork>();
 
