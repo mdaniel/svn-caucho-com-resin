@@ -1191,12 +1191,10 @@ public class ArrayModule
       return NullValue.NULL;
 
     ArrayValue arrayValues = new ArrayValueImpl(array.getSize());
-    int i = 0;
-
-    for (ArrayValue.Entry ptr = array.getHead();
-	 ptr != null;
-	 ptr = ptr.getNext()) {
-      arrayValues.append(LongValue.create(i++), ptr.getValue());
+    
+    Iterator<Value> iter = array.getValueIterator(env);
+    while (iter.hasNext()) {
+      arrayValues.put(iter.next());
     }
 
     return arrayValues;
@@ -2556,7 +2554,7 @@ public class ArrayModule
    * @param args the vector of array arguments
    * @return an array with all of the mapped values
    */
-  public static Value array_merge(Value []args)
+  public static Value array_merge(Env env, Value []args)
   {
     // php/1731
 
@@ -2568,20 +2566,25 @@ public class ArrayModule
 
       Value argValue = arg.toValue();
       
-      if (! (argValue instanceof ArrayValue))
+      if (! argValue.isArray())
         continue;
 
-      ArrayValue array = (ArrayValue) argValue;
-
-      ArrayValue.Entry next = null;
-      for (ArrayValue.Entry ptr = array.getHead();
-	   ptr != null;
-	   ptr = next) {
-        Value key = ptr.getKey();
-	next = ptr.getNext();
+      ArrayValue array = argValue.toArrayValue(env);
+      
+      Iterator<Map.Entry<Value,Value>> iter = array.getIterator(env);
+      
+      while (iter.hasNext()) {
+        Map.Entry<Value,Value> entry = iter.next();
         
-        // php/173z
-        Value value = ptr.getRawValue();
+        Value key = entry.getKey();
+        Value value;
+        
+        if (entry instanceof ArrayValue.Entry) {
+          // php/173z
+          value = ((ArrayValue.Entry) entry).getRawValue();
+        }
+        else
+          value = entry.getValue();
 
         if (key.isNumberConvertible())
           result.put(value);

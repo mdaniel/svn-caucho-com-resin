@@ -726,8 +726,6 @@ public class QuercusClass {
 
   protected Var getStaticFieldRec(Env env, String name)
   {
-    Value value;
-    
     String fullName = _className + "::" + name;
       
     EnvVar envVar = env.getGlobalRaw(fullName);

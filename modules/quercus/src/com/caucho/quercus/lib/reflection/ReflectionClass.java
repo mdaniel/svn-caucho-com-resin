@@ -44,6 +44,7 @@ import com.caucho.quercus.env.MethodMap;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.QuercusLanguageException;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
@@ -172,8 +173,15 @@ public class ReflectionClass
     return map.get(name) != null;
   }
   
-  public ReflectionMethod getMethod(String name)
+  public ReflectionMethod getMethod(Env env, String name)
   {
+    AbstractFunction fun = _cls.findFunction(name);
+    
+    if (fun == null)
+      throw new QuercusLanguageException(
+        env.createException("ReflectionException",
+                            L.l("method {0}::{1}() does not exist", _name, name)));
+    
     return new ReflectionMethod(_name, _cls.getFunction(name));
     
     /*

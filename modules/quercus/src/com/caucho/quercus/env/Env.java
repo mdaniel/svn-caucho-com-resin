@@ -3778,6 +3778,24 @@ public class Env {
     return string;
   }
 
+  public Value createException(String exceptionClass, String message)
+  {
+    QuercusClass cls = getClass(exceptionClass);
+    
+    StringValue messageV = createString(message);
+    Value []args = { messageV };
+
+    Value value = cls.callNew(this, args);
+    
+    Location location = getLocation();
+    
+    value.putField(this, "file", createString(location.getFileName()));
+    value.putField(this, "line", LongValue.create(location.getLineNumber()));
+    value.putField(this, "trace", ErrorModule.debug_backtrace(this));
+
+    return value;
+  }
+  
   /**
    * Creates a PHP Exception.
    */
