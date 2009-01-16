@@ -9,7 +9,6 @@
         <exclude name="**/*.war"/>
       </zipfileset>
     </jar>
-    <move file="${project.working.dir}/${module.name}.war" todir="${server.publish.dir}"/>
     <sleep seconds="${pause.deploy}"/>
   </target>
 

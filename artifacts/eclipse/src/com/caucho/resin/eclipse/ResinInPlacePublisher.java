@@ -67,8 +67,12 @@ public class ResinInPlacePublisher extends GenericPublisher {
     try {
       if (monitor.isCanceled())
         return null;
-      
-      File configFile = locateConfigurationFile();
+
+      ServerRuntime typeDef = getServerRuntime().getServerTypeDefinition();
+      String filename = 
+        PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
+                                       RESIN_CONFIGURATION_FILE_NAME_ID);
+      File configFile = PublisherUtil.locateBundleFile(typeDef, filename);
       
       VariableUtil.setVariable(RESIN_CONFIGURATION_FILE_NAME_ID, 
                                configFile.toString());
@@ -77,7 +81,7 @@ public class ResinInPlacePublisher extends GenericPublisher {
     } catch (CoreException e) {
       IStatus s = new Status(IStatus.ERROR, 
                              CorePlugin.PLUGIN_ID, 0, 
-                             "Publish failed using Resin in place publisher",
+                             "In place Resin publish failed",
                              e);
       CorePlugin.getDefault().getLog().log(s);
       return new IStatus[] { s };
@@ -85,86 +89,11 @@ public class ResinInPlacePublisher extends GenericPublisher {
     
     return null;
   }
-  
 
-  
   @Override
   public IStatus[] unpublish(IProgressMonitor monitor)
   {
     // TODO Auto-generated method stub
-    return null;
-  }
-
-  private File locateConfigurationFile() 
-    throws CoreException 
-  {
-    String confFile = getResinConfigurationFilename();
-    ServerRuntime typeDef = getServerRuntime().getServerTypeDefinition(); 
-    String bundleName = typeDef.getConfigurationElementNamespace();
-    Bundle bundle = Platform.getBundle(bundleName);
-    URL bundleUrl = bundle.getEntry(confFile);
-    URL fileUrl = FileUtil.resolveURL(bundleUrl);
-    
-    // the file is stuck in the plugin jar, so we have to copy it 
-    // out to a temporary directory
-    if (fileUrl.getProtocol().equals("jar")) {
-      OutputStream os = null;
-      InputStream is = null;
-      
-      try {
-        String dir = CorePlugin.getDefault().getStateLocation().toOSString(); 
-        File tempFile = FileUtil.createTempFile(confFile, dir);
-        os = new FileOutputStream(tempFile);
-        is = fileUrl.openStream();
-        FileUtil.copy(is, os);
-        
-        return tempFile;
-      } 
-      catch (IOException e) {
-        IStatus s = new Status(IStatus.ERROR, 
-                               CorePlugin.PLUGIN_ID, 0, 
-                               "error creating temporary configuration file", 
-                               e);
-        CorePlugin.getDefault().getLog().log(s);
-        
-        throw new CoreException(s);
-      } 
-      finally {
-        try {
-          if (is != null)
-            is.close();
-          
-          if (os != null)
-            os.close();  
-        } 
-        catch (IOException e) {
-        }
-      }
-    } 
-   
-    return FileUtil.resolveFile(fileUrl);
-  }  
-  /**
-   * Find the name of the resin configuration file to use.  We need to
-   * iterate through the arguments for the publisher (this class) and find
-   * the value, then do variable resolution on that string value.
-   *  
-   * @return
-   */
-  private String getResinConfigurationFilename() 
-  {
-    ServerRuntime typeDef = getServerRuntime().getServerTypeDefinition();
-    Publisher publisher = typeDef.getPublisher(PUBLISHER_ID);
-    Iterator<PublisherData> iterator = publisher.getPublisherdata().iterator();
-    
-    while (iterator.hasNext()) {
-      PublisherData data = iterator.next();
-      
-      if (RESIN_CONFIGURATION_FILE_NAME_ID.equals(data.getDataname())) {
-        return typeDef.getResolver().resolveProperties(data.getDatavalue());
-      }
-    }
-    
     return null;
   }
 }

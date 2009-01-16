@@ -17,6 +17,6 @@ Require-Bundle: org.eclipse.jst.server.core,
  org.eclipse.wst.server.ui,
  org.eclipse.core.variables
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: resin-eclipse.jar
+Bundle-ClassPath: resin-eclipse.jar, lib/resin.jar, lib/resin-kernel.jar, lib/hessian.jar
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: com.caucho.resin.eclipse;uses:="org.eclipse.core.runtime,org.eclipse.wst.server.core.model"

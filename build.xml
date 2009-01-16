@@ -23,7 +23,7 @@
     </antcall>
   </target>
 
-  <target name="eclipse" depends="init">
+  <target name="eclipse" depends="init, resin, resin-kernel, hessian">
     <property name="eclipse.basedir" location="${artifacts}/eclipse"/>
     <property name="eclipse.build" location="${eclipse.basedir}/build"/>
   
@@ -50,6 +50,10 @@
         <exclude name="src/manifest"/>
       </fileset>
     </copy>
+
+    <copy file="${lib}/resin.jar" todir="${eclipse.build}/lib"/>
+    <copy file="${lib}/resin-kernel.jar" todir="${eclipse.build}/lib"/>
+    <copy file="${lib}/hessian.jar" todir="${eclipse.build}/lib"/>
 
     <property name="eclipse.dist" location="${eclipse.basedir}/dist"/>
 

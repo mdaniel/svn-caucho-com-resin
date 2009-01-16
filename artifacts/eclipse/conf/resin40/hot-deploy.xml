@@ -1,23 +1,27 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="http://caucho.com/ns/resin/core">
+
+  <management>
+    <deploy-service/>
+  </management>
 
   <log-handler name="" level="all" path="stdout:"
                timestamp="[%H:%M:%S.%s] {%{thread}} "/>
 
-  <logger name="com.caucho" level="info"/>
-
+  <logger name="com.caucho" level="finest"/>
 
   <cluster id="">
-    <server id="">
+    <server id="" address="${system['wtp.server.address']}"
+                  port="${system['wtp.hmux.port']}">
       <http port="${system['wtp.port']}"/>
     </server>
 
     <resin:import path="${resin.root}/conf/app-default.xml"/>
 
     <host id="" root-directory=".">
-      <web-app id="/${system['wtp.webapp.id']}" 
-               root-directory="${system['wtp.webapp.dir']}"/>
+      <web-app-deploy path="${system['wtp.webapp.deploydir']}"/>
+<!--       <web-app id="/${system['wtp.webapp.id']}" 
+               root-directory="${system['wtp.webapp.dir']}"/>-->
     </host>
   </cluster>
 </resin>

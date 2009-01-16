@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -28,11 +28,53 @@
 
 package com.caucho.resin.eclipse;
 
+import java.io.File;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jst.server.generic.core.internal.CorePlugin;
 import org.eclipse.jst.server.generic.core.internal.GenericServerBehaviour;
+import org.eclipse.jst.server.generic.internal.core.util.FileUtil;
+import org.eclipse.jst.server.generic.servertype.definition.ServerRuntime;
 
-public class ResinServerBehaviour
-  extends GenericServerBehaviour
+@SuppressWarnings("restriction")
+public class ResinServerBehaviour extends GenericServerBehaviour
 {
+  public static final String RESIN_CONFIGURATION_FILE_NAME_ID =
+    "resin.configuration.file";
+  
+  @Override
+  public void setupLaunchConfiguration(
+      ILaunchConfigurationWorkingCopy workingCopy, IProgressMonitor monitor)
+    throws CoreException
+  {
+    /*    Map properties = getRuntimeDelegate().getServerInstanceProperties();
+            String filename = (String) properties.get();*/
+
+    ServerRuntime typeDef = getRuntimeDelegate().getServerTypeDefinition();
+    String filename = 
+      PublisherUtil.getPublisherData(typeDef, ResinGitPublisher.PUBLISHER_ID,
+                                     RESIN_CONFIGURATION_FILE_NAME_ID);
+    if (filename != null) {
+      File configFile = PublisherUtil.locateBundleFile(typeDef, filename);
+      VariableUtil.setVariable(RESIN_CONFIGURATION_FILE_NAME_ID, 
+                               configFile.toString());
+
+      // create a webapp deploy directory in case we're doing hot deploy
+      String dir = CorePlugin.getDefault().getStateLocation().toOSString(); 
+      File tempFile = FileUtil.createTempFile("webapps", dir);
+
+      VariableUtil.setVariable("wtp.webapp.deploydir", tempFile.toString());
+
+      /*
+            VariableUtil.setVariable("wtp.webapp.dir", webContentFolder);
+            VariableUtil.setVariable("wtp.webapp.id", webappId);*/
+    }
+
+    super.setupLaunchConfiguration(workingCopy, monitor);
+  }
+
+
   @Override
   public void stop(boolean force)
   {
