@@ -581,6 +581,11 @@ public class MathModule extends AbstractQuercusModule {
   {
     return NullValue.NULL;
   }
+  
+  public static double lcg_value()
+  {
+    return RandomUtil.nextDouble();
+  }
 
   /**
    *  Returns the decimal equivalent of the octal number represented by the
