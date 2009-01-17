@@ -32,6 +32,7 @@ package com.caucho.hemp.servlet;
 import com.caucho.bam.BamConnection;
 import com.caucho.bam.BamStream;
 import com.caucho.hmtp.Packet;
+import com.caucho.hmtp.HmtpPacketType;
 import com.caucho.bam.BamError;
 import java.io.*;
 import java.util.logging.*;
@@ -57,9 +58,10 @@ public class ServerBrokerStream
   private BamStream _toBroker;
 
   private Hessian2StreamingInput _in;
-  private Hessian2StreamingOutput _out;
+  private Hessian2Output _out;
 
-  private ServerAgentStream _callbackHandler;
+  private ServerAgentStream _agentStream;
+  private LinkService _linkService;
   private AuthBrokerStream _authHandler;
 
   private String _jid;
@@ -77,10 +79,11 @@ public class ServerBrokerStream
     }
     
     _in = new Hessian2StreamingInput(is);
-    _out = new Hessian2StreamingOutput(os);
+    _out = new Hessian2Output(os);
 
-    _callbackHandler = new ServerAgentStream(this, _out);
-    _authHandler = new AuthBrokerStream(this, _callbackHandler);
+    _agentStream = new ServerAgentStream(this, _out);
+    _authHandler = new AuthBrokerStream(this, _agentStream);
+    _linkService = new LinkService(this, _agentStream);
   }
 
   public String getJid()
@@ -97,11 +100,9 @@ public class ServerBrokerStream
     if (in == null)
       return false;
 
-    Object obj = in.readObject();
-    
-    Packet packet = (Packet) obj;
+    Hessian2Input hIn = in.startPacket();
 
-    if (packet == null) {
+    if (hIn == null) {
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " end of stream");
       
@@ -109,13 +110,85 @@ public class ServerBrokerStream
       return false;
     }
 
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " receive " + packet);
+    int type = hIn.readInt();
+    String to = hIn.readString();
+    String from = hIn.readString();
 
-    if (_conn != null)
-      packet.dispatch(this, _toBroker);
+    BamStream stream;
+    if (to == null)
+      stream = _linkService.getAgentStream();
+    else if (_conn != null)
+      stream = _toBroker;
     else
-      packet.dispatch(_authHandler, _toBroker);
+      stream = _authHandler;
+
+    switch (HmtpPacketType.TYPES[type]) {
+    case MESSAGE:
+      {
+	Serializable value = (Serializable) hIn.readObject();
+	in.endPacket();
+
+	stream.message(to, from, value);
+
+	break;
+      }
+      
+    case MESSAGE_ERROR:
+      {
+	Serializable value = (Serializable) hIn.readObject();
+	BamError error = (BamError) hIn.readObject();
+	in.endPacket();
+
+	stream.messageError(to, from, value, error);
+
+	break;
+      }
+      
+    case QUERY_GET:
+      {
+	long id = hIn.readLong();
+	Serializable value = (Serializable) hIn.readObject();
+	in.endPacket();
+
+	stream.queryGet(id, to, from, value);
+
+	break;
+      }
+      
+    case QUERY_SET:
+      {
+	long id = hIn.readLong();
+	Serializable value = (Serializable) hIn.readObject();
+	in.endPacket();
+
+	stream.querySet(id, to, from, value);
+
+	break;
+      }
+      
+    case QUERY_RESULT:
+      {
+	long id = hIn.readLong();
+	Serializable value = (Serializable) hIn.readObject();
+	in.endPacket();
+
+	stream.queryResult(id, to, from, value);
+
+	break;
+      }
+      
+    case QUERY_ERROR:
+      {
+	long id = hIn.readLong();
+	Serializable value = (Serializable) hIn.readObject();
+	BamError error = (BamError) hIn.readObject();
+	in.endPacket();
+
+	stream.queryError(id, to, from, value, error);
+
+	break;
+      }
+    }
 
     return true;
   }
@@ -132,7 +205,7 @@ public class ServerBrokerStream
     String password = (String) credentials;
     
     _conn = _broker.getConnection(uid, password);
-    _conn.setStreamHandler(_callbackHandler);
+    _conn.setStreamHandler(_agentStream);
 
     _jid = _conn.getJid();
     
@@ -314,7 +387,7 @@ public class ServerBrokerStream
     Hessian2StreamingInput in = _in;
     _in = null;
     
-    Hessian2StreamingOutput out = _out;
+    Hessian2Output out = _out;
     _out = null;
 
     if (in != null) {

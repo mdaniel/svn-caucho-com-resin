@@ -51,7 +51,7 @@ public class ClientBrokerStream implements BamStream {
   private OutputStream _os;
 
   private Hessian2StreamingInput _in;
-  private Hessian2StreamingOutput _out;
+  private Hessian2Output _out;
 
   private boolean _isFinest;
 
@@ -67,7 +67,7 @@ public class ClientBrokerStream implements BamStream {
       _is = new HessianDebugInputStream(_is, log, Level.FINEST);
     }
       
-    _out = new Hessian2StreamingOutput(_os);
+    _out = new Hessian2Output(_os);
     _in = new Hessian2StreamingInput(_is);
   }
 
@@ -94,10 +94,15 @@ public class ClientBrokerStream implements BamStream {
   public void message(String to, String from, Serializable value)
   {
     try {
-      Hessian2StreamingOutput out = _out;
+      Hessian2Output out = _out;
 
       if (out != null) {
-	out.writeObject(new Message(to, from, value));
+	out.startPacket();
+	out.writeInt(HmtpPacketType.MESSAGE.ordinal());
+	out.writeString(to);
+	out.writeString(from);
+	out.writeObject(value);
+	out.endPacket();
 	out.flush();
       }
     } catch (IOException e) {
@@ -109,15 +114,21 @@ public class ClientBrokerStream implements BamStream {
    * Sends a message error to a given jid
    */
   public void messageError(String to,
-			       String from,
-			       Serializable value,
-			       BamError error)
+			   String from,
+			   Serializable value,
+			   BamError error)
   {
     try {
-      Hessian2StreamingOutput out = _out;
+      Hessian2Output out = _out;
 
       if (out != null) {
-	out.writeObject(new MessageError(to, from, value, error));
+	out.startPacket();
+	out.writeInt(HmtpPacketType.MESSAGE_ERROR.ordinal());
+	out.writeString(to);
+	out.writeString(from);
+	out.writeObject(value);
+	out.writeObject(error);
+	out.endPacket();
 	out.flush();
       }
     } catch (IOException e) {
@@ -138,13 +149,19 @@ public class ClientBrokerStream implements BamStream {
 			      Serializable value)
   {
     try {
-      Hessian2StreamingOutput out = _out;
+      Hessian2Output out = _out;
 
       if (out != null) {
-	out.writeObject(new QueryGet(id, to, from, value));
+	out.startPacket();
+	out.writeInt(HmtpPacketType.QUERY_GET.ordinal());
+	out.writeString(to);
+	out.writeString(from);
+	out.writeLong(id);
+	out.writeObject(value);
+	out.endPacket();
 	out.flush();
       }
-
+      
       return true;
     } catch (IOException e) {
       throw new BamProtocolException(e);
@@ -160,10 +177,17 @@ public class ClientBrokerStream implements BamStream {
 			      Serializable value)
   {
     try {
-      Hessian2StreamingOutput out = _out;
+      Hessian2Output out = _out;
 
       if (out != null) {
-	out.writeObject(new QuerySet(id, to, from, value));
+	out.startPacket();
+	out.writeInt(HmtpPacketType.QUERY_SET.ordinal());
+	out.writeString(to);
+	out.writeString(from);
+	out.writeLong(id);
+	out.writeObject(value);
+	System.out.println("WRITE: " + id + " " + value);
+	out.endPacket();
 	out.flush();
       }
 
@@ -182,10 +206,16 @@ public class ClientBrokerStream implements BamStream {
 			      Serializable value)
   {
     try {
-      Hessian2StreamingOutput out = _out;
+      Hessian2Output out = _out;
 
       if (out != null) {
-	out.writeObject(new QueryResult(id, to, from, value));
+	out.startPacket();
+	out.writeInt(HmtpPacketType.QUERY_RESULT.ordinal());
+	out.writeString(to);
+	out.writeString(from);
+	out.writeLong(id);
+	out.writeObject(value);
+	out.endPacket();
 	out.flush();
       }
     } catch (IOException e) {
@@ -197,16 +227,22 @@ public class ClientBrokerStream implements BamStream {
    * Low-level query error
    */
   public void queryError(long id,
-			     String to,
-			     String from, 
-			     Serializable value,
-			     BamError error)
+			 String to,
+			 String from, 
+			 Serializable value,
+			 BamError error)
   {
     try {
-      Hessian2StreamingOutput out = _out;
+      Hessian2Output out = _out;
 
       if (out != null) {
-	out.writeObject(new QueryError(id, to, from, value, error));
+	out.startPacket();
+	out.writeInt(HmtpPacketType.QUERY_ERROR.ordinal());
+	out.writeString(to);
+	out.writeString(from);
+	out.writeLong(id);
+	out.writeObject(value);
+	out.endPacket();
 	out.flush();
       }
     } catch (IOException e) {
@@ -222,14 +258,19 @@ public class ClientBrokerStream implements BamStream {
    * Sends a presence packet to the server
    */
   public void presence(String to,
-			   String from,
-			   Serializable data)
+		       String from,
+		       Serializable value)
   {
     try {
-      Hessian2StreamingOutput out = _out;
+      Hessian2Output out = _out;
 
       if (out != null) {
-	out.writeObject(new Presence(to, from, data));
+	out.startPacket();
+	out.writeInt(HmtpPacketType.PRESENCE.ordinal());
+	out.writeString(to);
+	out.writeString(from);
+	out.writeObject(value);
+	out.endPacket();
 	out.flush();
       }
     } catch (IOException e) {
@@ -241,14 +282,19 @@ public class ClientBrokerStream implements BamStream {
    * Sends a presence packet to the server
    */
   public void presenceUnavailable(String to,
-				      String from,
-				      Serializable data)
+				  String from,
+				  Serializable value)
   {
     try {
-      Hessian2StreamingOutput out = _out;
+      Hessian2Output out = _out;
 
       if (out != null) {
-	out.writeObject(new PresenceUnavailable(to, from, data));
+	out.startPacket();
+	out.writeInt(HmtpPacketType.PRESENCE_UNAVAILABLE.ordinal());
+	out.writeString(to);
+	out.writeString(from);
+	out.writeObject(value);
+	out.endPacket();
 	out.flush();
       }
     } catch (IOException e) {
@@ -260,14 +306,19 @@ public class ClientBrokerStream implements BamStream {
    * Sends a presence probe packet to the server
    */
   public void presenceProbe(String to,
-				String from,
-				Serializable data)
+			    String from,
+			    Serializable value)
   {
     try {
-      Hessian2StreamingOutput out = _out;
+      Hessian2Output out = _out;
 
       if (out != null) {
-	out.writeObject(new PresenceProbe(to, from, data));
+	out.startPacket();
+	out.writeInt(HmtpPacketType.PRESENCE_PROBE.ordinal());
+	out.writeString(to);
+	out.writeString(from);
+	out.writeObject(value);
+	out.endPacket();
 	out.flush();
       }
     } catch (IOException e) {
@@ -279,14 +330,19 @@ public class ClientBrokerStream implements BamStream {
    * Sends a presence subscribe packet to the server
    */
   public void presenceSubscribe(String to,
-				    String from,
-				    Serializable data)
+				String from,
+				Serializable value)
   {
     try {
-      Hessian2StreamingOutput out = _out;
+      Hessian2Output out = _out;
 
       if (out != null) {
-	out.writeObject(new PresenceSubscribe(to, from, data));
+	out.startPacket();
+	out.writeInt(HmtpPacketType.PRESENCE_SUBSCRIBE.ordinal());
+	out.writeString(to);
+	out.writeString(from);
+	out.writeObject(value);
+	out.endPacket();
 	out.flush();
       }
     } catch (IOException e) {
@@ -298,14 +354,19 @@ public class ClientBrokerStream implements BamStream {
    * Sends a presence subscribed packet to the server
    */
   public void presenceSubscribed(String to,
-				     String from,
-				     Serializable data)
+				 String from,
+				 Serializable value)
   {
     try {
-      Hessian2StreamingOutput out = _out;
+      Hessian2Output out = _out;
 
       if (out != null) {
-	out.writeObject(new PresenceSubscribed(to, from, data));
+	out.startPacket();
+	out.writeInt(HmtpPacketType.PRESENCE_SUBSCRIBE.ordinal());
+	out.writeString(to);
+	out.writeString(from);
+	out.writeObject(value);
+	out.endPacket();
 	out.flush();
       }
     } catch (IOException e) {
@@ -317,14 +378,19 @@ public class ClientBrokerStream implements BamStream {
    * Sends a presence subscribe packet to the server
    */
   public void presenceUnsubscribe(String to,
-				      String from,
-				      Serializable data)
+				  String from,
+				  Serializable value)
   {
     try {
-      Hessian2StreamingOutput out = _out;
+      Hessian2Output out = _out;
 
       if (out != null) {
-	out.writeObject(new PresenceUnsubscribe(to, from, data));
+	out.startPacket();
+	out.writeInt(HmtpPacketType.PRESENCE_UNSUBSCRIBE.ordinal());
+	out.writeString(to);
+	out.writeString(from);
+	out.writeObject(value);
+	out.endPacket();
 	out.flush();
       }
     } catch (IOException e) {
@@ -336,14 +402,19 @@ public class ClientBrokerStream implements BamStream {
    * Sends a presence subscribed packet to the server
    */
   public void presenceUnsubscribed(String to,
-				       String from,
-				       Serializable data)
+				   String from,
+				   Serializable value)
   {
     try {
-      Hessian2StreamingOutput out = _out;
-    
+      Hessian2Output out = _out;
+
       if (out != null) {
-	out.writeObject(new PresenceUnsubscribed(to, from, data));
+	out.startPacket();
+	out.writeInt(HmtpPacketType.PRESENCE_UNSUBSCRIBE.ordinal());
+	out.writeString(to);
+	out.writeString(from);
+	out.writeObject(value);
+	out.endPacket();
 	out.flush();
       }
     } catch (IOException e) {
@@ -355,15 +426,21 @@ public class ClientBrokerStream implements BamStream {
    * Sends a presence error packet to the server
    */
   public void presenceError(String to,
-				String from,
-				Serializable data,
-				BamError error)
+			    String from,
+			    Serializable value,
+			    BamError error)
   {
     try {
-      Hessian2StreamingOutput out = _out;
-    
+      Hessian2Output out = _out;
+
       if (out != null) {
-	out.writeObject(new PresenceError(to, from, data, error));
+	out.startPacket();
+	out.writeInt(HmtpPacketType.PRESENCE_ERROR.ordinal());
+	out.writeString(to);
+	out.writeString(from);
+	out.writeObject(value);
+	out.writeObject(error);
+	out.endPacket();
 	out.flush();
       }
     } catch (IOException e) {
@@ -374,7 +451,7 @@ public class ClientBrokerStream implements BamStream {
   public void flush()
     throws IOException
   {
-    Hessian2StreamingOutput out = _out;
+    Hessian2Output out = _out;
 
     if (out != null) {
       out.flush();

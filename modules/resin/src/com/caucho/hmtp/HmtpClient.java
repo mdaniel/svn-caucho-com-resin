@@ -193,9 +193,11 @@ public class HmtpClient extends AbstractBamConnection {
   {
     try {
       AuthResult result;
-      result = (AuthResult) querySet("", new AuthQuery(uid, password));
+      result = (AuthResult) querySet(null, new AuthQuery(uid, password));
 
       _jid = result.getJid();
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -344,89 +346,5 @@ public class HmtpClient extends AbstractBamConnection {
   protected void finalize()
   {
     close();
-  }
-
-  static class QueryItem {
-    private final long _id;
-    private final BamQueryCallback _callback;
-
-    QueryItem(long id, BamQueryCallback callback)
-    {
-      _id = id;
-      _callback = callback;
-    }
-
-    void onQueryResult(String to, String from, Serializable value)
-    {
-      if (_callback != null)
-	_callback.onQueryResult(to, from, value);
-    }
-
-    void onQueryError(String to,
-		      String from,
-		      Serializable value,
-		      BamError error)
-    {
-      if (_callback != null)
-	_callback.onQueryError(to, from, value, error);
-    }
-    
-    @Override
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + _id + "," + _callback + "]";
-    }
-  }
-
-  static class WaitQueryCallback implements BamQueryCallback {
-    private Serializable _result;
-    private BamError _error;
-    private boolean _isResult;
-
-    public Serializable getResult()
-    {
-      return _result;
-    }
-    
-    public BamError getError()
-    {
-      return _error;
-    }
-
-    boolean waitFor()
-    {
-      try {
-	synchronized (this) {
-	  if (! _isResult)
-	    this.wait(10000);
-	}
-      } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
-      }
-
-      return _isResult;
-    }
-    
-    public void onQueryResult(String fromJid, String toJid,
-			      Serializable value)
-    {
-      _result = value;
-
-      synchronized (this) {
-	_isResult = true;
-	notifyAll();
-      }
-    }
-  
-    public void onQueryError(String fromJid, String toJid,
-			     Serializable value, BamError error)
-    {
-      _error = error;
-
-      synchronized (this) {
-	_isResult = true;
-	notifyAll();
-      }
-    }
   }
 }

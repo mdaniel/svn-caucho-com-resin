@@ -99,17 +99,41 @@ class ClientAgentStream implements Runnable, BamStream {
     if (in == null)
       return;
 
-    Packet packet = (Packet) in.readObject();
+    Hessian2Input hIn = in.startPacket();
 
-    if (packet == null) {
+    if (hIn == null) {
       close();
       return;
     }
 
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " receive " + packet);
+    int type = hIn.readInt();
+    String to = hIn.readString();
+    String from = hIn.readString();
 
-    packet.dispatch(this, _clientStream);
+    System.out.println("CL: " + HmtpPacketType.TYPES[type] + " " + to + " " + from);
+
+    switch (HmtpPacketType.TYPES[type]) {
+    case QUERY_RESULT:
+      {
+	long id = hIn.readLong();
+	Serializable value = (Serializable) hIn.readObject();
+	in.endPacket();
+
+	_clientStream.queryResult(id, to, from, value);
+	break;
+      }
+      
+    case QUERY_ERROR:
+      {
+	long id = hIn.readLong();
+	Serializable value = (Serializable) hIn.readObject();
+	BamError error = (BamError) hIn.readObject();
+	in.endPacket();
+
+	_clientStream.queryError(id, to, from, value, error);
+	break;
+      }
+    }
   }
   
   /**

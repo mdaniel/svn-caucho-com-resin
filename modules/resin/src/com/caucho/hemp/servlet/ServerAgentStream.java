@@ -29,6 +29,7 @@
 
 package com.caucho.hemp.servlet;
 
+import com.caucho.hmtp.HmtpPacketType;
 import com.caucho.hmtp.QuerySet;
 import com.caucho.hmtp.QueryResult;
 import com.caucho.hmtp.QueryGet;
@@ -51,7 +52,7 @@ import java.util.logging.*;
 import com.caucho.hessian.io.*;
 
 /**
- * Handles callbacks for a hmpp service
+ * Handles callbacks for a hmtp service
  */
 public class ServerAgentStream implements BamStream
 {
@@ -59,10 +60,10 @@ public class ServerAgentStream implements BamStream
     = Logger.getLogger(ServerAgentStream.class.getName());
 
   private ServerBrokerStream _packetHandler;
-  private Hessian2StreamingOutput _out;
+  private Hessian2Output _out;
 
   ServerAgentStream(ServerBrokerStream packetHandler,
-		     Hessian2StreamingOutput out)
+		     Hessian2Output out)
   {
     _packetHandler = packetHandler;
     _out = out;
@@ -80,11 +81,16 @@ public class ServerAgentStream implements BamStream
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send message to=" + to
-		  + " from=" + from);
+	log.finer(this + " message " + value
+		  + " {to:" + to + ", from:" + from + "}");
       }
-      
-      _out.writeObject(new Message(to, from, value));
+
+      _out.startPacket();
+      _out.writeInt(HmtpPacketType.MESSAGE.ordinal());
+      _out.writeString(to);
+      _out.writeString(from);
+      _out.writeObject(value);
+      _out.endPacket();
       _out.flush();
     } catch (IOException e) {
       _packetHandler.close();
@@ -94,17 +100,23 @@ public class ServerAgentStream implements BamStream
   }
   
   public void messageError(String to,
-			       String from,
-			       Serializable value,
-			       BamError error)
+			   String from,
+			   Serializable value,
+			   BamError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send error message to=" + to
-		  + " from=" + from + " error=" + error);
+	log.finer(this + " messageError " + error + " " + value
+		  + " {to:" + to + ", from:" + from + "}");
       }
-      
-      _out.writeObject(new MessageError(to, from, value, error));
+
+      _out.startPacket();
+      _out.writeInt(HmtpPacketType.MESSAGE_ERROR.ordinal());
+      _out.writeString(to);
+      _out.writeString(from);
+      _out.writeObject(value);
+      _out.writeObject(error);
+      _out.endPacket();
       _out.flush();
     } catch (IOException e) {
       _packetHandler.close();
@@ -120,7 +132,7 @@ public class ServerAgentStream implements BamStream
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " queryGet to=" + to
+	log.finer(this + " queryGet to=" + to
 		  + " from=" + from);
       }
       
@@ -142,7 +154,7 @@ public class ServerAgentStream implements BamStream
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " querySet to=" + to
+	log.finer(this + " querySet to=" + to
 		  + " from=" + from);
       }
       
@@ -158,17 +170,23 @@ public class ServerAgentStream implements BamStream
   }
   
   public void queryResult(long id,
-			      String to,
-			      String from,
-			      Serializable value)
+			  String to,
+			  String from,
+			  Serializable value)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " queryResult id=" + id + " to=" + to
-		  + " from=" + from);
+	log.finer(this + " queryResult " + value
+		  + " {id:" + id + ", to:" + to + ", from:" + from + "}");
       }
-      
-      _out.writeObject(new QueryResult(id, to, from, value));
+
+      _out.startPacket();
+      _out.writeInt(HmtpPacketType.QUERY_RESULT.ordinal());
+      _out.writeString(to);
+      _out.writeString(from);
+      _out.writeLong(id);
+      _out.writeObject(value);
+      _out.endPacket();
       _out.flush();
     } catch (IOException e) {
       _packetHandler.close();
@@ -180,16 +198,23 @@ public class ServerAgentStream implements BamStream
   public void queryError(long id,
 			     String to,
 			     String from,
-			     Serializable query,
+			     Serializable value,
 			     BamError error)
   {
     try {
       if (log.isLoggable(Level.FINER)) {
-	log.finer(_packetHandler + " send " + error + " to=" + to
-		  + " from=" + from);
+	log.finer(_packetHandler + " queryError " + error + " " + value
+		  + " {id:" + id + ", to:" + to + ", from:" + from + "}");
       }
-      
-      _out.writeObject(new QueryError(id, to, from, query, error));
+
+      _out.startPacket();
+      _out.writeInt(HmtpPacketType.QUERY_ERROR.ordinal());
+      _out.writeString(to);
+      _out.writeString(from);
+      _out.writeLong(id);
+      _out.writeObject(value);
+      _out.writeObject(error);
+      _out.endPacket();
       _out.flush();
     } catch (IOException e) {
       _packetHandler.close();
