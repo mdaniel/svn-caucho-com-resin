@@ -229,12 +229,21 @@ public class ClassesModule extends AbstractQuercusModule {
   {
     ArrayValue result = new ArrayValueImpl();
 
-    Iterator<Map.Entry<Value,Value>> iter = obj.getIterator(env);
+    // #3253, php/4as7 - XXX: needs cleanup
 
-    while (iter.hasNext()) {
-      Map.Entry<Value,Value> entry = iter.next();
+    if (obj instanceof ObjectValue) {
+      for (Map.Entry<Value,Value> entry : ((ObjectValue) obj).entrySet()) {
+	result.put(entry.getKey(), entry.getValue());
+      }
+    }
+    else {
+      Iterator<Map.Entry<Value,Value>> iter = obj.getIterator(env);
 
-      result.put(entry.getKey(), entry.getValue());
+      while (iter.hasNext()) {
+	Map.Entry<Value,Value> entry = iter.next();
+
+	result.put(entry.getKey(), entry.getValue());
+      }
     }
 
     return result;

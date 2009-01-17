@@ -221,7 +221,11 @@ public class MiscModule extends AbstractQuercusModule {
 
       args[2] = command;
       
-      Process process = Runtime.getRuntime().exec(args);
+      ProcessBuilder processBuilder = new ProcessBuilder(args);
+      processBuilder.redirectErrorStream(true);
+      // XXX: security issues?
+      processBuilder.directory(new File(env.getPwd().getNativePath()));
+      final Process process = processBuilder.start();
 
       InputStream is = process.getInputStream();
       InputStream es = process.getErrorStream();
@@ -597,7 +601,11 @@ public class MiscModule extends AbstractQuercusModule {
 
       args[2] = command;
       
-      Process process = Runtime.getRuntime().exec(args);
+      ProcessBuilder processBuilder = new ProcessBuilder(args);
+      processBuilder.redirectErrorStream(true);
+      // XXX: security issues?
+      processBuilder.directory(new File(env.getPwd().getNativePath()));
+      final Process process = processBuilder.start();
 
       InputStream is = process.getInputStream();
       InputStream es = process.getErrorStream();
@@ -658,6 +666,8 @@ public class MiscModule extends AbstractQuercusModule {
 
       ProcessBuilder processBuilder = new ProcessBuilder(args);
       processBuilder.redirectErrorStream(true);
+      // XXX: security issues?
+      processBuilder.directory(new File(env.getPwd().getNativePath()));
       final Process process = processBuilder.start();
 
       try {

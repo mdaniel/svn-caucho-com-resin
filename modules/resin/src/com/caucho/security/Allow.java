@@ -44,11 +44,29 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 /**
+ * The &lt;sec:Allow> tag authorizes requests for a set of url-patterns.
+ * If the request URL matches, &lt;sec:Allow> checks all its children
+ * ServletReqestPredicate for matches, and if all children match, the
+ * request is authorized.
+ *
+ * <p>If the url-patterns match but the children don't match, Resin checks
+ * following &lt;sec:Allow> and &lt;sec:Deny> tags to see if they match.
+ * If of the following tags match, Resin will reject the request.  This
+ * chaining lets you solve more complicated authorization requirements
+ * simply.
+ *
  * <code><pre>
  * &lt;web-app xmlns="http://caucho.com/ns/resin"
  *          xmlns:sec="urn:java:com.caucho.security">
  *
  *   &lt;sec:Allow url-pattern="*.jsp"/>
+ *
+ *   &lt;sec:Allow>
+ *     &lt;sec:url-pattern>/admin/*&lt;sec:url-pattern>
+ *     &lt;sec:url-pattern>/security/*&lt;sec:url-pattern>
+ *
+ *     &lt;sec:IfNetwork>192.168.0.1&lt;/sec:IfNetwork>
+ *   &lt;/sec:Allow>
  *
  * &lt;/web-app>
  * </pre></code>

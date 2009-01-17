@@ -122,7 +122,8 @@ public abstract class AbstractLogin implements Login {
       try {
 	_auth = _webBeans.getInstanceByType(Authenticator.class);
       } catch (Exception e) {
-        log.log(Level.FINER, e.toString(), e);
+        log.finer(e.toString());
+	log.log(Level.FINEST, e.toString(), e);
       }
 
       if (_auth == null)

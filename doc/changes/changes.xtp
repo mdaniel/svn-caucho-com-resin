@@ -13,6 +13,11 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>quercus: pwd not working properly in passthru (#3247, rep by mikhailb)</li>
+<li>quercus: get_object_vars must not use iterator (#3253, rep by haplo)</li>
+<li>quercus: Java interfaces not properly populating instanceof (#3230, rep by haplo)</li>
+<li>quercus: ArrayIterator constructor issues (#3239, #3253, rep by haplo)</li>
+<li>quercus: instanceof not working with Java classes (#3242, rep by haplo)</li>
 <li>quercus: static variables related to late static binding (#3225, rep by koreth)</li>
 <li>osgi: getLocalResource needs to check for loader null (#3236, rep by koreth)</li>
 <li>jsf: f:view not bound when using jsf:ri with xml syntax (#3102, rep by alex)</li>

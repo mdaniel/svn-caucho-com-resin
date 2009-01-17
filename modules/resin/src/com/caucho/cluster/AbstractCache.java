@@ -323,15 +323,7 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
    */
   public Object get(Object key)
   {
-    CacheKeyEntry entry = _entryCache.get(key);
-
-    if (entry == null) {
-      entry = _distributedCacheManager.getKey(key, _config);
-
-      _entryCache.put(key, entry);
-    }
-
-    return entry.get(_config);
+    return getKeyEntry(key).get(_config);
   }
   
   /**
@@ -340,15 +332,7 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
   public boolean get(Object key, OutputStream os)
     throws IOException
   {
-    CacheKeyEntry entry = _entryCache.get(key);
-
-    if (entry == null) {
-      entry = _distributedCacheManager.getKey(key, _config);
-
-      _entryCache.put(key, entry);
-    }
-
-    return entry.getStream(os, _config);
+    return getKeyEntry(key).getStream(os, _config);
   }
   
   /**
@@ -356,15 +340,7 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
    */
   public CacheEntry<Object> getEntry(Object key)
   {
-    CacheKeyEntry entry = _entryCache.get(key);
-
-    if (entry == null) {
-      entry = _distributedCacheManager.getKey(key, _config);
-
-      _entryCache.put(key, entry);
-    }
-
-    return entry.getEntry(_config);
+    return getKeyEntry(key).getEntry(_config);
   }
   
   /**
@@ -375,15 +351,7 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
    */
   public Object put(Object key, Object value)
   {
-    CacheKeyEntry entry = _entryCache.get(key);
-
-    if (entry == null) {
-      entry = _distributedCacheManager.getKey(key, _config);
-
-      _entryCache.put(key, entry);
-    }
-
-    return entry.put(value, _config);
+    return getKeyEntry(key).put(value, _config);
   }
   
   /**
@@ -399,15 +367,7 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
 			long idleTimeout)
     throws IOException
   {
-    CacheKeyEntry entry = _entryCache.get(key);
-
-    if (entry == null) {
-      entry = _distributedCacheManager.getKey(key, _config);
-
-      _entryCache.put(key, entry);
-    }
-
-    return entry.put(is, _config, idleTimeout);
+    return getKeyEntry(key).put(is, _config, idleTimeout);
   }
   
   /**
@@ -456,15 +416,7 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
    */
   public Object remove(Object key)
   {
-    CacheKeyEntry entry = _entryCache.get(key);
-
-    if (entry == null) {
-      entry = _distributedCacheManager.getKey(key, _config);
-
-      _entryCache.put(key, entry);
-    }
-
-    return entry.remove(_config);
+    return getKeyEntry(key).remove(_config);
   }
 
   /**
@@ -475,6 +427,22 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
     // HashKey hashKey = getHashKey(key);
     
     return false;
+  }
+
+  /**
+   * Returns the CacheKeyEntry for the given key.
+   */
+  protected CacheKeyEntry getKeyEntry(Object key)
+  {
+    CacheKeyEntry entry = _entryCache.get(key);
+
+    if (entry == null) {
+      entry = _distributedCacheManager.getKey(key, _config);
+
+      _entryCache.put(key, entry);
+    }
+
+    return entry;
   }
 
   @Override

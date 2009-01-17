@@ -31,9 +31,11 @@ package com.caucho.quercus.lib.spl;
 
 import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.This;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.Callback;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
@@ -45,8 +47,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class ArrayIterator
-  implements Traversable,
-             SeekableIterator,
+  implements SeekableIterator,
              ArrayAccess,
              Countable
 {
@@ -54,31 +55,33 @@ public class ArrayIterator
   public static final int ARRAY_AS_PROPS = 0x00000002;
 
   private Env _env;
-  private final Value _value;
+  private Value _qThis;
+  private Value _value = NullValue.NULL;
   private int _flags;
 
   private java.util.Iterator<Map.Entry<Value,Value>> _iterator;
   private Map.Entry<Value, Value> _current;
 
+  public ArrayIterator()
+  {
+  }
+  
   @Name("__construct")
-  public ArrayIterator(Env env,
-                       @Optional Value value,
-                       @Optional int flags)
+  public Value __construct(Env env,
+			   @This Value qThis,
+			   @Optional Value value,
+			   @Optional int flags)
   {
     _env = env;
+    _qThis = qThis;
+    
+    if (value == null)
+      value = NullValue.NULL;
+    
     _value = value;
     _flags = flags;
 
-    resetToFirst();
-  }
-
-  private void resetToFirst()
-  {
-    _iterator = _value.getIterator(_env);
-    if (_iterator.hasNext())
-      _current = _iterator.next();
-    else
-      _current = null;
+    return qThis;
   }
 
   public void append(Value value)
@@ -137,8 +140,11 @@ public class ArrayIterator
       ArrayModule.natsort((ArrayValue) _value);
   }
 
-  public void next()
+  public void next(Env env)
   {
+    if (_iterator == null)
+      rewind();
+    
     if (_iterator.hasNext())
       _current = _iterator.next();
     else
@@ -165,9 +171,22 @@ public class ArrayIterator
     return _value.remove(offset);
   }
 
+  public void rewindJava(Env env)
+  {
+    if (_qThis != null)
+      _qThis.findFunction("rewind").callMethod(env, _qThis);
+    else
+      rewind();
+  }
+
   public void rewind()
   {
-    resetToFirst();
+    _iterator = _value.getIterator(_env);
+    
+    if (_iterator.hasNext())
+      _current = _iterator.next();
+    else
+      _current = null;
   }
 
   public void setFlags(Value flags)
@@ -175,12 +194,12 @@ public class ArrayIterator
     _flags = flags.toInt();
   }
 
-  public void seek(int index)
+  public void seek(Env env, int index)
   {
-    resetToFirst();
+    rewindJava(env);
 
     for (int i = 0; i < index; i++) {
-      if (!_iterator.hasNext()) {
+      if (! _iterator.hasNext()) {
         _current = null;
         break;
       }
@@ -203,6 +222,9 @@ public class ArrayIterator
 
   public boolean valid()
   {
+    if (_iterator == null)
+      rewind();
+    
     return _current != null;
   }
 

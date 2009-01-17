@@ -88,7 +88,7 @@ XML authenticator as follows.</p>
 </example>
 
 <p>For security, the password is secured with an MD5 hash, because
-plaintext passwords aren't very security at all.  The easiest way to
+plaintext passwords aren't very secure at all.  The easiest way to
 generate the hash is with a short PHP script:</p>
 
 <example title="PHP generation of MD5 hash">
@@ -714,86 +714,6 @@ public class MyAuthenticator extends AbstractAuthenticator {
 
 </s2>
 
-<s2 title="Quick Start">
-<p>The easiest authenticator to understand is the 
-<a href="#XmlAuthenticator">XmlAuthenticator</a>.
-It lets you put users and passwords directly in the configuration
-file.  The following example uses "Basic" authentication for login.
-Basic authentication asks the browser to pop open a window prompting
-for a username and password.  (Basic authentication is discouraged
-because it is not secure unless you use it with SSL, but it's the
-easiest example.)  The only user defined here is "Harry Potter" and
-he has the password "quidditch".  He also plays the
-"user" role.</p>
-
-<example title="Using the XmlAuthenticator">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-         xmlns:sec="urn:java:com.caucho.security">
-
-  ...
-
-  &lt;sec:XmlAuthenticator password-digest="none">
-    &lt;sec:user name="Harry Potter" password="quidditch" group="user"&lt;/user&gt;
-  &lt;/sec:XmlAuthenticator&gt;
-
-  &lt;sec:BasicConfig/>
-
-  &lt;sec:Allow url-pattern="/users-only/*">
-    &lt;sec:IfRole -name="user"/&gt;
-  &lt;/sec:Allow>
-
-  ...
-
-&lt;/web-app&gt;
-</example>
-
-<p>In the above example, the &lt;sec:Allow&gt; checks
-for authorization.  Only users playing the "user" role can access
-the /users-only directory.</p>
-
-<p>Another often used authenticator is the 
-<a href="#DatabaseAuthenticator">DatabaseAuthenticator</a>, 
-which uses usernames, passwords, and roles stored in a database.</p>
-
-<example>
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-   xmlns:sec="urn:java:com.caucho.security"&gt;
-
-  ...
-
-  &lt;!-- Resin-specific JdbcAuthenticator --&gt;
-  &lt;sec:DatabaseAuthenticator'&gt;
-    &lt;sec:data-source&gt;test&lt;/sec:data-source&gt;
-    
-    &lt;sec:password-query&gt;
-      SELECT password FROM LOGIN WHERE username=?
-    &lt;/sec:password-query&gt;
-    
-    &lt;sec:cookie-auth-query&gt;
-      SELECT username FROM LOGIN WHERE cookie=?
-    &lt;/sec:cookie-auth-query&gt;
-    
-    &lt;sec:cookie-auth-update&gt;
-      UPDATE LOGIN SET cookie=? WHERE username=?
-    &lt;/sec:cookie-auth-update&gt;
-    
-    &lt;sec:role-query&gt;
-      SELECT role FROM LOGIN WHERE username=?
-    &lt;/sec:role-query&gt;
-  &lt;/sec:DatabaseAuthenticator&gt;
-
-  &lt;sec:BasicLogin/&gt;
-
-  &lt;sec:Allow url-pattern="/users-only/*">
-    &lt;sec:IfRole name="user"/&gt;
-  &lt;/sec:Allow>
-
-  ...
-
-&lt;/web-app&gt;
-</example>
-
-</s2>
 </s1>
 
 <s1 title="Digest passwords">

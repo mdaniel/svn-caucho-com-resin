@@ -29,11 +29,13 @@
 
 package com.caucho.quercus.lib.spl;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.TraversableDelegate;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.util.L10N;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -45,31 +47,51 @@ import java.util.Map;
 public class IteratorAggregateDelegate
   implements TraversableDelegate
 {
+  private static final L10N L = new L10N(IteratorAggregateDelegate.class);
+  
   private static final StringBuilderValue GET_ITERATOR
     = new StringBuilderValue("getIterator");
   
-  private final IteratorDelegate _iteratorDelegate = new IteratorDelegate();
+  private static final IteratorDelegate _iteratorDelegate
+    = new IteratorDelegate();
 
   public Iterator<Map.Entry<Value, Value>>
     getIterator(Env env, ObjectValue qThis)
   {
-    return _iteratorDelegate.getIterator(env, getTarget(env, qThis));
+    Value target = getTarget(env, qThis);
+
+    if (target instanceof ObjectValue) {
+      return target.getIterator(env);
+    }
+    else
+      throw new QuercusException(L.l("'{0}' is not a valid Traversable",
+				     qThis));
   }
 
   public Iterator<Value> getKeyIterator(Env env, ObjectValue qThis)
   {
-    return _iteratorDelegate.getKeyIterator(env, getTarget(env, qThis));
+    Value target = getTarget(env, qThis);
+    
+    if (target instanceof ObjectValue)
+      return _iteratorDelegate.getKeyIterator(env, (ObjectValue) target);
+    else
+      throw new QuercusException(L.l("'{0}' is not a valid Traversable",
+				     qThis));
   }
 
   public Iterator<Value> getValueIterator(Env env, ObjectValue qThis)
   {
-    return _iteratorDelegate.getValueIterator(env, getTarget(env, qThis));
+    Value target = getTarget(env, qThis);
+    
+    if (target instanceof ObjectValue)
+      return _iteratorDelegate.getValueIterator(env, (ObjectValue) target);
+    else
+      throw new QuercusException(L.l("'{0}' is not a valid Traversable",
+				     qThis));
   }
 
-  private ObjectValue getTarget(Env env, ObjectValue qThis)
+  private Value getTarget(Env env, ObjectValue qThis)
   {
-    Value iter = qThis.callMethod(env, GET_ITERATOR);
-
-    return (ObjectValue) iter;
+    return qThis.callMethod(env, GET_ITERATOR);
   }
 }

@@ -1061,7 +1061,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 	  long now = Alarm.getCurrentTime();
 
 	  if (entry == null
-	      || entry.getLastAccessTime() + _idleTimeout < now) {
+	      || entry.getLastUpdateTime() + _idleTimeout < now) {
 	    isRemove = true;
 	  }
 	}

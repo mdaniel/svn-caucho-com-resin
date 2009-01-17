@@ -701,8 +701,8 @@ public class ObjectExtValue extends ObjectValue
 
     if (delegate != null)
       return delegate.getIterator(env, this);
-
-    return new KeyValueIterator(_entries);
+    else
+      return new KeyValueIterator(_entries);
   }
 
   /**

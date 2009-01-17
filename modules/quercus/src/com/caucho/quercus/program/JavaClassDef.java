@@ -102,6 +102,7 @@ public class JavaClassDef extends ClassDef {
     = new HashMap<StringValue, FieldMarshalPair> ();
 
   private AbstractJavaMethod _cons;
+  private AbstractJavaMethod __construct;
   
   private JavaMethod __fieldGet;
   private JavaMethod __fieldSet;
@@ -264,8 +265,28 @@ public class JavaClassDef extends ClassDef {
       fillInstanceOfSet(_type);
     }
     
-    return _instanceOfSet.contains(name)
-           || _instanceOfSetLowerCase.contains(name.toLowerCase());
+    return (_instanceOfSet.contains(name)
+	    || _instanceOfSetLowerCase.contains(name.toLowerCase()));
+  }
+
+  /**
+   * Adds the interfaces to the set
+   */
+  @Override
+  public void addInterfaces(HashSet<String> interfaceSet)
+  {
+    addInterfaces(interfaceSet, _type);
+  }
+
+  protected void addInterfaces(HashSet<String> interfaceSet, Class type)
+  {
+    interfaceSet.add(type.getSimpleName().toLowerCase());
+
+    if (type.getInterfaces() != null) {
+      for (Class iface : type.getInterfaces()) {
+	addInterfaces(interfaceSet, iface);
+      }
+    }
   }
 
   private boolean hasInterface(String name, Class type)
@@ -524,8 +545,14 @@ public class JavaClassDef extends ClassDef {
   @Override
   public Value callNew(Env env, Value []args)
   {
-    if (_cons != null)
-      return _cons.callMethod(env, null, args);
+    if (_cons != null) {
+      Value value = _cons.callMethod(env, null, args);
+
+      if (__construct != null)
+	__construct.callMethod(env, value, args);
+
+      return value;
+    }
     else
       return NullValue.NULL;
   }
@@ -753,6 +780,10 @@ public class JavaClassDef extends ClassDef {
       cl.setConstructor(_cons);
       cl.addMethod("__construct", _cons);
     }
+    
+    if (__construct != null) {
+      cl.addMethod("__construct", __construct);
+    }
 
     for (AbstractJavaMethod value : _functionMap.values()) {
       cl.addMethod(value.getName(), value);
@@ -869,10 +900,15 @@ public class JavaClassDef extends ClassDef {
     _marshal = new JavaMarshal(this, false);
 
     Method consMethod = getConsMethod(_type);
-
-    if (consMethod != null)
-      _cons = new JavaMethod(_moduleContext, consMethod);
-    else {
+    
+    if (consMethod != null) {
+      if (Modifier.isStatic(consMethod.getModifiers()))
+	_cons = new JavaMethod(_moduleContext, consMethod);
+      else
+	__construct = new JavaMethod(_moduleContext, consMethod);
+    }
+    
+    if (_cons == null) {
       Constructor []cons = _type.getConstructors();
 
       if (cons.length > 0) {
@@ -994,14 +1030,12 @@ public class JavaClassDef extends ClassDef {
 
     for (int i = 0; i < methods.length; i++) {
       Method method = methods[i];
-      
+
       if (! method.getName().equals("__construct"))
-	continue;
-      if (! Modifier.isStatic(method.getModifiers()))
 	continue;
       if (! Modifier.isPublic(method.getModifiers()))
 	continue;
-
+      
       return method;
     }
 

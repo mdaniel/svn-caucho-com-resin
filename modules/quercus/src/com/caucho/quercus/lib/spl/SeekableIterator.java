@@ -29,11 +29,13 @@
 
 package com.caucho.quercus.lib.spl;
 
+import com.caucho.quercus.env.Env;
+
 public interface SeekableIterator
   extends Iterator
 {
   /**
    * Seeks to the given offset.
    */
-  public void seek(int index);
+  public void seek(Env env, int index);
 }

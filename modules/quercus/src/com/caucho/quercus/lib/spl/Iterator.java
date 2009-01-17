@@ -50,7 +50,7 @@ public interface Iterator
   /**
    * Advances to the next row.
    */
-  public void next();
+  public void next(Env env);
 
   /**
    * Rewinds the iterator so it is at the first row.

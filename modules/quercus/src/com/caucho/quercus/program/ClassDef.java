@@ -36,6 +36,7 @@ import com.caucho.quercus.Location;
 import com.caucho.util.L10N;
 
 import java.util.Map;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -129,6 +130,18 @@ abstract public class ClassDef {
   public String []getInterfaces()
   {
     return _ifaceList;
+  }
+
+  /**
+   * Adds the interfaces to the set
+   */
+  public void addInterfaces(HashSet<String> interfaceSet)
+  {
+    interfaceSet.add(getName());
+    
+    for (String name : getInterfaces()) {
+      interfaceSet.add(name);
+    }
   }
 
   /**

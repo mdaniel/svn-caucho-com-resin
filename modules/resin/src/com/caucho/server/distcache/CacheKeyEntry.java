@@ -32,6 +32,7 @@ package com.caucho.server.distcache;
 import com.caucho.cluster.CacheEntry;
 import com.caucho.server.cluster.ClusterTriad;
 import com.caucho.util.Alarm;
+import com.caucho.util.Hex;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -187,6 +188,7 @@ public class CacheKeyEntry {
   {
     return (getClass().getSimpleName()
 	    + "[key=" + _key
+	    + ",keyHash=" + Hex.toHex(_keyHash.getHash(), 0, 4)
 	    + ",owner=" + _owner
 	    + "]");
   }

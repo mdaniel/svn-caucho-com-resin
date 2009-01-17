@@ -183,26 +183,7 @@ public class QuercusClass {
 
       classDef.init();
 
-      _instanceofSet.add(classDef.getName());
-
-      for (String iface : classDef.getInterfaces()) {
-        // XXX: php/0cn2, but this is wrong:
-        QuercusClass cl = Env.getInstance().findClass(iface);
-        
-        if (cl == null)
-          throw new QuercusRuntimeException(L.l("cannot find interface {0}",
-                                                iface));
-
-	_instanceofSet.addAll(cl.getInstanceofSet());
-        
-        ClassDef ifaceDef = cl.getClassDef();
-        // ClassDef ifaceDef = moduleContext.findClass(iface);
-
-        if (ifaceDef != null) {
-          if (ifaces.add(iface))
-            ifaceDef.initClass(this);
-        }
-      }
+      addInstances(_instanceofSet, ifaces, classDef);
 
       classDef.initClass(this);
     }
@@ -218,6 +199,36 @@ public class QuercusClass {
 
     if (_destructor == null && parent != null)
       _destructor = parent.getDestructor();
+  }
+
+  private void addInstances(HashSet<String> instanceofSet,
+			    HashSet<String> ifaces,
+			    ClassDef classDef)
+  {
+    // _instanceofSet.add(classDef.getName());
+    classDef.addInterfaces(instanceofSet);
+
+    for (String iface : classDef.getInterfaces()) {
+      // XXX: php/0cn2, but this is wrong:
+      QuercusClass cl = Env.getInstance().findClass(iface, true, true);
+        
+      if (cl == null)
+	throw new QuercusRuntimeException(L.l("cannot find interface {0}",
+					      iface));
+
+      // _instanceofSet.addAll(cl.getInstanceofSet());
+        
+      ClassDef ifaceDef = cl.getClassDef();
+      // ClassDef ifaceDef = moduleContext.findClass(iface);
+
+      if (ifaceDef != null) {
+	if (ifaces.add(iface)) {
+	  addInstances(instanceofSet, ifaces, ifaceDef);
+
+	  ifaceDef.initClass(this);
+	}
+      }
+    }
   }
 
   /**
@@ -884,7 +895,7 @@ public class QuercusClass {
    */
   public boolean isA(String name)
   {
-    return _instanceofSet.contains(name);
+    return _instanceofSet.contains(name.toLowerCase());
   }
   
   /*

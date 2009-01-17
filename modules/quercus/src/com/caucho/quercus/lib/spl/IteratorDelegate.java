@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.spl;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.TraversableDelegate;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
@@ -66,7 +67,7 @@ public class IteratorDelegate implements TraversableDelegate
 
   public Iterator<Value> getValueIterator(Env env, ObjectValue qThis)
   {
-    return new ValueIterator(env, qThis);
+    return new ValueIterator(env, (ObjectValue) qThis);
   }
 
   abstract public static class AbstractIteratorImpl<T>
@@ -86,6 +87,10 @@ public class IteratorDelegate implements TraversableDelegate
     {
       _env = env;
       _obj = obj;
+
+      if (! obj.isA("iterator"))
+	throw new IllegalStateException(L.l("'{0}' is an invalid iterator",
+					    obj));
 
       _currentFun = _obj.findFunction("current");
       _keyFun = _obj.findFunction("key");
