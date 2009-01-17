@@ -29,6 +29,7 @@
 package com.caucho.jsp;
 
 import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -36,6 +37,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.jsp.HttpJspPage;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Wraps Java JSP files using 'extends' in a page.  Since a JSP file which
@@ -68,6 +70,8 @@ class WrapperPage extends Page {
   public void caucho_init(ServletConfig config)
     throws ServletException
   {
+    super.init(config);
+
     if (_childPage != null)
       _childPage.caucho_init(config);
     else
@@ -98,6 +102,17 @@ class WrapperPage extends Page {
       return _childPage._caucho_isModified();
     else
       return false;
+  }
+
+  public ArrayList<PersistentDependency> _caucho_getDependList()
+  {
+    if (_childPage != null)
+      return _childPage._caucho_getDependList();
+
+    if (_child instanceof CauchoPage)
+      ((CauchoPage)_child)._caucho_getDependList();
+
+    return null;
   }
 
   public long _caucho_lastModified()

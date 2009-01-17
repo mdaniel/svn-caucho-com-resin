@@ -1685,12 +1685,12 @@ public class JavaJspGenerator extends JspGenerator {
   {
     out.println();
     // out.println("private com.caucho.java.LineMap _caucho_line_map;");
-    out.println("private java.util.ArrayList _caucho_depends = new java.util.ArrayList();");
+    out.println("private java.util.ArrayList<com.caucho.vfs.PersistentDependency> _caucho_depends = new java.util.ArrayList<com.caucho.vfs.PersistentDependency>();");
     if (_isCacheable && ! _isUncacheable)
       out.println("private java.util.ArrayList _caucho_cacheDepends = new java.util.ArrayList();");
-    
+
     out.println();
-    out.println("public java.util.ArrayList _caucho_getDependList()");
+    out.println("public java.util.ArrayList<com.caucho.vfs.PersistentDependency> _caucho_getDependList()");
     out.println("{");
     out.println("  return _caucho_depends;");
     out.println("}");

@@ -316,6 +316,7 @@ abstract public class PageManager {
         page._caucho_setNeverModified(true);
 
       page._caucho_setUpdateInterval(_updateInterval);
+      page.cauchoIsModified();
 
       try {
 	ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();

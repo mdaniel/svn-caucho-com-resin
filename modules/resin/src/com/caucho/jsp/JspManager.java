@@ -224,7 +224,7 @@ public class JspManager extends PageManager {
     if (page != null) {
       if (log.isLoggable(Level.FINE))
         log.fine("loading pre-compiled page for " + uri);
-      
+
       return page;
     }
 

@@ -31,9 +31,11 @@ package com.caucho.jsp;
 
 import com.caucho.server.webapp.WebApp;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletConfig;
+import java.util.ArrayList;
 
 public interface CauchoPage {
   public void init(Path path)
@@ -47,4 +49,6 @@ public interface CauchoPage {
   public boolean _caucho_isModified();
   
   public long _caucho_lastModified();
+
+  public ArrayList<PersistentDependency> _caucho_getDependList();
 }

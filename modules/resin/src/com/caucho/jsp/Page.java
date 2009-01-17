@@ -224,6 +224,11 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
     _caucho_addDepend(depend);
   }
 
+  public ArrayList<PersistentDependency> _caucho_getDependList()
+  {
+    return null;
+  }
+
   /**
    * Marks the page as cacheable.
    */
@@ -316,7 +321,11 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
     
     _webApp = (WebApp) config.getServletContext();
 
-    cauchoIsModified();
+    //cauchoIsModified();
+    ArrayList<PersistentDependency> depends = _caucho_getDependList();
+
+    for (int i = 0; depends != null && i < depends.size(); i++)
+      _depends.add(depends.get(i));
 
     if (! disableLog() && _caucho_log.isLoggable(Level.FINE))
       _caucho_log.fine(getClass().getName() + " init");
