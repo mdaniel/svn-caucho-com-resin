@@ -531,7 +531,10 @@ abstract public class ArrayValue extends Value {
     while (iter.hasNext()) {
       Map.Entry<Value,Value> entry = iter.next();
       
-      result.put(entry.getKey(), entry.getValue());
+      Value key = entry.getKey();
+      
+      if (result.get(key) == UnsetValue.UNSET)
+        result.put(key, entry.getValue());
     }
 
     return result;
