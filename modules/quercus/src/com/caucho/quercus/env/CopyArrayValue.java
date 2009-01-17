@@ -198,7 +198,41 @@ public class CopyArrayValue extends ArrayValue {
   }
 
   /**
-   * Gets a new value.
+   * Returns the corresponding key if this array contains the given value
+   *
+   * @param value to search for in the array
+   *
+   * @return the key if it is found in the array, NULL otherwise
+   */
+  public Value contains(Value value)
+  {
+    if (_copyArray != null)
+      return _copyArray.contains(value);
+    else
+      return _constArray.contains(value);
+  }
+
+  /**
+   * Returns the corresponding key if this array contains the given value
+   *
+   * @param value to search for in the array
+   *
+   * @return the key if it is found in the array, NULL otherwise
+   */
+  public Value containsStrict(Value value)
+  {
+    if (_copyArray != null)
+      return _copyArray.containsStrict(value);
+    else
+      return _constArray.containsStrict(value);
+  }
+
+  /**
+   * Returns the corresponding value if this array contains the given key
+   *
+   * @param key to search for in the array
+   *
+   * @return the value if it is found in the array, NULL otherwise
    */
   public Value containsKey(Value key)
   {
@@ -256,7 +290,7 @@ public class CopyArrayValue extends ArrayValue {
     getCopyArray().shuffle();
   }
 
-  public Entry getHead()
+  protected Entry getHead()
   {
     if (_copyArray != null)
       return _copyArray.getHead();

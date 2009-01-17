@@ -493,11 +493,13 @@ public class ArrayModule
     ArrayValue newArray = new ArrayValueImpl(array.getSize());
 
     int i = 0;
-    for (ArrayValue.Entry ptr = array.getHead();
-	 ptr != null;
-	 ptr = ptr.getNext()) {
-      Value entryKey = ptr.getKey();
-      Value entryValue = ptr.getValue();
+    
+    Iterator<Map.Entry<Value,Value>> iter = array.getIterator(env);
+    
+    while (iter.hasNext()) {
+      Map.Entry<Value,Value> entry = iter.next();
+      Value entryKey = entry.getKey();
+      Value entryValue = entry.getValue();
 
       if (searchValue == null || searchValue instanceof DefaultValue)
         newArray.append(LongValue.create(i++), entryKey);
@@ -910,7 +912,9 @@ public class ArrayModule
     if (array.getSize() < 1)
       return NullValue.NULL;
 
-    Value value = array.getHead().getKey();
+    Iterator<Value> iter = array.getKeyIterator(env);
+    
+    Value value = iter.next();
 
     Value firstValue = array.remove(value);
 
@@ -962,23 +966,21 @@ public class ArrayModule
 
     ArrayValue slicedArray = new ArrayValueImpl();
 
-    ArrayValue.Entry entry = array.getHead();
-    ArrayValue.Entry next = null;
-    for (int k = 0; k < endIndex && entry != null; k++) {
-      next = entry.getNext();
+    Iterator<Map.Entry<Value,Value>> iter = array.getIterator(env);
+    
+    for (int i = 0; i < endIndex && iter.hasNext(); i++) {
+      Map.Entry<Value,Value> entry = iter.next();
       
-      if (startIndex <= k) {
-        Value entryKey = entry.getKey();
+      if (startIndex <= i) {
+        Value key = entry.getKey();
 
-        Value entryValue = entry.getValue();
+        Value value = entry.getValue();
 
-        if ((entryKey instanceof StringValue) || presKeys)
-          slicedArray.put(entryKey, entryValue);
+        if ((key.isString()) || presKeys)
+          slicedArray.put(key, value);
         else
-          slicedArray.put(entryValue);
+          slicedArray.put(value);
       }
-
-      entry = next;
     }
 
     return slicedArray;

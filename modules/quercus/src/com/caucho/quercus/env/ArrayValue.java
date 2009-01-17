@@ -759,7 +759,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the head.
    */
-  abstract public Entry getHead();
+  abstract protected Entry getHead();
 
   /**
    * Returns the tail.
@@ -866,49 +866,27 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the corresponding key if this array contains the given value
    *
-   * @param value  the value to search for in the array
+   * @param value to search for in the array
    *
    * @return the key if it is found in the array, NULL otherwise
-   *
-   * @throws NullPointerException
    */
-  public Value contains(Value value)
-  {
-    for (Entry entry = getHead(); entry != null; entry = entry._next) {
-      if (entry.getValue().eq(value))
-        return entry.getKey();
-    }
-
-    return NullValue.NULL;
-  }
+  abstract public Value contains(Value value);
 
   /**
    * Returns the corresponding key if this array contains the given value
    *
-   * @param value  the value to search for in the array
+   * @param value to search for in the array
    *
    * @return the key if it is found in the array, NULL otherwise
-   *
-   * @throws NullPointerException
    */
-  public Value containsStrict(Value value)
-  {
-    for (Entry entry = getHead(); entry != null; entry = entry._next) {
-      if (entry.getValue().eql(value))
-        return entry.getKey();
-    }
-
-    return NullValue.NULL;
-  }
+  abstract public Value containsStrict(Value value);
 
   /**
-   * Returns the corresponding valeu if this array contains the given key
+   * Returns the corresponding value if this array contains the given key
    *
-   * @param key  the key to search for in the array
+   * @param key to search for in the array
    *
    * @return the value if it is found in the array, NULL otherwise
-   *
-   * @throws NullPointerException
    */
   abstract public Value containsKey(Value key);
 

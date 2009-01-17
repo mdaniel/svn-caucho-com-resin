@@ -438,7 +438,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the head.
    */
-  public Entry getHead()
+  protected Entry getHead()
   {
     throw new UnsupportedOperationException();
   }
@@ -518,7 +518,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the corresponding key if this array contains the given value
    *
-   * @param value  the value to search for in the array
+   * @param value to search for in the array
    *
    * @return the key if it is found in the array, NULL otherwise
    *
@@ -537,11 +537,9 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the corresponding key if this array contains the given value
    *
-   * @param value  the value to search for in the array
+   * @param value to search for in the array
    *
    * @return the key if it is found in the array, NULL otherwise
-   *
-   * @throws NullPointerException
    */
   public Value containsStrict(Value value)
   {
@@ -556,11 +554,9 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the corresponding valeu if this array contains the given key
    *
-   * @param key  the key to search for in the array
+   * @param key to search for in the array
    *
    * @return the value if it is found in the array, NULL otherwise
-   *
-   * @throws NullPointerException
    */
   public Value containsKey(Value key)
   {

@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.env.ArrayValue.Entry;
 import com.caucho.util.RandomUtil;
 
 import java.io.IOException;
@@ -669,8 +670,49 @@ public class ArrayValueImpl extends ArrayValue
   }
   
   /**
-   * Gets a new value.
+   * Returns the corresponding key if this array contains the given value
+   *
+   * @param value to search for in the array
+   *
+   * @return the key if it is found in the array, NULL otherwise
    */
+  @Override
+  public Value contains(Value value)
+  {
+    for (Entry entry = getHead(); entry != null; entry = entry._next) {
+      if (entry.getValue().eq(value))
+        return entry.getKey();
+    }
+
+    return NullValue.NULL;
+  }
+  
+  /**
+   * Returns the corresponding key if this array contains the given value
+   *
+   * @param value to search for in the array
+   *
+   * @return the key if it is found in the array, NULL otherwise
+   */
+  @Override
+  public Value containsStrict(Value value)
+  {
+    for (Entry entry = getHead(); entry != null; entry = entry._next) {
+      if (entry.getValue().eql(value))
+        return entry.getKey();
+    }
+
+    return NullValue.NULL;
+  }
+  
+  /**
+   * Returns the corresponding value if this array contains the given key
+   *
+   * @param key to search for in the array
+   *
+   * @return the value if it is found in the array, NULL otherwise
+   */
+  @Override
   public Value containsKey(Value key)
   {
     Entry entry = getEntry(key);
@@ -919,7 +961,7 @@ public class ArrayValueImpl extends ArrayValue
       return BooleanValue.FALSE;
   }
 
-  public Entry getHead()
+  protected Entry getHead()
   {
     return _head;
   }

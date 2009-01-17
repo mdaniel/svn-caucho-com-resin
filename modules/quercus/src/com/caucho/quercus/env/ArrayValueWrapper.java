@@ -210,7 +210,7 @@ public class ArrayValueWrapper extends ArrayValue {
    * Returns the head.
    */
   @Override
-  public Entry getHead()
+  protected Entry getHead()
   {
     return _array.getHead();
   }
@@ -297,13 +297,37 @@ public class ArrayValueWrapper extends ArrayValue {
   }
   
   /**
-   * Returns the corresponding valeu if this array contains the given key
+   * Returns the corresponding key if this array contains the given value
+   *
+   * @param value to search for in the array
+   *
+   * @return the key if it is found in the array, NULL otherwise
+   */
+  @Override
+  public Value contains(Value key)
+  {
+    return _array.contains(key);
+  }
+  
+  /**
+   * Returns the corresponding key if this array contains the given value
+   *
+   * @param value to search for in the array
+   *
+   * @return the key if it is found in the array, NULL otherwise
+   */
+  @Override
+  public Value containsStrict(Value key)
+  {
+    return _array.containsStrict(key);
+  }
+  
+  /**
+   * Returns the corresponding value if this array contains the given key
    * 
-   * @param key  the key to search for in the array
+   * @param key to search for in the array
    * 
    * @return the value if it is found in the array, NULL otherwise
-   * 
-   * @throws NullPointerException
    */
   @Override
   public Value containsKey(Value key)
