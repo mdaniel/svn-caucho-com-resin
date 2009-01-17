@@ -347,31 +347,6 @@ abstract public class JavaAdapter extends ArrayValue
   abstract public Value createTailKey();
 
   /**
-   * Returns a union of this array and the rValue as array.
-   * If the rValue is not an array, the returned union contains the elements
-   * of this array only.
-   *
-   * To append a value to this ArrayValue use the {@link #put(Value)} method.
-   */
-  public Value add(Value rValue)
-  {
-    rValue = rValue.toValue();
-
-    if (! (rValue instanceof ArrayValue))
-      return copy();
-
-    ArrayValue rArray = (ArrayValue) rValue;
-
-    ArrayValue result = new ArrayValueImpl(rArray);
-
-    for (Map.Entry<Value,Value> entry : entrySet()) {
-      result.put(entry.getKey(), entry.getValue());
-    }
-
-    return result;
-  }
-
-  /**
    * Returns the field values.
    */
   public Collection<Value> getIndices()

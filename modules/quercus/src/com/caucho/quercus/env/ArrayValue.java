@@ -520,14 +520,17 @@ abstract public class ArrayValue extends Value {
   {
     rValue = rValue.toValue();
 
-    if (! (rValue instanceof ArrayValue))
+    if (! rValue.isArray())
       return copy();
+    
+    ArrayValue result = new ArrayValueImpl(this);
+    
+    Iterator<Map.Entry<Value,Value>> iter 
+      = ((ArrayValue) rValue).getIterator(Env.getInstance());
 
-    ArrayValue rArray = (ArrayValue) rValue;
-
-    ArrayValue result = new ArrayValueImpl(rArray);
-
-    for (Entry entry = getHead(); entry != null; entry = entry._next) {
+    while (iter.hasNext()) {
+      Map.Entry<Value,Value> entry = iter.next();
+      
       result.put(entry.getKey(), entry.getValue());
     }
 
