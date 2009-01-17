@@ -27,17 +27,40 @@
  * @author Emil Ong
  */
 
-package com.caucho.bam.annotation;
+package com.caucho.bam;
 
 import static java.lang.annotation.ElementType.METHOD;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @PresenceUnavailable annotation.
+ * The @PresenceSubscribe annotation marks a SimpleBamService method
+ * as handling a presence subscribe request.  Chat, multi-user chat,
+ * and publish/subscribe applications use subscribe packets
+ * to request a subscription to a service from agent.
+ *
+ * <code><pre>
+ * @PresenceSubscribe
+ * void subscribe(String to, String from, MySubscribe value)
+ * </pre></code>
+ *
+ * A logging subscribe handler might look like:
+ *
+ * <code><pre>
+ * @PresenceSubscribe
+ * public void pingSubscribe(String to,
+ *                           String from,
+ *                           MySubscribe value)
+ * {
+ *   getBrokerStream().subscribed(from, to, value);
+ * }
+ * </pre></code>
  */
+
 @Target({METHOD})
 @Retention(RUNTIME)
-public @interface PresenceUnavailable {
+@Documented  
+public @interface PresenceSubscribe {
 }

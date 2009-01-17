@@ -29,8 +29,8 @@
 
 package com.caucho.boot;
 
-import com.caucho.bam.annotation.QueryGet;
-import com.caucho.bam.annotation.QuerySet;
+import com.caucho.bam.QueryGet;
+import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleBamService;
 import com.caucho.util.L10N;
 

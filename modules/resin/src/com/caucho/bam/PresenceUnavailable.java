@@ -27,17 +27,40 @@
  * @author Emil Ong
  */
 
-package com.caucho.bam.annotation;
+package com.caucho.bam;
 
 import static java.lang.annotation.ElementType.METHOD;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @Message annotation.
+ * The @PresenceUnavailable annotation marks a SimpleBamService method
+ * as handling a presence unavailable notification.  Chat, multi-user
+ * chat, and publish/subscribe applications use presence unavailable
+ * packets to notify a service that a user has logged out.
+ *
+ * <code><pre>
+ * @PresenceUnavailable
+ * void unavailable(String to, String from, MyUnavailable value)
+ * </pre></code>
+ *
+ * A logging presence unavailable handler would look like:
+ *
+ * <code><pre>
+ * @PresenceUnavailable
+ * public void pingUnavailable(String to,
+ *                             String from,
+ *                             MyUnavailable value)
+ * {
+ *   System.out.println("Ping: " + value
+ *                      + " {to:" + to + ", from:" + from + "}");
+ * }
+ * </pre></code>
  */
 @Target({METHOD})
 @Retention(RUNTIME)
-public @interface Message {
+@Documented  
+public @interface PresenceUnavailable {
 }

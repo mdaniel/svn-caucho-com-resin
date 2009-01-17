@@ -27,17 +27,37 @@
  * @author Emil Ong
  */
 
-package com.caucho.bam.annotation;
+package com.caucho.bam;
 
 import static java.lang.annotation.ElementType.METHOD;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @PresenceSubscribe annotation.
+ * The @Message annotation marks a SimpleBamService method as handling
+ * a message.  BAM messages are unidirectional packets with a Serializable
+ * payload addressed to a service.  The method signature is
+ *
+ * <code><pre>
+ * @Message
+ * void message(String to, String from, MyMessage value)
+ * </pre></code>
+ *
+ * A ping error message handler would look like:
+ *
+ * <code><pre>
+ * @Message
+ * public void pingMessage(String to, String from, MyPing value)
+ * {
+ *   System.out.println("Ping: " + value
+ *                      + " {to:" + to + ", from:" + from + "}");
+ * }
+ * </pre></code>
  */
 @Target({METHOD})
 @Retention(RUNTIME)
-public @interface PresenceSubscribe {
+@Documented  
+public @interface Message {
 }

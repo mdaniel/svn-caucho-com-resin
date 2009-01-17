@@ -75,13 +75,13 @@ public class ProxyBamConnection extends AbstractBamConnection {
   }
 
   @Override
-  public BamStream getStreamHandler()
+  public BamStream getAgentStream()
   {
     throw new UnsupportedOperationException(getClass().getSimpleName());
   }
 
   @Override
-  public void setStreamHandler(BamStream bamStream)
+  public void setAgentStream(BamStream bamStream)
   {
     throw new UnsupportedOperationException(getClass().getSimpleName());
   }

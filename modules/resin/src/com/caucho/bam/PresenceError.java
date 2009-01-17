@@ -27,17 +27,45 @@
  * @author Emil Ong
  */
 
-package com.caucho.bam.annotation;
+package com.caucho.bam;
 
 import static java.lang.annotation.ElementType.METHOD;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @PresenceError annotation.
+ * The @PresenceError annotation marks a SimpleBamService method as handling
+ * a presence error notification.  The presence error packet is optional,
+ * and can be used by a service to notify a failure in a presence or
+ * subscripton request.
+ *
+ * <code><pre>
+ * @PresenceError
+ * void presenceError(String to,
+ *                    String from,
+ *                    MyPresence value,
+ *                    BamError error)
+ * </pre></code>
+ *
+ * A logging presence error handler would look like:
+ *
+ * <code><pre>
+ * @PresenceError
+ * public void pingPresenceError(String to,
+ *                               String from,
+ *                               MyPresence value,
+ *                               BamError error)
+ * {
+ *   System.out.println("Ping: " + error + " " + value
+ *                      + " {to:" + to + ", from:" + from + "}");
+ * }
+ * </pre></code>
  */
+
 @Target({METHOD})
 @Retention(RUNTIME)
+@Documented  
 public @interface PresenceError {
 }

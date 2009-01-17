@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.bam.hmtp;
 
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
@@ -40,24 +40,26 @@ import java.util.concurrent.*;
 import java.util.logging.*;
 
 /**
- * HMTP client protocol
+ * ClientToServerLink stream handles client packets received from the server.
  */
-class ClientAgentStream implements Runnable, BamStream {
+class FromServerLinkStream implements Runnable, BamStream {
   private static final Logger log
-    = Logger.getLogger(ClientAgentStream.class.getName());
+    = Logger.getLogger(FromServerLinkStream.class.getName());
 
   private static long _gId;
   
   private HmtpClient _client;
-  private BamStream _clientStream;
+  private BamStream _toServerStream;
+  private BamStream _toClientStream;
   private ClassLoader _loader;
   
   private boolean _isFinest;
 
-  ClientAgentStream(HmtpClient client)
+  FromServerLinkStream(HmtpClient client)
   {
     _client = client;
-    _clientStream = client.getBrokerStream();
+    _toServerStream = client.getBrokerStream();
+    _toClientStream = client.getAgentStream();
     _loader = Thread.currentThread().getContextClassLoader();
   }
 
@@ -119,7 +121,7 @@ class ClientAgentStream implements Runnable, BamStream {
 	Serializable value = (Serializable) hIn.readObject();
 	in.endPacket();
 
-	_clientStream.queryResult(id, to, from, value);
+	_toClientStream.queryResult(id, to, from, value);
 	break;
       }
       
@@ -130,7 +132,7 @@ class ClientAgentStream implements Runnable, BamStream {
 	BamError error = (BamError) hIn.readObject();
 	in.endPacket();
 
-	_clientStream.queryError(id, to, from, value, error);
+	_toClientStream.queryError(id, to, from, value, error);
 	break;
       }
     }
@@ -151,7 +153,7 @@ class ClientAgentStream implements Runnable, BamStream {
 			String from,
 			Serializable value)
   {
-    BamStream handler = _client.getStreamHandler();
+    BamStream handler = _client.getAgentStream();
 
     if (handler != null)
       handler.message(to, from, value);
@@ -165,7 +167,7 @@ class ClientAgentStream implements Runnable, BamStream {
 			       Serializable value,
 			       BamError error)
   {
-    BamStream handler = _client.getStreamHandler();
+    BamStream handler = _client.getAgentStream();
 
     if (handler != null)
       handler.messageError(to, from, value, error);
@@ -187,13 +189,13 @@ class ClientAgentStream implements Runnable, BamStream {
 			      String from,
 			      Serializable value)
   {
-    BamStream handler = _client.getStreamHandler();
+    BamStream handler = _client.getAgentStream();
 
     if (handler == null || ! handler.queryGet(id, to, from, value)) {
       String msg = "no queryGet handling " + value.getClass().getName();
       BamError error = new BamError("unknown", msg);
       
-      _clientStream.queryError(id, from, to, value, error);
+      _toServerStream.queryError(id, from, to, value, error);
     }
     
     return true;
@@ -210,13 +212,13 @@ class ClientAgentStream implements Runnable, BamStream {
 			    String from,
 			    Serializable value)
   {
-    BamStream handler = _client.getStreamHandler();
+    BamStream handler = _client.getAgentStream();
 
     if (handler == null || ! handler.querySet(id, to, from, value)) {
       String msg = "no querySet handling " + value.getClass().getName();
       BamError error = new BamError("unknown", msg);
       
-      _clientStream.queryError(id, from, to, value, error);
+      _toServerStream.queryError(id, from, to, value, error);
     }
     
     return true;
@@ -259,7 +261,7 @@ class ClientAgentStream implements Runnable, BamStream {
 			 String from,
 			 Serializable data)
   {
-    BamStream handler = _client.getStreamHandler();
+    BamStream handler = _client.getAgentStream();
 
     if (handler != null)
       handler.presence(to, from, data);
@@ -275,7 +277,7 @@ class ClientAgentStream implements Runnable, BamStream {
 				    String from,
 				    Serializable data)
   {
-    BamStream handler = _client.getStreamHandler();
+    BamStream handler = _client.getAgentStream();
 
     if (handler != null)
       handler.presenceUnavailable(to, from, data);
@@ -288,7 +290,7 @@ class ClientAgentStream implements Runnable, BamStream {
 			      String from,
 			      Serializable data)
   {
-    BamStream handler = _client.getStreamHandler();
+    BamStream handler = _client.getAgentStream();
 
     if (handler != null)
       handler.presenceProbe(to, from, data);
@@ -301,7 +303,7 @@ class ClientAgentStream implements Runnable, BamStream {
 				  String from,
 				  Serializable data)
   {
-    BamStream handler = _client.getStreamHandler();
+    BamStream handler = _client.getAgentStream();
 
     if (handler != null)
       handler.presenceSubscribe(to, from, data);
@@ -314,7 +316,7 @@ class ClientAgentStream implements Runnable, BamStream {
 				   String from,
 				   Serializable data)
   {
-    BamStream handler = _client.getStreamHandler();
+    BamStream handler = _client.getAgentStream();
 
     if (handler != null)
       handler.presenceSubscribed(to, from, data);
@@ -327,7 +329,7 @@ class ClientAgentStream implements Runnable, BamStream {
 				    String from,
 				    Serializable data)
   {
-    BamStream handler = _client.getStreamHandler();
+    BamStream handler = _client.getAgentStream();
 
     if (handler != null)
       handler.presenceUnsubscribe(to, from, data);
@@ -340,10 +342,10 @@ class ClientAgentStream implements Runnable, BamStream {
 				     String from,
 				     Serializable data)
   {
-    BamStream handler = _client.getStreamHandler();
+    BamStream agentStream = _client.getAgentStream();
 
-    if (handler != null)
-      handler.presenceUnsubscribed(to, from, data);
+    if (agentStream != null)
+      agentStream.presenceUnsubscribed(to, from, data);
   }
   
   /**
@@ -354,7 +356,7 @@ class ClientAgentStream implements Runnable, BamStream {
 			      Serializable data,
 			      BamError error)
   {
-    BamStream handler = _client.getStreamHandler();
+    BamStream handler = _client.getAgentStream();
 
     if (handler != null)
       handler.presenceError(to, from, data, error);

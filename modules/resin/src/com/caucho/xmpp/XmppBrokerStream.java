@@ -151,7 +151,7 @@ public class XmppBrokerStream
     _uid = uid + _broker.getJid();
     
     _conn = _broker.getConnection(_uid, password);
-    _conn.setStreamHandler(_toClient);
+    _conn.setAgentStream(_toClient);
 
     _jid = _conn.getJid();
     
@@ -165,7 +165,7 @@ public class XmppBrokerStream
     String password = null;
     
     _conn = _broker.getConnection(_uid, password, resource);
-    _conn.setStreamHandler(_toClient);
+    _conn.setAgentStream(_toClient);
 
     _jid = _conn.getJid();
     

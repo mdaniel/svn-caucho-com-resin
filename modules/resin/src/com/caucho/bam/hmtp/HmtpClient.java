@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.bam.hmtp;
 
 import com.caucho.bam.AbstractBamConnection;
 import com.caucho.bam.BamQueryCallback;
@@ -36,6 +36,7 @@ import com.caucho.bam.BamError;
 import com.caucho.bam.BamConnection;
 import com.caucho.bam.BamException;
 import com.caucho.bam.BamRemoteConnectionFailedException;
+import com.caucho.bam.SimpleBamConnectionStream;
 import com.caucho.hessian.io.*;
 
 import java.io.*;
@@ -67,15 +68,25 @@ public class HmtpClient extends AbstractBamConnection {
 
   private BamException _connException;
   
-  private ClientBrokerStream _brokerStream;
+  private ToServerLinkStream _brokerStream;
   private String _jid;
 
   private BamStream _streamHandler;
 
   public HmtpClient(String url)
   {
+    this(url, null);
+  }
+
+  public HmtpClient(String url, BamStream agentStream)
+  {
     _url = url;
     parseURL(url);
+
+    if (agentStream == null)
+      agentStream = new SimpleBamConnectionStream(this);
+    
+    setAgentStream(agentStream);
   }
 
   protected void parseURL(String url)
@@ -153,9 +164,9 @@ public class HmtpClient extends AbstractBamConnection {
 	if (log.isLoggable(Level.FINE))
 	  log.fine(this + " " + status);
 
-	_brokerStream = new ClientBrokerStream(_is, _os);
+	_brokerStream = new ToServerLinkStream(_is, _os);
 
-	executeThread(new ClientAgentStream(this));
+	executeThread(new FromServerLinkStream(this));
       }
       else {
 	_os.close();
@@ -196,6 +207,9 @@ public class HmtpClient extends AbstractBamConnection {
       result = (AuthResult) querySet(null, new AuthQuery(uid, password));
 
       _jid = result.getJid();
+
+      if (log.isLoggable(Level.FINE))
+	log.fine(this + " login");
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -235,7 +249,7 @@ public class HmtpClient extends AbstractBamConnection {
   public void flush()
     throws IOException
   {
-    ClientBrokerStream stream = _brokerStream;
+    ToServerLinkStream stream = _brokerStream;
 
     if (stream != null)
       stream.flush();
@@ -301,7 +315,7 @@ public class HmtpClient extends AbstractBamConnection {
       Socket s;
       InputStream is;
       OutputStream os;
-      ClientBrokerStream stream;
+      ToServerLinkStream stream;
       
       synchronized (this) {
 	s = _s;

@@ -27,17 +27,37 @@
  * @author Emil Ong
  */
 
-package com.caucho.bam.annotation;
+package com.caucho.bam;
 
 import static java.lang.annotation.ElementType.METHOD;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @PresenceSubscribed annotation.
+ * The @QueryRequest annotation marks a SimpleBamService method as handling
+ * a result from an RPC query.  Queries are matched to results using a
+ * long id, which is unique for each query in the connection.
+ *
+ * <code><pre>
+ * @QueryResult
+ * void queryResult(long id, String to, String from, MyResult value)
+ * </pre></code>
+ *
+ * A ping RPC query result would look like:
+ *
+ * <code><pre>
+ * @QueryResult
+ * public void pingResult(long id, String to, String from, PingQuery value)
+ * {
+ *   System.out.println("Ping: " + value
+ *                    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
+ * }
+ * </pre></code>
  */
 @Target({METHOD})
 @Retention(RUNTIME)
-public @interface PresenceSubscribed {
+@Documented  
+public @interface QueryResult {
 }

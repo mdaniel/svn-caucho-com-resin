@@ -112,17 +112,17 @@ public class HempConnectionImpl implements BamConnection
   /**
    * Registers the listener
    */
-  public void setStreamHandler(BamStream handler)
+  public void setAgentStream(BamStream handler)
   {
-    _handler.setStreamHandler(handler);
+    _handler.setAgentStream(handler);
   }
 
   /**
    * Registers the listener
    */
-  public BamStream getStreamHandler()
+  public BamStream getAgentStream()
   {
-    return _handler.getStreamHandler();
+    return _handler.getAgentStream();
   }
 
   /**

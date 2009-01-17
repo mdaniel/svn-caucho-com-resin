@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.bam.hmtp;
 
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamProtocolException;
@@ -41,11 +41,12 @@ import java.util.concurrent.*;
 import java.util.logging.*;
 
 /**
- * HMTP client protocol
+ * ClientToServerLink stream handles client packets to be sent to the server.
  */
-public class ClientBrokerStream implements BamStream {
+public class ToServerLinkStream implements BamStream
+{
   private static final Logger log
-    = Logger.getLogger(ClientBrokerStream.class.getName());
+    = Logger.getLogger(ToServerLinkStream.class.getName());
 
   private InputStream _is;
   private OutputStream _os;
@@ -55,7 +56,7 @@ public class ClientBrokerStream implements BamStream {
 
   private boolean _isFinest;
 
-  public ClientBrokerStream(InputStream is, OutputStream os)
+  public ToServerLinkStream(InputStream is, OutputStream os)
   {
     _is = is;
     _os = os;
@@ -97,6 +98,11 @@ public class ClientBrokerStream implements BamStream {
       Hessian2Output out = _out;
 
       if (out != null) {
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " message " + value
+		    + " {to:" + to + ", from:" + from + "}");
+	}
+	
 	out.startPacket();
 	out.writeInt(HmtpPacketType.MESSAGE.ordinal());
 	out.writeString(to);
@@ -122,6 +128,11 @@ public class ClientBrokerStream implements BamStream {
       Hessian2Output out = _out;
 
       if (out != null) {
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " messageError " + value
+		    + " {to:" + to + ", from:" + from + "}");
+	}
+	
 	out.startPacket();
 	out.writeInt(HmtpPacketType.MESSAGE_ERROR.ordinal());
 	out.writeString(to);
@@ -186,7 +197,6 @@ public class ClientBrokerStream implements BamStream {
 	out.writeString(from);
 	out.writeLong(id);
 	out.writeObject(value);
-	System.out.println("WRITE: " + id + " " + value);
 	out.endPacket();
 	out.flush();
       }
@@ -499,6 +509,6 @@ public class ClientBrokerStream implements BamStream {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    return getClass().getSimpleName() + "[" + getJid() + "]";
   }
 }

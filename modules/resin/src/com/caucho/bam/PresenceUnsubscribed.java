@@ -27,17 +27,40 @@
  * @author Emil Ong
  */
 
-package com.caucho.bam.annotation;
+package com.caucho.bam;
 
 import static java.lang.annotation.ElementType.METHOD;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @QueryError annotation.
+ * The @PresenceUnsubscribed annotation marks a SimpleBamService method
+ * as handling a presence unsubscribed notification.  Chat, multi-user chat,
+ * and publish/subscribe applications use presence unsubscribed packets
+ * to notify an agent that it has been unsubscribed from the service.
+ *
+ * <code><pre>
+ * @PresenceUnsubscribed
+ * void unsubscribed(String to, String from, MyUnsubscribed value)
+ * </pre></code>
+ *
+ * A logging presence unsubscribed handler would look like:
+ *
+ * <code><pre>
+ * @PresenceUnsubscribed
+ * public void pingUnsubscribed(String to,
+ *                              String from,
+ *                              MyUnsubscribed value)
+ * {
+ *   System.out.println("Ping: " + value
+ *                      + " {to:" + to + ", from:" + from + "}");
+ * }
+ * </pre></code>
  */
 @Target({METHOD})
 @Retention(RUNTIME)
-public @interface QueryError {
+@Documented  
+public @interface PresenceUnsubscribed {
 }

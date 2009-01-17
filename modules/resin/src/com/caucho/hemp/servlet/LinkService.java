@@ -29,13 +29,13 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.bam.annotation.QuerySet;
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamStream;
+import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleBamService;
 
-import com.caucho.hmtp.AuthQuery;
-import com.caucho.hmtp.AuthResult;
+import com.caucho.bam.hmtp.AuthQuery;
+import com.caucho.bam.hmtp.AuthResult;
 
 /**
  * The LinkService is low-level link

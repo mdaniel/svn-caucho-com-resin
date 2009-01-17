@@ -31,7 +31,6 @@ package com.caucho.hemp.services;
 
 import com.caucho.bam.BamStream;
 import com.caucho.bam.SimpleBamService;
-import com.caucho.bam.annotation.*;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 

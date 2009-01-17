@@ -50,7 +50,7 @@ class HempConnectionAgentStream implements BamStream
   private final HempConnectionImpl _conn;
   private final String _jid;
 
-  private BamStream _streamHandler;
+  private BamStream _agentStream;
 
   HempConnectionAgentStream(HempConnectionImpl conn)
   {
@@ -73,17 +73,17 @@ class HempConnectionAgentStream implements BamStream
   /**
    * Registers the handler
    */
-  void setStreamHandler(BamStream handler)
+  void setAgentStream(BamStream handler)
   {
-    _streamHandler = handler;
+    _agentStream = handler;
   }
 
   /**
    * Registers the handler
    */
-  BamStream getStreamHandler()
+  BamStream getAgentStream()
   {
-    return _streamHandler;
+    return _agentStream;
   }
 
   //
@@ -95,7 +95,7 @@ class HempConnectionAgentStream implements BamStream
    */
   public void message(String to, String from, Serializable value)
   {
-    BamStream handler = _streamHandler;
+    BamStream handler = _agentStream;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -114,7 +114,7 @@ class HempConnectionAgentStream implements BamStream
 			       Serializable value,
 			       BamError error)
   {
-    BamStream handler = _streamHandler;
+    BamStream handler = _agentStream;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -138,7 +138,7 @@ class HempConnectionAgentStream implements BamStream
 			      String from,
 			      Serializable query)
   {
-    BamStream handler = _streamHandler;
+    BamStream handler = _agentStream;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -167,7 +167,7 @@ class HempConnectionAgentStream implements BamStream
 		            String from,
 		            Serializable query)
   {
-    BamStream handler = _streamHandler;
+    BamStream handler = _agentStream;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -196,7 +196,7 @@ class HempConnectionAgentStream implements BamStream
 		            String from,
 		            Serializable value)
   {
-    BamStream handler = _streamHandler;
+    BamStream handler = _agentStream;
 
     if (handler == null) {
       if (_conn.onQueryResult(id, to, from, value))
@@ -219,7 +219,7 @@ class HempConnectionAgentStream implements BamStream
 		           Serializable query,
 		           BamError error)
   {
-    BamStream handler = _streamHandler;
+    BamStream handler = _agentStream;
 
     if (handler == null) {
       if (_conn.onQueryError(id, to, from, query, error))
@@ -242,7 +242,7 @@ class HempConnectionAgentStream implements BamStream
    */
   public void presence(String to, String from, Serializable data)
   {
-    BamStream handler = _streamHandler;
+    BamStream handler = _agentStream;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -260,7 +260,7 @@ class HempConnectionAgentStream implements BamStream
 				String from,
 				Serializable data)
   {
-    BamStream handler = _streamHandler;
+    BamStream handler = _agentStream;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -278,7 +278,7 @@ class HempConnectionAgentStream implements BamStream
 				      String from,
 				      Serializable data)
   {
-    BamStream handler = _streamHandler;
+    BamStream handler = _agentStream;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -296,7 +296,7 @@ class HempConnectionAgentStream implements BamStream
 				    String from,
 				    Serializable data)
   {
-    BamStream handler = _streamHandler;
+    BamStream handler = _agentStream;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -314,7 +314,7 @@ class HempConnectionAgentStream implements BamStream
 				     String from,
 				     Serializable data)
   {
-    BamStream handler = _streamHandler;
+    BamStream handler = _agentStream;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -332,7 +332,7 @@ class HempConnectionAgentStream implements BamStream
 				      String from,
 				      Serializable data)
   {
-    BamStream handler = _streamHandler;
+    BamStream handler = _agentStream;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -350,7 +350,7 @@ class HempConnectionAgentStream implements BamStream
 				       String from,
 				       Serializable data)
   {
-    BamStream handler = _streamHandler;
+    BamStream handler = _agentStream;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))
@@ -369,7 +369,7 @@ class HempConnectionAgentStream implements BamStream
 				Serializable data,
 				BamError error)
   {
-    BamStream handler = _streamHandler;
+    BamStream handler = _agentStream;
 
     if (handler == null) {
       if (log.isLoggable(Level.FINE))

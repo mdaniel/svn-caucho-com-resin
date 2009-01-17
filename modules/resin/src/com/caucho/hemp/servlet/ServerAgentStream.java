@@ -29,7 +29,6 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.hmtp.HmtpPacketType;
 import com.caucho.hmtp.QuerySet;
 import com.caucho.hmtp.QueryResult;
 import com.caucho.hmtp.QueryGet;
@@ -46,6 +45,7 @@ import com.caucho.hmtp.MessageError;
 import com.caucho.hmtp.Message;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
+import com.caucho.bam.hmtp.HmtpPacketType;
 import java.io.*;
 import java.util.logging.*;
 
@@ -397,5 +397,10 @@ public class ServerAgentStream implements BamStream
       
       log.log(Level.FINE, e.toString(), e);
     }
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _packetHandler + "]";
   }
 }

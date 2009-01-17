@@ -30,8 +30,6 @@
 package com.caucho.bam;
 
 import com.caucho.config.*;
-import com.caucho.bam.annotation.*;
-import com.caucho.bam.BamError;
 import com.caucho.util.*;
 
 import java.io.Serializable;
@@ -40,11 +38,10 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.*;
 import javax.annotation.*;
-import javax.webbeans.*;
 
 /**
  */
-public class BamSkeleton<C>
+class BamSkeleton<C>
 {
   private static final L10N L = new L10N(BamSkeleton.class);
   private static final Logger log

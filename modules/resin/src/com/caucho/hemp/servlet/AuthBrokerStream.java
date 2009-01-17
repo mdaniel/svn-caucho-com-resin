@@ -29,11 +29,11 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.hmtp.AuthResult;
-import com.caucho.hmtp.AuthQuery;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.AbstractBamStream;
 import com.caucho.bam.BamError;
+import com.caucho.bam.hmtp.AuthResult;
+import com.caucho.bam.hmtp.AuthQuery;
 import java.io.*;
 import java.util.logging.*;
 import javax.servlet.*;

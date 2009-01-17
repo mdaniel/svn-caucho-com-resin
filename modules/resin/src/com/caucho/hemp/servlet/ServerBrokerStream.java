@@ -31,9 +31,9 @@ package com.caucho.hemp.servlet;
 
 import com.caucho.bam.BamConnection;
 import com.caucho.bam.BamStream;
-import com.caucho.hmtp.Packet;
-import com.caucho.hmtp.HmtpPacketType;
+import com.caucho.bam.hmtp.HmtpPacketType;
 import com.caucho.bam.BamError;
+import com.caucho.hmtp.Packet;
 import java.io.*;
 import java.util.logging.*;
 import javax.servlet.*;
@@ -205,7 +205,7 @@ public class ServerBrokerStream
     String password = (String) credentials;
     
     _conn = _broker.getConnection(uid, password);
-    _conn.setStreamHandler(_agentStream);
+    _conn.setAgentStream(_agentStream);
 
     _jid = _conn.getJid();
     
@@ -218,8 +218,8 @@ public class ServerBrokerStream
    * Handles a message
    */
   public void message(String to,
-			  String from,
-			  Serializable value)
+		      String from,
+		      Serializable value)
   {
     _toBroker.message(to, _jid, value);
   }

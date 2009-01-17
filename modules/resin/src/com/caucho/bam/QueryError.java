@@ -27,17 +27,47 @@
  * @author Emil Ong
  */
 
-package com.caucho.bam.annotation;
+package com.caucho.bam;
 
 import static java.lang.annotation.ElementType.METHOD;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @QueryResult annotation.
+ * The @QueryError annotation marks a SimpleBamService method as handling
+ * a queryError response to a query GET or SET.  BAM query errors
+ * are required replies from a BAM service when a RPC query fails.
+ * The method signature is
+ *
+ * <code><pre>
+ * @QueryError
+ * void queryError(long id,
+ *                 String to,
+ *                 String from,
+ *                 MyQuery value,
+ *                 BamError error);
+ * </pre></code>
+ *
+ * A query error message handler would look like:
+ *
+ * <code><pre>
+ * @QueryError
+ * public void pingError(long id,
+ *                       String to,
+ *                       String from,
+ *                       MyQuery value,
+ *                       BamError error)
+ * {
+ *   System.out.println("Ping Error: " + error + " " + value
+ *                      + " {to:" + to + ", from:" + from + "}");
+ * }
+ * </pre></code>
  */
+
 @Target({METHOD})
 @Retention(RUNTIME)
-public @interface QueryResult {
+@Documented
+public @interface QueryError {
 }

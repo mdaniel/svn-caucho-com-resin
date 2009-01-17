@@ -29,13 +29,13 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.bam.annotation.QueryGet;
 import com.caucho.bam.AbstractBamStream;
 import com.caucho.bam.BamBroker;
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamService;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamConnection;
+import com.caucho.bam.QueryGet;
 import com.caucho.bam.SimpleBamService;
 import com.caucho.config.*;
 import com.caucho.util.*;

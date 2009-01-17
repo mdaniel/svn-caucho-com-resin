@@ -1400,7 +1400,7 @@ public class HmuxRequest extends AbstractHttpRequest
     try {
       _bamConn = broker.getConnection("client", null);
 
-      _bamConn.setStreamHandler(new HmuxBamCallback(this));
+      _bamConn.setAgentStream(new HmuxBamCallback(this));
 
       WriteStream os = _rawWrite;
 

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.bam.hmtp;
 
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamProtocolException;

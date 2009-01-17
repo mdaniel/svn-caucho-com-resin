@@ -27,17 +27,42 @@
  * @author Emil Ong
  */
 
-package com.caucho.bam.annotation;
+package com.caucho.bam;
 
 import static java.lang.annotation.ElementType.METHOD;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @PresenceUnsubscribed annotation.
+ * The @QueryGet annotation marks a SimpleBamService method as handling
+ * a SET RPC query.  SET calls may modify state in the service.  If you
+ * just need information, use a GET call instead.  Queries
+ * are matched to results using a long id, which is unique for each
+ * query in the connection.  SET queries must send either a queryResult
+ * or a queryError to the caller, because the client may be blocking
+ * waiting for a reply.
+ *
+ * <code><pre>
+ * @QuerySet
+ * boolean querySet(long id, String to, String from, MySetQuery value)
+ * </pre></code>
+ *
+ * A ping RPC query handler would look like:
+ *
+ * <code><pre>
+ * @QuerySet
+ * public boolean pingQuery(long id, String to, String from, PingQuery value)
+ * {
+ *   getBrokerStream().queryResult(id, from, to, value);
+ *
+ *   return true;
+ * }
+ * </pre></code>
  */
 @Target({METHOD})
 @Retention(RUNTIME)
-public @interface PresenceUnsubscribed {
+@Documented  
+public @interface QuerySet {
 }

@@ -27,17 +27,40 @@
  * @author Emil Ong
  */
 
-package com.caucho.bam.annotation;
+package com.caucho.bam;
 
 import static java.lang.annotation.ElementType.METHOD;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @Presence annotation.
+ * The @PresenceUnsubscribe annotation marks a SimpleBamService method
+ * as handling a presence unsubscribe request.  Chat, multi-user chat,
+ * and publish/subscribe applications use unsubscribe packets
+ * to request unsubscription from a service.
+ *
+ * <code><pre>
+ * @PresenceUnsubscribe
+ * void unsubscribe(String to, String from, MyUnsubscribe value)
+ * </pre></code>
+ *
+ * A logging unsubscribe handler might look like:
+ *
+ * <code><pre>
+ * @PresenceUnsubscribe
+ * public void pingUnsubscribe(String to,
+ *                             String from,
+ *                             MySubscribe value)
+ * {
+ *   getBrokerStream().unsubscribed(from, to, value);
+ * }
+ * </pre></code>
  */
+
 @Target({METHOD})
 @Retention(RUNTIME)
-public @interface Presence {
+@Documented  
+public @interface PresenceUnsubscribe {
 }

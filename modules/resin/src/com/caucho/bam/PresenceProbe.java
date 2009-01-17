@@ -27,17 +27,40 @@
  * @author Emil Ong
  */
 
-package com.caucho.bam.annotation;
+package com.caucho.bam;
 
 import static java.lang.annotation.ElementType.METHOD;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @PresenceUnsubscribe annotation.
+ * The @PresenceProbe annotation marks a SimpleBamService method as handling
+ * a presence probe notification.  Chat and multi-user chat applications
+ * use presence probe packets to determine the capabilities of user agents,
+ * e.g. HTML or .mp3 or video capabilities.
+ *
+ * <code><pre>
+ * @PresenceProbe
+ * void presence(String to, String from, MyPresenceProbe value)
+ * </pre></code>
+ *
+ * A logging presence probe handler would look like:
+ *
+ * <code><pre>
+ * @PresenceProbe
+ * public void pingPresenceProbe(String to,
+ *                               String from,
+ *                               MyPresenceProbe value)
+ * {
+ *   System.out.println("Ping: " + value
+ *                      + " {to:" + to + ", from:" + from + "}");
+ * }
+ * </pre></code>
  */
 @Target({METHOD})
 @Retention(RUNTIME)
-public @interface PresenceUnsubscribe {
+@Documented  
+public @interface PresenceProbe {
 }

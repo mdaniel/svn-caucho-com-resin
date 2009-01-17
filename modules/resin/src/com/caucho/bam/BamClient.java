@@ -85,17 +85,17 @@ public class BamClient implements BamConnection {
   /**
    * Sets the message handler
    */
-  public void setStreamHandler(BamStream handler)
+  public void setAgentStream(BamStream handler)
   {
-    _conn.setStreamHandler(handler);
+    _conn.setAgentStream(handler);
   }
 
   /**
    * Gets the message listener
    */
-  public BamStream getStreamHandler()
+  public BamStream getAgentStream()
   {
-    return _conn.getStreamHandler();
+    return _conn.getAgentStream();
   }
 
   /**

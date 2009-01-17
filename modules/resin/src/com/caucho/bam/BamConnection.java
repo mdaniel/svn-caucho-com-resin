@@ -61,14 +61,14 @@ public interface BamConnection {
   //
 
   /**
-   * Registers the stream handler
+   * Registers the stream to the agent
    */
-  public void setStreamHandler(BamStream handler);
+  public void setAgentStream(BamStream handler);
 
   /**
-   * Registers the stream handler
+   * Registers the stream to the agent
    */
-  public BamStream getStreamHandler();
+  public BamStream getAgentStream();
 
   //
   // message handling

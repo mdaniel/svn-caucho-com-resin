@@ -27,17 +27,43 @@
  * @author Emil Ong
  */
 
-package com.caucho.bam.annotation;
+package com.caucho.bam;
 
 import static java.lang.annotation.ElementType.METHOD;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @MessageError annotation.
+ * The @Presence annotation marks a SimpleBamService method as handling
+ * a presence notification.  When a user logs into an IM service,
+ * or chat room, or publish-subscribe service, his agent will send
+ * a presence packet to notify others of his presence.  A pub/sub service
+ * would then start sending new messages automatically to the user.
+ *
+ * IM, chat room and pub/sub services may define sophisticated protocols
+ * using the Presence, PresenceProbe and PresenceSubscribe messages for
+ * joining or subscribing.
+ *
+ * <code><pre>
+ * @Presence
+ * void presence(String to, String from, MyPresence value)
+ * </pre></code>
+ *
+ * A logging presence handler would look like:
+ *
+ * <code><pre>
+ * @Presence
+ * public void pingPresence(String to, String from, MyPresence value)
+ * {
+ *   System.out.println("Ping: " + value
+ *                      + " {to:" + to + ", from:" + from + "}");
+ * }
+ * </pre></code>
  */
 @Target({METHOD})
 @Retention(RUNTIME)
-public @interface MessageError {
+@Documented  
+public @interface Presence {
 }

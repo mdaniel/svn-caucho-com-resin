@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.client;
 
-import com.caucho.hmtp.HmtpClient;
+import com.caucho.bam.hmtp.HmtpClient;
 import com.caucho.server.connection.*;
 import com.caucho.server.port.*;
 import com.caucho.hemp.*;

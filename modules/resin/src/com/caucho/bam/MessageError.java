@@ -27,17 +27,44 @@
  * @author Emil Ong
  */
 
-package com.caucho.bam.annotation;
+package com.caucho.bam;
 
 import static java.lang.annotation.ElementType.METHOD;
-import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @QueryGet annotation.
+ * The @MessageError annotation marks a SimpleBamService method as handling
+ * a unidirectional messageError packet.  BAM message errors are optional
+ * replies from a BAM service when a message fails.  The method signature is
+ *
+ * <code><pre>
+ * @MessageError
+ * void messageError(String to,
+ *                   String from,
+ *                   MyMessage value,
+ *                   BamError error);
+ * </pre></code>
+ *
+ * A ping error message handler would look like:
+ *
+ * <code><pre>
+ * @MessageError
+ * public void pingErrorMessage(String to,
+ *                              String from,
+ *                              MyMessage value,
+ *                              BamError error)
+ * {
+ *   System.out.println("Ping Error: " + error + " " + value
+ *                      + " {to:" + to + ", from:" + from + "}");
+ * }
+ * </pre></code>
  */
+
 @Target({METHOD})
 @Retention(RUNTIME)
-public @interface QueryGet {
+@Documented
+public @interface MessageError {
 }

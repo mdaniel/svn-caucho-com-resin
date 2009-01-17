@@ -38,11 +38,12 @@ import java.util.logging.*;
 /**
  * Abstract bam connection
  */
-abstract public class AbstractBamConnection implements BamConnection {
+abstract public class AbstractBamConnection implements BamConnection
+{
   private static final Logger log
     = Logger.getLogger(AbstractBamConnection.class.getName());
 
-  // private BamStream _streamHandler;
+  private BamStream _agentStream;
 
   private Map<Long,QueryItem> _queryMap
     = Collections.synchronizedMap(new HashMap<Long,QueryItem>());
@@ -58,18 +59,21 @@ abstract public class AbstractBamConnection implements BamConnection {
   //
 
   /**
-   * Registers the stream handler
+   * The agent stream is the stream which receives messages
+   * sent to the BamConnection.
    */
-  public void setStreamHandler(BamStream handler)
+  public void setAgentStream(BamStream agentStream)
   {
+    _agentStream = agentStream;
   }
 
   /**
-   * Registers the stream handler
+   * The agent stream is the stream which receives messages
+   * sent to the BamConnection.
    */
-  public BamStream getStreamHandler()
+  public BamStream getAgentStream()
   {
-    return null;
+    return _agentStream;
   }
 
   //
