@@ -137,10 +137,10 @@ abstract public class ClassDef {
    */
   public void addInterfaces(HashSet<String> interfaceSet)
   {
-    interfaceSet.add(getName());
+    interfaceSet.add(getName().toLowerCase());
     
     for (String name : getInterfaces()) {
-      interfaceSet.add(name);
+      interfaceSet.add(name.toLowerCase());
     }
   }
 
