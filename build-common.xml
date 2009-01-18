@@ -432,6 +432,10 @@
         <exclude name="**/.*"/>
       </fileset>
       
+      <fileset dir="${resin.modules}/jcache/classes">
+        <exclude name="**/.*"/>
+      </fileset>
+      
       <fileset dir="${resin.modules}/jms/classes">
         <exclude name="**/.*"/>
       </fileset>

@@ -29,7 +29,7 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.cluster.CacheEntry;
+import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.cluster.CacheLoader;
 import com.caucho.cluster.CacheSerializer;
 import com.caucho.cluster.HessianSerializer;

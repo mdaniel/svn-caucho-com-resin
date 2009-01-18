@@ -29,7 +29,7 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.cluster.CacheEntry;
+import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.util.Alarm;
 
 import java.lang.ref.SoftReference;
@@ -37,7 +37,7 @@ import java.lang.ref.SoftReference;
 /**
  * An entry in the cache map
  */
-public final class CacheMapEntry implements CacheEntry {
+public final class CacheMapEntry implements ExtCacheEntry {
   public static final CacheMapEntry NULL
     = new CacheMapEntry(null, null, 0, 0, 0, 0, 0, 0, 0, 0, false);
   
@@ -278,7 +278,7 @@ public final class CacheMapEntry implements CacheEntry {
   /**
    * Sets the deserialized value for the entry.
    */
-  public final void setValue(Object value)
+  public final void setObjectValue(Object value)
   {
     if (value != null && (_valueRef == null || _valueRef.get() == null))
       _valueRef = new SoftReference(value);
@@ -325,6 +325,40 @@ public final class CacheMapEntry implements CacheEntry {
   public boolean isServerVersionValid()
   {
     return _isServerVersionValid;
+  }
+
+  //
+  // jcache stubs
+  //
+
+  public Object getKey()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public Object setValue(Object value)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public long getCreationTime()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public boolean isValid()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public long getCost()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public int getHits()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public String toString()

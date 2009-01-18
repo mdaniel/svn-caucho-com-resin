@@ -27,19 +27,37 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package com.caucho.cluster;
 
-import java.util.Map;
+import javax.cache.CacheEntry;
 
-public interface EvictionStrategy
+/**
+ * Represents an item in the cache.
+ */
+public interface ExtCacheEntry extends CacheEntry
 {
-  public void clear();
+  /**
+   * Returns true for a null entry
+   */
+  public boolean isValueNull();
+  
+  /**
+   * Returns the item's value
+   */
+  public Object getValue();
 
-  public CacheEntry createEntry(Object key, Object value, long expireTimeout);
+  /**
+   * Returns the idle timeout
+   */
+  public long getIdleTimeout();
 
-  public void discardEntry(CacheEntry entry);
+  /**
+   * Returns the lease timeout
+   */
+  public long getLeaseTimeout();
 
-  public Map evict(Cache cache);
-
-  public void touchEntry(CacheEntry entry);
+  /**
+   * Returns the lease owner
+   */
+  public int getLeaseOwner();
 }

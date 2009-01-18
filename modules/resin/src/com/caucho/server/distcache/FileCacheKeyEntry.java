@@ -29,7 +29,7 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.cluster.CacheEntry;
+import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.server.cluster.ClusterTriad;
 import com.caucho.util.Alarm;
 
@@ -106,7 +106,9 @@ public class FileCacheKeyEntry extends CacheKeyEntry {
    * Sets the value by an input stream
    */
   @Override
-  public CacheEntry put(InputStream is, CacheConfig config, long idleTimeout)
+  public ExtCacheEntry put(InputStream is,
+			   CacheConfig config,
+			   long idleTimeout)
     throws IOException
   {
     return _manager.put(this, is, config, idleTimeout);

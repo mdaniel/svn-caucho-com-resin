@@ -32,8 +32,8 @@ package javax.cache;
 import java.util.Collection;
 import java.util.Map;
 
-public interface CacheFactory<K,V>
+public interface CacheFactory
 {
-  public Cache<K,V> createCache(Map<K,V> env)
+  public Cache createCache(Map env)
     throws CacheException;
 }

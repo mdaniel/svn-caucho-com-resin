@@ -30,7 +30,7 @@
 package com.caucho.server.session;
 
 import com.caucho.cluster.ByteStreamCache;
-import com.caucho.cluster.CacheEntry;
+import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.hessian.io.*;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.distcache.ClusterObject;
@@ -92,7 +92,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   private boolean _isInvalidating = false;
   
   // the cache entry saved in the session
-  private CacheEntry _cacheEntry;
+  private ExtCacheEntry _cacheEntry;
   
   // to protect for threading
   private final AtomicInteger _useCount = new AtomicInteger();
@@ -557,7 +557,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       if (! isNew && _manager.isSaveOnShutdown())
 	return true;
 
-      CacheEntry entry = cache.getEntry(_id);
+      ExtCacheEntry entry = cache.getExtCacheEntry(_id);
 
       if (entry != null && entry == _cacheEntry)
 	return true;
@@ -1056,7 +1056,8 @@ public class SessionImpl implements HttpSession, CacheListener {
       if (_isInvalidating && _manager.getSessionStore() != null) {
 	boolean isRemove = false;
 	if (logout == Logout.TIMEOUT) {
-	  CacheEntry entry = _manager.getSessionStore().getEntry(_id);
+	  ExtCacheEntry entry
+	    = _manager.getSessionStore().getExtCacheEntry(_id);
 
 	  long now = Alarm.getCurrentTime();
 

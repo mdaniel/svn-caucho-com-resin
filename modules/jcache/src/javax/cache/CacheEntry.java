@@ -31,7 +31,7 @@ package javax.cache;
 
 import java.util.Map;
 
-public interface CacheEntry<K,V> extends Map.Entry<K,V>
+public interface CacheEntry extends Map.Entry
 {
   public long getCost();
   

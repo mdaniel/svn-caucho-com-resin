@@ -30,8 +30,23 @@
 package com.caucho.cluster;
 
 /**
- * Cache which stores consistent copies on the triad.
+ * Cache which stores consistent copies on the cluster segment.
+ *
+ * Using the cache is like using java.util.Map.  To add a new entry,
+ * call <code>cache.put(key, value)</code>.  To get the entry, call
+ * <code>cache.get(key)</code>.
+ *
+ * The cache configuration affects the lifetime, local caching timeouts
+ * and consistency.
  */
-public class TriadByteStreamCache extends AbstractCache
+public class ClusterCache extends AbstractCache
 {
+  public ClusterCache()
+  {
+  }
+  
+  public ClusterCache(String name)
+  {
+    setName(name);
+  }
 }

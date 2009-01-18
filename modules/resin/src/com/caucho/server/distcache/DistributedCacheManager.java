@@ -29,7 +29,7 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.cluster.CacheEntry;
+import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.cluster.CacheSerializer;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterTriad;
@@ -120,10 +120,10 @@ abstract public class DistributedCacheManager
   /**
    * Sets a cache entry
    */
-  public CacheEntry put(HashKey hashKey,
-				 InputStream is,
-				 CacheConfig config,
-				 long idleTimeout)
+  public ExtCacheEntry put(HashKey hashKey,
+			   InputStream is,
+			   CacheConfig config,
+			   long idleTimeout)
     throws IOException
   {
     throw new UnsupportedOperationException();

@@ -44,13 +44,20 @@ import com.caucho.util.L10N;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import java.security.MessageDigest;
 import javax.annotation.PostConstruct;
+import javax.cache.CacheListener;
+import javax.cache.CacheStatistics;
 
 /**
  * Implements the distributed cache
  */
-abstract public class AbstractCache implements Cache, ByteStreamCache
+abstract public class AbstractCache extends AbstractMap
+  implements ObjectCache, ByteStreamCache
 {
   private static final L10N L = new L10N(AbstractCache.class);
 
@@ -338,9 +345,17 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
   /**
    * Returns the cache entry for the object with the given key.
    */
-  public CacheEntry<Object> getEntry(Object key)
+  public ExtCacheEntry getExtCacheEntry(Object key)
   {
     return getKeyEntry(key).getEntry(_config);
+  }
+  
+  /**
+   * Returns the cache entry for the object with the given key.
+   */
+  public ExtCacheEntry getCacheEntry(Object key)
+  {
+    return getExtCacheEntry(key);
   }
   
   /**
@@ -362,9 +377,9 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
    * @param value the value of the item to put
    * @param idleTimeout the idle timeout for the item
    */
-  public CacheEntry put(Object key,
-			InputStream is,
-			long idleTimeout)
+  public ExtCacheEntry put(Object key,
+			   InputStream is,
+			   long idleTimeout)
     throws IOException
   {
     return getKeyEntry(key).put(is, _config, idleTimeout);
@@ -443,6 +458,50 @@ abstract public class AbstractCache implements Cache, ByteStreamCache
     }
 
     return entry;
+  }
+
+  //
+  // jcache stubs
+  //
+
+  public Set<Map.Entry> entrySet()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public Map getAll(Collection keys)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public void load(Object object)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void loadAll(Collection items)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void addListener(CacheListener listener)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public void removeListener(CacheListener listener)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public CacheStatistics getCacheStatistics()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void evict()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   @Override

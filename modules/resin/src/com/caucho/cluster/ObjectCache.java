@@ -29,53 +29,33 @@
 
 package com.caucho.cluster;
 
+import javax.cache.Cache;
+
 /**
- * Represents an item in the cache.
+ * Interface for a distributed cache.
  */
-public interface CacheEntry<V>
+public interface ObjectCache extends Cache
 {
   /**
-   * Returns true for a null entry
+   * Returns the extended entry
    */
-  public boolean isValueNull();
+  public ExtCacheEntry getExtCacheEntry(Object entry);
   
   /**
-   * Returns the item's value
+   * Updates the cache if the old value hash matches the current value.
+   * A null value for the old value hash only adds the entry if it's new
+   *
+   * @param key the key to compare
+   * @param version the version of the old value returned by getEntry
+   * @param value the new value
+   *
+   * @return true if the update succeeds, false if it fails
    */
-  public V getValue();
+  public boolean compareAndPut(Object key, long version, Object value);
 
   /**
-   * Returns the expire time.
+   * Removes the entry from the cache if the current entry's version
+   * matches.
    */
-  public long getExpirationTime();
-
-  /**
-   * Returns the last access time for the item.
-   */
-  public long getLastAccessTime();
-
-  /**
-   * Returns the last update time for the item.
-   */
-  public long getLastUpdateTime();
-
-  /**
-   * Returns the item version.
-   */
-  public long getVersion();
-
-  /**
-   * Returns the idle timeout
-   */
-  public long getIdleTimeout();
-
-  /**
-   * Returns the lease timeout
-   */
-  public long getLeaseTimeout();
-
-  /**
-   * Returns the lease owner
-   */
-  public int getLeaseOwner();
+  public boolean compareAndRemove(Object key, long version);
 }

@@ -32,26 +32,76 @@ package javax.cache;
 import java.util.Collection;
 import java.util.Map;
 
-public interface Cache<K,V> extends Map<K,V>
+/**
+ * The persistent or distributed cache is usable like a normal map, but loads
+ * and stores data across the cluster.
+ */
+public interface Cache extends Map
 {
-  public Map<K,V> getAll(Collection<K> keys)
+  /**
+   * Returns the object specified by the given key.
+   *
+   * If the item does not exist and a CacheLoader has been specified,
+   * the CacheLoader will be used to create a cache value.
+   */
+  public Object get(Object key);
+  
+  /**
+   * Puts a new item in the cache.
+   *
+   * @param key the key of the item to put
+   * @param value the value of the item to put
+   */
+  public Object put(Object key, Object value);
+
+  /**
+   * Removes the entry from the cache
+   */
+  public Object remove(Object key);
+  
+  /**
+   * Returns the cache entry for the object with the given key.
+   */
+  public CacheEntry getCacheEntry(Object key);
+
+  /**
+   * Returns the object with the given key, but does not check
+   * distributed caches or trigger a CacheLoader.
+   */
+  public Object peek(Object key);
+
+  /**
+   * Loads and returns a map of all values specified by the key collection.
+   */
+  public Map getAll(Collection keys)
     throws CacheException;
 
-  public void load(K key)
+  /**
+   * Asynchronous call to preload the cache item.
+   */
+  public void load(Object key)
     throws CacheException;
 
-  public void loadAll(Collection<K> keys)
+  /**
+   * Asynchronous call to preload all the cache items mentioned by the keys
+   */
+  public void loadAll(Collection keys)
     throws CacheException;
-
-  public V peek(K key);
-
-  public CacheEntry<K,V> getCacheEntry(K key);
 
   public CacheStatistics getCacheStatistics();
 
+  /**
+   * Removes expired items from the cache
+   */
   public void evict();
 
+  /**
+   * Adds a listener for cache events
+   */
   public void addListener(CacheListener listener);
   
+  /**
+   * Removes a registered listener for cache events
+   */
   public void removeListener(CacheListener listener);
 }

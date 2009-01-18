@@ -47,7 +47,7 @@ public interface ByteStreamCache
   /**
    * Returns the cache entry for the object with the given key.
    */
-  public CacheEntry getEntry(Object key);
+  public ExtCacheEntry getExtCacheEntry(Object key);
   
   /**
    * Puts a new item in the cache.
@@ -55,8 +55,8 @@ public interface ByteStreamCache
    * @param key the key of the item to put
    * @param is stream to contain the value
    */
-  public CacheEntry put(Object key, InputStream is,
-			long idleTimeout)
+  public ExtCacheEntry put(Object key, InputStream is,
+			   long idleTimeout)
     throws IOException;
   
   /**

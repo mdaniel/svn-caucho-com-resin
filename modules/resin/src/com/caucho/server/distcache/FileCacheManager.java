@@ -29,7 +29,7 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.cluster.CacheEntry;
+import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.cluster.CacheSerializer;
 import com.caucho.config.ConfigException;
 import com.caucho.server.cache.TempFileManager;
@@ -133,7 +133,7 @@ public class FileCacheManager extends DistributedCacheManager
   /**
    * Gets a cache entry
    */
-  public CacheEntry getEntry(HashKey key, CacheConfig config)
+  public ExtCacheEntry getEntry(HashKey key, CacheConfig config)
   {
     CacheKeyEntry keyEntry = getLocalEntry(key);
     CacheMapEntry entry = keyEntry.getEntry();
@@ -194,7 +194,7 @@ public class FileCacheManager extends DistributedCacheManager
 
     // use the old value if it's been overwritten
     if (entry.getValue() == null)
-      entry.setValue(value);
+      entry.setObjectValue(value);
 
     return value;
   }
@@ -303,10 +303,10 @@ public class FileCacheManager extends DistributedCacheManager
   /**
    * Sets a cache entry
    */
-  public CacheEntry put(FileCacheKeyEntry keyEntry,
-			InputStream is,
-			CacheConfig config,
-			long idleTimeout)
+  public ExtCacheEntry put(FileCacheKeyEntry keyEntry,
+			   InputStream is,
+			   CacheConfig config,
+			   long idleTimeout)
     throws IOException
   {
     return null;

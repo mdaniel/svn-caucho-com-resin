@@ -29,9 +29,9 @@
 
 package com.caucho.security;
 
-import com.caucho.cluster.Cache;
+import com.caucho.cluster.ObjectCache;
 import com.caucho.cluster.AbstractCache;
-import com.caucho.cluster.TriadCache;
+import com.caucho.cluster.ClusterCache;
 import com.caucho.util.LruCache;
 
 import java.util.logging.Logger;
@@ -55,7 +55,7 @@ public class ClusterSingleSignon implements SingleSignon {
 
   public ClusterSingleSignon()
   {
-    _cache = new TriadCache("resin:single-signon");
+    _cache = new ClusterCache("resin:single-signon");
   }
 
   public ClusterSingleSignon(String name)

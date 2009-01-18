@@ -29,7 +29,7 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.cluster.CacheEntry;
+import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.server.cluster.ClusterTriad;
 import com.caucho.util.Alarm;
 import com.caucho.util.Hex;
@@ -142,7 +142,9 @@ public class CacheKeyEntry {
   /**
    * Sets the value by an input stream
    */
-  public CacheEntry put(InputStream is, CacheConfig config, long idleTimeout)
+  public ExtCacheEntry put(InputStream is,
+			   CacheConfig config,
+			   long idleTimeout)
     throws IOException
   {
     return null;
