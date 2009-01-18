@@ -37,6 +37,7 @@ import javax.jms.*;
 import javax.resource.spi.*;
 
 import com.caucho.bam.*;
+import com.caucho.hemp.broker.HempBroker;
 import com.caucho.config.annotation.Start;
 import com.caucho.config.types.*;
 import com.caucho.webbeans.cfg.AbstractBeanConfig;
@@ -62,9 +63,7 @@ public class BamServiceConfig extends BeanConfig
   
   public BamServiceConfig()
   {
-    WebBeansContainer webBeans = WebBeansContainer.create();
-
-    _broker = webBeans.getInstanceByType(BamBroker.class);
+    _broker = HempBroker.getCurrent();
 
     setScope("singleton");
   }
@@ -102,7 +101,7 @@ public class BamServiceConfig extends BeanConfig
   {
     if (_service != null)
       return;
-    
+
     BamService service = (BamService) getObject();
 
     // XXX: jms/3a14 - needs to be cleaned up

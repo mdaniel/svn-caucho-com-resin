@@ -46,6 +46,7 @@ import com.caucho.webbeans.manager.BeanStartupEvent;
 import com.caucho.webbeans.component.CauchoBean;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.*;
 import java.lang.annotation.Annotation;
 import java.lang.ref.*;
@@ -70,8 +71,8 @@ public class HempBroker implements BamBroker, BamStream
   private DomainManager _domainManager;
   
   // agents
-  private final HashMap<String,WeakReference<BamStream>> _agentMap
-    = new HashMap<String,WeakReference<BamStream>>();
+  private final ConcurrentHashMap<String,WeakReference<BamStream>> _agentMap
+    = new ConcurrentHashMap<String,WeakReference<BamStream>>();
   
   private final HashMap<String,BamService> _serviceMap
     = new HashMap<String,BamService>();
@@ -642,11 +643,13 @@ public class HempBroker implements BamBroker, BamStream
 
   protected BamStream findAgent(String jid)
   {
-    synchronized (_agentMap) {
-      WeakReference<BamStream> ref = _agentMap.get(jid);
+    WeakReference<BamStream> ref = _agentMap.get(jid);
 
-      if (ref != null)
-        return ref.get();
+    if (ref != null) {
+      BamStream stream = ref.get();
+
+      if (stream != null)
+	return stream;
     }
 
     if (jid.endsWith("@")) {
@@ -661,7 +664,7 @@ public class HempBroker implements BamBroker, BamStream
       return putAgentStream(jid, findDomain(jid));
     }
     else if (jid.equals(service.getJid())) {
-      agentStream = service.getAgentStream(); 
+      agentStream = service.getAgentStream();
 
       if (agentStream != null) {
 	return putAgentStream(jid, agentStream);
@@ -671,12 +674,10 @@ public class HempBroker implements BamBroker, BamStream
       if (! service.startAgent(jid))
         return null;
 
-      synchronized (_agentMap) {
-        WeakReference<BamStream> ref = _agentMap.get(jid);
+      ref = _agentMap.get(jid);
 
-        if (ref != null)
-          return ref.get();
-      }
+      if (ref != null)
+	return ref.get();
     }
 
     return null;

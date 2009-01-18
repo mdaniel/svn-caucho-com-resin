@@ -31,7 +31,8 @@ package com.caucho.hemp.pubsub.memory;
 
 import com.caucho.xmpp.pubsub.PubSubPublish;
 import com.caucho.bam.BamError;
-import com.caucho.hemp.broker.GenericService;
+import com.caucho.bam.QuerySet;
+import com.caucho.bam.SimpleBamService;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.*;
@@ -40,7 +41,7 @@ import java.util.logging.*;
  * pub/sub (xep-0060)
  * http://www.xmpp.org/extensions/xep-0060.html
  */
-public class MemoryPubSub extends GenericService
+public class MemoryPubSub extends SimpleBamService
 {
   private static final Logger log
     = Logger.getLogger(MemoryPubSub.class.getName());
@@ -69,24 +70,29 @@ public class MemoryPubSub extends GenericService
   /**
    * Returns the XMPP discovery catetory
    */
+  /*
   @Override
   protected String getDiscoCategory()
   {
     return "pubsub";
   }
+  */
 
   /**
    * Returns the XMPP discovery type
    */
+  /*
   @Override
   protected String getDiscoType()
   {
     return "service";
   }
+  */
 
   /**
    * Returns the features supported by this service
    */
+  /*
   @Override
   protected void getDiscoFeatureNames(ArrayList<String> featureNames)
   {
@@ -94,33 +100,30 @@ public class MemoryPubSub extends GenericService
     
     featureNames.add(PUBSUB_FEATURE);
   }
+  */
 
   /**
    * Implements the queries
    */
-  @Override
-  public boolean querySet(long id, String to, String from,
-			      Serializable query)
+  @QuerySet
+  public boolean querySet(long id,
+			  String to,
+			  String from,
+			  PubSubPublish publish)
   {
-    if (query instanceof PubSubPublish) {
-      PubSubPublish publish = (PubSubPublish) query;
+    MemoryNode node = getNode(publish.getNode());
 
-      MemoryNode node = getNode(publish.getNode());
-
-      if (node == null) {
-	getBrokerStream().queryError(id, from, to, query,
-				     new BamError(BamError.TYPE_CANCEL,
-						   "no-node"));
-	return true;
-      }
-
-      node.publish(publish.getItems());
-      
-      getBrokerStream().queryResult(id, from, to, null);
-
+    if (node == null) {
+      getBrokerStream().queryError(id, from, to, publish,
+				   new BamError(BamError.TYPE_CANCEL,
+						"no-node"));
       return true;
     }
-    
-    return super.querySet(id, to, from, query);
+
+    node.publish(publish.getItems());
+      
+    getBrokerStream().queryResult(id, from, to, null);
+
+    return true;
   }
 }

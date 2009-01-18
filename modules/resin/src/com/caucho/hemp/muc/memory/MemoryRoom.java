@@ -32,7 +32,6 @@ package com.caucho.hemp.muc.memory;
 import com.caucho.xmpp.muc.MucUserPresence;
 import com.caucho.xmpp.im.ImMessage;
 import com.caucho.bam.*;
-import com.caucho.hemp.broker.GenericService;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.*;
@@ -40,7 +39,7 @@ import java.util.logging.*;
 /**
  * Multiuser chat room (xep-0045)
  */
-public class MemoryRoom extends GenericService
+public class MemoryRoom extends SimpleBamService
 {
   private static final Logger log
     = Logger.getLogger(MemoryRoom.class.getName());
@@ -56,6 +55,7 @@ public class MemoryRoom extends GenericService
 
   private MemoryNick []_userArray = new MemoryNick[0];
 
+  /*
   @Override
   protected String getDiscoCategory()
   {
@@ -92,6 +92,7 @@ public class MemoryRoom extends GenericService
       return true;
     }
   }
+  */
 
   @Message
   public void handleImMessage(String to, String from, ImMessage msg)

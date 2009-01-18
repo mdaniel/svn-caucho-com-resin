@@ -31,7 +31,6 @@ package com.caucho.hemp.im;
 
 import com.caucho.bam.BamStream;
 import com.caucho.bam.SimpleBamService;
-import com.caucho.hemp.broker.GenericService;
 import com.caucho.xmpp.im.RosterQuery;
 import com.caucho.xmpp.im.RosterItem;
 import com.caucho.xmpp.disco.DiscoInfoQuery;
@@ -45,7 +44,7 @@ import java.util.logging.*;
 /**
  * Resource representing an IM user
  */
-public class ImUserService extends GenericService
+public class ImUserService extends SimpleBamService
 {
   private static final Logger log
     = Logger.getLogger(ImUserService.class.getName());

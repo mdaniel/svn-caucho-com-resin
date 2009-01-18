@@ -84,7 +84,7 @@ public class HmtpClient extends AbstractBamConnection {
     parseURL(url);
 
     if (agentStream == null)
-      agentStream = new SimpleBamConnectionStream(this);
+      agentStream = new SimpleBamConnectionStream();
     
     setAgentStream(agentStream);
   }
@@ -164,9 +164,9 @@ public class HmtpClient extends AbstractBamConnection {
 	if (log.isLoggable(Level.FINE))
 	  log.fine(this + " " + status);
 
-	_brokerStream = new ToServerLinkStream(_is, _os);
+	_brokerStream = new ToServerLinkStream(null, _os);
 
-	executeThread(new FromServerLinkStream(this));
+	executeThread(new FromServerLinkStream(this, _is));
       }
       else {
 	_os.close();
@@ -215,11 +215,6 @@ public class HmtpClient extends AbstractBamConnection {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-  }
-
-  Hessian2StreamingInput getStreamingInput()
-  {
-    return _brokerStream.getStreamingInput();
   }
 
   /**

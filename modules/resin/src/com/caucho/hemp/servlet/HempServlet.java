@@ -87,7 +87,7 @@ public class HempServlet extends GenericServlet {
     WriteStream os = req.getConnection().getWriteStream();
 
     TcpDuplexController controller
-      = res.upgradeProtocol(new ServerBrokerStream(_broker, is, os));
+      = res.upgradeProtocol(new FromClientLinkStream(_broker, is, os));
     
     controller.setIdleTimeMax(30 * 60 * 1000L);
   }

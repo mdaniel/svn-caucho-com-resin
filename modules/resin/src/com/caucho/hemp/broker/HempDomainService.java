@@ -38,7 +38,7 @@ import com.caucho.bam.BamStream;
 import com.caucho.bam.BamConnection;
 import com.caucho.config.*;
 import com.caucho.bam.AbstractBamStream;
-import com.caucho.bam.BamService;
+import com.caucho.bam.SimpleBamService;
 import com.caucho.util.*;
 
 import java.io.Serializable;
@@ -50,8 +50,7 @@ import javax.webbeans.*;
 /**
  * GenericService implementation to simplify configuring a service.
  */
-public class HempDomainService extends GenericService
-  implements BamService
+public class HempDomainService extends SimpleBamService
 {
   private static final L10N L = new L10N(HempDomainService.class);
   private static final Logger log
@@ -61,10 +60,10 @@ public class HempDomainService extends GenericService
 
   HempDomainService(HempBroker broker, String jid)
   {
-    setBroker(broker);
+    // setBroker(broker);
     setJid(jid);
 
-    init();
+    // init();
   }
   
   @Override
@@ -76,15 +75,14 @@ public class HempDomainService extends GenericService
       return false;
   }
 
-  @Override
-  public boolean querySet(long id, String to, String from, Serializable query)
+  @QuerySet
+  public boolean querySet(long id,
+			  String to,
+			  String from,
+			  ImSessionQuery query)
   {
-    if (query instanceof ImSessionQuery) {
-      getBroker().getBrokerStream().queryResult(id, from, to, null);
+    getBrokerStream().queryResult(id, from, to, null);
 
-      return true;
-    }
-    
-    return false;
+    return true;
   }
 }

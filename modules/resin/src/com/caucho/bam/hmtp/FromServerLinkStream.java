@@ -42,36 +42,55 @@ import java.util.logging.*;
 /**
  * ClientToServerLink stream handles client packets received from the server.
  */
-class FromServerLinkStream implements Runnable, BamStream {
+class FromServerLinkStream extends FromLinkStream implements Runnable
+{
   private static final Logger log
     = Logger.getLogger(FromServerLinkStream.class.getName());
 
   private static long _gId;
   
   private HmtpClient _client;
-  private BamStream _toServerStream;
-  private BamStream _toClientStream;
   private ClassLoader _loader;
-  
-  private boolean _isFinest;
 
-  FromServerLinkStream(HmtpClient client)
+  private BamStream _toLinkStream;
+  private BamStream _toClientStream;
+
+  FromServerLinkStream(HmtpClient client,
+		       InputStream is)
   {
-    _client = client;
-    _toServerStream = client.getBrokerStream();
+    super(is);
+
+    _toLinkStream = client.getBrokerStream();
     _toClientStream = client.getAgentStream();
+
+    _client = client;
     _loader = Thread.currentThread().getContextClassLoader();
   }
 
-  private void close()
+  public String getJid()
   {
+    return _client.getJid();
+  }
+
+  protected BamStream getStream(String to)
+  {
+    return _toClientStream;
+  }
+
+  protected BamStream getLinkStream()
+  {
+    return _toLinkStream;
+  }
+
+  protected void close()
+  {
+    super.close();
+    
     _client.close();
   }
-    
+
   public void run()
   {
-    _isFinest = log.isLoggable(Level.FINEST);
-
     Thread thread = Thread.currentThread();
     String oldName = thread.getName();
       
@@ -89,283 +108,5 @@ class FromServerLinkStream implements Runnable, BamStream {
 
       thread.setName(oldName);
     }
-  }
-
-  private void readPacket()
-    throws IOException
-  {
-    int tag;
-
-    Hessian2StreamingInput in = _client.getStreamingInput();
-
-    if (in == null)
-      return;
-
-    Hessian2Input hIn = in.startPacket();
-
-    if (hIn == null) {
-      close();
-      return;
-    }
-
-    int type = hIn.readInt();
-    String to = hIn.readString();
-    String from = hIn.readString();
-
-    System.out.println("CL: " + HmtpPacketType.TYPES[type] + " " + to + " " + from);
-
-    switch (HmtpPacketType.TYPES[type]) {
-    case QUERY_RESULT:
-      {
-	long id = hIn.readLong();
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
-
-	_toClientStream.queryResult(id, to, from, value);
-	break;
-      }
-      
-    case QUERY_ERROR:
-      {
-	long id = hIn.readLong();
-	Serializable value = (Serializable) hIn.readObject();
-	BamError error = (BamError) hIn.readObject();
-	in.endPacket();
-
-	_toClientStream.queryError(id, to, from, value, error);
-	break;
-      }
-    }
-  }
-  
-  /**
-   * Returns the jid of the client
-   */
-  public String getJid()
-  {
-    return _client.getJid();
-  }
-  
-  /**
-   * Handles a message
-   */
-  public void message(String to,
-			String from,
-			Serializable value)
-  {
-    BamStream handler = _client.getAgentStream();
-
-    if (handler != null)
-      handler.message(to, from, value);
-  }
-  
-  /**
-   * Handles a message
-   */
-  public void messageError(String to,
-			       String from,
-			       Serializable value,
-			       BamError error)
-  {
-    BamStream handler = _client.getAgentStream();
-
-    if (handler != null)
-      handler.messageError(to, from, value, error);
-    else {
-      if (log.isLoggable(Level.FINER))
-	log.finer(this + " sendMessageError to=" + to + " from=" + from
-		  + " error=" + error);
-    }
-  }
-  
-  /**
-   * Handles a get query.
-   *
-   * The get handler must respond with either
-   * a QueryResult or a QueryError 
-   */
-  public boolean queryGet(long id,
-			      String to,
-			      String from,
-			      Serializable value)
-  {
-    BamStream handler = _client.getAgentStream();
-
-    if (handler == null || ! handler.queryGet(id, to, from, value)) {
-      String msg = "no queryGet handling " + value.getClass().getName();
-      BamError error = new BamError("unknown", msg);
-      
-      _toServerStream.queryError(id, from, to, value, error);
-    }
-    
-    return true;
-  }
-  
-  /**
-   * Handles a set query.
-   *
-   * The set handler must respond with either
-   * a QueryResult or a QueryError 
-   */
-  public boolean querySet(long id,
-			    String to,
-			    String from,
-			    Serializable value)
-  {
-    BamStream handler = _client.getAgentStream();
-
-    if (handler == null || ! handler.querySet(id, to, from, value)) {
-      String msg = "no querySet handling " + value.getClass().getName();
-      BamError error = new BamError("unknown", msg);
-      
-      _toServerStream.queryError(id, from, to, value, error);
-    }
-    
-    return true;
-  }
-  
-  /**
-   * Handles a query result.
-   *
-   * The result id will match a pending get or set.
-   */
-  public void queryResult(long id,
-			    String to,
-			    String from,
-			    Serializable value)
-  {
-    _client.onQueryResult(id, to, from, value);
-  }
-  
-  /**
-   * Handles a query error.
-   *
-   * The result id will match a pending get or set.
-   */
-  public void queryError(long id,
-			   String to,
-			   String from,
-			   Serializable value,
-			   BamError error)
-  {
-    _client.onQueryError(id, to, from, value, error);
-  }
-  
-  /**
-   * Handles a presence availability packet.
-   *
-   * If the handler deals with clients, the "from" value should be ignored
-   * and replaced by the client's jid.
-   */
-  public void presence(String to,
-			 String from,
-			 Serializable data)
-  {
-    BamStream handler = _client.getAgentStream();
-
-    if (handler != null)
-      handler.presence(to, from, data);
-  }
-  
-  /**
-   * Handles a presence unavailability packet.
-   *
-   * If the handler deals with clients, the "from" value should be ignored
-   * and replaced by the client's jid.
-   */
-  public void presenceUnavailable(String to,
-				    String from,
-				    Serializable data)
-  {
-    BamStream handler = _client.getAgentStream();
-
-    if (handler != null)
-      handler.presenceUnavailable(to, from, data);
-  }
-  
-  /**
-   * Handles a presence probe from another server
-   */
-  public void presenceProbe(String to,
-			      String from,
-			      Serializable data)
-  {
-    BamStream handler = _client.getAgentStream();
-
-    if (handler != null)
-      handler.presenceProbe(to, from, data);
-  }
-  
-  /**
-   * Handles a presence subscribe request from a client
-   */
-  public void presenceSubscribe(String to,
-				  String from,
-				  Serializable data)
-  {
-    BamStream handler = _client.getAgentStream();
-
-    if (handler != null)
-      handler.presenceSubscribe(to, from, data);
-  }
-  
-  /**
-   * Handles a presence subscribed result to a client
-   */
-  public void presenceSubscribed(String to,
-				   String from,
-				   Serializable data)
-  {
-    BamStream handler = _client.getAgentStream();
-
-    if (handler != null)
-      handler.presenceSubscribed(to, from, data);
-  }
-  
-  /**
-   * Handles a presence unsubscribe request from a client
-   */
-  public void presenceUnsubscribe(String to,
-				    String from,
-				    Serializable data)
-  {
-    BamStream handler = _client.getAgentStream();
-
-    if (handler != null)
-      handler.presenceUnsubscribe(to, from, data);
-  }
-  
-  /**
-   * Handles a presence unsubscribed result to a client
-   */
-  public void presenceUnsubscribed(String to,
-				     String from,
-				     Serializable data)
-  {
-    BamStream agentStream = _client.getAgentStream();
-
-    if (agentStream != null)
-      agentStream.presenceUnsubscribed(to, from, data);
-  }
-  
-  /**
-   * Handles a presence unsubscribed result to a client
-   */
-  public void presenceError(String to,
-			      String from,
-			      Serializable data,
-			      BamError error)
-  {
-    BamStream handler = _client.getAgentStream();
-
-    if (handler != null)
-      handler.presenceError(to, from, data, error);
-  }
-
-  @Override
-  public String toString()
-  {
-    // XXX: should have the connection
-    return getClass().getSimpleName() + "[]";
   }
 }

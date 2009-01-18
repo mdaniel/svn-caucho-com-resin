@@ -43,12 +43,16 @@ public class SimpleBamConnectionStream implements BamStream
     = Logger.getLogger(SimpleBamConnectionStream.class.getName());
 
   private final BamSkeleton _skeleton;
-  private final AbstractBamConnection _conn;
+  private AbstractBamConnection _conn;
 
-  public SimpleBamConnectionStream(AbstractBamConnection bamConnection)
+  public SimpleBamConnectionStream()
+  {
+    _skeleton = BamSkeleton.getBamSkeleton(getClass());
+  }
+
+  protected void setBamConnection(AbstractBamConnection bamConnection)
   {
     _conn = bamConnection;
-    _skeleton = BamSkeleton.getBamSkeleton(bamConnection.getClass());
   }
 
   /**

@@ -34,8 +34,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.BamStream;
+import com.caucho.bam.SimpleBamService;
 import com.caucho.config.ConfigException;
-import com.caucho.hemp.broker.GenericService;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.webbeans.manager.WebBeansContainer;
@@ -46,7 +46,7 @@ import javax.annotation.PostConstruct;
 /**
  * BAM agent spawns a new BamPhpAgent when requested.
  **/
-public class BamPhpRootService extends GenericService {
+public class BamPhpRootService extends SimpleBamService {
   private static final L10N L = new L10N(BamPhpAgent.class);
   private static final Logger log
     = Logger.getLogger(BamPhpRootService.class.getName());
@@ -84,7 +84,7 @@ public class BamPhpRootService extends GenericService {
     if (_script == null)
       throw new ConfigException(L.l("script path not specified"));
 
-    super.init();
+    // super.init();
   }
 
   @Override

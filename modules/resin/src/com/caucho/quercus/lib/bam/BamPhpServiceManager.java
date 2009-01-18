@@ -41,7 +41,6 @@ import com.caucho.bam.BamError;
 import com.caucho.bam.BamServiceManager;
 import com.caucho.bam.BamStream;
 import com.caucho.config.ConfigException;
-import com.caucho.hemp.broker.GenericService;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.JavaValue;

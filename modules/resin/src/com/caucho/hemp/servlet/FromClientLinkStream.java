@@ -32,6 +32,7 @@ package com.caucho.hemp.servlet;
 import com.caucho.bam.BamConnection;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.hmtp.HmtpPacketType;
+import com.caucho.bam.hmtp.FromLinkStream;
 import com.caucho.bam.BamError;
 import com.caucho.hmtp.Packet;
 import java.io.*;
@@ -45,13 +46,13 @@ import com.caucho.server.connection.*;
 import com.caucho.vfs.*;
 
 /**
- * Main protocol handler for the HTTP version of HeMPP.
+ * Main protocol handler for the HTTP version of HMTP
  */
-public class ServerBrokerStream
-  implements TcpDuplexHandler, BamStream
+public class FromClientLinkStream extends FromLinkStream
+  implements TcpDuplexHandler
 {
   private static final Logger log
-    = Logger.getLogger(ServerBrokerStream.class.getName());
+    = Logger.getLogger(FromClientLinkStream.class.getName());
   
   private BamBroker _broker;
   private BamConnection _conn;
@@ -60,39 +61,62 @@ public class ServerBrokerStream
   private Hessian2StreamingInput _in;
   private Hessian2Output _out;
 
-  private ServerAgentStream _agentStream;
+  private BamStream _linkStream;
   private LinkService _linkService;
   private AuthBrokerStream _authHandler;
 
   private String _jid;
 
-  public ServerBrokerStream(BamBroker broker, ReadStream rs, WriteStream ws)
+  public FromClientLinkStream(BamBroker broker,
+			      InputStream is,
+			      OutputStream os)
   {
+    super(is);
+	  
     _broker = broker;
 
-    InputStream is = rs;
-    OutputStream os = ws;
-
     if (log.isLoggable(Level.FINEST)) {
-      os = new HessianDebugOutputStream(os, log, Level.FINEST);
       is = new HessianDebugInputStream(is, log, Level.FINEST);
     }
     
     _in = new Hessian2StreamingInput(is);
-    _out = new Hessian2Output(os);
 
-    _agentStream = new ServerAgentStream(this, _out);
-    _authHandler = new AuthBrokerStream(this, _agentStream);
-    _linkService = new LinkService(this, _agentStream);
+    _linkStream = new ToClientLinkStream(getJid(), os);
+    // _authHandler = new AuthBrokerStream(getJid(), _agentStream);
+    _linkService = new LinkService(this, _linkStream);
   }
 
   public String getJid()
   {
     return _jid;
   }
+
+  @Override
+  public BamStream getLinkStream()
+  {
+    return _linkStream;
+  }
   
   public boolean serviceRead(ReadStream is,
 			     TcpDuplexController controller)
+    throws IOException
+  {
+    try {
+      if (readPacket()) {
+	return true;
+      }
+      else {
+	controller.close();
+	return false;
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+
+      return false;
+    }
+  }
+
+  protected boolean readPacket()
     throws IOException
   {
     Hessian2StreamingInput in = _in;
@@ -106,7 +130,6 @@ public class ServerBrokerStream
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " end of stream");
       
-      controller.close();
       return false;
     }
 
@@ -128,7 +151,12 @@ public class ServerBrokerStream
 	Serializable value = (Serializable) hIn.readObject();
 	in.endPacket();
 
-	stream.message(to, from, value);
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " message " + value
+		    + " {to:" + to + ", from:" + from + "}");
+	}
+	
+	stream.message(to, getJid(), value);
 
 	break;
       }
@@ -139,7 +167,12 @@ public class ServerBrokerStream
 	BamError error = (BamError) hIn.readObject();
 	in.endPacket();
 
-	stream.messageError(to, from, value, error);
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " messageError " + error + " " + value
+		    + " {to:" + to + ", from:" + from + "}");
+	}
+
+	stream.messageError(to, getJid(), value, error);
 
 	break;
       }
@@ -150,7 +183,12 @@ public class ServerBrokerStream
 	Serializable value = (Serializable) hIn.readObject();
 	in.endPacket();
 
-	stream.queryGet(id, to, from, value);
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " queryGet " + value
+		    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
+	}
+
+	stream.queryGet(id, to, getFrom(from), value);
 
 	break;
       }
@@ -161,7 +199,16 @@ public class ServerBrokerStream
 	Serializable value = (Serializable) hIn.readObject();
 	in.endPacket();
 
-	stream.querySet(id, to, from, value);
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " querySet " + value
+		    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
+	}
+
+	try {
+	  stream.querySet(id, to, from, value);
+	} catch (Exception e) {
+	  e.printStackTrace();
+	}
 
 	break;
       }
@@ -171,6 +218,11 @@ public class ServerBrokerStream
 	long id = hIn.readLong();
 	Serializable value = (Serializable) hIn.readObject();
 	in.endPacket();
+
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " queryResult " + value
+		    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
+	}
 
 	stream.queryResult(id, to, from, value);
 
@@ -184,13 +236,38 @@ public class ServerBrokerStream
 	BamError error = (BamError) hIn.readObject();
 	in.endPacket();
 
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " queryError " + error + " " + value
+		    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
+	}
+
 	stream.queryError(id, to, from, value, error);
 
 	break;
       }
+
+    default:
+      throw new IllegalStateException("ERROR: " + type);
     }
 
     return true;
+  }
+
+  @Override
+  protected BamStream getStream(String to)
+  {
+    BamStream stream;
+    if (to == null)
+      return _linkService.getAgentStream();
+    else if (_conn != null)
+      return _toBroker;
+    else
+      return _authHandler;
+  }
+
+  protected String getFrom(String from)
+  {
+    return getJid();
   }
   
   public boolean serviceWrite(WriteStream os,
@@ -205,7 +282,7 @@ public class ServerBrokerStream
     String password = (String) credentials;
     
     _conn = _broker.getConnection(uid, password);
-    _conn.setAgentStream(_agentStream);
+    _conn.setAgentStream(_linkStream);
 
     _jid = _conn.getJid();
     
