@@ -36,7 +36,7 @@ import com.caucho.bam.BamError;
 import com.caucho.bam.BamConnection;
 import com.caucho.bam.BamException;
 import com.caucho.bam.BamRemoteConnectionFailedException;
-import com.caucho.bam.SimpleBamConnectionStream;
+import com.caucho.bam.SimpleBamAgentStream;
 import com.caucho.hessian.io.*;
 
 import java.io.*;
@@ -68,7 +68,7 @@ public class HmtpClient extends AbstractBamConnection {
 
   private BamException _connException;
   
-  private ToServerLinkStream _brokerStream;
+  private ClientToLinkStream _brokerStream;
   private String _jid;
 
   private BamStream _streamHandler;
@@ -84,7 +84,7 @@ public class HmtpClient extends AbstractBamConnection {
     parseURL(url);
 
     if (agentStream == null)
-      agentStream = new SimpleBamConnectionStream();
+      agentStream = new SimpleBamAgentStream();
     
     setAgentStream(agentStream);
   }
@@ -164,9 +164,9 @@ public class HmtpClient extends AbstractBamConnection {
 	if (log.isLoggable(Level.FINE))
 	  log.fine(this + " " + status);
 
-	_brokerStream = new ToServerLinkStream(null, _os);
+	_brokerStream = new ClientToLinkStream(null, _os);
 
-	executeThread(new FromServerLinkStream(this, _is));
+	executeThread(new ClientFromLinkStream(this, _is));
       }
       else {
 	_os.close();
@@ -244,7 +244,7 @@ public class HmtpClient extends AbstractBamConnection {
   public void flush()
     throws IOException
   {
-    ToServerLinkStream stream = _brokerStream;
+    ClientToLinkStream stream = _brokerStream;
 
     if (stream != null)
       stream.flush();
@@ -310,7 +310,7 @@ public class HmtpClient extends AbstractBamConnection {
       Socket s;
       InputStream is;
       OutputStream os;
-      ToServerLinkStream stream;
+      ClientToLinkStream stream;
       
       synchronized (this) {
 	s = _s;

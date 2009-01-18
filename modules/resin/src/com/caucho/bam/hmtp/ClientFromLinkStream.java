@@ -42,10 +42,10 @@ import java.util.logging.*;
 /**
  * ClientToServerLink stream handles client packets received from the server.
  */
-class FromServerLinkStream extends FromLinkStream implements Runnable
+public class ClientFromLinkStream extends FromLinkStream implements Runnable
 {
   private static final Logger log
-    = Logger.getLogger(FromServerLinkStream.class.getName());
+    = Logger.getLogger(ClientFromLinkStream.class.getName());
 
   private static long _gId;
   
@@ -55,7 +55,7 @@ class FromServerLinkStream extends FromLinkStream implements Runnable
   private BamStream _toLinkStream;
   private BamStream _toClientStream;
 
-  FromServerLinkStream(HmtpClient client,
+  ClientFromLinkStream(HmtpClient client,
 		       InputStream is)
   {
     super(is);
@@ -80,6 +80,12 @@ class FromServerLinkStream extends FromLinkStream implements Runnable
   protected BamStream getLinkStream()
   {
     return _toLinkStream;
+  }
+
+  @Override
+  protected String getFrom(String from)
+  {
+    return from;
   }
 
   protected void close()

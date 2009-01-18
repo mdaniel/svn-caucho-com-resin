@@ -48,11 +48,11 @@ import com.caucho.vfs.*;
 /**
  * Main protocol handler for the HTTP version of HMTP
  */
-public class FromClientLinkStream extends FromLinkStream
+public class ServerFromLinkStream extends FromLinkStream
   implements TcpDuplexHandler
 {
   private static final Logger log
-    = Logger.getLogger(FromClientLinkStream.class.getName());
+    = Logger.getLogger(ServerFromLinkStream.class.getName());
   
   private BamBroker _broker;
   private BamConnection _conn;
@@ -62,12 +62,12 @@ public class FromClientLinkStream extends FromLinkStream
   private Hessian2Output _out;
 
   private BamStream _linkStream;
-  private LinkService _linkService;
+  private ServerLinkService _linkService;
   private AuthBrokerStream _authHandler;
 
   private String _jid;
 
-  public FromClientLinkStream(BamBroker broker,
+  public ServerFromLinkStream(BamBroker broker,
 			      InputStream is,
 			      OutputStream os)
   {
@@ -81,9 +81,9 @@ public class FromClientLinkStream extends FromLinkStream
     
     _in = new Hessian2StreamingInput(is);
 
-    _linkStream = new ToClientLinkStream(getJid(), os);
+    _linkStream = new ServerToLinkStream(getJid(), os);
     // _authHandler = new AuthBrokerStream(getJid(), _agentStream);
-    _linkService = new LinkService(this, _linkStream);
+    _linkService = new ServerLinkService(this, _linkStream);
   }
 
   public String getJid()
@@ -95,6 +95,24 @@ public class FromClientLinkStream extends FromLinkStream
   public BamStream getLinkStream()
   {
     return _linkStream;
+  }
+
+  @Override
+  protected BamStream getStream(String to)
+  {
+    BamStream stream;
+    if (to == null)
+      return _linkService.getAgentStream();
+    else if (_conn != null)
+      return _toBroker;
+    else
+      return _authHandler;
+  }
+
+  @Override
+  protected String getFrom(String from)
+  {
+    return getJid();
   }
   
   public boolean serviceRead(ReadStream is,
@@ -116,6 +134,7 @@ public class FromClientLinkStream extends FromLinkStream
     }
   }
 
+  /*
   protected boolean readPacket()
     throws IOException
   {
@@ -252,23 +271,7 @@ public class FromClientLinkStream extends FromLinkStream
 
     return true;
   }
-
-  @Override
-  protected BamStream getStream(String to)
-  {
-    BamStream stream;
-    if (to == null)
-      return _linkService.getAgentStream();
-    else if (_conn != null)
-      return _toBroker;
-    else
-      return _authHandler;
-  }
-
-  protected String getFrom(String from)
-  {
-    return getJid();
-  }
+  */
   
   public boolean serviceWrite(WriteStream os,
 			      TcpDuplexController controller)

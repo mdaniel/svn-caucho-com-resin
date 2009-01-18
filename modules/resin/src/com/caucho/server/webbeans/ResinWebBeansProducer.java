@@ -35,13 +35,16 @@ import com.caucho.config.annotation.OsgiServiceBinding;
 import com.caucho.ejb.timer.EjbTimerService;
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.jmx.Jmx;
+import com.caucho.remote.BamService;
 import com.caucho.webbeans.*;
+import com.caucho.webbeans.component.CauchoBean;
 import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.webbeans.manager.BeanStartupEvent;
 import com.caucho.server.util.ScheduledThreadPool;
 import com.caucho.transaction.*;
 import com.caucho.util.L10N;
 
+import java.lang.annotation.Annotation;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Set;

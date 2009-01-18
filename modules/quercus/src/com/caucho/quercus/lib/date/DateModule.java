@@ -112,10 +112,11 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the formatted date.
    */
-  public String date(String format,
+  public String date(Env env,
+		     String format,
                      @Optional("time()") long time)
   {
-    return date(format, time, false);
+    return date(env, format, time, false);
   }
   
   /**
@@ -149,7 +150,7 @@ public class DateModule extends AbstractQuercusModule {
       case 'Y':
       case 'z':
       case 'Z':
-        String dateString = date(format, time, false);
+        String dateString = date(env, format, time, false);
 
         int sign = 1;
         long result = 0;
@@ -279,10 +280,11 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the formatted date.
    */
-  public String gmdate(String format,
+  public String gmdate(Env env,
+		       String format,
 		       @Optional("time()") long time)
   {
-    return date(format, time, true);
+    return date(env, format, time, true);
   }
 
   /**
@@ -345,11 +347,21 @@ public class DateModule extends AbstractQuercusModule {
     return (c + day + e + f - 1524.5);
   }
 
-  private String date(String format, long time, boolean isGMT)
+  private String date(Env env, String format, long time, boolean isGMT)
   {
-    QDate calendar = isGMT ? _gmtCalendar : _localCalendar;
-    
-    return dateImpl(format, time, calendar);
+    if (isGMT) {
+      return dateImpl(format, time, _gmtCalendar);
+    }
+    else {
+      QDate calendar;
+      
+      if (env.getDefaultTimeZone() != null)
+	calendar = new QDate(env.getDefaultTimeZone());
+      else
+	calendar = _localCalendar;
+
+      return dateImpl(format, time, calendar);
+    }
   }
   
   protected static String date(String format, long time, QDate calendar)
@@ -837,16 +849,13 @@ public class DateModule extends AbstractQuercusModule {
    */
   public static Value microtime(Env env, @Optional boolean getAsFloat)
   {
-    double now;
+    long sec = Alarm.getExactTime() / 1000;
+    long nanos = Alarm.getExactTimeNanoseconds() % 1000000000L;
 
-    // windows System.nanoTime() does not return the system time,
-    // so just return milliseconds multiplied by 1000
-    if (Path.isWindows()) {
-      now = System.currentTimeMillis() * 0.001;
-    }
-    else {
-      now = Alarm.getExactTimeNanoseconds() * 1e-9;
-    }
+    if (nanos < 0)
+      nanos += 1000000000;
+
+    double now = sec + nanos * 1e-9;
 
     if (getAsFloat) {
       return new DoubleValue(now);
@@ -1292,6 +1301,9 @@ public class DateModule extends AbstractQuercusModule {
         }
 
         if (token < 0) {
+	  if (_hasDate && ! _hasTime)
+	    _date.setTime(0, 0, 0, 0);
+	  
           return _date.getGMTTime();
         }
         else if (token == INT) {

@@ -27,5 +27,10 @@ class FilterIterator extends IteratorIterator {
   {
     parent::rewind();
     $this->fetch();
-  }    
+  }
+
+  function __call($fun, $param)
+  {
+    return call_user_func_array(array($this->it, $fun), $param);
+  }
 }

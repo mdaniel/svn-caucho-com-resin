@@ -50,10 +50,10 @@ public class AuthBrokerStream extends AbstractBamStream
   private static final Logger log
     = Logger.getLogger(AuthBrokerStream.class.getName());
 
-  private FromClientLinkStream _manager;
+  private ServerFromLinkStream _manager;
   private BamStream _broker;
 
-  AuthBrokerStream(FromClientLinkStream manager, BamStream server)
+  AuthBrokerStream(ServerFromLinkStream manager, BamStream server)
   {
     _manager = manager;
     _broker = server;

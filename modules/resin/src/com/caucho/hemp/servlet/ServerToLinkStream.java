@@ -27,53 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.client;
+package com.caucho.hemp.servlet;
 
-import com.caucho.bam.hmtp.HmtpClient;
-import com.caucho.server.connection.*;
-import com.caucho.server.port.*;
-import com.caucho.hemp.*;
-import com.caucho.hessian.io.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
+import com.caucho.bam.BamStream;
+import com.caucho.bam.BamError;
+import com.caucho.bam.hmtp.HmtpPacketType;
+import com.caucho.bam.hmtp.ToLinkStream;
 import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.concurrent.*;
 import java.util.logging.*;
 
+import com.caucho.hessian.io.*;
+
 /**
- * HMPP client protocol
+ * Handles callbacks for a hmtp service
  */
-public class HempClient extends HmtpClient {
-  private static final L10N L = new L10N(HempClient.class);
+public class ServerToLinkStream extends ToLinkStream
+{
   private static final Logger log
-    = Logger.getLogger(HempClient.class.getName());
+    = Logger.getLogger(ServerToLinkStream.class.getName());
 
-  public HempClient(String url)
+  ServerToLinkStream(String jid, OutputStream os)
   {
-    super(url);
+    super(jid, os);
   }
 
-  @Override
-  protected void executeThread(Runnable task)
+  public String toString()
   {
-    ThreadPool.getThreadPool().start(task);
-  }
-
-  @Override
-  protected void openSocket(String host, int port)
-    throws IOException
-  {
-    _s = new Socket(getHost(), getPort());
-
-    SocketStream ss = new SocketStream(_s);
-
-    WriteStream os = new WriteStream(ss);
-    ReadStream is = new ReadStream(ss);
-    
-    _os = os;
-    _is = is;
+    return getClass().getSimpleName() + "[" + getJid() + "]";
   }
 }

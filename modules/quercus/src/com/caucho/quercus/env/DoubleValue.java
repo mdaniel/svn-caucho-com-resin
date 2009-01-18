@@ -257,12 +257,53 @@ public class DoubleValue extends NumberValue
    */
   public String toString()
   {
+    /*
     long longValue = (long) _value;
 
     if (longValue == _value)
       return String.valueOf(longValue);
+    */
+
+    double abs = _value < 0 ? - _value : _value;
+    int exp = (int) Math.log10(abs);
+
+    // #3279
+
+    if (-5 < exp && exp < 18) {
+      int digits = 13 - exp;
+
+      if (digits > 13)
+	digits = 13;
+      else if (digits < 0)
+	digits = 0;
+      
+      String v = String.format("%." + digits + "f", _value);
+
+      int len = v.length();
+      int nonzero = -1;
+      boolean dot = false;
+
+      for (len--; len >= 0; len--) {
+	int ch = v.charAt(len);
+
+	if (ch == '.')
+	  dot = true;
+	
+	if (ch != '0' && nonzero < 0) {
+	  if (ch == '.')
+	    nonzero = len - 1;
+	  else
+	    nonzero = len;
+	}
+      }
+
+      if (dot && nonzero >= 0)
+	return v.substring(0, nonzero + 1);
+      else
+	return v;
+    }
     else
-      return String.valueOf(_value);
+      return String.format("%.13e", _value);
   }
 
   /**

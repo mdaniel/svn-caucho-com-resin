@@ -13,6 +13,14 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>quercus: batch compiled files (#3261, rep by koreth)</li>
+<li>quercus: strtotime with date and not time needs to zero-out time (#3177, rep by dmaa)</li>
+<li>quercus: FilterIterator (#3214, rep by koreth)</li>
+<li>quercus: stub out CURLOPT_MAXREDIRS (#3126, rep by koreth)</li>
+<li>quercus: double printing needs to match php (#3279, rep by koreth)</li>
+<li>quercus: curl CURLOPT_POSTFIELDS needs to understand array (#3281, rep by koreth)</li>
+<li>quercus: microtime() was using System.nanos() incorrectly (#3280, rep by koreth)</li>
+<li>quercus: date() not using default timezone (#3273, rep by koreth)</li>
 <li>quercus: pwd not working properly in passthru (#3247, rep by mikhailb)</li>
 <li>quercus: get_object_vars must not use iterator (#3253, rep by haplo)</li>
 <li>quercus: Java interfaces not properly populating instanceof (#3230, rep by haplo)</li>

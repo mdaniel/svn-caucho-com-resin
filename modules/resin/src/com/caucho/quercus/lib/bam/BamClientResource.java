@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib.bam;
 
-import com.caucho.hemp.client.HempClient;
+import com.caucho.bam.hmtp.HmtpClient;
 import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.util.L10N;
 
@@ -47,14 +47,14 @@ public class BamClientResource
 
   private static final L10N L = new L10N(BamClientResource.class);
 
-  private HempClient _client;
+  private HmtpClient _client;
 
   public BamClientResource(String url)
   {
-    _client = new HempClient(url);
+    _client = new HmtpClient(url);
   }
 
-  public HempClient getClient()
+  public HmtpClient getClient()
   {
     return _client;
   }

@@ -45,6 +45,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -796,6 +797,9 @@ public class CurlModule
       case CURLOPT_MAXCONNECTS:
         //XXX
         break;
+      case CURLOPT_MAXREDIRS:
+        //XXX
+        break;
       case CURLOPT_PORT:
         curl.setPort(value.toInt());
         break;
@@ -909,7 +913,7 @@ public class CurlModule
         break;
       case CURLOPT_POSTFIELDS:
         curl.setRequestMethod("POST");
-        curl.setPostBody(value.toBinaryValue(env));
+	postfields(env, curl, value);
         break;
       case CURLOPT_PROXY:
         curl.setIsProxying(true);
@@ -1015,12 +1019,43 @@ public class CurlModule
         break;
 
       default:
-        env.warning(L.l("CURL option unknown or unimplemented"));
-        log.log(Level.FINE, L.l("CURL option unknown orunimplemented"));
+        env.warning(L.l("CURL option '{0}' unknown or unimplemented",
+			option));
+	
+        log.fine(L.l("CURL option '{0}' unknown or unimplemented",
+		     option));
         return false;
     }
 
     return true;
+  }
+
+  private static void postfields(Env env,
+				 CurlResource curl,
+				 Value value)
+  {
+    if (value.isArray()) {
+      StringValue sb = env.createBinaryBuilder();
+      boolean isFirst = true;
+
+      Iterator<Map.Entry<Value,Value>> iter = value.getIterator(env);
+      while (iter.hasNext()) {
+	Map.Entry<Value,Value> entry = iter.next();
+
+	if (! isFirst)
+	  sb.append("&");
+	isFirst = false;
+
+	sb.append(entry.getKey());
+	sb.append("=");
+	sb.append(entry.getValue());
+      }
+
+      curl.setPostBody(sb);
+    }
+    else {
+      curl.setPostBody(value.toBinaryValue(env));
+    }
   }
 
   /**

@@ -61,6 +61,8 @@ abstract public class FromLinkStream {
 
   abstract protected BamStream getLinkStream();
 
+  abstract protected String getFrom(String from);
+
   /**
    * Reads the next HMTP packet from the stream, returning false on
    * end of file.
@@ -186,17 +188,133 @@ abstract public class FromLinkStream {
 
 	break;
       }
+      
+    case PRESENCE:
+      {
+	Serializable value = (Serializable) hIn.readObject();
+	in.endPacket();
+
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " presence " + value
+		    + " {to:" + to + ", from:" + from + "}");
+	}
+
+	getStream(to).presence(to, getFrom(from), value);
+
+	break;
+      }
+      
+    case PRESENCE_UNAVAILABLE:
+      {
+	Serializable value = (Serializable) hIn.readObject();
+	in.endPacket();
+
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " presenceUnavailable " + value
+		    + " {to:" + to + ", from:" + from + "}");
+	}
+
+	getStream(to).presenceUnavailable(to, getFrom(from), value);
+
+	break;
+      }
+      
+    case PRESENCE_PROBE:
+      {
+	Serializable value = (Serializable) hIn.readObject();
+	in.endPacket();
+
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " presenceProbe " + value
+		    + " {to:" + to + ", from:" + from + "}");
+	}
+
+	getStream(to).presenceProbe(to, getFrom(from), value);
+
+	break;
+      }
+      
+    case PRESENCE_SUBSCRIBE:
+      {
+	Serializable value = (Serializable) hIn.readObject();
+	in.endPacket();
+
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " presenceSubscribe " + value
+		    + " {to:" + to + ", from:" + from + "}");
+	}
+
+	getStream(to).presenceSubscribe(to, getFrom(from), value);
+
+	break;
+      }
+      
+    case PRESENCE_SUBSCRIBED:
+      {
+	Serializable value = (Serializable) hIn.readObject();
+	in.endPacket();
+
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " presenceSubscribed " + value
+		    + " {to:" + to + ", from:" + from + "}");
+	}
+
+	getStream(to).presenceSubscribed(to, getFrom(from), value);
+
+	break;
+      }
+      
+    case PRESENCE_UNSUBSCRIBE:
+      {
+	Serializable value = (Serializable) hIn.readObject();
+	in.endPacket();
+
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " presenceUnsubscribe " + value
+		    + " {to:" + to + ", from:" + from + "}");
+	}
+
+	getStream(to).presenceUnsubscribe(to, getFrom(from), value);
+
+	break;
+      }
+      
+    case PRESENCE_UNSUBSCRIBED:
+      {
+	Serializable value = (Serializable) hIn.readObject();
+	in.endPacket();
+
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " presenceUnsubscribed " + value
+		    + " {to:" + to + ", from:" + from + "}");
+	}
+
+	getStream(to).presenceUnsubscribed(to, getFrom(from), value);
+
+	break;
+      }
+
+    case PRESENCE_ERROR:
+      {
+	Serializable value = (Serializable) hIn.readObject();
+	BamError error = (BamError) hIn.readObject();
+	in.endPacket();
+
+	if (log.isLoggable(Level.FINER)) {
+	  log.finer(this + " presenceError " + error + " " + value
+		    + " {to:" + to + ", from:" + from + "}");
+	}
+
+	getStream(to).presenceError(to, getFrom(from), value, error);
+
+	break;
+      }
 
     default:
-      throw new IllegalStateException("ERROR: " + type);
+      throw new UnsupportedOperationException("ERROR: " + HmtpPacketType.TYPES[type]);
     }
 
     return true;
-  }
-
-  protected String getFrom(String from)
-  {
-    return getJid();
   }
 
   protected void close()

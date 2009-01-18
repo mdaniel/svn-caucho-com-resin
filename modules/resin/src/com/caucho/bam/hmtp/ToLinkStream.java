@@ -267,7 +267,7 @@ public class ToLinkStream implements BamStream
 
       if (out != null) {
 	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " queryError " + value
+	  log.finer(this + " queryError " + error + " " + value
 		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
 	}
 	
@@ -277,6 +277,7 @@ public class ToLinkStream implements BamStream
 	out.writeString(from);
 	out.writeLong(id);
 	out.writeObject(value);
+	out.writeObject(error);
 	out.endPacket();
 	out.flush();
       }
@@ -407,7 +408,7 @@ public class ToLinkStream implements BamStream
 
       if (out != null) {
 	out.startPacket();
-	out.writeInt(HmtpPacketType.PRESENCE_SUBSCRIBE.ordinal());
+	out.writeInt(HmtpPacketType.PRESENCE_SUBSCRIBED.ordinal());
 	out.writeString(to);
 	out.writeString(from);
 	out.writeObject(value);
@@ -459,7 +460,7 @@ public class ToLinkStream implements BamStream
 
       if (out != null) {
 	out.startPacket();
-	out.writeInt(HmtpPacketType.PRESENCE_UNSUBSCRIBE.ordinal());
+	out.writeInt(HmtpPacketType.PRESENCE_UNSUBSCRIBED.ordinal());
 	out.writeString(to);
 	out.writeString(from);
 	out.writeObject(value);

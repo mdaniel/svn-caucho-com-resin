@@ -43,12 +43,12 @@ import java.util.logging.*;
 /**
  * ClientToLinkStream sends packets to the server.
  */
-public class ToServerLinkStream extends ToLinkStream
+public class ClientToLinkStream extends ToLinkStream
 {
   private static final Logger log
-    = Logger.getLogger(ToServerLinkStream.class.getName());
+    = Logger.getLogger(ClientToLinkStream.class.getName());
 
-  public ToServerLinkStream(String jid, OutputStream os)
+  public ClientToLinkStream(String jid, OutputStream os)
   {
     super(jid, os);
   }

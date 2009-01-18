@@ -29,30 +29,47 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
-import com.caucho.bam.hmtp.HmtpPacketType;
-import com.caucho.bam.hmtp.ToLinkStream;
-import java.io.*;
-import java.util.logging.*;
+import com.caucho.bam.BamStream;
+import com.caucho.bam.QuerySet;
+import com.caucho.bam.SimpleBamService;
 
-import com.caucho.hessian.io.*;
+import com.caucho.bam.hmtp.AuthQuery;
+import com.caucho.bam.hmtp.AuthResult;
 
 /**
- * Handles callbacks for a hmtp service
+ * The LinkService is low-level link
  */
-public class ToClientLinkStream extends ToLinkStream
-{
-  private static final Logger log
-    = Logger.getLogger(ToClientLinkStream.class.getName());
 
-  ToClientLinkStream(String jid, OutputStream os)
+public class ServerLinkService extends SimpleBamService {
+  private ServerFromLinkStream _manager;
+  
+  /**
+   * Creates the LinkService for low-level link messages
+   */
+  public ServerLinkService(ServerFromLinkStream manager, BamStream agentStream)
   {
-    super(jid, os);
+    _manager = manager;
+    
+    // the agent stream serves as its own broker because there's no
+    // routing involved
+    setBrokerStream(agentStream);
   }
 
-  public String toString()
+  @QuerySet
+  public boolean querySet(long id, String to, String from, AuthQuery query)
   {
-    return getClass().getSimpleName() + "[" + getJid() + "]";
+    String jid = _manager.login(query.getUid(),
+				query.getCredentials(),
+				query.getResource());
+
+    if (jid != null)
+      getBrokerStream().queryResult(id, from, to, new AuthResult(jid));
+    else
+      getBrokerStream().queryError(id, from, to, query,
+				   new BamError(BamError.TYPE_AUTH,
+						BamError.FORBIDDEN));
+
+    return true;
   }
 }

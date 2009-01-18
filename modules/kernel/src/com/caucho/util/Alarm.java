@@ -232,8 +232,13 @@ public class Alarm implements ThreadTask {
    */
   public static long getExactTimeNanoseconds()
   {
-    if (_testTime > 0)
-      return _testTime * 1000000L;
+    if (_testTime > 0) {
+      // php/190u
+      // System.nanoTime() is not related to currentTimeMillis(), so return
+      // a different offset.  See System.nanoTime() javadoc
+      
+      return (_testTime - 10000000) * 1000000L;
+    }
 
     return System.nanoTime();
   }

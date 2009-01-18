@@ -32,7 +32,7 @@ package com.caucho.bam.hmtp;
 import java.io.Serializable;
 
 /**
- * Authentication query merges the XMPP authentication and bind steps
+ * Authentication query merges the Hmtp authentication and bind steps
  */
 public class AuthQuery implements Serializable {
   private final String _uid;

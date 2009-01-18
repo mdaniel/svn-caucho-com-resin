@@ -139,8 +139,8 @@ public class SimpleBamService extends AbstractBamService
       return true;
     }
     else {
-      String msg = (this + " unknown queryGet "
-		    + query + " for jid=" + getJid());
+      String msg = (this + " unknown queryGet " + query
+		    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
     
       BamError error = new BamError(BamError.TYPE_CANCEL,
 				    BamError.FEATURE_NOT_IMPLEMENTED,

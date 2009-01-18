@@ -33,7 +33,7 @@ import com.caucho.bam.BamConnection;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import com.caucho.hemp.broker.HempBroker;
-import com.caucho.hemp.client.HempClient;
+import com.caucho.bam.hmtp.HmtpClient;
 import com.caucho.xmpp.im.ImMessage;
 import com.caucho.xmpp.im.ImPresence;
 import com.caucho.xmpp.im.RosterItem;
@@ -161,7 +161,7 @@ public class BamModule extends AbstractQuercusModule
     if (agent != null)
       return env.error("bam_login not available from agent script");
 
-    HempClient client = new HempClient(url);
+    HmtpClient client = new HmtpClient(url);
 
     BamConnectionResource resource = new BamConnectionResource(client);
     env.addCleanup(resource);
