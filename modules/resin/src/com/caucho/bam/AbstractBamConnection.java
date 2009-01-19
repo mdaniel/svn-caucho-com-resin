@@ -66,8 +66,8 @@ abstract public class AbstractBamConnection implements BamConnection
   {
     _agentStream = agentStream;
 
-    if (agentStream instanceof SimpleBamAgentStream) {
-      ((SimpleBamAgentStream) agentStream).setBamConnection(this);
+    if (agentStream instanceof SimpleBamClientStream) {
+      ((SimpleBamClientStream) agentStream).setBamConnection(this);
     }
   }
 

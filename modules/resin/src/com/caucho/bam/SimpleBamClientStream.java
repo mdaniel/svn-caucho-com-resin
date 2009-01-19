@@ -35,17 +35,17 @@ import java.util.concurrent.atomic.*;
 import java.io.Serializable;
 
 /**
- * Simple connections will receive packets using the SimpleBamAgentStream
+ * Simple connections will receive packets using the SimpleBamClientStream
  */
-public class SimpleBamAgentStream implements BamStream
+public class SimpleBamClientStream implements BamStream
 {
   private static final Logger log
-    = Logger.getLogger(SimpleBamAgentStream.class.getName());
+    = Logger.getLogger(SimpleBamClientStream.class.getName());
 
   private final BamSkeleton _skeleton;
   private AbstractBamConnection _conn;
 
-  public SimpleBamAgentStream()
+  public SimpleBamClientStream()
   {
     _skeleton = BamSkeleton.getBamSkeleton(getClass());
   }

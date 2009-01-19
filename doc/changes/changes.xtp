@@ -13,6 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>remote: &lt;remote:BamService> replaces &lt;bam-service></li>
 <li>quercus: batch compiled files (#3261, rep by koreth)</li>
 <li>quercus: strtotime with date and not time needs to zero-out time (#3177, rep by dmaa)</li>
 <li>quercus: FilterIterator (#3214, rep by koreth)</li>

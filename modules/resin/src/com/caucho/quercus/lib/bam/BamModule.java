@@ -167,13 +167,11 @@ public class BamModule extends AbstractQuercusModule
     env.addCleanup(resource);
 
     try {
-      client.connect();
+      client.connect(username, password);
     }
     catch (Exception e) {
       return env.error("Unable to connect to BAM server", e);
     }
-
-    client.login(username, password);
 
     env.setSpecialValue("_quercus_bam_connection", client);
 

@@ -36,7 +36,7 @@ import com.caucho.bam.BamError;
 import com.caucho.bam.BamConnection;
 import com.caucho.bam.BamException;
 import com.caucho.bam.BamRemoteConnectionFailedException;
-import com.caucho.bam.SimpleBamAgentStream;
+import com.caucho.bam.SimpleBamClientStream;
 import com.caucho.hessian.io.*;
 
 import java.io.*;
@@ -84,7 +84,7 @@ public class HmtpClient extends AbstractBamConnection {
     parseURL(url);
 
     if (agentStream == null)
-      agentStream = new SimpleBamAgentStream();
+      agentStream = new SimpleBamClientStream();
     
     setAgentStream(agentStream);
   }
@@ -133,7 +133,14 @@ public class HmtpClient extends AbstractBamConnection {
     return _port;
   }
 
-  public void connect()
+  public void connect(String user, String password)
+  {
+    connectImpl();
+
+    loginImpl(user, password);
+  }
+
+  protected void connectImpl()
   {
     if (_s != null)
       throw new IllegalStateException(this + " is already connected");
@@ -200,7 +207,7 @@ public class HmtpClient extends AbstractBamConnection {
   /**
    * Login to the server
    */
-  public void login(String uid, String password)
+  protected void loginImpl(String uid, String password)
   {
     try {
       AuthResult result;

@@ -539,6 +539,8 @@ public class Host extends WebAppContainer
       = new SingletonBean(_bamBroker, "bamBroker", BamBroker.class);
 
     webBeans.addBean(bean);
+
+    webBeans.addRegistrationListener(new BamRegisterListener());
   }
 
   /**

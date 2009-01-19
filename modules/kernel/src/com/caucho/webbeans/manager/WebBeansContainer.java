@@ -174,6 +174,12 @@ public class WebBeansContainer
   private HashMap<Class,InjectProgram> _injectMap
     = new HashMap<Class,InjectProgram>();
 
+  private ArrayList<BeanRegistrationListener> _registrationListenerList
+    = new ArrayList<BeanRegistrationListener>();
+
+  private ArrayList<CauchoBean> _pendingRegistrationList
+    = new ArrayList<CauchoBean>();
+
   private RuntimeException _configException;
 
   private WebBeansContainer(String id,
@@ -893,6 +899,9 @@ public class WebBeansContainer
 
       if (isStartupPresent(cauchoBean.getAnnotations()))
 	_pendingServiceList.add(cauchoBean);
+
+      if (isRegistrationMatch(cauchoBean))
+	_pendingRegistrationList.add(cauchoBean);
     }
     else {
       for (Class type : bean.getTypes()) {
@@ -1505,6 +1514,59 @@ public class WebBeansContainer
   }
 
   //
+  // registration and startup
+  //
+
+  /**
+   * Adds a listener for new beans matching an annotation
+   */
+  public void addRegistrationListener(BeanRegistrationListener listener)
+  {
+    _registrationListenerList.add(listener);
+  }
+
+  /**
+   * Checks if the bean matches one if the registration listeners
+   */
+  public boolean isRegistrationMatch(CauchoBean bean)
+  {
+    if (_parent != null && _parent.isRegistrationMatch(bean))
+      return true;
+
+    for (BeanRegistrationListener listener : _registrationListenerList) {
+      for (Annotation ann : bean.getAnnotations()) {
+	if (listener.isMatch(ann))
+	  return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Starts registrations
+   */
+  public void startRegistration(CauchoBean bean)
+  {
+    if (_parent != null)
+      _parent.startRegistration(bean);
+
+    for (BeanRegistrationListener listener : _registrationListenerList) {
+      boolean isMatch = false;
+      
+      for (Annotation ann : bean.getAnnotations()) {
+	if (listener.isMatch(ann)) {
+	  isMatch = true;
+	  break;
+	}
+      }
+
+      if (isMatch)
+	listener.start(this, bean);
+    }
+  }
+
+  //
   // class loader updates
   //
 
@@ -1660,18 +1722,22 @@ public class WebBeansContainer
   private void startServices()
   {
     ArrayList<CauchoBean> services;
+    ArrayList<CauchoBean> registerServices;
 
     synchronized (_pendingServiceList) {
-      if (_pendingServiceList.size() == 0)
-	return;
-
-      services = new ArrayList<CauchoBean>();
-      services.addAll(_pendingServiceList);
+      services = new ArrayList<CauchoBean>(_pendingServiceList);
       _pendingServiceList.clear();
+      
+      registerServices = new ArrayList<CauchoBean>(_pendingRegistrationList);
+      _pendingRegistrationList.clear();
     }
 
     for (CauchoBean bean : services) {
       registerBean(bean, bean.getAnnotations());
+    }
+
+    for (CauchoBean bean : registerServices) {
+      startRegistration(bean);
     }
   }
 

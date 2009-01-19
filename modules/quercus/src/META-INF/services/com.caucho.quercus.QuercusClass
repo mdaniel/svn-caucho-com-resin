@@ -28,7 +28,6 @@ com.caucho.quercus.lib.spl.Iterator
 com.caucho.quercus.lib.spl.IteratorAggregate
 com.caucho.quercus.lib.spl.OuterIterator
 com.caucho.quercus.lib.spl.RecursiveIterator
-com.caucho.quercus.lib.spl.RecursiveIteratorIterator
 com.caucho.quercus.lib.spl.SeekableIterator
 com.caucho.quercus.lib.spl.Serializable
 com.caucho.quercus.lib.spl.Traversable
