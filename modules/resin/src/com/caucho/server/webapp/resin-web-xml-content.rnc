@@ -550,6 +550,9 @@ r_session-config = element session-config {
   & (attribute always-save-session { r_boolean-Type }
      | element always-save-session { r_boolean-Type })?
 
+  & (attribute cluster-store { r_boolean-Type }
+     | element cluster-store { r_boolean-Type })?
+
   & (attribute cookie-append-server-index { r_boolean-Type }
      | element cookie-append-server-index { r_boolean-Type })?
 
@@ -579,6 +582,9 @@ r_session-config = element session-config {
 
   & (attribute enable-url-rewriting { r_boolean-Type }
      | element enable-url-rewriting { r_boolean-Type })?
+
+  & (attribute file-store { r_path-Type }
+     | element file-store { r_path-Type })?
 
   & (attribute ignore-serialization-errors { r_boolean-Type }
      | element ignore-serialization-errors { r_boolean-Type })?
