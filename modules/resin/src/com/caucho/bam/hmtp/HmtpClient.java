@@ -44,6 +44,7 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
+import java.security.PublicKey;
 
 /**
  * HMTP client protocol
@@ -62,11 +63,15 @@ public class HmtpClient extends AbstractBamConnection {
   
   private String _to;
 
+  private boolean _isEncryptPassword = true;
+
   protected Socket _s;
   protected InputStream _is;
   protected OutputStream _os;
 
   private BamException _connException;
+
+  private ClientLinkManager _linkManager = new ClientLinkManager();
   
   private ClientToLinkStream _brokerStream;
   private String _jid;
@@ -131,6 +136,11 @@ public class HmtpClient extends AbstractBamConnection {
   public int getPort()
   {
     return _port;
+  }
+
+  public void setEncryptPassword(boolean isEncrypt)
+  {
+    _isEncryptPassword = isEncrypt;
   }
 
   public void connect(String user, String password)
@@ -210,8 +220,24 @@ public class HmtpClient extends AbstractBamConnection {
   protected void loginImpl(String uid, String password)
   {
     try {
+      Serializable credentials = password;
+
+      if (_isEncryptPassword) {
+	GetPublicKeyQuery pkValue
+	  = (GetPublicKeyQuery) queryGet(null, new GetPublicKeyQuery());
+
+	PublicKey publicKey = _linkManager.getPublicKey(pkValue);
+
+	ClientLinkManager.Secret secret = _linkManager.generateSecret();
+
+	EncryptedObject encPassword
+	  = _linkManager.encrypt(secret, publicKey, password);
+
+	credentials = encPassword;
+      }
+
       AuthResult result;
-      result = (AuthResult) querySet(null, new AuthQuery(uid, password));
+      result = (AuthResult) querySet(null, new AuthQuery(uid, credentials));
 
       _jid = result.getJid();
 

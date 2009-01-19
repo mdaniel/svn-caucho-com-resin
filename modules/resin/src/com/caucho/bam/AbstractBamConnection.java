@@ -261,9 +261,6 @@ abstract public class AbstractBamConnection implements BamConnection
     if (stream == null)
       throw new IllegalStateException("connection is closed");
 
-    if (getJid() == null)
-      Thread.dumpStack();
-    
     stream.queryGet(id, to, getJid(), value);
   }
 

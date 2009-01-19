@@ -37,6 +37,7 @@ import com.caucho.bam.hmtp.AuthQuery;
 import com.caucho.bam.hmtp.AuthResult;
 import com.caucho.bam.hmtp.GetPublicKeyQuery;
 import com.caucho.hessian.io.*;
+import com.caucho.util.Hex;
 
 import java.io.*;
 import java.security.Key;
@@ -85,7 +86,7 @@ public class ServerLinkManager {
     }
   }
 
-  public Key decryptSharedKey(byte []encKey, String keyAlgorithm)
+  public Key decryptKey(String keyAlgorithm, byte []encKey)
   {
     try {
       Cipher cipher = Cipher.getInstance("RSA");
@@ -100,20 +101,29 @@ public class ServerLinkManager {
     }
   }
   
-  public Object decryptPublicKey(byte []msgKey,
-				 String msgAlgorithm,
-				 byte []data)
+  public Object decrypt(String msgAlgorithm,
+			byte []msgKey,
+			byte []data)
   {
     try {
-      Key key = decryptSharedKey(msgKey, msgAlgorithm);
-      
+      Key key = decryptKey(msgAlgorithm, msgKey);
+
+      return decrypt(key, data);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  public Object decrypt(Key key, byte []data)
+  {
+    try {
       Cipher aes = Cipher.getInstance("AES");
 
       aes.init(Cipher.DECRYPT_MODE, key);
 
       byte []plainData = aes.doFinal(data);
 
-      ByteArrayInputStream bis = new ByteArrayInputStream(data);
+      ByteArrayInputStream bis = new ByteArrayInputStream(plainData);
       Hessian2Input in = new Hessian2Input(bis);
       Object value = in.readObject();
       in.close();

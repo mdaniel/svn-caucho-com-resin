@@ -42,7 +42,9 @@ import javax.servlet.*;
 import com.caucho.hemp.*;
 import com.caucho.hessian.io.*;
 import com.caucho.bam.BamBroker;
+import com.caucho.bam.BamException;
 import com.caucho.server.connection.*;
+import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
 /**
@@ -51,6 +53,7 @@ import com.caucho.vfs.*;
 public class ServerFromLinkStream extends FromLinkStream
   implements TcpDuplexHandler
 {
+  private static final L10N L = new L10N(ServerFromLinkStream.class);
   private static final Logger log
     = Logger.getLogger(ServerFromLinkStream.class.getName());
   
@@ -280,8 +283,13 @@ public class ServerFromLinkStream extends FromLinkStream
     return false;
   }
 
-  String login(String uid, Serializable credentials, String resource)
+  String login(String uid, Object credentials, String resource)
   {
+    if (! (credentials instanceof String)) {
+      throw new BamException(L.l("'{0}' is an unknown credential",
+				 credentials));
+    }
+    
     String password = (String) credentials;
     
     _conn = _broker.getConnection(uid, password);

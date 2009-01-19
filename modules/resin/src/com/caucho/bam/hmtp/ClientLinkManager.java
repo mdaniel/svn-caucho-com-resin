@@ -30,6 +30,7 @@
 package com.caucho.bam.hmtp;
 
 import com.caucho.hessian.io.*;
+import com.caucho.util.Hex;
 
 import java.io.*;
 import java.lang.reflect.Method;
@@ -55,6 +56,13 @@ public class ClientLinkManager {
 
   private KeyPair _authKeyPair; // authentication key pair
 
+  public PublicKey getPublicKey(GetPublicKeyQuery query)
+  {
+    return getPublicKey(query.getAlgorithm(),
+			query.getFormat(),
+			query.getEncoded());
+  }
+  
   public PublicKey getPublicKey(String algorithm,
 				String format,
 				byte []encData)
@@ -86,6 +94,18 @@ public class ClientLinkManager {
     }
   }
 
+  public EncryptedObject encrypt(Secret secret,
+				 PublicKey publicKey,
+				 Object object)
+  {
+    byte []encKey = wrapSecret(secret.getKey(), publicKey);
+    byte []encData = encode(secret.getKey(), object);
+
+    return new EncryptedObject(secret.getAlgorithm(),
+			       encKey,
+			       encData);
+  }
+
   public byte []wrapSecret(SecretKey secretKey, PublicKey publicKey)
   {
     try {
@@ -112,7 +132,7 @@ public class ClientLinkManager {
       out.close();
 
       byte []plainData = bos.toByteArray();
-      
+
       Cipher cipher = Cipher.getInstance("AES");
 
       cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -168,6 +188,16 @@ public class ClientLinkManager {
     {
       _key = key;
       _algorithm = algorithm;
+    }
+
+    public SecretKey getKey()
+    {
+      return _key;
+    }
+
+    public String getAlgorithm()
+    {
+      return _algorithm;
     }
   }
   

@@ -31,18 +31,27 @@ package com.caucho.hemp.servlet;
 
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamStream;
+import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleBamService;
 
 import com.caucho.bam.hmtp.AuthQuery;
 import com.caucho.bam.hmtp.AuthResult;
+import com.caucho.bam.hmtp.GetPublicKeyQuery;
+import com.caucho.bam.hmtp.EncryptedObject;
+
+import java.security.Key;
 
 /**
  * The LinkService is low-level link
  */
 
 public class ServerLinkService extends SimpleBamService {
+  private ServerLinkManager _linkManager = new ServerLinkManager();
+  
   private ServerFromLinkStream _manager;
+
+  private boolean _isRequireEncryptedPassword = true;
   
   /**
    * Creates the LinkService for low-level link messages
@@ -56,11 +65,44 @@ public class ServerLinkService extends SimpleBamService {
     setBrokerStream(agentStream);
   }
 
-  @QuerySet
-  public boolean querySet(long id, String to, String from, AuthQuery query)
+  //
+  // message handling
+  //
+
+  @QueryGet
+  public boolean getPublicKey(long id, String to, String from,
+			      GetPublicKeyQuery query)
   {
+    GetPublicKeyQuery result = _linkManager.getPublicKey();
+
+    getBrokerStream().queryResult(id, from, to, result);
+
+    return true;
+  }
+
+  @QuerySet
+  public boolean authLogin(long id, String to, String from, AuthQuery query)
+  {
+    Object credentials = query.getCredentials();
+
+    if (credentials instanceof EncryptedObject) {
+      EncryptedObject encPassword = (EncryptedObject) credentials;
+
+      Key key = _linkManager.decryptKey(encPassword.getKeyAlgorithm(),
+					encPassword.getEncKey());
+
+      credentials = _linkManager.decrypt(key, encPassword.getEncData());
+    }
+    else if (_isRequireEncryptedPassword) {
+      getBrokerStream().queryError(id, from, to, query,
+				   new BamError(BamError.TYPE_AUTH,
+						BamError.FORBIDDEN,
+						"passwords must be encrypted"));
+      return true;
+    }
+    
     String jid = _manager.login(query.getUid(),
-				query.getCredentials(),
+				credentials,
 				query.getResource());
 
     if (jid != null)
