@@ -308,6 +308,9 @@ public class Env {
 
   private Env _oldThreadEnv;
   
+  private long _prevMilliTime;
+  private long _prevNanoTime;
+  
   public Env(Quercus quercus,
              QuercusPage page,
              WriteStream out,
@@ -5905,6 +5908,35 @@ public class Env {
       _locale = new LocaleInfo();
 
     return _locale;
+  }
+  
+  public double getMicroTime()
+  {
+    long prevMilliTime = _prevMilliTime;
+    long prevNanoTime = _prevNanoTime;
+    
+    long milliTime = Alarm.getExactTime();
+    long nanoTime = Alarm.getExactTimeNanoseconds();
+    
+    _prevMilliTime = milliTime;
+    _prevNanoTime = nanoTime;
+    
+    long nanoDiff = nanoTime - prevNanoTime;
+    
+    if (nanoTime < 0 || prevNanoTime < 0 || nanoDiff < 0)
+      return milliTime / 1000d;
+    else if (milliTime > prevMilliTime)
+      return milliTime / 1000d + (nanoTime % 1000000L) / 1e9d;
+    else if (nanoDiff >= 1000000L) {
+      _prevNanoTime = prevNanoTime + 1000000L;
+      return (milliTime + 1) / 1000d;
+    }
+    else if ((nanoTime % 1000000L + nanoDiff) >= 1000000L) {
+      _prevNanoTime = prevNanoTime + 1000000L;
+      return (milliTime + 1) / 1000d;
+    }
+    else
+      return milliTime / 1000d + (nanoTime % 1000000L) / 1e9d;
   }
 
   /**

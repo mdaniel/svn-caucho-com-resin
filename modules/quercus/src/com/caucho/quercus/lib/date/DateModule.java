@@ -849,13 +849,7 @@ public class DateModule extends AbstractQuercusModule {
    */
   public static Value microtime(Env env, @Optional boolean getAsFloat)
   {
-    long sec = Alarm.getExactTime() / 1000;
-    long nanos = Alarm.getExactTimeNanoseconds() % 1000000000L;
-
-    if (nanos < 0)
-      nanos += 1000000000;
-
-    double now = sec + nanos * 1e-9;
+    double now = env.getMicroTime();
 
     if (getAsFloat) {
       return new DoubleValue(now);
