@@ -29,14 +29,18 @@
 
 package com.caucho.boot;
 
+import com.caucho.admin.RemoteAdminService;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.config.types.RawString;
+import com.caucho.hemp.broker.HempBroker;
 import com.caucho.loader.*;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.log.LogConfig;
 import com.caucho.log.RotateStream;
+import com.caucho.security.Authenticator;
+import com.caucho.security.AdminAuthenticator;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.SingleCluster;
 import com.caucho.server.cluster.ClusterServer;
@@ -44,6 +48,7 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.ServletMapping;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
+import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolDispatchServer;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.resin.ResinELContext;
@@ -54,6 +59,7 @@ import com.caucho.util.*;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
+import com.caucho.webbeans.component.SingletonBean;
 import com.caucho.webbeans.manager.*;
 
 import java.io.*;
@@ -103,12 +109,13 @@ class WatchdogManager extends ProtocolDispatchServer {
     EnvironmentStream.setStdout(out);
     EnvironmentStream.setStderr(out);
 
-    Logger.getLogger("").setLevel(Level.FINEST);
-
     LogConfig log = new LogConfig();
     log.setName("");
     log.setPath(logPath);
+    log.setLevel("all");
     log.init();
+
+    // Logger.getLogger("").setLevel(Level.FINER);
 
     ThreadPool.getThreadPool().setThreadIdleMin(1);
     ThreadPool.getThreadPool().setThreadIdleMax(5);
@@ -137,20 +144,31 @@ class WatchdogManager extends ProtocolDispatchServer {
     server.getConfig().logInit(logStream);
 
     Resin resin = Resin.create();
+
+    Thread thread = Thread.currentThread();
+    thread.setContextClassLoader(resin.getClassLoader());
+    
     Cluster cluster = resin.createCluster();
     ClusterServer clusterServer = cluster.createServer();
     // cluster.addServer(clusterServer);
 
     clusterServer.setId("");
+    clusterServer.setPort(0);
+
+    Port http = clusterServer.createHttp();
     if (_watchdogPort > 0)
-      clusterServer.setPort(_watchdogPort);
+      http.setPort(_watchdogPort);
     else
-      clusterServer.setPort(server.getWatchdogPort());
+      http.setPort(server.getWatchdogPort());
 
-    clusterServer.setAddress(server.getWatchdogAddress());
+    http.setAddress(server.getWatchdogAddress());
 
-    clusterServer.getClusterPort().setMinSpareListen(1);
-    clusterServer.getClusterPort().setMaxSpareListen(2);
+    http.setMinSpareListen(1);
+    http.setMaxSpareListen(2);
+
+    http.init();
+
+    // clusterServer.addHttp(http);
 
     cluster.addServer(clusterServer);
 
@@ -158,11 +176,36 @@ class WatchdogManager extends ProtocolDispatchServer {
 
     _dispatchServer = resin.createServer();
 
-    WatchdogService service
-      = new WatchdogService(this, "watchdog@admin.resin.caucho");
+    ClassLoader oldLoader = thread.getContextClassLoader();
 
-    service.setBrokerStream(_dispatchServer.getAdminStream());
-    _dispatchServer.getAdminBroker().addService(service);
+    try {
+      thread.setContextClassLoader(_dispatchServer.getClassLoader());
+
+      AdminAuthenticator auth = null;
+
+      if (_management != null)
+	auth = _management.getAdminAuthenticator();
+
+      if (auth != null) {
+	webBeans.addBean(new SingletonBean(auth, null,
+					   AdminAuthenticator.class,
+					   Authenticator.class));
+      }
+      
+      RemoteAdminService adminService = new RemoteAdminService();
+      adminService.init();
+
+      WatchdogService service
+	= new WatchdogService(this, "watchdog@admin.resin.caucho");
+
+      HempBroker broker = HempBroker.getCurrent();
+
+      service.setBrokerStream(broker.getBrokerStream());
+
+      broker.addService(service);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   static WatchdogManager getWatchdog()

@@ -50,6 +50,7 @@ import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.util.*;
 import com.caucho.vfs.ByteToChar;
 import com.caucho.vfs.Encoding;
+import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.NullPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -1155,6 +1156,14 @@ public class Env {
   public Path getPwd()
   {
     return _pwd;
+  }
+
+  public String getShellPwd()
+  {
+    if (_pwd instanceof MemoryPath)
+      return System.getProperty("user.dir");
+    else
+      return _pwd.getNativePath();
   }
 
   /**

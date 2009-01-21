@@ -81,7 +81,6 @@ public class WebAppSingleDeployGenerator
   public WebAppSingleDeployGenerator(DeployContainer<WebAppController> deployContainer,
 				     WebAppContainer container,
 				     WebAppConfig config)
-    throws Exception
   {
     super(deployContainer);
     
@@ -219,9 +218,9 @@ public class WebAppSingleDeployGenerator
     for (WebAppConfig config : _defaultList)
       _controller.addConfigDefault(config);
     
-    // _controller.setConfig(_config);
-    // server/1h13
-    _controller.addConfigDefault(_config);
+    // server/1h13 vs server/2e00
+    _controller.setConfig(_config);
+    // _controller.addConfigDefault(_config);
 
     _controller.setPrologue(_config.getPrologue());
 

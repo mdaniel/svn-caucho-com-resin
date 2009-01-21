@@ -396,7 +396,10 @@ abstract public class
   {
     boolean isSkipDefault = _config != null && _config.isSkipDefaultConfig();
 
-    if (! isSkipDefault) {
+    if (isSkipDefault) {
+      initList.clear();
+    }
+    else {
       for (DeployConfig config : _configDefaults) {
 	DeployConfig prologue = config.getPrologue();
 

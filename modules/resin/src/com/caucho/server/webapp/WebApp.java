@@ -413,11 +413,11 @@ public class WebApp extends ServletContextImpl
       if (CauchoSystem.isTesting()) {
       }
       else if (_appDir.equals(CauchoSystem.getResinHome())) {
-        throw new ConfigException(L.l("web-app root-directory can not be the same as resin.home\n{0}", _appDir));
+        throw new ConfigException(L.l("web-app root-directory '{0}' can not be the same as resin.home\n", _appDir.getURL()));
       }
       else if (_parent != null
                && _appDir.equals(_parent.getRootDirectory())) {
-        throw new ConfigException(L.l("web-app root-directory can not be the same as the host root-directory\n{0}", _appDir));
+        throw new ConfigException(L.l("web-app root-directory '{0}' can not be the same as the host root-directory\n", _appDir.getURL()));
       }
     } catch (Throwable e) {
       setConfigException(e);

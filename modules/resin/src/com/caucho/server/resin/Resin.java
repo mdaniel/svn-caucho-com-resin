@@ -125,7 +125,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   private Path _resinHome;
   private Path _rootDirectory;
   
-  private Path _adminPath;
+  private Path _resinDataDirectory;
 
   private boolean _isGlobalSystemProperties;
 
@@ -514,22 +514,35 @@ public class Resin implements EnvironmentBean, SchemaBean
   }
 
   /**
-   * Returns the admin directory
+   * Returns the resin-data directory
    */
-  public Path getAdminPath()
+  public Path getResinDataDirectory()
   {
     Path path;
     
-    if (_adminPath != null)
-      path = _adminPath;
+    if (_resinDataDirectory != null)
+      path = _resinDataDirectory;
     else
-      path = getRootDirectory().lookup("admin");
+      path = getRootDirectory().lookup("resin-data");
     
     if (path instanceof MemoryPath) { // QA
-      path = Vfs.lookup("file:/tmp/caucho/qa/admin");
+      path = Vfs.lookup("file:/tmp/caucho/qa/resin-data");
     }
 
     return path;
+  }
+
+  /**
+   * Sets the resin-data directory
+   */
+  public void setResinDataDirectory(Path path)
+  {
+    if (path.isFile()) {
+      throw new ConfigException(L().l("resin-data-directory '{0}' must not be a file",
+				    path));
+    }
+    
+    _resinDataDirectory = path;
   }
 
   /**
@@ -537,7 +550,7 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public void setAdminPath(Path path)
   {
-    _adminPath = path;
+    setResinDataDirectory(path);
   }
 
   /**
@@ -719,7 +732,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     if (_tempFileManager == null) {
       String fileName = "temp_" + _serverId + ".cache";
       
-      Path path = getAdminPath().lookup(fileName);
+      Path path = getResinDataDirectory().lookup(fileName);
       
       _tempFileManager = new TempFileManager(path);
     }
@@ -850,7 +863,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       // force a GC on start
       System.gc();
       
-      Path repositoryPath = getAdminPath().lookup("ivy");
+      Path repositoryPath = getResinDataDirectory().lookup("ivy");
 
       ClusterServer clusterServer = null;
 

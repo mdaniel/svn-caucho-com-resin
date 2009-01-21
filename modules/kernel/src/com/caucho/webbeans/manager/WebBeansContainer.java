@@ -197,7 +197,7 @@ public class WebBeansContainer
       _parent = WebBeansContainer.create(_classLoader.getParent());
 
     Thread thread = Thread.currentThread();
-    ClassLoader oldClassLoader = thread.getContextClassLoader();
+    ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
       thread.setContextClassLoader(_classLoader);
@@ -235,7 +235,7 @@ public class WebBeansContainer
     
       Environment.addEnvironmentListener(this, _classLoader);
     } finally {
-      thread.setContextClassLoader(_classLoader);
+      thread.setContextClassLoader(oldLoader);
     }
   }
   
@@ -932,7 +932,7 @@ public class WebBeansContainer
       admin.register();
       */
     } finally {
-      thread.setContextClassLoader(_classLoader);
+      thread.setContextClassLoader(oldLoader);
     }
   }
 
@@ -1305,12 +1305,14 @@ public class WebBeansContainer
 			      Class<T> eventType,
 			      Annotation... bindings)
   {
+    checkActive();
+    
     if (eventType.getTypeParameters() != null
 	&& eventType.getTypeParameters().length > 0) {
       throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's a parameterized type.",
 					     eventType));
     }
-    
+
     synchronized (_observerMap) {
       ObserverMap map = _observerMap.get(eventType);
       
@@ -1967,6 +1969,12 @@ public class WebBeansContainer
   public Object writeReplace()
   {
     return new WebBeansHandle(Manager.class);
+  }
+
+  private void checkActive()
+  {
+    if (_webBeansMap == null)
+      throw new IllegalStateException(L.l("{0} is closed", this));
   }
 
   public String toString()

@@ -55,6 +55,10 @@ public class HempDomainManager extends DomainManager
   private final HashMap<String,WeakReference<BamStream>> _domainMap
     = new HashMap<String,WeakReference<BamStream>>();
 
+  public HempDomainManager()
+  {
+  }
+
   public void addDomain(String name, BamStream domain)
   {
     synchronized (_domainMap) {

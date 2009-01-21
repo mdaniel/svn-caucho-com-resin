@@ -47,7 +47,7 @@ import java.security.Key;
  */
 
 public class ServerLinkService extends SimpleBamService {
-  private ServerLinkManager _linkManager = new ServerLinkManager();
+  private ServerLinkManager _linkManager;
   
   private ServerFromLinkStream _manager;
 
@@ -56,9 +56,12 @@ public class ServerLinkService extends SimpleBamService {
   /**
    * Creates the LinkService for low-level link messages
    */
-  public ServerLinkService(ServerFromLinkStream manager, BamStream agentStream)
+  public ServerLinkService(ServerFromLinkStream manager,
+			   BamStream agentStream,
+			   ServerLinkManager linkManager)
   {
     _manager = manager;
+    _linkManager = linkManager;
     
     // the agent stream serves as its own broker because there's no
     // routing involved
@@ -81,7 +84,19 @@ public class ServerLinkService extends SimpleBamService {
   }
 
   @QuerySet
+  public boolean authLogin(long id, String to, String from, LoginQuery query)
+  {
+    return login(id, to, from, query.getAuth(), query.getAddress());
+  }
+
+  @QuerySet
   public boolean authLogin(long id, String to, String from, AuthQuery query)
+  {
+    return login(id, to, from, query, null);
+  }
+
+  private boolean login(long id, String to, String from,
+			AuthQuery query, String ipAddress)
   {
     Object credentials = query.getCredentials();
 
@@ -103,7 +118,8 @@ public class ServerLinkService extends SimpleBamService {
     
     String jid = _manager.login(query.getUid(),
 				credentials,
-				query.getResource());
+				query.getResource(),
+				ipAddress);
 
     if (jid != null)
       getBrokerStream().queryResult(id, from, to, new AuthResult(jid));

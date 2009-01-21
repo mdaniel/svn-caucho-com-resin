@@ -78,7 +78,7 @@ public class HmuxBamCallback extends AbstractBamStream
 			 BamError error)
   {
     try {
-      _request.writeHmtpError(id, to, from, query, error);
+      _request.writeHmtpQueryError(id, to, from, query, error);
       _request.writeFlush();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -92,7 +92,7 @@ public class HmuxBamCallback extends AbstractBamStream
 			  Serializable query)
   {
     try {
-      _request.writeHmtpResult(id, to, from, query);
+      _request.writeHmtpQueryResult(id, to, from, query);
       _request.writeFlush();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);

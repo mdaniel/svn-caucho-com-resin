@@ -105,4 +105,12 @@ public class NotFoundPath extends Path {
   {
     return null;
   }
+
+  /**
+   * Only identical is equals
+   */
+  public boolean equals(Object obj)
+  {
+    return false;
+  }
 }

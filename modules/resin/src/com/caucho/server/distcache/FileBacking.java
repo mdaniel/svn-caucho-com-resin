@@ -133,7 +133,7 @@ public class FileBacking {
     throws Exception
   {
     if (_path == null && Resin.getCurrent() != null)
-      _path = Resin.getCurrent().getAdminPath();
+      _path = Resin.getCurrent().getResinDataDirectory();
     
     if (_path == null)
       throw new ConfigException(L.l("file-backing needs path."));

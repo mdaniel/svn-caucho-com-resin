@@ -41,6 +41,7 @@ import com.caucho.git.GitRepository;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.hemp.broker.DomainManager;
+import com.caucho.hemp.servlet.ServerLinkManager;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
@@ -131,6 +132,8 @@ public class Server extends ProtocolDispatchServer
   private HempBrokerManager _brokerManager;
   private DomainManager _domainManager;
   private HempBroker _broker;
+  private ServerLinkManager _serverLinkManager
+    = new ServerLinkManager();
 
   private GitRepository _git;
   private Repository _repository;
@@ -229,6 +232,7 @@ public class Server extends ProtocolDispatchServer
 						 "server:" + triadId);
 
     _serverLocal.set(this, _classLoader);
+    log.warning("SET: " + _classLoader);
     
     if (! Alarm.isTest())
       _serverHeader = "Resin/" + com.caucho.Version.VERSION;
@@ -332,9 +336,17 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the admin path
    */
-  public Path getAdminPath()
+  public Path getResinDataDirectory()
   {
-    return _resin.getAdminPath();
+    return _resin.getResinDataDirectory();
+  }
+
+  /**
+   * Returns the HMTP link manager
+   */
+  public ServerLinkManager getServerLinkManager()
+  {
+    return _serverLinkManager;
   }
 
   /**
@@ -345,7 +357,7 @@ public class Server extends ProtocolDispatchServer
     synchronized (this) {
       if (_git == null && _resin != null) {
 	// initialize git repository
-	Path root = _resin.getRootDirectory();
+	Path root = _resin.getResinDataDirectory();
 
 	// QA
 	if (root instanceof MemoryPath)
@@ -1111,7 +1123,6 @@ public class Server extends ProtocolDispatchServer
    * Adds the host.
    */
   public void addHost(HostConfig host)
-    throws Exception
   {
     _hostContainer.addHost(host);
   }

@@ -64,7 +64,6 @@ public class HostSingleDeployGenerator
   public HostSingleDeployGenerator(DeployContainer<HostController> container,
 				   HostContainer hostContainer,
 				   HostConfig config)
-    throws Exception
   {
     super(container);
     

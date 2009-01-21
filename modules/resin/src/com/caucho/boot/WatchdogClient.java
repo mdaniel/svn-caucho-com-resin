@@ -30,10 +30,9 @@
 package com.caucho.boot;
 
 import com.caucho.bam.BamConnection;
+import com.caucho.bam.hmtp.HmtpClient;
 import com.caucho.config.*;
 import com.caucho.config.program.*;
-import com.caucho.server.admin.HessianHmuxProxy;
-import com.caucho.server.cluster.HmuxBamClient;
 import com.caucho.server.util.*;
 import com.caucho.util.*;
 import com.caucho.Version;
@@ -216,10 +215,12 @@ class WatchdogClient
     if (getGroupName() != null && ! hasBoot()) {
       throw new ConfigException(L.l("<group-name> requires compiled JNI.  Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin_os.so."));
     }
-    
-    BamConnection conn = getConnection();
+
+    BamConnection conn = null;
 
     try {
+      conn = getConnection();
+      
       ResultStatus status = (ResultStatus)
 	conn.querySet(WATCHDOG_JID, new WatchdogStartQuery(argv));
 
@@ -233,6 +234,9 @@ class WatchdogClient
       System.out.println(e.toString());
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
+    } finally {
+      if (conn != null)
+	conn.close();
     }
 
     launchManager(argv);
@@ -316,8 +320,17 @@ class WatchdogClient
   
   private BamConnection getConnection()
   {
-    if (_conn == null)
-      _conn = new HmuxBamClient(getWatchdogAddress(), getWatchdogPort());
+    if (_conn == null) {
+      HmtpClient client = new HmtpClient("http://" + getWatchdogAddress()
+					 + ":" + getWatchdogPort()
+					 + "/hmtp");
+
+      client.setVirtualHost("admin.resin");
+
+      client.connect("admin.resin", getAdminCookie());
+
+      _conn = client;
+    }
 
     return _conn;
   }

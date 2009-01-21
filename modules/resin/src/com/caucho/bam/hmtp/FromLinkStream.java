@@ -59,8 +59,6 @@ abstract public class FromLinkStream {
 
   abstract protected BamStream getStream(String to);
 
-  abstract protected BamStream getLinkStream();
-
   abstract protected String getFrom(String from);
 
   /**

@@ -343,7 +343,6 @@ public class WebAppContainer
    * Adds an webApp.
    */
   public void addWebApp(WebAppConfig config)
-    throws Exception
   {
     if (config.getURLRegexp() != null) {
       DeployGenerator<WebAppController> deploy

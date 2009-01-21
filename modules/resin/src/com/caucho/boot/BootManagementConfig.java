@@ -37,9 +37,9 @@ import com.caucho.server.resin.*;
 import com.caucho.security.*;
 import com.caucho.security.PasswordDigest;
 import com.caucho.security.PasswordUser;
-import com.caucho.server.security.*;
 import com.caucho.webbeans.manager.*;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 import javax.annotation.*;
 import javax.webbeans.*;
@@ -55,17 +55,22 @@ public class BootManagementConfig
   private static Logger log
     = Logger.getLogger(BootManagementConfig.class.getName());
 
-  private ManagementAuthenticator _auth;
-
+  private AdminAuthenticator _auth;
+  
   /**
    * Adds a user
    */
-  public void addUser(User user)
+  public void addUser(XmlAuthenticator.User user)
   {
     if (_auth == null)
-      _auth = new ManagementAuthenticator();
+      _auth = new AdminAuthenticator();
 
-    _auth.addUser(user.getName(), user.getPasswordUser());
+    _auth.addUser(user);
+  }
+
+  public AdminAuthenticator getAdminAuthenticator()
+  {
+    return _auth;
   }
 
   public String getAdminCookie()
@@ -76,7 +81,27 @@ public class BootManagementConfig
       return null;
   }
 
-  public void addBuilderProgram(ConfigProgram program)
+  public void addPath(ConfigProgram program)
+  {
+  }
+
+  public void addLogService(ConfigProgram program)
+  {
+  }
+
+  public void addDeployService(ConfigProgram program)
+  {
+  }
+
+  public void addStatService(ConfigProgram program)
+  {
+  }
+
+  public void addJmxService(ConfigProgram program)
+  {
+  }
+
+  public void addXaLogService(ConfigProgram program)
   {
   }
 
@@ -90,55 +115,6 @@ public class BootManagementConfig
       e.printStackTrace();
       
       throw ConfigException.create(e);
-    }
-  }
-
-  public static class User {
-    private String _name;
-    private String _password;
-    private boolean _isDisabled;
-
-    public void setName(String name)
-    {
-      _name = name;
-    }
-
-    public String getName()
-    {
-      return _name;
-    }
-
-    public void setPassword(String password)
-    {
-      _password = password;
-    }
-
-    public String getPassword()
-    {
-      return _password;
-    }
-
-    public void setDisable(boolean isDisabled)
-    {
-      _isDisabled = isDisabled;
-    }
-
-    public boolean isDisable()
-    {
-      return _isDisabled;
-    }
-
-    PasswordUser getPasswordUser()
-    {
-      if (_name == null)
-	throw new ConfigException(L.l("management <user> requires a 'name' attribute"));
-      
-      boolean isAnonymous = false;
-      
-      return new PasswordUser(new BasicPrincipal(_name),
-			      _password.toCharArray(),
-			      _isDisabled, isAnonymous,
-			      new String[] { "resin-admin" });
     }
   }
 }

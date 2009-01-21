@@ -37,6 +37,7 @@ import com.caucho.bam.hmtp.AuthQuery;
 import com.caucho.bam.hmtp.AuthResult;
 import com.caucho.bam.hmtp.GetPublicKeyQuery;
 import com.caucho.hessian.io.*;
+import com.caucho.security.Authenticator;
 import com.caucho.util.Hex;
 
 import java.io.*;
@@ -55,7 +56,17 @@ public class ServerLinkManager {
   private static final Logger log
     = Logger.getLogger(ServerLinkManager.class.getName());
 
+  private Authenticator _auth;
   private KeyPair _authKeyPair; // authentication key pair
+  
+  public ServerLinkManager()
+  {
+  }
+  
+  public ServerLinkManager(Authenticator auth)
+  {
+    _auth = auth;
+  }
 
   //
   // authentication

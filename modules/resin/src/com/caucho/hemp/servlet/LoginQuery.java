@@ -20,50 +20,63 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.security;
+package com.caucho.hemp.servlet;
+
+import com.caucho.bam.hmtp.AuthQuery;
+import java.io.Serializable;
 
 /**
- * Password-based credentials
+ * Authentication query merges the Hmtp authentication and bind steps
  */
-public class PasswordCredentials implements Credentials
-{
-  private char []_password;
+public class LoginQuery implements Serializable {
+  private final AuthQuery _auth;
+  private final String _ipAddress;
+  private final transient boolean _isLocal;
 
-  public PasswordCredentials()
+  /**
+   * login packet
+   */
+  public LoginQuery(AuthQuery auth, String ipAddress)
   {
+    _auth = auth;
+    _ipAddress = ipAddress;
+    _isLocal = true;
   }
 
-  public PasswordCredentials(char []password)
+  public AuthQuery getAuth()
   {
-    _password = password;
+    return _auth;
   }
 
-  public PasswordCredentials(String password)
+  public String getAddress()
   {
-    _password = password != null ? password.toCharArray() : null;
-  }
-
-  public char []getPassword()
-  {
-    return _password;
-  }
-
-  public void setPassword(char []password)
-  {
-    _password = password;
+    if (_isLocal)
+      return _ipAddress;
+    else
+      return "xx.xx.xx.xx";
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+    sb.append(_auth);
+
+    sb.append(", ");
+    sb.append(_ipAddress);
+    
+    sb.append("]");
+
+    return sb.toString();
   }
 }
-

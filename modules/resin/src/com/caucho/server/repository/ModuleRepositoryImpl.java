@@ -73,7 +73,7 @@ public class ModuleRepositoryImpl extends ModuleRepository
   public Path getRoot()
   {
     if (_root == null)
-      _root = Resin.getCurrent().getAdminPath().lookup("ivy");
+      _root = Resin.getCurrent().getResinDataDirectory().lookup("ivy");
 
     return _root;
   }

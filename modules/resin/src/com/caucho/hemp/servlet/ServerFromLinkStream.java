@@ -35,6 +35,7 @@ import com.caucho.bam.hmtp.HmtpPacketType;
 import com.caucho.bam.hmtp.FromLinkStream;
 import com.caucho.bam.BamError;
 import com.caucho.hmtp.Packet;
+import com.caucho.hemp.broker.HempBroker;
 import java.io.*;
 import java.util.logging.*;
 import javax.servlet.*;
@@ -57,7 +58,7 @@ public class ServerFromLinkStream extends FromLinkStream
   private static final Logger log
     = Logger.getLogger(ServerFromLinkStream.class.getName());
   
-  private BamBroker _broker;
+  private HempBroker _broker;
   private BamConnection _conn;
   private BamStream _toBroker;
 
@@ -66,13 +67,16 @@ public class ServerFromLinkStream extends FromLinkStream
 
   private BamStream _linkStream;
   private ServerLinkService _linkService;
+  private BamStream _linkServiceStream;
   private AuthBrokerStream _authHandler;
 
   private String _jid;
 
-  public ServerFromLinkStream(BamBroker broker,
+  public ServerFromLinkStream(HempBroker broker,
+			      ServerLinkManager linkManager,
 			      InputStream is,
-			      OutputStream os)
+			      OutputStream os,
+			      String ipAddress)
   {
     super(is);
 	  
@@ -81,12 +85,15 @@ public class ServerFromLinkStream extends FromLinkStream
     if (log.isLoggable(Level.FINEST)) {
       is = new HessianDebugInputStream(is, log, Level.FINEST);
     }
-    
+
     _in = new Hessian2StreamingInput(is);
 
     _linkStream = new ServerToLinkStream(getJid(), os);
     // _authHandler = new AuthBrokerStream(getJid(), _agentStream);
-    _linkService = new ServerLinkService(this, _linkStream);
+    _linkService = new ServerLinkService(this, _linkStream, linkManager);
+    
+    _linkServiceStream = new ServerLinkFilter(_linkService.getAgentStream(),
+					      ipAddress);
   }
 
   public String getJid()
@@ -95,17 +102,12 @@ public class ServerFromLinkStream extends FromLinkStream
   }
 
   @Override
-  public BamStream getLinkStream()
-  {
-    return _linkStream;
-  }
-
-  @Override
   protected BamStream getStream(String to)
   {
     BamStream stream;
+    
     if (to == null)
-      return _linkService.getAgentStream();
+      return _linkServiceStream;
     else if (_conn != null)
       return _toBroker;
     else
@@ -131,150 +133,9 @@ public class ServerFromLinkStream extends FromLinkStream
 	return false;
       }
     } catch (Exception e) {
-      e.printStackTrace();
-
       return false;
     }
   }
-
-  /*
-  protected boolean readPacket()
-    throws IOException
-  {
-    Hessian2StreamingInput in = _in;
-
-    if (in == null)
-      return false;
-
-    Hessian2Input hIn = in.startPacket();
-
-    if (hIn == null) {
-      if (log.isLoggable(Level.FINE))
-	log.fine(this + " end of stream");
-      
-      return false;
-    }
-
-    int type = hIn.readInt();
-    String to = hIn.readString();
-    String from = hIn.readString();
-
-    BamStream stream;
-    if (to == null)
-      stream = _linkService.getAgentStream();
-    else if (_conn != null)
-      stream = _toBroker;
-    else
-      stream = _authHandler;
-
-    switch (HmtpPacketType.TYPES[type]) {
-    case MESSAGE:
-      {
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
-
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " message " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
-	
-	stream.message(to, getJid(), value);
-
-	break;
-      }
-      
-    case MESSAGE_ERROR:
-      {
-	Serializable value = (Serializable) hIn.readObject();
-	BamError error = (BamError) hIn.readObject();
-	in.endPacket();
-
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " messageError " + error + " " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
-
-	stream.messageError(to, getJid(), value, error);
-
-	break;
-      }
-      
-    case QUERY_GET:
-      {
-	long id = hIn.readLong();
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
-
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " queryGet " + value
-		    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
-	}
-
-	stream.queryGet(id, to, getFrom(from), value);
-
-	break;
-      }
-      
-    case QUERY_SET:
-      {
-	long id = hIn.readLong();
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
-
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " querySet " + value
-		    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
-	}
-
-	try {
-	  stream.querySet(id, to, from, value);
-	} catch (Exception e) {
-	  e.printStackTrace();
-	}
-
-	break;
-      }
-      
-    case QUERY_RESULT:
-      {
-	long id = hIn.readLong();
-	Serializable value = (Serializable) hIn.readObject();
-	in.endPacket();
-
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " queryResult " + value
-		    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
-	}
-
-	stream.queryResult(id, to, from, value);
-
-	break;
-      }
-      
-    case QUERY_ERROR:
-      {
-	long id = hIn.readLong();
-	Serializable value = (Serializable) hIn.readObject();
-	BamError error = (BamError) hIn.readObject();
-	in.endPacket();
-
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " queryError " + error + " " + value
-		    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
-	}
-
-	stream.queryError(id, to, from, value, error);
-
-	break;
-      }
-
-    default:
-      throw new IllegalStateException("ERROR: " + type);
-    }
-
-    return true;
-  }
-  */
   
   public boolean serviceWrite(WriteStream os,
 			      TcpDuplexController controller)
@@ -283,16 +144,17 @@ public class ServerFromLinkStream extends FromLinkStream
     return false;
   }
 
-  String login(String uid, Object credentials, String resource)
+  String login(String uid, Object credentials, String resource,
+	       String ipAddress)
   {
-    if (! (credentials instanceof String)) {
+    if (credentials != null && ! (credentials instanceof String)) {
       throw new BamException(L.l("'{0}' is an unknown credential",
 				 credentials));
     }
     
     String password = (String) credentials;
     
-    _conn = _broker.getConnection(uid, password);
+    _conn = _broker.getConnection(uid, password, null, ipAddress);
     _conn.setAgentStream(_linkStream);
 
     _jid = _conn.getJid();
@@ -346,9 +208,9 @@ public class ServerFromLinkStream extends FromLinkStream
    * a QueryResult or a QueryError 
    */
   public boolean querySet(long id,
-			      String to,
-			      String from,
-			      Serializable value)
+			  String to,
+			  String from,
+			  Serializable value)
   {
     _toBroker.querySet(id, to, _jid, value);
     

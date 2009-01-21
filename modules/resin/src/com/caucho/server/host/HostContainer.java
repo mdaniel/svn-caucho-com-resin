@@ -221,7 +221,6 @@ public class HostContainer implements DispatchBuilder {
    * Adds a host.
    */
   public void addHost(HostConfig hostConfig)
-    throws Exception
   {
     if (hostConfig.getRegexp() != null) {
       _hostDeploy.add(new HostRegexpDeployGenerator(_hostDeploy, this, hostConfig));

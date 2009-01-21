@@ -53,7 +53,7 @@ public class ClusterStream {
   private WriteStream _os;
 
   private Hessian2StreamingInput _in;
-  private Hessian2StreamingOutput _out;
+  private Hessian2Output _out;
 
   private long _freeTime;
 
@@ -111,10 +111,10 @@ public class ClusterStream {
   /**
    * Returns the hessian output stream
    */
-  public Hessian2StreamingOutput getHessianOutputStream()
+  public Hessian2Output getHessianOutputStream()
   {
     if (_out == null)
-      _out = new Hessian2StreamingOutput(_os);
+      _out = new Hessian2Output(_os);
 
     return _out;
   }
@@ -163,12 +163,15 @@ public class ClusterStream {
     out.write(0);
     out.write(0);
 
-    writeString(to);
-    writeString(from);
+    Hessian2Output hOut = getHessianOutputStream();
 
-    Hessian2StreamingOutput hOut = getHessianOutputStream();
+    hOut.startPacket();
+    hOut.writeString(to);
+    hOut.writeString(from);
 
     hOut.writeObject(query);
+    hOut.endPacket();
+    hOut.flushBuffer();
 
     return true;
   }
@@ -183,13 +186,16 @@ public class ClusterStream {
     out.write(0);
     out.write(8);
 
-    writeLong(id);
-    writeString(to);
-    writeString(from);
+    Hessian2Output hOut = getHessianOutputStream();
 
-    Hessian2StreamingOutput hOut = getHessianOutputStream();
+    hOut.startPacket();
 
+    hOut.writeString(to);
+    hOut.writeString(from);
+    hOut.writeLong(id);
     hOut.writeObject(query);
+    hOut.endPacket();
+    hOut.flushBuffer();
 
     return true;
   }
@@ -206,13 +212,16 @@ public class ClusterStream {
     out.write(0);
     out.write(8);
 
-    writeLong(id);
-    writeString(to);
-    writeString(from);
+    Hessian2Output hOut = getHessianOutputStream();
 
-    Hessian2StreamingOutput hOut = getHessianOutputStream();
+    hOut.startPacket();
+    hOut.writeString(to);
+    hOut.writeString(from);
+    hOut.writeLong(id);
 
     hOut.writeObject(query);
+    hOut.endPacket();
+    hOut.flushBuffer();
 
     return true;
   }
@@ -229,13 +238,14 @@ public class ClusterStream {
     out.write(0);
     out.write(8);
 
-    writeLong(id);
-    writeString(to);
-    writeString(from);
+    Hessian2Output hOut = getHessianOutputStream();
 
-    Hessian2StreamingOutput hOut = getHessianOutputStream();
-
+    hOut.startPacket();
+    hOut.writeString(to);
+    hOut.writeString(from);
+    hOut.writeLong(id);
     hOut.writeObject(query);
+    hOut.endPacket();
 
     return true;
   }
@@ -293,7 +303,7 @@ public class ClusterStream {
     writeString(to);
     writeString(from);
 
-    Hessian2StreamingOutput hOut = getHessianOutputStream();
+    Hessian2Output hOut = getHessianOutputStream();
     
     hOut.writeObject(query);
     hOut.writeObject(error);

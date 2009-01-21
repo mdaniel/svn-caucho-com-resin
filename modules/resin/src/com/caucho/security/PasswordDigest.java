@@ -168,7 +168,6 @@ public class PasswordDigest {
    * Returns the digest of the user/password
    */
   public String getPasswordDigest(String user, String password)
-    throws ServletException
   {
     return getPasswordDigest(user, password, _realm, null);
   }

@@ -74,6 +74,8 @@ Java_com_caucho_bootjni_JniProcess_clearSaveOnExec(JNIEnv *env, jobject obj)
 	fcntl(fd, F_SETFD, arg);
       }
     }
+
+    return 1;
   }
 #endif
 }

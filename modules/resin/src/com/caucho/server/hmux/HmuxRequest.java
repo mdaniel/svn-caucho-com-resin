@@ -205,6 +205,9 @@ public class HmuxRequest extends AbstractHttpRequest
   
   public static final int ADMIN_CONNECT =       '_';
   public static final int BAM_CONNECT =         '+';
+  
+  public static final int ADMIN_MESSAGE_ERROR = '(';
+  public static final int BAM_MESSAGE_ERROR =   ')';
 
   public static final int HMUX_CLUSTER_PROTOCOL = 0x101;
   public static final int HMUX_DISPATCH_PROTOCOL = 0x102;
@@ -270,6 +273,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
   private Hessian2StreamingInput _in;
   private Hessian2StreamingOutput _out;
+  private Hessian2Output _hOut;
 
   private Server _server;
   private AbstractClusterRequest _clusterRequest;
@@ -277,6 +281,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
   private HmuxProtocol _hmuxProtocol;
   private ErrorPageManager _errorManager = new ErrorPageManager(null);
+  private HmuxLinkService _linkService;
 
   private int _srunIndex;
 
@@ -1014,9 +1019,8 @@ public class HmuxRequest extends AbstractHttpRequest
       case ADMIN_QUERY_GET:
 	{
 	  len = (is.read() << 8) + is.read();
-	  long id = readLong(is);
 
-	  readHmtpQueryGet(code, is, id, _server.getAdminBroker());
+	  readHmtpQueryGet(code, is, _server.getAdminStream());
 	  hasURI = true;
 	  break;
 	}
@@ -1024,9 +1028,8 @@ public class HmuxRequest extends AbstractHttpRequest
       case BAM_QUERY_GET:
 	{
 	  len = (is.read() << 8) + is.read();
-	  long id = readLong(is);
 
-	  readHmtpQueryGet(code, is, id, _server.getBamBroker());
+	  readHmtpQueryGet(code, is, _server.getBamStream());
 	  
 	  hasURI = true;
 	  break;
@@ -1035,9 +1038,8 @@ public class HmuxRequest extends AbstractHttpRequest
       case ADMIN_QUERY_SET:
 	{
 	  len = (is.read() << 8) + is.read();
-	  long id = readLong(is);
 	  
-	  readHmtpQuerySet(code, is, id, _server.getAdminBroker());
+	  readHmtpQuerySet(code, is, _server.getAdminStream());
 	  
 	  hasURI = true;
 	  break;
@@ -1046,9 +1048,8 @@ public class HmuxRequest extends AbstractHttpRequest
       case BAM_QUERY_SET:
 	{
 	  len = (is.read() << 8) + is.read();
-	  long id = readLong(is);
 	  
-	  readHmtpQuerySet(code, is, id, _server.getBamBroker());
+	  readHmtpQuerySet(code, is, _server.getBamStream());
 	  
 	  hasURI = true;
 	  break;
@@ -1057,9 +1058,8 @@ public class HmuxRequest extends AbstractHttpRequest
       case ADMIN_QUERY_RESULT:
 	{
 	  len = (is.read() << 8) + is.read();
-	  long id = readLong(is);
 
-	  readHmtpQueryResult(code, is, id, _server.getAdminStream());
+	  readHmtpQueryResult(code, is, _server.getAdminStream());
 	  
 	  hasURI = true;
 	  break;
@@ -1068,9 +1068,8 @@ public class HmuxRequest extends AbstractHttpRequest
       case BAM_QUERY_RESULT:
 	{
 	  len = (is.read() << 8) + is.read();
-	  long id = readLong(is);
 
-	  readHmtpQueryResult(code, is, id, _server.getBamStream());
+	  readHmtpQueryResult(code, is, _server.getBamStream());
 	  
 	  hasURI = true;
 	  break;
@@ -1079,9 +1078,8 @@ public class HmuxRequest extends AbstractHttpRequest
       case ADMIN_QUERY_ERROR:
 	{
 	  len = (is.read() << 8) + is.read();
-	  long id = readLong(is);
 
-	  readHmtpQueryError(code, is, id, _server.getAdminStream());
+	  readHmtpQueryError(code, is, _server.getAdminStream());
 	  
 	  hasURI = true;
 	  break;
@@ -1090,9 +1088,8 @@ public class HmuxRequest extends AbstractHttpRequest
       case BAM_QUERY_ERROR:
 	{
 	  len = (is.read() << 8) + is.read();
-	  long id = readLong(is);
 
-	  readHmtpQueryError(code, is, id, _server.getBamStream());
+	  readHmtpQueryError(code, is, _server.getBamStream());
 	  
 	  hasURI = true;
 	  break;
@@ -1133,6 +1130,14 @@ public class HmuxRequest extends AbstractHttpRequest
     // return false;
   }
 
+  private BamStream getLinkStream()
+  {
+    if (_linkService == null)
+      _linkService = new HmuxLinkService(_server, this);
+      
+    return _linkService.getAgentStream();
+  }
+
   private void resizeHeaders()
   {
     CharBuffer []newKeys = new CharBuffer[_headerSize * 2];
@@ -1161,17 +1166,23 @@ public class HmuxRequest extends AbstractHttpRequest
   private void readHmtpMessage(int code, ReadStream is, BamStream brokerStream)
     throws IOException
   {
-    String to = readString(is);
-    String from = readString(is);
-
     try {
-      Serializable query = (Serializable) readObject();
+      Hessian2Input hIn = startHmtpPacket();
+      String to = hIn.readString();
+      String from = hIn.readString();
+
+      Serializable query = (Serializable) hIn.readObject();
+
+      endHmtpPacket();
 
       if (log.isLoggable(Level.FINER))
 	log.fine(dbgId() + (char) code + "-r: HMTP message "
-		 + query + " to=" + to + " from=" + from);
+		 + query + " {to:" + to + ", from:" + from + "}");
 
-      brokerStream.message(to, from, query);
+      if (to == null)
+	getLinkStream().message(to, from, query);
+      else
+	brokerStream.message(to, from, query);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -1179,162 +1190,300 @@ public class HmuxRequest extends AbstractHttpRequest
 
   private void readHmtpQueryGet(int code,
 				ReadStream is,
-				long id,
-				BamBroker broker)
+				BamStream brokerStream)
     throws IOException
   {
-    String to = readString(is);
-    String from = readString(is);
+    Hessian2Input hIn = startHmtpPacket();
+    
+    String to = hIn.readString();
+    String from = hIn.readString();
 
-    Serializable query = (Serializable) readObject();
+    long id = hIn.readLong();
+
+    Serializable query = (Serializable) hIn.readObject();
+
+    endHmtpPacket();
 
     if (log.isLoggable(Level.FINER))
       log.fine(dbgId() + (char) code + "-r: HMTP queryGet " + query
-	       + " id=" + id + " to=" + to + " from=" + from);
+	       + " {id:" + id + ", to:" + to + ", from:" + from + "}");
 
-    if (_bamConn != null) {
-      _bamConn.getBrokerStream().queryGet(id, to, _bamConn.getJid(), query);
-    }
-    else if (from != null && ! "".equals(from)) {
-      BamStream brokerStream = broker.getBrokerStream();
-
+    if (to == null)
+      getLinkStream().queryGet(id, to, from, query);
+    else
       brokerStream.queryGet(id, to, from, query);
-    }
-    else {
-      // from=null means the client needs to block and return the data
-      // on the same stream
-      
-      Serializable result = null;
-
-      BamConnection conn = broker.getConnection("hmux", null);
-
-      try {
-	result = conn.queryGet(to, query);
-      } finally {
-	conn.close();
-      }
-
-      WriteStream out = _rawWrite;
-
-      int resultCode = (code == ADMIN_QUERY_GET
-			? ADMIN_QUERY_RESULT
-			: BAM_QUERY_RESULT);
-
-      out.write(resultCode);
-      out.write(0);
-      out.write(8);
-      writeLong(out, id);
-      writeString(HMUX_STRING, from);
-      writeString(HMUX_STRING, to);
-      writeObject(out, result);
-
-      if (log.isLoggable(Level.FINER)) {
-	log.finer(dbgId() + (char) resultCode + "-w:"
-		  + " HMTP queryResult " + result
-		  + " to=" + from + " from=" + to);
-      }
-    }
   }
 
   private void readHmtpQuerySet(int code,
 				ReadStream is,
-				long id,
-				BamBroker broker)
+				BamStream brokerStream)
     throws IOException
   {
-    String to = readString(is);
-    String from = readString(is);
+    Hessian2Input hIn = startHmtpPacket();
+    String to = hIn.readString();
+    String from = hIn.readString();
 
-    Serializable query = (Serializable) readObject();
+    long id = hIn.readLong();
+    
+    Serializable query = (Serializable) hIn.readObject();
 
-    BamStream brokerStream = broker.getBrokerStream();
+    endHmtpPacket();
 
     if (log.isLoggable(Level.FINER))
       log.fine(dbgId() + (char) code + "-r: HMTP querySet " + query
-	       + " id=" + id + " to=" + to + " from=" + from);
+	       + " {id:" + id + ", to:" + to + ", from:" + from + "}");
 
-    if (_bamConn != null) {
-      _bamConn.getBrokerStream().querySet(id, to, _bamConn.getJid(), query);
-    }
-    else if (from != null && ! "".equals(from)) {
+    if (to == null)
+      getLinkStream().querySet(id, to, from, query);
+    else
       brokerStream.querySet(id, to, from, query);
-    }
-    else {
-      // from=null means the client needs to block and return the data
-      // on the same stream
-      
-      Serializable result = null;
-
-      BamConnection conn = broker.getConnection("hmux", null);
-
-      try {
-	result = conn.querySet(to, query);
-      } finally {
-	conn.close();
-      }
-
-      WriteStream out = _rawWrite;
-
-      int resultCode = (code == ADMIN_QUERY_SET
-			? ADMIN_QUERY_RESULT
-			: BAM_QUERY_RESULT);
-
-      out.write(resultCode);
-      out.write(0);
-      out.write(8);
-      writeLong(out, id);
-      writeString(HMUX_STRING, from);
-      writeString(HMUX_STRING, to);
-      writeObject(out, result);
-
-      if (log.isLoggable(Level.FINER)) {
-	log.finer(dbgId() + (char) resultCode + "-w:"
-		  + " HMTP queryResult " + result
-		  + " to=" + from + " from=" + to);
-      }
-    }
   }
 
   private void readHmtpQueryResult(int code,
 				   ReadStream is,
-				   long id,
 				   BamStream brokerStream)
     throws IOException
   {
-    String to = readString(is);
-    String from = readString(is);
+    Hessian2Input hIn = startHmtpPacket();
+    
+    String to = hIn.readString();
+    String from = hIn.readString();
 
-    Serializable value = (Serializable) readObject();
+    long id = hIn.readLong();
 
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(dbgId() + (char) code + "-r: HMTP queryResult("
-		+ value + ", id=" + id
-		+ " to=" + to + " from=" + from + ")");
-    }
+    Serializable value = (Serializable) hIn.readObject();
 
-    brokerStream.queryResult(id, to, from, value);
+    endHmtpPacket();
+
+    if (log.isLoggable(Level.FINER))
+      log.fine(dbgId() + (char) code + "-r: HMTP queryResult " + value
+	       + " {id:" + id + ", to:" + to + ", from:" + from + "}");
+
+    if (to == null)
+      getLinkStream().queryResult(id, to, from, value);
+    else
+      brokerStream.queryResult(id, to, from, value);
   }
 
-  void writeHmtpResult(long id,
-		       String to, String from,
-		       Serializable value)
+  private void readHmtpQueryError(int code,
+				  ReadStream is,
+				  BamStream brokerStream)
+    throws IOException
+  {
+    Hessian2Input hIn = startHmtpPacket();
+    
+    String to = hIn.readString();
+    String from = hIn.readString();
+
+    long id = hIn.readLong();
+
+    Serializable value = (Serializable) hIn.readObject();
+    BamError error = (BamError) hIn.readObject();
+
+    endHmtpPacket();
+
+    if (log.isLoggable(Level.FINER))
+      log.fine(dbgId() + (char) code + "-r: HMTP queryResult " + value
+	       + " {id:" + id + ", to:" + to + ", from:" + from + "}");
+
+    if (to == null)
+      getLinkStream().queryResult(id, to, from, value);
+    else
+      brokerStream.queryResult(id, to, from, value);
+  }
+
+  void writeHmtpMessage(String to, String from,
+			Serializable value)
     throws IOException
   {
     WriteStream out = _rawWrite;
 
     synchronized (out) {
-      out.write(BAM_QUERY_RESULT);
+      out.write(HmuxRequest.ADMIN_MESSAGE);
       out.write(0);
-      out.write(8);
-      writeLong(out, id);
-      writeString(HMUX_STRING, from);
-      writeString(HMUX_STRING, to);
-      writeObject(out, value);
+      out.write(0);
+
+      Hessian2Output hOut = getHessianOutput();
+      
+      hOut.startPacket();
+
+      hOut.writeString(to);
+      hOut.writeString(from);
+
+      hOut.writeObject(value);
+
+      hOut.endPacket();
+      hOut.flushBuffer();
+
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(dbgId() + (char) BAM_MESSAGE + "-w:"
+		  + " HMTP message " + value
+		  + " {to:" + to + ", from:" + from + "}");
+      }
+    }
+  }
+
+  void writeHmtpMessageError(String to, String from,
+			     Serializable value,
+			     BamError error)
+    throws IOException
+  {
+    WriteStream out = _rawWrite;
+
+    synchronized (out) {
+      out.write(HmuxRequest.ADMIN_MESSAGE_ERROR);
+      out.write(0);
+      out.write(0);
+
+      Hessian2Output hOut = getHessianOutput();
+      
+      hOut.startPacket();
+
+      hOut.writeString(to);
+      hOut.writeString(from);
+
+      hOut.writeObject(value);
+      hOut.writeObject(error);
+
+      hOut.endPacket();
+      hOut.flushBuffer();
+
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(dbgId() + (char) BAM_MESSAGE_ERROR + "-w:"
+		  + " HMTP messageError " + value
+		  + " {to:" + to + ", from:" + from + "}");
+      }
+    }
+  }
+
+  void writeHmtpQueryGet(long id,
+			 String to, String from,
+			 Serializable value)
+    throws IOException
+  {
+    WriteStream out = _rawWrite;
+
+    synchronized (out) {
+      out.write(HmuxRequest.ADMIN_QUERY_GET);
+      out.write(0);
+      out.write(0);
+
+      Hessian2Output hOut = getHessianOutput();
+      
+      hOut.startPacket();
+
+      hOut.writeString(to);
+      hOut.writeString(from);
+      hOut.writeLong(id);
+
+      hOut.writeObject(value);
+
+      hOut.endPacket();
+      hOut.flushBuffer();
+
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(dbgId() + (char) BAM_QUERY_GET + "-w:"
+		  + " HMTP queryGet " + value
+		  + " {to:" + to + ", from:" + from + "}");
+      }
+    }
+  }
+
+  void writeHmtpQuerySet(long id,
+			 String to, String from,
+			 Serializable value)
+    throws IOException
+  {
+    WriteStream out = _rawWrite;
+
+    synchronized (out) {
+      out.write(HmuxRequest.ADMIN_QUERY_SET);
+      out.write(0);
+      out.write(0);
+
+      Hessian2Output hOut = getHessianOutput();
+      
+      hOut.startPacket();
+
+      hOut.writeString(to);
+      hOut.writeString(from);
+      hOut.writeLong(id);
+
+      hOut.writeObject(value);
+
+      hOut.endPacket();
+      hOut.flushBuffer();
+
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(dbgId() + (char) BAM_QUERY_SET + "-w:"
+		  + " HMTP querySet " + value
+		  + " {to:" + to + ", from:" + from + "}");
+      }
+    }
+  }
+
+  void writeHmtpQueryResult(long id,
+			    String to, String from,
+			    Serializable value)
+    throws IOException
+  {
+    WriteStream out = _rawWrite;
+
+    synchronized (out) {
+      out.write(HmuxRequest.ADMIN_QUERY_RESULT);
+      out.write(0);
+      out.write(0);
+
+      Hessian2Output hOut = getHessianOutput();
+      
+      hOut.startPacket();
+
+      hOut.writeString(to);
+      hOut.writeString(from);
+      hOut.writeLong(id);
+
+      hOut.writeObject(value);
+
+      hOut.endPacket();
+      hOut.flushBuffer();
 
       if (log.isLoggable(Level.FINER)) {
 	log.finer(dbgId() + (char) BAM_QUERY_RESULT + "-w:"
 		  + " HMTP queryResult " + value
-		  + " to=" + from + " from=" + to);
+		  + " {to:" + to + ", from:" + from + "}");
+      }
+    }
+  }
+
+  void writeHmtpQueryError(long id, String to, String from,
+			   Serializable value, BamError error)
+    throws IOException
+  {
+    WriteStream out = _rawWrite;
+
+    synchronized (out) {
+      out.write(HmuxRequest.ADMIN_QUERY_ERROR);
+      out.write(0);
+      out.write(0);
+
+      Hessian2Output hOut = getHessianOutput();
+      
+      hOut.startPacket();
+
+      hOut.writeString(to);
+      hOut.writeString(from);
+      hOut.writeLong(id);
+
+      hOut.writeObject(value);
+      hOut.writeObject(error);
+
+      hOut.endPacket();
+      hOut.flushBuffer();
+
+      if (log.isLoggable(Level.FINER)) {
+	log.finer(dbgId() + (char) BAM_QUERY_ERROR + "-w:"
+		  + " HMTP queryError " + error + " " + value
+		  + " {to:" + to + ", from:" + from + "}");
       }
     }
   }
@@ -1347,51 +1496,6 @@ public class HmuxRequest extends AbstractHttpRequest
     synchronized (out) {
       out.flush();
     }
-  }
-
-  void writeHmtpError(long id, String to, String from,
-		      Serializable value, BamError error)
-    throws IOException
-  {
-    WriteStream out = _rawWrite;
-
-    synchronized (out) {
-      out.write(BAM_QUERY_ERROR);
-      out.write(0);
-      out.write(8);
-      writeLong(out, id);
-      writeString(HMUX_STRING, from);
-      writeString(HMUX_STRING, to);
-      writeObject(out, value);
-      writeObject(out, error);
-
-      if (log.isLoggable(Level.FINER)) {
-	log.finer(dbgId() + (char) BAM_QUERY_ERROR + "-w:"
-		  + " HMTP queryError " + error + " " + value 
-		  + " to=" + from + " from=" + to);
-      }
-    }
-  }
-
-  private void readHmtpQueryError(int code,
-				  ReadStream is,
-				   long id,
-				   BamStream brokerStream)
-    throws IOException
-  {
-    String to = readString(is);
-    String from = readString(is);
-
-    Serializable query = (Serializable) readObject();
-    BamError error = (BamError) readObject();
-
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(dbgId() + (char) code + "-r: HMTP queryError("
-		+ query + ", error=" + error + ", id=" + id
-		+ " to=" + to + " from=" + from + ")");
-    }
-
-    brokerStream.queryError(id, to, from, query, error);
   }
 
   private void hmtpConnect(int code, BamBroker broker)
@@ -1412,7 +1516,7 @@ public class HmuxRequest extends AbstractHttpRequest
       throw new RuntimeException(e);
     }
   }
-
+  
   private Object readObject()
     throws IOException
   {
@@ -1430,6 +1534,32 @@ public class HmuxRequest extends AbstractHttpRequest
     }
 
     return _in.readObject();
+  }
+  
+  private Hessian2Input startHmtpPacket()
+    throws IOException
+  {
+    if (_in == null) {
+      InputStream is = _rawRead;
+
+      /*
+      if (log.isLoggable(Level.FINEST)) {
+	is = new HessianDebugInputStream(is, log, Level.FINEST);
+	is.startTop2();
+      }
+      */
+	
+      _in = new Hessian2StreamingInput(is);
+    }
+
+    return _in.startPacket();
+  }
+
+  private void endHmtpPacket()
+    throws IOException
+  {
+    if (_in != null)
+      _in.endPacket();
   }
 
   private String readString(ReadStream is)
@@ -1813,6 +1943,14 @@ public class HmuxRequest extends AbstractHttpRequest
   {
     writeString(HMUX_HEADER, key); 
     writeString(HMUX_STRING, value); 
+  }
+
+  private Hessian2Output getHessianOutput()
+  {
+    if (_hOut == null)
+      _hOut = new Hessian2Output(_rawWrite);
+
+    return _hOut;
   }
 
   private void writeObject(WriteStream out, Serializable value)

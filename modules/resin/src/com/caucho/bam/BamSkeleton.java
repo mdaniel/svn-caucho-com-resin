@@ -407,12 +407,10 @@ class BamSkeleton<C>
       return (Boolean) queryHandler.invoke(target, id, to, from, value);
     }
     catch (IllegalAccessException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return false;
+      throw new BamException(e);
     }
     catch (InvocationTargetException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return false;
+      throw new BamException(e.getCause());
     }
   }
 

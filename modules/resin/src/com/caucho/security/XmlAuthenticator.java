@@ -40,6 +40,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.webbeans.ApplicationScoped;
 import java.security.Principal;
 import java.util.Hashtable;
 import java.util.logging.*;
@@ -68,6 +69,7 @@ import java.util.logging.*;
  * &lt;/security:XmlAuthenticator>
  * </pre></code>
  */
+@ApplicationScoped
 public class XmlAuthenticator extends AbstractAuthenticator
 {
   private static final Logger log =
@@ -106,6 +108,14 @@ public class XmlAuthenticator extends AbstractAuthenticator
   public void addUser(User user)
   {
     _userMap.put(user.getName(), user.getPasswordUser());
+  }
+
+  /**
+   * Returns the user map
+   */
+  protected Hashtable<String,PasswordUser> getUserMap()
+  {
+    return _userMap;
   }
 
   /**

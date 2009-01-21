@@ -56,13 +56,12 @@ public class HmtpClient extends AbstractBamConnection {
   private String _url;
   private String _scheme;
   private String _host;
+  private String _virtualHost;
   private int _port;
   private String _path;
   
   private InetAddress _address;
   
-  private String _to;
-
   private boolean _isEncryptPassword = true;
 
   protected Socket _s;
@@ -92,6 +91,11 @@ public class HmtpClient extends AbstractBamConnection {
       agentStream = new SimpleBamClientStream();
     
     setAgentStream(agentStream);
+  }
+
+  public void setVirtualHost(String host)
+  {
+    _virtualHost = host;
   }
 
   protected void parseURL(String url)
@@ -161,7 +165,12 @@ public class HmtpClient extends AbstractBamConnection {
       // http upgrade
 
       print(_os, "CONNECT " + _path + " HTTP/1.1\r\n");
-      print(_os, "Host: " + _to + ":" + _port + "\r\n");
+
+      String host = _virtualHost;
+      if (host == null)
+	host = _host;
+      
+      print(_os, "Host: " + host + ":" + _port + "\r\n");
       print(_os, "Upgrade: HMTP/0.9\r\n");
       print(_os, "Connection: Upgrade\r\n");
       print(_os, "Content-Length: 0\r\n");
@@ -256,6 +265,29 @@ public class HmtpClient extends AbstractBamConnection {
   public String getJid()
   {
     return _jid;
+  }
+
+  /**
+   * Returns the broker jid
+   */
+  public String getBrokerJid()
+  {
+    String jid = getJid();
+
+    if (jid == null)
+      return null;
+
+    int p = jid.indexOf('@');
+    int q = jid.indexOf('/');
+
+    if (p >= 0 && q >= 0)
+      return jid.substring(p + 1, q);
+    else if (p >= 0)
+      return jid.substring(p + 1);
+    else if (q >= 0)
+      return jid.substring(0, q);
+    else
+      return jid;
   }
 
   /**

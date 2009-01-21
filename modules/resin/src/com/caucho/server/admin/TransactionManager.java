@@ -77,7 +77,7 @@ public class TransactionManager
   public Path getPath()
   {
     if (_resin != null)
-      return _resin.getAdminPath();
+      return _resin.getResinDataDirectory();
     else if (_path != null)
       return _path;
     else

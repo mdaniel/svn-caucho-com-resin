@@ -80,7 +80,7 @@ public class FileCacheManager extends DistributedCacheManager
     try {
       _tempFileManager = server.getTempFileManager();
 
-      Path adminPath = server.getAdminPath();
+      Path adminPath = server.getResinDataDirectory();
       String serverId = server.getServerId();
 
       _cacheMapBacking = new CacheMapBacking(adminPath, serverId);

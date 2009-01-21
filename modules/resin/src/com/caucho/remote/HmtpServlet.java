@@ -37,16 +37,48 @@ import com.caucho.hemp.*;
 import com.caucho.hemp.broker.*;
 import com.caucho.hemp.servlet.*;
 import com.caucho.bam.BamBroker;
+import com.caucho.security.Authenticator;
+import com.caucho.security.AdminAuthenticator;
 import com.caucho.server.connection.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
+import com.caucho.webbeans.manager.*;
+
+import java.util.logging.*;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  * Main protocol handler for the HTTP version of HeMPP.
  */
 public class HmtpServlet extends GenericServlet {
+  private static final Logger log
+    = Logger.getLogger(HmtpServlet.class.getName());
   private static final L10N L = new L10N(HmtpServlet.class);
+
+  private boolean _isAdmin;
+  
+  private Authenticator _auth;
+  private ServerLinkManager _linkManager;
+
+  public void init()
+  {
+    try {
+      WebBeansContainer webBeans = WebBeansContainer.getCurrent();
+
+      if (_isAdmin)
+	_auth = webBeans.getInstanceByType(AdminAuthenticator.class);
+      else
+	_auth = webBeans.getInstanceByType(Authenticator.class);
+    } catch (Exception e) {
+      log.info(L.l("{0} requires an active com.caucho.security.Authenticator because HMTP messaging requires authenticated login for security.  In the resin.xml, add an <sec:AdminAuthenticator>",
+		   this));
+      
+      log.log(Level.FINER, L.l("{0} requires an active com.caucho.security.Authenticator because HMTP messaging requires authenticated login for security.",
+		    this), e);
+    }
+
+    _linkManager = new ServerLinkManager(_auth);
+  }
   
   /**
    * Service handling
@@ -68,10 +100,13 @@ public class HmtpServlet extends GenericServlet {
     ReadStream is = req.getConnection().getReadStream();
     WriteStream os = req.getConnection().getWriteStream();
 
-    BamBroker broker = HempBroker.getCurrent();
+    HempBroker broker = HempBroker.getCurrent();
+    String address = req.getRemoteAddr();
 
-    TcpDuplexController controller
-      = res.upgradeProtocol(new ServerFromLinkStream(broker, is, os));
+    ServerFromLinkStream fromLinkStream
+      = new ServerFromLinkStream(broker, _linkManager, is, os, address);
+
+    TcpDuplexController controller = res.upgradeProtocol(fromLinkStream);
     
     controller.setIdleTimeMax(30 * 60 * 1000L);
   }

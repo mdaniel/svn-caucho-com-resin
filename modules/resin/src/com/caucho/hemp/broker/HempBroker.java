@@ -39,16 +39,19 @@ import com.caucho.bam.BamStream;
 import com.caucho.hemp.*;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.security.*;
 import com.caucho.server.resin.*;
 import com.caucho.util.*;
 import com.caucho.hemp.BamServiceBinding;
 import com.caucho.webbeans.manager.BeanStartupEvent;
+import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.webbeans.component.CauchoBean;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.*;
 import java.lang.annotation.Annotation;
+import java.security.Principal;
 import java.lang.ref.*;
 import java.io.Serializable;
 import javax.webbeans.Observes;
@@ -85,6 +88,9 @@ public class HempBroker implements BamBroker, BamStream
   private String _domain = "localhost";
   private String _managerJid = "localhost";
   private HempDomainService _domainService;
+
+  private boolean _isAdmin;
+  private Authenticator _auth;
 
   private ArrayList<String> _aliasList = new ArrayList<String>();
 
@@ -171,7 +177,7 @@ public class HempBroker implements BamBroker, BamStream
    */
   public BamConnection getConnection(String uid, String password)
   {
-    return getConnection(uid, password, null);
+    return getConnection(uid, password, null, "127.0.0.1");
   }
 
   /**
@@ -181,7 +187,18 @@ public class HempBroker implements BamBroker, BamStream
 				     String password,
 				     String resourceId)
   {
-    String jid = generateJid(uid, resourceId);
+    return getConnection(uid, password, resourceId, "127.0.0.1");
+  }
+
+  /**
+   * Creates a session
+   */
+  public BamConnection getConnection(String uid,
+				     String password,
+				     String resourceId,
+				     String ipAddress)
+  {
+    String jid = login(uid, password, resourceId, ipAddress);
 
     HempConnectionImpl conn = new HempConnectionImpl(this, jid);
 
@@ -205,6 +222,64 @@ public class HempBroker implements BamBroker, BamStream
     }
 
     return conn;
+  }
+
+  protected String login(String uid,
+			 String password,
+			 String resource,
+			 String ipAddress)
+  {
+    Authenticator auth = getAuthenticator();
+
+    if (auth == null && "127.0.0.1".equals(ipAddress)) {
+      return generateJid(uid, resource);
+    }
+    else if (auth == null)
+      throw new RuntimeException(L.l("remote access requires a configured authenticator, like <sec:AdminAuthenticator> for IP='{0}'",
+				     ipAddress));
+    else {
+      authenticate(uid, password, ipAddress);
+    }
+    
+    return generateJid(uid, resource);
+  }
+
+  protected void authenticate(String uid, String password, String ipAddress)
+  {
+    Authenticator auth = getAuthenticator();
+
+    if (auth == null)
+      throw new RuntimeException(L.l("can't login '{0}' for IP={1}",
+				     uid, ipAddress));
+
+    Principal user = auth.authenticate(new BasicPrincipal(uid),
+				       new PasswordCredentials(password),
+				       null);
+
+    if (user == null) {
+      throw new RuntimeException(L.l("authentication failed '{0}' for IP={1}",
+				     uid, ipAddress));
+    }
+  }
+
+  protected Authenticator getAuthenticator()
+  {
+    if (_auth == null) {
+      try {
+	WebBeansContainer webBeans = WebBeansContainer.getCurrent();
+      
+	if (_isAdmin)
+	  _auth = webBeans.getInstanceByType(AdminAuthenticator.class);
+	else
+	  _auth = webBeans.getInstanceByType(Authenticator.class);
+      } catch (Exception e) {
+	log.log(Level.FINER, e.toString(), e);
+
+	return null;
+      }
+    }
+	
+    return _auth;
   }
 
   protected String generateJid(String uid, String resource)
@@ -760,6 +835,9 @@ public class HempBroker implements BamBroker, BamStream
     if (domain == null)
       return null;
 
+    if ("local".equals(domain))
+      return getBrokerStream();
+
     BamBroker broker = _manager.findBroker(domain);
 
     if (broker instanceof HempBroker) {
@@ -773,10 +851,12 @@ public class HempBroker implements BamBroker, BamStream
     if (broker == this)
       return null;
 
+    BamStream stream = null;
+    
     if (_domainManager != null)
-      return _domainManager.findDomain(domain);
-    else
-      return null;
+      stream = _domainManager.findDomain(domain);
+
+    return stream;
   }
 
   protected boolean startServiceFromManager(String jid)

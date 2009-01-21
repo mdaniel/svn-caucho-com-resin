@@ -110,7 +110,9 @@ public class HostController
     setRootDirectory(config.calculateRootDirectory(getVariableMap()));
   }
 
-  HostController(String id, Path rootDirectory, HostContainer container)
+  public HostController(String id,
+			Path rootDirectory,
+			HostContainer container)
   {
     super(id, rootDirectory);
 

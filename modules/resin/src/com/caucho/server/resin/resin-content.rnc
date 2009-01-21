@@ -545,6 +545,8 @@ r_resin-Content =
 
   & r_module-repository?
 
+  & r_resin-data-directory?
+
   & r_root-directory?
 
   & r_security-manager?
@@ -563,6 +565,10 @@ r_resin-Content =
       element rcore:otherwise { r_resin-Content }?
     }*
 
+r_resin-data-directory =
+  attribute resin-data-directory { r_path-Type }
+  | element resin-data-directory { r_path-Type }
+  
 r_security-manager = 
   attribute security-manager { string }
   | element security-manager {

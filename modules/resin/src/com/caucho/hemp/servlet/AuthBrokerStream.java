@@ -92,10 +92,12 @@ public class AuthBrokerStream extends AbstractBamStream
   {
     if (value instanceof AuthQuery) {
       AuthQuery auth = (AuthQuery) value;
+      String ipAddress = null;
 
       String jid = _manager.login(auth.getUid(),
 				  auth.getCredentials(),
-				  auth.getResource());
+				  auth.getResource(),
+				  ipAddress);
 
       if (jid != null)
 	_broker.queryResult(id, from, to, new AuthResult(jid));

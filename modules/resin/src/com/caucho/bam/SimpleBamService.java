@@ -161,12 +161,29 @@ public class SimpleBamService extends AbstractBamService
 			  String from,
 			  Serializable query)
   {
-    if (_skeleton.dispatchQuerySet(this, id, to, from, query)) {
-      return true;
-    }
-    else {
-      String msg = (this + " unknown querySet " + query
-		    + " {id:" + id + ", to:" + to + ", from:" + from + "}");
+    try {
+      if (_skeleton.dispatchQuerySet(this, id, to, from, query)) {
+	return true;
+      }
+      else {
+	String msg = (this + " unknown querySet " + query
+		      + " {id:" + id + ", to:" + to + ", from:" + from + "}");
+    
+	BamError error = new BamError(BamError.TYPE_CANCEL,
+				      BamError.FEATURE_NOT_IMPLEMENTED,
+				      msg);
+				    
+	getBrokerStream().queryError(id, from, to, query, error);
+      
+	if (log.isLoggable(Level.FINE)) {
+	  log.fine(msg);
+	}
+
+	return true;
+      }
+    } catch (Exception e) {
+      String msg = (this + " exn querySet " + e + "\n" + query
+		      + " {id:" + id + ", to:" + to + ", from:" + from + "}");
     
       BamError error = new BamError(BamError.TYPE_CANCEL,
 				    BamError.FEATURE_NOT_IMPLEMENTED,
@@ -175,7 +192,7 @@ public class SimpleBamService extends AbstractBamService
       getBrokerStream().queryError(id, from, to, query, error);
       
       if (log.isLoggable(Level.FINE)) {
-	log.fine(msg);
+	log.log(Level.FINE, msg, e);
       }
 
       return true;

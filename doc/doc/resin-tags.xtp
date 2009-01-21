@@ -247,6 +247,7 @@ element resin {
   &amp; environment-system-properties?
   &amp; management?
   &amp; min-free-memory?
+  &amp; resin-data-directory?
   &amp; root-directory?
   &amp; security-manager?
   &amp; security-provider?
@@ -298,6 +299,21 @@ the host level are available for all web-apps in the host.</p>
   &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
+
+</defun>
+
+<defun title="&lt;resin-data-directory>" version="Resin 4.0.0">
+<parents>resin</parents>
+
+<p>&lt;resin-data-directory> specifies the location of Resin's administration
+and data files, including persistent caching, sessions, and administration
+logs.</p>
+
+<def title="&lt;resin-data-directory> schema">
+element resin-data-directory {
+  r_path-Type
+}
+</def>
 
 </defun>
 
