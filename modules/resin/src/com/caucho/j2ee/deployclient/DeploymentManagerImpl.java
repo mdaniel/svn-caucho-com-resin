@@ -90,11 +90,16 @@ public class DeploymentManagerImpl implements DeploymentManager {
     final int port;
 
     if (fileIdx > -1)
-     port  = Integer.parseInt(uri.substring(portIdx + 1, fileIdx));
+      port = Integer.parseInt(uri.substring(portIdx + 1, fileIdx));
     else
       port = Integer.parseInt(uri.substring(portIdx + 1));
 
-    _deployClient = new DeployClient(host, port);
+    String username = null;
+    String password = null;
+
+    // XXX: possibly refactor DeployClient to use connect(user, password)
+    // instead
+    _deployClient = new DeployClient(host, port, username, password);
   }
 
   /**
