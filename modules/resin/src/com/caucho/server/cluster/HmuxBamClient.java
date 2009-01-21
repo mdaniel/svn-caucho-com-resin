@@ -64,8 +64,6 @@ public class HmuxBamClient extends AbstractBamConnection
     if (_server == null)
       throw new ConfigException(L.l("'{0}' is an unknown server.",
                                     serverId));
-
-    Thread.dumpStack();
   }
 
   //

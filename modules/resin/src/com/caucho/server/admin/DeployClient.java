@@ -7,6 +7,7 @@
 package com.caucho.server.admin;
 
 import com.caucho.bam.*;
+import com.caucho.bam.hmtp.HmtpClient;
 import com.caucho.git.*;
 import com.caucho.server.cluster.HmuxBamClient;
 import com.caucho.server.resin.*;
@@ -49,9 +50,15 @@ public class DeployClient
     _deployJid = "deploy@" + serverId + ".resin.caucho";
   }
   
-  public DeployClient(String host, int port)
+  public DeployClient(String host, int port,
+		      String userName, String password)
   {
-    _client = new HmuxBamClient(host, port);
+    HmtpClient client = new HmtpClient("http://" + host + ":" + port + "/hmtp");
+    client.setVirtualHost("admin.resin");
+
+    client.connect(userName, password);
+
+    _conn = client;
     
     _deployJid = "deploy@resin.caucho";
   }
