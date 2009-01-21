@@ -61,6 +61,7 @@ public class Alarm implements ThreadTask {
   static private volatile int _runningAlarmCount;
   
   static private long _testTime;
+  static private long _testNanoDelta;
 
   private long _wakeTime;
   private AlarmListener _listener;
@@ -237,7 +238,7 @@ public class Alarm implements ThreadTask {
       // System.nanoTime() is not related to currentTimeMillis(), so return
       // a different offset.  See System.nanoTime() javadoc
       
-      return (_testTime - 10000000) * 1000000L;
+      return (_testTime - 10000000) * 1000000L + _testNanoDelta;
     }
 
     return System.nanoTime();
@@ -648,6 +649,11 @@ public class Alarm implements ThreadTask {
       Thread.sleep(10);
     } catch (Exception e) {
     }
+  }
+  
+  static void setTestNanoDelta(long delta)
+  {
+    _testNanoDelta = delta;
   }
 
   public String toString()
