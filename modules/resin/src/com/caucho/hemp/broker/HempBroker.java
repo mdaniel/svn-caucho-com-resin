@@ -286,6 +286,9 @@ public class HempBroker implements BamBroker, BamStream
   {
     StringBuilder sb = new StringBuilder();
 
+    if (uid == null)
+      uid = "anonymous";
+
     if (uid.indexOf('@') > 0)
       sb.append(uid);
     else

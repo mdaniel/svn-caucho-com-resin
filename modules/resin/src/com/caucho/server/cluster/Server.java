@@ -524,6 +524,11 @@ public class Server extends ProtocolDispatchServer
     return _resin.getManagement().getAdminBroker();
   }
 
+  public String getAdminCookie()
+  {
+    return _resin.getManagement().getRemoteCookie();
+  }
+
   //
   // Configuration from <server>
   //

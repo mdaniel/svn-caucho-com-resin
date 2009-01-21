@@ -43,7 +43,7 @@ import com.caucho.server.resin.*;
 import com.caucho.security.*;
 import com.caucho.security.PasswordUser;
 import com.caucho.security.AbstractAuthenticator;
-import com.caucho.server.security.*;
+import com.caucho.webbeans.component.SingletonBean;
 import com.caucho.webbeans.manager.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
@@ -69,7 +69,7 @@ public class Management
   
   private HostConfig _hostConfig;
 
-  private ManagementAuthenticator _auth = new ManagementAuthenticator();
+  private AdminAuthenticator _auth = new AdminAuthenticator();
 
   protected TransactionManager _transactionManager;
 
@@ -112,9 +112,9 @@ public class Management
   /**
    * Adds a user
    */
-  public void addUser(User user)
+  public void addUser(XmlAuthenticator.User user)
   {
-    _auth.addUser(user.getName(), user.getPasswordUser());
+    _auth.addUser(user);
   }
 
   /**
@@ -241,9 +241,6 @@ public class Management
   @PostConstruct
   public void init()
   {
-    if (true)
-      return;
-    
     try {
       if (! _lifecycle.toInit())
 	return;
@@ -253,7 +250,9 @@ public class Management
       
 	WebBeansContainer webBeans = WebBeansContainer.create();
 
-	webBeans.addSingleton(_auth, "resin_admin", Standard.class);
+	webBeans.addBean(new SingletonBean(_auth, null,
+					   Authenticator.class,
+					   AdminAuthenticator.class));
       }
 
       if (_transactionManager != null)

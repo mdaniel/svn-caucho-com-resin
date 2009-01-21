@@ -53,23 +53,19 @@ public class HmuxBamClient extends AbstractBamConnection
 {
   private static final L10N L = new L10N(HmuxBamClient.class);
 
-  private final ServerPool _pool;
+  private final ClusterServer _server;
 
   private HmuxBamConnection _conn;
 
   public HmuxBamClient(String serverId)
   {
-    _pool = findClient(serverId);
+    _server = findServer(serverId);
 
-    if (_pool == null)
+    if (_server == null)
       throw new ConfigException(L.l("'{0}' is an unknown server.",
                                     serverId));
-  }
 
-  public HmuxBamClient(String host,
-		    int port)
-  {
-    _pool = createClient(host, port);
+    Thread.dumpStack();
   }
 
   //
@@ -81,20 +77,7 @@ public class HmuxBamClient extends AbstractBamConnection
    */
   public BamStream getBrokerStream()
   {
-    try {
-      if (_conn == null) {
-	ClusterStream stream = _pool.open();
-
-	if (stream == null)
-	  throw new RuntimeException(this + " can't connect to " + _pool);
-      
-	_conn = new HmuxBamConnection(this, stream);
-      }
-    
-      return _conn;
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   //
@@ -116,9 +99,9 @@ public class HmuxBamClient extends AbstractBamConnection
 
   /**
    * Finds the ClusterServer in the current Resin instances by its
-   * server-id and returns its ServerPool.
+   * server-id.
    */
-  private ServerPool findClient(String serverId)
+  private ClusterServer findServer(String serverId)
   {
     Resin resin = Resin.getCurrent();
 
@@ -131,7 +114,7 @@ public class HmuxBamClient extends AbstractBamConnection
       throw new ConfigException(L.l("'{0}' is an unknown server.",
                                     serverId));
 
-    return server.getServerPool();
+    return server;
   }
 
   /**
@@ -176,7 +159,7 @@ public class HmuxBamClient extends AbstractBamConnection
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _pool + "]";
+    return getClass().getSimpleName() + "[" + _server + "]";
   }
 }
 
