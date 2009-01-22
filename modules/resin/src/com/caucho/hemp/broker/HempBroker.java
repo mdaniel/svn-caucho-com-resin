@@ -98,6 +98,8 @@ public class HempBroker implements BamBroker, BamStream
 
   private BamServiceManager []_serviceManagerList = new BamServiceManager[0];
 
+  private volatile boolean _isClosed;
+
   public HempBroker()
   {
     _manager = HempBrokerManager.getCurrent();
@@ -107,6 +109,8 @@ public class HempBroker implements BamBroker, BamStream
 
     if (_localBroker.getLevel() == null)
       _localBroker.set(this);
+
+    Environment.addCloseListener(this);
   }
 
   public HempBroker(String domain)
@@ -126,6 +130,14 @@ public class HempBroker implements BamBroker, BamStream
   public static HempBroker getCurrent()
   {
     return _localBroker.get();
+  }
+
+  /**
+   * Returns true if the broker is closed
+   */
+  public boolean isClosed()
+  {
+    return _isClosed;
   }
 
   /**
@@ -969,6 +981,8 @@ public class HempBroker implements BamBroker, BamStream
 
   public void close()
   {
+    _isClosed = true;
+    
     _manager.removeBroker(_domain);
 
     for (String alias : _aliasList)

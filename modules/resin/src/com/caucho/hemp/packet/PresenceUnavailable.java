@@ -37,34 +37,6 @@ import java.io.Serializable;
  */
 public class PresenceUnavailable extends Presence {
   /**
-   * zero-arg constructor for Hessian
-   */
-  private PresenceUnavailable()
-  {
-  }
-
-  /**
-   * An undirected presence unavailable announcement to the server.
-   *
-   * @param data a collection of presence data
-   */
-  public PresenceUnavailable(Serializable data)
-  {
-    super(data);
-  }
-
-  /**
-   * A directed presence unavailable announcement to another client
-   *
-   * @param to the target client
-   * @param data a collection of presence data
-   */
-  public PresenceUnavailable(String to, Serializable data)
-  {
-    super(to, data);
-  }
-
-  /**
    * A directed presence unavailable announcement to another client
    *
    * @param to the target client

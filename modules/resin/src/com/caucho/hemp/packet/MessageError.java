@@ -41,15 +41,6 @@ public class MessageError extends Packet {
   private final BamError _error;
 
   /**
-   * zero-arg constructor for Hessian
-   */
-  private MessageError()
-  {
-    _value = null;
-    _error = null;
-  }
-
-  /**
    * An empty message to a destination
    *
    * @param to the target jid

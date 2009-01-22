@@ -38,14 +38,6 @@ import java.io.Serializable;
  */
 public class PresenceError extends Presence {
   private final BamError _error;
-  
-  /**
-   * zero-arg constructor for Hessian
-   */
-  private PresenceError()
-  {
-    _error = null;
-  }
 
   /**
    * The subscribed response to the original client

@@ -39,13 +39,6 @@ import java.io.Serializable;
  */
 public class PresenceProbe extends Presence {
   /**
-   * zero-arg constructor for Hessian
-   */
-  private PresenceProbe()
-  {
-  }
-
-  /**
    * A directed presence announcement to another client
    *
    * @param to the target client

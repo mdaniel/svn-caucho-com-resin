@@ -37,24 +37,6 @@ import java.io.Serializable;
  */
 public class PresenceSubscribe extends Presence {
   /**
-   * zero-arg constructor for Hessian
-   */
-  private PresenceSubscribe()
-  {
-  }
-
-  /**
-   * A directed presence subscription request to another client
-   *
-   * @param to the target client
-   * @param data a collection of presence data
-   */
-  public PresenceSubscribe(String to, Serializable data)
-  {
-    super(to, data);
-  }
-
-  /**
    * A directed presence subscription request to another client
    *
    * @param to the target client

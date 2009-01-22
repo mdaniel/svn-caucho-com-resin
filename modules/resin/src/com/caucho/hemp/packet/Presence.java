@@ -39,37 +39,6 @@ public class Presence extends Packet {
   private final Serializable _data;
 
   /**
-   * zero-arg constructor for Hessian
-   */
-  protected Presence()
-  {
-    _data = null;
-  }
-
-  /**
-   * An undirected presence announcement to the server.
-   *
-   * @param data a collection of presence data
-   */
-  public Presence(Serializable data)
-  {
-    _data = data;
-  }
-
-  /**
-   * A directed presence announcement to another client
-   *
-   * @param to the target client
-   * @param data a collection of presence data
-   */
-  public Presence(String to, Serializable data)
-  {
-    super(to);
-    
-    _data = data;
-  }
-
-  /**
    * A directed presence announcement to another client
    *
    * @param to the target client

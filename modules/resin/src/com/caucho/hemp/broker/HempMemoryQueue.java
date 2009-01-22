@@ -30,6 +30,7 @@
 package com.caucho.hemp.broker;
 
 import com.caucho.hemp.packet.*;
+import com.caucho.bam.BamBroker;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import com.caucho.server.resin.*;
@@ -37,6 +38,7 @@ import com.caucho.server.util.*;
 import com.caucho.util.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.*;
 import java.lang.ref.*;
 import java.io.Serializable;
@@ -53,48 +55,57 @@ public class HempMemoryQueue implements BamStream, Runnable
   private static long _gid;
 
   // how long the thread should wait for a new request before exiting
-  private long _queueIdleTimeout = 1000L;
+  private long _queueIdleTimeout = 250L;
   
   private final Executor _executor = ScheduledThreadPool.getLocal();
   private final ClassLoader _loader
     = Thread.currentThread().getContextClassLoader();
-  private final BamStream _agentStream;
+  
+  private final BamBroker _broker;
   private final BamStream _brokerStream;
+  private final BamStream _agentStream;
 
-  private int _threadSemaphore;
+  private int _threadMax;
+  private AtomicInteger _threadCount = new AtomicInteger();
+  private AtomicInteger _idleCount = new AtomicInteger();
+  private Object _idleLock = new Object();
+  private long _lastExitTime;
 
-  private Packet []_queue = new Packet[32];
-  private int _head;
-  private int _tail;
-
+  private PacketQueue _queue;
   private String _name;
 
   private volatile boolean _isClosed;
 
-  public HempMemoryQueue(BamStream agentStream,
-			 BamStream brokerStream)
+  public HempMemoryQueue(BamBroker broker,
+			 BamStream agentStream)
   {
-    this(null, agentStream, brokerStream);
+    this(null, broker, agentStream);
   }
 
   public HempMemoryQueue(String name,
-			 BamStream agentStream,
-			 BamStream brokerStream)
+			 BamBroker broker,
+			 BamStream agentStream)
   {
-    if (agentStream == null)
-      throw new NullPointerException();
-
-    if (brokerStream == null)
+    if (broker == null)
       throw new NullPointerException();
     
+    if (agentStream == null)
+      throw new NullPointerException();
+    
+    _broker = broker;
+    _brokerStream = broker.getBrokerStream();
     _agentStream = agentStream;
-    _brokerStream = brokerStream;
-    _threadSemaphore = 1;
+    _threadMax = 5;
 
     if (name == null)
       name = _agentStream.getJid();
 
     _name = name;
+
+    int maxSize = -1;
+    long expireTimeout = -1;
+    
+    _queue = new PacketQueue(name, maxSize, expireTimeout);
   }
   
   /**
@@ -110,7 +121,7 @@ public class HempMemoryQueue implements BamStream, Runnable
    */
   public boolean isPacketAvailable()
   {
-    return _head != _tail;
+    return ! _queue.isEmpty();
   }
 
   /**
@@ -270,85 +281,136 @@ public class HempMemoryQueue implements BamStream, Runnable
     return _agentStream;
   }
 
-  protected void enqueue(Packet packet)
+  protected final void enqueue(Packet packet)
   {
     if (log.isLoggable(Level.FINEST)) {
-      int size = (_head - _tail + _queue.length) % _queue.length;
+      int size = _queue.getSize();
       log.finest(this + " enqueue(" + size + ") " + packet);
     }
-    
-    boolean isStartThread = false;
-    
-    synchronized (this) {
-      int next = (_head + 1) % _queue.length;
 
-      if (next == _tail) {
-	Packet []extQueue = new Packet[_queue.length + 32];
-	
-	int i = 0;
-	for (int tail = _tail;
-	     tail != _head;
-	     tail = (tail + 1) % _queue.length) {
-	  extQueue[i++] = _queue[tail];
+    _queue.enqueue(packet);
+
+    long lastExitTime = _lastExitTime;
+    _lastExitTime = Alarm.getCurrentTime();
+    
+    while (true) {
+      if (_idleCount.get() > 0) {
+	// notify any idle threads
+	synchronized (_idleLock) {
+	  _idleLock.notify();
 	}
-	
-	_queue = extQueue;
 
-	_tail = 0;
-	_head = i;
-	next = _head + 1;
+	break;
+      }
+      
+      int size = _queue.getSize();
+      int threadCount = _threadCount.get();
+      long now = Alarm.getCurrentTime();
+
+      if (size == 0) {
+	// empty queue
+	return;
+      }
+      else if (threadCount == _threadMax) {
+	// thread max
+	return;
+      }
+      else if (threadCount >= 2 && size / 3 < threadCount) {
+	// too little work to spawn a new thread
+	return;
+      }
+      else if (threadCount > 0 && now <= lastExitTime + 1) {
+	// last spawn too recent
+	return;
       }
 
-      _queue[_head] = packet;
-      _head = next;
-
-      notifyAll();
-
-      if (_threadSemaphore > 0 && ! _isClosed) {
-	_threadSemaphore--;
-	
-	isStartThread = true;
+      if (_threadCount.compareAndSet(threadCount, threadCount + 1)) {
+	_executor.execute(this);
+	return;
       }
-    }
-
-    if (isStartThread) {
-      _executor.execute(this);
+      else if (_threadCount.get() > 0) {
+	// other thread already added
+	return;
+      }
     }
   }
 
+  /**
+   * Dispatches the packet to the stream
+   */
+  protected void dispatch(Packet packet)
+  {
+    packet.dispatch(getAgentStream(), _brokerStream);
+  }
+
   protected Packet dequeue()
-  {    
-    synchronized (this) {
-      if (_head == _tail) {
-	try {
-	  if (! _isClosed)
-	    wait(_queueIdleTimeout);
-	} catch (Exception e) {
-	  log.log(Level.FINEST, e.toString(), e);
-	}
+  {
+    return _queue.dequeue();
+  }
 
-	if (_head == _tail) {
-	  _threadSemaphore++;
+  private void consumeQueue()
+  {
+    while (! _broker.isClosed()) {
+      try {
+	Packet packet = _queue.dequeue();
+
+	if (packet != null) {
+	  // reset last exit with a new packet
+	  _lastExitTime = Alarm.getCurrentTime();
+
+	  if (log.isLoggable(Level.FINEST))
+	    log.finest(this + " dequeue " + packet);
+
+	  dispatch(packet);
+	}
+	else {
+	  // wait for _queueIdleTimeout in case of quick messages
+	  synchronized (_idleLock) {
+	    _idleCount.incrementAndGet();
+
+	    try {
+	      if (_queue.getSize() == 0 && ! _broker.isClosed()) {
+		try {
+		  _idleLock.wait(_queueIdleTimeout);
+		} catch (Exception e) {
+		}
+	      }
+	    } finally {
+	      _idleCount.decrementAndGet();
+	    }
+	  }
+
+	  long now = Alarm.getCurrentTime();
 	  
-	  return null;
+	  if (_queue.getSize() > 0) {
+	    // check for queue values
+	    continue;
+	  }
+	  else if (_lastExitTime + _queueIdleTimeout < now) {
+	    // if thread hasn't exited recently
+	    _lastExitTime = now;
+	    
+	    int threadCount = _threadCount.decrementAndGet();
+
+	    if (_queue.getSize() > 0
+		&& threadCount < _threadMax
+		&& _threadCount.compareAndSet(threadCount, threadCount + 1)) {
+	      // second check needed in case a packet arrived
+	    }
+	    else {
+	      // exit the thread
+	      return;
+	    }
+	  }
 	}
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
       }
-      
-      if (_isClosed)
-	return null;
-
-      Packet packet = _queue[_tail];
-      
-      _tail = (_tail + 1) % _queue.length;
-
-      return packet;
     }
   }
 
   public void run()
   {
-    Packet packet;
-
     Thread thread = Thread.currentThread();
 
     String name = _name;
@@ -357,42 +419,37 @@ public class HempMemoryQueue implements BamStream, Runnable
 
     thread.setContextClassLoader(_loader);
 
-    while ((packet = dequeue()) != null) {
-      boolean isValid = false;
-      
-      try {
-	if (log.isLoggable(Level.FINEST))
-	  log.finest(this + " dequeue " + packet);
-	
-	packet.dispatch(getAgentStream(), _brokerStream);
-	
-	isValid = true;
-      } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
-	isValid = true;
-      } finally {
-	// fix semaphore in case of thread death
-	if (! isValid) {
-	  synchronized (this) {
-	    _threadSemaphore++;
-	  }
-	}
+    if (log.isLoggable(Level.FINE)) {
+      log.fine(this + " spawn {threadCount:" + _threadCount.get()
+	       + ", queueSize:" + _queue.getSize() + "}");
+    }
+
+    boolean isValid = false;
+    
+    try {
+      consumeQueue();
+
+      isValid = true;
+    } finally {
+      // fix semaphore in case of thread death
+      if (! isValid) {
+	_threadCount.decrementAndGet();
       }
     }
   }
 
   public void close()
   {
-    _isClosed = true;
+    synchronized (_idleLock) {
+      _isClosed = true;
 
-    synchronized (this) {
-      notifyAll();
+      _idleLock.notifyAll();
     }
   }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _agentStream + "]";
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 }

@@ -30,6 +30,8 @@
 package com.caucho.server.cluster;
 
 import com.caucho.bam.BamError;
+import com.caucho.bam.BamException;
+import com.caucho.bam.BamStream;
 import com.caucho.hessian.io.*;
 import com.caucho.server.hmux.*;
 import com.caucho.util.*;
@@ -41,7 +43,7 @@ import java.util.logging.*;
 /**
  * Defines a connection to the client.
  */
-public class ClusterStream {
+public class ClusterStream implements BamStream {
   private static final L10N L = new L10N(ClusterStream.class);
   
   private static final Logger log
@@ -172,110 +174,232 @@ public class ClusterStream {
     return (_pool.getLoadBalanceIdleTime() < now - _freeTime + 2000L);
   }
 
-  public boolean message(String to, String from, Serializable query)
-    throws IOException
+  //
+  // BamStream output for HMTP
+  //
+
+  public String getJid()
   {
-    WriteStream out = getWriteStream();
+    return "clusterStream@admin.resin";
+  }
 
-    out.write(HmuxRequest.HMTP_MESSAGE);
-    out.write(0);
-    out.write(1);
-    boolean isAdmin = true;
-    out.write(isAdmin ? 1 : 0);
+  public void message(String to, String from, Serializable query)
+  {
+    try {
+      WriteStream out = getWriteStream();
 
-    Hessian2Output hOut = getHessianOutputStream();
+      out.write(HmuxRequest.HMTP_MESSAGE);
+      out.write(0);
+      out.write(1);
+      boolean isAdmin = true;
+      out.write(isAdmin ? 1 : 0);
 
-    hOut.startPacket();
-    hOut.writeString(to);
-    hOut.writeString(from);
+      Hessian2Output hOut = getHessianOutputStream();
 
-    hOut.writeObject(query);
-    hOut.endPacket();
-    hOut.flushBuffer();
+      hOut.startPacket();
+      hOut.writeString(to);
+      hOut.writeString(from);
 
-    return true;
+      hOut.writeObject(query);
+      hOut.endPacket();
+      hOut.flushBuffer();
+    } catch (IOException e) {
+      throw new BamException(e);
+    }
+  }
+
+  public void messageError(String to,
+			   String from,
+			   Serializable query,
+			   BamError error)
+  {
+    try {
+      WriteStream out = getWriteStream();
+
+      out.write(HmuxRequest.HMTP_MESSAGE_ERROR);
+      out.write(0);
+      out.write(1);
+      boolean isAdmin = true;
+      out.write(isAdmin ? 1 : 0);
+
+      Hessian2Output hOut = getHessianOutputStream();
+
+      hOut.startPacket();
+      hOut.writeString(to);
+      hOut.writeString(from);
+
+      hOut.writeObject(query);
+      hOut.writeObject(error);
+      
+      hOut.endPacket();
+      hOut.flushBuffer();
+    } catch (IOException e) {
+      throw new BamException(e);
+    }
   }
 
   public boolean queryGet(long id, String to, String from,
 			  Serializable query)
-    throws IOException
   {
-    WriteStream out = getWriteStream();
+    try {
+      WriteStream out = getWriteStream();
 
-    out.write(HmuxRequest.HMTP_QUERY_GET);
-    out.write(0);
-    out.write(1);
-    boolean isAdmin = true;
-    out.write(isAdmin ? 1 : 0);
+      out.write(HmuxRequest.HMTP_QUERY_GET);
+      out.write(0);
+      out.write(1);
+      boolean isAdmin = true;
+      out.write(isAdmin ? 1 : 0);
 
-    Hessian2Output hOut = getHessianOutputStream();
+      Hessian2Output hOut = getHessianOutputStream();
 
-    hOut.startPacket();
+      hOut.startPacket();
 
-    hOut.writeString(to);
-    hOut.writeString(from);
-    hOut.writeLong(id);
-    hOut.writeObject(query);
-    hOut.endPacket();
-    hOut.flushBuffer();
+      hOut.writeString(to);
+      hOut.writeString(from);
+      hOut.writeLong(id);
+      hOut.writeObject(query);
+      hOut.endPacket();
+      hOut.flushBuffer();
 
-    return true;
+      return true;
+    } catch (IOException e) {
+      throw new BamException(e);
+    }
   }
 
   public boolean querySet(long id,
 			  String to,
 			  String from,
 			  Serializable query)
-    throws IOException
   {
-    WriteStream out = getWriteStream();
+    try {
+      WriteStream out = getWriteStream();
 
-    out.write(HmuxRequest.HMTP_QUERY_SET);
-    out.write(0);
-    out.write(1);
-    boolean isAdmin = true;
-    out.write(isAdmin ? 1 : 0);
+      out.write(HmuxRequest.HMTP_QUERY_SET);
+      out.write(0);
+      out.write(1);
+      boolean isAdmin = true;
+      out.write(isAdmin ? 1 : 0);
 
-    Hessian2Output hOut = getHessianOutputStream();
+      Hessian2Output hOut = getHessianOutputStream();
 
-    hOut.startPacket();
-    hOut.writeString(to);
-    hOut.writeString(from);
-    hOut.writeLong(id);
+      hOut.startPacket();
+      hOut.writeString(to);
+      hOut.writeString(from);
+      hOut.writeLong(id);
 
-    hOut.writeObject(query);
-    hOut.endPacket();
-    hOut.flushBuffer();
+      hOut.writeObject(query);
+      hOut.endPacket();
+      hOut.flushBuffer();
 
-    return true;
+      return true;
+    } catch (IOException e) {
+      throw new BamException(e);
+    }
   }
 
-  public boolean queryResult(long id,
-			     String to,
-			     String from,
-			     Serializable query)
-    throws IOException
+  public void queryResult(long id,
+			  String to,
+			  String from,
+			  Serializable query)
   {
-    WriteStream out = getWriteStream();
+    try {
+      WriteStream out = getWriteStream();
 
-    out.write(HmuxRequest.HMTP_QUERY_RESULT);
-    out.write(0);
-    out.write(1);
-    boolean isAdmin = true;
-    out.write(isAdmin ? 1 : 0);
+      out.write(HmuxRequest.HMTP_QUERY_RESULT);
+      out.write(0);
+      out.write(1);
+      boolean isAdmin = true;
+      out.write(isAdmin ? 1 : 0);
 
-    Hessian2Output hOut = getHessianOutputStream();
+      Hessian2Output hOut = getHessianOutputStream();
 
-    hOut.startPacket();
-    hOut.writeString(to);
-    hOut.writeString(from);
-    hOut.writeLong(id);
-    hOut.writeObject(query);
-    hOut.endPacket();
-
-    return true;
+      hOut.startPacket();
+      hOut.writeString(to);
+      hOut.writeString(from);
+      hOut.writeLong(id);
+      hOut.writeObject(query);
+      hOut.endPacket();
+    } catch (IOException e) {
+      throw new BamException(e);
+    }
   }
 
+  public void queryError(long id,
+			 String to,
+			 String from,
+			 Serializable query,
+			 BamError error)
+  {
+    try {
+      WriteStream out = getWriteStream();
+
+      out.write(HmuxRequest.HMTP_QUERY_ERROR);
+      out.write(0);
+      out.write(1);
+      boolean isAdmin = true;
+      out.write(isAdmin ? 1 : 0);
+
+      writeLong(id);
+      writeString(to);
+      writeString(from);
+
+      Hessian2Output hOut = getHessianOutputStream();
+    
+      hOut.writeObject(query);
+      hOut.writeObject(error);
+    } catch (IOException e) {
+      throw new BamException(e);
+    }
+  }
+
+  public void presence(String to, String from, Serializable value)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void presenceUnavailable(String to, String from, Serializable value)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void presenceProbe(String to, String from, Serializable value)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void presenceSubscribe(String to, String from, Serializable value)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void presenceSubscribed(String to, String from, Serializable value)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void presenceUnsubscribe(String to, String from, Serializable value)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void presenceUnsubscribed(String to, String from, Serializable value)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void presenceError(String to,
+			    String from,
+			    Serializable value,
+			    BamError error)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  //
+  // HMTP readers
+  //
+  
   public Serializable readQueryResult(long id)
     throws IOException
   {
@@ -337,33 +461,6 @@ public class ClusterStream {
     hInStream.endPacket();
 
     throw error.createException();
-  }
-
-  public boolean queryError(long id,
-			    String to,
-			    String from,
-			    Serializable query,
-			    BamError error)
-    throws IOException
-  {
-    WriteStream out = getWriteStream();
-
-    out.write(HmuxRequest.HMTP_QUERY_ERROR);
-    out.write(0);
-    out.write(1);
-    boolean isAdmin = true;
-    out.write(isAdmin ? 1 : 0);
-
-    writeLong(id);
-    writeString(to);
-    writeString(from);
-
-    Hessian2Output hOut = getHessianOutputStream();
-    
-    hOut.writeObject(query);
-    hOut.writeObject(error);
-
-    return true;
   }
 
   /**

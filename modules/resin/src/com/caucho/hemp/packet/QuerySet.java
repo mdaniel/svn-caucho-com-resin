@@ -44,30 +44,6 @@ public class QuerySet extends Packet {
   private final Serializable _value;
 
   /**
-   * zero-arg constructor for Hessian
-   */
-  private QuerySet()
-  {
-    _id = 0;
-    _value = null;
-  }
-
-  /**
-   * A query to a target
-   *
-   * @param id the query id
-   * @param to the target jid
-   * @param value the query content
-   */
-  public QuerySet(long id, String to, Serializable value)
-  {
-    super(to);
-
-    _id = id;
-    _value = value;
-  }
-
-  /**
    * A query to a target from a given source
    *
    * @param id the query id

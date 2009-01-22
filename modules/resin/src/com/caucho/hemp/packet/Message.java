@@ -39,39 +39,6 @@ public class Message extends Packet {
   private final Serializable _value;
 
   /**
-   * zero-arg constructor for Hessian
-   */
-  protected Message()
-  {
-    _value = null;
-  }
-
-  /**
-   * An empty message to a destination
-   *
-   * @param to the target jid
-   */
-  public Message(String to)
-  {
-    super(to);
-
-    _value = null;
-  }
-
-  /**
-   * An message to a destination
-   *
-   * @param to the target jid
-   * @param value the message content
-   */
-  public Message(String to, Serializable value)
-  {
-    super(to);
-
-    _value = value;
-  }
-
-  /**
    * An message to a destination with a source jid.
    *
    * @param to the target jid

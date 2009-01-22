@@ -35,6 +35,11 @@ package com.caucho.bam;
 public interface BamBroker extends BamConnectionFactory
 {
   /**
+   * Returns true if the broker has been closed
+   */
+  public boolean isClosed();
+  
+  /**
    * Returns the broker's jid, i.e. the virtual host domain name.
    */
   public String getJid();

@@ -30,13 +30,14 @@
 package com.caucho.hemp.packet;
 
 import com.caucho.bam.BamStream;
+import com.caucho.util.Alarm;
 
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 /**
  * Base packet class.  Contains only a 'to' and a 'from' field.
  */
-public class Packet implements java.io.Serializable
+public class Packet
 {
   private static final AtomicReferenceFieldUpdater<Packet,Packet> _casNext
     = AtomicReferenceFieldUpdater.newUpdater(Packet.class,
@@ -48,25 +49,16 @@ public class Packet implements java.io.Serializable
   private final String _to;
   private final String _from;
 
+  private final long _createTime;
+
   /**
    * null constructor for Hessian deserialization
    */
-  protected Packet()
+  public Packet()
   {
+    _createTime = 0;
+    
     _to = null;
-    _from = null;
-  }
-
-  /**
-   * Creates a packet with a destination, but no source, e.g. from a
-   * client.  The server will infer the source from the hmpp session
-   * binding.
-   *
-   * @param to the destination jid
-   */
-  public Packet(String to)
-  {
-    _to = to;
     _from = null;
   }
 
@@ -78,6 +70,8 @@ public class Packet implements java.io.Serializable
    */
   public Packet(String to, String from)
   {
+    _createTime = Alarm.getCurrentTime();
+    
     _to = to;
     _from = from;
   }
@@ -96,6 +90,14 @@ public class Packet implements java.io.Serializable
   public final String getFrom()
   {
     return _from;
+  }
+
+  /**
+   * Creation time
+   */
+  public final long getCreateTime()
+  {
+    return _createTime;
   }
 
   /**
