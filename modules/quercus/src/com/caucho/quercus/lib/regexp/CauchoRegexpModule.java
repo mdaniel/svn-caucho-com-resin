@@ -79,9 +79,6 @@ public class CauchoRegexpModule
   private static final LruCache<StringValue, ArrayList<Replacement>> _replacementCache
     = new LruCache<StringValue, ArrayList<Replacement>>(1024);
 
-  private static final HashMap<String, Value> _constMap
-    = new HashMap<String, Value>();
-
   @Override
   public String []getLoadedExtensions()
   {
@@ -148,17 +145,17 @@ public class CauchoRegexpModule
       rawPatternStr = rawPattern.toStringValue();
 
     StringValue cleanPattern = cleanEregRegexp(env, rawPatternStr, false);
-
+    
     if (isCaseInsensitive)
-      cleanPattern = addDelimiters(env, cleanPattern, "/", "/i");
+      cleanPattern = addDelimiters(env, cleanPattern, "/", "/si");
     else
-      cleanPattern = addDelimiters(env, cleanPattern, "/", "/");
+      cleanPattern = addDelimiters(env, cleanPattern, "/", "/s");
 
     try {
       Regexp regexp = getRegexp(env, cleanPattern);
       RegexpState regexpState = new RegexpState(env, regexp, string);
 
-      if (! regexpState.find())
+      if (regexpState.exec(env, string, 0) < 0)
         return BooleanValue.FALSE;
 
       if (regsV != null && ! (regsV instanceof NullValue)) {
@@ -177,7 +174,7 @@ public class CauchoRegexpModule
           else
             value = group;
 
-          regs.put(new LongValue(i), value);
+          regs.put(LongValue.create(i), value);
         }
 
         int len = regexpState.end() - regexpState.start();
@@ -185,7 +182,7 @@ public class CauchoRegexpModule
         if (len == 0)
           return LongValue.ONE;
         else
-          return new LongValue(len);
+          return LongValue.create(len);
       }
       else {
         return LongValue.ONE;

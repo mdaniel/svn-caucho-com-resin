@@ -5919,12 +5919,14 @@ public class Env {
       
       _firstMicroTime = Alarm.getExactTime() * 1000
                         + (_firstNanoTime % 1000000L) / 1000;
+      
+      return _firstMicroTime;
     }
-
-    long nanoDiff = nanoTime - _firstNanoTime;
-    long microDiff = nanoDiff / 1000;
-    
-    return _firstMicroTime + microDiff;
+    else {
+      long microDiff = (nanoTime - _firstNanoTime) / 1000; 
+      
+      return _firstMicroTime + microDiff;
+    }
   }
 
   /**
