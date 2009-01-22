@@ -27,32 +27,51 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.hemp.packet;
 
 import com.caucho.bam.BamStream;
 import java.io.Serializable;
 
 /**
- * PresenceProbe forwards presence announcements from the server to resources
- * to client has subscriptions from.  i.e. it acts like a listener
- * registration.
+ * Announces presence unavailability
  */
-public class PresenceProbe extends Presence {
+public class PresenceUnavailable extends Presence {
   /**
    * zero-arg constructor for Hessian
    */
-  private PresenceProbe()
+  private PresenceUnavailable()
   {
   }
 
   /**
-   * A directed presence announcement to another client
+   * An undirected presence unavailable announcement to the server.
+   *
+   * @param data a collection of presence data
+   */
+  public PresenceUnavailable(Serializable data)
+  {
+    super(data);
+  }
+
+  /**
+   * A directed presence unavailable announcement to another client
+   *
+   * @param to the target client
+   * @param data a collection of presence data
+   */
+  public PresenceUnavailable(String to, Serializable data)
+  {
+    super(to, data);
+  }
+
+  /**
+   * A directed presence unavailable announcement to another client
    *
    * @param to the target client
    * @param from the source
    * @param data a collection of presence data
    */
-  public PresenceProbe(String to, String from, Serializable data)
+  public PresenceUnavailable(String to, String from, Serializable data)
   {
     super(to, from, data);
   }
@@ -63,6 +82,6 @@ public class PresenceProbe extends Presence {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.presenceProbe(getTo(), getFrom(), getData());
+    handler.presenceUnavailable(getTo(), getFrom(), getData());
   }
 }

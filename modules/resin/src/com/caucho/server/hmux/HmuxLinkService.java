@@ -29,7 +29,10 @@
 
 package com.caucho.server.hmux;
 
+import com.caucho.bam.BamBroker;
+import com.caucho.bam.BamConnection;
 import com.caucho.bam.BamError;
+import com.caucho.bam.BamNotAuthorizedException;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
@@ -41,7 +44,9 @@ import com.caucho.bam.hmtp.GetPublicKeyQuery;
 import com.caucho.bam.hmtp.EncryptedObject;
 
 import com.caucho.server.cluster.Server;
+import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hemp.servlet.ServerLinkManager;
+import com.caucho.util.L10N;
 
 import java.security.Key;
 
@@ -50,8 +55,13 @@ import java.security.Key;
  */
 
 public class HmuxLinkService extends SimpleBamService {
+  private static final L10N L = new L10N(HmuxLinkService.class);
+  
   private ServerLinkManager _linkManager;
   private Server _server;
+
+  private HmuxRequest _request;
+  private BamConnection _adminConn;
   
   /**
    * Creates the LinkService for low-level link messages
@@ -60,6 +70,7 @@ public class HmuxLinkService extends SimpleBamService {
   {
     _server = server;
     _linkManager = _server.getServerLinkManager();
+    _request = request;
     
     // the agent stream serves as its own broker because there's no
     // routing involved
@@ -101,21 +112,43 @@ public class HmuxLinkService extends SimpleBamService {
 						"passwords must be encrypted"));
       return true;
     }
-    
-    String jid = "foo";
-    /*
-      _manager.login(query.getUid(),
-				credentials,
-				query.getResource());
-    */
 
-    if (jid != null)
-      getBrokerStream().queryResult(id, from, to, new AuthResult(jid));
-    else
-      getBrokerStream().queryError(id, from, to, query,
-				   new BamError(BamError.TYPE_AUTH,
-						BamError.FORBIDDEN));
+    String cookie = (String) credentials;
+
+    if (cookie == null && _server.getAdminCookie() == null) {
+    }
+    else if (cookie == null
+	     || ! "admin.resin".equals(query.getUid())
+	     || ! cookie.equals(_server.getAdminCookie())) {
+      throw new BamNotAuthorizedException(L.l("admin.resin login forbidden because the authentication cookies do not match"));
+    }
+    
+    BamBroker broker = _server.getAdminBroker();
+    
+    _adminConn = broker.getConnection("admin.resin", cookie);
+
+    _request.setHmtpAdminConnection(_adminConn);
+
+    getBrokerStream().queryResult(id, from, to,
+				  new AuthResult(_adminConn.getJid()));
 
     return true;
+  }
+
+  public BamStream getBrokerStream(boolean isAdmin)
+  {
+    if (_adminConn == null) {
+      BamBroker broker = _server.getAdminBroker();
+
+      String cookie = _server.getAdminCookie();
+
+      if (cookie != null)
+	throw new BamNotAuthorizedException(L.l("'{0}' anonymous login is not allowed in this server",
+						cookie));
+    
+      _adminConn = broker.getConnection("admin.resin", null);
+    }
+
+    return _adminConn.getBrokerStream();
   }
 }

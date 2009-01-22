@@ -75,7 +75,12 @@ public class TransactionLog
   public void start()
   {
     if (_path == null) {
-      String serverId = Server.getCurrent().getServerId();
+      Server server = Server.getCurrent();
+
+      if (server == null)
+	return;
+
+      String serverId = server.getServerId();
 
       if (serverId == null || serverId.length() == 0)
         serverId = "default";

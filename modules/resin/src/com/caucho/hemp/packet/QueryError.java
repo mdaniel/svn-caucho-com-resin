@@ -27,29 +27,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.hemp.packet;
 
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import java.io.Serializable;
 
 /**
- * RPC call requesting information/data.  The "id" field is used
- * to match the query with the response.  The target must either respond
- * with a QueryResult or QueryError.
+ * RPC error result from a get or set.  The "id" field is used
+ * to match the query with the response.
  */
-public class QueryGet extends Packet {
+public class QueryError extends Packet {
   private final long _id;
   
   private final Serializable _value;
+  private final BamError _error;
 
   /**
    * zero-arg constructor for Hessian
    */
-  private QueryGet()
+  private QueryError()
   {
     _id = 0;
     _value = null;
+    _error = null;
   }
 
   /**
@@ -57,30 +58,21 @@ public class QueryGet extends Packet {
    *
    * @param id the query id
    * @param to the target jid
-   * @param value the query content
-   */
-  public QueryGet(long id, String to, Serializable value)
-  {
-    super(to);
-
-    _id = id;
-    _value = value;
-  }
-
-  /**
-   * A query to a target from a given source
-   *
-   * @param id the query id
-   * @param to the target jid
    * @param from the source jid
-   * @param value the query content
+   * @param value copy the query request
+   * @param error the query error
    */
-  public QueryGet(long id, String to, String from, Serializable value)
+  public QueryError(long id,
+		    String to,
+		    String from,
+		    Serializable value,
+		    BamError error)
   {
     super(to, from);
 
     _id = id;
     _value = value;
+    _error = error;
   }
 
   /**
@@ -100,20 +92,21 @@ public class QueryGet extends Packet {
   }
 
   /**
+   * Returns the query error
+   */
+  public BamError getError()
+  {
+    return _error;
+  }
+
+  /**
    * SPI method to dispatch the packet to the proper handler
    */
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    if (! handler.queryGet(getId(), getTo(), getFrom(), getValue())) {
-      String to = getFrom();
-      if (to == null)
-	to = toSource.getJid();
-      
-      toSource.queryError(getId(), to, getTo(), getValue(),
-			  new BamError(BamError.TYPE_CANCEL,
-				       BamError.ITEM_NOT_FOUND));
-    }
+    handler.queryError(getId(), getTo(), getFrom(),
+			   getValue(), getError());
   }
 
   @Override
@@ -139,6 +132,10 @@ public class QueryGet extends Packet {
 
     if (_value != null) {
       sb.append("," + _value.getClass().getName());
+    }
+
+    if (_error != null) {
+      sb.append(",error=" + _error);
     }
     
     sb.append("]");

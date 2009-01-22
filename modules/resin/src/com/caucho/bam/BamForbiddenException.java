@@ -30,30 +30,27 @@
 package com.caucho.bam;
 
 /**
- * General BAM exception
+ * HMPP wrapper
  */
-public class BamException extends RuntimeException {
-  public BamException()
+public class BamForbiddenException
+  extends BamErrorPacketException
+{
+  public BamForbiddenException()
   {
   }
 
-  public BamException(String msg)
+  public BamForbiddenException(String msg)
   {
     super(msg);
   }
 
-  public BamException(Throwable e)
+  public BamForbiddenException(String msg, BamError error)
   {
-    super(e);
+    super(msg, error);
   }
 
-  public BamException(String msg, Throwable e)
+  public BamForbiddenException(BamError error)
   {
-    super(msg, e);
-  }
-
-  public BamError createBamError()
-  {
-    return null;
+    super(error);
   }
 }

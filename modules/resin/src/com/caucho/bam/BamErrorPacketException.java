@@ -62,4 +62,10 @@ public class BamErrorPacketException extends BamException {
   {
     return _bamError;
   }
+
+  @Override
+  public BamError createBamError()
+  {
+    return _bamError;
+  }
 }

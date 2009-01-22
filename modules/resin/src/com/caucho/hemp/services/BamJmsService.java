@@ -122,9 +122,12 @@ public class BamJmsService
 
   @PreDestroy()
   public void close()
-    throws JMSException
   {
-    _session.close();
-    _conn.close();
+    try {
+      _session.close();
+      _conn.close();
+    } catch (JMSException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
   }
 }

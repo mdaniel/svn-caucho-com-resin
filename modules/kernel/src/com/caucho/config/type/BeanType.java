@@ -619,6 +619,7 @@ public class BeanType extends ConfigType
 	       && createMap.get(name.substring(3)) == null) {
 	Class type = paramTypes[0];
 
+	String className = name.substring(3);
 	String propName = toXmlName(name.substring(3));
 	
 	Attribute attr;
@@ -634,6 +635,8 @@ public class BeanType extends ConfigType
 	  attr = new SetterAttribute(method, type);
 
 	_attributeMap.put(propName, attr);
+	// server/2e28
+	_attributeMap.put(className, attr);
 
 	if (propName.equals("value")) {
 	  _attributeMap.put("#text", attr);

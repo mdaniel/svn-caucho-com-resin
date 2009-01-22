@@ -410,7 +410,10 @@ class BamSkeleton<C>
       throw new BamException(e);
     }
     catch (InvocationTargetException e) {
-      throw new BamException(e.getCause());
+      if (e.getCause() instanceof RuntimeException)
+	throw (RuntimeException) e.getCause();
+      else
+	throw new BamException(e.getCause());
     }
   }
 

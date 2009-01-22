@@ -73,6 +73,10 @@ public class AdminAuthenticator extends XmlAuthenticator
   private String _remoteCookie;
   
 
+  public AdminAuthenticator()
+  {
+  }
+  
   /**
    * Abstract method to return a user based on the name
    *
@@ -83,15 +87,12 @@ public class AdminAuthenticator extends XmlAuthenticator
   @Override
   protected PasswordUser getPasswordUser(String userName)
   {
-    log.info("PASS: " + userName);
     if ("admin.resin".equals(userName)) {
       String hash = getHash();
       PasswordDigest digest = getPasswordDigest();
 
       if (digest != null)
 	hash = digest.getPasswordDigest(userName, hash);
-      
-      log.info("P-HASH: " + hash);
       
       return new PasswordUser(userName, hash);
     }

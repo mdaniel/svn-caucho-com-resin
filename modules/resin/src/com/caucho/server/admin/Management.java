@@ -69,7 +69,7 @@ public class Management
   
   private HostConfig _hostConfig;
 
-  private AdminAuthenticator _auth = new AdminAuthenticator();
+  private AdminAuthenticator _auth;
 
   protected TransactionManager _transactionManager;
 
@@ -114,6 +114,9 @@ public class Management
    */
   public void addUser(XmlAuthenticator.User user)
   {
+    if (_auth == null)
+      _auth = new AdminAuthenticator();
+    
     _auth.addUser(user);
   }
 

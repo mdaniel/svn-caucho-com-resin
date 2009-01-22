@@ -282,6 +282,13 @@ public class SimpleBamClientStream implements BamStream
     _skeleton.dispatchPresenceError(_conn, to, from, value, error);
   }
 
+  /**
+   * Close the stream
+   */
+  public void close()
+  {
+  }
+
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getJid() + "]";

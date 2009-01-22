@@ -508,6 +508,16 @@ public class ConfigContext {
 
       if (attrStrategy == null) {
 	if (childNode instanceof Element || childNode instanceof Attr) {
+	  String localName = qName.getLocalName();
+	  
+	  if (localName.indexOf(':') >= 0) {
+	    // XXX: need ioc QA
+	    throw error(L.l("'{0}' does not have a defined namespace for 'xmlns:{1}'.  Tags with prefixes need defined namespaces.",
+			    qName.getName(),
+			    localName.substring(0, localName.indexOf(':'))),
+			childNode);
+	  }
+	  
 	  throw error(L.l("'{0}' is an unknown property of '{1}'.",
 			  qName.getName(), type.getTypeName()),
 		      childNode);

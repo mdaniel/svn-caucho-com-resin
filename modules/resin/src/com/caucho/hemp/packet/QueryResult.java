@@ -27,66 +27,70 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.hemp.packet;
 
 import com.caucho.bam.BamStream;
 import java.io.Serializable;
 
 /**
- * Unidirectional message with a value.
+ * RPC result from a get or set.  The "id" field is used
+ * to match the query with the response.
  */
-public class Message extends Packet {
+public class QueryResult extends Packet {
+  private final long _id;
+  
   private final Serializable _value;
 
   /**
    * zero-arg constructor for Hessian
    */
-  protected Message()
+  private QueryResult()
   {
+    _id = 0;
     _value = null;
   }
 
   /**
-   * An empty message to a destination
+   * A query to a target
    *
+   * @param id the query id
    * @param to the target jid
+   * @param value the query content
    */
-  public Message(String to)
+  public QueryResult(long id, String to, Serializable value)
   {
     super(to);
 
-    _value = null;
-  }
-
-  /**
-   * An message to a destination
-   *
-   * @param to the target jid
-   * @param value the message content
-   */
-  public Message(String to, Serializable value)
-  {
-    super(to);
-
+    _id = id;
     _value = value;
   }
 
   /**
-   * An message to a destination with a source jid.
+   * A query to a target from a given source
    *
+   * @param id the query id
    * @param to the target jid
    * @param from the source jid
-   * @param value the message content
+   * @param value the query content
    */
-  public Message(String to, String from, Serializable value)
+  public QueryResult(long id, String to, String from, Serializable value)
   {
     super(to, from);
 
+    _id = id;
     _value = value;
   }
 
   /**
-   * Returns the message value
+   * Returns the id
+   */
+  public long getId()
+  {
+    return _id;
+  }
+
+  /**
+   * Returns the query value
    */
   public Serializable getValue()
   {
@@ -99,7 +103,7 @@ public class Message extends Packet {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.message(getTo(), getFrom(), _value);
+    handler.queryResult(getId(), getTo(), getFrom(), getValue());
   }
 
   @Override
@@ -109,9 +113,12 @@ public class Message extends Packet {
 
     sb.append(getClass().getSimpleName());
     sb.append("[");
+
+    sb.append("id=");
+    sb.append(_id);
     
     if (getTo() != null) {
-      sb.append("to=");
+      sb.append(",to=");
       sb.append(getTo());
     }
     
@@ -123,6 +130,7 @@ public class Message extends Packet {
     if (_value != null) {
       sb.append("," + _value.getClass().getName());
     }
+    
     sb.append("]");
     
     return sb.toString();

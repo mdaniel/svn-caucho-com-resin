@@ -27,76 +27,68 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.hemp.packet;
 
 import com.caucho.bam.BamStream;
-import com.caucho.bam.BamError;
 import java.io.Serializable;
 
 /**
- * RPC call changing information/data.  The "id" field is used
- * to match the query with the response.  The target must either respond
- * with a QueryResult or QueryError.
+ * Announces presence information
  */
-public class QuerySet extends Packet {
-  private final long _id;
-  
-  private final Serializable _value;
+public class Presence extends Packet {
+  private final Serializable _data;
 
   /**
    * zero-arg constructor for Hessian
    */
-  private QuerySet()
+  protected Presence()
   {
-    _id = 0;
-    _value = null;
+    _data = null;
   }
 
   /**
-   * A query to a target
+   * An undirected presence announcement to the server.
    *
-   * @param id the query id
-   * @param to the target jid
-   * @param value the query content
+   * @param data a collection of presence data
    */
-  public QuerySet(long id, String to, Serializable value)
+  public Presence(Serializable data)
+  {
+    _data = data;
+  }
+
+  /**
+   * A directed presence announcement to another client
+   *
+   * @param to the target client
+   * @param data a collection of presence data
+   */
+  public Presence(String to, Serializable data)
   {
     super(to);
-
-    _id = id;
-    _value = value;
+    
+    _data = data;
   }
 
   /**
-   * A query to a target from a given source
+   * A directed presence announcement to another client
    *
-   * @param id the query id
-   * @param to the target jid
-   * @param from the source jid
-   * @param value the query content
+   * @param to the target client
+   * @param from the source
+   * @param data a collection of presence data
    */
-  public QuerySet(long id, String to, String from, Serializable value)
+  public Presence(String to, String from, Serializable data)
   {
     super(to, from);
-
-    _id = id;
-    _value = value;
+    
+    _data = data;
   }
 
   /**
-   * Returns the id
+   * Returns the presence data
    */
-  public long getId()
+  public Serializable getData()
   {
-    return _id;
-  }
-
-  /**
-   * Returns the query value
-   */
-  public Serializable getValue()
-  {
-    return _value;
+    return _data;
   }
 
   /**
@@ -105,12 +97,7 @@ public class QuerySet extends Packet {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    if (! handler.querySet(getId(), getTo(), getFrom(), getValue())) {
-      toSource.queryError(getId(), getFrom(), getTo(), getValue(),
-			  new BamError(BamError.TYPE_CANCEL,
-				       BamError.ITEM_NOT_FOUND,
-				       handler + " does not support " + getValue()));
-    }
+    handler.presence(getTo(), getFrom(), _data);
   }
 
   @Override
@@ -120,22 +107,18 @@ public class QuerySet extends Packet {
 
     sb.append(getClass().getSimpleName());
     sb.append("[");
-
-    sb.append("id=");
-    sb.append(_id);
     
-    if (getTo() != null) {
-      sb.append(",to=");
-      sb.append(getTo());
-    }
+    sb.append("to=");
+    sb.append(getTo());
     
     if (getFrom() != null) {
       sb.append(",from=");
       sb.append(getFrom());
     }
 
-    if (_value != null) {
-      sb.append("," + _value.getClass().getName());
+    if (_data != null) {
+      sb.append(",data=");
+      sb.append(_data);
     }
     
     sb.append("]");

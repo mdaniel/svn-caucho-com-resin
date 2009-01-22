@@ -27,33 +27,58 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.hemp.packet;
 
+import com.caucho.bam.BamError;
 import com.caucho.bam.BamStream;
 import java.io.Serializable;
 
 /**
- * PresenceSubscribed returns a successful subscription response to
- * the client.
+ * Unidirectional message with an error
  */
-public class PresenceSubscribed extends Presence {
+public class MessageError extends Packet {
+  private final Serializable _value;
+  private final BamError _error;
+
   /**
    * zero-arg constructor for Hessian
    */
-  private PresenceSubscribed()
+  private MessageError()
   {
+    _value = null;
+    _error = null;
   }
 
   /**
-   * The subscribed response to the original client
+   * An empty message to a destination
    *
-   * @param to the target client
-   * @param from the source
-   * @param data a collection of presence data
+   * @param to the target jid
    */
-  public PresenceSubscribed(String to, String from, Serializable data)
+  public MessageError(String to,
+		      String from,
+		      Serializable value,
+		      BamError error)
   {
-    super(to, from, data);
+    super(to, from);
+
+    _value = value;
+    _error = error;
+  }
+
+  /**
+   * Returns the message value
+   */
+  public Serializable getValue()
+  {
+    return _value;
+  }
+
+  /**
+   * Returns the message error
+   */
+  public BamError getError()
+  {
+    return _error;
   }
 
   /**
@@ -62,6 +87,30 @@ public class PresenceSubscribed extends Presence {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.presenceSubscribed(getTo(), getFrom(), getData());
+    handler.messageError(getTo(), getFrom(), getValue(), _error);
+  }
+
+  @Override
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(getClass().getSimpleName());
+    sb.append("[");
+    
+    if (getTo() != null) {
+      sb.append("to=");
+      sb.append(getTo());
+    }
+    
+    if (getFrom() != null) {
+      sb.append(",from=");
+      sb.append(getFrom());
+    }
+
+    sb.append("," + _error);
+    sb.append("]");
+    
+    return sb.toString();
   }
 }

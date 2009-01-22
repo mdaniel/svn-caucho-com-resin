@@ -27,31 +27,41 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.hemp.packet;
 
 import com.caucho.bam.BamStream;
 import java.io.Serializable;
 
 /**
- * PresenceUnsubscribed returns a successful unsubscription response to
- * the client.
+ * A presence unsubscription request
  */
-public class PresenceUnsubscribed extends Presence {
+public class PresenceUnsubscribe extends Presence {
   /**
    * zero-arg constructor for Hessian
    */
-  private PresenceUnsubscribed()
+  private PresenceUnsubscribe()
   {
   }
 
   /**
-   * The unsubscribed response to the original client
+   * A directed presence unsubscription request to another client
+   *
+   * @param to the target client
+   * @param data a collection of presence data
+   */
+  public PresenceUnsubscribe(String to, Serializable data)
+  {
+    super(to, data);
+  }
+
+  /**
+   * A directed presence unsubscription request to another client
    *
    * @param to the target client
    * @param from the source
    * @param data a collection of presence data
    */
-  public PresenceUnsubscribed(String to, String from, Serializable data)
+  public PresenceUnsubscribe(String to, String from, Serializable data)
   {
     super(to, from, data);
   }
@@ -62,6 +72,6 @@ public class PresenceUnsubscribed extends Presence {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.presenceUnsubscribed(getTo(), getFrom(), getData());
+    handler.presenceUnsubscribe(getTo(), getFrom(), getData());
   }
 }

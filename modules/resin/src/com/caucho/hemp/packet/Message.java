@@ -27,70 +27,66 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.hemp.packet;
 
 import com.caucho.bam.BamStream;
 import java.io.Serializable;
 
 /**
- * RPC result from a get or set.  The "id" field is used
- * to match the query with the response.
+ * Unidirectional message with a value.
  */
-public class QueryResult extends Packet {
-  private final long _id;
-  
+public class Message extends Packet {
   private final Serializable _value;
 
   /**
    * zero-arg constructor for Hessian
    */
-  private QueryResult()
+  protected Message()
   {
-    _id = 0;
     _value = null;
   }
 
   /**
-   * A query to a target
+   * An empty message to a destination
    *
-   * @param id the query id
    * @param to the target jid
-   * @param value the query content
    */
-  public QueryResult(long id, String to, Serializable value)
+  public Message(String to)
   {
     super(to);
 
-    _id = id;
+    _value = null;
+  }
+
+  /**
+   * An message to a destination
+   *
+   * @param to the target jid
+   * @param value the message content
+   */
+  public Message(String to, Serializable value)
+  {
+    super(to);
+
     _value = value;
   }
 
   /**
-   * A query to a target from a given source
+   * An message to a destination with a source jid.
    *
-   * @param id the query id
    * @param to the target jid
    * @param from the source jid
-   * @param value the query content
+   * @param value the message content
    */
-  public QueryResult(long id, String to, String from, Serializable value)
+  public Message(String to, String from, Serializable value)
   {
     super(to, from);
 
-    _id = id;
     _value = value;
   }
 
   /**
-   * Returns the id
-   */
-  public long getId()
-  {
-    return _id;
-  }
-
-  /**
-   * Returns the query value
+   * Returns the message value
    */
   public Serializable getValue()
   {
@@ -103,7 +99,7 @@ public class QueryResult extends Packet {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.queryResult(getId(), getTo(), getFrom(), getValue());
+    handler.message(getTo(), getFrom(), _value);
   }
 
   @Override
@@ -113,12 +109,9 @@ public class QueryResult extends Packet {
 
     sb.append(getClass().getSimpleName());
     sb.append("[");
-
-    sb.append("id=");
-    sb.append(_id);
     
     if (getTo() != null) {
-      sb.append(",to=");
+      sb.append("to=");
       sb.append(getTo());
     }
     
@@ -130,7 +123,6 @@ public class QueryResult extends Packet {
     if (_value != null) {
       sb.append("," + _value.getClass().getName());
     }
-    
     sb.append("]");
     
     return sb.toString();

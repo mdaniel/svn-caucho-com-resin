@@ -379,6 +379,13 @@ class HempConnectionAgentStream implements BamStream
     
     handler.presenceError(to, from, data, error);
   }
+
+  /**
+   * Closes the stream
+   */
+  public void close()
+  {
+  }
   
   @Override
   public String toString()

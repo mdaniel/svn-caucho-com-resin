@@ -185,30 +185,14 @@ public class HmuxRequest extends AbstractHttpRequest
   public static final int CSE_QUERY =           'Q';
   public static final int CSE_PING =            'P';
 
-  public static final int ADMIN_MESSAGE =       '0';
-  public static final int BAM_MESSAGE =         '1';
+  public static final int HMTP_MESSAGE =        '0';
+  public static final int HMTP_MESSAGE_ERROR =  '1';
+  public static final int HMTP_QUERY_GET =      '2';
+  public static final int HMTP_QUERY_SET =      '3';
+  public static final int HMTP_QUERY_RESULT =   '4';
+  public static final int HMTP_QUERY_ERROR =    '5';
+  public static final int HMTP_PRESENCE =       '6';
   
-  public static final int ADMIN_QUERY_GET =     '2';
-  public static final int BAM_QUERY_GET =       '3';
-  
-  public static final int ADMIN_QUERY_SET =     '4';
-  public static final int BAM_QUERY_SET =       '5';
-  
-  public static final int ADMIN_QUERY_RESULT =  '6';
-  public static final int BAM_QUERY_RESULT =    '7';
-  
-  public static final int ADMIN_QUERY_ERROR =   '8';
-  public static final int BAM_QUERY_ERROR =     '9';
-  
-  public static final int ADMIN_PRESENCE =      '-';
-  public static final int BAM_PRESENCE =        '=';
-  
-  public static final int ADMIN_CONNECT =       '_';
-  public static final int BAM_CONNECT =         '+';
-  
-  public static final int ADMIN_MESSAGE_ERROR = '(';
-  public static final int BAM_MESSAGE_ERROR =   ')';
-
   public static final int HMUX_CLUSTER_PROTOCOL = 0x101;
   public static final int HMUX_DISPATCH_PROTOCOL = 0x102;
   public static final int HMUX_JMS_PROTOCOL = 0x103;
@@ -286,6 +270,8 @@ public class HmuxRequest extends AbstractHttpRequest
   private int _srunIndex;
 
   private BamConnection _bamConn;
+  private BamConnection _bamAdminConn;
+  private BamConnection _bamBamConn;
 
   private HttpServletRequestImpl _requestFacade;
   private HttpServletResponseImpl _responseFacade;
@@ -996,120 +982,55 @@ public class HmuxRequest extends AbstractHttpRequest
 	  log.fine(dbgId() + (char) code + " post-data: " + len);
 	return hasURI;
 
-      case ADMIN_MESSAGE:
+      case HMTP_MESSAGE:
 	{
 	  len = (is.read() << 8) + is.read();
+	  boolean isAdmin = is.read() != 0;
 
-	  readHmtpMessage(code, is, _server.getAdminStream());
+	  readHmtpMessage(code, is, isAdmin);
 	  
 	  hasURI = true;
 	  break;
 	}
 
-      case BAM_MESSAGE:
+      case HMTP_QUERY_GET:
 	{
 	  len = (is.read() << 8) + is.read();
+	  boolean isAdmin = is.read() != 0;
 
-	  readHmtpMessage(code, is, _server.getBamStream());
+	  readHmtpQueryGet(code, is, isAdmin);
+	  hasURI = true;
+	  break;
+	}
+
+      case HMTP_QUERY_SET:
+	{
+	  len = (is.read() << 8) + is.read();
+	  boolean isAdmin = is.read() != 0;
+	  
+	  readHmtpQuerySet(code, is, isAdmin);
 	  
 	  hasURI = true;
 	  break;
 	}
 
-      case ADMIN_QUERY_GET:
+      case HMTP_QUERY_RESULT:
 	{
 	  len = (is.read() << 8) + is.read();
+	  boolean isAdmin = is.read() != 0;
 
-	  readHmtpQueryGet(code, is, _server.getAdminStream());
-	  hasURI = true;
-	  break;
-	}
-
-      case BAM_QUERY_GET:
-	{
-	  len = (is.read() << 8) + is.read();
-
-	  readHmtpQueryGet(code, is, _server.getBamStream());
+	  readHmtpQueryResult(code, is, isAdmin);
 	  
 	  hasURI = true;
 	  break;
 	}
 
-      case ADMIN_QUERY_SET:
+      case HMTP_QUERY_ERROR:
 	{
 	  len = (is.read() << 8) + is.read();
-	  
-	  readHmtpQuerySet(code, is, _server.getAdminStream());
-	  
-	  hasURI = true;
-	  break;
-	}
+	  boolean isAdmin = is.read() != 0;
 
-      case BAM_QUERY_SET:
-	{
-	  len = (is.read() << 8) + is.read();
-	  
-	  readHmtpQuerySet(code, is, _server.getBamStream());
-	  
-	  hasURI = true;
-	  break;
-	}
-
-      case ADMIN_QUERY_RESULT:
-	{
-	  len = (is.read() << 8) + is.read();
-
-	  readHmtpQueryResult(code, is, _server.getAdminStream());
-	  
-	  hasURI = true;
-	  break;
-	}
-
-      case BAM_QUERY_RESULT:
-	{
-	  len = (is.read() << 8) + is.read();
-
-	  readHmtpQueryResult(code, is, _server.getBamStream());
-	  
-	  hasURI = true;
-	  break;
-	}
-
-      case ADMIN_QUERY_ERROR:
-	{
-	  len = (is.read() << 8) + is.read();
-
-	  readHmtpQueryError(code, is, _server.getAdminStream());
-	  
-	  hasURI = true;
-	  break;
-	}
-
-      case BAM_QUERY_ERROR:
-	{
-	  len = (is.read() << 8) + is.read();
-
-	  readHmtpQueryError(code, is, _server.getBamStream());
-	  
-	  hasURI = true;
-	  break;
-	}
-
-      case ADMIN_CONNECT:
-	{
-	  len = (is.read() << 8) + is.read();
-
-	  hmtpConnect(code, _server.getAdminBroker());
-	  
-	  hasURI = true;
-	  break;
-	}
-
-      case BAM_CONNECT:
-	{
-	  len = (is.read() << 8) + is.read();
-
-	  hmtpConnect(code, _server.getBamBroker());
+	  readHmtpQueryError(code, is, isAdmin);
 	  
 	  hasURI = true;
 	  break;
@@ -1135,7 +1056,20 @@ public class HmuxRequest extends AbstractHttpRequest
     if (_linkService == null)
       _linkService = new HmuxLinkService(_server, this);
       
-    return _linkService.getAgentStream();
+    return getLinkService().getAgentStream();
+  }
+
+  private HmuxLinkService getLinkService()
+  {
+    if (_linkService == null)
+      _linkService = new HmuxLinkService(_server, this);
+      
+    return _linkService;
+  }
+
+  private BamStream getBrokerStream(boolean isAdmin)
+  {
+    return getLinkService().getBrokerStream(isAdmin);
   }
 
   private void resizeHeaders()
@@ -1163,7 +1097,39 @@ public class HmuxRequest extends AbstractHttpRequest
     return ((_rawRead.read() << 8) + _rawRead.read());
   }
 
-  private void readHmtpMessage(int code, ReadStream is, BamStream brokerStream)
+  @Override
+  public void finishRequest()
+    throws IOException
+  {
+    BamConnection adminConn = _bamAdminConn;
+    _bamAdminConn = null;
+    
+    BamConnection bamConn = _bamBamConn;
+    _bamBamConn = null;
+
+    try {
+      super.finishRequest();
+    } finally {
+      if (adminConn != null)
+	adminConn.close();
+
+      if (bamConn != null)
+	bamConn.close();
+    }
+  }
+
+  //
+  // HMTP
+  //
+
+  void setHmtpAdminConnection(BamConnection conn)
+  {
+    _bamAdminConn = conn;
+  }
+
+  private void readHmtpMessage(int code,
+			       ReadStream is,
+			       boolean isAdmin)
     throws IOException
   {
     try {
@@ -1182,7 +1148,9 @@ public class HmuxRequest extends AbstractHttpRequest
       if (to == null)
 	getLinkStream().message(to, from, query);
       else
-	brokerStream.message(to, from, query);
+	getBrokerStream(isAdmin).message(to, from, query);
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -1190,7 +1158,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
   private void readHmtpQueryGet(int code,
 				ReadStream is,
-				BamStream brokerStream)
+				boolean isAdmin)
     throws IOException
   {
     Hessian2Input hIn = startHmtpPacket();
@@ -1211,12 +1179,12 @@ public class HmuxRequest extends AbstractHttpRequest
     if (to == null)
       getLinkStream().queryGet(id, to, from, query);
     else
-      brokerStream.queryGet(id, to, from, query);
+      getBrokerStream(isAdmin).queryGet(id, to, from, query);
   }
 
   private void readHmtpQuerySet(int code,
 				ReadStream is,
-				BamStream brokerStream)
+				boolean isAdmin)
     throws IOException
   {
     Hessian2Input hIn = startHmtpPacket();
@@ -1236,12 +1204,12 @@ public class HmuxRequest extends AbstractHttpRequest
     if (to == null)
       getLinkStream().querySet(id, to, from, query);
     else
-      brokerStream.querySet(id, to, from, query);
+      getBrokerStream(isAdmin).querySet(id, to, from, query);
   }
 
   private void readHmtpQueryResult(int code,
 				   ReadStream is,
-				   BamStream brokerStream)
+				   boolean isAdmin)
     throws IOException
   {
     Hessian2Input hIn = startHmtpPacket();
@@ -1262,12 +1230,12 @@ public class HmuxRequest extends AbstractHttpRequest
     if (to == null)
       getLinkStream().queryResult(id, to, from, value);
     else
-      brokerStream.queryResult(id, to, from, value);
+      getBrokerStream(isAdmin).queryResult(id, to, from, value);
   }
 
   private void readHmtpQueryError(int code,
 				  ReadStream is,
-				  BamStream brokerStream)
+				  boolean isAdmin)
     throws IOException
   {
     Hessian2Input hIn = startHmtpPacket();
@@ -1289,17 +1257,18 @@ public class HmuxRequest extends AbstractHttpRequest
     if (to == null)
       getLinkStream().queryResult(id, to, from, value);
     else
-      brokerStream.queryResult(id, to, from, value);
+      getBrokerStream(isAdmin).queryResult(id, to, from, value);
   }
 
-  void writeHmtpMessage(String to, String from,
+  void writeHmtpMessage(String to,
+			String from,
 			Serializable value)
     throws IOException
   {
     WriteStream out = _rawWrite;
 
     synchronized (out) {
-      out.write(HmuxRequest.ADMIN_MESSAGE);
+      out.write(HmuxRequest.HMTP_MESSAGE);
       out.write(0);
       out.write(0);
 
@@ -1316,7 +1285,7 @@ public class HmuxRequest extends AbstractHttpRequest
       hOut.flushBuffer();
 
       if (log.isLoggable(Level.FINER)) {
-	log.finer(dbgId() + (char) BAM_MESSAGE + "-w:"
+	log.finer(dbgId() + (char) HMTP_MESSAGE + "-w:"
 		  + " HMTP message " + value
 		  + " {to:" + to + ", from:" + from + "}");
       }
@@ -1331,7 +1300,7 @@ public class HmuxRequest extends AbstractHttpRequest
     WriteStream out = _rawWrite;
 
     synchronized (out) {
-      out.write(HmuxRequest.ADMIN_MESSAGE_ERROR);
+      out.write(HmuxRequest.HMTP_MESSAGE_ERROR);
       out.write(0);
       out.write(0);
 
@@ -1349,7 +1318,7 @@ public class HmuxRequest extends AbstractHttpRequest
       hOut.flushBuffer();
 
       if (log.isLoggable(Level.FINER)) {
-	log.finer(dbgId() + (char) BAM_MESSAGE_ERROR + "-w:"
+	log.finer(dbgId() + (char) HMTP_MESSAGE_ERROR + "-w:"
 		  + " HMTP messageError " + value
 		  + " {to:" + to + ", from:" + from + "}");
       }
@@ -1364,7 +1333,7 @@ public class HmuxRequest extends AbstractHttpRequest
     WriteStream out = _rawWrite;
 
     synchronized (out) {
-      out.write(HmuxRequest.ADMIN_QUERY_GET);
+      out.write(HmuxRequest.HMTP_QUERY_GET);
       out.write(0);
       out.write(0);
 
@@ -1382,7 +1351,7 @@ public class HmuxRequest extends AbstractHttpRequest
       hOut.flushBuffer();
 
       if (log.isLoggable(Level.FINER)) {
-	log.finer(dbgId() + (char) BAM_QUERY_GET + "-w:"
+	log.finer(dbgId() + (char) HMTP_QUERY_GET + "-w:"
 		  + " HMTP queryGet " + value
 		  + " {to:" + to + ", from:" + from + "}");
       }
@@ -1397,7 +1366,7 @@ public class HmuxRequest extends AbstractHttpRequest
     WriteStream out = _rawWrite;
 
     synchronized (out) {
-      out.write(HmuxRequest.ADMIN_QUERY_SET);
+      out.write(HmuxRequest.HMTP_QUERY_SET);
       out.write(0);
       out.write(0);
 
@@ -1415,7 +1384,7 @@ public class HmuxRequest extends AbstractHttpRequest
       hOut.flushBuffer();
 
       if (log.isLoggable(Level.FINER)) {
-	log.finer(dbgId() + (char) BAM_QUERY_SET + "-w:"
+	log.finer(dbgId() + (char) HMTP_QUERY_SET + "-w:"
 		  + " HMTP querySet " + value
 		  + " {to:" + to + ", from:" + from + "}");
       }
@@ -1430,7 +1399,7 @@ public class HmuxRequest extends AbstractHttpRequest
     WriteStream out = _rawWrite;
 
     synchronized (out) {
-      out.write(HmuxRequest.ADMIN_QUERY_RESULT);
+      out.write(HmuxRequest.HMTP_QUERY_RESULT);
       out.write(0);
       out.write(0);
 
@@ -1448,7 +1417,7 @@ public class HmuxRequest extends AbstractHttpRequest
       hOut.flushBuffer();
 
       if (log.isLoggable(Level.FINER)) {
-	log.finer(dbgId() + (char) BAM_QUERY_RESULT + "-w:"
+	log.finer(dbgId() + (char) HMTP_QUERY_RESULT + "-w:"
 		  + " HMTP queryResult " + value
 		  + " {to:" + to + ", from:" + from + "}");
       }
@@ -1462,7 +1431,7 @@ public class HmuxRequest extends AbstractHttpRequest
     WriteStream out = _rawWrite;
 
     synchronized (out) {
-      out.write(HmuxRequest.ADMIN_QUERY_ERROR);
+      out.write(HmuxRequest.HMTP_QUERY_ERROR);
       out.write(0);
       out.write(0);
 
@@ -1481,7 +1450,7 @@ public class HmuxRequest extends AbstractHttpRequest
       hOut.flushBuffer();
 
       if (log.isLoggable(Level.FINER)) {
-	log.finer(dbgId() + (char) BAM_QUERY_ERROR + "-w:"
+	log.finer(dbgId() + (char) HMTP_QUERY_ERROR + "-w:"
 		  + " HMTP queryError " + error + " " + value
 		  + " {to:" + to + ", from:" + from + "}");
       }

@@ -55,6 +55,8 @@ public class ClusterStream {
   private Hessian2StreamingInput _in;
   private Hessian2Output _out;
 
+  private boolean _isAuthenticated;
+
   private long _freeTime;
 
   private String _debugId;
@@ -95,6 +97,22 @@ public class ClusterStream {
     _freeTime = 0;
     
     return _os;
+  }
+
+  /**
+   * Returns true if the stream has been authenticated
+   */
+  public boolean isAuthenticated()
+  {
+    return _isAuthenticated;
+  }
+
+  /**
+   * Returns true if the stream has been authenticated
+   */
+  public void setAuthenticated(boolean isAuthenticated)
+  {
+    _isAuthenticated = isAuthenticated;
   }
 
   /**
@@ -159,9 +177,11 @@ public class ClusterStream {
   {
     WriteStream out = getWriteStream();
 
-    out.write(HmuxRequest.ADMIN_MESSAGE);
+    out.write(HmuxRequest.HMTP_MESSAGE);
     out.write(0);
-    out.write(0);
+    out.write(1);
+    boolean isAdmin = true;
+    out.write(isAdmin ? 1 : 0);
 
     Hessian2Output hOut = getHessianOutputStream();
 
@@ -182,9 +202,11 @@ public class ClusterStream {
   {
     WriteStream out = getWriteStream();
 
-    out.write(HmuxRequest.ADMIN_QUERY_GET);
+    out.write(HmuxRequest.HMTP_QUERY_GET);
     out.write(0);
-    out.write(8);
+    out.write(1);
+    boolean isAdmin = true;
+    out.write(isAdmin ? 1 : 0);
 
     Hessian2Output hOut = getHessianOutputStream();
 
@@ -208,9 +230,11 @@ public class ClusterStream {
   {
     WriteStream out = getWriteStream();
 
-    out.write(HmuxRequest.ADMIN_QUERY_SET);
+    out.write(HmuxRequest.HMTP_QUERY_SET);
     out.write(0);
-    out.write(8);
+    out.write(1);
+    boolean isAdmin = true;
+    out.write(isAdmin ? 1 : 0);
 
     Hessian2Output hOut = getHessianOutputStream();
 
@@ -234,9 +258,11 @@ public class ClusterStream {
   {
     WriteStream out = getWriteStream();
 
-    out.write(HmuxRequest.ADMIN_QUERY_RESULT);
+    out.write(HmuxRequest.HMTP_QUERY_RESULT);
     out.write(0);
-    out.write(8);
+    out.write(1);
+    boolean isAdmin = true;
+    out.write(isAdmin ? 1 : 0);
 
     Hessian2Output hOut = getHessianOutputStream();
 
@@ -257,33 +283,60 @@ public class ClusterStream {
 
     int code = in.read();
 
-    if (code != HmuxRequest.ADMIN_QUERY_RESULT)
+    if (code < 0)
+      throw new EOFException(L.l("unexpected end of file"));
+    else if (code == HmuxRequest.HMTP_QUERY_RESULT)
+      return parseQueryResult(id, in);
+    else if (code == HmuxRequest.HMTP_QUERY_ERROR)
+      return parseQueryError(id, in);
+    else
       throw new IOException(L.l("expected query result at '" +
 				(char) code + "' " + code));
+  }
 
-    int len = (in.read() << 8) + in.read();
+  public Serializable parseQueryResult(long id, ReadStream is)
+    throws IOException
+  {
+    int len = (is.read() << 8) + is.read();
+    boolean isAdmin = is.read() != 0;
 
-    long resultId = readLongValue();
+    Hessian2StreamingInput hInStream = getHessianInputStream();
 
-    code = in.read();
-    if (code != HmuxRequest.HMUX_STRING)
-      throw new IOException(L.l("expected string at '"
-				+ (char) code + "' " + code));
-    
-    String to = readStringValue();
-    
-    code = in.read();
-    if (code != HmuxRequest.HMUX_STRING)
-      throw new IOException(L.l("expected string at '"
-				+ (char) code + "' " + code));
-    
-    String from = readStringValue();
+    Hessian2Input hIn = hInStream.startPacket();
 
-    Hessian2StreamingInput hIn = getHessianInputStream();
+    String to = hIn.readString();
+    String from = hIn.readString();
+
+    long resultId = hIn.readLong();
 
     Serializable result = (Serializable) hIn.readObject();
 
+    hInStream.endPacket();
+
     return result;
+  }
+
+  public Serializable parseQueryError(long id, ReadStream is)
+    throws IOException
+  {
+    int len = (is.read() << 8) + is.read();
+    boolean isAdmin = is.read() != 0;
+
+    Hessian2StreamingInput hInStream = getHessianInputStream();
+
+    Hessian2Input hIn = hInStream.startPacket();
+
+    String to = hIn.readString();
+    String from = hIn.readString();
+
+    long resultId = hIn.readLong();
+
+    Serializable result = (Serializable) hIn.readObject();
+    BamError error = (BamError) hIn.readObject();
+
+    hInStream.endPacket();
+
+    throw error.createException();
   }
 
   public boolean queryError(long id,
@@ -295,9 +348,11 @@ public class ClusterStream {
   {
     WriteStream out = getWriteStream();
 
-    out.write(HmuxRequest.ADMIN_QUERY_ERROR);
+    out.write(HmuxRequest.HMTP_QUERY_ERROR);
     out.write(0);
-    out.write(8);
+    out.write(1);
+    boolean isAdmin = true;
+    out.write(isAdmin ? 1 : 0);
 
     writeLong(id);
     writeString(to);

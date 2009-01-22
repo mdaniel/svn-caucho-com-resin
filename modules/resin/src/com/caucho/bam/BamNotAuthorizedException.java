@@ -30,30 +30,40 @@
 package com.caucho.bam;
 
 /**
- * General BAM exception
+ * HMPP wrapper
  */
-public class BamException extends RuntimeException {
-  public BamException()
+public class BamNotAuthorizedException
+  extends BamErrorPacketException
+{
+  public BamNotAuthorizedException()
   {
   }
 
-  public BamException(String msg)
+  public BamNotAuthorizedException(String msg)
   {
     super(msg);
   }
 
-  public BamException(Throwable e)
+  public BamNotAuthorizedException(String msg, BamError error)
   {
-    super(e);
+    super(msg, error);
   }
 
-  public BamException(String msg, Throwable e)
+  public BamNotAuthorizedException(BamError error)
   {
-    super(msg, e);
+    super(error);
   }
 
+  @Override
   public BamError createBamError()
   {
-    return null;
+    BamError error = getBamError();
+
+    if (error != null)
+      return error;
+
+    return new BamError(BamError.TYPE_AUTH,
+			BamError.NOT_AUTHORIZED,
+			getMessage());
   }
 }

@@ -230,8 +230,6 @@ class WatchdogClient
       throw new RuntimeException(L.l("{0}: watchdog start failed because of '{1}'",
 				     this, status.getMessage()));
 
-    } catch (RuntimeException e) {
-      System.out.println(e.toString());
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
@@ -338,6 +336,11 @@ class WatchdogClient
   public void launchManager(String []argv)
     throws IOException
   {
+    System.out.println(L.l("Resin/{0} launching watchdog at {1}:{2}",
+			   Version.VERSION,
+			   getWatchdogAddress(),
+			   getWatchdogPort()));
+
     log.fine(this + " starting ResinWatchdogManager");
     
     Path resinHome = getResinHome();

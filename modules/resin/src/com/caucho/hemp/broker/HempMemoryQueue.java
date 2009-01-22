@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.hmtp.*;
+import com.caucho.hemp.packet.*;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import com.caucho.server.resin.*;
@@ -50,6 +50,11 @@ public class HempMemoryQueue implements BamStream, Runnable
     = Logger.getLogger(HempMemoryQueue.class.getName());
   private static final L10N L = new L10N(HempMemoryQueue.class);
 
+  private static long _gid;
+
+  // how long the thread should wait for a new request before exiting
+  private long _queueIdleTimeout = 1000L;
+  
   private final Executor _executor = ScheduledThreadPool.getLocal();
   private final ClassLoader _loader
     = Thread.currentThread().getContextClassLoader();
@@ -62,7 +67,19 @@ public class HempMemoryQueue implements BamStream, Runnable
   private int _head;
   private int _tail;
 
-  public HempMemoryQueue(BamStream agentStream, BamStream brokerStream)
+  private String _name;
+
+  private volatile boolean _isClosed;
+
+  public HempMemoryQueue(BamStream agentStream,
+			 BamStream brokerStream)
+  {
+    this(null, agentStream, brokerStream);
+  }
+
+  public HempMemoryQueue(String name,
+			 BamStream agentStream,
+			 BamStream brokerStream)
   {
     if (agentStream == null)
       throw new NullPointerException();
@@ -73,6 +90,11 @@ public class HempMemoryQueue implements BamStream, Runnable
     _agentStream = agentStream;
     _brokerStream = brokerStream;
     _threadSemaphore = 1;
+
+    if (name == null)
+      name = _agentStream.getJid();
+
+    _name = name;
   }
   
   /**
@@ -81,6 +103,14 @@ public class HempMemoryQueue implements BamStream, Runnable
   public String getJid()
   {
     return _agentStream.getJid();
+  }
+
+  /**
+   * Returns true if a message is available.
+   */
+  public boolean isPacketAvailable()
+  {
+    return _head != _tail;
   }
 
   /**
@@ -272,12 +302,15 @@ public class HempMemoryQueue implements BamStream, Runnable
       _queue[_head] = packet;
       _head = next;
 
-      if (_threadSemaphore > 0) {
+      notifyAll();
+
+      if (_threadSemaphore > 0 && ! _isClosed) {
 	_threadSemaphore--;
+	
 	isStartThread = true;
       }
     }
-    
+
     if (isStartThread) {
       _executor.execute(this);
     }
@@ -287,10 +320,22 @@ public class HempMemoryQueue implements BamStream, Runnable
   {    
     synchronized (this) {
       if (_head == _tail) {
-	_threadSemaphore++;
-	
-	return null;
+	try {
+	  if (! _isClosed)
+	    wait(_queueIdleTimeout);
+	} catch (Exception e) {
+	  log.log(Level.FINEST, e.toString(), e);
+	}
+
+	if (_head == _tail) {
+	  _threadSemaphore++;
+	  
+	  return null;
+	}
       }
+      
+      if (_isClosed)
+	return null;
 
       Packet packet = _queue[_tail];
       
@@ -304,7 +349,13 @@ public class HempMemoryQueue implements BamStream, Runnable
   {
     Packet packet;
 
-    Thread.currentThread().setContextClassLoader(_loader);
+    Thread thread = Thread.currentThread();
+
+    String name = _name;
+    
+    thread.setName(name + "-" + _gid++);
+
+    thread.setContextClassLoader(_loader);
 
     while ((packet = dequeue()) != null) {
       boolean isValid = false;
@@ -327,6 +378,15 @@ public class HempMemoryQueue implements BamStream, Runnable
 	  }
 	}
       }
+    }
+  }
+
+  public void close()
+  {
+    _isClosed = true;
+
+    synchronized (this) {
+      notifyAll();
     }
   }
   

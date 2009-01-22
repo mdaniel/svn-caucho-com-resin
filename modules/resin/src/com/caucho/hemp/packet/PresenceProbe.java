@@ -27,58 +27,34 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.hemp.packet;
 
-import com.caucho.bam.BamError;
 import com.caucho.bam.BamStream;
 import java.io.Serializable;
 
 /**
- * Unidirectional message with an error
+ * PresenceProbe forwards presence announcements from the server to resources
+ * to client has subscriptions from.  i.e. it acts like a listener
+ * registration.
  */
-public class MessageError extends Packet {
-  private final Serializable _value;
-  private final BamError _error;
-
+public class PresenceProbe extends Presence {
   /**
    * zero-arg constructor for Hessian
    */
-  private MessageError()
+  private PresenceProbe()
   {
-    _value = null;
-    _error = null;
   }
 
   /**
-   * An empty message to a destination
+   * A directed presence announcement to another client
    *
-   * @param to the target jid
+   * @param to the target client
+   * @param from the source
+   * @param data a collection of presence data
    */
-  public MessageError(String to,
-		      String from,
-		      Serializable value,
-		      BamError error)
+  public PresenceProbe(String to, String from, Serializable data)
   {
-    super(to, from);
-
-    _value = value;
-    _error = error;
-  }
-
-  /**
-   * Returns the message value
-   */
-  public Serializable getValue()
-  {
-    return _value;
-  }
-
-  /**
-   * Returns the message error
-   */
-  public BamError getError()
-  {
-    return _error;
+    super(to, from, data);
   }
 
   /**
@@ -87,30 +63,6 @@ public class MessageError extends Packet {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.messageError(getTo(), getFrom(), getValue(), _error);
-  }
-
-  @Override
-  public String toString()
-  {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append(getClass().getSimpleName());
-    sb.append("[");
-    
-    if (getTo() != null) {
-      sb.append("to=");
-      sb.append(getTo());
-    }
-    
-    if (getFrom() != null) {
-      sb.append(",from=");
-      sb.append(getFrom());
-    }
-
-    sb.append("," + _error);
-    sb.append("]");
-    
-    return sb.toString();
+    handler.presenceProbe(getTo(), getFrom(), getData());
   }
 }

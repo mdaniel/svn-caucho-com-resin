@@ -202,4 +202,9 @@ public interface BamStream
 			    String from,
 			    Serializable data,
 			    BamError error);
+
+  /**
+   * Closes the stream
+   */
+  public void close();
 }

@@ -36,6 +36,7 @@ import com.caucho.bam.BamError;
 import com.caucho.bam.BamService;
 import com.caucho.bam.AbstractBamService;
 import com.caucho.bam.BamStream;
+import com.caucho.bam.BamNotAuthorizedException;
 import com.caucho.hemp.*;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
@@ -90,6 +91,7 @@ public class HempBroker implements BamBroker, BamStream
   private HempDomainService _domainService;
 
   private boolean _isAdmin;
+  private boolean _isAllowNullAdminAuthenticator;
   private Authenticator _auth;
 
   private ArrayList<String> _aliasList = new ArrayList<String>();
@@ -148,6 +150,16 @@ public class HempBroker implements BamBroker, BamStream
   public BamService getDomainService()
   {
     return _domainService;
+  }
+
+  public void setAdmin(boolean isAdmin)
+  {
+    _isAdmin = isAdmin;
+  }
+
+  public void setAllowNullAdminAuthenticator(boolean isAllowNullAdmin)
+  {
+    _isAllowNullAdminAuthenticator = isAllowNullAdmin;
   }
 
   //
@@ -229,13 +241,22 @@ public class HempBroker implements BamBroker, BamStream
 			 String resource,
 			 String ipAddress)
   {
+    if (true)
+      return generateJid(uid, resource);
+    
     Authenticator auth = getAuthenticator();
 
-    if (auth == null && "127.0.0.1".equals(ipAddress)) {
+    if (auth == null
+	// && _isAllowNullAdminAuthenticator
+	// && "127.0.0.1".equals(ipAddress)
+	) {
+      // server/2e2a
+      // needed for watchdog (XXX: need watchdog testcase)
+      
       return generateJid(uid, resource);
     }
     else if (auth == null)
-      throw new RuntimeException(L.l("remote access requires a configured authenticator, like <sec:AdminAuthenticator> for IP='{0}'",
+      throw new BamNotAuthorizedException(L.l("remote access requires a configured authenticator, like <sec:AdminAuthenticator> for IP='{0}'",
 				     ipAddress));
     else {
       authenticate(uid, password, ipAddress);
@@ -257,8 +278,8 @@ public class HempBroker implements BamBroker, BamStream
 				       null);
 
     if (user == null) {
-      throw new RuntimeException(L.l("authentication failed '{0}' for IP={1}",
-				     uid, ipAddress));
+      throw new BamNotAuthorizedException(L.l("authentication failed '{0}' for IP={1}",
+					      uid, ipAddress));
     }
   }
 

@@ -53,6 +53,7 @@ import com.caucho.make.AlwaysModified;
 import com.caucho.management.server.CacheItem;
 import com.caucho.management.server.ServerMXBean;
 import com.caucho.security.PermissionManager;
+import com.caucho.security.AdminAuthenticator;
 import com.caucho.server.admin.Management;
 import com.caucho.server.cache.AbstractCache;
 import com.caucho.server.cache.TempFileManager;
@@ -86,6 +87,7 @@ import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
 import com.caucho.vfs.*;
+import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
@@ -129,6 +131,10 @@ public class Server extends ProtocolDispatchServer
 
   private String _serverHeader;
 
+  private AdminAuthenticator _adminAuth;
+
+  private WebBeansContainer _webBeans;
+  
   private HempBrokerManager _brokerManager;
   private DomainManager _domainManager;
   private HempBroker _broker;
@@ -261,6 +267,8 @@ public class Server extends ProtocolDispatchServer
 	_admin = new ServerAdmin(this);
 
 	_alarm = new Alarm(this);
+
+	_webBeans = WebBeansContainer.create();
 
 	_brokerManager = createBrokerManager();
 	_domainManager = createDomainManager();
@@ -526,7 +534,27 @@ public class Server extends ProtocolDispatchServer
 
   public String getAdminCookie()
   {
-    return _resin.getManagement().getRemoteCookie();
+    AdminAuthenticator auth = getAdminAuthenticator();
+
+    if (auth != null)
+      return auth.getHash();
+    else
+      return null;
+  }
+
+  public AdminAuthenticator getAdminAuthenticator()
+  {
+    if (_adminAuth == null) {
+      try {
+	_adminAuth = (AdminAuthenticator) _webBeans.getInstanceByType(AdminAuthenticator.class);
+      } catch (Exception e) {
+	log.log(Level.FINER, e.toString(), e);
+
+	_adminAuth = new AdminAuthenticator();
+      }
+    }
+    
+    return _adminAuth;
   }
 
   //
@@ -1695,6 +1723,8 @@ public class Server extends ProtocolDispatchServer
       }
 
       _lifecycle.toStarting();
+
+      getAdminAuthenticator();
 
       if (_resin != null && _resin.getManagement() != null)
 	_resin.getManagement().start(this);

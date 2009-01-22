@@ -27,15 +27,24 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.hemp.packet;
 
 import com.caucho.bam.BamStream;
+
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 /**
  * Base packet class.  Contains only a 'to' and a 'from' field.
  */
 public class Packet implements java.io.Serializable
 {
+  private static final AtomicReferenceFieldUpdater<Packet,Packet> _casNext
+    = AtomicReferenceFieldUpdater.newUpdater(Packet.class,
+					     Packet.class,
+					     "_next");
+  
+  private volatile Packet _next;
+  
   private final String _to;
   private final String _from;
 
@@ -76,7 +85,7 @@ public class Packet implements java.io.Serializable
   /**
    * Returns the 'to' field
    */
-  public String getTo()
+  public final String getTo()
   {
     return _to;
   }
@@ -84,9 +93,25 @@ public class Packet implements java.io.Serializable
   /**
    * Returns the 'from' field
    */
-  public String getFrom()
+  public final String getFrom()
   {
     return _from;
+  }
+
+  /**
+   * Returns the 'next' field
+   */
+  public final Packet getNext()
+  {
+    return _next;
+  }
+
+  /**
+   * Compare and set next
+   */
+  public final boolean compareAndSetNext(Packet expect, Packet update)
+  {
+    return _casNext.compareAndSet(this, expect, update);
   }
 
   /**

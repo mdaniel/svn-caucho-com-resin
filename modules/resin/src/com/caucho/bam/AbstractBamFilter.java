@@ -197,4 +197,11 @@ public class AbstractBamFilter implements BamStream
   {
     _next.presenceError(to, from, data, error);
   }
+
+  /**
+   * Closes the filter, but not the child by default.
+   */
+  public void close()
+  {
+  }
 }

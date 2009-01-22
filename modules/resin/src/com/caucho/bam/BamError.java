@@ -127,7 +127,7 @@ public class BamError implements Serializable {
     = "feature-not-implemented";
   
   /**
-   * The requstor does not have proper authorization.  ("auth")
+   * The requestor does not have proper authorization.  ("auth")
    */
   public static final String FORBIDDEN = "forbidden";
   
@@ -349,11 +349,17 @@ public class BamError implements Serializable {
       return new BamErrorPacketException(this);
 
     switch (group) {
+    case FEATURE_NOT_IMPLEMENTED:
+      return new BamFeatureNotImplementedException(this);
+      
+    case NOT_AUTHORIZED:
+      return new BamNotAuthorizedException(this);
+      
     case REMOTE_CONNECTION_FAILED:
       return new BamRemoteConnectionFailedException(this);
       
-    case FEATURE_NOT_IMPLEMENTED:
-      return new BamFeatureNotImplementedException(this);
+    case SERVICE_UNAVAILABLE:
+      return new BamServiceUnavailableException(this);
 
     default:
       return new BamErrorPacketException(this);
@@ -412,13 +418,18 @@ public class BamError implements Serializable {
       UNSUPPORTED_VERSION,
       XML_NOT_WELL_FORMED,
 
-      FEATURE_NOT_IMPLEMENTED
+      FEATURE_NOT_IMPLEMENTED,
+      SERVICE_UNAVAILABLE,
   }
 
   static {
-    _errorMap.put(REMOTE_CONNECTION_FAILED,
-		  ErrorGroup.REMOTE_CONNECTION_FAILED);
     _errorMap.put(FEATURE_NOT_IMPLEMENTED,
 		  ErrorGroup.FEATURE_NOT_IMPLEMENTED);
+    _errorMap.put(NOT_AUTHORIZED,
+		  ErrorGroup.NOT_AUTHORIZED);
+    _errorMap.put(REMOTE_CONNECTION_FAILED,
+		  ErrorGroup.REMOTE_CONNECTION_FAILED);
+    _errorMap.put(SERVICE_UNAVAILABLE,
+		  ErrorGroup.SERVICE_UNAVAILABLE);
   }
 }

@@ -33,7 +33,7 @@ import com.caucho.bam.BamError;
 import com.caucho.bam.BamService;
 import com.caucho.bam.BamStream;
 import com.caucho.config.ConfigException;
-import com.caucho.hmtp.*;
+import com.caucho.hemp.packet.*;
 import com.caucho.server.resin.*;
 import com.caucho.server.util.*;
 import com.caucho.util.*;

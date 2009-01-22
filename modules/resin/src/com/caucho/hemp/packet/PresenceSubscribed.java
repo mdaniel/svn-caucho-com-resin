@@ -27,51 +27,31 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.hemp.packet;
 
 import com.caucho.bam.BamStream;
 import java.io.Serializable;
 
 /**
- * Announces presence unavailability
+ * PresenceSubscribed returns a successful subscription response to
+ * the client.
  */
-public class PresenceUnavailable extends Presence {
+public class PresenceSubscribed extends Presence {
   /**
    * zero-arg constructor for Hessian
    */
-  private PresenceUnavailable()
+  private PresenceSubscribed()
   {
   }
 
   /**
-   * An undirected presence unavailable announcement to the server.
-   *
-   * @param data a collection of presence data
-   */
-  public PresenceUnavailable(Serializable data)
-  {
-    super(data);
-  }
-
-  /**
-   * A directed presence unavailable announcement to another client
-   *
-   * @param to the target client
-   * @param data a collection of presence data
-   */
-  public PresenceUnavailable(String to, Serializable data)
-  {
-    super(to, data);
-  }
-
-  /**
-   * A directed presence unavailable announcement to another client
+   * The subscribed response to the original client
    *
    * @param to the target client
    * @param from the source
    * @param data a collection of presence data
    */
-  public PresenceUnavailable(String to, String from, Serializable data)
+  public PresenceSubscribed(String to, String from, Serializable data)
   {
     super(to, from, data);
   }
@@ -82,6 +62,6 @@ public class PresenceUnavailable extends Presence {
   @Override
   public void dispatch(BamStream handler, BamStream toSource)
   {
-    handler.presenceUnavailable(getTo(), getFrom(), getData());
+    handler.presenceSubscribed(getTo(), getFrom(), getData());
   }
 }

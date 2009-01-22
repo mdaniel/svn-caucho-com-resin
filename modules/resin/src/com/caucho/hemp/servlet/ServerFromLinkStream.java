@@ -34,7 +34,6 @@ import com.caucho.bam.BamStream;
 import com.caucho.bam.hmtp.HmtpPacketType;
 import com.caucho.bam.hmtp.FromLinkStream;
 import com.caucho.bam.BamError;
-import com.caucho.hmtp.Packet;
 import com.caucho.hemp.broker.HempBroker;
 import java.io.*;
 import java.util.logging.*;

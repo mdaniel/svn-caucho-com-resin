@@ -180,7 +180,7 @@ public class ClientLinkManager {
   }
   */
 
-  static class Secret {
+  public static class Secret {
     private final SecretKey _key;
     private final String _algorithm;
 

@@ -239,6 +239,13 @@ public class AbstractBamStream implements BamStream
 		+ " value=" + value + " error=" + error);
     }
   }
+
+  /**
+   * Closes the stream
+   */
+  public void close()
+  {
+  }
   
   @Override
   public String toString()

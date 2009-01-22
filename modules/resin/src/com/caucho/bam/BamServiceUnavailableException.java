@@ -27,51 +27,43 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
-
-import com.caucho.bam.BamStream;
-import java.io.Serializable;
+package com.caucho.bam;
 
 /**
- * A presence unsubscription request
+ * Bam exception when a service address does not exist
  */
-public class PresenceUnsubscribe extends Presence {
-  /**
-   * zero-arg constructor for Hessian
-   */
-  private PresenceUnsubscribe()
+public class BamServiceUnavailableException
+  extends BamErrorPacketException
+{
+  public BamServiceUnavailableException()
   {
   }
 
-  /**
-   * A directed presence unsubscription request to another client
-   *
-   * @param to the target client
-   * @param data a collection of presence data
-   */
-  public PresenceUnsubscribe(String to, Serializable data)
+  public BamServiceUnavailableException(String msg)
   {
-    super(to, data);
+    super(msg);
   }
 
-  /**
-   * A directed presence unsubscription request to another client
-   *
-   * @param to the target client
-   * @param from the source
-   * @param data a collection of presence data
-   */
-  public PresenceUnsubscribe(String to, String from, Serializable data)
+  public BamServiceUnavailableException(String msg, BamError error)
   {
-    super(to, from, data);
+    super(msg, error);
   }
 
-  /**
-   * SPI method to dispatch the packet to the proper handler
-   */
+  public BamServiceUnavailableException(BamError error)
+  {
+    super(error);
+  }
+
   @Override
-  public void dispatch(BamStream handler, BamStream toSource)
+  public BamError createBamError()
   {
-    handler.presenceUnsubscribe(getTo(), getFrom(), getData());
+    BamError error = getBamError();
+
+    if (error != null)
+      return error;
+
+    return new BamError(BamError.TYPE_CANCEL,
+			BamError.SERVICE_UNAVAILABLE,
+			getMessage());
   }
 }

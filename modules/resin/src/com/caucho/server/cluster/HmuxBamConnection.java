@@ -69,10 +69,12 @@ class HmuxBamConnection extends AbstractBamStream
     WriteStream out = stream.getWriteStream();
     ReadStream in = stream.getReadStream();
 
+    /*
     out.write(HmuxRequest.ADMIN_CONNECT);
     out.write(0);
     out.write(0);
     out.flush();
+    */
 
     _callback = new HmuxBamClientCallback(client, this, in);
 

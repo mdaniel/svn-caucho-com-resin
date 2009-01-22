@@ -200,6 +200,9 @@ class WatchdogManager extends ProtocolDispatchServer {
 
       HempBroker broker = HempBroker.getCurrent();
 
+      broker.setAdmin(true);
+      broker.setAllowNullAdminAuthenticator(true);
+
       service.setBrokerStream(broker.getBrokerStream());
 
       broker.addService(service);

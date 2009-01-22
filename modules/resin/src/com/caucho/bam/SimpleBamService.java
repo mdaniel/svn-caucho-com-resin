@@ -185,9 +185,16 @@ public class SimpleBamService extends AbstractBamService
       String msg = (this + " exn querySet " + e + "\n" + query
 		      + " {id:" + id + ", to:" + to + ", from:" + from + "}");
     
-      BamError error = new BamError(BamError.TYPE_CANCEL,
-				    BamError.FEATURE_NOT_IMPLEMENTED,
-				    msg);
+      BamError error = null;
+
+      if (e instanceof BamException)
+	error = ((BamException) e).createBamError();
+
+      if (error == null) {
+	error = new BamError(BamError.TYPE_CANCEL,
+			     BamError.FEATURE_NOT_IMPLEMENTED,
+			     msg);
+      }
 				    
       getBrokerStream().queryError(id, from, to, query, error);
       
@@ -355,5 +362,12 @@ public class SimpleBamService extends AbstractBamService
     }
 
     _skeleton.dispatchPresenceError(this, to, from, value, error);
+  }
+
+  /**
+   * Closes the stream.
+   */
+  public void close()
+  {
   }
 }

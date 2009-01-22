@@ -394,4 +394,11 @@ public class XmppAgentStream implements BamStream
       log.log(Level.FINE, e.toString(), e);
     }
   }
+
+  /**
+   * closes the stream.
+   */
+  public void close()
+  {
+  }
 }

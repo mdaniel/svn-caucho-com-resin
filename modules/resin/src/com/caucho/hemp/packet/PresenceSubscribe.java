@@ -27,33 +27,51 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.hemp.packet;
+
+import com.caucho.bam.BamStream;
+import java.io.Serializable;
 
 /**
- * General BAM exception
+ * A presence subscription request
  */
-public class BamException extends RuntimeException {
-  public BamException()
+public class PresenceSubscribe extends Presence {
+  /**
+   * zero-arg constructor for Hessian
+   */
+  private PresenceSubscribe()
   {
   }
 
-  public BamException(String msg)
+  /**
+   * A directed presence subscription request to another client
+   *
+   * @param to the target client
+   * @param data a collection of presence data
+   */
+  public PresenceSubscribe(String to, Serializable data)
   {
-    super(msg);
+    super(to, data);
   }
 
-  public BamException(Throwable e)
+  /**
+   * A directed presence subscription request to another client
+   *
+   * @param to the target client
+   * @param from the source
+   * @param data a collection of presence data
+   */
+  public PresenceSubscribe(String to, String from, Serializable data)
   {
-    super(e);
+    super(to, from, data);
   }
 
-  public BamException(String msg, Throwable e)
+  /**
+   * SPI method to dispatch the packet to the proper handler
+   */
+  @Override
+  public void dispatch(BamStream handler, BamStream toSource)
   {
-    super(msg, e);
-  }
-
-  public BamError createBamError()
-  {
-    return null;
+    handler.presenceSubscribe(getTo(), getFrom(), getData());
   }
 }

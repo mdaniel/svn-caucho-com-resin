@@ -33,7 +33,6 @@ import com.caucho.bam.BamStream;
 import com.caucho.bam.SimpleBamService;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
-import com.caucho.hmtp.*;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;

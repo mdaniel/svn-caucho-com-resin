@@ -123,13 +123,11 @@ class HmuxBamClientCallback implements Runnable
 	  close();
 	  return;
 
-	case HmuxRequest.ADMIN_QUERY_RESULT:
-	case HmuxRequest.BAM_QUERY_RESULT:
+	case HmuxRequest.HMTP_QUERY_RESULT:
 	  readQueryResult(is);
 	  break;
 
-	case HmuxRequest.ADMIN_QUERY_ERROR:
-	case HmuxRequest.BAM_QUERY_ERROR:
+	case HmuxRequest.HMTP_QUERY_ERROR:
 	  readQueryError(is);
 	  break;
 
