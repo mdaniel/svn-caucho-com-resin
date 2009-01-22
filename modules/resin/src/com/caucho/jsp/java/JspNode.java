@@ -1201,7 +1201,7 @@ public abstract class JspNode {
 	else if (! isValueDeferred
 		 && value.indexOf("#{") >= 0
 		 && value.indexOf("${") < 0) {
-	  throw error(L.l("ValueExpression '{0}' must not use deferred syntax '${...}'",
+	  throw error(L.l("Deferred syntax '#{...}' is not allowed for '{0}'",
 			  value));
 	}
 
