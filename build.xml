@@ -910,8 +910,8 @@
 
     <antcall target="maven2-module" inheritRefs="true">
       <param name="module.name" value="kernel"/>
-      <param name="jar.name" value="caucho-kernel.jar"/>
-      <param name="maven.name" value="caucho-kernel"/>
+      <param name="jar.name" value="resin-kernel.jar"/>
+      <param name="maven.name" value="resin-kernel"/>
     </antcall>
   </target>
 

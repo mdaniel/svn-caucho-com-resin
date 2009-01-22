@@ -49,10 +49,22 @@
     
     <dependency>
       <groupId>com.caucho</groupId>
-      <artifactId>resin-util</artifactId>
+      <artifactId>resin-kernel</artifactId>
       <version>@VERSION@</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.caucho</groupId>
+      <artifactId>resin-jcache</artifactId>
+      <version>@VERSION@</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_core</artifactId>
+      <version>1.0</version>
+    </dependency>
+    
     <dependency>
       <groupId>javax.activation</groupId>
       <artifactId>activation</artifactId>

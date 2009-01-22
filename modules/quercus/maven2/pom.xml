@@ -17,7 +17,7 @@
   <dependencies>
     <dependency>
       <groupId>com.caucho</groupId>
-      <artifactId>resin-util</artifactId>
+      <artifactId>resin-kernel</artifactId>
       <version>@VERSION@</version>
     </dependency>
   </dependencies>
