@@ -38,6 +38,7 @@ import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.BinaryOutput;
+import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
@@ -913,7 +914,7 @@ public class CurlModule
         break;
       case CURLOPT_POSTFIELDS:
         curl.setRequestMethod("POST");
-	postfields(env, curl, value);
+        curl.setPostBody(postfields(env, value));
         break;
       case CURLOPT_PROXY:
         curl.setIsProxying(true);
@@ -1030,9 +1031,8 @@ public class CurlModule
     return true;
   }
 
-  private static void postfields(Env env,
-				 CurlResource curl,
-				 Value value)
+  private static StringValue postfields(Env env,
+                                        Value value)
   {
     if (value.isArray()) {
       StringValue sb = env.createBinaryBuilder();
@@ -1040,21 +1040,34 @@ public class CurlModule
 
       Iterator<Map.Entry<Value,Value>> iter = value.getIterator(env);
       while (iter.hasNext()) {
-	Map.Entry<Value,Value> entry = iter.next();
+        Map.Entry<Value,Value> entry = iter.next();
 
-	if (! isFirst)
-	  sb.append("&");
-	isFirst = false;
+        if (! isFirst)
+          sb.append("&");
+        isFirst = false;
 
-	sb.append(entry.getKey());
-	sb.append("=");
-	sb.append(entry.getValue());
+        sb.append(entry.getKey());
+        sb.append("=");
+        sb.append(entry.getValue());
       }
 
-      curl.setPostBody(sb);
+      return sb;
     }
     else {
-      curl.setPostBody(value.toBinaryValue(env));
+      StringValue str = value.toStringValue(env);
+      
+      if (str.length() > 0 && str.charAt(0) == '@') {
+        str = FileModule.file_get_contents(env,
+                                           str.substring(1),
+                                           false,
+                                           DefaultValue.DEFAULT,
+                                           0,
+                                           Integer.MAX_VALUE);
+      }
+      else
+        str = str.toBinaryValue(env);
+      
+      return str;
     }
   }
 

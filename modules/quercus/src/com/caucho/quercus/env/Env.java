@@ -307,9 +307,9 @@ public class Env {
   private Object _gzStream;
 
   private Env _oldThreadEnv;
-  
-  private long _prevMilliTime;
-  private long _prevNanoTime;
+
+  private long _firstMicroTime;
+  private long _firstNanoTime;
   
   public Env(Quercus quercus,
              QuercusPage page,
@@ -5910,33 +5910,21 @@ public class Env {
     return _locale;
   }
   
-  public double getMicroTime()
+  public long getMicroTime()
   {
-    long prevMilliTime = _prevMilliTime;
-    long prevNanoTime = _prevNanoTime;
-    
-    long milliTime = Alarm.getExactTime();
     long nanoTime = Alarm.getExactTimeNanoseconds();
     
-    _prevMilliTime = milliTime;
-    _prevNanoTime = nanoTime;
-    
-    long nanoDiff = nanoTime - prevNanoTime;
-    
-    if (nanoTime < 0 || prevNanoTime < 0 || nanoDiff < 0)
-      return milliTime / 1000d;
-    else if (milliTime > prevMilliTime)
-      return milliTime / 1000d + (nanoTime % 1000000L) / 1e9d;
-    else if (nanoDiff >= 1000000L) {
-      _prevNanoTime = prevNanoTime + 1000000L;
-      return (milliTime + 1) / 1000d;
+    if (_firstMicroTime <= 0) {
+      _firstNanoTime = nanoTime;
+      
+      _firstMicroTime = Alarm.getExactTime() * 1000
+                        + (_firstNanoTime % 1000000L) / 1000;
     }
-    else if ((nanoTime % 1000000L + nanoDiff) >= 1000000L) {
-      _prevNanoTime = prevNanoTime + 1000000L;
-      return (milliTime + 1) / 1000d;
-    }
-    else
-      return milliTime / 1000d + (nanoTime % 1000000L) / 1e9d;
+
+    long nanoDiff = nanoTime - _firstNanoTime;
+    long microDiff = nanoDiff / 1000;
+    
+    return _firstMicroTime + microDiff;
   }
 
   /**

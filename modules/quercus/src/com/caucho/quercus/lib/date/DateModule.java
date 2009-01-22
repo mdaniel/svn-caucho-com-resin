@@ -849,7 +849,7 @@ public class DateModule extends AbstractQuercusModule {
    */
   public static Value microtime(Env env, @Optional boolean getAsFloat)
   {
-    double now = env.getMicroTime();
+    double now = env.getMicroTime() * 1E-6;
 
     if (getAsFloat) {
       return new DoubleValue(now);
