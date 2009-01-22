@@ -1,6 +1,13 @@
 <resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core">
+       xmlns:resin="http://caucho.com/ns/resin/core"
+       xmlns:admin="urn:java:com.caucho.admin"
+       xmlns:sec="urn:java:com.caucho.security">
 
+  <sec:AdminAuthenticator password-digest="none">
+    <sec:user name="${system['wtp.deploy.username']}" 
+              password="${system['wtp.deploy.password']}"/>
+  </sec:AdminAuthenticator>
+    
   <management>
     <deploy-service/>
   </management>
@@ -8,9 +15,11 @@
   <log-handler name="" level="all" path="stdout:"
                timestamp="[%H:%M:%S.%s] {%{thread}} "/>
 
-  <logger name="com.caucho" level="finest"/>
+  <logger name="com.caucho" level="info"/>
 
   <cluster id="">
+    <admin:RemoteAdminService/>
+    
     <server id="" address="${system['wtp.server.address']}"
                   port="${system['wtp.hmux.port']}">
       <http port="${system['wtp.port']}"/>
@@ -20,8 +29,6 @@
 
     <host id="" root-directory=".">
       <web-app-deploy path="${system['wtp.webapp.deploydir']}"/>
-<!--       <web-app id="/${system['wtp.webapp.id']}" 
-               root-directory="${system['wtp.webapp.dir']}"/>-->
     </host>
   </cluster>
 </resin>

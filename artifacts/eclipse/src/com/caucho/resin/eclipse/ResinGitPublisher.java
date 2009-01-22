@@ -31,15 +31,15 @@ public class ResinGitPublisher extends AntPublisher {
   
   public static final String RESIN_VIRTUAL_HOST_ID =
     "resin.virtual.host";
-  
-  public static final String RESIN_HMUX_PORT_ID =
-    "resin.hmux.port";
 
   public static final String RESIN_DEPLOY_USERNAME_ID =
     "resin.deploy.username";
   
   public static final String RESIN_DEPLOY_PASSWORD_ID =
     "resin.deploy.password";
+
+  public static final String RESIN_HTTP_PORT_ID =
+    "resin.http.port";
 
   private DeployClient _client = null;
   
@@ -61,8 +61,6 @@ public class ResinGitPublisher extends AntPublisher {
                                                  RESIN_VIRTUAL_HOST_ID);
     String user = PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
                                                  RESIN_DEPLOY_USERNAME_ID);
-    String pass = PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
-                                                 RESIN_DEPLOY_PASSWORD_ID);
     
     Path war = getWarPath();
     String tag = "wars/" + host + "/" + getModuleName(); 
@@ -96,15 +94,20 @@ public class ResinGitPublisher extends AntPublisher {
   {
     if (_client == null) {
       ServerRuntime typeDef = getServerRuntime().getServerTypeDefinition();
+
+      String user = PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
+                                                   RESIN_DEPLOY_USERNAME_ID);
+      String pass = PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
+                                                   RESIN_DEPLOY_PASSWORD_ID);
+      
       String server = PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
                                                      RESIN_SERVER_ADDRESS_ID);
-
       String portString = PublisherUtil.getPublisherData(typeDef, PUBLISHER_ID, 
-                                                         RESIN_HMUX_PORT_ID);
-
+                                                         RESIN_HTTP_PORT_ID);
+ 
       int port = Integer.valueOf(portString);
 
-      _client = new DeployClient(server, port);
+      _client = new DeployClient(server, port, user, pass);
     }
 
     return _client;
