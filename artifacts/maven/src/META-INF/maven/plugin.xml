@@ -2,7 +2,7 @@
   <description></description>
   <groupId>com.caucho</groupId>
   <artifactId>resin-maven-plugin</artifactId>
-  <version>3.1-SNAPSHOT</version>
+  <version>4.0-SNAPSHOT</version>
   <goalPrefix>resin</goalPrefix>
   <isolatedRealm>false</isolatedRealm>
   <inheritedByDefault>true</inheritedByDefault>
@@ -73,13 +73,84 @@
         <rootDirectory implementation="java.io.File">${project.build.directory}/${project.artifactId}</rootDirectory>
       </configuration>
     </mojo>
+
+    <mojo>
+      <goal>deploy</goal>
+      <description>Deploys a WAR file to a running Resin instance</description>
+      <requiresDirectInvocation>false</requiresDirectInvocation>
+      <requiresProject>true</requiresProject>
+      <requiresReports>false</requiresReports>
+      <aggregator>false</aggregator>
+      <requiresOnline>false</requiresOnline>
+      <inheritedByDefault>true</inheritedByDefault>
+      <executePhase>package</executePhase>
+      <implementation>com.caucho.maven.MavenDeploy</implementation>
+      <language>java</language>
+      <instantiationStrategy>per-lookup</instantiationStrategy>
+      <executionStrategy>once-per-session</executionStrategy>
+      <parameters>
+        <parameter>
+	  <name>port</name>
+	  <type>int</type>
+	  <required>false</required>
+	  <editable>true</editable>
+        </parameter>
+        <parameter>
+	  <name>server</name>
+	  <type>java.lang.String</type>
+	  <required>false</required>
+	  <editable>true</editable>
+        </parameter>
+        <parameter>
+	  <name>contextPath</name>
+	  <type>java.lang.String</type>
+	  <required>true</required>
+	  <editable>true</editable>
+        </parameter>
+        <parameter>
+	  <name>warFile</name>
+	  <type>java.lang.String</type>
+	  <required>true</required>
+	  <editable>true</editable>
+        </parameter>
+        <parameter>
+	  <name>user</name>
+	  <type>java.lang.String</type>
+	  <required>true</required>
+	  <editable>true</editable>
+        </parameter>
+        <parameter>
+	  <name>password</name>
+	  <type>java.lang.String</type>
+	  <required>true</required>
+	  <editable>true</editable>
+        </parameter>
+        <parameter>
+	  <name>commitMessage</name>
+	  <type>java.lang.String</type>
+	  <required>false</required>
+	  <editable>true</editable>
+        </parameter>
+        <parameter>
+	  <name>version</name>
+	  <type>java.lang.String</type>
+	  <required>false</required>
+	  <editable>true</editable>
+        </parameter>
+      </parameters>
+      <configuration>
+        <contextPath implementation="java.lang.String">/${project.artifactId}</contextPath>
+        <warFile implementation="java.lang.String">${project.build.directory}/${project.artifactId}.war</warFile>
+      </configuration>
+    </mojo>
+ 
   </mojos>
     
   <dependencies>
     <dependency>
       <groupId>com.caucho</groupId>
       <artifactId>resin</artifactId>
-      <version>SNAPSHOT-3.1</version>
+      <version>4.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </plugin>
