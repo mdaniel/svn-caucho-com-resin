@@ -1048,7 +1048,7 @@ public class CurlModule
 
         sb.append(entry.getKey());
         sb.append("=");
-        sb.append(entry.getValue());
+        sb.append(postfields(env, entry.getValue()));
       }
 
       return sb;
