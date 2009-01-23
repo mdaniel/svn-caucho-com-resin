@@ -199,8 +199,7 @@ class HempConnectionAgentStream implements BamStream
     BamStream handler = _agentStream;
 
     if (handler == null) {
-      if (_conn.onQueryResult(id, to, from, value))
-	return;
+      _conn.onQueryResult(id, to, from, value);
       
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " sendQueryResult (no handler) to=" + to + " from=" + from);
@@ -222,8 +221,7 @@ class HempConnectionAgentStream implements BamStream
     BamStream handler = _agentStream;
 
     if (handler == null) {
-      if (_conn.onQueryError(id, to, from, query, error))
-	return;
+      _conn.onQueryError(id, to, from, query, error);
       
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " sendQueryError (no handler) to=" + to + " from=" + from);

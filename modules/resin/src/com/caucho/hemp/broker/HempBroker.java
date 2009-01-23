@@ -966,7 +966,7 @@ public class HempBroker implements BamBroker, BamStream
       // queue
       if (threadMax > 0) {
 	bamService = new MemoryQueueServiceFilter(bamService,
-						  getBrokerStream(),
+						  this,
 						  threadMax);
       }
 

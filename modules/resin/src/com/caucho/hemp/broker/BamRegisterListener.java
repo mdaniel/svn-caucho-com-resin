@@ -69,7 +69,7 @@ public class BamRegisterListener implements BeanRegistrationListener
     service.setJid(jid);
 
     service = new MemoryQueueServiceFilter(service,
-					   broker.getBrokerStream(),
+					   broker,
 					   threadMax);
 
     broker.addService(service);
