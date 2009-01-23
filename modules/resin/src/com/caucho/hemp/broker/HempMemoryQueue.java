@@ -391,7 +391,8 @@ public class HempMemoryQueue implements BamStream, Runnable
       // check for queue values
       return true;
     }
-    else if (_lastExitTime + _queueIdleTimeout < now) {
+    else if (_lastExitTime + _queueIdleTimeout < now
+	     || Alarm.isTest()) {
       // if thread hasn't exited recently
       _lastExitTime = now;
 	    
