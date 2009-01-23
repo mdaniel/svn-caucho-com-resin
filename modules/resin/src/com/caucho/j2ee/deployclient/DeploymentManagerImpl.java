@@ -66,7 +66,13 @@ public class DeploymentManagerImpl implements DeploymentManager {
     = Logger.getLogger(DeploymentManagerImpl.class.getName());
 
   private DeployClient _deployClient;
+
+  final private String _host;
+  final private int _port;
   private String _user;
+  private String _password;
+
+
 
   private String _uri;
 
@@ -85,21 +91,13 @@ public class DeploymentManagerImpl implements DeploymentManager {
 
     int fileIdx = uri.indexOf('/', portIdx + 1);
 
-    String host = uri.substring(hostIdx, portIdx);
+    _host = uri.substring(hostIdx, portIdx);
 
-    final int port;
 
     if (fileIdx > -1)
-      port = Integer.parseInt(uri.substring(portIdx + 1, fileIdx));
+      _port = Integer.parseInt(uri.substring(portIdx + 1, fileIdx));
     else
-      port = Integer.parseInt(uri.substring(portIdx + 1));
-
-    String username = null;
-    String password = null;
-
-    // XXX: possibly refactor DeployClient to use connect(user, password)
-    // instead
-    _deployClient = new DeployClient(host, port, username, password);
+      _port = Integer.parseInt(uri.substring(portIdx + 1));
   }
 
   /**
@@ -109,6 +107,9 @@ public class DeploymentManagerImpl implements DeploymentManager {
     throws DeploymentManagerCreationException
   {
     _user = user;
+    _password = password;
+    
+    _deployClient = new DeployClient(_host, _port, _user, _password);
   }
 
   /**
