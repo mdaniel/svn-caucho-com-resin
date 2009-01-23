@@ -201,7 +201,7 @@ public class HempBroker implements BamBroker, BamStream
    */
   public BamConnection getConnection(String uid, String password)
   {
-    return getConnection(uid, password, null, "127.0.0.1");
+    return getConnection(null, uid, password, null, "127.0.0.1");
   }
 
   /**
@@ -211,7 +211,7 @@ public class HempBroker implements BamBroker, BamStream
 				     String password,
 				     String resourceId)
   {
-    return getConnection(uid, password, resourceId, "127.0.0.1");
+    return getConnection(null, uid, password, resourceId, "127.0.0.1");
   }
 
   /**
@@ -222,11 +222,23 @@ public class HempBroker implements BamBroker, BamStream
 				     String resourceId,
 				     String ipAddress)
   {
+    return getConnection(null, uid, password, resourceId, ipAddress);
+  }
+
+  /**
+   * Creates a session
+   */
+  public BamConnection getConnection(BamStream agentStream,
+				     String uid,
+				     String password,
+				     String resourceId,
+				     String ipAddress)
+  {
     String jid = login(uid, password, resourceId, ipAddress);
 
-    HempConnectionImpl conn = new HempConnectionImpl(this, jid);
+    HempConnectionImpl conn = new HempConnectionImpl(this, jid, agentStream);
 
-    BamStream agentStream = conn.getAgentStream();
+    agentStream = conn.getAgentStream();
     
     synchronized (_agentMap) {
       _agentMap.put(jid, new WeakReference<BamStream>(agentStream));

@@ -30,7 +30,7 @@ common.lo	: $(OBJ_PICS)
 install	:
 
 clean	:
-	- rm *.o *.lo *.la *.so
+	- rm *.o *.lo *.la *.so *.jnilib *.dylib
 
 $(OBJ)	: Makefile cse.h
 $(OBJ_PICS)	: Makefile cse.h

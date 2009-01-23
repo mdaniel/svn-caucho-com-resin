@@ -6,6 +6,7 @@ all	:
 
 clean	:
 	(cd modules/c/src; $(MAKE) clean)
+	- rm -r $(LIBEXEC)
 
 install	:
 	(cd modules/c/src; $(MAKE) install)

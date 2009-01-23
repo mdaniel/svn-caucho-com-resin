@@ -324,7 +324,10 @@ public class HempMemoryQueue implements BamStream, Runnable
 	return;
       }
 
-      if (_threadCount.compareAndSet(threadCount, threadCount + 1)) {
+      if (isClosed()) {
+	return;
+      }
+      else if (_threadCount.compareAndSet(threadCount, threadCount + 1)) {
 	_executor.execute(this);
 	return;
       }
@@ -350,7 +353,7 @@ public class HempMemoryQueue implements BamStream, Runnable
 
   private void consumeQueue(WaitQueue.Item item)
   {
-    while (! _broker.isClosed()) {
+    while (! isClosed()) {
       try {
 	Packet packet;
 
@@ -379,7 +382,7 @@ public class HempMemoryQueue implements BamStream, Runnable
   private boolean waitForQueue(WaitQueue.Item item)
   {
     try {
-      if (! _broker.isClosed() && _queue.getSize() == 0) {
+      if (! isClosed() && _queue.getSize() == 0) {
 	item.park(_queueIdleTimeout);
       }
     } catch (Exception e) {
@@ -450,6 +453,11 @@ public class HempMemoryQueue implements BamStream, Runnable
     _isClosed = true;
     
     _wait.wakeAll();
+  }
+
+  public boolean isClosed()
+  {
+    return _isClosed || _broker.isClosed();
   }
   
   @Override

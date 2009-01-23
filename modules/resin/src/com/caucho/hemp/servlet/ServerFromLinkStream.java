@@ -153,8 +153,7 @@ public class ServerFromLinkStream extends FromLinkStream
     
     String password = (String) credentials;
     
-    _conn = _broker.getConnection(uid, password, null, ipAddress);
-    _conn.setAgentStream(_linkStream);
+    _conn = _broker.getConnection(_linkStream, uid, password, null, ipAddress);
 
     _jid = _conn.getJid();
     

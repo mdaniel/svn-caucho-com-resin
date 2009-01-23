@@ -62,7 +62,9 @@ public class HempConnectionImpl extends AbstractBamConnection
   
   private BamService _resource;
 
-  HempConnectionImpl(HempBroker broker, String jid)
+  HempConnectionImpl(HempBroker broker,
+		     String jid,
+		     BamStream agentStream)
   {
     _broker = broker;
     _jid = jid;
@@ -72,8 +74,6 @@ public class HempConnectionImpl extends AbstractBamConnection
 
     _brokerStream = broker.getBrokerStream();
     // _agentStream = _handler;
-    
-    BamStream agentStream = null;
     
     if (agentStream == null)
       agentStream = new SimpleBamClientStream();

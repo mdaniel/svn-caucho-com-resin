@@ -34,7 +34,7 @@ memory.o	: Makefile resin.h
 std.o		: Makefile resin.h
 
 clean	:
-	rm -f *.o *.$(SO)
+	- rm *.o *.lo *.la *.so *.jnilib *.dylib *.$(SO)
 
 install	: libresin_os.$(SO)
 #	cp resin $(resin_home)/bin
