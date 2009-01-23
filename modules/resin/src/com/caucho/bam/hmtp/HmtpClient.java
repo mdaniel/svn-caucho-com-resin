@@ -370,6 +370,8 @@ public class HmtpClient extends AbstractBamConnection {
   {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " close");
+
+    super.close();
     
     try {
       Socket s;

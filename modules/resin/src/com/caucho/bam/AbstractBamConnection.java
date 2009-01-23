@@ -45,10 +45,11 @@ abstract public class AbstractBamConnection implements BamConnection
 
   private BamStream _agentStream;
 
-  private Map<Long,QueryItem> _queryMap
-    = Collections.synchronizedMap(new HashMap<Long,QueryItem>());
+  private final QueryMap _queryMap = new QueryMap();
     
   private final AtomicLong _qId = new AtomicLong();
+
+  private boolean _isClosed;
 
   protected AbstractBamConnection()
   {
@@ -252,9 +253,9 @@ abstract public class AbstractBamConnection implements BamConnection
 		       Serializable value,
 		       BamQueryCallback callback)
   {
-    long id = _qId.getAndIncrement();
+    long id = _qId.incrementAndGet();
       
-    _queryMap.put(id, new QueryItem(id, callback));
+    _queryMap.add(id, callback);
 
     BamStream stream = getBrokerStream();
 
@@ -274,7 +275,6 @@ abstract public class AbstractBamConnection implements BamConnection
 
     querySet(to, query, callback);
 
-
     if (! callback.waitFor())
       throw new RuntimeException(this + " queryGet timeout to=" + to + " query=" + query);
     else if (callback.getError() != null)
@@ -290,9 +290,9 @@ abstract public class AbstractBamConnection implements BamConnection
 		       Serializable value,
 		       BamQueryCallback callback)
   {
-    long id = _qId.getAndIncrement();
+    long id = _qId.incrementAndGet();
       
-    _queryMap.put(id, new QueryItem(id, callback));
+    _queryMap.add(id, callback);
 
     BamStream stream = getBrokerStream();
 
@@ -340,10 +340,19 @@ abstract public class AbstractBamConnection implements BamConnection
   //
 
   /**
+   * Returns true if the connection is closed
+   */
+  public boolean isClosed()
+  {
+    return _isClosed;
+  }
+  
+  /**
    * Closes the connection
    */
   public void close()
   {
+    _isClosed = true;
   }
 
   @Override
@@ -352,14 +361,72 @@ abstract public class AbstractBamConnection implements BamConnection
     return getClass().getSimpleName() + "[" + getBrokerStream() + "]";
   }
 
-  static class QueryItem {
+  static final class QueryMap {
+    private final QueryItem []_entries = new QueryItem[128];
+    private final int _mask = _entries.length - 1;
+    
+    void add(long id, BamQueryCallback callback)
+    {
+      int hash = (int) (id & _mask);
+
+      synchronized (_entries) {
+	_entries[hash] = new QueryItem(id, callback, _entries[hash]);
+      }
+    }
+
+    QueryItem remove(long id)
+    {
+      int hash = (int) (id & _mask);
+
+      synchronized (_entries) {
+	QueryItem prev = null;
+
+	for (QueryItem ptr = _entries[hash];
+	     ptr != null;
+	     ptr = ptr.getNext()) {
+	  if (id == ptr.getId()) {
+	    if (prev != null)
+	      prev.setNext(ptr.getNext());
+	    else
+	      _entries[hash] = ptr.getNext();
+
+	    return ptr;
+	  }
+
+	  prev = ptr;
+	}
+
+	return null;
+      }
+    }
+  }
+
+  static final class QueryItem {
     private final long _id;
     private final BamQueryCallback _callback;
 
-    QueryItem(long id, BamQueryCallback callback)
+    private QueryItem _next;
+
+    QueryItem(long id, BamQueryCallback callback, QueryItem next)
     {
       _id = id;
       _callback = callback;
+      _next = next;
+    }
+
+    final long getId()
+    {
+      return _id;
+    }
+
+    final QueryItem getNext()
+    {
+      return _next;
+    }
+
+    final void setNext(QueryItem next)
+    {
+      _next = next;
     }
 
     void onQueryResult(String to, String from, Serializable value)
@@ -384,11 +451,12 @@ abstract public class AbstractBamConnection implements BamConnection
     }
   }
 
-  static class WaitQueryCallback implements BamQueryCallback {
-    private final Semaphore _resultSemaphore = new Semaphore(0);
+  static final class WaitQueryCallback implements BamQueryCallback {
+    private final CountDownLatch _latch = new CountDownLatch(1);
     
     private volatile Serializable _result;
     private volatile BamError _error;
+    private volatile boolean _isResult;
 
     public Serializable getResult()
     {
@@ -403,28 +471,29 @@ abstract public class AbstractBamConnection implements BamConnection
     boolean waitFor()
     {
       try {
-	return _resultSemaphore.tryAcquire(10000, TimeUnit.MILLISECONDS);
-      } catch (InterruptedException e) {
-	log.log(Level.FINEST, e.toString(), e);
-	
-	return false;
+	_latch.await(10, TimeUnit.SECONDS);
+      } catch (Exception e) {
       }
+
+      return _isResult;
     }
     
     public void onQueryResult(String fromJid, String toJid,
 			      Serializable value)
     {
       _result = value;
+      _isResult = true;
 
-      _resultSemaphore.release();
+      _latch.countDown();
     }
   
     public void onQueryError(String fromJid, String toJid,
 			     Serializable value, BamError error)
     {
       _error = error;
+      _isResult = true;
 
-      _resultSemaphore.release();
+      _latch.countDown();
     }
   }
 }

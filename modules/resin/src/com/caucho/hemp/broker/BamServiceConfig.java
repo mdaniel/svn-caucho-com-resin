@@ -124,7 +124,7 @@ public class BamServiceConfig extends BeanConfig
     // queue
     if (_threadMax > 0) {
       service = new MemoryQueueServiceFilter(service,
-					     _broker.getBrokerStream(),
+					     _broker,
 					     _threadMax);
     }
 

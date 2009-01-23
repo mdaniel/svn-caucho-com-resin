@@ -450,10 +450,6 @@ class WatchdogProcess
     if (! _watchdog.hasXmx())
       list.add("-Xmx256m");
 
-    if (! list.contains("-d32") && ! list.contains("-d64")
-	&& _watchdog.is64bit() && ! CauchoSystem.isWindows())
-      list.add("-d64");
-
     for (String arg : _watchdog.getJvmArgs()) {
       if (! arg.startsWith("-Djava.class.path"))
 	list.add(arg);
@@ -483,6 +479,15 @@ class WatchdogProcess
       }
       else
 	resinArgs.add(argv[i]);
+    }
+
+    if (! list.contains("-d32") && ! list.contains("-d64")
+	&& _watchdog.is64bit() && ! CauchoSystem.isWindows()) {
+      list.add("-d64");
+    }
+
+    if (! list.contains("-server") && ! list.contains("-client")) {
+      list.add("-server");
     }
     
     list.add("com.caucho.server.resin.Resin");

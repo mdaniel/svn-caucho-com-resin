@@ -709,6 +709,8 @@ public class ThreadPool {
 
       while (true) {
 	try {
+	  thread.setName(_name);
+	  
 	  // put the thread into the idle ring
 	  if (! isIdle) {
 	    _isQueuePriority = true;
@@ -743,7 +745,7 @@ public class ThreadPool {
 
 	  // clear interrupted flag
 	  Thread.interrupted();
-	
+	  
 	  // wait for the next available task
 	  synchronized (this) {
 	    if (_task == null) {

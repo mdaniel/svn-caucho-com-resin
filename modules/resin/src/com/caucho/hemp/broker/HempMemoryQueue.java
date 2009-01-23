@@ -67,8 +67,9 @@ public class HempMemoryQueue implements BamStream, Runnable
 
   private int _threadMax;
   private AtomicInteger _threadCount = new AtomicInteger();
-  private AtomicInteger _idleCount = new AtomicInteger();
+  private AtomicInteger _dequeueCount = new AtomicInteger();
   private Object _idleLock = new Object();
+  private final WaitQueue _wait = new WaitQueue();
   private long _lastExitTime;
 
   private PacketQueue _queue;
@@ -102,10 +103,11 @@ public class HempMemoryQueue implements BamStream, Runnable
 
     _name = name;
 
-    int maxSize = -1;
+    int maxDiscardSize = -1;
+    int maxBlockSize = 1024;
     long expireTimeout = -1;
     
-    _queue = new PacketQueue(name, maxSize, expireTimeout);
+    _queue = new PacketQueue(name, maxDiscardSize, maxBlockSize, expireTimeout);
   }
   
   /**
@@ -152,7 +154,6 @@ public class HempMemoryQueue implements BamStream, Runnable
 			  Serializable query)
   {
     if (from == null) {
-      Thread.dumpStack();
       throw new NullPointerException();
     }
     
@@ -292,17 +293,16 @@ public class HempMemoryQueue implements BamStream, Runnable
 
     long lastExitTime = _lastExitTime;
     _lastExitTime = Alarm.getCurrentTime();
+
+    /*
+    if (_dequeueCount.get() > 0)
+      return;
+    */
+
+    if (_wait.wake())
+      return;
     
     while (true) {
-      if (_idleCount.get() > 0) {
-	// notify any idle threads
-	synchronized (_idleLock) {
-	  _idleLock.notify();
-	}
-
-	break;
-      }
-      
       int size = _queue.getSize();
       int threadCount = _threadCount.get();
       long now = Alarm.getCurrentTime();
@@ -348,11 +348,15 @@ public class HempMemoryQueue implements BamStream, Runnable
     return _queue.dequeue();
   }
 
-  private void consumeQueue()
+  private void consumeQueue(WaitQueue.Item item)
   {
     while (! _broker.isClosed()) {
       try {
-	Packet packet = _queue.dequeue();
+	Packet packet;
+
+	// _dequeueCount.incrementAndGet();
+	packet = _queue.dequeue();
+	// _dequeueCount.decrementAndGet();
 
 	if (packet != null) {
 	  // reset last exit with a new packet
@@ -363,50 +367,49 @@ public class HempMemoryQueue implements BamStream, Runnable
 
 	  dispatch(packet);
 	}
-	else {
-	  // wait for _queueIdleTimeout in case of quick messages
-	  synchronized (_idleLock) {
-	    _idleCount.incrementAndGet();
-
-	    try {
-	      if (_queue.getSize() == 0 && ! _broker.isClosed()) {
-		try {
-		  _idleLock.wait(_queueIdleTimeout);
-		} catch (Exception e) {
-		}
-	      }
-	    } finally {
-	      _idleCount.decrementAndGet();
-	    }
-	  }
-
-	  long now = Alarm.getCurrentTime();
-	  
-	  if (_queue.getSize() > 0) {
-	    // check for queue values
-	    continue;
-	  }
-	  else if (_lastExitTime + _queueIdleTimeout < now) {
-	    // if thread hasn't exited recently
-	    _lastExitTime = now;
-	    
-	    int threadCount = _threadCount.decrementAndGet();
-
-	    if (_queue.getSize() > 0
-		&& threadCount < _threadMax
-		&& _threadCount.compareAndSet(threadCount, threadCount + 1)) {
-	      // second check needed in case a packet arrived
-	    }
-	    else {
-	      // exit the thread
-	      return;
-	    }
-	  }
+	else if (! waitForQueue(item)) {
+	  return;
 	}
       } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
     }
+  }
+
+  private boolean waitForQueue(WaitQueue.Item item)
+  {
+    try {
+      if (! _broker.isClosed() && _queue.getSize() == 0) {
+	item.park(_queueIdleTimeout);
+      }
+    } catch (Exception e) {
+    }
+
+    long now = Alarm.getCurrentTime();
+	  
+    if (_queue.getSize() > 0) {
+      // check for queue values
+      return true;
+    }
+    else if (_lastExitTime + _queueIdleTimeout < now) {
+      // if thread hasn't exited recently
+      _lastExitTime = now;
+	    
+      int threadCount = _threadCount.decrementAndGet();
+
+      if (_queue.getSize() > 0
+	  && threadCount < _threadMax
+	  && _threadCount.compareAndSet(threadCount, threadCount + 1)) {
+	// second check needed in case a packet arrived
+	return true;
+      }
+      else {
+	// exit the thread
+	return false;
+      }
+    }
+
+    return true;
   }
 
   public void run()
@@ -419,15 +422,16 @@ public class HempMemoryQueue implements BamStream, Runnable
 
     thread.setContextClassLoader(_loader);
 
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(this + " spawn {threadCount:" + _threadCount.get()
-	       + ", queueSize:" + _queue.getSize() + "}");
-    }
-
     boolean isValid = false;
+    WaitQueue.Item item = _wait.create();
     
     try {
-      consumeQueue();
+      if (log.isLoggable(Level.FINE)) {
+	log.fine(this + " spawn {threadCount:" + _threadCount.get()
+		 + ", queueSize:" + _queue.getSize() + "}");
+      }
+
+      consumeQueue(item);
 
       isValid = true;
     } finally {
@@ -435,16 +439,16 @@ public class HempMemoryQueue implements BamStream, Runnable
       if (! isValid) {
 	_threadCount.decrementAndGet();
       }
+
+      item.remove();
     }
   }
 
   public void close()
   {
-    synchronized (_idleLock) {
-      _isClosed = true;
-
-      _idleLock.notifyAll();
-    }
+    _isClosed = true;
+    
+    _wait.wakeAll();
   }
   
   @Override

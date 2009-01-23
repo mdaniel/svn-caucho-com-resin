@@ -49,7 +49,8 @@ public final class PacketQueue
 
   private final String _name;
   
-  private final int _maxSize;
+  private final int _discardMaxSize;
+  private final int _blockMaxSize;
   private final long _expireTimeout;
   
   private final AtomicReference<Packet> _head = new AtomicReference<Packet>();
@@ -57,19 +58,31 @@ public final class PacketQueue
 
   private final AtomicInteger _size = new AtomicInteger();
 
+  private final AtomicInteger _blockCount = new AtomicInteger();
+  private final Object _blockLock = new Object();
+
   public PacketQueue(String name,
-		     int maxSize,
+		     int discardMaxSize,
+		     int blockMaxSize,
 		     long expireTimeout)
   {
     _name = name;
 
-    if (maxSize > Integer.MAX_VALUE / 2 || maxSize < 0)
-      maxSize = Integer.MAX_VALUE / 2;
+    if (discardMaxSize > Integer.MAX_VALUE / 2 || discardMaxSize < 0)
+      discardMaxSize = Integer.MAX_VALUE / 2;
 
-    if (maxSize == 0)
-      throw new IllegalArgumentException(L.l("maxSize may not be zero"));
+    if (discardMaxSize == 0)
+      throw new IllegalArgumentException(L.l("discardMaxSize may not be zero"));
   
-    _maxSize = maxSize;
+    _discardMaxSize = discardMaxSize;
+
+    if (blockMaxSize > Integer.MAX_VALUE / 2 || blockMaxSize < 0)
+      blockMaxSize = Integer.MAX_VALUE / 2;
+
+    if (blockMaxSize == 0)
+      throw new IllegalArgumentException(L.l("blockMaxSize may not be zero"));
+  
+    _blockMaxSize = blockMaxSize;
   
     if (expireTimeout > Long.MAX_VALUE / 2 || expireTimeout < 0)
       expireTimeout = Long.MAX_VALUE / 2;
@@ -101,13 +114,31 @@ public final class PacketQueue
 
   public final void enqueue(Packet packet)
   {
-    while (_maxSize < _size.get()) {
+    while (_discardMaxSize < _size.get()) {
       if (log.isLoggable(Level.FINE)) {
 	log.fine(this + " dropping overflow packets size=" + _size.get()
-		 + " maxSize=" + _maxSize);
+		 + " maxSize=" + _discardMaxSize);
       }
 	
       dequeue();
+    }
+
+    if (_blockMaxSize < _size.get()) {
+      if (log.isLoggable(Level.FINE)) {
+	log.fine(this + " blocking due to overflow packets size=" + _size.get()
+		 + " maxSize=" + _blockMaxSize);
+      }
+
+      _blockCount.incrementAndGet();
+      try {
+	synchronized (_blockLock) {
+	  _blockLock.wait(1000);
+	}
+      } catch (Exception e) {
+	log.log(Level.ALL, e.toString(), e);
+      } finally {
+	_blockCount.decrementAndGet();
+      }
     }
 
     while (true) {
@@ -158,6 +189,13 @@ public final class PacketQueue
 	  long now = Alarm.getCurrentTime();
 
 	  if (createTime > 0 && now <= createTime + _expireTimeout) {
+	    // wake any blocked threads
+	    if (_blockCount.get() > 0 && _size.get() < _blockMaxSize) {
+	      synchronized (_blockLock) {
+		_blockLock.notify();
+	      }
+	    }
+	    
 	    return next;
 	  }
 	}

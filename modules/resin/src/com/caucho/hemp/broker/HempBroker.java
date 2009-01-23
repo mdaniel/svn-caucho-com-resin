@@ -226,8 +226,8 @@ public class HempBroker implements BamBroker, BamStream
 
     HempConnectionImpl conn = new HempConnectionImpl(this, jid);
 
-    BamStream agentStream = conn.getAgentStreamHandler();
-      
+    BamStream agentStream = conn.getAgentStream();
+    
     synchronized (_agentMap) {
       _agentMap.put(jid, new WeakReference<BamStream>(agentStream));
     }
