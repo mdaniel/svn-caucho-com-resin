@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,15 +30,13 @@
 package com.caucho.server.distcache;
 
 import com.caucho.cluster.ExtCacheEntry;
-import com.caucho.cluster.CacheSerializer;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterTriad;
 import com.caucho.server.cluster.Server;
-import com.caucho.util.LruCache;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 import java.security.MessageDigest;
 
 /**

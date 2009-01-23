@@ -56,21 +56,21 @@ public class HashManager {
   /**
    * Generates a hash from a string
    */
+
   public HashKey generateHash(String key)
   {
-    synchronized (_digest) {
-      _digest.reset();
-      
-      int len = key.length();
-      for (int i = 0; i < len; i++) {
-	char ch = key.charAt(i);
-	
-	_digest.update((byte) ch);
-	_digest.update((byte) (ch >> 8));
-      }
+    MessageDigest digest = _digest;
+    digest.reset();
 
-      return new HashKey(_digest.digest());
+    int len = key.length();
+    for (int i = 0; i < len; i++) {
+      char ch = key.charAt(i);
+
+      digest.update((byte) ch);
+      digest.update((byte) (ch >> 8));
     }
+
+    return new HashKey(digest.digest());
   }
 
   /**
@@ -78,20 +78,20 @@ public class HashManager {
    */
   public HashKey generateHash(HashKey priorHash, String key)
   {
-    synchronized (_digest) {
-      _digest.reset();
+    MessageDigest digest = _digest;
+    digest.reset();
 
-      _digest.update(priorHash.getHash());
-      
-      int len = key.length();
-      for (int i = 0; i < len; i++) {
-	char ch = key.charAt(i);
-	
-	_digest.update((byte) ch);
-	_digest.update((byte) (ch >> 8));
-      }
+    digest.update(priorHash.getHash());
 
-      return new HashKey(_digest.digest());
+    int len = key.length();
+    for (int i = 0; i < len; i++) {
+      char ch = key.charAt(i);
+
+      digest.update((byte) ch);
+      digest.update((byte) (ch >> 8));
     }
+
+    return new HashKey(digest.digest());
+
   }
 }

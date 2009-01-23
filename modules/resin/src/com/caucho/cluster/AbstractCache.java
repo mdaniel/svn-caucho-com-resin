@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -34,30 +34,27 @@ import com.caucho.config.types.Period;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.distcache.CacheConfig;
-import com.caucho.server.distcache.DistributedCacheManager;
-import com.caucho.server.distcache.HashKey;
-import com.caucho.server.distcache.HashManager;
 import com.caucho.server.distcache.CacheKeyEntry;
-import com.caucho.util.LruCache;
+import com.caucho.server.distcache.DistributedCacheManager;
 import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
 
+import javax.annotation.PostConstruct;
+import javax.cache.CacheListener;
+import javax.cache.CacheStatistics;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.security.MessageDigest;
-import javax.annotation.PostConstruct;
-import javax.cache.CacheListener;
-import javax.cache.CacheStatistics;
 
 /**
  * Implements the distributed cache
  */
 abstract public class AbstractCache extends AbstractMap
-  implements ObjectCache, ByteStreamCache
+        implements ObjectCache, ByteStreamCache
 {
   private static final L10N L = new L10N(AbstractCache.class);
 
@@ -67,8 +64,8 @@ abstract public class AbstractCache extends AbstractMap
 
   private CacheConfig _config = new CacheConfig();
 
-  private LruCache<Object,CacheKeyEntry> _entryCache
-    = new LruCache<Object,CacheKeyEntry>(512);
+  private LruCache<Object, CacheKeyEntry> _entryCache
+          = new LruCache<Object, CacheKeyEntry>(512);
 
   private boolean _isInit;
 
@@ -76,6 +73,7 @@ abstract public class AbstractCache extends AbstractMap
 
   /**
    * Assign the name.  The name is mandatory and must be unique.
+   * //TODO(fred): do we need a configuration check?
    */
   public void setName(String name)
   {
@@ -101,7 +99,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Sets the backup mode.  If backups are enabled, copies of the
    * cache item will be sent to the owning triad server.
-   *
+   * <p/>
    * Defaults to true.
    */
   public void setBackup(boolean isBackup)
@@ -115,7 +113,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Sets the triplicate backup mode.  If triplicate backups is set,
    * all triad servers have a copy of the cache item.
-   *
+   * <p/>
    * Defaults to true.
    */
   public void setTriplicate(boolean isTriplicate)
@@ -130,7 +128,7 @@ abstract public class AbstractCache extends AbstractMap
    * The maximum valid time for an item.  Items stored in the cache
    * for longer than the expire time are no longer valid and will
    * return null from a get.
-   *
+   * <p/>
    * Default is infinite.
    */
   public long getExpireTimeout()
@@ -142,7 +140,7 @@ abstract public class AbstractCache extends AbstractMap
    * The maximum valid time for a cached item before it expires.
    * Items stored in the cache for longer than the expire time are
    * no longer valid and will return null from a get.
-   *
+   * <p/>
    * Default is infinite.
    */
   public void setExpireTimeout(Period expireTimeout)
@@ -154,7 +152,7 @@ abstract public class AbstractCache extends AbstractMap
    * The maximum valid time for an item.  Items stored in the cache
    * for longer than the expire time are no longer valid and will
    * return null from a get.
-   *
+   * <p/>
    * Default is infinite.
    */
   public void setExpireTimeoutMillis(long expireTimeout)
@@ -166,10 +164,10 @@ abstract public class AbstractCache extends AbstractMap
    * The maximum idle time for an item, which is typically used for
    * temporary data like sessions.  For example, session
    * data might be removed if idle over 30 minutes.
-   *
+   * <p/>
    * Cached data would have infinite idle time because
    * it doesn't depend on how often it's accessed.
-   *
+   * <p/>
    * Default is infinite.
    */
   public void setIdleTimeout(Period period)
@@ -182,10 +180,10 @@ abstract public class AbstractCache extends AbstractMap
    * The maximum idle time for an item, which is typically used for
    * temporary data like sessions.  For example, session
    * data might be removed if idle over 30 minutes.
-   *
+   * <p/>
    * Cached data would have infinite idle time because
    * it doesn't depend on how often it's accessed.
-   *
+   * <p/>
    * Default is infinite.
    */
   public long getIdleTimeout()
@@ -240,11 +238,11 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * The local read timeout sets how long a local copy of
    * a cache item can be reused before checking with the master copy.
-   *
+   * <p/>
    * A read-only item could be infinite (-1).  A slow changing item
    * like a list of bulletin-board comments could be 10s.  Even a relatively
    * quicky changing item can be 10ms or 100ms.
-   *
+   * <p/>
    * The default is 10ms
    */
   public void setLocalReadTimeout(Period period)
@@ -255,11 +253,11 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * The local read timeout sets how long a local copy of
    * a cache item can be reused before checking with the master copy.
-   *
+   * <p/>
    * A read-only item could be infinite (-1).  A slow changing item
    * like a list of bulletin-board comments could be 10s.  Even a relatively
    * quicky changing item can be 10ms or 100ms.
-   *
+   * <p/>
    * The default is 10ms
    */
   public void setLocalReadTimeoutMillis(long period)
@@ -270,11 +268,11 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * The local read timeout is how long a local copy of
    * a cache item can be reused before checking with the master copy.
-   *
+   * <p/>
    * A read-only item could be infinite (-1).  A slow changing item
    * like a list of bulletin-board comments could be 10s.  Even a relatively
    * quicky changing item can be 10ms or 100ms.
-   *
+   * <p/>
    * The default is 10ms
    */
   public long getLocalReadTimeout()
@@ -290,12 +288,12 @@ abstract public class AbstractCache extends AbstractMap
   {
     synchronized (this) {
       if (_isInit)
-	return;
+        return;
       _isInit = true;
 
       if (_name == null)
-	throw new ConfigException(L.l("'name' is a require attribute for any Cache"));
-    
+        throw new ConfigException(L.l("'name' is a require attribute for any Cache"));
+
       String contextId = Environment.getEnvironmentName();
 
       _guid = contextId + ":" + _name;
@@ -307,13 +305,13 @@ abstract public class AbstractCache extends AbstractMap
       Server server = Server.getCurrent();
 
       if (server == null)
-	throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a clustered environment",
-				      getClass().getSimpleName()));
+        throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a clustered environment",
+                getClass().getSimpleName()));
 
       _distributedCacheManager = server.getDistributedCacheManager();
     }
   }
-  
+
   /**
    * Returns the object with the given key without checking the backing store.
    */
@@ -323,7 +321,7 @@ abstract public class AbstractCache extends AbstractMap
 
     return entry.peek();
   }
-  
+
   /**
    * Returns the object with the given key, checking the backing store if
    * necessary.
@@ -332,16 +330,16 @@ abstract public class AbstractCache extends AbstractMap
   {
     return getKeyEntry(key).get(_config);
   }
-  
+
   /**
    * Fills an output stream with the value for a key.
    */
   public boolean get(Object key, OutputStream os)
-    throws IOException
+          throws IOException
   {
     return getKeyEntry(key).getStream(os, _config);
   }
-  
+
   /**
    * Returns the cache entry for the object with the given key.
    */
@@ -349,7 +347,7 @@ abstract public class AbstractCache extends AbstractMap
   {
     return getKeyEntry(key).getEntry(_config);
   }
-  
+
   /**
    * Returns the cache entry for the object with the given key.
    */
@@ -357,70 +355,68 @@ abstract public class AbstractCache extends AbstractMap
   {
     return getExtCacheEntry(key);
   }
-  
+
   /**
    * Puts a new item in the cache.
    *
-   * @param key the key of the item to put
+   * @param key   the key of the item to put
    * @param value the value of the item to put
    */
   public Object put(Object key, Object value)
   {
     return getKeyEntry(key).put(value, _config);
   }
-  
+
   /**
    * Puts a new item in the cache with a custom idle
    * timeout (used for sessions).
    *
-   * @param key the key of the item to put
-   * @param value the value of the item to put
+   * @param key         the key of the item to put
+   * @param is          the value of the item to put
    * @param idleTimeout the idle timeout for the item
    */
   public ExtCacheEntry put(Object key,
-			   InputStream is,
-			   long idleTimeout)
-    throws IOException
+          InputStream is,
+          long idleTimeout)
+          throws IOException
   {
     return getKeyEntry(key).put(is, _config, idleTimeout);
   }
-  
+
   /**
    * Updates the cache if the old version matches the current version.
    * A zero value for the old value hash only adds the entry if it's new
    *
-   * @param key the key to compare
+   * @param key     the key to compare
    * @param version the version of the old value, returned by getEntry
-   * @param value the new value
-   *
+   * @param value   the new value
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-			       long version,
-			       Object value)
+          long version,
+          Object value)
   {
     put(key, value);
-    
+
     return true;
   }
-  
+
   /**
    * Updates the cache if the old version matches the current value.
    * A zero value for the old version only adds the entry if it's new
    *
-   * @param key the key to compare
-   * @param version the hash of the old version, returned by getEntry
-   * @param value the new value
-   *
+   * @param key         the key to compare
+   * @param version     the hash of the old version, returned by getEntry
+   * @param inputStream the new value
    * @return true if the update succeeds, false if it fails
    */
   public boolean compareAndPut(Object key,
-			       long version,
-			       InputStream is)
-    throws IOException
+          long version,
+          InputStream inputStream)
+          throws IOException
   {
-    put(key, is);
-    
+    put(key, inputStream);
+
     return true;
   }
 
@@ -440,7 +436,7 @@ abstract public class AbstractCache extends AbstractMap
   public boolean compareAndRemove(Object key, long version)
   {
     // HashKey hashKey = getHashKey(key);
-    
+
     return false;
   }
 
@@ -473,7 +469,7 @@ abstract public class AbstractCache extends AbstractMap
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public void load(Object object)
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -488,7 +484,7 @@ abstract public class AbstractCache extends AbstractMap
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   public void removeListener(CacheListener listener)
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -504,9 +500,60 @@ abstract public class AbstractCache extends AbstractMap
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  public Collection values()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+
+  public Set keySet()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public boolean containsValue(Object value)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
   @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _guid + "]";
+  }
+
+  @Override
+  public void clear()
+  {
+    _entryCache.clear();
+  }
+
+  @Override
+  public int size()
+  {
+    return _entryCache.size();
+  }
+
+  @Override
+  public void putAll(Map map)
+  {
+    if (map == null || map.size() == 0) return;
+    Set entries = map.entrySet();
+    for (Object item : entries) {
+      Map.Entry entry = (Map.Entry) item;
+      put(entry.getKey(), entry.getValue());
+    }
+  }
+
+  @Override
+  public boolean containsKey(Object key)
+  {
+    return _entryCache.get(key) != null;
+  }
+
+  @Override
+  public boolean isEmpty()
+  {
+    return _entryCache.size() == 0;
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,29 +29,25 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.cluster.CacheSerializer;
+import com.caucho.cluster.ExtCacheEntry;
 import com.caucho.config.ConfigException;
 import com.caucho.server.cache.TempFileManager;
-import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.ClusterTriad;
-import com.caucho.server.resin.Resin;
+import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
-import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.TempOutputStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
-import java.lang.ref.SoftReference;
-import java.util.logging.*;
-import java.security.MessageDigest;
-import java.security.DigestOutputStream;
+import java.util.logging.Logger;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
