@@ -40,7 +40,7 @@ public class HashManager {
   public static final String HASH_ALGORITHM = "SHA-256";
   
   private MessageDigest _digest;
-  
+
   /**
    * Creates the manager
    */
@@ -56,21 +56,21 @@ public class HashManager {
   /**
    * Generates a hash from a string
    */
-
   public HashKey generateHash(String key)
   {
-    MessageDigest digest = _digest;
-    digest.reset();
+    synchronized (_digest) {
+      _digest.reset();
 
-    int len = key.length();
-    for (int i = 0; i < len; i++) {
-      char ch = key.charAt(i);
+      int len = key.length();
+      for (int i = 0; i < len; i++) {
+	char ch = key.charAt(i);
 
-      digest.update((byte) ch);
-      digest.update((byte) (ch >> 8));
+	_digest.update((byte) ch);
+	_digest.update((byte) (ch >> 8));
+      }
+
+      return new HashKey(_digest.digest());
     }
-
-    return new HashKey(digest.digest());
   }
 
   /**
@@ -78,20 +78,20 @@ public class HashManager {
    */
   public HashKey generateHash(HashKey priorHash, String key)
   {
-    MessageDigest digest = _digest;
-    digest.reset();
+    synchronized (_digest) {
+      _digest.reset();
 
-    digest.update(priorHash.getHash());
+      _digest.update(priorHash.getHash());
 
-    int len = key.length();
-    for (int i = 0; i < len; i++) {
-      char ch = key.charAt(i);
+      int len = key.length();
+      for (int i = 0; i < len; i++) {
+	char ch = key.charAt(i);
 
-      digest.update((byte) ch);
-      digest.update((byte) (ch >> 8));
+	_digest.update((byte) ch);
+	_digest.update((byte) (ch >> 8));
+      }
+
+      return new HashKey(_digest.digest());
     }
-
-    return new HashKey(digest.digest());
-
   }
 }
