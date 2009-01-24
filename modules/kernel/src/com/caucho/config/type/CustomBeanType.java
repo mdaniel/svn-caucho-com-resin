@@ -45,7 +45,6 @@ import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.xml.*;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 import com.caucho.xml.QName;
 
@@ -211,19 +210,7 @@ public class CustomBeanType extends ConfigType
 
     String pkg = uri.substring("urn:java:".length());
 
-    String className = pkg + "." + name.getLocalName();
-
-    try {
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-      Class cl = Class.forName(className, false, loader);
-
-      return cl;
-    } catch (ClassNotFoundException e) {
-      log.log(Level.FINEST, e.toString(), e);
-
-      return null;
-    }
+    return TypeFactory.loadClass(pkg, name.getLocalName());
   }
 
   private Class createResinClass(String name)

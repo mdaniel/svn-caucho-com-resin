@@ -30,9 +30,9 @@
 package com.caucho.config.gen;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
 import java.io.*;
@@ -215,7 +215,7 @@ public class InterceptorCallChain extends AbstractCallChain {
       _isExcludeDefaultInterceptors = true;
 
     // webbeans annotations
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
     
     HashMap<Class,Annotation> interceptorTypes
       = new HashMap<Class,Annotation>();
@@ -333,10 +333,10 @@ public class InterceptorCallChain extends AbstractCallChain {
       
       out.println();
       out.print("private static ");
-      out.printClass(WebBeansContainer.class);
+      out.printClass(InjectManager.class);
       out.println(" __caucho_manager");
       out.print(" = ");
-      out.printClass(WebBeansContainer.class);
+      out.printClass(InjectManager.class);
       out.println(".create();");
     }
 

@@ -42,7 +42,6 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.xml.*;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
 import org.w3c.dom.*;

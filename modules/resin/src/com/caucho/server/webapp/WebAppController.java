@@ -30,6 +30,7 @@
 package com.caucho.server.webapp;
 
 import com.caucho.config.Config;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.server.deploy.DeployConfig;
 import com.caucho.server.deploy.DeployControllerAdmin;
@@ -516,7 +517,7 @@ public class WebAppController
   protected void configureInstanceVariables(WebApp app)
     throws Throwable
   {
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
     
     webBeans.addSingleton(app, CauchoDeployment.class, (String) null,
 			  WebApp.class, ServletContext.class);

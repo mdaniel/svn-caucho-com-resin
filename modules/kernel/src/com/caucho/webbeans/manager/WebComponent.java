@@ -31,10 +31,11 @@ package com.caucho.webbeans.manager;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.inject.BaseType;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.*;
 import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.component.*;
 
 import java.lang.annotation.*;
 import java.lang.reflect.*;
@@ -58,14 +59,14 @@ public class WebComponent<T> {
 
   private static final Class []NULL_ARG = new Class[0];
 
-  private WebBeansContainer _webBeans;
+  private InjectManager _webBeans;
   
   private BaseType _type;
 
   private ArrayList<BeanEntry<T>> _beanList
     = new ArrayList<BeanEntry<T>>();
 
-  public WebComponent(WebBeansContainer webBeans, BaseType type)
+  public WebComponent(InjectManager webBeans, BaseType type)
   {
     _webBeans = webBeans;
     _type = type;

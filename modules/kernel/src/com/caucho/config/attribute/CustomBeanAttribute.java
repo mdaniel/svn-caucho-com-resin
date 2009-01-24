@@ -94,16 +94,13 @@ public class CustomBeanAttribute extends Attribute {
     if (! uri.startsWith("urn:java:"))
       throw new IllegalStateException(L.l("'{0}' is an unexpected namespace, expected 'urn:java:...'", uri));
 
-    String className = uri.substring("uri:java:".length()) + '.' + localName;
-    Class cl = null;
-
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    String pkg = uri.substring("uri:java:".length());
     
-    try {
-      cl = Class.forName(className, false, loader);
-    } catch (ClassNotFoundException e) {
-      throw new ConfigException(L.l("'{0}' is an unknown class for element '{1}'",
-				    className, qName), e);
+    Class cl = TypeFactory.loadClass(pkg, localName);
+
+    if (cl == null) {
+      throw new ConfigException(L.l("'{0}.{1}' is an unknown class for element '{2}'",
+				    pkg, localName, qName));
     }
 
     if (Annotation.class.isAssignableFrom(cl)) {

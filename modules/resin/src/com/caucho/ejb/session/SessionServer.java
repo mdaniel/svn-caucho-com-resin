@@ -30,12 +30,13 @@
 package com.caucho.ejb.session;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.SingletonBean;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.ejb.*;
 import javax.annotation.Named;
@@ -80,7 +81,7 @@ abstract public class SessionServer extends AbstractServer
 
       super.init();
       
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
 
       SingletonBean comp
         = new SingletonBean(getSessionContext(), null, SessionContext.class);
@@ -107,7 +108,7 @@ abstract public class SessionServer extends AbstractServer
     ArrayList<Class> remoteApiList = getRemoteApiList();
 
     if (beanClass != null && (localApiList != null || remoteApiList != null)) {
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
 
       String beanName = getEJBName();
       Named named = (Named) beanClass.getAnnotation(Named.class);

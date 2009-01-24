@@ -29,14 +29,14 @@
 
 package com.caucho.config.j2ee;
 
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ValueGenerator;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.ConfigContext;
 import com.caucho.naming.*;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.component.ComponentImpl;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.naming.*;
 import javax.persistence.*;
@@ -64,7 +64,7 @@ public class ResourceGenerator extends ValueGenerator {
   
   private final String _location;
 
-  private WebBeansContainer _webBeans;
+  private InjectManager _webBeans;
   private Bean _bean;
   private boolean _isBound;
 
@@ -98,7 +98,7 @@ public class ResourceGenerator extends ValueGenerator {
     if (_bean == null && ! _isBound) {
       _isBound = false;
       
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
 
       if (_mappedName != null && ! "".equals(_mappedName)) {
 	_bean = InjectIntrospector.bind(_location, _type, _mappedName);

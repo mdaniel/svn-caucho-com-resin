@@ -31,7 +31,6 @@ package com.caucho.config.scope;
 
 import com.caucho.loader.*;
 import com.caucho.config.Service;
-import com.caucho.webbeans.component.*;
 
 import java.lang.annotation.Annotation;
 import java.util.Hashtable;

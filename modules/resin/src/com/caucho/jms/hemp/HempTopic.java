@@ -42,6 +42,7 @@ import javax.jms.*;
 import javax.webbeans.*;
 
 import com.caucho.config.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.jms.memory.*;
 import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
@@ -98,7 +99,7 @@ public class HempTopic extends AbstractTopic
     super.init();
 
     if (_broker == null) {
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
     
       _broker = webBeans.getInstanceByType(BamBroker.class);
 

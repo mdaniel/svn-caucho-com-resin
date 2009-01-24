@@ -30,10 +30,12 @@
 package com.caucho.remote.client;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.SimpleBean;
+import com.caucho.config.inject.SingletonBean;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
 import java.util.ArrayList;
@@ -80,7 +82,7 @@ public class RemoteClient extends BeanConfig
 
     Object proxy = factory.createProxy(_interface);
     
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     SimpleBean comp = new SingletonBean(webBeans, proxy);
 

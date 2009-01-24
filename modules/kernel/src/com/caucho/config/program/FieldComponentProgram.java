@@ -31,10 +31,9 @@ package com.caucho.config.program;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.scope.DependentScope;
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.util.*;
 
 import java.util.logging.*;
@@ -47,11 +46,11 @@ public class FieldComponentProgram extends ConfigProgram
   private static final Logger log
     = Logger.getLogger(FieldComponentProgram.class.getName());
 
-  private WebBeansContainer _manager;
+  private InjectManager _manager;
   private Bean _bean;
   private Field _field;
 
-  public FieldComponentProgram(WebBeansContainer manager,
+  public FieldComponentProgram(InjectManager manager,
 			       Bean bean,
 			       Field field)
   {

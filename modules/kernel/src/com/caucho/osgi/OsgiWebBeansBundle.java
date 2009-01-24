@@ -30,6 +30,8 @@
 package com.caucho.osgi;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.SingletonBean;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.PathPatternType;
 import com.caucho.loader.Loader;
@@ -42,8 +44,6 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.config.Names;
 import com.caucho.webbeans.manager.CurrentLiteral;
-import com.caucho.webbeans.component.SingletonBean;
-import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.vfs.*;
 
 import javax.annotation.PostConstruct;
@@ -70,13 +70,13 @@ public class OsgiWebBeansBundle extends AbstractOsgiBundle
   private static final Logger log
     = Logger.getLogger(OsgiWebBeansBundle.class.getName());
 
-  private WebBeansContainer _webBeans;
+  private InjectManager _webBeans;
 
   OsgiWebBeansBundle(OsgiManager manager)
   {
     super(manager, "WebBeansBundle");
 
-    _webBeans = WebBeansContainer.create();
+    _webBeans = InjectManager.create();
   }
 
   @Override

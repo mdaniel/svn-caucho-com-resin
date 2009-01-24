@@ -29,7 +29,7 @@
 
 package com.caucho.ejb.util;
 
-import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.util.L10N;
 
 import java.lang.annotation.Annotation;
@@ -53,7 +53,7 @@ public class EjbUtil {
   {
   }
 
-  public static int []createInterceptors(WebBeansContainer manager,
+  public static int []createInterceptors(InjectManager manager,
 					 ArrayList<Interceptor> beans,
 					 InterceptionType type,
 					 Annotation ...bindings)
@@ -134,7 +134,7 @@ public class EjbUtil {
   public static Object generateDelegate(List<Decorator> beans,
 					Object tail)
   {
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     for (int i = beans.size() - 1; i >= 0; i--) {
       Decorator bean = beans.get(i);
@@ -149,7 +149,7 @@ public class EjbUtil {
     return tail;
   }
 
-  public static Object []generateProxyDelegate(WebBeansContainer webBeans,
+  public static Object []generateProxyDelegate(InjectManager webBeans,
 					       List<Decorator> beans,
 					       Object proxy)
   {

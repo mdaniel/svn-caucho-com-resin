@@ -27,19 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.component;
+package com.caucho.config.inject;
 
 import com.caucho.config.ConfigContext;
+import com.caucho.config.inject.HandleAware;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.scope.SingletonScope;
+import com.caucho.webbeans.cfg.WbWebBeans;
+import com.caucho.webbeans.manager.*;
 
 import java.io.Closeable;
 import java.lang.annotation.*;
 import java.lang.reflect.Type;
 import javax.webbeans.*;
 
-import com.caucho.webbeans.cfg.WbWebBeans;
-import com.caucho.webbeans.manager.*;
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.
@@ -109,7 +111,7 @@ public class SingletonBean extends SimpleBean
 		       Annotation []binding,
 		       Type ...api)
   {
-    super(WebBeansContainer.create());
+    super(InjectManager.create());
     
     _value = value;
     setTargetType(value.getClass());
@@ -139,7 +141,7 @@ public class SingletonBean extends SimpleBean
   /**
    * Special constructor for internal use
    */
-  public SingletonBean(WebBeansContainer webBeans, Object value)
+  public SingletonBean(InjectManager webBeans, Object value)
   {
     super(webBeans);
     

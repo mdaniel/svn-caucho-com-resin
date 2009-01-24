@@ -29,6 +29,7 @@
 
 package com.caucho.jca;
 
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
@@ -44,7 +45,6 @@ import com.caucho.loader.StartListener;
 import com.caucho.naming.Jndi;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
 import javax.management.Attribute;
@@ -436,7 +436,7 @@ public class Resource {
     if (_name == null)
       name = _jndiName;
     
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     if (name != null)
       webBeans.addSingleton(_object, name);

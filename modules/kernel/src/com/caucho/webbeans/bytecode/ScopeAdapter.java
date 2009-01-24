@@ -35,9 +35,9 @@ import java.lang.reflect.*;
 
 import com.caucho.bytecode.*;
 import com.caucho.config.*;
+import com.caucho.config.inject.ComponentImpl;
 import com.caucho.loader.*;
 import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.component.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 

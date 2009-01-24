@@ -31,6 +31,7 @@ package com.caucho.config.j2ee;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.ConfigContext;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.*;
 import com.caucho.webbeans.manager.*;
@@ -71,7 +72,7 @@ public class PostConstructProgram extends ConfigProgram
     
     Annotation [][]paramAnns = _init.getParameterAnnotations();
 
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
     
     for (int i = 0; i < paramTypes.length; i++) {
       Annotation []bindings = createBindings(paramAnns[i]);
@@ -158,11 +159,11 @@ public class PostConstructProgram extends ConfigProgram
   }
 
   static class ParamProgram {
-    private final WebBeansContainer _webBeans;
+    private final InjectManager _webBeans;
     private final Type _type;
     private final Annotation []_bindings;
 
-    ParamProgram(WebBeansContainer webBeans,
+    ParamProgram(InjectManager webBeans,
 		 Type type,
 		 Annotation []bindings)
     {

@@ -30,6 +30,7 @@
 package com.caucho.sql;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.Period;
 import com.caucho.jca.ConnectionPool;
@@ -38,8 +39,7 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.naming.Jndi;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.component.HandleAware;
-import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.config.inject.HandleAware;
 
 import javax.annotation.PostConstruct;
 import javax.resource.spi.ManagedConnectionFactory;
@@ -681,9 +681,9 @@ public class DBPool
       name = _var;
 
     if (name != null)
-      WebBeansContainer.create().addSingleton(this, name, DataSource.class);
+      InjectManager.create().addSingleton(this, name, DataSource.class);
     else
-      WebBeansContainer.create().addSingleton(this, DataSource.class);
+      InjectManager.create().addSingleton(this, DataSource.class);
  }
 
   /**

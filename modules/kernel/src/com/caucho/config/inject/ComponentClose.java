@@ -19,67 +19,55 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.component;
+package com.caucho.config.inject;
 
-import com.caucho.config.ConfigContext;
-import com.caucho.config.scope.ScopeContext;
+import java.lang.ref.*;
 
-import java.lang.annotation.*;
-import javax.inject.Production;
-
-import com.caucho.webbeans.cfg.WbWebBeans;
-import com.caucho.webbeans.manager.*;
+import com.caucho.config.*;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.loader.*;
 
 /**
- * Component for a singleton beans
+ * Waits for the close event and calls a destroy() method.
  */
-abstract public class FactoryComponent extends ComponentImpl {
-  public FactoryComponent(Class targetType, String name)
-  {
-    super(WebBeansContainer.create());
+public class ComponentClose implements ClassLoaderListener {
+  private final WeakReference<Object> _ref;
+  private final ComponentImpl _comp;
 
-    setTargetType(targetType);
-    setName(name);
-    setDeploymentType(Production.class);
+  public ComponentClose(Object value, ComponentImpl comp)
+  {
+    _comp = comp;
+    _ref = new WeakReference<Object>(value);
   }
 
-  @Override
-  public void setScope(ScopeContext scope)
+  /**
+   * Handles the case where a class loader is activated.
+   */
+  public void classLoaderInit(DynamicClassLoader loader)
   {
   }
-
-  @Override
-  public Object get()
+  
+  /**
+   * Handles the case where a class loader is dropped.
+   */
+  public void classLoaderDestroy(DynamicClassLoader loader)
   {
-    return get(null);
+    Object obj = _ref.get();
+
+    if (obj != null)
+      _comp.destroy(obj, new ConfigContext());
   }
 
-  @Override
-  public Object get(ConfigContext env)
+  public String toString()
   {
-    if (env != null) {
-      Object value = env.get(this);
-
-      if (value != null)
-	return value;
-
-      value = create();
-      
-      env.put(this, value);
-
-      return value;
-    }
-    else
-      return create();
+    return getClass().getSimpleName() + "[" + _comp + "]";
   }
-
-  abstract public Object create();
 }
+

@@ -29,6 +29,7 @@
 package com.caucho.ejb.cfg;
 
 import com.caucho.config.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
@@ -80,7 +81,7 @@ public class MessageDestination extends DescriptionGroupConfig {
   {
     Destination destination = null;
 
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     String name = _mappedName;
 

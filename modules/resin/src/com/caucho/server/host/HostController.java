@@ -31,6 +31,7 @@ package com.caucho.server.host;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.el.EL;
 import com.caucho.management.server.HostMXBean;
@@ -505,7 +506,7 @@ public class HostController
     _hostAliases.clear();
     _hostAliases.addAll(_entryHostAliases);
 
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
     Config.setProperty("host", _hostVar);
 
     for (Map.Entry<String,Object> entry : getVariableMap().entrySet()) {

@@ -30,15 +30,17 @@
 package com.caucho.webbeans.cfg;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.SimpleBean;
+import com.caucho.config.inject.SingletonClassComponent;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.config.types.*;
 // import com.caucho.ejb.cfg.*;
 import com.caucho.config.gen.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.beans.*;
 import java.lang.reflect.*;
@@ -66,7 +68,7 @@ public class WbComponentConfig {
 
   private static final Object []NULL_ARGS = new Object[0];
 
-  private WebBeansContainer _webbeans;
+  private InjectManager _webbeans;
   
   private Class _cl;
 
@@ -89,10 +91,10 @@ public class WbComponentConfig {
 
   public WbComponentConfig()
   {
-    _webbeans = WebBeansContainer.create();
+    _webbeans = InjectManager.create();
   }
 
-  public WbComponentConfig(WebBeansContainer webbeans)
+  public WbComponentConfig(InjectManager webbeans)
   {
     _webbeans = webbeans;
   }
@@ -341,9 +343,9 @@ public class WbComponentConfig {
     SimpleBean comp;
 
     if (Singleton.class.equals(_scope))
-      comp = new SingletonClassComponent(WebBeansContainer.create());
+      comp = new SingletonClassComponent(InjectManager.create());
     else
-      comp = new SimpleBean(WebBeansContainer.create());
+      comp = new SimpleBean(InjectManager.create());
 
     comp.setTargetType(_cl);
 

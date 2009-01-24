@@ -35,6 +35,8 @@ import com.caucho.amber.gen.AmberEnhancer;
 import com.caucho.amber.gen.AmberGenerator;
 import com.caucho.amber.type.*;
 import com.caucho.config.*;
+import com.caucho.config.inject.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.EnhancerManager;
@@ -42,7 +44,6 @@ import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.loader.enhancer.ScanMatch;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.manager.*;
 
 import javax.sql.DataSource;
 import javax.persistence.*;
@@ -908,7 +909,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
       
       _persistenceContextMap.put(unitName, persistenceContext);
 
-      WebBeansContainer webBeans = WebBeansContainer.create(_parentLoader);
+      InjectManager webBeans = InjectManager.create(_parentLoader);
       webBeans.addBean(new EntityManagerFactoryComponent(this, provider, unit));
       webBeans.addBean(new PersistenceContextComponent(unitName, persistenceContext));
     } catch (RuntimeException e) {

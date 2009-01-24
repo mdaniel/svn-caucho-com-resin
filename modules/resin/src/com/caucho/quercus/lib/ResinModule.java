@@ -31,6 +31,8 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.Version;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.naming.Jndi;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
@@ -43,8 +45,6 @@ import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
-import com.caucho.webbeans.manager.WebBeansContainer;
-import com.caucho.webbeans.component.ComponentImpl;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -108,7 +108,7 @@ public class ResinModule
    */
   public static Object java_bean(String name)
   {
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     return webBeans.getInstanceByName(name);
   }

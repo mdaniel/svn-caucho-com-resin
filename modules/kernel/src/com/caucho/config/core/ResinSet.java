@@ -29,10 +29,10 @@
 
 package com.caucho.config.core;
 
+import com.caucho.config.manager.InjectManager;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
-import com.caucho.webbeans.manager.WebBeansContainer;
 import javax.annotation.PostConstruct;
 
 /**
@@ -88,7 +88,7 @@ public class ResinSet {
    */
   public void setProperty(String name, Object value)
   {
-    WebBeansContainer.create().addSingletonByName(value, name);
+    InjectManager.create().addSingletonByName(value, name);
   }
 
   @PostConstruct
@@ -99,7 +99,7 @@ public class ResinSet {
       Jndi.rebindDeepShort(_jndiName, _value);
     
     if (_var != null) {
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
       
       if (_value != null)
 	webBeans.addSingletonByName(_value, _var);

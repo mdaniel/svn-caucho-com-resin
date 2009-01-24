@@ -30,6 +30,8 @@
 package com.caucho.server.dispatch;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.NodeBuilderProgram;
@@ -45,7 +47,6 @@ import com.caucho.server.connection.StubServletResponse;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.servlet.comet.CometServlet;
 import com.caucho.util.*;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
@@ -527,7 +528,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
       
       Object servlet = createServlet(false);
 
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
       webBeans.addSingleton(servlet, _var);
     }
   }
@@ -844,7 +845,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
     }
 
     else if (servletClass != null) {
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
       
       _comp = (ComponentImpl) webBeans.createTransient(servletClass);
       

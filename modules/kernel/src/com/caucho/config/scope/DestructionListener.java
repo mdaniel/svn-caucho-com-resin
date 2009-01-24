@@ -34,8 +34,8 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 import javax.servlet.http.*;
 
+import com.caucho.config.inject.ComponentImpl;
 import com.caucho.loader.*;
-import com.caucho.webbeans.component.*;
 
 /**
  * Contains the objects which need destruction for a given scope.

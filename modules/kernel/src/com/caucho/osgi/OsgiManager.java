@@ -30,6 +30,7 @@
 package com.caucho.osgi;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.PathPatternType;
@@ -44,7 +45,6 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
 import java.net.URL;
@@ -95,7 +95,7 @@ public class OsgiManager
 
   private Path _workRoot;
 
-  private WebBeansContainer _serviceWebBeansContainer;
+  private InjectManager _serviceWebBeansContainer;
   
   private ArrayList<OsgiBundle> _bundleList
     = new ArrayList<OsgiBundle>();
@@ -140,7 +140,7 @@ public class OsgiManager
     _systemBundle = new OsgiSystemBundle(this);
     _bundleList.add(_systemBundle);
 
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     _serviceWebBeansContainer = webBeans.createParent("osgi:");
 
@@ -179,7 +179,7 @@ public class OsgiManager
   /**
    * Returns the web beans container for the published service beans
    */
-  WebBeansContainer getServiceWebBeansContainer()
+  InjectManager getServiceWebBeansContainer()
   {
     return _serviceWebBeansContainer;
   }

@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.component;
+package com.caucho.config.inject;
 
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
@@ -40,7 +41,6 @@ import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.bytecode.*;
 import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -49,17 +49,23 @@ import java.util.*;
 import javax.annotation.*;
 
 /**
- * param type matching
+ * class type matching
  */
-public class ParamType extends BaseType
+public class ClassType extends BaseType
 {
+  private static final HashMap<Class,Class> _boxTypeMap
+    = new HashMap<Class,Class>();
+    
   private Class _type;
-  private BaseType []_param;
 
-  public ParamType(Class type, BaseType []param)
+  public ClassType(Class type)
   {
+    Class boxType = _boxTypeMap.get(type);
+
+    if (boxType != null)
+      type = boxType;
+    
     _type = type;
-    _param = param;
   }
   
   public Class getRawClass()
@@ -69,26 +75,7 @@ public class ParamType extends BaseType
   
   public boolean isMatch(Type type)
   {
-    if (! (type instanceof ParameterizedType))
-      return false;
-
-    ParameterizedType pType = (ParameterizedType) type;
-    Type rawType = pType.getRawType();
-
-    if (! _type.equals(rawType))
-      return false;
-
-    Type []args = pType.getActualTypeArguments();
-    
-    if (_param.length != args.length)
-      return false;
-
-    for (int i = 0; i < _param.length; i++) {
-      if (! _param[i].isMatch(args[i]))
-	return false;
-    }
-
-    return true;
+    return _type.equals(type);
   }
 
   public int hashCode()
@@ -100,40 +87,27 @@ public class ParamType extends BaseType
   {
     if (o == this)
       return true;
-    else if (! (o instanceof ParamType))
+    else if (! (o instanceof ClassType))
       return false;
 
-    ParamType type = (ParamType) o;
+    ClassType type = (ClassType) o;
 
-    if (! _type.equals(type._type))
-      return false;
-
-    if (_param.length != type._param.length)
-      return false;
-
-    for (int i = 0; i < _param.length; i++) {
-      if (! _param[i].equals(type._param[i]))
-	return false;
-    }
-
-    return true;
+    return _type.equals(type._type);
   }
 
   public String toString()
   {
-    StringBuilder sb = new StringBuilder();
+    return getRawClass().toString();
+  }
 
-    sb.append(getRawClass());
-    sb.append("<");
-
-    for (int i = 0; i < _param.length; i++) {
-      if (i != 0)
-	sb.append(",");
-      
-      sb.append(_param[i]);
-    }
-    sb.append(">");
-
-    return sb.toString();
+  static {
+    _boxTypeMap.put(boolean.class, Boolean.class);
+    _boxTypeMap.put(byte.class, Byte.class);
+    _boxTypeMap.put(short.class, Short.class);
+    _boxTypeMap.put(int.class, Integer.class);
+    _boxTypeMap.put(long.class, Long.class);
+    _boxTypeMap.put(float.class, Float.class);
+    _boxTypeMap.put(double.class, Double.class);
+    _boxTypeMap.put(char.class, Character.class);
   }
 }

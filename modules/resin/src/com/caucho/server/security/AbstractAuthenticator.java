@@ -37,7 +37,6 @@ import com.caucho.server.webapp.Application;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
-import com.caucho.webbeans.component.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;

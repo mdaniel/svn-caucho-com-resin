@@ -27,12 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.component;
+package com.caucho.config.inject;
 
 import com.caucho.config.ConfigContext;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.scope.SingletonScope;
 import com.caucho.jmx.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.util.logging.*;
 import java.io.Closeable;
@@ -55,7 +55,7 @@ public class SingletonClassComponent extends SimpleBean
     super.setScope(new SingletonScope());
   }
   
-  public SingletonClassComponent(WebBeansContainer webBeans)
+  public SingletonClassComponent(InjectManager webBeans)
   {
     super(webBeans);
     

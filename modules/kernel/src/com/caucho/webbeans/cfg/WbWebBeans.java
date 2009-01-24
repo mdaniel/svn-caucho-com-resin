@@ -31,13 +31,17 @@ package com.caucho.webbeans.cfg;
 
 import com.caucho.bytecode.*;
 import com.caucho.config.*;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.SimpleBean;
+import com.caucho.config.inject.SingletonClassComponent;
+import com.caucho.config.inject.DecoratorBean;
+import com.caucho.config.inject.InterceptorBean;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.webbeans.Singleton;
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.lang.annotation.*;
 import java.lang.reflect.*;
@@ -59,7 +63,7 @@ public class WbWebBeans {
   private static final Logger log
     = Logger.getLogger(WbWebBeans.class.getName());
   
-  private WebBeansContainer _webBeansContainer;
+  private InjectManager _webBeansContainer;
   private Path _root;
   
   private Path _webBeansFile;
@@ -85,7 +89,7 @@ public class WbWebBeans {
 
   private boolean _isConfigured;
 
-  public WbWebBeans(WebBeansContainer webBeansContainer, Path root)
+  public WbWebBeans(InjectManager webBeansContainer, Path root)
   {
     _webBeansContainer = webBeansContainer;
     
@@ -101,7 +105,7 @@ public class WbWebBeans {
   /**
    * returns the owning container.
    */
-  public WebBeansContainer getContainer()
+  public InjectManager getContainer()
   {
     return _webBeansContainer;
   }
@@ -226,7 +230,7 @@ public class WbWebBeans {
 
   public void update()
   {
-    WebBeansContainer webBeans = _webBeansContainer;
+    InjectManager webBeans = _webBeansContainer;
 
     try {
       if (_pendingClasses.size() > 0) {

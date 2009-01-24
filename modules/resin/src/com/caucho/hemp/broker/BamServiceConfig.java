@@ -39,10 +39,10 @@ import javax.resource.spi.*;
 import com.caucho.bam.*;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.config.annotation.Start;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.webbeans.cfg.AbstractBeanConfig;
-import com.caucho.webbeans.component.ComponentImpl;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import com.caucho.util.*;
 import javax.webbeans.In;

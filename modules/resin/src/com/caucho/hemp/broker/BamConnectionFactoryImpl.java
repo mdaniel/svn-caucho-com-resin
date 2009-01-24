@@ -30,6 +30,7 @@
 package com.caucho.hemp.broker;
 
 import com.caucho.bam.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.util.*;
 import com.caucho.webbeans.manager.*;
 
@@ -49,7 +50,7 @@ public class BamConnectionFactoryImpl implements BamConnectionFactory
   
   public BamConnectionFactoryImpl()
   {
-    WebBeansContainer manager = WebBeansContainer.getCurrent();
+    InjectManager manager = InjectManager.getCurrent();
 
     _broker = manager.getInstanceByType(BamBroker.class);
 

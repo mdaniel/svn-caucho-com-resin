@@ -30,9 +30,9 @@
 package com.caucho.amber.manager;
 
 import com.caucho.amber.*;
+import com.caucho.config.inject.HandleAware;
 import com.caucho.jca.*;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.component.HandleAware;
 
 import javax.persistence.*;
 import javax.transaction.*;

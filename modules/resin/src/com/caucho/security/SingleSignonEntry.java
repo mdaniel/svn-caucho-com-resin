@@ -31,7 +31,6 @@ package com.caucho.security;
 
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.security.*;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 import com.caucho.util.LruCache;
 

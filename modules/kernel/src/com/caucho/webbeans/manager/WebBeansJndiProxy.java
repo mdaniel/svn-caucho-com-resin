@@ -28,6 +28,7 @@
 
 package com.caucho.webbeans.manager;
 
+import com.caucho.config.manager.InjectManager;
 import com.caucho.naming.ObjectProxy;
 
 import java.util.Hashtable;
@@ -48,6 +49,6 @@ public class WebBeansJndiProxy implements ObjectProxy, java.io.Serializable
   public Object createObject(Hashtable env)
     throws NamingException
   {
-    return WebBeansContainer.create();
+    return InjectManager.create();
   }
 }

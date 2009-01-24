@@ -27,29 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.component;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Set;
-
-import javax.inject.manager.Bean;
-import javax.inject.manager.Manager;
+package com.caucho.config.inject;
 
 /**
- * Configuration for the xml web bean component.
+ * Interface for singleton objects that need to know their handle
  */
-abstract public class CauchoBean<T> extends Bean<T>
-{
-  protected CauchoBean(Manager manager)
-  {
-    super(manager);
-  }
-  
-  abstract public Set<BaseType> getGenericTypes();
-
+public interface HandleAware {
   /**
-   * Returns all of the custom annotations
+   * Callback to set the webbeans handle.
    */
-  abstract public Annotation []getAnnotations();
+  public void setSerializationHandle(Object handle);
 }

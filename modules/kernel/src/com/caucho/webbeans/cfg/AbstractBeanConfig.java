@@ -30,14 +30,17 @@
 package com.caucho.webbeans.cfg;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.SimpleBean;
+import com.caucho.config.inject.SingletonBean;
+import com.caucho.config.inject.SingletonClassComponent;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.*;
 import com.caucho.naming.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -249,7 +252,7 @@ abstract public class AbstractBeanConfig {
 
   protected void register(Object value, Class api)
   {
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
     WbWebBeans wbWebBeans = webBeans.getWbWebBeans();
     
     ComponentImpl comp;

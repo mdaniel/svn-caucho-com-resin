@@ -29,9 +29,9 @@
 
 package com.caucho.el;
 
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.loader.*;
-import com.caucho.webbeans.component.ComponentImpl;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.el.ELContext;
 import javax.el.ELResolver;
@@ -46,14 +46,14 @@ public class EnvironmentLevelELResolver extends ELResolver {
     = new EnvironmentLocal<EnvironmentLevelELResolver>();
   
   private final ClassLoader _loader;
-  private final WebBeansContainer _webBeans;
+  private final InjectManager _webBeans;
 
   private EnvironmentLevelELResolver(ClassLoader loader)
   {
     _loader = loader;
 
     if (Environment.getEnvironmentClassLoader(loader) != null)
-      _webBeans = WebBeansContainer.create(loader);
+      _webBeans = InjectManager.create(loader);
     else
       _webBeans = null;
   }

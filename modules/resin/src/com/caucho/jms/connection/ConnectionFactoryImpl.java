@@ -31,7 +31,7 @@ package com.caucho.jms.connection;
 import com.caucho.config.ConfigException;
 import com.caucho.jms.memory.*;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.component.HandleAware;
+import com.caucho.config.inject.HandleAware;
 
 import javax.jms.*;
 import javax.sql.DataSource;

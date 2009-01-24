@@ -29,7 +29,8 @@
 
 package com.caucho.webbeans.manager;
 
-import com.caucho.webbeans.component.CauchoBean;
+import com.caucho.config.inject.CauchoBean;
+
 import java.lang.annotation.Annotation;
 import javax.inject.manager.Manager;
 

@@ -44,7 +44,7 @@ import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
 
 import com.caucho.util.*;
-import com.caucho.webbeans.component.*;
+import com.caucho.config.inject.HandleAware;
 
 /**
  * Implements an abstract queue.

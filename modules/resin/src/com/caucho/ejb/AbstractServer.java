@@ -31,6 +31,7 @@ package com.caucho.ejb;
 
 import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.*;
@@ -49,7 +50,6 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
-import com.caucho.webbeans.component.*;
 
 import javax.ejb.*;
 import javax.naming.Context;

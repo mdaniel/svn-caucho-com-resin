@@ -35,7 +35,7 @@ import javax.webbeans.*;
 import javax.context.Context;
 import javax.inject.manager.Bean;
 
-import com.caucho.webbeans.component.*;
+import com.caucho.config.inject.ComponentImpl;
 
 /**
  * Context for a named EL bean scope

@@ -30,6 +30,7 @@
 package com.caucho.config.type;
 
 import com.caucho.config.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.naming.*;
 import com.caucho.util.*;
@@ -109,7 +110,7 @@ public class AbstractBeanType extends BeanType
     if (text == null)
       return null;
 
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     Object value;
 

@@ -27,35 +27,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.component;
+package com.caucho.config.inject;
 
 import com.caucho.config.ConfigContext;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.scope.ScopeContext;
 
 import java.lang.annotation.*;
-import javax.naming.*;
-import javax.webbeans.*;
+import javax.inject.Production;
 
-import com.caucho.naming.*;
+import com.caucho.webbeans.cfg.WbWebBeans;
 import com.caucho.webbeans.manager.*;
 
 /**
  * Component for a singleton beans
  */
-public class ObjectProxyComponent extends ComponentImpl {
-  private static final Object []NULL_ARGS = new Object[0];
-
-  private ObjectProxy _proxy;
-  private Class _type;
-
-  public ObjectProxyComponent(WebBeansContainer webBeans,
-                              ObjectProxy proxy,
-                              Class type)
+abstract public class FactoryComponent extends ComponentImpl {
+  public FactoryComponent(Class targetType, String name)
   {
-    super(webBeans);
-    
-    _proxy = proxy;
-    setTargetType(type);
+    super(InjectManager.create());
+
+    setTargetType(targetType);
+    setName(name);
+    setDeploymentType(Production.class);
   }
 
   @Override
@@ -66,27 +61,27 @@ public class ObjectProxyComponent extends ComponentImpl {
   @Override
   public Object get()
   {
-    try {
-      return _proxy.createObject(null);
-    } catch (NamingException e) {
-      throw new RuntimeException(e);
-    }
+    return get(null);
   }
 
   @Override
   public Object get(ConfigContext env)
   {
-    return get();
+    if (env != null) {
+      Object value = env.get(this);
+
+      if (value != null)
+	return value;
+
+      value = create();
+      
+      env.put(this, value);
+
+      return value;
+    }
+    else
+      return create();
   }
 
-  @Override
-  public Object create()
-  {
-    return get();
-  }
-
-  protected Object createNew()
-  {
-    throw new IllegalStateException();
-  }
+  abstract public Object create();
 }

@@ -30,6 +30,7 @@
 package com.caucho.resources;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.loader.*;
 import com.caucho.util.*;
@@ -133,7 +134,7 @@ public class ScheduledTask extends BeanConfig
     _url = url;
 
     _webApp
-      = WebBeansContainer.create().getInstanceByType(WebApp.class);
+      = InjectManager.create().getInstanceByType(WebApp.class);
 
     if (_webApp == null)
       throw new ConfigException(L.l("relative url '{0}' requires web-app context",
@@ -283,7 +284,7 @@ public class ScheduledTask extends BeanConfig
     MethodTask(MethodExpression method)
     {
       _method = method;
-      _elContext = WebBeansContainer.create().getELContext();
+      _elContext = InjectManager.create().getELContext();
     }
 
     public void run()

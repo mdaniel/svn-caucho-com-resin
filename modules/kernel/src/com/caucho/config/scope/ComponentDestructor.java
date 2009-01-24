@@ -29,7 +29,7 @@
 
 package com.caucho.config.scope;
 
-import com.caucho.webbeans.component.ComponentImpl;
+import com.caucho.config.inject.ComponentImpl;
 
 import java.io.Closeable;
 

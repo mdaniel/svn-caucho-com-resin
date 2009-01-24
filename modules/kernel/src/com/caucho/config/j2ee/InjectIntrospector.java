@@ -29,6 +29,8 @@
 
 package com.caucho.config.j2ee;
 
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.SingletonGenerator;
 import com.caucho.config.program.ComponentValueGenerator;
 import com.caucho.config.program.FieldGeneratorProgram;
@@ -38,8 +40,6 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.component.ComponentImpl;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 
 import javax.annotation.*;
@@ -249,7 +249,7 @@ public class InjectIntrospector {
 
     for (Field field : type.getDeclaredFields()) {
       if (hasBindingAnnotation(field)) {
-        WebBeansContainer webBeans = WebBeansContainer.create();
+        InjectManager webBeans = InjectManager.create();
 
 	boolean isOptional = isBindingOptional(field);
 	
@@ -597,7 +597,7 @@ public class InjectIntrospector {
     if (! "".equals(pUnit.name()))
       jndiName = pUnit.name();
     
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
     
     Bean component;
 
@@ -656,7 +656,7 @@ public class InjectIntrospector {
 					Field field)
     throws ConfigException
   {
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     boolean isOptional = false;
     webBeans.createProgram(injectList, field, isOptional);
@@ -666,7 +666,7 @@ public class InjectIntrospector {
 					Method method)
     throws ConfigException
   {
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     webBeans.createProgram(injectList, method);
   }
@@ -767,7 +767,7 @@ public class InjectIntrospector {
 
   public static Bean bind(String location, Class type, String name)
   {
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     Set<Bean> beans = webBeans.resolveAllByType(type);
 

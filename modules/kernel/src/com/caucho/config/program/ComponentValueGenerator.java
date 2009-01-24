@@ -29,8 +29,8 @@
 
 package com.caucho.config.program;
 
+import com.caucho.config.manager.InjectManager;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.inject.manager.Bean;
 import java.util.logging.Logger;
@@ -43,7 +43,7 @@ public class ComponentValueGenerator extends ValueGenerator {
     = Logger.getLogger(ComponentValueGenerator.class.getName());
   private static final L10N L = new L10N(ComponentValueGenerator.class);
 
-  private final WebBeansContainer _webBeans;
+  private final InjectManager _webBeans;
   private final Bean _comp;
   
   private final String _location;
@@ -55,7 +55,7 @@ public class ComponentValueGenerator extends ValueGenerator {
     
     _location = location;
 
-    _webBeans = WebBeansContainer.create();
+    _webBeans = InjectManager.create();
     _comp = comp;
   }
 

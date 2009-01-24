@@ -29,11 +29,11 @@
 
 package com.caucho.config.j2ee;
 
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ValueGenerator;
 import com.caucho.config.ConfigException;
 import com.caucho.naming.*;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.persistence.*;
 import javax.inject.AnnotationLiteral;
@@ -47,7 +47,7 @@ public class PersistenceUnitGenerator extends ValueGenerator
     = Logger.getLogger(PersistenceUnitGenerator.class.getName());
   private static final L10N L = new L10N(PersistenceUnitGenerator.class);
 
-  private WebBeansContainer _webBeans = WebBeansContainer.create();
+  private InjectManager _webBeans = InjectManager.create();
   
   private String _location;
   private String _jndiName;

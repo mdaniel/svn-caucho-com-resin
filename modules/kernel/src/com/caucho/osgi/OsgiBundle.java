@@ -30,6 +30,9 @@
 package com.caucho.osgi;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.SingletonBean;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.BeanConfig;
 import com.caucho.config.types.CustomBeanConfig;
@@ -47,9 +50,6 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 import com.caucho.webbeans.cfg.WbComponentConfig;
-import com.caucho.webbeans.component.ComponentImpl;
-import com.caucho.webbeans.component.SingletonBean;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
 import java.net.URL;
@@ -252,7 +252,7 @@ public class OsgiBundle implements Bundle
 
       log.fine(this + " starting");
 
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
 
       SingletonBean bean = new SingletonBean(_bundleContext, null,
 					       BundleContext.class);
@@ -970,8 +970,8 @@ public class OsgiBundle implements Bundle
       super.init();
 
       if (_comp != null) {
-	WebBeansContainer webBeans
-	  = WebBeansContainer.create(_manager.getParentLoader());
+	InjectManager webBeans
+	  = InjectManager.create(_manager.getParentLoader());
 
 	webBeans.addBean(_comp);
       }

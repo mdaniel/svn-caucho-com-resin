@@ -32,7 +32,7 @@ package com.caucho.amber.manager;
 import javax.persistence.*;
 import java.util.*;
 
-import com.caucho.webbeans.component.*;
+import com.caucho.config.inject.*;
 
 /**
  * The @PersistenceContext webbeans component

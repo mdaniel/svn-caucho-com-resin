@@ -31,11 +31,13 @@ package com.caucho.config.types;
 
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.SimpleBean;
+import com.caucho.config.inject.SimpleBeanMethod;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.config.type.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.xml.QName;
 
 import java.util.*;
@@ -309,9 +311,10 @@ public class CustomBeanConfig {
   private Class createClass(QName name)
   {
     String uri = name.getNamespaceURI();
+    String localName = name.getLocalName();
 
     if (uri.equals(RESIN_NS)) {
-      return createResinClass(name.getLocalName());
+      return createResinClass(localName);
     }
 
     if (! uri.startsWith("urn:java:"))
@@ -319,19 +322,7 @@ public class CustomBeanConfig {
 
     String pkg = uri.substring("urn:java:".length());
 
-    String className = pkg + "." + name.getLocalName();
-
-    try {
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-      Class cl = Class.forName(className, false, loader);
-
-      return cl;
-    } catch (ClassNotFoundException e) {
-      log.log(Level.FINEST, e.toString(), e);
-
-      return null;
-    }
+    return TypeFactory.loadClass(pkg, name.getLocalName());
   }
 
   private Class createResinClass(String name)
@@ -372,7 +363,7 @@ public class CustomBeanConfig {
     if (_component != null) {
       initComponent();
     
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
 
       webBeans.addBean(_component);
     }

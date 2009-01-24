@@ -35,6 +35,7 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.lib.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
@@ -79,7 +80,6 @@ import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 import com.caucho.webbeans.manager.WebBeansAddLoaderListener;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
@@ -248,7 +248,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       //  setRootDirectory(Vfs.getPwd());
 
       Environment.addChildLoaderListener(new WebBeansAddLoaderListener());
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
 
       Config.setProperty("resinHome", getResinHome());
       Config.setProperty("resin", new Var());
@@ -426,7 +426,7 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public void setServerId(String serverId)
   {
-    WebBeansContainer.create().addSingletonByName(serverId, "serverId");
+    InjectManager.create().addSingletonByName(serverId, "serverId");
 
     _serverId = serverId;
     _serverIdLocal.set(serverId);

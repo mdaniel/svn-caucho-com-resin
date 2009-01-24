@@ -27,87 +27,58 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.component;
+package com.caucho.config.inject;
 
-import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.type.*;
 import com.caucho.config.types.*;
-import com.caucho.naming.*;
+import com.caucho.config.gen.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.bytecode.*;
 import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.webbeans.event.*;
+import com.caucho.webbeans.manager.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
 
 import javax.annotation.*;
+import javax.inject.manager.Bean;
 
 /**
- * class type matching
+ * Configuration for a SimpleBean method, e.g. for an XML configuration of
+ * a @Produces
  */
-public class ClassType extends BaseType
+public class SimpleBeanMethod
 {
-  private static final HashMap<Class,Class> _boxTypeMap
-    = new HashMap<Class,Class>();
-    
-  private Class _type;
-
-  public ClassType(Class type)
-  {
-    Class boxType = _boxTypeMap.get(type);
-
-    if (boxType != null)
-      type = boxType;
-    
-    _type = type;
-  }
+  private static final L10N L = new L10N(SimpleBeanMethod.class);
   
-  public Class getRawClass()
-  {
-    return _type;
-  }
-  
-  public boolean isMatch(Type type)
-  {
-    return _type.equals(type);
-  }
+  private Method _method;
 
-  public int hashCode()
+  private Annotation []_annotations;
+
+  public SimpleBeanMethod(Method method, Annotation []annotations)
   {
-    return _type.hashCode();
+    _method = method;
+    _annotations = annotations;
   }
 
-  public boolean equals(Object o)
+  public Method getMethod()
   {
-    if (o == this)
-      return true;
-    else if (! (o instanceof ClassType))
-      return false;
+    return _method;
+  }
 
-    ClassType type = (ClassType) o;
-
-    return _type.equals(type._type);
+  public Annotation []getAnnotations()
+  {
+    return _annotations;
   }
 
   public String toString()
   {
-    return getRawClass().toString();
-  }
-
-  static {
-    _boxTypeMap.put(boolean.class, Boolean.class);
-    _boxTypeMap.put(byte.class, Byte.class);
-    _boxTypeMap.put(short.class, Short.class);
-    _boxTypeMap.put(int.class, Integer.class);
-    _boxTypeMap.put(long.class, Long.class);
-    _boxTypeMap.put(float.class, Float.class);
-    _boxTypeMap.put(double.class, Double.class);
-    _boxTypeMap.put(char.class, Character.class);
+    return getClass().getSimpleName() + "[" + _method.getName() + "]";
   }
 }

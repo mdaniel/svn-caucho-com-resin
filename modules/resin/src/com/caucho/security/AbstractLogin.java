@@ -29,9 +29,9 @@
 
 package com.caucho.security;
 
+import com.caucho.config.manager.InjectManager;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.security.*;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 import com.caucho.util.LruCache;
 
@@ -95,14 +95,14 @@ public abstract class AbstractLogin implements Login {
   protected Authenticator _auth;
   protected SingleSignon _singleSignon;
 
-  private WebBeansContainer _webBeans;
+  private InjectManager _webBeans;
 
   private boolean _isSessionSaveLogin = true;
   private boolean _isLogoutOnTimeout = true;
   
   protected AbstractLogin()
   {
-    _webBeans = WebBeansContainer.create();
+    _webBeans = InjectManager.create();
   }
 
   /**

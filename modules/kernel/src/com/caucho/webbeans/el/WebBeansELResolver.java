@@ -33,18 +33,17 @@ import java.beans.*;
 import java.util.*;
 import javax.el.*;
 
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.config.manager.InjectManager;
 
 /**
  * Variable resolution for webbeans variables
  */
 public class WebBeansELResolver extends ELResolver {
-  private final WebBeansContainer _webBeans;
+  private final InjectManager _webBeans;
   
   public WebBeansELResolver()
   {
-    _webBeans = WebBeansContainer.create();
+    _webBeans = InjectManager.create();
     _webBeans.update();
   }
   

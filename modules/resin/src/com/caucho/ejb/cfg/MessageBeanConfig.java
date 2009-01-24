@@ -37,11 +37,11 @@ import javax.jms.*;
 import javax.resource.spi.*;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.ejb.manager.*;
 import com.caucho.webbeans.cfg.AbstractBeanConfig;
-import com.caucho.webbeans.component.ComponentImpl;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import com.caucho.util.*;
 
@@ -120,7 +120,7 @@ public class MessageBeanConfig extends AbstractBeanConfig
       bean.setInit(getInit());
 
     String loc = getInstanceClass().getName() + ": ";
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     bean.setMessageConsumerMax(_messageConsumerMax);
     

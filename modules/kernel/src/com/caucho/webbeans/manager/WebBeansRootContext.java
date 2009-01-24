@@ -36,38 +36,38 @@ import java.util.ArrayList;
 /**
  * Scanned data for the root context
  */
-class WebBeansRootContext  {
+public class WebBeansRootContext  {
   private final Path _root;
   
   private ArrayList<String> _classList = new ArrayList<String>();
   private boolean _isScanComplete;
   
-  WebBeansRootContext(Path root)
+  public WebBeansRootContext(Path root)
   {
     _root = root;
   }
 
-  Path getRoot()
+  public Path getRoot()
   {
     return _root;
   }
 
-  void addClassName(String className)
+  public void addClassName(String className)
   {
     _classList.add(className);
   }
 
-  ArrayList<String> getClassNameList()
+  public ArrayList<String> getClassNameList()
   {
     return _classList;
   }
 
-  boolean isScanComplete()
+  public boolean isScanComplete()
   {
     return _isScanComplete;
   }
 
-  void setScanComplete(boolean isScanComplete)
+  public void setScanComplete(boolean isScanComplete)
   {
     _isScanComplete = isScanComplete;
   }

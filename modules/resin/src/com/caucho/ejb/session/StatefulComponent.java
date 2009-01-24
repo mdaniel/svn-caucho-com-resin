@@ -30,12 +30,11 @@
 package com.caucho.ejb.session;
 
 import com.caucho.config.ConfigContext;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.manager.InjectManager;
+
 import java.lang.annotation.*;
 import javax.webbeans.*;
-
-
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 /**
  * Component for session beans
@@ -45,7 +44,7 @@ public class StatefulComponent extends ComponentImpl {
 
   public StatefulComponent(StatefulProvider provider)
   {
-    super(WebBeansContainer.create());
+    super(InjectManager.create());
     
     _provider = provider;
   }

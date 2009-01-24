@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.session;
+package com.caucho.config.inject;
 
 import com.caucho.config.ConfigContext;
 import com.caucho.config.inject.ComponentImpl;
@@ -35,21 +35,29 @@ import com.caucho.config.manager.InjectManager;
 import com.caucho.config.scope.ScopeContext;
 
 import java.lang.annotation.*;
+import javax.naming.*;
 import javax.webbeans.*;
 
+import com.caucho.naming.*;
+import com.caucho.webbeans.manager.*;
 
 /**
- * Component for session beans
+ * Component for a singleton beans
  */
-public class StatelessComponent extends ComponentImpl
-{
-  private final StatelessProvider _provider;
+public class ObjectProxyComponent extends ComponentImpl {
+  private static final Object []NULL_ARGS = new Object[0];
 
-  public StatelessComponent(StatelessProvider provider, Class api)
+  private ObjectProxy _proxy;
+  private Class _type;
+
+  public ObjectProxyComponent(InjectManager webBeans,
+                              ObjectProxy proxy,
+                              Class type)
   {
-    super(InjectManager.create());
-
-    _provider = provider;
+    super(webBeans);
+    
+    _proxy = proxy;
+    setTargetType(type);
   }
 
   @Override
@@ -60,18 +68,27 @@ public class StatelessComponent extends ComponentImpl
   @Override
   public Object get()
   {
-    return _provider.__caucho_get();
+    try {
+      return _proxy.createObject(null);
+    } catch (NamingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
   public Object get(ConfigContext env)
   {
-    return _provider.__caucho_get();
+    return get();
   }
 
   @Override
   public Object create()
   {
-    return _provider.__caucho_get();
+    return get();
+  }
+
+  protected Object createNew()
+  {
+    throw new IllegalStateException();
   }
 }

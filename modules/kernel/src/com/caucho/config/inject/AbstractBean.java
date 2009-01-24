@@ -27,9 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.component;
+package com.caucho.config.inject;
 
 import com.caucho.config.annotation.ServiceType;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
@@ -43,7 +44,6 @@ import com.caucho.webbeans.*;
 import com.caucho.webbeans.bytecode.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.event.ObserverImpl;
-import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.webbeans.manager.CurrentLiteral;
 
 import java.lang.reflect.*;
@@ -86,7 +86,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   public static final Annotation []CURRENT_ANN
     = new Annotation[] { new CurrentLiteral() };
 
-  protected WebBeansContainer _webBeans;
+  protected InjectManager _webBeans;
   
   private Type _targetType;
   private BaseType _baseType;
@@ -129,14 +129,14 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 
   protected Method _cauchoPostConstruct;
   
-  public AbstractBean(WebBeansContainer manager)
+  public AbstractBean(InjectManager manager)
   {
     super(manager);
 
     _webBeans = manager;
   }
 
-  public WebBeansContainer getWebBeans()
+  public InjectManager getWebBeans()
   {
     return _webBeans;
   }
@@ -842,7 +842,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
     return types;
   }
   
-  boolean hasBindingAnnotation(Constructor ctor)
+  protected boolean hasBindingAnnotation(Constructor ctor)
   {
     /*
     if (ctor.isAnnotationPresent(In.class))
@@ -870,7 +870,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
       for (Annotation ann : paramAnn[i]) {
 	if (ann instanceof Observes) {
 	  if (observer >= 0)
-	    throw WebBeansContainer.error(method, L.l("Only one param may have an @Observer"));
+	    throw InjectManager.error(method, L.l("Only one param may have an @Observer"));
 	  
 	  observer = i;
 	}

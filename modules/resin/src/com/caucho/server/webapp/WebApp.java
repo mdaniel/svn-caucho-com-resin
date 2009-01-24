@@ -31,7 +31,10 @@ package com.caucho.server.webapp;
 
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.CauchoBean;
+import com.caucho.config.inject.*;
 import com.caucho.config.j2ee.PersistenceContextRefConfig;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.*;
 import com.caucho.i18n.CharacterEncoding;
@@ -86,7 +89,6 @@ import com.caucho.vfs.Vfs;
 import com.caucho.webbeans.CauchoDeployment;
 import com.caucho.webbeans.el.WebBeansELResolver;
 import com.caucho.webbeans.manager.*;
-import com.caucho.webbeans.component.*;
 import com.caucho.java.WorkDir;
 import com.caucho.jsf.cfg.JsfPropertyGroup;
 
@@ -156,7 +158,7 @@ public class WebApp extends ServletContextImpl
   private WebAppController _controller;
 
   // The webbeans container
-  private WebBeansContainer _webBeans;
+  private InjectManager _webBeans;
 
   // The webApp directory.
   private final Path _appDir;
@@ -435,7 +437,7 @@ public class WebApp extends ServletContextImpl
 
     _osgiBundle = new OsgiWebAppBundle(manager, this);
 
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     webBeans.addSingleton(_osgiBundle.getBundleContext(),
 			  CauchoDeployment.class, (String) null,
@@ -1857,7 +1859,7 @@ public class WebApp extends ServletContextImpl
 
       _classLoader.setId("web-app:" + getId());
 
-      _webBeans = WebBeansContainer.getCurrent();
+      _webBeans = InjectManager.getCurrent();
 
       /*
       try {

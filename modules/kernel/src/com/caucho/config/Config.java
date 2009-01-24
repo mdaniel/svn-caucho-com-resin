@@ -30,6 +30,7 @@
 package com.caucho.config;
 
 import com.caucho.config.attribute.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.type.*;
 import com.caucho.config.types.*;
 import com.caucho.el.EL;
@@ -40,7 +41,6 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.relaxng.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.xml.DOMBuilder;
 import com.caucho.xml.QDocument;
 import com.caucho.xml.QName;
@@ -299,7 +299,7 @@ public class Config {
 
       ConfigContext builder = createBuilder();
 
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
 
       if (webBeans != null && webBeans.getObjectByName("__FILE__") == null)
 	webBeans.addSingleton(FileVar.__FILE__, "__FILE__");
@@ -353,7 +353,7 @@ public class Config {
 
       ConfigContext builder = createBuilder();
 
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
       
       if (webBeans != null && webBeans.findByName("__FILE__") == null)
 	webBeans.addSingleton(FileVar.__FILE__, "__FILE__");
@@ -744,7 +744,7 @@ public class Config {
    */
   public static Object getCurrentVar(String var)
   {
-    return WebBeansContainer.create().findByName(var);
+    return InjectManager.create().findByName(var);
   }
 
   /**

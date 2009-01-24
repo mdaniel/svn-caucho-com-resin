@@ -29,6 +29,7 @@
 
 package com.caucho.webbeans.manager;
 
+import com.caucho.config.manager.InjectManager;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.AddLoaderListener;
 
@@ -42,7 +43,7 @@ public class WebBeansAddLoaderListener implements AddLoaderListener
    */
   public void addLoader(EnvironmentClassLoader loader)
   {
-    WebBeansContainer container = WebBeansContainer.create(loader);
+    InjectManager container = InjectManager.create(loader);
 
     // jpa/0046
     // container.update();

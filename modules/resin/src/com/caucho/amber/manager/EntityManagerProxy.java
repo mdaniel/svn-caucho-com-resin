@@ -29,8 +29,8 @@
 
 package com.caucho.amber.manager;
 
+import com.caucho.config.inject.HandleAware;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.component.HandleAware;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;

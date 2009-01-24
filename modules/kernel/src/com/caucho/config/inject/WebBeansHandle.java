@@ -27,13 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.component;
+package com.caucho.config.inject;
 
 import java.io.Serializable;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.*;
-import javax.webbeans.*;
 
 import com.caucho.util.*;
 // import com.caucho.hessian.io.HessianHandle;

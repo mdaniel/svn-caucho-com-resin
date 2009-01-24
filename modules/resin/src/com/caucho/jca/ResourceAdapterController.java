@@ -29,10 +29,10 @@
 
 package com.caucho.jca;
 
+import com.caucho.config.inject.ComponentImpl;
 import com.caucho.lifecycle.*;
 import com.caucho.loader.*;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.component.*;
 
 import java.util.logging.Logger;
 import javax.resource.spi.*;

@@ -29,13 +29,13 @@
 
 package com.caucho.amber.manager;
 
+import com.caucho.config.inject.HandleAware;
 import javax.persistence.Cache;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import com.caucho.webbeans.component.*;
 
 /**
  * Amber's EntityManagerFactory container.

@@ -34,8 +34,8 @@ import java.util.logging.*;
 
 import javax.annotation.*;
 import com.caucho.config.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import com.caucho.util.*;
 import org.osgi.framework.*;
@@ -60,7 +60,7 @@ public class OsgiServiceConfig extends BeanConfig
 
     Object service = getObject();
 
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
     BundleContext bundle = webBeans.getInstanceByType(BundleContext.class);
 
     if (bundle == null)

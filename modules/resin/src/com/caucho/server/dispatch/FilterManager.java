@@ -29,9 +29,10 @@
 package com.caucho.server.dispatch;
 
 import com.caucho.config.Config;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
@@ -124,7 +125,7 @@ public class FilterManager {
         if (filter != null)
           return filter;
 	
-	WebBeansContainer webBeans = WebBeansContainer.create();
+	InjectManager webBeans = InjectManager.create();
       
 	_comp = (ComponentImpl) webBeans.createTransient(filterClass);
       

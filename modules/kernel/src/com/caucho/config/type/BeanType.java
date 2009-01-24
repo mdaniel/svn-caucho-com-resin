@@ -35,17 +35,18 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.*;
 
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
+import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.xml.*;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 import com.caucho.xml.QName;
 
@@ -140,8 +141,8 @@ public class BeanType extends ConfigType
 	  throw new ConfigException(L.l("{0} cannot be instantiated because it is an interface",
 					_beanClass.getName()));
 
-	WebBeansContainer webBeans
-	  = WebBeansContainer.create(_beanClass.getClassLoader());
+	InjectManager webBeans
+	  = InjectManager.create(_beanClass.getClassLoader());
 
 	_component = (ComponentImpl) webBeans.createTransient(_beanClass);
       }

@@ -34,6 +34,7 @@ import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.bam.hmtp.HmtpClient;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.xmpp.im.ImMessage;
 import com.caucho.xmpp.im.ImPresence;
 import com.caucho.xmpp.im.RosterItem;
@@ -56,7 +57,6 @@ import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.vfs.Path;
 
 import java.io.IOException;
@@ -101,7 +101,7 @@ public class BamModule extends AbstractQuercusModule
     // create a connection lazily
     if (connection == null) {
       HempBroker broker = 
-        WebBeansContainer.getCurrent().getInstanceByType(HempBroker.class);
+        InjectManager.getCurrent().getInstanceByType(HempBroker.class);
 
       String jid = "php@" + env.getGlobalVar("_SERVER").get(SERVER_NAME);
       String resource = env.getGlobalVar("_SERVER").get(PHP_SELF).toString();
@@ -210,7 +210,7 @@ public class BamModule extends AbstractQuercusModule
     child.setScript(path);
     // child.setBroker(manager.getBroker());
 
-    WebBeansContainer container = WebBeansContainer.getCurrent();
+    InjectManager container = InjectManager.getCurrent();
     container.injectObject(child);
 
     manager.addChild(jid, child);
@@ -269,7 +269,7 @@ public class BamModule extends AbstractQuercusModule
 
     child.setScript(path);
 
-    WebBeansContainer container = WebBeansContainer.getCurrent();
+    InjectManager container = InjectManager.getCurrent();
     container.injectObject(child);
 
     agent.addChild(jid, child);

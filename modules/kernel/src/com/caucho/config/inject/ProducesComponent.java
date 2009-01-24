@@ -27,15 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.component;
+package com.caucho.config.inject;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -60,7 +61,7 @@ public class ProducesComponent extends ComponentImpl {
 
   private boolean _isBound;
 
-  public ProducesComponent(WebBeansContainer webBeans,
+  public ProducesComponent(InjectManager webBeans,
 			   Bean producer,
 			   Method method,
 			   Annotation []annList)
@@ -148,7 +149,7 @@ public class ProducesComponent extends ComponentImpl {
 
       _isBound = true;
       
-      String loc = WebBeansContainer.location(_method);
+      String loc = InjectManager.location(_method);
     
       Type []param = _method.getGenericParameterTypes();
       Annotation [][]paramAnn = _method.getParameterAnnotations();

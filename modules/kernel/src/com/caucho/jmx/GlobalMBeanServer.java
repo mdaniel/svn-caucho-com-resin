@@ -30,7 +30,7 @@
 package com.caucho.jmx;
 
 import com.caucho.util.L10N;
-import com.caucho.webbeans.component.WebBeansHandle;
+import com.caucho.config.inject.WebBeansHandle;
 
 import java.util.logging.Logger;
 import javax.management.*;

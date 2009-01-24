@@ -37,7 +37,6 @@ import com.caucho.config.*;
 import com.caucho.config.attribute.*;
 import com.caucho.util.*;
 import com.caucho.xml.QName;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
 /**

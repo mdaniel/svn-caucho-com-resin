@@ -33,8 +33,7 @@ import java.beans.*;
 import java.util.*;
 import javax.el.*;
 
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.config.manager.InjectManager;
 
 /**
  * Variable resolution for webbeans variables
@@ -81,7 +80,7 @@ public class WebBeansContextResolver extends ELResolver {
 
     String name = (String) property;
 
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
     Object result = webBeans.getInstanceByName(name);
 
     if (result != null) {

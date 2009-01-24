@@ -46,7 +46,6 @@ import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
 
 import com.caucho.util.*;
-import com.caucho.webbeans.component.*;
 
 /**
  * Wrapper around a JMS destination

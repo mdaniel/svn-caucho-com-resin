@@ -30,6 +30,7 @@
 package com.caucho.resin;
 
 import com.caucho.config.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.server.cluster.*;
 import com.caucho.server.dispatch.*;
@@ -155,7 +156,7 @@ public class BeanEmbed
   protected void configure()
   {
     try {
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
 
       if (_value != null) {
 	if (_name != null)

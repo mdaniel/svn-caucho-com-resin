@@ -29,6 +29,7 @@
 
 package com.caucho.config.lib;
 
+import com.caucho.config.manager.InjectManager;
 import com.caucho.naming.Jndi;
 import com.caucho.webbeans.manager.*;
 
@@ -67,7 +68,7 @@ public class ResinConfigLibrary {
     return Jndi.lookup(jndiName);
   }
 
-  public static void configure(WebBeansContainer webBeans)
+  public static void configure(InjectManager webBeans)
   {
     try {
       for (Method m : ResinConfigLibrary.class.getMethods()) {

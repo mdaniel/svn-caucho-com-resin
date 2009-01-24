@@ -36,9 +36,9 @@ import java.util.logging.Logger;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.SimpleBamService;
 import com.caucho.config.ConfigException;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.xmpp.disco.DiscoInfoQuery;
 
 import javax.annotation.PostConstruct;
@@ -99,7 +99,7 @@ public class BamPhpRootService extends SimpleBamService {
       agent = new BamPhpAgent(_script, _encoding);
       agent.setJid(jid);
 
-      WebBeansContainer container = WebBeansContainer.getCurrent();
+      InjectManager container = InjectManager.getCurrent();
       container.injectObject(agent);
 
       _agents.put(jid, agent);

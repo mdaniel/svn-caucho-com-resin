@@ -29,6 +29,7 @@
 
 package com.caucho.security;
 
+import com.caucho.config.inject.HandleAware;
 import com.caucho.security.BasicPrincipal;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.security.PasswordDigest;
@@ -39,7 +40,6 @@ import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.util.Hex;
-import com.caucho.webbeans.component.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;

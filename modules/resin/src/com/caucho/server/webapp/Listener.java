@@ -29,6 +29,7 @@
 
 package com.caucho.server.webapp;
 
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
@@ -121,7 +122,7 @@ public class Listener extends DescriptionGroupConfig {
     if (_object != null)
       return _object;
 
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
     
     if (_init != null) {
       _object = webBeans.createTransientObjectNoInit(_listenerClass);

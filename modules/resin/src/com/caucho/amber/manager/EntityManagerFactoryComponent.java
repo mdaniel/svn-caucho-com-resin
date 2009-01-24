@@ -33,7 +33,7 @@ import javax.persistence.*;
 import javax.persistence.spi.*;
 
 import com.caucho.amber.cfg.*;
-import com.caucho.webbeans.component.*;
+import com.caucho.config.inject.*;
 
 /**
  * The Entity manager webbeans component

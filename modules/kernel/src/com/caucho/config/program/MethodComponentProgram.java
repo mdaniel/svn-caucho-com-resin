@@ -30,10 +30,10 @@
 package com.caucho.config.program;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.scope.DependentScope;
-import com.caucho.webbeans.component.*;
 
 import java.util.logging.*;
 import java.lang.reflect.*;

@@ -29,6 +29,7 @@
 
 package com.caucho.log.handler;
 
+import com.caucho.config.manager.InjectManager;
 import com.caucho.util.L10N;
 import com.caucho.webbeans.manager.*;
 
@@ -45,7 +46,7 @@ public class EventHandler extends Handler {
     = Logger.getLogger(EventHandler.class.getName());
   private static final L10N L = new L10N(EventHandler.class);
 
-  private WebBeansContainer _webBeans = WebBeansContainer.create();
+  private InjectManager _webBeans = InjectManager.create();
 
   /**
    * Publishes the record.

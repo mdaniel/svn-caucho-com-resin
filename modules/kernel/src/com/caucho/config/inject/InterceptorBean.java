@@ -27,8 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.component;
+package com.caucho.config.inject;
 
+import com.caucho.config.inject.SimpleBean;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.util.*;
 import com.caucho.webbeans.manager.*;
 
@@ -63,7 +65,7 @@ public class InterceptorBean extends Interceptor
   private HashSet<Annotation> _bindings
     = new HashSet<Annotation>();
   
-  public InterceptorBean(WebBeansContainer webBeans,
+  public InterceptorBean(InjectManager webBeans,
 			 Class type)
   {
     super(webBeans);
@@ -77,7 +79,7 @@ public class InterceptorBean extends Interceptor
   
   public InterceptorBean(Class type)
   {
-    this(WebBeansContainer.create(), type);
+    this(InjectManager.create(), type);
   }
 
   //

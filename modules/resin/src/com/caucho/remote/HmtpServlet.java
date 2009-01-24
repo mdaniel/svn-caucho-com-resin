@@ -33,6 +33,7 @@ import java.io.*;
 import javax.servlet.*;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.hemp.*;
 import com.caucho.hemp.broker.*;
 import com.caucho.hemp.servlet.*;
@@ -63,7 +64,7 @@ public class HmtpServlet extends GenericServlet {
   public void init()
   {
     try {
-      WebBeansContainer webBeans = WebBeansContainer.getCurrent();
+      InjectManager webBeans = InjectManager.getCurrent();
 
       if (_isAdmin)
 	_auth = webBeans.getInstanceByType(AdminAuthenticator.class);

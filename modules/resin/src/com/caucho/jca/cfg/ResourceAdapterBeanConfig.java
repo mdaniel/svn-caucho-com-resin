@@ -29,6 +29,7 @@
 
 package com.caucho.jca.cfg;
 
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
@@ -46,7 +47,6 @@ import com.caucho.loader.StartListener;
 import com.caucho.naming.Jndi;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
 import javax.management.Attribute;
@@ -91,7 +91,7 @@ public class ResourceAdapterBeanConfig extends BeanConfig {
     ResourceAdapterController controller
       = new ResourceAdapterController(getComponent(), ra);
 
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     webBeans.addSingleton(controller, type.getName());
 

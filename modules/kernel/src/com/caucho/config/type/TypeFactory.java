@@ -78,6 +78,9 @@ public class TypeFactory implements AddLoaderListener
 
   private final HashSet<URL> _configSet
     = new HashSet<URL>();
+
+  private final HashMap<String,ArrayList<String>> _packageImportMap
+    = new HashMap<String,ArrayList<String>>();
   
   private final HashMap<String,ConfigType> _typeMap
     = new HashMap<String,ConfigType>();
@@ -152,6 +155,14 @@ public class TypeFactory implements AddLoaderListener
   public static ConfigType getType(Type type)
   {
     return getType((Class) type);
+  }
+
+  /**
+   * Returns the appropriate strategy.
+   */
+  public static Class loadClass(String pkg, String name)
+  {
+    return getFactory().loadClassImpl(pkg, name);
   }
 
   public static TypeFactory create()
@@ -327,6 +338,66 @@ public class TypeFactory implements AddLoaderListener
       _envAttrMap.put(name, attr);
 
       return attr;
+    }
+  }
+
+  private Class loadClassImpl(String pkg, String name)
+  {
+    String className = pkg + "." + name;
+
+    ArrayList<String> pkgList = loadPackageList(pkg);
+
+    for (String pkgName : pkgList) {
+      try {
+	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+	Class cl = Class.forName(pkgName + '.' + name, false, loader);
+
+	return cl;
+      } catch (ClassNotFoundException e) {
+	log.log(Level.ALL, e.toString(), e);
+      }
+    }
+
+    return null;
+  }
+
+  private ArrayList<String> loadPackageList(String pkg)
+  {
+    synchronized (_packageImportMap) {
+      ArrayList<String> pkgList = _packageImportMap.get(pkg);
+
+      if (pkgList != null)
+	return pkgList;
+
+      pkgList = new ArrayList<String>();
+      pkgList.add(pkg);
+      
+      InputStream is = null;
+      try {
+	is = _loader.getResourceAsStream(pkg.replace('.', '/') + "/namespace");
+
+	if (is != null) {
+	  ReadStream in = Vfs.openRead(is);
+	  String line;
+	  while ((line = in.readLine()) != null) {
+	    for (String name : line.split("[ \t\r\n]+")) {
+	      if (! "".equals(name)) {
+		if (! pkgList.contains(name))
+		  pkgList.add(name);
+	      }
+	    }
+	  }
+	}
+      } catch (IOException e) {
+	log.log(Level.FINE, e.toString(), e);
+      } finally {
+	IoUtil.close(is);
+      }
+      
+      _packageImportMap.put(pkg, pkgList);
+
+      return pkgList;
     }
   }
 

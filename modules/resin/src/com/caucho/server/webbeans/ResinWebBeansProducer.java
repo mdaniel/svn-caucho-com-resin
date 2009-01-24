@@ -32,13 +32,13 @@ package com.caucho.server.webbeans;
 import com.caucho.config.ConfigException;
 import com.caucho.config.annotation.ServiceBinding;
 import com.caucho.config.annotation.OsgiServiceBinding;
+import com.caucho.config.inject.CauchoBean;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.ejb.timer.EjbTimerService;
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.jmx.Jmx;
 import com.caucho.remote.BamService;
 import com.caucho.webbeans.*;
-import com.caucho.webbeans.component.CauchoBean;
-import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.webbeans.manager.BeanStartupEvent;
 import com.caucho.server.util.ScheduledThreadPool;
 import com.caucho.transaction.*;
@@ -80,7 +80,7 @@ public class ResinWebBeansProducer
   @Standard
   public Manager getManager()
   {
-    return WebBeansContainer.create();
+    return InjectManager.create();
   }
   
   /**
@@ -90,7 +90,7 @@ public class ResinWebBeansProducer
   @Standard
   public Conversation getConversation()
   {
-    return WebBeansContainer.create().createConversation();
+    return InjectManager.create().createConversation();
   }
   
   /**
@@ -157,7 +157,7 @@ public class ResinWebBeansProducer
     if (log.isLoggable(Level.FINER))
       log.fine(bean + " starting at initialization");
     
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     webBeans.getInstance(bean);
   }
@@ -173,7 +173,7 @@ public class ResinWebBeansProducer
     if (log.isLoggable(Level.FINER))
       log.fine(bean + " starting at initialization");
     
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
     BundleContext bundle = webBeans.getInstanceByType(BundleContext.class);
 
     if (bundle == null)

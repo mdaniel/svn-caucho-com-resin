@@ -35,7 +35,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @Production ComponentType for web beans
+ * The @Production DeploymentType for web beans
  */
 @DeploymentType
 @Documented  

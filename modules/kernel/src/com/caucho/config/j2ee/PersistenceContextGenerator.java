@@ -29,10 +29,10 @@
 
 package com.caucho.config.j2ee;
 
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ValueGenerator;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.persistence.*;
 import javax.inject.AnnotationLiteral;
@@ -104,7 +104,7 @@ public class PersistenceContextGenerator
     if (_manager != null)
       return _manager;
 
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     EntityManager manager;
 

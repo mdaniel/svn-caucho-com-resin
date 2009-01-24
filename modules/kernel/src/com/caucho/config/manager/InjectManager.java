@@ -27,10 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.manager;
+package com.caucho.config.manager;
 
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
+import com.caucho.config.inject.CauchoBean;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.SimpleBean;
+import com.caucho.config.inject.SingletonBean;
+import com.caucho.config.inject.BaseType;
+import com.caucho.config.inject.ComponentClose;
+import com.caucho.config.inject.WebBeansHandle;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.MethodComponentProgram;
@@ -46,8 +53,16 @@ import com.caucho.vfs.*;
 import com.caucho.server.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.event.*;
+import com.caucho.webbeans.manager.BeanRegistrationListener;
+import com.caucho.webbeans.manager.BeanStartupEvent;
+import com.caucho.webbeans.manager.CurrentLiteral;
+import com.caucho.webbeans.manager.DecoratorEntry;
+import com.caucho.webbeans.manager.InterceptorEntry;
+import com.caucho.webbeans.manager.ObserverMap;
+import com.caucho.webbeans.manager.WebBeansJndiProxy;
+import com.caucho.webbeans.manager.WebBeansRootContext;
+import com.caucho.webbeans.manager.WebComponent;
 
 import java.io.*;
 import java.util.*;
@@ -85,18 +100,18 @@ import javax.webbeans.UnsatisfiedDependencyException;
 /**
  * The web beans container for a given environment.
  */
-public class WebBeansContainer
+public class InjectManager
   implements Manager, ScanListener, EnvironmentListener,
 	     java.io.Serializable
 {
-  private static final L10N L = new L10N(WebBeansContainer.class);
+  private static final L10N L = new L10N(InjectManager.class);
   private static final Logger log
-    = Logger.getLogger(WebBeansContainer.class.getName());
+    = Logger.getLogger(InjectManager.class.getName());
 
   private static final String SCHEMA = "com/caucho/webbeans/cfg/webbeans.rnc";
 
-  private static final EnvironmentLocal<WebBeansContainer> _localContainer
-    = new EnvironmentLocal<WebBeansContainer>();
+  private static final EnvironmentLocal<InjectManager> _localContainer
+    = new EnvironmentLocal<InjectManager>();
   
   private static final Annotation []NULL_ANN = new Annotation[0];
 
@@ -126,7 +141,7 @@ public class WebBeansContainer
 
   private String _id;
 
-  private WebBeansContainer _parent;
+  private InjectManager _parent;
   
   private EnvironmentClassLoader _classLoader;
   private ClassLoader _tempClassLoader;
@@ -197,8 +212,8 @@ public class WebBeansContainer
 
   private RuntimeException _configException;
 
-  private WebBeansContainer(String id,
-			    WebBeansContainer parent,
+  private InjectManager(String id,
+			    InjectManager parent,
 			    EnvironmentClassLoader loader,
 			    boolean isSetLocal)
   {
@@ -209,7 +224,7 @@ public class WebBeansContainer
     if (parent != null)
       _parent = parent;
     else if (_classLoader != null)
-      _parent = WebBeansContainer.create(_classLoader.getParent());
+      _parent = InjectManager.create(_classLoader.getParent());
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -271,7 +286,7 @@ public class WebBeansContainer
   /**
    * Returns the local container.
    */
-  public static WebBeansContainer getCurrent()
+  public static InjectManager getCurrent()
   {
     return getCurrent(Thread.currentThread().getContextClassLoader());
   }
@@ -279,7 +294,7 @@ public class WebBeansContainer
   /**
    * Returns the current environment container.
    */
-  public static WebBeansContainer getCurrent(ClassLoader loader)
+  public static InjectManager getCurrent(ClassLoader loader)
   {
     synchronized (_localContainer) {
       return _localContainer.get(loader);
@@ -289,7 +304,7 @@ public class WebBeansContainer
   /**
    * Returns the current active container.
    */
-  public static WebBeansContainer create()
+  public static InjectManager create()
   {
     return create(Thread.currentThread().getContextClassLoader());
   }
@@ -297,9 +312,9 @@ public class WebBeansContainer
   /**
    * Returns the current active container.
    */
-  public static WebBeansContainer create(ClassLoader loader)
+  public static InjectManager create(ClassLoader loader)
   {
-    WebBeansContainer webBeans = null;
+    InjectManager webBeans = null;
 
     synchronized (_localContainer) {
       webBeans = _localContainer.getLevel(loader);
@@ -315,7 +330,7 @@ public class WebBeansContainer
 	else
 	  id = "";
 	
-	webBeans = new WebBeansContainer(id, null, envLoader, true);
+	webBeans = new InjectManager(id, null, envLoader, true);
       
 	// _localContainer.set(webBeans, loader);
       }
@@ -327,9 +342,9 @@ public class WebBeansContainer
   /**
    * Returns the current active container.
    */
-  public WebBeansContainer createParent(String prefix)
+  public InjectManager createParent(String prefix)
   {
-    _parent = new WebBeansContainer(prefix + _id,
+    _parent = new InjectManager(prefix + _id,
 				    _parent,
 				    _classLoader,
 				    false);
@@ -347,12 +362,12 @@ public class WebBeansContainer
     return _classLoader;
   }
 
-  public WebBeansContainer getParent()
+  public InjectManager getParent()
   {
     return _parent;
   }
 
-  public void setParent(WebBeansContainer parent)
+  public void setParent(InjectManager parent)
   {
     _parent = parent;
   }

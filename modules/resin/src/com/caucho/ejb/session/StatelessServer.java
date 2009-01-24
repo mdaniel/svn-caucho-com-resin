@@ -29,13 +29,13 @@
 
 package com.caucho.ejb.session;
 
+import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.*;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.*;
-import com.caucho.webbeans.component.*;
 
 import javax.ejb.*;
 import javax.webbeans.*;

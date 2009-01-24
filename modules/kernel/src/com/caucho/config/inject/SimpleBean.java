@@ -27,10 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.component;
+package com.caucho.config.inject;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.type.*;
 import com.caucho.config.types.*;
@@ -80,19 +81,19 @@ public class SimpleBean extends ComponentImpl
   private String _mbeanName;
   private Class _mbeanInterface;
 
-  public SimpleBean(WebBeansContainer webBeans)
+  public SimpleBean(InjectManager webBeans)
   {
     super(webBeans);
   }
 
   public SimpleBean()
   {
-    this(WebBeansContainer.create());
+    this(InjectManager.create());
   }
 
   public SimpleBean(Class type)
   {
-    this(WebBeansContainer.create());
+    this(InjectManager.create());
 
     validateType(type);
 

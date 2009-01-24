@@ -30,8 +30,8 @@
 package com.caucho.hemp.broker;
 
 import com.caucho.bam.BamService;
+import com.caucho.config.inject.CauchoBean;
 import com.caucho.hemp.broker.HempBroker;
-import com.caucho.webbeans.component.CauchoBean;
 import com.caucho.webbeans.manager.BeanRegistrationListener;
 
 import java.lang.annotation.Annotation;

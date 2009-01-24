@@ -31,12 +31,12 @@ package com.caucho.webbeans.cfg;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.naming.*;
 import com.caucho.webbeans.*;
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
+import com.caucho.config.inject.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -63,7 +63,7 @@ public class InterceptorConfig {
     if (_class == null)
       throw new ConfigException(L.l("'class' is a required attribute of <interceptor>"));
     
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
     webBeans.addInterceptor(new InterceptorBean(_class));
   }
 }

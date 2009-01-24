@@ -36,6 +36,7 @@ import javax.annotation.*;
 import javax.jms.*;
 import javax.webbeans.*;
 
+import com.caucho.config.manager.InjectManager;
 import com.caucho.jms.memory.*;
 import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
@@ -72,7 +73,7 @@ public class XmppTopic extends AbstractTopic
   {
     super.init();
 
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
     
     XmppProtocol xmpp = webBeans.getInstanceByType(XmppProtocol.class);
 

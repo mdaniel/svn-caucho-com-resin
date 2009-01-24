@@ -34,6 +34,7 @@ import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.ApiMethod;
 import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.gen.MessageGenerator;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.JndiBuilder;
 import com.caucho.ejb.AbstractServer;
@@ -43,7 +44,6 @@ import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jca.*;
 import com.caucho.jca.cfg.*;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
@@ -325,7 +325,7 @@ public class EjbMessageBean extends EjbBean {
       if (value instanceof Destination)
 	setDestination((Destination) value);
       else {
-	WebBeansContainer webBeans = WebBeansContainer.create();
+	InjectManager webBeans = InjectManager.create();
 
 	Destination dest
 	  = webBeans.getObject(Destination.class, String.valueOf(value));
@@ -535,7 +535,7 @@ public class EjbMessageBean extends EjbBean {
       factory = getEjbContainer().getJmsConnectionFactory();
 
     if (factory == null) {
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
 
       factory = webBeans.getObject(ConnectionFactory.class);
     }
@@ -600,7 +600,7 @@ public class EjbMessageBean extends EjbBean {
 	throw error(L.l("resource-adapter class does not exist for activation-spec '{0}'.  Make sure the .rar file for the driver is properly installed.",
 			raClass.getName()));
 
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
 
       ResourceAdapter ra
 	= (ResourceAdapter) webBeans.getInstanceByType(raClass);

@@ -30,6 +30,7 @@ package com.caucho.j2ee.appclient;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.InjectIntrospector;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.*;
 import com.caucho.ejb.cfg.PostConstructConfig;
@@ -49,7 +50,6 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -347,7 +347,7 @@ public class AppClient implements EnvironmentBean
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, L.l("work-directory is {0}", WorkDir.getLocalWorkDir()));
 
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
       webBeans.addSingleton(new ResinVar(), "resin");
 
       _ejbContext = new InitialContext(_ejbEnv);

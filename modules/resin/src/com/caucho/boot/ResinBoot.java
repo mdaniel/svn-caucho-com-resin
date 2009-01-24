@@ -32,6 +32,7 @@ package com.caucho.boot;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.lib.ResinConfigLibrary;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.loader.*;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
@@ -39,7 +40,6 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.Version;
 
-import com.caucho.webbeans.manager.WebBeansContainer;
 import java.io.*;
 import java.lang.management.*;
 import java.util.*;
@@ -114,7 +114,7 @@ public class ResinBoot {
      * XXX: the following setVar calls should not be necessary, but the
      * EL.setEnviornment() call above is not effective:
      */
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
     webBeans.addSingletonByName(elContext.getResinHome(), "resinHome");
     webBeans.addSingletonByName(elContext.getJavaVar(), "java");
     webBeans.addSingletonByName(elContext.getResinVar(), "resin");

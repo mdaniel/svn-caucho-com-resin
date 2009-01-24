@@ -27,6 +27,7 @@
 
 package com.caucho.config;
 
+import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.program.NodeBuilderChildProgram;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.scope.DependentScope;
@@ -40,7 +41,6 @@ import com.caucho.el.Expr;
 import com.caucho.loader.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.component.ComponentImpl;
 import com.caucho.xml.*;
 
 import org.w3c.dom.*;

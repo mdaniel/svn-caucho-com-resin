@@ -29,6 +29,8 @@
 
 package com.caucho.jca.cfg;
 
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
@@ -48,7 +50,6 @@ import com.caucho.naming.Jndi;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.webbeans.*;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
@@ -175,7 +176,7 @@ public class ConnectionFactoryConfig extends BeanConfig {
       connectionFactory = cm.init(managedFactory);
       cm.start();
 
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
       
       if (getName() != null) {
 	Jndi.bindDeepShort(getName(), connectionFactory);
@@ -202,7 +203,7 @@ public class ConnectionFactoryConfig extends BeanConfig {
 				    cl.getName()));
     }
       
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     ResourceAdapterController raController
       = webBeans.getInstanceByType(ResourceAdapterController.class,

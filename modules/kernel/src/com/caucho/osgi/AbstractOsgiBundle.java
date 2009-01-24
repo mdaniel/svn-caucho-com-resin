@@ -30,6 +30,7 @@
 package com.caucho.osgi;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.PathPatternType;
 import com.caucho.loader.Loader;
@@ -40,7 +41,6 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.vfs.*;
 
 import javax.annotation.PostConstruct;

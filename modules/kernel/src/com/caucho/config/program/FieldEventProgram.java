@@ -32,10 +32,9 @@ package com.caucho.config.program;
 import com.caucho.config.*;
 import com.caucho.config.event.EventImpl;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.scope.DependentScope;
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 import com.caucho.util.*;
 
 import java.util.ArrayList;
@@ -52,12 +51,12 @@ public class FieldEventProgram extends ConfigProgram
   private static final Logger log
     = Logger.getLogger(FieldEventProgram.class.getName());
 
-  private WebBeansContainer _manager;
+  private InjectManager _manager;
   private Field _field;
   private Class _eventType;
   private Annotation []_bindings;
 
-  public FieldEventProgram(WebBeansContainer manager,
+  public FieldEventProgram(InjectManager manager,
 			   Field field,
 			   Annotation []bindings)
   {

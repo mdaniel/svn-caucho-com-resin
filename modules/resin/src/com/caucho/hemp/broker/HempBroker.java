@@ -37,6 +37,8 @@ import com.caucho.bam.BamService;
 import com.caucho.bam.AbstractBamService;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamNotAuthorizedException;
+import com.caucho.config.inject.CauchoBean;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.hemp.*;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
@@ -45,8 +47,6 @@ import com.caucho.server.resin.*;
 import com.caucho.util.*;
 import com.caucho.hemp.BamServiceBinding;
 import com.caucho.webbeans.manager.BeanStartupEvent;
-import com.caucho.webbeans.manager.WebBeansContainer;
-import com.caucho.webbeans.component.CauchoBean;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -311,7 +311,7 @@ public class HempBroker implements BamBroker, BamStream
   {
     if (_auth == null) {
       try {
-	WebBeansContainer webBeans = WebBeansContainer.getCurrent();
+	InjectManager webBeans = InjectManager.getCurrent();
       
 	if (_isAdmin)
 	  _auth = webBeans.getInstanceByType(AdminAuthenticator.class);

@@ -151,8 +151,9 @@
         <include name="**/*.rnc"/>
         <include name="**/*.tld"/>
         <include name="**/*.xml"/>
-        <include name="**/*.xsll"/>
+        <include name="**/*.xsl"/>
         <include name="**/jaxb.index"/>
+        <include name="**/namespace"/>
         <include name="META-INF/**"/>
       </fileset>
     </copy>

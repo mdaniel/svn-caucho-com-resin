@@ -33,6 +33,7 @@ import java.util.logging.*;
 import javax.annotation.*;
 
 import com.caucho.config.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.server.cluster.*;
 import com.caucho.server.port.*;
@@ -96,7 +97,7 @@ public class ProtocolPort extends Port
     throws ConfigException
   {
     if (_protocolClass != null) {
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
 
       Protocol protocol
 	= (Protocol) webBeans.createTransientObjectNoInit(_protocolClass);

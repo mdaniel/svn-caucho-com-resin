@@ -29,8 +29,8 @@
 
 package com.caucho.config.scope;
 
+import com.caucho.config.inject.ComponentImpl;
 import com.caucho.loader.Environment;
-import com.caucho.webbeans.component.ComponentImpl;
 
 import java.util.*;
 

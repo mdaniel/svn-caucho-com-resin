@@ -34,6 +34,7 @@ import com.caucho.bam.BamStream;
 import com.caucho.cluster.ClusterCache;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
@@ -87,7 +88,6 @@ import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
@@ -133,7 +133,7 @@ public class Server extends ProtocolDispatchServer
 
   private AdminAuthenticator _adminAuth;
 
-  private WebBeansContainer _webBeans;
+  private InjectManager _webBeans;
   
   private HempBrokerManager _brokerManager;
   private DomainManager _domainManager;
@@ -268,7 +268,7 @@ public class Server extends ProtocolDispatchServer
 
 	_alarm = new Alarm(this);
 
-	_webBeans = WebBeansContainer.create();
+	_webBeans = InjectManager.create();
 
 	_brokerManager = createBrokerManager();
 	_domainManager = createDomainManager();

@@ -31,6 +31,7 @@ package com.caucho.config.gen;
 
 import com.caucho.make.*;
 import com.caucho.util.L10N;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.java.*;
 import com.caucho.java.gen.*;
 import com.caucho.vfs.*;
@@ -198,7 +199,7 @@ abstract public class BeanGenerator extends GenClass
     if (cl.isAnnotationPresent(javax.decorator.Decorator.class))
       return;
     
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     HashSet<Class<?>> types = new HashSet<Class<?>>();
     for (Class iface : cl.getInterfaces()) {

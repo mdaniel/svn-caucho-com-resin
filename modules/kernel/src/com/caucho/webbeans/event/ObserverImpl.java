@@ -39,9 +39,11 @@ import javax.event.IfExists;
 import javax.inject.manager.Bean;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.AbstractBean;
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.util.*;
 import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
 /**
@@ -52,7 +54,7 @@ public class ObserverImpl implements Observer {
 
   private static final Object []NULL_ARGS = new Object[0];
 
-  private final WebBeansContainer _webBeans;
+  private final InjectManager _webBeans;
   private final AbstractBean _bean;
   
   private final Method _method;
@@ -63,7 +65,7 @@ public class ObserverImpl implements Observer {
 
   private Bean []_args;
 
-  public ObserverImpl(WebBeansContainer webBeans,
+  public ObserverImpl(InjectManager webBeans,
 		      AbstractBean bean,
 		      Method method,
 		      int paramIndex)

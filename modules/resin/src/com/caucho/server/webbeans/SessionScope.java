@@ -29,12 +29,12 @@
 
 package com.caucho.server.webbeans;
 
+import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.DestructionListener;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.scope.SingletonScope;
 import com.caucho.server.dispatch.ServletInvocation;
-import com.caucho.webbeans.component.*;
 
 import java.lang.annotation.Annotation;
 import javax.servlet.*;

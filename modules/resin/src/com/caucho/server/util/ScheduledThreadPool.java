@@ -35,7 +35,7 @@ import java.util.concurrent.*;
 
 import com.caucho.loader.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.component.WebBeansHandle;
+import com.caucho.config.inject.WebBeansHandle;
 
 /**
  * A wrapper for Caucho system variables, allowing tests to override

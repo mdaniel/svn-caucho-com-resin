@@ -30,12 +30,12 @@
 package com.caucho.ejb.message;
 
 import com.caucho.config.*;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.jca.*;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 
 import javax.ejb.MessageDrivenContext;
@@ -71,7 +71,7 @@ public class MessageServer extends AbstractServer
   {
     super(ejbContainer);
 
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
     UserTransaction ut = webBeans.getObject(UserTransaction.class);
     
     // ejb/0fbl
@@ -138,7 +138,7 @@ public class MessageServer extends AbstractServer
   @Override
   protected void bindContext()
   {
-    WebBeansContainer webBeans = WebBeansContainer.create();
+    InjectManager webBeans = InjectManager.create();
 
     webBeans.addSingleton(_context);
   }

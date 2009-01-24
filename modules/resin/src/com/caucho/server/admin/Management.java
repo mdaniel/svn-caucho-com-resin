@@ -32,6 +32,8 @@ package com.caucho.server.admin;
 import com.caucho.bam.BamBroker;
 import com.caucho.hemp.broker.*;
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.SingletonBean;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.RawString;
 import com.caucho.lifecycle.*;
@@ -41,9 +43,6 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.host.HostConfig;
 import com.caucho.server.resin.*;
 import com.caucho.security.*;
-import com.caucho.security.PasswordUser;
-import com.caucho.security.AbstractAuthenticator;
-import com.caucho.webbeans.component.SingletonBean;
 import com.caucho.webbeans.manager.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
@@ -251,7 +250,7 @@ public class Management
       if (_auth != null) {
 	_auth.init();
       
-	WebBeansContainer webBeans = WebBeansContainer.create();
+	InjectManager webBeans = InjectManager.create();
 
 	webBeans.addBean(new SingletonBean(_auth, null,
 					   Authenticator.class,

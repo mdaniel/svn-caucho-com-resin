@@ -29,11 +29,12 @@
 
 package com.caucho.config.types;
 
+import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.BeanConfig;
 import com.caucho.config.*;
 import com.caucho.naming.*;
 import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.*;
 import com.caucho.util.L10N;
 
@@ -170,7 +171,7 @@ public class InterfaceConfig extends BeanConfig {
   public void init()
   {
     if (_valueName != null) {
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
       
       _comp = (ComponentImpl) webBeans.findByName(_valueName);
 

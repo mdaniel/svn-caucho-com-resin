@@ -30,7 +30,7 @@
 package com.caucho.server.webbeans;
 
 import com.caucho.util.*;
-import com.caucho.webbeans.component.*;
+import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.scope.SingletonScope;

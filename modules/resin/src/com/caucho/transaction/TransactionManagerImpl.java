@@ -28,6 +28,7 @@
 
 package com.caucho.transaction;
 
+import com.caucho.config.inject.WebBeansHandle;
 import com.caucho.config.types.Period;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
@@ -37,7 +38,6 @@ import com.caucho.transaction.xalog.AbstractXALogStream;
 import com.caucho.util.Crc64;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
-import com.caucho.webbeans.component.*;
 
 import javax.transaction.*;
 import javax.transaction.xa.XAException;

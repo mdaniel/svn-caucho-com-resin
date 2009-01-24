@@ -31,7 +31,7 @@ package com.caucho.jca;
 
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.component.*;
+import com.caucho.config.inject.*;
 
 import javax.transaction.*;
 import javax.transaction.xa.*;
