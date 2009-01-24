@@ -62,7 +62,6 @@ public class JspDirectivePage extends JspNode {
   private static final QName TRIM_WS = new QName("trimDirectiveWhitespaces");
   private static final QName DEFER = new QName("deferredSyntaxAllowedAsLiteral");
 
-  private Boolean _isElIgnored;
   
   /**
    * Adds an attribute.
@@ -76,13 +75,12 @@ public class JspDirectivePage extends JspNode {
     if (IS_EL_IGNORED.equals(name)) {
       boolean isIgnored = value.equals("true");
 
-      // jsp/1093
-      if (_isElIgnored != null)
+      if (_parseState.isELIgnoredPageSpecified() &&
+          isIgnored != _parseState.isELIgnored())
         throw error(L.l("isELIgnored values conflict"));
 
-      _isElIgnored = isIgnored;
-
       _parseState.setELIgnored(isIgnored);
+      _parseState.setELIgnoredPageSpecified(true);
     }
     
     /*

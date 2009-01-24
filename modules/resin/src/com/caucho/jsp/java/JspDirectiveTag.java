@@ -59,7 +59,6 @@ public class JspDirectiveTag extends JspNode {
   
   static final L10N L = new L10N(JspDirectiveTag.class);
 
-  private Boolean _isElIgnored;
   private String _import;
   
   /**
@@ -79,12 +78,12 @@ public class JspDirectiveTag extends JspNode {
     if (IS_EL_IGNORED.equals(name)) {
       boolean isIgnored = value.equals("true");
 
-      _parseState.setELIgnored(isIgnored);
-      
-      if (_isElIgnored != null && _isElIgnored.booleanValue() != isIgnored)
+      if (_parseState.isELIgnoredPageSpecified() &&
+          isIgnored != _parseState.isELIgnored())
 	throw error(L.l("isELIgnored values conflict"));
 
-      _isElIgnored = new Boolean(isIgnored);
+      _parseState.setELIgnored(isIgnored);
+      _parseState.setELIgnoredPageSpecified(true);
     }
     /*
     else if (name.equals("isScriptingInvalid"))
@@ -287,8 +286,8 @@ public class JspDirectiveTag extends JspNode {
     os.print("<jsp:directive.tag");
     os.print(" jsp:id=\"" + gen.generateJspId() + "\"");
 
-    if (_isElIgnored != null)
-      os.print(" el-ignored='" + _isElIgnored + "'");
+    if (_parseState.isELIgnoredPageSpecified())
+      os.print(" el-ignored='" + _parseState.isELIgnored() + "'");
 
     if (_import != null)
       os.print(" import='" + _import + "'");

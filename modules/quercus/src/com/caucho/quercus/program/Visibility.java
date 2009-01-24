@@ -33,4 +33,4 @@ package com.caucho.quercus.program;
  * Function and field visibility.
  */
 
-public enum Visibility {PUBLIC, PROTECTED, PRIVATE};
+public enum Visibility {PUBLIC, PROTECTED, PRIVATE}

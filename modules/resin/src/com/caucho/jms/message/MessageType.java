@@ -40,5 +40,5 @@ public enum MessageType
   OBJECT,
   STREAM,
   TEXT
-};
+}
 

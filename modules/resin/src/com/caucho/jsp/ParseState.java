@@ -60,6 +60,7 @@ public class ParseState {
 
   private Boolean _isELIgnored;
   private Boolean _isELIgnoredDefault;
+  private boolean _isELIgnoredPageSpecified = false;
   
   private boolean _isScriptingInvalid = false;
   private boolean _isLocalScriptingInvalid = false;
@@ -173,6 +174,16 @@ public class ParseState {
   public Boolean getELIgnoredDefault()
   {
     return _isELIgnoredDefault;
+  }
+
+  public boolean isELIgnoredPageSpecified()
+  {
+    return _isELIgnoredPageSpecified;
+  }
+
+  public void setELIgnoredPageSpecified(boolean ELIgnoredPageSpecified)
+  {
+    _isELIgnoredPageSpecified = ELIgnoredPageSpecified;
   }
 
   /**
