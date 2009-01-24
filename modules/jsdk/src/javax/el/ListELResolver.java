@@ -103,6 +103,16 @@ public class ListELResolver extends ELResolver {
       return null;
   }
 
+  /**
+   *
+   * @param context
+   * @param base
+   * @param property
+   * @return If the <code>propertyResolved</code> property of
+     *     <code>ELContext</code> was set to <code>true</code>, then
+     *     the value at the given index or <code>null</code>
+     *     if the index was out of bounds. Otherwise, undefined.
+   */
   @Override
   public Object getValue(ELContext context,
 			 Object base,
@@ -118,9 +128,7 @@ public class ListELResolver extends ELResolver {
       if (0 <= index && index < list.size())
 	return list.get(index);
       else
-        throw new PropertyNotFoundException("list index '" +
-                                            index +
-                                            "' is invalid");
+        return null;
     }
     else {
       return null;
