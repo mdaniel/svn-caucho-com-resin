@@ -98,6 +98,20 @@ public class JstlFmtMessage extends JstlNode {
       super.addChild(node);
   }
 
+  @Override
+  public boolean hasCustomTag()
+  {
+    if (super.hasCustomTag())
+      return true;
+
+    for (JstlFmtParam param : _params) {
+      if (param.hasCustomTag())
+        return true;
+    }
+
+    return false;
+  }
+
   /**
    * Generates the XML text representation for the tag validation.
    *

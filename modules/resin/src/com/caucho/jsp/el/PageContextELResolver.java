@@ -187,7 +187,12 @@ public class PageContextELResolver extends AbstractVariableResolver {
       }
       else
 	return null;
-    } catch (ELException e) {
+    }
+    catch (PropertyNotFoundException e) {
+      // jsp/3253
+      throw e;
+    }
+    catch (ELException e) {
       // jsp/3094 vs jsp/30cc
 
       if (e.getCause() != null)
