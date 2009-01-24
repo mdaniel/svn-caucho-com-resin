@@ -37,6 +37,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 import com.caucho.xml.*;
 import com.caucho.xpath.XPath;
+import com.caucho.bam.BamRemoteConnectionFailedException;
 
 import org.w3c.dom.*;
 
@@ -60,7 +61,9 @@ import java.util.logging.Logger;
 /**
  * Manager for the deployments.
  */
-public class DeploymentManagerImpl implements DeploymentManager {
+public class DeploymentManagerImpl
+  implements DeploymentManager
+{
   private static final L10N L = new L10N(DeploymentManagerImpl.class);
   private static final Logger log
     = Logger.getLogger(DeploymentManagerImpl.class.getName());
@@ -72,16 +75,16 @@ public class DeploymentManagerImpl implements DeploymentManager {
   private String _user;
   private String _password;
 
-
-
   private String _uri;
 
   DeploymentManagerImpl(String uri)
   {
     int p = uri.indexOf("http");
-    
+
     if (p < 0)
-      throw new IllegalArgumentException(L.l("'{0}' is an illegal URI for DeploymentManager.", uri));
+      throw new IllegalArgumentException(L.l(
+        "'{0}' is an illegal URI for DeploymentManager.",
+        uri));
 
     _uri = uri;
 
@@ -108,40 +111,53 @@ public class DeploymentManagerImpl implements DeploymentManager {
   {
     _user = user;
     _password = password;
-    
+
+    _deployClient = new DeployClient(_host, _port, _user, _password);
+  }
+
+  // XXX: hack
+  private void reset()
+  {
     _deployClient = new DeployClient(_host, _port, _user, _password);
   }
 
   /**
    * Returns the targets supported by the manager.
    */
-  public Target []getTargets()
+  public Target[] getTargets()
     throws IllegalStateException
   {
-    HostQuery []hosts = _deployClient.listHosts();
+    try {
+      HostQuery[] hosts = _deployClient.listHosts();
 
-    if (hosts == null)
-      throw new IllegalStateException(L.l("'{0}' does not return any hosts",
-					  _deployClient));
+      if (hosts == null)
+        throw new IllegalStateException(L.l("'{0}' does not return any hosts",
+                                            _deployClient));
 
-    Target []targets = new Target[hosts.length];
+      Target[] targets = new Target[hosts.length];
 
-    for (int i = 0; i < hosts.length; i++) {
-      HostQuery host = hosts[i];
+      for (int i = 0; i < hosts.length; i++) {
+        HostQuery host = hosts[i];
 
-      Target target = new TargetImpl(host.getName(), null);
+        Target target = new TargetImpl(host.getName(), null);
 
-      targets[i] = target;
+        targets[i] = target;
+      }
+
+      return targets;
+    } // XXX: hack
+    catch (BamRemoteConnectionFailedException e) {
+      reset();
+
+      return getTargets();
     }
-
-    return targets;
   }
 
   /**
    * Returns the current running modules.
    */
-  public TargetModuleID []getRunningModules(ModuleType moduleType,
-                                            Target []targetList)
+  public TargetModuleID[] getRunningModules(ModuleType moduleType,
+                                            Target[] targetList)
     throws TargetException, IllegalStateException
   {
     return getAvailableModules(moduleType, targetList);
@@ -150,8 +166,8 @@ public class DeploymentManagerImpl implements DeploymentManager {
   /**
    * Returns the current non-running modules.
    */
-  public TargetModuleID []getNonRunningModules(ModuleType moduleType,
-                                               Target []targetList)
+  public TargetModuleID[] getNonRunningModules(ModuleType moduleType,
+                                               Target[] targetList)
     throws TargetException, IllegalStateException
   {
     return new TargetModuleID[0];
@@ -160,30 +176,37 @@ public class DeploymentManagerImpl implements DeploymentManager {
   /**
    * Returns all available modules.
    */
-  public TargetModuleID []getAvailableModules(ModuleType moduleType,
-                                              Target []targetList)
+  public TargetModuleID[] getAvailableModules(ModuleType moduleType,
+                                              Target[] targetList)
     throws TargetException, IllegalStateException
   {
-    ArrayList<TargetModuleID> resultList = new ArrayList<TargetModuleID>();
-    
-    for (int i = 0; i < targetList.length; i++) {
-      Target target = targetList[i];
+    try {
+      ArrayList<TargetModuleID> resultList = new ArrayList<TargetModuleID>();
 
-      TagQuery []tags = _deployClient.listTags(target.getName());
+      for (int i = 0; i < targetList.length; i++) {
+        Target target = targetList[i];
 
-      for (int j = 0; tags != null && j < tags.length; j++) {
-	String host = tags[j].getHost();
-	String tag = tags[j].getTag();
+        TagQuery[] tags = _deployClient.listTags(target.getName());
 
-	resultList.add(new TargetModuleIDImpl(new TargetImpl(host, null),
-					      tag));
+        for (int j = 0; tags != null && j < tags.length; j++) {
+          String host = tags[j].getHost();
+          String tag = tags[j].getTag();
+
+          resultList.add(new TargetModuleIDImpl(new TargetImpl(host, null),
+                                                tag));
+        }
       }
+
+      TargetModuleID[] result = new TargetModuleID[resultList.size()];
+      resultList.toArray(result);
+
+      return result;
+    } // XXX: hack
+    catch (BamRemoteConnectionFailedException e) {
+      reset();
+
+      return getAvailableModules(moduleType, targetList);
     }
-
-    TargetModuleID []result = new TargetModuleID[resultList.size()];
-    resultList.toArray(result);
-
-    return result;
   }
 
   /**
@@ -198,7 +221,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
   /**
    * Deploys the object.
    */
-  public ProgressObject distribute(Target []targetList,
+  public ProgressObject distribute(Target[] targetList,
                                    File archive,
                                    File deploymentPlan)
     throws IllegalStateException
@@ -209,7 +232,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
   /**
    * Deploys the object.
    */
-  public ProgressObject distribute(Target []targetList,
+  public ProgressObject distribute(Target[] targetList,
                                    InputStream archive,
                                    InputStream deploymentPlan)
     throws IllegalStateException
@@ -221,11 +244,11 @@ public class DeploymentManagerImpl implements DeploymentManager {
   /**
    * Deploys the object.
    */
-  public ProgressObject distributeImpl(Target []targetList,
-				       File archive,
-				       InputStream archiveStream,
-				       File deploymentPlan,
-				       InputStream deploymentPlanStream)
+  public ProgressObject distributeImpl(Target[] targetList,
+                                       File archive,
+                                       InputStream archiveStream,
+                                       File deploymentPlan,
+                                       InputStream deploymentPlanStream)
     throws IllegalStateException
   {
     try {
@@ -242,9 +265,9 @@ public class DeploymentManagerImpl implements DeploymentManager {
       xml.setCoalescing(true);
 
       if (deploymentPlan != null)
-	xml.parse(Vfs.lookup(deploymentPlan.getAbsolutePath()));
+        xml.parse(Vfs.lookup(deploymentPlan.getAbsolutePath()));
       else
-	xml.parse(deploymentPlanStream);
+        xml.parse(deploymentPlanStream);
 
       String type = XPath.evalString("/deployment-plan/archive-type", doc);
       String name = XPath.evalString("/deployment-plan/name", doc);
@@ -252,17 +275,17 @@ public class DeploymentManagerImpl implements DeploymentManager {
       String tag = type + "s/default/" + name;
 
       if (archive != null)
-	_deployClient.deployJarContents(Vfs.lookup(archive.getAbsolutePath()),
-					tag, _user, "", null, null);
+        _deployClient.deployJarContents(Vfs.lookup(archive.getAbsolutePath()),
+                                        tag, _user, "", null, null);
       else
-	_deployClient.deployJarContents(archiveStream,
-					tag, _user, "", null, null);
+        _deployClient.deployJarContents(archiveStream,
+                                        tag, _user, "", null, null);
 
       _deployClient.deploy(tag);
 
       deployExtraFiles(tag, doc);
 
-      TargetModuleID []targetModules = new TargetModuleID[targetList.length];
+      TargetModuleID[] targetModules = new TargetModuleID[targetList.length];
 
       for (int i = 0; i < targetList.length; i++) {
         Target target = targetList[i];
@@ -275,13 +298,22 @@ public class DeploymentManagerImpl implements DeploymentManager {
       StatusQuery status = _deployClient.status(tag);
 
       if (status.getMessage() == null)
-	result.completed(L.l("application {0} deployed from {1}",
-			     name, archive));
+        result.completed(L.l("application {0} deployed from {1}",
+                             name, archive));
       else
-	result.failed(L.l("application {0} failed from {1}: {2}",
-			  name, archive, status.getMessage()));
+        result.failed(L.l("application {0} failed from {1}: {2}",
+                          name, archive, status.getMessage()));
 
       return result;
+    } // XXX: hack
+    catch (BamRemoteConnectionFailedException e) {
+      reset();
+
+      return distributeImpl(targetList,
+                            archive,
+                            archiveStream,
+                            deploymentPlan,
+                            deploymentPlanStream);
     }
     catch (Exception e) {
       IllegalStateException ex;
@@ -299,41 +331,48 @@ public class DeploymentManagerImpl implements DeploymentManager {
       Iterator iter = XPath.select("/deployment-plan/ext-file", doc);
 
       while (iter.hasNext()) {
-	Node node = (Node) iter.next();
+        Node node = (Node) iter.next();
 
-	String name = XPath.evalString("name", node);
-	Node data = XPath.find("data", node);
+        String name = XPath.evalString("name", node);
+        Node data = XPath.find("data", node);
 
-	if (data != null) {
-	  data = data.getFirstChild();
+        if (data != null) {
+          data = data.getFirstChild();
 
-	  TempOutputStream os = new TempOutputStream();
+          TempOutputStream os = new TempOutputStream();
 
-	  XmlPrinter printer = new XmlPrinter(os);
+          XmlPrinter printer = new XmlPrinter(os);
 
-	  printer.printXml(data);
+          printer.printXml(data);
 
-	  os.close();
+          os.close();
 
-	  long length = os.getLength();
+          long length = os.getLength();
 
-	  if (length == 0)
-	    continue;
-	  
-	  InputStream is = os.openInputStreamNoFree();
+          if (length == 0)
+            continue;
 
-	  String sha1 = _deployClient.calculateFileDigest(is, length);
+          InputStream is = os.openInputStreamNoFree();
 
-	  _deployClient.sendFile(sha1, length, os.openInputStream());
+          String sha1 = _deployClient.calculateFileDigest(is, length);
 
-	  _deployClient.deploy(tag);
-      
-	  _deployClient.addDeployFile(tag, name, sha1);
-	}
+          _deployClient.sendFile(sha1, length, os.openInputStream());
+
+          _deployClient.deploy(tag);
+
+          _deployClient.addDeployFile(tag, name, sha1);
+        }
       }
-    } catch (RuntimeException e) {
+    } // XXX: hack
+    catch (BamRemoteConnectionFailedException e) {
+      reset();
+
+      deployExtraFiles(tag, doc);
+    }
+    catch (RuntimeException e) {
       throw e;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
@@ -341,83 +380,104 @@ public class DeploymentManagerImpl implements DeploymentManager {
   /**
    * Starts the modules.
    */
-  public ProgressObject start(TargetModuleID []moduleIDList)
+  public ProgressObject start(TargetModuleID[] moduleIDList)
     throws IllegalStateException
   {
-    StringBuilder sb = new StringBuilder();
+    try {
+      StringBuilder sb = new StringBuilder();
 
-    for (int i = 0; i < moduleIDList.length; i++) {
-      TargetModuleID targetModuleID = moduleIDList[i];
+      for (int i = 0; i < moduleIDList.length; i++) {
+        TargetModuleID targetModuleID = moduleIDList[i];
 
-      String host = targetModuleID.getTarget().getName();
-      String tag = targetModuleID.getModuleID();
+        String host = targetModuleID.getTarget().getName();
+        String tag = targetModuleID.getModuleID();
 
-      _deployClient.start(tag);
-      
-      sb.append(tag).append(' ');
+        _deployClient.start(tag);
+
+        sb.append(tag).append(' ');
+      }
+
+      ProgressObjectImpl result = new ProgressObjectImpl(moduleIDList);
+
+      result.completed(L.l("modules ${0} started", sb.toString()));
+
+      return result;
+    } // XXX: hack
+    catch (BamRemoteConnectionFailedException e) {
+      reset();
+
+      return start(moduleIDList);
     }
-
-    ProgressObjectImpl result = new ProgressObjectImpl(moduleIDList);
-
-    result.completed(L.l("modules ${0} started", sb.toString()));
-
-    return result;
   }
 
   /**
    * Stops the modules.
    */
-  public ProgressObject stop(TargetModuleID []moduleIDList)
+  public ProgressObject stop(TargetModuleID[] moduleIDList)
     throws IllegalStateException
   {
-    StringBuilder sb = new StringBuilder();
+    try {
+      StringBuilder sb = new StringBuilder();
 
-    for (int i = 0; i < moduleIDList.length; i++) {
-      TargetModuleID targetModuleID = moduleIDList[i];
+      for (int i = 0; i < moduleIDList.length; i++) {
+        TargetModuleID targetModuleID = moduleIDList[i];
 
-      String host = targetModuleID.getTarget().getName();
-      String tag = targetModuleID.getModuleID();
+        String host = targetModuleID.getTarget().getName();
+        String tag = targetModuleID.getModuleID();
 
-      System.out.println("STOP2:" + tag);
-      _deployClient.stop(tag);
-      System.out.println("STOP2a:" + tag);
-      
-      sb.append(tag).append(' ');
+        System.out.println("STOP2:" + tag);
+        _deployClient.stop(tag);
+        System.out.println("STOP2a:" + tag);
+
+        sb.append(tag).append(' ');
+      }
+
+      ProgressObjectImpl result = new ProgressObjectImpl(moduleIDList);
+
+      result.completed(L.l("modules ${0} stop", sb.toString()));
+
+      return result;
+    } // XXX: hack
+    catch (BamRemoteConnectionFailedException e) {
+      reset();
+
+      return stop(moduleIDList);
     }
-
-    ProgressObjectImpl result = new ProgressObjectImpl(moduleIDList);
-
-    result.completed(L.l("modules ${0} stop", sb.toString()));
-
-    return result;
   }
 
   /**
    * Undeploys the modules.
    */
-  public ProgressObject undeploy(TargetModuleID []moduleIDList)
+  public ProgressObject undeploy(TargetModuleID[] moduleIDList)
     throws IllegalStateException
   {
-    StringBuilder sb = new StringBuilder();
+    try {
+      StringBuilder sb = new StringBuilder();
 
-    for (int i = 0; i < moduleIDList.length; i++) {
-      TargetModuleID targetModuleID = moduleIDList[i];
+      for (int i = 0; i < moduleIDList.length; i++) {
+        TargetModuleID targetModuleID = moduleIDList[i];
 
-      String host = targetModuleID.getTarget().getName();
-      String tag = targetModuleID.getModuleID();
+        String host = targetModuleID.getTarget().getName();
+        String tag = targetModuleID.getModuleID();
 
-      System.out.println("UNDEPLOY: " + tag);
+        System.out.println("UNDEPLOY: " + tag);
 
-      _deployClient.undeploy(tag);
-      
-      sb.append(tag).append(' ');
+        _deployClient.undeploy(tag);
+
+        sb.append(tag).append(' ');
+      }
+
+      ProgressObjectImpl result = new ProgressObjectImpl(moduleIDList);
+
+      result.completed(L.l("modules ${0} undeployed", sb.toString()));
+
+      return result;
+    }// XXX: hack
+    catch (BamRemoteConnectionFailedException e) {
+      reset();
+
+      return undeploy(moduleIDList);
     }
-
-    ProgressObjectImpl result = new ProgressObjectImpl(moduleIDList);
-
-    result.completed(L.l("modules ${0} undeployed", sb.toString()));
-
-    return result;
   }
 
   /**
@@ -431,7 +491,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
   /**
    * Redeploys the object.
    */
-  public ProgressObject redeploy(TargetModuleID []targetList,
+  public ProgressObject redeploy(TargetModuleID[] targetList,
                                  File archive,
                                  File deploymentPlan)
     throws IllegalStateException
@@ -442,7 +502,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
   /**
    * Redeploys the object.
    */
-  public ProgressObject redeploy(TargetModuleID []targetList,
+  public ProgressObject redeploy(TargetModuleID[] targetList,
                                  InputStream archive,
                                  InputStream deploymentPlan)
     throws IllegalStateException
@@ -484,7 +544,7 @@ public class DeploymentManagerImpl implements DeploymentManager {
   /**
    * Returns the supported locales.
    */
-  public Locale []getSupportedLocales()
+  public Locale[] getSupportedLocales()
   {
     throw new UnsupportedOperationException();
   }
