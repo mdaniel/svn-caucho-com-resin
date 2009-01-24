@@ -31,7 +31,7 @@ package com.caucho.webbeans.manager;
 
 import com.caucho.webbeans.component.CauchoBean;
 import java.lang.annotation.Annotation;
-import javax.webbeans.manager.Manager;
+import javax.inject.manager.Manager;
 
 /**
  * Registers beans on startup

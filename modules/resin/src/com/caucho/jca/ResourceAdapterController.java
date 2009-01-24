@@ -36,8 +36,7 @@ import com.caucho.webbeans.component.*;
 
 import java.util.logging.Logger;
 import javax.resource.spi.*;
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
+import javax.inject.manager.Bean;
 
 /**
  * Controller for a resource-adapter

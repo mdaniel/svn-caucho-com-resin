@@ -44,7 +44,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.*;
 
-import javax.webbeans.manager.Decorator;
+import javax.inject.manager.Decorator;
 
 /**
  * Represents an introspected Decorator

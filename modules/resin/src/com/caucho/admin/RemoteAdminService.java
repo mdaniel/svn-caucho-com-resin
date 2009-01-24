@@ -43,13 +43,11 @@ import com.caucho.vfs.NotFoundPath;
 
 import java.util.logging.*;
 import javax.annotation.PostConstruct;
-import javax.webbeans.ApplicationScoped;
 
 /**
  * Enables remote administration
  */
 @com.caucho.config.Service
-@ApplicationScoped
 public class RemoteAdminService
 {
   private static final Logger log

@@ -44,8 +44,9 @@ import javax.faces.context.*;
 import javax.faces.component.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
+import javax.context.ConversationScoped;
+import javax.context.Conversation;
+import javax.inject.manager.Bean;
 
 /**
  * The conversation scope value

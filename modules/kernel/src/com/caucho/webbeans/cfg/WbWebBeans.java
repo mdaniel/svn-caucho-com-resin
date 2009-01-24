@@ -46,8 +46,10 @@ import java.util.logging.*;
 import java.util.zip.*;
 
 import javax.annotation.PostConstruct;
-import javax.webbeans.*;
-import javax.webbeans.manager.Interceptor;
+import javax.decorator.Decorator;
+import javax.inject.DeploymentType;
+import javax.inject.Standard;
+import javax.inject.manager.Interceptor;
 
 /**
  * Configuration for a classloader root containing webbeans
@@ -315,7 +317,7 @@ public class WbWebBeans {
 	throw new ConfigException(L.l("'{0}' is not valid because <Interceptors> can only contain interceptor implementations",
 				      cl.getName()));
 
-      if (! cl.isAnnotationPresent(javax.webbeans.Interceptor.class))
+      if (! cl.isAnnotationPresent(javax.interceptor.Interceptor.class))
 	throw new ConfigException(L.l("'{0}' must have an @Interceptor annotation because it is an interceptor implementation",
 				      cl.getName()));
 

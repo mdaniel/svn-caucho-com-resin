@@ -35,7 +35,7 @@ import com.caucho.webbeans.component.CauchoBean;
 import com.caucho.webbeans.manager.BeanRegistrationListener;
 
 import java.lang.annotation.Annotation;
-import javax.webbeans.manager.Manager;
+import javax.inject.manager.Manager;
 
 /**
  * Broker

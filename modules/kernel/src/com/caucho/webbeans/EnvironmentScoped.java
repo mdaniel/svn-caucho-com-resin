@@ -34,7 +34,7 @@ import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.webbeans.*;
+import javax.context.*;
 /**
  * The @EnvironmentScoped represents an instance for each Resin environment.
  */

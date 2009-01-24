@@ -46,10 +46,15 @@ import javax.annotation.*;
 import javax.ejb.EJB;
 import javax.ejb.EJBs;
 import javax.naming.*;
+import javax.inject.BindingType;
+import javax.inject.Produces;
+import javax.inject.Disposes;
+import javax.inject.Initializer;
+import javax.inject.manager.Bean;
 import javax.interceptor.*;
 import javax.persistence.*;
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
+import javax.event.Observes;
+import javax.inject.Disposes;
 //import javax.xml.ws.WebServiceRef;
 
 import java.beans.Introspector;
@@ -822,9 +827,6 @@ public class InjectIntrospector {
   {
     for (Annotation ann : field.getAnnotations()) {
       Class annType = ann.annotationType();
-      
-      if (annType.equals(In.class))
-	return true;
 
       if (annType.isAnnotationPresent(BindingType.class))
 	return true;
@@ -838,12 +840,6 @@ public class InjectIntrospector {
     for (Annotation ann : field.getAnnotations()) {
       Class annType = ann.annotationType();
       
-      if (annType.equals(In.class)) {
-	In in = (In) ann;
-	
-	return in.optional();
-      }
-
       if (annType.isAnnotationPresent(BindingType.class))
 	return false;
     }
@@ -858,10 +854,10 @@ public class InjectIntrospector {
       
       if (annType.equals(Produces.class))
 	return false;
+      /*
       else if (annType.equals(Destroys.class))
 	return false;
-      else if (annType.equals(In.class))
-	return true;
+      */
     }
 
     boolean hasBinding = false;

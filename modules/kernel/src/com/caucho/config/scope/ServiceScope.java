@@ -36,8 +36,7 @@ import com.caucho.webbeans.component.*;
 import java.lang.annotation.Annotation;
 import java.util.Hashtable;
 
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
+import javax.inject.manager.Bean;
 
 /**
  * The service scope manages load-on-startup services which also

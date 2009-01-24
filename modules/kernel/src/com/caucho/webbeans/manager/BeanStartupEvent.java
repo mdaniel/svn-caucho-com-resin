@@ -29,8 +29,8 @@
 
 package com.caucho.webbeans.manager;
 
-import javax.webbeans.manager.Bean;
-import javax.webbeans.manager.Manager;
+import javax.inject.manager.Bean;
+import javax.inject.manager.Manager;
 
 /**
  * An event at webbeans startup

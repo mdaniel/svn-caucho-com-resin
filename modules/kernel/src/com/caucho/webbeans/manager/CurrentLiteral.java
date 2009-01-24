@@ -29,8 +29,8 @@
 
 package com.caucho.webbeans.manager;
 
-import javax.webbeans.Current;
-import javax.webbeans.AnnotationLiteral;
+import javax.inject.Current;
+import javax.inject.AnnotationLiteral;
 
 /**
  * Represents the @Current annotation

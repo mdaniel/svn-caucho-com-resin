@@ -37,9 +37,9 @@ import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.webbeans.manager.Decorator;
-import javax.webbeans.manager.Interceptor;
-import javax.webbeans.manager.InterceptionType;
+import javax.inject.manager.Decorator;
+import javax.inject.manager.Interceptor;
+import javax.inject.manager.InterceptionType;
 
 /**
  * Utilities

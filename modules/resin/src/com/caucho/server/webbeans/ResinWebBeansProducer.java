@@ -51,11 +51,13 @@ import java.util.Set;
 import java.util.concurrent.*;
 import java.util.logging.*;
 import javax.ejb.*;
+import javax.context.Conversation;
+import javax.event.Observes;
 import javax.management.*;
 import javax.transaction.*;
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
-import javax.webbeans.manager.Manager;
+import javax.inject.*;
+import javax.inject.manager.Bean;
+import javax.inject.manager.Manager;
 
 import org.osgi.framework.BundleContext;
 

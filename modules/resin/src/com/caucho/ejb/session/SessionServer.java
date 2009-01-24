@@ -38,7 +38,7 @@ import com.caucho.webbeans.component.*;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.ejb.*;
-import javax.webbeans.*;
+import javax.annotation.Named;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;

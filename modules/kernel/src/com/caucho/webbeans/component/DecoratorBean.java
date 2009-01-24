@@ -37,11 +37,11 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
 
-import javax.webbeans.AnnotationLiteral;
-import javax.webbeans.BindingType;
-import javax.webbeans.Current;
-import javax.webbeans.Decorates;
-import javax.webbeans.manager.Decorator;
+import javax.decorator.Decorates;
+import javax.inject.BindingType;
+import javax.inject.Current;
+import javax.inject.manager.Decorator;
+import javax.inject.AnnotationLiteral;
 
 /**
  * DecoratorBean represents a Java decorator

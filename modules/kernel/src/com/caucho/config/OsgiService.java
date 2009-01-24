@@ -32,7 +32,7 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
 
-import javax.webbeans.Stereotype;
+import javax.annotation.Stereotype;
 
 /**
  * @OsgiService is a startup @Stereotype for an @ApplicationScoped bean

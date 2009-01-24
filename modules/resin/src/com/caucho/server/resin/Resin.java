@@ -83,6 +83,7 @@ import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
+import javax.inject.Standard;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
@@ -97,7 +98,6 @@ import java.security.Security;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.webbeans.Standard;
 
 /**
  * The Resin class represents the top-level container for Resin.

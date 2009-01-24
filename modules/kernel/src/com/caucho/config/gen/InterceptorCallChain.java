@@ -39,13 +39,14 @@ import java.io.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.*;
+import javax.annotation.NonBinding;
 import javax.annotation.security.*;
 import javax.ejb.*;
 import javax.interceptor.*;
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
-import javax.webbeans.manager.Interceptor;
-import javax.webbeans.manager.InterceptionType;
+import javax.inject.manager.Bean;
+import javax.inject.manager.Decorator;
+import javax.inject.manager.Interceptor;
+import javax.inject.manager.InterceptionType;
 
 /**
  * Represents the interception

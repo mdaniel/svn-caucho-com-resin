@@ -44,7 +44,7 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import javax.interceptor.*;
-import javax.webbeans.manager.Decorator;
+import javax.inject.manager.Decorator;
 
 /**
  * Generates the skeleton for a bean.
@@ -195,7 +195,7 @@ abstract public class BeanGenerator extends GenClass
    */
   protected void introspectDecorators(Class cl)
   {
-    if (cl.isAnnotationPresent(javax.webbeans.Decorator.class))
+    if (cl.isAnnotationPresent(javax.decorator.Decorator.class))
       return;
     
     WebBeansContainer webBeans = WebBeansContainer.create();

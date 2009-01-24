@@ -31,10 +31,11 @@ package com.caucho.webbeans;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.webbeans.*;
+import javax.context.ScopeType;
 
 /**
  * The @Singleton represents a unique single instance
@@ -43,5 +44,6 @@ import javax.webbeans.*;
 @ScopeType
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)
+@Documented  
 public @interface Singleton {
 }

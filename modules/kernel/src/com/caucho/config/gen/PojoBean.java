@@ -37,8 +37,13 @@ import java.io.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
-import javax.webbeans.*;
-import javax.webbeans.Interceptor;
+import javax.annotation.NonBinding;
+import javax.annotation.Stereotype;
+import javax.decorator.Decorator;
+import javax.inject.BindingType;
+import javax.inject.manager.Bean;
+import javax.interceptor.Interceptor;
+import javax.interceptor.InterceptorBindingType;
 
 /**
  * Generates the skeleton for a session bean.
@@ -192,8 +197,10 @@ public class PojoBean extends BeanGenerator {
 	if (ann.annotationType().isAnnotationPresent(BindingType.class))
 	  return true;
 
+	/*
 	if (In.class.equals(ann.annotationType()))
 	  return true;
+	*/
       }
     }
 

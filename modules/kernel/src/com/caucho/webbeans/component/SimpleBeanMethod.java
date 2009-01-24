@@ -47,8 +47,7 @@ import java.lang.annotation.*;
 import java.util.*;
 
 import javax.annotation.*;
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
+import javax.inject.manager.Bean;
 
 /**
  * Configuration for a SimpleBean method, e.g. for an XML configuration of

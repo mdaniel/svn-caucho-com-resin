@@ -44,8 +44,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.*;
 
-import javax.webbeans.manager.Bean;
-import javax.webbeans.NonBinding;
+import javax.inject.manager.Bean;
+import javax.annotation.NonBinding;
 
 /**
  * Introspected annotation binding

@@ -32,10 +32,11 @@ package com.caucho.webbeans.event;
 import java.util.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
-import javax.webbeans.*;
-import javax.webbeans.Observer;
-import javax.webbeans.manager.Bean;
-import javax.webbeans.manager.Context;
+import javax.context.Context;
+import javax.event.Observer;
+import javax.event.Observes;
+import javax.event.IfExists;
+import javax.inject.manager.Bean;
 
 import com.caucho.config.*;
 import com.caucho.util.*;

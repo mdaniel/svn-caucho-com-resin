@@ -39,7 +39,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.logging.Logger;
-import javax.webbeans.BindingType;
+import javax.inject.BindingType;
 
 
 public class PostConstructProgram extends ConfigProgram

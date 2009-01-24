@@ -42,9 +42,9 @@ import java.util.ArrayList;
 import java.util.logging.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import javax.webbeans.Event;
-import javax.webbeans.Observable;
-import javax.webbeans.manager.Bean;
+import javax.event.Event;
+import javax.event.Observable;
+import javax.inject.manager.Bean;
 
 public class FieldEventProgram extends ConfigProgram
 {

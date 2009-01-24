@@ -30,7 +30,7 @@
 package com.caucho.config.scope;
 
 import java.util.*;
-import javax.webbeans.manager.Bean;
+import javax.inject.manager.Bean;
 
 /**
  * The singleton scope value

@@ -38,10 +38,10 @@ import java.util.*;
 
 import javax.annotation.*;
 import javax.ejb.*;
-import javax.interceptor.*;
-import javax.webbeans.InterceptorBindingType;
-import javax.webbeans.manager.Interceptor;
-import javax.webbeans.manager.InterceptionType;
+import javax.interceptor.AroundInvoke;
+import javax.interceptor.InterceptorBindingType;
+import javax.inject.manager.Interceptor;
+import javax.inject.manager.InterceptionType;
 
 /**
  * InterceptorBean represents a Java interceptor

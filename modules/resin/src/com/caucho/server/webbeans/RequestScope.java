@@ -38,8 +38,8 @@ import com.caucho.webbeans.component.ComponentImpl;
 
 import java.lang.annotation.Annotation;
 import javax.servlet.*;
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
+import javax.context.RequestScoped;
+import javax.inject.manager.Bean;
 
 /**
  * Configuration for the xml web bean component.

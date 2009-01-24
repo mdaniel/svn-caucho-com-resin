@@ -44,9 +44,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.*;
 
-import javax.webbeans.manager.Bean;
-import javax.webbeans.BindingType;
-import javax.webbeans.NonBinding;
+import javax.annotation.NonBinding;
+import javax.inject.BindingType;
+import javax.inject.manager.Bean;
 
 /**
  * Configuration for the xml web bean component.

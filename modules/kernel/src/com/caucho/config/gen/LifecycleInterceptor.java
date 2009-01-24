@@ -41,8 +41,7 @@ import java.util.*;
 import javax.annotation.security.*;
 import javax.ejb.*;
 import javax.interceptor.*;
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
+import javax.inject.manager.Bean;
 
 /**
  * Represents the interception

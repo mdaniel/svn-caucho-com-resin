@@ -33,7 +33,7 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.*;
 
-import javax.webbeans.BindingType;
+import javax.inject.BindingType;
 
 /**
  * The @ServiceBinding is used startup a basic service.

@@ -55,17 +55,32 @@ import java.util.logging.*;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 
+import javax.annotation.Stereotype;
+import javax.context.Context;
+import javax.context.Conversation;
+import javax.context.ConversationScoped;
+import javax.context.Dependent;
+import javax.decorator.Decorates;
 import javax.el.*;
+import javax.event.Observer;
+import javax.event.Observable;
+import javax.inject.AnnotationLiteral;
+import javax.inject.BindingType;
+import javax.inject.New;
+import javax.inject.Production;
+import javax.inject.Produces;
+import javax.inject.Standard;
+import javax.inject.TypeLiteral;
+import javax.inject.manager.Bean;
+import javax.inject.manager.Decorator;
+import javax.inject.manager.Initialized;
+import javax.inject.manager.Interceptor;
+import javax.inject.manager.InterceptionType;
+import javax.inject.manager.Manager;
 import javax.naming.*;
-import javax.webbeans.*;
-import javax.webbeans.Observable;
-import javax.webbeans.Observer;
-import javax.webbeans.manager.Bean;
-import javax.webbeans.manager.Context;
-import javax.webbeans.manager.Decorator;
-import javax.webbeans.manager.Interceptor;
-import javax.webbeans.manager.InterceptionType;
-import javax.webbeans.manager.Manager;
+import javax.webbeans.AmbiguousDependencyException;
+import javax.webbeans.ContextNotActiveException;
+import javax.webbeans.UnsatisfiedDependencyException;
 
 /**
  * The web beans container for a given environment.
@@ -1594,7 +1609,7 @@ public class WebBeansContainer
 	  webBeans = new WbWebBeans(this, root);
 	  _webBeansMap.put(root, webBeans);
 
-	  Path path = root.lookup("web-beans.xml");
+	  Path path = root.lookup("META-INF/beans.xml");
 	  
 	  if (path.canRead()) {
 	    path.setUserPath(path.getURL());
@@ -1882,7 +1897,7 @@ public class WebBeansContainer
    */
   public boolean isRootScannable(Path root)
   {
-    if (! root.lookup("web-beans.xml").canRead())
+    if (! root.lookup("META-INF/beans.xml").canRead())
       return false;
 
     WebBeansRootContext context = _rootContextMap.get(root);

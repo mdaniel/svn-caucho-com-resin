@@ -39,7 +39,7 @@ import com.caucho.util.*;
 
 import java.util.logging.*;
 import java.lang.reflect.*;
-import javax.webbeans.manager.Bean;
+import javax.inject.manager.Bean;
 
 public class FieldComponentProgram extends ConfigProgram
 {

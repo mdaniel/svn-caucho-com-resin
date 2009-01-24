@@ -55,9 +55,9 @@ import java.lang.annotation.Annotation;
 import java.security.Principal;
 import java.lang.ref.*;
 import java.io.Serializable;
-import javax.webbeans.Observes;
-import javax.webbeans.manager.Bean;
-import javax.webbeans.manager.Manager;
+import javax.event.Observes;
+import javax.inject.manager.Bean;
+import javax.inject.manager.Manager;
 
 /**
  * Broker

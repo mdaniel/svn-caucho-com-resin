@@ -34,7 +34,7 @@ import com.caucho.webbeans.Singleton;
 import com.caucho.webbeans.component.*;
 
 import java.lang.annotation.Annotation;
-import javax.webbeans.manager.Bean;
+import javax.inject.manager.Bean;
 
 /**
  * The singleton scope value

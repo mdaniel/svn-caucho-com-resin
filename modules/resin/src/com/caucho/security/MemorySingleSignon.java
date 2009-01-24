@@ -40,7 +40,6 @@ import javax.annotation.PostConstruct;
  *
  * @since Resin 4.0.0
  */
-@javax.webbeans.ApplicationScoped
 @com.caucho.config.Service
 public class MemorySingleSignon implements SingleSignon {
   private final static Logger log

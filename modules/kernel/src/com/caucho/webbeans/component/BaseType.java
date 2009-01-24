@@ -47,9 +47,8 @@ import java.lang.annotation.*;
 import java.util.*;
 
 import javax.annotation.*;
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
-import javax.webbeans.manager.Manager;
+import javax.inject.manager.Bean;
+import javax.inject.manager.Manager;
 
 /**
  * type matching the web bean

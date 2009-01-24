@@ -33,8 +33,8 @@ import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import javax.ejb.*;
-import javax.webbeans.Interceptor;
-import javax.webbeans.Decorator;
+import javax.decorator.Decorator;
+import javax.interceptor.Interceptor;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;

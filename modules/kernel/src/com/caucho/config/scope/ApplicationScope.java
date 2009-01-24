@@ -35,8 +35,9 @@ import com.caucho.webbeans.component.*;
 import java.lang.annotation.Annotation;
 import java.util.Hashtable;
 
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
+import javax.context.ApplicationScoped;
+import javax.context.Context;
+import javax.inject.manager.Bean;
 
 /**
  * The application scope value

@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import javax.webbeans.manager.Bean;
+import javax.inject.manager.Bean;
 
 /**
  * Administration for a JMS queue

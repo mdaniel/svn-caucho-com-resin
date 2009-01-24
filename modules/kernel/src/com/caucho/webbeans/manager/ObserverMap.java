@@ -40,7 +40,7 @@ import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Set;
-import javax.webbeans.Observer;
+import javax.event.Observer;
 
 /**
  * Matches bindings

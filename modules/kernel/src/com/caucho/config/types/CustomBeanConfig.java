@@ -44,8 +44,10 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 
 import javax.annotation.*;
-
-import javax.webbeans.*;
+import javax.context.ScopeType;
+import javax.inject.BindingType;
+import javax.inject.DeploymentType;
+import javax.interceptor.InterceptorBindingType;
 
 import org.w3c.dom.Node;
 

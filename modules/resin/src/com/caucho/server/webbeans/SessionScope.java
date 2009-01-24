@@ -39,8 +39,8 @@ import com.caucho.webbeans.component.*;
 import java.lang.annotation.Annotation;
 import javax.servlet.*;
 import javax.servlet.http.*;
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
+import javax.context.SessionScoped;
+import javax.inject.manager.Bean;
 
 /**
  * The session scope value

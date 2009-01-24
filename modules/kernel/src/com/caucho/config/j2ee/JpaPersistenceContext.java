@@ -4,7 +4,7 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
 
-import javax.webbeans.BindingType;
+import javax.inject.BindingType;
 
 /**
  * JpaPersistenceContext is a binding type for the JPA EntityManager, letting

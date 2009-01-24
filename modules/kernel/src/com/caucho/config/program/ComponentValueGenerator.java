@@ -32,7 +32,7 @@ package com.caucho.config.program;
 import com.caucho.util.L10N;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
-import javax.webbeans.manager.Bean;
+import javax.inject.manager.Bean;
 import java.util.logging.Logger;
 
 /**

@@ -38,7 +38,6 @@ import java.lang.annotation.*;
 import java.util.ArrayList;
 
 import javax.annotation.*;
-import javax.webbeans.*;
 
 /**
  * Configuration for the xml web bean component.

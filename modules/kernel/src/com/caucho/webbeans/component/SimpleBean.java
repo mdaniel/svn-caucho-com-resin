@@ -48,8 +48,10 @@ import java.util.*;
 import java.util.logging.*;
 
 import javax.annotation.*;
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
+import javax.interceptor.InterceptorBindingType;
+import javax.inject.Produces;
+import javax.inject.manager.Bean;
+import javax.inject.Initializer;
 
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.

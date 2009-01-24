@@ -35,7 +35,7 @@ import com.caucho.util.L10N;
 import com.caucho.webbeans.manager.WebBeansContainer;
 
 import javax.persistence.*;
-import javax.webbeans.AnnotationLiteral;
+import javax.inject.AnnotationLiteral;
 
 import java.util.*;
 import java.util.logging.Logger;

@@ -47,9 +47,6 @@ import java.lang.annotation.*;
 import java.util.*;
 
 import javax.annotation.*;
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
-import javax.webbeans.manager.Manager;
 
 /**
  * param type matching

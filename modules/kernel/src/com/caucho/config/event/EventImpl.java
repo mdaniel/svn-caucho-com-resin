@@ -31,9 +31,9 @@ package com.caucho.config.event;
 
 import java.lang.annotation.Annotation;
 
-import javax.webbeans.Event;
-import javax.webbeans.Observer;
-import javax.webbeans.manager.Manager;
+import javax.event.Event;
+import javax.event.Observer;
+import javax.inject.manager.Manager;
 
 public class EventImpl implements Event<Object>
 {

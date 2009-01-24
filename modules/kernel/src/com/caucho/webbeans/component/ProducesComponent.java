@@ -42,8 +42,7 @@ import java.lang.annotation.*;
 import java.util.ArrayList;
 
 import javax.annotation.*;
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
+import javax.inject.manager.Bean;
 
 /**
  * Configuration for a @Produces method

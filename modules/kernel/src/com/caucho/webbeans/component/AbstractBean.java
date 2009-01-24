@@ -53,9 +53,19 @@ import java.util.logging.*;
 import java.io.Serializable;
 
 import javax.annotation.*;
-import javax.webbeans.*;
-import javax.webbeans.manager.Bean;
-import javax.webbeans.manager.Manager;
+import javax.context.Dependent;
+import javax.context.ScopeType;
+import javax.event.IfExists;
+import javax.event.Observes;
+import javax.inject.AnnotationLiteral;
+import javax.inject.BindingType;
+import javax.inject.Current;
+import javax.inject.DeploymentType;
+import javax.inject.Produces;
+import javax.inject.Production;
+import javax.inject.manager.Bean;
+import javax.inject.manager.Manager;
+import javax.interceptor.InterceptorBindingType;
 
 /**
  * Configuration for the xml web bean component.
@@ -140,7 +150,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
       throw new NullPointerException();
 
     if (! type.isAnnotationPresent(DeploymentType.class))
-      throw new ConfigException(L.l("'{0}' is an invalid deployment type because it does not implement @javax.webbeans.DeploymentType",
+      throw new ConfigException(L.l("'{0}' is an invalid deployment type because it does not implement @javax.inject.DeploymentType",
 				    type));
 
     if (_deploymentType != null && ! _deploymentType.equals(type))
@@ -834,8 +844,10 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   
   boolean hasBindingAnnotation(Constructor ctor)
   {
+    /*
     if (ctor.isAnnotationPresent(In.class))
       return true;
+    */
 
     Annotation [][]paramAnn = ctor.getParameterAnnotations();
 

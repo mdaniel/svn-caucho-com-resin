@@ -32,7 +32,8 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
 
-import javax.webbeans.Stereotype;
+import javax.annotation.Stereotype;
+import javax.context.ApplicationScoped;
 
 /**
  * @Service is a startup @Stereotype for an @ApplicationScoped bean
@@ -41,6 +42,7 @@ import javax.webbeans.Stereotype;
 
 @Stereotype
 @ServiceStartup  
+@ApplicationScoped
 @Documented  
 @Retention(RUNTIME)
 @Target({METHOD, TYPE})

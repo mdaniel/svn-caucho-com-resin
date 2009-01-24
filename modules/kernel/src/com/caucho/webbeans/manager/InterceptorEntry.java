@@ -44,7 +44,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.*;
 
-import javax.webbeans.manager.Interceptor;
+import javax.inject.manager.Interceptor;
 
 /**
  * Represents an introspected interceptor

@@ -55,7 +55,6 @@ import java.util.logging.Level;
  * @since Resin 2.0.2
  */
 @com.caucho.config.Service
-@javax.webbeans.ApplicationScoped
 public class FormLogin extends AbstractLogin
 {
   private static final L10N L = new L10N(FormLogin.class);
