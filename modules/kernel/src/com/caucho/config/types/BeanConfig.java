@@ -33,7 +33,7 @@ import com.caucho.config.*;
 import com.caucho.config.type.*;
 import com.caucho.naming.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.cfg.*;
+import com.caucho.config.cfg.*;
 
 /**
  * Configuration for the xml web bean component.

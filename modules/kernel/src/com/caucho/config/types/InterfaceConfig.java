@@ -34,7 +34,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.BeanConfig;
 import com.caucho.config.*;
 import com.caucho.naming.*;
-import com.caucho.webbeans.cfg.*;
+import com.caucho.config.cfg.*;
 import com.caucho.util.L10N;
 
 import java.util.logging.*;

@@ -33,7 +33,7 @@ import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.*;
-import com.caucho.webbeans.cfg.*;
+import com.caucho.config.cfg.*;
 
 import java.lang.annotation.*;
 import java.lang.reflect.*;

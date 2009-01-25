@@ -34,7 +34,6 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.naming.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.*;
 import com.caucho.xml.QName;
 
 /**

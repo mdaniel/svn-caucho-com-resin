@@ -35,7 +35,6 @@ import com.caucho.server.cluster.*;
 import com.caucho.server.dispatch.*;
 import com.caucho.server.webapp.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.cfg.*;
 
 import java.util.*;
 

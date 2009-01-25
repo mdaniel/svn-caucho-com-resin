@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.bytecode;
+package com.caucho.config.bytecode;
 
 import java.io.*;
 import java.util.*;
@@ -37,7 +37,7 @@ import com.caucho.bytecode.*;
 import com.caucho.config.*;
 import com.caucho.config.inject.ComponentImpl;
 import com.caucho.loader.*;
-import com.caucho.webbeans.cfg.*;
+import com.caucho.config.cfg.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 

@@ -33,7 +33,7 @@ import com.caucho.el.AbstractVariableResolver;
 import com.caucho.jsf.application.*;
 import com.caucho.jsf.cfg.*;
 import com.caucho.jsp.el.*;
-import com.caucho.webbeans.el.*;
+import com.caucho.config.el.*;
 
 import javax.el.*;
 import javax.faces.component.*;

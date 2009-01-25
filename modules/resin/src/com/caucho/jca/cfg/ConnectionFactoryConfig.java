@@ -49,7 +49,6 @@ import com.caucho.loader.StartListener;
 import com.caucho.naming.Jndi;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.*;
 
 import javax.annotation.PostConstruct;
 import javax.management.Attribute;

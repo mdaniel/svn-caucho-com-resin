@@ -35,7 +35,7 @@ import com.caucho.config.inject.SimpleBean;
 import com.caucho.config.inject.SingletonBean;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.cfg.*;
+import com.caucho.config.cfg.*;
 
 import java.util.ArrayList;
 import java.util.Hashtable;

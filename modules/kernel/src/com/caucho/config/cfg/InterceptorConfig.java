@@ -27,58 +27,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.cfg;
+package com.caucho.config.cfg;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.config.types.*;
 import com.caucho.util.*;
+import com.caucho.naming.*;
+import com.caucho.config.inject.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.annotation.*;
 
 /**
- * Runtime binding value
+ * Configuration for the xml interceptor component.
  */
-public class Binding implements java.io.Serializable {
-  private static final L10N L = new L10N(Binding.class);
+public class InterceptorConfig {
+  private static final L10N L = new L10N(InterceptorConfig.class);
 
-  private Class _cl;
+  private Class _class;
 
-  private HashMap<String,Object> _valueMap
-    = new HashMap<String,Object>();
-
-  public Binding(Class cl)
+  public void setClass(Class cl)
   {
-    _cl = cl;
+    _class = cl;
   }
 
-  public Class getBindingClass()
+  @PostConstruct
+  public void init()
   {
-    return _cl;
-  }
-
-  /**
-   * Sets the named binding value
-   */
-  public void put(String key, Object value)
-  {
-    _valueMap.put(key, value);
-  }
-
-  /**
-   * Returns the named binding value
-   */
-  public Object get(String key)
-  {
-    return _valueMap.get(key);
-  }
-
-  public String toString()
-  {
-    return "@" + _cl.getSimpleName() + _valueMap;
+    if (_class == null)
+      throw new ConfigException(L.l("'class' is a required attribute of <interceptor>"));
+    
+    InjectManager webBeans = InjectManager.create();
+    webBeans.addInterceptor(new InterceptorBean(_class));
   }
 }

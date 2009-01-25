@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.el;
+package com.caucho.config.el;
 
 import java.beans.*;
 import java.util.*;
@@ -38,9 +38,13 @@ import com.caucho.config.inject.InjectManager;
 /**
  * Variable resolution for webbeans variables
  */
-public class WebBeansContextResolver extends ELResolver {
-  public WebBeansContextResolver()
+public class WebBeansELResolver extends ELResolver {
+  private final InjectManager _webBeans;
+  
+  public WebBeansELResolver()
   {
+    _webBeans = InjectManager.create();
+    _webBeans.update();
   }
   
   public Class<?> getCommonPropertyType(ELContext context,
@@ -80,8 +84,9 @@ public class WebBeansContextResolver extends ELResolver {
 
     String name = (String) property;
 
-    InjectManager webBeans = InjectManager.create();
-    Object result = webBeans.getInstanceByName(name);
+    Object result = null;
+
+    result = _webBeans.getInstanceByName(name);
 
     if (result != null) {
       context.setPropertyResolved(true);

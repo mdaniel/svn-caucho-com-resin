@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.cfg;
+package com.caucho.config.cfg;
 
 import java.util.*;
 import java.lang.reflect.*;

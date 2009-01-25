@@ -36,7 +36,7 @@ import com.caucho.config.scope.ScopeContext;
 import java.lang.annotation.*;
 import javax.inject.Production;
 
-import com.caucho.webbeans.cfg.WbWebBeans;
+import com.caucho.config.cfg.WbWebBeans;
 
 /**
  * Component for a singleton beans

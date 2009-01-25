@@ -31,7 +31,7 @@ package com.caucho.jsf.el;
 
 import com.caucho.jsf.cfg.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.el.*;
+import com.caucho.config.el.*;
 
 import javax.el.*;
 import javax.faces.component.*;

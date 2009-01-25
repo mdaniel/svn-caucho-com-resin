@@ -36,7 +36,7 @@ import java.util.logging.*;
 
 import com.caucho.util.*;
 // import com.caucho.hessian.io.HessianHandle;
-import com.caucho.webbeans.cfg.*;
+import com.caucho.config.cfg.*;
 
 /**
  * Handle for webbeans serialization

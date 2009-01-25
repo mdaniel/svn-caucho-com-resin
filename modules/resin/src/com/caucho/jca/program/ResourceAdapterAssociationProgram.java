@@ -34,7 +34,6 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.jca.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.*;
 
 import javax.resource.spi.*;
 

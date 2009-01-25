@@ -39,10 +39,10 @@ import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.types.*;
 import com.caucho.naming.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.*;
-import com.caucho.webbeans.bytecode.*;
-import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.event.ObserverImpl;
+import com.caucho.config.*;
+import com.caucho.config.bytecode.*;
+import com.caucho.config.cfg.*;
+import com.caucho.config.event.ObserverImpl;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;

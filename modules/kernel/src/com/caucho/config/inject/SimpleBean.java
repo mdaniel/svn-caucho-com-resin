@@ -36,10 +36,9 @@ import com.caucho.config.type.*;
 import com.caucho.config.types.*;
 import com.caucho.config.gen.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.*;
-import com.caucho.webbeans.bytecode.*;
-import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.event.*;
+import com.caucho.config.bytecode.*;
+import com.caucho.config.cfg.*;
+import com.caucho.config.event.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;

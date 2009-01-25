@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,23 +27,28 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans;
+package com.caucho.config;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.context.ScopeType;
-
 /**
- * The @Singleton represents a unique single instance
+ * @Configurable documents a class or method as configurable by Resin's
+ * dependency injection or configured as part of Resin's normal
+ * configuration.
+ *
+ * The purpose of the annotation is to help the JavaDoc distinguish between
+ * configurable parameters and internal parameters.
  */
 
-@ScopeType
-@Target({TYPE, METHOD})
-@Retention(RUNTIME)
 @Documented  
-public @interface Singleton {
+@Retention(RUNTIME)
+@Target({TYPE, FIELD, METHOD})
+public @interface Configurable {
 }

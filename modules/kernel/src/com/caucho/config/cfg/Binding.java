@@ -27,19 +27,58 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans;
+package com.caucho.config.cfg;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import com.caucho.config.*;
+import com.caucho.config.j2ee.*;
+import com.caucho.util.*;
 
-import javax.context.*;
+import java.lang.reflect.*;
+import java.lang.annotation.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.annotation.*;
+
 /**
- * The @EnvironmentScoped represents an instance for each Resin environment.
+ * Runtime binding value
  */
-@ScopeType
-@Target({TYPE, METHOD})
-@Retention(RUNTIME)
-public @interface EnvironmentScoped {
+public class Binding implements java.io.Serializable {
+  private static final L10N L = new L10N(Binding.class);
+
+  private Class _cl;
+
+  private HashMap<String,Object> _valueMap
+    = new HashMap<String,Object>();
+
+  public Binding(Class cl)
+  {
+    _cl = cl;
+  }
+
+  public Class getBindingClass()
+  {
+    return _cl;
+  }
+
+  /**
+   * Sets the named binding value
+   */
+  public void put(String key, Object value)
+  {
+    _valueMap.put(key, value);
+  }
+
+  /**
+   * Returns the named binding value
+   */
+  public Object get(String key)
+  {
+    return _valueMap.get(key);
+  }
+
+  public String toString()
+  {
+    return "@" + _cl.getSimpleName() + _valueMap;
+  }
 }

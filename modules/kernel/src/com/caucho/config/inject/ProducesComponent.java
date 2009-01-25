@@ -34,8 +34,8 @@ import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.*;
-import com.caucho.webbeans.cfg.*;
+import com.caucho.config.*;
+import com.caucho.config.cfg.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;

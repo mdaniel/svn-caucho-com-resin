@@ -49,7 +49,6 @@ import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.cfg.WbComponentConfig;
 
 import javax.annotation.PostConstruct;
 import java.net.URL;

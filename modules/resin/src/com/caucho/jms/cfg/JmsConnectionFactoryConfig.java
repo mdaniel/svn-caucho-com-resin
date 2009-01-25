@@ -36,10 +36,10 @@ import javax.annotation.*;
 import javax.jms.*;
 
 import com.caucho.config.*;
+import com.caucho.config.cfg.AbstractBeanConfig;
 import com.caucho.jms.JmsConnectionFactory;
 import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
-import com.caucho.webbeans.cfg.AbstractBeanConfig;
 
 import com.caucho.util.*;
 

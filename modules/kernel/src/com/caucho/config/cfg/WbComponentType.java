@@ -27,41 +27,50 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.cfg;
-
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.types.*;
-import com.caucho.util.*;
-import com.caucho.naming.*;
-import com.caucho.webbeans.*;
-import com.caucho.config.inject.*;
-
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-
-import javax.annotation.*;
+package com.caucho.config.cfg;
 
 /**
- * Configuration for the xml interceptor component.
+ * Configuration for the xml component type.
  */
-public class InterceptorConfig {
-  private static final L10N L = new L10N(InterceptorConfig.class);
+public class WbComponentType {
+  private Class _type;
+  private int _priority = -1;
 
-  private Class _class;
-
-  public void setClass(Class cl)
+  public WbComponentType(Class type)
   {
-    _class = cl;
+    _type = type;
+
+    if (type == null)
+      throw new NullPointerException();
   }
 
-  @PostConstruct
-  public void init()
+  public void setType(Class type)
   {
-    if (_class == null)
-      throw new ConfigException(L.l("'class' is a required attribute of <interceptor>"));
-    
-    InjectManager webBeans = InjectManager.create();
-    webBeans.addInterceptor(new InterceptorBean(_class));
+    _type = type;
+  }
+
+  public Class getType()
+  {
+    return _type;
+  }
+
+  public void setPriority(int priority)
+  {
+    _priority = priority;
+  }
+
+  public int getPriority()
+  {
+    return _priority;
+  }
+
+  public boolean isEnabled()
+  {
+    return _priority >= 0;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[@" + _type.getSimpleName() + "]";
   }
 }

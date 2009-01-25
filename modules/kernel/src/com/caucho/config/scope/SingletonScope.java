@@ -29,9 +29,9 @@
 
 package com.caucho.config.scope;
 
+import com.caucho.config.Singleton;
 import com.caucho.config.inject.ComponentImpl;
 import com.caucho.loader.*;
-import com.caucho.webbeans.Singleton;
 
 import java.lang.annotation.Annotation;
 import javax.inject.manager.Bean;

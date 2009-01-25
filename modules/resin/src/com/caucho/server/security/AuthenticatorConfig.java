@@ -32,7 +32,6 @@ package com.caucho.server.security;
 import com.caucho.config.types.BeanConfig;
 import com.caucho.config.*;
 import com.caucho.security.Authenticator;
-import com.caucho.webbeans.cfg.*;
 import com.caucho.util.L10N;
 
 /**

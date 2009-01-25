@@ -33,7 +33,6 @@ import com.caucho.config.ConfigContext;
 import com.caucho.config.inject.HandleAware;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.scope.SingletonScope;
-import com.caucho.webbeans.cfg.WbWebBeans;
 
 import java.io.Closeable;
 import java.lang.annotation.*;

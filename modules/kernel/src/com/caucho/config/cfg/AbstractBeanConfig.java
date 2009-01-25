@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.cfg;
+package com.caucho.config.cfg;
 
 import com.caucho.config.*;
 import com.caucho.config.inject.ComponentImpl;
@@ -40,7 +40,6 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.*;
 import com.caucho.naming.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;

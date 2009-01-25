@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.cfg;
+package com.caucho.config.cfg;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;

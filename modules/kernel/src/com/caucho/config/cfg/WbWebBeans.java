@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.cfg;
+package com.caucho.config.cfg;
 
 import com.caucho.bytecode.*;
 import com.caucho.config.*;
@@ -41,7 +41,6 @@ import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.Singleton;
 
 import java.lang.annotation.*;
 import java.lang.reflect.*;

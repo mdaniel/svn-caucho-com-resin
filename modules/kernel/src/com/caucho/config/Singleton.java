@@ -27,32 +27,23 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans;
+package com.caucho.config;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.loader.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.server.util.*;
-import com.caucho.webbeans.cfg.*;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.lang.annotation.*;
-import java.lang.reflect.*;
-import java.net.URL;
+import javax.context.ScopeType;
 
 /**
- * The web beans for a given environment (?)
+ * The @Singleton represents a unique single instance
  */
-public class WebBeans {
-  private static final L10N L = new L10N(WebBeans.class);
-  private static final Logger log
-    = Logger.getLogger(WebBeans.class.getName());
 
-  private WebBeans()
-  {
-  }
+@ScopeType
+@Target({TYPE, METHOD})
+@Retention(RUNTIME)
+@Documented  
+public @interface Singleton {
 }

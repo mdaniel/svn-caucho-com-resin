@@ -19,14 +19,15 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Sam
  */
 
-package com.caucho.webbeans.bytecode;
+package com.caucho.config.bytecode;
 
 import java.lang.reflect.*;
 import java.util.*;

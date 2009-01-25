@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.event;
+package com.caucho.config.event;
 
 import java.util.*;
 import java.lang.annotation.*;
@@ -43,7 +43,7 @@ import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.util.*;
-import com.caucho.webbeans.cfg.*;
+import com.caucho.config.cfg.*;
 
 /**
  * Implements a single observer.

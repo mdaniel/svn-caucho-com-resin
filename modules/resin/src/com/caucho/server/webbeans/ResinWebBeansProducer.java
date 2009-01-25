@@ -31,6 +31,7 @@ package com.caucho.server.webbeans;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.CauchoDeployment;
+import com.caucho.config.Singleton;
 import com.caucho.config.annotation.ServiceBinding;
 import com.caucho.config.annotation.OsgiServiceBinding;
 import com.caucho.config.inject.BeanStartupEvent;
@@ -40,7 +41,6 @@ import com.caucho.ejb.timer.EjbTimerService;
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.jmx.Jmx;
 import com.caucho.remote.BamService;
-import com.caucho.webbeans.Singleton;
 import com.caucho.server.util.ScheduledThreadPool;
 import com.caucho.transaction.*;
 import com.caucho.util.L10N;

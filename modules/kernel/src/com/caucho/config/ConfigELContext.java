@@ -31,7 +31,7 @@ package com.caucho.config;
 
 import com.caucho.el.StackELResolver;
 import com.caucho.el.SystemPropertiesResolver;
-import com.caucho.webbeans.el.WebBeansContextResolver;
+import com.caucho.config.el.WebBeansContextResolver;
 
 import javax.el.*;
 

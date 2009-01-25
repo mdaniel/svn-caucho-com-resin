@@ -36,9 +36,10 @@ import javax.annotation.*;
 import javax.jms.*;
 
 import com.caucho.config.*;
+import com.caucho.config.cfg.AbstractBeanConfig;
+import com.caucho.config.cfg.WbComponentConfig;
 import com.caucho.config.types.*;
 import com.caucho.ejb.manager.*;
-import com.caucho.webbeans.cfg.*;
 
 import com.caucho.util.*;
 

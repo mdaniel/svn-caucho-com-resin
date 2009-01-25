@@ -37,9 +37,6 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.*;
 import com.caucho.naming.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.*;
-import com.caucho.webbeans.bytecode.*;
-import com.caucho.webbeans.cfg.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;

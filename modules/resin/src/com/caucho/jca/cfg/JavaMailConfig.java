@@ -29,8 +29,8 @@
 package com.caucho.jca.cfg;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.cfg.AbstractBeanConfig;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.cfg.*;
 
 import java.lang.reflect.Method;
 import java.util.Properties;

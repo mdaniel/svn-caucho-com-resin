@@ -9,7 +9,7 @@
   <property name="shell" value="bash"/>
 
   <target name="compile" 
-          depends="init, hessian, javaee, jaxstream, jcache, jsf, portlet, script, resin-kernel, quercus, resin, ecmascript, webbeans, webutil, conf, ext">
+          depends="init, hessian, javaee, jaxstream, jcache, jsf, portlet, script, resin-kernel, quercus, resin, ecmascript, inject, webutil, conf, ext">
   </target>
 
   <!--
@@ -340,7 +340,7 @@
     </antcall>
   </target>
   
-  <target name="resin-kernel" depends="init, webbeans, osgi, jsdk">
+  <target name="resin-kernel" depends="init, inject, osgi, jsdk">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="kernel"/>
       <param name="module.dist" value="${lib}"/>
@@ -409,10 +409,10 @@
     </antcall>
   </target>
 
-  <target name="webbeans" depends="init">
+  <target name="inject" depends="init">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="webbeans"/>
-      <param name="module.jar" value="webbeans-16.jar"/>
+      <param name="module.jar" value="inject-16.jar"/>
     </antcall>
   </target>
 
@@ -451,7 +451,7 @@
     </copy>
   </target>
 
-  <target name="javaee" depends="ejb, jca, jms, jpa, jsdk, jstl, jta, jws, webbeans">
+  <target name="javaee" depends="ejb, jca, jms, jpa, jsdk, jstl, jta, jws, inject">
     <!--
        - javaee-16.jar
       -->
@@ -677,6 +677,7 @@
       author="true"
       version="true"
       windowtitle="Resin ${version}"
+      overview="${modules}/resin/src/overview.html"	     
       source="1.5"
       splitindex="yes">
 
@@ -685,29 +686,23 @@
       <packageset dir="${modules}/jsdk/src"/>
       <packageset dir="${modules}/jcache/src"/>
       <packageset dir="${modules}/jpa/src"/>
-      <!--
-      <packageset dir="${modules}/j2ee-deploy/src"/>
-      <packageset dir="${modules}/j2ee-management/src"/>
-      <packageset dir="${modules}/jaf/src"/>
-      -->
       <packageset dir="${modules}/jaxstream/src"/>
       <packageset dir="${modules}/jca/src"/>
       <packageset dir="${modules}/jms/src"/>
       <packageset dir="${modules}/jstl/src"/>
       <packageset dir="${modules}/jta/src"/>
-      <!--
-      <packageset dir="${modules}/portlet/src"/>
-      -->
       <packageset dir="${modules}/quercus/src"/>
+      <packageset dir="${modules}/osgi/src"/>
       <packageset dir="${modules}/resin/src"/>
       <!--
-      <packageset dir="${modules}/saaj/src"/>
-      -->
       <packageset dir="${modules}/script/src"/>
       <packageset dir="${modules}/unix/src"/>
+      -->
       <packageset dir="${modules}/kernel/src"/>
       <packageset dir="${modules}/webbeans/src"/>
+      <!--
       <packageset dir="${modules}/webutil/src"/>
+      -->
       <packageset dir="${promodules}/pro/src"/>
 
     <!-- For any linked documents here, the href="xxx" must be matched

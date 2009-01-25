@@ -32,9 +32,11 @@ package com.caucho.server.webapp;
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.inject.*;
 import com.caucho.config.j2ee.PersistenceContextRefConfig;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.el.WebBeansELResolver;
 import com.caucho.config.types.*;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.jsp.JspServlet;
@@ -85,7 +87,6 @@ import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-import com.caucho.webbeans.el.WebBeansELResolver;
 import com.caucho.java.WorkDir;
 import com.caucho.jsf.cfg.JsfPropertyGroup;
 
@@ -116,6 +117,7 @@ import org.osgi.framework.BundleContext;
 /**
  * Resin's webApp implementation.
  */
+@Configurable
 public class WebApp extends ServletContextImpl
   implements Dependency, EnvironmentBean, SchemaBean, DispatchBuilder,
              EnvironmentDeployInstance, java.io.Serializable
@@ -562,6 +564,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Sets the redeploy-mode of the controller
    */
+  @Configurable
   public void setRedeployMode(String mode)
   {
     if (_controller != null)
@@ -579,6 +582,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Enables detailed statistics
    */
+  @Configurable
   public void setStatisticsEnable(boolean isEnable)
   {
     _isStatisticsEnabled = isEnable;
@@ -639,6 +643,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Sets the root directory (app-dir).
    */
+  @Configurable
   public void setRootDirectory(Path appDir)
   {
   }
@@ -681,6 +686,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Sets the servlet version.
    */
+  @Configurable
   public void setVersion(String version)
   {
     _servletVersion = version;
@@ -701,6 +707,7 @@ public class WebApp extends ServletContextImpl
   {
   }
 
+  @Configurable
   public void setDistributable(boolean isDistributable)
   {
   }
@@ -760,6 +767,7 @@ public class WebApp extends ServletContextImpl
   /**
    * A user description of the web-app
    */
+  @Configurable
   public void setDescription(String description)
   {
     _description = description;
@@ -768,6 +776,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Sets the icon
    */
+  @Configurable
   public void setIcon(com.caucho.config.types.Icon icon)
   {
   }
@@ -775,6 +784,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Sets the servlet init-param EL enabling.
    */
+  @Configurable
   public void setAllowServletEL(boolean allow)
   {
     _servletAllowEL = allow;
@@ -783,6 +793,7 @@ public class WebApp extends ServletContextImpl
   /**
    * If true, disables getContext().
    */
+  @Configurable
   public void setDisableCrossContext(boolean isDisable)
   {
     _isDisableCrossContext = isDisable;
@@ -814,6 +825,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds a servlet configuration.
    */
+  @Configurable
   public void addServlet(ServletConfigImpl config)
     throws ServletException
   {
@@ -833,6 +845,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Set true if strict mapping.
    */
+  @Configurable
   public void setStrictMapping(boolean isStrict)
     throws ServletException
   {
@@ -850,6 +863,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Lazy servlet validation.
    */
+  @Configurable
   public void setLazyServletValidate(boolean isLazy)
   {
     _servletManager.setLazyValidate(isLazy);
@@ -868,6 +882,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds a servlet-mapping configuration.
    */
+  @Configurable
   public void addServletMapping(ServletMapping servletMapping)
     throws ServletException
   {
@@ -890,6 +905,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds a servlet-regexp configuration.
    */
+  @Configurable
   public void addServletRegexp(ServletRegexp servletRegexp)
     throws ServletException, ClassNotFoundException
   {
@@ -909,6 +925,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds a filter configuration.
    */
+  @Configurable
   public void addFilter(FilterConfigImpl config)
   {
     config.setServletContext(this);
@@ -919,6 +936,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds a filter-mapping configuration.
    */
+  @Configurable
   public void addFilterMapping(FilterMapping filterMapping)
     throws ServletException
   {
@@ -969,6 +987,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Set true if includes wrap filters.
    */
+  @Configurable
   public void setDispatchWrapsFilters(boolean wrap)
   {
     _dispatchWrapsFilters = wrap;
@@ -1001,6 +1020,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds a welcome file list to the webApp.
    */
+  @Configurable
   public void addWelcomeFileList(WelcomeFileList list)
   {
     ArrayList<String> fileList = list.getWelcomeFileList();
@@ -1011,6 +1031,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Configures the locale encoding.
    */
+  @Configurable
   public LocaleEncodingMappingList createLocaleEncodingMappingList()
   {
     return new LocaleEncodingMappingList(this);
@@ -1047,6 +1068,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds the session manager.
    */
+  @Configurable
   public void addSessionConfig(SessionManager manager)
     throws ConfigException
   {
@@ -1058,6 +1080,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Sets the cookie-http-only
    */
+  @Configurable
   public void setCookieHttpOnly(boolean isHttpOnly)
   {
     _cookieHttpOnly = isHttpOnly;
@@ -1086,6 +1109,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Sets the context param
    */
+  @Configurable
   public void addContextParam(InitParam initParam)
   {
     HashMap<String,String> map = initParam.getParameters();
@@ -1102,6 +1126,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds an error page
    */
+  @Configurable
   public void addErrorPage(ErrorPage errorPage)
   {
     _errorPageManager.addErrorPage(errorPage);
@@ -1118,6 +1143,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Sets the access log.
    */
+  @Configurable
   public void setAccessLog(AbstractAccessLog log)
   {
     _accessLog = log;
@@ -1128,6 +1154,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds a mime-mapping
    */
+  @Configurable
   public void addMimeMapping(MimeMapping mimeMapping)
   {
     _mimeMapping.put(mimeMapping.getExtension(),
@@ -1266,6 +1293,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Sets the secure requirement.
    */
+  @Configurable
   public void setSecure(boolean isSecure)
   {
     _isSecure = isSecure;
@@ -1281,6 +1309,7 @@ public class WebApp extends ServletContextImpl
     }
   }
 
+  @Configurable
   public void addListener(Listener listener)
     throws Exception
   {
@@ -1384,6 +1413,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Multipart form config.
    */
+  @Configurable
   public MultipartForm createMultipartForm()
   {
     if (_multipartForm == null)
@@ -1430,6 +1460,7 @@ public class WebApp extends ServletContextImpl
   /**
    * jsp configuration
    */
+  @Configurable
   public JspPropertyGroup createJsp()
   {
     if (_jsp == null) {
@@ -1461,6 +1492,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Returns the JSF configuration
    */
+  @Configurable
   public JsfPropertyGroup getJsf() {
     return _jsf;
   }
@@ -1484,6 +1516,7 @@ public class WebApp extends ServletContextImpl
   /**
    * taglib configuration
    */
+  @Configurable
   public void addTaglib(JspTaglib taglib)
   {
     if (_taglibList == null) {
@@ -1555,6 +1588,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds a war generator
    */
+  @Configurable
   public void addWebAppDeploy(WebAppExpandDeployGenerator deploy)
     throws Exception
   {
@@ -1583,6 +1617,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds a web-app default
    */
+  @Configurable
   public void addWebAppDefault(WebAppConfig config)
   {
     _webAppDefaultList.add(config);
@@ -1599,6 +1634,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds a sub web-app
    */
+  @Configurable
   public void addWebApp(WebAppConfig config)
     throws Exception
   {
@@ -1720,6 +1756,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Sets the delay time waiting for requests to end.
    */
+  @Configurable
   public void setShutdownWaitMax(Period wait)
   {
     _shutdownWaitTime = wait.getPeriod();
@@ -1736,6 +1773,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Sets the delay time waiting for a restart
    */
+  @Configurable
   public void setActiveWaitTime(Period wait)
   {
     _activeWaitTime = wait.getPeriod();
@@ -1744,6 +1782,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Sets the delay time waiting for requests to end.
    */
+  @Configurable
   public void setIdleTime(Period idle)
   {
     _idleTime = idle.getPeriod();
