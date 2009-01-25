@@ -19,37 +19,35 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
+package javax.context;
+
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import javax.annotation.Named;
+import javax.annotation.Stereotype;
 
 /**
- * Exception during runtime for webbeans
+ * A standard @Stereotype
  */
-
-public class DeploymentException extends RuntimeException
-{
-  public DeploymentException()
-  {
-  }
-
-  public DeploymentException(String message)
-  {
-    super(message);
-  }
-
-  public DeploymentException(Throwable cause)
-  {
-    super(cause);
-  }
-  
-  public DeploymentException(String message, Throwable cause)
-  {
-    super(message, cause);
-  }
+@Named
+@RequestScoped
+@Stereotype  
+@Documented  
+@Retention(RUNTIME)
+@Target({TYPE, METHOD})
+public @interface Model {
 }

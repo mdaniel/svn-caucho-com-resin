@@ -57,7 +57,6 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.resource.spi.*;
 import javax.naming.NamingException;
-import javax.webbeans.*;
 import java.lang.reflect.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;

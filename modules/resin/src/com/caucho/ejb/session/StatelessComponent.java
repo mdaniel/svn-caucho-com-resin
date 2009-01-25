@@ -35,8 +35,6 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.scope.ScopeContext;
 
 import java.lang.annotation.*;
-import javax.webbeans.*;
-
 
 /**
  * Component for session beans

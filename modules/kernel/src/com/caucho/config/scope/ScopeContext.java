@@ -31,7 +31,6 @@ package com.caucho.config.scope;
 
 import java.lang.annotation.Annotation;
 
-import javax.webbeans.*;
 import javax.context.Context;
 import javax.inject.manager.Bean;
 

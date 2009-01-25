@@ -37,7 +37,6 @@ import com.caucho.util.L10N;
 import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 import javax.servlet.ServletException;
-import javax.webbeans.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;

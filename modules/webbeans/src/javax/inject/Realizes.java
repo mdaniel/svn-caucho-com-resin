@@ -26,30 +26,17 @@
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
+package javax.inject;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * Exception thrown when a webbean getInstance is not unique
+ * The @Disposes annotation for web beans
  */
-
-public class AmbiguousDependencyException extends RuntimeException
-{
-  public AmbiguousDependencyException()
-  {
-  }
-
-  public AmbiguousDependencyException(String message)
-  {
-    super(message);
-  }
-
-  public AmbiguousDependencyException(Throwable cause)
-  {
-    super(cause);
-  }
-  
-  public AmbiguousDependencyException(String message, Throwable cause)
-  {
-    super(message, cause);
-  }
+@Target({PARAMETER})
+@Retention(RUNTIME)
+public @interface Realizes {
 }

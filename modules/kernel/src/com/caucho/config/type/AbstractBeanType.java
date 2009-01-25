@@ -37,8 +37,6 @@ import com.caucho.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.xml.QName;
 
-import javax.webbeans.*;
-
 /**
  * Represents an interface.  The interface will try to lookup the
  * value in webbeans.

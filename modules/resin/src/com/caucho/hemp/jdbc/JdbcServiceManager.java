@@ -42,7 +42,6 @@ import java.util.logging.*;
 import java.sql.*;
 import javax.annotation.*;
 import javax.sql.*;
-import javax.webbeans.*;
 
 import java.net.*;
 

@@ -42,7 +42,6 @@ import java.util.Hashtable;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
-import javax.webbeans.*;
 
 /**
  * Configuration class for a remote client

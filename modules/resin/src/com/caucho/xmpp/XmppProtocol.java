@@ -44,7 +44,6 @@ import java.util.logging.*;
 import javax.annotation.*;
 import javax.jms.*;
 import javax.xml.namespace.*;
-import javax.webbeans.*;
 
 /*
  * XMPP protocol server

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,43 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.jdbc;
+package javax.inject.manager;
 
-import com.caucho.config.*;
-import com.caucho.bam.*;
-import com.caucho.util.*;
-import java.util.logging.*;
-import java.sql.*;
-import javax.annotation.*;
-import javax.sql.*;
+import java.lang.annotation.Annotation;
+import java.util.List;
+import java.util.Set;
+
+import javax.context.Context;
+import javax.event.Observer;
+import javax.inject.TypeLiteral;
 
 /**
- * host
  */
-class HostItem
+public interface InjectionPoint
 {
-  private final int _id;
-  private final String _name;
-
-  HostItem(int id, String name)
-  {
-    _id = id;
-    _name = name;
-  }
-
-  public int getId()
-  {
-    return _id;
-  }
-
-  public String getName()
-  {
-    return _name;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _id + "," + _name + "]";
-  }
 }

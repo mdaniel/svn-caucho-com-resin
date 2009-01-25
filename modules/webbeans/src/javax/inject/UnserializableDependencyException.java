@@ -26,17 +26,30 @@
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.*;
+package javax.inject;
 
 /**
- * The transaction annotation for web beans
+ * Exception thrown when a webbean getInstance is not unique
  */
 
-@Retention(RUNTIME)
-@Target({PARAMETER})
-public @interface BeforeTransactionCompletion {
+public class UnserializableDependencyException extends DeploymentException
+{
+  public UnserializableDependencyException()
+  {
+  }
+
+  public UnserializableDependencyException(String message)
+  {
+    super(message);
+  }
+
+  public UnserializableDependencyException(Throwable cause)
+  {
+    super(cause);
+  }
+  
+  public UnserializableDependencyException(String message, Throwable cause)
+  {
+    super(message, cause);
+  }
 }

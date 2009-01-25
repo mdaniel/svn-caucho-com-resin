@@ -34,7 +34,6 @@ import java.util.logging.*;
 
 import javax.annotation.*;
 import javax.jms.*;
-import javax.webbeans.*;
 
 import com.caucho.config.inject.InjectManager;
 import com.caucho.jms.memory.*;

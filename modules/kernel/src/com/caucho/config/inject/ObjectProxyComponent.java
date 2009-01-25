@@ -35,7 +35,6 @@ import com.caucho.config.scope.ScopeContext;
 
 import java.lang.annotation.*;
 import javax.naming.*;
-import javax.webbeans.*;
 
 import com.caucho.naming.*;
 

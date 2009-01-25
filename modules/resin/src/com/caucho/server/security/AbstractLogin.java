@@ -39,7 +39,6 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.servlet.*;
 import javax.servlet.http.*;
-import javax.webbeans.*;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.security.Principal;

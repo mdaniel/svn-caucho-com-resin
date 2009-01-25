@@ -19,38 +19,24 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
+package javax.inject;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.*;
 
 /**
- * Exception during runtime for webbeans
+ * The transaction annotation for web beans
  */
 
-public class DuplicateBindingTypeException extends ExecutionException
-{
-  public DuplicateBindingTypeException()
-  {
-  }
-
-  public DuplicateBindingTypeException(String message)
-  {
-    super(message);
-  }
-
-  public DuplicateBindingTypeException(Throwable cause)
-  {
-    super(cause);
-  }
-  
-  public DuplicateBindingTypeException(String message, Throwable cause)
-  {
-    super(message, cause);
-  }
+@Retention(RUNTIME)
+@Target({PARAMETER})
+public @interface BeforeTransactionCompletion {
 }

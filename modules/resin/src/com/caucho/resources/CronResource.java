@@ -37,7 +37,6 @@ import com.caucho.util.*;
 
 import javax.annotation.PostConstruct;
 import javax.resource.spi.work.Work;
-import javax.webbeans.*;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.logging.*;

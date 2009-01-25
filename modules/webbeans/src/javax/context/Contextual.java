@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,43 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.jdbc;
+package javax.context;
 
-import com.caucho.config.*;
-import com.caucho.bam.*;
-import com.caucho.util.*;
-import java.util.logging.*;
-import java.sql.*;
-import javax.annotation.*;
-import javax.sql.*;
+import java.lang.annotation.Annotation;
+import javax.inject.manager.Bean;
 
 /**
- * host
+ * Representation of a scope context
  */
-class HostItem
+public interface Contextual
 {
-  private final int _id;
-  private final String _name;
-
-  HostItem(int id, String name)
-  {
-    _id = id;
-    _name = name;
-  }
-
-  public int getId()
-  {
-    return _id;
-  }
-
-  public String getName()
-  {
-    return _name;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _id + "," + _name + "]";
-  }
 }

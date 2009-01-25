@@ -41,7 +41,6 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 
 import javax.annotation.*;
-import javax.webbeans.*;
 
 /**
  * Configuration for the xml interceptor component.

@@ -41,7 +41,6 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import javax.annotation.*;
-import javax.webbeans.*;
 import java.util.*;
 import java.util.logging.*;
 

@@ -56,6 +56,7 @@ import java.lang.reflect.*;
 
 import javax.annotation.Stereotype;
 import javax.context.Context;
+import javax.context.ContextNotActiveException;
 import javax.context.Conversation;
 import javax.context.ConversationScoped;
 import javax.context.Dependent;
@@ -70,6 +71,8 @@ import javax.inject.Production;
 import javax.inject.Produces;
 import javax.inject.Standard;
 import javax.inject.TypeLiteral;
+import javax.inject.AmbiguousDependencyException;
+import javax.inject.UnsatisfiedDependencyException;
 import javax.inject.manager.Bean;
 import javax.inject.manager.Decorator;
 import javax.inject.manager.Initialized;
@@ -77,9 +80,6 @@ import javax.inject.manager.Interceptor;
 import javax.inject.manager.InterceptionType;
 import javax.inject.manager.Manager;
 import javax.naming.*;
-import javax.webbeans.AmbiguousDependencyException;
-import javax.webbeans.ContextNotActiveException;
-import javax.webbeans.UnsatisfiedDependencyException;
 
 /**
  * The web beans container for a given environment.

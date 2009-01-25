@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.annotation.*;
-import javax.webbeans.*;
 
 /**
  * Runtime binding value

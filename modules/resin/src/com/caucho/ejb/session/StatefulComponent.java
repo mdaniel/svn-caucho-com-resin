@@ -34,7 +34,6 @@ import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 
 import java.lang.annotation.*;
-import javax.webbeans.*;
 
 /**
  * Component for session beans

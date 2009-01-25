@@ -44,7 +44,6 @@ import javax.resource.spi.*;
 import javax.resource.spi.endpoint.*;
 import javax.transaction.*;
 import javax.transaction.xa.*;
-import javax.webbeans.*;
 import java.lang.reflect.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;

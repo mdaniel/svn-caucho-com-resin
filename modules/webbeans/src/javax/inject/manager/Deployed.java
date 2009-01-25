@@ -26,30 +26,22 @@
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
+package javax.inject.manager;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import javax.inject.BindingType;
 
 /**
- * Exception thrown when a webbean definition is inconsistent or invalid
+ * The @Deployed event on startup
  */
-
-public class ContextNotActiveException extends ExecutionException
-{
-  public ContextNotActiveException()
-  {
-  }
-
-  public ContextNotActiveException(String message)
-  {
-    super(message);
-  }
-
-  public ContextNotActiveException(Throwable cause)
-  {
-    super(cause);
-  }
-  
-  public ContextNotActiveException(String message, Throwable cause)
-  {
-    super(message, cause);
-  }
+@BindingType
+@Documented  
+@Retention(RUNTIME)
+@Target({FIELD, PARAMETER})
+public @interface Deployed {
 }

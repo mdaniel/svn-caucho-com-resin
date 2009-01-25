@@ -19,36 +19,37 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
+package javax.inject;
 
 /**
- * Exception thrown when a webbean getInstance is not unique
+ * Exception during runtime for webbeans
  */
 
-public class UnsatisfiedDependencyException extends RuntimeException
+public class DuplicateBindingTypeException extends ExecutionException
 {
-  public UnsatisfiedDependencyException()
+  public DuplicateBindingTypeException()
   {
   }
 
-  public UnsatisfiedDependencyException(String message)
+  public DuplicateBindingTypeException(String message)
   {
     super(message);
   }
 
-  public UnsatisfiedDependencyException(Throwable cause)
+  public DuplicateBindingTypeException(Throwable cause)
   {
     super(cause);
   }
   
-  public UnsatisfiedDependencyException(String message, Throwable cause)
+  public DuplicateBindingTypeException(String message, Throwable cause)
   {
     super(message, cause);
   }

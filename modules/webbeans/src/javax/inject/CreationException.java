@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,43 +27,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.jdbc;
-
-import com.caucho.config.*;
-import com.caucho.bam.*;
-import com.caucho.util.*;
-import java.util.logging.*;
-import java.sql.*;
-import javax.annotation.*;
-import javax.sql.*;
+package javax.inject;
 
 /**
- * host
+ * Exception during runtime for webbeans
  */
-class HostItem
+
+public class CreationException extends ExecutionException
 {
-  private final int _id;
-  private final String _name;
-
-  HostItem(int id, String name)
+  public CreationException()
   {
-    _id = id;
-    _name = name;
   }
 
-  public int getId()
+  public CreationException(String message)
   {
-    return _id;
+    super(message);
   }
 
-  public String getName()
+  public CreationException(Throwable cause)
   {
-    return _name;
+    super(cause);
   }
-
-  @Override
-  public String toString()
+  
+  public CreationException(String message, Throwable cause)
   {
-    return getClass().getSimpleName() + "[" + _id + "," + _name + "]";
+    super(message, cause);
   }
 }

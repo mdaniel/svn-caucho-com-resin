@@ -45,7 +45,6 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.logging.*;
 import javax.annotation.*;
-import javax.webbeans.*;
 
 /**
  * GenericService implementation to simplify configuring a service.

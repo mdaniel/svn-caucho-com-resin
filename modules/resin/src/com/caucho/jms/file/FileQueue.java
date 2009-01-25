@@ -35,7 +35,6 @@ import java.sql.*;
 
 import javax.jms.*;
 import javax.annotation.*;
-import javax.webbeans.*;
 
 import com.caucho.jms.queue.*;
 import com.caucho.jms.message.*;

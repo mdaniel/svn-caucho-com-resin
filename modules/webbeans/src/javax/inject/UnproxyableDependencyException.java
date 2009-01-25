@@ -19,37 +19,36 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
+package javax.inject;
 
 /**
- * Exception during runtime for webbeans
+ * Exception thrown when a webbean getInstance is not unique
  */
 
-public class CreationException extends ExecutionException
+public class UnproxyableDependencyException extends DeploymentException
 {
-  public CreationException()
+  public UnproxyableDependencyException()
   {
   }
 
-  public CreationException(String message)
+  public UnproxyableDependencyException(String message)
   {
     super(message);
   }
 
-  public CreationException(Throwable cause)
+  public UnproxyableDependencyException(Throwable cause)
   {
     super(cause);
   }
   
-  public CreationException(String message, Throwable cause)
+  public UnproxyableDependencyException(String message, Throwable cause)
   {
     super(message, cause);
   }

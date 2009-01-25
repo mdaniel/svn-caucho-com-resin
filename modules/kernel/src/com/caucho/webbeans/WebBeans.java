@@ -44,8 +44,6 @@ import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.net.URL;
 
-import javax.webbeans.*;
-
 /**
  * The web beans for a given environment (?)
  */

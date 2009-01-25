@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,51 +19,24 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.jdbc;
+package javax.inject;
 
-import com.caucho.config.*;
-import com.caucho.bam.*;
-import com.caucho.util.*;
-import java.util.logging.*;
-import java.sql.*;
-import javax.annotation.*;
-import javax.sql.*;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * host
+ * The @Disposes annotation for web beans
  */
-class HostItem
-{
-  private final int _id;
-  private final String _name;
-
-  HostItem(int id, String name)
-  {
-    _id = id;
-    _name = name;
-  }
-
-  public int getId()
-  {
-    return _id;
-  }
-
-  public String getName()
-  {
-    return _name;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _id + "," + _name + "]";
-  }
+@Target({PARAMETER})
+@Retention(RUNTIME)
+public @interface Specializes {
 }

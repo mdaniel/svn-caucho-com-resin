@@ -26,29 +26,29 @@
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
+package javax.inject;
 
 /**
- * Exception during runtime for webbeans
+ * Exception thrown when a webbean getInstance is not unique
  */
 
-public class ExecutionException extends RuntimeException
+public class NullableDependencyException extends DeploymentException
 {
-  public ExecutionException()
+  public NullableDependencyException()
   {
   }
 
-  public ExecutionException(String message)
+  public NullableDependencyException(String message)
   {
     super(message);
   }
 
-  public ExecutionException(Throwable cause)
+  public NullableDependencyException(Throwable cause)
   {
     super(cause);
   }
   
-  public ExecutionException(String message, Throwable cause)
+  public NullableDependencyException(String message, Throwable cause)
   {
     super(message, cause);
   }

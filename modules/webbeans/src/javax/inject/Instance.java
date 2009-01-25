@@ -27,28 +27,13 @@
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
+package javax.inject;
 
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import javax.annotation.Named;
-import javax.annotation.Stereotype;
-import javax.context.RequestScoped;
+import java.lang.reflect.*;
 
 /**
- * A standard @Stereotype
+ * Usable API for Parameterized types.
  */
-@Named
-@RequestScoped
-@Stereotype  
-@Documented  
-@Retention(RUNTIME)
-@Target({TYPE, METHOD})
-public @interface Model {
+public class Instance
+{
 }

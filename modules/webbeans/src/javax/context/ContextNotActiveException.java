@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,51 +19,39 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.jdbc;
+package javax.context;
 
-import com.caucho.config.*;
-import com.caucho.bam.*;
-import com.caucho.util.*;
-import java.util.logging.*;
-import java.sql.*;
-import javax.annotation.*;
-import javax.sql.*;
+import javax.inject.ExecutionException;
 
 /**
- * host
+ * Exception thrown when a webbean definition is inconsistent or invalid
  */
-class HostItem
+
+public class ContextNotActiveException extends ExecutionException
 {
-  private final int _id;
-  private final String _name;
-
-  HostItem(int id, String name)
+  public ContextNotActiveException()
   {
-    _id = id;
-    _name = name;
   }
 
-  public int getId()
+  public ContextNotActiveException(String message)
   {
-    return _id;
+    super(message);
   }
 
-  public String getName()
+  public ContextNotActiveException(Throwable cause)
   {
-    return _name;
+    super(cause);
   }
-
-  @Override
-  public String toString()
+  
+  public ContextNotActiveException(String message, Throwable cause)
   {
-    return getClass().getSimpleName() + "[" + _id + "," + _name + "]";
+    super(message, cause);
   }
 }

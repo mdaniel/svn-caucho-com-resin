@@ -48,7 +48,6 @@ import com.caucho.vfs.*;
 
 import javax.annotation.*;
 import javax.resource.spi.ResourceAdapter;
-import javax.webbeans.*;
 import java.util.logging.Logger;
 
 /**

@@ -38,8 +38,6 @@ import com.caucho.webbeans.cfg.WbWebBeans;
 import java.io.Closeable;
 import java.lang.annotation.*;
 import java.lang.reflect.Type;
-import javax.webbeans.*;
-
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.

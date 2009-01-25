@@ -19,37 +19,31 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
+package javax.inject;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Exception thrown when a webbean definition is inconsistent or invalid
+ * The @Standard DeploymentType for web beans
  */
 
-public class DefinitionException extends RuntimeException
-{
-  public DefinitionException()
-  {
-  }
-
-  public DefinitionException(String message)
-  {
-    super(message);
-  }
-
-  public DefinitionException(Throwable cause)
-  {
-    super(cause);
-  }
-  
-  public DefinitionException(String message, Throwable cause)
-  {
-    super(message, cause);
-  }
+@DeploymentType
+@Documented
+@Retention(RUNTIME)
+@Target({TYPE, METHOD})
+public @interface Obtains {
 }

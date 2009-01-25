@@ -29,8 +29,6 @@
 
 package com.caucho.config;
 
-import javax.webbeans.*;
-
 /**
  * Utility class for creating @Name annotations, used for generic
  * resources like DataSources.

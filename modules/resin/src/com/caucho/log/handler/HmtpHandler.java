@@ -37,7 +37,6 @@ import com.caucho.log.*;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
-import javax.webbeans.*;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;

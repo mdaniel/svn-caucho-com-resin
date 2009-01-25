@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,43 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hemp.jdbc;
+package javax.event;
 
-import com.caucho.config.*;
-import com.caucho.bam.*;
-import com.caucho.util.*;
-import java.util.logging.*;
-import java.sql.*;
-import javax.annotation.*;
-import javax.sql.*;
+import javax.inject.ExecutionException;
 
 /**
- * host
+ * Exception during runtime for webbeans
  */
-class HostItem
+
+public class ObserverException extends ExecutionException
 {
-  private final int _id;
-  private final String _name;
-
-  HostItem(int id, String name)
+  public ObserverException()
   {
-    _id = id;
-    _name = name;
   }
 
-  public int getId()
+  public ObserverException(String message)
   {
-    return _id;
+    super(message);
   }
 
-  public String getName()
+  public ObserverException(Throwable cause)
   {
-    return _name;
+    super(cause);
   }
-
-  @Override
-  public String toString()
+  
+  public ObserverException(String message, Throwable cause)
   {
-    return getClass().getSimpleName() + "[" + _id + "," + _name + "]";
+    super(message, cause);
   }
 }

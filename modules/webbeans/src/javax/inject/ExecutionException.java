@@ -26,17 +26,30 @@
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+package javax.inject;
 
 /**
- * The @EventBindingType annotation for web beans
+ * Exception during runtime for webbeans
  */
-@Target({TYPE})
-@Retention(RUNTIME)
-public @interface EventBindingType {
+
+public class ExecutionException extends RuntimeException
+{
+  public ExecutionException()
+  {
+  }
+
+  public ExecutionException(String message)
+  {
+    super(message);
+  }
+
+  public ExecutionException(Throwable cause)
+  {
+    super(cause);
+  }
+  
+  public ExecutionException(String message, Throwable cause)
+  {
+    super(message, cause);
+  }
 }

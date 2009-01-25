@@ -38,7 +38,6 @@ import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.protocol.*;
 
 import javax.ejb.*;
-import javax.webbeans.*;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.Level;

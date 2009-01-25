@@ -19,24 +19,38 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+package javax.inject;
 
 /**
- * The @Destroys annotation for web beans
+ * Exception during runtime for webbeans
  */
-@Target({METHOD})
-@Retention(RUNTIME)
-public @interface Destroys {
+
+public class IllegalProductException extends ExecutionException
+{
+  public IllegalProductException()
+  {
+  }
+
+  public IllegalProductException(String message)
+  {
+    super(message);
+  }
+
+  public IllegalProductException(Throwable cause)
+  {
+    super(cause);
+  }
+  
+  public IllegalProductException(String message, Throwable cause)
+  {
+    super(message, cause);
+  }
 }
