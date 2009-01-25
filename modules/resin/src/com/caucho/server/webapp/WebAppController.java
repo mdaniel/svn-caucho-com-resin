@@ -29,8 +29,9 @@
 
 package com.caucho.server.webapp;
 
+import com.caucho.config.CauchoDeployment;
 import com.caucho.config.Config;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.server.deploy.DeployConfig;
 import com.caucho.server.deploy.DeployControllerAdmin;
@@ -40,8 +41,6 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.Path;
-import com.caucho.webbeans.CauchoDeployment;
-import com.caucho.webbeans.manager.*;
 
 import javax.servlet.ServletContext;
 import javax.servlet.jsp.el.ELException;

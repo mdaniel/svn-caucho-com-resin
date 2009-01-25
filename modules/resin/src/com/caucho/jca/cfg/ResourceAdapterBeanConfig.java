@@ -29,7 +29,7 @@
 
 package com.caucho.jca.cfg;
 
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;

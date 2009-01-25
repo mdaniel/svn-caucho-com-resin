@@ -27,19 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.manager;
+package com.caucho.config;
 
-import com.caucho.config.inject.CauchoBean;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-import java.lang.annotation.Annotation;
-import javax.inject.manager.Manager;
+import javax.inject.DeploymentType;
 
 /**
- * Registers beans on startup
+ * The @CauchoDeployment is for Caucho automatic objects
  */
-public interface BeanRegistrationListener
-{
-  public boolean isMatch(Annotation ann);
 
-  public void start(Manager manager, CauchoBean bean);
+@DeploymentType
+@Target({TYPE, METHOD})
+@Retention(RUNTIME)
+public @interface CauchoDeployment {
 }

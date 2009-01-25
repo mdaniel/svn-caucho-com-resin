@@ -72,7 +72,7 @@ public class FileQueue extends AbstractQueue implements Topic
   private FileQueueEntry []_head = new FileQueueEntry[10];
   private FileQueueEntry []_tail = new FileQueueEntry[10];
 
-  @In public FileQueue()
+  public FileQueue()
   {
     _store = new FileQueueStore(_messageFactory);
   }

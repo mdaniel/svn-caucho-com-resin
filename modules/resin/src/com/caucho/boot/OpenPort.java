@@ -40,7 +40,6 @@ import com.caucho.server.port.*;
 import com.caucho.server.http.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.manager.*;
 
 /**
  * Represents a protocol connection.

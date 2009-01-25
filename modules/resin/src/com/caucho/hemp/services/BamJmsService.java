@@ -49,7 +49,6 @@ import javax.jms.Session;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.webbeans.In;
 
 /**
  * jms service

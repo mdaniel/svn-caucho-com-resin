@@ -30,7 +30,7 @@
 package com.caucho.jca.cfg;
 
 import com.caucho.config.inject.ComponentImpl;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
@@ -50,7 +50,6 @@ import com.caucho.naming.Jndi;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.webbeans.*;
-import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
 import javax.management.Attribute;

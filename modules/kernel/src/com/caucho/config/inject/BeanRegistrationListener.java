@@ -27,32 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.manager;
+package com.caucho.config.inject;
 
-import com.caucho.config.manager.InjectManager;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.AddLoaderListener;
+
+import java.lang.annotation.Annotation;
+import javax.inject.manager.Manager;
 
 /**
- * Listener for environment creation to detect webbeans
+ * Registers beans on startup
  */
-public class WebBeansAddLoaderListener implements AddLoaderListener
+public interface BeanRegistrationListener
 {
-  /**
-   * Handles the case where the environment is starting (after init).
-   */
-  public void addLoader(EnvironmentClassLoader loader)
-  {
-    InjectManager container = InjectManager.create(loader);
+  public boolean isMatch(Annotation ann);
 
-    // jpa/0046
-    // container.update();
-  }
-
-  public boolean equals(Object o)
-  {
-    return o instanceof WebBeansAddLoaderListener;
-  }
+  public void start(Manager manager, CauchoBean bean);
 }
-
-

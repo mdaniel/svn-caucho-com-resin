@@ -31,7 +31,6 @@ package com.caucho.config.gen;
 
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.*;
 
 import java.io.*;
 import java.lang.annotation.*;

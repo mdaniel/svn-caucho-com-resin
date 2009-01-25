@@ -54,7 +54,6 @@ import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-import com.caucho.webbeans.manager.*;
 
 import java.util.ArrayList;
 import java.util.logging.Level;

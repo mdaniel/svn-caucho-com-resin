@@ -30,10 +30,9 @@
 package com.caucho.config.gen;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.*;
 
 import java.io.*;
 import java.lang.annotation.*;
@@ -562,7 +561,7 @@ public class InterceptorCallChain extends AbstractCallChain {
 				    Annotation ann)
     throws IOException
   {
-    out.print("new javax.webbeans.AnnotationLiteral<");
+    out.print("new javax.inject.AnnotationLiteral<");
     out.printClass(ann.annotationType());
     out.print(">() {");
 
@@ -672,7 +671,7 @@ public class InterceptorCallChain extends AbstractCallChain {
 
       out.println();
 
-      out.println("private static java.util.List<javax.webbeans.manager.Decorator> " + _decoratorBeanVar + ";");
+      out.println("private static java.util.List<javax.inject.manager.Decorator> " + _decoratorBeanVar + ";");
 
       out.println("private transient Object [] " + _decoratorBeanVar + "_i;");
     }

@@ -27,14 +27,36 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.manager;
+package com.caucho.config.inject;
 
-import javax.inject.Current;
-import javax.inject.AnnotationLiteral;
+import javax.inject.manager.Bean;
+import javax.inject.manager.Manager;
 
 /**
- * Represents the @Current annotation
+ * An event at webbeans startup
  */
-public class CurrentLiteral extends AnnotationLiteral<Current> {
-  public static final CurrentLiteral CURRENT = new CurrentLiteral();
+public class BeanStartupEvent {
+  private final Manager _manager;
+  private final Bean _bean;
+
+  public BeanStartupEvent(Manager manager, Bean bean)
+  {
+    _manager = manager;
+    _bean = bean;
+  }
+
+  public Manager getManager()
+  {
+    return _manager;
+  }
+
+  public Bean getBean()
+  {
+    return _bean;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _bean + "]";
+  }
 }

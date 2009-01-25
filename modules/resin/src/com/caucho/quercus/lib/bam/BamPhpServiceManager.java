@@ -40,6 +40,7 @@ import com.caucho.bam.BamBroker;
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamServiceManager;
 import com.caucho.bam.BamStream;
+import com.caucho.hemp.broker.HempBroker;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.env.Env;
@@ -61,7 +62,6 @@ import com.caucho.xmpp.disco.DiscoInfoQuery;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
-import javax.webbeans.In;
 
 /**
  * BAM agent that calls into a PHP script to handle messages/queries.
@@ -82,7 +82,7 @@ public class BamPhpServiceManager implements BamServiceManager {
   private Path _script;
   private String _encoding = "ISO-8859-1";
 
-  @In BamBroker _broker;
+  BamBroker _broker = HempBroker.getCurrent();
 
   public BamPhpServiceManager()
   {

@@ -55,7 +55,7 @@ public class JdbcServiceManager extends AbstractBamServiceManager
   private static final Logger log
     = Logger.getLogger(JdbcServiceManager.class.getName());
   
-  @In private BamBroker _broker;
+  private BamBroker _broker;
   private DataSource _db;
 
   private String _tablePrefix = "hemp_";

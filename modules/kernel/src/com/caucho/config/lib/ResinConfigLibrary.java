@@ -29,9 +29,8 @@
 
 package com.caucho.config.lib;
 
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.naming.Jndi;
-import com.caucho.webbeans.manager.*;
 
 import java.lang.reflect.*;
 import java.util.logging.*;

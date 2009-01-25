@@ -30,11 +30,10 @@
 package com.caucho.server.webapp;
 
 import com.caucho.amber.manager.AmberContainer;
+import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ConfigException;
-import com.caucho.config.inject.CauchoBean;
 import com.caucho.config.inject.*;
 import com.caucho.config.j2ee.PersistenceContextRefConfig;
-import com.caucho.config.manager.InjectManager;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.types.*;
 import com.caucho.i18n.CharacterEncoding;
@@ -86,9 +85,7 @@ import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-import com.caucho.webbeans.CauchoDeployment;
 import com.caucho.webbeans.el.WebBeansELResolver;
-import com.caucho.webbeans.manager.*;
 import com.caucho.java.WorkDir;
 import com.caucho.jsf.cfg.JsfPropertyGroup;
 

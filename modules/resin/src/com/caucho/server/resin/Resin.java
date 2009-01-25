@@ -34,8 +34,9 @@ import com.caucho.bam.*;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.WebBeansAddLoaderListener;
 import com.caucho.config.lib.*;
-import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
@@ -79,7 +80,6 @@ import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
-import com.caucho.webbeans.manager.WebBeansAddLoaderListener;
 
 import javax.annotation.PostConstruct;
 import javax.management.ObjectName;

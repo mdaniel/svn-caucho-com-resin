@@ -30,8 +30,8 @@
 package com.caucho.config.program;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.j2ee.*;
-import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.scope.DependentScope;
 import com.caucho.util.*;

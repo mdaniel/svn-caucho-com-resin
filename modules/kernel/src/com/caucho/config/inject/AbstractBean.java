@@ -30,7 +30,6 @@
 package com.caucho.config.inject;
 
 import com.caucho.config.annotation.ServiceType;
-import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
@@ -44,7 +43,6 @@ import com.caucho.webbeans.*;
 import com.caucho.webbeans.bytecode.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.event.ObserverImpl;
-import com.caucho.webbeans.manager.CurrentLiteral;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;

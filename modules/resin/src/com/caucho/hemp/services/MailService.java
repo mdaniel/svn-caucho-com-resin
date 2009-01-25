@@ -44,8 +44,6 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.MimeMessage;
 
-import javax.webbeans.In;
-
 /**
  * mail service
  */

@@ -32,7 +32,6 @@ package com.caucho.server.security;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.port.TcpConnection;
 import com.caucho.server.session.SessionImpl;
-import com.caucho.webbeans.manager.*;
 import com.caucho.util.LruCache;
 
 import javax.annotation.PostConstruct;

@@ -30,7 +30,7 @@
 package com.caucho.osgi;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.PathPatternType;

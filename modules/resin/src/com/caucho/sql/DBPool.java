@@ -29,8 +29,10 @@
 
 package com.caucho.sql;
 
+import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ConfigException;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.Names;
+import com.caucho.config.inject.SingletonBean;
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.Period;
 import com.caucho.jca.ConnectionPool;
@@ -40,6 +42,7 @@ import com.caucho.naming.Jndi;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
 import com.caucho.config.inject.HandleAware;
+import com.caucho.config.inject.InjectManager;
 
 import javax.annotation.PostConstruct;
 import javax.resource.spi.ManagedConnectionFactory;
@@ -48,6 +51,7 @@ import javax.sql.DataSource;
 import javax.sql.XADataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Annotation;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
@@ -680,10 +684,18 @@ public class DBPool
     if (name == null)
       name = _var;
 
-    if (name != null)
-      InjectManager.create().addSingleton(this, name, DataSource.class);
-    else
-      InjectManager.create().addSingleton(this, DataSource.class);
+    SingletonBean bean;
+    if (name != null) {
+      bean = new SingletonBean(this, CauchoDeployment.class, null,
+			       new Annotation[] { Names.create(name) },
+			       DataSource.class);
+    }
+    else {
+      bean = new SingletonBean(this, CauchoDeployment.class, null,
+			       DataSource.class);
+    }
+
+    InjectManager.create().addBean(bean);
  }
 
   /**
@@ -819,7 +831,7 @@ public class DBPool
    */
   public String toString()
   {
-    return "DBPool[" + getName() + "]";
+    return getClass().getSimpleName() + "[" + getName() + "]";
   }
 }
 

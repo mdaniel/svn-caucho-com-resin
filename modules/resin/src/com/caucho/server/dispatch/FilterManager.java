@@ -30,10 +30,9 @@ package com.caucho.server.dispatch;
 
 import com.caucho.config.Config;
 import com.caucho.config.inject.ComponentImpl;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.Filter;

@@ -53,7 +53,7 @@ import com.caucho.amber.query.ResultSetCacheChunk;
 import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.*;
 import com.caucho.config.ConfigException;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.naming.Jndi;

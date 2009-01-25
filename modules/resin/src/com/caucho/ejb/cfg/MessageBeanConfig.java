@@ -38,7 +38,7 @@ import javax.resource.spi.*;
 
 import com.caucho.config.*;
 import com.caucho.config.inject.ComponentImpl;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.ejb.manager.*;
 import com.caucho.webbeans.cfg.AbstractBeanConfig;

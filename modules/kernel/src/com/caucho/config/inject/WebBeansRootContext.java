@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.manager;
+package com.caucho.config.inject;
 
 import com.caucho.vfs.*;
 

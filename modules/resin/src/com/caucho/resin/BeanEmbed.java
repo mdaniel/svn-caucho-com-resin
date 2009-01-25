@@ -30,14 +30,13 @@
 package com.caucho.resin;
 
 import com.caucho.config.*;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.server.cluster.*;
 import com.caucho.server.dispatch.*;
 import com.caucho.server.webapp.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.manager.*;
 
 import java.util.*;
 

@@ -19,36 +19,39 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.webbeans.manager;
+package com.caucho.config.inject;
 
-import com.caucho.config.manager.InjectManager;
-import com.caucho.naming.ObjectProxy;
-
-import java.util.Hashtable;
-import javax.naming.NamingException;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.AddLoaderListener;
 
 /**
- * The JNDI proxy for Manager
+ * Listener for environment creation to detect webbeans
  */
-public class WebBeansJndiProxy implements ObjectProxy, java.io.Serializable
+public class WebBeansAddLoaderListener implements AddLoaderListener
 {
   /**
-   * Creates the object from the proxy.
-   *
-   * @param env the calling environment
-   *
-   * @return the object named by the proxy.
+   * Handles the case where the environment is starting (after init).
    */
-  public Object createObject(Hashtable env)
-    throws NamingException
+  public void addLoader(EnvironmentClassLoader loader)
   {
-    return InjectManager.create();
+    InjectManager container = InjectManager.create(loader);
+
+    // jpa/0046
+    // container.update();
+  }
+
+  public boolean equals(Object o)
+  {
+    return o instanceof WebBeansAddLoaderListener;
   }
 }
+
+

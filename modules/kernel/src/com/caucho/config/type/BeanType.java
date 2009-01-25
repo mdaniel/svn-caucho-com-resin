@@ -35,19 +35,18 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.*;
 
-import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
 import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.xml.*;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.manager.*;
 import com.caucho.xml.QName;
 
 import org.w3c.dom.*;

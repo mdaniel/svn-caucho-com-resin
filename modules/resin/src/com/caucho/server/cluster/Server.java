@@ -34,7 +34,7 @@ import com.caucho.bam.BamStream;
 import com.caucho.cluster.ClusterCache;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;

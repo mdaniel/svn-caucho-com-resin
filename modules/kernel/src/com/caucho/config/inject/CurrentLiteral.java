@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,26 +19,22 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package javax.webbeans;
+package com.caucho.config.inject;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import javax.inject.Current;
+import javax.inject.AnnotationLiteral;
 
 /**
- * The @In binding annotation for web beans
+ * Represents the @Current annotation
  */
-
-@Target({CONSTRUCTOR, METHOD, FIELD, PARAMETER, TYPE})
-@Retention(RUNTIME)
-public @interface In {
-  boolean optional() default false;
+public class CurrentLiteral extends AnnotationLiteral<Current> {
+  public static final CurrentLiteral CURRENT = new CurrentLiteral();
 }

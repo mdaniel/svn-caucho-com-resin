@@ -31,7 +31,7 @@ package com.caucho.ejb.session;
 
 import com.caucho.config.ConfigContext;
 import com.caucho.config.inject.ComponentImpl;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 
 import java.lang.annotation.*;
 import javax.webbeans.*;

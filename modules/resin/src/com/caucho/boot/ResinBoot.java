@@ -31,8 +31,8 @@ package com.caucho.boot;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.lib.ResinConfigLibrary;
-import com.caucho.config.manager.InjectManager;
 import com.caucho.loader.*;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;

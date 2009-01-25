@@ -31,7 +31,6 @@ package com.caucho.config.inject;
 
 import com.caucho.config.ConfigContext;
 import com.caucho.config.inject.ComponentImpl;
-import com.caucho.config.manager.InjectManager;
 import com.caucho.config.scope.ScopeContext;
 
 import java.lang.annotation.*;
@@ -39,7 +38,6 @@ import javax.naming.*;
 import javax.webbeans.*;
 
 import com.caucho.naming.*;
-import com.caucho.webbeans.manager.*;
 
 /**
  * Component for a singleton beans

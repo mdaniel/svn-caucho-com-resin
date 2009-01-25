@@ -31,7 +31,7 @@ package com.caucho.server.host;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.el.EL;
 import com.caucho.management.server.HostMXBean;
@@ -45,7 +45,6 @@ import com.caucho.vfs.Depend;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-import com.caucho.webbeans.manager.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;

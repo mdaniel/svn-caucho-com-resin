@@ -31,8 +31,6 @@ package com.caucho.jms.hub;
 
 import com.caucho.server.port.*;
 
-import com.caucho.webbeans.manager.*;
-
 import javax.annotation.*;
 import javax.jms.*;
 

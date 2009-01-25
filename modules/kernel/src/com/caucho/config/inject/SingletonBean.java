@@ -31,11 +31,9 @@ package com.caucho.config.inject;
 
 import com.caucho.config.ConfigContext;
 import com.caucho.config.inject.HandleAware;
-import com.caucho.config.manager.InjectManager;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.scope.SingletonScope;
 import com.caucho.webbeans.cfg.WbWebBeans;
-import com.caucho.webbeans.manager.*;
 
 import java.io.Closeable;
 import java.lang.annotation.*;

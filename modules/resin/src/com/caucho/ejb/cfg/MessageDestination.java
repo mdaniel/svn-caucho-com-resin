@@ -29,11 +29,10 @@
 package com.caucho.ejb.cfg;
 
 import com.caucho.config.*;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
 import javax.jms.Destination;

@@ -29,14 +29,13 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.*;
 
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;

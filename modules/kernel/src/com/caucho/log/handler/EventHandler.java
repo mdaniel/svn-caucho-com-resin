@@ -29,9 +29,8 @@
 
 package com.caucho.log.handler;
 
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.*;
 
 import java.util.logging.Logger;
 import java.util.logging.LogRecord;

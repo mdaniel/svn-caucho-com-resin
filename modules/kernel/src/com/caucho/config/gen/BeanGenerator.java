@@ -31,11 +31,10 @@ package com.caucho.config.gen;
 
 import com.caucho.make.*;
 import com.caucho.util.L10N;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.java.*;
 import com.caucho.java.gen.*;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.manager.*;
 
 import java.io.*;
 import java.lang.annotation.*;

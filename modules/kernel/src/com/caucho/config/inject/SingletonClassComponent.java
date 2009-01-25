@@ -30,7 +30,6 @@
 package com.caucho.config.inject;
 
 import com.caucho.config.ConfigContext;
-import com.caucho.config.manager.InjectManager;
 import com.caucho.config.scope.SingletonScope;
 import com.caucho.jmx.*;
 

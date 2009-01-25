@@ -30,9 +30,7 @@
 package com.caucho.config.inject;
 
 import com.caucho.config.inject.SimpleBean;
-import com.caucho.config.manager.InjectManager;
 import com.caucho.util.*;
-import com.caucho.webbeans.manager.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;

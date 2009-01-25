@@ -32,8 +32,6 @@ package com.caucho.xmpp;
 import com.caucho.server.port.*;
 import com.caucho.vfs.*;
 
-import com.caucho.webbeans.manager.*;
-
 import java.io.*;
 import java.net.*;
 import java.util.*;

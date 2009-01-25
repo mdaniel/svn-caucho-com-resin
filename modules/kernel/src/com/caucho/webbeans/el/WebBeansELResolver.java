@@ -33,7 +33,7 @@ import java.beans.*;
 import java.util.*;
 import javax.el.*;
 
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 
 /**
  * Variable resolution for webbeans variables

@@ -30,11 +30,10 @@
 package com.caucho.resources;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.loader.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.manager.*;
 import com.caucho.server.connection.*;
 import com.caucho.server.webapp.*;
 
@@ -42,7 +41,7 @@ import javax.annotation.PostConstruct;
 import javax.el.*;
 import javax.resource.spi.work.Work;
 import javax.servlet.*;
-import javax.webbeans.*;
+import javax.inject.Current;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.logging.*;
@@ -58,7 +57,7 @@ public class ScheduledTask extends BeanConfig
   private static final Logger log
     = Logger.getLogger(ScheduledTask.class.getName());
 
-  @In
+  @Current
   private Executor _threadPool;
 
   private ClassLoader _loader;

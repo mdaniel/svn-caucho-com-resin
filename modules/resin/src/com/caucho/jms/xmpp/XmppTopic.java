@@ -36,13 +36,12 @@ import javax.annotation.*;
 import javax.jms.*;
 import javax.webbeans.*;
 
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.jms.memory.*;
 import com.caucho.jms.message.*;
 import com.caucho.jms.queue.*;
 import com.caucho.jms.connection.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.manager.*;
 
 /**
  * Implements an xmpp topic.

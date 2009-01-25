@@ -31,7 +31,7 @@ package com.caucho.jca;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.jca.cfg.ObjectConfig;
 import com.caucho.lifecycle.Lifecycle;
@@ -40,7 +40,6 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
 import javax.resource.spi.*;

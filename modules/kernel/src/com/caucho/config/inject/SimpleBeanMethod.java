@@ -40,7 +40,6 @@ import com.caucho.webbeans.*;
 import com.caucho.webbeans.bytecode.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.event.*;
-import com.caucho.webbeans.manager.*;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;

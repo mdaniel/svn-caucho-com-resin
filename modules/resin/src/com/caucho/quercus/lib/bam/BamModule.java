@@ -34,7 +34,7 @@ import com.caucho.bam.BamStream;
 import com.caucho.bam.BamError;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.bam.hmtp.HmtpClient;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.xmpp.im.ImMessage;
 import com.caucho.xmpp.im.ImPresence;
 import com.caucho.xmpp.im.RosterItem;
@@ -64,8 +64,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Logger;
-
-import javax.webbeans.In;
 
 /**
  * BAM functions

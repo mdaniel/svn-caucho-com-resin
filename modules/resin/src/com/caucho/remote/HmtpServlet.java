@@ -33,7 +33,7 @@ import java.io.*;
 import javax.servlet.*;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.hemp.*;
 import com.caucho.hemp.broker.*;
 import com.caucho.hemp.servlet.*;
@@ -43,7 +43,6 @@ import com.caucho.security.AdminAuthenticator;
 import com.caucho.server.connection.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.manager.*;
 
 import java.util.logging.*;
 import javax.servlet.http.HttpServletResponse;

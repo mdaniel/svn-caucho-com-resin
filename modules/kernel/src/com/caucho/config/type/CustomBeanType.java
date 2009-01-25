@@ -45,7 +45,6 @@ import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.xml.*;
 import com.caucho.vfs.*;
-import com.caucho.webbeans.manager.*;
 import com.caucho.xml.QName;
 
 import org.w3c.dom.*;
@@ -217,27 +216,9 @@ public class CustomBeanType extends ConfigType
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-    try {
-      String className = "javax.webbeans." + name;
-      
-      Class cl = Class.forName(className, false, loader);
+    Class cl = TypeFactory.loadClass("ee", name);
 
-      return cl;
-    } catch (ClassNotFoundException e) {
-      log.log(Level.FINEST, e.toString(), e);
-    }
-    
-    try {
-      String className = "com.caucho.config." + name;
-      
-      Class cl = Class.forName(className, false, loader);
-
-      return cl;
-    } catch (ClassNotFoundException e) {
-      log.log(Level.FINEST, e.toString(), e);
-    }
-
-    return null;
+    return cl;
   }
   
   /**

@@ -31,10 +31,10 @@ package com.caucho.webbeans.cfg;
 
 import com.caucho.config.*;
 import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SimpleBean;
 import com.caucho.config.inject.SingletonClassComponent;
 import com.caucho.config.j2ee.*;
-import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.config.types.*;
 // import com.caucho.ejb.cfg.*;

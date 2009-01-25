@@ -33,12 +33,11 @@ import java.util.logging.*;
 import javax.annotation.*;
 
 import com.caucho.config.*;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.server.cluster.*;
 import com.caucho.server.port.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.manager.*;
 
 /**
  * Represents a protocol connection.

@@ -27,17 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.manager;
+package com.caucho.config.inject;
 
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
-import com.caucho.config.inject.CauchoBean;
-import com.caucho.config.inject.ComponentImpl;
-import com.caucho.config.inject.SimpleBean;
-import com.caucho.config.inject.SingletonBean;
-import com.caucho.config.inject.BaseType;
-import com.caucho.config.inject.ComponentClose;
-import com.caucho.config.inject.WebBeansHandle;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.MethodComponentProgram;
@@ -54,15 +47,6 @@ import com.caucho.server.util.*;
 import com.caucho.webbeans.*;
 import com.caucho.webbeans.cfg.*;
 import com.caucho.webbeans.event.*;
-import com.caucho.webbeans.manager.BeanRegistrationListener;
-import com.caucho.webbeans.manager.BeanStartupEvent;
-import com.caucho.webbeans.manager.CurrentLiteral;
-import com.caucho.webbeans.manager.DecoratorEntry;
-import com.caucho.webbeans.manager.InterceptorEntry;
-import com.caucho.webbeans.manager.ObserverMap;
-import com.caucho.webbeans.manager.WebBeansJndiProxy;
-import com.caucho.webbeans.manager.WebBeansRootContext;
-import com.caucho.webbeans.manager.WebComponent;
 
 import java.io.*;
 import java.util.*;

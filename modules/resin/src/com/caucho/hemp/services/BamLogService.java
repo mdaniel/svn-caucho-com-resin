@@ -47,7 +47,7 @@ import javax.jms.ObjectMessage;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.webbeans.In;
+
 
 /**
  * log service

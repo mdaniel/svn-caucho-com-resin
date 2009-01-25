@@ -37,8 +37,9 @@ import com.caucho.bam.BamService;
 import com.caucho.bam.AbstractBamService;
 import com.caucho.bam.BamStream;
 import com.caucho.bam.BamNotAuthorizedException;
+import com.caucho.config.inject.BeanStartupEvent;
 import com.caucho.config.inject.CauchoBean;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.hemp.*;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
@@ -46,7 +47,6 @@ import com.caucho.security.*;
 import com.caucho.server.resin.*;
 import com.caucho.util.*;
 import com.caucho.hemp.BamServiceBinding;
-import com.caucho.webbeans.manager.BeanStartupEvent;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

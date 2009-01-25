@@ -32,7 +32,6 @@ package com.caucho.config.inject;
 import com.caucho.config.*;
 import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.j2ee.*;
-import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;

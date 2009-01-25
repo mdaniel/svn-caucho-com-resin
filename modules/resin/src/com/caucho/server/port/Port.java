@@ -47,7 +47,6 @@ import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.QSocket;
 import com.caucho.vfs.SSLFactory;
-import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
 import java.net.ConnectException;

@@ -32,9 +32,9 @@ package com.caucho.boot;
 import com.caucho.admin.RemoteAdminService;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SingletonBean;
 import com.caucho.config.lib.ResinConfigLibrary;
-import com.caucho.config.manager.InjectManager;
 import com.caucho.config.types.RawString;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.loader.*;
@@ -61,7 +61,6 @@ import com.caucho.util.*;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
-import com.caucho.webbeans.manager.*;
 
 import java.io.*;
 import java.util.ArrayList;

@@ -32,9 +32,9 @@ package com.caucho.config.types;
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
 import com.caucho.config.inject.ComponentImpl;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SimpleBean;
 import com.caucho.config.inject.SimpleBeanMethod;
-import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.config.type.*;
 import com.caucho.util.*;
@@ -329,25 +329,15 @@ public class CustomBeanConfig {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-    try {
-      String className = "javax.webbeans." + name;
-      
-      Class cl = Class.forName(className, false, loader);
+    Class cl = TypeFactory.loadClass("ee", name);
 
+    if (cl != null)
       return cl;
-    } catch (ClassNotFoundException e) {
-      log.log(Level.FINEST, e.toString(), e);
-    }
-    
-    try {
-      String className = "com.caucho.config." + name;
-      
-      Class cl = Class.forName(className, false, loader);
 
+    cl = TypeFactory.loadClass("com.caucho.config", name);
+
+    if (cl != null)
       return cl;
-    } catch (ClassNotFoundException e) {
-      log.log(Level.FINEST, e.toString(), e);
-    }
 
     return null;
   }

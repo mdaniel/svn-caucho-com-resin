@@ -36,7 +36,6 @@ import com.caucho.amber.gen.AmberGenerator;
 import com.caucho.amber.type.*;
 import com.caucho.config.*;
 import com.caucho.config.inject.*;
-import com.caucho.config.manager.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.EnhancerManager;

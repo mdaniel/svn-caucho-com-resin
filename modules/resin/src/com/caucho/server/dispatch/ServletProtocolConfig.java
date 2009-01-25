@@ -36,7 +36,6 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.BeanConfig;
 import com.caucho.remote.server.ProtocolServletFactory;
 import com.caucho.util.*;
-import com.caucho.webbeans.manager.*;
 
 import java.util.*;
 import javax.annotation.PostConstruct;

@@ -34,7 +34,7 @@ import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.ApiMethod;
 import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.gen.MessageGenerator;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.JndiBuilder;
 import com.caucho.ejb.AbstractServer;
@@ -44,7 +44,6 @@ import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jca.*;
 import com.caucho.jca.cfg.*;
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.*;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.ActivationConfigProperty;

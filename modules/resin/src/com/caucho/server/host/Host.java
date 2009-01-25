@@ -32,8 +32,8 @@ package com.caucho.server.host;
 import com.caucho.bam.*;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SingletonBean;
-import com.caucho.config.manager.InjectManager;
 import com.caucho.hemp.broker.*;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentBean;
@@ -53,7 +53,6 @@ import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
-import com.caucho.webbeans.manager.*;
 
 import java.net.*;
 import java.util.ArrayList;

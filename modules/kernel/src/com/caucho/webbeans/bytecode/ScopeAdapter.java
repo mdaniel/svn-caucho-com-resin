@@ -114,12 +114,12 @@ public class ScopeAdapter {
       jClass.setThisClass(thisClassName);
 
       JavaField jField
-	= jClass.createField("_cxt", "Lcom/caucho/webbeans/component/ComponentImpl;");
+	= jClass.createField("_cxt", "Lcom/caucho/config/inject/ComponentImpl;");
       jField.setAccessFlags(Modifier.PRIVATE);
 
       JavaMethod ctor
 	= jClass.createMethod("<init>",
-			      "(Lcom/caucho/webbeans/component/ComponentImpl;)V");
+			      "(Lcom/caucho/config/inject/ComponentImpl;)V");
       ctor.setAccessFlags(Modifier.PUBLIC);
       
       CodeWriterAttribute code = ctor.createCodeWriter();
@@ -184,9 +184,9 @@ public class ScopeAdapter {
 
     code.pushObjectVar(0);
     code.getField(jClass.getThisClass(), "_cxt",
-		  "Lcom/caucho/webbeans/component/ComponentImpl;");
+		  "Lcom/caucho/config/inject/ComponentImpl;");
     
-    code.invoke("com/caucho/webbeans/component/ComponentImpl",
+    code.invoke("com/caucho/config/inject/ComponentImpl",
 		"get", "()Ljava/lang/Object;", 1, 1);
     
     code.cast(method.getDeclaringClass().getName().replace('.', '/'));

@@ -29,7 +29,7 @@
 
 package com.caucho.config.program;
 
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.util.L10N;
 
 import javax.inject.manager.Bean;

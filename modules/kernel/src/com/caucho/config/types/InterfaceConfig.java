@@ -30,12 +30,11 @@
 package com.caucho.config.types;
 
 import com.caucho.config.inject.ComponentImpl;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.BeanConfig;
 import com.caucho.config.*;
 import com.caucho.naming.*;
 import com.caucho.webbeans.cfg.*;
-import com.caucho.webbeans.manager.*;
 import com.caucho.util.L10N;
 
 import java.util.logging.*;

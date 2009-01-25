@@ -30,12 +30,11 @@
 package com.caucho.jca.program;
 
 import com.caucho.config.*;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.jca.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
-import com.caucho.webbeans.manager.*;
 
 import javax.webbeans.*;
 import javax.resource.spi.*;

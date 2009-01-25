@@ -30,13 +30,11 @@
 package com.caucho.xmpp;
 
 import com.caucho.bam.BamBroker;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.hemp.broker.*;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.port.*;
 import com.caucho.vfs.*;
-
-import com.caucho.webbeans.manager.*;
 
 import java.io.*;
 import java.net.*;

@@ -29,10 +29,9 @@
 
 package com.caucho.security;
 
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.security.*;
-import com.caucho.webbeans.manager.*;
 import com.caucho.util.LruCache;
 
 import javax.annotation.PostConstruct;

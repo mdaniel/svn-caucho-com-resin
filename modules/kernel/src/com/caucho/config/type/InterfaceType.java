@@ -30,12 +30,11 @@
 package com.caucho.config.type;
 
 import com.caucho.config.*;
-import com.caucho.config.manager.InjectManager;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.naming.*;
 import com.caucho.util.*;
 import com.caucho.webbeans.*;
-import com.caucho.webbeans.manager.*;
 import com.caucho.xml.QName;
 
 import javax.webbeans.*;
