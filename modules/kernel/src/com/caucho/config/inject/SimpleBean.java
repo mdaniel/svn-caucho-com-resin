@@ -408,8 +408,10 @@ public class SimpleBean extends ComponentImpl
 
       value = createNew(env);
 
-      env.push(value);
-      
+      // jsf/4221
+      if (env != null)
+        env.push(value);
+
       init(value, env);
 
       return value;
