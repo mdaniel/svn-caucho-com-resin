@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.regexp;
 import java.util.*;
 import java.util.logging.*;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
@@ -78,6 +79,9 @@ public class RegexpState {
 
     subject = _regexp.convertSubject(env, subject);
     
+    if (subject == null)
+      throw new QuercusException(L.l("error converting subject to utf8"));
+    
     _subject = subject;
   }
   
@@ -92,6 +96,13 @@ public class RegexpState {
     int nLoop = _regexp._nLoop;
     _loopCount = new int[nLoop];
     _loopOffset = new int[nLoop];
+  }
+  
+  public boolean setSubject(Env env, StringValue subject)
+  {
+    _subject = _regexp.convertSubject(env, subject);
+    
+    return _subject != null;
   }
 
   public boolean find()
@@ -150,6 +161,9 @@ public class RegexpState {
   {
     try {
       subject = _regexp.convertSubject(env, subject);
+      
+      if (subject == null)
+        throw new QuercusException(L.l("error converting subject to utf8"));
     
       _subject = subject;
       _first = 0;
@@ -171,6 +185,9 @@ public class RegexpState {
 	log.finest(this + " find(" + subject + ")");
     
       subject = _regexp.convertSubject(env, subject);
+      
+      if (subject == null)
+        throw new QuercusException(L.l("error converting subject to utf8"));
     
       _subject = subject;
 
@@ -197,6 +214,9 @@ public class RegexpState {
 	log.finest(this + " exec(" + subject + ")");
     
       subject = _regexp.convertSubject(env, subject);
+      
+      if (subject == null)
+        throw new QuercusException(L.l("error converting subject to utf8"));
 
       clearGroup();
     

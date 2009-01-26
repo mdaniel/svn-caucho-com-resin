@@ -139,8 +139,12 @@ public class Regexp {
 
     // XXX: what if unicode.semantics='true'?
     
-    if ((flags & Regcomp.UTF8) != 0)
+    if ((flags & Regcomp.UTF8) != 0) {
       pattern = fromUtf8(env, pattern);
+      
+      if (pattern == null)
+        throw new QuercusException(L.l("Regexp: error converting subject to utf8"));
+    }
 
     _pattern = pattern;
 
@@ -255,16 +259,20 @@ public class Regexp {
       if (ch < 0x80)
         target.append(ch);
       else if ((ch & 0xe0) == 0xc0) {
-        if (i + 1 >= len)
-          throw new QuercusRuntimeException("bad UTF-8 sequence, saw EOF");
+        if (i + 1 >= len) {
+          log.fine(L.l("Regexp: bad UTF-8 sequence, saw EOF"));
+          return null;
+        }
         
         char ch2 = source.charAt(++i);
 
         target.append((char) (((ch & 0x1f) << 6) + (ch2 & 0x3f)));
       }
       else {
-        if (i + 2 >= len)
-          throw new QuercusRuntimeException("bad UTF-8 sequence, saw EOF");
+        if (i + 2 >= len) {
+          log.fine(L.l("Regexp: bad UTF-8 sequence, saw EOF"));
+          return null;
+        }
         
         char ch2 = source.charAt(++i);
         char ch3 = source.charAt(++i);
