@@ -51,11 +51,12 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.context.CreationalContext;
 
 /**
  * The ConfigContext contains the state of the current configuration.
  */
-public class ConfigContext {
+public class ConfigContext implements CreationalContext {
   private final static L10N L = new L10N(ConfigContext.class);
   private final static Logger log
     = Logger.getLogger(ConfigContext.class.getName());
@@ -83,9 +84,6 @@ public class ConfigContext {
     = new ThreadLocal<ConfigContext>();
 
   private Config _config;
-
-  private ArrayList<ValidatorEntry> _validators
-    = new ArrayList<ValidatorEntry>();
 
   private ConfigELContext _elContext = new ConfigELContext();
   
@@ -224,6 +222,11 @@ public class ConfigContext {
   public boolean canInject(ScopeContext scope)
   {
     return _dependentScope == null || _dependentScope.canInject(scope);
+  }
+
+  public boolean canInject(Class scopeType)
+  {
+    return _dependentScope == null || _dependentScope.canInject(scopeType);
   }
 
   /**
@@ -973,14 +976,6 @@ public class ConfigContext {
     return _elContext;
   }
 
-  void addValidator(Validator validator)
-  {
-    if (_validators == null)
-      _validators = new ArrayList<ValidatorEntry>();
-    
-    _validators.add(new ValidatorEntry(validator));
-  }
-
   static boolean hasChildren(Node node)
   {
     Node ptr;
@@ -1447,6 +1442,10 @@ public class ConfigContext {
 	thread.setContextClassLoader(oldLoader);
       }
     }
+  }
+
+  public void push(Object obj)
+  {
   }
 
   static {

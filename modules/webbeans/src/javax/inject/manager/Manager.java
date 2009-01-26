@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.context.Context;
+import javax.context.CreationalContext;
 import javax.event.Observer;
 import javax.inject.TypeLiteral;
 
@@ -49,7 +50,7 @@ public interface Manager
   //
   // bean resolution and instantiation
   //
-
+  
   /**
    * Adds a new bean definition to the manager
    */
@@ -116,6 +117,17 @@ public interface Manager
    */
   public <T> T getInstanceByType(TypeLiteral<T> type,
 				 Annotation... bindings);
+
+  /**
+   * Internal callback during creation to get a new injection instance.
+   */
+  public <T> T getInstanceToInject(InjectionPoint ij,
+				   CreationalContext<?> ctx);
+
+  /**
+   * Internal callback during creation to get a new injection instance.
+   */
+  public <T> T getInstanceToInject(InjectionPoint ij);
 
   //
   // scopes

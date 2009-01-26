@@ -33,7 +33,6 @@ import com.caucho.util.*;
 import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.scope.SingletonScope;
 import com.caucho.server.dispatch.ServletInvocation;
 
 import java.lang.annotation.Annotation;
@@ -186,8 +185,7 @@ public class ConversationScope extends ScopeContext
   @Override
   public boolean canInject(ScopeContext scope)
   {
-    return (scope instanceof SingletonScope
-	    || scope instanceof ApplicationScope
+    return (scope instanceof ApplicationScope
 	    || scope instanceof SessionScope
 	    || scope instanceof ConversationScope);
   }

@@ -844,11 +844,11 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener
     }
 
     else if (servletClass != null) {
-      InjectManager webBeans = InjectManager.create();
+      InjectManager inject = InjectManager.create();
       
-      _comp = (ComponentImpl) webBeans.createTransient(servletClass);
+      _comp = (ComponentImpl) inject.createTransient(servletClass);
       
-      servlet = _comp.createNoInit();
+      servlet = inject.getInstance(_comp);
     }
     else
       throw new ServletException(L.l("Null servlet class for '{0}'.",

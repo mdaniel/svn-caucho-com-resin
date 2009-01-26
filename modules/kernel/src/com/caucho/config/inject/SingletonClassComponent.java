@@ -30,11 +30,12 @@
 package com.caucho.config.inject;
 
 import com.caucho.config.ConfigContext;
-import com.caucho.config.scope.SingletonScope;
+import com.caucho.config.scope.ApplicationScope;
 import com.caucho.jmx.*;
 
 import java.util.logging.*;
 import java.io.Closeable;
+import javax.context.CreationalContext;
 
 /**
  * Configuration for a singleton component.
@@ -51,14 +52,14 @@ public class SingletonClassComponent extends SimpleBean
   {
     super(type);
     
-    super.setScope(new SingletonScope());
+    super.setScope(ApplicationScope.create());
   }
   
   public SingletonClassComponent(InjectManager webBeans)
   {
     super(webBeans);
     
-    super.setScope(new SingletonScope());
+    super.setScope(ApplicationScope.create());
   }
 
   /**
@@ -92,7 +93,8 @@ public class SingletonClassComponent extends SimpleBean
     if (_value == null) {
       _value = createNew(null);
 
-      init(_value, new ConfigContext(this, _value, new SingletonScope()));
+      init(_value, new ConfigContext(this, _value,
+				     ApplicationScope.create()));
 
       if (_value instanceof HandleAware)
 	((HandleAware) _value).setSerializationHandle(getHandle());
@@ -105,7 +107,7 @@ public class SingletonClassComponent extends SimpleBean
    * The singleton instance is created in its original class loader context
    */
   @Override
-  protected Object createNew(ConfigContext env)
+  protected Object createNew(CreationalContext env)
   {
     ClassLoader loader = getWebBeans().getClassLoader();
 
@@ -125,7 +127,7 @@ public class SingletonClassComponent extends SimpleBean
    * The singleton instance is initialized in its original class loader context
    */
   @Override
-  protected Object init(Object value, ConfigContext env)
+  protected Object init(Object value, CreationalContext env)
   {
     ClassLoader loader = getWebBeans().getClassLoader();
 

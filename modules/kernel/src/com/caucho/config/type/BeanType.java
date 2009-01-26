@@ -96,9 +96,8 @@ public class BeanType extends ConfigType
   
   private ComponentImpl _component;
 
-  private ArrayList<ConfigProgram> _injectList
-    = new ArrayList<ConfigProgram>();
-  private ArrayList<ConfigProgram> _initList = new ArrayList<ConfigProgram>();
+  private ArrayList<ConfigProgram> _injectList;
+  private ArrayList<ConfigProgram> _initList;
 
   private boolean _isIntrospecting;
   private boolean _isIntrospected;
@@ -281,6 +280,8 @@ public class BeanType extends ConfigType
   @Override
   public void inject(Object bean)
   {
+    introspectInject();
+    
     for (int i = 0; i < _injectList.size(); i++)
       _injectList.get(i).inject(bean, null);
   }
@@ -291,6 +292,8 @@ public class BeanType extends ConfigType
   @Override
   public void init(Object bean)
   {
+    introspectInject();
+    
     for (int i = 0; i < _initList.size(); i++)
       _initList.get(i).inject(bean, null);
   }
@@ -411,9 +414,11 @@ public class BeanType extends ConfigType
     
 	  introspectMethods(methods);
 
+	  /*
 	  InjectIntrospector.introspectInject(_injectList, _beanClass);
 
 	  InjectIntrospector.introspectInit(_initList, _beanClass, null);
+	  */
 	}
       } finally {
 	_isIntrospecting = false;
@@ -662,6 +667,24 @@ public class BeanType extends ConfigType
 
 	_attributeMap.put(propName, attr);
       }
+    }
+  }
+
+  /**
+   * Introspect the bean for configuration
+   */
+  protected void introspectInject()
+  {
+    synchronized (_introspectLock) {
+      if (_injectList != null)
+	return;
+
+      _injectList = new ArrayList<ConfigProgram>();
+      _initList = new ArrayList<ConfigProgram>();
+    
+      InjectIntrospector.introspectInject(_injectList, _beanClass);
+
+      InjectIntrospector.introspectInit(_initList, _beanClass, null);
     }
   }
 

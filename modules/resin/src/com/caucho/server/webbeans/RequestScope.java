@@ -33,12 +33,11 @@ import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.DestructionListener;
 import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.scope.SingletonScope;
 import com.caucho.server.dispatch.ServletInvocation;
 
 import java.lang.annotation.Annotation;
 import javax.servlet.*;
-import javax.context.RequestScoped;
+import javax.context.*;
 import javax.inject.manager.Bean;
 
 /**
@@ -63,68 +62,60 @@ public class RequestScope extends ScopeContext
   {
     return RequestScoped.class;
   }
-
-  /**
-   * Returns the value in the request scope
-   *
-   * @param bean the component to retrieve
-   * @param create if true, create a new instance if it doesn't already exist
-   */
-  public <T> T get(Bean<T> bean, boolean create)
+  
+  public <T> T get(Contextual<T> bean)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
-    if (request != null) {
-      ComponentImpl comp = (ComponentImpl) bean;
-
-      Object value = request.getAttribute(comp.getScopeId());
-
-      if (value == null && create) {
-	value = bean.create();
-	
-	request.setAttribute(comp.getScopeId(), value);
-      }
-      
-      return (T) value;
-    }
-    else
+    if (request == null)
       return null;
+
+    ComponentImpl comp = (ComponentImpl) bean;
+
+    Object result = request.getAttribute(comp.getScopeId());
+
+    return (T) result;
   }
   
-  public <T> void put(Bean<T> bean, T value)
+  public <T> T get(Contextual<T> bean,
+		   CreationalContext<T> creationalContext)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
-    if (request != null) {
-      ComponentImpl comp = (ComponentImpl) bean;
-      
-      request.setAttribute(comp.getScopeId(), value);
-    }
+    if (request == null)
+      return null;
+
+    ComponentImpl comp = (ComponentImpl) bean;
+
+    Object result = request.getAttribute(comp.getScopeId());
+
+    if (result != null || creationalContext == null)
+      return (T) result;
+    
+    result = comp.create(creationalContext);
+
+    request.setAttribute(comp.getScopeId(), result);
+    
+    return (T) result;
   }
-
-  /**
-   * Removes the scope value for the given component.
-   */
-  public <T> void remove(Bean<T> bean)
-  {
-    ServletRequest request = ServletInvocation.getContextRequest();
-
-    if (request != null) {
-      ComponentImpl comp = (ComponentImpl) bean;
-      
-      request.removeAttribute(comp.getScopeId());
-    }
-  }
-
 
   @Override
   public boolean canInject(ScopeContext scope)
   {
-    return (scope instanceof SingletonScope
-	    || scope instanceof ApplicationScope
+    return (scope instanceof ApplicationScope
 	    || scope instanceof SessionScope
 	    || scope instanceof ConversationScope
 	    || scope instanceof RequestScope);
+  }
+
+  @Override
+  public boolean canInject(Class scopeType)
+  {
+    return (scopeType == ApplicationScoped.class
+	    || scopeType == SessionScoped.class
+	    || scopeType == ConversationScoped.class
+	    || scopeType == RequestScoped.class
+	    || scopeType == Dependent.class);
   }
 
   public void addDestructor(ComponentImpl comp, Object value)

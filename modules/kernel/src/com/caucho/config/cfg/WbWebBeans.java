@@ -243,10 +243,12 @@ public class WbWebBeans {
 
 	  SimpleBean component;
 
+	  /*
 	  if (cl.isAnnotationPresent(Singleton.class))
 	    component = new SingletonClassComponent(cl);
 	  else
-	    component = new SimpleBean(cl);
+	  */
+	  component = new SimpleBean(cl);
 
 	  component.setFromClass(true);
 	  component.init();

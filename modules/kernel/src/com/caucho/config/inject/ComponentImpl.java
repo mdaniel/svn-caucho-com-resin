@@ -36,7 +36,6 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.scope.SingletonScope;
 import com.caucho.config.types.*;
 import com.caucho.naming.*;
 import com.caucho.util.*;
@@ -50,6 +49,7 @@ import java.util.*;
 
 import javax.annotation.*;
 import javax.context.Context;
+import javax.context.CreationalContext;
 import javax.context.Dependent;
 import javax.inject.manager.Bean;
 
@@ -100,8 +100,7 @@ public class ComponentImpl<T> extends AbstractBean<T>
 
   public boolean isSingleton()
   {
-    return (_scope instanceof SingletonScope
-	    || _scope instanceof ApplicationScope);
+    return (_scope instanceof ApplicationScope);
   }
 
   /**
@@ -185,10 +184,13 @@ public class ComponentImpl<T> extends AbstractBean<T>
    */
   public Object getIfExists()
   {
+    return null;
+    /*
     if (_scope != null)
       return _scope.get(this, false);
     else
       return get();
+    */
   }
 
   /**
@@ -196,24 +198,14 @@ public class ComponentImpl<T> extends AbstractBean<T>
    */
   public Object get()
   {
-    if (_scope != null) {
-      return _scope.get(this, true);
-    }
-    else if (Dependent.class.equals(getScopeType())) {
-      return create();
-    }
-    else {
-      Context context = _webBeans.getContext(getScopeType());
-
-      if (context != null)
-	return context.get(this, true);
-      else
-	return create();
-    }
+    return _webBeans.getInstance(this);
   }
 
   public T get(ConfigContext env)
   {
+    return null;
+    
+    /* XXX:
     if (_scope != null) {
       T value = _scope.get(this, false);
 
@@ -242,6 +234,19 @@ public class ComponentImpl<T> extends AbstractBean<T>
     init(value, env);
 
     return value;
+    */
+  }
+
+  /**
+   * Creates a new instance of the component.
+   */
+  public T create(CreationalContext<T> context)
+  {
+    T object = createNew(context);
+
+    init(object, context);
+    
+    return object;
   }
 
   /**
@@ -249,6 +254,7 @@ public class ComponentImpl<T> extends AbstractBean<T>
    */
   public T create()
   {
+    /* XXX:
     try {
       ConfigContext env = new ConfigContext(_scope);
       
@@ -267,6 +273,8 @@ public class ComponentImpl<T> extends AbstractBean<T>
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+    */
+    return null;
   }
 
   /**
@@ -299,7 +307,7 @@ public class ComponentImpl<T> extends AbstractBean<T>
    * @param env the configuration environment
    * @return the new object
    */
-  protected T createNew(ConfigContext env)
+  protected T createNew(CreationalContext context)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -307,8 +315,10 @@ public class ComponentImpl<T> extends AbstractBean<T>
   /**
    * Initialize the created value
    */
-  protected T init(T value, ConfigContext env)
+  protected T init(T value, CreationalContext context)
   {
+    ConfigContext env = (ConfigContext) context;
+
     if (_init != null)
       _init.inject(value, env);
 

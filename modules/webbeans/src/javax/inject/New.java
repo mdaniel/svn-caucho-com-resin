@@ -35,7 +35,27 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @New annotation for web beans
+ * The @New annotation injects a new instance of a bean to the injection
+ * point.  The configuration for the @New instance is separate from any
+ * simple bean configuration.
+ *
+ * <ul>
+ * <li>Initializer methods and injected fields are defined by annotations.
+ * <li>Interceptor bindings are defined by annotations.
+ * <li>Scope is @Dependent
+ * <li>Deployment type is @Standard
+ * <li>The binding is @New
+ * <li>No bean name
+ * <li>No @Stereotypes
+ * <li>No observer methods, producer methods, or disposal methods
+ * </ul>
+ *
+ * <code><pre>
+ * class MyBean {
+ *   @New
+ *   private SubBean _bean;
+ * }
+ * </pre></code>
  */
 @BindingType
 @Documented  

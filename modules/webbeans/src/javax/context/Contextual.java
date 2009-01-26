@@ -29,12 +29,45 @@
 
 package javax.context;
 
-import java.lang.annotation.Annotation;
-import javax.inject.manager.Bean;
-
 /**
- * Representation of a scope context
+ * Contextual creates and destroys instances of a given type.  In particular,
+ * the {@link javax.inject.manager.Bean} interface extends Contextual.
+ *
+ * Applications will not use Contextual, because its internal SPI, called by
+ * the {@link javax.inject.manager.Manager} during bean creation.
  */
-public interface Contextual
+public interface Contextual<T>
 {
+  /**
+   * Creates a new instance for the Contextual's type.  If the instance
+   * already exists in the CreationalContext, create will return it instead
+   * of creating a new instance.
+   *
+   * <ol>
+   * <li>create an instance of the bean
+   * <li>create interceptor and decorator stacks
+   * <li>inject dependencies
+   * <li>set any XML-configured values
+   * <li>call @PostConstruct
+   * </ol>
+   *
+   * @param creationalContext the creation context used to support circular
+   * references.
+   *
+   * @return the new instance
+   */
+  public T create(CreationalContext<T> creationalContext);
+
+  /**
+   * Destroys an instance for the Contextual's type.
+   *
+   * <ol>
+   * <li>Call any {@link javax.inject.Disposal @Disposal} method
+   * <li>Call {@link javax.annotation.PreDestroy @PreDestroy} methods
+   * <li>Destroy dependent objects
+   * </ol>
+   *
+   * @param instance the instance to destroy
+   */
+  public void destroy(T instance);
 }

@@ -42,6 +42,7 @@ import java.lang.annotation.*;
 import java.util.ArrayList;
 
 import javax.annotation.*;
+import javax.context.CreationalContext;
 import javax.inject.manager.Bean;
 
 /**
@@ -56,6 +57,7 @@ public class ProducesComponent extends ComponentImpl {
   private final Method _method;
   private final Annotation []_annotationList;
 
+  // XXX: needs to be InjectionPoint
   private Bean []_args;
 
   private boolean _isBound;
@@ -108,10 +110,17 @@ public class ProducesComponent extends ComponentImpl {
   }
 
   @Override
-  public Object createNew(ConfigContext env)
+  protected Object createNew(CreationalContext context)
   {
     try {
-      Object factory = _webBeans.getInstance(_producer, env);
+      ConfigContext env = (ConfigContext) context;
+      
+      Object factory = _webBeans.getInstance(_producer);
+
+      if (factory == null) {
+	throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
+					    this, _producer));
+      }
 
       if (_args == null)
 	bind();
@@ -121,7 +130,7 @@ public class ProducesComponent extends ComponentImpl {
 	args = new Object[_args.length];
 
 	for (int i = 0; i < args.length; i++)
-	  args[i] = _webBeans.getInstance(_args[i], env);
+	  args[i] = _webBeans.getInstance(_args[i]);
       }
       else
 	args = NULL_ARGS;

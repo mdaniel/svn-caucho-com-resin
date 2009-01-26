@@ -46,10 +46,12 @@ import java.util.*;
 import java.util.logging.*;
 
 import javax.annotation.*;
+import javax.context.CreationalContext;
 import javax.interceptor.InterceptorBindingType;
+import javax.inject.CreationException;
 import javax.inject.Produces;
-import javax.inject.manager.Bean;
 import javax.inject.Initializer;
+import javax.inject.manager.Bean;
 
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.
@@ -90,7 +92,12 @@ public class SimpleBean extends ComponentImpl
 
   public SimpleBean(Class type)
   {
-    this(InjectManager.create());
+    this(InjectManager.create(), type);
+  }
+
+  public SimpleBean(InjectManager inject, Class type)
+  {
+    this(inject);
 
     validateType(type);
 
@@ -200,6 +207,13 @@ public class SimpleBean extends ComponentImpl
       System.out.println("M: " + method);
   }
 
+  /**
+   * Adds a configured method
+   */
+  public void addField(SimpleBeanField simpleField)
+  {
+  }
+
   private boolean isAnnotationPresent(Annotation []annotations, Class type)
   {
     for (Annotation ann : annotations) {
@@ -243,7 +257,7 @@ public class SimpleBean extends ComponentImpl
     introspectConstructor();
     introspectProduces(cl);
 
-    if (getBindingTypes().size() == 0)
+    if (getBindings().size() == 0)
       introspectBindings();
 
     introspectObservers(cl);
@@ -370,64 +384,56 @@ public class SimpleBean extends ComponentImpl
    * Creates a new instance of the component.
    */
   @Override
-  public Object get(ConfigContext env)
+  public Object create(CreationalContext cxt)
   {
     try {
       Object value;
       boolean isNew = false;
 
-      if (env.canInject(_scope)) {
-	if (_scope != null) {
-	  value = _scope.get(this, false);
-	  
-	  if (value != null)
-	    return value;
-	}
-	else {
-	  value = env.get(this);
-	  
-	  if (value != null)
-	    return value;
-	}
+      ConfigContext env = (ConfigContext) cxt;
       
-	value = createNew(env);
-	
-	if (_scope != null) {
-	  _scope.put(this, value);
-	  env = new ConfigContext(this, value, _scope);
-	}
-	else
-	  env.put(this, value);
-	
-	init(value, env);
-      }
-      else {
-	if (env != null) {
-	  value = env.get(this);
-	  if (value != null)
-	    return value;
-	}
-
+      /*
+      if (! env.canInject(_scope)) {
 	value = _scopeAdapter;
+	
 	if (value == null) {
 	  ScopeAdapter scopeAdapter = ScopeAdapter.create(getTargetClass());
 	  _scopeAdapter = scopeAdapter.wrap(this);
 	  value = _scopeAdapter;
 	}
 
-	env.put(this, value);
+	return value;
       }
+      */
+
+      value = createNew(env);
+
+      env.push(value);
+      
+      init(value, env);
 
       return value;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new CreationException(e);
     }
   }
 
-  @Override
-  protected Object createNew(ConfigContext env)
+  public Object getScopeAdapter()
+  {
+    Object value = _scopeAdapter;
+	
+    if (value == null) {
+      ScopeAdapter scopeAdapter = ScopeAdapter.create(getTargetClass());
+      _scopeAdapter = scopeAdapter.wrap(this);
+      value = _scopeAdapter;
+    }
+
+    return value;
+  }
+
+  protected Object createNew(CreationalContext env)
   {
     try {
       if (! _isBound)
@@ -437,8 +443,9 @@ public class SimpleBean extends ComponentImpl
       if (_ctorArgs != null && _ctorArgs.length > 0) {
 	args = new Object[_ctorArgs.length];
 
-	for (int i = 0; i < args.length; i++)
-	  args[i] = _ctorArgs[i].eval(env);
+	for (int i = 0; i < args.length; i++) {
+	  args[i] = _ctorArgs[i].eval((ConfigContext) env);
+	}
       }
       else
 	args = NULL_ARGS;
@@ -448,14 +455,11 @@ public class SimpleBean extends ComponentImpl
       if (isSingleton())
 	SerializationAdapter.setHandle(value, getHandle());
 
-      if (env != null)
-	env.put(this, value);
-
       return value;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new CreationException(e);
     }
   }
 
@@ -621,8 +625,9 @@ public class SimpleBean extends ComponentImpl
     {
       if (_bean == null)
 	bind();
-      
-      return _webBeans.getInstance(_bean, env);
+
+      // XXX: getInstance for injection?
+      return _webBeans.getInstance(_bean);
     }
   }
 

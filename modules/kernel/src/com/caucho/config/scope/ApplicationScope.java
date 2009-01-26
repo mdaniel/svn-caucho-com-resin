@@ -43,7 +43,18 @@ import javax.inject.manager.Bean;
  * The application scope value
  */
 public class ApplicationScope extends ScopeContext {
-  private Hashtable _map = new Hashtable();
+  private static final ApplicationScope SCOPE = new ApplicationScope();
+  
+  private final static EnvironmentLocal<ScopeMap> _localScopeMap
+    = new EnvironmentLocal<ScopeMap>();
+
+  /**
+   * Returns the current applicatin scope
+   */
+  public static ApplicationScope create()
+  {
+    return SCOPE;
+  }
   
   /**
    * Returns true if the scope is currently active.
@@ -60,35 +71,32 @@ public class ApplicationScope extends ScopeContext {
   {
     return ApplicationScoped.class;
   }
-  
-  public <T> T get(Bean<T> bean, boolean create)
+
+  @Override
+  protected ScopeMap getScopeMap()
   {
-    Object v = _map.get(bean);
-      
-    if (v == null && create) {
-      v = bean.create();
-      // XXX: delete because of optimistic locking
-      _map.put(bean, v);
+    return _localScopeMap.getLevel();
+  }
+
+  @Override
+  protected ScopeMap createScopeMap()
+  {
+    synchronized (_localScopeMap) {
+      ScopeMap scopeMap = _localScopeMap.getLevel();
+
+      if (scopeMap == null) {
+	scopeMap = new ScopeMap();
+	_localScopeMap.set(scopeMap);
+      }
+
+      return scopeMap;
     }
-    
-    return (T) v;
-  }
-  
-  public <T> void put(Bean<T> bean, T value)
-  {
-    _map.put(bean, value);
-  }
-  
-  public <T> void remove(Bean<T> bean)
-  {
-    _map.remove(bean);
   }
 
   @Override
   public boolean canInject(ScopeContext scope)
   {
-    return (scope instanceof SingletonScope
-	    || scope instanceof ApplicationScope);
+    return (scope instanceof ApplicationScope);
   }
 
   public void addDestructor(ComponentImpl comp, Object value)

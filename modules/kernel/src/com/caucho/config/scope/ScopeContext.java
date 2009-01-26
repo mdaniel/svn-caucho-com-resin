@@ -31,7 +31,7 @@ package com.caucho.config.scope;
 
 import java.lang.annotation.Annotation;
 
-import javax.context.Context;
+import javax.context.*;
 import javax.inject.manager.Bean;
 
 import com.caucho.config.inject.ComponentImpl;
@@ -54,16 +54,54 @@ abstract public class ScopeContext implements Context {
   abstract public Class<? extends Annotation> getScopeType();
 
   /**
-   * Returns a instance of a bean, creating if necessary
+   * Returns the current instance, if it exists.
    */
-  abstract public <T> T get(Bean<T> bean, boolean create);
-
-  /**
-   * Returns a instance of a bean, creating if necessary
-   */
-  public <T> void put(Bean<T> bean, T value)
+  public <T> T get(Contextual<T> bean)
   {
-    // XXX: needs to be removed?
+    ScopeMap scopeMap = getScopeMap();
+
+    if (scopeMap != null) {
+      return (T) scopeMap.get(bean);
+    }
+    
+    return null;
+  }
+  
+  public <T> T get(Contextual<T> bean,
+		   CreationalContext<T> creationalContext)
+  {
+    ScopeMap scopeMap = getScopeMap();
+
+    T instance = null;
+
+    if (scopeMap != null) {
+      instance = (T) scopeMap.get(bean);
+
+      if (instance != null)
+	return instance;
+    }
+
+    if (creationalContext == null)
+      return null;
+
+    if (scopeMap == null)
+      scopeMap = createScopeMap();
+
+    instance = bean.create(creationalContext);
+
+    scopeMap.put(bean, instance);
+    
+    return instance;
+  }
+
+  protected ScopeMap getScopeMap()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  protected ScopeMap createScopeMap()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   /**
@@ -73,7 +111,18 @@ abstract public class ScopeContext implements Context {
   public boolean canInject(ScopeContext scope)
   {
     return (getClass().equals(scope.getClass())
-	    || scope instanceof SingletonScope);
+	    || scope instanceof ApplicationScope);
+  }
+  
+  /**
+   * Returns true if a value in the target scope can be safely be injected
+   * into this scope
+   */
+  public boolean canInject(Class scopeType)
+  {
+    return (getScopeType() == scopeType
+	    || scopeType == ApplicationScoped.class
+	    || scopeType == Dependent.class);
   }
 
   public void addDestructor(ComponentImpl comp, Object value)

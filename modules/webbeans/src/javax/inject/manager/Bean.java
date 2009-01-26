@@ -32,16 +32,18 @@ package javax.inject.manager;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
+import javax.context.Contextual;
+
 /**
  * Internal implementation for a Bean
  */
-public abstract class Bean<T>
+public abstract class Bean<T> implements Contextual<T>
 {
-  private final Manager _manager;
+  private final Manager manager;
 
   protected Bean(Manager manager)
   {
-    _manager = manager;
+    this.manager = manager;
   }
 
   /**
@@ -49,7 +51,7 @@ public abstract class Bean<T>
    */
   public Manager getManager()
   {
-    return _manager;
+    return this.manager;
   }
 
   //
@@ -57,14 +59,19 @@ public abstract class Bean<T>
   //
 
   /**
-   * Returns the bean's binding types
+   * Returns the bean's binding annotations.
    */
-  public abstract Set<Annotation> getBindingTypes();
+  public abstract Set<Annotation> getBindings();
 
   /**
    * Returns the bean's deployment type
    */
   public abstract Class<? extends Annotation> getDeploymentType();
+
+  /**
+   * Returns the set of injection points, for validation.
+   */
+  public abstract Set<InjectionPoint> getInjectionPoints();
 
   /**
    * Returns the bean's name or null if the bean does not have a
@@ -83,26 +90,12 @@ public abstract class Bean<T>
   public abstract boolean isSerializable();
 
   /**
-   * Returns the bean's scope
+   * Returns the bean's scope type.
    */
   public abstract Class<? extends Annotation> getScopeType();
 
   /**
-   * Returns the types that the bean implements
+   * Returns the types that the bean exports for bindings.
    */
   public abstract Set<Class<?>> getTypes();
-
-  //
-  // lifecycle
-  //
-
-  /**
-   * Create a new instance of the bean.
-   */
-  public abstract T create();
-
-  /**
-   * Destroys a bean instance
-   */
-  public abstract void destroy(T instance);
 }

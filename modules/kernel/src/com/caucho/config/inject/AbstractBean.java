@@ -62,6 +62,7 @@ import javax.inject.DeploymentType;
 import javax.inject.Produces;
 import javax.inject.Production;
 import javax.inject.manager.Bean;
+import javax.inject.manager.InjectionPoint;
 import javax.inject.manager.Manager;
 import javax.interceptor.InterceptorBindingType;
 
@@ -232,7 +233,8 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   /**
    * Returns the bean's binding types
    */
-  public Set<Annotation> getBindingTypes()
+  @Override
+  public Set<Annotation> getBindings()
   {
     Set<Annotation> set = new LinkedHashSet<Annotation>();
 
@@ -396,7 +398,7 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
       _deploymentType = Production.class;
 
     if (_bindings.size() == 0)
-      addBinding(new AnnotationLiteral<Current>() {});
+      addBinding(CurrentLiteral.CURRENT);
 
     if (_scopeType == null)
       _scopeType = Dependent.class;
@@ -994,6 +996,14 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
 		   cl, beanLoader,
 		   webBeansLoader));
     }
+  }
+
+  /**
+   * Returns the set of injection points, for validation.
+   */
+  public Set<InjectionPoint> getInjectionPoints()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public String toDebugString()

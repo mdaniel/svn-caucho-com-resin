@@ -52,6 +52,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
 import javax.ejb.*;
+import javax.context.CreationalContext;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -823,8 +824,9 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Initialize an instance
    */
-  public void initInstance(Object instance, ConfigContext env)
+  public void initInstance(Object instance, CreationalContext cxt)
   {
+    ConfigContext env = (ConfigContext) cxt;
     /*
     if (scope != null)
       scope.put(_component, scope);

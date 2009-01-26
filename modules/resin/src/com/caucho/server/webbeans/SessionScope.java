@@ -33,13 +33,12 @@ import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.DestructionListener;
 import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.scope.SingletonScope;
 import com.caucho.server.dispatch.ServletInvocation;
 
 import java.lang.annotation.Annotation;
 import javax.servlet.*;
 import javax.servlet.http.*;
-import javax.context.SessionScoped;
+import javax.context.*;
 import javax.inject.manager.Bean;
 
 /**
@@ -71,54 +70,57 @@ public class SessionScope extends ScopeContext {
     return SessionScoped.class;
   }
   
-  public <T> T get(Bean<T> bean, boolean create)
+  public <T> T get(Contextual<T> bean)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
-    if (request != null) {
-      HttpSession session = ((HttpServletRequest) request).getSession();
-      ComponentImpl comp = (ComponentImpl) bean;
-
-      Object result = session.getAttribute(comp.getScopeId());
-
-      if (result != null || ! create)
-        return (T) result;
-      else
-        return bean.create();
-    }
-    else
+    if (request == null)
       return null;
+
+    HttpSession session = ((HttpServletRequest) request).getSession();
+    ComponentImpl comp = (ComponentImpl) bean;
+
+    Object result = session.getAttribute(comp.getScopeId());
+
+    return (T) result;
   }
   
-  public <T> void put(Bean<T> bean, T value)
+  public <T> T get(Contextual<T> bean,
+		   CreationalContext<T> creationalContext)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
-    if (request != null) {
-      HttpSession session = ((HttpServletRequest) request).getSession();
-      ComponentImpl comp = (ComponentImpl) bean;
-      
-      session.setAttribute(comp.getScopeId(), value);
-    }
-  }
-  
-  public <T> void remove(Bean<T> bean)
-  {
-    ServletRequest request = ServletInvocation.getContextRequest();
+    if (request == null)
+      return null;
 
-    if (request != null) {
-      HttpSession session = ((HttpServletRequest) request).getSession();
-      ComponentImpl comp = (ComponentImpl) bean;
-      
-      session.removeAttribute(comp.getScopeId());
-    }
+    HttpSession session = ((HttpServletRequest) request).getSession();
+    ComponentImpl comp = (ComponentImpl) bean;
+
+    Object result = session.getAttribute(comp.getScopeId());
+
+    if (result != null || creationalContext == null)
+      return (T) result;
+
+    result = comp.create(creationalContext);
+
+    session.setAttribute(comp.getScopeId(), result);
+    
+    return (T) result;
+  }
+
+  @Override
+  public boolean canInject(Class scopeType)
+  {
+    return (scopeType == ApplicationScoped.class
+	    || scopeType == SessionScoped.class
+	    || scopeType == ConversationScoped.class
+	    || scopeType == Dependent.class);
   }
 
   @Override
   public boolean canInject(ScopeContext scope)
   {
-    return (scope instanceof SingletonScope
-	    || scope instanceof ApplicationScope
+    return (scope instanceof ApplicationScope
 	    || scope instanceof SessionScope);
   }
 

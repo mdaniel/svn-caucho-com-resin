@@ -188,7 +188,7 @@ public class WbComponentConfig {
   public void setScope(String scope)
   {
     if ("singleton".equals(scope))
-      _scope = Singleton.class;
+      _scope = ApplicationScoped.class;
     else if ("dependent".equals(scope))
       _scope = Dependent.class;
     else if ("request".equals(scope))
@@ -341,10 +341,12 @@ public class WbComponentConfig {
     
     SimpleBean comp;
 
+    /*
     if (Singleton.class.equals(_scope))
       comp = new SingletonClassComponent(InjectManager.create());
     else
-      comp = new SimpleBean(InjectManager.create());
+    */
+    comp = new SimpleBean(InjectManager.create());
 
     comp.setTargetType(_cl);
 

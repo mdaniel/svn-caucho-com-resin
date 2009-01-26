@@ -41,7 +41,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * The @Standard DeploymentType for web beans
  */
 
-@DeploymentType
+@BindingType
 @Documented
 @Retention(RUNTIME)
 @Target({TYPE, METHOD})

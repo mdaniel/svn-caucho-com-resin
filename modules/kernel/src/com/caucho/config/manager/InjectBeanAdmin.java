@@ -28,7 +28,7 @@
  */
 
 
-package com.caucho.config.inject;
+package com.caucho.config.manager;
 
 import com.caucho.management.server.*;
 
@@ -40,15 +40,15 @@ import java.util.Set;
 import javax.inject.manager.Bean;
 
 /**
- * Administration for a JMS queue
+ * Administration for an injection Bean queue
  */
-public class WebBeanAdmin extends AbstractManagedObject
+public class InjectBeanAdmin extends AbstractManagedObject
   implements WebBeanMXBean
 {
   private final Bean _bean;
   private int _id;
 
-  public WebBeanAdmin(Bean bean, int id)
+  public InjectBeanAdmin(Bean bean, int id)
   {
     _bean = bean;
     _id = id;

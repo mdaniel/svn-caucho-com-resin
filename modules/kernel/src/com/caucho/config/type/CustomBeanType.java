@@ -147,17 +147,30 @@ public class CustomBeanType extends ConfigType
     if (attr != null) {
       return CustomBeanProgramAttribute.ATTRIBUTE;
     }
+
+    String uri = qName.getNamespaceURI();
     
-    if (qName.getNamespaceURI() == null)
+    if (uri == null)
       return null;
-    else if (! qName.getNamespaceURI().startsWith("urn:java:")
-	     && ! qName.getNamespaceURI().equals(RESIN_NS))
+    else if (! uri.startsWith("urn:java:") && ! uri.equals(RESIN_NS))
       return null;
 
     Method method = null;
-    if (qName.getNamespaceURI().equals(_namespaceURI)
+    if (uri.equals(_namespaceURI)
 	&& (method = findMethod(qName.getLocalName())) != null) {
       return new CustomBeanMethodAttribute(_beanClass, method);
+    }
+
+    Field field = null;
+    if (uri.equals(_namespaceURI)
+	     && (field = findField(qName.getLocalName())) != null) {
+      return new CustomBeanFieldAttribute(_beanClass, field);
+    }
+
+    if ("value".equals(qName.getLocalName())
+	&& (uri.equals("urn:java:ee") || (uri.equals(RESIN_NS)))) {
+      // ioc/022k
+      return CustomBeanValueArgAttribute.ATTRIBUTE;
     }
 
     Class cl = createClass(qName);
@@ -194,6 +207,24 @@ public class CustomBeanType extends ConfigType
     }
 
     return findMethod(cl.getSuperclass(), name);
+  }
+
+  private Field findField(String name)
+  {
+    return findField(_beanClass, name);
+  }
+
+  private Field findField(Class cl, String name)
+  {
+    if (cl == null || cl.equals(Object.class))
+      return null;
+    
+    for (Field field : cl.getDeclaredFields()) {
+      if (field.getName().equals(name))
+	return field;
+    }
+
+    return findField(cl.getSuperclass(), name);
   }
 
   private Class createClass(QName name)

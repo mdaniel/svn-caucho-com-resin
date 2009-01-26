@@ -27,23 +27,53 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config;
+package com.caucho.config.inject;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import com.caucho.config.*;
+import com.caucho.config.j2ee.*;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.type.*;
+import com.caucho.config.types.*;
+import com.caucho.config.gen.*;
+import com.caucho.util.*;
 
-import javax.context.ScopeType;
+import java.lang.reflect.*;
+import java.lang.annotation.*;
+import java.util.*;
+
+import javax.annotation.*;
+import javax.inject.manager.Bean;
 
 /**
- * The @Singleton represents a unique single instance
+ * Configuration for a SimpleBean method, e.g. for an XML configuration of
+ * a @Produces
  */
+public class SimpleBeanField
+{
+  private static final L10N L = new L10N(SimpleBeanField.class);
+  
+  private Field _field;
 
-@ScopeType
-@Target({TYPE, METHOD})
-@Retention(RUNTIME)
-@Documented  
-public @interface Singleton {
+  private Annotation []_annotations;
+
+  public SimpleBeanField(Field field, Annotation []annotations)
+  {
+    _field = field;
+    _annotations = annotations;
+  }
+
+  public Field getField()
+  {
+    return _field;
+  }
+
+  public Annotation []getAnnotations()
+  {
+    return _annotations;
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _field.getName() + "]";
+  }
 }

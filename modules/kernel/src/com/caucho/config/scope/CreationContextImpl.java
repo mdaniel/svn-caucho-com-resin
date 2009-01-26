@@ -29,58 +29,28 @@
 
 package com.caucho.config.scope;
 
-import com.caucho.loader.*;
-import com.caucho.config.Service;
-
 import java.lang.annotation.Annotation;
-import java.util.Hashtable;
 
+import javax.context.Context;
+import javax.context.Contextual;
+import javax.context.CreationalContext;
 import javax.inject.manager.Bean;
 
+import com.caucho.config.inject.InjectManager;
+
 /**
- * The service scope manages load-on-startup services which also
- * publish to osgi.
+ * Context for a named EL bean scope
  */
-public class ServiceScope extends ScopeContext
-{
-  private Hashtable _map = new Hashtable();
-  
-  /**
-   * Returns true if the scope is currently active.
-   */
-  public boolean isActive()
+public class CreationContextImpl implements CreationalContext {
+  private InjectManager _inject;
+
+  public CreationContextImpl(InjectManager inject)
   {
-    return true;
-   }
-  
-  /**
-   * Returns the scope annotation type.
-   */
-  public Class<? extends Annotation> getScopeType()
-  {
-    return Service.class;
+    _inject = inject;
   }
   
-  public <T> T get(Bean<T> bean, boolean create)
+  public void push(Object incompleteInstance)
   {
-    Object v = _map.get(bean);
-      
-    if (v == null && create) {
-      v = bean.create();
-      // XXX: delete because of optimistic locking
-      _map.put(bean, v);
-    }
-    
-    return (T) v;
   }
   
-  public <T> void put(Bean<T> bean, T value)
-  {
-    _map.put(bean, value);
-  }
-  
-  public <T> void remove(Bean<T> bean)
-  {
-    _map.remove(bean);
-  }
 }

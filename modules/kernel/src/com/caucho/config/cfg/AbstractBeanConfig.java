@@ -189,7 +189,7 @@ abstract public class AbstractBeanConfig {
   public void setScope(String scope)
   {
     if ("singleton".equals(scope))
-      _scope = Singleton.class;
+      _scope = ApplicationScoped.class;
     else if ("dependent".equals(scope))
       _scope = Dependent.class;
     else if ("request".equals(scope))

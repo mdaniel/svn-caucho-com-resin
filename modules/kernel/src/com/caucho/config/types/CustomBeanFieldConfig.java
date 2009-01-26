@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,22 +27,41 @@
  * @author Scott Ferguson
  */
 
-package javax.inject.manager;
+package com.caucho.config.types;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.lang.reflect.Member;
-import java.util.Set;
+import java.util.*;
+import java.lang.reflect.*;
+import java.lang.annotation.*;
 
 /**
+ * Custom bean configured by namespace
  */
-public interface InjectionPoint
-{
-  public Set<Annotation> getBindings();
-  public Type getType();
-  public Bean<?> getBean();
-  public Member getMember();
-  public <T extends Annotation> T getAnnotation(Class<T> annotationType);
-  public Annotation []getAnnotations();
-  public boolean isAnnotationPresent(Class<? extends Annotation> annType);
+public class CustomBeanFieldConfig {
+  private Field _field;
+  
+  private ArrayList<Annotation> _annotationList
+    = new ArrayList<Annotation>();
+
+  public CustomBeanFieldConfig(Field field)
+  {
+    _field = field;
+  }
+
+  public Field getField()
+  {
+    return _field;
+  }
+
+  public void addAnnotation(Annotation ann)
+  {
+    _annotationList.add(ann);
+  }
+
+  public Annotation []getAnnotations()
+  {
+    Annotation []annotations = new Annotation[_annotationList.size()];
+    _annotationList.toArray(annotations);
+
+    return annotations;
+  }
 }

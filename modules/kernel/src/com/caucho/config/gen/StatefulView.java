@@ -184,7 +184,7 @@ abstract public class StatefulView extends View {
     out.println("}");
 
     out.println();
-    out.println("public " + getViewClassName() + "(StatefulServer server, ConfigContext env)");
+    out.println("public " + getViewClassName() + "(StatefulServer server, javax.context.CreationalContext env)");
     out.println("{");
     out.pushDepth();
     
@@ -230,7 +230,7 @@ abstract public class StatefulView extends View {
     throws IOException
   {
     out.println();
-    out.println("public Object __caucho_createNew(ConfigContext env)");
+    out.println("public Object __caucho_createNew(javax.context.CreationalContext env)");
     out.println("{");
     out.println("  " + getViewClassName() + " bean"
 		+ " = new " + getViewClassName() + "(_server, env);");

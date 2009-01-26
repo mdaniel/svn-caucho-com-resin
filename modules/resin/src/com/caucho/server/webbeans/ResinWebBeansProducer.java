@@ -31,7 +31,6 @@ package com.caucho.server.webbeans;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.CauchoDeployment;
-import com.caucho.config.Singleton;
 import com.caucho.config.annotation.ServiceBinding;
 import com.caucho.config.annotation.OsgiServiceBinding;
 import com.caucho.config.inject.BeanStartupEvent;
@@ -68,7 +67,7 @@ import org.osgi.framework.BundleContext;
  */
 
 @CauchoDeployment
-@Singleton
+@ApplicationScoped
 public class ResinWebBeansProducer
 {
   private static final Logger log

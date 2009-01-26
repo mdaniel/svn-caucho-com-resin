@@ -29,11 +29,14 @@
 
 package javax.inject;
 
-import java.lang.reflect.*;
+import java.lang.annotation.Annotation;
 
 /**
- * Usable API for Parameterized types.
+ * The Instance interface obtains instances of a specific type.
+ *
+ * @see javax.event.Event
  */
-public class Instance
+public interface Instance<T>
 {
+  public T get(Annotation... bindings);
 }

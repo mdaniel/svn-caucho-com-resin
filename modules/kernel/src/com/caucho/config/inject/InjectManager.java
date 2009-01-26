@@ -37,8 +37,8 @@ import com.caucho.config.program.MethodComponentProgram;
 import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.program.FieldEventProgram;
 import com.caucho.config.scope.ApplicationScope;
+import com.caucho.config.scope.CreationContextImpl;
 import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.scope.SingletonScope;
 import com.caucho.loader.*;
 import com.caucho.loader.enhancer.*;
 import com.caucho.util.*;
@@ -59,6 +59,7 @@ import javax.context.Context;
 import javax.context.ContextNotActiveException;
 import javax.context.Conversation;
 import javax.context.ConversationScoped;
+import javax.context.CreationalContext;
 import javax.context.Dependent;
 import javax.decorator.Decorates;
 import javax.el.*;
@@ -76,6 +77,7 @@ import javax.inject.UnsatisfiedDependencyException;
 import javax.inject.manager.Bean;
 import javax.inject.manager.Decorator;
 import javax.inject.manager.Initialized;
+import javax.inject.manager.InjectionPoint;
 import javax.inject.manager.Interceptor;
 import javax.inject.manager.InterceptionType;
 import javax.inject.manager.Manager;
@@ -92,7 +94,7 @@ public class InjectManager
   private static final Logger log
     = Logger.getLogger(InjectManager.class.getName());
 
-  private static final String SCHEMA = "com/caucho/webbeans/cfg/webbeans.rnc";
+  private static final String SCHEMA = "com/caucho/config/cfg/webbeans.rnc";
 
   private static final EnvironmentLocal<InjectManager> _localContainer
     = new EnvironmentLocal<InjectManager>();
@@ -236,7 +238,6 @@ public class InjectManager
       addContext("com.caucho.server.webbeans.RequestScope");
       addContext("com.caucho.server.webbeans.SessionScope");
       addContext("com.caucho.server.webbeans.ConversationScope");
-      addContext(new SingletonScope());
       addContext(new ApplicationScope());
 
       _deploymentMap.put(Standard.class, 0);
@@ -560,10 +561,19 @@ public class InjectManager
     if (field.isAnnotationPresent(Decorates.class))
       return;
     
-    if (field.isAnnotationPresent(New.class))
-      throw new IllegalStateException(L.l("can't cope with new"));
+    Annotation []bindings;
     
-    Annotation []bindings = getBindings(field.getAnnotations());
+    if (field.isAnnotationPresent(New.class)) {
+      bindings = new Annotation[] { NewLiteral.NEW };
+
+      Set set = resolve(field.getGenericType(), bindings);
+
+      if (set == null || set.size() == 0) {
+	addBean(new NewBean(this, field.getType()));
+      }
+    }
+    else
+      bindings = getBindings(field.getAnnotations());
     
     if (field.isAnnotationPresent(Observable.class)) {
       injectList.add(new FieldEventProgram(this, field, bindings));
@@ -730,7 +740,7 @@ public class InjectManager
   {
     Bean<T> factory = createTransient(type);
 
-    return factory.create();
+    return factory.create(null);
   }
 
   /**
@@ -1132,20 +1142,31 @@ public class InjectManager
    */
   public <T> T getInstance(Bean<T> bean)
   {
-    if (bean instanceof ComponentImpl)
+    if (false && bean instanceof ComponentImpl)
       return (T) ((ComponentImpl) bean).get();
     else {
       Class scopeType = bean.getScopeType();
 
       if (Dependent.class.equals(scopeType))
-	return (T) bean.create();
+	return (T) bean.create(new ConfigContext());
       
       Context context = getContext(scopeType);
 
-      if (context != null)
-	return (T) context.get(bean, true);
+      if (context == null)
+	return null;
+      
+      CreationalContext createContext;
+
+      if ((bean instanceof ComponentImpl)
+	  && (context instanceof ScopeContext)) {
+	createContext = new ConfigContext((ComponentImpl) bean,
+					  null,
+					  (ScopeContext) context);
+      }
       else
-	return (T) bean.create();
+	createContext = new ConfigContext();
+      
+      return (T) context.get(bean, createContext);
     }
   }
 
@@ -1239,6 +1260,34 @@ public class InjectManager
 				 Annotation... bindings)
   {
     return (T) getInstanceByType((Class) type.getType(), bindings);
+  }
+
+  /**
+   * Internal callback during creation to get a new injection instance.
+   */
+  public <T> T getInstanceToInject(InjectionPoint ij,
+				   CreationalContext<?> ctx)
+  {
+    Bean bean = ij.getBean();
+
+    ConfigContext env = (ConfigContext) ctx;
+    Class scopeType = bean.getScopeType();
+
+    if (! env.canInject(scopeType)) {
+      return (T) ((SimpleBean) bean).getScopeAdapter();
+    }
+
+    return (T) getInstance(bean);
+  }
+
+  /**
+   * Internal callback during creation to get a new injection instance.
+   */
+  public <T> T getInstanceToInject(InjectionPoint ij)
+  {
+    Bean bean = ij.getBean();
+    
+    return (T) getInstance(bean);
   }
 
   //

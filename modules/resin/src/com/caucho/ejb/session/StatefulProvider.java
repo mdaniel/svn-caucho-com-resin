@@ -29,11 +29,11 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.config.ConfigContext;
+import javax.context.CreationalContext;
 
 /**
  * Creates a new instance of a stateful bean
  */
 public interface StatefulProvider {
-  public Object __caucho_createNew(ConfigContext env);
+  public Object __caucho_createNew(CreationalContext env);
 }

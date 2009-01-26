@@ -37,11 +37,13 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 import java.util.*;
 
+import javax.context.CreationalContext;
 import javax.decorator.Decorates;
+import javax.inject.AnnotationLiteral;
 import javax.inject.BindingType;
 import javax.inject.Current;
 import javax.inject.manager.Decorator;
-import javax.inject.AnnotationLiteral;
+import javax.inject.manager.InjectionPoint;
 
 /**
  * DecoratorBean represents a Java decorator
@@ -81,7 +83,8 @@ public class DecoratorBean extends Decorator
   /**
    * Returns the bean's binding types
    */
-  public Set<Annotation> getBindingTypes()
+  @Override
+  public Set<Annotation> getBindings()
   {
     return _bindings;
   }
@@ -282,6 +285,26 @@ public class DecoratorBean extends Decorator
   private void addType(Class type)
   {
     _types.add(type);
+  }
+  
+  public Object create(CreationalContext creationalContext)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /*
+  public void destroy(Object instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  */
+
+  /**
+   * Returns the set of injection points, for validation.
+   */
+  public Set<InjectionPoint> getInjectionPoints()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public String toString()

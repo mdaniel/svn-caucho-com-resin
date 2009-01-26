@@ -33,6 +33,8 @@ import com.caucho.config.inject.ComponentImpl;
 import com.caucho.loader.Environment;
 
 import java.util.*;
+import javax.context.ApplicationScoped;
+import javax.context.Dependent;
 
 
 /**
@@ -124,9 +126,20 @@ public class DependentScope {
     if (scope == null)
       return true;
     else if (_scope == null)
-      return scope instanceof SingletonScope;
+      return scope instanceof ApplicationScope;
     else
       return _scope.canInject(scope);
+  }
+
+  public boolean canInject(Class scopeType)
+  {
+    if (scopeType == null)
+      return true;
+    else if (_scope == null)
+      return (scopeType.equals(ApplicationScoped.class)
+	      || scopeType.equals(Dependent.class));
+    else
+      return _scope.canInject(scopeType);
   }
 
   /**

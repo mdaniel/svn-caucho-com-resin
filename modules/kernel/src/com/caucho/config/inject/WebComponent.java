@@ -162,7 +162,7 @@ public class WebComponent<T> {
     {
       _bean = bean;
 
-      Set<Annotation> bindings = bean.getBindingTypes();
+      Set<Annotation> bindings = bean.getBindings();
       
       _bindings = new Binding[bindings.size()];
 

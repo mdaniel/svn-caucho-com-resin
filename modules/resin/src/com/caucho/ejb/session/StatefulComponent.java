@@ -34,6 +34,7 @@ import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 
 import java.lang.annotation.*;
+import javax.context.CreationalContext;
 
 /**
  * Component for session beans
@@ -52,7 +53,7 @@ public class StatefulComponent extends ComponentImpl {
    * Creates a new instance of the component
    */
   @Override
-  public Object createNew(ConfigContext env)
+  public Object createNew(CreationalContext env)
   {
     return _provider.__caucho_createNew(env);
   }

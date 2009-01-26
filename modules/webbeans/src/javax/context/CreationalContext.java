@@ -27,22 +27,21 @@
  * @author Scott Ferguson
  */
 
-package javax.inject.manager;
+package javax.context;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.lang.reflect.Member;
-import java.util.Set;
+import javax.inject.manager.Bean;
 
 /**
+ * The CreationalContext is a temporary, internal context used during
+ * creation to resolve internal references.  Only
+ * {@link javax.context.Contextual} implementations may use
+ * CreationalContext.
  */
-public interface InjectionPoint
+public interface CreationalContext<T>
 {
-  public Set<Annotation> getBindings();
-  public Type getType();
-  public Bean<?> getBean();
-  public Member getMember();
-  public <T extends Annotation> T getAnnotation(Class<T> annotationType);
-  public Annotation []getAnnotations();
-  public boolean isAnnotationPresent(Class<? extends Annotation> annType);
+  /**
+   * Pushes an incomplete instance into the creational context.
+   */
+  public void push(T incompleteInstance);
 }

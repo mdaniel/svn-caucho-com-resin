@@ -32,11 +32,12 @@ package com.caucho.config.inject;
 import com.caucho.config.ConfigContext;
 import com.caucho.config.inject.HandleAware;
 import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.scope.SingletonScope;
+import com.caucho.config.scope.ApplicationScope;
 
 import java.io.Closeable;
 import java.lang.annotation.*;
 import java.lang.reflect.Type;
+import javax.context.CreationalContext;
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.
@@ -111,7 +112,7 @@ public class SingletonBean extends SimpleBean
     _value = value;
     setTargetType(value.getClass());
     
-    super.setScope(new SingletonScope());
+    super.setScope(ApplicationScope.create());
     
     setName(name);
 
@@ -144,7 +145,7 @@ public class SingletonBean extends SimpleBean
 
     setTargetType(value.getClass());
     
-    super.setScope(new SingletonScope());
+    super.setScope(ApplicationScope.create());
   }
 
   @Override
@@ -193,7 +194,13 @@ public class SingletonBean extends SimpleBean
   }
 
   @Override
-  protected Object createNew(ConfigContext env)
+  public Object create(CreationalContext env)
+  {
+    return _value;
+  }
+
+  @Override
+  protected Object createNew(CreationalContext env)
   {
     throw new IllegalStateException();
   }

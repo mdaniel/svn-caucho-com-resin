@@ -36,11 +36,15 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.scope.DependentScope;
 import com.caucho.util.*;
 
+import java.util.Set;
 import java.util.logging.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import javax.inject.manager.Bean;
+import javax.inject.manager.InjectionPoint;
 
 public class FieldComponentProgram extends ConfigProgram
+  implements InjectionPoint
 {
   private static final L10N L = new L10N(FieldComponentProgram.class);
   private static final Logger log
@@ -65,7 +69,7 @@ public class FieldComponentProgram extends ConfigProgram
   {
     Object value = null;
     try {
-      value = _manager.getInstance(_bean, env);
+      value = _manager.getInstanceToInject(this, env);
 
       _field.set(bean, value);
     } catch (IllegalArgumentException e) {
@@ -73,5 +77,49 @@ public class FieldComponentProgram extends ConfigProgram
     } catch (Exception e) {
       throw new ConfigException(ConfigException.loc(_field) + e.toString(), e);
     }
+  }
+  
+  public Set<Annotation> getBindings()
+  {
+    return null;
+  }
+  
+  public Type getType()
+  {
+    return _field.getType();
+  }
+  
+  public Bean<?> getBean()
+  {
+    return _bean;
+  }
+  
+  public Member getMember()
+  {
+    return _field;
+  }
+  
+  public <T extends Annotation> T getAnnotation(Class<T> annotationType)
+  {
+    return _field.getAnnotation(annotationType);
+  }
+  
+  public Annotation []getAnnotations()
+  {
+    return _field.getAnnotations();
+  }
+  
+  public boolean isAnnotationPresent(Class<? extends Annotation> annType)
+  {
+    return _field.isAnnotationPresent(annType);
+  }
+
+  public String toString()
+  {
+    return (getClass().getSimpleName()
+	    + "[" + _field.getDeclaringClass().getSimpleName()
+	    + "." + _field.getName()
+	    + "," + _field.getType().getSimpleName()
+	    + "]");
   }
 }

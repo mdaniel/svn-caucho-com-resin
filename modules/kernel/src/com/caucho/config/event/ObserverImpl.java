@@ -167,10 +167,12 @@ public class ObserverImpl implements Observer {
     Object obj = null;
 
     if (_ifExists) {
+      /* XXX:
       Context context = _webBeans.getContext(_bean.getScopeType());
 
       if (context != null && context.isActive())
 	obj = context.get(_bean, false);
+      */
     }
     else
       obj = _webBeans.getInstance(_bean);

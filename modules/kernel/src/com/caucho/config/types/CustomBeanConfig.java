@@ -34,6 +34,7 @@ import com.caucho.config.annotation.StartupType;
 import com.caucho.config.inject.ComponentImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SimpleBean;
+import com.caucho.config.inject.SimpleBeanField;
 import com.caucho.config.inject.SimpleBeanMethod;
 import com.caucho.config.program.*;
 import com.caucho.config.type.*;
@@ -283,6 +284,14 @@ public class CustomBeanConfig {
     Annotation []annList = methodConfig.getAnnotations();
 
     _component.addMethod(new SimpleBeanMethod(method, annList));
+  }
+
+  public void addField(CustomBeanFieldConfig fieldConfig)
+  {
+    Field field = fieldConfig.getField();
+    Annotation []annList = fieldConfig.getAnnotations();
+
+    _component.addField(new SimpleBeanField(field, annList));
   }
 
   private void addStereotype(Class type)

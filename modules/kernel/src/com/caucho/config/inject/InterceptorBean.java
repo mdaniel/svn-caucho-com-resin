@@ -37,11 +37,13 @@ import java.lang.annotation.*;
 import java.util.*;
 
 import javax.annotation.*;
+import javax.context.CreationalContext;
 import javax.ejb.*;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InterceptorBindingType;
 import javax.inject.manager.Interceptor;
 import javax.inject.manager.InterceptionType;
+import javax.inject.manager.InjectionPoint;
 
 /**
  * InterceptorBean represents a Java interceptor
@@ -95,9 +97,10 @@ public class InterceptorBean extends Interceptor
   /**
    * Returns the bean's bindings
    */
-  public Set<Annotation> getBindingTypes()
+  @Override
+  public Set<Annotation> getBindings()
   {
-    return _bean.getBindingTypes();
+    return _bean.getBindings();
   }
 
   /**
@@ -247,6 +250,26 @@ public class InterceptorBean extends Interceptor
 	_bindings.add(ann);
       }
     }
+  }
+
+  public Object create(CreationalContext creationalContext)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /*
+  public void destroy(Object instance)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  */
+  
+  /**
+   * Returns the set of injection points, for validation.
+   */
+  public Set<InjectionPoint> getInjectionPoints()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public String toString()

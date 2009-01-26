@@ -30,26 +30,26 @@
 package com.caucho.config.scope;
 
 import java.util.*;
-import javax.inject.manager.Bean;
+import javax.context.Contextual;
 
 /**
  * The singleton scope value
  */
 public class ScopeMap<T> {
-  private transient final HashMap<Bean<T>,T> _map
-    = new HashMap<Bean<T>,T>(8);
+  private transient final HashMap<Contextual<T>,T> _map
+    = new HashMap<Contextual<T>,T>(8);
   
-  public T get(Bean<T> bean)
+  public T get(Contextual<T> bean)
   {
     return _map.get(bean);
   }
   
-  public void put(Bean<T> bean, T value)
+  public void put(Contextual<T> bean, T value)
   {
     _map.put(bean, value);
   }
   
-  public void remove(Bean<T> bean)
+  public void remove(Contextual<T> bean)
   {
     _map.remove(bean);
   }

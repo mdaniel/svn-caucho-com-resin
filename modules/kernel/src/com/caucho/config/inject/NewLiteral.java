@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,22 +27,18 @@
  * @author Scott Ferguson
  */
 
-package javax.inject.manager;
+package com.caucho.config.inject;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.lang.reflect.Member;
-import java.util.Set;
+import javax.inject.AnnotationLiteral;
+import javax.inject.New;
 
 /**
+ * Represents the @New annotation
  */
-public interface InjectionPoint
-{
-  public Set<Annotation> getBindings();
-  public Type getType();
-  public Bean<?> getBean();
-  public Member getMember();
-  public <T extends Annotation> T getAnnotation(Class<T> annotationType);
-  public Annotation []getAnnotations();
-  public boolean isAnnotationPresent(Class<? extends Annotation> annType);
+public class NewLiteral extends AnnotationLiteral<New> {
+  public static final NewLiteral NEW = new NewLiteral();
+
+  private NewLiteral()
+  {
+  }
 }

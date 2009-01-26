@@ -25,7 +25,7 @@
           class="com.caucho.loader.DependencyCheckInterval"/>
 
     <bean name="component"
-          class="com.caucho.webbeans.cfg.WbComponentConfig"/>
+          class="com.caucho.config.cfg.WbComponentConfig"/>
 
     <bean name="connector"
           class="com.caucho.jca.ConnectorConfig"/>

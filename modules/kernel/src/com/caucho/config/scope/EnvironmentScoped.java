@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,22 +27,19 @@
  * @author Scott Ferguson
  */
 
-package javax.inject.manager;
+package com.caucho.config.scope;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.lang.reflect.Member;
-import java.util.Set;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
+import javax.context.*;
 /**
+ * The @EnvironmentScoped represents an instance for each Resin environment.
  */
-public interface InjectionPoint
-{
-  public Set<Annotation> getBindings();
-  public Type getType();
-  public Bean<?> getBean();
-  public Member getMember();
-  public <T extends Annotation> T getAnnotation(Class<T> annotationType);
-  public Annotation []getAnnotations();
-  public boolean isAnnotationPresent(Class<? extends Annotation> annType);
+@ScopeType
+@Target({TYPE, METHOD})
+@Retention(RUNTIME)
+public @interface EnvironmentScoped {
 }

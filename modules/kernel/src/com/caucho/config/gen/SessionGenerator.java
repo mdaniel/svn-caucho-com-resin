@@ -465,7 +465,7 @@ abstract public class SessionGenerator extends BeanGenerator {
     if (isStateless())
       out.println("Bean(" + _contextClassName + " context)");
     else
-      out.println("Bean(" + _contextClassName + " context, com.caucho.config.ConfigContext env)");
+      out.println("Bean(" + _contextClassName + " context, javax.context.CreationalContext env)");
     out.println("{");
     out.pushDepth();
 

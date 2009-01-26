@@ -33,22 +33,58 @@ import java.lang.annotation.Annotation;
 import javax.inject.manager.Bean;
 
 /**
- * Representation of a scope context
+ * Represents a bean scope, storing the bean instances available to the
+ * execution context, and corresponding to a
+ * {@link javax.context.ScopeType @ScopeType}.
+ *
+ * The Context is an SPI class, called by
+ * the {@link javax.inject.manager.Manager inject
+ * Manager}, but not normally by application code.  Applications will call
+ * {@link javax.inject.manager.Manager#newInstance Manager.newInstance} to
+ * create a new instance of a bean.
+ *
+ * Example contexts include @ApplicationScoped for singleton objects,
+ * @RequestScoped for servlet request-specific objects, and @SessionScoped
+ * for HTTP session objects.
+ *
+ * Applications may create their own Contexts by creating an associated
+ * @ScopeType annotation and registering their Context with the inject
+ * manager.
  */
 public interface Context
 {
   /**
+   * Returns the @ScopeType corresponding to the current context.
+   */
+  public Class<? extends Annotation> getScopeType();
+  
+  /**
    * Returns true if the scope is currently active.
    */
   public boolean isActive();
-  
-  /**
-   * Returns the scope annotation type.
-   */
-  public Class<? extends Annotation> getScopeType();
 
   /**
-   * Returns a instance of a bean, creating if necessary
+   * Returns a instance of a bean, creating if the bean is not already
+   * available in the context.
+   *
+   * @param bean the Bean type to be created
+   *
+   * @return an injected and initialized instance
    */
-  public <T> T get(Bean<T> bean, boolean create);
+  public <T> T get(Contextual<T> bean);
+
+  /**
+   * Internal SPI method to create a new instance of a bean, when given
+   * a creational context.  This method is needed to handle circular
+   * initialization of bean instances.  If the bean already exists
+   * in the creationalContext, return the existing bean.
+   *
+   * @param bean the Bean type to be created
+   * @param creationalContext - temporary context used for managing
+   *  circular references
+   *
+   * @return the bean instance
+   */
+  public <T> T get(Contextual<T> bean,
+		   CreationalContext<T> creationalContext);
 }
