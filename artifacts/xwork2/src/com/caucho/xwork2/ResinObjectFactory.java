@@ -29,12 +29,12 @@
 
 package com.caucho.xwork2;
 
-import com.caucho.webbeans.manager.*;
+import com.caucho.config.inject.*;
 
 import com.opensymphony.xwork2.ObjectFactory;
 
 import java.util.*;
-import javax.webbeans.*;
+import javax.inject.*;
 
 
 /**
@@ -42,7 +42,7 @@ import javax.webbeans.*;
  */
 public class ResinObjectFactory extends ObjectFactory
 {
-  private final WebBeansContainer _webBeans = WebBeansContainer.create();
+  private final InjectManager _webBeans = InjectManager.create();
   
   /**
    * Returns the defined bean if available, otherwise

@@ -29,10 +29,9 @@
 
 package com.caucho.spring;
 
-import com.caucho.webbeans.component.*;
-import com.caucho.webbeans.manager.*;
+import com.caucho.config.inject.*;
 import com.caucho.util.*;
-import javax.webbeans.manager.*;
+import javax.inject.manager.*;
 
 import org.springframework.beans.*;
 import org.springframework.beans.factory.*;
@@ -48,7 +47,7 @@ public class ResinBeanFactory extends DefaultListableBeanFactory
 {
   private static final L10N L = new L10N(ResinBeanFactory.class);
   
-  private final WebBeansContainer _webBeans = WebBeansContainer.create();
+  private final InjectManager _webBeans = InjectManager.create();
   
   /**
    * Creates a new bean factory adapter

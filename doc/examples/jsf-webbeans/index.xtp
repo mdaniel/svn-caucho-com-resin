@@ -1,9 +1,9 @@
 <document>
   <header>
-    <title>JSF with WebBeans</title>
+    <title>JSF with Java Injection</title>
         <description>
-          <p>WebBeans (JSR-299) gives JSF a solid foundation for
-its component model, based on WebBeans' typesafe IoC capabilities
+          <p>Java Injection (JSR-299) gives JSF a solid foundation for
+its component model, based on Java Injection's typesafe IoC capabilities
 and annotation-based discovery. </p>
         </description>
     <type>tutorial</type>
@@ -25,28 +25,28 @@ and annotation-based discovery. </p>
 </tr>
 <tr>
   <td><viewfile-link file="WEB-INF/classes/example/Calculator.java"/></td>
-  <td>Calculator model WebBean, taking the input and calculating the result.</td>
+  <td>Calculator model simple bean, taking the input and calculating the result.</td>
 </tr>
 <tr>
   <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
   <td>Configures FacesServlet.</td>
 </tr>
 <tr>
-  <td><viewfile-link file="WEB-INF/classes/META-INF/web-beans.xml"/></td>
-  <td>WebBeans configuration file.</td>
+  <td><viewfile-link file="WEB-INF/classes/META-INF/beans.xml"/></td>
+  <td>Java Injection configuration file.</td>
 </tr>
 </deftable>
 </s1>
 
 <s1 title="Overview">
 
-<p>WebBeans works together with JSF to provide a solid component-basis
-for the data model of a JSF application.</p>
+<p>Java Injection works together with JSF to provide a solid
+component configuration for the data model of a JSF application.</p>
 
-<p>With WebBeans, data components can be created by marking them with
-a @Component annotation, reducing the amount of configuration XML to
+<p>With Java Injection, component classes are automatically registered
+through classpath scanning,, reducing the amount of configuration XML to
 a minimum.  In this example, we only need XML to define the FacesServlet,
-and a marker web-beans.xml to direct WebBeans to search for
+and a marker beans.xml to direct Java Injection to search for
 component classes.</p>
 
 <p>The data components automatically populate the JSF EL (expression language),
@@ -64,11 +64,10 @@ component tree.</p>
 <p>The data model is the heart of the JSF application.  In this case,
 a trivial calculator.</p>
 
-<p>The <code>@Component</code> marks <code>example.Calculator</code> as
-a WebBeans component.  When WebBeans scans the classes, it will discover
-<code>Calculator</code>, introspect it, and automatically register the
-calculator in the WebBeans directory.  Once it's registered, any other
-WebBeans component, or JSP/JSF EL, or PHP file or servlet or EJB can
+<p>The <code>example.Calculator</code> is a Java Injection <a href="http://wiki.caucho.com/Simple+Bean">Simple Bean</a>.  When Resin scans the classes,
+it will discover <code>Calculator</code>, introspect it, and automatically
+register the calculator.  Once it's registered, any other
+Java Injection component, or JSP/JSF EL, or PHP file or servlet or EJB can
 use the component.</p>
 
 <p>The <code>Calculator</code> component has no XML configuration at all,
@@ -79,9 +78,9 @@ occur in something like the resin-web.xml file.</p>
 <example title="Calculator.java">
 package example;
 
-import javax.webbeans.*;
+import javax.context.RequestScoped;
+import javax.annotation.Named;
 
-@Component
 @RequestScoped
 @Named("calc")  
 public class Calculator {
@@ -101,23 +100,23 @@ public class Calculator {
 }
 </example>
 
-<p>The <code>@RequestScoped</code> annotation tells WebBeans to store
+<p>The <code>@RequestScoped</code> annotation tells Java Injection to store
 the bean in the servlet request scope.  Each request will use its own
 instance of the calculator.  If the scope was <code>@SessionScoped</code>,
 the same <code>Calculator</code> would be used for the entire session.
 If it was <code>@ConversationScoped</code> it would be used for the
 JSF page.</p>
 
-<p>The optional <code>@Named</code> annotation gives an alternate name
-for the calculator.  If there is no <code>@Named</code>, WebBeans will
-use the class name, e.g. "calculator" in this case.</p>
+<p>The optional <code>@Named</code> annotation gives a name
+for the calculator so JSP EL expressions and JSF can access it.
+If there is no <code>@Named</code>, the bean cannot be used in a JSP
+EL expression.</p>
 
-<p>WebBeans components can also be injected with other WebBeans, or
-DataSources, JPA EntityManager or EntityManagerFactory
+<p>Java Injection components can also be injected with other
+Java Injection, or DataSources, JPA EntityManager or EntityManagerFactory
 or JMS Queues, and they can also use the <code>@PostConstruct</code>
 and <code>@PreDestroy</code> lifecycle annotations.  Method interception
 and event listening are also possible.</p>
-
 
 </s1>
 
@@ -165,21 +164,21 @@ method to assign the new value.</p>
 
 </s1>
 
-<s1 title="Housekeeping: the resin-web.xml and web-beans.xml">
+<s1 title="Housekeeping: the resin-web.xml and beans.xml">
 
-<p>The housekeeping overhead is a minimum when using WebBeans.  In this
-example we just need two pieces of XML configuration:</p>
+<p>The housekeeping overhead is a minimum when using Java Injection.
+In this example we just need two pieces of XML configuration:</p>
 
 <ol>
 <li>Configuring the JSF servlet in the web.xml</li>
-<li>Marking a classpath root with a web-beans.xml</li>
+<li>Marking a classpath root with a beans.xml</li>
 </ol>
 
-<p>WebBeans will scan classes directories and jars if they contain
-a <code>META-INF/web-beans.xml</code> file, so many applications will
-just use <code>web-beans.xml</code> as a marker file with no content.
-Others applications will want to configure the WebBeans components using
-the <code>web-beans.xml</code> or may put that configuration in the
+<p>Java Injection will scan classes directories and jars if they contain
+a <code>META-INF/beans.xml</code> file, so many applications will
+just use <code>beans.xml</code> as a marker file with no content.
+Others applications will want to configure the Java Injection components using
+the <code>beans.xml</code> or may put that configuration in the
 <code>resin-web.xml</code>.</p>
 
 <example title="WEB-INF/resin-web.xml">
@@ -191,14 +190,14 @@ the <code>web-beans.xml</code> or may put that configuration in the
 &lt;/web-app>
 </example>
 
-<example title="META-INF/web-beans.xml">
-&lt;web-beans xmlns="http://caucho.com/ns/resin">
+<example title="META-INF/beans.xml">
+&lt;Beans xmlns="urn:java:ee">
   &lt;!--
-     - The web-beans.xml marks a class root for WebBeans to search for
-     - @Component beans.  Since the example doesn't need to override any
+     - The beans.xml marks a class root for Java Inject to search for
+     - simple beans.  Since the example doesn't need to override any
      - defaults, there's no additional configuration necessary.
      -->
-&lt;/web-beans>
+&lt;/Beans>
 </example>
 
 </s1>
@@ -206,14 +205,15 @@ the <code>web-beans.xml</code> or may put that configuration in the
 <s1 title="Completing the Application">
 
 <p>A more complete application would likely the IoC injection capabilities
-of WebBeans.  For example:</p>
+of Java Injection.  For example:</p>
 
 <ul>
-<li>Use Java Persistence by injecting a <code>@In EntityManager</code>
+<li>Use Java Persistence by injecting a <code>@Current EntityManager</code>
 to a model field.</li>
-<li>Injecting a WebBeans singleton service with <code>@In</code>, defined
-by a &lt;bean> configuration in the resin.conf (assuming it needs configuration.</li>
-<li>Using JDBC directly with <code>@In DataSource</code> or <code>@Named("jdbc/test") DataSource.</code>.</li>
+<li>Injecting a Java injection singleton service
+with <code>@Current</code>, defined
+by a &lt;foo:MyBean> configuration in the resin.xm. (assuming it needs configuration.</li>
+<li>Using JDBC directly with <code>@Current DataSource</code> or <code>@Name("jdbc/test") DataSource.</code>.</li>
 <li>Using EJB stateless or stateful session beans as services.</li>
 </ul>
 

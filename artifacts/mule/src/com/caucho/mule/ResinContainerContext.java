@@ -35,10 +35,10 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.webbeans.manager.Bean;
+import javax.inject.manager.Bean;
 
 import com.caucho.util.L10N;
-import com.caucho.webbeans.manager.*;
+import com.caucho.config.inject.*;
 
 import org.mule.impl.container.ContainerKeyPair;
 import org.mule.umo.lifecycle.Initialisable;
@@ -56,7 +56,7 @@ public class ResinContainerContext implements UMOContainerContext
   private final WeakHashMap<Class,Bean> _beanMap
     = new WeakHashMap<Class,Bean>();
 
-  private final WebBeansContainer _webBeans = WebBeansContainer.create();
+  private final InjectManager _webBeans = InjectManager.create();
 
   private String _name = "resin";
 

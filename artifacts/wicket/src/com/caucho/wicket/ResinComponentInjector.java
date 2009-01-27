@@ -31,7 +31,7 @@ package com.caucho.wicket;
 
 import com.caucho.config.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.manager.*;
+import com.caucho.config.inject.*;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.application.*;
@@ -41,7 +41,7 @@ import org.apache.wicket.application.*;
  */
 public class ResinComponentInjector implements IComponentInstantiationListener
 {
-  private WebBeansContainer _webBeans = WebBeansContainer.create();
+  private InjectManager _webBeans = InjectManager.create();
   
   /**
    * Called for a component that is instantiated

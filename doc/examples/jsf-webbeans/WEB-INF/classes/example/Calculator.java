@@ -1,8 +1,8 @@
 package example;
 
-import javax.webbeans.*;
+import javax.annotation.Named;
+import javax.context.RequestScoped;
 
-@Component
 @RequestScoped
 @Named("calc")  
 public class Calculator {

@@ -31,7 +31,7 @@ package com.caucho.wicket;
 
 import com.caucho.config.*;
 import com.caucho.util.*;
-import com.caucho.webbeans.manager.*;
+import com.caucho.config.inject.*;
 
 import org.apache.wicket.protocol.http.*;
 
@@ -62,7 +62,7 @@ public class ResinApplicationFactory implements IWebApplicationFactory
       
       Class cl = Class.forName(className, false, loader);
 
-      WebBeansContainer webBeans = WebBeansContainer.create();
+      InjectManager webBeans = InjectManager.create();
 
       return (WebApplication) webBeans.getObject(cl);
     } catch (ConfigException e) {

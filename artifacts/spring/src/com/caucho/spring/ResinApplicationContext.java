@@ -29,7 +29,7 @@
 
 package com.caucho.spring;
 
-import com.caucho.webbeans.manager.*;
+import com.caucho.config.inject.*;
 
 import org.springframework.beans.*;
 import org.springframework.beans.factory.*;
@@ -43,7 +43,7 @@ import org.springframework.context.support.*;
  */
 public class ResinApplicationContext extends AbstractApplicationContext
 {
-  private final WebBeansContainer _webBeans = WebBeansContainer.create();
+  private final InjectManager _webBeans = InjectManager.create();
 
   private final ConfigurableListableBeanFactory _beanFactory
     = new ResinBeanFactory();
