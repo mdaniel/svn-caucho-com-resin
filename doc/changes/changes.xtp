@@ -13,6 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>(2009-01-27) inject: update packaging to latest Java Injection draft</li>
 <li>make: makefiles updated to use $(CC) instead of $(LD) (#3267, rep by dicr)</li>
 <li>admin: add &lt;resin-data-directory> to replace admin path</li>
 <li>remote: &lt;remote:BamService> replaces &lt;bam-service></li>
