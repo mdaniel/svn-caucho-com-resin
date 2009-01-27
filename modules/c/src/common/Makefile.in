@@ -16,10 +16,10 @@ INCLUDES=@INCLUDES@
 all	: common.o $(OBJ_PICS)
 
 common.o	: $(OBJ)
-	$(LD) -r -o $@ $(OBJ)
+	$(CC) $(LDFLAGS) -r -o $@ $(OBJ)
 
 common.lo	: $(OBJ_PICS)
-	$(LD) -r -o $@ $(OBJ_PICS)
+	$(CC) $(LDFLAGS) -r -o $@ $(OBJ_PICS)
 
 .c.lo	:
 	$(LIBTOOL) --mode=compile $(CC) -o $@ -c $(INCLUDES) $(CFLAGS) $<

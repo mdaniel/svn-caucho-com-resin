@@ -35,6 +35,8 @@ import com.caucho.naming.*;
 import com.caucho.util.*;
 import com.caucho.config.cfg.*;
 
+import javax.inject.*;
+
 /**
  * Configuration for the xml web bean component.
  */
@@ -57,6 +59,8 @@ public class BeanConfig extends WbComponentConfig {
   {
     if (getDefaultScope() != null)
       setScope(getDefaultScope());
+    
+    setService(true);
   }
 
   protected String getDefaultScope()
@@ -212,13 +216,16 @@ public class BeanConfig extends WbComponentConfig {
     if (_customBean != null) {
       _customBean.initComponent();
       _comp = _customBean.getComponent();
+
+      _comp.addAnnotation(new AnnotationLiteral<Service>() {});
+      System.out.println("INIT-A: " + _comp);
       
       return;
     }
 
-    setService(true);
-    
     super.init();
+    
+      System.out.println("INIT-B: " + _comp);
 
     try {
       if (_comp == null) {

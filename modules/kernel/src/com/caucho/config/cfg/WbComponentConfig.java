@@ -376,6 +376,7 @@ public class WbComponentConfig {
 
     if (_isService) {
       comp.addAnnotation(new AnnotationLiteral<Service>() {});
+      System.out.println("SERVICE: " + comp);
     }
 
     if (_newArgs != null)

@@ -13,6 +13,7 @@
 
 <s2 title="4.0.0 snapshot">
 <ul>
+<li>make: makefiles updated to use $(CC) instead of $(LD) (#3267, rep by dicr)</li>
 <li>admin: add &lt;resin-data-directory> to replace admin path</li>
 <li>remote: &lt;remote:BamService> replaces &lt;bam-service></li>
 <li>quercus: batch compiled files (#3261, rep by koreth)</li>

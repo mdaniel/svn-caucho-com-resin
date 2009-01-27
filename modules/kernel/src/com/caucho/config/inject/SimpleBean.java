@@ -292,7 +292,7 @@ public class SimpleBean extends ComponentImpl
 	}
 	else if (hasBindingAnnotation(ctor)) {
 	  if (best != null && hasBindingAnnotation(best))
-	    throw new ConfigException(L.l("WebBean {0} has two constructors with binding annotations.",
+	    throw new ConfigException(L.l("Simple bean {0} has two constructors with binding annotations.",
 					  ctor.getDeclaringClass().getName()));
 	  best = ctor;
 	  second = null;

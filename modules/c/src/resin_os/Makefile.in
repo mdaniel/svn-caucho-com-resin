@@ -20,10 +20,10 @@ OBJ= boot.o java.o jni_os.o jni_jvmti.o jni_socket.o memory.o std.o
 all	: libresin_os.$(SO)
 
 libresin_os.so	: $(OBJ)
-	$(LD) $(LDFLAGS_SHLIB) -o $@ $(OBJ) $(PROXY_LIBS)
+	$(CC) $(LDFLAGS_SHLIB) -o $@ $(OBJ) $(PROXY_LIBS)
 
 libresin_os.jnilib	: $(OBJ)
-	$(LD) $(LDFLAGS_SHLIB) -framework JavaVM -o $@ $(OBJ) $(PROXY_LIBS)
+	$(CC) $(LDFLAGS_SHLIB) -framework JavaVM -o $@ $(OBJ) $(PROXY_LIBS)
 
 boot.o		: Makefile resin.h
 java.o		: Makefile resin.h

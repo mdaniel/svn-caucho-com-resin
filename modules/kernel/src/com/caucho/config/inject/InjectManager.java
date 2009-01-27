@@ -921,8 +921,9 @@ public class InjectManager
 	addComponentByType(type, bean);
       }
 
-      if (isStartupPresent(cauchoBean.getAnnotations()))
+      if (isStartupPresent(cauchoBean.getAnnotations())) {
 	_pendingServiceList.add(cauchoBean);
+      }
 
       if (isRegistrationMatch(cauchoBean))
 	_pendingRegistrationList.add(cauchoBean);

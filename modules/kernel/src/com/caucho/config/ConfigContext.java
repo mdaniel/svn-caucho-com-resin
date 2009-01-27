@@ -52,6 +52,8 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.context.CreationalContext;
+import javax.context.ApplicationScoped;
+import javax.context.Dependent;
 
 /**
  * The ConfigContext contains the state of the current configuration.
@@ -226,7 +228,12 @@ public class ConfigContext implements CreationalContext {
 
   public boolean canInject(Class scopeType)
   {
-    return _dependentScope == null || _dependentScope.canInject(scopeType);
+    if (scopeType == ApplicationScoped.class
+	|| scopeType == Dependent.class
+	|| _dependentScope != null && _dependentScope.canInject(scopeType))
+      return true;
+    else
+      return false;
   }
 
   /**

@@ -55,7 +55,17 @@ import com.caucho.vfs.*;
  *
  * It is configured as:
  * <pre>
- * &lt;jms-queue jndi-name="jms/my-name" uri="file:path=WEB-INF/jms"/>
+ * &lt;web-app xmlns="http://caucho.com/ns/resin"
+ *             xmlns:resin="urn:java:com.caucho.resin">
+ *
+ *   &lt;resin:FileQueue>
+ *     &lt;resin:JndiName>jms/my-name&lt;/resin:JndiName>
+ *
+ *     &lt;resin:name>my-name&lt;/resin:name>
+ *     &lt;resin:path>WEB-INF/jms&lt;/resin:path>
+ *   &lt;/resin:FileQueue>
+ *
+ * &lt;/web-app>
  * </pre>
  */
 public class FileQueue extends AbstractQueue implements Topic
@@ -125,62 +135,32 @@ public class FileQueue extends AbstractQueue implements Topic
 
   public int getQueueSize()
   {
-    synchronized (_queueLock) {
-      int count = 0;
+    int count = 0;
 
-      for (int i = 0; i < _head.length; i++ ){
-	for (FileQueueEntry entry = _head[i];
-	     entry != null;
-	     entry = entry._next) {
-	  count++;
-	}
+    for (int i = 0; i < _head.length; i++ ){
+      for (FileQueueEntry entry = _head[i];
+	   entry != null;
+	   entry = entry._next) {
+	count++;
       }
-
-      return count;
     }
+
+    return count;
   }
 
   /**
    * Initialize the queue
    */
+  @PostConstruct
   public void init()
   {
+    System.out.println("INIT: " + getName());
+    
     _store.setName(getName());
 
     _store.init();
 
     _store.receiveStart(this);
-  }
-  
-  /**
-   * Adds a message entry from startup.
-   */
-  FileQueueEntry addEntry(long id,
-			  long leaseTimeout,
-			  int priority,
-			  long expire,
-			  MessageType type)
-  {
-    synchronized (_queueLock) {
-      if (priority < 0)
-	priority = 0;
-      else if (priority >= _head.length)
-	priority = _head.length;
-      
-      FileQueueEntry entry
-	= new FileQueueEntry(id, leaseTimeout, priority, expire, type);
-
-      entry._prev = _tail[priority];
-
-      if (_tail[priority] != null)
-	_tail[priority]._next = entry;
-      else
-	_head[priority] = entry;
-
-      _tail[priority] = entry;
-
-      return entry;
-    }
   }
 
   /**
@@ -196,10 +176,13 @@ public class FileQueue extends AbstractQueue implements Topic
 		   int priority,
 		   long expires)
   {
+    System.out.println("SEND: " + msg);
+    
     synchronized (_queueLock) {
       long id = _store.send(msg, priority, expires);
 
-      FileQueueEntry entry = addEntry(id, -1, priority, expires, null);
+      FileQueueEntry entry = addEntry(id, msg.getJMSMessageID(),
+				      -1, priority, expires, null);
 
       entry.setMessage(msg);
     }
@@ -224,7 +207,8 @@ public class FileQueue extends AbstractQueue implements Topic
       long id = _store.send(msg, priority, expires);
 
       FileQueueEntry entry
-	= addEntry(id, leaseTimeout, priority, expires, null);
+	= addEntry(id, msg.getJMSMessageID(), leaseTimeout,
+		   priority, expires, null);
 
       entry.setMessage(msg);
     }
@@ -237,6 +221,8 @@ public class FileQueue extends AbstractQueue implements Topic
   @Override
   public MessageImpl receive(boolean isAutoAck)
   {
+	  System.out.println("RECEIVE: " + isAutoAck);
+	  
     synchronized (_queueLock) {
       for (int i = _head.length - 1; i >= 0; i--) {
 	for (FileQueueEntry entry = _head[i];
@@ -283,13 +269,16 @@ public class FileQueue extends AbstractQueue implements Topic
 	for (FileQueueEntry entry = _head[i];
 	     entry != null;
 	     entry = entry._next) {
-	  MessageImpl msg = entry.getMessage();
+	  if (msgId.equals(entry.getMsgId())) {
+	    if (entry.isRead()) {
+	      entry.setRead(false);
+
+	      MessageImpl msg = entry.getMessage();
         
-	  if (msg != null
-	      && msgId.equals(msg.getJMSMessageID())
-	      && entry.isRead()) {
-	    entry.setRead(false);
-	    msg.setJMSRedelivered(true);
+	      if (msg != null)
+		msg.setJMSRedelivered(true);
+	    }
+	    
 	    return;
 	  }
 	}
@@ -308,14 +297,50 @@ public class FileQueue extends AbstractQueue implements Topic
 	for (FileQueueEntry entry = _head[i];
 	     entry != null;
 	     entry = entry._next) {
-	  if (entry.getMessage().getJMSMessageID().equals(msgId)
-	      && entry.isRead()) {
-	    removeEntry(entry);
-	    _store.delete(entry.getId());
+	  if (msgId.equals(entry.getMsgId())) {
+	    if (entry.isRead()) {
+	      removeEntry(entry);
+	      _store.delete(entry.getId());
+	    }
+	      
 	    return;
 	  }
 	}
       }
+    }
+  }
+  
+  /**
+   * Adds a message entry from startup.
+   */
+  FileQueueEntry addEntry(long id,
+			  String msgId,
+			  long leaseTimeout,
+			  int priority,
+			  long expire,
+			  MessageType type)
+  {
+    if (priority < 0)
+      priority = 0;
+    else if (_head.length <= priority)
+      priority = _head.length;
+
+    System.out.println("ADD: " + id + " " + msgId);
+      
+    FileQueueEntry entry
+      = new FileQueueEntry(id, msgId, leaseTimeout, priority, expire, type);
+
+    synchronized (_queueLock) {
+      entry._prev = _tail[priority];
+
+      if (_tail[priority] != null)
+	_tail[priority]._next = entry;
+      else
+	_head[priority] = entry;
+
+      _tail[priority] = entry;
+
+      return entry;
     }
   }
 
@@ -324,24 +349,35 @@ public class FileQueue extends AbstractQueue implements Topic
    */
   public void removeMessage(String msgId)
   {
+    if (removeMessageEntry(msgId)) {
+      _store.remove(msgId);
+    }
+  }
+
+  /**
+   * Rollsback the message from the store.
+   */
+  private boolean removeMessageEntry(String msgId)
+  {
     synchronized (_queueLock) {
       loop:
       for (int i = _head.length - 1; i >= 0; i--) {
 	for (FileQueueEntry entry = _head[i];
 	     entry != null;
 	     entry = entry._next) {
-	  if (entry.getMessage().getJMSMessageID().equals(msgId)) {
+	  if (msgId.equals(entry.getMsgId())) {
 	    if (log.isLoggable(Level.FINER))
 	      log.finer(this + " remove " + msgId);
 	    
 	    removeEntry(entry);
-	    break loop;
+
+	    return true;
 	  }
 	}
       }
     }
 
-    _store.remove(msgId);
+    return false;
   }
 
   private void removeEntry(FileQueueEntry entry)

@@ -59,6 +59,7 @@ import javax.inject.AnnotationLiteral;
 import javax.inject.BindingType;
 import javax.inject.Current;
 import javax.inject.DeploymentType;
+import javax.inject.Initializer;
 import javax.inject.Produces;
 import javax.inject.Production;
 import javax.inject.manager.Bean;
@@ -844,10 +845,8 @@ abstract public class AbstractBean<T> extends CauchoBean<T>
   
   protected boolean hasBindingAnnotation(Constructor ctor)
   {
-    /*
-    if (ctor.isAnnotationPresent(In.class))
+    if (ctor.isAnnotationPresent(Initializer.class))
       return true;
-    */
 
     Annotation [][]paramAnn = ctor.getParameterAnnotations();
 

@@ -91,6 +91,7 @@ public class FileQueueStore
   public void setName(String name)
   {
     _name = name;
+    Thread.dumpStack();
   }
 
   public String getName()
@@ -147,10 +148,13 @@ public class FileQueueStore
     if (resin != null)
       serverId = resin.getServerId();
 
-    if (serverId == null)
+    if (serverId == null) {
       serverId = "anon";
+    }
     else if ("".equals(serverId))
       serverId = "default";
+    System.out.println("SID: " + serverId);
+    Thread.dumpStack();
 
     _queueTable = escapeName("jms_queue_" + serverId);
     _messageTable = escapeName("jms_message_" + serverId);
@@ -220,18 +224,24 @@ public class FileQueueStore
 	_receiveStartStmt.setLong(1, _queueId);
 
 	ResultSet rs = _receiveStartStmt.executeQuery();
+	System.out.println("STARTMMM:");
 
 	while (rs.next()) {
 	  long id = rs.getLong(1);
-	  int priority = rs.getInt(2);
-	  long expire = rs.getLong(3);
-	  MessageType type = MESSAGE_TYPE[rs.getInt(4)];
+	  String msgId = rs.getString(2);
+	  int priority = rs.getInt(3);
+	  long expire = rs.getLong(4);
+	  MessageType type = MESSAGE_TYPE[rs.getInt(5)];
+
+	  System.out.println("START: " + id + " " + msgId);
 	  
 	  FileQueueEntry entry
-	    = fileQueue.addEntry(id, -1, priority, expire, type);
+	    = fileQueue.addEntry(id, msgId, -1, priority, expire, type);
 	}
 
 	rs.close();
+      } catch (RuntimeException e) {
+	throw e;
       } catch (Exception e) {
 	throw new RuntimeException(e);
       }
@@ -243,6 +253,8 @@ public class FileQueueStore
    */
   public MessageImpl readMessage(long id, MessageType type)
   {
+    System.out.println("READ: " + id + " " + type);
+    
     synchronized (this) {
       try {
 	_readStmt.setLong(1, id);
@@ -483,7 +495,7 @@ public class FileQueueStore
     
     _readStmt = _conn.prepareStatement(sql);
     
-    sql = ("select id,priority,expire,type from " + _messageTable
+    sql = ("select id,msg_id,priority,expire,type from " + _messageTable
 	   + " WHERE queue=? AND body is not null ORDER BY id");
     
     _receiveStartStmt = _conn.prepareStatement(sql);

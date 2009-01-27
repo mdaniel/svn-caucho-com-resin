@@ -46,6 +46,8 @@ public class FileQueueEntry
 
   private final long _leaseExpire;
 
+  private final String _msgId;
+
   FileQueueEntry _prev;
   FileQueueEntry _next;
   
@@ -61,23 +63,33 @@ public class FileQueueEntry
   private boolean _isRead;
 
   public FileQueueEntry(long id,
+			String msgId,
 			long leaseTimeout,
 			int priority,
 			long expiresTime)
   {
+    if (msgId == null)
+      throw new NullPointerException();
+    
     _id = id;
+    _msgId = msgId;
     _leaseExpire = leaseTimeout + Alarm.getCurrentTime();
     _expiresTime = expiresTime;
     _priority = priority;
   }
 
   public FileQueueEntry(long id,
+			String msgId,
 			long leaseTimeout,
 			int priority,
 			long expiresTime,
 			MessageType type)
   {
+    if (msgId == null)
+      throw new NullPointerException();
+    
     _id = id;
+    _msgId = msgId;
     _leaseExpire = leaseTimeout + Alarm.getCurrentTime();
     _priority = priority;
     _expiresTime = expiresTime;
@@ -85,12 +97,17 @@ public class FileQueueEntry
   }
 
   public FileQueueEntry(long id,
+			String msgId,
 			long leaseTimeout,
 			int priority,
 			long expiresTime,
 			MessageImpl msg)
   {
+    if (msgId == null)
+      throw new NullPointerException();
+    
     _id = id;
+    _msgId = msgId;
     _leaseExpire = leaseTimeout + Alarm.getCurrentTime();
     _priority = priority;
     _expiresTime = expiresTime;
@@ -100,6 +117,11 @@ public class FileQueueEntry
   public long getId()
   {
     return _id;
+  }
+
+  public String getMsgId()
+  {
+    return _msgId;
   }
 
   public MessageType getType()
@@ -148,6 +170,14 @@ public class FileQueueEntry
   public int getPriority()
   {
     return _priority;
+  }
+
+  @Override
+  public String toString()
+  {
+    return (getClass().getSimpleName()
+	    + "[" + _id + "," + _msgId
+	    + ",pri=" + _priority + "]");
   }
 }
 
